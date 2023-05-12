@@ -3147,7 +3147,8 @@ ul.sidebar-tabs {
 .meta,
 .meta.discussion,
 .meta.history,
-.meta.other-locales {
+.meta.other-locales,
+.meta.translation-memory {
 	padding: 12px;
 }
 
@@ -3189,9 +3190,18 @@ ul.sidebar-tabs {
 	vertical-align: middle;
 }
 
-.meta.other-locales ul {
+.meta.other-locales ul, .meta.transation-memory ul {
 	margin: 0;
 	padding: 0;
+}
+
+.meta.translation-memory ul.suggestions-list {
+	list-style: none;
+	margin-left: 0;
+}
+
+.meta.translation-memory div.translation-suggestion {
+	margin: 1rem 0;
 }
 
 .meta.other-locales .locale.unique, .meta.other-locales .other-locales .locale {

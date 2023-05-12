@@ -1,3 +1,4 @@
+/* global $gp */
 ( function( $ ){
 	var $html = $( 'html' );
 	var $document = $( document );
@@ -299,6 +300,51 @@
 				$gp.editor.current.find( '.' + type ).removeAttr( 'open' );
 			}
 		}
+		// Click on the last tab opened in the previous row, to show the same tab in the current row.
+		$gp.editor.current.find( '.' + states['last-tab-type-open'] ).first().click();
+	}
+
+	function changeRightTab( event ) {
+		var tab = $( this );
+		var tabType = tab.attr( 'class' ).split(' ')[0];
+		var tabId = tab.attr( 'data-tab' );
+		var divId = tabId.replace( 'tab', 'div' );
+		var originalId = tabId.replace( /[^\d-]/g, '' ).replace( /^-+/g, '' );
+		changeVisibleTab( tab );
+		changeVisibleDiv( divId, originalId );
+		updateDetailsState( 'last-tab-type-open', tabType );
+		// Avoid to execute the code from the gp-translation-helpers plugin.
+		event.stopImmediatePropagation();
+	}
+
+	/**
+	 * Hides all tabs and show one of them, the last clicked.
+	 *
+	 * @param {Object} tab The selected tab.
+	 */
+	function changeVisibleTab( tab ) {
+		var tabId = tab.attr( 'data-tab' );
+		tab.siblings().removeClass( 'current' );
+		tab.parents( '.sidebar-tabs ' ).find( '.helper' ).removeClass( 'current' );
+		tab.addClass( 'current' );
+
+		$( '#' + tabId ).addClass( 'current' );
+	}
+
+
+	/**
+	 * Hides all divs and show one of them, the last clicked.
+	 *
+	 * @param {string} tabId      The select tab id.
+	 * @param {number} originalId The id of the original string to translate.
+	 */
+	function changeVisibleDiv( tabId, originalId ) {
+		$( '#sidebar-div-meta-' + originalId ).hide();
+		$( '#sidebar-div-discussion-' + originalId ).hide();
+		$( '#sidebar-div-history-' + originalId ).hide();
+		$( '#sidebar-div-other-locales-' + originalId ).hide();
+		$( '#sidebar-div-translation-memory-' + originalId ).hide();
+		$( '#' + tabId ).show();
 	}
 
 	$gp.editor.show = ( function( original ) {
@@ -329,7 +375,8 @@
 				.on( 'click', 'summary', toggleDetails )
 				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu )
 				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
-				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion );
+				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion )
+				.on( 'click', '.sidebar-tabs li', changeRightTab );
 		}
 	})( $gp.editor.install_hooks );
 

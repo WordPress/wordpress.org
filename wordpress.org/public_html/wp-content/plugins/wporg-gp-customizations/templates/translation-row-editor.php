@@ -6,14 +6,33 @@
 
 $more_links = array();
 if ( $translation->translation_status ) {
-	$translation_permalink = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[status]' => 'either', 'filters[original_id]' => $translation->original_id, 'filters[translation_id]' => $translation->id ) );
+	$translation_permalink               = gp_url_project_locale(
+		$project,
+		$locale->slug,
+		$translation_set->slug,
+		array(
+			'filters[status]'         => 'either',
+			'filters[original_id]'    => $translation->original_id,
+			'filters[translation_id]' => $translation->id,
+		)
+	);
 	$more_links['translation-permalink'] = '<a href="' . esc_url( $translation_permalink ) . '">Permalink to translation</a>';
 } else {
-	$original_permalink = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[original_id]' => $translation->original_id ) );
+	$original_permalink               = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[original_id]' => $translation->original_id ) );
 	$more_links['original-permalink'] = '<a href="' . esc_url( $original_permalink ) . '">Permalink to original</a>';
 }
 
-$original_history = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[status]' => 'either', 'filters[original_id]' => $translation->original_id, 'sort[by]' => 'translation_date_added', 'sort[how]' => 'asc' ) );
+$original_history      = gp_url_project_locale(
+	$project,
+	$locale->slug,
+	$translation_set->slug,
+	array(
+		'filters[status]'      => 'either',
+		'filters[original_id]' => $translation->original_id,
+		'sort[by]'             => 'translation_date_added',
+		'sort[how]'            => 'asc',
+	)
+);
 $more_links['history'] = '<a href="' . esc_url( $original_history ) . '">Translation History</a>';
 
 /**
@@ -30,7 +49,7 @@ $more_links['history'] = '<a href="' . esc_url( $original_history ) . '">Transla
 $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_links, $project, $locale, $translation_set, $translation );
 ?>
 <tr class="editor <?php echo gp_translation_row_classes( $translation ); ?>" id="editor-<?php echo esc_attr( $translation->row_id ); ?>" row="<?php echo esc_attr( $translation->row_id ); ?>">
-	<td colspan="<?php echo $can_approve ? 5 : 4 ?>">
+	<td colspan="<?php echo $can_approve ? 5 : 4; ?>">
 		<div class="editor-panel">
 			<div class="editor-panel__left">
 				<div class="panel-header">
@@ -79,12 +98,13 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						$singular = $translation->singular_glossary_markup ?? esc_translation( $translation->singular );
 						$plural   = $translation->plural_glossary_markup ?? esc_translation( $translation->plural );
 
-						if ( ! $translation->plural ) : ?>
+						if ( ! $translation->plural ) :
+							?>
 							<div class="source-string__singular">
 								<span class="original"><?php echo prepare_original( $singular ); ?></span>
 								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); ?></span>
 							</div>
-						<?php else: ?>
+						<?php else : ?>
 							<div class="source-string__singular">
 								<small>Singular:</small>
 								<span class="original"><?php echo prepare_original( $singular ); ?></span>
@@ -99,13 +119,14 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 					</div>
 
 					<div class="source-details">
-						<?php if ( wporg_gp_should_display_original_context( $translation ) ): ?>
+						<?php if ( wporg_gp_should_display_original_context( $translation ) ) : ?>
 							<details open class="source-details__context">
 								<summary>Context</summary>
 								<span class="context bubble"><?php echo esc_translation( $translation->context ); ?></span>
 							</details>
 						<?php endif; ?>
-						<?php if ( $translation->extracted_comments ) :
+						<?php
+						if ( $translation->extracted_comments ) :
 							?>
 							<details open class="source-details__comment">
 								<summary><?php _e( 'Comment', 'glotpress' ); ?></summary>
@@ -154,14 +175,15 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 											</button>
 										</li>
 									<?php else : ?>
-										<?php foreach( range( 0, $locale->nplurals - 1 ) as $plural_index ):
-											$plural_string = implode(', ', $locale->numbers_for_index( $plural_index ) );
+										<?php
+										foreach ( range( 0, $locale->nplurals - 1 ) as $plural_index ) :
+											$plural_string = implode( ', ', $locale->numbers_for_index( $plural_index ) );
 											?>
 											<li>
 												<button
 														class="translation-form-list__tab with-tooltip<?php echo ( 0 === $plural_index ) ? ' translation-form-list__tab--active' : ''; ?>"
 														data-plural-index="<?php echo $plural_index; ?>"
-														aria-label="<?php printf('This plural form is used for numbers like: %s', $plural_string ); ?>"
+														aria-label="<?php printf( 'This plural form is used for numbers like: %s', $plural_string ); ?>"
 														type="button">
 													<?php echo $plural_string; ?>
 												</button>
@@ -173,10 +195,10 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						<?php endif; ?>
 
 						<?php if ( ! $translation->plural ) : ?>
-							<?php wporg_gp_translate_textarea( $translation, [ $can_edit, $can_approve_translation ] ); ?>
+							<?php wporg_gp_translate_textarea( $translation, array( $can_edit, $can_approve_translation ) ); ?>
 						<?php else : ?>
-							<?php foreach( range( 0, $locale->nplurals - 1 ) as $plural_index ): ?>
-								<?php wporg_gp_translate_textarea( $translation, [ $can_edit, $can_approve ], $plural_index ); ?>
+							<?php foreach ( range( 0, $locale->nplurals - 1 ) as $plural_index ) : ?>
+								<?php wporg_gp_translate_textarea( $translation, array( $can_edit, $can_approve ), $plural_index ); ?>
 							<?php endforeach; ?>
 						<?php endif; ?>
 
@@ -239,13 +261,13 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 
 			<div class="editor-panel__right">
 <!--				<div class="panel-header">
-					<h3><?php /*_e( 'Meta', 'glotpress' ); */?></h3>
+					<h3><?php /*_e( 'Meta', 'glotpress' ); */ ?></h3>
 				</div>-->
 				<div class="panel-content">
 					<?php ob_start(); ?>
-                    <div class="meta" id="sidebar-div-meta-<?php echo $translation->row_id ?>">
+					<div class="meta" id="sidebar-div-meta-<?php echo $translation->row_id; ?>">
 						<?php gp_tmpl_load( 'translation-row-editor-meta-feedback', get_defined_vars() ); ?>
-						<?php if ( $translation->translation_status && ( $can_approve_translation || $can_reject_self ) ): ?>
+						<?php if ( $translation->translation_status && ( $can_approve_translation || $can_reject_self ) ) : ?>
 							<div class="status-actions">
 								<?php if ( $can_approve_translation ) : ?>
 									<?php if ( 'current' !== $translation->translation_status ) : ?>
@@ -260,7 +282,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 									<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
 										<button class="button fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
 									<?php endif; ?>
-								<?php elseif ( $can_reject_self ): ?>
+								<?php elseif ( $can_reject_self ) : ?>
 									<button class="button reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject Suggestion', 'glotpress' ); ?></button>
 									<button class="button fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
 								<?php endif; ?>
@@ -274,13 +296,13 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 							</dd>
 						</dl>
 
-						<?php if ( $translation->translation_added && $translation->translation_added !== '0000-00-00 00:00:00' ): ?>
+						<?php if ( $translation->translation_added && $translation->translation_added !== '0000-00-00 00:00:00' ) : ?>
 							<dl>
 								<dt><?php _e( 'Added:', 'glotpress' ); ?></dt>
 								<dd><?php echo $translation->translation_added; ?> UTC</dd>
 							</dl>
 						<?php endif; ?>
-						<?php if ( $translation->date_modified && $translation->date_modified !== '0000-00-00 00:00:00' && $translation->date_modified !== $translation->translation_added ): ?>
+						<?php if ( $translation->date_modified && $translation->date_modified !== '0000-00-00 00:00:00' && $translation->date_modified !== $translation->translation_added ) : ?>
 							<dl>
 								<dt><?php _e( 'Last modified:', 'glotpress' ); ?></dt>
 								<dd><?php echo $translation->date_modified; ?> UTC</dd>
@@ -294,15 +316,16 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						<?php endif; ?>
 						<?php if ( $translation->user_last_modified && ( ! $translation->user || $translation->user->ID !== $translation->user_last_modified->ID ) ) : ?>
 							<dl>
-								<dt><?php
-									if ( 'current' === $translation->translation_status ) {
-										_e( 'Approved by:', 'glotpress' );
-									} elseif ( 'rejected' === $translation->translation_status ) {
-										_e( 'Rejected by:', 'glotpress' );
-									} else {
-										_e( 'Last updated by:', 'glotpress' );
-									}
-									?>
+								<dt>
+								<?php
+								if ( 'current' === $translation->translation_status ) {
+									_e( 'Approved by:', 'glotpress' );
+								} elseif ( 'rejected' === $translation->translation_status ) {
+									_e( 'Rejected by:', 'glotpress' );
+								} else {
+									_e( 'Last updated by:', 'glotpress' );
+								}
+								?>
 								</dt>
 								<dd><?php gp_link_user( $translation->user_last_modified ); ?></dd>
 							</dl>
@@ -310,8 +333,9 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 
 						<dl>
 							<dt><?php _e( 'Priority of the original:', 'glotpress' ); ?></dt>
-							<?php if ( $can_write ): ?>
-								<dd><?php
+							<?php if ( $can_write ) : ?>
+								<dd>
+								<?php
 									echo gp_select(
 										'priority-' . $translation->original_id,
 										GP::$original->get_static( 'priorities' ),
@@ -322,7 +346,8 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 											'data-nonce' => wp_create_nonce( 'set-priority_' . $translation->original_id ),
 										)
 									);
-									?></dd>
+								?>
+									</dd>
 							<?php else : ?>
 								<dd><?php echo gp_array_get( GP::$original->get_static( 'priorities' ), $translation->priority, 'unknown' ); ?></dd>
 							<?php endif; ?>
@@ -337,11 +362,13 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 					$sidebar_tabs .= '	<li class="tab-discussion" data-tab="sidebar-tab-discussion-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Discussion&nbsp;<span class="count"></span></li>';
 					$sidebar_tabs .= '	<li class="tab-history" data-tab="sidebar-tab-history-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">History&nbsp;<span class="count"></span></li>';
 					$sidebar_tabs .= '	<li class="tab-other-locales" data-tab="sidebar-tab-other-locales-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Other&nbsp;locales&nbsp;<span class="count"></span></li>';
+					$sidebar_tabs .= '	<li class="tab-translation-memory" data-tab="sidebar-tab-translation-memory-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">TM&nbsp;<span class="count"></span></li>';
 					$sidebar_tabs .= '</ul>';
 					$sidebar_tabs .= $meta_sidebar;
 					$sidebar_tabs .= '<div class="meta discussion" id="sidebar-div-discussion-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
 					$sidebar_tabs .= '<div class="meta history" id="sidebar-div-history-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
 					$sidebar_tabs .= '<div class="meta other-locales" id="sidebar-div-other-locales-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
+					$sidebar_tabs .= '<div class="meta translation-memory" id="sidebar-div-translation-memory-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
 					$sidebar_tabs .= '</nav>';
 
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
