@@ -62,9 +62,6 @@
 		if ( !TMcontainer.length ) {
 			return;
 		}
-		if ( !TMcontainer.hasClass( 'initialized' ) ) {
-			return;
-		}
 
 		var itemsInTM = TMcontainer.find( '.translation-suggestion.with-tooltip.translation' ).length;
 		itemsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.deepl' ).length;
