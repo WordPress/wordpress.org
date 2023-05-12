@@ -1,4 +1,20 @@
 ( function( $ ){
+	/**
+	 * Stores the originalId of the translations for which OpenAI has already been queried,
+	 * to avoid making the query another time.
+	 *
+	 * @type {array}
+	 */
+	var OpenAITMSuggestionRequested = [];
+
+	/**
+	 * Stores the originalId of the translations for which DeepL has already been queried,
+	 * to avoid making the query another time.
+	 *
+	 * @type {array}
+	 */
+	var DeeplTMSuggestionRequested = [];
+
 	function fetchSuggestions( $container, apiUrl, originalId, translationId, nonce ) {
 		var xhr = $.ajax( {
 			url: apiUrl,
@@ -15,6 +31,8 @@
 			$container.find( '.suggestions__loading-indicator' ).remove();
 			if ( response.success ) {
 				$container.append( response.data );
+				removeNoSuggestionsMessage( $container );
+				copyTranslationMemoryToSidebarTab();
 			} else {
 				$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
 			}
@@ -29,8 +47,30 @@
 
 		xhr.always( function() {
 			$container.removeClass( 'fetching' );
-			removeNoSuggestionsMessage( $container );
 		} );
+	}
+
+	/**
+	 * Copies the translation memory to the sidebar tab and adds the number of items in the TM to the tab.
+	 *
+	 * @return {void}
+	 */
+	function copyTranslationMemoryToSidebarTab(){
+	    var divSidebarWithTM = $gp.editor.current.find( '.meta.translation-memory' ).first();
+		var divId = divSidebarWithTM.attr( 'data-row-id' );
+		var TMcontainer = $gp.editor.current.find( '.suggestions__translation-memory' );
+		if ( !TMcontainer.length ) {
+			return;
+		}
+		if ( !TMcontainer.hasClass( 'initialized' ) ) {
+			return;
+		}
+
+		var itemsInTM = TMcontainer.find( '.translation-suggestion.with-tooltip.translation' ).length;
+		itemsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.deepl' ).length;
+		itemsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.openai' ).length;
+		$( '[data-tab="sidebar-tab-translation-memory-' + divId + '"]' ).html( 'TM&nbsp;(' + itemsInTM + ')' );
+		$( '#sidebar-div-translation-memory-' + divId ).html( TMcontainer.html() );
 	}
 
 	/**
@@ -70,6 +110,10 @@
 			return;
 		}
 
+		if ( !$gp.editor.current.find('translation-suggestion.with-tooltip.translation').first() ) {
+			return;
+		}
+
 		$container.addClass( 'fetching' );
 
 		var originalId = $gp.editor.current.original_id;
@@ -85,7 +129,7 @@
 	 * @return {void}
 	 **/
 	function maybeFetchOpenAISuggestions() {
-		maybeFetchExternalSuggestions( gpTranslationSuggestions.get_external_translations.get_openai_translations, window.WPORG_TRANSLATION_MEMORY_OPENAI_API_URL );
+		maybeFetchExternalSuggestions( 'OpenAI', gpTranslationSuggestions.get_external_translations.get_openai_translations, window.WPORG_TRANSLATION_MEMORY_OPENAI_API_URL );
 	}
 
 	/**
@@ -94,16 +138,19 @@
 	 * @return {void}
 	 **/
 	function maybeFetchDeeplSuggestions() {
-		maybeFetchExternalSuggestions( gpTranslationSuggestions.get_external_translations.get_deepl_translations, window.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL );
+		maybeFetchExternalSuggestions( 'DeepL', gpTranslationSuggestions.get_external_translations.get_deepl_translations, window.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL );
 	}
 
 	/**
 	 * Gets the suggestions from an external service.
 	 *
-	 * @param getExternalSuggestions
-	 * @param apiUrl
+	 * @param type					 The type of the external service: OpenAI or DeepL.
+	 * @param getExternalSuggestions Whether to get the suggestions from the external service.
+	 * @param apiUrl				 The URL of the API.
+	 *
+	 * @return {void}
 	 */
-	function maybeFetchExternalSuggestions( getExternalSuggestions, apiUrl ) {
+	function maybeFetchExternalSuggestions( type, getExternalSuggestions, apiUrl ) {
 		var $container = $gp.editor.current.find( '.suggestions__translation-memory' );
 		if ( !$container.length ) {
 			return;
@@ -111,12 +158,41 @@
 		if ( true !== getExternalSuggestions ) {
 			return;
 		}
-
 		var originalId = $gp.editor.current.original_id;
 		var translationId = $gp.editor.current.translation_id;
 		var nonce = $container.data( 'nonce' );
 
+		if( true === wasRequestMade( type, originalId ) ) {
+			return;
+		}
+
 		fetchSuggestions( $container, apiUrl, originalId, translationId, nonce );
+	}
+
+	/**
+	 * Checks if the request was already made for this originalId and type.
+	 *
+	 * @param type		  The type of the external service: OpenAI or DeepL.
+	 * @param originalId  The original ID.
+	 *
+	 * @returns {boolean} Whether the request was already made.
+	 */
+	function wasRequestMade( type, originalId ) {
+		if ('OpenAI' === type) {
+			if ( originalId in OpenAITMSuggestionRequested ) {
+				return true;
+			} else {
+				OpenAITMSuggestionRequested[originalId] = true;
+			}
+		}
+		if ('DeepL' === type) {
+			if ( originalId in DeeplTMSuggestionRequested ) {
+				return true;
+			} else {
+				DeeplTMSuggestionRequested[originalId] = true;
+			}
+		}
+		return false;
 	}
 
 	function maybeFetchOtherLanguageSuggestions() {
