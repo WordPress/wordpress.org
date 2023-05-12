@@ -3195,7 +3195,8 @@ ul.sidebar-tabs {
 	padding: 0;
 }
 
-.meta.translation-memory ul.suggestions-list {
+.meta.translation-memory ul.suggestions-list,
+.meta.translation-memory summary {
 	list-style: none;
 	margin-left: 0;
 }
