@@ -27,7 +27,7 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
-$wp20_url = 'http://wp20.wordpress.net/';
+$wp20_url = 'https://wp20.wordpress.net/';
 if ( is_object( $rosetta ) && isset( $rosetta->locale ) ) {
 	$wp20_url .= '?locale=' . $rosetta->locale;
 }
