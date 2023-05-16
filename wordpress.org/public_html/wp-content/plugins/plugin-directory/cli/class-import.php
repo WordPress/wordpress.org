@@ -72,16 +72,18 @@ class Import {
 
 		$data = $this->export_and_parse_plugin( $plugin_slug );
 
-		$readme          = $data['readme'];
-		$assets          = $data['assets'];
-		$headers         = $data['plugin_headers'];
-		$stable_tag      = $data['stable_tag'];
-		$last_committer  = $data['last_committer'];
-		$last_revision   = $data['last_revision'];
-		$tagged_versions = $data['tagged_versions'];
-		$last_modified   = $data['last_modified'];
-		$blocks          = $data['blocks'];
-		$block_files     = $data['block_files'];
+		$readme             = $data['readme'];
+		$assets             = $data['assets'];
+		$headers            = $data['plugin_headers'];
+		$stable_tag         = $data['stable_tag'];
+		$last_committer     = $data['last_committer'];
+		$last_revision      = $data['last_revision'];
+		$tagged_versions    = $data['tagged_versions'];
+		$last_modified      = $data['last_modified'];
+		$blocks             = $data['blocks'];
+		$block_files        = $data['block_files'];
+		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
+		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
 		// Release confirmation
 		if ( $plugin->release_confirmation ) {
@@ -130,6 +132,34 @@ class Import {
 			$release = Plugin_Directory::get_release( $plugin, $stable_tag );
 			if ( ! $release ) {
 				throw new Exception( "Plugin release {$stable_tag} not found." );
+			}
+
+			/*
+			 * If the stable release isn't confirmed, the next section will abort processing,
+			 * but if this commit didn't touch a stable tag, but rather a confirmed release tag,
+			 * then we need to build a new zip for that tag.
+			 *
+			 * This is required as ZIP building occurs at the end of the import process, yet with
+			 * release confirmations the 
+			 */
+			if ( ! $release['confirmed'] && ! $touches_stable_tag ) {
+				$zips_to_build = [];
+				foreach ( $svn_changed_tags as $svn_changed_tag ) {
+					// We're not concerned with trunk or stable tags.
+					if ( 'trunk' === $svn_changed_tag || $svn_changed_tag === $stable_tag ) {
+						continue;
+					}
+
+					$this_release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
+					if ( $this_release['confirmed'] && ! $this_release['zips_built'] ) {
+						$zips_to_build[] = $this_release['tag'];
+					}
+				}
+
+				if ( $zips_to_build ) {
+					// NOTE: $stable_tag not passed, as it's not yet stable and won't be.
+					$this->rebuild_affected_zips( $plugin_slug, $current_stable_tag, $current_stable_tag, $zips_to_build, $svn_revision_triggered );
+				}
 			}
 
 			// Check that the tag is approved.
@@ -321,8 +351,6 @@ class Import {
 			delete_post_meta( $plugin->ID, 'block_files' );
 		}
 
-		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
-
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
 		// Finally, set the new version live.
@@ -387,13 +415,23 @@ class Import {
 
 				$release = Plugin_Directory::get_release( $plugin, $tag );
 
-				if ( ! $release || ! $release['confirmed'] || $release['zips_built'] ) {
+				if (
+					// If the release isn't known, skip.
+					! $release ||
+					// If the release isn't confirmed AND confirmations were required, skip.
+					( ! $release['confirmed'] && $release['confirmations_required'] ) ||
+					// If the release has had its ZIPs built, skip if it required confirmations.
+					( $release['zips_built'] && $release['confirmations_required'] )
+				) {
 					unset( $versions_to_build[ $i ] );
 				} else {
 					$release['zips_built'] = true;
 					Plugin_Directory::add_release( $plugin, $release );
 				}
+			}
 
+			if ( $versions_to_build ) {
+				echo "Building ZIPs for {$plugin_slug}: " . implode( ', ', $versions_to_build ) . "\n";
 			}
 		}
 
