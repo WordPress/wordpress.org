@@ -89,32 +89,47 @@ class Import {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
 
+			// Check to see if the commit has touched tags that don't have known confirmed releases.
+			foreach ( $svn_changed_tags as $svn_changed_tag ) {
+				if ( 'trunk' === $svn_changed_tag ) {
+					continue;
+				}
+
+				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
+				if ( ! $release ) {
+					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
+					$version = ( $svn_changed_tag === $stable_tag ) ? $headers->Version : $svn_changed_tag;
+
+					Plugin_Directory::add_release(
+						$plugin,
+						[
+							'tag'       => $svn_changed_tag,
+							'version'   => $version,
+							'committer' => [ $last_committer ],
+							'revision'  => [ $last_revision ]
+						]
+					);
+
+					$email = new Release_Confirmation_Email(
+						$plugin,
+						Tools::get_plugin_committers( $plugin_slug ),
+						[
+							'who'     => $last_committer,
+							'readme'  => $readme,
+							'headers' => $headers,
+							'version' => $version,
+						]
+					);
+					$email->send();
+
+					echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
+				}
+			}
+
+			// Now check to see if the stable has been confirmed.
 			$release = Plugin_Directory::get_release( $plugin, $stable_tag );
-
-			// This tag is unknown? Trigger email.
 			if ( ! $release ) {
-				Plugin_Directory::add_release(
-					$plugin,
-					[
-						'tag'       => $stable_tag,
-						'version'   => $headers->Version,
-						'committer' => [ $last_committer ],
-						'revision'  => [ $last_revision ]
-					]
-				);
-
-				$email = new Release_Confirmation_Email(
-					$plugin,
-					Tools::get_plugin_committers( $plugin_slug ),
-					[
-						'who'     => $last_committer,
-						'readme'  => $readme,
-						'headers' => $headers,
-					]
-				);
-				$email->send();
-
-				throw new Exception( 'Plugin release not confirmed; email triggered.' );
+				throw new Exception( "Plugin release {$stable_tag} not found." );
 			}
 
 			// Check that the tag is approved.
@@ -130,7 +145,7 @@ class Import {
 				// Update with ^
 				Plugin_Directory::add_release( $plugin, $release );
 
-				throw new Exception( 'Plugin release not confirmed.' );
+				throw new Exception( "Plugin release {$stable_tag} not confirmed." );
 			}
 
 			// At this point we can assume that the release was confirmed, and should be imported.
@@ -372,7 +387,7 @@ class Import {
 
 				$release = Plugin_Directory::get_release( $plugin, $tag );
 
-				if ( ! $release || ( $release['zips_built'] && $release['confirmations_required'] ) ) {
+				if ( ! $release || ! $release['confirmed'] || $release['zips_built'] ) {
 					unset( $versions_to_build[ $i ] );
 				} else {
 					$release['zips_built'] = true;
