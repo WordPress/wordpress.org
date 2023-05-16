@@ -27,6 +27,24 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
+$wp20_url = 'https://wp20.wordpress.net/';
+if ( is_object( $rosetta ) && isset( $rosetta->locale ) ) {
+	$wp20_url .= '?locale=' . $rosetta->locale;
+}
+
+// The blocks code sets up the layout, but there is also inline CSS to refine things that aren't supported in classic themes.
+$banner_blocks = '<!-- wp:wporg/link-wrapper {"align":"full","layout":{"type":"constrained"}} -->
+<a class="wp-block-wporg-link-wrapper alignfull" style="background-color:#0a4b78;color:#fff;font-size:16px;" href="' . $wp20_url . '"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
+<div class="wp-block-group" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px;gap:10px;"><!-- wp:image {"width":45,"height":29,"sizeSlug":"full","linkDestination":"none"} -->
+<figure class="wp-block-image size-full is-resized" style="flex-shrink: 0;"><img src="https://wordpress.org/files/2023/05/wp20-logo-white.png" alt="" width="45" height="29" /></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.1"}}} -->
+<p style="line-height:1.1">' . __( 'Join a celebration online or around the globe for the 20th anniversary of WordPress. ↗', 'wporg' ) . '</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></a>
+<!-- /wp:wporg/link-wrapper -->';
+
 \WordPressdotorg\skip_to( '#masthead' );
 
 get_header( 'wporg' );
@@ -34,6 +52,20 @@ get_header( 'wporg' );
 	<aside id="download-mobile">
 		<span class="download-ready"><?php _e( 'Ready to get started?', 'wporg' ); ?></span><a class="button download-button" href="/download/"><?php _e( 'Get WordPress', 'wporg' ); ?></a>
 	</aside>
+
+	<style>
+		.wp-block-wporg-link-wrapper {
+			/* This property is used in the focus state, and should match (or at least compliment) the background color. */
+			--wp--preset--color--blueberry-1: #0a4b78;
+		}
+		@media (max-width: 499px) {
+			.wp-block-wporg-link-wrapper p {
+				font-size: 13px !important;
+				line-height: 1.2 !important;
+			}
+		}
+	</style>
+	<?php echo do_blocks( $banner_blocks ); ?>
 
 	<header id="masthead" class="site-header" role="banner">
 		<div class="site-branding">
