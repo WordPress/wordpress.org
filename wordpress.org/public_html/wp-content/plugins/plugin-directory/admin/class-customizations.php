@@ -63,9 +63,14 @@ class Customizations {
 		add_filter( 'wp_ajax_delete-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 		add_action( 'wp_ajax_plugin-svn-sync', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'svn_sync' ) );
+		add_action( 'wp_ajax_plugin-set-reviewer', array( __NAMESPACE__ . '\Metabox\Reviewer', 'xhr_set_reviewer' ) );
 
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
+
+		// Audit logs
+		add_action( 'updated_postmeta', array( $this, 'updated_postmeta' ), 10, 4 );
 	}
 
 	/**
@@ -211,6 +216,17 @@ class Customizations {
 			} );
 		}
 
+		// Filter by reviewer.
+		if ( ! empty( $_REQUEST['reviewer'] ) ) {
+			$meta_query = $query->get( 'meta_query' ) ?: [];
+			$meta_query[] = [
+				'key'   => 'assigned_reviewer',
+				'value' => intval( $_GET['reviewer'] ),
+			];
+
+			$query->set( 'meta_query', $meta_query );
+		}
+
 	}
 
 	/**
@@ -241,7 +257,7 @@ class Customizations {
 		}
 
 		$action = array_intersect(
-			[ 'plugin_open', 'plugin_close', 'plugin_disable', 'plugin_reject' ],
+			[ 'plugin_open', 'plugin_close', 'plugin_disable', 'plugin_reject', 'plugin_assign' ],
 			[ $_REQUEST['action'], $_REQUEST['action2'] ]
 		);
 		$action = array_shift( $action );
@@ -250,6 +266,10 @@ class Customizations {
 		}
 
 		check_admin_referer( 'bulk-posts' );
+
+		$new_status = false;
+		$from_state = false;
+		$meta_data  = false;
 
 		switch( $action ) {
 			case 'plugin_open':
@@ -276,27 +296,51 @@ class Customizations {
 				$message    = _n_noop( '%s plugin rejected.', '%s plugins rejected.', 'wporg-plugins' );
 				$from_state = [ 'new', 'pending' ];
 				break;
+			case 'plugin_assign':
+				if ( ! isset( $_REQUEST['reviewer'] ) ) {
+					return;
+				}
+
+				$capability = 'plugin_review';
+				$from_state = 'any';
+				$message    = _n_noop( '%s plugin assigned.', '%s plugins assigned.', 'wporg-plugins' );
+				$meta_data = array(
+					'assigned_reviewer'      => intval( $_REQUEST['reviewer'] ),
+					'assigned_reviewer_time' => time(),
+				);
+				break;
 			default:
 				return;
 		}
 
 		$closed = 0;
-		$plugins  = get_posts( array(
+		$args = array(
 			'post_type'      => 'plugin',
 			'post__in'       => array_map( 'absint', $_REQUEST['post'] ),
-			'post_status'    => $from_state,
 			'posts_per_page' => count( $_REQUEST['post'] ),
-		) );
+		);
+		if ( $from_state ) {
+			$args['post_status'] = $from_state;
+		}
+		$plugins  = get_posts( $args );
 
 		foreach ( $plugins as $plugin ) {
 			if ( ! current_user_can( $capability, $plugin ) ) {
 				continue;
 			}
+			$updated = false;
 
-			$updated = wp_update_post( array(
-				'ID'          => $plugin->ID,
-				'post_status' => $new_status,
-			) );
+			if ( $new_status ) {
+				$updated = wp_update_post( array(
+					'ID'          => $plugin->ID,
+					'post_status' => $new_status,
+				) );
+			}
+			if ( $meta_data ) {
+				foreach ( $meta_data as $key => $value ) {
+					$updated = update_post_meta( $plugin->ID, $key, $value );
+				}
+			}
 
 			if ( $updated && ! is_wp_error( $updated ) ) {
 				$closed++;
@@ -544,6 +588,13 @@ class Customizations {
 			'submitdiv',
 			__( 'Plugin Controls', 'wporg-plugins' ),
 			array( __NAMESPACE__ . '\Metabox\Controls', 'display' ),
+			'plugin', 'side', 'high'
+		);
+
+		add_meta_box(
+			'reviewerdiv',
+			__( 'Reviewer', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Reviewer', 'display' ),
 			'plugin', 'side', 'high'
 		);
 
@@ -805,5 +856,24 @@ class Customizations {
 		wp_cache_set( __METHOD__, $keys, 'distinct-meta-keys', DAY_IN_SECONDS );
 
 		return $keys;
+	}
+
+	/**
+	 * Watch for post_meta updates and log accordingly.
+	 */
+	public function updated_postmeta( $meta_id, $post_id, $meta_key, $meta_value ) {
+		if ( 'assigned_reviewer' === $meta_key && $meta_value ) {
+			$reviewer = get_user_by( 'id', $meta_value );
+			Tools::audit_log(
+				sprintf(
+					'Assigned to <a href="%s">%s</a>.',
+					esc_url( 'https://profiles.wordpress.org/' . $reviewer->user_nicename . '/' ),
+					$reviewer->display_name ?: $reviewer->user_login
+				),
+				get_post( $post_id )
+			);
+		} elseif ( 'assigned_reviewer' === $meta_key && ! $meta_value ) {
+			Tools::audit_log( 'Unassigned.', get_post( $post_id ) );
+		}
 	}
 }
