@@ -87,6 +87,10 @@ td {
 	margin-top: 1em;
 }
 
+.entry-content p a {
+	word-wrap: break-word;
+}
+
 .entry-content td,
 .entry-content th {
 	padding: 1em !important;
