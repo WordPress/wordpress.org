@@ -548,13 +548,12 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	}
 
 	/**
-	 * Display the "actions" fields below the filters.
+	 * Display the additional filter fields.
 	 */
 	public function extra_tablenav( $which ) {
 		parent::extra_tablenav( $which );
 
 		if ( 'top' === $which ) {
-			// The first is the reviewer filter, the second is the assign review bulk action.
 			?>
 			<fieldset class="alignleft actions filter-reviewer">
 				<?php
@@ -568,39 +567,44 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				submit_button( __( 'Filter', 'wporg-plugins' ), 'secondary', false, false );
 				?>
 			</fieldset>
-			<fieldset class="alignleft actions hide-if-js bulk-plugin_assign" disabled="disabled">
-				<?php
-				wp_dropdown_users( [
-					'name'              => 'reviewer',
-					'selected'          => 0,
-					'show_option_none'  => __( 'Assign Review to ...', 'wporg-plugins' ),
-					'option_none_value' => 0,
-					'role__in'          => [ 'plugin_admin', 'plugin_reviewer' ],
-				] );
-				submit_button( __( 'Assign', 'wporg-plugins' ), 'primary', false, false );
-				?>
-			</fieldset>
 			<?php
 		}
+	}
 
-		// TODO: This shouldn't have inline CSS/JS.
+	/**
+	 * Display the additional bulk action fields.
+	 */
+	protected function bulk_actions( $which = '' ) {
+		parent::bulk_actions( $which );
 
+		$maybe_dash_two = 'top' === $which ? '' : '-2';
+
+		?>
+		<fieldset class="alignleft actions hide-if-js bulk-plugin_assign" disabled="disabled">
+			<?php
+			wp_dropdown_users( [
+				'name'              => 'reviewer',
+				'id'                => "reviewer{$maybe_dash_two}",
+				'selected'          => 0,
+				'show_option_none'  => __( 'Assign Review to ...', 'wporg-plugins' ),
+				'option_none_value' => 0,
+				'role__in'          => [ 'plugin_admin', 'plugin_reviewer' ],
+			] );
+			?>
+		</fieldset>
+		<fieldset class="alignleft actions hide-if-js bulk-plugin_close bulk-plugin_disable" disabled="disabled">
+			<select name="close_reason" id="close_reason<?php echo $maybe_dash_two; ?>">
+				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></option>
+				<?php foreach ( Template::get_close_reasons() as $key => $label ) : ?>
+					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</fieldset>
+		<?php
+
+		// Output the JS+CSS needed
 		if ( 'top' === $which ) {
 			?>
-			<fieldset class="alignleft actions hide-if-js bulk-plugin_close bulk-plugin_disable" disabled="disabled">
-				<select name="close_reason" id="close_reason">
-					<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></option>
-					<?php foreach ( Template::get_close_reasons() as $key => $label ) : ?>
-						<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
-					<?php endforeach; ?>
-				</select>
-				<span class="actions bulk-plugin_close">
-					<?php submit_button( __( 'Close', 'wporg-plugins' ), 'primary', 'bulk_close', false ); ?>
-				</span>
-				<span class="actions bulk-plugin_disable">
-					<?php submit_button( __( 'Disable', 'wporg-plugins' ), 'primary', 'bulk_close', false ); ?>
-				</span>
-			</fieldset>
 			<style>
 				#posts-filter fieldset.bulk-plugin_close {
 					margin: 0;
@@ -610,11 +614,18 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			jQuery( function( $ ) {
 				$( '.bulkactions' ).on( 'change', function() {
 					var $this = $( this ),
-						val = $this.find(':selected').val(),
-						$tablenav = $this.parents('form').find( '.tablenav.top' );
+						$select = $this.find( 'select[name^=action]' ),
+						val = $select.find(':selected').val();
 
-					$tablenav.find( '.actions.bulk-plugin_close, .actions.bulk-plugin_disable, .actions.bulk-plugin_assign' ).prop( 'disabled', true ).hide();
-					$tablenav.find( '.actions.bulk-' + val ).prop( 'disabled', false ).show();
+					$( '.bulkactions .actions.bulk-plugin_close, .actions.bulk-plugin_disable, .actions.bulk-plugin_assign' ).prop( 'disabled', true ).hide();
+					$( '.bulkactions .actions.bulk-' + val ).prop( 'disabled', false ).show();
+
+					// Sync the values between the various selects in top+bottom.
+					$this.find('select').not( $select ).each( function() {
+						$( '.bulkactions' ).not( $this ).find( 'select[name="' + this.name + '"]' ).val( this.value );
+					} );
+
+					$( '.bulkactions input.action' ).toggleClass( 'button-primary', val != '-1' );
 				} );
 			} );
 			</script>
