@@ -139,6 +139,11 @@ function display_items( $post_ids ) {
 		$post        = get_post( $post_id );
 		$post_status = '';
 		$style       = 'color: green;';
+		$reviewer    = false;
+		if ( 'plugin' === $post->post_type && $post->assigned_reviewer ) {
+			$reviewer_user = get_user_by( 'id', $post->assigned_reviewer );
+			$reviewer      = $reviewer_user->display_name ?: $reviewer_user->user_login;
+		}
 
 		switch ( $post->post_status ) {
 			// Plugins
@@ -148,7 +153,7 @@ function display_items( $post_ids ) {
 				break;
 			case 'closed':
 			case 'disabled':
-				$post_status = '(Closed)';
+				$post_status = '(' . ucwords( $post->post_status ) . ')';
 				$style       = 'color: red;';
 				break;
 			case 'pending':
@@ -174,6 +179,11 @@ function display_items( $post_ids ) {
 				$post_status = '(Delisted)';
 				$style       = 'color: red;';
 				break;
+		}
+
+		// Append assigned to, if known.
+		if ( $reviewer ) {
+			$post_status = str_replace( ')', ", Assigned to {$reviewer})", $post_status );
 		}
 
 		printf(
