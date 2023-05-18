@@ -7,6 +7,7 @@ use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Approved as Plugin_Approved_Email;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Rejected as Plugin_Rejected_Email;
+use WordPressdotorg\Plugin_Directory\Admin\Metabox\Reviewer as Reviewer_Metabox;
 
 /**
  * All functionality related to Status Transitions.
@@ -134,15 +135,18 @@ class Status_Transitions {
 		switch ( $new_status ) {
 			case 'approved':
 				$this->approved( $post->ID, $post );
+				$this->clear_reviewer( $post );
 				break;
 
 			case 'rejected':
 				$this->rejected( $post->ID, $post );
+				$this->clear_reviewer( $post );
 				break;
 
 			case 'publish':
 				$this->clean_closed_date( $post->ID );
 				$this->set_translation_status( $post, 'active' );
+				$this->clear_reviewer( $post );
 				break;
 
 			case 'disabled':
@@ -363,4 +367,13 @@ class Status_Transitions {
 		), $post_id );
 	}
 
+	/**
+	 * Clear the assigned reviewer.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public function clear_reviewer( $post ) {
+		// Unset the reviewer, but don't log it, as the triggering status changes should've been logged in some form.
+		Reviewer_Metabox::set_reviewer( $post, false, false );
+	}
 }

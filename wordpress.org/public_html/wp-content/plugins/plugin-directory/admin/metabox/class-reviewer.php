@@ -102,8 +102,7 @@ class Reviewer {
 			return;
 		}
 
-		update_post_meta( $post_id, 'assigned_reviewer', $reviewer_id );
-		update_post_meta( $post_id, 'assigned_reviewer_time', time() );
+		self::set_reviewer( $post_id, $reviewer_id );
 
 		$assigned_reviewer = get_post_meta( $post_id, 'assigned_reviewer', true );
 
@@ -126,7 +125,49 @@ class Reviewer {
 
 		$reviewer_id = absint( $_POST['assigned_reviewer'] ?? 0 );
 
-		update_post_meta( $post_id, 'assigned_reviewer', $reviewer_id );
-		update_post_meta( $post_id, 'assigned_reviewer_time', time() );
+		self::set_reviewer( $post_id, $reviewer_id );
+	}
+
+	/**
+	 * Set the reviewer for a post.
+	 *
+	 * @param int|WP_Post $post     Post object or ID.
+	 * @param int|WP_User $reviewer Reviewer User object or ID.
+	 * @param bool        $log_it   Whether to log the change. Optional.
+	 * @return bool
+	 */
+	public static function set_reviewer( $post, $reviewer, $log_it = true ) {
+		$post             = get_post( $post );
+		$current_reviewer = get_post_meta( $post->ID, 'assigned_reviewer', true );
+		$reviewer         = is_object( $reviewer ) ? $reviewer : get_user_by( 'id', $reviewer );
+		$reviewer_id      = $reviewer->ID ?? 0;
+
+		if ( $current_reviewer == $reviewer_id || ! $post ) {
+			return false;
+		}
+
+		if ( ! $reviewer ) {
+			delete_post_meta( $post->ID, 'assigned_reviewer' );
+			delete_post_meta( $post->ID, 'assigned_reviewer_time' );
+		} else {
+			update_post_meta( $post->ID, 'assigned_reviewer', $reviewer_id );
+			update_post_meta( $post->ID, 'assigned_reviewer_time', time() );
+		}
+
+		// Audit logging.
+		if ( $log_it ) {
+			$message = 'Unassigned.';
+			if ( $reviewer ) {
+				$message = sprintf(
+					'Assigned to <a href="%s">%s</a>.',
+					esc_url( 'https://profiles.wordpress.org/' . $reviewer->user_nicename . '/' ),
+					$reviewer->display_name ?: $reviewer->user_login
+				);
+			}
+
+			Tools::audit_log( $message, $post );
+		}
+
+		return true;
 	}
 }

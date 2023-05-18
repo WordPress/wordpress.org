@@ -68,9 +68,6 @@ class Customizations {
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
-
-		// Audit logs
-		add_action( 'updated_postmeta', array( $this, 'updated_postmeta' ), 10, 4 );
 	}
 
 	/**
@@ -856,24 +853,5 @@ class Customizations {
 		wp_cache_set( __METHOD__, $keys, 'distinct-meta-keys', DAY_IN_SECONDS );
 
 		return $keys;
-	}
-
-	/**
-	 * Watch for post_meta updates and log accordingly.
-	 */
-	public function updated_postmeta( $meta_id, $post_id, $meta_key, $meta_value ) {
-		if ( 'assigned_reviewer' === $meta_key && $meta_value ) {
-			$reviewer = get_user_by( 'id', $meta_value );
-			Tools::audit_log(
-				sprintf(
-					'Assigned to <a href="%s">%s</a>.',
-					esc_url( 'https://profiles.wordpress.org/' . $reviewer->user_nicename . '/' ),
-					$reviewer->display_name ?: $reviewer->user_login
-				),
-				get_post( $post_id )
-			);
-		} elseif ( 'assigned_reviewer' === $meta_key && ! $meta_value ) {
-			Tools::audit_log( 'Unassigned.', get_post( $post_id ) );
-		}
 	}
 }
