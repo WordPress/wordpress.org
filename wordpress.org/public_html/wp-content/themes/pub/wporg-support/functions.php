@@ -630,7 +630,7 @@ function wporg_support_add_moderation_notice() {
 	elseif ( in_array( $post->post_status, array( 'pending', 'spam' ) ) ) :
 
 		/* translators: Number of hours the user should wait for a pending post to get approved before contacting moderators. */
-		$moderation_timeframe = (int) __( '96', 'wporg-forums' );
+		$moderation_timeframe = (int) _x( '96', 'Wait-hours', 'wporg-forums' );
 		if ( ! $moderation_timeframe ) {
 			$moderation_timeframe = 96;
 		}
@@ -646,7 +646,8 @@ function wporg_support_add_moderation_notice() {
 				esc_url( __( 'https://make.wordpress.org/chat/', 'wporg-forums' ) )
 			);
 		} else {
-			$notices[] = __( 'This post has been held for moderation by our automated system and will be manually reviewed by a moderator.', 'wporg-forums' );
+			$notices[] = __( 'Your post is being held for moderation by our automated system and will be manually reviewed by a volunteer as soon as possible.', 'wporg-forums' );
+			$notices[] = __( 'No action is needed on your part at this time, and you do not need to resubmit your message.', 'wporg-forums' );
 		}
 
 	endif;
