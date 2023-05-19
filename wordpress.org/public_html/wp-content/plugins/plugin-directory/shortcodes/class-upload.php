@@ -25,8 +25,11 @@ class Upload {
 		foreach ( $plugins as &$plugin ) {
 			$counts->{ $plugin->post_status }++;
 
+			$plugin->can_replace = false;
+
 			if ( 'new' === $plugin->post_status ) {
 				$plugin->status = __( 'Awaiting Review &#8212; This plugin has not yet been reviewed.', 'wporg-plugins' );
+				$plugin->can_replace = true;
 			} elseif ( 'pending' === $plugin->post_status ) {
 				$plugin->status = __( 'Being Reviewed &#8212; This plugin is currently waiting on action from you. Please check your email for details.', 'wporg-plugins' );
 			} elseif ( 'approved' === $plugin->post_status ) {
@@ -60,13 +63,24 @@ class Upload {
 		$upload_result = false;
 
 		if (
-			! empty( $_POST['_wpnonce'] )
-			&& wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' )
-			&& 'upload' === $_POST['action']
-			&& ! $submitted_counts->total
-			&& ! empty( $_FILES['zip_file'] )
+			! empty( $_POST['_wpnonce'] ) &&
+			! empty( $_FILES['zip_file'] ) &&
+			(
+				// New submission.
+				! $submitted_counts->total &&
+				empty( $_POST['plugin_id'] ) &&
+				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' ) &&
+				'upload' === $_POST['action']
+			) || (
+				// Existing submission
+				! empty( $_POST['plugin_id'] ) &&
+				'upload-additional' === $_POST['action'] &&
+				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload-' . $_POST['plugin_id'] )
+			)
 		) {
-			$upload_result = $uploader->process_upload();
+			$for_plugin = absint( $_POST['plugin_id'] ?? 0 );
+
+			$upload_result = $uploader->process_upload( $for_plugin );
 
 			if ( is_wp_error( $upload_result ) ) {
 				$message = $upload_result->get_error_message();
@@ -257,7 +271,51 @@ class Upload {
 							<?php
 							endif; // $can_change_slug
 							echo '</li>';
-							echo '</ul>';
+
+							if ( $plugin->can_replace ) {
+								echo '<li>';
+								foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
+									$filename = preg_replace( '!^[0-9-_]+!', '', basename( get_attached_file( $zip_file->ID ) ) );
+
+									printf(
+										'<li>%s</li>',
+										sprintf(
+											/* translators: 1: Filename 2: Date */
+											__( '%1$s uploaded on %2$s', 'wporg-plugins'),
+											'<code>' . esc_html( $filename ) . '</code>',
+											esc_html( date_i18n( get_option( 'date_format' ), strtotime( $zip_file->post_date ) ) )
+										)
+									);
+								}
+
+								// Offer for the user to upload a new ZIP file.
+								echo '<li>';
+								printf(
+									'<a href="#" class="">%s</a>',
+									sprintf(
+										/* translators: %s: Plugin Name. */
+										__( 'Upload updated version of %s for review', 'wporg-plugins' ),
+										esc_html( $plugin->post_title )
+									)
+								);
+
+								?>
+								<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
+									<?php wp_nonce_field( 'wporg-plugins-upload-' . $plugin->ID ); ?>
+									<input type="hidden" name="action" value="upload-additional"/>
+									<input type="hidden" name="plugin_id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
+
+									<label class="button button-secondary zip-file">
+										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
+									</label>
+
+									<input class="upload-button button button-primary" type="submit" value="<?php esc_attr_e( 'Upload updated version for review', 'wporg-plugins' ) ?>"/>
+								</form>
+								<?php
+
+								echo "</li>";
+							}
 						
 						echo "</li>\n";
 					}
@@ -305,10 +363,12 @@ class Upload {
 						<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
 					</ul>
 				</fieldset> */
-?>
+				?>
 
-				<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
-				<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
+				<label class="button button-secondary zip-file">
+					<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
+					<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
+				</label>
 
 				<p>
 					<small>
@@ -356,37 +416,26 @@ class Upload {
 
 				<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 			</form>
-
-			<?php
-			$upload_script = '
-				( function ( $ ) {
-					var $label = $( "label.button" ),
-						labelText = $label.text();
-					$( "#zip_file" )
-						.on( "change", function( event ) {
-							var fileName = event.target.value.split( "\\\\" ).pop(),
-								fileSize = event.target.files[0].size || 0;
-
-							if ( fileSize > $(this).data( "maxbytes" ) ) {
-								event.target.value = "";
-								fileName = false;
-							}
-
-							fileName ? $label.text( fileName ) : $label.text( labelText );
-						} )
-						.on( "focus", function() { $label.addClass( "focus" ); } )
-						.on( "blur", function() { $label.removeClass( "focus" ); } );
-				} ( window.jQuery ) );';
-
-			if ( ! wp_script_is( 'jquery', 'done' ) ) {
-				wp_enqueue_script( 'jquery' );
-				wp_add_inline_script( 'jquery-migrate', $upload_script );
-			} else {
-				printf( '<script>%s</script>', $upload_script );
-			}
-			?>
-
 		<?php endif; // ! $submitted_counts->total
+
+		$upload_script = '( function ( $ ) {
+			var defaultLabelText = $( "label.zip-file span").first().text();
+
+			$( "input.plugin-file" )
+				.on( "change", function( event ) {
+					var fileName = event.target.value.split( "\\\\" ).pop();
+					$(this).parent().find("span").text( fileName ? fileName : defaultLabelText );
+				} )
+				.on( "focus", function() { $(this).parent().addClass( "focus" ); } )
+				.on( "blur", function() { $(this).parent().removeClass( "focus" ); } );
+		} ( window.jQuery ) );';
+
+		if ( ! wp_script_is( 'jquery', 'done' ) ) {
+			wp_enqueue_script( 'jquery' );
+			wp_add_inline_script( 'jquery-migrate', $upload_script );
+		} else {
+			printf( '<script>%s</script>', $upload_script );
+		}
 
 		return ob_get_clean();
 	}

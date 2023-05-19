@@ -57,9 +57,11 @@ class Upload_Handler {
 	 *
 	 * Runs various tests and creates plugin post.
 	 *
+	 * @param int $for_plugin The plugin being uploaded to. This is used when adding additional .zip files.
+	 *
 	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
-	public function process_upload() {
+	public function process_upload( $for_plugin = 0) {
 		if ( UPLOAD_ERR_OK !== $_FILES['zip_file']['error'] ) {
 			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
@@ -72,6 +74,8 @@ class Upload_Handler {
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
 		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
+		$plugin_post       = $for_plugin ? get_post( $for_plugin ) : false;
+		$updating_existing = (bool) $plugin_post;
 
 		$plugin_data = (array) Import::find_plugin_headers( $this->plugin_dir, 1 /* Max Depth to search */ );
 		if ( ! empty( $plugin_data['Name'] ) ) {
@@ -92,11 +96,15 @@ class Upload_Handler {
 			) );
 		}
 
-		// Determine the plugin slug based on the name of the plugin in the main plugin file.
-		$this->plugin_slug = remove_accents( $this->plugin['Name'] );
-		$this->plugin_slug = preg_replace( '/[^a-z0-9 _.-]/i', '', $this->plugin_slug );
-		$this->plugin_slug = str_replace( '_', '-', $this->plugin_slug );
-		$this->plugin_slug = sanitize_title_with_dashes( $this->plugin_slug );
+		if ( $updating_existing ) {
+			$this->plugin_slug = $plugin_post->post_name;
+		} else {
+			// Determine the plugin slug based on the name of the plugin in the main plugin file.
+			$this->plugin_slug = remove_accents( $this->plugin['Name'] );
+			$this->plugin_slug = preg_replace( '/[^a-z0-9 _.-]/i', '', $this->plugin_slug );
+			$this->plugin_slug = str_replace( '_', '-', $this->plugin_slug );
+			$this->plugin_slug = sanitize_title_with_dashes( $this->plugin_slug );
+		}
 
 		if ( ! $this->plugin_slug ) {
 			$error = __( 'Error: The plugin has an unsupported name.', 'wporg-plugins' );
@@ -122,7 +130,7 @@ class Upload_Handler {
 		}
 
 		// Make sure it doesn't use a TRADEMARK protected slug.
-		if ( false !== $this->has_trademarked_slug() && ! $has_upload_token ) {
+		if ( false !== $this->has_trademarked_slug() && ! $has_upload_token && ! $updating_existing ) {
 			$error = __( 'Error: The plugin name includes a restricted term.', 'wporg-plugins' );
 
 			if ( $this->has_trademarked_slug() === trim( $this->has_trademarked_slug(), '-' ) ) {
@@ -150,7 +158,9 @@ class Upload_Handler {
 			return new \WP_Error( 'trademarked_name', $error . ' ' . $message );
 		}
 
-		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
+		if ( ! $plugin_post ) {
+			$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
+		}
 
 		// If no matching plugin by that slug, check to see if a plugin exists with that Title in the database.
 		if ( ! $plugin_post ) {
@@ -178,7 +188,7 @@ class Upload_Handler {
 		}
 
 		// Is there already a plugin with the same slug by the same author?
-		if ( $plugin_post ) {
+		if ( $plugin_post && ! $updating_existing ) {
 			$error = __( 'Error: The plugin has already been submitted.', 'wporg-plugins' );
 
 			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
@@ -249,7 +259,7 @@ class Upload_Handler {
 		}
 
 		// Prevent uploads using popular Plugin names in the wild.
-		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) && ! $has_upload_token ) {
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) && ! $has_upload_token && ! $updating_existing ) {
 			$installs = wporg_stats_get_plugin_name_install_count( $this->plugin['Name'] );
 
 			if ( $installs && $installs->count >= 100 ) {
@@ -282,9 +292,10 @@ class Upload_Handler {
 
 		// Double check no existing plugins clash with the readme title.
 		$readme_plugin_post = get_posts( array(
-			'post_type'   => 'plugin',
-			'title'       => $readme->name,
-			'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
+			'post_type'    => 'plugin',
+			'title'        => $readme->name,
+			'post_status'  => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
+			'post__not_in' => $plugin_post ? array( $plugin_post->ID ) : [],
 		) );
 		if ( $readme_plugin_post && trim( $readme->name ) ) {
 			$error = __( 'README Error: The plugin has already been submitted.', 'wporg-plugins' );
@@ -307,7 +318,7 @@ class Upload_Handler {
 			) );
 		}
 
-		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) && ! $has_upload_token ) {
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) && ! $has_upload_token && ! $updating_existing ) {
 			$installs = wporg_stats_get_plugin_name_install_count( $readme->name );
 
 			if ( $installs && $installs->count >= 100 ) {
@@ -339,7 +350,7 @@ class Upload_Handler {
 		// We're not actually using this right now.
 		$result = $this->check_plugin();
 
-		if ( ! $result && ! $has_upload_token ) {
+		if ( ! $result && ! $has_upload_token && ! $updating_existing ) {
 			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
 
 			return new \WP_Error( 'failed_checks', $error . ' ' . sprintf(
@@ -353,60 +364,66 @@ class Upload_Handler {
 		// Passed all tests!
 		// Let's save everything and get things wrapped up.
 		// Create a new post on first-time submissions.
-		if ( ! $plugin_post ) {
-			$content = '';
-			foreach ( $readme->sections as $section => $section_content ) {
-				$content .= "\n\n<!--section={$section}-->\n{$section_content}";
-			}
+		$content = '';
+		foreach ( $readme->sections as $section => $section_content ) {
+			$content .= "\n\n<!--section={$section}-->\n{$section_content}";
+		}
 
-			// Add a Plugin Directory entry for this plugin.
-			$plugin_post = Plugin_Directory::create_plugin_post( array(
-				'post_title'   => $this->plugin['Name'],
-				'post_name'    => $this->plugin_slug,
-				'post_status'  => 'new',
-				'post_content' => $content,
-				'post_excerpt' => $this->plugin['Description'],
-				// 'tax_input'    => wp_unslash( $_POST['tax_input'] ), // for category selection
-				'meta_input'   => array(
-					'tested'                   => $readme->tested,
-					'requires'                 => $readme->requires,
-					'requires_php'             => $readme->requires_php,
-					'stable_tag'               => $readme->stable_tag,
-					'upgrade_notice'           => $readme->upgrade_notice,
-					'contributors'             => $readme->contributors,
-					'screenshots'              => $readme->screenshots,
-					'donate_link'              => $readme->donate_link,
-					'license'                  => $readme->license,
-					'license_uri'              => $readme->license_uri,
-					'sections'                 => array_keys( $readme->sections ),
-					'version'                  => $this->plugin['Version'],
-					'header_name'              => $this->plugin['Name'],
-					'header_plugin_uri'        => $this->plugin['PluginURI'],
-					'header_author'            => $this->plugin['Author'],
-					'header_author_uri'        => $this->plugin['AuthorURI'],
-					'header_textdomain'        => $this->plugin['TextDomain'],
-					'header_description'       => $this->plugin['Description'],
-					'requires_plugins'         => array_filter( array_map( 'trim', explode( ',', $this->plugin['RequiresPlugins'] ) ) ),
-					'assets_screenshots'       => array(),
-					'assets_icons'             => array(),
-					'assets_banners'           => array(),
-					'assets_banners_color'     => false,
-					'support_threads'          => 0,
-					'support_threads_resolved' => 0,
-					'downloads'                => 0,
-					'last_updated'             => gmdate( 'Y-m-d H:i:s' ),
-					'rating'                   => 0,
-					'ratings'                  => array(),
-					'active_installs'          => 0,
-					'_active_installs'         => 0,
-					'usage'                    => array(),
-					'_author_ip'               => preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] ),
-					'_submitted_date'          => time(),
-				),
-			) );
-			if ( is_wp_error( $plugin_post ) ) {
-				return $plugin_post->get_error_message();
-			}
+		$post_args = array(
+			'ID'           => $plugin_post->ID ?? 0,
+			'post_title'   => $this->plugin['Name'],
+			'post_name'    => $this->plugin_slug,
+			'post_status'  => $plugin_post->post_status ?? 'new',
+			'post_content' => $content,
+			'post_excerpt' => $this->plugin['Description'],
+			// 'tax_input'    => wp_unslash( $_POST['tax_input'] ), // for category selection
+			'meta_input'   => array(
+				'tested'                   => $readme->tested,
+				'requires'                 => $readme->requires,
+				'requires_php'             => $readme->requires_php,
+				'stable_tag'               => $readme->stable_tag,
+				'upgrade_notice'           => $readme->upgrade_notice,
+				'contributors'             => $readme->contributors,
+				'screenshots'              => $readme->screenshots,
+				'donate_link'              => $readme->donate_link,
+				'license'                  => $readme->license,
+				'license_uri'              => $readme->license_uri,
+				'sections'                 => array_keys( $readme->sections ),
+				'version'                  => $this->plugin['Version'],
+				'header_name'              => $this->plugin['Name'],
+				'header_plugin_uri'        => $this->plugin['PluginURI'],
+				'header_author'            => $this->plugin['Author'],
+				'header_author_uri'        => $this->plugin['AuthorURI'],
+				'header_textdomain'        => $this->plugin['TextDomain'],
+				'header_description'       => $this->plugin['Description'],
+				'requires_plugins'         => array_filter( array_map( 'trim', explode( ',', $this->plugin['RequiresPlugins'] ) ) ),
+				'assets_screenshots'       => array(),
+				'assets_icons'             => array(),
+				'assets_banners'           => array(),
+				'assets_banners_color'     => false,
+				'support_threads'          => 0,
+				'support_threads_resolved' => 0,
+				'downloads'                => 0,
+				'last_updated'             => gmdate( 'Y-m-d H:i:s' ),
+				'rating'                   => 0,
+				'ratings'                  => array(),
+				'active_installs'          => 0,
+				'_active_installs'         => 0,
+				'usage'                    => array(),
+			),
+		);
+
+		// First time submission, track some additional metadata.
+		if ( ! $plugin_post ) {
+			$post_args['meta_input']['_author_ip']      = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
+			$post_args['meta_input']['_submitted_date'] = time();
+		}
+
+		// Add/Update the Plugin Directory entry for this plugin.
+		$plugin_post = Plugin_Directory::create_plugin_post( $post_args );
+
+		if ( is_wp_error( $plugin_post ) ) {
+			return $result->get_error_message();
 		}
 
 		$attachment = $this->save_zip_file( $plugin_post->ID );
@@ -422,7 +439,9 @@ class Upload_Handler {
 		update_post_meta( $plugin_post->ID, '_submitted_zip_loc', $lines_of_code );
 
 		// Send plugin author an email for peace of mind.
-		$this->send_email_notification();
+		if ( ! $updating_existing ) {
+			$this->send_email_notification();
+		}
 
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
@@ -433,7 +452,9 @@ class Upload_Handler {
 			'<code>' . $this->plugin_slug . '</code>'
 		) . '</p><p>';
 
-		$message .= __( 'We&rsquo;ve sent you an email verifying this submission. Make sure you set all emails from wordpress.org to never go to spam (i.e. via email filters or approval lists). That will ensure you won&rsquo;t miss any of our messages.', 'wporg-plugins' ) . '</p><p>';
+		if ( ! $updating_existing ) {
+			$message .= __( 'We&rsquo;ve sent you an email verifying this submission. Make sure you set all emails from wordpress.org to never go to spam (i.e. via email filters or approval lists). That will ensure you won&rsquo;t miss any of our messages.', 'wporg-plugins' ) . '</p><p>';
+		}
 
 		$message .= __( 'If there are any errors in your submission, such as having submitted via the wrong account, please don\'t resubmit! Instead, email us as soon as possible (you can reply to the automated email we sent you). We can correct most issues before approval.', 'wporg-plugins' ) . '</p><p>';
 
