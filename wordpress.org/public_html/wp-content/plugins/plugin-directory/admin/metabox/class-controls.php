@@ -53,9 +53,6 @@ class Controls {
 			case 'rejected':
 				$label = __( 'Reject', 'wporg-plugins' );
 				break;
-			case 'pending':
-				$label = __( 'Mark as Pending', 'wporg-plugins' );
-				break;
 			case 'publish':
 				$label = __( 'Open', 'wporg-plugins' );
 				break;
@@ -65,6 +62,7 @@ class Controls {
 			case 'closed':
 				$label = __( 'Close', 'wporg-plugins' );
 				break;
+			case 'pending':
 			default:
 				$label = __( 'Mark as Pending', 'wporg-plugins' );
 				break;
@@ -136,13 +134,27 @@ class Controls {
 
 			<?php endif; ?>
 
-			<?php foreach ( $statuses as $status ) : ?>
+			<?php foreach ( $statuses as $status ) {
+				echo '<p>';
 
-				<p><button type="submit" name="post_status" value="<?php echo esc_attr( $status ); ?>" class="button set-plugin-status">
-					<?php echo self::get_status_button_label( $status ); ?>
-				</button></p>
+				if ( 'pending' === $status && ! $post->assigned_reviewer ) {
+					printf(
+						'<p class="pending-assign"><button onclick="%s" type="submit" name="post_status" value="%s" class="button set-plugin-status button-primary">%s</button></p>',
+						esc_attr( "document.getElementById('assigned_reviewer').value = userSettings.uid" ),
+						esc_attr( $status ),
+						esc_attr__( 'Mark as Pending & Assign Review', 'wporg-plugins' ),
+					);
+				}
 
-			<?php endforeach; ?>
+				printf(
+					'<button type="submit" name="post_status" value="%s" class="button set-plugin-status">%s</button>',
+					esc_attr( $status ),
+					self::get_status_button_label( $status )
+				);
+
+				echo '</p>';
+
+			} ?>
 		</div><!-- .misc-pub-section -->
 		<?php
 	}
