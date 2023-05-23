@@ -5,7 +5,6 @@
 	$external_support_url = $is_commercial ? get_post_meta( $post->ID, 'external_support_url', true ) : '';
 	$is_community = has_term( 'community', 'theme_business_model', $post );
 	$external_repository_url = $is_community ? get_post_meta( $post->ID, 'external_repository_url', true ) : '';
-	$can_configure_categorization_options = current_user_can( 'theme_configure_categorization_options', $post );
 ?>
 <div>
 	<div class="theme-navigation">
@@ -145,57 +144,6 @@
 				<div class="theme-downloads">
 				</div><!-- .theme-downloads -->
 
-				<?php if ( $can_configure_categorization_options && $is_community ) : ?>
-					<?php $field_name = 'external_repository_url'; ?>
-					<div class="theme-categorization-options">
-						<h3><?php esc_html_e( 'Community Options', 'wporg-themes' ); ?></h2>
-
-						<p><?php esc_html_e('This theme is developed and supported by a community.', 'wporg-themes' ); ?></p>
-
-						<form id="community" class="categorization" method="POST">
-						<p>
-						<?php printf( '<label for="%s">%s</label>', esc_attr( $field_name ), esc_attr__( 'Development repository URL', 'wporg-themes' ) ); ?>
-						<?php printf(
-							'<input id="%s" type="text" name="%s" value="%s" data-original-value="%s">',
-							esc_attr( $field_name ),
-							esc_attr( $field_name ),
-							esc_url( $external_repository_url ),
-							esc_url( $external_repository_url )
-						); ?>
-						<span class="help"><?php esc_attr_e( 'Optional. The URL where development happens, such as at github.com.', 'wporg-themes' ); ?></span>
-						</p><p>
-						<button class="button button-secondary" type="submit"><?php esc_attr_e( 'Save', 'wporg-themes' ); ?></button>
-						<span class="success-msg"><?php esc_html_e( 'Saved!', 'wporg-themes' ); ?></span>
-						</p>
-						</form>
-					</div>
-				<?php endif; ?>
-
-				<?php if ( $can_configure_categorization_options && $is_commercial ) : ?>
-					<?php $field_name = 'external_support_url'; ?>
-					<div class="theme-categorization-options">
-						<h3><?php esc_html_e( 'Commercial Options', 'wporg-themes' ); ?></h2>
-
-						<p><?php esc_html_e('This theme is free but offers paid upgrades, support, and/or add-ons.', 'wporg-themes' ); ?></p>
-
-						<form id="commercial" class="categorization" method="POST">
-						<p>
-						<?php printf( '<label for="%s">%s</label>', esc_attr( $field_name ), esc_attr__( 'Commercial support URL', 'wporg-themes' ) ); ?>
-						<?php printf(
-							'<input id="%s" type="text" name="%s" value="%s" data-original-value="%s">',
-							esc_attr( $field_name ),
-							esc_attr( $field_name ),
-							esc_url( $external_support_url ),
-							esc_url( $external_support_url )
-						); ?>
-						<span class="help"><?php esc_attr_e( 'Optional. The URL for theme support, other than its support forum on wordpress.org.', 'wporg-themes' ); ?></span>
-						</p><p>
-						<button class="button button-secondary" type="submit"><?php esc_attr_e( 'Save', 'wporg-themes' ); ?></button>
-						<span class="success-msg"><?php esc_html_e( 'Saved!', 'wporg-themes' ); ?></span>
-						</p>
-						</form>
-					</div>
-				<?php endif; ?>
 			</div>
 
 			<div class="theme-meta">

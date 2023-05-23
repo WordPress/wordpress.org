@@ -59,6 +59,18 @@ window.wp = window.wp || {};
 				description = this.get( 'sections' ).description;
 				this.set({ description: description });
 			}
+
+			/*
+			 * Mark whether the current user can edit this theme.
+			 * is_admin is set based on `edit_posts`, where as the rest api cap is `edit_post $id`.
+			 */
+			this.set( {
+				can_configure_categorization_options: (
+					themes.data.settings.currentUser?.is_admin ||
+					( this.get('author')?.user_nicename === themes.data.settings.currentUser?.slug )
+				)
+			} );
+
 		}
 	});
 
@@ -357,7 +369,6 @@ window.wp = window.wp || {};
 					requires_php: true,
 					is_commercial: true,
 					is_community: true,
-					allow_configure_categorization_options: true,
 				}
 			}, request);
 
@@ -543,9 +554,9 @@ window.wp = window.wp || {};
 				data.active_installs = data.active_installs.toLocaleString() + '+';
 			}
 
-			data.show_favorites = !! themes.data.settings.favorites.user;
+			data.show_favorites = !! themes.data.settings.currentUser?.login;
 			data.is_favorited   = ( themes.data.settings.favorites.themes.indexOf( data.slug ) !== -1 );
-			data.current_user   = themes.data.settings.favorites.user;
+			data.current_user   = themes.data.settings.currentUser?.login;
 
 			this.$el.html( this.html( data ) );
 			// Set up navigation events
@@ -596,7 +607,7 @@ window.wp = window.wp || {};
 				// If the user is no longer logged in, stop showing the favorite heart
 				if ( 'undefined' !== typeof result.error && 'not_logged_in' === result.error ) {
 					themes.data.settings.favorites.themes = [];
-					themes.data.settings.favorites.user = '';
+					themes.data.settings.currentUser = false;
 				}
 			} );
 		},

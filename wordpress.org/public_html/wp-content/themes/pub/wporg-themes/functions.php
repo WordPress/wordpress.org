@@ -184,9 +184,15 @@ function wporg_themes_scripts() {
 				'favorites'    => array(
 					'api'    => $api_endpoints['favorite'],
 					'themes' => wporg_themes_get_user_favorites(),
-					'user'   => wp_get_current_user()->user_login,
 					'nonce'  => is_user_logged_in() ? wp_create_nonce( 'modify-theme-favorite' ) : false,
 				),
+				'currentUser' => is_user_logged_in() ?
+					array(
+						'login'    => wp_get_current_user()->user_login,
+						'slug'     => wp_get_current_user()->user_nicename,
+						'is_admin' => current_user_can( 'edit_posts' ),
+					) :
+					false,
 				'browseDefault'=> WPORG_THEMES_DEFAULT_BROWSE,
 				'apiEndpoint'  => $api_endpoints['query'],
 			),

@@ -68,7 +68,6 @@ class Themes_API {
 		'is_community'       => false,
 		'external_repository_url' => false,
 		'external_support_url' => false,
-		'can_configure_categorization_options' => false,
 		'upload_date'        => false,
 	);
 
@@ -475,7 +474,6 @@ class Themes_API {
 			$defaults['is_community'] = true;
 			$defaults['external_repository_url'] = true;
 			$defaults['external_support_url'] = true;
-			$defaults['can_configure_categorization_options'] = true;
 		}
 
 		$this->request->fields = (array) ( $this->request->fields ?? [] );
@@ -546,7 +544,6 @@ class Themes_API {
 			$defaults['is_community'] = true;
 			$defaults['external_repository_url'] = true;
 			$defaults['external_support_url'] = true;
-			$defaults['can_configure_categorization_options'] = true;
 		}
 
 		$this->request->fields = (array) ( $this->request->fields ?? [] );
@@ -929,10 +926,6 @@ class Themes_API {
 			} else {
 				$phil->external_repository_url = '';
 			}
-		}
-
-		if ( $this->fields['can_configure_categorization_options'] ) {
-			$phil->can_configure_categorization_options = current_user_can( 'theme_configure_categorization_options', $theme );
 		}
 
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {

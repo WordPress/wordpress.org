@@ -164,20 +164,20 @@ function wporg_themes_init() {
 		) );
 	}
 
-    register_taxonomy( 'theme_business_model', 'repopackage', array(
-        'hierarchical'      => true, /* for tax_input[] handling on post saves. */
-        'query_var'         => 'theme_business_model',
-        'rewrite'           => false,
-        'labels'            => array(
-            'name' => __( 'Business Model', 'wporg-themes' ),
-        ),
-        'public'            => true,
-        'show_ui'           => true,
-        'show_admin_column' => false,
-        'capabilities'      => array(
-            'assign_terms' => 'assign_categories',
-        ),
-    ) );
+	register_taxonomy( 'theme_business_model', 'repopackage', array(
+		'hierarchical'      => true, /* for tax_input[] handling on post saves. */
+		'query_var'         => 'theme_business_model',
+		'rewrite'           => false,
+		'labels'            => array(
+			'name' => __( 'Business Model', 'wporg-themes' ),
+		),
+		'public'            => true,
+		'show_ui'           => true,
+		'show_admin_column' => false,
+		'capabilities'      => array(
+			'assign_terms' => 'assign_categories',
+		),
+	) );
 
 	// Add the browse/* views
 	add_rewrite_tag( '%browse%', '([^/]+)' );
@@ -903,7 +903,6 @@ function wporg_themes_get_themes_for_query() {
 		'external_support_url' => true,
 		'is_community' => true,
 		'external_repository_url' => true,
-		'can_configure_categorization_options' => true,
 	);
 
 	$api_result = wporg_themes_query_api( 'query_themes', $request );
@@ -949,7 +948,6 @@ function wporg_themes_theme_information( $slug ) {
 			'external_support_url' => true,
 			'is_community' => true,
 			'external_repository_url' => true,
-			'can_configure_categorization_model_options' => true,
 		)
 	) );
 }

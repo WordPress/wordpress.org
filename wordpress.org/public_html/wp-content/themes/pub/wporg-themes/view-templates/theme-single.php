@@ -124,7 +124,7 @@
 					</p>
 					<p>
 						<button class="button button-secondary" type="submit"><?php esc_html_e( 'Save', 'wporg-themes' ); ?></button>
-						<span class="success-msg"><?php esc_html_e( 'Saved!', 'wporg-themes' ) ?></span>
+						<span class="success-msg"><?php esc_html_e( 'Saved! Please wait for the caches to update.', 'wporg-themes' ) ?></span>
 					</p>
 					</form>
 				</div><!-- .theme-categorization-options -->
@@ -142,7 +142,7 @@
 					</p>
 					<p>
 						<button class="button button-secondary" type="submit"><?php esc_html_e( 'Save', 'wporg-themes' ); ?></button>
-						<span class="success-msg"><?php esc_html_e( 'Saved!', 'wporg-themes' ) ?></span>
+						<span class="success-msg"><?php esc_html_e( 'Saved! Please wait for the caches to update.', 'wporg-themes' ) ?></span>
 					</p>
 					</form>
 				</div><!-- .theme-categorization-options -->
