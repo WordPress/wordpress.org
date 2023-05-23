@@ -106,7 +106,7 @@ function wporg_themes_map_meta_cap( $caps, $cap, $user_id, $context ) {
 			}
 
 			// User must be able to edit theme or be the theme owner.
-			if ( ! ( user_can( $user->ID, 'edit_post', $post ) || $user->ID !== $post->post_author ) ) {
+			if ( ! user_can( $user->ID, 'edit_post', $post ) && $user->ID !== intval( $post->post_author ) ) {
 				return [ 'do_not_allow' ];
 			}
 
