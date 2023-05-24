@@ -14,7 +14,7 @@ class Release_Confirmation {
 
 	const SHORTCODE = 'release-confirmation';
 	const COOKIE    = 'release_confirmation_access_token';
-	const NONCE     = 'plugins-developers-releases-page';
+	const META_KEY  = '_release_confirmation_access_token';
 	const URL_PARAM = 'access_token';
 
 	/**
@@ -272,7 +272,13 @@ class Release_Confirmation {
 			return false;
 		}
 
-		if ( false !== wp_verify_nonce( $_COOKIE[ self::COOKIE ], self::NONCE ) ) {
+		// ...and it be valid..
+		$token = get_user_meta( get_current_user_id(), self::META_KEY, true );
+		if (
+			$token &&
+			$token['time'] > ( time() - DAY_IN_SECONDS ) &&
+			wp_check_password( $_COOKIE[ self::COOKIE ], $token['token'] )
+		) {
 			return true;
 		}
 
@@ -287,16 +293,16 @@ class Release_Confirmation {
 			return false;
 		}
 
-		$current_user = wp_get_current_user()->ID;
-		wp_set_current_user( $user->ID );
+		$time      = time();
+		$plaintext = wp_generate_password( 24, false );
+		$token     = wp_hash_password( $plaintext );
+		update_user_meta( $user->ID, self::META_KEY, compact( 'token', 'time' ) );
 
-		$url = wp_nonce_url(
-			home_url( '/developers/releases/' ), // TODO: Hardcoded url.
-			self::NONCE,
-			self::URL_PARAM
+		$url = add_query_arg(
+			self::URL_PARAM,
+			urlencode( $plaintext ),
+			home_url( '/developers/releases/' )
 		);
-
-		wp_set_current_user( $current_user );
 
 		return $url;
 	}
