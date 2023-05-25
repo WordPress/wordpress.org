@@ -14,17 +14,25 @@ class Uploads {
 	 *
 	 * @var int
 	 */
-	const MAX_LENGTH_DESCRIPTION = 250;
+	const MAX_LENGTH_DESCRIPTION = 350;
 
 	/**
-	 * Maximum number of pending/concurrent submissions.
+	 * The default maximum allowed file size in megabytes.
 	 *
-	 * Once this threshold is met, a user will be unable to make another
-	 * submission until the current submission is approved or rejected.
-	 *
-	 * @var int
+	 * @see `get_maximum_photo_file_size()` for actually retrieving the maximum
+	 * photo size, as it may be filtered.
+	 * @var int|float
 	 */
-	const MAX_PENDING_SUBMISSIONS = 5;
+	const MAX_PHOTO_FILE_SIZE = 20;
+
+	/**
+	 * The default minimum allowed file size in megabytes.
+	 *
+	 * @see `get_minimum_photo_file_size()` for actually retrieving the minimum
+	 * photo size, as it may be filtered.
+	 * @var int|float
+	 */
+	const MIN_PHOTO_FILE_SIZE = 1;
 
 	/**
 	 * The slug for the page used for photo uploads.
@@ -102,6 +110,9 @@ class Uploads {
 
 		/* After upload, after photo validates. */
 
+		// Disable jpeg to webp conversion.
+		add_filter( 'wp_upload_image_mime_transforms',  [ __CLASS__, 'disable_jpeg_to_webp' ] );
+
 		// Set post fields for photo.
 		add_action( 'wporg_photos_upload_success',      [ __CLASS__, 'set_post_fields' ], 100, 3 );
 		// Store original file info.
@@ -175,11 +186,104 @@ class Uploads {
 	}
 
 	/**
+	 * Returns the maximum allowed file size.
+	 *
+	 * @param bool $in_bytes Should the value returned be in bytes instead of megabytes?
+	 * @return int|float Maximum allowed file size. Returns value in bytes by default, but
+	 *             will return value in megabytes if `$as_bytes` is false.
+	 */
+	public static function get_maximum_photo_file_size( $as_bytes = true ) {
+		/**
+		 * Filters the maximum allowed photo file size, in megabytes.
+		 *
+		 * @param int The maximum allowed photo file size, in megabytes.
+		 */
+		$max_file_size = apply_filters( 'wporg_photos_max_photo_file_size', self::MAX_PHOTO_FILE_SIZE );
+
+		if ( $as_bytes ) {
+			$max_file_size = round( $max_file_size * 1024 * 1024 );
+		}
+
+		return $max_file_size;
+	}
+
+	/**
+	 * Returns the minimum allowed file size.
+	 *
+	 * @param bool $in_bytes Should the value returned be in bytes instead of megabytes?
+	 * @return int|float Minimum allowed file size. Returns value in bytes by default, but
+	 *             will return value in megabytes if `$as_bytes` is false.
+	 */
+	public static function get_minimum_photo_file_size( $as_bytes = true ) {
+		/**
+		 * Filters the minimum allowed photo file size, in megabytes.
+		 *
+		 * @param int The minimum allowed photo file size, in megabytes.
+		 */
+		$min_file_size = apply_filters( 'wporg_photos_min_photo_file_size', self::MIN_PHOTO_FILE_SIZE );
+
+		if ( $as_bytes ) {
+			$min_file_size = round( $min_file_size * 1024 * 1024 );
+		}
+
+		return $min_file_size;
+	}
+
+	/**
 	 * Enqueues scripts for the photo submit page.
 	 */
 	public static function wp_enqueue_scripts() {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) ) {
 			wp_enqueue_script( 'wporg-photos-submit', plugins_url( 'assets/js/submit.js', dirname( __FILE__ ) ), [], '1', true );
+
+			wp_localize_script(
+				'wporg-photos-submit',
+				'PhotoDir',
+				[
+					'error_class'           => 'error',
+
+					// Field required.
+					'err_field_required'    => __( 'This field is required.', 'wporg-photos' ),
+
+					// File extension.
+					'err_invalid_mimetype' => __( 'Please select a JPEG image.', 'wporg-photos' ),
+
+					// File size.
+					'err_file_too_large'    => sprintf(
+						__( 'The selected file cannot be larger than %s MB.', 'wporg-photos' ),
+						self::get_maximum_photo_file_size( false )
+					),
+					'err_file_too_small'    => sprintf(
+						__( 'The selected file must be larger than %s MB.', 'wporg-photos' ),
+						self::get_minimum_photo_file_size( false )
+					),
+					'max_file_size' => self::get_maximum_photo_file_size(),
+					'min_file_size' => self::get_minimum_photo_file_size(),
+
+					// File dimensions.
+					'err_file_too_long'     => sprintf(
+						/** translators: %d: The maximum number of pixels. */
+						__( 'The selected file cannot be longer in either length or width than %dpx.', 'wporg-photos' ),
+						self::big_image_size_threshold( 0 )
+					),
+					'err_file_too_short'    => sprintf(
+						/** translators: %d: The minimum number of pixels. */
+						__( 'The selected file must be longer in both length and width than %dpx.', 'wporg-photos' ),
+						self::get_minimum_photo_dimension()
+					),
+					'max_file_dimension' => self::big_image_size_threshold( 0 ),
+					'min_file_dimension' => self::get_minimum_photo_dimension(),
+					'msg_validating_dimensions' => __( 'Validating photo dimensions&hellip;', 'wporg-photos' ),
+
+					// Toggle all confirmation checkboxes for upload.
+					'user_can_toggle_all_checkboxes' => User::can_toggle_confirmation_checkboxes(),
+					'toggle_all_checkboxes' => __( 'As a contributor of many photos, I am well aware of the requirements listed below and agree to them all.', 'wporg-photos' ),
+
+					// File names of user's pending submissions.
+					'err_duplicate_pending_file_name' => __( 'You already have a pending submission with this file name.', 'wporg-photos' ),
+					'pending_file_names' => User::get_pending_file_names(),
+				]
+			);
 		}
 	}
 
@@ -248,15 +352,13 @@ class Uploads {
 	/**
 	 * Restricts upload mimetypes to only allow image mimetypes.
 	 *
-	 * @param array $mimes Array of mimetypes.
+	 * @param array $mimes Array of mimetypes. Ignored.
 	 * @return array
 	 */
-	public static function restrict_upload_mimes( $mimes ) {
-		$acceptable_mimes = [
-			'jpg|jpeg|jpe' => true,
+	public static function restrict_upload_mimes( $mimes = [] ) {
+		return [
+			'jpg|jpeg|jpe' => 'image/jpeg',
 		];
-
-		return array_intersect_key( $mimes, $acceptable_mimes );
 	}
 
 	/**
@@ -286,6 +388,33 @@ class Uploads {
 				case 'duplicate-file':
 					$rejection = __( 'Your submission appears to be a duplicate of something uploaded before.', 'wporg-photos' );
 					break;
+				case 'file-not-jpg':
+					$rejection = __( 'Your submission must be an image in the JPEG format.', 'wporg-photos' );
+					break;
+				case 'file-too-large':
+					$rejection = sprintf(
+						__( 'The file size for your submission is too large. Please submit a photo smaller than %d MB in size.', 'wporg-photos' ),
+						self::get_maximum_photo_file_size( false )
+					);
+					break;
+				case 'file-too-long':
+					$rejection = sprintf(
+						__( 'Your submission is too large. Please submit a photo with length and width each smaller than %dpx.', 'wporg-photos' ),
+						self::big_image_size_threshold( 0 )
+					);
+					break;
+				case 'file-too-short':
+					$rejection = sprintf(
+						__( 'Your submission is too small. Please submit a photo with length and width each larger than %dpx.', 'wporg-photos' ),
+						self::get_minimum_photo_dimension()
+					);
+					break;
+				case 'file-too-small':
+					$rejection = sprintf(
+						__( 'The file size for your submission is too small. Please submit a photo larger than %d MB in size.', 'wporg-photos' ),
+						self::get_minimum_photo_file_size( false )
+					);
+					break;
 				case 'insufficient-dimension':
 					$rejection = sprintf( __( 'Your photo must have a width and height of at least %d pixels each.', 'wporg-photos' ), self::get_minimum_photo_dimension() );
 					break;
@@ -294,6 +423,15 @@ class Uploads {
 					break;
 				case 'too-many-files':
 					$rejection = __( 'You can only upload one photo at a time.', 'wporg-photos' );
+					break;
+				case 'upload-error':
+					$rejection = __( 'There has been an error handling this submission. Feel free to try again, but if it persists try back again later.', 'wporg-photos' );
+					break;
+				case 'upload-error-partial':
+					$rejection = __( 'There has been an error with this submission and it has only partially uploaded. Feel free to try again, but if it persists try back again later.', 'wporg-photos' );
+					break;
+				case 'upload-error-unknown':
+					$rejection = __( 'There has been an unknown error handling this submission. Feel free to try again, but if it persists try back again later.', 'wporg-photos' );
 					break;
 			}
 			unset( $_COOKIE['wporg_photos_reject_reason'] );
@@ -380,7 +518,7 @@ class Uploads {
 
 		// Check if user has reached submission limit.
 		if ( $can ) {
-			$can = ! self::user_reached_concurrent_submission_limit();
+			$can = ! User::has_reached_concurrent_submission_limit();
 			$reason = 'concurrent-submission-limit';
 		}
 
@@ -418,12 +556,63 @@ class Uploads {
 	 *                      specific validation issue.
 	 */
 	protected static function validate_upload_form() {
+		if ( ! empty( $_FILES['files']['error'][0] ) ) {
+			switch ( $_FILES['files']['error'][0] ) {
+				case UPLOAD_ERR_INI_SIZE:
+				case UPLOAD_ERR_FORM_SIZE:
+					return 'file-too-large';
+				case UPLOAD_ERR_NO_FILE:
+					return 'no-file-uploaded';
+				case UPLOAD_ERR_PARTIAL:
+					return 'upload-error-partial';
+				case UPLOAD_ERR_NO_TMP_DIR:
+				case UPLOAD_ERR_CANT_WRITE:
+				case UPLOAD_ERR_EXTENSION:
+					return 'upload-error';
+				default:
+					return 'upload-error-unknown';
+			}
+		}
+
 		if ( empty( $_FILES['files']['tmp_name'][0] ) ) {
 			return 'no-file-uploaded';
 		}
 
 		if ( ! empty( $_FILES['files']['tmp_name'] ) && count( $_FILES['files']['tmp_name'] ) > 1 ) {
 			return 'too-many-files';
+		}
+
+		// Check file size.
+		if ( ! empty( $_FILES['files']['size'][0] ) ) {
+			$file_size = $_FILES['files']['size'][0];
+			// Check if file is too large.
+			//   (This is actually a fallback check in the event the MAX_FILE_SIZE
+			//   directive in the upload form is missing or has been tampered with.
+			//   Otherwise, PHP will already have invalidated a too-large upload.)
+			if ( $file_size >= self::get_maximum_photo_file_size() ) {
+				return 'file-too-large';
+			}
+			// Check if file is too small.
+			if ( $file_size <= self::get_minimum_photo_file_size() ) {
+				return 'file-too-small';
+			}
+		}
+
+		list( $width, $length, $image_type ) = getimagesize( $_FILES['files']['tmp_name'][0] );
+
+		// Check image type.
+		if ( ! in_array( $image_type, [ IMG_JPG, IMG_JPEG ] ) ) {
+			return 'file-not-jpg';
+		}
+
+		// Check image dimensions.
+		$max_dimension = self::big_image_size_threshold( 0 );
+		$min_dimension = self::get_minimum_photo_dimension();
+		if ( $width > $max_dimension || $length > $max_dimension ) {
+			return 'file-too-long';
+		}
+		if ( $width < $min_dimension || $length < $min_dimension ) {
+			return 'file-too-short';
 		}
 
 		if ( ! isset( $_POST['photo_copyright'] ) || ! $_POST['photo_copyright'] ) {
@@ -451,12 +640,12 @@ class Uploads {
 	}
 
 	/**
-	 * Validates a photo after being uploading.
+	 * Validates a photo after being uploaded.
 	 *
 	 * If valid, then triggers a success action.
 	 *
-	 * Note: Validations at this point should likely involve needing the actual
-	 * photo file. If possible, perform upload permission checks in
+	 * Note: Validations at this point probably involves needing the actual
+	 * photo file. If possible, perform upload permission checks earlier in
 	 * `can_proceed_with_upload()`.
 	 *
 	 * @param int[] $media_ids Media IDs for uploaded files.
@@ -653,33 +842,6 @@ class Uploads {
 	}
 
 	/**
-	 * Determines if user has reached concurrent submission limit for pending
-	 * uploads (e.g. max number of photos awaiting moderation).
-	 *
-	 * @return bool True if use has exceeded pending sumission limit, else false.
-	 */
-	public static function user_reached_concurrent_submission_limit() {
-		$limit_reached = true;
-
-		if ( is_user_logged_in() ) {
-			$posts = get_posts( [
-				'fields'         => 'ids',
-				'posts_per_page' => self::MAX_PENDING_SUBMISSIONS,
-				'author'         => get_current_user_id(),
-				'post_status'    => 'pending',
-				'post_type'      => Registrations::get_post_type(),
-			] );
-
-			if ( count( $posts ) < self::MAX_PENDING_SUBMISSIONS ) {
-				$limit_reached = false;
-			}
-		}
-
-		return $limit_reached;
-	}
-
-
-	/**
 	 * Outputs a notice for users who are prevented from uploading and prevents
 	 * the upload form from being output.
 	 *
@@ -710,6 +872,14 @@ class Uploads {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) ) {
 			$content .= apply_filters( 'wporg_photos_pre_upload_form', $content );
 
+			if ( User::count_published_photos( get_current_user_id() ) ) {
+				$content .= sprintf(
+					/* translators: %s: URL to current user's photo archive. */
+					'<p>' . __( 'View <a href="%s">your archive of photos</a> to see what you&#8217;ve already had published.', 'wporg-photos' ) . '</p>',
+					get_author_posts_url( get_current_user_id() )
+				);
+			}
+
 			$content .= '<fieldset id="wporg-photo-upload">';
 
 			$content .= sprintf(
@@ -718,20 +888,31 @@ class Uploads {
 				esc_attr( __( 'Upload your photo', 'wporg-photos' ) )
 			);
 
-			if ( self::user_reached_concurrent_submission_limit() ) {
+			if ( User::has_reached_concurrent_submission_limit() ) {
 				$content .= '<p>' . __( 'Thanks for your submissions! Please wait until a photo is approved by moderators before submitting again.', 'wporg-photos' ) . '</p>';
 			} else {
-				$content .= '[input type="hidden" name="post_title" value=""]' . "\n";
+				$valid_upload_mimetypes = implode( ',', array_values( self::restrict_upload_mimes() ) );
+				$content .= '<input type="hidden" name="post_title" value="" id="ugc-input-post_title" />' . "\n";
 				$content .= sprintf(
-					'[input type="file" name="ug_photo" id="ug_photo" description="%s" required="true" aria-required="true"]' . "\n",
+					'<input type="hidden" name="MAX_FILE_SIZE" value="%s" id="ugc-input-max_file_size" />' . "\n",
+					self::get_maximum_photo_file_size()
+				);
+				$content .= '<div class="ugc-input-wrapper">' . "\n"
+				. sprintf(
+					'<label for="ug_photo">%s</label>' . "\n",
 					esc_attr( __( 'Photo', 'wporg-photos' ) )
 				)
 				. sprintf(
-					'[%s name="post_content" class="textarea" id="ug_content" description="%s" maxlength="%d" help="%s"]' . "\n",
+					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" accept="%s">' . "\n",
+					esc_attr( $valid_upload_mimetypes )
+				)
+				. "</div>\n"
+				. sprintf(
+					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d" help="%s"]' . "\n",
 					$description_shortcode,
-					esc_attr( __( 'Description (optional)', 'wporg-photos' ) ),
+					esc_attr( __( 'Alternative Text (required)', 'wporg-photos' ) ),
 					self::MAX_LENGTH_DESCRIPTION,
-					esc_attr( sprintf( __( 'Maximum of %d characters.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
+					esc_attr( sprintf( __( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Maximum of %d characters. No HTML.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
 				)
 				. '<div class="upload-checkbox-wrapper">' . "\n";
 
@@ -789,6 +970,27 @@ class Uploads {
 		) {
 			do_action( 'wporg_photos_photo_upload_complete', $result['media_ids'][0], $result['post_id'] );
 		}
+	}
+
+	/**
+	 * Disables conversion of uploaded jpegs to webp.
+	 *
+	 * This is required as webp appears to use a lot of memory for conversion, often running out
+	 * of memory during upload on WordPress.org. Additionally, we don't use/expose webp at present.
+	 * This may be only required temporarily, see the below Core Trac ticket for confirmation.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/6142
+	 * @see https://core.trac.wordpress.org/ticket/55443
+	 *
+	 * @param array $transforms The mime type transforms for uploads.
+	 * @return array The modified $transforms.
+	 */
+	public static function disable_jpeg_to_webp( $transforms ) {
+		if ( isset( $transforms['image/jpeg'] ) ) {
+			$transforms['image/jpeg'] = [ 'image/jpeg' ];
+		}
+
+		return $transforms;
 	}
 }
 

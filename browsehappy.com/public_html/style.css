@@ -96,7 +96,7 @@ header, #main, footer {
 
 .wrap {
 	zoom: 1;
-	max-width: 1150px;
+	max-width: 1380px;
 	margin: 0 auto;
 }
 
@@ -325,6 +325,10 @@ html[dir="rtl"] #browserlist li {
 
 #browserlist li#edge .icon {
 	background-position: -625px 0;
+}
+
+#browserlist li#brave .icon {
+	background-position: -750px 0;
 }
 
 #browserlist h2 {
@@ -585,7 +589,7 @@ html[dir="rtl"] #share nav li {
 #byline {
 	clear: both;
 	margin: 0 auto;
-	padding-top: 10px;
+	padding-top: 60px;
 }
 
 #byline a {
@@ -601,7 +605,7 @@ html[dir="rtl"] #share nav li {
 	font-variant: initial;
 }
 
-@media (max-width: 1168px) {
+@media (max-width: 1379px) {
 	#main .wrap {
 		max-width: 728px;
 	}
@@ -609,12 +613,12 @@ html[dir="rtl"] #share nav li {
 		width: 242px;
 	}
 }
-@media (max-width: 976px)  {
+@media (max-width: 976px) {
 	#main .wrap {
 		max-width: 768px;
 	}
 }
-@media (max-width: 784px)  {
+@media (max-width: 784px) {
 	#main .wrap {
 		max-width: 690px;
 	}
@@ -622,7 +626,7 @@ html[dir="rtl"] #share nav li {
 		width: 230px;
 	}
 }
-@media (max-width: 705px)  {
+@media (max-width: 705px) {
 	#main .wrap {
 		max-width: 460px;
 	}
@@ -654,6 +658,23 @@ html[dir="rtl"] #share nav li {
 	#browserlist li {
 		width: 242px;
 	}
+	#about,
+	#share {
+		float: none;
+		margin-left: 15px;
+		margin-right: 15px;
+		width: inherit;
+	}
+	#about {
+		margin-bottom: 15px;
+
+	}
+	#byline {
+		padding-top: 20px;
+	}
+	footer {
+		padding: 40px 0;
+	}
 }
 @media (max-width: 430px) {
 	header {
@@ -664,6 +685,9 @@ html[dir="rtl"] #share nav li {
 	}
 	.wf-leaguegothic1leaguegothic2-n4-active header h1 {
 		font-size: 1000%;
+	}
+	footer {
+		padding: 25px 0;
 	}
 }
 @media (max-width: 383px) {
@@ -686,6 +710,6 @@ html[dir="rtl"] #share nav li {
 	#browserlist li .icon, #share nav li a {
 		background-image: url(imgs/browsehappy-sprite-2x.png);
 		background-repeat: no-repeat;
-		background-size: 750px 170px;
+		background-size: 875px 170px;
 	}
 }

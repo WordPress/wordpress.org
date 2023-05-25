@@ -44,10 +44,6 @@ $paginationBreakPoint: "600px";
 			border-bottom: 1px solid #eee;
 			margin: 1rem 0;
 
-			a.bbp-forum-title:active, a.bbp-forum-title:focus {
-				text-decoration: none;
-			}
-
 			h3 {
 				font-size: 1.4rem;
 				margin-bottom: 0;
@@ -59,14 +55,27 @@ $paginationBreakPoint: "600px";
 			}
 
 			a {
+				&.bbp-forum-title {
+					color: inherit;
+					font-weight: normal;
+				}
+
+				&:active, &:focus, &:hover {
+					text-decoration: none;
+				}
 
 				&:hover {
-
 					color: $color__link;
-					text-decoration: none;
+				}
 
-					h3 {
-						color: $color__link;
+				&.dashicons-before {
+    				-webkit-box-decoration-break: clone;
+    				box-decoration-break: clone;
+					padding-left: 1em;
+
+					&:before {
+						margin-left: -1em;
+						vertical-align: baseline;
 					}
 				}
 			}
@@ -271,12 +280,8 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
-		/* bbPress 2.5 */
-		div.bbp-reply-author a.bbp-author-name,
-		div.bbp-topic-author a.bbp-author-name,
-		/* bbPress 2.6 */
-		div.bbp-reply-author a.bbp-author-link span.bbp-author-name,
-		div.bbp-topic-author a.bbp-author-link span.bbp-author-name {
+		div.bbp-reply-author .bbp-author-name,
+		div.bbp-topic-author .bbp-author-name {
 			clear: none;
 			font-size: ms(0);
 			display: inline-block;
@@ -296,7 +301,7 @@ $paginationBreakPoint: "600px";
 				margin-left: 1rem;
 				padding-left: 0;
 			}
-	
+
 			@media screen and ( max-width: 480px ) {
 				min-height: auto;
 				border-bottom: 0;
@@ -378,7 +383,7 @@ $paginationBreakPoint: "600px";
 
 		li.bbp-body div.type-topic span.bbp-admin-links,
 		li.bbp-body div.type-reply span.bbp-admin-links {
-			display: none;
+			display: block;
 			position: absolute;
 			bottom: 0;
 			right: 0;
@@ -402,19 +407,6 @@ $paginationBreakPoint: "600px";
 					text-decoration: underline;
 				}
 			}
-		}
-
-		li.bbp-body div.type-topic:hover span.bbp-admin-links,
-		li.bbp-body div.type-reply:hover span.bbp-admin-links {
-			display: block;
-		}
-
-		li.bbp-body div.type-topic:focus-within span.bbp-admin-links,
-		li.bbp-body div.type-reply:focus-within span.bbp-admin-links {
-
-			/* Separated from the block above due to browsers that
-			 * don't support :focus-within */
-			display: block;
 		}
 
 		ul.status-closed,
@@ -1170,7 +1162,7 @@ div.bbp-breadcrumb {
 		input[type="text"] {
 			width: 100%;
 			padding: 0.2rem 0.5rem 0.1rem;
-			margin: 0;
+			margin: 5px 0;
 		}
 	}
 

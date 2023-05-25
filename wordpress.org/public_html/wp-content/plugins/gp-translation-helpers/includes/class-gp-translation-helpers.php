@@ -67,8 +67,21 @@ class GP_Translation_Helpers {
 		add_thickbox();
 		gp_enqueue_style( 'thickbox' );
 
-		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ), array(), '20220722' );
+		wp_register_style(
+			'gp-discussion-css',
+			plugins_url( 'css/discussion.css', __DIR__ ),
+			array(),
+			filemtime( plugin_dir_path( __DIR__ ) . 'css/discussion.css' )
+		);
 		gp_enqueue_style( 'gp-discussion-css' );
+
+		wp_register_style(  // todo: these CSS should be integrated in GlotPress.
+			'gp-translation-helpers-editor',
+			plugins_url( 'css/editor.css', __DIR__ ),
+			array(),
+			filemtime( plugin_dir_path( __DIR__ ) . 'css/editor.css' )
+		);
+		gp_enqueue_style( 'gp-translation-helpers-editor' );
 
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
@@ -189,10 +202,21 @@ class GP_Translation_Helpers {
 			}
 		);
 
-		wp_register_style( 'gp-translation-helpers-css', plugins_url( 'css/translation-helpers.css', __DIR__ ), '', '20220722' ); // todo: add the version as global element.
+		wp_register_style(
+			'gp-translation-helpers-css',
+			plugins_url( 'css/translation-helpers.css', __DIR__ ),
+			array(),
+			filemtime( plugin_dir_path( __DIR__ ) . 'css/translation-helpers.css' )
+		);
 		gp_enqueue_style( 'gp-translation-helpers-css' );
 
-		wp_register_script( 'gp-translation-helpers', plugins_url( '/js/translation-helpers.js', __DIR__ ), array( 'gp-editor' ), '20220722', true );
+		wp_register_script(
+			'gp-translation-helpers',
+			plugins_url( 'js/translation-helpers.js', __DIR__ ),
+			array( 'gp-editor' ),
+			filemtime( plugin_dir_path( __DIR__ ) . 'js/translation-helpers.js' ),
+			true
+		);
 		gp_enqueue_scripts( array( 'gp-translation-helpers' ) );
 
 		wp_localize_script( 'gp-translation-helpers', '$gp_translation_helpers_settings', $translation_helpers_settings );
@@ -311,6 +335,7 @@ class GP_Translation_Helpers {
 		GP::$router->prepend( "/$project/(\d+)(?:/$locale/$dir)?(/\d+)?", array( 'GP_Route_Translation_Helpers', 'original_permalink' ), 'get' );
 		GP::$router->prepend( "/$project/-get-translation-helpers/$id", array( 'GP_Route_Translation_Helpers', 'ajax_translation_helpers' ), 'get' );
 		GP::$router->prepend( "/$project/$locale/$dir/-get-translation-helpers/$id", array( 'GP_Route_Translation_Helpers', 'ajax_translation_helpers_locale' ), 'get' );
+		GP::$router->prepend( "/locale/$locale/$dir/discussions/?", array( 'GP_Route_Translation_Helpers', 'discussions_dashboard' ), 'get' );
 	}
 
 	/**
@@ -353,7 +378,7 @@ class GP_Translation_Helpers {
 	 * @since 0.0.2
 	 *
 	 *  @param string $template Template of the current page.
-	 *  @param string $translation_set Current translation set
+	 *  @param array  $translation_set Current translation set.
 	 *
 	 * @return void
 	 */
@@ -363,7 +388,12 @@ class GP_Translation_Helpers {
 			return;
 		}
 
-		wp_register_script( 'gp-comment-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery', 'gp-common', 'gp-editor', 'thickbox' ), '20220726' );
+		wp_register_script(
+			'gp-comment-feedback-js',
+			plugins_url( 'js/reject-feedback.js', __DIR__ ),
+			array( 'jquery', 'gp-common', 'gp-editor', 'thickbox' ),
+			filemtime( plugin_dir_path( __DIR__ ) . 'js/reject-feedback.js' )
+		);
 		gp_enqueue_script( 'gp-comment-feedback-js' );
 
 		wp_localize_script(
@@ -373,7 +403,35 @@ class GP_Translation_Helpers {
 				'url'             => admin_url( 'admin-ajax.php' ),
 				'nonce'           => wp_create_nonce( 'gp_comment_feedback' ),
 				'locale_slug'     => $translation_set['locale_slug'],
-				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons(),
+				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
+			)
+		);
+
+		wp_register_script(
+			'gp-translation-helpers-editor',
+			plugins_url( 'js/editor.js', __DIR__ ),
+			array( 'gp-editor' ),
+			filemtime( plugin_dir_path( __DIR__ ) . 'js/editor.js' ),
+			true
+		);
+		gp_enqueue_scripts( array( 'gp-translation-helpers-editor' ) );
+
+		wp_localize_script(
+			'gp-translation-helpers-editor',
+			'$gp_translation_helpers_editor',
+			array(
+				'translation_helper_url' => gp_url_project( $translation_set['project']->path, gp_url_join( $translation_set['locale_slug'], $translation_set['translation_set']->slug, '-get-translation-helpers' ) ),
+				'reply_text'             => esc_attr__( 'Reply' ),
+				'cancel_reply_text'      => esc_html__( 'Cancel reply' ),
+			)
+		);
+		wp_localize_script(
+			'gp-translation-helpers-editor',
+			'wpApiSettings',
+			array(
+				'root'           => esc_url_raw( rest_url() ),
+				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				'admin_ajax_url' => admin_url( 'admin-ajax.php' ),
 			)
 		);
 	}
@@ -390,10 +448,11 @@ class GP_Translation_Helpers {
 
 		$helper_discussion    = new Helper_Translation_Discussion();
 		$locale_slug          = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
+		$translation_status   = ! empty( $_POST['data']['translation_status'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_status' ), $_POST['data']['translation_status'] ) : null;
 		$translation_id_array = ! empty( $_POST['data']['translation_id'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] ) : null;
 		$original_id_array    = ! empty( $_POST['data']['original_id'] ) ? array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] ) : null;
 		$comment_reason       = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
-		$all_comment_reasons  = array_keys( Helper_Translation_Discussion::get_comment_reasons() );
+		$all_comment_reasons  = array_keys( Helper_Translation_Discussion::get_comment_reasons( $locale_slug ) );
 		$comment_reason       = array_filter(
 			$comment_reason,
 			function( $reason ) use ( $all_comment_reasons ) {
@@ -402,8 +461,17 @@ class GP_Translation_Helpers {
 		);
 		$comment              = sanitize_text_field( $_POST['data']['comment'] );
 
-		if ( ! $locale_slug || ! $translation_id_array || ! $original_id_array || ( ! $comment_reason && ! $comment ) ) {
-			wp_send_json_error();
+		if ( ! $locale_slug ) {
+			wp_send_json_error( 'Oops! Locale slug missing' );
+		}
+		if ( ! $translation_id_array ) {
+			wp_send_json_error( 'Oops! Translation ID missing' );
+		}
+		if ( ! $original_id_array ) {
+			wp_send_json_error( 'Oops! Original ID missing' );
+		}
+		if ( ! $comment_reason && ! $comment ) {
+			wp_send_json_error( 'Oops! No comment and reason found' );
 		}
 
 		// Get original_id and translation_id of first string in the array
@@ -411,15 +479,15 @@ class GP_Translation_Helpers {
 		$first_translation_id = array_shift( $translation_id_array );
 
 		// Post comment on discussion page for the first string
-		$first_comment_id = $this->insert_comment( $comment, $first_original_id, $comment_reason, $first_translation_id, $locale_slug, $_SERVER );
+		$first_comment_id = $this->insert_comment( $comment, $first_original_id, $comment_reason, $first_translation_id, $locale_slug, $_SERVER, $translation_status );
 
 		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
 			$comment = get_comment_link( $first_comment_id );
 			foreach ( $original_id_array as $index => $single_original_id ) {
-				$comment_id = $this->insert_comment( $comment, $single_original_id, $comment_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
-				$comment    = get_comment( $comment_id );
-				GP_Notifications::add_related_comment( $comment );
+				$comment_id = $this->insert_comment( $comment, $single_original_id, $comment_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER, $translation_status );
+				$_comment   = get_comment( $comment_id );
+				GP_Notifications::add_related_comment( $_comment );
 			}
 		}
 
@@ -428,7 +496,7 @@ class GP_Translation_Helpers {
 			GP_Notifications::init( $comment, null, null );
 		}
 
-		wp_send_json_success();
+		wp_send_json_success( 'success' );
 	}
 
 	/**
@@ -475,7 +543,7 @@ class GP_Translation_Helpers {
 	 * @return false|int
 	 * @since 0.0.2
 	 */
-	private function insert_comment( $comment, $original_id, $reason, $translation_id, $locale_slug, $server ) {
+	private function insert_comment( $comment, $original_id, $reason, $translation_id, $locale_slug, $server, $translation_status ) {
 		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original_id );
 		$user    = wp_get_current_user();
 		return wp_insert_comment(
@@ -489,9 +557,10 @@ class GP_Translation_Helpers {
 				'comment_agent'        => sanitize_text_field( $server['HTTP_USER_AGENT'] ),
 				'user_id'              => $user->ID,
 				'comment_meta'         => array(
-					'reject_reason'  => $reason,
-					'translation_id' => $translation_id,
-					'locale'         => $locale_slug,
+					'reject_reason'      => $reason,
+					'translation_id'     => $translation_id,
+					'locale'             => $locale_slug,
+					'translation_status' => $translation_status,
 				),
 			)
 		);

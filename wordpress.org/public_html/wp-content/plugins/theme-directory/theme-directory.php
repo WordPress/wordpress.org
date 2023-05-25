@@ -164,6 +164,21 @@ function wporg_themes_init() {
 		) );
 	}
 
+	register_taxonomy( 'theme_business_model', 'repopackage', array(
+		'hierarchical'      => true, /* for tax_input[] handling on post saves. */
+		'query_var'         => 'theme_business_model',
+		'rewrite'           => false,
+		'labels'            => array(
+			'name' => __( 'Business Model', 'wporg-themes' ),
+		),
+		'public'            => true,
+		'show_ui'           => true,
+		'show_admin_column' => false,
+		'capabilities'      => array(
+			'assign_terms' => 'assign_categories',
+		),
+	) );
+
 	// Add the browse/* views
 	add_rewrite_tag( '%browse%', '([^/]+)' );
 	add_permastruct( 'browse', 'browse/%browse%' );
@@ -726,12 +741,35 @@ function wporg_themes_remove_wpthemescom( $theme_slug ) {
 }
 
 /**
- * Custom version of core's deprecated `get_theme_data()` function.
+ * Custom version of core's deprecated `get_theme_data()` function merged with some WP_Theme changes.
  *
- * @param string $theme_file Path to the file.
+ * This function exists purely because we can't create a `WP_Theme` instance
+ * from a style.css as a string. We need a very small selection of the data,
+ * so this is better than complex workarounds.
+ *
+ * @param string $theme_file URL or Path to the file.
  * @return array|false File headers, or false on failure.
  */
 function wporg_themes_get_header_data( $theme_file ) {
+
+	// WP_Theme::$file_headers, which is private.
+	$file_headers = array(
+		'Name'        => 'Theme Name',
+		'ThemeURI'    => 'Theme URI',
+		'Description' => 'Description',
+		'Author'      => 'Author',
+		'AuthorURI'   => 'Author URI',
+		'Version'     => 'Version',
+		'Template'    => 'Template',
+		'Status'      => 'Status',
+		'Tags'        => 'Tags',
+		'TextDomain'  => 'Text Domain',
+		'DomainPath'  => 'Domain Path',
+		'RequiresWP'  => 'Requires at least',
+		'RequiresPHP' => 'Requires PHP',
+		'UpdateURI'   => 'Update URI',
+	);
+
 	$themes_allowed_tags = array(
 		'a'       => array(
 			'href'  => array(),
@@ -748,66 +786,38 @@ function wporg_themes_get_header_data( $theme_file ) {
 		'strong'  => array(),
 	);
 
-	$context = stream_context_create( array(
-		'http' => array(
-			'user_agent' => 'WordPress.org Theme Directory'
-		)
-	) );
+	/*
+	 * If it's a remote file, download it first.
+	 *
+	 * While get_file_data() can operate on a http:// url, we can't
+	 * guarantee that the server will be happy with the User Agent.
+	 */
+	if ( str_contains( $theme_file, '://' ) ) {
+		$request = wp_remote_get( 
+			$theme_file,
+			[
+				'user-agent' => 'WordPress.org Theme Directory',
+				'stream'     => true,
+			]
+		);
+		$theme_file = $request['filename'] ?? false;
+	}
 
-	$theme_data = file_get_contents( $theme_file, false, $context );
-	if ( ! $theme_data ) {
-		// Failure reading, or empty style.css file.
+	if ( ! $theme_file || ! file_exists( $theme_file ) ) {
 		return false;
 	}
 
-	$theme_data = str_replace( '\r', '\n', $theme_data );
+	$theme_data = get_file_data( $theme_file, $file_headers, 'theme' );
 
-	// Set defaults.
-	$author_uri  = '';
-	$template    = '';
-	$version     = '';
-	$status      = 'publish';
-	$tags        = array();
-	$author      = 'Anonymous';
-	$name        = '';
-	$theme_uri   = '';
-	$description = '';
-
-	if ( preg_match( '|^[ \t\/*#@]*Theme Name:(.*)$|mi', $theme_data, $m ) ) {
-		$name = wp_strip_all_tags( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Theme URI:(.*)$|mi', $theme_data, $m ) ) {
-		$theme_uri = esc_url( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Description:(.*)$|mi', $theme_data, $m ) ) {
-		$description = wp_kses( trim( $m[1] ), $themes_allowed_tags );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Author:(.*)$|mi', $theme_data, $m ) ) {
-		$author = wp_kses( trim( $m[1] ), $themes_allowed_tags );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Author URI:(.*)$|mi', $theme_data, $m ) ) {
-		$author_uri = esc_url( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Version:(.*)$|mi', $theme_data, $m ) ) {
-		$version = wp_strip_all_tags( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Template:(.*)$|mi', $theme_data, $m ) ) {
-		$template = wp_strip_all_tags( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Status:(.*)$|mi', $theme_data, $m ) ) {
-		$status = wp_strip_all_tags( trim( $meta_key[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Tags:(.*)$|mi', $theme_data, $m ) ) {
-		$tags = array_map( 'trim', explode( ',', wp_strip_all_tags( trim( $m[1] ) ) ) );
-	}
+	$name        = wp_strip_all_tags( trim( $theme_data['Name'] ) );
+	$theme_uri   = esc_url( trim( $theme_data['ThemeURI'] ) );
+	$description = wp_kses( trim( $theme_data['Description'] ), $themes_allowed_tags );
+	$author      = wp_kses( trim( $theme_data['Author'] ), $themes_allowed_tags ) ?: 'Anonymous';
+	$author_uri  = esc_url( trim( $theme_data['AuthorURI'] ) );
+	$version     = wp_strip_all_tags( trim( $theme_data['Version'] ) );
+	$template    = wp_strip_all_tags( trim( $theme_data['Template'] ) );
+	$status      = wp_strip_all_tags( trim( $theme_data['Status'] ) ) ?: 'publish';
+	$tags        = array_map( 'trim', explode( ',', wp_strip_all_tags( trim( $theme_data['Tags'] ) ) ) ) ?: [];
 
 	return array(
 		'Name'        => $name,
@@ -889,6 +899,10 @@ function wporg_themes_get_themes_for_query() {
 		'active_installs' => true,
 		'requires' => true,
 		'requires_php' => true,
+		'is_commercial' => true,
+		'external_support_url' => true,
+		'is_community' => true,
+		'external_repository_url' => true,
 	);
 
 	$api_result = wporg_themes_query_api( 'query_themes', $request );
@@ -930,6 +944,10 @@ function wporg_themes_theme_information( $slug ) {
 			'active_installs' => true,
 			'requires' => true,
 			'requires_php' => true,
+			'is_commercial' => true,
+			'external_support_url' => true,
+			'is_community' => true,
+			'external_repository_url' => true,
 		)
 	) );
 }
@@ -1277,24 +1295,41 @@ function wporg_themes_add_hreflang_link_attributes() {
 		'arq',
 		'art',
 		'art-xemoji',
+		'art-pirate', 'pirate',
 		'ary',
 		'ast',
 		'az-ir',
 		'azb',
+		'bal',
 		'bcc',
+		'bho',
+		'brx',
+		'dsb',
 		'ff-sn',
+		'fon',
 		'frp',
 		'fuc',
 		'fur',
+		'gax',
 		'haz',
+		'hsb',
 		'ido',
 		'io',
+		'kaa',
 		'kab',
 		'li',
 		'li-nl',
+		'lij',
 		'lmo',
+		'mai',
 		'me',
 		'me-me',
+		'mfe',
+		'nqo',
+		'pap-aw',
+		'pap-cw',
+		'pcd',
+		'pcm',
 		'rhg',
 		'rup',
 		'sah',
@@ -1302,11 +1337,14 @@ function wporg_themes_add_hreflang_link_attributes() {
 		'scn',
 		'skr',
 		'srd',
+		'syr',
 		'szl',
 		'tah',
 		'twd',
 		'ty-tj',
 		'tzm',
+		'vec',
+		'zgh',
 	);
 
 	// WARNING: for any changes below, check other uses of the `locale-assosciations` group as there's shared cache keys in use.
@@ -1438,3 +1476,9 @@ add_filter( 'wporg_canonical_url', 'wporg_themes_canonical_url' );
 
 // Theme Directory doesn't support pagination.
 add_filter( 'wporg_rel_next_pages', '__return_zero' );
+
+// Force-enable Jetpack SEO
+function wporg_themes_jetpack_seo_enable( $modules ) {
+	return array_values( array_merge( $modules, array( 'seo-tools' ) ) );
+}
+add_filter( 'jetpack_active_modules', 'wporg_themes_jetpack_seo_enable' );

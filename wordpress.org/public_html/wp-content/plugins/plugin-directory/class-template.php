@@ -331,110 +331,25 @@ class Template {
 	}
 
 	/**
-	 * Returns the available sections for a plugin.
+	 * Returns the section names for plugins.
 	 *
 	 * @static
-	 *
-	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
 	 * @return array
 	 */
-	public static function get_plugin_sections( $post = null ) {
-		$plugin = get_post( $post );
-
-		$default_sections = array(
-			'description',
-			'screenshots',
-			'blocks',
-			'stats',
-			'support',
-			'reviews',
-			'developers',
-		);
-		if ( ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
-			unset( $default_sections[ array_search( 'screenshots', $default_sections ) ] );
-		}
-		if ( ! get_post_meta( $plugin->ID, 'all_blocks' ) ) {
-			unset( $default_sections[ array_search( 'blocks', $default_sections ) ] );
-		}
-
-		$raw_sections = get_post_meta( $plugin->ID, 'sections', true ) ?: array();
-		$raw_sections = array_unique( array_merge( $raw_sections, $default_sections ) );
-
-		$sections  = array();
-		$title     = $url = '';
-		$permalink = get_permalink();
-
-		foreach ( $raw_sections as $section_slug ) {
-			switch ( $section_slug ) {
-
-				case 'description':
-					$title = _x( 'Description', 'plugin tab title', 'wporg-plugins' );
-					$url   = $permalink;
-					break;
-
-				case 'installation':
-					$title = _x( 'Installation', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
-					break;
-
-				case 'faq':
-					$title = _x( 'FAQ', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
-					break;
-
-				case 'screenshots':
-					$title = _x( 'Screenshots', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
-					break;
-
-				case 'changelog':
-					$title = _x( 'Changelog', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
-					break;
-
-				case 'stats':
-					$title = _x( 'Stats', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
-					break;
-
-				case 'support':
-					$title = _x( 'Support', 'plugin tab title', 'wporg-plugins' );
-					$url   = 'https://wordpress.org/support/plugin/' . $plugin->post_name . '/';
-					break;
-
-				case 'reviews':
-					$title = _x( 'Reviews', 'plugin tab title', 'wporg-plugins' );
-					$url   = 'https://wordpress.org/support/plugin/' . $plugin->post_name . '/reviews/';
-					break;
-
-				case 'developers':
-					$title = _x( 'Contributors &amp; Developers', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
-					break;
-
-				case 'other_notes':
-					$title = _x( 'Other Notes', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
-					break;
-
-				case 'blocks':
-					$title = _x( 'Blocks', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
-					break;
-
-				default:
-					// Skip ahead to the next section
-					continue 2;
-			}
-
-			$sections[] = array(
-				'slug'  => $section_slug,
-				'url'   => $url,
-				'title' => $title,
-			);
-		}
-
-		return $sections;
+	public static function get_plugin_section_titles() {
+		return [
+			'description'  => _x( 'Description', 'plugin tab title', 'wporg-plugins' ),
+			'installation' => _x( 'Installation', 'plugin tab title', 'wporg-plugins' ),
+			'faq'          => _x( 'FAQ', 'plugin tab title', 'wporg-plugins' ),
+			'screenshots'  => _x( 'Screenshots', 'plugin tab title', 'wporg-plugins' ),
+			'changelog'    => _x( 'Changelog', 'plugin tab title', 'wporg-plugins' ),
+			'stats'        => _x( 'Stats', 'plugin tab title', 'wporg-plugins' ),
+			'support'      => _x( 'Support', 'plugin tab title', 'wporg-plugins' ),
+			'reviews'      => _x( 'Reviews', 'plugin tab title', 'wporg-plugins' ),
+			'developers'   => _x( 'Contributors &amp; Developers', 'plugin tab title', 'wporg-plugins' ),
+			'other_notes'  => _x( 'Other Notes', 'plugin tab title', 'wporg-plugins' ),
+			'blocks'       => _x( 'Blocks', 'plugin tab title', 'wporg-plugins' ),
+		];
 	}
 
 	/**
@@ -444,45 +359,38 @@ class Template {
 	 *
 	 * @param int|\WP_Post|null $post   Optional. Post ID or post object. Defaults to global $post.
 	 * @param string            $output Optional. Output type. 'html' or 'raw'. Default: 'raw'.
+	 * @param string            $locale Optional. Locale to use. Default: current locale.
 	 * @return mixed
 	 */
-	public static function get_plugin_icon( $post = null, $output = 'raw' ) {
+	public static function get_plugin_icon( $post = null, $output = 'raw', $locale = null ) {
 		$plugin = get_post( $post );
+		$locale = $locale ?: get_locale();
 
-		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true ) ?: array();
+		$all_icons = get_post_meta( $plugin->ID, 'assets_icons', true ) ?: [];
 		$icon      = $icon_1x = $icon_2x = $svg = $generated = false;
+		$svg       = self::find_best_asset( $plugin, $all_icons, false, $locale );
 
-		foreach ( $raw_icons as $file => $info ) {
-			switch ( $info['resolution'] ) {
-				case '256x256':
-					$icon_2x = self::get_asset_url( $plugin, $info );
-					break;
+		// SVG has priority.
+		if ( $svg && 'icon.svg' === $svg['filename'] ) {
+			$icon   = $svg;
+		} else {
+			// Look for the non-SVGs.
+			$svg     = false;
+			$icon_1x = self::find_best_asset( $plugin, $all_icons, '128x128', $locale );
+			$icon_2x = self::find_best_asset( $plugin, $all_icons, '256x256', $locale );
 
-				case '128x128':
-					$icon_1x = self::get_asset_url( $plugin, $info );
-					break;
-
-				/* false = the resolution of the icon, this is NOT disabled */
-				case false && 'icon.svg' == $file:
-					$icon = $svg = self::get_asset_url( $plugin, $info );
-					break;
-			}
+			$icon = ( $icon_1x ?: $icon_2x ) ?: false;
 		}
 
-		// Fallback to 1x if it exists.
-		if ( ! $icon && $icon_1x ) {
-			$icon = $icon_1x;
-		}
-
-		// Fallback to 2x if it exists.
-		if ( ! $icon && $icon_2x ) {
-			$icon = $icon_2x;
-		}
+		// Resolve to URLs
+		$svg     = $svg     ? self::get_asset_url( $plugin, $svg )     : false;
+		$icon    = $icon    ? self::get_asset_url( $plugin, $icon )    : false;
+		$icon_2x = $icon_2x ? self::get_asset_url( $plugin, $icon_2x ) : false;
 
 		if ( ! $icon || 'publish' !== $plugin->post_status ) {
 			$generated = true;
-			$icon_2x = false; // For the ! publish branch.
-			$icon = self::get_geopattern_icon_url( $plugin );
+			$icon_2x   = false; // For the ! publish branch.
+			$icon      = self::get_geopattern_icon_url( $plugin );
 		}
 
 		switch ( $output ) {
@@ -530,56 +438,55 @@ class Template {
 	 *
 	 * @param int|\WP_Post|null $post   Optional. Post ID or post object. Defaults to global $post.
 	 * @param string            $output Optional. Output type. 'html', 'raw', or 'raw_with_rtl'. Default: 'raw'.
+	 * @param string            $locale Optional. Locale to use. Defaults to current locale.
 	 * @return mixed
 	 */
-	public static function get_plugin_banner( $post = null, $output = 'raw' ) {
+	public static function get_plugin_banner( $post = null, $output = 'raw', $locale = null ) {
 		$plugin = get_post( $post );
+		$locale = $locale ?: get_locale();
 
 		if ( in_array( $plugin->post_status, [ 'disabled', 'closed' ], true ) ) {
 			return false;
 		}
 
 		$banner      = $banner_2x = $banner_rtl = $banner_2x_rtl = false;
-		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true ) ?: array();
+		$all_banners = get_post_meta( $plugin->ID, 'assets_banners', true ) ?: [];
 
-		// Split in rtl and non-rtl banners.
-		$rtl_banners = array_filter( $raw_banners, function ( $info ) {
-			return (bool) stristr( $info['filename'], '-rtl' );
-		} );
-		$raw_banners = array_diff_key( $raw_banners, $rtl_banners );
-
-		// Default are non-rtl banners.
-		foreach ( $raw_banners as $info ) {
-			switch ( $info['resolution'] ) {
-				case '1544x500':
-					$banner_2x = self::get_asset_url( $plugin, $info );
-					break;
-
-				case '772x250':
-					$banner = self::get_asset_url( $plugin, $info );
-					break;
-			}
-		}
-
-		if ( is_rtl() || 'raw_with_rtl' == $output ) {
-			foreach ( $rtl_banners as $info ) {
-				switch ( $info['resolution'] ) {
-					case '1544x500':
-						$field = 'raw_with_rtl' == $output ? 'banner_2x_rtl' : 'banner_2x';
-						$$field = self::get_asset_url( $plugin, $info );
-						break;
-
-					case '772x250':
-						$field = 'raw_with_rtl' == $output ? 'banner_rtl' : 'banner';
-						$$field = self::get_asset_url( $plugin, $info );
-						break;
-				}
-			}
-		}
+		$banner    = self::find_best_asset( $plugin, $all_banners, '772x250', $locale );
+		$banner_2x = self::find_best_asset( $plugin, $all_banners, '1544x500', $locale );
 
 		if ( ! $banner ) {
 			return false;
 		}
+
+		/*
+		 * If we need both LTR and a RTL banners, fetch both..
+		 * This doesn't use find_best_asset() as it's too complex to add the "RTL only" functionality to it.
+		 */
+		if ( 'raw_with_rtl' === $output ) {
+			$banner_rtl = array_filter(
+				wp_list_filter( $all_banners, array( 'resolution' => '772x250' ) ),
+				function( $info ) {
+					return (bool) stristr( $info['filename'], '-rtl' );
+				}
+			);
+
+			$banner_2x_rtl = array_filter(
+				wp_list_filter( $all_banners, array( 'resolution' => '1544x500' ) ),
+				function( $info ) {
+					return (bool) stristr( $info['filename'], '-rtl' );
+				}
+			);
+
+			$banner_rtl    = $banner_rtl    ? array_shift( $banner_rtl )    : false;
+			$banner_2x_rtl = $banner_2x_rtl ? array_shift( $banner_2x_rtl ) : false;
+		}
+
+		// Resolve the URLs.
+		$banner        = $banner        ? self::get_asset_url( $plugin, $banner )        : false;
+		$banner_2x     = $banner_2x     ? self::get_asset_url( $plugin, $banner_2x )     : false;
+		$banner_rtl    = $banner_rtl    ? self::get_asset_url( $plugin, $banner_rtl )    : false;
+		$banner_2x_rtl = $banner_2x_rtl ? self::get_asset_url( $plugin, $banner_2x_rtl ) : false;
 
 		switch ( $output ) {
 			case 'html':
@@ -587,7 +494,7 @@ class Template {
 				$html  = "<style type='text/css'>";
 				$html .= "#{$id} { background-image: url('{$banner}'); }";
 				if ( ! empty( $banner_2x ) ) {
-					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
+					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 120dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
 				}
 				$html .= '</style>';
 				$html .= "<div class='plugin-banner' id='{$id}'></div>";
@@ -600,6 +507,80 @@ class Template {
 			default:
 				return compact( 'banner', 'banner_2x', 'banner_rtl', 'banner_2x_rtl' );
 		}
+	}
+
+	/**
+	 * Retrieve the Plugin asset that matches the requested resolution, locale, and RTL.
+	 *
+	 * @static
+	 *
+	 * @param \WP_Post $plugin     The plugin.
+	 * @param array    $assets     The assets.
+	 * @param string   $resolution The resolution.
+	 * @param string   $locale     The locale.
+	 * @return string|false
+	 */
+	public static function find_best_asset( $plugin, $assets, $resolution, $locale ) {
+		// Asset matches resolution.
+		$assets = wp_list_filter( $assets, [ 'resolution' => $resolution ] );
+
+		/*
+		 * Filter the matching assets by locale.
+		 * NOTE: en_US/'' must also go through this branch, to remove localised assets from the list.
+		 * This also handles plugins which have specific english assets.
+		 */
+		if ( count( $assets ) > 1 ) {
+			// Locales, match [ `de_DE_formal`, `de_DE`, `de` ], prioritising the full locale before falling back to the partial match.
+			$locale_parts = explode( '_', $locale );
+			foreach ( range( count( $locale_parts ), 1 ) as $length ) {
+				$locale       = implode( '_', array_slice( $locale_parts, 0, $length ) );
+				$locale_asset = wp_list_filter( $assets, [ 'locale' => $locale ] );
+				if ( $locale_asset ) {
+					break;
+				}
+			}
+			if ( ! $locale_asset ) {
+				// No locale match, filter to no-locale only.
+				$locale_asset = wp_list_filter( $assets, [ 'locale' => '' ] );
+			}
+
+			$assets = $locale_asset ?: $assets;
+		}
+
+		// Fetch RTL asset, if needed. This is only needed if there isn't a locale match.
+		if ( count( $assets ) > 1 ) {
+			$direction_assets = array_filter(
+				$assets,
+				function( $info ) {
+					// If we're on a RTL locale, we filter to RTL items else we remove them.
+					$is_rtl_image = (bool) stristr( $info['filename'], '-rtl' );
+
+					if ( is_rtl() ) {
+						return $is_rtl_image;
+					} else {
+						return ! $is_rtl_image;
+					}
+				}
+			);
+			$assets           = $direction_assets ?: $assets;
+		}
+
+		if ( ! $assets ) {
+			return false;
+		}
+
+		// Sort them if needed, svg > png > jpg
+		if ( count( $assets ) > 1 ) {
+			uasort( $assets, function( $a, $b ) {
+				// Thankfully the extensions are alphabetical, so let's just sort by that.
+				$a_ext = strtolower( pathinfo( $a['filename'], PATHINFO_EXTENSION ) );
+				$b_ext = strtolower( pathinfo( $b['filename'], PATHINFO_EXTENSION ) );
+
+				return $b_ext <=> $a_ext;
+			} );
+		}
+
+		return array_shift( $assets );
 	}
 
 	/**
@@ -907,24 +888,41 @@ class Template {
 			'arq',
 			'art',
 			'art-xemoji',
+			'art-pirate', 'pirate',
 			'ary',
 			'ast',
 			'az-ir',
 			'azb',
+			'bal',
 			'bcc',
+			'bho',
+			'brx',
+			'dsb',
 			'ff-sn',
+			'fon',
 			'frp',
 			'fuc',
 			'fur',
+			'gax',
 			'haz',
+			'hsb',
 			'ido',
 			'io',
+			'kaa',
 			'kab',
 			'li',
 			'li-nl',
+			'lij',
 			'lmo',
+			'mai',
 			'me',
 			'me-me',
+			'mfe',
+			'nqo',
+			'pap-aw',
+			'pap-cw',
+			'pcd',
+			'pcm',
 			'rhg',
 			'rup',
 			'sah',
@@ -932,11 +930,14 @@ class Template {
 			'scn',
 			'skr',
 			'srd',
+			'syr',
 			'szl',
 			'tah',
 			'twd',
 			'ty-tj',
 			'tzm',
+			'vec',
+			'zgh',
 		);
 
 		// WARNING: for any changes below, check other uses of the `locale-assosciations` group as there's shared cache keys in use.
@@ -1085,72 +1086,37 @@ class Template {
 	 */
 	public static function get_screenshots( $plugin = null, $locale = null ) {
 		$plugin = get_post( $plugin );
-
-		if ( ! $locale ) {
-			$locale = get_locale();
-		}
+		$locale = $locale ?: get_locale();
 
 		// All indexed from 1. The Image 'number' is stored in the 'resolution' key
-		$screen_shots = get_post_meta( $plugin->ID, 'assets_screenshots', true ) ?: array();
-		$descriptions = get_post_meta( $plugin->ID, 'screenshots', true ) ?: array();
+		$all_screenshots = get_post_meta( $plugin->ID, 'assets_screenshots', true ) ?: [];
+		$descriptions    = get_post_meta( $plugin->ID, 'screenshots', true )        ?: [];
 
-		if ( empty( $screen_shots ) ) {
-			return array();
+		if ( empty( $all_screenshots ) ) {
+			return [];
 		}
 
-		$sorted = array();
-		foreach ( $screen_shots as $image ) {
-			if ( ! isset( $sorted[ $image['resolution'] ] ) ) {
-				$sorted[ $image['resolution'] ] = array();
+		$screenshot_nums = array_unique( wp_list_pluck( $all_screenshots, 'resolution') );
+		sort( $screenshot_nums, SORT_NATURAL );
+
+		foreach ( $screenshot_nums as $screenshot_num ) {
+			$caption = $descriptions[ (int) $screenshot_num ] ?? '';
+
+			$caption = Plugin_I18n::instance()->translate(
+				'screenshot-' . $screenshot_num,
+				$caption,
+				[ 'post_id' => $plugin->ID ]
+			);
+
+			$asset = self::find_best_asset( $plugin, $all_screenshots, $screenshot_num, $locale );
+			if ( ! $asset ) {
+				continue;
 			}
 
-			if ( empty( $image['locale'] ) ) {
-				// if the image has no locale, always insert to the last element (lowerst priority).
-				$sorted[ $image['resolution'] ][] = $image;
-			} elseif ( $locale === $image['locale'] ) {
-				// if the locale is a full match, always insert to the first element (highest priority).
-				array_unshift( $sorted[ $image['resolution'] ], $image );
-			} else {
-				// TODO: de_DE_informal should probably fall back to de_DE before de_CH. Maybe this can wait until Core properly supports locale hierarchy.
+			$asset['caption'] = $caption;
+			$asset['src']     = self::get_asset_url( $plugin, $asset );
 
-				$image_locale_parts = explode( '_', $image['locale'] );
-				$locale_parts       = explode( '_', $locale );
-				// if only the language matches.
-				if ( $image_locale_parts[0] === $locale_parts[0] ) {
-					// image with locale has a higher priority than image without locale.
-					$last_image = end( $sorted[ $image['resolution'] ] );
-					if ( empty( $last_image['locale'] ) ) {
-						array_splice( $sorted[ $image['resolution'] ], count( $sorted[ $image['resolution'] ] ), 0, array( $image ) );
-					} else {
-						$sorted[ $image['resolution'] ][] = $image;
-					}
-				}
-			}
-		}
-
-		// Sort
-		ksort( $sorted, SORT_NATURAL );
-
-		// Reduce images to singulars and attach metadata
-		foreach ( $sorted as $index => $items ) {
-			// The highest priority image is the first.
-			$image = $items[0];
-
-			// Attach caption data
-			$image['caption'] = false;
-			if ( isset( $descriptions[ (int) $index ] ) ) {
-				$image['caption'] = $descriptions[ (int) $index ];
-				$image['caption'] = Plugin_I18n::instance()->translate(
-					'screenshot-' . $image['resolution'],
-					$image['caption'],
-					[ 'post_id' => $plugin->ID ]
-				);
-			}
-
-			// Attach URL information for the asset
-			$image['src'] = Template::get_asset_url( $plugin, $image );
-
-			$sorted[ $index ] = $image;
+			$sorted[ $screenshot_num ] = $asset;
 		}
 
 		return $sorted;

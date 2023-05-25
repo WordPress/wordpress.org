@@ -8,6 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		event.target.removeEventListener('click', unblurPhoto, true);
 		event.preventDefault();
 	}
-	document.querySelector('#photos_photo .photos-photo-link img.blurred').addEventListener('click', unblurPhoto, true);
+	document.querySelector('#photos_photo .photos-photo-link img.blurred')?.addEventListener('click', unblurPhoto, true);
 
 }, false);

@@ -59,6 +59,18 @@ window.wp = window.wp || {};
 				description = this.get( 'sections' ).description;
 				this.set({ description: description });
 			}
+
+			/*
+			 * Mark whether the current user can edit this theme.
+			 * is_admin is set based on `edit_posts`, where as the rest api cap is `edit_post $id`.
+			 */
+			this.set( {
+				can_configure_categorization_options: (
+					themes.data.settings.currentUser?.is_admin ||
+					( this.get('author')?.user_nicename === themes.data.settings.currentUser?.slug )
+				)
+			} );
+
 		}
 	});
 
@@ -355,6 +367,8 @@ window.wp = window.wp || {};
 					photon_screenshots: true,
 					active_installs: true,
 					requires_php: true,
+					is_commercial: true,
+					is_community: true,
 				}
 			}, request);
 
@@ -488,12 +502,15 @@ window.wp = window.wp || {};
 			'click': 'collapse',
 			'click .left': 'previousTheme',
 			'click .right': 'nextTheme',
+			'click .screenshot': 'preview',
 			'click .theme-actions .button-secondary': 'preview',
 			'keydown .theme-actions .button-secondary': 'preview',
 			'touchend .theme-actions .button-secondary': 'preview',
 			'click .favorite': 'favourite_toggle',
 			// This is provided by a Third Party
-			'click .wporg-screenshot-card': 'preview', 
+			'click #theme-patterns-grid-js .wporg-screenshot-card': 'preview', 
+			'click .wporg-horizontal-slider-js .wporg-screenshot-card': 'thumbnailPreview', 
+			'keydown .wporg-horizontal-slider-js .wporg-screenshot-card': 'thumbnailPreview', 
 		},
 
 		// The HTML template for the theme overlay
@@ -537,9 +554,9 @@ window.wp = window.wp || {};
 				data.active_installs = data.active_installs.toLocaleString() + '+';
 			}
 
-			data.show_favorites = !! themes.data.settings.favorites.user;
+			data.show_favorites = !! themes.data.settings.currentUser?.login;
 			data.is_favorited   = ( themes.data.settings.favorites.themes.indexOf( data.slug ) !== -1 );
-			data.current_user   = themes.data.settings.favorites.user;
+			data.current_user   = themes.data.settings.currentUser?.login;
 
 			this.$el.html( this.html( data ) );
 			// Set up navigation events
@@ -550,6 +567,9 @@ window.wp = window.wp || {};
 			this.containFocus( this.$el );
 			this.renderDownloadsGraph();
 			this.renderPatterns();
+
+			// Currently this feature is in beta
+			this.renderStyleVariations();
 		},
 
 		favourite_toggle: function() {
@@ -587,7 +607,7 @@ window.wp = window.wp || {};
 				// If the user is no longer logged in, stop showing the favorite heart
 				if ( 'undefined' !== typeof result.error && 'not_logged_in' === result.error ) {
 					themes.data.settings.favorites.themes = [];
-					themes.data.settings.favorites.user = '';
+					themes.data.settings.currentUser = false;
 				}
 			} );
 		},
@@ -722,6 +742,75 @@ window.wp = window.wp || {};
 			});
 		},
 
+		thumbnailPreview: function ( event ) {
+			// 'enter' and 'space' keys expand the details view when a theme is :focused
+			if ( event.type === 'keydown' && ( event.which !== 13 && event.which !== 32 ) ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			var $anchorLink = $( event.target );
+
+			if ( $anchorLink.prop( 'tagName' ).toLowerCase() !== 'a' ) {
+				$anchorLink = $( $anchorLink.parent( 'a' )[0] );
+			}
+
+			// Get the theme's main thumbnail
+			var $thumbnailContainer = $('.screenshot');
+			var CARD_ACTIVE_CLASS = 'wporg-screenshot-card__active';
+			var SCREENSHOT_PREVIEW_CLASS = 'wporg-thumbnail-screenshot-preview-js';
+			var STYLE_VARIATION_CLASS = 'style-variation';
+
+			/**
+			 * Determine the index, we need to restore the original thumbnail if it's the first item.
+			 */
+			var cards = $( '.wporg-horizontal-slider-js .wporg-screenshot-card' );
+			cards.attr( 'aria-selected', false );
+			$anchorLink.attr( 'aria-selected', true );
+
+			if( cards.index( $anchorLink ) === 0 ) {
+				$thumbnailContainer.find( 'picture' ).show();
+				$thumbnailContainer.removeClass( STYLE_VARIATION_CLASS );
+				$( '.' + SCREENSHOT_PREVIEW_CLASS ).remove();
+			} else {
+				// Create element
+				var newEl = $( '<div class="'+ SCREENSHOT_PREVIEW_CLASS +'" role="tabpanel"></div>' )
+				.attr( 'data-link', $anchorLink.attr( 'href' ) )
+				.attr( 'data-preview-link', $anchorLink.attr( 'href' ) + '&v=' + this.model.attributes.version + '-betaV2' )
+				.attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', $anchorLink.find( 'img' ).attr( 'alt' ) ) )
+				.attr( 'data-height', $thumbnailContainer.height() + 'px' )
+				.attr( 'data-aspect-ratio', 3 / 4 )
+				.attr( 'data-query-string', '?vpw=1200&vph=900' )
+				.attr( 'id', $anchorLink.attr( 'aria-controls' ) );
+
+			   $thumbnailContainer.find( 'picture' ).hide();
+
+			   /**
+				* The screenshot container uses a padding system to prevent image size change.
+				* We don't want the padding when we preview our image.
+			   */
+			   $thumbnailContainer.addClass( STYLE_VARIATION_CLASS );
+
+				// Remove if one exists, we can't just replace the source.
+				$( '.' + SCREENSHOT_PREVIEW_CLASS ).remove();
+				$thumbnailContainer.append( newEl );
+
+				if ( window.__wporg_screenshot_preview_render ) {
+					window.__wporg_screenshot_preview_render( SCREENSHOT_PREVIEW_CLASS );
+				}
+			}
+
+			/**
+			 * Add an active class on the current style variation.
+			 */
+			$( '.' + CARD_ACTIVE_CLASS ).removeClass( CARD_ACTIVE_CLASS );
+			$anchorLink.addClass( CARD_ACTIVE_CLASS );
+
+			// Update the preview url so uses get style variation when the previewer is opened
+			this.model.attributes.preview_url = $anchorLink.attr( 'href' );
+		},
+
 		// Handles .disabled classes for previous/next buttons in theme installer preview
 		setNavButtonsState: function() {
 			var $themeInstaller = $( '.theme-install-overlay' ),
@@ -787,6 +876,8 @@ window.wp = window.wp || {};
 
 				// Add a temporary closing class while overlay fades out
 				$( 'body' ).addClass( 'closing-overlay' );
+
+				self.unmountReactAssets();
 
 				// With a quick fade out animation
 				this.$el.fadeOut( 1, function() {
@@ -904,8 +995,7 @@ window.wp = window.wp || {};
 					 */
 					 var newEl = $( '<div class="wporg-screenshot-preview-js"></div>' )
 					 .attr( 'data-link', value.link )
-					 .attr( 'data-preview-link', value.preview_link )
-					 .attr( 'data-version', self.get( 'version' ) + '-betaV1' )
+					 .attr( 'data-preview-link', value.preview_link + '&v=' + self.get( 'version' ) + '-betaV4.0.4'  )
 					 .attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', value.title ) );
 
 					$container.append( newEl );
@@ -947,6 +1037,71 @@ window.wp = window.wp || {};
 				}
 			} );
 		},
+
+		renderStyleVariations: function() {
+			var options = {
+				type: 'GET',    
+				url: 'https://wp-themes.com/' + this.model.get( 'slug' ) + '/?rest_route=/wporg-styles/v1/variations',
+			};
+			var self = this.model;
+
+			/**
+			 * Map it to be compatible with the wporg/screenshot-preview block
+			 * 
+			 * See: https://github.com/WordPress/wporg-mu-plugins/tree/trunk/mu-plugins/blocks/screenshot-preview
+			 */
+			function mapVariations( variations ) {
+				var out = [];
+
+				$.each( variations, function ( key, value ) {
+					 out.push( {
+						title: value.title,
+						link: value.link,
+						previewLink: value.preview_link + '&v=' + self.get( 'version' ) + '-betaV1.1.2',
+						caption:  _wpThemeSettings.l10n.style_variation_caption_template.replace( '%s', value.title ),
+					 } );
+				} );
+
+				return out;
+			}
+
+			$.ajax( options ).done( function( data ) {
+				var $container = $( '.wporg-horizontal-slider-js' );
+				var variations = JSON.parse( data );
+
+				if ( variations.length ) {
+					var mapped = mapVariations( variations );
+
+					$container.attr( 'data-items', JSON.stringify( mapped ) );
+					$container.attr( 'data-title', _wpThemeSettings.l10n.style_variations_title );
+					
+					if ( window.__wporg_horizontal_slider_render ) {
+						window.__wporg_horizontal_slider_render();
+					}        
+				}
+			} );
+		},
+		/* jshint ignore:start */
+		/* Turns off ReactDOM undefined */
+		unmountReactAssets: function () {
+			if( ! ReactDOM || ! ReactDOM.unmountComponentAtNode ) {
+				return;
+			}
+
+			$( '.wporg-horizontal-slider-js' ).each( function () {
+				ReactDOM.unmountComponentAtNode( this );
+			} );
+
+			$( '.wporg-screenshot-preview-js' ).each( function () {
+				ReactDOM.unmountComponentAtNode( this );
+			} );
+
+			$( '.wporg-thumbnail-screenshot-preview-js' ).each( function () {
+				ReactDOM.unmountComponentAtNode( this );
+			} )  ;
+		},
+		/* jshint ignore:end */
+
 		// Handles .disabled classes for next/previous buttons
 		navigation: function() {
 
@@ -998,6 +1153,7 @@ window.wp = window.wp || {};
 			'click .collapse-sidebar': 'collapse',
 			'click .previous-theme': 'previousTheme',
 			'click .next-theme': 'nextTheme',
+			'click .wp-full-overlay-footer .devices button': 'devicePreview',
 			'keyup': 'keyEvent'
 		},
 
@@ -1016,6 +1172,10 @@ window.wp = window.wp || {};
 				$( 'body' ).addClass( 'theme-installer-active full-overlay-active' );
 				$( '.close-full-overlay' ).focus();
 			});
+
+			if ( themes.activeDevicePreview ) {
+				this.setDevicePreview( themes.activeDevicePreview );
+			}
 		},
 
 		close: function() {
@@ -1043,6 +1203,27 @@ window.wp = window.wp || {};
 			} else {
 				this.$el.toggleClass( 'expanded' );
 			}
+
+			return false;
+		},
+
+		devicePreview: function( event ) {
+			return this.setDevicePreview( event.target.dataset.device );
+		},
+
+		setDevicePreview: function ( device ) {
+			// Make the correct button appear active
+			var $footer = this.$el.find( '.wp-full-overlay-footer' );
+			$footer.find( '.active' ).removeClass( 'active' );
+			$footer.find( '.' + device ).addClass( 'active' );
+
+			// Update the iframe with the device class to change the iframe width
+			this.$el.find( '.wp-full-overlay-main iframe' )
+			.removeClass( themes.activeDevicePreview ) // Remove the previous device class
+			.addClass( device );
+
+			// Store our active viewport to reuse if theme changes
+			themes.activeDevicePreview = device;
 
 			return false;
 		},
@@ -1885,3 +2066,91 @@ window.wp = window.wp || {};
 		packages: [ 'corechart' ]
 	});
 })( google );
+
+( function( wp, themeDir ) {
+	const logError = function( result ) {
+		document.querySelector( '.spinner' )?.classList.remove( 'spinner' );
+		const error = result.status + ': ' + result.statusText;
+		//result = JSON.parse( result.responseText );
+		//if ( typeof result.message !== 'undefined' ) {
+			alert( error );
+		//}
+	};
+	
+	document.addEventListener( 'submit', event => {
+		event.preventDefault();
+
+		const form = event.target.closest('form');
+		const submitButton = form.querySelector('button[type="submit"]');
+		const successMsg = form.querySelector('.success-msg');
+		const themeSlug = form.closest('.theme-about').dataset.slug;
+
+		if ( ! form || ! ['commercial', 'community'].includes(form.id) ) {
+			return;
+		}
+
+		successMsg?.classList.remove( 'saved' );
+
+		let field_name = '';
+
+		if ( 'commercial' === form.id ) {
+			field_name = 'external_support_url';
+			rest_name  = 'supportURL';
+		} else {
+			field_name = 'external_repository_url';
+			rest_name  = 'repositoryURL';
+		}
+
+		let fieldInput = form.querySelector( 'input[name="' + field_name + '"]' ),
+			button = form.querySelector( '.button-small' )?.classList.add( 'spinner' ),
+			url = themeDir.restUrl + 'themes/v1/theme/' + themeSlug + '/' + form.id + '/?_wpnonce=' + themeDir.restNonce;
+			originalValue = fieldInput.dataset.originalValue ?? '';
+
+		submitButton.disabled = true;
+
+		fetch( url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				[rest_name]: fieldInput.value,
+			}),
+		})
+			.then((response) => {
+				if ( !response.ok ) {
+					logError(response);
+				}
+				return response;
+			})
+			.then((response) => {
+				return response.json();
+			})
+			.then((data) => {
+				let fieldValue;
+				if ( typeof data[rest_name] !== 'undefined' ) {
+					successMsg?.classList.add( 'saved' );
+					// Use value sanitized and saved by server.
+					fieldValue = data[rest_name];
+				} else {
+					// Restore original value.
+					fieldValue = originalValue;
+				}
+				fieldInput.value = fieldValue;
+				// Update widget.
+				const widgetLink = document.querySelector('.categorization-widget .widget-head a');
+				if ( widgetLink ) {
+					widgetLink.attributes.href.value = fieldValue;
+				}
+				// TODO: Update the in-memory data relating to the post so navigating between themes doesn't
+				// continue to use the original cached value for the URL.
+				submitButton.disabled = false;
+				button?.classList.remove( 'spinner' );
+			})
+			.catch((error) => {
+				logError(error);
+				fieldInput.value = originalValue;
+				submitButton.disabled = false;
+			})
+	} );
+} )( window.wp, _wpThemeSettings.rest );

@@ -43,7 +43,7 @@ const BreadcrumbMonitor = () => {
 			// translators: %s is the category name.
 			setBreadcrumbText( sprintf( __( 'Category: %s', 'wporg-patterns' ), categoryName ) );
 		}
-	}, [ path ] );
+	}, [ path, authorName, categoryName ] );
 
 	return null;
 };

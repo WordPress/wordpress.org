@@ -2,7 +2,7 @@
     display: block;
 
     width: 100%;
-    height: calc(100vh - var(--wp-global-header-height));
+    height: calc(100vh - var(--wp-global-header-height) - var(--wp-admin--admin-bar--height, 0px));
 
     border: none;
 }

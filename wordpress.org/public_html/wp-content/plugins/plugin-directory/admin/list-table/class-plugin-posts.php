@@ -82,6 +82,22 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$actions['plugin_reject'] = __( 'Reject', 'wporg-plugins' );
 		}
 
+		if ( current_user_can( 'plugin_approve' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'closed', 'disabled' ) ) ) ) {
+			$actions['plugin_open'] = __( 'Open', 'wporg-plugins' );
+		}
+
+		if ( current_user_can( 'plugin_close' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'publish', 'approved', 'disabled' ) ) ) ) {
+			$actions['plugin_close'] = __( 'Close', 'wporg-plugins' );
+		}
+
+		if ( current_user_can( 'plugin_close' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'publish', 'approved', 'closed' ) ) ) ) {
+			$actions['plugin_disable'] = __( 'Disable', 'wporg-plugins' );
+		}
+
+		if ( current_user_can( 'plugin_review' ) ) {
+			$actions['plugin_assign'] = __( 'Assign reviewer', 'wporg-plugins' );
+		}
+
 		return $actions;
 	}
 
@@ -92,10 +108,11 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	public function get_columns() {
 		$post_type     = $this->screen->post_type;
 		$posts_columns = array(
-			'cb'     => '<input type="checkbox" />',
+			'cb'       => '<input type="checkbox" />',
 			/* translators: manage posts column name */
-			'title'  => _x( 'Title', 'column name', 'wporg-plugins' ),
-			'author' => __( 'Submitter', 'wporg-plugins' ),
+			'title'    => _x( 'Title', 'column name', 'wporg-plugins' ),
+			'author'   => __( 'Submitter', 'wporg-plugins' ),
+			'reviewer' => __( 'Assigned Reviewer', 'wporg-plugins' ),
 		);
 
 		$taxonomies = get_object_taxonomies( $post_type, 'objects' );
@@ -333,6 +350,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 *
 	 * @global array $locked_post_status This seems to be deprecated.
 	 * @global array $avail_post_stati
+	 * @global \wpdb $wpdb
 	 * @return array
 	 */
 	protected function get_views() {
@@ -397,8 +415,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 			$mine_inner_html = sprintf(
 				_nx(
-					'Mine <span class="count">(%s)</span>',
-					'Mine <span class="count">(%s)</span>',
+					'My Plugins <span class="count">(%s)</span>',
+					'My Plugins <span class="count">(%s)</span>',
 					$user_post_count,
 					'posts',
 					'wporg-plugins'
@@ -434,6 +452,36 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		);
 
 		$status_links['all'] = $this->get_edit_link( $all_args, $all_inner_html, $class );
+
+		// Assigned to me.
+		if ( current_user_can( 'plugin_review' ) ) {
+			$assigned_count = $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(p.ID)
+				FROM $wpdb->posts p
+					JOIN $wpdb->postmeta pm ON p.ID = pm.post_id
+				WHERE pm.meta_key = 'assigned_reviewer' AND pm.meta_value = %d AND p.post_status NOT IN( 'approved', 'publish' )",
+				get_current_user_id()
+			) );
+
+			$assigned_args = array(
+				'post_type' => $post_type,
+				'reviewer'  => get_current_user_id(),
+			);
+
+			$assigned_label = sprintf(
+				_nx(
+					'Assigned to Me <span class="count">(%s)</span>',
+					'Assigned to Me <span class="count">(%s)</span>',
+					$assigned_count,
+					'posts',
+					'wporg-plugins'
+				),
+				number_format_i18n( $assigned_count )
+			);
+
+			$status_links['assigned'] = $this->get_edit_link( $assigned_args, $assigned_label, ( ($_REQUEST['reviewer'] ?? 0) === get_current_user_id() ? 'current' : '' ) );
+		}
+
 		if ( $mine ) {
 			$status_links['mine'] = $mine;
 		}
@@ -497,5 +545,113 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		return $status_links;
+	}
+
+	/**
+	 * Display the additional filter fields.
+	 */
+	public function extra_tablenav( $which ) {
+		parent::extra_tablenav( $which );
+
+		if ( 'top' === $which ) {
+			?>
+			<fieldset class="alignleft actions filter-reviewer">
+				<?php
+				wp_dropdown_users( [
+					'name'              => 'reviewer',
+					'selected'          => intval( $_REQUEST['reviewer'] ?? 0 ),
+					'show_option_none'  => __( 'All Reviewers', 'wporg-plugins' ),
+					'option_none_value' => 0,
+					'role__in'          => [ 'plugin_admin', 'plugin_reviewer' ],
+				] );
+				submit_button( __( 'Filter', 'wporg-plugins' ), 'secondary', false, false );
+				?>
+			</fieldset>
+			<?php
+		}
+	}
+
+	/**
+	 * Display the additional bulk action fields.
+	 */
+	protected function bulk_actions( $which = '' ) {
+		parent::bulk_actions( $which );
+
+		$maybe_dash_two = 'top' === $which ? '' : '-2';
+
+		?>
+		<fieldset class="alignleft actions hide-if-js bulk-plugin_assign" disabled="disabled">
+			<?php
+			wp_dropdown_users( [
+				'name'              => 'reviewer',
+				'id'                => "reviewer{$maybe_dash_two}",
+				'selected'          => 0,
+				'show_option_none'  => __( 'Assign Review to ...', 'wporg-plugins' ),
+				'option_none_value' => 0,
+				'role__in'          => [ 'plugin_admin', 'plugin_reviewer' ],
+			] );
+			?>
+		</fieldset>
+		<fieldset class="alignleft actions hide-if-js bulk-plugin_close bulk-plugin_disable" disabled="disabled">
+			<select name="close_reason" id="close_reason<?php echo $maybe_dash_two; ?>">
+				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></option>
+				<?php foreach ( Template::get_close_reasons() as $key => $label ) : ?>
+					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</fieldset>
+		<?php
+
+		// Output the JS+CSS needed
+		if ( 'top' === $which ) {
+			?>
+			<style>
+				#posts-filter fieldset.bulk-plugin_close {
+					margin: 0;
+				}
+			</style>
+			<script>
+			jQuery( function( $ ) {
+				$( '.bulkactions' ).on( 'change', function() {
+					var $this = $( this ),
+						$select = $this.find( 'select[name^=action]' ),
+						val = $select.find(':selected').val();
+
+					$( '.bulkactions .actions.bulk-plugin_close, .actions.bulk-plugin_disable, .actions.bulk-plugin_assign' ).prop( 'disabled', true ).hide();
+					$( '.bulkactions .actions.bulk-' + val ).prop( 'disabled', false ).show();
+
+					// Sync the values between the various selects in top+bottom.
+					$this.find('select').not( $select ).each( function() {
+						$( '.bulkactions' ).not( $this ).find( 'select[name="' + this.name + '"]' ).val( this.value );
+					} );
+
+					$( '.bulkactions input.action' ).toggleClass( 'button-primary', val != '-1' );
+				} );
+			} );
+			</script>
+			<?php
+		}
+	}
+
+	/**
+	 * The custom Assigned Reviewer column.
+	 */
+	public function column_reviewer( $post ) {
+		$reviewer_id   = (int) ( $post->assigned_reviewer ?? 0 );
+		$reviewer      = $reviewer_id ? get_user_by( 'id', $reviewer_id ) : false;
+		$reviewer_time = (int) ( $post->assigned_reviewer_time ?? 0 );
+
+		if ( $reviewer ) {
+			printf(
+				"<a href='%s'>%s</a><br><span>%s</span>",
+				add_query_arg( [ 'reviewer' => $reviewer_id ] ),
+				$reviewer->display_name ?: $reviewer->user_login,
+				sprintf(
+					/* translators: %s The time/date different, '1 hour' */
+					__( '%s ago', 'wporg-plugins' ),
+					human_time_diff( $reviewer_time )
+				)
+			);
+		}
 	}
 }

@@ -22,6 +22,9 @@ add_action( 'template_redirect', 'nocache_headers', 10, 0 );
  */
 function wporg_login_setup() {
 	load_theme_textdomain( 'wporg' );
+
+	// We don't need wp4.css to load here.
+	add_theme_support( 'wp4-styles' );
 }
 add_action( 'after_setup_theme', 'wporg_login_setup' );
 
@@ -47,15 +50,7 @@ add_filter( 'body_class', 'wporg_login_body_class' );
 /**
  * Remove the toolbar.
  */
-function wporg_login_init() {
-	show_admin_bar( false );
-}
-add_action( 'init', 'wporg_login_init' );
-
-/**
- * Disable the Core Language Selector on wp-login.php.
- */
-add_filter( 'login_display_language_dropdown', '__return_false' );
+add_filter( 'show_admin_bar', '__return_false', 101 );
 
 /**
  * Disable XML-RPC endpoints.
@@ -66,7 +61,7 @@ add_filter( 'xmlrpc_methods', '__return_empty_array' );
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20211216' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20230504' );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
 
@@ -82,7 +77,7 @@ function wporg_login_scripts() {
 	}
 
 	wp_enqueue_style( 'wporg-normalize', get_template_directory_uri() . '/stylesheets/normalize.css', 3 );
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20211216' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20230504' );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
@@ -90,6 +85,18 @@ function wporg_login_register_scripts() {
 	if ( is_admin() ) {
 		return;
 	}
+
+	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), filemtime( __DIR__ . '/js/registration.js' ) );
+	wp_localize_script( 'wporg-registration', 'wporg_registration', array(
+		'rest_url' => esc_url_raw( rest_url( 'wporg/v1' ) )
+	) );
+
+	// Local environments do not need reCaptcha.
+	if ( 'local' === wp_get_environment_type() && ! defined( 'RECAPTCHA_V3_PUBKEY' ) ) {
+		wp_register_script( 'recaptcha-api', false ); // Empty script to satisfy wporg-registration requirements.
+		return;
+	}
+
 
 	wp_register_script( 'recaptcha-api', 'https://www.google.com/recaptcha/api.js', array(), '2' );
 	wp_add_inline_script(
@@ -111,11 +118,6 @@ function wporg_login_register_scripts() {
 			}
 		}'
 	);
-
-	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), filemtime( __DIR__ . '/js/registration.js' ) );
-	wp_localize_script( 'wporg-registration', 'wporg_registration', array(
-		'rest_url' => esc_url_raw( rest_url( 'wporg/v1' ) )
-	) );
 
 	// reCaptcha v3 is loaded on all login pages, not just the registration flow.
 	wp_enqueue_script( 'recaptcha-api-v3', 'https://www.google.com/recaptcha/api.js?onload=reCaptcha_v3_init&render=' . RECAPTCHA_V3_PUBKEY, array(), '3' );
@@ -241,12 +243,17 @@ remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 remove_action( 'rest_api_init', 'wp_oembed_register_route' );
 
 // Don't perform any WP_Query queries on this site..
-add_filter( 'posts_request', '__return_empty_string' );
+if ( ! is_admin() ) {
+	add_filter( 'posts_pre_query', '__return_empty_array' );
+}
+
 // Don't attempt to do canonical lookups..
 remove_filter( 'template_redirect', 'redirect_canonical' );
+
 // There's no need to edit the site..
 remove_action( 'wp_head', 'wlwmanifest_link' );
 remove_action( 'wp_head', 'rsd_link' );
+
 // We don't need all the rest routes either..
 remove_action( 'rest_api_init', 'create_initial_rest_routes', 99 );
 
@@ -307,8 +314,16 @@ function wporg_login_get_locales() {
  * 
  * Note: See the 'Locale Detection' plugin for the switching of the locale.
  */
-function wporg_login_language_switcher() {
+function wporg_login_language_switcher( $display = true ) {
 	$current_locale = get_locale();
+
+	/*
+	 * If something has explicitely disabled the switcher, don't show our version either.
+	 * This is used for when we're called from the 'login_display_language_dropdown' filter.
+	 */
+	if ( ! $display ) {
+		return $display;
+	}
 
 	?>
 	<div class="language-switcher">
@@ -342,9 +357,11 @@ function wporg_login_language_switcher() {
 		} );
 	</script>
 	<?php
+
+	return false; // For the login_display_language_dropdown filter.
 }
-add_action( 'wp_footer', 'wporg_login_language_switcher', 1 );
-add_action( 'login_footer', 'wporg_login_language_switcher', 1 );
+add_action( 'wp_footer', 'wporg_login_language_switcher', 1, 0 );
+add_action( 'login_display_language_dropdown', 'wporg_login_language_switcher', 20 );
 
 /**
  * Simple API for accessing the reCaptcha verify api.
@@ -549,7 +566,7 @@ function wporg_remember_where_user_came_from() {
 		return;
 	}
 
-	setcookie( 'wporg_came_from', $came_from, time() + 10*MINUTE_IN_SECONDS, '/', 'login.wordpress.org', true, true );
+	setcookie( 'wporg_came_from', $came_from, time() + 10*MINUTE_IN_SECONDS, '/', WPOrg_SSO::get_instance()->get_cookie_host(), true, true );
 }
 add_action( 'init', 'wporg_remember_where_user_came_from' );
 

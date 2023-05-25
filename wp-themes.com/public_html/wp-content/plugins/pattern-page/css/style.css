@@ -1,0 +1,15 @@
+* {
+	visibility: hidden;
+}
+
+/* We take the block and move it above all the visibly hidden content */
+#wporg-pattern-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: unset;
+}
+
+#wporg-pattern-preview > div {
+    width: 100%;
+}

@@ -16,6 +16,7 @@ class Jobs_Controller extends Base {
 			[
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_items' ],
+				'permission_callback' => [ $this, 'permission_check_internal_api_bearer' ],
 			],
 			[
 				'methods'             => WP_REST_Server::CREATABLE,

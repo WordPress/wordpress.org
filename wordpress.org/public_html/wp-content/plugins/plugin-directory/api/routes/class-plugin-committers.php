@@ -138,6 +138,7 @@ class Plugin_Committers extends Base {
 		}
 
 		$plugin_slug = $request['plugin_slug'];
+		$plugin_post = Plugin_Directory::get_plugin_post( $plugin_slug );
 
 		// Prevent a committer removing themselves, if they're the only committer.
 		if ( $user->user_login == wp_get_current_user()->user_login ) {
@@ -145,6 +146,11 @@ class Plugin_Committers extends Base {
 			if ( count( $committers ) == 1 && in_array( $user->user_login, $committers ) ) {
 				return new WP_Error( 'failed', __( 'Sorry, you must have at least one committer.', 'wporg-plugins' ) );
 			}
+		}
+
+		// Prevent a non-admin removing a committer who is the owner of the plugin.
+		if ( ! current_user_can( 'plugin_approve' ) && $user->ID == $plugin_post->post_author ) {
+			return new WP_Error( 'failed', __( 'Sorry, you cannot remove the owner of the plugin as a committer.', 'wporg-plugins' ) );
 		}
 
 		$result = Tools::revoke_plugin_committer( $plugin_slug, $user );

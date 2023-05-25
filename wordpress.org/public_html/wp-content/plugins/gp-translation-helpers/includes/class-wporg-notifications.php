@@ -94,6 +94,83 @@ class WPorg_GlotPress_Notifications {
 				10,
 				2
 			);
+			add_filter(
+				'gp_mentions_list',
+				function( $result, $comments, $locale, $original_id ) {
+					$validator_email_addresses  = ( $locale && $original_id ) ? WPorg_GlotPress_Notifications::get_validator_details_for_original_id( $locale, $original_id ) : array();
+					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments ) );
+
+					// Remove commenter email if it already exists as a GTE.
+					$commenters_email_addresses = array_filter(
+						$commenters_email_addresses,
+						function( $commenter_email ) use ( $validator_email_addresses ) {
+							return ( ! in_array( $commenter_email, array_column( $validator_email_addresses, 'email' ) ) );
+						}
+					);
+
+					$commenters_email_role = array_map(
+						function( $commenter_email ) {
+							return(
+							array(
+								'role'  => 'commenter',
+								'email' => $commenter_email,
+							)
+							);
+						},
+						$commenters_email_addresses
+					);
+
+					$all_email_addresses = array_merge(
+						$validator_email_addresses,
+						$commenters_email_role
+					);
+
+					$current_user       = wp_get_current_user();
+					$current_user_email = $current_user->user_email;
+
+					// Find all instances of the logged_in user in the array
+					$user_search_result = array_keys( array_column( $all_email_addresses, 'email' ), $current_user_email );
+
+					if ( false !== $user_search_result ) {
+						foreach ( $user_search_result as $index ) {
+							unset( $all_email_addresses[ $index ] );
+						}
+						$all_email_addresses = array_values( $all_email_addresses );
+					}
+
+					$users = array_map(
+						function( $mentionable_user ) {
+							$email = $mentionable_user;
+							$role  = '';
+							if ( is_array( $mentionable_user ) ) {
+								$email = $mentionable_user['email'];
+								$role  = ! ( 'commenter' === $mentionable_user['role'] ) ? ' - ' . $mentionable_user['role'] : '';
+							}
+
+							$user = get_user_by( 'email', $email );
+							if ( $user ) {
+								return array(
+									'ID'            => $user->ID,
+									'user_login'    => $user->user_login,
+									'user_nicename' => $user->user_nicename . $role,
+									'display_name'  => '',
+									'source'        => array( 'translators' ),
+									'image_URL'     => get_avatar_url( $user->ID ),
+								);
+							}
+
+							return false;
+						},
+						$all_email_addresses
+					);
+
+					$users = array_filter( $users );
+
+					return $users;
+				},
+				10,
+				4
+			);
 		}
 	}
 
@@ -117,6 +194,54 @@ class WPorg_GlotPress_Notifications {
 		$email_addresses = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $original->id, $locale ) );
 		return array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $original->id ) );
 	}
+
+	/**
+	 * Gets the email addresses and roles(GTE/PTE/CLPTE) of all project validators: GTE, PTE and CLPTE.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string $locale  The locale for the translation.
+	 * @param int    $original_id  The original id for the string.
+	 *
+	 * @return array    The emails and roles(GTE/PTE/CLPTE) of the validators.
+	 */
+	public static function get_validator_details_for_original_id( $locale, $original_id ): array {
+		$gtes_email_and_role = array_map(
+			function( $gte_email ) {
+				return array(
+					'role'  => 'GTE',
+					'email' => $gte_email,
+				);
+			},
+			self::get_gte_email_addresses( $locale )
+		);
+
+		$ptes_email_and_role = array_map(
+			function( $pte_email ) {
+				return array(
+					'role'  => 'GTE',
+					'email' => $pte_email,
+				);
+			},
+			self::get_pte_email_addresses_by_project_and_locale( $original_id, $locale )
+		);
+
+		$clptes_email_and_role = array_map(
+			function( $clpte_email ) {
+				return array(
+					'role'  => 'GTE',
+					'email' => $clpte_email,
+				);
+			},
+			self::get_clpte_email_addresses_by_project( $original_id )
+		);
+
+		return array_merge(
+			array_merge( $gtes_email_and_role, $ptes_email_and_role ),
+			$clptes_email_and_role
+		);
+	}
+
 
 	/**
 	 * Gets the general translation editors (GTE) emails for the given locale.
@@ -325,6 +450,19 @@ class WPorg_GlotPress_Notifications {
 				$output .= '- <strong>' . esc_html__( 'Translation string: ' ) . '</strong>' . esc_html( $translation->translation_0 ) . '<br>';
 			}
 		}
+		if ( isset( $comment_meta['reject_reason'][0] ) && ! empty( maybe_unserialize( $comment_meta['reject_reason'][0] ) ) ) {
+			$reasons         = array();
+			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+			$reasons         = array_map(
+				function( $reason ) use ( $comment_reasons ) {
+					if ( array_key_exists( $reason, $comment_reasons ) ) {
+						return $comment_reasons[ $reason ]['name'];
+					}
+				},
+				maybe_unserialize( $comment_meta['reject_reason'][0] )
+			);
+			$output         .= '- <strong>' . esc_html__( 'Reason(s): ' ) . '</strong>' . esc_html( implode( ', ', $reasons ) ) . '<br>';
+		}
 		$output .= '- <strong>' . esc_html__( 'Comment: ' ) . '</strong>' . esc_html( $comment->comment_content ) . '</pre>';
 		$output .= '<br><br>';
 		$output .= esc_html__( 'Have a nice day' );
@@ -429,12 +567,9 @@ class WPorg_GlotPress_Notifications {
 	 * @return array The list of emails with the opt-in enabled.
 	 */
 	private static function get_opted_in_email_addresses( array $email_addresses ): array {
-		foreach ( $email_addresses as $email_address ) {
-			if ( self::is_global_optout_email_address( $email_address ) ) {
-				$index = array_search( $email_address, $email_addresses, true );
-				if ( false !== $index ) {
-					unset( $email_addresses[ $index ] );
-				}
+		foreach ( $email_addresses as $index => $email_address ) {
+			if ( ! is_string( $email_address ) || empty( $email_address ) || self::is_global_optout_email_address( $email_address ) ) {
+				unset( $email_addresses[ $index ] );
 			}
 		}
 		return array_values( $email_addresses );
@@ -450,6 +585,9 @@ class WPorg_GlotPress_Notifications {
 	 * @return bool Whether a user wis globally opt-out.
 	 */
 	private static function is_global_optout_email_address( string $email_address ): bool {
+		if ( empty( $email_address ) || ! is_email( $email_address ) ) {
+			return false;
+		}
 		$user            = get_user_by( 'email', $email_address );
 		$gp_default_sort = get_user_option( 'gp_default_sort', $user->ID );
 		if ( 'on' != gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ) {
@@ -601,8 +739,11 @@ class WPorg_GlotPress_Notifications {
 	public static function optin_message_for_each_discussion( int $original_id ): string {
 		$user = wp_get_current_user();
 
+		if ( ! $user->user_email ) {
+			return __( "You will not receive notifications because you don't have an e-mail address set." );
+		}
 		if ( self::is_global_optout_email_address( $user->user_email ) ) {
-			$output  = __( 'You will not receive notifications because you have not yet opted-in. ' );
+			$output  = __( 'You will not receive notifications because you have not yet opted-in.' );
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Start receiving notifications.' ) . '</a>';
 			return $output;
 		}

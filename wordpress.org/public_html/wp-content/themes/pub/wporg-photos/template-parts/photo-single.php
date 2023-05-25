@@ -55,20 +55,33 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 	</header><!-- .entry-header -->
 
 	<div class="entry-content">
-		<figure>
-			<a href="<?php echo wp_get_attachment_url( get_post_thumbnail_id() ); ?>" aria-label="<?php esc_attr_e( 'View larger photo', 'wporg-photos' ); ?>">
-				<img class="single-photo" src="<?php echo get_the_post_thumbnail_url( get_the_ID(), 'medium'); ?>" srcset="<?php echo esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ); ?>" alt="">
-			</a>
+		<?php $alt_text = get_the_content(); ?>
 
+		<a href="<?php echo wp_get_attachment_url( get_post_thumbnail_id() ); ?>">
 			<?php
-			$caption = get_the_content();
-			if ( $caption ) {
+			printf(
+				'<img class="single-photo" src="%s" srcset="%s" alt="%s">',
+				esc_url( get_the_post_thumbnail_url( get_the_ID(), 'medium') ),
+				esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ),
+				sprintf(
+					/* translators: %s: The alternative text for the photo. */
+					'View larger photo: %s',
+					esc_attr( $alt_text )
+				)
+			);
 			?>
 
-			<figcaption class="wp-caption-text"><?php echo wp_kses_post( $caption ); ?></figcaption>
+		</a>
 
-			<?php } ?>
-		</figure>
+		<?php if ( $alt_text ) : ?>
+
+		<p class="photo-alt-text">
+			<span><?php _e( 'Alternative Text: ', 'wporg-photos' ); ?></span><?php echo wp_kses_post( $alt_text ); ?>
+
+		</p>
+
+		<?php endif; ?>
+
 	</div><!-- .entry-content -->
 
 	<footer class="entry-footer">
@@ -85,6 +98,53 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 			</div>
 			<div class="column">
 				<?php Template_Tags\show_exif(); ?>
+			</div>
+		</div>
+
+		<div class="attribution">
+			<h3><?php _e( 'Attribution', 'wporg-photos' ); ?></h3>
+			<div class="attribution-label">
+				<?php _e( "Photo attribution is not necessary, but appreciated. If you'd like to give credit to the photographer, feel free to use this text:", 'wporg-photos' ); ?>
+			</div>
+			<div class="attribution-text">
+				<div class="tabs">
+					<button class="active"><?php _e( 'Rich Text', 'wporg-photos' ); ?></button>
+					<button><?php _e( 'HTML', 'wporg-photos' ); ?></button>
+					<button><?php _e( 'Plain text', 'wporg-photos' ); ?></button>
+				</div>
+				<div class="tab-content">
+				<div class="tab tab-rich-text active">
+				<?php printf(
+					/* translators: 1: URL to CCO license, 2: URL to photo's page, 3: URL to contributor's profile, 4: Contributor's display name, 5: URL to Photo Directory. */
+					__( '<a href="%1$s">CCO</a> licensed <a href="%2$s">photo</a> by <a href="%3$s">%4$s</a> from the <a href="%5$s">WordPress Photo Directory</a>.', 'wporg-photos' ),
+					'https://creativecommons.org/share-your-work/public-domain/cc0/',
+					esc_url( get_the_permalink() ),
+					esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
+					esc_html( get_the_author_meta( 'display_name' ) ),
+					esc_url( home_url( '/' ) )
+				); ?>
+				</div>
+				<div class="tab tab-html">
+					<?php printf(
+						/* translators: 1: URL to CCO license, 2: URL to photo's page, 3: URL to contributor's profile, 4: Contributor's display name, 5: URL to Photo Directory. */
+						htmlentities( '<p class="attribution">' . __( '<a href="%1$s">CCO</a> licensed <a href="%2$s">photo</a> by <a href="%3$s">%4$s</a> from the <a href="%5$s">WordPress Photo Directory</a>.', 'wporg-photos' ) . '</p>' ),
+						'https://creativecommons.org/share-your-work/public-domain/cc0/',
+						esc_url( get_the_permalink() ),
+						esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
+						esc_html( get_the_author_meta( 'display_name' ) ),
+						esc_url( home_url( '/' ) )
+					); ?>
+				</div>
+				<div class="tab tab-plain-text">
+				<?php printf(
+					/* translators: 1: Contributor's display name, 4: URL to photo's page. */
+					__( 'CCO licensed photo by %1$s from the WordPress Photo Directory: %2$s', 'wporg-photos' ),
+					esc_html( get_the_author_meta( 'display_name' ) ),
+					esc_url( get_the_permalink() )
+				); ?>
+				</div>
+				<button class="attribution-copy"><?php _e( 'Copy to clipboard', 'wporg-photos' ); ?></button>
+				</div>
 			</div>
 		</div>
 

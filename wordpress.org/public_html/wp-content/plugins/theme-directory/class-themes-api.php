@@ -64,6 +64,11 @@ class Themes_API {
 		'requires'           => false,
 		'requires_php'       => false,
 		'trac_tickets'       => false,
+		'is_commercial'      => false,
+		'is_community'       => false,
+		'external_repository_url' => false,
+		'external_support_url' => false,
+		'upload_date'        => false,
 	);
 
 	/**
@@ -385,6 +390,12 @@ class Themes_API {
 			asort( $tags[ __( 'Features' ) ] );
 		}
 
+		// See https://core.trac.wordpress.org/ticket/56869.
+		if ( ! isset( $wp_version ) || version_compare( $wp_version, '6.0-alpha', '>=' ) ) {
+			$tags[ __( 'Features' ) ]['style-variations'] = __( 'Style Variations' );
+			asort( $tags[ __( 'Features' ) ] );
+		}
+
 		// Only return tag slugs, to stay compatible with bbpress-version of Themes API.
 		foreach ( $tags as $title => $group ) {
 			$tags[ $title ] = array_keys( $group );
@@ -459,6 +470,10 @@ class Themes_API {
 			$defaults['requires'] = true;
 			$defaults['requires_php'] = true;
 			$defaults['creation_time'] = true;
+			$defaults['is_commercial'] = true;
+			$defaults['is_community'] = true;
+			$defaults['external_repository_url'] = true;
+			$defaults['external_support_url'] = true;
 		}
 
 		$this->request->fields = (array) ( $this->request->fields ?? [] );
@@ -525,6 +540,10 @@ class Themes_API {
 			$defaults['parent'] = true;
 			$defaults['requires'] = true;
 			$defaults['requires_php'] = true;
+			$defaults['is_commercial'] = true;
+			$defaults['is_community'] = true;
+			$defaults['external_repository_url'] = true;
+			$defaults['external_support_url'] = true;
 		}
 
 		$this->request->fields = (array) ( $this->request->fields ?? [] );
@@ -803,6 +822,10 @@ class Themes_API {
 			$phil->creation_time = get_post_time( 'Y-m-d H:i:s', true, $theme->ID, true );
 		}
 
+		if ( $this->fields['upload_date'] ) {
+			$phil->upload_date = get_post_meta( $theme->ID, '_upload_date', true );
+		}
+
 		if ( $this->fields['homepage'] ) {
 			$phil->homepage = "https://wordpress.org/themes/{$theme->post_name}/";
 		}
@@ -877,6 +900,32 @@ class Themes_API {
 
 		if ( $this->fields['trac_tickets'] ) {
 			$phil->trac_tickets = get_post_meta( $theme->ID, '_ticket_id', true );
+		}
+
+		if ( $this->fields['is_commercial'] ) {
+			$phil->is_commercial = has_term( 'commercial', 'theme_business_model', $theme );
+		}
+
+		if ( $this->fields['external_support_url'] ) {
+			// Only return external_support_url value if theme is commercial.
+			if ( ! empty( $phil->is_commercial ) ) {
+				$phil->external_support_url = get_post_meta( $theme->ID, 'external_support_url', true );
+			} else {
+				$phil->external_support_url = false;
+			}
+		}
+
+		if ( $this->fields['is_community'] ) {
+			$phil->is_community = has_term( 'community', 'theme_business_model', $theme );
+		}
+
+		if ( $this->fields['external_repository_url'] ) {
+			// Only return external_repository_url value if theme is community.
+			if ( ! empty( $phil->is_community ) ) {
+				$phil->external_repository_url = get_post_meta( $theme->ID, 'external_repository_url', true );
+			} else {
+				$phil->external_repository_url = '';
+			}
 		}
 
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {

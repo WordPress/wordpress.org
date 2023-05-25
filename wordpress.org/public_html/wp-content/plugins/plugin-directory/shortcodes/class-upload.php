@@ -27,6 +27,8 @@ class Upload {
 	public static function display() {
 		ob_start();
 
+		$uploader = new Upload_Handler();
+
 		if ( is_user_logged_in() ) :
 			include_once ABSPATH . 'wp-admin/includes/template.php';
 
@@ -57,7 +59,6 @@ class Upload {
 				&& ! $submitted_counts->total
 			) :
 				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) :
-					$uploader      = new Upload_Handler();
 					$upload_result = $uploader->process_upload();
 
 					if ( is_wp_error( $upload_result ) ) {
@@ -74,7 +75,9 @@ class Upload {
 				endif;
 
 			else :
-				$plugins = wp_count_posts( 'plugin', 'readable' );
+				$plugins       = wp_count_posts( 'plugin', 'readable' );
+				$oldest_plugin = get_posts( [ 'post_type' => 'plugin', 'post_status' => 'new', 'order' => 'ASC', 'orderby' => 'post_date_gmt', 'numberposts' => 1 ] );
+				$queue_length  = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
 				?>
 
 				<div class="plugin-queue-message notice notice-info notice-alt">
@@ -91,7 +94,25 @@ class Upload {
 								$plugins->new,
 								'wporg-plugins'
 							) ),
-							'<strong>' . $plugins->new . '</strong>'
+							'<strong>' . number_format_i18n( $plugins->new ) . '</strong>'
+						);
+					}
+
+					// If the queue is currently beyond 10 days, display a warning to that effect.
+					if ( $queue_length > 10 ) {
+						echo '</p><p>';
+						esc_html_e( 'The review queue is currently longer than normal, we apologize for the delays and ask for patience.', 'wporg-plugins' );
+
+						echo '</p><p>';
+						printf(
+							/* translators: %s: Number of days. Only displayed if > 10 */
+							esc_html( _n(
+								'The current wait for an initial review is at least %s day.',
+								'The current wait for an initial review is at least %s days.',
+								$queue_length,
+								'wporg-plugins'
+							) ),
+							'<strong>' . number_format_i18n( $queue_length ) . '</strong>'
 						);
 					}
 					?>
@@ -180,6 +201,21 @@ class Upload {
 				<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 					<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 					<input type="hidden" name="action" value="upload"/>
+					<?php
+					if ( ! empty( $_REQUEST['upload_token'] ) ) {
+						printf(
+							'<input type="hidden" name="upload_token" value="%s"/>',
+							esc_attr( $_REQUEST['upload_token'] )
+						);
+
+						if ( ! $uploader->has_valid_upload_token() ) {
+							printf(
+								'<div class="notice notice-error notice-alt"><p>%s</p></div>',
+								esc_html__( 'The token provided is invalid for this user.', 'wporg-plugins')
+							);
+						}
+					}
+					?>
 					<?php
 					/*
 					<fieldset>

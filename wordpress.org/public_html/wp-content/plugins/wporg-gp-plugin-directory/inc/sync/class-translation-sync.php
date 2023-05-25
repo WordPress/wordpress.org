@@ -56,7 +56,7 @@ class Translation_Sync {
 		$plugin_slug    = $project_parts[1];
 		$plugin_project = $project_parts[1] . '/' . $this->project_mapping[ $project_parts[2] ];
 
-		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, 'wporg_translate_sync_plugin_translations', [
+		wp_schedule_single_event( time() + 5, 'wporg_translate_sync_plugin_translations', [
 			[
 				'plugin'     => $plugin_slug,
 				'gp_project' => $plugin_project,
@@ -135,8 +135,10 @@ class Translation_Sync {
 	public function queue_translation_for_sync( $translation ) {
 		global $wpdb;
 
-		// Only propagate current translations without warnings.
-		if ( 'current' !== $translation->status || ! empty( $translation->warnings ) ) {
+		$allowed_statuses = array( 'current', 'rejected', 'changesrequested', 'fuzzy' );
+		
+		// Do not propagate waiting translations and other translations with warnings.
+		if ( ! in_array( $translation->status, $allowed_statuses ) || ! empty( $translation->warnings ) ) {
 			return;
 		}
 
@@ -230,7 +232,7 @@ class Translation_Sync {
 		$existing_translations = GP::$translation->find( [
 			'translation_set_id' => $new_translation_set->id,
 			'original_id'        => $new_original->id,
-			'status'             => [ 'current', 'waiting', 'fuzzy' ],
+			'status'             => [ 'current', 'waiting', 'fuzzy', 'changesrequested' ],
 		] );
 
 		foreach ( $existing_translations as $_existing_translation ) {
@@ -247,25 +249,41 @@ class Translation_Sync {
 					$_existing_translation->save();
 				}
 
-				$_existing_translation->set_as_current();
+				if ( 'current' == $translation->status ) {
+					$_existing_translation->set_as_current();
+
+				} elseif ( 'changesrequested' == $translation->status ) {
+					$_existing_translation->set_as_changesrequested();
+
+				} else {
+					$_existing_translation->set_status( $translation->status );
+				}
+
 				gp_clean_translation_set_cache( $new_translation_set->id );
 
 				return true;
 			}
 		}
 
+		// Do not create a new translation if it is not current
+		if ( 'current' !== $translation->status ) {
+			return true;
+		}
+
 		// Create a new translation.
 		$copy = new GP_Translation( $translation->fields() );
 		$copy->original_id = $new_original->id;
 		$copy->translation_set_id = $new_translation_set->id;
-		$copy->status = 'current';
+		$copy->status = $translation->status;
 
 		$translation = GP::$translation->create( $copy );
 		if ( ! $translation ) {
 			return false;
 		}
 
-		$translation->set_as_current();
+		do_action( 'wporg_translate_translation_synced', $copy, $translation );
+
+		$translation->set_status($copy->status);
 		gp_clean_translation_set_cache( $new_translation_set->id );
 
 		return true;

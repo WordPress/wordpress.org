@@ -90,10 +90,20 @@ class Plugin_Directory_Compat extends Directory_Compat {
 			exit;
 		}
 
+		if ( ! $this->for_slug( $slug ) ) {
+			status_header( 404 );
+		}
+	}
+
+	/**
+	 * Set the directory instance to the slugs data.
+	 *
+	 * @param string $slug The plugin slug.
+	 */
+	public function for_slug( $slug ) {
 		$plugin = $this->get_object( $slug );
 		if ( ! $plugin ) {
-			status_header( 404 );
-			return;
+			return false;
 		}
 
 		$this->slug         = $plugin->post_name;
@@ -101,6 +111,8 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		$this->authors      = $this->get_authors( $slug );
 		$this->contributors = $this->get_contributors( $slug );
 		$this->support_reps = $this->get_support_reps( $slug );
+
+		return true;
 	}
 
 	public function do_view_sidebar() {
@@ -122,7 +134,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 
 		$icon       = '';
 		$plugin     = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url ), esc_html( $this->plugin->post_title ) );
-		$faq        = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url . 'faq/' ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
+		$faq        = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url . '#faq' ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
 		$support    = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
 		$active     = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
 		$unresolved = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/unresolved/' ), __( 'Unresolved Topics', 'wporg-forums' ) );

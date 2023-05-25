@@ -1224,9 +1224,9 @@ class Test_Events extends TestCase {
 			'ip-asia' => array(
 				'input' => array( 'ip' => '86.108.55.28' ),
 				'expected' => array(
-					'description' => 'karak city',
-					'latitude'    => '31.164',
-					'longitude'   => '35.762',
+					'description' => 'amman',
+					'latitude'    => '31.955',
+					'longitude'   => '35.945',
 					'country'     => 'JO',
 					'internal'    => true,
 				),
@@ -1312,8 +1312,8 @@ class Test_Events extends TestCase {
 				'input'    => array( 'ip' => '2405:200:1000::' ),
 				'expected' => array(
 					'description' => 'mumbai',
-					'latitude'    => '19.014',
-					'longitude'   => '72.848',
+					'latitude'    => '19.076',
+					'longitude'   => '72.877',
 					'country'     => 'IN',
 					'internal'    => true,
 				),
@@ -1463,9 +1463,11 @@ class Test_Events extends TestCase {
 		$seed_events = array();
 
 		// Don't forget to update the values here when they're updated in the FUT.
-		$actual_events_before_expiration = pin_one_off_events( $seed_events, strtotime( 'December 16, 2021' ) );
-		$actual_events_after_expiration  = pin_one_off_events( $seed_events, strtotime( 'December 17, 2021' ) );
+		$actual_events_before_start      = pin_one_off_events( $seed_events, strtotime( 'December 12, 2022' ) );
+		$actual_events_before_expiration = pin_one_off_events( $seed_events, strtotime( 'December 17, 2022' ) );
+		$actual_events_after_expiration  = pin_one_off_events( $seed_events, strtotime( 'December 19, 2022' ) );
 
+		$this->assertEmpty( $actual_events_before_start );
 		$this->assertIsArray( $actual_events_after_expiration );
 		$this->assertEmpty( $actual_events_after_expiration );
 

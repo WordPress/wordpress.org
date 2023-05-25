@@ -11,9 +11,9 @@ gp_tmpl_header();
 ?>
 <div class="stats-table">
 	<style>
-	.gp-content {
-		max-width: 95%;
-	}
+		.gp-content {
+			max-width: 95%;
+		}
 	</style>
 	<table id="stats-table" class="table">
 		<thead>

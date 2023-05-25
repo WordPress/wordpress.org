@@ -1586,18 +1586,21 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  * Pin one-off events.
  */
 function pin_one_off_events( $events, $current_time ) {
+	if ( $current_time > strtotime( 'December 13, 2022' ) && $current_time < strtotime( 'December 18, 2022' ) ) {
+		$utc_offset = -5 * HOUR_IN_SECONDS;
 
-	if ( $current_time < strtotime( 'December 17, 2021' ) ) {
-		array_unshift( $events, array(
+		$sotw = array(
 			'type'                 => 'wordcamp',
 			'title'                => 'State of the Word',
-			'url'                  => 'https://wordpress.org/news/2021/11/state-of-the-word-2021/',
+			// `utm_source` is `private` because it would have to be set by the WP install, we don't need it, and tracking it could be a privacy concern.
+			// This may need to be updated for GA4 - https://support.google.com/analytics/answer/10089681.
+			'url'                  => 'https://wordpress.org/news/2022/11/state-of-the-word-2022/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2022',
 			'meetup'               => '',
 			'meetup_url'           => '',
-			'date'                 => '2021-12-14 17:00:00',
-			'end_date'             => '2021-12-14 19:00:00',
-			'start_unix_timestamp' => 1639519200,
-			'end_unix_timestamp'   => 1639526400,
+			'date'                 => '2022-12-15 13:00:00',
+			'end_date'             => '2022-12-15 14:30:00',
+			'start_unix_timestamp' => strtotime( '2022-12-15 13:00:00' ) - $utc_offset,
+			'end_unix_timestamp'   => strtotime( '2022-12-15 14:30:00' ) - $utc_offset,
 
 			'location' => array(
 				'location'  => 'Online',
@@ -1605,7 +1608,9 @@ function pin_one_off_events( $events, $current_time ) {
 				'latitude'  => 29.768241024468665,
 				'longitude' => -95.36765276500797,
 			),
-		) );
+		);
+
+		array_unshift( $events, $sotw );
 	}
 
 	return $events;

@@ -175,6 +175,21 @@ function wporg_support_breadcrumb() {
 }
 add_filter( 'bbp_before_get_breadcrumb_parse_args', 'wporg_support_breadcrumb' );
 
+add_filter(
+	'bbp_breadcrumbs',
+	/**
+	 * Filters the breadcrumbs to replace the home URL with the forums page.
+	 */
+	function( $crumbs ) {
+		foreach ( $crumbs as $i => $link ) {
+			if ( str_contains( $link, 'bbp-breadcrumb-home' ) ) {
+				$crumbs[ $i ] = str_replace( home_url(), home_url( '/forums/' ), $link );
+			}
+		}
+		return $crumbs;
+	}
+);
+
 /**
  * Customize arguments for Subscribe/Unsubscribe link.
  *
@@ -615,7 +630,7 @@ function wporg_support_add_moderation_notice() {
 	elseif ( in_array( $post->post_status, array( 'pending', 'spam' ) ) ) :
 
 		/* translators: Number of hours the user should wait for a pending post to get approved before contacting moderators. */
-		$moderation_timeframe = (int) __( '96', 'wporg-forums' );
+		$moderation_timeframe = (int) _x( '96', 'Wait-hours', 'wporg-forums' );
 		if ( ! $moderation_timeframe ) {
 			$moderation_timeframe = 96;
 		}
@@ -631,7 +646,8 @@ function wporg_support_add_moderation_notice() {
 				esc_url( __( 'https://make.wordpress.org/chat/', 'wporg-forums' ) )
 			);
 		} else {
-			$notices[] = __( 'This post has been held for moderation by our automated system and will be manually reviewed by a moderator.', 'wporg-forums' );
+			$notices[] = __( 'Your post is being held for moderation by our automated system and will be manually reviewed by a volunteer as soon as possible.', 'wporg-forums' );
+			$notices[] = __( 'No action is needed on your part at this time, and you do not need to resubmit your message.', 'wporg-forums' );
 		}
 
 	endif;
@@ -799,6 +815,46 @@ function wporg_support_set_is_single_on_single_replies( $args ) {
 	return $args;
 }
 add_filter( 'bbp_after_theme_compat_reset_post_parse_args', 'wporg_support_set_is_single_on_single_replies' );
+
+/**
+ * Add query vars
+ */
+function wporg_add_query_vars( array $vars ) : array {
+	// For https://wordpress.org/support/users/foo/edit/account/.
+	// See `site-support.php` for the rewrite rule.
+	$vars[] = 'edit_account';
+
+	return $vars;
+}
+add_filter( 'query_vars', 'wporg_add_query_vars' );
+
+/**
+ * Detect if the current request is for editing a bbPress Account
+ *
+ * The Account screen is a custom modification where the security settings are moved to a separate screen.
+ */
+function wporg_bbp_is_single_user_edit_account() : bool {
+	global $wp_query;
+
+	return $wp_query->get( 'bbp_user', false ) && $wp_query->get( 'edit_account', false );
+}
+
+/**
+ * Determine if the current request is to show a profile.
+ *
+ * This is necessary because `bbp_parse_query()` assumes that the current page is a Profile if it doesn't match
+ * any of the other built-in pages, rather than checking that the current page actually is a request for a profile.
+ */
+function wporg_is_single_user_profile( bool $is_single_user_profile ) : bool {
+	// True for https://wordpress.org/support/users/foo/ but not https://wordpress.org/support/users/foo/edit/account/.
+	// See `site-support.php` for the rewrite rule.
+	if ( $is_single_user_profile ) {
+			$is_single_user_profile = ! wporg_bbp_is_single_user_edit_account();
+	}
+
+	return $is_single_user_profile;
+}
+add_filter( 'bbp_is_single_user_profile', 'wporg_is_single_user_profile' );
 
 
 /** bb Base *******************************************************************/

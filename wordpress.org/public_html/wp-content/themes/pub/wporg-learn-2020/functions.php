@@ -25,6 +25,9 @@ function setup() {
 	// The parent wporg theme is designed for use on wordpress.org/* and assumes locale-domains are available.
 	// Remove hreflang support.
 	remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
+
+	add_filter( 'mkaz_code_syntax_force_loading', '__return_true' );
+	add_filter( 'mkaz_prism_css_path', '__return_empty_string' ); // Disable default styles to avoid conflicts.
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 
@@ -58,6 +61,24 @@ function wporg_learn_scripts() {
 		true
 	);
 
+	wp_enqueue_script(
+		'wporg-developer-function-reference',
+		get_stylesheet_directory_uri() . '/js/function-reference.js',
+		array( 'jquery', 'wp-a11y' ),
+		filemtime( __DIR__ . '/js/function-reference.js' ),
+		true
+	);
+	wp_localize_script(
+		'wporg-developer-function-reference',
+		'wporgFunctionReferenceI18n',
+		array(
+			'copy'   => __( 'Copy', 'wporg-learn' ),
+			'copied' => __( 'Code copied', 'wporg-learn' ),
+			'expand'   => __( 'Expand code', 'wporg-learn' ),
+			'collapse' => __( 'Collapse code', 'wporg-learn' ),
+		)
+	);
+
 	// Temporarily disabling the enhanced dropdowns for workshop filtering, see https://github.com/WordPress/Learn/issues/810
 
 	// phpcs:ignore
@@ -82,15 +103,6 @@ function wporg_learn_scripts() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'wporg_learn_scripts' );
-
-/**
- * The Header for our theme.
- *
- * @package WPBBP
- */
-function wporg_get_global_header() {
-	require WPORGPATH . 'header.php';
-}
 
 /**
  * Get the taxonomies associated to workshop
@@ -232,25 +244,25 @@ function wporg_learn_get_lesson_plan_taxonomy_data( $post_id, $context ) {
 		array(
 			'icon'  => 'clock',
 			'slug'  => 'duration',
-			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'duration' ) )->singular_name ),
+			'label' => get_taxonomy_labels( get_taxonomy( 'duration' ) )->singular_name,
 			'value' => wporg_learn_get_taxonomy_terms( $post_id, 'duration', $context ),
 		),
 		array(
 			'icon'  => 'admin-users',
 			'slug'  => 'audience',
-			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'audience' ) )->singular_name ),
+			'label' => get_taxonomy_labels( get_taxonomy( 'audience' ) )->singular_name,
 			'value' => wporg_learn_get_taxonomy_terms( $post_id, 'audience', $context ),
 		),
 		array(
 			'icon'  => 'dashboard',
 			'slug'  => 'level',
-			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'level' ) )->singular_name ),
+			'label' => get_taxonomy_labels( get_taxonomy( 'level' ) )->singular_name,
 			'value' => wporg_learn_get_taxonomy_terms( $post_id, 'level', $context ),
 		),
 		array(
 			'icon'  => 'welcome-learn-more',
 			'slug'  => 'type',
-			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'instruction_type' ) )->singular_name ),
+			'label' => get_taxonomy_labels( get_taxonomy( 'instruction_type' ) )->singular_name,
 			'value' => wporg_learn_get_taxonomy_terms( $post_id, 'instruction_type', $context ),
 		),
 	);
@@ -328,7 +340,7 @@ function wporg_archive_modify_query( WP_Query $query ) {
 
 	// Some lesson plans were created at exactly the same second, so we're adding the ID to the implicit sort order to avoid randomization.
 	if (
-		( $query->is_post_type_archive( 'lesson-plan' ) || $query->is_tax( 'wporg_lesson_category' ) ) &&
+		( $query->is_post_type_archive( 'lesson-plan' ) || $query->is_tax( 'topic' ) ) &&
 		empty( $query->get( 'orderby' ) )
 	) {
 		$query->set(
@@ -448,7 +460,7 @@ add_filter( 'posts_orderby', 'wporg_archive_orderby', 10, 2 );
  *
  * After:
  * SELECT SQL_CALC_FOUND_ROWS wp_posts.*,
- *   MAX( IF( pmeta.meta_key = 'video_language' AND pmeta.meta_value LIKE 'art_%', 1, 0 ) ) AS has_language,
+ *   MAX( IF( pmeta.meta_key = 'language' AND pmeta.meta_value LIKE 'art_%', 1, 0 ) ) AS has_language,
  *   MAX( IF( pmeta.meta_key = 'video_caption_language' AND pmeta.meta_value LIKE 'art_%', 1, 0 ) ) AS has_caption
  * FROM wp_posts
  * INNER JOIN wp_postmeta pmeta ON ( wp_posts.ID = pmeta.post_id )
@@ -463,7 +475,7 @@ add_filter( 'posts_orderby', 'wporg_archive_orderby', 10, 2 );
  * @return array
  */
 function wporg_archive_query_prioritize_locale( $clauses, $query ) {
-	if ( ! $query->is_post_type_archive( 'wporg_workshop' ) || is_admin() ) {
+	if ( ! $query->is_post_type_archive( 'wporg_workshop' ) || is_admin() || is_feed() ) {
 		return $clauses;
 	}
 
@@ -482,7 +494,7 @@ function wporg_archive_query_prioritize_locale( $clauses, $query ) {
 		 * grouping, there would be a separate row for each postmeta value for each workshop post.
 		 */
 		$clauses['fields'] .= ",
-			MAX( IF( pmeta.meta_key = 'video_language' AND pmeta.meta_value LIKE '{$locale_root}%', 1, 0 ) ) AS has_language
+			MAX( IF( pmeta.meta_key = 'language' AND pmeta.meta_value LIKE '{$locale_root}%', 1, 0 ) ) AS has_language
 		";
 		$clauses['fields'] .= ",
 			MAX( IF( pmeta.meta_key = 'video_caption_language' AND pmeta.meta_value LIKE '{$locale_root}%', 1, 0 ) ) AS has_caption
@@ -542,7 +554,7 @@ function wporg_archive_maybe_apply_query_filters( WP_Query &$query ) {
 
 	$entity_map = array(
 		'captions'   => 'video_caption_language',
-		'language'   => 'video_language',
+		'language'   => 'language',
 		'audience'   => 'audience',
 		'duration'   => 'duration',
 		'level'      => 'level',
@@ -695,7 +707,16 @@ function wporg_learn_get_card_template_args( $post_id ) {
 			break;
 
 		case 'lesson-plan':
-			$args['meta'] = wporg_learn_get_lesson_plan_taxonomy_data( $post_id, 'archive' );
+			$args['meta'] = array_merge(
+				wporg_learn_get_lesson_plan_taxonomy_data( $post_id, 'archive' ),
+				array(
+					array(
+						'icon'  => 'admin-site-alt3',
+						'label' => __( 'Language:', 'wporg-learn' ),
+						'value' => \WordPressdotorg\Locales\get_locale_name_from_code( $post->language, 'native' ),
+					),
+				)
+			);
 			break;
 
 		case 'wporg_workshop':
@@ -713,7 +734,7 @@ function wporg_learn_get_card_template_args( $post_id ) {
 				array(
 					'icon'  => 'admin-site-alt3',
 					'label' => __( 'Language:', 'wporg-learn' ),
-					'value' => \WordPressdotorg\Locales\get_locale_name_from_code( $post->video_language, 'native' ),
+					'value' => \WordPressdotorg\Locales\get_locale_name_from_code( $post->language, 'native' ),
 				),
 			);
 			break;
@@ -1108,7 +1129,7 @@ add_filter( 'widgets_init', 'wporg_learn_register_sidebars', 10 );
  * @return string Image URL.
  */
 function wporg_learn_return_default_image( $default_image ) {
-	return 'https://s.w.org/images/learn-thumbnail-fallback.jpg';
+	return 'https://s.w.org/images/learn-thumbnail-fallback.jpg?v=3';
 }
 add_action( 'jetpack_open_graph_image_default', 'wporg_learn_return_default_image', 15, 1 );
 
@@ -1156,6 +1177,7 @@ function wporg_learn_redirect_old_urls() {
 		'/workshops'                      => '/tutorials',
 		'/social-learning'                => '/online-workshops',
 		'/workshop-presenter-application' => '/tutorial-presenter-application',
+		'/report-content-errors'          => '/report-content-feedback',
 	);
 
 	// Use `REQUEST_URI` rather than `$wp->request`, to get the entire source URI including url parameters.
@@ -1189,3 +1211,36 @@ function wporg_learn_mime_types( $mime_types ) {
 	return $mime_types;
 }
 add_filter( 'mime_types', 'wporg_learn_mime_types' );
+
+/**
+ * Get the sticky Topic terms, with the selected topic first
+ *
+ * @param string $first The slug of the topic to return first.
+ * @return array
+ */
+function wporg_learn_get_sticky_topics_with_selected_first( $first = 'general' ) {
+	$first_topic;
+	$topics     = array();
+	$all_topics = get_terms( array(
+		'taxonomy'   => 'topic',
+		'hide_empty' => false,
+	) );
+
+	foreach ( $all_topics as $topic ) {
+		$is_sticky = get_term_meta( $topic->term_id, 'sticky', true );
+
+		if ( $is_sticky ) {
+			if ( $topic->slug === $first ) {
+				$first_topic = $topic;
+			} else {
+				array_push( $topics, $topic );
+			}
+		}
+	}
+
+	if ( isset( $first_topic ) ) {
+		array_unshift( $topics, $first_topic );
+	}
+
+	return $topics;
+}

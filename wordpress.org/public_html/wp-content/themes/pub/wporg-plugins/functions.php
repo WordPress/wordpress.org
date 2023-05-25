@@ -87,10 +87,20 @@ function scripts() {
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
 		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-faq.js' ), true );
+
+		$post = get_post();
+		if ( $post && current_user_can( 'plugin_admin_edit', $post ) ) {
+			wp_enqueue_script( 'wporg-plugins-categorization', get_stylesheet_directory_uri() . '/js/section-categorization.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-categorization.js' ), true );
+			wp_localize_script( 'wporg-plugins-categorization', 'categorizationOptions', [
+				'restUrl'    => get_rest_url(),
+				'restNonce'  => wp_create_nonce( 'wp_rest' ),
+				'pluginSlug' => $post->post_name,
+			] );
+		}
 	}
 
 	if ( ! is_404() ) {
-		wp_enqueue_script( 'wporg-plugins-locale-banner', get_stylesheet_directory_uri() . '/js/locale-banner.js', array( 'jquery' ), '20200401', true );
+		wp_enqueue_script( 'wporg-plugins-locale-banner', get_stylesheet_directory_uri() . '/js/locale-banner.js', array( 'jquery' ), filemtime( __DIR__ . '/js/locale-banner.js' ), true );
 		wp_localize_script( 'wporg-plugins-locale-banner', 'wporgLocaleBanner', array(
 			'apiURL'        => rest_url( '/plugins/v1/locale-banner' ),
 			'currentPlugin' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
@@ -99,14 +109,13 @@ function scripts() {
 
 	if ( get_query_var( 'plugin_advanced' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), false, true );
-		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20210329b', true );
+		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20220929', true );
 
 		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
 			'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
 			'l10n' => array(
 				'date'      => __( 'Date', 'wporg-plugins' ),
 				'downloads' => __( 'Downloads', 'wporg-plugins' ),
-				'growth'    => __( 'Growth', 'wporg-plugins' ),
 				'noData'    => __( 'No data yet', 'wporg-plugins' ),
 				'today'     => __( 'Today', 'wporg-plugins' ),
 				'yesterday' => __( 'Yesterday', 'wporg-plugins' ),
@@ -230,7 +239,20 @@ add_action( 'customize_preview_init', __NAMESPACE__ . '\customize_preview_js' );
  * @return array
  */
 function custom_body_class( $classes ) {
+	$post = get_post();	
+
 	$classes[] = 'no-js';
+
+	if ( $post && is_singular( 'plugin' ) ) {
+		if ( has_term( 'commercial', 'plugin_business_model', $post ) ) {
+			$classes[] = 'is-commercial-plugin';
+		}
+
+		if ( has_term( 'community', 'plugin_business_model', $post ) ) {
+			$classes[] = 'is-community-plugin';
+		}
+	}
+
 	return $classes;
 }
 add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
@@ -307,6 +329,14 @@ add_filter( 'document_title_separator', __NAMESPACE__ . '\document_title_separat
  * @return string
  */
 function excerpt_length( $excerpt ) {
+	/*
+	 * Don't run this filter during rest-api requests.
+	 * This shouldn't normally be needed, but this avoids accidental shortening of the API fields.
+	 */
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return $excerpt;
+	}
+
 	if ( is_home() || is_archive() ) {
 		/*
 		 * translators: If your word count is based on single characters (e.g. East Asian characters),

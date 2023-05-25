@@ -6,12 +6,19 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 	 * @author stephdau
 	 */
 	class WPOrg_SSO {
-		const SSO_HOST = 'login.wordpress.org';
 
 		const SUPPORT_EMAIL = 'forum-password-resets@wordpress.org';
 
 		const LOGIN_TOS_COOKIE  = 'wporg_tos_login';
 		const TOS_USER_META_KEY = 'tos_revision';
+
+		/**
+		 * The time SSO tokens are valid. These are used for remote login/logout on
+		 * non-wordpress.org domains.
+		 *
+		 * @var int
+		 */
+		const REMOTE_TOKEN_TIMEOUT = 5;
 
 		const VALID_HOSTS = [
 			'wordpress.org',
@@ -20,12 +27,13 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			'wordcamp.org'
 		];
 
-		public $sso_host_url;
-		public $sso_login_url;
-		public $sso_signup_url;
+		public $sso_host       = 'login.wordpress.org';
+		public $sso_host_url   = '';
+		public $sso_login_url  = '';
+		public $sso_signup_url = '';
 
-		public $host;
-		public $script;
+		public $host   = '';
+		public $script = '';
 
 		private static $instance = null;
 
@@ -33,7 +41,19 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * Constructor, instantiate common properties
 		 */
 		public function __construct() {
-			$this->sso_host_url   = 'https://' . self::SSO_HOST;
+			// On local installations, the SSO host is always the current sites domain and scheme.
+			if ( function_exists( 'wp_get_environment_type' ) && 'local' === wp_get_environment_type() ) {
+				$this->sso_host     = parse_url( home_url(), PHP_URL_HOST );
+				$this->sso_host_url = untrailingslashit( home_url() ); // Respect scheme, domain, and port.
+
+				// If a port is specified, include that in the hostname.
+				if ( parse_url( home_url(), PHP_URL_PORT ) ) {
+					$this->sso_host .= ':' . parse_url( home_url(), PHP_URL_PORT );
+				}
+			} else {
+				$this->sso_host_url = 'https://' . $this->sso_host;
+			}
+
 			$this->sso_login_url  = $this->sso_host_url . '/';
 			$this->sso_signup_url = $this->sso_host_url . '/register';
 
@@ -53,6 +73,17 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		}
 
 		/**
+		 * Return the hostname to use in cookie headers.
+		 *
+		 * Cookies do not respect the port in the hostname, and are hostname-specific unless the `Port` parameter is set.
+		 */
+		public function get_cookie_host() {
+			list( $cookie_host ) = explode( ':', $this->sso_host );
+
+			return $cookie_host;
+		}
+
+		/**
 		 * Checks if the requested redirect_to URL is part of the wordpress.org empire, adds it as an redirect host if so.
 		 *
 		 * @param array $hosts Currently allowed hosts
@@ -67,7 +98,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$host = ( ! $url || ! isset( $url['host'] ) ) ? null : $url['host'];
 			} else {
 				// If not on the SSO host, add login.wordpress.org, to be safe
-				$host = self::SSO_HOST;
+				$host = $this->sso_host;
 			}
 
 			// If we got a host by now, it's a safe wordpress.org-based one, add it to the list of allowed redirects
@@ -123,7 +154,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * @return bool True if current host is the SSO host, false if not.
 		 */
 		public function is_sso_host() {
-			return self::SSO_HOST === $this->host;
+			return $this->sso_host === $this->host;
 		}
 
 		/**
@@ -145,10 +176,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			} else if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
 				// We didn't get a redirect_to, but we got a referrer, use that if a valid target.
 				$redirect_to_referrer = $_SERVER['HTTP_REFERER'];
-				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) && self::SSO_HOST != parse_url( $redirect_to_referrer, PHP_URL_HOST ) ) {
+				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) && $this->sso_host != parse_url( $redirect_to_referrer, PHP_URL_HOST ) ) {
 					$redirect_to = $redirect_to_referrer;
 				}
-			} elseif ( self::SSO_HOST !== $this->host ) {
+			} elseif ( ! $this->is_sso_host() ) {
 				// Otherwise, attempt to guess the parent dir of where they came from and validate that.
 				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$_SERVER['REQUEST_URI']}" );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_source_parent ) ) {
@@ -162,11 +193,11 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		/**
 		 * Tests if the passed host/domain, or URL, is part of the WordPress.org network.
 		 *
-		 * @param unknown $host A domain, hostname, or URL
+		 * @param string $host A domain, hostname, or URL
 		 * @return boolean True is ok, false if not
 		 */
 		protected function _is_valid_targeted_domain( $host ) {
-			if ( empty( $host ) || ! is_string( $host ) || ! strstr( $host, '.' ) ) {
+			if ( empty( $host ) || ! is_string( $host ) ) {
 				return false;
 			}
 
@@ -174,14 +205,36 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$host = parse_url( $host, PHP_URL_HOST );
 			}
 
-			if ( in_array( $host, self::VALID_HOSTS, true ) ) {
+			if ( $host === $this->sso_host ) {
 				return true;
+			}
+
+			$host = $this->_get_targetted_host( $host );
+
+			return in_array( $host, self::VALID_HOSTS, true );
+		}
+
+		/**
+		 * Determine the targetted hostname for a given hostname.
+		 *
+		 * This returns 'wordpress.org' in the case of 'login.wordpress.org'.
+		 * This does NOT validate the hostname is valid for a redirect.
+		 *
+		 * @param string $host The hostname to process.
+		 * @return string The hostname, maybe top-level, maybe not.
+		 */
+		protected function _get_targetted_host( $host ) {
+			if ( in_array( $host, self::VALID_HOSTS, true ) ) {
+				return $host;
 			}
 
 			// If not a top-level domain, shrink it down and try again.
 			$top_level_host = implode( '.', array_slice( explode( '.', $host ), -2 ) );
+			if ( in_array( $top_level_host, self::VALID_HOSTS, true ) ) {
+				$host = $top_level_host;
+			}
 
-			return in_array( $top_level_host, self::VALID_HOSTS, true );
+			return $host;
 		}
 
 		/**
@@ -193,9 +246,6 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * @param int    $status HTTP redirect status, defaults to 302
 		 */
 		protected function _safe_redirect( $to, $status = 302 ) {
-			if ( headers_sent() ) {
-				return;
-			}
 
 			// When available, sanitize the redirect prior to redirecting.
 			// This isn't strictly needed, but prevents harmless invalid inputs being passed through to the Location header.
@@ -203,6 +253,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$to = wp_sanitize_redirect( $to );
 			}
 
+			// This function MUST be passed a full URI, a relative or root-relative URI is not valid.
 			if ( ! $this->_is_valid_targeted_domain( $to ) ) {
 				$to = $this->_get_safer_redirect_to();
 			}
@@ -211,13 +262,36 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$to = apply_filters( 'wp_redirect', $to, $status );
 			}
 
+			/*
+			 * Collapse leading multiple slashes at the start of the path in the URL.
+			 * This can cause problems with setting cookies when the redirect is to
+			 * a SSO login destination such as `http://example.org//////wp-admin`.
+			 */
+			$to = preg_replace( '!^(https?://[^/]+)/{2,}!', '$1/', $to );
+
+			// In the event headers have been sent already, output a HTML redirect.
+			if ( headers_sent() ) {
+				if ( function_exists( 'esc_url' ) ) {
+					$to = esc_url( $to );
+				} else {
+					// This is not a replacement for esc_url().
+					$to = htmlspecialchars( $to, ENT_QUOTES | ENT_SUBSTITUTE );
+				}
+
+				printf(
+					'<meta http-equiv="refresh" content="1;url=%1$s" />' . 
+					'<a href="%1$s">%1$s</a>',
+					$to
+				);
+				exit;
+			}
+
 			header(
 				'Location: ' . $to,
 				true,
 				preg_match( '/^30(1|2)$/', $status ) ? $status : 302
 			);
-
-			die();
+			exit;
 		}
 	}
 }

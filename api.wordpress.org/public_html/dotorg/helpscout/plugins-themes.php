@@ -1,133 +1,205 @@
 <?php
-// Simple sidebar to list plugin/theme details.
+namespace WordPressdotorg\API\HelpScout;
+/**
+ * Simple sidebar to list plugin/theme details.
+ */
+
+/*
+
+Plugins mentioned in this email:
+ - Plugin 1
+ - Plugin 2
+
+Themes mentioned in this email:
+ - Theme 3
+
+Plugins owned by this user:
+ - Plugin 1
+
+Themes owned by this user:
+ - Theme 3
+
+*/
 
 // $request is the validated HelpScout request.
 $request = include __DIR__ . '/common.php';
 
 // default empty output
-$html = '';
+ob_start();
 
 // look up profile url by email
 $email = get_user_email_for_email( $request );
 $user  = get_user_by( 'email', $email );
 
-if ( ! $user ) {
-	echo json_encode( array( 'html' => $html ) );
-	die();
+$sites = [
+	'themes'  => WPORG_THEME_DIRECTORY_BLOGID,
+	'plugins' => WPORG_PLUGIN_DIRECTORY_BLOGID,
+];
+$repo_post_types = [
+	'themes'  => 'repopackage',
+	'plugins' => 'plugin',
+];
+
+// Display plugins first in the plugins inbox.
+if ( str_starts_with( $request->mailbox->email ?? '' , 'plugins' ) ) {
+	$sites           = array_reverse( $sites );
+	$repo_post_types = array_reverse( $repo_post_types );
 }
 
-foreach ( [
-	/* site_id => [ textual singular, post_type ] */
-	WPORG_PLUGIN_DIRECTORY_BLOGID => [ 'plugin', 'plugin' ],
-	WPORG_THEME_DIRECTORY_BLOGID  => [ 'theme', 'repopackage' ]
-] as $site_id => $details ) {
-	list( $type, $post_type ) = $details;
+// Mentioned in email
+$mentioned = get_plugin_or_theme_from_email( $request );
+foreach ( $mentioned as $type => $slugs ) {
+	switch_to_blog( $sites[ $type ] );
 
-	switch_to_blog( $site_id );
+	$post_ids = get_posts( [
+		'fields'        => 'ids',
+		'post_name__in' => $slugs,
+		'post_type'     => $repo_post_types, // Cannot be 'all', as that only queries for known post_type
+		'post_status'   => 'any',
+		'orderby'       => 'post_title',
+		'order'         => 'ASC',
+	] );
 
-	$slugs = [];
-	if ( 'plugin' === $type ) {
-		// Committer to a plugin.
-		$slugs = $wpdb->get_col( $wpdb->prepare( 'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s', $user->user_login ) );
-		$slugs = array_filter( array_map( function( $slug ) {
-			return ltrim( $slug, '/' ) ?: false;
-		}, $slugs ) );
+	if ( $post_ids ) {
+		echo '<p><strong>' . ucwords( $type ) . ' mentioned in this email:</strong></p>';
 
-		// TODO: Would be nice to pull for support reps too, but that's less common.
+		display_items( $post_ids );
+
+		echo '<br/>';
 	}
 
-	// Reported themes, shortcut, assume the slug is the title.. since it is..
-	if (
-		'theme' === $type &&
-		str_starts_with( $request->ticket->subject ?? '', 'Reported Theme:' )
-	) {
-		$slugs[] = sanitize_title_with_dashes( trim( explode( ':', $request->ticket->subject )[1] ) );
-	}
-
-	$slugs    = $slugs ? '"' . implode( '", "', array_map( 'esc_sql', $slugs ) ) . '"' : '';
-	$or_slugs = $slugs ? "OR post_name IN( {$slugs} )" : '';
-
-	$counts = $wpdb->get_results( $wpdb->prepare(
-		"SELECT post_status, COUNT(*) as count, group_concat( ID ORDER BY post_title ) as ids, group_concat( post_title ORDER BY post_title SEPARATOR ', ' ) as titles
-		FROM $wpdb->posts
-		WHERE post_type = %s AND ( post_author = %s {$or_slugs} )
-		GROUP BY post_status
-		ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'closed', 'approved', 'suspended', 'rejected', 'draft' )",
-		$post_type,
-		$user->ID
-	) );
-
-	if ( $counts ) {
-		$total       = array_sum( wp_list_pluck( $counts, 'count' ) );
-		$ids         = wp_parse_id_list( implode( ',', wp_list_pluck( $counts, 'ids' ) ) );
-		$post_statii = implode(
-			', ',
-			array_map(
-				function( $i ) {
-					return sprintf( "%s: %s (%s)", $i->post_status, $i->count, $i->titles );
-				},
-				$counts
-			)
-		);
-
-		$html .= sprintf(
-			'<p><a href="%s" title="%s">%s</a></p>',
-			add_query_arg( [ 'post_type' => $post_type, 'author' => $user->ID ], admin_url( 'edit.php' ) ),
-			esc_attr( $post_statii ),
-			ucwords( _n( "$total $type", "{$total} {$type}s", $total ) ) // Real bad internationalisation where internationalisation will never be used.
-		);
-
-		// plugins@ and themes@ - expand and provide direct links.
-		if ( "{$type}s@wordpress.org" === $request->mailbox->email ) {
-			$html .= '<ul>';
-			foreach ( $ids as $post_id ) {
-				$post        = get_post( $post_id );
-				$post_status = '';
-
-				switch ( $post->post_status ) {
-					// Plugins
-					case 'rejected':
-						$post_status = '(Rejected)';
-						break;
-					case 'closed':
-					case 'disabled':
-						$post_status = '(Closed)';
-						break;
-					case 'pending':
-					case 'new':
-						$post_status = '(In Review)';
-						break;
-					case 'approved':
-						$post_status = '(Approved)';
-						break;
-
-					// Themes
-					case 'draft':
-						$post_status = '(In Review or Rejected)';
-						break;
-					case 'suspended':
-						$post_status = '(Suspended)';
-						break;
-					case 'delisted':
-						$post_status = '(Delisted)';
-						break;
-				}
-
-				$html .= sprintf(
-					'<li><a href="%s">%s</a> <a href="%s">#</a> %s</li>',
-					/* get_edit_post_link( $post ), // Won't work as post type not registered */
-					esc_url( add_query_arg( [ 'action' => 'edit', 'post' => $post_id ], admin_url( 'post.php' ) ) ),
-					esc_html( $post->post_title ),
-					get_permalink( $post ),
-					esc_html( $post_status )
-				);
-			}
-			$html .= '</ul>';
-		}
-
-	}
 	restore_current_blog();
 }
 
+// Owned by user.
+if ( $user ) {
+	foreach ( $sites as $type => $_blog_id ) {
+		switch_to_blog( $_blog_id );
+
+		$items = get_user_items( $user );
+		if ( $items ) {
+			echo '<p><strong>' . ucwords( $type ) . ' owned by this user:</strong></p>';
+
+			display_items( $items );
+
+			echo '<br/>';
+		}
+
+		restore_current_blog();
+	}
+}
+
+function get_user_items( $user ) {
+	global $wpdb;
+
+	if ( ! $user ) {
+		return [];
+	}
+
+	$ids    = [];
+	$slugs  = [];
+	$wheres = [];
+
+	if ( WPORG_PLUGIN_DIRECTORY_BLOGID === get_current_blog_id() ) {
+		// Committer to a plugin.
+		$committer_plugins = $wpdb->get_col( $wpdb->prepare( 'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s', $user->user_login ) );
+
+		foreach ( $committer_plugins as $plugin ) {
+			$plugin = ltrim( $plugin, '/' );
+			if ( $plugin ) {
+				$slugs[] = $plugin;
+			}
+		}
+	}
+
+	if ( $slugs ) {
+		$slugs    = '"' . implode( '", "', array_map( 'esc_sql', array_unique( $slugs ) ) ) . '"';
+		$wheres[] = "post_name IN( {$slugs} )";
+	}
+
+	$wheres[] = $wpdb->prepare( "post_author = %d", $user->ID );
+
+	if ( $wheres ) {
+		$where = implode( ' OR ', $wheres );
+
+		$ids = $wpdb->get_col(
+			"SELECT ID
+			FROM $wpdb->posts
+			WHERE post_type IN( 'plugin', 'repopackage' ) AND ( {$where} )
+			ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'closed', 'approved', 'suspended', 'rejected', 'draft' ), post_title",
+		);
+	}
+
+	return $ids;
+}
+
+function display_items( $post_ids ) {
+	echo '<ul>';
+	foreach ( $post_ids as $post_id ) {
+		$post        = get_post( $post_id );
+		$post_status = '';
+		$style       = 'color: green;';
+		$reviewer    = false;
+		if ( 'plugin' === $post->post_type && $post->assigned_reviewer ) {
+			$reviewer_user = get_user_by( 'id', $post->assigned_reviewer );
+			$reviewer      = $reviewer_user->display_name ?: $reviewer_user->user_login;
+		}
+
+		switch ( $post->post_status ) {
+			// Plugins
+			case 'rejected':
+				$post_status = '(Rejected)';
+				$style       = 'color: red;';
+				break;
+			case 'closed':
+			case 'disabled':
+				$post_status = '(' . ucwords( $post->post_status ) . ')';
+				$style       = 'color: red;';
+				break;
+			case 'pending':
+			case 'new':
+				$post_status = '(In Review)';
+				$style       = '';
+				break;
+			case 'approved':
+				$post_status = '(Approved)';
+				$style       = '';
+				break;
+
+			// Themes
+			case 'draft':
+				$post_status = '(In Review or Rejected)';
+				$style       = '';
+				break;
+			case 'suspend':
+				$post_status = '(Suspended)';
+				$style       = 'color: red;';
+				break;
+			case 'delist':
+				$post_status = '(Delisted)';
+				$style       = 'color: red;';
+				break;
+		}
+
+		// Append assigned to, if known.
+		if ( $reviewer ) {
+			$post_status = str_replace( ')', ", Assigned to {$reviewer})", $post_status );
+		}
+
+		printf(
+			'<li><a href="%1$s" style="%2$s">%3$s</a> <a href="%4$s" style="%2$s">#</a> %5$s</li>',
+			/* 1 get_edit_post_link( $post ), // Won't work as post type not registered */
+			/* 1 */ esc_url( add_query_arg( [ 'action' => 'edit', 'post' => $post_id ], admin_url( 'post.php' ) ) ),
+			/* 2 */ esc_attr( $style ),
+			/* 3 */ esc_html( $post->post_title ),
+			/* 4 get_permalink( $post ), */
+			/* 4 */ esc_url( home_url( "/{$post->post_name}/" ) ),
+			/* 5 */ esc_html( $post_status )
+		);
+	}
+
+	echo '</ul>';
+}
+
 // response to HS is just HTML to display in the sidebar
-echo json_encode( array( 'html' => $html ) );
+echo json_encode( array( 'html' => ob_get_clean() ) );

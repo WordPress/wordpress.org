@@ -455,6 +455,32 @@ class Block_Plugin_Checker {
 	}
 
 	/**
+	 * Determine whether a block is top-level or a child block.
+	 *
+	 * @param object $block The block in question.
+	 *
+	 * @return bool True if the block is top-level; false if it is a child block that can only be used within other blocks in the plugin.
+	 */
+	public function is_top_level_block( $block ) {
+		$ancestors = $block->parent ?? [];
+		$ancestors = array_merge( $ancestors, $block->ancestor ?? [] );
+
+		// If it has no parent or ancestor blocks, it's top-level.
+		if ( empty( $ancestors ) ) {
+			return true;
+		}
+
+		foreach ( $ancestors as $ancestor_block_name ) {
+			// If it has an ancestor outside of this plugin, like `core/column`, then it's also top-level.
+			if ( ! isset( $this->blocks[ $ancestor_block_name ] ) ) {
+				return true;
+			}
+		}
+
+		return false;	
+	}
+
+	/**
 	 * Check functions below here. Must be named `check_*()`.
 	 */
 
@@ -791,9 +817,7 @@ class Block_Plugin_Checker {
 
 		$top_level_blocks = array_filter(
 			$this->blocks,
-			function( $block ) {
-				return ! isset( $block->parent ) || is_null( $block->parent );
-			}
+			array( $this, 'is_top_level_block' )
 		);
 
 		if ( count( $top_level_blocks ) > 1 ) {

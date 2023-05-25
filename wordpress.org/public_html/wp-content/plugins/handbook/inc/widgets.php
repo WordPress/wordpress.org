@@ -87,7 +87,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 
 		$post_type_obj = get_post_type_object( $post_type );
 
-		if ( current_user_can( $post_type_obj->cap->read_private_posts ) ) {
+		if ( $post_type_obj && current_user_can( $post_type_obj->cap->read_private_posts ) ) {
 			$args['post_status'] = array( 'publish', 'private' );
 		}
 

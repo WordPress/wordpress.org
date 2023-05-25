@@ -18,6 +18,7 @@ abstract class Directory_Compat {
 	abstract protected function taxonomy();
 	abstract protected function name();
 	abstract protected function parse_query();
+	abstract protected function for_slug( $slug );
 	abstract protected function do_view_sidebar();
 	abstract protected function do_topic_sidebar();
 	abstract protected function do_view_header();
@@ -31,8 +32,8 @@ abstract class Directory_Compat {
 
 	public function init() {
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
-			// Intercept feed requests prior to bbp_request_feed_trap.
-			add_filter( 'bbp_request', array( $this, 'request' ), 9 );
+			// Intercept feed requests prior to bbp_request_feed_trap at 10, before Performance::bbp_request_disable_missing_view_feeds at 9
+			add_filter( 'bbp_request', array( $this, 'request' ), 5 );
 
 			// Add plugin or theme name to view feed titles.
 			add_filter( 'wp_title_rss', array( $this, 'title_correction_for_feed' ) );
@@ -62,7 +63,30 @@ abstract class Directory_Compat {
 
 			// Tell WordPress not to 404 (before bbPress overrides it) so that Canonical can do it's job.
 			add_filter( 'pre_handle_404', array( $this, 'abort_wp_handle_404' ) );
+
+			// Let plugins know which forum we're in.
+			add_filter( 'bbp_get_forum_id', array( $this, 'bbp_get_forum_id' ) );
+
 		}
+	}
+
+	/**
+	 * Maybe load the data for this compat directory class.
+	 *
+	 * @param int $topic_id The topic ID that we should initialize in the context of.
+	 */
+	public function init_for_topic( $topic_id ) {
+		$forum_id = bbp_get_topic_forum_id( $topic_id );
+		if ( $forum_id != $this->forum_id() ) {
+			return;
+		}
+
+		$terms = get_the_terms( $topic_id, $this->taxonomy() );
+		if ( ! $terms ) {
+			return;
+		}
+
+		$this->for_slug( $terms[0]->slug );
 	}
 
 	/**
@@ -726,6 +750,24 @@ abstract class Directory_Compat {
 		return $handled;
 	}
 
+	/**
+	 * These compat routes are views, but showing a singular forum.
+	 * This makes other plugins understand that the compat view is a forum.
+	 *
+	 * @param int $forum_id The detected forum id.
+	 * @return int The actual forum id.
+	 */
+	public function bbp_get_forum_id( $forum_id ) {
+		if ( ! $forum_id && bbp_is_single_view() ) {
+			if ( $this->compat() === bbp_get_view_id() ) {
+				$forum_id = $this->forum_id();
+			} elseif ( 'reviews' == bbp_get_view_id() ) {
+				$forum_id = Plugin::REVIEWS_FORUM_ID;
+			}
+		}
+
+		return $forum_id;
+	}
 
 	/**
 	 * Add a subscribe/unsubscribe link to the compat views.
@@ -805,7 +847,9 @@ abstract class Directory_Compat {
 	public function get_term( $term ) {
 		// Note: Not using $this->title() here so as to filter other terms of this taxonomy correctly.
 
-		$term->name = $this->get_object( $term->slug )->post_title ?? $term->name;
+		if ( ! is_admin() ) {
+			$term->name = $this->get_object( $term->slug )->post_title ?? $term->name;
+		}
 
 		return $term;
 	}
@@ -1010,5 +1054,56 @@ abstract class Directory_Compat {
 		}
 
 		return $support_reps;
+	}
+
+	/**
+	 * Get the plugin or theme object slugs for a given user.
+	 *
+	 * @param int $user_id The user id.
+	 * @return array
+	 */
+	public function get_user_object_slugs( $user_id ) {
+		global $wpdb;
+
+		// Check the cache.
+		$cache_key   = $user_id;
+		$cache_group = $this->compat() . '-user-object-slugs';
+		$slugs       = wp_cache_get( $cache_key, $cache_group );
+		if ( $slugs !== false ) {
+			return $slugs;
+		}
+		$slugs = [];
+
+		// Themes.
+		if ( 'theme' == $this->compat() ) {
+			$slugs = $wpdb->get_col( $wpdb->prepare(
+				"SELECT post_name
+					FROM %i
+					WHERE post_type = 'repopackage' AND post_author = %d",
+				$wpdb->base_prefix . WPORG_THEME_DIRECTORY_BLOGID . '_posts',
+				$user_id
+			) );
+		}
+
+		// Plugins
+		if ( 'plugin' == $this->compat() ) {
+			$slugs = $wpdb->get_col( $wpdb->prepare(
+				"SELECT DISTINCT p.post_name
+					FROM %i AS t
+						LEFT JOIN %i AS tt ON tt.term_id = t.term_id
+						LEFT JOIN %i AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						LEFT JOIN %i AS p ON tr.object_id = p.ID
+					WHERE tt.taxonomy IN( 'plugin_contributors', 'plugin_support_reps', 'plugin_committers' ) AND t.name = %s",
+					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_terms',
+					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_taxonomy',
+					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_relationships',
+					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_posts',
+					get_user_by( 'id', $user_id )->user_nicename
+			) );
+		}
+
+		wp_cache_set( $cache_key, $slugs, $cache_group, HOUR_IN_SECONDS );
+
+		return $slugs;
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 
 // Locale detection.
-//require dirname( __FILE__ ) . '/inc/locale.php';
+require dirname( __FILE__ ) . '/inc/locale.php';
 
 function browsehappy_get_browser_data( $browser = false ) {
 
@@ -20,7 +20,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikidata' => 'Q777',
 			'normalized' => 1, // just first number
 			'facebook' => 'googlechrome',
-			'url' => 'https://www.google.com/chrome',
+			'url' => class_exists( 'Browse_Happy_Locale' ) && 'zh_CN' === Browse_Happy_Locale::locale() ? 'https://www.google.cn/chrome' : 'https://www.google.com/chrome',
 			'info' => ( $latest_strings ?
 				__( '&#8220;Get more done with the new Google Chrome. A more simple, secure, and faster web browser than ever, with Google’s smarts built-in.&#8221;', 'browsehappy' )
 				: __( '&#8220;A fast new browser from Google. Try&nbsp;it&nbsp;now!&#8221;', 'browsehappy' )
@@ -77,6 +77,16 @@ function browsehappy_get_browser_data( $browser = false ) {
 				__( '&#8220;Microsoft Edge offers world-class performance with more privacy, more productivity, and more value while you browse.&#8221;', 'browsehappy' )
 				: __( '&#8220;Microsoft Edge ranks first when put to real world page load tests. Whether you use the web to search, watch or play, this browser won&#8217;t slow you down.&#8221;', 'browsehappy' )
 			),
+		),
+		'brave' => (object) array(
+			'name' => 'Brave',
+			'long_name' => 'Brave',
+			'wikipedia' => 'Brave_(web_browser)',
+			'wikidata' => 'Q22906900',
+			'normalized' => 1.5, // include second number if non-zero
+			'facebook' => 'bravetheinternet',
+			'url' => 'https://brave.com/',
+			'info' => __( '&#8220;The Brave browser is a fast, private and secure web browser for PC, Mac and mobile.&#8221;', 'browsehappy' ),
 		),
 	);
 	if ( false === $browser )

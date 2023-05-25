@@ -167,6 +167,11 @@ https://make.wordpress.org/plugins', 'wporg-plugins' );
 	 * This shouldn't be needed, but unfortunately often is on WordPress.org.
 	 */
 	public function user_text( $user ) {
+		// Allow passing 'who=WordPress.org' instead of a user object.
+		if ( 'WordPress.org' === $user ) {
+			return 'WordPress.org';
+		}
+
 		if ( ! $user instanceof WP_User ) {
 			$user = new WP_User( $user );
 		}

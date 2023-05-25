@@ -85,7 +85,7 @@ describe( 'getCategories', () => {
 		// trigger apiFetch
 		const { value: apiFetchAction } = generator.next();
 		expect( apiFetchAction.request ).toEqual( {
-			path: '/wp/v2/pattern-categories',
+			path: '/wp/v2/pattern-categories?per_page=50',
 		} );
 
 		// Provide response and trigger action

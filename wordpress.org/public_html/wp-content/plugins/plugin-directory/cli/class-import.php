@@ -49,9 +49,10 @@ class Import {
 		'TextDomain' => 'header_textdomain',
 
 		// These headers are stored in these fields, but are handled separately.
-		// 'Version'     => 'version',
-		// 'RequiresWP'  => 'requires',
-		// 'RequiresPHP' => 'requires_php',
+		// 'Version'         => 'version',
+		// 'RequiresWP'      => 'requires',
+		// 'RequiresPHP'     => 'requires_php',
+		// 'RequiresPlugins' => 'requires_plugins'
 	);
 
 	/**
@@ -71,16 +72,18 @@ class Import {
 
 		$data = $this->export_and_parse_plugin( $plugin_slug );
 
-		$readme          = $data['readme'];
-		$assets          = $data['assets'];
-		$headers         = $data['plugin_headers'];
-		$stable_tag      = $data['stable_tag'];
-		$last_committer  = $data['last_committer'];
-		$last_revision   = $data['last_revision'];
-		$tagged_versions = $data['tagged_versions'];
-		$last_modified   = $data['last_modified'];
-		$blocks          = $data['blocks'];
-		$block_files     = $data['block_files'];
+		$readme             = $data['readme'];
+		$assets             = $data['assets'];
+		$headers            = $data['plugin_headers'];
+		$stable_tag         = $data['stable_tag'];
+		$last_committer     = $data['last_committer'];
+		$last_revision      = $data['last_revision'];
+		$tagged_versions    = $data['tagged_versions'];
+		$last_modified      = $data['last_modified'];
+		$blocks             = $data['blocks'];
+		$block_files        = $data['block_files'];
+		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
+		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
 		// Release confirmation
 		if ( $plugin->release_confirmation ) {
@@ -88,32 +91,75 @@ class Import {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
 
+			// Check to see if the commit has touched tags that don't have known confirmed releases.
+			foreach ( $svn_changed_tags as $svn_changed_tag ) {
+				if ( 'trunk' === $svn_changed_tag ) {
+					continue;
+				}
+
+				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
+				if ( ! $release ) {
+					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
+					$version = ( $svn_changed_tag === $stable_tag ) ? $headers->Version : $svn_changed_tag;
+
+					Plugin_Directory::add_release(
+						$plugin,
+						[
+							'tag'       => $svn_changed_tag,
+							'version'   => $version,
+							'committer' => [ $last_committer ],
+							'revision'  => [ $last_revision ]
+						]
+					);
+
+					$email = new Release_Confirmation_Email(
+						$plugin,
+						Tools::get_plugin_committers( $plugin_slug ),
+						[
+							'who'     => $last_committer,
+							'readme'  => $readme,
+							'headers' => $headers,
+							'version' => $version,
+						]
+					);
+					$email->send();
+
+					echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
+				}
+			}
+
+			// Now check to see if the stable has been confirmed.
 			$release = Plugin_Directory::get_release( $plugin, $stable_tag );
-
-			// This tag is unknown? Trigger email.
 			if ( ! $release ) {
-				Plugin_Directory::add_release(
-					$plugin,
-					[
-						'tag'       => $stable_tag,
-						'version'   => $headers->Version,
-						'committer' => [ $last_committer ],
-						'revision'  => [ $last_revision ]
-					]
-				);
+				throw new Exception( "Plugin release {$stable_tag} not found." );
+			}
 
-				$email = new Release_Confirmation_Email(
-					$plugin,
-					Tools::get_plugin_committers( $plugin_slug ),
-					[
-						'who'     => $last_committer,
-						'readme'  => $readme,
-						'headers' => $headers,
-					]
-				);
-				$email->send();
+			/*
+			 * If the stable release isn't confirmed, the next section will abort processing,
+			 * but if this commit didn't touch a stable tag, but rather a confirmed release tag,
+			 * then we need to build a new zip for that tag.
+			 *
+			 * This is required as ZIP building occurs at the end of the import process, yet with
+			 * release confirmations the 
+			 */
+			if ( ! $release['confirmed'] && ! $touches_stable_tag ) {
+				$zips_to_build = [];
+				foreach ( $svn_changed_tags as $svn_changed_tag ) {
+					// We're not concerned with trunk or stable tags.
+					if ( 'trunk' === $svn_changed_tag || $svn_changed_tag === $stable_tag ) {
+						continue;
+					}
 
-				throw new Exception( 'Plugin release not confirmed; email triggered.' );
+					$this_release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
+					if ( $this_release['confirmed'] && ! $this_release['zips_built'] ) {
+						$zips_to_build[] = $this_release['tag'];
+					}
+				}
+
+				if ( $zips_to_build ) {
+					// NOTE: $stable_tag not passed, as it's not yet stable and won't be.
+					$this->rebuild_affected_zips( $plugin_slug, $current_stable_tag, $current_stable_tag, $zips_to_build, $svn_revision_triggered );
+				}
 			}
 
 			// Check that the tag is approved.
@@ -129,7 +175,7 @@ class Import {
 				// Update with ^
 				Plugin_Directory::add_release( $plugin, $release );
 
-				throw new Exception( 'Plugin release not confirmed.' );
+				throw new Exception( "Plugin release {$stable_tag} not confirmed." );
 			}
 
 			// At this point we can assume that the release was confirmed, and should be imported.
@@ -232,16 +278,46 @@ class Import {
 			$requires_php = $headers->RequiresPHP;
 		}
 
+		// Keep a log of all plugin names used by the plugin over time.
+		$plugin_names = get_post_meta( $plugin->ID, 'plugin_name_history', true ) ?: [];
+		if ( ! isset( $plugin_names[ $headers->Name ] ) ) {
+			// [ 'Plugin Name' => '1.2.3', 'Plugin New Name' => '4.5.6' ]
+			$plugin_names[ $headers->Name ] = $headers->Version;
+			update_post_meta( $plugin->ID, 'plugin_name_history', wp_slash( $plugin_names ) );
+		}
+
+		// Validate whether the dependencies are met by WordPress.org-hosted plugins.
+		$requires_plugins       = array_filter( array_map( 'trim', explode( ',', $headers->RequiresPlugins ) ) );
+		$requires_plugins_unmet = false;
+		foreach ( $requires_plugins as $requires_plugin_slug ) {
+			// TODO: Add support for premium plugins.
+			$requires_plugin_post = Plugin_Directory::get_plugin_post( $requires_plugin_slug );
+			if (
+				! $requires_plugin_post ||
+				// get_plugin_post() will resolve some edge-cases, but we only want exact slug-matches.
+				$requires_plugin_slug !== $requires_plugin_post->post_name ||
+				'publish' !== $requires_plugin_post->post_status
+			) {
+				$requires_plugins_unmet = true;
+				break;
+			}
+		}
+
+		update_post_meta( $plugin->ID, 'requires_plugins', wp_slash( $requires_plugins ) );
+		if ( $requires_plugins_unmet ) {
+			update_post_meta( $plugin->ID, '_requires_plugins_unmet', true );
+		} else {
+			delete_post_meta( $plugin->ID, '_requires_plugins_unmet' );
+		}
+
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
 		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
-		update_post_meta( $plugin->ID, 'tags',               wp_slash( $tagged_versions ) );
 		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
 		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
 		update_post_meta( $plugin->ID, 'assets_banners',     wp_slash( $assets['banner'] ) );
 		update_post_meta( $plugin->ID, 'last_updated',       wp_slash( $plugin->post_modified_gmt ) );
-		update_post_meta( $plugin->ID, 'plugin_status',      wp_slash( $plugin->post_status ) );
 
 		// Calculate the 'plugin color' from the average color of the banner if provided. This is used for fallback icons.
 		$banner_average_color = '';
@@ -275,13 +351,13 @@ class Import {
 			delete_post_meta( $plugin->ID, 'block_files' );
 		}
 
-		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
-
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', wp_slash( $stable_tag ) );
-		update_post_meta( $plugin->ID, 'version', wp_slash( $headers->Version ) );
+		update_post_meta( $plugin->ID, 'version',    wp_slash( $headers->Version ) );
+		// Update the list of tags last, as it controls which ZIPs are present in the 'Previous versions' section and info API.
+		update_post_meta( $plugin->ID, 'tags',       wp_slash( $tagged_versions ) );
 
 		// Ensure that the API gets the updated data
 		API_Update_Updater::update_single_plugin( $plugin->post_name );
@@ -339,13 +415,23 @@ class Import {
 
 				$release = Plugin_Directory::get_release( $plugin, $tag );
 
-				if ( ! $release || ( $release['zips_built'] && $release['confirmations_required'] ) ) {
+				if (
+					// If the release isn't known, skip.
+					! $release ||
+					// If the release isn't confirmed AND confirmations were required, skip.
+					( ! $release['confirmed'] && $release['confirmations_required'] ) ||
+					// If the release has had its ZIPs built, skip if it required confirmations.
+					( $release['zips_built'] && $release['confirmations_required'] )
+				) {
 					unset( $versions_to_build[ $i ] );
 				} else {
 					$release['zips_built'] = true;
 					Plugin_Directory::add_release( $plugin, $release );
 				}
+			}
 
+			if ( $versions_to_build ) {
+				echo "Building ZIPs for {$plugin_slug}: " . implode( ', ', $versions_to_build ) . "\n";
 			}
 		}
 
@@ -714,38 +800,72 @@ class Import {
 	 * Find the plugin headers for the given directory.
 	 *
 	 * @param string $directory The directory of the plugin.
+	 * @param int    $max_depth The maximum depth to search for files. Default: current directory only.
 	 *
 	 * @return object The plugin headers.
 	 */
-	public static function find_plugin_headers( $directory ) {
-		$files = Filesystem::list_files( $directory, false, '!\.php$!i' );
+	public static function find_plugin_headers( $directory, $max_depth = -1 ) {
+		$files = Filesystem::list_files( $directory, ( $max_depth > 0 ), '!\.php$!i', $max_depth );
 
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			require ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		// Add any additional headers required.
+		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_extra_plugin_headers' ) );
+
 		/*
 		 * Sometimes plugins have multiple files which we detect as a plugin based on the headers.
-		 * We'll return immediately if the file has a `Plugin Name:` header, otherwise
+		 * We'll break immediately if the file has a `Plugin Name:` header, otherwise
 		 * simply return the last set of headers we come across.
 		 */
-		$possible_headers = false;
+		$headers = false;
 		foreach ( $files as $file ) {
 			$data = get_plugin_data( $file, false, false );
 			if ( array_filter( $data ) ) {
-				if ( $data['Name'] ) {
-					return (object) $data;
-				} else {
-					$possible_headers = (object) $data;
+				$data['PluginFile'] = $file;
+				$headers            = $data;
+
+				if ( $headers['Name'] ) {
+					break;
 				}
 			}
 		}
 
-		if ( $possible_headers ) {
-			return $possible_headers;
+		remove_filter( 'extra_plugin_headers', array( __CLASS__, 'add_extra_plugin_headers' ) );
+
+		if ( ! $headers ) {
+			return false;
 		}
 
-		return false;
+		// The extra_plugin_headers filter doesn't let you set the key.
+		foreach ( self::add_extra_plugin_headers( [] ) as $key => $header ) {
+			if (
+				$key != $header &&
+				! isset( $headers[ $key ] ) &&
+				isset( $headers[ $header ] )
+			) {
+				$headers[ $key ] = $headers[ $header ];
+				unset( $headers[ $header ] );
+			}
+		}
+
+		return (object) $headers;
+	}
+
+	/**
+	 * Add support for additional plugin headers prior to WordPress supporting it.
+	 *
+	 * @param array $headers The headers to look for in plugins.
+	 * @return array
+	 */
+	public static function add_extra_plugin_headers( $headers ) {
+		// WordPress Plugin Dependencies - See https://meta.trac.wordpress.org/ticket/6921
+		if ( ! isset( $headers['RequiresPlugins'] ) ) {
+			$headers['RequiresPlugins'] = 'Requires Plugins';
+		}
+
+		return $headers;
 	}
 
 	/**
@@ -805,7 +925,13 @@ class Import {
 				$is_json_valid = array_reduce(
 					$required_valid_props,
 					function( $is_valid, $prop ) use ( $error ) {
-						return $is_valid && ( false === strpos( $error, $prop ) );
+						$prop_field = substr( $prop, 11, -1 ); // 'name' in 'block.json[name]'
+						return (
+							$is_valid &&
+							( false === strpos( $error, $prop ) ) &&
+							// String in rest_validate_object_value_from_schema()
+							( false === strpos( $error, "{$prop_field} is a required property of block.json." ) )
+						);
 					},
 					true
 				);
@@ -835,7 +961,13 @@ class Import {
 
 		foreach ( $props as $prop ) {
 			if ( isset( $parsed_json->$prop ) ) {
-				$files[] = trailingslashit( $block_json_path ) . $parsed_json->$prop;
+				foreach ( (array) $parsed_json->$prop as $file ) {
+					if ( str_starts_with( $file, 'file:' ) || str_contains( $file, '.' ) ) {
+						$files[] = trailingslashit( $block_json_path ) . remove_block_asset_path_prefix( $file );
+					} else {
+						// script handle.. not handled.
+					}
+				}
 			}
 		}
 

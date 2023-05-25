@@ -29,6 +29,7 @@ include( __DIR__ . '/inc/class-nsfw-handler.php' );
 include( __DIR__ . '/inc/class-stats.php' );
 include( __DIR__ . '/inc/class-emails.php' );
 include( __DIR__ . '/inc/class-audit-log.php' );
+include( __DIR__ . '/inc/class-blocks.php' );
 
 // Compat-only includes.
 include( __DIR__ . '/inc/class-dropin.php' );

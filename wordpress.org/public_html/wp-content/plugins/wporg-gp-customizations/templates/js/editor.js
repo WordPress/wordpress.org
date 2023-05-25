@@ -1,6 +1,9 @@
+/* global $gp */
 ( function( $ ){
 	var $html = $( 'html' );
 	var $document = $( document );
+	var $openAITranslationsUsed = [];
+	var $deeplTranslationsUsed = [];
 
 	function checkStorage() {
 		var test = 'test',
@@ -67,6 +70,48 @@
 		$textarea.addClass( 'autosize' );
 
 		autosize( $textarea );
+	}
+
+	/**
+	 * Adds the suggestion to the translation in an array, and removes the previous suggestions, so
+	 * we only store the last one in the database, using the saveExternalSuggestions() function.
+	 *
+	 * @return {void}
+	 */
+	function addSuggestion() {
+		var $row = $( this );
+		var $originalId = $row.closest( 'tr' ).attr( 'id' ).substring( 7 );
+		var $CSSclass = $row.attr( 'class' );
+		if ( $CSSclass.indexOf( 'openai' ) > -1 ) {
+			$openAITranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
+			$deeplTranslationsUsed.splice( $originalId, 1 );
+		} else if ( $CSSclass.indexOf( 'deepl' ) > -1 ) {
+			$deeplTranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
+			$openAITranslationsUsed.splice( $originalId, 1 );
+		}
+	}
+
+	/**
+	 * Saves the number of external suggestions used and used without modification.
+	 *
+	 * @return {void}
+	 **/
+	function saveExternalSuggestions() {
+		var $button = $( this );
+		var $row = $button.closest( 'tr.editor' );
+		var $originalId = $row.attr( 'id' ).substring( 7 );
+		var $translation = $row.find( 'textarea' ).val();
+		var $data = {
+			nonce: wporgEditorSettings.nonce,
+			translation: $translation,
+			openAITranslationsUsed: $openAITranslationsUsed[$originalId],
+			deeplTranslationsUsed: $deeplTranslationsUsed[$originalId]
+		};
+		$.ajax({
+			url: '/-save-external-suggestions',
+			type: 'POST',
+			data: $data,
+		});
 	}
 
 	// Override functions to adopt custom markup.
@@ -255,6 +300,51 @@
 				$gp.editor.current.find( '.' + type ).removeAttr( 'open' );
 			}
 		}
+		// Click on the last tab opened in the previous row, to show the same tab in the current row.
+		$gp.editor.current.find( '.' + states['last-tab-type-open'] ).first().click();
+	}
+
+	function changeRightTab( event ) {
+		var tab = $( this );
+		var tabType = tab.attr( 'class' ).split(' ')[0];
+		var tabId = tab.attr( 'data-tab' );
+		var divId = tabId.replace( 'tab', 'div' );
+		var originalId = tabId.replace( /[^\d-]/g, '' ).replace( /^-+/g, '' );
+		changeVisibleTab( tab );
+		changeVisibleDiv( divId, originalId );
+		updateDetailsState( 'last-tab-type-open', tabType );
+		// Avoid to execute the code from the gp-translation-helpers plugin.
+		event.stopImmediatePropagation();
+	}
+
+	/**
+	 * Hides all tabs and show one of them, the last clicked.
+	 *
+	 * @param {Object} tab The selected tab.
+	 */
+	function changeVisibleTab( tab ) {
+		var tabId = tab.attr( 'data-tab' );
+		tab.siblings().removeClass( 'current' );
+		tab.parents( '.sidebar-tabs ' ).find( '.helper' ).removeClass( 'current' );
+		tab.addClass( 'current' );
+
+		$( '#' + tabId ).addClass( 'current' );
+	}
+
+
+	/**
+	 * Hides all divs and show one of them, the last clicked.
+	 *
+	 * @param {string} tabId      The select tab id.
+	 * @param {number} originalId The id of the original string to translate.
+	 */
+	function changeVisibleDiv( tabId, originalId ) {
+		$( '#sidebar-div-meta-' + originalId ).hide();
+		$( '#sidebar-div-discussion-' + originalId ).hide();
+		$( '#sidebar-div-history-' + originalId ).hide();
+		$( '#sidebar-div-other-locales-' + originalId ).hide();
+		$( '#sidebar-div-translation-memory-' + originalId ).hide();
+		$( '#' + tabId ).show();
 	}
 
 	$gp.editor.show = ( function( original ) {
@@ -276,13 +366,17 @@
 				.on( 'click', 'button.panel-header-actions__cancel', $gp.editor.hooks.cancel )
 				.on( 'click', 'button.translation-actions__copy', $gp.editor.hooks.copy )
 				.on( 'click', 'button.translation-actions__insert-tab', $gp.editor.hooks.tab )
+				.on( 'click', 'button.translation-actions__save', saveExternalSuggestions )
 				.on( 'click', 'button.translation-actions__save', $gp.editor.hooks.ok )
 				.on( 'click', 'button.translation-actions__help', openHelpModal )
 				.on( 'click', 'button.translation-actions__ltr', switchTextDirection )
 				.on( 'click', 'button.translation-actions__rtl', switchTextDirection )
 				.on( 'focus', 'textarea', textareaAutosize )
 				.on( 'click', 'summary', toggleDetails )
-				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu );
+				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu )
+				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
+				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion )
+				.on( 'click', '.sidebar-tabs li', changeRightTab );
 		}
 	})( $gp.editor.install_hooks );
 

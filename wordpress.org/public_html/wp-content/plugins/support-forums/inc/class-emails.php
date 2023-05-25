@@ -104,18 +104,22 @@ class Emails {
 		// Prevent recursive calls.
 		$recursive = true;
 		foreach ( $dest_emails as $to ) {
-			// The to is always the current recipient.
-			$attrs['to'] = $to;
+			// Use a fresh copy of the attrs.
+			$email_attrs = $attrs;
+
+			// The to is always going to be the current recipient.
+			$email_attrs['to'] = $to;
 
 			// Filter for w.org plugins to personalize emails.
-			$attrs = apply_filters( 'wporg_bbp_subscription_email', $attrs );
-	
+			$email_attrs = apply_filters( 'wporg_bbp_subscription_email', $email_attrs );
+
+			// Send the filtered email.
 			$filter_return = wp_mail(
-				$attrs['to'],
-				$attrs['subject'],
-				$attrs['message'],
-				$attrs['headers'],
-				$attrs['attachments']
+				$email_attrs['to'],
+				$email_attrs['subject'],
+				$email_attrs['message'],
+				$email_attrs['headers'],
+				$email_attrs['attachments']
 			);
 		}
 
@@ -162,7 +166,14 @@ class Emails {
 		}
 
 		$forum_id     = bbp_get_topic_forum_id( $topic_id );
-		$topic_author = bbp_get_reply_author_id( $reply_id );
+		$topic_author = bbp_get_topic_author_id( $topic_id );
+
+		// Setup the forum compat classes, as used by email filters for subject changes.
+		$forums = Plugin::get_instance();
+		if ( $forums->plugins ) {
+			$forums->plugins->init_for_topic( $topic_id );
+			$forums->themes->init_for_topic( $topic_id );
+		}
 
 		// For performance reasons, we've removed the bbPress bbp_update_topic() method, and replaced it with our slightly altered variant.
 		$bbp_update_topic = [ Plugin::get_instance()->dropin, 'bbp_update_topic' ];
@@ -196,6 +207,13 @@ class Emails {
 
 		if ( ! bbp_is_reply_published( $reply_id ) || ! bbp_is_topic_public( $topic_id ) ) {
 			return;
+		}
+
+		// Setup the forum compat classes, as used by email filters for subject changes.
+		$forums = Plugin::get_instance();
+		if ( $forums->plugins ) {
+			$forums->plugins->init_for_topic( $topic_id );
+			$forums->themes->init_for_topic( $topic_id );
 		}
 
 		// For performance reasons, we've removed the bbPress bbp_update_reply() method, and replaced it with our slightly altered variant.

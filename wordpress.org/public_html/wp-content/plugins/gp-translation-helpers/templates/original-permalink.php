@@ -115,10 +115,6 @@ gp_tmpl_header();
 	<p>
 		<a href="<?php echo esc_url( $translate_url ); ?>"><?php esc_html_e( 'This string has no translation in this language.' ); ?></a>
 	</p>
-<?php else : ?>
-	<p>
-		<?php esc_html_e( 'This string has no translation in this language.' ); ?>
-	</p>
 <?php endif; ?>
 <div class="translations" row="<?php echo esc_attr( $row_id . ( $translation ? '-' . $translation->id : '' ) ); ?>" replytocom="<?php echo esc_attr( gp_get( 'replytocom' ) ); ?>" >
 <div class="translation-helpers">

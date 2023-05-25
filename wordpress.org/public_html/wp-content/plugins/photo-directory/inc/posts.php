@@ -13,7 +13,9 @@ class Posts {
 	 * Initializer.
 	 */
 	public static function init() {
-		add_action( 'publish_' . Registrations::get_post_type(), [ __CLASS__, 'make_photo_attachment_available' ] );
+		$post_type = Registrations::get_post_type();
+
+		add_action( "publish_{$post_type}", [ __CLASS__, 'make_photo_attachment_available' ] );
 		add_action( 'before_delete_post', [ __CLASS__, 'delete_attachments' ], 10, 2 );
 		add_action( 'delete_attachment',  [ __CLASS__, 'delete_photo_post' ], 10, 2 );
 		add_action( 'template_redirect',  [ __CLASS__, 'redirect_attachment_page_to_photo' ] );
@@ -26,6 +28,30 @@ class Posts {
 		add_action( 'pre_get_posts',      [ __CLASS__, 'offset_front_page_paginations' ], 11 );
 		// Fix pages count for front page paginations.
 		add_filter( 'the_posts',          [ __CLASS__, 'fix_front_page_pagination_count' ], 10, 2 );
+
+		// Modify REST response to include URL to small photo (used by Profiles).
+		add_filter( "rest_prepare_{$post_type}", [ __CLASS__, 'rest_prepare_add_photo_url' ] );
+
+		// Dedicate primary feed to photos.
+		add_action( 'request',            [ __CLASS__, 'make_primary_feed_all_photos' ] );
+		add_filter( 'the_content_feed',   [ __CLASS__, 'add_photo_to_rss_feed' ] );
+		add_filter( 'wp_get_attachment_image_attributes', [ __CLASS__, 'feed_attachment_image_attributes' ], 10, 3 );
+	}
+
+	/**
+	 * Amends REST response for photos to include URL to small version of photo.
+	 *
+	 * @param WP_REST_Response $response
+	 * @return WP_REST_Response
+	 */
+	public static function rest_prepare_add_photo_url( $response ) {
+		$data = $response->get_data();
+
+		$data['photo-thumbnail-url'] = wp_get_attachment_image_src( get_post_thumbnail_id( $data['id'] ), 'medium' )[0] ?? '';
+
+		$response->set_data( $data );
+
+		return $response;
 	}
 
 	/**
@@ -253,6 +279,109 @@ class Posts {
 		}
 
 		return $posts;
+	}
+
+	/**
+	 * Returns the next post in the queue that the current user can moderate.
+	 *
+	 * By default it chooses a random photo in the queue that wasn't submitted
+	 * by the current user.
+	 *
+	 * @param string $orderby The field to order posts by when determining the
+	 *                        next post in queue. Default 'date'.
+	 * @param string $order   The sort order used when determining the next post
+	 *                        in queue. Either 'ASC' or 'DESC'. Default 'ASC'.
+	 * @return WP_Post|false The next post, or false if there are no other posts
+	 *                       available for the user to moderate.
+	 */
+	public static function get_next_post_in_queue( $orderby = 'date', $order = 'ASC' ) {
+		$next = false;
+
+		if ( 'rand' === $orderby ) {
+			$order = '';
+		}
+		elseif ( ! in_array( $order, [ 'ASC', 'DESC' ] ) ) {
+			$order = 'ASC';
+		}
+
+		$posts = get_posts( [
+			'author__not_in' => [ get_current_user_id() ],
+			'order'          => $order,
+			'orderby'        => $orderby,
+			'posts_per_page' => 1,
+			'post_status'    => 'pending',
+			'post_type'      => Registrations::get_post_type(),
+			'meta_query'     => [
+				'relation'   => 'OR',
+				[
+					'key'     => '_edit_lock',
+					'compare' => 'NOT EXISTS',
+				],
+				[
+					'key'     => '_edit_lock',
+					'value'   => '',
+					'compare' => '='
+				],
+			],
+		] );
+
+		if ( $posts ) {
+			$next = $posts[0];
+		}
+
+		return $next;
+	}
+
+	/**
+	 * Changes feeds to only serve photos by default.
+	 *
+	 * @param array $query_vars The array of requested query variables.
+	 * @return array
+	 */
+	public static function make_primary_feed_all_photos( $query_vars ) {
+		if ( isset( $query_vars['feed'] ) && ! isset( $query_vars['post_type'] ) ) {
+			$query_vars['post_type'] = Registrations::get_post_type();
+		}
+
+		return $query_vars;
+	}
+
+	/**
+	 * Outputs markup to include the photo in RSS feeds of photos.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public static function add_photo_to_rss_feed( $content ) {
+		global $post;
+
+		if ( $post && Registrations::get_post_type() === get_post_type( $post ) && has_post_thumbnail( $post->ID ) ) {
+			$content = '<figure>'
+				. get_the_post_thumbnail( $post->ID, 'medium_large', [ 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
+				. ( $content ? "<figcaption>{$content}</figcaption>\n" : '' )
+				. "</figure>\n";
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Overrides the image attributes for images shown in feed.
+	 *
+	 * @param string[]     $attr       Array of attribute values for the image markup, keyed by attribute name.
+	 *                                 See `wp_get_attachment_image()`.
+	 * @param WP_Post      $attachment Image attachment post.
+	 * @param string|int[] $size       Requested image size. Can be any registered image size name, or
+	 *                                 an array of width and height values in pixels (in that order).
+	 * @return string[]
+	 */
+	public static function feed_attachment_image_attributes( $attr, $attachment, $size ) {
+		if ( is_feed() ) {
+			$attr['class'] = '';
+			unset( $attr['srcset'] );
+		}
+
+		return $attr;
 	}
 
 }

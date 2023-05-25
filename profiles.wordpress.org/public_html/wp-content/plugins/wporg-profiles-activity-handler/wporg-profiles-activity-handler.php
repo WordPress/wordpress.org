@@ -38,12 +38,14 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			add_filter( 'bp_activity_global_tables', array( $this, 'change_global_table_names' ) );
 			add_filter( 'bp_activity_meta_tables',   array( $this, 'change_meta_table_names' ) );
 			add_filter( 'bp_active_components',      array( $this, 'activate_activity_component' ) );
+			add_action( 'bp_setup_cache_groups',     array( $this, 'bp_setup_cache_groups' ), 11 );
 			add_action( 'plugins_loaded',            array( $this, 'plugins_loaded' ) );
 
 			// Disable default BP activity features
 			add_filter( 'bp_activity_can_comment', '__return_false' );
 			add_filter( 'bp_activity_do_mentions', '__return_false' );
 			add_filter( 'bp_activity_use_akismet', '__return_false' );
+
 		}
 
 		/**
@@ -105,6 +107,28 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$tables['activity'] = $bp->table_prefix . 'wporg_activity_meta';
 
 			return $tables;
+		}
+
+		/**
+		 * Make the cache-group localised to the profile site.
+		 *
+		 * See https://core.trac.wordpress.org/ticket/54303 for remove_global_group.
+		 */
+		public function bp_setup_cache_groups() {
+			global $wp_object_cache;
+
+			if ( ! is_object( $wp_object_cache ) || 'WPORG_Object_Cache' !== get_class( $wp_object_cache ) ) {
+				return;
+			}
+
+			$wp_object_cache->global_groups = array_diff(
+				$wp_object_cache->global_groups,
+				[
+					'bp_activity',
+					'bp_activity_comments',
+					'activity_meta'
+				]
+			);
 		}
 
 		/**
@@ -723,6 +747,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 */
 		private function handle_wordpress_activity() {
 			$user = self::get_user( $_POST['user'] );
+			$content      = $_POST['content'];
+			$primary_link = sanitize_url( $_POST['url'] );
 
 			if ( ! $user ) {
 				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
@@ -737,7 +763,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$_POST['title'],
 					$_POST['blog']
 				);
-			} else {
+			} elseif ( isset( $_POST['type'] ) && 'new' === $_POST['type'] ) {
 				$type    = 'blog_post_create';
 				$item_id = $_POST['post_id'];
 
@@ -770,13 +796,33 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$_POST['title'],
 					$_POST['blog']
 				);
+			} elseif ( isset( $_POST['type'] ) && 'update' === $_POST['type'] ) {
+				// Handbooks are currently the only post type that send notifications of updates.
+				$type    = 'blog_handbook_update';
+				$item_id = $_POST['post_id'];
+				$action  = ''; // Will be set by `digest_bump()`
+				$content = false;
+				$primary_link = sanitize_url( $_POST['blog_url'] ); // To group digest entries by site.
+
+				$singular = sprintf(
+					'Updated a handbook page on <a href="%s">%s</a>.',
+					sanitize_url( $_POST['blog_url'] ),
+					sanitize_text_field( $_POST['blog'] )
+				);
+
+				$plural = sprintf(
+					'Made %s updates to handbook pages on <a href="%s">%s</a>.',
+					'%d',
+					sanitize_url( $_POST['blog_url'] ),
+					sanitize_text_field( $_POST['blog'] )
+				);
 			}
 
 			$args = array(
 				'user_id'           => $user->ID,
 				'action'            => $action,
-				'content'           => $_POST['content'],
-				'primary_link'      => $_POST['url'],
+				'content'           => $content,
+				'primary_link'      => $primary_link,
 				'component'         => 'blogs',
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
@@ -784,7 +830,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'hide_sitewide'     => false,
 			);
 
-			return bp_activity_add( $args );
+			if ( 'blog_handbook_update' === $type ) {
+				$activity_id = $this->digest_bump( $args, 1, $singular, $plural, true );
+			} else {
+				$activity_id = bp_activity_add( $args );
+			}
+
+			return $activity_id;
 		}
 
 		/**
@@ -892,7 +944,25 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			foreach ( $activities as $activity ) {
 				$bump        = intval( $activity['bump'] ?? 1 );
-				$activity_id = $this->digest_bump( $this->sanitize_activity( $activity ), $bump );
+				$activity = $this->sanitize_activity( $activity );
+
+				switch ( $activity['type'] ) {
+					case 'glotpress_translation_suggested':
+						$action = 'Suggested';
+						break;
+
+					case 'glotpress_translation_approved':
+						$action = 'Translated';
+						break;
+
+					case 'glotpress_translation_reviewed':
+						$action = 'Reviewed';
+						break;
+				}
+
+				$singular    = $action . ' %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+				$plural      = $action . ' %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+				$activity_id = $this->digest_bump( $activity, $bump, $singular, $plural );
 
 				if ( is_wp_error( $activity_id ) ) {
 					$errors .= sprintf(
@@ -914,9 +984,17 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * entry per day is created. That single entry gets updated each time a new action occurs, so the latest
 		 * count is always displayed.
 		 *
+		 * @param bool $group_by_site If `true`, a separate digest entry is created for each site; otherwise a
+		 *                            single entry is shared across all sites. If `true`,
+		 *                            `$new_activity['primary_link']` must be the _site_ URL, rather than the
+		 *                            _post_ URL.
+		 *
 		 * @return WP_Error|int
 		 */
-		protected function digest_bump( array $new_activity, int $bump = 1 ) {
+		protected function digest_bump(
+			array $new_activity, int $bump, string $action_singular, string $action_plural,
+			bool $group_by_site = false
+		) {
 			// Standardize on this to reduce the number of paths in error handling code.
 			// Also done in `sanitize_activity()`, but callers aren't guaranteed to use that.
 			$new_activity['error_type'] = 'wp_error';
@@ -950,9 +1028,24 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				),
 			);
 
+			if ( $group_by_site ) {
+				$args['filter_query'][] = array(
+					array(
+						'column'   => 'primary_link',
+						'value'    => $new_activity['primary_link'],
+						'relation' => 'AND',
+					),
+				);
+			}
+
 			$stored_activity_id = bp_activity_get( $args )['activities'][0] ?? false;
 			$current_count      = (int) bp_activity_get_meta( $stored_activity_id, 'digest_count', true );
-			$new_action         = $this->get_digest_actions( $new_activity['component'], $new_activity['type'], $current_count + $bump );
+			$new_total          = $current_count + $bump;
+
+			$new_action = sprintf(
+				_n( $action_singular, $action_plural, $new_total ),
+				$new_total
+			);
 
 			if ( $stored_activity_id ) {
 				$activity_object         = new BP_Activity_Activity( $stored_activity_id );
@@ -961,7 +1054,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$activity_id             = is_wp_error( $saved ) ? $saved : $stored_activity_id;
 
 				// Increase this even if couldn't update action, to preserve accurate count.
-				bp_activity_update_meta( $stored_activity_id, 'digest_count', $current_count + $bump );
+				bp_activity_update_meta( $stored_activity_id, 'digest_count', $new_total );
 
 			} else {
 				$new_activity['action'] = $new_action;
@@ -971,43 +1064,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			return $activity_id;
-		}
-
-		/**
-		 * Get the action string for a digest activity.
-		 *
-		 * This doesn't use BuddyPress' `format_callback` because we don't register the `type`s.
-		 */
-		protected function get_digest_actions( string $component, string $type, int $count ) : string {
-			$action   = '';
-			$singular = false;
-			$plural   = false;
-
-			switch ( $component . ':' . $type ) {
-				case 'glotpress:glotpress_translation_suggested':
-					$singular = 'Suggested %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					$plural   = 'Suggested %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					break;
-
-				case 'glotpress:glotpress_translation_approved':
-					$singular = 'Translated %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					$plural   = 'Translated %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					break;
-
-				case 'glotpress:glotpress_translation_reviewed':
-					$singular = 'Reviewed %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					$plural   = 'Reviewed %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					break;
-			}
-
-			if ( $singular && $plural ) {
-				$action = sprintf(
-					_n( $singular, $plural, $count ),
-					$count
-				);
-			}
-
-			return $action;
 		}
 	} /* /class WPOrg_Profiles_Activity_Handler */
 } /* if class_exists */

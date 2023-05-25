@@ -128,6 +128,14 @@
 			$post_obj = $post->ID;
 			$_post_id = $post->ID;
 		}
+		?>
+
+		<?php if ( $comments ) : ?>
+		<details class="hide-textarea">
+			<summary>Start a new conversation</summary>
+		<?php endif; ?>
+
+		<?php
 		comment_form(
 			array(
 				'title_reply'         => __( 'Discuss this string' ),
@@ -163,10 +171,25 @@
 			)
 		);
 		echo '</div>';
+		?>
+		
+		<?php if ( $comments ) : ?>
+			</details>
+		<?php endif; ?>
+		
+			<?php
 	} else {
 		/* translators: Log in URL. */
 		echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
 	}
-
 	?>
 </div><!-- .discussion-wrapper -->
+<script>	
+	jQuery(function( e, mentions ) {
+		var mentionsList = '<?php echo wp_json_encode( $mentions_list ); ?>';
+		var jetpackMentionsData = JSON.parse( mentionsList );
+		if( jetpackMentionsData.length > 0 ) {
+			jQuery( 'textarea#comment' ).mentions( jetpackMentionsData );
+		}
+	});
+</script>

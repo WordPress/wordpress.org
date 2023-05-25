@@ -14,6 +14,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'2nd-opinion' : 'A second opinion is desired for the problem or solution.',
 		'close' : 'The ticket is a candidate for closure.',
 		'needs-testing' : 'Patch has a particular need for testing.',
+		'has-testing-info' : 'Steps have been provided to reproduce the issue or test a patch.',
+		'needs-testing-info' : 'A more detailed testing procedure is needed to reproduce the issue, or to validate a patch works as expected.',
 		'needs-design' : 'A designer should create a prototype of how the suggested changes should look/behave before writing code.',
 		'needs-design-feedback' : 'A designer should review and give feedback on the proposed changes.',
 		'has-unit-tests' : 'Proposed solution has unit test coverage.',
@@ -88,9 +90,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			enable_copy: true
 		},
 		'Learn (learn.wordpress.org)': {
-			tracker: 'https://github.com/WordPress/learn/issues/new',
+			tracker: 'https://github.com/WordPress/Learn/issues/new/choose',
 			tracker_text: 'WordPress.org Learn GitHub Repository',
-			enable_copy: true
 		},
 		'Pattern Directory': {
 			tracker: 'https://github.com/WordPress/pattern-directory/issues/new/choose',
@@ -126,9 +127,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 	// phpDocumentor tags, but also a few common @-terms.
 	reservedTerms = [
-		'access', 'author', 'category', 'copyright', 'covers', 'deprecated', 'example', 'expectedDeprecated',
-		'final', 'filesource', 'global', 'group', 'home', 'ignore', 'import', 'inheritdoc',
-		'internal', 'license', 'link', 'media', 'mention', 'mentions', 'method', 'name',
+		'access', 'author', 'category', 'copyright', 'covers', 'coversNothing', 'deprecated', 'example',
+		'expectedDeprecated', 'final', 'filesource', 'global', 'group', 'home', 'ignore', 'import',
+		'inheritdoc', 'internal', 'license', 'link', 'media', 'mention', 'mentions', 'method', 'name',
 		'notification', 'notifications', 'package', 'param', 'private', 'property', 'property-read',
 		'requires', 'return', 'returns', 'see', 'since', 'static', 'staticvar', 'subpackage',
 		'term', 'terms', 'throws', 'ticket', 'toc', 'todo', 'tutorial', 'type',
@@ -695,13 +696,15 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			elements.version = $('#field-version');
 			version = parseFloat( elements.version.val() );
 
-			// Remove task (blessed), or make a task ticket read only.
-			if ( 'task (blessed)' === elements.type.val() ) {
-				elements.type.after('<input type="hidden" name="field_type" value="task (blessed)" /> task (blessed)')
-					.parent().css('vertical-align', 'middle').end()
-					.remove();
-			} else {
-				elements.type.find('option[value="task (blessed)"]').remove();
+			// Remove task, or make a task ticket read only. This supports the ticket type being 'task' or 'task (blessed)'
+			if ( elements.type.length ) {
+				if ( -1 !== elements.type.val().indexOf( 'task' ) ) {
+					elements.type.after('<input type="hidden" name="field_type" value="' + elements.type.val() + '" /> ' + elements.type.val() )
+						.parent().css('vertical-align', 'middle').end()
+						.remove();
+				} else {
+					elements.type.find('option[value*="task"]').remove();
+				}
 			}
 
 			// Once a Version is set, remove newer versions.
@@ -1236,6 +1239,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						wpTrac.workflow.removeKeyword( 'needs-patch' );
 					} else if ( 'needs-patch' === keyword ) {
 						wpTrac.workflow.removeKeyword( 'has-patch' );
+					}
+
+					if ( 'has-testing-info' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'needs-testing-info' );
+					} else if ( 'needs-testing-info' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'has-testing-info' );
 					}
 
 					if ( 'has-unit-tests' === keyword ) {

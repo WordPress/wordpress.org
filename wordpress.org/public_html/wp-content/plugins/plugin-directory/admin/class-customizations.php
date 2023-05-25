@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin;
 
 use \WordPressdotorg\Plugin_Directory;
 use \WordPressdotorg\Plugin_Directory\Tools;
+use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
 
@@ -30,13 +31,14 @@ class Customizations {
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 
-		add_action( 'load-edit.php', array( $this, 'bulk_reject_plugins' ) );
+		add_action( 'load-edit.php', array( $this, 'bulk_action_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
 		add_action( 'edit_form_top', array( $this, 'show_permalink' ) );
 		add_action( 'admin_notices', array( $this, 'add_post_status_notice' ) );
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 
 		add_filter( 'wp_insert_post_data', array( $this, 'check_existing_plugin_slug_on_post_update' ), 10, 2 );
 		add_filter( 'wp_unique_post_slug', array( $this, 'check_existing_plugin_slug_on_inline_save' ), 10, 6 );
@@ -60,8 +62,12 @@ class Customizations {
 		add_filter( 'wp_ajax_add-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'add_support_rep' ) );
 		add_filter( 'wp_ajax_delete-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
+		add_action( 'wp_ajax_plugin-svn-sync', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'svn_sync' ) );
+		add_action( 'wp_ajax_plugin-set-reviewer', array( __NAMESPACE__ . '\Metabox\Reviewer', 'xhr_set_reviewer' ) );
 
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
 	}
 
 	/**
@@ -141,6 +147,48 @@ class Customizations {
 	}
 
 	/**
+	 * Add the Repo Tools menu item to the admin menu.
+	 */
+	public function admin_menu() {
+		add_menu_page( 
+			__( 'Plugin Tools', 'wporg-plugins' ),
+			__( 'Plugin Tools', 'wporg-plugins' ),
+			'plugin_review',
+			'plugin-tools',
+			array( $this, 'plugin_tools_page' ),
+			'dashicons-admin-tools',
+			30
+		);
+	}
+
+	/**
+	 * Render the Repo Tools dashboard page, just a basic list of the menu items.
+	 */
+	public function plugin_tools_page() {
+		global $submenu;
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Plugin Tools', 'wporg-plugins' ); ?></h1>
+			<ul>
+				<?php
+				foreach ( $submenu['plugin-tools'] ?? [] as $page ) {
+					if ( 'plugin-tools' === $page[2] ) {
+						continue;
+					}
+
+					printf(
+						'<li><a href="%s">%s</a></li>',
+						esc_url( admin_url( 'admin.php?page=' . $page[2] ) ),
+						esc_html( $page[0] )
+					);
+				}
+				?>
+			</ul>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Filter the query in wp-admin to list only plugins relevant to the current user.
 	 *
 	 * @param \WP_Query $query
@@ -165,6 +213,17 @@ class Customizations {
 			} );
 		}
 
+		// Filter by reviewer.
+		if ( ! empty( $_REQUEST['reviewer'] ) ) {
+			$meta_query = $query->get( 'meta_query' ) ?: [];
+			$meta_query[] = [
+				'key'   => 'assigned_reviewer',
+				'value' => intval( $_GET['reviewer'] ),
+			];
+
+			$query->set( 'meta_query', $meta_query );
+		}
+
 	}
 
 	/**
@@ -183,51 +242,120 @@ class Customizations {
 	}
 
 	/**
-	 * Rejects plugins in bulk.
+	 * Performs plugin status changes in bulk.
 	 */
-	public function bulk_reject_plugins() {
-		if ( empty( $_REQUEST['action'] ) || empty( $_REQUEST['action2'] ) || ! in_array( 'plugin_reject', array( $_REQUEST['action'], $_REQUEST['action2'] ) ) || 'plugin' !== $_REQUEST['post_type'] ) {
+	public function bulk_action_plugins() {
+		if (
+			empty( $_REQUEST['action'] ) ||
+			empty( $_REQUEST['action2'] ) ||
+			'plugin' !== $_REQUEST['post_type']
+		) {
+			return;
+		}
+
+		$action = array_intersect(
+			[ 'plugin_open', 'plugin_close', 'plugin_disable', 'plugin_reject', 'plugin_assign' ],
+			[ $_REQUEST['action'], $_REQUEST['action2'] ]
+		);
+		$action = array_shift( $action );
+		if ( ! $action ) {
 			return;
 		}
 
 		check_admin_referer( 'bulk-posts' );
 
-		$rejected = 0;
-		$plugins  = get_posts( array(
+		$new_status = false;
+		$from_state = false;
+		$meta_data  = false;
+
+		switch( $action ) {
+			case 'plugin_open':
+				$capability = 'plugin_approve';
+				$new_status = 'publish';
+				$message    = _n_noop( '%s plugin opened.', '%s plugins opened.', 'wporg-plugins' );
+				$from_state = [ 'closed', 'disabled' ];
+				break;
+			case 'plugin_close':
+				$capability = 'plugin_close';
+				$new_status = 'closed';
+				$message    = _n_noop( '%s plugin closed.', '%s plugins closed.', 'wporg-plugins' );
+				$from_state = [ 'closed', 'disabled', 'publish', 'approved' ];
+				break;
+			case 'plugin_disable':
+				$capability = 'plugin_close';
+				$new_status = 'disabled';
+				$message    = _n_noop( '%s plugin disabled.', '%s plugins disabled.', 'wporg-plugins' );
+				$from_state = [ 'closed', 'disabled', 'publish', 'approved' ];
+				break;
+			case 'plugin_reject':
+				$capability = 'plugin_reject';
+				$new_status = 'rejected';
+				$message    = _n_noop( '%s plugin rejected.', '%s plugins rejected.', 'wporg-plugins' );
+				$from_state = [ 'new', 'pending' ];
+				break;
+			case 'plugin_assign':
+				if ( ! isset( $_REQUEST['reviewer'] ) ) {
+					return;
+				}
+
+				$capability = 'plugin_review';
+				$from_state = 'any';
+				$message    = _n_noop( '%s plugin assigned.', '%s plugins assigned.', 'wporg-plugins' );
+				$meta_data = array(
+					'assigned_reviewer'      => intval( $_REQUEST['reviewer'] ),
+					'assigned_reviewer_time' => time(),
+				);
+				break;
+			default:
+				return;
+		}
+
+		$closed = 0;
+		$args = array(
 			'post_type'      => 'plugin',
 			'post__in'       => array_map( 'absint', $_REQUEST['post'] ),
-			'post_status'    => array( 'new', 'pending' ),
 			'posts_per_page' => count( $_REQUEST['post'] ),
-		) );
+		);
+		if ( $from_state ) {
+			$args['post_status'] = $from_state;
+		}
+		$plugins  = get_posts( $args );
 
 		foreach ( $plugins as $plugin ) {
-			if ( ! current_user_can( 'plugin_reject', $plugin ) ) {
-				wp_die( __( 'You are not allowed to reject this plugin.', 'wporg-plugins' ), '', array( 'back_link' => true ) );
+			if ( ! current_user_can( $capability, $plugin ) ) {
+				continue;
 			}
+			$updated = false;
 
-			$updated = wp_update_post( array(
-				'ID'          => $plugin->ID,
-				'post_status' => 'rejected',
-			) );
+			if ( $new_status ) {
+				$updated = wp_update_post( array(
+					'ID'          => $plugin->ID,
+					'post_status' => $new_status,
+				) );
+			}
+			if ( $meta_data ) {
+				foreach ( $meta_data as $key => $value ) {
+					$updated = update_post_meta( $plugin->ID, $key, $value );
+				}
+			}
 
 			if ( $updated && ! is_wp_error( $updated ) ) {
-				$rejected++;
+				$closed++;
 			}
+
 		}
 
-		if ( $rejected ) {
-			set_transient( 'settings_errors', array(
-				array(
-					'setting' => 'wporg-plugins',
-					'code'    => 'plugins-bulk-rejected',
-					'message' => sprintf( _n( '%d plugin rejected.', '%d plugins rejected.', $rejected, 'wporg-plugins' ), $rejected ),
-					'type'    => 'updated',
-				),
-			) );
-		}
+		set_transient( 'settings_errors', array(
+			array(
+				'setting' => 'wporg-plugins',
+				'code'    => 'plugins-bulk-actioned',
+				'message' => sprintf( translate_nooped_plural( $message, $closed, 'wporg-plugins' ), number_format_i18n( $closed ) ),
+				'type'    => 'updated',
+			),
+		) );
 
 		$send_back = remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'locked', 'ids', 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), wp_get_referer() );
-		wp_redirect( add_query_arg( array( 'settings-updated' => true ), $send_back ) );
+		wp_safe_redirect( add_query_arg( array( 'settings-updated' => true ), $send_back ) );
 		exit;
 	}
 
@@ -316,9 +444,19 @@ class Customizations {
 
 		if ( 'disabled' == $post->post_status && 'disabled' != $post_status ) {
 			$post_states['disabled'] = _x( 'Disabled', 'plugin status', 'wporg-plugins' );
+			// Affix the reason it's disabled.
+			$reason = Template::get_close_reason( $post );
+			if ( $reason != _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) ) {
+				$post_states['reason'] = $reason;
+			}
 		}
 		if ( 'closed' == $post->post_status && 'closed' != $post_status ) {
 			$post_states['closed'] = _x( 'Closed', 'plugin status', 'wporg-plugins' );
+			// Affix the reason it's closed.
+			$reason = Template::get_close_reason( $post );
+			if ( $reason != _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) ) {
+				$post_states['reason'] = $reason;
+			}
 		}
 		if ( 'rejected' == $post->post_status && 'rejected' != $post_status ) {
 			$post_states['rejected'] = _x( 'Rejected', 'plugin status', 'wporg-plugins' );
@@ -450,6 +588,13 @@ class Customizations {
 			'plugin', 'side', 'high'
 		);
 
+		add_meta_box(
+			'reviewerdiv',
+			__( 'Reviewer', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Reviewer', 'display' ),
+			'plugin', 'side', 'high'
+		);
+
 		if ( 'new' !== $post->post_status && 'pending' != $post->post_status ) {
 			add_meta_box(
 				'plugin-committers',
@@ -463,6 +608,20 @@ class Customizations {
 				__( 'Plugin Support Reps', 'wporg-plugins' ),
 				array( __NAMESPACE__ . '\Metabox\Support_Reps', 'display' ),
 				'plugin', 'side'
+			);
+
+			add_meta_box(
+				'plugin-commits',
+				__( 'Plugin Commits', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Commits', 'display' ),
+				'plugin', 'normal', 'low'
+			);
+
+			add_meta_box(
+				'plugin-author-notice',
+				__( 'Author Notice (Displayed on the plugins page to Plugin Authors)', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Author_Notice', 'display' ),
+				'plugin', 'normal', 'high'
 			);
 		}
 

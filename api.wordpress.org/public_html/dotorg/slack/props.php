@@ -2,6 +2,8 @@
 
 /*
  * This endpoint receives requests from the `#props - production` app.
+ *
+ * See `includes/slack/props/lib.php` for setup/testing instructions and helper functions.
  */
 
 namespace {

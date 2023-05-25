@@ -81,17 +81,12 @@ function time_converter_script() {
 				var parseDate, formatTime, formatDate, toLocaleTimeStringSupportsLocales;
 
 				parseDate = function( text ) {
-					var m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\+00:00$/.exec( text ),
-						d = new Date();
+					var m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\+00:00$/.exec( text );
 
-					d.setUTCFullYear( + m[1] );
-					d.setUTCDate( + m[3] );
-					d.setUTCMonth( + m[2] - 1 );
-					d.setUTCHours( + m[4] );
-					d.setUTCMinutes( + m[5] );
-					d.setUTCSeconds( + m[6] );
-
-					return d;
+					return new Date(
+						// Date.UTC(year, monthIndex (0..11), day, hour, minute, second)
+						Date.UTC( + m[1], + m[2] - 1, + m[3], + m[4], + m[5], + m[6] )
+					);
 				};
 
 				formatTime = function( d ) {

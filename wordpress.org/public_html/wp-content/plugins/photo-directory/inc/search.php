@@ -15,6 +15,7 @@ class Search {
 	public static function init() {
 		add_action( 'pre_get_posts',        [ __CLASS__, 'default_search_to_only_photos' ] );
 		add_filter( 'posts_join',           [ __CLASS__, 'tag_join_for_search' ], 10, 2 );
+		add_filter( 'posts_search',         [ __CLASS__, 'limit_partial_matching' ], 9, 2 );
 		add_filter( 'posts_search',         [ __CLASS__, 'tag_where_for_search' ], 10, 2 );
 		add_filter( 'posts_groupby',        [ __CLASS__, 'tag_groupby_for_search' ], 10, 2 );
 		add_filter( 'posts_search_orderby', [ __CLASS__, 'tag_orderby_for_search' ], 10, 2 );
@@ -28,6 +29,28 @@ class Search {
 	 */
 	public static function is_search( $query ) {
 		return ! is_admin() && $query->is_search() && $query->is_main_query();
+	}
+
+	/**
+	 * Determines if the search query matches the username of a contributor.
+	 *
+	 * The search must be solely for the user's nicename and a found user must
+	 * also have a published photo.
+	 *
+	 * @param string $search The search string.
+	 * @return WP_User|false The user if the search matches a contributor, else false.
+	 */
+	public static function query_matches_username( $search ) {
+		$matches = false;
+
+		if ( preg_match( '/^[a-zA-Z0-9_]{3,}$/', $search ) ) {
+			$user = get_user_by( 'slug', $search );
+			if ( $user && User::count_published_photos( $user->ID ) ) {
+				$matches = $user;
+			}
+		}
+
+		return $matches;
 	}
 
 	/**
@@ -67,6 +90,28 @@ class Search {
 		}
 
 		return $join;
+	}
+
+	/**
+	 * Limits partial matching of search terms to at least being at the start of
+	 * a matching term.
+	 *
+	 * @param string   $where Search SQL for WHERE clause.
+	 * @param WP_Query $query The current WP_Query object.
+	 * @return string
+	 */
+	public static function limit_partial_matching( $where, $query ) {
+		global $wpdb;
+
+		if ( ! is_admin() && $query->is_search() && $query->is_main_query() ) {
+			$where = preg_replace(
+				"/LIKE '(\{\w+\})([^\{]+)(\{\w+\})'/",
+				"REGEXP '\\\\\\\\b$2.*'",
+				$where
+			);
+		}
+
+		return $where;
 	}
 
 	/**

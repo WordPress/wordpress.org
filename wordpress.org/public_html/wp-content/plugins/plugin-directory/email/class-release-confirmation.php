@@ -34,7 +34,7 @@ Follow the link below to login and confirm the release.
 			$this->user_text( $this->user ),
 			$this->user_text( $this->args['who'] ),
 			$this->args['readme']->name,
-			$this->args['headers']->Version,
+			$this->args['version'] ?? $this->args['headers']->Version,
 			esc_url( Release_Confirmation_Shortcode::generate_access_url( $this->user ) )
 		);
 	}

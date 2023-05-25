@@ -66,8 +66,8 @@ class Plugin {
 		add_action( 'bbp_template_redirect', array( $this, 'fix_bbpress_post_actions' ), 9 ); // before bbp_get_request/bbp_post_request
 
 		// Notify subscribers when a topic or reply with a given term is added.
-		add_action( 'bbp_new_topic', array( $this, 'notify_term_subscribers_of_new_topic' ), 10, 4 );
-		add_action( 'bbp_new_reply', array( $this, 'notify_term_subscribers_of_new_reply' ), 10, 5 );
+		add_action( 'bbp_new_topic', array( $this, 'notify_term_subscribers_of_new_topic' ), 10, 2 );
+		add_action( 'bbp_new_reply', array( $this, 'notify_term_subscribers_of_new_reply' ), 10, 3 );
 
 		// Replace the title of subscription emails with the term-specific prefix.
 		// This applies to all notification emails sent related to the topic, not just the term-specific emails.
@@ -80,6 +80,9 @@ class Plugin {
 		// Add a banner above the 'forum' about being subscribed to it.
 		add_action( 'bbp_template_before_topics_index', array( $this, 'before_view' ) );
 		add_action( 'wporg_compat_before_single_view',  array( $this, 'before_view' ) );
+
+		// Use a custom salt
+		add_filter( 'salt', array( $this, 'forum_subscriptions_salt' ), 10, 2 );
 	}
 
 	/**
@@ -114,7 +117,7 @@ class Plugin {
 
 		if ( $is_subscribed ) {
 			$message = sprintf(
-				__( 'You are subscribed to this forum, and will receive emails for future topic activity. <a href="%1$s">Unsubscribe from %2$s.</a>', 'wporg-forums' ),
+				__( 'You are subscribed to this forum, and will receive emails for future topic activity. <a href="%1$s">Unsubscribe from %2$s</a>.', 'wporg-forums' ),
 				self::get_subscription_url( get_current_user_id(), $term->term_id, $this->taxonomy ),
 				esc_html( $term->name )
 			);
@@ -168,7 +171,7 @@ class Plugin {
 			$user_id = $this->has_valid_unsubscription_token();
 
 			if ( ! $user_id ) {
-				bbp_add_error( 'wporg_bbp_subscribe_invalid_token', __( '<strong>ERROR</strong>: Link expired!', 'wporg-forums' ) );
+				bbp_add_error( 'wporg_bbp_subscribe_invalid_token', __( '<strong>Error:</strong> Link expired!', 'wporg-forums' ) );
 				return false;
 			}
 
@@ -179,8 +182,9 @@ class Plugin {
 						'<h1>%1$s</h1>' .
 						'<p>%2$s</p>' .
 						'<form method="POST" action="%3$s">' .
-							'<input type="submit" name="confirm" value="%4$s">' .
-							'&nbsp<a href="%5$s">%6$s</a>' .
+							'<input type="hidden" name="_wp_http_referer" value="%4$s" />' .
+							'<input type="submit" name="confirm" value="%5$s">' .
+							'&nbsp<a href="%6$s">%7$s</a>' .
 						'</form>',
 						get_bloginfo('name'),
 						sprintf(
@@ -189,6 +193,7 @@ class Plugin {
 							$term->name
 						),
 						esc_attr( $_SERVER['REQUEST_URI'] ),
+						esc_attr( wp_get_raw_referer() ),
 						esc_attr__( 'Yes, unsubscribe me', 'wporg-forums' ),
 						esc_url( get_term_link( $term ) ),
 						esc_attr( sprintf(
@@ -205,15 +210,15 @@ class Plugin {
 
 		// Check for empty term id.
 		if ( empty( $user_id ) ) {
-			bbp_add_error( 'wporg_bbp_subscribe_logged_id', __( '<strong>ERROR</strong>: You must be logged in to do this!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_logged_id', __( '<strong>Error:</strong> You must be logged in to do this!', 'wporg-forums' ) );
 
 		// Check nonce.
 		} elseif ( 'token' !== $auth && ! bbp_verify_nonce_request( 'toggle-term-subscription_' . $user_id . '_' . $term_id . '_' . $this->taxonomy ) ) {
-			bbp_add_error( 'wporg_bbp_subscribe_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_nonce', __( '<strong>Error:</strong> Are you sure you wanted to do that?', 'wporg-forums' ) );
 
 		// Check user's ability to spectate if attempting to subscribe to a term.
 		} elseif ( ! user_can( $user_id, 'spectate' ) && 'wporg_bbp_subscribe_term' === $action ) {
-			bbp_add_error( 'wporg_bbp_subscribe_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to do this!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_permissions', __( '<strong>Error:</strong> You don\'t have permission to do this!', 'wporg-forums' ) );
 		}
 
 		if ( bbp_has_errors() ) {
@@ -245,10 +250,10 @@ class Plugin {
 			bbp_redirect( $redirect );
 		} elseif ( true === $is_subscribed && 'wporg_bbp_subscribe_term' === $action ) {
 			/* translators: Term: topic tag */
-			bbp_add_error( 'wporg_bbp_subscribe_user', __( '<strong>ERROR</strong>: There was a problem subscribing to that term!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_user', __( '<strong>Error:</strong> There was a problem subscribing to that term!', 'wporg-forums' ) );
 		} elseif ( false === $is_subscribed && 'wporg_bbp_unsubscribe_term' === $action ) {
 			/* translators: Term: topic tag */
-			bbp_add_error( 'wporg_bbp_unsubscribe_user', __( '<strong>ERROR</strong>: There was a problem unsubscribing from that term!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_unsubscribe_user', __( '<strong>Error:</strong> There was a problem unsubscribing from that term!', 'wporg-forums' ) );
 		}
 	}
 
@@ -259,10 +264,8 @@ class Plugin {
 	 *
 	 * @param int $topic_id The topic id
 	 * @param int $forum_id The forum id
-	 * @param mixed $anonymous_data Array of anonymous user data
-	 * @param int $topic_author The topic author id
 	 */
-	public function notify_term_subscribers_of_new_topic( $topic_id, $forum_id, $anonymous_data = false, $topic_author = 0 ) {
+	public function notify_term_subscribers_of_new_topic( $topic_id, $forum_id ) {
 		$terms = get_the_terms( $topic_id, $this->taxonomy );
 		if ( ! $terms ) {
 			return;
@@ -360,7 +363,7 @@ Note that replying to this email has no effect.
 
 %4$s
 
-To unsubscribe from future emails click here:
+To unsubscribe from future emails, click here:
 ####UNSUB_LINK####', 'wporg-forums' ),
 			$topic_author_name,
 			$topic_content,
@@ -409,10 +412,8 @@ To unsubscribe from future emails click here:
 	 * @param int $reply_id The reply id
 	 * @param int $topic_id The topic id
 	 * @param int $forum_id The forum id
-	 * @param mixed $anonymous_data
-	 * @param int $reply_author
 	 */
-	public function notify_term_subscribers_of_new_reply( $reply_id, $topic_id, $forum_id, $anonymous_data, $reply_author ) {
+	public function notify_term_subscribers_of_new_reply( $reply_id, $topic_id, $forum_id ) {
 		$terms = get_the_terms( $topic_id, $this->taxonomy );
 		if ( ! $terms ) {
 			return;
@@ -502,7 +503,7 @@ Note that replying to this email has no effect.
 
 %4$s
 
-To unsubscribe from future emails click here:
+To unsubscribe from future emails, click here:
 ####UNSUB_LINK####', 'wporg-forums' ),
 			$reply_author_name,
 			$reply_content,
@@ -760,7 +761,7 @@ To unsubscribe from future emails click here:
 	 * @param int $taxonomy The taxonomy
 	 * @return string
 	 */
-	public static function get_subscription_url( $user_id = 0, $term_id, $taxonomy ) {
+	public static function get_subscription_url( $user_id, $term_id, $taxonomy ) {
 		if ( empty( $user_id ) ) {
 			$user_id = bbp_get_user_id();
 		}
@@ -799,6 +800,17 @@ To unsubscribe from future emails click here:
 	}
 
 	/**
+	 * Define a custom salt for wp_hash( ..., 'forum_subcriptions' ).
+	 */
+	public function forum_subscriptions_salt( $salt, $scheme ) {
+		if ( 'forum_subscriptions' === $scheme && defined( 'FORUM_SUBSCRIPTIONS_SALT' ) ) {
+			$salt = FORUM_SUBSCRIPTIONS_SALT;
+		}
+
+		return $salt;
+	}
+
+	/**
 	 * Generates a unsubscription token for a user.
 	 *
 	 * The token form is 'user_id|expiry|hash', and dependant upon the user email, password, and term.
@@ -818,7 +830,7 @@ To unsubscribe from future emails click here:
 
 		$expiry    = intval( $expiry );
 		$pass_frag = substr( $user->user_pass, 8, 4 ); // Password fragment used by cookie auth.
-		$key       = wp_hash( $term->term_id . '|' . $term->taxonomy . '|' . $user->user_email . '|' . $pass_frag . '|' . $expiry, 'forum_subcriptions' );
+		$key       = wp_hash( $term->term_id . '|' . $term->taxonomy . '|' . $user->user_email . '|' . $pass_frag . '|' . $expiry, 'forum_subscriptions' );
 		$hash      = hash_hmac( 'sha256',  $term->term_id . '|' . $term->taxonomy . '|' . $user->user_email . '|' . $expiry, $key );
 
 		return $user->ID . '|' . $expiry . '|' . $hash;

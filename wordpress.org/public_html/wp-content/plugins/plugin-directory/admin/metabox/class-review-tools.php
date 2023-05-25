@@ -9,6 +9,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
 
 /**
  * The Plugin Review metabox.
@@ -111,32 +112,34 @@ class Review_Tools {
 			'suppress_filters' => false,
 		] );
 
-		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
+		$zip_files = array();
+		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
+			$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
+		}
 
-			$zip_files = array();
-			foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
-				$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
-			}
+		if ( $zip_files ) {
 			uksort( $zip_files, function ( $a, $b ) {
 				return strtotime( $a ) < strtotime( $b );
 			} );
-
-			$zip_url = get_post_meta( $post->ID, '_submitted_zip', true );
-			if ( $zip_url ) {
-				// Back-compat only.
-				$zip_files['User provided URL'] = array( $zip_url, null );
-			}
 
 			echo '<p><strong>Zip files:</strong></p>';
 			echo '<ul class="plugin-zip-files">';
 			foreach ( $zip_files as $zip_date => $zip ) {
 				list( $zip_url, $zip_file ) = $zip;
-				$zip_size                   = is_object( $zip_file ) ? size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 ) : 'unknown size';
+				$zip_size                   = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
 
-				printf( '<li>%s <a href="%s">%s</a> (%s)</li>', esc_html( $zip_date ), esc_url( $zip_url ), esc_html( $zip_url ), esc_html( $zip_size ) );
+				printf(
+					'<li>%1$s <a href="%2$s">%3$s</a> (%4$s)</li>',
+					esc_html( $zip_date ),
+					esc_url( $zip_url ),
+					esc_html( basename( $zip_url ) ),
+					esc_html( $zip_size )
+				);
 			}
 			echo '</ul>';
+		}
 
+		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 			$slug_restricted = [];
 			$slug_reserved   = [];
 
@@ -281,6 +284,38 @@ class Review_Tools {
 					<li><a href='https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=<?php echo esc_attr( $post->post_name ); ?>'>Block Plugin Checker</a></li>
 				<?php endif; ?>
 			</ul>
+			<p>
+				<?php
+				$svn_sync_url = add_query_arg(
+					array(
+						'action'      => 'plugin-svn-sync',
+						'slug'        => $post->post_name,
+						'_ajax_nonce' => wp_create_nonce( 'wporg_plugins_svn_sync-' . $post->post_name ),
+					),
+					admin_url( 'admin-ajax.php' )
+				);
+				?>
+				<a id="svn-sync" class="button button-secondary" href="<?php echo esc_url( $svn_sync_url ); ?>">Trigger svn sync</a>
+				<script>
+				jQuery( function( $ ) {
+					$( '#svn-sync' ).click( function( e ) {
+						e.preventDefault();
+
+						var $this = $(this),
+						    url = $this.attr('href');
+
+						$this.addClass( 'disabled' );
+						$this.prop( 'href', '' );
+
+						if ( url ) {
+							$.get( url ).then( function( response ) {
+								alert( response );
+							} );
+						}
+					} );
+				});
+				</script>
+			</p>
 			<?php
 		}
 
@@ -327,5 +362,26 @@ class Review_Tools {
 
 			return $string;
 		} );
+	}
+
+	/**
+	 * admin-ajax.php handler for queueing a plugin import.
+	 */
+	static function svn_sync() {
+		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) );
+
+		check_ajax_referer( 'wporg_plugins_svn_sync-' . $plugin_slug );
+
+		Plugin_Import::queue(
+			$plugin_slug,
+			array(
+				'tags_touched' => [
+					'trunk'
+				],
+				'source' => 'wp-admin svn-sync button'
+			)
+		);
+
+		die( "Queued SVN import for {$plugin_slug}." );
 	}
 }

@@ -29,18 +29,7 @@ class Locale_Manager implements Role {
 	 */
 	public static function get_capabilities() {
 		return [
-			'level_1' => true, // Make user visible in authors dropdown, see https://core.trac.wordpress.org/ticket/16841.
-		];
-	}
-
-	/**
-	 * Retrieves the dynamic capabilities for this role.
-	 *
-	 * @return array Array of dynamic capabilities.
-	 */
-	public static function get_dynamic_capabilities() {
-		return [
-			// Core.
+			'level_1'                    => true,
 			'read'                       => true,
 			'moderate_comments'          => true,
 			'manage_categories'          => true,
@@ -70,7 +59,16 @@ class Locale_Manager implements Role {
 			'list_users'                 => true,
 			'promote_users'              => true,
 			'remove_users'               => true,
+		];
+	}
 
+	/**
+	 * Retrieves the dynamic capabilities for this role.
+	 *
+	 * @return array Array of dynamic capabilities.
+	 */
+	public static function get_dynamic_capabilities() {
+		return [
 			// Custom.
 			'manage_translation_editors' => true,
 		];

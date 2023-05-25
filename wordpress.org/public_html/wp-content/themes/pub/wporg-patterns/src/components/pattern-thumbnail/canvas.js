@@ -1,23 +1,21 @@
 /**
  * WordPress dependencies
  */
-import { isRTL } from '@wordpress/i18n';
+import { __, isRTL } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Iframe from '../iframe';
 import getCardFrameHeight from '../../utils/get-card-frame-height';
 import useInView from '../../hooks/in-view';
+import Screenshot from './screenshot';
 
-const VIEWPORT_WIDTH = 1200;
-
-function PatternThumbnail( { className, html } ) {
+export default function ( { alt, url, useMShot = true } ) {
 	const wrapperRef = useRef();
-	const [ frameHeight, setFrameHeight ] = useState( '1px' );
-	const [ frameScale, setFrameScale ] = useState( 0.3125 );
 	const isVisible = useInView( { element: wrapperRef } );
+	const [ frameHeight, setFrameHeight ] = useState( 1 );
+	const [ frameWidth, setFrameWidth ] = useState( 1 );
 	const [ shouldLoad, setShouldLoad ] = useState( false );
 
 	useEffect( () => {
@@ -30,7 +28,7 @@ function PatternThumbnail( { className, html } ) {
 		const handleOnResize = () => {
 			try {
 				setFrameHeight( getCardFrameHeight( wrapperRef.current.clientWidth ) );
-				setFrameScale( wrapperRef.current.clientWidth / VIEWPORT_WIDTH );
+				setFrameWidth( wrapperRef.current.clientWidth );
 			} catch ( err ) {}
 		};
 
@@ -39,43 +37,58 @@ function PatternThumbnail( { className, html } ) {
 		window.addEventListener( 'resize', handleOnResize );
 
 		return () => {
-			window.addEventListener( 'resize', handleOnResize );
+			window.removeEventListener( 'resize', handleOnResize );
 		};
-	}, [] );
+	}, [ isVisible ] );
 
 	const style = {
 		border: 'none',
-		width: `${ VIEWPORT_WIDTH }px`,
+		width: '100%',
 		maxWidth: 'none',
-		height: `${ getCardFrameHeight( VIEWPORT_WIDTH ) }px`,
-		transform: `scale(${ frameScale })`,
-		transformOrigin: isRTL() ? 'top right' : 'top left',
-		pointerEvents: 'none',
+		height: `${ frameHeight }px`,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
 	};
 
 	return (
-		<div
-			className={ className }
-			ref={ wrapperRef }
-			style={ {
-				height: frameHeight,
-			} }
-			tabIndex="-1"
-		>
-			<Iframe
-				className="pattern-grid__preview-iframe"
-				style={ style }
-				bodyStyle={ 'overflow: hidden;' }
-				headHTML={ window.__editorStyles.html }
-			>
-				<div
-					dangerouslySetInnerHTML={ {
-						__html: shouldLoad ? html : '',
-					} }
+		<div ref={ wrapperRef }>
+			{ useMShot ? (
+				<Screenshot
+					className="pattern-grid__preview"
+					alt={ alt || __( 'Pattern Preview', 'wporg-patterns' ) }
+					style={ style }
+					isReady={ shouldLoad }
+					src={
+						wporgPatternsData.env === 'local'
+							? url.replace( wporgPatternsUrl.site, 'https://wordpress.org/patterns' )
+							: url
+					}
 				/>
-			</Iframe>
+			) : (
+				<div
+					style={ {
+						height: `${ frameHeight }px`,
+						overflow: 'hidden',
+					} }
+				>
+					<iframe
+						className="pattern-grid__preview"
+						title={ alt || __( 'Pattern Preview', 'wporg-patterns' ) }
+						tabIndex="-1"
+						style={ {
+							border: 'none',
+							width: `${ frameWidth * 4 }px`,
+							maxWidth: 'none',
+							height: `${ frameHeight * 4 }px`,
+							transform: 'scale(0.25)',
+							transformOrigin: isRTL() ? 'top right' : 'top left',
+							pointerEvents: 'none',
+						} }
+						src={ shouldLoad ? url : '' }
+					/>
+				</div>
+			) }
 		</div>
 	);
 }
-
-export default PatternThumbnail;

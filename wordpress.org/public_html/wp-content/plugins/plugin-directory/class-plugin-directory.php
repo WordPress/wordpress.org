@@ -3,8 +3,7 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\Author_Cards;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\Stats_Report;
+use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Stats_Report, Upload_Token };
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
@@ -95,21 +94,6 @@ class Plugin_Directory {
 			return array_unique( $modules );
 		} );
 
-/*
-		// Temporarily disabled to see if this is still needed / causing issues.
-		// Work around caching issues
-		add_filter( 'pre_option_jetpack_sync_full__started', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__started', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__params', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__params', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__queue_finished', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__queue_finished', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__send_started', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__send_started', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__finished', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__finished', '__return_null' );
-*/
-
 		// Fix login URLs in admin bar
 		add_filter( 'login_url', array( $this, 'fix_login_url' ), 10, 3 );
 
@@ -121,6 +105,7 @@ class Plugin_Directory {
 			Customizations::instance();
 			Author_Cards::instance();
 			Stats_Report::instance();
+			Upload_Token::instance();
 
 			add_action( 'wp_insert_post_data', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'can_change_post_status' ), 10, 2 );
 			add_action( 'transition_post_status', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'instance' ) );
@@ -257,9 +242,8 @@ class Plugin_Directory {
 				'name' => __( 'Business Model', 'wporg-plugins' ),
 			),
 			'public'            => true,
-			'show_ui'           => false,
+			'show_ui'           => true,
 			'show_admin_column' => false,
-			'meta_box_cb'       => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
 			),
@@ -533,6 +517,9 @@ class Plugin_Directory {
 
 		// Add duplicate search rule which will be hit before the following old-plugin tab rules
 		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
+		
+		// Add additional tags endpoint, to avoid being caught in old-plugins tab rules. See: https://meta.trac.wordpress.org/ticket/6819.
+		add_rewrite_rule( '^tags/([^/]+)/?$', 'index.php?plugin_tags=$matches[1]', 'top' );
 
 		// Add a rule for generated plugin icons. geopattern-icon/demo.svg | geopattern-icon/demo_abc123.svg
 		add_rewrite_rule( '^geopattern-icon/([^/_]+)(_([a-f0-9]{6}))?\.svg$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
@@ -552,7 +539,7 @@ class Plugin_Directory {
 		// Remove the /admin$ redirect to wp-admin
 		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
 
-		// disable feeds
+		// Disable feeds
 		remove_action( 'wp_head', 'feed_links', 2 );
 		remove_action( 'wp_head', 'feed_links_extra', 3 );
 
@@ -617,6 +604,7 @@ class Plugin_Directory {
 		register_widget( __NAMESPACE__ . '\Widgets\Contributors' );
 		register_widget( __NAMESPACE__ . '\Widgets\Support_Reps' );
 		register_widget( __NAMESPACE__ . '\Widgets\Adopt_Me' );
+		register_widget( __NAMESPACE__ . '\Widgets\Categorization' );
 	}
 
 	/**
@@ -958,21 +946,6 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Filter to bypass caching for options critical to Jetpack sync to work around race conditions and other unidentified bugs.
-	 * If this works and becomes a permanent solution, it probably belongs elsewhere.
-	 */
-	public function bypass_options_cache( $value, $option ) {
-		global $wpdb;
-		$value = $wpdb->get_var( $wpdb->prepare(
-			"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
-			$option
-		) );
-		$value = maybe_unserialize( $value );
-
-		return $value;
-	}
-
-	/**
 	 * Adjust the login URL to point back to whatever part of the plugin directory we're
 	 * currently looking at. This allows the redirect to come back to the same place
 	 * instead of the main /support URL by default.
@@ -1188,16 +1161,20 @@ class Plugin_Directory {
 		$vars[] = 'geopattern_icon';
 		$vars[] = 'block_search';
 
-		// Remove support for any query vars the Plugin Directory doesn't support/need.
-		$not_needed = [
-			'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
-			'posts', 'withcomments', 'withoutcomments', 'favicon', 'cpage',
-			'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
-			'attachment_id', 'subpost', 'subpost_id', 'preview',
-			'post_format', 'cat', 'category_name', 'tag', // We use custom cats/tags.
-		];
+		// Remove support for any query vars the Plugin Directory doesn't support/need on the front-end.
+		if ( ! is_admin() ) {
+			$not_needed = [
+				'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
+				'posts', 'withcomments', 'withoutcomments', 'favicon', 'cpage',
+				'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
+				'attachment_id', 'subpost', 'subpost_id', 'preview',
+				'post_format', 'cat', 'category_name', 'tag', // We use custom cats/tags.
+			];
 
-		return array_diff( $vars, $not_needed );
+			$vars = array_diff( $vars, $not_needed );
+		}
+
+		return $vars;
 	}
 
 	/**
@@ -1274,7 +1251,7 @@ class Plugin_Directory {
 		if ( is_404() ) {
 
 			// [1] => plugins [2] => example-plugin-name [3..] => random().
-			$path = explode( '/', $_SERVER['REQUEST_URI'] );
+			$path = explode( '/', trailingslashit( explode( '?', $_SERVER['REQUEST_URI'] )[0] ) );
 
 			if ( 'tags' === $path[2] ) {
 				if ( isset( $path[3] ) && ! empty( $path[3] ) ) {

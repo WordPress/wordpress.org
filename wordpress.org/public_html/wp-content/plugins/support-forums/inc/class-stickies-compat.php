@@ -119,15 +119,15 @@ class Stickies_Compat {
 
 		// Check for empty topic or term id.
 		if ( ! $topic || ! $term ) {
-			bbp_add_error( 'wporg_bbp_sticky_topic_id', __( '<strong>ERROR</strong>: No topic was found! Which topic are you sticking?', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_sticky_topic_id', __( '<strong>Error:</strong> No topic was found! Which topic are you sticking?', 'wporg-forums' ) );
 
 		// Check user.
 		} elseif ( ! $this->user_can_stick( $user_id, $term->term_id, $topic->ID ) ) {
-			bbp_add_error( 'wporg_bbp_sticky_logged_in', __( '<strong>ERROR</strong>: You do not have permission to do this!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_sticky_logged_in', __( '<strong>Error:</strong> You do not have permission to do this!', 'wporg-forums' ) );
 
 		// Check nonce.
 		} elseif( ! bbp_verify_nonce_request( 'toggle-topic-sticky_' . $topic->ID . '_' . $term->term_id ) ) {
-			bbp_add_error( 'wporg_bbp_sticky_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_sticky_nonce', __( '<strong>Error:</strong> Are you sure you wanted to do that?', 'wporg-forums' ) );
 		}
 
 		if ( bbp_has_errors() ) {
@@ -149,9 +149,9 @@ class Stickies_Compat {
 		if ( $success && ! is_wp_error( $success ) ) {
 			bbp_redirect( $permalink );
 		} elseif ( true === $is_sticky && 'wporg_bbp_stick_compat_topic' == $action ) {
-			bbp_add_error( 'wporg_bbp_stick_compat_topic', __( '<strong>ERROR</strong>: There was a problem sticking that topic!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_stick_compat_topic', __( '<strong>Error:</strong> There was a problem sticking that topic!', 'wporg-forums' ) );
 		} elseif ( false === $is_sticky && 'wporg_bbp_unstick_compat_topic' == $action ) {
-			bbp_add_error( 'wporg_bbp_unstick_compat_topic', __( '<strong>ERROR</strong>: There was a problem unsticking that topic!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_unstick_compat_topic', __( '<strong>Error:</strong> There was a problem unsticking that topic!', 'wporg-forums' ) );
 		}
 	}
 

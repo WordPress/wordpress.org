@@ -54,7 +54,7 @@ if ( bb_base_is_codex() ) {
 function bb_base_register_stylesheets() {
 
 	// Version of CSS
-	$version = '202111290001';
+	$version = '20221108';
 
 	// Base theme styling
 	wp_enqueue_style( 'bb-base',   get_template_directory_uri()   . '/style.css', false,                         $version, 'screen' );
@@ -284,6 +284,17 @@ function bb_base_single_forum_description() {
 function bb_base_get_plugins( $page = 1, $search = false, $tag = 'bbpress' ) {
 	$args    = array( 'tag' => $tag, 'page' => (int) $page, 'per_page' => 10, 'search' => $search );
 	$plugins = bb_base_plugins_api('query_plugins', $args);
+
+	// Handle errors, in the least-graceful way possible.
+	if ( is_wp_error( $plugins ) ) {
+		return (object) array(
+			'plugins' => array(),
+			'info'    => array(
+				'page'    => (int) $page,
+				'results' => 0,
+			)
+		);
+	}
 
 	foreach( $plugins->plugins as $plugin_key => $plugin_value ) {
 		if ( $plugins->plugins[$plugin_key]->slug == 'mingle' ) {

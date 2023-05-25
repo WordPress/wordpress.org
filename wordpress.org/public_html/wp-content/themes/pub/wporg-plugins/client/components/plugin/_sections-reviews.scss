@@ -50,15 +50,22 @@
 	}
 
 	.review-author,
-	.review-date {
+	.review-date,
+	.review-replies {
 		line-height: 1.25;
 		font-size: 0.9em;
 	}
 
-	.review-date {
+	.review-date,
+	.review-replies {
 		margin-left: 12px;
 		color: #999;
 		font-size: 0.9em;
+	}
+
+	.review-replies::before {
+		content: '•';
+		margin-right: 12px;
 	}
 
 	@media screen and ( min-width: $ms-breakpoint ) {
@@ -80,7 +87,8 @@
 		}
 
 		.review-author,
-		.review-date {
+		.review-date,
+		.review-replies {
 			line-height: 1;
 		}
 	}

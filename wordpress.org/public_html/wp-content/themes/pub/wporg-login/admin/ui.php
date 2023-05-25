@@ -2,6 +2,35 @@
 
 include __DIR__  . '/class-user-registrations-list-table.php';
 
+add_action( 'admin_init', function() {
+	global $wpdb;
+	if ( 'local' !== wp_get_environment_type() ) {
+		return;
+	}
+
+	require ABSPATH . 'wp-admin/includes/upgrade.php';
+
+	// Check to see if the table exists.
+	$table_sql = "CREATE TABLE `{$wpdb->base_prefix}user_pending_registrations` (
+		`pending_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		`user_login` varchar(60) NOT NULL DEFAULT '',
+		`user_email` varchar(100) NOT NULL DEFAULT '',
+		`user_registered` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+		`user_activation_key` varchar(60) DEFAULT NULL,
+		`user_profile_key` varchar(60) DEFAULT NULL,
+		`scores` text DEFAULT NULL,
+		`meta` text DEFAULT NULL,
+		`cleared` tinyint(1) unsigned NOT NULL DEFAULT 1,
+		`created` tinyint(1) unsigned NOT NULL DEFAULT 0,
+		`created_date` datetime NOT NULL,
+		PRIMARY KEY (`pending_id`),
+		UNIQUE KEY `user_login` (`user_login`),
+		UNIQUE KEY `user_email` (`user_email`)
+	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;";
+
+	dbDelta( $table_sql );
+} );
+
 add_action( 'admin_menu', function() {
 	add_menu_page(
 		'Pending User Registrations',

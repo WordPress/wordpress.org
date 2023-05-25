@@ -19,23 +19,23 @@ main( $_SERVER['QUERY_STRING'] );
 function flush_handler( $buffer ) {
 	$old_headers = headers_list();
 
-	// Remove CORS header added by REST API
+	// Remove CORS header added by REST API.
 	header_remove( 'access-control-allow-headers' );
 
 	$replace = true;
 
-	foreach( headers_list() as $header ) {
+	foreach ( headers_list() as $header ) {
 		if ( 'Link: ' === substr( $header, 0, 6) ) {
 			$new_header = str_replace( 'https://wordpress.org/patterns/wp-json/wp/v2/wporg-pattern', 'https://api.wordpress.org/patterns/1.0', $header );
 			$new_header = str_replace( 'https://wordpress.org/patterns/wp-json/', 'https://api.wordpress.org/patterns/1.0/', $new_header );
 			if ( $new_header !== $header ) {
 				header( $new_header, $replace );
-				$replace = false; // Only replace the first time
+				$replace = false; // Only replace the first time.
 			}
 		}
 	}
 
-	return false; // original buffer will be output with no changes
+	return false; // Original buffer will be output with no changes.
 }
 
 
@@ -70,13 +70,7 @@ function main( $query_string ) {
 	} else { // Return patterns.
 		$endpoint               = '/wp/v2/wporg-pattern';
 		$query_args['_fields']  = 'id,title,content,meta,category_slugs,keyword_slugs,pattern_content';
-		$query_args['per_page'] = 100;
-
-		// Sort alphabetically so that browsing is intuitive. Search will be sorted by rank.
-		if ( ! isset( $query_args['search'] ) ) {
-			$query_args['orderby'] = 'title';
-			$query_args['order']   = 'asc';
-		}
+		$query_args['per_page'] = $query_args['per_page'] ?? 100;
 	}
 
 	// Mimic browser request, so that `wp_is_json_request()` is accurate.

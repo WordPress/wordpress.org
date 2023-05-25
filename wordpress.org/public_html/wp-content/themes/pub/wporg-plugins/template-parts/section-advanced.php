@@ -26,17 +26,23 @@ global $post;
 	<h4><?php esc_html_e( 'Downloads Per Day', 'wporg-plugins' ); ?></h4>
 	<div id="plugin-download-stats" class="chart download-stats"></div>
 
-	<h4><?php esc_html_e( 'Active Install Growth', 'wporg-plugins' ); ?></h4>
-	<div id="plugin-growth-stats" class="chart download-stats"></div>
-
 	<h4><?php esc_html_e( 'Downloads history', 'wporg-plugins' ); ?></h4>
 	<table id="plugin-download-history-stats" class="download-history-stats">
 		<tbody></tbody>
 	</table>
 
 	<?php
+		do_action( 'before_plugin_advanced_zone' );
+		// Display the community categorization options.
+		the_plugin_community_zone();
+
+		// Display the commercial categorization options.
+		the_plugin_commercial_zone();
+
 		// Display the advanced controls (only seen if the plugin is open).
 		the_plugin_advanced_zone();
+
+		do_action( 'after_plugin_advanced_zone' );
 
 		// Display the danger zone (only shown to committers of the plugin).
 		the_plugin_danger_zone();

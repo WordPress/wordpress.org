@@ -251,9 +251,7 @@ class HelpHub_Post_Types_Post_Type {
 	 * @return array $defaults
 	 */
 	public function register_custom_column_headings( $defaults ) {
-		$new_columns = array(
-			'image' => __( 'Image', 'wporg-forums' ),
-		);
+		$new_columns = array();
 
 		$last_item = array();
 

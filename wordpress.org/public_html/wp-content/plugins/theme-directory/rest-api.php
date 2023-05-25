@@ -53,5 +53,6 @@ add_action( 'rest_api_init', function() {
 	include __DIR__ . '/rest-api/class-features-endpoint.php';
 	include __DIR__ . '/rest-api/class-tags-endpoint.php';
 	include __DIR__ . '/rest-api/class-themes-auto-review.php';
+	include __DIR__ . '/rest-api/class-theme-categorization.php';
 	include __DIR__ . '/rest-api/class-theme-review-stats.php';
 } );

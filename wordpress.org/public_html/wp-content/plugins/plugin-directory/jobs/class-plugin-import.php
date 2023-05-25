@@ -13,7 +13,7 @@ class Plugin_Import {
 
 	public static function queue( $plugin_slug, $plugin_data ) {
 		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
-		$when_to_run = time();
+		$when_to_run = time() + 10;
 		if ( $next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' ) ) {
 			$when_to_run = $next_scheduled + HOUR_IN_SECONDS;
 		}
@@ -33,13 +33,12 @@ class Plugin_Import {
 	public static function cron_trigger( $plugin_data ) {
 		$plugin_slug  = $plugin_data['plugin'];
 
-		if ( ! isset( $plugin_data['tags_touched'] ) ) {
-			$plugin_data['tags_touched'] = array( 'trunk' );
-		}
-
-		if ( ! isset( $plugin_data['revisions'] ) ) {
-			$plugin_data['revisions'] = [ 0 ];
-		}
+		// Set some default values if not included from the caller.
+		$plugin_data['tags_touched']   ??= array( 'trunk' );
+		$plugin_data['revisions']      ??= [ 0 ];
+		$plugin_data['readme_touched'] ??= true;
+		$plugin_data['code_touched']   ??= true;
+		$plugin_data['assets_touched'] ??= true;
 
 		$tags_touched = $plugin_data['tags_touched'];
 		$revision     = max( (array) $plugin_data['revisions'] );

@@ -146,6 +146,41 @@ class User_Notes {
 	}
 
 	/**
+	 * Saves a note to a users meta data. Suffixes to previous user note if by same moderator within a timeframe.
+	 * 
+	 * @param int    $user_id   The user ID.
+	 * @param string $note_text The note text to add.
+	 * @param int    $post_id   The support thread this text is related to. Optional.
+	 * @param int    $timeframe The timeframe used to determine if the previous note should be updated. Optional. Default 5 minutes.
+	 */
+	public function add_user_note_or_update_previous( $user_id, $note_text, $post_id = 0, $timeframe = 300 ) {
+		// Default to adding a new note..
+		$note_id = 0;
+
+		// Add a user note about this action.
+		$existing_notes = $this->get_user_notes( $user_id );
+
+		// Check to see if the last note added was from the current user in the last few minutes, and if so, append to it.
+		if ( $existing_notes->count ) {
+			$last_note_id = array_key_last( $existing_notes->raw );
+			$last_note    = $existing_notes->raw[ $last_note_id ];
+			if (
+				// Note from the current user
+				$last_note->moderator === wp_get_current_user()->user_nicename &&
+				// ..and created within $timeframe seconds
+				absint( time() - strtotime( $last_note->date ) ) <= $timeframe
+			) {
+				$note_id = $last_note_id;
+
+				// Prefix the existing message.
+				$note_text = trim( $last_note->text . "\n\n" . $note_text );
+			}
+		}
+
+		return $this->add_user_note( $user_id, $note_text, $post_id, $note_id );
+	}
+
+	/**
 	 * Deletes a previously added note from user's meta data.
 	 *
 	 * @param string $action Requested action.

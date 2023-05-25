@@ -35,6 +35,7 @@ class Base {
 		new Routes\Plugin_Self_Transfer();
 		new Routes\Plugin_Release_Confirmation();
 		new Routes\Plugin_E2E_Callback();
+		new Routes\Plugin_Categorization();
 	}
 
 	/**

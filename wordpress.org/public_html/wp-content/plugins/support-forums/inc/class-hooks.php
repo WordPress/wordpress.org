@@ -22,6 +22,7 @@ class Hooks {
 		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
+		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
 
 		// Add bbPress support to the WordPress.org SEO plugin.
 		add_filter( 'wporg_canonical_base_url', array( $this, 'wporg_canonical_base_url' ) );
@@ -131,8 +132,15 @@ class Hooks {
 		// Add a no-reply-to-email suggestion to topic subscription emails
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'bbp_subscription_mail_message'), 5, 3 );
 
+		// Don't embed WordPress.org links with anchors included.
+		add_filter( 'pre_oembed_result', array( $this, 'pre_oembed_result_dont_embed_wordpress_org_anchors' ), 20, 2 );
+
+		// Add a user note when flagging/unflagging a user.
+		add_filter( 'wporg_bbp_flag_user', array( $this, 'log_user_flag_changes' ) );
+		add_filter( 'wporg_bbp_unflag_user', array( $this, 'log_user_flag_changes' ) );
+
+		// Break users sessions / passwords when they get blocked, on the main forums only.
 		if ( 'wordpress.org' === get_blog_details()->domain ) {
-			// Break users sessions / passwords when they get blocked, on the main forums only.
 			add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
 		}
 	}
@@ -227,6 +235,21 @@ class Hooks {
 		}
 
 		return $caps;
+	}
+
+	/**
+	 * Allow moderators to view anonymized user account details.
+	 */
+	function allow_mods_to_view_inactive_users( $filter_value, $user_id ) {
+		if (
+			! $filter_value &&
+			bbp_is_user_inactive( $user_id ) &&
+			current_user_can( 'moderate' )
+		) {
+			$filter_value = true;
+		}
+
+		return $filter_value;
 	}
 
 	/**
@@ -1313,6 +1336,26 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	}
 
 	/**
+	 * Don't embed WordPress.org links when anchors are included.
+	 *
+	 * NOTE: `$return` will have HTML when the link points to the current site, as WordPress uses
+	 *       the same filter to preempt HTTP requests, ignoring any earlier filtered results.
+	 *
+	 * TODO: It may be better wanted to inject the actual hash into the oEmbed iframe instead of
+	 *       disabling this rich embed entirely.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/4346
+	 */
+	public function pre_oembed_result_dont_embed_wordpress_org_anchors( $return, $url ) {
+		// Match WordPress.org + Subdomains which includes a Hash character in the URL.
+		if ( preg_match( '!^https?://([^/]+[.])?wordpress[.]org/.*#!i', $url ) ) {
+			$return = false;
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Catch a user being blocked / unblocked and set their password appropriately.
 	 *
 	 * Note: This method is called even when the users role is not changed.
@@ -1410,34 +1453,25 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 
 		if ( $note_text ) {
 			// Add a user note about this action.
-			$notes   = Plugin::get_instance()->user_notes->get_user_notes( $user->ID );
-			$note_id = 0;
-
-			// Check to see if the last note added was from the current user in the last few minutes, and if so, append to it.
-			if ( $notes->count ) {
-				$last_note_id = array_key_last( $notes->raw );
-				$last_note    = $notes->raw[ $last_note_id ];
-				if (
-					// Note from the current user
-					$last_note->moderator === wp_get_current_user()->user_nicename &&
-					// ..and created within 5 minutes.
-					absint( time() - strtotime( $last_note->date ) ) <= 5 * MINUTE_IN_SECONDS
-				) {
-					$note_id = $last_note_id;
-
-					// Prefix the existing message.
-					$note_text = trim( $last_note->text . "\n\n" . $note_text );
-				}
-			}
-
-			// Add a user note about this action.
-			Plugin::get_instance()->user_notes->add_user_note(
+			Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
 				$user->ID,
-				$note_text,
-				null,
-				$note_id
+				$note_text
 			);
 		}
 
+	}
+
+	/**
+	 * Add a user note when a user is flagged / unflagged.
+	 */
+	function log_user_flag_changes( $user_id ) {
+		$flag_action = ( 'wporg_bbp_flag_user' === current_filter () ) ? 'flagged' : 'unflagged';
+
+		$note_text = "User {$flag_action}.";
+
+		Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
+			$user_id,
+			$note_text
+		);
 	}
 }

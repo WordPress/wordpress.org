@@ -34,6 +34,12 @@ p, ul, ol,
 	font-size: inherit;
 }
 
+.rtl ul,
+.rtl ol {
+	margin-left: 0;
+	margin-right: 25px;
+}
+
 h1 {
 	font-size: 1.8em;
 }
@@ -79,6 +85,10 @@ td {
 
 .entry-content h3 + h4 {
 	margin-top: 1em;
+}
+
+.entry-content p a {
+	word-wrap: break-word;
 }
 
 .entry-content td,
@@ -533,7 +543,6 @@ pre code {
 }
 
 .wp-block-code {
-	background-color: #f1f1f1;
 	display: block;
 	font-size: 13px;
 	line-height: 1.75em;
@@ -1198,6 +1207,13 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	padding-right: 34px;
 }
 
+.rtl .handbook-breadcrumbs {
+	left: inherit;
+	right: 280px;
+	padding-left: 34px;
+	padding-right: inherit;
+}
+
 .single-handbook .handbook-breadcrumbs ~ #primary {
 	padding-top: 9rem;
 }
@@ -1247,6 +1263,13 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	color: #555d66;
 }
 
+.rtl.post-type-archive-handbook div.table-of-contents,
+.rtl.single-handbook div.table-of-contents {
+	float: left;
+	margin-left: 0;
+	margin-right: 15px;
+}
+
 .single-handbook div.table-of-contents {
 	background-color: #fff;
 	box-shadow: 0 0 8px rgba(0,0,0,0.1);
@@ -1257,6 +1280,12 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	.post-type-archive-handbook div.table-of-contents,
 	.single-handbook div.table-of-contents {
 		margin: 0 -30px 15px 15px;
+	}
+
+	.rtl.post-type-archive-handbook div.table-of-contents,
+	.rtl.single-handbook div.table-of-contents {
+		margin-left: -30px;
+		margin-right: 15px;
 	}
 }
 
@@ -1319,11 +1348,28 @@ h2.toc-heading + h3.toc-heading:target {
 .toc-heading:target:before {
 	content: '';
 	position: absolute;
-	left: -10px;
+	left: -40px;
 	top: 50px;
 	border-left: 5px solid #0073aa;
 	height: 50%;
 	height: calc(100% - 50px);
+}
+
+.rtl .toc-heading:target:before {
+	left: inherit;
+	right: -40px;
+	border-left: 0;
+	border-right: 5px solid #0073aa;
+}
+
+@media(max-width: 876px) {
+	.toc-heading:target:before {
+		left: -10px;
+	}
+	.toc-heading:target:before {
+		left: inherit;
+		right: -10px;
+	}
 }
 
 .toc-jump {
@@ -1470,6 +1516,11 @@ h2.toc-heading + h3.toc-heading:target {
 	padding: 0;
 }
 
+.rtl.post-type-archive-handbook #page,
+.rtl.single-handbook #page {
+	background: linear-gradient(to left, #fafafa 40%, #fff 40%);
+}
+
 .post-type-archive-handbook #main,
 .single-handbook #main {
 	max-width: 1024px;
@@ -1494,6 +1545,12 @@ h2.toc-heading + h3.toc-heading:target {
 	padding: 4rem 0 4rem 4rem;
 	background: #fff;
 	box-sizing: border-box;
+}
+
+.rtl.post-type-archive-handbook #primary,
+.rtl.single-handbook #primary {
+	padding-left: 0;
+	padding-right: 4rem;
 }
 
 @media(max-width: 876px) {
@@ -1555,6 +1612,7 @@ h2.toc-heading + h3.toc-heading:target {
 	height: auto !important;
 	background-color: white !important;
 	font-family: 'Open Sans' !important;
+	font-size: inherit;
 }
 
 .notice {

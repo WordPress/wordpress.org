@@ -390,5 +390,20 @@ function format_github_content_for_trac_comment( $desc ) {
 	// Convert Links.
 	$desc = preg_replace( '#\[(.+?)\]\((.+?)\)#', '[$2 $1]', $desc );
 
+	// Convert Tables. This doesn't convert GitHub table headers to Trac headers.
+	$desc = preg_replace_callback(
+		'#^[|].+[|]$#m', 
+		function( $m ) {
+			// Headers such as `| --- |---|`
+			if ( preg_match( '#^[- |]+$#', $m[0] ) ) {
+				return '|| ||'; // Empty row.
+			}
+
+			// Replace singular |'s but not double ||'s
+			return preg_replace( '#(?<![|])[|](?![|])#', '||', $m[0] );
+		},
+		$desc
+	);
+
 	return trim( $desc );
 }

@@ -7,7 +7,7 @@ use function Dotorg\Profiles\{ post as profiles_post };
 /**
  * Adds props in Slack to w.org profiles.
  *
- * Receives webhook notifications for all new messages in `#props`,
+ * Receives webhook notifications for all new messages in `#props`. See `dotorg/slack/props.php` for the caller.
  */
 function handle_props_message( object $request ) : string {
 	if ( ! is_valid_props( $request->event ) ) {
@@ -86,26 +86,40 @@ function is_valid_props( object $event ) : bool {
 
 /**
  * Parse the mentioned Slack user IDs from a message event.
- *
- * This assumes that the app is configured to escape usernames.
  */
 function get_recipient_slack_ids( array $blocks ) : array {
 	$ids = array();
 
 	foreach ( $blocks as $block ) {
 		foreach ( $block->elements as $element ) {
-			foreach ( $element->elements as $inner_element ) {
-				if ( 'user' !== $inner_element->type ) {
-					continue;
-				}
-
-				$ids[] = $inner_element->user_id;
-			}
+			$ids = array_merge( $ids, get_user_ids_from_element( $element ) );
 		}
 	}
 
 	return array_unique( $ids );
 }
+
+/**
+ * Recursively parse any mentioned Slack user IDs from a message element.
+ *
+ * This assumes that the app is configured to escape usernames.
+ */
+function get_user_ids_from_element( object $element ) : array {
+	$ids = array();
+
+	if ( 'user' === $element->type ) {
+		$ids[] = $element->user_id;
+	}
+
+	if ( isset( $element->elements ) ) {
+		foreach ( $element->elements as $inner_element ) {
+			$ids = array_merge( $ids, get_user_ids_from_element( $inner_element ) );
+		}
+	}
+
+	return $ids;
+}
+
 
 /**
  * Find the w.org users associated with the given slack accounts.

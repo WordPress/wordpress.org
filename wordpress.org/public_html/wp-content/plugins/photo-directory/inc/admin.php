@@ -34,6 +34,7 @@ class Admin {
 		add_filter( 'use_block_editor_for_post_type',          [ __CLASS__, 'disable_block_editor' ], 10, 2 );
 		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_to_photo_media_if_pending' ] );
 		add_filter( 'add_menu_classes',                        [ __CLASS__, 'add_admin_menu_pending_indicator' ] );
+		add_filter( "manage_taxonomies_for_{$post_type}_columns", [ __CLASS__, 'remove_orientations_column' ], 10, 2 );
 
 		// Record and display photo contributor IP address.
 		add_action( 'transition_post_status',                  [ __CLASS__, 'record_contributor_ip' ], 10, 3 );
@@ -53,23 +54,10 @@ class Admin {
 
 		// Modify admin menu links for photo posts.
 		add_action( 'admin_menu',                              [ __CLASS__, 'modify_admin_menu_links' ] );
-	}
 
-	/**
-	 * Returns the count of the number of photo submissions from a user that were rejected.
-	 *
-	 * @param int $user_id The user ID.
-	 * @return int
-	 */
-	public static function count_user_rejections( $user_id ) {
-		global $wpdb;
-
-		return (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s AND post_author = %d",
-			Registrations::get_post_type(),
-			Rejection::get_post_status(),
-			$user_id
-		) );
+		// Navigate to next post after moderation.
+		add_action( 'edit_form_top',                           [ __CLASS__, 'show_moderation_message' ] );
+		add_filter( 'redirect_post_location',                  [ __CLASS__, 'redirect_to_next_post_after_moderation' ], 5, 2 );
 	}
 
 	/**
@@ -532,12 +520,12 @@ class Admin {
 		$display_name .= '<div class="user-approved-count">'
 		. sprintf(
 			__( 'Approved: <strong>%s</strong>', 'wporg-photos' ),
-			sprintf( '<a href="%s">%d</a>', $approved_link, Photo::count_user_published_photos() )
+			sprintf( '<a href="%s">%d</a>', $approved_link, User::count_published_photos() )
 		)
 		. "</div>\n";
 
 		// Show number of pending photos if there are any.
-		$pending_count = Photo::count_user_pending_photos();
+		$pending_count = User::count_pending_photos();
 		if ( $pending_count ) {
 			$pending_link = add_query_arg( [
 				'post_type'   => Registrations::get_post_type(),
@@ -762,7 +750,7 @@ class Admin {
 		}
 
 		$author = get_user_by( 'id', $post->post_author );
-		$photos_count = Photo::count_user_published_photos( $author->ID );
+		$photos_count = User::count_published_photos( $author->ID );
 		$account_created = explode( ' ', $author->user_registered )[0];
 		?>
 		<style>
@@ -800,7 +788,7 @@ class Admin {
 						);
 					?></li>
 					<li><?php
-						$rejected_count = self::count_user_rejections( $author->ID );
+						$rejected_count = User::count_rejected_photos( $author->ID );
 						$link_args = [
 							'post_type'   => Registrations::get_post_type(),
 							'post_status' => Rejection::get_post_status(),
@@ -815,7 +803,7 @@ class Admin {
 						);
 					?></li>
 					<li><?php
-						$pending_count = Photo::count_user_pending_photos( $author->ID );
+						$pending_count = User::count_pending_photos( $author->ID );
 						$link_args = [
 							'post_type'   => Registrations::get_post_type(),
 							'post_status' => 'pending',
@@ -968,6 +956,119 @@ class Admin {
 			'',
 			1
 		);
+	}
+
+	/**
+	 * Outputs an admin notice when a photo post has been moderated and the
+	 * moderator has been redirected to the next photo in the queue.
+	 *
+	 * @param WP_Post $post Post object.
+	 */
+	public static function show_moderation_message( $post ) {
+		if (
+			empty( $_GET['photomoderated'] )
+		||
+			empty( $_GET['photoaction'] )
+		||
+			Registrations::get_post_type() !== get_post_type( $post )
+		) {
+			return;
+		}
+
+		$moderated_post = get_post( (int) $_GET['photomoderated'] );
+
+		if ( ! $moderated_post ) {
+			return;
+		}
+
+		$message = '';
+		$edit_link = get_edit_post_link( $moderated_post );
+
+		switch ( $_GET['photoaction'] ) {
+			case 'approval':
+				$message = sprintf(
+					/* translators: 1: Link markup to view photo post, 2: Link markup to edit photo post. */
+					__( 'Photo post approved. %1$s &mdash; %2$s', 'wporg-photos' ),
+					sprintf(
+						' <a href="%s">%s</a>',
+						esc_url( get_post_permalink( $moderated_post ) ),
+						__( 'View photo post', 'wporg-photos' )
+					),
+					sprintf(
+						' <a href="%s">%s</a>',
+						esc_url( $edit_link ),
+						__( 'Edit photo post', 'wporg-photos' )
+					)
+				);
+				break;
+			case 'rejection':
+				$message = sprintf(
+					/* translators: %s: Link markup to view photo post. */
+					__( 'Photo post rejected. %s', 'wporg-photos' ),
+					sprintf(
+						' <a href="%s">%s</a>',
+						esc_url( $edit_link ),
+						__( 'Edit photo post', 'wporg-photos' )
+					)
+				);
+				break;
+			default:
+				$message = '';
+		}
+
+		if ( $message ) {
+			printf(
+				'<div id="message" class="updated notice notice-success is-dismissible"><p>%s</p></div>',
+				$message
+			);
+		}
+	}
+
+	/**
+	 * Overrides the redirect after moderating a post to load the next post in
+	 * the queue.
+	 *
+	 * Only redirects if a photo post is initially published or rejected.
+	 *
+	 * @param string $location The destination URL.
+	 * @param int    $post_id  The post ID.
+	 * @return string
+	 */
+	public static function redirect_to_next_post_after_moderation( $location, $post_id ) {
+		$is_rejection = isset( $_POST[ Rejection::$action ] );
+
+		if (
+			( isset( $_POST['publish'] ) || $is_rejection )
+		&&
+			Registrations::get_post_type() === get_post_type( $post_id )
+		) {
+			$action = $is_rejection ? 'rejection' : 'approval';
+			$next_post = Posts::get_next_post_in_queue();
+			if ( $next_post ) {
+				$location = add_query_arg( 'photomoderated', $post_id, get_edit_post_link( $next_post, 'url' ) );
+				$location = add_query_arg( 'photoaction', $action, $location );
+			}
+		}
+
+		return $location;
+	}
+
+	/**
+	 * Removes the 'Orientations' column from post listings.
+	 *
+	 * The column doesn't represent information that needs to be gleaned from a
+	 * post listing overview.
+	 *
+	 * @param string[] $taxonomies Array of taxonomy names to show columns for.
+	 * @param string   $post_type  The post type.
+	 * @return string[]
+	 */
+	public static function remove_orientations_column( $taxonomies, $post_type ) {
+		if ( Registrations::get_post_type() === $post_type ) {
+			unset( $taxonomies[ Registrations::get_taxonomy( 'orientations' ) ] );
+		}
+
+		return $taxonomies;
 	}
 
 }

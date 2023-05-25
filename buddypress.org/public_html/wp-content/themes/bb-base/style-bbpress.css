@@ -191,7 +191,7 @@ input.submit:hover {
 /* =Responsive
 -------------------------------------------------------------- */
 
-@media screen and ( max-width: 820px ) {
+@media screen and ( max-width: 835px ) {
 	#header-inner {
 		background-position-x: 55px;
 	}

@@ -1,3 +1,11 @@
+<?php
+	// $post = WP_Post, $theme = Theme info object
+
+	$is_commercial = has_term( 'commercial', 'theme_business_model', $post );
+	$external_support_url = $is_commercial ? get_post_meta( $post->ID, 'external_support_url', true ) : '';
+	$is_community = has_term( 'community', 'theme_business_model', $post );
+	$external_repository_url = $is_community ? get_post_meta( $post->ID, 'external_repository_url', true ) : '';
+?>
 <div>
 	<div class="theme-navigation">
 		<a class="close" href="<?php echo home_url('/'); ?>"><?php _e( 'Return to Themes List', 'wporg-themes' ); ?></a>
@@ -7,7 +15,7 @@
 		</div>
 	</div>
 	<div class="theme-wrap">
-		<div class="theme-about hentry">
+		<?php printf( '<div class="theme-about hentry" data-slug="%s">' . "\n", $theme->slug ); ?>
 			<?php if ( time() - strtotime( $theme->last_updated ) > 2 * YEAR_IN_SECONDS ) { ?>
 			<div class="theme-notice notice notice-warning notice-alt">
 				<p><?php _e( 'This theme <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-themes' ); ?></p>
@@ -28,6 +36,28 @@
 			</div>
 
 			<div class="theme-head">
+				<?php if ( $is_community ) : ?>
+				<div class="widget categorization-widget categorization-widget-community">
+					<h3><?php esc_html_e( 'Community Theme', 'wporg-themes' ); ?></h3>
+					<?php
+					if ( $external_repository_url ) : ?>
+						<a href="<?php echo esc_url( $external_repository_url ); ?>" rel="nofollow"><?php _e( 'Contribute', 'wporg-themes' ); ?></a>
+					<?php endif; ?>
+					<p><?php esc_html_e( 'This theme is developed and supported by a community.', 'wporg-themes' ); ?></p>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( $is_commercial ) : ?>
+				<div class="widget categorization-widget categorization-widget-commercial">
+					<h3><?php esc_html_e( 'Commercial Theme', 'wporg-themes' ); ?></h3>
+					<?php
+					if ( $external_support_url ) : ?>
+						<a href="<?php echo esc_url( $external_support_url ); ?>" rel="nofollow"><?php _e( 'Support', 'wporg-themes' ); ?></a>
+					<?php endif; ?>
+					<p><?php esc_html_e( 'This theme is free but offers additional paid commercial upgrades or support.', 'wporg-themes' ); ?></p>
+				</div>
+				<?php endif; ?>
+
 				<div class="theme-actions clear">
 					<a href="<?php echo esc_url( $theme->preview_url ); ?>" class="button button-secondary alignleft"><?php _e( 'Preview', 'wporg-themes' ); ?></a>
 					<a href="<?php echo esc_url( $theme->download_link); ?>" class="button button-primary alignright"><?php _e( 'Download', 'wporg-themes' ); ?></a>
@@ -113,6 +143,7 @@
 
 				<div class="theme-downloads">
 				</div><!-- .theme-downloads -->
+
 			</div>
 
 			<div class="theme-meta">
@@ -164,19 +195,19 @@
 				</div><!-- .theme-support -->
 
 				<div class="theme-report">
-        				<h2><?php _e( 'Report', 'wporg-themes' ); ?></h2>
-        				<p><?php _e( 'Does this theme have major issues?', 'wporg-themes' ); ?></p>
-        				<?php
-        				$report_url = add_query_arg(
-                				urlencode_deep( array_filter( array(
-                        				'rep-theme'   => "https://wordpress.org/themes/{$theme->slug}/",
-                        				'rep-subject' => "Reported Theme: {$theme->name}", // Not translated, email subject.
-                        				'rep-name'    => wp_get_current_user()->user_login,
-                				) ) ),
-                				'https://make.wordpress.org/themes/report-theme/'
-        				);
-        				?>
-        				<a rel="nofollow" href="<?php echo esc_url( $report_url ); ?>" class="button button-secondary"><?php _e( 'Report this theme', 'wporg-themes' ); ?></a>
+					<h2><?php _e( 'Report', 'wporg-themes' ); ?></h2>
+					<p><?php _e( 'Does this theme have major issues?', 'wporg-themes' ); ?></p>
+					<?php
+					$report_url = add_query_arg(
+						urlencode_deep( array_filter( array(
+							'rep-theme'   => "https://wordpress.org/themes/{$theme->slug}/",
+							'rep-subject' => "Reported Theme: {$theme->name}", // Not translated, email subject.
+							'rep-name'    => wp_get_current_user()->user_login,
+						) ) ),
+						'https://make.wordpress.org/themes/report-theme/'
+					);
+					?>
+					<a rel="nofollow" href="<?php echo esc_url( $report_url ); ?>" class="button button-secondary"><?php _e( 'Report this theme', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-report -->
 
 				<div class="theme-translations">

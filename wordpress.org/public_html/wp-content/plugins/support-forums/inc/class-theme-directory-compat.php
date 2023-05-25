@@ -90,10 +90,20 @@ class Theme_Directory_Compat extends Directory_Compat {
 			exit;
 		}
 
+		if ( ! $this->for_slug( $slug ) ) {
+			status_header( 404 );
+		}
+	}
+
+	/**
+	 * Set the directory instance to the slugs data.
+	 *
+	 * @param string $slug The theme slug.
+	 */
+	public function for_slug( $slug ) {
 		$theme = $this->get_object( $slug );
 		if ( ! $theme ) {
-			status_header( 404 );
-			return;
+			return false;
 		}
 
 		$this->slug         = $theme->post_name;
@@ -101,6 +111,8 @@ class Theme_Directory_Compat extends Directory_Compat {
 		$this->authors      = $this->get_authors( $slug );
 		$this->contributors = $this->get_contributors( $slug );
 		$this->support_reps = $this->get_support_reps( $slug );
+
+		return true;
 	}
 
 	public function do_view_sidebar() {

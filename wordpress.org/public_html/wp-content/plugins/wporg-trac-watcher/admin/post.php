@@ -4,7 +4,7 @@ namespace WordPressdotorg\Trac\Watcher;
 add_action( 'admin_post_svn_save', function() {
 	global $wpdb;
 
-	if ( ! current_user_can( 'edit_posts' ) ) {
+	if ( ! current_user_can( 'publish_posts' ) ) {
 		die( '-1' );
 	}
 	check_admin_referer( 'edit_svn_prop' );
@@ -91,11 +91,16 @@ add_action( 'admin_post_svn_save', function() {
 	} elseif ( 'add' === $action ) {
 		// Adding one?
 
-		if ( empty( $_REQUEST['prop_name'] ) ) {
+		// Use the 'prop name' field first, otherwise fall back to the user_id field if the former is blank
+		$prop_name = wp_unslash( $_REQUEST['prop_name'] ?? '' );
+		if ( ! $prop_name ) {
+			$prop_name = wp_unslash( $_REQUEST['user_id'] ?? '' );
+		};
+
+		if ( ! $prop_name ) {
 			die( -1 );
 		}
 
-		$prop_name = wp_unslash( $_REQUEST['prop_name'] );
 		if ( ! $user ) {
 			$user = Props\find_user_id( $prop_name );
 		}
@@ -109,17 +114,19 @@ add_action( 'admin_post_svn_save', function() {
 			]
 		);
 
-		// Update any other occurences of this typo.
-		$wpdb->update(
-			$svn['props_table'],
-			[
-				'user_id'   => $user,
-			],
-			[
-				'prop_name' => $prop_name,
-				'user_id'   => null
-			]
-		);
+		// Update any other occurrences of this typo.
+		if ( $user ) {
+			$wpdb->update(
+				$svn['props_table'],
+				[
+					'user_id'   => $user,
+				],
+				[
+					'prop_name' => $prop_name,
+					'user_id'   => null
+				]
+			);
+		}
 	}
 
 	// Output the replacement `<td>`'s
@@ -132,7 +139,7 @@ add_action( 'admin_post_svn_save', function() {
 add_action( 'admin_post_svn_reparse', function() {
 	global $wpdb;
 
-	if ( ! current_user_can( 'edit_posts' ) ) {
+	if ( ! current_user_can( 'publish_posts' ) ) {
 		die( '-1' );
 	}
 	check_admin_referer( 'reparse_svn' );
@@ -152,7 +159,8 @@ add_action( 'admin_post_svn_reparse', function() {
 	}
 
 	// Reparse
-	$raw_props = Props\from_log( $details->message );
+	$include_old = strtotime( $details->date ) < strtotime( '2020-01-01' );
+	$raw_props   = Props\from_log( $details->message, $include_old );
 
 	// Fetch all the user_id's
 	$props = [];

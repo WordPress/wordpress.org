@@ -4,6 +4,8 @@ namespace WPOrg_Learn\Blocks;
 
 use Error;
 use Sensei_Lesson;
+use Sensei_Utils;
+use Sensei_Reports_Overview_Service_Courses;
 use function WordPressdotorg\Locales\get_locale_name_from_code;
 use function WPOrg_Learn\{get_build_path, get_build_url, get_views_path};
 use function WPOrg_Learn\Form\render_workshop_application_form;
@@ -24,8 +26,212 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_block_style_assets' 
  * @return void
  */
 function register_types() {
+	register_lesson_plan_actions();
+	register_lesson_plan_details();
+	register_course_data();
 	register_workshop_details();
 	register_workshop_application_form();
+}
+
+/**
+ * Register Lesson Plan Actions block type and related assets.
+ *
+ * @throws Error If the build files are not found.
+ */
+function register_lesson_plan_actions() {
+	$script_asset_path = get_build_path() . 'lesson-plan-actions.asset.php';
+	if ( ! is_readable( $script_asset_path ) ) {
+		throw new Error(
+			'You need to run `npm start` or `npm run build` for the "wporg-learn/lesson-plan-actions" block first.'
+		);
+	}
+
+	$script_asset = require $script_asset_path;
+	wp_register_script(
+		'lesson-plan-actions-editor-script',
+		get_build_url() . 'lesson-plan-actions.js',
+		$script_asset['dependencies'],
+		$script_asset['version'],
+		true
+	);
+
+	wp_register_style(
+		'lesson-plan-actions-style',
+		get_build_url() . 'style-lesson-plan-actions.css',
+		array(),
+		filemtime( get_build_path() . 'style-lesson-plan-actions.css' )
+	);
+
+	register_block_type( 'wporg-learn/lesson-plan-actions', array(
+		'editor_script'   => 'lesson-plan-actions-editor-script',
+		'style'           => 'lesson-plan-actions-style',
+		'render_callback' => __NAMESPACE__ . '\lesson_plan_actions_render_callback',
+	) );
+}
+
+/**
+ * Render the block content (html) on the frontend of the site.
+ *
+ * @param array  $attributes
+ * @param string $content
+ * @return string HTML output used by the block
+ */
+function lesson_plan_actions_render_callback( $attributes, $content ) {
+	if ( get_post_type() !== 'lesson-plan' ) {
+		return;
+	}
+
+	$post = get_post();
+
+	ob_start();
+	require get_views_path() . 'block-lesson-plan-actions.php';
+
+	return ob_get_clean();
+}
+
+/**
+ * Register Lesson Plan Details block type and related assets.
+ *
+ * @throws Error If the build files are not found.
+ */
+function register_lesson_plan_details() {
+	$script_asset_path = get_build_path() . 'lesson-plan-details.asset.php';
+	if ( ! is_readable( $script_asset_path ) ) {
+		throw new Error(
+			'You need to run `npm start` or `npm run build` for the "wporg-learn/lesson-plan-details" block first.'
+		);
+	}
+
+	$script_asset = require $script_asset_path;
+	wp_register_script(
+		'lesson-plan-details-editor-script',
+		get_build_url() . 'lesson-plan-details.js',
+		$script_asset['dependencies'],
+		$script_asset['version'],
+		true,
+	);
+
+	wp_register_style(
+		'lesson-plan-details-style',
+		get_build_url() . 'style-lesson-plan-details.css',
+		array(),
+		filemtime( get_build_path() . 'style-lesson-plan-details.css' )
+	);
+
+	register_block_type( 'wporg-learn/lesson-plan-details', array(
+		'editor_script'   => 'lesson-plan-details-editor-script',
+		'style'           => 'lesson-plan-details-style',
+		'render_callback' => __NAMESPACE__ . '\lesson_plan_details_render_callback',
+	) );
+}
+
+/**
+ * Render the block content (html) on the frontend of the site.
+ *
+ * @param array  $attributes
+ * @param string $content
+ * @return string HTML output used by the block
+ */
+function lesson_plan_details_render_callback( $attributes, $content ) {
+	if ( get_post_type() !== 'lesson-plan' ) {
+		return;
+	}
+
+	$details = wporg_learn_get_lesson_plan_taxonomy_data( get_the_ID(), 'single' );
+
+	ob_start();
+	require get_views_path() . 'block-lesson-plan-details.php';
+
+	return ob_get_clean();
+}
+
+/**
+ * Register Course Data block type and related assets.
+ *
+ * @throws Error If the build files are not found.
+ */
+function register_course_data() {
+	$script_asset_path = get_build_path() . 'course-data.asset.php';
+	if ( ! is_readable( $script_asset_path ) ) {
+		throw new Error(
+			'You need to run `npm start` or `npm run build` for the "wporg-learn/course-data" block first.'
+		);
+	}
+
+	$script_asset = require $script_asset_path;
+	wp_register_script(
+		'course-data-editor-script',
+		get_build_url() . 'course-data.js',
+		$script_asset['dependencies'],
+		$script_asset['version'],
+		true,
+	);
+
+	wp_register_style(
+		'course-data-style',
+		get_build_url() . 'style-course-data.css',
+		array(),
+		filemtime( get_build_path() . 'style-course-data.css' )
+	);
+
+	register_block_type( 'wporg-learn/course-data', array(
+		'editor_script'   => 'course-data-editor-script',
+		'style'           => 'course-data-style',
+		'render_callback' => __NAMESPACE__ . '\course_data_render_callback',
+	) );
+}
+
+/**
+ * Render the block content (html) on the frontend of the site.
+ *
+ * @param array  $attributes
+ * @param string $content
+ * @return string HTML output used by the block
+ */
+function course_data_render_callback( $attributes, $content ) {
+	if ( get_post_type() !== 'course' ) {
+		return;
+	}
+
+	$course_service = new Sensei_Reports_Overview_Service_Courses();
+	$post           = get_post();
+	$course_id      = $post->ID;
+
+	// Get the total number of learners enrolled in the course
+	$learners = Sensei_Utils::sensei_check_for_activity(
+		array(
+			'type'     => 'sensei_course_status',
+			'status'   => 'in-progress',
+			'post__in' => $course_id,
+		)
+	);
+
+	// Get the average grade scross all learners
+	$average_grade = round( $course_service->get_courses_average_grade( array( $course_id ) ), 0 );
+
+	// Get the average number of days it takes to complete a course
+	$average_days = $course_service->get_average_days_to_completion( array( $course_id ) );
+
+	// Set up array of data to be used
+	$data = array(
+		'learners' => array(
+			'label' => __( 'Enrolled learners', 'wporg-learn' ),
+			'value' => $learners,
+		),
+		'grade' => array(
+			'label' => __( 'Average final grade', 'wporg-learn' ),
+			'value' => $average_grade . '%',
+		),
+		'days' => array(
+			'label' => __( 'Average days to completion', 'wporg-learn' ),
+			'value' => $average_days,
+		),
+	);
+
+	ob_start();
+	require get_views_path() . 'block-course-data.php';
+
+	return ob_get_clean();
 }
 
 /**
@@ -46,7 +252,8 @@ function register_workshop_details() {
 		'workshop-details-editor-script',
 		get_build_url() . 'workshop-details.js',
 		$script_asset['dependencies'],
-		$script_asset['version']
+		$script_asset['version'],
+		true,
 	);
 
 	wp_register_style(
@@ -71,6 +278,10 @@ function register_workshop_details() {
  * @return string HTML output used by the block
  */
 function workshop_details_render_callback( $attributes, $content ) {
+	if ( get_post_type() !== 'wporg_workshop' ) {
+		return;
+	}
+
 	$post      = get_post();
 	$topic_ids = wp_get_post_terms( $post->ID, 'topic', array( 'fields' => 'ids' ) );
 	$level     = wp_get_post_terms( $post->ID, 'level', array( 'fields' => 'names' ) );
@@ -107,8 +318,8 @@ function workshop_details_render_callback( $attributes, $content ) {
 		),
 		'language' => array(
 			'label' => __( 'Language', 'wporg-learn' ),
-			'param' => array( $post->video_language ),
-			'value' => array( esc_html( get_locale_name_from_code( $post->video_language, 'native' ) ) ),
+			'param' => array( $post->language ),
+			'value' => array( esc_html( get_locale_name_from_code( $post->language, 'native' ) ) ),
 		),
 		'captions' => array(
 			'label' => __( 'Subtitles', 'wporg-learn' ),

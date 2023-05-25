@@ -26,6 +26,16 @@ function api_request( $url ) {
 		]
 	);
 
+	// The token was probably revoked, so we need to update it.
+	if ( 401 === wp_remote_retrieve_response_code( $req ) ) {
+		trigger_error(
+			'The Calendly token has probably been revoked, the password was probably changed.' .
+			'Please update the COMMUNITY_CALENDLY_TOKEN secrets constant with a new PAT created on https://calendly.com/integrations/api_webhooks from the WordCamp Calendly account.' .
+			wp_remote_retrieve_body( $req ),
+			E_USER_WARNING
+		);
+	}
+
 	return json_decode( wp_remote_retrieve_body( $req ) );
 }
 

@@ -36,6 +36,11 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 				'/5-for-the-future' => '/five-for-the-future/',
 				'/5forthefuture'    => '/five-for-the-future/',
 				'/fiveforthefuture' => '/five-for-the-future/',
+
+				// Deprecated About / Testimonials page https://github.com/WordPress/wporg-main-2022/issues/196
+				'/about/testimonials' => '/news/category/community/',
+				// Deprecated About / Swag page https://github.com/WordPress/wporg-main-2022/issues/208
+				'/about/swag'         => 'https://mercantile.wordpress.org/',
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
@@ -154,7 +159,7 @@ add_action( 'template_redirect', function() {
 
 /**
  * Handle the domain-based redirects
- * 
+ *
  * Called from sunrise.php on ms_site_not_found and ms_network_not_found actions.
  */
 function wporg_redirect_site_not_found() {
@@ -175,6 +180,7 @@ function wporg_redirect_site_not_found() {
 
 		// WordPress.org => WordPress.net
 		case 'wp15.wordpress.org':
+		case 'wp20.wordpress.org':
 		case 'jobs.wordpress.org':
 		// Default Theme Demo sites are on WordPress.net
 		case '2017.wordpress.org':

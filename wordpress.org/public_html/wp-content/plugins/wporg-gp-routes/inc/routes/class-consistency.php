@@ -15,13 +15,14 @@ class Consistency extends GP_Route {
 
 	private $cache_group = 'wporg-translate';
 
-	const PROJECTS = [
-		1   => 'WordPress',
-		523 => 'Themes',
-		17  => 'Plugins',
-		487 => 'Meta',
-		281 => 'Apps',
-	];
+	const PROJECTS = array(
+		1      => 'WordPress',
+		523    => 'Themes',
+		17     => 'Plugins',
+		487    => 'Meta',
+		281    => 'Apps',
+		473698 => 'Patterns',
+	);
 
 	/**
 	 * Prints a search form and the search results for a consistency view.

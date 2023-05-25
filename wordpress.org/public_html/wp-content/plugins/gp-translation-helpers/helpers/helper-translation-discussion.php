@@ -40,6 +40,14 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public $load_inline = true;
 
 	/**
+	 * Indicates whether we're currently using a temporary post.
+	 *
+	 * @since 0.0.2
+	 * @var object|null
+	 */
+	public static $temporary_post = null;
+
+	/**
 	 * The post type used to store the comments.
 	 *
 	 * @since 0.0.1
@@ -89,6 +97,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function after_constructor() {
 		$this->register_post_type_and_taxonomy();
 		add_filter( 'pre_comment_approved', array( $this, 'comment_moderation' ), 10, 2 );
+		add_filter( 'comments_open', array( $this, 'comments_open_override' ), 10, 2 );
 		add_filter( 'map_meta_cap', array( $this, 'map_comment_meta_caps' ), 10, 4 );
 		add_filter( 'user_has_cap', array( $this, 'give_user_read_cap' ), 10, 3 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
@@ -151,6 +160,18 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => array( $this, 'sanitize_comment_locale' ),
+				'rewrite'           => false,
+			)
+		);
+
+		register_meta(
+			'comment',
+			'translation_status',
+			array(
+				'description'       => 'Translation status as at when the comment was made',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => array( $this, 'sanitize_comment_translation_status' ),
 				'rewrite'           => false,
 			)
 		);
@@ -245,10 +266,40 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			return $cache[ $post->ID ];
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$locale_exists = isset( $_POST['meta']['locale'] ) && ! empty( $this->sanitize_comment_locale( $_POST['meta']['locale'] ) );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$locale_slug = $locale_exists ? $_POST['meta']['locale'] : null;
+
+		$set_slug = $locale_exists ? 'default' : null;
+
 		// We were able to gather all information, let's put it in the cache.
-		$cache[ $post->ID ] = GP_Route_Translation_Helpers::get_permalink( $project->path, $original_id );
+		$cache[ $post->ID ] = GP_Route_Translation_Helpers::get_permalink( $project->path, $original_id, $set_slug, $locale_slug );
 
 		return $cache[ $post->ID ];
+	}
+
+	/**
+	 * Enable showing the comment form on non-existing posts.
+	 *
+	 * @param      boolean $open     Whether the comments are open or not.
+	 * @param      int     $post_id  The post id.
+	 *
+	 * @return     bool    Whether the comments are open or not.
+	 */
+	public function comments_open_override( $open, $post_id ) {
+		if ( self::is_temporary_post_id( $post_id ) ) {
+			return true;
+		}
+
+		// If we just had to define a temporary post, the post id can also be 0.
+		// This is due to a code change in core in this commit:
+		// https://github.com/WordPress/WordPress/commit/1069ac4afda821742cf7f600412aacc139013a55
+		if ( self::$temporary_post && 0 === $post_id ) {
+			return true;
+		}
+		return $open;
 	}
 
 	/**
@@ -365,7 +416,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 */
 	public static function maybe_get_temporary_post( $post_id ) {
 		if ( self::is_temporary_post_id( $post_id ) ) {
-			return new Gth_Temporary_Post( $post_id );
+			self::$temporary_post = new Gth_Temporary_Post( $post_id );
+			return self::$temporary_post;
 		}
 
 		return get_post( $post_id );
@@ -388,7 +440,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		if ( false !== $post_id ) {
 			// Something was found in the cache.
 
-			if ( self::is_temporary_post_id( $post_id ) && $create ) {
+			if ( self::is_temporary_post_id( $post_id ) ) {
 				// a fake post_id was stored in the cache but we need to create an entry.
 				// Let's pretend a cache fail, so that we get a chance to create an entry unless one already exists.
 				$post_id = false;
@@ -432,7 +484,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			}
 		}
 
-		wp_cache_add( $cache_key, $post_id );
+		wp_cache_set( $cache_key, $post_id );
 		return $post_id;
 	}
 
@@ -517,7 +569,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
-		$post = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+		$post          = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+		$mentions_list = apply_filters( 'gp_mentions_list', array(), $comments, $this->data['locale_slug'], $this->data['original_id'] );
 
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
@@ -526,10 +579,11 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'post'                 => $post,
 				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
 				'locale_slug'          => $this->data['locale_slug'],
-				'original_permalink'   => $this->data['original_permalink'],
+				'original_permalink'   => $this->data['original_permalink'] ?? false,
 				'original_id'          => $this->data['original_id'],
 				'project'              => $this->data['project'],
 				'translation_set_slug' => $this->data['translation_set_slug'],
+				'mentions_list'        => $mentions_list,
 
 			),
 			$this->assets_dir . 'templates'
@@ -636,11 +690,31 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
+	 * Sets the translation_status meta_key as "unknown" if is not in the accepted values.
+	 *
+	 * Used as sanitize callback in the register_meta for the "comment" object type,
+	 * 'translation_status' meta_key
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string $translation_status The meta_value for the meta_key "translation_status".
+	 *
+	 * @return string
+	 */
+	public function sanitize_translation_status( string $translation_status ): string {
+		if ( ! in_array( $translation_status, array( 'approved', 'rejected', 'waiting', 'current', 'fuzzy', 'changesrequested' ), true ) ) {
+			$translation_status = 'unknown';
+		}
+		return $translation_status;
+
+	}
+
+	/**
 	 * The comment reply link override.
 	 *
 	 * @param      string  $link     The link.
 	 * @param      array   $args     The arguments.
-	 * @param      string  $comment  The comment.
+	 * @param      object  $comment  The comment.
 	 * @param      WP_Post $post     The post.
 	 *
 	 * @return     string  Return the reply link HTML.
@@ -653,6 +727,12 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			'respondelement' => $args['respond_id'],
 			'replyto'        => sprintf( $args['reply_to_text'], $comment->comment_author ),
 		);
+
+		if ( get_option( 'page_comments' ) ) {
+			$permalink = str_replace( '#comment-' . $comment->comment_ID, '', get_comment_link( $comment ) );
+		} else {
+			$permalink = get_permalink( $post->ID );
+		}
 
 		$data_attribute_string = '';
 
@@ -671,7 +751,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 						'unapproved'      => false,
 						'moderation-hash' => false,
 					),
-					$args['original_permalink']
+					$permalink
 				)
 			) . '#' . $args['respond_id'],
 			$data_attribute_string,
@@ -724,8 +804,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return array
 	 */
-	public static function get_comment_reasons(): array {
-		return array(
+	public static function get_comment_reasons( $locale = null ): array {
+		$default_reasons = array(
 			'style'       => array(
 				'name'        => __( 'Style Guide' ),
 				'explanation' => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
@@ -744,14 +824,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			),
 			'punctuation' => array(
 				'name'        => __( 'Punctuation' ),
-				'explanation' =>
-					__( 'The translation is not using the punctuation marks correctly.' ),
+				'explanation' => __( 'The translation is not using the punctuation marks correctly.' ),
 			),
 			'typo'        => array(
 				'name'        => __( 'Typo' ),
 				'explanation' => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
 			),
 		);
+		$reasons         = apply_filters( 'gp_custom_reasons', $default_reasons, $locale );
+		return $reasons;
 	}
 }
 
@@ -817,13 +898,14 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 	$is_linking_comment = preg_match( '!^' . home_url( gp_url() ) . '[a-z0-9_/#-]+$!i', $comment->comment_content );
 
-	$comment_locale = get_comment_meta( $comment->comment_ID, 'locale', true );
-	$current_locale = $args['locale_slug'];
-
+	$comment_locale         = get_comment_meta( $comment->comment_ID, 'locale', true );
+	$current_locale         = $args['locale_slug'];
 	$current_translation_id = $args['translation_id'];
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
 
 	$comment_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+
+	$_translation_status = get_comment_meta( $comment->comment_ID, 'translation_status', true );
 
 	$classes = array( 'comment-locale-' . $comment_locale );
 	if ( ! empty( $comment_reason ) ) {
@@ -877,7 +959,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 			if ( $comment_reason ) :
 				?>
-				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'is being discussed here' ); ?></a>.
+				<p>The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'is being discussed here' ); ?></a>.</p>
 			<?php else : ?>
 				<a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'Please continue the discussion here' ); ?></a>
 			<?php endif; ?>
@@ -889,7 +971,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				<?php
 				$number_of_items = count( $comment_reason );
 				$counter         = 0;
-				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons( $comment_locale );
 				foreach ( $comment_reason as $reason ) {
 					echo wp_kses(
 						sprintf(
@@ -954,10 +1036,15 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				<?php
 			}
 
-			if ( ! $is_linking_comment ) :
-				if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
-					gth_print_translation( $comment_translation_id, $args, 'Translation: ' );
+			if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
+				$translation_status = '';
+				if ( $_translation_status ) {
+
+					$translation_status = ( is_array( $_translation_status ) && array_key_exists( $comment_translation_id, $_translation_status ) ) ? '(' . $_translation_status[ $comment_translation_id ] . ')' : ' (' . $_translation_status[0] . ')';
 				}
+				gth_print_translation( $comment_translation_id, $args, 'Translation' . $translation_status . ': ' );
+			}
+			if ( ! $is_linking_comment ) :
 
 				?>
 				<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">

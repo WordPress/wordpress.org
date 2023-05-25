@@ -1,9 +1,11 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 
 /**
  * The [wporg-plugin-upload] shortcode handler to display a plugin uploader.
@@ -58,17 +60,14 @@ class Upload_Handler {
 	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
 	public function process_upload() {
+		$has_upload_token = $this->has_valid_upload_token();
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
-		$plugin_files = Filesystem::list_files( $this->plugin_dir, true /* Recursive */, '!\.php$!i', 1 /* Depth */ );
-		foreach ( $plugin_files as $plugin_file ) {
-			$plugin_data = get_plugin_data( $plugin_file, false, false ); // No markup/translation needed.
-			if ( ! empty( $plugin_data['Name'] ) ) {
-				$this->plugin      = $plugin_data;
-				$this->plugin_root = dirname( $plugin_file );
-				break;
-			}
+		$plugin_data = (array) Import::find_plugin_headers( $this->plugin_dir, 1 /* Max Depth to search */ );
+		if ( ! empty( $plugin_data['Name'] ) ) {
+			$this->plugin      = $plugin_data;
+			$this->plugin_root = dirname( $plugin_data['PluginFile'] );
 		}
 
 		// Let's check some plugin headers, shall we?
@@ -114,7 +113,7 @@ class Upload_Handler {
 		}
 
 		// Make sure it doesn't use a TRADEMARK protected slug.
-		if ( false !== $this->has_trademarked_slug() ) {
+		if ( false !== $this->has_trademarked_slug() && ! $has_upload_token ) {
 			$error = __( 'Error: The plugin name includes a restricted term.', 'wporg-plugins' );
 
 			if ( $this->has_trademarked_slug() === trim( $this->has_trademarked_slug(), '-' ) ) {
@@ -144,6 +143,19 @@ class Upload_Handler {
 
 		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
 
+		// If no matching plugin by that slug, check to see if a plugin exists with that Title in the database.
+		if ( ! $plugin_post ) {
+			$plugin_posts = get_posts( array(
+				'post_type'   => 'plugin',
+				'title'       => $this->plugin['Name'],
+				'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
+			) );
+
+			if ( $plugin_posts ) {
+				$plugin_post = array_shift( $plugin_posts );
+			}
+		}
+
 		// Is there already a plugin with the same slug by a different author?
 		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
 			$error = __( 'Error: The plugin already exists.', 'wporg-plugins' );
@@ -151,7 +163,7 @@ class Upload_Handler {
 			return new \WP_Error( 'already_exists', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 				__( 'There is already a plugin with the name %1$s in the directory. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>',
+				'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
 				'<code>Plugin Name:</code>'
 			) );
 		}
@@ -163,7 +175,7 @@ class Upload_Handler {
 			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: Documentation URL, 3: plugins@wordpress.org */
 				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Instead, please update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>',
+				'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
 				__( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 'wporg-plugins' ),
 				'plugins@wordpress.org'
 			) );
@@ -228,7 +240,7 @@ class Upload_Handler {
 		}
 
 		// Prevent uploads using popular Plugin names in the wild.
-		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) ) {
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) && ! $has_upload_token ) {
 			$installs = wporg_stats_get_plugin_name_install_count( $this->plugin['Name'] );
 
 			if ( $installs && $installs->count >= 100 ) {
@@ -237,7 +249,7 @@ class Upload_Handler {
 				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 					__( 'There is already a plugin with the name %1$s known to exist, though it is not hosted on WordPress.org. This means the permalink %2$s is already in use, and has a significant user base. Were we to accept it as-is, our system would overwrite those other installs and potentially damage any existing users. This is especially true since WordPress 5.5 and up will automatically update plugins and themes. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is an incorrect assessment of the situation, please email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
-					'<code>' . $this->plugin['Name'] . '</code>',
+					'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
 					'<code>' . $this->plugin_slug . '</code>',
 					'<code>Plugin Name:</code>',
 					'plugins@wordpress.org'
@@ -246,7 +258,7 @@ class Upload_Handler {
 		}
 
 		// Check for a valid readme.
-		$readme = $this->find_readme_file();
+		$readme = Import::find_readme_file( $this->plugin_root );
 		if ( empty( $readme ) ) {
 			$error = __( 'Error: The plugin has no readme.', 'wporg-plugins' );
 
@@ -258,6 +270,50 @@ class Upload_Handler {
 			) );
 		}
 		$readme = new Parser( $readme );
+
+		// Double check no existing plugins clash with the readme title.
+		$readme_plugin_post = get_posts( array(
+			'post_type'   => 'plugin',
+			'title'       => $readme->name,
+			'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
+		) );
+		if ( $readme_plugin_post && trim( $readme->name ) ) {
+			$error = __( 'README Error: The plugin has already been submitted.', 'wporg-plugins' );
+
+			if ( $readme_plugin_post->post_author != get_current_user_id() ) {
+				return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
+					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+					__( 'There is already a plugin with the name %1$s in the directory. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
+					'<code>' . esc_html( $readme->name ) . '</code>',
+					'<code>Plugin Name:</code>'
+				) );
+			}
+
+			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
+				/* translators: 1: plugin slug, 2: Documentation URL, 3: plugins@wordpress.org */
+				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Instead, please update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know.', 'wporg-plugins' ),
+				'<code>' . esc_html( $readme->name ) . '</code>',
+				__( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 'wporg-plugins' ),
+				'plugins@wordpress.org'
+			) );
+		}
+
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) && ! $has_upload_token ) {
+			$installs = wporg_stats_get_plugin_name_install_count( $readme->name );
+
+			if ( $installs && $installs->count >= 100 ) {
+				$error = __( 'Error: That plugin name is already in use.', 'wporg-plugins' );
+
+				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
+					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+					__( 'There is already a plugin with the name %1$s known to exist, though it is not hosted on WordPress.org. This means the permalink %2$s is already in use, and has a significant user base. Were we to accept it as-is, our system would overwrite those other installs and potentially damage any existing users. This is especially true since WordPress 5.5 and up will automatically update plugins and themes. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is an incorrect assessment of the situation, please email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
+					'<code>' . esc_html( $readme->name ) . '</code>',
+					'<code>' . $this->plugin_slug . '</code>',
+					'<code>Plugin Name:</code>',
+					'plugins@wordpress.org'
+				) );
+			}
+		}
 
 		// Check for a readme license.
 		if ( empty( $readme->license ) ) {
@@ -274,7 +330,7 @@ class Upload_Handler {
 		// We're not actually using this right now.
 		$result = $this->check_plugin();
 
-		if ( ! $result ) {
+		if ( ! $result && ! $has_upload_token ) {
 			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
 
 			return new \WP_Error( 'failed_checks', $error . ' ' . sprintf(
@@ -311,6 +367,8 @@ class Upload_Handler {
 					'contributors'             => $readme->contributors,
 					'screenshots'              => $readme->screenshots,
 					'donate_link'              => $readme->donate_link,
+					'license'                  => $readme->license,
+					'license_uri'              => $readme->license_uri,
 					'sections'                 => array_keys( $readme->sections ),
 					'version'                  => $this->plugin['Version'],
 					'header_name'              => $this->plugin['Name'],
@@ -319,6 +377,7 @@ class Upload_Handler {
 					'header_author_uri'        => $this->plugin['AuthorURI'],
 					'header_textdomain'        => $this->plugin['TextDomain'],
 					'header_description'       => $this->plugin['Description'],
+					'requires_plugins'         => array_filter( array_map( 'trim', explode( ',', $this->plugin['RequiresPlugins'] ) ) ),
 					'assets_screenshots'       => array(),
 					'assets_icons'             => array(),
 					'assets_banners'           => array(),
@@ -327,7 +386,6 @@ class Upload_Handler {
 					'support_threads_resolved' => 0,
 					'downloads'                => 0,
 					'last_updated'             => gmdate( 'Y-m-d H:i:s' ),
-					'plugin_status'            => 'new',
 					'rating'                   => 0,
 					'ratings'                  => array(),
 					'active_installs'          => 0,
@@ -359,11 +417,7 @@ class Upload_Handler {
 			'<code>' . $this->plugin_slug . '</code>'
 		) . '</p><p>';
 
-		$message .= sprintf(
-			/* translators: 1: plugins@wordpress.org */
-			__( 'We&rsquo;ve sent you an email verifying this submission. Please make sure to whitelist our email address - <a href="mailto:%1$s">%1$s</a> - to ensure you receive all our communications.' ),
-			'plugins@wordpress.org'
-		) . '</p><p>';
+		$message .= __( 'We&rsquo;ve sent you an email verifying this submission. Make sure you set all emails from wordpress.org to never go to spam (i.e. via email filters or approval lists). That will ensure you won&rsquo;t miss any of our messages.', 'wporg-plugins' ) . '</p><p>';
 
 		$message .= __( 'If there are any errors in your submission, such as having submitted via the wrong account, please don\'t resubmit! Instead, email us as soon as possible (you can reply to the automated email we sent you). We can correct most issues before approval.', 'wporg-plugins' ) . '</p><p>';
 
@@ -454,8 +508,10 @@ class Upload_Handler {
 			'booking-com',
 			'bootstrap-',
 			'buddypress-',
-			'contact-form-7-',
+			'chatgpt-',
+			'chat-gpt-',
 			'cloudflare-',
+			'contact-form-7-',
 			'cpanel-',
 			'disqus-',
 			'divi-',
@@ -547,14 +603,16 @@ class Upload_Handler {
 
 		// Domains from which exceptions would be accepted.
 		$trademark_exceptions = array(
-			'yoast.com'             => array( 'yoast' ),
+			'adobe.com'             => array( 'adobe' ),
 			'automattic.com'        => array( 'akismet', 'akismet-', 'jetpack', 'jetpack-', 'wordpress', 'wp-', 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
 			'facebook.com'          => array( 'facebook', 'instagram', 'oculus', 'whatsapp' ),
 			'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
 			'trustpilot.com'        => array( 'trustpilot' ),
 			'microsoft.com'         => array( 'bing-', 'microsoft-' ),
 			'yandex-team.ru'        => array( 'yandex' ),
+			'yoast.com'             => array( 'yoast' ),
 			'opera.com'             => array( 'opera-' ),
+			'adobe.com'				=> array( 'adobe-' ),
 		);
 
 		// Trademarks that are allowed as 'for-whatever' ONLY.
@@ -613,26 +671,6 @@ class Upload_Handler {
 		}
 
 		return $has_trademarked_slug;
-	}
-
-	/**
-	 * Find the plugin readme file.
-	 *
-	 * Looks for either a readme.txt or readme.md file, prioritizing readme.txt.
-	 *
-	 * @return string The plugin readme.txt or readme.md filename.
-	 */
-	protected function find_readme_file() {
-		$files = Filesystem::list_files( $this->plugin_root, false /* non-recursive */, '!^readme\.(txt|md)$!i' );
-
-		// Prioritize readme.txt file.
-		foreach ( $files as $file ) {
-			if ( '.txt' === strtolower( substr( $file, -4 ) ) ) {
-				return $file;
-			}
-		}
-
-		return reset( $files );
 	}
 
 	/**
@@ -740,6 +778,17 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 	 */
 	public function whitelist_zip_files() {
 		return 'zip';
+	}
+
+	/**
+	 * Determine if the current user has a valid upload token.
+	 *
+	 * An upload token can be used to bypass various plugin checks.
+	 */
+	public function has_valid_upload_token() {
+		$token = wp_unslash( $_REQUEST['upload_token'] ?? '' );
+
+		return $token && Upload_Token::instance()->is_valid_for_user( get_current_user_id(), $token );
 	}
 
 }

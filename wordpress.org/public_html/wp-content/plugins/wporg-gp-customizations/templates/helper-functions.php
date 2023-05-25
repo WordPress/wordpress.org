@@ -33,6 +33,14 @@ wp_register_script(
 	filemtime( __DIR__ . '/js/editor.js' )
 );
 
+wp_localize_script(
+	'wporg-translate-editor',
+	'wporgEditorSettings',
+	array(
+		'nonce' => wp_create_nonce( 'wporg-editor-settings' ),
+	)
+);
+
 wp_register_style(
 	'chartist',
 	plugins_url( 'css/chartist.min.css', __FILE__ ),
@@ -61,7 +69,7 @@ add_action( 'wp_head', function () {
 
 /**
  * Set the document title to that of GlotPress.
- * 
+ *
  * @see https://github.com/GlotPress/GlotPress-WP/issues/8
  */
 add_filter( 'document_title_parts', static function() {
@@ -328,7 +336,7 @@ function wporg_references( $project, $entry ) {
 			<?php
 			elseif ( wp_http_validate_url( $reference ) ) :
 				?>
-				<li><a target="_blank" href="<?php echo esc_url( $reference ); ?>"><?php echo esc_html( $reference ); ?></a></li>		
+				<li><a target="_blank" href="<?php echo esc_url( $reference ); ?>"><?php echo esc_html( $reference ); ?></a></li>
 			<?php
 			else :
 				echo "<li>$file:$line</li>";

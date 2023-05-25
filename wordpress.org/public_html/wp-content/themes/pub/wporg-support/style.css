@@ -2887,6 +2887,23 @@ p a:hover {
 }
 
 /*--------------------------------------------------------------
+# Blocks Hotfix
+--------------------------------------------------------------*/
+.wp-block-navigation__responsive-close,
+.wp-block-navigation__responsive-container {
+	pointer-events: unset !important;
+}
+
+.wp-block-navigation:not(.is-selected):not(.has-child-selected) .has-child:hover > .wp-block-navigation__submenu-container {
+	opacity: 1;
+	visibility: unset;
+}
+
+.wp-block-navigation-item .wp-block-navigation-item__content {
+	cursor: pointer;
+}
+
+/*--------------------------------------------------------------
 # Site
 --------------------------------------------------------------*/
 body, #pagebody {
@@ -3492,10 +3509,6 @@ section {
 	margin: 1rem 0;
 }
 
-.three-up.bbp-forums > div a.bbp-forum-title:active, .three-up.bbp-forums > div a.bbp-forum-title:focus {
-	text-decoration: none;
-}
-
 .three-up.bbp-forums > div h3 {
 	font-size: 1.4rem;
 	margin-bottom: 0;
@@ -3506,13 +3519,28 @@ section {
 	color: #666;
 }
 
-.three-up.bbp-forums > div a:hover {
-	color: #0073aa;
+.three-up.bbp-forums > div a.bbp-forum-title {
+	color: inherit;
+	font-weight: normal;
+}
+
+.three-up.bbp-forums > div a:active, .three-up.bbp-forums > div a:focus, .three-up.bbp-forums > div a:hover {
 	text-decoration: none;
 }
 
-.three-up.bbp-forums > div a:hover h3 {
+.three-up.bbp-forums > div a:hover {
 	color: #0073aa;
+}
+
+.three-up.bbp-forums > div a.dashicons-before {
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+	padding-left: 1em;
+}
+
+.three-up.bbp-forums > div a.dashicons-before:before {
+	margin-left: -1em;
+	vertical-align: baseline;
 }
 
 @media (min-width: 48em) {
@@ -3589,10 +3617,6 @@ section {
 
 .bbpress.bbp-view-reviews #bbpress-forums .bbp-create-topic-wrapper .search-form {
 	width: 100%;
-}
-
-.bbpress #bbpress-forums {
-	/* bbPress 2.5 */
 }
 
 .bbpress #bbpress-forums div.bbp-template-notice {
@@ -3721,10 +3745,8 @@ section {
 	}
 }
 
-.bbpress #bbpress-forums div.bbp-reply-author a.bbp-author-name,
-.bbpress #bbpress-forums div.bbp-topic-author a.bbp-author-name,
-.bbpress #bbpress-forums div.bbp-reply-author a.bbp-author-link span.bbp-author-name,
-.bbpress #bbpress-forums div.bbp-topic-author a.bbp-author-link span.bbp-author-name {
+.bbpress #bbpress-forums div.bbp-reply-author .bbp-author-name,
+.bbpress #bbpress-forums div.bbp-topic-author .bbp-author-name {
 	clear: none;
 	font-size: 1rem;
 	display: inline-block;
@@ -3841,7 +3863,7 @@ section {
 
 .bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links,
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links {
-	display: none;
+	display: block;
 	position: absolute;
 	bottom: 0;
 	right: 0;
@@ -3873,18 +3895,6 @@ section {
 .bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links a:hover,
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a:hover {
 	text-decoration: underline;
-}
-
-.bbpress #bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links,
-.bbpress #bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links {
-	display: block;
-}
-
-.bbpress #bbpress-forums li.bbp-body div.type-topic:focus-within span.bbp-admin-links,
-.bbpress #bbpress-forums li.bbp-body div.type-reply:focus-within span.bbp-admin-links {
-	/* Separated from the block above due to browsers that
-			 * don't support :focus-within */
-	display: block;
 }
 
 .bbpress #bbpress-forums ul.status-closed,
@@ -4596,7 +4606,7 @@ div.bbp-breadcrumb p {
 .sidebar .topic-info li.topic-report input[type="text"] {
 	width: 100%;
 	padding: 0.2rem 0.5rem 0.1rem;
-	margin: 0;
+	margin: 5px 0;
 }
 
 .sidebar .topic-info li.topic-previous-reports .previous-reports {
@@ -4687,6 +4697,14 @@ div.bbp-breadcrumb p {
 	.bbp-view .review-ratings .col-3, .bbp-view .review-ratings .col-5 {
 		width: 100%;
 	}
+}
+
+/*--------------------------------------------------------------
+# Block Editor Specific
+--------------------------------------------------------------*/
+/* Move the Block Editor toolbar below the Header & Also Viewing z-index bar */
+.iso-editor.has-fixed-toolbar .interface-interface-skeleton__header {
+	z-index: 100;
 }
 
 /*--------------------------------------------------------------

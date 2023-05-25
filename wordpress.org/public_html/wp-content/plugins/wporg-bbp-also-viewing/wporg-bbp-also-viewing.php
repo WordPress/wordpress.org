@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\BBP_Also_Viewing;
 use function WordPressdotorg\SEO\Canonical\get_canonical_url;
+use const MINUTE_IN_SECONDS;
 
 /**
  * Plugin Name: bbPress: Also Viewing
@@ -27,10 +28,10 @@ use function WordPressdotorg\SEO\Canonical\get_canonical_url;
  */
 
 const USER_OPTION  = 'also-viewing';
-const TIMEOUT      = 5 * \MINUTE_IN_SECONDS;
+const TIMEOUT      = 5 * MINUTE_IN_SECONDS;
 const REFRESH_INT  = 45; // How often the client should check for new viewers in seconds.
 const CACHE_GROUP  = 'also-viewing';
-const CACHE_TIME   = 5 * \MINUTE_IN_SECONDS;
+const CACHE_TIME   = 5 * MINUTE_IN_SECONDS;
 const REPLY_THRESH = 20; // The number of replies a user must have before the feature can be opt'd into.
 
 function init() {
@@ -72,9 +73,9 @@ add_action( 'init', __NAMESPACE__ . '\init' );
 
 /**
  * Whether Also Viewing is enabled for the current user.
- * 
+ *
  * @param int $user_id The user ID to check for.
- * 
+ *
  * @return bool
  */
 function enabled( $user_id = 0 ) {
@@ -87,9 +88,9 @@ function enabled( $user_id = 0 ) {
 
 /**
  * Whether Also Viewing is able to be activated for the current user.
- * 
+ *
  * @param int $user_id The user ID to check for.
- * 
+ *
  * @return bool
  */
 function allowed_for_user( $user_id = 0 ) {
@@ -109,9 +110,9 @@ function allowed_for_user( $user_id = 0 ) {
 
 /**
  * The current page "slug"/"path" for refering to the current request.
- * 
+ *
  * This uses the WordPress.org SEO plugin for the canonical url, or falls back to REQUEST_URI.
- * 
+ *
  * @return string The path for the current page, eg. 'view/no-replies'
  */
 function current_page() {
@@ -130,9 +131,9 @@ function current_page() {
 
 /**
  * Sanitizes a given string/url/path to the format used for uniquely identifying pages.
- * 
+ *
  * @param string $page The strng/url/path
- * 
+ *
  * @return string The sanitized $page.
  */
 function sanitize_page_url_for_db( $page ) {
@@ -193,6 +194,7 @@ function bbp_user_edit_after() {
 
 	printf(
 		'<p>
+		<input type="hidden" name="can_update_also_viewing_preference" value="true">
 		<input name="also_viewing" id="also_viewing_toggle" type="checkbox" value="yes" %s>
 		<label for="also_viewing_toggle">%s</label>
 		</p>',
@@ -208,6 +210,11 @@ function bbp_user_edit_after() {
  * Save the user option to enable/disable.
  */
 function bbp_profile_update( $user_id ) {
+	// Catch profile updates that should not be able to include the Also Viewing preference, and return early.
+	if ( ! isset( $_REQUEST['can_update_also_viewing_preference'] ) ) {
+		return;
+	}
+
 	$enabled = ! empty( $_REQUEST['also_viewing'] ) && 'yes' === $_REQUEST['also_viewing'];
 
 	update_user_meta( $user_id, USER_OPTION, (int) $enabled );
@@ -221,9 +228,9 @@ function bbp_profile_update( $user_id ) {
 
 /**
  * Get the list of users who are currently viewing a page.
- * 
+ *
  * @param string $page The page to get the userse for.
- * 
+ *
  * @return array Array of user names + if they're typing.
  */
 function get_currently_viewing( $page ) {
@@ -267,9 +274,11 @@ function get_currently_viewing( $page ) {
 
 /**
  * Get the list of OTHER users who are currently viewing a page.
- * 
+ *
+ * This anonymizes users so that only mods can see other mods, and plugin support reps can see other reps and committers.
+ *
  * @param string $page The page to get the userse for.
- * 
+ *
  * @return array Array of user names + if they're typing.
  */
 function get_others_currently_viewing( $page ) {
@@ -280,16 +289,71 @@ function get_others_currently_viewing( $page ) {
 		}
 	}
 
+	// Anonymize the list of users if appropriate.
+	// Mods + Admins can see all.
+	if ( current_user_can( 'moderate' ) || current_user_can( 'list_users' ) ) {
+		return array_values( $users );
+	}
+
+	// Anonymize mods for other users.
+	foreach ( $users as &$u ) {
+		if ( user_can( $u['user_id'], 'moderate' ) ) {
+			$u['who']     = '';
+			$u['user_id'] = 0;
+		}
+	}
+
+	// Anonymize users unless they've got similar caps.
+	// Plugin support reps can see other reps and committers -for their own plugins-.
+	$current_user_objects = get_user_object_slugs( get_current_user_id() );
+	foreach ( $users as &$u ) {
+		$user_objects = get_user_object_slugs( $u['user_id'] );
+		if ( ! array_intersect( $current_user_objects, $user_objects ) ) {
+			$u['who']     = '';
+			$u['user_id'] = 0;
+		}
+	}
+
 	return array_values( $users );
 }
 
 /**
+ * Fetch the list of plugins/themes a user has access to.
+ *
+ * @param int $user_id The user ID to check for.
+ * @return array Array of plugin slugs.
+ */
+function get_user_object_slugs( $user_id ) {
+	if ( ! class_exists( '\WordPressdotorg\Forums\Plugin' ) ) {
+		return [];
+	}
+
+	$forums = \WordPressdotorg\Forums\Plugin::get_instance();
+	if ( ! $forums->plugins || ! $forums->themes ) {
+		return [];
+	}
+
+	$plugin_slugs = $forums->plugins->get_user_object_slugs( $user_id );
+	$theme_slugs  = $forums->themes->get_user_object_slugs( $user_id );
+
+	$matrix = [];
+	foreach ( $plugin_slugs as $slug ) {
+		$matrix[] = "plugin:{$slug}";
+	}
+	foreach ( $theme_slugs as $slug ) {
+		$matrix[] = "theme:{$slug}";
+	}
+
+	return $matrix;
+}
+
+/**
  * Mark a user as currently viewing/typing on the current page.
- * 
+ *
  * @param string $page    The page being viewed. Default current page.
  * @param bool   $typing  If the current user is typing. Default false.
  * @param int    $user_id The user ID who is viewing/typing.
- * 
+ *
  * @return bool
  */
 function user_viewing( $page = false, $typing = false, $user_id = false ) {
@@ -332,7 +396,7 @@ function user_viewing( $page = false, $typing = false, $user_id = false ) {
 
 /**
  * Mark a user as no longer viewing a page.
- * 
+ *
  * @param string $page    The page to no longer view. Defaults to clearing all pages.
  * @param int    $user_id The user ID no longer viewing the page. Default current user.
  */
@@ -380,7 +444,9 @@ function rest_api_init() {
 			'callback' => function( $request ) {
 				return get_others_currently_viewing( (string) $request['page'] );
 			},
-			'permission_callback' => 'is_user_logged_in',
+			'permission_callback' => function() {
+				return is_user_logged_in() && enabled();
+			},
 		],
 		[
 			'methods'  => 'POST',
@@ -390,14 +456,18 @@ function rest_api_init() {
 					! empty( $request['isTyping'] ) && 'false' !== $request['isTyping']
 				);
 			},
-			'permission_callback' => 'is_user_logged_in',
+			'permission_callback' => function() {
+				return is_user_logged_in() && enabled();
+			},
 		],
 		[
 			'methods'  => 'DELETE',
 			'callback' => function( $request ) {
 				return clear_viewing( (string) $request['page'] );
 			},
-			'permission_callback' => 'is_user_logged_in',
+			'permission_callback' => function() {
+				return is_user_logged_in() && enabled();
+			},
 		],
 	] );
 }
@@ -423,7 +493,7 @@ function cron_cleanup() {
 
 /**
  * The table name used for storing the state of users.
- * 
+ *
  * @return string
  */
 function get_table() {
@@ -434,7 +504,7 @@ function get_table() {
 
 /**
  * Maybe create the database table used for this plugin.
- * 
+ *
  * This only runs once per site, ever.
  */
 function maybe_create_table() {

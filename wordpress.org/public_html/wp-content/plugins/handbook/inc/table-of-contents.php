@@ -8,11 +8,65 @@ class WPorg_Handbook_TOC {
 	protected $post_types = array();
 
 	protected $styles = '<style>
-		.toc-jump { text-align: right; font-size: 12px; }
-		.toc-heading a:first-of-type { color: inherit; font-weight: inherit; margin-left: -25px; text-decoration: none !important; }
-		.toc-heading a:before { visibility: hidden; vertical-align: middle; margin-top: -5px; margin-right: 5px; }
-		.toc-heading:target a:before { margin-left: -8px; margin-right: 13px; }
-		.toc-heading a:hover:before, .toc-heading a:focus:before { visibility: visible; }
+		.toc-header {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 48px !important;
+		}
+		.toc-jump {
+			text-align: right;
+			font-size: 0.75em;
+			order: 2;
+		}
+		.rtl .toc-jump {
+			text-align: left;
+		}
+		.toc-heading a:first-of-type {
+			color: inherit;
+			font-weight: inherit;
+			margin-left: -32px;
+			text-decoration: none !important;
+		}
+		.rtl .toc-heading a:first-of-type {
+			margin-left: inherit;
+			margin-right: -32px;
+		}
+		.toc-heading a:before {
+			vertical-align: middle;
+			/* icon is 20px wide in a 32px space, so add 12px horizontal margin. */
+			margin: -4px 8px 0 4px;
+		}
+		.rtl .toc-heading a:before {
+			margin-left: 8px;
+			margin-right: 4px;
+		}
+		@media (max-width: 876px) {
+			.toc-heading a {
+				margin-left: -20px;
+			}
+			.rtl .toc-heading a {
+				margin-left: inherit;
+				margin-right: -20px;
+			}
+			.toc-heading a:before {
+				/* icon is 14px wide in a 20px space, so add 6px horizontal margin. */
+				margin: -2px 4px 0 2px;
+				width: 14px;
+				height: 14px;
+				font-size: 14px;
+			}
+			.rtl .toc-heading a:before {
+				margin-left: 4px;
+				margin-right: 2px;
+			}
+			.toc-heading a:first-of-type {
+				margin-left: 0;
+			}
+			.rtl .toc-heading a:first-of-type {
+				margin-left: inherit;
+				margin-right: 0;
+			}
+		}
 	</style>';
 
 	/**
@@ -53,7 +107,16 @@ class WPorg_Handbook_TOC {
 	}
 
 	public function load_filters() {
-		if ( is_singular( $this->post_types ) && ! is_embed() ) {
+		$page_supports_toc = is_singular( $this->post_types ) && ! is_embed();
+
+		/**
+		 * Filter whether the table of contents should be injected into the page.
+		 *
+		 * @param bool $page_supports_toc True if the current page supports a table of contents.
+		 */
+		$should_add_toc = apply_filters( 'wporg_handbook_toc_should_add_toc', $page_supports_toc );
+
+		if ( $should_add_toc ) {
 			add_filter( 'the_content', array( $this, 'add_toc' ) );
 		}
 	}
@@ -206,7 +269,7 @@ class WPorg_Handbook_TOC {
 				$extra_attrs,
 				$title
 			);
-			$replacements[] = $replacement;
+			$replacements[] = '<header class="toc-header">' . $replacement . '</header>';
 		}
 
 		if ( $replacements ) {

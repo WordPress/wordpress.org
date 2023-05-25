@@ -53,13 +53,14 @@ Arguments:
     </div>
   </h3>
 </py:when>
-<py:when test="'author' in change and 'prbot' == change.author and change.comment.startswith('\'\'')"
-         py:with="
-           wporg_user  = wporg_sanitize_user_nicename(change.author);
-           pr_byline   = change.comment.partition('\n')[0];
-           pr_comment  = ''.join(change.comment.partition('\n')[1:]) or False;
-           prbot_class = 'prbot with-context' if pr_comment or change.fields else 'prbot without-context';
-         ">
+<py:when test="'author' in change and 'prbot' == change.author"
+        py:with="
+          wporg_user   = wporg_sanitize_user_nicename(change.author);
+          display_text = re.sub( '[{]+#!comment[^}]+[}]+', '', change.comment ).lstrip();
+          pr_byline    = display_text.partition('\n')[0];
+          pr_comment   = ''.join(display_text.partition('\n')[1:]) or False;
+          prbot_class  = 'prbot with-context' if pr_comment or change.fields else 'prbot without-context';
+        ">
   <h3 class="change chat-bot ${prbot_class}">
     <span class="avatar">
       <span class="username-line">
@@ -68,6 +69,17 @@ Arguments:
       </span>
       <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
     </span>
+    <span class="threading">
+      <span py:if="'cnum' in change" id="comment:$cnum" class="cnum">${commentref('#', cnum)}</span>
+    </span>
+    <div py:if="show_buttons" class="trac-ticket-buttons">
+      <form py:if="'cnum' in change and can_edit_comment" method="get" action="#comment:${cnum}">
+        <div class="inlinebuttons">
+        <input type="hidden" name="cnum_edit" value="${cnum}"/>
+        <input type="submit" value="${captioned_button('✎', _('Edit'))}" title="${_('Edit comment %(cnum)s', cnum=cnum)}" />
+        </div>
+      </form>
+    </div>
   </h3>
   <ul py:if="change.fields" class="changes">
     <li py:for="field_name, field in sorted(change.fields.iteritems(), key=lambda item: item[1].label.lower())"
@@ -87,9 +99,20 @@ Arguments:
       </py:choose>
     </li>
   </ul>
-  <div py:if="pr_comment" class="comment searchable" xml:space="preserve">
+  <div py:if="pr_comment and not show_editor" class="comment searchable" xml:space="preserve">
     ${wiki_to_html(context, pr_comment, escape_newlines=preserve_newlines)}
   </div>
+  <form py:if="show_editor" id="trac-comment-editor" method="post" action="${href.ticket(ticket.id) + '#comment:%d' % cnum}">
+    <div>
+      <textarea name="edited_comment" class="wikitext trac-resizable" rows="10" cols="78">
+${edited_comment if edited_comment is not None else change.comment}</textarea>
+      <input type="hidden" name="cnum_edit" value="${cnum}"/>
+    </div>
+    <div class="buttons">
+      <input type="submit" name="edit_comment" value="${_('Submit changes')}" title="${_('Submit changes to comment %(cnum)s', cnum=cnum)}"/>
+      <input type="submit" name="cancel_comment" value="${_('Cancel')}" title="Cancel comment edit"/>
+    </div>
+  </form>
 </py:when>
 <py:otherwise>
 

@@ -25,11 +25,22 @@ namespace WordPressdotorg\BBP_Code_Blocks_Expand_Contract;
  */
 
 function wp_head() {
-	wp_enqueue_script( 'wporg-bbp-code-blocks-expand-contract', plugins_url( 'wporg-bbp-code-blocks-expand-contract.js', __FILE__ ), [ 'jquery' ], 1, true );
+	wp_enqueue_script(
+		'wporg-bbp-code-blocks-expand-contract',
+		plugins_url( 'wporg-bbp-code-blocks-expand-contract.js', __FILE__ ),
+		[ 'jquery' ],
+		filemtime( __DIR__ . '/wporg-bbp-code-blocks-expand-contract.js' ),
+		true
+	);
 	wp_localize_script( 'wporg-bbp-code-blocks-expand-contract', 'bbpCodeBlocksExpandContract', [
 		'expand'   => __( 'Expand', 'wporg-forums' ),
 		'contract' => __( 'Contract', 'wporg-forums' ),
 	] );
-	wp_enqueue_style( 'wporg-bbp-code-blocks-expand-contract', plugins_url( 'wporg-bbp-code-blocks-expand-contract.css', __FILE__ ), [], 1 );
+	wp_enqueue_style(
+		'wporg-bbp-code-blocks-expand-contract', 
+		plugins_url( 'wporg-bbp-code-blocks-expand-contract.css', __FILE__ ),
+		[],
+		filemtime( __DIR__ . '/wporg-bbp-code-blocks-expand-contract.css' ),
+	);
 }
 add_action( 'wp_head', __NAMESPACE__ . '\wp_head' );

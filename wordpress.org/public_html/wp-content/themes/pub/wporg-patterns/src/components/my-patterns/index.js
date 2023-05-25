@@ -44,7 +44,7 @@ const MyPatterns = () => {
 		const loginUrl = addQueryArgs( wporgPatternsUrl.login, { redirect_to: window.location } );
 		return (
 			<div className="entry-content">
-				<div className="alignwide" style={ { maxWidth: 960 } }>
+				<div className="alignwide" style={ { marginLeft: 'auto', marginRight: 'auto', maxWidth: 960 } }>
 					<p>{ __( 'Please log in to view your patterns.', 'wporg-patterns' ) }</p>
 					<p>
 						<a className="button button-primary button-large" href={ loginUrl }>

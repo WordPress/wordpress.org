@@ -149,8 +149,8 @@ jQuery( function( $ ) {
 });
 
 new Chartist.Line('.ct-chart-contributors', {
-	labels: <?php echo json_encode( $chart_data['labels'] ); ?>,
-	series: <?php echo json_encode( $chart_data['series'] ); ?>
+	labels: <?php echo json_encode( $chart_data['labels'] ?? [] ); ?>,
+	series: <?php echo json_encode( $chart_data['series'] ?? [] ); ?>
 }, {
 	lineSmooth: Chartist.Interpolation.simple({
 		divisor: 2

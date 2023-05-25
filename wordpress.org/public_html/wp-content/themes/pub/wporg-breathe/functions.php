@@ -23,6 +23,10 @@ function after_setup_theme() {
 	add_filter( 'mkaz_prism_css_path', function() {
 		return '/assets/prism/prism.css';
 	} );
+
+	// Use the front-end style.css as the editor styles, not perfect, but looks better than without.
+	add_theme_support( 'editor-styles' );
+	add_editor_style( 'style.css' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\after_setup_theme', 11 );
 

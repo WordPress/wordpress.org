@@ -46,6 +46,15 @@ $show_full_header = is_home() && ! is_paged();
 						?>
 					</p>
 					<?php get_search_form(); ?>
+
+					<p class="site-contribute">
+						<?php
+							printf(
+								__( 'Or <a href="%s">contribute</a> your own photos!', 'wporg-photos' ),
+								esc_url( get_permalink( get_page_by_path( 'submit' ) ) )
+							);
+						?>
+					</p>
 				<?php else : ?>
 					<nav id="site-navigation" class="main-navigation" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-photos' ); ?>"></button>
@@ -64,10 +73,3 @@ $show_full_header = is_home() && ! is_paged();
 				<?php endif; ?>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
-
-		<div class="banner"><?php printf(
-	/* translators: 1: URL for submitting a photo, 2: URL for reporting an issue. */
-	__( 'You&#39;re a bit early to the party! This directory hasn&#39;t yet fully launched. However, you&#39;re welcome to <a href="%1$s">submit photos</a> or <a href="%2$s">report any issues</a> in the meantime. Stay tuned for more.', 'wporg-photos' ),
-	'https://wordpress.org/photos/submit/',
-	'https://meta.trac.wordpress.org/newticket?component=Photo%20Directory'
-); ?></div>

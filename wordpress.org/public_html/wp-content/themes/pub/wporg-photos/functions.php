@@ -80,7 +80,7 @@ add_action( 'template_redirect', __NAMESPACE__ . '\enforce_trailing_slash' );
 function content_width() {
 	$GLOBALS['content_width'] = apply_filters( 'wporg_photos_content_width', 960 );
 }
-add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
+add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 100 );
 
 /**
  * Enqueue scripts and styles.
@@ -102,6 +102,18 @@ function scripts() {
 	wp_dequeue_script( 'devicepx' );
 	wp_register_script( 'grofiles-cards', false );
 	wp_enqueue_script( 'grofiles-cards' );
+
+	if ( is_singular( get_photo_post_type() ) ) {
+		wp_enqueue_script( 'wporg-photos-attribution', get_stylesheet_directory_uri() . '/js/attribution.js', [], filemtime( __DIR__ . '/js/attribution.js' ), true );
+		wp_localize_script(
+			'wporg-photos-attribution',
+			'PhotoDir',
+			[
+				'copied_text'            => __( 'Copied!', 'wporg-photos' ),
+				'copy_to_clipboard_text' => __( 'Copy to clipboard', 'wporg-photos' ),
+			]
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
@@ -195,7 +207,7 @@ function document_title( $title ) {
 	global $wp_query;
 
 	if ( is_front_page() ) {
-		$title['title']   = __( 'WordPress Photos', 'wporg-photos' );
+		$title['title']   = __( 'WordPress Photo Directory', 'wporg-photos' );
 		$title['tagline'] = __( 'WordPress.org', 'wporg-photos' );
 	} else {
 		if ( is_singular( get_photo_post_type() ) ) {
@@ -214,7 +226,7 @@ function document_title( $title ) {
 			);
 		}
 
-		$title['site'] = __( 'WordPress.org', 'wporg-photos' );
+		$title['site'] = __( 'WordPress.org Photo Directory', 'wporg-photos' );
 	}
 
 	return $title;

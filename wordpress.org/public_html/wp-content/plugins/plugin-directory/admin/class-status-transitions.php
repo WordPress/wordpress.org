@@ -7,6 +7,7 @@ use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Approved as Plugin_Approved_Email;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Rejected as Plugin_Rejected_Email;
+use WordPressdotorg\Plugin_Directory\Admin\Metabox\Reviewer as Reviewer_Metabox;
 
 /**
  * All functionality related to Status Transitions.
@@ -134,15 +135,18 @@ class Status_Transitions {
 		switch ( $new_status ) {
 			case 'approved':
 				$this->approved( $post->ID, $post );
+				$this->clear_reviewer( $post );
 				break;
 
 			case 'rejected':
 				$this->rejected( $post->ID, $post );
+				$this->clear_reviewer( $post );
 				break;
 
 			case 'publish':
 				$this->clean_closed_date( $post->ID );
 				$this->set_translation_status( $post, 'active' );
+				$this->clear_reviewer( $post );
 				break;
 
 			case 'disabled':
@@ -202,7 +206,6 @@ class Status_Transitions {
 	 * @param \WP_Post $post    Post object.
 	 */
 	public function approved( $post_id, $post ) {
-		$attachments   = get_attached_media( 'application/zip', $post_id );
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
@@ -213,6 +216,7 @@ class Status_Transitions {
 
 		/*
 		 Temporarily disable SVN prefill from ZIP files
+		$attachments = get_attached_media( 'application/zip', $post_id );
 		if ( $attachments ) {
 			$attachment = end( $attachments );
 
@@ -227,11 +231,6 @@ class Status_Transitions {
 		*/
 
 		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
-
-		// Delete zips.
-		foreach ( $attachments as $attachment ) {
-			wp_delete_attachment( $attachment->ID, true );
-		}
 
 		// Grant commit access.
 		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
@@ -254,11 +253,6 @@ class Status_Transitions {
 		// Default data for review.
 		$original_permalink = $post->post_name;
 		$submission_date    = get_the_modified_date( 'F j, Y', $post_id );
-
-		// Delete zips.
-		foreach ( get_attached_media( 'application/zip', $post_id ) as $attachment ) {
-			wp_delete_attachment( $attachment->ID, true );
-		}
 
 		// Change slug to 'rejected-plugin-name-rejected' to free up 'plugin-name'.
 		wp_update_post( array(
@@ -332,7 +326,7 @@ class Status_Transitions {
 	 * @param int $post_id Post ID.
 	 */
 	public function save_close_reason( $post_id ) {
-		if ( ! isset( $_POST['close_reason'] ) ) {
+		if ( ! isset( $_REQUEST['close_reason'] ) ) {
 			return;
 		}
 
@@ -340,7 +334,7 @@ class Status_Transitions {
 			return;
 		}
 
-		$close_reason = sanitize_key( $_POST['close_reason'] );
+		$close_reason = sanitize_key( $_REQUEST['close_reason'] );
 
 		update_post_meta( $post_id, '_close_reason', $close_reason );
 		update_post_meta( $post_id, 'plugin_closed_date', current_time( 'mysql' ) );
@@ -373,4 +367,13 @@ class Status_Transitions {
 		), $post_id );
 	}
 
+	/**
+	 * Clear the assigned reviewer.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public function clear_reviewer( $post ) {
+		// Unset the reviewer, but don't log it, as the triggering status changes should've been logged in some form.
+		Reviewer_Metabox::set_reviewer( $post, false, false );
+	}
 }

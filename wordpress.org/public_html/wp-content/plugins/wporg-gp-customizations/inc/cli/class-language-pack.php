@@ -579,6 +579,11 @@ class Language_Pack extends WP_CLI_Command {
 			$wpdb->insert_id
 		) );
 
+		// Clear the API update-check translation caches. See api.wordpress.org/translations/lib.php
+		wp_cache_add_global_groups( [ 'update-check-translations', 'translations-query' ] );
+		wp_cache_delete( "{$type}:{$language}:{$domain}", 'update-check-translations' );
+		wp_cache_delete( "{$type}:{$domain}:{$version}", 'translations-query' );
+
 		return true;
 	}
 
@@ -599,8 +604,9 @@ class Language_Pack extends WP_CLI_Command {
 			}
 
 			// Change wp_locale until GlotPress returns the correct wp_locale for variants.
+			// https://meta.trac.wordpress.org/changeset/12176/
 			$wp_locale = $gp_locale->wp_locale;
-			if ( 'default' !== $set->slug ) {
+			if ( 'default' !== $set->slug && ! str_contains( $wp_locale, $set->slug ) ) {
 				$wp_locale = $wp_locale . '_' . $set->slug;
 			}
 

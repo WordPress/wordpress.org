@@ -847,6 +847,12 @@ div.trac-content {
 	box-shadow: none;
 }
 
+/* There's already a border on the title, no need for a border on links in titles */
+.wikipage h2 :link, .wikipage h2 :visited,
+.wikipage h3 :link, .wikipage h3 :visited {
+	border-bottom: none;
+}
+
 /* Gravatars and Comments */
 span.avatar img,
 table.properties img.avatar {
@@ -927,6 +933,12 @@ span.contributor-label[title]:hover {
 	content: none;
 }
 #changelog h3.chat-bot .trac-ticket-buttons {
+	display: none;
+}
+#changelog h3.chat-bot.prbot:hover .trac-ticket-buttons {
+	display: inherit;
+}
+#changelog h3.chat-bot.prbot .trac-ticket-buttons .trac-delete {
 	display: none;
 }
 span.time-ago {
@@ -1389,6 +1401,11 @@ body.bbpress .atwho-view .cur {
 
 body.bbpress .atwho-view strong {
 	color: #080;
+}
+
+body.bbpress .wiki-toc ul li,
+body.bbpress #content.prefs #tabs li {
+	list-style: none;
 }
 
 /* BuddyPress colors */
@@ -2387,6 +2404,7 @@ a.mention.me {
 	}
 	#attachments > div.attachments > p {
 		float: none;
+		position: unset;
 	}
 	#prefs {
 		position: static !important;

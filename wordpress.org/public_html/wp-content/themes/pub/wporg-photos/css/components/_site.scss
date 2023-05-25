@@ -39,13 +39,35 @@ summary {
 }
 
 .site-main {
-	figcaption {
+	.photo-alt-text {
 		color: #666;
 		font-style: italic;
+		margin: 0;
+
+		span {
+			font-style: normal;
+			font-weight: bold;
+			user-select: none;
+		}
 
 		@include breakpoint( 0, 960px ) {
 			margin-left: 20px;
 			margin-right: 20px;
+		}
+	}
+}
+
+.site-contribute {
+	color: rgba( 255, 255, 255, 0.8);
+	font-weight: 300;
+	margin-top: 0;
+
+	a {
+		color: rgba( 255, 255, 255, 0.8);
+		font-weight: 500;
+
+		&:hover {
+			color: rgba(0, 0, 0, 0.8);
 		}
 	}
 }
@@ -64,6 +86,10 @@ body.search  {
 
 		@include breakpoint( 737px ) {
 			padding: 0 10px;
+		}
+
+		@include breakpoint( 0, 650px ) {
+			padding: initial;
 		}
 
 		article {
@@ -225,6 +251,17 @@ body.page {
 	width: 100%;
 }
 
+.site-content .search-username {
+	grid-column: 1 / -1;
+	margin-bottom: 1rem;
+	width: 100%;
+	font-style: italic;
+
+	p {
+		margin-top: 0;
+	}
+}
+
 #wporg-photo-upload {
 	border: none;
 	margin: 0;
@@ -309,12 +346,23 @@ body.page {
 
 .photo-meta {
 	display: flex;
-	flex-flow: row wrap;
+	flex-flow: row nowrap;
 	justify-content: space-around;
+
+	@include breakpoint( 0, 600px ) {
+		flex-wrap: wrap;
+	}
 
 	.column {
 		flex: 2 1 auto;
 		margin-bottom: 2rem;
+		min-width: 250px;
+
+		&:first-child {
+			@include breakpoint( 0, 600px ) {
+				margin-bottom: 1rem;
+			}
+		}
 
 		&:last-child {
 			flex: 1 1 auto;
@@ -339,6 +387,36 @@ body.page {
 	.photo-meta-label {
 		display: inline-block;
 		min-width: 100px;
+	}
+
+	.photo-tags {
+		display: flex;
+		flex-flow: row nowrap;
+
+		ul {
+			display: flex;
+			flex-flow: row wrap;
+			gap: 0.5rem;
+			list-style: none;
+			margin: 0.3rem 0 1rem;
+		}
+
+		.photo-tag {
+			background-color: #ddd;
+			color: #333;
+			padding: 4px 14px;
+			border-radius: 16px;
+			font-size: 14px;
+
+			a {
+				text-decoration: none;
+
+				&:hover {
+					color: #0073aa;
+					text-decoration: underline;
+				}
+			}
+		}
 	}
 
 	.photo-dimensions {
@@ -481,6 +559,54 @@ body.page {
 	}
 }
 
+div.attribution {
+	margin: 1rem 0 3rem;
+	font-size: 0.9rem;
+
+	.attribution-copy {
+		background-color: #30272E;
+		border-color: transparent;
+		color: #fff;
+		font-size: small;
+		padding: 0.25rem 0.5rem;
+		margin-top: 1.5rem;
+	}
+
+	.attribution-label {
+		margin-bottom: 1rem;
+	}
+
+	.attribution-text {
+		.tabs {
+			button {
+				background-color: white;
+				border: 0;
+				border-bottom: 1px solid #aaa;
+				padding: 0.5rem 1rem;
+
+				&.active {
+					border: 1px solid #aaa;
+					border-bottom-color: #fff;
+					display: inline-block;
+				}
+			}
+		}
+		.tab-content {
+			border: 1px solid #aaa;
+			padding: 1rem;
+			margin-top: -1px;
+
+			.tab {
+				display: none;
+
+				&.active {
+					display: block;
+				}
+			}
+		}
+	}
+}
+
 .taxonomy-photo_color-black,
 .color-black::before  { background-color: black }
 .taxonomy-photo_color-blue,
@@ -566,10 +692,26 @@ div.upload-checkbox-wrapper {
 	}
 }
 
-#wporg-photo-upload label.error {
-	background-color: #fbeaea;
-	border-left: 5px solid red;
+#wporg-photo-upload span {
 	padding: 0.1rem 0.3rem;
+	font-weight: normal;
+	border-left-width: 5px;
+	border-left-style: solid;
+
+	&.error {
+		background-color: #fbeaea;
+		border-left-color: red;
+	}
+
+	&.processing {
+		background-color: #e5f5fa;
+		border-left-color: #00a0d2;
+		font-style: italic;
+	}
+}
+
+.confirmation-checkbox-toggle-container {
+	margin-bottom: 1rem;
 }
 
 .taxonomy-photo_orientation {

@@ -26,6 +26,60 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
+	 * Loads the 'discussions-dashboard' template.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string|null $locale_slug          Optional. The locale slug. E.g. "es".
+	 *
+	 * @return void
+	 */
+	public function discussions_dashboard( $locale_slug ) {
+		if ( ! is_user_logged_in() ) {
+			$this->die_with_404();
+		}
+		$user_id = wp_get_current_user()->ID;
+
+		$all_comments_post_ids = $this->get_comment_post_ids( $locale_slug );
+		$comments_count        = count( $all_comments_post_ids );
+		$comment_post_ids      = $all_comments_post_ids;
+
+		$participating          = $this->get_user_comments( $locale_slug, $user_id );
+		$participating_post_ids = array_unique( array_column( $participating, 'comment_post_ID' ) );
+
+		$not_participating_post_ids = array_diff( $all_comments_post_ids, $participating_post_ids );
+
+		$comments_per_page   = 12;
+		$page_num_from_query = (int) get_query_var( 'page' );
+		$offset              = $page_num_from_query > 0 ? ( $page_num_from_query - 1 ) * $comments_per_page : 0;
+		$filter              = isset( $_GET['filter'] ) ? esc_html( $_GET['filter'] ) : '';
+		$page_number         = ( ! empty( $page_num_from_query ) && is_int( $page_num_from_query ) ) ? $page_num_from_query : 1;
+		$gp_locale           = GP_Locales::by_slug( $locale_slug );
+		if ( 'participating' == $filter ) {
+			$comment_post_ids = $participating_post_ids;
+			$comments_count   = count( $participating_post_ids );
+		}
+		if ( 'not_participating' == $filter ) {
+			$comment_post_ids = $not_participating_post_ids;
+			$comments_count   = count( $not_participating_post_ids );
+		}
+		$total_pages = (int) ceil( $comments_count / $comments_per_page );
+
+		$post_ids = array();
+
+		$post_ids       = array_splice( $comment_post_ids, $offset, $comments_per_page );
+		$args           = array(
+			'meta_key'   => 'locale',
+			'meta_value' => $locale_slug,
+			'post__in'   => $post_ids,
+		);
+		$comments_query = new WP_Comment_Query( $args );
+		$comments       = $comments_query->comments;
+
+		$this->tmpl( 'discussions-dashboard', get_defined_vars() );
+	}
+
+	/**
 	 * Loads the 'original-permalink' template.
 	 *
 	 * @since 0.0.2
@@ -333,5 +387,42 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			$args
 		);
 		return $translation_permalink;
+	}
+
+	/**
+	 * Gets distinct post_ids for all comments made by user
+	 *
+	 * @param      string $locale_slug           The locale slug.
+	 * @param      int    $user_id           The user id.
+	 *
+	 * @return     array    The array of comment_post_IDs.
+	 */
+	private function get_user_comments( $locale_slug, $user_id ) {
+		$args     = array(
+			'meta_key'   => 'locale',
+			'meta_value' => $locale_slug,
+			'user_id'    => $user_id,
+		);
+		$query    = new WP_Comment_Query( $args );
+		$comments = $query->comments;
+
+		return $comments;
+	}
+
+	/**
+	 * Run a query to fetch comment_post_ID of all comments
+	 *
+	 * @param string $locale_slug           The locale slug.
+	 *
+	 * @return array Array of unique comment_post_IDs for all comments.
+	 */
+	private function get_comment_post_ids( $locale_slug ) {
+		global $wpdb;
+		return $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT {$wpdb->comments}.comment_post_ID FROM {$wpdb->comments} INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id WHERE meta_key='locale' AND meta_value = %s ORDER BY comment_date DESC",
+				$locale_slug
+			)
+		);
 	}
 }

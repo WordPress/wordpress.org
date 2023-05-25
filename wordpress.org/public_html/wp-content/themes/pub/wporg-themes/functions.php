@@ -184,9 +184,15 @@ function wporg_themes_scripts() {
 				'favorites'    => array(
 					'api'    => $api_endpoints['favorite'],
 					'themes' => wporg_themes_get_user_favorites(),
-					'user'   => wp_get_current_user()->user_login,
 					'nonce'  => is_user_logged_in() ? wp_create_nonce( 'modify-theme-favorite' ) : false,
 				),
+				'currentUser' => is_user_logged_in() ?
+					array(
+						'login'    => wp_get_current_user()->user_login,
+						'slug'     => wp_get_current_user()->user_nicename,
+						'is_admin' => current_user_can( 'edit_posts' ),
+					) :
+					false,
 				'browseDefault'=> WPORG_THEMES_DEFAULT_BROWSE,
 				'apiEndpoint'  => $api_endpoints['query'],
 			),
@@ -206,9 +212,19 @@ function wporg_themes_scripts() {
 				/* translators: %s: Name of the pattern */
 				'pattern_caption_template' => __( '%s pattern', 'wporg-themes' ),
 
+				'style_variations_title' => __( 'Style variations', 'wporg-themes' ),
+
+				/* translators: %s: Title of the style variation */
+				'style_variation_caption_template' => __( '%s style variation', 'wporg-themes' ),
+
 				// Active Installs
 				'active_installs_less_than_10' => __( 'Less than 10', 'wporg-themes' ),
 				'active_installs_1_million' => __( '1+ million', 'wporg-themes' ),
+			),
+			'rest' => array(
+				'restUrl'   => get_rest_url(),
+				'restNonce' => wp_create_nonce( 'wp_rest' ),
+				'themeSlug' => get_post()->post_name ?? '',
 			),
 		) );
 	}
@@ -402,6 +418,7 @@ function wporg_themes_get_feature_list( $include = 'active' ) {
 				'post-formats'          => __( 'Post Formats', 'wporg-themes' ),
 				'rtl-language-support'  => __( 'RTL Language Support', 'wporg-themes' ),
 				'sticky-post'           => __( 'Sticky Post', 'wporg-themes' ),
+				'style-variations'      => __( 'Style Variations', 'wporg-themes' ),
 				'template-editing'      => __( 'Template Editing', 'wporg-themes' ),
 				'theme-options'         => __( 'Theme Options', 'wporg-themes' ),
 				'threaded-comments'     => __( 'Threaded Comments', 'wporg-themes' ),
@@ -477,17 +494,6 @@ function wporg_themes_get_tag_translations() {
 		$translations = array_merge( $translations, $tags );
 	}
 	return $translations;
-}
-
-if ( class_exists( 'Jetpack' ) ) {
-	include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo.php';
-	include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-posts.php';
-	include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-titles.php';
-	include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-utils.php';
-
-	if ( class_exists( 'Jetpack_SEO' ) ) {
-		new Jetpack_SEO;
-	}
 }
 
 /**

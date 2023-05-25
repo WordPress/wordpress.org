@@ -302,7 +302,22 @@ class o2_follow {
 		$current_user          = wp_get_current_user();
 		$jetpack_subscriptions = Jetpack_Subscriptions::init();
 
-		$response = $jetpack_subscriptions->subscribe( $current_user->user_email, array( $post_id ), true );
+		$response = $jetpack_subscriptions->subscribe(
+			$current_user->user_email,
+			array( $post_id ),
+			true,
+			array(
+				'source'         => 'widget',
+				'widget-in-use'  => is_active_widget( false, false, 'blog_subscription', true ) ? 'yes' : 'no',
+				'comment_status' => '',
+				'server_data'    => jetpack_subscriptions_cherry_pick_server_data(),
+			)
+		);
+
+		// todo: This only checks that the data passed was valid, not that the remote request was successful. The
+		// code below counts the post as being followed even if the remote request failed. That's necessary
+		// because it's done async. Maybe refactor to be synchronous and update this to check all error
+		// conditions.
 		if ( is_wp_error( $response ) ) {
 			return;
 		}

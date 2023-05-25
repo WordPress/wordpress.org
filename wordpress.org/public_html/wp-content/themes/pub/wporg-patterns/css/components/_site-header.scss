@@ -60,14 +60,18 @@
 
 body:not(.home) {
 	.site-branding {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: 1fr auto;
 		font-size: 0.8125rem;
 		color: $color-white;
 
 		@include breakpoint( $breakpoint-medium ) {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+
 			*:first-child {
 				flex-grow: 1;
 			}
@@ -87,14 +91,7 @@ body:not(.home) {
 		}
 
 		.pattern-search {
-			margin-top: 1rem;
-			flex-basis: 100%;
-
-			@include breakpoint( $breakpoint-medium ) {
-				margin-top: 0;
-				margin-left: 1rem;
-				flex-basis: unset;
-			}
+			grid-column: 1 / span 2;
 		}
 	}
 }

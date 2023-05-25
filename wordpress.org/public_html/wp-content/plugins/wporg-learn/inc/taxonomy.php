@@ -8,23 +8,30 @@ defined( 'WPINC' ) || die();
  * Actions and filters.
  */
 add_action( 'init', __NAMESPACE__ . '\register' );
+add_action( 'audience_add_form_fields', __NAMESPACE__ . '\register_custom_fields' );
+add_action( 'topic_add_form_fields', __NAMESPACE__ . '\register_custom_fields' );
+add_action( 'audience_edit_form_fields', __NAMESPACE__ . '\tax_edit_term_fields', 10, 2 );
+add_action( 'topic_edit_form_fields', __NAMESPACE__ . '\tax_edit_term_fields', 10, 2 );
+add_action( 'created_audience', __NAMESPACE__ . '\tax_save_term_fields' );
+add_action( 'edited_audience', __NAMESPACE__ . '\tax_save_term_fields' );
+add_action( 'created_topic', __NAMESPACE__ . '\tax_save_term_fields' );
+add_action( 'edited_topic', __NAMESPACE__ . '\tax_save_term_fields' );
 
 /**
  * Register all the taxonomies.
  */
 function register() {
 	register_lesson_audience();
-	register_lesson_category();
 	register_lesson_duration();
 	register_lesson_group();
 	register_lesson_instruction_type();
 	register_lesson_level();
 	register_lesson_plan_series();
 	register_workshop_series();
-	register_workshop_topic();
 	register_workshop_type();
 	register_wp_version();
 	register_included_content();
+	register_topic();
 }
 
 /**
@@ -70,51 +77,6 @@ function register_lesson_audience() {
 	);
 
 	register_taxonomy( 'audience', array( 'lesson-plan' ), $args );
-}
-
-/**
- * Register the Lesson Category taxonomy.
- */
-function register_lesson_category() {
-	$labels = array(
-		'name'                       => _x( 'Lesson Categories', 'Taxonomy General Name', 'wporg-learn' ),
-		'singular_name'              => _x( 'Lesson Category', 'Taxonomy Singular Name', 'wporg-learn' ),
-		'menu_name'                  => __( 'Categories', 'wporg-learn' ),
-		'all_items'                  => __( 'All Lesson Categories', 'wporg-learn' ),
-		'new_item_name'              => __( 'New Lesson Category', 'wporg-learn' ),
-		'add_new_item'               => __( 'Add New Lesson Category', 'wporg-learn' ),
-		'edit_item'                  => __( 'Edit Lesson Category', 'wporg-learn' ),
-		'update_item'                => __( 'Update Lesson Category', 'wporg-learn' ),
-		'view_item'                  => __( 'View Lesson Category', 'wporg-learn' ),
-		'separate_items_with_commas' => __( 'Separate lesson categories with commas', 'wporg-learn' ),
-		'add_or_remove_items'        => __( 'Add or remove lesson categories', 'wporg-learn' ),
-		'choose_from_most_used'      => __( 'Choose from the most used', 'wporg-learn' ),
-		'popular_items'              => __( 'Popular lesson categories', 'wporg-learn' ),
-		'search_items'               => __( 'Search lesson categories', 'wporg-learn' ),
-		'not_found'                  => __( 'Not Found', 'wporg-learn' ),
-		'no_terms'                   => __( 'No lesson categories', 'wporg-learn' ),
-		'items_list'                 => __( 'Lesson Categories list', 'wporg-learn' ),
-		'items_list_navigation'      => __( 'Lesson Categories list navigation', 'wporg-learn' ),
-	);
-
-	$args = array(
-		'labels'            => $labels,
-		'hierarchical'      => true,
-		'public'            => true,
-		'rewrite'           => array(
-			'slug' => 'lesson-plans',
-		),
-		'show_ui'           => true,
-		'show_admin_column' => true,
-		'show_in_nav_menus' => false,
-		'show_tagcloud'     => false,
-		'show_in_rest'      => true,
-		'capabilities'      => array(
-			'assign_terms' => 'edit_lesson_plans',
-		),
-	);
-
-	register_taxonomy( 'wporg_lesson_category', array( 'lesson-plan' ), $args );
 }
 
 /**
@@ -233,7 +195,7 @@ function register_lesson_instruction_type() {
 		'items_list_navigation'      => __( 'Instruction Types list navigation', 'wporg-learn' ),
 	);
 
-	$args   = array(
+	$args = array(
 		'labels'            => $labels,
 		'hierarchical'      => true,
 		'public'            => true,
@@ -297,7 +259,7 @@ function register_lesson_level() {
 }
 
 /**
- * Register the Workshop Series taxonomy.
+ * Register the Lesson Plan Series taxonomy.
  */
 function register_lesson_plan_series() {
 	$labels = array(
@@ -386,11 +348,11 @@ function register_workshop_series() {
 }
 
 /**
- * Register the Workshop Topic taxonomy.
+ * Register the Topic taxonomy.
  */
-function register_workshop_topic() {
+function register_topic() {
 	$labels = array(
-		'name'                       => _x( 'Topics', 'Topic Plans associated to tutorial.', 'wporg-learn' ),
+		'name'                       => _x( 'Topics', 'Topics associated with the content.', 'wporg-learn' ),
 		'singular_name'              => _x( 'Topic', 'Taxonomy Singular Name', 'wporg-learn' ),
 		'menu_name'                  => __( 'Topics', 'wporg-learn' ),
 		'all_items'                  => __( 'All topic', 'wporg-learn' ),
@@ -410,6 +372,7 @@ function register_workshop_topic() {
 		'no_terms'                   => __( 'No Topic ', 'wporg-learn' ),
 		'items_list'                 => __( 'Topic list', 'wporg-learn' ),
 		'items_list_navigation'      => __( 'Topic list navigation', 'wporg-learn' ),
+		'back_to_items'              => __( '&larr; Back to topics', 'wporg-learn' ),
 	);
 
 	$args = array(
@@ -423,11 +386,11 @@ function register_workshop_topic() {
 		'show_tagcloud'     => false,
 		'show_in_rest'      => true,
 		'capabilities'      => array(
-			'assign_terms' => 'edit_workshops',
+			'assign_terms' => 'edit_any_learn_content', // See \WPOrg_Learn\Capabilities\map_meta_caps.
 		),
 	);
 
-	register_taxonomy( 'topic', array( 'wporg_workshop' ), $args );
+	register_taxonomy( 'topic', array( 'lesson-plan', 'wporg_workshop', 'course', 'lesson', 'meeting' ), $args );
 }
 
 /**
@@ -563,4 +526,80 @@ function register_included_content() {
 	$post_types = array( 'lesson-plan', 'wporg_workshop', 'course', 'lesson' );
 
 	register_taxonomy( 'wporg_included_content', $post_types, $args );
+}
+
+/**
+ * Add icon field for Category and Audience
+ */
+function register_custom_fields( $taxonomy ) {
+	echo '<div class="form-field">
+	<label for="dashicon-class">Dashicon ID</label>
+	<input type="text" name="dashicon-class" id="dashicon-class" />
+	<p>Enter the id of a <a href="https://developer.wordpress.org/resource/dashicons/#wordpress" target="_blank">Dashicon</a>. Example: <code>wordpress</code></p>
+	</div>
+	<div class="form-field">
+	<label for="sticky">
+	<input type="checkbox" name="sticky" id="sticky" />Sticky topic</label>
+	<p>Check to show on landing page</p>
+	</div>
+	';
+}
+
+/**
+ * Icon field on edit screen.
+ *
+ * @param object $term the term data.
+ * @param array  $taxonomy the taxonomy array.
+ */
+function tax_edit_term_fields( $term, $taxonomy ) {
+	$value  = get_term_meta( $term->term_id, 'dashicon-class', true );
+	$sticky = get_term_meta( $term->term_id, 'sticky', true );
+
+	echo '<tr class="form-field">
+	<th>
+		<label for="dashicon-class">Dashicon ID</label>
+	</th>
+	<td>
+		<input name="dashicon-class" id="dashicon-class" type="text" value="' . esc_attr( $value ) . '" />
+		<p>Enter the id of a <a href="https://developer.wordpress.org/resource/dashicons/#wordpress" target="_blank">Dashicon</a>. Example: <code>wordpress</code></p>
+	</td>
+	</tr>
+	<tr class="form-field">
+	<th>
+		<label for="sticky">Sticky topic</label>
+	</th>
+	<td>
+		<input name="sticky" id="sticky" type="checkbox" ' . esc_html( $sticky ? ' checked' : '' ) . ' />
+		<p>Check to show on landing page</p>
+	</td>
+	</tr>
+	';
+}
+
+/**
+ * Save icon field.
+ *
+ * @param int $term_id the term id to update.
+ */
+function tax_save_term_fields( $term_id ) {
+	$wp_list_table = _get_list_table( 'WP_Terms_List_Table' );
+
+	if ( 'add-tag' === $wp_list_table->current_action() ) {
+		check_admin_referer( 'add-tag', '_wpnonce_add-tag' );
+	} else {
+		check_admin_referer( 'update-tag_' . $term_id );
+	}
+
+	update_term_meta(
+		$term_id,
+		'dashicon-class',
+		sanitize_text_field( $_POST['dashicon-class'] )
+	);
+
+	$is_sticky = $_POST['sticky'] ?? 0;
+	update_term_meta(
+		$term_id,
+		'sticky',
+		rest_sanitize_boolean( $is_sticky )
+	);
 }

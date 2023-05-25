@@ -1599,7 +1599,7 @@ div.plugin-meta img {
 /* =Trac
 -------------------------------------------------------------- */
 
-body.trac .attachment {
+body.trac a.attachment {
 	display: inline;
 }
 
@@ -1651,7 +1651,7 @@ body.trac .attachment {
 }
 
 /* Shrink logo to make room for navigation */
-@media screen and ( max-width: 820px ) {
+@media screen and ( max-width: 835px ) {
 	#header-inner h1 a {
 		width: 65px !important;
 	}

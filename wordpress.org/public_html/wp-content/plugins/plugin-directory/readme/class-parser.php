@@ -578,6 +578,9 @@ class Parser {
 	 */
 	protected function sanitize_contributors( $users ) {
 		foreach ( $users as $i => $name ) {
+			// Trim any leading `@` off the name, in the event that someone uses `@joe-bloggs`.
+			$name = ltrim( $name, '@' );
+
 			// Contributors should be listed by their WordPress.org Login name (Example: 'Joe Bloggs')
 			$user = get_user_by( 'login', $name );
 
@@ -792,6 +795,11 @@ class Parser {
 	protected function parse_markdown( $text ) {
 		static $markdown = null;
 
+		// Return early if the Markdown processor isn't available.
+		if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Markdown' ) ) {
+			return $text;
+		}
+
 		if ( is_null( $markdown ) ) {
 			$markdown = new Markdown();
 		}
@@ -799,28 +807,4 @@ class Parser {
 		return $markdown->transform( $text );
 	}
 
-	/**
-	 * Determine if the readme contains unique installation instructions.
-	 *
-	 * When phrases are added here, the affected plugins will need to be reparsed to pick it up.
-	 *
-	 * @return bool Whether the instructions differ from default instructions.
-	 */
-	protected function has_unique_installation_instructions() {
-		if ( ! isset( $this->sections['installation'] ) ) {
-			return false;
-		}
-
-		// If the plugin installation section contains any of these phrases, skip it as it's not useful.
-		$common_phrases = array(
-			'This section describes how to install the plugin and get it working.', // Default readme.txt content
-		);
-		foreach ( $common_phrases as $phrase ) {
-			if ( false !== stripos( $this->sections['installation'], $phrase ) ) {
-				return false;
-			}
-		}
-
-		return true;
-	}
 }

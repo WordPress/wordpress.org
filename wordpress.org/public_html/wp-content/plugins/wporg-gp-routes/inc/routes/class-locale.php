@@ -43,7 +43,7 @@ class Locale extends GP_Route {
 	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = false ) {
 		global $wpdb;
 
-		$per_page = 21;
+		$per_page = 24;
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
 		$filter = gp_get( 'filter', false );
@@ -72,7 +72,7 @@ class Locale extends GP_Route {
 				$this->roles_adapter->is_approver_for_locale( $user_id, $locale_slug ) // Doesn't have project-level access either
 			)
 			// Add check to see if there are any waiting translations for this locale?
-			) {
+		) {
 			$default_project_tab = 'wp';
 		}
 
@@ -105,6 +105,13 @@ class Locale extends GP_Route {
 				'locale' => $locale_slug,
 			)
 		);
+
+		$data['project']                = $project;
+		$data['sub_projects']           = $paged_sub_projects['projects'];
+		$data['pages']                  = $paged_sub_projects['pages'];
+		$data                           = apply_filters( 'gp_subprojects', $data );
+		$paged_sub_projects['projects'] = $data['sub_projects'];
+		$paged_sub_projects['pages']    = $data['pages'];
 
 		if ( ! $paged_sub_projects ) {
 			return $this->die_with_404();
@@ -270,6 +277,8 @@ class Locale extends GP_Route {
 						return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
 					case 'browsehappy':
 						return '<div class="icon"><img src="' . plugins_url( 'templates/images/browsehappy.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
+					case 'openverse':
+						return '<div class="icon"><img src="' . plugins_url( 'templates/images/openverse.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
 					default:
 						return '<div class="default-icon"><span class="dashicons dashicons-networking"></span></div>';
 				}
@@ -581,13 +590,19 @@ class Locale extends GP_Route {
 	private function get_project_status( $project, $locale, $set_slug, $status = null, $calc_sub_projects = true ) {
 		if ( null === $status ) {
 			$status = new stdClass;
-			$status->sub_projects_count = 0;
-			$status->waiting_count      = 0;
-			$status->current_count      = 0;
-			$status->fuzzy_count        = 0;
-			$status->untranslated_count = 0;
-			$status->all_count          = 0;
-			$status->percent_complete   = 0;
+			$status->sub_projects_count     = 0;
+			$status->waiting_count          = 0;
+			$status->current_count          = 0;
+			$status->fuzzy_count            = 0;
+			$status->untranslated_count     = 0;
+			$status->changesrequested_count = 0;
+			$status->all_count              = 0;
+			$status->percent_complete       = 0;
+		}
+
+		$status = apply_filters( 'gp_get_project_status', $status, $project, $locale, $set_slug );
+		if ( isset( $status->is_pattern ) && $status->is_pattern ) {
+			return $status;
 		}
 
 		$set = GP::$translation_set->by_project_id_slug_and_locale(
@@ -598,11 +613,12 @@ class Locale extends GP_Route {
 
 		if ( $set ) {
 			$status->sub_projects_count += 1;
-			$status->waiting_count      += (int) $set->waiting_count();
-			$status->current_count      += (int) $set->current_count();
-			$status->fuzzy_count        += (int) $set->fuzzy_count();
-			$status->untranslated_count += (int) $set->untranslated_count();
-			$status->all_count          += (int) $set->all_count();
+			$status->waiting_count          += (int) $set->waiting_count();
+			$status->current_count          += (int) $set->current_count();
+			$status->fuzzy_count            += (int) $set->fuzzy_count();
+			$status->untranslated_count     += (int) $set->untranslated_count();
+			$status->changesrequested_count += (int) $set->changesrequested_count();
+			$status->all_count              += (int) $set->all_count();
 
 			if ( $status->all_count ) {
 				/*

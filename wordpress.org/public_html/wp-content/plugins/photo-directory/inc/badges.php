@@ -35,7 +35,7 @@ class Badges {
 
 		} elseif ( 'publish' === $old_status && 'publish' !== $new_status ) {
 			// If the user now has no published Photos, remove the badge.
-			if ( ! Photo::count_user_published_photos( $post->post_author ) ) {
+			if ( ! User::count_published_photos( $post->post_author ) ) {
 				remove_badge( 'photo-contributor', $post->post_author );
 			}
 		}

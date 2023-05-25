@@ -20,9 +20,10 @@ class Plugin extends Base {
 	 */
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/?', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'plugin_info' ),
-			'args'     => array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'plugin_info' ),
+			'permission_callback' => '__return_true',
+			'args'                => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
 				),
@@ -111,10 +112,11 @@ class Plugin extends Base {
 			);
 		}
 
-		$result['requires']      = get_post_meta( $post_id, 'requires', true ) ?: false;
-		$result['tested']        = get_post_meta( $post_id, 'tested', true ) ?: false;
-		$result['requires_php']  = get_post_meta( $post_id, 'requires_php', true ) ?: false;
-		$result['compatibility'] = array();
+		$result['requires']         = get_post_meta( $post_id, 'requires', true ) ?: false;
+		$result['tested']           = get_post_meta( $post_id, 'tested', true ) ?: false;
+		$result['requires_php']     = get_post_meta( $post_id, 'requires_php', true ) ?: false;
+		$result['requires_plugins'] = get_post_meta( $post_id, 'requires_plugins', true ) ?: [];
+		$result['compatibility']    = array();
 
 		if ( class_exists( '\WPORG_Ratings' ) ) {
 			$result['rating']  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;

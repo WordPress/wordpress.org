@@ -152,6 +152,7 @@ if ( 'wp-plugins' === $project->path ) {
 				<th><?php _e( 'Fuzzy' ); ?></th>
 				<th><?php _e( 'Untranslated' ); ?></th>
 				<th><?php _e( 'Waiting' ); ?></th>
+				<th><?php _e( 'Changes requested' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -179,6 +180,9 @@ if ( 'wp-plugins' === $project->path ) {
 					</td>
 					<td class="stats waiting">
 						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), number_format_i18n( $sub_project_status->waiting_count ) ); ?>
+					</td>
+					<td class="stats changesrequested">
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[changesrequested]' => 'yes', 'filters[status]' => 'changesrequested' ) ), number_format_i18n( $sub_project_status->changesrequested_count ) ); ?>
 					</td>
 					</tr>
 				</tr>
@@ -227,7 +231,9 @@ if ( 'wp-plugins' === $project->path ) {
 					<td class="stats waiting">
 						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), number_format_i18n( $status->waiting_count ) ); ?>
 					</td>
-					</tr>
+					<td class="stats changesrequested">
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[changesrequested]' => 'yes', 'filters[status]' => 'changesrequested' ) ), number_format_i18n( $status->changesrequested_count ) ); ?>
+					</td>
 				</tr>
 				<?php
 			}

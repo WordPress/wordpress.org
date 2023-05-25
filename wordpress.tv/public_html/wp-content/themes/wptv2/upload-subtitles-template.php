@@ -276,7 +276,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 						<select name="wptv_language">
 							<?php $tracks = VideoPress_Subtitles::get_tracks( $video->guid ); ?>
 							<?php foreach ( VideoPress_Subtitles::get_languages() as $value => $language ) : ?>
-								<option value="<?php echo esc_attr( $value ); ?>" <?php disabled( ! empty( $tracks[ $value ] ) ); ?> ><?php echo esc_html( $language['localized_label'] ); ?></option>
+								<option value="<?php echo esc_attr( $value ); ?>" ><?php echo esc_html( $language['localized_label'] ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</td>

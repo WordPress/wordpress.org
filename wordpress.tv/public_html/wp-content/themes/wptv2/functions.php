@@ -39,13 +39,19 @@ class WordPressTV_Theme {
 
 		add_filter( 'document_title_parts', array( $this, 'document_title_parts' ) );
 
-		add_filter( 'template_redirect', array( $this, 'redirects' ) );
+		add_filter( 'template_redirect', array( $this, 'redirects' ), 1 );
 
 		register_nav_menus( array(
 			'primary'            => __( 'Primary Menu', 'wptv' ),
 			'footer'             => __( 'Footer Menu', 'wptv' ),
 			'featured_wordcamps' => __( 'Featured WordCamps', 'wptv' ),
 		) );
+
+		// MediaRSS
+		// All videos are uploaded by anonvideoupload, we don't need that in the RSS feed.
+		add_filter( 'mrss_avatar_user', '__return_false' );
+		// Add the original uploaded file to the mediaRss output.
+		add_filter( 'mrss_media', array( $this, 'mrss_media_add_original' ) );
 	}
 
 	/**
@@ -144,6 +150,12 @@ class WordPressTV_Theme {
 		if ( str_starts_with( $_SERVER['REQUEST_URI'], '/category/social-learning' ) ) {
 			$url = str_replace( '/social-learning', '/learn-wordpress-online-workshops', $_SERVER['REQUEST_URI'] );
 			wp_safe_redirect( $url, 301 );
+			die();
+		}
+
+		// Redirect /upload to submit-video
+		if ( 'upload' === trim( $_SERVER['REQUEST_URI'], '/' ) ) {
+			wp_safe_redirect( '/submit-video/', 301 );
 			die();
 		}
 	}
@@ -597,6 +609,35 @@ class WordPressTV_Theme {
 	}
 
 	/**
+	 * Retrieve the original uploaded file details.
+	 */
+	function get_video_attachment( $post = null ) {
+		$post   = get_post( $post );
+		$videos = get_children(
+			array(
+				'post_parent' => $post->ID,
+				'post_mime_type' => 'video/%'
+			)
+		);
+
+		if ( ! $videos ) {
+			return false;
+		}
+
+		$videos = array_values( $videos );
+		return $videos[0];
+	}
+
+	/**
+	 * Return the URL to the attached video.
+	 */
+	function get_video_attachment_url( $post = null ) {
+		$attachment = $this->get_video_attachment( $post );
+
+		return $attachment ? wp_get_attachment_url( $attachment->ID ) : false;
+	}
+
+	/**
 	 * Retrieves the guid for the wpvideo video for a given post.
 	 */
 	function get_the_video_guid( $post = null ) {
@@ -780,6 +821,27 @@ class WordPressTV_Theme {
 		];
 
 		return $locales[ $locale ] ?? false;
+	}
+
+	/**
+	 * Add the Original uploaded file to the mediaRss output.
+	 */
+	public function mrss_media_add_original( $meds ) {
+		$original_url = $this->get_video_attachment_url();
+
+		if ( $original_url ) {
+			$meds[] = array(
+				'content' => array(
+					'attr' => array(
+						'medium'    => 'video',
+						'isDefault' => 'false',
+						'url'       => $original_url,
+					)
+				)
+			);
+		}
+
+		return $meds;
 	}
 }
 

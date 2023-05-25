@@ -5,7 +5,9 @@ namespace WordPressdotorg\GlotPress\Customizations;
 use GP;
 use GP_Locales;
 use GP_Translation;
+use WordPressdotorg\GlotPress\Customizations\CLI\Stats;
 use WP_CLI;
+use function WordPressdotorg\Profiles\assign_badge;
 
 class Plugin {
 
@@ -43,6 +45,7 @@ class Plugin {
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
 		add_action( 'init', array( $this, 'bump_assets_versions' ), 20 );
+		add_action( 'init', array( $this, 'add_cors_header' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
@@ -55,10 +58,13 @@ class Plugin {
 
 		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
 
+		add_filter( 'gp_custom_reasons', array( $this, 'get_custom_reasons' ), 10, 2 );
+
 		// Cron.
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
 		add_action( 'init', [ $this, 'register_cron_events' ] );
 		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
+		add_action( 'wporg_translate_update_polyglots_stats', [ $this, 'update_polyglots_stats' ] );
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
@@ -72,6 +78,9 @@ class Plugin {
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\REST_API\Base', 'load_endpoints' ) );
 
 		//Locales\Serbian_Latin::init();
+
+		// Correct `WP_Locale` for variant locales in project lists.
+		add_filter( 'gp_translation_sets_sort', [ $this, 'filter_gp_translation_sets_sort' ] );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
@@ -129,6 +138,9 @@ class Plugin {
 		if ( ! wp_next_scheduled( 'wporg_translate_update_contributor_profile_badges' ) ) {
 			wp_schedule_event( time(), '15_minutes', 'wporg_translate_update_contributor_profile_badges' );
 		}
+		if ( ! wp_next_scheduled( 'wporg_translate_update_polyglots_stats' ) ) {
+			wp_schedule_event( time(), 'daily', 'wporg_translate_update_polyglots_stats' );
+		}
 	}
 
 	/**
@@ -137,6 +149,10 @@ class Plugin {
 	 */
 	public function update_contributor_profile_badges() {
 		global $wpdb;
+
+		if ( ! function_exists( 'WordPressdotorg\Profiles\assign_badge' ) ) {
+			return;
+		}
 
 		if ( ! isset( $wpdb->user_translations_count ) ) {
 			return;
@@ -160,23 +176,22 @@ class Plugin {
 			return;
 		}
 
-		$request_body = [
-			'action'      => 'wporg_handle_association',
-			'source'      => 'polyglots',
-			'command'     => 'add',
-			'association' => 'translation-contributor',
-		];
-
-		foreach( $user_ids as $user_id ) {
-			$request_body['user_id'] = $user_id;
-
-			wp_remote_post( 'https://profiles.wordpress.org/wp-admin/admin-ajax.php', [
-				'body'       => $request_body,
-				'user-agent' => 'WordPress.org Translate',
-			] );
-		}
+		assign_badge( 'translation-contributor', $user_ids );
 
 		update_option( 'wporg_translate_last_badges_sync', $now );
+	}
+
+	/**
+	 * Updates the Polyglots stats at https://make.wordpress.org/polyglots/stats/
+	 *
+	 * @return void
+	 */
+	public function update_polyglots_stats() {
+		// Increase the memory limit during the cron request to support the memory-heavy stats cron.
+		ini_set( 'memory_limit', '1G' );
+
+		$stats = new Stats();
+		$stats();
 	}
 
 	/**
@@ -357,7 +372,7 @@ class Plugin {
 
 		add_action( 'gp_head', 'stats_hide_smile_css' );
 		add_action( 'gp_head', 'stats_admin_bar_head', 100 );
-		add_action( 'gp_footer', 'stats_footer', 101 );
+		add_action( 'gp_footer', array( 'Automattic\Jetpack\Stats\Tracking_Pixel', 'add_to_footer' ), 101 );
 	}
 
 	/**
@@ -447,7 +462,24 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate make-core-pot', __NAMESPACE__ . '\CLI\Make_Core_Pot' );
 		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
+		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Stats_Print' );
 
+	}
+
+	/**
+	 * Allow the Playground to access translate.wordpress.org.
+	 */
+	public static function add_cors_header() {
+		if ( headers_sent() ) {
+			return;
+		}
+		if ( isset( $_SERVER['HTTP_ORIGIN'] ) ) {
+			switch ( $_SERVER['HTTP_ORIGIN'] ) {
+				case 'https://playground.wordpress.net':
+					header( 'Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] );
+			}
+		}
+		header( 'Vary: origin' );
 	}
 
 	/**
@@ -559,5 +591,59 @@ class Plugin {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Filter the project translation set list to have correct WP_Locale fields for variants.
+	 *
+	 * This also affects the API output, so as not to have duplicate `wp_locale` fields with variants.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/4367
+	 *
+	 * @param array $translation_sets The translation sets.
+	 * @return array Filtered translation sets.
+	 */
+	function filter_gp_translation_sets_sort( $translation_sets ) {
+		foreach ( $translation_sets as $set ) {
+			if ( 'default' !== $set->slug && ! str_contains( $set->wp_locale, $set->slug ) ) {
+				$set->wp_locale .= '_' . $set->slug;
+			}
+		}
+
+		return $translation_sets;
+	}
+
+	public function get_custom_reasons( $default_reasons, $locale ) {
+		$locale_reasons = array(
+			'it' => array(
+				'consistency'          => array(
+					'name'        => 'Consistenza',
+					'explanation' => 'Utilizzare una traduzione consistente',
+				),
+				'second_person'        => array(
+					'name'        => '2a persona',
+					'explanation' => 'Per i verbi utilizziamo la seconda persona singolare rivolgendoci direttamente all’utente',
+				),
+				'capitalize_titlecase' => array(
+					'name'        => 'No maiuscole TitleCase',
+					'explanation' => 'Verificare il corretto uso delle maiuscole in italiano, sono presenti maiuscole non necessarie/errate',
+				),
+				'double_space'         => array(
+					'name'        => 'Spazio doppio',
+					'explanation' => 'Sono presenti uno o più uno spazi doppi',
+				),
+				'beginning_space'      => array(
+					'name'        => 'Spazio all’inizio o alla fine',
+					'explanation' => 'Sono presenti/assenti spazi all’inizio o alla fine della traduzione diversamente dalla stringa originale',
+				),
+				'no_s_plural'          => array(
+					'name'        => 'Niente s al plurale',
+					'explanation' => 'In italiano non si riportano le s del plurale dei termini che rimangono invariati',
+				),
+			),
+		);
+
+		$reasons = isset( $locale_reasons[ $locale ] ) ? $locale_reasons[ $locale ] : array();
+		return array_merge( $default_reasons, $reasons );
 	}
 }

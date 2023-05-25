@@ -2,6 +2,15 @@
 
 function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low_scores = true ) {
 
+	// Allow local installs to bypass
+	if (
+		'local' === wp_get_environment_type() &&
+		! defined( 'RECAPTCHA_V3_PRIVKEY' ) &&
+		! defined( 'RECAPTCHA_INVIS_PRIVKEY' )
+	) {
+		return true;
+	}
+
 	// reCaptcha V3 Checks
 	if ( $check_v3_action ) {
 		if ( empty( $_POST['_reCaptcha_v3_token'] ) ) {
@@ -74,7 +83,9 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		'meta' => $meta + array(
 			'registration_ip'  => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
 		),
-		'scores' => array(),
+		'scores' => array(
+			'pending' => 1,
+		),
 		'cleared' => 0,
 	);
 
@@ -149,22 +160,31 @@ function wporg_login_send_confirmation_email( $user ) {
 		return false;
 	}
 
+	$password_set_url = home_url( '/register/create/' . urlencode( $user_login ) . '/' . urlencode( $activation_key ) . '/' );
+
 	$body  = sprintf( __( 'Hi %s,', 'wporg' ), $user_login ) . "\n\n";
 	$body .= __( 'Welcome to WordPress.org! Your new account has been setup.', 'wporg' ) . "\n";
 	$body .= "\n";
 	$body .= sprintf( __( 'Your username is: %s', 'wporg' ), $user_login ) . "\n";
 	$body .= __( 'You can create a password at the following URL:', 'wporg' ) . "\n";
-	$body .= home_url( '/register/create/' . urlencode( $user_login ) . '/' . urlencode( $activation_key ) . '/' );
+	$body .= $password_set_url;
 	$body .= "\n\n";
 	$body .= __( '-- The WordPress.org Team', 'wporg' );
+
+	$headers = array(
+		'From: "WordPress.org" <noreply@wordpress.org>'
+	);
+
+	if ( 'local' === wp_get_environment_type() ) {
+		$headers = array();
+		setcookie( 'emailed_url', $password_set_url );
+	}
 
 	return wp_mail(
 		$user_email,
 		__( '[WordPress.org] Your new account', 'wporg' ),
 		$body,
-		array(
-			'From: "WordPress.org" <noreply@wordpress.org>'
-		)
+		$headers
 	);
 }
 
@@ -274,7 +294,10 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 		$password = wp_generate_password();
 	}
 
-	$user_id = wpmu_create_user(
+	// Use wpmu_create_user() on multisite, and wp_create_user() on single-sites (local testing).
+	$wp_create_user = function_exists( 'wpmu_create_user' ) ? 'wpmu_create_user' : 'wp_create_user';
+
+	$user_id = $wp_create_user(
 		wp_slash( $user_login ),
 		$password,
 		wp_slash( $user_email )
@@ -319,6 +342,11 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 			$value = $pending_user['meta'][ $field ];
 			if ( 'url' == $field ) {
 				wp_update_user( array( 'ID' => $user_id, 'user_url' => $value ) );
+
+				// Update BuddyPress xProfile data.
+				if ( function_exists( 'WordPressdotorg\Profiles\update_profile' ) ) {
+					WordPressdotorg\Profiles\update_profile( 'Website URL', $value, $user_id );
+				}
 			} else {
 				if ( $value ) {
 					update_user_meta( $user_id, $field, $value );

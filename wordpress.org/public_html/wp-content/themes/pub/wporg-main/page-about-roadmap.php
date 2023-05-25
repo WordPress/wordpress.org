@@ -159,10 +159,10 @@ the_post();
 						<tbody>
 						<tr>
 							<th>
-								6.1
+								6.2
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td>2022</td>
+							<td>2023</td>
 						</tr>
 						</tbody>
 					</table>

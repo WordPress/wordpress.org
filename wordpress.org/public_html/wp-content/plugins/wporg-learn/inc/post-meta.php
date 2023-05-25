@@ -16,8 +16,11 @@ defined( 'WPINC' ) || die();
 add_action( 'init', __NAMESPACE__ . '\register' );
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_lesson_plan_metaboxes' );
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_workshop_metaboxes' );
+add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_meeting_metaboxes' );
 add_action( 'save_post_lesson-plan', __NAMESPACE__ . '\save_lesson_plan_metabox_fields' );
-add_action( 'save_post_wporg_workshop', __NAMESPACE__ . '\save_workshop_metabox_fields' );
+add_action( 'save_post_wporg_workshop', __NAMESPACE__ . '\save_workshop_meta_fields' );
+add_action( 'save_post_meeting', __NAMESPACE__ . '\save_meeting_metabox_fields' );
+add_action( 'admin_footer', __NAMESPACE__ . '\render_locales_list' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 
 /**
@@ -118,19 +121,6 @@ function register_workshop_meta() {
 
 	register_post_meta(
 		$post_type,
-		'video_language',
-		array(
-			'description'       => __( 'The language that the workshop is presented in.', 'wporg_learn' ),
-			'type'              => 'string',
-			'single'            => true,
-			'default'           => 'en_US',
-			'sanitize_callback' => __NAMESPACE__ . '\sanitize_locale',
-			'show_in_rest'      => true,
-		)
-	);
-
-	register_post_meta(
-		$post_type,
 		'video_caption_language',
 		array(
 			'description'       => __( 'A language for which subtitles are available for the workshop video.', 'wporg_learn' ),
@@ -177,6 +167,23 @@ function register_misc_meta() {
 			)
 		);
 	}
+
+	// Language field.
+	$post_types = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson' );
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'language',
+			array(
+				'description'       => __( 'The language for the content.', 'wporg_learn' ),
+				'type'              => 'string',
+				'single'            => true,
+				'default'           => 'en_US',
+				'sanitize_callback' => __NAMESPACE__ . '\sanitize_locale',
+				'show_in_rest'      => true,
+			)
+		);
+	}
 }
 
 /**
@@ -190,10 +197,6 @@ function register_misc_meta() {
  * @return string
  */
 function sanitize_locale( $meta_value, $meta_key, $object_type, $object_subtype ) {
-	if ( 'wporg_workshop' !== $object_subtype ) {
-		return $meta_value;
-	}
-
 	$meta_value = trim( $meta_value );
 	$locales = array_keys( get_locales_with_english_names() );
 
@@ -254,32 +257,32 @@ function get_workshop_duration( WP_Post $workshop, $format = 'raw' ) {
 }
 
 /**
- * Get a list of locales that are associated with at least one workshop.
- *
- * Optionally only published workshops.
+ * Get a list of locales that are associated with at least one post of the specified type.
  *
  * @param string $meta_key
+ * @param string $post_type
+ * @param string $post_status
  * @param string $label_language
- * @param bool   $published_only
  *
  * @return array
  */
-function get_available_workshop_locales( $meta_key, $label_language = 'english', $published_only = true ) {
+function get_available_post_type_locales( $meta_key, $post_type, $post_status, $label_language = 'english' ) {
 	global $wpdb;
 
 	$and_post_status = '';
-	if ( $published_only ) {
-		$and_post_status = "AND posts.post_status = 'publish'";
+	if ( in_array( $post_status, get_post_stati(), true ) ) {
+		$and_post_status = "AND posts.post_status = '$post_status'";
 	}
 
 	$results = $wpdb->get_col( $wpdb->prepare(
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $and_post_status contains no user input.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $and_post_status only includes $post_status if it matches an allowed string.
 		"
-			SELECT DISTINCT postmeta.meta_value
-			FROM {$wpdb->postmeta} postmeta
-				JOIN {$wpdb->posts} posts ON posts.ID = postmeta.post_id $and_post_status
-			WHERE postmeta.meta_key = %s
-		",
+		SELECT DISTINCT postmeta.meta_value
+		FROM {$wpdb->postmeta} postmeta
+			JOIN {$wpdb->posts} posts ON posts.ID = postmeta.post_id AND posts.post_type = %s $and_post_status
+		WHERE postmeta.meta_key = %s
+	",
+		$post_type,
 		$meta_key
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	) );
@@ -342,6 +345,15 @@ function save_lesson_plan_metabox_fields( $post_id ) {
 
 	$download_url = filter_input( INPUT_POST, 'slides-download-url', FILTER_VALIDATE_URL ) ?: '';
 	update_post_meta( $post_id, 'slides_download_url', $download_url );
+
+	// This language meta field is rendered in the editor sidebar using a PluginDocumentSettingPanel block,
+	// which won't save the field on publish if it has the default value.
+	// Our filtering by locale depends on it being set, so we force it to be updated after saving:
+	$language         = get_post_meta( $post_id, 'language', true );
+	$language_default = 'en_US';
+	if ( ! isset( $language ) || $language_default === $language ) {
+		update_post_meta( $post_id, 'language', $language_default );
+	}
 }
 
 /**
@@ -380,6 +392,19 @@ function add_workshop_metaboxes() {
 		__NAMESPACE__ . '\render_metabox_workshop_application',
 		'wporg_workshop',
 		'advanced'
+	);
+}
+
+/**
+ * Add meta boxes to the Edit Meeting screen.
+ */
+function add_meeting_metaboxes( $post_type = '' ) {
+	add_meta_box(
+		'meeting-language',
+		__( 'Language', 'wporg_learn' ),
+		__NAMESPACE__ . '\render_metabox_meeting_language',
+		'meeting',
+		'side'
 	);
 }
 
@@ -441,11 +466,23 @@ function render_metabox_workshop_application( WP_Post $post ) {
 }
 
 /**
- * Update the post meta values from the meta box fields when the post is saved.
+ * Render the Meeting Language meta box.
+ *
+ * @param WP_Post $post
+ */
+function render_metabox_meeting_language( WP_Post $post ) {
+	$locales  = get_locales_with_english_names();
+	$language = get_post_meta( $post->ID, 'language', true ) ?: '';
+
+	require get_views_path() . 'metabox-meeting-language.php';
+}
+
+/**
+ * Update the post meta values from the meta fields when the post is saved.
  *
  * @param int $post_id
  */
-function save_workshop_metabox_fields( $post_id ) {
+function save_workshop_meta_fields( $post_id ) {
 	if ( wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
 		return;
 	}
@@ -464,9 +501,6 @@ function save_workshop_metabox_fields( $post_id ) {
 		$duration = $duration['h'] * HOUR_IN_SECONDS + $duration['m'] * MINUTE_IN_SECONDS + $duration['s'];
 		update_post_meta( $post_id, 'duration', $duration );
 	}
-
-	$video_language = filter_input( INPUT_POST, 'video-language' );
-	update_post_meta( $post_id, 'video_language', $video_language );
 
 	$captions = filter_input( INPUT_POST, 'video-caption-language', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
 	delete_post_meta( $post_id, 'video_caption_language' );
@@ -496,12 +530,65 @@ function save_workshop_metabox_fields( $post_id ) {
 			add_post_meta( $post_id, 'other_contributor_wporg_username', $username );
 		}
 	}
+
+	// This language meta field is rendered in the editor sidebar using a PluginDocumentSettingPanel block,
+	// which won't save the field on publish if it has the default value.
+	// Our custom workshops query for locale prioritized tutorials (see functions.php `wporg_archive_query_prioritize_locale`)
+	// depends on it being set, so we force it to be updated after saving:
+	$language         = get_post_meta( $post_id, 'language', true );
+	$language_default = 'en_US';
+	if ( ! isset( $language ) || $language_default === $language ) {
+		update_post_meta( $post_id, 'language', $language_default );
+	}
+}
+
+/**
+ * Update the post meta values from the meta box fields when a meeting post is saved.
+ *
+ * @param int $post_id
+ */
+function save_meeting_metabox_fields( $post_id ) {
+	if ( wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// This nonce field is rendered in the Meeting Language metabox.
+	$nonce = filter_input( INPUT_POST, 'meeting-metabox-nonce' );
+	if ( ! wp_verify_nonce( $nonce, 'meeting-metaboxes' ) ) {
+		return;
+	}
+
+	$language = filter_input( INPUT_POST, 'meeting-language' );
+	update_post_meta( $post_id, 'language', $language );
+
+}
+
+/**
+ * Render the locales list for the language meta block.
+ */
+function render_locales_list() {
+	global $typenow;
+
+	$post_types_with_language = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson' );
+	if ( in_array( $typenow, $post_types_with_language, true ) ) {
+		$locales = get_locales_with_english_names();
+
+		require get_views_path() . 'locales-list.php';
+	}
 }
 
 /**
  * Enqueue scripts for the block editor.
  */
 function enqueue_editor_assets() {
+	enqueue_expiration_date_assets();
+	enqueue_language_meta_assets();
+}
+
+/**
+ * Enqueue scripts for the expiration data block.
+ */
+function enqueue_expiration_date_assets() {
 	global $typenow;
 
 	$post_types_with_expiration = array( 'lesson-plan', 'wporg_workshop', 'course', 'lesson' );
@@ -521,5 +608,32 @@ function enqueue_editor_assets() {
 		);
 
 		wp_set_script_translations( 'wporg-learn-expiration-date', 'wporg-learn' );
+	}
+}
+
+
+/**
+ * Enqueue scripts for the language meta block.
+ */
+function enqueue_language_meta_assets() {
+	global $typenow;
+
+	$post_types_with_language = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson' );
+	if ( in_array( $typenow, $post_types_with_language, true ) ) {
+		$script_asset_path = get_build_path() . 'language-meta.asset.php';
+		if ( ! file_exists( $script_asset_path ) ) {
+			wp_die( 'You need to run `yarn start` or `yarn build` to build the required assets.' );
+		}
+
+		$script_asset = require( $script_asset_path );
+		wp_enqueue_script(
+			'wporg-learn-language-meta',
+			get_build_url() . 'language-meta.js',
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
+		wp_set_script_translations( 'wporg-learn-language-meta', 'wporg-learn' );
 	}
 }

@@ -128,7 +128,7 @@ function the_author_byline( $post = null ) {
 function the_active_plugin_notice( $post = null ) {
 	if ( ! in_array( get_post_status( $post ), [ 'rejected', 'closed' ], true ) ) {
 		echo wp_kses_post( get_plugin_status_notice( $post ) );
-	};
+	}
 }
 
 /**
@@ -381,6 +381,100 @@ function the_previous_version_download( $post = null ) {
 }
 
 /**
+ * Display the Community Zone.
+ *
+ * Only shown if current user can edit the plugin and the plugin is tagged as
+ * 'community' in the plugin_business_model taxonomy.
+ */
+function the_plugin_community_zone() {
+	$post = get_post();
+	$field_name = 'external_repository_url';
+
+	if ( 'publish' !== $post->post_status ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'plugin_admin_edit', $post ) ) {
+		return;
+	}
+
+	if ( ! has_term( 'community', 'plugin_business_model', $post ) ) {
+		return;
+	}
+
+	echo '<hr>';
+
+	echo '<h2>' . esc_html__( 'Community Options', 'wporg-plugins' ) . '</h2>';
+
+	echo '<p>' . esc_html__( 'This plugin is developed and supported by a community.', 'wporg-plugins' ) . '</p>';
+
+	echo '<form id="community" class="categorization" method="POST">';
+	echo '<p>';
+	echo sprintf( '<label for="%s">', esc_attr( $field_name ) ) . esc_attr__( 'Development repository URL', 'wporg-plugins' ) . '</label>';
+	$value = get_post_meta( $post->ID, $field_name, true );
+	printf(
+		'<input id="%s" type="text" name="%s" value="%s" data-original-value="%s">',
+		esc_attr( $field_name ),
+		esc_attr( $field_name ),
+		esc_url( $value ),
+		esc_url( $value )
+	);
+	echo '<span class="help">' . esc_attr__( 'Optional. The URL where development happens, such as at github.com.', 'wporg-plugins' ) . '</span>';
+	echo '</p>';
+	echo '<p>';
+	echo '<button class="button button-secondary" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
+	echo '<span class="success-msg">' . __( 'Saved!', 'wporg-plugins' ) . '</span>';
+	echo '</p>';
+	echo '</form>';
+}
+
+/**
+ * Display the Commercial Zone.
+ *
+ * Only shown if current user can edit the plugin and the plugin is tagged as
+ * 'commercial' in the plugin_business_model taxonomy.
+ */
+function the_plugin_commercial_zone() {
+	$post = get_post();
+	$field_name = 'external_support_url';
+
+	if ( ! current_user_can( 'plugin_admin_edit', $post ) ) {
+		return;
+	}
+
+	if ( ! has_term( 'commercial', 'plugin_business_model', $post ) ) {
+		return;
+	}
+
+	$can_edit = 'publish' === $post->post_status;
+
+	echo '<hr>';
+
+	echo '<h2>' . esc_html__( 'Commercial Options', 'wporg-plugins' ) . '</h2>';
+
+	echo '<p>' . esc_html__( 'This plugin is free but offers paid upgrades, support, and/or add-ons.', 'wporg-plugins' ) . '</p>';
+
+	echo '<form id="commercial" class="categorization" method="POST">';
+	echo '<p>';
+	echo sprintf( '<label for="%s">', esc_attr( $field_name ) ) . esc_attr__( 'Commercial support URL', 'wporg-plugins' ) . '</label>';
+	$value = get_post_meta( $post->ID, $field_name, true );
+	printf(
+		'<input id="%s" type="text" name="%s" value="%s" data-original-value="%s">',
+		esc_attr( $field_name ),
+		esc_attr( $field_name ),
+		esc_url( $value ),
+		esc_url( $value )
+	);
+	echo '<span class="help">' . esc_attr__( 'Optional. The URL for plugin support, other than its support forum on wordpress.org.', 'wporg-plugins' ) . '</span>';
+	echo '</p>';
+	echo '<p>';
+	echo '<button class="button button-secondary" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
+	echo '<span class="success-msg">' . __( 'Saved!', 'wporg-plugins' ) . '</span>';
+	echo '</p>';
+	echo '</form>';
+}
+
+/**
  * Display the Danger Zone.
  */
 function the_plugin_danger_zone() {
@@ -401,13 +495,13 @@ function the_plugin_danger_zone() {
 	// Output the Release Confirmation form.
 	the_plugin_release_confirmation_form();
 
-	// Output the transfer form.
-	the_plugin_self_transfer_form();
-
 	if ( 'publish' != $post->post_status ) {
 		// A reminder of the closed status.
 		the_active_plugin_notice();
 	} else {
+		// Output the transfer form.
+		the_plugin_self_transfer_form();
+
 		// Output the self close button.
 		the_plugin_self_close_button();
 	}
@@ -539,5 +633,27 @@ function the_plugin_release_confirmation_form() {
 	} else {
 		/* translators: 1: plugins@wordpress.org */
 		echo '<p>' . sprintf( __( 'To disable release confirmations, please contact the plugins team by emailing %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
+	}
+}
+
+/**
+ * Displays a persistent notice to the plugin author.
+ */
+function the_author_notice( $post = null ) {
+	$post = get_post( $post );
+
+	if ( ! current_user_can( 'plugin_admin_edit', $post->ID ) ) {
+		return;
+	}
+
+	$notice = get_post_meta( $post->ID, '_author_notice', true );
+
+	if ( $notice && $notice['type'] && $notice['html'] ) {
+		printf(
+			'<div class="notice notice-alt notice-%s">%s</div>',
+			esc_attr( $notice['type'] ),
+			'<p><strong>' . __( 'A note from the Plugin Review team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			wp_kses_post( $notice['html'] ) // Should have wrapping <p> tags.
+		);
 	}
 }
