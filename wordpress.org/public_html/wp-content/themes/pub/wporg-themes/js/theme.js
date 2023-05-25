@@ -2078,16 +2078,17 @@ window.wp = window.wp || {};
 	};
 	
 	document.addEventListener( 'submit', event => {
-		event.preventDefault();
-
 		const form = event.target.closest('form');
-		const submitButton = form.querySelector('button[type="submit"]');
-		const successMsg = form.querySelector('.success-msg');
-		const themeSlug = form.closest('.theme-about').dataset.slug;
 
 		if ( ! form || ! ['commercial', 'community'].includes(form.id) ) {
 			return;
 		}
+
+		event.preventDefault();
+
+		const submitButton = form.querySelector('button[type="submit"]');
+		const successMsg = form.querySelector('.success-msg');
+		const themeSlug = form.closest('.theme-about')?.dataset.slug;
 
 		successMsg?.classList.remove( 'saved' );
 
