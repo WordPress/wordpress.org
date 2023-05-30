@@ -80,14 +80,17 @@
 	 */
 	function addSuggestion() {
 		var $row = $( this );
+		if ( ! $row ) {
+			return;
+		}
 		var $originalId = $row.closest( 'tr' ).attr( 'id' ).substring( 7 );
 		var $CSSclass = $row.attr( 'class' );
 		if ( $CSSclass.indexOf( 'openai' ) > -1 ) {
 			$openAITranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
-			$deeplTranslationsUsed.splice( $originalId, 1 );
+			delete $deeplTranslationsUsed[ $originalId ];
 		} else if ( $CSSclass.indexOf( 'deepl' ) > -1 ) {
 			$deeplTranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
-			$openAITranslationsUsed.splice( $originalId, 1 );
+			delete $openAITranslationsUsed[ $originalId ];
 		}
 	}
 
@@ -100,6 +103,9 @@
 		var $button = $( this );
 		var $row = $button.closest( 'tr.editor' );
 		var $originalId = $row.attr( 'id' ).substring( 7 );
+		if ( ! $openAITranslationsUsed[$originalId] && ! $deeplTranslationsUsed[$originalId] ) {
+			return;
+		}
 		var $translation = $row.find( 'textarea' ).val();
 		var $data = {
 			nonce: wporgEditorSettings.nonce,
