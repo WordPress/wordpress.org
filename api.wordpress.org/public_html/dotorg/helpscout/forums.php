@@ -1,8 +1,11 @@
 <?php
+namespace WordPressdotorg\API\HelpScout;
+
 // Simple User Notes sidebar panel.
+include __DIR__ . '/common.php';
 
 // $request is the validated HelpScout request.
-$request = include __DIR__ . '/common.php';
+$request = get_request();
 
 // default empty output
 $html  = '';

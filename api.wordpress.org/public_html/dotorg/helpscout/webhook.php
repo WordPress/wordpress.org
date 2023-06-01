@@ -4,8 +4,10 @@ namespace WordPressdotorg\API\HelpScout;
 // Webhook fired when an event is fired for any inbox.
 // Events: Conversation Created (convo.created), convo.assigned, convo.customer.reply.created, convo.merged, convo.agent.reply.created, convo.deleted, convo.status, convo.moved
 
+include __DIR__ . '/common.php';
+
 // $request is the validated HelpScout request.
-$request = include __DIR__ . '/common.php';
+$request = get_request();
 $event   = $_SERVER['HTTP_X_HELPSCOUT_EVENT'] ?? '';
 
 // Handle the openverse webhook.

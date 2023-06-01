@@ -1,11 +1,38 @@
 <?php
+namespace WordPressdotorg\API\HelpScout;
 use WordPressdotorg\MU_Plugins\Utilities\HelpScout;
 
-if ( ! isset( $wp_init_host ) ) {
-	$wp_init_host = 'https://api.wordpress.org/';
+/**
+ * Load WordPress.
+ */
+function load_wordpress( $wp_init_host = '' ) {
+	if ( ! $wp_init_host ) {
+		$wp_init_host = 'https://api.wordpress.org/';
+	}
+
+	$base_dir = dirname( dirname( __DIR__ ) );
+	require( $base_dir . '/wp-init.php' );
 }
-$base_dir = dirname( dirname( __DIR__ ) );
-require( $base_dir . '/wp-init.php' );
+// Always load WordPress, if WordPress is not loaded.
+if ( ! defined( 'ABSPATH' ) ) {
+	load_wordpress( $wp_init_host ?? '' );
+}
+
+/**
+ * Retrieve the incoming payload, and verify it's from HelpScout.
+ */
+function get_request() {
+	// HelpScout sends json data in the POST, so grab it from the input directly.
+	$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
+
+	// Check the signature matches.
+	if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ) ) {
+		exit;
+	}
+
+	// get the info from HS.
+	return json_decode( $HTTP_RAW_POST_DATA );
+}
 
 // function to verify signature from HelpScout
 function is_from_helpscout( $data, $signature ) {
@@ -364,14 +391,3 @@ function get_wporg_user_for_helpscout_user( $hs_id, $instance = false ) {
 
 	return $user;
 }
-
-// HelpScout sends json data in the POST, so grab it from the input directly.
-$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
-
-// Check the signature matches.
-if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ) ) {
-	exit;
-}
-
-// get the info from HS.
-return json_decode( $HTTP_RAW_POST_DATA );

@@ -21,8 +21,10 @@ Themes owned by this user:
 
 */
 
+include __DIR__ . '/common.php';
+
 // $request is the validated HelpScout request.
-$request = include __DIR__ . '/common.php';
+$request = get_request();
 
 // default empty output
 ob_start();
