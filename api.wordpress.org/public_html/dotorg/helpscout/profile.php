@@ -24,7 +24,7 @@ if ( $email ) {
 		$html .= '<p>Forums: <a href="https://wordpress.org/support/users/'. $user->user_nicename . '/">'. $user->user_nicename .'</a></p>';
 
 		// When the Displayed account email doesn't match the email being displayed, output the user email address too.
-		if ( ! empty( $request->customer->email ) && $request->customer->email !== $user->user_email ) {
+		if ( ! empty( $request->customer->email ) && strcasecmp( $request->customer->email, $user->user_email ) ) {
 			$html .= '<p>Account Email: ' . esc_html( $user->user_email ) . '</p>';
 		}
 	} else {
@@ -57,7 +57,7 @@ if ( $email ) {
 				'<li><a href="%s">%s <strong>%s</strong></a></li>',
 				esc_url( add_query_arg( 's', urlencode( $u->user_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations&s=' ) ),
 				esc_html( $u->user_login ) . (
-					$request->customer->email == $u->user_email ? '' : ' (' . esc_html( $u->user_email ) . ')'
+					strcasecmp( $request->customer->email, $u->user_email ) ? ' (' . esc_html( $u->user_email ) . ')' : ''
 				),
 				esc_html( $match_status( $u ) )
 			);

@@ -103,9 +103,11 @@ function cached_helpscout_get( $url, $force = false, $instance = false ) {
  * Get the user associated with a HelpScout email.
  */
 function get_user_email_for_email( $request ) {
-	$email   = $request->customer->email ?? false;
-	$subject = $request->ticket->subject ?? '';
-	$user    = get_user_by( 'email', $email );
+	$customer = $request->customer ?? ( $request->primaryCustomer ?? false );
+	$email    = $customer->email ?? false;
+	$subject  = $request->ticket->subject ?? ( $request->subject ?? '' );
+	$user     = get_user_by( 'email', $email );
+	$email_id = $request->ticket->id ?? ( $request->id ?? false );
 
 	// If this is related to a slack user, fetch their details instead.
 	if (
@@ -116,8 +118,8 @@ function get_user_email_for_email( $request ) {
 	}
 
 	// If the customer object has alternative emails listed, check to see if they have a profile.
-	if ( ! $user && ! empty( $request->customer->emails ) ) {
-		$user = get_user_from_emails( $request->customer->emails );
+	if ( ! $user && ! empty( $customer->emails ) ) {
+		$user = get_user_from_emails( $customer->emails );
 	}
 
 	// Ignore @wordpress.org "users", unless it's literally the only match (The ?? $email fallback at the end).
@@ -126,8 +128,8 @@ function get_user_email_for_email( $request ) {
 	}
 
 	// Determine if this is a bounce, and if so, find out who for.
-	if ( ! $user && $email && isset( $request->ticket->id ) ) {
-		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $request->customer->fname ?? false ), ( $request->customer->lname ?? false ) ] ) ) );
+	if ( ! $user && $email && $email_id ) {
+		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $customer->fname ?? false ), ( $customer->first ?? false ), ( $customer->lname ?? false ), ( $customer->last ?? false ) ] ) ) );
 		$subject_lower = strtolower( $subject );
 
 		if (
@@ -145,7 +147,7 @@ function get_user_email_for_email( $request ) {
 		) {
 
 			// Fetch the email.
-			$email_obj = get_email_thread( $request->ticket->id ?? 0 );
+			$email_obj = get_email_thread( $email_id );
 			if ( ! empty( $email_obj->_embedded->threads ) ) {
 				$attachment_api_urls = [];
 
@@ -251,7 +253,7 @@ function get_user_from_emails( $emails ) {
  * Get the possible plugins or themes from the email.
  */
 function get_plugin_or_theme_from_email( $request ) {
-	$subject = $request->ticket->subject ?? '';
+	$subject = $request->subject ?? ( $request->ticket->subject ?? '' );
 
 	$possible = [
 		'themes'  => [],
@@ -260,7 +262,7 @@ function get_plugin_or_theme_from_email( $request ) {
 
 	// Reported themes, shortcut, assume the slug is the title.. since it always is..
 	if ( str_starts_with( $subject, 'Reported Theme:' ) ) {
-		$possible['themes'][] = sanitize_title_with_dashes( trim( explode( ':', $request->ticket->subject )[1] ) );
+		$possible['themes'][] = sanitize_title_with_dashes( trim( explode( ':', $subject )[1] ) );
 	}
 
 	// Plugin reviews, match the format of "[WordPress Plugin Directory] {Type Of Email}: {Plugin Title}"
@@ -280,7 +282,7 @@ function get_plugin_or_theme_from_email( $request ) {
 	}
 
 	// Often a slug is mentioned in the title, so let's try to extract that.
-	if ( preg_match_all( '!(?P<slug>[a-z0-9\-]{10,})!', $subject, $m ) ) {
+	if ( preg_match_all( '!\b(?P<slug>[a-z0-9\-]{10,})!', $subject, $m ) ) {
 		$possible['plugins'] = array_merge( $possible['plugins'], $m['slug'] );
 		$possible['themes']  = array_merge( $possible['themes'],  $m['slug'] );
 	}
@@ -390,4 +392,40 @@ function get_wporg_user_for_helpscout_user( $hs_id, $instance = false ) {
 	}
 
 	return $user;
+}
+
+/**
+ * Find the human-readable name for a mailbox ID.
+ *
+ * @param int|object $mailbox_id_or_request Mailbox ID or request object.
+ */
+function get_mailbox_name( $mailbox_id_or_request ) {
+	$constants = [
+		'data',
+		'jobs',
+		'openverse',
+		'password_resets',
+		'photos',
+		'plugins',
+		'themes',
+	];
+
+	$mailbox_id = $mailbox_id_or_request->mailboxId ?? $mailbox_id_or_request;
+	if ( ! $mailbox_id || ! is_numeric( $mailbox_id ) ) {
+		return 0;
+	}
+
+	foreach ( $constants as $constant ) {
+		if ( constant( 'HELPSCOUT_' . strtoupper( $constant ) . '_MAILBOXID' ) == $mailbox_id ) {
+			return $constant;
+		}
+	}
+
+	// Fetch the mailbox..
+	$mailbox = cached_helpscout_get( "/mailboxes/{$mailbox_id}" );
+	if ( ! $mailbox ) {
+		return $mailbox_id;
+	}
+
+	return sanitize_title( $mailbox->name );
 }
