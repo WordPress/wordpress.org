@@ -1,32 +1,32 @@
 /* global $gp */
 ( function( $ ){
 	/**
-	 * Stores the originalId of the translations for which the TM has already been queried,
-	 * to avoid making the query another time.
+	 * Stores (caches) the translation memory (TM) suggestions that has already been queried,
+	 * to avoid making the query another time. The key is the originalId.
 	 *
 	 * @type {array}
 	 */
 	var TMSuggestionRequested = [];
 
 	/**
-	 * Stores the originalId of the translations for which OpenAI has already been queried,
-	 * to avoid making the query another time.
+	 * Stores (caches) the OpenAI suggestions that has already been queried,
+	 * to avoid making the query another time. The key is the originalId.
 	 *
 	 * @type {array}
 	 */
 	var OpenAITMSuggestionRequested = [];
 
 	/**
-	 * Stores the originalId of the translations for which DeepL has already been queried,
-	 * to avoid making the query another time.
+	 * Stores (caches) the DeepL suggestions that has already been queried,
+	 * to avoid making the query another time. The key is the originalId.
 	 *
 	 * @type {array}
 	 */
 	var DeeplTMSuggestionRequested = [];
 
 	/**
-	 * Stores the originalId of the translations for which "Other Languages" have already been queried,
-	 * to avoid making the query another time.
+	 * Stores (caches) the "Other Languages" suggestions that has already been queried,
+	 * to avoid making the query another time. The key is the originalId.
 	 *
 	 * @type {array}
 	 */
