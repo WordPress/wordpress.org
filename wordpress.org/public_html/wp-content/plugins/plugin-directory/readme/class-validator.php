@@ -121,13 +121,12 @@ class Validator {
 			);
 		}
 
-		if ( empty( $readme->stable_tag ) ) {
+		if ( empty( $readme->stable_tag ) || str_contains( $readme->stable_tag, 'trunk' ) ) {
 			$warnings[] = sprintf(
-				/* translators: 1: 'Stable tag', 2: /trunk/ SVN directory, 3: 'Stable tag: trunk' */
-				__( 'The %1$s field is missing.  Hint: If you treat %2$s as stable, put %3$s.', 'wporg-plugins' ),
+				/* translators: 1: 'Stable tag', 2: /trunk/ SVN directory */
+				__( 'The %1$s field is missing or invalid.  Note: We ask you no longer attempt to use %2$s as stable, so that all plugins can be rolled back.', 'wporg-plugins' ),
 				'<code>Stable tag</code>',
-				'<code>/trunk/</code>',
-				'<code>Stable tag: trunk</code>'
+				'<code>/trunk/</code>'
 			);
 		}
 
