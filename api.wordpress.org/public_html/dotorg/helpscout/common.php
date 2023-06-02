@@ -22,6 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Retrieve the incoming payload, and verify it's from HelpScout.
  */
 function get_request() {
+	global $HTTP_RAW_POST_DATA;
+
 	// HelpScout sends json data in the POST, so grab it from the input directly.
 	$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
 
@@ -470,7 +472,8 @@ function get_mailbox_name( $mailbox_id_or_request ) {
 function log_email( $request ) {
 	global $wpdb;
 
-	if ( empty( $request->id ) ) {
+	if ( empty( $request->id ) || ! isset( $request->status ) ) {
+		trigger_error( 'Missing required properties on request object: ' . $_SERVER['HTTP_X_HELPSCOUT_EVENT'], E_USER_NOTICE );
 		return;
 	}
 
