@@ -13,18 +13,15 @@ class Controls {
 
 	/**
 	 * Displays the Publish metabox for plugins.
-	 * The HTML here matches what Core uses.
+	 * The HTML here mostly matches what Core uses.
 	 */
 	static function display() {
 		?>
 		<div class="submitbox" id="submitpost">
 			<div id="misc-publishing-actions">
 				<?php
+				self::display_meta();
 				self::display_post_status();
-
-				if ( 'publish' === get_post_status() ) {
-					self::display_tested_up_to();
-				}
 				?>
 			</div>
 
@@ -96,8 +93,6 @@ class Controls {
 		$reason_unknown = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $reason_label );
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
-			<label for="post_status"><?php _e( 'Status:', 'wporg-plugins' ); ?></label>
-			<strong id="plugin-status-display"><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></strong>
 
 			<?php if ( 'closed' === $post->post_status ) : ?>
 
@@ -160,17 +155,39 @@ class Controls {
 	}
 
 	/**
-	 * Displays the Tested Up To control in the Publish metabox.
+	 * Displays the most important plugin meta in the Publish metabox.
 	 */
-	protected static function display_tested_up_to() {
-		$post           = get_post();
-		$tested_up_to   = (string) get_post_meta( $post->ID, 'tested', true );
-		$unknown_string = _x( 'Unknown', 'unknown version', 'wporg-plugins' );
+	protected static function display_meta() {
+		$post = get_post();
 		?>
-		<div class="misc-pub-section misc-pub-tested">
-			<label for="tested_with"><?php _e( 'Tested With:', 'wporg-plugins' ); ?></label>
-			<strong id="tested-with-display"><?php echo ( $tested_up_to ? sprintf( 'WordPress %s', $tested_up_to ) : $unknown_string ); ?></strong>
-		</div><!-- .misc-pub-section -->
+		<table class="misc-pub-section misc-pub-meta">
+			<tr>
+				<td><?php _e( 'Status:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></strong></td>
+			</tr>
+
+			<tr>
+				<td><?php _e( 'Version:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php echo esc_html( $post->version ); ?></strong></td>
+			</tr>
+
+			<tr>
+				<td><?php _e( 'Updated:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php printf( '<span title="%s">%s ago</span>', esc_attr( $post->last_updated ), human_time_diff( strtotime( $post->last_updated ) ) ); ?></strong></td>
+			</tr>
+
+			<tr>
+				<td><?php _e( 'Installs:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php echo Template::active_installs( false, $post ); ?></strong></td>
+			</tr>
+
+			<?php if ( $post->tested ) : ?>
+			<tr>
+				<td><?php _e( 'Tested With:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php printf( 'WordPress %s', $post->tested ); ?></strong></td>
+			</tr>
+			<?php endif; ?>
+		</table><!-- .misc-pub-section -->
 		<?php
 	}
 
