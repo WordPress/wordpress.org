@@ -467,21 +467,25 @@ function get_mailbox_name( $mailbox_id_or_request ) {
 /**
  * Keep a cached copy of the received emails in the database for querying.
  *
+ * @param string $event   Event name.
  * @param object $request Helpscout request object / Conversation object.
  */
-function log_email( $request ) {
+function log_email( $event, $request ) {
 	global $wpdb;
 
-	if ( empty( $request->id ) || ! isset( $request->status ) ) {
-		trigger_error( 'Missing required properties on request object: ' . $_SERVER['HTTP_X_HELPSCOUT_EVENT'], E_USER_NOTICE );
+	if ( str_starts_with( $event, 'convo.' ) ) {
+		return;
+	}
+
+	if ( empty( $request->id ) ) {
 		return;
 	}
 
 	$row  = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', "{$wpdb->base_prefix}helpscout", $request->id ) );
 	$meta = $row ? $wpdb->get_results( $wpdb->prepare( 'SELECT meta_key, meta_value FROM %i WHERE helpscout_id = %d', "{$wpdb->base_prefix}helpscout_meta", $request->id ), ARRAY_A ) : [];
 
-	// We don't need to know about spam.
-	if ( 'spam' === $request->status ) {
+	// We don't need to know about deleted items or spam.
+	if ( 'convo.deleted' === $event || 'spam' === $request->status ) {
 		if ( $row ) {
 			$wpdb->delete( 'wporg_helpscout', [ 'id' => $request->id ] );
 			$wpdb->delete( 'wporg_helpscout_meta', [ 'helpscout_id' => $request->id ] );

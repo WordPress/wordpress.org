@@ -20,9 +20,7 @@ get_email_thread( $request->id, true );
 contributor_stats( $event, $request );
 
 // Record the email in the database.
-if ( str_starts_with( $event, 'convo.' ) ) {
-	log_email( $request );
-}
+log_email( $event, $request );
 
 /**
  * Ping the Openverse webhook.
