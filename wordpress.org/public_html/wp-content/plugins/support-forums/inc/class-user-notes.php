@@ -86,7 +86,7 @@ class User_Notes {
 
 	/**
 	 * Saves a note to a users meta data.
-	 * 
+	 *
 	 * @param int    $user_id   The user ID.
 	 * @param string $note_text The note text to add.
 	 * @param int    $post_id   The support thread this text is related to. Optional.
@@ -147,7 +147,7 @@ class User_Notes {
 
 	/**
 	 * Saves a note to a users meta data. Suffixes to previous user note if by same moderator within a timeframe.
-	 * 
+	 *
 	 * @param int    $user_id   The user ID.
 	 * @param string $note_text The note text to add.
 	 * @param int    $post_id   The support thread this text is related to. Optional.
@@ -268,6 +268,9 @@ class User_Notes {
 		if ( ! $user_notes ) {
 			$user_notes = array();
 		}
+
+		// Reverse the order, so that the newer notes are displayed first.
+		$user_notes = array_reverse( $user_notes, true );
 
 		$note_id   = isset( $_GET['note_id'] ) ? (int) $_GET['note_id'] : 0;
 		$edit_note = isset( $user_notes[ $note_id ] );
@@ -590,7 +593,7 @@ class User_Notes {
 		<?php
 	}
 
-	
+
 	/**
 	 * Displays existing notes and the form for adding a new note in user edit profile.
 	 */
