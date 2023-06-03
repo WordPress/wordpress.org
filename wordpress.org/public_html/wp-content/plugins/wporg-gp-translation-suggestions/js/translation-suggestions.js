@@ -48,6 +48,8 @@
 	function fetchSuggestions( $container, apiUrl, originalId, translationId, nonce, type ) {
 		var cachedSuggestion = getTheSuggestionFromTheCache( type, originalId );
 		if ( cachedSuggestion ) {
+			$container.removeClass( 'fetching' );
+			$container.find( '.suggestions__loading-indicator' ).remove();
 			if ( isThisTypeOfSuggestionInTheContainer( $container, type ) ) {
 				return;
 			}
@@ -55,7 +57,6 @@
 			$container.append( cachedSuggestion );
 			removeNoSuggestionsMessage( $container );
 			copyTranslationMemoryToSidebarTab( $container );
-			$container.removeClass( 'fetching' );
 			return;
 		}
 		// Store a string with a space to avoid making the same request another time.
@@ -407,6 +408,11 @@
 	 */
 	function isThisTypeOfSuggestionInTheContainer( container, type ) {
 		switch ( type ) {
+			case 'TM':
+				if ( container.find( '.translation-suggestion.with-tooltip.translation' ).length > 0 ) {
+					return true;
+				}
+				break;
 			case 'OpenAI':
 				if ( container.find( '.translation-suggestion.with-tooltip.openai' ).length > 0 ) {
 					return true;
