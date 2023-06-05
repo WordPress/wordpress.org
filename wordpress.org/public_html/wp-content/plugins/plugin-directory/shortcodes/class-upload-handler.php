@@ -60,8 +60,12 @@ class Upload_Handler {
 	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
 	public function process_upload() {
-		$has_upload_token = $this->has_valid_upload_token();
+		if ( UPLOAD_ERR_OK !== $_FILES['zip_file']['error'] ) {
+			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
+		}
+
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
+		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
 		$plugin_data = (array) Import::find_plugin_headers( $this->plugin_dir, 1 /* Max Depth to search */ );
