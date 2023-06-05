@@ -247,7 +247,10 @@ class Upload {
 											</label>
 										</p>
 										<p>
-											<input class="button button-primary" type="submit" value="<?php esc_attr_e( 'Request', 'wporg-plugins' ); ?>" />
+											<input class="button button-primary" type="submit" value="<?php
+												/* translators: Request slug-change button */
+												esc_attr_e( 'Request', 'wporg-plugins' );
+											?>" />
 										</p>
 									</form>
 								</dialog>
