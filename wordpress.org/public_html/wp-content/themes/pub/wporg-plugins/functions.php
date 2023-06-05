@@ -125,6 +125,11 @@ function scripts() {
 		) );
 	}
 
+	// The plugin submission page: /developers/add/
+	if ( is_page( 'add' ) ) {
+		wp_enqueue_script( 'wporg-plugins-upload', get_stylesheet_directory_uri() . '/js/upload.js', array( 'wp-api' ), filemtime( __DIR__ . '/js/upload.js' ), true );
+	}
+
 	// React is currently only used on detail pages.
 	if ( is_single() ) {
 		$assets_path = dirname( __FILE__ ) . '/js/build/theme.asset.php';

@@ -569,7 +569,7 @@ class Template {
 			return false;
 		}
 
-		// Sort them if needed, svg > png > jpg
+		// Sort them if needed, svg > png > jpg > gif.
 		if ( count( $assets ) > 1 ) {
 			uasort( $assets, function( $a, $b ) {
 				// Thankfully the extensions are alphabetical, so let's just sort by that.

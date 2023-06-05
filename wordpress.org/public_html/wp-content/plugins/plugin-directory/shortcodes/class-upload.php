@@ -6,7 +6,7 @@ class Upload {
 	/**
 	 * Retrieves plugins in the queue submitted by the current user.
 	 *
-	 * @return array An array of user's plugins.
+	 * @return array An array of user's plugins, and counts of it.
 	 */
 	public static function get_submitted_plugins() {
 		$plugins = get_posts( array(
@@ -18,7 +18,23 @@ class Upload {
 			'posts_per_page' => -1,
 		) );
 
-		return $plugins;
+		$counts        = (object) array_fill_keys( array( 'new', 'pending', 'approved' ), 0 );
+		$counts->total = count( $plugins );
+
+		// Set the status text for each type.
+		foreach ( $plugins as &$plugin ) {
+			$counts->{ $plugin->post_status }++;
+
+			if ( 'new' === $plugin->post_status ) {
+				$plugin->status = __( 'Awaiting Review &#8212; This plugin has not yet been reviewed.', 'wporg-plugins' );
+			} elseif ( 'pending' === $plugin->post_status ) {
+				$plugin->status = __( 'Being Reviewed &#8212; This plugin is currently waiting on action from you. Please check your email for details.', 'wporg-plugins' );
+			} elseif ( 'approved' === $plugin->post_status ) {
+				$plugin->status = __( 'Approved &#8212; Please check your email for instructions on uploading your plugin.', 'wporg-plugins' );
+			}
+		}
+
+		return [ $plugins, $counts ];
 	}
 
 	/**
@@ -32,23 +48,7 @@ class Upload {
 		if ( is_user_logged_in() ) :
 			include_once ABSPATH . 'wp-admin/includes/template.php';
 
-			$submitted_plugins = self::get_submitted_plugins();
-			$submitted_counts  = (object) array_fill_keys( array( 'new', 'pending', 'approved' ), 0 );
-
-			$submitted_counts->total = count( $submitted_plugins );
-
-			foreach ( $submitted_plugins as $key => $plugin ) {
-				if ( 'new' === $plugin->post_status ) {
-					$submitted_plugins[ $key ]->status = __( 'Awaiting Review', 'wporg-plugins' );
-					$submitted_counts->new++;
-				} elseif ( 'pending' === $plugin->post_status ) {
-					$submitted_plugins[ $key ]->status = __( 'Being Reviewed', 'wporg-plugins' );
-					$submitted_counts->pending++;
-				} elseif ( 'approved' === $plugin->post_status ) {
-					$submitted_plugins[ $key ]->status = __( 'Approved', 'wporg-plugins' );
-					$submitted_counts->approved++;
-				}
-			}
+			list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
 
 			$upload_result = false;
 
@@ -57,8 +57,8 @@ class Upload {
 				&& wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' )
 				&& 'upload' === $_POST['action']
 				&& ! $submitted_counts->total
-			) :
-				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) :
+			) {
+				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) {
 					$upload_result = $uploader->process_upload();
 
 					if ( is_wp_error( $upload_result ) ) {
@@ -66,15 +66,20 @@ class Upload {
 					} else {
 						$message = $upload_result;
 					}
-				else :
+
+					// Refresh the lists.
+					list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
+
+				} else {
 					$message = __( 'Error in file upload.', 'wporg-plugins' );
-				endif;
+				}
 
-				if ( ! empty( $message ) ) :
+				if ( ! empty( $message ) ) {
 					echo "<div class='notice notice-warning notice-alt'><p>{$message}</p></div>\n";
-				endif;
+				}
+			}
 
-			else :
+			if ( ! is_wp_error( $upload_result ) ) :
 				$plugins       = wp_count_posts( 'plugin', 'readable' );
 				$oldest_plugin = get_posts( [ 'post_type' => 'plugin', 'post_status' => 'new', 'order' => 'ASC', 'orderby' => 'post_date_gmt', 'numberposts' => 1 ] );
 				$queue_length  = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
@@ -114,6 +119,14 @@ class Upload {
 							) ),
 							'<strong>' . number_format_i18n( $queue_length ) . '</strong>'
 						);
+					} else {
+						echo '</p><p>';
+						printf(
+							/* translators: plugins@wordpress.org */
+							__( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
+							'plugins@wordpress.org'
+						);
+						echo '</p>';
 					}
 					?>
 					</p>
@@ -166,25 +179,89 @@ class Upload {
 						<?php
 						// List of all plugins in progress.
 						foreach ( $submitted_plugins as $plugin ) {
-							echo '<li>' . esc_html( $plugin->post_title ) . ' &#8212; ' . $plugin->status . "</li>\n";
+							$can_change_slug = ! $plugin->{'_wporg_plugin_original_slug'};
+
+							echo '<li>';
+								echo '<strong>' . esc_html( $plugin->post_title ) . '</strong>';
+								echo '<ul>';
+								printf(
+									'<li>%s</li>',
+									sprintf(
+										__( 'Review status: %s', 'wporg-plugins' ),
+										$plugin->status
+									)
+								);
+								echo '<li>';
+								printf(
+									__( 'Current assigned slug: %s', 'wporg-plugins' ),
+									'<code>' . esc_html( $plugin->post_name ) . '</code>'
+								);
+								?>
+								<?php if ( $can_change_slug ) : ?>
+									<a href="#" class="hide-if-no-js" onclick="this.nextElementSibling.showModal()"><?php _e( 'change', 'wporg-plugins' ); ?></a>
+									<dialog class="slug-change hide-if-no-js">
+										<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
+										<strong><?php _e( 'Request to change your plugin slug', 'wporg-plugins' ); ?></strong>
+										<form>
+											<input type="hidden" name="action" value="request-slug-change" />
+											<input type="hidden" name="id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
+
+											<div class="notice notice-info notice-alt">
+												<p><?php _e( 'Your chosen slug cannot be guaranteed, and is subject to change based on the results of your review.', 'wporg-plugins' ); ?></p>
+												<p><?php
+													printf(
+														/* Translators: URL */
+														__( "Your slug is used to generate your plugins URL. Currently it's %s", 'wporg-plugins' ),
+														'<code>' . esc_url( home_url( $plugin->post_name ) . '/' ) . '</code>'
+													);
+												?></p>
+												<p><?php _e( 'Your slug (aka permalink) cannot be changed once your review is completed. Please choose carefully.', 'wporg-plugins' ); ?></p>
+											</div>
+											<div class="notice notice-error notice-alt hidden"><p></p></div>
+											<p>
+												<label>
+													<strong><?php _e( 'Plugin Name', 'wporg-plugins' ); ?></strong><br>
+													<?php echo esc_html( $plugin->post_title ); ?>
+												</label>
+											</p>
+											<p>
+												<label>
+													<strong><?php _e( 'Desired Slug', 'wporg-plugins' ); ?></strong><br>
+													<input type="text" name="post_name" required maxlength="200" pattern="[a-z0-9-]*" value="<?php echo esc_attr( $plugin->post_name ); ?>" />
+												</label>
+											</p>
+
+											<p>
+												<label>
+													<input type="checkbox" name="confirm" required />
+													<?php
+														printf(
+															/* Translators: URL to plugin guidelines */
+															__( 'I confirm that my slug choice <a href="%s">meets the guidelines for plugin slugs</a>.', 'wporg-plugins' ),
+															'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#17-plugins-must-respect-trademarks-copyrights-and-project-names'
+														);
+													?>
+												</label>
+											</p>
+											<p>
+												<input class="button button-primary" type="submit" value="<?php esc_attr_e( 'Request', 'wporg-plugins' ); ?>" />
+											</p>
+										</form>
+									</dialog>
+								<?php
+								endif; // $can_change_slug
+								echo '</li>';
+								echo '</ul>';
+							
+							echo "</li>\n";
 						}
 						?>
 						</ul>
-
-						<p>
-						<?php
-							printf(
-								/* translators: plugins@wordpress.org */
-								__( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
-								'plugins@wordpress.org'
-							);
-						?>
-						</p>
 					</div>
 
 				<?php endif; // $submitted_counts->total ?>
 
-			<?php endif; // wp_verify_nonce() && 'upload' === $_POST['action'] ?>
+			<?php endif; // ! is_wp_error( $upload_result ) ?>
 
 			<?php
 			if ( is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
