@@ -473,7 +473,7 @@ function get_mailbox_name( $mailbox_id_or_request ) {
 function log_email( $event, $request ) {
 	global $wpdb;
 
-	if ( str_starts_with( $event, 'convo.' ) ) {
+	if ( ! str_starts_with( $event, 'convo.' ) ) {
 		return;
 	}
 
