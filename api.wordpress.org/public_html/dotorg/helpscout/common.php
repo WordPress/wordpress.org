@@ -299,10 +299,15 @@ function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
 			}
 
 			// Extract matches from the email.
-			$email_body = strip_tags( str_replace( '<br>', "\n", $thread->body ) );
+			$email_text = strip_tags( str_replace( '<br>', "\n", $thread->body ) );
 
 			foreach ( $regexes as $regex ) {
-				if ( ! preg_match_all( $regex, $email_body, $m ) ) {
+				if (
+					// Check the email text only
+					! preg_match_all( $regex, $email_text, $m ) &&
+					// ..and the full email body, which may be HTML.
+					! preg_match_all( $regex, $thread->body, $m )
+				) {
 					continue;
 				}
 
