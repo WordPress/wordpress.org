@@ -19,7 +19,7 @@ class GP_OpenAI_Review {
 	 *
 	 * @return array
 	 */
-	public static function get_openai_review( $original_singular, $translation, $locale, $glossary_query, $is_retry ): array {
+	public static function get_openai_review( $original, $translation, $language, $glossary_query, $is_retry ): array {
 		$openai_query = '';
 		$openai_key   = apply_filters( 'gp_get_openai_key', self::$gp_openai_key );
 
@@ -28,8 +28,7 @@ class GP_OpenAI_Review {
 		}
 		$openai_temperature = 0;
 
-		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
-		$openai_query .= 'For the english text  "' . $original_singular . '", is "' . $translation . '" a correct translation in ' . $gp_locale->english_name . '?';
+		$openai_query .= 'For the english text  "' . $original . '", is "' . $translation . '" a correct translation in ' . $language . '?';
 		if ( $glossary_query ) {
 			$messages[] = array(
 				'role'    => 'system',
@@ -65,17 +64,18 @@ class GP_OpenAI_Review {
 
 		$response_status = wp_remote_retrieve_response_code( $openai_response );
 		$output          = json_decode( wp_remote_retrieve_body( $openai_response ), true );
+		$response = array();
 
 		if ( 200 !== $response_status || is_wp_error( $openai_response ) ) {
-			$response['openai']['status'] = $response_status;
-			$response['openai']['error']  = wp_remote_retrieve_response_message( $openai_response );
+			$response['status'] = $response_status;
+			$response['error']  = wp_remote_retrieve_response_message( $openai_response );
 			return $response;
 		}
 
 		$message                          = $output['choices'][0]['message'];
-		$response['openai']['status']     = $response_status;
-		$response['openai']['review']     = trim( trim( $message['content'] ), '"' );
-		$response['openai']['time_taken'] = $time_taken;
+		$response['status']     = $response_status;
+		$response['review']     = trim( trim( $message['content'] ), '"' );
+		$response['time_taken'] = $time_taken;
 
 		return $response;
 	}

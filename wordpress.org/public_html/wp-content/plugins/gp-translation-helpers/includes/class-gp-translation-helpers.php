@@ -445,17 +445,15 @@ class GP_Translation_Helpers {
 	 */
 	public static function fetch_openai_review() {
 		check_ajax_referer( 'gp_comment_feedback', 'nonce' );
-		$translation_id = sanitize_text_field( $_POST['data']['translation_id'] );
-		$locale_slug    = sanitize_text_field( $_POST['data']['locale_slug'] );
-		$glossary_query = sanitize_text_field( $_POST['data']['glossary_query'] );
-		$is_retry       = filter_var( $_POST['data']['is_retry'], FILTER_VALIDATE_BOOLEAN );
+		$original    = sanitize_text_field( $_POST['data']['original'] );
+		$translation = sanitize_text_field( $_POST['data']['translation'] );
+		$language    = sanitize_text_field( $_POST['data']['language'] );
+		$glossary    = sanitize_text_field( $_POST['data']['glossary_query'] );
+		$is_retry    = filter_var( $_POST['data']['is_retry'], FILTER_VALIDATE_BOOLEAN );
 
-		$translation = GP::$translation->get( $translation_id );
-		$original    = GP::$original->get( $translation->original_id );
+		$openai_response = GP_OpenAI_Review::get_openai_review( $original, $translation, $language, $glossary, $is_retry );
 
-		$openai_response = GP_OpenAI_Review::get_openai_review( $original->singular, $translation->translation_0, $locale_slug, $glossary_query, $is_retry );
-
-		wp_send_json_success( $openai_response['openai'] );
+		wp_send_json_success( $openai_response );
 	}
 
 	/**
