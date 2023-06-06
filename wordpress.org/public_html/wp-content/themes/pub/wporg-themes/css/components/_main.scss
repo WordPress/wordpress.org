@@ -1430,13 +1430,14 @@ body.full-overlay-active {
 }
 
 .filter-links {
-	display: inline-block;
+	display: flex;
+	align-items: baseline;
 	margin: 0;
 	padding: 0;
 }
 
 .filter-links li {
-	display: inline-block;
+	display: block;
 	margin: 0;
 }
 
