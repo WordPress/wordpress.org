@@ -1,6 +1,7 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings  */
+/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, console, $gp_editor_options  */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
+	var focusedRowId = '';
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
 		var tab = $( this );
@@ -14,9 +15,28 @@ jQuery( function( $ ) {
 	// When a new translation row is opened (with double click, clicking in the "Details" button,
 	// or with the hotkeys), the translation textarea is focused, so the tabs (header tabs and
 	// divs with the content) for the right sidebar are updated.
-	$gp.editor.table.on( 'focus input', 'tr.editor textarea.foreign-text', function() {
+	$gp.editor.table.on( 'focus', 'tr.editor textarea.foreign-text', function() {
 		var tr = $( this ).closest( 'tr.editor' );
+		var rowId = tr.attr( 'row' );
+		var translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
+
+		if ( focusedRowId === rowId ) {
+			return;
+		}
+		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
+		if ( $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
+			fetchOpenAIReviewResponse( rowId, tr, false );
+		}
+	} );
+
+	$gp.editor.table.on( 'click', 'a.retry-auto-review', function( event ) {
+		var tr = $( this ).closest( 'tr.editor' );
+		var rowId = tr.attr( 'row' );
+		event.preventDefault();
+		tr.find( '.openai-review .auto-review-result' ).html( '' );
+		tr.find( '.openai-review .suggestions__loading-indicator' ).show();
+		fetchOpenAIReviewResponse( rowId, tr, true );
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -209,5 +229,73 @@ jQuery( function( $ ) {
 			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
 			add_copy_button( '#sidebar-div-other-locales-' + originalId );
 		} );
+	}
+
+	/**
+	 * Fetch translation review from OpenAI.
+	 *
+	 * @param {string}  rowId      The row-id attribute of the current row.
+	 * @param {string}  currentRow The current row.
+	 * @param {boolean} isRetry    The current row.
+	 */
+	function fetchOpenAIReviewResponse( rowId, currentRow, isRetry ) {
+		var payload = {};
+		var data = {};
+		var original_str = currentRow.find( '.original' );
+		var glossary_prompt = '';
+		var translationId = $gp.editor.translation_id_from_row_id( rowId );
+
+		$.each( $( original_str ).find( '.glossary-word' ), function( k, word ) {
+			$.each( $( word ).data( 'translations' ), function( i, e ) {
+				glossary_prompt += 'where "' + word.textContent + '" is translated as "' + e.translation + '" when it is a ' + e.pos;
+				if ( e.comment ) {
+					glossary_prompt += ' (' + e.comment + ')';
+				}
+				glossary_prompt += ', ';
+			} );
+		} );
+
+		if ( '' !== glossary_prompt ) {
+			glossary_prompt = 'You are required to follow these rules, ' + glossary_prompt + 'for words found in the English text you are translating.';
+		}
+		payload.locale_slug = $gp_comment_feedback_settings.locale_slug;
+		payload.translation_id = translationId;
+		payload.glossary_query = glossary_prompt;
+		payload.is_retry = isRetry;
+
+		data = {
+			action: 'fetch_openai_review',
+			data: payload,
+			_ajax_nonce: $gp_comment_feedback_settings.nonce,
+		};
+
+		$.ajax(
+			{
+				type: 'POST',
+				url: $gp_comment_feedback_settings.url,
+				data: data,
+			}
+		).done(
+			function( response ) {
+				currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
+				if ( 200 === response.data.status ) {
+					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Auto-review by ChatGPT' ).append( $( '<span/>' ).text( response.data.review + ' (' + response.data.time_taken.toFixed( 2 ) + 's)' ) );
+				} else {
+					currentRow.find( '.openai-review .auto-review-result' ).text( 'Error ' + response.data.status + ' : ' + response.data.error );
+				}
+				currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
+			}
+		).fail(
+			function( xhr, msg ) {
+				/* eslint no-console: ["error", { allow: ["error"] }] */
+				console.error( data );
+				msg = 'An error has occurred';
+				if ( xhr.responseText ) {
+					msg += ': ' + xhr.responseText;
+				}
+				msg += '. Please, take a screenshot of the output in the browser console, send it to the developers, and reload the page to see if it works.';
+				$gp.notices.error( msg );
+			}
+		);
 	}
 } );
