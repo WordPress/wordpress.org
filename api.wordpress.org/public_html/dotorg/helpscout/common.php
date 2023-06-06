@@ -269,7 +269,7 @@ function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
 	}
 
 	// Plugin reviews, match the format of "[WordPress Plugin Directory] {Type Of Email}: {Plugin Title}"
-	if ( preg_match( '!^(Re: )?\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ) {
+	if ( preg_match( '!\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ) {
 		switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
 		$plugins = get_posts( [
 			'title'       => trim( $m['title'] ),
