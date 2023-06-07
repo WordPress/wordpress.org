@@ -122,8 +122,12 @@ class Themes_API {
 
 		// Favorites requests require a user to fetch favorites for.
 		if ( isset( $this->request->browse ) && 'favorites' === $this->request->browse && ! isset( $this->request->user ) ) {
-			$this->request->user = '';
-			$this->bad_input = true;
+			if ( is_user_logged_in() ) {
+				$this->request->user = wp_get_current_user()->user_nicename;
+			} else {
+				$this->request->user = '';
+				$this->bad_input = true;
+			}
 		}
 
 		$array_of_string_fields = [
