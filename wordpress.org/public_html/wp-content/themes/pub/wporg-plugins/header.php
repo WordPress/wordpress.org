@@ -27,11 +27,13 @@ $local_nav_items = array(
 
 global $wp_query;
 $is_beta = 'beta' === $wp_query->get( 'browse' );
+$is_favs = 'favorites' === $wp_query->get( 'browse' );
 // The filter bar should not be shown on:
 // - search: wp-query filters not compatible with ES search.
 // - singular: not relevant on pages or individual plugins.
 // - beta: likely unnecessary, these are probably all "community".
-$show_filter_bar = ! ( is_search() || is_singular() || $is_beta );
+// - favorites: not necessary.
+$show_filter_bar = ! ( is_search() || is_singular() || $is_beta || $is_favs );
 
 echo do_blocks( '<!-- wp:wporg/global-header /-->' ); // phpcs:ignore
 
