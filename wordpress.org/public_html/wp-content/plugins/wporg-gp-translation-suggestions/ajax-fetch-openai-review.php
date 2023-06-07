@@ -6,11 +6,10 @@ if ( defined( 'ABSPATH' ) ) {
 header( 'Content-type: application/json' );
 
 if ( empty( $_POST['action'] ) || 'fetch_openai_review' !== $_POST['action'] ) {
-	echo '{"success":false","error":"wrong-action"}';
+	echo '{"success":false","data":{"error":"wrong-action","status":404}}';
 	exit;
 }
 
-$site_id = 351; // translate.wordpress.org
 require_once dirname( __DIR__, 3 ) . '/wp-config.php';
 require_once ABSPATH . 'wp-includes/ms-functions.php';
 require_once ABSPATH . 'wp-includes/pluggable.php';
@@ -19,10 +18,14 @@ check_ajax_referer( 'gp_comment_feedback', 'nonce' );
 $decoded = wp_parse_auth_cookie( '', 'logged_in' );
 
 if ($decoded['expiration'] < time()) {
-	echo '{"success":false","error":"expired"}';
-    exit;
+	echo '{"success":false","data":{"error":"expired","status":404}}';
+	exit;
 }
 wp_set_current_user( null, $decoded['username'] );
+if ( ! is_user_logged_in() ) {
+	echo '{"success":false","data":{"error":"not-logged-in","status":404}}';
+	exit;
+}
 switch_to_blog( 351 ); // translate.wordpress.org
 
 $openai_key = false;
@@ -38,7 +41,7 @@ if ( is_array( $default_sort ) ) {
 		}
 }
 if ( ! $openai_key ) {
-	echo '{"success":false","error":"no-openai-key"}';
+	echo '{"success":false","data":{"error":"no-openai-key","status":404}}';
 	exit;
 }
 
