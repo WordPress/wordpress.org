@@ -25,8 +25,10 @@ jQuery( function( $ ) {
 		}
 		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
-		if ( $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
+		if ( $gp_comment_feedback_settings.has_openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
 			fetchOpenAIReviewResponse( rowId, tr, false );
+		} else {
+			tr.find( '.openai-review' ).hide();
 		}
 	} );
 
@@ -273,14 +275,17 @@ jQuery( function( $ ) {
 		$.ajax(
 			{
 				type: 'POST',
-				url: '/wp-content/plugins/wporg-gp-translation-suggestions/ajax-fetch-openai-review.php',
+				url: typeof window.useThinFetch !== 'undefined' && window.useThinFetch ? '/wp-content/plugins/wporg-gp-translation-suggestions/ajax-fetch-openai-review.php' : $gp_comment_feedback_settings.url,
 				data: data,
 			}
 		).done(
 			function( response ) {
 				currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
-				if ( 200 === response.data.status ) {
+				if ( response.success ) {
 					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( $( '<span/>' ).text( response.data.review + ' (' + response.data.time_taken.toFixed( 2 ) + 's)' ) );
+				} else if ( 404 === response.data.status ) {
+					currentRow.find( '.openai-review' ).hide();
+					return;
 				} else {
 					currentRow.find( '.openai-review .auto-review-result' ).text( 'Error ' + response.data.status + ' : ' + response.data.error );
 				}
@@ -290,12 +295,6 @@ jQuery( function( $ ) {
 			function( xhr, msg ) {
 				/* eslint no-console: ["error", { allow: ["error"] }] */
 				console.error( data );
-				msg = 'An error has occurred';
-				if ( xhr.responseText ) {
-					msg += ': ' + xhr.responseText;
-				}
-				msg += '. Please, take a screenshot of the output in the browser console, send it to the developers, and reload the page to see if it works.';
-				$gp.notices.error( msg );
 			}
 		);
 	}

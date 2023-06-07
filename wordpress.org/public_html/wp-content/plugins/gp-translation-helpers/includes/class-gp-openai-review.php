@@ -24,9 +24,11 @@ class GP_OpenAI_Review {
 		$openai_key   = apply_filters( 'gp_get_openai_key', self::$gp_openai_key );
 
 		if ( empty( trim( $openai_key ) ) ) {
-			return array();
+			return array(
+				'status' => 404,
+				'error' => 'No OpenAI Key defined',
+			);
 		}
-		$openai_temperature = 0;
 
 		$openai_query .= 'For the english text  "' . $original . '", is "' . $translation . '" a correct translation in ' . $language . '?';
 		if ( $glossary_query ) {
@@ -54,7 +56,6 @@ class GP_OpenAI_Review {
 						'max_tokens'  => 1000,
 						'n'           => 1,
 						'messages'    => $messages,
-						'temperature' => $openai_temperature,
 					)
 				),
 			)

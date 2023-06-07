@@ -396,6 +396,7 @@ class GP_Translation_Helpers {
 		);
 		gp_enqueue_script( 'gp-comment-feedback-js' );
 
+		$gp_locale = GP_Locales::by_field( 'slug', $translation_set['locale_slug'] );
 		wp_localize_script(
 			'gp-comment-feedback-js',
 			'$gp_comment_feedback_settings',
@@ -403,6 +404,8 @@ class GP_Translation_Helpers {
 				'url'             => admin_url( 'admin-ajax.php' ),
 				'nonce'           => wp_create_nonce( 'gp_comment_feedback' ),
 				'locale_slug'     => $translation_set['locale_slug'],
+				'language'        => $gp_locale ? $gp_locale->english_name : 'Unknown',
+				'has_openai_key'  => !! apply_filters( 'gp_get_openai_key', null ),
 				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
 			)
 		);
@@ -452,7 +455,9 @@ class GP_Translation_Helpers {
 		$is_retry    = filter_var( $_POST['data']['is_retry'], FILTER_VALIDATE_BOOLEAN );
 
 		$openai_response = GP_OpenAI_Review::get_openai_review( $original, $translation, $language, $glossary, $is_retry );
-
+		if ( isset( $openai_response['error'] ) ) {
+			wp_send_json_error( $openai_response );
+		}
 		wp_send_json_success( $openai_response );
 	}
 
