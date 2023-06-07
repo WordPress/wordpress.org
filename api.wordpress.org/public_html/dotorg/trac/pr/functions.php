@@ -336,7 +336,7 @@ function get_trac_instance( $trac ) {
  * Formats a PR description/comment for usage on Trac.
  *
  * This:
- *  - Strips standard boilerplate text
+ *  - Strips standard boilerplate texts
  *  - format_github_content_for_trac_comment();
  *
  * @param string $desc.
@@ -347,6 +347,9 @@ function format_pr_desc_for_trac_comment( $desc ) {
 
 	// Remove the final line if it matches the specific boilerplate format.
 	$desc = preg_replace( "#---\r?\n\*\*.+\*\*$#", '', $desc );
+
+	// Or the 'Trac Ticket: ...' reference.
+	$desc = preg_replace( '!^(Trac )?Ticket:\s*https://[a-z0-9.#/:]+$!im', '', $desc );
 
 	return format_github_content_for_trac_comment( $desc );
 }
@@ -359,11 +362,15 @@ function format_pr_desc_for_trac_comment( $desc ) {
  *  - Converts code blocks
  *  - Converts image embeds
  *  - Converts links
+ *  - Converts tables
  *
  * @param string $desc.
  * @return string Converted PR Description
  */
 function format_github_content_for_trac_comment( $desc ) {
+	// Standardise on \n.
+	$desc = str_replace( "\r\n", "\n", $desc );
+
 	// Remove HTML comments
 	$desc = preg_replace( '#<!--.+?-->#s', '', $desc );
 
@@ -390,13 +397,13 @@ function format_github_content_for_trac_comment( $desc ) {
 	// Convert Links.
 	$desc = preg_replace( '#\[(.+?)\]\((.+?)\)#', '[$2 $1]', $desc );
 
-	// Convert Tables. This doesn't convert GitHub table headers to Trac headers.
+	// Convert Tables.
 	$desc = preg_replace_callback(
 		'#^[|].+[|]$#m', 
 		function( $m ) {
 			// Headers such as `| --- |---|`
 			if ( preg_match( '#^[- |]+$#', $m[0] ) ) {
-				return '|| ||'; // Empty row.
+				return '~~~TABLEHEADER~~~';
 			}
 
 			// Replace singular |'s but not double ||'s
@@ -404,6 +411,21 @@ function format_github_content_for_trac_comment( $desc ) {
 		},
 		$desc
 	);
+	// Markup the headers now. Trac table headers are in the format of ||= Header =||
+	$desc = preg_replace_callback(
+		"#^([|].+[|])\n(~~~TABLEHEADER~~~)#m",
+		function( $m ) {
+			$headers = $m[1];
+			$headers = preg_replace( '#[|]{2}([^|=])#', '||=$1', $headers );
+			$headers = preg_replace( '#([^|=])[|]{2}#', '$1=||', $headers );
+
+			return $headers;
+		},
+		$desc
+	);
+
+	// It shouldn't exist at this point, but if it does, replace it back with it's original content.
+	$desc = str_replace( '~~~TABLEHEADER~~~', '|| ||', $desc );
 
 	return trim( $desc );
 }
