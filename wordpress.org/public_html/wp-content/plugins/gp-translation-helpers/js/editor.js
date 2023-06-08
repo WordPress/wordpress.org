@@ -423,9 +423,13 @@ jQuery( function( $ ) {
 				body: JSON.stringify( request ),
 			}
 		);
+		const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
 
-		for await (const value of response.body?.pipeThrough(new TextDecoderStream())) {
-		    parser.feed(value)
+		while (true) {
+			const {value, done} = await reader.read();
+			if (done) break;
+			parser.feed(value)
+			console.log('Received', value);
 		}
 	}
 
