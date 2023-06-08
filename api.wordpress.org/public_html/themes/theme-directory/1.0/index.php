@@ -17,8 +17,9 @@ require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
 function api_send_json( $data ) {
 	// Allow cross-domain calls from *.wordpress.org
-	if ( isset( $_SERVER['HTTP_ORIGIN'] ) && preg_match( '!^https?://[^.]+\.wordpress\.org/!i', $_SERVER['HTTP_ORIGIN'] ) ) {
+	if ( isset( $_SERVER['HTTP_ORIGIN'] ) && preg_match( '!^https?://([^.]+\.)?wordpress\.org/?$!i', $_SERVER['HTTP_ORIGIN'] ) ) {
 		header( 'Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] );
+		header( 'Access-Control-Allow-Credentials: true' ); // Allow cookies to be used.
 	}
 
 	if ( isset( $_GET['callback'] ) ) {

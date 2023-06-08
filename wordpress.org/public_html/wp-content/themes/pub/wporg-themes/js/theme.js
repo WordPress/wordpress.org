@@ -345,47 +345,26 @@ window.wp = window.wp || {};
 			var url = themes.data.settings.apiEndpoint,
 				data, options;
 
-			data = _.extend({
-				per_page: themes.data.settings.postsPerPage,
-				locale: themes.data.settings.locale,
+			data = _.extend( {
+				action: 'query_themes',
+				// Fields which are not set as true in theme-directory/class-themes-api.php for the API endpoint used.
 				fields: {
-					description: true,
-					sections: false,
-					tested: true,
-					requires: true,
-					downloaded: false,
+					active_installs: true,
 					downloadlink: true,
 					last_updated: true,
-					homepage: true,
-					theme_url: true,
-					parent: true,
-					tags: true,
-					rating: true,
 					ratings: true,
-					num_ratings: true,
-					extended_author: true,
 					photon_screenshots: true,
-					active_installs: true,
-					requires_php: true,
-					is_commercial: true,
-					is_community: true,
-				}
+					tags: true,
+					theme_url: true,
+				},
+				per_page: themes.data.settings.postsPerPage,
+				locale: themes.data.settings.locale
 			}, request);
-
-			// Requests against api.WordPress.org need to be nested.
-			if ( 'api.wordpress.org' === ( new URL(url) ).hostname ) {
-				data = {
-					action: 'query_themes',
-					// Request data
-					request: data
-				};
-			}
 
 			options = {
 				type: 'GET',
 				url: url,
-				jsonp: 'callback',
-				dataType: 'jsonp',
+				dataType: 'json',
 				data: data,
 
 				beforeSend: function() {
@@ -506,7 +485,7 @@ window.wp = window.wp || {};
 			'click .theme-actions .button-secondary': 'preview',
 			'keydown .theme-actions .button-secondary': 'preview',
 			'touchend .theme-actions .button-secondary': 'preview',
-			'click .favorite': 'favourite_toggle',
+			'click .favorite': 'favorite_toggle',
 			// This is provided by a Third Party
 			'click #theme-patterns-grid-js .wporg-screenshot-card': 'preview', 
 			'click .wporg-horizontal-slider-js .wporg-screenshot-card': 'thumbnailPreview', 
@@ -572,7 +551,7 @@ window.wp = window.wp || {};
 			this.renderStyleVariations();
 		},
 
-		favourite_toggle: function() {
+		favorite_toggle: function() {
 			var $heart = this.$el.find( '.favorite' ),
 				favorited = ! $heart.hasClass( 'favorited' ),
 				slug = this.model.get('slug'),
@@ -594,8 +573,10 @@ window.wp = window.wp || {};
 			var options = {
 				type: 'GET',
 				url: themes.data.settings.favorites.api,
-				jsonp: 'callback',
-				dataType: 'jsonp',
+				dataType: 'json',
+				xhrFields: {
+					withCredentials: true
+				},
 				data: {
 					action: favorited ? 'add-favorite' : 'remove-favorite',
 					theme: this.model.get('slug'),
@@ -1696,7 +1677,7 @@ window.wp = window.wp || {};
 			if ( 'favorites' === section ) {
 				this.collection.query( {
 					browse: section,
-					user: themes.data.settings.favorites.user
+					user: themes.data.settings.currentUser?.login
 				} );
 			} else {
 				this.collection.query( { browse: section } );
