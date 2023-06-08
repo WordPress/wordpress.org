@@ -48,7 +48,7 @@ class Site_Quality_Stats_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error True if the token exists, WP_Error upon failure.
 	 */
 	function update_item_permissions_check( $request ) {
-		return $this->permission_check_api_bearer( $request, 'AUTO_REVIEW_TRAC_API_GITHUB_BEARER_TOKEN' );
+		return $this->permission_check_api_bearer( $request, 'SITE_QUALITY_STATS_API_GITHUB_BEARER_TOKEN' );
 	}
 
 	/**
