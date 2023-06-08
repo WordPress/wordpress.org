@@ -401,12 +401,13 @@ class GP_Translation_Helpers {
 			'gp-comment-feedback-js',
 			'$gp_comment_feedback_settings',
 			array(
-				'url'             => admin_url( 'admin-ajax.php' ),
-				'nonce'           => wp_create_nonce( 'gp_comment_feedback' ),
-				'locale_slug'     => $translation_set['locale_slug'],
-				'language'        => $gp_locale ? $gp_locale->english_name : 'Unknown',
-				'has_openai_key'  => !! apply_filters( 'gp_get_openai_key', null ),
-				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
+				'url'                => admin_url( 'admin-ajax.php' ),
+				'nonce'              => wp_create_nonce( 'gp_comment_feedback' ),
+				'locale_slug'        => $translation_set['locale_slug'],
+				'language'           => $gp_locale ? $gp_locale->english_name : 'Unknown',
+				'openai_key'         => apply_filters( 'gp_get_openai_key', null ),
+				'openai_temperature' => apply_filters( 'gp_get_openai_temperature', 0.8 ),
+				'comment_reasons'    => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
 			)
 		);
 
