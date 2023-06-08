@@ -121,6 +121,30 @@ function wporg_themes_pre_get_posts( $query ) {
 			$query->query_vars['orderby'] = 'meta_value DESC';
 			break;
 
+		case 'commercial':
+			if ( ! isset( $query->query_vars['tax_query'] ) ) {
+				$query->query_vars['tax_query'] = array();
+			}
+			$query->query_vars['tax_query']['model'] = array(
+				'taxonomy' => 'theme_business_model',
+				'field'    => 'slug',
+				'terms'    => 'commercial',
+				'operator' => 'IN',
+			);
+			break;
+
+		case 'community':
+			if ( ! isset( $query->query_vars['tax_query'] ) ) {
+				$query->query_vars['tax_query'] = array();
+			}
+			$query->query_vars['tax_query']['model'] = array(
+				'taxonomy' => 'theme_business_model',
+				'field'    => 'slug',
+				'terms'    => 'community',
+				'operator' => 'IN',
+			);
+			break;
+
 		default:
 			// Force a 404 for anything else.
 			if ( $query->query_vars['browse'] ) {
