@@ -503,12 +503,12 @@ class Plugin {
 	 * @return string|true True if check is OK, otherwise warning message.
 	 */
 	public function gp_core_setting_warning( $original, $translation, $locale, $meta = array() ) {
-		if ( empty( $meta ) ) {
+		if ( empty( $meta ) || ! isset( $meta['project_id'] ) ) {
 			// unable to check.
 			return true;
 		}
 
-		if ( isset( $meta['project_id'] ) || 78 === $meta['project_id'] ) { // wp/dev/admin
+		if ( 78 === $meta['project_id'] ) { // wp/dev/admin
 			if (
 				'0' === $original &&
 				'default GMT offset or timezone string' === $meta['context']
