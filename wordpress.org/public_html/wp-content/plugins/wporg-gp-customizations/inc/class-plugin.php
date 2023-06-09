@@ -514,11 +514,12 @@ class Plugin {
 				'default GMT offset or timezone string' === $meta['context']
 				) {
 				// Must be either a valid offset (-12 to 14).
-				if ( is_numeric( $translation ) && $translation >= -12 && $translation <= 14 ) {
+				if ( is_numeric( $translation ) && round( $translation ) === intval( $translation ) && $translation >= -12 && $translation <= 14 ) {
+					// Countries with half-hour offsets or similar need to use a timezone string.
 					return true;
 				}
 				// or a valid timezone string (America/New_York).
-				if ( preg_match( '#^[A-Z][A-Za-z_]+/[A-Za-z_]+$#', $translation ) ) {
+				if ( preg_match( '#^[A-Z][A-Za-z_]+/[A-Z][A-Za-z_]+$#', $translation ) ) {
 					return true;
 				}
 
