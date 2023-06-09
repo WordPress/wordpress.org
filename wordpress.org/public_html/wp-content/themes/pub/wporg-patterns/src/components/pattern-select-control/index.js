@@ -1,7 +1,6 @@
 /**
  * Wordpress dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { addQueryArgs, getQueryArg } from '@wordpress/url';
 import { SelectControl } from '@wordpress/components';
 import { useViewportMatch } from '@wordpress/compose';
@@ -11,28 +10,29 @@ import { useViewportMatch } from '@wordpress/compose';
  */
 import { useRoute } from '../../hooks';
 
-const PatternOrderSelect = ( { options } ) => {
+const PatternSelectControl = ( { defaultValue, label, param, options } ) => {
 	const { path, replace } = useRoute();
 	const hideLabel = useViewportMatch( 'medium', '>=' );
 
 	if ( ! options ) {
 		return null;
 	}
+	const value = getQueryArg( window.location.href, param ) || defaultValue;
 
 	return (
-		<div className="pattern-order-select">
+		<div className="pattern-select-control">
 			<SelectControl
-				label={ __( 'Order by', 'wporg-patterns' ) }
+				label={ label }
 				labelPosition="side"
 				hideLabelFromVision={ hideLabel }
-				value={ getQueryArg( window.location.href, 'orderby' ) }
+				value={ value }
 				options={ options }
-				onChange={ ( value ) => {
-					replace( addQueryArgs( path, { orderby: value } ).replace( /\/page\/[\d]+/, '' ) );
+				onChange={ ( newValue ) => {
+					replace( addQueryArgs( path, { [ param ]: newValue } ).replace( /\/page\/[\d]+/, '' ) );
 				} }
 			/>
 		</div>
 	);
 };
 
-export default PatternOrderSelect;
+export default PatternSelectControl;

@@ -1,6 +1,7 @@
 .pattern-navigation-layout {
 	margin: 0 auto $gutter-default;
 	max-width: $size__site-main;
+	gap: $gutter-default;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -11,21 +12,25 @@
 	}
 
 	.pattern-navigation-layout__secondary {
-		margin-top: $gutter-default;
-		width: calc(100% - #{$gutter-default * 2});
+		display: flex;
+		flex-direction: column;
+		gap: #{$gutter-default / 2};
 	}
 
 	@media only screen and ( min-width: #{$breakpoint-medium + 1} ) {
 		margin: $gutter-default;
+		gap: #{$gutter-default / 2};
 		flex-direction: row;
+		flex-wrap: wrap;
 
 		.pattern-navigation-layout__primary {
 			margin-bottom: 0;
+			width: auto;
 		}
 
 		.pattern-navigation-layout__secondary {
-			margin: 0;
 			width: auto;
+			flex-direction: row;
 		}
 	}
 

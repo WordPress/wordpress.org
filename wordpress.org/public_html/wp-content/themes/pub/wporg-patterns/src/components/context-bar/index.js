@@ -29,8 +29,8 @@ import { store as patternStore } from '../../store';
  */
 const isHomeQuery = ( query ) => {
 	const allKeys = Object.keys( query || {} );
-	// Filter out "orderby" and "page", which have no affect on what kind of query this is.
-	const keys = allKeys.filter( ( key ) => ! [ 'orderby', 'page' ].includes( key ) );
+	// Filter out "orderby", "page", and "curation", which have no affect on what kind of query this is.
+	const keys = allKeys.filter( ( key ) => ! [ 'orderby', 'page', 'curation' ].includes( key ) );
 	return ! keys.length;
 };
 

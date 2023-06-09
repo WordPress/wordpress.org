@@ -13,8 +13,8 @@ import { useSelect } from '@wordpress/data';
 import Menu from './menu';
 import NavigationLayout from '../navigation-layout';
 import PatternGrid from '../pattern-grid';
+import PatternSelectControl from '../pattern-select-control';
 import PatternThumbnail from '../pattern-thumbnail';
-import PatternOrderSelect from '../pattern-order-select';
 import QueryMonitor from '../query-monitor';
 import { RouteProvider } from '../../hooks';
 
@@ -63,10 +63,13 @@ const MyPatterns = () => {
 			<NavigationLayout
 				primary={ <Menu /> }
 				secondary={
-					<PatternOrderSelect
+					<PatternSelectControl
+						label={ __( 'Order by', 'wporg-patterns' ) }
+						param="orderby"
+						defaultValue="date"
 						options={ [
 							{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
-							{ label: __( 'Favorites', 'wporg-patterns' ), value: 'favorite_count' },
+							{ label: __( 'Popular', 'wporg-patterns' ), value: 'favorite_count' },
 						] }
 					/>
 				}
