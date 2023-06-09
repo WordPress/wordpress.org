@@ -1443,8 +1443,8 @@ body.full-overlay-active {
 
 .filter-links li > a {
 	display: inline-block;
-	margin: 0 10px;
-	padding: 15px 0;
+	margin: 0;
+	padding: 15px 10px;
 	border-bottom: 4px solid #fff;
 	color: #666;
 	cursor: pointer;
@@ -1934,6 +1934,7 @@ span.favorite.favorited {
 
 			a.filter-tab {
 				padding: 0.5em;
+				margin-left: 10px;
 				border-bottom: none;
 				border-left: 4px solid transparent;
 
