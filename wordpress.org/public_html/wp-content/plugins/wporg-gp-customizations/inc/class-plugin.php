@@ -46,6 +46,7 @@ class Plugin {
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
 		add_action( 'init', array( $this, 'bump_assets_versions' ), 20 );
 		add_action( 'init', array( $this, 'add_cors_header' ) );
+		add_action( 'init', array( $this, 'add_wp_core_warnings' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
@@ -328,14 +329,14 @@ class Plugin {
 	 */
 	function allow_searching_for_no_author_translations( $clauses, $set, $filters ) {
 		$user_login = gp_array_get( $filters, 'user_login' );
-	
+
 		if ( '0' === $user_login ) {
 			$clauses['where'] .= ( $clauses['where'] ? ' AND' : '' ) . ' t.user_id = 0';
 		} elseif ( 'anonymous' === $user_login ) {
 			// 'Anonymous' user exists, but has no translations.
 			$clauses['where'] = preg_replace( '/(user_id\s*=\s*\d+)/', 'user_id = 0', $clauses['where'] );
 		}
-	
+
 		return $clauses;
 	}
 
@@ -469,7 +470,7 @@ class Plugin {
 	/**
 	 * Allow the Playground to access translate.wordpress.org.
 	 */
-	public static function add_cors_header() {
+	public function add_cors_header() {
 		if ( headers_sent() ) {
 			return;
 		}
@@ -480,6 +481,52 @@ class Plugin {
 			}
 		}
 		header( 'Vary: origin' );
+	}
+
+	/**
+	 * Add GlotPress Core Warnings.
+	 */
+	public function add_wp_core_warnings() {
+		\GP::$translation_warnings->add( 'core_setting', array( $this, 'gp_core_setting_warning' ) );
+	}
+
+	/**
+	 * Checks whether lengths of source and translation differ too much.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param string    $original_string    The source string.
+	 * @param string    $translation The translation.
+	 * @param GP_Locale $locale      The locale of the translation.
+	 * @param object $original|null      The original object.
+	 * @return string|true True if check is OK, otherwise warning message.
+	 */
+	public function gp_core_setting_warning( $original_string, $translation, $locale, $original = null ) {
+		if ( is_null( $original ) ) {
+			// unable to check.
+			return true;
+		}
+
+		if ( 78 === $original->project_id ) { // wp/dev/admin
+			if (
+				'0' === $original_string &&
+				'default GMT offset or timezone string' === $original->context
+				) {
+				// Must be either a valid offset (-12 to 14).
+				if ( is_numeric( $translation ) && $translation >= -12 && $translation <= 14 ) {
+					return true;
+				}
+
+				if ( preg_match( '/^[A-Za-z]+/[A-Za-z_]+/$', $translation ) ) {
+					return true;
+				}
+
+				return 'Must be either a valid offset (-12 to 14) or a valid timezone string (America/New_York)';
+			}
+		}
+
+		return true;
 	}
 
 	/**
