@@ -496,22 +496,22 @@ class Plugin {
 	 * @since 1.0.0
 	 * @access public
 	 *
-	 * @param string    $original_string    The source string.
+	 * @param string    $original    The source string.
 	 * @param string    $translation The translation.
 	 * @param GP_Locale $locale      The locale of the translation.
-	 * @param object $original|null      The original object.
+	 * @param array     $meta        Original metadata.
 	 * @return string|true True if check is OK, otherwise warning message.
 	 */
-	public function gp_core_setting_warning( $original_string, $translation, $locale, $original = null ) {
-		if ( is_null( $original ) ) {
+	public function gp_core_setting_warning( $original, $translation, $locale, $meta = array() ) {
+		if ( empty( $meta ) ) {
 			// unable to check.
 			return true;
 		}
 
-		if ( 78 === $original->project_id ) { // wp/dev/admin
+		if ( isset( $meta['project_id'] ) || 78 === $meta['project_id'] ) { // wp/dev/admin
 			if (
-				'0' === $original_string &&
-				'default GMT offset or timezone string' === $original->context
+				'0' === $original &&
+				'default GMT offset or timezone string' === $meta['context']
 				) {
 				// Must be either a valid offset (-12 to 14).
 				if ( is_numeric( $translation ) && $translation >= -12 && $translation <= 14 ) {
