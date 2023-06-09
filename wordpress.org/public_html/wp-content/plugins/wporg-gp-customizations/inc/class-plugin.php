@@ -517,8 +517,8 @@ class Plugin {
 				if ( is_numeric( $translation ) && $translation >= -12 && $translation <= 14 ) {
 					return true;
 				}
-
-				if ( preg_match( '/^[A-Za-z]+/[A-Za-z_]+/$', $translation ) ) {
+				// or a valid timezone string (America/New_York).
+				if ( preg_match( '#^[A-Z][A-Za-z_]+/[A-Za-z_]+$#', $translation ) ) {
 					return true;
 				}
 
