@@ -438,6 +438,38 @@ add_action( 'wp_head', function() {
 } );
 
 /**
+ * Filter the archive title to use custom string for business model.
+ *
+ * @param string $title Archive title to be displayed.
+ * @return string Updated title.
+ */
+function update_archive_title( $title ) {
+	if ( is_tax( 'plugin_business_model', 'community' ) ) {
+		return __( 'Community Plugins', 'wporg-plugins' );
+	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
+		return __( 'Commercial Plugins', 'wporg-plugins' );
+	}
+	return $title;
+}
+add_filter( 'get_the_archive_title', __NAMESPACE__ . '\update_archive_title' );
+
+/**
+ * Filter the archive description to use custom string for business model.
+ *
+ * @param string $description Archive description to be displayed.
+ * @return string Updated description.
+ */
+function update_archive_description( $description ) {
+	if ( is_tax( 'plugin_business_model', 'community' ) ) {
+		return __( 'These plugins are developed and supported by a community.', 'wporg-plugins' );
+	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
+		return __( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' );
+	}
+	return $description;
+}
+add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
+
+/**
  * Custom template tags for this theme.
  */
 require get_stylesheet_directory() . '/inc/template-tags.php';
