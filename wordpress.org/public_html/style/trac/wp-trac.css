@@ -152,11 +152,16 @@ h3.change a {
 }
 #banner {
 	position: relative;
+	margin-bottom: 40px !important;
 }
 #metanav {
-	position: absolute;
-	top: -24px;
-	right: 6px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    background: #eff6f9;
+    border: 2px solid #21759b;
+    margin: 5px 0;
 }
 #headline.no-menu ~ #banner #metanav {
 	top: -40px;
@@ -166,9 +171,11 @@ h3.change a {
 }
 #metanav.nav ul {
 	font-size: 12px;
+	margin: 0;
+    padding: 0 5px;
 }
 #metanav.nav li {
-	color: #fff;
+	color: #000;
 	border-right: 0;
 }
 .build #metanav.nav li,
@@ -181,7 +188,7 @@ h3.change a {
 #metanav.nav a,
 #metanav.nav a:visited,
 #metanav form.trac-logout button {
-	color: rgba(255, 255, 255, 0.8);
+	color: #000;
 	background: inherit;
 	border: inherit;
 }
@@ -197,7 +204,7 @@ h3.change a {
 #metanav.nav a:active,
 #metanav form.trac-logout button:hover,
 #metanav form.trac-logout button:active {
-	color: #fff;
+	color: #000;
 	text-decoration: underline;
 	background-color: inherit;
 }
@@ -207,6 +214,11 @@ form#search {
 }
 form#search input {
 	font-size: 13px;
+}
+
+/* trac search */
+.trac form#search {
+	margin-top: 40px;
 }
 
 /* Everything should be 940px width, except for reports (too much tabular data for 940px) */
@@ -2279,7 +2291,7 @@ a.mention.me {
 	#filters td {
 		display: block;
 	}
-	#filters .trac-clause td:not(.actions td), 
+	#filters .trac-clause td:not(.actions td),
 	#filters .trac-clause th {
 		text-align:left;
 	}
