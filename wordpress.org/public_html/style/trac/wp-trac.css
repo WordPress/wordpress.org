@@ -152,7 +152,6 @@ h3.change a {
 }
 #banner {
 	position: relative;
-	margin-bottom: 40px !important;
 }
 #metanav {
     position: absolute;
@@ -175,7 +174,7 @@ h3.change a {
     padding: 0 5px;
 }
 #metanav.nav li {
-	color: #000;
+	color: rgba(0, 0, 0, 0.8);
 	border-right: 0;
 }
 .build #metanav.nav li,
@@ -188,7 +187,7 @@ h3.change a {
 #metanav.nav a,
 #metanav.nav a:visited,
 #metanav form.trac-logout button {
-	color: #000;
+	color: rgba(0, 0, 0, 0.8);
 	background: inherit;
 	border: inherit;
 }
@@ -214,11 +213,6 @@ form#search {
 }
 form#search input {
 	font-size: 13px;
-}
-
-/* trac search */
-.trac form#search {
-	margin-top: 40px;
 }
 
 /* Everything should be 940px width, except for reports (too much tabular data for 940px) */
@@ -260,6 +254,14 @@ form#search input {
 /* When blame displays a changeset inline, override the inline style set by blame.js */
 #main ~ .message[style] {
 	width: auto !important;
+}
+
+/* Trac specific styles */
+.trac #banner {
+	margin-bottom: 40px;
+}
+.trac form#search {
+	margin-top: 40px;
 }
 
 /* =admin.css */
@@ -2237,6 +2239,24 @@ a.mention.me {
 	.listing.tickets thead tr th a,
 	.listing.tickets tbody .trac-columns th a {
 		font-size: 1.2em;
+	}
+
+	/* Trac specific styles */
+	.trac #banner {
+		margin-bottom: -45px;
+	}
+	.trac form#search {
+		margin-top: 0;
+	}
+	.trac #metanav {
+		background: none;
+		border: none;
+	}
+	.trac #metanav.nav li {
+		color: #fff;
+	}
+	#metanav.nav a, #metanav.nav a:hover, #metanav.nav a:visited, #metanav form.trac-logout button {
+		color: rgba(255, 255, 255, 0.8);
 	}
 }
 
