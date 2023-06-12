@@ -1568,7 +1568,6 @@ window.wp = window.wp || {};
 		// Register events for sorting and filters in theme-navigation
 		events: {
 			'click .filter-links li > a:not(.drawer-toggle)': 'onLinkClick',
-			'change #filters-sort': 'onSortChange',
 			'click .theme-filter': 'onFilter',
 			'click .drawer-toggle': 'moreFilters',
 			'click .filter-drawer .apply-filters': 'applyFilters',
@@ -1713,24 +1712,6 @@ window.wp = window.wp || {};
 				themes.router.navigate( themes.router.baseUrl( '/' ) );
 			} else {
 				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + section ) );
-			}
-		},
-
-		// Handle changes in the sorting dropdown.
-		onSortChange: function( event ) {
-			const sort = event.target.value;
-
-			event.preventDefault();
-
-			$( 'body' ).removeClass( 'filters-applied show-filters' );
-
-			this.sort( sort );
-
-			// Trigger a router.navigate update
-			if ( themes.data.settings.browseDefault === sort ) {
-				themes.router.navigate( themes.router.baseUrl( '/' ) );
-			} else {
-				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sort ) );
 			}
 		},
 

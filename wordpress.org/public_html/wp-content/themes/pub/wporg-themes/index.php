@@ -14,9 +14,15 @@
 $menu_items = array(
 	array(
 		'href' => home_url( '/' ),
-		'label' => _x( 'All', 'themes', 'wporg-themes' ),
+		'label' => _x( 'Popular', 'themes', 'wporg-themes' ),
 		'data-sort' => 'popular',
 		'is-current' => ( is_front_page() && ! get_query_var( 'browse' ) ) || 'popular' == get_query_var( 'browse' ),
+	),
+	array(
+		'href' => home_url( 'browse/new/' ),
+		'label' => _x( 'Latest', 'themes', 'wporg-themes' ),
+		'data-sort' => 'new',
+		'is-current' => 'new' == get_query_var( 'browse' ),
 	),
 	array(
 		'href' => home_url( 'browse/commercial/' ),
@@ -77,23 +83,6 @@ get_header();
 					<a class="drawer-toggle" href="#">
 						<span class="drawer-text"><?php _e( 'Feature Filter', 'wporg-themes' ); ?></span>
 					</a>
-				</li>
-				<li>
-					<label for="filters-sort" class="screen-reader-text"><?php _e( 'Sort by', 'wporg-themes' ); ?></label>
-					<select id="filters-sort">
-						<option
-							value="popular"
-							<?php selected( ( is_front_page() && ! get_query_var( 'browse' ) ) || 'popular' == get_query_var( 'browse' ) ); ?>
-						>
-							<?php _e( 'Popular', 'wporg-themes' ); ?>
-						</option>
-						<option
-							value="new"
-							<?php selected( 'new' == get_query_var( 'browse' ) ); ?>
-						>
-							<?php _e( 'Latest', 'wporg-themes' ); ?>
-						</option>
-					</select>
 				</li>
 			</ul>
 
