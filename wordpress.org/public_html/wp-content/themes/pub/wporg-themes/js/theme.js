@@ -1716,12 +1716,8 @@ window.wp = window.wp || {};
 		},
 
 		sort: function( sort ) {
-			var self = this,
-				sorter = false;
-
-			if ( -1 !== _.indexOf( this.sortValues, sort ) ) {
-				sorter = $( '#filters-sort option[value="' + sort + '"]' );
-			}
+			const self = this;
+			const isSort = ( -1 !== _.indexOf( this.sortValues, sort ) );
 
 			self.clearSearch();
 
@@ -1733,17 +1729,16 @@ window.wp = window.wp || {};
 
 			$( '.filter-links li > a, .theme-filter' ).removeClass( this.activeClass );
 
-			if ( sorter ) {
-				// Set the current sort value in the dropdown.
-				sorter.prop( 'selected', true );
-				// If there is also a link for the sort value (All), highlight that too.
-				$( '.filter-links li > a[data-sort="' + sort + '"]' ).addClass( this.activeClass );
+			if ( isSort ) {
+				// Highlight the active tab.
+				const $activeTab = $( '.filter-links li > a[data-sort="' + sort + '"]' );
+				$activeTab.addClass( this.activeClass );
 
 				// Update the page title.
 				if ( themes.data.settings.browseDefault === sort ) {
 					themes.utils.title( 'home' );
 				} else {
-					themes.utils.title( sorter.text(), 'browse' );
+					themes.utils.title( $activeTab.text(), 'browse' );
 				}
 
 				this.browse( sort );
