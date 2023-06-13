@@ -32,7 +32,7 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 </header>
 
 <?php if ( ! is_page( 'upload' ) ) : ?>
-<nav id="site-navigation" class="main-navigation" role="navigation">
+<nav id="site-navigation" class="main-navigation" aria-label="<?php _e( 'Main menu', 'wporg-themes' ); ?>" role="navigation">
 	<ul id="menu-theme-directory" class="menu">
 		<li><a href="<?php echo home_url( '/commercial/' ); ?>"><?php _e( 'Commercial Themes', 'wporg-themes' ); ?></a></li>
 	</ul>

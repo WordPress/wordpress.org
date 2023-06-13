@@ -56,7 +56,7 @@ $show_full_header = is_home() && ! is_paged();
 						?>
 					</p>
 				<?php else : ?>
-					<nav id="site-navigation" class="main-navigation" role="navigation">
+					<nav id="site-navigation" class="main-navigation" aria-label="<?php _e( 'Main menu', 'wporg-photos' ); ?>" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-photos' ); ?>"></button>
 						<div id="primary-menu" class="menu">
 							<ul>
