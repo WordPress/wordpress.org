@@ -1582,7 +1582,7 @@ window.wp = window.wp || {};
 
 		// Overwrite search container class to append search
 		// in new location
-		searchContainer: $( '.wp-filter .search-form' ),
+		searchContainer: $( '.site-branding .search-form' ),
 
 		initialize: function() {
 			themes.view.Appearance.prototype.initialize.apply( this, arguments );

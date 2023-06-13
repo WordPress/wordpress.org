@@ -25,6 +25,8 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 				);
 				?>
 			</p>
+
+			<form class="search-form"></form>
 		<?php else : ?>
 			<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Themes', 'Site title', 'wporg-themes' ); ?></a></p>
 		<?php endif; ?>
