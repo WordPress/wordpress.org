@@ -80,7 +80,8 @@ if ( $user ) {
 
 		$items = get_user_items( $user );
 		if ( $items ) {
-			echo '<p><strong>' . ucwords( $type ) . ' owned by this user:</strong></p>';
+			$url = add_query_arg( [ 'post_type' => $repo_post_types[ $type ], 'author' => $user->ID ], admin_url( 'edit.php' ) );
+			echo '<p><strong><a href="' . esc_url( $url ) . '">' . ucwords( $type ) . ' owned by this user:</a></strong></p>';
 
 			display_items( $items );
 
