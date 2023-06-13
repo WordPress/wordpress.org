@@ -13,7 +13,7 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 <header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 	<div class="site-branding">
 		<?php if ( is_home() ) : ?>
-		<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Themes', 'Site title', 'wporg-themes' ); ?></a></h1>
+			<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Themes', 'Site title', 'wporg-themes' ); ?></a></h1>
 
 			<p class="site-description">
 				<?php
@@ -29,6 +29,7 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 			<form class="search-form"></form>
 		<?php else : ?>
 			<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Themes', 'Site title', 'wporg-themes' ); ?></a></p>
+			<form class="search-form"></form>
 		<?php endif; ?>
 	</div>
 </header>

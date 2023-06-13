@@ -1407,6 +1407,23 @@ body.full-overlay-active {
 	}
 }
 
+body:not(.home) {
+	.site-branding {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.search-form {
+		margin-bottom: 0;
+
+		.wp-filter-search {
+			padding: 0.3rem 0.5rem;
+			width: ms( 24 );
+			font-size: 0.8rem;
+		}
+	}
+}
+
 /* Filter bar */
 .wp-filter {
 	display: inline-block;
@@ -1485,15 +1502,6 @@ body.full-overlay-active {
 .show-filters .filter-links a.current:hover,
 .show-filters .filter-links a.current:focus {
 	color: #2ea2cc;
-}
-
-.wp-filter .wp-filter-search {
-	margin: 0;
-	padding: 3px 5px;
-	width: 270px;
-	font-size: 16px;
-	font-weight: 300;
-	line-height: 1.5;
 }
 
 .wp-filter .drawer-toggle {
@@ -1955,6 +1963,21 @@ span.favorite.favorited {
 				margin-top: 0.5em;
 				margin-bottom: 0.5em;
 				border-bottom: none;
+			}
+		}
+	}
+
+	body:not(.home) {
+		.site-branding {
+			display: block;
+		}
+
+		.search-form {
+			margin-top: 1rem;
+
+			.wp-filter-search {
+				font-size: 1rem;
+				width: 100%;
 			}
 		}
 	}
