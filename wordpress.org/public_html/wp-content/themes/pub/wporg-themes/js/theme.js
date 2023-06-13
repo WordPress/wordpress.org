@@ -897,7 +897,9 @@ window.wp = window.wp || {};
 							themes.router.navigate( themes.router.baseUrl( '/' ), args );
 							themes.utils.title( 'home' );
 						} else {
-							themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sorter.data( 'sort' ) ), args );
+							const data = sorter.data() || {};
+							const section = data.sort || data.model; 
+							themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + section ) );
 							themes.utils.title( sorter.text(), 'browse' );
 						}
 					}
