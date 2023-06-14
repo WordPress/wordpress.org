@@ -4,7 +4,7 @@
 
 if ( 'waiting' === $translation->translation_status || 'fuzzy' === $translation->translation_status ) :
 	?>
-<details open>
+<details class="details-chatgpt" open>
 	<summary class="chatgpt-summary"><?php esc_html_e( 'ChatGPT Review', 'glotpress' ); ?></summary>
 	<div>
 		<div class="openai-review">
@@ -14,7 +14,7 @@ if ( 'waiting' === $translation->translation_status || 'fuzzy' === $translation-
 	</div>
 </details>
 <?php endif; ?>
-<details open>
+<details class="details-feedback" open>
 	<summary class="feedback-summary"><?php esc_html_e( 'Give feedback', 'glotpress' ); ?></summary>
 	<div id="feedback-form">
 		<form>
