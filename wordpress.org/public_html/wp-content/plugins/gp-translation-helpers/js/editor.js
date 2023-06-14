@@ -1,4 +1,4 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, console, $gp_editor_options, EventSource */
+/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	let focusedRowId = '';
@@ -68,12 +68,12 @@ jQuery( function( $ ) {
 				type: 'POST',
 				url: wpApiSettings.admin_ajax_url,
 				data,
-			}
+			},
 		).done(
 			function( response ) {
 				formdata.post = response.data;
 				submitComment( formdata );
-			}
+			},
 		);
 	}
 
@@ -338,7 +338,7 @@ jQuery( function( $ ) {
 			lineBuffer,
 			index,
 			fieldLength,
-			lineLength
+			lineLength,
 		) {
 			if ( lineLength === 0 ) {
 				// We reached the last line of this event
@@ -408,11 +408,11 @@ jQuery( function( $ ) {
 			} else if ( event.type === 'invalid_request_error' ) {
 				response_span.text( event.value );
 			} else if ( event.type === 'reconnect-interval' ) {
-				console.log( 'We should set reconnect interval to %d milliseconds', event.value );
+				// console.log( 'We should set reconnect interval to %d milliseconds', event.value );
 			}
 		} );
 
-		let response = await fetch(
+		const response = await fetch(
 			'https://api.openai.com/v1/chat/completions',
 			{
 				headers: {
@@ -421,13 +421,15 @@ jQuery( function( $ ) {
 				},
 				method: 'POST',
 				body: JSON.stringify( request ),
-			}
+			},
 		);
-		const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+		const reader = response.body.pipeThrough( new TextDecoderStream() ).getReader();
 
-		while (true) {
+		while ( true ) {
 			const { value, done } = await reader.read();
-			if ( done ) break;
+			if ( done ) {
+				break;
+			}
 			parser.feed( value );
 		}
 	}
@@ -437,12 +439,12 @@ jQuery( function( $ ) {
 	 *
 	 * @param {string}  rowId      The row-id attribute of the current row.
 	 * @param {string}  currentRow The current row.
+	 * @param {boolean} isRetry    This is a retry.
 	 */
 	function fetchOpenAIReviewResponse( rowId, currentRow, isRetry ) {
 		const messages = [];
 		const original_str = currentRow.find( '.original' );
 		let glossary_prompt = '';
-		let result = '';
 
 		$.each( $( original_str ).find( '.glossary-word' ), function( k, word ) {
 			$.each( $( word ).data( 'translations' ), function( i, e ) {
@@ -467,6 +469,6 @@ jQuery( function( $ ) {
 
 		currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 		currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( '<span style="white-space: pre-line">' );
-		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then(()=>currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' ));
+		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then( () => currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' ) );
 	}
 } );

@@ -26,7 +26,7 @@ class GP_OpenAI_Review {
 		if ( empty( trim( $openai_key ) ) ) {
 			return array(
 				'status' => 404,
-				'error' => 'No OpenAI Key defined',
+				'error' => 'no-openai-key',
 			);
 		}
 

@@ -196,8 +196,8 @@ div#TB_ajaxWindowTitle {
 	font-size: 1.2em;
 	padding: 8px;
 }
-.meta summary.feedback-summary{
-	font-size: 1.2em;
+.meta summary.feedback-summary, .meta summary.chatgpt-summary{
+	font-size: 1.1em;
 	font-weight: bold;
 	padding: 7px 0;
 }
