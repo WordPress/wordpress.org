@@ -40,8 +40,8 @@ class Plugin_Upload extends Base {
 			'args' => [
 				'post_name' => [
 					'type'     => 'string',
-					'required' => true,
-				]
+					'required' => false,
+				],
 			]
 		) );
 	}
@@ -50,22 +50,27 @@ class Plugin_Upload extends Base {
 		$plugin = get_post( $request['ID'] );
 		$slug   = trim( $request['post_name'] ?? '' );
 
-		$result = $this->perform_slug_change( $plugin, $slug );
-		if ( is_wp_error( $result ) ) {
-			// Warn the reviewer when a plugin author has attempted to use an unavailable slug. 
-			Tools::audit_log(
-				sprintf(
-					"Attempt to change slug to '%s' blocked: %s",
-					esc_html( $slug ),
-					$result->get_error_code()
-				),
-				$plugin
-			);
+		if ( $slug ) {
+			$result = $this->perform_slug_change( $plugin, $slug );
+			if ( is_wp_error( $result ) ) {
+				// Warn the reviewer when a plugin author has attempted to use an unavailable slug. 
+				Tools::audit_log(
+					sprintf(
+						"Attempt to change slug to '%s' blocked: %s",
+						esc_html( $slug ),
+						$result->get_error_code()
+					),
+					$plugin
+				);
 
-			$result = new WP_Error( 'error', $result->get_error_message() );
+				$result = new WP_Error( 'error', $result->get_error_message() );
+			}
+
+			return $result;
+
+		} elseif ( ! empty( $_FILES['zip_file'] ) && current_user_can( 'plugin_approve' ) ) {
+			return ( new Upload_Handler() )->process_upload( $plugin->ID );
 		}
-
-		return $result;
 	}
 
 	/**

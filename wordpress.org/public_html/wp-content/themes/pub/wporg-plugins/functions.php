@@ -127,7 +127,7 @@ function scripts() {
 
 	// The plugin submission page: /developers/add/
 	if ( is_page( 'add' ) ) {
-		wp_enqueue_script( 'wporg-plugins-upload', get_stylesheet_directory_uri() . '/js/upload.js', array( 'wp-api' ), filemtime( __DIR__ . '/js/upload.js' ), true );
+		wp_enqueue_script( 'wporg-plugins-upload', get_stylesheet_directory_uri() . '/js/upload.js', array( 'wp-api', 'jquery' ), filemtime( __DIR__ . '/js/upload.js' ), true );
 	}
 
 	// React is currently only used on detail pages.

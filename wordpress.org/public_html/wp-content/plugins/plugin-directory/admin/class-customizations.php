@@ -36,6 +36,7 @@ class Customizations {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
 		add_action( 'edit_form_top', array( $this, 'show_permalink' ) );
+		add_action( 'post_edit_form_tag', array( $this, 'post_edit_form_tag' ) );
 		add_action( 'admin_notices', array( $this, 'add_post_status_notice' ) );
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
@@ -69,6 +70,7 @@ class Customizations {
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'save_post' ) );
 	}
 
 	/**
@@ -129,7 +131,8 @@ class Customizations {
 			switch ( $hook_suffix ) {
 				case 'post.php':
 					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 7 );
-					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 5 );
+					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists', 'wp-api' ), 6 );
+
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
 						'approvePluginAYS'    => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
 						'rejectPluginAYS'     => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
@@ -399,6 +402,15 @@ class Customizations {
 	public function show_permalink( $post ) {
 		if ( 'plugin' === $post->post_type && 'publish' === $post->post_status ) {
 			echo get_sample_permalink_html( $post );
+		}
+	}
+
+	/**
+	 * Allow file uploads within the plugin edit screen.
+	 */
+	public function post_edit_form_tag( $post ) {
+		if ( 'plugin' === $post->post_type ) {
+			echo ' enctype="multipart/form-data"';
 		}
 	}
 

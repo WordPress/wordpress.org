@@ -61,7 +61,7 @@ class Upload_Handler {
 	 *
 	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
-	public function process_upload( $for_plugin = 0) {
+	public function process_upload( $for_plugin = 0 ) {
 		if ( UPLOAD_ERR_OK !== $_FILES['zip_file']['error'] ) {
 			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
@@ -74,8 +74,18 @@ class Upload_Handler {
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
 		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
+
 		$plugin_post       = $for_plugin ? get_post( $for_plugin ) : false;
 		$updating_existing = (bool) $plugin_post;
+
+		if ( $for_post && ! $updating_existing ) {
+			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
+		}
+
+		// Allow plugin reviewers to bypass some restrictions.
+		if ( $updating_existing && current_user_can( 'approve_plugins' ) && ! $has_upload_token ) {
+			$has_upload_token = true;
+		}
 
 		$plugin_data = (array) Import::find_plugin_headers( $this->plugin_dir, 1 /* Max Depth to search */ );
 		if ( ! empty( $plugin_data['Name'] ) ) {
@@ -348,9 +358,9 @@ class Upload_Handler {
 
 		// Pass it through Plugin Check and see how great this plugin really is.
 		// We're not actually using this right now.
-		$result = $this->check_plugin();
+		$plugin_check_result = $this->check_plugin();
 
-		if ( ! $result && ! $has_upload_token && ! $updating_existing ) {
+		if ( ! $plugin_check_result && ! $has_upload_token && ! $updating_existing ) {
 			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
 
 			return new \WP_Error( 'failed_checks', $error . ' ' . sprintf(
@@ -423,12 +433,12 @@ class Upload_Handler {
 		$plugin_post = Plugin_Directory::create_plugin_post( $post_args );
 
 		if ( is_wp_error( $plugin_post ) ) {
-			return $result->get_error_message();
+			return $plugin_post;
 		}
 
 		$attachment = $this->save_zip_file( $plugin_post->ID );
 		if ( is_wp_error( $attachment ) ) {
-			return $attachment->get_error_message();
+			return $attachment;
 		}
 
 		// Store metadata about the uploaded ZIP.
@@ -445,6 +455,10 @@ class Upload_Handler {
 
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
+		if ( $updating_existing ) {
+			return __( 'Additional ZIP uploaded successfully.', 'wporg-plugins' );
+		}
+
 		$message = sprintf(
 			/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
 			__( 'Thank you for uploading %1$s to the WordPress Plugin Directory. Your plugin has been given the initial slug of %2$s, however that is subject to change based on the results of your code review. If this slug is incorrect, please change it below. Remember, a plugin slug cannot be changed once your plugin is approved.' ),
@@ -452,9 +466,7 @@ class Upload_Handler {
 			'<code>' . $this->plugin_slug . '</code>'
 		) . '</p><p>';
 
-		if ( ! $updating_existing ) {
-			$message .= __( 'We&rsquo;ve sent you an email verifying this submission. Make sure you set all emails from wordpress.org to never go to spam (i.e. via email filters or approval lists). That will ensure you won&rsquo;t miss any of our messages.', 'wporg-plugins' ) . '</p><p>';
-		}
+		$message .= __( 'We&rsquo;ve sent you an email verifying this submission. Make sure you set all emails from wordpress.org to never go to spam (i.e. via email filters or approval lists). That will ensure you won&rsquo;t miss any of our messages.', 'wporg-plugins' ) . '</p><p>';
 
 		$message .= __( 'If there are any errors in your submission, such as having submitted via the wrong account, please don\'t resubmit! Instead, email us as soon as possible (you can reply to the automated email we sent you). We can correct most issues before approval.', 'wporg-plugins' ) . '</p><p>';
 
@@ -743,8 +755,13 @@ class Upload_Handler {
 	 * @return int|\WP_Error Attachment ID or upload error.
 	 */
 	public function save_zip_file( $post_id ) {
+		$zip_hash = sha1_file( $_FILES['zip_file']['tmp_name'] );
+		if ( in_array( $zip_hash, get_post_meta( $post_id, 'uploaded_zip_hash' ) ?: [], true ) ) {
+			return new \WP_Error( 'already_uploaded', __( "You've already uploaded that ZIP file.", 'wporg-plugins' ) );
+		}
 
 		// Upload folders are already year/month based. A second-based prefix should be specific enough.
+		$original_name              = $_FILES['zip_file']['name'];
 		$_FILES['zip_file']['name'] = date( 'd_H-i-s' ) . '_' . $_FILES['zip_file']['name'];
 
 		add_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
@@ -754,6 +771,15 @@ class Upload_Handler {
 
 		remove_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		remove_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
+
+		if ( ! is_wp_error( $attachment_id ) ) {
+			// Save some basic details with the ZIP.
+			update_post_meta( $attachment_id, 'version', $this->plugin['Version'] );
+			update_post_meta( $attachment_id, 'submitted_name', $original_name );
+
+			// And record this ZIP as having been uploaded.
+			add_post_meta( $post_id, 'uploaded_zip_hash', $zip_hash );
+		}
 
 		return $attachment_id;
 	}

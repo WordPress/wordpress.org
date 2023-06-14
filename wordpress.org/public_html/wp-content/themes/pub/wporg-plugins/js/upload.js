@@ -18,12 +18,34 @@
 		.done( function() {
 			window.location.reload();
 		} )
-		.fail( function( request, statusText ) {
-			var errorHtml = request?.responseJSON?.message || statusText;
+		.fail( function( response, statusText ) {
+			var errorHtml = response?.responseJSON?.message || statusText;
 
 			$errorNotice.html( errorHtml ).parent().removeClass('hidden');
 
 			$form.find('input').prop('disabled', false);
 		} );
 	} );
+
+	// Show the filename on the button when a file is selected.
+	$( 'input.plugin-file' )
+		.on( 'change', function( e ) {
+			var $span = $(this).parent().find('span'),
+				fileName = e.target.value.split( '\\' ).pop();
+
+			if ( ! $span.data( 'defaultText' ) ) {
+				$span.data( 'defaultText', $span.text() );
+			}
+
+			$span.text( fileName || $span.data( 'defaultText' ) );
+		} )
+		.on( 'focus', function() { $(this).parent().addClass( 'focus' ); } )
+		.on( 'blur', function() { $(this).parent().removeClass( 'focus' ); } );
+
+	$( 'a.upload-another').on( 'click', function( e ) {
+		e.preventDefault();
+
+		$(this).hide().siblings('form.hidden' ).removeClass( 'hidden' );
+	} );
+
 })( jQuery );

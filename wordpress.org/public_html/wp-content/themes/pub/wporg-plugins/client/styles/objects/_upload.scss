@@ -1,4 +1,9 @@
 .plugin-upload-form {
+
+	&.hidden {
+		display: none;
+	}
+
 	fieldset {
 		border: none;
 		margin: 0;
@@ -52,6 +57,10 @@
 }
 
 .plugin-queue-message {
+
+	code {
+		font-size: 1em;
+	}
 
 	dialog.slug-change input[type="text"] {
 		font-family: monospace;

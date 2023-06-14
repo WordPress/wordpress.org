@@ -143,6 +143,14 @@ class Review_Tools {
 			echo '</ul>';
 		}
 
+		// Ability to upload an additional ZIP.
+		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
+			echo '<label>
+				<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+				<button class="button button-secondary plugin-upload-zip">' . __( 'Upload', 'wporg-plugins' ) . '</button>
+				</label>';
+		}
+
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 			$slug_restricted = [];
 			$slug_reserved   = [];

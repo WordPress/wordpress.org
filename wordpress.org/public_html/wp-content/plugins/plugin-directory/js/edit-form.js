@@ -46,6 +46,9 @@
 			} );
 
 			$( '#contact-author' ).appendTo( '#plugin-review .inside' );
+
+			$( '.plugin-upload-zip' ).click( PluginEdit.uploadZip );
+			$( '.plugin-upload-zip' ).parents('form').submit( PluginEdit.uploadZipDisable );
 		},
 
 		setPluginStatus: function() {
@@ -147,6 +150,62 @@
 			} else {
 				$( '#support-rep-error' ).empty().hide();
 			}
+		},
+
+		uploadZip: function( e ) {
+			e.preventDefault();
+
+			var $this = $(this),
+				$container = $this.parents('label'),
+				post_ID = $( '#post_ID' ).val(),
+				$file = $container.find('input[type="file"]' ),
+				file_input = $file.get(0),
+				restEndpoint = 'plugins/v1/upload/' + post_ID;
+
+			if ( ! file_input.files.length ) {
+				alert( "Select a file first." );
+				return;
+			}
+
+			$this.prop( 'disabled', true );
+			$this.text( 'Uploading...' );
+			$container.find( '.notice' ).remove();
+
+			var data = new FormData()
+			data.append( $file.prop( 'name' ), file_input.files[0] );
+			data.append( 'admin', true );
+
+			wp.apiRequest( {
+				path: restEndpoint,
+				type: 'POST',
+				data: data,
+				processData: false,
+				contentType: false,
+			} )
+			.done( function( response, statusText ) {
+				var successHtml = response?.responseJSON?.message || statusText;
+
+				$container.append( '<div class="notice notice-success"><p>' + successHtml + '</p></div>' );
+
+				$('ul.plugin-zip-files').append(
+					'<li>' + new Date().toLocaleString() + ' ' + file_input.files[0].name + '</li>'
+				);
+
+				$file.val( '' );
+			} )
+			.fail( function( response, statusText ) {
+				var errorHtml = response?.responseJSON?.message || statusText;
+
+				$container.append( '<div class="notice notice-error"><p>' + errorHtml + '</p></div>' );
+			} )
+			.always( function() {
+				$this.text( 'Upload' ).prop( 'disabled', false );
+			} );
+		},
+	
+		// Disable any file input fields, to prevent the browser sending it.
+		uploadZipDisable: function() {
+			$(this).find('input[type="file"]').prop( 'disabled', true );
 		}
 
 	};

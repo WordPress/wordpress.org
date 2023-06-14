@@ -87,6 +87,12 @@ class ZIP_Cleanup {
 			delete_post_meta( $plugin->ID, '_submitted_zip_size' );
 			delete_post_meta( $plugin->ID, '_submitted_zip_loc' );
 
+			// Delete the file hash from the post.
+			$file_hash = sha1_file( get_attached_file( $attachment ) );
+			if ( $file_hash ) {
+				delete_post_meta( $plugin->ID, 'uploaded_zip_hash', $file_hash );
+			}
+
 			// Include some log output for debugging.
 			$filename = basename( wp_get_attachment_url( $attachment->ID ) );
 			echo "Removing {$filename} from {$plugin->post_name} after {$days_to_keep} days\n";

@@ -25,11 +25,8 @@ class Upload {
 		foreach ( $plugins as &$plugin ) {
 			$counts->{ $plugin->post_status }++;
 
-			$plugin->can_replace = false;
-
 			if ( 'new' === $plugin->post_status ) {
 				$plugin->status = __( 'Awaiting Review &#8212; This plugin has not yet been reviewed.', 'wporg-plugins' );
-				$plugin->can_replace = true;
 			} elseif ( 'pending' === $plugin->post_status ) {
 				$plugin->status = __( 'Being Reviewed &#8212; This plugin is currently waiting on action from you. Please check your email for details.', 'wporg-plugins' );
 			} elseif ( 'approved' === $plugin->post_status ) {
@@ -54,13 +51,12 @@ class Upload {
 
 		ob_start();
 
-		$uploader = new Upload_Handler();
-
 		include_once ABSPATH . 'wp-admin/includes/template.php';
 
-		list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
-
+		$uploader      = new Upload_Handler();
 		$upload_result = false;
+
+		list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
 
 		if (
 			! empty( $_POST['_wpnonce'] ) &&
@@ -78,13 +74,14 @@ class Upload {
 				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload-' . $_POST['plugin_id'] )
 			)
 		) {
-			$for_plugin = absint( $_POST['plugin_id'] ?? 0 );
-
+			$for_plugin    = absint( $_POST['plugin_id'] ?? 0 );
 			$upload_result = $uploader->process_upload( $for_plugin );
 
 			if ( is_wp_error( $upload_result ) ) {
+				$type    = 'error';
 				$message = $upload_result->get_error_message();
 			} else {
+				$type    = 'success';
 				$message = $upload_result;
 			}
 
@@ -92,7 +89,7 @@ class Upload {
 			list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
 
 			if ( ! empty( $message ) ) {
-				echo "<div class='notice notice-warning notice-alt'><p>{$message}</p></div>\n";
+				echo "<div class='notice notice-{$type} notice-alt'><p>{$message}</p></div>\n";
 			}
 		}
 
@@ -196,7 +193,8 @@ class Upload {
 					<?php
 					// List of all plugins in progress.
 					foreach ( $submitted_plugins as $plugin ) {
-						$can_change_slug = ( 'new' === $plugin->post_status && ! $plugin->{'_wporg_plugin_original_slug'} );
+						$can_change_slug   = ( 'new' === $plugin->post_status && ! $plugin->{'_wporg_plugin_original_slug'} );
+						$can_upload_extras = in_array( $plugin->post_status, array( 'new', /* 'pending' */ ), true );
 
 						echo '<li>';
 							echo '<strong>' . esc_html( $plugin->post_title ) . '</strong>';
@@ -272,35 +270,23 @@ class Upload {
 							endif; // $can_change_slug
 							echo '</li>';
 
-							if ( $plugin->can_replace ) {
-								echo '<li>';
-								foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
-									$filename = preg_replace( '!^[0-9-_]+!', '', basename( get_attached_file( $zip_file->ID ) ) );
+							echo '<li>';
+							$attached_media = get_attached_media( 'application/zip', $plugin );
+							$latest         = array_pop( $attached_media );
 
-									printf(
-										'<li>%s</li>',
-										sprintf(
-											/* translators: 1: Filename 2: Date */
-											__( '%1$s uploaded on %2$s', 'wporg-plugins'),
-											'<code>' . esc_html( $filename ) . '</code>',
-											esc_html( date_i18n( get_option( 'date_format' ), strtotime( $zip_file->post_date ) ) )
-										)
-									);
-								}
-
-								// Offer for the user to upload a new ZIP file.
-								echo '<li>';
-								printf(
-									'<a href="#" class="">%s</a>',
-									sprintf(
-										/* translators: %s: Plugin Name. */
-										__( 'Upload updated version of %s for review', 'wporg-plugins' ),
-										esc_html( $plugin->post_title )
-									)
-								);
-
+							$filename = $latest->submitted_name ?: preg_replace( '!^[0-9-_]+!', '', basename( get_attached_file( $latest->ID ) ) );
+							printf(
+								/* translators: 1: Version, 2: Date, 3: Filename, 4: "upload new version" action link, link to upload zip. */
+								__( 'Latest file uploaded for review: %1$s %2$s uploaded on %3$s %4$s.', 'wporg-plugins' ),
+								'<code>' . esc_html( $filename ) . '</code>',
+								'<code>' . esc_html( $zip_file->version ?? $plugin->version ) . '</code>',
+								esc_html( date_i18n( get_option( 'date_format' ), strtotime( $zip_file->post_date ) ) ),
+								/* translators: upload action link */
+								$can_upload_extras ? '<a href="#" class="upload-another">' . esc_html__( 'Upload new version', 'wporg-plugins' ) . '</a>' : ''
+							);
+							if ( $can_upload_extras ) {
 								?>
-								<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
+								<form class="plugin-upload-form hidden" enctype="multipart/form-data" method="POST" action="">
 									<?php wp_nonce_field( 'wporg-plugins-upload-' . $plugin->ID ); ?>
 									<input type="hidden" name="action" value="upload-additional"/>
 									<input type="hidden" name="plugin_id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
@@ -310,13 +296,12 @@ class Upload {
 										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
 									</label>
 
-									<input class="upload-button button button-primary" type="submit" value="<?php esc_attr_e( 'Upload updated version for review', 'wporg-plugins' ) ?>"/>
+									<input class="upload-button button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>"/>
 								</form>
 								<?php
-
-								echo "</li>";
 							}
-						
+							echo '</li>';
+							echo '</ul>';
 						echo "</li>\n";
 					}
 					?>
@@ -417,25 +402,6 @@ class Upload {
 				<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 			</form>
 		<?php endif; // ! $submitted_counts->total
-
-		$upload_script = '( function ( $ ) {
-			var defaultLabelText = $( "label.zip-file span").first().text();
-
-			$( "input.plugin-file" )
-				.on( "change", function( event ) {
-					var fileName = event.target.value.split( "\\\\" ).pop();
-					$(this).parent().find("span").text( fileName ? fileName : defaultLabelText );
-				} )
-				.on( "focus", function() { $(this).parent().addClass( "focus" ); } )
-				.on( "blur", function() { $(this).parent().removeClass( "focus" ); } );
-		} ( window.jQuery ) );';
-
-		if ( ! wp_script_is( 'jquery', 'done' ) ) {
-			wp_enqueue_script( 'jquery' );
-			wp_add_inline_script( 'jquery-migrate', $upload_script );
-		} else {
-			printf( '<script>%s</script>', $upload_script );
-		}
 
 		return ob_get_clean();
 	}
