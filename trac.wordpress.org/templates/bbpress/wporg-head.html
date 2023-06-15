@@ -19,5 +19,7 @@
 
 	<body py:match="body" py:attrs="select('@*')">
 		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24PF4B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+		${select('*|comment()|text()')}
 	</body>
 </html>
