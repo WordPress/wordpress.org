@@ -31,7 +31,7 @@ if ( $openai_key ) {
 	$openai_response = wp_remote_get(
 		'https://api.openai.com/v1/usage?date=' . gmdate( 'Y-m-d' ),
 		array(
-			'timeout' => 4,
+			'timeout' => 8,
 			'headers' => array(
 				'Content-Type'  => 'application/json',
 				'Authorization' => 'Bearer ' . $openai_key,
@@ -152,9 +152,12 @@ $deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 			<?php
 			if ( trim( $openai_key ) ) {
 				echo '<br>';
-				if ( 200 != $openai_response_code ) {
+				if ( 401 == $openai_response_code ) {
 					echo '<small style="color:red;">';
 					esc_html_e( 'Your OpenAI API Key is not correct.', 'glotpress' );
+				} elseif ( 200 != $openai_response_code ) {
+					echo '<small style="color:red;">';
+					esc_html_e( 'We have had a problem with the OpenAI API.', 'glotpress' );
 				} else {
 					echo '<small style="color:green;">';
 					esc_html_e( 'Your OpenAI API Key is correct.', 'glotpress' );
