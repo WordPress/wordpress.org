@@ -66,14 +66,12 @@ class Plugin {
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 10, 2 );
 		add_action( 'gp_translation_created', array( $this, 'auto_reject_replaced_suggestions' ) );
 		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
-		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
 
 		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
 
 		add_filter( 'gp_custom_reasons', array( $this, 'get_custom_reasons' ), 10, 2 );
 
 		// Cron.
-<<<<<<< HEAD
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
 		add_action( 'init', [ $this, 'register_cron_events' ] );
 		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
@@ -81,12 +79,6 @@ class Plugin {
 		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
 		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
 		add_action( 'gp_translations_imported', array( $this, 'log_imported_translations' ) );
-=======
-		add_filter( 'cron_schedules', array( $this, 'register_cron_schedules' ) );
-		add_action( 'init', array( $this, 'register_cron_events' ) );
-		add_action( 'wporg_translate_update_contributor_profile_badges', array( $this, 'update_contributor_profile_badges' ) );
-		add_action( 'wporg_translate_update_polyglots_stats', array( $this, 'update_polyglots_stats' ) );
->>>>>>> 8a7dfc8af (Save source in database when a translation is created or saved)
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
@@ -773,20 +765,5 @@ class Plugin {
 		$reasons = isset( $locale_reasons[ $locale ] ) ? $locale_reasons[ $locale ] : array();
 		return array_merge( $default_reasons, $reasons );
 	}
-<<<<<<< HEAD
-}
-=======
 
-	public function log_translation_source( $translation ) {
-		global $wpdb;
-		$translation_source = 'frontend'; // just a placeholder for now.
-		$result             = $wpdb->insert(
-			'translate_meta',
-			array(
-				'meta_key'   => $translation_id,
-				'meta_value' => $translation_source,
-			)
-		);
-	}
 }
->>>>>>> 8a7dfc8af (Save source in database when a translation is created or saved)
