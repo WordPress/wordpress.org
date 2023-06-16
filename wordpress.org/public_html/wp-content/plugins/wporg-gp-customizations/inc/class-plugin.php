@@ -56,7 +56,6 @@ class Plugin {
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 10, 2 );
 		add_action( 'gp_translation_created', array( $this, 'auto_reject_replaced_suggestions' ) );
 		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
-		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
 
 		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
 
@@ -278,6 +277,26 @@ class Plugin {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Store source of a translation in database.
+	 *
+	 * @param GP_Translation $translation Translation instance.
+	 * @return void
+	 */
+	public function log_translation_source( GP_Translation $translation ) {
+		global $wpdb;
+
+		$gp_external_translations = get_user_option( 'gp_external_translations', get_current_user_id() );
+		$gp_external_translations['last_translation_source'];
+		$result = $wpdb->insert(
+			'translate_meta',
+			array(
+				'meta_key'   => $translation_id,
+				'meta_value' => $gp_external_translations['last_translation_source'],
+			)
+		);
 	}
 
 	/**
@@ -659,17 +678,5 @@ class Plugin {
 
 		$reasons = isset( $locale_reasons[ $locale ] ) ? $locale_reasons[ $locale ] : array();
 		return array_merge( $default_reasons, $reasons );
-	}
-
-	public function log_translation_source( $translation ) {
-		global $wpdb;
-		$translation_source = 'frontend'; // just a placeholder for now.
-		$result             = $wpdb->insert(
-			'translate_meta',
-			array(
-				'meta_key'   => $translation_id,
-				'meta_value' => $translation_source,
-			)
-		);
 	}
 }
