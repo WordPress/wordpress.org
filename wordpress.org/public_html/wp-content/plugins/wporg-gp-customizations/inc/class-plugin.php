@@ -289,11 +289,13 @@ class Plugin {
 		global $wpdb;
 
 		$gp_external_translations = get_user_option( 'gp_external_translations', get_current_user_id() );
-		$gp_external_translations['last_translation_source'];
+		if ( ! $gp_external_translations['last_translation_source'] && ! $translation->id ) {
+			return;
+		}
 		$result = $wpdb->insert(
 			'translate_meta',
 			array(
-				'meta_key'   => $translation_id,
+				'meta_key'   => $translation->id,
 				'meta_value' => $gp_external_translations['last_translation_source'],
 			)
 		);
