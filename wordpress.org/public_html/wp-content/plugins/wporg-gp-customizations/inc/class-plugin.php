@@ -292,13 +292,7 @@ class Plugin {
 		if ( ! $gp_external_translations['last_translation_source'] && ! $translation->id ) {
 			return;
 		}
-		$result = $wpdb->insert(
-			'translate_meta',
-			array(
-				'meta_key'   => $translation->id,
-				'meta_value' => $gp_external_translations['last_translation_source'],
-			)
-		);
+		gp_update_meta( 0, $translation->id, $gp_external_translations['last_translation_source'], 'gp_option' );
 	}
 
 	/**
