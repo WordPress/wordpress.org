@@ -38,13 +38,22 @@ function get_synced_online_events() {
 	foreach ( $raw_events as $event ) {
 		// The `date_utc` is not actually a UTC timestamp, it's the local time as Y-m-d H:i:s.
 		// We need to convert it back to UTC by subtracting the UTC offset.
-		$timestamp = strtotime( $event->date_utc ) - $event->date_utc_offset;
+		$timestamp       = strtotime( $event->date_utc ) - $event->date_utc_offset;
 		$cached_events[] = array(
 			'title'           => $event->title,
 			'url'             => $event->url,
 			'start_timestamp' => $timestamp,
 		);
 	}
+
+	// As the original data was sorted by local time (`date_utc`),
+	// we need to reorder the events after it's converted back to UTC.
+	usort(
+		$cached_events,
+		function( $a, $b ) {
+			return $a['start_timestamp'] <=> $b['start_timestamp'];
+		}
+	);
 
 	return $cached_events;
 }
@@ -83,7 +92,7 @@ function enqueue_scripts() {
  * Inject JS templates into page.
  */
 function render_online_templates() {
-	require_once( __DIR__ . '/template-events-online.php' );
+	require_once __DIR__ . '/template-events-online.php';
 }
 
 /**
