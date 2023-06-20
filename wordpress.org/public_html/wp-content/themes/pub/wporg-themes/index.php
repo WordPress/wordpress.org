@@ -137,7 +137,7 @@ get_header();
 			<p class="no-themes"><?php _e( 'No themes found. Try a different search.', 'wporg-themes' ); ?></p>
 		</div>
 		<div class="theme-load-more">
-			<button class="button button-primary button-large js-load-more-themes"><?php esc_html_e( 'Load more themes', 'wporg-themes' ); ?></button>
+			<button class="button button-primary button-large js-load-more-themes hidden"><?php esc_html_e( 'Load more themes', 'wporg-themes' ); ?></button>
 		</div>
 		<div class="theme-install-overlay"></div>
 		<div class="theme-overlay"></div>

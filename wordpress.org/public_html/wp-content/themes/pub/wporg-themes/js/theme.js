@@ -368,6 +368,8 @@ window.wp = window.wp || {};
 				data: data,
 
 				beforeSend: function() {
+					$('.js-load-more-themes').hide();
+
 					if ( ! paginated ) {
 						// Spin it
 						$( 'body' ).addClass( 'loading-content' ).removeClass( 'no-results' );
@@ -1636,6 +1638,7 @@ window.wp = window.wp || {};
 				if ( ! _.isNumber( count ) ) {
 					count = self.collection.count;
 				}
+
 				// Hide the load more button when all themes matching this
 				// collection query are on the page.
 				if ( count <= self.collection.length ) {
