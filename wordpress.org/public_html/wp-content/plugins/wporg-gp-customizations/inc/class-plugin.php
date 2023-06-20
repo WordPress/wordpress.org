@@ -56,6 +56,7 @@ class Plugin {
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 10, 2 );
 		add_action( 'gp_translation_created', array( $this, 'auto_reject_replaced_suggestions' ) );
 		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
+		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
 
 		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
 
