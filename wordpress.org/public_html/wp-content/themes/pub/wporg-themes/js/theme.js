@@ -1504,7 +1504,6 @@ window.wp = window.wp || {};
 
 		// Handles Ajax request for searching through themes in public repo
 		search: function( event ) {
-
 			// Tabbing or reverse tabbing into the search input shouldn't trigger a search
 			if ( event.type === 'keyup' && ( event.which === 9 || event.which === 16 ) ) {
 				return;
@@ -1517,10 +1516,10 @@ window.wp = window.wp || {};
 				event.target.value = '';
 			}
 
-			_.debounce( _.bind( this.doSearch, this ), 300 )( event.target.value );
+			this.doSearch.call( this, event.target.value );
 		},
 
-		doSearch: _.debounce( function( value ) {
+		doSearch: function( value ) {
 			var request = {};
 
 			themes.view.Installer.prototype.clearFilters( jQuery.Event( 'click' ) );
@@ -1562,7 +1561,14 @@ window.wp = window.wp || {};
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
 			// or searching the local cache
+			this.runQuery( request );
+		},
+
+		runQuery: _.debounce( function ( request ) {
 			this.collection.query( request );
+
+			// In case we are viewing the single page, close it
+			this.parent.trigger( 'theme:close' );
 		}, 300 )
 	});
 
