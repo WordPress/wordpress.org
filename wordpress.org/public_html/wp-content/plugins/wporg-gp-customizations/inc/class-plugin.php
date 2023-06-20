@@ -280,19 +280,32 @@ class Plugin {
 	}
 
 	/**
-	 * Store source of a translation in database.
+	 * Stores source of a translation in database.
 	 *
 	 * @param GP_Translation $translation Translation instance.
 	 * @return void
 	 */
 	public function log_translation_source( GP_Translation $translation ) {
-		global $wpdb;
-
-		$gp_external_translations = get_user_option( 'gp_external_translations', get_current_user_id() );
-		if ( ! $gp_external_translations['last_translation_source'] && ! $translation->id ) {
-			return;
+		$source = '';
+		if ( 'GP_Route_Translation' === GP::$current_route->class_name ) {
+			if ( 'translations_post' === GP::$current_route->last_method_called ) {
+				$source = 'frontend';
+			}
+			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
+				$source = 'import';
+			}
 		}
-		gp_update_meta( 0, $translation->id, $gp_external_translations['last_translation_source'], 'gp_option' );
+
+		if ( 'frontend' === $source ) {
+			$gp_external_translations = get_user_option( 'gp_external_translations', get_current_user_id() );
+			if ( $gp_external_translations['last_translation_source'] && $translation->id ) {
+				$source = $gp_external_translations['last_translation_source'];
+			}
+		}
+		unset( $gp_external_translations['last_translation_source'] );
+		update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
+
+		gp_update_meta( 0, $translation->id, $source, 'gp_option' );
 	}
 
 	/**
