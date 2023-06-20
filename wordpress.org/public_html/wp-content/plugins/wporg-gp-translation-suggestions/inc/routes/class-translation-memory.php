@@ -530,8 +530,6 @@ class Translation_Memory extends GP_Route {
 	 */
 	private function update_one_external_translation( string $translation, string $suggestion, string $external_translations_used, string $external_same_translations_used, string $external_translation_source ) {
 		$is_the_same_translation = $translation == $suggestion;
-		unset( $gp_external_translations['last_translation_source'] );
-
 		$gp_external_translations = get_user_option( 'gp_external_translations' );
 		$translations_used        = gp_array_get( $gp_external_translations, $external_translations_used, 0 );
 		$same_translations_used   = gp_array_get( $gp_external_translations, $external_same_translations_used, 0 );
