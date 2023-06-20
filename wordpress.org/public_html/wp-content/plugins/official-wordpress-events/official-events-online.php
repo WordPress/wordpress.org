@@ -20,7 +20,7 @@ function get_synced_online_events() {
 	// Include yesterday's events because server timezone may be ahead of user's timezone.
 	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$raw_events = $wpdb->get_results(
-		"SELECT title, url, date_utc, date_utc_offset
+		"SELECT title, url, date_utc, date_utc_offset, type
 		FROM `{$table}`
 		WHERE
 			date_utc >= SUBDATE( CURRENT_DATE(), 1 ) AND
@@ -43,6 +43,7 @@ function get_synced_online_events() {
 			'title'           => $event->title,
 			'url'             => $event->url,
 			'start_timestamp' => $timestamp,
+			'type'            => $event->type,
 		);
 	}
 
