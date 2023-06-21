@@ -30,7 +30,7 @@ jQuery( function( $ ) {
 		if ( chatgpt_review_enabled && $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
 			fetchOpenAIReviewResponse( rowId, tr, false );
 		} else {
-			tr.find( '.openai-review' ).hide();
+			tr.find( '.details-chatgpt, .openai-review' ).hide();
 		}
 	} );
 
