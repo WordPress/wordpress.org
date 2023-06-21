@@ -13,6 +13,9 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
+// Disable hreflangs, this page has no localised variants.
+remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
+
 /* See inc/page-meta-descriptions.php for the meta description for this page. */
 
 get_header( 'top-level-page' );
