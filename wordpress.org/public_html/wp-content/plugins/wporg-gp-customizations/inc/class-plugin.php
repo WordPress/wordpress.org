@@ -301,10 +301,12 @@ class Plugin {
 			$gp_external_translations = get_user_option( 'gp_external_translations', get_current_user_id() );
 			if ( $gp_external_translations['last_translation_source'] && $translation->id ) {
 				$source = $gp_external_translations['last_translation_source'];
+				unset( $gp_external_translations['last_translation_source'] );
+				update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
+			} else {
+				$source = 'frontend';
 			}
 		}
-		unset( $gp_external_translations['last_translation_source'] );
-		update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
 
 		gp_update_meta( 0, $translation->id, $source, 'gp_option' );
 	}
