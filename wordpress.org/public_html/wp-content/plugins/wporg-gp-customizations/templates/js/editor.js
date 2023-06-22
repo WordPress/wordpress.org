@@ -81,6 +81,71 @@
 		}
 	});
 
+	// Override save function in GlotPress.
+	$gp.editor.save = function(button) {
+		
+		var editor, textareaName,
+					data = [],
+					translations,
+					source = 'frontend';
+
+				if ( ! $gp.editor.current ) {
+					return;
+				}
+
+				editor = $gp.editor.current;
+				button.prop( 'disabled', true );
+				$gp.notices.notice( 'Saving&hellip;' );
+
+				if ( $openAITranslationsUsed[ editor.original_id ] ) {
+					source = 'openai';
+					$openAITranslationsUsed.splice( [ editor.original_id ] );
+				} 
+				if( $deeplTranslationsUsed[ editor.original_id ] ) {
+					source = 'deepl';
+					$deeplTranslationsUsed.splice( [ editor.original_id ] );
+				}
+
+				data = {
+					original_id: editor.original_id,
+					_gp_route_nonce: button.data( 'nonce' ),
+					translation_source: source,
+				};
+
+				textareaName = 'translation[' + editor.original_id + '][]';
+				translations = $( 'textarea[name="' + textareaName + '"]', editor ).map( function() {
+					return this.value;
+				} ).get();
+
+				data[ textareaName ] = translations;
+
+				$.ajax( {
+					type: 'POST',
+					url: $gp_editor_options.url,
+					data: data,
+					dataType: 'json',
+					success: function( response ) {
+						var original_id;
+
+						button.prop( 'disabled', false );
+						$gp.notices.success( 'Saved!' );
+
+						for ( original_id in response ) {
+							$gp.editor.replace_current( response[ original_id ] );
+						}
+
+						if ( $gp.editor.current.hasClass( 'no-warnings' ) ) {
+							$gp.editor.next();
+						}
+					},
+					error: function( xhr, msg ) {
+						button.prop( 'disabled', false );
+						msg = xhr.responseText ? 'Error: ' + xhr.responseText : 'Error saving the translation!';
+						$gp.notices.error( msg );
+					},
+				} );
+	}
+
 	// Override functions to adopt custom markup.
 	$gp.editor.copy = function() {
 		var $activeTextarea = $gp.editor.current.find( '.textareas.active textarea' );
