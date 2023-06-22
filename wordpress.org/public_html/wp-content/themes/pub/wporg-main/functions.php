@@ -170,7 +170,7 @@ add_filter( 'script_loader_src', __NAMESPACE__ . '\script_src', 10, 2 );
  * @return array
  */
 function body_class( $classes ) {
-	if ( is_page() ) {
+	if ( is_page() && get_queried_object() ) {
 		$page = get_queried_object();
 
 		$classes[] = 'page-' . $page->post_name;
@@ -289,6 +289,33 @@ function old_page_redirects() {
 	}
 }
 add_filter( 'template_redirect', __NAMESPACE__ . '\old_page_redirects' );
+
+/**
+ * Disables hreflang tags on instances of this theme, unless it's a page that has localised variants.
+ *
+ * This takes the reverse approach of the function name.
+ * Instead of maybe removing it, it removes it unless a specific criteria is met.
+ * 
+ * The criteria is that...
+ *  - It's a page
+ *  - It's not the hosting page
+ *  - It's not a rosetta page owned by anyone other than wordpressdotorg (These are the globally synced pages).
+ */
+function maybe_remove_hreflang_tags() {
+	if (
+		! is_page() ||
+		is_page( 'hosting' ) ||
+		// Exclude custom localised pages.
+		// Only include posts authored by `wordPressdotorg` which are using a page template.
+		(
+			defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK &&
+			get_user_by( 'slug', 'wordpressdotorg' )->ID != get_post()->post_author
+		)
+	) {
+		remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
+	}
+}
+add_action( 'wp_head', __NAMESPACE__ . '\maybe_remove_hreflang_tags', 1 );
 
 /**
  * Custom template tags.
