@@ -289,25 +289,18 @@ class Plugin {
 	public function log_translation_source( GP_Translation $translation ) {
 		$source = '';
 		if ( 'GP_Route_Translation' === GP::$current_route->class_name ) {
-			if ( 'translations_post' === GP::$current_route->last_method_called ) {
-				$source = 'frontend';
-			}
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				$source = 'import';
 			}
-		}
-
-		if ( 'frontend' === $source ) {
-			$gp_external_translations = get_user_option( 'gp_external_translations', get_current_user_id() );
-			if ( $gp_external_translations['last_translation_source'] && $translation->id ) {
-				$source = $gp_external_translations['last_translation_source'];
-				unset( $gp_external_translations['last_translation_source'] );
-				update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
-			} else {
-				$source = 'frontend';
+			if ( 'translations_post' === GP::$current_route->last_method_called ) {
+				if ( isset( $_POST['translation_source'] ) ) {
+					$source = sanitize_text_field( $_POST['translation_source'] );
+				}
 			}
 		}
-
+		if ( ! $source ) {
+			return;
+		}
 		gp_update_meta( 0, $translation->id, $source, 'gp_option' );
 	}
 
