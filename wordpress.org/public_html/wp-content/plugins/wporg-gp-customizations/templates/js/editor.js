@@ -120,70 +120,34 @@
 		});
 	}
 
-	// Override save function in GlotPress.
-	$gp.editor.save = function(button) {
-		
-		var editor, textareaName,
-					data = [],
-					translations,
-					source = 'frontend';
+	// Convert object to query params.
+	function convertObjectToQueryParam( object ) {
+		const params = new URLSearchParams();
 
-				if ( ! $gp.editor.current ) {
-					return;
-				}
+		Object.entries(object).forEach(([key, value]) => {
+		params.append(key, value);
+		});
 
-				editor = $gp.editor.current;
-				button.prop( 'disabled', true );
-				$gp.notices.notice( 'Saving&hellip;' );
-
-				if ( $openAITranslationsUsed[ editor.original_id ] ) {
-					source = 'openai';
-					$openAITranslationsUsed.splice( [ editor.original_id ] );
-				} 
-				if( $deeplTranslationsUsed[ editor.original_id ] ) {
-					source = 'deepl';
-					$deeplTranslationsUsed.splice( [ editor.original_id ] );
-				}
-
-				data = {
-					original_id: editor.original_id,
-					_gp_route_nonce: button.data( 'nonce' ),
-					translation_source: source,
-				};
-
-				textareaName = 'translation[' + editor.original_id + '][]';
-				translations = $( 'textarea[name="' + textareaName + '"]', editor ).map( function() {
-					return this.value;
-				} ).get();
-
-				data[ textareaName ] = translations;
-
-				$.ajax( {
-					type: 'POST',
-					url: $gp_editor_options.url,
-					data: data,
-					dataType: 'json',
-					success: function( response ) {
-						var original_id;
-
-						button.prop( 'disabled', false );
-						$gp.notices.success( 'Saved!' );
-
-						for ( original_id in response ) {
-							$gp.editor.replace_current( response[ original_id ] );
-						}
-
-						if ( $gp.editor.current.hasClass( 'no-warnings' ) ) {
-							$gp.editor.next();
-						}
-					},
-					error: function( xhr, msg ) {
-						button.prop( 'disabled', false );
-						msg = xhr.responseText ? 'Error: ' + xhr.responseText : 'Error saving the translation!';
-						$gp.notices.error( msg );
-					},
-				} );
+		return params.toString();
 	}
+
+	//Prefilter ajax requests to add translation_source to the request.
+	$.ajaxPrefilter( function ( options ) {
+		let data = Object.fromEntries( new URLSearchParams( options.data ) );
+
+		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
+			data.translation_source = 'frontend';
+			if ( $openAITranslationsUsed[ data.original_id ] ) {
+				data.translation_source = 'openai';
+				$openAITranslationsUsed.splice( [ data.original_id ] );
+			} 
+			if ( $deeplTranslationsUsed[ data.original_id ] ) {
+				data.translation_source = 'deepl';
+				$deeplTranslationsUsed.splice( [ data.original_id ] );
+			}
+			options.data = convertObjectToQueryParam( data );
+		}
+	});
 
 	// Override functions to adopt custom markup.
 	$gp.editor.copy = function() {
