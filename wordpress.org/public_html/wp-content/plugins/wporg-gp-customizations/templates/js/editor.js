@@ -98,14 +98,6 @@
 
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
 			data.translation_source = 'frontend';
-			if ( $openAITranslationsUsed[ data.original_id ] ) {
-				data.translation_source = 'openai';
-				$openAITranslationsUsed.splice( [ data.original_id ] );
-			} 
-			if ( $deeplTranslationsUsed[ data.original_id ] ) {
-				data.translation_source = 'deepl';
-				$deeplTranslationsUsed.splice( [ data.original_id ] );
-			}
 			options.data = convertObjectToQueryParam( data );
 		}
 	});

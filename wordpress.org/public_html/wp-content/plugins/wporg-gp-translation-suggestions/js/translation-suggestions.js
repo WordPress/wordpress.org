@@ -475,6 +475,34 @@
 		};
 	})( $gp.editor.install_hooks );
 
+	// Convert object to query params.
+	function convertObjectToQueryParam( object ) {
+		const params = new URLSearchParams();
+
+		Object.entries(object).forEach(([key, value]) => {
+		params.append(key, value);
+		});
+
+		return params.toString();
+	}
+
+	// Prefilter ajax requests to add translation_source to the request.
+	$.ajaxPrefilter( function ( options ) {
+		let data = Object.fromEntries( new URLSearchParams( options.data ) );
+
+		if ( 'POST' === options.type && $gp_editor_options.url === options.url && ! data.translation_source ) {
+
+			if ( $openAITranslationsUsed[ data.original_id ] ) {
+				data.translation_source = 'openai';
+				$openAITranslationsUsed.splice( [ data.original_id ] );
+			} 
+			if ( $deeplTranslationsUsed[ data.original_id ] ) {
+				data.translation_source = 'deepl';
+				$deeplTranslationsUsed.splice( [ data.original_id ] );
+			}
+			options.data = convertObjectToQueryParam( data );
+		}
+	});
 	/**
 	 * Adds the suggestion to the translation in an array, and removes the previous suggestions, so
 	 * we only store the last one in the database, using the saveExternalSuggestions() function.
