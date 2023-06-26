@@ -19,28 +19,28 @@ class Upload_Handler {
 	 *
 	 * @var string
 	 */
-	protected $plugin_dir;
+	public $plugin_dir;
 
 	/**
 	 * Path to the detected plugins files.
 	 *
 	 * @var string
 	 */
-	protected $plugin_root;
+	public $plugin_root;
 
 	/**
 	 * The uploaded plugin headers.
 	 *
 	 * @var array
 	 */
-	protected $plugin;
+	public $plugin;
 
 	/**
 	 * The plugin slug.
 	 *
 	 * @var string
 	 */
-	protected $plugin_slug;
+	public $plugin_slug;
 
 	/**
 	 * Get set up to run tests on the uploaded plugin.
@@ -60,8 +60,12 @@ class Upload_Handler {
 	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
 	public function process_upload() {
-		$has_upload_token = $this->has_valid_upload_token();
+		if ( UPLOAD_ERR_OK !== $_FILES['zip_file']['error'] ) {
+			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
+		}
+
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
+		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
 		$plugin_data = (array) Import::find_plugin_headers( $this->plugin_dir, 1 /* Max Depth to search */ );
@@ -412,7 +416,7 @@ class Upload_Handler {
 
 		$message = sprintf(
 			/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
-			__( 'Thank you for uploading %1$s to the WordPress Plugin Directory. Your plugin has been given the initial slug of %2$s, however that is subject to change based on the results of your code review. If this slug is incorrect, please contact us immediately and tell us exactly what the correct slug should be. Remember, a plugin slug cannot be changed once your plugin is approved.' ),
+			__( 'Thank you for uploading %1$s to the WordPress Plugin Directory. Your plugin has been given the initial slug of %2$s, however that is subject to change based on the results of your code review. If this slug is incorrect, please change it below. Remember, a plugin slug cannot be changed once your plugin is approved.' ),
 			esc_html( $this->plugin['Name'] ),
 			'<code>' . $this->plugin_slug . '</code>'
 		) . '</p><p>';

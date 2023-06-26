@@ -1,28 +1,10 @@
 /*
  * CSS Rules for the Plugin Admin screen
  */
-.misc-pub-section label::before {
-	font: normal 20px/1 dashicons;
-	speak: none;
-	display: inline-block;
-	padding: 0 2px 0 0;
-	top: 0;
-	left: -1px;
-	position: relative;
-	vertical-align: top;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-decoration: none !important;
-	color: #82878c;
+.misc-pub-section > p:first-child {
+	margin-top: 0;
 }
 
-.misc-pub-section label[for="post_status"]::before {
-	content: "\f173";
-}
-
-.misc-pub-section label[for="tested_with"]::before {
-	content: "\f177";
-}
 
 .plugin-control-select {
 	margin-top: 3px;

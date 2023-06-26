@@ -11,29 +11,80 @@
  * @package wporg-themes
  */
 
+$menu_items = array(
+	array(
+		'href' => home_url( '/' ),
+		'label' => _x( 'Popular', 'themes', 'wporg-themes' ),
+		'data-sort' => 'popular',
+		'is-current' => ( is_front_page() && ! get_query_var( 'browse' ) ) || 'popular' == get_query_var( 'browse' ),
+	),
+	array(
+		'href' => home_url( 'browse/new/' ),
+		'label' => _x( 'Latest', 'themes', 'wporg-themes' ),
+		'data-sort' => 'new',
+		'is-current' => 'new' == get_query_var( 'browse' ),
+	),
+	array(
+		'href' => home_url( 'browse/commercial/' ),
+		'label' => _x( 'Commercial', 'theme category', 'wporg-themes' ),
+		'data-model' => 'commercial',
+		'is-current' => 'commercial' == get_query_var( 'theme_business_model' ),
+	),
+	array(
+		'href' => home_url( 'browse/community/' ),
+		'label' => _x( 'Community', 'theme category', 'wporg-themes' ),
+		'data-model' => 'community',
+		'is-current' => 'community' == get_query_var( 'theme_business_model' ),
+	),
+	array(
+		'href' => home_url( 'tags/full-site-editing/' ),
+		'label' => _x( 'Block Themes', 'themes filter', 'wporg-themes' ),
+		'data-tag' => 'full-site-editing',
+		'is-current' => 'full-site-editing' == get_query_var( 'tag' ),
+	),
+);
+
 get_header();
 ?>
 	<main id="themes" class="wrap">
 		<div class="wp-filter">
 			<h2 class="screen-reader-text"><?php _e( 'Themes List', 'wporg-themes' ); ?></h2>
-			<div class="filter-count">
-				<span class="count theme-count"><?php echo number_format_i18n( $wp_query->found_posts ); ?></span>
-			</div>
-
 			<ul class="filter-links">
-				<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>" data-sort="popular" <?php if ( (is_front_page() && !get_query_var('browse') ) || 'popular' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Popular', 'themes', 'wporg-themes' ); ?></a></li>
-				<li><a href="<?php echo esc_url( home_url( 'browse/new/' ) ); ?>" data-sort="new" <?php if ( 'new' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Latest', 'themes', 'wporg-themes' ); ?></a></li>
-				<li><a href="<?php echo esc_url( home_url( 'tags/full-site-editing/' ) ); ?>" data-tag="full-site-editing" <?php if ( 'full-site-editing' == get_query_var('tag') ) { echo 'class="current"'; } ?>><?php _ex( 'Block Themes', 'themes filter', 'wporg-themes' ); ?></a></li>
-				<?php if ( is_user_logged_in() ) { ?>
-					<li><a href="<?php echo esc_url( home_url( 'browse/favorites/' ) ); ?>" data-sort="favorites" <?php if ( 'favorites' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Favorites', 'themes', 'wporg-themes' ); ?></a></li>
-				<?php } ?>
+				<?php
+				foreach ( $menu_items as $item ) {
+					$data_attrs = array();
+					foreach ( array( 'data-sort', 'data-tag', 'data-model' ) as $key ) {
+						if ( isset( $item[ $key ] ) ) {
+							$data_attrs[] = $key . '="' . esc_attr( $item[ $key ] ) . '"';
+						}
+					}
+					printf(
+						'<li><a href="%1$s" %2$s class="filter-tab %3$s">%4$s</a></li>',
+						esc_url( $item['href'] ),
+						implode( ' ', $data_attrs ),
+						$item['is-current'] ? 'current' : '',
+						esc_html( $item['label'] )
+					);
+				}
+				?>
+				<li style="flex-grow:1;"></li>
+				<?php if ( is_user_logged_in() ) : ?>
+					<li>
+						<a
+							href="<?php echo esc_url( home_url( 'browse/favorites/' ) ); ?>"
+							data-sort="favorites"
+							class="filter-tab <?php echo ( 'favorites' == get_query_var( 'browse' ) ) ? 'current' : ''; ?>"
+						>
+							<?php _ex( 'Favorites', 'themes', 'wporg-themes' ); ?>
+						</a>
+					</li>
+				<?php endif; ?>
+				<li>
+					<a class="drawer-toggle" href="#">
+						<span class="drawer-text"><?php _e( 'Feature Filter', 'wporg-themes' ); ?></span>
+					</a>
+				</li>
 			</ul>
-
-			<a class="drawer-toggle" href="#">
-				<span class="drawer-text"><?php _e( 'Feature Filter', 'wporg-themes' ); ?></span>
-			</a>
-
-			<div class="search-form"></div>
 
 			<div class="filter-drawer">
 				<div class="buttons">
@@ -66,7 +117,7 @@ get_header();
 		<div class="theme-browser content-filterable">
 			<div class="themes">
 				<?php
-				if ( get_query_var('name') && !is_404() ) {
+				if ( get_query_var( 'name' ) && ! is_404() ) {
 					while ( have_posts() ) {
 						the_post();
 						$theme = wporg_themes_theme_information( $post->post_name );
@@ -86,7 +137,7 @@ get_header();
 			<p class="no-themes"><?php _e( 'No themes found. Try a different search.', 'wporg-themes' ); ?></p>
 		</div>
 		<div class="theme-load-more">
-			<button class="button button-primary button-large js-load-more-themes"><?php esc_html_e( 'Load more themes', 'wporg-themes' ); ?></button>
+			<button class="button button-primary button-large js-load-more-themes hidden"><?php esc_html_e( 'Load more themes', 'wporg-themes' ); ?></button>
 		</div>
 		<div class="theme-install-overlay"></div>
 		<div class="theme-overlay"></div>

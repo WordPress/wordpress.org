@@ -19,16 +19,25 @@ import { store as patternStore } from '../../store';
 import useFocusOnNavigation from '../../hooks/use-focus-on-navigation';
 
 const Patterns = () => {
-	const { isEmpty, isSearch, query } = useSelect( ( select ) => {
+	const { isAuthor, isEmpty, isSearch, query } = useSelect( ( select ) => {
 		const { getCurrentQuery, getPatternsByQuery, isLoadingPatternsByQuery } = select( patternStore );
-		const _query = getCurrentQuery();
-		const isLoading = _query && isLoadingPatternsByQuery( _query );
-		const posts = _query ? getPatternsByQuery( _query ) : [];
+		const _query = getCurrentQuery() || {};
+		const _isSearch = !! _query.search;
+		const _isAuthor = !! _query.author_name;
+
+		const modifiedQuery = { ..._query };
+		if ( ! _isSearch && ! _isAuthor && ! modifiedQuery.curation ) {
+			modifiedQuery.curation = 'core';
+		}
+
+		const isLoading = isLoadingPatternsByQuery( modifiedQuery );
+		const posts = modifiedQuery ? getPatternsByQuery( modifiedQuery ) : [];
 
 		return {
+			isAuthor: _isAuthor,
 			isEmpty: ! isLoading && ! posts.length,
-			isSearch: _query && !! _query.search,
-			query: _query,
+			isSearch: _isSearch,
+			query: modifiedQuery,
 		};
 	} );
 	const [ ref, onNavigation ] = useFocusOnNavigation();
@@ -39,12 +48,16 @@ const Patterns = () => {
 			<QueryMonitor />
 			<BreadcrumbMonitor />
 			<div ref={ ref }>
-				{ isSearch ? <ContextBar query={ query } /> : <PatternGridMenu onNavigation={ onNavigation } /> }
+				{ isSearch ? (
+					<ContextBar query={ query } />
+				) : (
+					<PatternGridMenu onNavigation={ onNavigation } query={ query } hideCuration={ isAuthor } />
+				) }
 			</div>
 			{ isEmpty ? (
 				<>
 					<EmptyHeader />
-					<PatternGrid query={ { per_page: 6 } } showPagination={ false }>
+					<PatternGrid query={ { per_page: 6, curation: 'core' } } showPagination={ false }>
 						{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
 					</PatternGrid>
 				</>

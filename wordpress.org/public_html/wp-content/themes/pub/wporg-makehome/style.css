@@ -214,26 +214,27 @@ section.get-involved article h2 a:before {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-section.get-involved article.make-core          h2 a:before { content: "\f475"; }
-section.get-involved article.make-mobile        h2 a:before { content: "\f470"; }
-section.get-involved article.make-design        h2 a:before { content: "\f309"; }
-section.get-involved article.make-accessibility h2 a:before { content: "\f483"; }
-section.get-involved article.make-polyglots     h2 a:before { content: '\f326'; }
-section.get-involved article.make-support       h2 a:before { content: "\f125"; }
-section.get-involved article.make-themes        h2 a:before { content: '\f100'; }
-section.get-involved article.make-plugins       h2 a:before { content: '\f106'; }
-section.get-involved article.make-docs          h2 a:before { content: '\f105'; }
-section.get-involved article.make-community     h2 a:before { content: '\f307'; }
-section.get-involved article.make-meta          h2 a:before { content: '\f325'; }
-section.get-involved article.make-training      h2 a:before { content: '\f118'; }
-section.get-involved article.make-flow          h2 a:before { content: '\f115'; }
-section.get-involved article.make-tv            h2 a:before { content: '\f235'; }
-section.get-involved article.make-marketing     h2 a:before { content: '\f130'; }
-section.get-involved article.make-cli           h2 a:before { content: '\f345'; }
-section.get-involved article.make-hosting       h2 a:before { content: '\f176'; }
-section.get-involved article.make-tide          h2 a:before { content: '\f10d'; }
-section.get-involved article.make-openverse     h2 a:before { content: '\f179'; }
-section.get-involved article.make-photos        h2 a:before { content: '\f306'; }
+section.get-involved article.make-core           h2 a:before { content: "\f475"; }
+section.get-involved article.make-mobile         h2 a:before { content: "\f470"; }
+section.get-involved article.make-design         h2 a:before { content: "\f309"; }
+section.get-involved article.make-accessibility  h2 a:before { content: "\f483"; }
+section.get-involved article.make-polyglots      h2 a:before { content: '\f326'; }
+section.get-involved article.make-support        h2 a:before { content: "\f125"; }
+section.get-involved article.make-themes         h2 a:before { content: '\f100'; }
+section.get-involved article.make-plugins        h2 a:before { content: '\f106'; }
+section.get-involved article.make-docs           h2 a:before { content: '\f105'; }
+section.get-involved article.make-community      h2 a:before { content: '\f307'; }
+section.get-involved article.make-meta           h2 a:before { content: '\f325'; }
+section.get-involved article.make-training       h2 a:before { content: '\f118'; }
+section.get-involved article.make-flow           h2 a:before { content: '\f115'; }
+section.get-involved article.make-tv             h2 a:before { content: '\f235'; }
+section.get-involved article.make-marketing      h2 a:before { content: '\f130'; }
+section.get-involved article.make-cli            h2 a:before { content: '\f345'; }
+section.get-involved article.make-hosting        h2 a:before { content: '\f176'; }
+section.get-involved article.make-tide           h2 a:before { content: '\f10d'; }
+section.get-involved article.make-openverse      h2 a:before { content: '\f179'; }
+section.get-involved article.make-photos         h2 a:before { content: '\f306'; }
+section.get-involved article.make-sustainability h2 a:before { content: '\f11f'; }
 
 section.get-involved article.make-openverse     h2 a:before,
 section.get-involved article.make-performance   h2 a:before {

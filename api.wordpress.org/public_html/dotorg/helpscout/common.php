@@ -1,11 +1,40 @@
 <?php
+namespace WordPressdotorg\API\HelpScout;
 use WordPressdotorg\MU_Plugins\Utilities\HelpScout;
 
-if ( ! isset( $wp_init_host ) ) {
-	$wp_init_host = 'https://api.wordpress.org/';
+/**
+ * Load WordPress.
+ */
+function load_wordpress( $wp_init_host = '' ) {
+	if ( ! $wp_init_host ) {
+		$wp_init_host = 'https://api.wordpress.org/';
+	}
+
+	$base_dir = dirname( dirname( __DIR__ ) );
+	require( $base_dir . '/wp-init.php' );
 }
-$base_dir = dirname( dirname( __DIR__ ) );
-require( $base_dir . '/wp-init.php' );
+// Always load WordPress, if WordPress is not loaded.
+if ( ! defined( 'ABSPATH' ) ) {
+	load_wordpress( $wp_init_host ?? '' );
+}
+
+/**
+ * Retrieve the incoming payload, and verify it's from HelpScout.
+ */
+function get_request() {
+	global $HTTP_RAW_POST_DATA;
+
+	// HelpScout sends json data in the POST, so grab it from the input directly.
+	$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
+
+	// Check the signature matches.
+	if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ) ) {
+		exit;
+	}
+
+	// get the info from HS.
+	return json_decode( $HTTP_RAW_POST_DATA );
+}
 
 // function to verify signature from HelpScout
 function is_from_helpscout( $data, $signature ) {
@@ -76,9 +105,11 @@ function cached_helpscout_get( $url, $force = false, $instance = false ) {
  * Get the user associated with a HelpScout email.
  */
 function get_user_email_for_email( $request ) {
-	$email   = $request->customer->email ?? false;
-	$subject = $request->ticket->subject ?? '';
-	$user    = get_user_by( 'email', $email );
+	$email_id = $request->ticket->id      ?? ( $request->id ?? false );
+	$subject  = $request->ticket->subject ?? ( $request->subject ?? '' );
+	$customer = $request->customer        ?? ( $request->primaryCustomer ?? false );
+	$email    = $customer->email          ?? false;
+	$user     = get_user_by( 'email', $email );
 
 	// If this is related to a slack user, fetch their details instead.
 	if (
@@ -89,8 +120,8 @@ function get_user_email_for_email( $request ) {
 	}
 
 	// If the customer object has alternative emails listed, check to see if they have a profile.
-	if ( ! $user && ! empty( $request->customer->emails ) ) {
-		$user = get_user_from_emails( $request->customer->emails );
+	if ( ! $user && ! empty( $customer->emails ) ) {
+		$user = get_user_from_emails( $customer->emails );
 	}
 
 	// Ignore @wordpress.org "users", unless it's literally the only match (The ?? $email fallback at the end).
@@ -99,8 +130,8 @@ function get_user_email_for_email( $request ) {
 	}
 
 	// Determine if this is a bounce, and if so, find out who for.
-	if ( ! $user && $email && isset( $request->ticket->id ) ) {
-		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $request->customer->fname ?? false ), ( $request->customer->lname ?? false ) ] ) ) );
+	if ( ! $user && $email && $email_id ) {
+		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $customer->fname ?? false ), ( $customer->first ?? false ), ( $customer->lname ?? false ), ( $customer->last ?? false ) ] ) ) );
 		$subject_lower = strtolower( $subject );
 
 		if (
@@ -118,11 +149,11 @@ function get_user_email_for_email( $request ) {
 		) {
 
 			// Fetch the email.
-			$email_obj = get_email_thread( $request->ticket->id ?? 0 );
-			if ( ! empty( $email_obj->_embedded->threads ) ) {
+			$threads = $request->_embedded->threads ?? ( get_email_thread( $email_id )->_embedded->threads ?? [] );
+			if (  $threads ) {
 				$attachment_api_urls = [];
 
-				foreach ( $email_obj->_embedded->threads as $thread ) {
+				foreach ( $threads as $thread ) {
 					if ( 'customer' !== $thread->type ) {
 						continue;
 					}
@@ -223,8 +254,9 @@ function get_user_from_emails( $emails ) {
 /**
  * Get the possible plugins or themes from the email.
  */
-function get_plugin_or_theme_from_email( $request ) {
-	$subject = $request->ticket->subject ?? '';
+function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
+	$subject  = $request->subject ?? ( $request->ticket->subject ?? '' );
+	$email_id = $request->id      ?? ( $request->ticket->id      ?? 0 );
 
 	$possible = [
 		'themes'  => [],
@@ -233,11 +265,11 @@ function get_plugin_or_theme_from_email( $request ) {
 
 	// Reported themes, shortcut, assume the slug is the title.. since it always is..
 	if ( str_starts_with( $subject, 'Reported Theme:' ) ) {
-		$possible['themes'][] = sanitize_title_with_dashes( trim( explode( ':', $request->ticket->subject )[1] ) );
+		$possible['themes'][] = sanitize_title_with_dashes( trim( explode( ':', $subject )[1] ) );
 	}
 
 	// Plugin reviews, match the format of "[WordPress Plugin Directory] {Type Of Email}: {Plugin Title}"
-	if ( preg_match( '!^(Re: )?\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ) {
+	if ( preg_match( '!\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ) {
 		switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
 		$plugins = get_posts( [
 			'title'       => trim( $m['title'] ),
@@ -252,31 +284,30 @@ function get_plugin_or_theme_from_email( $request ) {
 		}
 	}
 
-	// Often a slug is mentioned in the title, so let's try to extract that.
-	if ( preg_match_all( '!(?P<slug>[a-z0-9\-]{10,})!', $subject, $m ) ) {
-		$possible['plugins'] = array_merge( $possible['plugins'], $m['slug'] );
-		$possible['themes']  = array_merge( $possible['themes'],  $m['slug'] );
-	}
-
 	$regexes = [
 		'!/([^/]+\.)?wordpress.org/(?<type>plugins|themes)/(?P<slug>[a-z0-9-]+)/?!im',
 		'!(?P<type>Plugin|Theme):\s*(?P<slug>[a-z0-9-]+)$!im',
 		'!(?P<type>plugins|themes)\.(trac|svn)\.wordpress\.org/(browser/)?(?P<slug>[a-z0-9-]+)!im',
 	];
 
-	// Fetch the email.
-	$email_obj = get_email_thread( $request->ticket->id ?? 0 );
-	if ( ! empty( $email_obj->_embedded->threads ) ) {
-		foreach ( $email_obj->_embedded->threads as $thread ) {
+	// Fetch the email threads.
+	$threads = $request->_embedded->threads ?? ( get_email_thread( $email_id )->_embedded->threads ?? [] );
+	if ( $threads ) {
+		foreach ( $threads as $thread ) {
 			if ( empty( $thread->body ) ) {
 				continue;
 			}
 
 			// Extract matches from the email.
-			$email_body = strip_tags( str_replace( '<br>', "\n", $thread->body ) );
+			$email_text = strip_tags( str_replace( '<br>', "\n", $thread->body ) );
 
 			foreach ( $regexes as $regex ) {
-				if ( ! preg_match_all( $regex, $email_body, $m ) ) {
+				if (
+					// Check the email text only
+					! preg_match_all( $regex, $email_text, $m ) &&
+					// ..and the full email body, which may be HTML.
+					! preg_match_all( $regex, $thread->body, $m )
+				) {
 					continue;
 				}
 
@@ -297,8 +328,45 @@ function get_plugin_or_theme_from_email( $request ) {
 		}
 	}
 
+	// Often a slug is mentioned in the title, so let's try to extract that if we didn't find a better item.
+	if ( preg_match_all( '!\b(?P<slug>[a-z0-9\-]{10,})\b!', $subject, $m ) ) {
+		if ( ! $possible['plugins'] ) {
+			$possible['plugins'] = array_merge( $possible['plugins'], $m['slug'] );
+		}
+
+		if ( ! $possible['themes'] ) {
+			$possible['themes']  = array_merge( $possible['themes'],  $m['slug'] );
+		}
+	}
+
 	$possible['themes']  = array_unique( $possible['themes'] );
 	$possible['plugins'] = array_unique( $possible['plugins'] );
+
+	// If we only want valid slugs back, better validate them..
+	if ( $validate_slugs ) {
+		if ( $possible['themes'] ) {
+			switch_to_blog( WPORG_THEME_DIRECTORY_BLOGID );
+			$themes = get_posts( [
+				'post_name__in' => $possible['themes'],
+				'post_type'     => 'repopackage',
+				'post_status'   => 'any',
+			] );
+			restore_current_blog();
+
+			$possible['themes'] = wp_list_pluck( $themes, 'post_name' );
+		}
+		if ( $possible['plugins'] ) {
+			switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+			$plugins = get_posts( [
+				'post_name__in' => $possible['plugins'],
+				'post_type'     => 'plugin',
+				'post_status'   => 'any',
+			] );
+			restore_current_blog();
+
+			$possible['plugins'] = wp_list_pluck( $plugins, 'post_name' );
+		}
+	}
 
 	return array_filter( $possible );
 }
@@ -365,13 +433,126 @@ function get_wporg_user_for_helpscout_user( $hs_id, $instance = false ) {
 	return $user;
 }
 
-// HelpScout sends json data in the POST, so grab it from the input directly.
-$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
+/**
+ * Find the human-readable name for a mailbox ID.
+ *
+ * @param int|object $mailbox_id_or_request Mailbox ID or request object.
+ */
+function get_mailbox_name( $mailbox_id_or_request ) {
+	$constants = [
+		'data',
+		'jobs',
+		'openverse',
+		'password_resets',
+		'photos',
+		'plugins',
+		'themes',
+	];
 
-// Check the signature matches.
-if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ) ) {
-	exit;
+	$mailbox_id = $mailbox_id_or_request->mailboxId ?? $mailbox_id_or_request;
+	if ( ! $mailbox_id || ! is_numeric( $mailbox_id ) ) {
+		return 0;
+	}
+
+	foreach ( $constants as $constant ) {
+		if ( constant( 'HELPSCOUT_' . strtoupper( $constant ) . '_MAILBOXID' ) == $mailbox_id ) {
+			return $constant;
+		}
+	}
+
+	// Fetch the mailbox..
+	$mailbox = cached_helpscout_get( "/mailboxes/{$mailbox_id}" );
+	if ( ! $mailbox ) {
+		return $mailbox_id;
+	}
+
+	return sanitize_title( $mailbox->name );
 }
 
-// get the info from HS.
-return json_decode( $HTTP_RAW_POST_DATA );
+/**
+ * Keep a cached copy of the received emails in the database for querying.
+ *
+ * @param string $event   Event name.
+ * @param object $request Helpscout request object / Conversation object.
+ */
+function log_email( $event, $request ) {
+	global $wpdb;
+
+	if ( ! str_starts_with( $event, 'convo.' ) ) {
+		return;
+	}
+
+	if ( empty( $request->id ) ) {
+		return;
+	}
+
+	$row  = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', "{$wpdb->base_prefix}helpscout", $request->id ) );
+	$meta = $row ? $wpdb->get_results( $wpdb->prepare( 'SELECT meta_key, meta_value FROM %i WHERE helpscout_id = %d', "{$wpdb->base_prefix}helpscout_meta", $request->id ), ARRAY_A ) : [];
+
+	// We don't need to know about deleted items or spam.
+	if ( 'convo.deleted' === $event || 'spam' === $request->status ) {
+		if ( $row ) {
+			$wpdb->delete( 'wporg_helpscout', [ 'id' => $request->id ] );
+			$wpdb->delete( 'wporg_helpscout_meta', [ 'helpscout_id' => $request->id ] );
+		}
+		return;
+	}
+
+	foreach ( get_plugin_or_theme_from_email( $request, true ) as $type => $slugs ) {
+		foreach ( $slugs as $slug ) {
+			if ( ! wp_list_filter( $meta, [ 'meta_key' => $type, 'meta_value' => $slug ] ) ) {
+				$meta[] = [
+					'meta_key'   => $type,
+					'meta_value' => $slug,
+				];
+			}
+		}
+	}
+
+	$user_id = $row->user_id ?? 0;
+	if ( ! $user_id ) {
+		$user_email = get_user_email_for_email( $request );
+		if ( $user_email ) {
+			$user_id = get_user_by( 'email', $user_email )->ID ?? 0;
+		}
+	}
+
+	$email = $request->primaryCustomer->email ?? ( $row->email ?? '' );
+	$name = '';
+	if ( ! empty( $request->primaryCustomer ) ) {
+		$name = $request->primaryCustomer->first ?? '';
+		$name .= ' ' . ( $request->primaryCustomer->last ?? '' );
+		$name = trim( $name );
+	}
+	$email = $name ? "{$name} <{$email}>" : $email;
+
+	$data = [
+		'id'       => $request->id,
+		'number'   => $request->number,
+		'user_id'  => $user_id,
+		'mailbox'  => get_mailbox_name( $request->mailboxId ),
+		'status'   => $request->status,
+		'email'    => $email,
+		'subject'  => $request->subject ?? ( $row->subject ?? '' ),
+		'preview'  => $request->preview ?? ( $row->preview ?? '' ),
+		'created'  => gmdate( 'Y-m-d H:i:s', strtotime( $request->createdAt ) ),
+		'closed'   => empty( $request->closedAt ) ? '' : gmdate( 'Y-m-d H:i:s', strtotime( $request->closedAt ) ),
+		'modified' => gmdate( 'Y-m-d H:i:s', max( array_filter( [ strtotime( $request->createdAt ), strtotime( $request->userUpdatedAt ), strtotime( $request->closedAt ?? '' ) ] ) ) ),
+	];
+
+	if ( $row ) {
+		$wpdb->update( "{$wpdb->base_prefix}helpscout", $data, [ 'id' => $data['id'] ] );
+	} else {
+		$wpdb->insert( "{$wpdb->base_prefix}helpscout", $data );
+	}
+
+	foreach ( $meta as $kv ) {
+		$wpdb->query( $wpdb->prepare(
+			'INSERT INTO %i ( helpscout_id, meta_key, meta_value ) VALUES ( %d, %s, %s ) ON DUPLICATE KEY UPDATE meta_value = VALUES( meta_value )',
+			"{$wpdb->base_prefix}helpscout_meta",
+			$data['id'],
+			$kv['meta_key'],
+			$kv['meta_value']
+		) );
+	}
+}

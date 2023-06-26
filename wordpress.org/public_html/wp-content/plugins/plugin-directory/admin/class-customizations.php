@@ -127,7 +127,7 @@ class Customizations {
 		if ( 'plugin' === $post_type ) {
 			switch ( $hook_suffix ) {
 				case 'post.php':
-					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 5 );
+					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 6 );
 					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 5 );
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
 						'approvePluginAYS'    => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
@@ -593,6 +593,13 @@ class Customizations {
 			__( 'Reviewer', 'wporg-plugins' ),
 			array( __NAMESPACE__ . '\Metabox\Reviewer', 'display' ),
 			'plugin', 'side', 'high'
+		);
+
+		add_meta_box(
+			'emailsdiv',
+			__( 'Emails', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Helpscout', 'display' ),
+			'plugin', 'normal', 'high'
 		);
 
 		if ( 'new' !== $post->post_status && 'pending' != $post->post_status ) {

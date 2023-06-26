@@ -396,14 +396,18 @@ class GP_Translation_Helpers {
 		);
 		gp_enqueue_script( 'gp-comment-feedback-js' );
 
+		$gp_locale = GP_Locales::by_field( 'slug', $translation_set['locale_slug'] );
 		wp_localize_script(
 			'gp-comment-feedback-js',
 			'$gp_comment_feedback_settings',
 			array(
-				'url'             => admin_url( 'admin-ajax.php' ),
-				'nonce'           => wp_create_nonce( 'gp_comment_feedback' ),
-				'locale_slug'     => $translation_set['locale_slug'],
-				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
+				'url'                => admin_url( 'admin-ajax.php' ),
+				'nonce'              => wp_create_nonce( 'gp_comment_feedback' ),
+				'locale_slug'        => $translation_set['locale_slug'],
+				'language'           => $gp_locale ? $gp_locale->english_name : 'Unknown',
+				'openai_key'         => apply_filters( 'gp_get_openai_key', null ),
+				'openai_temperature' => apply_filters( 'gp_get_openai_temperature', 0.8 ),
+				'comment_reasons'    => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
 			)
 		);
 
@@ -434,6 +438,28 @@ class GP_Translation_Helpers {
 				'admin_ajax_url' => admin_url( 'admin-ajax.php' ),
 			)
 		);
+	}
+
+	/**
+	 * Is called from the AJAX request in reject-feedback.js to use ChatGPT to review a translation.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @return void
+	 */
+	public static function fetch_openai_review() {
+		check_ajax_referer( 'gp_comment_feedback', 'nonce' );
+		$original    = sanitize_text_field( $_POST['data']['original'] );
+		$translation = sanitize_text_field( $_POST['data']['translation'] );
+		$language    = sanitize_text_field( $_POST['data']['language'] );
+		$glossary    = sanitize_text_field( $_POST['data']['glossary_query'] );
+		$is_retry    = filter_var( $_POST['data']['is_retry'], FILTER_VALIDATE_BOOLEAN );
+
+		$openai_response = GP_OpenAI_Review::get_openai_review( $original, $translation, $language, $glossary, $is_retry );
+		if ( isset( $openai_response['error'] ) ) {
+			wp_send_json_error( $openai_response );
+		}
+		wp_send_json_success( $openai_response );
 	}
 
 	/**

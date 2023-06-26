@@ -3,7 +3,23 @@
       xmlns:py="http://genshi.edgewall.org/"
       py:strip="">
 
+	<link rel="dns-prefetch" href="//fonts.googleapis.com"/>
+	<link rel="dns-prefetch" href="//www.googletagmanager.com"/>
+	<script>//<![CDATA[
+	(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-P24PF4B');
+	//]]></script>
+
 	<link rel='stylesheet' href='//fonts.googleapis.com/css?family=Open+Sans%3A300italic%2C400italic%2C600italic%2C300%2C400%2C600&#038;subset=latin%2Clatin-ext&#038;ver=3.8.1-alpha' type='text/css' media='all' />
 	<link type="text/css" media="screen" rel="stylesheet" href="//bbpress.org/wp-content/themes/bb-base/style.css?v=24" />
 	<link type="text/css" media="screen" rel="stylesheet" href="//bbpress.org/wp-content/themes/bb-base/style-bbpress.css?v=24" />
+
+	<body py:match="body" py:attrs="select('@*')">
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24PF4B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+		${select('*|comment()|text()')}
+	</body>
 </html>

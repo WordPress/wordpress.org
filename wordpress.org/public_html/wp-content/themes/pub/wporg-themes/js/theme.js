@@ -345,50 +345,31 @@ window.wp = window.wp || {};
 			var url = themes.data.settings.apiEndpoint,
 				data, options;
 
-			data = _.extend({
-				per_page: themes.data.settings.postsPerPage,
-				locale: themes.data.settings.locale,
+			data = _.extend( {
+				action: 'query_themes',
+				// Fields which are not set as true in theme-directory/class-themes-api.php for the API endpoint used.
 				fields: {
-					description: true,
-					sections: false,
-					tested: true,
-					requires: true,
-					downloaded: false,
+					active_installs: true,
 					downloadlink: true,
 					last_updated: true,
-					homepage: true,
-					theme_url: true,
-					parent: true,
-					tags: true,
-					rating: true,
 					ratings: true,
-					num_ratings: true,
-					extended_author: true,
 					photon_screenshots: true,
-					active_installs: true,
-					requires_php: true,
-					is_commercial: true,
-					is_community: true,
-				}
+					tags: true,
+					theme_url: true,
+				},
+				per_page: themes.data.settings.postsPerPage,
+				locale: themes.data.settings.locale
 			}, request);
-
-			// Requests against api.WordPress.org need to be nested.
-			if ( 'api.wordpress.org' === ( new URL(url) ).hostname ) {
-				data = {
-					action: 'query_themes',
-					// Request data
-					request: data
-				};
-			}
 
 			options = {
 				type: 'GET',
 				url: url,
-				jsonp: 'callback',
-				dataType: 'jsonp',
+				dataType: 'json',
 				data: data,
 
 				beforeSend: function() {
+					$('.js-load-more-themes').hide();
+
 					if ( ! paginated ) {
 						// Spin it
 						$( 'body' ).addClass( 'loading-content' ).removeClass( 'no-results' );
@@ -506,7 +487,7 @@ window.wp = window.wp || {};
 			'click .theme-actions .button-secondary': 'preview',
 			'keydown .theme-actions .button-secondary': 'preview',
 			'touchend .theme-actions .button-secondary': 'preview',
-			'click .favorite': 'favourite_toggle',
+			'click .favorite': 'favorite_toggle',
 			// This is provided by a Third Party
 			'click #theme-patterns-grid-js .wporg-screenshot-card': 'preview', 
 			'click .wporg-horizontal-slider-js .wporg-screenshot-card': 'thumbnailPreview', 
@@ -572,7 +553,7 @@ window.wp = window.wp || {};
 			this.renderStyleVariations();
 		},
 
-		favourite_toggle: function() {
+		favorite_toggle: function() {
 			var $heart = this.$el.find( '.favorite' ),
 				favorited = ! $heart.hasClass( 'favorited' ),
 				slug = this.model.get('slug'),
@@ -594,8 +575,10 @@ window.wp = window.wp || {};
 			var options = {
 				type: 'GET',
 				url: themes.data.settings.favorites.api,
-				jsonp: 'callback',
-				dataType: 'jsonp',
+				dataType: 'json',
+				xhrFields: {
+					withCredentials: true
+				},
 				data: {
 					action: favorited ? 'add-favorite' : 'remove-favorite',
 					theme: this.model.get('slug'),
@@ -916,7 +899,9 @@ window.wp = window.wp || {};
 							themes.router.navigate( themes.router.baseUrl( '/' ), args );
 							themes.utils.title( 'home' );
 						} else {
-							themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sorter.data( 'sort' ) ), args );
+							const data = sorter.data() || {};
+							const section = data.sort || data.model; 
+							themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + section ) );
 							themes.utils.title( sorter.text(), 'browse' );
 						}
 					}
@@ -1519,7 +1504,6 @@ window.wp = window.wp || {};
 
 		// Handles Ajax request for searching through themes in public repo
 		search: function( event ) {
-
 			// Tabbing or reverse tabbing into the search input shouldn't trigger a search
 			if ( event.type === 'keyup' && ( event.which === 9 || event.which === 16 ) ) {
 				return;
@@ -1532,10 +1516,10 @@ window.wp = window.wp || {};
 				event.target.value = '';
 			}
 
-			_.debounce( _.bind( this.doSearch, this ), 300 )( event.target.value );
+			this.doSearch.call( this, event.target.value );
 		},
 
-		doSearch: _.debounce( function( value ) {
+		doSearch: function( value ) {
 			var request = {};
 
 			themes.view.Installer.prototype.clearFilters( jQuery.Event( 'click' ) );
@@ -1577,7 +1561,14 @@ window.wp = window.wp || {};
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
 			// or searching the local cache
+			this.runQuery( request );
+		},
+
+		runQuery: _.debounce( function ( request ) {
 			this.collection.query( request );
+
+			// In case we are viewing the single page, close it
+			this.parent.trigger( 'theme:close' );
 		}, 300 )
 	});
 
@@ -1586,7 +1577,7 @@ window.wp = window.wp || {};
 
 		// Register events for sorting and filters in theme-navigation
 		events: {
-			'click .filter-links li > a': 'onSort',
+			'click .filter-links li > a:not(.drawer-toggle)': 'onLinkClick',
 			'click .theme-filter': 'onFilter',
 			'click .drawer-toggle': 'moreFilters',
 			'click .filter-drawer .apply-filters': 'applyFilters',
@@ -1599,14 +1590,12 @@ window.wp = window.wp || {};
 
 		// Overwrite search container class to append search
 		// in new location
-		searchContainer: $( '.wp-filter .search-form' ),
+		searchContainer: $( '.site-branding .search-form' ),
 
 		initialize: function() {
 			themes.view.Appearance.prototype.initialize.apply( this, arguments );
 
-			this.sortValues = $( '.filter-links li > a' ).map( function() {
-				return $( this ).data( 'sort' );
-			} ).get();
+			this.sortValues = [ 'popular', 'new' ];
 		},
 
 		// Initial render method
@@ -1655,6 +1644,7 @@ window.wp = window.wp || {};
 				if ( ! _.isNumber( count ) ) {
 					count = self.collection.count;
 				}
+
 				// Hide the load more button when all themes matching this
 				// collection query are on the page.
 				if ( count <= self.collection.length ) {
@@ -1696,23 +1686,23 @@ window.wp = window.wp || {};
 			if ( 'favorites' === section ) {
 				this.collection.query( {
 					browse: section,
-					user: themes.data.settings.favorites.user
+					user: themes.data.settings.currentUser?.login
 				} );
 			} else {
 				this.collection.query( { browse: section } );
 			}
 		},
 
-		// Sorting navigation
-		onSort: function( event ) {
-			var $el = $( event.target ),
-				sort = $el.data( 'sort' );
+		// Handle clicks on link navigation.
+		onLinkClick: function( event ) {
+			const $el = $( event.target );
+			const data = $el.data() || {};
 
 			event.preventDefault();
 
 			// Special handling for any tags present within the menu, such as full-site-editing.
-			if ( ! sort && $el.data( 'tag' ) ) {
-				themes.router.trigger( 'route:tag', $el.data( 'tag' ) );
+			if ( ! data.sort && data.tag ) {
+				themes.router.trigger( 'route:tag', data.tag );
 				return;
 			}
 
@@ -1723,23 +1713,22 @@ window.wp = window.wp || {};
 				return;
 			}
 
-			this.sort( sort );
+			// Use the sort function for both sort and model queries, as it
+			// also handles resetting fitlers and active classes.
+			const section = data.sort || data.model; 
+			this.sort( section );
 
-			// Trigger a router.navigate update
-			if ( themes.data.settings.browseDefault === sort ) {
+			// Trigger a router.navigate update.
+			if ( themes.data.settings.browseDefault === section ) {
 				themes.router.navigate( themes.router.baseUrl( '/' ) );
 			} else {
-				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sort ) );
+				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + section ) );
 			}
 		},
 
 		sort: function( sort ) {
-			var self = this,
-				sorter = false;
-
-			if ( -1 !== _.indexOf( this.sortValues, sort ) ) {
-				sorter = $( '.filter-links [data-sort="' + sort + '"]');
-			}
+			const self = this;
+			const isSort = ( -1 !== _.indexOf( this.sortValues, sort ) );
 
 			self.clearSearch();
 
@@ -1747,17 +1736,34 @@ window.wp = window.wp || {};
 			_.each( $( '.filter-group' ).find( ':checkbox' ).filter( ':checked' ), function( item ) {
 				$( item ).prop( 'checked', false );
 				return self.filtersChecked();
-			});
+			} );
 
 			$( '.filter-links li > a, .theme-filter' ).removeClass( this.activeClass );
 
-			if ( sorter && sorter.length ) {
-				sorter.addClass( this.activeClass );
+			if ( isSort ) {
+				// Highlight the active tab.
+				const $activeTab = $( '.filter-links li > a[data-sort="' + sort + '"]' );
+				$activeTab.addClass( this.activeClass );
+
+				// Update the page title.
 				if ( themes.data.settings.browseDefault === sort ) {
 					themes.utils.title( 'home' );
 				} else {
-					themes.utils.title( sorter.text(), 'browse' );
+					themes.utils.title( $activeTab.text(), 'browse' );
 				}
+
+				this.browse( sort );
+			} else if ( 'favorites' === sort || 'commercial' === sort || 'community' === sort ) {
+				// Grab the current link. Note, favorites uses a different data attribute.
+				const $link = 'favorites' === sort ?
+					$( '.filter-links li > a[data-sort="' + sort + '"]' ) :
+					$( '.filter-links li > a[data-model="' + sort + '"]' );
+
+				// Highlight the current link.
+				$link.addClass( this.activeClass );
+
+				// Update the page title.
+				themes.utils.title( $link.text(), 'browse' );
 
 				this.browse( sort );
 			} else {
@@ -2078,16 +2084,17 @@ window.wp = window.wp || {};
 	};
 	
 	document.addEventListener( 'submit', event => {
-		event.preventDefault();
-
 		const form = event.target.closest('form');
-		const submitButton = form.querySelector('button[type="submit"]');
-		const successMsg = form.querySelector('.success-msg');
-		const themeSlug = form.closest('.theme-about').dataset.slug;
 
 		if ( ! form || ! ['commercial', 'community'].includes(form.id) ) {
 			return;
 		}
+
+		event.preventDefault();
+
+		const submitButton = form.querySelector('button[type="submit"]');
+		const successMsg = form.querySelector('.success-msg');
+		const themeSlug = form.closest('.theme-about')?.dataset.slug;
 
 		successMsg?.classList.remove( 'saved' );
 

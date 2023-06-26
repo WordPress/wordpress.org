@@ -349,7 +349,7 @@ function get_whitelist() {
 			'Amieiro',
 			'ocean90',
 		),
-		'hosting-community' => array(
+		'hosting' => array(
 			'andrew.taylor', // @ataylorme on Slack
 			'Crixu',
 			'mikeschroder', // @mike on Slack

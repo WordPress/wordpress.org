@@ -58,7 +58,7 @@ class Plugin_Import {
 		if ( $next_timestamp = Manager::get_scheduled_time( $hook, 'next' ) ) {
 			Manager::reschedule_event(
 				$hook,
-				time() + MINUTE_IN_SECONDS,
+				time() + 10,
 				$next_timestamp
 			);
 		}

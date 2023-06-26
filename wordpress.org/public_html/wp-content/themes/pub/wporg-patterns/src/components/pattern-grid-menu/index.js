@@ -8,7 +8,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import ContextBar from '../context-bar';
-import PatternOrderSelect from '../pattern-order-select';
+import PatternSelectControl from '../pattern-select-control';
 import Menu from '../menu';
 import NavigationLayout from '../navigation-layout';
 import { store as patternStore } from '../../store';
@@ -27,7 +27,7 @@ const ALLOWED_CATS = [
 	'wireframe',
 ];
 
-const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
+const PatternGridMenu = ( { basePath = '', onNavigation, hideCuration = false, ...props } ) => {
 	const { path, update: updatePath } = useRoute();
 	const { categorySlug, isLoading, options } = useSelect( ( select ) => {
 		const { getCategoryById, getCategories, getQueryFromUrl, getUrlFromQuery, isLoadingCategories } =
@@ -76,12 +76,28 @@ const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 					/>
 				}
 				secondary={
-					<PatternOrderSelect
-						options={ [
-							{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
-							{ label: __( 'Popular', 'wporg-patterns' ), value: 'favorite_count' },
-						] }
-					/>
+					<>
+						{ hideCuration ? null : (
+							<PatternSelectControl
+								label={ __( 'Filter by', 'wporg-patterns' ) }
+								param="curation"
+								defaultValue="core"
+								options={ [
+									{ label: __( 'Curated', 'wporg-patterns' ), value: 'core' },
+									{ label: __( 'Community', 'wporg-patterns' ), value: 'community' },
+								] }
+							/>
+						) }
+						<PatternSelectControl
+							label={ __( 'Order by', 'wporg-patterns' ) }
+							param="orderby"
+							defaultValue="date"
+							options={ [
+								{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
+								{ label: __( 'Popular', 'wporg-patterns' ), value: 'favorite_count' },
+							] }
+						/>
+					</>
 				}
 			/>
 			<ContextBar { ...props } />

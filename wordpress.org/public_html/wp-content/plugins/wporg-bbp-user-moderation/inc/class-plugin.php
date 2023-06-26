@@ -26,6 +26,11 @@ class Plugin {
 	const MODERATION_DATE_META = '_wporg_bbp_moderation_date';
 
 	/**
+	 * @var array Array of user id's and their most recent posting history.
+	 */
+	private $user_history = array();
+
+	/**
 	 * Always return the same instance of this plugin.
 	 *
 	 * @return Plugin
@@ -339,5 +344,48 @@ class Plugin {
 		}
 
 		return $caps;
+	}
+
+	/**
+	 * Return recent posting history for a given user id.
+	 *
+	 * Returns the last archived post, and the number of pending and approved posts since the
+	 * last archived posts original publication date.
+	 *
+	 * @param int $user_id User id to look up.
+	 * @return array
+	 */
+	function get_user_posting_history( $user_id ) {
+		global $wpdb;
+
+		if ( ! isset( $this->user_history[ $user_id ] ) ) {
+			$details = [
+				'posts_since_archive' => array(),
+				'pending_posts'       => array(),
+				'last_archived_post'  => get_posts( array(
+					'post_type'      => [ 'topic', 'reply' ],
+					'posts_per_page' => 1,
+					'post_status'    => 'archived',
+					'author'         => $user_id,
+				) ),
+			];
+
+			if ( $details['last_archived_post'] ) {
+				$details['posts_since_archive'] = $wpdb->get_var( $wpdb->prepare(
+					"SELECT COUNT(DISTINCT `ID`) FROM {$wpdb->posts} WHERE ( `post_type` = 'topic' OR `post_type` = 'reply') AND `post_status` = 'publish' AND `post_author` = %d AND `post_date_gmt` >= %s",
+					$user_id,
+					$details['last_archived_post'][0]->post_modified_gmt
+				) );
+
+				$details['pending_posts'] = $wpdb->get_var( $wpdb->prepare(
+					"SELECT COUNT(DISTINCT `ID`) FROM {$wpdb->posts} WHERE ( `post_type` = 'topic' OR `post_type` = 'reply') AND `post_status` = 'pending' AND `post_author` = %d",
+					$user_id
+				) );
+			}
+
+			$this->user_history[ $user_id ] = $details;
+		}
+
+		return $this->user_history[ $user_id ];
 	}
 }

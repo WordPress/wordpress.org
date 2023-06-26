@@ -81,6 +81,17 @@ class WPorg_GlotPress_Customizations {
 					return __( 'GTEs/PTEs/CLPTEs Involved' );
 				}
 			);
+			add_filter(
+				'gp_get_openai_key',
+				function () {
+					$default_sort = get_user_option( 'gp_default_sort' );
+					if ( is_array( $default_sort ) && ! empty( $default_sort['openai_api_key'] ) ) {
+						$gp_openai_key = $default_sort['openai_api_key'];
+						return $gp_openai_key;
+					}
+					return;
+				}
+			);
 		}
 	}
 }

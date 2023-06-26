@@ -879,7 +879,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			if ( is_array( $value ) ) {
 				$value = implode( ', ', $value );
 			}
-			if ( ! $value ) {
+			if ( ! $value || 'Array' === $value ) {
 				continue;
 			}
 

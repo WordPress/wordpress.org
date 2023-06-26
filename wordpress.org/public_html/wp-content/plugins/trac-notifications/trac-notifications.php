@@ -100,6 +100,7 @@ class wporg_trac_notifications {
 				'privacy',
 				'rest-api',
 				'rtl',
+				'sustainability',
 				'template',
 				'ui',
 				'ui-copy',
