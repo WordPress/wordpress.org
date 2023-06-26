@@ -2,8 +2,6 @@
 ( function( $ ){
 	var $html = $( 'html' );
 	var $document = $( document );
-	var $openAITranslationsUsed = [];
-	var $deeplTranslationsUsed = [];
 
 	function checkStorage() {
 		var test = 'test',
@@ -72,53 +70,6 @@
 		autosize( $textarea );
 	}
 
-	/**
-	 * Adds the suggestion to the translation in an array, and removes the previous suggestions, so
-	 * we only store the last one in the database, using the saveExternalSuggestions() function.
-	 *
-	 * @return {void}
-	 */
-	function addSuggestion() {
-		var $row = $( this );
-		if ( ! $row ) {
-			return;
-		}
-		var $originalId = $row.closest( 'tr' ).attr( 'id' ).substring( 7 );
-		var $CSSclass = $row.attr( 'class' );
-		if ( $CSSclass.indexOf( 'openai' ) > -1 ) {
-			$openAITranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
-			delete $deeplTranslationsUsed[ $originalId ];
-		} else if ( $CSSclass.indexOf( 'deepl' ) > -1 ) {
-			$deeplTranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
-			delete $openAITranslationsUsed[ $originalId ];
-		}
-	}
-
-	/**
-	 * Saves the number of external suggestions used and used without modification.
-	 *
-	 * @return {void}
-	 **/
-	function saveExternalSuggestions() {
-		var $button = $( this );
-		var $row = $button.closest( 'tr.editor' );
-		var $originalId = $row.attr( 'id' ).substring( 7 );
-		if ( ! $openAITranslationsUsed[$originalId] && ! $deeplTranslationsUsed[$originalId] ) {
-			return;
-		}
-		var $translation = $row.find( 'textarea' ).val();
-		var $data = {
-			nonce: wporgEditorSettings.nonce,
-			translation: $translation,
-			openAITranslationsUsed: $openAITranslationsUsed[$originalId],
-			deeplTranslationsUsed: $deeplTranslationsUsed[$originalId]
-		};
-		$.ajax({
-			url: '/-save-external-suggestions',
-			type: 'POST',
-			data: $data,
-		});
-	}
 
 	// Convert object to query params.
 	function convertObjectToQueryParam( object ) {
@@ -137,14 +88,6 @@
 
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
 			data.translation_source = 'frontend';
-			if ( $openAITranslationsUsed[ data.original_id ] ) {
-				data.translation_source = 'openai';
-				$openAITranslationsUsed.splice( [ data.original_id ] );
-			} 
-			if ( $deeplTranslationsUsed[ data.original_id ] ) {
-				data.translation_source = 'deepl';
-				$deeplTranslationsUsed.splice( [ data.original_id ] );
-			}
 			options.data = convertObjectToQueryParam( data );
 		}
 	});
