@@ -299,6 +299,7 @@ class Plugin {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				$source                           = 'import';
 				$this->imported_translation_ids[] = $translation->id;
+				return;
 			}
 			if ( 'translations_post' === GP::$current_route->last_method_called ) {
 				if ( isset( $_POST['translation_source'] ) ) {
