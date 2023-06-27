@@ -67,6 +67,7 @@ class Plugin {
 		add_action( 'gp_translation_created', array( $this, 'auto_reject_replaced_suggestions' ) );
 		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
 		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
+		add_action( 'gp_translations_imported', array( $this, 'log_imported_translations' ) );
 
 		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
 
@@ -384,6 +385,24 @@ class Plugin {
 		$sql       .= implode( ', ', $sql_values );
 		$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
 
+	}
+
+	/**
+	 * Logs imported translations.
+	 *
+	 * @return void
+	 */
+	public function log_imported_translations() {
+		global $wpdb;
+		foreach ( $this->imported_translation_ids as $translation_id ) {
+			$result = $wpdb->insert(
+				'translate_meta',
+				array(
+					'meta_key'   => $translation_id,
+					'meta_value' => 'import',
+				)
+			);
+		}
 	}
 
 	/**
