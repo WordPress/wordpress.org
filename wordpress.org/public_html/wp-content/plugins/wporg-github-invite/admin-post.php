@@ -85,7 +85,7 @@ add_action( 'admin_post_github_invite', function() {
 
 			$log = sprintf(
 				'`%s` invited to organisation by `%s` to team(s) `%s`',
-				$result->login ?: $result->email,
+				$github_username ?: $invite,
 				wp_get_current_user()->user_login,
 				implode( ', ', $readable_teams )
 			);
