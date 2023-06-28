@@ -82,6 +82,34 @@ function invite_member( $who, array $team_ids ) {
 }
 
 /**
+ * Add an organisation member to a team.
+ *
+ * @param int|string $who      The GitHub user login.
+ * @param array      $team_ids The team IDs to add the user to.
+ */
+function add_to_team( $who, array $team_ids ) {
+	$error = new WP_Error;
+
+	foreach ( $team_ids as $team_id ) {
+		$response = api(
+			"/orgs/{ORG}/team/{$team_id}/memberships/{$who}",
+			false,
+			'PUT'
+		);
+
+		if ( is_wp_error( $response ) ) {
+			$error->merge_from( $response );
+		}
+	}
+
+	if ( $error->get_error_code() ) {
+		return $error;
+	}
+
+	return $response;
+}
+
+/**
  * Cancel an invitation by ID
  */
 function cancel_invite( $id ) {
@@ -91,7 +119,6 @@ function cancel_invite( $id ) {
 		'DELETE'
 	);
 }
-
 
 /**
  * Quick GitHub API method.

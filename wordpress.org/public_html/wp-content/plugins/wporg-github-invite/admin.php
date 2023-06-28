@@ -79,7 +79,7 @@ function render() {
 		<?php wp_nonce_field( 'github_invite' ); ?>
 		<table class="form-table">
 			<tr>
-				<th scope="row"><label for="invite">GitHub Email, WordPress.org user slug, or WordPress.org Profile URL</label></th>
+				<th scope="row"><label for="invite">GitHub Email, GitHub URL, WordPress.org user slug, or WordPress.org Profile URL</label></th>
 				<td><input type="text" name="invite" id="invite" class="regular-text" placeholder="https://profiles.wordpress.org/<?php echo wp_get_current_user()->user_nicename; ?>/"></td>
 			</tr>
 			<tr>
