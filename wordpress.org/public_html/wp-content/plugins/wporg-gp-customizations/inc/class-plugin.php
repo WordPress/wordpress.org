@@ -297,8 +297,9 @@ class Plugin {
 		$source = '';
 		if ( 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
-				$source                           = 'import';
+				$http_referer                     = stripslashes( $_POST['_wp_http_referer'] );
 				$this->imported_translation_ids[] = $translation->id;
+				$source                           = preg_match( '/^\.\.\/\?sort/', $http_referer ) ? 'import_from_playground' : 'import_from_frontend';
 				return;
 			}
 			if ( 'translations_post' === GP::$current_route->last_method_called ) {
