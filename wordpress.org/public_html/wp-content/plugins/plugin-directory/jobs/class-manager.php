@@ -24,6 +24,7 @@ class Manager {
 		add_action( 'plugin_directory_update_api_check', array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger' ) );
 		add_action( 'plugin_directory_translation_sync', array( __NAMESPACE__ . '\Translation_Sync', 'cron_trigger' ) );
 		add_action( 'plugin_directory_zip_cleanup', array( __NAMESPACE__ . '\Zip_Cleanup', 'cron_trigger' ) );
+		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
@@ -261,6 +262,9 @@ class Manager {
 		}
 		if ( ! wp_next_scheduled ( 'plugin_directory_zip_cleanup' ) ) {
 			wp_schedule_event( time() + 60, 'daily', 'plugin_directory_zip_cleanup' );
+		}
+		if ( ! wp_next_scheduled ( 'plugin_directory_daily_post_checks' ) ) {
+			wp_schedule_event( time() + 60, 'daily', 'plugin_directory_daily_post_checks' );
 		}
 
 		// Check to see if `WP_CORE_LATEST_RELEASE` has changed since we last ran.
