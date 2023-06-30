@@ -307,14 +307,14 @@ class Plugin {
 				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
 					$this->imported_source = 'playground';
 				} elseif ( ! isset( $_POST['source'] ) && 'Import' == $_POST['submit'] ) {
-					$this->imported_source = 'frontend';
+					$this->imported_source = 'import';
 				} else {
 					return;
 				}
 			}
 			if ( 'translations_post' === GP::$current_route->last_method_called ) {
-				if ( isset( $_POST['translation_source'] ) ) {
-					$source = sanitize_text_field( $_POST['translation_source'] );
+				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
+					$source = 'frontend';
 				}
 			}
 		}
