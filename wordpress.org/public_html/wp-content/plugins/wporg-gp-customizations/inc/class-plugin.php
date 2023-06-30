@@ -400,13 +400,13 @@ class Plugin {
 		global $wpdb;
 		$source = $this->imported_source;
 
-		$sql = 'INSERT INTO ' . $wpdb->gp_meta . ' (meta_key, meta_value) VALUES ';
+		$sql = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
 		$sql_vars = array();
 		$sql_values = array_map(
-			function( $value ) use ( $source, $sql_vars ) {
-				$sql_vars[] = $value;
+			function( $translation_id ) use ( $source, $sql_vars ) {
+				$sql_vars[] = $translation_id;
 				$sql_vars[] = $source;
-				return '( %d, %s )';
+				return '( "translation", %d, "source", %s )';
 			},
 			$this->imported_translation_ids
 		);
