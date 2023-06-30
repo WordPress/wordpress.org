@@ -25,6 +25,10 @@ class Plugin {
 	 * @var string The source of translations that have been imported.
 	 */
 	private string $imported_source;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 23d0f9a17 (Generate sql statement and insert in database.)
 
 	/**
 	 * Returns always the same instance of this plugin.
@@ -394,15 +398,19 @@ class Plugin {
 	 */
 	public function log_imported_translations() {
 		global $wpdb;
-		foreach ( $this->imported_translation_ids as $translation_id ) {
-			$result = $wpdb->insert(
-				'translate_meta',
-				array(
-					'meta_key'   => $translation_id,
-					'meta_value' => 'import',
-				)
-			);
-		}
+		$source = $this->imported_source;
+
+		$sql = 'INSERT INTO ' . $wpdb->gp_meta . ' (meta_key, meta_value) VALUES ';
+
+		$sql_values = array_map(
+			function( $value ) use ( $source ) {
+				return "($value, '$source')";
+			},
+			$this->imported_translation_ids
+		);
+		$sql       .= implode( ', ', $sql_values );
+		$wpdb->query( $sql );
+
 	}
 
 	/**
