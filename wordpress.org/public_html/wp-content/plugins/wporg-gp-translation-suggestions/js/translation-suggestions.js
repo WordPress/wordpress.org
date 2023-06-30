@@ -486,18 +486,18 @@
 		return params.toString();
 	}
 
-	// Prefilter ajax requests to add translation_source to the request.
+	// Prefilter ajax requests to add translation_assist to the request.
 	$.ajaxPrefilter( function ( options ) {
 		let data = Object.fromEntries( new URLSearchParams( options.data ) );
 
-		if ( 'POST' === options.type && $gp_editor_options.url === options.url && ! data.translation_source ) {
+		if ( 'POST' === options.type && $gp_editor_options.url === options.url && ! data.translation_assist ) {
 
 			if ( $openAITranslationsUsed[ data.original_id ] ) {
-				data.translation_source = 'openai';
+				data.translation_assist = 'openai';
 				$openAITranslationsUsed.splice( [ data.original_id ] );
 			} 
 			if ( $deeplTranslationsUsed[ data.original_id ] ) {
-				data.translation_source = 'deepl';
+				data.translation_assist = 'deepl';
 				$deeplTranslationsUsed.splice( [ data.original_id ] );
 			}
 			options.data = convertObjectToQueryParam( data );
