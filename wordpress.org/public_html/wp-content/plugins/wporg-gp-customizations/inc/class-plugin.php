@@ -316,7 +316,7 @@ class Plugin {
 		if ( ! $source ) {
 			return;
 		}
-		gp_update_meta( 0, $translation->id, $source, 'gp_option' );
+		gp_update_meta( $translation->id, 'source', $source, 'translation' );
 	}
 
 	/**
