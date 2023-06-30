@@ -21,6 +21,11 @@ class Plugin {
 	 */
 	private array $imported_translation_ids = array();
 
+	/**
+	 * @var string The source of translations that have been imported.
+	 */
+	private string $imported_source;
+
 
 	/**
 	 * Returns always the same instance of this plugin.
@@ -299,7 +304,7 @@ class Plugin {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				$http_referer                     = stripslashes( $_POST['_wp_http_referer'] );
 				$this->imported_translation_ids[] = $translation->id;
-				$source                           = preg_match( '/^\.\.\/\?sort/', $http_referer ) ? 'import_from_playground' : 'import_from_frontend';
+				$this->imported_source            = preg_match( '/^\.\.\/\?sort/', $http_referer ) ? 'import_from_playground' : 'import_from_frontend';
 				return;
 			}
 			if ( 'translations_post' === GP::$current_route->last_method_called ) {
@@ -321,15 +326,19 @@ class Plugin {
 	 */
 	public function log_imported_translations() {
 		global $wpdb;
-		foreach ( $this->imported_translation_ids as $translation_id ) {
-			$result = $wpdb->insert(
-				'translate_meta',
-				array(
-					'meta_key'   => $translation_id,
-					'meta_value' => 'import',
-				)
-			);
-		}
+		$source = $this->imported_source;
+
+		$sql = 'INSERT INTO ' . $wpdb->gp_meta . ' (meta_key, meta_value) VALUES ';
+
+		$sql_values = array_map(
+			function( $value ) use ( $source ) {
+				return "($value, '$source')";
+			},
+			$this->imported_translation_ids
+		);
+		$sql       .= implode( ', ', $sql_values );
+		$wpdb->query( $sql );
+
 	}
 
 	/**
