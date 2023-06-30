@@ -392,28 +392,6 @@ class Plugin {
 	}
 
 	/**
-	 * Logs imported translations.
-	 *
-	 * @return void
-	 */
-	public function log_imported_translations() {
-		global $wpdb;
-		$source = $this->imported_source;
-
-		$sql = 'INSERT INTO ' . $wpdb->gp_meta . ' (meta_key, meta_value) VALUES ';
-
-		$sql_values = array_map(
-			function( $value ) use ( $source ) {
-				return "($value, '$source')";
-			},
-			$this->imported_translation_ids
-		);
-		$sql       .= implode( ', ', $sql_values );
-		$wpdb->query( $sql );
-
-	}
-
-	/**
 	 * Auto-Rejects a translators submissions when the translator submits a replacement suggestion.
 	 *
 	 * @see https://github.com/GlotPress/GlotPress-WP/issues/889
