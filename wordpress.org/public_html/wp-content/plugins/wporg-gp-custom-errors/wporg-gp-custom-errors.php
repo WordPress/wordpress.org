@@ -65,7 +65,7 @@ class WPorg_GP_Custom_Translation_Errors {
 		if ( is_null( $gp_original->context ) ) {
 			return true;
 		}
-		if ( ! str_contains( $gp_original->context, 'default GMT offset or timezone string' ) ) {
+		if ( strpos( $gp_original->context, 'default GMT offset or timezone string' ) === false ) {
 			return true;
 		}
 		$spaces_present = $translation !== trim( $translation );
@@ -103,7 +103,7 @@ class WPorg_GP_Custom_Translation_Errors {
 		if ( is_null( $gp_original->context ) ) {
 			return true;
 		}
-		if ( ! str_contains( $gp_original->context, 'start of week' ) ) {
+		if ( strpos( $gp_original->context, 'start of week' ) === false ) {
 			return true;
 		}
 		$spaces_present = $translation !== trim( $translation );
@@ -133,10 +133,10 @@ class WPorg_GP_Custom_Translation_Errors {
 		if ( is_null( $gp_original->context ) ) {
 			return true;
 		}
-		if ( ! (
-			str_contains( $gp_original->context, 'Default post slug' ) ||
-			str_contains( $gp_original->context, 'sample permalink structure' )
-		) ) {
+		if (
+			strpos( $gp_original->context, 'Default post slug' ) === false &&
+			strpos( $gp_original->context, 'sample permalink structure' ) === false
+		) {
 			return true;
 		}
 		$spaces_present = $translation !== trim( $translation );
