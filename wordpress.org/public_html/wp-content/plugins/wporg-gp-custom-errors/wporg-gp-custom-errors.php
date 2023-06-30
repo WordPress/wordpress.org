@@ -38,8 +38,6 @@ class WPorg_GP_Custom_Translation_Errors {
 	 * @return bool
 	 */
 	public function is_core_project( GP_Original $gp_original ): bool {
-		// todo: change it.
-		return true;
 		$project = GP::$project->get( $gp_original->project_id );
 
 		if ( self::WORPRESS_CORE_PROJECT_ID == $project->parent_project_id ) {
