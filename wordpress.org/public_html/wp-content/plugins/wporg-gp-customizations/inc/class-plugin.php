@@ -302,10 +302,15 @@ class Plugin {
 		$source = '';
 		if ( 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
-				$http_referer                     = stripslashes( $_POST['_wp_http_referer'] );
 				$this->imported_translation_ids[] = $translation->id;
-				$this->imported_source            = preg_match( '/^\.\.\/\?sort/', $http_referer ) ? 'import_from_playground' : 'import_from_frontend';
-				return;
+				$source                           = $_POST['source'];
+				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
+					$this->imported_source = 'playground';
+				} elseif ( ! isset( $_POST['source'] ) && 'Import' == $_POST['submit'] ) {
+					$this->imported_source = 'frontend';
+				} else {
+					return;
+				}
 			}
 			if ( 'translations_post' === GP::$current_route->last_method_called ) {
 				if ( isset( $_POST['translation_source'] ) ) {
@@ -328,8 +333,8 @@ class Plugin {
 		global $wpdb;
 		$source = $this->imported_source;
 
-		$sql = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
-		$sql_vars = array();
+		$sql        = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
+		$sql_vars   = array();
 		$sql_values = array_map(
 			function( $translation_id ) use ( $source, $sql_vars ) {
 				$sql_vars[] = $translation_id;
