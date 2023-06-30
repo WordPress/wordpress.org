@@ -337,7 +337,7 @@ class Plugin {
 		$sql        = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
 		$sql_vars   = array();
 		$sql_values = array_map(
-			function( $translation_id ) use ( $source, $sql_vars ) {
+			function( $translation_id ) use ( $source, &$sql_vars ) {
 				$sql_vars[] = $translation_id;
 				$sql_vars[] = $source;
 				return '( "translation", %d, "source", %s )';
