@@ -401,15 +401,17 @@ class Plugin {
 		$source = $this->imported_source;
 
 		$sql = 'INSERT INTO ' . $wpdb->gp_meta . ' (meta_key, meta_value) VALUES ';
-
+		$sql_vars = array();
 		$sql_values = array_map(
-			function( $value ) use ( $source ) {
-				return "($value, '$source')";
+			function( $value ) use ( $source, $sql_vars ) {
+				$sql_vars[] = $value;
+				$sql_vars[] = $source;
+				return '( %d, %s )';
 			},
 			$this->imported_translation_ids
 		);
 		$sql       .= implode( ', ', $sql_values );
-		$wpdb->query( $sql );
+		$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
 
 	}
 
