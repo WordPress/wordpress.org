@@ -303,7 +303,7 @@ class Plugin {
 		if ( 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				$this->imported_translation_ids[] = $translation->id;
-				$source                           = $_POST['source'];
+
 				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
 					$this->imported_source = 'playground';
 				} elseif ( ! isset( $_POST['source'] ) && 'Import' == $_POST['submit'] ) {
@@ -318,10 +318,9 @@ class Plugin {
 				}
 			}
 		}
-		if ( ! $source ) {
-			return;
+		if ( $source ) {
+			gp_update_meta( $translation->id, 'source', $source, 'translation' );
 		}
-		gp_update_meta( $translation->id, 'source', $source, 'translation' );
 	}
 
 	/**
@@ -332,7 +331,9 @@ class Plugin {
 	public function log_imported_translations() {
 		global $wpdb;
 		$source = $this->imported_source;
-
+		if ( ! $source && ! $this->imported_translation_ids ) {
+			return;
+		}
 		$sql        = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
 		$sql_vars   = array();
 		$sql_values = array_map(
