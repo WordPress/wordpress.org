@@ -199,6 +199,11 @@ function wporg_get_pending_user( $login_or_email ) {
 		return $login_or_email;
 	}
 
+	$login_or_email = trim( $login_or_email );
+	if ( ! $login_or_email ) {
+		return false;
+	}
+
 	$pending_user = $wpdb->get_row( $wpdb->prepare(
 		"SELECT * FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE ( `user_login` = %s OR `user_email` = %s ) LIMIT 1",
 		$login_or_email,
