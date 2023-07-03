@@ -236,6 +236,9 @@ class Moderation {
 		&&
 			// Post is in a non-published status that is still associated with a photo.
 			in_array( $post->post_status, [ 'draft', 'pending', 'private', Flagged::get_post_status() ] )
+		&&
+			// Post hasn't been unflagged.
+			! Flagged::was_unflagged( $post )
 		) {
 			$flags = Photo::get_filtered_moderation_assessment( $post->ID );
 
