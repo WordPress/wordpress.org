@@ -1000,6 +1000,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *
 	 * This only applies for unpublished photos that also meet one of these
 	 * criteria:
+	 * - Post status is 'flagged'
 	 * - Flagged by Vision as being "possible" or more likely in any criteria category
 	 *
 	 * @param int|WP_Post|null Optional. The post or attachment. Default null,
@@ -1018,9 +1019,16 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			return false;
 		}
 
+		$post_status = get_post_status( $post );
+
 		// Not controversial if it has been published.
-		if ( 'publish' === get_post_status( $post ) ) {
+		if ( 'publish' === $post_status ) {
 			return false;
+		}
+
+		// Controversial if photo is outright flagged.
+		if ( Flagged::get_post_status() === $post_status ) {
+			return true;
 		}
 
 		// Controversial if photo got flagged as 'possible' or more likely by Vision.
