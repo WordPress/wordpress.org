@@ -234,8 +234,8 @@ class Moderation {
 			// Post is a photo post type.
 			get_post_type( $post ) === Registrations::get_post_type()
 		&&
-			// Post is pending.
-			'pending' === $post->post_status
+			// Post is in a non-published status that is still associated with a photo.
+			in_array( $post->post_status, [ 'draft', 'pending', 'private', Flagged::get_post_status() ] )
 		) {
 			$flags = Photo::get_filtered_moderation_assessment( $post->ID );
 
