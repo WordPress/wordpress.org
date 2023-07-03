@@ -10,6 +10,20 @@ namespace WordPressdotorg\Photo_Directory;
 class Flagged {
 
 	/**
+	 * The meta key name for recording the user ID of the user who unflagged a photo.
+	 *
+	 * @var string
+	 */
+	const META_KEY_UNFLAGGER = 'photo_unflagger';
+
+	/**
+	 * The meta key name for recording the user ID of the user who flagged a photo.
+	 *
+	 * @var string
+	 */
+	const META_KEY_FLAGGER = 'photo_flagger';
+
+	/**
 	 * Initializer.
 	 */
 	public static function init() {
@@ -41,6 +55,11 @@ class Flagged {
 
 		// Allow Photo metabox to be shown for flagged photos.
 		add_filter( 'wporg_photos_post_statuses_with_photo', [ __CLASS__, 'amend_with_post_status' ] );
+
+		// Record the fact that a flagged photo was unflagged.
+		$flagged_status = self::get_post_status();
+		add_action( "{$flagged_status}_to_pending",          [ __CLASS__, 'record_unflagging' ], 10, 3 );
+		add_action( "pending_to_{$flagged_status}",          [ __CLASS__, 'record_flagging' ], 10, 3 );
 	}
 
 	/**
@@ -335,6 +354,82 @@ class Flagged {
 			}, false);
 		</script>
 		<?php
+	}
+
+	/**
+	 * Determines if a photo post was unflagged.
+	 *
+	 * @param int|WP_Post $post Post object.
+	 * @return bool True if the post was unflagged, else false.
+	 */
+	public static function was_unflagged( $post ) {
+		return (bool) self::get_unflagger( $post );
+	}
+
+	/**
+	 * Records the ID of the user who unflagged a post.
+	 *
+	 * @param int|WP_Post $post Post object.
+	 * @return int|false The ID of the user who unflagged the post, else false.
+	 */
+	public static function get_unflagger( $post ) {
+		$user_id = false;
+		$post = get_post( $post );
+		if ( $post ) {
+			$user_id = get_post_meta( $post->ID, self::META_KEY_UNFLAGGER, true ) ?? false;
+		}
+		return $user_id;
+	}
+
+	/**
+	 * Records the ID of the user who unflagged a post.
+	 *
+	 * @param int|WP_Post $post Post object.
+	 */
+	public static function record_unflagging( $post ) {
+		if ( Registrations::get_post_type() === get_post_type( $post ) ) {
+			update_post_meta( $post->ID, self::META_KEY_UNFLAGGER, get_current_user_id() );
+		}
+	}
+
+	/**
+	 * Determines if a photo post was manually flagged.
+	 *
+	 * Note: A post may have been automatically flagged based on the Vision API
+	 * analysis, for which this function would return false since no actual user
+	 * flagged the post. Simply check the post's post status to see if it flagged.
+	 *
+	 * @param int|WP_Post $post Post object.
+	 * @return bool True if the post was unflagged, else false.
+	 */
+	public static function was_flagged( $post ) {
+		return (bool) self::get_flagger( $post );
+	}
+
+	/**
+	 * Records the ID of the user who flagged a post.
+	 *
+	 * @param int|WP_Post $post Post object.
+	 * @return int|false The ID of the user who unflagged the post, else false.
+	 */
+	public static function get_flagger( $post ) {
+		$user_id = false;
+		$post = get_post( $post );
+		if ( $post ) {
+			$user_id = get_post_meta( $post->ID, self::META_KEY_FLAGGER, true ) ?? false;
+		}
+		return $user_id;
+	}
+
+	/**
+	 * Records the ID of the user who flagged a post.
+	 *
+	 * @param int|WP_Post $post Post object.
+	 */
+	public static function record_flagging( $post ) {
+		if ( Registrations::get_post_type() === get_post_type( $post ) ) {
+			update_post_meta( $post->ID, self::META_KEY_FLAGGER, get_current_user_id() );
+		}
 	}
 
 }
