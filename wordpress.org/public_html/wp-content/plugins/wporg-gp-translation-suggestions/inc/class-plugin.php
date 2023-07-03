@@ -4,6 +4,7 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions;
 
 use GP;
 use GP_Locales;
+use WordPressdotorg\GlotPress\TranslationSuggestions\Routes\Translation_Memory;
 
 class Plugin {
 
@@ -55,6 +56,7 @@ class Plugin {
 		}
 
 		add_action( self::TM_UPDATE_EVENT, array( Translation_Memory_Client::class, 'update' ) );
+		add_action( 'gp_translation_created', array( $this, 'update_external_translations' ) );
 	}
 
 	/**
@@ -100,7 +102,6 @@ class Plugin {
 		GP::$router->prepend( "/$set/-get-other-language-suggestions", array( __NAMESPACE__ . '\Routes\Other_Languages', 'get_suggestions' ) );
 		GP::$router->prepend( "/$set/-get-tm-openai-suggestions", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'get_openai_suggestions' ) );
 		GP::$router->prepend( "/$set/-get-tm-deepl-suggestions", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'get_deepl_suggestions' ) );
-		GP::$router->prepend( '/-save-external-suggestions', array( __NAMESPACE__ . '\Routes\Translation_Memory', 'update_external_translations' ), 'post' );
 	}
 
 	/**
@@ -186,5 +187,35 @@ class Plugin {
 			<p class="suggestions__loading-indicator">Loading <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>
 		</details>
 		<?php
+	}
+
+	/**
+	 * Update the number of external translations used.
+	 *
+	 * @param object $translation Created translation.
+	 */
+	public function update_external_translations( $translation ) {
+		if ( 'GP_Route_Translation' === GP::$current_route->class_name ) {
+			if ( 'translations_post' === GP::$current_route->last_method_called ) {
+				if ( isset( $_POST['openAITranslationsUsed'] ) ) {
+					Translation_Memory::update_one_external_translation(
+						$translation->translation_0,
+						$_POST['openAITranslationsUsed'],
+						'openai_translations_used',
+						'openai_same_translations_used',
+						'openai',
+					);
+				}
+				if ( isset( $_POST['deeplTranslationsUsed'] ) ) {
+					Translation_Memory::update_one_external_translation(
+						$translation->translation_0,
+						$_POST['deeplTranslationsUsed'],
+						'deepl_translations_used',
+						'deepl_same_translations_used',
+						'deepl',
+					);
+				}
+			}
+		}
 	}
 }
