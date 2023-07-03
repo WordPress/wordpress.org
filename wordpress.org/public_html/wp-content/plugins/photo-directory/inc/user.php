@@ -119,6 +119,30 @@ class User {
 	}
 
 	/**
+	 * Returns a count of flagged photos for a user.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes global
+	 *                     author. Default false.
+	 * @return int
+	 */
+	public static function count_flagged_photos( $user_id = false ) {
+		global $wpdb;
+
+		if (  ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		return (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s AND post_author = %d",
+			Registrations::get_post_type(),
+			Flagged::get_post_status(),
+			$user_id
+		) );
+	}
+
+	/**
 	 * Determines if a user is eligible to toggle all confirmation checkboxes on
 	 * the photo upload form.
 	 *
