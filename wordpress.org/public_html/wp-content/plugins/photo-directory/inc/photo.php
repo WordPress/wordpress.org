@@ -399,6 +399,18 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	}
 
 	/**
+	 * Returns an array of post statuses for which a photo can be associated.
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_post_statuses_with_photo() {
+		return (array) apply_filters(
+			'wporg_photos_post_statuses_with_photo',
+			[ 'draft', 'inherit', 'pending', 'private', 'publish' ]
+		);
+	}
+
+	/**
 	 * Determines if the provided MD5 hash of a photo is already known, implying
 	 * it is a duplicate.
 	 *
