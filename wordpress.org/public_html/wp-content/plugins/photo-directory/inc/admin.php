@@ -550,8 +550,8 @@ class Admin {
 		}
 
 		// Show number of rejected photos.
-		$rejections = Rejection::get_user_rejections( $authordata->ID );
-		if ( $rejections ) {
+		$rejection_count = User::count_rejected_photos( $authordata->ID );
+		if ( $rejection_count ) {
 			$rejected_link = add_query_arg( [
 				'post_type'   => Registrations::get_post_type(),
 				'post_status' => Rejection::get_post_status(),
@@ -560,8 +560,8 @@ class Admin {
 			$display_name .= '<div class="user-rejected-count">'
 				. sprintf(
 					/* translators: %s: Count of user rejections linked to listing of their rejections. */
-					__( 'Rejected: <strong>%s</strong>', 'wporg-photos' ),
-					sprintf( '<a href="%s">%d</a>', $rejected_link, count( $rejections ) )
+					_n( 'Rejected: <strong>%s</strong>', 'Rejected: <strong>%s</strong>', $rejection_count, 'wporg-photos' ),
+					sprintf( '<a href="%s">%d</a>', $rejected_link, $rejection_count )
 				)
 				. "</div>\n";
 		}
