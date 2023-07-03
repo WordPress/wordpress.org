@@ -373,7 +373,7 @@ body.login form input.input:invalid + span.invalid-message {
 }
 
 body.login form input.error,
-body.login form input:invalid {
+body.login form input[pattern]:invalid {
 	background-color: #fbeaea;
 	border: 2px solid #dc3232;
 }
