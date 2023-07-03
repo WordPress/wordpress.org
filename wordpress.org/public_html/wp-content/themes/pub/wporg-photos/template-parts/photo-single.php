@@ -10,6 +10,7 @@
 namespace WordPressdotorg\Photo_Directory\Theme;
 use WordPressdotorg\Photo_Directory\Template_Tags;
 
+$photo_id = get_post_thumbnail_id();
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -31,12 +32,20 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 					'2048x2048'    => [ 'label' => __( 'Large %s', 'wporg-photos' ) ],
 					'full'         => [ 'label' => __( 'Original Size %s', 'wporg-photos' ) ],
 				];
+
+				$photo_meta = wp_get_attachment_metadata( $photo_id );
 				foreach ( array_keys( $photo_sizes ) as $size ) {
-					$src = wp_get_attachment_image_src( get_post_thumbnail_id(), $size );
+					$src = wp_get_attachment_image_src( $photo_id, $size );
+					if ( 'full' === $size ) {
+						$filesize = $photo_meta['filesize'] ?? '';
+					} else {
+						$filesize = $photo_meta['sizes'][ $size ]['filesize'] ?? '';
+					}
 					$photo_sizes[ $size ] = array_merge( $photo_sizes[ $size ], [
-						'width'  => $src[ 1 ],
-						'height' => $src[ 2 ],
-						'url'    => $src[ 0 ],
+						'filesize' => size_format( $filesize ),
+						'width'    => $src[ 1 ],
+						'height'   => $src[ 2 ],
+						'url'      => $src[ 0 ],
 					] );
 				}
 			?>
@@ -44,9 +53,10 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 				<?php
 					foreach ( $photo_sizes as $size => $info ) {
 						printf(
-							'<li><a href="%s" rel="nofollow" download target="_blank">%s</a></li>',
-							$info[ 'url' ],
-							sprintf( $info[ 'label' ], sprintf( '<span class="photo-dimensions">(%s&times;%s)</span>', $info['width'], $info['height'] ) )
+							'<li><a href="%s" rel="nofollow" download target="_blank">%s<span class="photo-filesize">%s</span></a></li>',
+							esc_url( $info[ 'url' ] ),
+							sprintf( $info[ 'label' ], sprintf( '<span class="photo-dimensions">(%s&times;%s)</span>', $info['width'], $info['height'] ) ),
+							$info['filesize']
 						);
 					}
 				?>
@@ -57,12 +67,12 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 	<div class="entry-content">
 		<?php $alt_text = get_the_content(); ?>
 
-		<a href="<?php echo wp_get_attachment_url( get_post_thumbnail_id() ); ?>">
+		<a href="<?php echo wp_get_attachment_url( $photo_id ); ?>">
 			<?php
 			printf(
 				'<img class="single-photo" src="%s" srcset="%s" alt="%s">',
 				esc_url( get_the_post_thumbnail_url( get_the_ID(), 'medium') ),
-				esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ),
+				esc_attr( wp_get_attachment_image_srcset( $photo_id ) ),
 				sprintf(
 					/* translators: %s: The alternative text for the photo. */
 					'View larger photo: %s',
