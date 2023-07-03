@@ -119,9 +119,16 @@
 
 		if ( 'versions' === sort ) {
 			tableData.sort( function ( a, b ) {
-				return a[0] - b[0];
+				/*
+				 * Converts a string such as 'Example 1.1' to '1.01', or 'Example 10.10' to '10.10'.
+				 *
+				 * This allows for MariaDB 10.10 to appear beside 10.9.
+				 */
+				var a_version = a[0].replace( /[^0-9.]/g, '' ).replace( /\.(\d{1})$/g, '.0$1' ),
+					b_version = b[0].replace( /[^0-9.]/g, '' ).replace( /\.(\d{1})$/g, '.0$1' );
+
+				return b_version - a_version;
 			} );
-			tableData.reverse();
 		} else if ( 'alphabeticaly' === sort ) {
 			tableData.sort();
 		}
@@ -224,7 +231,8 @@
 				textStyle: {
 					color: '#444'
 				},
-				showColorCode: true
+				showColorCode: true,
+				trigger: 'selection'
 			}
 		};
 
@@ -237,5 +245,17 @@
 		chart.setChartType( chartType );
 		chart.setOptions( chartOptions );
 		chart.draw();
+
+		google.visualization.events.addListener(
+			chart.getChart(),
+			'onmouseover',
+			( entry ) => chart.getChart().setSelection( [ { row: entry.row } ] )
+		);
+
+		google.visualization.events.addListener(
+			chart.getChart(),
+			'onmouseout',
+			( entry ) => chart.getChart().setSelection( [] )
+		);
 	}
 } )( window.jQuery, window.google, window.wporgPageStats );
