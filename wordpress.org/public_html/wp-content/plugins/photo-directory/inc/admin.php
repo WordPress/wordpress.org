@@ -133,9 +133,18 @@ class Admin {
 			'attachment'
 		];
 
-		$excluded_post_statuses = [ 'trash', Rejection::get_post_status() ];
+		$post_statuses = Photo::get_post_statuses_with_photo();
 
-		return ! empty( $screen->id ) && in_array( $screen->id, $pertinent_screen_ids ) && ( empty( $_GET['post_status'] ) || ! in_array( $_GET['post_status'], $excluded_post_statuses ) );
+		return (
+			// Screen is known.
+			! empty( $screen->id )
+		&&
+			// Screen is one that could show the photo column.
+			in_array( $screen->id, $pertinent_screen_ids )
+		&&
+			// No post status is explicitly requested OR the post status is one that supports photos.
+			( empty( $_GET['post_status'] ) || in_array( $_GET['post_status'], $post_statuses ) )
+		);
 	}
 
 	/**
@@ -301,7 +310,7 @@ class Admin {
 	public static function add_photos_meta_boxes( $post_type, $post ) {
 		// Certain metaboxes shouldn't be shown unless in contexts where a photo is expected.
 		$show = true;
-		if ( ! in_array( get_post_status( $post ), [ 'draft', 'inherit', 'pending', 'private', 'publish' ] ) ) {
+		if ( ! in_array( get_post_status( $post ), Photo::get_post_statuses_with_photo() ) ) {
 			$show = false;
 		}
 
