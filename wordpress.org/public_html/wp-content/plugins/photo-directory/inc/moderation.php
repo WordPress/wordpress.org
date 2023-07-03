@@ -63,26 +63,34 @@ class Moderation {
 	}
 
 	/**
-	 * Adds the 'Photos Moderator' role.
+	 * Returns all capabilities for photos-related roles.
+	 *
+	 * @param bool $for_photos_admin Optional. Should capabilites include those
+	 *                               exclusive to Photo Admins?
+	 *                               Default false.
+	 * @return array
 	 */
-	public static function add_roles() {
-		add_role(
-			'photos_moderator',
-			__( 'Photos Moderator', 'wporg-photos' ),
-			[
-				// Capabilities for photo posts.
-				'read'                    => true,
-				'edit_photos'             => true,
-				'delete_photos'           => true,
-				'publish_photos'          => true,
-				'edit_others_photos'      => true,
-				'delete_others_photos'    => true,
-				'edit_published_photos'   => true,
-				'delete_published_photos' => true,
-				'edit_private_photos'     => true,
+	public static function get_photos_caps( $for_photos_admin = false ) {
+		$caps = [
+			// Capabilities for photo posts.
+			'read'                    => true,
+			'edit_photos'             => true,
+			'delete_photos'           => true,
+			'publish_photos'          => true,
+			'edit_others_photos'      => true,
+			'delete_others_photos'    => true,
+			'edit_published_photos'   => true,
+			'delete_published_photos' => true,
+			'upload_files'            => true,
+		];
+
+		if ( $for_photos_admin ) {
+			$caps = array_merge( $caps, [
+				// Manage flagged and private photos.
+				'manage_flagged_photos'   => true,
 				'delete_private_photos'   => true,
+				'edit_private_photos'     => true,
 				'read_private_photos'     => true,
-				'upload_files'            => true,
 				// Capabilities for posts and media.
 				'edit_posts'              => true,
 				'delete_posts'            => true,
@@ -91,14 +99,71 @@ class Moderation {
 				'delete_others_posts'     => true,
 				'edit_published_posts'    => true,
 				'delete_published_posts'  => true,
-				'edit_private_posts'      => true,
-				'delete_private_posts'    => true,
-				'read_private_posts'      => true,
 				'edit_post'               => true,
 				'delete_post'             => true,
 				'read_post'               => true,
-			]
+			] );
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Adds the photos-specific roles.
+	 *
+	 * Adds:
+	 * - photos_moderator: User who can moderate photos.
+	 * - photos_administrator: Same as photos moderator, but can additionally:
+	 *     - Access and manage private (aka flagged) photos.
+	 *     - Create/edit/delete posts.
+	 */
+	public static function add_roles() {
+		// Remove the roles first, in case the permission set has changed.
+		remove_role( 'photos_moderator' );
+		remove_role( 'photos_administrator' );
+
+		add_role(
+			'photos_moderator',
+			__( 'Photo Moderator', 'wporg-photos' ),
+			self::get_photos_caps()
 		);
+
+		$admin_caps = self::get_photos_caps( true );
+
+		add_role(
+			'photos_administrator',
+			__( 'Photo Admin', 'wporg-photos' ),
+			$admin_caps
+		);
+
+		// Add capabilites to administrator role.
+		$admin = get_role( 'administrator' );
+		if ( $admin ) {
+			foreach ( $admin_caps as $cap => $val ) {
+				$admin->add_cap( $cap );
+			}
+		}
+	}
+
+	/**
+	 * Removes the photo-specific roles.
+	 *
+	 * Removes:
+	 * - photos_moderator
+	 * - photos_administrator
+	 */
+	public static function remove_roles() {
+		remove_role( 'photos_moderator' );
+		remove_role( 'photos_administrator' );
+
+		// Remove added capabilites from administrator role.
+		$admin = get_role( 'administrator' );
+		foreach ( self::get_photos_caps( true ) as $cap => $val ) {
+			// Only remove photos-specific caps.
+			if ( false !== strpos( $cap, 'photo' ) ) {
+				$admin->remove_cap( $cap );
+			}
+		}
 	}
 
 	/**
@@ -561,7 +626,7 @@ https://wordpress.org/photos/
 			return $content;
 		}
 
-		$content .= '<h2>' . __( 'Submissions awaiting moderation', 'wporg-photos' ) . "</h2>\n";
+		$content .= '<h3>' . __( 'Submissions awaiting moderation', 'wporg-photos' ) . "</h3>\n";
 		$content .= '<p>';
 		$max_pending_submissions = User::get_concurrent_submission_limit( $user_id );
 		$content .= sprintf(
@@ -660,5 +725,6 @@ https://wordpress.org/photos/
 }
 
 register_activation_hook( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/photo-directory.php', [ __NAMESPACE__ . '\Moderation', 'add_roles' ] );
+register_deactivation_hook( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/photo-directory.php', [ __NAMESPACE__ . '\Moderation', 'remove_roles' ] );
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Moderation', 'init' ] );
