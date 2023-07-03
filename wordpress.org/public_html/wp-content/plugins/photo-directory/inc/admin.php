@@ -823,6 +823,23 @@ class Admin {
 						);
 					?></li>
 					<li><?php
+						$flagged_count = User::count_flagged_photos( $author->ID );
+						$flagged_link = '';
+						if ( $flagged_count && current_user_can( Flagged::get_capability() )) {
+							$link_args = [
+								'post_type'   => Registrations::get_post_type(),
+								'post_status' => Flagged::get_post_status(),
+								'author'      => $author->ID,
+							];
+							$flagged_link = add_query_arg( $link_args, 'edit.php' );
+						}
+						printf(
+							/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
+							_n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
+							$flagged_link ? sprintf( '<a href="%s">%d</a>', $flagged_link, $flagged_count ) : $flagged_count
+						);
+					?></li>
+					<li><?php
 						$pending_count = User::count_pending_photos( $author->ID );
 						$link_args = [
 							'post_type'   => Registrations::get_post_type(),
