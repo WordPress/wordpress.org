@@ -30,6 +30,9 @@ class Flagged {
 		// Register post statuses.
 		add_action( 'init',                                  [ __CLASS__, 'register_post_statuses' ] );
 
+		// Change submission status to flagged if Vision analysis suggests potential concern.
+		add_action( 'wporg_photos_photo_analysis_complete',  [ __CLASS__, 'flag_controversial_photos' ], 20 );
+
 		// Restrict access to the listing of flagged photos.
 		add_action( 'current_screen',                        [ __CLASS__, 'restrict_photo_listing' ] );
 
@@ -120,6 +123,26 @@ class Flagged {
 	public static function amend_with_post_status( $post_statuses ) {
 		$post_statuses[] = self::get_post_status();
 		return $post_statuses;
+	}
+
+	/**
+	 * Flags submission if Vision analysis suggests potential concerns.
+	 *
+	 * @param int  $image_id The ID of the attachment that is the photo.
+	 */
+	public static function flag_controversial_photos( $image_id ) {
+		$post_id = wp_get_post_parent_id( $image_id );
+
+		if ( ! $post_id ) {
+			return;
+		}
+
+		if ( Photo::get_filtered_moderation_assessment( $post_id ) ) {
+			wp_update_post( [
+				'ID'          => $post_id,
+				'post_status' => self::get_post_status(),
+			] );
+		}
 	}
 
 	/**
