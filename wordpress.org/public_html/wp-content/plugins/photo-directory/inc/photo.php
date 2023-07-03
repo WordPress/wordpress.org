@@ -1026,6 +1026,11 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			return false;
 		}
 
+		// Not controversial if photo has been manually unflagged.
+		if ( Flagged::was_unflagged( $post ) ) {
+			return false;
+		}
+
 		// Controversial if photo is outright flagged.
 		if ( Flagged::get_post_status() === $post_status ) {
 			return true;
