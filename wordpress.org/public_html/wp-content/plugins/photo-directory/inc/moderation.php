@@ -87,7 +87,7 @@ class Moderation {
 		if ( $for_photos_admin ) {
 			$caps = array_merge( $caps, [
 				// Manage flagged and private photos.
-				'manage_flagged_photos'   => true,
+				Flagged::get_capability() => true,
 				'delete_private_photos'   => true,
 				'edit_private_photos'     => true,
 				'read_private_photos'     => true,
