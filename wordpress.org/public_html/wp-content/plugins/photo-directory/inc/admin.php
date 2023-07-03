@@ -575,6 +575,9 @@ class Admin {
 				. "</div>\n";
 		}
 
+		// Prevent unbalanced tag.
+		$display_name .= '<a>';
+
 		return $display_name;
 	}
 
