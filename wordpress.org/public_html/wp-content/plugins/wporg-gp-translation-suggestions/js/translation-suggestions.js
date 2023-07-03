@@ -24,6 +24,18 @@
 	 */
 	var DeeplTMSuggestionRequested = [];
 
+	/** 
+	* Stores the OpenAI translations used.
+	* @type {array}
+	*/
+   var $openAITranslationsUsed = [];
+
+   /**
+	* Stores the DeepL translations used.
+	* @type {array}
+	* */
+   var $deeplTranslationsUsed = [];
+
 	/**
 	 * Stores (caches) the "Other Languages" suggestions that has already been queried,
 	 * to avoid making the query another time. The key is the originalId.
@@ -453,11 +465,61 @@
 			original();
 
 			$( $gp.editor.table )
-				.on( 'click', '.translation-suggestion', copySuggestion );
+				.on( 'click', '.translation-suggestion', copySuggestion )
+				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
+				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion );
 			$( document ).ready( function() {
 				getSuggestionsForTheFirstRow();
 			});
 		};
 	})( $gp.editor.install_hooks );
 
+	/**
+	 * Adds the suggestion to the translation in an array, and removes the previous suggestions, so
+	 * we only store the last one in the database, using the saveExternalSuggestions() function.
+	 *
+	 * @return {void}
+	 */
+	function addSuggestion() {
+		var $row = $( this );
+		if ( ! $row ) {
+			return;
+		}
+		var $originalId = $row.closest( 'tr' ).attr( 'id' ).substring( 7 );
+		var $CSSclass = $row.attr( 'class' );
+		if ( $CSSclass.indexOf( 'openai' ) > -1 ) {
+			$openAITranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
+			delete $deeplTranslationsUsed[ $originalId ];
+		} else if ( $CSSclass.indexOf( 'deepl' ) > -1 ) {
+			$deeplTranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
+			delete $openAITranslationsUsed[ $originalId ];
+		}
+	}
+
+	// Convert object to query params.
+	function convertObjectToQueryParam( object ) {
+		const params = new URLSearchParams();
+
+		Object.entries(object).forEach(([key, value]) => {
+		params.append(key, value);
+		});
+
+		return params.toString();
+	}
+
+	//Prefilter ajax requests to add external translations used to the request.
+	$.ajaxPrefilter( function ( options ) {
+		
+
+		let data = Object.fromEntries( new URLSearchParams( options.data ) );
+		let originalId = data.original_id;
+		if ( ! $openAITranslationsUsed[originalId] && ! $deeplTranslationsUsed[originalId] ) {
+			return;
+		}
+		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
+			data.openAITranslationsUsed = $openAITranslationsUsed[originalId];
+			data.deeplTranslationsUsed =  $deeplTranslationsUsed[originalId];
+			options.data = convertObjectToQueryParam( data );
+		}
+	});
 })( jQuery );
