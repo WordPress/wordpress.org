@@ -482,40 +482,6 @@ class Translation_Memory extends GP_Route {
 	}
 
 	/**
-	 * Updates the external translations used by each user.
-	 *
-	 * @return void
-	 */
-	public function update_external_translations() {
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'wporg-editor-settings' ) ) {
-			wp_send_json_error( array( 'message' => esc_html__( 'Invalid nonce.', 'glotpress' ) ), 403 );
-		}
-		if ( ! isset( $_POST['translation'] ) ) {
-			wp_send_json_error( array( 'message' => esc_html__( 'Translation parameter is not present.', 'glotpress' ) ), 400 );
-		}
-		if ( ! isset( $_POST['openAITranslationsUsed'] ) && ! isset( $_POST['deeplTranslationsUsed'] ) ) {
-			wp_send_json_error( array( 'message' => esc_html__( 'Translation suggested parameter is not present.', 'glotpress' ) ), 400 );
-		}
-		if ( isset( $_POST['openAITranslationsUsed'] ) ) {
-			$this->update_one_external_translation(
-				$_POST['translation'],
-				$_POST['openAITranslationsUsed'],
-				'openai_translations_used',
-				'openai_same_translations_used'
-			);
-		}
-		if ( isset( $_POST['deeplTranslationsUsed'] ) ) {
-			$this->update_one_external_translation(
-				$_POST['translation'],
-				$_POST['deeplTranslationsUsed'],
-				'deepl_translations_used',
-				'deepl_same_translations_used'
-			);
-		}
-		wp_send_json_success();
-	}
-
-	/**
 	 * Updates an external translation used by each user.
 	 *
 	 * @param string $translation                     The translation.
@@ -525,7 +491,7 @@ class Translation_Memory extends GP_Route {
 	 *
 	 * @return void
 	 */
-	private function update_one_external_translation( string $translation, string $suggestion, string $external_translations_used, string $external_same_translations_used ) {
+	public static function update_one_external_translation( string $translation, string $suggestion, string $external_translations_used, string $external_same_translations_used ) {
 		$is_the_same_translation  = $translation == $suggestion;
 		$gp_external_translations = get_user_option( 'gp_external_translations' );
 		$translations_used        = gp_array_get( $gp_external_translations, $external_translations_used, 0 );
