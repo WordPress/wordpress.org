@@ -786,7 +786,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 */
 	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely' ] ) {
 		$flags = [];
-		$safe_search_flags = Photo::get_raw_moderation_assessment( $post_id );
+		$safe_search_flags = self::get_raw_moderation_assessment( $post_id );
 
 		foreach ( $safe_search_flags as $flag => $likelihood ) {
 			$likelihood = strtolower( $likelihood );
@@ -1032,7 +1032,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		}
 
 		// Controversial if photo got flagged as 'possible' or more likely by Vision.
-		$flags = Photo::get_filtered_moderation_assessment( $post->ID );
+		$flags = self::get_filtered_moderation_assessment( $post->ID );
 		if ( ! empty( $flags ) ) {
 			return true;
 		}
