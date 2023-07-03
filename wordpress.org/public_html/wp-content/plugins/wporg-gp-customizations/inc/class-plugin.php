@@ -300,7 +300,7 @@ class Plugin {
 	 */
 	public function log_translation_source( GP_Translation $translation ) {
 		$source = '';
-		if ( 'GP_Route_Translation' === GP::$current_route->class_name ) {
+		if ( $translation && 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				$this->imported_translation_ids[] = $translation->id;
 
