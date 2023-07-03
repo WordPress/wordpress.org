@@ -49,8 +49,11 @@ class Admin {
 		// Show user card for photo contributor.
 		add_action( 'do_meta_boxes',                           [ __CLASS__, 'register_photo_contributor_metabox' ], 1, 3 );
 
-		// Admin notices
+		// Admin notice if killswitch enabled.
 		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_if_killswitch_enabled' ] );
+
+		// Admin notice related to flagging/unflagging.
+		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_if_flagged_or_unflagged' ] );
 
 		// Modify admin menu links for photo posts.
 		add_action( 'admin_menu',                              [ __CLASS__, 'modify_admin_menu_links' ] );
@@ -74,6 +77,61 @@ class Admin {
 			sprintf(
 				__( '<strong>Photo uploads are currently disabled for all users!</strong> Uncheck <a href="%s">the setting</a> to re-enable uploading.', 'wporg-photos' ),
 				esc_url( admin_url( 'options-media.php' ) . '#' . Settings::KILLSWITCH_OPTION_NAME )
+			)
+		);
+	}
+
+	/**
+	 * Outputs admin notices.
+	 */
+	public static function add_notice_if_flagged_or_unflagged() {
+		$screen = get_current_screen();
+
+		// Only add notice when editing single photo.
+		$post_type = Registrations::get_post_type();
+		if ( ! $screen || $post_type !== $screen->id || $post_type !== $screen->post_type ) {
+			return;
+		}
+
+		$notice = $user = $user_id = '';
+		$notice_type = 'warning';
+
+		$post = get_post();
+		if ( ! $post ) {
+			return;
+		}
+
+		// Don't need to report flagging/unflagging for published posts.
+		if ( 'published' === $post->post_status ) {
+			return;
+		}
+
+		// Note: Not reporting who flagged a post once it has been unflagged.
+		if ( $user_id = Flagged::get_unflagger( $post ) ) {
+			/* translators: 1: URL to the profile of the user who unflagged the photo, 2: The name of the user who unflagged the photo. */
+			$notice = __( '<strong>This photo was unflagged by <a href="%1$s">%2$s</a> and is safe to moderate.', 'wporg-photos' );
+			$notice_type = 'success';
+		}
+		elseif ( $user_id = Flagged::get_flagger( $post ) ) {
+			/* translators: 1: URL to the profile of the user who flagged the photo, 2: The name of the user who flagged the photo. */
+			$notice = __( '<strong>This photo was flagged by <a href="%1$s">%2$s</a>.', 'wporg-photos' );
+		}
+
+		if ( $user_id ) {
+			$user = new \WP_User( $user_id );
+		}
+
+		if ( ! $user  || ! $notice ) {
+			return;
+		}
+
+		printf(
+			'<div id="message" class="notice notice-%s"><p>%s</p></div>' . "\n",
+			esc_attr( $notice_type ),
+			sprintf(
+				$notice,
+				'https://profiles.wordpress.org/' . $user->user_nicename . '/',
+				sanitize_text_field( $user->display_name )
 			)
 		);
 	}
