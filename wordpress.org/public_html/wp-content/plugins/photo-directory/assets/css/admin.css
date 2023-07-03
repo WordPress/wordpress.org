@@ -1,4 +1,10 @@
 .fixed .column-wporg-photo { font-weight: bold; width: 180px; }
+.status-flagged {
+	background-color: rgba(255,150,150,0.15);
+}
+.striped > tbody > .status-flagged:nth-child(2n+1) {
+	background-color: rgba(255,150,150,0.3);
+}
 .photos-flagged {
 	list-style: none;
 }
