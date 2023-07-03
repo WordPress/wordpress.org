@@ -466,7 +466,6 @@
 
 			$( $gp.editor.table )
 				.on( 'click', '.translation-suggestion', copySuggestion )
-				.on( 'click', 'button.translation-actions__save', saveExternalSuggestions )
 				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
 				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion );
 			$( document ).ready( function() {
@@ -497,33 +496,30 @@
 		}
 	}
 
-	/**
-	 * Saves the number of external suggestions used and used without modification.
-	 *
-	 * @return {void}
-	 **/
-	function saveExternalSuggestions() {
+	// Convert object to query params.
+	function convertObjectToQueryParam( object ) {
+		const params = new URLSearchParams();
 
-		var $button = $( this );
-		var $row = $button.closest( 'tr.editor' );
-		var $originalId = $row.attr( 'id' ).substring( 7 );
-		if ( ! $openAITranslationsUsed[$originalId] && ! $deeplTranslationsUsed[$originalId] ) {
-			return;
-		}
-
-		var $translation = $row.find( 'textarea' ).val();
-		var $data = {
-			nonce: wporgEditorSettings.nonce,
-			translation: $translation,
-			openAITranslationsUsed: $openAITranslationsUsed[$originalId],
-			deeplTranslationsUsed: $deeplTranslationsUsed[$originalId]
-		};
-
-		$.ajax({
-			url: '/-save-external-suggestions',
-			type: 'POST',
-			data: $data,
+		Object.entries(object).forEach(([key, value]) => {
+		params.append(key, value);
 		});
+
+		return params.toString();
 	}
 
+	//Prefilter ajax requests to add external translations used to the request.
+	$.ajaxPrefilter( function ( options ) {
+		
+
+		let data = Object.fromEntries( new URLSearchParams( options.data ) );
+		let originalId = data.original_id;
+		if ( ! $openAITranslationsUsed[originalId] && ! $deeplTranslationsUsed[originalId] ) {
+			return;
+		}
+		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
+			data.openAITranslationsUsed = $openAITranslationsUsed[originalId];
+			data.deeplTranslationsUsed =  $deeplTranslationsUsed[originalId];
+			options.data = convertObjectToQueryParam( data );
+		}
+	});
 })( jQuery );
