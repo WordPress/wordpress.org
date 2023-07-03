@@ -47,7 +47,7 @@ the_post();
 						<div id="php_versions" class="wporg-stats-chart loading"></div>
 					</section>
 					<section>
-						<h2><?php esc_html_e( 'MySQL Version', 'wporg' ); ?> <a class="swap-table dashicons dashicons-editor-table" title="<?php esc_attr_e( 'View as Table', 'wporg' ); ?>" aria-hidden="true"></a></h2>
+						<h2><?php esc_html_e( 'Database Version', 'wporg' ); ?> <a class="swap-table dashicons dashicons-editor-table" title="<?php esc_attr_e( 'View as Table', 'wporg' ); ?>" aria-hidden="true"></a></h2>
 						<div id="mysql_versions" class="wporg-stats-chart loading"></div>
 					</section>
 					<section>
