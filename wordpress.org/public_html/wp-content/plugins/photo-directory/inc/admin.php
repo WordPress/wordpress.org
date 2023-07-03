@@ -58,6 +58,10 @@ class Admin {
 		// Modify admin menu links for photo posts.
 		add_action( 'admin_menu',                              [ __CLASS__, 'modify_admin_menu_links' ] );
 
+		// Restrict Media Library access.
+		add_action( 'admin_init',                              [ __CLASS__, 'restrict_media_library_access' ] );
+		add_action( 'admin_menu',                              [ __CLASS__, 'disable_media_library' ] );
+
 		// Navigate to next post after moderation.
 		add_action( 'edit_form_top',                           [ __CLASS__, 'show_moderation_message' ] );
 		add_filter( 'redirect_post_location',                  [ __CLASS__, 'redirect_to_next_post_after_moderation' ], 5, 2 );
@@ -1029,6 +1033,29 @@ class Admin {
 
 		if ( $photo_contrib_ip ) {
 			echo '<span>' . sanitize_text_field( $photo_contrib_ip ) . '</span>';
+		}
+	}
+
+	/**
+	 * Restricts direct access to the Media Library by moderators.
+	 */
+	public static function restrict_media_library_access() {
+		global $pagenow;
+		if (
+			'upload.php' === $pagenow
+		&&
+			! current_user_can( get_post_type_object( 'post' )->cap->create_posts )
+		) {
+			wp_die( __( 'Sorry, you are not allowed to access the media library.', 'wporg-photos' ) );
+		}
+	}
+
+	/**
+	 * Removes "Media Library" from the admin menu for moderators.
+	 */
+	public static function disable_media_library() {
+		if ( ! current_user_can( get_post_type_object( 'post' )->cap->create_posts ) ) {
+			remove_menu_page( 'upload.php' );
 		}
 	}
 
