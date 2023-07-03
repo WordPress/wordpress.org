@@ -77,7 +77,7 @@ function wporg_login_scripts() {
 	}
 
 	wp_enqueue_style( 'wporg-normalize', get_template_directory_uri() . '/stylesheets/normalize.css', 3 );
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20230504' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), filemtime( __DIR__ . '/stylesheets/login.css' ) );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
