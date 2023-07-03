@@ -155,6 +155,39 @@ class WPorg_GP_Custom_Translation_Errors {
 			sanitize_title( $translation )
 		);
 	}
+
+	/**
+	 * Adds an error for unexpected date formats.
+	 *
+	 * @param string      $original    The original string.
+	 * @param string      $translation The translated string.
+	 * @param GP_Original $gp_original The GP_original object.
+	 * @param GP_Locale   $locale      The locale.
+	 * @return string|true The error message or true if no error.
+	 */
+	public function error_timezone_date_format( $original, $translation, $gp_original, $locale ) {
+		if ( ! $this->is_core_project( $gp_original ) ) {
+			return true;
+		}
+		if ( is_null( $gp_original->context ) ) {
+			return true;
+		}
+		if ( ! str_contains( $gp_original->context, 'timezone date format' ) ) {
+			return true;
+		}
+
+		$date_time = DateTime::createFromFormat( $translation, gmdate( $translation ) );
+		if ( $date_time ) {
+			return true;
+		}
+
+		$spaces_present = $translation !== trim( $translation );
+		if ( $spaces_present ) {
+			return esc_html__( 'The translation has empty spaces, new lines or another similar elements.', 'glotpress' );
+		}
+
+		return esc_html__( 'Must be a valid timezone date format.', 'glotpress' );
+	}
 }
 
 /**
