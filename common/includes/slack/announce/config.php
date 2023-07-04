@@ -37,6 +37,12 @@ function get_whitelist() {
 	);
 
 	return array(
+		'6-4-release-leads' => array(
+			'cbringmann', // @Chloé Bringmann on Slack
+			'chanthaboune',
+			'francina',
+			'metalandcoffee',
+		),
 		'accessibility' => array(
 			// #core (inc committers) already included via get_parent_channel().
 			'afercia',
