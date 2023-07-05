@@ -68,4 +68,33 @@ class Trac_Notifications_SQLite_Driver /* implements wpdb_interface */ {
 		);
 		return (bool) $this->db->query( $query );
 	}
+
+	public function update( $table, $data, $wheres ) {
+		$values     = [];
+		$sql_sets   = [];
+		$sql_wheres = [];
+
+		foreach ( $data as $field => $value ) {
+			$sql_sets[] = "$field = %s";
+			$values[]   = $value;
+		}
+		$sql_sets = implode( ', ', $sql_sets );
+
+		foreach ( $wheres as $field => $where ) {
+			$sql_wheres[] = "$field = %s";
+			$values[]     = $value;
+		}
+		$sql_wheres = implode( ' AND ', $sql_wheres );
+
+		if ( ! $values ) {
+			return false;
+		}
+
+		$query = $this->prepare(
+			"UPDATE $table SET $sql_sets WHERE $sql_wheres",
+			$values
+		);
+
+		return (bool) $this->db->query( $query );
+	}
 }
