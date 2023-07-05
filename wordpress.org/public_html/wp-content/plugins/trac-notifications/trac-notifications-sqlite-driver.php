@@ -50,15 +50,25 @@ class Trac_Notifications_SQLite_Driver /* implements wpdb_interface */ {
 		}
 	}
 
+	/**
+	 * Delete row(s) from a table.
+	 *
+	 * @return bool If the query ran.
+	 */
 	public function delete( $table, $where ) {
 		$fields = 'AND ' . implode( ' = %s AND ', array_keys( $where ) ) . ' = %s';
 		$query = $this->prepare(
 			"DELETE FROM $table WHERE 1=1 $fields",
 			array_values( $where )
 		);
-		$this->db->query( $query );
+		return (bool) $this->db->query( $query );
 	}
 
+	/**
+	 * Insert a row into a table.
+	 *
+	 * @return bool If the query ran.
+	 */
 	public function insert( $table, $args ) {
 		$fields = "'" . implode( "', '", array_keys( $args ) ) . "'";
 		$placeholders = implode( ', ', array_fill( 0, count( $args ), '%s' ) );
@@ -69,10 +79,15 @@ class Trac_Notifications_SQLite_Driver /* implements wpdb_interface */ {
 		return (bool) $this->db->query( $query );
 	}
 
+	/**
+	 * Update a row in a table.
+	 *
+	 * @return bool If the query executed and modified rows.
+	 */
 	public function update( $table, $data, $wheres ) {
-		$values     = [];
-		$sql_sets   = [];
-		$sql_wheres = [];
+		$values     = array();
+		$sql_sets   = array();
+		$sql_wheres = array();
 
 		foreach ( $data as $field => $value ) {
 			$sql_sets[] = "$field = %s";
@@ -80,13 +95,13 @@ class Trac_Notifications_SQLite_Driver /* implements wpdb_interface */ {
 		}
 		$sql_sets = implode( ', ', $sql_sets );
 
-		foreach ( $wheres as $field => $where ) {
+		foreach ( $wheres as $field => $value ) {
 			$sql_wheres[] = "$field = %s";
 			$values[]     = $value;
 		}
 		$sql_wheres = implode( ' AND ', $sql_wheres );
 
-		if ( ! $values ) {
+		if ( ! $values || ! $sql_wheres ) {
 			return false;
 		}
 
@@ -95,6 +110,8 @@ class Trac_Notifications_SQLite_Driver /* implements wpdb_interface */ {
 			$values
 		);
 
-		return (bool) $this->db->query( $query );
+		$result = $this->db->query( $query );
+
+		return $result && $result->rowCount() > 0;
 	}
 }

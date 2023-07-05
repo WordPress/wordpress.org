@@ -213,54 +213,48 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 	 *
 	 * @param string $username   The username.
 	 * @param string $name       The preference.
-	 * @param string|null $value The value to set. If null, the preference will be deleted.
+	 * @param string|null $value The value to set.
 	 */
-	function set_user_pref( $username, $name, $value = null ) {
+	function set_user_pref( $username, $name, $value = '' ) {
 		// The trac column for username is `sid`. All our users are authenticated.
 		// The session_attribute table has an index: UNIQUE (sid,authenticated,name)
 
-		if ( ! is_null( $value ) ) {
+		$result = $this->db->insert( 'session_attribute', array(
+			'sid'           => $username,
+			'authenticated' => 1,
+			'name'          => $name,
+			'value'         => $value
+		) );
+
+		if ( ! $result ) {
 			$result = $this->db->update(
 				'session_attribute',
-				[ 'value' => $value ],
-				[
-					'sid'           => $username,
-					'authenticated' => 1,
-					'name'          => $name
-				]
-			);
-
-			if ( ! $result ) {
-				// Insert the session if it doesn't exist.
-				$user_has_visited_trac = $this->db->get_var( $this->db->prepare(
-					'SELECT sid FROM session WHERE sid = %s',
-					$username
-				) );
-				if ( ! $user_has_visited_trac ) {
-					$this->db->insert( 'session', [
-						'sid'           => $username,
-						'authenticated' => 1,
-						'last_visit'    => time(),
-					] );
-				}
-
-				// Set the pref.
-				$result = $this->db->insert( 'session_attribute', [
+				array(
+					'value'         => $value
+				), array(
 					'sid'           => $username,
 					'authenticated' => 1,
 					'name'          => $name,
-					'value'         => $value,
-				] );
-			}
-
-			return $result;
-		} else {
-			return $this->db->delete( 'session_attribute', [
-				'sid'           => $username,
-				'authenticated' => 1,
-				'name'          => $name
-			] );
+				)
+			);
 		}
+
+		return $result;
+	}
+	
+	/**
+	 * Delete a user preference.
+	 *
+	 * @param string $username The username.
+	 * @param string $name     The preference.
+	 * @return bool
+	 */
+	function delete_user_pref( $username, $name ) {
+		return $this->db->delete( 'session_attribute', array(
+			'sid'           => $username,
+			'authenticated' => 1,
+			'name'          => $name
+		) );
 	}
 
 	function get_user_anonymization_items( $username ) {
@@ -302,7 +296,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			'ticket_owner',
 			'attachments',
 			'comments',
-			'profile_data',
+			'profile_data'
 		);
 	}
 
