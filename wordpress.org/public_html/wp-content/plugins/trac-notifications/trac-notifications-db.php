@@ -193,6 +193,76 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		}
 	}
 
+	/**
+	 * Fetch user preferences from Trac.
+	 *
+	 * @param string $username The username.
+	 * @return array The user preferences. [ key => value ].
+	 */
+	function get_user_prefs( $username ) {
+		$data = $this->db->get_results( $this->db->prepare(
+			'SELECT name, value FROM session_attribute WHERE sid = %s',
+			$username
+		), ARRAY_A );
+
+		return array_column( $data, 'value', 'name' );
+	}
+
+	/**
+	 * Set a user preference in Trac.
+	 *
+	 * @param string $username   The username.
+	 * @param string $name       The preference.
+	 * @param string|null $value The value to set. If null, the preference will be deleted.
+	 */
+	function set_user_pref( $username, $name, $value = null ) {
+		// The trac column for username is `sid`. All our users are authenticated.
+		// The session_attribute table has an index: UNIQUE (sid,authenticated,name)
+
+		if ( ! is_null( $value ) ) {
+			$result = $this->db->update(
+				'session_attribute',
+				[ 'value' => $value ],
+				[
+					'sid'           => $username,
+					'authenticated' => 1,
+					'name'          => $name
+				]
+			);
+
+			if ( ! $result ) {
+				// Insert the session if it doesn't exist.
+				$user_has_visited_trac = $this->db->get_var( $this->db->prepare(
+					'SELECT sid FROM session WHERE sid = %s',
+					$username
+				) );
+				if ( ! $user_has_visited_trac ) {
+					$this->db->insert( 'session', [
+						'sid'           => $username,
+						'authenticated' => 1,
+						'last_visit'    => time(),
+					] );
+				}
+
+				// Set the pref.
+				$result = $this->db->insert( 'session_attribute', [
+					'sid'           => $username,
+					'authenticated' => 1,
+					'name'          => $name,
+					'value'         => $value,
+				] );
+			}
+
+			return $result;
+		} else {
+			return $this->db->delete( 'session_attribute', [
+				'sid'           => $username,
+				'authenticated' => 1,
+				'name'          => $name
+			] );
+		}
+	}
+
 	function get_user_anonymization_items( $username ) {
 		$ticket_subscriptions = $this->get_trac_ticket_subscriptions_for_user( $username );
 		$ticket_notifications = $this->get_trac_notifications_for_user( $username );
