@@ -79,7 +79,7 @@ $hosting_cache_buster = '3';
 						</div>
 					</div>
 
-					<div class="partner">
+<?php /*					<div class="partner">
 						<h2>
 							<a href="https://www.siteground.com/hosting/wordpress" rel="nofollow">
 								<img
@@ -98,7 +98,7 @@ $hosting_cache_buster = '3';
 							<a href="https://wordpress.org/search/SiteGround/?in=support_forums">Forum threads about SiteGround &raquo;</a>
 						</div>
 					</div>
-
+ */ ?>
 				</section>
 
 				<section class="col-8">
