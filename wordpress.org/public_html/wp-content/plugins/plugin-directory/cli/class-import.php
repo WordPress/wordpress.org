@@ -190,8 +190,16 @@ class Import {
 			$content = "<!--section=description-->\n{$headers->Description}";
 		}
 
-		// Fallback to the plugin title if the readme didn't contain it.
-		$plugin->post_title   = trim( $readme->name ) ?: strip_tags( $headers->Name ) ?: $plugin->post_title;
+		// Use the Readme name, as long as it's not the plugin slug.
+		if (
+			$readme->name &&
+			$readme->name !== $plugin->post_name
+		) {
+			$plugin->post_title = $readme->name;
+		} elseif ( $headers->Name ) {
+			$plugin->post_title = strip_tags( $headers->Name );
+		}
+
 		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
 		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
 
