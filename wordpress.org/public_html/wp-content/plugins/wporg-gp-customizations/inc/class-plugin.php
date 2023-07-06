@@ -299,7 +299,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function log_translation_source( GP_Translation $translation ) {
-		$source = '';
+		$source = $source_meta = '';
 		if ( $translation && 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				$this->imported_translation_ids[] = $translation->id;
@@ -315,12 +315,45 @@ class Plugin {
 			if ( 'translations_post' === GP::$current_route->last_method_called ) {
 				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
 					$source = 'frontend';
+					if ( isset( $_POST['openAITranslationsUsed'] ) ) {
+						$suggestion_source     = 'openai';
+						$suggested_translation = sanitize_text_field( $_POST['openAITranslationsUsed'] );
+						$this->update_translation_source_meta( $translation, $suggested_translation, $suggestion_source );
+					}
+					if ( isset( $_POST['deeplTranslationsUsed'] ) ) {
+						$suggestion_source     = 'deepl';
+						$suggested_translation = sanitize_text_field( $_POST['deeplTranslationsUsed'] );
+						$this->update_translation_source_meta( $translation, $suggested_translation, $suggestion_source );
+					}
 				}
 			}
 		}
 		if ( $source ) {
 			gp_update_meta( $translation->id, 'source', $source, 'translation' );
 		}
+	}
+
+	/**
+	 * Updates translation source meta.
+	 *
+	 * @param object $translation Translation object.
+	 * @param string $suggested_translation Suggested translation string.
+	 * @param string $suggestion_source Suggestion source.
+	 *
+	 * @return void
+	 */
+	private function update_translation_source_meta( $translation, $suggested_translation, $suggestion_source ) {
+		$source_meta  = '';
+		$_translation = $translation->translation_0;
+		if ( $_translation === $suggested_translation ) {
+			$source_meta = $suggestion_source;
+		} else {
+			$source_meta = $suggestion_source . '_modified';
+		}
+		if ( $source_meta ) {
+			gp_update_meta( $translation->id, 'source_meta', $source_meta, 'translation' );
+		}
+
 	}
 
 	/**
