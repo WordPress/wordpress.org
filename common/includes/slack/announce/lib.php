@@ -159,13 +159,11 @@ function get_parent_channels( $channel ) {
 		default:
 			// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel.
 			if ( ! get_whitelist_for_channel( $root ) ) {
-				return false;
+				$parent_channels[] = $root;
 			}
-
-			$parent_channels = array( $root );
 	}
 
-	return $parent_channels;
+	return $parent_channels ?: false;
 }
 
 function run( $data ) {
