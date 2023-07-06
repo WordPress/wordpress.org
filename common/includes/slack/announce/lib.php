@@ -158,7 +158,7 @@ function get_parent_channels( $channel ) {
 			// Intentional Fallthrough.
 		default:
 			// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel.
-			if ( ! get_whitelist_for_channel( $root ) ) {
+			if ( get_whitelist_for_channel( $root ) ) {
 				$parent_channels[] = $root;
 			}
 	}
