@@ -146,6 +146,11 @@ function get_parent_channels( $channel ) {
 			break;
 	}
 
+	// Such as #6-4-release-leads
+	if ( preg_match( '!^[0-9\.-]+-release-leads$!i', $channel ) ) {
+		$root = 'core';
+	}
+
 	// No parent channel!
 	if ( $root === $channel ) {
 		return false;
