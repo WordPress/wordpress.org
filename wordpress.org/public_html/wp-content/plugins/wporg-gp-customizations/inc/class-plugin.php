@@ -330,20 +330,12 @@ class Plugin {
 					if ( isset( $_POST['openAITranslationsUsed'] ) ) {
 						$suggestion_source     = 'openai';
 						$suggested_translation = sanitize_text_field( $_POST['openAITranslationsUsed'] );
-<<<<<<< HEAD
 						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
-=======
-						$this->update_translation_source_meta( $translation, $suggested_translation, $suggestion_source );
->>>>>>> 6f4fd59a6 (Log source meta (openai or deepl))
 					}
 					if ( isset( $_POST['deeplTranslationsUsed'] ) ) {
 						$suggestion_source     = 'deepl';
 						$suggested_translation = sanitize_text_field( $_POST['deeplTranslationsUsed'] );
-<<<<<<< HEAD
 						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
-=======
-						$this->update_translation_source_meta( $translation, $suggested_translation, $suggestion_source );
->>>>>>> 6f4fd59a6 (Log source meta (openai or deepl))
 					}
 				}
 			}
@@ -354,11 +346,7 @@ class Plugin {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Save the source of a translation suggestion.
-=======
-	 * Updates translation source meta.
->>>>>>> 6f4fd59a6 (Log source meta (openai or deepl))
 	 *
 	 * @param object $translation Translation object.
 	 * @param string $suggested_translation Suggested translation string.
@@ -366,7 +354,6 @@ class Plugin {
 	 *
 	 * @return void
 	 */
-<<<<<<< HEAD
 	private function save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source ) {
 		$suggestion_used = $suggestion_source;
 		if ( $translation->translation_0 !== $suggested_translation ) {
@@ -374,18 +361,6 @@ class Plugin {
 		}
 		if ( $suggestion_used ) {
 			gp_update_meta( $translation->id, 'suggestion-used', $suggestion_used, 'translation' );
-=======
-	private function update_translation_source_meta( $translation, $suggested_translation, $suggestion_source ) {
-		$source_meta  = '';
-		$_translation = $translation->translation_0;
-		if ( $_translation === $suggested_translation ) {
-			$source_meta = $suggestion_source;
-		} else {
-			$source_meta = $suggestion_source . '_modified';
-		}
-		if ( $source_meta ) {
-			gp_update_meta( $translation->id, 'source_meta', $source_meta, 'translation' );
->>>>>>> 6f4fd59a6 (Log source meta (openai or deepl))
 		}
 
 	}

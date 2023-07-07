@@ -97,8 +97,8 @@
 		let data = Object.fromEntries( new URLSearchParams( options.data ) );
 
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
-			data.translation_source = 'frontend';
-			options.data = convertObjectToQueryParam( data );
+			options.data += '&translation_source=frontend';
+
 		}
 	});
 
