@@ -139,6 +139,8 @@ function get_parent_channels( $channel ) {
 		case 'tide':
 			$root = 'core';
 			break;
+		case 'contributor': // Such as #contributor-mentorship
+		case 'mentorship':  // Such as #mentorship-cohort-july-2023
 		case 'community':
 			$root = 'community-team';
 			break;
