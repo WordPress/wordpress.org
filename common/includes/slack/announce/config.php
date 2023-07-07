@@ -33,6 +33,7 @@ function get_whitelist() {
 		'harmonyromo', // @Harmony Romo on Slack
 		'hlashbrooke',
 		'iandunn',
+		'Nao',
 		'ryelle',
 	);
 
