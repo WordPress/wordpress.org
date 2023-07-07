@@ -496,28 +496,18 @@
 		}
 	}
 
-	// Convert object to query params.
-	function convertObjectToQueryParam( object ) {
-		const params = new URLSearchParams();
-
-		Object.entries(object).forEach(([key, value]) => {
-		params.append(key, value);
-		});
-
-		return params.toString();
-	}
-
 	//Prefilter ajax requests to add external translations used to the request.
 	$.ajaxPrefilter( function ( options ) {
 		let data = Object.fromEntries( new URLSearchParams( options.data ) );
 		let originalId = data.original_id;
-		if ( ! $openAITranslationsUsed[originalId] && ! $deeplTranslationsUsed[originalId] ) {
+
+		const isExternalTranslationUsed = $openAITranslationsUsed[originalId] || $deeplTranslationsUsed[originalId];
+		if ( ! isExternalTranslationUsed ) {
 			return;
 		}
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
-			data.openAITranslationsUsed = $openAITranslationsUsed[originalId];
-			data.deeplTranslationsUsed =  $deeplTranslationsUsed[originalId];
-			options.data = convertObjectToQueryParam( data );
+				options.data += ( $openAITranslationsUsed[originalId] ) ? '&openAITranslationsUsed=' + $openAITranslationsUsed[originalId] : '';
+				options.data += ( $openAITranslationsUsed[originalId] ) ? '&deeplTranslationsUsed=' + $deeplTranslationsUsed[originalId] : '';
 		}
 	});
 })( jQuery );
