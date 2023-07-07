@@ -344,7 +344,6 @@
 				.on( 'click', 'button.panel-header-actions__cancel', $gp.editor.hooks.cancel )
 				.on( 'click', 'button.translation-actions__copy', $gp.editor.hooks.copy )
 				.on( 'click', 'button.translation-actions__insert-tab', $gp.editor.hooks.tab )
-				.on( 'click', 'button.translation-actions__save', saveExternalSuggestions )
 				.on( 'click', 'button.translation-actions__save', $gp.editor.hooks.ok )
 				.on( 'click', 'button.translation-actions__help', openHelpModal )
 				.on( 'click', 'button.translation-actions__ltr', switchTextDirection )
@@ -352,8 +351,6 @@
 				.on( 'focus', 'textarea', textareaAutosize )
 				.on( 'click', 'summary', toggleDetails )
 				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu )
-				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
-				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion )
 				.on( 'click', '.sidebar-tabs li', changeRightTab );
 		}
 	})( $gp.editor.install_hooks );
