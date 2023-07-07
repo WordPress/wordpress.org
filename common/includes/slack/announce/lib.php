@@ -146,8 +146,8 @@ function get_parent_channels( $channel ) {
 			break;
 	}
 
-	// Such as #6-4-release-leads
-	if ( preg_match( '!^[0-9\.-]+-release-leads$!i', $channel ) ) {
+	// Such as #6-4-release-leads, or #6-1-site-editor-merge
+	if ( preg_match( '!^\d-\d-!i', $channel ) ) {
 		$root = 'core';
 	}
 
