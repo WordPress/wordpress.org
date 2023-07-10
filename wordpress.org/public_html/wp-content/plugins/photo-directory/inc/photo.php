@@ -411,6 +411,25 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	}
 
 	/**
+	 * Returns an array of post statuses for which a photo can or had been
+	 * associated.
+	 *
+	 * These post statuses will be included in checks for already generated
+	 * photo hashes. This basically consists of posts statuses from
+	 * `self::get_post_statuses_with_photo()` and any added by the filter
+	 * (mainly to include new post statuses that don't actively have a photo
+	 * associated with them but did at one point, e.g. rejected photos).
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_post_statuses_with_photo_hash() {
+		return (array) apply_filters(
+			'wporg_photos_post_statuses_with_photo_hash',
+			self::get_post_statuses_with_photo()
+		);
+	}
+
+	/**
 	 * Returns an array of photo post statuses that are considered pending.
 	 *
 	 * Posts with these statuses should count towards the user's current
@@ -442,7 +461,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 				'key'        => Registrations::get_meta_key( 'file_hash' ),
 				'value'      => $hash,
 			] ],
-			'post_status'    => [ 'draft', 'pending', 'private', 'publish', Rejection::get_post_status() ],
+			'post_status'    => self::get_post_statuses_with_photo_hash(),
 			'post_type'      => Registrations::get_post_type(),
 			'posts_per_page' => 1,
 		] );
