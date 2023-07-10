@@ -111,6 +111,9 @@ class Rejection {
 		add_action( 'init',                                    [ __CLASS__, 'register_meta' ] );
 		add_filter( 'is_protected_meta',                       [ __CLASS__, 'is_protected_meta' ], 10, 2 );
 
+		// Rejected photos should be considered in photo hash checks..
+		add_filter( 'wporg_photos_post_statuses_with_photo_hash', [ __CLASS__, 'amend_with_post_status' ] );
+
 		// Customize post row actions.
 		add_action( 'post_row_actions',                        [ __CLASS__, 'post_row_actions' ], 10, 2 );
 
@@ -207,6 +210,17 @@ class Rejection {
 				],
 			],
 		];
+	}
+
+	/**
+	 * Amends an array with the rejection post status.
+	 *
+	 * @param string[] $post_statuses Array of post statuses.
+	 * @return string[]
+	 */
+	public static function amend_with_post_status( $post_statuses ) {
+		$post_statuses[] = self::get_post_status();
+		return $post_statuses;
 	}
 
 	/**
