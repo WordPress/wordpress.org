@@ -369,6 +369,47 @@ class User {
 		return $limit_reached;
 	}
 
+	/**
+	 * Returns the photo post most recently moderated by the user.
+	 *
+	 * @param int $user_id            Optional. The user ID. If not defined,
+	 *                                assumes global author. Default false.
+	 * @param int $include_rejections Optional. Should photos rejected by the
+	 *                                user be considered? Default false.
+	 * @return WP_Post|false The post, or false if no posts found.
+	 */
+	public static function get_last_moderated( $user_id = false, $include_rejections = false ) {
+		if ( ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return false;
+		}
+
+		$post_statuses = ['publish'];
+		if ( $include_rejections ) {
+			$post_statuses[] = Rejection::get_post_status();
+		}
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => $post_statuses,
+			'meta_query'     => self::get_moderator_meta_query( $user_id, $include_rejections ),
+			'posts_per_page' => 1,
+		];
+
+		$query = new \WP_Query( $args );
+
+		if ( $query->have_posts() ) {
+			return $query->posts[0];
+		}
+
+		return false;
+	}
+
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\User', 'init' ] );
