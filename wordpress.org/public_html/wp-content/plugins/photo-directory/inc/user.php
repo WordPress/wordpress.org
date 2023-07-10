@@ -89,7 +89,7 @@ class User {
 			'fields'         => $fields,
 			'posts_per_page' => -1,
 			'author'         => $user_id,
-			'post_status'    => 'pending',
+			'post_status'    => Photo::get_pending_post_statuses(),
 			'post_type'      => Registrations::get_post_type(),
 		] );
 	}
