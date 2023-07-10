@@ -343,12 +343,9 @@ class Plugin {
 	 * @return void
 	 */
 	private function update_translation_source_meta( $translation, $suggested_translation, $suggestion_source ) {
-		$source_meta  = '';
-		$_translation = $translation->translation_0;
-		if ( $_translation === $suggested_translation ) {
-			$source_meta = $suggestion_source;
-		} else {
-			$source_meta = $suggestion_source . '_modified';
+		$source_meta = $suggestion_source;
+		if ( $translation->translation_0 !== $suggested_translation ) {
+			$source_meta .= '_modified';
 		}
 		if ( $source_meta ) {
 			gp_update_meta( $translation->id, 'suggestion-used', $source_meta, 'translation' );
