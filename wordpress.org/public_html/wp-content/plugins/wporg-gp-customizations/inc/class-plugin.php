@@ -351,7 +351,7 @@ class Plugin {
 			$source_meta = $suggestion_source . '_modified';
 		}
 		if ( $source_meta ) {
-			gp_update_meta( $translation->id, 'source_meta', $source_meta, 'translation' );
+			gp_update_meta( $translation->id, 'suggestion-used', $source_meta, 'translation' );
 		}
 
 	}
