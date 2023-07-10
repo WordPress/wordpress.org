@@ -411,6 +411,22 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	}
 
 	/**
+	 * Returns an array of photo post statuses that are considered pending.
+	 *
+	 * Posts with these statuses should count towards the user's current
+	 * submission count and are considered as being in the moderation queue.
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_pending_post_statuses() {
+		return (array) apply_filters(
+			'wporg_photos_pending_post_statuses',
+			[ 'pending' ]
+		);
+
+	}
+
+	/**
 	 * Determines if the provided MD5 hash of a photo is already known, implying
 	 * it is a duplicate.
 	 *
