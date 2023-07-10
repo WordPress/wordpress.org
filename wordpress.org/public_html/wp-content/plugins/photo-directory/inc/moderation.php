@@ -530,7 +530,7 @@ https://wordpress.org/photos/
 		$post_type = Registrations::get_post_type();
 
 		// Bail if not photo post type or not pending.
-		if ( get_post_type( $post ) !== $post_type || 'pending' !== $post->post_status ) {
+		if ( get_post_type( $post ) !== $post_type || ! in_array( $post->post_status, Photo::get_pending_post_statuses() ) ) {
 			return;
 		}
 
