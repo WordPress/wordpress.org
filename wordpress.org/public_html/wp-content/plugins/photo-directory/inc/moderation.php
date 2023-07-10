@@ -677,17 +677,7 @@ https://wordpress.org/photos/
 				'posts_per_page' => -1,
 				'post_status'    => [ 'publish', Rejection::get_post_status() ],
 				'post_type'      => Registrations::get_post_type(),
-				'meta_query'     => [
-					'relation' => 'OR',
-					[
-						'key'        => Registrations::get_meta_key( 'moderator' ),
-						'value'      => $user_id,
-					],
-					[
-						'key'        => 'rejected_by',
-						'value'      => $user_id,
-					],
-				],
+				'meta_query'     => User::get_moderator_meta_query( $user_id, true ),
 			] );
 
 			$output = $query->found_posts;
