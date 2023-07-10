@@ -236,15 +236,9 @@ class User {
 
 		if ( $user_id ) {
 			$max_pending_submissions = self::get_concurrent_submission_limit( $user_id );
-			$posts = get_posts( [
-				'fields'         => 'ids',
-				'posts_per_page' => $max_pending_submissions,
-				'author'         => $user_id,
-				'post_status'    => 'pending',
-				'post_type'      => Registrations::get_post_type(),
-			] );
+			$pending_photos_count = self::count_pending_photos( $user_id );
 
-			if ( count( $posts ) < $max_pending_submissions ) {
+			if ( $pending_photos_count < $max_pending_submissions ) {
 				$limit_reached = false;
 			}
 		}
