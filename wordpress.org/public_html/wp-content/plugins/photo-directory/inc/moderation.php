@@ -60,6 +60,9 @@ class Moderation {
 
 		// Modify Date column for photo posts table with name of moderator.
 		add_action( 'post_date_column_time',              [ __CLASS__, 'add_moderator_to_date_column' ], 10, 3 );
+
+		// Register dashboard widget.
+		add_action( 'wp_dashboard_setup',                 [ __CLASS__, 'dashboard_setup' ] );
 	}
 
 	/**
@@ -708,6 +711,68 @@ https://wordpress.org/photos/
 		}
 
 		return $t_time;
+	}
+
+	/**
+	 * Registers the admin dashboard.
+	 */
+	public static function dashboard_setup() {
+		if ( current_user_can( 'edit_photos' ) ) {
+			wp_add_dashboard_widget(
+				'dashboard_photo_moderators',
+				__( 'Photo Moderators', 'wporg-photos' ),
+				[ __CLASS__, 'dashboard_photo_moderators' ]
+			);
+		}
+	}
+
+	/**
+	 * Outputs the Photo Moderators dashboard.
+	 */
+	public static function dashboard_photo_moderators() {
+		echo '<div class="main">';
+
+		// Get all users with the 'edit_photos' capability.
+		$args = [
+			'capability' => 'edit_photos',
+		];
+		$users = get_users( $args );
+
+		echo '<table class="wp-list-table widefat fixed striped table-view-list">';
+		echo '<thead><tr>';
+		echo '<th>' . __( 'Username', 'wporg-photos' ) . '</th>';
+		echo '<th>' . __( 'Name', 'wporg-photos' ) . '</th>';
+		echo '<th title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
+		echo '<th title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
+		echo '<th>' . __( 'Last Moderated', 'wporg-photos' ) . '</th>';
+		echo '</tr></thead>';
+		echo '<tbody>';
+
+		foreach ( $users as $user ) {
+			$count_approved = User::count_photos_moderated( $user->ID );
+			$count_rejected = User::count_photos_rejected_as_moderator( $user->ID );
+
+			// Bail if user has not moderated any photos.
+			if ( ! $count_approved && ! $count_rejected ) {
+				continue;
+			}
+
+			echo '<tr>';
+			echo '<td>' . sprintf( '<a href="%s">%s</a>', esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ), $user->user_nicename ) . '</td>';
+			echo '<td>' . esc_html( $user->display_name ) . '</td>';
+			echo '<td>' . number_format_i18n( $count_approved ) . '</td>';
+			echo '<td>' . number_format_i18n( $count_rejected ) . '</td>';
+			echo '<td>';
+			$last_moderated = User::get_last_moderated( $user->ID, true );
+			if ( $last_moderated ) {
+				printf( '<a href="%s">%s</a>', get_edit_post_link( $last_moderated->ID ), get_the_date( 'Y-m-d', $last_moderated->ID ) );
+			}
+			echo '</td>';
+			echo '</tr>';
+		}
+
+		echo '</tbody></table>';
+		echo '</div>';
 	}
 
 }
