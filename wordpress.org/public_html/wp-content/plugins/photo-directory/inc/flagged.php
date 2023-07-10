@@ -59,6 +59,9 @@ class Flagged {
 		// Allow Photo metabox to be shown for flagged photos.
 		add_filter( 'wporg_photos_post_statuses_with_photo', [ __CLASS__, 'amend_with_post_status' ] );
 
+		// Treat flagged photos as pending.
+		add_filter( 'wporg_photos_pending_post_statuses',    [ __CLASS__, 'amend_with_post_status' ] );
+
 		// Record the fact that a flagged photo was unflagged.
 		$flagged_status = self::get_post_status();
 		add_action( "{$flagged_status}_to_pending",          [ __CLASS__, 'record_unflagging' ], 10, 3 );
