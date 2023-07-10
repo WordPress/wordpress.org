@@ -617,12 +617,7 @@ https://wordpress.org/photos/
 			return $content;
 		}
 
-		$pending = get_posts( [
-			'posts_per_page' => -1,
-			'author'         => (int) $user_id,
-			'post_status'    => 'pending',
-			'post_type'      => Registrations::get_post_type(),
-		] );
+		$pending = User::get_pending_photos( $user_id, '' );
 
 		// Bail if user does not have any pending posts.
 		if ( ! $pending ) {
