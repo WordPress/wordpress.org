@@ -313,12 +313,12 @@ class Plugin {
 					if ( isset( $_POST['openAITranslationsUsed'] ) ) {
 						$suggestion_source     = 'openai';
 						$suggested_translation = sanitize_text_field( $_POST['openAITranslationsUsed'] );
-						$this->update_translation_source_meta( $translation, $suggested_translation, $suggestion_source );
+						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
 					}
 					if ( isset( $_POST['deeplTranslationsUsed'] ) ) {
 						$suggestion_source     = 'deepl';
 						$suggested_translation = sanitize_text_field( $_POST['deeplTranslationsUsed'] );
-						$this->update_translation_source_meta( $translation, $suggested_translation, $suggestion_source );
+						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
 					}
 				}
 			}
@@ -329,7 +329,7 @@ class Plugin {
 	}
 
 	/**
-	 * Updates translation source meta.
+	 * Save the source of a translation suggestion.
 	 *
 	 * @param object $translation Translation object.
 	 * @param string $suggested_translation Suggested translation string.
@@ -337,7 +337,7 @@ class Plugin {
 	 *
 	 * @return void
 	 */
-	private function update_translation_source_meta( $translation, $suggested_translation, $suggestion_source ) {
+	private function save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source ) {
 		$source_meta = $suggestion_source;
 		if ( $translation->translation_0 !== $suggested_translation ) {
 			$source_meta .= '_modified';
