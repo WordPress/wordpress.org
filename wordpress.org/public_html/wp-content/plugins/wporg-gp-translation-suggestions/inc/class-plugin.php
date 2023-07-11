@@ -195,25 +195,26 @@ class Plugin {
 	 * @param object $translation Created translation.
 	 */
 	public function update_external_translations( $translation ) {
-		if ( 'GP_Route_Translation' === GP::$current_route->class_name && 'translations_post' === GP::$current_route->last_method_called ) {
-			if ( isset( $_POST['openAITranslationsUsed'] ) && 'openai' == $_POST['openAITranslationsUsed'] && $translation ) {
-				Translation_Memory::update_one_external_translation(
-					$translation->translation_0,
-					$_POST['openAITranslationsUsed'],
-					'openai_translations_used',
-					'openai_same_translations_used',
-					'openai',
-				);
-			}
-			if ( isset( $_POST['deeplTranslationsUsed'] ) && 'deepl' == $_POST['deeplTranslationsUsed'] && $translation ) {
-				Translation_Memory::update_one_external_translation(
-					$translation->translation_0,
-					$_POST['deeplTranslationsUsed'],
-					'deepl_translations_used',
-					'deepl_same_translations_used',
-					'deepl',
-				);
-			}
+		if ( 'GP_Route_Translation' !== GP::$current_route->class_name || 'translations_post' !== GP::$current_route->last_method_called || ! $translation ) {
+			return;
+		}
+		if ( isset( $_POST['openAITranslationsUsed'] ) && 'openai' == $_POST['openAITranslationsUsed'] ) {
+			Translation_Memory::update_one_external_translation(
+				$translation->translation_0,
+				$_POST['openAITranslationsUsed'],
+				'openai_translations_used',
+				'openai_same_translations_used',
+				'openai',
+			);
+		}
+		if ( isset( $_POST['deeplTranslationsUsed'] ) && 'deepl' == $_POST['deeplTranslationsUsed'] ) {
+			Translation_Memory::update_one_external_translation(
+				$translation->translation_0,
+				$_POST['deeplTranslationsUsed'],
+				'deepl_translations_used',
+				'deepl_same_translations_used',
+				'deepl',
+			);
 		}
 	}
 }
