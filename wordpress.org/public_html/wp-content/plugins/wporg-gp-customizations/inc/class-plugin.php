@@ -294,7 +294,13 @@ class Plugin {
 	 * @return void
 	 */
 	public function log_translation_source( GP_Translation $translation ) {
-		$source = '';
+		static $already_logged = array();
+		$key                   = ! $translation->translation_0 ? null : $translation->translation_0;
+		if ( isset( $already_logged[ $key ] ) ) {
+			return;
+		}
+		$already_logged[ $key ] = true;
+		$source                 = '';
 		if ( $translation && 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				$this->imported_translation_ids[] = $translation->id;
