@@ -344,12 +344,12 @@ class Plugin {
 	 * @return void
 	 */
 	private function save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source ) {
-		$source_meta = $suggestion_source;
+		$suggestion_used = $suggestion_source;
 		if ( $translation->translation_0 !== $suggested_translation ) {
-			$source_meta .= '_modified';
+			$suggestion_used .= '_modified';
 		}
-		if ( $source_meta ) {
-			gp_update_meta( $translation->id, 'suggestion-used', $source_meta, 'translation' );
+		if ( $suggestion_used ) {
+			gp_update_meta( $translation->id, 'suggestion-used', $suggestion_used, 'translation' );
 		}
 
 	}
