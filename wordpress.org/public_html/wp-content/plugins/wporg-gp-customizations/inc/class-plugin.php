@@ -26,7 +26,6 @@ class Plugin {
 	 */
 	private string $imported_source;
 
-
 	/**
 	 * Returns always the same instance of this plugin.
 	 *
@@ -66,19 +65,19 @@ class Plugin {
 
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 10, 2 );
 		add_action( 'gp_translation_created', array( $this, 'auto_reject_replaced_suggestions' ) );
-		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
-		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
-		add_action( 'gp_translations_imported', array( $this, 'log_imported_translations' ) );
 
 		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
 
 		add_filter( 'gp_custom_reasons', array( $this, 'get_custom_reasons' ), 10, 2 );
 
 		// Cron.
-		add_filter( 'cron_schedules', array( $this, 'register_cron_schedules' ) );
-		add_action( 'init', array( $this, 'register_cron_events' ) );
-		add_action( 'wporg_translate_update_contributor_profile_badges', array( $this, 'update_contributor_profile_badges' ) );
-		add_action( 'wporg_translate_update_polyglots_stats', array( $this, 'update_polyglots_stats' ) );
+		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
+		add_action( 'init', [ $this, 'register_cron_events' ] );
+		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
+		add_action( 'wporg_translate_update_polyglots_stats', [ $this, 'update_polyglots_stats' ] );
+		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
+		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
+		add_action( 'gp_translations_imported', array( $this, 'log_imported_translations' ) );
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
@@ -91,10 +90,10 @@ class Plugin {
 		// Load the API endpoints.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\REST_API\Base', 'load_endpoints' ) );
 
-		// Locales\Serbian_Latin::init();
+		//Locales\Serbian_Latin::init();
 
 		// Correct `WP_Locale` for variant locales in project lists.
-		add_filter( 'gp_translation_sets_sort', array( $this, 'filter_gp_translation_sets_sort' ) );
+		add_filter( 'gp_translation_sets_sort', [ $this, 'filter_gp_translation_sets_sort' ] );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
@@ -108,7 +107,7 @@ class Plugin {
 	 * @param string $slug Slug of a theme.
 	 * @return array Filtered WP-CLI arguments.
 	 */
-	public function set_version_for_default_themes_in_development( $args, $slug ) {
+	public function set_version_for_default_themes_in_development(  $args, $slug ) {
 		if ( 'twentytwentyone' !== $slug || ! empty( $args['version'] ) ) {
 			return $args;
 		}
@@ -178,17 +177,12 @@ class Plugin {
 			return;
 		}
 
-		$user_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"
+		$user_ids = $wpdb->get_col( $wpdb->prepare( "
 			SELECT user_id
 			FROM {$wpdb->user_translations_count}
 			WHERE accepted > 0 AND date_modified > %s
 			GROUP BY user_id
-		",
-				gmdate( 'Y-m-d H:i:s', $last_sync )
-			)
-		);
+		", gmdate( 'Y-m-d H:i:s', $last_sync ) ) );
 
 		if ( ! $user_ids ) {
 			update_option( 'wporg_translate_last_badges_sync', $now );
@@ -248,7 +242,7 @@ class Plugin {
 			// New translation being added.
 
 			$translation_set = GP::$translation_set->get( $args['translation_set_id'] );
-			$project         = GP::$project->get( $translation_set->project_id );
+			$project = GP::$project->get( $translation_set->project_id );
 
 			// If the current user can approve / write to the project, skip.
 			if (
@@ -274,7 +268,7 @@ class Plugin {
 			if ( $existing_rejected_translations ) {
 				$locale = GP_Locales::by_slug( $translation_set->locale );
 
-				$translations = array();
+				$translations = [];
 				foreach ( range( 0, GP::$translation->get_static( 'number_of_plural_translations' ) - 1 ) as $i ) {
 					if ( isset( $args[ "translation_$i" ] ) ) {
 						$translations[] = $args[ "translation_$i" ];
@@ -287,6 +281,7 @@ class Plugin {
 					}
 				}
 			}
+
 		}
 
 		return $args;
@@ -393,7 +388,7 @@ class Plugin {
 		}
 
 		$translation_set = GP::$translation_set->get( $translation->translation_set_id );
-		$project         = GP::$project->get( $translation_set->project_id );
+		$project = GP::$project->get( $translation_set->project_id );
 
 		// If the current user can approve / write to the project, skip. Probably not needed due to the `waiting` check above.
 		if (
@@ -433,14 +428,14 @@ class Plugin {
 	 */
 	function allow_searching_for_no_author_translations( $clauses, $set, $filters ) {
 		$user_login = gp_array_get( $filters, 'user_login' );
-
+	
 		if ( '0' === $user_login ) {
 			$clauses['where'] .= ( $clauses['where'] ? ' AND' : '' ) . ' t.user_id = 0';
 		} elseif ( 'anonymous' === $user_login ) {
 			// 'Anonymous' user exists, but has no translations.
 			$clauses['where'] = preg_replace( '/(user_id\s*=\s*\d+)/', 'user_id = 0', $clauses['where'] );
 		}
-
+	
 		return $clauses;
 	}
 
@@ -455,10 +450,10 @@ class Plugin {
 	 */
 	public function add_consistency_tool_link( $more_links, $project, $locale, $translation_set, $translation ) {
 		$consistency_tool_url = add_query_arg(
-			array(
+			[
 				'search' => urlencode( $translation->singular ),
 				'set'    => urlencode( $locale->slug . '/' . $translation_set->slug ),
-			),
+			],
 			home_url( '/consistency' )
 		);
 
@@ -501,14 +496,12 @@ class Plugin {
 		$logout_node = $wp_admin_bar->get_node( 'logout' );
 		$wp_admin_bar->remove_node( 'logout' );
 
-		$wp_admin_bar->add_node(
-			array(
-				'parent' => 'user-actions',
-				'id'     => 'gp-profile-settings',
-				'title'  => 'Translate Settings',
-				'href'   => gp_url( '/settings' ),
-			)
-		);
+		$wp_admin_bar->add_node( [
+			'parent' => 'user-actions',
+			'id'     => 'gp-profile-settings',
+			'title'  => 'Translate Settings',
+			'href'   => gp_url( '/settings' ),
+		] );
 
 		if ( $logout_node ) {
 			$wp_admin_bar->add_node( $logout_node ); // Ensures that logout is the last action.
@@ -525,10 +518,10 @@ class Plugin {
 			return;
 		}
 
-		$menu = array(
-			'id'   => 'log-in',
+		$menu = [
+			'id' => 'log-in',
 			'href' => wp_login_url( gp_url_current() ),
-		);
+		];
 		$wp_admin_bar->add_menu( $menu );
 	}
 
@@ -594,14 +587,14 @@ class Plugin {
 	 */
 	public function bump_assets_versions() {
 		$scripts = wp_scripts();
-		foreach ( array( 'gp-common', 'gp-editor', 'gp-glossary', 'gp-translations-page', 'gp-mass-create-sets-page' ) as $handle ) {
+		foreach ( [ 'gp-common', 'gp-editor', 'gp-glossary', 'gp-translations-page', 'gp-mass-create-sets-page' ] as $handle ) {
 			if ( isset( $scripts->registered[ $handle ] ) ) {
 				$scripts->registered[ $handle ]->ver = $scripts->registered[ $handle ]->ver . '-1';
 			}
 		}
 
 		$styles = wp_styles();
-		foreach ( array( 'gp-base' ) as $handle ) {
+		foreach ( [ 'gp-base' ] as $handle ) {
 			if ( isset( $styles->registered[ $handle ] ) ) {
 				$styles->registered[ $handle ]->ver = $styles->registered[ $handle ]->ver . '-1';
 			}
@@ -651,29 +644,23 @@ class Plugin {
 	 */
 	public function natural_sort_projects( $sub_projects, $parent_id ) {
 		if ( in_array( $parent_id, array( 1, 13, 58 ) ) ) { // 1 = WordPress, 13 = BuddyPress, 58 = bbPress
-			usort(
-				$sub_projects,
-				function( $a, $b ) {
-					return - strcasecmp( $a->name, $b->name );
-				}
-			);
+			usort( $sub_projects, function( $a, $b ) {
+				return - strcasecmp( $a->name, $b->name );
+			} );
 		}
 
 		if ( in_array( $parent_id, array( 17, 523 ) ) ) { // 17 = Plugins, 523 = Themes
-			usort(
-				$sub_projects,
-				function( $a, $b ) {
-					return strcasecmp( $a->name, $b->name );
-				}
-			);
+			usort( $sub_projects, function( $a, $b ) {
+				return strcasecmp( $a->name, $b->name );
+			} );
 		}
 
 		// Attach wp-themes meta keys
 		if ( 523 == $parent_id ) {
 			foreach ( $sub_projects as $project ) {
 				$project->non_db_field_names = array_merge( $project->non_db_field_names, array( 'version', 'screenshot' ) );
-				$project->version            = gp_get_meta( 'wp-themes', $project->id, 'version' );
-				$project->screenshot         = esc_url( gp_get_meta( 'wp-themes', $project->id, 'screenshot' ) );
+				$project->version = gp_get_meta( 'wp-themes', $project->id, 'version' );
+				$project->screenshot = esc_url( gp_get_meta( 'wp-themes', $project->id, 'screenshot' ) );
 			}
 		}
 
@@ -690,7 +677,7 @@ class Plugin {
 	function localize_links( $content, $wp_locale ) {
 		global $wpdb;
 
-		static $subdomains = array();
+		static $subdomains = [];
 		if ( ! isset( $subdomains[ $wp_locale ] ) ) {
 			$subdomains[ $wp_locale ] = $wpdb->get_var( $wpdb->prepare( 'SELECT subdomain FROM wporg_locales WHERE locale = %s LIMIT 1', $wp_locale ) );
 		}
