@@ -21,7 +21,7 @@ function api_request( $url ) {
 		$url,
 		[
 			'headers' => [
-				'Authorization' => 'BEARER ' . COMMUNITY_CALENDLY_TOKEN
+				'Authorization' => 'Bearer ' . COMMUNITY_CALENDLY_TOKEN
 			]
 		]
 	);
@@ -44,8 +44,8 @@ if ( empty( $_GET['secret'] ) || $_GET['secret'] !== COMMUNITY_CALENDLY_SECRET )
 	die();
 }
 
-$request_body_raw    = file_get_contents( 'php://input' );
-$request_body_parsed = json_decode( $request_body_raw );
+$HTTP_RAW_POST_DATA  = file_get_contents( 'php://input' );
+$request_body_parsed = json_decode( $HTTP_RAW_POST_DATA );
 $event               = $request_body_parsed->event ?? '';
 if ( ! $event ) {
 	die();
