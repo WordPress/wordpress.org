@@ -204,7 +204,6 @@ class Plugin {
 				$_POST['openAITranslationsUsed'],
 				'openai_translations_used',
 				'openai_same_translations_used',
-				'openai',
 			);
 		}
 		if ( isset( $_POST['deeplTranslationsUsed'] ) && 'deepl' == $_POST['deeplTranslationsUsed'] ) {
@@ -213,7 +212,6 @@ class Plugin {
 				$_POST['deeplTranslationsUsed'],
 				'deepl_translations_used',
 				'deepl_same_translations_used',
-				'deepl',
 			);
 		}
 	}
