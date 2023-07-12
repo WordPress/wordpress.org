@@ -56,7 +56,7 @@ class Plugin {
 		}
 
 		add_action( self::TM_UPDATE_EVENT, array( Translation_Memory_Client::class, 'update' ) );
-		add_action( 'gp_translation_created', array( $this, 'update_external_translations' ) );
+		add_action( 'gp_translation_created', array( Translation_Memory::class, 'update_external_translations' ) );
 	}
 
 	/**
@@ -187,32 +187,5 @@ class Plugin {
 			<p class="suggestions__loading-indicator">Loading <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>
 		</details>
 		<?php
-	}
-
-	/**
-	 * Update the number of external translations used.
-	 *
-	 * @param object $translation Created translation.
-	 */
-	public function update_external_translations( $translation ) {
-		if ( 'GP_Route_Translation' !== GP::$current_route->class_name || 'translations_post' !== GP::$current_route->last_method_called || ! $translation ) {
-			return;
-		}
-		if ( isset( $_POST['openAITranslationsUsed'] ) && 'openai' == $_POST['openAITranslationsUsed'] ) {
-			Translation_Memory::update_one_external_translation(
-				$translation->translation_0,
-				$_POST['openAITranslationsUsed'],
-				'openai_translations_used',
-				'openai_same_translations_used',
-			);
-		}
-		if ( isset( $_POST['deeplTranslationsUsed'] ) && 'deepl' == $_POST['deeplTranslationsUsed'] ) {
-			Translation_Memory::update_one_external_translation(
-				$translation->translation_0,
-				$_POST['deeplTranslationsUsed'],
-				'deepl_translations_used',
-				'deepl_same_translations_used',
-			);
-		}
 	}
 }

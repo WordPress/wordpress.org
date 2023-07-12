@@ -482,16 +482,36 @@ class Translation_Memory extends GP_Route {
 	}
 
 	/**
+	 * Update the number of external translations used.
+	 *
+	 * @preturn void
+	 */
+	public function update_external_translations( $translation ) {
+		$is_source_set    = isset( $_POST['externalTranslationSource'] ) && isset( $_POST['externalTranslationUsed'] );
+		$is_request_valid = 'GP_Route_Translation' === GP::$current_route->class_name && 'translations_post' === GP::$current_route->last_method_called;
+		if ( ! $is_request_valid || ! $is_source_set || ! $translation ) {
+			return;
+		}
+		self::update_one_external_translation(
+			$translation->translation_0,
+			sanitize_text_field( $_POST['externalTranslationSource'] ),
+			sanitize_text_field( $_POST['externalTranslationUsed'] ),
+		);
+	}
+
+	/**
 	 * Updates an external translation used by each user.
 	 *
 	 * @param string $translation                     The translation.
+	 * @param string $suggestion_source               The suggestion_source.
 	 * @param string $suggestion                      The suggestion.
-	 * @param string $external_translations_used      The external translations used.
-	 * @param string $external_same_translations_used The external same translations used.
 	 *
 	 * @return void
 	 */
-	public static function update_one_external_translation( string $translation, string $suggestion, string $external_translations_used, string $external_same_translations_used ) {
+	private static function update_one_external_translation( string $translation, string $suggestion_source, string $suggestion ) {
+		$external_translations_used      = $suggestion_source . '_translations_used';
+		$external_same_translations_used = $suggestion_source . '_same_translations_used';
+
 		$is_the_same_translation  = $translation == $suggestion;
 		$gp_external_translations = get_user_option( 'gp_external_translations' );
 		$translations_used        = gp_array_get( $gp_external_translations, $external_translations_used, 0 );
