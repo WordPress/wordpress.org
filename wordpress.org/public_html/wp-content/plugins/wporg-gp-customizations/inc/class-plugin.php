@@ -316,14 +316,9 @@ class Plugin {
 			if ( 'translations_post' === GP::$current_route->last_method_called ) {
 				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
 					$source = 'frontend';
-					if ( isset( $_POST['openAITranslationsUsed'] ) ) {
-						$suggestion_source     = 'openai';
-						$suggested_translation = sanitize_text_field( $_POST['openAITranslationsUsed'] );
-						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
-					}
-					if ( isset( $_POST['deeplTranslationsUsed'] ) ) {
-						$suggestion_source     = 'deepl';
-						$suggested_translation = sanitize_text_field( $_POST['deeplTranslationsUsed'] );
+					if ( isset( $_POST['externalTranslationSource'] ) ) {
+						$suggestion_source     = sanitize_text_field( $_POST['externalTranslationSource'] );
+						$suggested_translation = sanitize_text_field( $_POST['externalTranslationUsed'] );
 						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
 					}
 				}
