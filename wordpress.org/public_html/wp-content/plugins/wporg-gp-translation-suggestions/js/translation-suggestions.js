@@ -479,8 +479,7 @@
 		if ( ! $row ) {
 			return;
 		}
-		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' );
-
+		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' ) == 'translation' ? 'tm' : $row.data( 'suggestion-source' );
 		externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
 
 	}
