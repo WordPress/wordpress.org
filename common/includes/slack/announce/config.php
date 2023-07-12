@@ -375,6 +375,10 @@ function get_whitelist() {
 			'santanainniss',
 			'SeReedMedia',
 		),
+		'mentorship-cohort-july-2023' => array(
+			'rishanker',
+			'nao',
+		),
 		'meta' => array(
 			'coreymckrill',
 			'courane01', // @Courtney on Slack
