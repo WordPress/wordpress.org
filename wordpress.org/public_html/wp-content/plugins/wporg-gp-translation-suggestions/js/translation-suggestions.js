@@ -487,7 +487,6 @@
 
 	//Prefilter ajax requests to add external translations used to the request.
 	$.ajaxPrefilter( function ( options ) {
-		let data = Object.fromEntries( new URLSearchParams( options.data ) );
 		if ( ! externalSuggestion ) {
 			return;
 		}
