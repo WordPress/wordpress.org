@@ -24,17 +24,11 @@
 	 */
 	var DeeplTMSuggestionRequested = [];
 
-	/** 
-	* Stores the OpenAI translations used.
-	* @type {array}
-	*/
-   var $openAITranslationsUsed = [];
-
    /**
-	* Stores the DeepL translations used.
-	* @type {array}
-	* */
-   var $deeplTranslationsUsed = [];
+	* Stores the external translations used.
+	* @type {object}
+    */
+   var externalSuggestion = {};
 
 	/**
 	 * Stores (caches) the "Other Languages" suggestions that has already been queried,
@@ -485,29 +479,21 @@
 		if ( ! $row ) {
 			return;
 		}
-		var $originalId = $row.closest( 'tr' ).attr( 'id' ).substring( 7 );
-		var $CSSclass = $row.attr( 'class' );
-		if ( $CSSclass.indexOf( 'openai' ) > -1 ) {
-			$openAITranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
-			delete $deeplTranslationsUsed[ $originalId ];
-		} else if ( $CSSclass.indexOf( 'deepl' ) > -1 ) {
-			$deeplTranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
-			delete $openAITranslationsUsed[ $originalId ];
-		}
+		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' );
+
+		externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
+
 	}
 
 	//Prefilter ajax requests to add external translations used to the request.
 	$.ajaxPrefilter( function ( options ) {
 		let data = Object.fromEntries( new URLSearchParams( options.data ) );
-		let originalId = data.original_id;
-
-		const isExternalTranslationUsed = $openAITranslationsUsed[originalId] || $deeplTranslationsUsed[originalId];
-		if ( ! isExternalTranslationUsed ) {
+		if ( ! externalSuggestion ) {
 			return;
 		}
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
-				options.data += ( $openAITranslationsUsed[originalId] ) ? '&openAITranslationsUsed=' + $openAITranslationsUsed[originalId] : '';
-				options.data += ( $openAITranslationsUsed[originalId] ) ? '&deeplTranslationsUsed=' + $deeplTranslationsUsed[originalId] : '';
+				options.data += '&externalTranslationSource=' + externalSuggestion.suggestion_source;
+				options.data += '&externalTranslationUsed=' + externalSuggestion.translation;
 		}
 	});
 })( jQuery );
