@@ -139,7 +139,7 @@ function get_parent_channels( $channel ) {
 		case 'tide':
 			$root = 'core';
 			break;
-		case 'mentorship':  // Such as #mentorship-cohort-july-2023
+		case 'mentorship': // Such as #mentorship-cohort-july-2023
 			$root = 'contributor-mentorship';
 			break;
 		case 'contributor': // Such as #contributor-mentorship
@@ -172,7 +172,13 @@ function get_parent_channels( $channel ) {
 			}
 	}
 
-	return $parent_channels ?: false;
+	// Recurse, in case the parent channel has a parent channel.
+	// ie. #mentorship-cohort-july-2023 => #contributor-mentorship => #community-team
+	foreach ( $parent_channels as $parent_channel ) {
+		$parent_channels = array_merge( $parent_channels, get_parent_channels( $parent_channel ) ?: [] );
+	}
+
+	return array_unique( $parent_channels ) ?: false;
 }
 
 function run( $data ) {
