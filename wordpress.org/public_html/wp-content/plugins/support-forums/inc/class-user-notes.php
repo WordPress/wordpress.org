@@ -142,6 +142,9 @@ class User_Notes {
 			unset( $this->user_notes[ $user_id ] );
 		}
 
+		// Fire an action to let others know about the note.
+		do_action( 'wporg_bbp_note_added', $user_id, $note_id, $user_notes[ $note_id ] );
+
 		return true;
 	}
 

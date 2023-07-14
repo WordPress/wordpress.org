@@ -4,10 +4,20 @@ namespace WordPressdotorg\Forums;
 
 class Audit_Log {
 
+	/**
+	 * List of note IDs that have been edited, keyed by user ID.
+	 *
+	 * @var array
+	 */
+	var $edited_notes = [];
+
 	function __construct() {
 		// Audit-log entries for Term subscriptions (add/remove)
 		add_action( 'wporg_bbp_add_user_term_subscription',    array( $this, 'term_subscriptions' ), 10, 2 );
 		add_action( 'wporg_bbp_remove_user_term_subscription', array( $this, 'term_subscriptions' ), 10, 2 );
+
+		// Slack logs for Moderation notes.
+		add_action( 'wporg_bbp_note_added', [ $this, 'forums_notes_added' ], 10, 2 );
 	}
 
 	/**
@@ -38,6 +48,82 @@ class Audit_Log {
 			$action,
 			get_current_user_id()
 		);
+	}
+
+	/**
+	 * Record Note changes to Slack.
+	 *
+	 * @param int $user_id
+	 * @param int $note_id
+	 */
+	function forums_notes_added( $user_id, $note_id ) {
+		$this->edited_notes[ $user_id ] ??= [];
+		$this->edited_notes[ $user_id ][] = $note_id;
+
+		if ( ! has_action( 'shutdown', [ $this, 'forums_notes_added_shutdown' ] ) ) {
+			add_action( 'shutdown', [ $this, 'forums_notes_added_shutdown' ] );
+		}
+	}
+
+	/**
+	 * Send Slack notifications for Note changes.
+	 */
+	function forums_notes_added_shutdown() {
+		if ( ! function_exists( 'notify_slack' ) || ! defined( 'FORUMS_MODACTIONS_SLACK_CHANNEL' ) ) {
+			return;
+		}
+
+		// Fetch all the notes altered.
+		foreach ( $this->edited_notes as $user_id => $note_ids ) {
+			$note_ids = array_unique( $note_ids );
+			$notes    = Plugin::get_instance()->user_notes->get_user_notes( $user_id, false );
+
+			$notes = array_filter(
+				$notes->raw,
+				function( $note_id ) use ( $note_ids ) {
+					return in_array( $note_id, $note_ids );
+				},
+				ARRAY_FILTER_USE_KEY
+			);
+
+			$notes = array_map(
+				function( $note ) {
+					$pretext = '';
+					if ( strtotime( $note->date ) < time() - 5 ) {
+						$pretext = '_(Edited)_ ';
+					}
+
+					return $pretext . $note->text;
+				},
+				$notes
+			);
+
+			$note_text = trim( implode( "\n", $notes ) );
+
+			if ( str_contains( $note_text, 'Forum role changed' ) ) {
+				$action_text = 'Role changed';
+			} else {
+				$action_text = 'Note added';
+			}
+
+			$message = sprintf(
+				"*%s for %s*\n%s\n",
+				$action_text,
+				sprintf(
+					'<%s|%s>',
+					bbp_get_user_profile_edit_url( $user_id ),
+					get_userdata( $user_id )->display_name ?: get_userdata( $user_id )->user_login
+				),
+				// Wrap the note in a blockquote.
+				'> ' . str_replace(
+					"\n",
+					"\n> ",
+					$note_text
+				)
+			);
+
+			notify_slack( FORUMS_MODACTIONS_SLACK_CHANNEL, $message, wp_get_current_user() );
+		}
 	}
 
 	/**
