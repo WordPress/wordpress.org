@@ -24,7 +24,7 @@ class Plugin {
 	/**
 	 * @var string The source of translations that have been imported.
 	 */
-	private string $imported_source;
+	private string $imported_source = '';
 
 	/**
 	 * Returns always the same instance of this plugin.
