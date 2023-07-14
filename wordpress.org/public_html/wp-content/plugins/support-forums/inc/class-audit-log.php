@@ -106,12 +106,19 @@ class Audit_Log {
 				$action_text = 'Note added';
 			}
 
+			$user_edit_url = bbp_get_user_profile_edit_url( $user_id );
+
+			// On login.wordpress.org, the link should direct to the global forums.
+			if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && WPORG_LOGIN_REGISTER_BLOGID == get_current_blog_id() ) {
+				$user_edit_url = sprintf( 'https://wordpress.org/support/users/%s/edit/', urlencode( get_userdata( $user_id )->user_login ) );
+			}
+
 			$message = sprintf(
 				"*%s for %s*\n%s\n",
 				$action_text,
 				sprintf(
 					'<%s|%s>',
-					bbp_get_user_profile_edit_url( $user_id ),
+					$user_edit_url,
 					get_userdata( $user_id )->display_name ?: get_userdata( $user_id )->user_login
 				),
 				// Wrap the note in a blockquote.
