@@ -17,6 +17,16 @@ class Plugin {
 	private static $instance;
 
 	/**
+	 * @var array The IDs of the translations that have been imported.
+	 */
+	private array $imported_translation_ids = array();
+
+	/**
+	 * @var string The source of translations that have been imported.
+	 */
+	private string $imported_source;
+
+	/**
 	 * Returns always the same instance of this plugin.
 	 *
 	 * @return Plugin
@@ -65,6 +75,9 @@ class Plugin {
 		add_action( 'init', [ $this, 'register_cron_events' ] );
 		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
 		add_action( 'wporg_translate_update_polyglots_stats', [ $this, 'update_polyglots_stats' ] );
+		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
+		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
+		add_action( 'gp_translations_imported', array( $this, 'log_imported_translations' ) );
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
@@ -272,6 +285,99 @@ class Plugin {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Stores source of a translation in database.
+	 *
+	 * @param GP_Translation $translation Translation instance.
+	 * @return void
+	 */
+	public function log_translation_source( GP_Translation $translation ) {
+		static $already_logged = array();
+		$key                   = ! $translation->translation_0 ? null : $translation->translation_0;
+		if ( isset( $already_logged[ $key ] ) ) {
+			return;
+		}
+		$already_logged[ $key ] = true;
+		$source                 = '';
+		if ( $translation && 'GP_Route_Translation' === GP::$current_route->class_name ) {
+			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
+				$this->imported_translation_ids[] = $translation->id;
+
+				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
+					$this->imported_source = 'playground';
+				} elseif ( ! isset( $_POST['source'] ) && 'Import' == $_POST['submit'] ) {
+					$this->imported_source = 'import';
+				} else {
+					return;
+				}
+			}
+			if ( 'translations_post' === GP::$current_route->last_method_called ) {
+				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
+					$source = 'frontend';
+					if ( isset( $_POST['openAITranslationsUsed'] ) ) {
+						$suggestion_source     = 'openai';
+						$suggested_translation = sanitize_text_field( $_POST['openAITranslationsUsed'] );
+						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
+					}
+					if ( isset( $_POST['deeplTranslationsUsed'] ) ) {
+						$suggestion_source     = 'deepl';
+						$suggested_translation = sanitize_text_field( $_POST['deeplTranslationsUsed'] );
+						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
+					}
+				}
+			}
+		}
+		if ( $source ) {
+			gp_update_meta( $translation->id, 'source', $source, 'translation' );
+		}
+	}
+
+	/**
+	 * Save the source of a translation suggestion.
+	 *
+	 * @param object $translation Translation object.
+	 * @param string $suggested_translation Suggested translation string.
+	 * @param string $suggestion_source Suggestion source.
+	 *
+	 * @return void
+	 */
+	private function save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source ) {
+		$suggestion_used = $suggestion_source;
+		if ( $translation->translation_0 !== $suggested_translation ) {
+			$suggestion_used .= '_modified';
+		}
+		if ( $suggestion_used ) {
+			gp_update_meta( $translation->id, 'suggestion-used', $suggestion_used, 'translation' );
+		}
+
+	}
+
+	/**
+	 * Logs imported translations.
+	 *
+	 * @return void
+	 */
+	public function log_imported_translations() {
+		global $wpdb;
+		$source = $this->imported_source;
+		if ( ! $source && ! $this->imported_translation_ids ) {
+			return;
+		}
+		$sql        = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
+		$sql_vars   = array();
+		$sql_values = array_map(
+			function( $translation_id ) use ( $source, &$sql_vars ) {
+				$sql_vars[] = $translation_id;
+				$sql_vars[] = $source;
+				return '( "translation", %d, "source", %s )';
+			},
+			$this->imported_translation_ids
+		);
+		$sql       .= implode( ', ', $sql_values );
+		$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
+
 	}
 
 	/**
