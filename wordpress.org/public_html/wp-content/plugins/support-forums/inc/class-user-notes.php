@@ -162,7 +162,10 @@ class User_Notes {
 
 		// Check to see if the last note added was from the current user in the last few minutes, and if so, append to it.
 		if ( $existing_notes->count ) {
-			$last_note_id = array_key_last( $existing_notes->raw );
+			// Find the latest note.
+			$note_times   = wp_list_pluck( $existing_notes->raw, 'date' );
+			$note_times   = array_map( 'strtotime', $note_times );
+			$last_note_id = array_search( max( $note_times ), $note_times );
 			$last_note    = $existing_notes->raw[ $last_note_id ];
 			if (
 				// Note from the current user
