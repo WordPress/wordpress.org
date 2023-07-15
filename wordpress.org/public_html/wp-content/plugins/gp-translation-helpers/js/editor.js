@@ -1,6 +1,13 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window */
+/* global document, $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
+	/**
+	 * Stores (caches) the content of the translation helpers, to avoid making the query another time.
+	 *
+	 * @type {Array}
+	 */
+	// eslint-disable-next-line prefer-const
+	let translationHelpersCache = [];
 	let focusedRowId = '';
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
@@ -19,6 +26,7 @@ jQuery( function( $ ) {
 		const tr = $( this ).closest( 'tr.editor' );
 		const rowId = tr.attr( 'row' );
 		const translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
+		const nextEditor = $gp.editor.current.nextAll( 'tr.editor' ).first();
 		const chatgpt_review_status = JSON.parse( window.localStorage.getItem( 'translate-details-state' ) );
 		const chatgpt_review_enabled = ( chatgpt_review_status && 'open' === chatgpt_review_status[ 'details-chatgpt' ] ) || ! chatgpt_review_status;
 
@@ -27,13 +35,15 @@ jQuery( function( $ ) {
 		}
 		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
+
+		if ( nextEditor.length ) {
+			cacheTranslationHelpersForARow( nextEditor );
+		}
+
 		if ( chatgpt_review_enabled && $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
 			fetchOpenAIReviewResponse( rowId, tr, false );
 		} else {
-			if ( ! $gp_comment_feedback_settings.openai_key ) {
-				tr.find( '.details-chatgpt' ).hide();
-			}
-			tr.find( '.openai-review' ).hide();
+			tr.find( '.details-chatgpt, .openai-review' ).hide();
 		}
 	} );
 
@@ -193,6 +203,12 @@ jQuery( function( $ ) {
 		$( 'tr.preview td' ).trigger( 'dblclick' );
 	}
 
+	$( document ).ready( function() {
+		// Gets the translation helpers for the first row and caches them.
+		const firstEditor = $( '#translations' ).find( 'tr.editor' ).first();
+		cacheTranslationHelpersForARow( firstEditor );
+	} );
+
 	/**
 	 * Hides all tabs and show one of them, the last clicked.
 	 *
@@ -236,22 +252,69 @@ jQuery( function( $ ) {
 	}
 
 	/**
-	 * Load the content in the tabs (header tab and content) for the opened row.
+	 * Loads the content in the tabs (header tab and content) for the opened row.
 	 *
 	 * @param {Object} element The element that triggers the action.
 	 */
 	function loadTabsAndDivs( element ) {
-		const originalId = element.closest( 'tr' ).attr( 'id' ).substring( 7 );
-		const requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
-		$.getJSON( requestUrl, function( data ) {
+		const rowId = element.closest( 'tr.editor' ).attr( 'id' ).substring( 7 );
+		const requestUrl = $gp_translation_helpers_editor.translation_helper_url + rowId + '?nohc';
+		if ( translationHelpersCache[ rowId ] !== undefined ) {
+			updateDataInTabs( translationHelpersCache[ rowId ], rowId );
+		} else {
+			$.getJSON( requestUrl, function( data ) {
+				translationHelpersCache[ rowId ] = data;
+				updateDataInTabs( data, rowId );
+			} );
+		}
+	}
+
+	/**
+	 * Updates the content of the tabs and divs.
+	 *
+	 * @param {Object} data       The content to update the tabs and divs.
+	 * @param {number} originalId The id of the original string to translate.
+	 *
+	 * @return {void}
+	 */
+	function updateDataInTabs( data, originalId ) {
+		if ( data[ 'helper-translation-discussion-' + originalId ] !== undefined ) {
 			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion&nbsp;(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
 			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
+		}
+		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
 			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
 			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+		}
+		if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
 			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
 			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
 			add_copy_button( '#sidebar-div-other-locales-' + originalId );
-		} );
+		}
+	}
+
+	/**
+	 * Caches the translation helpers for a row.
+	 *
+	 * @param {Object} editor The editor row.
+	 *
+	 * @return {void}
+	 */
+	function cacheTranslationHelpersForARow( editor ) {
+		const rowId = editor.attr( 'row' );
+		const requestUrl = $gp_translation_helpers_editor.translation_helper_url + rowId + '?nohc';
+		if ( ! rowId ) {
+			return;
+		}
+
+		if ( translationHelpersCache[ rowId ] === undefined ) {
+			// Store a string with a space to avoid making the same request another time.
+			translationHelpersCache[ rowId ] = ' ';
+			$.getJSON( requestUrl, function( data ) {
+				translationHelpersCache[ rowId ] = data;
+				updateDataInTabs( data, rowId );
+			} );
+		}
 	}
 
 	function EventStreamParser( onParse ) {

@@ -49,11 +49,18 @@ class Admin {
 		// Show user card for photo contributor.
 		add_action( 'do_meta_boxes',                           [ __CLASS__, 'register_photo_contributor_metabox' ], 1, 3 );
 
-		// Admin notices
+		// Admin notice if killswitch enabled.
 		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_if_killswitch_enabled' ] );
+
+		// Admin notice related to flagging/unflagging.
+		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_if_flagged_or_unflagged' ] );
 
 		// Modify admin menu links for photo posts.
 		add_action( 'admin_menu',                              [ __CLASS__, 'modify_admin_menu_links' ] );
+
+		// Restrict Media Library access.
+		add_action( 'admin_init',                              [ __CLASS__, 'restrict_media_library_access' ] );
+		add_action( 'admin_menu',                              [ __CLASS__, 'disable_media_library' ] );
 
 		// Navigate to next post after moderation.
 		add_action( 'edit_form_top',                           [ __CLASS__, 'show_moderation_message' ] );
@@ -74,6 +81,66 @@ class Admin {
 			sprintf(
 				__( '<strong>Photo uploads are currently disabled for all users!</strong> Uncheck <a href="%s">the setting</a> to re-enable uploading.', 'wporg-photos' ),
 				esc_url( admin_url( 'options-media.php' ) . '#' . Settings::KILLSWITCH_OPTION_NAME )
+			)
+		);
+	}
+
+	/**
+	 * Outputs admin notices.
+	 */
+	public static function add_notice_if_flagged_or_unflagged() {
+		$screen = get_current_screen();
+
+		// Only add notice when editing single photo.
+		$post_type = Registrations::get_post_type();
+		if ( ! $screen || $post_type !== $screen->id || $post_type !== $screen->post_type ) {
+			return;
+		}
+
+		$notice = $user = $user_id = '';
+		$notice_type = 'warning';
+
+		$post = get_post();
+		if ( ! $post ) {
+			return;
+		}
+
+		// Don't need to report flagging/unflagging for published posts.
+		if ( 'published' === $post->post_status ) {
+			return;
+		}
+
+		// Note: Not reporting who flagged a post once it has been unflagged.
+		if ( $user_id = Flagged::get_unflagger( $post ) ) {
+			/* translators: 1: URL to the profile of the user who unflagged the photo, 2: The name of the user who unflagged the photo. */
+			$notice = __( '<strong>This photo was unflagged by <a href="%1$s">%2$s</a> and is safe to moderate.', 'wporg-photos' );
+			$notice_type = 'success';
+		}
+		elseif ( $user_id = Flagged::get_flagger( $post ) ) {
+			// A user can't actually flag their own submission. This results from auto-flagging.
+			if ( $user_id === $post->post_author ) {
+				$notice = __( '<strong>This photo was automatically flagged due to potential concerns after image analysis.', 'wporg-photos' );
+			} else {
+				/* translators: 1: URL to the profile of the user who flagged the photo, 2: The name of the user who flagged the photo. */
+				$notice = __( '<strong>This photo was flagged by <a href="%1$s">%2$s</a>.', 'wporg-photos' );
+			}
+		}
+
+		if ( $user_id ) {
+			$user = new \WP_User( $user_id );
+		}
+
+		if ( ! $user  || ! $notice ) {
+			return;
+		}
+
+		printf(
+			'<div id="message" class="notice notice-%s"><p>%s</p></div>' . "\n",
+			esc_attr( $notice_type ),
+			sprintf(
+				$notice,
+				'https://profiles.wordpress.org/' . $user->user_nicename . '/',
+				sanitize_text_field( $user->display_name )
 			)
 		);
 	}
@@ -110,12 +177,20 @@ class Admin {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_scripts_and_styles' ] );
 	}
 
+	/**
+	 * Enqueues admin scripts and styles.
+	 */
 	public static function admin_enqueue_scripts_and_styles() {
 		wp_enqueue_script( 'wporg-photos', plugins_url( 'assets/js/admin.js', dirname( __FILE__ ) ), [], filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/js/admin.js' ), true );
 		wp_enqueue_style( 'wporg_photos_admin', plugins_url( 'assets/css/admin.css', WPORG_PHOTO_DIRECTORY_MAIN_FILE ), [], filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/css/admin.css' ) );
 	}
 
-	protected static function should_include_photo_column() {
+	/**
+	 * Determines if the 'Photo' column should be added to a post listing table.
+	 *
+	 * @return bool True if the 'Photo' column should be added; else false.
+	 */
+	public static function should_include_photo_column() {
 		$screen = get_current_screen();
 		$post_type = Registrations::get_post_type();
 
@@ -125,9 +200,18 @@ class Admin {
 			'attachment'
 		];
 
-		$excluded_post_statuses = [ 'trash', Rejection::get_post_status() ];
+		$post_statuses = Photo::get_post_statuses_with_photo();
 
-		return ! empty( $screen->id ) && in_array( $screen->id, $pertinent_screen_ids ) && ( empty( $_GET['post_status'] ) || ! in_array( $_GET['post_status'], $excluded_post_statuses ) );
+		return (
+			// Screen is known.
+			! empty( $screen->id )
+		&&
+			// Screen is one that could show the photo column.
+			in_array( $screen->id, $pertinent_screen_ids )
+		&&
+			// No post status is explicitly requested OR the post status is one that supports photos.
+			( empty( $_GET['post_status'] ) || in_array( $_GET['post_status'], $post_statuses ) )
+		);
 	}
 
 	/**
@@ -293,7 +377,7 @@ class Admin {
 	public static function add_photos_meta_boxes( $post_type, $post ) {
 		// Certain metaboxes shouldn't be shown unless in contexts where a photo is expected.
 		$show = true;
-		if ( ! in_array( get_post_status( $post ), [ 'draft', 'inherit', 'pending', 'private', 'publish' ] ) ) {
+		if ( ! in_array( get_post_status( $post ), Photo::get_post_statuses_with_photo() ) ) {
 			$show = false;
 		}
 
@@ -542,8 +626,8 @@ class Admin {
 		}
 
 		// Show number of rejected photos.
-		$rejections = Rejection::get_user_rejections( $authordata->ID );
-		if ( $rejections ) {
+		$rejection_count = User::count_rejected_photos( $authordata->ID );
+		if ( $rejection_count ) {
 			$rejected_link = add_query_arg( [
 				'post_type'   => Registrations::get_post_type(),
 				'post_status' => Rejection::get_post_status(),
@@ -552,11 +636,14 @@ class Admin {
 			$display_name .= '<div class="user-rejected-count">'
 				. sprintf(
 					/* translators: %s: Count of user rejections linked to listing of their rejections. */
-					__( 'Rejected: <strong>%s</strong>', 'wporg-photos' ),
-					sprintf( '<a href="%s">%d</a>', $rejected_link, count( $rejections ) )
+					_n( 'Rejected: <strong>%s</strong>', 'Rejected: <strong>%s</strong>', $rejection_count, 'wporg-photos' ),
+					sprintf( '<a href="%s">%d</a>', $rejected_link, $rejection_count )
 				)
 				. "</div>\n";
 		}
+
+		// Prevent unbalanced tag.
+		$display_name .= '<a>';
 
 		return $display_name;
 	}
@@ -803,6 +890,23 @@ class Admin {
 						);
 					?></li>
 					<li><?php
+						$flagged_count = User::count_flagged_photos( $author->ID );
+						$flagged_link = '';
+						if ( $flagged_count && current_user_can( Flagged::get_capability() )) {
+							$link_args = [
+								'post_type'   => Registrations::get_post_type(),
+								'post_status' => Flagged::get_post_status(),
+								'author'      => $author->ID,
+							];
+							$flagged_link = add_query_arg( $link_args, 'edit.php' );
+						}
+						printf(
+							/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
+							_n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
+							$flagged_link ? sprintf( '<a href="%s">%d</a>', $flagged_link, $flagged_count ) : $flagged_count
+						);
+					?></li>
+					<li><?php
 						$pending_count = User::count_pending_photos( $author->ID );
 						$link_args = [
 							'post_type'   => Registrations::get_post_type(),
@@ -929,6 +1033,29 @@ class Admin {
 
 		if ( $photo_contrib_ip ) {
 			echo '<span>' . sanitize_text_field( $photo_contrib_ip ) . '</span>';
+		}
+	}
+
+	/**
+	 * Restricts direct access to the Media Library by moderators.
+	 */
+	public static function restrict_media_library_access() {
+		global $pagenow;
+		if (
+			'upload.php' === $pagenow
+		&&
+			! current_user_can( get_post_type_object( 'post' )->cap->create_posts )
+		) {
+			wp_die( __( 'Sorry, you are not allowed to access the media library.', 'wporg-photos' ) );
+		}
+	}
+
+	/**
+	 * Removes "Media Library" from the admin menu for moderators.
+	 */
+	public static function disable_media_library() {
+		if ( ! current_user_can( get_post_type_object( 'post' )->cap->create_posts ) ) {
+			remove_menu_page( 'upload.php' );
 		}
 	}
 

@@ -193,6 +193,70 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		}
 	}
 
+	/**
+	 * Fetch user preferences from Trac.
+	 *
+	 * @param string $username The username.
+	 * @return array The user preferences. [ key => value ].
+	 */
+	function get_user_prefs( $username ) {
+		$data = $this->db->get_results( $this->db->prepare(
+			'SELECT name, value FROM session_attribute WHERE sid = %s',
+			$username
+		), ARRAY_A );
+
+		return array_column( $data, 'value', 'name' );
+	}
+
+	/**
+	 * Set a user preference in Trac.
+	 *
+	 * @param string $username   The username.
+	 * @param string $name       The preference.
+	 * @param string|null $value The value to set.
+	 */
+	function set_user_pref( $username, $name, $value = '' ) {
+		// The trac column for username is `sid`. All our users are authenticated.
+		// The session_attribute table has an index: UNIQUE (sid,authenticated,name)
+
+		$result = $this->db->insert( 'session_attribute', array(
+			'sid'           => $username,
+			'authenticated' => 1,
+			'name'          => $name,
+			'value'         => $value
+		) );
+
+		if ( ! $result ) {
+			$result = $this->db->update(
+				'session_attribute',
+				array(
+					'value'         => $value
+				), array(
+					'sid'           => $username,
+					'authenticated' => 1,
+					'name'          => $name,
+				)
+			);
+		}
+
+		return $result;
+	}
+	
+	/**
+	 * Delete a user preference.
+	 *
+	 * @param string $username The username.
+	 * @param string $name     The preference.
+	 * @return bool
+	 */
+	function delete_user_pref( $username, $name ) {
+		return $this->db->delete( 'session_attribute', array(
+			'sid'           => $username,
+			'authenticated' => 1,
+			'name'          => $name
+		) );
+	}
+
 	function get_user_anonymization_items( $username ) {
 		$ticket_subscriptions = $this->get_trac_ticket_subscriptions_for_user( $username );
 		$ticket_notifications = $this->get_trac_notifications_for_user( $username );
@@ -232,7 +296,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			'ticket_owner',
 			'attachments',
 			'comments',
-			'profile_data',
+			'profile_data'
 		);
 	}
 

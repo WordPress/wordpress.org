@@ -138,7 +138,7 @@ class Reviewer {
 	 */
 	public static function set_reviewer( $post, $reviewer, $log_it = true ) {
 		$post             = get_post( $post );
-		$current_reviewer = get_post_meta( $post->ID, 'assigned_reviewer', true );
+		$current_reviewer = (int) get_post_meta( $post->ID, 'assigned_reviewer', true );
 		$reviewer         = is_object( $reviewer ) ? $reviewer : get_user_by( 'id', $reviewer );
 		$reviewer_id      = $reviewer->ID ?? 0;
 

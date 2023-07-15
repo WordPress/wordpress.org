@@ -89,7 +89,7 @@ class User {
 			'fields'         => $fields,
 			'posts_per_page' => -1,
 			'author'         => $user_id,
-			'post_status'    => 'pending',
+			'post_status'    => Photo::get_pending_post_statuses(),
 			'post_type'      => Registrations::get_post_type(),
 		] );
 	}
@@ -110,12 +110,159 @@ class User {
 			$user_id = $authordata->ID;
 		}
 
+		if ( ! $user_id ) {
+			return 0;
+		}
+
 		return (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s AND post_author = %d",
 			Registrations::get_post_type(),
 			Rejection::get_post_status(),
 			$user_id
 		) );
+	}
+
+	/**
+	 * Returns a count of flagged photos for a user.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes global
+	 *                     author. Default false.
+	 * @return int
+	 */
+	public static function count_flagged_photos( $user_id = false ) {
+		global $wpdb;
+
+		if (  ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		return (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s AND post_author = %d",
+			Registrations::get_post_type(),
+			Flagged::get_post_status(),
+			$user_id
+		) );
+	}
+
+	/**
+	 * Returns the 'meta_query' value for use in finding posts moderated (and also
+	 * optionally rejected) by a user.
+	 *
+	 * @param int $user_id            The user ID.
+	 * @param int $include_rejections Optional. Should the count of photos
+	 *                                rejected by the user be included in the
+	 *                                count? Default false.
+	 * @return array
+	 */
+	public static function get_moderator_meta_query( $user_id, $include_rejections = false ) {
+		if ( ! $user_id ) {
+			return [];
+		}
+
+		$moderator_query = [
+			'key'   => Registrations::get_meta_key( 'moderator' ),
+			'value' => $user_id,
+		];
+		$rejector_query = [
+			'key'   => 'rejected_by',
+			'value' => $user_id,
+		];
+
+		if ( $include_rejections ) {
+			$meta_query = [
+				'relation' => 'OR',
+				$moderator_query,
+				$rejector_query,
+			];
+		} else {
+			$meta_query = [ $moderator_query ];
+		}
+
+		return $meta_query;
+	}
+
+	/**
+	 * Returns the number of photos moderated by the user.
+	 *
+	 * By default, this does NOT include photo rejections unless the optional
+	 * argument is enabled.
+	 *
+	 * @param int $user_id            Optional. The user ID. If not defined,
+	 *                                assumes global author. Default false.
+	 * @param int $include_rejections Optional. Should the count of photos
+	 *                                rejected by the user be included in the
+	 *                                count? Default false.
+	 * @return int
+	 */
+	public static function count_photos_moderated( $user_id = false, $include_rejections = false ) {
+		if ( ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		$post_statuses = ['publish'];
+		if ( $include_rejections ) {
+			$post_statuses[] = Rejection::get_post_status();
+		}
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => $post_statuses,
+			'meta_query'     => self::get_moderator_meta_query( $user_id, $include_rejections ),
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		];
+
+		$query = new \WP_Query( $args );
+
+		return $query->post_count;
+	}
+
+	/**
+	 * Returns the number of photos rejected by the user as a moderator.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes global
+	 *                     author. Default false.
+	 * @return int
+	 */
+	public static function count_photos_rejected_as_moderator( $user_id = false ) {
+		if ( ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => Rejection::get_post_status(),
+			'meta_query'     => [
+				[
+					'key'   => 'rejected_by',
+					'value' => $user_id,
+				],
+			],
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		];
+
+		$query = new \WP_Query( $args );
+
+		return $query->post_count;
 	}
 
 	/**
@@ -212,20 +359,55 @@ class User {
 
 		if ( $user_id ) {
 			$max_pending_submissions = self::get_concurrent_submission_limit( $user_id );
-			$posts = get_posts( [
-				'fields'         => 'ids',
-				'posts_per_page' => $max_pending_submissions,
-				'author'         => $user_id,
-				'post_status'    => 'pending',
-				'post_type'      => Registrations::get_post_type(),
-			] );
+			$pending_photos_count = self::count_pending_photos( $user_id );
 
-			if ( count( $posts ) < $max_pending_submissions ) {
+			if ( $pending_photos_count < $max_pending_submissions ) {
 				$limit_reached = false;
 			}
 		}
 
 		return $limit_reached;
+	}
+
+	/**
+	 * Returns the photo post most recently moderated by the user.
+	 *
+	 * @param int $user_id            Optional. The user ID. If not defined,
+	 *                                assumes global author. Default false.
+	 * @param int $include_rejections Optional. Should photos rejected by the
+	 *                                user be considered? Default false.
+	 * @return WP_Post|false The post, or false if no posts found.
+	 */
+	public static function get_last_moderated( $user_id = false, $include_rejections = false ) {
+		if ( ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return false;
+		}
+
+		$post_statuses = ['publish'];
+		if ( $include_rejections ) {
+			$post_statuses[] = Rejection::get_post_status();
+		}
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => $post_statuses,
+			'meta_query'     => self::get_moderator_meta_query( $user_id, $include_rejections ),
+			'posts_per_page' => 1,
+		];
+
+		$query = new \WP_Query( $args );
+
+		if ( $query->have_posts() ) {
+			return $query->posts[0];
+		}
+
+		return false;
 	}
 
 }

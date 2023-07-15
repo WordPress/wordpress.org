@@ -31,24 +31,24 @@ function get_channel_info( $channel_id ) {
 	return $channel_info['channel'] ?? false;
 }
 
+/**
+ * Get the list of whitelisted users for a channel.
+ * Includes parent channel whitelisted users.
+ *
+ * @param string $channel The channel to get the whitelist for.
+ * @return array
+ */
 function get_whitelist_for_channel( $channel ) {
-	$whitelist = get_whitelist();
+	$whitelist       = get_whitelist();
+	$users           = $whitelist[ $channel ] ?? [];
+	$parent_channels = get_parent_channels( $channel );
 
-	$users = [];
-
-	if ( ! empty( $whitelist[ $channel ] ) ) {
-		$users = $whitelist[ $channel ];
-	}
-
-	$parent_channel = get_parent_channel( $channel );
-	if ( $parent_channel && ! empty( $whitelist[ $parent_channel ] ) ) {
-		$users = array_merge( $users, $whitelist[ $parent_channel ] );
+	foreach ( (array) $parent_channels as $parent ) {
+		$users = array_merge( $users, $whitelist[ $parent ] ?? [] );
 	}
 
 	// Some users are listed twice, due to array_merge() in config & parent channel above.
-	$users = array_unique( $users );
-
-	return $users;
+	return array_unique( $users );
 }
 
 /**
@@ -116,39 +116,69 @@ function show_authorization( $user, $channel ) {
 	printf( "Your linked WordPress.org account that needs to be granted access is '%s'.", $user );
 }
 
-function get_parent_channel( $channel ) {
+/**
+ * Return the parent channels for a channel.
+ *
+ * @param string $channel The channel to get the parent channel for. eg. 'foobar-example'
+ * @return array|false The parent channels, or false if there is no parent channel.
+ */
+function get_parent_channels( $channel ) {
 	// Private groups are not actually channels.
 	if ( 'privategroup' === $channel ) {
 		return false;
 	}
 
-	list( $parent_channel, ) = explode( '-', $channel, 2 );
+	list( $root, ) = explode( '-', $channel, 2 );
 
 	// Some channels parents are not a 1:1 match.
-	switch ( $parent_channel ) {
+	switch ( $root ) {
 		case 'accessibility':
 		case 'design':
 		case 'feature':
 		case 'performance':
 		case 'tide':
-			$parent_channel = 'core';
+			$root = 'core';
 			break;
+		case 'mentorship': // Such as #mentorship-cohort-july-2023
+			$root = 'contributor-mentorship';
+			break;
+		case 'contributor': // Such as #contributor-mentorship
 		case 'community':
-			$parent_channel = 'community-team';
+			$root = 'community-team';
 			break;
+	}
+
+	// Such as #6-4-release-leads, or #6-1-site-editor-merge
+	if ( preg_match( '!^\d-\d-!i', $channel ) ) {
+		$root = 'core';
 	}
 
 	// No parent channel!
-	if ( $parent_channel === $channel ) {
+	if ( $root === $channel ) {
 		return false;
 	}
 
-	// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel
-	if ( ! get_whitelist_for_channel( $parent_channel ) ) {
-		return false;
+	$parent_channels = [];
+
+	// For when a channel has multiple parents.
+	switch ( $channel ) {
+		case 'meta-learn':
+			$parent_channels[] = 'training';
+			// Intentional Fallthrough.
+		default:
+			// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel.
+			if ( get_whitelist_for_channel( $root ) ) {
+				$parent_channels[] = $root;
+			}
 	}
 
-	return $parent_channel;
+	// Recurse, in case the parent channel has a parent channel.
+	// ie. #mentorship-cohort-july-2023 => #contributor-mentorship => #community-team
+	foreach ( $parent_channels as $parent_channel ) {
+		$parent_channels = array_merge( $parent_channels, get_parent_channels( $parent_channel ) ?: [] );
+	}
+
+	return array_unique( $parent_channels ) ?: false;
 }
 
 function run( $data ) {
@@ -253,10 +283,10 @@ function run( $data ) {
 	$send->send( $channel_id );
 
 	// Broadcast this message as a non-@here to the "parent" channel too.
-	$parent_channel = get_parent_channel( $channel );
+	$parent_channels = get_parent_channels( $channel );
 
 	// Validate the parent channel exists.
-	if ( ! $parent_channel ) {
+	if ( ! $parent_channels ) {
 		return;
 	}
 
@@ -267,7 +297,9 @@ function run( $data ) {
 		$text = mb_substr( $text, 0, 100 ) . '...';
 	}
 
-	$send->set_text( 'In #' . $channel . ': ' . $text );
-	$send->send( '#' . $parent_channel );
+	foreach ( $parent_channels as $parent_channel ) {
+		$send->set_text( 'In #' . $channel . ': ' . $text );
+		$send->send( '#' . $parent_channel );
+	}
 }
 

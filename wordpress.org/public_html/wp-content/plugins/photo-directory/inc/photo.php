@@ -399,6 +399,53 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	}
 
 	/**
+	 * Returns an array of post statuses for which a photo can be associated.
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_post_statuses_with_photo() {
+		return (array) apply_filters(
+			'wporg_photos_post_statuses_with_photo',
+			[ 'draft', 'inherit', 'pending', 'private', 'publish' ]
+		);
+	}
+
+	/**
+	 * Returns an array of post statuses for which a photo can or had been
+	 * associated.
+	 *
+	 * These post statuses will be included in checks for already generated
+	 * photo hashes. This basically consists of posts statuses from
+	 * `self::get_post_statuses_with_photo()` and any added by the filter
+	 * (mainly to include new post statuses that don't actively have a photo
+	 * associated with them but did at one point, e.g. rejected photos).
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_post_statuses_with_photo_hash() {
+		return (array) apply_filters(
+			'wporg_photos_post_statuses_with_photo_hash',
+			self::get_post_statuses_with_photo()
+		);
+	}
+
+	/**
+	 * Returns an array of photo post statuses that are considered pending.
+	 *
+	 * Posts with these statuses should count towards the user's current
+	 * submission count and are considered as being in the moderation queue.
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_pending_post_statuses() {
+		return (array) apply_filters(
+			'wporg_photos_pending_post_statuses',
+			[ 'pending' ]
+		);
+
+	}
+
+	/**
 	 * Determines if the provided MD5 hash of a photo is already known, implying
 	 * it is a duplicate.
 	 *
@@ -414,7 +461,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 				'key'        => Registrations::get_meta_key( 'file_hash' ),
 				'value'      => $hash,
 			] ],
-			'post_status'    => [ 'draft', 'pending', 'private', 'publish', Rejection::get_post_status() ],
+			'post_status'    => self::get_post_statuses_with_photo_hash(),
 			'post_type'      => Registrations::get_post_type(),
 			'posts_per_page' => 1,
 		] );
@@ -774,7 +821,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 */
 	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely' ] ) {
 		$flags = [];
-		$safe_search_flags = Photo::get_raw_moderation_assessment( $post_id );
+		$safe_search_flags = self::get_raw_moderation_assessment( $post_id );
 
 		foreach ( $safe_search_flags as $flag => $likelihood ) {
 			$likelihood = strtolower( $likelihood );
@@ -988,6 +1035,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *
 	 * This only applies for unpublished photos that also meet one of these
 	 * criteria:
+	 * - Post status is 'flagged'
 	 * - Flagged by Vision as being "possible" or more likely in any criteria category
 	 *
 	 * @param int|WP_Post|null Optional. The post or attachment. Default null,
@@ -1006,13 +1054,25 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			return false;
 		}
 
+		$post_status = get_post_status( $post );
+
 		// Not controversial if it has been published.
-		if ( 'publish' === get_post_status( $post ) ) {
+		if ( 'publish' === $post_status ) {
 			return false;
 		}
 
+		// Not controversial if photo has been manually unflagged.
+		if ( Flagged::was_unflagged( $post ) ) {
+			return false;
+		}
+
+		// Controversial if photo is outright flagged.
+		if ( Flagged::get_post_status() === $post_status ) {
+			return true;
+		}
+
 		// Controversial if photo got flagged as 'possible' or more likely by Vision.
-		$flags = Photo::get_filtered_moderation_assessment( $post->ID );
+		$flags = self::get_filtered_moderation_assessment( $post->ID );
 		if ( ! empty( $flags ) ) {
 			return true;
 		}
