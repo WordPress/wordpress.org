@@ -484,7 +484,7 @@ class Translation_Memory extends GP_Route {
 	/**
 	 * Update the number of external translations used.
 	 *
-	 * @preturn void
+	 * @return void
 	 */
 	public function update_external_translations( $translation ) {
 		$is_source_set    = isset( $_POST['externalTranslationSource'] ) && isset( $_POST['externalTranslationUsed'] );
