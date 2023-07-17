@@ -81,27 +81,6 @@
 		}
 	});
 
-	// Convert object to query params.
-	function convertObjectToQueryParam( object ) {
-		const params = new URLSearchParams();
-
-		Object.entries(object).forEach(([key, value]) => {
-		params.append(key, value);
-		});
-
-		return params.toString();
-	}
-
-	//Prefilter ajax requests to add translation_source to the request.
-	$.ajaxPrefilter( function ( options ) {
-		let data = Object.fromEntries( new URLSearchParams( options.data ) );
-
-		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
-			options.data += '&translation_source=frontend';
-
-		}
-	});
-
 	// Override functions to adopt custom markup.
 	$gp.editor.copy = function() {
 		var $activeTextarea = $gp.editor.current.find( '.textareas.active textarea' );
