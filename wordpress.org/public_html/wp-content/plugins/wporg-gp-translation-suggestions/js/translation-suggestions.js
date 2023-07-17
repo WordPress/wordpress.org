@@ -460,8 +460,7 @@
 
 			$( $gp.editor.table )
 				.on( 'click', '.translation-suggestion', copySuggestion )
-				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
-				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion );
+				.on( 'click', '.translation-suggestion', addSuggestion );
 			$( document ).ready( function() {
 				getSuggestionsForTheFirstRow();
 			});
