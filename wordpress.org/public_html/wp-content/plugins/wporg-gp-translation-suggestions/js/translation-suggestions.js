@@ -485,12 +485,15 @@
 
 	//Prefilter ajax requests to add external translations used to the request.
 	$.ajaxPrefilter( function ( options ) {
-		if ( ! externalSuggestion ) {
+		const isSuggestionUsed = Object.keys( externalSuggestion ).length  > 0 ? true : false;
+
+		if ( ! externalSuggestion || ! isSuggestionUsed ) {
 			return;
 		}
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
 				options.data += '&externalTranslationSource=' + externalSuggestion.suggestion_source;
 				options.data += '&externalTranslationUsed=' + externalSuggestion.translation;
+				externalSuggestion = {};
 		}
 	});
 })( jQuery );
