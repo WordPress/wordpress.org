@@ -99,6 +99,7 @@ class Audit_Log {
 			);
 
 			$note_text = trim( implode( "\n", $notes ) );
+			$note_text = str_replace( "\r", '', $note_text );
 
 			if ( str_contains( $note_text, 'Forum role changed' ) ) {
 				$action_text = 'Role changed';
@@ -110,17 +111,18 @@ class Audit_Log {
 
 			// On login.wordpress.org, the link should direct to the global forums.
 			if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && WPORG_LOGIN_REGISTER_BLOGID == get_current_blog_id() ) {
-				$user_edit_url = sprintf( 'https://wordpress.org/support/users/%s/edit/', urlencode( get_userdata( $user_id )->user_login ) );
+				$user_edit_url = sprintf( 'https://wordpress.org/support/users/%s/edit/', get_userdata( $user_id )->user_nicename );
 			}
 
 			$message = sprintf(
-				"*%s for %s*\n%s\n",
+				"*%s for %s* (created %s ago)\n%s\n",
 				$action_text,
 				sprintf(
 					'<%s|%s>',
 					$user_edit_url,
-					get_userdata( $user_id )->display_name ?: get_userdata( $user_id )->user_login
+					get_userdata( $user_id )->display_name ?: get_userdata( $user_id )->user_login,
 				),
+				human_time_diff( strtotime( get_userdata( $user_id )->user_registered ) ),
 				// Wrap the note in a blockquote.
 				'> ' . str_replace(
 					"\n",
