@@ -360,14 +360,24 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 					$sidebar_tabs .= '<ul class="sidebar-tabs">';
 					$sidebar_tabs .= '	<li class="current tab-meta" data-tab="sidebar-tab-meta-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Meta</li>';
 					$sidebar_tabs .= '	<li class="tab-discussion" data-tab="sidebar-tab-discussion-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Discussion&nbsp;<span class="count"></span></li>';
-					$sidebar_tabs .= '	<li class="tab-history" data-tab="sidebar-tab-history-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">History&nbsp;<span class="count"></span></li>';
-					$sidebar_tabs .= '	<li class="tab-other-locales" data-tab="sidebar-tab-other-locales-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Other&nbsp;locales&nbsp;<span class="count"></span></li>';
-					$sidebar_tabs .= '	<li class="tab-translation-memory" data-tab="sidebar-tab-translation-memory-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">TM&nbsp;<span class="count"></span></li>';
+					$sidebar_tabs .= '	<li class="tab-others" data-tab="sidebar-tab-others-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Others&nbsp;<span class="count"></span></li>';
 					$sidebar_tabs .= '</ul>';
 					$sidebar_tabs .= $meta_sidebar;
 					$sidebar_tabs .= '<div class="meta discussion" id="sidebar-div-discussion-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
-					$sidebar_tabs .= '<div class="meta history" id="sidebar-div-history-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
-					$sidebar_tabs .= '<div class="meta other-locales" id="sidebar-div-other-locales-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
+					$sidebar_tabs .= '<div class="meta others" id="sidebar-div-others-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;">';
+					$sidebar_tabs .= '	<details class="details-translation-memory" open="">';
+					$sidebar_tabs .= '		<summary class="summary-translation-memory" id="summary-translation-memory-' . $translation->row_id . '">Translation Memory</summary>';
+					$sidebar_tabs .= '		<div class="sidebar-div-others-translation-memory-content" id="sidebar-div-others-translation-memory-content-' . $translation->row_id . '"></div>';
+					$sidebar_tabs .= '	</details>';
+					$sidebar_tabs .= '	<details class="details-other-locales" open="">';
+					$sidebar_tabs .= '		<summary class="summary-other-locales" id="summary-other-locales-' . $translation->row_id . '">Other locales</summary>';
+					$sidebar_tabs .= '		<div class="sidebar-div-others-other-locales-content" id="sidebar-div-others-other-locales-content-' . $translation->row_id . '"></div>';
+					$sidebar_tabs .= '		</details>';
+					$sidebar_tabs .= '	<details class="details-history" open="">';
+					$sidebar_tabs .= '		<summary class="summary-history" id="summary-history-' . $translation->row_id . '">History</summary>';
+					$sidebar_tabs .= '		<div class="sidebar-div-others-history-content" id="sidebar-div-others-history-content-' . $translation->row_id . '"></div>';
+					$sidebar_tabs .= '	</details>';
+					$sidebar_tabs .= '</div>'; /* meta others */
 					$sidebar_tabs .= '<div class="meta translation-memory" id="sidebar-div-translation-memory-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
 					$sidebar_tabs .= '</nav>';
 

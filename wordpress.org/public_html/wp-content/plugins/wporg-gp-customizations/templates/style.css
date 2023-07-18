@@ -3146,9 +3146,7 @@ ul.sidebar-tabs {
 
 .meta,
 .meta.discussion,
-.meta.history,
-.meta.other-locales,
-.meta.translation-memory {
+.meta.others {
 	padding: 12px;
 }
 
@@ -3160,52 +3158,56 @@ ul.sidebar-tabs {
 	padding: 1rem 0;
 }
 
-.meta.history td:nth-child(1),
-.meta.history td:nth-child(3),
-.meta.history td:nth-child(4) {
+.meta.others .summary-translation-memory {
+	font-weight: bold;
+	padding: 1rem 0 0.5rem 0;
+}
+
+.meta.others td:nth-child(1),
+.meta.others td:nth-child(3),
+.meta.others td:nth-child(4) {
 	text-align: center;
 	vertical-align: middle;
 	overflow: hidden;
 }
 
-.meta.history th,
-.meta.history td {
+.meta.others th,
+.meta.others td {
 	padding: 4px !important;
 	border: 1px solid #72777C !important;
 }
 
-.meta.history th:nth-child(1) {
+.meta.others th:nth-child(1) {
 	width: 20%;
 	vertical-align: middle;
 }
 
-.meta.history  th:nth-child(2) {
+.meta.others th:nth-child(2) {
 	width: 50%;
 	vertical-align: middle;
 }
 
-.meta.history th:nth-child(3),
-.meta.history th:nth-child(4) {
+.meta.others th:nth-child(3),
+.meta.others th:nth-child(4) {
 	width: 15%;
 	vertical-align: middle;
 }
 
-.meta.other-locales ul, .meta.transation-memory ul {
+.meta.others ul {
 	margin: 0;
 	padding: 0;
 }
 
-.meta.translation-memory ul.suggestions-list,
-.meta.translation-memory summary {
-	list-style: none;
+.meta.others ul.suggestions-list,
+.meta.others summary {
 	margin-left: 0;
 }
 
-.meta.translation-memory div.translation-suggestion {
+.meta.others div.translation-suggestion {
 	margin: 1rem 0;
 }
 
-.meta.other-locales .locale.unique, .meta.other-locales .other-locales .locale {
+.meta.others .locale.unique, .meta.others .other-locales .locale {
 	width: 6rem;
 	background: #0073aa;
 	margin-right: 10px !important;
