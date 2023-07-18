@@ -21,6 +21,12 @@ class Moderators {
 		add_filter( 'bbp_map_primary_meta_caps',        array( $this, 'map_meta_caps' ), 10, 4 );
 		add_action( 'bbp_post_request',                 array( $this, 'edit_user_handler' ), 0 );
 
+		// Allow moderators to manage user roles.
+		add_filter( 'bbp_get_caps_for_role',            array( $this, 'bbp_get_caps_for_role' ), 10, 2 );
+
+		// Limit which roles a moderator can assign to a user. Before bbp_profile_update_role().
+		add_action( 'bbp_profile_update',               array( $this, 'bbp_profile_update' ), 1 );
+
 		// Append 'view=all' to forum, topic, and reply URLs in moderator views.
 		add_filter( 'bbp_get_forum_permalink',          array( $this, 'add_view_all' ) );
 		add_filter( 'bbp_get_topic_permalink',          array( $this, 'add_view_all' ) );
@@ -184,17 +190,56 @@ class Moderators {
 						return $caps;
 					}
 
-					if ( 'promote_user' === $cap || 'promote_users' === $cap ) {
-						// Only keymasters can promote users.
-						$caps = array( 'keep_gate' );
-					} else {
-						$caps = array( 'moderate' );
-					}
+					$caps = array( 'moderate' );
 				}
 				break;
 		}
 
 		return $caps;
+	}
+
+	/**
+	 * Allow (global) moderators to assign roles to users.
+	 *
+	 * @param array  $caps Role capabilities.
+	 * @param string $role Role name.
+	 * @return array
+	 */
+	function bbp_get_caps_for_role( $caps, $role ) {
+		if (
+			$role === bbp_get_moderator_role() &&
+			Plugin::get_instance()->is_main_forums
+		) {
+			$caps['promote_users'] = true;
+		}
+	
+		return $caps;
+	}
+
+	/**
+	 * Limit the site/forum roles a moderator can set.
+	 */
+	public function bbp_profile_update() {
+		// Keymasters need no special handling.
+		if ( bbp_is_user_keymaster( get_current_user_id() ) ) {
+			return;
+		}
+
+		$new_forum_role = sanitize_key( $_POST['bbp-forums-role'] ?? '' );
+
+		// Prevent setting any roles.
+		unset( $_POST['role'], $_POST['bbp-forums-role'] );
+
+		$allowed_roles = array(
+			bbp_get_participant_role(),
+			bbp_get_spectator_role(),
+			bbp_get_blocked_role()
+		);
+
+		// If it's an allowed role, add it back so it can be processed by bbp_profile_update_role().
+		if ( in_array( $new_forum_role, $allowed_roles, true ) ) {
+			$_POST['bbp-forums-role'] = $new_forum_role;
+		}
 	}
 
 	/**
