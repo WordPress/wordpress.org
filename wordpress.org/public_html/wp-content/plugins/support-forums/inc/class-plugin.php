@@ -41,6 +41,14 @@ class Plugin {
 	public $blocks               = false;
 
 	/**
+	 * Define whether this is the global forums, or a locale forum.
+	 * ie. https://wordpress.org/support/
+	 *
+	 * @var bool
+	 */
+	public $is_main_forums = false;
+
+	/**
 	 * Always return the same instance of this plugin.
 	 *
 	 * @return Plugin
@@ -66,14 +74,19 @@ class Plugin {
 		$this->emails       = new Emails;
 		$this->audit_log    = new Audit_Log;
 
+		// Set a flag to indicate whether this is the global forums, or a locale forum.
+		$this->is_main_forums = (
+			defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) &&
+			WPORG_SUPPORT_FORUMS_BLOGID == get_current_blog_id()
+		);
+
 		// These modifications are specific to https://wordpress.org/support/
-		$blog_id = get_current_blog_id();
-		if ( $blog_id && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == $blog_id ) {
+		if ( $this->is_main_forums ) {
 			$this->dropin          = new Dropin;
 			$this->support_compat  = new Support_Compat;
 
 			// Only load Performance_Optimizations if necessary.
-			$this->performance = new Performance_Optimizations;
+			$this->performance     = new Performance_Optimizations;
 
 			// Ratings_Compat is loaded by Theme_Directory_Compat or
 			// Plugin_Directory_Compat depending on the request.
@@ -81,8 +94,9 @@ class Plugin {
 			$this->plugins         = new Plugin_Directory_Compat;
 		}
 
+		// Only load the Block Support if the Blocks Everywhere plugin is available.
 		if ( class_exists( 'Automattic\Blocks_Everywhere\Blocks_Everywhere' ) ) {
-			$this->blocks = new Blocks;
+			$this->blocks          = new Blocks;
 		}
 
 		add_action( 'bbp_add_rewrite_rules', array( $this, 'maybe_flush_rewrite_rules' ) );
