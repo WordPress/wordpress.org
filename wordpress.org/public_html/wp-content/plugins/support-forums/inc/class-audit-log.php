@@ -120,7 +120,7 @@ class Audit_Log {
 				sprintf(
 					'<%s|%s>',
 					$user_edit_url,
-					get_userdata( $user_id )->display_name ?: get_userdata( $user_id )->user_login,
+					get_userdata( $user_id )->display_name ?: get_userdata( $user_id )->user_login
 				),
 				human_time_diff( strtotime( get_userdata( $user_id )->user_registered ) ),
 				// Wrap the note in a blockquote.
