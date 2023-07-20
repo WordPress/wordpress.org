@@ -3226,3 +3226,8 @@ ul.sidebar-tabs {
 		vertical-align: top;
 	}
 }
+
+ul.other-locales li {
+	display: flex;
+	margin-bottom: 0.2rem;
+}
