@@ -3231,3 +3231,12 @@ ul.other-locales li {
 	display: flex;
 	margin-bottom: 0.2rem;
 }
+
+.sidebar-div-others-other-locales-content > ul.other-locales > li > span.locale.unique {
+	min-width: 6rem;
+}
+
+.sidebar-div-others-other-locales-content > ul.other-locales > li > a {
+	display: flex;
+	flex: auto;
+}
