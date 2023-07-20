@@ -3240,3 +3240,9 @@ ul.other-locales li {
 	display: flex;
 	flex: auto;
 }
+
+.sidebar-div-others-other-locales-content > ul.other-locales > li > ul {
+	display: flex;
+	flex-direction: column;
+	flex: auto;
+}
