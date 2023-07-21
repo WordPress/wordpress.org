@@ -4,6 +4,7 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions;
 
 use GP;
 use GP_Locales;
+use WordPressdotorg\GlotPress\TranslationSuggestions\Routes\Translation_Memory;
 
 class Plugin {
 
@@ -55,6 +56,7 @@ class Plugin {
 		}
 
 		add_action( self::TM_UPDATE_EVENT, array( Translation_Memory_Client::class, 'update' ) );
+		add_action( 'gp_translation_created', array( Translation_Memory::class, 'update_external_translations' ) );
 	}
 
 	/**
@@ -100,7 +102,6 @@ class Plugin {
 		GP::$router->prepend( "/$set/-get-other-language-suggestions", array( __NAMESPACE__ . '\Routes\Other_Languages', 'get_suggestions' ) );
 		GP::$router->prepend( "/$set/-get-tm-openai-suggestions", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'get_openai_suggestions' ) );
 		GP::$router->prepend( "/$set/-get-tm-deepl-suggestions", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'get_deepl_suggestions' ) );
-		GP::$router->prepend( '/-save-external-suggestions', array( __NAMESPACE__ . '\Routes\Translation_Memory', 'update_external_translations' ), 'post' );
 	}
 
 	/**
