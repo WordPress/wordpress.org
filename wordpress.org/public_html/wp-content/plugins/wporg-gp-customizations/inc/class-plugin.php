@@ -344,7 +344,7 @@ class Plugin {
 			$suggestion_used .= '_modified';
 		}
 		if ( $suggestion_used ) {
-			gp_update_meta( $translation->id, 'suggestionused', $suggestion_used, 'translation' );
+			gp_update_meta( $translation->id, 'suggestion-used', $suggestion_used, 'translation' );
 		}
 
 	}
