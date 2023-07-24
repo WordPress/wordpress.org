@@ -139,6 +139,7 @@ function get_user_email_for_email( $request ) {
 			str_contains( $from, 'postmaster' ) ||
 			str_contains( $from, 'mailer-daemon' ) ||
 			str_contains( $from, 'noreply' ) ||
+			str_contains( $subject_lower, 'undeliverable' ) ||
 			str_contains( $subject_lower, 'undelivered mail' ) ||
 			str_contains( $subject_lower, 'returned mail' ) ||
 			str_contains( $subject_lower, 'returned to sender' ) ||
