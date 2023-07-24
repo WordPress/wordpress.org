@@ -478,9 +478,13 @@
 		if ( ! $row ) {
 			return;
 		}
-		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' ) == 'translation' ? 'tm' : $row.data( 'suggestion-source' );
-		externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
-
+		if ( $row.data( 'suggestion-locale' ) ) {
+			externalSuggestion.suggestion_source = $row.data( 'suggestion-locale' );
+			externalSuggestion.translation = $row.find( '.translation-suggestion__translation-raw' ).text();
+		} else {
+			externalSuggestion.suggestion_source = $row.data( 'suggestion-source' );
+			externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
+		}
 	}
 
 	//Prefilter ajax requests to add external translations used to the request.
