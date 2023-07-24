@@ -17,6 +17,8 @@ class HelpScout {
 		global $wpdb;
 		$post = get_post();
 
+		// Trim off the rejected prefix/suffix.
+		$slug   = preg_replace( '/(^rejected-|-rejected$)/i', '', $post->post_name );
 		$emails = $wpdb->get_results( $wpdb->prepare(
 			"SELECT emails.*
 				FROM %i emails
@@ -25,7 +27,7 @@ class HelpScout {
 				ORDER BY `created` DESC",
 			"{$wpdb->base_prefix}helpscout",
 			"{$wpdb->base_prefix}helpscout_meta",
-			$post->post_name
+			$slug
 		) );
 
 		echo '<table class="widefat striped helpscout-emails">';
