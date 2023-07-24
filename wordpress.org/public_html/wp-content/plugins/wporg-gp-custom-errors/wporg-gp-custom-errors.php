@@ -127,7 +127,7 @@ class WPorg_GP_Custom_Translation_Errors {
 	 * @param GP_Locale   $locale      The locale.
 	 * @return string|true The error message or true if no error.
 	 */
-	public function error_unexepected_slug( $original, $translation, $gp_original, $locale ) {
+	public function error_unexpected_slug( $original, $translation, $gp_original, $locale ) {
 		if ( ! $this->is_core_project( $gp_original ) ) {
 			return true;
 		}
