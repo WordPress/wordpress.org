@@ -18,16 +18,17 @@ class HelpScout {
 		$post = get_post();
 
 		// Trim off the rejected prefix/suffix.
-		$slug   = preg_replace( '/(^rejected-|-rejected$)/i', '', $post->post_name );
+		$slug   = preg_replace( '/(^rejected-|-rejected(-\d)?$)/i', '', $post->post_name );
 		$emails = $wpdb->get_results( $wpdb->prepare(
 			"SELECT emails.*
 				FROM %i emails
 					JOIN %i meta ON emails.id = meta.helpscout_id
-				WHERE meta.meta_key = 'plugins' AND meta.meta_value = %s
+				WHERE meta.meta_key = 'plugins' AND meta.meta_value IN( %s, %s )
 				ORDER BY `created` DESC",
 			"{$wpdb->base_prefix}helpscout",
 			"{$wpdb->base_prefix}helpscout_meta",
-			$slug
+			$slug,
+			$post->post_name
 		) );
 
 		echo '<table class="widefat striped helpscout-emails">';
