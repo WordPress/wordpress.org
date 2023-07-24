@@ -6,7 +6,7 @@ if ( empty( $suggestions ) ) {
 	echo '<ul class="suggestions-list">';
 	foreach ( $suggestions as $suggestion ) {
 		echo '<li>';
-		echo '<div class="translation-suggestion with-tooltip" tabindex="0" role="button" data-suggestion-source="' . esc_html( strtolower( $suggestion['locale'] ) ) . '" aria-pressed="false" aria-label="Copy translation">';
+		echo '<div class="translation-suggestion with-tooltip" tabindex="0" role="button" data-suggestion-locale="' . esc_html( strtolower( $suggestion['locale'] ) ) . '" aria-pressed="false" aria-label="Copy translation">';
 
 			echo '<span class="translation-suggestion__translation">';
 				echo esc_translation( $suggestion['translation'] );
