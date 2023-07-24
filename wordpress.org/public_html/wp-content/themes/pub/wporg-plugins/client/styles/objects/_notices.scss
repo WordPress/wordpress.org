@@ -4,9 +4,9 @@
 	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
 	margin: 1em 0;
 	padding: 1px 12px;
+	font-size: ms( -2 );
 
-	ul, p {
-		font-size: ms( -2 );
+	p, ul {
 		margin: 0.5em 0;
 		padding: 2px;
 
@@ -14,6 +14,10 @@
 		a {
 			border-bottom: 0;
 		}
+	}
+
+	pre {
+		white-space: pre-wrap;
 	}
 
 	ul {
