@@ -581,6 +581,7 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 
 	// If the redirect is to a url that doesn't seem right, override it.
 	$redirect_host = parse_url( $redirect, PHP_URL_HOST );
+	$redirect_qv   = parse_url( $redirect, PHP_URL_QUERY );
 	$proper_host   = parse_url( $_COOKIE['wporg_came_from'], PHP_URL_HOST );
 	if (
 		$redirect_host != $proper_host &&
@@ -590,6 +591,11 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 				'profiles.wordpress.org', // Default redirect for low-priv users.
 				'login.wordpress.org',    // Default redirect for priv'd users.
 			]
+		) &&
+		// Don't override if the redirect is back to an OIDC destination.
+		! (
+			'login.wordpress.org' == $redirect_host &&
+			str_contains( $redirect_qv, 'response_type=code' )
 		)
 	) {
 		if ( wp_validate_redirect( $_COOKIE['wporg_came_from'] ) ) {
