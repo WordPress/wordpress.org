@@ -527,18 +527,20 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			$user = wp_get_current_user();
 
-			// Perform the logout on this network first.
-			wp_logout();
-
 			// Redirect back to the requested location.. the referer.. or failing that, the current sites front page after it's all done.
 			$logout_redirect = ( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ?: wp_get_referer() ) ?: home_url( '/' );
+
+			// Never to wp-admin.
+			if ( str_contains( $logout_redirect, '/wp-admin/' ) ) {
+				$logout_redirect = home_url( '/' );
+			}
+
 			$logout_redirect = apply_filters( 'logout_redirect', $logout_redirect, $logout_redirect, $user );
 
 			$remote_logout_url = add_query_arg(
 				array(
 					'action'         => 'remote-logout',
 					'redirect_to'    => urlencode( $logout_redirect ),
-					'loggedout_on[]' => urlencode( $this->_get_targetted_host( $this->host ) ),
 					'sso_logout'     => urlencode( $this->_generate_remote_token( $user ) )
 				),
 				$this->sso_host_url . '/wp-login.php'
@@ -642,60 +644,36 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
-		 * Log out a user from all sites and networks.
-		 *
-		 * This works by keeping track of the domains logged out on, and redirecting the user to the next
-		 * site in self::VALID_HOSTS. Each is only requested once, so the user should experience minimal
-		 * redirects.
+		 * Log out a user and destroy the session.
 		 */
 		protected function _maybe_perform_remote_logout() {
-			if ( empty( $_GET['sso_logout'] ) ) {
+			if ( empty( $_GET['sso_logout'] ) || ! $this->is_sso_host() ) {
 				return;
 			}
 
+			// Validate the logout token.
 			$remote_token = wp_unslash( $_GET['sso_logout'] );
 			$remote_token = $this->_validate_remote_token( $remote_token );
-
 			if ( ! $remote_token || ! $remote_token['valid'] ) {
 				return;
 			}
-			$user = $remote_token['user'];
 
-			// If the matching user is logged in, log them out.
-			// If they're logged in as someone else, that's problematic, but we ignore that intentionally.
-			if ( is_user_logged_in() && get_current_user_id() == $user->ID ) {
-				wp_logout();
-			}
+			// Perform the logout. This will destroy the session, logging the user out of all sites.
+			wp_logout();
 
-			// Hosts logged out on..
-			$logged_out_on     = (array) $_REQUEST['loggedout_on'] ?? [];
-			$logged_out_on[]   = $this->_get_targetted_host( $this->host );
-			$need_to_logout_on = array_diff( self::VALID_HOSTS, $logged_out_on );
+			// Default to the logout confirmation screen, or back to the source site if possible.
+			$redirect_to = $this->sso_host_url . '/loggedout';
+			if ( ! empty( $_REQUEST['redirect_to'] ) ) {
+				$requested_redirect_to = urldecode( wp_unslash( $_REQUEST['redirect_to'] ) );
+				$redirect_to           = add_query_arg( 'redirect_to', urlencode( $requested_redirect_to ), $redirect_to );
 
-			// Logged out everywhere, send them over to the logout confirmation screen.
-			if ( ! $need_to_logout_on ) {
-				$final_url = $this->sso_host_url . '/loggedout';
-
-				if ( ! empty( $_REQUEST['redirect_to'] ) ) {
-					$final_url = add_query_arg( 'redirect_to', $_REQUEST['redirect_to'], $final_url );
+				// If the requested redirect_to is valid, use it.
+				if ( wp_validate_redirect( $requested_redirect_to ) ) {
+					$redirect_to = $requested_redirect_to;
 				}
-
-				$this->_safe_redirect( $final_url );
-				exit;
 			}
 
-			// Redirect on to the next host in self::VALID_HOSTS to logout from.
-			$logout_redirect = add_query_arg(
-				array(
-					'action'       => 'remote-logout',
-					'sso_logout'   => urlencode( $this->_generate_remote_token( $user ) ),
-					'redirect_to'  => urlencode( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ),
-					'loggedout_on' => array_values( $logged_out_on )
-				),
-				'https://' . reset( $need_to_logout_on ) . '/wp-login.php'
-			);
-
-			$this->_safe_redirect( $logout_redirect );
+			$this->_safe_redirect( $redirect_to );
 			exit;
 		}
 
