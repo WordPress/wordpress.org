@@ -142,7 +142,6 @@ function get_parent_channels( $channel ) {
 		case 'mentorship': // Such as #mentorship-cohort-july-2023
 			$root = 'contributor-mentorship';
 			break;
-		case 'contributor': // Such as #contributor-mentorship
 		case 'community':
 			$root = 'community-team';
 			break;
@@ -170,12 +169,6 @@ function get_parent_channels( $channel ) {
 			if ( get_whitelist_for_channel( $root ) ) {
 				$parent_channels[] = $root;
 			}
-	}
-
-	// Recurse, in case the parent channel has a parent channel.
-	// ie. #mentorship-cohort-july-2023 => #contributor-mentorship => #community-team
-	foreach ( $parent_channels as $parent_channel ) {
-		$parent_channels = array_merge( $parent_channels, get_parent_channels( $parent_channel ) ?: [] );
 	}
 
 	return array_unique( $parent_channels ) ?: false;
@@ -290,6 +283,11 @@ function run( $data ) {
 		return;
 	}
 
+	// Don't send to these parent channels.
+	$dont_send_to = [
+		'contributor-mentorship',
+	];
+
 	$text = $data['text'];
 	// Remove any @here or @channel
 	$text = str_ireplace( [ '@here', '@channel', '@group' ], '', $text );
@@ -298,6 +296,10 @@ function run( $data ) {
 	}
 
 	foreach ( $parent_channels as $parent_channel ) {
+		if ( in_array( $parent_channel, $dont_send_to, true ) ) {
+			continue;
+		}
+
 		$send->set_text( 'In #' . $channel . ': ' . $text );
 		$send->send( '#' . $parent_channel );
 	}
