@@ -3232,7 +3232,7 @@ ul.other-locales li {
 	margin-bottom: 0.2rem;
 }
 
-.sidebar-div-others-other-locales-content > ul.other-locales > li > span.locale.unique {
+.sidebar-div-others-other-locales-content > ul.other-locales > li > span {
 	min-width: 6rem;
 }
 
@@ -3245,4 +3245,8 @@ ul.other-locales li {
 	display: flex;
 	flex-direction: column;
 	flex: auto;
+}
+
+.sidebar-div-others-history-content #translation-history-table > tbody > tr > td {
+	overflow: hidden;
 }
