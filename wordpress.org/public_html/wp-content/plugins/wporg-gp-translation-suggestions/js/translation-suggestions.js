@@ -25,16 +25,10 @@
 	var DeeplTMSuggestionRequested = [];
 
 	/**
-	* Stores the OpenAI translations used.
-	* @type {array}
-	*/
-   var $openAITranslationsUsed = [];
-
-   /**
-	* Stores the DeepL translations used.
-	* @type {array}
-	* */
-   var $deeplTranslationsUsed = [];
+	 * Stores the external translations used.
+	 * @type {object}
+	 */
+	var externalSuggestion = {};
 
 	/**
 	 * Stores (caches) the "Other Languages" suggestions that has already been queried,
@@ -489,10 +483,7 @@
 
 			$( $gp.editor.table )
 				.on( 'click', '.translation-suggestion', copySuggestion )
-				.on( 'click', 'button.translation-actions__save', saveExternalSuggestions )
-				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
-				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion )
-				.on( 'click', '.translation-suggestion', copySuggestion );
+				.on( 'click', '.translation-suggestion', addSuggestion );
 			$( document ).ready( function() {
 				getSuggestionsForTheFirstRow();
 			});
@@ -510,44 +501,22 @@
 		if ( ! $row ) {
 			return;
 		}
-		var $originalId = $row.closest( 'tr' ).attr( 'id' ).substring( 7 );
-		var $CSSclass = $row.attr( 'class' );
-		if ( $CSSclass.indexOf( 'openai' ) > -1 ) {
-			$openAITranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
-			delete $deeplTranslationsUsed[ $originalId ];
-		} else if ( $CSSclass.indexOf( 'deepl' ) > -1 ) {
-			$deeplTranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
-			delete $openAITranslationsUsed[ $originalId ];
-		}
+		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' ) == 'translation' ? 'tm' : $row.data( 'suggestion-source' );
+		externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
+
 	}
 
-	/**
-	 * Saves the number of external suggestions used and used without modification.
-	 *
-	 * @return {void}
-	 **/
-	function saveExternalSuggestions() {
+	//Prefilter ajax requests to add external translations used to the request.
+	$.ajaxPrefilter( function ( options ) {
+		const isSuggestionUsed = Object.keys( externalSuggestion ).length  > 0 ? true : false;
 
-		var $button = $( this );
-		var $row = $button.closest( 'tr.editor' );
-		var $originalId = $row.attr( 'id' ).substring( 7 );
-		if ( ! $openAITranslationsUsed[$originalId] && ! $deeplTranslationsUsed[$originalId] ) {
+		if ( ! externalSuggestion || ! isSuggestionUsed ) {
 			return;
 		}
-
-		var $translation = $row.find( 'textarea' ).val();
-		var $data = {
-			nonce: wporgEditorSettings.nonce,
-			translation: $translation,
-			openAITranslationsUsed: $openAITranslationsUsed[$originalId],
-			deeplTranslationsUsed: $deeplTranslationsUsed[$originalId]
-		};
-
-		$.ajax({
-			url: '/-save-external-suggestions',
-			type: 'POST',
-			data: $data,
-		});
-	}
-
+		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
+				options.data += '&externalTranslationSource=' + externalSuggestion.suggestion_source;
+				options.data += '&externalTranslationUsed=' + externalSuggestion.translation;
+				externalSuggestion = {};
+		}
+	});
 })( jQuery );
