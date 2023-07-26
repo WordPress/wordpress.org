@@ -135,13 +135,9 @@ class Hooks {
 		// Don't embed WordPress.org links with anchors included.
 		add_filter( 'pre_oembed_result', array( $this, 'pre_oembed_result_dont_embed_wordpress_org_anchors' ), 20, 2 );
 
-		// Add a user note when flagging/unflagging a user.
-		add_filter( 'wporg_bbp_flag_user', array( $this, 'log_user_flag_changes' ) );
-		add_filter( 'wporg_bbp_unflag_user', array( $this, 'log_user_flag_changes' ) );
-
 		// Break users sessions / passwords when they get blocked, on the main forums only.
 		if ( 'wordpress.org' === get_blog_details()->domain ) {
-			add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
+			add_filter( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
 		}
 	}
 
@@ -1359,13 +1355,15 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	 * Catch a user being blocked / unblocked and set their password appropriately.
 	 *
 	 * Note: This method is called even when the users role is not changed.
+	 *
+	 * See Audit_Log class for where the note is set/updated.
 	 */
 	public function user_blocked_password_handler( $new_role, $user_id, \WP_User $user ) {
 		global $wpdb;
 
 		// ~~~ is a reset password on WordPress.org. Let's ignore those.
 		if ( '~~~' === $user->user_pass ) {
-			return;
+			return $new_role;
 		}
 
 		// bbPress 1.x used `{$user_pass}---{$secret}` while we're using the reverse here.
@@ -1373,23 +1371,9 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		$blocked_prefix  = 'BLOCKED' . substr( wp_hash( 'bb_break_password' ), 0, 13 ) . '---';
 		$blocked_role    = bbp_get_blocked_role();
 		$password_broken = ( 0 === strpos( $user->user_pass, $blocked_prefix ) );
-		$note_text       = false;
 
 		// WP_User::has_role() does not exist, and WP_User::has_cap( 'bbp_blocked' ) will be truthful for super admins.
 		$user_has_blocked_role = ! empty( $user->roles ) && in_array( $blocked_role, $user->roles, true );
-
-		// Define what has blocked the user.
-		if ( ! ms_is_switched() ) {
-			$where_from = preg_replace( '!^https?://!i', '', home_url( is_admin() ? '/wp-admin' : '' ) );
-		} else {
-			// When we're switched, we can't determine the source of the switch, so we use a bit of URL parsing magic.
-			$where_from = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			if ( str_contains( $where_from, '?' ) ) {
-				list( $where_from, ) = explode( '?', $where_from );
-			}
-			// Trim actual filename off, just the major path component.
-			$where_from = preg_replace( '!/[^/?]+\.[a-z]{3}$!i', '', $where_from  );
-		}
 
 		if (
 			( $blocked_role === $new_role || $user_has_blocked_role ) &&
@@ -1412,16 +1396,6 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			// Destroy all of their WordPress sessions.
 			$manager = \WP_Session_Tokens::get_instance( $user->ID );
 			$manager->destroy_all();
-
-			// Add a user note about this action.
-			$note_text = sprintf(
-				$where_from ? 'Forum role changed to %s via %s.' : 'Forum role changed to %s.',
-				get_role( $new_role )->name,
-				$where_from
-			);
-
-			// Used in wporg-login to add context.
-			$note_text = apply_filters( 'wporg_bbp_forum_role_changed_note_text', $note_text, $user );
 		} else if (
 			$password_broken &&
 			! $user_has_blocked_role
@@ -1439,39 +1413,10 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			);
 
 			clean_user_cache( $user );
-
-			// Add a user note about this action.
-			$note_text = sprintf(
-				$where_from ? 'Forum role changed to %s via %s.' : 'Forum role changed to %s.',
-				get_role( $new_role )->name,
-				$where_from
-			);
-
-			// Unused, here for consistency with above.
-			$note_text = apply_filters( 'wporg_bbp_forum_role_changed_note_text', $note_text, $user );
 		}
 
-		if ( $note_text ) {
-			// Add a user note about this action.
-			Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
-				$user->ID,
-				$note_text
-			);
-		}
-
+		// It's a filter, return the value.
+		return $new_role;
 	}
 
-	/**
-	 * Add a user note when a user is flagged / unflagged.
-	 */
-	function log_user_flag_changes( $user_id ) {
-		$flag_action = ( 'wporg_bbp_flag_user' === current_filter () ) ? 'flagged' : 'unflagged';
-
-		$note_text = "User {$flag_action}.";
-
-		Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
-			$user_id,
-			$note_text
-		);
-	}
 }

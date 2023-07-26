@@ -5,7 +5,6 @@
 	margin-top: 0;
 }
 
-
 .plugin-control-select {
 	margin-top: 3px;
 }
@@ -83,6 +82,10 @@ input#post_author_username {
 .comments-meta-box p {
 	padding: 8px 10px;
 	margin: 0;
+}
+
+.comments-meta-box pre {
+	white-space: pre-wrap;
 }
 
 .comments-meta-box .comments-box,
@@ -354,3 +357,4 @@ a.profile-plugin-open {
 .plugin-zip-files a {
 	overflow-wrap: break-word;
 }
+
