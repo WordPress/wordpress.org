@@ -366,19 +366,24 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 					$sidebar_tabs .= '<div class="meta discussion" id="sidebar-div-discussion-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
 					$sidebar_tabs .= '<div class="meta others" id="sidebar-div-others-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;">';
 					$sidebar_tabs .= '	<details class="details-translation-memory" open="">';
-					$sidebar_tabs .= '		<summary class="summary-translation-memory" id="summary-translation-memory-' . $translation->row_id . '">Translation Memory</summary>';
+					$sidebar_tabs .= '		<summary class="summary-translation-memory" id="summary-translation-memory-' . $translation->row_id . '">Translation Memory';
+					$sidebar_tabs .= '			<span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span>';
+					$sidebar_tabs .= '		</summary>';
 					$sidebar_tabs .= '		<div class="sidebar-div-others-translation-memory-content" id="sidebar-div-others-translation-memory-content-' . $translation->row_id . '"></div>';
 					$sidebar_tabs .= '	</details>';
 					$sidebar_tabs .= '	<details class="details-other-locales" open="">';
-					$sidebar_tabs .= '		<summary class="summary-other-locales" id="summary-other-locales-' . $translation->row_id . '">Other locales</summary>';
+					$sidebar_tabs .= '		<summary class="summary-other-locales suggestions__loading-indicator" id="summary-other-locales-' . $translation->row_id . '">Other locales';
+					$sidebar_tabs .= '			<span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span>';
+					$sidebar_tabs .= '		</summary>';
 					$sidebar_tabs .= '		<div class="sidebar-div-others-other-locales-content" id="sidebar-div-others-other-locales-content-' . $translation->row_id . '"></div>';
-					$sidebar_tabs .= '		</details>';
+					$sidebar_tabs .= '	</details>';
 					$sidebar_tabs .= '	<details class="details-history" open="">';
-					$sidebar_tabs .= '		<summary class="summary-history" id="summary-history-' . $translation->row_id . '">History</summary>';
+					$sidebar_tabs .= '		<summary class="summary-history suggestions__loading-indicator" id="summary-history-' . $translation->row_id . '">History';
+					$sidebar_tabs .= '			<span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span>';
+					$sidebar_tabs .= '		</summary>';
 					$sidebar_tabs .= '		<div class="sidebar-div-others-history-content" id="sidebar-div-others-history-content-' . $translation->row_id . '"></div>';
 					$sidebar_tabs .= '	</details>';
 					$sidebar_tabs .= '</div>'; /* meta others */
-					$sidebar_tabs .= '<div class="meta translation-memory" id="sidebar-div-translation-memory-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
 					$sidebar_tabs .= '</nav>';
 
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
