@@ -353,7 +353,7 @@ foreach ( $actions_to_take as $post_id => $data ) {
 			'<ol>' .
 				'<li><a href="https://wordpress.org/support/users/profile/edit/">Make sure the email on the user account is valid</a>.</li>' .
 				'<li>If the email is a group mail or mailing list, make sure it can receive email from external domains or non-members.</li>' .
-				"<li>If the email forwards, check all addresses to make sure they're valid and do not forward bounces, some email forwarders break DMARC signatures in which case you will need to change your forwarding configutation.</li>" .
+				"<li>If the email forwards, check all addresses to make sure they're valid and do not forward bounces, some email forwarders break DMARC signatures in which case you will need to change your forwarding configuration.</li>" .
 				'<li>If the ownership of the plugin is in doubt, let us know what accounts are supposed to have access and be the official owners so we can transfer them appropriately.</li>' .
 				'<li>You must update the plugin readme to confirm it is compatible with the current release of WordPress. This is to ensure people can actually find your plugin.</li>' .
 				'<li>Perform a full security and guideline check of your own work. Look for sanitization, remote loading of content, and any other minor bugs.</li>' .
