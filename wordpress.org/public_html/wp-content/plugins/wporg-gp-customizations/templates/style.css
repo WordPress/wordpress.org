@@ -3213,6 +3213,10 @@ ul.sidebar-tabs {
 	margin-right: 10px !important;
 }
 
+.sidebar-div-others-translation-memory-content > summary {
+	list-style-type: none;
+}
+
 @media screen and (max-width: 530px), (min-width: 1024px) and (max-width: 1450px) {
 	.editor-panel__right .tab-meta,
 	.editor-panel__right .tab-discussion,
