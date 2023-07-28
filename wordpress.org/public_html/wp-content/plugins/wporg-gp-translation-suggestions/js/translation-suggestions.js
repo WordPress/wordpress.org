@@ -225,9 +225,6 @@
 			return;
 		}
 
-		var itemsInTM = TMcontainer.find( '.translation-suggestion.with-tooltip.translation' ).length;
-		itemsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.deepl' ).length;
-		itemsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.openai' ).length;
 		$( '#sidebar-div-others-translation-memory-content-' + divId ).html( TMcontainer.html() );
 		add_amount_to_others_tab('sidebar-tab-others-' + divId, window.translationHelpersCache[ divId ], divId);
 	}
