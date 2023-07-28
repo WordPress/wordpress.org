@@ -218,8 +218,8 @@
 	 */
 	function copyTranslationMemoryToSidebarTab( $container ){
 		var editor = $container.closest( '.editor' );
-	    var divSidebarWithTM = editor.find( '.meta.translation-memory' ).first();
-		var divId = divSidebarWithTM.attr( 'data-row-id' );
+	    var divSidebarWithDiscussion = editor.find( '.meta.discussion' ).first();
+		var divId = divSidebarWithDiscussion.attr( 'data-row-id' );
 		var TMcontainer = editor.find( '.suggestions__translation-memory' );
 		if ( !TMcontainer.length ) {
 			return;
