@@ -4,8 +4,10 @@ if ( empty( $suggestions ) ) {
 } else {
 	echo '<ul class="suggestions-list">';
 	foreach ( $suggestions as $suggestion ) {
+		$suggestion_type = ( 'translation' === strtolower( $type ) ) ? 'tm' : $type;
+
 		echo '<li>';
-		echo '<div class="translation-suggestion with-tooltip ' . esc_html( strtolower( $type ) ) . '" tabindex="0" data-suggestion-source="' . esc_html( strtolower( $type ) ) . '" role="button" aria-pressed="false" aria-label="Copy translation">';
+		echo '<div class="translation-suggestion with-tooltip ' . esc_html( strtolower( $type ) ) . '" tabindex="0" data-suggestion-source="' . esc_html( strtolower( $suggestion_type ) ) . '" role="button" aria-pressed="false" aria-label="Copy translation">';
 			echo '<span class="' . esc_html( strtolower( $type ) ) . '-suggestion__score">';
 		if ( 'Translation' == $type ) {
 			echo number_format( 100 * $suggestion['similarity_score'] ) . '%';

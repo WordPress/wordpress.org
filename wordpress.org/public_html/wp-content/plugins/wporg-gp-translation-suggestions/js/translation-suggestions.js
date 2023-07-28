@@ -478,16 +478,18 @@
 		if ( ! $row ) {
 			return;
 		}
-		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' ) == 'translation' ? 'tm' : $row.data( 'suggestion-source' );
-		externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
-
+		if ( $row.data( 'suggestion-locale' ) ) {
+			externalSuggestion.suggestion_source = $row.data( 'suggestion-locale' );
+			externalSuggestion.translation = $row.find( '.translation-suggestion__translation-raw' ).text();
+		} else {
+			externalSuggestion.suggestion_source = $row.data( 'suggestion-source' );
+			externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
+		}
 	}
 
 	//Prefilter ajax requests to add external translations used to the request.
 	$.ajaxPrefilter( function ( options ) {
-		const isSuggestionUsed = Object.keys( externalSuggestion ).length  > 0 ? true : false;
-
-		if ( ! externalSuggestion || ! isSuggestionUsed ) {
+		if ( ! externalSuggestion || ! externalSuggestion.suggestion_source || ! externalSuggestion.translation ) {
 			return;
 		}
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
