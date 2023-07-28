@@ -280,6 +280,8 @@ class Review_Tools {
 				<li><a href='https://plugins.svn.wordpress.org/<?php echo esc_attr( $post->post_name ); ?>/'>Subversion Repository</a></li>
 				<li><a href='https://plugins.trac.wordpress.org/browser/<?php echo esc_attr( $post->post_name ); ?>/'>Browse in Trac</a></li>
 				<li><a href='<?php echo esc_url( Template::download_link() ); ?>'>Download Current Version</a></li>
+				<li><a href='<?php echo esc_url( 'https://playground.wordpress.net/?plugin=' . $post->post_name ); ?>'>Run in playground</a></li>
+
 				<?php if ( has_term( 'block', 'plugin_section', $post ) ) : ?>
 					<li><a href='https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=<?php echo esc_attr( $post->post_name ); ?>'>Block Plugin Checker</a></li>
 				<?php endif; ?>
