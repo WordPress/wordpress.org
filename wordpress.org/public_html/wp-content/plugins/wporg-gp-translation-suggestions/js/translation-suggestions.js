@@ -489,7 +489,7 @@
 
 	//Prefilter ajax requests to add external translations used to the request.
 	$.ajaxPrefilter( function ( options ) {
-		if ( ! externalSuggestion.suggestion_source || ! externalSuggestion.translation ) {
+		if ( ! externalSuggestion || ! externalSuggestion.suggestion_source || ! externalSuggestion.translation ) {
 			return;
 		}
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
