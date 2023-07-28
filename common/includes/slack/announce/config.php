@@ -95,6 +95,7 @@ function get_whitelist() {
 			'Kau-Boy',
 			'sippis',
 		),
+		'contributor-mentorship' => $wordcamp_central,
 		'core' => array_merge( get_committers(), array(
 			'amykamala', // @amy kamala on Slack
 			'angelasjin',
