@@ -3262,7 +3262,7 @@ ul.other-locales li {
 
 .preview-virtual-pattern {
 	max-width: 39%;
-	float:right;
+	float: right;
 	padding: 1rem 1rem 0 1rem;
 	margin-top: 0.5rem;
 	margin-bottom: 0.5rem;
@@ -3278,4 +3278,16 @@ ul.other-locales li {
 	padding: 0 0 1rem 0;
 	margin: 0 -1rem;
 	border-bottom: 1px solid rgb(114, 119, 124);
+}
+
+@media screen and (max-width: 1280px) {
+	#translations.table-virtual-pattern {
+		float: none;
+		width: 100%;
+	}
+
+	.preview-virtual-pattern {
+		max-width: 100%;
+		float: none;
+	}
 }
