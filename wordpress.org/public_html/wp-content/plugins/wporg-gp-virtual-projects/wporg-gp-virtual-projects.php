@@ -12,7 +12,8 @@ class WPorg_Virtual_Projects {
 	public function __construct() {
 		add_filter( 'gp_subprojects', array( $this, 'add_virtual_projects' ), 10, 1 );
 		add_filter( 'gp_get_project_status', array( $this, 'gp_get_project_status' ), 10, 4 );
-		add_filter( 'gp_translation_table_after', array( $this, 'add_pattern_preview' ), 10, 2 );
+		add_filter( 'gp_translation_table_classes', array( $this, 'gp_translation_table_classes' ) );
+		add_action( 'gp_translation_table_after', array( $this, 'add_pattern_preview' ), 10, 2 );
 	}
 
 	/**
