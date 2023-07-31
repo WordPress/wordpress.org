@@ -165,6 +165,10 @@ class WPorg_Virtual_Projects {
 		$search_term        = $get_defined_vars['filters']['term'];
 		$project_name       = $get_defined_vars['project']->name;
 
+		if ( ! $_GET['pattern_preview'] ) {
+			return $translations_table;
+		}
+
 		if ( '' == $search_term || 'Patterns' != $project_name ) {
 			return $translations_table;
 		}
