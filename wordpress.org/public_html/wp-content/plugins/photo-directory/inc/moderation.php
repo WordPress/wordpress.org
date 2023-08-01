@@ -821,8 +821,19 @@ CSS;
 			echo '<tr>';
 			echo '<td>' . sprintf( '<a href="%s">%s</a>', esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ), $user->user_nicename ) . '</td>';
 			echo '<td>' . esc_html( $user->display_name ) . '</td>';
-			echo '<td>' . number_format_i18n( $count_approved ) . '</td>';
-			echo '<td>' . number_format_i18n( $count_rejected ) . '</td>';
+
+			$base_edit_url = add_query_arg( [ 'post_type' => Registrations::get_post_type(), 'author' => $user->ID ], admin_url( 'edit.php' ) );
+			echo '<td>' . ( $count_approved ? sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( add_query_arg( [ 'post_status' => 'publish' ], $base_edit_url ) ),
+				number_format_i18n( $count_approved )
+			) : '0' ) . '</td>';
+			echo '<td>' . ( $count_rejected ? sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( add_query_arg( [ 'post_status' => Rejection::get_post_status() ], $base_edit_url ) ),
+				number_format_i18n( $count_rejected )
+			) : '0' ) . '</td>';
+
 			echo '<td>';
 			$last_moderated = User::get_last_moderated( $user->ID, true );
 			if ( $last_moderated ) {
