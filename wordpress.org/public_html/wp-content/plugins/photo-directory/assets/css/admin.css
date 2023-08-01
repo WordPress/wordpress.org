@@ -64,3 +64,8 @@ dl.photos-flagged dt {
 	border-color: orange;
 	background-color: antiquewhite;
 }
+
+body.post-type-photo label[for="authordiv-hide"],
+body.post-type-photo #authordiv {
+	display: none;
+}
