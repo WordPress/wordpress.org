@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		'#photo_category-adder',
 		'#photo_color-adder',
 		'#photo_orientation-adder',
+		'body.post-type-photo #wp-content-editor-tools',
+		'body.post-type-photo #ed_toolbar',
 	];
 	interfaceElementsToRemove.forEach(n => { document.querySelector(n)?.remove(); });
 
