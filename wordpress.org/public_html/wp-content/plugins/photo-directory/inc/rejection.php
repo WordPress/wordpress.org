@@ -510,7 +510,7 @@ class Rejection {
 			return $untrash;
 		}
 
-		// Prevent untrashing if the previous post status was rejected.
+		// Prevent untrashing if the previous post status was not rejected.
 		if ( self::get_post_status() !== $previous_status ) {
 			return false;
 		}
@@ -676,8 +676,8 @@ class Rejection {
 	 * Removes the ability to delete photo posts.
 	 *
 	 * Photo posts must first be rejected (and ideally remain rejected) rather
-	 * than get deleted since we'd lose valuatble information about the rejection
-	 * such who submitted, when they submitted, why it was rejected, who rejected
+	 * than get deleted since we'd lose valuable information about the rejection
+	 * such as who submitted, when they submitted, why it was rejected, who rejected
 	 * it, and the hash of the photo to prevent resubmissions of the photo.
 	 *
 	 * @param string[] $caps    Primitive capabilities required of the user.
@@ -717,7 +717,7 @@ class Rejection {
 	/**
 	 * Removes the ability to publish photos once rejected.
 	 *
-	 * Once rejected, photo posts will have had their submitted photo deleted,
+	 * Once rejected, photo posts will have had their submitted photo deleted so
 	 * publishing the post is no longer a viable path for the post. If no
 	 * post is associated with the capability check, and no post is global, then
 	 * the capability isn't disallowed since user may be able to publish photos
