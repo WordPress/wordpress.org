@@ -34,6 +34,19 @@ document.addEventListener('DOMContentLoaded', function () {
 	];
 	interfaceElementsToRemove.forEach(n => { document.querySelector(n)?.remove(); });
 
+	// Highlight photo description/caption if empty.
+	const photoDescription = document.getElementById('content');
+	function setDescriptionHighlight() {
+		const missingDescription = 'photo-missing-description';
+		if ( photoDescription?.value.trim().length > 0 ) {
+			photoDescription.classList.remove(missingDescription);
+		} else {
+			photoDescription.classList.add(missingDescription);
+		}
+	}
+	setDescriptionHighlight();
+	photoDescription.addEventListener('input', e => setDescriptionHighlight());
+
 	// Highlight custom taxonomies lacking terms.
 	highlightCustomTaxonomiesWithoutTerms();
 }, false);
