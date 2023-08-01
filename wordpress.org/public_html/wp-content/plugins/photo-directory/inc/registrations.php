@@ -93,6 +93,7 @@ class Registrations {
 			'show_in_rest'      => true,
 			'rest_base'         => 'photos',
 			'capability_type'   => [ 'photo', 'photos' ],
+			'capabilities'      => [ 'create_posts' => 'do_not_allow' ],
 			'map_meta_cap'      => true,
 			'has_archive'       => true,
 			'hierarchical'      => false,
