@@ -69,6 +69,9 @@ class Admin {
 		// Navigate to next post after moderation.
 		add_action( 'edit_form_top',                           [ __CLASS__, 'show_moderation_message' ] );
 		add_filter( 'redirect_post_location',                  [ __CLASS__, 'redirect_to_next_post_after_moderation' ], 5, 2 );
+
+		// Add class(es) to body tag.
+		add_filter( 'admin_body_class',                        [ __CLASS__, 'add_body_class' ] );
 	}
 
 	/**
@@ -1246,6 +1249,27 @@ class Admin {
 		}
 
 		return $taxonomies;
+	}
+
+	/**
+	 * Amends body tag with additional classes.
+	 *
+	 * @param string $classes Body classes.
+	 * @return string
+	 */
+	public static function add_body_class( $classes ) {
+		$post_type = Registrations::get_post_type();
+		if (
+			// Post listing of photos.
+			filter_input(INPUT_GET, 'post_type') === $post_type
+		||
+			// Editing a photo post.
+			( ( $post_id = filter_input(INPUT_GET, 'post', FILTER_SANITIZE_NUMBER_INT) ) && get_post_type( $post_id ) === $post_type )
+		) {
+			$classes .= ' post-type-photo';
+		}
+
+		return $classes;
 	}
 
 }
