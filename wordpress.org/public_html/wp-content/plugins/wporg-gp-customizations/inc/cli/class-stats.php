@@ -120,6 +120,7 @@ class Stats {
 
 	private string $header                           = '';
 	private string $originals_by_year                = '';
+	private string $originals_by_translation_source  = '';
 	private string $translations_translators_by_year = '';
 	private string $forum_post_and_replies_by_year   = '';
 	private string $wordpress_translation_percentage = '';
@@ -145,6 +146,20 @@ class Stats {
 	private bool $echo_the_values = false;
 
 	/**
+	 * The id of the blog where the stats are stored.
+	 *
+	 * @var int
+	 */
+	private const MAKE_POLYGLOTS_BLOG_ID = 19;
+
+	/**
+	 * The id of the page where the stats are stored.
+	 *
+	 * @var int
+	 */
+	private const POLYGLOTS_PAGE_ID = 42132;
+
+	/**
 	 * Prints the Polyglots stats or stores them on a page.
 	 *
 	 * @param bool $echo_the_values Whether it should print the info in the CLI or stores it on a page.
@@ -160,13 +175,12 @@ class Stats {
 			return;
 		}
 
-		define( 'MAKE_POLYGLOTS_BLOG_ID', 19 );
-		define( 'POLYGLOTS_PAGE_ID', 42132 );
-
 		$this->echo_the_values = $echo_the_values;
 		$this->set_number_of_years_with_data();
 		$this->print_header();
+		$this->print_stats_comparison( gmdate( 'Y-m-d' ) );
 		$this->print_wordpress_translation_percentage();
+		$this->print_stats_for_translation_sources();
 		$this->print_packages_generated();
 		$this->print_unique_themes_plugins_by_year();
 		$this->print_originals_natural_year();
@@ -177,7 +191,6 @@ class Stats {
 		$this->print_managers_stats();
 		$this->print_most_active_translators();
 		$this->store_stats();
-		$this->print_stats_comparison( gmdate( 'Y-m-d' ) );
 
 		$this->update_page();
 	}
@@ -239,7 +252,7 @@ class Stats {
 	 */
 	private function get_locale_requests() {
 		$locale_requests = array();
-		switch_to_blog( MAKE_POLYGLOTS_BLOG_ID );
+		switch_to_blog( self::MAKE_POLYGLOTS_BLOG_ID );
 		$args                     = array(
 			'post_type'   => 'post',
 			'tag'         => 'locale-requests',
@@ -281,7 +294,7 @@ class Stats {
 	 */
 	private function get_editor_requests() {
 		$editor_requests = array();
-		switch_to_blog( MAKE_POLYGLOTS_BLOG_ID );
+		switch_to_blog( self::MAKE_POLYGLOTS_BLOG_ID );
 		register_taxonomy(
 			'p2_resolved',
 			'post',
@@ -942,14 +955,18 @@ class Stats {
 		$feedback_posts_args = array(
 			'posts_per_page' => - 1,
 			'post_status'    => 'publish',
-			'post_type'      => $this::FEEDBACK_POST_TYPE,
+			'post_type'      => self::FEEDBACK_POST_TYPE,
 			'date_query'     => array(
 				array( 'after' => '2022-07-28' ),
 			),
 		);
-		$feedback_posts_count = $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_status='publish' AND post_type=%s AND post_date > %s", $this::FEEDBACK_POST_TYPE, '2022-07-28'
-		));
+		$feedback_posts_count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_status='publish' AND post_type=%s AND post_date > %s",
+				self::FEEDBACK_POST_TYPE,
+				'2022-07-28'
+			)
+		);
 		$original_strings_with_comments = number_format_i18n( $feedback_posts_count );
 
 		// Get the total number of comments.
@@ -957,7 +974,7 @@ class Stats {
 			get_comments(
 				array(
 					'number'     => - 1,
-					'post_type'  => $this::FEEDBACK_POST_TYPE,
+					'post_type'  => self::FEEDBACK_POST_TYPE,
 					'count'      => true,
 					'date_query' => array(
 						array( 'after' => '2022-07-28' ),
@@ -969,9 +986,13 @@ class Stats {
 		// Get some info related with the status of the translations who get feedback.
 		// First, get the comments related with a translation, because we can get comments related
 		// only with the original.
-		$comment_meta_translation_ids = $wpdb->get_col( $wpdb->prepare(
-			"SELECT cm.meta_value FROM $wpdb->commentmeta cm, $wpdb->comments c, $wpdb->posts p WHERE p.post_status='publish' AND p.post_type=%s AND p.post_date > %s AND cm.meta_key = 'translation_id' AND c.comment_post_id = p.id AND cm.comment_id = c.comment_id", $this::FEEDBACK_POST_TYPE, '2022-07-28'
-		));
+		$comment_meta_translation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT cm.meta_value FROM $wpdb->commentmeta cm, $wpdb->comments c, $wpdb->posts p WHERE p.post_status='publish' AND p.post_type=%s AND p.post_date > %s AND cm.meta_key = 'translation_id' AND c.comment_post_id = p.id AND cm.comment_id = c.comment_id",
+				self::FEEDBACK_POST_TYPE,
+				'2022-07-28'
+			)
+		);
 
 		// Check all comments with a related translation.
 		foreach ( $comment_meta_translation_ids as $comment_meta_translation_id ) {
@@ -1015,9 +1036,13 @@ class Stats {
 		}
 
 		// Get most active commenter's.
-		$comment_user_ids = $wpdb->get_col( $wpdb->prepare(
-			"SELECT c.user_id FROM $wpdb->comments c, $wpdb->posts p WHERE p.post_status='publish' AND p.post_type=%s AND p.post_date > %s AND c.comment_post_id = p.id", $this::FEEDBACK_POST_TYPE, '2022-07-28'
-		));
+		$comment_user_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT c.user_id FROM $wpdb->comments c, $wpdb->posts p WHERE p.post_status='publish' AND p.post_type=%s AND p.post_date > %s AND c.comment_post_id = p.id",
+				self::FEEDBACK_POST_TYPE,
+				'2022-07-28'
+			)
+		);
 
 		$commenters_with_comment_count = array_count_values( $comment_user_ids );
 		arsort( $commenters_with_comment_count );
@@ -1165,6 +1190,138 @@ class Stats {
 
 		if ( ! $this->echo_the_values ) {
 			$this->contributors_per_locale .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
+	}
+
+	/**
+	 * Print the stats for translation sources.
+	 *
+	 * @return void
+	 */
+	private function print_stats_for_translation_sources(): void {
+		global $wpdb;
+		// Source used: frontend, file import, playground
+		$originals = $wpdb->get_results(
+			"SELECT 
+    			meta_key, 
+    			meta_value, 
+    			count(*) as number_of_strings 
+			FROM `translate_meta` 
+			WHERE 
+			    object_type = 'translation' 
+			  	AND meta_key = 'source' 
+			    AND meta_value <> '' 
+			GROUP BY 
+			    meta_key, 
+			    meta_value 
+			ORDER BY 
+			    `translate_meta`.
+			    `meta_key` ASC, 
+			    count(*) desc
+			"
+		);
+		if ( ! $this->echo_the_values ) {
+			$this->originals_by_translation_source = $this->create_gutenberg_heading( 'Number of translations by translation source (starting on 2023-06-30)' );
+		} else {
+			$this->print_wpcli_heading( 'Number of translations by translation source (starting on 2023-06-30)' );
+		}
+		$code  = "Source \t\t\t\t Number of strings" . PHP_EOL;
+		$code .= '................................................................' . PHP_EOL;
+
+		foreach ( $originals as $original ) {
+			$code .= str_pad( ucfirst( $original->meta_value ), 15 ) . " \t\t " . str_pad( number_format_i18n( $original->number_of_strings ), 15, ' ', STR_PAD_LEFT ) . PHP_EOL;
+		}
+		$code .= PHP_EOL;
+
+		if ( ! $this->echo_the_values ) {
+			$this->originals_by_translation_source .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
+
+		// Suggestion used: TM, OpenAI, DeepL, undefined.
+		$suggestions = $wpdb->get_results(
+			"SELECT 
+    			meta_key, 
+    			meta_value, 
+    			count(*) as number_of_strings 
+			FROM `translate_meta` 
+			WHERE 
+			    object_type = 'translation' 
+			  	AND meta_key = 'suggestion_used' 
+			    AND 
+                	(meta_value LIKE 'tm%' 
+                     OR meta_value LIKE 'openai%'
+                     OR meta_value LIKE 'deepl%')  
+			GROUP BY 
+			    meta_key, 
+			    meta_value 
+			ORDER BY 
+			    `translate_meta`.
+			    `meta_key` ASC, 
+			    count(*) desc
+			"
+		);
+		if ( ! $this->echo_the_values ) {
+			$this->originals_by_translation_source .= $this->create_gutenberg_heading( 'Number of translations by suggestion source (starting on 2023-06-30)' );
+		} else {
+			$this->print_wpcli_heading( 'Number of translations by suggestion source (starting on 2023-06-30)' );
+		}
+		$code  = "Source \t\t\t\t Number of strings" . PHP_EOL;
+		$code .= '................................................................' . PHP_EOL;
+
+		foreach ( $suggestions as $suggestion ) {
+			$code .= str_pad( $suggestion->meta_value, 15 ) . " \t\t " . str_pad( number_format_i18n( $suggestion->number_of_strings ), 15, ' ', STR_PAD_LEFT ) . PHP_EOL;
+		}
+		$code .= PHP_EOL;
+
+		if ( ! $this->echo_the_values ) {
+			$this->originals_by_translation_source .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
+
+		// Suggestion from other languages.
+		$suggestions_ol = $wpdb->get_results(
+			"SELECT 
+    			meta_key, 
+    			meta_value, 
+    			count(*) as number_of_strings 
+			FROM `translate_meta` 
+			WHERE 
+			    object_type = 'translation' 
+			  	AND meta_key = 'suggestion_used' 
+			    AND 
+                	NOT (meta_value LIKE 'tm%' 
+                     OR meta_value LIKE 'undefined%' 
+                     OR meta_value LIKE 'openai%'
+                     OR meta_value LIKE 'deepl%')  
+			GROUP BY 
+			    meta_key, 
+			    meta_value 
+			ORDER BY 
+			    `translate_meta`.
+			    `meta_key` ASC, 
+			    count(*) desc
+			"
+		);
+		if ( ! $this->echo_the_values ) {
+			$this->originals_by_translation_source .= $this->create_gutenberg_heading( 'Number of translations suggested from another language (starting on 2023-06-30)' );
+		} else {
+			$this->print_wpcli_heading( 'Number of translations suggested from another language (starting on 2023-06-30)' );
+		}
+		$code  = "Language \t\t\t\t Number of strings" . PHP_EOL;
+		$code .= '................................................................' . PHP_EOL;
+
+		foreach ( $suggestions_ol as $suggestion ) {
+			$code .= str_pad( $suggestion->meta_value, 15 ) . " \t\t " . str_pad( number_format_i18n( $suggestion->number_of_strings ), 15, ' ', STR_PAD_LEFT ) . PHP_EOL;
+		}
+		$code .= PHP_EOL;
+
+		if ( ! $this->echo_the_values ) {
+			$this->originals_by_translation_source .= $this->create_gutenberg_code( $code );
 		} else {
 			WP_CLI::log( $code );
 		}
@@ -1495,7 +1652,7 @@ class Stats {
 		add_filter(
 			'wp_revisions_to_keep',
 			function ( $num, $post ) {
-				if ( POLYGLOTS_PAGE_ID === $post->ID ) {
+				if ( self::POLYGLOTS_PAGE_ID === $post->ID ) {
 					$num = 0; // pretend we don't want to keep revisions so that it will not lookup all old revisions.
 				}
 
@@ -1504,11 +1661,11 @@ class Stats {
 			10,
 			2
 		);
-		switch_to_blog( MAKE_POLYGLOTS_BLOG_ID );
+		switch_to_blog( self::MAKE_POLYGLOTS_BLOG_ID );
 
 		wp_update_post(
 			array(
-				'ID'           => POLYGLOTS_PAGE_ID,
+				'ID'           => self::POLYGLOTS_PAGE_ID,
 				'post_type'    => 'page',
 				'post_author'  => 'Amieiro',
 				'post_content' => $this->get_polyglots_stats_page_content(),
@@ -1527,6 +1684,7 @@ class Stats {
 		return $this->header .
 			$this->stats_comparison .
 			$this->wordpress_translation_percentage .
+			$this->originals_by_translation_source .
 			$this->originals_by_year .
 			$this->packages_generated_by_year .
 			$this->themes_plugins_by_year .
