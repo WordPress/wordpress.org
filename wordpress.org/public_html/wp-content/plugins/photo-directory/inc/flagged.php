@@ -118,6 +118,21 @@ class Flagged {
 	}
 
 	/**
+	 * Is a given post flagged?
+	 *
+	 * @param int|WP_Post $post The post or post ID.
+	 * @return bool True if post is flagged, else false.
+	 */
+	public static function is_post_flagged( $post ) {
+		$post = get_post( $post );
+		if ( $post && self::get_post_status() === get_post_status( $post ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Amends an array with the flagged post status.
 	 *
 	 * @param string[] $post_statuses Array of post statuses.
