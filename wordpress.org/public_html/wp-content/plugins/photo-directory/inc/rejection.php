@@ -14,7 +14,7 @@ class Rejection {
 	 *
 	 * @var string
 	 */
-	public static $action = 'reject-photo';
+	public static $action = 'reject';
 
 	/**
 	 * Array of reason types and their explanations (suitable for dropdown use).
@@ -536,7 +536,7 @@ class Rejection {
 		$nonce_field = 'photo-rejection-nonce';
 
 		// Bail if expected data isn't present.
-		if ( empty( $_POST['reject'] ) || empty( $_POST[ $nonce_field ] ) || empty( $_POST['post_type'] ) || empty( $_POST['post_ID'] ) ) {
+		if ( empty( $_POST[ self::$action ] ) || empty( $_POST[ $nonce_field ] ) || empty( $_POST['post_type'] ) || empty( $_POST['post_ID'] ) ) {
 			return;
 		}
 
@@ -879,7 +879,8 @@ JS;
 
 		printf( '<div class="reject-action%s">', $is_rejected ? ' post-is-rejected' : '' );
 		printf(
-			'<input type="submit" name="reject" id="reject-post" value="%s" class="button button-large">',
+			'<input type="submit" name="%s" id="reject-post" value="%s" class="button button-large">',
+			self::$action,
 			$is_rejected ? esc_attr__( 'Update', 'wporg-photos' ) : esc_attr__( 'Reject', 'wporg-photos' )
 		);
 		echo '</div>';
