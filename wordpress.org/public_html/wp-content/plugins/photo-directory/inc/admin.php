@@ -72,6 +72,12 @@ class Admin {
 
 		// Add class(es) to body tag.
 		add_filter( 'admin_body_class',                        [ __CLASS__, 'add_body_class' ] );
+
+		// Disable visual editor.
+			// Prevent the visual editor from being loaded.
+			add_filter( 'user_can_richedit',                   [ __CLASS__, 'disable_rich_editing' ] );
+			// Force the default editor to be the HTML editor.
+			add_filter( 'wp_default_editor',                   [ __CLASS__, 'force_text_editor' ], 99 );
 	}
 
 	/**
@@ -1270,6 +1276,36 @@ class Admin {
 		}
 
 		return $classes;
+	}
+
+	/**
+	 * Disables rich editor for photo posts.
+	 *
+	 * @param bool $user_can Can the user rich edit?
+	 * @return bool
+	 */
+	public static function disable_rich_editing( $user_can ) {
+		$post = get_post();
+		if ( $user_can && $post && get_post_type( $post ) === Registrations::get_post_type() ) {
+			$user_can = false;
+		}
+
+		return $user_can;
+	}
+
+	/**
+	 * Forces use of the text editor for photo posts.
+	 *
+	 * @param string $default The default editor as chosen by user or defaulted by WP.
+	 * @return string 'html'
+	 */
+	public static function force_text_editor( $default ) {
+		$post = get_post();
+		if ( $post && get_post_type( $post ) === Registrations::get_post_type() ) {
+			$default = 'html';
+		}
+
+		return $default;
 	}
 
 }
