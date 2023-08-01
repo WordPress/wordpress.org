@@ -66,6 +66,9 @@ dl.photos-flagged dt {
 }
 
 body.post-type-photo label[for="authordiv-hide"],
-body.post-type-photo #authordiv {
+body.post-type-photo #authordiv,
+#photo_category-adder,
+#photo_color-adder,
+#photo_orientation-adder {
 	display: none;
 }

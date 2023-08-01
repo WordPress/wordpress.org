@@ -23,6 +23,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		document.getElementById('photo_orientationdiv').hidden = true;
 	}
 
+	// Remove a number of interface elements.
+	const interfaceElementsToRemove = [
+		'#photo_category-adder',
+		'#photo_color-adder',
+		'#photo_orientation-adder',
+	];
+	interfaceElementsToRemove.forEach(n => { document.querySelector(n)?.remove(); });
+
 	// Highlight custom taxonomies lacking terms.
 	highlightCustomTaxonomiesWithoutTerms();
 }, false);
