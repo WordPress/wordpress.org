@@ -11,5 +11,15 @@ document.addEventListener('DOMContentLoaded', function () {
 	document.querySelector('#photos_photo .photos-photo-link img.blurred')?.addEventListener('click', unblurPhoto, true);
 
 	// Hide 'Post submitted' admin notice if post publication was actually blocked due to missing taxonomies.
-	document.querySelector('.notice-missing-taxonomies ~ #message.notice-success')?.hidden = true;
+	const successNoticeAlongsideMissingTerms = document.querySelector('.notice-missing-taxonomies ~ #message.notice-success');
+	if (successNoticeAlongsideMissingTerms) {
+		successNoticeAlongsideMissingTerms.hidden = true;
+	}
+
+	// Hide 'Orientations' metabox when a value is assigned.
+	//  Orientation shouldn't need direct assignment or changing, so don't show it (as long as a value was set).
+	const orientation_value = document.querySelector('input[name="tax_input[photo_orientation][]"]:checked' );
+	if ( orientation_value ) {
+		document.getElementById('photo_orientationdiv').hidden = true;
+	}
 }, false);
