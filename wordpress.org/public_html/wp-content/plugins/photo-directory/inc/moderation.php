@@ -54,6 +54,9 @@ class Moderation {
 		add_action( 'wporg_photos_moderation_email_sent', [ __CLASS__, 'sent_user_email' ] );
 		add_filter( 'wporg_photos_pre_upload_form',       [ __CLASS__, 'output_list_of_pending_submissions_for_user' ] );
 
+		// Disable moderating own posts.
+		add_filter( 'user_has_cap',                       [ __CLASS__, 'disable_own_post_editing' ], 10, 4 );
+
 		// Add column to users table with count of photos moderated.
 		add_filter( 'manage_users_columns',               [ __CLASS__, 'add_moderated_count_column' ] );
 		add_filter( 'manage_users_custom_column',         [ __CLASS__, 'handle_moderated_count_column_data' ], 10, 3 );
@@ -190,6 +193,55 @@ class Moderation {
 			if ( $photos_moderator_role ) {
 				$caps = array_merge( (array) $photos_moderator_role->capabilities, (array) $caps );
 			}
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Prevents moderators from being able to edit or moderate their own photos.
+	 *
+	 * @param array    $caps Array of key/value pairs where keys represent a
+	 *                       capability name and boolean values represent whether
+	 *                       the user has that capability.
+	 * @param string[] $cap  Required primitive capabilities for requested capability.
+	 * @param array    $args {
+	 *     Arguments that accompany the requested capability check.
+	 *
+	 *     @type string    $0 Requested capability.
+	 *     @type int       $1 Concerned user ID.
+	 *     @type mixed  ...$2 Optional second and further parameters, typically object ID.
+	 * }
+	 * @param WP_User  $user The user object.
+	 * @return array
+	 */
+	 public static function disable_own_post_editing( $caps, $cap, $args, $user ) {
+		// Bail if not a relevant capability.
+		if ( ! in_array( $cap[0], [ 'edit_photos', 'publish_photos' ] ) ) {
+			return $caps;
+		}
+
+		// Bail if no post context provided.
+		if ( ! isset( $args[2] ) ) {
+			return $caps;
+		}
+
+		// Bail if user isn't a moderator.
+		if ( ! user_can( $user->ID, 'photos_moderator' ) ) {
+			return $caps;
+		}
+
+		$post = get_post( $args[2] );
+
+		// Bail if not a photo post.
+		if ( Registrations::get_post_type() !== $post->post_type ) {
+			return $caps;
+		}
+
+		// Disallow editing their own submission.
+		if ( isset( $post->post_author ) && $post->post_author == $user->ID ) {
+			$caps['edit_photos'] = false;
+			$caps['publish_photos'] = false;
 		}
 
 		return $caps;
