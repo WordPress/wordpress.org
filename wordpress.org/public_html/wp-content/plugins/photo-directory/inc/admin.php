@@ -29,6 +29,7 @@ class Admin {
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'handle_photo_column_data' ], 10, 2 );
 		add_filter( "manage_{$post_type}_posts_columns",       [ __CLASS__, 'add_flags_column' ] );
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'handle_flags_column_data' ], 10, 2 );
+		add_filter( "manage_edit-{$post_type}_columns",        [ __CLASS__, 'remove_photo_colors_column' ] );
 		add_filter( 'post_row_actions',                        [ __CLASS__, 'add_post_action_photo_links' ], 10, 2 );
 		add_filter( 'the_author',                              [ __CLASS__, 'add_published_photos_count_to_author' ] );
 		add_filter( 'use_block_editor_for_post_type',          [ __CLASS__, 'disable_block_editor' ], 10, 2 );
@@ -324,6 +325,27 @@ class Admin {
 		$post = get_post( $post_id );
 
 		do_action( 'wporg_photos_flag_column_data', $post );
+	}
+
+	/**
+	 * Removes the colors column from the listing of pending photos.
+	 *
+	 * Currently colors aren't auto-assigned, so rarely is there antyhing
+	 * to show.
+	 *
+	 * @param  array $columns Array of post column titles.
+	 * @return array
+	 */
+	public static function remove_photo_colors_column( $columns ) {
+		if (
+			filter_input( INPUT_GET, 'post_type' ) === Registrations::get_post_type()
+		&&
+			filter_input( INPUT_GET, 'post_status' ) === 'pending'
+		) {
+			unset( $columns[ 'taxonomy-' . Registrations::get_taxonomy( 'colors' ) ] );
+		}
+
+		return $columns;
 	}
 
 	/**
