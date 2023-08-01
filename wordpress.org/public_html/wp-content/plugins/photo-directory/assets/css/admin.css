@@ -59,3 +59,8 @@ dl.photos-flagged dt {
 .photo-moderator {
 	margin-top: 1rem;
 }
+
+.photo-missing-taxonomy {
+	border-color: orange;
+	background-color: antiquewhite;
+}
