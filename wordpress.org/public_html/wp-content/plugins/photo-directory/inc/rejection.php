@@ -1104,16 +1104,16 @@ JS;
 			<script>
 			document.addEventListener('DOMContentLoaded', function () {
 				// Remove the 'Submit for Review' button.
-				document.querySelector("#publishing-action").remove();
+				document.querySelector("body.post-type-photo #publishing-action")?.remove();
 
 				// Remove the 'Preview' button.
-				document.querySelector("#preview-action").remove();
+				document.querySelector("body.post-type-photo #preview-action")?.remove();
 
 				// Add rejected post status to status display.
-				document.querySelector(".misc-pub-post-status #post-status-display").innerText = "{$status_label}";
+				document.querySelector("body.post-type-photo .misc-pub-post-status #post-status-display").innerText = "{$status_label}";
 
 				// Change visibility display to indicate it is hidden.
-				document.querySelector(".misc-pub-visibility #post-visibility-display").innerText = "{$visibility_label}";
+				document.querySelector("body.post-type-photo .misc-pub-visibility #post-visibility-display").innerText = "{$visibility_label}";
 			} );
 			</script>
 
