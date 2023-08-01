@@ -18,9 +18,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Hide 'Orientations' metabox when a value is assigned.
 	//  Orientation shouldn't need direct assignment or changing, so don't show it (as long as a value was set).
-	const orientation_value = document.querySelector('input[name="tax_input[photo_orientation][]"]:checked' );
-	if ( orientation_value ) {
-		document.getElementById('photo_orientationdiv').hidden = true;
+	const orientationValue = document.querySelector('input[name="tax_input[photo_orientation][]"]:checked' );
+	const orientationDiv = document.getElementById('photo_orientationdiv');
+	if ( orientationValue && orientationDiv ) {
+		orientationDiv.hidden = true;
 	}
 
 	// Remove a number of interface elements.
@@ -59,7 +60,8 @@ function highlightCustomTaxonomiesWithoutTerms() {
 		});
 
 		// The tag list is handled differently. Re-determine as tags are added/removed.
-		if (element[3]) {
+		const tagList = element[3] ? document.querySelector(element[3]) : null;
+		if (tagList) {
 			const observer = new MutationObserver(function(mutations_list) {
 				mutations_list.forEach(function(mutation) {
 					if (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0) {
@@ -68,7 +70,7 @@ function highlightCustomTaxonomiesWithoutTerms() {
 				});
 			});
 
-			observer.observe(document.querySelector(element[3]), { subtree: false, childList: true });
+			observer.observe(tagList, { subtree: false, childList: true });
 		}
 	});
 
@@ -95,7 +97,7 @@ function highlightCustomTaxonomiesWithoutTerms() {
 		let value = document.querySelector(selector)?.value;
 		// If tagListClass is present, see if it has any values if one not already found.
 		if (!value && tagListClass) {
-			value = document.querySelector(tagListClass).hasChildNodes();
+			value = document.querySelector(tagListClass)?.hasChildNodes();
 		}
 
 		value ? div?.classList.remove(missingTaxClass) : div?.classList.add(missingTaxClass);
