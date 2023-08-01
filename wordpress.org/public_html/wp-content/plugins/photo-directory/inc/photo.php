@@ -171,14 +171,14 @@ class Photo {
 	 * wrapper seems touchy, failing to obtain EXIF data more times than not,
 	 * though it appears to be related to the image files themselves and doesn't
 	 * affect all files. Perhaps the stream is not a seekable as the
-	 * `exif_read_data()`docs suggest it needs to be.
+	 * `exif_read_data()` docs suggest it needs to be.
 	 *
 	 * This function essentially copies `wp_read_image_metadata()`. If that
 	 * function didn't find any EXIF data, then this is called. This does everything
 	 * that function does but with 2 changes:
 	 * - A check was added to the very beginning to bail early if EXIF had been extracted.
 	 * - The calls to `exif_read_data()` have been commented out and a call to
-	 *   `self::exif_read_data_as_data_stream()` as been added instead.
+	 *   `self::exif_read_data_as_data_stream()` has been added instead.
 	 *
 	 * Look for 'Start of retry_exif_read() specific changes here. ' to denote the
 	 * start of the section that is changed.
@@ -452,7 +452,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 * @param string $hash The MD5 hash of a photo file. Should not be the hash
 	 *                     of a known photo as obviously the provided hash
 	 *                     would match itself.
-	 * @return bool True is the MD5 hash matches one for an existing photo.
+	 * @return bool True if the MD5 hash matches one for an existing photo.
 	 */
 	public static function hash_exists( $hash ) {
 		$dupe = get_posts( [
@@ -477,7 +477,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *                       ignored, forcing a new API fetch for data? Default
 	 *                       false.
 	 * @return array|false   Associative array of analysis info or false if the
-	 *                       image was invalid or not data was retrieved.
+	 *                       image was invalid or no data was retrieved.
 	 */
 	public static function fetch_analysis_from_api( $image_id, $force = false ) {
 		$photo_meta = wp_get_attachment_metadata( $image_id );
@@ -513,7 +513,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *                       ignored, forcing a new API fetch for data? Default
 	 *                       false.
 	 * @return array|false   Associative array of analysis info or false if the
-	 *                       image was invalid or not data was retrieved.
+	 *                       image was invalid or no data was retrieved.
 	 */
 	public static function get_analysis( $image_id, $force = false ) {
 		$results = self::fetch_analysis_from_api( $image_id, $force );
@@ -817,6 +817,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *
 	 * @param int   $post_id          The ID of the photo post type post.
 	 * @param array $skip_likelihoods Likelihoods to skip due to not being of concern.
+	 *                                Default ['very_unlikely', 'unlikely'].
 	 * @return array
 	 */
 	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely' ] ) {
@@ -1000,7 +1001,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		$moderator = get_userdata( $moderator_id );
 
 		if ( get_current_user_id() === $moderator_id ) {
-			$link = '<b>you</b>';
+			$link = '<b>' . __( 'you', 'wporg-photos' ) . '</b>';
 		} else {
 			$link = sprintf(
 				'<span id="photo-moderator"><a href="%s">%s</a></span>',
