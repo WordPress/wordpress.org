@@ -817,7 +817,13 @@ https://wordpress.org/photos/
 			echo '<td>';
 			$last_moderated = User::get_last_moderated( $user->ID, true );
 			if ( $last_moderated ) {
-				printf( '<a href="%s">%s</a>', get_edit_post_link( $last_moderated->ID ), get_the_date( 'Y-m-d', $last_moderated->ID ) );
+				$edit_url = get_edit_post_link( $last_moderated->ID );
+				$last_mod_date = get_the_date( 'Y-m-d', $last_moderated->ID );
+				if ( $edit_url ) {
+					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), $last_mod_date );
+				} else {
+					echo $last_mod_date;
+				}
 			}
 			echo '</td>';
 			echo '</tr>';
