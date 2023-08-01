@@ -60,8 +60,9 @@ dl.photos-flagged dt {
 	margin-top: 1rem;
 }
 
+#content.photo-missing-description,
 .photo-missing-taxonomy {
-	border-color: orange;
+	border: 1px solid orange;
 	background-color: antiquewhite;
 }
 
