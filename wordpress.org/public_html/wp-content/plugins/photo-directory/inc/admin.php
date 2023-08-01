@@ -285,12 +285,16 @@ class Admin {
 
 		// Mimic standard posts by adding a prefix if post is pending.
 		$prefixed_format = '%s';
-		if ( isset( $post->post_status ) && 'pending' === $post->post_status ) {
+		if ( isset( $post->post_status ) && in_array( $post->post_status, Photo::get_pending_post_statuses() ) ) {
 			// See if a rejection reason has been set.
 			$reason = Rejection::get_rejection_reason( $post );
 			if ( $reason ) {
 				/* translators: %s: Reason for pending rejection. */
 				$prefixed_format = '<span class="pending-rejection">' . sprintf( __( 'Pending rejection - %s:' , 'wporg-photos' ), $reason  ) . '%s<span>';
+			}
+			elseif ( Flagged::is_post_flagged( $post ) ) {
+				/* translators: %s: Pending post title. */
+				$prefixed_format = __( 'Flagged: %s', 'wporg-photos' );
 			}
 			// Else, it is still awaiting moderation.
 			else {
@@ -341,7 +345,7 @@ class Admin {
 	 * @return array The $posts_columns array with the photo column added.
 	 */
 	public static function add_flags_column( $posts_columns ) {
-		if ( empty( $_GET['post_status'] ) || 'pending' === $_GET['post_status'] ) {
+		if ( in_array( filter_input( INPUT_GET, 'post_status' ), Photo::get_pending_post_statuses() ) ) {
 			$posts_columns[ self::COL_NAME_FLAG ] = __( 'Flags', 'wporg-photos' );
 		}
 
@@ -377,7 +381,7 @@ class Admin {
 		if (
 			filter_input( INPUT_GET, 'post_type' ) === Registrations::get_post_type()
 		&&
-			filter_input( INPUT_GET, 'post_status' ) === 'pending'
+			in_array( filter_input( INPUT_GET, 'post_status' ), Photo::get_pending_post_statuses() )
 		) {
 			unset( $columns[ 'taxonomy-' . Registrations::get_taxonomy( 'colors' ) ] );
 		}
@@ -748,7 +752,7 @@ class Admin {
 
 			$post = get_post( $post_id );
 
-			if ( 'pending' === $post->post_status ) {
+			if ( in_array( $post->post_status, Photo::get_pending_post_statuses() ) ) {
 				$msg = sprintf(
 					__( 'This photo is private (though technically directly available should its obfuscated path be known) until officially published to the site. To do so, moderate its <a href="%s">associated post</a>.', 'wporg-photos' ),
 					get_edit_post_link( $post_id )
