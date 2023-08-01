@@ -97,6 +97,7 @@ class wporg_trac_notifications {
 				'javascript',
 				'multisite',
 				'performance',
+				'php-compatibility',
 				'privacy',
 				'rest-api',
 				'rtl',
