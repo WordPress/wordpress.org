@@ -10,4 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 	document.querySelector('#photos_photo .photos-photo-link img.blurred')?.addEventListener('click', unblurPhoto, true);
 
+	// Hide 'Post submitted' admin notice if post publication was actually blocked due to missing taxonomies.
+	document.querySelector('.notice-missing-taxonomies ~ #message.notice-success')?.hidden = true;
 }, false);
