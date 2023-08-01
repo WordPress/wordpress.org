@@ -56,6 +56,9 @@ class Admin {
 		// Admin notice related to flagging/unflagging.
 		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_if_flagged_or_unflagged' ] );
 
+		// Admin notice related to failed publication due to missing taxonomy values.
+		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_if_publish_failed_due_to_missing_taxonomies' ] );
+
 		// Modify admin menu links for photo posts.
 		add_action( 'admin_menu',                              [ __CLASS__, 'modify_admin_menu_links' ] );
 
@@ -69,7 +72,7 @@ class Admin {
 	}
 
 	/**
-	 * Outputs admin notices.
+	 * Outputs admin notice if submissions are currently disabled due to the killswitch.
 	 */
 	public static function add_notice_if_killswitch_enabled() {
 		if ( ! Settings::is_killswitch_enabled() ) {
@@ -87,7 +90,7 @@ class Admin {
 	}
 
 	/**
-	 * Outputs admin notices.
+	 * Outputs admin notice indicating if a photo post is flagged or has been unflagged.
 	 */
 	public static function add_notice_if_flagged_or_unflagged() {
 		$screen = get_current_screen();
@@ -144,6 +147,31 @@ class Admin {
 				sanitize_text_field( $user->display_name )
 			)
 		);
+	}
+
+	/**
+	 * Outputs admin notice if a photo post publication failed due to any custom
+	 * taxonomy not having a value assigned.
+	 */
+	public static function add_notice_if_publish_failed_due_to_missing_taxonomies() {
+		global $post;
+
+		$meta_key = Posts::META_KEY_MISSING_TAXONOMIES;
+
+		if ( isset( $post->ID ) ) {
+			$missing_taxonomies = get_post_meta( $post->ID, $meta_key, true );
+
+			if ( $missing_taxonomies ) {
+				echo '<div class="notice notice-error is-dismissible notice-missing-taxonomies"><p>';
+				printf(
+					__( '<strong>Error:</strong> Photo was not published because the following taxonomies are missing terms: %s', 'wporg-photos' ),
+					'<strong>' . implode( '</strong>, <strong>', $missing_taxonomies ) . '</strong>'
+				);
+
+				echo '</p></div>' . "\n";
+				delete_post_meta( $post->ID, $meta_key );
+			}
+		}
 	}
 
 	/**
