@@ -75,6 +75,13 @@ class Author_Card {
 			return;
 		}
 
+		// Don't show author cards for these users.
+		// These are Profiles shortcuts and never the users that actually happen to have these names.
+		$ignored_users = [ 'me', 'profile' ];
+		if ( in_array( $author->user_nicename, $ignored_users ) ) {
+			return;
+		}
+
 		$author_support_rep = get_posts( [
 			'post_type'      => 'plugin',
 			'post_status'    => 'any',
