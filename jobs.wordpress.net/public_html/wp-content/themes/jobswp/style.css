@@ -1616,3 +1616,22 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	}
 }
 
+@media only screen and (max-width: 400px) {
+	#subhead .container, #content,
+	.container .content-area.grid_9, .container .widget-area.grid_3 {
+		padding-left: 0;
+		padding-right: 0;
+	}
+	input[type="button"].submit-job,
+	input[type="submit"].submit-job,
+	#si_contact_form1 input[type="submit"],
+	.post-job {
+		margin-right: 0;
+	}
+	.entry-header,
+	.entry-content,
+	span.edit-link {
+		margin-left: 5px;
+		margin-right: 5px;
+	}
+}
