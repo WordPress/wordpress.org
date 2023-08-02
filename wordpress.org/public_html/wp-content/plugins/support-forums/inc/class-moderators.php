@@ -70,6 +70,12 @@ class Moderators {
 		add_action( 'bbp_approved_reply',               array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_unapproved_topic',             array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_unapproved_reply',             array( $this, 'store_moderator_username' ) );
+
+		// Allow moderators to post as @moderator.
+		add_action( 'bbp_theme_before_reply_form_subscription', array( $this, 'form_add_post_as_anon_mod' ) );
+		add_filter( 'bbp_new_reply_pre_insert',                 array( $this, 'bbp_new_reply_pre_insert' ) );
+		add_action( 'bbp_theme_before_reply_author_details',    array( $this, 'show_anon_mod_name' ) );
+		add_filter( 'user_has_cap',                             array( $this, 'anon_moderator_user_has_cap' ), 10, 4 );
 	}
 
 	/**
@@ -1108,5 +1114,89 @@ class Moderators {
 		}
 
 		return $topic_status;
+	}
+
+	/**
+	 * Add a checkbox to the reply form to allow moderators to post anonymously.
+	 */
+	public function form_add_post_as_anon_mod() {
+		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		$moderator_user = get_user_by( 'slug', 'moderator' );
+		if ( bbp_is_reply_edit() && $moderator_user->ID !== bbp_get_reply_author_id() ) {
+			return;
+		}
+
+		?>
+
+		<p>
+			<label>
+				<input type="checkbox" name="post_as_anon_moderator" <?php disabled( true, bbp_is_reply_edit() ); checked( $moderator_user->ID, bbp_get_reply_author_id() ) ?>>
+				<?php esc_html_e( 'Post this reply anonymously as @moderator.', 'wporg-forums' ); ?>
+			</label>
+		</p>
+
+		<?php
+	}
+
+	/**
+	 * Overwrite the reply author if required.
+	 *
+	 * @param array $post_data The reply data.
+	 * @return array The filtered reply data.
+	 */
+	public function bbp_new_reply_pre_insert( $post_data ) {
+		if ( ! current_user_can( 'moderate' ) || empty( $_POST['post_as_anon_moderator'] ) ) {
+			return $post_data;
+		}
+
+		// Overwrite the author.
+		$post_data['post_author'] = get_user_by( 'slug', 'moderator' )->ID;
+
+		// Record the real user in the post meta.
+		$post_data['meta_input'] ??= [];
+		$post_data['meta_input'][ self::MODERATOR_META ] = get_current_user_id();
+
+		return $post_data;
+	}
+
+	/**
+	 * Display the moderator's name (to other moderators) if the reply was posted anonymously.
+	 */
+	function show_anon_mod_name() {
+		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		$moderator_user = get_user_by( 'slug', 'moderator' );
+		if ( $moderator_user->ID !== bbp_get_reply_author_id() ) {
+			return;
+		}
+
+		$user = get_user_by( 'id', get_post_meta( bbp_get_reply_id(), self::MODERATOR_META, true ) );
+
+		printf(
+			'<em>' . __( 'Posted by <a href="%s">@%s</a>.', 'wporg-forums' ) . '</em><br/>',
+			esc_url( bbp_get_user_profile_url( $user->ID ) ),
+			esc_html( $user->user_nicename )
+		);
+	}
+
+	/**
+	 * Pretend the @moderator user can moderate, except when they're logged in.
+	 */
+	public function anon_moderator_user_has_cap( $allcaps, $caps, $args, $user ) {
+		if (
+			$user &&
+			[ 'moderate' === $caps ] &&
+			'moderator' === $user->user_nicename &&
+			$user->ID !== get_current_user_id()
+		) {
+			$allcaps['moderate'] = true;
+		}
+
+		return $allcaps;
 	}
 }
