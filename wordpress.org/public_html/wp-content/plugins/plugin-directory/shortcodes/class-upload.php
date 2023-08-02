@@ -307,7 +307,7 @@ class Upload {
 				</fieldset> */
 ?>
 
-				<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+				<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
 				<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
 
 				<p>
@@ -364,7 +364,14 @@ class Upload {
 						labelText = $label.text();
 					$( "#zip_file" )
 						.on( "change", function( event ) {
-							var fileName = event.target.value.split( "\\\\" ).pop();
+							var fileName = event.target.value.split( "\\\\" ).pop(),
+								fileSize = event.target.files[0].size || 0;
+
+							if ( fileSize > $(this).data( "maxbytes" ) ) {
+								event.target.value = "";
+								fileName = false;
+							}
+
 							fileName ? $label.text( fileName ) : $label.text( labelText );
 						} )
 						.on( "focus", function() { $label.addClass( "focus" ); } )
