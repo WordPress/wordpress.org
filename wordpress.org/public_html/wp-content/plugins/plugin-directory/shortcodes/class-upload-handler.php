@@ -64,6 +64,11 @@ class Upload_Handler {
 			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
 
+		// Validate the maximum upload size.
+		if ( $_FILEs['zip_file']['size'] > wp_max_upload_size() ) {
+			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
+		}
+
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
 		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
