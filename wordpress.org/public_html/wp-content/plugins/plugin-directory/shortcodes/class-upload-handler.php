@@ -65,7 +65,7 @@ class Upload_Handler {
 		}
 
 		// Validate the maximum upload size.
-		if ( $_FILEs['zip_file']['size'] > wp_max_upload_size() ) {
+		if ( $_FILES['zip_file']['size'] > wp_max_upload_size() ) {
 			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
 
