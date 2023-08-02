@@ -172,11 +172,11 @@
 		);
 		echo '</div>';
 		?>
-		
+
 		<?php if ( $comments ) : ?>
 			</details>
 		<?php endif; ?>
-		
+
 			<?php
 	} else {
 		/* translators: Log in URL. */
@@ -184,11 +184,11 @@
 	}
 	?>
 </div><!-- .discussion-wrapper -->
-<script>	
+<script>
 	jQuery(function( e, mentions ) {
 		var mentionsList = '<?php echo wp_json_encode( $mentions_list ); ?>';
 		var jetpackMentionsData = JSON.parse( mentionsList );
-		if( jetpackMentionsData.length > 0 ) {
+		if( jetpackMentionsData.length > 0 && typeof jQuery.fn.mentions !== 'undefined' ) {
 			jQuery( 'textarea#comment' ).mentions( jetpackMentionsData );
 		}
 	});
