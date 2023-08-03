@@ -4,11 +4,12 @@ namespace WordPressdotorg\Forums;
 
 class Moderators {
 
-	const ARCHIVED       = 'archived';
-	const ARCHIVED_META  = '_wporg_bbp_unarchived_post_status';
-	const MODERATOR_META = '_wporg_bbp_moderator';
-	const DEFAULT_STATUS = 'publish';
-	const VIEWS          = array( 'archived', 'pending', 'spam' );
+	const ARCHIVED               = 'archived';
+	const ARCHIVED_META          = '_wporg_bbp_unarchived_post_status';
+	const MODERATOR_META         = '_wporg_bbp_moderator';
+	const MODERATOR_REPLY_AUTHOR = '_wporg_bbp_moderator_reply_author';
+	const DEFAULT_STATUS         = 'publish';
+	const VIEWS                  = array( 'archived', 'pending', 'spam' );
 
 	public function __construct() {
 		// Moderator-specific views.
@@ -1157,7 +1158,7 @@ class Moderators {
 
 		// Record the real user in the post meta.
 		$post_data['meta_input'] ??= [];
-		$post_data['meta_input'][ self::MODERATOR_META ] = get_current_user_id();
+		$post_data['meta_input'][ self::MODERATOR_REPLY_AUTHOR ] = get_current_user_id();
 
 		return $post_data;
 	}
@@ -1175,7 +1176,7 @@ class Moderators {
 			return;
 		}
 
-		$user = get_user_by( 'id', get_post_meta( bbp_get_reply_id(), self::MODERATOR_META, true ) );
+		$user = get_user_by( 'id', get_post_meta( bbp_get_reply_id(), self::MODERATOR_REPLY_AUTHOR, true ) );
 
 		printf(
 			'<em>' . __( 'Posted by <a href="%s">@%s</a>.', 'wporg-forums' ) . '</em><br/>',
@@ -1186,6 +1187,9 @@ class Moderators {
 
 	/**
 	 * Pretend the @moderator user can moderate, except when they're logged in.
+	 *
+	 * This keeps the moderator account as a low-access account, while also showing the replies
+	 * with a moderator badge. This should probably ideally be a filter on the badges.
 	 */
 	public function anon_moderator_user_has_cap( $allcaps, $caps, $args, $user ) {
 		if (
