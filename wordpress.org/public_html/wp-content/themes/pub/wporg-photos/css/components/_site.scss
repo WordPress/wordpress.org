@@ -23,6 +23,21 @@ summary {
 	padding: 0;
 }
 
+.main-navigation,
+.download-button,
+.site-header {
+	background-color: #3858e9;
+}
+
+.download-button:focus,
+.download-button:hover {
+	background-color: #213FD4;
+}
+
+.site-header.home .site-title {
+	font-family: "EB Garamond", serif;
+}
+
 .site-title a {
 	border-bottom: none;
 	color: #fff;
@@ -164,6 +179,7 @@ body.search  {
 				float: none;
 				width: 100%;
 				margin-right: 0;
+				margin-bottom: 2rem;
 			}
 		}
 	}
@@ -484,12 +500,13 @@ body.page {
 			transition: $transition;
 
 			&:hover {
-				background-color: rgba(#0085ba, 0.15);
+				background-color: #f6f6f6;
+				color: #6682FF;
 			}
 
 			&:focus {
 				outline: none;
-				background-color: rgba(#0085ba, 0.25);
+				background-color: rgba(#3858e9, 0.25);
 			}
 		}
 
