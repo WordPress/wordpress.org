@@ -630,7 +630,7 @@ class Hooks {
 			// Prepend label if thread is closed.
 			if ( bbp_is_topic_closed( $topic_id ) ) {
 				/* translators: %s: Excerpt of the topic's first post. */
-				$description = __( '[This thread is closed.] %s', 'wporg-support' );
+				$description = __( '[This thread is closed.] %s', 'wporg-forums' );
 			} else {
 				$description = '%s '; // trailing space is intentional
 			}
@@ -1296,7 +1296,7 @@ class Hooks {
 			'title="' . esc_attr( $title ) . '"',
 			'title="' . esc_attr(
 				// bbPress string from bbp_get_reply_post_date()
-				sprintf( _x( '%1$s at %2$s', 'date at time', 'wporg-support' ), $date, $time )
+				sprintf( _x( '%1$s at %2$s', 'date at time', 'wporg-forums' ), $date, $time )
 			) . '"',
 			$anchor
 		);
