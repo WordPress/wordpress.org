@@ -91,6 +91,16 @@
 			position: relative;
 			width: auto;
 
+			& + .button-search {
+				background-color: #213FD4;
+				border: 0;
+				box-shadow: none;
+			}
+
+			& + .button-search:hover {
+				background-color: #000;
+			}
+
 			@media screen and (min-width: $ms-breakpoint) {
 				font-size: ms( -4 );
 				width: 7rem;
