@@ -77,6 +77,7 @@ class Moderators {
 		add_filter( 'bbp_new_reply_pre_insert',                 array( $this, 'bbp_new_reply_pre_insert' ) );
 		add_action( 'bbp_theme_before_reply_author_details',    array( $this, 'show_anon_mod_name' ) );
 		add_filter( 'user_has_cap',                             array( $this, 'anon_moderator_user_has_cap' ), 10, 4 );
+		add_filter( 'wporg_notifications_pre_notify_matchers',  array( $this, 'notify_mod_of_at_mention' ), 10, 2 );
 	}
 
 	/**
@@ -1189,7 +1190,7 @@ class Moderators {
 	 * Pretend the @moderator user can moderate, except when they're logged in.
 	 *
 	 * This keeps the moderator account as a low-access account, while also showing the replies
-	 * with a moderator badge. This should probably ideally be a filter on the badges.
+	 * with a moderator badge, and bypassing moderation.
 	 */
 	public function anon_moderator_user_has_cap( $allcaps, $caps, $args, $user ) {
 		if (
@@ -1202,5 +1203,51 @@ class Moderators {
 		}
 
 		return $allcaps;
+	}
+
+	/**
+	 * When a @moderator mention is used in a reply, notify the
+	 * moderators who have interacted with that thread.
+	 *
+	 * As it's possible for multiple moderators to be involved in a thread
+	 * the notification is sent to all who have interacted with it.
+	 *
+	 * This filter is within the wporg-notifications plugin.
+	 */
+	public function notify_mod_of_at_mention( $matchers, $data ) {
+		if (
+			empty( $matchers['moderator']->type ) ||
+			'username' != $matchers['moderator']->type ||
+			'forum_topic_reply' != $data['type']
+		) {
+			return $matchers;
+		}
+
+		// Get all moderators who have interacted with this thread.		
+		$mod_replies = (array) get_posts( [
+			'post_parent'    => $data['topic_id'],
+			'post_type'      => bbp_get_reply_post_type(),
+			'author'         => get_user_by( 'slug', 'moderator' )->ID,
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+			'order'          => 'ASC'
+		] );
+
+		$moderators = [];
+		foreach ( $mod_replies as $reply_id ) {
+			$moderators[] = get_post_meta( $reply_id, self::MODERATOR_REPLY_AUTHOR, true );
+		}
+
+		foreach ( array_unique( $moderators ) as $mod_id ) {
+			$moderator = get_user_by( 'id', $mod_id );
+			if ( ! $moderator || isset( $matchers[ $moderator->user_nicename ] ) ) {
+				continue;
+			}
+
+			$matchers[ $moderator->user_nicename ]                    = $matchers['moderator'];
+			$matchers[ $moderator->user_nicename ]->notification_name = "@moderator response";
+		}
+
+		return $matchers;
 	}
 }
