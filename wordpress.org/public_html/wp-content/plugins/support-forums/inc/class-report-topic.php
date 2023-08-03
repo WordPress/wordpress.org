@@ -195,7 +195,7 @@ class Report_Topic {
 				'<br><a href="%s" class="button">%s</a>',
 				esc_url( $this->remove_topic_modlook_url() ),
 				// translators: `modlook` is the term used for posts tagged by users when they want a moderator to have a look.
-				__( 'Remove modlook', 'wporg-support' )
+				__( 'Remove modlook', 'wporg-forums' )
 			);
 		}
 
@@ -237,7 +237,7 @@ class Report_Topic {
 
 			printf(
 				'<li class="topic-previous-reports">%s<ul class="previous-reports">%s</ul></li>',
-				__( 'Previously reported by:', 'wporg-support' ),
+				__( 'Previously reported by:', 'wporg-forums' ),
 				implode( ' ', $lines )
 			);
 		}
