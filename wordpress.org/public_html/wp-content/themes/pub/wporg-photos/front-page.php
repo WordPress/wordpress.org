@@ -61,7 +61,7 @@ get_header();
 	<aside id="secondary" class="widget-area wrap" role="complementary">
 		<?php
 		the_widget( 'WP_Widget_Text', array(
-			'title' => __( 'Add Your Photo', 'wporg-photos' ),
+			'title' => __( 'Contribute', 'wporg-photos' ),
 			'text'  => sprintf(
 				/* translators: URL to submit page. */
 				__( 'The WordPress Photo Directory is the perfect place to release your photos into the public domain for the benefit of all. <a href="%s">Submit your photo</a>.', 'wporg-photos' ),
