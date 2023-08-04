@@ -41,11 +41,11 @@ document.addEventListener('DOMContentLoaded', function () {
 		if ( photoDescription?.value.trim().length > 0 ) {
 			photoDescription.classList.remove(missingDescription);
 		} else {
-			photoDescription.classList.add(missingDescription);
+			photoDescription?.classList.add(missingDescription);
 		}
 	}
 	setDescriptionHighlight();
-	photoDescription.addEventListener('input', e => setDescriptionHighlight());
+	photoDescription?.addEventListener('input', e => setDescriptionHighlight());
 
 	// Highlight custom taxonomies lacking terms.
 	highlightCustomTaxonomiesWithoutTerms();
