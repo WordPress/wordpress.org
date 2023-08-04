@@ -40,6 +40,10 @@ class Rejection {
 				'label' => __( 'Potential copyright/ownership infringement', 'wporg-photos' ),
 				'email' => __( 'The photo has been posted elsewhere but does not appear to be your original work. We require that you "have the copyright or other legal ownership for any photo you submit". This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.', 'wporg-photos' ),
 			],
+			'branding'      => [
+				'label' => __( 'Prominent branding', 'wporg-photos' ),
+				'email' => __ ( 'The photo prominently displayed branding in such a way that the branding and/or branded product was the focus of the image. We do not accept branded subject matter to avoid the directory being used for promotional purposes or to imply endorsement by the WordPress project.', 'wporg-photos' ),
+			],
 			'image_quality' => [
 				'label' => __( 'Insufficient image quality (e.g. blurriness, composition, lighting, lens issues)', 'wporg-photos' ),
 				'email' => __( 'The photo had an issue regarding image quality. Submissions should be of high quality composition, lighting, focus, and color. The image should be free of blur (for the primary subject), noise, lens flare, glare, and spots due to water or dirt on the lens.', 'wporg-photos' ),
