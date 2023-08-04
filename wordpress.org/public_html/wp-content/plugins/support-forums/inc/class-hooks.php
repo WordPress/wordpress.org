@@ -1283,8 +1283,8 @@ class Hooks {
 			$last_active = get_post_field( 'post_date', $topic_id );
 		}
 
-		// This is for translating the date components.
-		$datetime = date_create_immutable_from_format( 'Y-m-d H:i:s', $last_active );
+		// This is for translating the date components. $last_active is based on non-gmt fields, so the timezone must be passed.
+		$datetime = date_create_immutable_from_format( 'Y-m-d H:i:s', $last_active, wp_timezone() );
 		if ( ! $datetime ) {
 			return $anchor;
 		}
