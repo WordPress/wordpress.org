@@ -163,9 +163,8 @@ add_action( 'template_redirect', function() {
  * Called from sunrise.php on ms_site_not_found and ms_network_not_found actions.
  */
 function wporg_redirect_site_not_found() {
-	// Default location for a not-found site or network is the main WordPress.org homepage.
-	$location = 'https://wordpress.org/';
-	$host     = $_SERVER['HTTP_HOST'];
+	$location = '';
+	$host     = strtolower( $_SERVER['HTTP_HOST'] );
 
 	switch ( $host ) {
 		// :earth_asia::earth_africa::earth_americas:.wordpress.org
@@ -202,6 +201,17 @@ function wporg_redirect_site_not_found() {
 		// Plural => Singular
 		case 'developers.wordpress.org':
 			$location = 'https://developer.wordpress.org/';
+			break;
+
+		// This should absolutely never happen, exit without a redirect.
+		case 'wordpress.org':
+			status_header( 503 );
+			die( 'WordPress.org is currently unavailable.' );
+			break;
+
+		// Default location for a not-found site or network is the main WordPress.org homepage.
+		default:
+			$location = 'https://wordpress.org/';
 			break;
 	}
 
