@@ -9,6 +9,21 @@ use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 
 class Other_Languages extends GP_Route {
 
+	/**
+	 * Indicates the related locales for each locale, so we will put them in the top list
+	 * of "Other locales".
+	 *
+	 * This array should be sync with
+	 * https://github.com/GlotPress/gp-translation-helpers/blob/main/helpers/helper-other-locales.php
+	 *
+	 * @since 0.0.1
+	 * @var array
+	 */
+	public array $related_locales = array(
+		'gl' => array( 'es', 'pt', 'pt-ao', 'pt-br', 'ca', 'it', 'fr', 'ro' ),
+		'es' => array( 'gl', 'ca', 'pt', 'pt-ao', 'pt-br', 'it', 'fr', 'ro' ),
+	);
+
 	public function get_suggestions( $project_path, $locale_slug, $translation_set_slug ) {
 		$original_id = gp_get( 'original' );
 		$nonce       = gp_get( 'nonce' );
@@ -38,7 +53,7 @@ class Other_Languages extends GP_Route {
 
 		$suggestions = $this->query( $original, $translation_set );
 
-		wp_send_json_success( gp_tmpl_get_output( 'other-languages-suggestions', [ 'suggestions' => $suggestions ], PLUGIN_DIR . '/templates/' ) );
+		wp_send_json_success( gp_tmpl_get_output( 'other-languages-suggestions', array( 'suggestions' => $suggestions ), PLUGIN_DIR . '/templates/' ) );
 	}
 
 	protected function query( $original, $set_to_exclude ) {
@@ -77,6 +92,28 @@ ORDER BY
 			ARRAY_A
 		);
 
-		return $results;
+		$results_with_preference = array();
+
+		// Put the variants in the top list.
+		foreach ( $results as $key => $result ) {
+			if ( explode( '-', $result['locale'] )[0] === explode( '-', $set_to_exclude->locale )[0] ) {
+				$results_with_preference[] = $result;
+				unset( $results[ $key ] );
+			}
+		}
+
+		if ( ! empty( $this->related_locales[ $set_to_exclude->locale ] ) ) {
+			foreach ( $this->related_locales[ $set_to_exclude->locale ] as $locale ) {
+				foreach ( $results as $key => $result ) {
+					if ( $result['locale'] == $locale ) {
+						$results_with_preference[] = $result;
+						unset( $results[ $key ] );
+						continue 2;
+					}
+				}
+			}
+		}
+
+		return array_merge( $results_with_preference, $results );
 	}
 }
