@@ -101,7 +101,26 @@ function wporg_login_rest_email_in_use( $request ) {
 		$pending = wporg_get_pending_user_by_email_wildcard( $email );
 	}
 
-	if ( $pending && ! $pending['created'] ) {
+	if ( $pending && ! $pending['created'] && ! $pending['cleared'] ) {
+		// Account is in pending state, but requires manual human review, don't suggest sending a reset email.
+		$sso = WPOrg_SSO::get_instance();
+
+		return [
+			'available' => false,
+			'error' => sprintf(
+				__( 'That email address already has an account.', 'wporg' ) . '<br>' .
+				/* translators: %s Email address */
+				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . 
+				/* translators: %s Email address */
+				'<br>' . __( 'Please contact %s for more details.', 'wporg' ),
+				'<code>' . esc_html( $pending['user_email'] ) . '</code>',
+				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+			),
+			'avatar' => get_avatar( $email, 64 ),
+		];
+
+	} elseif ( $pending && ! $pending['created'] ) {
+		// Account is in pending state, just needs the user to click through on the email, offer to resend the email.
 		return [
 			'available' => false,
 			'error' => __( 'That email address already has an account.', 'wporg' ) . '<br>' .
