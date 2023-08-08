@@ -23,6 +23,10 @@ class Release_Confirmation {
 	static function display() {
 		$plugins = Tools::get_users_write_access_plugins( wp_get_current_user() );
 
+		if ( isset( $_GET['show-plugin'] ) && current_user_can( 'plugin_review' ) ) {
+			$plugins = [ wp_unslash( $_GET['show-plugin'] ) ];
+		}
+
 		if ( ! $plugins ) {
 			if ( ! headers_sent() ) {
 				wp_safe_redirect( home_url( '/developers/' ) );
@@ -185,6 +189,8 @@ class Release_Confirmation {
 
 		if ( ! $data['confirmations_required'] ) {
 			_e( 'Release did not require confirmation.', 'wporg-plugins' );
+		} else if ( ! empty( $data['discarded'] ) ) {
+			_e( 'Release discarded.', 'wporg-plugins' );
 		} else if ( $data['confirmed'] ) {
 			_e( 'Release confirmed.', 'wporg-plugins' );
 		} else if ( 1 == $data['confirmations_required'] ) {
@@ -222,6 +228,19 @@ class Release_Confirmation {
 				$approved_text
 			);
 		}
+
+		if ( ! empty( $data['discarded'] ) ) {
+			$user = get_user_by( 'slug', $data['discarded']['user'] );
+			printf(
+				'<span title="%s">%s</span><br>',
+				esc_attr( gmdate( 'Y-m-d H:i:s', $time ) ),
+				sprintf(
+					__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
+					$user->display_name ?: $user->user_nicename,
+					human_time_diff( $data['discarded']['time'] )
+				)
+			);
+		}
 		echo '</div>';
 
 		return ob_get_clean();
@@ -230,7 +249,7 @@ class Release_Confirmation {
 	static function get_actions( $plugin, $data ) {
 		$buttons = [];
 
-		if ( $data['confirmations_required'] ) {
+		if ( $data['confirmations_required'] && empty( $data['discarded'] ) ) {
 			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
 			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
@@ -243,10 +262,19 @@ class Release_Confirmation {
 						Template::get_release_confirmation_link( $data['tag'], $plugin ),
 						__( 'Confirm', 'wporg-plugins' )
 					);
+					$buttons[] = sprintf(
+						'<a href="%s" class="button approve-release button-secondary">%s</a>',
+						Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' ),
+						__( 'Discard', 'wporg-plugins' )
+					);
 				} else {
 					$buttons[] = sprintf(
 						'<a class="button approve-release button-secondary disabled">%s</a>',
 						__( 'Confirm', 'wporg-plugins' )
+					);
+					$buttons[] = sprintf(
+						'<a class="button approve-release button-secondary disabled">%s</a>',
+						__( 'Discard', 'wporg-plugins' )
 					);
 				}
 

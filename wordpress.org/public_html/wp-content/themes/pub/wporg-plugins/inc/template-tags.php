@@ -277,8 +277,9 @@ function the_unconfirmed_releases_notice() {
 	$warning  = false;
 
 	foreach ( $releases as $release ) {
-		if ( ! $release['confirmed'] && $release['confirmations_required'] ) {
+		if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
 			$warning = true;
+			break;
 		}
 	}
 
