@@ -23,10 +23,6 @@ class Release_Confirmation {
 	static function display() {
 		$plugins = Tools::get_users_write_access_plugins( wp_get_current_user() );
 
-		if ( isset( $_GET['show-plugin'] ) && current_user_can( 'plugin_review' ) ) {
-			$plugins = [ wp_unslash( $_GET['show-plugin'] ) ];
-		}
-
 		if ( ! $plugins ) {
 			if ( ! headers_sent() ) {
 				wp_safe_redirect( home_url( '/developers/' ) );
