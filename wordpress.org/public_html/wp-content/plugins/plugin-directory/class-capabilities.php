@@ -74,7 +74,7 @@ class Capabilities {
 			if ( 'disabled' === $post->post_status || 'closed' === $post->post_status ) {
 				// Plugin reviewers can approve for disabled/closed plugins.
 				$required_caps[] = 'plugin_review';
-			} elseif ( 'publish' !== $post->post_status ) {
+			} elseif ( ! in_array( $post->post_status, [ 'publish', 'approved' ] ) ) {
 				// A non-published plugin cannot have it's releases approved otherwise.
 				$required_caps[] = 'do_not_allow';
 			}
