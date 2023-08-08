@@ -1532,11 +1532,12 @@ class Plugin_Directory {
 			if ( $tags ) {
 				foreach ( $tags as $tag_version => $tag ) {
 					self::add_release( $plugin, [
-						'date' => strtotime( $tag['date'] ),
-						'tag'  => $tag['tag'],
-						'version' => $tag_version,
-						'committer' => [ $tag['author'] ],
-						'confirmations_required' => 0, // Old release, assume it's released.
+						'date'                   => strtotime( $tag['date'] ),
+						'tag'                    => $tag['tag'],
+						'version'                => $tag_version,
+						'committer'              => [ $tag['author'] ],
+						'zips_built'             => true, // Old release, assume they were built.
+						'confirmations_required' => 0,    // Old release, assume it's released.
 					] );
 				}
 			} else {
@@ -1556,16 +1557,29 @@ class Plugin_Directory {
 					}
 
 					self::add_release( $plugin, [
-						'date' => strtotime( $entry['date'] ),
-						'tag'  => $entry['filename'],
-						'version' => $tag,
-						'committer' => [ $entry['author'] ],
-						'confirmations_required' => 0, // Old release, assume it's released.
+						'date'                   => strtotime( $entry['date'] ),
+						'tag'                    => $entry['filename'],
+						'version'                => $tag,
+						'committer'              => [ $entry['author'] ],
+						'zips_built'             => true, // Old release, assume they were built.
+						'confirmations_required' => 0,    // Old release, assume it's released.
 					] );
 				}
 			}
 
 			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+		}
+
+		/**
+		 * If confirmations weren't required, claim that the ZIPs were built.
+		 *
+		 * This is needed for data pre-[12816].
+		 * @see https://meta.trac.wordpress.org/changeset/12816
+		 */
+		foreach ( $releases as &$release ) {
+			if ( ! $release['confirmations_required'] && ! $release['zips_built'] ) {
+				$release['zips_built'] = true;
+			}
 		}
 
 		return $releases;
@@ -1599,7 +1613,8 @@ class Plugin_Directory {
 			'date'                   => time(),
 			'tag'                    => '',
 			'version'                => '',
-			'zips_built'             => false,
+			// Assume zips built if no release confirmation.
+			'zips_built'             => ! $plugin->release_confirmation,
 			'confirmations'          => [],
 			// Confirmed by default if no release confiration.
 			'confirmed'              => ! $plugin->release_confirmation,
