@@ -720,7 +720,6 @@ class WP_63_Credits extends WP_Credits {
 			'wplmillet',
 			'wpnook',
 			'wtower',
-			'wtranch',
 			'xavortm',
 			'xerpa43',
 			'xknown',
