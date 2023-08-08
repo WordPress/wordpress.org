@@ -198,6 +198,10 @@ function wporg_redirect_site_not_found() {
 			$location = 'https://make.wordpress.org/chat/';
 			break;
 
+		case 'community.wordpress.org':
+			$location = 'https://make.wordpress.org/chat/matrix/';
+			break;
+
 		// Plural => Singular
 		case 'developers.wordpress.org':
 			$location = 'https://developer.wordpress.org/';
