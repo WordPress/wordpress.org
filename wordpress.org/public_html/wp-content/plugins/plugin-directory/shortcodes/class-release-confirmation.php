@@ -39,7 +39,7 @@ class Release_Confirmation {
 
 		// Remove closed plugins.
 		$plugins = array_filter( $plugins, function( $plugin ) {
-			return ( $plugin && in_array( $plugin->post_status, array( 'publish', 'disabled' ) ) );
+			return ( $plugin && in_array( $plugin->post_status, array( 'publish', 'disabled', 'approved' ) ) );
 		} );
 
 		uasort( $plugins, function( $a, $b ) {
