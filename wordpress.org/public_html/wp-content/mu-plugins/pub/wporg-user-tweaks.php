@@ -61,7 +61,7 @@ add_filter( 'bbp_get_displayed_user_field', function( $value, $field, $filter ) 
  * Filter the BuddyPress displayed name.
  */
 add_filter( 'bp_displayed_user_fullname', function( $name ) {
-	$userdata = buddypress()->displayed_user->userdata;
+	$userdata = buddypress()->displayed_user->userdata ?? false;
 
 	if ( ! $userdata ) {
 		return $name;
