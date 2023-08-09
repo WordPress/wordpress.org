@@ -181,7 +181,9 @@ class Template {
 	public static function should_noindex_request( $noindex ) {
 		if ( get_query_var( 'plugin_advanced' ) ) {
 			$noindex = true;
-		} else if ( is_singular( 'plugin' ) && self::is_plugin_outdated() ) {
+		} elseif ( get_query_var( 'plugin_business_model' ) && get_query_var( 'browse' ) ) {
+			$noindex = true;
+		} elseif ( is_singular( 'plugin' ) && self::is_plugin_outdated() ) {
 			$noindex = true;
 		}
 
