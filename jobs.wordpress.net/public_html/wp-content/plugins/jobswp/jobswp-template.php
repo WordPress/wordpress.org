@@ -127,23 +127,24 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
  * @return string
  */
 function jobswp_text_field( $field_name, $field_label, $required = false, $type = 'text', $help_text = '' ) {
-	$field_name  = esc_attr( $field_name );
-	$field_label = esc_html( $field_label );
-
-	echo '<div class="post-job-input post-job-input-' . $field_name . '">' . "\n";
-	echo "<label for='$field_name'>$field_label" . ( $required ? '*' : '' ) . "</label>\n";
+	echo '<div class="post-job-input post-job-input-' . esc_attr( $field_name ) . '">' . "\n";
+	echo '<label for="' . esc_attr( $field_name ) . '">' . esc_html( $field_label ) . ( $required ? '*' : '' ) . "</label>\n";
 
 	$html5_input_types = array( 'color', 'date', 'datetime', 'datetime-local', 'email', 'month', 'number',
 		'range', 'search', 'tel', 'time', 'url', 'week' );
 	if ( ! in_array( $type, $html5_input_types ) )
 		$type = 'text';
 
-	echo "<input type='$type' name='$field_name' class='" .
-		( $required ? jobswp_required_field_classes( $field_name ) : '' ) .
-		"' " .
-		jobswp_field_value( $field_name ) .
-		( $required ? ' required' : '' ) .
-		" />\n";
+	$classes = $required ? jobswp_required_field_classes( $field_name ) : '';
+	printf(
+		'<input type="%s" name="%s" id="%s" class="%s" %s%s />' . "\n",
+		esc_attr( $type ),
+		esc_attr( $field_name ),
+		esc_attr( $field_name ),
+		esc_attr( $classes ),
+		jobswp_field_value( $field_name ),
+		( $required ? ' required' : '' )
+	);
 
 	if ( $help_text ) {
 		echo '<div class="job-help-text">' . $help_text . "</div>\n";
