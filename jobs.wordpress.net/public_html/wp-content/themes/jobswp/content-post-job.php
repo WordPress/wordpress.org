@@ -47,13 +47,13 @@
 	<div class="post-job-input">
 		<label for="howtoapply"><?php _e( 'How to Apply', 'jobswp' ); ?>* <span><?php _e( '(also specify)', 'jobswp' ); ?></span></label>
 		<div class="howtoapply-inputs">
-			<select name="howtoapply_method" class="<?php echo jobswp_required_field_classes( 'howtoapply_method' ); ?>" required>
+			<select name="howtoapply_method" id="howtoapply_method" class="<?php echo esc_attr( jobswp_required_field_classes( 'howtoapply_method' ) ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<option value="email" <?php echo jobswp_field_value( 'howtoapply_method', 'email' ); ?>><?php _e( 'Email Address', 'jobswp' ); ?></option>
 				<option value="phone" <?php echo jobswp_field_value( 'howtoapply_method', 'phone' ); ?>><?php _e( 'Phone Number', 'jobswp' ); ?></option>
 				<option value="web" <?php echo jobswp_field_value( 'howtoapply_method', 'web' ); ?>><?php _e( 'Online Form', 'jobswp' ); ?></option>
 			</select> :
-			<input type="text" name="howtoapply" class="<?php echo jobswp_required_field_classes( 'howtoapply' ); ?>" <?php echo jobswp_field_value( 'howtoapply' ); ?> />
+			<input type="text" name="howtoapply" id="howtoapply" class="<?php echo esc_attr( jobswp_required_field_classes( 'howtoapply' ) ); ?>" <?php echo jobswp_field_value( 'howtoapply' ); ?> />
 		</div>
 
 		<div class="job-help-text">
@@ -80,7 +80,7 @@
 
 		<div class="post-job-input">
 			<label for="category"><?php _e( 'Category', 'jobswp' ); ?>*</label>
-			<select name="category" class="<?php echo jobswp_required_field_classes( 'category' ); ?>" required>
+			<select name="category" id="category" class="<?php echo jobswp_required_field_classes( 'category' ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<?php foreach ( Jobs_Dot_WP::get_job_categories() as $cat ) : ?>
 					<option value="<?php echo esc_attr( $cat->slug ); ?>" <?php echo jobswp_field_value( 'category', esc_attr( $cat->slug ) ); ?>><?php echo $cat->name; ?></option>
@@ -90,7 +90,7 @@
 
 		<div class="post-job-input">
 			<label for="jobtype"><?php _e( 'Job Type', 'jobswp' ); ?>*</label>
-			<select name="jobtype" class="<?php echo jobswp_required_field_classes( 'jobtype' ); ?>" required>
+			<select name="jobtype" id="jobtype" class="<?php echo esc_attr( jobswp_required_field_classes( 'jobtype' ) ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<option value="ft" <?php echo jobswp_field_value( 'jobtype', 'ft' ); ?>><?php _e( 'Full Time', 'jobswp' ); ?></option>
 				<option value="pt" <?php echo jobswp_field_value( 'jobtype', 'pt' ); ?>><?php _e( 'Part Time', 'jobswp' ); ?></option>
@@ -104,8 +104,8 @@
 	<div class="grid_9 alpha omega">
 
 		<div class="post-job-input">
-			<label for="job_title"><?php _e( 'Job Description', 'jobswp' ); ?>*</label>
-			<textarea name="job_description" rows="10" class="<?php echo jobswp_required_field_classes( 'job_description' ); ?>"><?php echo jobswp_field_value( 'job_description' ); ?></textarea>
+			<label for="job_description"><?php _e( 'Job Description', 'jobswp' ); ?>*</label>
+			<textarea name="job_description" id="job_description" rows="10" class="<?php echo jobswp_required_field_classes( 'job_description' ); ?>"><?php echo jobswp_field_value( 'job_description' ); ?></textarea>
 			<p><?php echo sprintf( __( 'Line and paragraph breaks are automatic. <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>', 'jobswp' ), jobswp_allowed_tags() ); ?></p>
 			<p><?php _e( 'All job postings are moderated prior to appearing on the site.', 'jobswp' ); ?></p>
 
@@ -135,13 +135,13 @@
 				<li><?php _e( 'Upon successful submission, you will be immediately presented with a job token. <strong>MAKE NOTE OF THE TOKEN</strong>. It is your only means of removing the job from the site in a <em>timely</em> fashion.', 'jobswp' ); ?></li>
 			</ul>
 			<p>
-				<input type="checkbox" name="accept" value="1" required /><label for="accept"><?php _e( 'I agree to the terms stated above.', 'jobswp' ); ?>*</label>
+				<input type="checkbox" name="accept" id="accept" value="1" required /><label for="accept"><?php _e( 'I agree to the terms stated above.', 'jobswp' ); ?>*</label>
 			</p>
 		</div>
 	<?php } else {
 		$button_label = __( 'Submit Job', 'jobswp' );
 	} ?>
-	<input class="submit-job" type="submit" name="submitjob" value="<?php echo esc_attr( $button_label ); ?>" />
+	<input class="submit-job" id="submit-job" type="submit" name="submitjob" value="<?php echo esc_attr( $button_label ); ?>" />
 </div>
 
 </div>
