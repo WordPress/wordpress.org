@@ -1565,6 +1565,17 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	#subhead .container .grid_9 {
 		width: 100%;
 	}
+	.container .main-navigation.grid_8,
+	.main-navigation ul,
+	.main-navigation li {
+		float: none;
+	}
+	.main-navigation li.current_page_item {
+		border: 2px solid #dfdfdf;
+	}
+	.menu.mobile-pop {
+		margin-bottom: 1.5rem;
+	}
 	.container .content-area.grid_9, .container .widget-area.grid_3 {
 		width: 100%;
 	}
