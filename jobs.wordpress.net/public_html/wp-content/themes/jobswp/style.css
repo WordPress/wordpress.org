@@ -1204,6 +1204,12 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	margin: 0 0 1.5em;
 }
 
+/* Feedback page */
+#fscf_submit_div1 {
+	margin-bottom: 4rem;
+	margin-top: 2rem;
+}
+
 /* Global footer */
 #wporg-footer {
 	clear: both;
