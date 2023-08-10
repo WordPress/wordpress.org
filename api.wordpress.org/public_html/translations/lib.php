@@ -320,7 +320,7 @@ function find_translated_locales_for( $type, $domain ) {
 	if ( ! $found ) {
 		$languages = wp_cache_get( $cache_key, $cache_group, false, $found );
 		if ( $found ) {
-			apcu_store( "{$cache_group}:{$cache_key}", $translated_languages, $apcu_cache_time );
+			apcu_store( "{$cache_group}:{$cache_key}", $languages, $apcu_cache_time );
 		}
 	}
 
@@ -336,7 +336,7 @@ function find_translated_locales_for( $type, $domain ) {
 		$languages = array_map( 'strtolower', $languages );
 
 		apcu_store( "{$cache_group}:{$cache_key}", $languages, $apcu_cache_time );
-		wp_cache_add( $cache_key, $translated_languages, $cache_group, $cache_time );
+		wp_cache_add( $cache_key, $languages, $cache_group, $cache_time );
 	}
 
 	return $languages ?: array();
