@@ -583,6 +583,7 @@ class Language_Pack extends WP_CLI_Command {
 		wp_cache_add_global_groups( [ 'update-check-translations', 'translations-query' ] );
 		wp_cache_delete( "{$type}:{$language}:{$domain}", 'update-check-translations' );
 		wp_cache_delete( "{$type}:{$domain}:{$version}", 'translations-query' );
+		wp_cache_delete( "{$type}:{$domain}", 'translations-query' );
 
 		return true;
 	}
