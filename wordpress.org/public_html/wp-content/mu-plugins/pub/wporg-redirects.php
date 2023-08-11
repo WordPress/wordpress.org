@@ -79,6 +79,9 @@ add_action( 'template_redirect', function() {
 
 		// Rosetta txt-download urls were changed to /download/.
 		'/txt-download/' => '/downloads/',
+
+		// Hotfix for capital B causing wrong theme to load
+		'/Blocks/' => '/blocks/'
 	];
 
 	if ( 'make.wordpress.org' === $host ) {
