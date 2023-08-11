@@ -45,7 +45,25 @@ function wporg_login_rest_username_exists( $request ) {
 	}
 
 	// Check we don't have a pending registration for that username.
-	if ( $pending = wporg_get_pending_user( $login ) ) {
+	$pending = wporg_get_pending_user( $login );
+	if ( $pending && ! $pending['cleared'] ) {
+		// Account is in pending state, but requires manual human review, don't suggest sending a reset email.
+		$sso = WPOrg_SSO::get_instance();
+
+		return [
+			'available' => false,
+			'error' => sprintf(
+				__( 'That username is already in use.', 'wporg' ) . '<br>' .
+				/* translators: %s Email address */
+				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . 
+				/* translators: %s Email address */
+				'<br>' . __( 'Please contact %s for more details.', 'wporg' ),
+				'<code>' . esc_html( $pending['user_email'] ) . '</code>',
+				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+			),
+			'avatar' => get_avatar( $email, 64 ),
+		];
+	} elseif ( $pending ) {
 		return [
 			'available' => false,
 			'error' => __( 'That username is already in use.', 'wporg' ) . '<br>' .
