@@ -10,6 +10,11 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			wp_safe_redirect( '/news/feed/' . ( 'feed' !== get_query_var('feed') ? get_query_var('feed') : '' ), 301 );
 			exit;
 
+		// temp fix for /B;ocks, rm later
+		} elseif ( 0 === strpos( $_SERVER['REQUEST_URI'], '/Blocks' ) ) {
+			wp_safe_redirect( '/blocks/', 301 );
+		   	exit;
+
 		// WordPress.org does not have a specific site search, only the global WordPress.org search
 		} elseif ( ! empty( $_GET['s'] ) && false === strpos( $_SERVER['REQUEST_URI'], '/search/' ) ) {
 			wp_safe_redirect( '/search/' . urlencode( wp_unslash( $_GET['s'] ) ) . '/', 301 );
@@ -79,9 +84,6 @@ add_action( 'template_redirect', function() {
 
 		// Rosetta txt-download urls were changed to /download/.
 		'/txt-download/' => '/downloads/',
-
-		// Hotfix for capital B causing wrong theme to load
-		'/Blocks/' => '/blocks/'
 	];
 
 	if ( 'make.wordpress.org' === $host ) {
