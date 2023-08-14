@@ -29,80 +29,80 @@ class Rejection {
 	public static function init() {
 		self::$rejection_reasons = [
 			''              => [
-				'label' => __( 'Do not reject', 'wporg-photos' ),
+				'label' => __( 'Approve: Do not reject', 'wporg-photos' ),
 				'email' => '',
 			],
-			'general'       => [
-				'label' => __( 'General/nonspecific', 'wporg-photos' ),
-				'email' => '', // No specific reason will be conveyed to contributor.
-			],
-			'copyright'     => [
-				'label' => __( 'Potential copyright/ownership infringement', 'wporg-photos' ),
-				'email' => __( 'The photo has been posted elsewhere but does not appear to be your original work. We require that you "have the copyright or other legal ownership for any photo you submit". This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.', 'wporg-photos' ),
-			],
-			'branding'      => [
-				'label' => __( 'Prominent branding', 'wporg-photos' ),
-				'email' => __ ( 'The photo prominently displayed branding in such a way that the branding and/or branded product was the focus of the image. We do not accept branded subject matter to avoid the directory being used for promotional purposes or to imply endorsement by the WordPress project.', 'wporg-photos' ),
-			],
-			'image_quality' => [
-				'label' => __( 'Insufficient image quality (e.g. blurriness, composition, lighting, lens issues)', 'wporg-photos' ),
-				'email' => __( 'The photo had an issue regarding image quality. Submissions should be of high quality composition, lighting, focus, and color. The image should be free of blur (for the primary subject), noise, lens flare, glare, and spots due to water or dirt on the lens.', 'wporg-photos' ),
-			],
-			'not_a_photo'    => [
-				'label' => __( 'Not a photo (e.g. screenshot, digital art)', 'wporg-photos' ),
-				'email' => __( 'The image did not appear to be a photograph. We do not accept screenshots, digital art, or other non-photographic images.', 'wporg-photos' ),
-			],
-			'collage'        => [
-				'label' => __( 'Collage or composite image', 'wporg-photos' ),
-				'email' => __( 'The image appeared to be a collage or composite of separate images.', 'wporg-photos' ),
-			],
-			'overlays'       => [
-				'label' => __( 'Overlays, watermark, borders, or other additions', 'wporg-photos' ),
-				'email' => __( 'The photo included an overlay of some form (e.g. graphic, text, watermark, border).', 'wporg-photos' ),
-			],
-			'image_subject' => [
-				'label' => __( 'Image subject matter', 'wporg-photos' ),
-				'email' => __( 'The photo included subject matter of insufficient quality.', 'wporg-photos' ),
-			],
-			'image_extreme' => [
-				'label' => __( 'Violence, gore, hate, or sexual content', 'wporg-photos' ),
-				'email' => __( 'The photo depicted some element of violence, gore, hate, or sexual content.', 'wporg-photos' ),
-			],
-			'text'          => [
-				'label' => __( 'Predominantly text', 'wporg-photos' ),
-				'email' => __( 'The photo was predominantly text. Please refrain from submitting photos where text is a significant element of the photo.', 'wporg-photos' ),
-			],
-			'overprocessed' => [
-				'label' => __( 'Overprocessed', 'wporg-photos' ),
-				'email' => __( 'The photo appeared to be overprocessed with filters or other photo adjustments. We prefer minimal processing.', 'wporg-photos' ),
-			],
 			'anothers_art' => [
-				'label' => __( 'Predominantly another piece of art', 'wporg-photos' ),
+				'label' => __( 'Other art: Predominantly another piece of art', 'wporg-photos' ),
 				'email' => __( 'The photo appeared to largely consist of the art of another person. We respect the rights of other artists by not distributing reproductions of their work.', 'wporg-photos' ),
 			],
+			'branding'      => [
+				'label' => __( 'Branding: Prominent branding', 'wporg-photos' ),
+				'email' => __ ( 'The photo prominently displayed branding in such a way that the branding and/or branded product was the focus of the image. We do not accept branded subject matter to avoid the directory being used for promotional purposes or to imply endorsement by the WordPress project.', 'wporg-photos' ),
+			],
+			'collage'        => [
+				'label' => __( 'Collage: Collage or composite image', 'wporg-photos' ),
+				'email' => __( 'The image appeared to be a collage or composite of separate images.', 'wporg-photos' ),
+			],
+			'copyright'     => [
+				'label' => __( 'Copyright: Potential copyright/ownership infringement', 'wporg-photos' ),
+				'email' => __( 'The photo has been posted elsewhere but does not appear to be your original work. We require that you "have the copyright or other legal ownership for any photo you submit". This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.', 'wporg-photos' ),
+			],
 			'faces'         => [
-				'label' => __( 'Contains human face(s)', 'wporg-photos' ),
+				'label' => __( 'Faces: Contains human face(s)', 'wporg-photos' ),
 				'email' => __( 'The photo contained one or more human faces. We do not currently accept photos that show human faces, wholly or partially, even if facial features cannot clearly be identified.', 'wporg-photos' ),
 			],
+			'general'       => [
+				'label' => __( 'General: General/nonspecific', 'wporg-photos' ),
+				'email' => '', // No specific reason will be conveyed to contributor.
+			],
+			'image_extreme' => [
+				'label' => __( 'Extreme: Violence, gore, hate, or sexual content', 'wporg-photos' ),
+				'email' => __( 'The photo depicted some element of violence, gore, hate, or sexual content.', 'wporg-photos' ),
+			],
+			'image_quality' => [
+				'label' => __( 'Quality: Insufficient image quality (e.g. blurriness, composition, lighting, lens issues)', 'wporg-photos' ),
+				'email' => __( 'The photo had an issue regarding image quality. Submissions should be of high quality composition, lighting, focus, and color. The image should be free of blur (for the primary subject), noise, lens flare, glare, and spots due to water or dirt on the lens.', 'wporg-photos' ),
+			],
+			'image_subject' => [
+				'label' => __( 'Subject matter: Image subject matter', 'wporg-photos' ),
+				'email' => __( 'The photo included subject matter of insufficient quality.', 'wporg-photos' ),
+			],
+			'not_a_photo'    => [
+				'label' => __( 'Not a photo: Not a photo (e.g. screenshot, digital art)', 'wporg-photos' ),
+				'email' => __( 'The image did not appear to be a photograph. We do not accept screenshots, digital art, or other non-photographic images.', 'wporg-photos' ),
+			],
+			'other'         => [
+				'label' => __( 'See below: Reason specified below', 'wporg-photos' ),
+				'email' => '',
+			],
+			'overlays'       => [
+				'label' => __( 'Overlays: Overlays, watermark, borders, or other additions', 'wporg-photos' ),
+				'email' => __( 'The photo included an overlay of some form (e.g. graphic, text, watermark, border).', 'wporg-photos' ),
+			],
+			'overprocessed' => [
+				'label' => __( 'Overprocessed: Overprocessed', 'wporg-photos' ),
+				'email' => __( 'The photo appeared to be overprocessed with filters or other photo adjustments. We prefer minimal processing.', 'wporg-photos' ),
+			],
 			'privacy'       => [
-				'label' => __( 'Potentially violates privacy', 'wporg-photos' ),
+				'label' => __( 'Privacy: Potentially violates privacy', 'wporg-photos' ),
 				'email' => __( 'The photo contained potentially privacy-violating material such as a home address, license plate, or other form of personal identification.', 'wporg-photos' ),
 			],
-			'variation'     => [
-				'label' => __( 'Duplicate or minor variation of submitted photo', 'wporg-photos' ),
-				'email' => __( 'The photo is a duplicate or minor variation of something you have already had published to the site or recently submitted. This can be the same subject matter taken from a different angle, from slightly before or after in time, with a different composition or cropping or dimensions, or staged or edited differently.', 'wporg-photos' ),
-			],
 			'submission-error' => [ // This specific key is referenced in code, so make related updates if renaming.
-				'label' => __( 'Submission error', 'wporg-photos' ),
+				'label' => __( 'Error: Submission error', 'wporg-photos' ),
 				/* translators: %s: URL to meta.trac to report bugs. */
 				'email' => sprintf(
 					__( 'There appears to have been an error with your submission and the photo never fully uploaded. This could be caused by a broken internet connection, network issues, or a glitch somewhere. Please retry your submission. If this is not your first notice regarding this image, try another. If you have anything to report in terms of errors encountered while uploading, please report them to us at %s.', 'wporg-photos' ),
 					'https://meta.trac.wordpress.org/newticket?component=Photo%20Directory'
 				),
 			],
-			'other'         => [
-				'label' => __( 'Reason specified below', 'wporg-photos' ),
-				'email' => '',
+			'text'          => [
+				'label' => __( 'Text: Predominantly text', 'wporg-photos' ),
+				'email' => __( 'The photo was predominantly text. Please refrain from submitting photos where text is a significant element of the photo.', 'wporg-photos' ),
+			],
+			'variation'     => [
+				'label' => __( 'Variation/Duplicate: Duplicate or minor variation of submitted photo', 'wporg-photos' ),
+				'email' => __( 'The photo is a duplicate or minor variation of something you have already had published to the site or recently submitted. This can be the same subject matter taken from a different angle, from slightly before or after in time, with a different composition or cropping or dimensions, or staged or edited differently.', 'wporg-photos' ),
 			],
 		];
 
@@ -306,7 +306,11 @@ class Rejection {
 	public static function get_rejection_reasons( $reason = '', $field = '' ) {
 		// Return all reasons if one wasn't specified.
 		if ( ! $reason ) {
-			return self::$rejection_reasons;
+			$reasons = self::$rejection_reasons;
+			uasort( $reasons, function( $a, $b ) {
+				return strcmp( $a['label'], $b['label'] );
+			} );
+			return $reasons;
 		}
 
 		// Bail if reason requested is not valid.
