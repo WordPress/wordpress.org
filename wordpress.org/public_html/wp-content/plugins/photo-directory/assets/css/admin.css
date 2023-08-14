@@ -61,6 +61,7 @@ dl.photos-flagged dt {
 }
 
 #content.photo-missing-description,
+.photo-missing-note-to-user,
 .photo-missing-taxonomy {
 	border: 1px solid orange;
 	background-color: antiquewhite;
