@@ -49,6 +49,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Highlight custom taxonomies lacking terms.
 	highlightCustomTaxonomiesWithoutTerms();
+
+	// Highlight rejection note to user if 'See below' option is chosen and no note exists.
+	const photoRejectionReason = document.getElementById('rejected_reason');
+	const photoRejectionNoteToUser = document.getElementById('moderator_note_to_user');
+	function setNoteToUserHighlight() {
+		const missingNoteClass = 'photo-missing-note-to-user';
+		if ( photoRejectionReason?.value === 'other' && photoRejectionNoteToUser?.value.trim().length === 0 ) {
+			photoRejectionNoteToUser?.classList.add(missingNoteClass);
+		} else {
+			photoRejectionNoteToUser?.classList.remove(missingNoteClass);
+		}
+	}
+	setNoteToUserHighlight();
+	photoRejectionReason?.addEventListener('change', e => setNoteToUserHighlight());
+	photoRejectionNoteToUser?.addEventListener('input', e => setNoteToUserHighlight());
+
 }, false);
 
 /**
