@@ -41,7 +41,7 @@ class Committers {
 
 		check_ajax_referer( 'add-committer' );
 
-		if ( ! current_user_can( 'plugin_add_committer', $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+		if ( ! current_user_can( 'plugin_add_committer', $post_id ) ) {
 			wp_die( -1 );
 		}
 
