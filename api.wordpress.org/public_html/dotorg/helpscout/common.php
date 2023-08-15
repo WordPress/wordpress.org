@@ -342,6 +342,18 @@ function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
 					$possible[ $type ][] = $slug;
 				}
 			}
+
+			// If we have an edit url.. fetch that too. This is usually in a note from a reviewer.
+			if ( preg_match( '!wordpress\.org/(?P<type>(plugins|themes))/wp-admin/post.php\?post=(?P<id>\d+)!i', $email_text . $thread->body, $m ) ) {
+				$site_id = 'plugins' == $m['type'] ? WPORG_PLUGIN_DIRECTORY_BLOGID : WPORG_THEME_DIRECTORY_BLOGID;
+
+				switch_to_blog( $site_id );
+				$post = get_post( $m['id'] );
+				if ( $post ) {
+					$possible[ $m['type'] ][] = $post->post_name;
+				}
+				restore_current_blog();
+			}
 		}
 	}
 
