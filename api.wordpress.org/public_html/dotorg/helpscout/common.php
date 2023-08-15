@@ -247,6 +247,15 @@ function get_user_from_emails( $emails ) {
 		if ( $user ) {
 			return $user;
 		}
+
+		// If the email is a plus address, try without. This is common with auto-responders it seems.
+		if ( str_contains( $maybe_email, '+' ) ) {
+			$maybe_email = preg_replace( '/[+].+@/', '@', $maybe_email );
+			$user        = get_user_by( 'email', $maybe_email );
+			if ( $user ) {
+				return $user;
+			}
+		}
 	}
 
 	return false;
