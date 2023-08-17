@@ -105,7 +105,7 @@ class Plugins_Info_API {
 		}
 
 		// Short circuit for invalid slugs.
-		if ( ! $request->slug || ! preg_match( '/^[a-z0-9-]+$/', $request->slug ) ) {
+		if ( ! $request->slug || ! preg_match( '/^[a-z0-9_-]+$/', $request->slug ) ) {
 			$response = [
 				'error' => 'Invalid plugin slug.'
 			];
