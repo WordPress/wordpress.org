@@ -8,6 +8,8 @@ use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Approved as Plugin_Approved_Email;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Rejected as Plugin_Rejected_Email;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Reviewer as Reviewer_Metabox;
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
+use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 
 /**
  * All functionality related to Status Transitions.
@@ -163,6 +165,9 @@ class Status_Transitions {
 		} else {
 			update_post_meta( $post->ID, "_{$new_status}", strtotime( $post->post_modified_gmt ) );
 		}
+
+		// Clear any relevant caches.
+		$this->flush_caches( $post );
 	}
 
 	/**
@@ -375,5 +380,14 @@ class Status_Transitions {
 	public function clear_reviewer( $post ) {
 		// Unset the reviewer, but don't log it, as the triggering status changes should've been logged in some form.
 		Reviewer_Metabox::set_reviewer( $post, false, false );
+	}
+
+	/**
+	 * Flush the caches for the plugin.
+	 */
+	protected function flush_caches( $post ) {
+		// Update the API endpoints with the new data
+		API_Update_Updater::update_single_plugin( $post->post_name );
+		Plugins_Info_API::flush_plugin_information_cache( $post->post_name );
 	}
 }
