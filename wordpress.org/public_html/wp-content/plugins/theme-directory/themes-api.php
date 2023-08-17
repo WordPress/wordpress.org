@@ -21,5 +21,8 @@ function wporg_themes_update_check( $post_id, $current_version ) {
 	);
 
 	wp_cache_set( $slug, $theme_meta, $cache_group );
+
+	// Delete the error cache if this theme is new.
+	wp_cache_delete( $slug, 'theme_information_error' );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_update_check', 10, 2 );
