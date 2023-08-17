@@ -1,12 +1,11 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Standalone;
 
-// The API caches here expire every 6-7 hours, avoids cache races when multiple change at the same time.
-define( 'API_CACHE_EXPIRY', 6 * 60 * 60 + rand( 0, 60 * 60 ) );
 class Plugins_Info_API {
 
-	const CACHE_GROUP  = 'plugin_api_info';
-	const CACHE_EXPIRY = API_CACHE_EXPIRY;
+	const CACHE_GROUP       = 'plugin_api_info';
+	const CACHE_EXPIRY      = 21600; // 6 hour cache, wporg_object_cache will spread this out.
+	const LONG_CACHE_EXPIRY = 86400; // 24 hour cache, wporg_object_cache will spread this out.
 
 	protected $format  = 'json';
 	protected $jsonp   = false;
@@ -105,17 +104,22 @@ class Plugins_Info_API {
 			return;
 		}
 
-		if ( false === ( $response = wp_cache_get( $cache_key = $this->plugin_information_cache_key( $request ), self::CACHE_GROUP ) ) ) {
+		// Short circuit for invalid slugs.
+		if ( ! $request->slug || ! preg_match( '/^[a-z0-9-]+$/', $request->slug ) ) {
+			$response = [
+				'error' => 'Invalid plugin slug.'
+			];
+		} elseif ( false === ( $response = wp_cache_get( $cache_key = $this->plugin_information_cache_key( $request ), self::CACHE_GROUP ) ) ) {
 			$response = $this->internal_rest_api_call( 'plugins/v1/plugin/' . $request->slug, array( 'locale' => $request->locale ) );
 
 			if ( 200 != $response->status ) {
 				$response = [
 					'error' => 'Plugin not found.'
 				];
-				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 15 * 60 ); // shorter TTL for missing/erroring plugins.
+				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::LONG_CACHE_EXPIRY * 2 ); // Not found, twice as long as normal.
 			} else {
 				$response = $response->data;
-				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
+				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::LONG_CACHE_EXPIRY );
 			}
 		}
 
@@ -144,7 +148,23 @@ class Plugins_Info_API {
 	protected function plugin_information_cache_key( $request ) {
 		return 'plugin_information:'
 			. ( strlen( $request->slug ) > 200 ? 'md5:' . md5( $request->slug ) : $request->slug )
-			. ':' . ( $request->locale ?: 'en_US' );
+			. ':' . strtolower( $request->locale ?: 'en_US' );
+	}
+
+	/**
+	 * Flush the cache for the plugin_information cache.
+	 *
+	 * @param string $slug The slug of the plugin to flush the cache for.
+	 */
+	public static function flush_plugin_information_cache( $slug ) {
+		foreach ( get_available_languages() as $locale ) {
+			wp_cache_delete(
+				self::plugin_information_cache_key(
+					(object) compact( 'slug', 'locale' )
+				),
+				self::CACHE_GROUP
+			);
+		}
 	}
 
 	/**
