@@ -87,18 +87,37 @@ $action = $_REQUEST['action'] ?? '';
 // Validate the request.
 switch ( $action ) {
 	case 'theme_information':
-		// Validate the slug provided is valid.
-		$slug = $request->slug ?? '';
-		if ( ! $slug ) {
-			send_error( 'Slug not provided' );
-		}
-		if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
-			send_error( 'Invalid slug provided' );
-		}
+		if ( isset( $request->slugs ) ) {
+			// Validate that the slugs provided are valid.
+			$slugs = $request->slugs ?? '';
+			$slugs = is_array( $slugs ) ? $slugs : explode( ',', $slugs );
 
-		// Check to see if this theme has been specified as not existing.
-		if ( 'not_found' === wp_cache_get( $slug, 'theme_information_error' ) ) {
-			send_error( 'Theme not found' );
+			if ( ! $slug ) {
+				send_error( 'Slugs not provided' );
+			}
+
+			foreach ( $slugs as $slug ) {
+				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
+					send_error( 'Invalid slugs provided' );
+				}
+
+				// No check for 404 themes, as this bulk endpoint is low traffic and probably at least one theme will be found.
+			}
+			unset( $slug );
+		} else {
+			// Validate the slug provided is valid.
+			$slug = $request->slug ?? '';
+			if ( ! $slug ) {
+				send_error( 'Slug not provided' );
+			}
+			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
+				send_error( 'Invalid slug provided' );
+			}
+
+			// Check to see if this theme has been specified as not existing.
+			if ( 'not_found' === wp_cache_get( $slug, 'theme_information_error' ) ) {
+				send_error( 'Theme not found' );
+			}
 		}
 		break;
 	case 'query_themes':
@@ -127,6 +146,6 @@ $api->set_status_header();
 echo $api->get_result( $format );
 
 // Cache when a theme doesn't exist. See the validation handler above.
-if ( 'theme_information' == $action && 404 == http_response_code() ) {
+if ( 'theme_information' == $action && isset( $slug ) && 404 == http_response_code() ) {
 	wp_cache_set( $slug, 'not_found', 'theme_information_error', WEEK_IN_SECONDS );
 }
