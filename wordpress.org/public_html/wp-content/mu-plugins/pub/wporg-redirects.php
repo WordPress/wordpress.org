@@ -89,6 +89,9 @@ add_action( 'template_redirect', function() {
 	if ( 'make.wordpress.org' === $host ) {
 		// Slack invite url is /chat not /slack.
 		$path_redirects['/slack'] = '/chat/';
+		
+		// Short URL for Gutenberg Phase 3 publicity
+		$path_redirects['/phase-3'] = '/core/tag/phase-3/';
 	}
 
 	foreach ( $path_redirects as $test => $redirect ) {
