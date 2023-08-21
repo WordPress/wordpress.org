@@ -353,6 +353,7 @@ function get_whitelist() {
 			'colorful tones', // @colorful-tones on Slack
 			'daisyo', // @DaisyO on Slack
 			'greenshady',
+			'ndiego', // @Nick Diego on Slack
 		),
 		'glotpress' => array(
 			'Amieiro',
@@ -529,6 +530,9 @@ function get_whitelist() {
 			'vc27', // @randy_hicks on Slack
 			'andrealeebishop', // @bishop on Slack
 			'DustinMeza',
+		),
+		'website-redesign' => array(
+			'ndiego', // @Nick Diego on Slack
 		),
 		'wptv' => array(
 			'casiepa', // @Pascal on Slack
