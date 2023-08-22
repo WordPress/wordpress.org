@@ -526,9 +526,18 @@ h2 {
 	-webkit-box-shadow: none;
 	box-shadow: none;
 }
+
 /* =trac.css */
 #main, #main th, #main tr, #main h1, #main h2, #main h3, #main h4 {
 	font-family: "Open Sans", sans-serif;
+}
+#main h2 {
+	font-size: 22px;
+	font-weight: 300;
+}
+#main h3 {
+	font-size: 14px;
+	font-weight: bold;
 }
 
 body {
