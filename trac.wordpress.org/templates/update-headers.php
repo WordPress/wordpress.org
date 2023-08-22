@@ -98,6 +98,13 @@ foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
 	$html_node->appendChild( $wporg_head->importNode( $node, true ) );
 }
 
+
+// Remove Global Styles, it's causing header sizes to be wacky.
+$global_styles = $wporg_head->getElementById( 'global-styles-inline-css' );
+if ( $global_styles ) {
+	$global_styles->parentNode->removeChild( $global_styles );
+}
+
 // Swap out the shortcut icon for a Trac one. #6072
 $icon_url = 'https://s.w.org/style/trac/common/trac.ico';
 foreach ( ( new DOMXPath( $wporg_head ) )->query( '//link[@rel="icon"]' ) as $icon ) {
