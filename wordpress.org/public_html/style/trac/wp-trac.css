@@ -531,11 +531,15 @@ h2 {
 #main, #main th, #main tr, #main h1, #main h2, #main h3, #main h4 {
 	font-family: "Open Sans", sans-serif;
 }
+#main h1 {
+	font-size: 19px;
+	font-weight: bold;
+}
 #main h2 {
 	font-size: 22px;
 	font-weight: 300;
 }
-#main h3 {
+#main h3, #main h4 {
 	font-size: 14px;
 	font-weight: bold;
 }
