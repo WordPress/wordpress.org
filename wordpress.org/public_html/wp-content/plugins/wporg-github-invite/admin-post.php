@@ -60,7 +60,7 @@ add_action( 'admin_post_github_invite', function() {
 		if (
 			is_wp_error( $result ) &&
 			$github_username &&
-			'Invitee is already a part of this org' === $result->get_error_data( 'api_error' )->errors[0]->message ?? ''
+			'Invitee is already a part of this organization' === $result->get_error_data( 'api_error' )->errors[0]->message ?? ''
 		) {
 			// Already a GitHub member, just add them to the team.
 			$result  = add_to_team( $github_username, $team_ids );
