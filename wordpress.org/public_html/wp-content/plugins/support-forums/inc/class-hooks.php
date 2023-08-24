@@ -75,6 +75,9 @@ class Hooks {
 		// Limit no-replies view to a certain number of days and hide resolved topics.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
 
+		// Allow topics with the OP adding more details to show up in no-replies view.
+		add_filter( 'bbp_register_view_no_replies', array( $this, 'make_no_replies_consider_voices' ), 20 );
+
 		// Remove the description from the CPT to avoid Jetpack using it as the og:description.
 		add_filter( 'bbp_register_forum_post_type', array( $this, 'bbp_register_forum_post_type' ) );
 
@@ -332,7 +335,7 @@ class Hooks {
 	 * Redirect legacy urls to their new permastructure.
 	 *  - /users/$id & /profile/$slug to /users/$slug
 	 *  - /users/profile/* => /users/$slug/*
-	 * 
+	 *
 	 * See also: Support_Compat in inc/class-support-compat.php
 	 */
 	public function redirect_legacy_urls() {
@@ -626,7 +629,7 @@ class Hooks {
 		// Single topic.
 		if ( bbp_is_single_topic() ) {
 			$topic_id = bbp_get_topic_id();
-	
+
 			// Prepend label if thread is closed.
 			if ( bbp_is_topic_closed( $topic_id ) ) {
 				/* translators: %s: Excerpt of the topic's first post. */
@@ -925,6 +928,38 @@ class Hooks {
 
 		// Exclude closed/hidden/spam/etc topics.
 		$args['post_status'] = 'publish';
+
+		return $args;
+	}
+
+	/**
+	 * Modifies the No Replies view to look at the amount of voices instead of replies.
+     *
+     * This allows a topic OP to provide additional details without their topic
+     * going away from the No Replies view.
+	 *
+	 * @param array $args Array of query args for the view.
+	 * @return array
+	 */
+	public function make_no_replies_consider_voices( $args ) {
+		/*
+		 * Remove the default view arguments, in favor of a new meta_query instead.
+		 * Looping over an array of defined keys allows us to be forward compatible
+		 * if bbPress implements meta queries in the future.
+		 */
+		$default_keys = array( 'meta_key', 'meta_type', 'meta_value', 'meta_compare' );
+		foreach ( $default_keys as $key ) {
+			if ( isset( $args[ $key ] ) ) {
+				unset( $args[ $key ] );
+			}
+		}
+
+		$args['meta_query'][] = array(
+			'key'     => '_bbp_voice_count',
+			'type'    => 'NUMERIC',
+			'value'   => 2,
+			'compare' => '<',
+		);
 
 		return $args;
 	}
@@ -1270,7 +1305,7 @@ class Hooks {
 
 		return $content;
 	}
-	
+
 	/**
 	 * Alter the bbPress topic freshness links to use the date in the title attribute rather than thread title.
 	 */
@@ -1303,7 +1338,7 @@ class Hooks {
 	}
 
 	/**
-	 * Filter the topic subscription message to 
+	 * Filter the topic subscription message to
 	 */
 	public function bbp_subscription_mail_message( $message, $reply_id, $topic_id ) {
 		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
