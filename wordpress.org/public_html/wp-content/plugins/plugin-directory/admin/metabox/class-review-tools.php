@@ -296,10 +296,10 @@ class Review_Tools {
 							$update_check_payload = [
 								// This is a placeholder filename, it'll work for our purposes.
 								"{$post->post_name}/{$post->post_name}.php" => [
-									// This Update-URI header should not exist in w.org plugins, but ensures this test request resolves to this plugin.
-									'Update-URI' => "w.org/plugins/{$post->post_name}",
-									'Name'       => $post->post_title,
-									'Version'    => $post->version,
+									// This Update URI header should not exist in w.org plugins, but ensures this test request resolves to this plugin.
+									'UpdateURI' => "w.org/plugins/{$post->post_name}",
+									'Name'      => $post->post_title,
+									'Version'   => $post->version,
 								]
 							];
 						?>
