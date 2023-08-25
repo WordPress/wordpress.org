@@ -275,17 +275,38 @@ class Review_Tools {
 			echo '</ul>';
 		} else {
 			?>
-			<ul>
-				<li><a href='https://plugins.trac.wordpress.org/log/<?php echo esc_attr( $post->post_name ); ?>/'>Development Log</a></li>
-				<li><a href='https://plugins.svn.wordpress.org/<?php echo esc_attr( $post->post_name ); ?>/'>Subversion Repository</a></li>
-				<li><a href='https://plugins.trac.wordpress.org/browser/<?php echo esc_attr( $post->post_name ); ?>/'>Browse in Trac</a></li>
-				<li><a href='<?php echo esc_url( Template::download_link() ); ?>'>Download Current Version</a></li>
-				<li><a href='<?php echo esc_url( 'https://playground.wordpress.net/?plugin=' . $post->post_name ); ?>'>Run in playground</a></li>
+			<div style="display: flex; gap: 2em">
+				<ul>
+					<li><a href='https://plugins.trac.wordpress.org/log/<?php echo esc_attr( $post->post_name ); ?>/'>Development Log</a></li>
+					<li><a href='https://plugins.svn.wordpress.org/<?php echo esc_attr( $post->post_name ); ?>/'>Subversion Repository</a></li>
+					<li><a href='https://plugins.trac.wordpress.org/browser/<?php echo esc_attr( $post->post_name ); ?>/'>Browse in Trac</a></li>
+					<li><a href='<?php echo esc_url( Template::download_link() ); ?>'>Download Current Version</a></li>
+					<li><a href='<?php echo esc_url( 'https://playground.wordpress.net/?plugin=' . $post->post_name ); ?>'>Run in playground</a></li>
 
-				<?php if ( has_term( 'block', 'plugin_section', $post ) ) : ?>
-					<li><a href='https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=<?php echo esc_attr( $post->post_name ); ?>'>Block Plugin Checker</a></li>
-				<?php endif; ?>
-			</ul>
+					<?php if ( has_term( 'block', 'plugin_section', $post ) ) : ?>
+						<li><a href='https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=<?php echo esc_attr( $post->post_name ); ?>'>Block Plugin Checker</a></li>
+					<?php endif; ?>
+				</ul>
+				<ul>
+					<li>API Endpoints:
+						<ul class="ul-disc">
+						<li><a href="<?php echo esc_url( 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&slug=' . $post->post_name ); ?>">Info</a></li>
+						<li><a href="<?php echo rest_url('/plugins/v1/plugin/' . $post->post_name ); ?>" title="Source-data for info endpoint">wp-json Info</a></li>
+						<?php
+							$update_check_payload = [
+								// This is a placeholder filename, it'll work for our purposes.
+								"{$post->post_name}/{$post->post_name}.php" => [
+									// This Update-URI header should not exist in w.org plugins, but ensures this test request resolves to this plugin.
+									'Update-URI' => "w.org/plugins/{$post->post_name}",
+									'Name'       => $post->post_title,
+									'Version'    => $post->version,
+								]
+							];
+						?>
+						<li><a href="<?php echo esc_url( 'https://api.wordpress.org/plugins/update-check/1.0/test.php?plugins=' . urlencode( json_encode( $update_check_payload ) ) ); ?>">Update Check</a></li>
+					</ul></li>
+				</ul>
+			</div>
 			<p>
 				<?php
 				$svn_sync_url = add_query_arg(
