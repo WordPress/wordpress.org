@@ -171,8 +171,9 @@ add_action( 'template_redirect', function() {
  * Called from sunrise.php on ms_site_not_found and ms_network_not_found actions.
  */
 function wporg_redirect_site_not_found() {
-	$location = '';
-	$host     = strtolower( $_SERVER['HTTP_HOST'] );
+	$location    = '';
+	$status_code = 301;
+	$host        = strtolower( $_SERVER['HTTP_HOST'] );
 
 	switch ( $host ) {
 		// :earth_asia::earth_africa::earth_americas:.wordpress.org
@@ -207,7 +208,8 @@ function wporg_redirect_site_not_found() {
 			break;
 
 		case 'community.wordpress.org':
-			$location = 'https://make.wordpress.org/chat/matrix/';
+			$location    = 'https://make.wordpress.org/chat/matrix/';
+			$status_code = 302;
 			break;
 
 		// Plural => Singular
@@ -228,7 +230,7 @@ function wporg_redirect_site_not_found() {
 	}
 
 	if ( ! headers_sent() ) {
-		header( 'Location: ' . $location, true, 301 );
+		header( 'Location: ' . $location, true, $status_code );
 	} else {
 		// Headers should not have been sent at this point in time.
 		// On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".
