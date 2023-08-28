@@ -125,8 +125,8 @@ $photo_id = get_post_thumbnail_id();
 				<div class="tab-content">
 				<div class="tab tab-rich-text active">
 				<?php printf(
-					/* translators: 1: URL to CCO license, 2: URL to photo's page, 3: URL to contributor's profile, 4: Contributor's display name, 5: URL to Photo Directory. */
-					__( '<a href="%1$s">CCO</a> licensed <a href="%2$s">photo</a> by <a href="%3$s">%4$s</a> from the <a href="%5$s">WordPress Photo Directory</a>.', 'wporg-photos' ),
+					/* translators: 1: URL to CC0 license, 2: URL to photo's page, 3: URL to contributor's profile, 4: Contributor's display name, 5: URL to Photo Directory. */
+					__( '<a href="%1$s">CC0</a> licensed <a href="%2$s">photo</a> by <a href="%3$s">%4$s</a> from the <a href="%5$s">WordPress Photo Directory</a>.', 'wporg-photos' ),
 					'https://creativecommons.org/share-your-work/public-domain/cc0/',
 					esc_url( get_the_permalink() ),
 					esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
@@ -136,8 +136,8 @@ $photo_id = get_post_thumbnail_id();
 				</div>
 				<div class="tab tab-html">
 					<?php printf(
-						/* translators: 1: URL to CCO license, 2: URL to photo's page, 3: URL to contributor's profile, 4: Contributor's display name, 5: URL to Photo Directory. */
-						htmlentities( '<p class="attribution">' . __( '<a href="%1$s">CCO</a> licensed <a href="%2$s">photo</a> by <a href="%3$s">%4$s</a> from the <a href="%5$s">WordPress Photo Directory</a>.', 'wporg-photos' ) . '</p>' ),
+						/* translators: 1: URL to CC0 license, 2: URL to photo's page, 3: URL to contributor's profile, 4: Contributor's display name, 5: URL to Photo Directory. */
+						htmlentities( '<p class="attribution">' . __( '<a href="%1$s">CC0</a> licensed <a href="%2$s">photo</a> by <a href="%3$s">%4$s</a> from the <a href="%5$s">WordPress Photo Directory</a>.', 'wporg-photos' ) . '</p>' ),
 						'https://creativecommons.org/share-your-work/public-domain/cc0/',
 						esc_url( get_the_permalink() ),
 						esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
@@ -148,7 +148,7 @@ $photo_id = get_post_thumbnail_id();
 				<div class="tab tab-plain-text">
 				<?php printf(
 					/* translators: 1: Contributor's display name, 4: URL to photo's page. */
-					__( 'CCO licensed photo by %1$s from the WordPress Photo Directory: %2$s', 'wporg-photos' ),
+					__( 'CC0 licensed photo by %1$s from the WordPress Photo Directory: %2$s', 'wporg-photos' ),
 					esc_html( get_the_author_meta( 'display_name' ) ),
 					esc_url( get_the_permalink() )
 				); ?>
@@ -161,7 +161,7 @@ $photo_id = get_post_thumbnail_id();
 		<div class="photo-license">
 			<h3><?php _e( 'License / Usage', 'wporg-photos' ); ?></h3>
 			<p><?php printf(
-				/* translators: %s: URL to CCO license. */
+				/* translators: %s: URL to CC0 license. */
 				__( 'Photo contributors submit their original content under the <a href="%s">CC0 license</a>. This license allows everyone to use the photos anywhere, for any purpose, without the need for permission, attribution, or payment. However, you cannot claim ownership or authorship of any photos in the WordPress Photo Directory, out of respect for the original photographers. Submissions are moderated by a team of volunteers who recommend prior to use that you verify that the work is actually under the CC0 license and abides by any applicable local laws.', 'wporg-photos' ),
 				'https://creativecommons.org/share-your-work/public-domain/cc0/'
 			); ?></p>
