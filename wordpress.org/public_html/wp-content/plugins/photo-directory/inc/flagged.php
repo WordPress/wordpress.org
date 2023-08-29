@@ -27,6 +27,8 @@ class Flagged {
 	 * Initializer.
 	 */
 	public static function init() {
+		$post_type = Registrations::get_post_type();
+
 		// Register post statuses.
 		add_action( 'init',                                  [ __CLASS__, 'register_post_statuses' ] );
 
@@ -51,6 +53,9 @@ class Flagged {
 
 		// Add support to the post edit page.
 		add_action( 'admin_footer-post.php',                 [ __CLASS__, 'output_js_for_post_edit_support' ] );
+
+		// Add an unlinked 'Flagged (n)' label alongside the table view links.
+		add_filter( "views_edit-{$post_type}",                 [ __CLASS__, 'add_unlinked_flagged_status' ] );
 
 		// Add support to quick edit and bulk edit.
 		add_filter( 'quick_edit_dropdown_pages_args',        [ __CLASS__, 'add_custom_status_to_quick_edit' ] );
@@ -335,6 +340,36 @@ class Flagged {
 			</script>
 			";
 		}
+	}
+
+	/**
+	 * Adds an unlinked 'Flagged (n)' status and count to the view links for a
+	 * photos post listing for non-Photo Admins.
+	 *
+	 * Photo Admins automatically see a linked version of the link because they
+	 * have access to the listing. Since Moderators don't have that access, this
+	 * at least shows them that the current number of flagged photos.
+	 *
+	 * @param string[] $views An array of available list table views.
+	 * @return string[]
+	 */
+	public static function add_unlinked_flagged_status( $views ) {
+		$flagged_count = self::count();
+		if ( ! $flagged_count ) {
+			return $views;
+		}
+
+		$flagged_status = self::get_post_status();
+		if ( filter_input( INPUT_GET, 'post_type' ) === Registrations::get_post_type() ) {
+			if ( empty( $views[ $flagged_status ] ) ) {
+				$views[ $flagged_status ] = sprintf(
+					_n( 'Flagged <span class="count">(%s)</span>', 'Flagged <span class="count">(%s)</span>', $flagged_count, 'wporg-photos' ),
+					number_format_i18n( $flagged_count )
+				);
+			}
+		}
+
+		return $views;
 	}
 
 	/**
