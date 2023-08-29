@@ -217,7 +217,7 @@ class Moderation {
 	 */
 	 public static function disable_own_post_editing( $caps, $cap, $args, $user ) {
 		// Bail if not a relevant capability.
-		if ( ! in_array( $cap[0], [ 'edit_photos', 'publish_photos' ] ) ) {
+		if ( empty( $cap[0] ) || ! in_array( $cap[0], [ 'edit_photos', 'publish_photos' ] ) ) {
 			return $caps;
 		}
 
