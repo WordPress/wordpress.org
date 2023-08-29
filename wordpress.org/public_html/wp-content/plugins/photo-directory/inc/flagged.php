@@ -377,7 +377,7 @@ class Flagged {
 
 				// Function to check if a new node is the Quick Edit or Bulk Edit form
 				function checkNewNode(target) {
-					if (target.classList.contains('inline-edit-<?php echo Registrations::get_post_type(); ?>') || target.id === 'bulk-edit') {
+					if (target instanceof HTMLElement && (target.classList.contains('inline-edit-<?php echo Registrations::get_post_type(); ?>') || target.id === 'bulk-edit')) {
 						addNewStatus(target);
 					}
 				}
