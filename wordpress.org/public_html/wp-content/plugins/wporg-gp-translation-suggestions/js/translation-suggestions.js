@@ -27,7 +27,7 @@
    /**
 	* Stores the external translations used.
 	* @type {object}
-    */
+	*/
    var externalSuggestion = {};
 
 	/**
@@ -62,6 +62,7 @@
 
 			$container.append( cachedSuggestion );
 			removeNoSuggestionsMessage( $container );
+			moveFooterToTheBottom( $container );
 			copyTranslationMemoryToSidebarTab( $container );
 			return;
 		}
@@ -84,6 +85,7 @@
 				$container.append( response.data );
 				storeTheSuggestionInTheCache( type, originalId, response.data );
 				removeNoSuggestionsMessage( $container );
+				moveFooterToTheBottom( $container );
 				copyTranslationMemoryToSidebarTab( $container );
 			} else {
 				$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
@@ -195,7 +197,7 @@
 	 */
 	function copyTranslationMemoryToSidebarTab( $container ){
 		var editor = $container.closest( '.editor' );
-	    var divSidebarWithTM = editor.find( '.meta.translation-memory' ).first();
+		var divSidebarWithTM = editor.find( '.meta.translation-memory' ).first();
 		var divId = divSidebarWithTM.attr( 'data-row-id' );
 		var TMcontainer = editor.find( '.suggestions__translation-memory' );
 		if ( !TMcontainer.length ) {
@@ -357,6 +359,23 @@
 		} else {
 			removeNoSuggestionsDuplicateMessage( $container );
 		}
+	}
+
+	/**
+	 * Moves the footer with the link to OpenAI and DeepL to the bottom of the container.
+	 *
+	 * This is needed because the suggestions are loaded asynchronously.
+	 *
+	 * @param {object} $container The container where the suggestions are stored.
+	 *
+	 * @return {void}
+	 */
+	function moveFooterToTheBottom( $container ) {
+		var footer = $container.find( '.translation-suggestion__footer_message__for_suggestions' );
+		if ( ! footer ) {
+			return;
+		}
+		$container.append( footer );
 	}
 
 	/**
