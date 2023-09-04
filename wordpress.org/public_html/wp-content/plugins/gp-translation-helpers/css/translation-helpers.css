@@ -83,6 +83,13 @@ ul.helpers-tabs {
 	border: 1px solid rgb(0 0 0 / 5%);
 }
 
+#translation-history-table ul {
+	margin-left: -1rem;
+}
+#translation-history-table li:not(:last-child){
+	margin-bottom: 0.5rem;
+}
+
 footer em {
 	margin-left: 14px;
 }
