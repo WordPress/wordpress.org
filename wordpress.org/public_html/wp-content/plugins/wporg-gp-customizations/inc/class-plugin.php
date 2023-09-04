@@ -98,7 +98,7 @@ class Plugin {
 		// Add site tour items
 		if ( isset( $_GET['site_tour'] ) && 'test' == $_GET['site_tour'] ) {
 			gp_enqueue_style( 'gp-jquery-webui-popover' );
-			gp_enqueue_scripts( array( 'gp-jquery-webui-popover', 'gp-tour' ) );
+			gp_enqueue_scripts( array( 'gp-tour' ) );
 
 			add_filter( 'gp_tour', function(){
 				return array(
