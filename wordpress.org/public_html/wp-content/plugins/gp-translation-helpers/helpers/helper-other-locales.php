@@ -42,8 +42,9 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 	 * @var array
 	 */
 	public array $related_locales = array(
-		'gl' => array( 'es', 'pt', 'pt-ao', 'pt-br', 'ca', 'it', 'fr', 'ro' ),
-		'es' => array( 'gl', 'ca', 'pt', 'pt-ao', 'pt-br', 'it', 'fr', 'ro' ),
+		'gl'  => array( 'es', 'pt', 'pt-ao', 'pt-br', 'ca', 'it', 'fr', 'ro' ),
+		'es'  => array( 'gl', 'ca', 'pt', 'pt-ao', 'pt-br', 'it', 'fr', 'ro' ),
+		'oci' => array( 'ca', 'fr', 'it', 'es', 'gl' ),
 	);
 
 	/**
