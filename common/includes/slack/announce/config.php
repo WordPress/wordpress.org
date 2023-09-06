@@ -294,6 +294,7 @@ function get_whitelist() {
 			'laurelfulford',
 			'luminuu', // @jessica on Slack
 			'melchoyce',
+			'onemaggie',
 			'poena',
 		) ),
 		'design' => array(
