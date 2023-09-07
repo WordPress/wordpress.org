@@ -662,6 +662,7 @@ class WP_63_Credits extends WP_Credits {
 			'sumitbagthariya16',
 			'sumitsingh',
 			'sunyatasattva',
+			'supersoju',
 			'suzettefranck',
 			'swissspidy',
 			'syamraj24',
