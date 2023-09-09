@@ -297,6 +297,9 @@ function get_whitelist() {
 			'onemaggie',
 			'poena',
 		) ),
+		'deib-working-group' => array(
+			'CoachBirgit',
+		),
 		'design' => array(
 			// #core (inc committers) already included via get_parent_channel().
 			'chaion07',
