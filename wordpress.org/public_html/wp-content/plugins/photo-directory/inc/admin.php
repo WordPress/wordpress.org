@@ -622,27 +622,7 @@ class Admin {
 	 * @param array   $args Associative array of additional data.
 	 */
 	public static function meta_box_photo( $post, $args ) {
-		$image_id = get_post_thumbnail_id( $post );
-		if ( ! $image_id ) {
-			return;
-		}
-
-		$thumb_url = wp_get_attachment_image_src( $image_id, [ 900, 450 ], true );
-
-		$classes = 'photo-thumbnail';
-
-		if ( Photo::is_controversial( $image_id ) ) {
-			$classes .= ' blurred';
-		}
-
-		printf(
-			'<a class="photos-photo-link row-title" href="%s" target="_blank" aria-label="%s"><img class="%s" src="%s" style="max-width:100%%" alt="" /></a>',
-			wp_get_attachment_url( $image_id ),
-			/* translators: %s: Post title. */
-			esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
-			esc_attr( $classes ),
-			set_url_scheme( $thumb_url[0] )
-		);
+		self::output_photo_in_metabox( $post, [ 900, 450 ], true );
 	}
 
 	/**
@@ -727,7 +707,7 @@ class Admin {
 			}
 		}
 
-		if ( 'fullsize' === $link_to_fullsize ) {
+		if ( $link_to_fullsize ) {
 			$link_url = wp_get_attachment_url( $image_id );
 			$label = __( 'View full-sized version of the photo.', 'wporg-photos' );
 		} else {
