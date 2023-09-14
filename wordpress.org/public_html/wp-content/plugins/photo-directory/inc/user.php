@@ -95,6 +95,26 @@ class User {
 	}
 
 	/**
+	 * Returns the most recent photos for a given user.
+	 *
+	 * @param int  $user_id The user ID.
+	 * @param int  $number The number of photos to return.
+	 * @param bool $include_pending Include pending photos?
+	 * @return WP_Post[]
+	 */
+	public static function get_recent_photos( $user_id, $number, $include_pending = false ) {
+		$post_statuses = $include_pending ? Photo::get_pending_post_statuses() : [];
+		$post_statuses[] = 'publish';
+
+		return get_posts( [
+			'posts_per_page' => $number,
+			'author'         => $user_id,
+			'post_status'    => $post_statuses,
+			'post_type'      => Registrations::get_post_type(),
+		] );
+	}
+
+	/**
 	 * Returns a count of rejected photos for a user.
 	 *
 	 * @param int $user_id Optional. The user ID. If not defined, assumes global
