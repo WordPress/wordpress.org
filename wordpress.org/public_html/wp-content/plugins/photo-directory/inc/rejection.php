@@ -158,6 +158,9 @@ class Rejection {
 		add_filter( 'manage_posts_columns',                    [ __CLASS__, 'posts_columns' ], 8, 2 );
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'custom_rejection_columns' ], 10, 2 );
 
+		// Remove columns.
+		add_filter( "manage_edit-{$post_type}_columns",        [ __CLASS__, 'remove_columns' ] );
+
 		// Log the user and datetime when a photo gets rejected.
 		add_action( 'wporg_photos_reject_post',                [ __CLASS__, 'log_rejection' ], 1 );
 		add_action( 'wporg_photos_reject_post',                [ __CLASS__, 'delete_associated_photo_media' ], 1 );
@@ -1035,6 +1038,34 @@ JS;
 				}
 				break;
 		}
+	}
+
+	/**
+	 * Removes certain columns from the listing of rejected photos.
+	 *
+	 * Removes these columns:
+	 * - The custom taxonomy columns (Categories, Colors, Tags) since those
+	 *   get removed upon rejection.
+	 * - The number of likes, as provided by Jetpack.
+	 * - Stats
+	 *
+	 * @param  array $columns Array of post column titles.
+	 * @return array
+	 */
+	public static function remove_columns( $columns ) {
+		if (
+			filter_input( INPUT_GET, 'post_type' ) === Registrations::get_post_type()
+		&&
+			filter_input( INPUT_GET, 'post_status' ) === self::get_post_status()
+		) {
+			foreach ( Registrations::get_taxonomy( 'all' ) as $tax ) {
+				unset( $columns[ "taxonomy-{$tax}" ] );
+			}
+			unset( $columns['likes'] );
+			unset( $columns['stats'] );
+		}
+
+		return $columns;
 	}
 
 	/**
