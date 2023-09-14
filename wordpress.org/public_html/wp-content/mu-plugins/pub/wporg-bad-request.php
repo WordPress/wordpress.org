@@ -54,7 +54,11 @@ function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
 
 	// Assumption: WP::$public_query_vars will only ever contain non-array query vars.
 	// Assumption invalid. Some fields are valid.
-	$array_fields = [ 'post_type' => true, 'cat' => true ];
+	$array_fields = [
+		'post_type' => true,
+		'cat' => true,
+		'tag' => true,
+	];
 
 	// Some fields only accept numeric values.
 	$must_be_num = [
