@@ -455,6 +455,7 @@ class Admin {
 		} elseif ( Registrations::get_post_type() === get_post_type( $post->ID ) ) {
 			if ( $show ) {
 				add_meta_box( 'photos_photo', __( 'Photo', 'wporg-photos' ), [ __CLASS__, 'meta_box_photo' ], $post_type, 'normal' );
+				add_meta_box( 'photos_by_contributor', __( 'Other Recent Photo Submissions by Contributor', 'wporg-photos' ), [ __CLASS__, 'meta_box_photos_by_contributor' ], $post_type, 'normal' );
 			}
 			add_meta_box( 'photos_info', __( 'Photo Info', 'wporg-photos' ), [ __CLASS__, 'meta_box_info' ], $post_type, 'side' );
 		} else {
@@ -641,6 +642,107 @@ class Admin {
 			esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
 			esc_attr( $classes ),
 			set_url_scheme( $thumb_url[0] )
+		);
+	}
+
+	/**
+	 * Outputs the contents for the Recent Photo Submissions by Contributor metabox.
+	 *
+	 * @param WP_Post $post Post object.
+	 * @param array   $args Associative array of additional data.
+	 */
+	public static function meta_box_photos_by_contributor( $post, $args ) {
+		$photos_in_grid = 24;
+
+		// Request one more photo than is intended to be shown to determine if the contributor
+		// has more photos than will be shown. Also, as the current photo will be excluded from
+		// the grid, this also allows for its slot in the grid to be replaced without coming up
+		// short or making an additional query.
+		$recent_subs = User::get_recent_photos( $post->post_author, $photos_in_grid + 1, true );
+
+		echo '<div class="photos-grid">' . "\n";
+
+		$shown_photos = 0;
+		foreach ( $recent_subs as $photo ) {
+			// Don't show more photos than intended.
+			// An extra photo was requested to determine if the contributor has even more photos.
+			if ( $shown_photos >= $photos_in_grid ) {
+				break;
+			}
+
+			// Don't show the current photo in the grid.
+			if ( $photo->ID === $post->ID ) {
+				continue;
+			}
+
+			// Show the photo.
+			self::output_photo_in_metabox( $photo, 'medium', false );
+
+			$shown_photos++;
+		}
+
+		echo '</div>' . "\n";
+
+		if ( count( $recent_subs ) > $photos_in_grid ) {
+			echo '<div class="view-all-contributor-photos">';
+			$link = add_query_arg( [
+				'post_type'   => Registrations::get_post_type(),
+				'author'      => $post->post_author,
+			], 'edit.php' );
+			printf(
+				'<a href="%s">%s</a>',
+				esc_url( $link ),
+				__( "View all photos from this contributor &rarr;", 'wporg-photos' )
+			);
+			echo '</div>' . "\n";
+		}
+	}
+
+	/**
+	 * Outputs markup for a photo intended to be shown in an admin metabox.
+	 *
+	 * @param WP_Post      $post             Photo post object.
+	 * @param string|int[] $size             Image size. Accepts any registered image size name, or an
+	 *                                       array of width and height values in pixels (in that order).
+	 * @param bool         $link_to_fullsize Should the image link to its full-sized version? If not, it
+	 *                                       will link to edit the photo post. Default true;
+	 */
+	protected static function output_photo_in_metabox( $post, $size, $link_to_fullsize = true ) {
+		$image_id = get_post_thumbnail_id( $post );
+		if ( ! $image_id ) {
+			return;
+		}
+
+		$pending_notice = '';
+		$classes = 'photo-thumbnail';
+
+		if ( Photo::is_controversial( $image_id ) ) {
+			$classes .= ' blurred';
+		}
+
+		if ( 'pending' === $post->post_status ) {
+			$classes .= ' pending';
+			if ( ! $link_to_fullsize ) {
+				$pending_notice = '<div class="pending-notice">' . __( 'Pending', 'wporg-photos' ) . '</div>';
+			}
+		}
+
+		if ( 'fullsize' === $link_to_fullsize ) {
+			$link_url = wp_get_attachment_url( $image_id );
+			$label = __( 'View full-sized version of the photo.', 'wporg-photos' );
+		} else {
+			$link_url = get_edit_post_link( $post );
+			$label = sprintf( __( 'Edit photo post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title );
+		}
+
+		printf(
+			'<span><a class="photos-photo-link row-title" href="%s" target="_blank" aria-label="%s"><img class="%s" src="%s" alt="" /></a>%s</span>',
+			esc_url( $link_url ),
+			/* translators: %s: Post title. */
+			esc_attr( $label ),
+			esc_attr( $classes ),
+			esc_url( get_the_post_thumbnail_url( $post->ID, $size ) ),
+			$pending_notice
 		);
 	}
 
