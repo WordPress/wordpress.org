@@ -640,6 +640,20 @@ class Admin {
 		// short or making an additional query.
 		$recent_subs = User::get_recent_photos( $post->post_author, $photos_in_grid + 1, true );
 
+		// Front-load all pending photos.
+		usort( $recent_subs, function ( $a, $b ) {
+			$a_status = $a->post_status ?? '';
+			$b_status = $b->post_status ?? '';
+
+			if ( $a_status === $b_status ) {
+				return ( ( $a->post_date ?? '' ) > ( $b->post_date ?? '' ) ) ? -1 : 1;
+			} elseif ( 'publish' === $a_status ) {
+				return 1;
+			} else {
+				return -1;
+			}
+		} );
+
 		echo '<div class="photos-grid">' . "\n";
 
 		$shown_photos = 0;
