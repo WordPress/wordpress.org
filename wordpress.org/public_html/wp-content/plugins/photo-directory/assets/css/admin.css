@@ -114,3 +114,11 @@ body.post-type-photo #ed_toolbar,
 body.post-type-photo #wp-content-editor-container {
 	margin-top: 2rem;
 }
+
+#photos_info dt {
+	font-weight:bold;
+	color: #777;
+}
+#photos_info dd {
+	margin-left: 1.5rem;
+}
