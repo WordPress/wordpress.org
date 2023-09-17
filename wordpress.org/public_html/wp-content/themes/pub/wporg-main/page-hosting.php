@@ -26,16 +26,9 @@ $hosting_cache_buster = '3';
 			<div class="entry-content row">
 
 				<section class="col-8">
-					<p>There are hundreds of thousands of web hosts out there, the vast majority of which meet the
-						<a href="https://wordpress.org/about/requirements/">WordPress minimum requirements</a>
-						, and choosing one from the crowd can be a chore. Just like flowers need the right environment to grow, WordPress works best when it&#8217;s in a rich hosting environment.
-					</p>
+					<p>There are hundreds of thousands of web hosts out there, the vast majority of which meet the <a href="https://wordpress.org/about/requirements/">WordPress minimum requirements</a>, and choosing one from the crowd can be a chore. Just like flowers need the right environment to grow, WordPress works best when it&#8217;s in a rich hosting environment.</p>
 
-					<p>
-						We&#8217;ve dealt with more hosts than you can imagine; in our opinion, the hosts below represent some of the best and brightest of the hosting world. If you do decide to go with one of the hosts below and click through from this page, some will donate a portion of your fee back&#8212;so you can have a great host and support WordPress.org at the same time. If you&#8217;d like to try WordPress for free, you can get started with a free website or blog at
-						<a href="https://wordpress.com/">WordPress.com</a>
-						.
-					</p>
+					<p>We&#8217;ve dealt with more hosts than you can imagine; in our opinion, the hosts below represent some of the best and brightest of the hosting world. If you do decide to go with one of the hosts below and click through from this page, some will donate a portion of your fee back&#8212;so you can have a great host and support WordPress.org at the same time. If you&#8217;d like to try WordPress for free, you can get started with a free website or blog at <a href="https://wordpress.com/">WordPress.com</a>.</p>
 				</section>
 
 				<section>
