@@ -3,3 +3,25 @@
 .bbp-topic-form.reviews #qt_bbp_topic_content_link {
 	display: none;
 }
+
+/*--------------------------------------------------------------
+# Topic reports
+--------------------------------------------------------------*/
+
+#bbpress-forums .type-reported_topics .topic-report-reply {
+	border: 2px solid #33b4ce;
+	padding: 8px;
+}
+#bbpress-forums .type-reported_topics .topic-report-reply .topic-report-reply-meta {
+	color: #747474;
+	font-size: 0.7rem;
+	text-align: right;
+}
+
+#bbpress-forums .type-reported_topics .topic-report-reply-form textarea {
+	min-height: 80px;
+	width: 100%;
+}
+#bbpress-forums .type-reported_topics .topic-report-reply-form .topic-report-reply-form-actions {
+	text-align: right;
+}

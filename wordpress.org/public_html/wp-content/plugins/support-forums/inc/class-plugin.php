@@ -19,7 +19,7 @@ class Plugin {
 	/**
 	 * @var int Plugin DB revision, increments when changes are made to rewrite rules.
 	 */
-	private static $db_version = 5636;
+	private static $db_version = 5637;
 
 	// Define the properties for all the Support Forum components.
 	public $users                = false;

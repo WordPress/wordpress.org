@@ -337,7 +337,8 @@ $paginationBreakPoint: "600px";
 		}
 
 		div.topic,
-		div.reply {
+		div.reply,
+		div.reported_topics {
 			padding: 1.5rem 1.5rem 1.5rem 0;
 		}
 
@@ -1159,10 +1160,25 @@ div.bbp-breadcrumb {
 		}
 
 		select,
-		input[type="text"] {
+		input[type="text"],
+		textarea {
 			width: 100%;
 			padding: 0.2rem 0.5rem 0.1rem;
-			margin: 5px 0;
+			margin: 0;
+		}
+
+		.topic-report-notice {
+			margin-bottom: 1em;
+			padding: 4px;
+			background-color: #dfffe9;
+
+			&.topic-report-notice-type-error {
+				background-color: #ffdbdb;
+			}
+
+			&.topic-report-notice-type-warning {
+				background-color: #fbffdf;
+			}
 		}
 	}
 

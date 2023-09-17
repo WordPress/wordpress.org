@@ -443,6 +443,22 @@ function wporg_support_get_user_reviews_count( $user_id = 0 ) {
 }
 
 /**
+ * Return the raw database count of reviews by a user.
+ *
+ * @param int $user_id User ID to get count for.
+ * @return int Raw DB count of reviews.
+ */
+function wporg_support_get_user_report_count( $user_id = 0 ) {
+	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) ) {
+		return 0;
+	}
+
+	$plugin_instance = WordPressdotorg\Forums\Plugin::get_instance();
+
+	return $plugin_instance->users->get_user_report_count( $user_id );
+}
+
+/**
  * Check if the current page is a single review.
  *
  * @return bool True if the current page is a single review, false otherwise.
@@ -487,6 +503,15 @@ function wporg_support_is_single_user_reviews() {
  */
 function wporg_support_is_single_user_topics_replied_to() {
 	return (bool) get_query_var( 'wporg_single_user_topics_replied_to' );
+}
+
+/**
+ * Check if the current page is a user's "Reports Submitted" page.
+ *
+ * @return bool True if the page is a "Reports Submitted" page, false otherwise.
+ */
+function wporg_support_is_single_user_reported_topics() {
+	return (bool) get_query_var( 'wporg_single_user_reported_topics' );
 }
 
 /**
