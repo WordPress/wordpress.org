@@ -22,6 +22,10 @@
 	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__thread_starter;
 }
 
+.type-reported_topics {
+	border-right: 2px solid $color__thread-reporter;
+}
+
 .author-badge {
 	position: absolute;
 	top: 14px;
@@ -49,9 +53,17 @@
 	background-color: $color__theme-author;
 }
 
+.author-badge-reporter {
+	background-color: $color__thread-reporter;
+	right: -2px;
+	left: initial;
+	border-radius: 2px 0 0 2px;
+}
+
 .bbp-view .bbp-topics,
 .bbp-search .bbp-search-results,
-.bbp-user-replies-created {
+.bbp-user-replies-created,
+.bbp-user-reports-submitted {
 
 	div.author-has-badge {
 		box-shadow: none;
@@ -78,11 +90,16 @@
 	.author-badge {
 		left: 0;
 	}
+	.author-badge-reporter {
+		left: initial;
+		right: 0;
+	}
 }
 
 @media screen and ( max-width: 480px ) {
 
-	.author-badge {
+	.author-badge,
+	.author-badge-reporter {
 		top: -28px;
 	}
 }
