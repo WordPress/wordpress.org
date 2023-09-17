@@ -301,11 +301,20 @@ The WordPress.org Team',
 				'label'             => __( 'Reported Topics', 'wporg-forums' ),
 				'description'       => __( 'User-submitted reports of support topics or reviews.', 'wporg-forums' ),
 				'public'            => false,
-				'show_ui'           => current_user_can( 'moderate' ),
+				'show_ui'           => current_user_can( 'bbp_forums_admin' ),
 				'show_in_admin_bar' => false,
 				'show_in_rest'      => false,
 				'menu_icon'         => 'dashicons-flag',
-				'capability_type'   => 'moderate',
+				'capability_type'   => array( 'forum', 'forums' ),
+				'capabilities'      => array(
+					'edit_posts'          => 'edit_forums',
+					'edit_others_posts'   => 'edit_others_forums',
+					'publish_posts'       => 'publish_forums',
+					'read_private_posts'  => 'read_private_forums',
+					'read_hidden_posts'   => 'read_hidden_forums',
+					'delete_posts'        => 'delete_forums',
+					'delete_others_posts' => 'delete_others_forums'
+				),
 				'supports'          => array( 'editor' ),
 			)
 		);
