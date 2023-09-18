@@ -23,6 +23,8 @@ class Hooks {
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
+		add_action( 'init',                            array( $this, 'add_rewrite_rules' ) );
+
 
 		// Add bbPress support to the WordPress.org SEO plugin.
 		add_filter( 'wporg_canonical_base_url', array( $this, 'wporg_canonical_base_url' ) );
@@ -249,6 +251,25 @@ class Hooks {
 		}
 
 		return $filter_value;
+	}
+
+	/**
+	 * Add rewrite rules.
+	 *
+	 * This function needs to live in this file, so that it's ran no matter what theme is dynamically activated by
+	 * the `template` / `stylesheet` callbacks above.
+	 */
+	function add_rewrite_rules() {
+		if ( ! function_exists( 'bbp_get_user_slug' ) ) {
+			return;
+		}
+
+		// e.g., https://wordpress.org/support/users/foo/edit/account/
+		add_rewrite_rule(
+			bbp_get_user_slug() . '/([^/]+)/' . bbp_get_edit_slug() . '/account/?$',
+			'index.php?' . bbp_get_user_rewrite_id() . '=$matches[1]&edit_account=1',
+			'top'
+		);
 	}
 
 	/**
