@@ -333,7 +333,7 @@ class Performance_Optimizations {
 
 	public function enqueue_styles() {
 		if ( current_user_can( 'participate' ) ) {
-			wp_enqueue_style( 'support-forums-participants', plugins_url( 'css/styles-participants.css', __DIR__ ), array(), '20211105' );
+			wp_enqueue_style( 'support-forums-participants', plugins_url( 'css/styles-participants.css', __DIR__ ), array(), '20230919' );
 		}
 	}
 
@@ -565,7 +565,7 @@ class Performance_Optimizations {
 
 	/**
 	 * Cache the result of `count_users()` as the Support Forums site has a lot of users.
-	 * 
+	 *
 	 * This slows wp-admin/users.php down so much that it's hard to use when required.
 	 * As these numbers don't change often, it's cached for 24hrs hours, which avoids a 20-60s query on each users.php pageload.
 	 */
@@ -603,7 +603,7 @@ class Performance_Optimizations {
 	/**
 	 * Filter use queries to be more performant, as the default WordPress user queries
 	 * just don't scale to several million users here.
-	 * 
+	 *
 	 * @param \WP_User_Query $query
 	 */
 	public function pre_get_users( $query ) {
