@@ -34,7 +34,6 @@ class WP_63_Credits extends WP_Credits {
 					'meher'               => 'Meher Bala',
 					'ironprogrammer'      => 'Brian Alexander',
 					'webtechpooja'        => 'Pooja Derashri',
-					'chrismalone617'      => 'Chris Malone',
 					'Boniu91'             => 'Piotrek Boniu',
 					'karmatosed'          => 'Tammie Lister',
 					'richtabor'           => 'Rich Tabor',
