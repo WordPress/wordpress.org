@@ -95,6 +95,19 @@ class Report_Topic {
 			);
 		}
 
+        $content .= sprintf(
+            '<p class="topic-report-origin">%s</p>',
+            sprintf(
+                // translators: 1: The link to the original topic, with the topic title as its text.
+                __( 'Reported topic: %s', 'wporg-forums' ),
+                sprintf(
+                    '<a href="%s">%s</a>',
+                    esc_url( bbp_get_topic_permalink( get_post_field( 'post_parent', get_the_ID() ) ) ),
+                    esc_html( bbp_get_topic_title( get_post_field( 'post_parent', get_the_ID() ) ) )
+                )
+            )
+        );
+
 		$replies = get_comments( array(
 			'post_id' => get_the_ID(),
 		) );
