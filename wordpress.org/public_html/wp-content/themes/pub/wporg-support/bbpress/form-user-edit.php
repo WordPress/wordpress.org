@@ -119,7 +119,7 @@ defined( 'ABSPATH' ) || exit;
 			<p id="security">
 				<?php printf(
 					__( 'Your password and two-factor authentication settings can be changed in <a href="%s">the Account section</a>.', 'wporg' ),
-					bbp_get_user_profile_edit_url() . '/edit/account/'
+					bbp_get_user_profile_edit_url() . 'account/'
 				); ?>
 			</p>
 		</div>
