@@ -1395,6 +1395,8 @@ h2.toc-heading + h3.toc-heading:target {
 }
 
 .toc-jump a {
+	margin-left: 6px;
+	word-break: normal;
 	z-index: 1;
 }
 
