@@ -156,7 +156,12 @@ function display_items( $post_ids ) {
 				break;
 			case 'closed':
 			case 'disabled':
-				$post_status = '(' . ucwords( $post->post_status ) . ')';
+				$post_status = ucwords( $post->post_status );
+				// This is not perfect, but close enough.
+				if ( $post->_close_reason ) {
+					$post_status .= ': ' . ucwords( str_replace( '-', ' ', $post->_close_reason ) );
+				}
+				$post_status = "({$post_status})";
 				$style       = 'color: red;';
 				break;
 			case 'pending':

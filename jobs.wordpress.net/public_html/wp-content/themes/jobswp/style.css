@@ -694,11 +694,11 @@ li > ul {
 	width: 100%;
 	padding: 12px 5px 10px 32px;
 	border: 0;
+	box-sizing: border-box;
 }
 .search-form label {
 	display: block;
 	overflow: hidden;
-	padding-right: 10px;
 }
 .search-form .dashicons-search {
 	position: absolute;
@@ -886,7 +886,7 @@ li > ul {
 	padding-right: 1em;
 }
 .job-categories {
-	color: #999;
+	color: #595959;
 	line-height: 1.3em;
 	border-left: 1px solid #ccc;
 	margin-left: 10px;
@@ -978,7 +978,7 @@ li > ul {
 	top: 1.5em;
 	right: 2em;
 	font-style: italic;
-	color: #CCC;
+	color: #595959;
 }
 .post-field-section-header {
 	text-transform: uppercase;
@@ -988,7 +988,7 @@ li > ul {
 }
 .post-field-section-subheader {
 	font-style: italic;
-	color: #CCC;
+	color: #595959;
 }
 .post-job, #si_contact_form1 {
 	font-size: 0.8em;
@@ -1003,7 +1003,7 @@ li > ul {
 .post-job label span {
 	font-style: italic;
 	font-weight: normal;
-	color: #BBB;
+	color: #595959;
 }
 .post-job input[type="text"],
 .post-job input[type="email"],
@@ -1122,7 +1122,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 .job-help-text {
 	margin-top: -1em;
 	margin-bottom: 1.6em;
-	color: #999;
+	color: #595959;
 	font-style: italic;
 }
 .notice {
@@ -1202,6 +1202,12 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 }
 .page-faq .entry-content dd {
 	margin: 0 0 1.5em;
+}
+
+/* Feedback page */
+#fscf_submit_div1 {
+	margin-bottom: 4rem;
+	margin-top: 2rem;
 }
 
 /* Global footer */
@@ -1511,7 +1517,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 		padding-right: 10px;
 		padding-left: 10px;
 		font-size: 12px;
-		color: #999;
+		color: #595959;
 	}
 	.container .jobs-group .job-location {
 		display: inline-block;
@@ -1558,6 +1564,17 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	}
 	#subhead .container .grid_9 {
 		width: 100%;
+	}
+	.container .main-navigation.grid_8,
+	.main-navigation ul,
+	.main-navigation li {
+		float: none;
+	}
+	.main-navigation li.current_page_item {
+		border: 2px solid #dfdfdf;
+	}
+	.menu.mobile-pop {
+		margin-bottom: 1.5rem;
 	}
 	.container .content-area.grid_9, .container .widget-area.grid_3 {
 		width: 100%;
@@ -1616,3 +1633,22 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	}
 }
 
+@media only screen and (max-width: 400px) {
+	#subhead .container, #content,
+	.container .content-area.grid_9, .container .widget-area.grid_3 {
+		padding-left: 0;
+		padding-right: 0;
+	}
+	input[type="button"].submit-job,
+	input[type="submit"].submit-job,
+	#si_contact_form1 input[type="submit"],
+	.post-job {
+		margin-right: 0;
+	}
+	.entry-header,
+	.entry-content,
+	span.edit-link {
+		margin-left: 5px;
+		margin-right: 5px;
+	}
+}

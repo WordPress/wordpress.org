@@ -10,6 +10,11 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			wp_safe_redirect( '/news/feed/' . ( 'feed' !== get_query_var('feed') ? get_query_var('feed') : '' ), 301 );
 			exit;
 
+		// temp fix for /B;ocks, rm later
+		} elseif ( 0 === strpos( $_SERVER['REQUEST_URI'], '/Blocks' ) ) {
+			wp_safe_redirect( '/blocks/', 301 );
+		   	exit;
+
 		// WordPress.org does not have a specific site search, only the global WordPress.org search
 		} elseif ( ! empty( $_GET['s'] ) && false === strpos( $_SERVER['REQUEST_URI'], '/search/' ) ) {
 			wp_safe_redirect( '/search/' . urlencode( wp_unslash( $_GET['s'] ) ) . '/', 301 );
@@ -84,6 +89,9 @@ add_action( 'template_redirect', function() {
 	if ( 'make.wordpress.org' === $host ) {
 		// Slack invite url is /chat not /slack.
 		$path_redirects['/slack'] = '/chat/';
+		
+		// Short URL for Gutenberg Phase 3 publicity
+		$path_redirects['/phase-3'] = '/core/tag/phase-3/';
 	}
 
 	foreach ( $path_redirects as $test => $redirect ) {
@@ -163,9 +171,9 @@ add_action( 'template_redirect', function() {
  * Called from sunrise.php on ms_site_not_found and ms_network_not_found actions.
  */
 function wporg_redirect_site_not_found() {
-	// Default location for a not-found site or network is the main WordPress.org homepage.
-	$location = 'https://wordpress.org/';
-	$host     = $_SERVER['HTTP_HOST'];
+	$location    = '';
+	$status_code = 301;
+	$host        = strtolower( $_SERVER['HTTP_HOST'] );
 
 	switch ( $host ) {
 		// :earth_asia::earth_africa::earth_americas:.wordpress.org
@@ -199,14 +207,30 @@ function wporg_redirect_site_not_found() {
 			$location = 'https://make.wordpress.org/chat/';
 			break;
 
+		case 'community.wordpress.org':
+			$location    = 'https://make.wordpress.org/chat/matrix/';
+			$status_code = 302;
+			break;
+
 		// Plural => Singular
 		case 'developers.wordpress.org':
 			$location = 'https://developer.wordpress.org/';
 			break;
+
+		// This should absolutely never happen, exit without a redirect.
+		case 'wordpress.org':
+			status_header( 503 );
+			die( 'WordPress.org is currently unavailable.' );
+			break;
+
+		// Default location for a not-found site or network is the main WordPress.org homepage.
+		default:
+			$location = 'https://wordpress.org/';
+			break;
 	}
 
 	if ( ! headers_sent() ) {
-		header( 'Location: ' . $location, true, 301 );
+		header( 'Location: ' . $location, true, $status_code );
 	} else {
 		// Headers should not have been sent at this point in time.
 		// On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".

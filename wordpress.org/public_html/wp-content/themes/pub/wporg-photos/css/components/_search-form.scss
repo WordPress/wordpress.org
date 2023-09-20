@@ -14,7 +14,7 @@
 		line-height: 1.5;
 		margin: 0 auto;
 		max-width: 100%;
-		padding: 0.5rem;
+		padding: 0.5rem 2rem 0.5rem 0.5rem;
 		vertical-align: initial;
 		width: ms( 28 );
 	}
@@ -56,7 +56,7 @@
 			color: $color__text-input;
 			display: block;
 			height: 45px;
-			padding: 0.5rem 1rem;
+			padding: 0.5rem;
 			position: absolute;
 			right: 0;
 			text-shadow: none;
@@ -90,6 +90,16 @@
 			padding: 5px 10px;
 			position: relative;
 			width: auto;
+
+			& + .button-search {
+				background-color: #213FD4;
+				border: 0;
+				box-shadow: none;
+			}
+
+			& + .button-search:hover {
+				background-color: #000;
+			}
 
 			@media screen and (min-width: $ms-breakpoint) {
 				font-size: ms( -4 );

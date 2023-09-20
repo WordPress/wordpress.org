@@ -6,49 +6,50 @@ class Users {
 
 	public function __construct() {
 		// Add custom fields to user's profile.
-		add_action( 'bbp_user_edit_after_name',        array( $this, 'add_custom_title_input' ) );
-		add_action( 'bbp_user_edit_after',             array( $this, 'add_options_section_header' ), 0 );
-		add_action( 'bbp_user_edit_after',             array( $this, 'add_auto_topic_subscription_checkbox' ) );
+		add_action( 'bbp_user_edit_after_name',         array( $this, 'add_custom_title_input' ) );
+		add_action( 'bbp_user_edit_after',              array( $this, 'add_options_section_header' ), 0 );
+		add_action( 'bbp_user_edit_after',              array( $this, 'add_auto_topic_subscription_checkbox' ) );
 
 		// Save custom field values.
-		add_action( 'personal_options_update',         array( $this, 'save_custom_fields' ), 10, 2 );
-		add_action( 'edit_user_profile_update',        array( $this, 'save_custom_fields' ), 10, 2 );
+		add_action( 'personal_options_update',          array( $this, 'save_custom_fields' ), 10, 2 );
+		add_action( 'edit_user_profile_update',         array( $this, 'save_custom_fields' ), 10, 2 );
 
 		// Adjust display of user fields
-		add_filter( 'bbp_get_displayed_user_field',    array( $this, 'modify_user_fields' ), 10, 3 );
+		add_filter( 'bbp_get_displayed_user_field',     array( $this, 'modify_user_fields' ), 10, 3 );
 
 		// Custom user contact methods.
-		add_filter( 'user_contactmethods',             array( $this, 'custom_contact_methods' ) );
+		add_filter( 'user_contactmethods',              array( $this, 'custom_contact_methods' ) );
 
 		// Add "My Account" submenu items to admin bar for quick access.
-		add_action( 'admin_bar_menu',                  array( $this, 'add_my_account_submenu_items' ) );
+		add_action( 'admin_bar_menu',                   array( $this, 'add_my_account_submenu_items' ) );
 
 		// Only allow 3 published topics from a user in the first 24 hours.
-		add_action( 'bbp_new_topic_pre_insert',        array( $this, 'limit_new_user_topics' ) );
+		add_action( 'bbp_new_topic_pre_insert',         array( $this, 'limit_new_user_topics' ) );
 
 		// Add query vars and rewrite rules for user's topic and review queries.
-		add_filter( 'query_vars',                      array( $this, 'add_query_vars' ) );
-		add_action( 'bbp_add_rewrite_rules',           array( $this, 'add_rewrite_rules' ) );
+		add_filter( 'query_vars',                       array( $this, 'add_query_vars' ) );
+		add_action( 'bbp_add_rewrite_rules',            array( $this, 'add_rewrite_rules' ) );
 
 		// Don't allow attempting to set an email to one that is banned-from-use on WordPress.org.
-		add_action( 'bbp_post_request',                array( $this, 'check_email_safe_for_use' ), 0 ); // bbPress is at 1
+		add_action( 'bbp_post_request',                 array( $this, 'check_email_safe_for_use' ), 0 ); // bbPress is at 1
 
 		// Parse user's topic and review queries.
-		add_action( 'parse_query',                     array( $this, 'parse_user_topics_query' ) );
-		add_filter( 'posts_groupby',                   array( $this, 'parse_user_topics_posts_groupby' ), 10, 2 );
-		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'parse_user_topics_query_args' ) );
-		add_filter( 'bbp_topic_pagination',            array( $this, 'parse_user_topics_pagination_args' ) );
-		add_filter( 'bbp_replies_pagination',          array( $this, 'parse_user_topics_pagination_args' ) );
-		add_filter( 'bbp_before_title_parse_args',     array( $this, 'parse_user_topics_title_args' ) );
+		add_action( 'parse_query',                      array( $this, 'parse_user_topics_query' ) );
+		add_filter( 'posts_groupby',                    array( $this, 'parse_user_topics_posts_groupby' ), 10, 2 );
+		add_filter( 'bbp_after_has_topics_parse_args',  array( $this, 'parse_user_topics_query_args' ) );
+		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'parse_user_replies_query_args' ) );
+		add_filter( 'bbp_topic_pagination',             array( $this, 'parse_user_topics_pagination_args' ) );
+		add_filter( 'bbp_replies_pagination',           array( $this, 'parse_user_topics_pagination_args' ) );
+		add_filter( 'bbp_before_title_parse_args',      array( $this, 'parse_user_topics_title_args' ) );
 
 		// Clear user's topics and reviews count cache.
-		add_action( 'bbp_new_topic',                   array( $this, 'clear_user_topics_count_cache' ) );
-		add_action( 'bbp_spammed_topic',               array( $this, 'clear_user_topics_count_cache' ) );
-		add_action( 'bbp_unspammed_topic',             array( $this, 'clear_user_topics_count_cache' ) );
-		add_action( 'bbp_approved_topic',              array( $this, 'clear_user_topics_count_cache' ) );
-		add_action( 'bbp_unapproved_topic',            array( $this, 'clear_user_topics_count_cache' ) );
-		add_action( 'wporg_bbp_archived_topic',        array( $this, 'clear_user_topics_count_cache' ) );
-		add_action( 'wporg_bbp_unarchived_topic',      array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_new_topic',                    array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_spammed_topic',                array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_unspammed_topic',              array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_approved_topic',               array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_unapproved_topic',             array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'wporg_bbp_archived_topic',         array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'wporg_bbp_unarchived_topic',       array( $this, 'clear_user_topics_count_cache' ) );
 	}
 
 	/**
@@ -75,13 +76,13 @@ class Users {
 		if ( ! current_user_can( 'moderate' ) ) {
 			return;
 		}
-		
+
 		$title = get_user_option( 'title', bbp_get_displayed_user_id() );
 		?>
-		<div>
-			<label for="title"><?php esc_html_e( 'Custom Title', 'wporg-forums' ); ?></label>
-			<input type="text" name="title" id="title" value="<?php echo esc_attr( $title ); ?>" class="regular-text" />
-		</div>
+        <div>
+            <label for="title"><?php esc_html_e( 'Custom Title', 'wporg-forums' ); ?></label>
+            <input type="text" name="title" id="title" value="<?php echo esc_attr( $title ); ?>" class="regular-text" />
+        </div>
 		<?php
 	}
 
@@ -101,10 +102,10 @@ class Users {
 	public function add_auto_topic_subscription_checkbox() {
 		$auto_topic_subscription = get_user_option( 'auto_topic_subscription', bbp_get_displayed_user_id() );
 		?>
-		<p>
-			<input name="auto_topic_subscription" id="auto_topic_subscription" type="checkbox" value="yes" <?php checked( $auto_topic_subscription ); ?> />
-			<label for="auto_topic_subscription"><?php esc_html_e( 'Always notify me via email of follow-up posts in any topics I reply to', 'wporg-forums' ); ?></label>
-		</p>
+        <p>
+            <input name="auto_topic_subscription" id="auto_topic_subscription" type="checkbox" value="yes" <?php checked( $auto_topic_subscription ); ?> />
+            <label for="auto_topic_subscription"><?php esc_html_e( 'Always notify me via email of follow-up posts in any topics I reply to', 'wporg-forums' ); ?></label>
+        </p>
 		<?php
 	}
 
@@ -131,7 +132,7 @@ class Users {
 			}
 		}
 		return $value;
-	}	
+	}
 
 	/**
 	 * Add "My Account" submenu items to admin bar for quick access.
@@ -256,7 +257,8 @@ class Users {
 	}
 
 	/**
-	 * Add query vars for user's "Reviews Written" and "Topics Replied To" views.
+	 * Add query vars for user's "Reviews Written",
+	 * "Topics Replied To", and "Reports Submitted" views.
 	 *
 	 * @param array $query_vars Query vars.
 	 * @return array Filtered query vars.
@@ -264,17 +266,20 @@ class Users {
 	public function add_query_vars( $query_vars ) {
 		$query_vars[] = 'wporg_single_user_reviews';
 		$query_vars[] = 'wporg_single_user_topics_replied_to';
+		$query_vars[] = 'wporg_single_user_reported_topics';
 		return $query_vars;
 	}
 
 	/**
-	 * Add rewrite rules for user's "Reviews Written" and "Topics Replied To" views.
+	 * Add rewrite rules for user's "Reviews Written",
+	 * "Topics Replied To", and "Reports Submitted" views.
 	 */
 	public function add_rewrite_rules() {
 		$priority   = 'top';
 
 		$user_reviews_rule           = bbp_get_user_slug() . '/([^/]+)/reviews/';
 		$user_topics_replied_to_rule = bbp_get_user_slug() . '/([^/]+)/replied-to/';
+		$user_reports_submitted      = bbp_get_user_slug() . '/([^/]+)/reports/';
 
 		$feed_id    = 'feed';
 		$user_id    = bbp_get_user_rewrite_id();
@@ -296,11 +301,16 @@ class Users {
 		add_rewrite_rule( $user_topics_replied_to_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1',                               $priority );
 		add_rewrite_rule( $user_topics_replied_to_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1&' . $paged_id . '=$matches[2]', $priority );
 		add_rewrite_rule( $user_topics_replied_to_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1&' . $feed_id  . '=$matches[2]', $priority );
+
+		// Add users "Reports Submitted" page rewrite rules.
+		add_rewrite_rule( $user_reports_submitted . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reported_topics=1',                               $priority );
+		add_rewrite_rule( $user_reports_submitted . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reported_topics=1&' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $user_reports_submitted . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reported_topics=1&' . $feed_id  . '=$matches[2]', $priority );
 	}
 
 	/**
 	 * Verify that the a new email is valid for use.
-	 * 
+	 *
 	 * @param string $action The current action.
 	 */
 	function check_email_safe_for_use( $action = '' ) {
@@ -331,16 +341,18 @@ class Users {
 	}
 
 	/**
-	 * Set WP_Query::bbp_is_single_user_profile to false on user's "Reviews Written"
-	 * and "Topics Replied To" views.
+	 * Set WP_Query::bbp_is_single_user_profile to false on user's "Reviews Written",
+	 * "Topics Replied To", and "Reports Submitted" views.
 	 *
 	 * @param WP_Query $query Current query object.
 	 */
 	public function parse_user_topics_query( $query ) {
 		if (
 			get_query_var( 'wporg_single_user_reviews' )
-		||
+			||
 			get_query_var( 'wporg_single_user_topics_replied_to' )
+			||
+			get_query_var( 'wporg_single_user_reported_topics' )
 		) {
 			$query->bbp_is_single_user_profile = false;
 		}
@@ -385,8 +397,24 @@ class Users {
 	}
 
 	/**
-	 * Set 'base' argument for pagination links on user's "Reviews Written"
-	 * and "Topics Replied To" views.
+	 * Set the arguments for user's "Reports Submitted" query.
+	 *
+	 * @param array $args WO_Query arguments.
+	 * @return array Filtered query arguments.
+	 */
+	public function parse_user_replies_query_args( $args ) {
+		if ( get_query_var( 'wporg_single_user_reported_topics' ) ) {
+			$args['post_type'] = 'reported_topics';
+			unset( $args['meta_key'] );
+			unset( $args['meta_type'] );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Set 'base' argument for pagination links on user's "Reviews Written",
+	 * "Topics Replied To", and "Reports Submitted" views.
 	 *
 	 * @param array $args Pagination arguments.
 	 * @return array Filtered pagination arguments.
@@ -402,11 +430,16 @@ class Users {
 			$args['base'] .= bbp_get_paged_slug() . '/%#%/';
 		}
 
+		if ( get_query_var( 'wporg_single_user_reported_topics' ) ) {
+			$args['base']  = bbp_get_user_profile_url( bbp_get_displayed_user_id() ) . 'reports/';
+			$args['base'] .= bbp_get_paged_slug() . '/%#%/';
+		}
+
 		return $args;
 	}
 
 	/**
-	 * Set title for user's "Reviews Written" and "Topics Replied To" views.
+	 * Set title for user's "Reviews Written", "Topics Replied To", and "Reports Submitted" views.
 	 *
 	 * @param array $title Title parts.
 	 * @return array Filtered title parts.
@@ -429,6 +462,16 @@ class Users {
 				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
 				/* translators: user's display name */
 				$title['format'] = __( 'Topics %s Has Replied To', 'wporg-forums' );
+			}
+		}
+
+		if ( get_query_var( 'wporg_single_user_reported_topics' ) ) {
+			if ( bbp_is_user_home() ) {
+				$title['text'] = __( "Reports You've Submitted", 'wporg-forums' );
+			} elseif ( bbp_get_user_id() ) {
+				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
+				/* translators: user's display name */
+				$title['format'] = __( 'Reports %s Has Submitted', 'wporg-forums' );
 			}
 		}
 
@@ -469,6 +512,43 @@ class Users {
 				$user_id
 			) );
 			wp_cache_set( $user_id, $count, 'user-topics-count' );
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Return the raw database count of reports by a user.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
+	 * @param int $user_id User ID to get count for.
+	 * @return int Raw DB count of reports.
+	 */
+	public function get_user_report_count( $user_id = 0 ) {
+		global $wpdb;
+
+		$user_id = bbp_get_user_id( $user_id );
+		if ( empty( $user_id ) ) {
+			return 0;
+		}
+
+		if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) ) {
+			return 0;
+		}
+
+		// Check cache.
+		$count = wp_cache_get( $user_id, 'user-report-count' );
+		if ( false === $count ) {
+			$count = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(*)
+					FROM {$wpdb->posts}
+					WHERE post_type = 'reported_topics'
+						AND post_status IN ( 'publish', 'closed' )
+						AND post_author = %d",
+				$user_id
+			) );
+			wp_cache_set( $user_id, $count, 'user-report-count' );
 		}
 
 		return $count;
@@ -520,7 +600,7 @@ class Users {
 	 */
 	public function clear_user_topics_count_cache( $topic_id ) {
 		$post = get_post( $topic_id );
-		
+
 		if ( Plugin::REVIEWS_FORUM_ID != $post->post_parent ) {
 			wp_cache_delete( $post->post_author, 'user-topics-count' );
 		} else {

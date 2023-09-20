@@ -92,35 +92,35 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 		?></p>
 
 		<?php if ( ! $hide_profile_fields && ( $custom_title = get_user_option( 'title', bbp_get_displayed_user_id() ) ) ) : ?>
-	
+
 			<p class="bbp-user-custom-title"><?php
 				/* translators: %s: user's custom title */
 				printf( esc_html__( 'Title: %s', 'wporg-forums' ), esc_html( $custom_title ) );
 			?></p>
-	
+
 		<?php endif; ?>
 
 		<?php
-			// Only show the forum role when they're privledged, or the current user is privledged.
-			if (
-				current_user_can( 'moderate' ) ||
-				bbpress()->displayed_user->has_cap( bbp_get_moderator_role() ) ||
-				bbpress()->displayed_user->has_cap( bbp_get_keymaster_role() )
-			) {
-				?><p class="bbp-user-forum-role"><?php
-				/* translators: %s: user's forum role */
-				printf( esc_html__( 'Forum Role: %s', 'wporg-forums' ), bbp_get_user_display_role() );
-				?></p><?php
-			}
+		// Only show the forum role when they're privledged, or the current user is privledged.
+		if (
+			current_user_can( 'moderate' ) ||
+			bbpress()->displayed_user->has_cap( bbp_get_moderator_role() ) ||
+			bbpress()->displayed_user->has_cap( bbp_get_keymaster_role() )
+		) {
+			?><p class="bbp-user-forum-role"><?php
+			/* translators: %s: user's forum role */
+			printf( esc_html__( 'Forum Role: %s', 'wporg-forums' ), bbp_get_user_display_role() );
+			?></p><?php
+		}
 		?>
 
 		<?php if ( is_user_logged_in() && ! $hide_profile_fields && ( $website = bbp_get_displayed_user_field( 'user_url' ) ) ) : ?>
-	
+
 			<p class="bbp-user-website"><?php
-			/* translators: %s: link to user's website */
-			printf( esc_html__( 'Website: %s', 'wporg-forums' ), sprintf( '<a href="%s" rel="nofollow ugc">%s</a>', esc_url( $website ), esc_html( $website ) ) );
+				/* translators: %s: link to user's website */
+				printf( esc_html__( 'Website: %s', 'wporg-forums' ), sprintf( '<a href="%s" rel="nofollow ugc">%s</a>', esc_url( $website ), esc_html( $website ) ) );
 			?></p>
-	
+
 		<?php endif; ?>
 
 		<p class="bbp-user-member-since"><?php
@@ -142,6 +142,13 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 			<p class="bbp-user-review-count"><?php
 				/* translators: %s: number of user's reviews */
 				printf( esc_html__( 'Reviews Written: %s', 'wporg-forums' ), number_format_i18n( wporg_support_get_user_reviews_count() ) );
+			?></p>
+		<?php endif; ?>
+
+		<?php if ( bbp_is_user_home() || current_user_can( 'moderate' ) ) : ?>
+			<p class="bbp-user-report-count"><?php
+				/* translators: %s: number of user's reviews */
+				printf( esc_html__( 'Reports Submitted: %s', 'wporg-forums' ), number_format_i18n( wporg_support_get_user_report_count() ) );
 			?></p>
 		<?php endif; ?>
 	</div>

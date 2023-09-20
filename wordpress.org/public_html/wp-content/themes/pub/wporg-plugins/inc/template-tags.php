@@ -277,8 +277,9 @@ function the_unconfirmed_releases_notice() {
 	$warning  = false;
 
 	foreach ( $releases as $release ) {
-		if ( ! $release['confirmed'] && $release['confirmations_required'] ) {
+		if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
 			$warning = true;
+			break;
 		}
 	}
 
@@ -368,8 +369,22 @@ function the_previous_version_download( $post = null ) {
 
 	echo '<select class="previous-versions" onchange="getElementById(\'download-previous-link\').href=this.value;">';
 	foreach ( $tags as $version ) {
-		$text = ( 'trunk' === $version ? __( 'Development Version', 'wporg-plugins' ) : $version );
-		printf( '<option value="%s">%s</option>', esc_attr( Template::download_link( $post, $version ) ), esc_html( $text ) );
+		// Check the tag against the confirmed releases.
+		$release = Plugin_Directory::get_release( $post, $version );
+		if ( $release && ! $release['zips_built'] ) {
+			continue;
+		}
+
+		$text = $version;
+		if ( 'trunk' === $version ) {
+			$text = __( 'Development Version', 'wporg-plugins' );
+		}
+
+		printf(
+			'<option value="%s">%s</option>',
+			esc_attr( Template::download_link( $post, $version ) ),
+			esc_html( $text )
+		);
 	}
 	echo '</select> ';
 

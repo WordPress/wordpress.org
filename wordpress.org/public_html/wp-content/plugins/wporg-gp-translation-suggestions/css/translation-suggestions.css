@@ -103,3 +103,7 @@
 	color: #000;
 	background: #B5E1B9;
 }
+
+.translation-suggestion__footer_message__for_suggestions {
+	font-size: 12px;
+}

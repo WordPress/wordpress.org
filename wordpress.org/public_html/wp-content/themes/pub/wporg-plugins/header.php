@@ -93,10 +93,12 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' ); // phpcs:ignore
 						$class = 'is-active';
 					}
 					$url = home_url( '/' );
+					// If a browse view, use that as the base.
+					if ( ! is_home() && $browse = get_query_var( 'browse' ) ) {
+						$url = home_url( "/browse/{$browse}/" );
+					}
 					if ( $slug ) {
-						$url = add_query_arg( array( 'plugin_business_model' => $slug ) );
-					} else if ( ! is_home() ) {
-						$url = remove_query_arg( 'plugin_business_model' );
+						$url = add_query_arg( array( 'plugin_business_model' => $slug ), $url );
 					}
 					printf(
 						'<li class="page_item"><a class="%1$s" href="%2$s">%3$s</a></li>',

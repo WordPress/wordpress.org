@@ -192,7 +192,7 @@ function wporg_themes_post_submitbox_misc_actions() {
 		$links[] = sprintf( '<a class="submit-suspend_theme submitdelete" title="%1$s" href="%2$s">%3$s</a>', esc_attr__( 'Suspend this item', 'wporg-themes' ), esc_url( wporg_themes_get_suspend_url( $post ) ), __( 'Suspend', 'wporg-themes' ) );
 	}
 	elseif ( current_user_can( 'reinstate_theme', $post->ID ) && 'suspend' == $post->post_status ) {
-		$links[] = sprintf( '<a class="submit-reinstate_theme" title="%1$s" href="%2$s">%3$s</a>', esc_attr__( 'Suspend this item', 'wporg-themes' ), esc_url( wporg_themes_get_reinstate_url( $post ) ), __( 'Reinstate', 'wporg-themes' ) );
+		$links[] = sprintf( '<a class="submit-reinstate_theme" title="%1$s" href="%2$s">%3$s</a>', esc_attr__( 'Reinstate this item', 'wporg-themes' ), esc_url( wporg_themes_get_reinstate_url( $post ) ), __( 'Reinstate', 'wporg-themes' ) );
 	}
 
 	if ( current_user_can( 'suspend_theme', $post->ID ) && 'publish' == $post->post_status ) {
@@ -259,8 +259,6 @@ function wporg_themes_suspend_theme() {
 		'ID'          => $post_id,
 		'post_status' => 'suspend',
 	) );
-
-	wporg_themes_remove_wpthemescom( $post->post_name );
 
 	wp_redirect( add_query_arg( 'suspended', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
@@ -403,18 +401,6 @@ function wporg_themes_relist_theme() {
 	exit();
 }
 add_filter( 'admin_action_relist', 'wporg_themes_relist_theme' );
-
-/**
- * Remove themes from wp-themes.com upon theme status moving to draft.
- *
- * @param WP_Post $post
- */
-function wporg_themes_remove_draft_themes_from_wpthemescom( $post ) {
-	if ( 'repopackage' === $post->post_type ) {
-		wporg_themes_remove_wpthemescom( $post->post_name );
-	}
-}
-add_action( 'publish_to_draft', 'wporg_themes_remove_draft_themes_from_wpthemescom' );
 
 /**
  * Give the user feedback after suspending or reinstating a theme.

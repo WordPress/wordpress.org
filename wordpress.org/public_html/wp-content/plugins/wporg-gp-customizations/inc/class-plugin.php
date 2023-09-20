@@ -95,6 +95,53 @@ class Plugin {
 		// Correct `WP_Locale` for variant locales in project lists.
 		add_filter( 'gp_translation_sets_sort', [ $this, 'filter_gp_translation_sets_sort' ] );
 
+		// Add site tour items.
+		if ( isset( $_GET['site_tour'] ) && 'test' == $_GET['site_tour'] ) {
+			add_filter(
+				'gp_tour',
+				function() {
+					return array(
+						'ui-intro' => [
+							[
+								'title' => 'UI Introduction Tour',
+								'color' => '#3939c7',
+							],
+							[
+								'selector'         => '.source-string__singular',
+								'html'             => 'This is the original string, pay attention to underlined words: they are in the glossary of your locale and if the context fits you must use the translation suggested by the glossary',
+								'popover-position' => 'left',
+							],
+							[
+								'selector' => '.source-details__references',
+								'html'     => 'This is the comments, context and references area: it can contain very useful information such as placheholders meaning, context of the string, a link to the code that could contain more comments about the use of that string.',
+							],
+							[
+								'selector' => '.translation-wrapper .textareas',
+								'html'     => 'This is the area where you can suggest your translation. Good grammar helps! Also, always pay attention to context and the Glossary entries that may apply.',
+							],
+							[
+								'selector' => '.translation-actions',
+								'html'     => 'This is the buttons area where you can find the very helpful “Help” button!',
+							],
+							[
+								'selector' => '.suggestions-wrapper',
+								'html'     => 'This is the Translations memory and Other languages area, remember Translation Memory could be a very useful help, but it all depends on the context. Context is all!',
+							],
+							[
+								'selector' => '.sidebar-tabs',
+								'html'     => 'This is the meta information area, Discussion and History can give more context information about the string, Make sure you always check these as well, if available.',
+							],
+							[
+								'selector' => '.translation-actions__primary',
+								'html'     => 'When you\'re happy with your translation click on the “Suggest” button',
+							],
+						],
+					);
+				},
+				10
+			);
+		}
+
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
@@ -301,7 +348,7 @@ class Plugin {
 		}
 		$already_logged[ $key ] = true;
 		$source                 = '';
-		if ( $translation && 'GP_Route_Translation' === GP::$current_route->class_name ) {
+		if ( $translation && is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				$this->imported_translation_ids[] = $translation->id;
 

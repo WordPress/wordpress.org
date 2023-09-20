@@ -9,6 +9,8 @@ namespace WordPressdotorg\Photo_Directory;
 
 class Posts {
 
+	const META_KEY_MISSING_TAXONOMIES = '_missing_taxonomies';
+
 	/**
 	 * Initializer.
 	 */
@@ -20,6 +22,10 @@ class Posts {
 		add_action( 'delete_attachment',  [ __CLASS__, 'delete_photo_post' ], 10, 2 );
 		add_action( 'template_redirect',  [ __CLASS__, 'redirect_attachment_page_to_photo' ] );
 		add_filter( 'attachment_link',    [ __CLASS__, 'use_photo_url_instead_of_media_permalink_url' ], 10, 2 );
+
+		// Ensure all custom taxonomies have been assigned values before publication.
+		// Note: The add_action and hook priority are duplicated in `require_taxonomies_before_publishing()`.
+		add_action( 'transition_post_status', [ __CLASS__, 'require_taxonomies_before_publishing' ], 1, 3 );
 
 		// Sync photo post content to photo media on update.
 		add_action( 'post_updated',       [ __CLASS__, 'sync_photo_post_to_photo_media_on_update' ], 5, 3 );
@@ -52,6 +58,48 @@ class Posts {
 		$response->set_data( $data );
 
 		return $response;
+	}
+
+	/**
+	 * Prevents publication of a photo if any custom taxonomy hasn't been assigned
+	 * at least one value.
+	 *
+	 * @param string  $new_status The new post status.
+	 * @param string  $old_status The old post status.
+	 * @param WP_Post $post       The post object.
+	 */
+	public static function require_taxonomies_before_publishing( $new_status, $old_status, $post ) {
+		// Bail if post is not being published.
+		if ( 'publish' !== $new_status ) {
+			return;
+		}
+
+		// Bail if not a photo post.
+		if ( Registrations::get_post_type() !== $post->post_type ) {
+			return;
+		}
+
+		// Assume all custom taxonomies are required.
+		$required_taxonomies = Registrations::get_taxonomy( 'all' );
+		$missing_taxonomies = [];
+
+		// Check each required taxonomy.
+		foreach ( $required_taxonomies as $taxonomy ) {
+			$terms = wp_get_post_terms( $post->ID, $taxonomy, [ 'fields' => 'ids' ] );
+			if ( count( $terms ) == 0 ) {
+				$missing_taxonomies[] = $taxonomy;
+			}
+		}
+
+		if ( $missing_taxonomies ) {
+			// Prevent publishing.
+			remove_action( 'transition_post_status', [ __CLASS__, 'require_taxonomies_before_publishing' ], 1 );
+			wp_update_post( [ 'ID' => $post->ID, 'post_status' => $old_status ] );
+			add_action( 'transition_post_status', [ __CLASS__, 'require_taxonomies_before_publishing' ], 1, 3 );
+
+			// Store the missing taxonomies to later display them in an admin notice.
+			update_post_meta( $post->ID, self::META_KEY_MISSING_TAXONOMIES, $missing_taxonomies );
+		}
 	}
 
 	/**

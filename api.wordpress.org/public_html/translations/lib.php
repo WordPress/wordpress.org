@@ -145,13 +145,23 @@ function find_latest_translations( $args ) {
 
 	wp_cache_add_global_groups( $translations_cache_group );
 
+	// Filter the requested languages down to only valid translated locales.
+	$translated_languages = find_translated_locales_for( $type, $domain );
+	$languages            = array_filter( $languages, function( $language ) use( $translated_languages ) {
+		return (
+			// Skip any invalid language data requested
+			is_string( $language ) &&
+			// and only query for languages this item is translated into
+			in_array( strtolower( $language ), $translated_languages, true )
+		);
+	} );
+
+	if ( ! $languages ) {
+		return array();
+	}
+
 	$return = array();
 	foreach ( $languages as $language ) {
-		// Skip if an invalid language was provided to the API.
-		if ( ! is_string( $language ) ) {
-			continue;
-		}
-
 		// Disable LP's for en_US for now, can re-enable later if we have non-en_US native items
 		if ( 'en_US' == $language ) {
 			continue;
@@ -285,4 +295,49 @@ function check_for_translations_of_installed_items( $args ) {
 	}
 
 	return $translations;
+}
+
+/**
+ * Find the languages an item is actually translated into.
+ *
+ * Used by find_latest_translations().
+ *
+ * @param string $type   Type of item. Expects 'core', 'plugin', or 'theme'.
+ * @param string $domain Item slug.
+ * @return array Array of lower-case language codes.
+ */
+function find_translated_locales_for( $type, $domain ) {
+	global $wpdb;
+
+	$cache_group     = 'translations-query';
+	$cache_key       = "{$type}:{$domain}";
+	$cache_time      = 86400; // 24hrs
+	$apcu_cache_time = 60;
+
+	wp_cache_add_global_groups( $cache_group );
+
+	$languages = apcu_fetch( "{$cache_group}:{$cache_key}", $found );
+	if ( ! $found ) {
+		$languages = wp_cache_get( $cache_key, $cache_group, false, $found );
+		if ( $found ) {
+			apcu_store( "{$cache_group}:{$cache_key}", $languages, $apcu_cache_time );
+		}
+	}
+
+	if ( ! $found ) {
+		$languages = $wpdb->get_col( $wpdb->prepare(
+			"SELECT DISTINCT `language`
+			FROM `language_packs`
+			WHERE `type` = %s AND `domain` = %s AND `active` = 1",
+			$type,
+			$domain
+		) );
+
+		$languages = array_map( 'strtolower', $languages );
+
+		apcu_store( "{$cache_group}:{$cache_key}", $languages, $apcu_cache_time );
+		wp_cache_add( $cache_key, $languages, $cache_group, $cache_time );
+	}
+
+	return $languages ?: array();
 }

@@ -109,7 +109,7 @@
 			}
 		}
 
-		a:not(.button), a:not(.dashicons) {
+		a:not(.button, .dashicons) {
 			text-decoration: underline;
 		}
 

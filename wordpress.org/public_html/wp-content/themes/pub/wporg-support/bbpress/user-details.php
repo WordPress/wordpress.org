@@ -60,6 +60,17 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				</li>
 			<?php endif; ?>
 
+			<?php if ( current_user_can( 'moderate' ) || get_current_user_id() === bbp_get_user_id() ) : ?>
+				<li class="<?php if ( wporg_support_is_single_user_reported_topics() ) :?>current<?php endif; ?>">
+					<span class='bbp-user-reviews-link'>
+						<a href="<?php bbp_user_profile_url(); ?>reports/" title="<?php
+							/* translators: %s: user's display name */
+							printf( esc_attr__( "%s's Submitted Reports", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+						?>"><?php esc_html_e( 'Reports Submitted', 'wporg-forums' ); ?></a>
+					</span>
+				</li>
+			<?php endif; ?>
+
 			<li class="<?php if ( wporg_support_is_single_user_topics_replied_to() ) :?>current<?php endif; ?>">
 				<span class='bbp-user-topics-replied-to-link'>
 					<a href="<?php bbp_user_profile_url(); ?>replied-to/" title="<?php
@@ -104,8 +115,6 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					</li>
 				<?php endif; ?>
 
-				<?php // todo remove the condition when launch for all users ?>
-				<?php if ( \WordPressdotorg\Two_Factor\is_2fa_beta_tester() ) : ?>
 				<li class="<?php if ( wporg_bbp_is_single_user_edit_account() ) : ?>current<?php endif; ?>">
 					<span class="bbp-user-edit-account-link">
 						<a href="<?php bbp_user_profile_edit_url(); ?>account/">
@@ -113,7 +122,6 @@ do_action( 'bbp_template_before_user_details' ); ?>
 						</a>
 					</span>
 				</li>
-				<?php endif; ?>
 
 				<li class="<?php if ( bbp_is_single_user_edit() ) :?>current<?php endif; ?>">
 					<span class="bbp-user-edit-link">

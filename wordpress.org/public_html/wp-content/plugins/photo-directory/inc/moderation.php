@@ -54,6 +54,9 @@ class Moderation {
 		add_action( 'wporg_photos_moderation_email_sent', [ __CLASS__, 'sent_user_email' ] );
 		add_filter( 'wporg_photos_pre_upload_form',       [ __CLASS__, 'output_list_of_pending_submissions_for_user' ] );
 
+		// Disable moderating own posts.
+		add_filter( 'user_has_cap',                       [ __CLASS__, 'disable_own_post_editing' ], 10, 4 );
+
 		// Add column to users table with count of photos moderated.
 		add_filter( 'manage_users_columns',               [ __CLASS__, 'add_moderated_count_column' ] );
 		add_filter( 'manage_users_custom_column',         [ __CLASS__, 'handle_moderated_count_column_data' ], 10, 3 );
@@ -190,6 +193,55 @@ class Moderation {
 			if ( $photos_moderator_role ) {
 				$caps = array_merge( (array) $photos_moderator_role->capabilities, (array) $caps );
 			}
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Prevents moderators from being able to edit or moderate their own photos.
+	 *
+	 * @param array    $caps Array of key/value pairs where keys represent a
+	 *                       capability name and boolean values represent whether
+	 *                       the user has that capability.
+	 * @param string[] $cap  Required primitive capabilities for requested capability.
+	 * @param array    $args {
+	 *     Arguments that accompany the requested capability check.
+	 *
+	 *     @type string    $0 Requested capability.
+	 *     @type int       $1 Concerned user ID.
+	 *     @type mixed  ...$2 Optional second and further parameters, typically object ID.
+	 * }
+	 * @param WP_User  $user The user object.
+	 * @return array
+	 */
+	 public static function disable_own_post_editing( $caps, $cap, $args, $user ) {
+		// Bail if not a relevant capability.
+		if ( empty( $cap[0] ) || ! in_array( $cap[0], [ 'edit_photos', 'publish_photos' ] ) ) {
+			return $caps;
+		}
+
+		// Bail if no post context provided.
+		if ( ! isset( $args[2] ) ) {
+			return $caps;
+		}
+
+		// Bail if user isn't a moderator.
+		if ( ! user_can( $user->ID, 'photos_moderator' ) ) {
+			return $caps;
+		}
+
+		$post = get_post( $args[2] );
+
+		// Bail if not a photo post.
+		if ( Registrations::get_post_type() !== $post->post_type ) {
+			return $caps;
+		}
+
+		// Disallow editing their own submission.
+		if ( isset( $post->post_author ) && $post->post_author == $user->ID ) {
+			$caps['edit_photos'] = false;
+			$caps['publish_photos'] = false;
 		}
 
 		return $caps;
@@ -738,12 +790,21 @@ https://wordpress.org/photos/
 		];
 		$users = get_users( $args );
 
-		echo '<table class="wp-list-table widefat fixed striped table-view-list">';
+		echo "<style>\n";
+		echo <<<CSS
+			#dashboard-photo-moderators .col-num-approved,
+			#dashboard-photo-moderators .col-num-rejected {
+				width: 50px;
+			}
+CSS;
+		echo "</style>\n";
+
+		echo '<table id="dashboard-photo-moderators" class="wp-list-table widefat fixed striped table-view-list">';
 		echo '<thead><tr>';
 		echo '<th>' . __( 'Username', 'wporg-photos' ) . '</th>';
 		echo '<th>' . __( 'Name', 'wporg-photos' ) . '</th>';
-		echo '<th title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
-		echo '<th title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
+		echo '<th class="col-num-approved" title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
+		echo '<th class="col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
 		echo '<th>' . __( 'Last Moderated', 'wporg-photos' ) . '</th>';
 		echo '</tr></thead>';
 		echo '<tbody>';
@@ -760,12 +821,29 @@ https://wordpress.org/photos/
 			echo '<tr>';
 			echo '<td>' . sprintf( '<a href="%s">%s</a>', esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ), $user->user_nicename ) . '</td>';
 			echo '<td>' . esc_html( $user->display_name ) . '</td>';
-			echo '<td>' . number_format_i18n( $count_approved ) . '</td>';
-			echo '<td>' . number_format_i18n( $count_rejected ) . '</td>';
+
+			$base_edit_url = add_query_arg( [ 'post_type' => Registrations::get_post_type(), 'author' => $user->ID ], admin_url( 'edit.php' ) );
+			echo '<td>' . ( $count_approved ? sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( add_query_arg( [ 'post_status' => 'publish' ], $base_edit_url ) ),
+				number_format_i18n( $count_approved )
+			) : '0' ) . '</td>';
+			echo '<td>' . ( $count_rejected ? sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( add_query_arg( [ 'post_status' => Rejection::get_post_status() ], $base_edit_url ) ),
+				number_format_i18n( $count_rejected )
+			) : '0' ) . '</td>';
+
 			echo '<td>';
 			$last_moderated = User::get_last_moderated( $user->ID, true );
 			if ( $last_moderated ) {
-				printf( '<a href="%s">%s</a>', get_edit_post_link( $last_moderated->ID ), get_the_date( 'Y-m-d', $last_moderated->ID ) );
+				$edit_url = get_edit_post_link( $last_moderated->ID );
+				$last_mod_date = get_the_date( 'Y-m-d', $last_moderated->ID );
+				if ( $edit_url ) {
+					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), $last_mod_date );
+				} else {
+					echo $last_mod_date;
+				}
 			}
 			echo '</td>';
 			echo '</tr>';

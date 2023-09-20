@@ -4,11 +4,12 @@ namespace WordPressdotorg\Forums;
 
 class Moderators {
 
-	const ARCHIVED       = 'archived';
-	const ARCHIVED_META  = '_wporg_bbp_unarchived_post_status';
-	const MODERATOR_META = '_wporg_bbp_moderator';
-	const DEFAULT_STATUS = 'publish';
-	const VIEWS          = array( 'archived', 'pending', 'spam' );
+	const ARCHIVED               = 'archived';
+	const ARCHIVED_META          = '_wporg_bbp_unarchived_post_status';
+	const MODERATOR_META         = '_wporg_bbp_moderator';
+	const MODERATOR_REPLY_AUTHOR = '_wporg_bbp_moderator_reply_author';
+	const DEFAULT_STATUS         = 'publish';
+	const VIEWS                  = array( 'archived', 'pending', 'spam' );
 
 	public function __construct() {
 		// Moderator-specific views.
@@ -70,6 +71,13 @@ class Moderators {
 		add_action( 'bbp_approved_reply',               array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_unapproved_topic',             array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_unapproved_reply',             array( $this, 'store_moderator_username' ) );
+
+		// Allow moderators to post as @moderator.
+		add_action( 'bbp_theme_before_reply_form_subscription', array( $this, 'form_add_post_as_anon_mod' ) );
+		add_filter( 'bbp_new_reply_pre_insert',                 array( $this, 'bbp_new_reply_pre_insert' ) );
+		add_action( 'bbp_theme_before_reply_author_details',    array( $this, 'show_anon_mod_name' ) );
+		add_filter( 'user_has_cap',                             array( $this, 'anon_moderator_user_has_cap' ), 10, 4 );
+		add_filter( 'wporg_notifications_pre_notify_matchers',  array( $this, 'notify_mod_of_at_mention' ), 10, 2 );
 	}
 
 	/**
@@ -1108,5 +1116,138 @@ class Moderators {
 		}
 
 		return $topic_status;
+	}
+
+	/**
+	 * Add a checkbox to the reply form to allow moderators to post anonymously.
+	 */
+	public function form_add_post_as_anon_mod() {
+		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		$moderator_user = get_user_by( 'slug', 'moderator' );
+		if ( bbp_is_reply_edit() && $moderator_user->ID !== bbp_get_reply_author_id() ) {
+			return;
+		}
+
+		?>
+
+		<p>
+			<label>
+				<input type="checkbox" name="post_as_anon_moderator" <?php disabled( true, bbp_is_reply_edit() ); checked( $moderator_user->ID, bbp_get_reply_author_id() ) ?>>
+				<?php esc_html_e( 'Post this reply anonymously as @moderator.', 'wporg-forums' ); ?>
+			</label>
+		</p>
+
+		<?php
+	}
+
+	/**
+	 * Overwrite the reply author if required.
+	 *
+	 * @param array $post_data The reply data.
+	 * @return array The filtered reply data.
+	 */
+	public function bbp_new_reply_pre_insert( $post_data ) {
+		if ( ! current_user_can( 'moderate' ) || empty( $_POST['post_as_anon_moderator'] ) ) {
+			return $post_data;
+		}
+
+		// Overwrite the author.
+		$post_data['post_author'] = get_user_by( 'slug', 'moderator' )->ID;
+
+		// Record the real user in the post meta.
+		$post_data['meta_input'] ??= [];
+		$post_data['meta_input'][ self::MODERATOR_REPLY_AUTHOR ] = get_current_user_id();
+
+		return $post_data;
+	}
+
+	/**
+	 * Display the moderator's name (to other moderators) if the reply was posted anonymously.
+	 */
+	function show_anon_mod_name() {
+		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		$moderator_user = get_user_by( 'slug', 'moderator' );
+		if ( $moderator_user->ID !== bbp_get_reply_author_id() ) {
+			return;
+		}
+
+		$user = get_user_by( 'id', get_post_meta( bbp_get_reply_id(), self::MODERATOR_REPLY_AUTHOR, true ) );
+
+		printf(
+			'<em>' . __( 'Posted by <a href="%s">@%s</a>.', 'wporg-forums' ) . '</em><br/>',
+			esc_url( bbp_get_user_profile_url( $user->ID ) ),
+			esc_html( $user->user_nicename )
+		);
+	}
+
+	/**
+	 * Pretend the @moderator user can moderate, except when they're logged in.
+	 *
+	 * This keeps the moderator account as a low-access account, while also showing the replies
+	 * with a moderator badge, and bypassing moderation.
+	 */
+	public function anon_moderator_user_has_cap( $allcaps, $caps, $args, $user ) {
+		if (
+			$user &&
+			[ 'moderate' === $caps ] &&
+			'moderator' === $user->user_nicename &&
+			$user->ID !== get_current_user_id()
+		) {
+			$allcaps['moderate'] = true;
+		}
+
+		return $allcaps;
+	}
+
+	/**
+	 * When a @moderator mention is used in a reply, notify the
+	 * moderators who have interacted with that thread.
+	 *
+	 * As it's possible for multiple moderators to be involved in a thread
+	 * the notification is sent to all who have interacted with it.
+	 *
+	 * This filter is within the wporg-notifications plugin.
+	 */
+	public function notify_mod_of_at_mention( $matchers, $data ) {
+		if (
+			empty( $matchers['moderator']->type ) ||
+			'username' != $matchers['moderator']->type ||
+			'forum_topic_reply' != $data['type']
+		) {
+			return $matchers;
+		}
+
+		// Get all moderators who have interacted with this thread.		
+		$mod_replies = (array) get_posts( [
+			'post_parent'    => $data['topic_id'],
+			'post_type'      => bbp_get_reply_post_type(),
+			'author'         => get_user_by( 'slug', 'moderator' )->ID,
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+			'order'          => 'ASC'
+		] );
+
+		$moderators = [];
+		foreach ( $mod_replies as $reply_id ) {
+			$moderators[] = get_post_meta( $reply_id, self::MODERATOR_REPLY_AUTHOR, true );
+		}
+
+		foreach ( array_unique( $moderators ) as $mod_id ) {
+			$moderator = get_user_by( 'id', $mod_id );
+			if ( ! $moderator || isset( $matchers[ $moderator->user_nicename ] ) ) {
+				continue;
+			}
+
+			$matchers[ $moderator->user_nicename ]                    = $matchers['moderator'];
+			$matchers[ $moderator->user_nicename ]->notification_name = "@moderator response";
+		}
+
+		return $matchers;
 	}
 }

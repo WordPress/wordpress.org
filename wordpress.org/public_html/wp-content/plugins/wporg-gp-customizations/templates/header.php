@@ -2,6 +2,9 @@
 
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
+gp_enqueue_style( 'gp-jquery-webui-popover' );
+gp_enqueue_scripts( array( 'gp-tour' ) );
+
 ?>
 <script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
 

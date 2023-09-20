@@ -112,6 +112,7 @@ function get_whitelist() {
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
 			'ironprogrammer',
+			'James Roberts', // @jamesroberts on Slack
 			'JeffPaul',
 			'JoshuaWold',
 			'justinahinon',
@@ -293,8 +294,12 @@ function get_whitelist() {
 			'laurelfulford',
 			'luminuu', // @jessica on Slack
 			'melchoyce',
+			'onemaggie',
 			'poena',
 		) ),
+		'deib-working-group' => array(
+			'CoachBirgit',
+		),
 		'design' => array(
 			// #core (inc committers) already included via get_parent_channel().
 			'chaion07',
@@ -352,6 +357,7 @@ function get_whitelist() {
 			'colorful tones', // @colorful-tones on Slack
 			'daisyo', // @DaisyO on Slack
 			'greenshady',
+			'ndiego', // @Nick Diego on Slack
 		),
 		'glotpress' => array(
 			'Amieiro',
@@ -528,6 +534,9 @@ function get_whitelist() {
 			'vc27', // @randy_hicks on Slack
 			'andrealeebishop', // @bishop on Slack
 			'DustinMeza',
+		),
+		'website-redesign' => array(
+			'ndiego', // @Nick Diego on Slack
 		),
 		'wptv' => array(
 			'casiepa', // @Pascal on Slack

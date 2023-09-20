@@ -14,7 +14,7 @@ class Rejection {
 	 *
 	 * @var string
 	 */
-	public static $action = 'reject-photo';
+	public static $action = 'reject';
 
 	/**
 	 * Array of reason types and their explanations (suitable for dropdown use).
@@ -29,76 +29,80 @@ class Rejection {
 	public static function init() {
 		self::$rejection_reasons = [
 			''              => [
-				'label' => __( 'Do not reject', 'wporg-photos' ),
+				'label' => __( 'Approve: Do not reject', 'wporg-photos' ),
 				'email' => '',
 			],
-			'general'       => [
-				'label' => __( 'General/nonspecific', 'wporg-photos' ),
-				'email' => '', // No specific reason will be conveyed to contributor.
-			],
-			'copyright'     => [
-				'label' => __( 'Potential copyright/ownership infringement', 'wporg-photos' ),
-				'email' => __( 'The photo has been posted elsewhere but does not appear to be your original work. We require that you "have the copyright or other legal ownership for any photo you submit". This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.', 'wporg-photos' ),
-			],
-			'image_quality' => [
-				'label' => __( 'Insufficient image quality (e.g. blurriness, composition, lighting, lens issues)', 'wporg-photos' ),
-				'email' => __( 'The photo had an issue regarding image quality. Submissions should be of high quality composition, lighting, focus, and color. The image should be free of blur (for the primary subject), noise, lens flare, glare, and spots due to water or dirt on the lens.', 'wporg-photos' ),
-			],
-			'not_a_photo'    => [
-				'label' => __( 'Not a photo (e.g. screenshot, digital art)', 'wporg-photos' ),
-				'email' => __( 'The image did not appear to be a photograph. We do not accept screenshots, digital art, or other non-photographic images.', 'wporg-photos' ),
-			],
-			'collage'        => [
-				'label' => __( 'Collage or composite image', 'wporg-photos' ),
-				'email' => __( 'The image appeared to be a collage or composite of separate images.', 'wporg-photos' ),
-			],
-			'overlays'       => [
-				'label' => __( 'Overlays, watermark, borders, or other additions', 'wporg-photos' ),
-				'email' => __( 'The photo included an overlay of some form (e.g. graphic, text, watermark, border).', 'wporg-photos' ),
-			],
-			'image_subject' => [
-				'label' => __( 'Image subject matter', 'wporg-photos' ),
-				'email' => __( 'The photo included subject matter of insufficient quality.', 'wporg-photos' ),
-			],
-			'image_extreme' => [
-				'label' => __( 'Violence, gore, hate, or sexual content', 'wporg-photos' ),
-				'email' => __( 'The photo depicted some element of violence, gore, hate, or sexual content.', 'wporg-photos' ),
-			],
-			'text'          => [
-				'label' => __( 'Predominantly text', 'wporg-photos' ),
-				'email' => __( 'The photo was predominantly text. Please refrain from submitting photos where text is a significant element of the photo.', 'wporg-photos' ),
-			],
-			'overprocessed' => [
-				'label' => __( 'Overprocessed', 'wporg-photos' ),
-				'email' => __( 'The photo appeared to be overprocessed with filters or other photo adjustments. We prefer minimal processing.', 'wporg-photos' ),
-			],
 			'anothers_art' => [
-				'label' => __( 'Predominantly another piece of art', 'wporg-photos' ),
+				'label' => __( 'Other art: Predominantly another piece of art', 'wporg-photos' ),
 				'email' => __( 'The photo appeared to largely consist of the art of another person. We respect the rights of other artists by not distributing reproductions of their work.', 'wporg-photos' ),
 			],
+			'branding'      => [
+				'label' => __( 'Branding: Prominent branding', 'wporg-photos' ),
+				'email' => __ ( 'The photo prominently displayed branding in such a way that the branding and/or branded product was the focus of the image. We do not accept branded subject matter to avoid the directory being used for promotional purposes or to imply endorsement by the WordPress project.', 'wporg-photos' ),
+			],
+			'collage'        => [
+				'label' => __( 'Collage: Collage or composite image', 'wporg-photos' ),
+				'email' => __( 'The image appeared to be a collage or composite of separate images.', 'wporg-photos' ),
+			],
+			'copyright'     => [
+				'label' => __( 'Copyright: Potential copyright/ownership infringement', 'wporg-photos' ),
+				'email' => __( 'The photo has been posted elsewhere but does not appear to be your original work. We require that you "have the copyright or other legal ownership for any photo you submit". This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.', 'wporg-photos' ),
+			],
 			'faces'         => [
-				'label' => __( 'Contains human face(s)', 'wporg-photos' ),
+				'label' => __( 'Faces: Contains human face(s)', 'wporg-photos' ),
 				'email' => __( 'The photo contained one or more human faces. We do not currently accept photos that show human faces, wholly or partially, even if facial features cannot clearly be identified.', 'wporg-photos' ),
 			],
+			'general'       => [
+				'label' => __( 'General: General/nonspecific', 'wporg-photos' ),
+				'email' => '', // No specific reason will be conveyed to contributor.
+			],
+			'image_extreme' => [
+				'label' => __( 'Extreme: Violence, gore, hate, or sexual content', 'wporg-photos' ),
+				'email' => __( 'The photo depicted some element of violence, gore, hate, or sexual content.', 'wporg-photos' ),
+			],
+			'image_quality' => [
+				'label' => __( 'Quality: Insufficient image quality (e.g. blurriness, composition, lighting, lens issues)', 'wporg-photos' ),
+				'email' => __( 'The photo had an issue regarding image quality. Submissions should be of high quality composition, lighting, focus, and color. The image should be free of blur (for the primary subject), noise, lens flare, glare, and spots due to water or dirt on the lens.', 'wporg-photos' ),
+			],
+			'image_subject' => [
+				'label' => __( 'Subject matter: Image subject matter', 'wporg-photos' ),
+				'email' => __( 'The photo included subject matter of insufficient quality.', 'wporg-photos' ),
+			],
+			'not_a_photo'    => [
+				'label' => __( 'Not a photo: Not a photo (e.g. screenshot, digital art)', 'wporg-photos' ),
+				'email' => __( 'The image did not appear to be a photograph. We do not accept screenshots, digital art, or other non-photographic images.', 'wporg-photos' ),
+			],
+			'other'         => [
+				'label' => __( 'See below: Reason specified below', 'wporg-photos' ),
+				'email' => '',
+			],
+			'overlays'       => [
+				'label' => __( 'Overlays: Overlays, watermark, borders, or other additions', 'wporg-photos' ),
+				'email' => __( 'The photo included an overlay of some form (e.g. graphic, text, watermark, border).', 'wporg-photos' ),
+			],
+			'overprocessed' => [
+				'label' => __( 'Overprocessed: Overprocessed', 'wporg-photos' ),
+				'email' => __( 'The photo appeared to be overprocessed with filters or other photo adjustments. We prefer minimal processing.', 'wporg-photos' ),
+			],
 			'privacy'       => [
-				'label' => __( 'Potentially violates privacy', 'wporg-photos' ),
+				'label' => __( 'Privacy: Potentially violates privacy', 'wporg-photos' ),
 				'email' => __( 'The photo contained potentially privacy-violating material such as a home address, license plate, or other form of personal identification.', 'wporg-photos' ),
 			],
-			'variation'     => [
-				'label' => __( 'Duplicate or minor variation of submitted photo', 'wporg-photos' ),
-				'email' => __( 'The photo is a duplicate or minor variation of something you have already had published to the site or recently submitted. This can be the same subject matter taken from a different angle, from slightly before or after in time, with a different composition or cropping or dimensions, or staged or edited differently.', 'wporg-photos' ),
-			],
 			'submission-error' => [ // This specific key is referenced in code, so make related updates if renaming.
-				'label' => __( 'Submission error', 'wporg-photos' ),
+				'label' => __( 'Error: Submission error', 'wporg-photos' ),
 				/* translators: %s: URL to meta.trac to report bugs. */
 				'email' => sprintf(
 					__( 'There appears to have been an error with your submission and the photo never fully uploaded. This could be caused by a broken internet connection, network issues, or a glitch somewhere. Please retry your submission. If this is not your first notice regarding this image, try another. If you have anything to report in terms of errors encountered while uploading, please report them to us at %s.', 'wporg-photos' ),
 					'https://meta.trac.wordpress.org/newticket?component=Photo%20Directory'
 				),
 			],
-			'other'         => [
-				'label' => __( 'Reason specified below', 'wporg-photos' ),
-				'email' => '',
+			'text'          => [
+				'label' => __( 'Text: Predominantly text', 'wporg-photos' ),
+				'email' => __( 'The photo was predominantly text. Please refrain from submitting photos where text is a significant element of the photo.', 'wporg-photos' ),
+			],
+			'variation'     => [
+				'label' => __( 'Variation/Duplicate: Duplicate or minor variation of submitted photo', 'wporg-photos' ),
+				'email' => __( 'The photo is a duplicate or minor variation of something you have already had published to the site or recently submitted. This can be the same subject matter taken from a different angle, from slightly before or after in time, with a different composition or cropping or dimensions, or staged or edited differently.', 'wporg-photos' ),
 			],
 		];
 
@@ -153,6 +157,9 @@ class Rejection {
 		// Add columns (moderator, date, reason, etc) to rejection view.
 		add_filter( 'manage_posts_columns',                    [ __CLASS__, 'posts_columns' ], 8, 2 );
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'custom_rejection_columns' ], 10, 2 );
+
+		// Remove columns.
+		add_filter( "manage_edit-{$post_type}_columns",        [ __CLASS__, 'remove_columns' ] );
 
 		// Log the user and datetime when a photo gets rejected.
 		add_action( 'wporg_photos_reject_post',                [ __CLASS__, 'log_rejection' ], 1 );
@@ -302,7 +309,11 @@ class Rejection {
 	public static function get_rejection_reasons( $reason = '', $field = '' ) {
 		// Return all reasons if one wasn't specified.
 		if ( ! $reason ) {
-			return self::$rejection_reasons;
+			$reasons = self::$rejection_reasons;
+			uasort( $reasons, function( $a, $b ) {
+				return strcmp( $a['label'], $b['label'] );
+			} );
+			return $reasons;
 		}
 
 		// Bail if reason requested is not valid.
@@ -510,7 +521,7 @@ class Rejection {
 			return $untrash;
 		}
 
-		// Prevent untrashing if the previous post status was rejected.
+		// Prevent untrashing if the previous post status was not rejected.
 		if ( self::get_post_status() !== $previous_status ) {
 			return false;
 		}
@@ -536,7 +547,7 @@ class Rejection {
 		$nonce_field = 'photo-rejection-nonce';
 
 		// Bail if expected data isn't present.
-		if ( empty( $_POST['reject'] ) || empty( $_POST[ $nonce_field ] ) || empty( $_POST['post_type'] ) || empty( $_POST['post_ID'] ) ) {
+		if ( empty( $_POST[ self::$action ] ) || empty( $_POST[ $nonce_field ] ) || empty( $_POST['post_type'] ) || empty( $_POST['post_ID'] ) ) {
 			return;
 		}
 
@@ -676,8 +687,8 @@ class Rejection {
 	 * Removes the ability to delete photo posts.
 	 *
 	 * Photo posts must first be rejected (and ideally remain rejected) rather
-	 * than get deleted since we'd lose valuatble information about the rejection
-	 * such who submitted, when they submitted, why it was rejected, who rejected
+	 * than get deleted since we'd lose valuable information about the rejection
+	 * such as who submitted, when they submitted, why it was rejected, who rejected
 	 * it, and the hash of the photo to prevent resubmissions of the photo.
 	 *
 	 * @param string[] $caps    Primitive capabilities required of the user.
@@ -717,7 +728,7 @@ class Rejection {
 	/**
 	 * Removes the ability to publish photos once rejected.
 	 *
-	 * Once rejected, photo posts will have had their submitted photo deleted,
+	 * Once rejected, photo posts will have had their submitted photo deleted so
 	 * publishing the post is no longer a viable path for the post. If no
 	 * post is associated with the capability check, and no post is global, then
 	 * the capability isn't disallowed since user may be able to publish photos
@@ -879,7 +890,8 @@ JS;
 
 		printf( '<div class="reject-action%s">', $is_rejected ? ' post-is-rejected' : '' );
 		printf(
-			'<input type="submit" name="reject" id="reject-post" value="%s" class="button button-large">',
+			'<input type="submit" name="%s" id="reject-post" value="%s" class="button button-large">',
+			self::$action,
 			$is_rejected ? esc_attr__( 'Update', 'wporg-photos' ) : esc_attr__( 'Reject', 'wporg-photos' )
 		);
 		echo '</div>';
@@ -1029,6 +1041,34 @@ JS;
 	}
 
 	/**
+	 * Removes certain columns from the listing of rejected photos.
+	 *
+	 * Removes these columns:
+	 * - The custom taxonomy columns (Categories, Colors, Tags) since those
+	 *   get removed upon rejection.
+	 * - The number of likes, as provided by Jetpack.
+	 * - Stats
+	 *
+	 * @param  array $columns Array of post column titles.
+	 * @return array
+	 */
+	public static function remove_columns( $columns ) {
+		if (
+			filter_input( INPUT_GET, 'post_type' ) === Registrations::get_post_type()
+		&&
+			filter_input( INPUT_GET, 'post_status' ) === self::get_post_status()
+		) {
+			foreach ( Registrations::get_taxonomy( 'all' ) as $tax ) {
+				unset( $columns[ "taxonomy-{$tax}" ] );
+			}
+			unset( $columns['likes'] );
+			unset( $columns['stats'] );
+		}
+
+		return $columns;
+	}
+
+	/**
 	 * Hides 'Restore' (aka untrash) bulk action for deleted photo posts.
 	 *
 	 * A photo post needs an associated photo media. But the media has been
@@ -1104,16 +1144,16 @@ JS;
 			<script>
 			document.addEventListener('DOMContentLoaded', function () {
 				// Remove the 'Submit for Review' button.
-				document.querySelector("#publishing-action").remove();
+				document.querySelector("body.post-type-photo #publishing-action")?.remove();
 
 				// Remove the 'Preview' button.
-				document.querySelector("#preview-action").remove();
+				document.querySelector("body.post-type-photo #preview-action")?.remove();
 
 				// Add rejected post status to status display.
-				document.querySelector(".misc-pub-post-status #post-status-display").innerText = "{$status_label}";
+				document.querySelector("body.post-type-photo .misc-pub-post-status #post-status-display").innerText = "{$status_label}";
 
 				// Change visibility display to indicate it is hidden.
-				document.querySelector(".misc-pub-visibility #post-visibility-display").innerText = "{$visibility_label}";
+				document.querySelector("body.post-type-photo .misc-pub-visibility #post-visibility-display").innerText = "{$visibility_label}";
 			} );
 			</script>
 

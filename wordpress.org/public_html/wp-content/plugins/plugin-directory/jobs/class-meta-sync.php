@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 
 /**
  * Sync various meta elements from other locations on WordPress.org to the plugin directory meta.
@@ -181,6 +182,7 @@ class Meta_Sync {
 
 			// Update the API endpoints with the new data
 			API_Update_Updater::update_single_plugin( $row->post_name );
+			Plugins_Info_API::flush_plugin_information_cache( $row->post_name );
 
 			if ( $i % 100 === 0 ) {
 				Manager::clear_memory_heavy_variables();

@@ -54,7 +54,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'privacy' : 'Privacy focus.',
 		'sustainability': 'Relating to improving the sustainability of WordPress.',
 		'ui-copy' : 'Copy focus for the user interface.',
-		'coding-standards' : 'Coding Standards focus.'
+		'coding-standards' : 'Coding Standards focus.',
+		'php-compatibility' : 'Relating to PHP forward and backward compatibility. A phpNN keyword identifies the PHP version that introduced the incompatibility.'
 	};
 
 	// Other Bug Trackers which the WordPress project uses for various things.

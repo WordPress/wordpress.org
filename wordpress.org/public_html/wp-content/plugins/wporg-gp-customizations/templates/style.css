@@ -429,6 +429,8 @@ body.wporg-make #headline h2 a:before {
 	--gp-color-status-old-subtle: #cdc5e1;
 	--gp-color-status-waiting-subtle: #ffe399;
 	--gp-color-status-rejected-subtle: #eb9090;
+
+	--gp-color-tour: #d54e21;
 }
 
 .locale-sub-projects .stats,
@@ -3215,6 +3217,16 @@ ul.sidebar-tabs {
 
 .sidebar-div-others-translation-memory-content > summary {
 	list-style-type: none;
+}
+
+/* GlotPress Tour Overrides */
+a.tour-button {
+	text-shadow: none;
+	padding-top: 0;
+	text-decoration: none;
+}
+.pulse-wrapper {
+	margin: 0;
 }
 
 @media screen and (max-width: 530px), (min-width: 1024px) and (max-width: 1450px) {

@@ -44,14 +44,21 @@ class Plugin_Release_Confirmation extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
 				]
 			],
-			'permission_callback' => function( $request ) {
-				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+			'permission_callback' => [ $this, 'permission_can_access_plugin' ],
+		] );
 
-				return (
-					Release_Confirmation_Shortcode::can_access() &&
-					current_user_can( 'plugin_manage_releases', $plugin )
-				);
-			},
+		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/discard', [
+			'methods'             => \WP_REST_Server::READABLE, // TODO: This really should be a POST
+			'callback'            => [ $this, 'discard_release' ],
+			'args'                => [
+				'plugin_slug' => [
+					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
+				],
+				'plugin_tag' => [
+					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
+				]
+			],
+			'permission_callback' => [ $this, 'permission_can_access_plugin' ],
 		] );
 
 		register_rest_route( 'plugins/v1', '/release-confirmation-access', [
@@ -83,6 +90,18 @@ class Plugin_Release_Confirmation extends Base {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Validate that the user can manage releases for the given plugin.
+	 */
+	public function permission_can_access_plugin( $request ) {
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+
+		return (
+			Release_Confirmation_Shortcode::can_access() &&
+			current_user_can( 'plugin_manage_releases', $plugin )
+		);
 	}
 
 	/**
@@ -153,8 +172,8 @@ class Plugin_Release_Confirmation extends Base {
 		];
 		header( 'Location: ' . $result['location'] );
 
-		if ( ! $release || ! empty( $release['confirmed'][ $user_login ] ) ) {
-			// Already confirmed.
+		if ( ! $release || ! empty( $release['confirmed'][ $user_login ] ) || ! empty( $release['discarded'] ) ) {
+			// Already confirmed, or unable to be confirmed.
 			$result['confirmed'] = false;
 			return $result;
 		}
@@ -165,8 +184,8 @@ class Plugin_Release_Confirmation extends Base {
 
 		// Mark the release as confirmed if enough confirmations.
 		if ( count( $release['confirmations'] ) >= $release['confirmations_required'] ) {
-			$release['confirmed'] = true;
-			$result['fully_confirmed']     = true;
+			$release['confirmed']      = true;
+			$result['fully_confirmed'] = true;
 		}
 
 		Plugin_Directory::add_release( $plugin, $release );
@@ -187,6 +206,37 @@ class Plugin_Release_Confirmation extends Base {
 				'revisions'      => $release['revision'],
 			]
 		);
+
+		return $result;
+	}
+
+	/**
+	 * A simple endpoint to decline/discard a release.
+	 */
+	public function discard_release( $request ) {
+		$user_login = wp_get_current_user()->user_login;
+		$plugin     = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+		$tag        = $request['plugin_tag'];
+		$release    = Plugin_Directory::get_release( $plugin, $tag );
+		$result     = [
+			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
+		];
+		header( 'Location: ' . $result['location'] );
+
+		if ( ! $release || $release['confirmed'] || ! empty( $release['discarded'] ) ) {
+			// Already confirmed, or other error encountered.
+			$result['confirmed'] = false;
+			return $result;
+		}
+
+		// Record this user as discarding the release.
+		$release['confirmed'] = false; // Already false, just noting it here explicitely.
+		$release['discarded'] = [
+			'user' => $user_login,
+			'time' => time(),
+		];
+
+		Plugin_Directory::add_release( $plugin, $release );
 
 		return $result;
 	}

@@ -29,6 +29,7 @@ class Admin {
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'handle_photo_column_data' ], 10, 2 );
 		add_filter( "manage_{$post_type}_posts_columns",       [ __CLASS__, 'add_flags_column' ] );
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'handle_flags_column_data' ], 10, 2 );
+		add_filter( "manage_edit-{$post_type}_columns",        [ __CLASS__, 'remove_columns_from_pending_photos' ] );
 		add_filter( 'post_row_actions',                        [ __CLASS__, 'add_post_action_photo_links' ], 10, 2 );
 		add_filter( 'the_author',                              [ __CLASS__, 'add_published_photos_count_to_author' ] );
 		add_filter( 'use_block_editor_for_post_type',          [ __CLASS__, 'disable_block_editor' ], 10, 2 );
@@ -55,6 +56,9 @@ class Admin {
 		// Admin notice related to flagging/unflagging.
 		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_if_flagged_or_unflagged' ] );
 
+		// Admin notice related to failed publication due to missing taxonomy values.
+		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_if_publish_failed_due_to_missing_taxonomies' ] );
+
 		// Modify admin menu links for photo posts.
 		add_action( 'admin_menu',                              [ __CLASS__, 'modify_admin_menu_links' ] );
 
@@ -65,10 +69,19 @@ class Admin {
 		// Navigate to next post after moderation.
 		add_action( 'edit_form_top',                           [ __CLASS__, 'show_moderation_message' ] );
 		add_filter( 'redirect_post_location',                  [ __CLASS__, 'redirect_to_next_post_after_moderation' ], 5, 2 );
+
+		// Add class(es) to body tag.
+		add_filter( 'admin_body_class',                        [ __CLASS__, 'add_body_class' ] );
+
+		// Disable visual editor.
+			// Prevent the visual editor from being loaded.
+			add_filter( 'user_can_richedit',                   [ __CLASS__, 'disable_rich_editing' ] );
+			// Force the default editor to be the HTML editor.
+			add_filter( 'wp_default_editor',                   [ __CLASS__, 'force_text_editor' ], 99 );
 	}
 
 	/**
-	 * Outputs admin notices.
+	 * Outputs admin notice if submissions are currently disabled due to the killswitch.
 	 */
 	public static function add_notice_if_killswitch_enabled() {
 		if ( ! Settings::is_killswitch_enabled() ) {
@@ -86,7 +99,7 @@ class Admin {
 	}
 
 	/**
-	 * Outputs admin notices.
+	 * Outputs admin notice indicating if a photo post is flagged or has been unflagged.
 	 */
 	public static function add_notice_if_flagged_or_unflagged() {
 		$screen = get_current_screen();
@@ -143,6 +156,31 @@ class Admin {
 				sanitize_text_field( $user->display_name )
 			)
 		);
+	}
+
+	/**
+	 * Outputs admin notice if a photo post publication failed due to any custom
+	 * taxonomy not having a value assigned.
+	 */
+	public static function add_notice_if_publish_failed_due_to_missing_taxonomies() {
+		global $post;
+
+		$meta_key = Posts::META_KEY_MISSING_TAXONOMIES;
+
+		if ( isset( $post->ID ) ) {
+			$missing_taxonomies = get_post_meta( $post->ID, $meta_key, true );
+
+			if ( $missing_taxonomies ) {
+				echo '<div class="notice notice-error is-dismissible notice-missing-taxonomies"><p>';
+				printf(
+					__( '<strong>Error:</strong> Photo was not published because the following taxonomies are missing terms: %s', 'wporg-photos' ),
+					'<strong>' . implode( '</strong>, <strong>', $missing_taxonomies ) . '</strong>'
+				);
+
+				echo '</p></div>' . "\n";
+				delete_post_meta( $post->ID, $meta_key );
+			}
+		}
 	}
 
 	/**
@@ -247,12 +285,16 @@ class Admin {
 
 		// Mimic standard posts by adding a prefix if post is pending.
 		$prefixed_format = '%s';
-		if ( isset( $post->post_status ) && 'pending' === $post->post_status ) {
+		if ( isset( $post->post_status ) && in_array( $post->post_status, Photo::get_pending_post_statuses() ) ) {
 			// See if a rejection reason has been set.
 			$reason = Rejection::get_rejection_reason( $post );
 			if ( $reason ) {
 				/* translators: %s: Reason for pending rejection. */
 				$prefixed_format = '<span class="pending-rejection">' . sprintf( __( 'Pending rejection - %s:' , 'wporg-photos' ), $reason  ) . '%s<span>';
+			}
+			elseif ( Flagged::is_post_flagged( $post ) ) {
+				/* translators: %s: Pending post title. */
+				$prefixed_format = __( 'Flagged: %s', 'wporg-photos' );
 			}
 			// Else, it is still awaiting moderation.
 			else {
@@ -303,7 +345,7 @@ class Admin {
 	 * @return array The $posts_columns array with the photo column added.
 	 */
 	public static function add_flags_column( $posts_columns ) {
-		if ( empty( $_GET['post_status'] ) || 'pending' === $_GET['post_status'] ) {
+		if ( in_array( filter_input( INPUT_GET, 'post_status' ), Photo::get_pending_post_statuses() ) ) {
 			$posts_columns[ self::COL_NAME_FLAG ] = __( 'Flags', 'wporg-photos' );
 		}
 
@@ -324,6 +366,30 @@ class Admin {
 		$post = get_post( $post_id );
 
 		do_action( 'wporg_photos_flag_column_data', $post );
+	}
+
+	/**
+	 * Removes certain columns from the listing of pending photos.
+	 *
+	 * Removes these columns:
+	 * - The colors column. (Currently colors aren't auto-assigned, so rarely
+	 *   is there antyhing to show.)
+	 * - The number of likes, as provided by Jetpack.
+	 *
+	 * @param  array $columns Array of post column titles.
+	 * @return array
+	 */
+	public static function remove_columns_from_pending_photos( $columns ) {
+		if (
+			filter_input( INPUT_GET, 'post_type' ) === Registrations::get_post_type()
+		&&
+			in_array( filter_input( INPUT_GET, 'post_status' ), Photo::get_pending_post_statuses() )
+		) {
+			unset( $columns[ 'taxonomy-' . Registrations::get_taxonomy( 'colors' ) ] );
+			unset( $columns['likes'] );
+		}
+
+		return $columns;
 	}
 
 	/**
@@ -389,6 +455,7 @@ class Admin {
 		} elseif ( Registrations::get_post_type() === get_post_type( $post->ID ) ) {
 			if ( $show ) {
 				add_meta_box( 'photos_photo', __( 'Photo', 'wporg-photos' ), [ __CLASS__, 'meta_box_photo' ], $post_type, 'normal' );
+				add_meta_box( 'photos_by_contributor', __( 'Other Recent Photo Submissions by Contributor', 'wporg-photos' ), [ __CLASS__, 'meta_box_photos_by_contributor' ], $post_type, 'normal' );
 			}
 			add_meta_box( 'photos_info', __( 'Photo Info', 'wporg-photos' ), [ __CLASS__, 'meta_box_info' ], $post_type, 'side' );
 		} else {
@@ -555,26 +622,121 @@ class Admin {
 	 * @param array   $args Associative array of additional data.
 	 */
 	public static function meta_box_photo( $post, $args ) {
+		self::output_photo_in_metabox( $post, [ 900, 450 ], true );
+	}
+
+	/**
+	 * Outputs the contents for the Recent Photo Submissions by Contributor metabox.
+	 *
+	 * @param WP_Post $post Post object.
+	 * @param array   $args Associative array of additional data.
+	 */
+	public static function meta_box_photos_by_contributor( $post, $args ) {
+		$photos_in_grid = 24;
+
+		// Request one more photo than is intended to be shown to determine if the contributor
+		// has more photos than will be shown. Also, as the current photo will be excluded from
+		// the grid, this also allows for its slot in the grid to be replaced without coming up
+		// short or making an additional query.
+		$recent_subs = User::get_recent_photos( $post->post_author, $photos_in_grid + 1, true );
+
+		// Front-load all pending photos.
+		usort( $recent_subs, function ( $a, $b ) {
+			$a_status = $a->post_status ?? '';
+			$b_status = $b->post_status ?? '';
+
+			if ( $a_status === $b_status ) {
+				return ( ( $a->post_date ?? '' ) > ( $b->post_date ?? '' ) ) ? -1 : 1;
+			} elseif ( 'publish' === $a_status ) {
+				return 1;
+			} else {
+				return -1;
+			}
+		} );
+
+		echo '<div class="photos-grid">' . "\n";
+
+		$shown_photos = 0;
+		foreach ( $recent_subs as $photo ) {
+			// Don't show more photos than intended.
+			// An extra photo was requested to determine if the contributor has even more photos.
+			if ( $shown_photos >= $photos_in_grid ) {
+				break;
+			}
+
+			// Don't show the current photo in the grid.
+			if ( $photo->ID === $post->ID ) {
+				continue;
+			}
+
+			// Show the photo.
+			self::output_photo_in_metabox( $photo, 'medium', false );
+
+			$shown_photos++;
+		}
+
+		echo '</div>' . "\n";
+
+		if ( count( $recent_subs ) > $photos_in_grid ) {
+			echo '<div class="view-all-contributor-photos">';
+			$link = add_query_arg( [
+				'post_type'   => Registrations::get_post_type(),
+				'author'      => $post->post_author,
+			], 'edit.php' );
+			printf(
+				'<a href="%s">%s</a>',
+				esc_url( $link ),
+				__( "View all photos from this contributor &rarr;", 'wporg-photos' )
+			);
+			echo '</div>' . "\n";
+		}
+	}
+
+	/**
+	 * Outputs markup for a photo intended to be shown in an admin metabox.
+	 *
+	 * @param WP_Post      $post             Photo post object.
+	 * @param string|int[] $size             Image size. Accepts any registered image size name, or an
+	 *                                       array of width and height values in pixels (in that order).
+	 * @param bool         $link_to_fullsize Should the image link to its full-sized version? If not, it
+	 *                                       will link to edit the photo post. Default true;
+	 */
+	protected static function output_photo_in_metabox( $post, $size, $link_to_fullsize = true ) {
 		$image_id = get_post_thumbnail_id( $post );
 		if ( ! $image_id ) {
 			return;
 		}
 
-		$thumb_url = wp_get_attachment_image_src( $image_id, [ 900, 450 ], true );
-
+		$pending_notice = '';
 		$classes = 'photo-thumbnail';
 
 		if ( Photo::is_controversial( $image_id ) ) {
 			$classes .= ' blurred';
 		}
 
+		if ( 'pending' === $post->post_status ) {
+			$classes .= ' pending';
+			if ( ! $link_to_fullsize ) {
+				$pending_notice = '<div class="pending-notice">' . __( 'Pending', 'wporg-photos' ) . '</div>';
+			}
+		}
+
+		if ( $link_to_fullsize ) {
+			$link_url = wp_get_attachment_url( $image_id );
+			$label = __( 'View full-sized version of the photo.', 'wporg-photos' );
+		} else {
+			$link_url = get_edit_post_link( $post );
+			$label = sprintf( __( 'Edit photo post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title );
+		}
+
 		printf(
-			'<a class="photos-photo-link row-title" href="%s" target="_blank" aria-label="%s"><img class="%s" src="%s" style="max-width:100%%" alt="" /></a>',
-			wp_get_attachment_url( $image_id ),
+			'<span><a class="photos-photo-link row-title" href="%s" target="_blank" aria-label="%s"><img class="%s" src="%s" alt="" /></a>%s</span>',
+			esc_url( $link_url ),
 			/* translators: %s: Post title. */
-			esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
+			esc_attr( $label ),
 			esc_attr( $classes ),
-			set_url_scheme( $thumb_url[0] )
+			esc_url( get_the_post_thumbnail_url( $post->ID, $size ) ),
+			$pending_notice
 		);
 	}
 
@@ -689,7 +851,7 @@ class Admin {
 
 			$post = get_post( $post_id );
 
-			if ( 'pending' === $post->post_status ) {
+			if ( in_array( $post->post_status, Photo::get_pending_post_statuses() ) ) {
 				$msg = sprintf(
 					__( 'This photo is private (though technically directly available should its obfuscated path be known) until officially published to the site. To do so, moderate its <a href="%s">associated post</a>.', 'wporg-photos' ),
 					get_edit_post_link( $post_id )
@@ -1196,6 +1358,57 @@ class Admin {
 		}
 
 		return $taxonomies;
+	}
+
+	/**
+	 * Amends body tag with additional classes.
+	 *
+	 * @param string $classes Body classes.
+	 * @return string
+	 */
+	public static function add_body_class( $classes ) {
+		$post_type = Registrations::get_post_type();
+		if (
+			// Post listing of photos.
+			filter_input(INPUT_GET, 'post_type') === $post_type
+		||
+			// Editing a photo post.
+			( ( $post_id = filter_input(INPUT_GET, 'post', FILTER_SANITIZE_NUMBER_INT) ) && get_post_type( $post_id ) === $post_type )
+		) {
+			$classes .= ' post-type-photo';
+		}
+
+		return $classes;
+	}
+
+	/**
+	 * Disables rich editor for photo posts.
+	 *
+	 * @param bool $user_can Can the user rich edit?
+	 * @return bool
+	 */
+	public static function disable_rich_editing( $user_can ) {
+		$post = get_post();
+		if ( $user_can && $post && get_post_type( $post ) === Registrations::get_post_type() ) {
+			$user_can = false;
+		}
+
+		return $user_can;
+	}
+
+	/**
+	 * Forces use of the text editor for photo posts.
+	 *
+	 * @param string $default The default editor as chosen by user or defaulted by WP.
+	 * @return string 'html'
+	 */
+	public static function force_text_editor( $default ) {
+		$post = get_post();
+		if ( $post && get_post_type( $post ) === Registrations::get_post_type() ) {
+			$default = 'html';
+		}
+
+		return $default;
 	}
 
 }

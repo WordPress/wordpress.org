@@ -145,6 +145,7 @@ class Uploads {
 			'photo_no_faces'           => __( 'Photo must not contain any human faces.', 'wporg-photos' ),
 			'photo_privacy'            => __( "Photo must not potentially violate anyone's privacy (such as revealing home address, license plate, etc).", 'wporg-photos' ),
 			'photo_no_variations'      => __( 'Photo must not be a minor variation of something you submitted to this site before.', 'wporg-photos' ),
+			'photo_no_branding'        => __( 'Photo must not prominently feature branding or clearly branded products.', 'wporg-photos' ),
 		];
 	}
 

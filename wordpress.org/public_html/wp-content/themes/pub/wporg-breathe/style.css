@@ -419,7 +419,9 @@ input[type="submit"]:hover {
 		margin-right: 0px;
 	}
 
-	.responsive-show #secondary-toggle {
+	#main #secondary-toggle {
+		margin-left: 4px;
+		margin-right: 18px;
 		margin-top: 22px;
 	}
 
@@ -429,8 +431,17 @@ input[type="submit"]:hover {
 	}
 
 	body.responsive-show #secondary-toggle:before {
+		content: '';
 		color: #0073aa;
 	}
+
+	#secondary-toggle svg {
+		background-color: #fff;
+		fill: #0073aa;
+		height: 42px;
+		width: 42px;
+	}
+
 }
 
 .content-area {
@@ -1384,6 +1395,8 @@ h2.toc-heading + h3.toc-heading:target {
 }
 
 .toc-jump a {
+	margin-left: 6px;
+	word-break: normal;
 	z-index: 1;
 }
 

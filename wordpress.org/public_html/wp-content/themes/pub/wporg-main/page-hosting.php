@@ -26,16 +26,9 @@ $hosting_cache_buster = '3';
 			<div class="entry-content row">
 
 				<section class="col-8">
-					<p>There are hundreds of thousands of web hosts out there, the vast majority of which meet the
-						<a href="https://wordpress.org/about/requirements/">WordPress minimum requirements</a>
-						, and choosing one from the crowd can be a chore. Just like flowers need the right environment to grow, WordPress works best when it&#8217;s in a rich hosting environment.
-					</p>
+					<p>There are hundreds of thousands of web hosts out there, the vast majority of which meet the <a href="https://wordpress.org/about/requirements/">WordPress minimum requirements</a>, and choosing one from the crowd can be a chore. Just like flowers need the right environment to grow, WordPress works best when it&#8217;s in a rich hosting environment.</p>
 
-					<p>
-						We&#8217;ve dealt with more hosts than you can imagine; in our opinion, the hosts below represent some of the best and brightest of the hosting world. If you do decide to go with one of the hosts below and click through from this page, some will donate a portion of your fee back&#8212;so you can have a great host and support WordPress.org at the same time. If you&#8217;d like to try WordPress for free, you can get started with a free website or blog at
-						<a href="https://wordpress.com/">WordPress.com</a>
-						.
-					</p>
+					<p>We&#8217;ve dealt with more hosts than you can imagine; in our opinion, the hosts below represent some of the best and brightest of the hosting world. If you do decide to go with one of the hosts below and click through from this page, some will donate a portion of your fee back&#8212;so you can have a great host and support WordPress.org at the same time. If you&#8217;d like to try WordPress for free, you can get started with a free website or blog at <a href="https://wordpress.com/">WordPress.com</a>.</p>
 				</section>
 
 				<section>
@@ -79,26 +72,25 @@ $hosting_cache_buster = '3';
 						</div>
 					</div>
 
-<?php /*					<div class="partner">
+					<div class="partner">
 						<h2>
-							<a href="https://www.siteground.com/hosting/wordpress" rel="nofollow">
+							<a href="https://wordpress.com/wordpress-hosting/" rel="nofollow">
 								<img
 									alt=""
-									src="https://s.w.org/hosting/siteground.png?<?php echo $hosting_cache_buster; ?>"
+									src="https://s.w.org/style/images/about/WordPress-logotype-wmark.png?<?php echo $hosting_cache_buster; ?>"
 									height="100"
 									width="100"
 								/>
-								SiteGround
+								WordPress.com
 							</a>
 						</h2>
 
-						<p>SiteGround has tools that make managing WordPress sites easy: one-click install, managed updates, WP-Cli, WordPress staging and git integration. We have a very fast support team with advanced WordPress expertise available 24/7. We provide latest speed technologies that make WordPress load faster: NGINX-based caching, SSD-drives, PHP 7, CDN, HTTP/2. We proactively protect the WordPress sites from hacks.</p>
+						<p>At WordPress.com, we've built an automatically scalable and secure platform optimized for the latest WordPress has to offer.  Start a free website or blog today with everything you need to grow. Get lightning-fast and reliable performance with our global CDN, high-frequency CPUs, multi-datacenter failover, secure login, integrated visitor stats, and more. Managed hosting, with the 24/7 support of our dedicated WordPress experts, you're well taken care of.</p>
 
 						<div class="forum">
-							<a href="https://wordpress.org/search/SiteGround/?in=support_forums">Forum threads about SiteGround &raquo;</a>
+							<a href="https://wordpress.org/search/wordpress.com/?in=support_forums">Forum threads about WordPress.com &raquo;</a>
 						</div>
 					</div>
- */ ?>
 				</section>
 
 				<section class="col-8">

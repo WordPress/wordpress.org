@@ -705,7 +705,8 @@ body.reply-edit #bbpress-forums fieldset legend {
 }
 
 #bbpress-forums li.bbp-body div.type-topic,
-#bbpress-forums li.bbp-body div.type-reply {
+#bbpress-forums li.bbp-body div.type-reply,
+#bbpress-forums li.bbp-body div.type-reported_topics {
 	position: relative;
 }
 
@@ -1355,6 +1356,10 @@ table {
 	box-shadow: 4px 0 0 #fff, 6px 0 0 #43cc99;
 }
 
+.type-reported_topics {
+	border-left: 2px solid #ff4141;
+}
+
 .author-badge {
 	position: absolute;
 	top: 14px;
@@ -1382,9 +1387,17 @@ table {
 	background-color: #4e3288;
 }
 
+.author-badge-reporter {
+	background-color: #ff4141;
+	left: -2px;
+	right: initial;
+	border-radius: 0 2px 2px 0;
+}
+
 .bbp-view .bbp-topics div.author-has-badge,
 .bbp-search .bbp-search-results div.author-has-badge,
-.bbp-user-replies-created div.author-has-badge {
+.bbp-user-replies-created div.author-has-badge,
+.bbp-user-reports-submitted div.author-has-badge {
 	box-shadow: none;
 	border-right-style: solid;
 	border-right-width: 3px;
@@ -1392,7 +1405,8 @@ table {
 
 .bbp-view .bbp-topics .by-moderator,
 .bbp-search .bbp-search-results .by-moderator,
-.bbp-user-replies-created .by-moderator {
+.bbp-user-replies-created .by-moderator,
+.bbp-user-reports-submitted .by-moderator {
 	border-right-color: #33b4ce;
 }
 
@@ -1404,7 +1418,10 @@ table {
 .bbp-search .bbp-search-results .by-plugin-support-rep,
 .bbp-user-replies-created .by-plugin-author,
 .bbp-user-replies-created .by-plugin-contributor,
-.bbp-user-replies-created .by-plugin-support-rep {
+.bbp-user-replies-created .by-plugin-support-rep,
+.bbp-user-reports-submitted .by-plugin-author,
+.bbp-user-reports-submitted .by-plugin-contributor,
+.bbp-user-reports-submitted .by-plugin-support-rep {
 	border-right-color: #f06723;
 }
 
@@ -1416,18 +1433,31 @@ table {
 .bbp-search .bbp-search-results .by-theme-support-rep,
 .bbp-user-replies-created .by-theme-author,
 .bbp-user-replies-created .by-theme-contributor,
-.bbp-user-replies-created .by-theme-support-rep {
+.bbp-user-replies-created .by-theme-support-rep,
+.bbp-user-reports-submitted .by-theme-author,
+.bbp-user-reports-submitted .by-theme-contributor,
+.bbp-user-reports-submitted .by-theme-support-rep {
 	border-right-color: #4e3288;
 }
 
 .bbp-view .bbp-topics .author-badge,
 .bbp-search .bbp-search-results .author-badge,
-.bbp-user-replies-created .author-badge {
+.bbp-user-replies-created .author-badge,
+.bbp-user-reports-submitted .author-badge {
 	right: 0;
 }
 
+.bbp-view .bbp-topics .author-badge-reporter,
+.bbp-search .bbp-search-results .author-badge-reporter,
+.bbp-user-replies-created .author-badge-reporter,
+.bbp-user-reports-submitted .author-badge-reporter {
+	right: initial;
+	left: 0;
+}
+
 @media screen and (max-width: 480px) {
-	.author-badge {
+	.author-badge,
+	.author-badge-reporter {
 		top: -28px;
 	}
 }
@@ -3806,7 +3836,8 @@ section {
 }
 
 .bbpress #bbpress-forums div.topic,
-.bbpress #bbpress-forums div.reply {
+.bbpress #bbpress-forums div.reply,
+.bbpress #bbpress-forums div.reported_topics {
 	padding: 1.5rem 0 1.5rem 1.5rem;
 }
 
@@ -4601,10 +4632,25 @@ div.bbp-breadcrumb p {
 }
 
 .sidebar .topic-info li.topic-report select,
-.sidebar .topic-info li.topic-report input[type="text"] {
+.sidebar .topic-info li.topic-report input[type="text"],
+.sidebar .topic-info li.topic-report textarea {
 	width: 100%;
 	padding: 0.2rem 0.5rem 0.1rem;
-	margin: 5px 0;
+	margin: 0;
+}
+
+.sidebar .topic-info li.topic-report .topic-report-notice {
+	margin-bottom: 1em;
+	padding: 4px;
+	background-color: #dfffe9;
+}
+
+.sidebar .topic-info li.topic-report .topic-report-notice.topic-report-notice-type-error {
+	background-color: #ffdbdb;
+}
+
+.sidebar .topic-info li.topic-report .topic-report-notice.topic-report-notice-type-warning {
+	background-color: #fbffdf;
 }
 
 .sidebar .topic-info li.topic-previous-reports .previous-reports {

@@ -121,7 +121,7 @@ class Helper_History extends GP_Translation_Helper {
 				is_null( $translation->translation_4 ) &&
 				is_null( $translation->translation_5 )
 			) {
-					$output_translation = $translation->translation_0;
+					$output_translation = esc_translation( $translation->translation_0 );
 			} else {
 				$output_translation = '<ul>';
 				for ( $i = 0; $i <= 5; $i ++ ) {
@@ -137,7 +137,8 @@ class Helper_History extends GP_Translation_Helper {
 				esc_attr( $translation->status ),
 				esc_attr( $translation->date_modified ?? $translation->date_added ),
 				esc_html( $date_and_time[0] ),
-				$translation_permalink ? '<a href="' . esc_url( $translation_permalink ) . '">' . esc_html( $output_translation ) . '</a>' : esc_html( $output_translation ),
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$translation_permalink ? '<a href="' . esc_url( $translation_permalink ) . '">' . $output_translation . '</a>' : $output_translation,
 				$user ? esc_html( $user->user_login ) : '&mdash;',
 				$user_last_modified ? esc_html( $user_last_modified->user_login ) : '&mdash;'
 			);

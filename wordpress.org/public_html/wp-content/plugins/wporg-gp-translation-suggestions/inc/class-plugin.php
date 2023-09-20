@@ -172,6 +172,11 @@ class Plugin {
 		// and have no results due to being too unique.
 		$query_tm = mb_strlen( $entry->singular ) <= 420;
 
+		// Used to add a link to add the OpenAI and the DeepL keys.
+		// We only show this link if the user has not added any of these keys yet.
+		$gp_default_sort = get_user_option( 'gp_default_sort' );
+		$openai_key      = trim( gp_array_get( $gp_default_sort, 'openai_api_key' ) );
+		$deepl_key       = trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) );
 		?>
 		<details open class="suggestions__translation-memory<?php echo $query_tm ? '' : ' initialized'; ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'translation-memory-suggestions-' . $entry->original_id ) ); ?>">
 			<summary>Suggestions from Translation Memory</summary>
@@ -179,6 +184,10 @@ class Plugin {
 				<p class="suggestions__loading-indicator">Loading <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>
 			<?php else : ?>
 				<p class="no-suggestions">No suggestions.</p>
+			<?php endif; ?>
+
+			<?php if ( empty( $openai_key ) && empty( $deepl_key ) ) : ?>
+				<p class="translation-suggestion__footer_message__for_suggestions">Get translation suggestions from <a href="https://translate.wordpress.org/settings/" target="_blank">OpenAI</a>  and from <a href="https://translate.wordpress.org/settings/" target="_blank">DeepL</a>. <a href="https://make.wordpress.org/polyglots/2023/03/29/adding-chatgpt-and-deepl-in-the-translation-memory/" target="_blank">More info</a>.</p>
 			<?php endif; ?>
 		</details>
 

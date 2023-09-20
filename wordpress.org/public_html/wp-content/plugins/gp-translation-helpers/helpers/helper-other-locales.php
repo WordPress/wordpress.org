@@ -32,6 +32,23 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 	public $has_async_content = true;
 
 	/**
+	 * Indicates the related locales for each locale, so we will put them in the top list
+	 * of "Other locales".
+	 *
+	 * This array should be sync with
+	 * https://github.com/WordPress/wordpress.org/blob/trunk/wordpress.org/public_html/wp-content/plugins/wporg-gp-translation-suggestions/inc/routes/class-other-languages.php
+	 *
+	 * @since 0.0.1
+	 * @var array
+	 */
+	public array $related_locales = array(
+		'ca'  => array( 'ca-val', 'bal', 'es', 'oci', 'an', 'gl', 'fr', 'it', 'pt', 'ro', 'la' ),
+		'es'  => array( 'gl', 'ca', 'pt', 'pt-ao', 'pt-br', 'it', 'fr', 'ro' ),
+		'gl'  => array( 'es', 'pt', 'pt-ao', 'pt-br', 'ca', 'it', 'fr', 'ro' ),
+		'oci' => array( 'ca', 'fr', 'it', 'es', 'gl' ),
+	);
+
+	/**
 	 * Activates the helper.
 	 *
 	 * @since 0.0.2
@@ -66,13 +83,14 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 			$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $this->data['project_id'], $this->data['translation_set_slug'], $this->data['locale_slug'] );
 		}
 
-		$translations           = GP::$translation->find_many_no_map(
+		$translations                           = GP::$translation->find_many_no_map(
 			array(
 				'status'      => 'current',
 				'original_id' => $this->data['original_id'],
 			)
 		);
-		$translations_by_locale = array();
+		$translations_by_locale                 = array();
+		$translations_by_locale_with_preference = array();
 		foreach ( $translations as $translation ) {
 			$_set = GP::$translation_set->get( $translation->translation_set_id );
 			if ( ! $_set || ( $translation_set && intval( $translation->translation_set_id ) === intval( $translation_set->id ) ) ) {
@@ -83,7 +101,26 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 
 		ksort( $translations_by_locale );
 
-		return $translations_by_locale;
+		// Put the variants in the top list.
+		foreach ( $translations_by_locale as $key => $translation ) {
+			// phpcs:ignore WordPress.PHP.YodaConditions.NotYoda
+			if ( explode( '-', $key )[0] === explode( '-', $this->data['locale_slug'] )[0] ) {
+				$translations_by_locale_with_preference[ $key ] = $translation;
+				unset( $translations_by_locale[ $key ] );
+			}
+		}
+
+		// Put the related locales in the top list, after the variants.
+		if ( ! empty( $this->related_locales[ $this->data['locale_slug'] ] ) ) {
+			foreach ( $this->related_locales[ $this->data['locale_slug'] ] as $locale ) {
+				if ( array_key_exists( $locale, $translations_by_locale ) ) {
+					$translations_by_locale_with_preference[ $locale ] = $translations_by_locale[ $locale ];
+					unset( $translations_by_locale[ $locale ] );
+				}
+			}
+		}
+
+		return array_merge( $translations_by_locale_with_preference, $translations_by_locale );
 	}
 
 	/**
