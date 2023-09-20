@@ -704,7 +704,7 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 		wp_remote_post( "http://$server/", array(
 			'body'    => array(
 				'theme_update'        => $theme_slug,
-				'theme_version'       => $theme_version,
+				'theme_version'       => "$theme_version",
 				'theme_action'        => 'update',
 				'theme_update_secret' => THEME_PREVIEWS_SYNC_SECRET,
 			),
