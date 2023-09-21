@@ -85,7 +85,7 @@ $hosting_cache_buster = '3';
 							</a>
 						</h2>
 
-						<p>At WordPress.com, we've built an automatically scalable and secure platform optimized for the latest WordPress has to offer.  Start a free website or blog today with everything you need to grow. Get lightning-fast and reliable performance with our global CDN, high-frequency CPUs, multi-datacenter failover, secure login, integrated visitor stats, and more. Managed hosting, with the 24/7 support of our dedicated WordPress experts, you're well taken care of.</p>
+						<p>At WordPress.com, we've built an automatically scalable and secure platform optimized for the latest WordPress has to offer.  Start a free website or blog today with everything you need to grow. Get lightning-fast and reliable performance with our global CDN, high-frequency CPUs, multi-datacenter failover, secure login, integrated visitor stats, and more. With managed hosting and the 24/7 support of our dedicated WordPress experts, you'll be well taken care of.</p>
 
 						<div class="forum">
 							<a href="https://wordpress.org/search/wordpress.com/?in=support_forums">Forum threads about WordPress.com &raquo;</a>
