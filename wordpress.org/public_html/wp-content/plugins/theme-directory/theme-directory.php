@@ -700,8 +700,10 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 		return;
 	}
 
+	$result = array();
+
 	foreach ( $wporg_webs as $server ) {
-		wp_remote_post( "http://$server/", array(
+		$response = wp_remote_post( "http://$server/", array(
 			'body'    => array(
 				'theme_update'        => $theme_slug,
 				'theme_version'       => "$theme_version",
@@ -712,7 +714,16 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 				'Host' => 'wp-themes.com',
 			),
 		) );
+
+		$result[ $server ] = array(
+			'error' => is_wp_error( $response ) ? $response->get_error_message() : 'no',
+			'code' => wp_remote_retrieve_response_code( $response ),
+			'body' => wp_remote_retrieve_body( $response ),
+		);
 	}
+
+	$message = __FUNCTION__ . " results:\n\n" . print_r( $result, true );
+	notify_slack( 'C03AKLN7P9U', $message ); // iandunn-testing
 }
 
 /**
@@ -793,7 +804,7 @@ function wporg_themes_get_header_data( $theme_file ) {
 	 * guarantee that the server will be happy with the User Agent.
 	 */
 	if ( str_contains( $theme_file, '://' ) ) {
-		$request = wp_remote_get( 
+		$request = wp_remote_get(
 			$theme_file,
 			[
 				'user-agent' => 'WordPress.org Theme Directory',
