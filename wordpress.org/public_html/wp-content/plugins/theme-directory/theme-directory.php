@@ -723,7 +723,7 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 	}
 
 	$message = __FUNCTION__ . " results:\n\n" . print_r( $result, true );
-	slack_dm( $message, 'iandunn' );
+	// slack_dm( $message, 'iandunn' );
 }
 
 /**
