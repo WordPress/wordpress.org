@@ -723,7 +723,7 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 	}
 
 	$trace = wp_debug_backtrace_summary();
-	$message = __FUNCTION__ . " trace: " . $trace;
+	$message = __FUNCTION__ .  " - slug: $theme_slug - version: $theme_version - trace: $trace";
 	slack_dm( $message, 'iandunn' );
 }
 
@@ -1150,17 +1150,24 @@ add_action( 'publish_to_draft', 'wporg_themes_glotpress_mark_as_inactive_on_susp
  *
  * @param int  $post_id The post ID being published
  */
-function wporg_themes_glotpress_mark_as_active_on_publish( $post_id ) {
-	$post           = get_post( $post_id );
+function wporg_themes_glotpress_mark_as_active_on_publish( $post_id, $post, $old_status ) {
+	// This is only intended to handle when a suspended/delisted theme is reinstated. Other functions handle when
+	// a new version of a published theme is uploaded.
+	if ( 'publish' === $old_status ) {
+		return;
+	}
+
 	$latest_version = array_search( 'live', $post->_status ?: [] );
+
 	if ( ! $latest_version ) {
 		return;
 	}
 
 	wporg_themes_glotpress_import( $post, $latest_version );
+
 	wporg_themes_update_wpthemescom( $post->post_name, $latest_version );
 }
-add_action( 'publish_repopackage', 'wporg_themes_glotpress_mark_as_active_on_publish', 100 );
+add_action( 'publish_repopackage', 'wporg_themes_glotpress_mark_as_active_on_publish', 10, 3 );
 
 /**
  * Import theme strings to GlotPress on approval.
