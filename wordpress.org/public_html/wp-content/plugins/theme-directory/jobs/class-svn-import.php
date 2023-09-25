@@ -109,6 +109,9 @@ class SVN_Import {
 			return;
 		}
 
+		$message = __FUNCTION__ . " results:\n\n" . print_r( $args, true );
+		slack_dm( $message, 'Steve Dufresne' );
+
 		$uploader = new WPORG_Themes_Upload;
 
 		$return = $uploader->process_update_from_svn(
