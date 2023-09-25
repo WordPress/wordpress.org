@@ -722,9 +722,9 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 		);
 	}
 
-	$trace = wp_debug_backtrace_summary();
-	$message = __FUNCTION__ .  " - slug: $theme_slug - version: $theme_version - trace: $trace";
-	slack_dm( $message, 'iandunn' );
+	// $trace = wp_debug_backtrace_summary();
+	// $message = __FUNCTION__ .  " - slug: $theme_slug - version: $theme_version - trace: $trace";
+	// slack_dm( $message, 'iandunn' );
 }
 
 /**
