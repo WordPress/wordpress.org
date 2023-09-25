@@ -232,6 +232,20 @@ class WPORG_Themes_Upload {
 	public function process_update_from_svn( $slug, $version, $changeset = 0, $author = '', $commit_message = '' ) {
 		$this->reset_properties();
 
+		require_once API_WPORGPATH . 'includes/slack-config.php';
+		$send = new \Dotorg\Slack\Send( SLACK_ERROR_REPORT_URL );
+
+		$message = sprintf(
+			"slug: %s, version: %s, changeset: %s",
+			$slug, 
+			$version, 
+			$changeset
+		);
+
+		$send->set_username( 'process_update_from_svn' );
+		$send->set_text( $message );
+		$send->send( '#dotorg-alerts' );
+
 		$this->importing_from = 'svn';
 		$this->theme_slug     = $slug;
 		$this->commit_msg     = $commit_message;
