@@ -1156,6 +1156,19 @@ function wporg_themes_glotpress_mark_as_active_on_publish( $post_id ) {
 		return;
 	}
 
+	require_once API_WPORGPATH . 'includes/slack-config.php';
+	$send = new \Dotorg\Slack\Send( SLACK_ERROR_REPORT_URL );
+
+	$message = sprintf(
+		"post_name: %s, version: %s",
+		$post->post_name, 
+		$latest_version, 
+	);
+
+	$send->set_username( 'wporg_themes_glotpress_mark_as_active_on_publish' );
+	$send->set_text( $message );
+	$send->send( '#dotorg-alerts' );
+
 	wporg_themes_glotpress_import( $post, $latest_version );
 	wporg_themes_update_wpthemescom( $post->post_name, $latest_version );
 }
