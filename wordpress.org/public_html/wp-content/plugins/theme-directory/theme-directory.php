@@ -1159,7 +1159,7 @@ function wporg_themes_glotpress_mark_as_active_on_publish( $post_id ) {
 	wporg_themes_glotpress_import( $post, $latest_version );
 	wporg_themes_update_wpthemescom( $post->post_name, $latest_version );
 }
-add_action( 'publish_repopackage', 'wporg_themes_glotpress_mark_as_active_on_publish' );
+add_action( 'publish_repopackage', 'wporg_themes_glotpress_mark_as_active_on_publish', 100 );
 
 /**
  * Import theme strings to GlotPress on approval.
