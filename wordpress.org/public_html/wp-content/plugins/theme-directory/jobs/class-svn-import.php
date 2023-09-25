@@ -110,7 +110,7 @@ class SVN_Import {
 		}
 
 		$message = __FUNCTION__ . " results:\n\n" . print_r( $args, true );
-		slack_dm( $message, 'Steve Dufresne' );
+		slack_dm( $message, 'dufresnesteven' );
 
 		$uploader = new WPORG_Themes_Upload;
 
