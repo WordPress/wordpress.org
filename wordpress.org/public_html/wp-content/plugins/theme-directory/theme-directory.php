@@ -700,10 +700,8 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 		return;
 	}
 
-	$result = array();
-
 	foreach ( $wporg_webs as $server ) {
-		$response = wp_remote_post( "http://$server/", array(
+		wp_remote_post( "http://$server/", array(
 			'body'    => array(
 				'theme_update'        => $theme_slug,
 				'theme_version'       => "$theme_version",
@@ -714,17 +712,7 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 				'Host' => 'wp-themes.com',
 			),
 		) );
-
-		$result[ $server ] = array(
-			'error' => is_wp_error( $response ) ? $response->get_error_message() : 'no',
-			'code' => wp_remote_retrieve_response_code( $response ),
-			'body' => wp_remote_retrieve_body( $response ),
-		);
 	}
-
-	// $trace = wp_debug_backtrace_summary();
-	// $message = __FUNCTION__ .  " - slug: $theme_slug - version: $theme_version - trace: $trace";
-	// slack_dm( $message, 'iandunn' );
 }
 
 /**
