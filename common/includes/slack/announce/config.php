@@ -126,6 +126,7 @@ function get_whitelist() {
 			'metalandcoffee',
 			'monikarao',
 			'mukesh27',
+			'nicolefurlan',
 			'oglekler',
 			'pbiron',
 			'priethor',
