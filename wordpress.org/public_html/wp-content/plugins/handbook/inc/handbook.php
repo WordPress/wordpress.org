@@ -411,6 +411,41 @@ class WPorg_Handbook {
 	}
 
 	/**
+	 * Returns an array of slugs suitable for use as the handbook's landing page.
+	 *
+	 * @return string[]
+	 */
+	public function get_possible_landing_page_slugs() {
+		return array_unique( [
+			'welcome',
+			'handbook',
+			str_replace( '-handbook', '', $this->post_type ),
+			$this->post_type,
+		] );
+	}
+
+	/**
+	 * Returns the landing page for the handbook of the given post type.
+	 *
+	 * @param string $fields The page fields to return. One of 'all', 'ids', or 'id=>parent'. Default 'all'.
+	 * @return WP_Post|false The handbook's landing page, else false.
+	 */
+	public function get_landing_page( $fields = 'all' ) {
+		$query = new WP_Query( [
+			'post_type'      => $this->post_type,
+			'post_name__in'  => $this->get_possible_landing_page_slugs(),
+			'posts_per_page' => 1,
+			'post_parent'    => 0,
+			'post_status'    => 'publish',
+			'fields'         => $fields,
+		] );
+
+		return $query->have_posts()
+			? $query->posts[0]
+			: false;
+	}
+
+	/**
 	 * For a handbook page acting as the root page for the handbook, change its
 	 * permalink to be the equivalent of the post type archive link.
 	 *
