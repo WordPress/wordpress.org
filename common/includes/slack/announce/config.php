@@ -39,6 +39,7 @@ function get_whitelist() {
 
 	return array(
 		'6-4-release-leads' => array(
+			'akshayar', // @akshaya on Slack
 			'cbringmann', // @Chloé Bringmann on Slack
 			'chanthaboune',
 			'francina',
@@ -97,6 +98,7 @@ function get_whitelist() {
 		),
 		'contributor-mentorship' => $wordcamp_central,
 		'core' => array_merge( get_committers(), array(
+			'akshayar', // @akshaya on Slack
 			'amykamala', // @amy kamala on Slack
 			'angelasjin',
 			'annezazu',
