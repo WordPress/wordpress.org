@@ -230,7 +230,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		usort(
 			$sections,
 			function( $s1, $s2 ) {
-				return $s1['priority'] > $s2['priority'];
+				return $s1['priority'] <=> $s2['priority'];
 			}
 		);
 
@@ -309,7 +309,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			};
 		}
 
-		echo wp_json_encode( $sections );
+		wp_send_json( $sections );
 	}
 
 	/**
