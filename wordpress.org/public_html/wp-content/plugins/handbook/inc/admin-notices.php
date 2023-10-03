@@ -95,9 +95,7 @@ class WPorg_Handbook_Admin_Notices {
 	}
 
 	/**
-	 * Outputs admin notice showing tips for newly created handbook.
-	 *
-	 * @todo Maybe instead of hiding the message once posts are present it should persist as long as no landing page has been created?
+	 * Outputs admin notice warning if a handbook that already has pages doesn't have a landing page.
 	 *
 	 * @access public
 	 */
