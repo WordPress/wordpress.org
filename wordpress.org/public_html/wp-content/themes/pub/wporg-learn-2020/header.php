@@ -55,7 +55,7 @@ $menu_items = array(
 						<span class="site-title--no-mobile"><?php echo esc_html( _x( 'WordPress', 'Site title', 'wporg-learn' ) ); ?></span>
 					</a>
 				</p>
-				<nav id="site-navigation" class="main-navigation" role="navigation">
+				<nav id="site-navigation" aria-label="<?php _e( 'Main menu', 'wporg-learn' ); ?>" class="main-navigation" role="navigation">
 					<button
 						class="menu-toggle dashicons dashicons-arrow-down-alt2"
 						aria-controls="primary-menu"
@@ -83,5 +83,5 @@ $menu_items = array(
 
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
-		
+
 		<?php locale_notice(); ?>

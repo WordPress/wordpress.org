@@ -22,7 +22,7 @@ get_template_part( 'header', 'wporg' );
 				<p class="site-title"><a href="<?php echo esc_url( get_permalink( get_post()->post_parent ) ); ?>" rel="bookmark"><?php echo get_the_title( get_post()->post_parent ); ?></a></p>
 
 				<?php if ( ! empty( $menu_items ) ) : ?>
-				<nav id="site-navigation" class="main-navigation" role="navigation">
+				<nav id="site-navigation" aria-label="<?php _e( 'Main menu', 'wporg' ); ?>" class="main-navigation" role="navigation">
 					<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg' ); ?>"></button>
 					<div id="primary-menu" class="menu">
 						<ul>

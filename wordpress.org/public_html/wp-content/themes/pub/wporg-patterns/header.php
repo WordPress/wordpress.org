@@ -59,7 +59,7 @@ get_template_part( 'header', 'wporg' );
 						</span>
 					</div>
 
-					<nav id="site-navigation" class="main-navigation" role="navigation">
+					<nav id="site-navigation" aria-label="<?php _e( 'Main menu', 'wporg-patterns' ); ?>" class="main-navigation" role="navigation">
 						<button
 							class="menu-toggle dashicons dashicons-arrow-down-alt2"
 							aria-controls="primary-menu"
@@ -74,7 +74,7 @@ get_template_part( 'header', 'wporg' );
 							'menu_id'        => 'primary-menu',
 						) );
 						?>
-						
+
 					</nav><!-- #site-navigation -->
 					<?php get_search_form(); ?>
 				<?php endif; ?>

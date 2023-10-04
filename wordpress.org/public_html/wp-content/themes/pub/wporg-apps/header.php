@@ -24,7 +24,7 @@
 		<h1 class="site-title">
 			<a class="wpcom-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a>
 		</h1>
-		<nav id="site-navigation" class="main-navigation" role="navigation">
+		<nav id="site-navigation" aria-label="<?php _e( 'Main menu', 'wpmobileapps' ); ?>" class="main-navigation" role="navigation">
 			<button class="menu-toggle"><span class="screen-reader-text"><?php _e( 'Primary Menu', 'wpmobileapps' ); ?></span></button>
 			<a class="skip-link screen-reader-text" href="#content"><?php _e( 'Skip to content', 'wpmobileapps' ); ?></a>
 

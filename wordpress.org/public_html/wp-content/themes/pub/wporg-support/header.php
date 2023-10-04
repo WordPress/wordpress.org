@@ -44,7 +44,7 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 				<?php else : ?>
 					<p class="site-title"><a href="<?php echo esc_url( home_url( '/forums/' ) ); ?>" rel="home"><?php _ex( 'Support', 'Site title', 'wporg-forums' ); ?></a></p>
 
-					<nav id="site-navigation" class="main-navigation" role="navigation">
+					<nav id="site-navigation" class="main-navigation" aria-label="<?php _e( 'Main menu', 'wporg-forums' ); ?>" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-forums' ); ?>"></button>
 						<div id="primary-menu" class="menu">
 							<ul>
