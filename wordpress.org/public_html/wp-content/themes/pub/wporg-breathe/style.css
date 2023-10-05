@@ -1130,12 +1130,27 @@ article.page p.contributor-name {
 	text-align: center;
 	color: #aaa;
 	margin-top: 1em;
+	margin-left: 25px;
+	margin-right: 35px;
 	overflow: hidden;
 	letter-spacing: 2px;
-	font-size: 1.5em;
+	line-height: 1.1em;
+	font-size: 1.3em;
 	text-transform: uppercase;
 	border-bottom: 0;
 }
+@media(max-width: 680px) {
+	.handbook-name {
+		font-size: 1.1em;
+	}
+}
+@media(max-width: 480px) {
+	.handbook-name {
+		font-size: 1em;
+	}
+}
+
+
 .handbook-name span {
 	display: inline-block;
 	position: relative;
