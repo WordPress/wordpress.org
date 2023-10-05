@@ -722,6 +722,19 @@ class Template {
 	}
 
 	/**
+	 * Generate a live preview (playground) link for a given plugin.
+	 *
+	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @param string            $landing_page The landing page for the preview. Option. Default: /wp-admin/plugins.php.
+	 * @return string The preview url.
+	 */
+	public static function preview_link( $post = null, $landing_page = '/wp-admin/plugins.php' ) {
+		$post = get_post( $post );
+
+		return sprintf( 'https://playground.wordpress.net/?plugin=%s&login=1&url=%s', esc_attr( $post->post_name ), esc_attr( $landing_page ) );
+	}
+
+	/**
 	 * Properly encodes a string to UTF-8.
 	 *
 	 * @static
