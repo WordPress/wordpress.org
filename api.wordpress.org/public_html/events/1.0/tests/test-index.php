@@ -177,6 +177,7 @@ class Test_Events extends TestCase {
 		$local_events = get_events( array(
 			'number' => '5',
 			'nearby' => array(
+				// Off the coast of Robben Island, South Africa.
 				'latitude'  => '-33.849951',
 				'longitude' => '18.426246',
 			),
@@ -209,11 +210,12 @@ class Test_Events extends TestCase {
 		$core_user_agent  = 'WordPress/5.2; https://example.org';
 		$other_user_agent = 'Smith';
 
+		$promo_start               = strtotime( $region_data['us']['event']['date'] . ' - 2 months' );
 		$time_before_promo         = strtotime( '2019-08-15 00:00:00' );
-		$time_during_promo_phase_1 = strtotime( '+ 1 day', $region_data['us']['promo_start'] );
-		$time_during_promo_phase_2 = strtotime( '+ 2 weeks + 1 day', $region_data['us']['promo_start'] );
-		$time_during_promo_phase_3 = strtotime( '+ 4 weeks + 1 day', $region_data['us']['promo_start'] );
-		$time_after_promo          = strtotime( '+ 6 weeks + 1 day', $region_data['us']['promo_start'] );
+		$time_during_promo_phase_1 = strtotime( '+ 1 day', $promo_start );
+		$time_during_promo_phase_2 = strtotime( '+ 2 weeks + 1 day', $promo_start );
+		$time_during_promo_phase_3 = strtotime( '+ 4 weeks + 1 day', $promo_start );
+		$time_after_promo          = strtotime( '+ 6 weeks + 1 day', $promo_start );
 
 		$location_country_within_region = array(
 			'country' => 'us',
