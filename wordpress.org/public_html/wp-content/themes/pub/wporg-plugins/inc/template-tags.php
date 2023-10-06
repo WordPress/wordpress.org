@@ -519,9 +519,6 @@ function the_plugin_danger_zone() {
 
 		// Output the self close button.
 		the_plugin_self_close_button();
-
-		// Output the toggle preview button.
-		the_plugin_self_toggle_preview_button();
 	}
 
 }
