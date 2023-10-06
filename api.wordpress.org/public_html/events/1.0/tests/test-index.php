@@ -1076,6 +1076,53 @@ class Test_Events extends TestCase {
 				),
 			),
 
+			// Genova, IT is the native name of a populated city, and it's English name is Genoa. There's also a
+			// small village in IT whose English name is Genova. Geonames considers the English name to be the
+			// primary one, and native names are considered alternate names. We rank primary names higher than
+			// alternate names, and that usually works, but in this case people are more likely to be looking for
+			// the city.
+			'rural-match-less-likely-than-city-match' => array(
+				'input' => array(
+					'location_name' => 'Genova',
+					'locale'        => 'it_IT',
+					'timezone'      => 'Europe/Rome',
+				),
+				'expected' => array(
+					'description' => 'genova',
+					'latitude'    => '44.413',
+					'longitude'   => '8.957',
+					'country'     => 'IT',
+				),
+			),
+
+			'rural-match-less-likely-than-city-match-with-accent' => array(
+				'input' => array(
+					'location_name' => 'Gènova',
+					'locale'        => 'it_IT',
+					'timezone'      => 'Europe/Rome',
+				),
+				'expected' => array(
+					'description' => 'genova',
+					'latitude'    => '44.413',
+					'longitude'   => '8.957',
+					'country'     => 'IT',
+				),
+			),
+
+			'city-match-more-likely-than-rural-match' => array(
+				'input' => array(
+					'location_name' => 'Genoa',
+					'locale'        => 'it_IT',
+					'timezone'      => 'Europe/Rome',
+				),
+				'expected' => array(
+					'description' => 'genoa',
+					'latitude'    => '44.405',
+					'longitude'   => '8.944',
+					'country'     => 'IT',
+				),
+			),
+
 			/*
 			 * A combination of city, region, and country are given, along with the locale and timezone
 			 *
