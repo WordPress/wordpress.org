@@ -40,7 +40,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 
 			<?php if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) : ?>
 				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php esc_html_e( 'Download', 'wporg-plugins' ); ?></a>
-				<?php if ( !Template::is_plugin_outdated( $post ) ) : ?>
+				<?php if ( !Template::is_plugin_outdated( $post ) && !get_post_meta( $post->ID, '_no_preview', true ) ) : ?>
 					<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::preview_link() ); ?>"><?php esc_html_e( 'Live Preview', 'wporg-plugins' ); ?></a>
 				<?php endif; ?>
 			<?php endif; ?>
