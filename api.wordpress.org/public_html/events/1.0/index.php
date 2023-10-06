@@ -390,8 +390,10 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 function guess_location_from_geonames( $location_name, $timezone, $country, $wildcard = true ) {
 	global $wpdb;
 	// Look for a location that matches the name.
-	// The asc ordering provides preference to the oreferred name of the locations.
+	// The asc ordering provides preference to the preferred name of the locations.
 	// The population ordering provides preference to the populated areas over unpopulated/unknown.
+	//    It's unlikely an area with less than ~500 people would hold an event, but sometimes those places rank
+	//    higher than populated areas due to the alt vs primary name. See `Genova` unit tests
 	// The FIELD() orderings give preference to rows that match the country and/or timezone, without excluding rows that don't match.
 	// And we sort by population desc, assuming that the biggest matching location is the most likely one within the above matching groups.
 
@@ -403,7 +405,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 		ORDER BY
 			FIELD( %s, country ) DESC,
 			alt ASC,
-			population > 0 DESC,
+			population > 500 DESC,
 			FIELD( %s, timezone ) DESC,
 			LEFT( type, 1 ) = "P" DESC,
 			population DESC,
