@@ -1370,7 +1370,7 @@ class Test_Events extends TestCase {
 				'input'    => array( 'ip' => '2a02:578:1000::' ),
 				'expected' => array(
 					'description' => 'brussels',
-					'latitude'    => '50.850',
+					'latitude'    => '50.851',
 					'longitude'   => '4.349',
 					'country'     => 'BE',
 					'internal'    => true,
