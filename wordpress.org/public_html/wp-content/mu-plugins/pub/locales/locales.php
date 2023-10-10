@@ -2290,8 +2290,6 @@ class GP_Locales {
 		$skr->country_code = 'pk';
 		$skr->wp_locale = 'skr';
 		$skr->slug = 'skr';
-		$skr->nplurals = 2;
-		$skr->plural_expression = 'n > 1';
 		$skr->text_direction = 'rtl';
 		$skr->alphabet = 'saraiki';
 
