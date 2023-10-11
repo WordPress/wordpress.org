@@ -387,6 +387,7 @@ class Admin {
 		) {
 			unset( $columns[ 'taxonomy-' . Registrations::get_taxonomy( 'colors' ) ] );
 			unset( $columns['likes'] );
+			unset( $columns['stats'] );
 		}
 
 		return $columns;
