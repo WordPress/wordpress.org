@@ -66,11 +66,12 @@ class Plugin_Search {
 			add_filter( 'pre_option_has_jetpack_search_product', array( $this, 'option_has_jetpack_search_product' ), 10, 1 );
 
 			// add_filter( 'jetpack_search_abort', array( $this, 'log_jetpack_search_abort' ) );
-			
+
 			// $es_query_args = apply_filters( 'jetpack_search_es_query_args', $es_query_args, $query );
 
 			add_filter( 'jetpack_search_es_wp_query_args', array( $this, 'jetpack_search_es_wp_query_args' ), 10, 2 );
-			add_filter( 'jetpack_search_es_query_args', array( $this, 'jetpack_search_es_query_args' ), 10, 2 );			
+			add_filter( 'jetpack_search_es_query_args', array( $this, 'jetpack_search_es_query_args' ), 10, 2 );
+			add_filter( 'posts_pre_query', array( $this, 'set_max_num_pages' ), 15, 2 ); // After `Classic_Search::filter__posts_pre_query()`
 
 			// Load Jetpack Search.
 			include_once WP_PLUGIN_DIR . '/jetpack/vendor/autoload_packages.php';
@@ -81,7 +82,7 @@ class Plugin_Search {
 
 			} else {
 				// Old(er) Jetpack, load the classic search module, Temporarily.
-				
+
 				include_once WP_PLUGIN_DIR . '/jetpack/modules/search/class.jetpack-search.php';
 				include_once WP_PLUGIN_DIR . '/jetpack/modules/search/class.jetpack-search-helpers.php';
 
@@ -393,6 +394,28 @@ class Plugin_Search {
 		];
 
 		return $es_query_args;
+	}
+
+	/**
+	 * Limit the number of pagination links to 50.
+	 *
+	 * Jetpack ignores the `max_num_pages` that's set in `WP_Query` args and overrides it in
+	 * `Classic_Search::filter__posts_pre_query()`. When there are more than 1,000 matches, their value causes
+	 * Core's `paginate_links()` to generated 51 links, even though we redirect the user to the homepage when
+	 * page 51+ is requested.
+	 */
+	function set_max_num_pages( $posts, $query ) {
+		$post_type = (array) $query->query_vars['post_type'] ?? '';
+
+		if ( is_admin() || ! is_search() || ! in_array( 'plugin', $post_type ) ) {
+			return $posts;
+		}
+
+		if ( $query->max_num_pages > 50 ) {
+			$query->max_num_pages = 50;
+		}
+
+		return $posts;
 	}
 
 	public function log_search_es_wp_query_args( $es_wp_query_args, $query ) {
