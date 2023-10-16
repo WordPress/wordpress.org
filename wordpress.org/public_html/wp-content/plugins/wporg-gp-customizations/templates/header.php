@@ -2,7 +2,7 @@
 
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
-gp_enqueue_style( 'gp-jquery-webui-popover' );
+gp_enqueue_styles( array( 'gp-jquery-webui-popover', 'driver-js' ) );
 gp_enqueue_scripts( array( 'gp-tour' ) );
 
 ?>
