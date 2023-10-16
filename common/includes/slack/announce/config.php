@@ -278,6 +278,7 @@ function get_whitelist() {
 			'tweetythierry', // @Thierry Muller on Slack
 		) ),
 		'core-test' => array_merge( get_committers(), array(
+			'ankit-k-gupta', // @Ankit K Gupta on Slack
 			'Boniu91', // @Piotrek Boniu on Slack
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
@@ -285,6 +286,7 @@ function get_whitelist() {
 			'justinahinon',
 			'monikarao',
 			'ryan', // @boren on Slack
+			'webtechpooja', // @Pooja Derashri on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'anlino', // @andersnoren on Slack
