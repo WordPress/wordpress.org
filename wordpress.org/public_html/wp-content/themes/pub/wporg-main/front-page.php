@@ -27,14 +27,14 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
-$wp20_url = 'https://wordpress.tv/2023/10/13/gutenberg-next-with-matt-mullenweg/';
+$banner_url = 'https://wordpress.tv/2023/10/13/gutenberg-next-with-matt-mullenweg/';
 if ( is_object( $rosetta ) && isset( $rosetta->locale ) ) {
-	$wp20_url .= '?locale=' . $rosetta->locale;
+	$banner_url .= '?locale=' . $rosetta->locale;
 }
 
 // The blocks code sets up the layout, but there is also inline CSS to refine things that aren't supported in classic themes.
 $banner_blocks = '<!-- wp:wporg/link-wrapper {"align":"full","layout":{"type":"constrained"}} -->
-<a class="wp-block-wporg-link-wrapper alignfull" style="background-color:#0a4b78;color:#fff;font-size:16px;" href="' . $wp20_url . '"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
+<a class="wp-block-wporg-link-wrapper alignfull" style="background-color:#0a4b78;color:#fff;font-size:16px;" href="' . $banner_url . '"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
 <div class="wp-block-group" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px;gap:10px;"><!-- wp:image {"width":45,"height":29,"sizeSlug":"full","linkDestination":"none"} -->
 <figure class="wp-block-image size-full is-resized" style="flex-shrink: 0;"><img src="https://wordpress.org/files/2023/05/wp20-logo-white.png" alt="" width="45" height="29" /></figure>
 <!-- /wp:image -->
