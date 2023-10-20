@@ -27,7 +27,7 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
-$wp20_url = 'https://wp20.wordpress.net/';
+$wp20_url = 'https://wordpress.tv/2023/10/13/gutenberg-next-with-matt-mullenweg/';
 if ( is_object( $rosetta ) && isset( $rosetta->locale ) ) {
 	$wp20_url .= '?locale=' . $rosetta->locale;
 }
@@ -40,7 +40,7 @@ $banner_blocks = '<!-- wp:wporg/link-wrapper {"align":"full","layout":{"type":"c
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.1"}}} -->
-<p style="line-height:1.1">' . __( 'Join a celebration online or around the globe for the 20th anniversary of WordPress. ↗', 'wporg' ) . '</p>
+<p style="line-height:1.1">' . __( 'Watch the 2023 WordCamp US Keynotes from Matt Mullenweg and Josepha Haden Chomphosy. ↗', 'wporg' ) . '</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></a>
 <!-- /wp:wporg/link-wrapper -->';
