@@ -1,0 +1,10 @@
+.pulse {
+	border-radius: 50%;
+	position: relative;
+	cursor: pointer;
+	top: 0em;
+	left: -0.4em;
+	width: 12px;
+	height: 12px;
+	margin: -6px;
+}
