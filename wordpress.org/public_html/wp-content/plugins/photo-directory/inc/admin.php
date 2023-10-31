@@ -628,10 +628,16 @@ class Admin {
 				$file_dims = __( 'unknown', 'wporg-photos' );
 			}
 
+			$orientation = Photo::get_orientation( $post->ID );
+
 			$info = [
 				'dimensions' => [
 					'label' => __( 'Dimensions', 'wporg-photos' ),
 					'value' => $file_dims,
+				],
+				'orientation'   => [
+					'label' => __( 'Orientation', 'wporg-photos' ),
+					'value' => $orientation ? esc_html( $orientation->name ) : sprintf( '<em>%s</em>', __( 'unknown', 'wporg-photos' ) ),
 				],
 				'filesize' => [
 					'label' => __( 'File size', 'wporg-photos' ),
