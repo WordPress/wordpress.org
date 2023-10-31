@@ -18,12 +18,14 @@
 .photos-flagged li::before {
 	margin-right: 4px;
 }
-.photos-flagged li.very_likely,
-.photos-flagged li.likely {
+.photos-flagged li.very_likely {
 	background-color: #AA0000;
 }
-.photos-flagged li.possible {
+.photos-flagged li.likely {
 	background-color: darkorange;
+}
+.photos-flagged li.possible {
+	background-color: goldenrod;
 }
 
 dl.photos-flagged {

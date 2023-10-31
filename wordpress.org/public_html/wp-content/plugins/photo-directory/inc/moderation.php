@@ -21,23 +21,33 @@ class Moderation {
 
 	/**
 	 * The threshold percentage of the number of rejections relative to the
-	 * number of approvals at which the user should be flagged as a warning
-	 * (in orange). Should be a lower value than
+	 * number of approvals+rejections at which the user should be flagged as a warning
+	 * (in yellow). Should be a lower value than
 	 * `FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE`.
 	 *
 	 * @var float
 	 */
-	const FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE = 0.1;
+	const FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE = 0.15;
 
 	/**
 	 * The threshold percentage of the number of rejections relative to the
-	 * number of approvals at which the user should be flagged as an alert
+	 * number of approvals+rejections at which the user should be flagged as an alert
 	 * (in red) rather than a warning (in orange). Should be a higher value than
 	 * `FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE`.
 	 *
 	 * @var float
 	 */
-	const FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE = 0.25;
+	const FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE = 0.30;
+
+	/**
+	 * The threshold percentage of the number of rejections relative to the
+	 * number of approvals+rejections at which the user should be flagged as
+	 * critical rather than an alert. Should be a higher value than
+	 * `FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE`.
+	 *
+	 * @var float
+	 */
+	const FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE = 0.50;
 
 	/**
 	 * Initializes component.
@@ -618,25 +628,33 @@ https://wordpress.org/photos/
 			$rejections_count -= $submission_errors_count;
 
 			if ( $rejections_count > 0 ) {
-				$rejections_level = '';
+				$rejections_level = $message = '';
+
+				$rejections_percentage = $rejections_count / ( $rejections_count + $published_photos_count );
 
 				// A user with more rejections than approvals should be an alert.
-				if ( $rejections_count >= $published_photos_count ) {
+				if ( $rejections_count > $published_photos_count ) {
 					$rejections_level = 'very_likely';
+					$message = __( 'more rejections than approvals', 'wporg-photos' );
 				}
 				// Specify as alert or warning based on count relative to alert threshold.
 				else {
-					$reject_pct = $rejections_count / $published_photos_count;
-					if ( $reject_pct >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
+					if ( $rejections_percentage >= self::FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'very_likely';
+						$message = __( 'very high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
 					}
-					elseif ( $reject_pct >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
+					elseif ( $rejections_percentage >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
+						$rejections_level = 'likely';
+						$message = __( 'high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+					}
+					elseif ( $rejections_percentage >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'possible';
+						$message = __( 'rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
 					}
 				}
 
-				if ( $rejections_level ) {
-					$flags[ sprintf( 'has rejections (<strong>%d</strong>)', $rejections_count ) ] = $rejections_level;
+				if ( $rejections_level && $message ) {
+					$flags[ sprintf( $message, round( $rejections_percentage * 100 , 0 ) ) ] = $rejections_level;
 				}
 			}
 		}
