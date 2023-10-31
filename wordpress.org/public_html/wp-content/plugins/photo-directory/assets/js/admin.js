@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', function () {
 	const orientationDiv = document.getElementById('photo_orientationdiv');
 	if ( orientationValue && orientationDiv ) {
 		orientationDiv.hidden = true;
+		// Also hide checkbox that controls display of metabox.
+		const orientationCheckbox = document.querySelector('body.post-type-photo .metabox-prefs label[for="photo_orientationdiv-hide"]');
+		if (orientationCheckbox) {
+			orientationCheckbox.hidden = true;
+			orientationCheckbox.style.display = 'none';
+		}
 	}
 
 	// Remove a number of interface elements.
