@@ -657,6 +657,10 @@ class Admin {
 				'label' => __( 'Original file name', 'wporg-photos' ),
 				'value' => esc_html( get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ),
 			],
+			'orig-caption'  => [
+				'label' => __( 'Original caption', 'wporg-photos' ),
+				'value' => esc_html( get_post_meta( $post->ID, 'post_content', true ) ),
+			],
 			'uploaded-at' => [
 				'label' => __( 'Uploaded on', 'wporg-photos' ),
 				'value' => $uploaded_on,
