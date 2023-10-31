@@ -103,6 +103,7 @@ dl.photos-flagged dt {
 
 body.post-type-photo label[for="authordiv-hide"],
 body.post-type-photo #authordiv,
+body.post-type-photo label[for="likes_meta-hide"],
 body.post-type-photo #wp-content-editor-tools,
 body.post-type-photo #ed_toolbar,
 #photo_category-adder,
