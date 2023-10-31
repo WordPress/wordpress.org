@@ -23,6 +23,7 @@ class Admin {
 		add_action( 'admin_init',                              [ __CLASS__, 'remove_menu_pages' ] );
 		add_filter( 'is_protected_meta',                       [ __CLASS__, 'is_protected_meta' ], 10, 2 );
 		add_action( 'add_meta_boxes',                          [ __CLASS__, 'add_photos_meta_boxes' ], 10, 2 );
+		add_action( "add_meta_boxes_{$post_type}",             [ __CLASS__, 'remove_metaboxes' ], 15 );
 		add_action( 'load-edit.php',                           [ __CLASS__, 'add_admin_css' ] );
 		add_action( 'load-post.php',                           [ __CLASS__, 'add_admin_css' ] );
 		add_filter( "manage_{$post_type}_posts_columns",       [ __CLASS__, 'add_photo_column' ] );
@@ -191,6 +192,30 @@ class Admin {
 
 		remove_submenu_page( "edit.php?post_type={$post_type}", "manage_frontend_uploader_{$post_type}s" );
 		remove_submenu_page( 'upload.php', 'manage_frontend_uploader' );
+	}
+
+	/**
+	 * Removes certain metaboxes.
+	 *
+	 * This only hides the metaboxes themselves. CSS must be added in order to
+	 * also hide the checkboxes associated with the metaboxes in the Screen
+	 * Options panel.
+	 *
+	 * Removes these metaboxes:
+	 * - Custom Fields
+	 * - Slug
+	 */
+	public static function remove_metaboxes() {
+		$post_type = Registrations::get_post_type();
+
+		$hide = [
+			'postcustom' => 'normal',
+			'slugdiv'    => 'normal',
+		];
+
+		foreach ( $hide as $mb => $context ) {
+			remove_meta_box( $mb, $post_type, $context );
+		}
 	}
 
 	/**
