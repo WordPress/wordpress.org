@@ -47,6 +47,7 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 		'gl'  => array( 'es', 'pt', 'pt-ao', 'pt-br', 'ca', 'it', 'fr', 'ro' ),
 		'it'  => array( 'ca', 'de', 'es', 'fr', 'pt', 'ro' ),
 		'oci' => array( 'ca', 'fr', 'it', 'es', 'gl' ),
+		'ug'  => array( 'tr', 'uz', 'az', 'zh-cn', 'zh-tw' ),
 	);
 
 	/**
