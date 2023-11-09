@@ -653,6 +653,7 @@ class WP_64_Credits extends WP_Credits {
 			'soulseekah',
 			'spacedmonkey',
 			'spenserhale',
+			'starbuck',
 			'stephenerdelyi',
 			'stevejonesdev',
 			'subodhsun',
