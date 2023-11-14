@@ -314,7 +314,7 @@ class Posts {
 	 *       or use the count of results on the first page, so no need to do yet.
 	 */
 	public static function fix_front_page_pagination_count( $posts, $query ) {
-		if ( $query->is_home() ) {
+		if ( $query->is_home() && $query->is_main_query() ) {
 			$front_page_count  = get_option( 'posts_per_page' );
 			$archives_per_page = 30;
 
@@ -322,6 +322,10 @@ class Posts {
 			$total_posts = $query->found_posts - $front_page_count;
 			if ( $total_posts > 0 ) {
 				$count += ceil( $total_posts / $archives_per_page );
+			}
+			// Account for logged-out pagination limit on w.org.
+			if ( defined( '\WPORG_Page_Limiter::MAX_PAGES' ) && ! is_user_logged_in() ) {
+				$count = min( $count, \WPORG_Page_Limiter::MAX_PAGES );
 			}
 			$query->max_num_pages = $count;
 		}
