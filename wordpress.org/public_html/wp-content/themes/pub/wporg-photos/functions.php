@@ -357,3 +357,37 @@ function body_class_for_taxonomy_roots( $classes ) {
 	return $classes;
 }
 add_filter( 'body_class', __NAMESPACE__ . '\body_class_for_taxonomy_roots' );
+
+/**
+ * Outputs a message adjacent to the navigation markup when viewing the last page
+ * in the pagination.
+ *
+ * Only affects logged-out users on w.org since pagination is limited to 49 pages.
+ *
+ * @param string $markup  The default markup.
+ * @return string
+ */
+function show_logged_out_max_pagination_message( $markup ) {
+	// Only concerned if...
+	if (
+		// ...the w.org page limiter is present
+		defined( '\WPORG_Page_Limiter::MAX_PAGES' )
+	&&
+		// ...user is not logged in
+		! is_user_logged_in()
+	&&
+		// ...on max pagination page
+		get_query_var( 'paged' ) === \WPORG_Page_Limiter::MAX_PAGES
+	) {
+		$markup .= '<div class="navigation-wporg-max-page">'
+			. sprintf(
+				__( '<a href="%s">Log in</a> to see the full archive of photos!', 'wporg-photos' ),
+				// Escape '%' characters since this function's return value will be passed through `sprintf()`.
+				str_replace( '%', '%%', esc_url( wp_login_url() ) )
+			)
+			. '</div>';
+	}
+
+	return $markup;
+}
+add_filter( 'navigation_markup_template', __NAMESPACE__ . '\show_logged_out_max_pagination_message' );
