@@ -46,7 +46,7 @@ class Rejection {
 			],
 			'copyright'     => [
 				'label' => __( 'Copyright: Potential copyright/ownership infringement', 'wporg-photos' ),
-				'email' => __( 'The photo has been posted elsewhere but does not appear to be your original work. We require that you "have the copyright or other legal ownership for any photo you submit". This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.', 'wporg-photos' ),
+				'email' => __( "The photo has been previously posted elsewhere, but due to our limited resources we are unable to verify its ownership. We require that you 'have the copyright or other legal ownership for any photo you submit'. This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.\n\nIf you do have the copyright, we apologize, but hope you understand our abundance of caution. Reply to let us know and provide some verification of that fact and we can remove the block that would prevent you from resubmitting the photo.", 'wporg-photos' ),
 			],
 			'faces'         => [
 				'label' => __( 'Faces: Contains human face(s)', 'wporg-photos' ),
