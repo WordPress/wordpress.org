@@ -30,11 +30,11 @@ if ( 'waiting' === $translation->translation_status || 'fuzzy' === $translation-
 				<?php endforeach; ?>
 			</ul>
 			<div class="feedback-comment">
-				<label for="feedback_comment"><?php esc_html_e( 'Comment (Optional)', 'glotpress' ); ?>
+				<label for="<?php echo 'feedback-' . esc_attr( $translation->row_id ); ?>"><?php esc_html_e( 'Comment (Optional)', 'glotpress' ); ?>
 				</label>
-				<textarea name="feedback_comment"></textarea>
+				<textarea id="<?php echo 'feedback-' . esc_attr( $translation->row_id ); ?>" name="feedback_comment"></textarea>
 
-				<label class="note">Please note that all feedback is visible to the public.</label>
+				<span class="note">Please note that all feedback is visible to the public.</span>
 			</div>
 		</form>
 	</div>
