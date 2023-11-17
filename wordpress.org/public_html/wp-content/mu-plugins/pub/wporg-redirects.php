@@ -46,6 +46,9 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 				'/about/testimonials' => '/news/category/community/',
 				// Deprecated About / Swag page https://github.com/WordPress/wporg-main-2022/issues/208
 				'/about/swag'         => 'https://mercantile.wordpress.org/',
+
+				// Hashtag alias for State of the Word
+				'/sotw' => 'https://wordpress.org/state-of-the-word/',
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
@@ -89,7 +92,7 @@ add_action( 'template_redirect', function() {
 	if ( 'make.wordpress.org' === $host ) {
 		// Slack invite url is /chat not /slack.
 		$path_redirects['/slack'] = '/chat/';
-		
+
 		// Short URL for Gutenberg Phase 3 publicity
 		$path_redirects['/phase-3'] = '/core/tag/phase-3/';
 	}
