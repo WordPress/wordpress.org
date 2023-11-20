@@ -1588,30 +1588,33 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  * Pin one-off events.
  */
 function pin_one_off_events( $events, $current_time ) {
+	$madrid_utc_offset = 1 * HOUR_IN_SECONDS; // Central European Standard Time - GMT+1
+
+	$sotw = array(
+		'type'                 => 'wordcamp',
+		'title'                => 'State of the Word',
+		// `utm_source` is `private` because it would have to be set by the WP install, we don't need it, and tracking it could be a privacy concern.
+		'url'                  => 'https://wordpress.org/state-of-the-word/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2023',
+		'meetup'               => '',
+		'meetup_url'           => '',
+		'date'                 => '2023-12-11 15:00:00',
+		'end_date'             => '2023-12-11 16:30:00',
+		'start_unix_timestamp' => strtotime( '2023-12-11 15:00:00' ) - $madrid_utc_offset,
+		'end_unix_timestamp'   => strtotime( '2023-12-11 16:30:00' ) - $madrid_utc_offset,
+
+		'location' => array(
+			'location'  => 'Online',
+			'country'   => 'ES',
+			'latitude'  => 40.41446998218856,
+			'longitude' => -3.695042334019202,
+		),
+	);
+
+	if ( $current_time > $sotw['start_unix_timestamp'] ) {
+		$sotw['title'] .= ' - Watch Now';
+	}
+
 	if ( $current_time > strtotime( 'December 9, 2023' ) && $current_time < strtotime( 'December 14, 2023' ) ) {
-		$utc_offset = 1 * HOUR_IN_SECONDS;
-
-		$sotw = array(
-			'type'                 => 'wordcamp',
-			'title'                => 'State of the Word',
-			// `utm_source` is `private` because it would have to be set by the WP install, we don't need it, and tracking it could be a privacy concern.
-			// This may need to be updated for GA4 - https://support.google.com/analytics/answer/10089681.
-			'url'                  => 'https://wordpress.org/news/2023/10/state-of-the-word-2023/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2023',
-			'meetup'               => '',
-			'meetup_url'           => '',
-			'date'                 => '2023-12-11 15:00:00',
-			'end_date'             => '2023-12-11 16:30:00',
-			'start_unix_timestamp' => strtotime( '2023-12-11 15:00:00' ) - $utc_offset,
-			'end_unix_timestamp'   => strtotime( '2023-12-11 16:30:00' ) - $utc_offset,
-
-			'location' => array(
-				'location'  => 'Online',
-				'country'   => 'ES',
-				'latitude'  => 40.41446998218856,
-				'longitude' => -3.695042334019202,
-			),
-		);
-
 		array_unshift( $events, $sotw );
 	}
 
