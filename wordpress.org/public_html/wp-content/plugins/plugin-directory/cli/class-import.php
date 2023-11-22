@@ -336,6 +336,13 @@ class Import {
 		}
 		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
 
+		// Store the content of blueprint files, if they're available and valid.
+		if ( isset( $assets['blueprint'] ) ) {
+			update_post_meta( $plugin->ID, 'assets_blueprints', wp_slash( $assets['blueprint'] ) );
+		} else {
+			delete_post_meta( $plugin->ID, 'assets_blueprints' );
+		}
+
 		// Store the block data, if known
 		if ( count( $blocks ) ) {
 			$changed = update_post_meta( $plugin->ID, 'all_blocks', $blocks );
@@ -564,12 +571,6 @@ class Import {
 		}
 
 		if ( ! $svn_info || ! $svn_info['result'] ) {
-			$stable_tag = 'trunk';
-			$stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk";
-			$svn_info   = SVN::info( $stable_url );
-		}
-
-		if ( ! $svn_info['result'] ) {
 			throw new Exception( 'Could not find stable SVN URL: ' . implode( ' ', reset( $svn_info['errors'] ) ) );
 		}
 
@@ -613,17 +614,25 @@ class Import {
 			'screenshot' => array(),
 			'banner'     => array(),
 			'icon'       => array(),
+			'blueprint'  => array(),
 		);
 
 		$asset_limits = array(
 			'screenshot' => 10 * MB_IN_BYTES,
 			'banner'     => 4 * MB_IN_BYTES,
 			'icon'       => 1 * MB_IN_BYTES,
+			'blueprint'  => 100 * KB_IN_BYTES,
 		);
 
+		$svn_blueprints_folder = null;
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
 			foreach ( $svn_assets_folder as $asset ) {
+				if ( 'blueprints' === $asset['filename'] ) {
+					$svn_blueprints_folder = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/blueprints/";
+					continue;
+				}
+
 				// screenshot-0(-rtl)(-de_DE).(png|jpg|jpeg|gif) || banner-772x250.PNG || icon.svg
 				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(?:-(?P<resolution>\d+(?:\D\d+)?)(-rtl)?(?:-(?P<locale>[a-z]{2,3}(?:_[A-Z]{2})?(?:_[a-z0-9]+)?))?\.(png|jpg|jpeg|gif)|\.svg)$!iu', $asset['filename'], $m ) ) {
 					continue;
@@ -651,6 +660,45 @@ class Import {
 				}
 
 				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+			}
+		}
+
+		if ( $svn_blueprints_folder ) {
+			$svn_export = SVN::export(
+				$svn_blueprints_folder,
+				$tmp_dir . '/blueprints',
+				array(
+					'ignore-externals',
+				)
+			);
+
+			foreach ( Filesystem::list_files( "$tmp_dir/blueprints/", false /* non-recursive */, '!^blueprint[-\w]*\.json$!' ) as $plugin_blueprint ) {
+				$filename = basename( $plugin_blueprint );
+
+				// Don't import oversize blueprints
+				if ( filesize( $plugin_blueprint ) > $asset_limits['blueprint'] ) {
+					continue;
+				}
+
+				// Make sure the blueprint file is valid json and contains the essentials; also minimize whitespace etc.
+				$contents = self::normalize_blueprint_json( file_get_contents( $plugin_blueprint ), $plugin_slug );
+				if ( !$contents ) {
+					continue;
+				}
+
+				$assets['blueprint'][ $filename ] = array(
+					'filename'   => $filename,
+					'revision'   => $svn_export['revision'],
+					'resolution' => false,
+					'location'   => 'assets',
+					'locale'     => '',
+					'contents'   => $contents
+				);
+			}
+
+			// For the time being, limit the number of blueprints. Revise this when the case for multiple blueprints is more clear.
+			if ( isset( $assets['blueprint'] ) && count ( $assets['blueprint'] ) > 10 ) {
+				$assets['blueprint'] = array_slice( $assets['blueprint'], 0, 10, true );
 			}
 		}
 
@@ -1039,5 +1087,45 @@ class Import {
 		}
 
 		return array_unique( $build_files );
+	}
+
+	static function normalize_blueprint_json( $blueprint_file_contents, $plugin_slug ) {
+		$decoded_file = json_decode( $blueprint_file_contents, true );
+
+		$contents = false;
+		if ( is_array( $decoded_file ) && JSON_ERROR_NONE === json_last_error() ) {
+
+			$has_self_install_step = false;
+			if ( isset( $decoded_file[ 'steps' ] ) ) {
+				foreach ( $decoded_file[ 'steps' ] as $i => $step ) {
+					if ( 'installPlugin' === $step['step']
+						&& $plugin_slug === $step['pluginZipFile']['slug'] ) {
+						$has_self_install_step = true;
+
+						if ( true != $step['options']['activate'] ) {
+							$decoded_file[ 'steps' ][ $i ][ 'options' ][ 'activate' ] = true;
+						}
+					}
+				}
+			}
+
+			if ( !$has_self_install_step ) {
+				$decoded_file['steps'][] = array(
+					'step' => 'installPlugin',
+					'pluginZipFile' => array(
+						'resource' => 'wordpress.org/plugins',
+						'slug'     => $plugin_slug,
+					),
+					'options' => array(
+						'activate' => true,
+					)
+				);
+			}
+
+
+			$contents = json_encode( $decoded_file ); // Re-encode to minimize whitespace
+		}
+
+		return $contents;
 	}
 }

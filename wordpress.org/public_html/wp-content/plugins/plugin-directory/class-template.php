@@ -722,16 +722,44 @@ class Template {
 	}
 
 	/**
+	 * Is a live preview available for the plugin, and allowed for the current user to view?
+	 *
+	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @return bool	True if a preview is available and the current user is permitted to see it.
+	 */
+	public static function is_preview_available( $post = null ) {
+
+		if ( self::preview_link( $post ) ) {
+			// Plugin committers can always use the plugin preview button if it exists.
+			if ( current_user_can( 'plugin_admin_edit', $post ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Generate a live preview (playground) link for a given plugin.
 	 *
 	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
-	 * @param string            $landing_page The landing page for the preview. Option. Default: /wp-admin/plugins.php.
-	 * @return string The preview url.
+	 * @return false|string The preview url. False if no preview is configured.
 	 */
-	public static function preview_link( $post = null, $landing_page = '/wp-admin/plugins.php' ) {
+	public static function preview_link( $post = null ) {
 		$post = get_post( $post );
 
-		return sprintf( 'https://playground.wordpress.net/?plugin=%s&login=1&url=%s', esc_attr( $post->post_name ), esc_attr( $landing_page ) );
+		$blueprints = get_post_meta( $post->ID, 'assets_blueprints', true );
+		// Note: for now, only use a file called `blueprint.json`.
+		if ( !isset( $blueprints['blueprint.json'] ) ) {
+			return false;
+		}
+		$blueprint = $blueprints['blueprint.json'];
+		if ( !$blueprint || !isset( $blueprint['contents'] ) || !is_string( $blueprint['contents'] ) ) {
+			return false;
+		}
+
+		$blueprint_encoded = esc_html( $blueprint['contents'] );
+
+		return sprintf( 'https://playground.wordpress.net/?plugin=%s#%s', $post->post_name, $blueprint_encoded );
 	}
 
 	/**
