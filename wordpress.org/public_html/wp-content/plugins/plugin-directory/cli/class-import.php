@@ -1115,7 +1115,8 @@ class Import {
 				}
 			}
 
-			if ( !$has_self_install_step ) {
+			// Akismet is a special case because the plugin is bundled with WordPress.
+			if ( !$has_self_install_step && 'akismet' !== $plugin_slug ) {
 				$decoded_file['steps'][] = array(
 					'step' => 'installPlugin',
 					'pluginZipFile' => array(
