@@ -757,7 +757,7 @@ class Template {
 			return false;
 		}
 
-		$blueprint_encoded = esc_html( $blueprint['contents'] );
+		$blueprint_encoded = esc_html( str_replace( '%', '%25', $blueprint['contents'] ) );
 
 		return sprintf( 'https://playground.wordpress.net/?plugin=%s#%s', $post->post_name, $blueprint_encoded );
 	}
