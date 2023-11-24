@@ -250,7 +250,6 @@ class Detect_Duplicate_Translations {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo $update_query . "\n";
 			}
-			break; // todo: remove this break to update all the duplicates.
 		}
 
 		if ( $this->verbose ) {
