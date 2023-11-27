@@ -11,19 +11,73 @@ namespace WordPressdotorg\MemorialProfiles;
 function get_profiles() {
 	global $wpdb;
 
-	$results = $wpdb->get_results( 'SELECT user_id FROM bpmain_bp_xprofile_data WHERE field_id = "476" AND value = "Yes"', ARRAY_A );
+	$date_of_passing_field_id = 483;
+	$memorial_name_field_id   = 484;
 
-	$user_ids = wp_list_pluck( $results, 'user_id' );
+	$query = $wpdb->prepare(
+		'
+		SELECT field_id, value, user_id
+		FROM `bpmain_bp_xprofile_data`
+		WHERE field_id IN ( %d, %d )
+		AND user_id IN (
+			SELECT user_id
+			FROM bpmain_bp_xprofile_data
+			WHERE field_id = 476 AND value = "Yes"
+		)
+		ORDER BY user_id
+		',
+		$date_of_passing_field_id,
+		$memorial_name_field_id
+	);
 
-	// Grabs user display_name and user_nicename for profile link.
-	return get_users(
+	// Execute the prepared statement
+	$profile_data = $wpdb->get_results( $query, ARRAY_A );
+
+	$user_ids = wp_list_pluck( $profile_data, 'user_id' );
+
+	// Grabs user display_name, user_nicename, ID for profile link.
+	$users = get_users(
 		array(
 			'blog_id' => 0,
 			'include' => $user_ids,
 			'fields'  => array(
-				'display_name',
+				'ID',
 				'user_nicename',
 			),
 		)
 	);
+
+	// Add meta each user in the result
+	foreach ( $users as &$user ) {
+		foreach ( $profile_data as $profile ) {
+			if ( $profile['user_id'] === $user->ID ) {
+
+				if ( $date_of_passing_field_id === (int) $profile['field_id'] ) {
+					$user->date_passing = $profile['value'];
+				}
+
+				if ( $memorial_name_field_id === (int) $profile['field_id'] ) {
+					$user->display_name = $profile['value'];
+				}
+			}
+		}
+	}
+
+	// Sort based on date of passing
+	usort(
+		$users,
+		function ( $a, $b ) {
+			$timestampA = strtotime( $a->date_passing );
+			$timestampB = strtotime( $b->date_passing );
+
+			if ( $timestampA === $timestampB ) {
+				return 0;
+			}
+
+			// Use the less than operator for ascending order, or greater than for descending order
+			return ( $timestampA < $timestampB ) ? -1 : 1;
+		}
+	);
+
+	return $users;
 }
