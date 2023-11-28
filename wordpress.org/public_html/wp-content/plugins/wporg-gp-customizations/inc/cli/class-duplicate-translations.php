@@ -156,10 +156,10 @@ class Duplicate_Translations {
 					);
 					echo $prepared_query . "\n";
 					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-					$duplicate_entries = $wpdb->get_results( $prepared_query, ARRAY_A );
-					foreach ( $duplicate_entries as $duplicate_entry ) {
+					$duplicated = $wpdb->get_results( $prepared_query, ARRAY_A );
+					foreach ( $duplicated as $entry ) {
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						echo "  - translation_id: {$duplicate_entry['id']}, date_added: {$duplicate_entry['date_added']}, date_modified: {$duplicate_entry['date_modified']}, user_id: {$duplicate_entry['user_id']}, user_id_last_modified: {$duplicate_entry['user_id_last_modified']}, translation: {$duplicate_entry['translation_0']}\n";
+						echo "  - translation_id: {$entry['id']}, date_added: {$entry['date_added']}, date_modified: {$entry['date_modified']}, user_id: {$entry['user_id']}, user_id_last_modified: {$entry['user_id_last_modified']}, translation: {$entry['translation_0']}\n";
 					}
 				}
 			}
@@ -182,65 +182,34 @@ class Duplicate_Translations {
 		global $wpdb;
 
 		foreach ( $this->duplicates as $duplicate ) {
-			$update_query = $wpdb->prepare(
-				"UPDATE {$wpdb->gp_translations}
-				SET status = CASE
-					WHEN id = (
-						SELECT id
-						FROM (
-							SELECT id
-							FROM {$wpdb->gp_translations}
-							WHERE original_id = %d
-							AND translation_set_id = %d
-							AND status = 'current'
-							ORDER BY date_modified DESC, id DESC
-							LIMIT 1
-						) AS subquery
-					) THEN 'current'
-					ELSE 'old'
-				END,
-				user_id_last_modified = CASE
-					WHEN id = (
-						SELECT id
-						FROM (
-							SELECT id
-							FROM {$wpdb->gp_translations}
-							WHERE original_id = %d
-							AND translation_set_id = %d
-							AND status = 'current'
-							ORDER BY date_modified DESC, id DESC
-							LIMIT 1
-						) AS subquery
-					) THEN user_id_last_modified
-					ELSE NULL
-				END,
-				date_modified = CASE
-					WHEN id = (
-						SELECT id
-						FROM (
-							SELECT id
-							FROM {$wpdb->gp_translations}
-							WHERE original_id = %d
-							AND translation_set_id = %d
-							AND status = 'current'
-							ORDER BY date_modified DESC, id DESC
-							LIMIT 1
-						) AS subquery
-					) THEN date_modified
-					ELSE NOW()
-				END
+			$id_to_not_update = $wpdb->get_var(
+				$wpdb->prepare("
+					SELECT id
+					FROM {$wpdb->gp_translations}
+					WHERE original_id = %d
+					AND translation_set_id = %d
+					AND status = 'current'
+					ORDER BY date_modified DESC, id DESC
+					LIMIT 1
+					",
+					$duplicate['original_id'],
+					$duplicate['translation_set_id']
+				)
+			);
+
+			$update_query = $wpdb->prepare("
+				UPDATE {$wpdb->gp_translations}
+				SET status = 'old',
+				user_id_last_modified = NULL,
+				date_modified = NOW()
 				WHERE original_id = %d
 				AND translation_set_id = %d
+				AND id != %d
 				AND status = 'current';
 			",
 				$duplicate['original_id'],
 				$duplicate['translation_set_id'],
-				$duplicate['original_id'],
-				$duplicate['translation_set_id'],
-				$duplicate['original_id'],
-				$duplicate['translation_set_id'],
-				$duplicate['original_id'],
-				$duplicate['translation_set_id']
+				$id_to_not_update
 			);
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
