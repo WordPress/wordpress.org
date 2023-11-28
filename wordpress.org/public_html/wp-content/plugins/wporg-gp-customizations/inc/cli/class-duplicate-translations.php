@@ -150,8 +150,17 @@ class Duplicate_Translations {
 				foreach ( $results as $result ) {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					echo "- Translation_set_id: {$result['translation_set_id']}, Original_id: {$result['original_id']} -> ";
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo "SELECT * FROM `{$wpdb->gp_translations}` WHERE `original_id` = {$result['original_id']} AND `translation_set_id` = {$result['translation_set_id']}\n";
+					$prepared_query = $wpdb->prepare("SELECT * FROM `{$wpdb->gp_translations}` WHERE `original_id` = %d AND `translation_set_id` = %d AND `status`='current';",
+						$result['original_id'],
+						$result['translation_set_id'],
+					);
+					echo $prepared_query . "\n";
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+					$duplicate_entries = $wpdb->get_results( $prepared_query, ARRAY_A );
+					foreach ( $duplicate_entries as $duplicate_entry ) {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo "  - translation_id: {$duplicate_entry['id']}, date_added: {$duplicate_entry['date_added']}, date_modified: {$duplicate_entry['date_modified']}, user_id: {$duplicate_entry['user_id']}, user_id_last_modified: {$duplicate_entry['user_id_last_modified']}, translation: {$duplicate_entry['translation_0']}\n";
+					}
 				}
 			}
 		}
