@@ -4,7 +4,7 @@
  *
  * To execute this command, you need to use this text in the CLI:
  *
- * wp wporg-translate detect-duplicate-translations --url=translate.wordpress.org
+ * wp wporg-translate duplicate-translations --url=translate.wordpress.org
  *
  * @package WordPressdotorg\GlotPress\Customizations\CLI
  */
@@ -14,14 +14,14 @@ namespace WordPressdotorg\GlotPress\Customizations\CLI;
 use WP_CLI_Command;
 
 /**
- * Class Detect_Duplicate_Translations_CLI
+ * Class Duplicate_Translations_CLI
  */
-class Detect_Duplicate_Translations_CLI extends WP_CLI_Command {
+class Duplicate_Translations_CLI extends WP_CLI_Command {
 	/**
 	 * Detect duplicate translations in the database in "current" status and update them.
 	 *
 	 * ## OPTIONS
-	 * [--<update>]
+	 * [--<fix>]
 	 *       Update the duplicates, setting all translations to old except the last one.
 	 *
 	 * [--<notify>]
@@ -35,10 +35,10 @@ class Detect_Duplicate_Translations_CLI extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp wporg-translate detect-duplicate-translations --url=translate.wordpress.org
-	 * wp wporg-translate detect-duplicate-translations --url=translate.wordpress.org --update
-	 * wp wporg-translate detect-duplicate-translations --url=translate.wordpress.org --notify
-	 * wp wporg-translate detect-duplicate-translations --url=translate.wordpress.org --update --verbose --print-sql
+	 * wp wporg-translate duplicate-translations --url=translate.wordpress.org
+	 * wp wporg-translate duplicate-translations --url=translate.wordpress.org --fix
+	 * wp wporg-translate duplicate-translations --url=translate.wordpress.org --notify
+	 * wp wporg-translate duplicate-translations --url=translate.wordpress.org --fix --verbose --print-sql
 	 *
 	 * @param array $args       The arguments.
 	 * @param array $assoc_args The associative arguments.
@@ -48,7 +48,7 @@ class Detect_Duplicate_Translations_CLI extends WP_CLI_Command {
 		$notify        = false;
 		$verbose       = false;
 		$print_sql     = false;
-		if ( array_key_exists( 'update', $assoc_args ) ) {
+		if ( array_key_exists( 'fix', $assoc_args ) ) {
 			$update_values = true;
 		}
 		if ( array_key_exists( 'notify', $assoc_args ) ) {
@@ -61,7 +61,7 @@ class Detect_Duplicate_Translations_CLI extends WP_CLI_Command {
 			$print_sql = true;
 		}
 
-		$detect_duplicates = new Detect_Duplicate_Translations();
-		$detect_duplicates( $update_values, $notify, $verbose, $print_sql );
+		$duplicates = new Duplicate_Translations();
+		$duplicates( $update_values, $notify, $verbose, $print_sql );
 	}
 }

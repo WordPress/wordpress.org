@@ -6,7 +6,7 @@ use GP;
 use GP_Locales;
 use GP_Translation;
 use WordPressdotorg\GlotPress\Customizations\CLI\Stats;
-use WordPressdotorg\GlotPress\Customizations\CLI\Detect_Duplicate_Translations;
+use WordPressdotorg\GlotPress\Customizations\CLI\Duplicate_Translations;
 use WP_CLI;
 use function WordPressdotorg\Profiles\assign_badge;
 
@@ -76,7 +76,7 @@ class Plugin {
 		add_action( 'init', [ $this, 'register_cron_events' ] );
 		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
 		add_action( 'wporg_translate_update_polyglots_stats', [ $this, 'update_polyglots_stats' ] );
-		add_action( 'wporg_translate_detect_duplicate_translations', [ $this, 'detect_duplicate_translations' ] );
+		add_action( 'wporg_translate_duplicate_translations', [ $this, 'duplicate_translations' ] );
 		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
 		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
 		add_action( 'gp_translations_imported', array( $this, 'log_imported_translations' ) );
@@ -203,8 +203,8 @@ class Plugin {
 		if ( ! wp_next_scheduled( 'wporg_translate_update_polyglots_stats' ) ) {
 			wp_schedule_event( time(), 'daily', 'wporg_translate_update_polyglots_stats' );
 		}
-		if ( ! wp_next_scheduled( 'wporg_translate_detect_duplicate_translations' ) ) {
-			wp_schedule_event( time(), 'daily', 'wporg_translate_detect_duplicate_translations' );
+		if ( ! wp_next_scheduled( 'wporg_translate_duplicate_translations' ) ) {
+			wp_schedule_event( time(), 'daily', 'wporg_translate_duplicate_translations' );
 		}
 	}
 
@@ -264,9 +264,9 @@ class Plugin {
 	 *
 	 * @return void
 	 */
-	public function detect_duplicate_translations() {
-		$stats = new Detect_Duplicate_Translations();
-		$stats( false, true, false, false );
+	public function duplicate_translations() {
+		$duplicates = new Duplicate_Translations();
+		$duplicates( false, true, false, false );
 	}
 
 	/**
@@ -619,7 +619,7 @@ class Plugin {
 	 * Registers CLI commands if WP-CLI is loaded.
 	 */
 	public function register_cli_commands() {
-		WP_CLI::add_command( 'wporg-translate detect-duplicate-translations', __NAMESPACE__ . '\CLI\Detect_Duplicate_Translations_CLI', $args = [] );
+		WP_CLI::add_command( 'wporg-translate duplicate-translations', __NAMESPACE__ . '\CLI\Duplicate_Translations_CLI', $args = [] );
 		WP_CLI::add_command( 'wporg-translate init-locale', __NAMESPACE__ . '\CLI\Init_Locale' );
 		WP_CLI::add_command( 'wporg-translate language-pack', __NAMESPACE__ . '\CLI\Language_Pack' );
 		WP_CLI::add_command( 'wporg-translate mass-create-sets', __NAMESPACE__ . '\CLI\Mass_Create_Sets' );

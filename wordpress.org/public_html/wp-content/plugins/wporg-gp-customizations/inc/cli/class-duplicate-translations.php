@@ -8,9 +8,9 @@
 namespace WordPressdotorg\GlotPress\Customizations\CLI;
 
 /**
- * Class Detect_Duplicate_Translations
+ * Class Duplicate_Translations
  */
-class Detect_Duplicate_Translations {
+class Duplicate_Translations {
 
 	/**
 	 * The lower limit for translation_set_id.
@@ -66,7 +66,7 @@ class Detect_Duplicate_Translations {
 	private string $last_sql_error = '';
 
 	/**
-	 * Detect_Duplicate_Translations constructor.
+	 * Duplicate_Translations constructor.
 	 *
 	 * @param bool $update_values If true, update the duplicate entries.
 	 * @param bool $notify        If true, notify the duplicate entries in Slack.
@@ -274,8 +274,8 @@ class Detect_Duplicate_Translations {
 			$message .= $mysql_error;
 		} else {
 			$message  = ":warning: There are " . count( $this->duplicates ) . " duplicate translations in the database with *current* status.\n\n";
-			$message .= "Execute *'wp wporg-translate detect-duplicate-translations --url=translate.wordpress.org --verbose'* to show the duplicate entries.\n";
-			$message .= "Execute *'wp wporg-translate detect-duplicate-translations --url=translate.wordpress.org --update-values'* to update the duplicate entries, solving the problem.\n";
+			$message .= "Execute *'wp wporg-translate duplicate-translations --url=translate.wordpress.org --verbose'* to show the duplicate entries.\n";
+			$message .= "Execute *'wp wporg-translate duplicate-translations --url=translate.wordpress.org --fix'* to update the duplicate entries, solving the problem.\n";
 			$message .= $mysql_error;
 			$message .= "\ncc @akirk @Tosin @amieiro";
 		}
