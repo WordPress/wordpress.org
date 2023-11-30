@@ -61,7 +61,7 @@ function wporg_login_rest_username_exists( $request ) {
 				'<code>' . esc_html( $pending['user_email'] ) . '</code>',
 				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
 			),
-			'avatar' => get_avatar( $email, 64 ),
+			'avatar' => get_avatar( $pending['user_email'], 64 ),
 		];
 	} elseif ( $pending ) {
 		return [
