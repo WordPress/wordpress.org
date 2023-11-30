@@ -50,12 +50,17 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 							<ul>
 								<?php
 								foreach ( $menu_items as $path => $text ) :
-									$class = '';
 									$url = parse_url( $path );
+
+									// Check both host and path (if available).
+									$is_same_host = ! empty( $url['host'] ) ? $url['host'] === $_SERVER['HTTP_HOST'] : true;
+									$is_same_path = ! empty( $url['path'] ) && false !== strpos( $_SERVER['REQUEST_URI'], $url['path'] );
+
+									$class = ( $is_same_host && $is_same_path ) ? 'class="active" ' : '';
+
 									if ( ! empty( $url['host' ] ) ) {
 										$url = esc_url( $path );
 									} else {
-										$class = false !== strpos( $_SERVER['REQUEST_URI'], $url['path'] ) ? 'class="active" ' : '';
 										$url = esc_url( home_url( $path ) );
 									}
 								?>
