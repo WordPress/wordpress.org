@@ -12,6 +12,11 @@ class Posts {
 	const META_KEY_MISSING_TAXONOMIES = '_missing_taxonomies';
 
 	/**
+	 * The registered image size that should be used for photos included in feeds.
+	 */
+	const RSS_PHOTO_SIZE = 'medium_large';
+
+	/**
 	 * Initializer.
 	 */
 	public static function init() {
@@ -41,6 +46,7 @@ class Posts {
 		// Dedicate primary feed to photos.
 		add_action( 'request',            [ __CLASS__, 'make_primary_feed_all_photos' ] );
 		add_filter( 'the_content_feed',   [ __CLASS__, 'add_photo_to_rss_feed' ] );
+		add_action( 'rss2_item',          [ __CLASS__, 'add_photo_as_enclosure_to_rss_feed' ] );
 		add_filter( 'wp_get_attachment_image_attributes', [ __CLASS__, 'feed_attachment_image_attributes' ], 10, 3 );
 	}
 
@@ -409,12 +415,54 @@ class Posts {
 
 		if ( $post && Registrations::get_post_type() === get_post_type( $post ) && has_post_thumbnail( $post->ID ) ) {
 			$content = '<figure>'
-				. get_the_post_thumbnail( $post->ID, 'medium_large', [ 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
+				. get_the_post_thumbnail( $post->ID, self::RSS_PHOTO_SIZE, [ 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
 				. ( $content ? "<figcaption>{$content}</figcaption>\n" : '' )
 				. "</figure>\n";
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Outputs an `enclosure` tag for a photo in RSS feeds of photos.
+	 */
+	public static function add_photo_as_enclosure_to_rss_feed() {
+		global $post;
+
+		// Bail if not a photo post.
+		if ( ! $post || Registrations::get_post_type() !== get_post_type( $post ) ) {
+			return;
+		}
+
+		// Bail if somehow there is no associated photo.
+		$photo_id = get_post_thumbnail_id( $post );
+		if ( ! $photo_id ) {
+			return;
+		}
+
+		// Get the photo's URL.
+		$photo_url = get_the_post_thumbnail_url( $post, self::RSS_PHOTO_SIZE );
+
+		// Get the photo's MIME type.
+		$mime_type = get_post_mime_type( $photo_id );
+
+		// Get the photo's file size.
+		$photo_meta = wp_get_attachment_metadata( $photo_id );
+		if ( 'full' === self::RSS_PHOTO_SIZE ) {
+			$filesize = $photo_meta['filesize'] ?? '';
+		} else {
+			$filesize = $photo_meta['sizes'][ self::RSS_PHOTO_SIZE ]['filesize'] ?? '';
+		}
+
+		if ( $photo_url && $mime_type && $filesize ) {
+			// Output the enclosure tag.
+			printf(
+				'<enclosure url="%s" length="%s" type="%s" />' . "\n",
+				esc_url( $photo_url ),
+				esc_attr( $filesize ),
+				esc_attr( $mime_type )
+			);
+		}
 	}
 
 	/**
