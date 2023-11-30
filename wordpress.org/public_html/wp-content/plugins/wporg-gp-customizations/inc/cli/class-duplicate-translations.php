@@ -199,7 +199,7 @@ class Duplicate_Translations {
 
 			$update_query = $wpdb->prepare("
 				UPDATE {$wpdb->gp_translations}
-				SET status = 'old',
+				SET status = 'fuzzy',
 				user_id_last_modified = NULL,
 				date_modified = NOW()
 				WHERE original_id = %d
