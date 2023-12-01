@@ -158,8 +158,9 @@ class Stats_Report {
 		// # Break down the plugins in the queue, based on if we're still waiting on a reply.
 		$stats['in_queue_pending_why'] = $wpdb->get_row( $wpdb->prepare(
 			'SELECT
-				SUM( IF( active = 0, 1, 0 ) ) AS `author`,
-				SUM( IF( active > 0, 1, 0 ) ) AS `reviewer`
+				SUM( IF( active = 0 AND closed > 0, 1, 0 ) ) AS `author`,
+				SUM( IF( active > 0, 1, 0 ) ) AS `reviewer`,
+				SUM( IF( active = 0 AND closed = 0, 1, 0 ) ) AS `noemail`
 			FROM (
 				SELECT
 					p.post_name,
@@ -440,6 +441,17 @@ class Stats_Report {
 				);
 			?>
 			</li>
+			<?php if ( $stats['in_queue_pending_why']['noemail'] ) : ?>
+				<li>
+				<?php
+					/* translators: %d: number of pending plugins */
+					printf(
+						__( '&rarr; (pending; waiting on reviewer, email not yet sent)* : %d', 'wporg-plugins' ),
+						esc_html( $stats['in_queue_pending_why']['noemail'] )
+					);
+				?>
+				</li>
+			<?php endif; ?>
 		</ul>
 
 		<h3><?php _e( 'Help Scout Queue Stats', 'wporg-plugins' ); ?></h3>
