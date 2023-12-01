@@ -246,8 +246,8 @@ class Consistency extends GP_Route {
 
 				$new_request['notice_message'] .= '</ul>';
 			}
+			$this->notify_to_matrix( $matrix_message, $current_user, $new_request['set'] );
 		}
-		$this->notify_to_matrix( $matrix_message, $current_user, $new_request['set'] );
 		$this->get_search_form( $new_request );
 	}
 
