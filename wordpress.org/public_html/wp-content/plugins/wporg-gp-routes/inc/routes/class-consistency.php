@@ -95,6 +95,7 @@ class Consistency extends GP_Route {
 				o.singular AS original_singular,
 				o.plural AS original_plural,
 				o.context AS original_context,
+				o.comment AS original_comment,
 				o.id AS original_id,
 				t.translation_0 AS translation,
 				t.date_added AS translation_added,
@@ -165,8 +166,21 @@ class Consistency extends GP_Route {
 			$consistency_data = $this->prepare_consistency_data( $new_request );
 
 			foreach ( $consistency_data['results'] as $result ) {
+				$exception = '';
 				if ( 'wporg-bulk-update-do-not-update' == $_POST['translation'][$result->translation] ) {
 					continue;
+				}
+				if ( false !== stripos( strtolower( 'Plugin Name of the plugin' ), strtolower( $result->original_comment ) ) ) {
+					$exception = 'A translation cannot be updated because it is the name of the plugin.';
+				}
+				if ( false !== stripos( strtolower( 'Author of the plugin' ), strtolower( $result->original_comment ) ) ) {
+					$exception = 'A translation cannot be updated because it is the author of the plugin.';
+				}
+				if ( false !== stripos( strtolower( 'Theme Name of the theme' ), strtolower( $result->original_comment ) ) ) {
+					$exception = 'A translation cannot be updated because it is the name of the theme.';
+				}
+				if ( false !== stripos( strtolower( 'Author of the theme' ), strtolower( $result->original_comment ) ) ) {
+					$exception = 'A translation cannot be updated because it is the author of the theme.';
 				}
 				// Get the current translation to update.
 				$current_translation = GP::$translation->get( $result->translation_id );
@@ -184,24 +198,29 @@ class Consistency extends GP_Route {
 					break;
 				}
 				// Create a new translation with the selected translation.
-				$new_translation = GP::$translation->create(
-					array(
-						'original_id'           => $current_translation->original_id,
-						'translation_set_id'    => $current_translation->translation_set_id,
-						'translation_0'         => $translation_selected->translation_0,
-						'translation_1'         => $translation_selected->translation_1,
-						'translation_2'         => $translation_selected->translation_2,
-						'translation_3'         => $translation_selected->translation_3,
-						'translation_4'         => $translation_selected->translation_4,
-						'translation_5'         => $translation_selected->translation_5,
-						'user_id'               => $current_user->ID,
-						'user_id_last_modified' => $current_user->ID,
-						'status'                => 'current',
-					)
-				);
-				$current_translation->set_status( 'old' );
-				$updated_translation_count++;
+				if ( ! $exception ) {
+					$new_translation = GP::$translation->create(
+						array(
+							'original_id'           => $current_translation->original_id,
+							'translation_set_id'    => $current_translation->translation_set_id,
+							'translation_0'         => $translation_selected->translation_0,
+							'translation_1'         => $translation_selected->translation_1,
+							'translation_2'         => $translation_selected->translation_2,
+							'translation_3'         => $translation_selected->translation_3,
+							'translation_4'         => $translation_selected->translation_4,
+							'translation_5'         => $translation_selected->translation_5,
+							'user_id'               => $current_user->ID,
+							'user_id_last_modified' => $current_user->ID,
+							'status'                => 'current',
+						)
+					);
+					$current_translation->set_status( 'old' );
+					$updated_translation_count++;
+				} else {
+					$new_translation = $current_translation;
+				}
 				$modified_elements[] = array(
+					'exception' => $exception,
 					'old_translation' => $current_translation->translation_0,
 					'new_translation' => $translation_selected->translation_0,
 					'new_translation_id' => $new_translation->id,
@@ -228,6 +247,21 @@ class Consistency extends GP_Route {
 						$modified_element['original_id'],
 						$modified_element['new_translation_id'],
 					);
+					if ( '' != $modified_element['exception'] ) {
+						$new_request['notice_message'] .= sprintf(
+							"<li>%s Please, update this translation manually at <a href=\"%s\" target=\"_blank\">%s</a>.</li>",
+							esc_html( $modified_element['exception'] ),
+							esc_url( $url ),
+							esc_url( $url )
+						);
+						$matrix_message 			  .= sprintf(
+							"- %s Please, update this translation manually at [%s](%s).\n\n",
+							esc_html( $modified_element['exception'] ),
+							esc_url( $url ),
+							esc_url( $url )
+						);
+						continue;
+					}
 					$new_request['notice_message'] .= sprintf(
 						"<li>Old: \"%s\" → New: \"%s\"\n <ul><li><a href=\"%s\" target=\"_blank\">%s</a></li></ul></li>",
 						esc_html( $modified_element['old_translation'] ),
@@ -236,7 +270,7 @@ class Consistency extends GP_Route {
 						esc_url( $url )
 					);
 					$matrix_message 			  .= sprintf(
-						"Old: %s → New: %s\n\n- [%s](%s) \n\n",
+						"Old: %s → New: %s\n\n- [%s](%s)\n\n",
 						esc_html( $modified_element['old_translation'] ),
 						esc_html( $modified_element['new_translation'] ),
 						esc_url( $url ),
