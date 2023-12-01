@@ -159,12 +159,7 @@ class Status_Transitions {
 		}
 
 		// Record the time a plugin was transitioned into a specific status.
-		if ( '0000-00-00 00:00:00' === $post->post_modified_gmt ) {
-			// Assume now.
-			update_post_meta( $post->ID, "_{$new_status}", time() );
-		} else {
-			update_post_meta( $post->ID, "_{$new_status}", strtotime( $post->post_modified_gmt ) );
-		}
+		update_post_meta( $post->ID, "_{$new_status}", time() );
 
 		// Clear any relevant caches.
 		$this->flush_caches( $post );
