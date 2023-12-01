@@ -69,23 +69,25 @@ class Stats_Report {
 	 * @return array {
 	 *     Array of stats.
 	 *
-	 *     @type int $plugin_approve                        The number of plugins approved within the defined time interval.
-	 *     @type int $plugin_delist                         The number of plugins delisted within the defined time interval.
-	 *     @type int $plugin_new                            The number of plugins submitted within the defined time interval.
-	 *     @type int $plugin_reject                         The number of plugins rejected within the defined time interval.
-	 *     @type int $in_queue                              The number of plugins currently in the queue (new or pending).
-	 *     @type int $in_queue_new                          The number of new plugins currently in the queue.
-	 *     @type int $in_queue_pending                      The number of pending plugins currently in the queue.
-	 *     @type int $in_queue_from_time_window             The number of plugins currently in the queue submitted during the specified time window.
-	 *     @type int $in_queue_old                          The number of plugins currently in the queue that are older than "recently".
-	 *     @type int $helpscout_queue_total_conversations   The number of ongoing Help Scout conversations.
-	 *     @type int $helpscout_queue_new_conversations     The number of new Help Scout conversations.
-	 *     @type int $helpscout_queue_customers             The number of unique Plugin authors contacted.
-	 *     @type int $helpscout_queue_conversations_per_day The number of Help Scout conversations per day.
-	 *     @type int $helpscout_queue_busiest_day           The busiest day in the Help Scout queue.
-	 *     @type int $helpscout_queue_messages_received     The number of emails received in HelpScout.
-	 *     @type int $helpscout_queue_replies_sent          The number of replies sent to emails.
-	 *     @type int $helpscout_queue_emails_created        The number of new outgoing conversations created.
+	 *     @type int   $plugin_approve                        The number of plugins approved within the defined time interval.
+	 *     @type int   $plugin_delist                         The number of plugins delisted within the defined time interval.
+	 *     @type array $plugin_delist_reasons                 The number of plugins delisted within the defined time interval, broken down by reason.
+	 *     @type int   $plugin_new                            The number of plugins submitted within the defined time interval.
+	 *     @type int   $plugin_reject                         The number of plugins rejected within the defined time interval.
+	 *     @type int   $in_queue                              The number of plugins currently in the queue (new or pending).
+	 *     @type int   $in_queue_new                          The number of new plugins currently in the queue.
+	 *     @type int   $in_queue_pending                      The number of pending plugins currently in the queue.
+	 *     @type array $in_queue_pending_why                  The number of pending plugins currently in the queue, broken down by whom we're waiting on.
+	 *     @type int   $in_queue_from_time_window             The number of plugins currently in the queue submitted during the specified time window.
+	 *     @type int   $in_queue_old                          The number of plugins currently in the queue that are older than "recently".
+	 *     @type int   $helpscout_queue_total_conversations   The number of ongoing Help Scout conversations.
+	 *     @type int   $helpscout_queue_new_conversations     The number of new Help Scout conversations.
+	 *     @type int   $helpscout_queue_customers             The number of unique Plugin authors contacted.
+	 *     @type int   $helpscout_queue_conversations_per_day The number of Help Scout conversations per day.
+	 *     @type int   $helpscout_queue_busiest_day           The busiest day in the Help Scout queue.
+	 *     @type int   $helpscout_queue_messages_received     The number of emails received in HelpScout.
+	 *     @type int   $helpscout_queue_replies_sent          The number of replies sent to emails.
+	 *     @type int   $helpscout_queue_emails_created        The number of new outgoing conversations created.
 	 * }
 	 */
 	public function get_stats( $args = array() ) {
@@ -126,6 +128,8 @@ class Stats_Report {
 			date( 'Y-m-d', strtotime( $args['date'] ) )
 		) ), 'count', 'reason' );
 
+		$stats[ 'plugin_delist_reasons' ] = array_map( 'intval', $stats[ 'plugin_delist_reasons' ] );
+
 		$stats[ 'plugin_new' ] = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = '_submitted_date' AND meta_value >= %d AND meta_value < %d",
 			strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ),
@@ -142,20 +146,43 @@ class Stats_Report {
 		// Plugin Queue
 		// --------------
 		// # of plugins currently in the queue that are new (have not been processed/replied to yet)
-		$stats['in_queue_new'] = $wpdb->get_var(
+		$stats['in_queue_new'] = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` = 'new'"
 		);
 
 		// # of plugins currently in the queue that are pending (have been initially replied to)
-		$stats['in_queue_pending'] = $wpdb->get_var(
+		$stats['in_queue_pending'] = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` = 'pending'"
 		);
+
+		// # Break down the plugins in the queue, based on if we're still waiting on a reply.
+		$stats['in_queue_pending_why'] = $wpdb->get_row( $wpdb->prepare(
+			'SELECT
+				SUM( IF( active = 0, 1, 0 ) ) AS `author`,
+				SUM( IF( active > 0, 1, 0 ) ) AS `reviewer`
+			FROM (
+				SELECT
+					p.post_name,
+					SUM( IF( emails.status = "closed", 1, 0 ) ) AS `closed`,
+					SUM( IF( emails.status = "active", 1, 0 ) ) AS `active`
+				FROM %i p
+					LEFT JOIN %i meta ON meta.meta_key = "plugins" AND meta.meta_value = p.post_name
+					LEFT JOIN %i emails ON meta.helpscout_id = emails.id
+				WHERE p.post_status = "pending"
+				GROUP BY p.ID
+			) subquery',
+			$wpdb->posts,
+			"{$wpdb->base_prefix}helpscout_meta",
+			"{$wpdb->base_prefix}helpscout",
+		), ARRAY_A );
+
+		$stats['in_queue_pending_why'] = array_map( 'intval', $stats['in_queue_pending_why'] );
 
 		// # of plugins currently in the queue (new + pending)
 		$stats['in_queue'] = $stats['in_queue_new'] + $stats['in_queue_pending'];
 
 		// # of plugins currently in the queue submitted during the specified time window
-		$stats['in_queue_from_time_window'] = $wpdb->get_var( $wpdb->prepare(
+		$stats['in_queue_from_time_window'] = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` IN ( 'new','pending' ) AND post_date < %s AND post_date > DATE_SUB( %s, INTERVAL %d DAY )",
 			$args['date'],
 			$args['date'],
@@ -163,7 +190,7 @@ class Stats_Report {
 		) );
 
 		// # of plugins currently in the queue that are older than "recently"
-		$stats['in_queue_old'] = $wpdb->get_var( $wpdb->prepare(
+		$stats['in_queue_old'] = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` IN ( 'new','pending' ) AND post_date < DATE_SUB( %s, INTERVAL %d DAY )",
 			$args['date'],
 			absint( $args['recentdays'] ) + 1
@@ -392,6 +419,24 @@ class Stats_Report {
 				printf(
 					__( '&rarr; (pending; replied to)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue_pending'] )
+				);
+			?>
+			</li>
+			<li>
+			<?php
+				/* translators: %d: number of pending plugins */
+				printf(
+					__( '&rarr; (pending; waiting on author)* : %d', 'wporg-plugins' ),
+					esc_html( $stats['in_queue_pending_why']['author'] )
+				);
+			?>
+			</li>
+			<li>
+			<?php
+				/* translators: %d: number of pending plugins */
+				printf(
+					__( '&rarr; (pending; waiting on reviewer)* : %d', 'wporg-plugins' ),
+					esc_html( $stats['in_queue_pending_why']['reviewer'] )
 				);
 			?>
 			</li>
