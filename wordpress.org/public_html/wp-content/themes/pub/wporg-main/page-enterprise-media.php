@@ -57,9 +57,6 @@ the_post();
 
 			<div class="entry-content row media-logos">
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/newyorkpostlogo.png'); ?>">
-				</section>
-				<section class="col-3">
 					<img src="<?php echo get_theme_file_uri('images/enterprise/nytlogo.png'); ?>">
 				</section>
 				<section class="col-3">
@@ -115,6 +112,8 @@ the_post();
 				</section>
 				<section class="col-3">
 					<img src="<?php echo get_theme_file_uri('images/enterprise/readersdigestlogo.png'); ?>">
+				</section>
+				<section class="col-3">
 				</section>
 				<hr class="bluesmall">
 			</div>
