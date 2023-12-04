@@ -231,6 +231,97 @@ class Stats_Report {
 		return $stats;
 	}
 
+	public function get_user_stats( $args = array() ) {
+		global $wpdb;
+
+		$stats['as_of_date'] = gmdate( 'Y-m-d' );
+
+		$defaults = array(
+			'date'       => $stats['as_of_date'],
+			'num_days'   => 7,
+			'recentdays' => 7,
+		);
+
+		foreach ( $defaults as $key => $val ) {
+			$args[ $key ] = empty( $args[ $key ] ) ? $val : $args[ $key ];
+		}
+
+		$stats = $args;
+		$stats['data'] = [];
+
+		$reviewers = get_users( [
+			'role__in' => [
+				'plugin_reviewer',
+				'plugin_admin',
+				'administrator',
+			],
+		] );
+
+		$reviewer_ids            = wp_list_pluck( $reviewers, 'ID' );
+		$reviewer_ids_list       = implode( ', ', $reviewer_ids );
+		$reviewer_nicenames      = wp_list_pluck( $reviewers, 'user_nicename' );
+		$reviewer_nicenames_list = $wpdb->prepare( trim( str_repeat( '%s,', count( $reviewer_nicenames ) ) , ',' ), $reviewer_nicenames );
+
+		$events = $wpdb->get_results( $wpdb->prepare(
+			"SELECT user_id,
+			CASE
+				WHEN `comment_content` LIKE concat( 'Assigned to%', comment_author, '%' ) THEN 'Assigned to self.'
+				WHEN `comment_content` LIKE 'Assigned to%' THEN 'Assigned to other.'
+				ELSE `comment_content`
+			END AS `_thing`,
+			count(*) AS `count`
+			FROM %i
+			WHERE
+				`comment_date_gmt` > DATE_SUB( %s, INTERVAL %d DAY )
+				AND `user_id` IN( {$reviewer_ids_list} )
+				AND `comment_agent` = ''
+				AND (
+					`comment_content` IN( 'Plugin Approved.', 'Plugin Rejected.' )
+					OR `comment_content` LIKE 'Assigned TO%'
+					OR (
+						`comment_content` LIKE 'Plugin closed.%'
+						AND NOT `comment_content` LIKE '%Author Self-close%'
+					)
+				)
+			GROUP BY `user_id`, `_thing`
+			ORDER BY `user_id`, `_thing`",
+			$wpdb->comments,
+			$args['date'],
+			$args['num_days'],
+		) );
+
+		foreach ( $events as $row ) {
+			$stats['data'][ $row->user_id ] ??= [];
+			$stats['data'][ $row->user_id ][ $row->_thing ] = $row->count;
+		}
+
+		// Fetch HelpScout stats from our stats. We might be able to pull some information from HS Stats instead.
+		$emails = $wpdb->get_results( $wpdb->prepare(
+			"SELECT `name`, `value`, SUM(views) AS count
+			FROM %i
+			WHERE `name` IN( 'hs-total', 'hs-replies' )
+				AND `value` IN( {$reviewer_nicenames_list} )
+				AND `date` > DATE_SUB( %s, INTERVAL %d DAY )
+			GROUP BY `name`, `value`",
+			'stats_extras',
+			$args['date'],
+			$args['num_days']
+		) );
+
+		foreach ( $emails as $row ) {
+			$user  = get_user_by( 'slug', $row->value );
+			$field = 'hs-total' === $row->name ? 'Email Actions' : 'Email Replies';
+			$stats['data'][ $user->ID ] ??= [];
+			$stats['data'][ $user->ID ][ $field ] = $row->count;
+		}
+
+		uasort( $stats['data'], function( $a, $b ) {
+			return array_sum( $b ) <=> array_sum( $a );
+		} );
+
+		return $stats;
+	}
+
 	/**
 	 * Outputs the stats report admin page, including form to customize time range
 	 * and the stats themselves.
@@ -251,7 +342,8 @@ class Stats_Report {
 		$args['num_days']   = empty( $_REQUEST['days'] ) ? 7 : absint( $_REQUEST['days'] );
 		$args['recentdays'] = empty( $_REQUEST['recentdays'] ) ? 7 : absint( $_REQUEST['recentdays'] );
 
-		$stats = $this->get_stats( $args );
+		$stats      = $this->get_stats( $args );
+		$user_stats = $this->get_user_stats( $args );
 
 		$date = gmdate( 'Y-m-d' );
 
@@ -527,6 +619,86 @@ class Stats_Report {
 			<li><code>*</code> : <?php _e( "Stat reflects current size of queue and does not take into account 'date' or 'day' interval", 'wporg-plugins' ); ?></li>
 			<li><code>**</code> : <?php _e( "Stat reflects activity only within the 'recentdays' from today", 'wporg-plugins' ); ?></li>
 		</ul>
+
+		<h3>Reviewer Stats</h3>
+		<p><em>NOTE: These are not intended on being made public. Data displayed for the <?php echo esc_html( $user_stats['num_days'] ); ?> ending <?php echo esc_html( $user_stats['date'] ); ?></em></p>
+
+		<?php
+			$data_points = [
+				'Assigned to self.',
+				'Assigned to other.',
+				'Plugin approved.',
+				'Plugin rejected.',
+				'Plugin closed',
+				'Emails^',
+			];
+			$close_types = [];
+
+			// Determine the close reasons in this timeframe.
+			foreach ( $user_stats['data'] as $user => $user_stat ) {
+				foreach ( preg_grep( '/^Plugin closed\./', array_keys( $user_stat ) ) as $reason ) {
+					$close_types[ trim( explode( ':', $reason )[1] ) ] = true;
+				}
+			}
+			$close_types = array_keys( $close_types );
+
+			?>
+			<table class="widefat">
+			<thead>
+				<tr>
+					<th rowspan="2">Reviewer</th>
+					<th rowspan="2" style="text-align:center">Assigned<br/>(to others)</th>
+					<th colspan="2" style="text-align:center">Plugins</th>
+					<th colspan="<?php echo esc_attr( count( $close_types ) ); ?>" style="text-align:center">Plugins closed</th>
+					<th colspan="2" style="text-align:center">Emails^</th>
+				</tr>
+				<tr>
+					<th>Approved</th>
+					<th>Rejected</th>
+					<?php foreach ( $close_types as $type ) : ?>
+						<th><?php echo esc_html( Template::get_close_reasons()[ $type ] ); ?></th>
+					<?php endforeach; ?>
+					<th>Actions</th>
+					<th>Replies</th>
+				</tr>
+
+			</thead>
+			<?php
+
+			echo '<tbody>';
+			foreach ( $user_stats['data'] as $user_id => $user_stat ) {
+				$user = get_user_by( 'id', $user_id );
+				echo '<tr><th>', esc_html( $user->display_name ?: $user->user_login ), '</th>';
+
+				// Assigned.
+				echo '<td>', number_format_i18n( $user_stat[ 'Assigned to self.' ] ?? 0 );
+				if ( $user_stat[ 'Assigned to others.' ] ?? 0 ) {
+					echo ' (', number_format_i18n( $user_stat[ 'Assigned to others.' ] ), ')';
+				}
+				echo '</td>';
+
+				// Plugins Approved, Rejected.
+				echo '<td>', number_format_i18n( $user_stat[ 'Plugin approved.' ] ?? 0 ), '</td>';
+				echo '<td>', number_format_i18n( $user_stat[ 'Plugin rejected.' ] ?? 0 ), '</td>';
+
+				// Plugins Closed.
+				foreach ( $close_types as $close_type ) {
+					echo '<td>', number_format_i18n( $user_stat[ "Plugin closed. Reason: {$close_type}" ] ?? 0 ), '</td>';
+				}
+
+				// Emails.
+				echo '<td>', number_format_i18n( $user_stat[ "Email Actions" ] ?? 0 ), '</td>';
+				echo '<td>', number_format_i18n( $user_stat[ "Email Replies" ] ?? 0 ), '</td>';
+				echo '</tr>';
+			}
+			echo '</tbody>';
+			echo '</table>';
+
+			?>
+			<ul style="font-style:italic;">
+				<li><code>^</code> : This is currently of all Helpscout mailboxes, not Plugins specific. Requires your Helpscout email to be the same as your WordPress.org email, or as one of your profiles alternate emails.</li>
+				<li>Email "Actions" include sending emails, replying to emails, marking as spam, moving to different inbox, etc.</li>
+			</ul>
 
 		</div>
 		<?php
