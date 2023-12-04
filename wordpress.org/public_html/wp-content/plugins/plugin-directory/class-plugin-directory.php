@@ -49,6 +49,7 @@ class Plugin_Directory {
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
+		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
 
 		// Add no-index headers where appropriate.
 		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
@@ -1391,11 +1392,28 @@ class Plugin_Directory {
 			die();
 		}
 
+		if ( is_single() && isset( $_GET['preview'] ) && Template::is_preview_available( ) ) {
+			if ( $preview_url = Template::preview_link() ) {
+				wp_safe_redirect( $preview_url, 302 );
+				die;
+			}
+		}
+
 		if ( is_comment_feed() ) {
 			wp_redirect( 'https://wordpress.org/plugins/', 301 );
 			die();
 		}
 
+	}
+
+	/**
+	 * Filter allowed_redirect_hosts to allow safe redirect to trusted hosts.
+	 * @param array $hosts
+	 */
+	function filter_redirect_hosts( $hosts ) {
+		$hosts[] = 'playground.wordpress.net';
+
+		return $hosts;
 	}
 
 	/**
