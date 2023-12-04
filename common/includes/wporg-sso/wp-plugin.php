@@ -76,6 +76,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				add_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
 
 				add_action( 'wp_login', array( $this, 'record_last_logged_in' ), 10, 2 );
+				add_action( 'profile_update', array( $this, 'record_last_password_change' ), 10, 3 );
 
 				add_action( 'login_form_logout', array( $this, 'login_form_logout' ) );
 
@@ -827,6 +828,15 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function record_last_logged_in( $login, $user ) {
 			update_user_meta( $user->ID, 'last_logged_in', gmdate( 'Y-m-d H:i:s' ) );
+		}
+
+		/**
+		 * Record the last date a user changed their password.
+		 */
+		public function record_last_password_change( $user_id, $old_data, $new_data ) {
+			if ( $old_data->user_pass !== $new_data['user_pass'] ) {
+				update_user_meta( $user_id, 'last_password_change', gmdate( 'Y-m-d H:i:s' ) );
+			}
 		}
 
 	}
