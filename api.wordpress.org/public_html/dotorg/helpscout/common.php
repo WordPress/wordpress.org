@@ -289,10 +289,20 @@ function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
 	) {
 		switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
 		$plugins = get_posts( [
-			'title'       => trim( $m['title'] ),
+			// Post titles are always escaped.
+			'title'       => esc_html( trim( $m['title'] ) ),
 			'post_type'   => 'plugin',
 			'post_status' => 'any',
 		] );
+
+		// Although the above should always catch it, let's try again with the unescaped title.
+		if ( ! $plugins ) {
+			$plugins = get_posts( [
+				'title'       => trim( $m['title'] ),
+				'post_type'   => 'plugin',
+				'post_status' => 'any',
+			] );
+		}
 		restore_current_blog();
 
 		// As we're searching by title, multiple plugins may come up.
