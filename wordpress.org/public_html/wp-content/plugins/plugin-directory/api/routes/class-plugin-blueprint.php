@@ -36,12 +36,12 @@ class Plugin_Blueprint extends Base {
 
         $blueprints = get_post_meta( $plugin->ID, 'assets_blueprints', true );
         // Note: for now, only use a file called `blueprint.json`.
-        if ( !isset( $blueprints['blueprint.json'] ) ) {
-            return false;
+		if ( !isset( $blueprints['blueprint.json'] ) ) {
+			return new \WP_Error( 'no_blueprint', 'File not found', array( 'status' => 404 ) );
         }
         $blueprint = $blueprints['blueprint.json'];
         if ( !$blueprint || !isset( $blueprint['contents'] ) || !is_string( $blueprint['contents'] ) ) {
-            return false;
+			return new \WP_Error( 'invalid_blueprint', 'Invalid file', array( 'status' => 500 ) );
         }
 
 		// Configure this elsewhere?

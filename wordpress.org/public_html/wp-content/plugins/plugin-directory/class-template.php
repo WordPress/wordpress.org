@@ -757,9 +757,9 @@ class Template {
 			return false;
 		}
 
-		$blueprint_encoded = esc_html( str_replace( '%', '%25', $blueprint['contents'] ) );
+		$blueprint_url = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?rev=%d', $post->post_name, $blueprint['revision'] );
 
-		return sprintf( 'https://playground.wordpress.net/?plugin=%s#%s', $post->post_name, $blueprint_encoded );
+		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), esc_attr($blueprint_url ) );
 	}
 
 	/**
