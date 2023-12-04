@@ -1,4 +1,10 @@
 body.page-hosting {
+	.site-header.home .site-title {
+		@media (max-width: 375px ) {
+			font-size: ms( 10 );
+		}
+	}
+
 	.partner {
 		position: relative;
 
