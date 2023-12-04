@@ -260,7 +260,7 @@ class Duplicate_Translations {
 		}
 		$message .= $mysql_error;
 
-		require_once '/home/api/public_html/includes/matrix/poster.php';
+		require_once '/home/api/public_html/dotorg/matrix/poster.php';
 		$send_result = \DotOrg\Matrix\Poster::force_send( $matrix_room, $message );
 
 		if ( $this->verbose ) {
