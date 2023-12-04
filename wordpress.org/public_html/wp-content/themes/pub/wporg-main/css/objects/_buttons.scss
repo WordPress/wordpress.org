@@ -1,3 +1,7 @@
 input[type="submit"] {
 	@extend .button;
 }
+body.page-data-erasure-request #erase-request-form input[type="submit"] {
+	white-space: normal;
+}
+
