@@ -140,15 +140,14 @@ function display_items( $post_ids ) {
 	echo '<ul>';
 	foreach ( $post_ids as $post_id ) {
 		$post          = get_post( $post_id );
-		$type          = 'theme'; // plugin set below.
+		$type          = ( 'plugin' === $post->post_type ) ? 'plugin' : 'theme';
 		$post_status   = '';
 		$style         = 'color: green;';
 		$reviewer      = false;
 		$last_modidied = $post->post_modified_gmt;
+		$download_link = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
 
-		if ( 'plugin' === $post->post_type ) {
-			$type = 'plugin';
-
+		if ( 'plugin' === $type ) {
 			if ( $post->assigned_reviewer ) {
 				$reviewer_user = get_user_by( 'id', $post->assigned_reviewer );
 				$reviewer      = $reviewer_user->display_name ?: $reviewer_user->user_login;
@@ -170,7 +169,6 @@ function display_items( $post_ids ) {
 			}
 		}
 
-		$download_link      = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
 		$last_updated       = human_time_diff( strtotime( $last_modified ), time() );
 		$short_last_updated = str_ireplace(
 			[ ' seconds', ' second', ' hours', ' hour', ' days', ' day', ' weeks', ' week', ' months', ' month', ' years', ' year' ],
@@ -228,10 +226,10 @@ function display_items( $post_ids ) {
 
 		printf(
 			'<li>
-				<a href="%1$s" style="%2$s">%3$s</a>
+				<a href="%1$s" style="%2$s">%3$s</a>&nbsp;
 				<a href="%4$s" style="%2$s">#</a>&nbsp;
-				<a href="%5$s" style="%2$s">ↆ</a>&nbsp;%6$s
-				<br><span style="%2$s">%7$s</span>&nbsp;
+				<a href="%5$s" style="%2$s">ↆ</a>&nbsp;%6$s<br>
+				<span style="%2$s">%7$s</span>&nbsp;
 				%8$s
 			</li>',
 			/* 1: get_edit_post_link( $post ), // Won't work as post type not registered. */
