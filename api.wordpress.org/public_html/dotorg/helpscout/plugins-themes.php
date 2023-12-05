@@ -145,7 +145,6 @@ function display_items( $post_ids ) {
 		$style         = 'color: green;';
 		$reviewer      = false;
 		$last_modidied = $post->post_modified_gmt;
-		$download_link = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
 
 		if ( 'plugin' === $post->post_type ) {
 			$type = 'plugin';
@@ -171,6 +170,7 @@ function display_items( $post_ids ) {
 			}
 		}
 
+		$download_link      = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
 		$last_updated       = human_time_diff( strtotime( $last_modified ), time() );
 		$short_last_updated = str_ireplace(
 			[ ' seconds', ' second', ' hours', ' hour', ' days', ' day', ' weeks', ' week', ' months', ' month', ' years', ' year' ],
