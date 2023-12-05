@@ -266,7 +266,7 @@ class Stats_Report {
 			"SELECT user_id,
 			CASE
 				WHEN `comment_content` LIKE concat( 'Assigned to%', comment_author, '%' ) THEN 'Assigned to self.'
-				WHEN `comment_content` LIKE 'Assigned to%' THEN 'Assigned to other.'
+				WHEN `comment_content` LIKE 'Assigned to%' THEN 'Assigned to others.'
 				ELSE `comment_content`
 			END AS `_thing`,
 			count(*) AS `count`
@@ -276,7 +276,7 @@ class Stats_Report {
 				AND `user_id` IN( {$reviewer_ids_list} )
 				AND `comment_agent` = ''
 				AND (
-					`comment_content` IN( 'Plugin Approved.', 'Plugin Rejected.' )
+					`comment_content` IN( 'Plugin Approved.', 'Plugin Rejected.', 'Unassigned.' )
 					OR `comment_content` LIKE 'Assigned TO%'
 					OR (
 						`comment_content` LIKE 'Plugin closed.%'
@@ -621,47 +621,19 @@ class Stats_Report {
 		</ul>
 
 		<h3>Reviewer Stats</h3>
-		<p><em>NOTE: These are not intended on being made public. Data displayed for the <?php echo esc_html( $user_stats['num_days'] ); ?> ending <?php echo esc_html( $user_stats['date'] ); ?></em></p>
+		<p><em>NOTE: These are not intended on being made public. Data displayed for the <?php echo esc_html( $user_stats['num_days'] ); ?> days ending <?php echo esc_html( $user_stats['date'] ); ?></em></p>
 
-		<?php
-			$data_points = [
-				'Assigned to self.',
-				'Assigned to other.',
-				'Plugin approved.',
-				'Plugin rejected.',
-				'Plugin closed',
-				'Emails^',
-			];
-			$close_types = [];
-
-			// Determine the close reasons in this timeframe.
-			foreach ( $user_stats['data'] as $user => $user_stat ) {
-				foreach ( preg_grep( '/^Plugin closed\./', array_keys( $user_stat ) ) as $reason ) {
-					$close_types[ trim( explode( ':', $reason )[1] ) ] = true;
-				}
-			}
-			$close_types = array_keys( $close_types );
-
-			?>
-			<table class="widefat">
+		<table class="widefat review-stats">
 			<thead>
 				<tr>
-					<th rowspan="2">Reviewer</th>
-					<th rowspan="2" style="text-align:center">Assigned<br/>(to others)</th>
-					<th colspan="2" style="text-align:center">Plugins</th>
-					<th colspan="<?php echo esc_attr( count( $close_types ) ); ?>" style="text-align:center">Plugins closed</th>
-					<th colspan="2" style="text-align:center">Emails^</th>
+					<th>Reviewer</th>
+					<th>Assigned<br>(to others)</th>
+					<th>Plugins<br>Approved</th>
+					<th>Plugins<br>Rejected</th>
+					<th>Plugins<br>Closed</th>
+					<th>Email<br>Actions^</th>
+					<th>Email<br>Replies^</th>
 				</tr>
-				<tr>
-					<th>Approved</th>
-					<th>Rejected</th>
-					<?php foreach ( $close_types as $type ) : ?>
-						<th><?php echo esc_html( Template::get_close_reasons()[ $type ] ); ?></th>
-					<?php endforeach; ?>
-					<th>Actions</th>
-					<th>Replies</th>
-				</tr>
-
 			</thead>
 			<?php
 
@@ -670,10 +642,13 @@ class Stats_Report {
 				$user = get_user_by( 'id', $user_id );
 				echo '<tr><th>', esc_html( $user->display_name ?: $user->user_login ), '</th>';
 
-				// Assigned.
-				echo '<td>', number_format_i18n( $user_stat[ 'Assigned to self.' ] ?? 0 );
+				// Assigned, Unassigned, Assigned to others.
+				echo '<td><span title="Assigned to self">', number_format_i18n( $user_stat[ 'Assigned to self.' ] ?? 0 ), '</span>';
+				if ( $user_stat[ 'Unassigned.' ] ?? 0 ) {
+					echo '<span title="Unassigned"> -', number_format_i18n( $user_stat[ 'Unassigned.' ] ), '</span>';
+				}
 				if ( $user_stat[ 'Assigned to others.' ] ?? 0 ) {
-					echo ' (', number_format_i18n( $user_stat[ 'Assigned to others.' ] ), ')';
+					echo ' <span title="Assigned to others">(', number_format_i18n( $user_stat[ 'Assigned to others.' ] ), ')</span>';
 				}
 				echo '</td>';
 
@@ -682,9 +657,28 @@ class Stats_Report {
 				echo '<td>', number_format_i18n( $user_stat[ 'Plugin rejected.' ] ?? 0 ), '</td>';
 
 				// Plugins Closed.
-				foreach ( $close_types as $close_type ) {
-					echo '<td>', number_format_i18n( $user_stat[ "Plugin closed. Reason: {$close_type}" ] ?? 0 ), '</td>';
+				$user_closed_breakdown = '';
+				$user_closed_count     = 0;
+				foreach ( $user_stat as $key => $count ) {
+					if ( ! preg_match( '/^Plugin closed\./', $key ) ) {
+						continue;
+					}
+					$reason             = trim( explode( ':', $key )[1] );
+					$user_closed_count += $count;
+
+					$user_closed_breakdown .= sprintf(
+						"%s: %s\n",
+						Template::get_close_reasons()[ $reason ],
+						number_format_i18n( $count )
+					);
 				}
+				$user_closed_breakdown = trim( $user_closed_breakdown );
+
+				echo '<td class="breakdown">', '<span title="', esc_attr( $user_closed_breakdown ), '">', number_format_i18n( $user_closed_count ), '</span>';
+				if ( $user_closed_breakdown ) {
+					echo '<div class="hidden">', nl2br( $user_closed_breakdown ), '</div>';
+				}
+				echo '</td>';
 
 				// Emails.
 				echo '<td>', number_format_i18n( $user_stat[ "Email Actions" ] ?? 0 ), '</td>';
@@ -694,10 +688,16 @@ class Stats_Report {
 			echo '</tbody>';
 			echo '</table>';
 
+			echo '<script> jQuery(document).ready( function($) {
+				$("table.review-stats").on( "click", ".breakdown", function() {
+					$(this).children().length > 1 && $(this).children().toggleClass("hidden");
+				} );
+			} );</script>'
+
 			?>
 			<ul style="font-style:italic;">
 				<li><code>^</code> : This is currently of all Helpscout mailboxes, not Plugins specific. Requires your Helpscout email to be the same as your WordPress.org email, or as one of your profiles alternate emails.</li>
-				<li>Email "Actions" include sending emails, replying to emails, marking as spam, moving to different inbox, etc.</li>
+				<li><code>^</code> : Email "Actions" include sending emails, replying to emails, marking as spam, moving to different inbox, etc.</li>
 			</ul>
 
 		</div>
