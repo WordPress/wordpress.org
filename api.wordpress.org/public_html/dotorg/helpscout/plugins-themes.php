@@ -144,7 +144,7 @@ function display_items( $post_ids ) {
 		$post_status   = '';
 		$style         = 'color: green;';
 		$reviewer      = false;
-		$last_modidied = $post->post_modified_gmt;
+		$last_modified = $post->post_modified_gmt;
 		$download_link = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
 
 		if ( 'plugin' === $type ) {
@@ -153,7 +153,7 @@ function display_items( $post_ids ) {
 				$reviewer      = $reviewer_user->display_name ?: $reviewer_user->user_login;
 			}
 
-			// Prefer the last_modified post meta.
+			// Prefer the last_updated post meta.
 			$last_modified = $post->last_updated ?: $last_modified;
 
 			// Get the ZIPs attached, link to the latest for pending/new.
