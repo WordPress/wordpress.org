@@ -229,9 +229,9 @@ function display_items( $post_ids ) {
 		printf(
 			'<li>
 				<a href="%1$s" style="%2$s">%3$s</a>
-				<a href="%4$s" style="%2$s">#</a>
-				<a href="%5$s" style="%2$s">ↆ</a> %6$s
-				<br><span style="%2$s">%7$s</span>
+				<a href="%4$s" style="%2$s">#</a>&nbsp;
+				<a href="%5$s" style="%2$s">ↆ</a>&nbsp;%6$s
+				<br><span style="%2$s">%7$s</span>&nbsp;
 				%8$s
 			</li>',
 			/* 1: get_edit_post_link( $post ), // Won't work as post type not registered. */
