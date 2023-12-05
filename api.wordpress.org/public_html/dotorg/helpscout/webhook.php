@@ -81,25 +81,38 @@ function contributor_stats( $event, $request ) {
 	}
 
 	// Determine the WordPress.org user for this HelpScout user.
+	$stat_user  = 'HS-' . get_client()->name . '-' . $hs_user_id;
 	$wporg_user = get_wporg_user_for_helpscout_user( $hs_user_id );
 	if ( $wporg_user ) {
 		$stat_user = $wporg_user->user_nicename;
-	} else {
-		$client    = get_client();
-		$stat_user = "HS-{$client->name}-{$hs_user_id}";
 	}
+
+	// Per-mailbox stats.
+	$mailbox = get_mailbox_name( $request );
 
 	// Total actions performed by user.
 	bump_stats_extra( 'hs-total', $stat_user );
+
+	if ( $mailbox ) {
+		bump_stats_extra( 'hs-' . $mailbox . '-total', $stat_user );
+	}
 
 	// Specific actions performed by user, replies and outgoing emails are counted as replies.
 	switch ( $event ) {
 		case 'convo.agent.reply.created':
 			bump_stats_extra( 'hs-replies', $stat_user );
+
+			if ( $mailbox ) {
+				bump_stats_extra( 'hs-' . $mailbox . '-replies', $stat_user );
+			}
 			break;
 		case 'convo.created':
 			if ( 'user' === $request->createdBy->type ?? '' ) {
 				bump_stats_extra( 'hs-replies', $stat_user );
+
+				if ( $mailbox ) {
+					bump_stats_extra( 'hs-' . $mailbox . '-replies', $stat_user );
+				}
 			}
 			break;
 	}
