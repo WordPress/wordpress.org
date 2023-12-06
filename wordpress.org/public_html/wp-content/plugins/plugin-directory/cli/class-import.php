@@ -353,7 +353,7 @@ class Import {
 		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
 
 		// Store the content of blueprint files, if they're available and valid.
-		if ( isset( $assets['blueprint'] ) ) {
+		if ( isset( $assets['blueprint'] ) && count( $assets['blueprint'] ) > 0 ) {
 			update_post_meta( $plugin->ID, 'assets_blueprints', wp_slash( $assets['blueprint'] ) );
 		} else {
 			delete_post_meta( $plugin->ID, 'assets_blueprints' );
