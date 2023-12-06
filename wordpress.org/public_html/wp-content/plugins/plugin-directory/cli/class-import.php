@@ -86,6 +86,22 @@ class Import {
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
+		// Validate various headers:
+
+		/*
+		 * Check to see if the plugin is using the `Update URI` header.
+		 *
+		 * Plugins on WordPress.org should NOT use this header, but we do accept some URI formats for it in the API,
+		 * so those are allowed to pass here.
+		 * Any documentation suggesting that a WordPress.org hosted plugin should use this header is incorrect.
+		 */
+		if ( $headers->UpdateURI ) {
+			$update_uri_valid = preg_match( '!^(https?://)?(wordpress.org|w.org)/plugins?/(?P<slug>[^/]+)/?$!i', $headers->UpdateURI, $update_uri_matches );
+			if ( ! $update_uri_valid || $update_uri_matches['slug'] !== $plugin_slug ) {
+				throw new Exception( 'Invalid Update URI header detected: ' . $headers->UpdateURI );
+			}
+		}
+
 		// Release confirmation
 		if ( $plugin->release_confirmation ) {
 			if ( 'trunk' === $stable_tag ) {
