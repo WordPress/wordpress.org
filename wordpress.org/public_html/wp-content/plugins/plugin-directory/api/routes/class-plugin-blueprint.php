@@ -17,6 +17,7 @@ class Plugin_Blueprint extends Base {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/blueprint.json', array(
 			'methods'             => array( \WP_REST_Server::READABLE, \WP_REST_Server::CREATABLE ),
 			'callback'            => array( $this, 'blueprint' ),
+			'permission_callback' => '__return_true',
 			'args'                => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
