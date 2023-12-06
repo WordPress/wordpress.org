@@ -29,6 +29,7 @@ class Customizations {
 	private function __construct() {
 		add_filter( 'dashboard_glance_items', array( $this, 'plugin_glance_items' ) );
 
+		add_filter( 'query_vars', array( $this, 'query_vars' ) );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 
 		add_action( 'load-edit.php', array( $this, 'bulk_action_plugins' ) );
@@ -189,6 +190,15 @@ class Customizations {
 	}
 
 	/**
+	 * Filter the query vars used in wp-admin.
+	 */
+	public function query_vars( $query_vars ) {
+		$query_vars[] = 'reviewer';
+
+		return $query_vars;
+	}
+
+	/**
 	 * Filter the query in wp-admin to list only plugins relevant to the current user.
 	 *
 	 * @param \WP_Query $query
@@ -214,11 +224,28 @@ class Customizations {
 		}
 
 		// Filter by reviewer.
-		if ( ! empty( $_REQUEST['reviewer'] ) ) {
+		if ( isset( $query->query['reviewer'] ) && strlen( $query->query['reviewer'] ) ) {
 			$meta_query = $query->get( 'meta_query' ) ?: [];
-			$meta_query[] = [
+			$meta_query['assigned_reviewer'] = [
 				'key'   => 'assigned_reviewer',
-				'value' => intval( $_GET['reviewer'] ),
+				'value' => intval( $query->query['reviewer'] ),
+				'type'  => 'unsigned',
+			];
+
+			// Query for no assignee.
+			if ( ! $meta_query['assigned_reviewer']['value'] ) {
+				$meta_query['assigned_reviewer']['compare'] = 'NOT EXISTS';
+			}
+
+			$query->set( 'meta_query', $meta_query );
+		}
+
+		if ( 'assigned_reviewer_time' === $query->query['orderby'] ?? '' ) {
+			$meta_query = $query->get( 'meta_query' ) ?: [];
+
+			$meta_query['assigned_reviewer_time'] = [
+				'key'     => 'assigned_reviewer_time',
+				'type'    => 'unsigned',
 			];
 
 			$query->set( 'meta_query', $meta_query );
