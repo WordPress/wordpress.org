@@ -66,7 +66,24 @@ echo $what; ?></p>
 				<h2><?php _e( 'Share the Happiness', 'browsehappy' ); ?></h2>
 				<nav>
 					<ul>
-						<li class="twitter"><a onclick="window.open(this.href, 'twittershare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=250,width=500'); return false;" href="https://twitter.com/share?url=<?php echo urlencode( home_url( '/' ) ); ?>&amp;text=<?php echo urlencode( __( 'Browse Happy: Online. Worry-free. Upgrade your browser today!', 'browsehappy' ) ); ?>" title="<?php esc_attr_e( 'Share on Twitter', 'browsehappy' ); ?>">Twitter</a></li>
+						<li class="tumblr">
+							<a
+								href="https://www.tumblr.com/widgets/share/tool?shareSource=legacy&canonicalUrl=&url=<?php echo urlencode( home_url( '/' ) ); ?>&posttype=link&title=Browse+Happy&content=<?php echo urlencode( home_url( '/' ) ); ?>"
+								title="<?php esc_attr_e( 'Share on Tumblr', 'browsehappy' ); ?>"
+							>
+								Tumblr
+							</a>
+						</li>
+
+						<li class="twitter">
+							<a
+								onclick="window.open(this.href, 'twittershare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=250,width=500'); return false;"
+								href="https://twitter.com/share?url=<?php echo urlencode( home_url( '/' ) ); ?>&amp;text=<?php echo urlencode( __( 'Browse Happy: Online. Worry-free. Upgrade your browser today!', 'browsehappy' ) ); ?>"
+								title="<?php esc_attr_e( 'Share on X (Twitter)', 'browsehappy' ); ?>"
+							>
+								X
+							</a>
+						</li>
 <?php
 $redirect_uri = home_url( '/' );
 if ( isset( $_GET['locale'] ) )
