@@ -572,8 +572,17 @@ html[dir="rtl"] #share nav li {
 	transition: all .5s;
 }
 
+#share nav li.tumblr {
+	width: 21px;
+	margin-right: 6px;
+}
+
+#share nav li.tumblr a {
+	background-position: -362px -135px;
+}
+
 #share nav li.twitter a {
-	background-position: -300px -135px;
+	background-position: -300px -134px;
 }
 
 #share nav li.facebook a {
