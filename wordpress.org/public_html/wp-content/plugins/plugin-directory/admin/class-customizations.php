@@ -240,17 +240,22 @@ class Customizations {
 			$query->set( 'meta_query', $meta_query );
 		}
 
-		if ( 'assigned_reviewer_time' === $query->query['orderby'] ?? '' ) {
+		$orderby                    = $query->query['orderby'] ?? '';
+		$possible_orderby_meta_keys = [
+			'assigned_reviewer_time',
+			'_submitted_zip_loc',
+			'_submitted_zip_size',
+		];
+		if ( in_array( $orderby, $possible_orderby_meta_keys, true ) ) {
 			$meta_query = $query->get( 'meta_query' ) ?: [];
 
-			$meta_query['assigned_reviewer_time'] = [
-				'key'     => 'assigned_reviewer_time',
+			$meta_query[ $orderby ] = [
+				'key'     => $orderby,
 				'type'    => 'unsigned',
 			];
 
 			$query->set( 'meta_query', $meta_query );
 		}
-
 	}
 
 	/**
