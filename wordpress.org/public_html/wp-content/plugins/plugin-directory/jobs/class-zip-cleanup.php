@@ -83,6 +83,10 @@ class ZIP_Cleanup {
 				continue;
 			}
 
+			// Cleanup ZIP-related metadata.
+			delete_post_meta( $plugin->ID, '_submitted_zip_size' );
+			delete_post_meta( $plugin->ID, '_submitted_zip_loc' );
+
 			// Include some log output for debugging.
 			$filename = basename( wp_get_attachment_url( $attachment->ID ) );
 			echo "Removing {$filename} from {$plugin->post_name} after {$days_to_keep} days\n";

@@ -666,15 +666,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			return;
 		}
 
-		$attachments = get_posts( [
-			'post_parent'    => $post->ID,
-			'post_type'      => 'attachment',
-			'post_mime_type' => 'application/zip',
-			'posts_per_page' => 1,
-			'orderby'        => 'post_date',
-			'order'          => 'DESC',
-		] )[0];
-
 		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
 			$zip_size = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
 
