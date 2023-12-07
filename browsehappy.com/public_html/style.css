@@ -643,6 +643,11 @@ html[dir="rtl"] #share nav li {
 		width: 230px;
 	}
 }
+@media (max-width: 705px) {
+	footer {
+		padding-bottom: 33px;
+	}
+}
 @media (max-width: 500px) {
 	header h1 {
 		font-size: 900%;
