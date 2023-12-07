@@ -60,7 +60,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1.5, // include second number if non-zero
 			'facebook' => 'vivaldi.browser',
 			'url' => 'https://vivaldi.com/',
-			'info' => __( '&#8220;Powerful. Personal. Private. It&#8217;s a web browser. But fun, with clever features.', 'browsehappy' ),
+			'info' => __( '&#8220;Powerful. Personal. Private. It&#8217;s a web browser. But fun, with clever features.&#8221;', 'browsehappy' ),
 		),
 		'edge' => (object) array(
 			'name' => 'Microsoft Edge',
