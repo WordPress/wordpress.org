@@ -414,6 +414,13 @@ class Upload_Handler {
 			return $attachment->get_error_message();
 		}
 
+		// Store metadata about the uploaded ZIP.
+		// Count lines of PHP code, this is not 100% accurate but it's a good indicator.
+		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
+
+		update_post_meta( $plugin_post->ID, '_submitted_zip_size', filesize( get_attached_file( $attachment->ID ) ) );
+		update_post_meta( $plugin_post->ID, '_submitted_zip_loc', $lines_of_code );
+
 		// Send plugin author an email for peace of mind.
 		$this->send_email_notification();
 
