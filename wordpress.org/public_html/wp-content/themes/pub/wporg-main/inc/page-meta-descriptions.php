@@ -395,6 +395,10 @@ function custom_page_title( $title, $post = null ) {
 			$title = esc_html_x( 'Source Code', 'Page title', 'wporg' );
 			break;
 
+		case 'page-40-percent-of-web.php':
+			$title = esc_html_x( 'WordPress and the Journey to 40% of the Web', 'Page title', 'wporg' );
+			break;
+
 		case 'page-hosting.php':
 			$title = esc_html_x( 'WordPress Hosting', 'Page title', 'wporg' );
 			break;
