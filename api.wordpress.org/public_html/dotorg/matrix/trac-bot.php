@@ -13,7 +13,6 @@ namespace {
 
 namespace Dotorg\Matrix\Trac {
 
-	define( 'DISABLE_TRAC_TICKETS_UPDATION', true ); // For testing, this prevents test stuff to be posted on Trac tickets.
 	define( 'REPOST_MATRIX_LINK_TIME', 300 ); // 5 mins
 	define( 'REPOST_TRAC_COMMENT_TIME', 7200 ); // 2 hrs
 
@@ -32,6 +31,8 @@ namespace Dotorg\Matrix\Trac {
 	}
 
 	$room_alias_local_part = ltrim( explode( ':', $_POST['room_alias'] )[0], '#' );
+
+	define( 'IS_MATRIX_TESTING_ROOM', $room_alias_local_part === 'matrix-testing' );
 
 	// Prevent frequent posting to both Matrix & Trac using Redundancy Manager.
 	$redundancy_manager = new Redundancy_Manager(
@@ -119,7 +120,7 @@ namespace Dotorg\Matrix\Trac {
 			continue;
 		}
 
-		if ( ! DISABLE_TRAC_TICKETS_UPDATION ) {
+		if ( ! IS_MATRIX_TESTING_ROOM ) {
 			if ( defined( TRACBOT_WPORG_PASSWORD ) && ! empty( TRACBOT_WPORG_PASSWORD ) ) {
 				$trac_xmlrpc = new \Trac( 'matrixbot', TRACBOT_WPORG_PASSWORD, "https://$trac.trac.wordpress.org/login/xmlrpc" );
 			}
@@ -151,8 +152,10 @@ namespace Dotorg\Matrix\Trac {
 
 			$redundancy_manager->set( 'trac', $trac, 'ticket', $ticket_id );
 
-			if ( ! DISABLE_TRAC_TICKETS_UPDATION ) {
+			if ( ! IS_MATRIX_TESTING_ROOM ) {
 				isset( $trac_xmlrpc ) && $trac_xmlrpc->ticket_update( $ticket_id, $trac_comment );
+			} else {
+				$matrix_message[] = "[$trac] Trac comment: " . $trac_comment;
 			}
 		}
 	}
