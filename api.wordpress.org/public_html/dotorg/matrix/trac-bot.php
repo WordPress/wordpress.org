@@ -26,7 +26,7 @@ namespace Dotorg\Matrix\Trac {
 	// $_POST['event_id'] = '$HHHHHHHHHHHHH';
 
 	// Verify it came from Maubot tracbot plugin.
-	if ( ! isset( $_GET['secret'] ) || $_GET['secret'] !== URL_SECRET__TRAC_BOT ) {
+	if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== URL_SECRET__TRAC_BOT ) {
 		http_response_code( 403 );
 		return;
 	}
