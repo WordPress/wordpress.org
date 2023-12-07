@@ -155,7 +155,7 @@ namespace Dotorg\Matrix\Trac {
 			if ( ! IS_MATRIX_TESTING_ROOM ) {
 				isset( $trac_xmlrpc ) && $trac_xmlrpc->ticket_update( $ticket_id, $trac_comment );
 			} else {
-				$matrix_message[] = "[$trac] Trac comment: " . $trac_comment;
+				$matrix_messages[] = "[$trac] Trac comment: " . $trac_comment;
 			}
 		}
 	}
