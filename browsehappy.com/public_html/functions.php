@@ -52,18 +52,15 @@ function browsehappy_get_browser_data( $browser = false ) {
 				: str_replace( 'and Windows ', '', __( '&#8220;Safari for Mac and Windows from Apple, the world’s most innovative&nbsp;browser.&#8221;', 'browsehappy' ) )
 			),
 		),
-		'opera' => (object) array(
-			'name' => 'Opera',
-			'long_name' => 'Opera',
-			'wikipedia' => 'Opera',
-			'wikidata' => 'Q41242',
-			'normalized' => 1, // just first number
-			'facebook' => 'Opera',
-			'url' => 'https://www.opera.com/',
-			'info' => ( $latest_strings ?
-				__( '&#8220;Opera is a secure, innovative browser used by millions around the world with a built-in ad blocker, free VPN, and much more - all for your best browsing experience.&#8221;', 'browsehappy' )
-				: __( '&#8220;The fastest browser on Earth—secure, powerful and easy to use, with excellent privacy protection. And&nbsp;it&nbsp;is&nbsp;free.&#8221;', 'browsehappy' )
-			),
+		'vivaldi' => (object) array(
+			'name' => 'Vivaldi',
+			'long_name' => 'Vivaldi',
+			'wikipedia' => 'Vivaldi_(web_browser)',
+			'wikidata' => 'Q18913176',
+			'normalized' => 1.5, // include second number if non-zero
+			'facebook' => 'vivaldi.browser',
+			'url' => 'https://vivaldi.com/',
+			'info' => __( '&#8220;Powerful. Personal. Private. It&#8217;s a web browser. But fun, with clever features.', 'browsehappy' ),
 		),
 		'edge' => (object) array(
 			'name' => 'Microsoft Edge',
@@ -178,6 +175,8 @@ function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) 
 
 	$version = $data->results->bindings[0]->version->value;
 
+	// Remove minor version inside parentheses, like Vivaldi's "6.4 (3160.34)"
+	$version = preg_replace( '#\(\d+\.\d+\)#', '', $version );
 	$version = preg_replace( '/[^0-9\.]/', '', $version );
 
 	set_transient( 'browsehappy_version_' . $browser, $version );
