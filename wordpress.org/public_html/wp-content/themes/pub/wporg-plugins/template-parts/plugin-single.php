@@ -41,7 +41,9 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			<?php if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) : ?>
 				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php esc_html_e( 'Download', 'wporg-plugins' ); ?></a>
 			<?php endif; ?>
-			<?php if ( current_user_can( 'plugin_admin_edit', $post ) && Template::is_preview_available() ) : ?>
+			<?php if ( Template::is_preview_available() ) : ?>
+				<a class="plugin-preview button download-button button-large" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Live Preview', 'wporg-plugins' ); ?></a>
+			<?php elseif ( current_user_can( 'plugin_admin_edit', $post ) && Template::preview_link() ) : ?>
 				<a class="plugin-preview button download-button button-large" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Test Preview', 'wporg-plugins' ); ?></a>
 			<?php endif; ?>
 		</div>
