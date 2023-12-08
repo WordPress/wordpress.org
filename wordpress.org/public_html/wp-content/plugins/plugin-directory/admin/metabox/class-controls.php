@@ -85,47 +85,38 @@ class Controls {
 			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status );
 		}
 
-		$close_reasons   = Template::get_close_reasons();
-		$close_reason    = (string) get_post_meta( $post->ID, '_close_reason', true );
-		$active_installs = (int) get_post_meta( $post->ID, 'active_installs', true );
+		$close_reasons     = Template::get_close_reasons();
+		$close_reason      = (string) get_post_meta( $post->ID, '_close_reason', true );
+		$rejection_reasons = Template::get_rejection_reasons();
+		$rejection_reason  = (string) get_post_meta( $post->ID, '_rejection_reason', true );
+		$active_installs   = (int) get_post_meta( $post->ID, 'active_installs', true );
 
-		$reason_label   = Template::get_close_reason();
-		$reason_unknown = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $reason_label );
+		$close_reason_label     = Template::get_close_reason();
+		$close_reason_unknown   = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $reason_label );
+		$rejection_reason_label = $rejection_reasons[ $rejection_reason ] ?? $rejection_reasons[ 'other' ];
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
 
 			<?php if ( 'closed' === $post->post_status ) : ?>
 
-				<p><?php printf( __( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . $reason_label . '</strong>' ); ?></p>
+				<p><?php printf( __( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
 
 			<?php elseif ( 'disabled' === $post->post_status ) : ?>
 
-				<p><?php printf( __( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . $reason_label . '</strong>' ); ?></p>
+				<p><?php printf( __( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
+
+			<?php elseif ( 'rejected' === $post->post_status ) : ?>
+
+				<p><?php printf(
+						__( 'Rejection Reason: %s', 'wporg-plugins' ),
+						'<strong>' . $rejection_reason_label . '</strong>'
+				); ?></p>
 
 			<?php elseif ( 'publish' === $post->post_status ) : ?>
 
 				<?php if ( $active_installs >= '20000' ) : ?>
 					<p><strong><?php _e( 'Notice:', 'wporg-plugins' ); ?></strong> <?php _e( 'Due to the large volume of active users, the developers should be warned and their plugin remain open save under extreme circumstances.', 'wporg-plugins' ); ?>.</p>
 				<?php endif; ?>
-
-			<?php endif; ?>
-
-			<?php
-			if (
-					( in_array( 'closed', $statuses, true ) || in_array( 'disabled', $statuses, true ) )
-				&&
-					( ! in_array( $post->post_status, array( 'closed', 'disabled' ) ) || $reason_unknown )
-				) :
-				?>
-
-				<p>
-					<label for="close_reason"><?php _e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
-					<select name="close_reason" id="close_reason">
-						<?php foreach ( $close_reasons as $key => $label ) : ?>
-							<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $close_reason ); ?>><?php echo esc_html( $label ); ?></option>
-						<?php endforeach; ?>
-					</select>
-				</p>
 
 			<?php endif; ?>
 
@@ -140,6 +131,28 @@ class Controls {
 						esc_attr__( 'Mark as Pending & Assign Review', 'wporg-plugins' ),
 					);
 				}
+
+				if ( 'closed' === $status || 'disabled' === $status ) { ?>
+					<p>
+						<label for="close_reason"><?php _e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
+						<select name="close_reason" id="close_reason">
+							<?php foreach ( $close_reasons as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $close_reason ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</p>
+				<?php }
+
+				if ( 'rejected' === $status ) { ?>
+					<p>
+						<label for="rejection_reason"><?php _e( 'Rejection Reason:', 'wporg-plugins' ); ?></label>
+						<select name="rejection_reason" id="rejection_reason">
+							<?php foreach ( $rejection_reasons as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $rejection_reason ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</p>
+				<?php }
 
 				printf(
 					'<button type="submit" name="post_status" value="%s" class="button set-plugin-status">%s</button>',

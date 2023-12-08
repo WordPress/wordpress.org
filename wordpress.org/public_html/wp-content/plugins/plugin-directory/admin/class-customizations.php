@@ -474,7 +474,7 @@ class Customizations {
 			$post_status = $_REQUEST['post_status'];
 		}
 
-		if ( 'disabled' == $post->post_status && 'disabled' != $post_status ) {
+		if ( 'disabled' == $post->post_status ) {
 			$post_states['disabled'] = _x( 'Disabled', 'plugin status', 'wporg-plugins' );
 			// Affix the reason it's disabled.
 			$reason = Template::get_close_reason( $post );
@@ -482,7 +482,8 @@ class Customizations {
 				$post_states['reason'] = $reason;
 			}
 		}
-		if ( 'closed' == $post->post_status && 'closed' != $post_status ) {
+
+		if ( 'closed' == $post->post_status ) {
 			$post_states['closed'] = _x( 'Closed', 'plugin status', 'wporg-plugins' );
 			// Affix the reason it's closed.
 			$reason = Template::get_close_reason( $post );
@@ -490,8 +491,14 @@ class Customizations {
 				$post_states['reason'] = $reason;
 			}
 		}
-		if ( 'rejected' == $post->post_status && 'rejected' != $post_status ) {
+
+		if ( 'rejected' == $post->post_status ) {
 			$post_states['rejected'] = _x( 'Rejected', 'plugin status', 'wporg-plugins' );
+
+			if ( $post->_rejection_reason ) {
+				$post_states['reason'] = Template::get_rejection_reasons()[ $post->_rejection_reason ] ?? '';
+			}
+
 		}
 		if ( 'approved' == $post->post_status && 'approved' != $post_status ) {
 			$post_states['approved'] = _x( 'Approved', 'plugin status', 'wporg-plugins' );

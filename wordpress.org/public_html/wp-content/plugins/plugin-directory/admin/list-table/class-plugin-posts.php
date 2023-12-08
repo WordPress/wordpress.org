@@ -605,6 +605,16 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				<?php endforeach; ?>
 			</select>
 		</fieldset>
+
+		<fieldset class="alignleft actions hide-if-js bulk-plugin_reject" disabled="disabled">
+			<select name="rejection_reason" id="rejection_reason">
+				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Rejection Reason:', 'wporg-plugins' ); ?></option>
+				<?php foreach ( Template::get_rejection_reasons() as $key => $label ) : ?>
+					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</fieldset>
+
 		<?php
 
 		// Output the JS+CSS needed
