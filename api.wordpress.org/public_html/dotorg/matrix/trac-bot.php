@@ -17,16 +17,22 @@ namespace Dotorg\Matrix\Trac {
 	define( 'REPOST_TRAC_COMMENT_TIME', 7200 ); // 2 hrs
 
 	// Simulate a webhook request.
-	// $_GET['secret'] = URL_SECRET__TRAC_BOT;
+	// $_POST['secret'] = URL_SECRET__TRAC_BOT;
 	// $_POST['text'] = 'Hello #40007 and #1232-bbpress'; // Or 'Hello #1232-bbpress'
 	// $_POST['user_id'] = '@admin:matrix.test';
 	// $_POST['room_id'] = '!XXXXXXXX:matrix.test';
-	// $_POST['room_alias'] = '#sandbox:matrix.test';
+	// $_POST['room_alias'] = '#matrix-testing:matrix.test';
 	// $_POST['event_id'] = '$HHHHHHHHHHHHH';
 
 	// Verify it came from Maubot tracbot plugin.
 	if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== URL_SECRET__TRAC_BOT ) {
 		http_response_code( 403 );
+		return;
+	}
+
+	// room_name and room_alias can be empty for rooms not published in room directory
+	if ( empty( $_POST['room_alias'] ) ) {
+		http_response_code( 204 );
 		return;
 	}
 
