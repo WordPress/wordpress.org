@@ -49,6 +49,10 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 
 				// Hashtag alias for State of the Word
 				'/sotw' => 'https://wordpress.org/state-of-the-word/',
+
+				// Events
+				'/events' => 'https://events.wordpress.org/',
+				'/meet'   => 'https://events.wordpress.org/',
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
