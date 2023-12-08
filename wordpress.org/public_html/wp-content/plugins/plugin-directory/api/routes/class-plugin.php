@@ -225,6 +225,9 @@ class Plugin extends Base {
 		// Fun fact: ratings are stored as 1-5 in postmeta, but returned as percentages by the API
 		$result['author_block_rating'] = get_post_meta( $post_id, 'author_block_rating', true ) ? 20 * get_post_meta( $post_id, 'author_block_rating', true ) : $result['rating'];
 
+		// Blueprints, if available
+		$result['blueprints'] = Template::get_blueprints( $post ) ?: [];
+
 		// Translations.
 		$result['language_packs'] = [];
 		if ( defined ( 'API_WPORGPATH' ) && file_exists( API_WPORGPATH . '/translations/lib.php' ) ) {
