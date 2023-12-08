@@ -911,6 +911,31 @@ class Template {
 	}
 
 	/**
+	 * Returns the reasons for rejecting a plugin.
+	 *
+	 * @return array Rejection reason labels.
+	 */
+	public static function get_rejection_reasons() {
+		return array(
+			'3-month'              => '3 months without completion',
+			'core-supports'        => 'Code is already in core',
+			'duplicate-copy'       => 'Duplicate (copy) of another Plugin',
+			'library-or-framework' => 'Framework or Library Plugin',
+			'generic'              => "Something we're just not hosting",
+			'duplicate'            => 'New/renamed version of their own plugin',
+			'wp-cli'               => 'WP-CLI Only Plugins',
+			'storefront'           => 'Storefront',
+			'not-owner'            => 'Not the submitters plugin',
+			'script-insertion'     => 'Script Insertion Plugins are Dangerous',
+			'demo'                 => 'Test/Demo plugin (non functional)',
+			'translation'          => 'Translation of existing plugin',
+			'banned'               => 'Banned developer trying to sneak back in',
+			'author-request'       => 'Author requested not to continue',
+			'other'                => 'OTHER: See notes',
+		);
+	}
+
+	/**
 	 * Returns the close/disable reason for a plugin.
 	 *
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.

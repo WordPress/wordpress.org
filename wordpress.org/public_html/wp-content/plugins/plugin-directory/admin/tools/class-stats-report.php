@@ -276,8 +276,9 @@ class Stats_Report {
 				AND `user_id` IN( {$reviewer_ids_list} )
 				AND `comment_agent` = ''
 				AND (
-					`comment_content` IN( 'Plugin Approved.', 'Plugin Rejected.', 'Unassigned.' )
+					`comment_content` IN( 'Plugin Approved.', 'Unassigned.' )
 					OR `comment_content` LIKE 'Assigned TO%'
+					OR `comment_content` LIKE 'Plugin rejected.%'
 					OR (
 						`comment_content` LIKE 'Plugin closed.%'
 						AND NOT `comment_content` LIKE '%Author Self-close%'
@@ -652,9 +653,36 @@ class Stats_Report {
 				}
 				echo '</td>';
 
-				// Plugins Approved, Rejected.
+				// Plugins Approved.
 				echo '<td>', number_format_i18n( $user_stat[ 'Plugin approved.' ] ?? 0 ), '</td>';
-				echo '<td>', number_format_i18n( $user_stat[ 'Plugin rejected.' ] ?? 0 ), '</td>';
+
+				// Plugins Rejected.
+				$user_rejected_breakdown = '';
+				$user_rejected_count     = 0;
+				foreach ( $user_stat as $key => $count ) {
+					if ( ! preg_match( '/^Plugin rejected\./', $key ) ) {
+						continue;
+					}
+					$user_rejected_count += $count;
+					$reason               = trim( explode( ':', $key )[1] ?? '' );
+
+					if ( ! $reason ) {
+						continue;
+					}
+
+					$user_rejected_breakdown .= sprintf(
+						"%s: %s\n",
+						Template::get_rejection_reasons()[ $reason ],
+						number_format_i18n( $count )
+					);
+				}
+				$user_rejected_breakdown = trim( $user_rejected_breakdown );
+
+				echo '<td class="breakdown">', '<span title="', esc_attr( $user_rejected_breakdown ), '">', number_format_i18n( $user_rejected_count ), '</span>';
+				if ( $user_rejected_breakdown ) {
+					echo '<div class="hidden">', nl2br( $user_rejected_breakdown ), '</div>';
+				}
+				echo '</td>';
 
 				// Plugins Closed.
 				$user_closed_breakdown = '';
@@ -692,7 +720,7 @@ class Stats_Report {
 				$("table.review-stats").on( "click", ".breakdown", function() {
 					$(this).children().length > 1 && $(this).children().toggleClass("hidden");
 				} );
-			} );</script>'
+			} );</script>';
 
 			?>
 			<ul style="font-style:italic;">

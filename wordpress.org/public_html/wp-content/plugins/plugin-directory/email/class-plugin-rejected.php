@@ -18,6 +18,8 @@ class Plugin_Rejected extends Base {
 	}
 
 	function body() {
+		// NOTE: $this->args['reason'] has rejection reason if applicable.
+
 		/* translators: 1: plugin name, 2: plugin permalink, 3: date of submission, 4: plugins@wordpress.org */
 		$email_text = __(
 			'Unfortunately your plugin submission for %1$s (%2$s), submitted on %3$s, has been rejected from the WordPress Plugin Directory.
