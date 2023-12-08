@@ -2,7 +2,6 @@
 
 namespace Dotorg\Matrix;
 
-const TEST_MODE = true; // used to post everything to #matrix-testing room instead
 const MATRIX_INTEGRATIONS_ENABLED = true;
 
 class Poster {
@@ -75,7 +74,7 @@ class Poster {
 	 * @return bool  Returns true on success, false on failure
 	 */
 	private static function post_message( string $room_id_or_alias, string $message, string $http_endpoint ): bool {
-		if ( TEST_MODE ) {
+		if ( WPORG_SANDBOXED ) {
 			$room_id_or_alias = "#matrix-testing:community.wordpress.org";
 		}
 
