@@ -734,6 +734,12 @@ class Template {
 			if ( current_user_can( 'plugin_admin_edit', $post ) ) {
 				return true;
 			}
+
+			// Other users can only use the preview button if plugin committers have enabled it.
+			$post = get_post( $post );
+			if ( get_post_meta( $post->ID, '_public_preview', true ) ) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -747,19 +753,40 @@ class Template {
 	public static function preview_link( $post = null ) {
 		$post = get_post( $post );
 
-		$blueprints = get_post_meta( $post->ID, 'assets_blueprints', true );
+		$blueprints = self::get_blueprints( $post );
 		// Note: for now, only use a file called `blueprint.json`.
 		if ( !isset( $blueprints['blueprint.json'] ) ) {
 			return false;
 		}
 		$blueprint = $blueprints['blueprint.json'];
-		if ( !$blueprint || !isset( $blueprint['contents'] ) || !is_string( $blueprint['contents'] ) ) {
-			return false;
+
+		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), esc_attr($blueprint['url'] ) );
+	}
+
+	/**
+	 * Return a list of blueprints for the given plugin.
+	 *
+	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @return array An array of blueprints.
+	 */
+	public static function get_blueprints( $post = null ) {
+		$post = get_post( $post );
+
+		$out = array();
+
+		$blueprints = get_post_meta( $post->ID, 'assets_blueprints', true );
+		if ( $blueprints ) {
+			foreach ( $blueprints as $filename => $item ) {
+				if ( isset( $item['contents'] ) ) {
+					$out[ $filename ] = array(
+						'filename' => $filename,
+						'url' => sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?rev=%d', $post->post_name, $item['revision'] )
+					);
+				}
+			}
 		}
 
-		$blueprint_url = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?rev=%d', $post->post_name, $blueprint['revision'] );
-
-		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), esc_attr($blueprint_url ) );
+		return $out;
 	}
 
 	/**
