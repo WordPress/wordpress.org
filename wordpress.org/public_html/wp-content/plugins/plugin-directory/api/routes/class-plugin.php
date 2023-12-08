@@ -226,7 +226,7 @@ class Plugin extends Base {
 		$result['author_block_rating'] = get_post_meta( $post_id, 'author_block_rating', true ) ? 20 * get_post_meta( $post_id, 'author_block_rating', true ) : $result['rating'];
 
 		// Blueprints, if available
-		$result['blueprints'] = Template::get_blueprints( $post ) ?: [];
+		$result['blueprints'] = array_values( Template::get_blueprints( $post ) ) ?: [];
 
 		// Translations.
 		$result['language_packs'] = [];
