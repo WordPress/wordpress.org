@@ -866,7 +866,7 @@ class Template {
 	 */
 	public static function get_rejection_reasons() {
 		return array(
-			'6-month'              => '6 months without completion',
+			'3-month'              => '3 months without completion',
 			'core-supports'        => 'Code is already in core',
 			'duplicate-copy'       => 'Duplicate (copy) of another Plugin',
 			'library-or-framework' => 'Framework or Library Plugin',
