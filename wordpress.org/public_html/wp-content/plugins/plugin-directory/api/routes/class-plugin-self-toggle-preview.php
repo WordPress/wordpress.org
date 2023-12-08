@@ -65,12 +65,12 @@ class Plugin_Self_Toggle_Preview extends Base {
 
 		// Toggle the postmeta value. Note that there is a race condition here.
 		$did = '';
-		if ( get_post_meta( $plugin->ID, '_no_preview', true ) ) {
-			$r = delete_post_meta( $plugin->ID, '_no_preview' );
-			$did = 'enabled';
-		} else {
-			$r = add_post_meta( $plugin->ID, '_no_preview', '1', true );
+		if ( get_post_meta( $plugin->ID, '_public_preview', true ) ) {
+			$r = delete_post_meta( $plugin->ID, '_public_preview' );
 			$did = 'disabled';
+		} else {
+			$r = add_post_meta( $plugin->ID, '_public_preview', '1', true );
+			$did = 'enabled';
 		}
 
 		// Add an audit-log entry as to why this has happened.
