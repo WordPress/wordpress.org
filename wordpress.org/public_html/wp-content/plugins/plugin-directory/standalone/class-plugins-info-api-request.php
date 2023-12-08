@@ -39,6 +39,7 @@ class Plugins_Info_API_Request {
 		'language_packs'      => false,
 		'versions'            => false,
 		'screenshots'         => false,
+		'blueprints'          => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
