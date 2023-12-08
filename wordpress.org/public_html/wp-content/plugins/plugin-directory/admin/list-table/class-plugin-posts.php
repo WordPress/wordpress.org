@@ -26,6 +26,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 		add_filter( "manage_{$this->screen->post_type}_posts_columns", [ $this, 'filter_columns' ], 100 );
 		add_filter( "manage_{$this->screen->id}_sortable_columns", [ $this, 'filter_sortable_columns' ], 100 );
+		add_filter( 'hidden_columns', [ $this, 'filter_hidden_columns' ], 100, 3 );
 	}
 
 	/**
@@ -54,6 +55,28 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$columns[ 'reviewer' ] = [ 'assigned_reviewer_time', 'asc' ];
 		$columns[ 'zip' ]      = [ '_submitted_zip_size', 'asc' ];
 		$columns[ 'loc' ]      = [ '_submitted_zip_loc', 'asc' ];
+
+		return $columns;
+	}
+
+	/**
+	 * Hide some fields by default.
+	 */
+	public function filter_hidden_columns( $columns, $screen, $use_defaults ) {
+		if ( $screen->id !== $this->screen->id ) {
+			return $columns;
+		}
+
+		// Hide certain columns on default / published views.
+		if (
+			in_array( $_REQUEST['post_status'] ?? 'all', [ 'all', 'publish', 'disabled', 'closed' ] ) &&
+			empty( $_REQUEST['author'] ) &&
+			empty( $_REQUEST['reviewer'] )
+		) {
+			$columns[] = 'reviewer';
+			$columns[] = 'zip';
+			$columns[] = 'loc';
+		}
 
 		return $columns;
 	}
@@ -667,16 +690,20 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 					human_time_diff( $reviewer_time )
 				)
 			);
+		} else {
+			echo '-';
 		}
 	}
 
 	public function column_zip( $post ) {
-		if ( ! in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
+		$media = get_attached_media( 'application/zip', $post );
+
+		if ( ! $media || ! in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
 			echo '-';
 			return;
 		}
 
-		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
+		foreach ( $media as $zip_file ) {
 			$zip_size = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
 
 			$url  = wp_get_attachment_url( $zip_file->ID );
@@ -693,6 +720,11 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	}
 
 	public function column_loc( $post ) {
-		echo number_format_i18n( $post->_submitted_zip_loc );
+		if ( ! in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
+			echo '-';
+			return;
+		}
+
+		echo number_format_i18n( (int) $post->_submitted_zip_loc ) ?: '-';
 	}
 }
