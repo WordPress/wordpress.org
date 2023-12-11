@@ -585,9 +585,17 @@ function the_plugin_self_toggle_preview_button() {
 		echo '<div class="plugin-notice notice notice-error notice-alt"><p>';
 		_e( '<strong>Note:</strong> Missing or invalid blueprint.json file.', 'wporg-plugins' );
 		echo '</p></div>';
-	} 
+	} elseif ( $toggle_link ) {
 
-	if ( $toggle_link ) {
+		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
+		if ( 'enabled' === $preview_status ) {
+			_e( 'This will disable the Preview button for public users.', 'wporg-plugins' );
+		} else {
+			_e( 'This will enable the Preview button for public users.', 'wporg-plugins' );
+		}
+
+		echo '</p></div>';
+
 		echo '<form method="POST" action="' . esc_url( $toggle_link ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
 		// Translators: %s is the plugin name, as defined by the plugin itself.
 		echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'Please toggle the Live Preview link for %s', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
