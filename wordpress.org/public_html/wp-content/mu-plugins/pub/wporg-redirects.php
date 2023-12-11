@@ -10,10 +10,10 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			wp_safe_redirect( '/news/feed/' . ( 'feed' !== get_query_var('feed') ? get_query_var('feed') : '' ), 301 );
 			exit;
 
-		// temp fix for /B;ocks, rm later
+		// temp fix for /Blocks, rm later
 		} elseif ( 0 === strpos( $_SERVER['REQUEST_URI'], '/Blocks' ) ) {
 			wp_safe_redirect( '/blocks/', 301 );
-		   	exit;
+			exit;
 
 		// WordPress.org does not have a specific site search, only the global WordPress.org search
 		} elseif ( ! empty( $_GET['s'] ) && false === strpos( $_SERVER['REQUEST_URI'], '/search/' ) ) {
@@ -53,6 +53,9 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 				// Events
 				'/events' => 'https://events.wordpress.org/',
 				'/meet'   => 'https://events.wordpress.org/',
+
+				// Data Liberation
+				'/and' => '/data-liberation/',
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
