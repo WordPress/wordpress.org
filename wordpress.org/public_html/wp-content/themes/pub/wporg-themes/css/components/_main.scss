@@ -1729,6 +1729,27 @@ body:not(.home) {
 	text-decoration: none;
 }
 
+.main-navigation .menu {
+	padding: 12px 0;
+}
+.main-navigation .menu li > a::after {
+	content: '';
+	display: block;
+	border-bottom: 1px solid transparent;
+	position: relative;
+}
+.main-navigation .menu li > a:hover {
+	color: #2ea2cc;
+}
+.main-navigation .menu li:hover > a::after,
+.main-navigation .menu li.current-menu-item a::after,
+.main-navigation .menu li.current-menu-item:hover a::after {
+	border-bottom-color: #2ea2cc;
+}
+.main-navigation .menu li.current-menu-item a::after {
+	border-bottom-color: #636363;
+}
+
 /* Responsive design for secondary header */
 @media (max-width: 740px) {
 	#headline h2 {
