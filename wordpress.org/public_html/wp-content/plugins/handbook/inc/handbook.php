@@ -29,6 +29,13 @@ class WPorg_Handbook {
 	public $setting_name = '';
 
 	/**
+	 * The configuration of the handbook.
+	 *
+	 * @var array
+	 */
+	public $config = [];
+
+	/**
 	 * The memoized and filtered label text for the handbook.
 	 *
 	 * @var string
