@@ -1592,15 +1592,21 @@ function pin_one_off_events( $events, $current_time ) {
 
 	$sotw = array(
 		'type'                 => 'wordcamp',
-		'title'                => 'State of the Word',
+		'title'                => 'State of the Word - Watch Now', // Remove "watch now" next year, see date note below.
 		// `utm_source` is `private` because it would have to be set by the WP install, we don't need it, and tracking it could be a privacy concern.
 		'url'                  => 'https://wordpress.org/state-of-the-word/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2023',
 		'meetup'               => '',
 		'meetup_url'           => '',
-		'date'                 => '2023-12-11 15:00:00',
-		'end_date'             => '2023-12-11 16:30:00',
-		'start_unix_timestamp' => strtotime( '2023-12-11 15:00:00' ) - $madrid_utc_offset,
-		'end_unix_timestamp'   => strtotime( '2023-12-11 16:30:00' ) - $madrid_utc_offset,
+
+		// This year they requested the event to show up for a few days after it was over. The API does that no
+		// problem, but in Core `WP_Community_Events::trim_events()` will remove it. This is a hack to make the
+		// event show up, but it will probably confuse people about when it actual was, because the date will be
+		// wrong. Don't do this again next year, only show the event in the lead up to it. The pinned News item
+		// will still show it to people after the event.
+		'date'                 => '2023-12-14 15:00:00',
+		'end_date'             => '2023-12-14 16:30:00',
+		'start_unix_timestamp' => strtotime( '2023-12-14 15:00:00' ) - $madrid_utc_offset,
+		'end_unix_timestamp'   => strtotime( '2023-12-14 16:30:00' ) - $madrid_utc_offset,
 
 		'location' => array(
 			'location'  => 'Online',
@@ -1609,10 +1615,6 @@ function pin_one_off_events( $events, $current_time ) {
 			'longitude' => -3.695042334019202,
 		),
 	);
-
-	if ( $current_time > $sotw['start_unix_timestamp'] ) {
-		$sotw['title'] .= ' - Watch Now';
-	}
 
 	if ( $current_time > strtotime( 'December 9, 2023' ) && $current_time < strtotime( 'December 14, 2023' ) ) {
 		array_unshift( $events, $sotw );
