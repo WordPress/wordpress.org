@@ -9,6 +9,9 @@
 
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
+$menu_links = [
+	home_url( '/commercial/' ) => __( 'Commercial Themes', 'wporg-themes' ),
+];
 ?>
 <header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 	<div class="site-branding">
@@ -37,7 +40,13 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 <?php if ( ! is_page( 'upload' ) ) : ?>
 <nav id="site-navigation" class="main-navigation" role="navigation">
 	<ul id="menu-theme-directory" class="menu">
-		<li><a href="<?php echo home_url( '/commercial/' ); ?>"><?php _e( 'Commercial Themes', 'wporg-themes' ); ?></a></li>
+		<?php
+		foreach ( $menu_links as $url => $text ) :
+			$is_current_page = 0 === strpos( "https://{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}", $url );
+			$class = $is_current_page ? ' class="current-menu-item"' : '';
+		?>
+		<li<?php echo $class; ?>><a href="<?php echo esc_url( $url ); ?>"><?php echo $text; ?></a></li>
+		<?php endforeach; ?>
 	</ul>
 </nav>
 <?php endif; ?>
