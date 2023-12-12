@@ -56,16 +56,24 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 
 				// Data Liberation
 				'/and' => '/data-liberation/',
+
+				// Playground, temporarily.
+				'/playground' => [ 302, 'https://developer.wordpress.org/playground/' ]
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
 				if ( 0 === strpos( $_SERVER['REQUEST_URI'], $test ) ) {
 
+					$code = 301;
+					if ( is_array( $redirect ) ) {
+						list( $code, $redirect ) = $redirect;
+					}
+
 					// override nocache_headers();
 					header_remove( 'expires' );
 					header_remove( 'cache-control' );
 
-					wp_safe_redirect( $redirect, 301 );
+					wp_safe_redirect( $redirect, $code );
 					exit;
 				}
 			}
