@@ -3237,6 +3237,27 @@ ul.sidebar-tabs {
 	border-top: #32373C 1px double;
 }
 
+.meta.translation-memory {
+	padding-top: 1rem;
+}
+
+.meta.translation-memory ul.suggestions-list:first-of-type {
+	margin-top: 1rem;
+}
+
+.meta.translation-memory ul.suggestions-list {
+	margin-bottom: 0;
+}
+
+.meta.translation-memory ul.suggestions-list li {
+	list-style: none;
+	margin-left: -1.2rem;
+}
+
+.meta.translation-memory div.translation-suggestion.with-tooltip.translation {
+	margin-bottom: 0;
+}
+
 .sidebar-div-others-translation-memory-content > summary {
 	list-style-type: none;
 }
