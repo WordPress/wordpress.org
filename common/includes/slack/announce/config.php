@@ -278,7 +278,7 @@ function get_whitelist() {
 			'tweetythierry', // @Thierry Muller on Slack
 		) ),
 		'core-test' => array_merge( get_committers(), array(
-			'ankit-k-gupta', // @Ankit K Gupta on Slack
+			'Ankit K Gupta', // @Ankit K Gupta on Slack
 			'Boniu91', // @Piotrek Boniu on Slack
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
