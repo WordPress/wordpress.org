@@ -3219,6 +3219,19 @@ ul.sidebar-tabs {
 	margin: 1rem 0.5rem;
 }
 
+.meta.other-locales .sidebar-other-locales.button.is-small.copy-suggestion {
+	margin-left: auto;
+}
+
+.meta.other-locales span.locale.unique {
+	margin-right: 14px;
+}
+
+.meta.other-locales .other-locales .locale {
+	min-width: 4em;
+	width: 4em;
+}
+
 .meta.history .translations {
 	margin-top: 0.5rem;
 	border-top: #32373C 1px double;
