@@ -2041,6 +2041,11 @@ span.favorite.favorited {
 		margin: 0;
 	}
 
+	span.favorite.dashicons,
+	span.favorite.dashicons::before {
+		line-height: 1;
+	}
+
 	.theme-wrap .theme-about .theme-head,
 	.theme-wrap .theme-about .theme-info,
 	.theme-wrap .theme-about .theme-info > div:not(:last-of-type),
