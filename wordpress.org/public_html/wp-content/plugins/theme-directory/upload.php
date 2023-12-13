@@ -79,10 +79,10 @@ function wporg_themes_render_upload_shortcode() {
 
 			' . $terms_notice . '
 
-			<p>
-				<label><input type="checkbox" required="required" name="required_terms[permission]"> ' . __( 'I have permission to upload this theme to WordPress.org for others to use and share.', 'wporg-themes' ) . '</label><br>
-				<label><input type="checkbox" required="required" name="required_terms[guidelines]"> ' . sprintf( __( 'The theme complies with all <a href="%s">Theme Guidelines</a>.', 'wporg-themes' ), 'https://make.wordpress.org/themes/handbook/review/required/' ) . '</label><br>
-				<label><input type="checkbox" required="required" name="required_terms[gpl]"> ' . sprintf( __( 'The theme, and all included assets, <a href="%s">are licenced as GPL or are under a GPL compatible license</a>.', 'wporg-themes' ), 'https://make.wordpress.org/themes/handbook/review/required/#1-licensing-copyright' ) . '</label><br>
+			<p class="upload-checkboxes">
+				<label><input type="checkbox" required="required" name="required_terms[permission]"><span>' . __( 'I have permission to upload this theme to WordPress.org for others to use and share.', 'wporg-themes' ) . '</span></label>
+				<label><input type="checkbox" required="required" name="required_terms[guidelines]"><span>' . sprintf( __( 'The theme complies with all <a href="%s">Theme Guidelines</a>.', 'wporg-themes' ), 'https://make.wordpress.org/themes/handbook/review/required/' ) . '</span></label>
+				<label><input type="checkbox" required="required" name="required_terms[gpl]"><span>' . sprintf( __( 'The theme, and all included assets, <a href="%s">are licenced as GPL or are under a GPL compatible license</a>.', 'wporg-themes' ), 'https://make.wordpress.org/themes/handbook/review/required/#1-licensing-copyright' ) . '</span></label>
 			</p>
 
 			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
