@@ -1815,6 +1815,29 @@ span.favorite.favorited {
 	color: #e02020;
 }
 
+/* = Upload form
+----------------*/
+
+#upload_form {
+	.upload-checkboxes {
+		display: flex;
+		flex-flow: column wrap;
+		gap: 15px;
+		line-height: 1.2;
+
+		label {
+			align-items: center;
+			display: flex;
+			gap: 5px;
+
+			input[type="checkbox"] {
+				flex-shrink: 0;
+				margin-top: 2px;
+			}
+		}
+	}
+}
+
 
 /* =Media Queries
 -------------------------------------------------------------- */
