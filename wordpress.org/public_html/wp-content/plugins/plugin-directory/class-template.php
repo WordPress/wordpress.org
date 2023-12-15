@@ -725,13 +725,14 @@ class Template {
 	 * Is a live preview available for the plugin, and allowed for the current user to view?
 	 *
 	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @param 'view'|'edit'     $context Optional. 'view' to check if preview is available for public viewing. 'edit' to also check if available for current user to test. Default: view.
 	 * @return bool	True if a preview is available and the current user is permitted to see it.
 	 */
-	public static function is_preview_available( $post = null ) {
+	public static function is_preview_available( $post = null, $context = 'view' ) {
 
 		if ( self::preview_link( $post ) ) {
-			// Plugin committers can always use the plugin preview button if it exists.
-			if ( current_user_can( 'plugin_admin_edit', $post ) ) {
+			// Plugin committers can use the plugin preview button to test if a blueprint exists.
+			if ( 'edit' === $context && current_user_can( 'plugin_admin_edit', $post ) ) {
 				return true;
 			}
 
