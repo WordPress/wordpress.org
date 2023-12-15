@@ -43,7 +43,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			<?php endif; ?>
 			<?php if ( Template::is_preview_available() ) : ?>
 				<a class="plugin-preview button download-button button-large" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Live Preview', 'wporg-plugins' ); ?></a>
-			<?php elseif ( current_user_can( 'plugin_admin_edit', $post ) && Template::preview_link() ) : ?>
+			<?php elseif ( Template::preview_link() && Template::is_preview_available( $post, 'edit' ) ) : ?>
 				<a class="plugin-preview button download-button button-large" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Test Preview', 'wporg-plugins' ); ?></a>
 			<?php endif; ?>
 		</div>

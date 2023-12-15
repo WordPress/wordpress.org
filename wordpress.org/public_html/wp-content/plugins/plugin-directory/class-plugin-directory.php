@@ -1392,7 +1392,7 @@ class Plugin_Directory {
 			die();
 		}
 
-		if ( is_single() && isset( $_GET['preview'] ) && Template::is_preview_available( ) ) {
+		if ( is_single() && isset( $_GET['preview'] ) && ( Template::is_preview_available() || Template::is_preview_available( null, 'edit' ) ) ) {
 			if ( $preview_url = Template::preview_link() ) {
 				wp_safe_redirect( $preview_url, 302 );
 				die;
