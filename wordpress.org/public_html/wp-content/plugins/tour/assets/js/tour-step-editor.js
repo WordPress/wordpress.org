@@ -75,7 +75,12 @@ function enableTourCreation() {
 		document.getElementById( 'tour-launcher' ).style.display = 'none';
 	}
 }
-enableTourCreation();
+document.addEventListener( 'DOMContentLoaded', function () {
+	document
+		.getElementById( 'tour-launcher' )
+		.addEventListener( 'click', toggleTourSelector );
+	enableTourCreation();
+} );
 
 function reportMissingSelector( tourTitle, step, selector ) {
 	const xhr = new XMLHttpRequest();
@@ -107,9 +112,6 @@ function toggleTourSelector( event ) {
 	return false;
 }
 
-document
-	.getElementById( 'tour-launcher' )
-	.addEventListener( 'click', toggleTourSelector );
 const clearHighlight = function ( event ) {
 	if ( typeof tour_plugin.tours[ tourId ] !== 'undefined' ) {
 		for ( let i = 1; i < tour_plugin.tours[ tourId ].length; i++ ) {
