@@ -43,3 +43,10 @@ ul#page-tour-list li a {
 .inline-tour-list {
 	cursor: pointer;
 }
+.dismiss-tour {
+	background: none;
+    border: none;
+    color: #1067a9;
+    text-decoration: underline;
+	cursor: pointer;
+}
