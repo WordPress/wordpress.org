@@ -14,7 +14,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 class Plugin_Zip extends Base {
 
 	public function __construct() {
-		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/zip/(?P<zip_id>[\d]+)', array(
+		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/zip/(?P<zip_hash>[^/]+)', array(
 			'methods'             => array( \WP_REST_Server::READABLE, \WP_REST_Server::CREATABLE ),
 			'callback'            => array( $this, 'output_zip' ),
 			// Note: publicly accessible, since Playground does not inclue cookie credentials in its request.
@@ -35,16 +35,17 @@ class Plugin_Zip extends Base {
 	 */
 	public function output_zip( $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-		$zip_id = intval( $request['zip_id'] );
+		$zip_hash = strval( $request['zip_hash'] );
 
-		if ( $zip_id <= 0 ) {
+		if ( ! $zip_hash ) {
 			return new \WP_Error( 'invalid_id', 'File not found', array( 'status' => 404 ) );
 		}
 
 		// Surely there's a better way to confirm an attachment ID has a given mime type and belongs to a post?
 		foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
-			if ( $zip_file->ID == $zip_id ) {
-				$file = get_attached_file( $zip_file->ID );
+			$file = get_attached_file( $zip_file->ID );
+			// Should use a secure hash compare here - is there none in core?!
+			if ( wp_hash( $file, 'nonce' ) === $zip_hash ) {
 				if ( file_exists( $file ) ) {
 					header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
 					header('Content-Description: File Transfer');

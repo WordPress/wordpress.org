@@ -37,11 +37,12 @@ class Plugin_Blueprint extends Base {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
 		// Direct zip preview for plugin reviewers
-		if ( $request->get_params('zip_id') ) {
-			$zip_url = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/zip/%d', $request['plugin_slug'], $request['zip_id'] );
+		if ( $request->get_params('zip_hash') ) {
+			$zip_url = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/zip/%s', $request['plugin_slug'], $request['zip_hash'] );
+			$zip_url = esc_url( $zip_url );
 			$zip_blueprint =<<<EOF
 {
-    "landingPage": "/wp-admin/",
+    "landingPage": "/wp-admin/plugins.php",
     "preferredVersions": {
         "php": "8.0",
         "wp": "latest"

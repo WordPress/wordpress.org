@@ -127,7 +127,8 @@ class Review_Tools {
 			foreach ( $zip_files as $zip_date => $zip ) {
 				list( $zip_url, $zip_file ) = $zip;
 				$zip_size                   = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
-				$zip_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?zip_id=%d', $slug, $zip_file->ID );
+				$zip_hash                   = wp_hash( get_attached_file( $zip_file->ID ), 'nonce' );
+				$zip_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?zip_hash=%s', $slug, $zip_hash );
 				$zip_preview = add_query_arg( 'blueprint-url', urlencode($zip_blueprint), 'https://playground.wordpress.net/' );
 
 				printf(
