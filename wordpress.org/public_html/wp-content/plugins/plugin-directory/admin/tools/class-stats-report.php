@@ -93,10 +93,8 @@ class Stats_Report {
 	public function get_stats( $args = array() ) {
 		global $wpdb;
 
-		$stats['as_of_date'] = gmdate( 'Y-m-d' );
-
 		$defaults = array(
-			'date'       => $stats['as_of_date'],
+			'date'       => gmdate( 'Y-m-d' ),
 			'num_days'   => 7,
 			'recentdays' => 7,
 		);
@@ -234,10 +232,8 @@ class Stats_Report {
 	public function get_user_stats( $args = array() ) {
 		global $wpdb;
 
-		$stats['as_of_date'] = gmdate( 'Y-m-d' );
-
 		$defaults = array(
-			'date'       => $stats['as_of_date'],
+			'date'       => gmdate( 'Y-m-d' ),
 			'num_days'   => 7,
 			'recentdays' => 7,
 		);
@@ -247,7 +243,8 @@ class Stats_Report {
 		}
 
 		$stats = $args;
-		$stats['data'] = [];
+		$stats['start_date'] = gmdate( 'Y-m-d', time() - ( $args['num_days'] * DAY_IN_SECONDS ) );
+		$stats['data']       = [];
 
 		$reviewers = get_users( [
 			'role__in' => [
@@ -297,21 +294,31 @@ class Stats_Report {
 		}
 
 		// Fetch HelpScout stats from our stats. We might be able to pull some information from HS Stats instead.
+		$stats_field_prefix = 'hs-plugins-';
+		if (
+			// See https://meta.trac.wordpress.org/changeset/13010
+			strtotime( $stats['start_date'] ) < strtotime('2023-12-06')
+		) {
+			$stats_field_prefix      = 'hs-';
+			$stats['all-hs-warning'] = true;
+		}
+
 		$emails = $wpdb->get_results( $wpdb->prepare(
 			"SELECT `name`, `value`, SUM(views) AS count
 			FROM %i
-			WHERE `name` IN( 'hs-total', 'hs-replies' )
+			WHERE `name` IN( %s, %s )
 				AND `value` IN( {$reviewer_nicenames_list} )
-				AND `date` > DATE_SUB( %s, INTERVAL %d DAY )
+				AND `date` > %s
 			GROUP BY `name`, `value`",
 			'stats_extras',
-			$args['date'],
-			$args['num_days']
+			$stats_field_prefix . 'total',
+			$stats_field_prefix . 'replies',
+			$stats['start_date']
 		) );
 
 		foreach ( $emails as $row ) {
 			$user  = get_user_by( 'slug', $row->value );
-			$field = 'hs-total' === $row->name ? 'Email Actions' : 'Email Replies';
+			$field = str_ends_with( $row->name, '-total' ) ? 'Email Actions' : 'Email Replies';
 			$stats['data'][ $user->ID ] ??= [];
 			$stats['data'][ $user->ID ][ $field ] = $row->count;
 		}
@@ -724,7 +731,10 @@ class Stats_Report {
 
 			?>
 			<ul style="font-style:italic;">
-				<li><code>^</code> : This is currently of all Helpscout mailboxes, not Plugins specific. Requires your Helpscout email to be the same as your WordPress.org email, or as one of your profiles alternate emails.</li>
+				<?php if ( isset( $user_stats['all-hs-warning'] ) ) : ?>
+					<li><code>^</code> : This is of all Helpscout mailboxes, not Plugins specific, as plugins-only data is only available after <a href="https://meta.trac.wordpress.org/changeset/13010">2023-12-05</a>.</li>
+				<?php endif; ?>
+				<li><code>^</code> : Requires your Helpscout email to be the same as your WordPress.org email, or as one of your profiles alternate emails.</li>
 				<li><code>^</code> : Email "Actions" include sending emails, replying to emails, marking as spam, moving to different inbox, etc.</li>
 			</ul>
 
