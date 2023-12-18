@@ -24,11 +24,11 @@
 	 */
 	var DeeplTMSuggestionRequested = [];
 
-   /**
-	* Stores the external translations used.
-	* @type {object}
-	*/
-   var externalSuggestion = {};
+	/**
+	 * Stores the external translations used.
+	 * @type {object}
+	 */
+	var externalSuggestion = {};
 
 	/**
 	 * Stores (caches) the "Other Languages" suggestions that has already been queried,
@@ -62,7 +62,6 @@
 
 			$container.append( cachedSuggestion );
 			removeNoSuggestionsMessage( $container );
-			moveFooterToTheBottom( $container );
 			copyTranslationMemoryToSidebarTab( $container );
 			return;
 		}
@@ -85,7 +84,6 @@
 				$container.append( response.data );
 				storeTheSuggestionInTheCache( type, originalId, response.data );
 				removeNoSuggestionsMessage( $container );
-				moveFooterToTheBottom( $container );
 				copyTranslationMemoryToSidebarTab( $container );
 			} else {
 				$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
@@ -188,6 +186,29 @@
 		}
 	}
 
+	add_amount_to_others_tab = function ( sidebarTab, data, originalId ) {
+		let elements = 0;
+		if ( data?.['helper-history-' + originalId] ) {
+			elements += data['helper-history-' + originalId].count;
+		}
+		if ( data?.['helper-other-locales-' + originalId] ) {
+			elements += data['helper-other-locales-' + originalId].count;
+		}
+		var editor = $('[data-tab="' + sidebarTab + '"]').closest( '.editor' );
+		var TMcontainer = editor.find( '.suggestions__translation-memory' );
+		var elementsInTM = 0;
+		if ( TMcontainer.length ) {
+			elementsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.translation' ).length;
+			elementsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.deepl' ).length;
+			elementsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.openai' ).length;
+		}
+		elements += elementsInTM;
+		$( '#summary-translation-memory-' + originalId ).html('Translation&nbsp;Memory&nbsp;(' + elementsInTM + ')');
+
+		let content = 'Others&nbsp;(' + elements + ')';
+		$('[data-tab="' + sidebarTab + '"]').html( content );
+	}
+
 	/**
 	 * Copies the translation memory to the sidebar tab and adds the number of items in the TM to the tab.
 	 *
@@ -197,18 +218,16 @@
 	 */
 	function copyTranslationMemoryToSidebarTab( $container ){
 		var editor = $container.closest( '.editor' );
-		var divSidebarWithTM = editor.find( '.meta.translation-memory' ).first();
-		var divId = divSidebarWithTM.attr( 'data-row-id' );
+	    var divSidebarWithDiscussion = editor.find( '.meta.discussion' ).first();
+		var divId = divSidebarWithDiscussion.attr( 'data-row-id' );
 		var TMcontainer = editor.find( '.suggestions__translation-memory' );
 		if ( !TMcontainer.length ) {
 			return;
 		}
 
-		var itemsInTM = TMcontainer.find( '.translation-suggestion.with-tooltip.translation' ).length;
-		itemsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.deepl' ).length;
-		itemsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.openai' ).length;
-		$( '[data-tab="sidebar-tab-translation-memory-' + divId + '"]' ).html( 'TM&nbsp;(' + itemsInTM + ')' );
-		$( '#sidebar-div-translation-memory-' + divId ).html( TMcontainer.html() );
+		$( '#sidebar-div-others-translation-memory-content-' + divId ).html( TMcontainer.html() );
+		console.log('sidebar-tab-others-' + divId, window.translationHelpersCache );
+		add_amount_to_others_tab('sidebar-tab-others-' + divId, window.translationHelpersCache?.[ divId ], divId);
 	}
 
 	/**
@@ -362,23 +381,6 @@
 	}
 
 	/**
-	 * Moves the footer with the link to OpenAI and DeepL to the bottom of the container.
-	 *
-	 * This is needed because the suggestions are loaded asynchronously.
-	 *
-	 * @param {object} $container The container where the suggestions are stored.
-	 *
-	 * @return {void}
-	 */
-	function moveFooterToTheBottom( $container ) {
-		var footer = $container.find( '.translation-suggestion__footer_message__for_suggestions' );
-		if ( ! footer ) {
-			return;
-		}
-		$container.append( footer );
-	}
-
-	/**
 	 * Removes duplicate "No suggestions" messages.
 	 *
 	 * @param {object} $container The container where the suggestions are stored.
@@ -497,18 +499,16 @@
 		if ( ! $row ) {
 			return;
 		}
-		if ( $row.data( 'suggestion-locale' ) ) {
-			externalSuggestion.suggestion_source = $row.data( 'suggestion-locale' );
-			externalSuggestion.translation = $row.find( '.translation-suggestion__translation-raw' ).text();
-		} else {
-			externalSuggestion.suggestion_source = $row.data( 'suggestion-source' );
-			externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
-		}
+		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' ) == 'translation' ? 'tm' : $row.data( 'suggestion-source' );
+		externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
+
 	}
 
 	//Prefilter ajax requests to add external translations used to the request.
 	$.ajaxPrefilter( function ( options ) {
-		if ( ! externalSuggestion || ! externalSuggestion.suggestion_source || ! externalSuggestion.translation ) {
+		const isSuggestionUsed = Object.keys( externalSuggestion ).length  > 0 ? true : false;
+
+		if ( ! externalSuggestion || ! isSuggestionUsed ) {
 			return;
 		}
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
