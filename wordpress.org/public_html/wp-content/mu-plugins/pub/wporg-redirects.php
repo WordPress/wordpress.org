@@ -56,9 +56,6 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 
 				// Data Liberation
 				'/and' => '/data-liberation/',
-
-				// Playground, temporarily.
-				'/playground' => [ 302, 'https://developer.wordpress.org/playground/' ]
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
@@ -289,3 +286,17 @@ add_action( 'template_redirect', function() {
 	wp_safe_redirect( 'https://learn.wordpress.org/course-category/contributing-to-wordpress/', 301, 'Contributor Training to Learn' );
 	exit;
 } );
+
+/**
+ * Redirect developer.wp.org/playground/ to github documentation.
+ */
+add_action( 'template_redirect', function() {
+	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
+	if ( 'developer.wordpress.org' !== $_SERVER['HTTP_HOST'] || ! str_starts_with( $path, '/playground' ) ) {
+		return;
+	}
+
+	wp_redirect( 'https://wordpress.github.io/wordpress-playground/', 301 );
+	exit;
+} );
+
