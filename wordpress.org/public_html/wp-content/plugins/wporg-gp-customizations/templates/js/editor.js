@@ -308,9 +308,7 @@
 	function changeVisibleDiv( tabId, originalId ) {
 		$( '#sidebar-div-meta-' + originalId ).hide();
 		$( '#sidebar-div-discussion-' + originalId ).hide();
-		$( '#sidebar-div-history-' + originalId ).hide();
-		$( '#sidebar-div-other-locales-' + originalId ).hide();
-		$( '#sidebar-div-translation-memory-' + originalId ).hide();
+		$( '#sidebar-div-others-' + originalId ).hide();
 		$( '#' + tabId ).show();
 	}
 
