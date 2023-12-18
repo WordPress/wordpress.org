@@ -113,11 +113,11 @@ body.home-page.home #main {
   border-bottom: #bbb solid 1px;
   margin: 1em 0;
 }
-.footer-meta-wrap .footer-meta {
+.footer-meta-wrap .footer-meta { 
+  display: flex;
   margin: 0 auto;
-  width: 960px;
+  max-width: 960px;
   padding: 24px 0;
-  overflow: auto;
   color: #555;
   font-family: 'Source Sans Pro', 'HelveticaNeue', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
