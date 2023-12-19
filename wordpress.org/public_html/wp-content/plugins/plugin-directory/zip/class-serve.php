@@ -17,6 +17,8 @@ class Serve {
 		try {
 			$request = $this->determine_request();
 
+			$this->maybe_redirect_latest_stable( $request );
+
 			$this->serve_zip( $request );
 
 			if ( $request['args']['stats'] ) {
@@ -55,7 +57,10 @@ class Serve {
 		if ( isset( $m['version'] ) && '' !== $m['version'] ) {
 			$version = $m['version'];
 		}
-		if ( 'latest-stable' == $version ) {
+
+		// If the latest-stable is requested, determine the file to serve.
+		$is_latest_stable = ( 'latest-stable' == $version );
+		if ( $is_latest_stable ) {
 			$version = $this->get_stable_tag( $slug );
 		}
 
@@ -78,7 +83,37 @@ class Serve {
 			$args['stats'] = ! empty( $_GET['nostats'] );
 		}
 
-		return compact( 'zip', 'slug', 'version', 'args', 'checksum_request', 'signature_request' );
+
+		return compact( 'zip', 'slug', 'version', 'args', 'checksum_request', 'signature_request', 'is_latest_stable' );
+	}
+
+	/**
+	 * Redirect to the latest stable version if requested.
+	 *
+	 * @param array $request The request array for the request.
+	 */
+	protected function maybe_redirect_latest_stable( $request ) {
+		if ( ! $request['is_latest_stable'] ) {
+			return;
+		}
+
+		$file     = $this->get_file( $request );
+		$redirect = 'https://downloads.wordpress.org/plugin/' . basename( $file );
+
+		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+			$redirect .= '?' . $_SERVER['QUERY_STRING'];
+		}
+
+		// CORS, to match the ZIP passthrough.
+		header( 'Access-Control-Allow-Methods: GET, HEAD' );
+		header( 'Access-Control-Allow-Origin: *' );
+
+		// Tell browsers to only cache this for 5 minutes.
+		header( 'Cache-Control: max-age=300' );
+
+		// Redirect to the file they want.
+		header( 'Location: ' . $redirect, 302 );
+		exit;
 	}
 
 	/**
