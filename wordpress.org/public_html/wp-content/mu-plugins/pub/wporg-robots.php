@@ -79,6 +79,15 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 		$robots = "Sitemap: https://{$blog_details->domain}/themes/sitemap.xml\n" . $robots;
 	}
 
+	/*
+	 * Add the Developer Blog sitemap.
+	 */
+	if ( 'developer.wordpress.org' === $blog_details->domain ) {
+		$robots = "Sitemap: https://developer.wordpress.org/news/sitemap.xml\n" .
+		          "Sitemap: https://developer.wordpress.org/news/news-sitemap.xml\n" .
+		          $robots;
+	}
+
 	return $robots;
 }
 add_filter( 'robots_txt', 'wporg_robots_prefix_sitemaps', 1 );
