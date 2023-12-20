@@ -49,12 +49,17 @@ function customize_register( $wp_customize ) {
 }
 
 /**
- * noindex the Mentions archives.
+ * noindex certain archives.
  */
 function no_robots( $noindex ) {
 	if ( is_tax( 'mentions' ) ) {
 		$noindex = true;
 	}
+
+	if ( get_query_var( 'o2_recent_comments' ) ) {
+		$noindex = true;
+	}
+
 
 	// This is used by https://github.com/WordPress/phpunit-test-reporter/blob/master/src/class-display.php on the test reporter page
 	if ( isset( $_GET['rpage'] ) ) {
