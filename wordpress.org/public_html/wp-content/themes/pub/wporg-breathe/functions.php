@@ -56,6 +56,11 @@ function no_robots( $noindex ) {
 		$noindex = true;
 	}
 
+	// This is used by https://github.com/WordPress/phpunit-test-reporter/blob/master/src/class-display.php on the test reporter page
+	if ( isset( $_GET['rpage'] ) ) {
+		$noindex = true;
+	}
+
 	return $noindex;
 }
 add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\no_robots' );
