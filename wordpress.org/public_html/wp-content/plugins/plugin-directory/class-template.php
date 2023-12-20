@@ -765,6 +765,22 @@ class Template {
 	}
 
 	/**
+	 * Generate a live preview (playground) link for a zip attachment. Needed for newly uploaded plugins that have not yet been published.
+	 *
+	 * @param string $slug            The slug of the plugin post.
+	 * @param int $attachment_id      The ID of the attachment post corresponding to a plugin zip file. Must be attached to the post identified by $slug.
+	 * @return false|string           The preview URL.
+	 */
+	public static function preview_link_zip( $slug, $attachment_id ) {
+
+		$zip_hash = wp_hash( get_attached_file( $attachment_id ), 'nonce' );
+		$zip_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?zip_hash=%s', esc_attr( $slug ), esc_attr( $zip_hash ) );
+		$zip_preview = add_query_arg( 'blueprint-url', urlencode($zip_blueprint), 'https://playground.wordpress.net/' );
+
+		return $zip_preview;
+	}
+
+	/**
 	 * Return a list of blueprints for the given plugin.
 	 *
 	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.

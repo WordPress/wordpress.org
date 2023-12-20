@@ -37,10 +37,13 @@ class Plugin_Blueprint extends Base {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
 		// Direct zip preview for plugin reviewers
-		if ( $request->get_params('zip_hash') ) {
-			$zip_url = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/zip/%s', $request['plugin_slug'], $request['zip_hash'] );
-			$zip_url = esc_url( $zip_url );
-			$zip_blueprint =<<<EOF
+		if ( $request->get_param('zip_hash') ) {
+			foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
+				$file = get_attached_file( $zip_file->ID );
+				// Should use a secure hash compare here - is there none in core?!
+				if ( wp_hash( $file, 'nonce' ) === $request->get_param('zip_hash') ) {
+					$zip_url = wp_get_attachment_url( $zip_file->ID );
+					$zip_blueprint =<<<EOF
 {
     "landingPage": "/wp-admin/plugins.php",
     "preferredVersions": {
@@ -54,6 +57,13 @@ class Plugin_Blueprint extends Base {
         "networking": true
     },
     "steps": [
+		{
+            "step": "installPlugin",
+            "pluginZipFile": {
+                "resource": "wordpress.org/plugins",
+                "slug": "plugin-check"
+            }
+        },
         {
             "step": "installPlugin",
             "pluginZipFile": {
@@ -69,8 +79,10 @@ class Plugin_Blueprint extends Base {
 	]
 }
 EOF;
-			header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
-			die( $zip_blueprint );
+					header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+					die( $zip_blueprint );
+				}
+			}
 		}
 
         $blueprints = get_post_meta( $plugin->ID, 'assets_blueprints', true );
