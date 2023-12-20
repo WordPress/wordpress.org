@@ -5,6 +5,11 @@ namespace WordPressdotorg\Markdown;
 use WP_Post;
 
 class Editor {
+	/**
+	 * @var Importer
+	 */
+	public $importer;
+
 	public function __construct( Importer $importer ) {
 		$this->importer = $importer;
 	}
