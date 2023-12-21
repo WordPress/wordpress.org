@@ -300,3 +300,14 @@ add_action( 'template_redirect', function() {
 	exit;
 } );
 
+// Add wp.org redirect from developer.wp.org see: https://github.com/WordPress/wporg-developer/issues/452
+add_action( 'parse_request', function() {
+	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
+	if ( 'developer.wordpress.org' !== $_SERVER['HTTP_HOST'] || '/themes/getting-started/wordpress-licensing-the-gpl/' !== $path ) {
+		return;
+	}
+
+	wp_safe_redirect( '	https://wordpress.org/about/license/', 301, 'wporg dev redirect'  );
+	exit;
+} );
+
