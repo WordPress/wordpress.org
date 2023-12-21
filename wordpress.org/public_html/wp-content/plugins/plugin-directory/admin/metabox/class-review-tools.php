@@ -127,13 +127,15 @@ class Review_Tools {
 			foreach ( $zip_files as $zip_date => $zip ) {
 				list( $zip_url, $zip_file ) = $zip;
 				$zip_size                   = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
+				$zip_preview                = Template::preview_link_zip( $slug, $zip_file->ID );
 
 				printf(
-					'<li>%1$s <a href="%2$s">%3$s</a> (%4$s)</li>',
+					'<li>%1$s <a href="%2$s">%3$s</a> (%4$s) (<a href="%5$s" target="_blank">preview</a>)</li>',
 					esc_html( $zip_date ),
 					esc_url( $zip_url ),
 					esc_html( basename( $zip_url ) ),
-					esc_html( $zip_size )
+					esc_html( $zip_size ),
+					esc_url( $zip_preview )
 				);
 			}
 			echo '</ul>';
