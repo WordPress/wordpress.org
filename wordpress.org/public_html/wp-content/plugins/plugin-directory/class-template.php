@@ -773,11 +773,40 @@ class Template {
 	 */
 	public static function preview_link_zip( $slug, $attachment_id ) {
 
-		$zip_hash = wp_hash( get_attached_file( $attachment_id ), 'nonce' );
+		$zip_hash = self::preview_link_hash( $attachment_id );
+		if ( !$zip_hash ) {
+			return false;
+		}
 		$zip_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?zip_hash=%s', esc_attr( $slug ), esc_attr( $zip_hash ) );
 		$zip_preview = add_query_arg( 'blueprint-url', urlencode($zip_blueprint), 'https://playground.wordpress.net/' );
 
 		return $zip_preview;
+	}
+
+	/**
+	 * Return a time-dependent variable for zip preview links.
+	 *
+	 * @param int $lifespan           The life span of the nonce, in seconds. Default is one week.
+	 * @return float                  The tick value.
+	 */
+	public static function preview_link_tick( $lifespan = WEEK_IN_SECONDS ) {
+		return ceil( time() / ( $lifespan / 2 ) );
+	}
+
+	/**
+	 * Return a nonce-style hash for zip preview links.
+	 *
+	 * @param int $attachment_id      The ID of the attachment post corresponding to a plugin zip file.
+	 * @param int $tick_offest        Number to subtract from the nonce tick. Use both 0 and -1 to verify older nonces.
+	 * @return false|string           The hash as a hex string; or false if the attachment ID is invalid.
+	 */
+	public static function preview_link_hash( $attachment_id, $tick_offset = 0 ) {
+		$file = get_attached_file( $attachment_id );
+		if ( !$file ) {
+			return false;
+		}
+		$tick = self::preview_link_tick() - $tick_offset;
+		return wp_hash( $tick . '|' . $file, 'nonce' );
 	}
 
 	/**

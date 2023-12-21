@@ -39,9 +39,8 @@ class Plugin_Blueprint extends Base {
 		// Direct zip preview for plugin reviewers
 		if ( $request->get_param('zip_hash') ) {
 			foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
-				$file = get_attached_file( $zip_file->ID );
-				// Should use a secure hash compare here - is there none in core?!
-				if ( wp_hash( $file, 'nonce' ) === $request->get_param('zip_hash') ) {
+				if ( hash_equals( Template::preview_link_hash( $zip_file->ID, 0 ), $request->get_param('zip_hash') ) ||
+				     hash_equals( Template::preview_link_hash( $zip_file->ID, -1 ), $request->get_param('zip_hash') ) ) {
 					$zip_url = wp_get_attachment_url( $zip_file->ID );
 					$zip_blueprint =<<<EOF
 {
