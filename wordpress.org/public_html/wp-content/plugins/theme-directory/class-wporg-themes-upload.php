@@ -1153,7 +1153,7 @@ class WPORG_Themes_Upload {
 BLUEPRINT;
 
 		// NOTE: The json_encode( json_decode() ) is to remove the whitespaces used above for readability.
-		$live_preview_link = 'https://playground.wordpress.net/#' . urlencode( json_encode( json_decode( $blueprint ) ) );
+		$live_preview_link = 'https://playground.wordpress.net/#' . json_encode( json_decode( $blueprint ) );
 
 		// Hacky way to prevent a problem with xml-rpc.
 		$this->trac_ticket->description = <<<TICKET
@@ -1169,7 +1169,7 @@ WordPress.org - https://wordpress.org/themes/{$this->theme_slug}/
 
 SVN - https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}
 ZIP - {$theme_zip_link}
-Live preview – [{$live_preview_link} https://playground.wordpress.net/#…]
+Live preview – [[{$live_preview_link}|https://playground.wordpress.net/#…]]
 
 {$this->trac_ticket->parent_link}
 {$this->trac_ticket->diff_line}
