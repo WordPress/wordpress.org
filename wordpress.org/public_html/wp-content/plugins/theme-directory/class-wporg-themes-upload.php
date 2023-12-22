@@ -1093,6 +1093,68 @@ class WPORG_Themes_Upload {
 		// Description
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->display( 'Description' ) );
 
+		// ZIP location
+		$theme_zip_link = "https://downloads.wordpress.org/theme/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1";
+
+		/*
+		 * Build the Live Preview URL.
+		 *
+		 * NOTE: The username + password included below are only used for the local in-browser environment, and are not a secret.
+		 */
+		$blueprint = <<<BLUEPRINT
+{
+	"preferredVersions": {
+		"php": "7.4",
+		"wp": "latest"
+	},
+	"steps": [
+		{
+			"step": "login",
+			"username": "admin",
+			"password": "password"
+		},
+		{
+			"step": "defineWpConfigConsts",
+			"consts": {
+				"WP_DEBUG": true
+			}
+		},
+		{
+			"step": "importFile",
+			"file": {
+				"resource": "url",
+				"url": "https://raw.githubusercontent.com/WordPress/theme-test-data/master/themeunittestdata.wordpress.xml",
+				"caption": "Downloading theme testing content"
+			},
+			"progress": {
+				"caption": "Installing theme testing content"
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginZipFile": {
+				"resource": "wordpress.org/plugins",
+				"slug": "theme-check"
+			},
+			"options": {
+				"activate": true
+			}
+		},
+		{
+			"step": "installTheme",
+			"themeZipFile": {
+				"resource": "url",
+				"url": "{$theme_zip_link}",
+				"caption": "Downloading the theme"
+			}
+		}
+	]
+}
+BLUEPRINT;
+
+		// NOTE: The json_encode( json_decode() ) is to remove the whitespaces used above for readability.
+		$live_preview_link = 'https://playground.wordpress.net/#' . urlencode( json_encode( json_decode( $blueprint ) ) );
+
 		// Hacky way to prevent a problem with xml-rpc.
 		$this->trac_ticket->description = <<<TICKET
 {$this->theme->display( 'Name' )} - {$this->theme->display( 'Version' )}
@@ -1106,7 +1168,9 @@ Trac Browser - https://themes.trac.wordpress.org/browser/{$this->theme_slug}/{$t
 WordPress.org - https://wordpress.org/themes/{$this->theme_slug}/
 
 SVN - https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}
-ZIP - https://wordpress.org/themes/download/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1
+ZIP - {$theme_zip_link}
+Live preview – [{$live_preview_link} https://playground.wordpress.net/#…]
+
 {$this->trac_ticket->parent_link}
 {$this->trac_ticket->diff_line}
 History:
