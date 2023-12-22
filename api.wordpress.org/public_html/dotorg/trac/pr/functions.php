@@ -243,12 +243,6 @@ function get_app_install_token() {
 function determine_trac_ticket( $pr ) {
 	$ticket = false;
 
-	// If the trac found is the key, return the value.
-	$trac_redirects = [
-		// Themes trac mentions are likely Meta tickets.
-		'themes' => 'meta',
-	];
-
 	// For now, we assume everything is destined for the Core Trac.
 	$trac = 'core';
 	switch ( $pr->base->repo->full_name ) {
@@ -270,9 +264,12 @@ function determine_trac_ticket( $pr ) {
 				$trac = WEBHOOK_TRAC_HINT;
 			}
 
-			// If a specific trac is mentioned within the PR body:
-			elseif ( preg_match( '!/(?P<trac>[a-z]+).trac.wordpress.org/!i', $pr->body, $m ) ) {
-				$trac = $m['trac'];
+			// If a specific trac is mentioned within the PR body (and only that trac)
+			elseif (
+				preg_match_all( '!/(?P<trac>[a-z]+).trac.wordpress.org/!i', $body, $m ) &&
+				1 === count( array_unique( $m[0] ) )
+			) {
+				$trac = $m['trac'][0];
 			}
 
 			// If the repo starts with 'wporg-' assume Meta.
@@ -283,14 +280,26 @@ function determine_trac_ticket( $pr ) {
 	}
 
 	$regexes = [
+		// Match explicit ticket-ref links, as included in most PR descriptions.
+		"!Trac ticket:\s*https://(?P<trac>[a-z]+).trac.wordpress.org/ticket/(?P<id>\d+)!i",
+
+		// Match any references to the "expected" trac instance first. This covers cases where multiple tracs are mentioned.
+		"!{$trac}.trac.wordpress.org/ticket/(?P<id>\d+)!i",
+
+		// Then any trac instance.
 		'!(?P<trac>[a-z]+).trac.wordpress.org/ticket/(?P<id>\d+)!i',
+
+		// Now for just plain ticket references without a trac instance.
 		'!(?:^|\s)#WP(\d+)!', // #WP1234
 		'!(?:^|\s)#(\d{4,5})!', // #1234
 		'!Ticket[ /-](\d+)!i',
+
 		// diff filenames.
 		'!\b(\d+)(\.\d)?\.(?:diff|patch)!i',
-		// Formats of common branches
+
+		// Formats of common branches.
 		'!((?P<trac>core|meta|bbpress|buddypress|themes)|WordPress|fix|trac)[-/](?P<id>\d+)!i',
+
 		// Starts or ends with a ticketish number
 		// These match things it really shouldn't, and are a last-ditch effort.
 		'!\s(\d{4,5})$!i',
@@ -312,8 +321,6 @@ function determine_trac_ticket( $pr ) {
 				if ( ! empty( $m['trac'] ) ) {
 					$trac = $m['trac'];
 				}
-
-				$trac = $trac_redirects[ $trac ] ?? $trac;
 
 				return [ $trac, $id ];
 			}
