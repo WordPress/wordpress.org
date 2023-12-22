@@ -40,6 +40,7 @@ class Plugins_Info_API_Request {
 		'versions'            => false,
 		'screenshots'         => false,
 		'blueprints'          => false,
+		'preview_link'        => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
