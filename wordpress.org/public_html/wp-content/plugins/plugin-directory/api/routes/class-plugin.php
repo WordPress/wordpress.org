@@ -228,6 +228,9 @@ class Plugin extends Base {
 		// Blueprints, if available
 		$result['blueprints'] = array_values( Template::get_blueprints( $post ) ) ?: [];
 
+		// Preview link, if available
+		$result['preview_link'] = Template::is_preview_available( $post ) ? add_query_arg( array( 'preview' => 1 ), get_the_permalink( $post ) ) : '';
+
 		// Translations.
 		$result['language_packs'] = [];
 		if ( defined ( 'API_WPORGPATH' ) && file_exists( API_WPORGPATH . '/translations/lib.php' ) ) {
