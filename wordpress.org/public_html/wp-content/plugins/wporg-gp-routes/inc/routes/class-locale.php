@@ -47,7 +47,14 @@ class Locale extends GP_Route {
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
 		$filter = gp_get( 'filter', false );
-		$without_editors = gp_get( 'without-editors', false );
+		$without_editors = (bool) gp_get( 'without-editors', false );
+
+		if ( $search && ! is_string( $search ) ) {
+			$search = '';
+		}
+		if ( $filter && ! is_string( $filter ) ) {
+			$filter = false;
+		}
 
 		$locale = GP_Locales::by_slug( $locale_slug );
 		if ( ! $locale ) {
