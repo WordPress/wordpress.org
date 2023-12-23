@@ -120,9 +120,18 @@ class Controls {
 
 			<?php endif; ?>
 
-			<?php foreach ( $statuses as $status ) {
-				echo '<p>';
+			<?php if ( array_intersect( $statuses, [ 'closed', 'disabled' ] ) ) { ?>
+				<p>
+					<label for="close_reason"><?php _e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
+					<select name="close_reason" id="close_reason">
+						<?php foreach ( $close_reasons as $key => $label ) : ?>
+							<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $close_reason ); ?>><?php echo esc_html( $label ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</p>
+			<?php }
 
+			foreach ( $statuses as $status ) {
 				if ( 'pending' === $status && ! $post->assigned_reviewer ) {
 					printf(
 						'<p class="pending-assign"><button onclick="%s" type="submit" name="post_status" value="%s" class="button set-plugin-status button-primary">%s</button></p>',
@@ -132,18 +141,7 @@ class Controls {
 					);
 				}
 
-				if ( 'closed' === $status || 'disabled' === $status ) { ?>
-					<p>
-						<label for="close_reason"><?php _e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
-						<select name="close_reason" id="close_reason">
-							<?php foreach ( $close_reasons as $key => $label ) : ?>
-								<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $close_reason ); ?>><?php echo esc_html( $label ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</p>
-				<?php }
-
-				if ( 'rejected' === $status ) { ?>
+				if ( $status === 'rejected' ) { ?>
 					<p>
 						<label for="rejection_reason"><?php _e( 'Rejection Reason:', 'wporg-plugins' ); ?></label>
 						<select name="rejection_reason" id="rejection_reason">
@@ -155,13 +153,10 @@ class Controls {
 				<?php }
 
 				printf(
-					'<button type="submit" name="post_status" value="%s" class="button set-plugin-status">%s</button>',
+					'<p><button type="submit" name="post_status" value="%s" class="button set-plugin-status">%s</button></p>',
 					esc_attr( $status ),
 					self::get_status_button_label( $status )
 				);
-
-				echo '</p>';
-
 			} ?>
 		</div><!-- .misc-pub-section -->
 		<?php
