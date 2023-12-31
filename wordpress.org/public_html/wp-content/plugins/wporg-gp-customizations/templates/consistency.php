@@ -23,6 +23,19 @@ gp_tmpl_header();
 			$locale_options = [
 				'' => 'Select a locale',
 			];
+			$sets_to_hide = array(
+				'ca/valencia',
+				'nl/formal/default',
+				'en/formal',
+				'en/default',
+				'fr/formal',
+				'de/formal/default',
+				'de-ch/info/default',
+				'pt/ao90/default',
+				'sr/latin',
+				'sr/latin/latin',
+			);
+			$sets = array_diff_key( $sets, array_flip( $sets_to_hide ) );
 			$locale_options = array_merge( $locale_options, $sets );
 			echo gp_select(
 				'set',
