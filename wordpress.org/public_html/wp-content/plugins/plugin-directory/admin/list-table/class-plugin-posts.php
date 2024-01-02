@@ -711,11 +711,12 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$name = explode( '_', $name, 3 )[2];
 
 			printf(
-				'<a href="%1$s">%2$s</a><br>%3$s<br>(<a href="%4$s" target="_blank">preview</a>)</li>',
+				'<a href="%1$s">%2$s</a><br>%3$s<br>(<a href="%4$s" target="_blank">preview</a> | <a href="%5$s" target="_blank">pcp</a>)</li>',
 				esc_url( $url ),
 				esc_html( $name ),
 				esc_html( $zip_size ),
-				esc_url( Template::preview_link_zip( $post->post_name, $zip_file->ID ) )
+				esc_url( Template::preview_link_zip( $post->post_name, $zip_file->ID ) ),
+				esc_url( Template::preview_link_zip( $post->post_name, $zip_file->ID, 'pcp' ) )
 			);
 		}
 	}

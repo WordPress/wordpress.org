@@ -36,52 +36,8 @@ class Plugin_Blueprint extends Base {
 	public function blueprint( $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-		// Direct zip preview for plugin reviewers
 		if ( $request->get_param('zip_hash') ) {
-			foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
-				if ( hash_equals( Template::preview_link_hash( $zip_file->ID, 0 ), $request->get_param('zip_hash') ) ||
-				     hash_equals( Template::preview_link_hash( $zip_file->ID, -1 ), $request->get_param('zip_hash') ) ) {
-					$zip_url = wp_get_attachment_url( $zip_file->ID );
-					$zip_blueprint =<<<EOF
-{
-    "landingPage": "/wp-admin/plugins.php",
-    "preferredVersions": {
-        "php": "8.0",
-        "wp": "latest"
-	},
-    "phpExtensionBundles": [
-        "kitchen-sink"
-    ],
-    "features": {
-        "networking": true
-    },
-    "steps": [
-		{
-            "step": "installPlugin",
-            "pluginZipFile": {
-                "resource": "wordpress.org/plugins",
-                "slug": "plugin-check"
-            }
-        },
-        {
-            "step": "installPlugin",
-            "pluginZipFile": {
-                "resource": "url",
-                "url": "$zip_url"
-            }
-		},
-		{
-            "step": "login",
-            "username": "admin",
-            "password": "password"
-        }
-	]
-}
-EOF;
-					header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
-					die( $zip_blueprint );
-				}
-			}
+			$this->reviewer_blueprint( $request, $plugin );
 		}
 
         $blueprints = get_post_meta( $plugin->ID, 'assets_blueprints', true );
@@ -99,6 +55,77 @@ EOF;
 
 		// We already have a json string, returning would double-encode it.
 		die( $blueprint['contents'] );
+	}
+
+	function reviewer_blueprint( $request, $plugin ) {
+		// Direct zip preview for plugin reviewers
+		if ( $request->get_param('zip_hash') ) {
+			foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
+				if ( hash_equals( Template::preview_link_hash( $zip_file->ID, 0 ), $request->get_param('zip_hash') ) ||
+				     hash_equals( Template::preview_link_hash( $zip_file->ID, -1 ), $request->get_param('zip_hash') ) ) {
+					$zip_url = wp_get_attachment_url( $zip_file->ID );
+					if ( $zip_url ) {
+
+						$landing_page = '/wp-admin/plugins.php';
+						$activate_plugin = true;
+
+						// Plugin deactivated, and land on the Plugin Check page
+						if ( 'pcp' === $request->get_param('type') ) {
+							$landing_page = '/wp-admin/admin.php?page=plugin-check';
+							$activate_plugin = false;
+						}
+
+						$zip_blueprint = (object)[
+							'landingPage' => $landing_page,
+							'preferredVersions' => (object)[
+								'php' => '8.0',
+								'wp'  => 'latest',
+							],
+							'phpExtensionBundles' => [
+								'kitchen-sink'
+							],
+							'features' => (object)[
+								'networking' => true
+							],
+							'steps' => [
+								(object)[
+									'step' => 'installPlugin',
+									'pluginZipFile' => [
+										'resource' => 'wordpress.org/plugins',
+										'slug'     => 'plugin-check',
+									]
+								],
+								(object)[
+									'step' => 'installPlugin',
+									'pluginZipFile' => (object)[
+										'resource' => 'url',
+										'url'      => $zip_url,
+									],
+									'options' => (object)[
+										'activate' => (bool)$activate_plugin
+									]
+								],
+								(object)[
+									'step' => 'login',
+									'username' => 'admin',
+									'password' => 'password',
+								]
+							]
+						];
+
+						$output = json_encode( $zip_blueprint );
+
+						if ( $output ) {
+							header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+							die( $output );
+						}
+					}
+				}
+			}
+		}
+
+		return new \WP_Error( 'invalid_blueprint', 'Invalid file', array( 'status' => 500 ) );
+
 	}
 
 }

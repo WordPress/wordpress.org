@@ -771,13 +771,16 @@ class Template {
 	 * @param int $attachment_id      The ID of the attachment post corresponding to a plugin zip file. Must be attached to the post identified by $slug.
 	 * @return false|string           The preview URL.
 	 */
-	public static function preview_link_zip( $slug, $attachment_id ) {
+	public static function preview_link_zip( $slug, $attachment_id, $type = null ) {
 
 		$zip_hash = self::preview_link_hash( $attachment_id );
 		if ( !$zip_hash ) {
 			return false;
 		}
 		$zip_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?zip_hash=%s', esc_attr( $slug ), esc_attr( $zip_hash ) );
+		if ( is_string( $type ) ) {
+			$zip_blueprint = add_query_arg( 'type', strval( $type ), $zip_blueprint );
+		}
 		$zip_preview = add_query_arg( 'blueprint-url', urlencode($zip_blueprint), 'https://playground.wordpress.net/' );
 
 		return $zip_preview;
