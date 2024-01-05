@@ -415,6 +415,17 @@ abstract class Importer {
 			}
 		}
 
+		// Check to see if this differs from the actual post.
+		if ( $post_data ) {
+			$post = get_post( $post_id );
+			foreach ( $post_data as $field => $value ) {
+				if ( $value == $post->$field ) {
+					// Unset it to prevent calling `wp_update_post()` with this and bumping the last_modified date.
+					unset( $post_data[ $field ] );
+				}
+			}
+		}
+
 		if ( $do_update && $post_data ) {
 			$post_data['ID'] = $post_id;
 
