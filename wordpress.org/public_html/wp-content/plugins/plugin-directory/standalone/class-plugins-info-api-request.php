@@ -74,6 +74,7 @@ class Plugins_Info_API_Request {
 		'reviews'           => true,
 		'active_installs'   => true,
 		'contributors'      => true,
+		'preview_link'      => true,
 	);
 
 	static $query_plugins_fields_defaults = array(
