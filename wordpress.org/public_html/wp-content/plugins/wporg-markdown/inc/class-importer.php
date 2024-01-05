@@ -330,7 +330,7 @@ abstract class Importer {
 			$ret = $this->update_post_from_markdown_source( $id );
 			if ( class_exists( 'WP_CLI' ) ) {
 				if ( is_wp_error( $ret ) ) {
-					WP_CLI::warning( $ret->get_error_message() );
+					WP_CLI::warning( "{$id} returned an error: " . $ret->get_error_message() );
 				} elseif ( false === $ret ) {
 					WP_CLI::log( "No updates for {$id}" );
 					$success++;
@@ -416,7 +416,7 @@ abstract class Importer {
 		}
 
 		// Check to see if this differs from the actual post.
-		if ( $post_data ) {
+		if ( $do_update && $post_data ) {
 			$post = get_post( $post_id );
 			foreach ( $post_data as $field => $value ) {
 				if ( $value == $post->$field ) {
