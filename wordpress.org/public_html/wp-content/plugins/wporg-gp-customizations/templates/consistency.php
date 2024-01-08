@@ -160,7 +160,7 @@ if ( $performed_search && ! $results ) {
 					);
 				}
 
-				if( ! $is_active ) {
+				if( $is_active ) {
 					$active_text = '';
 				} else {
 					$active_text = sprintf(
