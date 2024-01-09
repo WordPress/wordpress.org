@@ -139,15 +139,19 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 				$authorship = "[https://profiles.wordpress.org/{$user->user_nicename}/ @{$user->user_login}]";
 			}
 
-			$trac->update(
-				$pr_data->trac_ticket[1],
-				"''This ticket was mentioned in [{$pr_data->html_url} PR #{$pr_number}] " .
-					"on [https://github.com/{$pr_repo}/ {$pr_repo}] " .
-					"by {$authorship}.''" .
-					( $pr_description ? "\n{$pr_description}" : '' ),
-				$attributes,  // Attributes changed
-				true // Notify
-			);
+			try {
+				$trac->update(
+					$pr_data->trac_ticket[1],
+					"''This ticket was mentioned in [{$pr_data->html_url} PR #{$pr_number}] " .
+						"on [https://github.com/{$pr_repo}/ {$pr_repo}] " .
+						"by {$authorship}.''" .
+						( $pr_description ? "\n{$pr_description}" : '' ),
+					$attributes,  // Attributes changed
+					true // Notify
+				);
+			} catch( \Exception $e ) {
+				// For now, nothing.
+			}
 		}
 
 		// Step 4. Update all the instances of this PR with the new data, it may be linked to multiple tickets/tracs.
@@ -231,12 +235,16 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			$trac = get_trac_instance( $t->trac );
 
 			if ( ! $is_edit ) {
-				$trac->update(
-					$t->ticket, $comment_body,
-					[], false,
-					$comment_author,
-					$comment_time
-				);
+				try {
+					$trac->update(
+						$t->ticket, $comment_body,
+						[], false,
+						$comment_author,
+						$comment_time
+					);
+				} catch( \Exception $e ) {
+					// For now, nothing.
+				}
 			} else {
 				// TODO: Need to edit..
 				// use /wpapi endpoint for that.
