@@ -512,6 +512,7 @@ function get_whitelist() {
 			'hardeepasrani',
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
+			'lada7042',
 			'meaganhanes',
 			'mrfoxtalbot',
 			'ndiego',
