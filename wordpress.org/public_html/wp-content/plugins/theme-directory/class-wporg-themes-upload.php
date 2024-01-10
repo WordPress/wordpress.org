@@ -204,6 +204,17 @@ class WPORG_Themes_Upload {
 			return false;
 		}
 
+		// Validate it's not too large.
+		if ( $size > wp_max_upload_size() ) {
+			return new WP_Error(
+				'file_too_big',
+				sprintf(
+					__( 'Maximum allowed file size: %s', 'wporg-themes' ),
+					esc_html( size_format( wp_max_upload_size() ) )
+				)
+			);
+		}
+
 		// Validate that the file is a ZIP file before processing it.
 		$check = wp_check_filetype_and_ext(
 			$file['tmp_name'],
@@ -287,7 +298,9 @@ class WPORG_Themes_Upload {
 		$this->reset_properties();
 
 		$valid_upload = $this->validate_upload( $file_upload );
-		if ( ! $valid_upload ) {
+		if ( is_wp_error( $valid_upload ) ) {
+			return $valid_upload;
+		} elseif ( ! $valid_upload ) {
 			return new WP_Error(
 				'invalid_input',
 				__( 'Error in file upload.', 'wporg-themes' )
