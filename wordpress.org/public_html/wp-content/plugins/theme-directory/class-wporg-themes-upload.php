@@ -1023,8 +1023,12 @@ class WPORG_Themes_Upload {
 			}
 		}
 
-		// Run the checks.
+		// Run the checks, using US English.
+		$locale_switched = switch_to_locale( 'en_US' );
 		$result = run_themechecks_against_theme( $this->theme, $this->theme_slug );
+		if ( $locale_switched ) {
+			restore_previous_locale();
+		}
 
 		// Display the errors.
 		$verdict = $result ? array( 'tc-pass', __( 'Pass', 'wporg-themes' ) ) : array( 'tc-fail', __( 'Fail', 'wporg-themes' ) );
