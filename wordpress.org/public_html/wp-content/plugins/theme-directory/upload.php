@@ -63,6 +63,8 @@ function wporg_themes_render_upload_shortcode() {
 
 		if ( 'pre_upload_terms' === $code ) {
 			$terms_notice = "<div class='notice notice-error notice-large'><ul>{$notice_content}</ul></div>";
+		} elseif ( is_wp_error( $messages ) ) {
+			$notice = "<div class='notice notice-error notice-large'><ul>{$notice_content}</ul></div>";
 		} else {
 			$notice = "<div class='notice notice-warning notice-large'><ul>{$notice_content}</ul></div>";
 		}
