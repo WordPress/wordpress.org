@@ -37,6 +37,8 @@ function bail( $error_code, $error_text, $http_code = 400, $http_code_text = fal
 function output_response( $data ) {
 	$json_data = json_encode( $data );
 
+	header( 'Access-Control-Allow-Origin: *' );
+
 	if ( !empty( $_GET['callback'] ) ) {
 		call_headers( 'application/javascript' );
 
