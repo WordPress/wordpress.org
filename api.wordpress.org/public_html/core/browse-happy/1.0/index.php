@@ -29,8 +29,10 @@ if ( $jsonp ) {
 	echo $jsonp.'('.json_encode($data).')';
 } elseif ( defined( 'JSON_RESPONSE' ) ) {
 	header( 'Access-Control-Allow-Origin: *' );
+	header( 'Content-Type: application/json' );
 	echo json_encode( $data );
 } else {
+	header( 'Content-Type: text/plain' );
 	echo serialize( $data );
 }
 
