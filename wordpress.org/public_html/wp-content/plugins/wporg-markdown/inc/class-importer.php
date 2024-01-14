@@ -499,7 +499,7 @@ abstract class Importer {
 
 		$html = apply_filters( 'wporg_markdown_after_transform', $html, $this->get_post_type() );
 
-		add_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allow_links' ], 10, 2 );
+		add_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allowed_html' ], 10, 2 );
 
 		$post_data = array(
 			'ID'           => $post_id,
@@ -507,7 +507,7 @@ abstract class Importer {
 			'post_excerpt' => sanitize_text_field( wp_slash( $excerpt ) ),
 		);
 
-		remove_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allow_links' ], 10 );
+		remove_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allowed_html' ], 10 );
 
 		$fields_from_manifest = $this->update_post_from_manifest( $post_id, $title, false );
 		if ( $fields_from_manifest ) {
@@ -523,19 +523,20 @@ abstract class Importer {
 	}
 
 	/**
-	 * Ensures that the 'a' tag and certain of its attributes are allowed in
+	 * Ensures that the 'a' and 'iframe' tags and certain attributes are allowed in
 	 * posts if not already.
 	 *
 	 * Supported 'a' attributes are those defined for `$allowedposttags` by default.
+	 * Supported 'iframe' attributes are those required for YouTube embeds.
 	 *
-	 * This is necessary since the 'a' tag is being removed somewhere along the way.
+	 * This is necessary since the 'a' and 'iframe' tags are being removed somewhere along the way.
 	 *
 	 * @param array[]|string $allowed_tags Allowed HTML tags and their attributes
 	 *                                     or the context to judge allowed tags by.
 	 * @param string         $context      Context name.
 	 * @return array[]|string
 	 */
-	public function wp_kses_allow_links( $allowed_tags, $context ) {
+	public function wp_kses_allowed_html( $allowed_tags, $context ) {
 		if ( 'post' === $context && is_array( $allowed_tags ) && empty( $allowed_tags[ 'a' ] ) ) {
 			$allowed_tags['a'] = [
 				'href'     => true,
@@ -546,6 +547,19 @@ abstract class Importer {
 				'download' => [
 						'valueless' => 'y',
 				],
+			];
+		}
+
+		if ( 'post' === $context && is_array( $allowed_tags ) && empty( $allowed_tags['iframe'] ) ) {
+			$allowed_tags['iframe'] = [
+				'src' => true,
+				'title' => true,
+				'width' => true,
+				'height' => true,
+				'frameborder' => true,
+				'allowfullscreen' => true,
+				'allow' => true,
+				'style' => true,
 			];
 		}
 
