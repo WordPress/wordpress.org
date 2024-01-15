@@ -77,6 +77,7 @@ class Upload_Handler {
 
 		$plugin_post       = $for_plugin ? get_post( $for_plugin ) : false;
 		$updating_existing = (bool) $plugin_post;
+		$this->plugin_slug = $plugin_post->post_name ?? '';
 
 		if ( $for_post && ! $updating_existing ) {
 			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
@@ -84,6 +85,11 @@ class Upload_Handler {
 
 		// Allow plugin reviewers to bypass some restrictions.
 		if ( $updating_existing && current_user_can( 'approve_plugins' ) && ! $has_upload_token ) {
+			$has_upload_token = true;
+		}
+
+		// If the plugin was uploaded using a token, we'll assume future uploads for the plugin should use one.
+		if ( $updating_existing && ! $has_upload_token && $plugin_post->{"_used_upload_token"} ) {
 			$has_upload_token = true;
 		}
 
@@ -106,10 +112,8 @@ class Upload_Handler {
 			) );
 		}
 
-		if ( $updating_existing ) {
-			$this->plugin_slug = $plugin_post->post_name;
-		} else {
-			// Determine the plugin slug based on the name of the plugin in the main plugin file.
+		// Determine the plugin slug based on the name of the plugin in the main plugin file.
+		if ( ! $this->plugin_slug ) {
 			$this->plugin_slug = remove_accents( $this->plugin['Name'] );
 			$this->plugin_slug = preg_replace( '/[^a-z0-9 _.-]/i', '', $this->plugin_slug );
 			$this->plugin_slug = str_replace( '_', '-', $this->plugin_slug );
@@ -425,8 +429,9 @@ class Upload_Handler {
 
 		// First time submission, track some additional metadata.
 		if ( ! $plugin_post ) {
-			$post_args['meta_input']['_author_ip']      = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
-			$post_args['meta_input']['_submitted_date'] = time();
+			$post_args['meta_input']['_author_ip']        = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
+			$post_args['meta_input']['_submitted_date']   = time();
+			$post_args['meta_input']['_used_upload_token'] = $has_upload_token;
 		}
 
 		// Add/Update the Plugin Directory entry for this plugin.
@@ -448,16 +453,14 @@ class Upload_Handler {
 		update_post_meta( $plugin_post->ID, '_submitted_zip_size', filesize( get_attached_file( $attachment->ID ) ) );
 		update_post_meta( $plugin_post->ID, '_submitted_zip_loc', $lines_of_code );
 
-		// Send plugin author an email for peace of mind.
-		if ( ! $updating_existing ) {
-			$this->send_email_notification();
-		}
-
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
 		if ( $updating_existing ) {
 			return __( 'Additional ZIP uploaded successfully.', 'wporg-plugins' );
 		}
+
+		// Send plugin author an email for peace of mind.
+		$this->send_email_notification();
 
 		$message = sprintf(
 			/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
