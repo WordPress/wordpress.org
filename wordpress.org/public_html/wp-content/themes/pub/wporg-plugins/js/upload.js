@@ -3,8 +3,9 @@
 		e.preventDefault();
 		var $form = $(e.target),
 			$errorNotice = $form.find('.notice-error p'),
-			restEndpoint = 'plugins/v1/upload/' + $form.find('input[name="id"]').val(),
-			slug = $form.find('input[name="post_name"]').val();
+			pluginId = $form.find('input[name="id"]').val(),
+			slug = $form.find('input[name="post_name"]').val(),
+			restEndpoint = 'plugins/v1/upload/' + pluginId + '/slug';
 
 		$form.find('input').prop('disabled', true);
 
@@ -42,10 +43,10 @@
 		.on( 'focus', function() { $(this).parent().addClass( 'focus' ); } )
 		.on( 'blur', function() { $(this).parent().removeClass( 'focus' ); } );
 
-	$( 'a.upload-another').on( 'click', function( e ) {
+	$( 'a.show-upload-additional').on( 'click', function( e ) {
 		e.preventDefault();
 
-		$(this).hide().siblings('form.hidden' ).removeClass( 'hidden' );
+		$(this).hide().parents('ul').find('.plugin-upload-form.hidden').removeClass( 'hidden' );
 	} );
 
 })( jQuery );

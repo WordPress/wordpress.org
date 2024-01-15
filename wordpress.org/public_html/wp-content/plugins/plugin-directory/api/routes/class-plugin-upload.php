@@ -22,21 +22,7 @@ class Plugin_Upload extends Base {
 		register_rest_route( 'plugins/v1', '/upload/(?P<ID>[0-9]+)', array(
 			'methods'             => WP_REST_Server::EDITABLE,
 			'callback'            => array( $this, 'upload' ),
-			'permission_callback' => function( $request ) {
-				if (
-					! current_user_can( 'plugin_approve' ) &&
-					get_current_user_id() != get_post_field( 'post_author', $request['ID'] ) 
-				) {
-					return false;
-				}
-
-				$post = get_post( $request['ID'] );
-				if ( $post->ID != $request['ID'] || 'plugin' !== $post->post_type ) {
-					return false;
-				}
-
-				return true;
-			},
+			'permission_callback' => array( $this, 'permission_check' ),
 			'args' => [
 				'post_name' => [
 					'type'     => 'string',
@@ -44,33 +30,69 @@ class Plugin_Upload extends Base {
 				],
 			]
 		) );
+
+		register_rest_route( 'plugins/v1', '/upload/(?P<ID>[0-9]+)/slug', array(
+			'methods'             => WP_REST_Server::EDITABLE,
+			'callback'            => array( $this, 'slug' ),
+			'permission_callback' => array( $this, 'permission_check' ),
+			'args' => [
+				'post_name' => [
+					'type'     => 'string',
+					'required' => true,
+				],
+			]
+		) );
+	}
+
+	public function permission_check( $request ) {
+		if (
+			! current_user_can( 'plugin_approve' ) &&
+			get_current_user_id() != get_post_field( 'post_author', $request['ID'] )
+		) {
+			return false;
+		}
+
+		$post = get_post( $request['ID'] );
+		if ( $post->ID != $request['ID'] || 'plugin' !== $post->post_type ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function upload( $request ) {
 		$plugin = get_post( $request['ID'] );
-		$slug   = trim( $request['post_name'] ?? '' );
 
-		if ( $slug ) {
-			$result = $this->perform_slug_change( $plugin, $slug );
-			if ( is_wp_error( $result ) ) {
-				// Warn the reviewer when a plugin author has attempted to use an unavailable slug. 
-				Tools::audit_log(
-					sprintf(
-						"Attempt to change slug to '%s' blocked: %s",
-						esc_html( $slug ),
-						$result->get_error_code()
-					),
-					$plugin
-				);
-
-				$result = new WP_Error( 'error', $result->get_error_message() );
-			}
-
-			return $result;
+		if ( ! empty( $request['post_name'] ) ) {
+			return $this->slug( $request );
 
 		} elseif ( ! empty( $_FILES['zip_file'] ) && current_user_can( 'plugin_approve' ) ) {
 			return ( new Upload_Handler() )->process_upload( $plugin->ID );
 		}
+	}
+
+	/**
+	 * Change the slug of a plugin.
+	 */
+	public function slug( $request ) {
+		$plugin = get_post( $request['ID'] );
+		$slug   = trim( $request['post_name'] ?? '' );
+		$result = $this->perform_slug_change( $plugin, $slug );
+		if ( is_wp_error( $result ) ) {
+			// Warn the reviewer when a plugin author has attempted to use an unavailable slug.
+			Tools::audit_log(
+				sprintf(
+					"Attempt to change slug to '%s' blocked: %s",
+					esc_html( $slug ),
+					$result->get_error_code()
+				),
+				$plugin
+			);
+
+			$result = new WP_Error( 'error', $result->get_error_message() );
+		}
+
+		return $result;
 	}
 
 	/**
