@@ -199,7 +199,7 @@ class Upload {
 					// List of all plugins in progress.
 					foreach ( $submitted_plugins as $plugin ) {
 						$can_change_slug   = ( 'new' === $plugin->post_status && ! $plugin->{'_wporg_plugin_original_slug'} );
-						$can_upload_extras = in_array( $plugin->post_status, array( 'new', /* 'pending' */ ), true );
+						$can_upload_extras = in_array( $plugin->post_status, array( 'new', 'pending' ), true );
 
 						echo '<li>';
 							echo '<strong>' . esc_html( $plugin->post_title ) . '</strong>';
