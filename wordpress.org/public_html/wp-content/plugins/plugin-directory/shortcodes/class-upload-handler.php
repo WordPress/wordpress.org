@@ -796,7 +796,12 @@ class Upload_Handler {
 		add_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		add_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 
-		$attachment_id = media_handle_upload( 'zip_file', $post_id );
+		// Store the plugin details against the media as well.
+		$post_details  = array(
+			'post_title'   => sprintf( '%s Version %s', $this->plugin['Name'], $this->plugin['Version'] ),
+			'post_excerpt' => $this->plugin['Description'],
+		);
+		$attachment_id = media_handle_upload( 'zip_file', $post_id, $post_details );
 
 		remove_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		remove_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
