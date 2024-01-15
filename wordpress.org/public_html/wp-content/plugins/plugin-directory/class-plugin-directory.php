@@ -159,7 +159,7 @@ class Plugin_Directory {
 				'edit_item'          => is_admin() ? __( 'Editing Plugin:', 'wporg-plugins' ) : __( 'Edit Plugin', 'wporg-plugins' ),
 			),
 			'description'  => __( 'A Repo Plugin', 'wporg-plugins' ),
-			'supports'     => array( 'comments', 'author', 'custom-fields' ),
+			'supports'     => array( 'comments', 'author', 'custom-fields', 'media' ),
 			'public'       => true,
 			'show_ui'      => true,
 			'show_in_rest' => true,
@@ -1741,7 +1741,7 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Create a new post entry for a given plugin slug.
+	 * Create (or update) a new post entry for a given plugin slug.
 	 *
 	 * @static
 	 *
@@ -1804,19 +1804,21 @@ class Plugin_Directory {
 			'post_modified_gmt' => $post_date_gmt,
 		) );
 
+		$update = ! empty( $args['ID'] );
 		$result = wp_insert_post( $args, true );
 
 		if ( ! is_wp_error( $result ) ) {
 			wp_cache_set( $result, $slug, 'plugin-slugs' );
 			$result = get_post( $result );
 
-			$owner = get_userdata( $result->post_author );
-
-			Tools::audit_log( sprintf(
-				'Submitted by <a href="%s">%s</a>.',
-				esc_url( 'https://profiles.wordpress.org/' . $owner->user_nicename . '/' ),
-				$owner->user_login
-			), $result->ID );
+			if ( ! $update ) {
+				$owner = get_userdata( $result->post_author );
+				Tools::audit_log( sprintf(
+					'Submitted by <a href="%s">%s</a>.',
+					esc_url( 'https://profiles.wordpress.org/' . $owner->user_nicename . '/' ),
+					$owner->user_login
+				), $result->ID );
+			}
 		}
 
 		return $result;

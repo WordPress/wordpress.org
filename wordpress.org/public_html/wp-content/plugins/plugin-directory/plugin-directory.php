@@ -20,6 +20,11 @@ namespace WordPressdotorg\Plugin_Directory;
  */
 define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
 
+/**
+ * Store the root plugin folder for usage with functions which need the relative path.
+ */
+define( __NAMESPACE__ . '\PLUGIN_DIR', __DIR__ );
+
 // Register an Autoloader for all files
 require __DIR__ . '/class-autoloader.php';
 Autoloader\register_class_path( __NAMESPACE__, __DIR__ );
