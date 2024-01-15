@@ -795,7 +795,7 @@ class Upload_Handler {
 	 * Saves zip file and attaches it to the plugin post.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return int|WP_Error Attachment ID or upload error.
+	 * @return WP_Post|WP_Error Attachment post or upload error.
 	 */
 	public function save_zip_file( $post_id ) {
 		$zip_hash = sha1_file( $_FILES['zip_file']['tmp_name'] );
@@ -815,21 +815,23 @@ class Upload_Handler {
 			'post_title'   => sprintf( '%s Version %s', $this->plugin['Name'], $this->plugin['Version'] ),
 			'post_excerpt' => $this->plugin['Description'],
 		);
-		$attachment_id = media_handle_upload( 'zip_file', $post_id, $post_details );
+		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details );
 
 		remove_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		remove_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 
-		if ( ! is_wp_error( $attachment_id ) ) {
+		if ( ! is_wp_error( $attachment ) ) {
+			$attachment = get_post( $attachment );
+
 			// Save some basic details with the ZIP.
-			update_post_meta( $attachment_id, 'version', $this->plugin['Version'] );
-			update_post_meta( $attachment_id, 'submitted_name', $original_name );
+			update_post_meta( $attachment->ID, 'version', $this->plugin['Version'] );
+			update_post_meta( $attachment->ID, 'submitted_name', $original_name );
 
 			// And record this ZIP as having been uploaded.
 			add_post_meta( $post_id, 'uploaded_zip_hash', $zip_hash );
 		}
 
-		return $attachment_id;
+		return $attachment;
 	}
 
 	/**
