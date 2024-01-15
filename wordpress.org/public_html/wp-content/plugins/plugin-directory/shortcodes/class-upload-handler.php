@@ -855,7 +855,9 @@ class Upload_Handler {
 
 Your plugin has been given the initial permalink (aka slug) of %2$s based on your display name of %1$s. This is subject to change based on the results of your review.
 
-If you need to change the plugin permalink, please reply to this email immediately and let us know what the correct slug should be. We will be unable to change your plugin slug once your review is completed.
+If you need to change the plugin permalink, you are able to do this once on the plugin submission page. If you are unable to do this, please reply to this email immediately and let us know what the correct slug should be. We will be unable to change your plugin slug once your review is completed.
+
+If you wish to provide us with a newer version of the plugin, you can upload on the same submission page from the same WordPress.org account as you submitted with.
 
 If there are any other problems with your submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved.
 
@@ -906,6 +908,8 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 
 	/**
 	 * Locate the HelpScout review email and it's status.
+	 *
+	 * @param WP_Post $post The plugin post.
 	 *
 	 * @return array|false
 	 */
