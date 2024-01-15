@@ -89,7 +89,7 @@ class Upload_Handler {
 		}
 
 		// If the plugin was uploaded using a token, we'll assume future uploads for the plugin should use one.
-		if ( $updating_existing && ! $has_upload_token && $plugin_post->{"_used_upload_token"} ) {
+		if ( $updating_existing && ! $has_upload_token && $plugin_post->{'_used_upload_token'} ) {
 			$has_upload_token = true;
 		}
 
@@ -114,10 +114,7 @@ class Upload_Handler {
 
 		// Determine the plugin slug based on the name of the plugin in the main plugin file.
 		if ( ! $this->plugin_slug ) {
-			$this->plugin_slug = remove_accents( $this->plugin['Name'] );
-			$this->plugin_slug = preg_replace( '/[^a-z0-9 _.-]/i', '', $this->plugin_slug );
-			$this->plugin_slug = str_replace( '_', '-', $this->plugin_slug );
-			$this->plugin_slug = sanitize_title_with_dashes( $this->plugin_slug );
+			$this->plugin_slug = $this->generate_plugin_slug( $this->plugin['Name'] );
 		}
 
 		if ( ! $this->plugin_slug ) {
@@ -144,16 +141,24 @@ class Upload_Handler {
 		}
 
 		// Make sure it doesn't use a TRADEMARK protected slug.
-		if ( false !== $this->has_trademarked_slug() && ! $has_upload_token && ! $updating_existing ) {
+		if ( ! $updating_existing ) {
+			$has_trademarked_slug = $this->has_trademarked_slug( $this->plugin_slug );
+		} else {
+			// If we're updating an existing plugin, we need to check the new name, but the slug may be different.
+			$has_trademarked_slug = $this->has_trademarked_slug(
+				$this->generate_plugin_slug( $this->plugin['Name'] )
+			);
+		}
+		if ( false !== $has_trademarked_slug && ! $has_upload_token ) {
 			$error = __( 'Error: The plugin name includes a restricted term.', 'wporg-plugins' );
 
-			if ( $this->has_trademarked_slug() === trim( $this->has_trademarked_slug(), '-' ) ) {
+			if ( $has_trademarked_slug === trim( $has_trademarked_slug, '-' ) ) {
 				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
 				$message = sprintf(
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
 					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used at all in your plugin permalink nor the display name. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. Do not attempt to work around this by removing letters (i.e. WordPess) or using numbers (4 instead of A). Those are seen as intentional actions to avoid our restrictions, and are not permitted. If you feel this is in error, such as you legally own the trademark for a term, please email us at %4$s and explain your situation.', 'wporg-plugins' ),
 					'<code>' . $this->plugin_slug . '</code>',
-					trim( $this->has_trademarked_slug(), '-' ),
+					trim( $has_trademarked_slug, '-' ),
 					'<code>Plugin Name:</code>',
 					'<code>plugins@wordpress.org</code>'
 				);
@@ -163,7 +168,7 @@ class Upload_Handler {
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
 					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used to begin your permalink or display name. We disallow the use of certain terms in ways that are abused, or potentially infringe on and/or are misleading with regards to trademarks. In order to proceed with this submission, you must change the %3$s line in your main plugin file and readme to end with  "-%2$s" instead. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, such as you legally own the trademark for the term, please email us at %4$s and explain your situation.', 'wporg-plugins' ),
 					'<code>' . $this->plugin_slug . '</code>',
-					trim( $this->has_trademarked_slug(), '-' ),
+					trim( $has_trademarked_slug, '-' ),
 					'<code>Plugin Name:</code>',
 					'<code>plugins@wordpress.org</code>'
 				);
@@ -493,6 +498,21 @@ class Upload_Handler {
 	}
 
 	/**
+	 * Generate a plugin slug from a Plugin name.
+	 *
+	 * @param string $plugin_name The plugin name.
+	 * @return string The generated plugin slug.
+	 */
+	public function generate_plugin_slug( $plugin_name ) {
+		$plugin_slug = remove_accents( $plugin_name );
+		$plugin_slug = preg_replace( '/[^a-z0-9 _.-]/i', '', $plugin_slug );
+		$plugin_slug = str_replace( '_', '-', $plugin_slug );
+		$plugin_slug = sanitize_title_with_dashes( $plugin_slug );
+
+		return $plugin_slug;
+	}
+
+	/**
 	 * Whether the uploaded plugin uses a reserved slug.
 	 *
 	 * @return bool True if the slug is reserved, false otherwise.
@@ -544,7 +564,9 @@ class Upload_Handler {
 	 *
 	 * @return string|false The trademarked slug if found, false otherwise.
 	 */
-	public function has_trademarked_slug() {
+	public function has_trademarked_slug( $plugin_slug = false ) {
+		$plugin_slug = $plugin_slug ?: $this->plugin_slug;
+
 		$trademarked_slugs = array(
 			'adobe-',
 			'adsense-',
@@ -686,11 +708,11 @@ class Upload_Handler {
 		foreach ( $trademarked_slugs as $trademark ) {
 			if ( '-' === $trademark[-1] ) {
 				// Trademarks ending in "-" indicate slug cannot begin with that term.
-				if ( 0 === strpos( $this->plugin_slug, $trademark ) ) {
+				if ( 0 === strpos( $plugin_slug, $trademark ) ) {
 					$has_trademarked_slug = $trademark;
 					break;
 				}
-			} elseif ( false !== strpos( $this->plugin_slug, $trademark ) ) {
+			} elseif ( false !== strpos( $plugin_slug, $trademark ) ) {
 				// Otherwise, the term cannot appear anywhere in slug.
 				$has_trademarked_slug = $trademark;
 				break;
@@ -701,7 +723,7 @@ class Upload_Handler {
 		if ( $has_trademarked_slug && in_array( $has_trademarked_slug, $for_use_exceptions ) ) {
 			$for_trademark = '-for-' . $has_trademarked_slug;
 			// At this point we might be okay, but there's one more check.
-			if ( $for_trademark === substr( $this->plugin_slug, -1 * strlen( $for_trademark ) ) ) {
+			if ( $for_trademark === substr( $plugin_slug, -1 * strlen( $for_trademark ) ) ) {
 				// Yes the slug ENDS with 'for-TRADEMARK'.
 				$has_trademarked_slug = false;
 			}
@@ -709,7 +731,7 @@ class Upload_Handler {
 
 		// Check portmanteaus.
 		foreach ( $portmanteaus as $portmanteau ) {
-			if ( 0 === strpos( $this->plugin_slug, $portmanteau ) ) {
+			if ( 0 === strpos( $plugin_slug, $portmanteau ) ) {
 				$has_trademarked_slug = $portmanteau;
 				break;
 			}
