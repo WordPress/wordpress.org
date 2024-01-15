@@ -93,7 +93,7 @@ class Upload {
 			}
 		}
 
-		if ( ! is_wp_error( $upload_result ) ) :
+		if ( ! is_wp_error( $upload_result ) || $submitted_counts->total ) :
 			$plugins       = wp_count_posts( 'plugin', 'readable' );
 			$oldest_plugin = get_posts( [ 'post_type' => 'plugin', 'post_status' => 'new', 'order' => 'ASC', 'orderby' => 'post_date_gmt', 'numberposts' => 1 ] );
 			$queue_length  = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
@@ -281,11 +281,11 @@ class Upload {
 
 								echo '<li><code>' . esc_html( $filename ) . '</code></li>';
 								echo '<li>' . sprintf( __( 'Version: %s', 'wporg-plugins' ), '<code>' . esc_html( $version ) . '</code>' ) . '</li>';
-								echo '<li>' . date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) . '</li>';
+								echo '<li>' . sprintf( __( 'Upload Date: %s', 'wporg-plugins' ), date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</li>';
 								echo '</ul></li>';
 							}
 							if ( $can_upload_extras ) {
-								echo '<li class="unmarked-list"><a href="#" class="show-upload-additional hide-if-no-js">' . __( 'Upload another', 'wporg-plugins' ) . '</a>';
+								echo '<li class="unmarked-list"><a href="#" class="show-upload-additional hide-if-no-js">' . sprintf( __( 'Upload new version of %s for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
 							}
 							echo '</ol>';
 
