@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WP_Error;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
@@ -57,18 +58,18 @@ class Upload_Handler {
 	 *
 	 * Runs various tests and creates plugin post.
 	 *
-	 * @param int $for_plugin The plugin being uploaded to. This is used when adding additional .zip files.
+	 * @param int $for_plugin Optional. The plugin being uploaded to. This is used when adding additional .zip files.
 	 *
 	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
 	public function process_upload( $for_plugin = 0 ) {
 		if ( UPLOAD_ERR_OK !== $_FILES['zip_file']['error'] ) {
-			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
+			return new WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
 
 		// Validate the maximum upload size.
 		if ( $_FILES['zip_file']['size'] > wp_max_upload_size() ) {
-			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
+			return new WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
 
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
@@ -80,7 +81,7 @@ class Upload_Handler {
 		$this->plugin_slug = $plugin_post->post_name ?? '';
 
 		if ( $for_plugin && ! $updating_existing ) {
-			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
+			return new WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
 
 		// Allow plugin reviewers to bypass some restrictions.
@@ -104,7 +105,7 @@ class Upload_Handler {
 		if ( empty( $this->plugin['Name'] ) ) {
 			$error = __( 'Error: The plugin has no name.', 'wporg-plugins' );
 
-			return new \WP_Error( 'no_name', $error . ' ' . sprintf(
+			return new WP_Error( 'no_name', $error . ' ' . sprintf(
 				/* translators: 1: plugin header line, 2: Documentation URL */
 				__( 'Add a %1$s line to your main plugin file and upload the plugin again. For more information, please review our documentation on <a href="%2$s">Plugin Headers</a>.', 'wporg-plugins' ),
 				'<code>Plugin Name:</code>',
@@ -120,7 +121,7 @@ class Upload_Handler {
 		if ( ! $this->plugin_slug ) {
 			$error = __( 'Error: The plugin has an unsupported name.', 'wporg-plugins' );
 
-			return new \WP_Error( 'unsupported_name', $error . ' ' . sprintf(
+			return new WP_Error( 'unsupported_name', $error . ' ' . sprintf(
 				/* translators: %s: 'Plugin Name:' */
 				__( 'Plugin names may only contain latin letters (A-z), numbers, spaces, and hyphens. Please change the %s line in your main plugin file and readme, then you may upload it again.', 'wporg-plugins' ),
 				esc_html( $this->plugin['Name'] ),
@@ -132,7 +133,7 @@ class Upload_Handler {
 		if ( $this->has_reserved_slug() ) {
 			$error = __( 'Error: The plugin has a reserved name.', 'wporg-plugins' );
 
-			return new \WP_Error( 'reserved_name', $error . ' ' . sprintf(
+			return new WP_Error( 'reserved_name', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 				__( 'Your chosen plugin name - %1$s - has been reserved or otherwise restricted from use entirely. Please change the %2$s line in your main plugin file and readme, then you may upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
@@ -174,7 +175,7 @@ class Upload_Handler {
 				);
 			}
 
-			return new \WP_Error( 'trademarked_name', $error . ' ' . $message );
+			return new WP_Error( 'trademarked_name', $error . ' ' . $message );
 		}
 
 		if ( ! $plugin_post ) {
@@ -198,7 +199,7 @@ class Upload_Handler {
 		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
 			$error = __( 'Error: The plugin already exists.', 'wporg-plugins' );
 
-			return new \WP_Error( 'already_exists', $error . ' ' . sprintf(
+			return new WP_Error( 'already_exists', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 				__( 'There is already a plugin with the name %1$s in the directory. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
 				'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
@@ -210,7 +211,7 @@ class Upload_Handler {
 		if ( $plugin_post && ! $updating_existing ) {
 			$error = __( 'Error: The plugin has already been submitted.', 'wporg-plugins' );
 
-			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
+			return new WP_Error( 'already_submitted', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: Documentation URL, 3: plugins@wordpress.org */
 				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Instead, please update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know.', 'wporg-plugins' ),
 				'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
@@ -223,7 +224,7 @@ class Upload_Handler {
 		if ( strlen( $this->plugin_slug ) < 5 ) {
 			$error = __( 'Error: The plugin slug is too short.', 'wporg-plugins' );
 
-			return new \WP_Error( 'trademarked_name', $error . ' ' . sprintf(
+			return new WP_Error( 'trademarked_name', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 				__( 'Your chosen plugin name - %1$s - is not permitted because it is too short. Please change the %2$s line in your main plugin file and readme to a different name. When you have finished, you may upload your plugin again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
@@ -235,7 +236,7 @@ class Upload_Handler {
 		if ( ! $this->plugin['Description'] ) {
 			$error = __( 'Error: The plugin has no description.', 'wporg-plugins' );
 
-			return new \WP_Error( 'no_description', $error . ' ' . sprintf(
+			return new WP_Error( 'no_description', $error . ' ' . sprintf(
 				/* translators: 1: plugin header line, 2: Documentation URL */
 				__( 'We cannot find a description in your plugin headers. Please add a %1$s line to your main plugin file and upload the complete plugin again. If you need more information, please review our documentation on <a href="%2$s">Plugin Headers</a>.', 'wporg-plugins' ),
 				'<code>Description:</code>',
@@ -247,7 +248,7 @@ class Upload_Handler {
 		if ( ! $this->plugin['Version'] ) {
 			$error = __( 'Error: The plugin has no version.', 'wporg-plugins' );
 
-			return new \WP_Error( 'no_version', $error . ' ' . sprintf(
+			return new WP_Error( 'no_version', $error . ' ' . sprintf(
 				/* translators: 1: plugin header line, 2: Documentation URL */
 				__( 'We cannot find a version listed in your plugin headers. Please add a %1$s line to your main plugin file and upload the complete plugin again. If you need more information, please review our documentation on <a href="%2$s">Plugin Headers</a>.', 'wporg-plugins' ),
 				'<code>Version:</code>',
@@ -259,7 +260,7 @@ class Upload_Handler {
 		if ( preg_match( '|[^\d\.]|', $this->plugin['Version'] ) ) {
 			$error = __( 'Error: Plugin versions are expected to be numbers.', 'wporg-plugins' );
 
-			return new \WP_Error( 'invalid_version', $error . ' ' . sprintf(
+			return new WP_Error( 'invalid_version', $error . ' ' . sprintf(
 				/* translators: %s: 'Version:' */
 				__( 'Version strings may only contain numeric and period characters (i.e. 1.2). Please correct the %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
 				'<code>Version:</code>'
@@ -275,7 +276,7 @@ class Upload_Handler {
 		) {
 			$error = __( 'Error: Your plugin and author URIs are the same.', 'wporg-plugins' );
 
-			return new \WP_Error(
+			return new WP_Error(
 				'plugin_author_uri', $error . ' ' .
 				__( 'Your plugin headers in the main plugin file headers have the same value for both the plugin and author URI (Uniform Resource Identifier). A plugin URI is a webpage that provides details about this specific plugin. An author URI is a webpage that provides information about the author of the plugin. Those two must be different. You are not required to provide both, so pick the one that best applies to your situation.', 'wporg-plugins' )
 			);
@@ -288,7 +289,7 @@ class Upload_Handler {
 			if ( $installs && $installs->count >= 100 ) {
 				$error = __( 'Error: That plugin name is already in use.', 'wporg-plugins' );
 
-				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
+				return new WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 					__( 'There is already a plugin with the name %1$s known to exist, though it is not hosted on WordPress.org. This means the permalink %2$s is already in use, and has a significant user base. Were we to accept it as-is, our system would overwrite those other installs and potentially damage any existing users. This is especially true since WordPress 5.5 and up will automatically update plugins and themes. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is an incorrect assessment of the situation, please email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
 					'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
@@ -304,7 +305,7 @@ class Upload_Handler {
 		if ( empty( $readme ) ) {
 			$error = __( 'Error: The plugin has no readme.', 'wporg-plugins' );
 
-			return new \WP_Error( 'no_readme', $error . ' ' . sprintf(
+			return new WP_Error( 'no_readme', $error . ' ' . sprintf(
 				/* translators: 1: readme.txt, 2: readme.md */
 				__( 'The zip file must include a file named %1$s or %2$s. We recommend using %1$s as it will allow you to fully utilize our directory.', 'wporg-plugins' ),
 				'<code>readme.txt</code>',
@@ -324,7 +325,7 @@ class Upload_Handler {
 			$error = __( 'README Error: The plugin has already been submitted.', 'wporg-plugins' );
 
 			if ( $readme_plugin_post->post_author != get_current_user_id() ) {
-				return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
+				return new WP_Error( 'already_submitted', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 					__( 'There is already a plugin with the name %1$s in the directory. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
 					'<code>' . esc_html( $readme->name ) . '</code>',
@@ -332,7 +333,7 @@ class Upload_Handler {
 				) );
 			}
 
-			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
+			return new WP_Error( 'already_submitted', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: Documentation URL, 3: plugins@wordpress.org */
 				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Instead, please update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know.', 'wporg-plugins' ),
 				'<code>' . esc_html( $readme->name ) . '</code>',
@@ -347,7 +348,7 @@ class Upload_Handler {
 			if ( $installs && $installs->count >= 100 ) {
 				$error = __( 'Error: That plugin name is already in use.', 'wporg-plugins' );
 
-				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
+				return new WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 					__( 'There is already a plugin with the name %1$s known to exist, though it is not hosted on WordPress.org. This means the permalink %2$s is already in use, and has a significant user base. Were we to accept it as-is, our system would overwrite those other installs and potentially damage any existing users. This is especially true since WordPress 5.5 and up will automatically update plugins and themes. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is an incorrect assessment of the situation, please email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
 					'<code>' . esc_html( $readme->name ) . '</code>',
@@ -362,7 +363,7 @@ class Upload_Handler {
 		if ( empty( $readme->license ) ) {
 			$error = __( 'Error: No license defined.', 'wporg-plugins' );
 
-			return new \WP_Error( 'no_license', $error . ' ' . sprintf(
+			return new WP_Error( 'no_license', $error . ' ' . sprintf(
 				/* translators: 1: readme.txt */
 				__( 'Your plugin has no license declared. Please update your %1$s with a GPLv2 (or later) compatible license.', 'wporg-plugins' ),
 				'<code>readme.txt</code>'
@@ -376,7 +377,7 @@ class Upload_Handler {
 		if ( ! $plugin_check_result && ! $has_upload_token ) {
 			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
 
-			return new \WP_Error( 'failed_checks', $error . ' ' . sprintf(
+			return new WP_Error( 'failed_checks', $error . ' ' . sprintf(
 				/* translators: 1: Plugin Check Plugin URL, 2: https://make.wordpress.org/plugins */
 				__( 'Please correct the listed problems with your plugin and upload it again. You can also use the <a href="%1$s">Plugin Check Plugin</a> to test your plugin before uploading. If you have any questions about this please post them to %2$s.', 'wporg-plugins' ),
 				'https://wordpress.org/plugins/plugin-check/',
@@ -781,12 +782,12 @@ class Upload_Handler {
 	 * Saves zip file and attaches it to the plugin post.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return int|\WP_Error Attachment ID or upload error.
+	 * @return int|WP_Error Attachment ID or upload error.
 	 */
 	public function save_zip_file( $post_id ) {
 		$zip_hash = sha1_file( $_FILES['zip_file']['tmp_name'] );
 		if ( in_array( $zip_hash, get_post_meta( $post_id, 'uploaded_zip_hash' ) ?: [], true ) ) {
-			return new \WP_Error( 'already_uploaded', __( "You've already uploaded that ZIP file.", 'wporg-plugins' ) );
+			return new WP_Error( 'already_uploaded', __( "You've already uploaded that ZIP file.", 'wporg-plugins' ) );
 		}
 
 		// Upload folders are already year/month based. A second-based prefix should be specific enough.
