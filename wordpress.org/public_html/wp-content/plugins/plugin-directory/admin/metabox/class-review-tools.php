@@ -129,14 +129,14 @@ class Review_Tools {
 				$zip_size                   = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
 				$zip_preview                = Template::preview_link_zip( $slug, $zip_file->ID );
 				$zip_pcp                    = Template::preview_link_zip( $slug, $zip_file->ID, 'pcp' );
-				$zip_filename               = $zip_file->submitted_name ?? preg_replace( '!^[0-9-_]+!', '', basename( $zip_url ) );
 
 				printf(
-					'<li>%1$s <a href="%2$s" title="%3$s">%4$s</a> (%5$s) (<a href="%6$s" target="_blank">preview</a> | <a href="%7$s" target="_blank">pcp</a>)</li>',
+					'<li>%1$s v%2$s <a href="%3$s" title="%4$s">%5$s</a> (%6$s) (<a href="%7$s" target="_blank">preview</a> | <a href="%8$s" target="_blank">pcp</a>)</li>',
 					esc_html( $zip_date ),
+					esc_html( $zip_file->version ),
 					esc_url( $zip_url ),
 					esc_attr( $zip_file->post_title ),
-					esc_html( $zip_filename ),
+					esc_html( $zip_file->submitted_name ),
 					esc_html( $zip_size ),
 					esc_url( $zip_preview ),
 					esc_url( $zip_pcp )
