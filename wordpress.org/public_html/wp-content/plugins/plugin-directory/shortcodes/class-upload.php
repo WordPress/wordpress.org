@@ -272,18 +272,23 @@ class Upload {
 
 							echo '<li>';
 							$attached_media = get_attached_media( 'application/zip', $plugin );
-							$latest         = array_pop( $attached_media );
 
-							$filename = $latest->submitted_name ?: preg_replace( '!^[0-9-_]+!', '', basename( get_attached_file( $latest->ID ) ) );
-							printf(
-								/* translators: 1: Version, 2: Date, 3: Filename, 4: "upload new version" action link, link to upload zip. */
-								__( 'Latest file uploaded for review: %1$s %2$s uploaded on %3$s %4$s.', 'wporg-plugins' ),
-								'<code>' . esc_html( $filename ) . '</code>',
-								'<code>' . esc_html( $zip_file->version ?? $plugin->version ) . '</code>',
-								esc_html( date_i18n( get_option( 'date_format' ), strtotime( $zip_file->post_date ) ) ),
-								/* translators: upload action link */
-								$can_upload_extras ? '<a href="#" class="upload-another">' . esc_html__( 'Upload new version', 'wporg-plugins' ) . '</a>' : ''
-							);
+							echo '<strong>Uploaded files:</strong><ol>';
+							foreach ( $attached_media as $upload ) {
+								echo '<li><ul>';
+								$filename = $upload->submitted_name ?: preg_replace( '!^[0-9-_]+!', '', basename( get_attached_file( $upload->ID ) ) );
+								$version  = $upload->version ?: $plugin->version;
+
+								echo '<li><code>' . esc_html( $filename ) . '</code></li>';
+								echo '<li>' . sprintf( 'Version: %s', '<code>' . esc_html( $version ) . '</code>' ) . '</li>';
+								echo '<li>' . date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) . '</li>';
+								echo '</ul></li>';
+							}
+							if ( $can_upload_extras ) {
+								echo '<li class="unmarked-list"><a href="#" class="show-upload-additional hide-if-no-js">' . __( 'Upload another', 'wporg-plugins' ) . '</a>';
+							}
+							echo '</ol>';
+
 							if ( $can_upload_extras ) {
 								?>
 								<form class="plugin-upload-form hidden" enctype="multipart/form-data" method="POST" action="">
@@ -292,7 +297,7 @@ class Upload {
 									<input type="hidden" name="plugin_id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
 
 									<label class="button button-secondary zip-file">
-										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
 										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
 									</label>
 
