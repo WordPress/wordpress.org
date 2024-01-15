@@ -466,7 +466,10 @@ class Upload_Handler {
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
 		if ( $updating_existing ) {
-			return __( 'Additional ZIP uploaded successfully.', 'wporg-plugins' );
+			return sprintf(
+				__( 'New version of %s uploaded for review.', 'wporg-plugins' ),
+				esc_html( $this->plugin['Name'] )
+			);
 		}
 
 		// Send plugin author an email for peace of mind.
