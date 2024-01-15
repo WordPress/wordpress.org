@@ -14,7 +14,7 @@ class HelpScout {
 	 */
 	const TIMEOUT = 15;
 
-	public static function api( $url, $args = null, $method = 'GET' ) {
+	public static function api( $url, $args = null, $method = 'GET', & $response_code = null ) {
 		// Verify the configuration variables are available.
 		if ( ! defined( 'HELPSCOUT_APP_ID' ) || ! defined( 'HELPSCOUT_APP_SECRET' ) ) {
 			return false;
@@ -50,6 +50,8 @@ class HelpScout {
 				'body'    => $body,
 			)
 		);
+
+		$response_code = wp_remote_retrieve_response_code( $request );
 
 		return json_decode( wp_remote_retrieve_body( $request ) );
 	}
