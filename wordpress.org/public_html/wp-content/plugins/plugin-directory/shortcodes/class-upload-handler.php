@@ -79,7 +79,7 @@ class Upload_Handler {
 		$updating_existing = (bool) $plugin_post;
 		$this->plugin_slug = $plugin_post->post_name ?? '';
 
-		if ( $for_post && ! $updating_existing ) {
+		if ( $for_plugin && ! $updating_existing ) {
 			return new \WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
 
