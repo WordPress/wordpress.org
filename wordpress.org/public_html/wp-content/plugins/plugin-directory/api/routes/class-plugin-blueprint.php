@@ -65,7 +65,7 @@ class Plugin_Blueprint extends Base {
 
 		$zips = get_attached_media( 'application/zip', $plugin );
 		// Return the first (is this correct?)
-		if ( $zips & count( $zips ) ) {
+		if ( $zips && count( $zips ) ) {
 			return wp_get_attachment_url( reset($zips)->ID );
 		}
 		return false;
