@@ -12,7 +12,8 @@ ol {
 }
 
 ul.unmarked-list,
-ol.unmarked-list {
+ol.unmarked-list,
+li.unmarked-list {
 	list-style: none;
 	padding-left: 0;
 }
