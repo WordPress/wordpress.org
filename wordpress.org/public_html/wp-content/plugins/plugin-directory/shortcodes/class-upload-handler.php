@@ -157,7 +157,7 @@ class Upload_Handler {
 				$message = sprintf(
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
 					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used at all in your plugin permalink nor the display name. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. Do not attempt to work around this by removing letters (i.e. WordPess) or using numbers (4 instead of A). Those are seen as intentional actions to avoid our restrictions, and are not permitted. If you feel this is in error, such as you legally own the trademark for a term, please email us at %4$s and explain your situation.', 'wporg-plugins' ),
-					'<code>' . $this->plugin_slug . '</code>',
+					'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
 					trim( $has_trademarked_slug, '-' ),
 					'<code>Plugin Name:</code>',
 					'<code>plugins@wordpress.org</code>'
@@ -167,7 +167,7 @@ class Upload_Handler {
 				$message = sprintf(
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
 					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used to begin your permalink or display name. We disallow the use of certain terms in ways that are abused, or potentially infringe on and/or are misleading with regards to trademarks. In order to proceed with this submission, you must change the %3$s line in your main plugin file and readme to end with  "-%2$s" instead. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, such as you legally own the trademark for the term, please email us at %4$s and explain your situation.', 'wporg-plugins' ),
-					'<code>' . $this->plugin_slug . '</code>',
+					'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
 					trim( $has_trademarked_slug, '-' ),
 					'<code>Plugin Name:</code>',
 					'<code>plugins@wordpress.org</code>'
