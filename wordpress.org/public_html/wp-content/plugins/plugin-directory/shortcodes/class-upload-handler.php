@@ -470,10 +470,16 @@ class Upload_Handler {
 			// Update HelpScout, if in review.
 			$this->update_review_email( $plugin_post, $attachment );
 
-			return sprintf(
+			$message = sprintf(
 				__( 'New version of %s uploaded for review.', 'wporg-plugins' ),
 				esc_html( $this->plugin['Name'] )
 			);
+
+			if ( 'pending' === $plugin_post->post_status ) {
+				$message .= '<br>' . __( 'Please respond to the review email to let us know, and address any feedback that was given to you.', 'wporg-plugins' );
+			}
+
+			return $message;
 		}
 
 		// Send plugin author an email for peace of mind.
