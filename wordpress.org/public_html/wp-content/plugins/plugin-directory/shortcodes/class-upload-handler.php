@@ -263,7 +263,11 @@ class Upload_Handler {
 
 		// Prevent duplicate URLs.
 		// This is part of how the API looks for updates, so having them different helps prevent conflicts.
-		if ( ! empty( $this->plugin['PluginURI'] ) && ! empty( $this->plugin['AuthorURI'] ) && $this->plugin['PluginURI'] == $this->plugin['AuthorURI'] ) {
+		if (
+			! empty( $this->plugin['PluginURI'] ) &&
+			! empty( $this->plugin['AuthorURI'] ) &&
+			$this->plugin['PluginURI'] == $this->plugin['AuthorURI']
+		) {
 			$error = __( 'Error: Your plugin and author URIs are the same.', 'wporg-plugins' );
 
 			return new \WP_Error(
@@ -364,13 +368,13 @@ class Upload_Handler {
 		// We're not actually using this right now.
 		$plugin_check_result = $this->check_plugin();
 
-		if ( ! $plugin_check_result && ! $has_upload_token && ! $updating_existing ) {
+		if ( ! $plugin_check_result && ! $has_upload_token ) {
 			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
 
 			return new \WP_Error( 'failed_checks', $error . ' ' . sprintf(
 				/* translators: 1: Plugin Check Plugin URL, 2: https://make.wordpress.org/plugins */
 				__( 'Please correct the listed problems with your plugin and upload it again. You can also use the <a href="%1$s">Plugin Check Plugin</a> to test your plugin before uploading. If you have any questions about this please post them to %2$s.', 'wporg-plugins' ),
-				'//wordpress.org/plugins/plugin-check/',
+				'https://wordpress.org/plugins/plugin-check/',
 				'<a href="https://make.wordpress.org/plugins">https://make.wordpress.org/plugins</a>'
 			) );
 		}
