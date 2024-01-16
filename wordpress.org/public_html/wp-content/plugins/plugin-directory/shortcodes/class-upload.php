@@ -28,7 +28,12 @@ class Upload {
 			if ( 'new' === $plugin->post_status ) {
 				$plugin->status = __( 'Awaiting Review &#8212; This plugin has not yet been reviewed.', 'wporg-plugins' );
 			} elseif ( 'pending' === $plugin->post_status ) {
-				$plugin->status = __( 'Being Reviewed &#8212; This plugin is currently waiting on action from you. Please check your email for details.', 'wporg-plugins' );
+				$plugin->status       = __( 'Being Reviewed &#8212; This plugin is currently waiting on action from you. Please check your email for details.', 'wporg-plugins' );
+				$plugin->review_email = Upload_Handler::find_review_email( $plugin );
+
+				if ( $plugin->review_email && 'closed' !== $plugin->review_email->status ) {
+					$plugin->status = __( "Being Reviewed &#8212; We've got your email. This plugin is currently waiting on action from our review team.", 'wporg-plugins' );
+				}
 			} elseif ( 'approved' === $plugin->post_status ) {
 				$plugin->status = __( 'Approved &#8212; Please check your email for instructions on uploading your plugin.', 'wporg-plugins' );
 			}
