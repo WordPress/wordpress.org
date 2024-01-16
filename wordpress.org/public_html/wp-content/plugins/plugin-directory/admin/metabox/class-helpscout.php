@@ -79,4 +79,5 @@ class HelpScout {
 
 		echo '</table>';
 	}
+
 }
