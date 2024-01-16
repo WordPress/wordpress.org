@@ -276,11 +276,8 @@ class Upload {
 							echo '<strong>' . __( 'Submitted files:', 'wporg' ) . '</strong><ol>';
 							foreach ( $attached_media as $upload ) {
 								echo '<li><ul>';
-								$filename = $upload->submitted_name ?: preg_replace( '!^[0-9-_]+!', '', basename( get_attached_file( $upload->ID ) ) );
-								$version  = $upload->version ?: $plugin->version;
-
-								echo '<li><code>' . esc_html( $filename ) . '</code></li>';
-								echo '<li>' . sprintf( __( 'Version: %s', 'wporg-plugins' ), '<code>' . esc_html( $version ) . '</code>' ) . '</li>';
+								echo '<li><code>' . esc_html( $upload->submitted_name ) . '</code></li>';
+								echo '<li>' . sprintf( __( 'Version: %s', 'wporg-plugins' ), '<code>' . esc_html( $upload->version ) . '</code>' ) . '</li>';
 								echo '<li>' . sprintf( __( 'Upload Date: %s', 'wporg-plugins' ), date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</li>';
 								echo '</ul></li>';
 							}
