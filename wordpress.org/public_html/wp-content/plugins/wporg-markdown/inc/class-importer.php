@@ -505,18 +505,18 @@ abstract class Importer {
 		}
 		$markdown = trim( $markdown );
 
-		// Use the first sentence as the excerpt.
-		$excerpt = '';
-		if ( preg_match( '/^(.+)/', $markdown, $matches ) ) {
-			$excerpt = $matches[1];
-		}
-
 		// Transform to HTML and save the post
 		$parser = new WPCom_GHF_Markdown_Parser();
 		$parser->preserve_shortcodes = false;
 		$html = $parser->transform( $markdown );
 
 		$html = apply_filters( 'wporg_markdown_after_transform', $html, $this->get_post_type() );
+
+		// Use the first line as the excerpt, but first strip any HTML.
+		$excerpt = '';
+		if ( preg_match( '/^(.+)/', wp_strip_all_tags( $html ), $matches ) ) {
+			$excerpt = $matches[1];
+		}
 
 		add_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allow_links' ], 10, 2 );
 
