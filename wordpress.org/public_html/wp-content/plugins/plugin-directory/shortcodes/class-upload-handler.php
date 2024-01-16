@@ -7,6 +7,7 @@ use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
+use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
 
 /**
  * The [wporg-plugin-upload] shortcode handler to display a plugin uploader.
@@ -466,10 +467,20 @@ class Upload_Handler {
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
 		if ( $updating_existing ) {
-			return sprintf(
+
+			// Update HelpScout, if in review.
+			$this->update_review_email( $plugin_post, $attachment );
+
+			$message = sprintf(
 				__( 'New version of %s uploaded for review.', 'wporg-plugins' ),
 				esc_html( $this->plugin['Name'] )
 			);
+
+			if ( 'pending' === $plugin_post->post_status ) {
+				$message .= '<br>' . __( 'Please respond to the review email to let us know, and address any feedback that was given to you.', 'wporg-plugins' );
+			}
+
+			return $message;
 		}
 
 		// Send plugin author an email for peace of mind.
@@ -785,7 +796,7 @@ class Upload_Handler {
 	 * Saves zip file and attaches it to the plugin post.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return int|WP_Error Attachment ID or upload error.
+	 * @return WP_Post|WP_Error Attachment post or upload error.
 	 */
 	public function save_zip_file( $post_id ) {
 		$zip_hash = sha1_file( $_FILES['zip_file']['tmp_name'] );
@@ -805,21 +816,23 @@ class Upload_Handler {
 			'post_title'   => sprintf( '%s Version %s', $this->plugin['Name'], $this->plugin['Version'] ),
 			'post_excerpt' => $this->plugin['Description'],
 		);
-		$attachment_id = media_handle_upload( 'zip_file', $post_id, $post_details );
+		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details );
 
 		remove_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		remove_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 
-		if ( ! is_wp_error( $attachment_id ) ) {
+		if ( ! is_wp_error( $attachment ) ) {
+			$attachment = get_post( $attachment );
+
 			// Save some basic details with the ZIP.
-			update_post_meta( $attachment_id, 'version', $this->plugin['Version'] );
-			update_post_meta( $attachment_id, 'submitted_name', $original_name );
+			update_post_meta( $attachment->ID, 'version', $this->plugin['Version'] );
+			update_post_meta( $attachment->ID, 'submitted_name', $original_name );
 
 			// And record this ZIP as having been uploaded.
 			add_post_meta( $post_id, 'uploaded_zip_hash', $zip_hash );
 		}
 
-		return $attachment_id;
+		return $attachment;
 	}
 
 	/**
@@ -892,4 +905,73 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 		return $token && Upload_Token::instance()->is_valid_for_user( get_current_user_id(), $token );
 	}
 
+	/**
+	 * Locate the HelpScout review email and it's status.
+	 *
+	 * @param WP_Post $post The plugin post.
+	 *
+	 * @return array|false
+	 */
+	public static function find_review_email( $post ) {
+		global $wpdb;
+
+		if ( 'pending' !== $post->post_status ) {
+			return false;
+		}
+
+		// Find the latest email for this plugin that looks like a review email.
+		return $wpdb->get_row( $wpdb->prepare(
+			"SELECT emails.*
+				FROM %i emails
+					JOIN %i meta ON emails.id = meta.helpscout_id
+				WHERE meta.meta_key = 'plugins' AND meta.meta_value = %s
+					AND emails.subject LIKE %s
+				ORDER BY `created` DESC
+				LIMIT 1",
+			"{$wpdb->base_prefix}helpscout",
+			"{$wpdb->base_prefix}helpscout_meta",
+			$post->post_name,
+			'%Review in Progress:%' // The subject line of the review email.
+		) );
+	}
+
+	/**
+	 * Update the HelpScout review email.
+	 *
+	 * @param WP_Post $post       The plugin post.
+	 * @param WP_Post $attachment The uploaded attachment post.
+	 *
+	 * @return bool True if the email was updated, false otherwise.
+	 */
+	public function update_review_email( $post, $attachment ) {
+		$review_email = self::find_review_email( $post );
+		if ( ! $review_email ) {
+			return false;
+		}
+
+		// Don't update the review email if the plugin author isn't the one who uploaded the ZIP.
+		if ( $post->post_author != get_current_user_id() ) {
+			return false;
+		}
+
+		$text = sprintf(
+			"New ZIP uploaded by %s, version %s.\n%s\n%s",
+			wp_get_current_user()->user_login,
+			$attachment->version,
+			get_edit_post_link( $post ),
+			wp_get_attachment_url( $attachment->ID )
+		);
+
+		$result = HelpScout::api(
+			'/v2/conversations/' . $review_email->id . '/notes',
+			[
+				'text'   => $text,
+				'status' => 'active',
+			],
+			'POST',
+			$http_response_code
+		);
+
+		return ( 201 === $http_response_code );
+	}
 }
