@@ -197,7 +197,10 @@ class Upload_Handler {
 		}
 
 		// Is there already a plugin with the same slug by a different author?
-		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
+		if (
+			( $plugin_post && $plugin_post->post_author != get_current_user_id() ) &&
+			! current_user_can( 'edit_post', $plugin_post ) /* reviewer uploading via wp-admin */
+		) {
 			$error = __( 'Error: The plugin already exists.', 'wporg-plugins' );
 
 			return new WP_Error( 'already_exists', $error . ' ' . sprintf(
