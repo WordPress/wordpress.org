@@ -953,6 +953,11 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 			return false;
 		}
 
+		// Don't update the review email if the plugin author isn't the one who uploaded the ZIP.
+		if ( $post->post_author != get_current_user_id() ) {
+			return false;
+		}
+
 		$text = sprintf(
 			"New ZIP uploaded by %s, version %s.\n%s\n%s",
 			wp_get_current_user()->user_login,
