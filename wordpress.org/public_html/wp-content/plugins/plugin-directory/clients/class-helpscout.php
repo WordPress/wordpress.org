@@ -14,7 +14,7 @@ class HelpScout {
 	 */
 	const TIMEOUT = 15;
 
-	public static function api( $url, $args = null, $method = 'GET' ) {
+	public static function api( $url, $args = null, $method = 'GET', & $response_code = null ) {
 		// Verify the configuration variables are available.
 		if ( ! defined( 'HELPSCOUT_APP_ID' ) || ! defined( 'HELPSCOUT_APP_SECRET' ) ) {
 			return false;
@@ -29,18 +29,29 @@ class HelpScout {
 			$url = add_query_arg( $args, $url );
 		}
 
+		$body    = null;
+		$headers = [
+			'Accept'        => 'application/json',
+			'Authorization' => self::get_auth_string(),
+		];
+		// All editable requests must have a json content-type.
+		// See https://developer.helpscout.com/mailbox-api/overview/content_type/
+		if ( in_array( $method, [ 'POST', 'PUT', 'PATCH' ], true ) ) {
+			$headers['Content-Type'] = 'application/json';
+			$body                    = json_encode( $args );
+		}
+
 		$request = wp_remote_request(
 			$url,
 			array(
 				'method'  => $method,
-				'headers' => [
-					'Accept'        => 'application/json',
-					'Authorization' => self::get_auth_string(),
-				],
+				'headers' => $headers,
 				'timeout' => self::TIMEOUT,
-				'body'    => ( 'POST' === $method && $args ) ? $args : null,
+				'body'    => $body,
 			)
 		);
+
+		$response_code = wp_remote_retrieve_response_code( $request );
 
 		return json_decode( wp_remote_retrieve_body( $request ) );
 	}
