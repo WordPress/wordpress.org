@@ -380,6 +380,7 @@ function get_whitelist() {
 			'brettface',
 		),
 		'marketing' => array(
+			'bernard0omnisend', // Bernard Meyer on Slack
 			'eidolonnight',
 			'lmurillom',
 			'nalininonstopnewsuk', // @Nalini on Slack
