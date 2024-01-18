@@ -225,6 +225,8 @@ class Parser {
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
+			$this->warnings['invalid_plugin_name_header'] = true;
+
 			$this->name = $line = $this->get_first_nonwhitespace( $contents );
 
 			// Ensure that the line read wasn't an actual header or description.
