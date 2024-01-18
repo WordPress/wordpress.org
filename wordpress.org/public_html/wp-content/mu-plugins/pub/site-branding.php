@@ -90,7 +90,7 @@ namespace WordPressdotorg\MU_Plugins\Site_Branding {
 	 * Set a default og:image image.
 	 */
 	function jetpack_open_graph_image_default() {
-		return 'https://s.w.org/images/backgrounds/wordpress-bg-medblue.png';
+		return 'https://s.w.org/images/home/wordpress-default-ogimage.png';
 	}
 	add_filter( 'jetpack_open_graph_image_default', __NAMESPACE__ . '\jetpack_open_graph_image_default' );
 	
