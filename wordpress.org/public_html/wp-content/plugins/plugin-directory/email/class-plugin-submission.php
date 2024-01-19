@@ -28,7 +28,7 @@ class Plugin_Submission extends Markdown_Base {
 
 **Slug / Permalink**
 
-Based on your display name of ###NAME### your plugin has been initially assigned the following permalink:  
+Based on your display name of ###NAME### your plugin has been initially assigned the following permalink:
 http://wordpress.org/plugins/###SLUG###/ _(please note: This URL will not be operational until your plugin review is approved)_
 
 You can customize this on the [Plugin Submission page](https://wordpress.org/plugins/developers/add/), if you were unable to do this, please reply with the details of what you would like your plugin slug to be.
@@ -39,7 +39,7 @@ Your plugin slug / permalink is subject to change once a human review is complet
 
 Our volunteer team of reviewers endeavours to perform all reviews in a timely manner, we are unable to provide an exact date of when your plugin will be reviewed.
 
-We encourage all plugin authors to use [Plugin Check](https://wordpress.org/plugins/plugin-check/) to ensure that most basic issues are resolved first.  
+We encourage all plugin authors to use [Plugin Check](https://wordpress.org/plugins/plugin-check/) to ensure that most basic issues are resolved first.
 Please note: Automated tools may have false positives, or may miss issues. Plugin Check and other tools cannot guarantee our reviewers won’t find an issue that requires fixing or clarification.
 
 Please refer to the [Plugin Submission page](https://wordpress.org/plugins/developers/add/) for:
@@ -49,23 +49,23 @@ Please refer to the [Plugin Submission page](https://wordpress.org/plugins/devel
 
 **Guidelines**
 
-All plugins are required to abide by our Plugin Guidelines. Please ensure you have read and understand these.  
+All plugins are required to abide by our Plugin Guidelines. Please ensure you have read and understand these.
 https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
 
-A common issue encountered by plugin authors is that we require your accounts email address to remain operational, not to have autoresponders, and not mark our emails as spam.  
-To reduce the possibility of this affecting you, please ensure you add `plugins@wordpress.org` to your address book / contact list.  
+A common issue encountered by plugin authors is that we require your accounts email address to remain operational, not to have autoresponders, and not mark our emails as spam.
+To reduce the possibility of this affecting you, please ensure you add `plugins@wordpress.org` to your address book / contact list.
 If you use an email forwarder, alias, or group mailing list, please ensure that address is added to the Allow list.
 
 **Other Questions or Concerns?**
 
-Please refer to our Frequently Asked Questions list here:  
+Please refer to our Frequently Asked Questions list here:
 https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
 
 If your question is not covered by this email, the submission page, or the above FAQ, please respond to this email with your question.
 
 **Additionally...**
 
-Please make sure to follow our official blog, for updates related to the team and review requirement changes:  
+Please make sure to follow our official blog, for updates related to the team and review requirement changes:
 https://make.wordpress.org/plugins/
 
 Reviews are currently in English only. We apologize for the inconvenience.
