@@ -18,12 +18,25 @@
 
 		$( '#support-rep-list' )
 			.on( 'click', '.remove', function() {
-				if ( ! window.confirm( pluginDir.removeSupportRepAYS ) ) {
+				var $this = $( this ),
+					$row = $this.parents( 'li' ),
+					user_id = $row.data( 'user' ),
+					url;
+
+				if (
+					! window.confirm(
+						pluginDir.removeSupportRepAYS.replace(
+							/%(1[$])?s/,
+							$row.find('a').first().text().trim()
+						)
+					)
+				) {
 					return;
 				}
+	
+				$this.addClass( 'spinner' );
 
-				var $row = $( this ).addClass( 'spinner' ).parents( 'li' ),
-					url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/support-reps/' + $row.data( 'user' ) + '/?_wpnonce=' + pluginDir.restNonce;
+				url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/support-reps/' + user_id + '/?_wpnonce=' + pluginDir.restNonce;
 
 				$.post( {
 					url: url,

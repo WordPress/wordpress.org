@@ -35,12 +35,12 @@ class Committers extends \WP_Widget {
 		}, $committers );
 
 		if ( current_user_can( 'plugin_add_committer', $post ) || current_user_can( 'plugin_remove_committer', $post ) ) {
-			wp_enqueue_script( 'wporg-plugins-committers', plugins_url( 'js/committers.js', __FILE__ ), array( 'wp-util' ), true );
+			wp_enqueue_script( 'wporg-plugins-committers', plugins_url( 'js/committers.js', __FILE__ ), array( 'wp-util' ), filemtime( __DIR__ . '/js/committers.js' ) );
 			wp_localize_script( 'wporg-plugins-committers', 'committersWidget', array(
 				'restUrl'            => get_rest_url(),
 				'restNonce'          => wp_create_nonce( 'wp_rest' ),
 				'pluginSlug'         => $post->post_name,
-				'removeCommitterAYS' => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+				'removeCommitterAYS' => __( 'Are you sure you want to remove %s as a committer?', 'wporg-plugins' ),
 			) );
 		}
 
