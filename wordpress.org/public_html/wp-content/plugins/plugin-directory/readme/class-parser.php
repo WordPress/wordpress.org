@@ -423,7 +423,7 @@ class Parser {
 		$this->short_description = $this->sanitize_text( $this->short_description );
 		$this->short_description = $this->parse_markdown( $this->short_description );
 		$this->short_description = wp_strip_all_tags( $this->short_description );
-		$short_description = $this->trim_length( $this->short_description, 150 );
+		$short_description       = $this->trim_length( $this->short_description, 150 );
 		if ( $short_description !== $this->short_description ) {
 			if ( empty( $this->warnings['no_short_description_present'] ) ) {
 				$this->warnings['trimmed_short_description'] = true;
