@@ -37,7 +37,7 @@ Your plugin slug / permalink is subject to change once a human review is complet
 
 **Review Process**
 
-Our volunteer team of reviewers endeavours to perform all reviews in a timely manner, we are unable to provide an exact date of when your plugin will be reviewed.
+Our volunteer team of reviewers endeavors to perform all reviews in a timely manner, we are unable to provide an exact date of when your plugin will be reviewed.
 
 We encourage all plugin authors to use [Plugin Check](https://wordpress.org/plugins/plugin-check/) to ensure that most basic issues are resolved first.
 Please note: Automated tools may have false positives, or may miss issues. Plugin Check and other tools cannot guarantee our reviewers won’t find an issue that requires fixing or clarification.
