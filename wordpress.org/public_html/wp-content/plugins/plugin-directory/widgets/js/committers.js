@@ -18,12 +18,25 @@
 
 		$( '#committer-list' )
 			.on( 'click', '.remove', function() {
-				if ( ! window.confirm( pluginDir.removeCommitterAYS ) ) {
+				var $this = $( this ),
+					$row = $this.parents( 'li' ),
+					user_id = $row.data( 'user' ),
+					url;
+
+				if (
+					! window.confirm(
+						pluginDir.removeCommitterAYS.replace(
+							/%(1[$])?s/,
+							$row.find('a').first().text().trim()
+						)
+					)
+				) {
 					return;
 				}
 
-				var $row = $( this ).addClass( 'spinner' ).parents( 'li' ),
-					url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/' + $row.data( 'user' ) + '/?_wpnonce=' + pluginDir.restNonce;
+				$this.addClass( 'spinner' );
+
+				url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/' + user_id + '/?_wpnonce=' + pluginDir.restNonce;
 
 				$.post( {
 					url: url,

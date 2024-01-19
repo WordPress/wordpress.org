@@ -36,12 +36,12 @@ class Support_Reps extends \WP_Widget {
 		}, $support_reps );
 
 		if ( current_user_can( 'plugin_add_support_rep', $post ) || current_user_can( 'plugin_remove_support_rep', $post ) ) {
-			wp_enqueue_script( 'wporg-plugins-support-reps', plugins_url( 'js/support-reps.js', __FILE__ ), array( 'wp-util' ), true );
+			wp_enqueue_script( 'wporg-plugins-support-reps', plugins_url( 'js/support-reps.js', __FILE__ ), array( 'wp-util' ), filemtime( __DIR__ . '/js/support-reps.js' ) );
 			wp_localize_script( 'wporg-plugins-support-reps', 'supportRepsWidget', array(
 				'restUrl'             => get_rest_url(),
 				'restNonce'           => wp_create_nonce( 'wp_rest' ),
 				'pluginSlug'          => $post->post_name,
-				'removeSupportRepAYS' => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+				'removeSupportRepAYS' => __( 'Are you sure you want to remove %s as a support rep?', 'wporg-plugins' ),
 			) );
 		} elseif ( ! $support_reps ) {
 			return;
