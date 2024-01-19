@@ -29,7 +29,7 @@ class Plugin_Submission extends Markdown_Base {
 **Slug / Permalink**
 
 Based on your display name of ###NAME### your plugin has been initially assigned the following permalink:
-http://wordpress.org/plugins/###SLUG###/ _(please note: This URL will not be operational until your plugin review is approved)_
+https://wordpress.org/plugins/###SLUG###/ _(please note: This URL will not be operational until your plugin review is approved)_
 
 You can customize this on the [Plugin Submission page](https://wordpress.org/plugins/developers/add/), if you were unable to do this, please reply with the details of what you would like your plugin slug to be.
 Once your plugin is approved, _we cannot change it_. If the slug listed [on the submission page](https://wordpress.org/plugins/developers/add/) is incorrect, please tell us as soon as possible; if that's correct, you do not need to contact us.
