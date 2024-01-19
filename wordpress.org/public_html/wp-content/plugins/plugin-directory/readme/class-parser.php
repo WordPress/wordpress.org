@@ -279,7 +279,7 @@ class Parser {
 				$this->tags = array_diff( $this->tags, $this->ignore_tags );
 				$this->warnings['ignored_tags'] = true;
 			}
-			if ( count( $this->tags ) > 6 ) {
+			if ( count( $this->tags ) > 5 ) {
 				$this->tags = array_slice( $this->tags, 0, 5 );
 				$this->warnings['too_many_tags'] = true;
 			}
