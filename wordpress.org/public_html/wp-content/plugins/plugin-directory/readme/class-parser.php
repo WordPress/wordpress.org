@@ -144,7 +144,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $ignore_tags = array(
+	public $ignore_tags = array(
 		'plugin',
 		'wordpress',
 	);
