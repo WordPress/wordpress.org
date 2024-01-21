@@ -27,7 +27,7 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
-$banner_url = 'https://wordpress.tv/2023/10/13/gutenberg-next-with-matt-mullenweg/';
+$banner_url = 'https://wordpress.org/state-of-the-word/';
 if ( is_object( $rosetta ) && isset( $rosetta->locale ) ) {
 	$banner_url .= '?locale=' . $rosetta->locale;
 }
