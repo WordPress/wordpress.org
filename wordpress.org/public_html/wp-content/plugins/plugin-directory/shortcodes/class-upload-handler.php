@@ -8,6 +8,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
+use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submission_Email;
 
 /**
  * The [wporg-plugin-upload] shortcode handler to display a plugin uploader.
@@ -487,7 +488,8 @@ class Upload_Handler {
 		}
 
 		// Send plugin author an email for peace of mind.
-		$this->send_email_notification();
+		$email = new Plugin_Submission_Email( $plugin_post, wp_get_current_user() );
+		$email->send();
 
 		$message = sprintf(
 			/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
@@ -836,53 +838,6 @@ class Upload_Handler {
 		}
 
 		return $attachment;
-	}
-
-	/**
-	 * Sends out an email confirmation to the plugin's author.
-	 */
-	public function send_email_notification() {
-
-		/* translators: %s: plugin name */
-		$email_subject = sprintf(
-			__( '[WordPress Plugin Directory] Successful Plugin Submission - %s', 'wporg-plugins' ),
-			$this->plugin['Name']
-		);
-
-		/*
-			Please leave the blank lines in place.
-		*/
-		$email_content = sprintf(
-			// translators: 1: plugin name, 2: plugin slug.
-			__(
-'Thank you for uploading %1$s to the WordPress Plugin Directory. We will review your submission as soon as possible and send you a follow up email with the results.
-
-Your plugin has been given the initial permalink (aka slug) of %2$s based on your display name of %1$s. This is subject to change based on the results of your review.
-
-If you need to change the plugin permalink, please reply to this email immediately and let us know what the correct slug should be. We will be unable to change your plugin slug once your review is completed.
-
-If there are any other problems with your submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved.
-
-We remind you read the following links to understand the review process and our expectations:
-
-Guidelines: https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
-Frequently Asked Questions: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
-
-Also, make sure to follow our official blog: https://make.wordpress.org/plugins/
-
-Note: Reviews are currently in English only. We apologize for the inconvenience.
-
---
-The WordPress Plugin Directory Team
-https://make.wordpress.org/plugins', 'wporg-plugins'
-			),
-			$this->plugin['Name'],
-			$this->plugin_slug
-		);
-
-		$user_email = wp_get_current_user()->user_email;
-
-		wp_mail( $user_email, $email_subject, $email_content, 'From: plugins@wordpress.org' );
 	}
 
 	// Helper.
