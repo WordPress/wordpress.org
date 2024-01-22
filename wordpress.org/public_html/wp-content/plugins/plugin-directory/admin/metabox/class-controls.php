@@ -14,10 +14,16 @@ class Controls {
 	/**
 	 * Displays the Publish metabox for plugins.
 	 * The HTML here mostly matches what Core uses.
+	 *
+	 * NOTE: The input[type="submit"].screen-reader-text is such that the default
+	 *       form submit method is a button whose submission causes no action
+	 *       (such as approval/rejection/assign). This is used for submit-by-enter.
+	 *       See https://meta.trac.wordpress.org/ticket/6635.
 	 */
 	static function display() {
 		?>
 		<div class="submitbox" id="submitpost">
+			<input type="submit" name="save_changes" class="screen-reader-text" />
 			<div id="misc-publishing-actions">
 				<?php
 				self::display_meta();
