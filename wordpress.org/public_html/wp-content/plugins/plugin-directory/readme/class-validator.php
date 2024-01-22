@@ -71,7 +71,7 @@ class Validator {
 		$errors = $warnings = $notes = array();
 
 		// Fatal errors.
-		if ( empty( $readme->name ) ) {
+		if ( empty( $readme->name ) || isset( $readme->warnings['invalid_plugin_name_header'] ) ) {
 			$errors[] = sprintf(
 				/* translators: 1: 'Plugin Name' section title, 2: 'Plugin Name' */
 				__( 'We cannot find a plugin name in your readme. Plugin names look like: %1$s. Please change %2$s to reflect the actual name of your plugin.', 'wporg-plugins' ),
@@ -144,6 +144,18 @@ class Validator {
 			);
 		}
 
+		if ( isset( $readme->warnings['too_many_tags'] ) ) {
+			$warnings[] = __( 'One or more tags were ignored. Please limit your plugin to 5 tags.', 'wporg-plugins' );
+		}
+
+		if ( isset( $readme->warnings['ignored_tags'] ) ) {
+			$warnings[] = sprintf(
+				/* translators: %s: list of tags not supported */
+				__( 'One or more tags were ignored. The following tags are not permitted: %s', 'wporg-plugins' ),
+				'<code>' . implode( '</code>, <code>', $readme->ignore_tags ) . '</code>'
+			);
+		}
+
 		// Notes.
 		if ( empty( $readme->requires ) ) {
 			$notes[] = sprintf(
@@ -158,6 +170,20 @@ class Validator {
 				/* translators: %s: plugin header tag */
 				__( 'The %s field is missing. It should be defined here, or in your main plugin file.', 'wporg-plugins' ),
 				'<code>Requires PHP</code>'
+			);
+		}
+
+		if ( isset( $readme->warnings['no_short_description_present'] ) ) {
+			$notes[] = sprintf(
+				/* translators: %s: section title */
+				__( 'The %s section is missing. An excerpt was generated from your main plugin description.', 'wporg-plugins' ),
+				'<code>Short Description</code>'
+			);
+		} elseif( isset( $readme->warnings['trimmed_short_description'] ) ) {
+			$notes[] = sprintf(
+				/* translators: %s: section title */
+				__( 'The %s section is too long and was truncated. A maximum of 150 characters is supported.', 'wporg-plugins' ),
+				'<code>Short Description</code>'
 			);
 		}
 
