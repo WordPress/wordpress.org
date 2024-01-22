@@ -1370,6 +1370,11 @@ class Plugin_Directory {
 			return;
 		}
 
+		// Favorites should be a 200 response, even with no plugins.
+		if ( 'favorites' === get_query_var( 'browse' ) ) {
+			status_header( 200 );
+		}
+
 		// Disable feeds
 		if ( is_feed() ) {
 			if ( isset( $_GET['feed'] ) ) {
