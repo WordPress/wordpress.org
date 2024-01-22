@@ -102,6 +102,27 @@ class Upload_Handler {
 			$this->plugin_root = dirname( $plugin_data['PluginFile'] );
 		}
 
+		/*
+		 * Validate the contents of the ZIP seems reasonable.
+		 *
+		 * We don't want Version Control direcories, or compressed/executable files.
+		 */
+		$unexpected_files = array_merge(
+			Filesystem::list( $this->plugin_dir, 'directories', true, '!/\.(git|svn|hg|bzr)$!i' ),
+			Filesystem::list( $this->plugin_dir, 'files', true, '!\.(phar|sh|zip|gz|tgz|rar|tar|7z)$!i' )
+		);
+
+		if ( $unexpected_files ) {
+			$unexpected_files = array_map( 'basename', $unexpected_files );
+
+			$error = __( 'Error: The plugin contains unexpected files.', 'wporg-plugins' );
+			return new WP_Error( 'unexpected_files', $error . ' ' . sprintf(
+				/* translators: %s: Filenames */
+				__( 'The following files are not permitted in plugins: %s. Please remove them and upload the plugin again.', 'wporg-plugins' ),
+				'<code>' . implode( '</code>, <code>', $unexpected_files ) . '</code>'
+			) );
+		}
+
 		// Let's check some plugin headers, shall we?
 		// Catches both empty Plugin Name & when no valid files could be found.
 		if ( empty( $this->plugin['Name'] ) ) {
