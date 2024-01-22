@@ -792,7 +792,7 @@ class Plugin_Directory {
 				break;
 
 			case 'updated':
-				$wp_query->query_vars['orderby'] = 'modified_date';
+				$wp_query->query_vars['orderby'] = 'post_modified';
 				break;
 
 			case 'block':
