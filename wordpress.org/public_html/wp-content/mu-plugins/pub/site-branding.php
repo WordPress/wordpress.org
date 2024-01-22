@@ -98,7 +98,7 @@ namespace WordPressdotorg\MU_Plugins\Site_Branding {
 	 * To prevent a cropped version of the og:image on Twitter, provide a square version.
 	 */
 	function jetpack_twitter_cards_image_default() {
-		return 'https://s.w.org/images/backgrounds/wordpress-bg-medblue-square.png';
+		return 'https://s.w.org/images/home/wordpress-default-image-square.png';
 	}
 	add_filter( 'jetpack_twitter_cards_image_default', __NAMESPACE__ . '\jetpack_twitter_cards_image_default' );
 
