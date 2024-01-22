@@ -764,6 +764,16 @@ class Plugin_Directory {
 				$wp_query->query_vars['meta_key'] = 'last_updated';
 				$wp_query->query_vars['orderby']  = 'meta_value';
 				$wp_query->query_vars['order']    = 'DESC';
+
+				// Limit the Beta tab to plugins updated within 12 months.
+				$meta_query                = $wp_query->get( 'meta_query' ) ?: [];
+				$meta_query['updated-12m'] = [
+					'key'     => 'last_updated',
+					'value'   => gmdate( 'Y-m-d H:i:s', time() - YEAR_IN_SECONDS ),
+					'compare' => '>',
+				];
+				$wp_query->set( 'meta_query', $meta_query );
+
 				break;
 
 			case 'favorites':
