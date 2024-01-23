@@ -102,6 +102,17 @@ class Export extends WP_CLI_Command {
 
 			$files = array_merge( $files, $jed_files );
 
+			// Create PHP file.
+			$php_file = "{$wp_locale}.l10n.php";
+			if ($context) {
+				$php_file = "$context-{$php_file}";
+			}
+			$php_file = "{$dest}/{$php_file}";
+			$result = $this->build_php_file( $gp_project, $gp_locale, $translation_set, $po_entries, $php_file );
+			if ($result) {
+				$files[] = $php_file;
+			}
+
 			// Create PO file.
 			$po_file = "{$wp_locale}.po";
 			if ( $context ) {
@@ -255,5 +266,21 @@ class Export extends WP_CLI_Command {
 		file_put_contents( $dest, $po_content );
 
 		return true;
+	}
+
+	/**
+	 * Builds a PHP file for translations.
+	 *
+	 * @param GP_Project          $gp_project The GlotPress project.
+	 * @param GP_Locale           $gp_locale  The GlotPress locale.
+	 * @param GP_Translation_Set  $set        The translation set.
+	 * @param Translation_Entry[] $entries    The translation entries.
+	 * @param string              $dest       Destination file name.
+	 * @return boolean True on success, false on failure.
+	 */
+	private function build_php_file( $gp_project, $gp_locale, $set, $entries, $dest ) {
+		$format  = gp_array_get( GP::$formats, 'php' );
+		$content = $format->print_exported_file( $gp_project, $gp_locale, $set, $entries );
+		return false !== file_put_contents( $dest, $content );
 	}
 }
