@@ -154,6 +154,7 @@ class Plugin extends Base {
 		$result['short_description'] = get_the_excerpt();
 		$result['description']       = $result['sections']['description'] ?? $result['short_description'];;
 		$result['download_link']     = Template::download_link( $post );
+		$result['upgrade_notice']    = get_post_meta( $post->ID, 'upgrade_notice', true );
 
 		// Reduce images to caption + src
 		$result['screenshots'] = array_map(

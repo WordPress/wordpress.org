@@ -41,6 +41,7 @@ class Plugins_Info_API_Request {
 		'screenshots'         => false,
 		'blueprints'          => false,
 		'preview_link'        => false,
+		'upgrade_notice'      => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
