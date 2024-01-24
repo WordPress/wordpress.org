@@ -479,7 +479,7 @@ class Parser {
 			}
 		}
 
-		return $line;
+		return $line ?? '';
 	}
 
 	/**
