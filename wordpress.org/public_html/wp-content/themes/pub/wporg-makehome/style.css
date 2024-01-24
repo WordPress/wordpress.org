@@ -170,6 +170,7 @@ section.get-involved h2 {
 }
 
 section.get-involved h2.section-title {
+	line-height: 2rem;
 	padding: 20px 10px;
 }
 
