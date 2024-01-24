@@ -104,12 +104,13 @@ class Export extends WP_CLI_Command {
 
 			// Create PHP file.
 			$php_file = "{$wp_locale}.l10n.php";
-			if ($context) {
+			if ( $context ) {
 				$php_file = "$context-{$php_file}";
 			}
 			$php_file = "{$dest}/{$php_file}";
+
 			$result = $this->build_php_file( $gp_project, $gp_locale, $translation_set, $po_entries, $php_file );
-			if ($result) {
+			if ( $result ) {
 				$files[] = $php_file;
 			}
 
