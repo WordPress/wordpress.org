@@ -226,7 +226,6 @@
 		}
 
 		$( '#sidebar-div-others-translation-memory-content-' + divId ).html( TMcontainer.html() );
-		console.log('sidebar-tab-others-' + divId, window.translationHelpersCache );
 		add_amount_to_others_tab('sidebar-tab-others-' + divId, window.translationHelpersCache?.[ divId ], divId);
 	}
 
