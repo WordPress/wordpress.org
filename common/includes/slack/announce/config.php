@@ -413,6 +413,7 @@ function get_whitelist() {
 		'meta-learn' => array(
 			'coreymckrill',
 			'courane01', // @Courtney on Slack
+			'digitalchild', // @Jamie Madden on Slack
 			'psykro', // @Jonathan on Slack
 			'tellyworth',
 		),

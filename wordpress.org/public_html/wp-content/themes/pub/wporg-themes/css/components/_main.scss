@@ -436,6 +436,8 @@ body.author .theme-browser .theme .theme-author  {
 }
 
 .theme-wrap .theme-actions {
+	display: flex;
+	gap: 5px;
 	margin: 0 0 1.5em;
 	text-align: center;
 }
@@ -1807,7 +1809,7 @@ span.favorite.dashicons,
 span.favorite.dashicons:before {
 	font-size: 40px;
 	width: 40px;
-	line-height: 1.5;
+	line-height: 1;
 }
 
 span.favorite:hover,
@@ -2053,6 +2055,10 @@ span.favorite.favorited {
 		margin-right: 0;
 	}
 
+	.theme-wrap .theme-actions {
+		flex-flow: column wrap;
+	}
+
 	.theme-wrap .theme-actions .button-primary,
 	.theme-wrap .theme-actions .button-secondary {
 		width: 100%;
@@ -2062,11 +2068,6 @@ span.favorite.favorited {
 	.theme-wrap .theme-name {
 		display: block;
 		margin: 0;
-	}
-
-	span.favorite.dashicons,
-	span.favorite.dashicons::before {
-		line-height: 1;
 	}
 
 	.theme-wrap .theme-about .theme-head,
