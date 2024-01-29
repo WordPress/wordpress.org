@@ -567,8 +567,8 @@ class Uploads {
 	 *                      specific validation issue.
 	 */
 	protected static function validate_upload_form() {
-		// Check description length
-		if ( str_word_count( $_POST['post_content']) < self::MIN_WORDS_DESCRIPTION ) {
+		// Check description length.
+		if ( str_word_count( $_POST['post_content'] ) < self::MIN_WORDS_DESCRIPTION ) {
 			return 'description-too-short';
 		}
 
