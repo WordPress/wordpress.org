@@ -1007,6 +1007,7 @@ class Template {
 			'translation'          => 'Translation of existing plugin',
 			'banned'               => 'Banned developer trying to sneak back in',
 			'author-request'       => 'Author requested not to continue',
+			'security'             => 'Security concerns',
 			'other'                => 'OTHER: See notes',
 		);
 	}
