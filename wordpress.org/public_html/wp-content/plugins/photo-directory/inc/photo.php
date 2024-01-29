@@ -941,7 +941,12 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					break;
 				case 'focal_length':
 					$label = 'Focal Length';
-					$value .= 'mm';
+					$value = number_format( (float) $value, 2 );
+					if ( 0 >= $value ) {
+						continue;
+					}
+					// Trim trailing zeroes after the decimal place, and potentially the decimal itself, then append 'mm'.
+					$value = rtrim( rtrim( $value, '0' ), '.' ) . 'mm';
 					break;
 				case 'iso':
 					$label = 'ISO';
