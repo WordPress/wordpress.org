@@ -941,7 +941,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					break;
 				case 'focal_length':
 					$label = 'Focal Length';
-					$value =  number_format_i18n( $value ) . 'mm';
+					$value =  number_format_i18n( $value, 2 ) . 'mm';
 					break;
 				case 'iso':
 					$label = 'ISO';
