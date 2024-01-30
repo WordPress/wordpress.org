@@ -385,6 +385,7 @@ function get_whitelist() {
 			'lmurillom',
 			'nalininonstopnewsuk', // @Nalini on Slack
 			'ngreennc', // @Nyasha G on Slack
+			'ninianepress', // @jenni on Slack
 			'robinwpdeveloper',
 			'santanainniss',
 			'SeReedMedia',
