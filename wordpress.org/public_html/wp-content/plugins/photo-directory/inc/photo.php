@@ -943,7 +943,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					$label = 'Focal Length';
 					$value = number_format( (float) $value, 2 );
 					if ( 0 >= $value ) {
-						continue;
+						break;
 					}
 					// Trim trailing zeroes after the decimal place, and potentially the decimal itself, then append 'mm'.
 					$value = rtrim( rtrim( $value, '0' ), '.' ) . 'mm';
