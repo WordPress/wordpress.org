@@ -511,6 +511,22 @@ class Language_Pack extends WP_CLI_Command {
 	}
 
 	/**
+	 * Builds a PHP file for translations.
+	 *
+	 * @param GP_Project          $gp_project The GlotPress project.
+	 * @param GP_Locale           $gp_locale  The GlotPress locale.
+	 * @param GP_Translation_Set  $set        The translation set.
+	 * @param Translation_Entry[] $entries    The translation entries.
+	 * @param string              $dest       Destination file name.
+	 * @return bool True on success, false on error.
+	 */
+	private function build_php_file( $gp_project, $gp_locale, $set, $entries, $dest ) {
+		$format  = gp_array_get( GP::$formats, 'php' );
+		$content = $format->print_exported_file( $gp_project, $gp_locale, $set, $entries );
+		return false !== file_put_contents( $dest, $content );
+	}
+
+	/**
 	 * Executes a command via exec().
 	 *
 	 * @param string $command The escaped command to execute.
@@ -652,6 +668,7 @@ class Language_Pack extends WP_CLI_Command {
 			$json_file_base = "{$export_directory}/{$filename}";
 			$po_file        = "{$export_directory}/{$filename}.po";
 			$mo_file        = "{$export_directory}/{$filename}.mo";
+			$php_file       = "{$export_directory}/{$filename}.l10n.php";
 			$zip_file       = "{$export_directory}/{$filename}.zip";
 			$build_zip_file = "{$build_directory}/{$wp_locale}.zip";
 			$build_sig_file = "{$build_zip_file}.sig";
@@ -666,7 +683,13 @@ class Language_Pack extends WP_CLI_Command {
 			unset( $mapping['po'] );
 
 			// Create JED json files for each JS file.
-			$json_files = $this->build_json_files( $data->gp_project, $gp_locale, $set, $mapping, $json_file_base );
+			$additional_files = $this->build_json_files( $data->gp_project, $gp_locale, $set, $mapping, $json_file_base );
+
+			// Create PHP file.
+			$php_file_written = $this->build_php_file( $data->gp_project, $gp_locale, $set, $po_entries, $php_file );
+			if ( $php_file_written ) {
+				$additional_files[] = $php_file;
+			}
 
 			// Create PO file.
 			$last_modified = $this->build_po_file( $data->gp_project, $gp_locale, $set, $po_entries, $po_file );
@@ -703,7 +726,7 @@ class Language_Pack extends WP_CLI_Command {
 				escapeshellarg( $zip_file ),
 				escapeshellarg( $po_file ),
 				escapeshellarg( $mo_file ),
-				implode( ' ', array_map( 'escapeshellarg', $json_files ) )
+				implode( ' ', array_map( 'escapeshellarg', $additional_files ) )
 			) );
 
 			if ( is_wp_error( $result ) ) {
