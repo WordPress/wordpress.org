@@ -14,7 +14,7 @@ class WPorg_GP_Help_Page {
 	const handbook_link = 'https://make.wordpress.org/polyglots/handbook/tools/glotpress-translate-wordpress-org/';
 
 	function __construct() {
-		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'gp_init', array( $this, 'init' ) );
 		add_action( 'after_hello', array( $this, 'after_hello' ) );
 		add_action( 'gp_after_notices', array( $this, 'after_notices' ) );
 	}
