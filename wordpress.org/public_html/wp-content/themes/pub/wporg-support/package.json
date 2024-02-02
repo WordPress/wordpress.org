@@ -28,8 +28,5 @@
 	},
 	"browserslist": [
 		"extends @wordpress/browserslist-config"
-	],
-	"dependencies": {
-		"postcss-scss": "~4.0.9"
-	}
+	]
 }
