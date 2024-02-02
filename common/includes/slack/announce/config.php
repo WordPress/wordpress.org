@@ -133,6 +133,7 @@ function get_whitelist() {
 			'pbiron',
 			'priethor',
 			'psykro', // @Jonathan on Slack
+			'rajinsharwar', // @Rajin Sharwar on Slack
 			'sabernhardt',
 			'sncoker', // @shawntellecoker on Slack
 			'thelmachido', // @thelmachido-zw on Slack
