@@ -10,25 +10,26 @@
 	"author": "wordpressdotorg",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
-		"@wordpress/browserslist-config": "~2.6.0",
-		"autoprefixer": "~9.7.6",
-		"grunt": "~1.4.1",
+		"@lodder/grunt-postcss": "~3.1.1",
+		"@wordpress/browserslist-config": "~5.33.0",
+		"@wordpress/stylelint-config": "~21.33.0",
+		"autoprefixer": "~10.4.17",
+		"grunt": "~1.6.1",
 		"grunt-contrib-watch": "^1.1.0",
-		"grunt-postcss": "^0.9.0",
 		"grunt-rtlcss": "^2.0.2",
 		"grunt-sass": "~3.1.0",
-		"grunt-stylelint": "^0.10.1",
-		"node-sass": "~6.0.1",
-		"postcss-scss": "^2.0.0",
-		"stylelint": "~13.13.1",
-		"stylelint-config-wordpress": "^13.1.0",
-		"@wordpress/stylelint-config": "~19.0.0"
+		"grunt-stylelint": "^0.18.0",
+		"postcss": "~8.4.33",
+		"sass": "~1.70.0",
+		"stylelint": "^14.2"
 	},
 	"engines": {
-		"node": ">=8.11.2",
-		"npm": ">=6.1.0"
+		"node": ">=16"
 	},
 	"browserslist": [
 		"extends @wordpress/browserslist-config"
-	]
+	],
+	"dependencies": {
+		"postcss-scss": "~4.0.9"
+	}
 }
