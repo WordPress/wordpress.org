@@ -104,6 +104,7 @@ function inline_scripts() {
 
 				// Toggle it
 				$toggle.text( $toggle.data( isHide ? 'show' : 'hide' ) );
+				$welcome.get( 0 ).classList.toggle( 'collapsed', isHide );
 				$content.slideToggle();
 				$welcome.find('.post-edit-link' ).toggle( ! isHide );
 
@@ -159,11 +160,15 @@ function welcome_box() {
 				if ( elContent ) {
 					if ( -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash ) ) {
 						var elToggle = document.getElementById( 'make-welcome-toggle' ),
-							elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' )
+							elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' ),
+							elContainer = document.querySelector( '.make-welcome' );
 
 						// It's hidden, hide it ASAP.
 						elContent.className += " hidden";
 						elToggle.innerText = elToggle.dataset.show;
+
+						// Add class to welcome box container indicating collapsed state.
+						elContainer && elContainer.classList.add( 'collapsed' );
 
 						if ( elEditLink.length ) {
 							elEditLink[0].className += " hidden";

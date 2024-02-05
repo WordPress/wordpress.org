@@ -932,6 +932,17 @@ nav.o2-post-footer-actions ul li > span > a {
 	outline: thin dotted;
 }
 
+.make-welcome #make-welcome-toggle::after {
+	content: "\f343";
+	font-family: dashicons;
+	vertical-align: middle;
+	margin-left: 9px;
+	overflow: auto;
+}
+.make-welcome.collapsed #make-welcome-toggle::after {
+	content: "\f347";
+}
+
 .make-welcome .hidden {
 	display: none;
 }
