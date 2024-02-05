@@ -79,6 +79,10 @@ class Admin {
 			add_filter( 'user_can_richedit',                   [ __CLASS__, 'disable_rich_editing' ] );
 			// Force the default editor to be the HTML editor.
 			add_filter( 'wp_default_editor',                   [ __CLASS__, 'force_text_editor' ], 99 );
+
+		// Randomize the queue.
+		add_filter( 'query_vars',                              [ __CLASS__, 'add_query_var_for_random' ] );
+		add_action( 'pre_get_posts',                           [ __CLASS__, 'randomize_the_queue' ] );
 	}
 
 	/**
@@ -1477,6 +1481,55 @@ class Admin {
 		}
 
 		return $default;
+	}
+
+	/**
+	 * Adds 'random' as a custom query variable for photo queue listings.
+	 *
+	 * @param string[] $vars The array of allowed query variable names.
+	 * @return string[]
+	 */
+	public static function add_query_var_for_random( $vars ) {
+		if (
+			is_admin()
+		&&
+			is_main_query()
+		&&
+			Registrations::get_post_type() === ( $_GET['post_type'] ?? false )
+		&&
+			'pending' === ( $_GET['post_status'] ?? '' )
+		) {
+			$vars[] = 'random';
+		}
+
+		return $vars;
+	}
+
+	/**
+	 * Randomizes the list of posts in the queue.
+	 *
+	 * Note: Can be disabled via query string: ?random=0
+	 */
+	public static function randomize_the_queue( $query ) {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		// Don't randomize if disabled via query parameter.
+		if ( '0' === $query->get( 'random' ) ) {
+			return;
+		}
+
+		// Ensure the request is the main query and just for the photo queue.
+		if (
+			$query->is_main_query()
+		&&
+			Registrations::get_post_type() === $query->get( 'post_type' )
+		&&
+			'pending' === $query->get( 'post_status' )
+		) {
+			$query->set( 'orderby', 'rand' );
+		}
 	}
 
 }
