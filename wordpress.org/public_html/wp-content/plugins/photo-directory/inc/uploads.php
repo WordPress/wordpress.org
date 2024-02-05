@@ -295,14 +295,25 @@ class Uploads {
 	public static function handle_overwriting_fu_strings() {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) && ! empty( $_GET['errors']['fu-disallowed-mime-type'] ) ) {
 			// Hook as reasonably late as possible.
-			add_filter( 'the_content', function ( $content ) {
-				add_filter( 'gettext', [ __CLASS__, 'overwrite_fu_strings' ], 10, 3 );
-				return $content;
-			} );
+			add_filter( 'the_content', [ __CLASS__, '_overwrite_fu_strings' ] );
 
 			// Unhook as early as possible.
 			add_action( 'fu_additional_html', function () { remove_filter( 'gettext', [ __CLASS__, 'overwrite_fu_strings' ] ); } );
 		}
+	}
+
+	/**
+	 * Hooks `overwrite_fu_strings()` to the 'gettext' filter.
+	 *
+	 * Note: This should only be used as a callback as late as possible and after checking that
+	 * context indicates a string rewrite is likely.
+	 *
+	 * @param string $content The content.
+	 * @return string The content, unchanged.
+	 */
+	public static function _overwrite_fu_strings( $content ) {
+		add_filter( 'gettext', [ __CLASS__, 'overwrite_fu_strings' ], 10, 3 );
+		return $content;
 	}
 
 	/**
