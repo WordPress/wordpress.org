@@ -1,6 +1,5 @@
 module.exports = function(grunt) {
 	var autoprefixer = require( 'autoprefixer' );
-	var scsssyntax = require( 'postcss-scss' );
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON( 'package.json' ),
@@ -10,7 +9,7 @@ module.exports = function(grunt) {
 					'style.css': 'sass/style.scss',
 				},
 				options: {
-					implementation: require( 'node-sass' ),
+					implementation: require( 'sass' ),
 					indentType: 'tab',
 					indentWidth: 1,
 					outputStyle: 'expanded',
@@ -21,7 +20,7 @@ module.exports = function(grunt) {
 		stylelint: {
 			scss: {
 				options: {
-					syntax: 'scss'
+					customSyntax: 'postcss-scss'
 				},
 				expand: true,
 				src: [
@@ -41,12 +40,11 @@ module.exports = function(grunt) {
 						cascade: false,
 					}),
 				],
-				syntax: scsssyntax,
 				failOnError: true,
 			},
 			dist: {
 				expand: true,
-				src: [ 'sass/**/*.scss' ],
+				src: [ 'style.css' ],
 			},
 		},
 		rtlcss: {
@@ -64,11 +62,11 @@ module.exports = function(grunt) {
 		},
 	});
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
-	grunt.loadNpmTasks( 'grunt-postcss' );
+	grunt.loadNpmTasks( '@lodder/grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 
-	grunt.registerTask( 'build', [ 'postcss', 'sass', 'rtlcss' ]);
+	grunt.registerTask( 'build', [ 'sass', 'postcss', 'rtlcss' ]);
 	grunt.registerTask( 'default', [ 'build' ]);
 };
