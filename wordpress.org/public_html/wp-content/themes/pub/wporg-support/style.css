@@ -3766,8 +3766,17 @@ section {
 	vertical-align: middle;
 }
 .bbpress #bbpress-forums .bbp-create-topic-wrapper {
-	padding: 15px 0 25px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 15px 0;
 	text-align: center;
+}
+@media (min-width: 767px) {
+	.bbpress #bbpress-forums .bbp-create-topic-wrapper {
+		flex-direction: row;
+		justify-content: space-between;
+	}
 }
 .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic {
 	float: none;
