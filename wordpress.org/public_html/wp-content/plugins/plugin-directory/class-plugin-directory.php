@@ -1353,7 +1353,8 @@ class Plugin_Directory {
 		if (
 			( is_tax() || is_category() || is_tag() ) &&
 			! have_posts() &&
-			! is_tax( 'plugin_section' ) // All sections have something, or intentionally don't (favorites)
+			! is_tax( 'plugin_section' ) && // All sections have something, or intentionally don't (favorites)
+			! is_tax( 'plugin_business_model' ) // When the business model filter is applying, we still want to show archives.
 		) {
 			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
