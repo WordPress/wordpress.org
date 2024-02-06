@@ -4326,7 +4326,8 @@ div.bbp-breadcrumb p {
 .sidebar .topic-info li.topic-previous-reports .previous-reports li {
 	list-style: inside;
 }
-.sidebar .plugin-meta-icon {
+.sidebar .plugin-meta-icon,
+.sidebar .theme-meta-icon {
 	border-top: 0;
 }
 .sidebar .plugin-icon {
