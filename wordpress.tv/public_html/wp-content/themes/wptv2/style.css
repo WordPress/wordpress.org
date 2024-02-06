@@ -2686,6 +2686,12 @@ h3#comments {
 	}
 }
 
+@media screen and ( max-width:940px ) {
+	.wptv-hero .page-title {
+		padding-left: 20px;
+	}
+}
+
 @media screen and ( max-width:620px ) {
 	.dot {
 		display: none;
