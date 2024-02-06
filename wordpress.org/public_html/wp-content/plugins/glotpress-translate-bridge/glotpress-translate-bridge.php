@@ -36,13 +36,16 @@ class GlotPress_Translate_Bridge {
 	 * @param $singular     The string to translate.
 	 * @param $project_path The GlotPress project path.
 	 * @param $context      The strings context. Default: null.
+	 * @param $found        Whether the translation was found. Passed by reference.
 	 *
 	 * @return string The translated string if it exists, else, the existing string.
 	 */
-	static function translate( $singular, $project_path, $context = null ) {
+	static function translate( $singular, $project_path, $context = null, & $found = null ) {
 		$t = self::instance();
 
 		$translation = $t->find_translation( compact( 'singular', 'context' ), $project_path );
+
+		$found = (bool) $translation;
 
 		return $translation ? $translation[0] : $singular;
 	}
@@ -54,13 +57,16 @@ class GlotPress_Translate_Bridge {
 	 * @param $plural       The plural form of the string.
 	 * @param $project_path The GlotPress project path.
 	 * @param $context      The strings context. Default: null
+	 * @param $found        Whether the translation was found. Passed by reference.
 	 *
 	 * @return array The translated plural forms of the string.
 	 */
-	static function translate_plural( $singular, $plural, $project_path, $context = null ) {
+	static function translate_plural( $singular, $plural, $project_path, $context = null, & $found = null ) {
 		$t = self::instance();
 
 		$translation = $t->find_translation( compact( 'singular', 'plural', 'context' ), $project_path );
+
+		$found = (bool) $translation;
 
 		return $translation ?: array( $singular, $plural );
 	}
@@ -114,9 +120,10 @@ class GlotPress_Translate_Bridge {
 		}
 
 		$cache_key = $this->cache_key( $strings, $project_path );
-		$cache_not_found = '__NONE__';
+		$cache_not_found = '__NONE__'; // TODO: remove in preference of $cache_found.
 
-		if ( false !== ( $cache = wp_cache_get( $cache_key, $this->cache_group ) ) ) {
+		$cache = wp_cache_get( $cache_key, $this->cache_group, false, $cache_found );
+		if ( $cache_found ) {
 			if ( $cache === $cache_not_found ) {
 				return false;
 			}
@@ -181,6 +188,10 @@ class GlotPress_Translate_Bridge {
 			return false;
 		}
 
+		if ( 'pirate' === $wp_locale ) {
+			return [ 'locale' => 'pirate', 'slug' => 'default' ];
+		}
+
 		preg_match( '!^([a-z]{2,3})(_([A-Z]{2}))?(_([a-z0-9]+))?$!', $wp_locale, $matches );
 		if ( ! $matches ) {
 			return false;
@@ -219,6 +230,7 @@ class GlotPress_Translate_Bridge {
 	 * @return string The cache key.
 	 */
 	private function cache_key( $strings, $project_path ) {
+		// TODO: This needs to respect the 255char limit of Memcache????????
 		return strtolower( get_locale() ) . ':' . $project_path . ':' . serialize( array_filter( $strings ) );
 	}
 }
