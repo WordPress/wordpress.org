@@ -91,7 +91,6 @@ class WP_64_Credits extends WP_Credits {
 					'James Roberts'       => 'James Roberts',
 					'nalininonstopnewsuk' => 'Nalini Thakor',
 					'codente'             => 'Jamie VanRaalte',
-					'sabernhardt'         => 'Stephen Bernhardt',
 					'CoachBirgit'         => 'Birgit Olzem',
 					'annebovelett'        => 'Anne-Mieke Bovelett',
 					'huzaifaalmesbah'     => 'Huzaifa Al Mesbah',
