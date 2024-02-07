@@ -22,6 +22,16 @@ function domdocument_from_url( $url ) {
 		$html
 	);
 
+	// Ensure it's treated as UTF8, we'll assume if there's no <body> tag it's just a HTML blob.
+	if ( ! strpos( $html, '<body' ) ) {
+		$html = '<!DOCTYPE html>
+			<html xmlns="http://www.w3.org/1999/xhtml">
+			<head>
+				<meta charset="UTF-8">
+			</head>
+			<body>' . $html . '</body></html>';
+	}
+
 	$doc = new DOMDocument();
 	$doc->validateOnParse = false;
 
