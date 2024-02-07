@@ -62,8 +62,8 @@ function save_domdocument( $file, $dom ) {
 	// Remove CDATA tags from <style>
 	$html = preg_replace( '#<style([^>]*)><!\[CDATA\[(.+?)\]\]></style>#ism', "<style$1>$2</style>", $html );
 
-	// Remove CDATA tags in <script>
-	$html = preg_replace( '#<script([^>]*)><!\[CDATA\[(.+?)\]\]></script>#ism', "<script$1>$2</script>", $html );
+	// Escape CDATA tags in <script>. REQUIRED. Trac will fatal without it.
+	$html = preg_replace( '#<script([^>]*)><!\[CDATA\[(.+?)\]\]></script>#ism', "<script$1>//<![CDATA[\n$2\n//]]></script>", $html );
 
 	// Remove trailing whitespace.
 	$html = preg_replace( '#(\S)\s+$#m', '$1', $html );
