@@ -7,6 +7,21 @@ libxml_use_internal_errors( true );
 function domdocument_from_url( $url ) {
 	$html = file_get_contents( $url );
 
+	/*
+	 * Escape HTML within Javascript strings.
+	 * DomDocument doesn't handle HTML tags within Javascript strings.
+	 * See https://stackoverflow.com/questions/40703313/php-domdocument-errors-while-parsing-unescaped-strings
+	 */
+	$html = preg_replace_callback(
+		'!<script([^>]+)>(.*?)</script>!ism',
+		function( $m ) {
+			$escaped = $m[2];
+			$escaped = str_replace( array( '<', '>' ), array( '\x3C',  '\x3E' ), $escaped );
+			return "<script{$m[1]}>{$escaped}</script>";
+		},
+		$html
+	);
+
 	$doc = new DOMDocument();
 	$doc->validateOnParse = false;
 
@@ -41,8 +56,8 @@ function save_domdocument( $file, $dom ) {
 	// Remove CDATA tags from <style>
 	$html = preg_replace( '#<style([^>]*)><!\[CDATA\[(.+?)\]\]></style>#ism', "<style$1>$2</style>", $html );
 
-	// Escape CDATA tags in <script>
-	$html = preg_replace( '#<script([^>]*)><!\[CDATA\[(.+?)\]\]></script>#ism', "<script$1>//<![CDATA[\n$2\n//]]></script>", $html );
+	// Remove CDATA tags in <script>
+	$html = preg_replace( '#<script([^>]*)><!\[CDATA\[(.+?)\]\]></script>#ism', "<script$1>$2</script>", $html );
 
 	// Remove trailing whitespace.
 	$html = preg_replace( '#(\S)\s+$#m', '$1', $html );
