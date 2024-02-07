@@ -93,10 +93,10 @@ function save_domdocument( $file, $dom ) {
 			$url  = str_replace( 'https://wordpress.org/', 'https://s.w.org/', $m['url'] );
 			$hash = md5( file_get_contents( $m['url'] ) );
 
-			if ( preg_match( '/([?&](ver)=[^&]+)/i', $url, $m ) ) {
+			if ( preg_match( '/([?&;](ver)=[^&]+)/i', $url, $m ) ) {
 				$url = str_replace( $m[0], $m[0] . '-' . $hash, $url );
 			} else {
-				$url .= ( str_contains( $url, '?' ) ? '&' : '?' ) . 'ver=' . $hash;
+				$url .= ( str_contains( $url, '?' ) ? '&amp;' : '?' ) . 'ver=' . $hash;
 			}
 
 			return $url;
