@@ -62,8 +62,27 @@ function save_domdocument( $file, $dom ) {
 	// Remove CDATA tags from <style>
 	$html = preg_replace( '#<style([^>]*)><!\[CDATA\[(.+?)\]\]></style>#ism', "<style$1>$2</style>", $html );
 
-	// Escape CDATA tags in <script>. REQUIRED. Trac will fatal without it.
-	$html = preg_replace( '#<script([^>]*)><!\[CDATA\[(.+?)\]\]></script>#ism', "<script$1>//<![CDATA[\n$2\n//]]></script>", $html );
+	// Escape or Remove CDATA tags from <script>. Trac requires this for inline scripts, but not for non-javascript tags.
+	$html = preg_replace_callback(
+		'#<script(?P<attr>[^>]*)><!\[CDATA\[(?P<code>.+?)\]\]></script>#ism',
+		function( $m ) {
+			$attr = $m['attr'];
+			$code = $m['code'];
+			$type = '';
+			if ( preg_match( '/type=(["\'])(?P<type>[^\'"]+)\\1/', $attr, $mtype ) ) {
+				$type = $mtype['type'];
+			}
+
+			// For non-javascript, remove the CDATA tags.
+			if ( $type && in_array( strtolower( $type ), [ 'importmap', /* 'module' */ ] ) ) {
+				return "<script{$attr}>{$code}</script>";
+			}
+
+			// If javascript, or unknown, escape it.
+			return "<script{$attr}>//<![CDATA[\n{$code}\n//]]></script>";
+		},
+		$html
+	);
 
 	// Remove trailing whitespace.
 	$html = preg_replace( '#(\S)\s+$#m', '$1', $html );
