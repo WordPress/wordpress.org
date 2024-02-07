@@ -88,15 +88,26 @@ function save_domdocument( $file, $dom ) {
 	 * Until https://github.com/WordPress/wporg-mu-plugins/pull/430 is resolved.
 	 */
 	$html = preg_replace_callback(
-		'!(?P<url>https://wordpress.org/wp-(includes|content)/[^\'"]+)!i',
+		'!(?P<url>https:[\\\/]+wordpress.org[\\\/]+wp-(includes|content)[\\\/]+[^\'"]+)!i',
 		function( $m ) {
-			$url  = str_replace( 'https://wordpress.org/', 'https://s.w.org/', $m['url'] );
-			$hash = md5( file_get_contents( $m['url'] ) );
+			$url     = $m['url'];
+			$escaped = false !== strpos( $url, '\/' );
 
-			if ( preg_match( '/([?&;](ver)=[^&]+)/i', $url, $m ) ) {
+			if ( $escaped ) {
+				$url = stripslashes( $url );
+			}
+
+			$url  = str_replace( 'wordpress.org', 's.w.org', $url );
+			$hash = md5( file_get_contents( $url ) );
+
+			if ( preg_match( '/([?&;](ver|v)=[^&]+)/i', $url, $m ) ) {
 				$url = str_replace( $m[0], $m[0] . '-' . $hash, $url );
 			} else {
-				$url .= ( str_contains( $url, '?' ) ? '&amp;' : '?' ) . 'ver=' . $hash;
+				$url .= ( strpos( $url, '?' ) ? '&amp;' : '?' ) . 'ver=' . $hash;
+			}
+
+			if ( $escaped ) {
+				$url = addcslashes( $url, '/' );
 			}
 
 			return $url;
