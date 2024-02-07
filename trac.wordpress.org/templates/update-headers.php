@@ -27,6 +27,9 @@ function domdocument_from_url( $url ) {
 
 	$doc->loadHTML( $html );
 
+	// Ensure it's treated as UTF-8, It should already be detected as such, but this is just in case.
+	$doc->encoding = 'utf-8';
+
 	return $doc;
 }
 
@@ -36,6 +39,9 @@ function domdocument_for_trac() {
 
 	$doc->loadHTML( '<!DOCTYPE html>
 	<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" py:strip=""></html>' );
+
+	// Set the encoding to UTF-8 to allow unicode characters in the output. This avoids them being escaped.
+	$doc->encoding = 'utf-8';
 
 	return $doc;
 }
