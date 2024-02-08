@@ -14,9 +14,6 @@ if ( is_search() ) : ?>
 	<?php
 		get_search_form();
 
-elseif ( is_tax( 'plugin_tags' ) ) :
-	?><p><?php esc_html_e( 'Sorry, but nothing matched your search terms.', 'wporg-plugins' ); ?></p><?php
-
 elseif ( is_tax( 'plugin_section', 'favorites' ) ) :
 	if ( is_user_logged_in() ) :
 		$current_user = wp_get_current_user();
@@ -44,4 +41,7 @@ elseif ( is_tax( 'plugin_section', 'favorites' ) ) :
 		</p>
 
 	<?php endif; // is_user_logged_in.
+else :
+	?><p><?php esc_html_e( 'Sorry, but nothing matched your query.', 'wporg-plugins' ); ?></p><?php
+
 endif;
