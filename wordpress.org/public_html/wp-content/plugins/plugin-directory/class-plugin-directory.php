@@ -36,6 +36,7 @@ class Plugin_Directory {
 		add_filter( 'post_type_link', array( $this, 'filter_post_type_link' ), 10, 2 );
 		add_filter( 'term_link', array( $this, 'filter_term_link' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		add_action( 'parse_tax_query', array( $this, 'parse_tax_query' ) );
 		add_filter( 'found_posts', array( $this, 'filter_found_posts' ), 10, 2 );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
@@ -942,6 +943,30 @@ class Plugin_Directory {
 			$wp_query->query_vars['orderby']  = 'meta_value_num';
 			$wp_query->query_vars['meta_key'] = '_active_installs';
 		}
+	}
+
+	/**
+	 * Sort the tax_queries so that the order is consistently what we expect.
+	 *
+	 * The sort order defined which term is returned by get_queried_object().
+	 */
+	public function parse_tax_query( $wp_query ) {
+		if ( count( $wp_query->tax_query->queried_terms ) < 2 ) {
+			return;
+		}
+
+		$keys = array_keys( $wp_query->tax_query->queried_terms );
+
+		// If the tag is first, or not present, nothing to do.
+		if ( 'plugin_tags' === $keys[0] || ! in_array( 'plugin_tags', $keys, true ) ) {
+			return;
+		}
+
+		// Resort the array so that the plugin_tags are first.
+		$tag    = [ 'plugin_tags' => $wp_query->tax_query->queried_terms['plugin_tags'] ];
+		$others = array_diff_key( $wp_query->tax_query->queried_terms, $tag );
+
+		$wp_query->tax_query->queried_terms = array_merge( $tag, $others );
 	}
 
 	/**
