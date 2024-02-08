@@ -51,7 +51,7 @@ class Plugin_Blueprint extends Base {
         }
 
 		// Configure this elsewhere?
-		header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+		header( 'Access-Control-Allow-Origin: *' );
 
 		// We already have a json string, returning would double-encode it.
 		die( $blueprint['contents'] );
