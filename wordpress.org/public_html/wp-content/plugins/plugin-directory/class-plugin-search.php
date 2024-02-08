@@ -206,6 +206,16 @@ class Plugin_Search {
 			];
 		}
 
+		if ( $query->get( 'plugin_business_model' ) ) {
+			$es_query_args['filter']['and'][] = [
+				'term' => [
+					'taxonomy.plugin_business_model.name' => [
+						'value' => $query->get( 'plugin_business_model' )
+					]
+				]
+			];
+		}
+
 		// Set boost on the match query
 
 		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ][0][ 'multi_match' ] ) ) {
