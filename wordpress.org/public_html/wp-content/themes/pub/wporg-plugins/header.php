@@ -29,11 +29,10 @@ global $wp_query;
 $is_beta = 'beta' === $wp_query->get( 'browse' );
 $is_favs = 'favorites' === $wp_query->get( 'browse' );
 // The filter bar should not be shown on:
-// - search: wp-query filters not compatible with ES search.
 // - singular: not relevant on pages or individual plugins.
 // - beta: likely unnecessary, these are probably all "community".
 // - favorites: not necessary.
-$show_filter_bar = ! ( is_search() || is_singular() || $is_beta || $is_favs );
+$show_filter_bar = ! ( is_singular() || $is_beta || $is_favs );
 
 echo do_blocks( '<!-- wp:wporg/global-header /-->' ); // phpcs:ignore
 
@@ -86,20 +85,23 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' ); // phpcs:ignore
 					$class = '';
 					if (
 						// URL contains this filter.
-						( $slug && str_contains( $_SERVER['REQUEST_URI'], "plugin_business_model=$slug" ) ) || // phpcs:ignore
+						( $slug === ( $_GET['plugin_business_model'] ?? false ) ) ||
 						// Set the All item active if no business model is selected.
-						( ! $slug && false === strpos( $_SERVER['REQUEST_URI'], 'plugin_business_model' ) ) // phpcs:ignore
+						( ! $slug && empty( $_GET['plugin_business_model'] ) )
 					) {
 						$class = 'is-active';
 					}
-					$url = home_url( '/' );
-					// If a browse view, use that as the base.
-					if ( ! is_home() && $browse = get_query_var( 'browse' ) ) {
-						$url = home_url( "/browse/{$browse}/" );
-					}
+
 					if ( $slug ) {
-						$url = add_query_arg( array( 'plugin_business_model' => $slug ), $url );
+						$url = add_query_arg( array( 'plugin_business_model' => $slug ) );
+					} else {
+						$url = remove_query_arg( 'plugin_business_model' );
 					}
+
+					// Reset pagination.
+					$url = remove_query_arg( 'paged', $url );
+					$url = preg_replace( '!/page/\d+/?!i', '/', $url );
+
 					printf(
 						'<li class="page_item"><a class="%1$s" href="%2$s">%3$s</a></li>',
 						esc_attr( $class ),
