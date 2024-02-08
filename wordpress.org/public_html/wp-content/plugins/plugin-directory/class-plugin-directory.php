@@ -1376,10 +1376,9 @@ class Plugin_Directory {
 
 		// Existing tag with no plugins.
 		if (
-			( is_tax() || is_category() || is_tag() ) &&
+			is_tax( 'plugin_tags' ) &&
 			! have_posts() &&
-			! is_tax( 'plugin_section' ) && // All sections have something, or intentionally don't (favorites)
-			! is_tax( 'plugin_business_model' ) // When the business model filter is applying, we still want to show archives.
+			! get_queried_object()->count // Filters might have resulted in no posts but the tag has posts.
 		) {
 			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
@@ -1391,9 +1390,9 @@ class Plugin_Directory {
 		// Empty search query.
 		// This may occur due to WordPress's 1600 character search limit.
 		if (
-				'search' === get_query_var( 'name' ) ||
-				( isset( $_GET['s'] ) && ! get_query_var( 's' ) ) ||
-				( is_search() && 0 === strlen( get_query_var( 's' ) ) )
+			'search' === get_query_var( 'name' ) ||
+			( isset( $_GET['s'] ) && ! get_query_var( 's' ) ) ||
+			( is_search() && 0 === strlen( get_query_var( 's' ) ) )
 		) {
 			wp_safe_redirect( site_url( '/' ), 301 );
 			die();
