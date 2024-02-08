@@ -126,6 +126,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 			return;
 		}
 
+		$icon       = ''; 
 		$theme      = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
 		$support    = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
 		$active     = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
@@ -144,9 +145,24 @@ class Theme_Directory_Compat extends Directory_Compat {
 		if ( $create_label ) {
 			$create = sprintf( '<a href="#new-post">%s</a>', $create_label );
 		}
+
+		if ( file_exists( WPORGPATH . 'wp-content/plugins/theme-directory/class-wporg-themes-repo-package.php' ) ) {
+			include_once WPORGPATH . 'wp-content/plugins/theme-directory/class-wporg-themes-repo-package.php';
+		
+			if ( class_exists( 'WPORG_Themes_Repo_Package' ) ) {
+				switch_to_blog( WPORG_THEME_DIRECTORY_BLOGID );
+				$repo_package = new \WPORG_Themes_Repo_Package( $this->theme->ID );
+				$icon = $repo_package->screenshot_url();
+				restore_current_blog();
+			}
+		}
+
 		?>
 		<div>
 			<ul>
+				<?php if ( ! empty( $icon ) ) : ?>
+					<li class="theme-meta-icon"><img src="<?php echo esc_url( $icon ); ?>"></li> 
+				<?php endif; ?>
 				<li><?php echo $theme; ?></li>
 				<li><?php echo $support; ?></li>
 				<li><?php echo $active; ?></li>

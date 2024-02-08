@@ -193,6 +193,15 @@ div.sidebar #bbpress-forums {
 	display: block;
 }
 
+/**
+ * Hides the top pagination from forums.
+ * See: https://meta.trac.wordpress.org/ticket/7431
+ */
+#bbpress-forums > .bbp-pagination:first-child,
+#bbpress-forums > .bbp-create-topic-wrapper + .bbp-pagination {
+	display: none !important;
+}
+
 #bbpress-forums .bbp-pagination {
 	color: #888;
 	float: none;

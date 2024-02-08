@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
+use WordPressdotorg\Plugin_Directory\Template;
 
 class Upload {
 
@@ -194,6 +195,10 @@ class Upload {
 					?>
 					</p>
 
+					<p>
+						<?php _e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the plugin review team examines it.' ); ?>
+					</p>
+
 					<ul>
 					<?php
 					// List of all plugins in progress.
@@ -279,11 +284,17 @@ class Upload {
 							$attached_media = get_attached_media( 'application/zip', $plugin );
 
 							echo '<strong>' . __( 'Submitted files:', 'wporg' ) . '</strong><ol>';
-							foreach ( $attached_media as $upload ) {
+							foreach ( $attached_media as $attachment_post_id => $upload ) {
 								echo '<li><ul>';
 								echo '<li><code>' . esc_html( $upload->submitted_name ) . '</code></li>';
 								echo '<li>' . sprintf( __( 'Version: %s', 'wporg-plugins' ), '<code>' . esc_html( $upload->version ) . '</code>' ) . '</li>';
 								echo '<li>' . sprintf( __( 'Upload Date: %s', 'wporg-plugins' ), date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</li>';
+								printf(
+									'<li><a href="%s" class="%s" target="_blank">%s</a></li>',
+									esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
+									( array_key_first( $attached_media) === $attachment_post_id ? 'button button-primary' : 'button button-secondary' ),
+									__( 'Check with Plugin Check', 'wporg-plugins' )
+								);
 								echo '</ul></li>';
 							}
 							if ( $can_upload_extras ) {
