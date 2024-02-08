@@ -948,25 +948,21 @@ class Plugin_Directory {
 	/**
 	 * Sort the tax_queries so that the order is consistently what we expect.
 	 *
-	 * The sort order defined which term is returned by get_queried_object().
+	 * The sort order defines which term is returned by get_queried_object().
 	 */
 	public function parse_tax_query( $wp_query ) {
 		if ( count( $wp_query->tax_query->queried_terms ) < 2 ) {
 			return;
 		}
 
-		$keys = array_keys( $wp_query->tax_query->queried_terms );
-
-		// If the tag is first, or not present, nothing to do.
-		if ( 'plugin_tags' === $keys[0] || ! in_array( 'plugin_tags', $keys, true ) ) {
-			return;
-		}
-
-		// Resort the array so that the plugin_tags are first.
-		$tag    = [ 'plugin_tags' => $wp_query->tax_query->queried_terms['plugin_tags'] ];
-		$others = array_diff_key( $wp_query->tax_query->queried_terms, $tag );
-
-		$wp_query->tax_query->queried_terms = array_merge( $tag, $others );
+		// Sort the tax_query so that the plugin_tags are first, followed by plugin_contributors, then the rest.
+		$expected_order = array( 'plugin_tags' => false, 'plugin_contributors' => false );
+		$wp_query->tax_query->queried_terms = array_filter(
+			array_replace(
+				$expected_order,
+				$wp_query->tax_query->queried_terms
+			)
+		);
 	}
 
 	/**
