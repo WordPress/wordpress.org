@@ -137,6 +137,9 @@ class Plugin_Directory {
 
 	/**
 	 * Set up the Plugin Directory.
+	 *
+	 * NOTE: The order of the taxonomy register calls defines which one will be
+	 *       returned by get_queried_object() for a multi-taxonomy query.
 	 */
 	public function init() {
 		load_plugin_textdomain( 'wporg-plugins' );
@@ -220,6 +223,56 @@ class Plugin_Directory {
 			),
 		) );
 
+		/*
+		 * Register before other taxonomies.
+		 * This ensures that it'll be returned by get_queried_object() in a multi-tax query.
+		 */
+		register_taxonomy( 'plugin_tags', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
+			'hierarchical'      => false,
+			'query_var'         => 'plugin_tags',
+			'rewrite'           => array(
+				'hierarchical' => false,
+				'slug'         => 'tags',
+				'with_front'   => false,
+				'ep_mask'      => EP_TAGS,
+			),
+			'labels'            => array(
+				'name'          => __( 'Plugin Tags', 'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Tag', 'wporg-plugins' ),
+				'edit_item'     => __( 'Edit Tag', 'wporg-plugins' ),
+				'update_item'   => __( 'Update Tag', 'wporg-plugins' ),
+				'add_new_item'  => __( 'Add New Tag', 'wporg-plugins' ),
+				'new_item_name' => __( 'New Tag Name', 'wporg-plugins' ),
+				'search_items'  => __( 'Search Tags', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'meta_box_cb'       => false,
+			'capabilities'      => array(
+				'assign_terms' => 'do_not_allow',
+			),
+		) );
+
+		// Next, Contributors as this is the taxonomy used for `/author/xxxxxx/`
+		register_taxonomy( 'plugin_contributors', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
+			'hierarchical'      => false,
+			'query_var'         => 'plugin_contributor',
+			'sort'              => true,
+			'rewrite'           => false,
+			'labels'            => array(
+				'name'          => __( 'Contributors', 'wporg-plugins' ),
+				'singular_name' => __( 'Contributor', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'capabilities'      => array(
+				'assign_terms' => 'do_not_allow',
+			),
+		) );
+
+		// Meta-data taxonomies can follow, these will always end up being used as query parameters in URLs.
 		register_taxonomy( 'plugin_built_for', 'plugin', array(
 			'hierarchical'      => true, /* for tax_input[] handling on post saves. */
 			'query_var'         => 'plugin_built_for',
@@ -251,26 +304,9 @@ class Plugin_Directory {
 			),
 		) );
 
-		register_taxonomy( 'plugin_contributors', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
-			'hierarchical'      => false,
-			'query_var'         => 'plugin_contributor',
-			'sort'              => true,
-			'rewrite'           => false,
-			'labels'            => array(
-				'name'          => __( 'Contributors', 'wporg-plugins' ),
-				'singular_name' => __( 'Contributor', 'wporg-plugins' ),
-			),
-			'public'            => true,
-			'show_ui'           => true,
-			'show_admin_column' => true,
-			'capabilities'      => array(
-				'assign_terms' => 'do_not_allow',
-			),
-		) );
-
 		register_taxonomy( 'plugin_committers', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
-			'query_var'         => 'plugin_committer',
+			'query_var'         => false,
 			'rewrite'           => false,
 			'labels'            => array(
 				'name'          => __( 'Committers', 'wporg-plugins' ),
@@ -286,7 +322,7 @@ class Plugin_Directory {
 
 		register_taxonomy( 'plugin_support_reps', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
-			'query_var'         => 'plugin_support_rep',
+			'query_var'         => false,
 			'rewrite'           => false,
 			'labels'            => array(
 				'name'          => __( 'Support Reps', 'wporg-plugins' ),
@@ -295,33 +331,6 @@ class Plugin_Directory {
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => true,
-			'capabilities'      => array(
-				'assign_terms' => 'do_not_allow',
-			),
-		) );
-
-		register_taxonomy( 'plugin_tags', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
-			'hierarchical'      => false,
-			'query_var'         => 'plugin_tags',
-			'rewrite'           => array(
-				'hierarchical' => false,
-				'slug'         => 'tags',
-				'with_front'   => false,
-				'ep_mask'      => EP_TAGS,
-			),
-			'labels'            => array(
-				'name'          => __( 'Plugin Tags', 'wporg-plugins' ),
-				'singular_name' => __( 'Plugin Tag', 'wporg-plugins' ),
-				'edit_item'     => __( 'Edit Tag', 'wporg-plugins' ),
-				'update_item'   => __( 'Update Tag', 'wporg-plugins' ),
-				'add_new_item'  => __( 'Add New Tag', 'wporg-plugins' ),
-				'new_item_name' => __( 'New Tag Name', 'wporg-plugins' ),
-				'search_items'  => __( 'Search Tags', 'wporg-plugins' ),
-			),
-			'public'            => true,
-			'show_ui'           => true,
-			'show_admin_column' => true,
-			'meta_box_cb'       => false,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',
 			),
@@ -846,19 +855,19 @@ class Plugin_Directory {
 			$viewing_own_author_archive = is_user_logged_in() && $user && ( current_user_can( 'plugin_review' ) || 0 === strcasecmp( $user, wp_get_current_user()->user_nicename ) );
 
 			// Author archives by default list plugins you're a contributor on.
-			$wp_query->query_vars['tax_query'] = array(
-				'relation' => 'OR',
+			$wp_query->query_vars['tax_query']['author'] = array(
 				array(
 					'taxonomy' => 'plugin_contributors',
 					'field'    => 'slug',
 					'terms'    => $user,
 				),
+				'relation' => 'OR',
 			);
 
 			// Author archives for self include plugins you're a committer on, not just publically a contributor
 			// Plugin Reviewers also see plugins you're a committer on here.
 			if ( $viewing_own_author_archive ) {
-				$wp_query->query_vars['tax_query'][] = array(
+				$wp_query->query_vars['tax_query']['author'][] = array(
 					'taxonomy' => 'plugin_committers',
 					'field'    => 'slug',
 					'terms'    => $user,
