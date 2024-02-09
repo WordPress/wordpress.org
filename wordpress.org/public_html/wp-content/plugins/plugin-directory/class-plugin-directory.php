@@ -854,19 +854,19 @@ class Plugin_Directory {
 			$viewing_own_author_archive = is_user_logged_in() && $user && ( current_user_can( 'plugin_review' ) || 0 === strcasecmp( $user, wp_get_current_user()->user_nicename ) );
 
 			// Author archives by default list plugins you're a contributor on.
-			$wp_query->query_vars['tax_query'] = array(
-				'relation' => 'OR',
+			$wp_query->query_vars['tax_query']['author'] = array(
 				array(
 					'taxonomy' => 'plugin_contributors',
 					'field'    => 'slug',
 					'terms'    => $user,
 				),
+				'relation' => 'OR',
 			);
 
 			// Author archives for self include plugins you're a committer on, not just publically a contributor
 			// Plugin Reviewers also see plugins you're a committer on here.
 			if ( $viewing_own_author_archive ) {
-				$wp_query->query_vars['tax_query'][] = array(
+				$wp_query->query_vars['tax_query']['author'][] = array(
 					'taxonomy' => 'plugin_committers',
 					'field'    => 'slug',
 					'terms'    => $user,
