@@ -1362,7 +1362,8 @@ class Plugin_Directory {
 		if (
 			is_tax( 'plugin_tags' ) &&
 			! have_posts() &&
-			! get_queried_object()->count // Filters might have resulted in no posts but the tag has posts.
+			// Only redirect if only plugin_tags is queried. Other taxonomies cannot be handled.
+			count( $wp_query->tax_query->queried_terms ) <= 1
 		) {
 			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
