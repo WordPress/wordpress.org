@@ -793,6 +793,7 @@ class WP_64_Credits extends WP_Credits {
 			[ 'phpass', 'https://www.openwall.com/phpass/' ],
 			[ 'PHPMailer', 'https://github.com/PHPMailer/PHPMailer' ],
 			[ 'Plupload', 'https://www.plupload.com/' ],
+			[ 'Preact', 'https://preactjs.com/' ],
 			[ 'random_compat', 'https://github.com/paragonie/random_compat' ],
 			[ 'React', 'https://reactjs.org/' ],
 			[ 'Redux', 'https://redux.js.org/' ],
