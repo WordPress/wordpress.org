@@ -305,7 +305,7 @@ class Plugin_Directory {
 
 		register_taxonomy( 'plugin_committers', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
-			'query_var'         => 'plugin_committer',
+			'query_var'         => false,
 			'rewrite'           => false,
 			'labels'            => array(
 				'name'          => __( 'Committers', 'wporg-plugins' ),
@@ -321,7 +321,7 @@ class Plugin_Directory {
 
 		register_taxonomy( 'plugin_support_reps', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
-			'query_var'         => 'plugin_support_rep',
+			'query_var'         => false,
 			'rewrite'           => false,
 			'labels'            => array(
 				'name'          => __( 'Support Reps', 'wporg-plugins' ),
