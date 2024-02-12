@@ -83,6 +83,10 @@ class Admin {
 		// Randomize the queue.
 		add_filter( 'query_vars',                              [ __CLASS__, 'add_query_var_for_random' ] );
 		add_action( 'pre_get_posts',                           [ __CLASS__, 'randomize_the_queue' ] );
+
+		// Add button to skip current photo in the queue.
+		add_action( "add_meta_boxes_{$post_type}",             [ __CLASS__, 'add_skip_queued_photo_meta_box' ], 10, 2 );
+		add_action( 'admin_init',                              [ __CLASS__, 'admin_redirect_to_next_photo' ] );
 	}
 
 	/**
@@ -1481,6 +1485,68 @@ class Admin {
 		}
 
 		return $default;
+	}
+
+	/**
+	 * Registers meta box used for the 'skip' button to load another photo.
+	 *
+	 * @param WP_Post $post Post object.
+	 */
+	public static function add_skip_queued_photo_meta_box( $post ) {
+		if ( ! $post ) {
+			return;
+		}
+
+		if ( 'pending' === $post->post_status ) {
+			add_meta_box(
+				'photoskip',
+				__( 'Skip Photo', 'wporg-photos' ),
+				[ __CLASS__, 'output_skip_queued_photo_meta_box' ],
+				$post->post_type,
+				'side',
+				'core'
+			);
+		}
+
+	}
+
+	/**
+	 * Outputs the metabox for the skip button.
+	 *
+	 * @param WP_Post $post Current post object.
+	 */
+	public static function output_skip_queued_photo_meta_box( $post ) {
+		printf(
+			'<a href="%s" id="photo-dir-skip-photo" class="page-title-action" title="%s">%s</a>',
+			esc_url( add_query_arg( 'skipphoto', '1' ) ),
+			esc_attr__( 'Skip this photo and load another.', 'wporg-photos' ),
+			__( 'Skip Photo', 'wporg-photos')
+		);
+	}
+
+	/**
+	 * Redirects to the next photo in the queue when the current one is being skipped.
+	 */
+	public static function admin_redirect_to_next_photo() {
+		$post_type = Registrations::get_post_type();
+
+		// If a random photo is being requested, then redirect to one.
+		if (
+			'1' === ( $_GET['skipphoto'] ?? false )
+		&&
+			'edit' === ( $_GET['action'] ?? false )
+		&&
+			! empty( $_GET['post'] )
+		) {
+			$exclude_photos = [ intval( $_GET['post'] ) ];
+
+			$next_photo = Posts::get_next_post_in_queue( 'rand', '', $exclude_photos );
+
+			if ( $next_photo ) {
+				wp_redirect( get_edit_post_link( $next_photo->ID, 'url' ), 302 );
+				exit;
+			}
+		}
 	}
 
 	/**

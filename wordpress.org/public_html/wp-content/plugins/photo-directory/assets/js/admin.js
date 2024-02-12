@@ -84,6 +84,13 @@ document.addEventListener('DOMContentLoaded', function () {
 	photoRejectionReason?.addEventListener('change', e => setNoteToUserHighlight());
 	photoRejectionNoteToUser?.addEventListener('input', e => setNoteToUserHighlight());
 
+	// Move the skip button out of its metabox and into the top of the page. Also remove the metabox and its display toggle.
+	const skipButton = document.getElementById('photo-dir-skip-photo');
+	if (skipButton) {
+		document.querySelector('#wpbody-content .wrap h1')?.appendChild(skipButton);
+		document.querySelector('#photoskip')?.remove();
+		document.querySelector('label[for="photoskip-hide"]')?.remove();
+	}
 }, false);
 
 /**
