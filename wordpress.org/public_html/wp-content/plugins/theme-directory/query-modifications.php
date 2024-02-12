@@ -160,6 +160,7 @@ function wporg_themes_pre_get_posts( $query ) {
 	if (
 		empty( $query->query_vars['name'] ) &&
 		empty( $query->query_vars['author_name'] ) &&
+		empty( $query->query_vars['author'] ) &&
 		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) ) &&
 		empty( $query->query_vars['meta_query']['trac_sync_ticket_id'] ) && // jobs/class-trac-sync.php - Always needs to find the post, and looks up via a meta search.
 		empty( $query->query_vars['meta_query']['theme_uri_search'] ) // class-wporg-themes-upload.php - Searching all known themes by meta value.

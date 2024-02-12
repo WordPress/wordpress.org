@@ -139,20 +139,49 @@ function get_user_items( $user ) {
 function display_items( $post_ids ) {
 	echo '<ul>';
 	foreach ( $post_ids as $post_id ) {
-		$post        = get_post( $post_id );
-		$post_status = '';
-		$style       = 'color: green;';
-		$reviewer    = false;
-		if ( 'plugin' === $post->post_type && $post->assigned_reviewer ) {
-			$reviewer_user = get_user_by( 'id', $post->assigned_reviewer );
-			$reviewer      = $reviewer_user->display_name ?: $reviewer_user->user_login;
+		$post          = get_post( $post_id );
+		$type          = ( 'plugin' === $post->post_type ) ? 'plugin' : 'theme';
+		$post_status   = '';
+		$style         = 'color: green;';
+		$reviewer      = false;
+		$last_modified = $post->post_modified_gmt;
+		$download_link = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
+
+		if ( 'plugin' === $type ) {
+			if ( $post->assigned_reviewer ) {
+				$reviewer_user = get_user_by( 'id', $post->assigned_reviewer );
+				$reviewer      = $reviewer_user->display_name ?: $reviewer_user->user_login;
+			}
+
+			// Prefer the last_updated post meta.
+			$last_modified = $post->last_updated ?: $last_modified;
+
+			// Get the ZIPs attached, link to the latest for pending/new.
+			if ( in_array( $post->post_status, [ 'new', 'pending' ] ) ) {
+				$attachments = get_posts( [
+					'post_parent'    => $post_id,
+					'post_type'      => 'attachment',
+					'orderby'        => 'post_date',
+					'order'          => 'DESC',
+					'posts_per_page' => 1,
+				] );
+				$download_link = $attachments ? wp_get_attachment_url( $attachments[0]->ID ) : '#';
+			}
 		}
+
+		$last_updated       = human_time_diff( strtotime( $last_modified ), time() );
+		$short_last_updated = str_ireplace(
+			[ ' seconds', ' second', ' hours', ' hour', ' days', ' day', ' weeks', ' week', ' months', ' month', ' years', ' year' ],
+			[ 's', 's', 'h', 'h', 'd', 'd', 'w', 'w', 'm', 'm', 'y', 'y' ],
+			$last_updated
+		);
 
 		switch ( $post->post_status ) {
 			// Plugins
 			case 'rejected':
-				$post_status = '(Rejected)';
-				$style       = 'color: red;';
+				$post_status   = '(Rejected)';
+				$style         = 'color: red;';
+				$download_link = '#'; // No zips exist for rejected plugins.
 				break;
 			case 'closed':
 			case 'disabled':
@@ -176,8 +205,9 @@ function display_items( $post_ids ) {
 
 			// Themes
 			case 'draft':
-				$post_status = '(In Review or Rejected)';
-				$style       = '';
+				$post_status   = '(In Review or Rejected)';
+				$style         = '';
+				$download_link = '#'; // No zips exist for drafts.
 				break;
 			case 'suspend':
 				$post_status = '(Suspended)';
@@ -195,14 +225,23 @@ function display_items( $post_ids ) {
 		}
 
 		printf(
-			'<li><a href="%1$s" style="%2$s">%3$s</a> <a href="%4$s" style="%2$s">#</a> %5$s</li>',
-			/* 1 get_edit_post_link( $post ), // Won't work as post type not registered */
-			/* 1 */ esc_url( add_query_arg( [ 'action' => 'edit', 'post' => $post_id ], admin_url( 'post.php' ) ) ),
-			/* 2 */ esc_attr( $style ),
-			/* 3 */ esc_html( $post->post_title ),
-			/* 4 get_permalink( $post ), */
-			/* 4 */ esc_url( home_url( "/{$post->post_name}/" ) ),
-			/* 5 */ esc_html( $post_status )
+			'<li>
+				<a href="%1$s" style="%2$s">%3$s</a>&nbsp;
+				<a href="%4$s" style="%2$s">#</a>&nbsp;
+				<a href="%5$s" style="%2$s">ↆ</a>&nbsp;%6$s<br>
+				<span style="%2$s">%7$s</span>&nbsp;
+				%8$s
+			</li>',
+			/* 1: get_edit_post_link( $post ), // Won't work as post type not registered. */
+			/* 1: Edit link */ esc_url( add_query_arg( [ 'action' => 'edit', 'post' => $post_id ], admin_url( 'post.php' ) ) ),
+			/* 2: The HTML style for the links */ esc_attr( $style ),
+			/* 3: The title */ esc_html( $post->post_title ),
+			/* 4: get_permalink( $post ), // Won't work as post type is not properly registered. */
+			/* 4: Permalink */ esc_url( home_url( "/{$post->post_name}/" ) ),
+			/* 5: Download link */ esc_attr( $download_link ),
+			/* 6: Last Updated diff */ esc_html( $short_last_updated ),
+			/* 7: slug */ esc_html( $post->post_name ),
+			/* 8: The actual text */ esc_html( $post_status )
 		);
 	}
 

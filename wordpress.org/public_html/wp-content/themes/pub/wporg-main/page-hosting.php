@@ -71,7 +71,7 @@ $hosting_cache_buster = '3';
 							<a href="https://wordpress.org/search/DreamHost/?in=support_forums">Forum threads about DreamHost &raquo;</a>
 						</div>
 					</div>
-
+					
 					<div class="partner">
 						<h2>
 							<a href="https://wordpress.com/wordpress-hosting/" rel="nofollow">

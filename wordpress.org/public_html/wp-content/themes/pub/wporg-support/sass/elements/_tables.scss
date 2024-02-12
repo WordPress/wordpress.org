@@ -11,7 +11,7 @@ table {
 
 	table {
 
-		tr:nth-child(odd){
+		tr:nth-child(odd) {
 			background-color: $color__table-odd;
 		}
 

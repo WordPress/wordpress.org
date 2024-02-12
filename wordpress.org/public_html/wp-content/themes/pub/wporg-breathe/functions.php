@@ -49,10 +49,20 @@ function customize_register( $wp_customize ) {
 }
 
 /**
- * noindex the Mentions archives.
+ * noindex certain archives.
  */
 function no_robots( $noindex ) {
 	if ( is_tax( 'mentions' ) ) {
+		$noindex = true;
+	}
+
+	if ( get_query_var( 'o2_recent_comments' ) ) {
+		$noindex = true;
+	}
+
+
+	// This is used by https://github.com/WordPress/phpunit-test-reporter/blob/master/src/class-display.php on the test reporter page
+	if ( isset( $_GET['rpage'] ) ) {
 		$noindex = true;
 	}
 
@@ -94,6 +104,7 @@ function inline_scripts() {
 
 				// Toggle it
 				$toggle.text( $toggle.data( isHide ? 'show' : 'hide' ) );
+				$welcome.get( 0 ).classList.toggle( 'collapsed', isHide );
 				$content.slideToggle();
 				$welcome.find('.post-edit-link' ).toggle( ! isHide );
 
@@ -149,11 +160,15 @@ function welcome_box() {
 				if ( elContent ) {
 					if ( -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash ) ) {
 						var elToggle = document.getElementById( 'make-welcome-toggle' ),
-							elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' )
+							elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' ),
+							elContainer = document.querySelector( '.make-welcome' );
 
 						// It's hidden, hide it ASAP.
 						elContent.className += " hidden";
 						elToggle.innerText = elToggle.dataset.show;
+
+						// Add class to welcome box container indicating collapsed state.
+						elContainer && elContainer.classList.add( 'collapsed' );
 
 						if ( elEditLink.length ) {
 							elEditLink[0].className += " hidden";

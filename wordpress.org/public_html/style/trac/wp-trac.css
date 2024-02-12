@@ -15,6 +15,13 @@
 	padding: 0 10px;
 }
 
+/* Footer padding. */
+@media (max-width: 889px) {
+	body[class] {
+		--wp--preset--spacing--edge-space: 20px;
+	}
+}
+
 #main {
 	clear: both;
 }
@@ -937,9 +944,6 @@ span.contributor-label[title]:hover {
 }
 #changelog h3.chat-bot.prbot:hover .trac-ticket-buttons {
 	display: inherit;
-}
-#changelog h3.chat-bot.prbot .trac-ticket-buttons .trac-delete {
-	display: none;
 }
 span.time-ago {
 	font-size: 0.85em;

@@ -1,3 +1,4 @@
+
 <div class="entry-meta sidebar">
 
 	<?php if ( is_user_logged_in() ) : ?>
@@ -81,7 +82,7 @@
 
 		<?php endif; ?>
 
-		<?php if ( ! bbp_is_single_user() ) : ?>
+		<?php if ( ! bbp_is_single_user() && ! ( wporg_support_is_compat_forum() ) ) : ?>
 
 			<div>
 				<h4><?php _e( 'Views', 'wporg-forums' ); ?></h4>

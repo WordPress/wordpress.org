@@ -459,6 +459,15 @@ function wporg_support_get_user_report_count( $user_id = 0 ) {
 }
 
 /**
+ * Returns whether we are viewing a theme or plugin forum.
+ *
+ * @return bool Returns true if theme or plugin forum.
+ */
+function wporg_support_is_compat_forum() {
+	return null !== wporg_support_get_compat_object();
+}
+
+/**
  * Check if the current page is a single review.
  *
  * @return bool True if the current page is a single review, false otherwise.

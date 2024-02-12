@@ -204,6 +204,17 @@ class WPORG_Themes_Upload {
 			return false;
 		}
 
+		// Validate it's not too large.
+		if ( $size > wp_max_upload_size() ) {
+			return new WP_Error(
+				'file_too_big',
+				sprintf(
+					__( 'Maximum allowed file size: %s', 'wporg-themes' ),
+					esc_html( size_format( wp_max_upload_size() ) )
+				)
+			);
+		}
+
 		// Validate that the file is a ZIP file before processing it.
 		$check = wp_check_filetype_and_ext(
 			$file['tmp_name'],
@@ -287,7 +298,9 @@ class WPORG_Themes_Upload {
 		$this->reset_properties();
 
 		$valid_upload = $this->validate_upload( $file_upload );
-		if ( ! $valid_upload ) {
+		if ( is_wp_error( $valid_upload ) ) {
+			return $valid_upload;
+		} elseif ( ! $valid_upload ) {
 			return new WP_Error(
 				'invalid_input',
 				__( 'Error in file upload.', 'wporg-themes' )
@@ -1023,8 +1036,12 @@ class WPORG_Themes_Upload {
 			}
 		}
 
-		// Run the checks.
+		// Run the checks, using US English.
+		$locale_switched = switch_to_locale( 'en_US' );
 		$result = run_themechecks_against_theme( $this->theme, $this->theme_slug );
+		if ( $locale_switched ) {
+			restore_previous_locale();
+		}
 
 		// Display the errors.
 		$verdict = $result ? array( 'tc-pass', __( 'Pass', 'wporg-themes' ) ) : array( 'tc-fail', __( 'Fail', 'wporg-themes' ) );
@@ -1093,6 +1110,95 @@ class WPORG_Themes_Upload {
 		// Description
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->display( 'Description' ) );
 
+		// ZIP location
+		$theme_zip_link = "https://downloads.wordpress.org/theme/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1";
+
+		// Build the Live Preview Blueprint & URL.
+		 $blueprint_parent_step = '';
+		 if (
+			$this->theme->parent() &&
+			in_array( 'buddypress', $this->theme->get( 'Tags' ) )
+		) {
+			$blueprint_parent_step = <<<BLUEPRINT_PARENT_BP
+			{
+				"step": "installPlugin",
+				"pluginZipFile": {
+					"resource": "wordpress.org/plugins",
+					"slug": "buddypress"
+				},
+				"options": {
+					"activate": true
+				}
+			},
+			BLUEPRINT_PARENT_BP;
+		} elseif ( $this->theme->parent() ) {
+			$blueprint_parent_step = <<<BLUEPRINT_PARENT_THEME
+			{
+				"step": "installTheme",
+				"themeZipFile": {
+					"resource": "wordpress.org/themes",
+					"slug": "{$this->theme->get_template()}"
+				}
+			},
+			BLUEPRINT_PARENT_THEME;
+		}
+
+		// NOTE: The username + password included below are only used for the local in-browser environment, and are not a secret.
+		$blueprint = <<<BLUEPRINT
+		{
+			"preferredVersions": {
+				"php": "7.4",
+				"wp": "latest"
+			},
+			"steps": [
+				{
+					"step": "login",
+					"username": "admin",
+					"password": "password"
+				},
+				{
+					"step": "defineWpConfigConsts",
+					"consts": {
+						"WP_DEBUG": true
+					}
+				},
+				{
+					"step": "importFile",
+					"file": {
+						"resource": "url",
+						"url": "https://raw.githubusercontent.com/WordPress/theme-test-data/master/themeunittestdata.wordpress.xml",
+						"caption": "Downloading theme testing content"
+					},
+					"progress": {
+						"caption": "Installing theme testing content"
+					}
+				},
+				{
+					"step": "installPlugin",
+					"pluginZipFile": {
+						"resource": "wordpress.org/plugins",
+						"slug": "theme-check"
+					},
+					"options": {
+						"activate": true
+					}
+				},
+				{$blueprint_parent_step}
+				{
+					"step": "installTheme",
+					"themeZipFile": {
+						"resource": "url",
+						"url": "{$theme_zip_link}",
+						"caption": "Downloading the theme"
+					}
+				}
+			]
+		}
+		BLUEPRINT;
+
+		// NOTE: The json_encode( json_decode() ) is to remove the whitespaces used above for readability.
+		$live_preview_link = 'https://playground.wordpress.net/#' . json_encode( json_decode( $blueprint ) );
+
 		// Hacky way to prevent a problem with xml-rpc.
 		$this->trac_ticket->description = <<<TICKET
 {$this->theme->display( 'Name' )} - {$this->theme->display( 'Version' )}
@@ -1106,7 +1212,9 @@ Trac Browser - https://themes.trac.wordpress.org/browser/{$this->theme_slug}/{$t
 WordPress.org - https://wordpress.org/themes/{$this->theme_slug}/
 
 SVN - https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}
-ZIP - https://wordpress.org/themes/download/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1
+ZIP - {$theme_zip_link}
+Live preview – [[{$live_preview_link}|https://playground.wordpress.net/#…]]
+
 {$this->trac_ticket->parent_link}
 {$this->trac_ticket->diff_line}
 History:

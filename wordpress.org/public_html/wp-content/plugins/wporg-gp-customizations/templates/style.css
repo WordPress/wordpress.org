@@ -3227,6 +3227,52 @@ ul.sidebar-tabs {
 	margin-right: 10px !important;
 }
 
+.meta.other-locales ul {
+	margin: 1rem 0.5rem;
+}
+
+.meta.other-locales .sidebar-other-locales.button.is-small.copy-suggestion {
+	margin-left: auto;
+}
+
+.meta.other-locales span.locale.unique {
+	margin-right: 14px;
+}
+
+.meta.other-locales .other-locales .locale {
+	min-width: 4em;
+	width: 4em;
+}
+
+.meta.history {
+	padding-top: 0.5rem;
+}
+
+.meta.history .translations {
+	border-top: #32373C 1px double;
+}
+
+.meta.translation-memory {
+	padding-top: 1rem;
+}
+
+.meta.translation-memory ul.suggestions-list:first-of-type {
+	margin-top: 1rem;
+}
+
+.meta.translation-memory ul.suggestions-list {
+	margin-bottom: 0;
+}
+
+.meta.translation-memory ul.suggestions-list li {
+	list-style: none;
+	margin-left: -1.2rem;
+}
+
+.meta.translation-memory div.translation-suggestion.with-tooltip.translation {
+	margin-bottom: 0;
+}
+
 .sidebar-div-others-translation-memory-content > summary {
 	list-style-type: none;
 }

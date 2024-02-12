@@ -131,6 +131,7 @@ class Plugin extends Base {
 		krsort( $result['ratings'] );
 
 		$result['num_ratings']              = array_sum( $result['ratings'] );
+		$result['support_url']              = 'https://wordpress.org/support/plugin/' . urlencode( $plugin_slug ) . '/';
 		$result['support_threads']          = intval( get_post_meta( $post_id, 'support_threads', true ) );
 		$result['support_threads_resolved'] = intval( get_post_meta( $post_id, 'support_threads_resolved', true ) );
 		$result['active_installs']          = intval( get_post_meta( $post_id, 'active_installs', true ) );
@@ -154,6 +155,7 @@ class Plugin extends Base {
 		$result['short_description'] = get_the_excerpt();
 		$result['description']       = $result['sections']['description'] ?? $result['short_description'];;
 		$result['download_link']     = Template::download_link( $post );
+		$result['upgrade_notice']    = get_post_meta( $post->ID, 'upgrade_notice', true );
 
 		// Reduce images to caption + src
 		$result['screenshots'] = array_map(
@@ -191,6 +193,20 @@ class Plugin extends Base {
 			}
 		}
 
+		// Add Commercial / Community metadata.
+		$result['business_model']         = false;
+		$result['repository_url']         = '';
+		$result['commercial_support_url'] = '';
+		if ( $terms = get_the_terms( $post_id, 'plugin_business_model' ) ) {
+			$result['business_model'] = $terms[0]->slug; // commercial, community, canonical
+
+			if ( 'commercial' === $result['business_model'] ) {
+				$result['commercial_support_url'] = get_post_meta( $post_id, 'external_support_url', true ) ?: '';
+			} else {
+				$result['repository_url']         = get_post_meta( $post_id, 'external_repository_url', true ) ?: '';
+			}
+		}
+
 		$result['donate_link'] = get_post_meta( $post_id, 'donate_link', true ) ?: '';
 
 		$result['banners'] = array();
@@ -224,6 +240,12 @@ class Plugin extends Base {
 		$result['author_block_count'] = get_post_meta( $post_id, 'author_block_count', true ) ?: intval( count( $result['blocks'] ) > 0 );
 		// Fun fact: ratings are stored as 1-5 in postmeta, but returned as percentages by the API
 		$result['author_block_rating'] = get_post_meta( $post_id, 'author_block_rating', true ) ? 20 * get_post_meta( $post_id, 'author_block_rating', true ) : $result['rating'];
+
+		// Blueprints, if available
+		$result['blueprints'] = array_values( Template::get_blueprints( $post ) ) ?: [];
+
+		// Preview link, if available
+		$result['preview_link'] = Template::is_preview_available( $post ) ? add_query_arg( array( 'preview' => 1 ), get_the_permalink( $post ) ) : '';
 
 		// Translations.
 		$result['language_packs'] = [];

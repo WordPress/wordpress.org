@@ -5,34 +5,51 @@
     min-height: 300px;
 }
 
-.meta.discussion, .meta.history, .meta.other-locales {
+.meta.discussion, .meta.others {
     padding: 1rem;
 }
+
 .meta.discussion h6 {
     margin-block: auto;
 }
 
-.meta.history .translations {
+.meta.others .details-history,
+.meta.others .details-other-locales {
+	margin: 1rem 0 -0.5rem 0;
+}
+
+.meta.others .summary-history,
+.meta.others .summary-other-locales {
+	font-weight: bold;
+	margin-bottom: 0.5rem;
+}
+
+.meta.others .sidebar-div-others-history-content {
+	margin-left: 0.5rem;
+}
+
+.meta.others .translations {
     width: 100%;
 }
-.meta.history #translation-history-table thead tr th {
+
+.meta.others #translation-history-table thead tr th {
     font-size: 0.9rem;
     font-weight: 500 !important;
 }
 
-.meta.history #legend > div {
+.meta.others #legend > div {
     margin-top: 0.5rem;
 }
 
-.meta.other-locales ul {
+.meta.others ul {
     list-style: none;
 }
 
-.meta.other-locales span.locale.unique {
-    margin-right: 26px;
+.meta.others span.locale.unique {
+    margin-right: 0.5rem;
 }
 
-.meta.other-locales .other-locales .locale {
+.meta.others .other-locales .locale {
     display: inline-block;
     padding: 1px 6px 0 0;
     margin: 1px 6px 1px 0;
@@ -43,7 +60,11 @@
     color: #fff;
 }
 
-.meta.other-locales .sidebar-other-locales {
+.sidebar-div-others-other-locales-content > ul {
+	padding-left: 1rem;
+}
+
+.meta.others .sidebar-other-locales {
     margin: 0.1rem .5rem;
 }
 

@@ -1,3 +1,6 @@
+// stylelint-disable scss/at-extend-no-missing-placeholder
+// ^ Disabled to avoid changing the built CSS.
+
 /* bbPress specific styles */
 
 /* Many of these override the styles from the plugin */
@@ -17,6 +20,7 @@ $paginationBreakPoint: "600px";
 .three-up { //3-columns section
 
 	&:not(.helphub-front-page) {
+
 		@extend .clear;
 	}
 
@@ -55,9 +59,10 @@ $paginationBreakPoint: "600px";
 			}
 
 			a {
+
 				&.bbp-forum-title {
 					color: inherit;
-					font-weight: normal;
+					font-weight: 400;
 				}
 
 				&:active, &:focus, &:hover {
@@ -69,11 +74,11 @@ $paginationBreakPoint: "600px";
 				}
 
 				&.dashicons-before {
-    				-webkit-box-decoration-break: clone;
-    				box-decoration-break: clone;
+					-webkit-box-decoration-break: clone;
+					box-decoration-break: clone;
 					padding-left: 1em;
 
-					&:before {
+					&::before {
 						margin-left: -1em;
 						vertical-align: baseline;
 					}
@@ -270,11 +275,13 @@ $paginationBreakPoint: "600px";
 		}
 
 		@media only screen and (max-width: 1040px) {
+
 			div.bbp-reply-author img.avatar,
 			div.bbp-topic-author img.avatar {
 				position: relative;
 				margin: 6px 1rem 2rem 0;
 			}
+
 			div.bbp-topic-content {
 				clear: left;
 			}
@@ -493,8 +500,16 @@ $paginationBreakPoint: "600px";
 		}
 
 		.bbp-create-topic-wrapper {
-			padding: 15px 0 25px;
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+			padding: 15px 0;
 			text-align: center;
+
+			@media (min-width: 767px) {
+				flex-direction: row;
+				justify-content: space-between;
+			}
 
 			.create-topic {
 				float: none;
@@ -502,7 +517,7 @@ $paginationBreakPoint: "600px";
 				padding: 9px 12px;
 
 				&::before {
-					color: #FFF;
+					color: #fff;
 				}
 
 				&.button-secondary::before {
@@ -523,6 +538,7 @@ $paginationBreakPoint: "600px";
 			}
 
 			@media (max-width: 767px) {
+
 				.create-topic,
 				> span,
 				.search-form {
@@ -1081,6 +1097,7 @@ body.single-topic:not(body.topic-edit) {
 						top: -32px;
 						left: -2px;
 						width: 30px;
+
 						@media screen and (max-width: 568px) {
 							left: -16px;
 						}
@@ -1193,7 +1210,8 @@ div.bbp-breadcrumb {
 		}
 	}
 
-	.plugin-meta-icon {
+	.plugin-meta-icon,
+	.theme-meta-icon {
 		border-top: 0;
 	}
 
@@ -1213,7 +1231,9 @@ div.bbp-breadcrumb {
 
 	input[type="text"] {
 		padding: 3px 5px;
+
 		@media (max-width: 767px) {
+
 			&#ts {
 				margin-bottom: 6px;
 			}

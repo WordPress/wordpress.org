@@ -60,10 +60,11 @@ if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Plugin_Directory' ) ) {
 
 if ( 'live' == OPERATION_MODE ) {
 	echo "Running in live mode. Changes will be made.\nProceeding in 10s...\n";
+	sleep( 10 );
 } else {
-	echo "Running in dry-run mode. No changes will be made. Pass --doit parameter to make changes.\nProceeding in 10s...\n";
+	echo "Running in dry-run mode. No changes will be made. Pass --doit parameter to make changes.\n";
 }
-sleep( 10 );
+
 
 // Load the HelpScout API helper methods.
 require_once API_WPORGPATH . '/dotorg/helpscout/common.php';
@@ -160,6 +161,7 @@ $stats = [
 	'error'          => 0,
 	'closed'         => 0,
 	'revoked-commit' => 0,
+	'hs-closed'      => 0,
 ];
 
 $actions_to_take = [
@@ -173,6 +175,7 @@ $actions_to_take = [
 	],
 */
 ];
+$just_close_it = []; // The HS tickets to just close.
 
 foreach ( get_bounces()->_embedded->conversations as $bounce ) {
 	$helpscout_url = "https://secure.helpscout.net/conversation/{$bounce->id}/{$bounce->number}";
@@ -190,6 +193,13 @@ foreach ( get_bounces()->_embedded->conversations as $bounce ) {
 			return Plugin_Directory::get_plugin_post( $slug );
 		},
 		$slugs
+	);
+
+	$closed_plugins = array_filter(
+		$plugins,
+		function( $plugin ) {
+			return 'closed' === get_post_status( $plugin ) || 'disabled' === get_post_status( $plugin );
+		}
 	);
 
 	$plugins = array_filter(
@@ -218,7 +228,7 @@ foreach ( get_bounces()->_embedded->conversations as $bounce ) {
 		}
 	);
 
-	if ( ! $email || ! $user || ! $slugs || ! $plugins ) {
+	if ( ! $email || ! $user || ! $slugs || ( ! $plugins && ! $closed_plugins ) ) {
 		echo "\tNo user or plugins found.\n";
 		$stats['error']++;
 		continue;
@@ -230,6 +240,7 @@ foreach ( get_bounces()->_embedded->conversations as $bounce ) {
 	echo "\tUser: {$user->user_login}\n";
 	echo "\tSingular committer (or owns): " . implode( ', ', wp_list_pluck( $single_committer_plugins, 'post_name' ) ) . "\n";
 	echo "\tJust a committer: " . implode( ', ', wp_list_pluck( $multiple_committer_plugins, 'post_name' ) ) . "\n";
+	echo "\tClosed plugins: " . implode( ', ', wp_list_pluck( $closed_plugins, 'post_name' ) ) . "\n";
 
 	echo "\tBounce Message:\n\t\t> " . ( str_replace( "\n", "\n\t\t> ", $bounce_message ) ?: 'Unable to determine bounce reason' ) . "\n";
 
@@ -238,6 +249,10 @@ foreach ( get_bounces()->_embedded->conversations as $bounce ) {
 
 		$actions_to_take[ $plugin->ID ]['id'][]  = $bounce->id;
 		$actions_to_take[ $plugin->ID ]['users'][ $user->ID ] = $bounce_message;
+	}
+
+	if ( ! $plugins && $closed_plugins ) {
+		$just_close_it[] = $bounce->id;
 	}
 
 	echo "\n";
@@ -391,6 +406,25 @@ foreach ( $actions_to_take as $post_id => $data ) {
 	$stats['closed']++;
 
 	echo "\n";
+}
+
+// Close those HS tickets.
+foreach ( $just_close_it as $hs_id ) {
+	$stats['hs-closed']++;
+
+	echo "Marking https://secure.helpscout.net/conversation/{$hs_id} as closed as all plugins are closed.\n";
+
+	if ( 'live' == OPERATION_MODE ) {
+		HelpScout::instance()->api(
+			'/v2/conversations/' . $hs_id,
+			[
+				'op'    => 'replace',
+				'path'  => '/status',
+				'value' => 'closed',
+			],
+			'PATCH'
+		);
+	}
 }
 
 echo "\nAll Done! Stats:\n";

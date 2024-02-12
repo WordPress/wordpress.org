@@ -7,10 +7,38 @@ libxml_use_internal_errors( true );
 function domdocument_from_url( $url ) {
 	$html = file_get_contents( $url );
 
+	/*
+	 * Escape HTML within Javascript strings.
+	 * DomDocument doesn't handle HTML tags within Javascript strings.
+	 * See https://stackoverflow.com/questions/40703313/php-domdocument-errors-while-parsing-unescaped-strings
+	 */
+	$html = preg_replace_callback(
+		'!<script([^>]+)>(.*?)</script>!ism',
+		function( $m ) {
+			$escaped = $m[2];
+			$escaped = str_replace( array( '<', '>' ), array( '\x3C',  '\x3E' ), $escaped );
+			return "<script{$m[1]}>{$escaped}</script>";
+		},
+		$html
+	);
+
+	// Ensure it's treated as UTF8, we'll assume if there's no <body> tag it's just a HTML blob.
+	if ( ! strpos( $html, '<body' ) ) {
+		$html = '<!DOCTYPE html>
+			<html xmlns="http://www.w3.org/1999/xhtml">
+			<head>
+				<meta charset="UTF-8">
+			</head>
+			<body>' . $html . '</body></html>';
+	}
+
 	$doc = new DOMDocument();
 	$doc->validateOnParse = false;
 
 	$doc->loadHTML( $html );
+
+	// Ensure it's treated as UTF-8, It should already be detected as such, but this is just in case.
+	$doc->encoding = 'utf-8';
 
 	return $doc;
 }
@@ -21,6 +49,9 @@ function domdocument_for_trac() {
 
 	$doc->loadHTML( '<!DOCTYPE html>
 	<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" py:strip=""></html>' );
+
+	// Set the encoding to UTF-8 to allow unicode characters in the output. This avoids them being escaped.
+	$doc->encoding = 'utf-8';
 
 	return $doc;
 }
@@ -41,8 +72,27 @@ function save_domdocument( $file, $dom ) {
 	// Remove CDATA tags from <style>
 	$html = preg_replace( '#<style([^>]*)><!\[CDATA\[(.+?)\]\]></style>#ism', "<style$1>$2</style>", $html );
 
-	// Escape CDATA tags in <script>
-	$html = preg_replace( '#<script([^>]*)><!\[CDATA\[(.+?)\]\]></script>#ism', "<script$1>//<![CDATA[\n$2\n//]]></script>", $html );
+	// Escape or Remove CDATA tags from <script>. Trac requires this for inline scripts, but not for non-javascript tags.
+	$html = preg_replace_callback(
+		'#<script(?P<attr>[^>]*)><!\[CDATA\[(?P<code>.+?)\]\]></script>#ism',
+		function( $m ) {
+			$attr = $m['attr'];
+			$code = $m['code'];
+			$type = '';
+			if ( preg_match( '/type=(["\'])(?P<type>[^\'"]+)\\1/', $attr, $mtype ) ) {
+				$type = $mtype['type'];
+			}
+
+			// For non-javascript, remove the CDATA tags.
+			if ( $type && in_array( strtolower( $type ), [ 'importmap', /* 'module' */ ] ) ) {
+				return "<script{$attr}>{$code}</script>";
+			}
+
+			// If javascript, or unknown, escape it.
+			return "<script{$attr}>//<![CDATA[\n{$code}\n//]]></script>";
+		},
+		$html
+	);
 
 	// Remove trailing whitespace.
 	$html = preg_replace( '#(\S)\s+$#m', '$1', $html );
@@ -58,6 +108,38 @@ function save_domdocument( $file, $dom ) {
 			$prefix_id = $ids[ $m['class'] ] ?? ( $ids[ $m['class'] ] = $m['prefix'] . '-trac-' . ( $next_id++ ) );
 
 			return $prefix_id . $m['suffix'];
+		},
+		$html
+	);
+
+	/*
+	 * Use CDN assets, to avoid CORS issues.
+	 * Until https://github.com/WordPress/wporg-mu-plugins/pull/430 is resolved.
+	 */
+	$html = preg_replace_callback(
+		'!(?P<url>https:[\\\/]+wordpress.org[\\\/]+wp-(includes|content)[\\\/]+[^\'"]+)!i',
+		function( $m ) {
+			$url     = $m['url'];
+			$escaped = false !== strpos( $url, '\/' );
+
+			if ( $escaped ) {
+				$url = stripslashes( $url );
+			}
+
+			$url  = str_replace( 'wordpress.org', 's.w.org', $url );
+			$hash = md5( file_get_contents( $url ) );
+
+			if ( preg_match( '/([?&;](ver|v)=[^&]+)/i', $url, $m ) ) {
+				$url = str_replace( $m[0], $m[0] . '-' . $hash, $url );
+			} else {
+				$url .= ( strpos( $url, '?' ) ? '&amp;' : '?' ) . 'ver=' . $hash;
+			}
+
+			if ( $escaped ) {
+				$url = addcslashes( $url, '/' );
+			}
+
+			return $url;
 		},
 		$html
 	);

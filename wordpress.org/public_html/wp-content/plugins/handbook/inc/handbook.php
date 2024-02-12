@@ -29,6 +29,13 @@ class WPorg_Handbook {
 	public $setting_name = '';
 
 	/**
+	 * The configuration of the handbook.
+	 *
+	 * @var array
+	 */
+	public $config = [];
+
+	/**
 	 * The memoized and filtered label text for the handbook.
 	 *
 	 * @var string
@@ -184,6 +191,7 @@ class WPorg_Handbook {
 		add_filter( 'comments_open',                      [ $this, 'comments_open' ], 10, 2 );
 		add_filter( 'wp_nav_menu_objects',                [ $this, 'highlight_menu_handbook_link' ] );
 		add_filter( 'display_post_states',                [ $this, 'display_post_states' ], 10, 2 );
+		add_filter( 'jetpack_sitemap_post_types',         [ $this, 'jetpack_sitemap_post_types' ] );
 	}
 
 	/**
@@ -752,4 +760,17 @@ class WPorg_Handbook {
 		return $menu_items;
 	}
 
+	/**
+	 * Include handbooks in Jetpack Sitemaps (if enabled).
+	 *
+	 * @param array $post_types The post types for inclusion in sitemaps.
+	 * @return array
+	 */
+	public function jetpack_sitemap_post_types( $post_types ) {
+		if ( ! in_array( $this->post_type, $post_types ) ) {
+			$post_types[] = $this->post_type;
+		}
+
+		return $post_types;
+	}
 }

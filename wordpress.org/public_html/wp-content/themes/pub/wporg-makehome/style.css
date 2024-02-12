@@ -170,6 +170,7 @@ section.get-involved h2 {
 }
 
 section.get-involved h2.section-title {
+	line-height: 2rem;
 	padding: 20px 10px;
 }
 
@@ -196,6 +197,11 @@ section.get-involved article {
 	-ms-transition-property: background, box-shadow;
 	-o-transition-property: background, box-shadow;
 	transition-property: background, box-shadow;
+}
+
+.error404 section.get-involved article {
+	box-sizing: border-box;
+	width: calc( 100% - 20px );
 }
 
 section.get-involved article:hover {
@@ -298,6 +304,10 @@ section.get-involved article .team-meeting {
 		width: 43%;
 		width: calc( 100% / 2 - 60px );
 	}
+
+	.error404 section.get-involved article {
+		width: calc( 100% - 20px );
+	}
 }
 
 @media ( max-width: 600px ) {
@@ -327,6 +337,9 @@ section.get-involved article .team-meeting {
 		float: none;
 	}
 
+	.error404 section.get-involved article {
+		width: calc( 100% - 20px );
+	}
 }
 
 /* schedule */

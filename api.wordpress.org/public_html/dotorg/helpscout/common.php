@@ -265,8 +265,9 @@ function get_user_from_emails( $emails ) {
  * Get the possible plugins or themes from the email.
  */
 function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
-	$subject  = $request->subject ?? ( $request->ticket->subject ?? '' );
-	$email_id = $request->id      ?? ( $request->ticket->id      ?? 0 );
+	$subject    = $request->subject   ?? ( $request->ticket->subject ?? '' );
+	$email_id   = $request->id        ?? ( $request->ticket->id      ?? 0 );
+	$mailbox_id = $request->mailboxId ?? ( $request->mailbox->id     ?? 0 );
 
 	$possible = [
 		'themes'  => [],
@@ -280,19 +281,43 @@ function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
 
 	/*
 	 * Plugin reviews, match the format of either:
+	 *
 	 * "[WordPress Plugin Directory] {Type Of Email}: {Plugin Title}"
 	 * "[WordPress Plugin Directory] {Type Of Email} - {Plugin Title}"
+	 * "[Translated WordPress Plugin Directory] {Translated Type} - {Plugin Title}
+	 *
+	 * Because of translations, we can't be sure of the exact wording, so we'll just hope that it matches the general format.
+	 * NOTE: \p{Pd} is Regex for a dash-like character, which includes hyphens and ndashes.
 	 */
 	if (
-		preg_match( '!\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ||
-		preg_match( '!\[WordPress Plugin Directory\].+? - (?P<title>.+)$!i', $subject, $m )
+		(
+			'plugins' === get_mailbox_name( $mailbox_id ) &&
+			(
+				preg_match( '!\[[^]]+\][^:]+: (?P<title>.+)$!i', $subject, $m ) ||
+				preg_match( '!\[[^]]+\].+? \p{Pd} (?P<title>.+)$!iu', $subject, $m )
+			)
+		) || (
+			// Same as above, but in non-plugins mailboxes using the English strings only.
+			preg_match( '!\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ||
+			preg_match( '!\[WordPress Plugin Directory\].+? \p{Pd} (?P<title>.+)$!iu', $subject, $m )
+		)
 	) {
 		switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
 		$plugins = get_posts( [
-			'title'       => trim( $m['title'] ),
+			// Post titles are always escaped.
+			'title'       => esc_html( trim( $m['title'] ) ),
 			'post_type'   => 'plugin',
 			'post_status' => 'any',
 		] );
+
+		// Although the above should always catch it, let's try again with the unescaped title.
+		if ( ! $plugins ) {
+			$plugins = get_posts( [
+				'title'       => trim( $m['title'] ),
+				'post_type'   => 'plugin',
+				'post_status' => 'any',
+			] );
+		}
 		restore_current_blog();
 
 		// As we're searching by title, multiple plugins may come up.

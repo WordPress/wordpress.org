@@ -311,7 +311,7 @@ abstract class Importer {
 			$ret = $this->update_post_from_markdown_source( $id );
 			if ( class_exists( 'WP_CLI' ) ) {
 				if ( is_wp_error( $ret ) ) {
-					WP_CLI::warning( $ret->get_error_message() );
+					WP_CLI::warning( "{$id} returned an error: " . $ret->get_error_message() );
 				} elseif ( false === $ret ) {
 					WP_CLI::log( "No updates for {$id}" );
 					$success++;
@@ -396,6 +396,17 @@ abstract class Importer {
 			}
 		}
 
+		// Check to see if this differs from the actual post.
+		if ( $do_update && $post_data ) {
+			$post = get_post( $post_id );
+			foreach ( $post_data as $field => $value ) {
+				if ( $value == $post->$field ) {
+					// Unset it to prevent calling `wp_update_post()` with this and bumping the last_modified date.
+					unset( $post_data[ $field ] );
+				}
+			}
+		}
+
 		if ( $do_update && $post_data ) {
 			$post_data['ID'] = $post_id;
 
@@ -475,18 +486,18 @@ abstract class Importer {
 		}
 		$markdown = trim( $markdown );
 
-		// Use the first sentence as the excerpt.
-		$excerpt = '';
-		if ( preg_match( '/^(.+)/', $markdown, $matches ) ) {
-			$excerpt = $matches[1];
-		}
-
 		// Transform to HTML and save the post
 		$parser = new WPCom_GHF_Markdown_Parser();
 		$parser->preserve_shortcodes = false;
 		$html = $parser->transform( $markdown );
 
 		$html = apply_filters( 'wporg_markdown_after_transform', $html, $this->get_post_type() );
+
+		// Use the first line as the excerpt, but first strip any HTML.
+		$excerpt = '';
+		if ( preg_match( '/^(.+)/', wp_strip_all_tags( $html ), $matches ) ) {
+			$excerpt = $matches[1];
+		}
 
 		add_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allow_links' ], 10, 2 );
 

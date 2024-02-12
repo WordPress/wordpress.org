@@ -145,7 +145,7 @@ class Plugins_Info_API {
 	/**
 	 * Generates a Cache key for a plugin based on the request.
 	 */
-	protected function plugin_information_cache_key( $request ) {
+	protected static function plugin_information_cache_key( $request ) {
 		return 'plugin_information:'
 			. ( strlen( $request->slug ) > 200 ? 'md5:' . md5( $request->slug ) : $request->slug )
 			. ':' . strtolower( $request->locale ?: 'en_US' );

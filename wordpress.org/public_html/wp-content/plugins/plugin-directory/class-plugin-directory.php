@@ -49,6 +49,7 @@ class Plugin_Directory {
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
+		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
 
 		// Add no-index headers where appropriate.
 		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
@@ -135,6 +136,9 @@ class Plugin_Directory {
 
 	/**
 	 * Set up the Plugin Directory.
+	 *
+	 * NOTE: The order of the taxonomy register calls defines which one will be
+	 *       returned by get_queried_object() for a multi-taxonomy query.
 	 */
 	public function init() {
 		load_plugin_textdomain( 'wporg-plugins' );
@@ -158,7 +162,7 @@ class Plugin_Directory {
 				'edit_item'          => is_admin() ? __( 'Editing Plugin:', 'wporg-plugins' ) : __( 'Edit Plugin', 'wporg-plugins' ),
 			),
 			'description'  => __( 'A Repo Plugin', 'wporg-plugins' ),
-			'supports'     => array( 'comments', 'author', 'custom-fields' ),
+			'supports'     => array( 'comments', 'author', 'custom-fields', 'media' ),
 			'public'       => true,
 			'show_ui'      => true,
 			'show_in_rest' => true,
@@ -218,6 +222,56 @@ class Plugin_Directory {
 			),
 		) );
 
+		/*
+		 * Register before other taxonomies.
+		 * This ensures that it'll be returned by get_queried_object() in a multi-tax query.
+		 */
+		register_taxonomy( 'plugin_tags', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
+			'hierarchical'      => false,
+			'query_var'         => 'plugin_tags',
+			'rewrite'           => array(
+				'hierarchical' => false,
+				'slug'         => 'tags',
+				'with_front'   => false,
+				'ep_mask'      => EP_TAGS,
+			),
+			'labels'            => array(
+				'name'          => __( 'Plugin Tags', 'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Tag', 'wporg-plugins' ),
+				'edit_item'     => __( 'Edit Tag', 'wporg-plugins' ),
+				'update_item'   => __( 'Update Tag', 'wporg-plugins' ),
+				'add_new_item'  => __( 'Add New Tag', 'wporg-plugins' ),
+				'new_item_name' => __( 'New Tag Name', 'wporg-plugins' ),
+				'search_items'  => __( 'Search Tags', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'meta_box_cb'       => false,
+			'capabilities'      => array(
+				'assign_terms' => 'do_not_allow',
+			),
+		) );
+
+		// Next, Contributors as this is the taxonomy used for `/author/xxxxxx/`
+		register_taxonomy( 'plugin_contributors', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
+			'hierarchical'      => false,
+			'query_var'         => 'plugin_contributor',
+			'sort'              => true,
+			'rewrite'           => false,
+			'labels'            => array(
+				'name'          => __( 'Contributors', 'wporg-plugins' ),
+				'singular_name' => __( 'Contributor', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'capabilities'      => array(
+				'assign_terms' => 'do_not_allow',
+			),
+		) );
+
+		// Meta-data taxonomies can follow, these will always end up being used as query parameters in URLs.
 		register_taxonomy( 'plugin_built_for', 'plugin', array(
 			'hierarchical'      => true, /* for tax_input[] handling on post saves. */
 			'query_var'         => 'plugin_built_for',
@@ -249,26 +303,9 @@ class Plugin_Directory {
 			),
 		) );
 
-		register_taxonomy( 'plugin_contributors', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
-			'hierarchical'      => false,
-			'query_var'         => 'plugin_contributor',
-			'sort'              => true,
-			'rewrite'           => false,
-			'labels'            => array(
-				'name'          => __( 'Contributors', 'wporg-plugins' ),
-				'singular_name' => __( 'Contributor', 'wporg-plugins' ),
-			),
-			'public'            => true,
-			'show_ui'           => true,
-			'show_admin_column' => true,
-			'capabilities'      => array(
-				'assign_terms' => 'do_not_allow',
-			),
-		) );
-
 		register_taxonomy( 'plugin_committers', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
-			'query_var'         => 'plugin_committer',
+			'query_var'         => false,
 			'rewrite'           => false,
 			'labels'            => array(
 				'name'          => __( 'Committers', 'wporg-plugins' ),
@@ -284,7 +321,7 @@ class Plugin_Directory {
 
 		register_taxonomy( 'plugin_support_reps', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
-			'query_var'         => 'plugin_support_rep',
+			'query_var'         => false,
 			'rewrite'           => false,
 			'labels'            => array(
 				'name'          => __( 'Support Reps', 'wporg-plugins' ),
@@ -293,33 +330,6 @@ class Plugin_Directory {
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => true,
-			'capabilities'      => array(
-				'assign_terms' => 'do_not_allow',
-			),
-		) );
-
-		register_taxonomy( 'plugin_tags', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
-			'hierarchical'      => false,
-			'query_var'         => 'plugin_tags',
-			'rewrite'           => array(
-				'hierarchical' => false,
-				'slug'         => 'tags',
-				'with_front'   => false,
-				'ep_mask'      => EP_TAGS,
-			),
-			'labels'            => array(
-				'name'          => __( 'Plugin Tags', 'wporg-plugins' ),
-				'singular_name' => __( 'Plugin Tag', 'wporg-plugins' ),
-				'edit_item'     => __( 'Edit Tag', 'wporg-plugins' ),
-				'update_item'   => __( 'Update Tag', 'wporg-plugins' ),
-				'add_new_item'  => __( 'Add New Tag', 'wporg-plugins' ),
-				'new_item_name' => __( 'New Tag Name', 'wporg-plugins' ),
-				'search_items'  => __( 'Search Tags', 'wporg-plugins' ),
-			),
-			'public'            => true,
-			'show_ui'           => true,
-			'show_admin_column' => true,
-			'meta_box_cb'       => false,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',
 			),
@@ -763,6 +773,16 @@ class Plugin_Directory {
 				$wp_query->query_vars['meta_key'] = 'last_updated';
 				$wp_query->query_vars['orderby']  = 'meta_value';
 				$wp_query->query_vars['order']    = 'DESC';
+
+				// Limit the Beta tab to plugins updated within 12 months.
+				$meta_query                = $wp_query->get( 'meta_query' ) ?: [];
+				$meta_query['updated-12m'] = [
+					'key'     => 'last_updated',
+					'value'   => gmdate( 'Y-m-d H:i:s', time() - YEAR_IN_SECONDS ),
+					'compare' => '>',
+				];
+				$wp_query->set( 'meta_query', $meta_query );
+
 				break;
 
 			case 'favorites':
@@ -791,7 +811,7 @@ class Plugin_Directory {
 				break;
 
 			case 'updated':
-				$wp_query->query_vars['orderby'] = 'modified_date';
+				$wp_query->query_vars['orderby'] = 'post_modified';
 				break;
 
 			case 'block':
@@ -834,19 +854,19 @@ class Plugin_Directory {
 			$viewing_own_author_archive = is_user_logged_in() && $user && ( current_user_can( 'plugin_review' ) || 0 === strcasecmp( $user, wp_get_current_user()->user_nicename ) );
 
 			// Author archives by default list plugins you're a contributor on.
-			$wp_query->query_vars['tax_query'] = array(
-				'relation' => 'OR',
+			$wp_query->query_vars['tax_query']['author'] = array(
 				array(
 					'taxonomy' => 'plugin_contributors',
 					'field'    => 'slug',
 					'terms'    => $user,
 				),
+				'relation' => 'OR',
 			);
 
 			// Author archives for self include plugins you're a committer on, not just publically a contributor
 			// Plugin Reviewers also see plugins you're a committer on here.
 			if ( $viewing_own_author_archive ) {
-				$wp_query->query_vars['tax_query'][] = array(
+				$wp_query->query_vars['tax_query']['author'][] = array(
 					'taxonomy' => 'plugin_committers',
 					'field'    => 'slug',
 					'terms'    => $user,
@@ -1340,9 +1360,10 @@ class Plugin_Directory {
 
 		// Existing tag with no plugins.
 		if (
-			( is_tax() || is_category() || is_tag() ) &&
+			is_tax( 'plugin_tags' ) &&
 			! have_posts() &&
-			! is_tax( 'plugin_section' ) // All sections have something, or intentionally don't (favorites)
+			// Only redirect if only plugin_tags is queried. Other taxonomies cannot be handled.
+			count( $wp_query->tax_query->queried_terms ) <= 1
 		) {
 			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
@@ -1354,9 +1375,9 @@ class Plugin_Directory {
 		// Empty search query.
 		// This may occur due to WordPress's 1600 character search limit.
 		if (
-				'search' === get_query_var( 'name' ) ||
-				( isset( $_GET['s'] ) && ! get_query_var( 's' ) ) ||
-				( is_search() && 0 === strlen( get_query_var( 's' ) ) )
+			'search' === get_query_var( 'name' ) ||
+			( isset( $_GET['s'] ) && ! get_query_var( 's' ) ) ||
+			( is_search() && 0 === strlen( get_query_var( 's' ) ) )
 		) {
 			wp_safe_redirect( site_url( '/' ), 301 );
 			die();
@@ -1367,6 +1388,11 @@ class Plugin_Directory {
 			$GLOBALS['wp_query']->set_404();
 			status_header( 404 );
 			return;
+		}
+
+		// Favorites should be a 200 response, even with no plugins.
+		if ( 'favorites' === get_query_var( 'browse' ) ) {
+			status_header( 200 );
 		}
 
 		// Disable feeds
@@ -1391,11 +1417,28 @@ class Plugin_Directory {
 			die();
 		}
 
+		if ( is_single() && isset( $_GET['preview'] ) && ( Template::is_preview_available() || Template::is_preview_available( null, 'edit' ) ) ) {
+			if ( $preview_url = Template::preview_link() ) {
+				wp_safe_redirect( $preview_url, 302 );
+				die;
+			}
+		}
+
 		if ( is_comment_feed() ) {
 			wp_redirect( 'https://wordpress.org/plugins/', 301 );
 			die();
 		}
 
+	}
+
+	/**
+	 * Filter allowed_redirect_hosts to allow safe redirect to trusted hosts.
+	 * @param array $hosts
+	 */
+	function filter_redirect_hosts( $hosts ) {
+		$hosts[] = 'playground.wordpress.net';
+
+		return $hosts;
 	}
 
 	/**
@@ -1723,7 +1766,7 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Create a new post entry for a given plugin slug.
+	 * Create (or update) a new post entry for a given plugin slug.
 	 *
 	 * @static
 	 *
@@ -1786,19 +1829,21 @@ class Plugin_Directory {
 			'post_modified_gmt' => $post_date_gmt,
 		) );
 
+		$update = ! empty( $args['ID'] );
 		$result = wp_insert_post( $args, true );
 
 		if ( ! is_wp_error( $result ) ) {
 			wp_cache_set( $result, $slug, 'plugin-slugs' );
 			$result = get_post( $result );
 
-			$owner = get_userdata( $result->post_author );
-
-			Tools::audit_log( sprintf(
-				'Submitted by <a href="%s">%s</a>.',
-				esc_url( 'https://profiles.wordpress.org/' . $owner->user_nicename . '/' ),
-				$owner->user_login
-			), $result->ID );
+			if ( ! $update ) {
+				$owner = get_userdata( $result->post_author );
+				Tools::audit_log( sprintf(
+					'Submitted by <a href="%s">%s</a>.',
+					esc_url( 'https://profiles.wordpress.org/' . $owner->user_nicename . '/' ),
+					$owner->user_login
+				), $result->ID );
+			}
 		}
 
 		return $result;

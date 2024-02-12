@@ -10,35 +10,42 @@ class Plugins_Info_API_Request {
 	protected $requested_fields = array();
 
 	static $fields = array(
-		'active_installs'     => false,
-		'added'               => false,
-		'banners'             => false,
-		'compatibility'       => false,
-		'contributors'        => false,
-		'description'         => false,
-		'donate_link'         => false,
-		'downloaded'          => false,
-		'download_link'       => false,
-		'homepage'            => false,
-		'icons'               => false,
-		'last_updated'        => false,
-		'rating'              => false,
-		'ratings'             => false,
-		'reviews'             => false, // NOTE: sub-key of 'sections'.
-		'requires'            => false,
-		'requires_php'        => false,
-		'sections'            => false,
-		'short_description'   => false,
-		'tags'                => false,
-		'tested'              => false,
-		'stable_tag'          => false,
-		'blocks'              => false,
-		'block_assets'        => false,
-		'author_block_count'  => false,
-		'author_block_rating' => false,
-		'language_packs'      => false,
-		'versions'            => false,
-		'screenshots'         => false,
+		'active_installs'        => false,
+		'added'                  => false,
+		'banners'                => false,
+		'compatibility'          => false,
+		'contributors'           => false,
+		'description'            => false,
+		'donate_link'            => false,
+		'downloaded'             => false,
+		'download_link'          => false,
+		'homepage'               => false,
+		'icons'                  => false,
+		'last_updated'           => false,
+		'rating'                 => false,
+		'ratings'                => false,
+		'reviews'                => false, // NOTE: sub-key of 'sections'.
+		'requires'               => false,
+		'requires_php'           => false,
+		'sections'               => false,
+		'short_description'      => false,
+		'tags'                   => false,
+		'tested'                 => false,
+		'stable_tag'             => false,
+		'blocks'                 => false,
+		'block_assets'           => false,
+		'author_block_count'     => false,
+		'author_block_rating'    => false,
+		'language_packs'         => false,
+		'versions'               => false,
+		'screenshots'            => false,
+		'blueprints'             => false,
+		'preview_link'           => false,
+		'upgrade_notice'         => false,
+		'business_model'         => false,
+		'repository_url'         => false,
+		'support_url'            => false,
+		'commercial_support_url' => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -64,14 +71,20 @@ class Plugins_Info_API_Request {
 
 	// Alterations made to default fields in the info/1.2 API.
 	static $plugins_info_fields_defaults_12 = array(
-		'downloaded'        => false,
-		'bare_contributors' => false,
-		'compatibility'     => false,
-		'description'       => false,
-		'banners'           => true,
-		'reviews'           => true,
-		'active_installs'   => true,
-		'contributors'      => true,
+		'downloaded'             => false,
+		'bare_contributors'      => false,
+		'compatibility'          => false,
+		'description'            => false,
+		'banners'                => true,
+		'reviews'                => true,
+		'active_installs'        => true,
+		'contributors'           => true,
+		'preview_link'           => true,
+		'upgrade_notice'         => true,
+		'business_model'         => true,
+		'repository_url'         => true,
+		'support_url'            => true,
+		'commercial_support_url' => true,
 	);
 
 	static $query_plugins_fields_defaults = array(
@@ -125,7 +138,8 @@ class Plugins_Info_API_Request {
 	// Fields that affect other fields.
 	// If the key is disabled, disable all of the values here unless client turns them on.
 	static $field_interconnected = array(
-		'sections' => [ 'reviews' ], // If sections is disabled, reviews should be disabled unless explicitly enabled.
+		'sections'       => [ 'reviews' ], // If sections is disabled, reviews should be disabled unless explicitly enabled.
+		'business_model' => [ 'repository_url', 'commercial_support_url' ]
 	);
 
 	public function __construct( $args ) {

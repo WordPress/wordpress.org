@@ -1,13 +1,14 @@
-/* global document, $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window */
+/* global document, $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window, translationHelpersCache, add_amount_to_others_tab */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	/**
 	 * Stores (caches) the content of the translation helpers, to avoid making the query another time.
 	 *
-	 * @type {Array}
+	 * @type {Object}
 	 */
 	// eslint-disable-next-line prefer-const
-	let translationHelpersCache = [];
+	window.translationHelpersCache = {};
+
 	let focusedRowId = '';
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
@@ -232,8 +233,7 @@ jQuery( function( $ ) {
 	function change_visible_div( tabId, originalId ) {
 		$( '#sidebar-div-meta-' + originalId ).hide();
 		$( '#sidebar-div-discussion-' + originalId ).hide();
-		$( '#sidebar-div-history-' + originalId ).hide();
-		$( '#sidebar-div-other-locales-' + originalId ).hide();
+		$( '#sidebar-div-others-' + originalId ).hide();
 		$( '#' + tabId ).show();
 	}
 
@@ -249,6 +249,26 @@ jQuery( function( $ ) {
 			html += '<button class="sidebar-other-locales button is-small copy-suggestion"> Copy </button>';
 			$( this ).html( html );
 		} );
+	}
+
+	/**
+	 * Adds the amount of elements to the "Others" tab.
+	 *
+	 * @param {string} sidebarTab The tab where we add the amount of elements.
+	 * @param {Object} data       The object where we have the data to add.
+	 * @param {number} originalId The id of the original string to translate.
+	 */
+	if ( typeof window.add_amount_to_others_tab === 'undefined' ) {
+		add_amount_to_others_tab = function( sidebarTab, data, originalId ) {
+			let elements = 0;
+			if ( data[ 'helper-history-' + originalId ] !== undefined ) {
+				elements += data[ 'helper-history-' + originalId ].count;
+			}
+			if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
+				elements += data[ 'helper-other-locales-' + originalId ].count;
+			}
+			$( '[data-tab="' + sidebarTab + '"]' ).html( 'Others&nbsp;(' + elements + ')' );
+		};
 	}
 
 	/**
@@ -283,13 +303,19 @@ jQuery( function( $ ) {
 			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
 		}
 		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
-			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
-			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+			$( '#summary-history-' + originalId ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
+			$( '#sidebar-div-others-history-content-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+			add_amount_to_others_tab( 'sidebar-tab-others-' + originalId, data, originalId );
+		} else {
+			$( '#sidebar-div-others-history-content-' + originalId ).html( '' );
 		}
 		if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
-			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
-			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
-			add_copy_button( '#sidebar-div-other-locales-' + originalId );
+			$( '#summary-other-locales-' + originalId ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
+			$( '#sidebar-div-others-other-locales-content-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
+			add_copy_button( '#sidebar-div-others-other-locales-content-' + originalId );
+			add_amount_to_others_tab( 'sidebar-tab-others-' + originalId, data, originalId );
+		} else {
+			$( '#sidebar-div-others-other-locales-content-' + originalId ).html( '' );
 		}
 	}
 

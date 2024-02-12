@@ -281,12 +281,13 @@ body.page-template-page-enterprise-security {
 		margin: 0 auto;
 		font-size:14px;
 		line-height: 1.5rem;
-		padding: 2rem 0;
+		padding: 2rem;
 		
 		.top {
 			h3, p {
 				width: 720px;
 				margin: 0 auto;
+				max-width: 100%;
 			}
 			
 			h3 {

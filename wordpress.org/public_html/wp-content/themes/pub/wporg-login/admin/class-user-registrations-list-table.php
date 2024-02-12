@@ -69,7 +69,9 @@ class User_Registrations_List_Table extends WP_List_Table {
 					$url = add_query_arg( 's', urlencode( $_GET['s'] ), $url );
 				}
 
-				$url = add_query_arg( 'view', $item[0], $url );
+				if ( 'all' !== $item[0] ) {
+					$url = add_query_arg( 'view', $item[0], $url );
+				}
 
 				return sprintf(
 					'<a href="%s" class="%s">%s <span class="count">(%s)</span></a>',
@@ -127,11 +129,15 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		// Join if the view needs the users or description table.
-		if ( strpos( $where . $join, 'users.' ) || strpos( $where, 'description.' ) ) {
+		if ( strpos( $where . $join, 'users.' ) || strpos( $where, 'description.' ) || (  'banned-users' === $view ?: ( $_REQUEST['view'] ?? 'all' )  ) ) {
 			$join .= " LEFT JOIN {$wpdb->users} users ON registrations.created = 1 AND registrations.user_login = users.user_login";
 		}
 		if ( strpos( $where, 'description.' ) ) {
 			$join .= " LEFT JOIN {$wpdb->usermeta} description ON users.ID = description.user_id AND description.meta_key = 'description'";
+		}
+
+		if ( 'banned-users' === $view ?: ( $_REQUEST['view'] ?? 'all' ) ) {
+			$join .= " LEFT JOIN {$wpdb->usermeta} notes ON users.ID = notes.user_id AND notes.meta_key = '_wporg_bbp_user_notes'";
 		}
 
 		return $join . $where;
@@ -161,24 +167,28 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$this->get_columns(),
 			array(),
 			$this->get_sortable_columns(),
-	   );
+		);
 
-	   $sort_column = $_GET['orderby'] ?? 'pending_id';
-	   $sort_order = strtoupper( $_GET['order'] ?? 'DESC' );
+		$sort_column = $_GET['orderby'] ?? 'pending_id';
+		$sort_order = strtoupper( $_GET['order'] ?? 'DESC' );
 
-	   if ( ! in_array( $sort_order, [ 'DESC', 'ASC' ] ) ) {
-		   $sort_order = 'DESC';
-	   }
-	   if ( ! isset( $this->get_sortable_columns()[ $sort_column ] ) ) {
-		   $sort_column = 'pending_id';
-	   }
+		if ( ! in_array( $sort_order, [ 'DESC', 'ASC' ] ) ) {
+			$sort_order = 'DESC';
+		}
+		if ( ! isset( $this->get_sortable_columns()[ $sort_column ] ) ) {
+			$sort_column = 'pending_id';
+		}
+		if ( 'banned-users' === ( $_GET['view'] ?? '' ) ) {
+			$sort_column = 'notes.umeta_id';
+			$sort_order = 'DESC';
+		}
 
-	   $per_page     = $this->get_items_per_page( 'users_per_page', 100 );
-	   $current_page = $this->get_pagenum();
+		$per_page     = $this->get_items_per_page( 'users_per_page', 100 );
+		$current_page = $this->get_pagenum();
 
-	   $join_where = $this->get_join_where_sql();
+		$join_where = $this->get_join_where_sql();
 
-	   $per_page_offset = ($current_page-1) * $per_page;
+		$per_page_offset = ($current_page-1) * $per_page;
 
 		$this->items = $wpdb->get_results(
 			"SELECT SQL_CALC_FOUND_ROWS registrations.*
@@ -430,6 +440,9 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 	function link_to_search( $s ) {
 		$parts = preg_split( '/([^\w\.-])/ui', $s, -1, PREG_SPLIT_DELIM_CAPTURE );
+		if ( ! $parts ) {
+			$parts = array( $s );
+		}
 
 		return implode( '', array_map( function( $s ) {
 			if ( strlen( $s ) >= 3 ) {

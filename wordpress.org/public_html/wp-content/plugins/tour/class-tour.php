@@ -14,7 +14,6 @@ class Tour {
 		$class = get_called_class();
 		add_action( 'admin_enqueue_scripts', array( $class, 'enqueue_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $class, 'enqueue_scripts' ) );
-		add_action( 'gp_head', array( $class, 'enqueue_scripts' ) );
 		add_action( 'init', array( $class, 'register_post_type' ) );
 		add_action( 'init', array( $class, 'register_block_type' ) );
 		add_action( 'rest_api_init', array( $class, 'rest_api_init' ) );
@@ -26,10 +25,11 @@ class Tour {
 		add_action( 'admin_init', array( $class, 'admin_init' ) );
 		add_action( 'edit_form_after_editor', array( $class, 'edit_form_after_editor' ) );
 		add_filter( 'tour_list', array( $class, 'tour_list' ) );
-		add_shortcode( 'tour_button', array( $class, 'show_tour_list' ) );
+		add_shortcode( 'tour_list', array( $class, 'show_tour_list' ) );
 		add_action( 'admin_menu', array( $class, 'add_admin_menu' ) );
 		add_action( 'wp_footer', array( $class, 'output_tour_button' ) );
 		add_action( 'admin_footer', array( $class, 'output_tour_button' ) );
+		add_action( 'gp_footer', array( $class, 'output_tour_button' ) );
 		add_action( 'show_user_profile', array( $class, 'show_user_profile' ) );
 		add_action( 'wp_before_admin_bar_render', array( $class, 'add_tours_menu_to_masterbar' ) );
 	}

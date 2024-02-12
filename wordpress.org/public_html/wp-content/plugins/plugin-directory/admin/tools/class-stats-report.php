@@ -93,10 +93,8 @@ class Stats_Report {
 	public function get_stats( $args = array() ) {
 		global $wpdb;
 
-		$stats['as_of_date'] = gmdate( 'Y-m-d' );
-
 		$defaults = array(
-			'date'       => $stats['as_of_date'],
+			'date'       => gmdate( 'Y-m-d' ),
 			'num_days'   => 7,
 			'recentdays' => 7,
 		);
@@ -231,6 +229,107 @@ class Stats_Report {
 		return $stats;
 	}
 
+	public function get_user_stats( $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'date'       => gmdate( 'Y-m-d' ),
+			'num_days'   => 7,
+			'recentdays' => 7,
+		);
+
+		foreach ( $defaults as $key => $val ) {
+			$args[ $key ] = empty( $args[ $key ] ) ? $val : $args[ $key ];
+		}
+
+		$stats = $args;
+		$stats['start_date'] = gmdate( 'Y-m-d', time() - ( $args['num_days'] * DAY_IN_SECONDS ) );
+		$stats['data']       = [];
+
+		$reviewers = get_users( [
+			'role__in' => [
+				'plugin_reviewer',
+				'plugin_admin',
+				'administrator',
+			],
+		] );
+
+		$reviewer_ids            = wp_list_pluck( $reviewers, 'ID' );
+		$reviewer_ids_list       = implode( ', ', $reviewer_ids );
+		$reviewer_nicenames      = wp_list_pluck( $reviewers, 'user_nicename' );
+		$reviewer_nicenames_list = $wpdb->prepare( trim( str_repeat( '%s,', count( $reviewer_nicenames ) ) , ',' ), $reviewer_nicenames );
+
+		$events = $wpdb->get_results( $wpdb->prepare(
+			"SELECT user_id,
+			CASE
+				WHEN `comment_content` LIKE concat( 'Assigned to%', comment_author, '%' ) THEN 'Assigned to self.'
+				WHEN `comment_content` LIKE 'Assigned to%' THEN 'Assigned to others.'
+				ELSE `comment_content`
+			END AS `_thing`,
+			count(*) AS `count`
+			FROM %i
+			WHERE
+				`comment_date_gmt` > DATE_SUB( %s, INTERVAL %d DAY )
+				AND `user_id` IN( {$reviewer_ids_list} )
+				AND `comment_agent` = ''
+				AND (
+					`comment_content` IN( 'Plugin Approved.', 'Unassigned.' )
+					OR `comment_content` LIKE 'Assigned TO%'
+					OR `comment_content` LIKE 'Plugin rejected.%'
+					OR (
+						`comment_content` LIKE 'Plugin closed.%'
+						AND NOT `comment_content` LIKE '%Author Self-close%'
+					)
+				)
+			GROUP BY `user_id`, `_thing`
+			ORDER BY `user_id`, `_thing`",
+			$wpdb->comments,
+			$args['date'],
+			$args['num_days'],
+		) );
+
+		foreach ( $events as $row ) {
+			$stats['data'][ $row->user_id ] ??= [];
+			$stats['data'][ $row->user_id ][ $row->_thing ] = $row->count;
+		}
+
+		// Fetch HelpScout stats from our stats. We might be able to pull some information from HS Stats instead.
+		$stats_field_prefix = 'hs-plugins-';
+		if (
+			// See https://meta.trac.wordpress.org/changeset/13010
+			strtotime( $stats['start_date'] ) < strtotime('2023-12-06')
+		) {
+			$stats_field_prefix      = 'hs-';
+			$stats['all-hs-warning'] = true;
+		}
+
+		$emails = $wpdb->get_results( $wpdb->prepare(
+			"SELECT `name`, `value`, SUM(views) AS count
+			FROM %i
+			WHERE `name` IN( %s, %s )
+				AND `value` IN( {$reviewer_nicenames_list} )
+				AND `date` > %s
+			GROUP BY `name`, `value`",
+			'stats_extras',
+			$stats_field_prefix . 'total',
+			$stats_field_prefix . 'replies',
+			$stats['start_date']
+		) );
+
+		foreach ( $emails as $row ) {
+			$user  = get_user_by( 'slug', $row->value );
+			$field = str_ends_with( $row->name, '-total' ) ? 'Email Actions' : 'Email Replies';
+			$stats['data'][ $user->ID ] ??= [];
+			$stats['data'][ $user->ID ][ $field ] = $row->count;
+		}
+
+		uasort( $stats['data'], function( $a, $b ) {
+			return array_sum( $b ) <=> array_sum( $a );
+		} );
+
+		return $stats;
+	}
+
 	/**
 	 * Outputs the stats report admin page, including form to customize time range
 	 * and the stats themselves.
@@ -251,7 +350,8 @@ class Stats_Report {
 		$args['num_days']   = empty( $_REQUEST['days'] ) ? 7 : absint( $_REQUEST['days'] );
 		$args['recentdays'] = empty( $_REQUEST['recentdays'] ) ? 7 : absint( $_REQUEST['recentdays'] );
 
-		$stats = $this->get_stats( $args );
+		$stats      = $this->get_stats( $args );
+		$user_stats = $this->get_user_stats( $args );
 
 		$date = gmdate( 'Y-m-d' );
 
@@ -527,6 +627,116 @@ class Stats_Report {
 			<li><code>*</code> : <?php _e( "Stat reflects current size of queue and does not take into account 'date' or 'day' interval", 'wporg-plugins' ); ?></li>
 			<li><code>**</code> : <?php _e( "Stat reflects activity only within the 'recentdays' from today", 'wporg-plugins' ); ?></li>
 		</ul>
+
+		<h3>Reviewer Stats</h3>
+		<p><em>NOTE: These are not intended on being made public. Data displayed for the <?php echo esc_html( $user_stats['num_days'] ); ?> days ending <?php echo esc_html( $user_stats['date'] ); ?></em></p>
+
+		<table class="widefat review-stats">
+			<thead>
+				<tr>
+					<th>Reviewer</th>
+					<th>Assigned<br>(to others)</th>
+					<th>Plugins<br>Approved</th>
+					<th>Plugins<br>Rejected</th>
+					<th>Plugins<br>Closed</th>
+					<th>Email<br>Actions^</th>
+					<th>Email<br>Replies^</th>
+				</tr>
+			</thead>
+			<?php
+
+			echo '<tbody>';
+			foreach ( $user_stats['data'] as $user_id => $user_stat ) {
+				$user = get_user_by( 'id', $user_id );
+				echo '<tr><th>', esc_html( $user->display_name ?: $user->user_login ), '</th>';
+
+				// Assigned, Unassigned, Assigned to others.
+				echo '<td><span title="Assigned to self">', number_format_i18n( $user_stat[ 'Assigned to self.' ] ?? 0 ), '</span>';
+				if ( $user_stat[ 'Unassigned.' ] ?? 0 ) {
+					echo '<span title="Unassigned"> -', number_format_i18n( $user_stat[ 'Unassigned.' ] ), '</span>';
+				}
+				if ( $user_stat[ 'Assigned to others.' ] ?? 0 ) {
+					echo ' <span title="Assigned to others">(', number_format_i18n( $user_stat[ 'Assigned to others.' ] ), ')</span>';
+				}
+				echo '</td>';
+
+				// Plugins Approved.
+				echo '<td>', number_format_i18n( $user_stat[ 'Plugin approved.' ] ?? 0 ), '</td>';
+
+				// Plugins Rejected.
+				$user_rejected_breakdown = '';
+				$user_rejected_count     = 0;
+				foreach ( $user_stat as $key => $count ) {
+					if ( ! preg_match( '/^Plugin rejected\./', $key ) ) {
+						continue;
+					}
+					$user_rejected_count += $count;
+					$reason               = trim( explode( ':', $key )[1] ?? '' );
+
+					if ( ! $reason ) {
+						continue;
+					}
+
+					$user_rejected_breakdown .= sprintf(
+						"%s: %s\n",
+						Template::get_rejection_reasons()[ $reason ],
+						number_format_i18n( $count )
+					);
+				}
+				$user_rejected_breakdown = trim( $user_rejected_breakdown );
+
+				echo '<td class="breakdown">', '<span title="', esc_attr( $user_rejected_breakdown ), '">', number_format_i18n( $user_rejected_count ), '</span>';
+				if ( $user_rejected_breakdown ) {
+					echo '<div class="hidden">', nl2br( $user_rejected_breakdown ), '</div>';
+				}
+				echo '</td>';
+
+				// Plugins Closed.
+				$user_closed_breakdown = '';
+				$user_closed_count     = 0;
+				foreach ( $user_stat as $key => $count ) {
+					if ( ! preg_match( '/^Plugin closed\./', $key ) ) {
+						continue;
+					}
+					$reason             = trim( explode( ':', $key )[1] );
+					$user_closed_count += $count;
+
+					$user_closed_breakdown .= sprintf(
+						"%s: %s\n",
+						Template::get_close_reasons()[ $reason ],
+						number_format_i18n( $count )
+					);
+				}
+				$user_closed_breakdown = trim( $user_closed_breakdown );
+
+				echo '<td class="breakdown">', '<span title="', esc_attr( $user_closed_breakdown ), '">', number_format_i18n( $user_closed_count ), '</span>';
+				if ( $user_closed_breakdown ) {
+					echo '<div class="hidden">', nl2br( $user_closed_breakdown ), '</div>';
+				}
+				echo '</td>';
+
+				// Emails.
+				echo '<td>', number_format_i18n( $user_stat[ "Email Actions" ] ?? 0 ), '</td>';
+				echo '<td>', number_format_i18n( $user_stat[ "Email Replies" ] ?? 0 ), '</td>';
+				echo '</tr>';
+			}
+			echo '</tbody>';
+			echo '</table>';
+
+			echo '<script> jQuery(document).ready( function($) {
+				$("table.review-stats").on( "click", ".breakdown", function() {
+					$(this).children().length > 1 && $(this).children().toggleClass("hidden");
+				} );
+			} );</script>';
+
+			?>
+			<ul style="font-style:italic;">
+				<?php if ( isset( $user_stats['all-hs-warning'] ) ) : ?>
+					<li><code>^</code> : This is of all Helpscout mailboxes, not Plugins specific, as plugins-only data is only available after <a href="https://meta.trac.wordpress.org/changeset/13010">2023-12-05</a>.</li>
+				<?php endif; ?>
+				<li><code>^</code> : Requires your Helpscout email to be the same as your WordPress.org email, or as one of your profiles alternate emails.</li>
+				<li><code>^</code> : Email "Actions" include sending emails, replying to emails, marking as spam, moving to different inbox, etc.</li>
+			</ul>
 
 		</div>
 		<?php

@@ -144,7 +144,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $ignore_tags = array(
+	public $ignore_tags = array(
 		'plugin',
 		'wordpress',
 	);
@@ -225,13 +225,23 @@ class Parser {
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
-			$this->name = $line = $this->get_first_nonwhitespace( $contents );
+			$this->warnings['invalid_plugin_name_header'] = true;
 
-			// Ensure that the line read wasn't an actual header or description.
-			if ( strlen( $line ) > 50 || preg_match( '~^(' . implode( '|', array_keys( $this->valid_headers ) ) . ')\s*:~i', $line ) ) {
-				$this->name = false;
-				array_unshift( $contents, $line );
+			$this->name = false;
+			$line       = $this->get_first_nonwhitespace( $contents );
+
+			// Ensure that the line read doesn't look like a description.
+			if ( strlen( $line ) < 50 && ! $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
+				$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
 			}
+		}
+
+		// It's possible to leave the plugin name header off entirely.
+		if ( $this->parse_possible_header( $this->name, true /* only valid headers */ ) ) {
+			array_unshift( $contents, $line );
+
+			$this->warnings['invalid_plugin_name_header'] = true;
+			$this->name                                   = false;
 		}
 
 		// Parse headers.
@@ -240,9 +250,11 @@ class Parser {
 		$line                = $this->get_first_nonwhitespace( $contents );
 		$last_line_was_blank = false;
 		do {
-			$value = null;
+			$value  = null;
+			$header = $this->parse_possible_header( $line );
+
 			// If it doesn't look like a header value, maybe break to the next section.
-			if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
+			if ( ! $header ) {
 				if ( empty( $line ) ) {
 					// Some plugins have line-breaks within the headers...
 					$last_line_was_blank = true;
@@ -253,12 +265,10 @@ class Parser {
 				}
 			}
 
-			$bits                = explode( ':', trim( $line ), 2 );
-			list( $key, $value ) = $bits;
-			$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+			list( $key, $value ) = $header;
 
 			if ( isset( $this->valid_headers[ $key ] ) ) {
-				$headers[ $this->valid_headers[ $key ] ] = trim( $value );
+				$headers[ $this->valid_headers[ $key ] ] = $value;
 			} elseif ( $last_line_was_blank ) {
 				// If we skipped over a blank line, and then ended up with an unexpected header, assume we parsed too far and ended up in the Short Description.
 				// This final line will be added back into the stack after the loop for further parsing.
@@ -273,8 +283,14 @@ class Parser {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
 			$this->tags = array_filter( $this->tags );
-			$this->tags = array_diff( $this->tags, $this->ignore_tags );
-			$this->tags = array_slice( $this->tags, 0, 5 );
+			if ( array_intersect( $this->tags, $this->ignore_tags ) ) {
+				$this->tags = array_diff( $this->tags, $this->ignore_tags );
+				$this->warnings['ignored_tags'] = true;
+			}
+			if ( count( $this->tags ) > 5 ) {
+				$this->tags = array_slice( $this->tags, 0, 5 );
+				$this->warnings['too_many_tags'] = true;
+			}
 		}
 		if ( ! empty( $headers['requires'] ) ) {
 			$this->requires = $this->sanitize_requires_version( $headers['requires'] );
@@ -408,13 +424,20 @@ class Parser {
 		// Use the first line of the description for the short description if not provided.
 		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
 			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
+			$this->warnings['no_short_description_present'] = true;
 		}
 
 		// Sanitize and trim the short_description to match requirements.
 		$this->short_description = $this->sanitize_text( $this->short_description );
 		$this->short_description = $this->parse_markdown( $this->short_description );
 		$this->short_description = wp_strip_all_tags( $this->short_description );
-		$this->short_description = $this->trim_length( $this->short_description, 150 );
+		$short_description       = $this->trim_length( $this->short_description, 150 );
+		if ( $short_description !== $this->short_description ) {
+			if ( empty( $this->warnings['no_short_description_present'] ) ) {
+				$this->warnings['trimmed_short_description'] = true;
+			}
+			$this->short_description = $short_description;
+		}
 
 		if ( isset( $this->sections['screenshots'] ) ) {
 			preg_match_all( '#<li>(.*?)</li>#is', $this->sections['screenshots'], $screenshots, PREG_SET_ORDER );
@@ -464,7 +487,7 @@ class Parser {
 			}
 		}
 
-		return $line;
+		return $line ?? '';
 	}
 
 	/**
@@ -504,6 +527,31 @@ class Parser {
 		}
 
 		return trim( $desc );
+	}
+
+	/**
+	 * Parse a line to see if it's a header.
+	 *
+	 * @access protected
+	 *
+	 * @param string $line       The line from the readme to parse.
+	 * @param bool   $only_valid Whether to only return a valid known header.
+	 * @return false|array
+	 */
+	protected function parse_possible_header( $line, $only_valid = false ) {
+		if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
+			return false;
+		}
+
+		list( $key, $value ) = explode( ':', $line, 2 );
+		$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+		$value               = trim( $value, " \t*-\r\n" );
+
+		if ( $only_valid && ! isset( $this->valid_headers[ $key ] ) ) {
+			return false;
+		}
+
+		return [ $key, $value ];
 	}
 
 	/**

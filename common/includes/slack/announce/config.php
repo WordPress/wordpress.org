@@ -133,6 +133,7 @@ function get_whitelist() {
 			'pbiron',
 			'priethor',
 			'psykro', // @Jonathan on Slack
+			'rajinsharwar', // @Rajin Sharwar on Slack
 			'sabernhardt',
 			'sncoker', // @shawntellecoker on Slack
 			'thelmachido', // @thelmachido-zw on Slack
@@ -278,7 +279,7 @@ function get_whitelist() {
 			'tweetythierry', // @Thierry Muller on Slack
 		) ),
 		'core-test' => array_merge( get_committers(), array(
-			'ankit-k-gupta', // @Ankit K Gupta on Slack
+			'Ankit K Gupta', // @Ankit K Gupta on Slack
 			'Boniu91', // @Piotrek Boniu on Slack
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
@@ -380,9 +381,12 @@ function get_whitelist() {
 			'brettface',
 		),
 		'marketing' => array(
+			'bernard0omnisend', // Bernard Meyer on Slack
 			'eidolonnight',
 			'lmurillom',
 			'nalininonstopnewsuk', // @Nalini on Slack
+			'ngreennc', // @Nyasha G on Slack
+			'ninianepress', // @jenni on Slack
 			'robinwpdeveloper',
 			'santanainniss',
 			'SeReedMedia',
@@ -411,6 +415,7 @@ function get_whitelist() {
 		'meta-learn' => array(
 			'coreymckrill',
 			'courane01', // @Courtney on Slack
+			'digitalchild', // @Jamie Madden on Slack
 			'psykro', // @Jonathan on Slack
 			'tellyworth',
 		),
@@ -512,6 +517,7 @@ function get_whitelist() {
 			'hardeepasrani',
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
+			'lada7042',
 			'meaganhanes',
 			'mrfoxtalbot',
 			'ndiego',

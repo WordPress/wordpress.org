@@ -19,6 +19,13 @@ class HelpScout {
 
 		// Trim off the rejected prefix/suffix.
 		$slug   = preg_replace( '/(^rejected-|-rejected(-\d)?$)/i', '', $post->post_name );
+
+		// If the slug is not set, we can't query HelpScout.
+		if ( ! $post->post_name || ! $slug ) {
+			echo 'Invalid Slug, cannot query emails.';
+			return;
+		}
+
 		$emails = $wpdb->get_results( $wpdb->prepare(
 			"SELECT emails.*
 				FROM %i emails

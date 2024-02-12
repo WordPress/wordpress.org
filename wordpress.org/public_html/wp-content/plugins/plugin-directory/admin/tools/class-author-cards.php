@@ -75,20 +75,21 @@ class Author_Cards {
 			return;
 		}
 
-		$usernames = ! empty( $_POST['users'] ) ? $_POST['users'] : '';
+		$usernames = ! empty( $_REQUEST['users'] ) ? $_REQUEST['users'] : '';
 
 		echo '<div class="wrap author-cards">';
 		echo '<h1>' . __( 'Author Cards', 'wporg-plugins' ) . '</h1>';
 
 		echo '<p>' . __( 'This is a tool to display an author card for one or more specified users.', 'wporg-plugins' ) . '</p>';
 
-		echo '<form method="post">';
+		echo '<form method="GET">';
 		echo '<table class="form-table"><tbody><tr>';
 		echo '<th scope="row"><label for="users">' . __( 'Users', 'wporg-plugins' ) . '</label></th><td>';
+		echo '<input name="page" type="hidden" value="' . esc_attr( $_REQUEST['page'] ) . '">';
 		echo '<input name="users" type="text" id="users" value="' . esc_attr( $usernames ) . '" class="regular-text">';
 		echo '<p>' . __( 'Comma-separated list of user slugs, logins, and/or email addresses.', 'wporg-plugins' ) . '</p>';
 		echo '</td></tr></tbody></table>';
-		echo '<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="' . esc_attr__( 'Submit', 'wporg-plugins' ) . '"></p>';
+		echo '<p class="submit"><input type="submit" id="submit" class="button button-primary" value="' . esc_attr__( 'Submit', 'wporg-plugins' ) . '"></p>';
 		echo '</form>';
 
 		if ( $usernames ) {

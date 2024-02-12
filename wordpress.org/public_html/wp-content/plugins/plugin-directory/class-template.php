@@ -725,13 +725,20 @@ class Template {
 	 * Is a live preview available for the plugin, and allowed for the current user to view?
 	 *
 	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @param 'view'|'edit'     $context Optional. 'view' to check if preview is available for public viewing. 'edit' to also check if available for current user to test. Default: view.
 	 * @return bool	True if a preview is available and the current user is permitted to see it.
 	 */
-	public static function is_preview_available( $post = null ) {
+	public static function is_preview_available( $post = null, $context = 'view' ) {
 
 		if ( self::preview_link( $post ) ) {
-			// Plugin committers can always use the plugin preview button if it exists.
-			if ( current_user_can( 'plugin_admin_edit', $post ) ) {
+			// Plugin committers can use the plugin preview button to test if a blueprint exists.
+			if ( 'edit' === $context && current_user_can( 'plugin_admin_edit', $post ) ) {
+				return true;
+			}
+
+			// Other users can only use the preview button if plugin committers have enabled it.
+			$post = get_post( $post );
+			if ( get_post_meta( $post->ID, '_public_preview', true ) ) {
 				return true;
 			}
 		}
@@ -747,19 +754,88 @@ class Template {
 	public static function preview_link( $post = null ) {
 		$post = get_post( $post );
 
-		$blueprints = get_post_meta( $post->ID, 'assets_blueprints', true );
+		$blueprints = self::get_blueprints( $post );
 		// Note: for now, only use a file called `blueprint.json`.
 		if ( !isset( $blueprints['blueprint.json'] ) ) {
 			return false;
 		}
 		$blueprint = $blueprints['blueprint.json'];
-		if ( !$blueprint || !isset( $blueprint['contents'] ) || !is_string( $blueprint['contents'] ) ) {
+
+		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), esc_attr($blueprint['url'] ) );
+	}
+
+	/**
+	 * Generate a live preview (playground) link for a zip attachment. Needed for newly uploaded plugins that have not yet been published.
+	 *
+	 * @param string $slug            The slug of the plugin post.
+	 * @param int $attachment_id      The ID of the attachment post corresponding to a plugin zip file. Must be attached to the post identified by $slug.
+	 * @return false|string           The preview URL.
+	 */
+	public static function preview_link_zip( $slug, $attachment_id, $type = null ) {
+
+		$zip_hash = self::preview_link_hash( $attachment_id );
+		if ( !$zip_hash ) {
 			return false;
 		}
+		$zip_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?zip_hash=%s', esc_attr( $slug ), esc_attr( $zip_hash ) );
+		if ( is_string( $type ) ) {
+			$zip_blueprint = add_query_arg( 'type', strval( $type ), $zip_blueprint );
+		}
+		$zip_preview = add_query_arg( 'blueprint-url', urlencode($zip_blueprint), 'https://playground.wordpress.net/' );
 
-		$blueprint_encoded = esc_html( str_replace( '%', '%25', $blueprint['contents'] ) );
+		return $zip_preview;
+	}
 
-		return sprintf( 'https://playground.wordpress.net/?plugin=%s#%s', $post->post_name, $blueprint_encoded );
+	/**
+	 * Return a time-dependent variable for zip preview links.
+	 *
+	 * @param int $lifespan           The life span of the nonce, in seconds. Default is one week.
+	 * @return float                  The tick value.
+	 */
+	public static function preview_link_tick( $lifespan = WEEK_IN_SECONDS ) {
+		return ceil( time() / ( $lifespan / 2 ) );
+	}
+
+	/**
+	 * Return a nonce-style hash for zip preview links.
+	 *
+	 * @param int $attachment_id      The ID of the attachment post corresponding to a plugin zip file.
+	 * @param int $tick_offest        Number to subtract from the nonce tick. Use both 0 and -1 to verify older nonces.
+	 * @return false|string           The hash as a hex string; or false if the attachment ID is invalid.
+	 */
+	public static function preview_link_hash( $attachment_id, $tick_offset = 0 ) {
+		$file = get_attached_file( $attachment_id );
+		if ( !$file ) {
+			return false;
+		}
+		$tick = self::preview_link_tick() - $tick_offset;
+		return wp_hash( $tick . '|' . $file, 'nonce' );
+	}
+
+	/**
+	 * Return a list of blueprints for the given plugin.
+	 *
+	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @return array An array of blueprints.
+	 */
+	public static function get_blueprints( $post = null ) {
+		$post = get_post( $post );
+
+		$out = array();
+
+		$blueprints = get_post_meta( $post->ID, 'assets_blueprints', true );
+		if ( $blueprints ) {
+			foreach ( $blueprints as $filename => $item ) {
+				if ( isset( $item['contents'] ) ) {
+					$out[ $filename ] = array(
+						'filename' => $filename,
+						'url' => sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?rev=%d', $post->post_name, $item['revision'] )
+					);
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	/**
@@ -907,6 +983,32 @@ class Template {
 			'licensing-trademark-violation' => __( 'Licensing/Trademark Violation', 'wporg-plugins' ),
 			'merged-into-core'              => __( 'Merged into Core', 'wporg-plugins' ),
 			'unused'                        => __( 'Unused', 'wporg-plugins' ),
+		);
+	}
+
+	/**
+	 * Returns the reasons for rejecting a plugin.
+	 *
+	 * @return array Rejection reason labels.
+	 */
+	public static function get_rejection_reasons() {
+		return array(
+			'3-month'              => '3 months without completion',
+			'core-supports'        => 'Code is already in core',
+			'duplicate-copy'       => 'Duplicate (copy) of another Plugin',
+			'library-or-framework' => 'Framework or Library Plugin',
+			'generic'              => "Something we're just not hosting",
+			'duplicate'            => 'New/renamed version of their own plugin',
+			'wp-cli'               => 'WP-CLI Only Plugins',
+			'storefront'           => 'Storefront',
+			'not-owner'            => 'Not the submitters plugin',
+			'script-insertion'     => 'Script Insertion Plugins are Dangerous',
+			'demo'                 => 'Test/Demo plugin (non functional)',
+			'translation'          => 'Translation of existing plugin',
+			'banned'               => 'Banned developer trying to sneak back in',
+			'author-request'       => 'Author requested not to continue',
+			'security'             => 'Security concerns',
+			'other'                => 'OTHER: See notes',
 		);
 	}
 

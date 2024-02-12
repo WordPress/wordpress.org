@@ -8,6 +8,79 @@ _get_list_table( 'WP_Posts_List_Table' );
 
 class Plugin_Posts extends \WP_Posts_List_Table {
 
+	protected $column_order = [
+		'cb',
+		'title',
+		'author',
+		'reviewer',
+		'zip',
+		'loc',
+		'comments',
+	];
+
+	/**
+	 * Engage the filters.
+	 */
+	public function __construct() {
+		parent::__construct();
+
+		add_filter( "manage_{$this->screen->post_type}_posts_columns", [ $this, 'filter_columns' ], 100 );
+		add_filter( "manage_{$this->screen->id}_sortable_columns", [ $this, 'filter_sortable_columns' ], 100 );
+		add_filter( 'hidden_columns', [ $this, 'filter_hidden_columns' ], 100, 3 );
+	}
+
+	/**
+	 * Add the custom columns and set the order.
+	 */
+	public function filter_columns( $columns ) {
+		// Rename some columns.
+		$columns['author']   = __( 'Submitter', 'wporg-plugins' );
+		$columns['reviewer'] = __( 'Assigned Reviewer', 'wporg-plugins' );
+		$columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class="screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
+		$columns['zip']      = 'Latest Zip';
+		$columns['loc']      = 'Lines of PHP Code'; 
+
+		// We don't want the stats column.
+		unset( $columns['stats'] );
+
+		$columns = array_merge( array_flip( $this->column_order ), $columns );
+
+		return $columns;
+	}
+
+	/**
+	 * The sortable columns.
+	 */
+	public function filter_sortable_columns( $columns ) {
+		$columns[ 'reviewer' ] = [ 'assigned_reviewer_time', 'asc' ];
+		$columns[ 'zip' ]      = [ '_submitted_zip_size', 'asc' ];
+		$columns[ 'loc' ]      = [ '_submitted_zip_loc', 'asc' ];
+
+		return $columns;
+	}
+
+	/**
+	 * Hide some fields by default.
+	 */
+	public function filter_hidden_columns( $columns, $screen, $use_defaults ) {
+		if ( $screen->id !== $this->screen->id ) {
+			return $columns;
+		}
+
+		// Hide certain columns on default / published views.
+		if (
+			in_array( $_REQUEST['post_status'] ?? 'all', [ 'all', 'publish', 'disabled', 'closed' ] ) &&
+			empty( $_REQUEST['author'] ) &&
+			empty( $_REQUEST['reviewer'] )
+		) {
+			$columns[] = 'reviewer';
+			$columns[] = 'zip';
+			$columns[] = 'loc';
+		}
+
+		return $columns;
+	}
+
 	/**
 	 *
 	 * @global array     $avail_post_stati
@@ -99,51 +172,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		return $actions;
-	}
-
-	/**
-	 *
-	 * @return array
-	 */
-	public function get_columns() {
-		$post_type     = $this->screen->post_type;
-		$posts_columns = array(
-			'cb'       => '<input type="checkbox" />',
-			/* translators: manage posts column name */
-			'title'    => _x( 'Title', 'column name', 'wporg-plugins' ),
-			'author'   => __( 'Submitter', 'wporg-plugins' ),
-			'reviewer' => __( 'Assigned Reviewer', 'wporg-plugins' ),
-		);
-
-		$taxonomies = get_object_taxonomies( $post_type, 'objects' );
-		$taxonomies = wp_filter_object_list( $taxonomies, array( 'show_admin_column' => true ), 'and', 'name' );
-		$taxonomies = apply_filters( "manage_taxonomies_for_{$post_type}_columns", $taxonomies, $post_type );
-		$taxonomies = array_filter( $taxonomies, 'taxonomy_exists' );
-
-		foreach ( $taxonomies as $taxonomy ) {
-			$column_key                   = 'taxonomy-' . $taxonomy;
-			$posts_columns[ $column_key ] = get_taxonomy( $taxonomy )->labels->name;
-		}
-
-		$posts_columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class="screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
-		$posts_columns['date']     = __( 'Date', 'wporg-plugins' );
-
-		/**
-		 * Filter the columns displayed in the Plugins list table.
-		 *
-		 * @param array  $posts_columns An array of column names.
-		 * @param string $post_type     The post type slug.
-		 */
-		$posts_columns = apply_filters( 'manage_posts_columns', $posts_columns, $post_type );
-
-		/**
-		 * Filter the columns displayed in the Plugins list table.
-		 *
-		 * The dynamic portion of the hook name, `$post_type`, refers to the post type slug.
-		 *
-		 * @param array $post_columns An array of column names.
-		 */
-		return apply_filters( "manage_{$post_type}_posts_columns", $posts_columns );
 	}
 
 	/**
@@ -600,6 +628,16 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				<?php endforeach; ?>
 			</select>
 		</fieldset>
+
+		<fieldset class="alignleft actions hide-if-js bulk-plugin_reject" disabled="disabled">
+			<select name="rejection_reason" id="rejection_reason">
+				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Rejection Reason:', 'wporg-plugins' ); ?></option>
+				<?php foreach ( Template::get_rejection_reasons() as $key => $label ) : ?>
+					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</fieldset>
+
 		<?php
 
 		// Output the JS+CSS needed
@@ -652,6 +690,43 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 					human_time_diff( $reviewer_time )
 				)
 			);
+		} else {
+			echo '-';
 		}
+	}
+
+	public function column_zip( $post ) {
+		$media = get_attached_media( 'application/zip', $post );
+
+		if ( ! $media || ! in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
+			echo '-';
+			return;
+		}
+
+		foreach ( $media as $zip_file ) {
+			$zip_size = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
+
+			$url  = wp_get_attachment_url( $zip_file->ID );
+			$name = basename( $url );
+			$name = explode( '_', $name, 3 )[2];
+
+			printf(
+				'<a href="%1$s">%2$s</a><br>%3$s<br>(<a href="%4$s" target="_blank">preview</a> | <a href="%5$s" target="_blank">pcp</a>)</li>',
+				esc_url( $url ),
+				esc_html( $name ),
+				esc_html( $zip_size ),
+				esc_url( Template::preview_link_zip( $post->post_name, $zip_file->ID ) ),
+				esc_url( Template::preview_link_zip( $post->post_name, $zip_file->ID, 'pcp' ) )
+			);
+		}
+	}
+
+	public function column_loc( $post ) {
+		if ( ! in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
+			echo '-';
+			return;
+		}
+
+		echo number_format_i18n( (int) $post->_submitted_zip_loc ) ?: '-';
 	}
 }

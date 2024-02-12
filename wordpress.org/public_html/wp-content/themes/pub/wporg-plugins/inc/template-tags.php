@@ -519,6 +519,9 @@ function the_plugin_danger_zone() {
 
 		// Output the self close button.
 		the_plugin_self_close_button();
+
+		// Output the toggle preview button.
+		the_plugin_self_toggle_preview_button();
 	}
 
 }
@@ -569,18 +572,30 @@ function the_plugin_self_toggle_preview_button() {
 	}
 
 	echo '<h4>' . esc_html__( 'Toggle Live Preview', 'wporg-plugins' ) . '</h4>';
-	$preview_status = get_post_meta( $post->ID, '_no_preview', true ) ? 'disabled' : 'enabled';
+	$preview_status = get_post_meta( $post->ID, '_public_preview', true ) ? 'enabled' : 'disabled';
 	if ( 'enabled' === $preview_status ) {
 		echo '<p>' . esc_html__( 'The Live Preview link to Playground is currently enabled. Use the toggle button to disable it.', 'wporg-plugins' ) . '</p>';
 	} else {
 		echo '<p>' . esc_html__( 'The Live Preview link to Playground is currently disabled. Use the toggle button to enable it.', 'wporg-plugins' ) . '</p>';
 	}
 
-	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
-	_e( '<strong>Note:</strong> This only affects the availability of the Live Preview button on the plugin page. It does not prevent a plugin from running in the Playground.', 'wporg-plugins' );
-	echo '</p></div>';
+	$blueprints = get_post_meta( $post->ID, 'assets_blueprints', true );
 
-	if ( $toggle_link ) {
+	if ( !isset( $blueprints[ 'blueprint.json' ] ) ) {
+		echo '<div class="plugin-notice notice notice-error notice-alt"><p>';
+		_e( '<strong>Note:</strong> Missing or invalid blueprint.json file.', 'wporg-plugins' );
+		echo '</p></div>';
+	} elseif ( $toggle_link ) {
+
+		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
+		if ( 'enabled' === $preview_status ) {
+			_e( 'This will disable the Preview button for public users.', 'wporg-plugins' );
+		} else {
+			_e( 'This will enable the Preview button for public users.', 'wporg-plugins' );
+		}
+
+		echo '</p></div>';
+
 		echo '<form method="POST" action="' . esc_url( $toggle_link ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
 		// Translators: %s is the plugin name, as defined by the plugin itself.
 		echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'Please toggle the Live Preview link for %s', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';

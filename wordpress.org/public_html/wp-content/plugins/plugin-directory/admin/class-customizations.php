@@ -7,6 +7,9 @@ use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
 
+use const \WordPressdotorg\Plugin_Directory\PLUGIN_FILE;
+use const \WordPressdotorg\Plugin_Directory\PLUGIN_DIR;
+
 /**
  * All functionality related to the Administration interface.
  *
@@ -29,12 +32,14 @@ class Customizations {
 	private function __construct() {
 		add_filter( 'dashboard_glance_items', array( $this, 'plugin_glance_items' ) );
 
+		add_filter( 'query_vars', array( $this, 'query_vars' ) );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 
 		add_action( 'load-edit.php', array( $this, 'bulk_action_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
 		add_action( 'edit_form_top', array( $this, 'show_permalink' ) );
+		add_action( 'post_edit_form_tag', array( $this, 'post_edit_form_tag' ) );
 		add_action( 'admin_notices', array( $this, 'add_post_status_notice' ) );
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
@@ -127,8 +132,9 @@ class Customizations {
 		if ( 'plugin' === $post_type ) {
 			switch ( $hook_suffix ) {
 				case 'post.php':
-					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 7 );
-					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 5 );
+					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', PLUGIN_FILE ), array( 'edit' ), filemtime( PLUGIN_DIR . '/css/edit-form.css') );
+					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js',PLUGIN_FILE ), array( 'wp-util', 'wp-lists', 'wp-api' ), filemtime( PLUGIN_DIR . '/js/edit-form.js') );
+
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
 						'approvePluginAYS'    => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
 						'rejectPluginAYS'     => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
@@ -189,6 +195,15 @@ class Customizations {
 	}
 
 	/**
+	 * Filter the query vars used in wp-admin.
+	 */
+	public function query_vars( $query_vars ) {
+		$query_vars[] = 'reviewer';
+
+		return $query_vars;
+	}
+
+	/**
 	 * Filter the query in wp-admin to list only plugins relevant to the current user.
 	 *
 	 * @param \WP_Query $query
@@ -214,16 +229,38 @@ class Customizations {
 		}
 
 		// Filter by reviewer.
-		if ( ! empty( $_REQUEST['reviewer'] ) ) {
+		if ( isset( $query->query['reviewer'] ) && strlen( $query->query['reviewer'] ) ) {
 			$meta_query = $query->get( 'meta_query' ) ?: [];
-			$meta_query[] = [
+			$meta_query['assigned_reviewer'] = [
 				'key'   => 'assigned_reviewer',
-				'value' => intval( $_GET['reviewer'] ),
+				'value' => intval( $query->query['reviewer'] ),
+				'type'  => 'unsigned',
 			];
+
+			// Query for no assignee.
+			if ( ! $meta_query['assigned_reviewer']['value'] ) {
+				$meta_query['assigned_reviewer']['compare'] = 'NOT EXISTS';
+			}
 
 			$query->set( 'meta_query', $meta_query );
 		}
 
+		$orderby                    = $query->query['orderby'] ?? '';
+		$possible_orderby_meta_keys = [
+			'assigned_reviewer_time',
+			'_submitted_zip_loc',
+			'_submitted_zip_size',
+		];
+		if ( in_array( $orderby, $possible_orderby_meta_keys, true ) ) {
+			$meta_query = $query->get( 'meta_query' ) ?: [];
+
+			$meta_query[ $orderby ] = [
+				'key'     => $orderby,
+				'type'    => 'unsigned',
+			];
+
+			$query->set( 'meta_query', $meta_query );
+		}
 	}
 
 	/**
@@ -371,6 +408,15 @@ class Customizations {
 	}
 
 	/**
+	 * Allow file uploads within the plugin edit screen.
+	 */
+	public function post_edit_form_tag( $post ) {
+		if ( 'plugin' === $post->post_type ) {
+			echo ' enctype="multipart/form-data"';
+		}
+	}
+
+	/**
 	 * Adds banners to provide a clearer status for a plugin.
 	 *
 	 * This is being displayed in the edit screen for a particular plugin,
@@ -442,7 +488,7 @@ class Customizations {
 			$post_status = $_REQUEST['post_status'];
 		}
 
-		if ( 'disabled' == $post->post_status && 'disabled' != $post_status ) {
+		if ( 'disabled' == $post->post_status ) {
 			$post_states['disabled'] = _x( 'Disabled', 'plugin status', 'wporg-plugins' );
 			// Affix the reason it's disabled.
 			$reason = Template::get_close_reason( $post );
@@ -450,7 +496,8 @@ class Customizations {
 				$post_states['reason'] = $reason;
 			}
 		}
-		if ( 'closed' == $post->post_status && 'closed' != $post_status ) {
+
+		if ( 'closed' == $post->post_status ) {
 			$post_states['closed'] = _x( 'Closed', 'plugin status', 'wporg-plugins' );
 			// Affix the reason it's closed.
 			$reason = Template::get_close_reason( $post );
@@ -458,8 +505,14 @@ class Customizations {
 				$post_states['reason'] = $reason;
 			}
 		}
-		if ( 'rejected' == $post->post_status && 'rejected' != $post_status ) {
+
+		if ( 'rejected' == $post->post_status ) {
 			$post_states['rejected'] = _x( 'Rejected', 'plugin status', 'wporg-plugins' );
+
+			if ( $post->_rejection_reason ) {
+				$post_states['reason'] = Template::get_rejection_reasons()[ $post->_rejection_reason ] ?? '';
+			}
+
 		}
 		if ( 'approved' == $post->post_status && 'approved' != $post_status ) {
 			$post_states['approved'] = _x( 'Approved', 'plugin status', 'wporg-plugins' );
@@ -491,6 +544,16 @@ class Customizations {
 				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
 				$data['post_name']
 			) );
+		}
+
+		// Record the slug change.
+		$plugin = get_post( $postarr['ID'] );
+		if ( $plugin && $plugin->post_name !== $data['post_name'] ) {
+			Tools::audit_log( sprintf(
+				"Slug changed from '%s' to '%s'.",
+				$plugin->post_name,
+				$data['post_name']
+			), $plugin->ID );
 		}
 
 		return $data;

@@ -346,13 +346,13 @@ class Posts {
 	 * by the current user.
 	 *
 	 * @param string $orderby The field to order posts by when determining the
-	 *                        next post in queue. Default 'date'.
+	 *                        next post in queue, e.g. 'date'. Default 'rand'.
 	 * @param string $order   The sort order used when determining the next post
 	 *                        in queue. Either 'ASC' or 'DESC'. Default 'ASC'.
 	 * @return WP_Post|false The next post, or false if there are no other posts
 	 *                       available for the user to moderate.
 	 */
-	public static function get_next_post_in_queue( $orderby = 'date', $order = 'ASC' ) {
+	public static function get_next_post_in_queue( $orderby = 'rand', $order = 'ASC' ) {
 		$next = false;
 
 		if ( 'rand' === $orderby ) {

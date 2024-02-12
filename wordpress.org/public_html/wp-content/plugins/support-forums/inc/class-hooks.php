@@ -734,12 +734,8 @@ class Hooks {
 					if( $is_reviews ) {
 						echo $searchform;
 					} else {
-						printf(
-							/* translators: 1: markup for forums search field which is primary action, 2: markup for button to create topic */
-							__( '%1$s or %2$s', 'wporg-forums' ),
-							$searchform,
-							$btn
-						);
+						echo $searchform;
+						echo $btn;
 					}
 				} else {
 					echo $btn;

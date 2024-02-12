@@ -43,7 +43,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			steps: tourSteps,
 			onHighlightStarted( element, step ) {
 				step.popover.description +=
-					'<br><a href="" class="dismiss-tour">Dismiss the tour';
+					'<br><button class="dismiss-tour">Dismiss the tour';
 			},
 			onHighlighted( element, step, options ) {
 				tour_plugin.progress[ tourId ] = options.state.activeIndex + 1;
@@ -206,6 +206,17 @@ document.addEventListener( 'DOMContentLoaded', function () {
 						'animation: animation-' +
 						tourId +
 						' 2s infinite; }',
+					style.cssRules.length
+				);
+
+				style.insertRule(
+					'@media (prefers-reduced-motion: reduce) {' +
+						'.tour-' +
+						tourId +
+						'{' +
+						'box-shadow: none !important;' +
+						'}' +
+						'}',
 					style.cssRules.length
 				);
 			}

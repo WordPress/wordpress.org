@@ -10,10 +10,10 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			wp_safe_redirect( '/news/feed/' . ( 'feed' !== get_query_var('feed') ? get_query_var('feed') : '' ), 301 );
 			exit;
 
-		// temp fix for /B;ocks, rm later
+		// temp fix for /Blocks, rm later
 		} elseif ( 0 === strpos( $_SERVER['REQUEST_URI'], '/Blocks' ) ) {
 			wp_safe_redirect( '/blocks/', 301 );
-		   	exit;
+			exit;
 
 		// WordPress.org does not have a specific site search, only the global WordPress.org search
 		} elseif ( ! empty( $_GET['s'] ) && false === strpos( $_SERVER['REQUEST_URI'], '/search/' ) ) {
@@ -49,16 +49,28 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 
 				// Hashtag alias for State of the Word
 				'/sotw' => 'https://wordpress.org/state-of-the-word/',
+
+				// Events
+				'/events' => 'https://events.wordpress.org/',
+				'/meet'   => 'https://events.wordpress.org/',
+
+				// Data Liberation
+				'/and' => '/data-liberation/',
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
 				if ( 0 === strpos( $_SERVER['REQUEST_URI'], $test ) ) {
 
+					$code = 301;
+					if ( is_array( $redirect ) ) {
+						list( $code, $redirect ) = $redirect;
+					}
+
 					// override nocache_headers();
 					header_remove( 'expires' );
 					header_remove( 'cache-control' );
 
-					wp_safe_redirect( $redirect, 301 );
+					wp_safe_redirect( $redirect, $code );
 					exit;
 				}
 			}
@@ -274,3 +286,28 @@ add_action( 'template_redirect', function() {
 	wp_safe_redirect( 'https://learn.wordpress.org/course-category/contributing-to-wordpress/', 301, 'Contributor Training to Learn' );
 	exit;
 } );
+
+/**
+ * Redirect developer.wp.org/playground/ to github documentation.
+ */
+add_action( 'template_redirect', function() {
+	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
+	if ( 'developer.wordpress.org' !== $_SERVER['HTTP_HOST'] || ! str_starts_with( $path, '/playground' ) ) {
+		return;
+	}
+
+	wp_redirect( 'https://wordpress.github.io/wordpress-playground/', 301 );
+	exit;
+} );
+
+// Add wp.org redirect from developer.wp.org see: https://github.com/WordPress/wporg-developer/issues/452
+add_action( 'parse_request', function() {
+	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
+	if ( 'developer.wordpress.org' !== $_SERVER['HTTP_HOST'] || '/themes/getting-started/wordpress-licensing-the-gpl/' !== $path ) {
+		return;
+	}
+
+	wp_safe_redirect( '	https://wordpress.org/about/license/', 301, 'wporg dev redirect'  );
+	exit;
+} );
+

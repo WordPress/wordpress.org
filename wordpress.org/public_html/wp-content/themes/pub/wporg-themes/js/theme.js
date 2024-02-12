@@ -1583,7 +1583,7 @@ window.wp = window.wp || {};
 			'click .filter-drawer .apply-filters': 'applyFilters',
 			'click .filter-group [type="checkbox"]': 'addFilter',
 			'click .filter-drawer .clear-filters': 'clearFilters',
-			'click .filtered-by': 'backToFilters'
+			'click .filtered-by a': 'backToFilters'
 		},
 
 		activeClass: 'current',

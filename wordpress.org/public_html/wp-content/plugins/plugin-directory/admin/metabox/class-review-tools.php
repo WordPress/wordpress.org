@@ -127,16 +127,30 @@ class Review_Tools {
 			foreach ( $zip_files as $zip_date => $zip ) {
 				list( $zip_url, $zip_file ) = $zip;
 				$zip_size                   = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
+				$zip_preview                = Template::preview_link_zip( $slug, $zip_file->ID );
+				$zip_pcp                    = Template::preview_link_zip( $slug, $zip_file->ID, 'pcp' );
 
 				printf(
-					'<li>%1$s <a href="%2$s">%3$s</a> (%4$s)</li>',
+					'<li>%1$s v%2$s <a href="%3$s" title="%4$s">%5$s</a> (%6$s) (<a href="%7$s" target="_blank">preview</a> | <a href="%8$s" target="_blank">pcp</a>)</li>',
 					esc_html( $zip_date ),
+					esc_html( $zip_file->version ),
 					esc_url( $zip_url ),
-					esc_html( basename( $zip_url ) ),
-					esc_html( $zip_size )
+					esc_attr( $zip_file->post_title ),
+					esc_html( $zip_file->submitted_name ),
+					esc_html( $zip_size ),
+					esc_url( $zip_preview ),
+					esc_url( $zip_pcp )
 				);
 			}
 			echo '</ul>';
+		}
+
+		// Ability to upload an additional ZIP.
+		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
+			echo '<label>
+				<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+				<button class="button button-secondary plugin-upload-zip">' . __( 'Upload', 'wporg-plugins' ) . '</button>
+				</label>';
 		}
 
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {

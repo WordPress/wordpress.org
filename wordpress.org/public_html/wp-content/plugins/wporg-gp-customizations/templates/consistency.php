@@ -23,6 +23,19 @@ gp_tmpl_header();
 			$locale_options = [
 				'' => 'Select a locale',
 			];
+			$sets_to_hide = array(
+				'ca/valencia',
+				'nl/formal/default',
+				'en/formal',
+				'en/default',
+				'fr/formal',
+				'de/formal/default',
+				'de-ch/info/default',
+				'pt/ao90/default',
+				'sr/latin',
+				'sr/latin/latin',
+			);
+			$sets = array_diff_key( $sets, array_flip( $sets_to_hide ) );
 			$locale_options = array_merge( $locale_options, $sets );
 			echo gp_select(
 				'set',
@@ -189,10 +202,12 @@ if ( $performed_search && ! $results ) {
 
 				$project_name      = $result->project_name;
 				$parent_project_id = $result->project_parent_id;
+				$is_active = $result->active;
 				while ( $parent_project_id ) {
 					$parent_project    = GP::$project->get( $parent_project_id );
 					$parent_project_id = $parent_project->parent_project_id;
-					$project_name      = "{$parent_project->name} - {$project_name}";
+					$project_name = "{$parent_project->name} - {$project_name}";
+					$is_active = $is_active && $parent_project->active;
 				}
 
 				$original_context = '';
@@ -203,18 +218,28 @@ if ( $performed_search && ! $results ) {
 					);
 				}
 
+				if( $is_active ) {
+					$active_text = '';
+				} else {
+					$active_text = sprintf(
+						' <span class="dashicons dashicons-flag"></span><span class="inactive">%s</span>',
+						esc_translation( '(inactive)' )
+					);
+				}
+
 				printf(
 					'<tr class="%s"><td>%s</td><td>%s</td></tr>',
 					isset( $parent_project->name ) ? sanitize_title( 'project-' . $parent_project->name ) : '',
 					sprintf(
 						'<div class="string">%s%s</div>
-						<div class="meta">Project: <a href="/projects/%s/%s/">%s</a></div>',
+						<div class="meta">Project: <a href="/projects/%s/%s/">%s</a>%s</div>',
 						esc_translation( $result->original_singular ),
 						$original_context,
 						$result->project_path,
 						$set,
-						$project_name
-					),
+						$project_name,
+						$active_text
+				),
 					sprintf(
 						'<div class="string%s">%s</div>
 						<div class="meta">
