@@ -114,6 +114,7 @@ class Upload_Handler {
 
 		if ( $unexpected_files ) {
 			$unexpected_files = array_map( 'basename', $unexpected_files );
+			$unexpected_files = array_map( 'esc_html', $unexpected_files );
 
 			$error = __( 'Error: The plugin contains unexpected files.', 'wporg-plugins' );
 			return new WP_Error( 'unexpected_files', $error . ' ' . sprintf(
