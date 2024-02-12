@@ -372,18 +372,6 @@ class Posts {
 			'posts_per_page' => 1,
 			'post_status'    => 'pending',
 			'post_type'      => Registrations::get_post_type(),
-			'meta_query'     => [
-				'relation'   => 'OR',
-				[
-					'key'     => '_edit_lock',
-					'compare' => 'NOT EXISTS',
-				],
-				[
-					'key'     => '_edit_lock',
-					'value'   => '',
-					'compare' => '='
-				],
-			],
 		] );
 
 		if ( $posts ) {
