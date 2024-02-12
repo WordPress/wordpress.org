@@ -546,6 +546,16 @@ class Customizations {
 			) );
 		}
 
+		// Record the slug change.
+		$plugin = get_post( $postarr['ID'] );
+		if ( $plugin && $plugin->post_name !== $data['post_name'] ) {
+			Tools::audit_log( sprintf(
+				"Slug changed from '%s' to '%s'.",
+				$plugin->post_name,
+				$data['post_name']
+			), $plugin->ID );
+		}
+
 		return $data;
 	}
 
