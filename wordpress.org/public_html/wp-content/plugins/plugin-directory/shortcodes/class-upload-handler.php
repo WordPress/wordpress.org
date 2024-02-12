@@ -895,7 +895,7 @@ class Upload_Handler {
 	public static function find_review_email( $post ) {
 		global $wpdb;
 
-		if ( 'pending' !== $post->post_status ) {
+		if ( 'pending' !== $post->post_status || ! $post->post_name ) {
 			return false;
 		}
 
