@@ -197,11 +197,37 @@ function wporg_login_admin_settings_page() {
 		if ( $ip_block || $ip_allow ) {
 			wp_cache_add_global_groups( array( 'registration-limit' ) );
 
+			$expand_to_range = function( $ip ) {
+				$ip  = trim( $ip );
+				$ips = [ $ip ];
+				if ( str_ends_with( $ip, '.*' ) ) {
+					$ips = [];
+					$ip  = substr( $ip, 0, -2 );
+					foreach ( range( 0, 255 ) as $i ) {
+						$ips[] = $ip . '.' . $i;
+					}
+				}
+
+				return $ips;
+			};
+
 			if ( $ip_allow ) {
-				wp_cache_set( $ip_allow, 'whitelist', 'registration-limit', DAY_IN_SECONDS );
+				$time_to_allow = wp_unslash( $_POST['ip_allow_time'] ?? DAY_IN_SECONDS );
+				$ip_allow      = $expand_to_range( $ip_allow );
+				foreach ( $ip_allow as $ip ) {
+					wp_cache_set( $ip, 'whitelist', 'registration-limit', $time_to_allow );
+				}
+
+				printf( '<div class="notice notice-success"><p>%d IPs added to the allow list.</p></div>', count( $ip_allow ) );
 			}
 			if ( $ip_block ) {
-				wp_cache_set( $ip_block, 999, 'registration-limit', DAY_IN_SECONDS );
+				$time_to_block = wp_unslash( $_POST['ip_block_time'] ?? DAY_IN_SECONDS );
+				$ip_block      = $expand_to_range( $ip_block );
+				foreach ( $ip_block as $ip ) {
+					wp_cache_set( $ip, 999, 'registration-limit', $time_to_block );
+				}
+
+				printf( '<div class="notice notice-success"><p>%d IPs blocked from registration.</p></div>', count( $ip_block ) );
 			}
 		}
 
@@ -252,18 +278,28 @@ function wporg_login_admin_settings_page() {
 	);
 
 	echo '<tr>
-		<th>IP Block for 24hrs</th>
+		<th>IP Block</th>
 		<td>
-			<input class="regular-text" type="text" name="ip_block" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" placeholder="xxx.xxx.xxx.xxx">
-			<p><em>One IP only. IP will be blocked from registrations for 24hrs. </em></p>
+			<input class="regular-text" type="text" name="ip_block" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]|[*])$" placeholder="xxx.xxx.xxx.xxx">
+			<select name="ip_block_time">
+				<option value="86400">24hrs</option>
+				<option value="604800">7 days</option>
+				<option value="2592000">30 days</option>
+			</select>
+			<p><em>Single IP, or range specified as <code>1.2.3.*</code>. IP will be blocked from registrations for the selected time period. </em></p>
 		</td>
 	</tr>';
 
 	echo '<tr>
-		<th>IP Allow for 24hrs</th>
+		<th>IP Allow</th>
 		<td>
-			<input class="regular-text" type="text" name="ip_allow" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" placeholder="xxx.xxx.xxx.xxx">
-			<p><em>One IP only. IP will bypass per-IP limits on registrations for 24hrs. Will also bypass Jetpack Protect login limiter.</em></p>
+			<input class="regular-text" type="text" name="ip_allow" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]|[*])$" placeholder="xxx.xxx.xxx.xxx">
+			<select name="ip_allow_time">
+				<option value="86400">24hrs</option>
+				<option value="259200">3 days</option>
+				<option value="604800">7 days</option>
+			</select>
+			<p><em>Single IP, or range specified as <code>1.2.3.*</code>. IP will bypass per-IP limits on registrations for the selected time period. Will also bypass Jetpack Protect login limiter.</em></p>
 		</td>
 	</tr>';
 
