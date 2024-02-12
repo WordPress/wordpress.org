@@ -349,10 +349,12 @@ class Posts {
 	 *                        next post in queue, e.g. 'date'. Default 'rand'.
 	 * @param string $order   The sort order used when determining the next post
 	 *                        in queue. Either 'ASC' or 'DESC'. Default 'ASC'.
+	 * @param int[]  $exclude Array of post IDs to exclude from being selected
+	 *                        next. Default empty array.
 	 * @return WP_Post|false The next post, or false if there are no other posts
 	 *                       available for the user to moderate.
 	 */
-	public static function get_next_post_in_queue( $orderby = 'rand', $order = 'ASC' ) {
+	public static function get_next_post_in_queue( $orderby = 'rand', $order = 'ASC', $exclude = [] ) {
 		$next = false;
 
 		if ( 'rand' === $orderby ) {
@@ -366,6 +368,7 @@ class Posts {
 			'author__not_in' => [ get_current_user_id() ],
 			'order'          => $order,
 			'orderby'        => $orderby,
+			'post__not_in'   => $exclude,
 			'posts_per_page' => 1,
 			'post_status'    => 'pending',
 			'post_type'      => Registrations::get_post_type(),
