@@ -98,7 +98,7 @@ class Controls {
 		$active_installs   = (int) get_post_meta( $post->ID, 'active_installs', true );
 
 		$close_reason_label     = Template::get_close_reason();
-		$close_reason_unknown   = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $reason_label );
+		$close_reason_unknown   = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $close_reason_label );
 		$rejection_reason_label = $rejection_reasons[ $rejection_reason ] ?? $rejection_reasons[ 'other' ];
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
