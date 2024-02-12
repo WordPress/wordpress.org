@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
+	// Move the 'current' menu class to the link to a post status specific menu link if appropriate.
+	const searchParams = new URLSearchParams(document.location.search);
+	if (window.location.pathname.endsWith('edit.php') && searchParams.has('post_status')) {
+		const linkToPostStatus = document.querySelector('.wp-submenu a[href="edit.php?post_type=' + searchParams.get('post_type') + '&post_status=' + searchParams.get('post_status') + '"]');
+		if (linkToPostStatus) {
+			// Remove existing 'current' classes.
+			document.querySelectorAll('.wp-submenu .current').forEach( n => n.classList.remove('current') );
+			// Assign 'current' class to new menu item and link.
+			linkToPostStatus.classList.add('current');
+			linkToPostStatus.parentElement?.classList.add('current');
+		}
+	}
+
 	// Convert Orientations taxonomy checkboxes to radio buttons.
 	document.querySelectorAll('#photo_orientationchecklist input[type="checkbox"]').forEach((item) => {item.setAttribute('type', 'radio');});
 
