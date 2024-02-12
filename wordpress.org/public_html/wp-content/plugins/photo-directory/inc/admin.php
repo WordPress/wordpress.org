@@ -1508,15 +1508,20 @@ class Admin {
 	/**
 	 * Randomizes the list of posts in the queue.
 	 *
-	 * Note: Can be disabled via query string: ?random=0
+	 * Note: Can be disabled if explicitly sorting via a post field or via query string: ?random=0
 	 */
 	public static function randomize_the_queue( $query ) {
 		if ( ! is_admin() ) {
 			return;
 		}
 
-		// Don't randomize if disabled via query parameter.
+		// Bail if disabled via query parameter.
 		if ( '0' === $query->get( 'random' ) ) {
+			return;
+		}
+
+		// Bail if already explicitly sorting by a post field.
+		if ( ! empty( $_GET['orderby'] ) && 'random' !== $_GET['orderby'] ) {
 			return;
 		}
 
