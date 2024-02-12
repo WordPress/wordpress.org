@@ -379,7 +379,7 @@ class Flagged {
 	 * @return array
 	 */
 	public static function add_custom_status_to_quick_edit( $args ) {
-		$args['include'] = array_merge( $args['include'], [ self::get_post_status() ] );
+		$args['include'] = array_merge( $args['include'] ?? [], [ self::get_post_status() ] );
 		return $args;
 	}
 
