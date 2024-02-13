@@ -31,13 +31,13 @@ $banner_url = 'https://wordpress.org/state-of-the-word/';
 
 // The blocks code sets up the layout, but there is also inline CSS to refine things that aren't supported in classic themes.
 $banner_blocks = '<!-- wp:wporg/link-wrapper {"align":"full","layout":{"type":"constrained"}} -->
-<a class="wp-block-wporg-link-wrapper alignfull" style="background-color:#0a4b78;color:#fff;font-size:16px;" href="' . $banner_url . '"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
-<div class="wp-block-group" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px;gap:10px;"><!-- wp:image {"width":45,"height":29,"sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized" style="flex-shrink: 0;"><img src="https://wordpress.org/files/2023/05/wp20-logo-white.png" alt="" width="45" height="29" /></figure>
+<a class="wp-block-wporg-link-wrapper alignfull" style="background-color:#000000;color:#fff;font-size:16px;" href="' . $banner_url . '"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
+<div class="wp-block-group" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px;gap:40px;max-width:50rem"><!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
+<figure class="wp-block-image size-full is-resized" style="flex-shrink: 0;flex-basis:45%"><img src="https://wordpress.org/files/2023/12/sotw-dotorg-drawer.png" alt="' . __( 'State of the Word', 'wporg' ) . '" /></figure>
 <!-- /wp:image -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.1"}}} -->
-<p style="line-height:1.1">' . __( 'Watch the 2023 WordCamp US Keynotes from Matt Mullenweg and Josepha Haden Chomphosy. ↗', 'wporg' ) . '</p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.6","fontSize":"14px"}}} -->
+<p style="font-size:14px;line-height:1.6">' . __( 'Watch State of the Word, the annual keynote address delivered by the WordPress project&#039;s co-founder, Matt Mullenweg, recorded on Dec. 11, live from Madrid.', 'wporg' ) . ' ↗</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></a>
 <!-- /wp:wporg/link-wrapper -->';
