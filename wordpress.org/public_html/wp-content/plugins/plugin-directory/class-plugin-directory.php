@@ -78,7 +78,7 @@ class Plugin_Directory {
 		// Load the API routes.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'init' ) );
 
-		// Allow post_modified not to be modified when we don't specifically bump it.
+		// Allow post_modified not to be modified when we don't specifically bump it, and slugs for pending plugins.
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 
 		add_filter( 'jetpack_active_modules', function( $modules ) {
@@ -118,8 +118,9 @@ class Plugin_Directory {
 
 	/**
 	 * Filters `wp_insert_post()` to respect the presented data.
+	 *
 	 * This function overrides `wp_insert_post()`s constant updating of
-	 * the post_modified fields.
+	 * the post_modified fields, and allows for pending posts to have a slug.
 	 *
 	 * @param array $data    The data to be inserted into the database.
 	 * @param array $postarr The raw data passed to `wp_insert_post()`.
@@ -127,10 +128,35 @@ class Plugin_Directory {
 	 * @return array The data to insert into the database.
 	 */
 	public function filter_wp_insert_post_data( $data, $postarr ) {
-		if ( 'plugin' === $postarr['post_type'] ) {
-			$data['post_modified']     = $postarr['post_modified'];
-			$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
+		if ( 'plugin' !== $postarr['post_type'] ) {
+			return $data;
 		}
+
+		// Allow setting post_modified fields.
+		$data['post_modified']     = $postarr['post_modified'];
+		$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
+
+		/*
+		 * wp_insert_post() does not allow `pending` posts to have a slug, unless the user can publish it.
+		 *
+		 * Inherit the previous slug, never allowing it to go to empty for this case.
+		 *
+		 * There's an edgecase here, where we might be inserting a post as pending for the first time,
+		 * in that case we just do our best to respect the data provided..
+		 */
+		if (
+			'pending' === $data['post_status'] &&
+			empty( $data['post_name'] )
+		) {
+			if ( ! empty( $postarr['ID'] ) ) {
+				// Updating an existing post.
+				$data['post_name'] = get_post_field( 'post_name', $postarr['ID'] );
+			} else {
+				// New insert, we'll just hope that it was specified.
+				$data['post_name'] = $postarr['post_name'] ?? '';
+			}
+		}
+
 		return $data;
 	}
 
