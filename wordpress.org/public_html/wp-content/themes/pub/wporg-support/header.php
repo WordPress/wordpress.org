@@ -31,9 +31,8 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 	<div id="content" class="site-content">
 		<header id="masthead" class="site-header <?php echo is_front_page() ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
+				<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/forums/' ) ); ?>" rel="home"><?php _ex( 'Forums', 'Site title', 'wporg-forums' ); ?></a></h1>
 				<?php if ( is_front_page() ) : ?>
-					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/forums/' ) ); ?>" rel="home"><?php _ex( 'WordPress Support', 'Site title', 'wporg-forums' ); ?></a></h1>
-
 					<p class="site-description">
 						<?php
 						/* Translators: subhead */
@@ -42,8 +41,6 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 					</p>
 					<?php get_search_form(); ?>
 				<?php else : ?>
-					<p class="site-title"><a href="<?php echo esc_url( home_url( '/forums/' ) ); ?>" rel="home"><?php _ex( 'Support', 'Site title', 'wporg-forums' ); ?></a></p>
-
 					<nav id="site-navigation" class="main-navigation" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-forums' ); ?>"></button>
 						<div id="primary-menu" class="menu">

@@ -19,7 +19,8 @@ $paginationBreakPoint: "600px";
 
 .three-up { //3-columns section
 
-	&:not(.helphub-front-page) {
+	&:not(.helphub-front-page),
+	&:not(.cards-grid) {
 
 		@extend .clear;
 	}
