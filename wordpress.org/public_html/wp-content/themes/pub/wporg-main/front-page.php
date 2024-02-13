@@ -28,9 +28,6 @@ $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
 $banner_url = 'https://wordpress.org/state-of-the-word/';
-if ( is_object( $rosetta ) && isset( $rosetta->locale ) ) {
-	$banner_url .= '?locale=' . $rosetta->locale;
-}
 
 // The blocks code sets up the layout, but there is also inline CSS to refine things that aren't supported in classic themes.
 $banner_blocks = '<!-- wp:wporg/link-wrapper {"align":"full","layout":{"type":"constrained"}} -->
