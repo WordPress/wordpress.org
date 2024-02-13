@@ -56,9 +56,9 @@ get_header( 'wporg' );
 			--wp--preset--color--blueberry-1: #0a4b78;
 		}
 		@media (max-width: 499px) {
-			.wp-block-wporg-link-wrapper p {
-				font-size: 13px !important;
-				line-height: 1.2 !important;
+			.wp-block-wporg-link-wrapper > .wp-block-group {
+				flex-direction: column;
+				gap: 16px !important;
 			}
 		}
 	</style>
