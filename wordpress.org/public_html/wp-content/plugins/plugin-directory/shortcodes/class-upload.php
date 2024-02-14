@@ -280,9 +280,36 @@ class Upload {
 							endif; // $can_change_slug
 							echo '</li>';
 
-							echo '<li>';
+							add_filter( 'get_attached_media_args', $get_attached_media_args = function( $args ) {
+								$args['orderby'] = 'post_date';
+								$args['order']   = 'DESC';
+								return $args;
+							} );
 							$attached_media = get_attached_media( 'application/zip', $plugin );
+							remove_filter( 'get_attached_media_args', $get_attached_media_args );
 
+							if ( $can_upload_extras ) {
+								echo '<li>';
+								echo '<a href="#" class="show-upload-additional hide-if-no-js">' . sprintf( __( 'Upload new version of %s for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
+
+								?>
+								<form class="plugin-upload-form hidden" enctype="multipart/form-data" method="POST" action="">
+									<?php wp_nonce_field( 'wporg-plugins-upload-' . $plugin->ID ); ?>
+									<input type="hidden" name="action" value="upload-additional"/>
+									<input type="hidden" name="plugin_id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
+
+									<label class="button button-secondary zip-file">
+										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
+										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
+									</label>
+
+									<input class="upload-button button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>"/>
+								</form>
+								<?php
+								echo '</li>';
+							}
+
+							echo '<li>';
 							echo '<strong>' . __( 'Submitted files:', 'wporg' ) . '</strong><ol>';
 							foreach ( $attached_media as $attachment_post_id => $upload ) {
 								echo '<li><ul>';
@@ -299,27 +326,8 @@ class Upload {
 								}
 								echo '</ul></li>';
 							}
-							if ( $can_upload_extras ) {
-								echo '<li class="unmarked-list"><a href="#" class="show-upload-additional hide-if-no-js">' . sprintf( __( 'Upload new version of %s for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
-							}
 							echo '</ol>';
 
-							if ( $can_upload_extras ) {
-								?>
-								<form class="plugin-upload-form hidden" enctype="multipart/form-data" method="POST" action="">
-									<?php wp_nonce_field( 'wporg-plugins-upload-' . $plugin->ID ); ?>
-									<input type="hidden" name="action" value="upload-additional"/>
-									<input type="hidden" name="plugin_id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
-
-									<label class="button button-secondary zip-file">
-										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
-										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
-									</label>
-
-									<input class="upload-button button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>"/>
-								</form>
-								<?php
-							}
 							echo '</li>';
 							echo '</ul>';
 						echo "</li>\n";
