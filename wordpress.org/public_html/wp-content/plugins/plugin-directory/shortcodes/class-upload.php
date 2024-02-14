@@ -289,12 +289,14 @@ class Upload {
 								echo '<li><code>' . esc_html( $upload->submitted_name ) . '</code></li>';
 								echo '<li>' . sprintf( __( 'Version: %s', 'wporg-plugins' ), '<code>' . esc_html( $upload->version ) . '</code>' ) . '</li>';
 								echo '<li>' . sprintf( __( 'Upload Date: %s', 'wporg-plugins' ), date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</li>';
-								printf(
-									'<li><a href="%s" class="%s" target="_blank">%s</a></li>',
-									esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
-									( array_key_first( $attached_media) === $attachment_post_id ? 'button button-primary' : 'button button-secondary' ),
-									__( 'Check with Plugin Check', 'wporg-plugins' )
-								);
+								if ( array_key_first( $attached_media) === $attachment_post_id ) {
+									printf(
+										'<li><a href="%s" class="%s" target="_blank">%s</a></li>',
+										esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
+										'button button-primary',
+										__( 'Check with Plugin Check', 'wporg-plugins' )
+									);
+								}
 								echo '</ul></li>';
 							}
 							if ( $can_upload_extras ) {
