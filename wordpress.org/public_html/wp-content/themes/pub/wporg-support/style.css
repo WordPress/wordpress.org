@@ -2439,10 +2439,11 @@ p a:hover {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear::before, .bbp-view .review-ratings::before, .bbpress main#main::before, .three-up:not(.helphub-front-page)::before,
+.clear::before, .bbp-view .review-ratings::before, .bbpress main#main::before, .two-up::before, .three-up:not(.helphub-front-page)::before,
 .clear::after,
 .bbp-view .review-ratings::after,
 .bbpress main#main::after,
+.two-up::after,
 .three-up:not(.helphub-front-page)::after,
 .entry-content::before,
 .entry-content::after,
@@ -2459,7 +2460,7 @@ p a:hover {
 	table-layout: fixed;
 }
 
-.clear::after, .bbp-view .review-ratings::after, .bbpress main#main::after, .three-up:not(.helphub-front-page)::after,
+.clear::after, .bbp-view .review-ratings::after, .bbpress main#main::after, .two-up::after, .three-up:not(.helphub-front-page)::after,
 .entry-content::after,
 .comment-content::after,
 .site-header::after,
@@ -2877,7 +2878,8 @@ body, #pagebody {
 /*--------------------------------------------------------------
 # .site-title
 --------------------------------------------------------------*/
-.site-title {
+.site-title,
+.bbpress h1.site-title {
 	display: inline-block;
 	font-size: 1.5625rem;
 	font-weight: 300;
@@ -2885,25 +2887,32 @@ body, #pagebody {
 	margin: 0 2rem 0 0;
 	max-width: none;
 }
-.site-title a {
+.site-title a,
+.bbpress h1.site-title a {
 	color: #fff;
 	font-weight: 300;
 }
-.site-title a:hover, .site-title a:focus, .site-title a:active {
+.site-title a:hover, .site-title a:focus, .site-title a:active,
+.bbpress h1.site-title a:hover,
+.bbpress h1.site-title a:focus,
+.bbpress h1.site-title a:active {
 	text-decoration: none;
 }
-.site-header.home .site-title {
+.site-header.home .site-title,
+.site-header.home .bbpress h1.site-title {
 	display: inherit;
 	font-size: 3.8146972656rem;
 	margin: 2rem 0 1rem;
 }
 @media screen and (max-width: 480px) {
-	.site-header.home .site-title {
+	.site-header.home .site-title,
+	.site-header.home .bbpress h1.site-title {
 		font-size: 3.0517578125rem;
 	}
 }
 @media screen and (max-width: 320px) {
-	.site-header.home .site-title {
+	.site-header.home .site-title,
+	.site-header.home .bbpress h1.site-title {
 		font-size: 2.44140625rem;
 	}
 }
@@ -3411,6 +3420,43 @@ section {
 	.three-up.bbp-forums > div:nth-child(3n) {
 		margin-right: 0;
 	}
+}
+
+@media (min-width: 48em) {
+	.two-up > div {
+		display: inline-block;
+		vertical-align: top;
+		width: 49%;
+		margin-right: 0;
+		font-size: 0.8rem;
+	}
+	.two-up > div:nth-child(2n) {
+		margin-right: 0;
+		margin-left: 0;
+	}
+}
+
+.cards-grid {
+	display: grid;
+}
+.cards-grid.three-up, .cards-grid.two-up {
+	gap: 10px;
+}
+.cards-grid.three-up::before, .cards-grid.two-up::before {
+	display: none;
+}
+.cards-grid.three-up > *, .cards-grid.two-up > * {
+	width: unset;
+}
+.cards-grid.two-up {
+	grid-template-columns: 1fr 1fr;
+}
+.cards-grid.three-up {
+	grid-template-columns: 1fr 1fr 1fr;
+}
+.cards-grid > * {
+	border: 1px solid grey;
+	padding: 10px;
 }
 
 .bbpress main#main .entry-content,

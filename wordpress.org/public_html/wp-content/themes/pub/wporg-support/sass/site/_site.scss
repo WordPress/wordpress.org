@@ -34,7 +34,8 @@ body, #pagebody {
 /*--------------------------------------------------------------
 # .site-title
 --------------------------------------------------------------*/
-.site-title {
+.site-title,
+.bbpress h1.site-title {
 	display: inline-block;
 	font-size: ms( 4 );
 	font-weight: 300;
