@@ -970,6 +970,19 @@ class Plugin_Directory {
 			$wp_query->set( 's', $s );
 		}
 
+		// Support various filters.
+		if ( $wp_query->get( 'rating' ) ) {
+			$wp_query->query_vars['meta_query']['rating'] ??= [
+				'key'     => 'rating',
+				'type'    => 'DECIMAL(3,2)',
+				'compare' => 'EXISTS',
+			];
+
+
+			$wp_query->query_vars['meta_query']['rating']['compare'] = '>=';
+			$wp_query->query_vars['meta_query']['rating']['value']   = (float) $wp_query->get( 'rating' );
+		}
+
 		// By default, all archives are sorted by active installs
 		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
 			$wp_query->query_vars['orderby']  = 'active_installs';
@@ -1290,6 +1303,9 @@ class Plugin_Directory {
 		$vars[] = 'plugin_advanced';
 		$vars[] = 'geopattern_icon';
 		$vars[] = 'block_search';
+
+		// Various meta values that can be filtered by.
+		$vars[] = 'rating';
 
 		// Remove support for any query vars the Plugin Directory doesn't support/need on the front-end.
 		if ( ! is_admin() ) {
