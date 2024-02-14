@@ -1484,6 +1484,7 @@ class Plugin_Directory {
 			die();
 		}
 
+		/* // Disabled. This doesn't work with filters.. this should go bye-bye.
 		// Existing tag with no plugins.
 		if (
 			is_tax( 'plugin_tags' ) &&
@@ -1496,7 +1497,7 @@ class Plugin_Directory {
 
 			wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ), 301 );
 			die();
-		}
+		}*/
 
 		// Empty search query.
 		// This may occur due to WordPress's 1600 character search limit.
