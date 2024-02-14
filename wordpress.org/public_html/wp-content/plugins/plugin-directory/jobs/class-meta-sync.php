@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
+use WPORG_Ratings;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 
@@ -89,12 +90,17 @@ class Meta_Sync {
 			update_post_meta(
 				$post->ID,
 				'rating',
-				\WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name )
+				WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name )
 			);
 			update_post_meta(
 				$post->ID,
 				'ratings',
-				\WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name )
+				WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name )
+			);
+			update_post_meta(
+				$post->ID,
+				'num_ratings',
+				WPORG_Ratings::get_rating_count( 'plugin', $post->post_name )
 			);
 
 			$author_block_query = new \WP_Query( array(
