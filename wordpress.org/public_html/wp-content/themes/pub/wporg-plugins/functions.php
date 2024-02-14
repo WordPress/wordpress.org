@@ -473,3 +473,168 @@ add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_desc
  * Custom template tags for this theme.
  */
 require get_stylesheet_directory() . '/inc/template-tags.php';
+
+add_filter( 'wporg_query_filter_options_sort', function() {
+	global $wp_query;
+	$orderby = strtolower( $wp_query->query['orderby'] ?? '' );
+	$order   = strtolower( $wp_query->query['order'] ?? '' );
+	$sort     = $orderby . ( $order ? '_' . $order : '' );
+
+	$options =  array(
+		'installs'     => __( 'Most Used', 'wporg-plugins' ),
+		'rating'       => __( 'Rating', 'wporg-plugins' ),
+		'ratings'      => __( 'Reviews', 'wporg-plugins' ),
+		'last_updated' => __( 'Recently Updated', 'wporg-plugins' ),
+		'date_desc'    => __( 'Newest', 'wporg-plugins' ),
+		'tested'       => __( 'Tested Up to', 'wporg-plugins' ),
+	);
+
+	$label = __( 'Sort', 'wporg-plugins' );
+	if ( $sort && isset( $options[ $sort ] ) ) {
+		/* translators: 'Sort: Rating' or 'Sort: Most Used', etc. */
+		$label = sprintf( __( 'Sort: %s', 'wporg-plugins' ), $options[ $sort ] );
+	}
+
+	return array(
+		'label'    => $label,
+		'title'    => __( 'Sort', 'wporg-plugins' ),
+		'key'      => 'orderby',
+		'action'   => '',
+		'options'  => $options,
+		'selected' => [ $sort ],
+	);
+} );
+
+add_filter( 'wporg_query_filter_options_business_model', function() {
+	$options = array(
+		'commercial' => __( 'Commercial', 'wporg-plugins' ),
+		'community' => __( 'Community', 'wporg-plugins' ),
+	);
+	$label = __( 'Business Model', 'wporg-plugins' );
+	if ( get_query_var( 'plugin_business_model' ) ) {
+		$label = $options[ get_query_var( 'plugin_business_model' ) ] ?? $label;
+	}
+
+	return array(
+		'label'    => $label,
+		'title'    => __( 'Business Model', 'wporg-plugins' ),
+		'key'      => 'plugin_business_model',
+		'action'   => '',
+		'options'  => $options ,
+		'selected' => [ get_query_var( 'plugin_business_model' ) ],
+	);
+} );
+
+add_filter( 'wporg_query_filter_options_sort', function() {
+	global $wp_query;
+	$orderby = strtolower( $wp_query->query['orderby'] ?? '' );
+	$order   = strtolower( $wp_query->query['order'] ?? '' );
+	$sort     = $orderby . ( $order ? '_' . $order : '' );
+
+	$options =  array(
+		'installs'     => __( 'Most Used', 'wporg-plugins' ),
+		'rating'       => __( 'Rating', 'wporg-plugins' ),
+		'ratings'      => __( 'Reviews', 'wporg-plugins' ),
+		'last_updated' => __( 'Recently Updated', 'wporg-plugins' ),
+		'date_desc'    => __( 'Newest', 'wporg-plugins' ),
+		'tested'       => __( 'Tested Up to', 'wporg-plugins' ),
+	);
+
+	$label = __( 'Sort', 'wporg-plugins' );
+	if ( $sort && isset( $options[ $sort ] ) ) {
+		/* translators: 'Sort: Rating' or 'Sort: Most Used', etc. */
+		$label = sprintf( __( 'Sort: %s', 'wporg-plugins' ), $options[ $sort ] );
+	}
+
+	return array(
+		'label'    => $label,
+		'title'    => __( 'Sort', 'wporg-plugins' ),
+		'key'      => 'orderby',
+		'action'   => '',
+		'options'  => $options,
+		'selected' => [ $sort ],
+	);
+} );
+
+add_filter( 'wporg_query_filter_options_rating', function() {
+	foreach ( range( 5, 1 ) as $_rating ) {
+		$options[ $_rating ] = ''; // Template::dashicons_stars( $_rating ) . ' '; // TODO: Filter doesn't accept HTML.
+		$options[ $_rating ] .= sprintf( __( '%d stars', 'wporg-plugins' ), $_rating );
+	}
+
+	$rating = (int) get_query_var( 'rating' );
+
+	$label = __( 'Rating', 'wporg-plugins' );
+	if ( $rating && isset( $options[ $rating ] ) ) {
+		/* translators: 'Rating: 5 stars' */
+		$label = sprintf( __( 'Rating: %s', 'wporg-plugins' ), $options[ $rating ] );
+	}
+
+	return array(
+		'label'    => $label,
+		'title'    => __( 'Rating', 'wporg-plugins' ),
+		'key'      => 'rating',
+		'action'   => '',
+		'options'  => $options,
+		'selected' => [ $rating ],
+	);
+} );
+
+add_filter( 'wporg_query_filter_options_plugin_category', function() {
+	$options = [];
+	foreach ( get_terms( 'plugin_category', [ 'hide_empty' => true ] ) as $term ) {
+		$options[ $term->slug ] = $term->name;
+	}
+
+	return array(
+		'label'    => __( 'Category', 'wporg-plugins' ),
+		'title'    => __( 'Category', 'wporg-plugins' ),
+		'key'      => 'plugin_category',
+		'action'   => '',
+		'options'  => $options,
+		'selected' => (array) get_query_var( 'plugin_category' ),
+	);
+} );
+
+add_action( 'wporg_query_filter_in_form', function( $key ) {
+	global $wp_query;
+
+	$query_vars = array_filter( wp_list_pluck( get_object_taxonomies( 'plugin', 'object' ), 'query_var' ) );
+
+	// and sorting.
+	$query_vars[] = 'orderby';
+	$query_vars[] = 'order';
+
+	// And various filters.
+	// TODO: Make a helper for this or something..
+	$query_vars[] = 'rating';
+
+	foreach ( $query_vars as $query_var ) {
+		if ( ! isset( $wp_query->query[ $query_var ] ) ) {
+			continue;
+		}
+		if ( $key === $query_var ) {
+			continue;
+		}
+
+		$values = (array) $wp_query->query[ $query_var ];
+		foreach ( $values as $value ) {
+			// Support for tax archives... TODO Hacky..
+			// Realistically we should just ditch these and have all of the filters hit /search/?stuff=goes&here
+			if ( $value === ( get_queried_object()->slug ?? '' ) ) {
+				continue;
+			}
+
+			printf(
+				'<input type="hidden" name="%s" value="%s" />',
+				esc_attr( $query_var ) . ( 1 === count( $values ) ? '' : '[]' ),
+				esc_attr( $value )
+			);
+		}
+	}
+
+	// Pass through search query.
+	if ( isset( $wp_query->query['s'] ) ) {
+		printf( '<input type="hidden" name="s" value="%s" />', esc_attr( $wp_query->query['s'] ) );
+	}
+} );
