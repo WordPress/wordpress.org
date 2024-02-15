@@ -222,32 +222,6 @@ class Plugin_Directory {
 			),
 		) );
 
-		register_taxonomy( 'plugin_category', 'plugin', array(
-			'hierarchical'      => true, /* for tax_input[] handling on post saves. */
-			'query_var'         => 'plugin_category',
-			'rewrite'           => array(
-				'hierarchical' => false,
-				'slug'         => 'category',
-				'with_front'   => false,
-				'ep_mask'      => EP_TAGS,
-			),
-			'labels'            => array(
-				'name'          => __( 'Plugin Categories', 'wporg-plugins' ),
-				'singular_name' => __( 'Plugin Category', 'wporg-plugins' ),
-				'edit_item'     => __( 'Edit Category', 'wporg-plugins' ),
-				'update_item'   => __( 'Update Category', 'wporg-plugins' ),
-				'add_new_item'  => __( 'Add New Category', 'wporg-plugins' ),
-				'new_item_name' => __( 'New Category Name', 'wporg-plugins' ),
-				'search_items'  => __( 'Search Categories', 'wporg-plugins' ),
-			),
-			'public'            => true,
-			'show_ui'           => true,
-			'show_admin_column' => false,
-			'capabilities'      => array(
-				'assign_terms' => 'plugin_set_category',
-			),
-		) );
-
 		/*
 		 * Register before other taxonomies.
 		 * This ensures that it'll be returned by get_queried_object() in a multi-tax query.
@@ -276,6 +250,32 @@ class Plugin_Directory {
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',
+			),
+		) );
+
+		register_taxonomy( 'plugin_category', 'plugin', array(
+			'hierarchical'      => true, /* for tax_input[] handling on post saves. */
+			'query_var'         => 'plugin_category',
+			'rewrite'           => array(
+				'hierarchical' => false,
+				'slug'         => 'category',
+				'with_front'   => false,
+				'ep_mask'      => EP_TAGS,
+			),
+			'labels'            => array(
+				'name'          => __( 'Plugin Categories', 'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Category', 'wporg-plugins' ),
+				'edit_item'     => __( 'Edit Category', 'wporg-plugins' ),
+				'update_item'   => __( 'Update Category', 'wporg-plugins' ),
+				'add_new_item'  => __( 'Add New Category', 'wporg-plugins' ),
+				'new_item_name' => __( 'New Category Name', 'wporg-plugins' ),
+				'search_items'  => __( 'Search Categories', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => false,
+			'capabilities'      => array(
+				'assign_terms' => 'plugin_set_category',
 			),
 		) );
 
@@ -977,7 +977,6 @@ class Plugin_Directory {
 				'type'    => 'DECIMAL(3,2)',
 				'compare' => 'EXISTS',
 			];
-
 
 			$wp_query->query_vars['meta_query']['rating']['compare'] = '>=';
 			$wp_query->query_vars['meta_query']['rating']['value']   = (float) $wp_query->get( 'rating' );
