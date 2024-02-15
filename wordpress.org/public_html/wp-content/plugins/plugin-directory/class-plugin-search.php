@@ -214,16 +214,11 @@ class Plugin_Search {
 			}
 
 			$taxonomy = $tax_query['taxonomy'];
-			// Loop through them.. because we can't set an array?
-			foreach ( $tax_query['terms'] as $term ) {
-				$es_query_args['filter']['and'][] = [
-					'term' => [ // TODO: maybe 'terms'
-						"taxonomy.{$taxonomy}.slug" => [
-							'value' => $term
-						]
-					]
-				];
-			}
+			$es_query_args['filter']['and'][] = [
+				'terms' => [
+					"taxonomy.{$taxonomy}.slug" => $tax_query['terms']
+				]
+			];
 
 		}
 
@@ -234,17 +229,17 @@ class Plugin_Search {
 				continue;
 			}
 
-			$meta_key = $meta_query['key'];
+			$meta_key   = $meta_query['key'];
 			$meta_value = $meta_query['value'];
-			$compare = null;
-			$type = null;
+			$compare    = null;
+			$type       = null;
 			switch ( $meta_query['compare'] ) {
 				case '>=':
+					$type ??= 'range';
 					$op   ??= 'gte';
-					$type ??= 'range';
 				case '<=':
-					$op   ??= 'lte';
 					$type ??= 'range';
+					$op   ??= 'lte';
 				case '=':
 					$op   ??= 'value';
 					$type ??= 'term';
@@ -263,7 +258,7 @@ class Plugin_Search {
 
 		// Apply sorts...
 		if ( empty( $es_query_args['sort']  ) ) {
-			$orderby = $query->get( 'orderby' );
+			$orderby      = $query->get( 'orderby' );
 			$meta_clauses = $query->meta_query->get_clauses();
 			foreach ( (array) $orderby as $_orderby => $_order ) {
 				if ( ! is_string( $_orderby ) && is_string( $_order ) ) {
