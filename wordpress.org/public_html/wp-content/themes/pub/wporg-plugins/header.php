@@ -90,7 +90,9 @@ echo <<<CSS
 	.wporg-plugins__filters {
 		--wporg--oldtheme--primary-color: #2371a6;
 		--wp--custom--button--color--text: #ffffff;
+		--wp--custom--button--hover--color--text: #ffffff;
 		--wp--custom--wporg-query-filters--border--color: #e5e5e5;
+		--wp--custom--wporg-query-filters--option--active--color--background: #f0f0f0;
 		--wp--custom--wporg-query-filters--toggle--active--color--background: var(--wporg--oldtheme--primary-color);
 		--wp--custom--wporg-query-filters--toggle--hover--color--text: var(--wporg--oldtheme--primary-color);
 		--wp--custom--button--color--background: var(--wporg--oldtheme--primary-color);
@@ -103,8 +105,8 @@ echo <<<CSS
 	CSS;
 
 echo do_blocks( <<<FILTERBLOCKS
-	<!-- wp:group {"align":"wide","className":"wporg-filter-bar wporg-plugins__filters wporg-plugins__filters__no-count","style":{"spacing":{"margin":{"top":"40px","bottom":"40px"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
-	<div class="wp-block-group alignwide wporg-filter-bar wporg-plugins__filters wporg-plugins__filters__no-count" style="margin-top:40px;margin-bottom:40px">
+	<!-- wp:group {"align":"wide","className":"wporg-filter-bar wporg-plugins__filters wporg-plugins__filters__no-count","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
+	<div class="wp-block-group alignwide wporg-filter-bar wporg-plugins__filters wporg-plugins__filters__no-count">
 		<!-- wp:group {"className":"wporg-plugins__filters__search","layout":{"type":"flex","flexWrap":"wrap"}} -->
 		<div class="wp-block-group wporg-plugins__filters__search">
 			<!-- wp:search {"showLabel":false,"placeholder":"Search plugins...","width":100,"widthUnit":"%","buttonText":"Search","buttonPosition":"button-inside","buttonUseIcon":true,"className":"is-style-secondary-search-control"} /-->
