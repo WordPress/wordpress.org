@@ -983,7 +983,7 @@ class Plugin_Directory {
 		}
 
 		// By default, all archives are sorted by active installs
-		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
+		if ( $wp_query->is_archive() && ! $wp_query->is_search() && empty( $wp_query->query_vars['orderby'] ) ) {
 			$wp_query->query_vars['orderby']  = 'active_installs';
 		}
 
