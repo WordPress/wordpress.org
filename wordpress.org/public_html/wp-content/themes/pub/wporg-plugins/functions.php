@@ -561,8 +561,15 @@ add_filter( 'wporg_query_filter_options_plugin_category', function() {
 		$options[ $term->slug ] = $term->name;
 	}
 
+	$count = count( (array) get_query_var( 'plugin_category' ) );
+	$label = sprintf(
+		/* translators: The dropdown label for filtering, %s is the selected term count. */
+		_n( 'Categories <span>%s</span>', 'Categories <span>%s</span>', number_format_i18n( $count ), 'wporg-plugins' ),
+		$count
+	);
+
 	return array(
-		'label'    => __( 'Category', 'wporg-plugins' ),
+		'label'    => $label,
 		'title'    => __( 'Category', 'wporg-plugins' ),
 		'key'      => 'plugin_category',
 		'action'   => '',
@@ -596,4 +603,12 @@ add_action( 'wporg_query_filter_in_form', function( $key ) {
 		}
 	}
 
+} );
+
+add_filter( 'wporg_query_total_label', function() {
+	global $wp_query;
+	return sprintf(
+		_n( '%s item', '%s items', number_format_i18n( $wp_query->found_posts ), 'wporg-plugins' ),
+		$wp_query->found_posts
+	);
 } );
