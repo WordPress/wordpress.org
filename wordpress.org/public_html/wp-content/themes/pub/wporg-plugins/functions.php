@@ -480,7 +480,8 @@ add_filter( 'wporg_query_filter_options_sort', function() {
 	$order   = strtolower( $wp_query->query['order'] ?? '' );
 	$sort     = $orderby . ( $order ? '_' . $order : '' );
 
-	$options =  array(
+	$options = array(
+		'relevance'    => __( 'Relevance', 'wporg-plugins' ),
 		'installs'     => __( 'Most Used', 'wporg-plugins' ),
 		'rating'       => __( 'Rating', 'wporg-plugins' ),
 		'ratings'      => __( 'Reviews', 'wporg-plugins' ),
@@ -488,6 +489,11 @@ add_filter( 'wporg_query_filter_options_sort', function() {
 		'date_desc'    => __( 'Newest', 'wporg-plugins' ),
 		'tested'       => __( 'Tested Up to', 'wporg-plugins' ),
 	);
+
+	// Remove relevance for non-search.
+	if ( ! is_search() ) {
+		unset( $options['relevance'] );
+	}
 
 	$label = __( 'Sort', 'wporg-plugins' );
 	if ( $sort && isset( $options[ $sort ] ) ) {
@@ -522,37 +528,6 @@ add_filter( 'wporg_query_filter_options_business_model', function() {
 		'action'   => '',
 		'options'  => $options ,
 		'selected' => [ get_query_var( 'plugin_business_model' ) ],
-	);
-} );
-
-add_filter( 'wporg_query_filter_options_sort', function() {
-	global $wp_query;
-	$orderby = strtolower( $wp_query->query['orderby'] ?? '' );
-	$order   = strtolower( $wp_query->query['order'] ?? '' );
-	$sort     = $orderby . ( $order ? '_' . $order : '' );
-
-	$options =  array(
-		'installs'     => __( 'Most Used', 'wporg-plugins' ),
-		'rating'       => __( 'Rating', 'wporg-plugins' ),
-		'ratings'      => __( 'Reviews', 'wporg-plugins' ),
-		'last_updated' => __( 'Recently Updated', 'wporg-plugins' ),
-		'date_desc'    => __( 'Newest', 'wporg-plugins' ),
-		'tested'       => __( 'Tested Up to', 'wporg-plugins' ),
-	);
-
-	$label = __( 'Sort', 'wporg-plugins' );
-	if ( $sort && isset( $options[ $sort ] ) ) {
-		/* translators: 'Sort: Rating' or 'Sort: Most Used', etc. */
-		$label = sprintf( __( 'Sort: %s', 'wporg-plugins' ), $options[ $sort ] );
-	}
-
-	return array(
-		'label'    => $label,
-		'title'    => __( 'Sort', 'wporg-plugins' ),
-		'key'      => 'orderby',
-		'action'   => '',
-		'options'  => $options,
-		'selected' => [ $sort ],
 	);
 } );
 
@@ -599,25 +574,13 @@ add_filter( 'wporg_query_filter_options_plugin_category', function() {
 add_action( 'wporg_query_filter_in_form', function( $key ) {
 	global $wp_query;
 
-	$query_vars = array_filter( wp_list_pluck( get_object_taxonomies( 'plugin', 'object' ), 'query_var' ) );
-
-	// and sorting.
-	$query_vars[] = 'orderby';
-	$query_vars[] = 'order';
-
-	// And various filters.
-	// TODO: Make a helper for this or something..
-	$query_vars[] = 'rating';
-
-	foreach ( $query_vars as $query_var ) {
-		if ( ! isset( $wp_query->query[ $query_var ] ) ) {
-			continue;
-		}
+	foreach ( $wp_query->query as $query_var => $values ) {
 		if ( $key === $query_var ) {
 			continue;
 		}
 
-		$values = (array) $wp_query->query[ $query_var ];
+		$array  = is_array( $values );
+		$values = (array) $values;
 		foreach ( $values as $value ) {
 			// Support for tax archives... TODO Hacky..
 			// Realistically we should just ditch these and have all of the filters hit /search/?stuff=goes&here
@@ -627,14 +590,10 @@ add_action( 'wporg_query_filter_in_form', function( $key ) {
 
 			printf(
 				'<input type="hidden" name="%s" value="%s" />',
-				esc_attr( $query_var ) . ( 1 === count( $values ) ? '' : '[]' ),
+				esc_attr( $query_var ) . ( $array ? '[]' : '' ),
 				esc_attr( $value )
 			);
 		}
 	}
 
-	// Pass through search query.
-	if ( isset( $wp_query->query['s'] ) ) {
-	//	printf( '<input type="hidden" name="s" value="%s" />', esc_attr( $wp_query->query['s'] ) );
-	}
 } );
