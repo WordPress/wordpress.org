@@ -206,14 +206,88 @@ class Plugin_Search {
 			];
 		}
 
-		if ( $query->get( 'plugin_business_model' ) ) {
-			$es_query_args['filter']['and'][] = [
-				'term' => [
-					'taxonomy.plugin_business_model.name' => [
-						'value' => $query->get( 'plugin_business_model' )
+		// Apply Taxonomy filters..
+		$tax_queries = $query->tax_query->queries;
+		foreach ( (array) $tax_queries as $tax_query ) {
+			if ( 'slug' !== $tax_query['field'] || 'IN' !== $tax_query['operator'] ) {
+				continue;
+			}
+
+			$taxonomy = $tax_query['taxonomy'];
+			// Loop through them.. because we can't set an array?
+			foreach ( $tax_query['terms'] as $term ) {
+				$es_query_args['filter']['and'][] = [
+					'term' => [ // TODO: maybe 'terms'
+						"taxonomy.{$taxonomy}.slug" => [
+							'value' => $term
+						]
 					]
-				]
-			];
+				];
+			}
+
+		}
+
+		// Apply post_meta filters
+		foreach ( (array) $query->meta_query->queries as $name => $meta_query ) {
+			if ( ! is_array( $meta_query ) ) {
+				// TODO: nested meta_queries, ie. relation = OR
+				continue;
+			}
+
+			$meta_key = $meta_query['key'];
+			$meta_value = $meta_query['value'];
+			$compare = null;
+			$type = null;
+			switch ( $meta_query['compare'] ) {
+				case '>=':
+					$op   ??= 'gte';
+					$type ??= 'range';
+				case '<=':
+					$op   ??= 'lte';
+					$type ??= 'range';
+				case '=':
+					$op   ??= 'value';
+					$type ??= 'term';
+
+					$es_query_args['filter']['and'][] = [
+						$type => [
+							$meta_key => [
+								$op => $meta_value
+							]
+						]
+					];
+					break;
+			}
+
+		}
+
+		// Apply sorts...
+		if ( empty( $es_query_args['sort']  ) ) {
+			$orderby = $query->get( 'orderby' );
+			$meta_clauses = $query->meta_query->get_clauses();
+			foreach ( (array) $orderby as $_orderby => $_order ) {
+				if ( ! is_string( $_orderby ) && is_string( $_order ) ) {
+					$_orderby = $_order;
+					$_order   = 'DESC';
+				}
+				if ( ! is_string( $_orderby ) || empty( $meta_clauses[ $_orderby ]['key'] ) ) {
+					continue;
+				}
+
+				$clause = $meta_clauses[ $_orderby ];
+				$key = $clause['key'];
+
+				// ES doesn't have this data, fall back to the post modified field.
+				if ( 'last_updated' === $key ) {
+					$key = 'modified_gmt';
+				}
+
+				$es_query_args['sort'][] = [
+					$key => array(
+						'order' => $_order,
+					),
+				];
+			}
 		}
 
 		// Set boost on the match query
