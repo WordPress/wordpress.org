@@ -5,7 +5,6 @@ use WordPressdotorg\Plugin_Directory\Template;
 
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\wporg_query_filter_options_sort' );
 add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg_query_filter_options_business_model' );
-add_filter( 'wporg_query_filter_options_rating', __NAMESPACE__ . '\wporg_query_filter_options_rating' );
 add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wporg_query_filter_options_plugin_category' );
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label' );
@@ -64,30 +63,6 @@ function wporg_query_filter_options_business_model() {
 		'action'   => '',
 		'options'  => $options ,
 		'selected' => [ get_query_var( 'plugin_business_model' ) ],
-	);
-}
-
-function wporg_query_filter_options_rating() {
-	foreach ( range( 5, 1 ) as $_rating ) {
-		$options[ $_rating ] = ''; // Template::dashicons_stars( $_rating ) . ' '; // TODO: Filter doesn't accept HTML.
-		$options[ $_rating ] .= sprintf( __( '%d stars', 'wporg-plugins' ), $_rating );
-	}
-
-	$rating = (int) get_query_var( 'rating' );
-
-	$label = __( 'Rating', 'wporg-plugins' );
-	if ( $rating && isset( $options[ $rating ] ) ) {
-		/* translators: 'Rating: 5 stars' */
-		$label = sprintf( __( 'Rating: %s', 'wporg-plugins' ), $options[ $rating ] );
-	}
-
-	return array(
-		'label'    => $label,
-		'title'    => __( 'Rating', 'wporg-plugins' ),
-		'key'      => 'rating',
-		'action'   => '',
-		'options'  => $options,
-		'selected' => [ $rating ],
 	);
 }
 
