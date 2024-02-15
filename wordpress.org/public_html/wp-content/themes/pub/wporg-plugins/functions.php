@@ -510,14 +510,14 @@ add_filter( 'wporg_query_filter_options_business_model', function() {
 		'commercial' => __( 'Commercial', 'wporg-plugins' ),
 		'community' => __( 'Community', 'wporg-plugins' ),
 	);
-	$label = __( 'Business Model', 'wporg-plugins' );
-	if ( get_query_var( 'plugin_business_model' ) ) {
-		$label = $options[ get_query_var( 'plugin_business_model' ) ] ?? $label;
+	$label = __( 'Type', 'wporg-plugins' );
+	if ( get_query_var( 'plugin_business_model' ) && isset( $options[ get_query_var( 'plugin_business_model' ) ] ) ) {
+		$label = sprintf( __( 'Type: %s', 'wporg-plugins' ), $options[ get_query_var( 'plugin_business_model' ) ] );
 	}
 
 	return array(
 		'label'    => $label,
-		'title'    => __( 'Business Model', 'wporg-plugins' ),
+		'title'    => __( 'Type', 'wporg-plugins' ),
 		'key'      => 'plugin_business_model',
 		'action'   => '',
 		'options'  => $options ,
@@ -621,7 +621,7 @@ add_action( 'wporg_query_filter_in_form', function( $key ) {
 		foreach ( $values as $value ) {
 			// Support for tax archives... TODO Hacky..
 			// Realistically we should just ditch these and have all of the filters hit /search/?stuff=goes&here
-			if ( $value === ( get_queried_object()->slug ?? '' ) ) {
+			if ( ! is_search() && $value === ( get_queried_object()->slug ?? '' ) ) {
 				continue;
 			}
 
@@ -635,6 +635,6 @@ add_action( 'wporg_query_filter_in_form', function( $key ) {
 
 	// Pass through search query.
 	if ( isset( $wp_query->query['s'] ) ) {
-		printf( '<input type="hidden" name="s" value="%s" />', esc_attr( $wp_query->query['s'] ) );
+	//	printf( '<input type="hidden" name="s" value="%s" />', esc_attr( $wp_query->query['s'] ) );
 	}
 } );
