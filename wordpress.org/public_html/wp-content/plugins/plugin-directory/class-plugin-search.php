@@ -222,6 +222,12 @@ class Plugin_Search {
 
 		}
 
+		// These fields aren't in ES, but we have other data to query.
+		$unknown_es_meta_fields = [
+			'last_updated'     => 'post_modified',
+			'_active_installs' => 'active_installs',
+		];
+
 		// Apply post_meta filters
 		foreach ( (array) $query->meta_query->queries as $name => $meta_query ) {
 			if ( ! is_array( $meta_query ) ) {
@@ -244,6 +250,8 @@ class Plugin_Search {
 					$op   ??= 'value';
 					$type ??= 'term';
 
+					$meta_key = $unknown_es_meta_fields[ $meta_key ] ?? $meta_key;
+
 					$es_query_args['filter']['and'][] = [
 						$type => [
 							$meta_key => [
@@ -263,19 +271,16 @@ class Plugin_Search {
 			foreach ( (array) $orderby as $_orderby => $_order ) {
 				if ( ! is_string( $_orderby ) && is_string( $_order ) ) {
 					$_orderby = $_order;
-					$_order   = 'DESC';
+					$_order   = $query->get('order');
 				}
 				if ( ! is_string( $_orderby ) || empty( $meta_clauses[ $_orderby ]['key'] ) ) {
 					continue;
 				}
 
-				$clause = $meta_clauses[ $_orderby ];
-				$key = $clause['key'];
+				$key = $meta_clauses[ $_orderby ]['key'];
 
-				// ES doesn't have this data, fall back to the post modified field.
-				if ( 'last_updated' === $key ) {
-					$key = 'modified_gmt';
-				}
+				// ES doesn't have all keys
+				$key = $unknown_es_meta_fields[ $key ] ?? $key;
 
 				$es_query_args['sort'][] = [
 					$key => array(
