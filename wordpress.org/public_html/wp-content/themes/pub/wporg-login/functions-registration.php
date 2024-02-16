@@ -252,6 +252,10 @@ function wporg_get_pending_user_by_email_wildcard( $email ) {
  */
 function wporg_update_pending_user( $pending_user ) {
 	global $wpdb;
+
+	// Allow altering the user fields.
+	$pending_user = apply_filters( 'wporg_login_registration_update_pending_user', $pending_user );
+
 	$pending_user['meta']   = json_encode( $pending_user['meta'] );
 	$pending_user['scores'] = json_encode( $pending_user['scores'] );
 
