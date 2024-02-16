@@ -88,6 +88,12 @@ function wporg_login_admin_page() {
 			$tr.append( "<td colspan=" + $tds.length + ">...</td>" );
 
 			var url = $this.prop('href') + '&ajax=1';
+			if ( url.indexOf( 'block_account' ) !== -1 ) {
+				if ( ! $('block_reason').val() ) {
+					$('block_reason').val( prompt( 'Reason for blocking?' ) || '' );
+				}
+				url += '&block_reason=' + encodeURIComponent( $('block_reason').val() );
+			}
 
 			$.get( url, function( data ) {
 				$tr.find('td:last').text( data );
@@ -374,14 +380,7 @@ add_action( 'admin_post_login_block', function() {
 
 	check_admin_referer( 'block_' . $email );
 
-	$user = wporg_get_pending_user( $email );
-	if ( $user ) {
-		$user['cleared']             = 0;
-		$user['user_activation_key'] = '';
-		$user['user_profile_key']    = '';
-
-		wporg_update_pending_user( $user );
-	}
+	wporg_login_block_registration( $user );
 
 	if ( isset( $_GET['ajax'] ) ) {
 		die( wporg_login_admin_action_text( 'blocked' ) );
@@ -394,6 +393,21 @@ add_action( 'admin_post_login_block', function() {
 	) );
 	exit;
 } );
+
+function wporg_login_block_registration( $user ) {
+	$user = wporg_get_pending_user( $user );
+	if ( $user ) {
+		$user['cleared']             = 0;
+		$user['user_activation_key'] = '';
+		$user['user_profile_key']    = '';
+
+		wporg_update_pending_user( $user );
+
+		return true;
+	}
+
+	return false;
+}
 
 add_action( 'admin_post_login_delete', function() { 
 	if ( ! current_user_can( 'promote_users' ) ) {
@@ -426,18 +440,47 @@ add_action( 'admin_post_login_block_account', function() {
 		wp_die();
 	}
 
-	if ( empty( $_REQUEST['user'] ) ) {
+	$user   = $_REQUEST['user'] ?? '';
+	$reason = $_REQUEST['block_reason'] ?? '';
+	if ( empty( $user ) ) {
 		die();
 	}
 
-	$pending_user = wporg_get_pending_user( $_REQUEST['user'] );
-	if ( ! $pending_user || ! $pending_user['created'] ) {
+	$pending_user = wporg_get_pending_user( $user );
+	if ( ! $user ) {
 		die();
 	}
 
 	$user = get_user_by( 'slug', $pending_user['user_login'] );
-	if ( ! $user ) {
+
+	check_admin_referer( 'block_account_' . $user->ID );
+
+	$result = wporg_login_block_account( $pending_user, $reason );
+	if ( ! $result ) {
 		die();
+	}
+
+	if ( isset( $_GET['ajax'] ) ) {
+		die( wporg_login_admin_action_text( 'blocked_account' ) );
+	}
+
+	wp_safe_redirect( add_query_arg(
+		's',
+		urlencode( $user->user_email ),
+		'https://login.wordpress.org/wp-admin/index.php?page=user-registrations&action=blocked_account'
+	) );
+	exit;
+} );
+
+function wporg_login_block_account( $user, $reason = '' ) {
+	$pending_user = wporg_get_pending_user( $user );
+	if ( ! $pending_user || ! $pending_user['created'] ) {
+		return false;
+	}
+
+	$user = get_user_by( 'slug', $pending_user['user_login'] );
+	if ( ! $user ) {
+		return false;
 	}
 
 	$table = new User_Registrations_List_Table();
@@ -452,8 +495,6 @@ add_action( 'admin_post_login_block_account', function() {
 	$table->column_meta( $pending_as_object );
 	$meta_column = ob_get_clean();
 	$meta_column = wp_strip_all_tags( str_replace( '<br>', "\n", $meta_column ), false );
-
-	check_admin_referer( 'block_account_' . $user->ID );
 
 	if ( $user && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 
@@ -470,9 +511,15 @@ add_action( 'admin_post_login_block_account', function() {
 		restore_current_blog();
 		switch_to_blog( WPORG_SUPPORT_FORUMS_BLOGID );
 
-		add_filter( 'wporg_bbp_forum_role_changed_note_text', function( $text ) use ( $meta_column ) {
-			return trim( "{$meta_column}\n\n{$text}" );
-		} );
+		// Load the Support Forums, for logging and whatnot.
+		WordPressdotorg\Forums\Plugin::get_instance();
+
+		$callback = function( $text ) use ( $callback, $reason, $meta_column ) {
+			remove_filter( 'wporg_bbp_forum_role_changed_note_text', $callback );
+
+			return trim( "{$reason}\n{$meta_column}\n\n{$text}" );
+		};
+		add_filter( 'wporg_bbp_forum_role_changed_note_text', $callback );
 
 		// Set the user to blocked. Support forum hooks will take care of the rest.
 		bbp_set_user_role( $user->ID, bbp_get_blocked_role() );
@@ -480,15 +527,36 @@ add_action( 'admin_post_login_block_account', function() {
 		restore_current_blog();
 	}
 
-	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'blocked_account' ) );
+	return true;
+}
+
+add_action( 'load-toplevel_page_user-registrations', function() {
+	// Perform bulk actions.
+	$action = $_REQUEST['action'] ?? ( $_REQUEST['action2'] ?? '' );
+	if (
+		empty( $_REQUEST['pending_ids'] ) ||
+		'reg_block' !== $action ||
+		! wp_verify_nonce( $_REQUEST['_wpnonce'], 'bulk-toplevel_page_user-registrations' )
+	) {
+		return;
 	}
 
-	wp_safe_redirect( add_query_arg(
-		's',
-		urlencode( $user->user_email ),
-		'https://login.wordpress.org/wp-admin/index.php?page=user-registrations&action=blocked_account'
-	) );
+	$reason = $_REQUEST['block_reason'] ?? '';
+	foreach ( (array) $_REQUEST['pending_ids'] as $pending_id ) {
+		$pending_user = wporg_get_pending_user( $pending_id );
+		if ( ! $pending_user ) {
+			continue;
+		}
+
+		if ( $pending_user['created'] ) {
+			wporg_login_block_account( $pending_user, $reason );
+		} else {
+			wporg_login_block_registration( $pending_user );
+		}
+	}
+
+	$url = remove_query_arg( array( 'pending_ids', 'action', 'action2', '_wpnonce', '_wp_http_referer' ) );
+	$url = add_query_arg( 'action', 'blocked_account', $url );
+	wp_safe_redirect( $url );
 	exit;
 } );
-

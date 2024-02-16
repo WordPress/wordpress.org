@@ -82,6 +82,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		'user_profile_key' => $hashed_profile_key,
 		'meta' => $meta + array(
 			'registration_ip'  => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
+			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? ' ' . \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ) : '' )
 		),
 		'scores' => array(
 			'pending' => 1,
@@ -190,24 +191,34 @@ function wporg_login_send_confirmation_email( $user ) {
 
 /**
  * Fetches a pending user record from the database by username or Email.
+ *
+ * @param string|int $who The username, email address, or user ID.
  */
-function wporg_get_pending_user( $login_or_email ) {
+function wporg_get_pending_user( $who ) {
 	global $wpdb;
 
 	// Is it a pending user object already?
-	if ( is_array( $login_or_email ) && isset( $login_or_email['pending_id'] ) ) {
-		return $login_or_email;
+	if ( is_array( $who ) && isset( $who['pending_id'] ) ) {
+		return $who;
 	}
 
-	$login_or_email = trim( $login_or_email );
-	if ( ! $login_or_email ) {
+	if ( is_numeric( $who ) && (int) $who == $who ) {
+		$field = 'pending_id';
+	} elseif ( str_contains( $who, '@' ) ) {
+		$field = 'user_email';
+	} else {
+		$field = 'user_login';
+	}
+
+	$who = trim( $who );
+	if ( ! $who ) {
 		return false;
 	}
 
 	$pending_user = $wpdb->get_row( $wpdb->prepare(
-		"SELECT * FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE ( `user_login` = %s OR `user_email` = %s ) LIMIT 1",
-		$login_or_email,
-		$login_or_email
+		"SELECT * FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE %i = %s LIMIT 1",
+		$field,
+		$who
 	), ARRAY_A );
 
 	if ( ! $pending_user ) {
@@ -322,9 +333,10 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 	) );
 
 	// Update the pending record with the new details.
-	$pending_user['created'] = 1;
-	$pending_user['created_date'] = gmdate( 'Y-m-d H:i:s' );
-	$pending_user['meta']['confirmed_ip'] = $_SERVER['REMOTE_ADDR']; // Spam/Fraud purposes, will be deleted once not needed.
+	$pending_user['created']                      = 1;
+	$pending_user['created_date']                 = gmdate( 'Y-m-d H:i:s' );
+	$pending_user['meta']['confirmed_ip']         = $_SERVER['REMOTE_ADDR'];
+	$pending_user['meta']['confirmed_ip_country'] = ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? ' ' . \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ): '' );
 
 	// reCaptcha v3 logging.
 	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
