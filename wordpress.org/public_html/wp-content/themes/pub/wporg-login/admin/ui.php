@@ -89,10 +89,10 @@ function wporg_login_admin_page() {
 
 			var url = $this.prop('href') + '&ajax=1';
 			if ( url.indexOf( 'block_account' ) !== -1 ) {
-				if ( ! $('block_reason').val() ) {
-					$('block_reason').val( prompt( 'Reason for blocking?' ) || '' );
+				if ( ! $('#block_reason').val() ) {
+					$('#block_reason').val( prompt( 'Reason for blocking?' ) );
 				}
-				url += '&block_reason=' + encodeURIComponent( $('block_reason').val() );
+				url += '&block_reason=' + encodeURIComponent( $('#block_reason').val() );
 			}
 
 			$.get( url, function( data ) {
