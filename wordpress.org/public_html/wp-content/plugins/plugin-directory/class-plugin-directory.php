@@ -787,16 +787,18 @@ class Plugin_Directory {
 		}
 
 		// For any invalid values passed to browse, set it to featured instead
-		if ( !empty ( $wp_query->query ['browse'] ) &&
-		     !in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated' ) ) ) {
-			 $wp_query->query['browse'] = 'featured';
+		if (
+			! empty ( $wp_query->query['browse'] ) &&
+			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated' ) )
+		) {
+			 $wp_query->query['browse']      = 'featured';
 			 $wp_query->query_vars['browse'] = 'featured';
 		}
 
 		// Set up custom queries for the /browse/ URLs
 		switch ( $wp_query->get( 'browse' ) ) {
 			case 'beta':
-				$wp_query->query_vars['orderby'] = 'last_updated';
+				$wp_query->query_vars['orderby'] ??= 'last_updated';
 
 				// Limit the Beta tab to plugins updated within 12 months.
 				$meta_query                = $wp_query->get( 'meta_query' ) ?: [];
@@ -825,8 +827,8 @@ class Plugin_Directory {
 					$wp_query->query_vars['favorites_user'] = $favorites_user->user_nicename;
 					$wp_query->query_vars['post_name__in']  = get_user_meta( $favorites_user->ID, 'plugin_favorites', true );
 
-					$wp_query->query_vars['orderby'] = 'post_title';
-					$wp_query->query_vars['order']   = 'ASC';
+					$wp_query->query_vars['orderby'] ??= 'post_title';
+					$wp_query->query_vars['order']   ??= 'ASC';
 				}
 
 				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
@@ -835,12 +837,12 @@ class Plugin_Directory {
 				break;
 
 			case 'updated':
-				$wp_query->query_vars['orderby'] = 'last_updated';
+				$wp_query->query_vars['orderby'] ??= 'last_updated';
 				break;
 
 			case 'block':
 			case 'new':
-				$wp_query->query_vars['orderby'] = 'post_date';
+				$wp_query->query_vars['orderby'] ??= 'post_date';
 				break;
 		}
 
@@ -897,8 +899,8 @@ class Plugin_Directory {
 				);
 			}
 
-			$wp_query->query_vars['orderby'] = 'post_title';
-			$wp_query->query_vars['order']   = 'ASC';
+			$wp_query->query_vars['orderby'] ??= 'post_title';
+			$wp_query->query_vars['order']   ??= 'ASC';
 
 			// Treat it as a taxonomy query now, not the author archive.
 			$wp_query->is_author = false;
@@ -1011,6 +1013,7 @@ class Plugin_Directory {
 				);
 
 				break;
+			case 'num_ratings':
 			case 'ratings':
 				$wp_query->query_vars['meta_query']['num_ratings'] ??= [
 					'key'     => 'num_ratings',
