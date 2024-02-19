@@ -977,7 +977,7 @@ class Plugin_Directory {
 
 		// Adjust the rules for other sorts.
 		// Support orderby={orderby}_{order}
-		$orderby = $wp_query->query_vars['orderby'] ?? '';
+		$orderby = strtolower( $wp_query->query_vars['orderby'] ?? '' );
 		if ( str_ends_with( $orderby, '_desc' ) ) {
 			$wp_query->query_vars['order']   = 'DESC';
 			$wp_query->query_vars['orderby'] = substr( $orderby, 0, -5 );
@@ -988,6 +988,7 @@ class Plugin_Directory {
 
 		// The custom sorts.
 		$orderby = $wp_query->query_vars['orderby'] ?? '';
+		$order   = $wp_query->query_vars['order'] ?? 'DESC';
 		switch( $orderby ) {
 			case 'rating':
 				// TODO: Round out the rating to be based on half-stars. A 4.95 rating vs a 5.00 should be the same thing.
@@ -1004,8 +1005,6 @@ class Plugin_Directory {
 				];
 
 				// Should be a multisort, with an additional `num_ratings`.
-				$order = $wp_query->query['order'] ?? 'DESC';
-
 				$wp_query->query_vars['orderby']  = array(
 					'rating'      => $order,
 					'num_ratings' => $order,
