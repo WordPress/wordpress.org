@@ -16,13 +16,13 @@ function wporg_query_filter_options_sort() {
 	$sort     = $orderby . ( $order ? '_' . $order : '' );
 
 	$options = array(
-		'relevance'    => __( 'Relevance', 'wporg-plugins' ),
-		'installs'     => __( 'Most Used', 'wporg-plugins' ),
-		'rating'       => __( 'Rating', 'wporg-plugins' ),
-		'ratings'      => __( 'Reviews', 'wporg-plugins' ),
-		'last_updated' => __( 'Recently Updated', 'wporg-plugins' ),
-		'date_desc'    => __( 'Newest', 'wporg-plugins' ),
-		'tested'       => __( 'Tested Up to', 'wporg-plugins' ),
+		'relevance'       => __( 'Relevance', 'wporg-plugins' ),
+		'active_installs' => __( 'Most Used', 'wporg-plugins' ),
+		'rating'          => __( 'Rating', 'wporg-plugins' ),
+		'ratings'         => __( 'Reviews', 'wporg-plugins' ),
+		'last_updated'    => __( 'Recently Updated', 'wporg-plugins' ),
+		'date_desc'       => __( 'Newest', 'wporg-plugins' ),
+		'tested'          => __( 'Tested Up to', 'wporg-plugins' ),
 	);
 
 	// Remove relevance for non-search.
@@ -102,7 +102,7 @@ function wporg_query_filter_in_form( $key ) {
 		foreach ( $values as $value ) {
 			// Support for tax archives... TODO Hacky..
 			// Realistically we should just ditch these and have all of the filters hit /search/?stuff=goes&here
-			if ( ! is_search() && $value === ( get_queried_object()->slug ?? '' ) ) {
+			if ( is_tax() && $value === ( get_queried_object()->slug ?? '' ) ) {
 				continue;
 			}
 
