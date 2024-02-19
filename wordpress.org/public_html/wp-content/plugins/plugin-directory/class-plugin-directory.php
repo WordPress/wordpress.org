@@ -1015,8 +1015,9 @@ class Plugin_Directory {
 					'value'   => 0,
 				];
 
-				// Needs to be a multisort, with an additional `num_ratings`..
+				// Should be a multisort, with an additional `num_ratings`.
 				$order = $wp_query->query['order'] ?? 'DESC';
+
 				$wp_query->query_vars['orderby']  = array(
 					'rating'      => $order,
 					'num_ratings' => $order,
@@ -1033,7 +1034,6 @@ class Plugin_Directory {
 
 				$wp_query->query_vars['orderby']  = 'num_ratings';
 				break;
-			case 'installs':
 			case 'active_installs':
 				$wp_query->query_vars['meta_query']['active_installs'] ??= [
 					'key'     => '_active_installs',
@@ -1043,7 +1043,6 @@ class Plugin_Directory {
 
 				$wp_query->query_vars['orderby']  = 'active_installs';
 				break;
-			case 'updated':
 			case 'last_updated':
 				$wp_query->query_vars['meta_query']['last_updated'] ??= [
 					'key'     => 'last_updated',
@@ -1072,7 +1071,6 @@ class Plugin_Directory {
 				$wp_query->query_vars['orderby'] = 'downloads';
 				break;
 		}
-
 	}
 
 	/**
