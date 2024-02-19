@@ -452,7 +452,7 @@ class WP_54_Credits extends WP_Credits {
 			'mikehansenme',
 			'mikejdent',
 			'mikeschinkel',
-			'mikeschroder',
+			'kirasong',
 			'mimitips',
 			'mircoraffinetti',
 			'mislavjuric',

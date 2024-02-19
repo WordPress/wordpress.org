@@ -225,7 +225,7 @@ function get_whitelist() {
 			'desrosj',
 			'joemcgill',
 			'karmatosed',
-			'mikeschroder', // @mike on Slack
+			'kirasong',
 			'ocean90',
 		) ),
 		'core-multisite' => array_merge( get_committers(), array(
@@ -372,7 +372,7 @@ function get_whitelist() {
 		'hosting' => array(
 			'andrew.taylor', // @ataylorme on Slack
 			'Crixu',
-			'mikeschroder', // @mike on Slack
+			'kirasong',
 			'jadonn',
 			'JavierCasares',
 			'jessibelle',

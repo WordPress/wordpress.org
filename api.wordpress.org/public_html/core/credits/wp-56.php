@@ -518,7 +518,7 @@ class WP_56_Credits extends WP_Credits {
 			'michelleames',
 			'mihdan',
 			'mikelopez',
-			'mikeschroder',
+			'kirasong',
 			'mikeyarce',
 			'milana_cap',
 			'miqrogroove',

@@ -1742,6 +1742,21 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 				// Fetch the PRs immediately
 				fetchPRs();
+
+				// deProxy github images, CORS changes.
+				deProxyImages();
+			}
+
+			// See https://meta.trac.wordpress.org/ticket/7442
+			function deProxyImages() {
+				$('img[src*="i0.wp.com/github.com/"]').each( function() {
+					var $this = $(this), $parent = $this.parent('a');
+					$this.removeAttr('crossorigin'); // We trust GitHub for these images.
+					$this.prop( 'src', $this.prop('src').replace(/i0\.wp\.com/, '' ) );
+					$this.prop( 'alt', $this.prop('alt').replace(/i0\.wp\.com/, '' ) );
+					$this.prop( 'title', $this.prop('title').replace(/i0\.wp\.com/, '' ) );
+					$parent.prop( 'href', $parent.prop('href').replace(/i0\.wp\.com/, '' ) );
+				} );
 			}
 
 			function fetchPRs() {

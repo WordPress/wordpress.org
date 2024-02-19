@@ -42,7 +42,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		$default      = 'all';
 		$current_view = $_REQUEST['view'] ?? $default;
 
-		if ( isset( $_GET['s'] ) ) {
+		if ( ! empty( $_GET['s'] ) ) {
 			$default = 'search';
 			$views[0] = [
 				'search', 'All search results'
@@ -143,8 +143,9 @@ class User_Registrations_List_Table extends WP_List_Table {
 		return $join . $where;
 	}
 
-	function get_columns() {
+	public function get_columns() {
 		return [
+			'cb'              => '<input type="checkbox" />',
 			'user_login'      => 'User Login',
 			'meta'            => 'Meta',
 			'scores'          => 'Anti-spam<br>reCaptcha Akismet',
@@ -158,7 +159,13 @@ class User_Registrations_List_Table extends WP_List_Table {
 			'scores'          => array( 'scores', true ),
 			'user_registered' => array( 'user_registered', true ),
 		];
-	 }
+	}
+
+	protected function get_bulk_actions() {
+		return array(
+			'reg_block' => 'Block Reg / Ban user',
+		);
+	}
 
 	function prepare_items() {
 		global $wpdb;
@@ -183,7 +190,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$sort_order = 'DESC';
 		}
 
-		$per_page     = $this->get_items_per_page( 'users_per_page', 100 );
+		$per_page     = $_GET['per_page'] ?? $this->get_items_per_page( 'users_per_page', 100 );
 		$current_page = $this->get_pagenum();
 
 		$join_where = $this->get_join_where_sql();
@@ -216,6 +223,20 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 	}
 
+	protected function bulk_actions( $which = '' ) {
+		parent::bulk_actions( $which );
+
+		if ( 'top' !== $which ) {
+			return;
+		}
+		?>
+
+		<fieldset class="alignleft actions">
+			<input name="block_reason" id="block_reason" placeholder="Ban/Block reason. Used for bulk + single." style="width: 32em;padding: 0.4em;margin: 0;" value="<?php echo esc_attr( $_REQUEST['block_reason'] ?? '' ); ?>" />
+		</fieldset>
+		<?php
+	}
+
 	function single_row( $item ) {
 		$classes = $this->get_row_class( $item );
 		printf( '<tr class="%s">', esc_attr( implode( ' ', $classes ) ) );
@@ -246,6 +267,13 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		return $classes;
+	}
+
+	public function column_cb( $item ) {
+		return sprintf(
+			'<input type="checkbox" name="pending_ids[]" value="%1$s" />',
+			esc_attr( $item->pending_id ),
+		);
 	}
 
 	function column_default( $item, $column_name ) {
@@ -347,19 +375,19 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		echo '<div>';
 
-		echo implode( ', ',
-			array_map(
-				function( $ip ) {
-					return $this->link_to_search( $ip ) .
-						( is_callable( 'WordPressdotorg\GeoIP\query' ) ?
-							' ' . \WordPressdotorg\GeoIP\query( $ip, 'country_short' ) : '' );
-				},
-				array_filter( array_unique( [
-					$meta->registration_ip ?? false,
-					$meta->confirmed_ip ?? false
-				] ) )
-			)
-		);
+		$ips = [];
+		foreach ( [ 'registration', 'confirmed' ] as $field ) {
+			if ( empty( $meta->{$field . '_ip'} ) ) {
+				continue;
+			}
+			$ip = $meta->{$field . '_ip'};
+
+			$meta->{$field . '_ip_country'} ??= ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? ' ' . \WordPressdotorg\GeoIP\query( $ip, 'country_short' ) : '' );
+
+			$ips[] = $ip . ' ' . $meta->{$field . '_ip_country'};
+		}
+
+		echo implode( ', ', array_map( array( $this, 'link_to_Search' ), array_unique( $ips ) ) );
 
 		echo '<hr>';
 
@@ -445,7 +473,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		return implode( '', array_map( function( $s ) {
-			if ( strlen( $s ) >= 3 ) {
+			if ( strlen( $s ) >= 3 || preg_match( '/^[A-Z]{2}$/', $s ) /* country */ ) {
 				return '<a href="' . add_query_arg( 's', urlencode( $s ), admin_url( 'admin.php?page=user-registrations' ) ) . '">' . esc_html( $s ) . '</a>';
 			}
 			return esc_html( $s );
