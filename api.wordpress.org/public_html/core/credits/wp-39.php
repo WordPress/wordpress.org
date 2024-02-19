@@ -40,7 +40,7 @@ class WP_39_Credits extends WP_Credits {
 					'DrewAPicture'   => 'Drew Jaynes',
 					'lancewillett'   => 'Lance Willett',
 					'gcorne'         => 'Gregory Cornelius',
-					'DH-Shredder'    => 'Mike Schroder',
+					'DH-Shredder'    => 'Kira Song',
 				),
 			),
 			'recent-rockstars' => array(

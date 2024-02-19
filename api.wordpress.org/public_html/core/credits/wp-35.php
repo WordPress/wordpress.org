@@ -46,7 +46,7 @@ class WP_35_Credits extends WP_Credits {
 				'data'    => array(
 					'lessbloat'      => 'Dave Martin',
 					'obenland'       => 'Konstantin Obenland',
-					'DH-Shredder'    => 'Mike Schroder',
+					'DH-Shredder'    => 'Kira Song',
 					'drewstrojny'    => 'Drew Strojny',
 					'wonderboymusic' => array( 'Scott Taylor', '0e9fc8ea22885ed718ee37d31dcffb8c' ),
 					'mattwiebe'      => 'Matt Wiebe',
