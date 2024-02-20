@@ -104,6 +104,8 @@ function wporg_query_filter_in_form( $key ) {
 			// Realistically we should just ditch these and have all of the filters hit /search/?stuff=goes&here
 			if ( is_tax() && $value === ( get_queried_object()->slug ?? '' ) ) {
 				continue;
+			} elseif ( is_search() && 's' === $query_var ) {
+				continue;
 			}
 
 			printf(
