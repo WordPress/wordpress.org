@@ -25,10 +25,15 @@ class Meta_Sync {
 	 */
 	function sync() {
 		$this->sync_downloads();
-		$this->sync_ratings();
-		$this->update_tested_up_to();
-		$this->cleanup_empty_terms();
+		Manager::clear_memory_heavy_variables();
 
+		$this->sync_ratings();
+		Manager::clear_memory_heavy_variables();
+
+		$this->update_tested_up_to();
+		Manager::clear_memory_heavy_variables();
+
+		$this->cleanup_empty_terms();
 		Manager::clear_memory_heavy_variables();
 	}
 
@@ -201,6 +206,8 @@ class Meta_Sync {
 	 * Remove old plugin tags that are no longer in use.
 	 */
 	public function cleanup_empty_terms() {
+		global $wpdb;
+
 		$taxonomies = [
 			'plugin_tags',
 			'plugin_contributors',
@@ -208,8 +215,17 @@ class Meta_Sync {
 			'plugin_support_reps'
 		];
 		foreach ( $taxonomies as $taxonomy ) {
+			$term_ids = $wpdb->get_col( $wpdb->prepare(
+				"SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s AND count = 0",
+				$taxonomy
+			) );
+			if ( ! $term_ids ) {
+				continue;
+			}
+
 			$terms = get_terms( array(
 				'taxonomy'   => $taxonomy,
+				'include'    => $term_ids,
 				'hide_empty' => false,
 				'count'      => true,
 			) );
