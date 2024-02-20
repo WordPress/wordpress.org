@@ -1,7 +1,6 @@
 <?php do_action( 'bbp_template_before_forums_loop' ); ?>
 
-<h2>[TBD] Check these Forums</h2>
-<p>[TBD] Paragraph describing the page content</p>
+<h2>Forums</h2>
 
 <div id="forums-list-<?php bbp_forum_id(); ?>" class="bbp-forums three-up cards-grid">
 
