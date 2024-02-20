@@ -993,7 +993,7 @@ class Plugin_Directory {
 		$order   = $wp_query->query_vars['order'] ?? 'DESC';
 		switch( $orderby ) {
 			case 'rating':
-				// TODO: Round out the rating to be based on half-stars. A 4.95 rating vs a 5.00 should be the same thing.
+				// TODO: Round out the rating to be based on half-stars. A 4.95 rating vs a 5.00 appears the same, but sorts differently.
 				$wp_query->query_vars['meta_query']['rating'] ??= [
 					'key'     => 'rating',
 					'type'    => 'DECIMAL(3,2)',
@@ -1467,21 +1467,6 @@ class Plugin_Directory {
 			wp_safe_redirect( $url, 301 );
 			die();
 		}
-
-		/* // Disabled. This doesn't work with filters.. this should go bye-bye.
-		// Existing tag with no plugins.
-		if (
-			is_tax( 'plugin_tags' ) &&
-			! have_posts() &&
-			// Only redirect if only plugin_tags is queried. Other taxonomies cannot be handled.
-			count( $wp_query->tax_query->queried_terms ) <= 1
-		) {
-			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
-			$path = explode( '/', $_SERVER['REQUEST_URI'] );
-
-			wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ), 301 );
-			die();
-		}*/
 
 		// Empty search query.
 		// This may occur due to WordPress's 1600 character search limit.
