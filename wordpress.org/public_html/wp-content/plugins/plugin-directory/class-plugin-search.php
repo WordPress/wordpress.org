@@ -283,6 +283,15 @@ class Plugin_Search {
 					),
 				];
 			}
+
+			// We've added a custom sort, but we still want to sub-sort it by the relevance score.
+			if ( ! empty( $es_query_args['sort'] ) ) {
+				$es_query_args['sort'][] = [
+					'_score' => array(
+						'order' => 'DESC',
+					),
+				];
+			}
 		}
 
 		// Set boost on the match query
