@@ -182,9 +182,8 @@ class Validator {
 		} elseif( isset( $readme->warnings['trimmed_short_description'] ) ) {
 			$notes[] = sprintf(
 				/* translators: %s: section title */
-				__( 'The %s section is too long and was truncated. A maximum of %d characters is supported.', 'wporg-plugins' ),
-				'<code>Short Description</code>',
-				number_format_i18n( $readme->maximum_field_lengths['short_description'] )
+				__( 'The %s section is too long and was truncated. A maximum of 150 characters is supported.', 'wporg-plugins' ),
+				'<code>Short Description</code>'
 			);
 		}
 
