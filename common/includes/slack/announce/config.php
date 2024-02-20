@@ -174,6 +174,7 @@ function get_whitelist() {
 		) ),
 		'core-dev-blog' => array(
 			'bph',
+			'greenshady',
 		),
 		'core-docs' => array_merge( get_committers(), array(
 			'DrewAPicture', // @drew on Slack
