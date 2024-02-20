@@ -182,8 +182,22 @@ class Validator {
 		} elseif( isset( $readme->warnings['trimmed_short_description'] ) ) {
 			$notes[] = sprintf(
 				/* translators: %s: section title */
-				__( 'The %s section is too long and was truncated. A maximum of 150 characters is supported.', 'wporg-plugins' ),
-				'<code>Short Description</code>'
+				__( 'The %s section is too long and was truncated. A maximum of %d characters is supported.', 'wporg-plugins' ),
+				'<code>Short Description</code>',
+				number_format_i18n( $readme->maximum_field_lengths['short_description'] )
+			);
+		}
+
+		$trimmed_sections = array_filter( $readme->warnings, function( $warning ) {
+			return str_contains( $warning, 'trimmed_section_' );
+		}, ARRAY_FILTER_USE_KEY );
+		foreach ( $trimmed_sections as $section_name => $dummy ) {
+			$section_name = str_replace( 'trimmed_section_', '', $section_name );
+			$notes[]      = sprintf(
+				/* translators: %s: section title */
+				__( 'The %s section is too long and was truncated. A maximum of %s words is supported.', 'wporg-plugins' ),
+				'<code>' . esc_html( ucwords( str_replace( '_', ' ', $section_name ) ) ) . '</code>',
+				number_format_i18n( $readme->maximum_field_lengths[ 'section' ] )
 			);
 		}
 
