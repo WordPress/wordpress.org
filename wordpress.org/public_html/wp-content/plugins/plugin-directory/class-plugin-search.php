@@ -231,7 +231,21 @@ class Plugin_Search {
 				continue;
 			}
 
-			$meta_key   = $meta_query['key'];
+			$meta_key = $meta_query['key'];
+
+			// Exists needs to be handled differently.
+			if ( 'EXISTS' === $meta_query['compare'] ) {
+				$es_query_args['filter']['and'][] = [
+					'exists' => [
+						'field' => $meta_key
+					]
+				];
+			}
+
+			if ( ! isset( $meta_query['value'] ) ) {
+				continue;
+			}
+
 			$meta_value = $meta_query['value'];
 			$compare    = null;
 			$type       = null;
