@@ -232,6 +232,7 @@ class Plugin_Search {
 			}
 
 			$meta_key = $meta_query['key'];
+			$meta_key = $unknown_es_meta_fields[ $meta_key ] ?? $meta_key;
 
 			// Exists needs to be handled differently.
 			if ( 'EXISTS' === $meta_query['compare'] ) {
@@ -259,8 +260,6 @@ class Plugin_Search {
 				case '=':
 					$op   ??= 'value';
 					$type ??= 'term';
-
-					$meta_key = $unknown_es_meta_fields[ $meta_key ] ?? $meta_key;
 
 					$es_query_args['filter']['and'][] = [
 						$type => [
