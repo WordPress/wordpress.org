@@ -979,13 +979,15 @@ class Plugin_Directory {
 
 		// Adjust the rules for other sorts.
 		// Support orderby={orderby}_{order}
-		$orderby = strtolower( $wp_query->query_vars['orderby'] ?? '' );
-		if ( str_ends_with( $orderby, '_desc' ) ) {
-			$wp_query->query_vars['order']   = 'DESC';
-			$wp_query->query_vars['orderby'] = substr( $orderby, 0, -5 );
-		} elseif ( str_ends_with( $orderby, '_asc' ) ) {
-			$wp_query->query_vars['order']   = 'ASC';
-			$wp_query->query_vars['orderby'] = substr( $orderby, 0, -4 );
+		if ( isset( $wp_query->query_vars['orderby'] ) && is_string( $wp_query->query_vars['orderby'] ) ) {
+			$orderby = $wp_query->query_vars['orderby'];
+			if ( str_ends_with( $orderby, '_desc' ) ) {
+				$wp_query->query_vars['order']   = 'DESC';
+				$wp_query->query_vars['orderby'] = substr( $orderby, 0, -5 );
+			} elseif ( str_ends_with( $orderby, '_asc' ) ) {
+				$wp_query->query_vars['order']   = 'ASC';
+				$wp_query->query_vars['orderby'] = substr( $orderby, 0, -4 );
+			}
 		}
 
 		// The custom sorts.
