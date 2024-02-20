@@ -69,7 +69,7 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' ); // phpcs:ignore
 
 		<?php
 
-if ( ! is_front_page() && is_archive() ) {
+if ( ! is_front_page() && ( is_archive() || is_search() ) ) {
 	//echo esc_html( $wp_query->request );
 	echo '<style>
 		body {
