@@ -58,7 +58,7 @@ function enqueue_assets() {
 	// See https://github.com/WordPress/gutenberg/blob/9d4b83cbbafcd6c6cbd20c86b572f458fc65ff16/lib/block-supports/layout.php#L38
 	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
 	$layout = wp_get_global_settings( array( 'layout' ) );
-	$style = gutenberg_get_layout_style( '.entry-content', $layout, true, $block_gap );
+	$style = wp_get_layout_style( '.entry-content', $layout, true, $block_gap );
 	wp_add_inline_style( 'wporg-style', $style );
 
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
