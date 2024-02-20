@@ -27,6 +27,7 @@ class Meta_Sync {
 		$this->sync_downloads();
 		$this->sync_ratings();
 		$this->update_tested_up_to();
+		$this->cleanup_empty_terms();
 
 		Manager::clear_memory_heavy_variables();
 	}
@@ -192,6 +193,33 @@ class Meta_Sync {
 
 			if ( $i % 100 === 0 ) {
 				Manager::clear_memory_heavy_variables();
+			}
+		}
+	}
+
+	/**
+	 * Remove old plugin tags that are no longer in use.
+	 */
+	public function cleanup_empty_terms() {
+		$taxonomies = [
+			'plugin_tags',
+			'plugin_contributors',
+			'plugin_committers',
+			'plugin_support_reps'
+		];
+		foreach ( $taxonomies as $taxonomy ) {
+			$terms = get_terms( array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'count'      => true,
+			) );
+
+			$terms = array_filter( $terms, function( $term ) {
+				return $term->count === 0;
+			} );
+
+			foreach ( $terms as $term ) {
+				wp_delete_term( $term->term_id, $term->taxonomy );
 			}
 		}
 	}

@@ -1384,20 +1384,6 @@ class Plugin_Directory {
 			die();
 		}
 
-		// Existing tag with no plugins.
-		if (
-			is_tax( 'plugin_tags' ) &&
-			! have_posts() &&
-			// Only redirect if only plugin_tags is queried. Other taxonomies cannot be handled.
-			count( $wp_query->tax_query->queried_terms ) <= 1
-		) {
-			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
-			$path = explode( '/', $_SERVER['REQUEST_URI'] );
-
-			wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ), 301 );
-			die();
-		}
-
 		// Empty search query.
 		// This may occur due to WordPress's 1600 character search limit.
 		if (
