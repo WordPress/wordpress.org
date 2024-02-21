@@ -34,6 +34,12 @@ function add_site_navigation_menus( $menus ) {
 }
 add_filter( 'wporg_block_navigation_menus', '\add_site_navigation_menus' );
 
+function register_patterns() {
+	require get_template_directory() . '/patterns/local-nav.php';
+	require get_template_directory() . '/patterns/forums-homepage-header.php';
+	require get_template_directory() . '/patterns/search-field.php';
+}
+add_action( 'init', 'register_patterns' );
 
 /**
  * Add theme support for some features.

@@ -9,7 +9,7 @@
 
 	.wrapper {
 		margin: 0 auto;
-		max-width: 960px;
+		max-width: var(--wp--style--global--wide-size, 1160px);
 	}
 
 	h1 {
