@@ -2445,7 +2445,7 @@ p a:hover {
 }
 #wporg-header .wrapper {
 	margin: 0 auto;
-	max-width: var(--wp--style--global--wide-size, 1160px);
+	max-width: var(--wp--style--global--wide-size);
 }
 #wporg-header h1 {
 	display: inline-block;
