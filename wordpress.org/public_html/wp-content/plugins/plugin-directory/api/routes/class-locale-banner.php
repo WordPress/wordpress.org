@@ -210,9 +210,10 @@ class Locale_Banner extends Base {
 
 		if ( is_array( $http_locales ) ) {
 			foreach ( $http_locales as $http_locale ) {
-				@list( $lang, $region ) = explode( '-', $http_locale );
-				if ( is_null( $region ) ) {
-					$region = $lang;
+				$lang   = $http_locale;
+				$region = $http_locale;
+				if ( str_contains( $http_locale, '-' ) ) {
+					list( $lang, $region ) = explode( '-', $http_locale );
 				}
 
 				/*
