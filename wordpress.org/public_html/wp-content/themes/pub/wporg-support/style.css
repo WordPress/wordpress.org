@@ -304,7 +304,7 @@ a:hover {
 /**
  * 4.0 Overrides
  */
-@media only screen and (min-width: 960px) {
+@media only screen and (min-width: 1160px) {
 	.col-6 #bbpress-forums {
 		margin-left: 0;
 	}
@@ -894,14 +894,14 @@ div.bbp-template-notice.updated {
 }
 
 /* Force widths for desktops */
-@media screen and (min-width: 960px) {
+@media screen and (min-width: 1160px) {
 	#header-inner,
 	#headline-inner,
 	#subnav-inner,
 	#showcase-inner,
 	#main,
 	#footer {
-		width: 960px;
+		width: var(--wp--style--global--wide-size);
 	}
 	div.content {
 		width: 692px;
@@ -955,6 +955,105 @@ div.bbp-template-notice.updated {
 		margin: 100px 10px 40px 10px;
 	}
 }
+/*--------------------------------------------------------------
+# Typography
+--------------------------------------------------------------*/
+h1,
+h2,
+h3,
+h4,
+.bbp-view .review-ratings .col-5 > div:first-child,
+h5,
+h6 {
+	margin-bottom: calc(var(--wp--style--block-gap) / 2);
+}
+
+h2.comment-reply-title {
+	font-weight: 400;
+	font-size: 1.45rem;
+	line-height: 1.5em;
+}
+
+h3.comment-reply-title {
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+
+h4, .bbp-view .review-ratings .col-5 > div:first-child {
+	border: none;
+	color: #32373c;
+	padding: 0;
+}
+
+p {
+	margin: 1em 0;
+}
+p.subheading {
+	color: #82878c;
+	font-size: 1.25rem;
+	font-weight: 300;
+	margin: -0.4rem auto 2rem;
+	text-align: center;
+}
+p.intro {
+	font-size: 1.25rem;
+}
+p.aside {
+	font-size: 0.8rem;
+}
+p.note {
+	font-size: 0.64rem;
+	letter-spacing: 0.01rem;
+	max-width: 18.1898940355rem;
+}
+
+dfn, cite, em, i {
+	font-style: italic;
+}
+
+blockquote {
+	margin: 0 1.5em;
+}
+
+address {
+	margin: 0 0 1.5em;
+}
+
+pre {
+	background: #eee;
+	box-sizing: content-box;
+	font-family: "Courier 10 Pitch", Courier, monospace;
+	font-size: 0.8rem;
+	line-height: 1.6;
+	margin-bottom: 1.6em;
+	max-width: 100%;
+	overflow: auto;
+	padding: 1.6em;
+}
+
+code, kbd, tt, var {
+	font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+	font-size: 0.8rem;
+}
+
+abbr, acronym {
+	border-bottom: 1px dotted #666;
+	cursor: help;
+}
+
+mark, ins {
+	background: #fff9c0;
+	text-decoration: none;
+}
+
+big {
+	font-size: 125%;
+}
+
+.text-center {
+	text-align: center;
+}
+
 /*--------------------------------------------------------------
 # Blocks
 --------------------------------------------------------------*/
@@ -1165,7 +1264,7 @@ table {
 @media (min-width: 67rem) {
 	.locale-banner {
 		margin: 1rem auto 0;
-		max-width: 960px;
+		max-width: var(--wp--style--global--wide-size);
 	}
 }
 
@@ -2345,7 +2444,7 @@ p a:hover {
 }
 #wporg-header .wrapper {
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: var(--wp--style--global--wide-size, 1160px);
 }
 #wporg-header h1 {
 	display: inline-block;
@@ -2726,7 +2825,7 @@ body, #pagebody {
 }
 .site-header .site-branding {
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: var(--wp--style--global--wide-size);
 	padding: 0 1.5625rem;
 }
 @media screen and (min-width: 48em) {
@@ -2922,7 +3021,7 @@ body, #pagebody {
 --------------------------------------------------------------*/
 .site-main {
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: var(--wp--style--global--wide-size);
 	padding: 3.0517578125rem 1.5625rem;
 }
 @media screen and (min-width: 48em) {
@@ -3774,12 +3873,6 @@ section {
 .bbpress li.bbp-forum-freshness,
 .bbpress li.bbp-topic-freshness {
 	text-align: left;
-}
-.bbpress h1 {
-	font-size: 1.5625rem;
-	font-weight: 400;
-	padding-bottom: 0;
-	margin: 2rem 0 1rem;
 }
 .bbpress h1.page-title {
 	margin-top: 0;

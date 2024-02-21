@@ -68,7 +68,7 @@ a:hover {
 /**
  * 4.0 Overrides
  */
-@media only screen and (min-width: 960px) {
+@media only screen and (min-width: 1160px) {
 
 	.col-6 #bbpress-forums {
 		margin-left: 0;
@@ -714,7 +714,7 @@ div.bbp-template-notice.updated {
 }
 
 /* Force widths for desktops */
-@media screen and ( min-width: 960px ) {
+@media screen and ( min-width: 1160px ) {
 
 	#header-inner,
 	#headline-inner,
@@ -722,7 +722,7 @@ div.bbp-template-notice.updated {
 	#showcase-inner,
 	#main,
 	#footer {
-		width: 960px;
+		width: var(--wp--style--global--wide-size);
 	}
 
 	div.content {

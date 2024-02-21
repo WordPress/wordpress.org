@@ -1,6 +1,6 @@
 <?php do_action( 'bbp_template_before_forums_loop' ); ?>
 
-<h2>Forums</h2>
+<h2 class="has-heading-5-font-size">Forums</h2>
 
 <div id="forums-list-<?php bbp_forum_id(); ?>" class="bbp-forums wp-block-group is-style-cards-grid has-small-font-size is-layout-grid wp-block-group-is-layout-grid">
 

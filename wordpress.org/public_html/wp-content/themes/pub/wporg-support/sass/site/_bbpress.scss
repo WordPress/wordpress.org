@@ -650,10 +650,6 @@ $paginationBreakPoint: "600px";
 	}
 
 	h1 {
-		font-size: ms(4);
-		font-weight: 400;
-		padding-bottom: 0;
-		margin: 2rem 0 1rem;
 
 		&.page-title {
 			margin-top: 0;
@@ -1286,7 +1282,7 @@ div.bbp-breadcrumb {
 
 			> div:first-child {
 
-				// @extend h4;
+				@extend h4;
 				margin-top: 0;
 			}
 
