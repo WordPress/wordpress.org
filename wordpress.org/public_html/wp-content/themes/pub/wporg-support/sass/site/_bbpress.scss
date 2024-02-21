@@ -6,7 +6,9 @@
 /* Many of these override the styles from the plugin */
 
 section {
-	padding: 4rem 0;
+	padding: unset;
+	margin-top: var(--wp--preset--spacing--50);
+	margin-bottom: var(--wp--preset--spacing--50);
 }
 
 #bbpress-forums {

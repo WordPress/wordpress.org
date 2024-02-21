@@ -965,6 +965,7 @@ h4,
 .bbp-view .review-ratings .col-5 > div:first-child,
 h5,
 h6 {
+	clear: both;
 	margin-bottom: calc(var(--wp--style--block-gap) / 2);
 }
 
@@ -3316,7 +3317,9 @@ body.category #main .archive-pagination {
 /* bbPress specific styles */
 /* Many of these override the styles from the plugin */
 section {
-	padding: 4rem 0;
+	padding: unset;
+	margin-top: var(--wp--preset--spacing--50);
+	margin-bottom: var(--wp--preset--spacing--50);
 }
 
 #bbpress-forums {
