@@ -18,6 +18,7 @@
 
 		strong {
 			float: right;
+			font-weight: 500;
 		}
 
 		&:first-child {
@@ -41,7 +42,6 @@
 
 	.languages .popover-trigger {
 		color: $color__link;
-		font-weight: 600;
 
 		&:hover {
 			text-decoration: underline;

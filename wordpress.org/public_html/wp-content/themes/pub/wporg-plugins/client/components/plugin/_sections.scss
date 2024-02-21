@@ -2,8 +2,6 @@
 	h1, h2, h3 {
 		font-size: ms( 0 );
 		font-weight: 600;
-		letter-spacing: 0.01rem;
-		text-transform: uppercase;
 
 		&:nth-child(2) {
 			margin-top: 0;
@@ -13,8 +11,6 @@
 	h4, h5, h6 {
 		font-size: ms( -2 );
 		font-weight: 600;
-		letter-spacing: 0.05rem;
-		text-transform: uppercase;
 
 		&:nth-child(2) {
 			margin-top: 0;
@@ -30,5 +26,9 @@
 		font-weight: 600;
 		padding: 0;
 		text-transform: inherit;
+	}
+
+	ul li {
+		margin-bottom: 8px;
 	}
 }

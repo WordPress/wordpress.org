@@ -92,6 +92,7 @@
 	.entry-content {
 		padding: 0 ms( 4 );
 		max-width: 48rem;
+		font-size: 16px;
 
 		@media screen and ( min-width: $ms-breakpoint ) {
 			float: left;
