@@ -2,7 +2,7 @@
 
 <h2>Forums</h2>
 
-<div id="forums-list-<?php bbp_forum_id(); ?>" class="bbp-forums three-up cards-grid">
+<div id="forums-list-<?php bbp_forum_id(); ?>" class="bbp-forums wp-block-group is-style-cards-grid has-small-font-size is-layout-grid wp-block-group-is-layout-grid">
 
 		<?php while ( bbp_forums() ) : bbp_the_forum(); ?>
 

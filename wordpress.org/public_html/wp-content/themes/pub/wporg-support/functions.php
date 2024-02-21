@@ -257,20 +257,20 @@ function wporg_support_get_views() {
 		'support-forum-no',
 	);
 
-	$output = array();
+	$output = '';
 
 	foreach ( $views as $view ) {
 		if ( empty( bbpress()->views[ $view ] ) ) {
 			continue;
 		}
 
-		$output[] = sprintf( '<li class="view"><a href="%s">%s</a></li>',
+		$output .= sprintf( '<a class="wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s">%s</a>',
 			esc_url( bbp_get_view_url( $view ) ),
 			bbp_get_view_title( $view )
 		);
 	}
 
-	echo implode( ' | ', $output );
+	echo $output;
 }
 
 /**

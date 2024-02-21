@@ -22,9 +22,9 @@
 <section>
 	<h2><?php _e( 'Topics', 'wporg-forums' ); ?></h2>
 
-	<ul class="three-up cards-grid" id="views">
+	<div class="wp-block-group is-style-cards-grid has-small-font-size is-layout-grid wp-block-group-is-layout-grid">
 		<?php wporg_support_get_views(); ?>
-	</ul>
+	</div>
 </section>
 
 <section>
