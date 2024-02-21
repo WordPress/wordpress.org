@@ -11,25 +11,44 @@
 
 namespace WordPressdotorg\Forums;
 
-$menu_items = array(
-	/* translators: relative link to the forums home page */
-	_x( '/forums/', 'header menu', 'wporg-forums' )                                     => _x( 'Forums', 'header menu', 'wporg-forums' ),
-	_x( 'https://wordpress.org/support/guidelines/', 'header menu', 'wporg-forums' )    => _x( 'Guidelines', 'header menu', 'wporg-forums' ),
-	_x( 'https://wordpress.org/documentation/', 'header menu', 'wporg-forums' )         => _x( 'Documentation', 'header menu', 'wporg-forums' ),
-	_x( 'https://make.wordpress.org/support/handbook/', 'header menu', 'wporg-forums' ) => _x( 'Get Involved', 'header menu', 'wporg-forums' ),
-);
-
 \WordPressdotorg\skip_to( '#content' );
 
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
-echo do_blocks( '<!-- wp:wporg/local-navigation-bar {"className":"has-display-contents","backgroundColor":"charcoal-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}}},"textColor":"white","fontSize":"small"} -->
+echo do_blocks(
+	sprintf(
+		'<!-- wp:wporg/local-navigation-bar {"className":"has-display-contents","backgroundColor":"charcoal-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}}},"textColor":"white","fontSize":"small"} -->
 
-	<!-- wp:site-title {"level":0,"fontSize":"small"} /-->
+			<!-- wp:paragraph {"fontSize":"small"} -->
+			<p class="wp-block-site-title has-small-font-size"><a href="%s">Forums</a></p>
+			<!-- /wp:paragraph -->
 
-	<!-- wp:navigation {"icon":"menu","overlayBackgroundColor":"charcoal-2","overlayTextColor":"white","layout":{"type":"flex","orientation":"horizontal"},"fontSize":"small","menuSlug":"subnav"} /-->
+			<!-- wp:navigation {"icon":"menu","overlayBackgroundColor":"charcoal-2","overlayTextColor":"white","layout":{"type":"flex","orientation":"horizontal"},"fontSize":"small","menuSlug":"forums"} /-->
 
-<!-- /wp:wporg/local-navigation-bar -->' );
+		<!-- /wp:wporg/local-navigation-bar -->',
+		esc_url( home_url( '/forums/' ) )
+	)
+);
+
+$search_field = do_blocks(
+	sprintf(
+		'<!-- wp:group {"layout":{"type":"constrained","wideSize":"1280px","contentSize":"680px"},"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+		<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
+
+			<!-- wp:group {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}}}} -->
+			<div id="wporg-search" class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--20);margin-bottom:var(--wp--preset--spacing--20)">
+
+				<!-- wp:search {"label":"%1$s","showLabel":false,"placeholder":"%2$s","width":232,"widthUnit":"px","buttonText":"%1$s","buttonPosition":"button-inside","buttonUseIcon":true} /-->
+
+			</div>
+			<!-- /wp:group -->
+
+		</div>
+		<!-- /wp:group -->',
+		esc_attr__( 'Search', 'wporg' ),
+		esc_attr__( 'Search forums', 'wporg' ),
+	)
+);
 
 ?>
 
@@ -37,10 +56,11 @@ echo do_blocks( '<!-- wp:wporg/local-navigation-bar {"className":"has-display-co
 	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-forums' ); ?></a>
 
 	<div id="content" class="site-content">
-		<header id="masthead" class="site-header <?php echo is_front_page() ? 'home' : ''; ?>" role="banner">
-			<div class="site-branding">
-				<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/forums/' ) ); ?>" rel="home"><?php _ex( 'Forums', 'Site title', 'wporg-forums' ); ?></a></h1>
-				<?php if ( is_front_page() ) : ?>
+		<?php if ( is_front_page() ) : ?>
+			<header id="masthead" class="site-header <?php echo is_front_page() ? 'home' : ''; ?>" role="banner">
+				<div class="site-branding">
+					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/forums/' ) ); ?>" rel="home"><?php _ex( 'WordPress Support', 'Site title', 'wporg-forums' ); ?></a></h1>
+
 					<p class="site-description">
 						<?php
 						/* Translators: subhead */
@@ -48,34 +68,9 @@ echo do_blocks( '<!-- wp:wporg/local-navigation-bar {"className":"has-display-co
 						?>
 					</p>
 					<?php get_search_form(); ?>
-				<?php else : ?>
-					<nav id="site-navigation" class="main-navigation" role="navigation">
-						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-forums' ); ?>"></button>
-						<div id="primary-menu" class="menu">
-							<ul>
-								<?php
-								foreach ( $menu_items as $path => $text ) :
-									$url = parse_url( $path );
-
-									// Check both host and path (if available).
-									$is_same_host = ! empty( $url['host'] ) ? $url['host'] === $_SERVER['HTTP_HOST'] : true;
-									$is_same_path = ! empty( $url['path'] ) && false !== strpos( $_SERVER['REQUEST_URI'], $url['path'] );
-
-									$class = ( $is_same_host && $is_same_path ) ? 'class="active" ' : '';
-
-									if ( ! empty( $url['host' ] ) ) {
-										$url = esc_url( $path );
-									} else {
-										$url = esc_url( home_url( $path ) );
-									}
-								?>
-								<li class="page_item"><a <?php echo $class; ?>href="<?php echo $url; ?>"><?php echo esc_html( $text ); ?></a></li>
-								<?php endforeach; ?>
-								<li><?php get_search_form(); ?></li>
-							</ul>
-						</div>
-					</nav><!-- #site-navigation -->
-				<?php endif; ?>
-			</div><!-- .site-branding -->
-		</header><!-- #masthead -->
+				</div><!-- .site-branding -->
+			</header><!-- #masthead -->
+		<?php else : ?>
+			<?php echo $search_field; ?>
+		<?php endif; ?>
 		<div id="lang-guess-wrap"></div>

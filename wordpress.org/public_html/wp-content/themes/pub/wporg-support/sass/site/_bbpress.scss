@@ -98,53 +98,6 @@ $paginationBreakPoint: "600px";
 	}
 }
 
-.two-up { //2-columns section
-	@media (min-width: $ms-breakpoint) {
-		> div {
-			display: inline-block;
-			vertical-align: top;
-			width: 49%;
-			margin-right: 0;
-			font-size: ms( -2 );
-
-			&:nth-child(2n) {
-				margin-right: 0;
-				margin-left: 0;
-			}
-		}
-	}
-}
-
-.cards-grid {
-	display: grid;
-
-	&.three-up,
-	&.two-up {
-		gap: 10px;
-
-		&::before {
-			display: none;
-		}
-
-		> * {
-			width: unset;
-		}
-	}
-
-	&.two-up {
-		grid-template-columns: 1fr 1fr;
-	}
-
-	&.three-up {
-		grid-template-columns: 1fr 1fr 1fr;
-	}
-
-	> * {
-		border: 1px solid grey;
-		padding: 10px;
-	}
-}
-
 
 .bbpress,
 .page-template-page-forums-sidebar {

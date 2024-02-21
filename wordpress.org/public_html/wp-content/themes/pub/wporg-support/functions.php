@@ -12,6 +12,30 @@
 add_filter( 'bbp_show_lead_topic', '__return_true' );
 
 /**
+ * Provide a list of local navigation menus.
+ */
+function add_site_navigation_menus( $menus ) {
+	return array(
+		'forums' => array(
+			array(
+				'label' => __( 'Guidelines', 'wporg' ),
+				'url' => '/guidelines/',
+			),
+			array(
+				'label' => __( 'Welcome to Support', 'wporg' ),
+				'url' => '/welcome/',
+			),
+			array(
+				'label' => __( 'Get Involved', 'wporg' ),
+				'url' => '/handbook/',
+			)
+		),
+	);
+}
+add_filter( 'wporg_block_navigation_menus', '\add_site_navigation_menus' );
+
+
+/**
  * Add theme support for some features.
  */
 function wporg_support_theme_support() {
