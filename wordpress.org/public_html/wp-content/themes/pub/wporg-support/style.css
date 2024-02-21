@@ -956,156 +956,21 @@ div.bbp-template-notice.updated {
 	}
 }
 /*--------------------------------------------------------------
-# Typography
+# Blocks
 --------------------------------------------------------------*/
-html {
-	font-size: 100%;
+.wp-block-group.is-layout-grid.is-style-cards-grid {
+	grid-template-columns: repeat(auto-fill, minmax(32.3%, 1fr));
+	gap: var(--wp--preset--spacing--10);
+}
+#bbpress-forums .wp-block-group .wp-block-wporg-link-wrapper {
+	border: 1px solid var(--wp--preset--color--light-grey-1);
 }
 
-body,
-button,
-input,
-select,
-textarea {
-	color: #32373c;
-	font-family: "Open Sans", sans-serif;
-	font-size: 100%;
-	line-height: 1.5;
+.wp-block-wporg-local-navigation-bar figure.wp-block-image {
+	margin: 0;
 }
-
-@media screen and (min-width: 48em) {
-	html {
-		font-size: 1.125rem;
-	}
-}
-h1, h2, h3, h4, .bbp-view .review-ratings .col-5 > div:first-child, h5, h6 {
-	clear: both;
-	font-family: inherit;
-	line-height: 1.5;
-	margin: 2rem 0 1rem;
-}
-
-h1 {
-	font-size: 3.8146972656rem;
-	font-weight: 300;
-}
-
-h1.title {
-	font-size: 0.8rem;
-	color: #0073aa;
-	font-weight: 600;
-	letter-spacing: 0.05rem;
-	text-transform: uppercase;
-}
-
-h2 {
-	font-size: 2.44140625rem;
-	font-weight: 300;
-}
-h2.comment-reply-title {
-	font-weight: 400;
-	font-size: 1.45rem;
-	line-height: 1.5em;
-}
-
-h3 {
-	font-size: 1.5625rem;
-	font-weight: 400;
-}
-h3.comment-reply-title {
-	font-size: 1.25rem;
-	font-weight: 700;
-}
-
-h4, .bbp-view .review-ratings .col-5 > div:first-child {
-	font-size: 1.25rem;
-	border: none;
-	color: #32373c;
-	font-weight: 600;
-	padding: 0;
-}
-
-h5 {
-	font-size: 1rem;
-	font-weight: 600;
-	letter-spacing: 0.01rem;
-	text-transform: uppercase;
-}
-
-h6 {
-	font-size: 0.8rem;
-	font-weight: 600;
-	letter-spacing: 0.8px;
-	text-transform: uppercase;
-}
-
-p {
-	margin: 1em 0;
-}
-p.subheading {
-	color: #82878c;
-	font-size: 1.25rem;
-	font-weight: 300;
-	margin: -0.4rem auto 2rem;
-	text-align: center;
-}
-p.intro {
-	font-size: 1.25rem;
-}
-p.aside {
-	font-size: 0.8rem;
-}
-p.note {
-	font-size: 0.64rem;
-	letter-spacing: 0.01rem;
-	max-width: 18.1898940355rem;
-}
-
-dfn, cite, em, i {
-	font-style: italic;
-}
-
-blockquote {
-	margin: 0 1.5em;
-}
-
-address {
-	margin: 0 0 1.5em;
-}
-
-pre {
-	background: #eee;
-	box-sizing: content-box;
-	font-family: "Courier 10 Pitch", Courier, monospace;
-	font-size: 0.8rem;
-	line-height: 1.6;
-	margin-bottom: 1.6em;
-	max-width: 100%;
-	overflow: auto;
-	padding: 1.6em;
-}
-
-code, kbd, tt, var {
-	font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
-	font-size: 0.8rem;
-}
-
-abbr, acronym {
-	border-bottom: 1px dotted #666;
-	cursor: help;
-}
-
-mark, ins {
-	background: #fff9c0;
-	text-decoration: none;
-}
-
-big {
-	font-size: 125%;
-}
-
-.text-center {
-	text-align: center;
+.wp-block-wporg-local-navigation-bar .wp-block-site-title a:visited {
+	color: inherit;
 }
 
 /*--------------------------------------------------------------
@@ -3419,43 +3284,6 @@ section {
 	.three-up.bbp-forums > div:nth-child(3n) {
 		margin-right: 0;
 	}
-}
-
-@media (min-width: 48em) {
-	.two-up > div {
-		display: inline-block;
-		vertical-align: top;
-		width: 49%;
-		margin-right: 0;
-		font-size: 0.8rem;
-	}
-	.two-up > div:nth-child(2n) {
-		margin-right: 0;
-		margin-left: 0;
-	}
-}
-
-.cards-grid {
-	display: grid;
-}
-.cards-grid.three-up, .cards-grid.two-up {
-	gap: 10px;
-}
-.cards-grid.three-up::before, .cards-grid.two-up::before {
-	display: none;
-}
-.cards-grid.three-up > *, .cards-grid.two-up > * {
-	width: unset;
-}
-.cards-grid.two-up {
-	grid-template-columns: 1fr 1fr;
-}
-.cards-grid.three-up {
-	grid-template-columns: 1fr 1fr 1fr;
-}
-.cards-grid > * {
-	border: 1px solid grey;
-	padding: 10px;
 }
 
 .bbpress main#main .entry-content,

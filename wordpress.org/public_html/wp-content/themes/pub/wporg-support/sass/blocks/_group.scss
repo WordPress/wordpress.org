@@ -1,0 +1,14 @@
+.wp-block-group {
+
+	&.is-layout-grid.is-style-cards-grid {
+		grid-template-columns: repeat(auto-fill, minmax(min(32.3%, 100%), 1fr));
+		gap: var(--wp--preset--spacing--10);
+	}
+
+	.wp-block-wporg-link-wrapper {
+
+		#bbpress-forums & {
+			border: 1px solid var(--wp--preset--color--light-grey-1);
+		}
+	}
+}
