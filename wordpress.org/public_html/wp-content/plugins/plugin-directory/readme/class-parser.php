@@ -306,6 +306,24 @@ class Parser {
 				$this->tags = array_diff( $this->tags, $this->ignore_tags );
 				$this->warnings['ignored_tags'] = true;
 			}
+
+			// Check if the tags are low-quality (ie. little used)
+			if ( $this->tags && taxonomy_exists( 'plugin_tags' ) ) {
+				$tags = get_terms( array(
+					'taxonomy' => 'plugin_tags',
+					'name'     => $this->tags,
+				) );
+
+				$low_usage_tags = array_filter(
+					$tags,
+					function( $term ) {
+						return $term->count < 5;
+					}
+				);
+
+				$this->warnings['low_usage_tags'] = wp_list_pluck( $low_usage_tags, 'name' );
+			}
+
 			if ( count( $this->tags ) > 5 ) {
 				$this->tags = array_slice( $this->tags, 0, 5 );
 				$this->warnings['too_many_tags'] = true;

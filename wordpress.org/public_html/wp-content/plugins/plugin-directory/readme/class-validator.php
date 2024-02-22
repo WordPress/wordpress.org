@@ -80,7 +80,7 @@ class Validator {
 			);
 		}
 
-		// Warnings.
+		// Warnings & Notes.
 		if ( isset( $readme->warnings['requires_header_ignored'] ) ) {
 			$latest_wordpress_version = defined( 'WP_CORE_STABLE_BRANCH' ) ? WP_CORE_STABLE_BRANCH : '5.0';
 
@@ -137,7 +137,7 @@ class Validator {
 				'<code>Contributors</code>'
 			);
 		} elseif ( ! count( $readme->contributors ) ) {
-			$warnings[] = sprintf(
+			$notes[] = sprintf(
 				/* translators: %s: plugin header tag */
 				__( 'The %s field is missing.', 'wporg-plugins' ),
 				'<code>Contributors</code>'
@@ -156,7 +156,14 @@ class Validator {
 			);
 		}
 
-		// Notes.
+		if ( isset( $readme->warnings['low_usage_tags'] ) ) {
+			$notes[] = sprintf(
+				/* translators: %s: list of tags with low usage. */
+				__( 'The following tags are not widely used: %s', 'wporg-plugins' ),
+				'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $readme->warnings['low_usage_tags'] ) ) . '</code>'
+			);
+		}
+
 		if ( empty( $readme->requires ) ) {
 			$notes[] = sprintf(
 				/* translators: %s: plugin header tag */
