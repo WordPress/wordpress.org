@@ -541,7 +541,18 @@ class Parser {
 		}
 
 		if ( 'words' === $type ) {
-			return wp_trim_words( $desc, $length, ' &hellip;' );
+			// Split by whitespace, capturing it so we can put it back together.
+			$pieces = preg_split( '/(\s+)/u', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+
+			$word_count_with_spaces = $length * 2;
+
+			if ( count( $pieces ) < $word_count_with_spaces ) {
+				return $desc;
+			}
+
+			$pieces = array_slice( $pieces, 0, $word_count_with_spaces );
+
+			return implode( '', $pieces ) . ' &hellip;';
 		}
 
 		// Apply the length restriction without counting html entities.
