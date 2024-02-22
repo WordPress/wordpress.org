@@ -353,7 +353,7 @@ ul#views {
 .bbp-reply-header .bbp-meta .bbp-reply-permalink {
 	float: none;
 	margin-right: 0;
-	color: #0073aa;
+	color: var(--wp--custom--link--color--text);
 }
 
 div.sidebar #bbpress-forums {
@@ -982,7 +982,7 @@ h3.comment-reply-title {
 
 h4, .bbp-view .review-ratings .col-5 > div:first-child {
 	border: none;
-	color: #32373c;
+	color: var(--wp--preset--color--charcoal-1);
 	padding: 0;
 }
 
@@ -1021,7 +1021,7 @@ address {
 }
 
 pre {
-	background: #eee;
+	background: var(--wp--preset--color--light-grey-1);
 	box-sizing: content-box;
 	font-family: "Courier 10 Pitch", Courier, monospace;
 	font-size: 0.8rem;
@@ -1043,7 +1043,7 @@ abbr, acronym {
 }
 
 mark, ins {
-	background: #fff9c0;
+	background: var(--wp--preset--color--lemon-1);
 	text-decoration: none;
 }
 
@@ -1088,7 +1088,7 @@ html {
 }
 
 body {
-	background: #fff; /* Fallback for when there is no custom background color defined. */
+	background: var(--wp--preset--color--white); /* Fallback for when there is no custom background color defined. */
 }
 
 blockquote, q {
@@ -1103,8 +1103,8 @@ blockquote {
 	background: transparent;
 	border: none;
 	padding: 0;
-	border-right: 2px solid #767676;
-	color: #767676;
+	border-right: 2px solid var(--wp--preset--color--charcoal-4);
+	color: var(--wp--preset--color--charcoal-4);
 	margin: 1rem 0;
 	padding-right: 0.8rem;
 }
@@ -1117,7 +1117,7 @@ blockquote p {
 }
 
 hr {
-	background-color: #eee;
+	background-color: var(--wp--preset--color--light-grey-1);
 	border: 0;
 	height: 2px;
 	margin: 0 auto;
@@ -1185,7 +1185,7 @@ table {
 	margin: 1em 0;
 }
 .helphub_article table tr:nth-child(odd) {
-	background-color: #f3f4f5;
+	background-color: var(--wp--preset--color--light-grey-2);
 }
 .helphub_article table th,
 .helphub_article table td {
@@ -1257,7 +1257,7 @@ table {
 }
 
 .locale-banner {
-	background: #c7e8ca;
+	background: var(--wp--preset--color--acid-green-2);
 	font-size: 0.8rem;
 	padding: 0.5rem;
 	text-align: center;
@@ -1688,7 +1688,7 @@ p #bbpress-forums .favorite-toggle,
 #bbpress-forums .subscription-toggle:active,
 #bbpress-forums .favorite-toggle:active,
 .button-secondary:active {
-	background: #eee;
+	background: var(--wp--preset--color--light-grey-1);
 	border-color: #999;
 	box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
 	transform: translateY(1px);
@@ -2003,7 +2003,7 @@ textarea {
 	background-color: #fff;
 	border: 1px solid #ddd;
 	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
-	color: #32373c;
+	color: var(--wp--custom--form--search--color--text);
 	transition: 0.05s border-color ease-in-out;
 	-webkit-appearance: none;
 }
@@ -2189,7 +2189,7 @@ input.readonly,
 input[readonly],
 textarea.readonly,
 textarea[readonly] {
-	background-color: #eee;
+	background-color: var(--wp--preset--color--light-grey-1);
 }
 
 :-moz-placeholder {
@@ -2354,7 +2354,7 @@ p a:hover {
 	width: 1px;
 }
 .screen-reader-text:focus {
-	background-color: #f1f1f1;
+	background-color: var(--wp--preset--color--light-grey-2);
 	border-radius: 3px;
 	box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
 	clip: auto !important;
@@ -2723,7 +2723,7 @@ p a:hover {
 	#wporg-header ul li.current-menu-item::after,
 	#wporg-header ul li.current_page_parent::after,
 	#wporg-header ul li a.current ~ .uparrow {
-		border-bottom-color: #0073aa;
+		border-bottom-color: var(--wp--preset--color--blueberry-1);
 	}
 }
 
@@ -2817,7 +2817,7 @@ body, #pagebody {
 # .site-header
 --------------------------------------------------------------*/
 .site-header {
-	background: #0073aa;
+	background: var(--wp--preset--color--blueberry-1);
 	padding: 1rem 0;
 	position: relative;
 	z-index: 100;
@@ -2886,7 +2886,7 @@ body, #pagebody {
 # .main-navigation
 --------------------------------------------------------------*/
 .main-navigation {
-	background: #0073aa;
+	background: var(--wp--preset--color--blueberry-1);
 	clear: both;
 	right: 0;
 	position: absolute;
@@ -2947,7 +2947,7 @@ body, #pagebody {
 	#wporg-header ul li a.current ~ .uparrow,
 	#wporg-header ul li.current-menu-item::after,
 	#wporg-header ul li.current_page_parent::after {
-		border-bottom: 9px solid #0073aa;
+		border-bottom: 9px solid var(--wp--preset--color--blueberry-1);
 	}
 	#wporg-header ul li:hover .nav-submenu ~ .uparrow,
 	#wporg-header ul li .nav-submenu:hover ~ .uparrow {
@@ -3110,7 +3110,7 @@ body.home #page .site-main {
 	border: none;
 	border-radius: 0;
 	box-shadow: none;
-	color: #32373c;
+	color: var(--wp--custom--form--search--color--text);
 	display: block;
 	height: 100%;
 	padding: 0.5rem 1rem;
@@ -3232,7 +3232,7 @@ body.home #page .site-main {
 }
 .helphub-page .entry-content section + section,
 .page .entry-content section + section {
-	border-top: 2px solid #eee;
+	border-top: 2px solid var(--wp--preset--color--light-grey-1);
 }
 .helphub-page .submenu,
 .page .submenu {
@@ -3291,7 +3291,7 @@ body.category #main a {
 }
 body.category #main a:hover, body.category #main a:focus, body.category #main a:active {
 	text-decoration: none;
-	color: #0073aa;
+	color: var(--wp--custom--link--color--text);
 }
 body.category #main article h2 {
 	font-size: 1.3rem;
@@ -3356,7 +3356,7 @@ section {
 	text-decoration: none;
 }
 .three-up.bbp-forums > div a:hover {
-	color: #0073aa;
+	color: var(--wp--custom--link--color--text);
 }
 .three-up.bbp-forums > div a.dashicons-before {
 	-webkit-box-decoration-break: clone;
@@ -3447,11 +3447,11 @@ section {
 	line-height: 160%;
 }
 .bbpress #bbpress-forums div.bbp-template-notice a {
-	color: #0073aa;
+	color: var(--wp--preset--color--blueberry-1);
 	text-decoration: underline;
 }
 .bbpress #bbpress-forums div.bbp-template-notice a:hover {
-	color: #0073aa;
+	color: var(--wp--preset--color--blueberry-1);
 }
 .bbpress #bbpress-forums .bbp-topic-content > div.bbp-template-notice,
 .bbpress #bbpress-forums .bbp-reply-content > div.bbp-template-notice {
@@ -3489,7 +3489,7 @@ section {
 }
 .bbpress #bbpress-forums .bbp-forums > .bbp-header,
 .bbpress #bbpress-forums .bbp-topics > .bbp-header {
-	background: #0073aa;
+	background: var(--wp--preset--color--blueberry-1);
 	color: #fff;
 }
 .bbpress #bbpress-forums ul.bbp-lead-topic,
@@ -3694,7 +3694,7 @@ section {
 }
 .bbpress #bbpress-forums p.bbp-topic-meta a {
 	/* Override bb-base/style.css */
-	color: #0073aa;
+	color: var(--wp--custom--link--color--text);
 }
 .bbpress #bbpress-forums p.bbp-topic-meta a:hover, .bbpress #bbpress-forums p.bbp-topic-meta a:focus, .bbpress #bbpress-forums p.bbp-topic-meta a:active {
 	/* Override bb-base/style.css */
@@ -3815,10 +3815,10 @@ section {
 	}
 }
 .bbpress #bbpress-forums .bbp-pagination .page-numbers:not(.current):not(.dots):hover {
-	background: #0073aa;
+	background: var(--wp--preset--color--blueberry-1);
 	color: #fff;
 	text-decoration: none;
-	border: 1px solid #0073aa;
+	border: 1px solid var(--wp--preset--color--blueberry-1);
 }
 .bbpress #bbpress-forums .bbp-pagination .page-numbers.current {
 	background: #eee;
@@ -3826,7 +3826,7 @@ section {
 }
 .bbpress #bbpress-forums .bbp-pagination .page-numbers.dots {
 	background: #fff;
-	color: #32373c;
+	color: var(--wp--preset--color--charcoal-1);
 }
 .bbpress #bbpress-forums .bbp-pagination .page-numbers:first-child {
 	border-radius: 0 3px 3px 0;
@@ -4430,7 +4430,7 @@ body.helphub-with-sidebar .left-sidebar {
 body.helphub-with-sidebar .left-sidebar h2 {
 	font-size: 1.1rem;
 	font-weight: 600;
-	color: #32373c;
+	color: var(--wp--preset--color--charcoal-1);
 }
 body.helphub-with-sidebar .left-sidebar ul {
 	list-style: none;
