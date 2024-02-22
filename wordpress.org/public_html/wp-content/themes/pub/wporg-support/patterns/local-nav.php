@@ -3,7 +3,7 @@ if ( function_exists( 'register_block_pattern' ) ) {
     register_block_pattern(
         'wporg-support/local-nav',
         array(
-            'title'       => __( 'local-nav', 'wporg-support' ),
+            'title'       => __( 'Local Nav', 'wporg-support' ),
             'content'     => sprintf(
 				'<!-- wp:wporg/local-navigation-bar {"className":"has-display-contents","backgroundColor":"charcoal-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}}},"textColor":"white","fontSize":"small"} -->
 

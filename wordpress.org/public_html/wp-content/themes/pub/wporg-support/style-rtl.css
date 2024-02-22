@@ -3768,9 +3768,7 @@ section {
 	font-size: 0.8rem;
 }
 .bbpress #bbpress-forums .bbp-create-topic-wrapper .search-form {
-	display: inline-block;
-	width: 50%;
-	margin-bottom: 0;
+	display: none;
 }
 @media (max-width: 767px) {
 	.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic,

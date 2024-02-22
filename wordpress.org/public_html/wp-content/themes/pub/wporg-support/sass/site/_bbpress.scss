@@ -534,9 +534,7 @@ $paginationBreakPoint: "600px";
 			}
 
 			.search-form {
-				display: inline-block;
-				width: 50%;
-				margin-bottom: 0;
+				display: none;
 			}
 
 			@media (max-width: 767px) {

@@ -13,12 +13,13 @@ namespace WordPressdotorg\Forums;
 
 \WordPressdotorg\skip_to( '#content' );
 
-echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+echo do_blocks( '<!-- wp:wporg/global-header {"style":{"border":{"bottom":{"color":"var:preset|color|white-opacity-15","style":"solid","width":"1px"}}}} /-->' );
 
 $is_forums_home = function_exists( 'bbp_is_forum_archive' ) && bbp_is_forum_archive();
+$is_user_profile = function_exists( 'bbp_is_single_user' ) && bbp_is_single_user();
 
 echo do_blocks( $is_forums_home
-	? '<!-- wp:pattern {"slug":"wporg-support/forums-homepage-header"} /-->'
+	? '<!-- wp:pattern {"slug":"wporg-support/local-nav-home"} /-->'
 	: '<!-- wp:pattern {"slug":"wporg-support/local-nav"} /-->'
 );
 
@@ -42,7 +43,16 @@ echo do_blocks( $is_forums_home
 					<?php get_search_form(); ?>
 				</div><!-- .site-branding -->
 			</header><!-- #masthead -->
-		<?php elseif ( ! $is_forums_home ) : ?>
-			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->' ); ?>
+		<?php elseif ( $is_forums_home ) : ?>
+			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/forums-homepage-header"} /-->' ); ?>
+		<?php elseif ( ! $is_user_profile ) : ?>
+			<?php echo do_blocks(
+				'<!-- wp:group {"style":{"spacing":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+				<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+
+					<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
+
+				</div>
+				<!-- /wp:group -->'
+			); ?>
 		<?php endif; ?>
-		<div id="lang-guess-wrap"></div>
