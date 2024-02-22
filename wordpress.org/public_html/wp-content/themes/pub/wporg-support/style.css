@@ -2278,18 +2278,18 @@ fieldset label {
 ## Links
 --------------------------------------------------------------*/
 a {
-	color: #0073aa;
+	color: var(--wp--custom--link--color--text);
 }
 a:visited {
 	/* Override wp4.css */
-	color: #4ca6cf;
+	color: var(--wp--custom--link--color--text);
 }
 a.wp-block-button__link:visited {
-	color: #4ca6cf;
+	color: var(--wp--custom--link--color--text);
 }
 a:hover, a:focus, a:active {
 	/* Override wp4.css */
-	color: #0073aa;
+	color: var(--wp--custom--link--color--text);
 	text-decoration: underline;
 }
 a.button:hover, #bbpress-forums .wporg-bbp-term-subscription > a:hover,

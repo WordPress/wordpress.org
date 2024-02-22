@@ -1,16 +1,16 @@
 @import "../variables-site/variables-site";
 
 a {
-	color: $color__link;
+	color: var(--wp--custom--link--color--text);
 
 	&:visited {
 
 		/* Override wp4.css */
-		color: $color__link-visited;
+		color: var(--wp--custom--link--color--text);
 	}
 
 	&.wp-block-button__link:visited {
-		color: $color__link-visited;
+		color: var(--wp--custom--link--color--text);
 	}
 
 	&:hover,
@@ -18,7 +18,7 @@ a {
 	&:active {
 
 		/* Override wp4.css */
-		color: $color__link;
+		color: var(--wp--custom--link--color--text);
 		text-decoration: underline;
 	}
 
