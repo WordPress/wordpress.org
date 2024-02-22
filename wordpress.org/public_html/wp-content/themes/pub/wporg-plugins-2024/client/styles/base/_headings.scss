@@ -1,0 +1,27 @@
+h1.title {
+	font-size: ms( -2 );
+	color: $color__link;
+	font-weight: 600;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+caption,
+figcaption {
+	font-family: $font__main;
+	text-wrap: balance;
+	overflow-wrap: initial;
+	word-break: initial;
+}
+
+// Prevent orphans
+p,
+ul,
+ol,
+blockquote {
+	text-wrap: pretty;
+}

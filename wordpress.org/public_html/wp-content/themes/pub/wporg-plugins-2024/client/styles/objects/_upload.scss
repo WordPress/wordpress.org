@@ -1,0 +1,71 @@
+.plugin-upload-form {
+
+	&.hidden {
+		display: none;
+	}
+
+	fieldset {
+		border: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	legend {
+		margin: 1rem 0;
+	}
+
+	.category-checklist {
+		@extend .clear;
+		list-style-type: none;
+		margin: 0 0 2rem;
+
+		li {
+			float: left;
+			padding: 0.5rem 0;
+			width: 50%;
+		}
+
+		@media screen and ( min-width: 48em ) {
+			li {
+				padding: 0;
+			}
+
+			label {
+				font-size: ms( -2 );
+			}
+		}
+	}
+
+	@media screen and ( min-width: 48em ) {
+		label.button {
+			line-height: 1.8;
+		}
+	}
+
+	.plugin-file {
+		height: 0.1px;
+		opacity: 0;
+		overflow: hidden;
+		position: absolute;
+		width: 0.1px;
+		z-index: -1;
+	}
+
+	.plugin-file:focus + label {
+		box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
+	}
+}
+
+.plugin-queue-message {
+
+	code {
+		font-size: 1em;
+	}
+
+	dialog.slug-change input[type="text"] {
+		font-family: monospace;
+		font-size: 1.2em;
+		width: 20em;
+	}
+	
+}

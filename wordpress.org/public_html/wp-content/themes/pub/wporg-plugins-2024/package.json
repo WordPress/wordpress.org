@@ -1,0 +1,45 @@
+{
+  "name": "wporg-plugins",
+  "version": "1.0.0",
+  "description": "Theme for WordPress Plugin Directory",
+  "author": "wordpressdotorg",
+  "license": "GPL-2.0+",
+  "main": "index.php",
+  "scripts": {
+    "watch:css": "grunt watch",
+    "watch:js": "wp-scripts start",
+    "watch": "concurrently \"npm run watch:js\" \"npm run watch:css\"",
+    "build:css": "grunt build",
+    "build:js": "wp-scripts build",
+    "build": "npm run build:css && npm run build:js",
+    "format:js": "wp-scripts format client",
+    "lint:js": "wp-scripts lint-js client",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "svn",
+    "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-plugins/"
+  },
+  "browserslist": [
+    "extends @wordpress/browserslist-config"
+  ],
+  "devDependencies": {
+    "@lodder/grunt-postcss": "3.1.1",
+    "@wordpress/browserslist-config": "4.1.2",
+    "@wordpress/scripts": "22.2.1",
+    "autoprefixer": "10.4.3",
+    "concurrently": "7.0.0",
+    "cssnano": "5.1.4",
+    "eslint": "8.11.0",
+    "grunt": "1.4.1",
+    "grunt-contrib-watch": "1.1.0",
+    "grunt-rtlcss": "2.0.2",
+    "grunt-sass": "3.1.0",
+    "grunt-sass-globbing": "1.5.1",
+    "postcss": "8.4.11",
+    "prop-types": "15.7.2",
+    "rtlcss": "3.5.0",
+    "sass": "1.49.9",
+    "webpack": "5.70.0"
+  }
+}

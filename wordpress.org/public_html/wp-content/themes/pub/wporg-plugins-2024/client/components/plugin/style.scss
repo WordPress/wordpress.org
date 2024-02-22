@@ -1,0 +1,288 @@
+.type-plugin {
+	@extend .clear;
+
+	.plugin-notice {
+		margin-top: 0;
+	}
+
+	.plugin-header {
+		@extend .clear;
+		border-bottom: 0;
+		padding: ms( 1 ) ms( 4 );
+
+		.plugin-actions {
+			float: right;
+			margin-inline-start: 1rem;
+
+			div {
+				display: inline-block;
+				text-align: center;
+			}
+		}
+
+		.plugin-title {
+			clear: none;
+			font-size: ms( 4 );
+			font-weight: 400;
+			margin: 0;
+
+			a {
+				color: inherit;
+				text-decoration: none;
+			}
+		}
+
+		.byline {
+			color: #78848f;
+		}
+	}
+
+	.plugin-banner + .plugin-header {
+		padding-top: 0;
+	}
+
+	.tabs {
+		list-style: none;
+		margin:0;
+		border-bottom: 2px solid #eee;
+
+		li {
+			display: inline-block;
+			margin-bottom: -2px;
+			border: 2px solid transparent;
+			font-size: 0.8rem;
+			color: #0073aa;
+			transition: background .2s ease;
+
+			a {
+				border: 0;
+				display: block;
+				padding: 0.64rem 1.25rem;
+				background: white;
+				text-decoration: none;
+
+				&.active, &:hover {
+					background: #eee;
+				}
+			}
+
+			&.active, &:hover {
+				padding-bottom: 0 !important;
+				border: 2px solid #eee;
+			}
+		}
+
+		@media screen and (max-width:34em) {
+			border-top: 2px solid #eee;
+
+			li {
+				display: block;
+				border: none;
+				border-bottom: 1px solid #eee;
+				margin-bottom: 1px;
+
+				&.active, &:hover {
+					border: none;
+					border-bottom: 1px solid #eee;
+				}
+			}
+		}
+	}
+
+	.entry-content {
+		padding: 0 ms( 4 );
+		max-width: 48rem;
+		font-size: 16px;
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			float: left;
+			padding: 0;
+			width: 65%;
+		}
+
+		> div {
+			display:none;
+			border: 0;
+
+			~ button {
+				display:none;
+				border: 0;
+			}
+		}
+
+		a:not(.button, .dashicons) {
+			text-decoration: underline;
+		}
+
+		ul > li > p, ol > li > p {
+			margin: 0;
+		}
+
+		#admin {
+			display:block !important;
+		}
+	}
+
+	.plugin-blocks-list {
+		list-style: none;
+		margin-left: 0;
+
+		.plugin-blocks-list-item {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			margin-bottom: ms(2);
+		}
+
+		.block-icon {
+			display: inline-block;
+			margin-right: ms(0);
+			padding: ms(1);
+			width: 3.5rem; // 56px
+			height: 3.5rem; // 56px
+			border: 1px solid $color__border;
+			border-radius: 2px;
+
+			&.dashicons {
+				color: inherit; // Prevent rating color being applied to star icons
+			}
+
+			svg {
+				width: 16px;
+				height: 16px;
+				fill: currentColor;
+			}
+		}
+
+		.block-title {
+			align-self: center;
+			font-weight: bold;
+		}
+
+		.has-description {
+			.block-icon {
+				grid-row: 1 / span 2;
+			}
+
+			.block-title {
+				margin-bottom: ms(-8);
+			}
+		}
+	}
+
+	.entry-meta {
+		padding: 0 ms( 4 );
+	}
+
+	span#description,
+	span#reviews,
+	span#developers,
+	span#installation {
+		position:fixed;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#advanced:not(.displayed) ~ #section-links .tabs li#tablink-description,
+	span#reviews:target ~ #section-links .tabs li#tablink-reviews,
+	span#installation:target ~ #section-links .tabs li#tablink-installation,
+	span#developers:target ~ #section-links .tabs li#tablink-developers,
+	span#advanced.displayed ~ #section-links .tabs li#tablink-advanced  {
+		border-top: 2px solid #eee;
+		border-left: 2px solid #eee;
+		border-right: 2px solid #eee;
+		border-bottom: 0;
+		padding-bottom: 2px;
+		background: #fff;
+
+		@media screen and (max-width:34em) {
+			&.active, &:hover {
+				padding-bottom: 2px !important;
+			}
+		}
+	}
+
+
+	span#section-links {
+		display: flex;
+		flex-flow: row wrap;
+
+		.tabs {
+			flex: 1 1 auto;
+		}
+
+		@media screen and (max-width:34em) {
+			display: block;
+		}
+	}
+
+	#link-support {
+		border-bottom: 2px solid #eee;
+		flex: 0 0 auto;
+		font-size: 0.9rem;
+		align-self: flex-end;
+		height: 2rem;
+
+		a::before {
+			content: '\f125';
+			display: inline-block;
+			font-family: dashicons;
+			margin-right: 0.4em;
+			vertical-align: top;
+			font-size: 1.2em;
+			max-height: 1em;
+		}
+
+		@media screen and (max-width: 737px) {
+			padding-right: 20px;
+		}
+
+		@media screen and (max-width:34em) {
+			border-bottom: 0;
+			display: block;
+			margin-left: 20px;
+			margin-top: 1.5rem;
+			width: 100%;
+		}
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-description,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #screenshots,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #faq,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #blocks,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers ~ button,
+	span#reviews:target ~ .entry-content #tab-reviews,
+	span#installation:target ~ .entry-content #tab-installation,
+	span#developers:target ~ .entry-content #tab-changelog,
+	span#developers:target ~ .entry-content #tab-developers,
+	span#developers:target ~ .entry-content #tab-developers ~ button,
+	span#developers:target ~ .entry-content #tab-developers .plugin-development {
+		display:block;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers .plugin-development,
+	span#developers:target ~ .entry-content #tab-developers .plugin-contributors {
+		display:none;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-meta .plugin-contributors,
+	span#reviews:target ~ .entry-meta .plugin-meta,
+	span#reviews:target ~ .entry-meta .plugin-support,
+	span#reviews:target ~ .entry-meta .plugin-donate,
+	span#reviews:target ~ .entry-meta .plugin-contributors,
+	span#installation:target ~ .entry-meta .plugin-contributors {
+		display:none;
+	}
+
+	@media screen and ( min-width: $ms-breakpoint ) {
+		.plugin-header,
+		.entry-content,
+		.entry-meta {
+			padding-left: 0;
+			padding-right: 0;
+		}
+
+		.entry-meta {
+			float: right;
+			width: 30%;
+		}
+	}
+}

@@ -1,0 +1,34 @@
+.section {
+	h1, h2, h3 {
+		font-size: ms( 0 );
+		font-weight: 600;
+
+		&:nth-child(2) {
+			margin-top: 0;
+		}
+	}
+
+	h4, h5, h6 {
+		font-size: ms( -2 );
+		font-weight: 600;
+
+		&:nth-child(2) {
+			margin-top: 0;
+		}
+	}
+
+	h2:first-of-type {
+		font-size: ms( 2 );
+
+		// Override wp4.css.
+		border: none;
+		color: $color__text-main;
+		font-weight: 600;
+		padding: 0;
+		text-transform: inherit;
+	}
+
+	ul li {
+		margin-bottom: 8px;
+	}
+}

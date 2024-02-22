@@ -1,0 +1,45 @@
+.widget.plugin-categorization {
+	margin-top: 2rem;
+
+	.widget-head {
+		display: flex;
+		flex-flow: row wrap;
+		column-gap: 12px;
+		justify-content: space-between;
+
+		h2 {
+			flex: 1 1 auto;
+			font-size: 1rem;
+			font-weight: bold;
+			margin-top: 0;
+			margin-bottom: 0.2rem;
+		}
+
+		a {
+			flex: 0 0 auto;
+			font-size: 0.8rem;
+			line-height: 2;
+			text-align: right;
+
+			&[href=""] {
+				display: none;
+			}
+
+			&:after {
+				content: '\f504';
+				font-family: dashicons;
+				margin-left: 2px;
+			}
+		}
+	}
+
+	p {
+		font-size: 0.7rem;
+		margin-top: 0.5rem;
+	}
+
+	& ~ .plugin-meta li:first-child {
+		border-top: 1px solid #eee;
+	}
+}
+

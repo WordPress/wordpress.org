@@ -1,0 +1,38 @@
+.plugin-support {
+	font-size: ms( -2 );
+
+	.counter-container {
+		margin-bottom: 1rem;
+		position: relative;
+	}
+
+	.counter-back,
+	.counter-bar {
+		display: inline-block;
+		height: 30px;
+		vertical-align: middle;
+	}
+
+	.counter-back {
+		background-color: #ececec;
+		width: 100%;
+	}
+
+	.counter-bar {
+		background-color: #c7e8ca;
+		display: block;
+	}
+
+	.counter-count {
+		font-size: ms( -4 );
+		left: 8px;
+		position: absolute;
+		top: 8px;
+		width: 100%;
+		width: calc(100% - 8px);
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			top: 5px;
+		}
+	}
+}

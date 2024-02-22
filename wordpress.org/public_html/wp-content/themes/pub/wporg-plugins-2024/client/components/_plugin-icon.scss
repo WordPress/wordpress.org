@@ -1,0 +1,39 @@
+.entry-thumbnail {
+	display: none;
+	max-width: 128px;
+
+	.plugin-icon {
+		background-size: cover;
+		height: 128px;
+		width: 128px;
+	}
+
+	@media screen and ( min-width: 21em ) {
+			display: inline-block;
+			margin: 0 4% 0 0;
+			vertical-align: top;
+
+			a {
+				display: block;
+			}
+	}
+
+	.single & {
+		display: none;
+		float: left;
+		height: 96px;
+		margin-right: 1rem;
+		width: 96px;
+
+		@media screen and ( min-width: 26em ) {
+			display: block;
+		}
+
+		.plugin-icon {
+			background-size: contain !important;
+			height: 96px !important;
+			width: 96px !important;
+		}
+
+	}
+}

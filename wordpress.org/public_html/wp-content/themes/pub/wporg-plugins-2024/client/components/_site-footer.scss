@@ -1,0 +1,26 @@
+nav .nav-links {
+	text-align: center;
+
+	.page-numbers {
+		background-color: #f9f9f9;
+		min-width: 2em;
+		padding: 8px;
+		display: inline-block;
+		cursor: hand;
+
+		&.next,
+		&.prev,
+		&.dots {
+			width: auto;
+			font-size: 0.9em;
+			background: none;
+		}
+		&.dots {
+			cursor: inherit;
+		}
+	}
+	span.page-numbers {
+		font-weight: bold;
+		background-color: #f7f7f7;
+	}
+}

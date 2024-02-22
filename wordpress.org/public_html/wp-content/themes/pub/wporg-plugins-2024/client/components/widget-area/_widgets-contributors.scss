@@ -1,0 +1,30 @@
+.plugin-contributors.read-more {
+	border-bottom: 2px solid $color__border;
+	max-height: 200px;
+	overflow: hidden;
+	padding-bottom: 1px;
+
+	&.toggled {
+		max-height: none;
+	}
+
+	.no-js & {
+		max-height: none;
+		overflow: auto;
+	}
+}
+
+.contributors-list {
+	font-size: ms( -2 );
+	list-style-type: none;
+	margin: 0;
+
+	li {
+		margin-bottom: 1rem;
+	}
+
+	.avatar {
+		float: left;
+		margin-right: 10px;
+	}
+}

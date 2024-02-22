@@ -1,0 +1,42 @@
+.plugin-screenshots {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	h2:first-of-type {
+		font-size: ms( 2 );
+
+		// Override wp4.css.
+		border: none;
+		color: $color__text-main;
+		font-weight: 600;
+		padding: 0;
+		text-transform: inherit;
+	}
+
+	.image-gallery-content {
+		display: table;
+		width: 100%;
+	}
+
+	.image-gallery-slides {
+		display: table-cell;
+		max-height: 600px;
+	}
+
+	.image-gallery-image img {
+		max-height: 550px;
+	}
+
+	.image-gallery-thumbnail {
+		vertical-align: top;
+
+		img {
+			max-height: 100px; // See #2274
+		}
+	}
+
+	.image-gallery-thumbnails {
+		overflow: hidden;
+	}
+}

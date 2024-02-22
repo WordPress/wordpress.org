@@ -1,0 +1,31 @@
+.plugin-section {
+	border-bottom: 2px solid $color__border;
+	margin: 0 auto ms(14);
+	max-width: $size__site-main;
+	padding-bottom: ms(10);
+
+	&:last-of-type {
+		margin-bottom: 0;
+	}
+
+	.section-header {
+		display: flex;
+		flex-flow: row wrap;
+		margin-bottom: 2rem;
+		column-gap: 10px;
+	}
+
+	.section-title {
+		flex: 1 1 auto;
+		font-size: ms( 4 );
+		font-weight: 400;
+		margin-bottom: 0;
+		margin-top: 0;
+	}
+
+	.section-link {
+		align-self: center;
+		flex: 0 0 auto;
+		font-size: ms( 0 );
+	}
+}
