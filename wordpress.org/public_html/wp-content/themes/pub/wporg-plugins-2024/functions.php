@@ -12,6 +12,10 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
+
+// Block Files
+require_once( __DIR__ . '/src/blocks/front-page/index.php' );
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *
@@ -473,3 +477,8 @@ add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_desc
  * Custom template tags for this theme.
  */
 require get_stylesheet_directory() . '/inc/template-tags.php';
+
+function register_patterns() {
+	require get_stylesheet_directory() . '/patterns/nav.php';
+}
+add_action( 'init',  __NAMESPACE__ . '\register_patterns' );

@@ -1,5 +1,5 @@
 {
-  "name": "wporg-plugins",
+  "name": "wporg-plugins-2024",
   "version": "1.0.0",
   "description": "Theme for WordPress Plugin Directory",
   "author": "wordpressdotorg",
@@ -10,7 +10,8 @@
     "watch:js": "wp-scripts start",
     "watch": "concurrently \"npm run watch:js\" \"npm run watch:css\"",
     "build:css": "grunt build",
-    "build:js": "wp-scripts build",
+    "build:js": "wp-scripts build --webpack-copy-php",
+    
     "build": "npm run build:css && npm run build:js",
     "format:js": "wp-scripts format client",
     "lint:js": "wp-scripts lint-js client",
@@ -40,6 +41,7 @@
     "prop-types": "15.7.2",
     "rtlcss": "3.5.0",
     "sass": "1.49.9",
-    "webpack": "5.70.0"
+    "webpack": "5.70.0",
+    "webpack-cli": "^5.1.4"
   }
 }
