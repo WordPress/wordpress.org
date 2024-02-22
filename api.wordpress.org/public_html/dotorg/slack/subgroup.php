@@ -226,7 +226,7 @@ switch ( $command ) {
 			"`/subgroup list` - display this message\n" .
 			"`/subgroup join {name}` - join a subgroup\n" .
 			"`/subgroup create {name}` - create a subgroup with all current group members invited\n" .
-			"`/subgroup create-empty {name} - create a subgroup with no members invited"
+			"`/subgroup create-empty {name}` - create a subgroup with no members invited"
 		);
 }
 
