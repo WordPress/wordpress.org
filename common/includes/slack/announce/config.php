@@ -359,13 +359,6 @@ function get_whitelist() {
 			'mariaojob', // @Mary Job on Slack
 			'sterndata',
 		),
-		'fse-outreach-experiment' => array(
-			'annezazu',
-			'colorful tones', // @colorful-tones on Slack
-			'daisyo', // @DaisyO on Slack
-			'greenshady',
-			'ndiego', // @Nick Diego on Slack
-		),
 		'glotpress' => array(
 			'Amieiro',
 			'ocean90',
@@ -431,6 +424,13 @@ function get_whitelist() {
 			'sarayourfriend',
 			'stacimc',
 			'zackkrida',
+		),
+		'outreach' => array(
+			'annezazu',
+			'bph',
+			'colorful tones', // @colorful-tones on Slack
+			'greenshady',
+			'ndiego', // @Nick Diego on Slack
 		),
 		'core-performance' => array(
 			// #core (inc committers) already included via get_parent_channel().
