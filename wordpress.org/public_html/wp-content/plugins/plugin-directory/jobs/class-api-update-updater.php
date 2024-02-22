@@ -67,21 +67,24 @@ class API_Update_Updater {
 			return true;
 		}
 
+		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
+
 		$data = array(
-			'plugin_id'       => $post->ID,
-			'plugin_slug'     => $post->post_name,
-			'available'       => 'publish' === $post->post_status || 'disabled' === $post->post_status,
-			'version'         => get_post_meta( $post->ID, 'version', true ),
-			'stable_tag'      => get_post_meta( $post->ID, 'stable_tag', true ),
-			'plugin_name'     => strip_tags( get_post_meta( $post->ID, 'header_name', true ) ),
-			'plugin_name_san' => sanitize_title_with_dashes( strip_tags( get_post_meta( $post->ID, 'header_name', true ) ) ),
-			'plugin_author'   => strip_tags( get_post_meta( $post->ID, 'header_author', true ) ),
-			'tested'          => get_post_meta( $post->ID, 'tested', true ),
-			'requires'        => get_post_meta( $post->ID, 'requires', true ),
-			'requires_php'    => get_post_meta( $post->ID, 'requires_php', true ),
-			'upgrade_notice'  => '',
-			'assets'          => serialize( self::get_plugin_assets( $post ) ),
-			'last_updated'    => $post->post_modified,
+			'plugin_id'        => $post->ID,
+			'plugin_slug'      => $post->post_name,
+			'available'        => 'publish'      === $post->post_status || 'disabled' === $post->post_status,
+			'version'          => get_post_meta( $post->ID, 'version', true ),
+			'stable_tag'       => get_post_meta( $post->ID, 'stable_tag', true ),
+			'plugin_name'      => strip_tags( get_post_meta( $post->ID, 'header_name', true ) ),
+			'plugin_name_san'  => sanitize_title_with_dashes( strip_tags( get_post_meta( $post->ID, 'header_name', true ) ) ),
+			'plugin_author'    => strip_tags( get_post_meta( $post->ID, 'header_author', true ) ),
+			'tested'           => get_post_meta( $post->ID, 'tested', true ),
+			'requires'         => get_post_meta( $post->ID, 'requires', true ),
+			'requires_php'     => get_post_meta( $post->ID, 'requires_php', true ),
+			'requires_plugins' => $requires_plugins ? serialize( get_post_meta( $post->ID, 'requires_plugins', true ) ) : '',
+			'upgrade_notice'   => '',
+			'assets'           => serialize( self::get_plugin_assets( $post ) ),
+			'last_updated'     => $post->post_modified,
 		);
 		$upgrade_notice = get_post_meta( $post->ID, 'upgrade_notice', true );
 		if ( isset( $upgrade_notice[ $data['version'] ] ) ) {
@@ -176,6 +179,7 @@ CREATE TABLE `{$prefix}_update_source` (
   `tested` varchar(128) NOT NULL DEFAULT '',
   `requires` varchar(128) NOT NULL DEFAULT '',
   `requires_php` varchar(128) NOT NULL DEFAULT '',
+  `requires_plugins` text NOT NULL DEFAULT '',
   `upgrade_notice` text,
   `assets` text NOT NULL DEFAULT '',
   `last_updated` datetime NOT NULL,
