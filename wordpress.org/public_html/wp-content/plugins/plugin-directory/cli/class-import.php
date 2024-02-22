@@ -7,7 +7,7 @@ use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
-use WordPressdotorg\Plugin_Directory\Readme\Parser;
+use WordPressdotorg\Plugin_Directory\Readme\{ Parser as Readme_Parser, Validator as Readme_Validator };
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -57,6 +57,20 @@ class Import {
 	);
 
 	/**
+	 * List of warnings generated during the import process.
+	 *
+	 * @var array
+	 */
+	public $warnings = array();
+
+	/**
+	 * The last plugin imported.
+	 *
+	 * @var \WP_Post
+	 */
+	public $plugin;
+
+	/**
 	 * Process an import for a Plugin into the Plugin Directory.
 	 *
 	 * @throws \Exception
@@ -66,7 +80,10 @@ class Import {
 	 * @param array  $svn_revision_triggered The SVN revision which this import has been triggered by. Optional.
 	 */
 	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_revision_triggered = 0 ) {
-		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+		// Reset properties.
+		$this->warnings = [];
+
+		$plugin = $this->plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 		if ( ! $plugin ) {
 			throw new Exception( 'Unknown Plugin' );
 		}
@@ -86,6 +103,18 @@ class Import {
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
+		// If the readme generated any warnings, raise it to self::$import_warnings;
+		if ( $readme->warnings ) {
+			// Convert the warnings to a human readable format.
+			$readme_warnings = Readme_Validator::instance()->validate_content( $readme->raw_contents );
+
+			foreach ( [ 'errors', 'warnings' ] as $field ) {
+				foreach ( $readme_warnings[ $field ] ?? [] as $warning ) {
+					$this->warnings[] = "Readme: {$warning}";
+				}
+			}
+		}
+
 		// Validate various headers:
 
 		/*
@@ -98,7 +127,9 @@ class Import {
 		if ( $headers->UpdateURI ) {
 			$update_uri_valid = preg_match( '!^(https?://)?(wordpress.org|w.org)/plugins?/(?P<slug>[^/]+)/?$!i', $headers->UpdateURI, $update_uri_matches );
 			if ( ! $update_uri_valid || $update_uri_matches['slug'] !== $plugin_slug ) {
-				throw new Exception( 'Invalid Update URI header detected: ' . $headers->UpdateURI );
+				$this->warnings['invalid_update_uri'] = 'Invalid Update URI header detected: ' . $headers->UpdateURI;
+
+				throw new Exception( $this->warnings['invalid_update_uri'] );
 			}
 		}
 
@@ -121,7 +152,9 @@ class Import {
 		}
 
 		if ( $unmet_dependencies ) {
-			throw new Exception( 'Invalid plugin dependencies specified. The following dependencies could not be resolved: ' . implode( ', ', $requires_plugins_unmet ) );
+			$this->warnings['unmet_dependencies'] = 'Invalid plugin dependencies specified. The following dependencies could not be resolved: ' . implode( ', ', $requires_plugins_unmet );
+
+			throw new Exception( $this->warnings['unmet_dependencies'] );
 		}
 		unset( $_requires_plugins, $unmet_dependencies );
 
@@ -411,8 +444,9 @@ class Import {
 		 * @param string  $old_stable_tag The previous stable tag for the plugin.
 		 * @param array   $changed_tags   The list of SVN tags/trunk affected to trigger the import.
 		 * @param int     $svn_revision   The SVN revision that triggered the import.
+		 * @param array   $warnings       The list of warnings generated during the import process.
 		 */
-		do_action( 'wporg_plugins_imported', $plugin, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
+		do_action( 'wporg_plugins_imported', $plugin, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered, $this->warnings );
 
 		return true;
 	}
@@ -563,7 +597,7 @@ class Import {
 			}
 
 			$trunk_readme_file = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk/{$trunk_readme_file}";
-			$trunk_readme      = new Parser( $trunk_readme_file );
+			$trunk_readme      = new Readme_Parser( $trunk_readme_file );
 
 			$stable_tag = $trunk_readme->stable_tag;
 		}
@@ -623,7 +657,7 @@ class Import {
 
 		// The readme may not actually exist, but that's okay.
 		$readme = $this->find_readme_file( $tmp_dir . '/export' );
-		$readme = new Parser( $readme );
+		$readme = new Readme_Parser( $readme );
 
 		// There must be valid plugin headers though.
 		$plugin_headers = $this->find_plugin_headers( "$tmp_dir/export" );
