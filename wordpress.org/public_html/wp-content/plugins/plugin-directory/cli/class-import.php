@@ -102,6 +102,29 @@ class Import {
 			}
 		}
 
+		$_requires_plugins = array_filter( array_map( 'trim', explode( ',', $headers->RequiresPlugins ) ) );
+		$requires_plugins     = [];
+		$unmet_dependencies   = [];
+		foreach ( $_requires_plugins as $requires_plugin_slug ) {
+			$requires_plugin_post = Plugin_Directory::get_plugin_post( $requires_plugin_slug );
+
+			// get_plugin_post() will resolve some edge-cases, but we only want exact slug-matches, anything else is wrong.
+			if (
+				$requires_plugin_post &&
+				$requires_plugin_slug === $requires_plugin_post->post_name &&
+				'publish' === $requires_plugin_post->post_status
+			) {
+				$requires_plugins[] = $requires_plugin_post->post_name;
+			} else {
+				$unmet_dependencies[] = $requires_plugin_slug;
+			}
+		}
+
+		if ( $unmet_dependencies ) {
+			throw new Exception( 'Invalid plugin dependencies specified. The following dependencies could not be resolved: ' . implode( ', ', $requires_plugins_unmet ) );
+		}
+		unset( $_requires_plugins, $unmet_dependencies );
+
 		// Release confirmation
 		if ( $plugin->release_confirmation ) {
 			if ( 'trunk' === $stable_tag ) {
@@ -311,30 +334,7 @@ class Import {
 			update_post_meta( $plugin->ID, 'plugin_name_history', wp_slash( $plugin_names ) );
 		}
 
-		// Validate whether the dependencies are met by WordPress.org-hosted plugins.
-		$requires_plugins       = array_filter( array_map( 'trim', explode( ',', $headers->RequiresPlugins ) ) );
-		$requires_plugins_unmet = false;
-		foreach ( $requires_plugins as $requires_plugin_slug ) {
-			// TODO: Add support for premium plugins.
-			$requires_plugin_post = Plugin_Directory::get_plugin_post( $requires_plugin_slug );
-			if (
-				! $requires_plugin_post ||
-				// get_plugin_post() will resolve some edge-cases, but we only want exact slug-matches.
-				$requires_plugin_slug !== $requires_plugin_post->post_name ||
-				'publish' !== $requires_plugin_post->post_status
-			) {
-				$requires_plugins_unmet = true;
-				break;
-			}
-		}
-
-		update_post_meta( $plugin->ID, 'requires_plugins', wp_slash( $requires_plugins ) );
-		if ( $requires_plugins_unmet ) {
-			update_post_meta( $plugin->ID, '_requires_plugins_unmet', true );
-		} else {
-			delete_post_meta( $plugin->ID, '_requires_plugins_unmet' );
-		}
-
+		update_post_meta( $plugin->ID, 'requires_plugins',   wp_slash( $requires_plugins ) );
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
 		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
