@@ -1,10 +1,10 @@
 <?php
 if ( function_exists( 'register_block_pattern' ) ) {
-    register_block_pattern(
-        'wporg-support/forums-homepage-header',
-        array(
-            'title'       => __( 'Forums Homepage Header', 'wporg-support' ),
-            'content'     => sprintf(
+	register_block_pattern(
+		'wporg-support/forums-homepage-header',
+		array(
+			'title'   => __( 'Forums Homepage Header', 'wporg-support' ),
+			'content' => sprintf(
 				'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
 				<div class="wp-block-group alignfull has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color" style="padding-right:var(--wp--preset--spacing--edge-space);padding-left:var(--wp--preset--spacing--edge-space)">
 
@@ -15,8 +15,8 @@ if ( function_exists( 'register_block_pattern' ) ) {
 						<h1 class="wp-block-heading has-eb-garamond-font-family" style="font-size:50px;font-style:normal;font-weight:400">%s</h1>
 						<!-- /wp:heading -->
 
-						<!-- wp:paragraph {"style":{"typography":{"lineHeight":"2.3"}},"textColor":"white"} -->
-						<p class="has-white-color has-text-color" style="line-height:2.3">%s</p>
+						<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.8"}},"textColor":"white"} -->
+						<p class="has-white-color has-text-color" style="line-height:1.8">%s</p>
 						<!-- /wp:paragraph -->
 
 					</div>

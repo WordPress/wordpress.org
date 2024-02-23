@@ -347,6 +347,7 @@
 				},
 				"level-1": {
 					"typography": {
+						"fontFamily": "var(--wp--preset--font-family--eb-garamond)",
 						"lineHeight": 1.05
 					},
 					"breakpoint": {
@@ -669,7 +670,7 @@
 				},
 				{
 					"name": "Heading 1",
-					"size": "38px",
+					"size": "36px",
 					"slug": "heading-1"
 				},
 				{
@@ -875,7 +876,7 @@
 		"elements": {
 			"h1": {
 				"typography": {
-					"fontFamily": "var(--wp--custom--heading--typography--font-family)",
+					"fontFamily": "var(--wp--custom--heading--level-1--typography--font-family)",
 					"fontSize": "var(--wp--preset--font-size--heading-1)",
 					"fontWeight": "var(--wp--custom--heading--typography--font-weight)",
 					"lineHeight": "var(--wp--custom--heading--level-1--typography--line-height)"

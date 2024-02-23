@@ -3866,6 +3866,9 @@ section {
 	text-align: right;
 }
 .bbpress h1.page-title {
+	font-family: var(--wp--custom--heading--level-1--typography--font-family);
+	font-size: var(--wp--preset--font-size--heading-1);
+	line-height: var(--wp--custom--heading--level-1--typography--line-height);
 	margin-top: 0;
 	word-break: break-word;
 }
