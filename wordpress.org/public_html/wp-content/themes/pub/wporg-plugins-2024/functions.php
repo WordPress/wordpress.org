@@ -14,7 +14,14 @@ use WordPressdotorg\Plugin_Directory\Template;
 
 
 // Block Files
+require_once( __DIR__ . '/src/blocks/archive-page/index.php' );
+require_once( __DIR__ . '/src/blocks/filter-bar/index.php' );
 require_once( __DIR__ . '/src/blocks/front-page/index.php' );
+require_once( __DIR__ . '/src/blocks/search-page/index.php' );
+require_once( __DIR__ . '/src/blocks/single-page/index.php' );
+
+// Block Configs
+require_once( __DIR__ . '/inc/block-config.php' );
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -80,13 +87,16 @@ function scripts() {
 	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], filemtime( __DIR__ . '/css/style.css' ) );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
+	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
+	wp_enqueue_style( 'wporg-parent-2021-block-styles', get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css', [ 'wporg-global-fonts' ] );
+
 	// Make jQuery a footer script.
 	wp_scripts()->add_data( 'jquery', 'group', 1 );
 	wp_scripts()->add_data( 'jquery-core', 'group', 1 );
 	wp_scripts()->add_data( 'jquery-migrate', 'group', 1 );
 
-	wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
-	wp_enqueue_script( 'wporg-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
+	wp_enqueue_script( 'wporg-navigation', get_stylesheet_directory_uri() . '/js/navigation.js', array(), '20181209', true );
+	wp_enqueue_script( 'wporg-skip-link-focus-fix', get_stylesheet_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
 
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
@@ -477,8 +487,3 @@ add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_desc
  * Custom template tags for this theme.
  */
 require get_stylesheet_directory() . '/inc/template-tags.php';
-
-function register_patterns() {
-	require get_stylesheet_directory() . '/patterns/nav.php';
-}
-add_action( 'init',  __NAMESPACE__ . '\register_patterns' );

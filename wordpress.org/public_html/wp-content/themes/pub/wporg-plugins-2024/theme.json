@@ -1,5 +1,10 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/theme.json",
 	"version": 2,
-	"settings": {}
+	"settings": {
+		"layout": {
+			"contentSize": "960px",
+			"wideSize": "1220px"
+		}
+	}
 }

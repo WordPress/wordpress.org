@@ -12,7 +12,7 @@ if ( is_search() ) : ?>
 	<p><?php esc_html_e( 'Sorry, but nothing matched your search terms.', 'wporg-plugins' ); ?></p>
 	<p><?php esc_html_e( 'Please try again with some different keywords.', 'wporg-plugins' ); ?></p>
 	<?php
-		get_search_form();
+		echo do_blocks( '<!-- wp:search /-->');
 
 elseif ( is_tax( 'plugin_section', 'favorites' ) ) :
 	if ( is_user_logged_in() ) :

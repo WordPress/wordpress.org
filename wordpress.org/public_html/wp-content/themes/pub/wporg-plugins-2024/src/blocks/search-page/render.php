@@ -1,18 +1,9 @@
 <?php
-/**
- * The template for displaying search results pages.
- *
- * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#search-result
- *
- * @package WordPressdotorg\Plugin_Directory\Theme
- */
+global $wp_query;
 
-get_header();
 ?>
 
-	<main id="main" class="site-main" role="main">
-
-		<header class="page-header">
+<header class="page-header">
 			<h1 class="page-title">
 				<?php
 				printf(
@@ -48,8 +39,3 @@ get_header();
 		the_posts_pagination();
 
 		?>
-
-	</main><!-- #main -->
-
-<?php
-get_footer();

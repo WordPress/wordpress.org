@@ -29,4 +29,4 @@ get_header(); ?>
 	</main><!-- #main -->
 
 <?php
-get_footer();
+echo do_blocks( '<!-- wp:wporg/global-footer /-->' );

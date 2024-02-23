@@ -1,12 +1,12 @@
 <?php
 /**
- * Block Name: Front Page
- * Description: The content that is displayed on the front pag
+ * Block Name: Single
+ * Description: The content that is displayed on the single page
  *
  * @package wporg
  */
 
-namespace WordPressdotorg\Theme\Plugins_2024\FrontPage;
+namespace WordPressdotorg\Theme\Plugins_2024\SinglePage;
 
 add_action( 'init', __NAMESPACE__ . '\init' );
 
@@ -18,5 +18,5 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @see https://developer.wordpress.org/reference/functions/register_block_type/
  */
 function init() {
-	register_block_type( __DIR__ . '/../../../js/build/blocks/front-page' );
+	register_block_type( __DIR__ . '/../../../js/build/blocks/single-page' );
 }

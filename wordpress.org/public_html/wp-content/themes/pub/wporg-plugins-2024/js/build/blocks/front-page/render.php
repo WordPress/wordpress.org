@@ -1,14 +1,4 @@
 <?php
-/**
- * The front page template file.
- *
- * @link https://codex.wordpress.org/Template_Hierarchy
- *
- * @package WordPressdotorg\Plugin_Directory\Theme
- */
-
-namespace WordPressdotorg\Plugin_Directory\Theme;
-
 use WordPressdotorg\Plugin_Directory\Template;
 
 $sections = array(
@@ -24,7 +14,6 @@ $widget_args = array(
 	'after_title'  => '</h2>',
 );
 
-get_header();
 ?>
 
 	<main id="main" class="site-main" role="main">
@@ -129,6 +118,3 @@ get_header();
 		), $widget_args );
 		?>
 	</aside><!-- #secondary -->
-
-<?php
-get_footer();

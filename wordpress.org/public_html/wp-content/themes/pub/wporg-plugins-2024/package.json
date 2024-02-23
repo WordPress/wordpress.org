@@ -7,11 +7,10 @@
   "main": "index.php",
   "scripts": {
     "watch:css": "grunt watch",
-    "watch:js": "wp-scripts start",
+    "watch:js": "wp-scripts start --webpack-copy-php",
     "watch": "concurrently \"npm run watch:js\" \"npm run watch:css\"",
     "build:css": "grunt build",
     "build:js": "wp-scripts build --webpack-copy-php",
-    
     "build": "npm run build:css && npm run build:js",
     "format:js": "wp-scripts format client",
     "lint:js": "wp-scripts lint-js client",
@@ -27,7 +26,7 @@
   "devDependencies": {
     "@lodder/grunt-postcss": "3.1.1",
     "@wordpress/browserslist-config": "4.1.2",
-    "@wordpress/scripts": "22.2.1",
+    "@wordpress/scripts": "27.2.0",
     "autoprefixer": "10.4.3",
     "concurrently": "7.0.0",
     "cssnano": "5.1.4",

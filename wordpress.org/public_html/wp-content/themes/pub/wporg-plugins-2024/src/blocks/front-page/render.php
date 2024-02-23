@@ -1,7 +1,6 @@
 <?php
 use WordPressdotorg\Plugin_Directory\Template;
 
-var_dump('ok');
 $sections = array(
     'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
 	'featured'  => __( 'Featured Plugins', 'wporg-plugins' ),
@@ -15,7 +14,6 @@ $widget_args = array(
 	'after_title'  => '</h2>',
 );
 
-get_header();
 ?>
 
 	<main id="main" class="site-main" role="main">
