@@ -456,6 +456,21 @@ body.home #page .site-main {
 	}
 }
 
+/*--------------------------------------------------------------
+# .forums-homepage
+# .page
+--------------------------------------------------------------*/
+
+.forums-homepage-footer .wp-block-heading a {
+	text-decoration: none;
+}
+
+.forums-homepage-topics {
+
+	.wp-block-group-is-layout-grid.is-style-cards-grid .wp-block-wporg-link-wrapper h3 {
+		margin-bottom: unset;
+	}
+}
 
 /*--------------------------------------------------------------
 # .helphub-page

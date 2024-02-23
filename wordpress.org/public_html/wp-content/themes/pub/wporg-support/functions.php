@@ -260,6 +260,23 @@ function wporg_support_custom_views() {
 add_action( 'bbp_register_views', 'wporg_support_custom_views' );
 
 /**
+ * Get the list of forums for the front page.
+ *
+ * @return string
+ */
+function wporg_support_get_forums_list() {
+	ob_start();
+
+	while ( bbp_forums() ) : bbp_the_forum();
+
+		bbp_get_template_part( 'loop', 'single-forum-homepage' );
+
+	endwhile;
+
+	return ob_get_clean();
+}
+
+/**
  * Display an ordered list of bbPress views
  */
 function wporg_support_get_views() {
@@ -276,13 +293,13 @@ function wporg_support_get_views() {
 			continue;
 		}
 
-		$output .= sprintf( '<a class="wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s">%s</a>',
+		$output .= sprintf( '<a class="wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s"><h3 class="wp-block-heading has-inter-font-family has-normal-font-size">%s</h3></a>',
 			esc_url( bbp_get_view_url( $view ) ),
 			bbp_get_view_title( $view )
 		);
 	}
 
-	echo $output;
+	return $output;
 }
 
 /**

@@ -1058,10 +1058,6 @@ big {
 /*--------------------------------------------------------------
 # Blocks
 --------------------------------------------------------------*/
-.wp-block-group.is-layout-grid.is-style-cards-grid {
-	grid-template-columns: repeat(auto-fill, minmax(32.3%, 1fr));
-	gap: var(--wp--preset--spacing--10);
-}
 #bbpress-forums .wp-block-group .wp-block-wporg-link-wrapper {
 	border: 1px solid var(--wp--preset--color--light-grey-1);
 }
@@ -3174,6 +3170,18 @@ body.home #page .site-main {
 }
 .search.search-results .page-header {
 	margin: 2rem 0;
+}
+
+/*--------------------------------------------------------------
+# .forums-homepage
+# .page
+--------------------------------------------------------------*/
+.forums-homepage-footer .wp-block-heading a {
+	text-decoration: none;
+}
+
+.forums-homepage-topics .wp-block-group-is-layout-grid.is-style-cards-grid .wp-block-wporg-link-wrapper h3 {
+	margin-bottom: unset;
 }
 
 /*--------------------------------------------------------------
