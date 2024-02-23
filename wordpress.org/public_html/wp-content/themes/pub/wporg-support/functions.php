@@ -34,11 +34,16 @@ function add_site_navigation_menus( $menus ) {
 }
 add_filter( 'wporg_block_navigation_menus', '\add_site_navigation_menus' );
 
+/**
+ * Register patterns from the patterns directory.
+ */
 function register_patterns() {
-	require get_template_directory() . '/patterns/local-nav.php';
-	require get_template_directory() . '/patterns/local-nav-home.php';
-	require get_template_directory() . '/patterns/forums-homepage-header.php';
-	require get_template_directory() . '/patterns/search-field.php';
+	$pattern_directory = new DirectoryIterator( get_template_directory() . '/patterns/' );
+	foreach ( $pattern_directory as $file ) {
+		if ( $file->isFile() ) {
+			require $file->getPathname();
+		}
+	}
 }
 add_action( 'init', 'register_patterns' );
 
