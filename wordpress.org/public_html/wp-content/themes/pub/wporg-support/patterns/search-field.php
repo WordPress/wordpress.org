@@ -1,10 +1,10 @@
 <?php
 if ( function_exists( 'register_block_pattern' ) ) {
-    register_block_pattern(
-        'wporg-support/search-field',
-        array(
-            'title'       => __( 'Search Field', 'wporg-support' ),
-            'content'     => sprintf(
+	register_block_pattern(
+		'wporg-support/search-field',
+		array(
+			'title'   => __( 'Search Field', 'wporg-support' ),
+			'content' => sprintf(
 				'<!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}}}} -->
 				<div id="wporg-search" class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--20);margin-bottom:var(--wp--preset--spacing--20)">
 
