@@ -75,8 +75,8 @@ function wporg_support_scripts() {
 	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
 	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
 
-	wp_enqueue_style( 'wporg-parent-2021-style', 'https://developer.wordpress.org/wp-content/themes/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
-	wp_enqueue_style( 'wporg-parent-2021-block-styles', 'https://developer.wordpress.org/wp-content/themes/wporg-parent-2021/build/block-styles.css' );
+	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
+	wp_enqueue_style( 'wporg-parent-2021-block-styles', get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css', [ 'wporg-global-fonts' ] );
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
 	wp_enqueue_script( 'wporg-support-forums', get_template_directory_uri() . '/js/forums.js', array( 'jquery' ), '20220217', true );
