@@ -13,7 +13,7 @@ html {
 }
 
 body {
-	background: $color__background-body; /* Fallback for when there is no custom background color defined. */
+	background: var(--wp--preset--color--white); /* Fallback for when there is no custom background color defined. */
 }
 
 blockquote, q {
@@ -32,8 +32,8 @@ blockquote {
 	border: none;
 	padding: 0;
 
-	border-left: 2px solid $color__blockquote;
-	color: $color__blockquote;
+	border-left: 2px solid var(--wp--preset--color--charcoal-4);
+	color: var(--wp--preset--color--charcoal-4);
 	margin: 1rem 0;
 	padding-left: 0.8rem;
 
@@ -48,7 +48,7 @@ blockquote {
 }
 
 hr {
-	background-color: $color__background-hr;
+	background-color: var(--wp--preset--color--light-grey-1);
 	border: 0;
 	height: 2px;
 	margin: 0 auto;

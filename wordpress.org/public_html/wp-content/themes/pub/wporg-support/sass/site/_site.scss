@@ -9,7 +9,7 @@ body, #pagebody {
 # .site-header
 --------------------------------------------------------------*/
 .site-header {
-	background: $color__wp-blue;
+	background: var(--wp--preset--color--blueberry-1);
 	padding: 1rem 0;
 	position: relative;
 	z-index: 100;
@@ -85,7 +85,7 @@ body, #pagebody {
 # .main-navigation
 --------------------------------------------------------------*/
 .main-navigation {
-	background: $color__wp-blue;
+	background: var(--wp--preset--color--blueberry-1);
 	clear: both;
 	left: 0;
 	position: absolute;
@@ -176,7 +176,7 @@ body, #pagebody {
 	#wporg-header ul li a.current ~ .uparrow,
 	#wporg-header ul li.current-menu-item::after,
 	#wporg-header ul li.current_page_parent::after {
-		border-bottom: 9px solid $color__wp-blue;
+		border-bottom: 9px solid var(--wp--preset--color--blueberry-1);
 	}
 
 	#wporg-header ul li:hover .nav-submenu ~ .uparrow,
@@ -306,7 +306,7 @@ body.home #page .site-main {
 
 		ul > li {
 			font-size: ms(-2);
-			border-top: 1px solid #eee;
+			border-top: 1px solid var(--wp--custom--color--border);
 			padding: 0.5rem 0;
 		}
 	}
@@ -366,7 +366,7 @@ body.home #page .site-main {
 			border: none;
 			border-radius: 0;
 			box-shadow: none;
-			color: $color__text-input;
+			color: #32373c;
 			display: block;
 			height: 100%;
 			padding: 0.5rem 1rem;
@@ -428,7 +428,7 @@ body.home #page .site-main {
 	}
 
 	.site-main & .search-field {
-		border: 1px solid $color__border-input;
+		border: 1px solid var(--wp--preset--color--light-grey-1);
 		box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
 		padding: 0.5rem;
 		width: 100%;
@@ -520,7 +520,7 @@ body.home #page .site-main {
 			}
 
 			& + section {
-				border-top: 2px solid $color__background-hr;
+				border-top: 2px solid var(--wp--preset--color--light-grey-1);
 			}
 		}
 	}

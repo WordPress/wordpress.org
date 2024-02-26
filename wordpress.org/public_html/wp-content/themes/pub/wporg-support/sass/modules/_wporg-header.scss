@@ -324,7 +324,7 @@
 		ul li.current-menu-item::after,
 		ul li.current_page_parent::after,
 		ul li a.current ~ .uparrow {
-			border-bottom-color: $color__wp-blue;
+			border-bottom-color: var(--wp--preset--color--blueberry-1);
 		}
 	}
 }

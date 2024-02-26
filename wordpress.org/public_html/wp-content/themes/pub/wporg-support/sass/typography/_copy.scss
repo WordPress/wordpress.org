@@ -39,7 +39,7 @@ address {
 }
 
 pre {
-	background: $color__background-pre;
+	background: var(--wp--preset--color--light-grey-1);
 	box-sizing: content-box;
 	font-family: $font__pre;
 	font-size: ms( -2 );
@@ -56,12 +56,12 @@ code, kbd, tt, var {
 }
 
 abbr, acronym {
-	border-bottom: 1px dotted $color__border-abbr;
+	border-bottom: 1px dotted var(--wp--preset--color--charcoal-4);
 	cursor: help;
 }
 
 mark, ins {
-	background: $color__background-ins;
+	background: var(--wp--preset--color--lemon-1);
 	text-decoration: none;
 }
 

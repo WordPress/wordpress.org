@@ -26,14 +26,14 @@ input[type="week"],
 select,
 textarea {
 	background-color: #fff;
-	border: 1px solid $color__border-input;
+	border: 1px solid var(--wp--preset--color--light-grey-1);
 	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
-	color: $color__text-input;
+	color: var(--wp--custom--form--search--color--text);
 	transition: 0.05s border-color ease-in-out;
 	-webkit-appearance: none;
 
 	&:focus {
-		color: $color__text-input-focus;
+		color: var(--wp--preset--color--charcoal-1);
 	}
 }
 
@@ -200,7 +200,7 @@ input.readonly,
 input[readonly],
 textarea.readonly,
 textarea[readonly] {
-	background-color: $color__background-pre;
+	background-color: var(--wp--preset--color--light-grey-1);
 }
 
 :-moz-placeholder {

@@ -3,6 +3,14 @@
 	"version": 2,
 	"settings": {
 		"custom": {
+			"color": {
+				"border": "var(--wp--preset--color--light-grey-1)",
+				"moderator": "#33b4ce",
+				"plugin-author": "#f06723",
+				"theme-author": "#4e3288",
+				"thread-starter": "#43cc99",
+				"thread-reporter": "#ff4141"
+			},
 			"heading": {
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--inter)",

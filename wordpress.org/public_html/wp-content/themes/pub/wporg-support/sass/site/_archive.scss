@@ -15,7 +15,7 @@ body.category {
 			&:active {
 
 				text-decoration: none;
-				color: $color__link;
+				color: var(--wp--custom--link--color--text);
 			}
 		}
 

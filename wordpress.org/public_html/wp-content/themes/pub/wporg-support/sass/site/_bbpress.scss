@@ -47,7 +47,7 @@ $paginationBreakPoint: "600px";
 		> div {
 			background: transparent;
 			position: relative;
-			border-bottom: 1px solid #eee;
+			border-bottom: 1px solid var(--wp--custom--color--border);
 			margin: 1rem 0;
 
 			h3 {
@@ -72,7 +72,7 @@ $paginationBreakPoint: "600px";
 				}
 
 				&:hover {
-					color: $color__link;
+					color: var(--wp--custom--link--color--text);
 				}
 
 				&.dashicons-before {
@@ -174,11 +174,11 @@ $paginationBreakPoint: "600px";
 			}
 
 			a {
-				color: $color__wp-blue;
+				color: var(--wp--preset--color--blueberry-1);
 				text-decoration: underline;
 
 				&:hover {
-					color: $color__wp-blue;
+					color: var(--wp--preset--color--blueberry-1);
 				}
 			}
 		}
@@ -221,10 +221,10 @@ $paginationBreakPoint: "600px";
 
 		.bbp-forums,
 		.bbp-topics {
-			border: 1px solid #eee;
+			border: 1px solid var(--wp--custom--color--border);
 
 			> .bbp-header {
-				background: $color__wp-blue;
+				background: var(--wp--preset--color--blueberry-1);
 				color: #fff;
 			}
 		}
@@ -445,7 +445,7 @@ $paginationBreakPoint: "600px";
 		p.bbp-topic-meta a {
 
 			/* Override bb-base/style.css */
-			color: $color__link;
+			color: var(--wp--custom--link--color--text);
 
 			&:hover,
 			&:focus,
@@ -457,7 +457,7 @@ $paginationBreakPoint: "600px";
 		}
 
 		p.wporg-bbp-topic-site-url {
-			border-top: 1px solid #eee;
+			border-top: 1px solid var(--wp--custom--color--border);
 			padding-top: 0.5rem;
 		}
 
@@ -584,10 +584,10 @@ $paginationBreakPoint: "600px";
 				}
 
 				&:not(.current):not(.dots):hover {
-					background: $color__wp-blue;
+					background: var(--wp--preset--color--blueberry-1);
 					color: #fff;
 					text-decoration: none;
-					border: 1px solid $color__wp-blue;
+					border: 1px solid var(--wp--preset--color--blueberry-1);
 				}
 
 				&.current {
@@ -597,7 +597,7 @@ $paginationBreakPoint: "600px";
 
 				&.dots {
 					background: #fff;
-					color: $color__text-main;
+					color: var(--wp--preset--color--charcoal-1);
 				}
 
 				&:first-child {
@@ -825,7 +825,7 @@ $paginationBreakPoint: "600px";
 .bbp-view .bbp-topic-form {
 	margin-top: 1rem;
 	padding-top: 1rem;
-	border-top: 1px solid #eee;
+	border-top: 1px solid var(--wp--custom--color--border);
 	clear: both;
 }
 
@@ -938,7 +938,7 @@ select {
 
 	.themes-plugins {
 		margin: 0 0 4rem;
-		border-bottom: 1px solid #eee;
+		border-bottom: 1px solid var(--wp--custom--color--border);
 
 		p {
 			font-size: ms(0);
@@ -1033,7 +1033,7 @@ body.single-topic:not(body.topic-edit) {
 			}
 
 			ul.bbp-lead-topic li.bbp-body {
-				border: 1px solid #eee;
+				border: 1px solid var(--wp--custom--color--border);
 				border-top: none;
 			}
 
@@ -1050,13 +1050,13 @@ body.single-topic:not(body.topic-edit) {
 			div.odd,
 			ul.odd {
 				background: #fff;
-				border-top: 2px solid #eee;
+				border-top: 2px solid var(--wp--custom--color--border);
 			}
 
 			// Ratings
 			.wporg-ratings {
 				background-color: #fbfbfb;
-				border: 1px solid #eee;
+				border: 1px solid var(--wp--custom--color--border);
 				border-top: none;
 				border-bottom: none;
 				padding-left: 10%;
@@ -1114,7 +1114,7 @@ body.single-topic:not(body.topic-edit) {
 
 		header {
 			background: #fbfbfb;
-			border: 1px solid #eee;
+			border: 1px solid var(--wp--custom--color--border);
 			border-bottom: none;
 			padding: 1rem 2rem 1rem 10%;
 
@@ -1245,7 +1245,7 @@ div.bbp-breadcrumb {
 		@extend .clear;
 		margin-bottom: ms(0);
 		padding-bottom: 10px;
-		border-bottom: 1px solid #eee;
+		border-bottom: 1px solid var(--wp--custom--color--border);
 		display: flex;
 		flex-direction: row-reverse;
 
@@ -1254,7 +1254,7 @@ div.bbp-breadcrumb {
 			margin: 0;
 			width: 35%;
 			float: none;
-			border-top: 1px solid #eee;
+			border-top: 1px solid var(--wp--custom--color--border);
 
 			.reviews-total-count {
 				font-weight: 700;

@@ -3,27 +3,27 @@
 /* User badges */
 
 .by-moderator {
-	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__moderator;
+	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--moderator);
 }
 
 .by-plugin-author,
 .by-plugin-contributor,
 .by-plugin-support-rep {
-	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__plugin-author;
+	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--plugin-author);
 }
 
 .by-theme-author,
 .by-theme-contributor,
 .by-theme-support-rep {
-	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__theme-author;
+	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--theme-author);
 }
 
 .by-thread-starter {
-	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__thread_starter;
+	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--thread-starter);
 }
 
 .type-reported_topics {
-	border-right: 2px solid $color__thread-reporter;
+	border-right: 2px solid var(--wp--custom--color--thread-reporter);
 }
 
 .author-badge {
@@ -38,23 +38,23 @@
 }
 
 .author-badge-moderator {
-	background-color: $color__moderator;
+	background-color: var(--wp--custom--color--moderator);
 }
 
 .author-badge-thread-starter {
-	background-color: $color__thread-starter;
+	background-color: var(--wp--custom--color--thread-starter);
 }
 
 .author-badge-plugin {
-	background-color: $color__plugin-author;
+	background-color: var(--wp--custom--color--plugin-author);
 }
 
 .author-badge-theme {
-	background-color: $color__theme-author;
+	background-color: var(--wp--custom--color--theme-author);
 }
 
 .author-badge-reporter {
-	background-color: $color__thread-reporter;
+	background-color: var(--wp--custom--color--thread-reporter);
 	right: -2px;
 	left: initial;
 	border-radius: 2px 0 0 2px;
@@ -72,19 +72,19 @@
 	}
 
 	.by-moderator {
-		border-left-color: $color__moderator;
+		border-left-color: var(--wp--custom--color--moderator);
 	}
 
 	.by-plugin-author,
 	.by-plugin-contributor,
 	.by-plugin-support-rep {
-		border-left-color: $color__plugin-author;
+		border-left-color: var(--wp--custom--color--plugin-author);
 	}
 
 	.by-theme-author,
 	.by-theme-contributor,
 	.by-theme-support-rep {
-		border-left-color: $color__theme-author;
+		border-left-color: var(--wp--custom--color--theme-author);
 	}
 
 	.author-badge {
