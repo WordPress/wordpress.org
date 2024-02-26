@@ -97,6 +97,66 @@ function wporg_support_scripts() {
 add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
 
 /**
+ * Merge the support theme's theme.json into the parent theme.json.
+ *
+ * @param WP_Theme_JSON_Data $theme_json Parsed support theme.json.
+ *
+ * @return WP_Theme_JSON_Data The updated theme.json settings.
+ */
+function merge_parent_support_theme_json( $theme_json ) {
+	$support_theme_json_data = $theme_json->get_data();
+
+	$parent_theme_json_file = get_theme_root_uri() . '/wporg-parent-2021/theme.json';
+	$parent_theme_json_data = json_decode( file_get_contents( $parent_theme_json_file ), true );
+
+	if ( ! $parent_theme_json_data ) {
+		return $theme_json;
+	}
+
+	// Build a new theme.json object based on the parent.
+	$new_data = $parent_theme_json_data;
+	$support_settings = $support_theme_json_data['settings'];
+	$support_styles = $support_theme_json_data['styles'];
+
+	if ( ! empty( $support_settings ) ) {
+		$parent_settings = $parent_theme_json_data[ 'settings' ];
+
+		$new_data['settings'] = _recursive_array_merge( $parent_settings, $support_settings );
+	}
+
+	if ( ! empty( $support_styles ) ) {
+		$parent_styles = $parent_theme_json_data['styles'];
+
+		$new_data['styles'] = _recursive_array_merge( $parent_styles, $support_styles );
+	}
+
+	return $theme_json->update_with( $new_data );
+
+}
+add_filter( 'wp_theme_json_data_theme', 'merge_parent_support_theme_json' );
+
+/**
+ * Merge two arrays recursively, overwriting keys in the first array with keys from the second array.
+ *
+ * @param array $array1
+ * @param array $array2
+ *
+ * @return array
+ */
+function _recursive_array_merge( $array1, $array2 ) {
+	foreach ( $array2 as $key => $value ) {
+		// If the key exists in the first array and both values are arrays, recursively merge them
+		if ( isset( $array1[ $key ] ) && is_array( $value ) && is_array( $array1[ $key ] ) ) {
+			$array1[ $key ] = _recursive_array_merge( $array1[ $key ], $value );
+		} else {
+			$array1[ $key ] = $value;
+		}
+	}
+
+	return $array1;
+}
+
+/**
  * Register widget areas used by the theme.
  *
  * @uses register_sidebar()
