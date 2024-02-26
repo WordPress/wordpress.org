@@ -105,13 +105,15 @@ add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
  */
 function merge_parent_support_theme_json( $theme_json ) {
 	$support_theme_json_data = $theme_json->get_data();
-
-	$parent_theme_json_file = get_theme_root_uri() . '/wporg-parent-2021/theme.json';
-	$parent_theme_json_data = json_decode( file_get_contents( $parent_theme_json_file ), true );
+	$parent_theme_json_data = json_decode( file_get_contents( get_theme_root_uri() . '/wporg-parent-2021/theme.json' ), true );
 
 	if ( ! $parent_theme_json_data ) {
 		return $theme_json;
 	}
+
+	$parent_theme = class_exists( 'WP_Theme_JSON_Gutenberg' )
+		? new \WP_Theme_JSON_Gutenberg( $parent_theme_json_data )
+		: new \WP_Theme_JSON( $parent_theme_json_data );
 
 	// Build a new theme.json object based on the parent.
 	$new_data = $parent_theme_json_data;
@@ -119,7 +121,7 @@ function merge_parent_support_theme_json( $theme_json ) {
 	$support_styles = $support_theme_json_data['styles'];
 
 	if ( ! empty( $support_settings ) ) {
-		$parent_settings = $parent_theme_json_data[ 'settings' ];
+		$parent_settings = $parent_theme->get_settings();
 
 		$new_data['settings'] = _recursive_array_merge( $parent_settings, $support_settings );
 	}
@@ -147,13 +149,52 @@ function _recursive_array_merge( $array1, $array2 ) {
 	foreach ( $array2 as $key => $value ) {
 		// If the key exists in the first array and both values are arrays, recursively merge them
 		if ( isset( $array1[ $key ] ) && is_array( $value ) && is_array( $array1[ $key ] ) ) {
-			$array1[ $key ] = _recursive_array_merge( $array1[ $key ], $value );
+			// Check if both arrays are indexed (not associative)
+			if ( array_values( $array1[ $key ] ) === $array1[ $key ] && array_values( $value ) === $value ) {
+				// Use _merge_by_slug for indexed arrays
+				$array1[ $key ] = _merge_by_slug( $array1[ $key ], $value );
+			} else {
+				// Use recursive merge for associative arrays
+				$array1[ $key ] = _recursive_array_merge( $array1[ $key ], $value );
+			}
 		} else {
 			$array1[ $key ] = $value;
 		}
 	}
 
 	return $array1;
+}
+
+/**
+ * Merge two (or more) arrays, de-duplicating by the `slug` key.
+ *
+ * If any values in later arrays have slugs matching earlier items, the earlier
+ * items are overwritten with the later value.
+ *
+ * @param array ...$arrays A list of arrays of associative arrays, each item
+ *                         must have a `slug` key.
+ *
+ * @return array The combined array, unique by `slug`. Empty if any item is
+ *               missing a slug.
+ */
+function _merge_by_slug( ...$arrays ) {
+	$combined = array_merge( ...$arrays );
+	$result   = [];
+
+	foreach ( $combined as $value ) {
+		if ( ! isset( $value['slug'] ) ) {
+			return [];
+		}
+
+		$found = array_search( $value['slug'], wp_list_pluck( $result, 'slug' ), true );
+		if ( false !== $found ) {
+			$result[ $found ] = $value;
+		} else {
+			$result[] = $value;
+		}
+	}
+
+	return $result;
 }
 
 /**
