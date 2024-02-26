@@ -56,8 +56,8 @@ echo do_blocks( $is_forums_home
 							<h1 class="wp-block-heading has-eb-garamond-font-family" style="font-size:50px;font-style:normal;font-weight:400">%s</h1>
 							<!-- /wp:heading -->
 
-							<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.8"}},"textColor":"white"} -->
-							<p class="has-white-color has-text-color" style="line-height:1.8">%s</p>
+							<!-- wp:paragraph {"style":{"typography":{"lineHeight":"2.3"}},"textColor":"white"} -->
+							<p class="has-white-color has-text-color" style="line-height:2.3">%s</p>
 							<!-- /wp:paragraph -->
 
 						</div>

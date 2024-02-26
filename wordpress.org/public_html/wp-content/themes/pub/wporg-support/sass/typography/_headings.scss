@@ -8,7 +8,6 @@ h4,
 h5,
 h6 {
 	clear: both;
-	margin-bottom: calc( var(--wp--style--block-gap) / 2 );
 }
 
 h2 {
@@ -26,11 +25,4 @@ h3 {
 		font-size: ms( 2 );
 		font-weight: 700;
 	}
-}
-
-h4 {
-	// Override wp4.css.
-	border: none;
-	color: $color__text-main;
-	padding: 0;
 }

@@ -85,11 +85,6 @@ dfn {
 	font-style: italic;
 }
 
-h1 {
-	font-size: 2em;
-	margin: 0.67em 0;
-}
-
 mark {
 	background: #ff0;
 	color: #000;
@@ -966,7 +961,6 @@ h4,
 h5,
 h6 {
 	clear: both;
-	margin-bottom: calc(var(--wp--style--block-gap) / 2);
 }
 
 h2.comment-reply-title {
@@ -978,12 +972,6 @@ h2.comment-reply-title {
 h3.comment-reply-title {
 	font-size: 1.25rem;
 	font-weight: 700;
-}
-
-h4, .bbp-view .review-ratings .col-5 > div:first-child {
-	border: none;
-	color: var(--wp--preset--color--charcoal-1);
-	padding: 0;
 }
 
 p {
@@ -3027,15 +3015,8 @@ body, #pagebody {
 #page .site-main {
 	padding: 0 10px 3.0517578125rem;
 }
-.site-main .page-header h1 {
-	margin: 0;
-}
 .site-main .page-header p {
 	margin: 0.5rem 0;
-}
-.site-main .page-title {
-	font-size: 1.5625rem;
-	font-weight: 400;
 }
 .site-main .no-results {
 	margin: 0 auto;
@@ -3291,7 +3272,6 @@ body.home #page .site-main {
 # Archives
 --------------------------------------------------------------*/
 body.category #main h1 {
-	font-size: 2.2rem;
 	text-align: center;
 }
 body.category #main a {
@@ -3873,13 +3853,6 @@ section {
 .bbpress li.bbp-topic-freshness {
 	text-align: right;
 }
-.bbpress h1.page-title {
-	font-family: var(--wp--custom--heading--level-1--typography--font-family);
-	font-size: var(--wp--preset--font-size--heading-1);
-	line-height: var(--wp--custom--heading--level-1--typography--line-height);
-	margin-top: 0;
-	word-break: break-word;
-}
 .bbpress .forum-titles .bbp-topic-voice-count,
 .bbpress .forum-titles .bbp-topic-reply-count {
 	overflow: hidden;
@@ -4245,7 +4218,10 @@ body.single-topic:not(body.topic-edit) .entry-content header {
 	background: #fbfbfb;
 	border: 1px solid #eee;
 	border-bottom: none;
-	padding: 1rem 10% 0 2rem;
+	padding: 1rem 10% 1rem 2rem;
+}
+body.single-topic:not(body.topic-edit) .entry-content header h1 {
+	margin-bottom: 0;
 }
 @media screen and (max-width: 568px) {
 	body.single-topic:not(body.topic-edit) .entry-content header {
@@ -4326,9 +4302,6 @@ div.bbp-breadcrumb p {
 	.bbp-single-user input[type=text]#ts {
 		margin-bottom: 6px;
 	}
-}
-.bbp-single-user .page-header h1 {
-	margin-bottom: 1rem;
 }
 
 /*--------------------------------------------------------------

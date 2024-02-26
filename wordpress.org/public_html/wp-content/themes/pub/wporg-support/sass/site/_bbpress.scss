@@ -649,17 +649,6 @@ $paginationBreakPoint: "600px";
 		text-align: left;
 	}
 
-	h1 {
-
-		&.page-title {
-			font-family: var(--wp--custom--heading--level-1--typography--font-family);
-			font-size: var(--wp--preset--font-size--heading-1);
-			line-height: var(--wp--custom--heading--level-1--typography--line-height);
-			margin-top: 0;
-			word-break: break-word;
-		}
-	}
-
 	.forum-titles {
 
 		.bbp-topic-voice-count,
@@ -1127,7 +1116,11 @@ body.single-topic:not(body.topic-edit) {
 			background: #fbfbfb;
 			border: 1px solid #eee;
 			border-bottom: none;
-			padding: 1rem 2rem 0 10%;
+			padding: 1rem 2rem 1rem 10%;
+
+			h1 {
+				margin-bottom: 0;
+			}
 
 			@media screen and (max-width: 568px) {
 				padding-left: 1rem;
@@ -1236,13 +1229,6 @@ div.bbp-breadcrumb {
 			&#ts {
 				margin-bottom: 6px;
 			}
-		}
-	}
-
-	.page-header {
-
-		h1 {
-			margin-bottom: 1rem;
 		}
 	}
 }

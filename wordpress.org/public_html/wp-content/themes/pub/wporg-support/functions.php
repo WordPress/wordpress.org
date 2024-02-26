@@ -71,12 +71,13 @@ add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
  * @link https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/style
  */
 function wporg_support_scripts() {
-
-	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
-	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
+	wp_dequeue_style( 'wp4-styles' );
 
 	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
 	wp_enqueue_style( 'wporg-parent-2021-block-styles', get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css', [ 'wporg-global-fonts' ] );
+
+	wp_enqueue_style( 'support-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
+	wp_style_add_data( 'support-style', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
 	wp_enqueue_script( 'wporg-support-forums', get_template_directory_uri() . '/js/forums.js', array( 'jquery' ), '20220217', true );
