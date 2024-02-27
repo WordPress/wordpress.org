@@ -3376,6 +3376,32 @@ section {
 .page-template-page-forums-sidebar main#main .entry-meta {
 	padding: 0;
 }
+.bbpress main#main .entry-content .my-account ul,
+.bbpress main#main .entry-content .forum-feeds,
+.bbpress main#main .entry-content .forum-info,
+.bbpress main#main .entry-content .topic-admin-links,
+.bbpress main#main .entry-content .topic-info,
+.bbpress main#main .entry-content .topic-views,
+.bbpress main#main .entry-meta .my-account ul,
+.bbpress main#main .entry-meta .forum-feeds,
+.bbpress main#main .entry-meta .forum-info,
+.bbpress main#main .entry-meta .topic-admin-links,
+.bbpress main#main .entry-meta .topic-info,
+.bbpress main#main .entry-meta .topic-views,
+.page-template-page-forums-sidebar main#main .entry-content .my-account ul,
+.page-template-page-forums-sidebar main#main .entry-content .forum-feeds,
+.page-template-page-forums-sidebar main#main .entry-content .forum-info,
+.page-template-page-forums-sidebar main#main .entry-content .topic-admin-links,
+.page-template-page-forums-sidebar main#main .entry-content .topic-info,
+.page-template-page-forums-sidebar main#main .entry-content .topic-views,
+.page-template-page-forums-sidebar main#main .entry-meta .my-account ul,
+.page-template-page-forums-sidebar main#main .entry-meta .forum-feeds,
+.page-template-page-forums-sidebar main#main .entry-meta .forum-info,
+.page-template-page-forums-sidebar main#main .entry-meta .topic-admin-links,
+.page-template-page-forums-sidebar main#main .entry-meta .topic-info,
+.page-template-page-forums-sidebar main#main .entry-meta .topic-views {
+	padding-right: 0;
+}
 @media (min-width: 568px) {
 	.bbpress main#main .entry-content,
 	.bbpress main#main .entry-meta,

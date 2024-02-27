@@ -110,6 +110,15 @@ $paginationBreakPoint: "600px";
 		.entry-meta {
 			padding: 0;
 
+			.my-account ul,
+			.forum-feeds,
+			.forum-info,
+			.topic-admin-links,
+			.topic-info,
+			.topic-views {
+				padding-left: 0;
+			}
+
 			@media (min-width: 568px) {
 				padding: 0 ms(4);
 			}
