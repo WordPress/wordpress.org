@@ -4417,6 +4417,15 @@ div.bbp-breadcrumb p {
 	font-size: var(--wp--preset--font-size--small);
 }
 
+#bbpress-forums #bbp-single-user-details #bbp-user-avatar a {
+	display: block;
+}
+#bbpress-forums #bbp-single-user-details #bbp-user-avatar img.avatar {
+	margin-bottom: unset;
+}
+#bbpress-forums #bbp-single-user-details #bbp-user-navigation li a {
+	padding-left: unset;
+}
 #bbpress-forums #bbp-single-user-details #bbp-user-navigation li.current a {
 	background: unset;
 	opacity: unset;

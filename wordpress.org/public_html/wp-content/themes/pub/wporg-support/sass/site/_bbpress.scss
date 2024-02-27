@@ -544,8 +544,7 @@ $paginationBreakPoint: "600px";
 			@media (max-width: 767px) {
 
 				.create-topic,
-				> span,
-				.search-form {
+				> span {
 					display: block;
 					width: 100%;
 				}
@@ -1233,6 +1232,37 @@ div.bbp-breadcrumb {
 			&#ts {
 				margin-bottom: 6px;
 			}
+		}
+	}
+}
+
+.bbpress #bbpress-forums #bbp-user-wrapper {
+	font-size: var(--wp--preset--font-size--small);
+}
+
+#bbpress-forums #bbp-single-user-details {
+
+	#bbp-user-avatar {
+
+		a {
+			display: block;
+		}
+
+		img.avatar {
+			margin-bottom: unset;
+		}
+	}
+
+	#bbp-user-navigation li {
+
+		a {
+			padding-left: unset;
+		}
+
+		&.current a {
+			background: unset;
+			opacity: unset;
+			font-weight: 600;
 		}
 	}
 }
