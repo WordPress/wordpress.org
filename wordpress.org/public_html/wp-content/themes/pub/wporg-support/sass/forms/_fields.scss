@@ -123,14 +123,14 @@ input[type="radio"]:checked::before {
 }
 
 input[type="checkbox"]:checked::before {
-	color: #1e8cbe;
+	color: var(--wp--preset--color--blueberry-1);
 	content: "\f147";
 	font: 400 30px/1 dashicons;
 	margin: -3px -5px;
 }
 
 input[type="radio"]:checked::before {
-	background-color: #1e8cbe;
+	background-color: var(--wp--preset--color--blueberry-1);
 	border-radius: 50px;
 	content: "\2022";
 	font-size: 24px;

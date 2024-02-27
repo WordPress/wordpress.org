@@ -17,6 +17,10 @@
  * and share what you've learned with others.
  */
 /* Sass is good */
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 /*--------------------------------------------------------------
 # Normalize
 --------------------------------------------------------------*/
@@ -953,6 +957,14 @@ div.bbp-template-notice.updated {
 /*--------------------------------------------------------------
 # Typography
 --------------------------------------------------------------*/
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 h1,
 h2,
 h3,
@@ -972,6 +984,10 @@ h2.comment-reply-title {
 h3.comment-reply-title {
 	font-size: 1.25rem;
 	font-weight: 700;
+}
+
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
 }
 
 p {
@@ -1068,6 +1084,10 @@ big {
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 html {
 	box-sizing: border-box;
 }
@@ -1186,6 +1206,10 @@ table {
 	text-align: center;
 }
 
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 .notice {
 	--notice-background-color: #fff;
 	--notice-border-color: #fff;
@@ -1246,6 +1270,10 @@ table {
 	padding-top: 1em;
 }
 
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 .locale-banner {
 	background: var(--wp--preset--color--acid-green-3);
 	font-size: 0.8rem;
@@ -1257,6 +1285,10 @@ table {
 		margin: 1rem auto 0;
 		max-width: var(--wp--style--global--wide-size);
 	}
+}
+
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
 }
 
 /* User badges */
@@ -1401,6 +1433,10 @@ table {
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 /* --------------------------------------------------------------------------
 //
 // NOTE: If you edit this file, you should make sure that the CSS rules for
@@ -1743,23 +1779,30 @@ for a cross of good semantics with the visual */
 #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle,
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
-.download-button {
-	background: #0085ba;
-	border-color: #0073aa #006799 #006799;
-	box-shadow: 0 1px 0 #006799;
-	color: #fff;
+.download-button,
+input[type=submit] {
+	background: var(--wp--custom--button--color--background);
+	border: var(--wp--custom--button--border--width) var(--wp--custom--button--border--style) var(--wp--custom--button--border--color);
+	border-radius: var(--wp--custom--button--border--radius);
+	box-shadow: none;
+	color: var(--wp--custom--button--color--text);
 	text-decoration: none;
-	text-shadow: 0 -1px 1px #006799, -1px 0 1px #006799, 0 1px 1px #006799, 1px 0 1px #006799;
+	text-shadow: none;
+	font-size: var(--wp--custom--button--small--typography--font-size);
+	line-height: 1.3;
+	padding-left: var(--wp--custom--button--small--spacing--padding--right);
+	padding-right: var(--wp--custom--button--small--spacing--padding--left);
 }
 .button-primary:visited, #bbpress-forums fieldset.bbp-form .button.submit:visited, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit:visited,
 #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:visited,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:visited,
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:visited,
-.download-button:visited {
-	background: #0085ba;
-	border-color: #0073aa #006799 #006799;
-	box-shadow: 0 1px 0 #006799;
-	color: #fff;
+.download-button:visited,
+input[type=submit]:visited {
+	background: var(--wp--custom--button--color--background);
+	border-color: var(--wp--custom--button--border--color);
+	box-shadow: none;
+	color: var(--wp--custom--button--color--text);
 }
 .button-primary.hover, #bbpress-forums fieldset.bbp-form .hover.button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.hover.submit,
 #bbpress-forums fieldset.bbp-form .reviews-submit-link > .hover.submit.btn,
@@ -1777,11 +1820,15 @@ for a cross of good semantics with the visual */
 .download-button.hover,
 .download-button:hover,
 .download-button.focus,
-.download-button:focus {
-	background: #008ec2;
-	border-color: #006799;
-	box-shadow: 0 1px 0 #006799;
-	color: #fff;
+.download-button:focus,
+input[type=submit].hover,
+input[type=submit]:hover,
+input[type=submit].focus,
+input[type=submit]:focus {
+	background: var(--wp--custom--button--hover--color--background);
+	border-color: var(--wp--custom--button--hover--color--background);
+	box-shadow: none;
+	color: var(--wp--custom--button--hover--color--text);
 }
 .button-primary.focus, #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.focus.submit,
 #bbpress-forums fieldset.bbp-form .reviews-submit-link > .focus.submit.btn,
@@ -1791,8 +1838,11 @@ for a cross of good semantics with the visual */
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus,
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus,
 .download-button.focus,
-.download-button:focus {
-	box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
+.download-button:focus,
+input[type=submit].focus,
+input[type=submit]:focus {
+	box-shadow: none;
+	border-color: var(--wp--custom--button--focus--border--color);
 }
 .button-primary.active, #bbpress-forums fieldset.bbp-form .active.button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.active.submit,
 #bbpress-forums fieldset.bbp-form .reviews-submit-link > .active.submit.btn,
@@ -1804,10 +1854,15 @@ for a cross of good semantics with the visual */
 .download-button.active,
 .download-button.active:hover,
 .download-button.active:focus,
-.download-button:active {
-	background: #0073aa;
-	border-color: #006799;
-	box-shadow: inset 0 2px 0 #006799;
+.download-button:active,
+input[type=submit].active,
+input[type=submit].active:hover,
+input[type=submit].active:focus,
+input[type=submit]:active {
+	background: var(--wp--custom--button--active--color--background);
+	border-color: var(--wp--custom--button--active--border--color);
+	color: var(--wp--custom--button--active--color--text);
+	box-shadow: none;
 	vertical-align: top;
 }
 .button-primary[disabled], #bbpress-forums fieldset.bbp-form [disabled].button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a[disabled].submit,
@@ -1822,7 +1877,10 @@ for a cross of good semantics with the visual */
 #bbpress-forums fieldset.bbp-form .disabled.submit.favorite-toggle,
 .download-button[disabled],
 .download-button:disabled,
-.download-button.disabled {
+.download-button.disabled,
+input[type=submit][disabled],
+input[type=submit]:disabled,
+input[type=submit].disabled {
 	background: #008ec2 !important;
 	border-color: #007cb2 !important;
 	box-shadow: none !important;
@@ -1841,7 +1899,11 @@ for a cross of good semantics with the visual */
 #bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero,
 #bbpress-forums .reviews-submit-link > .download-button.button-hero.btn,
 #bbpress-forums .download-button.button-hero.subscription-toggle,
-#bbpress-forums .download-button.button-hero.favorite-toggle {
+#bbpress-forums .download-button.button-hero.favorite-toggle,
+input[type=submit].button.button-hero,
+#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.btn,
+#bbpress-forums input[type=submit].button-hero.subscription-toggle,
+#bbpress-forums input[type=submit].button-hero.favorite-toggle {
 	box-shadow: 0 2px 0 #006799;
 }
 .button-primary.button.button-hero.active, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero.active,
@@ -1868,7 +1930,17 @@ for a cross of good semantics with the visual */
 #bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero:active,
 #bbpress-forums .reviews-submit-link > .download-button.button-hero.btn:active,
 #bbpress-forums .download-button.button-hero.subscription-toggle:active,
-#bbpress-forums .download-button.button-hero.favorite-toggle:active {
+#bbpress-forums .download-button.button-hero.favorite-toggle:active,
+input[type=submit].button.button-hero.active,
+#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.active.btn,
+#bbpress-forums input[type=submit].button-hero.active.subscription-toggle,
+#bbpress-forums input[type=submit].button-hero.active.favorite-toggle,
+input[type=submit].button.button-hero.active:hover,
+input[type=submit].button.button-hero.active:focus,
+input[type=submit].button.button-hero:active,
+#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.btn:active,
+#bbpress-forums input[type=submit].button-hero.subscription-toggle:active,
+#bbpress-forums input[type=submit].button-hero.favorite-toggle:active {
 	box-shadow: inset 0 3px 0 #006799;
 }
 
@@ -1964,6 +2036,10 @@ for a cross of good semantics with the visual */
 		vertical-align: middle;
 	}
 }
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 /* Include margin and padding in the width calculation of input and textarea. */
 input,
 textarea {
@@ -2102,14 +2178,14 @@ input[type=radio]:checked::before {
 }
 
 input[type=checkbox]:checked::before {
-	color: #1e8cbe;
+	color: var(--wp--preset--color--blueberry-1);
 	content: "\f147";
 	font: 400 30px/1 dashicons;
 	margin: -3px -5px;
 }
 
 input[type=radio]:checked::before {
-	background-color: #1e8cbe;
+	background-color: var(--wp--preset--color--blueberry-1);
 	border-radius: 50px;
 	content: "•";
 	font-size: 24px;
@@ -2261,6 +2337,10 @@ fieldset label {
 /*--------------------------------------------------------------
 ## Links
 --------------------------------------------------------------*/
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 a {
 	color: var(--wp--custom--link--color--text);
 }
@@ -2308,6 +2388,10 @@ p a:hover {
 /*--------------------------------------------------------------
 ## Menus
 --------------------------------------------------------------*/
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 .site-main .comment-navigation,
 .site-main .posts-navigation,
 .site-main .post-navigation {
@@ -2420,6 +2504,10 @@ p a:hover {
 /*--------------------------------------------------------------
 # WP.org Header
 --------------------------------------------------------------*/
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 #wporg-header {
 	background: #23282d;
 	height: 140px;
@@ -2795,6 +2883,10 @@ p a:hover {
 /*--------------------------------------------------------------
 # Site
 --------------------------------------------------------------*/
+:root {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+}
+
 body, #pagebody {
 	font-size: 1rem;
 }
@@ -3401,14 +3493,6 @@ section {
 .page-template-page-forums-sidebar main#main .entry-meta .topic-views {
 	padding-right: 0;
 }
-@media (min-width: 568px) {
-	.bbpress main#main .entry-content,
-	.bbpress main#main .entry-meta,
-	.page-template-page-forums-sidebar main#main .entry-content,
-	.page-template-page-forums-sidebar main#main .entry-meta {
-		padding: 0 1.5625rem;
-	}
-}
 .bbpress main#main .entry-header .entry-title,
 .bbpress main#main .entry-content .container,
 .page-template-page-forums-sidebar main#main .entry-header .entry-title,
@@ -3784,8 +3868,7 @@ section {
 }
 @media (max-width: 767px) {
 	.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic,
-	.bbpress #bbpress-forums .bbp-create-topic-wrapper > span,
-	.bbpress #bbpress-forums .bbp-create-topic-wrapper .search-form {
+	.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
 		display: block;
 		width: 100%;
 	}
@@ -4326,6 +4409,16 @@ div.bbp-breadcrumb p {
 	.bbp-single-user input[type=text]#ts {
 		margin-bottom: 6px;
 	}
+}
+
+.bbpress #bbpress-forums #bbp-user-wrapper {
+	font-size: var(--wp--preset--font-size--small);
+}
+
+#bbpress-forums #bbp-single-user-details #bbp-user-navigation li.current a {
+	background: unset;
+	opacity: unset;
+	font-weight: 600;
 }
 
 /*--------------------------------------------------------------

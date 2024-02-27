@@ -214,43 +214,51 @@ for a cross of good semantics with the visual */
 ---------------------------------------------------------------------------- */
 
 .button-primary,
-.download-button {
-	background: #0085ba;
-	border-color: #0073aa #006799 #006799;
-	box-shadow: 0 1px 0 #006799;
-	color: #fff;
+.download-button,
+input[type="submit"] {
+	background: var(--wp--custom--button--color--background);
+	border: var(--wp--custom--button--border--width) var(--wp--custom--button--border--style) var(--wp--custom--button--border--color);
+	border-radius: var(--wp--custom--button--border--radius);
+	box-shadow: none;
+	color: var(--wp--custom--button--color--text);
 	text-decoration: none;
-	text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
+	text-shadow: none;
+	font-size: var(--wp--custom--button--small--typography--font-size);
+	line-height: 1.3;
+	padding-right: var(--wp--custom--button--small--spacing--padding--right);
+	padding-left: var(--wp--custom--button--small--spacing--padding--left);
 
 	&:visited {
-		background: #0085ba;
-		border-color: #0073aa #006799 #006799;
-		box-shadow: 0 1px 0 #006799;
-		color: #fff;
+		background: var(--wp--custom--button--color--background);
+		border-color: var(--wp--custom--button--border--color);
+		box-shadow: none;
+		color: var(--wp--custom--button--color--text);
 	}
 
 	&.hover,
 	&:hover,
 	&.focus,
 	&:focus {
-		background: #008ec2;
-		border-color: #006799;
-		box-shadow: 0 1px 0 #006799;
-		color: #fff;
+		background: var(--wp--custom--button--hover--color--background);
+		border-color: var(--wp--custom--button--hover--color--background);
+		box-shadow: none;
+		color: var(--wp--custom--button--hover--color--text);
 	}
 
 	&.focus,
 	&:focus {
-		box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
+		box-shadow: none;
+		border-color: var(--wp--custom--button--focus--border--color);
 	}
 
 	&.active,
 	&.active:hover,
 	&.active:focus,
 	&:active {
-		background: #0073aa;
-		border-color: #006799;
-		box-shadow: inset 0 2px 0 #006799;
+		background: var(--wp--custom--button--active--color--background);
+		border-color: var(--wp--custom--button--active--border--color);
+		color: var(--wp--custom--button--active--color--text);
+		box-shadow: none;
 		vertical-align: top;
 	}
 
