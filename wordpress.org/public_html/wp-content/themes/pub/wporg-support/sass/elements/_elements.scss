@@ -47,11 +47,9 @@ blockquote {
 	}
 }
 
-hr {
-	background-color: var(--wp--preset--color--light-grey-1);
-	border: 0;
-	height: 2px;
-	margin: 0 auto;
+p.has-background {
+	display: inline-block;
+	padding: var(--wp--preset--spacing--20);
 }
 
 @import "lists";

@@ -474,10 +474,6 @@ body.home #page .site-main {
 		margin-top: 2rem;
 
 		.entry-title {
-			font-size: ms( 6 );
-			font-weight: 400;
-			margin: 0 auto;
-			max-width: ms(32);
 
 			@media screen and ( min-width: $ms-breakpoint ) {
 				padding: 0 2rem;
@@ -487,28 +483,11 @@ body.home #page .site-main {
 
 	.entry-content {
 
-		h2 {
-			font-size: ms( 4 );
-			font-weight: 400;
-		}
-
-		h3 {
-			font-size: ms( 0 );
-			font-weight: 600;
-			letter-spacing: 0.01rem;
-			text-transform: uppercase;
-		}
-
-		a {
-			text-decoration: underline;
-		}
-
 		section {
-			padding: 2rem 0;
+			margin: var(--wp--preset--spacing--30) 0 var(--wp--preset--spacing--50);
 
 			.container {
 				margin: 0 auto;
-				max-width: ms(32);
 
 				@media screen and ( min-width: $ms-breakpoint ) {
 					padding: 0 2rem;
@@ -522,7 +501,41 @@ body.home #page .site-main {
 			& + section {
 				border-top: 2px solid var(--wp--preset--color--light-grey-1);
 			}
+
+			h2 {
+				font-size: var(--wp--preset--font-size--heading-4);
+				font-weight: 600;
+			}
+
+			h3 {
+				font-size: var(--wp--preset--font-size--heading-5);
+				font-weight: 600;
+			}
+
+			h2,
+			h3 {
+
+				&.toc-heading:target {
+					border-left-color: var(--wp--preset--color--blueberry-1);
+				}
+			}
 		}
+
+		.table-of-contents {
+			margin: 0 0 var(--wp--preset--spacing--20) var(--wp--preset--spacing--20);
+
+			.items {
+				font-size: var(--wp--preset--font-size--small);
+
+				li a:hover {
+					color: var(--wp--custom--link--color--text);
+				}
+			}
+		}
+	}
+
+	.entry-footer {
+		margin-bottom: var(--wp--preset--spacing--50);
 	}
 
 	.submenu {

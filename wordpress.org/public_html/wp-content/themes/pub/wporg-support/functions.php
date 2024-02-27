@@ -27,7 +27,7 @@ function add_site_navigation_menus( $menus ) {
 			),
 			array(
 				'label' => __( 'Get Involved', 'wporg' ),
-				'url' => '/handbook/',
+				'url' => 'https://make.wordpress.org/support/handbook/',
 			)
 		),
 	);
