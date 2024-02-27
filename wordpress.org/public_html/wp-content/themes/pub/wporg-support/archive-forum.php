@@ -41,7 +41,7 @@ get_header(); ?>
 							<div class="wp-block-column">
 
 								<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"700","lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|blueberry-2"}}}},"textColor":"blueberry-2","className":"is-style-short-text","fontSize":"normal","fontFamily":"inter"} -->
-								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="https://make.wordpress.org/docs/handbook/">%2$s</a></h3>
+								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="https://wordpress.org/documentation/">%2$s</a></h3>
 								<!-- /wp:heading -->
 
 								<!-- wp:paragraph -->
@@ -55,7 +55,7 @@ get_header(); ?>
 							<div class="wp-block-column">
 
 								<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"700","lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|blueberry-2"}}}},"textColor":"blueberry-2","className":"is-style-short-text","fontSize":"normal","fontFamily":"inter"} -->
-								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="https://make.wordpress.org/core/handbook/">%4$s</a></h3>
+								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="https://make.wordpress.org/support/handbook/">%4$s</a></h3>
 								<!-- /wp:heading -->
 
 								<!-- wp:paragraph -->
