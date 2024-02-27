@@ -3221,6 +3221,10 @@ body.home #page .site-main {
 .page .entry-content .table-of-contents .items li a:hover {
 	color: var(--wp--custom--link--color--text);
 }
+.helphub-page .entry-content p.toc-jump,
+.page .entry-content p.toc-jump {
+	height: unset;
+}
 .helphub-page .entry-footer,
 .page .entry-footer {
 	margin-bottom: var(--wp--preset--spacing--50);
