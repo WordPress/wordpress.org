@@ -11,7 +11,9 @@ namespace WordPressdotorg\Forums;
 
 get_header(); ?>
 
-<main id="main" class="site-main" role="main">
+<main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
+
+		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
 
 	<section class="error-404 not-found">
 		<header class="page-header">
@@ -22,6 +24,9 @@ get_header(); ?>
 			<p><?php printf( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg-forums' ), get_home_url() ); ?></p>
 		</div>
 	</section>
+
+	</div>
+
 </main>
 
 <?php get_footer(); ?>

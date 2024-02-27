@@ -11,32 +11,37 @@
 
 get_header(); ?>
 
-	<main id="main" class="site-main" role="main">
+	<main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
 
-		<h1><?php single_cat_title(); ?></h1>
+		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
 
-		<div class="three-up helphub-front-page">
-			<?php
-			while ( have_posts() ) :
-				the_post();
-			?>
+			<h1><?php single_cat_title(); ?></h1>
 
-				<a href="<?php echo esc_url( get_the_permalink() ); ?>" class="archive-block">
-					<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-						<?php the_title( '<h2>', '</h2>' ); ?>
+			<div class="three-up helphub-front-page">
+				<?php
+				while ( have_posts() ) :
+					the_post();
+				?>
 
-						<?php the_excerpt(); ?>
-					</article>
-				</a>
+					<a href="<?php echo esc_url( get_the_permalink() ); ?>" class="archive-block">
+						<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+							<?php the_title( '<h2>', '</h2>' ); ?>
+
+							<?php the_excerpt(); ?>
+						</article>
+					</a>
 
 
-			<?php endwhile; ?>
+				<?php endwhile; ?>
+
+			</div>
+
+			<div class="archive-pagination">
+				<?php posts_nav_link(); ?>
+			</div>
 
 		</div>
 
-		<div class="archive-pagination">
-			<?php posts_nav_link(); ?>
-		</div>
 	</main>
 
 <?php

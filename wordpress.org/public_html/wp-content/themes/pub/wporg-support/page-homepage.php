@@ -16,7 +16,9 @@ add_action( 'wp_head', function() {
 get_header(); ?>
 
 
-	<main id="main" class="site-main" role="main">
+	<main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
+
+		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
 
 		<?php do_action( 'bbp_before_main_content' ); ?>
 
@@ -86,7 +88,10 @@ get_header(); ?>
 
 		<?php do_action( 'bbp_after_main_content' ); ?>
 
-	</main>
+
+	</div>
+
+</main>
 
 
 <?php get_footer();

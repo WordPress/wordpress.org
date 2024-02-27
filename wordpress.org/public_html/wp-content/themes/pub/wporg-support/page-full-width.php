@@ -7,14 +7,18 @@
 
 get_header(); ?>
 
-	<main id="main" class="site-main page-full-width" role="main">
+	<main id="main" class="wp-block-group alignfull site-main page-full-width is-layout-constrained wp-block-group-is-layout-constrained" role="main">
 
-		<?php
-		while ( have_posts() ) : the_post();
+		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
 
-			get_template_part( 'template-parts/content', 'page' );
-		endwhile; // End of the loop.
-		?>
+			<?php
+			while ( have_posts() ) : the_post();
+
+				get_template_part( 'template-parts/content', 'page' );
+			endwhile; // End of the loop.
+			?>
+
+		</div>
 
 	</main><!-- #main -->
 

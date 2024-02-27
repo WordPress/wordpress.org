@@ -250,39 +250,29 @@ body, #pagebody {
 
 /*--------------------------------------------------------------
 # .site-main
+# Override original styles
 --------------------------------------------------------------*/
-.site-main {
-	margin: 0 auto;
-	max-width: $size__site-main;
-	padding: ms(10) ms(4);
 
-	@media screen and ( min-width: $ms-breakpoint ) {
-		padding: ms(10) 10px;
+body:not(.trac):not(.home-page):not(.home) #main {
+	margin-top: var(--wp--preset--spacing--50);
+}
+
+@media screen and (max-width: 460px) {
+
+	#main {
+		margin: unset;
 	}
+}
 
-	.single & {
-		padding: 0;
+@media screen and (min-width: 960px) {
 
-		@media screen and ( min-width: $ms-breakpoint ) {
-			padding: 0 10px ms(10);
-		}
-	}
-
-	#page & {
-		padding: 0 10px ms(10);
-	}
-
-	.page-header {
-
-		p {
-			margin: 0.5rem 0;
-		}
-	}
-
-	.no-results {
-		margin: 0 auto;
-		max-width: ms(32);
-		padding: 0 2rem;
+	#header-inner,
+	#headline-inner,
+	#subnav-inner,
+	#showcase-inner,
+	#main,
+	#footer {
+		width: unset;
 	}
 }
 

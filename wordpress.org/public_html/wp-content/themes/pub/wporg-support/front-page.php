@@ -8,31 +8,35 @@
 
 get_header(); ?>
 
-	<main id="main" class="site-main" role="main">
+	<main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
 
-		<?php if ( ! is_active_sidebar( 'front-page-blocks' ) ) : ?>
-			<?php get_template_part( 'template-parts/bbpress', 'front' ); ?>
-		<?php else : ?>
-			<div class="three-up helphub-front-page">
-				<?php dynamic_sidebar( 'front-page-blocks' ); ?>
-			</div>
+		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
 
-			<hr>
+			<?php if ( ! is_active_sidebar( 'front-page-blocks' ) ) : ?>
+				<?php get_template_part( 'template-parts/bbpress', 'front' ); ?>
+			<?php else : ?>
+				<div class="three-up helphub-front-page">
+					<?php dynamic_sidebar( 'front-page-blocks' ); ?>
+				</div>
 
-			<div id="helphub-forum-link" class="text-center">
-				<h3><?php esc_html_e( 'Support Forums', 'wporg-forums' ); ?></h3>
+				<hr>
 
-				<p>
-					<span>
-						<?php esc_html_e( 'Can\'t find what you\'re looking for? Find out if others share your experience.', 'wporg-forums' ); ?>
-					</span>
+				<div id="helphub-forum-link" class="text-center">
+					<h3><?php esc_html_e( 'Support Forums', 'wporg-forums' ); ?></h3>
 
-					<br>
+					<p>
+						<span>
+							<?php esc_html_e( 'Can\'t find what you\'re looking for? Find out if others share your experience.', 'wporg-forums' ); ?>
+						</span>
 
-					<a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>"><?php esc_html_e( 'Check out our support forums', 'wporg-forums' ); ?></a>
-				</p>
-			</div>
-		<?php endif; ?>
+						<br>
+
+						<a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>"><?php esc_html_e( 'Check out our support forums', 'wporg-forums' ); ?></a>
+					</p>
+				</div>
+			<?php endif; ?>
+
+		</div>
 
 	</main>
 

@@ -9,9 +9,13 @@
 
 get_header(); ?>
 
-	<main id="main" class="site-main" role="main">
+	<main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
 
-		<?php get_template_part( 'template-parts/bbpress', 'front' ); ?>
+		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
+
+			<?php get_template_part( 'template-parts/bbpress', 'front' ); ?>
+
+		</div>
 
 	</main>
 

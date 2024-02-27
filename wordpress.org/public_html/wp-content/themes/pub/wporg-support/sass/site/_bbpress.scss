@@ -7,7 +7,6 @@
 
 section {
 	padding: unset;
-	margin-top: var(--wp--preset--spacing--50);
 	margin-bottom: var(--wp--preset--spacing--50);
 }
 
@@ -129,9 +128,8 @@ $paginationBreakPoint: "600px";
 			padding: 0;
 		}
 
-		> .entry-content,
-		> article {
-			max-width: 48rem;
+		.wp-block-group > .entry-content,
+		.wp-block-group > article {
 
 			@media screen and ( min-width: $ms-breakpoint ) {
 				float: left;
@@ -159,8 +157,9 @@ $paginationBreakPoint: "600px";
 .bbpress {
 
 	main#main {
-		margin-top: 2rem;
-		padding: 0 10px 10px;
+		padding-left: var(--wp--preset--spacing--edge-space);
+		padding-right: var(--wp--preset--spacing--edge-space);
+		padding-bottom: var(--wp--preset--spacing--50);
 
 		@extend .clear;
 	}

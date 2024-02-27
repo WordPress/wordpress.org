@@ -299,7 +299,7 @@ a:hover {
 /**
  * 4.0 Overrides
  */
-@media only screen and (min-width: 1160px) {
+@media only screen and (min-width: 960px) {
 	.col-6 #bbpress-forums {
 		margin-left: 0;
 	}
@@ -889,14 +889,14 @@ div.bbp-template-notice.updated {
 }
 
 /* Force widths for desktops */
-@media screen and (min-width: 1160px) {
+@media screen and (min-width: 960px) {
 	#header-inner,
 	#headline-inner,
 	#subnav-inner,
 	#showcase-inner,
 	#main,
 	#footer {
-		width: var(--wp--style--global--wide-size);
+		width: 960px;
 	}
 	div.content {
 		width: 692px;
@@ -2997,37 +2997,27 @@ body, #pagebody {
 }
 /*--------------------------------------------------------------
 # .site-main
+# Override original styles
 --------------------------------------------------------------*/
-.site-main {
-	margin: 0 auto;
-	max-width: var(--wp--style--global--wide-size);
-	padding: 3.0517578125rem 1.5625rem;
-}
-@media screen and (min-width: 48em) {
-	.site-main {
-		padding: 3.0517578125rem 10px;
-	}
-}
-.single .site-main {
-	padding: 0;
-}
-@media screen and (min-width: 48em) {
-	.single .site-main {
-		padding: 0 10px 3.0517578125rem;
-	}
-}
-#page .site-main {
-	padding: 0 10px 3.0517578125rem;
-}
-.site-main .page-header p {
-	margin: 0.5rem 0;
-}
-.site-main .no-results {
-	margin: 0 auto;
-	max-width: 35.527136788rem;
-	padding: 0 2rem;
+body:not(.trac):not(.home-page):not(.home) #main {
+	margin-top: var(--wp--preset--spacing--50);
 }
 
+@media screen and (max-width: 460px) {
+	#main {
+		margin: unset;
+	}
+}
+@media screen and (min-width: 960px) {
+	#header-inner,
+	#headline-inner,
+	#subnav-inner,
+	#showcase-inner,
+	#main,
+	#footer {
+		width: unset;
+	}
+}
 body.home #page .site-main {
 	padding: 5rem 1rem;
 }
@@ -3310,7 +3300,6 @@ body.category #main .archive-pagination {
 /* Many of these override the styles from the plugin */
 section {
 	padding: unset;
-	margin-top: var(--wp--preset--spacing--50);
 	margin-bottom: var(--wp--preset--spacing--50);
 }
 
@@ -3424,17 +3413,11 @@ section {
 .page-template-page-forums-sidebar main#main .entry-content .container {
 	padding: 0;
 }
-.bbpress main#main > .entry-content,
-.bbpress main#main > article,
-.page-template-page-forums-sidebar main#main > .entry-content,
-.page-template-page-forums-sidebar main#main > article {
-	max-width: 48rem;
-}
 @media screen and (min-width: 48em) {
-	.bbpress main#main > .entry-content,
-	.bbpress main#main > article,
-	.page-template-page-forums-sidebar main#main > .entry-content,
-	.page-template-page-forums-sidebar main#main > article {
+	.bbpress main#main .wp-block-group > .entry-content,
+	.bbpress main#main .wp-block-group > article,
+	.page-template-page-forums-sidebar main#main .wp-block-group > .entry-content,
+	.page-template-page-forums-sidebar main#main .wp-block-group > article {
 		float: left;
 		padding: 0;
 		width: 65%;
@@ -3456,8 +3439,9 @@ section {
 }
 
 .bbpress main#main {
-	margin-top: 2rem;
-	padding: 0 10px 10px;
+	padding-left: var(--wp--preset--spacing--edge-space);
+	padding-right: var(--wp--preset--spacing--edge-space);
+	padding-bottom: var(--wp--preset--spacing--50);
 }
 .bbpress.bbp-view-reviews #bbpress-forums .bbp-create-topic-wrapper .search-form {
 	width: 100%;
