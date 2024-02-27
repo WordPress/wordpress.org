@@ -79,6 +79,14 @@ function wporg_support_scripts() {
 	wp_enqueue_style( 'support-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
 	wp_style_add_data( 'support-style', 'rtl', 'replace' );
 
+	// Preload the heading font(s).
+	if ( is_callable( 'global_fonts_preload' ) ) {
+		/* translators: Subsets can be any of cyrillic, cyrillic-ext, greek, greek-ext, vietnamese, latin, latin-ext. */
+		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg' );
+		// All headings.
+		global_fonts_preload( 'EB Garamond, Inter', $subsets );
+	}
+
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
 	wp_enqueue_script( 'wporg-support-forums', get_template_directory_uri() . '/js/forums.js', array( 'jquery' ), '20220217', true );
 
