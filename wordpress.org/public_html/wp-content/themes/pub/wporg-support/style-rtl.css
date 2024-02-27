@@ -1112,20 +1112,17 @@ blockquote::before, blockquote::after, q::before, q::after {
 }
 
 blockquote {
-	background: transparent;
-	border: none;
-	padding: 0;
 	border-right: 2px solid var(--wp--preset--color--charcoal-4);
 	color: var(--wp--preset--color--charcoal-4);
-	margin: 1rem 0;
-	padding-right: 0.8rem;
+	margin: var(--wp--preset--spacing--20) 0;
+	padding-right: var(--wp--preset--spacing--20);
 }
 blockquote cite {
 	font-size: 0.8rem;
 }
 blockquote p {
 	display: block;
-	margin: 1em 0;
+	margin: var(--wp--preset--spacing--20) 0;
 }
 
 p.has-background {
@@ -2334,57 +2331,6 @@ fieldset label {
 /*--------------------------------------------------------------
 # Navigation
 --------------------------------------------------------------*/
-/*--------------------------------------------------------------
-## Links
---------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
-}
-
-a {
-	color: var(--wp--custom--link--color--text);
-}
-a:visited {
-	/* Override wp4.css */
-	color: var(--wp--custom--link--color--text);
-}
-a.wp-block-button__link:visited {
-	color: var(--wp--custom--link--color--text);
-}
-a:hover, a:focus, a:active {
-	/* Override wp4.css */
-	color: var(--wp--custom--link--color--text);
-	text-decoration: underline;
-}
-a.button:hover, #bbpress-forums .wporg-bbp-term-subscription > a:hover,
-#bbpress-forums .reviews-submit-link > a.btn:hover,
-#bbpress-forums a.subscription-toggle:hover,
-#bbpress-forums a.favorite-toggle:hover, a.button:focus, #bbpress-forums .wporg-bbp-term-subscription > a:focus,
-#bbpress-forums .reviews-submit-link > a.btn:focus,
-#bbpress-forums a.subscription-toggle:focus,
-#bbpress-forums a.favorite-toggle:focus, a.button:active, #bbpress-forums .wporg-bbp-term-subscription > a:active,
-#bbpress-forums .reviews-submit-link > a.btn:active,
-#bbpress-forums a.subscription-toggle:active,
-#bbpress-forums a.favorite-toggle:active {
-	text-decoration: none;
-}
-a:focus {
-	outline: thin dotted;
-}
-a:hover, a:active {
-	outline: 0;
-}
-p a:not(.button), p a:not(.button):hover {
-	border: none;
-}
-
-p a {
-	border-bottom: none;
-}
-p a:hover {
-	border-bottom: none;
-}
-
 /*--------------------------------------------------------------
 ## Menus
 --------------------------------------------------------------*/

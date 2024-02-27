@@ -27,15 +27,10 @@ blockquote, q {
 }
 
 blockquote {
-	// Override wp4.css.
-	background: transparent;
-	border: none;
-	padding: 0;
-
 	border-left: 2px solid var(--wp--preset--color--charcoal-4);
 	color: var(--wp--preset--color--charcoal-4);
-	margin: 1rem 0;
-	padding-left: 0.8rem;
+	margin: var(--wp--preset--spacing--20) 0;
+	padding-left: var(--wp--preset--spacing--20);
 
 	cite {
 		font-size: ms( -2 );
@@ -43,7 +38,7 @@ blockquote {
 
 	p {
 		display: block;
-		margin: 1em 0;
+		margin: var(--wp--preset--spacing--20) 0;
 	}
 }
 
