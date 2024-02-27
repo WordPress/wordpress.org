@@ -95,6 +95,10 @@
 						}
 					}
 				}
+			},
+			"z-index": {
+				"iso-editor": 100,
+				"local-nav": 101
 			}
 		},
 		"layout": {
