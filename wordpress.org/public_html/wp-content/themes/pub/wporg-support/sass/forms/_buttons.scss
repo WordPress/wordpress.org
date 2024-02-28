@@ -215,7 +215,8 @@ for a cross of good semantics with the visual */
 
 .button-primary,
 .download-button,
-input[type="submit"] {
+input[type="submit"],
+button[type="submit"] {
 	background: var(--wp--custom--button--color--background);
 	border: var(--wp--custom--button--border--width) var(--wp--custom--button--border--style) var(--wp--custom--button--border--color);
 	border-radius: var(--wp--custom--button--border--radius);
@@ -265,12 +266,11 @@ input[type="submit"] {
 	&[disabled],
 	&:disabled,
 	&.disabled {
-		background: #008ec2 !important;
-		border-color: #007cb2 !important;
+		background: var(--wp--custom--button--disabled--background-color) !important;
+		border-color: var(--wp--custom--button--disabled--border-color) !important;
 		box-shadow: none !important;
-		color: #66c6e4 !important;
+		color: var(--wp--custom--button--disabled--color) !important;
 		cursor: default;
-		text-shadow: 0 -1px 0 rgba( 0, 0, 0, 0.1 ) !important;
 	}
 
 	&.button.button-hero {
@@ -286,12 +286,11 @@ input[type="submit"] {
 }
 
 .button-primary-disabled {
-	background: #008ec2 !important;
-	border-color: #007cb2 !important;
+	background: var(--wp--custom--button--disabled--background-color) !important;
+	border-color: var(--wp--custom--button--disabled--border-color) !important;
 	box-shadow: none !important;
-	color: #66c6e4 !important;
+	color: var(--wp--custom--button--disabled--color) !important;
 	cursor: default;
-	text-shadow: 0 -1px 0 rgba( 0, 0, 0, 0.1 ) !important;
 }
 
 

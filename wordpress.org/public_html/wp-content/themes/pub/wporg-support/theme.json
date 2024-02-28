@@ -3,6 +3,13 @@
 	"version": 2,
 	"settings": {
 		"custom": {
+			"button": {
+				"disabled": {
+					"backgroundColor": "var(--wp--preset--color--light-grey-1)",
+					"borderColor": "var(--wp--preset--color--light-grey-1)",
+					"color": "var(--wp--preset--color--charcoal-4)"
+				}
+			},
 			"color": {
 				"border": "var(--wp--preset--color--light-grey-1)",
 				"moderator": "#33b4ce",

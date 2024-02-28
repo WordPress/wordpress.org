@@ -1777,7 +1777,8 @@ for a cross of good semantics with the visual */
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle,
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
 .download-button,
-input[type=submit] {
+input[type=submit],
+button[type=submit] {
 	background: var(--wp--custom--button--color--background);
 	border: var(--wp--custom--button--border--width) var(--wp--custom--button--border--style) var(--wp--custom--button--border--color);
 	border-radius: var(--wp--custom--button--border--radius);
@@ -1795,7 +1796,8 @@ input[type=submit] {
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:visited,
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:visited,
 .download-button:visited,
-input[type=submit]:visited {
+input[type=submit]:visited,
+button[type=submit]:visited {
 	background: var(--wp--custom--button--color--background);
 	border-color: var(--wp--custom--button--border--color);
 	box-shadow: none;
@@ -1821,7 +1823,11 @@ input[type=submit]:visited {
 input[type=submit].hover,
 input[type=submit]:hover,
 input[type=submit].focus,
-input[type=submit]:focus {
+input[type=submit]:focus,
+button[type=submit].hover,
+button[type=submit]:hover,
+button[type=submit].focus,
+button[type=submit]:focus {
 	background: var(--wp--custom--button--hover--color--background);
 	border-color: var(--wp--custom--button--hover--color--background);
 	box-shadow: none;
@@ -1837,7 +1843,9 @@ input[type=submit]:focus {
 .download-button.focus,
 .download-button:focus,
 input[type=submit].focus,
-input[type=submit]:focus {
+input[type=submit]:focus,
+button[type=submit].focus,
+button[type=submit]:focus {
 	box-shadow: none;
 	border-color: var(--wp--custom--button--focus--border--color);
 }
@@ -1855,7 +1863,11 @@ input[type=submit]:focus {
 input[type=submit].active,
 input[type=submit].active:hover,
 input[type=submit].active:focus,
-input[type=submit]:active {
+input[type=submit]:active,
+button[type=submit].active,
+button[type=submit].active:hover,
+button[type=submit].active:focus,
+button[type=submit]:active {
 	background: var(--wp--custom--button--active--color--background);
 	border-color: var(--wp--custom--button--active--border--color);
 	color: var(--wp--custom--button--active--color--text);
@@ -1877,13 +1889,15 @@ input[type=submit]:active {
 .download-button.disabled,
 input[type=submit][disabled],
 input[type=submit]:disabled,
-input[type=submit].disabled {
-	background: #008ec2 !important;
-	border-color: #007cb2 !important;
+input[type=submit].disabled,
+button[type=submit][disabled],
+button[type=submit]:disabled,
+button[type=submit].disabled {
+	background: var(--wp--custom--button--disabled--background-color) !important;
+	border-color: var(--wp--custom--button--disabled--border-color) !important;
 	box-shadow: none !important;
-	color: #66c6e4 !important;
+	color: var(--wp--custom--button--disabled--color) !important;
 	cursor: default;
-	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
 }
 .button-primary.button.button-hero, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero,
 #bbpress-forums .reviews-submit-link > .button-primary.button-hero.btn,
@@ -1900,7 +1914,11 @@ input[type=submit].disabled {
 input[type=submit].button.button-hero,
 #bbpress-forums .reviews-submit-link > input[type=submit].button-hero.btn,
 #bbpress-forums input[type=submit].button-hero.subscription-toggle,
-#bbpress-forums input[type=submit].button-hero.favorite-toggle {
+#bbpress-forums input[type=submit].button-hero.favorite-toggle,
+button[type=submit].button.button-hero,
+#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.btn,
+#bbpress-forums button[type=submit].button-hero.subscription-toggle,
+#bbpress-forums button[type=submit].button-hero.favorite-toggle {
 	box-shadow: 0 2px 0 #006799;
 }
 .button-primary.button.button-hero.active, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero.active,
@@ -1937,17 +1955,26 @@ input[type=submit].button.button-hero.active:focus,
 input[type=submit].button.button-hero:active,
 #bbpress-forums .reviews-submit-link > input[type=submit].button-hero.btn:active,
 #bbpress-forums input[type=submit].button-hero.subscription-toggle:active,
-#bbpress-forums input[type=submit].button-hero.favorite-toggle:active {
+#bbpress-forums input[type=submit].button-hero.favorite-toggle:active,
+button[type=submit].button.button-hero.active,
+#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.active.btn,
+#bbpress-forums button[type=submit].button-hero.active.subscription-toggle,
+#bbpress-forums button[type=submit].button-hero.active.favorite-toggle,
+button[type=submit].button.button-hero.active:hover,
+button[type=submit].button.button-hero.active:focus,
+button[type=submit].button.button-hero:active,
+#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.btn:active,
+#bbpress-forums button[type=submit].button-hero.subscription-toggle:active,
+#bbpress-forums button[type=submit].button-hero.favorite-toggle:active {
 	box-shadow: inset 0 3px 0 #006799;
 }
 
 .button-primary-disabled {
-	background: #008ec2 !important;
-	border-color: #007cb2 !important;
+	background: var(--wp--custom--button--disabled--background-color) !important;
+	border-color: var(--wp--custom--button--disabled--border-color) !important;
 	box-shadow: none !important;
-	color: #66c6e4 !important;
+	color: var(--wp--custom--button--disabled--color) !important;
 	cursor: default;
-	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
 }
 
 /* ----------------------------------------------------------------------------
