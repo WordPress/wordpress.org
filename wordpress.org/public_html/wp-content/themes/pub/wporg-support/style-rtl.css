@@ -1213,11 +1213,11 @@ table {
 	background: var(--notice-background-color);
 	border-right: 4px solid var(--notice-border-color);
 	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
-	margin: 1em 0;
+	margin: var(--wp--preset--spacing--20) 0;
 	padding: 1px 12px;
 }
 .notice p {
-	font-size: 0.8rem;
+	font-size: var(--wp--preset--font-size--small);
 	margin: 0.5em 0;
 	padding: 2px;
 }
@@ -1246,10 +1246,10 @@ table {
 	--notice-background-color: #fbeaea;
 }
 .notice.notice-info {
-	--notice-border-color: #00a0d2;
+	--notice-border-color: var(--wp--preset--color--blueberry-1);
 }
 .notice.notice-info.notice-alt {
-	--notice-background-color: #e5f5fa;
+	--notice-background-color: var(--wp--preset--color--blueberry-4);
 }
 .notice.with-dashicon {
 	padding-right: 80px;
@@ -1777,6 +1777,7 @@ for a cross of good semantics with the visual */
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle,
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
 .download-button,
+.is-primary,
 input[type=submit],
 button[type=submit] {
 	background: var(--wp--custom--button--color--background);
@@ -1796,6 +1797,7 @@ button[type=submit] {
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:visited,
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:visited,
 .download-button:visited,
+.is-primary:visited,
 input[type=submit]:visited,
 button[type=submit]:visited {
 	background: var(--wp--custom--button--color--background);
@@ -1820,6 +1822,10 @@ button[type=submit]:visited {
 .download-button:hover,
 .download-button.focus,
 .download-button:focus,
+.is-primary.hover,
+.is-primary:hover,
+.is-primary.focus,
+.is-primary:focus,
 input[type=submit].hover,
 input[type=submit]:hover,
 input[type=submit].focus,
@@ -1842,6 +1848,8 @@ button[type=submit]:focus {
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus,
 .download-button.focus,
 .download-button:focus,
+.is-primary.focus,
+.is-primary:focus,
 input[type=submit].focus,
 input[type=submit]:focus,
 button[type=submit].focus,
@@ -1860,6 +1868,10 @@ button[type=submit]:focus {
 .download-button.active:hover,
 .download-button.active:focus,
 .download-button:active,
+.is-primary.active,
+.is-primary.active:hover,
+.is-primary.active:focus,
+.is-primary:active,
 input[type=submit].active,
 input[type=submit].active:hover,
 input[type=submit].active:focus,
@@ -1887,6 +1899,9 @@ button[type=submit]:active {
 .download-button[disabled],
 .download-button:disabled,
 .download-button.disabled,
+.is-primary[disabled],
+.is-primary:disabled,
+.is-primary.disabled,
 input[type=submit][disabled],
 input[type=submit]:disabled,
 input[type=submit].disabled,
@@ -1911,6 +1926,11 @@ button[type=submit].disabled {
 #bbpress-forums .reviews-submit-link > .download-button.button-hero.btn,
 #bbpress-forums .download-button.button-hero.subscription-toggle,
 #bbpress-forums .download-button.button-hero.favorite-toggle,
+.is-primary.button.button-hero,
+#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero,
+#bbpress-forums .reviews-submit-link > .is-primary.button-hero.btn,
+#bbpress-forums .is-primary.button-hero.subscription-toggle,
+#bbpress-forums .is-primary.button-hero.favorite-toggle,
 input[type=submit].button.button-hero,
 #bbpress-forums .reviews-submit-link > input[type=submit].button-hero.btn,
 #bbpress-forums input[type=submit].button-hero.subscription-toggle,
@@ -1927,7 +1947,13 @@ button[type=submit].button.button-hero,
 #bbpress-forums .button-primary.button-hero.active.favorite-toggle, #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.button-hero.active.submit,
 #bbpress-forums fieldset.bbp-form .reviews-submit-link > .button-hero.active.submit.btn,
 #bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle, .button-primary.button.button-hero.active:hover, .button-primary.button.button-hero.active:focus, .button-primary.button.button-hero:active, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero:active,
+#bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle, .button-primary.button.button-hero.active:hover, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero.active:hover,
+#bbpress-forums .reviews-submit-link > .button-primary.button-hero.active.btn:hover,
+#bbpress-forums .button-primary.button-hero.active.subscription-toggle:hover,
+#bbpress-forums .button-primary.button-hero.active.favorite-toggle:hover, .button-primary.button.button-hero.active:focus, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero.active:focus,
+#bbpress-forums .reviews-submit-link > .button-primary.button-hero.active.btn:focus,
+#bbpress-forums .button-primary.button-hero.active.subscription-toggle:focus,
+#bbpress-forums .button-primary.button-hero.active.favorite-toggle:focus, .button-primary.button.button-hero:active, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero:active,
 #bbpress-forums .reviews-submit-link > .button-primary.button-hero.btn:active,
 #bbpress-forums .button-primary.button-hero.subscription-toggle:active,
 #bbpress-forums .button-primary.button-hero.favorite-toggle:active, #bbpress-forums fieldset.bbp-form .button.button-hero.submit:active, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.button-hero.submit:active,
@@ -1940,18 +1966,52 @@ button[type=submit].button.button-hero,
 #bbpress-forums .download-button.button-hero.active.subscription-toggle,
 #bbpress-forums .download-button.button-hero.active.favorite-toggle,
 .download-button.button.button-hero.active:hover,
+#bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero.active:hover,
+#bbpress-forums .reviews-submit-link > .download-button.button-hero.active.btn:hover,
+#bbpress-forums .download-button.button-hero.active.subscription-toggle:hover,
+#bbpress-forums .download-button.button-hero.active.favorite-toggle:hover,
 .download-button.button.button-hero.active:focus,
+#bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero.active:focus,
+#bbpress-forums .reviews-submit-link > .download-button.button-hero.active.btn:focus,
+#bbpress-forums .download-button.button-hero.active.subscription-toggle:focus,
+#bbpress-forums .download-button.button-hero.active.favorite-toggle:focus,
 .download-button.button.button-hero:active,
 #bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero:active,
 #bbpress-forums .reviews-submit-link > .download-button.button-hero.btn:active,
 #bbpress-forums .download-button.button-hero.subscription-toggle:active,
 #bbpress-forums .download-button.button-hero.favorite-toggle:active,
+.is-primary.button.button-hero.active,
+#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero.active,
+#bbpress-forums .reviews-submit-link > .is-primary.button-hero.active.btn,
+#bbpress-forums .is-primary.button-hero.active.subscription-toggle,
+#bbpress-forums .is-primary.button-hero.active.favorite-toggle,
+.is-primary.button.button-hero.active:hover,
+#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero.active:hover,
+#bbpress-forums .reviews-submit-link > .is-primary.button-hero.active.btn:hover,
+#bbpress-forums .is-primary.button-hero.active.subscription-toggle:hover,
+#bbpress-forums .is-primary.button-hero.active.favorite-toggle:hover,
+.is-primary.button.button-hero.active:focus,
+#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero.active:focus,
+#bbpress-forums .reviews-submit-link > .is-primary.button-hero.active.btn:focus,
+#bbpress-forums .is-primary.button-hero.active.subscription-toggle:focus,
+#bbpress-forums .is-primary.button-hero.active.favorite-toggle:focus,
+.is-primary.button.button-hero:active,
+#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero:active,
+#bbpress-forums .reviews-submit-link > .is-primary.button-hero.btn:active,
+#bbpress-forums .is-primary.button-hero.subscription-toggle:active,
+#bbpress-forums .is-primary.button-hero.favorite-toggle:active,
 input[type=submit].button.button-hero.active,
 #bbpress-forums .reviews-submit-link > input[type=submit].button-hero.active.btn,
 #bbpress-forums input[type=submit].button-hero.active.subscription-toggle,
 #bbpress-forums input[type=submit].button-hero.active.favorite-toggle,
 input[type=submit].button.button-hero.active:hover,
+#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.active.btn:hover,
+#bbpress-forums input[type=submit].button-hero.active.subscription-toggle:hover,
+#bbpress-forums input[type=submit].button-hero.active.favorite-toggle:hover,
 input[type=submit].button.button-hero.active:focus,
+#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.active.btn:focus,
+#bbpress-forums input[type=submit].button-hero.active.subscription-toggle:focus,
+#bbpress-forums input[type=submit].button-hero.active.favorite-toggle:focus,
 input[type=submit].button.button-hero:active,
 #bbpress-forums .reviews-submit-link > input[type=submit].button-hero.btn:active,
 #bbpress-forums input[type=submit].button-hero.subscription-toggle:active,
@@ -1961,7 +2021,13 @@ button[type=submit].button.button-hero.active,
 #bbpress-forums button[type=submit].button-hero.active.subscription-toggle,
 #bbpress-forums button[type=submit].button-hero.active.favorite-toggle,
 button[type=submit].button.button-hero.active:hover,
+#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.active.btn:hover,
+#bbpress-forums button[type=submit].button-hero.active.subscription-toggle:hover,
+#bbpress-forums button[type=submit].button-hero.active.favorite-toggle:hover,
 button[type=submit].button.button-hero.active:focus,
+#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.active.btn:focus,
+#bbpress-forums button[type=submit].button-hero.active.subscription-toggle:focus,
+#bbpress-forums button[type=submit].button-hero.active.favorite-toggle:focus,
 button[type=submit].button.button-hero:active,
 #bbpress-forums .reviews-submit-link > button[type=submit].button-hero.btn:active,
 #bbpress-forums button[type=submit].button-hero.subscription-toggle:active,
@@ -2727,13 +2793,14 @@ body.home #page .site-main {
 # .sidebar
 --------------------------------------------------------------*/
 .sidebar div {
-	margin-bottom: 2rem;
+	margin-bottom: var(--wp--preset--spacing--30);
 }
 .sidebar div ul {
 	margin-bottom: 0;
+	padding-right: unset;
 }
 .sidebar div ul > li {
-	font-size: 0.8rem;
+	font-size: var(--wp--preset--font-size--small);
 	border-top: 1px solid var(--wp--custom--color--border);
 	padding: 0.5rem 0;
 }
@@ -3077,32 +3144,6 @@ section {
 .page-template-page-forums-sidebar main#main .entry-content,
 .page-template-page-forums-sidebar main#main .entry-meta {
 	padding: 0;
-}
-.bbpress main#main .entry-content .my-account ul,
-.bbpress main#main .entry-content .forum-feeds,
-.bbpress main#main .entry-content .forum-info,
-.bbpress main#main .entry-content .topic-admin-links,
-.bbpress main#main .entry-content .topic-info,
-.bbpress main#main .entry-content .topic-views,
-.bbpress main#main .entry-meta .my-account ul,
-.bbpress main#main .entry-meta .forum-feeds,
-.bbpress main#main .entry-meta .forum-info,
-.bbpress main#main .entry-meta .topic-admin-links,
-.bbpress main#main .entry-meta .topic-info,
-.bbpress main#main .entry-meta .topic-views,
-.page-template-page-forums-sidebar main#main .entry-content .my-account ul,
-.page-template-page-forums-sidebar main#main .entry-content .forum-feeds,
-.page-template-page-forums-sidebar main#main .entry-content .forum-info,
-.page-template-page-forums-sidebar main#main .entry-content .topic-admin-links,
-.page-template-page-forums-sidebar main#main .entry-content .topic-info,
-.page-template-page-forums-sidebar main#main .entry-content .topic-views,
-.page-template-page-forums-sidebar main#main .entry-meta .my-account ul,
-.page-template-page-forums-sidebar main#main .entry-meta .forum-feeds,
-.page-template-page-forums-sidebar main#main .entry-meta .forum-info,
-.page-template-page-forums-sidebar main#main .entry-meta .topic-admin-links,
-.page-template-page-forums-sidebar main#main .entry-meta .topic-info,
-.page-template-page-forums-sidebar main#main .entry-meta .topic-views {
-	padding-right: 0;
 }
 .bbpress main#main .entry-header .entry-title,
 .bbpress main#main .entry-content .container,

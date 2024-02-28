@@ -288,14 +288,15 @@ body.home #page .site-main {
 .sidebar {
 
 	div {
-		margin-bottom: 2rem;
+		margin-bottom: var(--wp--preset--spacing--30);
 
 		ul {
 			margin-bottom: 0;
+			padding-left: unset;
 		}
 
 		ul > li {
-			font-size: ms(-2);
+			font-size: var(--wp--preset--font-size--small);
 			border-top: 1px solid var(--wp--custom--color--border);
 			padding: 0.5rem 0;
 		}
