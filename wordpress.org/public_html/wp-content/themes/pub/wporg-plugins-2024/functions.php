@@ -18,7 +18,7 @@ require_once( __DIR__ . '/src/blocks/archive-page/index.php' );
 require_once( __DIR__ . '/src/blocks/filter-bar/index.php' );
 require_once( __DIR__ . '/src/blocks/front-page/index.php' );
 require_once( __DIR__ . '/src/blocks/search-page/index.php' );
-require_once( __DIR__ . '/src/blocks/single-page/index.php' );
+require_once( __DIR__ . '/src/blocks/single-plugin/index.php' );
 
 // Block Configs
 require_once( __DIR__ . '/inc/block-config.php' );

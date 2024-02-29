@@ -1,12 +1,12 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "wporg/single-page",
+	"name": "wporg/single-plugin",
 	"version": "0.1.0",
-	"title": "Single Page Content",
+	"title": "Single Plugin Content",
 	"category": "design",
 	"icon": "",
-	"description": "A block that displays the single page content",
+	"description": "A block that displays the single plugin content",
 	"textdomain": "wporg",
 	"attributes": {},
 	"supports": {

@@ -1,12 +1,12 @@
 <?php
 /**
- * Block Name: Single
- * Description: The content that is displayed on the single page
+ * Block Name: Single Plugin
+ * Description: The content that is displayed on the single plugin page
  *
  * @package wporg
  */
 
-namespace WordPressdotorg\Theme\Plugins_2024\SinglePage;
+namespace WordPressdotorg\Theme\Plugins_2024\SinglePlugin;
 
 add_action( 'init', __NAMESPACE__ . '\init' );
 
@@ -18,5 +18,5 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @see https://developer.wordpress.org/reference/functions/register_block_type/
  */
 function init() {
-	register_block_type( __DIR__ . '/../../../js/build/blocks/single-page' );
+	register_block_type( __DIR__ . '/../../../js/build/blocks/single-plugin' );
 }
