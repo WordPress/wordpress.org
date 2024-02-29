@@ -208,12 +208,12 @@ class Release_Confirmation {
 					human_time_diff( $time )
 				);
 			} else {
-				$user = get_user_by( 'slug', $who );
+				$user = get_user_by( 'login', $who );
 
 				$approved_text = sprintf(
 					/* translators: 1: Username, 2: '5 hours' */
 					__( 'Approved by %1$s, %2$s ago.', 'wporg-plugins' ),
-					$user->display_name ?: $user->user_nicename,
+					$user->display_name ?: $user->user_login,
 					human_time_diff( $time )
 				);
 			}
@@ -226,13 +226,13 @@ class Release_Confirmation {
 		}
 
 		if ( ! empty( $data['discarded'] ) ) {
-			$user = get_user_by( 'slug', $data['discarded']['user'] );
+			$user = get_user_by( 'login', $data['discarded']['user'] );
 			printf(
 				'<span title="%s">%s</span><br>',
 				esc_attr( gmdate( 'Y-m-d H:i:s', $time ) ),
 				sprintf(
 					__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
-					$user->display_name ?: $user->user_nicename,
+					$user->display_name ?: $user->user_login,
 					human_time_diff( $data['discarded']['time'] )
 				)
 			);
