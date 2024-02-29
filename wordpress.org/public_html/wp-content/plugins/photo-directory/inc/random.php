@@ -36,11 +36,15 @@ class Random {
 	 * Initializer.
 	 */
 	public static function init() {
+		// Add 'random' URL endpoint to front-end.
 		add_action( 'init',              [ __CLASS__, 'add_rewrite_rule' ] );
 		add_filter( 'query_vars',        [ __CLASS__, 'add_query_var' ] );
 		add_action( 'template_redirect', [ __CLASS__, 'detect_random_photo_cookie' ] );
 		add_action( 'template_redirect', [ __CLASS__, 'redirect_if_random' ] );
 		add_filter( 'wp_robots',         [ __CLASS__, 'noindex' ] );
+
+		// Accommodate randomization of queue.
+		add_filter( 'admin_body_class',  [ __CLASS__, 'random_in_admin_body_class' ] );
 	}
 
 	/**
@@ -133,6 +137,39 @@ class Random {
 		}
 
 		return $robots;
+	}
+
+	/**
+	 * Determines if the current query is for an admin listing of photos
+	 * that should be randomly ordered.
+	 *
+	 * @return bool True if the query is for an admin listing of photos that should be
+	 *              randomly ordered, else false.
+	 */
+	public static function is_random_admin_listing() {
+		return (
+			is_admin()
+		&&
+			is_main_query()
+		&&
+			Registrations::get_post_type() === ( $_GET['post_type'] ?? false )
+		&&
+			'pending' === ( $_GET['post_status'] ?? '' )
+		);
+	}
+
+	/**
+	 * Adds class denoting a random listing of photos when appropriate.
+	 *
+	 * @param string $classes Space-separated list of CSS classes.
+	 * @return string[]
+	 */
+	public static function random_in_admin_body_class( $classes ) {
+		if ( self::is_random_admin_listing() ) {
+			$classes .= ' photos-random';
+		}
+
+		return trim( $classes );
 	}
 
 }
