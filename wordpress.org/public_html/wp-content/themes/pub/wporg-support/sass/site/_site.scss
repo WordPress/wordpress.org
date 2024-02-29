@@ -284,6 +284,11 @@ body.home #page .site-main {
 .sidebar {
 	margin-top: 0;
 
+	// Override parent theme
+	body.single & {
+		margin-top: 0;
+	}
+
 	div {
 		margin-bottom: var(--wp--preset--spacing--30);
 
