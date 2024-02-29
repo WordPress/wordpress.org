@@ -21,7 +21,7 @@ function add_site_navigation_menus( $menus ) {
 				'label' => __( 'Beta Testing', 'wporg-plugins' ),
 				'url' => '/browse/beta/',
 			),
-            array(
+			array(
 				'label' => __( 'Developers', 'wporg-plugins' ),
 				'url' => '/developers/',
 			),
