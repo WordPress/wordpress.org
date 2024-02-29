@@ -1,9 +1,6 @@
-<?php
-global $wp_query;
-
-?>
-
-<header class="page-header">
+<div id="primary" class="content-area">
+	<main id="main" class="site-main" role="main">
+		<header class="page-header">
 			<h1 class="page-title">
 				<?php
 				printf(
@@ -25,17 +22,17 @@ global $wp_query;
 		</header><!-- .page-header -->
 
 		<?php
-		/* Start the Loop */
-		while ( have_posts() ) :
+		while ( have_posts() ) {
 			the_post();
 
 			get_template_part( 'template-parts/plugin', 'index' );
-		endwhile;
+		}
 
 		if ( ! have_posts() ) {
 			get_template_part( 'template-parts/no-results' );
 		}
 
 		the_posts_pagination();
-
 		?>
+	</main>
+</div>
