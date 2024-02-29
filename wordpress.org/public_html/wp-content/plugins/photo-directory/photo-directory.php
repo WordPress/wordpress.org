@@ -22,6 +22,7 @@ require_once __DIR__ . '/inc/head.php';
 require_once __DIR__ . '/inc/moderation.php';
 require_once __DIR__ . '/inc/photo.php';
 require_once __DIR__ . '/inc/posts.php';
+require_once __DIR__ . '/inc/random.php';
 require_once __DIR__ . '/inc/registrations.php';
 require_once __DIR__ . '/inc/rejection.php';
 require_once __DIR__ . '/inc/search.php';
