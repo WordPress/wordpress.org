@@ -99,7 +99,7 @@ class Release_Confirmation {
 
 		if ( $not_enabled ) {
 			printf(
-				'<em>' . __( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em>',
+				'<p><em>' . __( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em></p>',
 				wp_sprintf_l( '%l', array_filter( array_map( function( $plugin ) {
 					if ( 'publish' == get_post_status( $plugin ) ) {
 						return sprintf(
