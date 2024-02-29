@@ -1,14 +1,9 @@
-@import "../mixins/mixins-master";
-@import "../variables-site/variables-site";
-
 .locale-banner {
-	background: var(--wp--preset--color--acid-green-3);
-	font-size: ms( -2 );
-	padding: 0.5rem;
+	background: var(--wp--preset--color--blueberry-4);
+	font-size: var(--wp--preset--font-size--small);
 	text-align: center;
-
-	@media ( min-width: 67rem ) {
-		margin: 1rem auto 0;
-		max-width: $size__site-main;
-	}
+	color: var(--wp--preset--color--charcoal-1);
+	line-height: 18px;
+	padding-top: 8px;
+	padding-bottom: 8px;
 }
