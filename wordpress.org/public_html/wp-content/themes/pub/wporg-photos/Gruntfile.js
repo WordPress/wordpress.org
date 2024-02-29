@@ -8,7 +8,7 @@
 
 require( 'es6-promise' ).polyfill();
 
-module.exports = function( grunt ) {
+module.exports = function ( grunt ) {
 	var isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 
 	grunt.initConfig({
@@ -28,7 +28,6 @@ module.exports = function( grunt ) {
 						],
 						cascade: false
 					} ),
-					require( 'pixrem' ),
 					require('cssnano')({
 						mergeRules: false
 					})
@@ -57,11 +56,12 @@ module.exports = function( grunt ) {
 		},
 		sass: {
 			options: {
-				implementation: require( 'node-sass' ),
+				implementation: require( 'sass' ),
 				sourceMap: true,
 				// Don't add source map URL in built version.
 				omitSourceMapUrl: 'build' === process.argv[2],
-				outputStyle: 'expanded'
+				outputStyle: 'expanded',
+				includePaths: [ './node_modules' ],
 			},
 			dist: {
 				files: {
@@ -169,7 +169,7 @@ module.exports = function( grunt ) {
 
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
-	grunt.loadNpmTasks( 'grunt-postcss' );
+	grunt.loadNpmTasks( '@lodder/grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-sass-globbing' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );

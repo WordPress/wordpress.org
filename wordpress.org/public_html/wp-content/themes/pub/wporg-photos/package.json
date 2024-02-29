@@ -12,18 +12,20 @@
     "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-photos/"
   },
   "devDependencies": {
-    "autoprefixer": "^9.8.8",
-    "cssnano": "^4.1.11",
+    "@lodder/grunt-postcss": "3.1.1",
+    "autoprefixer": "10.4.3",
+    "cssnano": "5.1.4",
     "es6-promise": "~4.2.8",
     "grunt": "^1.6.1",
     "grunt-contrib-jshint": "^3.2.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-contrib-uglify": "^5.2.2",
     "grunt-postcss": "^0.9.0",
-    "grunt-rtlcss": "^2.0.2",
-    "grunt-sass": "~3.1.0",
-    "grunt-sass-globbing": "^1.5.1",
-    "node-sass": "^8.0.0",
-    "pixrem": "^5.0.0"
+    "grunt-rtlcss": "2.0.2",
+    "grunt-sass": "3.1.0",
+    "grunt-sass-globbing": "1.5.1",
+	"postcss": "8.4.11",
+	"rtlcss": "3.5.0",
+	"sass": "1.49.9"
   }
 }
