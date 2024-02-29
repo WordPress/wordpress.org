@@ -16,6 +16,10 @@ body {
 	background: var(--wp--preset--color--white); /* Fallback for when there is no custom background color defined. */
 }
 
+section {
+	margin-bottom: var(--wp--preset--spacing--40);
+}
+
 blockquote, q {
 	quotes: "" "";
 

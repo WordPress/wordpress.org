@@ -5,11 +5,6 @@
 
 /* Many of these override the styles from the plugin */
 
-section {
-	padding: unset;
-	margin-bottom: var(--wp--preset--spacing--50);
-}
-
 #bbpress-forums {
 	font-size: ms(0);
 	line-height: inherit;
@@ -106,10 +101,12 @@ $paginationBreakPoint: "600px";
 	main#main {
 
 		.entry-content,
-		.entry-meta {
-			padding: 0;
+		.entry-footer {
+			margin-bottom: var(--wp--preset--spacing--40);
 		}
 
+		.entry-content,
+		.entry-meta,
 		.entry-header .entry-title,
 		.entry-content .container {
 			padding: 0;
@@ -144,9 +141,6 @@ $paginationBreakPoint: "600px";
 .bbpress {
 
 	main#main {
-		padding-left: var(--wp--preset--spacing--edge-space);
-		padding-right: var(--wp--preset--spacing--edge-space);
-		padding-bottom: var(--wp--preset--spacing--50);
 
 		@extend .clear;
 	}

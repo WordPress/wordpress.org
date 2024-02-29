@@ -1,10 +1,5 @@
 @import "../variables-site/variables-site";
 
-
-body, #pagebody {
-	font-size: ms(0);
-}
-
 /*--------------------------------------------------------------
 # .site-header
 --------------------------------------------------------------*/
@@ -254,7 +249,8 @@ body, #pagebody {
 --------------------------------------------------------------*/
 
 body:not(.trac):not(.home-page):not(.home) #main {
-	margin-top: var(--wp--preset--spacing--50);
+	margin-top: 0;
+	padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
 }
 
 @media screen and (max-width: 460px) {
@@ -286,6 +282,7 @@ body.home #page .site-main {
 # .sidebar
 --------------------------------------------------------------*/
 .sidebar {
+	margin-top: 0;
 
 	div {
 		margin-bottom: var(--wp--preset--spacing--30);
@@ -462,7 +459,6 @@ body.home #page .site-main {
 .page {
 
 	.entry-header {
-		margin-top: 2rem;
 
 		.entry-title {
 
@@ -492,23 +488,25 @@ body.home #page .site-main {
 			& + section {
 				border-top: 2px solid var(--wp--preset--color--light-grey-1);
 			}
+		}
 
-			h2 {
-				font-size: var(--wp--preset--font-size--heading-4);
-				font-weight: 600;
-			}
+		h2.toc-heading {
+			font-size: var(--wp--preset--font-size--heading-4);
+			line-height: var(--wp--custom--heading--level-4--typography--line-height);
+			font-weight: 600;
+		}
 
-			h3 {
-				font-size: var(--wp--preset--font-size--heading-5);
-				font-weight: 600;
-			}
+		h3.toc-heading {
+			font-size: var(--wp--preset--font-size--heading-5);
+			line-height: var(--wp--custom--heading--level-5--typography--line-height);
+			font-weight: 600;
+		}
 
-			h2,
-			h3 {
+		h2,
+		h3 {
 
-				&.toc-heading:target {
-					border-left-color: var(--wp--preset--color--blueberry-1);
-				}
+			&.toc-heading:target {
+				border-left-color: var(--wp--preset--color--blueberry-1);
 			}
 		}
 
@@ -518,8 +516,15 @@ body.home #page .site-main {
 			.items {
 				font-size: var(--wp--preset--font-size--small);
 
-				li a:hover {
-					color: var(--wp--custom--link--color--text);
+				li {
+
+					ul {
+						margin-left: 0;
+					}
+
+					a:hover {
+						color: var(--wp--custom--link--color--text);
+					}
 				}
 			}
 		}
@@ -530,7 +535,7 @@ body.home #page .site-main {
 	}
 
 	.entry-footer {
-		margin-bottom: var(--wp--preset--spacing--50);
+		margin-bottom: var(--wp--preset--spacing--40);
 	}
 
 	.submenu {

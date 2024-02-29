@@ -14,7 +14,7 @@
 		)
 	); ?>
 
-</div>
+</section>
 
 <section class="forums-homepage-topics">
 	<h2 class="has-heading-5-font-size"><?php _e( 'Topics', 'wporg-forums' ); ?></h2>
