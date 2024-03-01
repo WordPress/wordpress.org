@@ -18,6 +18,7 @@ $menu_items = array(
 	'/guidelines/' => __( 'Guidelines', 'wporg-photos' ),
 	'/faq/'    => __( 'FAQ', 'wporg-photos' ),
 	'/license/'    => __( 'License', 'wporg-photos' ),
+	'/random/'     => __( 'Random', 'wporg-photos' ),
 );
 
 if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
@@ -34,6 +35,7 @@ $show_full_header = is_home() && ! is_paged();
 		<header id="masthead" class="site-header <?php echo $show_full_header ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
 				<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Photos', 'Site title', 'wporg-photos' ); ?></a></h1>
+
 				<?php if ( $show_full_header ) : ?>
 					<p class="site-description">
 						<?php
