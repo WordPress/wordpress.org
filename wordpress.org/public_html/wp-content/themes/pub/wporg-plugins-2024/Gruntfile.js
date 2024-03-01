@@ -41,8 +41,14 @@ module.exports = function ( grunt ) {
 					[ 'settings', 'tools', 'generic', 'base', 'objects', 'components', 'trumps' ].forEach(
 						function ( component ) {
 							var paths = [
-								'../wporg/css/' + component + '/**/*.scss',
-								'!../wporg/css/' + component + '/_' + component + '.scss',
+								'client/styles/settings/_colors.scss',
+
+								'../wporg/css/base/_tables.scss',
+								'../wporg/css/settings/_modular-scale.scss',
+								'../wporg/css/tools/_breakpoint.scss',
+								'../wporg/css/tools/_modular-scale.scss',
+								'../wporg/css/objects/_clearings.scss',
+								'../wporg/css/components/_posts-navigation.scss',
 							];
 
 							if ( isChild ) {
@@ -52,10 +58,6 @@ module.exports = function ( grunt ) {
 
 							if ( 'components' === component ) {
 								paths.push( 'client/components/**/*.scss' );
-								paths.push( '!../wporg/css/components/_search.scss' );
-								paths.push( '!../wporg/css/components/_main-navigation.scss' );
-								paths.push( '!../wporg/css/components/_entry-meta.scss' );
-								paths.push( '!../wporg/css/components/_page.scss' );
 							}
 
 							files[ 'client/styles/' + component + '/_' + component + '.scss' ] = paths;

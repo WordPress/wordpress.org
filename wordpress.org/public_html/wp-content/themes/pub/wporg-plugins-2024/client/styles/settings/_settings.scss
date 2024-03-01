@@ -1,7 +1,9 @@
-@import "../../../../wporg/css/settings/colors";
-@import "../../../../wporg/css/settings/modular-scale";
-@import "../../../../wporg/css/settings/structure";
-@import "../../../../wporg/css/settings/typography";
 @import "colors";
-@import "sctructure";
+@import "../../../../wporg/css/base/tables";
+@import "../../../../wporg/css/settings/modular-scale";
+@import "../../../../wporg/css/tools/breakpoint";
+@import "../../../../wporg/css/tools/modular-scale";
+@import "../../../../wporg/css/objects/clearings";
+@import "../../../../wporg/css/components/posts-navigation";
+@import "structure";
 @import "typography";

@@ -1,9 +1,13 @@
 .home .widget,
 .widget-area.home .widget {
 	display: inline-block;
-	font-size: ms( -2 );
+	font-size: ms( -1 );
 	margin: 0;
 	vertical-align: top;
+
+	.widget-title {
+		font-size: ms( 5 );
+	}
 
 	@media screen and ( min-width: $ms-breakpoint ) {
 		margin-right: 5%;

@@ -1,6 +1,6 @@
 .section {
 	h1, h2, h3 {
-		font-size: ms( 0 );
+		font-size: ms( 4 );
 		font-weight: 600;
 
 		&:nth-child(2) {
@@ -9,7 +9,7 @@
 	}
 
 	h4, h5, h6 {
-		font-size: ms( -2 );
+		font-size: ms( 1 );
 		font-weight: 600;
 
 		&:nth-child(2) {

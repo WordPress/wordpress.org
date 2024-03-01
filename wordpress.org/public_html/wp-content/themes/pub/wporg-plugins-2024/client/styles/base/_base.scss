@@ -1,8 +1,8 @@
-@import "../../../../wporg/css/base/copy";
-@import "../../../../wporg/css/base/elements";
-@import "../../../../wporg/css/base/headings";
-@import "../../../../wporg/css/base/links";
-@import "../../../../wporg/css/base/lists";
+@import "../settings/colors";
 @import "../../../../wporg/css/base/tables";
-@import "../../../../wporg/css/base/typography";
+@import "../../../../wporg/css/settings/modular-scale";
+@import "../../../../wporg/css/tools/breakpoint";
+@import "../../../../wporg/css/tools/modular-scale";
+@import "../../../../wporg/css/objects/clearings";
+@import "../../../../wporg/css/components/posts-navigation";
 @import "copy";

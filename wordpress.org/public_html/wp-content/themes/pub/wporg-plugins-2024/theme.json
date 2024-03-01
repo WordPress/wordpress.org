@@ -5,6 +5,15 @@
 		"layout": {
 			"contentSize": "960px",
 			"wideSize": "1220px"
+		},
+		"custom": {
+			"form": {
+				"border": {
+					"width": "1px",
+					"style": "solid",
+					"color": "rgb(214, 218, 221)"
+				}
+			}
 		}
 	}
 }
