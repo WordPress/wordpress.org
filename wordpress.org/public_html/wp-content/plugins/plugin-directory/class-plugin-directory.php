@@ -779,6 +779,11 @@ class Plugin_Directory {
 		if ( empty( $wp_query->query_vars['pagename'] ) && ( empty( $wp_query->query_vars['post_type'] ) || 'post' == $wp_query->query_vars['post_type'] ) ) {
 			$wp_query->query_vars['post_type']   = array( 'plugin' );
 			$wp_query->query_vars['post_status'] = array( 'publish' );
+
+			// Support queries for `?p=...` for pages, as it's used as the shortlink.
+			if ( ! empty( $wp_query->query_vars['p'] ) ) {
+				$wp_query->query_vars['post_type'][] = 'page';
+			}
 		}
 
 		// By default, if no query is made, we're querying /browse/featured/
