@@ -389,7 +389,7 @@ function the_previous_version_download( $post = null ) {
 	echo '</select> ';
 
 	printf(
-		'<a href="%s" id="download-previous-link" class="button">%s</a>',
+		'<a href="%s" id="download-previous-link" class="button button-secondary">%s</a>',
 		esc_url( Template::download_link( $post, reset( $tags ) ) ),
 		esc_html__( 'Download', 'wporg-plugins' )
 	);
