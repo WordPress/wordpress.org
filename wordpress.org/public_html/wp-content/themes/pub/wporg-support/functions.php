@@ -394,6 +394,7 @@ function wporg_support_get_views() {
 		'all-topics',
 		'no-replies',
 		'support-forum-no',
+		'taggedmodlook',
 	);
 
 	$output = '';
