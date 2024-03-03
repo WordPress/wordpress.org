@@ -3227,6 +3227,10 @@ body.category #main .archive-pagination {
 		width: 25%;
 	}
 }
+.bbpress #bbpress-forums .bbp-topic-header .bbp-meta .bbp-topic-permalink,
+.bbpress #bbpress-forums .bbp-reply-header .bbp-meta .bbp-reply-permalink {
+	color: var(--wp--custom--link--color--text);
+}
 .bbpress #bbpress-forums .bbp-forums,
 .bbpress #bbpress-forums .bbp-topics {
 	border: 1px solid var(--wp--custom--color--border);

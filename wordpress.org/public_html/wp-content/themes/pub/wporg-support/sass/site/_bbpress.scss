@@ -208,6 +208,11 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
+		.bbp-topic-header .bbp-meta .bbp-topic-permalink,
+		.bbp-reply-header .bbp-meta .bbp-reply-permalink {
+			color: var(--wp--custom--link--color--text);
+		}
+
 		.bbp-forums,
 		.bbp-topics {
 			border: 1px solid var(--wp--custom--color--border);
