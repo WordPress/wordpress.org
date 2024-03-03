@@ -2,7 +2,7 @@
 
 
 <section class="forums-homepage-list">
-	<h2 class="has-heading-5-font-size">Forums</h2>
+	<h2 class="has-heading-5-font-size"><?php _e( 'Forums', 'wporg-forums' ); ?></h2>
 
 	<?php echo do_blocks(
 		sprintf(
