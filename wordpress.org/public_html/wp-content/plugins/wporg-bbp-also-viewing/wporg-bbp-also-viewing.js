@@ -125,7 +125,7 @@
 			// Local nav bar position is set to relative on small screens to stop it being sticky
 			if ( $localNavBar.hasClass( 'is-sticking' ) && $localNavBar.css( 'position' ) !== 'relative' ) {
 				banner.css( 'position', 'sticky' );
-				banner.css( 'top', 'calc(var(--wp-admin--admin-bar--height, 32px) + var(--wp--custom--local-navigation-bar--spacing--height, 60px))' );
+				banner.css( 'top', 'calc(var(--wp-admin--admin-bar--height, 0px) + var(--wp--custom--local-navigation-bar--spacing--height, 60px))' );
 			} else {
 				banner.css( 'position', 'initial' );
 				banner.css( 'top', '' );
