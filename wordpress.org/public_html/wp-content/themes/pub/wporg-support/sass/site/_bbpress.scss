@@ -255,11 +255,11 @@ $paginationBreakPoint: "600px";
 			max-height: 50px;
 			margin: 0;
 			margin-right: 10px;
-			margin-left: -11%;
+			margin-left: -8.75%;
 		}
 
 		div.bbp-topic-author img.avatar {
-			margin-left: -19%;
+			margin-left: -15%;
 			margin-top: -6px;
 			width: 80px;
 			height: 80px;
@@ -267,7 +267,7 @@ $paginationBreakPoint: "600px";
 			max-height: 80px;
 		}
 
-		@media only screen and (max-width: 1040px) {
+		@media only screen and (max-width: 1200px) {
 
 			div.bbp-reply-author img.avatar,
 			div.bbp-topic-author img.avatar {
@@ -295,7 +295,7 @@ $paginationBreakPoint: "600px";
 			text-align: left;
 			width: 100%;
 			margin: 1rem 0 2rem;
-			padding-left: 10%;
+			padding-left: 8%;
 
 			@media screen and ( max-width: 568px ) {
 				margin-left: 1rem;
@@ -345,7 +345,7 @@ $paginationBreakPoint: "600px";
 		div.bbp-reply-content,
 		div.bbp-topic-content {
 			padding: 0;
-			margin: 0 0 0 10%;
+			margin: 0 0 0 8%;
 
 			@media only screen and (max-width: 1040px) {
 				clear: left;
@@ -1108,7 +1108,7 @@ body.single-topic:not(body.topic-edit) {
 			background: #fbfbfb;
 			border: 1px solid var(--wp--custom--color--border);
 			border-bottom: none;
-			padding: 1rem 2rem 1rem 10%;
+			padding: 1rem 2rem 1rem 8%;
 
 			h1 {
 				margin-bottom: 0;
