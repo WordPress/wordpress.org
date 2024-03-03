@@ -3977,7 +3977,7 @@ body.single-topic:not(body.topic-edit) .entry-content header {
 	background: #fbfbfb;
 	border: 1px solid var(--wp--custom--color--border);
 	border-bottom: none;
-	padding: 1rem 2rem 1rem 8%;
+	padding: var(--wp--preset--spacing--20) 2rem var(--wp--preset--spacing--20) 8%;
 }
 body.single-topic:not(body.topic-edit) .entry-content header h1 {
 	margin-bottom: 0;
@@ -3986,6 +3986,12 @@ body.single-topic:not(body.topic-edit) .entry-content header h1 {
 	body.single-topic:not(body.topic-edit) .entry-content header {
 		padding-left: 1rem;
 	}
+}
+body.single-topic:not(body.topic-edit) .entry-content header + #bbpress-forums .topic {
+	padding-top: 0;
+}
+body.single-topic:not(body.topic-edit) .entry-content header + #bbpress-forums .topic .bbp-topic-author {
+	margin-top: 0;
 }
 body.single-topic:not(body.topic-edit) div.bbp-breadcrumb {
 	float: none;

@@ -1108,7 +1108,7 @@ body.single-topic:not(body.topic-edit) {
 			background: #fbfbfb;
 			border: 1px solid var(--wp--custom--color--border);
 			border-bottom: none;
-			padding: 1rem 2rem 1rem 8%;
+			padding: var(--wp--preset--spacing--20) 2rem var(--wp--preset--spacing--20) 8%;
 
 			h1 {
 				margin-bottom: 0;
@@ -1116,6 +1116,14 @@ body.single-topic:not(body.topic-edit) {
 
 			@media screen and (max-width: 568px) {
 				padding-left: 1rem;
+			}
+
+			& + #bbpress-forums .topic {
+				padding-top: 0;
+
+				.bbp-topic-author {
+					margin-top: 0;
+				}
 			}
 		}
 	}
