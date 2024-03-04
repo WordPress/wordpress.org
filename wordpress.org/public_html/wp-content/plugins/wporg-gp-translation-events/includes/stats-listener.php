@@ -65,6 +65,9 @@ class Stats_Listener {
 
 	private function handle_action( GP_Translation $translation, int $user_id, string $action, DateTimeImmutable $happened_at ): void {
 		try {
+			if ( ! $user_id ) {
+				return;
+			}
 			// Get events that are active when the action happened, for which the user is registered for.
 			$active_events = $this->get_active_events( $happened_at );
 			$events        = $this->select_events_user_is_registered_for( $active_events, $user_id );
