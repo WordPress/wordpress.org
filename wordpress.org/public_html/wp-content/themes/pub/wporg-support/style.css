@@ -2977,7 +2977,7 @@ body.single .sidebar {
 }
 .helphub-page .entry-content p.toc-jump,
 .page .entry-content p.toc-jump {
-	height: unset;
+	margin-bottom: unset;
 }
 .helphub-page .entry-footer,
 .page .entry-footer {
