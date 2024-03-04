@@ -461,7 +461,11 @@ class Translation_Events {
 	 * @return void
 	 */
 	public function add_active_events_current_user(): void {
-		$user_attending_events      = get_user_meta( get_current_user_id(), Route::USER_META_KEY_ATTENDING, true ) ?: array();
+		$user_attending_events = get_user_meta( get_current_user_id(), Route::USER_META_KEY_ATTENDING, true ) ?: array();
+		if ( empty( $user_attending_events ) ) {
+			return;
+		}
+
 		$current_datetime_utc       = ( new DateTime( 'now', new DateTimeZone( 'UTC' ) ) )->format( 'Y-m-d H:i:s' );
 		$user_attending_events_args = array(
 			'post_type'   => self::CPT,
