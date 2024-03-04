@@ -1,7 +1,7 @@
 .plugin-section {
 	border-bottom: 2px solid $color__border;
 	margin: 0 auto ms(14);
-	max-width: $size__site-main;
+	max-width: var( --wp--style--global--content-size );
 	padding-bottom: ms(10);
 
 	&:last-of-type {

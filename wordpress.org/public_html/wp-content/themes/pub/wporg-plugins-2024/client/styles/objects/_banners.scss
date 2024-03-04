@@ -6,7 +6,7 @@
 
 	@media ( min-width: 67rem ) {
 		margin: 1rem auto;
-		max-width: $size__site-main;
+		max-width: var( --wp--style--global--content-size );
 	}
 
 	a {

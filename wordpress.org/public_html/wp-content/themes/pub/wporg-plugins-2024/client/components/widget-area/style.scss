@@ -1,6 +1,6 @@
 .widget-area {
 	margin: 0 auto;
-	max-width: $size__site-main;
+	max-width: var( --wp--style--global--content-size );
 	padding: 0 ms( 4 ) ms( 10 ) ms( 4 );
 
 	@media screen and ( min-width: $ms-breakpoint ) {
