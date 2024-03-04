@@ -3221,8 +3221,7 @@ body.category #main .archive-pagination {
 }
 .bbpress #bbpress-forums .bbp-forums > .bbp-header,
 .bbpress #bbpress-forums .bbp-topics > .bbp-header {
-	background: var(--wp--preset--color--blueberry-1);
-	color: var(--wp--preset--color--white);
+	background: var(--wp--preset--color--white);
 	border-top: none;
 	font-size: var(--wp--preset--font-size--small);
 }
