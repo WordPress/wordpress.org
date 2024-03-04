@@ -27,7 +27,7 @@
 		$adminbar = jQuery('#wpadminbar');
 		$header = jQuery('header.global-header');
 		$localNavBar = jQuery('.wp-block-wporg-local-navigation-bar');
-		$langBanner = jQuery('#lang-guess-wrap');
+		$langBanner = jQuery('.wp-block-wporg-language-suggest');
 
 		maybeDisplay();
 
@@ -58,7 +58,7 @@
 				$element = $langBanner.length ? $langBanner : $localNavBar;
 
 				$element.after(
-					'<div id="also-viewing-banner" style="display: none; font-size: var(--wp--preset--font-size--small, 14px); color: var(--wp--preset--color--charcoal-1, #1E1E1E); line-height: 18px; padding-top: 8px; padding-bottom: 8px; background: var(--wp--preset--color--acid-green-3, #E2FFED); width: 100%; text-align: center; position: initial; top: 32px; left: 0; z-index: 150;"></div>'
+					'<div id="also-viewing-banner" style="display: none; font-size: var(--wp--preset--font-size--extra-small, 12px); color: var(--wp--preset--color--charcoal-1, #1E1E1E); line-height: 18px; padding-top: 8px; padding-bottom: 8px; background: var(--wp--preset--color--acid-green-3, #E2FFED); width: 100%; text-align: center; position: initial; top: 32px; left: 0; z-index: 150;"></div>'
 				);
 			} else {
 				jQuery('#main').before( 
