@@ -1,11 +1,11 @@
 .entry-thumbnail {
 	display: none;
-	max-width: 128px;
+	max-width: 96px;
 
 	.plugin-icon {
 		background-size: cover;
-		height: 128px;
-		width: 128px;
+		height: 96px;
+		width: 96px;
 	}
 
 	@media screen and ( min-width: 21em ) {
