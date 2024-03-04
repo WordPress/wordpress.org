@@ -4155,23 +4155,28 @@ div.bbp-breadcrumb p {
 	margin-top: 4rem;
 }
 
-body.helphub-with-sidebar .left-sidebar {
-	font-size: 0.9rem;
-}
 body.helphub-with-sidebar .left-sidebar h2 {
-	font-size: 1.1rem;
-	font-weight: 600;
-	color: var(--wp--preset--color--charcoal-1);
+	font-size: var(--wp--preset--font-size--normal);
+	font-weight: 400;
 }
 body.helphub-with-sidebar .left-sidebar ul {
+	font-size: var(--wp--preset--font-size--small);
 	list-style: none;
-	margin: 0;
+	margin: 0 0 var(--wp--preset--spacing--20);
+	padding-left: 0;
 }
 body.helphub-with-sidebar .left-sidebar ul li {
 	margin-bottom: 0.8rem;
 }
 body.helphub-with-sidebar .left-sidebar ul li ul {
-	margin-left: 1rem;
+	margin-left: var(--wp--preset--spacing--20);
+}
+body.helphub-with-sidebar .left-sidebar li,
+body.helphub-with-sidebar .left-sidebar p {
+	color: var(--wp--preset--color--charcoal-4);
+}
+body.helphub-with-sidebar .left-sidebar a {
+	text-decoration: none;
 }
 @media screen and (min-width: 768px) {
 	body.helphub-with-sidebar .left-sidebar {
@@ -4202,6 +4207,9 @@ body.helphub-with-sidebar .left-sidebar ul li ul {
 		margin: 0;
 		width: 65%;
 	}
+}
+.helphub-page #main-content {
+	margin-top: 0;
 }
 .helphub-page .comment-respond {
 	padding-bottom: 2rem;
