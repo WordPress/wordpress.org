@@ -1122,14 +1122,6 @@ body.single-topic:not(body.topic-edit) {
 			@media screen and (max-width: 568px) {
 				padding-left: 1rem;
 			}
-
-			& + #bbpress-forums .topic {
-				padding-top: 0;
-
-				.bbp-topic-author {
-					margin-top: 0;
-				}
-			}
 		}
 	}
 

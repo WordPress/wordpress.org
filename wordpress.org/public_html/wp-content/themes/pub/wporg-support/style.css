@@ -3973,12 +3973,6 @@ body.single-topic:not(body.topic-edit) .entry-content header h1 {
 		padding-left: 1rem;
 	}
 }
-body.single-topic:not(body.topic-edit) .entry-content header + #bbpress-forums .topic {
-	padding-top: 0;
-}
-body.single-topic:not(body.topic-edit) .entry-content header + #bbpress-forums .topic .bbp-topic-author {
-	margin-top: 0;
-}
 body.single-topic:not(body.topic-edit) div.bbp-breadcrumb {
 	float: none;
 }
