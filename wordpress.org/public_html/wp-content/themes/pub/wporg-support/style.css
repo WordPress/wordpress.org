@@ -2776,17 +2776,20 @@ body.home #page .site-main {
 body.single .sidebar {
 	margin-top: 0;
 }
-.sidebar div {
+.sidebar > div {
 	margin-bottom: var(--wp--preset--spacing--30);
 }
-.sidebar div ul {
+.sidebar > div ul {
 	margin-bottom: 0;
 	padding-left: unset;
 }
-.sidebar div ul > li {
+.sidebar > div ul > li {
 	font-size: var(--wp--preset--font-size--small);
 	border-top: 1px solid var(--wp--custom--color--border);
 	padding: 0.5rem 0;
+}
+.sidebar a {
+	text-decoration: none;
 }
 
 /*--------------------------------------------------------------

@@ -289,7 +289,7 @@ body.home #page .site-main {
 		margin-top: 0;
 	}
 
-	div {
+	> div {
 		margin-bottom: var(--wp--preset--spacing--30);
 
 		ul {
@@ -302,6 +302,10 @@ body.home #page .site-main {
 			border-top: 1px solid var(--wp--custom--color--border);
 			padding: 0.5rem 0;
 		}
+	}
+
+	a {
+		text-decoration: none;
 	}
 }
 
