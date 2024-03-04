@@ -3033,23 +3033,14 @@ body.single .sidebar {
 # Archives
 --------------------------------------------------------------*/
 body.category #main h1 {
-	text-align: center;
-}
-body.category #main a {
-	color: inherit;
-}
-body.category #main a:hover, body.category #main a:focus, body.category #main a:active {
-	text-decoration: none;
-	color: var(--wp--custom--link--color--text);
+	margin-bottom: var(--wp--preset--spacing--50);
 }
 body.category #main article h2 {
 	font-size: 1.3rem;
 }
 body.category #main .archive-pagination {
-	display: block;
-	margin-top: 20px;
+	margin: var(--wp--preset--spacing--50) 0;
 	text-align: center;
-	width: 100%;
 }
 
 /*--------------------------------------------------------------

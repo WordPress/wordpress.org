@@ -3,20 +3,7 @@ body.category {
 	#main {
 
 		h1 {
-			text-align: center;
-		}
-
-		a {
-
-			color: inherit;
-
-			&:hover,
-			&:focus,
-			&:active {
-
-				text-decoration: none;
-				color: var(--wp--custom--link--color--text);
-			}
+			margin-bottom: var(--wp--preset--spacing--50);
 		}
 
 		article {
@@ -28,11 +15,8 @@ body.category {
 		}
 
 		.archive-pagination {
-
-			display: block;
-			margin-top: 20px;
+			margin: var(--wp--preset--spacing--50) 0;
 			text-align: center;
-			width: 100%;
 		}
 	}
 }

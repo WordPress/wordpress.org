@@ -17,22 +17,15 @@ get_header(); ?>
 
 			<h1><?php single_cat_title(); ?></h1>
 
-			<div class="three-up helphub-front-page">
-				<?php
-				while ( have_posts() ) :
-					the_post();
-				?>
-
-					<a href="<?php echo esc_url( get_the_permalink() ); ?>" class="archive-block">
-						<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-							<?php the_title( '<h2>', '</h2>' ); ?>
-
-							<?php the_excerpt(); ?>
-						</article>
-					</a>
-
-
-				<?php endwhile; ?>
+			<div>
+			<?php echo do_blocks(
+				sprintf(
+					'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"32.3%%"},"fontSize":"small"} -->
+					<div class="wp-block-group is-style-cards-grid has-small-font-size">%s</div>
+					<!-- /wp:group -->',
+					wporg_support_get_archive_posts(),
+				)
+			); ?>
 
 			</div>
 

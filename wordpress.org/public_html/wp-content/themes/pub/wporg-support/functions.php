@@ -370,6 +370,32 @@ function wporg_support_custom_views() {
 add_action( 'bbp_register_views', 'wporg_support_custom_views' );
 
 /**
+ * Get a list of archive posts as card grid items.
+ *
+ * @return string
+ */
+function wporg_support_get_archive_posts() {
+	$output = '';
+
+	while ( have_posts() ) : the_post();
+
+		$output .= sprintf(
+			'<a id="post-%1$s" class="wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%2$s">
+				<h2 class="wp-block-heading has-inter-font-family has-normal-font-size">%3$s</h2>
+				<div>%4$s</div>
+			</a>',
+			get_the_ID(),
+			esc_url( get_the_permalink() ),
+			get_the_title(),
+			get_the_excerpt(),
+		);
+
+	endwhile;
+
+	return $output;
+}
+
+/**
  * Get the list of forums for the front page.
  *
  * @return string
