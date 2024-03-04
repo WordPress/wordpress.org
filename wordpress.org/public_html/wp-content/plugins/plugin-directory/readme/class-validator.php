@@ -200,11 +200,17 @@ class Validator {
 		}, ARRAY_FILTER_USE_KEY );
 		foreach ( $trimmed_sections as $section_name => $dummy ) {
 			$section_name = str_replace( 'trimmed_section_', '', $section_name );
+
+			$max_length_field = "section-{$section_name}";
+			if ( ! isset( $this->maximum_field_lengths[ $max_length_field ] ) ) {
+				$max_length_field = 'section';
+			}
+
 			$warnings[]   = sprintf(
 				/* translators: %s: section title */
 				__( 'The %s section is too long and was truncated. A maximum of %s words is supported.', 'wporg-plugins' ),
 				'<code>' . esc_html( ucwords( str_replace( '_', ' ', $section_name ) ) ) . '</code>',
-				number_format_i18n( $readme->maximum_field_lengths[ 'section' ] )
+				number_format_i18n( $readme->maximum_field_lengths[ $max_length_field ] )
 			);
 		}
 
