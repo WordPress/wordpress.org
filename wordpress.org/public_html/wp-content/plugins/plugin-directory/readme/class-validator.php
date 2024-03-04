@@ -202,7 +202,7 @@ class Validator {
 			$section_name = str_replace( 'trimmed_section_', '', $section_name );
 
 			$max_length_field = "section-{$section_name}";
-			if ( ! isset( $this->maximum_field_lengths[ $max_length_field ] ) ) {
+			if ( ! isset( $readme->maximum_field_lengths[ $max_length_field ] ) ) {
 				$max_length_field = 'section';
 			}
 
