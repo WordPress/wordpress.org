@@ -19,19 +19,11 @@ get_header(); ?>
 					<?php dynamic_sidebar( 'front-page-blocks' ); ?>
 				</div>
 
-				<hr>
-
-				<div id="helphub-forum-link" class="text-center">
-					<h3><?php esc_html_e( 'Support Forums', 'wporg-forums' ); ?></h3>
+				<div id="helphub-forum-link">
+					<h2><?php esc_html_e( 'Support Forums', 'wporg-forums' ); ?></h2>
 
 					<p>
-						<span>
-							<?php esc_html_e( 'Can\'t find what you\'re looking for? Find out if others share your experience.', 'wporg-forums' ); ?>
-						</span>
-
-						<br>
-
-						<a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>"><?php esc_html_e( 'Check out our support forums', 'wporg-forums' ); ?></a>
+						<?php esc_html_e( 'Can\'t find what you\'re looking for? Find out if others share your experience.', 'wporg-forums' ); ?> <a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>"><?php esc_html_e( 'Check out our support forums', 'wporg-forums' ); ?></a>.
 					</p>
 				</div>
 			<?php endif; ?>
