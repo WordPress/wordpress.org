@@ -3195,6 +3195,9 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .bbp-body .bbp-topic-reply-count {
 	font-size: 0.73152rem;
 }
+.bbpress #bbpress-forums .bbp-body ul.topic a {
+	text-decoration: none;
+}
 .bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
 .bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
 .bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,

@@ -193,6 +193,10 @@ $paginationBreakPoint: "600px";
 			.bbp-topic-reply-count {
 				font-size: ms(-3);
 			}
+
+			ul.topic a {
+				text-decoration: none;
+			}
 		}
 
 		.bbp-header,
