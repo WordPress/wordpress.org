@@ -4,8 +4,10 @@
 	"description": "Theme for WordPress Support Forums",
 	"main": "index.php",
 	"scripts": {
+		"build": "grunt",
+		"grunt": "grunt",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"grunt": "grunt"
+		"watch": "grunt watch"
 	},
 	"author": "wordpressdotorg",
 	"license": "GPL-2.0-or-later",

@@ -57,7 +57,7 @@ module.exports = function(grunt) {
 		watch: {
 			css: {
 				files: '**/*.scss',
-				tasks: ['stylelint', 'sass', 'rtlcss'],
+				tasks: [ 'stylelint', 'sass', 'postcss', 'rtlcss' ],
 			},
 		},
 	});
@@ -67,6 +67,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 
-	grunt.registerTask( 'build', [ 'sass', 'postcss', 'rtlcss' ]);
+	grunt.registerTask( 'build', [ 'stylelint', 'sass', 'postcss', 'rtlcss' ]);
 	grunt.registerTask( 'default', [ 'build' ]);
 };
