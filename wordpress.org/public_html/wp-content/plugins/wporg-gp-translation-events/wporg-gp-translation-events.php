@@ -72,9 +72,9 @@ class Translation_Events {
 	}
 
 	public function activate() {
-		global $wpdb;
+		global $gp_table_prefix;
 		$create_table = "
-		CREATE TABLE `{$wpdb->base_prefix}event_actions` (
+		CREATE TABLE `{$gp_table_prefix}event_actions` (
 			`translate_event_actions_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 			`event_id` int(10) NOT NULL COMMENT 'Post_ID of the translation_event post in the wp_posts table',
 			`original_id` int(10) NOT NULL COMMENT 'ID of the translation',
