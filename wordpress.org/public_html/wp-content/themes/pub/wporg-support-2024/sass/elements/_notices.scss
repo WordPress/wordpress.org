@@ -7,11 +7,11 @@
 	background: var(--notice-background-color);
 	border-left: 4px solid var(--notice-border-color);
 	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
-	margin: 1em 0;
+	margin: var(--wp--preset--spacing--20) 0;
 	padding: 1px 12px;
 
 	p {
-		font-size: ms( -2 );
+		font-size: var(--wp--preset--font-size--small);
 		margin: 0.5em 0;
 		padding: 2px;
 	}
@@ -49,10 +49,10 @@
 	}
 
 	&.notice-info {
-		--notice-border-color: #00a0d2;
+		--notice-border-color: var(--wp--preset--color--blueberry-1);
 
 		&.notice-alt {
-			--notice-background-color: #e5f5fa;
+			--notice-background-color: var(--wp--preset--color--blueberry-4);
 		}
 	}
 

@@ -13,7 +13,11 @@ html {
 }
 
 body {
-	background: $color__background-body; /* Fallback for when there is no custom background color defined. */
+	background: var(--wp--preset--color--white); /* Fallback for when there is no custom background color defined. */
+}
+
+section {
+	margin-bottom: var(--wp--preset--spacing--40);
 }
 
 blockquote, q {
@@ -27,15 +31,10 @@ blockquote, q {
 }
 
 blockquote {
-	// Override wp4.css.
-	background: transparent;
-	border: none;
-	padding: 0;
-
-	border-left: 2px solid $color__blockquote;
-	color: $color__blockquote;
-	margin: 1rem 0;
-	padding-left: 0.8rem;
+	border-left: 2px solid var(--wp--preset--color--charcoal-4);
+	color: var(--wp--preset--color--charcoal-4);
+	margin: var(--wp--preset--spacing--20) 0;
+	padding-left: var(--wp--preset--spacing--20);
 
 	cite {
 		font-size: ms( -2 );
@@ -43,15 +42,13 @@ blockquote {
 
 	p {
 		display: block;
-		margin: 1em 0;
+		margin: var(--wp--preset--spacing--20) 0;
 	}
 }
 
-hr {
-	background-color: $color__background-hr;
-	border: 0;
-	height: 2px;
-	margin: 0 auto;
+p.has-background {
+	display: inline-block;
+	padding: var(--wp--preset--spacing--20);
 }
 
 @import "lists";
@@ -65,4 +62,3 @@ img {
 @import "notices";
 @import "banners";
 @import "badges";
-@import "legacy_notice";

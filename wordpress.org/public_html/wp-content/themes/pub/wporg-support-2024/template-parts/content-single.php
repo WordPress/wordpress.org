@@ -19,20 +19,18 @@
 	</header><!-- .entry-header -->
 
 	<div class="entry-content">
-		<section>
-			<div class="container">
-				<?php
-				the_content();
+		<div class="container">
+			<?php
+			the_content();
 
-				wp_link_pages(
-					array(
-						'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'wporg-forums' ),
-						'after'  => '</div>',
-					)
-				);
-				?>
-			</div>
-		</section>
+			wp_link_pages(
+				array(
+					'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'wporg-forums' ),
+					'after'  => '</div>',
+				)
+			);
+			?>
+		</div>
 	</div><!-- .entry-content -->
 
 	<footer class="entry-footer">

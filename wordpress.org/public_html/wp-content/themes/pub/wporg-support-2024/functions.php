@@ -12,6 +12,42 @@
 add_filter( 'bbp_show_lead_topic', '__return_true' );
 
 /**
+ * Provide a list of local navigation menus.
+ */
+function add_site_navigation_menus( $menus ) {
+	return array(
+		'forums' => array(
+			array(
+				'label' => __( 'Guidelines', 'wporg' ),
+				'url' => '/guidelines/',
+			),
+			array(
+				'label' => __( 'Welcome to Support', 'wporg' ),
+				'url' => '/welcome/',
+			),
+			array(
+				'label' => __( 'Get Involved', 'wporg' ),
+				'url' => 'https://make.wordpress.org/support/handbook/',
+			)
+		),
+	);
+}
+add_filter( 'wporg_block_navigation_menus', '\add_site_navigation_menus' );
+
+/**
+ * Register patterns from the patterns directory.
+ */
+function register_patterns() {
+	$pattern_directory = new DirectoryIterator( get_template_directory() . '/patterns/' );
+	foreach ( $pattern_directory as $file ) {
+		if ( $file->isFile() ) {
+			require $file->getPathname();
+		}
+	}
+}
+add_action( 'init', 'register_patterns' );
+
+/**
  * Add theme support for some features.
  */
 function wporg_support_theme_support() {
@@ -35,9 +71,21 @@ add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
  * @link https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/style
  */
 function wporg_support_scripts() {
+	wp_dequeue_style( 'wp4-styles' );
 
-	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
-	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
+	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
+	wp_enqueue_style( 'wporg-parent-2021-block-styles', get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css', [ 'wporg-global-fonts' ] );
+
+	wp_enqueue_style( 'support-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
+	wp_style_add_data( 'support-style', 'rtl', 'replace' );
+
+	// Preload the heading font(s).
+	if ( is_callable( 'global_fonts_preload' ) ) {
+		/* translators: Subsets can be any of cyrillic, cyrillic-ext, greek, greek-ext, vietnamese, latin, latin-ext. */
+		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg' );
+		// All headings.
+		global_fonts_preload( 'EB Garamond, Inter', $subsets );
+	}
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
 	wp_enqueue_script( 'wporg-support-forums', get_template_directory_uri() . '/js/forums.js', array( 'jquery' ), '20220217', true );
@@ -56,6 +104,107 @@ function wporg_support_scripts() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
+
+/**
+ * Merge the support theme's theme.json into the parent theme.json.
+ *
+ * @param WP_Theme_JSON_Data $theme_json Parsed support theme.json.
+ *
+ * @return WP_Theme_JSON_Data The updated theme.json settings.
+ */
+function merge_parent_support_theme_json( $theme_json ) {
+	$support_theme_json_data = $theme_json->get_data();
+	$parent_theme_json_data = json_decode( file_get_contents( get_theme_root_uri() . '/wporg-parent-2021/theme.json' ), true );
+
+	if ( ! $parent_theme_json_data ) {
+		return $theme_json;
+	}
+
+	$parent_theme = class_exists( 'WP_Theme_JSON_Gutenberg' )
+		? new \WP_Theme_JSON_Gutenberg( $parent_theme_json_data )
+		: new \WP_Theme_JSON( $parent_theme_json_data );
+
+	// Build a new theme.json object based on the parent.
+	$new_data = $parent_theme_json_data;
+	$support_settings = $support_theme_json_data['settings'];
+	$support_styles = $support_theme_json_data['styles'];
+
+	if ( ! empty( $support_settings ) ) {
+		$parent_settings = $parent_theme->get_settings();
+
+		$new_data['settings'] = _recursive_array_merge( $parent_settings, $support_settings );
+	}
+
+	if ( ! empty( $support_styles ) ) {
+		$parent_styles = $parent_theme_json_data['styles'];
+
+		$new_data['styles'] = _recursive_array_merge( $parent_styles, $support_styles );
+	}
+
+	return $theme_json->update_with( $new_data );
+
+}
+add_filter( 'wp_theme_json_data_theme', 'merge_parent_support_theme_json' );
+
+/**
+ * Merge two arrays recursively, overwriting keys in the first array with keys from the second array.
+ *
+ * @param array $array1
+ * @param array $array2
+ *
+ * @return array
+ */
+function _recursive_array_merge( $array1, $array2 ) {
+	foreach ( $array2 as $key => $value ) {
+		// If the key exists in the first array and both values are arrays, recursively merge them
+		if ( isset( $array1[ $key ] ) && is_array( $value ) && is_array( $array1[ $key ] ) ) {
+			// Check if both arrays are indexed (not associative)
+			if ( array_values( $array1[ $key ] ) === $array1[ $key ] && array_values( $value ) === $value ) {
+				// Use _merge_by_slug for indexed arrays
+				$array1[ $key ] = _merge_by_slug( $array1[ $key ], $value );
+			} else {
+				// Use recursive merge for associative arrays
+				$array1[ $key ] = _recursive_array_merge( $array1[ $key ], $value );
+			}
+		} else {
+			$array1[ $key ] = $value;
+		}
+	}
+
+	return $array1;
+}
+
+/**
+ * Merge two (or more) arrays, de-duplicating by the `slug` key.
+ *
+ * If any values in later arrays have slugs matching earlier items, the earlier
+ * items are overwritten with the later value.
+ *
+ * @param array ...$arrays A list of arrays of associative arrays, each item
+ *                         must have a `slug` key.
+ *
+ * @return array The combined array, unique by `slug`. Empty if any item is
+ *               missing a slug.
+ */
+function _merge_by_slug( ...$arrays ) {
+	$combined = array_merge( ...$arrays );
+	$result   = [];
+
+	foreach ( $combined as $value ) {
+		if ( ! isset( $value['slug'] ) ) {
+			return [];
+		}
+
+		$found = array_search( $value['slug'], wp_list_pluck( $result, 'slug' ), true );
+		if ( false !== $found ) {
+			$result[ $found ] = $value;
+		} else {
+			$result[] = $value;
+		}
+	}
+
+	return $result;
+}
 
 /**
  * Register widget areas used by the theme.
@@ -221,6 +370,49 @@ function wporg_support_custom_views() {
 add_action( 'bbp_register_views', 'wporg_support_custom_views' );
 
 /**
+ * Get a list of archive posts as card grid items.
+ *
+ * @return string
+ */
+function wporg_support_get_archive_posts() {
+	$output = '';
+
+	while ( have_posts() ) : the_post();
+
+		$output .= sprintf(
+			'<a id="post-%1$s" class="wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%2$s">
+				<h2 class="wp-block-heading has-inter-font-family has-normal-font-size">%3$s</h2>
+				<div>%4$s</div>
+			</a>',
+			get_the_ID(),
+			esc_url( get_the_permalink() ),
+			get_the_title(),
+			get_the_excerpt(),
+		);
+
+	endwhile;
+
+	return $output;
+}
+
+/**
+ * Get the list of forums for the front page.
+ *
+ * @return string
+ */
+function wporg_support_get_forums_list() {
+	ob_start();
+
+	while ( bbp_forums() ) : bbp_the_forum();
+
+		bbp_get_template_part( 'loop', 'single-forum-homepage' );
+
+	endwhile;
+
+	return ob_get_clean();
+}
+
+/**
  * Display an ordered list of bbPress views
  */
 function wporg_support_get_views() {
@@ -231,20 +423,20 @@ function wporg_support_get_views() {
 		'taggedmodlook',
 	);
 
-	$output = array();
+	$output = '';
 
 	foreach ( $views as $view ) {
 		if ( empty( bbpress()->views[ $view ] ) ) {
 			continue;
 		}
 
-		$output[] = sprintf( '<li class="view"><a href="%s">%s</a></li>',
+		$output .= sprintf( '<a class="wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s"><h3 class="wp-block-heading has-inter-font-family has-normal-font-size">%s</h3></a>',
 			esc_url( bbp_get_view_url( $view ) ),
 			bbp_get_view_title( $view )
 		);
 	}
 
-	echo implode( ' | ', $output );
+	return $output;
 }
 
 /**
