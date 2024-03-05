@@ -10,7 +10,7 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Template;
 
 remove_action( 'embed_content_meta', 'print_embed_comments_button' );
-wp_enqueue_style( 'dashicons' );
+wp_enqueue_style( 'dashicons' ); // NOTE: This is not compatible with the core embed CSS.
 
 if ( ! headers_sent() ) {
 	header( 'X-WP-embed: true' );
@@ -45,8 +45,8 @@ if ( ! headers_sent() ) {
 		}
 		.wp-embed-featured-image .plugin-icon {
 			background-size: 100%;
-			height: 60px;
-			width: 60px;
+			height: 64px;
+			width: 64px;
 		}
 		p.wp-embed-heading {
 			margin: 0;
@@ -82,48 +82,32 @@ if ( ! headers_sent() ) {
 			color: #32373c;
 		}
 		.button.download-button {
-			background: #0085ba;
-			border: 1px solid;
-			border-color: #0073aa #006799 #006799;
-			-webkit-border-radius: 3px;
-			border-radius: 3px;
-			-webkit-box-shadow: 0 1px 0 #006799;
-			box-shadow: 0 1px 0 #006799;
+			background: #3858e9;
 			-webkit-box-sizing: border-box;
 			-moz-box-sizing: border-box;
 			box-sizing: border-box;
 			color: #fff;
 			cursor: pointer;
 			display: inline-block;
-			height: 31.25px;
-			height: 1.953125rem;
 			line-height: 2;
 			margin: 0;
-			padding: 0 16px;
-			padding: 0 1rem;
+			padding: 8px 16px;
+			padding: 0.5rem 1rem;
 			text-decoration: none;
-			text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
 			white-space: nowrap;
 			-webkit-appearance: none;
 		}
 		a.button:active, a.button:focus, a.button:hover {
-			background: #008ec2;
-			border-color: #006799;
-			-webkit-box-shadow: 0 1px 0 #006799;
-			box-shadow: 0 1px 0 #006799;
 			color: #fff;
 			text-decoration: none;
-		}
-		a.button:active {
-			background: #0073aa;
-			border-color: #006799;
-			-webkit-box-shadow: inset 0 2px 0 #006799;
-			box-shadow: inset 0 2px 0 #006799;
-			vertical-align: top;
 		}
 		.wp-embed-share-dialog-open .dashicons {
 			color: #82878c;
 			top: 6px;
+		}
+		.wp-embed-share-dialog-close .dashicons {
+			color: #fff;
+			padding-top: 8px;
 		}
 	</style>
 </head>

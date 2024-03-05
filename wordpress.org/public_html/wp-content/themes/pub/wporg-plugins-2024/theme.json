@@ -14,6 +14,16 @@
 					"color": "rgb(214, 218, 221)"
 				}
 			},
+			"button":{
+				"spacing": {
+					"padding":{
+						"top": "12px",
+						"bottom": "12px",
+						"left": "16px",
+						"right": "16px"
+					}
+				}
+			},
 			"heading": {
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--inter)",

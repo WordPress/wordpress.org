@@ -4,7 +4,7 @@ $color__background-ins: #fff9c0;
 
 $color__text-input: #32373c;
 $color__text-input-focus: #111;
-$color__link: #0073aa;
+$color__link: var( --wp--custom--link--color--text );
 $color__text-main: #32373c;
 
 $color__border: #eee;
