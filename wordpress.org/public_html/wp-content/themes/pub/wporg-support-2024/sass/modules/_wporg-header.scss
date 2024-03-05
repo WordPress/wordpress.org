@@ -1,0 +1,395 @@
+@import "../variables-site/variables-site";
+
+#wporg-header {
+	background: #23282d;
+	height: 140px;
+	position: relative;
+	text-align: center;
+	width: 100%;
+
+	.wrapper {
+		margin: 0 auto;
+		max-width: 960px;
+	}
+
+	h1 {
+		display: inline-block;
+		margin: auto;
+		width: 303px;
+
+		a {
+			background: url(//s.w.org/style/images/wporg-logo.svg?3) center left no-repeat;
+			background-size: 290px 46px;
+			display: block;
+			height: 88px;
+			text-indent: -9999px;
+		}
+	}
+
+	h2.rosetta {
+		clear: none;
+		color: #dfdfdf;
+		font-family: Georgia, "Times New Roman", serif;
+		font-size: 30px;
+		margin: 0;
+
+		a {
+			border-bottom: none;
+			color: #dfdfdf;
+			display: block;
+			height: 52px; /* 88 header height - 36 top padding */
+			line-height: 22px;
+			padding: 0;
+
+			&:hover {
+				text-decoration: none;
+			}
+		}
+	}
+
+	#wporg-header-menu {
+		background: #23282d;
+		left: -75%;
+		list-style: none;
+		margin: 0;
+		max-width: 75%;
+		min-width: 200px;
+		padding: 20px 0 0;
+		position: absolute;
+		text-align: left;
+		transition: left 0.3s;
+		z-index: 100000;
+
+		&.active {
+			left: 0;
+		}
+	}
+
+	ul li {
+		list-style-type: none;
+		position: relative;
+
+		a {
+			color: #eee;
+			display: block;
+			font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
+			font-size: 13px;
+			font-weight: 600;
+			height: 34px;
+			line-height: 34px;
+			margin: 0 4px;
+			padding: 10px 30px;
+			text-decoration: none;
+
+			&.subcurrent {
+				font-weight: 700;
+			}
+
+			@include breakpoint( sm ) {
+				height: auto;
+			}
+		}
+
+		&#download,
+		&.download {
+			float: right;
+			height: 34px;
+			margin-right: 14px;
+			overflow: hidden;
+			padding: 0 0 34px;
+
+			@include breakpoint( 0, 820px ) {
+				display: none;
+			}
+
+			@include breakpoint( 0, $sm ) {
+				display: block;
+				float: none;
+				margin: 10px 20px 20px;
+				padding-bottom: 0;
+				height: auto;
+
+				a {
+					padding: 4px 10px;
+				}
+			}
+
+			a {
+				margin: 0;
+				padding: 0 16px;
+
+				&:hover {
+					color: #eee;
+				}
+			}
+
+			&.current,
+			&.current-menu-item,
+			.uparrow {
+				display: none;
+			}
+		}
+
+		a:hover,
+		a.current,
+		&.current-menu-item a,
+		&.current_page_parent a {
+			color: #00a0d2;
+		}
+	}
+
+	.nav-submenu {
+		display: none;
+		margin-bottom: 10px;
+		margin-top: -15px;
+		padding: 0;
+		position: static;
+
+		li a {
+			height: 24px;
+			line-height: 24px;
+			margin-left: 20px;
+		}
+	}
+
+	#head-search {
+
+		@include breakpoint( $sm ) {
+			float: right;
+			margin-right: 14px;
+			padding-top: 30px;
+		}
+
+		form {
+			border-bottom: 1px solid #3f3f3f;
+			display: inline-block;
+			margin-left: 60px;
+			width: 288px;
+
+			input.text {
+				background: #191e23;
+				border: 0;
+				border-radius: 0;
+				box-sizing: content-box;
+				color: #b4b9be;
+				float: left;
+				font-family: "Open Sans", sans-serif;
+				font-size: 12px;
+				height: 24px;
+				margin: 0;
+				outline: none;
+				padding: 3px;
+				vertical-align: top;
+				width: 256px;
+
+				&::-moz-placeholder {
+					color: #eee;
+				}
+
+				@media screen and (max-width: 480px) {
+					width: 216px;
+				}
+			}
+
+			[type="submit"] {
+				background: #191e23 url(//s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831) no-repeat 2px 5px;
+				border: none;
+				border-radius: 0;
+				box-shadow: none;
+				float: left;
+				height: 30px;
+				margin: 0;
+				padding: 0;
+				text-shadow: none !important;
+				width: 26px;
+			}
+
+			@include breakpoint( 0, 480px ) {
+				width: 248px;
+			}
+
+			@include breakpoint( 480px ) {
+				margin-left: 0;
+			}
+		}
+	}
+
+	@include breakpoint( $sm ) {
+		height: 120px;
+		text-align: inherit;
+
+		h1 {
+			float: left;
+			padding-left: 10px;
+		}
+
+		h2.rosetta {
+			float: left;
+			padding: 36px 27px 0;
+		}
+
+		#wporg-header-menu {
+			float: left;
+			list-style: none;
+			margin: -15px 0 0;
+			max-width: inherit;
+			min-width: 0;
+			padding: 0;
+			position: static;
+			width: 100%;
+		}
+
+		ul li {
+			float: left;
+			position: relative;
+
+			a {
+				color: #eee;
+				display: block;
+				font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
+				font-size: 13px;
+				font-weight: 600;
+				height: 46px;
+				line-height: 34px;
+				margin: 0 4px;
+				padding: 0 6px;
+
+				&.current ~ .uparrow {
+					border-bottom: 9px solid #f7f7f7;
+					border-left: 9px solid transparent;
+					border-right: 9px solid transparent;
+					height: 0;
+					margin: -8px auto 0 auto;
+					width: 0;
+				}
+			}
+
+			&.current-menu-item::after,
+			&.current_page_parent::after {
+				border-bottom: 9px solid #f7f7f7;
+				border-left: 9px solid transparent;
+				border-right: 9px solid transparent;
+				content: "";
+				height: 0;
+				left: 50%;
+				margin: -8px 0 0 -9px;
+				position: absolute;
+				width: 0;
+			}
+
+			&:hover .nav-submenu ~ .uparrow,
+			.nav-submenu:hover ~ .uparrow {
+				border-bottom: 9px solid #32373c;
+				border-left: 9px solid transparent;
+				border-right: 9px solid transparent;
+				height: 0;
+				margin: -10px auto 0 auto;
+				width: 0;
+			}
+
+			.nav-submenu li {
+				float: none;
+
+				a {
+					height: 34px;
+					line-height: 34px;
+				}
+			}
+		}
+
+		.nav-submenu {
+			background: #32373c;
+			border: #32373c solid 1px;
+			border-top: 0;
+			display: none !important;/* Prevents #wporg-header ul overwriting this */
+			margin-top: -1px;
+			min-width: 0;
+		}
+
+		ul li:hover .nav-submenu,
+		ul li .nav-submenu:hover {
+			display: block !important;/* Prevents #wporg-header ul overwriting this */
+			left: 0;
+			margin-left: 0;
+			position: absolute;
+			top: 46px;
+			width: auto;
+			z-index: 101;
+		}
+
+		#headline h2 {
+			text-rendering: optimizeLegibility;
+		}
+
+		ul li.current-menu-item::after,
+		ul li.current_page_parent::after,
+		ul li a.current ~ .uparrow {
+			border-bottom-color: $color__wp-blue;
+		}
+	}
+}
+
+#mobile-menu-button {
+	background: none;
+	border: none;
+	box-shadow: none;
+	display: block;
+	float: left;
+	font-family: dashicons;
+	font-size: 16px;
+	font-style: normal;
+	font-weight: 400;
+	left: 10px;
+	line-height: 1;
+	padding: 1px;
+	position: absolute;
+	text-align: center;
+	text-decoration: inherit;
+	text-shadow: none;
+	top: 75px;
+	transition: color 0.1s ease-in;
+	vertical-align: top;
+	-webkit-font-smoothing: antialiased;
+
+	&::before {
+		border: none;
+		box-sizing: border-box;
+		color: #888;
+		content: "\f228";
+		display: inline-block;
+		float: left;
+		font: 400 50px/1 dashicons;
+		margin: 0;
+		outline: none;
+		padding: 3px;
+		text-decoration: none;
+		vertical-align: middle;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	@include breakpoint( $sm ) {
+		display: none;
+	}
+}
+
+#download-mobile {
+	background: #f7f7f7;
+	border-bottom: 1px solid #ddd;
+
+	.wrapper {
+		padding: 20px 0;
+		text-align: center;
+	}
+
+	span.download-ready {
+		font-size: 1.6em;
+		margin: 0 0.25em;
+	}
+
+	a.download-button {
+		font-size: 1.6em;
+		height: inherit;
+		margin: 10px 0.25em;
+		padding: 10px 15px;
+	}
+}

@@ -1,0 +1,27 @@
+table {
+	margin: 0 0 1.5em;
+	width: 100%;
+}
+
+.helphub_article {
+
+	figure.wp-block-table {
+		margin: 1em 0;
+	}
+
+	table {
+
+		tr:nth-child(odd) {
+			background-color: $color__table-odd;
+		}
+
+		th,
+		td {
+			padding: 0.5em 1em;
+
+			&:not(:first-of-type) {
+				text-align: center;
+			}
+		}
+	}
+}
