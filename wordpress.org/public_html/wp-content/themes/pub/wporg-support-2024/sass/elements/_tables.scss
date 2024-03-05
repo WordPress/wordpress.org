@@ -12,7 +12,7 @@ table {
 	table {
 
 		tr:nth-child(odd) {
-			background-color: $color__table-odd;
+			background-color: var(--wp--preset--color--light-grey-2);
 		}
 
 		th,

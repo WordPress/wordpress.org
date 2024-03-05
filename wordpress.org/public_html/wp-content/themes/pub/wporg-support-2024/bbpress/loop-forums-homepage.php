@@ -1,30 +1,42 @@
 <?php do_action( 'bbp_template_before_forums_loop' ); ?>
 
-<div id="forums-list-<?php bbp_forum_id(); ?>" class="bbp-forums three-up">
 
+<section class="forums-homepage-list">
+	<h2 class="has-heading-5-font-size"><?php _e( 'Forums', 'wporg-forums' ); ?></h2>
 
-		<?php while ( bbp_forums() ) : bbp_the_forum(); ?>
+	<?php echo do_blocks(
+		sprintf(
+			'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"bbp-forums is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"32.3%%"},"fontSize":"small"} -->
+			<div id="forums-list-%s" class="bbp-forums wp-block-group is-style-cards-grid has-small-font-size">%s</div>
+			<!-- /wp:group -->',
+			esc_attr( bbp_get_forum_id() ),
+			wporg_support_get_forums_list(),
+		)
+	); ?>
 
-			<?php bbp_get_template_part( 'loop', 'single-forum-homepage' ); ?>
+</section>
 
-		<?php endwhile; ?>
+<section class="forums-homepage-topics">
+	<h2 class="has-heading-5-font-size"><?php _e( 'Topics', 'wporg-forums' ); ?></h2>
 
+	<?php echo do_blocks(
+		sprintf(
+			'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"32.3%%"},"fontSize":"small"} -->
+			<div class="wp-block-group is-style-cards-grid has-small-font-size">%s</div>
+			<!-- /wp:group -->',
+			wporg_support_get_views(),
+		)
+	); ?>
+</section>
 
-</div><!-- .forums-directory -->
-
-<div class="themes-plugins">
-	
-	<h3><?php _e( 'Themes and Plugins', 'wporg-forums' ); ?></h3>
+<section class="forums-homepage-themes-plugins">
 	<p><?php
-		/* translators: 1: Theme Directory URL, 2: Appearance icon, 3: Plugin Directory URL, 4: Plugins icon */
-		printf( __( 'Looking for help with a specific <a href="%1$s">%2$s theme</a> or <a href="%3$s">%4$s plugin</a>? Head to the theme or plugin\'s page and find the "View support forum" link to visit the theme or plugin\'s individual forum.', 'wporg-forums' ),
+		/* translators: 1: Theme Directory URL, 2: Plugin Directory URL */
+		printf( __( 'Looking for help with a specific <a href="%1$s">Theme</a> or <a href="%2$s">Plugin</a>?<br>Every theme and plugin has their own. Head to their individual pages and click "View support forum".', 'wporg-forums' ),
 			esc_url( __( 'https://wordpress.org/themes/', 'wporg-forums' ) ),
-			'<span class="dashicons dashicons-admin-appearance"></span>',
 			esc_url( __( 'https://wordpress.org/plugins/', 'wporg-forums' ) ),
-			'<span class="dashicons dashicons-admin-plugins"></span>'
 		);
 	?></p>
-
-</div>
+</section>
 
 <?php do_action( 'bbp_template_after_forums_loop' ); ?>
