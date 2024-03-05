@@ -45,10 +45,7 @@ module.exports = function ( grunt ) {
 
 								'../wporg/css/base/_tables.scss',
 								'../wporg/css/settings/_modular-scale.scss',
-								'../wporg/css/tools/_breakpoint.scss',
 								'../wporg/css/tools/_modular-scale.scss',
-								'../wporg/css/objects/_clearings.scss',
-								'../wporg/css/components/_posts-navigation.scss',
 							];
 
 							if ( isChild ) {

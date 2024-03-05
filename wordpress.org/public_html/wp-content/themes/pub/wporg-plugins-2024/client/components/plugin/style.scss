@@ -1,12 +1,10 @@
 .type-plugin {
-	@extend .clear;
 
 	.plugin-notice {
 		margin-top: 0;
 	}
 
 	.plugin-header {
-		@extend .clear;
 		border-bottom: 0;
 		padding: ms( 1 ) ms( 4 );
 
