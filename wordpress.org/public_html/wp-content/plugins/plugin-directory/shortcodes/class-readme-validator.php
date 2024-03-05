@@ -20,10 +20,10 @@ class Readme_Validator {
 			$readme_url      = '';
 			$readme_contents = '';
 			if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
-				$readme_url = $_REQUEST['readme'];
+				$readme_url = wp_unslash( $_REQUEST['readme'] );
 			}
 			if ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
-				$readme_contents = base64_decode( wp_unslash( $_POST['readme_contents'] ) );
+				$readme_contents = base64_decode( wp_unslash( $_POST['readme_contents'] ), true );
 			}
 			?>
 
@@ -67,7 +67,12 @@ class Readme_Validator {
 			$errors = Validator::instance()->validate_url( wp_unslash( $_REQUEST['readme'] ) );
 
 		} elseif ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
-			$errors = Validator::instance()->validate_content( base64_decode( wp_unslash( $_REQUEST['readme_contents'] ) ) );
+			$contents = base64_decode( wp_unslash( $_REQUEST['readme_contents'] ), true );
+			if ( ! $contents ) {
+				return;
+			}
+
+			$errors = Validator::instance()->validate_content( $contents );
 
 		} else {
 			return;
