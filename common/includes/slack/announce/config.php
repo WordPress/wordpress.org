@@ -126,6 +126,7 @@ function get_whitelist() {
 			'marybaum',
 			'meaganhanes',
 			'metalandcoffee',
+			'mikachan',
 			'monikarao',
 			'mukesh27',
 			'nicolefurlan',
