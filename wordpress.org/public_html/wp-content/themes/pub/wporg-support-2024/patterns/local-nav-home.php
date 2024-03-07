@@ -3,7 +3,7 @@ if ( function_exists( 'register_block_pattern' ) ) {
 	register_block_pattern(
 		'wporg-support/local-nav-home',
 		array(
-			'title'   => __( 'Local Nav - Home', 'wporg-support' ),
+			'title'   => __( 'Local Nav - Home', 'wporg-forums' ),
 			'content' => '<!-- wp:wporg/local-navigation-bar {"backgroundColor":"charcoal-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}}},"textColor":"white","fontSize":"small"} -->
 
 					<!-- wp:html -->

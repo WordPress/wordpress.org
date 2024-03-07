@@ -77,8 +77,8 @@ echo do_blocks( $is_forums_home
 
 					</div>
 					<!-- /wp:group -->',
-					esc_html__( 'Forums', 'wporg-support' ),
-					esc_html__( 'Learn how to help, or get help you need.', 'wporg-support' )
+					esc_html__( 'Forums', 'wporg-forums' ),
+					esc_html__( 'Learn how to help, or get help you need.', 'wporg-forums' )
 				)
 			); ?>
 		<?php elseif ( ! $is_user_profile ) : ?>

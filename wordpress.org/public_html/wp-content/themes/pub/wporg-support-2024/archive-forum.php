@@ -82,11 +82,11 @@ get_header(); ?>
 
 			</div>
 			<!-- /wp:group -->',
-			esc_html__( 'More resources', 'wporg-support' ),
-			esc_html__( 'Documentation', 'wporg-support' ),
-			esc_html__( "Your first stop where you'll find information on everything.", 'wporg-support' ),
-			esc_html__( 'Support Handbook', 'wporg-support' ),
-			esc_html__( 'Great for tips, tricks, and advice regarding giving the best support.', 'wporg-support' ),
+			esc_html__( 'More resources', 'wporg-forums' ),
+			esc_html__( 'Documentation', 'wporg-forums' ),
+			esc_html__( "Your first stop where you'll find information on everything.", 'wporg-forums' ),
+			esc_html__( 'Support Handbook', 'wporg-forums' ),
+			esc_html__( 'Great for tips, tricks, and advice regarding giving the best support.', 'wporg-forums' ),
 		)
 	); ?>
 

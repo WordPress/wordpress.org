@@ -3,7 +3,7 @@ if ( function_exists( 'register_block_pattern' ) ) {
 	register_block_pattern(
 		'wporg-support/local-nav',
 		array(
-			'title'   => __( 'Local Nav', 'wporg-support' ),
+			'title'   => __( 'Local Nav', 'wporg-forums' ),
 			'content' => sprintf(
 				'<!-- wp:wporg/local-navigation-bar {"className":"has-display-contents","backgroundColor":"charcoal-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}}},"textColor":"white","fontSize":"small"} -->
 
@@ -15,7 +15,7 @@ if ( function_exists( 'register_block_pattern' ) ) {
 
 				<!-- /wp:wporg/local-navigation-bar -->',
 				esc_url( home_url( '/forums/' ) ),
-				esc_html__( 'Forums', 'wporg-support' ),
+				esc_html__( 'Forums', 'wporg-forums' ),
 			),
 		)
 	);
