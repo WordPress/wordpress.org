@@ -49,9 +49,12 @@
 	width: 100%;
 	table-layout: fixed;
 }
-.event-details-stats table th, .event-details-stats table td{
+.event-details-stats table th, .event-details-stats table td {
 	padding: 1em;
 	text-align: center;
+}
+.event-details-stats table td:first-child {
+	text-align: left;
 }
 .event-details-stats table tr {
 	border-bottom: thin solid #f0f0f0;
@@ -59,8 +62,19 @@
 .event-details-stats table th {
 	background-color: #e9e9e9;
 }
-.event-details-stats-totals {
+.event-details-stats-totals td {
 	font-weight: bold;
+}
+.event-contributors li {
+	display: inline-block;
+	list-style-type: none;
+	margin-right: 1em;
+	margin-bottom: .5em;
+	width: 15em;
+}
+.event-contributors li .avatar {
+	border-radius: 50%;
+	vertical-align: middle;
 }
 .hide-event-url {
 	display: none;
@@ -217,7 +231,6 @@ input[type="submit"].attending-btn, a.button.is-primary.attend-btn {
 	padding: 0.8em;
 	font-size: .9em;
 	border-top: thin solid #e0e0e0;
-	font-family: monospace;
 }
 time.event-utc-time {
 	display: block;

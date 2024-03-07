@@ -4,16 +4,21 @@ namespace Wporg\TranslationEvents;
 
 use Exception;
 use WP_Post;
+use WP_User;
+use GP_Locale;
+use GP_Locales;
 
 class Stats_Row {
 	public int $created;
 	public int $reviewed;
 	public int $users;
+	public ?GP_Locale $language = null;
 
-	public function __construct( $created, $reviewed, $users ) {
+	public function __construct( $created, $reviewed, $users, ?GP_Locale $language = null ) {
 		$this->created  = $created;
 		$this->reviewed = $reviewed;
 		$this->users    = $users;
+		$this->language = $language;
 	}
 }
 
@@ -49,6 +54,23 @@ class Event_Stats {
 	 * @return Stats_Row[]
 	 */
 	public function rows(): array {
+		uasort(
+			$this->rows,
+			function ( $a, $b ) {
+				if ( ! $a->language && ! $b->language ) {
+					return 0;
+				}
+				if ( ! $a->language ) {
+					return -1;
+				}
+				if ( ! $b->language ) {
+					return 1;
+				}
+
+				return strcasecmp( $a->language->english_name, $b->language->english_name );
+			}
+		);
+
 		return $this->rows;
 	}
 
@@ -100,10 +122,16 @@ class Stats_Calculator {
 				);
 			}
 
+			$lang = GP_Locales::by_slug( $row->locale );
+			if ( ! $lang ) {
+				$lang = null;
+			}
+
 			$stats_row = new Stats_Row(
 				$row->created,
 				$row->total - $row->created,
 				$row->users,
+				$lang
 			);
 
 			if ( ! $is_totals ) {
@@ -114,6 +142,49 @@ class Stats_Calculator {
 		}
 
 		return $stats;
+	}
+
+	/**
+	 * Get contributors for an event.
+	 */
+	public function get_contributors( WP_Post $event ): array {
+		global $wpdb, $gp_table_prefix;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs thinks we're doing a schema change but we aren't.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+				select user_id, group_concat( distinct locale ) as locales
+				from {$gp_table_prefix}event_actions
+				where event_id = %d
+				group by user_id
+			",
+				array(
+					$event->ID,
+				)
+			)
+		);
+		// phpcs:enable
+
+		$users = array();
+		foreach ( $rows as $row ) {
+			$user          = new WP_User( $row->user_id );
+			$user->locales = explode( ',', $row->locales );
+			$users[]       = $user;
+		}
+
+		uasort(
+			$users,
+			function ( $a, $b ) {
+				return strcasecmp( $a->display_name, $b->display_name );
+			}
+		);
+
+		return $users;
 	}
 
 	/**

@@ -26,7 +26,8 @@ use WP_Post;
 use WP_Query;
 
 class Translation_Events {
-	const CPT = 'translation_event';
+	public const CPT                     = 'translation_event';
+	public const USER_META_KEY_ATTENDING = 'translation-events-attending';
 
 	public static function get_instance() {
 		static $instance = null;
@@ -55,16 +56,22 @@ class Translation_Events {
 		require_once __DIR__ . '/templates/helper-functions.php';
 		require_once __DIR__ . '/includes/active-events-cache.php';
 		require_once __DIR__ . '/includes/event.php';
-		require_once __DIR__ . '/includes/route.php';
+		require_once __DIR__ . '/includes/routes/route.php';
+		require_once __DIR__ . '/includes/routes/event/create.php';
+		require_once __DIR__ . '/includes/routes/event/details.php';
+		require_once __DIR__ . '/includes/routes/event/edit.php';
+		require_once __DIR__ . '/includes/routes/event/list.php';
+		require_once __DIR__ . '/includes/routes/user/attend-event.php';
+		require_once __DIR__ . '/includes/routes/user/my-events.php';
 		require_once __DIR__ . '/includes/stats-calculator.php';
 		require_once __DIR__ . '/includes/stats-listener.php';
 
-		GP::$router->add( '/events?', array( 'Wporg\TranslationEvents\Route', 'events_list' ) );
-		GP::$router->add( '/events/new', array( 'Wporg\TranslationEvents\Route', 'events_create' ) );
-		GP::$router->add( '/events/edit/(\d+)', array( 'Wporg\TranslationEvents\Route', 'events_edit' ) );
-		GP::$router->add( '/events/attend/(\d+)', array( 'Wporg\TranslationEvents\Route', 'events_attend' ), 'post' );
-		GP::$router->add( '/events/my-events', array( 'Wporg\TranslationEvents\Route', 'my_events' ) );
-		GP::$router->add( '/events/([a-z0-9_-]+)', array( 'Wporg\TranslationEvents\Route', 'events_details' ) );
+		GP::$router->add( '/events?', array( 'Wporg\TranslationEvents\Routes\Event\List_Route', 'handle' ) );
+		GP::$router->add( '/events/new', array( 'Wporg\TranslationEvents\Routes\Event\Create_Route', 'handle' ) );
+		GP::$router->add( '/events/edit/(\d+)', array( 'Wporg\TranslationEvents\Routes\Event\Edit_Route', 'handle' ) );
+		GP::$router->add( '/events/attend/(\d+)', array( 'Wporg\TranslationEvents\Routes\User\Attend_Event_Route', 'handle' ), 'post' );
+		GP::$router->add( '/events/my-events', array( 'Wporg\TranslationEvents\Routes\User\My_Events_Route', 'handle' ) );
+		GP::$router->add( '/events/([a-z0-9_-]+)', array( 'Wporg\TranslationEvents\Routes\Event\Details_Route', 'handle' ) );
 
 		$active_events_cache = new Active_Events_Cache();
 		$stats_listener      = new Stats_Listener( $active_events_cache );
@@ -399,12 +406,12 @@ class Translation_Events {
 		}
 		if ( 'publish' === $new_status && ( 'new' === $old_status || 'draft' === $old_status ) ) {
 			$current_user_id         = get_current_user_id();
-			$user_attending_events   = get_user_meta( $current_user_id, Route::USER_META_KEY_ATTENDING, true ) ?: array();
+			$user_attending_events   = get_user_meta( $current_user_id, self::USER_META_KEY_ATTENDING, true ) ?: array();
 			$is_user_attending_event = in_array( $post->ID, $user_attending_events, true );
 			if ( ! $is_user_attending_event ) {
 				$new_user_attending_events              = $user_attending_events;
 				$new_user_attending_events[ $post->ID ] = true;
-				update_user_meta( $current_user_id, Route::USER_META_KEY_ATTENDING, $new_user_attending_events, $user_attending_events );
+				update_user_meta( $current_user_id, self::USER_META_KEY_ATTENDING, $new_user_attending_events, $user_attending_events );
 			}
 		}
 	}
@@ -461,7 +468,7 @@ class Translation_Events {
 	 * @return void
 	 */
 	public function add_active_events_current_user(): void {
-		$user_attending_events = get_user_meta( get_current_user_id(), Route::USER_META_KEY_ATTENDING, true ) ?: array();
+		$user_attending_events = get_user_meta( get_current_user_id(), self::USER_META_KEY_ATTENDING, true ) ?: array();
 		if ( empty( $user_attending_events ) ) {
 			return;
 		}
