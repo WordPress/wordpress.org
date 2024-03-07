@@ -382,7 +382,9 @@ class User_Registrations_List_Table extends WP_List_Table {
 			}
 			$ip = $meta->{$field . '_ip'};
 
-			$meta->{$field . '_ip_country'} ??= ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? ' ' . \WordPressdotorg\GeoIP\query( $ip, 'country_short' ) : '' );
+			if ( empty( $meta->{$field . '_ip_country'} ) ) {
+				$meta->{$field . '_ip_country'} = ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $ip, 'country_short' ) : '' );
+			}
 
 			$ips[] = $ip . ' ' . $meta->{$field . '_ip_country'};
 		}
