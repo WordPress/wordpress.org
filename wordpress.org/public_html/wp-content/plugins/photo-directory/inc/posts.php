@@ -48,6 +48,9 @@ class Posts {
 		add_filter( 'the_content_feed',   [ __CLASS__, 'add_photo_to_rss_feed' ] );
 		add_action( 'rss2_item',          [ __CLASS__, 'add_photo_as_enclosure_to_rss_feed' ] );
 		add_filter( 'wp_get_attachment_image_attributes', [ __CLASS__, 'feed_attachment_image_attributes' ], 10, 3 );
+
+		// Allow the photos to be included in Jetpack Sitemaps.
+		add_filter( 'jetpack_sitemap_post_types', [ __CLASS__, 'jetpack_sitemap_post_types' ] );
 	}
 
 	/**
@@ -476,6 +479,18 @@ class Posts {
 		}
 
 		return $attr;
+	}
+
+	/**
+	 * The array of post types to be included in the sitemap.
+	 *
+	 * @param array $post_types List of included post types.
+	 * @return array
+	 */
+	public static function jetpack_sitemap_post_types( $post_types ) {
+		$post_types[] = Registrations::get_post_type();
+
+		return $post_types;
 	}
 
 }
