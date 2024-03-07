@@ -55,12 +55,15 @@
 }
 .event-details-stats table td:first-child {
 	text-align: left;
+	word-break: break-all;
 }
 .event-details-stats table tr {
 	border-bottom: thin solid #f0f0f0;
 }
 .event-details-stats table th {
 	background-color: #e9e9e9;
+	/* allow breaking the word anywhere so that it doesn't overflow */
+	word-break: break-all;
 }
 .event-details-stats-totals td {
 	font-weight: bold;
@@ -245,4 +248,21 @@ span.event-details-date-label {
 	font-weight: bold;
 	color: #5a5a5a;
 	display: block;
+}
+
+/* show the event-details-right below instead of on the right on mobile */
+@media (max-width: 768px) {
+	.event-page-wrapper, .event-details-right, .event-details-left {
+		width: 100%;
+		float: none;
+	}
+	.event-details-left {
+		border-right: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.event-details-stats {
+		margin: 0;
+	}
 }
