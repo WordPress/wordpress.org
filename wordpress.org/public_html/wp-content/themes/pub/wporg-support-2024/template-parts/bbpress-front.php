@@ -14,7 +14,11 @@
 <?php do_action( 'bbp_template_notices' ); ?>
 
 <section>
-	<p><?php _e( 'Our community-based Support Forums are a great place to learn, share, and troubleshoot. <a href="https://wordpress.org/support/welcome/">Get started!</a>', 'wporg-forums' ); ?></p>
+	<p><?php printf(
+		/* Translators: forums URL */
+		__( 'Our community-based Support Forums are a great place to learn, share, and troubleshoot. <a href="%s">Get started!</a>', 'wporg-forums' ),
+		esc_url( site_url( '/forums/' ) )
+	) ?></p>
 </section>
 
 <?php bbp_get_template_part( 'content', 'archive-forum' ); ?>
