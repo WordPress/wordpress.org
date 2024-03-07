@@ -12,8 +12,8 @@ if ( function_exists( 'register_block_pattern' ) ) {
 
 				</div>
 				<!-- /wp:group -->',
-				esc_attr__( 'Search', 'wporg' ),
-				esc_attr__( 'Search forums', 'wporg' ),
+				esc_attr__( 'Search', 'wporg-forums' ),
+				esc_attr__( 'Search forums', 'wporg-forums' ),
 			),
 		)
 	);

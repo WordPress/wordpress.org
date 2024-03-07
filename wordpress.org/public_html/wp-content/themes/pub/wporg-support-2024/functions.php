@@ -18,15 +18,15 @@ function add_site_navigation_menus( $menus ) {
 	return array(
 		'forums' => array(
 			array(
-				'label' => __( 'Guidelines', 'wporg' ),
+				'label' => __( 'Guidelines', 'wporg-forums' ),
 				'url' => '/guidelines/',
 			),
 			array(
-				'label' => __( 'Welcome to Support', 'wporg' ),
+				'label' => __( 'Welcome to Support', 'wporg-forums' ),
 				'url' => '/welcome/',
 			),
 			array(
-				'label' => __( 'Get Involved', 'wporg' ),
+				'label' => __( 'Get Involved', 'wporg-forums' ),
 				'url' => 'https://make.wordpress.org/support/handbook/',
 			)
 		),
@@ -82,7 +82,7 @@ function wporg_support_scripts() {
 	// Preload the heading font(s).
 	if ( is_callable( 'global_fonts_preload' ) ) {
 		/* translators: Subsets can be any of cyrillic, cyrillic-ext, greek, greek-ext, vietnamese, latin, latin-ext. */
-		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg' );
+		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg-forums' );
 		// All headings.
 		global_fonts_preload( 'EB Garamond, Inter', $subsets );
 	}
