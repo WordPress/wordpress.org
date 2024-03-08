@@ -25,7 +25,6 @@
 	}
 
 	.entry-title {
-		font-size: ms( 2 );
 		line-height: 1.3;
 		margin: 0 0 8px !important;
 
@@ -36,7 +35,7 @@
 	}
 
 	.entry-excerpt {
-		font-size: ms( -1 );
+		font-size: 0.9em;
 
 		p {
 			margin: 0;
@@ -51,15 +50,15 @@
 	}
 
 	footer {
+		font-size: var(--wp--preset--font-size--small);
+
 		span {
-			font-size: ms(-2);
 			display: inline-block;
 			overflow: hidden;
 			white-space: nowrap;
 
 			i {
 				display: inline-block;
-				font-size: 1rem;
 				margin-right: 0.4rem;
 			}
 
@@ -83,7 +82,7 @@
 			height: auto;
 			display: none;
 
-			@media (min-width:414px) {
+			@media (min-width:330px) {
 				display: inline-block;
 			}
 		}

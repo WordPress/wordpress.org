@@ -1,20 +1,22 @@
 .home .widget,
 .widget-area.home .widget {
 	display: inline-block;
-	font-size: ms( -1 );
+	font-size: var( --wp--preset--font-size--small );
 	margin: 0;
 	vertical-align: top;
-
-	.widget-title {
-		font-size: ms( 5 );
-	}
+	width: auto;
+	margin: var( --wp--style--block-gap );
 
 	@media screen and ( min-width: $ms-breakpoint ) {
-		margin-right: 5%;
+		margin: 0;
 		width: 30%;
 
+		&:first-child {
+			margin-right: 5%;
+		}
+
 		&:last-child {
-			margin-right: 0;
+			margin-left: 5%;
 		}
 	}
 
@@ -25,11 +27,10 @@
 }
 
 .entry-meta .widget-title {
-	font-size: ms( 2 );
+	font-size: var( --wp--preset--font-size--heading-4 );
+}
 
-	// Override wp4.css.
-	border: none;
-	color: $color__text-main;
-	font-weight: 600;
-	padding: 0;
+body.single.single-plugin .entry-meta {
+	/* override parent */
+	font-size: var( --wp--preset--font-size--normal );
 }

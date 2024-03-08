@@ -7,13 +7,10 @@
 		margin-right: 5px;
 	}
 
+	/* plugin-card */
 	.rating-count {
 		color: #999;
-		font-size: ms( -2 );
-
-		.site-main.single & {
-			display: none;
-		}
+		font-size: var( --wp--preset--font-size--extra-small );
 
 		a {
 			color: inherit;

@@ -5,8 +5,17 @@
 	}
 
 	.plugin-header {
+		&::before {
+			@include clearfix;
+		}
+
+		&::after {
+			@include clearfix;
+			@include clearfix-after;
+		}
+
 		border-bottom: 0;
-		padding: ms( 1 ) ms( 4 );
+		padding-top: 1em;
 
 		.plugin-actions {
 			float: right;
@@ -20,7 +29,7 @@
 
 		.plugin-title {
 			clear: none;
-			font-size: ms( 5 );
+			font-size: var( --wp--preset--font-size--heading-3 );
 			font-weight: 400;
 			line-height: 1.1;
 			margin: 0;
@@ -87,10 +96,6 @@
 	}
 
 	.entry-content {
-		padding: 0 ms( 4 );
-		max-width: 48rem;
-		font-size: 16px;
-
 		@media screen and ( min-width: $ms-breakpoint ) {
 			float: left;
 			padding: 0;
@@ -119,21 +124,27 @@
 	.plugin-blocks-list {
 		list-style: none;
 		margin-left: 0;
+		padding-left: 0;
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			padding-left: var( --wp--style--block-gap );
+		}
 
 		.plugin-blocks-list-item {
 			display: grid;
 			grid-template-columns: auto 1fr;
-			margin-bottom: ms(2);
+			margin-bottom: var( --wp--style--block-gap );
 		}
 
 		.block-icon {
 			display: inline-block;
-			margin-right: ms(0);
-			padding: ms(1);
-			width: 3.5rem; // 56px
-			height: 3.5rem; // 56px
+			margin-right: var( --wp--style--block-gap );
+			padding: var( --wp--style--block-gap );
+			max-width: 3.5rem; // 56px
+			max-height: 3.5rem; // 56px
 			border: 1px solid $color__border;
 			border-radius: 2px;
+			line-height: 16px; // to match svg.
 
 			&.dashicons {
 				color: inherit; // Prevent rating color being applied to star icons
@@ -157,13 +168,9 @@
 			}
 
 			.block-title {
-				margin-bottom: ms(-8);
+				margin-bottom: 0.4em;
 			}
 		}
-	}
-
-	.entry-meta {
-		padding: 0 ms( 4 );
 	}
 
 	span#description,
@@ -192,10 +199,10 @@
 		}
 	}
 
-
 	span#section-links {
 		display: flex;
 		flex-flow: row wrap;
+		margin-top: var( --wp--style--block-gap );
 
 		.tabs {
 			flex: 1 1 auto;
@@ -267,7 +274,6 @@
 	}
 
 	@media screen and ( min-width: $ms-breakpoint ) {
-		.plugin-header,
 		.entry-content,
 		.entry-meta {
 			padding-left: 0;

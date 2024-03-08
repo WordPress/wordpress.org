@@ -3,14 +3,12 @@
 	background-size: 100%;
 	background-repeat: no-repeat;
 	display: inline-block;
-	font-size: 0;
-	line-height: 0;
-	margin: 0 auto ms( 1 );
+	margin: 0 auto var( --wp--style--block-gap );
 	padding-top: 32.38342%; /* 250px / 722px */
 	vertical-align: middle;
 	width: 100%;
 
-	@media screen and ( min-width: 60em ) {
-		margin-top: ms( 4 );
+	@media screen and ( min-width: $ms-breakpoint ) {
+		margin-top: var( --wp--style--block-gap );
 	}
 }

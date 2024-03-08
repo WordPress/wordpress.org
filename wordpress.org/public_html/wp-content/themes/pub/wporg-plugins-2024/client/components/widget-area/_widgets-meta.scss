@@ -1,8 +1,8 @@
 .plugin-meta {
-	margin-top: 2rem;
+	margin-top: var(--wp--style--block-gap);
+	font-size: var(--wp--preset--font-size--small);
 
 	ul {
-		font-size: ms( -1 );
 		list-style-type: none;
 		margin: 0;
 		padding: 0;
@@ -52,7 +52,7 @@
 		border-radius: 2px;
 		color: #000;
 		display: inline-block;
-		font-size: ms( -4 );
+		font-size: var( --wp--preset--font-size--extra-small );
 		margin: 2px;
 		max-width: 95%;
 		overflow: hidden;

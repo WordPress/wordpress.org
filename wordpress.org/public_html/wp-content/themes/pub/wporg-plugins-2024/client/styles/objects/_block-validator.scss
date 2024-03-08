@@ -2,7 +2,7 @@
 
 	.block-validator__plugin-form label {
 		display: block;
-		margin-bottom: ms(-2);
+		margin-bottom: 0.8em;
 	}
 
 	.block-validator__plugin-input-container {
@@ -16,7 +16,7 @@
 
 	.block-validator__plugin-submit {
 		flex: 0;
-		margin-left: ms(-3);
+		margin-left: var( --wp--style--block-gap );
 	}
 
 	/* Input width plus some padding */
@@ -31,7 +31,7 @@
 
 		.block-validator__plugin-submit {
 			margin-left: 0;
-			margin-top: ms(-3);
+			margin-top: var( --wp--style--block-gap );
 		}
 	}
 
@@ -39,17 +39,13 @@
 
 		details,
 		p {
-			font-size: ms( 0 );
-			margin: ms(-3) 0;
+			font-size: var( --wp--preset--font-size--normal );
+			margin: var( --wp--style--block-gap ) 0;
 		}
 
 		details p {
 			margin-left: 1rem;
-			font-size: ms( -2 );
-		}
-
-		code {
-			font-size: 1em;
+			font-size: var( --wp--preset--font-size--small );
 		}
 
 		summary {

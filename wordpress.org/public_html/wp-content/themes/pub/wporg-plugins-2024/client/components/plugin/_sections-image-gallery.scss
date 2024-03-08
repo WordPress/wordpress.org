@@ -13,7 +13,7 @@ $ig-background-black: rgba(0, 0, 0, .4) !default;
 	.image-gallery-left-nav,
 	.image-gallery-right-nav {
 		display: none;
-		font-size: ms( 10 );
+		font-size: 48px;
 		height: 100%;
 		position: absolute;
 		top: 0;
@@ -105,10 +105,9 @@ $ig-background-black: rgba(0, 0, 0, .4) !default;
 		line-height: 1.5;
 		padding: 10px 20px;
 		white-space: normal;
-		font-size: ms( -2 );
+		font-size: var( --wp--preset--font-size--small );
 
 		@media (max-width: $ig-screen-sm-min) {
-			font-size: ms( -2 );
 			padding: 8px 15px;
 		}
 

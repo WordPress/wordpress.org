@@ -3,36 +3,42 @@
 @keyframes favme-anime {
 	0% {
 		opacity: 1;
-		font-size: ms(0);
+		font-size: var( --wp--preset--font-size--large );
 		-webkit-text-stroke-color: transparent;
 	}
 	25% {
 		opacity: 0.6;
 		color: #fff;
-		font-size: ms(-2);
+		font-size: var( --wp--preset--font-size--small );
 		-webkit-text-stroke-width: 1px;
 		-webkit-text-stroke-color: #dc3232;
 	}
 	75% {
 		opacity: 0.6;
 		color: #fff;
-		font-size: ms(3);
+		font-size: var( --wp--preset--font-size--large );
 		-webkit-text-stroke-width: 1px;
 		-webkit-text-stroke-color: #dc3232;
 	}
 	100% {
 		opacity: 1;
-		font-size: ms(2);
+		font-size: var( --wp--preset--font-size--normal );
 		-webkit-text-stroke-color: transparent;
 	}
 }
 
 @keyframes favme-hover {
-	from {
-		font-size: ms( 3 );
+	0% {
+		font-size: var( --wp--preset--font-size--large );
 	}
-	80% {
-		font-size: ms( 2 );
+	25% {
+		font-size: var( --wp--preset--font-size--small );
+	}
+	75% {
+		font-size: var( --wp--preset--font-size--large );
+	}
+	100% {
+		font-size: var( --wp--preset--font-size--normal );
 	}
 }
 
@@ -51,7 +57,7 @@
 		color: #cbcdce;
 		cursor: pointer;
 		display: flex;
-		font-size: ms( 2 );
+		font-size: var( --wp--preset--font-size--large );
 		height: 100%;
 		justify-content: center;
 		line-height: 1;

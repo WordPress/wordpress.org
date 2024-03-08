@@ -1,11 +1,5 @@
 .plugin-changelog {
-	font-size: ms( -2 );
-
 	code {
-		font-size: ms( -2 );
-	}
-
-	h4 {
-		margin-top: 0;
+		font-size: var( --wp--preset--font-size--small );
 	}
 }

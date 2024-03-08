@@ -1,8 +1,8 @@
-.plugin-section {
+#main .plugin-section { /* #main prefix is to overrule inline block styles */
 	border-bottom: 2px solid $color__border;
-	margin: 0 auto ms(14);
+	margin: var( --wp--preset--spacing--40 ) auto;
 	max-width: var( --wp--style--global--content-size );
-	padding-bottom: ms(10);
+	padding-bottom: var( --wp--preset--spacing--40 );
 
 	&:last-of-type {
 		margin-bottom: 0;
@@ -17,7 +17,6 @@
 
 	.section-title {
 		flex: 1 1 auto;
-		font-size: ms( 5 );
 		font-weight: 400;
 		margin-bottom: 0;
 		margin-top: 0;
@@ -26,6 +25,5 @@
 	.section-link {
 		align-self: center;
 		flex: 0 0 auto;
-		font-size: ms( 0 );
 	}
 }

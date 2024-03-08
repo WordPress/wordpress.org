@@ -1,5 +1,5 @@
 .widget.plugin-categorization {
-	margin-top: 2rem;
+	margin-top: var(--wp--style--block-gap);
 
 	.widget-head {
 		display: flex;
@@ -9,15 +9,14 @@
 
 		h2 {
 			flex: 1 1 auto;
-			font-size: 1.125rem;
-			font-weight: bold;
+			font-size: var( --wp--preset--font-size--heading-4 );
 			margin-top: 0;
 			margin-bottom: 0.2rem;
 		}
 
 		a {
 			flex: 0 0 auto;
-			font-size: 0.8rem;
+			font-size: var( --wp--preset--font-size--small );
 			line-height: 2;
 			text-align: right;
 
@@ -34,7 +33,7 @@
 	}
 
 	p {
-		font-size: 0.8rem;
+		font-size: var( --wp--preset--font-size--small );
 		margin-top: 0.5rem;
 	}
 

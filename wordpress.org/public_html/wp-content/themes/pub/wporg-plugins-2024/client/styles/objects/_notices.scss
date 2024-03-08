@@ -4,16 +4,11 @@
 	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
 	margin: 1em 0;
 	padding: 1px 12px;
-	font-size: ms( -1 );
+	font-size: var( --wp--preset--font-size--small );
 
 	p, ul {
 		margin: 0.5em 0;
 		padding: 2px;
-
-		/* wp4.css is setting a border bottom on anchor tags in paragraphs tags... The notice block requires a paragraph tag */
-		a {
-			border-bottom: 0;
-		}
 	}
 
 	pre {

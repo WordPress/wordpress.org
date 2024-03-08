@@ -1,11 +1,11 @@
 .plugin-ratings {
-	font-size: ms( -1 );
 	position: relative;
 
 	.reviews-link {
 		position: absolute;
 		right: 0;
 		top: 0;
+		font-size: var(--wp--preset--font-size--small);
 
 		&:after {
 			content: "\f345";
@@ -18,7 +18,7 @@
 	[class*='dashicons-star-'] {
 		color: #FFB900;
 		display: inline-block;
-		font-size: ms( 4 );
+		font-size: var( --wp--preset--font-size--large );
 		height: auto;
 		margin: 0;
 		width: auto;

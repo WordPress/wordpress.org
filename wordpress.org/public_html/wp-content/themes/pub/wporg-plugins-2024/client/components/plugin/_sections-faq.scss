@@ -1,16 +1,4 @@
 .plugin-faq {
-	h2:first-of-type {
-		font-size: ms( 2 );
-		font-weight: 600;
-		letter-spacing: 0.01rem;
-		text-transform: uppercase;
-
-		// Override wp4.css.
-		border: none;
-		color: $color__text-main;
-		padding: 0;
-		text-transform: inherit;
-	}
 
 	dl {
 		border-bottom: 1px solid $color__border;
@@ -19,7 +7,6 @@
 	dt {
 		border-top: 1px solid $color__border;
 		cursor: pointer;
-		font-size: ms( -1 );
 		padding: 1rem 0;
 
 		&:before {
@@ -44,12 +31,9 @@
 		}
 		h3 {
 			display: inline;
-			font-size: ms( 2 );
-			text-transform: none;
 			margin-top: 0 !important;
 			margin-bottom: 0;
-			color: $color__link;
-			text-decoration: underline;
+			color: var( --wp--custom--link--color--text );
 
 			button {
 				all: inherit;

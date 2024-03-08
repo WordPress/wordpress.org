@@ -1,8 +1,6 @@
 /* global module:false, require:function, process:object */
 
 module.exports = function ( grunt ) {
-	var isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
-
 	grunt.initConfig( {
 		postcss: {
 			options: {
@@ -41,17 +39,9 @@ module.exports = function ( grunt ) {
 					[ 'settings', 'tools', 'generic', 'base', 'objects', 'components', 'trumps' ].forEach(
 						function ( component ) {
 							var paths = [
-								'client/styles/settings/_colors.scss',
-
-								'../wporg/css/base/_tables.scss',
-								'../wporg/css/settings/_modular-scale.scss',
-								'../wporg/css/tools/_modular-scale.scss',
+								'client/styles/' + component + '/**/*.scss',
+								'!client/styles/' + component + '/_' + component + '.scss',
 							];
-
-							if ( isChild ) {
-								paths.push( 'client/styles/' + component + '/**/*.scss' );
-								paths.push( '!client/styles/' + component + '/_' + component + '.scss' );
-							}
 
 							if ( 'components' === component ) {
 								paths.push( 'client/components/**/*.scss' );
@@ -135,7 +125,7 @@ module.exports = function ( grunt ) {
 		},
 		watch: {
 			css: {
-				files: [ '**/*.scss', '../wporg/css/**/*scss', 'client/components/**/**.scss' ],
+				files: [ '**/*.scss', 'client/components/**/**.scss' ],
 				tasks: [ 'build' ],
 			},
 		},

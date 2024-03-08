@@ -1,15 +1,11 @@
 .locale-banner {
 	background: $color__green;
-	font-size: ms( -2 );
-	padding: 0.5rem;
+	font-size: var(--wp--preset--font-size--small);
+	padding: 0.5em;
 	text-align: center;
 
-	@media ( min-width: 67rem ) {
-		margin: 1rem auto;
+	@media ( min-width: $ms-breakpoint ) {
+		margin: var(--wp--style--block-gap) auto;
 		max-width: var( --wp--style--global--content-size );
-	}
-
-	a {
-		text-decoration: underline;
 	}
 }

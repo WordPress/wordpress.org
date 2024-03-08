@@ -1,5 +1,4 @@
 .plugin-support {
-	font-size: ms( -1 );
 
 	.counter-container {
 		margin-bottom: 1rem;
@@ -24,7 +23,7 @@
 	}
 
 	.counter-count {
-		font-size: ms( -4 );
+		font-size: var(--wp--preset--font-size--extra-small);
 		left: 8px;
 		position: absolute;
 		top: 8px;
