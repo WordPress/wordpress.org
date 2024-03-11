@@ -25,7 +25,7 @@ function endpoint_handler() {
 		 */
 		foreach ( $variations as $variation ) {
 			$title = strtolower( $variation['title'] );
-			$link  = "$base?style_variation=$title";
+			$link  = add_query_arg( 'style_variation', urlencode( $title ), $base );;
 
 			$styles[] = array(
 				'title'        => $title,
