@@ -323,40 +323,6 @@ function document_title_separator() {
 add_filter( 'document_title_separator', __NAMESPACE__ . '\document_title_separator' );
 
 /**
- * Shorten excerpt length on index pages, so plugins cards are all the same height.
- *
- * @param string $excerpt The excerpt.
- * @return string
- */
-function excerpt_length( $excerpt ) {
-	/*
-	 * Don't run this filter during rest-api requests.
-	 * This shouldn't normally be needed, but this avoids accidental shortening of the API fields.
-	 */
-	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-		return $excerpt;
-	}
-
-	if ( is_home() || is_archive() ) {
-		/*
-		 * translators: If your word count is based on single characters (e.g. East Asian characters),
-		 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
-		 * Do not translate into your own language.
-		 */
-		if ( strpos( _x( 'words', 'Word count type. Do not translate!', 'wporg-plugins' ), 'characters' ) === 0 ) {
-			// Use the default limit of 55 characters for East Asian locales.
-			$excerpt = wp_trim_words( $excerpt );
-		} else {
-			// Limit the excerpt to 15 words for other locales.
-			$excerpt = wp_trim_words( $excerpt, 15 );
-		}
-	}
-
-	return $excerpt;
-}
-add_filter( 'get_the_excerpt', __NAMESPACE__ . '\excerpt_length' );
-
-/**
  * Adds meta tags for richer social media integrations.
  */
 function social_meta_data() {
