@@ -43,7 +43,7 @@
 }
 
 .plugin-favorite {
-	height: 36px;
+	height: calc( 2 * var( --wp--custom--button--spacing--padding--top ) + 2 * var( --wp--preset--font-size--normal ) );
 	text-align: center;
 	vertical-align: top;
 	width: 36px;

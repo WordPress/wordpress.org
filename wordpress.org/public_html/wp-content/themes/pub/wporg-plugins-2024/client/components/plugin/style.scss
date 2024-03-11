@@ -21,7 +21,8 @@
 			float: right;
 			margin-inline-start: 1rem;
 
-			div {
+			> div,
+			> .button {
 				display: inline-block;
 				text-align: center;
 			}
@@ -46,6 +47,10 @@
 
 	.plugin-banner + .plugin-header {
 		padding-top: 0;
+
+		> .notice:first-of-type {
+			margin-top: 0;
+		}
 	}
 
 	.tabs {

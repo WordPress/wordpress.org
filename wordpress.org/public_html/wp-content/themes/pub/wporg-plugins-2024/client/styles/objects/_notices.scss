@@ -2,7 +2,7 @@
 	background: #fff;
 	border-left: 4px solid #fff;
 	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
-	margin: 1em 0;
+	margin: var( --wp--style--block-gap ) 0;
 	padding: 1px 12px;
 	font-size: var( --wp--preset--font-size--small );
 
