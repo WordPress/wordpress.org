@@ -1135,7 +1135,7 @@ p.has-background {
 }
 
 ul, ol {
-	margin: 0 0 1.5em 3em;
+	margin: 0 0 var(--wp--style--block-gap) 0;
 }
 
 ul {
@@ -3745,6 +3745,27 @@ body.category #main .archive-pagination {
 
 select {
 	-webkit-appearance: menulist;
+}
+
+/*--------------------------------------------------------------
+# Notices
+--------------------------------------------------------------*/
+div.bbp-template-notice,
+div.indicator-hint {
+	padding: 1.25em;
+	border-radius: 2px;
+	margin: 0 0 var(--wp--style--block-gap);
+}
+div.bbp-template-notice ul:last-child,
+div.indicator-hint ul:last-child {
+	margin-bottom: 0;
+}
+div.bbp-template-notice p,
+div.bbp-template-notice li,
+div.indicator-hint p,
+div.indicator-hint li {
+	font-size: var(--wp--preset--font-size--extra-small);
+	padding: 0;
 }
 
 /*--------------------------------------------------------------

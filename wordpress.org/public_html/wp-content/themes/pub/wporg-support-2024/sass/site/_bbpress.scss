@@ -856,6 +856,27 @@ select {
 	-webkit-appearance: menulist; // Get those arrows back into the select box.
 }
 
+/*--------------------------------------------------------------
+# Notices
+--------------------------------------------------------------*/
+
+div.bbp-template-notice,
+div.indicator-hint {
+	// Matches notice block
+	padding: 1.25em;
+	border-radius: 2px;
+	margin: 0 0 var(--wp--style--block-gap);
+
+	ul:last-child {
+		margin-bottom: 0;
+	}
+
+	p,
+	li {
+		font-size: var(--wp--preset--font-size--extra-small);
+		padding: 0;
+	}
+}
 
 /*--------------------------------------------------------------
 # Homepage
