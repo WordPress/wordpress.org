@@ -20,7 +20,7 @@ $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
 $plugin_title = $is_closed ? $post->post_name : get_the_title();
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'alignwide' ); ?>>
 	<?php the_plugin_banner(); ?>
 
 	<header class="plugin-header">

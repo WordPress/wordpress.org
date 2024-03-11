@@ -26,4 +26,8 @@
 		align-self: center;
 		flex: 0 0 auto;
 	}
+
+	@media screen and ( min-width: $large-breakpoint ) {
+		max-width: var( --wp--style--global--wide-size );
+	}
 }

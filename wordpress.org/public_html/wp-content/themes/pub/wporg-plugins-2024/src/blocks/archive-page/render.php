@@ -10,31 +10,29 @@ if ( ! $wp_query->have_posts() ) {
 
 ?>
 
-<div id="primary" class="content-area">
-	<main id="main" class="site-main" role="main">
+<main id="main" class="site-main alignwide" role="main">
 
-	<header class="page-header">
-		<?php
-		the_archive_title( '<h1 class="page-title">', '</h1>' );
-		the_archive_description( '<div class="taxonomy-description">', '</div>' );
-		?>
-	</header><!-- .page-header -->
-
+<header class="page-header">
 	<?php
-	/* Start the Loop */
-	while ( $wp_query->have_posts() ) {
-		the_post();
-
-		get_template_part( 'template-parts/plugin' );
-	}
-
-	if ( ! have_posts() ) {
-		get_template_part( 'template-parts/no-results' );
-	}
-
-	the_posts_pagination();
-
+	the_archive_title( '<h1 class="page-title">', '</h1>' );
+	the_archive_description( '<div class="taxonomy-description">', '</div>' );
 	?>
+</header><!-- .page-header -->
 
-	</main><!-- #main -->
-</div><!-- #primary -->
+<?php
+/* Start the Loop */
+while ( $wp_query->have_posts() ) {
+	the_post();
+
+	get_template_part( 'template-parts/plugin' );
+}
+
+if ( ! have_posts() ) {
+	get_template_part( 'template-parts/no-results' );
+}
+
+the_posts_pagination();
+
+?>
+
+</main><!-- #main -->

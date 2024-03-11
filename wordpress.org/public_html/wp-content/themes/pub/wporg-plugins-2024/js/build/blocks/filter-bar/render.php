@@ -20,7 +20,7 @@ $local_nav_items = array(
 
 ?>
 
-<div class="wporg-filter-bar">
+<div class="wporg-filter-bar alignwide">
 	<nav class="wporg-filter-bar__navigation" aria-label="<?php esc_html_e( 'Plugin filters', 'wporg-plugins' ); ?>">
 		<ul>
 		<?php

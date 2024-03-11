@@ -76,7 +76,7 @@ add_action( 'template_redirect', __NAMESPACE__ . '\enforce_trailing_slash' );
  * @global int $content_width
  */
 function content_width() {
-	$GLOBALS['content_width'] = apply_filters( 'wporg_plugins_content_width', 640 );
+	$GLOBALS['content_width'] = apply_filters( 'wporg_plugins_content_width', 750 );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
 
