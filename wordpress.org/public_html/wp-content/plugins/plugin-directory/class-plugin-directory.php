@@ -1833,6 +1833,14 @@ class Plugin_Directory {
 		$title = $args['post_title'] ?: $args['post_name'];
 		$slug  = $args['post_name'] ?: sanitize_title( $title );
 
+		// Remove null items (date-related fields) to fallback to the defaults below.
+		$args = array_filter(
+			$args,
+			function( $item ) {
+				return ! is_null( $item );
+			}
+		);
+
 		$post_date     = current_time( 'mysql' );
 		$post_date_gmt = current_time( 'mysql', 1 );
 
@@ -1846,21 +1854,12 @@ class Plugin_Directory {
 			'post_modified_gmt' => $post_date_gmt,
 		) );
 
-		$update = ! empty( $args['ID'] );
 		$result = wp_insert_post( $args, true );
 
 		if ( ! is_wp_error( $result ) ) {
 			wp_cache_set( $result, $slug, 'plugin-slugs' );
-			$result = get_post( $result );
 
-			if ( ! $update ) {
-				$owner = get_userdata( $result->post_author );
-				Tools::audit_log( sprintf(
-					'Submitted by <a href="%s">%s</a>.',
-					esc_url( 'https://profiles.wordpress.org/' . $owner->user_nicename . '/' ),
-					$owner->user_login
-				), $result->ID );
-			}
+			$result = get_post( $result );
 		}
 
 		return $result;
