@@ -22,11 +22,17 @@
 	</header><!-- .page-header -->
 
 	<?php
-	while ( have_posts() ) {
-		the_post();
-
-		get_template_part( 'template-parts/plugin', 'index' );
-	}
+	// NOTE: wp-block-group-is-layout-grid is here as `wp-block-query-is-layout-grid` is not supported yet by `wporg/link-wrapper`.
+	echo do_blocks( <<<BLOCKS
+		<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
+		<div class="wp-block-query plugin-cards">
+				<!-- wp:post-template {"className":"is-style-cards-grid wp-block-group-is-layout-grid","layout":{"type":"grid","minimumColumnWidth":"48%"}} -->
+					<!-- wp:wporg/plugin-card /-->
+				<!-- /wp:post-template -->
+			</div>
+		<!-- /wp:query -->
+	BLOCKS
+	);
 
 	if ( ! have_posts() ) {
 		get_template_part( 'template-parts/no-results' );

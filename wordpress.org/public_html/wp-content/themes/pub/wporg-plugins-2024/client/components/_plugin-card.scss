@@ -1,56 +1,37 @@
 .plugin-card {
-	background-color: #f9f9f9;
-	margin-bottom: 4%;
-	padding: 15px 15px 8px;
-	vertical-align: top;
-
-	@media screen and ( min-width: $ms-breakpoint ) {
-		display: inline-block;
-		margin-right: 4%;
-		width: 48%;
-
-		&:nth-of-type( even ) {
-			margin-right: 0;
-		}
-	}
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100%;
 
 	.entry {
 		display: inline-block;
-		margin: auto;
 		vertical-align: top;
-
-		@media screen and ( min-width: 21em ) {
-			width: calc(96% - 96px);
-		}
 	}
 
 	.entry-title {
 		line-height: 1.3;
-		margin: 0 0 8px !important;
 
-		a {
-			font-weight: 400;
-			word-wrap: break-word;
-		}
+		display: block;
+		display: -webkit-box;
+		overflow: hidden;
+		max-height: 2.6em; /* 2x line-height, non-webkit fallback */
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
 	}
 
 	.entry-excerpt {
-		font-size: 0.9em;
+		clear: both;
+		font-size: var( --wp--preset--font-size--small );
 
 		p {
 			margin: 0;
 		}
 	}
 
-	hr {
-		background-color: #fff;
-		border: 0;
-		height: 2px;
-		margin: 15px -15px 8px;
-	}
-
 	footer {
-		font-size: var(--wp--preset--font-size--small);
+		font-size: var( --wp--preset--font-size--small );
+		margin-top: var( --wp--style--block-gap );
 
 		span {
 			display: inline-block;
@@ -74,7 +55,7 @@
 		span.active-installs {
 			min-width: 48%;
 		}
-			
+
 		.dashicons {
 			margin: 0 2px -1rem;
 			color: #bbb;

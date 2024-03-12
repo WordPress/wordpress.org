@@ -1,0 +1,6 @@
+@media screen and ( max-width: $ms-breakpoint ) {
+	.plugin-cards .is-style-cards-grid {
+		grid-template-columns: 100%;
+		margin: 0 var( --wp--style--block-gap );
+	}
+}

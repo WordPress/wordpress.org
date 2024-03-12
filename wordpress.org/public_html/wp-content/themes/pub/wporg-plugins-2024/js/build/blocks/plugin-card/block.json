@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/plugin-card",
+  "version": "0.1.0",
+  "title": "Plugin Card for Archive Pages",
+  "category": "design",
+  "icon": "",
+  "description": "A block that displays a plugin card.",
+  "textdomain": "wporg",
+  "attributes": {},
+  "supports": {
+    "html": false
+  },
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

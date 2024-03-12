@@ -1,21 +1,19 @@
 .entry-thumbnail {
 	display: none;
-	max-width: 96px;
+	max-width: 80px;
+	margin-right: 20px;
+	margin-bottom: 20px;
 
 	.plugin-icon {
 		background-size: cover;
-		height: 96px;
-		width: 96px;
+		height: 80px;
+		width: 80px;
 	}
 
 	@media screen and ( min-width: 21em ) {
-			display: inline-block;
-			margin: 0 4% 0 0;
-			vertical-align: top;
-
-			a {
-				display: block;
-			}
+		display: inline-block;
+		vertical-align: top;
+		float: left;
 	}
 
 	.single & {
