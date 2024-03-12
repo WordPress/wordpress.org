@@ -34,11 +34,12 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 */
 	public function filter_columns( $columns ) {
 		// Rename some columns.
-		$columns['author']   = __( 'Submitter', 'wporg-plugins' );
-		$columns['reviewer'] = __( 'Assigned Reviewer', 'wporg-plugins' );
-		$columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class="screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
-		$columns['zip']      = 'Latest Zip';
-		$columns['loc']      = 'Lines of PHP Code'; 
+		$columns['author']         = __( 'Submitter', 'wporg-plugins' );
+		$columns['reviewer']       = __( 'Assigned Reviewer', 'wporg-plugins' );
+		$columns['comments']       = '<span class = "vers comment-grey-bubble" title = "' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class = "screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
+		$columns['zip']            = 'Latest Zip';
+		$columns['loc']            = 'Lines of PHP Code'; 
+		$columns['submitted_date'] = 'Submitted Date'; 
 
 		// We don't want the stats column.
 		unset( $columns['stats'] );
@@ -52,9 +53,10 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * The sortable columns.
 	 */
 	public function filter_sortable_columns( $columns ) {
-		$columns[ 'reviewer' ] = [ 'assigned_reviewer_time', 'asc' ];
-		$columns[ 'zip' ]      = [ '_submitted_zip_size', 'asc' ];
-		$columns[ 'loc' ]      = [ '_submitted_zip_loc', 'asc' ];
+		$columns[ 'reviewer' ]       = [ 'assigned_reviewer_time', 'asc' ];
+		$columns[ 'zip' ]            = [ '_submitted_zip_size', 'asc' ];
+		$columns[ 'loc' ]            = [ '_submitted_zip_loc', 'asc' ];
+		$columns[ 'submitted_date' ] = [ '_submitted_date', 'asc' ];
 
 		return $columns;
 	}
@@ -76,6 +78,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$columns[] = 'reviewer';
 			$columns[] = 'zip';
 			$columns[] = 'loc';
+			$columns[] = 'submitted_date';
 		}
 
 		return $columns;
@@ -728,5 +731,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		echo number_format_i18n( (int) $post->_submitted_zip_loc ) ?: '-';
+	}
+
+	public function column_submitted_date( $post ) {
+		echo gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 );
 	}
 }
