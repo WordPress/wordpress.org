@@ -250,6 +250,9 @@
 
 body:not(.trac):not(.home-page):not(.home) #main {
 	margin-top: 0;
+}
+
+body:not(.trac):not(.home-page) #main {
 	padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
 }
 
@@ -270,11 +273,6 @@ body:not(.trac):not(.home-page):not(.home) #main {
 	#footer {
 		width: unset;
 	}
-}
-
-// For the homepage, we don't want to have the default site main padding
-body.home #page .site-main {
-	padding: 5rem 1rem;
 }
 
 

@@ -13,6 +13,14 @@ get_header(); ?>
 
 		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
 
+			<section>
+				<p><?php printf(
+					/* Translators: forums URL */
+					__( 'Our community-based Support Forums are a great place to learn, share, and troubleshoot. <a href="%s">Get started!</a>', 'wporg-forums' ),
+					esc_url( site_url( '/welcome/' ) )
+				) ?></p>
+			</section>
+
 			<?php get_template_part( 'template-parts/bbpress', 'front' ); ?>
 
 		</div>
