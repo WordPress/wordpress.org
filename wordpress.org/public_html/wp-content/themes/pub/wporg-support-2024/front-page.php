@@ -28,40 +28,70 @@ get_header(); ?>
 
 			<?php else : ?>
 
-				<section class="three-up" id="forum-welcome">
-					<div>
-						<div class="info-box">
-							<span class="dashicons <?php
-								/* translators: dashicon class name for 'Welcome to Support' section. Do not translate into your own language. */
-								esc_attr_e( 'dashicons-sos', 'wporg-forums' );
-							?>"></span>
-							<h3><?php _e( 'Welcome to Support', 'wporg-forums' ); ?></h3>
-							<p><?php _e( 'Our community-based Support Forums are a great place to learn, share, and troubleshoot.', 'wporg-forums' ); ?></p>
-							<p><?php _e( '<a href="https://wordpress.org/support/welcome/">Get started</a>', 'wporg-forums' ); ?></p>
+				<section>
+
+					<?php echo do_blocks(
+						'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"32.3%"}} -->
+						<div class="wp-block-group is-style-cards-grid">
+
+							<!-- wp:group {"layout":{"type":"constrained"}} -->
+							<div class="wp-block-group">
+
+								<!-- wp:heading -->
+								<h2 class="wp-block-heading has-heading-5-font-size">' . __( 'Welcome to Support', 'wporg-forums' ) . '</h2>
+								<!-- /wp:heading -->
+
+								<!-- wp:paragraph -->
+								<p>' . __( 'Our community-based Support Forums are a great place to learn, share, and troubleshoot.', 'wporg-forums' ) . '</p>
+								<!-- /wp:paragraph -->
+
+								<!-- wp:paragraph -->
+								<p>' . __( '<a href="https://wordpress.org/support/welcome/">Get started</a>', 'wporg-forums' ) . '</p>
+								<!-- /wp:paragraph -->
+
+							</div>
+							<!-- /wp:group -->
+
+							<!-- wp:group {"layout":{"type":"constrained"}} -->
+							<div class="wp-block-group">
+
+								<!-- wp:heading -->
+								<h2 class="wp-block-heading has-heading-5-font-size">' . __( 'Documentation', 'wporg-forums' ) . '</h2>
+								<!-- /wp:heading -->
+
+								<!-- wp:paragraph -->
+								<p>' . __( 'Your first stop where you\'ll find information on everything from installing to creating plugins.', 'wporg-forums' ) . '</p>
+								<!-- /wp:paragraph -->
+
+								<!-- wp:paragraph -->
+								<p>' . __( '<a href="https://wordpress.org/documentation/">Explore documentation</a>', 'wporg-forums' ) . '</p>
+								<!-- /wp:paragraph -->
+
+							</div>
+							<!-- /wp:group -->
+
+							<!-- wp:group {"layout":{"type":"constrained"}} -->
+							<div class="wp-block-group">
+
+								<!-- wp:heading -->
+								<h2 class="wp-block-heading has-heading-5-font-size">' . __( 'Get Involved', 'wporg-forums' ) . '</h2>
+								<!-- /wp:heading -->
+
+								<!-- wp:paragraph -->
+								<p>' . __( 'The Support Handbook is great for tips, tricks, and advice regarding giving the best support possible.', 'wporg-forums' ) . '</p>
+								<!-- /wp:paragraph -->
+
+								<!-- wp:paragraph -->
+								<p>' . __( '<a href="https://make.wordpress.org/support/handbook/">Explore the Handbook</a>', 'wporg-forums' ) . '</p>
+								<!-- /wp:paragraph -->
+
+							</div>
+							<!-- /wp:group -->
+
 						</div>
-					</div>
-					<div>
-						<div class="info-box">
-							<span class="dashicons <?php
-								/* translators: dashicon class name for 'Documentation' section. Do not translate into your own language. */
-								esc_attr_e( 'dashicons-portfolio', 'wporg-forums' );
-							?>"></span>
-							<h3><?php _e( 'Documentation', 'wporg-forums' ); ?></h3>
-							<p><?php _e( 'Your first stop where you\'ll find information on everything from installing to creating plugins.', 'wporg-forums' ); ?></p>
-							<p><?php _e( '<a href="https://wordpress.org/support/">Explore documentation</a>', 'wporg-forums' ); ?></p>
-						</div>
-					</div>
-					<div>
-						<div class="info-box">
-							<span class="dashicons <?php
-								/* translators: dashicon class name for 'Get Involved' section. Do not translate into your own language. */
-								esc_attr_e( 'dashicons-hammer', 'wporg-forums' );
-							?>"></span>
-							<h3><?php _e( 'Get Involved', 'wporg-forums' ); ?></h3>
-							<p><?php _e( 'The Support Handbook is great for tips, tricks, and advice regarding giving the best support possible.', 'wporg-forums' ); ?></p>
-							<p><?php _e( '<a href="https://make.wordpress.org/support/handbook/">Explore the Handbook</a>', 'wporg-forums' ); ?></p>
-						</div>
-					</div>
+						<!-- /wp:group -->'
+					); ?>
+
 				</section>
 
 				<?php get_template_part( 'template-parts/bbpress', 'front' ); ?>
