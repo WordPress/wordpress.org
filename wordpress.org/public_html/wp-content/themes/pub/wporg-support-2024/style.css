@@ -3712,6 +3712,7 @@ div.indicator-hint li {
 .forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex,
 .home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex {
 	gap: var(--wp--preset--spacing--10);
+	align-items: normal;
 }
 .forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > *,
 .home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * {
@@ -3749,6 +3750,10 @@ div.indicator-hint li {
 .home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .icon-wrapper,
 .home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .dashicons {
 	display: none;
+}
+.forum-archive.wporg-support .helphub-front-page #bbp-search-form #bbp_search,
+.home.wporg-support .helphub-front-page #bbp-search-form #bbp_search {
+	width: 100%;
 }
 .forum-archive.wporg-support #bbpress-forums .bbp-forums,
 .home.wporg-support #bbpress-forums .bbp-forums {

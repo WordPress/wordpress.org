@@ -803,41 +803,49 @@ div.indicator-hint {
 .forum-archive.wporg-support,
 .home.wporg-support {
 
-	.helphub-front-page .wp-block-group-is-layout-flex {
-		gap: var(--wp--preset--spacing--10);
+	.helphub-front-page {
 
-		> * {
-			padding: var(--wp--preset--spacing--20);
-			border: 1px solid var(--wp--preset--color--light-grey-1);
-			border-radius: 2px;
-			width: 100%;
+		.wp-block-group-is-layout-flex {
+			gap: var(--wp--preset--spacing--10);
+			align-items: normal;
 
-			@media screen and (min-width: 600px) {
-				width: calc( 33.33% - ( ( var(--wp--preset--spacing--10) * 2 ) / 3 ) );
-			}
+			> * {
+				padding: var(--wp--preset--spacing--20);
+				border: 1px solid var(--wp--preset--color--light-grey-1);
+				border-radius: 2px;
+				width: 100%;
 
-			a {
-				text-decoration: none;
+				@media screen and (min-width: 600px) {
+					width: calc( 33.33% - ( ( var(--wp--preset--spacing--10) * 2 ) / 3 ) );
+				}
 
-				&:hover {
-					text-decoration: underline;
+				a {
+					text-decoration: none;
+
+					&:hover {
+						text-decoration: underline;
+					}
+				}
+
+				ul {
+					list-style: none;
+					padding: 0;
+					margin: 0;
+
+					li {
+						padding: calc(var(--wp--preset--spacing--10) / 2) 0;
+					}
 				}
 			}
 
-			ul {
-				list-style: none;
-				padding: 0;
-				margin: 0;
-
-				li {
-					padding: calc(var(--wp--preset--spacing--10) / 2) 0;
-				}
+			.icon-wrapper,
+			.dashicons {
+				display: none;
 			}
 		}
 
-		.icon-wrapper,
-		.dashicons {
-			display: none;
+		#bbp-search-form #bbp_search {
+			width: 100%;
 		}
 	}
 
