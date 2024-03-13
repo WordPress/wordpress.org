@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Template Name: bbPress - Support (Index)
+ * Template Name: bbPress - Archive
  *
  * @package bbPress
  * @subpackage Theme
