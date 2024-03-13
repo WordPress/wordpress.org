@@ -17,8 +17,9 @@ echo do_blocks( '<!-- wp:wporg/global-header {"style":{"border":{"bottom":{"colo
 
 $is_forums_home = function_exists( 'bbp_is_forum_archive' ) && bbp_is_forum_archive();
 $is_user_profile = function_exists( 'bbp_is_single_user' ) && bbp_is_single_user();
+$is_homepage = is_page_template( 'page-homepage.php' );
 
-echo do_blocks( $is_forums_home || is_front_page()
+echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	? '<!-- wp:pattern {"slug":"wporg-support/local-nav-home"} /-->'
 	: '<!-- wp:pattern {"slug":"wporg-support/local-nav"} /-->'
 );
@@ -29,7 +30,7 @@ echo do_blocks( $is_forums_home || is_front_page()
 	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-forums' ); ?></a>
 
 	<div id="content" class="site-content">
-		<?php if ( is_front_page() ) : ?>
+		<?php if ( is_front_page() || $is_homepage ) : ?>
 			<?php echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
