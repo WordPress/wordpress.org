@@ -145,20 +145,25 @@
 			display: inline-block;
 			margin-right: var( --wp--style--block-gap );
 			padding: var( --wp--style--block-gap );
-			max-width: 3.5rem; // 56px
-			max-height: 3.5rem; // 56px
+			width: 3.5rem; // 56px
+			height: 3.5rem; // 56px
 			border: 1px solid $color__border;
 			border-radius: 2px;
 			line-height: 16px; // to match svg.
 
 			&.dashicons {
 				color: inherit; // Prevent rating color being applied to star icons
+
+				&:before {
+					margin-left: -3px;
+				}
 			}
 
 			svg {
 				width: 16px;
 				height: 16px;
 				fill: currentColor;
+				margin-left: -1px;
 			}
 		}
 
