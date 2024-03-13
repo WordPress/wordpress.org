@@ -1,8 +1,6 @@
 #main .plugin-section { /* #main prefix is to overrule inline block styles */
-	border-bottom: 2px solid $color__border;
-	margin: var( --wp--preset--spacing--40 ) auto;
+	margin: var( --wp--preset--spacing--40 ) auto var( --wp--preset--spacing--60 );
 	max-width: var( --wp--style--global--content-size );
-	padding-bottom: var( --wp--preset--spacing--40 );
 
 	&:last-of-type {
 		margin-bottom: 0;
