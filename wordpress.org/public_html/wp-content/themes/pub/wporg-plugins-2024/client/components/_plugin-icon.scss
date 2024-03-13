@@ -1,8 +1,8 @@
 .entry-thumbnail {
 	display: none;
 	max-width: 80px;
-	margin-right: 20px;
-	margin-bottom: 20px;
+	margin-right: var( --wp--style--block-gap );
+	margin-bottom: var( --wp--style--block-gap );
 
 	.plugin-icon {
 		background-size: cover;
@@ -20,8 +20,8 @@
 		display: none;
 		float: left;
 		height: 96px;
-		margin-right: 1rem;
-		width: 96px;
+		margin-bottom: 0;
+		max-width: 96px;
 
 		@media screen and ( min-width: 26em ) {
 			display: block;
