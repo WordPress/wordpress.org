@@ -1,5 +1,5 @@
 ul, ol {
-	margin: 0 0 var(--wp--style--block-gap) 0;
+	margin: 0 0 var(--wp--style--block-gap);
 }
 
 ul {
@@ -38,12 +38,9 @@ dd {
 .meta-list {
 	padding: 0;
 	margin: 0;
+	list-style: none;
 
 	li {
-		list-style: none;
-		margin: 0;
-		padding: 0.5rem 0;
-		font-size: 0.8rem;
-		border-top: 1px solid var(--wp--custom--color--border);
+		padding: calc(var(--wp--preset--spacing--10) / 2) 0;
 	}
 }

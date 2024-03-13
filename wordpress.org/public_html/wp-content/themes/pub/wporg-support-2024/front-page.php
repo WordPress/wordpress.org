@@ -14,16 +14,27 @@ get_header(); ?>
 
 			<?php if ( is_active_sidebar( 'front-page-blocks' ) ) : ?>
 
-				<div class="three-up helphub-front-page">
-					<?php dynamic_sidebar( 'front-page-blocks' ); ?>
-				</div>
+				<div>
 
-				<div id="helphub-forum-link">
-					<h2><?php esc_html_e( 'Support Forums', 'wporg-forums' ); ?></h2>
+					<section class="helphub-front-page">
+						<?php echo do_blocks(
+							sprintf(
+								'<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"},"fontSize":"small"} -->
+								<div class="wp-block-group has-small-font-size">%s</div>
+								<!-- /wp:group -->',
+								wporg_support_get_front_page_blocks(),
+							)
+						); ?>
+					</section>
 
-					<p>
-						<?php esc_html_e( 'Can\'t find what you\'re looking for? Find out if others share your experience.', 'wporg-forums' ); ?> <a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>"><?php esc_html_e( 'Check out our support forums', 'wporg-forums' ); ?></a>.
-					</p>
+					<section id="helphub-forum-link">
+						<h2><?php esc_html_e( 'Support Forums', 'wporg-forums' ); ?></h2>
+
+						<p>
+							<?php esc_html_e( 'Can\'t find what you\'re looking for? Find out if others share your experience.', 'wporg-forums' ); ?> <a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>"><?php esc_html_e( 'Check out our support forums', 'wporg-forums' ); ?></a>.
+						</p>
+					</section>
+
 				</div>
 
 			<?php else : ?>

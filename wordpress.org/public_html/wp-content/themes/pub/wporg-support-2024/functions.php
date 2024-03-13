@@ -400,6 +400,19 @@ function wporg_support_get_archive_posts() {
  *
  * @return string
  */
+function wporg_support_get_front_page_blocks() {
+	ob_start();
+
+	dynamic_sidebar( 'front-page-blocks' );
+
+	return ob_get_clean();
+}
+
+/**
+ * Get the blocks for the front page.
+ *
+ * @return string
+ */
 function wporg_support_get_forums_list() {
 	ob_start();
 

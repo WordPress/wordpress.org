@@ -1,43 +1,3 @@
-.three-up {
-
-	&.helphub-front-page {
-
-		p,
-		ul {
-			text-align: left;
-		}
-
-		> div {
-
-			margin-bottom: 5rem;
-		}
-
-		.icon-wrapper {
-
-			a {
-
-				color: inherit;
-				text-decoration: none;
-			}
-		}
-
-		@media (min-width: $ms-breakpoint) {
-			display: flex;
-			flex-wrap: wrap;
-			justify-content: space-between;
-			align-items: flex-start;
-
-			.archive-block,
-			> div {
-				margin-right: 0;
-				margin-left: 0;
-				width: 30%;
-				font-size: ms( -2 );
-			}
-		}
-	}
-}
-
 .archive-pagination {
 	text-align: center;
 	margin-top: 4rem;
@@ -132,4 +92,3 @@ body.helphub-with-sidebar {
 		padding-bottom: 2rem;
 	}
 }
-

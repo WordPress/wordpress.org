@@ -973,6 +973,7 @@ h4,
 h5,
 h6 {
 	clear: both;
+	margin: 0 0 var(--wp--style--block-gap);
 }
 
 h2.comment-reply-title {
@@ -1135,7 +1136,7 @@ p.has-background {
 }
 
 ul, ol {
-	margin: 0 0 var(--wp--style--block-gap) 0;
+	margin: 0 0 var(--wp--style--block-gap);
 }
 
 ul {
@@ -1173,13 +1174,10 @@ dd {
 .meta-list {
 	padding: 0;
 	margin: 0;
+	list-style: none;
 }
 .meta-list li {
-	list-style: none;
-	margin: 0;
-	padding: 0.5rem 0;
-	font-size: 0.8rem;
-	border-top: 1px solid var(--wp--custom--color--border);
+	padding: calc(var(--wp--preset--spacing--10) / 2) 0;
 }
 
 img {
@@ -2490,11 +2488,10 @@ fieldset label {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear::before, .bbp-view .review-ratings::before, .bbpress main#main::before, .three-up:not(.helphub-front-page)::before,
+.clear::before, .bbp-view .review-ratings::before, .bbpress main#main::before,
 .clear::after,
 .bbp-view .review-ratings::after,
 .bbpress main#main::after,
-.three-up:not(.helphub-front-page)::after,
 .entry-content::before,
 .entry-content::after,
 .comment-content::before,
@@ -2510,7 +2507,7 @@ fieldset label {
 	table-layout: fixed;
 }
 
-.clear::after, .bbp-view .review-ratings::after, .bbpress main#main::after, .three-up:not(.helphub-front-page)::after,
+.clear::after, .bbp-view .review-ratings::after, .bbpress main#main::after,
 .entry-content::after,
 .comment-content::after,
 .site-header::after,
@@ -3051,64 +3048,6 @@ body.category #main .archive-pagination {
 	font-size: 1rem;
 	line-height: inherit;
 	overflow: inherit;
-}
-
-@media (min-width: 48em) {
-	.three-up .archive-block,
-	.three-up > div {
-		display: inline-block;
-		vertical-align: top;
-		width: 30%;
-		margin-left: 4%;
-		font-size: 0.8rem;
-	}
-	.three-up .archive-block:nth-child(3n),
-	.three-up > div:nth-child(3n) {
-		margin-left: 0;
-	}
-}
-.three-up.bbp-forums > div {
-	background: transparent;
-	position: relative;
-	border-bottom: 1px solid var(--wp--custom--color--border);
-	margin: 1rem 0;
-}
-.three-up.bbp-forums > div h3 {
-	font-size: 1.4rem;
-	margin-bottom: 0;
-	margin-top: 0;
-}
-.three-up.bbp-forums > div p {
-	color: #666;
-}
-.three-up.bbp-forums > div a.bbp-forum-title {
-	color: inherit;
-	font-weight: 400;
-}
-.three-up.bbp-forums > div a:active, .three-up.bbp-forums > div a:focus, .three-up.bbp-forums > div a:hover {
-	text-decoration: none;
-}
-.three-up.bbp-forums > div a:hover {
-	color: var(--wp--custom--link--color--text);
-}
-.three-up.bbp-forums > div a.dashicons-before {
-	-webkit-box-decoration-break: clone;
-	box-decoration-break: clone;
-	padding-right: 1em;
-}
-.three-up.bbp-forums > div a.dashicons-before::before {
-	margin-right: -1em;
-	vertical-align: baseline;
-}
-@media (min-width: 48em) {
-	.three-up.bbp-forums > div {
-		height: 200px;
-		border-bottom: none;
-		margin: 2rem 0 0 4%;
-	}
-	.three-up.bbp-forums > div:nth-child(3n) {
-		margin-left: 0;
-	}
 }
 
 .bbpress main#main .entry-content,
@@ -3768,35 +3707,40 @@ div.indicator-hint li {
 /*--------------------------------------------------------------
 # Homepage
 --------------------------------------------------------------*/
-.forum-archive.wporg-support .info-box,
-.home.wporg-support .info-box {
-	text-align: center;
-	max-width: 20rem;
-	margin: 0 auto 4rem;
+.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex,
+.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex {
+	gap: var(--wp--preset--spacing--10);
 }
-.forum-archive.wporg-support .info-box h3,
-.home.wporg-support .info-box h3 {
-	margin-top: 1rem;
+.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget,
+.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget {
+	padding: var(--wp--preset--spacing--20);
+	border: 1px solid var(--wp--preset--color--light-grey-1);
+	border-radius: 2px;
+	width: calc(33.33% - var(--wp--preset--spacing--10) * 2 / 3);
 }
-.forum-archive.wporg-support .info-box .icon-wrapper,
-.home.wporg-support .info-box .icon-wrapper {
-	display: inline-block;
-	width: 100%;
-	height: 108px;
+.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget a,
+.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget a {
+	text-decoration: none;
 }
-.forum-archive.wporg-support .info-box .dashicons,
-.home.wporg-support .info-box .dashicons {
-	font-size: 5.9604644775rem;
-	opacity: 0.4;
-	width: auto;
-	height: auto;
+.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget a:hover,
+.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget a:hover {
+	text-decoration: underline;
 }
-@media (min-width: 48em) {
-	.forum-archive.wporg-support .info-box,
-	.home.wporg-support .info-box {
-		max-width: 100%;
-		margin: 0;
-	}
+.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget ul,
+.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget ul li,
+.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget ul li {
+	padding: calc(var(--wp--preset--spacing--10) / 2) 0;
+}
+.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .icon-wrapper,
+.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .dashicons,
+.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .icon-wrapper,
+.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .dashicons {
+	display: none;
 }
 .forum-archive.wporg-support #bbpress-forums .bbp-forums,
 .home.wporg-support #bbpress-forums .bbp-forums {
@@ -4132,33 +4076,6 @@ div.bbp-breadcrumb p {
 /*--------------------------------------------------------------
 # HelpHub Specific
 --------------------------------------------------------------*/
-.three-up.helphub-front-page p,
-.three-up.helphub-front-page ul {
-	text-align: right;
-}
-.three-up.helphub-front-page > div {
-	margin-bottom: 5rem;
-}
-.three-up.helphub-front-page .icon-wrapper a {
-	color: inherit;
-	text-decoration: none;
-}
-@media (min-width: 48em) {
-	.three-up.helphub-front-page {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		align-items: flex-start;
-	}
-	.three-up.helphub-front-page .archive-block,
-	.three-up.helphub-front-page > div {
-		margin-left: 0;
-		margin-right: 0;
-		width: 30%;
-		font-size: 0.8rem;
-	}
-}
-
 .archive-pagination {
 	text-align: center;
 	margin-top: 4rem;
