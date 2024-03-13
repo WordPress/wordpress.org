@@ -806,7 +806,7 @@ div.indicator-hint {
 	.helphub-front-page .wp-block-group-is-layout-flex {
 		gap: var(--wp--preset--spacing--10);
 
-		.widget {
+		> * {
 			padding: var(--wp--preset--spacing--20);
 			border: 1px solid var(--wp--preset--color--light-grey-1);
 			border-radius: 2px;

@@ -64,9 +64,9 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 
 					</div>
 					<!-- /wp:group -->',
-					esc_html__( 'Support', 'wporg-forums' ),
+					__( 'Support', 'wporg-forums' ),
 					/* Translators: subhead */
-					esc_html__( 'We&#8217;ve got a variety of resources to help you get the most out of WordPress.', 'wporg-forums' )
+					__( 'We&#8217;ve got a variety of resources to help you get the most out of WordPress.', 'wporg-forums' )
 				)
 			); ?>
 		<?php elseif ( $is_forums_home ) : ?>
