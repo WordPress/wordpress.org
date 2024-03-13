@@ -3716,7 +3716,13 @@ div.indicator-hint li {
 	padding: var(--wp--preset--spacing--20);
 	border: 1px solid var(--wp--preset--color--light-grey-1);
 	border-radius: 2px;
-	width: calc(33.33% - var(--wp--preset--spacing--10) * 2 / 3);
+	width: 100%;
+}
+@media screen and (min-width: 600px) {
+	.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget,
+	.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget {
+		width: calc(33.33% - var(--wp--preset--spacing--10) * 2 / 3);
+	}
 }
 .forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget a,
 .home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .widget a {
