@@ -26,6 +26,12 @@
 				display: inline-block;
 				text-align: center;
 			}
+
+			@media screen and (max-width: 34em) {
+				> .button.download-button {
+					display: none;
+				}
+			}
 		}
 
 		.plugin-title {

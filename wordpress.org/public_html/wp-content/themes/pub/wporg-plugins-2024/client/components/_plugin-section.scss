@@ -18,11 +18,22 @@
 		font-weight: 400;
 		margin-bottom: 0;
 		margin-top: 0;
+		margin-left: var( --wp--style--block-gap );
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			margin-left: 0;
+		}
 	}
 
 	.section-link {
 		align-self: center;
 		flex: 0 0 auto;
+
+		margin-right: var( --wp--style--block-gap );
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			margin-right: 0;
+		}
 	}
 
 	@media screen and ( min-width: $large-breakpoint ) {
