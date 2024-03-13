@@ -423,10 +423,11 @@ add_filter( 'get_the_archive_title', __NAMESPACE__ . '\update_archive_title' );
  */
 function update_archive_description( $description ) {
 	if ( is_tax( 'plugin_business_model', 'community' ) ) {
-		return __( 'These plugins are developed and supported by a community.', 'wporg-plugins' );
+		return '<p>' . __( 'These plugins are developed and supported by a community.', 'wporg-plugins' ) . '</p>';
 	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
-		return __( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' );
+		return '<p>' . __( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' ) . '</p>';
 	}
+
 	return $description;
 }
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );

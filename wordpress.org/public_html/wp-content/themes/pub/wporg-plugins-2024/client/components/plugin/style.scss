@@ -15,7 +15,7 @@
 		}
 
 		border-bottom: 0;
-		padding-top: 1em;
+		padding-top: var( --wp--preset--spacing--40 ); /* This is overridden if we have a banner below. */
 
 		.plugin-actions {
 			float: right;
