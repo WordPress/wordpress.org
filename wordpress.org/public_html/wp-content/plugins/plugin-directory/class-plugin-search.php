@@ -182,16 +182,14 @@ class Plugin_Search {
 	public function jetpack_search_es_query_args( $es_query_args, $query ) {
 		// These are the things that jetpack_search_es_wp_query_args doesn't let us change, so we need to filter the es_query_args late in the code path to add more custom stuff.
 
+		$es_query_args['filter']['and'] ??= [];
+
 		// Exclude disabled plugins.
-		$es_query_args[ 'filter' ] = [
-			'and' => [
-			  0 => [
-				'term' => [
-				  'disabled' => [
+		$es_query_args['filter']['and'][] = [
+			'term' => [
+				'disabled' => [
 					'value' => false,
-				  ],
 				],
-			],
 			]
 		];
 
@@ -201,16 +199,6 @@ class Plugin_Search {
 				'term' => [
 					'taxonomy.plugin_section.name' => [
 						'value' => 'block'
-					]
-				]
-			];
-		}
-
-		if ( $query->get( 'plugin_business_model' ) ) {
-			$es_query_args['filter']['and'][] = [
-				'term' => [
-					'taxonomy.plugin_business_model.name' => [
-						'value' => $query->get( 'plugin_business_model' )
 					]
 				]
 			];
@@ -231,7 +219,6 @@ class Plugin_Search {
 		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ][ 'operator' ] ) ) {
 			unset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ][ 'operator' ] );
 		}
-
 
 		// Some extra fields here
 		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ] ) ) {

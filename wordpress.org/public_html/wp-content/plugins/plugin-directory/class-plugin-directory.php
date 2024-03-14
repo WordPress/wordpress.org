@@ -792,18 +792,18 @@ class Plugin_Directory {
 		}
 
 		// For any invalid values passed to browse, set it to featured instead
-		if ( !empty ( $wp_query->query ['browse'] ) &&
-		     !in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated' ) ) ) {
-			 $wp_query->query['browse'] = 'featured';
+		if (
+			! empty ( $wp_query->query['browse'] ) &&
+			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated' ) )
+		) {
+			 $wp_query->query['browse']      = 'featured';
 			 $wp_query->query_vars['browse'] = 'featured';
 		}
 
 		// Set up custom queries for the /browse/ URLs
 		switch ( $wp_query->get( 'browse' ) ) {
 			case 'beta':
-				$wp_query->query_vars['meta_key'] = 'last_updated';
-				$wp_query->query_vars['orderby']  = 'meta_value';
-				$wp_query->query_vars['order']    = 'DESC';
+				$wp_query->query_vars['orderby'] ??= 'last_updated';
 
 				// Limit the Beta tab to plugins updated within 12 months.
 				$meta_query                = $wp_query->get( 'meta_query' ) ?: [];
@@ -832,8 +832,8 @@ class Plugin_Directory {
 					$wp_query->query_vars['favorites_user'] = $favorites_user->user_nicename;
 					$wp_query->query_vars['post_name__in']  = get_user_meta( $favorites_user->ID, 'plugin_favorites', true );
 
-					$wp_query->query_vars['orderby'] = 'post_title';
-					$wp_query->query_vars['order']   = 'ASC';
+					$wp_query->query_vars['orderby'] ??= 'post_title';
+					$wp_query->query_vars['order']   ??= 'ASC';
 				}
 
 				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
@@ -842,12 +842,12 @@ class Plugin_Directory {
 				break;
 
 			case 'updated':
-				$wp_query->query_vars['orderby'] = 'post_modified';
+				$wp_query->query_vars['orderby'] ??= 'last_updated';
 				break;
 
 			case 'block':
 			case 'new':
-				$wp_query->query_vars['orderby'] = 'post_date';
+				$wp_query->query_vars['orderby'] ??= 'post_date';
 				break;
 		}
 
@@ -904,8 +904,8 @@ class Plugin_Directory {
 				);
 			}
 
-			$wp_query->query_vars['orderby'] = 'post_title';
-			$wp_query->query_vars['order']   = 'ASC';
+			$wp_query->query_vars['orderby'] ??= 'post_title';
+			$wp_query->query_vars['order']   ??= 'ASC';
 
 			// Treat it as a taxonomy query now, not the author archive.
 			$wp_query->is_author = false;
@@ -978,9 +978,96 @@ class Plugin_Directory {
 		}
 
 		// By default, all archives are sorted by active installs
-		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
-			$wp_query->query_vars['orderby']  = 'meta_value_num';
-			$wp_query->query_vars['meta_key'] = '_active_installs';
+		if ( $wp_query->is_archive() && ! $wp_query->is_search() && empty( $wp_query->query_vars['orderby'] ) ) {
+			$wp_query->query_vars['orderby']  = 'active_installs';
+		}
+
+		// Adjust the rules for other sorts.
+		// Support orderby={orderby}_{order}
+		if ( isset( $wp_query->query_vars['orderby'] ) && is_string( $wp_query->query_vars['orderby'] ) ) {
+			$orderby = $wp_query->query_vars['orderby'];
+			if ( str_ends_with( $orderby, '_desc' ) ) {
+				$wp_query->query_vars['order']   = 'DESC';
+				$wp_query->query_vars['orderby'] = substr( $orderby, 0, -5 );
+			} elseif ( str_ends_with( $orderby, '_asc' ) ) {
+				$wp_query->query_vars['order']   = 'ASC';
+				$wp_query->query_vars['orderby'] = substr( $orderby, 0, -4 );
+			}
+		}
+
+		// The custom sorts.
+		$orderby = $wp_query->query_vars['orderby'] ?? '';
+		$order   = $wp_query->query_vars['order'] ?? 'DESC';
+		switch( $orderby ) {
+			case 'rating':
+				// TODO: Round out the rating to be based on half-stars. A 4.95 rating vs a 5.00 appears the same, but sorts differently.
+				$wp_query->query_vars['meta_query']['rating'] ??= [
+					'key'     => 'rating',
+					'type'    => 'DECIMAL(3,2)',
+					'compare' => 'EXISTS',
+				];
+				$wp_query->query_vars['meta_query']['num_ratings'] ??= [
+					'key'     => 'num_ratings',
+					'type'    => 'UNSIGNED',
+					'compare' => '>',
+					'value'   => 0,
+				];
+
+				// Should be a multisort, with an additional `num_ratings`.
+				$wp_query->query_vars['orderby']  = array(
+					'rating'      => $order,
+					'num_ratings' => $order,
+				);
+
+				break;
+
+			case 'num_ratings':
+			case 'ratings':
+				$wp_query->query_vars['meta_query']['num_ratings'] ??= [
+					'key'     => 'num_ratings',
+					'type'    => 'UNSIGNED',
+					'compare' => '>',
+					'value'   => 0,
+				];
+
+				$wp_query->query_vars['orderby']  = 'num_ratings';
+				break;
+
+			case '_active_installs':
+			case 'active_installs':
+				$wp_query->query_vars['meta_query']['active_installs'] ??= [
+					'key'     => '_active_installs',
+					'type'    => 'UNSIGNED',
+					'compare' => 'EXISTS'
+				];
+
+				$wp_query->query_vars['orderby']  = 'active_installs';
+				break;
+
+			case 'last_updated':
+				$wp_query->query_vars['meta_query']['last_updated'] ??= [
+					'key'     => 'last_updated',
+					'type'    => 'DATE',
+					'compare' => 'EXISTS',
+				];
+				break;
+
+			case 'tested':
+				$wp_query->query_vars['meta_query']['tested'] ??= [
+					'key'     => 'tested',
+					'type'    => 'DECIMAL(2,1)',
+					'compare' => 'EXISTS',
+				];
+				break;
+
+			case 'downloads':
+				$wp_query->query_vars['meta_query']['downloads'] ??= [
+					'key'     => 'downloads',
+					'type'    => 'UNSIGNED',
+					'compare' => 'EXISTS',
+				];
+				$wp_query->query_vars['orderby']  = 'downloads';
+				break;
 		}
 	}
 
