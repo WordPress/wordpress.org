@@ -773,7 +773,8 @@ class Template {
 	 */
 	public static function preview_link_zip( $slug, $attachment_id, $type = null ) {
 
-		$zip_hash = self::preview_link_hash( $attachment_id );
+		$file = get_attached_file( $attachment_id );
+		$zip_hash = self::preview_link_hash( $file );
 		if ( !$zip_hash ) {
 			return false;
 		}
@@ -784,6 +785,29 @@ class Template {
 		$zip_preview = add_query_arg( 'blueprint-url', urlencode($zip_blueprint), 'https://playground.wordpress.net/' );
 
 		return $zip_preview;
+	}
+
+	/**
+	 * Generate a live preview (playground) link for a published plugin that does not yet have a custom blueprint. Needed for developer testing.
+	 *
+	 * @param string $slug            The slug of the plugin post.
+	 * @param int $download_link      The URL of the zip download for the plugin.
+	 * @param bool $blueprint_only    False will return a full preview URL. True will return only a blueprint URL.
+	 * @return false|string           The preview or blueprint URL.
+	 */
+	public static function preview_link_developer( $slug, $download_link, $blueprint_only = false ) {
+
+		$url_hash = self::preview_link_hash( $download_link );
+		if ( !$url_hash ) {
+			return false;
+		}
+		$dev_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?url_hash=%s', esc_attr( $slug ), esc_attr( $url_hash ) );
+		if ( $blueprint_only ) {
+			return $dev_blueprint;
+		}
+		$url_preview = add_query_arg( 'blueprint-url', urlencode($dev_blueprint), 'https://playground.wordpress.net/' );
+
+		return $url_preview;
 	}
 
 	/**
@@ -799,17 +823,16 @@ class Template {
 	/**
 	 * Return a nonce-style hash for zip preview links.
 	 *
-	 * @param int $attachment_id      The ID of the attachment post corresponding to a plugin zip file.
+	 * @param string $zip_file        The filesystem path or URL of the zip file.
 	 * @param int $tick_offest        Number to subtract from the nonce tick. Use both 0 and -1 to verify older nonces.
 	 * @return false|string           The hash as a hex string; or false if the attachment ID is invalid.
 	 */
-	public static function preview_link_hash( $attachment_id, $tick_offset = 0 ) {
-		$file = get_attached_file( $attachment_id );
-		if ( !$file ) {
+	public static function preview_link_hash( $zip_file, $tick_offset = 0 ) {
+		if ( !$zip_file ) {
 			return false;
 		}
 		$tick = self::preview_link_tick() - $tick_offset;
-		return wp_hash( $tick . '|' . $file, 'nonce' );
+		return wp_hash( $tick . '|' . $zip_file, 'nonce' );
 	}
 
 	/**
@@ -911,6 +934,21 @@ class Template {
 
 		return add_query_arg(
 			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-toggle-preview' )
+		);
+	}
+
+	/**
+	 * Generates a link to dismiss a missing blueprint notice.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string URL to toggle status.
+	 */
+	public static function get_self_dismiss_blueprint_notice_link( $post = null ) {
+		$post = get_post( $post );
+
+		return add_query_arg(
+			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ), 'dismiss' => 1 ),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-toggle-preview' )
 		);
 	}

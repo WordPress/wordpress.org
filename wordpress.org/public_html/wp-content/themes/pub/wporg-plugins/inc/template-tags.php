@@ -727,4 +727,45 @@ function the_author_notice( $post = null ) {
 			wp_kses_post( $import_warnings )
 		);
 	}
+
+	// This is less important, so only show if there are no other notices.
+	if ( !$notice && !$import_warnings && get_post_meta( $post->ID, '_missing_blueprint_notice', true ) ) {
+		$blueprint_test_button = sprintf(
+			'<a class="plugin-preview" target="_blank" href="%s">%s</a>',
+			Template::preview_link_developer( $post->post_name, Template::download_link() ),
+			esc_html__( 'Test your plugin in Playground', 'wporg-plugins' )
+		);
+		$blueprint_download_button = sprintf(
+			'<a class="plugin-preview" target="_blank" href="%s">%s</a>',
+			Template::preview_link_developer( $post->post_name, Template::download_link(), true ),
+			esc_html__( 'Download blueprint.json', 'wporg-plugins' )
+		);
+		$blueprint_dismiss_button = sprintf(
+			'<form method="POST" action="%s"><p><input type="submit" name="dismiss" value="%s" class="plugin-preview button button-secondary alignright" /></p></form>',
+			#'<a class="plugin-preview button button-secondary alignright" href="%s">%s</a>',
+			Template::get_self_dismiss_blueprint_notice_link( $post ),
+			esc_html__( 'Dismiss', 'wporg-plugins' )
+		);
+
+		// There is surely a neater way to format this.
+		$blueprint_notice = sprintf(
+			'<ol><li>%s</li><li>%s</li><li>%s</li><li>%s</li></ol>',
+			$blueprint_test_button,
+			esc_html__( 'Fix any bugs in your plugin that prevent it from working in Playground.', 'wporg-plugins' ),
+			$blueprint_download_button,
+			esc_html__( 'Commit your blueprint to svn.', 'wporg-plugins' )
+		);
+		$blueprint_more = sprintf(
+			__( 'More info can be found in the <a href="%s">plugin handbook</a>.', 'wporg-plugins' ),
+			'https://developer.wordpress.org/plugins/wordpress-org/previews-and-blueprints/'
+		);
+
+		printf(
+			'<div class="notice notice-info notice-alt">%s</div>',
+			'<p><strong>' . __( 'Your plugin does not yet have a blueprint file for user previews. If you\'d like to enable previews, please follow these steps to create a blueprint.', 'wporg-plugins' ) . '</strong></p>' .
+			$blueprint_notice .
+			$blueprint_dismiss_button .
+			'<p>' . $blueprint_more . '</p>'
+		);
+	}
 }

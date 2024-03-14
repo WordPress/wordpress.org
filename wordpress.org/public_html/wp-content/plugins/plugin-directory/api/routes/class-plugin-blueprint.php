@@ -39,6 +39,9 @@ class Plugin_Blueprint extends Base {
 		if ( $request->get_param('zip_hash') ) {
 			$this->reviewer_blueprint( $request, $plugin );
 		}
+		if ( $request->get_param('url_hash') ) {
+			$this->developer_blueprint( $request, $plugin );
+		}
 
         $blueprints = get_post_meta( $plugin->ID, 'assets_blueprints', true );
         // Note: for now, only use a file called `blueprint.json`.
@@ -75,106 +78,13 @@ class Plugin_Blueprint extends Base {
 		// Direct zip preview for plugin reviewers
 		if ( $request->get_param('zip_hash') ) {
 			foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
-				if ( hash_equals( Template::preview_link_hash( $zip_file->ID, 0 ), $request->get_param('zip_hash') ) ||
-				     hash_equals( Template::preview_link_hash( $zip_file->ID, -1 ), $request->get_param('zip_hash') ) ) {
+				$zip_file_path = get_attached_file( $zip_file->ID );
+				if ( hash_equals( Template::preview_link_hash( $zip_file_path, 0 ), $request->get_param('zip_hash') ) ||
+				     hash_equals( Template::preview_link_hash( $zip_file_path, -1 ), $request->get_param('zip_hash') ) ) {
 					$zip_url = wp_get_attachment_url( $zip_file->ID );
 					if ( $zip_url ) {
-
-						$landing_page = '/wp-admin/plugins.php';
-						$activate_plugin = true;
-						$dependencies = $plugin->requires_plugins ?: [];
-
-						if ( stripos( $plugin->post_title, 'woocommerce' ) ) {
-							$dependencies[] = 'woocommerce';
-						}
-						if ( stripos( $plugin->post_title, 'buddypress' ) ) {
-							$dependencies[] = 'buddypress';
-						}
-
-						$dependencies = array_diff( $dependencies, [ $plugin->post_name ] );
-
-						// Plugin deactivated, and land on the Plugin Check page
-						if ( 'pcp' === $request->get_param('type') ) {
-							$landing_page = '/wp-admin/admin.php?page=plugin-check&plugin=' . sanitize_title( $request['plugin_slug'] );
-							$activate_plugin = false;
-							$dependencies = [];
-						}
-
-						$zip_blueprint = (object)[
-							'landingPage' => $landing_page,
-							'preferredVersions' => (object)[
-								'php' => '8.0',
-								'wp'  => 'latest',
-							],
-							'phpExtensionBundles' => [
-								'kitchen-sink'
-							],
-							'features' => (object)[
-								'networking' => true
-							],
-							'steps' => [
-								(object)[
-									'step' => 'installPlugin',
-									'pluginZipFile' => (object)[
-										'resource' => 'wordpress.org/plugins',
-										'slug'     => 'plugin-check',
-									]
-								],
-								(object)[
-									'step' => 'installPlugin',
-									'pluginZipFile' => (object)[
-										'resource' => 'url',
-										'url'      => $zip_url,
-									],
-									'options' => (object)[
-										'activate' => (bool)$activate_plugin
-									]
-								],
-								(object)[
-									'step' => 'login',
-									'username' => 'admin',
-									'password' => 'password',
-								]
-							]
-						];
-
-						if ( $dependencies ) {
-							$dep_step = [];
-							foreach ( $dependencies as $slug ) {
-								$dep_step[] = (object)[
-									'step' => 'installPlugin',
-									'pluginZipFile' => [
-										'resource' => 'wordpress.org/plugins',
-										'slug'     => sanitize_title( $slug ),
-									],
-									'options' => (object)[
-										'activate' => true
-									]
-								];
-							}
-							// Insert dependencies aftter PCP
-							array_splice( $zip_blueprint->steps, 1, 0, $dep_step );
-						}
-
-						// Include the helper plugin too
-						$helper_zip = self::get_zip_url_by_slug( 'playground-review-helper' );
-						if ( $helper_zip && 'pcp' !== $request->get_param('type') ) {
-							$helper_step = [
-								(object)[
-									'step' => 'installPlugin',
-									'pluginZipFile' => [
-										'resource' => 'url',
-										'url'      => $helper_zip,
-									],
-									'options' => (object)[
-										'activate' => (bool)$activate_plugin
-									]
-								]
-							];
-							array_splice( $zip_blueprint->steps, 1, 0, $helper_step );
-						}
-
-						$output = json_encode( $zip_blueprint );
+						$is_pcp = 'pcp' === $request->get_param('type');
+						$output = $this->generate_blueprint( $request, $plugin, $zip_url, $is_pcp, true );
 
 						if ( $output ) {
 							header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
@@ -186,7 +96,129 @@ class Plugin_Blueprint extends Base {
 		}
 
 		return new \WP_Error( 'invalid_blueprint', 'Invalid file', array( 'status' => 500 ) );
+	}
 
+	function developer_blueprint( $request, $plugin ) {
+		// Generated blueprint for developers who haven't yet created a custom blueprint
+		if ( $request->get_param('url_hash') ) {
+			$download_link = Template::download_link( $plugin );
+			if ( $download_link ) {
+				if ( hash_equals( Template::preview_link_hash( $download_link, 0 ), $request->get_param('url_hash') ) ||
+					hash_equals( Template::preview_link_hash( $download_link, -1 ), $request->get_param('url_hash') ) ) {
+					$output = $this->generate_blueprint( $request, $plugin, $download_link, false, false );
+
+					if ( $output ) {
+						header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+						die( $output );
+					}
+				}
+			}
+		}
+	}
+
+	public function generate_blueprint( $request, $plugin, $zip_url, $install_pcp = true, $install_prh = true ) {
+		$landing_page = '/wp-admin/plugins.php';
+		$activate_plugin = true;
+		$dependencies = $plugin->requires_plugins ?: [];
+
+		if ( stripos( $plugin->post_title, 'woocommerce' ) ) {
+			$dependencies[] = 'woocommerce';
+		}
+		if ( stripos( $plugin->post_title, 'buddypress' ) ) {
+			$dependencies[] = 'buddypress';
+		}
+
+		$dependencies = array_diff( $dependencies, [ $plugin->post_name ] );
+
+		// Plugin deactivated, and land on the Plugin Check page
+		if ( $install_pcp ) {
+			$landing_page = '/wp-admin/admin.php?page=plugin-check&plugin=' . sanitize_title( $request['plugin_slug'] );
+			$activate_plugin = false;
+			$dependencies = [];
+		}
+
+		$zip_blueprint = (object)[
+			'landingPage' => $landing_page,
+			'preferredVersions' => (object)[
+				'php' => '8.0',
+				'wp'  => 'latest',
+			],
+			'phpExtensionBundles' => [
+				'kitchen-sink'
+			],
+			'features' => (object)[
+				'networking' => true
+			],
+		];
+
+		$steps = [];
+
+		// PCP first, if needed.
+		if ( $install_pcp ) {
+			$steps[] = (object)[
+				'step' => 'installPlugin',
+				'pluginZipFile' => (object)[
+					'resource' => 'wordpress.org/plugins',
+					'slug'     => 'plugin-check',
+				]
+			];
+		}
+
+		// Include the helper plugin too
+		$helper_zip = self::get_zip_url_by_slug( 'playground-review-helper' );
+		if ( $helper_zip && $install_prh ) {
+			$steps[] = (object)[
+					'step' => 'installPlugin',
+					'pluginZipFile' => [
+						'resource' => 'url',
+						'url'      => $helper_zip,
+					],
+					'options' => (object)[
+						'activate' => (bool)$activate_plugin
+					]
+				];
+		}
+
+		// Dependencies next
+		if ( $dependencies ) {
+			foreach ( $dependencies as $slug ) {
+				$steps[] = (object)[
+					'step' => 'installPlugin',
+					'pluginZipFile' => [
+						'resource' => 'wordpress.org/plugins',
+						'slug'     => sanitize_title( $slug ),
+					],
+					'options' => (object)[
+						'activate' => true
+					]
+				];
+			}
+		}
+
+		// Now the plugin itself
+		$steps[] = (object)[
+					'step' => 'installPlugin',
+					'pluginZipFile' => (object)[
+						'resource' => 'url',
+						'url'      => $zip_url,
+					],
+					'options' => (object)[
+						'activate' => (bool)$activate_plugin
+					]
+				];
+
+		// Finally log in
+		$steps[] = (object)[
+					'step' => 'login',
+					'username' => 'admin',
+					'password' => 'password',
+				];
+
+		$zip_blueprint->steps = $steps;
+
+		$output = json_encode( $zip_blueprint, JSON_PRETTY_PRINT );
+
+		return $output;
 	}
 
 }

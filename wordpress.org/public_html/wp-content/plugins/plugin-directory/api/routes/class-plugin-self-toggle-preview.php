@@ -63,6 +63,10 @@ class Plugin_Self_Toggle_Preview extends Base {
 		];
 		header( 'Location: ' . $result['location'] );
 
+		if ( $request->get_param('dismiss') ) {
+			return $this->self_dismiss( $request, $plugin );
+		}
+
 		// Toggle the postmeta value. Note that there is a race condition here.
 		$did = '';
 		if ( get_post_meta( $plugin->ID, '_public_preview', true ) ) {
@@ -82,4 +86,21 @@ class Plugin_Self_Toggle_Preview extends Base {
 		return $result;
 	}
 
+	/**
+	 * Endpoint special case to dismiss the missing blueprint notice.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @param object $plugin The plugin post.
+	 * @return bool True if the toggle was successful.
+	 */
+	public function self_dismiss( $request, $plugin ) {
+		$result = [
+			'location' => wp_get_referer() ?: get_permalink( $plugin ),
+		];
+
+		// Change the value from 1 to 0. This will persist and prevent it from being added again.
+		update_post_meta( $plugin->ID, '_missing_blueprint_notice', 0, 1 );
+
+		return $result;
+	}
 }

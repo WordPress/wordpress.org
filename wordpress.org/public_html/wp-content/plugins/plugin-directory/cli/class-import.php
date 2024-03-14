@@ -390,6 +390,8 @@ class Import {
 			update_post_meta( $plugin->ID, 'assets_blueprints', wp_slash( $assets['blueprint'] ) );
 		} else {
 			delete_post_meta( $plugin->ID, 'assets_blueprints' );
+			// TODO: maybe if ( $touches_stable_tag )?
+			add_post_meta( $plugin->ID, '_missing_blueprint_notice', 1, true );
 		}
 
 		// Store the block data, if known
