@@ -1,10 +1,10 @@
 .pagination .nav-links {
 	text-align: center;
 	margin-top: var( --wp--style--block-gap );
+	padding-top: var( --wp--style--block-gap );
 
 	.page-numbers {
-		background-color: #f9f9f9;
-		cursor: hand;
+		cursor: pointer;
 		display: inline-block;
 		min-width: 2em;
 		padding: 8px;
@@ -31,7 +31,6 @@
 
 			&.prev:before,
 			&.next:after {
-				background-color: #f9f9f9;
 				display: inline-block;
 				font-size: initial;
 				line-height: 1.5;
@@ -49,7 +48,10 @@
 		}
 	}
 	span.page-numbers {
-		background-color: #f7f7f7;
 		font-weight: bold;
+	}
+
+	span.page-numbers.current {
+		text-decoration: underline;
 	}
 }
