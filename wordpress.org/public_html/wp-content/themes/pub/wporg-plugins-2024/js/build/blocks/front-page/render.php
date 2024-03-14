@@ -19,6 +19,7 @@ $widget_args = array(
 <main id="main" class="site-main alignwide" role="main">
 
 	<?php
+
 	foreach ( $sections as $browse => $section_title ) :
 		// Only logged in users can have favorites.
 		if ( 'favorites' === $browse && ! is_user_logged_in() ) {

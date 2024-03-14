@@ -5,16 +5,10 @@
 	--wporg--filter-bar--focus--border-color: var(--wp--custom--button--focus--border--color);
 
 	max-width: var( --wp--style--global--content-size );
-	margin-left: var( --wp--style--block-gap );
-	padding: 40px 0 0;
+	margin: var( --wp--style--block-gap ) 0;
 
-	@media screen and ( min-width: $ms-breakpoint ) {
-		margin: 0 auto;
-	}
-
-	+ .site-main {
-		margin-top: 2rem;
-		padding-top: 0;
+	@media screen and ( max-width: $ms-breakpoint ) {
+		margin: var(--wp--style--block-gap) var(--wp--preset--spacing--edge-space);
 	}
 	
 	.wporg-filter-bar__navigation {
@@ -73,7 +67,6 @@
 	}
 
 	@media screen and ( min-width: $ms-breakpoint ) {
-		padding: 40px 0 0;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
