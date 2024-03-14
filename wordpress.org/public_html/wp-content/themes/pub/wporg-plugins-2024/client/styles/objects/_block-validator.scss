@@ -1,5 +1,9 @@
 .block-validator {
 
+	> details summary {
+		padding: var( --wp--style--block-gap ) 0;
+	}
+
 	.block-validator__plugin-form label {
 		display: block;
 		margin-bottom: 0.8em;
