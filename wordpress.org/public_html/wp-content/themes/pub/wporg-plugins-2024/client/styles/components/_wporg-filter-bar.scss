@@ -10,7 +10,14 @@
 	@media screen and ( max-width: $ms-breakpoint ) {
 		margin: var(--wp--style--block-gap) var(--wp--preset--spacing--edge-space);
 	}
-	
+
+	.wporg-query-filter__toggle.is-active,
+	.wporg-query-filter__toggle:active,
+	.wporg-query-filter__toggle:focus {
+		background-color: var(--wporg--filter-bar--active--background-color);
+		color: var(--wp--custom--button--color--text);
+	}
+
 	.wporg-filter-bar__navigation {
 		margin-bottom: var(--wporg--filter-bar--gap);
 		flex-grow: 1;
