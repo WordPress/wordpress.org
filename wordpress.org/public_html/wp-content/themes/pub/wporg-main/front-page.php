@@ -36,11 +36,11 @@ $banner_blocks = '<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"
 
 <!-- wp:group {"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:paragraph {"style":{"typography":{"lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}},"spacing":{"margin":{"top":"0"}}},"textColor":"white","fontSize":"small"} -->
-<p class="has-white-color has-text-color has-link-color has-small-font-size" style="margin-top:0;line-height:1.6">' . __( 'Stream the Q&amp;A session with the WordPress project&#039;s co-founder, Matt Mullenweg, live from WordCamp Asia 2024. <br>March 9 at 7:30 a.m. UTC. <a href="https://wordpress.org/news/2024/03/wordcamp-asia-2024-qa-with-matt-mullenweg/">More details</a>.', 'wporg' ) . '</p>
+<p class="has-white-color has-text-color has-link-color has-small-font-size" style="margin-top:0;line-height:1.6">' . __( 'Watch the Q&amp;A session with the WordPress project&#039;s co-founder, Matt Mullenweg, recorded live from WordCamp Asia 2024. <a href="https://wordpress.org/news/2024/03/highlights-from-wordcamp-asia-2024/">Read the event highlights</a>.', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"style":{"typography":{"lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}},"spacing":{"margin":{"bottom":"0"}}},"textColor":"white","fontSize":"small"} -->
-<p class="has-white-color has-text-color has-link-color has-small-font-size" style="margin-bottom:0;line-height:1.6">' . __( '<a href="https://www.youtube.com/wordpress"><strong>Watch now ↗</strong></a>', 'wporg' ) . '</p>
+<p class="has-white-color has-text-color has-link-color has-small-font-size" style="margin-bottom:0;line-height:1.6">' . __( '<a href="https://www.youtube.com/watch?v=EOF70YJLC5U"><strong>Watch now ↗</strong></a>', 'wporg' ) . '</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
