@@ -1,5 +1,9 @@
 .wp-block-group {
 
+	&.is-layout-grid.is-style-cards-grid {
+		grid-auto-rows: unset;
+	}
+
 	.wp-block-wporg-link-wrapper {
 
 		#bbpress-forums & {

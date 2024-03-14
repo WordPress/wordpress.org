@@ -29,14 +29,4 @@
 	); ?>
 </section>
 
-<section class="forums-homepage-themes-plugins">
-	<p><?php
-		/* translators: 1: Theme Directory URL, 2: Plugin Directory URL */
-		printf( __( 'Looking for help with a specific <a href="%1$s">Theme</a> or <a href="%2$s">Plugin</a>?<br>Every theme and plugin has their own. Head to their individual pages and click "View support forum".', 'wporg-forums' ),
-			esc_url( __( 'https://wordpress.org/themes/', 'wporg-forums' ) ),
-			esc_url( __( 'https://wordpress.org/plugins/', 'wporg-forums' ) ),
-		);
-	?></p>
-</section>
-
 <?php do_action( 'bbp_template_after_forums_loop' ); ?>

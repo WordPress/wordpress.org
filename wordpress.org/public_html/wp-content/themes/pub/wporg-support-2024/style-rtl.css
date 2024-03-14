@@ -1063,6 +1063,9 @@ big {
 /*--------------------------------------------------------------
 # Blocks
 --------------------------------------------------------------*/
+.wp-block-group.is-layout-grid.is-style-cards-grid {
+	grid-auto-rows: unset;
+}
 #bbpress-forums .wp-block-group .wp-block-wporg-link-wrapper {
 	border: 1px solid var(--wp--preset--color--light-grey-1);
 }
@@ -3788,36 +3791,18 @@ div.indicator-hint li {
 		margin-left: 0;
 	}
 }
-.forum-archive.wporg-support .themes-plugins,
-.home.wporg-support .themes-plugins {
-	margin: 0 0 4rem;
-	border-bottom: 1px solid var(--wp--custom--color--border);
-}
-.forum-archive.wporg-support .themes-plugins p,
-.home.wporg-support .themes-plugins p {
-	font-size: 1rem;
-	color: #666;
-}
-.forum-archive.wporg-support .themes-plugins p a:hover > .dashicons,
-.home.wporg-support .themes-plugins p a:hover > .dashicons {
-	text-decoration: none;
-}
-.forum-archive.wporg-support .themes-plugins h3,
-.home.wporg-support .themes-plugins h3 {
-	font-size: 1.4rem;
-	margin-bottom: 0;
-	margin-top: 0;
-}
-@media (min-width: 48em) {
-	.forum-archive.wporg-support .themes-plugins,
-	.home.wporg-support .themes-plugins {
-		width: 65%;
-		margin: 3rem 0 4rem;
-		border-bottom: none;
+@media screen and (min-width: 600px) {
+	.forum-archive.wporg-support .forums-homepage-themes-plugins,
+	.home.wporg-support .forums-homepage-themes-plugins {
+		grid-column: 1/4;
 	}
-	.forum-archive.wporg-support .themes-plugins p,
-	.home.wporg-support .themes-plugins p {
-		font-size: 0.8rem;
+	.forum-archive.wporg-support .forums-homepage-themes-plugins.span-1,
+	.home.wporg-support .forums-homepage-themes-plugins.span-1 {
+		grid-column: 3/4;
+	}
+	.forum-archive.wporg-support .forums-homepage-themes-plugins.span-2,
+	.home.wporg-support .forums-homepage-themes-plugins.span-2 {
+		grid-column: 2/4;
 	}
 }
 

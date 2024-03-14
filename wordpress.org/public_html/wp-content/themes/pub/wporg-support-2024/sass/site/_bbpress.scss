@@ -891,32 +891,17 @@ div.indicator-hint {
 		}
 	}
 
-	.themes-plugins {
-		margin: 0 0 4rem;
-		border-bottom: 1px solid var(--wp--custom--color--border);
+	.forums-homepage-themes-plugins {
 
-		p {
-			font-size: ms(0);
-			color: #666;
+		@media screen and (min-width: 600px) {
+			grid-column: 1 / 4;
 
-			a:hover > .dashicons {
-				text-decoration: none;
+			&.span-1 {
+				grid-column: 3 / 4;
 			}
-		}
 
-		h3 {
-			font-size: 1.4rem;
-			margin-bottom: 0;
-			margin-top: 0;
-		}
-
-		@media (min-width: $ms-breakpoint) {
-			width: 65%;
-			margin: 3rem 0 4rem;
-			border-bottom: none;
-
-			p {
-				font-size: ms(-2);
+			&.span-2 {
+				grid-column: 2 / 4;
 			}
 		}
 	}
