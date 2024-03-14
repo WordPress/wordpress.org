@@ -3712,46 +3712,28 @@ div.indicator-hint li {
 /*--------------------------------------------------------------
 # Homepage
 --------------------------------------------------------------*/
-.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex,
-.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex {
-	gap: var(--wp--preset--spacing--10);
-	align-items: normal;
-}
-.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > *,
-.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * {
-	padding: var(--wp--preset--spacing--20);
-	border: 1px solid var(--wp--preset--color--light-grey-1);
-	border-radius: 2px;
-	width: 100%;
-}
-@media screen and (min-width: 600px) {
-	.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > *,
-	.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * {
-		width: calc(33.33% - var(--wp--preset--spacing--10) * 2 / 3);
-	}
-}
-.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * a,
-.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * a {
+.forum-archive.wporg-support .helphub-front-page a,
+.home.wporg-support .helphub-front-page a {
 	text-decoration: none;
 }
-.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * a:hover,
-.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * a:hover {
+.forum-archive.wporg-support .helphub-front-page a:hover,
+.home.wporg-support .helphub-front-page a:hover {
 	text-decoration: underline;
 }
-.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * ul,
-.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * ul {
+.forum-archive.wporg-support .helphub-front-page ul,
+.home.wporg-support .helphub-front-page ul {
 	list-style: none;
 	padding: 0;
 	margin: 0;
 }
-.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * ul li,
-.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex > * ul li {
+.forum-archive.wporg-support .helphub-front-page ul li,
+.home.wporg-support .helphub-front-page ul li {
 	padding: calc(var(--wp--preset--spacing--10) / 2) 0;
 }
-.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .icon-wrapper,
-.forum-archive.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .dashicons,
-.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .icon-wrapper,
-.home.wporg-support .helphub-front-page .wp-block-group-is-layout-flex .dashicons {
+.forum-archive.wporg-support .helphub-front-page .icon-wrapper,
+.forum-archive.wporg-support .helphub-front-page .dashicons,
+.home.wporg-support .helphub-front-page .icon-wrapper,
+.home.wporg-support .helphub-front-page .dashicons {
 	display: none;
 }
 .forum-archive.wporg-support .helphub-front-page #bbp-search-form #bbp_search,

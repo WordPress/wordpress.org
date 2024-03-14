@@ -805,44 +805,30 @@ div.indicator-hint {
 
 	.helphub-front-page {
 
-		.wp-block-group-is-layout-flex {
-			gap: var(--wp--preset--spacing--10);
-			align-items: normal;
+		a {
+			text-decoration: none;
 
-			> * {
-				padding: var(--wp--preset--spacing--20);
-				border: 1px solid var(--wp--preset--color--light-grey-1);
-				border-radius: 2px;
-				width: 100%;
-
-				@media screen and (min-width: 600px) {
-					width: calc( 33.33% - ( ( var(--wp--preset--spacing--10) * 2 ) / 3 ) );
-				}
-
-				a {
-					text-decoration: none;
-
-					&:hover {
-						text-decoration: underline;
-					}
-				}
-
-				ul {
-					list-style: none;
-					padding: 0;
-					margin: 0;
-
-					li {
-						padding: calc(var(--wp--preset--spacing--10) / 2) 0;
-					}
-				}
-			}
-
-			.icon-wrapper,
-			.dashicons {
-				display: none;
+			&:hover {
+				text-decoration: underline;
 			}
 		}
+
+		ul {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+
+			li {
+				padding: calc(var(--wp--preset--spacing--10) / 2) 0;
+			}
+		}
+
+
+		.icon-wrapper,
+		.dashicons {
+			display: none;
+		}
+
 
 		#bbp-search-form #bbp_search {
 			width: 100%;

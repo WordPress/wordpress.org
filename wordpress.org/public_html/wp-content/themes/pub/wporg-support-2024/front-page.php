@@ -22,8 +22,8 @@ get_header(); ?>
 								'<!-- wp:heading -->
 								<h2 class="wp-block-heading screen-reader-text">%s</h2>
 								<!-- /wp:heading -->
-								<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"},"fontSize":"small"} -->
-								<div class="wp-block-group has-small-font-size">%s</div>
+								<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"32.3%%"},"fontSize":"small"} -->
+								<div class="wp-block-group is-style-cards-grid has-small-font-size">%s</div>
 								<!-- /wp:group -->',
 								__( 'Documentation', 'wporg-forums' ),
 								wporg_support_get_front_page_blocks(),
