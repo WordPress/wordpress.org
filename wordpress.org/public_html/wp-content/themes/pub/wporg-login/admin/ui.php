@@ -514,7 +514,7 @@ function wporg_login_block_account( $user, $reason = '' ) {
 		// Load the Support Forums, for logging and whatnot.
 		WordPressdotorg\Forums\Plugin::get_instance();
 
-		$callback = function( $text, $filter_user = false ) use ( $reason, $meta_column ) {
+		$callback = function( $text ) use ( $reason, $meta_column ) {
 			return trim( "{$reason}\n{$meta_column}\n\n{$text}" );
 		};
 		add_filter( 'wporg_bbp_forum_role_changed_note_text', $callback );
