@@ -1,0 +1,9 @@
+.widget-area {
+	margin: 0 auto;
+	max-width: var( --wp--style--global--content-size );
+	padding: 0 0 var( --wp--preset--spacing--50 );
+
+	@media screen and ( min-width: $large-breakpoint ) {
+		max-width: var( --wp--style--global--wide-size );
+	}
+}

@@ -248,6 +248,7 @@ class Customizations {
 		$orderby                    = $query->query['orderby'] ?? '';
 		$possible_orderby_meta_keys = [
 			'assigned_reviewer_time',
+			'_submitted_date',
 			'_submitted_zip_loc',
 			'_submitted_zip_size',
 		];

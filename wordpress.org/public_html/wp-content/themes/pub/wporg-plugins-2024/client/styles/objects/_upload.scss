@@ -1,0 +1,68 @@
+.plugin-upload-form {
+
+	&.hidden {
+		display: none;
+	}
+
+	fieldset {
+		border: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	legend {
+		margin: 1rem 0;
+	}
+
+	/* Styles for the plugin_category checklist that was removed. */
+	.category-checklist {
+		list-style-type: none;
+		margin: 0 0 2rem;
+
+		li {
+			float: left;
+			padding: 0.5rem 0;
+			width: 50%;
+		}
+
+		@media screen and ( min-width: 48em ) {
+			li {
+				padding: 0;
+			}
+
+			label {
+				font-size: var( --wp--preset--font-size--small );
+			}
+		}
+	}
+
+	@media screen and ( min-width: 48em ) {
+		label.button {
+			line-height: 1.8;
+		}
+	}
+
+	.plugin-file {
+		height: 0.1px;
+		opacity: 0;
+		overflow: hidden;
+		position: absolute;
+		width: 0.1px;
+		z-index: -1;
+	}
+
+}
+
+.plugin-queue-message {
+
+	code {
+		font-size: 1em;
+	}
+
+	dialog.slug-change input[type="text"] {
+		font-family: monospace;
+		font-size: 1.2em;
+		width: 20em;
+	}
+	
+}

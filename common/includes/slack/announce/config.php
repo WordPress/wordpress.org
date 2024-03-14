@@ -126,6 +126,7 @@ function get_whitelist() {
 			'marybaum',
 			'meaganhanes',
 			'metalandcoffee',
+			'mikachan',
 			'monikarao',
 			'mukesh27',
 			'nicolefurlan',
@@ -174,6 +175,7 @@ function get_whitelist() {
 		) ),
 		'core-dev-blog' => array(
 			'bph',
+			'greenshady',
 		),
 		'core-docs' => array_merge( get_committers(), array(
 			'DrewAPicture', // @drew on Slack
@@ -358,13 +360,6 @@ function get_whitelist() {
 			'mariaojob', // @Mary Job on Slack
 			'sterndata',
 		),
-		'fse-outreach-experiment' => array(
-			'annezazu',
-			'colorful tones', // @colorful-tones on Slack
-			'daisyo', // @DaisyO on Slack
-			'greenshady',
-			'ndiego', // @Nick Diego on Slack
-		),
 		'glotpress' => array(
 			'Amieiro',
 			'ocean90',
@@ -430,6 +425,13 @@ function get_whitelist() {
 			'sarayourfriend',
 			'stacimc',
 			'zackkrida',
+		),
+		'outreach' => array(
+			'annezazu',
+			'bph',
+			'colorful tones', // @colorful-tones on Slack
+			'greenshady',
+			'ndiego', // @Nick Diego on Slack
 		),
 		'core-performance' => array(
 			// #core (inc committers) already included via get_parent_channel().

@@ -779,6 +779,11 @@ class Plugin_Directory {
 		if ( empty( $wp_query->query_vars['pagename'] ) && ( empty( $wp_query->query_vars['post_type'] ) || 'post' == $wp_query->query_vars['post_type'] ) ) {
 			$wp_query->query_vars['post_type']   = array( 'plugin' );
 			$wp_query->query_vars['post_status'] = array( 'publish' );
+
+			// Support queries for `?p=...` for pages, as it's used as the shortlink.
+			if ( ! empty( $wp_query->query_vars['p'] ) ) {
+				$wp_query->query_vars['post_type'][] = 'page';
+			}
 		}
 
 		// By default, if no query is made, we're querying /browse/featured/
@@ -1013,8 +1018,8 @@ class Plugin_Directory {
 					'rating'      => $order,
 					'num_ratings' => $order,
 				);
-
 				break;
+
 			case 'num_ratings':
 			case 'ratings':
 				$wp_query->query_vars['meta_query']['num_ratings'] ??= [
@@ -1026,6 +1031,8 @@ class Plugin_Directory {
 
 				$wp_query->query_vars['orderby']  = 'num_ratings';
 				break;
+
+			case '_active_installs':
 			case 'active_installs':
 				$wp_query->query_vars['meta_query']['active_installs'] ??= [
 					'key'     => '_active_installs',
@@ -1035,32 +1042,29 @@ class Plugin_Directory {
 
 				$wp_query->query_vars['orderby']  = 'active_installs';
 				break;
+
 			case 'last_updated':
 				$wp_query->query_vars['meta_query']['last_updated'] ??= [
 					'key'     => 'last_updated',
 					'type'    => 'DATE',
 					'compare' => 'EXISTS',
 				];
-
-				$wp_query->query_vars['orderby']  = 'last_updated';
 				break;
+
 			case 'tested':
 				$wp_query->query_vars['meta_query']['tested'] ??= [
 					'key'     => 'tested',
 					'type'    => 'DECIMAL(2,1)',
 					'compare' => 'EXISTS',
 				];
+        break;
 
-				$wp_query->query_vars['orderby'] = 'tested';
-				break;
 			case 'downloads':
 				$wp_query->query_vars['meta_query']['downloads'] ??= [
 					'key'     => 'downloads',
 					'type'    => 'UNSIGNED',
 					'compare' => 'EXISTS',
 				];
-
-				$wp_query->query_vars['orderby'] = 'downloads';
 				break;
 		}
 	}
@@ -1914,6 +1918,14 @@ class Plugin_Directory {
 		$title = $args['post_title'] ?: $args['post_name'];
 		$slug  = $args['post_name'] ?: sanitize_title( $title );
 
+		// Remove null items (date-related fields) to fallback to the defaults below.
+		$args = array_filter(
+			$args,
+			function( $item ) {
+				return ! is_null( $item );
+			}
+		);
+
 		$post_date     = current_time( 'mysql' );
 		$post_date_gmt = current_time( 'mysql', 1 );
 
@@ -1927,21 +1939,12 @@ class Plugin_Directory {
 			'post_modified_gmt' => $post_date_gmt,
 		) );
 
-		$update = ! empty( $args['ID'] );
 		$result = wp_insert_post( $args, true );
 
 		if ( ! is_wp_error( $result ) ) {
 			wp_cache_set( $result, $slug, 'plugin-slugs' );
-			$result = get_post( $result );
 
-			if ( ! $update ) {
-				$owner = get_userdata( $result->post_author );
-				Tools::audit_log( sprintf(
-					'Submitted by <a href="%s">%s</a>.',
-					esc_url( 'https://profiles.wordpress.org/' . $owner->user_nicename . '/' ),
-					$owner->user_login
-				), $result->ID );
-			}
+			$result = get_post( $result );
 		}
 
 		return $result;

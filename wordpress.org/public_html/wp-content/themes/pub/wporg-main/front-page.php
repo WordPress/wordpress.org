@@ -27,20 +27,24 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
-$banner_url = 'https://wordpress.org/state-of-the-word/';
-
 // The blocks code sets up the layout, but there is also inline CSS to refine things that aren't supported in classic themes.
-$banner_blocks = '<!-- wp:wporg/link-wrapper {"align":"full","layout":{"type":"constrained"}} -->
-<a class="wp-block-wporg-link-wrapper alignfull" style="background-color:#000000;color:#fff;font-size:16px;" href="' . $banner_url . '"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
-<div class="wp-block-group" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px;gap:40px;max-width:50rem"><!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized" style="flex-shrink: 0;flex-basis:45%"><img src="https://wordpress.org/files/2023/12/sotw-dotorg-drawer.png" alt="' . __( 'State of the Word', 'wporg' ) . '" /></figure>
+$banner_blocks = '<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}}},"backgroundColor":"black","className":"wporg-homepage-banner","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull wporg-homepage-banner has-black-background-color has-background" style="padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
+<div class="wp-block-group"><!-- wp:image {"sizeSlug":"full","className":"is-resized"} -->
+<figure class="wp-block-image size-full is-resized"><img src="https://wordpress.org/files/2024/03/wcasia-white-rectangle.png" alt="' . esc_attr__( 'WordCamp Asia 2024', 'wporg' ) . '"/></figure>
 <!-- /wp:image -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.6","fontSize":"14px"}}} -->
-<p style="font-size:14px;line-height:1.6">' . __( 'Watch State of the Word, the annual keynote address delivered by the WordPress project&#039;s co-founder, Matt Mullenweg, recorded on Dec. 11, live from Madrid.', 'wporg' ) . ' ↗</p>
+<!-- wp:group {"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:paragraph {"style":{"typography":{"lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}},"spacing":{"margin":{"top":"0"}}},"textColor":"white","fontSize":"small"} -->
+<p class="has-white-color has-text-color has-link-color has-small-font-size" style="margin-top:0;line-height:1.6">' . __( 'Stream the Q&amp;A session with the WordPress project&#039;s co-founder, Matt Mullenweg, live from WordCamp Asia 2024. <br>March 9 at 7:30 a.m. UTC. <a href="https://wordpress.org/news/2024/03/wordcamp-asia-2024-qa-with-matt-mullenweg/">More details</a>.', 'wporg' ) . '</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}},"spacing":{"margin":{"bottom":"0"}}},"textColor":"white","fontSize":"small"} -->
+<p class="has-white-color has-text-color has-link-color has-small-font-size" style="margin-bottom:0;line-height:1.6">' . __( '<a href="https://www.youtube.com/wordpress"><strong>Watch now ↗</strong></a>', 'wporg' ) . '</p>
 <!-- /wp:paragraph --></div>
-<!-- /wp:group --></a>
-<!-- /wp:wporg/link-wrapper -->';
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->';
 
 \WordPressdotorg\skip_to( '#masthead' );
 
@@ -51,14 +55,30 @@ get_header( 'wporg' );
 	</aside>
 
 	<style>
-		.wp-block-wporg-link-wrapper {
-			/* This property is used in the focus state, and should match (or at least compliment) the background color. */
-			--wp--preset--color--blueberry-1: #0a4b78;
+		/* Set a few custom properties as they appear in the parent theme. */
+		.wporg-homepage-banner {
+			--wp--preset--spacing--20: 20px;
+			--wp--preset--spacing--30: 30px;
+			--wp--preset--spacing--60: clamp(20px, calc(10vw - 40px), 80px);
+			--wp--preset--font-size--small: 14px;
 		}
-		@media (max-width: 499px) {
-			.wp-block-wporg-link-wrapper > .wp-block-group {
+		.wporg-homepage-banner a:hover {
+			text-decoration: none;
+		}
+		.wporg-homepage-banner > * {
+			margin-left: auto !important;
+			margin-right: auto !important;
+			max-width: 1160px;
+		}
+		.wporg-homepage-banner .is-layout-flex {
+			gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--60);
+		}
+		.wporg-homepage-banner .is-layout-flex > * {
+			flex: 1;
+		}
+		@media (max-width: 650px) {
+			.wporg-homepage-banner .is-layout-flex {
 				flex-direction: column;
-				gap: 16px !important;
 			}
 		}
 	</style>

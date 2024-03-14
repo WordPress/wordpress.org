@@ -8,6 +8,7 @@
  */
 
 namespace WordPressdotorg\Photo_Directory\Theme;
+use WordPressdotorg\Photo_Directory\Random;
 use WordPressdotorg\Photo_Directory\Template_Tags;
 
 $photo_id = get_post_thumbnail_id();
@@ -15,6 +16,18 @@ $photo_id = get_post_thumbnail_id();
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<header class="entry-header">
+		<?php if ( Random::was_photo_random() ) : ?>
+			<div class="randomly-chosen-photo"><?php
+				printf(
+					/* translators: %s: Link to load another random photo. */
+					__( 'This photo was randomly chosen. %s', 'wporg-photos' ),
+					sprintf(
+						'<a href="%s">' . __( 'Load another random photo?', 'wporg-photos' ) . '</a>',
+						home_url( '/' . Random::PATH . '/' )
+					)
+				);
+			?></div>
+		<?php endif; ?>
 		<?php printf(
 			'<a href="%s" class="photo-author">%s</a>',
 			esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),

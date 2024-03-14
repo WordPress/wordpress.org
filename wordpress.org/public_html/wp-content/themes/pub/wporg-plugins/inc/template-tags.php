@@ -717,4 +717,14 @@ function the_author_notice( $post = null ) {
 			wp_kses_post( $notice['html'] ) // Should have wrapping <p> tags.
 		);
 	}
+
+	$import_warnings = get_post_meta( $post->ID, '_import_warnings', true );
+	if ( $import_warnings ) {
+		$import_warnings  = '<ul><li>' . implode( '</li><li>', $import_warnings ) . '</li></ul>';
+		printf(
+			'<div class="notice notice-error notice-alt">%s</div>',
+			'<p><strong>' . __( 'During the last import of your plugin the following warnings were encountered. This message is visible only to the plugin authors &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			wp_kses_post( $import_warnings )
+		);
+	}
 }

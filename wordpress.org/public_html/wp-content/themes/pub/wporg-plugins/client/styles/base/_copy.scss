@@ -1,3 +1,15 @@
+
+body,
+button,
+input,
+select,
+textarea {
+    color: #1e1e1e;
+	font-family: $font__main;
+	font-size: 100%;
+	line-height: $font__line-height-body;
+}
+
 p {
 	&.subheading {
 		color: #82878c;
@@ -64,4 +76,8 @@ mark, ins {
 
 big {
 	font-size: 125%;
+}
+
+strong {
+	font-weight: 600;
 }

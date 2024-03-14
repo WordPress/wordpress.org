@@ -204,20 +204,6 @@ class Plugin_Search {
 			];
 		}
 
-		// Apply Taxonomy filters..
-		$tax_queries = $query->tax_query->queries;
-		foreach ( (array) $tax_queries as $tax_query ) {
-			if ( 'slug' !== $tax_query['field'] || 'IN' !== $tax_query['operator'] ) {
-				continue;
-			}
-
-			$es_query_args['filter']['and'][] = [
-				'terms' => [
-					'taxonomy.' . $tax_query['taxonomy'] . '.slug' => $tax_query['terms']
-				]
-			];
-		}
-
 		// These fields aren't in ES, but we have other data to query.
 		$unknown_es_meta_fields = [
 			'last_updated'     => 'post_modified',

@@ -1,0 +1,268 @@
+.translation-event-form label {
+	display: inline-block;
+	width: 140px;
+	vertical-align: top;
+}
+.translation-event-form #event-title,
+.translation-event-form #event-description {
+	width: 30%;
+}
+.translation-event-form input[type="text"],
+.translation-event-form input[type="date"] {
+	width: 13%;
+}
+.translation-event-form div {
+	margin-top: 1em;
+}
+.translation-event-form #submit-event {
+	margin-left: 10%;
+	width: 30%;
+	margin-top: 1em;
+	display: block;
+}
+.event-page-title {
+	border-bottom: #d9d8d8 thin solid;
+	padding-bottom: .5em;
+}
+.event-details-page {
+	border-bottom: #cfd4d4 thin solid;
+	width: 60%;
+	margin: 0 auto;
+}
+.event-details-left {
+	width: 77%;
+	float: left;
+	border-right: #dadfdf thin solid;
+	margin-right: 1%;
+	padding-right: 1em;
+}
+.event-details-right {
+	width: 22%;
+	float: right;
+	padding-top: 1em;
+}
+.event-details-stats {
+	clear: both;
+	margin: 1em;
+}
+.event-details-stats table {
+	width: 100%;
+	table-layout: fixed;
+}
+.event-details-stats table th, .event-details-stats table td {
+	padding: 1em;
+	text-align: center;
+}
+.event-details-stats table td:first-child {
+	text-align: left;
+	word-break: break-all;
+}
+.event-details-stats table tr {
+	border-bottom: thin solid #f0f0f0;
+}
+.event-details-stats table th {
+	background-color: #e9e9e9;
+	/* allow breaking the word anywhere so that it doesn't overflow */
+	word-break: break-all;
+}
+.event-details-stats-totals td {
+	font-weight: bold;
+}
+.event-contributors li {
+	display: inline-block;
+	list-style-type: none;
+	margin-right: 1em;
+	margin-bottom: .5em;
+	width: 15em;
+}
+.event-contributors li .avatar {
+	border-radius: 50%;
+	vertical-align: middle;
+}
+.hide-event-url {
+	display: none;
+}
+.translation-event-form button.save-draft {
+	background: #fff;
+	color: var(--gp-color-btn-primary-bg);
+}
+#event-url span {
+	width: 10%;
+	display: inline-block;
+}
+span.event-list-date {
+	display: block;
+	color: #939393;
+	font-size: .8em;
+	font-weight: normal;
+}
+span.event-list-date.events-i-am-attending {
+	font-size: .8em;
+	font-weight: normal;
+}
+.event-list-item a{
+	font-weight: bold;
+	font-size: 1.2em;
+}
+li.event-list-item {
+	list-style-type: none;
+}
+li.event-list-item p {
+	margin-top: 0;
+	color: #5a5a5a;
+	font-size: .95em;
+}
+h2.event_page_title {
+	border-bottom: #e0e0e0 thin solid;
+	padding-bottom: 0.5em;
+	font-weight: bold;
+}
+.event-list-top-bar {
+	display: block;
+	width: 80%;
+	margin: 0 auto;
+	text-align: right;
+}
+.event-list-nav li {
+	display: inline;
+	margin: 0 0.1rem;
+}
+.event-list-nav li a {
+	text-decoration: none;
+	font-weight: bold;
+}
+.event-list-nav li:not(:first-child):not(:last-child):before {
+	content: " | ";
+}
+.event-left-col {
+	width: 75%;
+	float: left;
+	border-right: var(--gp-color-secondary-400) thin solid;
+}
+.event-right-col {
+	width: 25%;
+	float: left;
+	padding-left: 1em;
+}
+.event-attending-list {
+	list-style-type: none;
+	padding: 0;
+}
+.event-attending-list li {
+	margin-bottom: 1em;
+}
+.event-list-nav li a.button {
+	background-color: var(--gp-color-btn-primary-bg) !important;
+	color: #fff !important;
+}
+a.event-link-draft {
+	color:#80807f;
+}
+span.event-label-draft, span.event-details-join-expired, span.active-events-before-translation-table {
+	font-weight: 500;
+	color: var( --gp-color-bubble-inactive-project-text );
+	border: 1px solid var( --gp-color-bubble-inactive-project-text );
+	font-size: .7em;
+	margin-right: 0.3em;
+	width: 6em;
+	text-align: center;
+	padding: 0.2em 0.5em;
+	border-radius: 1em;
+	text-transform: capitalize;
+}
+span.active-events-before-translation-table a {
+	color: var( --gp-color-bubble-inactive-project-text );
+	text-decoration: none;
+}
+.active-events-before-translation-table {
+	width: 100%;
+	border: 1px solid var( --gp-color-border-default );
+	background: var( --gp-color-status-waiting-subtle );
+	margin: 1rem 0;
+	padding: 0.3rem 0.8rem;
+}
+.event-page-wrapper {
+	margin: 0 auto;
+	width: 80%;
+}
+.event-list {
+	margin: 0;
+	padding: 0;
+}
+.event-details-head {
+	border-bottom: var(--gp-color-secondary-400) thin solid;
+}
+input[type="submit"].attend-btn {
+	width: 100%;
+	text-align: center;
+	display: inline;
+	margin-top: 1em;
+	font-weight: bold;
+}
+input[type="submit"].attending-btn, a.button.is-primary.attend-btn {
+	width: 100%;
+	text-align: center;
+	display: block;
+	margin-top: 1em;
+}
+.event-details-date {
+	background: #f4f4f4;
+	color: #606161;
+	padding: .5em;
+	font-size: .9em;
+	line-height: 1.8em;
+	font-weight: 500;
+}
+.event-page-edit-link {
+	float: right;
+	text-decoration: none;
+}
+.event-stats-summary {
+	margin-top: 1em;
+}
+.event-stats-summary summary {
+	background: #f8f8f8;
+	padding: 0.4em;
+	cursor: pointer;
+	color: var(--gp-color-primary-400);
+	font-weight: 500;
+	font-size: .9em;
+}
+.event-stats-summary p.event-stats-text {
+	margin: 0;
+	background: #f8f8f8;
+	padding: 0.8em;
+	font-size: .9em;
+	border-top: thin solid #e0e0e0;
+}
+time.event-utc-time {
+	display: block;
+	font-size: .95em;
+}
+.event-utc-time:first-of-type{
+	border-bottom: #cdcdcd thin solid;
+	padding-bottom: 0.5em;
+	margin-bottom: 0.5em;
+}
+span.event-details-date-label {
+	font-weight: bold;
+	color: #5a5a5a;
+	display: block;
+}
+
+/* show the event-details-right below instead of on the right on mobile */
+@media (max-width: 768px) {
+	.event-page-wrapper, .event-details-right, .event-details-left {
+		width: 100%;
+		float: none;
+	}
+	.event-details-left {
+		border-right: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.event-details-stats {
+		margin: 0;
+	}
+}

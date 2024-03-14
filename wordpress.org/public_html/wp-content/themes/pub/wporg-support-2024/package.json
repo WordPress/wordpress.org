@@ -1,0 +1,34 @@
+{
+	"name": "wporg-support",
+	"version": "1.0.0",
+	"description": "Theme for WordPress Support Forums",
+	"main": "index.php",
+	"scripts": {
+		"build": "grunt",
+		"grunt": "grunt",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "grunt watch"
+	},
+	"author": "wordpressdotorg",
+	"license": "GPL-2.0-or-later",
+	"devDependencies": {
+		"@lodder/grunt-postcss": "~3.1.1",
+		"@wordpress/browserslist-config": "~5.33.0",
+		"@wordpress/stylelint-config": "~21.33.0",
+		"autoprefixer": "~10.4.17",
+		"grunt": "~1.6.1",
+		"grunt-contrib-watch": "^1.1.0",
+		"grunt-rtlcss": "^2.0.2",
+		"grunt-sass": "~3.1.0",
+		"grunt-stylelint": "^0.18.0",
+		"postcss": "~8.4.33",
+		"sass": "~1.70.0",
+		"stylelint": "^14.2"
+	},
+	"engines": {
+		"node": ">=16"
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	]
+}

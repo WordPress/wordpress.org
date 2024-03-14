@@ -514,15 +514,15 @@ function wporg_login_block_account( $user, $reason = '' ) {
 		// Load the Support Forums, for logging and whatnot.
 		WordPressdotorg\Forums\Plugin::get_instance();
 
-		$callback = function( $text ) use ( $callback, $reason, $meta_column ) {
-			remove_filter( 'wporg_bbp_forum_role_changed_note_text', $callback );
-
+		$callback = function( $text ) use ( $reason, $meta_column ) {
 			return trim( "{$reason}\n{$meta_column}\n\n{$text}" );
 		};
 		add_filter( 'wporg_bbp_forum_role_changed_note_text', $callback );
 
 		// Set the user to blocked. Support forum hooks will take care of the rest.
 		bbp_set_user_role( $user->ID, bbp_get_blocked_role() );
+
+		remove_filter( 'wporg_bbp_forum_role_changed_note_text', $callback );
 
 		restore_current_blog();
 	}

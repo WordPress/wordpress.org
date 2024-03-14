@@ -82,7 +82,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		'user_profile_key' => $hashed_profile_key,
 		'meta' => $meta + array(
 			'registration_ip'  => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
-			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? ' ' . \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ) : '' )
+			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ) : '' )
 		),
 		'scores' => array(
 			'pending' => 1,
@@ -336,7 +336,7 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 	$pending_user['created']                      = 1;
 	$pending_user['created_date']                 = gmdate( 'Y-m-d H:i:s' );
 	$pending_user['meta']['confirmed_ip']         = $_SERVER['REMOTE_ADDR'];
-	$pending_user['meta']['confirmed_ip_country'] = ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? ' ' . \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ): '' );
+	$pending_user['meta']['confirmed_ip_country'] = ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ): '' );
 
 	// reCaptcha v3 logging.
 	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {

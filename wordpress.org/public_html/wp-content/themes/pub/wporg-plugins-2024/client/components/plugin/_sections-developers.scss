@@ -1,0 +1,16 @@
+.plugin-developers .contributors-list {
+	li {
+		vertical-align: top;
+		padding-bottom: var(--wp--style--block-gap);
+	}
+
+	@media screen and (min-width: 500px) {
+		display: flex;
+		flex-wrap: wrap;
+
+		li {
+			width: 50%;
+			padding-bottom: unset;
+		}
+	}
+}

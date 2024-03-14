@@ -43,11 +43,16 @@ class Plugin_Import {
 		$tags_touched = $plugin_data['tags_touched'];
 		$revision     = max( (array) $plugin_data['revisions'] );
 
+		$importer = new CLI\Import();
 		try {
-			$importer = new CLI\Import();
 			$importer->import_from_svn( $plugin_slug, $tags_touched, $revision );
 		} catch ( Exception $e ) {
 			fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
+		} finally {
+			if ( $importer->plugin ) {
+				update_post_meta( $importer->plugin->ID, '_last_import', time() );
+				update_post_meta( $importer->plugin->ID, '_import_warnings', $importer->warnings );
+			}
 		}
 
 		// Schedule a job to import any i18n changes from this commit

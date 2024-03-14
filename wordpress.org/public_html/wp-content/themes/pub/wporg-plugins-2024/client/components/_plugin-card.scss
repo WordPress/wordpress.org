@@ -1,0 +1,71 @@
+.plugin-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100%;
+
+	.entry {
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.entry-title {
+		line-height: 1.3;
+
+		display: block;
+		display: -webkit-box;
+		overflow: hidden;
+		max-height: 2.6em; /* 2x line-height, non-webkit fallback */
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+	}
+
+	.entry-excerpt {
+		clear: both;
+		font-size: var( --wp--preset--font-size--small );
+
+		p {
+			margin: 0;
+		}
+	}
+
+	footer {
+		font-size: var( --wp--preset--font-size--small );
+		margin-top: var( --wp--style--block-gap );
+
+		span {
+			display: inline-block;
+			overflow: hidden;
+			white-space: nowrap;
+
+			i {
+				display: inline-block;
+				margin-right: 0.4rem;
+			}
+
+			&.last-updated {
+				display: none;
+			}
+			&.plugin-author {
+				width: 100%;
+			}
+
+		}
+
+		span.active-installs {
+			min-width: 48%;
+		}
+
+		.dashicons {
+			margin: 0 2px -1rem;
+			color: #bbb;
+			width: auto;
+			height: auto;
+			display: none;
+
+			@media (min-width:330px) {
+				display: inline-block;
+			}
+		}
+	}
+}

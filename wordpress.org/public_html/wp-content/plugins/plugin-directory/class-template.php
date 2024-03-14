@@ -163,7 +163,7 @@ class Template {
 	public static function output_meta() {
 		global $wp_query;
 
-		$metas   = [];
+		$metas = [];
 
 		if ( is_singular( 'plugin' ) ) {
 			$metas[] = sprintf(
@@ -305,7 +305,7 @@ class Template {
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
 	 * @return string
 	 */
-	public static function get_star_rating( $post = null ) {
+	public static function get_star_rating( $post = null, $linked = true ) {
 		$post = get_post( $post );
 
 		if ( class_exists( '\WPORG_Ratings' ) ) {
@@ -321,13 +321,13 @@ class Template {
 		return '<div class="plugin-rating">' .
 				Template::dashicons_stars( $rating ) .
 				'<span class="rating-count">(' .
-					'<a href="https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/">' .
+					( $linked ? '<a href="https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/">' : '' ) .
 					sprintf(
 						/* translators: 1: number of ratings */
 						__( '%1$s<span class="screen-reader-text"> total ratings</span>', 'wporg-plugins' ),
 						number_format_i18n( $num_ratings )
 					) .
-				'</a>' .
+				( $linked ? '</a>' : '' ) .
 				')</span>' .
 			'</div>';
 	}

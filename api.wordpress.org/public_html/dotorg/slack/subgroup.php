@@ -114,8 +114,20 @@ list( $command, $subcommand ) = explode( ' ', $_POST['text'] );
 
 switch ( $command ) {
 	case 'create':
+	case 'create-empty':
 		if ( 0 !== strpos( $subcommand, $group['name'] . '-' ) ) {
 			die_text( "Must create a group that starts with `{$group['name']}-`." );
+		}
+
+		// Determine who to invite to the new channel.
+		if ( 'create-empty' === $command ) {
+			// Just the requester should be invited to the channel. WordPress.org will be added automatically as the group creator.
+			$members_to_invite = [
+				$_POST['user_id']
+			];
+		} else {
+			// Invite all members.
+			$members_to_invite = $members;
 		}
 
 		// Create the new private channel.
@@ -145,14 +157,16 @@ switch ( $command ) {
 			]
 		);
 
-		// Invite all current parent channel members to the new channel.
-		// Note: Cannot invite self.
+		// Cannot invite self to group.
+		$members_to_invite = array_diff( $members_to_invite, [ WORDPRESSORG_SLACK_USER_ID ] );
+
+		// Invite users to the new channel.
 		api_call(
 			// https://api.slack.com/methods/conversations.invite
 			'conversations.invite',
 			[
 				'channel' => $new_group['channel']['id'],
-				'users'   => implode( ',', array_diff( $members, [ WORDPRESSORG_SLACK_USER_ID ] ) ),
+				'users'   => implode( ',', $members_to_invite ),
 			]
 		);
 
@@ -206,6 +220,13 @@ switch ( $command ) {
 			$text = "You are in all {$parent_group['name']} subgroups that the @wordpressdotorg user knows about.\n\n";
 		}
 
-		die_text( $text . "*Help:*\n`/subgroup list` - display this message\n`/subgroup join {name}` - join a subgroup\n`/subgroup create {name}` - create a subgroup" );
+		die_text(
+			$text . 
+			"*Help:*\n" .
+			"`/subgroup list` - display this message\n" .
+			"`/subgroup join {name}` - join a subgroup\n" .
+			"`/subgroup create {name}` - create a subgroup with all current group members invited\n" .
+			"`/subgroup create-empty {name}` - create a subgroup with no members invited"
+		);
 }
 

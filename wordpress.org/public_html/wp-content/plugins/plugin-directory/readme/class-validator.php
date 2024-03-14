@@ -80,7 +80,7 @@ class Validator {
 			);
 		}
 
-		// Warnings.
+		// Warnings & Notes.
 		if ( isset( $readme->warnings['requires_header_ignored'] ) ) {
 			$latest_wordpress_version = defined( 'WP_CORE_STABLE_BRANCH' ) ? WP_CORE_STABLE_BRANCH : '5.0';
 
@@ -137,7 +137,7 @@ class Validator {
 				'<code>Contributors</code>'
 			);
 		} elseif ( ! count( $readme->contributors ) ) {
-			$warnings[] = sprintf(
+			$notes[] = sprintf(
 				/* translators: %s: plugin header tag */
 				__( 'The %s field is missing.', 'wporg-plugins' ),
 				'<code>Contributors</code>'
@@ -156,7 +156,14 @@ class Validator {
 			);
 		}
 
-		// Notes.
+		if ( isset( $readme->warnings['low_usage_tags'] ) ) {
+			$notes[] = sprintf(
+				/* translators: %s: list of tags with low usage. */
+				__( 'The following tags are not widely used: %s', 'wporg-plugins' ),
+				'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $readme->warnings['low_usage_tags'] ) ) . '</code>'
+			);
+		}
+
 		if ( empty( $readme->requires ) ) {
 			$notes[] = sprintf(
 				/* translators: %s: plugin header tag */
@@ -180,10 +187,30 @@ class Validator {
 				'<code>Short Description</code>'
 			);
 		} elseif( isset( $readme->warnings['trimmed_short_description'] ) ) {
-			$notes[] = sprintf(
+			$warnings[] = sprintf(
 				/* translators: %s: section title */
 				__( 'The %s section is too long and was truncated. A maximum of 150 characters is supported.', 'wporg-plugins' ),
-				'<code>Short Description</code>'
+				'<code>Short Description</code>',
+				number_format_i18n( $readme->maximum_field_lengths['short_description'] )
+			);
+		}
+
+		$trimmed_sections = array_filter( $readme->warnings, function( $warning ) {
+			return str_contains( $warning, 'trimmed_section_' );
+		}, ARRAY_FILTER_USE_KEY );
+		foreach ( $trimmed_sections as $section_name => $dummy ) {
+			$section_name = str_replace( 'trimmed_section_', '', $section_name );
+
+			$max_length_field = "section-{$section_name}";
+			if ( ! isset( $readme->maximum_field_lengths[ $max_length_field ] ) ) {
+				$max_length_field = 'section';
+			}
+
+			$warnings[]   = sprintf(
+				/* translators: %s: section title */
+				__( 'The %s section is too long and was truncated. A maximum of %s words is supported.', 'wporg-plugins' ),
+				'<code>' . esc_html( ucwords( str_replace( '_', ' ', $section_name ) ) ) . '</code>',
+				number_format_i18n( $readme->maximum_field_lengths[ $max_length_field ] )
 			);
 		}
 

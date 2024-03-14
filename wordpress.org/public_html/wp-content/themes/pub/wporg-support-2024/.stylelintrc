@@ -1,0 +1,18 @@
+{
+  "extends": "@wordpress/stylelint-config/scss",
+  "rules": {
+	  "block-no-empty": null,
+	  "declaration-block-no-shorthand-property-overrides": null,
+	  "declaration-property-unit-allowed-list": null,
+	  "font-family-no-missing-generic-family-keyword": null,
+	  "function-parentheses-space-inside": null,
+	  "no-descending-specificity": null,
+	  "no-duplicate-selectors": null,
+	  "no-invalid-position-at-import-rule": null,
+	  "selector-class-pattern": null,
+	  "selector-id-pattern": null,
+	  "selector-list-comma-newline-after": null,
+	  "value-keyword-case": null,
+	  "scss/selector-no-redundant-nesting-selector": null,
+  }
+}

@@ -1,0 +1,106 @@
+@import "../variables-site/variables-site";
+
+/* User badges */
+
+.by-moderator {
+	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--moderator);
+}
+
+.by-plugin-author,
+.by-plugin-contributor,
+.by-plugin-support-rep {
+	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--plugin-author);
+}
+
+.by-theme-author,
+.by-theme-contributor,
+.by-theme-support-rep {
+	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--theme-author);
+}
+
+.by-thread-starter {
+	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--thread-starter);
+}
+
+.type-reported_topics {
+	border-right: 2px solid var(--wp--custom--color--thread-reporter);
+}
+
+.author-badge {
+	position: absolute;
+	top: 14px;
+	left: -4px;
+	padding: 2px 6px;
+	color: #fff;
+	font-size: 0.6rem;
+	letter-spacing: 1px;
+	border-radius: 0 2px 2px 0;
+}
+
+.author-badge-moderator {
+	background-color: var(--wp--custom--color--moderator);
+}
+
+.author-badge-thread-starter {
+	background-color: var(--wp--custom--color--thread-starter);
+}
+
+.author-badge-plugin {
+	background-color: var(--wp--custom--color--plugin-author);
+}
+
+.author-badge-theme {
+	background-color: var(--wp--custom--color--theme-author);
+}
+
+.author-badge-reporter {
+	background-color: var(--wp--custom--color--thread-reporter);
+	right: -2px;
+	left: initial;
+	border-radius: 2px 0 0 2px;
+}
+
+.bbp-view .bbp-topics,
+.bbp-search .bbp-search-results,
+.bbp-user-replies-created,
+.bbp-user-reports-submitted {
+
+	div.author-has-badge {
+		box-shadow: none;
+		border-left-style: solid;
+		border-left-width: 3px;
+	}
+
+	.by-moderator {
+		border-left-color: var(--wp--custom--color--moderator);
+	}
+
+	.by-plugin-author,
+	.by-plugin-contributor,
+	.by-plugin-support-rep {
+		border-left-color: var(--wp--custom--color--plugin-author);
+	}
+
+	.by-theme-author,
+	.by-theme-contributor,
+	.by-theme-support-rep {
+		border-left-color: var(--wp--custom--color--theme-author);
+	}
+
+	.author-badge {
+		left: 0;
+	}
+
+	.author-badge-reporter {
+		left: initial;
+		right: 0;
+	}
+}
+
+@media screen and ( max-width: 480px ) {
+
+	.author-badge,
+	.author-badge-reporter {
+		top: -28px;
+	}
+}

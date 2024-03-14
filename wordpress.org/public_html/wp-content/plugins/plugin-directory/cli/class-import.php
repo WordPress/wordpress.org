@@ -7,7 +7,7 @@ use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
-use WordPressdotorg\Plugin_Directory\Readme\Parser;
+use WordPressdotorg\Plugin_Directory\Readme\{ Parser as Readme_Parser, Validator as Readme_Validator };
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -57,6 +57,20 @@ class Import {
 	);
 
 	/**
+	 * List of warnings generated during the import process.
+	 *
+	 * @var array
+	 */
+	public $warnings = array();
+
+	/**
+	 * The last plugin imported.
+	 *
+	 * @var \WP_Post
+	 */
+	public $plugin;
+
+	/**
 	 * Process an import for a Plugin into the Plugin Directory.
 	 *
 	 * @throws \Exception
@@ -66,7 +80,10 @@ class Import {
 	 * @param array  $svn_revision_triggered The SVN revision which this import has been triggered by. Optional.
 	 */
 	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_revision_triggered = 0 ) {
-		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+		// Reset properties.
+		$this->warnings = [];
+
+		$plugin = $this->plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 		if ( ! $plugin ) {
 			throw new Exception( 'Unknown Plugin' );
 		}
@@ -86,6 +103,18 @@ class Import {
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
+		// If the readme generated any warnings, raise it to self::$import_warnings;
+		if ( $readme->warnings ) {
+			// Convert the warnings to a human readable format.
+			$readme_warnings = Readme_Validator::instance()->validate_content( $readme->raw_contents );
+
+			foreach ( [ 'errors', 'warnings' ] as $field ) {
+				foreach ( $readme_warnings[ $field ] ?? [] as $warning ) {
+					$this->warnings[] = "Readme: {$warning}";
+				}
+			}
+		}
+
 		// Validate various headers:
 
 		/*
@@ -98,9 +127,36 @@ class Import {
 		if ( $headers->UpdateURI ) {
 			$update_uri_valid = preg_match( '!^(https?://)?(wordpress.org|w.org)/plugins?/(?P<slug>[^/]+)/?$!i', $headers->UpdateURI, $update_uri_matches );
 			if ( ! $update_uri_valid || $update_uri_matches['slug'] !== $plugin_slug ) {
-				throw new Exception( 'Invalid Update URI header detected: ' . $headers->UpdateURI );
+				$this->warnings['invalid_update_uri'] = 'Invalid Update URI header detected: ' . $headers->UpdateURI;
+
+				throw new Exception( $this->warnings['invalid_update_uri'] );
 			}
 		}
+
+		$_requires_plugins = array_filter( array_map( 'trim', explode( ',', $headers->RequiresPlugins ) ) );
+		$requires_plugins     = [];
+		$unmet_dependencies   = [];
+		foreach ( $_requires_plugins as $requires_plugin_slug ) {
+			$requires_plugin_post = Plugin_Directory::get_plugin_post( $requires_plugin_slug );
+
+			// get_plugin_post() will resolve some edge-cases, but we only want exact slug-matches, anything else is wrong.
+			if (
+				$requires_plugin_post &&
+				$requires_plugin_slug === $requires_plugin_post->post_name &&
+				'publish' === $requires_plugin_post->post_status
+			) {
+				$requires_plugins[] = $requires_plugin_post->post_name;
+			} else {
+				$unmet_dependencies[] = $requires_plugin_slug;
+			}
+		}
+
+		if ( $unmet_dependencies ) {
+			$this->warnings['unmet_dependencies'] = 'Invalid plugin dependencies specified. The following dependencies could not be resolved: ' . implode( ', ', $requires_plugins_unmet );
+
+			throw new Exception( $this->warnings['unmet_dependencies'] );
+		}
+		unset( $_requires_plugins, $unmet_dependencies );
 
 		// Release confirmation
 		if ( $plugin->release_confirmation ) {
@@ -311,30 +367,7 @@ class Import {
 			update_post_meta( $plugin->ID, 'plugin_name_history', wp_slash( $plugin_names ) );
 		}
 
-		// Validate whether the dependencies are met by WordPress.org-hosted plugins.
-		$requires_plugins       = array_filter( array_map( 'trim', explode( ',', $headers->RequiresPlugins ) ) );
-		$requires_plugins_unmet = false;
-		foreach ( $requires_plugins as $requires_plugin_slug ) {
-			// TODO: Add support for premium plugins.
-			$requires_plugin_post = Plugin_Directory::get_plugin_post( $requires_plugin_slug );
-			if (
-				! $requires_plugin_post ||
-				// get_plugin_post() will resolve some edge-cases, but we only want exact slug-matches.
-				$requires_plugin_slug !== $requires_plugin_post->post_name ||
-				'publish' !== $requires_plugin_post->post_status
-			) {
-				$requires_plugins_unmet = true;
-				break;
-			}
-		}
-
-		update_post_meta( $plugin->ID, 'requires_plugins', wp_slash( $requires_plugins ) );
-		if ( $requires_plugins_unmet ) {
-			update_post_meta( $plugin->ID, '_requires_plugins_unmet', true );
-		} else {
-			delete_post_meta( $plugin->ID, '_requires_plugins_unmet' );
-		}
-
+		update_post_meta( $plugin->ID, 'requires_plugins',   wp_slash( $requires_plugins ) );
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
 		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
@@ -411,8 +444,9 @@ class Import {
 		 * @param string  $old_stable_tag The previous stable tag for the plugin.
 		 * @param array   $changed_tags   The list of SVN tags/trunk affected to trigger the import.
 		 * @param int     $svn_revision   The SVN revision that triggered the import.
+		 * @param array   $warnings       The list of warnings generated during the import process.
 		 */
-		do_action( 'wporg_plugins_imported', $plugin, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
+		do_action( 'wporg_plugins_imported', $plugin, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered, $this->warnings );
 
 		return true;
 	}
@@ -563,7 +597,7 @@ class Import {
 			}
 
 			$trunk_readme_file = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk/{$trunk_readme_file}";
-			$trunk_readme      = new Parser( $trunk_readme_file );
+			$trunk_readme      = new Readme_Parser( $trunk_readme_file );
 
 			$stable_tag = $trunk_readme->stable_tag;
 		}
@@ -623,7 +657,7 @@ class Import {
 
 		// The readme may not actually exist, but that's okay.
 		$readme = $this->find_readme_file( $tmp_dir . '/export' );
-		$readme = new Parser( $readme );
+		$readme = new Readme_Parser( $readme );
 
 		// There must be valid plugin headers though.
 		$plugin_headers = $this->find_plugin_headers( "$tmp_dir/export" );

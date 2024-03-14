@@ -29,6 +29,36 @@ summary {
 	background-color: #3858e9;
 }
 
+.randomly-chosen-photo {
+	background-color: #eff2ff;
+	border-color: #00a0d2;
+	border-radius: 2px;
+	border-style: solid;
+	border-width: 0;
+	margin-bottom: 2rem;
+	overflow: auto;
+	padding: 1.25em 1.25em 1.25em 3.25em;
+	position: relative;
+
+	&::before {
+		background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xOS42IDEyYTcuNiA3LjYgMCAxIDEtMTUuMiAwIDcuNiA3LjYgMCAwIDEgMTUuMiAwem0xLjQgMGE5IDkgMCAxIDEtMTggMCA5IDkgMCAwIDEgMTggMHptLTkuNzEzLTIuMjI2djcuMjU5aDEuNDEyVjkuNzc0aC0xLjQxMnptLjA4LTEuMzY1YS44OTguODk4IDAgMCAwIC42MzMuMjQ1Ljg4Mi44ODIgMCAwIDAgLjYyOS0uMjQ1Ljc5Mi43OTIgMCAwIDAgLjI2NC0uNTk2Ljc4My43ODMgMCAwIDAtLjI2NC0uNTk1Ljg3My44NzMgMCAwIDAtLjYyOS0uMjUuODg5Ljg4OSAwIDAgMC0uNjMzLjI1Ljc5Ljc5IDAgMCAwLS4yNi41OTVjMCAuMjMuMDg3LjQyOS4yNi41OTZ6IiBmaWxsPSIjMzg1OEU5Ii8+PC9zdmc+Cg==);
+		background-repeat: no-repeat;
+		content: "";
+		font-family: "dashicons";
+		font-size: 2em;
+		height: 24px;
+		left: .55em;
+		position: absolute;
+		top: .65em;
+		width: 24px;
+	}
+
+	a {
+		color: #3858e9;
+		text-decoration: underline;
+	}
+}
+
 .download-button:focus,
 .download-button:hover {
 	background-color: #213FD4;

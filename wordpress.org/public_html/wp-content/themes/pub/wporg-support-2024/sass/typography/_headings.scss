@@ -1,0 +1,29 @@
+@import "../variables-site/variables-site";
+@import "../mixins/mixins-master";
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	clear: both;
+	margin: 0 0 var(--wp--style--block-gap);
+}
+
+h2 {
+
+	&.comment-reply-title {
+		font-weight: 400;
+		font-size: 1.45rem;
+		line-height: 1.5em;
+	}
+}
+
+h3 {
+
+	&.comment-reply-title {
+		font-size: ms( 2 );
+		font-weight: 700;
+	}
+}

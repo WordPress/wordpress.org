@@ -12,7 +12,7 @@ function get_style_variation_from_url() {
 		return '';
 	}
 
-	return sanitize_text_field( urldecode( $_GET['style_variation'] ) );
+	return sanitize_text_field( urldecode( wp_unslash( $_GET['style_variation'] ) ) );
 }
 
 /**

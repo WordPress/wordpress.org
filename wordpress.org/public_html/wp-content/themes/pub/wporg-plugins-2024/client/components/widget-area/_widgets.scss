@@ -1,0 +1,36 @@
+.home .widget,
+.widget-area.home .widget {
+	display: inline-block;
+	font-size: var( --wp--preset--font-size--small );
+	margin: 0;
+	vertical-align: top;
+	width: auto;
+	margin: var( --wp--style--block-gap );
+
+	@media screen and ( min-width: $ms-breakpoint ) {
+		margin: 0;
+		width: 30%;
+
+		&:first-child {
+			margin-right: 5%;
+		}
+
+		&:last-child {
+			margin-left: 5%;
+		}
+	}
+
+	/* Make sure select elements fit in widgets. */
+	select {
+		max-width: 100%;
+	}
+}
+
+.entry-meta .widget-title {
+	font-size: var( --wp--preset--font-size--heading-4 );
+}
+
+body.single.single-plugin .entry-meta {
+	/* override parent */
+	font-size: var( --wp--preset--font-size--normal );
+}

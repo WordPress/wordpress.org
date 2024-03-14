@@ -5,6 +5,7 @@ use WP_Error;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
@@ -421,12 +422,14 @@ class Upload_Handler {
 		}
 
 		$post_args = array(
-			'ID'           => $plugin_post->ID ?? 0,
-			'post_title'   => $this->plugin['Name'],
-			'post_name'    => $this->plugin_slug,
-			'post_status'  => $plugin_post->post_status ?? 'new',
-			'post_content' => $content,
-			'post_excerpt' => $this->plugin['Description'],
+			'ID'            => $plugin_post->ID ?? 0,
+			'post_title'    => $this->plugin['Name'],
+			'post_name'     => $this->plugin_slug,
+			'post_status'   => $plugin_post->post_status ?? 'new',
+			'post_content'  => $content,
+			'post_excerpt'  => $this->plugin['Description'],
+			'post_date'     => $plugin_post->post_date ?? null,
+			'post_date_gmt' => $plugin_post->post_date_gmt ?? null,
 			// 'tax_input'    => wp_unslash( $_POST['tax_input'] ), // for category selection
 			'meta_input'   => array(
 				'tested'                   => $readme->tested,
@@ -465,7 +468,7 @@ class Upload_Handler {
 		);
 
 		// First time submission, track some additional metadata.
-		if ( ! $plugin_post ) {
+		if ( ! $updating_existing ) {
 			$post_args['meta_input']['_author_ip']        = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
 			$post_args['meta_input']['_submitted_date']   = time();
 			$post_args['meta_input']['_used_upload_token'] = $has_upload_token;
@@ -476,6 +479,18 @@ class Upload_Handler {
 
 		if ( is_wp_error( $plugin_post ) ) {
 			return $plugin_post;
+		}
+
+		// Record the submitter.
+		if ( ! $updating_existing ) {
+			Tools::audit_log(
+				sprintf(
+					'Submitted by <a href="%s">%s</a>.',
+					esc_url( 'https://profiles.wordpress.org/' . wp_get_current_user()->user_nicename . '/' ),
+					wp_get_current_user()->user_login
+				),
+				$plugin_post->ID
+			);
 		}
 
 		$attachment = $this->save_zip_file( $plugin_post->ID );
