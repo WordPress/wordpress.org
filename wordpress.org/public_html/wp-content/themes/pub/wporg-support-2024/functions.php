@@ -444,6 +444,7 @@ function wporg_support_get_forums_list() {
 			esc_attr( $columns_to_fill ),
 			__( 'Theme &amp; Plugins', 'wporg-forums' ),
 			sprintf(
+				/* translators: 1: Theme Directory URL, 2: Plugin Directory URL */
 				__( 'Looking for help with a specific <a href="%1$s">theme</a> or <a href="%2$s">plugin</a>? Head to the theme or plugin\'s page and find the "View support forum" link to visit its individual forum.', 'wporg-forums' ),
 				esc_url( __( 'https://wordpress.org/themes/', 'wporg-forums' ) ),
 				esc_url( __( 'https://wordpress.org/plugins/', 'wporg-forums' ) ),
