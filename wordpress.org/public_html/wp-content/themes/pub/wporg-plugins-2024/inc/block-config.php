@@ -54,10 +54,8 @@ function wporg_query_filter_options_sort() {
 	if ( ! is_search() ) {
 		unset( $options['relevance'] );
 	} else {
-		// TODO: Temporarily only show relevance on search.
-		$options = [
-			'relevance' => $options['relevance']
-		];
+		// Temporarily disable on search, until the ES integration supports it.
+		return false;
 	}
 
 	$label = __( 'Sort', 'wporg-plugins' );
