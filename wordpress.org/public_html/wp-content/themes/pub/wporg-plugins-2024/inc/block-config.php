@@ -11,6 +11,7 @@ add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg
 add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wporg_query_filter_options_plugin_category' );
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
+add_filter( 'render_block', __NAMESPACE__ . '\filter_search_block', 10, 2 );
 
 /**
  * Provide a list of local navigation menus.
@@ -148,4 +149,19 @@ function wporg_query_filter_in_form( $key ) {
 
 function wporg_query_total_label( $label, $count ) {
 	return _n( '%s plugin', '%s plugins', $count, 'wporg-plugins' );
+}
+
+/**
+ * Filters the search block to remove required attribute.
+ *
+ * @param string $block_content
+ * @param array  $block
+ * @return string
+ */
+function filter_search_block( $block_content, $block ) {
+	if ( 'core/search' !== $block['blockName'] ) {
+		return $block_content;
+	}
+
+	return preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
 }
