@@ -7,18 +7,6 @@
 			"wideSize": "1160px"
 		},
 		"custom": {
-			"form": {
-				"border": {
-					"width": "1px",
-					"style": "solid",
-					"color": "rgb(214, 218, 221)"
-				},
-				"search": {
-					"color": {
-						"background": "var(--wp--preset--color--white)"
-					}
-				}
-			},
 			"button":{
 				"spacing": {
 					"padding":{
