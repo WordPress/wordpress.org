@@ -1021,27 +1021,27 @@ class Plugin_Directory {
 
 				break;
 
-			case 'num_ratings':
 			case 'ratings':
+				$wp_query->query_vars['orderby'] = 'num_ratings';
+				// Fall through.
+			case 'num_ratings':
 				$wp_query->query_vars['meta_query']['num_ratings'] ??= [
 					'key'     => 'num_ratings',
 					'type'    => 'UNSIGNED',
 					'compare' => '>',
 					'value'   => 0,
 				];
-
-				$wp_query->query_vars['orderby']  = 'num_ratings';
 				break;
 
 			case '_active_installs':
+				$wp_query->query_vars['orderby']  = 'active_installs';
+				// Fall through.
 			case 'active_installs':
 				$wp_query->query_vars['meta_query']['active_installs'] ??= [
 					'key'     => '_active_installs',
 					'type'    => 'UNSIGNED',
 					'compare' => 'EXISTS'
 				];
-
-				$wp_query->query_vars['orderby']  = 'active_installs';
 				break;
 
 			case 'last_updated':
@@ -1066,7 +1066,6 @@ class Plugin_Directory {
 					'type'    => 'UNSIGNED',
 					'compare' => 'EXISTS',
 				];
-				$wp_query->query_vars['orderby']  = 'downloads';
 				break;
 		}
 	}
@@ -1467,9 +1466,17 @@ class Plugin_Directory {
 
 		// New-style search links.
 		if ( get_query_var( 's' ) && isset( $_GET['s'] ) ) {
-			$url = site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' );
-			if ( get_query_var( 'block_search' ) ) {
-				$url = add_query_arg( 'block_search', get_query_var( 'block_search' ), $url );
+			$url        = site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' );
+			$query_vars = array_filter( $wp_query->query );
+
+			// Don't need the search..
+			unset( $query_vars['s'] );
+
+			// Temporary: Disable sorts for search.
+			unset( $query_vars['order'], $query_vars['orderby'] );
+
+			if ( ! empty( $query_vars ) ) {
+				$url = add_query_arg( $query_vars, $url );
 			}
 
 			wp_safe_redirect( $url, 301 );

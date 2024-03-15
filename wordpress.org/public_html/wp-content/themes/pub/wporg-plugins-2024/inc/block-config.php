@@ -129,12 +129,17 @@ function wporg_query_filter_in_form( $key ) {
 		$array  = is_array( $values );
 		$values = (array) $values;
 		foreach ( $values as $value ) {
-			// Support for tax archives... TODO Hacky..
-			// Realistically we should just ditch these and have all of the filters hit /search/?stuff=goes&here
-			if ( is_tax() && $value === ( get_queried_object()->slug ?? '' ) ) {
+			if ( is_search() && 's' === $query_var ) {
 				continue;
-			} elseif ( is_search() && 's' === $query_var ) {
+			} elseif ( 'plugin_tags' === $query_var ) {
+				// We don't support tags yet as a filter.
 				continue;
+			} elseif ( 'browse' === $query_var ) {
+				// Don't retain if there's no actual items in the section (ie. it's dynamic).
+				$term = get_term_by( 'slug', $value, 'plugin_section' );
+				if ( ! $term || ! $term->count ) {
+					continue;
+				}
 			}
 
 			printf(
@@ -145,6 +150,11 @@ function wporg_query_filter_in_form( $key ) {
 		}
 	}
 
+	// If this is a block directory search, that needs to be retained too.
+	if ( is_search() && get_query_var( 'block_search' ) ) {
+		echo '<input type="hidden" name="block_search" value="1" />';
+	}
+
 }
 
 function wporg_query_total_label( $label, $count ) {
@@ -152,7 +162,7 @@ function wporg_query_total_label( $label, $count ) {
 }
 
 /**
- * Filters the search block to remove required attribute.
+ * Filters the search block to remove the required attribute, and add the query fields.
  *
  * @param string $block_content
  * @param array  $block
@@ -163,5 +173,13 @@ function filter_search_block( $block_content, $block ) {
 		return $block_content;
 	}
 
-	return preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
+	// Remove the required attribute
+	$block_content = preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
+
+	// Insert the current query filters into the search form.
+	ob_start();
+	wporg_query_filter_in_form( 's' );
+	$block_content = str_replace( '</form>', ob_get_clean() . '</form>', $block_content );
+
+	return $block_content;
 }
