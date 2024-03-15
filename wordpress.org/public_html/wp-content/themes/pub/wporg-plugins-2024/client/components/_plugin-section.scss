@@ -1,4 +1,5 @@
 #main .plugin-section { /* #main prefix is to overrule inline block styles */
+    margin: 0 auto var( --wp--preset--spacing--40 );
 
 	&:last-of-type {
 		margin-bottom: 0;
