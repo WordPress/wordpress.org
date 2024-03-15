@@ -19,6 +19,7 @@
 	border-width: 0;
 	cursor: pointer;
 	vertical-align: middle;
+	border-radius: var(--wp--custom--button--border--radius);
 
 	padding-top: calc(var(--wp--custom--button--small--spacing--padding--top) + var(--wp--custom--button--border--width));
 	padding-bottom: calc(var(--wp--custom--button--small--spacing--padding--bottom) + var(--wp--custom--button--border--width));

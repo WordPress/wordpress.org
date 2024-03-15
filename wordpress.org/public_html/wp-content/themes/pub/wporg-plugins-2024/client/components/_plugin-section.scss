@@ -1,6 +1,4 @@
 #main .plugin-section { /* #main prefix is to overrule inline block styles */
-	margin: var( --wp--preset--spacing--40 ) auto var( --wp--preset--spacing--60 );
-	max-width: var( --wp--style--global--content-size );
 
 	&:last-of-type {
 		margin-bottom: 0;
@@ -34,9 +32,5 @@
 		@media screen and ( min-width: $ms-breakpoint ) {
 			margin-right: 0;
 		}
-	}
-
-	@media screen and ( min-width: $large-breakpoint ) {
-		max-width: var( --wp--style--global--wide-size );
 	}
 }

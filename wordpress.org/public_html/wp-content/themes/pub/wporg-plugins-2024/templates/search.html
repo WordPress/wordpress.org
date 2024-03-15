@@ -1,9 +1,14 @@
 <!-- wp:template-part {"slug":"header","tagName":"div","className":"has-display-contents"} /-->
 
-<!-- wp:group {"tagName":"div","style":{"spacing":{"padding":{"top":"var:preset|spacing|40","left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--40);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--60);padding-left:var(--wp--preset--spacing--edge-space)">
-	<!-- wp:wporg/search-page /-->
-</div>
+<!-- wp:group {"tagName":"main","style":{"spacing":{"blockGap":"0px"}},"className":"entry-content","layout":{"type":"constrained"}} -->
+<main class="wp-block-group entry-content" style="padding-top:var(--wp--preset--spacing--40);padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--40)">
+	<!-- wp:group {"align":"wide","layout":{"type":"default"}} -->
+	<div class="wp-block-group alignwide" >
+		<!-- wp:wporg/search-page /-->
+	</div>
+	<!-- /wp:group -->
+</main>
 <!-- /wp:group -->
+
 
 <!-- wp:wporg/global-footer /-->

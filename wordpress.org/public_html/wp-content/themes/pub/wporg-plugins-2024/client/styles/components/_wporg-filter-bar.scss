@@ -4,12 +4,7 @@
 	--wporg--filter-bar--active--background-color: var(--wp--custom--button--color--background);
 	--wporg--filter-bar--focus--border-color: var(--wp--custom--button--focus--border--color);
 
-	max-width: var( --wp--style--global--content-size );
 	margin: var( --wp--style--block-gap ) 0;
-
-	@media screen and ( max-width: $ms-breakpoint ) {
-		margin: var(--wp--style--block-gap) var(--wp--preset--spacing--edge-space);
-	}
 
 	.wporg-query-filter__toggle.is-active,
 	.wporg-query-filter__toggle:active,
@@ -84,9 +79,5 @@
 		.wporg-filter-bar__navigation {
 			margin-bottom: 0;
 		}
-	}
-
-	@media screen and ( min-width: $large-breakpoint ) {
-		max-width: var( --wp--style--global--wide-size );
 	}
 }
