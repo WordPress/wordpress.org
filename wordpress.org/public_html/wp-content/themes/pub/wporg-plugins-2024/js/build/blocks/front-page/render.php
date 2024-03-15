@@ -19,7 +19,6 @@ $widget_args = array(
 <main id="main" class="site-main alignwide" role="main">
 
 	<?php
-
 	foreach ( $sections as $browse => $section_title ) :
 		// Only logged in users can have favorites.
 		if ( 'favorites' === $browse && ! is_user_logged_in() ) {
@@ -77,11 +76,10 @@ $widget_args = array(
 			</header>
 
 			<?php
-			// NOTE: wp-block-group-is-layout-grid is here as `wp-block-query-is-layout-grid` is not supported yet by `wporg/link-wrapper`.
 			echo do_blocks( <<<BLOCKS
 			<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 				<div class="wp-block-query plugin-cards">
-					<!-- wp:post-template {"className":"is-style-cards-grid wp-block-group-is-layout-grid","layout":{"type":"grid","minimumColumnWidth":"48%"}} -->
+					<!-- wp:post-template {"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"48%"}} -->
 						<!-- wp:wporg/plugin-card /-->
 					<!-- /wp:post-template -->
 				</div>
