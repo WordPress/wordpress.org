@@ -1,9 +1,10 @@
 .widget-area {
 	margin: 0 auto;
-	max-width: var( --wp--style--global--content-size );
-	padding: 0 0 var( --wp--preset--spacing--50 );
+	padding: var( --wp--preset--spacing--40 ) 0;
 
-	@media screen and ( min-width: $large-breakpoint ) {
-		max-width: var( --wp--style--global--wide-size );
+	.widget-title {
+		margin-top: var( --wp--preset--spacing--50 );
+		font-size: var( --wp--preset--font-size--heading-1 );
+		font-weight: var( --wp--custom--heading--typography--font-weight );
 	}
 }
