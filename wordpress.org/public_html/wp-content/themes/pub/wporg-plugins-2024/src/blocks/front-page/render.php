@@ -16,7 +16,7 @@ $widget_args = array(
 
 ?>
 
-<main id="main" class="site-main alignwide" role="main">
+<div id="main" class="site-main alignwide" role="main">
 
 	<?php
 	foreach ( $sections as $browse => $section_title ) :
@@ -91,7 +91,7 @@ $widget_args = array(
 
 	<?php endforeach; ?>
 
-</main><!-- #main -->
+</div><!-- #main -->
 
 <aside id="secondary" class="widget-area" role="complementary">
 	<?php
