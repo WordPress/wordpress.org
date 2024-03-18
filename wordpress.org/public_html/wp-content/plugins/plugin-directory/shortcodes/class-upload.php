@@ -425,6 +425,17 @@ class Upload {
 						<input type="checkbox" name="requirements[license]" required="required">
 						<?php _e( 'This plugin, all included libraries, and any other included assets are licenced as GPL or are under a GPL compatible license.', 'wporg-plugins' ); ?>
 					</label>
+					<br>
+					<label>
+						<input type="checkbox" name="requirements[plugin-check]" required="required" />
+						<?php
+							printf(
+								/* Translators: URL to plugin-check plugin */
+								__( 'I confirm that the plugin has been tested with the <a href="%s">Plugin Check</a> plugin, and all indicated issues resolved (apart from what I believe to be false-positives).', 'wporg-plugins' ),
+								home_url( '/plugins/plugin-check/' )
+							);
+						?>
+					</label>
 				</p>
 
 				<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
