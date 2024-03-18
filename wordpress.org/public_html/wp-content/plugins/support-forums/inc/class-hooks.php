@@ -409,7 +409,7 @@ class Hooks {
 	public function redirect_ask_question_plugin_forum() {
 		if (
 			'plugin' === get_query_var( 'bbp_view' ) &&
-			in_array( get_query_var( 'wporg_plugin' ), array( 'ask-question', 'technical-support' ) )
+			in_array( get_query_var( 'wporg_plugin' ), array( 'ask-question', 'technical-support', 'email' ) )
 		) {
 			wp_safe_redirect( home_url( '/forum/how-to-and-troubleshooting/' ) );
 			exit;
