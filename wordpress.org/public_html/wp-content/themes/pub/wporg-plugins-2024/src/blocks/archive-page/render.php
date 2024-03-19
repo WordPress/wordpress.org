@@ -8,17 +8,8 @@ if ( ! $wp_query->have_posts() ) {
 	nocache_headers();
 }
 
-?>
-
-<header class="page-header">
-	<?php
-	the_archive_title( '<h1 class="page-title">', '</h1>' );
-	the_archive_description( '<div class="taxonomy-description">', '</div>' );
-	?>
-</header>
-
-<?php
 echo do_blocks( <<<BLOCKS
+	<!-- wp:navigation {"menuSlug":"section-bar","className":"is-style-button-list","fontSize":"small"} /-->
 	<!-- wp:wporg/filter-bar /-->
 	<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 	<div class="wp-block-query plugin-cards">

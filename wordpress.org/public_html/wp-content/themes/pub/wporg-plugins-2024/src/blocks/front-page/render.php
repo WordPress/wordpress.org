@@ -14,6 +14,10 @@ $widget_args = array(
 	'after_title'  => '</h2>',
 );
 
+echo do_blocks(
+	'<!-- wp:navigation {"menuSlug":"section-bar","className":"is-style-button-list","fontSize":"small"} /-->'
+);
+
 ?>
 
 <div id="main" class="site-main alignwide" role="main">

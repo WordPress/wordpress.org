@@ -18,22 +18,65 @@ add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\filter_site_title_
  * Provide a list of local navigation menus.
  */
 function add_site_navigation_menus( $menus ) {
-	return array(
+	$items = array(
 		'plugins' => array(
 			array(
 				'label' => __( 'My Favorites', 'wporg-plugins' ),
 				'url' => '/browse/favorites/',
 			),
 			array(
-				'label' => __( 'Beta Testing', 'wporg-plugins' ),
-				'url' => '/browse/beta/',
-			),
-			array(
-				'label' => __( 'Developers', 'wporg-plugins' ),
+				'label' => __( 'Submit a plugin', 'wporg-plugins' ),
 				'url' => '/developers/',
 			),
 		),
+		'section-bar' => array(
+			array(
+				'label' => __( 'All', 'wporg-plugins' ),
+				'url' => home_url( '/' ),
+			),
+			array(
+				'label' => __( 'Community', 'wporg-plugins' ),
+				'url'   => home_url( '?plugin_business_model=community' ),
+				'term'  => get_term_by( 'slug', 'community', 'plugin_business_model' ),
+			),
+			array(
+				'label' => __( 'Commercial', 'wporg-plugins' ),
+				'url'   => home_url( '?plugin_business_model=commercial' ),
+				'term'  => get_term_by( 'slug', 'commercial', 'plugin_business_model' ),
+			),
+			array(
+				'label' => __( 'Block-Enabled', 'wporg-plugins' ),
+				'term'  => get_term_by( 'slug', 'blocks', 'plugin_section' ),
+			),
+			array(
+				'label' => __( 'Featured', 'wporg-plugins' ),
+				'term'  => get_term_by( 'slug', 'featured', 'plugin_section' ),
+			),
+			array(
+				'label' => __( 'Beta', 'wporg-plugins' ),
+				'term'  => get_term_by( 'slug', 'beta', 'plugin_section' ),
+			),
+			array(
+				'label' => __( 'Popular', 'wporg-plugins' ),
+				'term'  => get_term_by( 'slug', 'popular', 'plugin_section' ),
+			),
+		)
 	);
+
+	// Not usually in the menu, but we need to show these somehow.
+	if ( is_tax( 'plugin_section', 'adopt-me' ) ) {
+		$items['section-bar'][] = array(
+			'label' => _x( 'Adopt Me', 'Plugin Section Name', 'wporg-plugins' ),
+			'term'  => get_term_by( 'slug', 'adopt-me', 'plugin_section' )
+		);
+	} elseif ( is_tax( 'plugin_tags' ) ) {
+		$items['section-bar'][] = array(
+			'label' => sprintf( __( 'Tag: %s', 'wporg-plugins' ), single_term_title( '', false ) ),
+			'term'  => get_queried_object()
+		);
+	}
+
+	return $items;
 }
 
 function wporg_query_filter_options_sort() {
@@ -133,8 +176,10 @@ function wporg_query_filter_in_form( $key ) {
 			if ( is_search() && 's' === $query_var ) {
 				continue;
 			} elseif ( 'plugin_tags' === $query_var ) {
-				// We don't support tags yet as a filter.
-				continue;
+				// Don't include it if it's the current term.
+				if ( is_tax( 'plugin_tags', $value ) ) {
+					continue;
+				}
 			} elseif ( 'browse' === $query_var ) {
 				// Don't retain if there's no actual items in the section (ie. it's dynamic).
 				$term = get_term_by( 'slug', $value, 'plugin_section' );

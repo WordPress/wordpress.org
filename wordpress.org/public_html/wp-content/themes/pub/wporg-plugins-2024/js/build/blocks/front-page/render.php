@@ -14,11 +14,16 @@ $widget_args = array(
 	'after_title'  => '</h2>',
 );
 
+echo do_blocks(
+	'<!-- wp:navigation {"menuSlug":"section-bar","className":"is-style-button-list","fontSize":"small"} /-->'
+);
+
 ?>
 
 <div id="main" class="site-main alignwide" role="main">
 
 	<?php
+
 	foreach ( $sections as $browse => $section_title ) :
 		// Only logged in users can have favorites.
 		if ( 'favorites' === $browse && ! is_user_logged_in() ) {

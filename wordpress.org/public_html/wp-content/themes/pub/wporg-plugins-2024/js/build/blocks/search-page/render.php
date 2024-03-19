@@ -1,27 +1,6 @@
-
-<header class="page-header">
-	<h1 class="page-title">
-		<?php
-		printf(
-			/* translators: Search query. */
-			esc_html__( 'Showing results for: %s', 'wporg-plugins' ),
-			'<strong>' . get_search_query() . '</strong>'
-		);
-		?>
-	</h1>
-	<?php
-	if ( get_query_var( 'block_search' ) ) {
-		printf(
-			/* translators: %s: Search URL */
-			'<p>' . __( 'Searching the block directory. <a href="%s">Search all plugins</a>.', 'wporg-plugins' ) . '</p>',
-			remove_query_arg( 'block_search' )
-		);
-	}
-	?>
-</header><!-- .page-header -->
-
 <?php
 echo do_blocks( <<<BLOCKS
+	<!-- wp:navigation {"menuSlug":"section-bar","className":"is-style-button-list","fontSize":"small"} /-->
 	<!-- wp:wporg/filter-bar /-->
 	<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 	<div class="wp-block-query plugin-cards">

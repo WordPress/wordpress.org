@@ -1,14 +1,6 @@
 <?php
 
-global $wp_query;
-$is_beta = 'beta' === $wp_query->get( 'browse' );
-$is_favs = 'favorites' === $wp_query->get( 'browse' );
-// The filter bar should not be shown on:
-// - singular: not relevant on pages or individual plugins.
-// - beta: likely unnecessary, these are probably all "community".
-// - favorites: not necessary.
-
-if ( is_singular() || $is_beta || $is_favs || ( is_search() && $wp_query->found_posts === 0 ) ) {
+if ( in_array( get_query_var( 'browse' ), [ 'beta', 'featured' ] ) ) {
 	return;
 }
 
