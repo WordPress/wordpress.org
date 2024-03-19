@@ -871,7 +871,7 @@ div.bbp-template-notice.updated {
 	background-color: #64b450;
 	color: #fff;
 	position: absolute;
-	padding: 4px 6px 4px 12px;
+	padding: 0 6px 4px 12px;
 	left: -3px;
 	border-top-right-radius: 6px;
 	border-bottom-right-radius: 6px;
@@ -884,7 +884,7 @@ div.bbp-template-notice.updated {
 	font: 400 18px/0.8 dashicons;
 	margin-left: 3px;
 	position: relative;
-	top: 4px;
+	top: 6px;
 }
 
 .topic-resolved-indicator::before {
@@ -935,8 +935,6 @@ div.bbp-template-notice.updated {
 }
 @media screen and (max-width: 480px) {
 	.topic-resolved-indicator {
-		padding-top: 2px;
-		padding-bottom: 2px;
 		top: -2rem;
 		left: -1.7rem;
 	}
