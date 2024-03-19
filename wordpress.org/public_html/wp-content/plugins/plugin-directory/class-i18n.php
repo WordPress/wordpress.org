@@ -22,7 +22,14 @@ class I18n {
 		if ( 'plugin_category' == $term->taxonomy ) {
 			$term->name = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), 'Plugin Category Name', 'wporg-plugins' ) );
 		} elseif ( 'plugin_section' == $term->taxonomy ) {
+			$original   = $term->name;
 			$term->name = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), 'Plugin Section Name', 'wporg-plugins' ) );
+
+			// Some strings already exist without the context, try those.
+			if ( $term->name === $original ) {
+				$term->name = esc_html( translate( html_entity_decode( $term->name ), 'wporg-plugins' ) );
+			}
+
 			if ( $term->description ) {
 				$term->description = esc_html( translate_with_gettext_context( html_entity_decode( $term->description ), 'Plugin Section Description', 'wporg-plugins' ) );
 			}
@@ -72,19 +79,21 @@ class I18n {
 
 		// Section terms.
 		_x( 'Adopt Me', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Beta', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Blocks', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Beta Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Block-Enabled Plugins', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'My Favorites', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Featured', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Popular', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Blocks', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Featured Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Popular Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		/* translators: Block plugins are single-block plugins, not block-enabled plugins. */
+		_x( 'Block Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'New Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Updated Plugins', 'Plugin Section Name', 'wporg-plugins' );
 
 		// Section descriptions.
 		_x( 'Plugins that have been offered for adoption by others.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'Beta plugins are in development for possible inclusion in a future version of WordPress.', 'Plugin Section Description', 'wporg-plugins' );
-		_x( 'Plugins that offer blocks.', 'Plugin Section Description', 'wporg-plugins' );
-		_x( 'Plugins contained within this category get displayed on the Featured tab.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'The below plugins have been marked as favorites.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'Plugins that offer blocks for the block-based editor.', 'Plugin Section Description', 'wporg-plugins' );
+		_x( 'Block Plugins as used in the Block Directory.', 'Plugin Section Description', 'wporg-plugins' );
 	}
 }

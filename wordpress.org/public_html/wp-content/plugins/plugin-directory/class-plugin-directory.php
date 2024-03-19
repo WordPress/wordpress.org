@@ -46,6 +46,7 @@ class Plugin_Directory {
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ), 1 );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
+		add_filter( 'get_the_archive_title_prefix', array( $this, 'filter_get_the_archive_title_prefix' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
@@ -1347,6 +1348,21 @@ class Plugin_Directory {
 		}
 
 		return $name;
+	}
+
+	/**
+	 * Remove the prefix for the browse sections.
+	 * These should display "Term" rather than "Browse: Term".
+	 *
+	 * @param string $prefix the prefix for the archive.
+	 * @return string
+	 */
+	function filter_get_the_archive_title_prefix( $prefix ) {
+		if ( is_tax( 'plugin_section' ) ) {
+			$prefix = '';
+		}
+
+		return $prefix;
 	}
 
 	/**
