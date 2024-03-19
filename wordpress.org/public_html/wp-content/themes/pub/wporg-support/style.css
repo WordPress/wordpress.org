@@ -936,7 +936,7 @@ div.bbp-template-notice.updated {
 @media screen and (max-width: 480px) {
 	.topic-resolved-indicator {
 		top: -2rem;
-		right: -1.7rem;
+		right: -0.7rem;
 	}
 	.topic-resolved-indicator::before {
 		font-size: 19px;
