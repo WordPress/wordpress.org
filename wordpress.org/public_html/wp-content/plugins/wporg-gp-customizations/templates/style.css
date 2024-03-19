@@ -2264,12 +2264,24 @@ ul.ct-legend {
 
 .translations-unique {
 	margin: 5px;
+	padding-left: 0.5rem;
 }
 
 .translations-unique .space {
 	background: #cbcdce;
 	white-space: pre;
 	opacity: .5;
+}
+
+ul.translations-unique > li {
+	margin-top: 0.5rem;
+}
+
+#translations-overview.notice.wporg-notice-warning li {
+	font-size: 15px;
+}
+#translations-overview button.is-primary.consistency-update-form-submit {
+	margin: 0.2rem 0 0.2rem -0.5rem;
 }
 
 .paging a {
