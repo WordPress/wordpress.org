@@ -1,0 +1,8 @@
+.DS_Store
+.idea
+node_modules
+*.sublime-*
+# Community translator output files
+community-translator.js
+community-translator.min.js
+community-translator.css
