@@ -1103,7 +1103,17 @@ body.single-topic:not(body.topic-edit) {
 						width: 30px;
 
 						@media screen and (max-width: 568px) {
-							left: -16px;
+							top: 10px;
+
+							& + .bbp-topic-author > .author-badge {
+								left: 40px;
+							}
+						}
+
+						@media screen and (max-width: 480px) {
+							& + .bbp-topic-author > .author-badge {
+								left: 24px;
+							}
 						}
 					}
 				}

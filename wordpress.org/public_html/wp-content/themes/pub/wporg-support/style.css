@@ -4261,7 +4261,15 @@ body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.sti
 }
 @media screen and (max-width: 568px) {
 	body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.sticky > .topic-indicator, body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.super-sticky > .topic-indicator, body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.status-closed > .topic-indicator {
-		left: -16px;
+		top: 10px;
+	}
+	body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.sticky > .topic-indicator + .bbp-topic-author > .author-badge, body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.super-sticky > .topic-indicator + .bbp-topic-author > .author-badge, body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.status-closed > .topic-indicator + .bbp-topic-author > .author-badge {
+		left: 40px;
+	}
+}
+@media screen and (max-width: 480px) {
+	body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.sticky > .topic-indicator + .bbp-topic-author > .author-badge, body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.super-sticky > .topic-indicator + .bbp-topic-author > .author-badge, body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.status-closed > .topic-indicator + .bbp-topic-author > .author-badge {
+		left: 24px;
 	}
 }
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.sticky .dashicons-admin-post, body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.super-sticky .dashicons-admin-post, body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic.status-closed .dashicons-lock {
