@@ -318,6 +318,10 @@ $paginationBreakPoint: "600px";
 		.bbp-user-replies-created div.bbp-reply-author,
 		.bbp-user-replies-created div.bbp-topic-author {
 			padding-left: 1.5rem;
+
+			@media screen and (max-width: 480px) {
+				padding-left: 0;
+			}
 		}
 
 		.bbp-author-title {
