@@ -2,7 +2,7 @@
 use WordPressdotorg\Plugin_Directory\Template;
 
 $sections = array(
-    'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
+	'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
 	'featured'  => __( 'Featured Plugins', 'wporg-plugins' ),
 	'beta'      => __( 'Beta Plugins', 'wporg-plugins' ),
 	'favorites' => __( 'My Favorites', 'wporg-plugins' ),

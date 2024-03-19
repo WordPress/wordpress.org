@@ -11,7 +11,8 @@ add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg
 add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wporg_query_filter_options_plugin_category' );
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
-add_filter( 'render_block', __NAMESPACE__ . '\filter_search_block', 10, 2 );
+add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
+add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\filter_site_title_block' );
 
 /**
  * Provide a list of local navigation menus.
@@ -165,14 +166,9 @@ function wporg_query_total_label( $label, $count ) {
  * Filters the search block to remove the required attribute, and add the query fields.
  *
  * @param string $block_content
- * @param array  $block
  * @return string
  */
-function filter_search_block( $block_content, $block ) {
-	if ( 'core/search' !== $block['blockName'] ) {
-		return $block_content;
-	}
-
+function filter_search_block( $block_content ) {
 	// Remove the required attribute
 	$block_content = preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
 
@@ -180,6 +176,24 @@ function filter_search_block( $block_content, $block ) {
 	ob_start();
 	wporg_query_filter_in_form( 's' );
 	$block_content = str_replace( '</form>', ob_get_clean() . '</form>', $block_content );
+
+	return $block_content;
+}
+
+/**
+ * Filters the site title block to use the "proper" slashed home url.
+ *
+ * @see https://github.com/WordPress/wordpress-develop/blob/6a0e4aa570b6b9e7ce6d630b8d92e2f5091aac6b/src/wp-includes/blocks/site-title.php#L37
+ *
+ * @param string $block_content
+ * @return string
+ */
+function filter_site_title_block( $block_content ) {
+	$block_content = str_replace(
+		'href="' . home_url() . '"',
+		'href="' . home_url( '/' ) . '"',
+		$block_content
+	);
 
 	return $block_content;
 }
