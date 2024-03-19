@@ -482,6 +482,80 @@ class Posts {
 	}
 
 	/**
+	 * Retrieves the WP_Post object representing a given photo.
+	 *
+	 * Adapted from /plugins/plugin-directory/class-plugin-directory.php: get_plugin_post()
+	 *
+	 * @global \WP_Post $post WordPress post object.
+	 *
+	 * @param int|string|\WP_Post $plugin_slug The slug of the photo to retrieve.
+	 * @return \WP_Post|bool
+	 */
+	public static function get_photo_post( $photo_slug = null ) {
+		if ( $photo_slug instanceof \WP_Post ) {
+			return $photo_slug;
+		}
+
+		// Handle int $photo_slug being passed. NOT numeric slugs
+		if (
+			is_int( $photo_slug ) &&
+			( $post = get_post( $photo_slug ) ) &&
+			( $post->ID === $photo_slug )
+		) {
+			return $post;
+		}
+
+		// Use the global $post object when appropriate
+		if (
+			! empty( $GLOBALS['post']->post_type ) &&
+			Registrations::get_post_type() === $GLOBALS['post']->post_type
+		) {
+			// Default to the global object.
+			if ( is_null( $photo_slug ) || 0 === $photo_slug ) {
+				return get_post( $GLOBALS['post']->ID );
+			}
+
+			// Avoid hitting the database if it matches.
+			if ( $photo_slug == $GLOBALS['post']->post_name ) {
+				return get_post( $GLOBALS['post']->ID );
+			}
+		}
+
+		$photo_slug = sanitize_title_for_query( $photo_slug );
+		if ( ! $photo_slug ) {
+			return false;
+		}
+
+		$post    = false;
+		$post_id = wp_cache_get( $photo_slug, 'photo-slugs' );
+		if ( 0 === $post_id ) {
+			// Unknown photo slug.
+			return false;
+		} elseif ( $post_id ) {
+			$post = get_post( $post_id );
+		}
+
+		if ( ! $post ) {
+			// get_post_by_slug();
+			$posts = get_posts( [
+				'post_type'   => Registrations::get_post_type(),
+				'name'        => $photo_slug,
+				'post_status' => [ 'publish' ], // Only concerned with published photos.
+			] );
+
+			if ( ! $posts ) {
+				$post = false;
+				wp_cache_add( 0, $photo_slug, 'photo-slugs' );
+			} else {
+				$post = reset( $posts );
+				wp_cache_add( $post->ID, $photo_slug, 'photo-slugs' );
+			}
+		}
+
+		return $post;
+	}
+
+	/**
 	 * The array of post types to be included in the sitemap.
 	 *
 	 * @param array $post_types List of included post types.
