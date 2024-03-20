@@ -435,7 +435,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			} elseif ( in_array( $type, array( 'forum_topic_remove', 'forum_reply_remove' ) ) ) {
 				// Remove activity related to a topic or reply.
 				if ( ! $activity_obj ) {
-					return '-1 Activity not previously reported.';
+					// Verbose error on development environments.
+					if ( 'production' != wp_get_environment_type() ) {
+						return '-1 Activity not previously reported.';
+					}
+
+					// Don't need to worry about this on production.
+					return true;
 				}
 
 				bp_activity_mark_as_spam( $activity_obj, 'by_source' );
