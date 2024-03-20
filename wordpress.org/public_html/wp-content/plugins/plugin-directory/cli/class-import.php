@@ -1155,20 +1155,48 @@ class Import {
 
 			$has_self_install_step = false;
 			if ( isset( $decoded_file[ 'steps' ] ) ) {
-				foreach ( $decoded_file[ 'steps' ] as $i => $step ) {
-					if ( 'installPlugin' === $step['step']
-						&& $plugin_slug === $step['pluginZipFile']['slug'] ) {
+				foreach ( $decoded_file[ 'steps' ] as &$step ) {
+					// Normalize a "install plugin from url" to a install-by-slug.
+					if (
+						'installPlugin' === $step['step'] &&
+						isset( $step['pluginZipFile']['url'] ) &&
+						preg_match( '!^https?://downloads\.wordpress\.org/plugin/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step['pluginZipFile']['url'], $m )
+					) {
+						$step[ 'pluginZipFile' ] = [
+							'resource' => 'wordpress.org/plugins',
+							'slug'     => $m['slug']
+						];
+					}
+
+					// Normalise a "install theme from url" to a install-by-slug.
+					if (
+						'installTheme' === $step['step'] &&
+						isset( $step['themeZipFile']['url'] ) &&
+						preg_match( '!^https?://downloads\.wordpress\.org/theme/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step['themeZipFile']['url'], $m )
+					) {
+						$step[ 'themeZipFile' ] = [
+							'resource' => 'wordpress.org/themes',
+							'slug'     => $m['slug']
+						];
+					}
+
+					// Check if this is a "install this plugin" step.
+					if (
+						'installPlugin' === $step['step'] &&
+						isset( $step['pluginZipFile']['slug'] ) &&
+						$plugin_slug === $step['pluginZipFile']['slug']
+					) {
 						$has_self_install_step = true;
 
 						if ( true != $step['options']['activate'] ) {
-							$decoded_file[ 'steps' ][ $i ][ 'options' ][ 'activate' ] = true;
+							$step[ 'options' ][ 'activate' ] = true;
 						}
 					}
 				}
 			}
 
 			// Akismet is a special case because the plugin is bundled with WordPress.
-			if ( !$has_self_install_step && 'akismet' !== $plugin_slug ) {
+			if ( ! $has_self_install_step && 'akismet' !== $plugin_slug ) {
 				$decoded_file['steps'][] = array(
 					'step' => 'installPlugin',
 					'pluginZipFile' => array(
