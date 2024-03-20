@@ -4031,8 +4031,30 @@ section {
 	font-size: 0.8rem;
 }
 @media (max-width: 767px) {
-	#bbpress-forums input[type=text] {
-		width: 100%;
+	#bbpress-forums #bbp-user-body div.bbp-search-form {
+		float: none;
+	}
+	#bbpress-forums #bbp-user-body div.bbp-search-form form {
+		margin-bottom: 1rem;
+	}
+	#bbpress-forums #bbp-user-body div.bbp-search-form form input[type=text] {
+		width: calc(100% - 75px);
+	}
+	#bbpress-forums #bbp-user-body div.bbp-search-form form input[type=submit] {
+		float: right;
+		height: 100%;
+		padding: 8px 14px;
+	}
+	#bbpress-forums #bbp-user-body h2.entry-title {
+		clear: right;
+	}
+}
+@media (max-width: 480px) {
+	#bbpress-forums #bbp-user-body div.bbp-search-form form input[type=text] {
+		width: calc(100% - 68px);
+	}
+	#bbpress-forums #bbp-user-body div.bbp-search-form form input[type=submit] {
+		padding: 5px 12px;
 	}
 }
 

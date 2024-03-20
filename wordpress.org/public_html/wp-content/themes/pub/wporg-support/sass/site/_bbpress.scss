@@ -830,11 +830,47 @@ $paginationBreakPoint: "600px";
 	}
 
 	@media (max-width: 767px) {
+		#bbp-user-body {
+			div.bbp-search-form {
+				float: none;
 
-		input[type="text"] {
-			width: 100%;
+				form {
+					margin-bottom: 1rem;
+
+					input[type="text"] {
+						width: calc(100% - 75px);
+					}
+
+					input[type="submit"] {
+						float: right;
+						height: 100%;
+						padding: 8px 14px;
+					}
+				}
+			}
+
+			h2.entry-title {
+				clear: right;
+			}
 		}
 	}
+
+	@media (max-width: 480px) {
+		#bbp-user-body {
+			div.bbp-search-form {
+				form {
+					input[type="text"] {
+						width: calc(100% - 68px);
+					}
+
+					input[type="submit"] {
+						padding: 5px 12px;
+					}
+				}
+			}
+		}
+	}
+
 }
 
 .single-forum .bbp-topic-form,
