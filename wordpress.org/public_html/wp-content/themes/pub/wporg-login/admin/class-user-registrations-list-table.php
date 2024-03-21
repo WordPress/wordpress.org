@@ -116,16 +116,41 @@ class User_Registrations_List_Table extends WP_List_Table {
 		$where .= $this->get_view_sql_where( $view ?: ( $_REQUEST['view'] ?? 'all' ) );
 
 		if ( isset( $_GET['s'] ) && 'all' != $view ) {
-			 $search_like = '%' . $wpdb->esc_like( wp_unslash( $_GET['s'] ) ) . '%';
-			 $where .= $wpdb->prepare(
-				 " AND (
-					registrations.user_login LIKE %s OR
-					registrations.user_email LIKE %s OR
-					registrations.meta LIKE %s OR
-					description.meta_value LIKE %s
-				)",
-				 $search_like, $search_like, $search_like, $search_like
-			);
+			$where .= ' ';
+
+			$search_term = wp_unslash( $_GET['s'] );
+			$search_like = '%' . $wpdb->esc_like( $search_term ) . '%';
+
+			// Limit searches to where they're likely, for performance.
+			if ( str_contains( $search_term, '@' ) ) {
+				// Looks like an email, so just search the emails.
+				$where .= $wpdb->prepare(
+					"AND registrations.user_email LIKE %s",
+					$search_like
+				);
+			} elseif (
+				// If it looks like an IP
+				preg_match( '/^\d{1,3}\.[0-9.]*$/', $search_term ) ||
+				// Or it looks like a country code, 
+				preg_match( '/^[A-Z]{2}/', $search_term )
+			) {
+				// then only look in metadata.
+				$where .= $wpdb->prepare(
+					"AND registrations.meta LIKE %s",
+					$search_like
+				);
+			} else {
+				// Otherwise, search everything.
+				$where .= $wpdb->prepare(
+					"AND (
+						registrations.user_login LIKE %s OR
+						registrations.user_email LIKE %s OR
+						registrations.meta LIKE %s OR
+						description.meta_value LIKE %s
+					)",
+					$search_like, $search_like, $search_like, $search_like
+				);
+			}
 		}
 
 		// Join if the view needs the users or description table.
@@ -136,7 +161,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$join .= " LEFT JOIN {$wpdb->usermeta} description ON users.ID = description.user_id AND description.meta_key = 'description'";
 		}
 
-		if ( 'banned-users' === $view ?: ( $_REQUEST['view'] ?? 'all' ) ) {
+		if ( 'banned-users' === ( $view ?: ( $_REQUEST['view'] ?? 'all' ) ) ) {
 			$join .= " LEFT JOIN {$wpdb->usermeta} notes ON users.ID = notes.user_id AND notes.meta_key = '_wporg_bbp_user_notes'";
 		}
 
@@ -207,8 +232,17 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		$total_items = $wpdb->get_var( 'SELECT FOUND_ROWS()' );
 
+		// Prime the user lookups.
+		$logins = wp_list_pluck( wp_list_filter( $this->items, [ 'created' => true ] ), 'user_login' );
+		if ( $logins ) {
+			get_users( [
+				'login__in' => $logins,
+				'fields'    => 'all_with_meta'
+			] );
+		}
+
 		foreach ( $this->items as $i => $item ) {
-			$this->items[$i]->user       = $item->created ? get_user_by( 'slug', $item->user_login ) : false;
+			$this->items[$i]->user       = $item->created ? get_user_by( 'login', $item->user_login ) : false;
 			$this->items[$i]->pending_id = (int) $this->items[$i]->pending_id;
 			$this->items[$i]->cleared    = (int) $this->items[$i]->cleared;
 			$this->items[$i]->created    = (int) $this->items[$i]->created;
