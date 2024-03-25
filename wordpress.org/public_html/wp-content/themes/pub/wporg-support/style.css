@@ -1984,7 +1984,7 @@ for a cross of good semantics with the visual */
 /* ----------------------------------------------------------------------------
   5.0 - Responsive Button Styles
 ---------------------------------------------------------------------------- */
-@media screen and (max-width: 48em) {
+@media screen and (max-width: 47.9285714286em) {
 	.button, #bbpress-forums .wporg-bbp-term-subscription > a,
 	#bbpress-forums .reviews-submit-link > .btn,
 	#bbpress-forums .subscription-toggle,

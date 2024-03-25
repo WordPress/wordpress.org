@@ -331,12 +331,15 @@ for a cross of good semantics with the visual */
   5.0 - Responsive Button Styles
 ---------------------------------------------------------------------------- */
 
-@media screen and ( max-width: $ms-breakpoint ) {
+$button-font-size: 14px;
+// Convert 1px to ems.
+$px-to-em: calc( 1px / $button-font-size );
+@media screen and ( max-width: ($ms-breakpoint - $px-to-em) ) {
 
 	.button,
 	.button.button-large,
 	.button.button-small {
-		font-size: 14px;
+		font-size: $button-font-size;
 		height: auto;
 		line-height: normal;
 		margin-bottom: 4px;
