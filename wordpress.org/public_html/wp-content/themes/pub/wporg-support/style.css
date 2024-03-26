@@ -3740,6 +3740,9 @@ section {
 	/* Override bb-base/style.css */
 	text-decoration: underline;
 }
+.bbpress #bbpress-forums p.bbp-topic-meta span.bbp-author-name {
+	white-space: normal;
+}
 .bbpress #bbpress-forums p.wporg-bbp-topic-site-url {
 	border-top: 1px solid #eee;
 	padding-top: 0.5rem;
