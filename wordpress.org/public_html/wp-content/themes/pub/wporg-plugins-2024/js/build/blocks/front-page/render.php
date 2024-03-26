@@ -1,5 +1,8 @@
 <?php
 use WordPressdotorg\Plugin_Directory\Template;
+use WP_Query;
+
+global $wp_query;
 
 $sections = array(
 	'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
@@ -23,7 +26,6 @@ echo do_blocks(
 <div id="main" class="site-main alignwide" role="main">
 
 	<?php
-
 	foreach ( $sections as $browse => $section_title ) :
 		// Only logged in users can have favorites.
 		if ( 'favorites' === $browse && ! is_user_logged_in() ) {
@@ -32,9 +34,9 @@ echo do_blocks(
 
 		$section_args = array(
 			'post_type'      => 'plugin',
+			'post_status'    => 'publish',
 			'posts_per_page' => 4,
 			'browse'         => $browse,
-			'post_status'    => 'publish',
 		);
 
 		if ( 'popular' === $browse ) {
@@ -58,12 +60,15 @@ echo do_blocks(
 			];
 		}
 
-		$section_query = new \WP_Query( $section_args );
+		$section_query = new WP_Query( $section_args );
 
 		// If the user doesn't have any favorites, omit the section.
 		if ( 'favorites' === $browse && ! $section_query->have_posts() ) {
 			continue;
 		}
+
+		// Overwrite the global query with the section query.
+		$wp_query = $section_query;
 		?>
 
 		<section class="plugin-section">
@@ -91,6 +96,9 @@ echo do_blocks(
 			<!-- /wp:query -->
 			BLOCKS
 			);
+
+			// Reset the global $wp_query
+			wp_reset_query();
 			?>
 		</section>
 
