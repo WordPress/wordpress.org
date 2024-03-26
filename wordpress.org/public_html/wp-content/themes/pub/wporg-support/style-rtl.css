@@ -1420,6 +1420,7 @@ table {
 @media screen and (max-width: 480px) {
 	.author-badge,
 	.author-badge-reporter {
+		right: -20px;
 		top: -28px;
 	}
 }
