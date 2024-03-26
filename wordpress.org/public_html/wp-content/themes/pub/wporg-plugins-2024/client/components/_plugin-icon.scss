@@ -6,6 +6,7 @@
 
 	.plugin-icon {
 		background-size: cover;
+		border-radius: var( --wp--custom--button--border--radius );
 		height: 80px;
 		width: 80px;
 	}
