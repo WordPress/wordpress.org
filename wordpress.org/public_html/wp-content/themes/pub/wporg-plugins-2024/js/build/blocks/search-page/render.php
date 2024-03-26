@@ -1,6 +1,11 @@
 <?php
+namespace WordPressdotorg\Theme\Plugins_2024\SearchPage;
+
 echo do_blocks( <<<BLOCKS
 	<!-- wp:navigation {"menuSlug":"section-bar","className":"is-style-button-list","fontSize":"small"} /-->
+
+	<!-- wp:query-title {"type":"search","fontFamily":"inter"} /-->
+
 	<!-- wp:wporg/filter-bar /-->
 	<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 	<div class="wp-block-query plugin-cards">

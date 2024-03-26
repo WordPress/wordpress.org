@@ -1,4 +1,5 @@
 <?php
+namespace WordPressdotorg\Theme\Plugins_2024\ArchivePage;
 
 global $wp_query;
 
@@ -6,10 +7,17 @@ global $wp_query;
 if ( ! $wp_query->have_posts() ) {
 	status_header( 404 );
 	nocache_headers();
-}
+}	
+
+// TODO: There's no block for this.
+$archive_description = get_the_archive_description();
 
 echo do_blocks( <<<BLOCKS
 	<!-- wp:navigation {"menuSlug":"section-bar","className":"is-style-button-list","fontSize":"small"} /-->
+
+	<!-- wp:query-title {"type":"archive","fontFamily":"inter"} /-->
+	{$archive_description}
+
 	<!-- wp:wporg/filter-bar /-->
 	<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 	<div class="wp-block-query plugin-cards">
@@ -26,5 +34,3 @@ if ( ! have_posts() ) {
 }
 
 the_posts_pagination();
-
-?>

@@ -1,4 +1,6 @@
 <?php
+namespace WordPressdotorg\Theme\Plugins_2024\FrontPage;
+
 use WordPressdotorg\Plugin_Directory\Template;
 use WP_Query;
 

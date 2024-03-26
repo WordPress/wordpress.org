@@ -18,6 +18,8 @@
 			<!-- wp:post-title {"level":0,"fontSize":"small","fontFamily":"inter","className":"wporg-local-navigation-bar__fade-in-scroll"} /-->
 		<?php elseif ( is_archive() ) : ?>
 			<!-- wp:query-title {"type":"archive","level":0,"fontSize":"small","fontFamily":"inter","className":"wporg-local-navigation-bar__fade-in-scroll"} /-->
+		<?php elseif ( is_search() ) : ?>
+			<!-- wp:query-title {"type":"search","level":0,"fontSize":"small","fontFamily":"inter","className":"wporg-local-navigation-bar__fade-in-scroll"} /-->
 		<?php endif; ?>
 	</div>
 	<!-- /wp:group -->

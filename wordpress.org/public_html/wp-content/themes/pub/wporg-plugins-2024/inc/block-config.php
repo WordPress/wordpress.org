@@ -8,7 +8,6 @@ namespace WordPressdotorg\Theme\Plugins_2024\Block_Config;
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\wporg_query_filter_options_sort' );
 add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg_query_filter_options_business_model' );
-add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wporg_query_filter_options_plugin_category' );
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
@@ -44,6 +43,7 @@ function add_site_navigation_menus( $menus ) {
 				'url'   => home_url( '?plugin_business_model=commercial' ),
 				'term'  => get_term_by( 'slug', 'commercial', 'plugin_business_model' ),
 			),
+			/*
 			array(
 				'label' => __( 'Block-Enabled', 'wporg-plugins' ),
 				'term'  => get_term_by( 'slug', 'blocks', 'plugin_section' ),
@@ -59,10 +59,11 @@ function add_site_navigation_menus( $menus ) {
 			array(
 				'label' => __( 'Popular', 'wporg-plugins' ),
 				'term'  => get_term_by( 'slug', 'popular', 'plugin_section' ),
-			),
+			),*/
 		)
 	);
 
+	/*
 	// Not usually in the menu, but we need to show these somehow.
 	if ( is_tax( 'plugin_section', 'adopt-me' ) ) {
 		$items['section-bar'][] = array(
@@ -75,6 +76,7 @@ function add_site_navigation_menus( $menus ) {
 			'term'  => get_queried_object()
 		);
 	}
+	*/
 
 	return $items;
 }
@@ -139,29 +141,6 @@ function wporg_query_filter_options_business_model() {
 	);
 }
 
-function wporg_query_filter_options_plugin_category() {
-	$options = [];
-	foreach ( get_terms( 'plugin_category', [ 'hide_empty' => true ] ) as $term ) {
-		$options[ $term->slug ] = $term->name;
-	}
-
-	$count = count( (array) get_query_var( 'plugin_category' ) );
-	$label = sprintf(
-		/* translators: The dropdown label for filtering, %s is the selected term count. */
-		_n( 'Categories <span>%s</span>', 'Categories <span>%s</span>', number_format_i18n( $count ), 'wporg-plugins' ),
-		$count
-	);
-
-	return array(
-		'label'    => $label,
-		'title'    => __( 'Category', 'wporg-plugins' ),
-		'key'      => 'plugin_category',
-		'action'   => '',
-		'options'  => $options,
-		'selected' => (array) get_query_var( 'plugin_category' ),
-	);
-}
-
 function wporg_query_filter_in_form( $key ) {
 	global $wp_query;
 
@@ -217,10 +196,12 @@ function filter_search_block( $block_content ) {
 	// Remove the required attribute
 	$block_content = preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
 
+	/* Temporarily disable this until filters are enabled.
 	// Insert the current query filters into the search form.
 	ob_start();
 	wporg_query_filter_in_form( 's' );
 	$block_content = str_replace( '</form>', ob_get_clean() . '</form>', $block_content );
+	*/
 
 	return $block_content;
 }
