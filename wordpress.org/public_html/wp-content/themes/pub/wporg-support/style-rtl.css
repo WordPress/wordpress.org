@@ -1338,6 +1338,10 @@ table {
 	border-radius: 2px 0 0 2px;
 }
 
+.bbp-topic-author .author-badge {
+	top: 10px;
+}
+
 .author-badge-moderator {
 	background-color: #33b4ce;
 }
