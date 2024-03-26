@@ -34,7 +34,7 @@ class Trac {
 	 */
 	public function __construct( $username, $password, $host, $path = '/', $port = 80, $ssl = false ) {
 		// Assume URL to $host, ignore $path, $port, $ssl.
-		$this->rpc = new WP_HTTP_IXR_Client( $host );
+		$this->rpc = new WP_HTTP_IXR_Client( $host, false, false, 60 );
 
 		$http_basic_auth  = 'Basic ';
 		$http_basic_auth .= base64_encode( $username . ':' . $password );
@@ -64,7 +64,7 @@ class Trac {
 
 		$ok = $this->rpc->query( 'ticket.create', $subj, $desc, $attr );
 		if ( ! $ok ) {
-			trigger_error( 'Trac: ticket.create: ' . $this->rpc->error, E_USER_WARNING );
+			trigger_error( 'Trac: ticket.create: ' . $this->rpc->error->message, E_USER_WARNING );
 
 			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Squiz.Commenting.InlineComment.InvalidEndChar
 			// print_r( $this->rpc );
@@ -94,7 +94,7 @@ class Trac {
 
 		$ok = $this->rpc->query( 'ticket.update', $id, $comment, $attr, $notify );
 		if ( ! $ok ) {
-			trigger_error( 'Trac: ticket.update: ' . $this->rpc->error, E_USER_WARNING );
+			trigger_error( 'Trac: ticket.update: ' . $this->rpc->error->message, E_USER_WARNING );
 
 			return false;
 		}
