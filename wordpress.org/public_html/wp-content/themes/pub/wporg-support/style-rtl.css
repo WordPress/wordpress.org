@@ -3963,8 +3963,11 @@ section {
 	padding: 0 0.8rem;
 	font-size: 0.8rem;
 }
+#bbpress-forums .bbp-topic-form,
 #bbpress-forums .bbp-reply-form {
 	clear: both;
+	word-break: break-all;
+	overflow-wrap: break-word;
 }
 #bbpress-forums .bbp-topic-form fieldset.bbp-form button,
 #bbpress-forums .bbp-reply-form fieldset.bbp-form button {

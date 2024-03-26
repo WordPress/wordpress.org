@@ -726,8 +726,11 @@ $paginationBreakPoint: "600px";
 		font-size: ms(-2);
 	}
 
+	.bbp-topic-form,
 	.bbp-reply-form {
 		clear: both;
+		word-break: break-all;
+		overflow-wrap: break-word;
 	}
 
 	.bbp-topic-form fieldset.bbp-form button,
