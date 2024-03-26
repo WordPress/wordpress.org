@@ -3946,6 +3946,9 @@ section {
 .bbpress li.bbp-header li.bbp-topic-title {
 	text-align: right !important;
 }
+.bbpress li.bbp-topic-title {
+	overflow-wrap: anywhere;
+}
 
 /*--------------------------------------------------------------
 # Buttons
