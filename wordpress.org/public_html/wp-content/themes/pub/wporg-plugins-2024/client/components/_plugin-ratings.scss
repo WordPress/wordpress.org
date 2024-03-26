@@ -21,7 +21,7 @@
 }
 
 [class*='dashicons-star-'] {
-	color: #ffb900;
+	color: var( --wp--preset--color--charcoal-1 );
 }
 
 // Flip the half star for rating.
