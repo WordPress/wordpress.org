@@ -64,6 +64,8 @@ class Trac {
 
 		$ok = $this->rpc->query( 'ticket.create', $subj, $desc, $attr );
 		if ( ! $ok ) {
+			trigger_error( 'Trac: ticket.create: ' . $this->rpc->error, E_USER_WARNING );
+
 			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Squiz.Commenting.InlineComment.InvalidEndChar
 			// print_r( $this->rpc );
 			return false;
@@ -92,6 +94,8 @@ class Trac {
 
 		$ok = $this->rpc->query( 'ticket.update', $id, $comment, $attr, $notify );
 		if ( ! $ok ) {
+			trigger_error( 'Trac: ticket.update: ' . $this->rpc->error, E_USER_WARNING );
+
 			return false;
 		}
 
