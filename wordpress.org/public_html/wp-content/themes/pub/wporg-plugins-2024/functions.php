@@ -114,14 +114,6 @@ function scripts() {
 		}
 	}
 
-	if ( ! is_404() ) {
-		wp_enqueue_script( 'wporg-plugins-locale-banner', get_stylesheet_directory_uri() . '/js/locale-banner.js', array( 'jquery' ), filemtime( __DIR__ . '/js/locale-banner.js' ), true );
-		wp_localize_script( 'wporg-plugins-locale-banner', 'wporgLocaleBanner', array(
-			'apiURL'        => rest_url( '/plugins/v1/locale-banner' ),
-			'currentPlugin' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
-		) );
-	}
-
 	if ( get_query_var( 'plugin_advanced' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), false, true );
 		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20220929', true );

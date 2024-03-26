@@ -26,3 +26,13 @@
 
 	<!-- wp:navigation {"menuSlug":"plugins","overlayBackgroundColor":"charcoal-1","overlayTextColor":"white","icon":"menu","layout":{"type":"flex","orientation":"horizontal"},"style":{"spacing":{"blockGap":"24px"}},"fontSize":"small"} /-->
 <!-- /wp:wporg/local-navigation-bar -->
+
+<?php
+	$lang_suggest_endpoint = rest_url( '/plugins/v2/locale-banner' );
+	if ( is_singular( 'plugin' ) ) {
+		$lang_suggest_endpoint = add_query_arg( 'currentPlugin', get_queried_object()->post_name, $lang_suggest_endpoint );
+	}
+?>
+<!-- wp:wporg/language-suggest {"align":"full","endpoint":"<?php echo esc_attr( $lang_suggest_endpoint ); ?>"} -->
+<div class="wp-block-wporg-language-suggest alignfull" data-endpoint="<?php echo esc_attr( $lang_suggest_endpoint ); ?>"></div>
+<!-- /wp:wporg/language-suggest -->
