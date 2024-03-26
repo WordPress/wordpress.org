@@ -674,6 +674,7 @@ $paginationBreakPoint: "600px";
 		.bbp-topic-voice-count,
 		.bbp-topic-reply-count {
 			overflow: hidden;
+			white-space: nowrap;
 
 			&::before {
 				font: 400 16px/1 dashicons;

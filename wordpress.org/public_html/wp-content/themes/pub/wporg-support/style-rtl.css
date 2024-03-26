@@ -3921,6 +3921,7 @@ section {
 .bbpress .forum-titles .bbp-topic-voice-count,
 .bbpress .forum-titles .bbp-topic-reply-count {
 	overflow: hidden;
+	white-space: nowrap;
 }
 .bbpress .forum-titles .bbp-topic-voice-count::before,
 .bbpress .forum-titles .bbp-topic-reply-count::before {
