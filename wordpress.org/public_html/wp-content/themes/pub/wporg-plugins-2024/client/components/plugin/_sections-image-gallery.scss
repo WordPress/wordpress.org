@@ -18,7 +18,7 @@ $ig-background-black: rgba(0, 0, 0, .4) !default;
 		position: absolute;
 		top: 0;
 		z-index: 4;
-		border-color: #eee;
+		border-color: var( --wp--preset--color--light-grey-1 );
 		-webkit-transition: background 0.1s ease, border 0.1s ease;
 		transition: background 0.1s ease, border 0.1s ease;
 
@@ -30,7 +30,7 @@ $ig-background-black: rgba(0, 0, 0, .4) !default;
 			&:hover {
 				background: #fff;
 				opacity: 0.8;
-				border: 1px solid #eee;
+				border: 1px solid var( --wp--preset--color--light-grey-1 );
 			}
 		}
 

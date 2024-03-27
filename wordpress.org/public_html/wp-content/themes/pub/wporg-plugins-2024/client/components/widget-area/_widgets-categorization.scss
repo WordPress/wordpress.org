@@ -38,7 +38,7 @@
 	}
 
 	& ~ .plugin-meta li:first-child {
-		border-top: 1px solid #eee;
+		border-top: 1px solid var( --wp--preset--color--light-grey-1 );
 	}
 }
 

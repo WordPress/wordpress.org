@@ -9,7 +9,7 @@
 	}
 
 	li {
-		border-top: 1px solid $color__border;
+		border-top: 1px solid var( --wp--preset--color--light-grey-1 );
 		display: inline-block;
 		padding: 0.5rem 0;
 		width: 100%;
@@ -81,7 +81,7 @@
 	padding: 1em 1em 2em;
 	margin-top: 10px;
 	background-color: #fff;
-	border: 1px solid #ccc;
+	border: 1px solid var( --wp--preset--color--light-grey-1 );;
 	border-radius: 2px;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 

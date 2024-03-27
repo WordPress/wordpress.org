@@ -1,5 +1,5 @@
 table {
-	border: 1px solid #eee;
+	border: 1px solid var( --wp--preset--color--light-grey-1 );
 	//border-spacing: .1rem;
 	border-collapse: collapse;
 	font-size: 0.8em;
@@ -13,7 +13,7 @@ table {
 	}
 
 	th, td {
-		border: 1px solid #eee;
+		border: 1px solid var( --wp--preset--color--light-grey-1 );
 		font-weight: normal;
 		margin: 0;
 		padding: 0.4rem;
@@ -23,7 +23,7 @@ table {
 
 	tbody {
 		tr:nth-child( even ) {
-			background: #f7f7f7;
+			background: var( --wp--preset--color--light-grey-2 );
 		}
 	}
 }
