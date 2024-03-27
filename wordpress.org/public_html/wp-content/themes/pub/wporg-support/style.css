@@ -4426,8 +4426,7 @@ div.bbp-breadcrumb p {
 .bbp-view .review-ratings .col-3 {
 	font-size: 0.8rem;
 	margin: 0;
-	width: 35%;
-	float: none;
+	min-width: 40%;
 	border-top: 1px solid #eee;
 }
 .bbp-view .review-ratings .col-3 .reviews-total-count {
@@ -4436,10 +4435,10 @@ div.bbp-breadcrumb p {
 	padding-top: 5px;
 }
 .bbp-view .review-ratings .col-5 {
-	margin: 0 5% 10px 0;
-	width: 60%;
+	margin: 0 0 10px 0;
+	padding-right: 10px;
 	font-size: 0.8rem;
-	float: none;
+	min-width: 54%;
 }
 .bbp-view .review-ratings .col-5 > div:first-child {
 	margin-top: 0;
