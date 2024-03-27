@@ -3966,7 +3966,7 @@ section {
 #bbpress-forums .bbp-topic-form,
 #bbpress-forums .bbp-reply-form {
 	clear: both;
-	word-break: break-all;
+	word-break: break-word;
 	overflow-wrap: break-word;
 }
 #bbpress-forums .bbp-topic-form fieldset.bbp-form button,

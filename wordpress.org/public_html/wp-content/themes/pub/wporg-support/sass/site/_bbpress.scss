@@ -729,7 +729,7 @@ $paginationBreakPoint: "600px";
 	.bbp-topic-form,
 	.bbp-reply-form {
 		clear: both;
-		word-break: break-all;
+		word-break: break-word;
 		overflow-wrap: break-word;
 	}
 
