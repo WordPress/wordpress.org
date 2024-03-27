@@ -27,7 +27,7 @@ get_header();
 				printf(
 					/* translators: %s: Search URL */
 					'<p>' . __( 'Searching the block directory. <a href="%s">Search all plugins</a>.', 'wporg-plugins' ) . '</p>',
-					remove_query_arg( 'block_search' )
+					esc_url( remove_query_arg( 'block_search' ) )
 				);
 			}
 			?>
