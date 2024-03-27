@@ -38,34 +38,19 @@
 			overflow: hidden;
 			white-space: nowrap;
 
-			i {
-				display: inline-block;
-				margin-right: 0.4rem;
-			}
-
-			&.last-updated {
-				display: none;
-			}
 			&.plugin-author {
 				width: 100%;
 			}
 
+			svg {
+				height: 24px;
+				width: 24px;
+				vertical-align: bottom;
+			}
 		}
 
 		span.active-installs {
 			min-width: 48%;
-		}
-
-		.dashicons {
-			margin: 0 2px -1rem;
-			color: #bbb;
-			width: auto;
-			height: auto;
-			display: none;
-
-			@media (min-width:330px) {
-				display: inline-block;
-			}
 		}
 	}
 }
