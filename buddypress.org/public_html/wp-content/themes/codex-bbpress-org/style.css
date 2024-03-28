@@ -46,9 +46,9 @@ body.home-page.home #main {
 }
 .footer-meta-wrap .footer-meta {
 	margin: 0 auto;
-	width: 960px;
-	padding: 24px 0;
-	overflow: auto;
+	display: flex;
+	max-width: 960px;
+	padding: 24px 5px;
 	color: #555;
 	font-family: 'Source Sans Pro', 'HelveticaNeue', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
