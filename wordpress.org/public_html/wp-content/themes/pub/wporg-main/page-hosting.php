@@ -51,6 +51,25 @@ $hosting_cache_buster = '3';
 							<a href="https://wordpress.org/search/Bluehost/?in=support_forums">Forum threads about Bluehost &raquo;</a>
 						</div>
 					</div>
+                    <div class="partner">
+                        <h2>
+                            <a href="https://www.hostinger.com/special/wordpress" rel="nofollow">
+                                <img
+                                    alt=""
+                                    src="https://s.w.org/hosting/hostinger.png?<?php echo $hosting_cache_buster; ?>"
+                                    height="100"
+                                    width="100"
+                                />
+                                Hostinger
+                            </a>
+                        </h2>
+
+                        <p>Hostinger, trusted by more than 2.5 million clients worldwide, offers fast and secure managed WordPress hosting. Enjoy seamless WordPress experience with a 1-click installer, free domain and SSL, LiteSpeed and object cache for a faster website, and built-in CDN. Focusing on user security, experience and performance, it's an ideal solution for beginners and experts alike. Get smooth, value-driven hosting, backed by 24/7 support of WordPress experts, with Hostinger.</p>
+
+                        <div class="forum">
+                            <a href="https://wordpress.org/search/Hostinger/?in=support_forums">Forum threads about Hostinger &raquo;</a>
+                        </div>
+                    </div>
 
 					<div class="partner">
 						<h2>
