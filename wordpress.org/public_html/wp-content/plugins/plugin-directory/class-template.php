@@ -183,6 +183,8 @@ class Template {
 			$noindex = true;
 		} elseif ( get_query_var( 'plugin_business_model' ) && get_query_var( 'browse' ) ) {
 			$noindex = true;
+		} elseif ( 'preview' == get_query_var( 'browse' ) ) {
+			$noindex = true;
 		} elseif ( is_singular( 'plugin' ) && self::is_plugin_outdated() ) {
 			$noindex = true;
 		}

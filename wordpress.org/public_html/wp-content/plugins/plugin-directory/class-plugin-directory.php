@@ -546,7 +546,7 @@ class Plugin_Directory {
 		) );
 
 		// Add the browse/* views.
-		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated)' );
+		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated|preview)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
 
 		// Create an archive for a users favorites too.
@@ -795,7 +795,7 @@ class Plugin_Directory {
 		// For any invalid values passed to browse, set it to featured instead
 		if (
 			! empty ( $wp_query->query['browse'] ) &&
-			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated' ) )
+			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated', 'preview' ) )
 		) {
 			 $wp_query->query['browse']      = 'featured';
 			 $wp_query->query_vars['browse'] = 'featured';
@@ -812,6 +812,20 @@ class Plugin_Directory {
 					'key'     => 'last_updated',
 					'value'   => gmdate( 'Y-m-d H:i:s', time() - YEAR_IN_SECONDS ),
 					'compare' => '>',
+				];
+				$wp_query->set( 'meta_query', $meta_query );
+
+				break;
+
+			case 'preview':
+				$wp_query->query_vars['orderby'] ??= 'last_updated';
+
+				// Limit the Beta tab to plugins updated within 12 months.
+				$meta_query                = $wp_query->get( 'meta_query' ) ?: [];
+				$meta_query['live-preview'] = [
+					'key'     => '_public_preview',
+					'value'   => '1',
+					'compare' => '=',
 				];
 				$wp_query->set( 'meta_query', $meta_query );
 
