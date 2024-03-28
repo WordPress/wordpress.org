@@ -50,7 +50,7 @@ $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
 				?>
 			</span>
 		<?php endif; ?>
-		<span class="last-updated">
+		<span class="last-updated" <?php echo ( 'last_updated' === get_query_var( 'orderby' ) ) ? 'style="display: inherit"' : '' ?>>
 			<i class="dashicons dashicons-calendar"></i>
 			<?php
 			/* Translators: Plugin modified time. */

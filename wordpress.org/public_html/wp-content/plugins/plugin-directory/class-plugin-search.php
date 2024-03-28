@@ -204,6 +204,95 @@ class Plugin_Search {
 			];
 		}
 
+		// These fields aren't in ES, but we have other data to query.
+		$unknown_es_meta_fields = [
+			'last_updated'     => 'post_modified',
+			'_active_installs' => 'active_installs',
+		];
+
+		// Apply post_meta filters
+		foreach ( (array) $query->meta_query->queries as $name => $meta_query ) {
+			if ( ! is_array( $meta_query ) ) {
+				// TODO: nested meta_queries, ie. relation = OR
+				continue;
+			}
+
+			$meta_key = $meta_query['key'];
+			$meta_key = $unknown_es_meta_fields[ $meta_key ] ?? $meta_key;
+
+			// Exists needs to be handled differently.
+			if ( 'EXISTS' === $meta_query['compare'] ) {
+				$es_query_args['filter']['and'][] = [
+					'exists' => [
+						'field' => $meta_key
+					]
+				];
+			}
+
+			if ( ! isset( $meta_query['value'] ) ) {
+				continue;
+			}
+
+			$meta_value = $meta_query['value'];
+			$compare    = null;
+			$type       = null;
+			switch ( $meta_query['compare'] ) {
+				case '>=':
+					$type ??= 'range';
+					$op   ??= 'gte';
+				case '<=':
+					$type ??= 'range';
+					$op   ??= 'lte';
+				case '=':
+					$op   ??= 'value';
+					$type ??= 'term';
+
+					$es_query_args['filter']['and'][] = [
+						$type => [
+							$meta_key => [
+								$op => $meta_value
+							]
+						]
+					];
+					break;
+			}
+		}
+
+		// Apply sorts...
+		if ( empty( $es_query_args['sort']  ) ) {
+			$orderby      = $query->get( 'orderby' );
+			$meta_clauses = $query->meta_query->get_clauses();
+			foreach ( (array) $orderby as $_orderby => $_order ) {
+				if ( ! is_string( $_orderby ) && is_string( $_order ) ) {
+					$_orderby = $_order;
+					$_order   = $query->get('order');
+				}
+				if ( ! is_string( $_orderby ) || empty( $meta_clauses[ $_orderby ]['key'] ) ) {
+					continue;
+				}
+
+				$key = $meta_clauses[ $_orderby ]['key'];
+
+				// ES doesn't have all keys
+				$key = $unknown_es_meta_fields[ $key ] ?? $key;
+
+				$es_query_args['sort'][] = [
+					$key => array(
+						'order' => $_order,
+					),
+				];
+			}
+
+			// We've added a custom sort, but we still want to sub-sort it by the relevance score.
+			if ( ! empty( $es_query_args['sort'] ) ) {
+				$es_query_args['sort'][] = [
+					'_score' => array(
+						'order' => 'DESC',
+					),
+				];
+			}
+		}
+
 		// Set boost on the match query
 
 		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ][0][ 'multi_match' ] ) ) {
