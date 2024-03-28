@@ -10,6 +10,13 @@ namespace WordPressdotorg\Photo_Directory;
 class Uploads {
 
 	/**
+	 * Minimum number of words for a photo's description.
+	 *
+	 * @var int
+	 */
+	const MIN_WORDS_DESCRIPTION = 10;
+
+	/**
 	 * Maximum number of characters for a photo's description.
 	 *
 	 * @var int
@@ -397,6 +404,9 @@ class Uploads {
 				case 'concurrent-submission-limit':
 					$rejection = __( 'You already have a submission awaiting moderation.', 'wporg-photos' );
 					break;
+				case 'description-too-short':
+					$rejection = __( 'Your description is too short. Please provide a more detailed description.', 'wporg-photos' );
+					break;
 				case 'duplicate-file':
 					$rejection = __( 'Your submission appears to be a duplicate of something uploaded before.', 'wporg-photos' );
 					break;
@@ -568,6 +578,11 @@ class Uploads {
 	 *                      specific validation issue.
 	 */
 	protected static function validate_upload_form() {
+		// Check description length.
+		if ( str_word_count( $_POST['post_content'] ) < self::MIN_WORDS_DESCRIPTION ) {
+			return 'description-too-short';
+		}
+
 		if ( ! empty( $_FILES['files']['error'][0] ) ) {
 			switch ( $_FILES['files']['error'][0] ) {
 				case UPLOAD_ERR_INI_SIZE:
@@ -924,7 +939,7 @@ class Uploads {
 					$description_shortcode,
 					esc_attr( __( 'Alternative Text (required)', 'wporg-photos' ) ),
 					self::MAX_LENGTH_DESCRIPTION,
-					esc_attr( sprintf( __( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Maximum of %d characters. No HTML.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
+					esc_attr( sprintf( __( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Minimum of %1$d words. Maximum of %2$d characters. No HTML.', 'wporg-photos' ), self::MIN_WORDS_DESCRIPTION, self::MAX_LENGTH_DESCRIPTION ) )
 				)
 				. '<div class="upload-checkbox-wrapper">' . "\n";
 
