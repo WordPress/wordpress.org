@@ -2788,6 +2788,9 @@ body.single .sidebar {
 .sidebar a {
 	text-decoration: none;
 }
+.sidebar a:hover {
+	text-decoration: underline;
+}
 
 /*--------------------------------------------------------------
 # .search-form
@@ -3132,6 +3135,9 @@ body.category #main .archive-pagination {
 }
 .bbpress #bbpress-forums .bbp-body ul.topic a {
 	text-decoration: none;
+}
+.bbpress #bbpress-forums .bbp-body ul.topic a:hover {
+	text-decoration: underline;
 }
 .bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
 .bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
