@@ -3158,6 +3158,12 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-topic-author {
 	padding-left: 1.5rem;
 }
+@media screen and (max-width: 480px) {
+	.bbpress #bbpress-forums .bbp-user-replies-created div.bbp-reply-author,
+	.bbpress #bbpress-forums .bbp-user-replies-created div.bbp-topic-author {
+		padding-left: 0;
+	}
+}
 .bbpress #bbpress-forums .bbp-author-title {
 	margin: 0;
 }
