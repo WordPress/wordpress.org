@@ -310,7 +310,7 @@ function wporg_support_breadcrumb() {
 
 	// Home
 	$args['include_home']    = true;
-	$args['home_text']       = __( 'Support', 'wporg-forums' );
+	$args['home_text']       = __( 'Forums', 'wporg-forums' );
 
 	// Forum root
 	$args['include_root']    = false;
