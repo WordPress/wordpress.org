@@ -938,25 +938,6 @@ div.indicator-hint {
 		display: inline-block;
 	}
 
-	.forum-info li.topic-count::before {
-		content: "\f105";
-	}
-
-	.forum-info li.reply-count::before,
-	.topic-info li.reply-count::before {
-		content: "\f125";
-	}
-
-	.forum-info li.create-topic a::before,
-	.topic-info li.create-reply a::before {
-		content: "\f132";
-	}
-
-	.forum-info li.forum-subscribe::before,
-	.topic-info li.topic-subscribe::before {
-		content: "\f465";
-	}
-
 	.feed {
 		background: none;
 		padding-left: 0;
@@ -1093,27 +1074,7 @@ div.bbp-breadcrumb {
 
 .sidebar {
 
-	.topic-info li.topic-forum::before {
-		content: "\f230";
-	}
-
-	.topic-info li.wp-version::before {
-		content: "\f120";
-	}
-
-	.topic-info li.topic-resolved::before {
-		content: "\f546";
-	}
-
-	.topic-info li.topic-favorite::before {
-		content: "\f487";
-	}
-
 	.topic-info li.topic-report {
-
-		&::before {
-			content: "\f227";
-		}
 
 		select,
 		input[type="text"],

@@ -3775,21 +3775,6 @@ div.indicator-hint li {
 .sidebar .topic-info .topic-freshness-author a {
 	display: inline-block;
 }
-.sidebar .forum-info li.topic-count::before {
-	content: "\f105";
-}
-.sidebar .forum-info li.reply-count::before,
-.sidebar .topic-info li.reply-count::before {
-	content: "\f125";
-}
-.sidebar .forum-info li.create-topic a::before,
-.sidebar .topic-info li.create-reply a::before {
-	content: "\f132";
-}
-.sidebar .forum-info li.forum-subscribe::before,
-.sidebar .topic-info li.topic-subscribe::before {
-	content: "\f465";
-}
 .sidebar .feed {
 	background: none;
 	padding-left: 0;
@@ -3892,21 +3877,6 @@ div.bbp-breadcrumb p {
 	margin: 0 !important;
 }
 
-.sidebar .topic-info li.topic-forum::before {
-	content: "\f230";
-}
-.sidebar .topic-info li.wp-version::before {
-	content: "\f120";
-}
-.sidebar .topic-info li.topic-resolved::before {
-	content: "\f546";
-}
-.sidebar .topic-info li.topic-favorite::before {
-	content: "\f487";
-}
-.sidebar .topic-info li.topic-report::before {
-	content: "\f227";
-}
 .sidebar .topic-info li.topic-report select,
 .sidebar .topic-info li.topic-report input[type=text],
 .sidebar .topic-info li.topic-report textarea {
