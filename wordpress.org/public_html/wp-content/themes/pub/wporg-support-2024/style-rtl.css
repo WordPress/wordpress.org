@@ -582,6 +582,14 @@ body.reply-edit #bbpress-forums fieldset legend {
 	list-style: none;
 }
 
+#bbpress-forums li.bbp-body {
+	border-bottom: 1px solid #eee;
+}
+
+#bbpress-forums .bbp-topics li.bbp-body {
+	border-bottom: none;
+}
+
 #bbpress-forums li.bbp-body div.bbp-topic-content ul,
 #bbpress-forums li.bbp-body div.bbp-reply-content ul {
 	margin-bottom: 10px;
