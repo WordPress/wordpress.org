@@ -2,55 +2,40 @@
 
 /* User badges */
 
-.by-moderator {
-	box-shadow: 0 0 0 #fff, -2px 0 0 var(--wp--custom--color--moderator);
-}
-
-.by-plugin-author,
-.by-plugin-contributor,
-.by-plugin-support-rep {
-	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--plugin-author);
-}
-
-.by-theme-author,
-.by-theme-contributor,
-.by-theme-support-rep {
-	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--theme-author);
-}
-
-.by-thread-starter {
-	box-shadow: -4px 0 0 #fff, -6px 0 0 var(--wp--custom--color--thread-starter);
-}
-
 .type-reported_topics {
 	border-right: 2px solid var(--wp--custom--color--thread-reporter);
 }
 
 .author-badge {
 	position: absolute;
-	top: 14px;
-	left: -4px;
+	top: 15px;
+	left: 0;
 	padding: 2px 6px;
 	color: #fff;
-	font-size: 0.6rem;
-	letter-spacing: 1px;
-	border-radius: 0 2px 2px 0;
+	font-size: 11px;
+	border-radius: var(--wp--custom--button--border--radius);
+}
+
+.reply.author-has-badge,
+.reply.topic-author,
+.reply.by-moderator {
+	padding-top: 40px !important;
 }
 
 .author-badge-moderator {
-	background-color: var(--wp--custom--color--moderator);
+	background-color: var(--wp--preset--color--dark-blueberry);
 }
 
 .author-badge-thread-starter {
-	background-color: var(--wp--custom--color--thread-starter);
+	background-color: var(--wp--preset--color--charcoal-3);
 }
 
 .author-badge-plugin {
-	background-color: var(--wp--custom--color--plugin-author);
+	background-color: var(--wp--preset--color--dark-blueberry);
 }
 
 .author-badge-theme {
-	background-color: var(--wp--custom--color--theme-author);
+	background-color: var(--wp--preset--color--dark-blueberry);
 }
 
 .author-badge-reporter {
@@ -71,21 +56,21 @@
 		border-left-width: 3px;
 	}
 
-	.by-moderator {
-		border-left-color: var(--wp--custom--color--moderator);
-	}
+	// .by-moderator {
+	// 	border-left-color: var(--wp--custom--color--moderator);
+	// }
 
-	.by-plugin-author,
-	.by-plugin-contributor,
-	.by-plugin-support-rep {
-		border-left-color: var(--wp--custom--color--plugin-author);
-	}
+	// .by-plugin-author,
+	// .by-plugin-contributor,
+	// .by-plugin-support-rep {
+	// 	border-left-color: var(--wp--custom--color--plugin-author);
+	// }
 
-	.by-theme-author,
-	.by-theme-contributor,
-	.by-theme-support-rep {
-		border-left-color: var(--wp--custom--color--theme-author);
-	}
+	// .by-theme-author,
+	// .by-theme-contributor,
+	// .by-theme-support-rep {
+	// 	border-left-color: var(--wp--custom--color--theme-author);
+	// }
 
 	.author-badge {
 		left: 0;
