@@ -522,6 +522,7 @@ body:not(.trac):not(.home-page) #main {
 
 			&.toc-heading:target {
 				border-left-color: var(--wp--preset--color--blueberry-1);
+				scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
 			}
 		}
 

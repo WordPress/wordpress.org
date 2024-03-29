@@ -989,6 +989,7 @@ body.single-topic:not(body.topic-edit) {
 
 			div.reply.status-publish {
 				padding-right: 0;
+				scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
 			}
 
 			div.even:not(.topic),

@@ -2906,6 +2906,7 @@ body.single .sidebar {
 .page .entry-content h2.toc-heading:target,
 .page .entry-content h3.toc-heading:target {
 	border-right-color: var(--wp--preset--color--blueberry-1);
+	scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
 }
 .helphub-page .entry-content .table-of-contents,
 .page .entry-content .table-of-contents {
@@ -3810,6 +3811,7 @@ body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.bbp-lea
 }
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.reply.status-publish {
 	padding-left: 0;
+	scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
 }
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.even:not(.topic),
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.even,
