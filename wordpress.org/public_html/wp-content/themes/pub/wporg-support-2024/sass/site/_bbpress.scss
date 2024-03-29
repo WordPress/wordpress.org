@@ -1097,6 +1097,11 @@ div.bbp-breadcrumb {
 				background-color: #fbffdf;
 			}
 		}
+
+		/* Remove the margin bottom of a bbpress <p> tag. */
+		#topic-report-reason + p {
+			margin-bottom: 0;
+		}
 	}
 
 	.topic-info li.topic-previous-reports {

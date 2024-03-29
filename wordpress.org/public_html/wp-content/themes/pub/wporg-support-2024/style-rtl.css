@@ -3826,6 +3826,9 @@ div.bbp-breadcrumb p {
 	margin: 0 !important;
 }
 
+.sidebar .topic-info li.topic-report {
+	/* Remove the margin bottom of a bbpress <p> tag. */
+}
 .sidebar .topic-info li.topic-report select,
 .sidebar .topic-info li.topic-report input[type=text],
 .sidebar .topic-info li.topic-report textarea {
@@ -3843,6 +3846,9 @@ div.bbp-breadcrumb p {
 }
 .sidebar .topic-info li.topic-report .topic-report-notice.topic-report-notice-type-warning {
 	background-color: #fbffdf;
+}
+.sidebar .topic-info li.topic-report #topic-report-reason + p {
+	margin-bottom: 0;
 }
 .sidebar .topic-info li.topic-previous-reports .previous-reports {
 	padding-right: 0;
