@@ -791,7 +791,7 @@ body.reply-edit #bbpress-forums fieldset legend {
 /* Notices */
 div.bbp-template-notice,
 div.indicator-hint {
-	background: #fff8e5;
+	background: var(--wp--preset--color--lemon-3);
 	border: 1px solid #ffb900;
 	border-radius: 0;
 }
@@ -852,7 +852,7 @@ div.bbp-template-notice.updated {
 .bbp-topics ul.sticky,
 .bbp-topics ul.super-sticky,
 .bbp-topics-front ul.super-sticky {
-	background-color: #fff8e5 !important;
+	background-color: var(--wp--preset--color--lemon-3) !important;
 }
 
 /* Closed topics */
