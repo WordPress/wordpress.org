@@ -2727,6 +2727,9 @@ body.single .sidebar {
 	border-top: 1px solid var(--wp--custom--color--border);
 	padding: 0.5rem 0;
 }
+.sidebar > div.my-account li:first-child {
+	border-top: none;
+}
 .sidebar a {
 	text-decoration: none;
 }

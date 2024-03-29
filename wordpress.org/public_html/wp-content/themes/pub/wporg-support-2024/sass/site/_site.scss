@@ -302,6 +302,10 @@ body:not(.trac):not(.home-page) #main {
 		}
 	}
 
+	> div.my-account li:first-child {
+		border-top: none;
+	}
+
 	a {
 		text-decoration: none;
 
