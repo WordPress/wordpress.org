@@ -27,7 +27,7 @@ function add_site_navigation_menus( $menus ) {
 			),
 			array(
 				'label' => __( 'Get Involved', 'wporg-forums' ),
-				'url' => 'https://make.wordpress.org/support/handbook/',
+				'url' => 'https://make.wordpress.org/support/handbook/contributing-to-the-wordpress-forums/',
 			)
 		),
 	);
