@@ -3660,6 +3660,14 @@ body.category #main .archive-pagination {
 	border-top: 1px solid var(--wp--custom--color--border);
 	clear: both;
 }
+.single-forum .bbp-topic-form ul,
+.bbp-view .bbp-topic-form ul {
+	padding: 0 16px !important;
+}
+.single-forum .bbp-topic-form ul li,
+.bbp-view .bbp-topic-form ul li {
+	list-style: initial !important;
+}
 
 .topic-edit #bbpress-forums .bbp-topic-form legend,
 .reply-edit #bbpress-forums .bbp-reply-form legend {

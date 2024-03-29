@@ -743,6 +743,14 @@ $paginationBreakPoint: "600px";
 	padding-top: 1rem;
 	border-top: 1px solid var(--wp--custom--color--border);
 	clear: both;
+
+	ul {
+		padding: 0 16px !important;
+
+		li {
+			list-style: initial !important;
+		}
+	}
 }
 
 .topic-edit #bbpress-forums .bbp-topic-form legend,
