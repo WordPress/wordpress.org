@@ -1250,6 +1250,14 @@ table {
 	font-size: 11px;
 	border-radius: var(--wp--custom--button--border--radius);
 }
+.bbp-topic-author .author-badge {
+	top: 2px;
+}
+@media screen and (max-width: 568px) {
+	.topic-indicator + .bbp-topic-author .author-badge {
+		top: 12px;
+	}
+}
 
 .reply.author-has-badge,
 .reply.topic-author,
@@ -1305,6 +1313,14 @@ table {
 @media screen and (max-width: 480px) {
 	.author-badge,
 	.author-badge-reporter {
+		top: -28px;
+	}
+	.bbp-topic-author .author-badge,
+	.bbp-topic-author .author-badge-reporter {
+		top: -38px;
+	}
+	.topic-indicator + .bbp-topic-author .author-badge,
+	.topic-indicator + .bbp-topic-author .author-badge-reporter {
 		top: -28px;
 	}
 }
