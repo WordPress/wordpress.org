@@ -20,6 +20,7 @@
 
 		.header-bottom {
 			display: flex;
+			margin-top: 4px;
 		}
 	}
 
@@ -40,7 +41,7 @@
 
 	.review-title {
 		font-size: var( --wp--preset--font-size--normal );
-		font-weight: normal;
+		font-weight: 500;
 		margin: 2px 0 0 12px !important;
 		text-transform: inherit;
 	}
@@ -49,14 +50,14 @@
 	.review-date,
 	.review-replies {
 		line-height: 1.25;
-		font-size: var( --wp--preset--font-size--small );
+		font-size: var( --wp--preset--font-size--extra-small );
 	}
 
 	.review-date,
 	.review-replies {
 		margin-left: 12px;
 		color: var( --wp--preset--color--charcoal-4 );
-		font-size: var( --wp--preset--font-size--small );
+		font-size: var( --wp--preset--font-size--extra-small );
 	}
 
 	.review-replies::before {
