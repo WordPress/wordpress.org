@@ -1258,19 +1258,19 @@ table {
 }
 
 .author-badge-moderator {
-	background-color: var(--wp--preset--color--dark-blueberry);
+	background-color: var(--wp--custom--color--moderator);
 }
 
 .author-badge-thread-starter {
-	background-color: var(--wp--preset--color--charcoal-3);
+	background-color: var(--wp--custom--color--thread-starter);
 }
 
 .author-badge-plugin {
-	background-color: var(--wp--preset--color--dark-blueberry);
+	background-color: var(--wp--custom--color--plugin-author);
 }
 
 .author-badge-theme {
-	background-color: var(--wp--preset--color--dark-blueberry);
+	background-color: var(--wp--custom--color--theme-author);
 }
 
 .author-badge-reporter {
