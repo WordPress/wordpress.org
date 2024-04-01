@@ -1314,6 +1314,7 @@ table {
 	.author-badge,
 	.author-badge-reporter {
 		top: -28px;
+		right: -18px;
 	}
 	.bbp-topic-author .author-badge,
 	.bbp-topic-author .author-badge-reporter {
