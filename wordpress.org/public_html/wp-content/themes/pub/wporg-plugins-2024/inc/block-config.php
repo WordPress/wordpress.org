@@ -12,11 +12,13 @@ add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_i
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\filter_site_title_block' );
+add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\filter_navigation_block', 10, 2 );
 
 /**
  * Provide a list of local navigation menus.
  */
 function add_site_navigation_menus( $menus ) {
+	
 	$items = array(
 		'plugins' => array(
 			array(
@@ -31,16 +33,16 @@ function add_site_navigation_menus( $menus ) {
 		'section-bar' => array(
 			array(
 				'label' => __( 'All', 'wporg-plugins' ),
-				'url' => home_url( '/' ),
+				'url'   => is_search() ? get_search_link() : home_url( '/' ),
 			),
 			array(
 				'label' => __( 'Community', 'wporg-plugins' ),
-				'url'   => home_url( '?plugin_business_model=community' ),
+				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=community' ) :  home_url( '?plugin_business_model=community' ),
 				'term'  => get_term_by( 'slug', 'community', 'plugin_business_model' ),
 			),
 			array(
 				'label' => __( 'Commercial', 'wporg-plugins' ),
-				'url'   => home_url( '?plugin_business_model=commercial' ),
+				'url'   =>  is_search() ? esc_url( get_search_link() . '?plugin_business_model=commercial' ) : home_url( '?plugin_business_model=commercial' ),
 				'term'  => get_term_by( 'slug', 'commercial', 'plugin_business_model' ),
 			),
 			/*
@@ -220,6 +222,39 @@ function filter_site_title_block( $block_content ) {
 		'href="' . home_url( '/' ) . '"',
 		$block_content
 	);
+
+	return $block_content;
+}
+
+/**
+ * Filter the navigation to add the current item indicator when no business model is selected.
+ * 
+ * @param string $block_content
+ * @param array $block
+ * @return string
+ */
+function filter_navigation_block( $block_content, $block ) {
+	global $wp_query;
+
+	// We only want to apply this to our "All", "Community", "Commercial" menu.
+	if ( ! isset( $block['attrs']['menuSlug'] ) || $block['attrs']['menuSlug'] !== 'section-bar' ) {
+		return $block_content;
+	}
+
+	// If we have a business model selected, the navigation block will select appropriately.
+	if ( ! isset( $wp_query ) || isset( $wp_query->query['plugin_business_model'] ) ) {
+		return $block_content;
+	}
+
+	$tag_processor = new \WP_HTML_Tag_Processor( $block_content );
+
+	if ( $tag_processor->next_tag( 'ul' )) {
+		if ( $tag_processor->next_tag( 'li' ) ) {
+			$tag_processor->add_class( 'current-menu-item' );
+		}
+
+		return $tag_processor->get_updated_html();
+	}
 
 	return $block_content;
 }
