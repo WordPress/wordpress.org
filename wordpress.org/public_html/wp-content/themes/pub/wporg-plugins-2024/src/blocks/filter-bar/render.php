@@ -1,6 +1,12 @@
 <?php
 namespace WordPressdotorg\Theme\Plugins_2024\FilterBar;
 
+global $wp_query;
+
+if ( isset( $wp_query ) && ! empty( $wp_query->query_vars['browse'] ) ) {
+	return '';
+}
+
 $filter_blocks = <<<FILTERS
 	<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"className":"wporg-query-filters","layout":{"type":"flex","flexWrap":"nowrap"}} -->
 	<div class="wp-block-group wporg-query-filters">
