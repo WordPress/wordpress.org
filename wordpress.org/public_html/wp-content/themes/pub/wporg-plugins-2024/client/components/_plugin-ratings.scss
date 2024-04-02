@@ -9,7 +9,7 @@
 
 	/* plugin-card */
 	.rating-count {
-		color: var( --wp--preset--color--charcoal-4 );
+		color: var( --wp--preset--color--charcoal-2 );
 		font-size: var( --wp--preset--font-size--extra-small );
 		vertical-align: text-bottom;
 
@@ -22,7 +22,7 @@
 }
 
 [class*='dashicons-star-'] {
-	color: var( --wp--preset--color--charcoal-4 );
+	color: var( --wp--preset--color--charcoal-2 );
 }
 
 // Flip the half star for rating.
