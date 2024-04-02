@@ -132,6 +132,8 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					</span>
 				</li>
 
+				<?php $is_caped = function_exists( 'is_caped' ) && is_caped( get_current_user_id() ); ?>
+				<?php if ( $is_caped || bbp_is_user_home() ) : ?>
 				<li>
 					<span class="wporg-profile-edit-link">
 					<a href="https://profiles.wordpress.org/<?php echo bbp_get_displayed_user_field( 'user_nicename' ); ?>/profile/edit/" title="<?php
@@ -140,6 +142,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 						?>"><?php esc_html_e( 'Edit WP.org Profile', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
+				<?php endif; ?>
 
 			<?php endif; ?>
 
