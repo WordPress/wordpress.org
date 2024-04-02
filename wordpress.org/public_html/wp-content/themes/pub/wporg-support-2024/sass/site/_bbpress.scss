@@ -623,6 +623,10 @@ $paginationBreakPoint: "600px";
 	li.bbp-header li.bbp-topic-title {
 		text-align: left !important;
 	}
+
+	li.bbp-topic-title {
+		overflow-wrap: anywhere;
+	}
 }
 
 

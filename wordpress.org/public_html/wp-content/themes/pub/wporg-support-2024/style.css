@@ -3506,6 +3506,9 @@ body.category #main .archive-pagination {
 .bbpress li.bbp-header li.bbp-topic-title {
 	text-align: left !important;
 }
+.bbpress li.bbp-topic-title {
+	overflow-wrap: anywhere;
+}
 
 /*--------------------------------------------------------------
 # Buttons
