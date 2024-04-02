@@ -385,6 +385,10 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
+		p.bbp-topic-meta span.bbp-author-name {
+			white-space: normal;
+		}
+
 		p.wporg-bbp-topic-site-url {
 			border-top: 1px solid var(--wp--custom--color--border);
 			padding-top: 0.5rem;
