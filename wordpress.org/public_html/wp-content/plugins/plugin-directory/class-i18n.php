@@ -35,6 +35,11 @@ class I18n {
 			}
 		} elseif ( 'plugin_business_model' == $term->taxonomy ) {
 			$term->name = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), 'Plugin Business Model', 'wporg-plugins' ) );
+
+			if ( $term->description ) {
+				// Without context, as that's how it's been used for a while.
+				$term->description = esc_html( translate( html_entity_decode( $term->description ), 'wporg-plugins' ) );
+			}
 		}
 
 		return $term;
@@ -87,7 +92,8 @@ class I18n {
 		/* translators: Block plugins are single-block plugins, not block-enabled plugins. */
 		_x( 'Block Plugins', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'New Plugins', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Updated Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Recently Updated Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Preview-Enabled Plugins', 'Plugin Section Name', 'wporg-plugins' );
 
 		// Section descriptions.
 		_x( 'Plugins that have been offered for adoption by others.', 'Plugin Section Description', 'wporg-plugins' );
@@ -95,5 +101,9 @@ class I18n {
 		_x( 'The below plugins have been marked as favorites.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'Plugins that offer blocks for the block-based editor.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'Block Plugins as used in the Block Directory.', 'Plugin Section Description', 'wporg-plugins' );
+
+		// Business model descriptions.
+		__( 'These plugins are developed and supported by a community.', 'wporg-plugins' );
+		__( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' );
 	}
 }
