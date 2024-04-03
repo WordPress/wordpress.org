@@ -9,8 +9,8 @@
 
 <!-- wp:pattern {"slug":"wporg-plugins-2024/front-page-nav"} /-->
 
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space","bottom":"var:preset|spacing|30"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color" style="padding-right:var(--wp--preset--spacing--edge-space);padding-left:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--30);">
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space","bottom":"var:preset|spacing|40"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color" style="padding-right:var(--wp--preset--spacing--edge-space);padding-left:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--40);">
 
 	<!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|40"},"blockGap":"var:preset|spacing|30"}},"layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"bottom"}} -->
 	<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--40);">
@@ -31,11 +31,6 @@
 			?>
 		</p>
 		<!-- /wp:paragraph -->
-	</div>
-	<!-- /wp:group -->
-	<!-- wp:group {"align":"wide","style":{"spacing":{"bottom":"var:preset|spacing|10"}}}} -->
-	<div class="wp-block-group alignwide" style=";padding-bottom:var(--wp--preset--spacing--10)">
-		<!-- wp:search {"showLabel":false,"placeholder":"<?php esc_html_e( 'Search plugins...', 'wporg' ); ?>","width":250,"widthUnit":"px","buttonText":"<?php esc_html_e( 'Search', 'wporg' ); ?>","buttonPosition":"button-inside","buttonUseIcon":true,"className":"is-style-secondary-search-control"} /-->
 	</div>
 	<!-- /wp:group -->
 </div>

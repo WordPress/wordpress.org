@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "wporg/category-navigation",
+	"version": "0.2.0",
+	"title": "Category Navigation",
+	"category": "design",
+	"icon": "",
+	"description": "Adds the category navigation menu",
+	"textdomain": "wporg",
+	"attributes": {},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

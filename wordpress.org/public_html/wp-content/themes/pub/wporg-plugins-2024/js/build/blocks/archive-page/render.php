@@ -12,21 +12,11 @@ if ( ! $wp_query->have_posts() ) {
 // TODO: There's no block for this.
 $archive_description = get_the_archive_description();
 
-$menu = '<!-- wp:navigation {"menuSlug":"section-bar","ariaLabel":"'. esc_attr( 'Category menu', 'wporg-plugins' ) .'","overlayMenu":"never","layout":{"type":"flex","orientation":"horizontal","justifyContent":"left","flexWrap":"nowrap"},"fontSize":"small","className":"is-style-button-list"} /-->';
-
 echo do_blocks( <<<BLOCKS
-	<!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|20"}}}} -->
-	<div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--20)">
-	$menu
-	</div><!-- /wp:group -->
-	BLOCKS
-);
-
-echo do_blocks( <<<BLOCKS
-	<!-- wp:query-title {"type":"archive","fontFamily":"inter"} /-->
+	<!-- wp:wporg/filter-bar /-->	
+	<!-- wp:wporg/category-navigation /-->
+	<!-- wp:query-title {"type":"archive","fontFamily":"inter","style":{"typography":{"fontStyle":"normal","fontWeight":"600"},"spacing":{"margin":{"bottom":"var:preset|spacing|10"}}},"fontSize":"heading-5"} /-->
 	{$archive_description}
-
-	<!-- wp:wporg/filter-bar /-->
 	<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 	<div class="wp-block-query plugin-cards">
 			<!-- wp:post-template {"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"48%"}} -->

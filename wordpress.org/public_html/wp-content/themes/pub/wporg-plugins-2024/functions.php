@@ -15,6 +15,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 
 // Block Files
 require_once( __DIR__ . '/src/blocks/archive-page/index.php' );
+require_once( __DIR__ . '/src/blocks/category-navigation/index.php' );
 require_once( __DIR__ . '/src/blocks/filter-bar/index.php' );
 require_once( __DIR__ . '/src/blocks/front-page/index.php' );
 require_once( __DIR__ . '/src/blocks/search-page/index.php' );
@@ -403,6 +404,7 @@ function update_archive_title( $title ) {
 	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
 		return __( 'Commercial Plugins', 'wporg-plugins' );
 	}
+
 	return $title;
 }
 add_filter( 'get_the_archive_title', __NAMESPACE__ . '\update_archive_title' );
@@ -414,13 +416,19 @@ add_filter( 'get_the_archive_title', __NAMESPACE__ . '\update_archive_title' );
  * @return string Updated description.
  */
 function update_archive_description( $description ) {
+	$contents = $description;
+
+	// The description in the DB has <p> tags. Add them manually for consistency.
 	if ( is_tax( 'plugin_business_model', 'community' ) ) {
-		return '<p>' . __( 'These plugins are developed and supported by a community.', 'wporg-plugins' ) . '</p>';
+		$contents = '<p>' . __( 'These plugins are developed and supported by a community.', 'wporg-plugins' ) . '</p>';
 	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
-		return '<p>' . __( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' ) . '</p>';
+		$contents = '<p>' . __( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' ) . '</p>';
 	}
 
-	return $description;
+	return sprintf(
+		'<div class="section-intro">%s</div>',
+		$contents
+	);
 }
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
 

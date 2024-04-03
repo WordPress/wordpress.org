@@ -19,15 +19,7 @@ $widget_args = array(
 	'after_title'  => '</h2>',
 );
 
-$menu = '<!-- wp:navigation {"menuSlug":"section-bar","ariaLabel":"'. esc_attr( 'Category menu', 'wporg-plugins' ) .'","overlayMenu":"never","layout":{"type":"flex","orientation":"horizontal","justifyContent":"left","flexWrap":"nowrap"},"fontSize":"small","className":"is-style-button-list"} /-->';
-
-echo do_blocks( <<<BLOCKS
-	<!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
-	<div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--40)">
-	$menu
-	</div><!-- /wp:group -->
-	BLOCKS
-);
+echo do_blocks( '<!-- wp:wporg/filter-bar /--><!-- wp:wporg/category-navigation /-->' );
 
 ?>
 
@@ -77,11 +69,20 @@ echo do_blocks( <<<BLOCKS
 
 		// Overwrite the global query with the section query.
 		$wp_query = $section_query;
+
+		$safe_title = esc_html( $section_title );
+		$title = do_blocks ( <<<BLOCKS
+			<!-- wp:heading {"level":2,"style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"heading-5","fontFamily":"inter"} -->
+				<h2 class="wp-block-heading has-inter-font-family has-heading-5-font-size" style="font-style:normal;font-weight:600">$safe_title</h2>
+			<!-- /wp:heading -->
+		BLOCKS
+		);
+
 		?>
 
 		<section class="plugin-section">
 			<header class="section-header">
-				<h2 class="section-title"><?php echo esc_html( $section_title ); ?></h2>
+				<?php echo $title; ?>
 				<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>">
 					<?php
 					printf(

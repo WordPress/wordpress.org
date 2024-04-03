@@ -9,3 +9,18 @@
 		margin-bottom: 8px;
 	}
 }
+
+.section-heading {
+	font-style: normal;
+    font-weight: 600;
+	line-height: var(--wp--custom--heading--level-5--typography--line-height);
+	font-family: var(--wp--preset--font-family--inter) !important;
+	font-size: var(--wp--preset--font-size--heading-5) !important;
+}
+
+.section-intro {
+	margin-top: var(--wp--preset--spacing--10);
+	margin-bottom: var(--wp--preset--spacing--20);
+	color: var(--wp--preset--color--charcoal-4);
+	font-size: var(--wp--preset--font-size--small);
+}

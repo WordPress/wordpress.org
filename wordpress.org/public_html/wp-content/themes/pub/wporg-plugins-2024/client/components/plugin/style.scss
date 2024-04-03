@@ -47,7 +47,9 @@
 		}
 
 		.byline {
+			display: block;
 			color: #78848f;
+			margin-top: 4px;
 		}
 	}
 
@@ -136,10 +138,6 @@
 		list-style: none;
 		margin-left: 0;
 		padding-left: 0;
-
-		@media screen and ( min-width: $ms-breakpoint ) {
-			padding-left: var( --wp--style--block-gap );
-		}
 
 		.plugin-blocks-list-item {
 			display: grid;

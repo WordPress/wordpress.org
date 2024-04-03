@@ -185,6 +185,11 @@ function wporg_query_filter_in_form( $key ) {
 }
 
 function wporg_query_total_label( $label, $count ) {
+
+	if ( ! is_search() ) {
+		return;
+	}
+
 	return _n( '%s plugin', '%s plugins', $count, 'wporg-plugins' );
 }
 
