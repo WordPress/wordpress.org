@@ -105,14 +105,7 @@ class Import {
 
 		// If the readme generated any warnings, raise it to self::$import_warnings;
 		if ( $readme->warnings ) {
-			// Convert the warnings to a human readable format.
-			$readme_warnings = Readme_Validator::instance()->validate_content( $readme->raw_contents );
-
-			foreach ( [ 'errors', 'warnings' ] as $field ) {
-				foreach ( $readme_warnings[ $field ] ?? [] as $warning ) {
-					$this->warnings[] = "Readme: {$warning}";
-				}
-			}
+			$this->warnings = array_merge( $this->warnings, $readme->warnings );
 		}
 
 		// Validate various headers:
@@ -127,9 +120,9 @@ class Import {
 		if ( $headers->UpdateURI ) {
 			$update_uri_valid = preg_match( '!^(https?://)?(wordpress.org|w.org)/plugins?/(?P<slug>[^/]+)/?$!i', $headers->UpdateURI, $update_uri_matches );
 			if ( ! $update_uri_valid || $update_uri_matches['slug'] !== $plugin_slug ) {
-				$this->warnings['invalid_update_uri'] = 'Invalid Update URI header detected: ' . $headers->UpdateURI;
+				$this->warnings['invalid_update_uri'] = $headers->UpdateURI;
 
-				throw new Exception( $this->warnings['invalid_update_uri'] );
+				throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'invalid_update_uri' ) );
 			}
 		}
 
@@ -152,9 +145,9 @@ class Import {
 		}
 
 		if ( $unmet_dependencies ) {
-			$this->warnings['unmet_dependencies'] = 'Invalid plugin dependencies specified. The following dependencies could not be resolved: ' . implode( ', ', $requires_plugins_unmet );
+			$this->warnings['unmet_dependencies'] = $requires_plugins_unmet;
 
-			throw new Exception( $this->warnings['unmet_dependencies'] );
+			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'unmet_dependencies', $requires_plugins_unmet ) );
 		}
 		unset( $_requires_plugins, $unmet_dependencies );
 
@@ -1168,7 +1161,7 @@ class Import {
 						];
 					}
 
-					// Normalise a "install theme from url" to a install-by-slug.
+					// Normalize a "install theme from url" to a install-by-slug.
 					if (
 						'installTheme' === $step['step'] &&
 						isset( $step['themeZipFile']['url'] ) &&
@@ -1208,7 +1201,6 @@ class Import {
 					)
 				);
 			}
-
 
 			$contents = json_encode( $decoded_file ); // Re-encode to minimize whitespace
 		}

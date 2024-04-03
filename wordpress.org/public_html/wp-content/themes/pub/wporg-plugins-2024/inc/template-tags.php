@@ -720,6 +720,17 @@ function the_author_notice( $post = null ) {
 
 	$import_warnings = get_post_meta( $post->ID, '_import_warnings', true );
 	if ( $import_warnings ) {
+
+		if ( ! wp_is_numeric_array( $import_warnings ) ) {
+			// error_code => error_data, convert to error_code => human_readable_error
+
+			foreach ( $import_warnings as $error_code => $error_data ) {
+				$import_warnings[ $error_code ] = Readme_Validator::instance()->translate_code_to_message( $error_code, $error_data );
+			}
+		} else {
+			// back-compat; previously this was an array of numeric indexed human-readable strings.
+		}
+
 		$import_warnings  = '<ul><li>' . implode( '</li><li>', $import_warnings ) . '</li></ul>';
 		printf(
 			'<div class="notice notice-error notice-alt">%s</div>',
