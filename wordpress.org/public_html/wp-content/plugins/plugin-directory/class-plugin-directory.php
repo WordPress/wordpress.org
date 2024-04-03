@@ -680,7 +680,7 @@ class Plugin_Directory {
 		 * @var \WP_Theme $theme
 		 */
 		foreach ( wp_get_themes() as $theme ) {
-			if ( $theme->get( 'Name' ) === 'WordPress.org Plugins' ) {
+			if ( $theme->get( 'Name' ) === 'WordPress.org Plugins 2024' ) {
 				switch_theme( $theme->get_stylesheet() );
 				break;
 			}
