@@ -101,10 +101,12 @@ class Meta extends Trac {
 		'theme-directory/'                      => [ '#meta' => true, '#themereview' => true ],
 		'wp-themes.com/'                        => [ '#meta' => true, '#themereview' => true ],
 		'wporg-plugins/'                        => [ '#meta' => true, '#pluginreview' => true ],
+		'wporg-plugins-2024/'                   => [ '#meta' => true, '#pluginreview' => true ],
 		'plugin-directory/'                     => [ '#meta' => true, '#pluginreview' => true ],
 		'plugins/support-forums/'               => [ '#meta' => true, '#forums' => true ],
 		'plugins/wporg-bbp-'                    => [ '#meta' => true, '#forums' => true ],
 		'themes/pub/wporg-support/'             => [ '#meta' => true, '#forums' => true ],
+		'themes/pub/wporg-support-2024/'        => [ '#meta' => true, '#forums' => true ],
 	);
 
 	protected $ticket_component_filters = array(
