@@ -17,7 +17,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 get_header( 'top-level-page' );
 the_post();
-$hosting_cache_buster = '5';
+$hosting_cache_buster = '6';
 
 ?>
 
@@ -45,7 +45,7 @@ $hosting_cache_buster = '5';
 							</a>
 						</h2>
 
-						<p>Powering over 2 million websites, Bluehost offers the ultimate WordPress platform. Tuned for WordPress, we offer WordPress-centric dashboards and tools along with 1-click installation, a free domain name, email, FTP, and more. Bluehost also offers affordable all-in-one commerce solutions allowing users to build a robust online store on WordPress. Easily scalable and backed by legendary 24/7 support by in-house WordPress experts.</p>
+						<p>Bluehost is WordPress.org's longest running partner and offers the ultimate WordPress platform that powers millions of websites. Their shared hosting is benchmarked as delivering best-in-class performance, and for those that demand the fastest speed, 100% uptime and expert support, Bluehost Cloud Hosting offers unmatched power. No matter the solution you choose, you'll get WordPress pre-installed, an AI site builder, free domain name, email, SSL, built-in CDN and more. From blogs, business sites, and online stores, build any kind of website on an easily scalable WordPress-optimized platform backed by legendary 24/7 support by in-house WordPress experts.</p>
 
 						<div class="forum">
 							<a href="https://wordpress.org/search/Bluehost/?in=support_forums">Forum threads about Bluehost &raquo;</a>
