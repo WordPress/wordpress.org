@@ -845,28 +845,31 @@ function wporg_themes_get_themes_for_query() {
 	}
 
 	$request = array();
-	if ( get_query_var( 'browse' ) ) {
+	if ( get_query_var( 'browse' ) && is_string( get_query_var( 'browse' ) ) ) {
 		$request['browse'] = get_query_var( 'browse' );
 
 		if ( 'favorites' === $request['browse'] ) {
 			$request['user'] = wp_get_current_user()->user_login;
 		}
 
-	} else if ( get_query_var( 'tag' ) ) {
+	} else if ( get_query_var( 'tag' ) && is_string( get_query_var( 'tag' ) ) ) {
 		$request['tag'] = (array) explode( '+', get_query_var( 'tag' ) );
 
-	} else if ( get_query_var( 's' ) ) {
+	} else if ( get_query_var( 's' ) && is_string( get_query_var( 's' ) ) ) {
 		$request['search'] = get_query_var( 's' );
 
 	} else if ( get_query_var( 'author' ) ) {
 		$request['author'] = get_user_by( 'id', get_query_var( 'author' ) )->user_nicename;
 
 	} else if ( get_query_var( 'name' ) || get_query_var( 'pagename' ) ) {
-		$request['theme'] = basename( get_query_var( 'name' ) ?: get_query_var( 'pagename' ) );
+		$name = get_query_var( 'name' ) ?: get_query_var( 'pagename' );
+		if ( is_string( $name ) ) {
+			$request['theme'] = basename( $name );
+		}
 	}
 
 	if ( get_query_var( 'paged' ) ) {
-		$request['page'] = (int)get_query_var( 'paged' );
+		$request['page'] = (int) get_query_var( 'paged' );
 	}
 
 	if ( empty( $request ) ) {
@@ -923,7 +926,7 @@ function wporg_themes_prepare_themes_for_js() {
 
 function wporg_themes_theme_information( $slug ) {
 	return wporg_themes_query_api( 'theme_information', array(
-		'slug' => $slug,
+		'slug'   => $slug,
 		'fields' => array(
 			'description' => true,
 			'sections' => false,
