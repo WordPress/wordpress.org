@@ -210,6 +210,26 @@ class Status_Transitions {
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
+		$this->approved_create_svn_repo( $post, $plugin_author );
+
+		// Grant commit access.
+		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
+
+		// Send email.
+		$email = new Plugin_Approved_Email( $post, $plugin_author );
+		$email->send();
+
+		Tools::audit_log( 'Plugin approved.', $post_id );
+	}
+
+	/**
+	 * Create a SVN repository for this plugin.
+	 *
+	 * @param \WP_Post $post          Post object.
+	 * @param \WP_User $plugin_author Plugin author.
+	 * @return bool
+	 */
+	public function approved_create_svn_repo( $post, $plugin_author ) {
 		$dir = Filesystem::temp_directory( $post->post_name );
 		foreach ( array( 'assets', 'tags', 'trunk' ) as $folder ) {
 			mkdir( "$dir/$folder", 0777 );
@@ -231,16 +251,14 @@ class Status_Transitions {
 		}
 		*/
 
-		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
+		$result = SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
 
-		// Grant commit access.
-		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
+		if ( $result['errors'] ) {
+			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'], true ), $post->ID );
+			return false;
+		}
 
-		// Send email.
-		$email = new Plugin_Approved_Email( $post, $plugin_author );
-		$email->send();
-
-		Tools::audit_log( 'Plugin approved.', $post_id );
+		return true;
 	}
 
 	/**
