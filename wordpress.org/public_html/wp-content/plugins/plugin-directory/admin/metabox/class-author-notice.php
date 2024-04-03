@@ -169,7 +169,8 @@ class Author_Notice {
 					'Author notice set to: [%s] %s',
 					$type_text,
 					wp_strip_all_tags( $author_notice['html'] )
-				)
+				),
+				$post
 			);
 		}
 	}
