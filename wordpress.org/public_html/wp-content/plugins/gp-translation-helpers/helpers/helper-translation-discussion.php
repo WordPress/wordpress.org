@@ -830,6 +830,10 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'name'        => __( 'Typo' ),
 				'explanation' => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
 			),
+			'ai'          => array(
+				'name'        => __( 'Bad Quality (AI?)' ),
+				'explanation' => __( 'The translator has used some AI or other machine translation tool without additional manual review, and its quality is low.' ),
+			),
 		);
 		$reasons         = apply_filters( 'gp_custom_reasons', $default_reasons, $locale );
 		return $reasons;
