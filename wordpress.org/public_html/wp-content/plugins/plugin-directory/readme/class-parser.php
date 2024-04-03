@@ -177,7 +177,7 @@ class Parser {
 	 * the parse_readme() function, not the parse_readme_contents() function, so
 	 * that they can be turned from a URL into plain text via the stream.
 	 */
-	public function __construct( $string ) {
+	public function __construct( $string = '' ) {
 		if (
 			(
 				// If it's longer than the Filesystem path limit or contains newlines, it's not worth a file_exists() check.
