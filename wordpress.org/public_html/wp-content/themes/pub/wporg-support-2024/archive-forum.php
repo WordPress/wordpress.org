@@ -16,7 +16,7 @@ get_header(); ?>
 			<section>
 				<p><?php printf(
 					/* Translators: forums URL */
-					__( 'Our community-based Support Forums are a great place to learn, share, and troubleshoot. <a href="%s">Get started!</a>', 'wporg-forums' ),
+					__( 'Our community-based support forums are a great place to learn, share, and help each other. <a href="%s">Find out how to get started</a>.', 'wporg-forums' ),
 					esc_url( site_url( '/welcome/' ) )
 				) ?></p>
 			</section>
@@ -92,9 +92,9 @@ get_header(); ?>
 			<!-- /wp:group -->',
 			esc_html__( 'More resources', 'wporg-forums' ),
 			esc_html__( 'Documentation', 'wporg-forums' ),
-			esc_html__( "Your first stop where you'll find information on everything.", 'wporg-forums' ),
+			esc_html__( 'Find the information you need to get the most out of WordPress.', 'wporg-forums' ),
 			esc_html__( 'Support Handbook', 'wporg-forums' ),
-			esc_html__( 'Great for tips, tricks, and advice regarding giving the best support.', 'wporg-forums' ),
+			esc_html__( 'Learn how to get involved and provide support in the forums.', 'wporg-forums' ),
 		)
 	); ?>
 

@@ -104,7 +104,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					</div>
 					<!-- /wp:group -->',
 					esc_html__( 'Forums', 'wporg-forums' ),
-					esc_html__( 'Learn how to help, or get help you need.', 'wporg-forums' )
+					esc_html__( 'A space to ask and discuss all things WordPress.', 'wporg-forums' )
 				)
 			); ?>
 		<?php elseif ( ! $is_user_profile ) : ?>
