@@ -39,6 +39,11 @@
 			button {
 				all: inherit;
 				max-width: calc(100% - 60px);
+
+				&:hover, 
+				&:focus {
+					text-decoration: underline;
+				}
 			}
 		}
 
