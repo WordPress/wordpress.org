@@ -18,7 +18,10 @@ add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\filter_navigation_
  * Provide a list of local navigation menus.
  */
 function add_site_navigation_menus( $menus ) {
-	
+	global $wp;
+
+	$url = 'https://' . $_SERVER['HTTP_HOST'] . parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+
 	$items = array(
 		'plugins' => array(
 			array(
@@ -37,12 +40,12 @@ function add_site_navigation_menus( $menus ) {
 			),
 			array(
 				'label' => __( 'Community', 'wporg-plugins' ),
-				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=community' ) :  home_url( '?plugin_business_model=community' ),
+				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=community' ) :  esc_url( $url . '?plugin_business_model=community' ),
 				'term'  => get_term_by( 'slug', 'community', 'plugin_business_model' ),
 			),
 			array(
 				'label' => __( 'Commercial', 'wporg-plugins' ),
-				'url'   =>  is_search() ? esc_url( get_search_link() . '?plugin_business_model=commercial' ) : home_url( '?plugin_business_model=commercial' ),
+				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=commercial' ) : esc_url( $url . '?plugin_business_model=commercial' ),
 				'term'  => get_term_by( 'slug', 'commercial', 'plugin_business_model' ),
 			),
 			/*
@@ -246,19 +249,38 @@ function filter_navigation_block( $block_content, $block ) {
 		return $block_content;
 	}
 
-	// If we have a business model selected, the navigation block will select appropriately.
-	if ( ! isset( $wp_query ) || isset( $wp_query->query['plugin_business_model'] ) ) {
+	if ( get_query_var( 'plugin_business_model' ) ) {
+
+		// The menu doesn't select properly if viewing /tags/ or /browse/. 
+		if ( get_query_var( 'browse' ) || get_query_var( 'plugin_tags' ) ) {
+			$tags = new \WP_HTML_Tag_Processor( $block_content );
+			
+			while ( $tags->next_tag( 'li' ) ) {
+				$tags->set_bookmark( 'parent-li' );
+				$tags->next_tag( 'a' );
+
+				if ( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] === $tags->get_attribute( 'href' ) ) {
+					$tags->seek( 'parent-li' );
+					$tags->add_class( 'current-menu-item' );
+					break;
+				}
+			}
+
+			return $tags->get_updated_html();
+		}
+
 		return $block_content;
 	}
 
 	$tag_processor = new \WP_HTML_Tag_Processor( $block_content );
 
-	if ( $tag_processor->next_tag( 'ul' )) {
+	// Find the first li item and select it.
+	if ( $tag_processor->next_tag( 'ul' ) ) {
 		if ( $tag_processor->next_tag( 'li' ) ) {
 			$tag_processor->add_class( 'current-menu-item' );
-		}
 
-		return $tag_processor->get_updated_html();
+			return $tag_processor->get_updated_html();
+		}
 	}
 
 	return $block_content;
