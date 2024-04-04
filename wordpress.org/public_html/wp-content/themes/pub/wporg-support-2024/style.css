@@ -1291,6 +1291,18 @@ table {
 	right: 0;
 }
 
+.tag {
+	display: inline-block;
+	padding: 4px 10px;
+	color: var(--wp--preset--color--white);
+	font-size: var(--preset--font-size--small);
+	border-radius: var(--wp--custom--button--border--radius);
+	background-color: var(--wp--preset--color--blueberry-4);
+}
+.tag a {
+	color: var(--wp--preset--color--charcoal-1);
+}
+
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/
@@ -2666,10 +2678,21 @@ body.single .sidebar {
 	margin-bottom: 0;
 	padding-left: unset;
 }
-.sidebar > div ul > li {
-	font-size: var(--wp--preset--font-size--small);
+.sidebar > div ul.topic-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--10);
+}
+.sidebar > div ul:not(.topic-tags) > li {
+	font-size: var(--wp--preset--font-size--normal);
 	border-top: 1px solid var(--wp--custom--color--border);
-	padding: 0.5rem 0;
+	padding: var(--wp--preset--spacing--10) 0;
+}
+.sidebar > div ul:not(.topic-tags) > li:first-child {
+	border-top: none;
+}
+.sidebar > div ul:not(.topic-tags) > li:last-child {
+	border-bottom: none;
 }
 .sidebar > div.my-account li:first-child {
 	border-top: none;
@@ -2679,6 +2702,11 @@ body.single .sidebar {
 }
 .sidebar a:hover {
 	text-decoration: underline;
+}
+.sidebar h4, .sidebar .bbp-view .review-ratings .col-5 > div:first-child, .bbp-view .review-ratings .sidebar .col-5 > div:first-child {
+	font-weight: 400;
+	font-size: var(--wp--preset--font-size--normal);
+	margin-bottom: var(--wp--preset--spacing--10);
 }
 
 /*--------------------------------------------------------------
@@ -2969,7 +2997,7 @@ body.category #main .archive-pagination {
 	.page-template-page-forums-sidebar main#main .wp-block-group > article {
 		float: left;
 		padding: 0;
-		width: 65%;
+		width: calc(75% - var(--wp--preset--spacing--40));
 	}
 }
 @media screen and (min-width: 48em) {
@@ -2983,7 +3011,7 @@ body.category #main .archive-pagination {
 	.bbpress main#main .entry-meta,
 	.page-template-page-forums-sidebar main#main .entry-meta {
 		float: right;
-		width: 30%;
+		width: 25%;
 	}
 }
 

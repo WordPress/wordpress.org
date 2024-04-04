@@ -41,17 +41,17 @@
 			<?php do_action( 'wporg_compat_single_topic_sidebar_pre' ); ?>
 
 			<div>
-				<ul class="topic-info">
-					<?php bb_base_single_topic_description(); ?>
-				</ul>
+				<?php bbp_topic_tag_list( 0, array(
+					'before' => '<h4>' . __( 'Tags', 'wporg-forums' ) . '</h4><ul class="topic-tags"><li class="tag">',
+					'after'  => '</li></ul>',
+					'sep'    => '</li><li class="tag">',
+				) ); ?>
 			</div>
 
 			<div>
-				<?php bbp_topic_tag_list( 0, array(
-					'before' => '<h4>' . __( 'Topic Tags', 'wporg-forums' ) . '</h4><ul class="topic-tags"><li>',
-					'after'  => '</li></ul>',
-					'sep'    => '</li><li>',
-				) ); ?>
+				<ul class="topic-info">
+					<?php bb_base_single_topic_description(); ?>
+				</ul>
 			</div>
 
 			<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) || wporg_support_current_user_can_stick( bbp_get_topic_id() ) ) : ?>
@@ -59,7 +59,7 @@
 				<div>
 					<?php bbp_topic_admin_links( array (
 						'id'     => bbp_get_topic_id(),
-						'before' => '<h4>' . __( 'Topic Admin', 'wporg-forums' ) . '</h4><ul class="topic-admin-links"><li>',
+						'before' => '<h4>' . __( 'Admin', 'wporg-forums' ) . '</h4><ul class="topic-admin-links"><li>',
 						'after'  => '</li></ul>',
 						'sep'    => '</li><li>',
 						'links'  => array()
@@ -85,20 +85,16 @@
 		<?php if ( ! bbp_is_single_user() && ! ( wporg_support_is_compat_forum() ) ) : ?>
 
 			<div>
-				<h4><?php _e( 'Views', 'wporg-forums' ); ?></h4>
-				<ul class="topic-views">
+				<h4><?php _e( 'Topics', 'wporg-forums' ); ?></h4>
 
-					<?php foreach ( bbp_get_views() as $view => $args ) :
-						if ( in_array( $view, wporg_support_get_compat_views() ) ) {
-							continue;
-						}
-						?>
-
-						<li><a class="bbp-view-title" href="<?php bbp_view_url( $view ); ?>"><?php bbp_view_title( $view ); ?></a></li>
-
-					<?php endforeach; ?>
-
-				</ul>
+				<?php echo do_blocks(
+					sprintf(
+						'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"topic-views is-style-cards-grid","layout":{"type":"grid"},"fontSize":"small"} -->
+						<div class="topic-views wp-block-group is-style-cards-grid">%s</div>
+						<!-- /wp:group -->',
+						wporg_support_get_sidebar_topics()
+					)
+				); ?>
 			</div>
 
 		<?php endif; ?>
@@ -108,8 +104,8 @@
 			<div>
 				<h4><?php _e( 'Feeds', 'wporg-forums' ); ?></h4>
 				<ul class="forum-feeds">
-					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/"><?php _e( 'All Recent Posts', 'wporg-forums' ); ?></a></li>
-					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/"><?php _e( 'All Recent Topics', 'wporg-forums' ); ?></a></li>
+					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/"><?php _e( 'RSS Recent Posts', 'wporg-forums' ); ?></a></li>
+					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/"><?php _e( 'RSS Recent Topics', 'wporg-forums' ); ?></a></li>
 				</ul>
 			</div>
 

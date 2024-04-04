@@ -293,12 +293,26 @@ body:not(.trac):not(.home-page) #main {
 		ul {
 			margin-bottom: 0;
 			padding-left: unset;
+
+			&.topic-tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: var(--wp--preset--spacing--10);
+			}
 		}
 
-		ul > li {
-			font-size: var(--wp--preset--font-size--small);
+		ul:not(.topic-tags) > li {
+			font-size: var(--wp--preset--font-size--normal);
 			border-top: 1px solid var(--wp--custom--color--border);
-			padding: 0.5rem 0;
+			padding: var(--wp--preset--spacing--10) 0;
+
+			&:first-child {
+				border-top: none;
+			}
+
+			&:last-child {
+				border-bottom: none;
+			}
 		}
 	}
 
@@ -312,6 +326,12 @@ body:not(.trac):not(.home-page) #main {
 		&:hover {
 			text-decoration: underline;
 		}
+	}
+
+	h4 {
+		font-weight: 400;
+		font-size: var(--wp--preset--font-size--normal);
+		margin-bottom: var(--wp--preset--spacing--10);
 	}
 }
 

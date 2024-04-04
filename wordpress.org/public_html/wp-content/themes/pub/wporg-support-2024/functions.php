@@ -456,7 +456,7 @@ function wporg_support_get_forums_list() {
 }
 
 /**
- * Display an ordered list of bbPress views
+ * Display a list of bbPress views for landing pages.
  */
 function wporg_support_get_views() {
 	$views = array(
@@ -474,6 +474,26 @@ function wporg_support_get_views() {
 		}
 
 		$output .= sprintf( '<a class="wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s"><h3 class="wp-block-heading has-inter-font-family has-normal-font-size">%s</h3></a>',
+			esc_url( bbp_get_view_url( $view ) ),
+			bbp_get_view_title( $view )
+		);
+	}
+
+	return $output;
+}
+
+/**
+ * Display a list of bbPress views for the sidebar.
+ */
+function wporg_support_get_sidebar_topics() {
+	$output = '';
+
+	foreach ( bbp_get_views() as $view => $args ) {
+		if ( in_array( $view, wporg_support_get_compat_views() ) ) {
+			continue;
+		}
+
+		$output .= sprintf( '<a class="bbp-view-title wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s"><h5 class="wp-block-heading has-inter-font-family has-small-font-size" style="font-weight:700;margin-bottom:0">%s</h5></a>',
 			esc_url( bbp_get_view_url( $view ) ),
 			bbp_get_view_title( $view )
 		);
