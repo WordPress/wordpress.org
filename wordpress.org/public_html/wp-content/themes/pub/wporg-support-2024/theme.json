@@ -8,6 +8,11 @@
 					"slug": "purple-1",
 					"color": "#7a00df",
 					"name": "Purple 1"
+				},
+				{
+					"slug": "light-grey-3",
+					"color": "#fbfbfb",
+					"name": "Light Grey 3"
 				}
 			]
 		},
@@ -21,11 +26,11 @@
 			},
 			"color": {
 				"border": "var(--wp--preset--color--light-grey-1)",
-				"moderator": "#33b4ce",
-				"plugin-author": "#f06723",
-				"theme-author": "#4e3288",
-				"thread-starter": "#43cc99",
-				"thread-reporter": "#ff4141"
+				"moderator": "var(--wp--preset--color--blueberry-1)",
+				"plugin-author": "var(--wp--preset--color--pomegrade-1)",
+				"theme-author": "var(--wp--preset--color--vivid-purple)",
+				"thread-starter": "var(--wp--preset--color--acid-green-2)",
+				"thread-reporter": "var(--wp--preset--color--lemon-1)"
 			},
 			"heading": {
 				"typography": {

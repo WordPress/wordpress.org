@@ -105,6 +105,14 @@ $paginationBreakPoint: "600px";
 			background: #f49797;
 		}
 
+		.bbp-topic-content,
+		.bbp-reply-content {
+
+			p:last-child {
+				margin-bottom: var(--wp--preset--spacing--20);
+			}
+		}
+
 		.bbp-body {
 
 			.bbp-topic-freshness,
@@ -188,14 +196,12 @@ $paginationBreakPoint: "600px";
 			height: 50px;
 			max-width: 50px;
 			max-height: 50px;
-			margin: 0;
-			margin-right: 10px;
-			margin-left: -8.75%;
+			margin: 0 10px var(--wp--preset--spacing--20) 0;
 		}
 
 		div.bbp-topic-author img.avatar {
-			margin-left: -15%;
-			margin-top: -6px;
+			margin-left: 0;
+			margin-top: 0;
 			width: 80px;
 			height: 80px;
 			max-width: 80px;
@@ -207,11 +213,6 @@ $paginationBreakPoint: "600px";
 			div.bbp-reply-author img.avatar,
 			div.bbp-topic-author img.avatar {
 				position: relative;
-				margin: 6px 1rem 2rem 0;
-			}
-
-			div.bbp-topic-content {
-				clear: left;
 			}
 		}
 
@@ -229,27 +230,19 @@ $paginationBreakPoint: "600px";
 			float: none;
 			text-align: left;
 			width: 100%;
-			margin: 1rem 0 2rem;
-			padding-left: 8%;
-
-			@media screen and ( max-width: 568px ) {
-				margin-left: 1rem;
-				padding-left: 0;
-			}
+			margin: 0 0 var(--wp--preset--spacing--20);
+			padding-left: 0;
 
 			@media screen and ( max-width: 480px ) {
 				min-height: auto;
 				border-bottom: 0;
+				position: unset;
 			}
 		}
 
 		.bbp-user-replies-created div.bbp-reply-author,
 		.bbp-user-replies-created div.bbp-topic-author {
-			padding-left: 1.5rem;
-
-			@media screen and (max-width: 480px) {
-				padding-left: 0;
-			}
+			padding-left: var(--wp--preset--spacing--20);
 		}
 
 		.bbp-author-title {
@@ -278,25 +271,25 @@ $paginationBreakPoint: "600px";
 		div.topic,
 		div.reply,
 		div.reported_topics {
-			padding: 1.5rem 1.5rem 1.5rem 0;
+			padding: var(--wp--preset--spacing--20);
+		}
+
+		div.topic,
+		div.reply {
+
+			&.author-has-badge,
+			&.topic-author,
+			&.by-moderator {
+				padding-top: 60px;
+			}
 		}
 
 		div.bbp-reply-content,
 		div.bbp-topic-content {
 			padding: 0;
-			margin: 0 0 0 8%;
-
-			@media only screen and (max-width: 1040px) {
-				clear: left;
-			}
-
-			@media screen and (max-width: 568px) {
-				margin-left: 1rem;
-			}
-
-			@media screen and ( max-width: 480px ) {
-				margin-bottom: 5%;
-			}
+			margin-left: 0;
+			clear: left;
+			margin-top: var(--wp--preset--spacing--20);
 		}
 
 		.bbp-user-replies-created div.bbp-reply-content,
@@ -331,7 +324,7 @@ $paginationBreakPoint: "600px";
 			position: absolute;
 			bottom: 0;
 			right: 0;
-			background: #fbfbfb;
+			background: var(--wp--preset--color--light-grey-3);
 			padding: 3px 10px;
 
 			@media screen and ( max-width: 480px ) {
@@ -807,6 +800,21 @@ $paginationBreakPoint: "600px";
 	}
 }
 
+.topic-resolved-indicator {
+	background-color: var(--wp--preset--color--vivid-green-cyan);
+	top: var(--wp--preset--spacing--20);
+	border-radius: 2px;
+
+	@media screen and (max-width: 480px) {
+		top: -1px;
+		right: -1px;
+		border-top-left-radius: 0;
+		border-bottom-right-radius: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+	}
+}
+
 select {
 	-webkit-appearance: menulist; // Get those arrows back into the select box.
 }
@@ -976,31 +984,56 @@ body.single-topic:not(body.topic-edit) {
 				margin-bottom: 15px;
 			}
 
-			ul.bbp-lead-topic li.bbp-body {
+			div.bbp-pagination .bbp-pagination-count {
+				margin-bottom: 0;
+			}
+
+			ul.bbp-replies {
+				border-top: 1px solid var(--wp--custom--color--border);
+				margin-top: var(--wp--preset--spacing--30);
+				padding-top: var(--wp--preset--spacing--30);
+			}
+
+			ul.bbp-lead-topic li.bbp-body,
+			div.reply.status-publish {
 				border: 1px solid var(--wp--custom--color--border);
-				border-top: none;
+				border-radius: 2px;
+			}
+
+			ul.bbp-lead-topic li.bbp-body div.topic,
+			div.reply.status-publish {
+				background: var(--wp--preset--color--light-grey-3);
 			}
 
 			ul.bbp-lead-topic li.bbp-body div.topic {
-				background: #fbfbfb;
+
+				&.status-closed,
+				&.sticky,
+				&.super-sticky {
+					padding-top: var(--wp--preset--spacing--30);
+				}
+
+				&.author-has-badge {
+					padding-top: 80px;
+				}
 			}
 
 			div.reply.status-publish {
-				padding-right: 0;
 				scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
+				margin-bottom: var(--wp--preset--spacing--30);
 			}
 
-			div.even:not(.topic),
+			div.even:not(.topic):not(.reply),
 			ul.even,
-			div.odd,
+			div.odd:not(.reply),
 			ul.odd {
-				background: #fff;
+				background: var(--wp--preset--color--white);
 				border-top: 2px solid var(--wp--custom--color--border);
 			}
 
 			// Ratings
 			.wporg-ratings {
-				background-color: #fbfbfb;
+				background-color: var(--wp--preset--color--light-grey-3);
 				border: 1px solid var(--wp--custom--color--border);
 				border-top: none;
 				border-bottom: none;
@@ -1027,13 +1060,9 @@ body.single-topic:not(body.topic-edit) {
 					> .topic-indicator {
 						display: block;
 						position: absolute;
-						top: -32px;
-						left: -2px;
+						top: -1px;
+						left: -1px;
 						width: 30px;
-
-						@media screen and (max-width: 568px) {
-							top: -18px;
-						}
 					}
 				}
 
@@ -1047,29 +1076,20 @@ body.single-topic:not(body.topic-edit) {
 					padding-top: 3px;
 					width: 30px;
 					height: 25px;
-					border-radius: 0 3px 3px 0;
+					border-radius: 0 0 3px 0;
 				}
 
 				&.status-closed .dashicons-admin-post,
 				&.status-closed .dashicons-lock {
-					background: #bbb;
+					background: var(--wp--preset--color--charcoal-5);
 				}
 			}
 		}
 
 		header {
-			background: #fbfbfb;
-			border: 1px solid var(--wp--custom--color--border);
-			border-bottom: none;
-			padding: var(--wp--preset--spacing--20) 2rem var(--wp--preset--spacing--20) 8%;
-
-			h1 {
-				margin-bottom: 0;
-			}
-
-			@media screen and (max-width: 568px) {
-				padding-left: 1rem;
-			}
+			background: unset;
+			border: unset;
+			padding: unset;
 		}
 	}
 

@@ -8,29 +8,16 @@
 
 .author-badge {
 	position: absolute;
-	top: 15px;
-	left: 0;
+	top: var(--wp--preset--spacing--20);
+	left: var(--wp--preset--spacing--20);
 	padding: 2px 6px;
 	color: #fff;
 	font-size: 11px;
 	border-radius: var(--wp--custom--button--border--radius);
 
-	.bbp-topic-author & {
-		top: 2px;
+	.topic-indicator + .bbp-topic-author & {
+		top: 40px;
 	}
-
-	@media screen and ( max-width: 568px ) {
-
-		.topic-indicator + .bbp-topic-author & {
-			top: 12px;
-		}
-	}
-}
-
-.reply.author-has-badge,
-.reply.topic-author,
-.reply.by-moderator {
-	padding-top: 40px !important;
 }
 
 .author-badge-moderator {
@@ -39,6 +26,7 @@
 
 .author-badge-thread-starter {
 	background-color: var(--wp--custom--color--thread-starter);
+	color: var(--wp--preset--color--charcoal-1);
 }
 
 .author-badge-plugin {
@@ -51,6 +39,7 @@
 
 .author-badge-reporter {
 	background-color: var(--wp--custom--color--thread-reporter);
+	color: var(--wp--preset--color--charcoal-1);
 	right: -2px;
 	left: initial;
 	border-radius: 2px 0 0 2px;
@@ -61,51 +50,8 @@
 .bbp-user-replies-created,
 .bbp-user-reports-submitted {
 
-	div.author-has-badge {
-		box-shadow: none;
-		border-left-style: solid;
-		border-left-width: 3px;
-	}
-
-	// .by-moderator {
-	// 	border-left-color: var(--wp--custom--color--moderator);
-	// }
-
-	// .by-plugin-author,
-	// .by-plugin-contributor,
-	// .by-plugin-support-rep {
-	// 	border-left-color: var(--wp--custom--color--plugin-author);
-	// }
-
-	// .by-theme-author,
-	// .by-theme-contributor,
-	// .by-theme-support-rep {
-	// 	border-left-color: var(--wp--custom--color--theme-author);
-	// }
-
-	.author-badge {
-		left: 0;
-	}
-
 	.author-badge-reporter {
 		left: initial;
 		right: 0;
-	}
-}
-
-@media screen and ( max-width: 480px ) {
-
-	.author-badge,
-	.author-badge-reporter {
-		top: -28px;
-		left: -18px;
-
-		.bbp-topic-author & {
-			top: -38px;
-		}
-
-		.topic-indicator + .bbp-topic-author & {
-			top: -28px;
-		}
 	}
 }
