@@ -64,7 +64,7 @@
 	.tabs {
 		list-style: none;
 		margin:0;
-		border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );;
+		border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );
 
 		li {
 			display: inline-block;
@@ -79,9 +79,10 @@
 				padding: 0.64rem 1.25rem;
 				background: white;
 				text-decoration: none;
+				color: var(--wp--preset--color--charcoal-1);
 
 				&.active, &:hover {
-					background: var( --wp--preset--color--light-grey-1 );
+					background: var(--wp--preset--color--light-grey-2) !important;
 				}
 			}
 
@@ -91,7 +92,7 @@
 			}
 		}
 
-		@media screen and (max-width:34em) {
+		@media screen and (max-width:38em) {
 			border-top: 1px solid var( --wp--preset--color--light-grey-1 );
 
 			li {
@@ -206,7 +207,7 @@
 		padding-bottom: 1px;
 		background: #fff;
 
-		@media screen and (max-width:34em) {
+		@media screen and (max-width:38em) {
 			&.active, &:hover {
 				padding-bottom: 1px !important;
 			}
@@ -216,14 +217,22 @@
 	span#section-links {
 		display: flex;
 		flex-flow: row wrap;
-		margin-top: var( --wp--style--block-gap );
+		margin-top: var( --wp--preset--spacing--30 );
 
 		.tabs {
 			flex: 1 1 auto;
 			padding-left: 0;
+
+			@media screen and (max-width:38em) {
+				border: 1px solid var( --wp--preset--color--light-grey-1 ) !important;
+
+				li {
+					border: none !important;
+				}
+			}
 		}
 
-		@media screen and (max-width:34em) {
+		@media screen and (max-width:38em) {
 			display: block;
 		}
 	}
@@ -249,7 +258,7 @@
 			padding-right: 20px;
 		}
 
-		@media screen and (max-width:34em) {
+		@media screen and (max-width:38em) {
 			border-bottom: 0;
 			display: block;
 			margin-left: 20px;
