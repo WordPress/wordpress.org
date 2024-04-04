@@ -88,16 +88,6 @@ function the_plugin_favorite_button( $post = null ) {
 		</a>
 	</div>
 	<?php
-		wp_add_inline_script(
-			'wporg-plugins-faq',
-			"jQuery( '.plugin-favorite-heart' )
-				.on( 'click touchstart animationend', function () {
-					jQuery( this ).toggleClass( 'is-animating' );
-				} )
-				.on( 'click', function () {
-					jQuery( this ).toggleClass( 'favorited' );
-				} );"
-		);
 }
 
 /**
