@@ -7,14 +7,14 @@ $post = get_post();
 // Simulates wporg/link-wrapper block until this is migrated to a block, or it supports href=permalink.
 do_blocks( '<!-- wp:wporg/link-wrapper /-->' ); // Import the styles
 ?>
-<a class="plugin-card wp-block-wporg-link-wrapper is-style-no-underline" href="<?php the_permalink(); ?>">
+<div class="plugin-card wp-block-wporg-link-wrapper is-style-no-underline">
 	<div class="entry">
 		<div class="entry-thumbnail">
 			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
 		</div>
 
 		<header class="entry-header">
-			<?php the_title( '<h3 class="entry-title">', '</h3>' ); ?>
+			<h3 class="entry-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
 		</header><!-- .entry-header -->
 
 		<?php echo wp_kses_post( Template::get_star_rating( $post, false ) ); ?>
@@ -43,4 +43,4 @@ do_blocks( '<!-- wp:wporg/link-wrapper /-->' ); // Import the styles
 			</span>
 		<?php endif; ?>
 	</footer>
-</a>
+</div>

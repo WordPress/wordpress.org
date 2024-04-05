@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",(function(){var e=document.querySelectorAll(".plugin-cards li");e&&e.forEach((function(e){e.addEventListener("click",(function(){if(""===window.getSelection().toString()){var t=e.querySelector("a");if(t){var n=t.getAttribute("href");window.location.href=n}}}))}))}));

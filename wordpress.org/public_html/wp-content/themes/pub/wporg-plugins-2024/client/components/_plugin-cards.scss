@@ -1,3 +1,7 @@
+.plugin-cards {
+	cursor: pointer;
+}
+
 @media screen and ( max-width: $ms-breakpoint ) {
 	.plugin-cards .is-style-cards-grid {
 		grid-template-columns: 100%;
