@@ -3807,12 +3807,10 @@ body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.odd {
 	border-top: 2px solid var(--wp--custom--color--border);
 }
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .wporg-ratings {
-	background-color: var(--wp--preset--color--light-grey-3);
-	border: 1px solid var(--wp--custom--color--border);
-	border-top: none;
-	border-bottom: none;
-	padding-right: 10%;
-	padding-top: 0.5em;
+	margin: var(--wp--preset--spacing--20) 0;
+}
+body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .wporg-ratings [class*=dashicons-star-] {
+	color: var(--wp--preset--color--charcoal-2);
 }
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic {
 	position: relative;
@@ -3937,6 +3935,10 @@ div.bbp-breadcrumb p {
 /*--------------------------------------------------------------
 # Plugin / Theme specific support pages
 --------------------------------------------------------------*/
+.bbp-topics .wporg-ratings [class*=dashicons-star-] {
+	color: var(--wp--preset--color--charcoal-2);
+}
+
 .bbp-view .review-ratings {
 	margin-bottom: 1rem;
 	padding-bottom: 10px;
@@ -3956,6 +3958,9 @@ div.bbp-breadcrumb p {
 	padding-bottom: 5px;
 	padding-top: 5px;
 }
+.bbp-view .review-ratings .col-3 .counter-bar {
+	background-color: var(--wp--preset--color--charcoal-2) !important;
+}
 .bbp-view .review-ratings .col-5 {
 	margin: 0 0 10px 5%;
 	width: 60%;
@@ -3968,6 +3973,9 @@ div.bbp-breadcrumb p {
 .bbp-view .review-ratings .col-5 .wporg-ratings {
 	display: inline-block;
 	margin-left: 1rem;
+}
+.bbp-view .review-ratings .col-5 .wporg-ratings [class*=dashicons-star-] {
+	color: var(--wp--preset--color--charcoal-2);
 }
 .bbp-view .review-ratings .col-5 .reviews-submit-link {
 	margin-top: 1rem;

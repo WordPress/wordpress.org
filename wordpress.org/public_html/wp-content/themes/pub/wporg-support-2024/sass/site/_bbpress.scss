@@ -1042,12 +1042,11 @@ body.single-topic:not(body.topic-edit) {
 
 			// Ratings
 			.wporg-ratings {
-				background-color: var(--wp--preset--color--light-grey-3);
-				border: 1px solid var(--wp--custom--color--border);
-				border-top: none;
-				border-bottom: none;
-				padding-left: 10%;
-				padding-top: 0.5em;
+				margin: var(--wp--preset--spacing--20) 0;
+
+				[class*="dashicons-star-"] {
+					color: var(--wp--preset--color--charcoal-2);
+				}
 			}
 
 			// Show dashicon if topic is sticky or closed
@@ -1228,6 +1227,16 @@ div.bbp-breadcrumb {
 # Plugin / Theme specific support pages
 --------------------------------------------------------------*/
 
+.bbp-topics {
+
+	.wporg-ratings {
+
+		[class*="dashicons-star-"] {
+			color: var(--wp--preset--color--charcoal-2);
+		}
+	}
+}
+
 .bbp-view { // This is my hook for both the plugin/theme support review page and the actual plugin/theme support forum
 	// Review page
 	.review-ratings {
@@ -1251,6 +1260,10 @@ div.bbp-breadcrumb {
 				padding-bottom: 5px;
 				padding-top: 5px;
 			}
+
+			.counter-bar {
+				background-color: var(--wp--preset--color--charcoal-2) !important;
+			}
 		}
 
 		.col-5 {
@@ -1268,6 +1281,10 @@ div.bbp-breadcrumb {
 			.wporg-ratings {
 				display: inline-block;
 				margin-right: ms(0);
+
+				[class*="dashicons-star-"] {
+					color: var(--wp--preset--color--charcoal-2);
+				}
 			}
 
 			.reviews-submit-link {
