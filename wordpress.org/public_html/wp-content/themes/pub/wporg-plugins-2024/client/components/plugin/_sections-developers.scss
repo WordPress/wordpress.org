@@ -1,7 +1,8 @@
 .plugin-developers .contributors-list {
 	li {
-		vertical-align: top;
 		padding-bottom: var(--wp--style--block-gap);
+		display: flex;
+		align-items: center;
 	}
 
 	@media screen and (min-width: 500px) {

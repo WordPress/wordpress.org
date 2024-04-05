@@ -7,6 +7,11 @@
 			"wideSize": "1160px"
 		},
 		"custom": {
+			"form": {
+				"color": {
+					"background": "var(--wp--preset--color--light-grey-2)"
+				}
+			},
 			"button":{
 				"spacing": {
 					"padding":{
