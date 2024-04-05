@@ -36,7 +36,7 @@ module.exports = function ( grunt ) {
 				files: ( function () {
 					var files = {};
 
-					[ 'settings', 'tools', 'generic', 'base', 'objects', 'components', 'trumps' ].forEach(
+					[ 'settings', 'tools', 'objects', 'components' ].forEach(
 						function ( component ) {
 							var paths = [
 								'client/styles/' + component + '/**/*.scss',

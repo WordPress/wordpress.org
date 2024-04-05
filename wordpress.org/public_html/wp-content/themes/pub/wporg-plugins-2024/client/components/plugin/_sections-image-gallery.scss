@@ -100,8 +100,8 @@ $ig-background-black: rgba(0, 0, 0, .4) !default;
 	}
 
 	.image-gallery-description {
-		background: #f5f5f5;
-		color: $color__text-main;
+		background: var(--wp--preset--color--light-grey-2);
+		color: var(--wp--preset--color--charcoal-1);
 		line-height: 1.5;
 		padding: 10px 20px;
 		white-space: normal;
