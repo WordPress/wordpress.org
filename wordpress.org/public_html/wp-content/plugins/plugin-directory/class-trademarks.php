@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 use WP_Post;
 use WP_User;
@@ -119,7 +120,7 @@ class Trademarks {
 		'wordpress',
 		'wordpess',
 		'wpress',
-		'wp-',
+		'wp-', // Can be used, but often abused.
 		'wp-mail-smtp-',
 		'yandex-',
 		'yahoo-',
@@ -251,7 +252,11 @@ class Trademarks {
 		// Check portmanteaus.
 		foreach ( $portmanteaus as $portmanteau ) {
 			if ( str_starts_with( $plugin_slug, $portmanteau ) ) {
-				$has_trademarked_slug[] = $portmanteau . '-'; // State that the portmanteau cannnot start the text.
+				// Check there isn't a longer matching trademark already flagged.
+				// For example, 'woo' should not flag if 'woocommerce' is already flagged.
+				if ( ! preg_grep( '!^' . preg_quote( $portmanteau, '!' ) . '!', $has_trademarked_slug ) ) {
+					$has_trademarked_slug[] = $portmanteau . '-'; // State that the portmanteau cannnot start the text.
+				}
 			}
 		}
 
@@ -269,7 +274,7 @@ class Trademarks {
 		$user = $user ?: wp_get_current_user();
 
 		// The users email domain.
-		if ( $user && $user->exists() ) {
+		if ( $user && $user instanceof WP_User && $user->exists() ) {
 			$exceptions[] = explode( '@', $user->user_email, 2 )[1];
 		}
 
@@ -279,10 +284,21 @@ class Trademarks {
 	/**
 	 * Get the exceptions allowed for a plugin.
 	 *
-	 * @param string $plugin_slug The plugin slug.
+	 * @param WP_Post $plugin The plugin object.
 	 * @return array
 	 */
-	public static function get_plugin_exceptions( $plugin_slug ) {
-		return [];
+	public static function get_plugin_exceptions( $post ) {
+		// Assume all of the committers (and owner) are exceptions.
+		$committers = Tools::get_plugin_committers( $post );
+
+		$committers = array_map( function( $user_login ) { return get_user_by( 'login', $user_login); }, $committers );
+		$committers[] = get_user_by( 'id', $post->post_author );
+
+		$exceptions = [];
+		foreach ( $committers as $user ) {
+			$exceptions = array_merge( $exceptions, self::get_user_exceptions( $user ) );
+		}
+
+		return array_unique( $exceptions );
 	}
 }

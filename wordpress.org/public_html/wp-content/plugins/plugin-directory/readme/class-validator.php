@@ -407,6 +407,9 @@ class Validator {
 				$cannot_contain    = array_diff( $trademarks, $cannot_start_with );
 
 				if ( $cannot_start_with ) {
+					// Trim the - off.
+					$cannot_start_with = array_map( function( $slug ) { return rtrim( $slug, '-' ); }, $cannot_start_with );
+
 					$messages[] = sprintf(
 						/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
 						_n(
