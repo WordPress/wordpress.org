@@ -243,7 +243,7 @@ $paginationBreakPoint: "600px";
 
 		.bbp-user-replies-created div.bbp-reply-author,
 		.bbp-user-replies-created div.bbp-topic-author {
-			padding-left: var(--wp--preset--spacing--20);
+			padding-left: 0;
 		}
 
 		.bbp-author-title {
@@ -288,14 +288,13 @@ $paginationBreakPoint: "600px";
 		div.bbp-reply-content,
 		div.bbp-topic-content {
 			padding: 0;
-			margin-left: 0;
 			clear: left;
-			margin-top: var(--wp--preset--spacing--20);
+			margin: var(--wp--preset--spacing--20) 0 0;
 		}
 
 		.bbp-user-replies-created div.bbp-reply-content,
 		.bbp-user-replies-created div.bbp-topic-content {
-			margin-left: 1.5rem;
+			margin-left: 0;
 		}
 
 		div.bbp-reply-content a,

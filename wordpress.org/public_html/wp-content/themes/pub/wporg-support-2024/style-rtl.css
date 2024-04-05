@@ -3162,7 +3162,7 @@ body.category #main .archive-pagination {
 }
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-reply-author,
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-topic-author {
-	padding-right: var(--wp--preset--spacing--20);
+	padding-right: 0;
 }
 .bbpress #bbpress-forums .bbp-author-title {
 	margin: 0;
@@ -3198,13 +3198,12 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums div.bbp-reply-content,
 .bbpress #bbpress-forums div.bbp-topic-content {
 	padding: 0;
-	margin-right: 0;
 	clear: right;
-	margin-top: var(--wp--preset--spacing--20);
+	margin: var(--wp--preset--spacing--20) 0 0;
 }
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-reply-content,
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-topic-content {
-	margin-right: 1.5rem;
+	margin-right: 0;
 }
 .bbpress #bbpress-forums div.bbp-reply-content a,
 .bbpress #bbpress-forums div.bbp-topic-content a {
