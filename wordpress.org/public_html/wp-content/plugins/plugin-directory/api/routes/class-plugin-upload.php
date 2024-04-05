@@ -142,16 +142,17 @@ class Plugin_Upload extends Base {
 
 		// Duplicated from Upload handler.
 		// Make sure it doesn't use a TRADEMARK protected slug.
-		if ( false !== $upload_handler->has_trademarked_slug()  ) {
+		$has_trademarked_slug = Trademarks::check_slug( $slug, wp_get_current_user() );
+		if ( $has_trademarked_slug ) {
 			$error = __( 'That plugin slug includes a restricted term.', 'wporg-plugins' );
 
-			if ( $upload_handler->has_trademarked_slug() === trim( $upload_handler->has_trademarked_slug(), '-' ) ) {
+			if ( $has_trademarked_slug === trim( $has_trademarked_slug, '-' ) ) {
 				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
 				$message = sprintf(
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
 					__( 'Your chosen plugin slug - %1$s - contains the restricted term "%2$s", which cannot be used at all in your plugin permalink nor the display name.', 'wporg-plugins' ),
 					'<code>' . $slug . '</code>',
-					trim( $upload_handler->has_trademarked_slug(), '-' )
+					'<code>' . trim( $has_trademarked_slug, '-' ) . '</code>'
 				);
 			} else {
 				// Trademarks ending in "-" indicate slug cannot BEGIN with that term.
@@ -159,7 +160,7 @@ class Plugin_Upload extends Base {
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
 					__( 'Your chosen plugin slug - %1$s - contains the restricted term "%2$s" and cannot be used to begin your permalink or display name. We disallow the use of certain terms in ways that are abused, or potentially infringe on and/or are misleading with regards to trademarks.', 'wporg-plugins' ),
 					'<code>' . $slug . '</code>',
-					trim( $upload_handler->has_trademarked_slug(), '-' )
+					'<code>' . trim( $has_trademarked_slug, '-' ) . '</code>'
 				);
 			}
 

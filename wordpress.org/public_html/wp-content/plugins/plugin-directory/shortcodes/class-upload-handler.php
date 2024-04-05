@@ -7,6 +7,7 @@ use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Trademarks;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submission_Email;
@@ -168,13 +169,12 @@ class Upload_Handler {
 
 		// Make sure it doesn't use a TRADEMARK protected slug.
 		if ( ! $updating_existing ) {
-			$has_trademarked_slug = $this->has_trademarked_slug( $this->plugin_slug );
+			$has_trademarked_slug = Trademarks::check_slug( $this->plugin_slug, wp_get_current_user() );
 		} else {
 			// If we're updating an existing plugin, we need to check the new name, but the slug may be different.
-			$has_trademarked_slug = $this->has_trademarked_slug(
-				$this->generate_plugin_slug( $this->plugin['Name'] )
-			);
+			$has_trademarked_slug = Trademarks::check( $this->plugin['Name'], wp_get_current_user() );
 		}
+
 		if ( false !== $has_trademarked_slug && ! $has_upload_token ) {
 			$error = __( 'Error: The plugin name includes a restricted term.', 'wporg-plugins' );
 
@@ -614,198 +614,6 @@ class Upload_Handler {
 		);
 
 		return in_array( $this->plugin_slug, $reserved_slugs );
-	}
-
-	/**
-	 * Whether the uploaded plugin uses a trademark in the slug.
-	 *
-	 * @return string|false The trademarked slug if found, false otherwise.
-	 */
-	public function has_trademarked_slug( $plugin_slug = false ) {
-		$plugin_slug = $plugin_slug ?: $this->plugin_slug;
-
-		$trademarked_slugs = array(
-			'adobe-',
-			'adsense-',
-			'advanced-custom-fields-',
-			'adwords-',
-			'akismet-',
-			'all-in-one-wp-migration',
-			'amazon-',
-			'android-',
-			'apple-',
-			'applenews-',
-			'applepay-',
-			'aws-',
-			'azon-',
-			'bbpress-',
-			'bing-',
-			'booking-com',
-			'bootstrap-',
-			'buddypress-',
-			'chatgpt-',
-			'chat-gpt-',
-			'cloudflare-',
-			'contact-form-7-',
-			'cpanel-',
-			'disqus-',
-			'divi-',
-			'dropbox-',
-			'easy-digital-downloads-',
-			'elementor-',
-			'envato-',
-			'fbook',
-			'facebook',
-			'fb-',
-			'fb-messenger',
-			'fedex-',
-			'feedburner',
-			'firefox-',
-			'fontawesome-',
-			'font-awesome-',
-			'ganalytics-',
-			'gberg',
-			'github-',
-			'givewp-',
-			'google-',
-			'googlebot-',
-			'googles-',
-			'gravity-form-',
-			'gravity-forms-',
-			'gravityforms-',
-			'gtmetrix-',
-			'gutenberg',
-			'guten-',
-			'hubspot-',
-			'ig-',
-			'insta-',
-			'instagram',
-			'internet-explorer-',
-			'ios-',
-			'jetpack-',
-			'macintosh-',
-			'macos-',
-			'mailchimp-',
-			'microsoft-',
-			'ninja-forms-',
-			'oculus',
-			'onlyfans-',
-			'only-fans-',
-			'opera-',
-			'paddle-',
-			'paypal-',
-			'pinterest-',
-			'plugin',
-			'skype-',
-			'stripe-',
-			'tiktok-',
-			'tik-tok-',
-			'trustpilot',
-			'twitch-',
-			'twitter-',
-			'tweet',
-			'ups-',
-			'usps-',
-			'vvhatsapp',
-			'vvcommerce',
-			'vva-',
-			'vvoo',
-			'wa-',
-			'webpush-vn',
-			'wh4tsapps',
-			'whatsapp',
-			'whats-app',
-			'watson',
-			'windows-',
-			'wocommerce',
-			'woocom-',
-			'woocommerce',  // technically ending with '-for-woocommerce' is allowed.
-			'woocomerce',
-			'woo-commerce',
-			'woo-',
-			'wo-',
-			'wordpress',
-			'wordpess',
-			'wpress',
-			'wp-',
-			'wp-mail-smtp-',
-			'yandex-',
-			'yahoo-',
-			'yoast',
-			'youtube-',
-			'you-tube-',
-		);
-
-		// Domains from which exceptions would be accepted.
-		$trademark_exceptions = array(
-			'adobe.com'             => array( 'adobe' ),
-			'automattic.com'        => array( 'akismet', 'akismet-', 'jetpack', 'jetpack-', 'wordpress', 'wp-', 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
-			'facebook.com'          => array( 'facebook', 'instagram', 'oculus', 'whatsapp' ),
-			'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
-			'trustpilot.com'        => array( 'trustpilot' ),
-			'microsoft.com'         => array( 'bing-', 'microsoft-' ),
-			'yandex-team.ru'        => array( 'yandex' ),
-			'yoast.com'             => array( 'yoast' ),
-			'opera.com'             => array( 'opera-' ),
-			'adobe.com'				=> array( 'adobe-' ),
-		);
-
-		// Trademarks that are allowed as 'for-whatever' ONLY.
-		$for_use_exceptions = array(
-			'woocommerce',
-		);
-
-		// Commonly used 'combo' names (to prevent things like 'woopress').
-		$portmanteaus = array(
-			'woo',
-		);
-
-		$has_trademarked_slug = false;
-
-		foreach ( $trademarked_slugs as $trademark ) {
-			if ( '-' === $trademark[-1] ) {
-				// Trademarks ending in "-" indicate slug cannot begin with that term.
-				if ( 0 === strpos( $plugin_slug, $trademark ) ) {
-					$has_trademarked_slug = $trademark;
-					break;
-				}
-			} elseif ( false !== strpos( $plugin_slug, $trademark ) ) {
-				// Otherwise, the term cannot appear anywhere in slug.
-				$has_trademarked_slug = $trademark;
-				break;
-			}
-		}
-
-		// check for 'for-TRADEMARK' exceptions.
-		if ( $has_trademarked_slug && in_array( $has_trademarked_slug, $for_use_exceptions ) ) {
-			$for_trademark = '-for-' . $has_trademarked_slug;
-			// At this point we might be okay, but there's one more check.
-			if ( $for_trademark === substr( $plugin_slug, -1 * strlen( $for_trademark ) ) ) {
-				// Yes the slug ENDS with 'for-TRADEMARK'.
-				$has_trademarked_slug = false;
-			}
-		}
-
-		// Check portmanteaus.
-		foreach ( $portmanteaus as $portmanteau ) {
-			if ( 0 === strpos( $plugin_slug, $portmanteau ) ) {
-				$has_trademarked_slug = $portmanteau;
-				break;
-			}
-		}
-
-		// Get the user email domain.
-		list( ,$user_email_domain ) = explode( '@', wp_get_current_user()->user_email, 2 );
-
-		// If email domain is on our list of possible exceptions, we have an extra check.
-		if ( $has_trademarked_slug && array_key_exists( $user_email_domain, $trademark_exceptions ) ) {
-			// If $has_trademarked_slug is in the array for that domain, they can use the term.
-			if ( in_array( $has_trademarked_slug, $trademark_exceptions[ $user_email_domain ] ) ) {
-				$has_trademarked_slug = false;
-			}
-		}
-
-		return $has_trademarked_slug;
 	}
 
 	/**
