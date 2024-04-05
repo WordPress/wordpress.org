@@ -5,6 +5,7 @@ use WP_Error;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Trademarks;
@@ -167,40 +168,37 @@ class Upload_Handler {
 			) );
 		}
 
-		// Make sure it doesn't use a TRADEMARK protected slug.
-		if ( ! $updating_existing ) {
+		// Make sure it doesn't use a TRADEMARK. We check the name first, and then the slug.
+		$has_trademarked_slug = Trademarks::check( $this->plugin['Name'], wp_get_current_user() );
+		$trademark_context    = $this->plugin['Name'];
+
+		if ( ! $has_trademarked_slug && ! $updating_existing ) {
+			// Check the slug on new submissions in addition to the name.
 			$has_trademarked_slug = Trademarks::check_slug( $this->plugin_slug, wp_get_current_user() );
-		} else {
-			// If we're updating an existing plugin, we need to check the new name, but the slug may be different.
-			$has_trademarked_slug = Trademarks::check( $this->plugin['Name'], wp_get_current_user() );
+			$trademark_context    = $this->plugin_slug;
 		}
 
-		if ( false !== $has_trademarked_slug && ! $has_upload_token ) {
-			$error = __( 'Error: The plugin name includes a restricted term.', 'wporg-plugins' );
+		if ( $has_trademarked_slug && ! $has_upload_token ) {
+			$error = Readme_Validator::instance()->translate_code_to_message(
+				'trademarked_slug',
+				[
+					'trademark' => $has_trademarked_slug,
+					'context'   => $trademark_context,
+				]
+			);
 
-			if ( $has_trademarked_slug === trim( $has_trademarked_slug, '-' ) ) {
-				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
-				$message = sprintf(
-					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used at all in your plugin permalink nor the display name. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. Do not attempt to work around this by removing letters (i.e. WordPess) or using numbers (4 instead of A). Those are seen as intentional actions to avoid our restrictions, and are not permitted. If you feel this is in error, such as you legally own the trademark for a term, please email us at %4$s and explain your situation.', 'wporg-plugins' ),
-					'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
-					trim( $has_trademarked_slug, '-' ),
-					'<code>Plugin Name:</code>',
-					'<code>plugins@wordpress.org</code>'
-				);
-			} else {
-				// Trademarks ending in "-" indicate slug cannot BEGIN with that term.
-				$message = sprintf(
-					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used to begin your permalink or display name. We disallow the use of certain terms in ways that are abused, or potentially infringe on and/or are misleading with regards to trademarks. In order to proceed with this submission, you must change the %3$s line in your main plugin file and readme to end with  "-%2$s" instead. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, such as you legally own the trademark for the term, please email us at %4$s and explain your situation.', 'wporg-plugins' ),
-					'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
-					trim( $has_trademarked_slug, '-' ),
-					'<code>Plugin Name:</code>',
-					'<code>plugins@wordpress.org</code>'
-				);
-			}
+			$to_proceed_text = sprintf(
+				/* translators: 1: Plugin Name header */
+				__( 'To proceed with this submission you must change your %1$s line in both your main plugin file and readme to abide by these requirements. Once you\'ve finished, you may upload the plugin again. Do not attempt to work around this by removing letters (i.e. WordPess) or using numbers (4 instead of A). Those are seen as intentional actions to avoid our restrictions, and are not permitted.', 'wporg-plugins' ),
+				'<code>Plugin Name:</code>'
+			);
+			$in_error_text   = sprintf(
+				/* translators: plugins@wordpress.org */
+				__( 'If you feel this is in error, such as you legally own the trademark for the term, please email us at %1$s and explain your situation.', 'wporg-plugins' ),
+				'plugins@wordpress.org'
+			);
 
-			return new WP_Error( 'trademarked_name', $error . ' ' . $message );
+			return new WP_Error( 'trademarked_name', "{$error} {$to_proceed_text} {$in_error_text}" );
 		}
 
 		if ( ! $plugin_post ) {

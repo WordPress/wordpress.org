@@ -5,6 +5,8 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
+use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
+use WordPressdotorg\Plugin_Directory\Trademarks;
 use WP_REST_Server;
 use WP_Error;
 
@@ -140,31 +142,19 @@ class Plugin_Upload extends Base {
 			return new WP_Error( 'reserved_slug', __( 'That slug is already in use.', 'wporg-plugins' ) );
 		}
 
-		// Duplicated from Upload handler.
 		// Make sure it doesn't use a TRADEMARK protected slug.
 		$has_trademarked_slug = Trademarks::check_slug( $slug, wp_get_current_user() );
 		if ( $has_trademarked_slug ) {
-			$error = __( 'That plugin slug includes a restricted term.', 'wporg-plugins' );
-
-			if ( $has_trademarked_slug === trim( $has_trademarked_slug, '-' ) ) {
-				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
-				$message = sprintf(
-					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin slug - %1$s - contains the restricted term "%2$s", which cannot be used at all in your plugin permalink nor the display name.', 'wporg-plugins' ),
-					'<code>' . $slug . '</code>',
-					'<code>' . trim( $has_trademarked_slug, '-' ) . '</code>'
-				);
-			} else {
-				// Trademarks ending in "-" indicate slug cannot BEGIN with that term.
-				$message = sprintf(
-					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin slug - %1$s - contains the restricted term "%2$s" and cannot be used to begin your permalink or display name. We disallow the use of certain terms in ways that are abused, or potentially infringe on and/or are misleading with regards to trademarks.', 'wporg-plugins' ),
-					'<code>' . $slug . '</code>',
-					'<code>' . trim( $has_trademarked_slug, '-' ) . '</code>'
-				);
-			}
-
-			return new WP_Error( 'trademarked_slug', $error . ' ' . $message );
+			return new WP_Error(
+				'trademarked_slug',
+				Readme_Validator::instance()->translate_code_to_message(
+					'trademarked_slug',
+					[
+						'trademark' => $has_trademarked_slug,
+						'context'   => $slug
+					]
+				)
+			);
 		}
 
 		// Not ideal, but it's better than nothing.

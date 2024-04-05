@@ -170,7 +170,7 @@ class Trademarks {
 	 *
 	 * @param string $check                     The plugin name to check.
 	 * @param array|WP_User|WP_Post $exceptions An array of exceptions to the trademark checks, or a WP_User or WP_Post object to fetch their exceptions.
-	 * @return string|false The trademarked slug if found, false otherwise.
+	 * @return array|false The trademarked slug if found, false otherwise.
 	 */
 	public static function check( $check, $exceptions = [] ) {
 		// This logic is from Upload_Handler::generate_plugin_slug()
@@ -187,7 +187,7 @@ class Trademarks {
 	 *
 	 * @param string                $plugin_slug The slug-like-text to check.
 	 * @param array|WP_User|WP_Post $exceptions  An array of exceptions to the trademark checks, or a WP_User or WP_Post object to fetch their exceptions.
-	 * @return string|false The trademarked slug if found, false otherwise.
+	 * @return array|false The trademarked slug if found, false otherwise.
 	 */
 	public static function check_slug( $plugin_slug, $exceptions = [] ) {
 		if ( $exceptions instanceof WP_User ) {
@@ -219,14 +219,13 @@ class Trademarks {
 			$portmanteaus      = array_diff( $portmanteaus, $trademark_exceptions[ $exception ] );
 		}
 
-		$has_trademarked_slug = false;
+		$has_trademarked_slug = [];
 
 		foreach ( $trademarked_slugs as $trademark ) {
 			if ( str_ends_with( $trademark, '-' ) ) {
 				// Trademarks ending in "-" indicate slug cannot begin with that term.
 				if ( str_starts_with( $plugin_slug, $trademark ) ) {
-					$has_trademarked_slug = $trademark;
-					break;
+					$has_trademarked_slug[] = $trademark;
 				}
 
 			} elseif (
@@ -245,20 +244,18 @@ class Trademarks {
 				}
 
 				// The term cannot exist anywhere in the plugin slug, and it's not a for-use exception.
-				$has_trademarked_slug = $trademark;
-				break;
+				$has_trademarked_slug[] = $trademark;
 			}
 		}
 
 		// Check portmanteaus.
 		foreach ( $portmanteaus as $portmanteau ) {
 			if ( str_starts_with( $plugin_slug, $portmanteau ) ) {
-				$has_trademarked_slug = $portmanteau;
-				break;
+				$has_trademarked_slug[] = $portmanteau . '-'; // State that the portmanteau cannnot start the text.
 			}
 		}
 
-		return $has_trademarked_slug;
+		return array_unique( $has_trademarked_slug ) ?: false;
 	}
 
 	/**
