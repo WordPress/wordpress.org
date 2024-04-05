@@ -18,5 +18,5 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @see https://developer.wordpress.org/reference/functions/register_block_type/
  */
 function init() {
-	register_block_type( __DIR__ . '/../../../js/build/blocks/plugin-card' );
+	register_block_type( __DIR__ . '/../../../build/blocks/plugin-card' );
 }

@@ -7,10 +7,11 @@
   "main": "index.php",
   "scripts": {
     "watch:css": "grunt watch",
-    "watch:js": "wp-scripts start --webpack-copy-php",
+    "watch:js": "wp-scripts start",
     "watch": "concurrently \"npm run watch:js\" \"npm run watch:css\"",
     "build:css": "grunt build",
-    "build:js": "wp-scripts build --webpack-copy-php",
+    "build:old:js": "wp-scripts build client/theme.js --webpack-src-dir=client --output-path=js/build",
+    "build:js": "wp-scripts build",
     "build": "npm run build:css && npm run build:js",
     "format:js": "wp-scripts format client",
     "lint:js": "wp-scripts lint-js client",

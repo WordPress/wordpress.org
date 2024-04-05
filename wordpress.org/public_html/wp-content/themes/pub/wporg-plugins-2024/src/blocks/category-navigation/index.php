@@ -18,5 +18,5 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @see https://developer.wordpress.org/reference/functions/register_block_type/
  */
 function init() {
-	register_block_type( __DIR__ . '/../../../js/build/blocks/category-navigation' );
+	register_block_type( __DIR__ . '/../../../build/blocks/category-navigation' );
 }
