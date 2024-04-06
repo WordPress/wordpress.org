@@ -277,7 +277,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		postPreviewHacks: function() {
 			// Automatically preview images.
 			$('li.trac-field-attachment').each( function() {
-				var href, el, image, appendTo,
+				var href, el, image, appendTo, alt,
 					li = $(this);
 				if ( li.parent().parent().find( '.trac-image-preview' ).length ) {
 					return;
@@ -288,12 +288,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					return;
 				}
 				appendTo = li.parent().parent(); // div.change
+				alt = li.parent().parent().find( '.comment' ).text();
+				if ( alt.length < 1 ) {
+					// Use attachment filename if it has no description.
+					alt = el.find( '.trac-attachment-name' ).text();
+				}
 				image = new Image();
 				image.src = href;
 				image.onload = function() {
 					$('<img />')
 						.attr({
 							src: href,
+							alt: alt.trim(),
 							width: image.width,
 							height: image.height,
 							class: 'trac-image-preview'
