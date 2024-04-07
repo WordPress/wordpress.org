@@ -51,7 +51,7 @@ the_post();
 						<li>
 							<?php
 							/* translators: 1: URL to MySQL; 2: MySQL Version; 3: URL to MariaDB; 4: MariaDB Version */
-							printf( wp_kses_post( __( '<a href="%1$s">MySQL</a> version %2$s or greater <em>OR</em> <a href="%3$s">MariaDB</a> version %4$s or greater.', 'wporg' ) ), 'https://www.mysql.com/', '5.7', 'https://mariadb.org/', '10.3' );
+							printf( wp_kses_post( __( '<a href="%1$s">MySQL</a> version %2$s or greater <em>OR</em> <a href="%3$s">MariaDB</a> version %4$s or greater.', 'wporg' ) ), 'https://www.mysql.com/', '8.0', 'https://mariadb.org/', '10.4' );
 							?>
 						</li>
 						<li>
@@ -82,7 +82,7 @@ the_post();
 							/* translators: 1: PHP Version including; 2: MySQL Version */
 							wp_kses_post( __( 'Note: If you are in a legacy environment where you only have older PHP or MySQL versions, WordPress also works with PHP %1$s+ and MySQL %2$s+, but these versions have reached official End Of Life and as such <strong>may expose your site to security vulnerabilities</strong>.', 'wporg' ) ),
 							MINIMUM_PHP,
-							'5.0'
+							'5.5.5'
 						);
 						?>
 					</p>
@@ -104,7 +104,7 @@ the_post();
 							<li>
 								<?php
 								/* translators: 1: MySQL version; 2: MariaDB Version */
-								printf( esc_html__( 'MySQL %1$s or greater OR MariaDB %2$s or greater', 'wporg' ), '5.7', '10.3' );
+								printf( esc_html__( 'MySQL %1$s or greater OR MariaDB %2$s or greater', 'wporg' ), '8.0', '10.4' );
 								?>
 							</li>
 							<li><?php esc_html_e( 'Nginx or Apache with mod_rewrite module', 'wporg' ); ?></li>
