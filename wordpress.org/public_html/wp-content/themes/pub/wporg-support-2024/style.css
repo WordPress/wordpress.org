@@ -3415,7 +3415,7 @@ body.category #main .archive-pagination {
 	gap: calc(var(--wp--preset--spacing--10) / 2);
 }
 .topic-resolved select {
-	width: 150px;
+	width: 130px;
 }
 
 .topic-resolved-indicator {
