@@ -20,11 +20,5 @@
 		align-self: center;
 		flex: 0 0 auto;
 		text-decoration: underline;
-
-		margin-right: var( --wp--style--block-gap );
-
-		@media screen and ( min-width: $ms-breakpoint ) {
-			margin-right: 0;
-		}
 	}
 }
