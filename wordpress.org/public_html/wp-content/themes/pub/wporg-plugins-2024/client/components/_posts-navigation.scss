@@ -3,6 +3,10 @@
 	margin-top: var( --wp--style--block-gap );
 	padding-top: var( --wp--style--block-gap );
 
+	a {
+		text-decoration: none;
+	}
+
 	.page-numbers {
 		cursor: pointer;
 		display: inline-block;
