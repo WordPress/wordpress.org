@@ -929,12 +929,14 @@ To unsubscribe from future emails, click here:
 			$js_confirm = 'javascript:return confirm(' . json_encode( $r['js_confirm'] ) . ');';
 		}
 
-		return sprintf(
-			"<div class='wporg-bbp-term-subscription'><a href='%s' class='%s' onclick='%s'>%s</a></div>",
+		return do_blocks( sprintf(
+			'<!-- wp:button -->
+			<div class="wp-block-button is-small"><a href="%s" class="%s wp-block-button__link wp-element-button" onclick="%s">%s</a></div>
+			<!-- /wp:button -->',
 			$url,
 			esc_attr( $r['class'] ),
 			esc_attr( $js_confirm ),
 			esc_html( $text )
-		);
+		) );
 	}
 }
