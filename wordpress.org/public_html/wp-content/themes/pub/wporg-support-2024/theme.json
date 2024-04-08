@@ -32,6 +32,17 @@
 				"thread-starter": "var(--wp--preset--color--acid-green-2)",
 				"thread-reporter": "var(--wp--preset--color--lemon-1)"
 			},
+			"form": {
+				"border": {
+					"width": "1px",
+					"color": "var(--wp--preset--color--charcoal-5)"
+				},
+				"padding": {
+					"block": "7px",
+					"inline": "12px"
+				},
+				"lineHeight": "var(--wp--custom--body--small--typography--line-height)"
+			},
 			"heading": {
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--inter)",

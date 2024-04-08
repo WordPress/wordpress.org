@@ -677,7 +677,6 @@ $paginationBreakPoint: "600px";
 		@extend .button-primary;
 	}
 
-	.wporg-bbp-term-subscription > a,
 	.reviews-submit-link > .btn,
 	.subscription-toggle,
 	.favorite-toggle {
@@ -760,7 +759,43 @@ $paginationBreakPoint: "600px";
 		}
 	}
 
+	#bbp-user-body {
+
+		div.bbp-search-form {
+
+			form > div {
+				margin-bottom: var(--wp--style--block-gap);
+				display: flex;
+
+				input[type="text"] {
+					flex: 1;
+					margin-right: calc(var(--wp--preset--spacing--10) / 2);
+				}
+			}
+
+			button,
+			input {
+
+				@media only screen and (max-width: 480px) {
+					font-size: var(--wp--preset--font-size--small);
+					padding: var(--wp--custom--form--padding--block) var(--wp--custom--form--padding--inline);
+				}
+			}
+		}
+	}
+
 	@media (max-width: 767px) {
+
+		#bbp-user-body {
+
+			div.bbp-search-form {
+				float: none;
+			}
+
+			h2.entry-title {
+				clear: right;
+			}
+		}
 
 		input[type="text"] {
 			width: 100%;
@@ -799,13 +834,16 @@ $paginationBreakPoint: "600px";
 
 .topic-resolved {
 
-	label {
-		vertical-align: none;
+	form {
+		width: 100%;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: calc(var(--wp--preset--spacing--10) / 2);
 	}
 
 	select {
-		width: 120px;
-		line-height: 1;
+		width: 150px;
 	}
 }
 
@@ -1125,7 +1163,6 @@ div.bbp-breadcrumb {
 		input[type="text"],
 		textarea {
 			width: 100%;
-			padding: 0.2rem 0.5rem 0.1rem;
 			margin: 4px 0 8px;
 		}
 
@@ -1180,7 +1217,6 @@ div.bbp-breadcrumb {
 .bbp-single-user {
 
 	input[type="text"] {
-		padding: 3px 5px;
 
 		@media (max-width: 767px) {
 
@@ -1193,6 +1229,10 @@ div.bbp-breadcrumb {
 
 .bbpress #bbpress-forums #bbp-user-wrapper {
 	font-size: var(--wp--preset--font-size--small);
+
+	.bbp-user-section {
+		margin-top: var(--wp--style--block-gap);
+	}
 }
 
 #bbpress-forums #bbp-single-user-details {

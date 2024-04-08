@@ -2,29 +2,14 @@
 
 /* Include margin and padding in the width calculation of input and textarea. */
 input,
-textarea {
+textarea,
+select {
 	box-sizing: border-box;
+	line-height: var(--wp--custom--form--line-height);
 }
 
-input[type="text"],
-input[type="password"],
-input[type="checkbox"],
-input[type="color"],
-input[type="date"],
-input[type="datetime"],
-input[type="datetime-local"],
-input[type="email"],
-input[type="month"],
-input[type="number"],
-input[type="password"],
 input[type="radio"],
-input[type="tel"],
-input[type="text"],
-input[type="time"],
-input[type="url"],
-input[type="week"],
-select,
-textarea {
+input[type="checkbox"] {
 	background-color: #fff;
 	border: 1px solid var(--wp--preset--color--light-grey-1);
 	box-shadow: var(--wp--custom--form--color--box-shadow);
@@ -37,47 +22,10 @@ textarea {
 	}
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="color"]:focus,
-input[type="date"]:focus,
-input[type="datetime"]:focus,
-input[type="datetime-local"]:focus,
-input[type="email"]:focus,
-input[type="month"]:focus,
-input[type="number"]:focus,
-input[type="password"]:focus,
-input[type="search"]:focus,
-input[type="tel"]:focus,
-input[type="text"]:focus,
-input[type="time"]:focus,
-input[type="url"]:focus,
-input[type="week"]:focus,
 input[type="checkbox"]:focus,
-input[type="radio"]:focus,
-select:focus,
-textarea:focus {
+input[type="radio"]:focus {
 	border-color: #5b9dd9;
 	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
-}
-
-/* rtl:ignore */
-input[type="email"],
-input[type="url"] {
-	direction: ltr;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"] {
-	padding: 6px 10px;
-}
-
-/* Vertically align the number selector with the input. */
-input[type="number"] {
-	height: 40px;
-	line-height: inherit;
 }
 
 input[type="checkbox"],
@@ -151,41 +99,22 @@ input[type="radio"]:checked::before {
 	}
 }
 
+select {
+	background: var(--wp--custom--form--color--background);
+	border: var(--wp--custom--form--border--width) var(--wp--custom--form--border--style) var(--wp--custom--form--border--color);
+	border-radius: var(--wp--custom--form--border--radius);
+	box-shadow: var(--wp--custom--form--color--box-shadow);
+	font-family: inherit;
+	height: 40px;
+
+	&:focus {
+		border-color: var(--custom--form--color--border);
+	}
+}
+
 /* Search */
 input[type="search"]::-webkit-search-decoration {
 	display: none;
-}
-
-.ie8 input[type="password"] {
-	font-family: sans-serif;
-}
-
-textarea,
-input,
-select,
-button {
-	font-family: inherit;
-	font-size: inherit;
-	font-weight: inherit;
-}
-
-textarea,
-input,
-select {
-	border-radius: 0;
-	font-size: 16px;
-	padding: 3px 5px; /* Reset mobile webkit's default element styling */
-}
-
-textarea {
-	line-height: 1.4;
-	overflow: auto;
-	padding: 2px 6px;
-	resize: vertical;
-
-	.comment-form-comment & {
-		width: 100%;
-	}
 }
 
 input[type="file"] {
@@ -249,18 +178,6 @@ fieldset label {
 
 @media screen and ( min-width: 48em ) {
 
-	/* Input Elements */
-	input[type="text"],
-	input[type="email"],
-	input[type="password"],
-	input[type="number"] {
-		padding: 0;
-	}
-
-	input[type="number"] {
-		height: 28px;
-	}
-
 	input[type="checkbox"] {
 		padding: 0;
 	}
@@ -280,11 +197,5 @@ fieldset label {
 		width: 6px;
 		height: 6px;
 		margin: 4px;
-	}
-
-	textarea,
-	input,
-	select {
-		font-size: 14px;
 	}
 }
