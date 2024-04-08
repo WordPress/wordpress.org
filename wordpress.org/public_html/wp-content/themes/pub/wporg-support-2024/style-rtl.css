@@ -2460,6 +2460,7 @@ body.single .sidebar {
 }
 .sidebar > div ul:not(.topic-tags) > li {
 	font-size: var(--wp--preset--font-size--normal);
+	line-height: var(--wp--custom--body--short-text--typography--line-height);
 	border-top: 1px solid var(--wp--custom--color--border);
 	padding: var(--wp--preset--spacing--10) 0;
 }
