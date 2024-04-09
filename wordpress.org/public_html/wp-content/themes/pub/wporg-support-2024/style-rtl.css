@@ -1,4 +1,3 @@
-@charset "UTF-8";
 /**
  * Theme Name: WordPress.org Support 2024
  * Theme URI: http://wordpress.org/
@@ -1031,6 +1030,10 @@ big {
 }
 
 /* Move the Block Editor toolbar below the Header & Also Viewing z-index bar */
+.iso-editor {
+	border-color: var(--wp--custom--form--border--color);
+	border-radius: var(--wp--custom--form--border--radius);
+}
 .iso-editor.has-fixed-toolbar .interface-interface-skeleton__header {
 	z-index: var(--wp--custom--z-index--iso-editor);
 }
@@ -1898,84 +1901,35 @@ select {
 
 input[type=radio],
 input[type=checkbox] {
-	background-color: #fff;
-	border: 1px solid var(--wp--preset--color--light-grey-1);
+	border: 1px solid var(--wp--custom--form--border--color);
 	box-shadow: var(--wp--custom--form--color--box-shadow);
-	color: var(--wp--custom--form--color--text);
-	transition: 0.05s border-color ease-in-out;
-	-webkit-appearance: none;
+	border-radius: var(--wp--custom--form--border--radius);
+	clear: none;
+	cursor: pointer;
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	line-height: 0;
+	padding: 0 !important;
+	text-align: center;
+	vertical-align: middle;
+	margin: 0;
 }
 input[type=radio]:focus,
 input[type=checkbox]:focus {
+	box-shadow: none;
 	color: var(--wp--custom--form--color--text);
 }
-
-input[type=checkbox]:focus,
-input[type=radio]:focus {
-	border-color: #5b9dd9;
-	box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
-}
-
-input[type=checkbox],
-input[type=radio] {
-	background: #fff;
-	border: 1px solid #b4b9be;
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-	clear: none;
-	color: #555;
-	cursor: pointer;
-	display: inline-block;
-	height: 25px;
-	line-height: 0;
-	margin: -4px 0 0 4px;
-	min-width: 16px;
-	padding: 0 !important;
-	text-align: center;
-	transition: 0.05s border-color ease-in-out;
-	vertical-align: middle;
-	width: 25px;
-}
-
-input[type=checkbox] {
-	padding: 10px;
+input[type=radio]:focus-visible,
+input[type=checkbox]:focus-visible {
+	outline: -webkit-focus-ring-color auto 1px;
 }
 
 input[type=radio] {
 	border-radius: 50%;
-	line-height: 10px;
-	margin-left: 4px;
 }
-
-input[type=checkbox]:checked::before,
-input[type=radio]:checked::before {
-	display: inline-block;
-	float: right;
-	font: 400 21px/1 dashicons;
-	vertical-align: middle;
-	width: 16px;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-	speak: none;
-}
-
-input[type=checkbox]:checked::before {
-	color: var(--wp--preset--color--blueberry-1);
-	content: "\f147";
-	font: 400 30px/1 dashicons;
-	margin: -3px -5px;
-}
-
-input[type=radio]:checked::before {
-	background-color: var(--wp--preset--color--blueberry-1);
-	border-radius: 50px;
-	content: "•";
-	font-size: 24px;
-	height: 9px;
-	line-height: 16px;
-	margin: 7px;
-	text-indent: -9999px;
-	vertical-align: middle;
-	width: 9px;
+input[type=radio] + label {
+	margin-right: 0.5em;
 }
 
 @-moz-document url-prefix() {
@@ -1991,10 +1945,7 @@ select {
 	border-radius: var(--wp--custom--form--border--radius);
 	box-shadow: var(--wp--custom--form--color--box-shadow);
 	font-family: inherit;
-	height: 40px;
-}
-select:focus {
-	border-color: var(--custom--form--color--border);
+	min-height: 40px;
 }
 
 /* Search */
@@ -2027,10 +1978,10 @@ select:disabled,
 select.disabled,
 textarea:disabled,
 textarea.disabled {
-	background: rgba(255, 255, 255, 0.5);
-	border-color: rgba(222, 222, 222, 0.75);
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-	color: rgba(51, 51, 51, 0.5);
+	background: var(--wp--custom--form--color--background);
+	border-color: var(--wp--custom--form--disabled--border-color);
+	box-shadow: none;
+	color: var(--wp--custom--form--disabled--color);
 }
 
 input[type=file]:disabled,
@@ -2057,27 +2008,6 @@ fieldset label {
 	vertical-align: middle;
 }
 
-/* =Media Queries
--------------------------------------------------------------- */
-@media screen and (min-width: 48em) {
-	input[type=checkbox] {
-		padding: 0;
-	}
-	input[type=checkbox]:checked::before {
-		font: 400 21px/1 dashicons;
-		margin: -3px -4px 0 0;
-	}
-	input[type=radio],
-	input[type=checkbox] {
-		height: 16px;
-		width: 16px;
-	}
-	input[type=radio]:checked::before {
-		width: 6px;
-		height: 6px;
-		margin: 4px;
-	}
-}
 /*--------------------------------------------------------------
 # Navigation
 --------------------------------------------------------------*/
@@ -3274,10 +3204,6 @@ body.category #main .archive-pagination {
 /*--------------------------------------------------------------
 # Buttons
 --------------------------------------------------------------*/
-#bbpress-forums fieldset.bbp-form button {
-	padding: 0 0.8rem;
-	font-size: 0.8rem;
-}
 #bbpress-forums .bbp-reply-form {
 	clear: both;
 }
@@ -3286,18 +3212,9 @@ body.category #main .archive-pagination {
 	float: none;
 	margin-top: 0;
 }
-#bbpress-forums fieldset.bbp-form select,
-#bbpress-forums fieldset.bbp-form input[type=text] {
-	min-height: 32px;
-	height: 32px;
-}
+#bbpress-forums #bbp-your-profile fieldset.submit button,
 #bbpress-forums .bbp-submit-wrapper {
-	margin-top: -35px;
-}
-@media (max-width: 767px) {
-	#bbpress-forums .bbp-submit-wrapper {
-		margin-top: 0;
-	}
+	float: none;
 }
 #bbpress-forums .wporg-bbp-term-subscription {
 	margin-bottom: 1rem;
@@ -3325,36 +3242,71 @@ body.category #main .archive-pagination {
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/
-#bbpress-forums fieldset.bbp-form {
-	margin: 0;
-	border: 0;
-}
-#bbpress-forums fieldset.bbp-form legend {
-	font-weight: 400;
-	font-size: 1.25rem;
-}
-#bbpress-forums fieldset.bbp-form label,
-#bbpress-forums fieldset.bbp-form p em {
-	font-size: 0.8rem;
-}
-#bbpress-forums fieldset.bbp-form em#site_url_description {
-	display: inline-block;
-	margin-bottom: 12px;
-}
-#bbpress-forums fieldset.bbp-form input[type=checkbox],
-#bbpress-forums fieldset.bbp-form input#site_url,
-#bbpress-forums fieldset.bbp-form input#bbp_topic_tags {
-	margin-bottom: 0;
-}
-#bbpress-forums fieldset.bbp-form div.rate {
-	margin-bottom: 8px;
-}
 #bbpress-forums fieldset.log-edit {
 	margin: 12px 0 8px 0;
 }
 #bbpress-forums fieldset.log-edit legend {
 	padding: 0;
-	font-size: 0.8rem;
+}
+#bbpress-forums #bbp-your-profile fieldset {
+	padding: 0;
+	margin: 0 0 var(--wp--style--block-gap);
+	border: none;
+}
+#bbpress-forums fieldset.bbp-form select,
+#bbpress-forums fieldset.bbp-form input[type=text],
+#bbpress-forums #bbp-your-profile fieldset input,
+#bbpress-forums #bbp-your-profile fieldset textarea,
+#bbpress-forums #bbp-your-profile fieldset select {
+	height: unset;
+	border-color: var(--wp--custom--form--border--color);
+	padding: var(--wp--custom--form--padding--block) var(--wp--custom--form--padding--inline);
+	background-color: var(--wp--custom--form--color--background);
+	border-radius: var(--wp--custom--form--border--radius);
+	min-height: 40px;
+}
+#bbpress-forums fieldset.bbp-form select:focus,
+#bbpress-forums fieldset.bbp-form input[type=text]:focus,
+#bbpress-forums #bbp-your-profile fieldset input:focus,
+#bbpress-forums #bbp-your-profile fieldset textarea:focus,
+#bbpress-forums #bbp-your-profile fieldset select:focus {
+	box-shadow: none;
+}
+#bbpress-forums fieldset.bbp-form select:focus-visible,
+#bbpress-forums fieldset.bbp-form input[type=text]:focus-visible,
+#bbpress-forums #bbp-your-profile fieldset input:focus-visible,
+#bbpress-forums #bbp-your-profile fieldset textarea:focus-visible,
+#bbpress-forums #bbp-your-profile fieldset select:focus-visible {
+	box-shadow: none;
+	outline: -webkit-focus-ring-color auto 1px;
+}
+#bbpress-forums fieldset.bbp-form select:disabled,
+#bbpress-forums fieldset.bbp-form input[type=text]:disabled,
+#bbpress-forums #bbp-your-profile fieldset input:disabled,
+#bbpress-forums #bbp-your-profile fieldset textarea:disabled,
+#bbpress-forums #bbp-your-profile fieldset select:disabled {
+	border-color: var(--wp--custom--form--disabled--border-color);
+}
+#bbpress-forums fieldset.bbp-form input[type=checkbox],
+#bbpress-forums fieldset.bbp-form input[type=radio] {
+	margin: 0;
+}
+#bbpress-forums fieldset.bbp-form input[type=checkbox] + label,
+#bbpress-forums fieldset.bbp-form input[type=radio] + label {
+	margin-right: 0.5em;
+}
+#bbpress-forums fieldset.bbp-form input[type=checkbox]:focus,
+#bbpress-forums fieldset.bbp-form input[type=radio]:focus {
+	box-shadow: none;
+}
+#bbpress-forums fieldset.bbp-form input[type=checkbox]:focus-visible,
+#bbpress-forums fieldset.bbp-form input[type=radio]:focus-visible {
+	box-shadow: none;
+	outline: -webkit-focus-ring-color auto 1px;
+}
+#bbpress-forums fieldset.bbp-form label input[type=checkbox],
+#bbpress-forums fieldset.bbp-form label input[type=radio] {
+	margin-left: 0.5em;
 }
 #bbpress-forums #bbp-user-body div.bbp-search-form form > div {
 	margin-bottom: var(--wp--style--block-gap);
@@ -3402,6 +3354,12 @@ body.category #main .archive-pagination {
 .topic-edit #bbpress-forums .bbp-topic-form legend,
 .reply-edit #bbpress-forums .bbp-reply-form legend {
 	display: block;
+}
+
+body.reply-edit #bbpress-forums fieldset.bbp-form,
+body.topic-edit #bbpress-forums fieldset.bbp-form {
+	border: none;
+	margin: 0 0 var(--wp--style--block-gap);
 }
 
 .reply-edit #bbpress-forums .form-reply-to {
@@ -3717,6 +3675,11 @@ div.bbp-breadcrumb p {
 
 .bbpress #bbpress-forums #bbp-user-wrapper {
 	font-size: var(--wp--preset--font-size--small);
+}
+.bbpress #bbpress-forums #bbp-user-wrapper h2.entry-title {
+	font-size: var(--wp--preset--font-size--heading-4);
+	padding-bottom: unset;
+	margin: 0 0 var(--wp--style--block-gap);
 }
 .bbpress #bbpress-forums #bbp-user-wrapper .bbp-user-section {
 	margin-top: var(--wp--style--block-gap);

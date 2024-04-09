@@ -41,7 +41,11 @@
 					"block": "7px",
 					"inline": "12px"
 				},
-				"lineHeight": "var(--wp--custom--body--small--typography--line-height)"
+				"lineHeight": "var(--wp--custom--body--small--typography--line-height)",
+				"disabled": {
+					"borderColor": "var(--wp--preset--color--light-grey-1)",
+					"color": "var(--wp--preset--color--charcoal-5)"
+				}
 			},
 			"heading": {
 				"typography": {
