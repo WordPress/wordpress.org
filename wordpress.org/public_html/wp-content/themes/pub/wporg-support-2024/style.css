@@ -3724,9 +3724,9 @@ div.bbp-breadcrumb p {
 .bbp-view .review-ratings .col-3 {
 	font-size: 0.8rem;
 	margin: 0;
-	width: 35%;
-	float: none;
+	min-width: 40%;
 	border-top: 1px solid var(--wp--custom--color--border);
+	flex-shrink: 0;
 }
 .bbp-view .review-ratings .col-3 .reviews-total-count {
 	font-weight: 700;
@@ -3737,10 +3737,11 @@ div.bbp-breadcrumb p {
 	background-color: var(--wp--preset--color--charcoal-2) !important;
 }
 .bbp-view .review-ratings .col-5 {
-	margin: 0 5% 10px 0;
+	margin: 0 0 10px 0;
+	padding-right: 10px;
 	width: 60%;
+	min-width: 54%;
 	font-size: 0.8rem;
-	float: none;
 }
 .bbp-view .review-ratings .col-5 > div:first-child {
 	margin-top: 0;

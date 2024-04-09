@@ -1316,9 +1316,9 @@ div.bbp-breadcrumb {
 		.col-3 {
 			font-size: ms(-2);
 			margin: 0;
-			width: 35%;
-			float: none;
+			min-width: 40%;
 			border-top: 1px solid var(--wp--custom--color--border);
+			flex-shrink: 0;
 
 			.reviews-total-count {
 				font-weight: 700;
@@ -1332,10 +1332,11 @@ div.bbp-breadcrumb {
 		}
 
 		.col-5 {
-			margin: 0 5% 10px 0;
+			margin: 0 0 10px 0;
+			padding-right: 10px;
 			width: 60%;
+			min-width: 54%;
 			font-size: ms(-2);
-			float: none;
 
 			> div:first-child {
 
