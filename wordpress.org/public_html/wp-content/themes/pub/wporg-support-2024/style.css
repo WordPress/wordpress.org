@@ -1035,6 +1035,10 @@ big {
 	z-index: var(--wp--custom--z-index--iso-editor);
 }
 
+:where(.wp-block-search__button-inside .wp-block-search__inside-wrapper) {
+	border: none;
+}
+
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/
