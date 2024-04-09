@@ -619,6 +619,14 @@ body:not(.trac):not(.home-page) #main {
 # 404 Error page
 --------------------------------------------------------------*/
 
+body.error404 {
+	background-color: var(--wp--preset--color--white);
+
+	a {
+		color: var(--wp--preset--color--blueberry-1);
+	}
+}
+
 .error-404 .page-title, .error-404 .page-content {
 	text-align: center;
 }
