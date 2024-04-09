@@ -314,7 +314,7 @@ class Parser {
 			}
 
 			if ( count( $this->tags ) > 5 ) {
-				$this->warnings['too_many_tags'] = array_slice( $this->tags, 4 );
+				$this->warnings['too_many_tags'] = array_slice( $this->tags, 5 );
 				$this->tags = array_slice( $this->tags, 0, 5 );
 			}
 		}
