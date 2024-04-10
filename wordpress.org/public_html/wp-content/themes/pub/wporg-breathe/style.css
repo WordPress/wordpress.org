@@ -150,6 +150,16 @@ input[type="submit"] {
 	line-height: revert;
 }
 
+/* Gutenberg overrides */
+
+.wp-block-embed figcaption,
+.wp-block-image figcaption,
+.wp-block-video figcaption {
+	margin: 0.5em 2em 1em;
+	font-style: italic;
+	text-align: center;
+}
+
 /* site */
 
 .site,
