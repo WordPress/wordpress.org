@@ -3436,6 +3436,11 @@ div.indicator-hint.error {
 	border: none;
 	background-color: var(--wp--preset--color--pomegrade-3);
 }
+div.bbp-template-notice.warning,
+div.indicator-hint.warning {
+	border: none;
+	background-color: var(--wp--preset--color--lemon-3);
+}
 div.bbp-template-notice a,
 div.indicator-hint a {
 	color: var(--wp--preset--color--blueberry-1);

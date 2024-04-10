@@ -917,6 +917,11 @@ div.indicator-hint {
 		background-color: var(--wp--preset--color--pomegrade-3);
 	}
 
+	&.warning {
+		border: none;
+		background-color: var(--wp--preset--color--lemon-3);
+	}
+
 	a {
 		color: var(--wp--preset--color--blueberry-1);
 		text-decoration: underline;
