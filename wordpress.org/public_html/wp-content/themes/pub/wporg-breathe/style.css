@@ -1620,6 +1620,7 @@ h2.toc-heading + h3.toc-heading:target {
 .post-type-archive-handbook nav.o2-post-actions ul,
 .single-handbook nav.o2-post-actions ul {
 	margin-right: 16.8px;
+	top: 9px;
 }
 
 @media (max-width: 550px) {
