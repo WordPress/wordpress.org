@@ -521,6 +521,12 @@ input[type="submit"]:hover {
 	margin-bottom: 2em;
 }
 
+@media screen and (max-width: 640px) {
+	.make-polyglots .o2-app-new-post {
+		display: block;
+	}
+}
+
 .o2-post {
 	border-top: 2px solid #ddd;
 }
