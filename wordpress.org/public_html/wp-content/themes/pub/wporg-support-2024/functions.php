@@ -493,7 +493,7 @@ function wporg_support_get_sidebar_topics() {
 			continue;
 		}
 
-		$output .= sprintf( '<a class="bbp-view-title wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s"><h5 class="wp-block-heading has-inter-font-family has-small-font-size" style="font-weight:700;margin-bottom:0">%s</h5></a>',
+		$output .= sprintf( '<a class="bbp-view-title wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s"><h3 class="wp-block-heading has-inter-font-family has-small-font-size" style="font-weight:700;margin-bottom:0">%s</h3></a>',
 			esc_url( bbp_get_view_url( $view ) ),
 			bbp_get_view_title( $view )
 		);
