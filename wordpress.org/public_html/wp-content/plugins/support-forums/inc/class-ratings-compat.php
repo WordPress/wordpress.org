@@ -96,6 +96,10 @@ class Ratings_Compat {
 	public function add_filter_to_posts_clauses( $clauses ) {
 		global $wpdb;
 
+		if ( false !== strpos( $clauses['where'], ".post_type = 'wp_navigation' " ) ) {
+			return $clauses;
+		}
+
 		$clauses['join']  .= " INNER JOIN ratings ON ( $wpdb->posts.ID = ratings.post_id )";
 		$clauses['where'] .= $wpdb->prepare( " AND ratings.rating = %d", $this->filter );
 
