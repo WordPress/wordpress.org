@@ -917,7 +917,8 @@ div.indicator-hint {
 		background-color: var(--wp--preset--color--pomegrade-3);
 	}
 
-	&.warning {
+	&.warning,
+	&.important {
 		border: none;
 		background-color: var(--wp--preset--color--lemon-3);
 	}
