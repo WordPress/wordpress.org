@@ -816,6 +816,11 @@ nav.o2-post-footer-actions ul li > span > a {
 	width: inherit;
 }
 
+nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
+	height: 39px;
+	padding-top: 7px;
+}
+
 /* make/polyglots post type selector for new posts */
 .polyglots-post-type-selector {
 	margin: 0 0 1em;
