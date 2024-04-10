@@ -69,40 +69,26 @@ $paginationBreakPoint: "600px";
 
 	#bbpress-forums {
 
-		div.bbp-template-notice {
-			padding: var(--wp--preset--spacing--20);
-			border: none;
-			border-radius: 2px;
-			background-color: var(--wp--preset--color--blueberry-4);
-
-			p,
-			li {
-				font-size: 13px;
-				line-height: 160%;
-			}
-
-			a {
-				color: var(--wp--preset--color--blueberry-1);
-				text-decoration: underline;
-
-				&:hover {
-					color: var(--wp--preset--color--blueberry-1);
-				}
-			}
-		}
-
 		.bbp-topic-content > div.bbp-template-notice,
 		.bbp-reply-content > div.bbp-template-notice {
 			margin-bottom: 30px;
 		}
 
-		.status-pending div.bbp-template-notice {
-			background: #fff359;
+		.status-pending {
+			background: none;
+
+			div.bbp-template-notice {
+				background: var(--wp--preset--color--lemon-3);
+			}
 		}
 
-		.status-archived div.bbp-template-notice,
-		.status-spam div.bbp-template-notice {
-			background: #f49797;
+		.status-archived,
+		.status-spam {
+			background: none !important;
+
+			div.bbp-template-notice {
+				background: var(--wp--preset--color--pomegrade-3);
+			}
 		}
 
 		.bbp-topic-content,
@@ -912,10 +898,33 @@ select {
 
 div.bbp-template-notice,
 div.indicator-hint {
+	margin: 0 0 var(--wp--style--block-gap);
+	border: none;
+	font-size: var(--wp--preset--font-size--small);
 	// Matches notice block
 	padding: 1.25em;
+	color: var(--wp--preset--color--charcoal-1);
+	background-color: var(--wp--preset--color--acid-green-3);
 	border-radius: 2px;
-	margin: 0 0 var(--wp--style--block-gap);
+
+	&.info {
+		border: none;
+		background-color: var(--wp--preset--color--blueberry-4);
+	}
+
+	&.error {
+		border: none;
+		background-color: var(--wp--preset--color--pomegrade-3);
+	}
+
+	a {
+		color: var(--wp--preset--color--blueberry-1);
+		text-decoration: underline;
+
+		&:hover {
+			color: var(--wp--preset--color--blueberry-1);
+		}
+	}
 
 	ul:last-child {
 		margin-bottom: 0;
@@ -923,7 +932,7 @@ div.indicator-hint {
 
 	p,
 	li {
-		font-size: var(--wp--preset--font-size--extra-small);
+		font-size: var(--wp--preset--font-size--small);
 		padding: 0;
 	}
 }

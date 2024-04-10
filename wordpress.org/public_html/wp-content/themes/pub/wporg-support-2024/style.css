@@ -2735,34 +2735,23 @@ body.category #main .archive-pagination {
 .bbpress.bbp-view-reviews #bbpress-forums .bbp-create-topic-wrapper .search-form {
 	width: 100%;
 }
-.bbpress #bbpress-forums div.bbp-template-notice {
-	padding: var(--wp--preset--spacing--20);
-	border: none;
-	border-radius: 2px;
-	background-color: var(--wp--preset--color--blueberry-4);
-}
-.bbpress #bbpress-forums div.bbp-template-notice p,
-.bbpress #bbpress-forums div.bbp-template-notice li {
-	font-size: 13px;
-	line-height: 160%;
-}
-.bbpress #bbpress-forums div.bbp-template-notice a {
-	color: var(--wp--preset--color--blueberry-1);
-	text-decoration: underline;
-}
-.bbpress #bbpress-forums div.bbp-template-notice a:hover {
-	color: var(--wp--preset--color--blueberry-1);
-}
 .bbpress #bbpress-forums .bbp-topic-content > div.bbp-template-notice,
 .bbpress #bbpress-forums .bbp-reply-content > div.bbp-template-notice {
 	margin-bottom: 30px;
 }
+.bbpress #bbpress-forums .status-pending {
+	background: none;
+}
 .bbpress #bbpress-forums .status-pending div.bbp-template-notice {
-	background: #fff359;
+	background: var(--wp--preset--color--lemon-3);
+}
+.bbpress #bbpress-forums .status-archived,
+.bbpress #bbpress-forums .status-spam {
+	background: none !important;
 }
 .bbpress #bbpress-forums .status-archived div.bbp-template-notice,
 .bbpress #bbpress-forums .status-spam div.bbp-template-notice {
-	background: #f49797;
+	background: var(--wp--preset--color--pomegrade-3);
 }
 .bbpress #bbpress-forums .bbp-topic-content p:last-child,
 .bbpress #bbpress-forums .bbp-reply-content p:last-child {
@@ -3429,9 +3418,32 @@ select {
 --------------------------------------------------------------*/
 div.bbp-template-notice,
 div.indicator-hint {
-	padding: 1.25em;
-	border-radius: 2px;
 	margin: 0 0 var(--wp--style--block-gap);
+	border: none;
+	font-size: var(--wp--preset--font-size--small);
+	padding: 1.25em;
+	color: var(--wp--preset--color--charcoal-1);
+	background-color: var(--wp--preset--color--acid-green-3);
+	border-radius: 2px;
+}
+div.bbp-template-notice.info,
+div.indicator-hint.info {
+	border: none;
+	background-color: var(--wp--preset--color--blueberry-4);
+}
+div.bbp-template-notice.error,
+div.indicator-hint.error {
+	border: none;
+	background-color: var(--wp--preset--color--pomegrade-3);
+}
+div.bbp-template-notice a,
+div.indicator-hint a {
+	color: var(--wp--preset--color--blueberry-1);
+	text-decoration: underline;
+}
+div.bbp-template-notice a:hover,
+div.indicator-hint a:hover {
+	color: var(--wp--preset--color--blueberry-1);
 }
 div.bbp-template-notice ul:last-child,
 div.indicator-hint ul:last-child {
@@ -3441,7 +3453,7 @@ div.bbp-template-notice p,
 div.bbp-template-notice li,
 div.indicator-hint p,
 div.indicator-hint li {
-	font-size: var(--wp--preset--font-size--extra-small);
+	font-size: var(--wp--preset--font-size--small);
 	padding: 0;
 }
 
