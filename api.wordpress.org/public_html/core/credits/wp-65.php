@@ -78,6 +78,7 @@ class WP_65_Credits extends WP_Credits {
 					'matveb'              => 'Matias Ventura',
  					'Joen'                => 'Joen Asmussen',
 					'saxonfletcher'       => 'Saxon Fletcher',
+					'darerodz'            => 'David Arenas',
 				],
 			],
 		];
