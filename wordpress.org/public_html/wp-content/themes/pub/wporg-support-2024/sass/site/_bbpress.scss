@@ -128,6 +128,14 @@ $paginationBreakPoint: "600px";
 					text-decoration: underline;
 				}
 			}
+
+			.bbp-topic-content,
+			.bbp-reply-content {
+
+				ul {
+					margin-bottom: var(--wp--style--block-gap);
+				}
+			}
 		}
 
 		.bbp-header,
@@ -310,7 +318,9 @@ $paginationBreakPoint: "600px";
 		}
 
 		ul.bbp-topic-revision-log {
-			color: var(--wp--preset--color--charcoal-3);
+			color: var(--wp--preset--color--charcoal-1);
+			font-size: var(--wp--preset--font-size--extra-small);
+			border-top: 1px solid var(--wp--custom--color--border);
 		}
 
 		div.bbp-reply-content .bbp-reply-revision-log-item a,
@@ -324,8 +334,9 @@ $paginationBreakPoint: "600px";
 			position: absolute;
 			bottom: 0;
 			right: 0;
-			background: var(--wp--preset--color--light-grey-3);
-			padding: 3px 10px;
+			background: none;
+			padding: var(--wp--preset--spacing--10) calc(var(--wp--preset--spacing--20) - 5px);
+			font-size: 0; // hide the pipe character separators for a11y
 
 			@media screen and ( max-width: 480px ) {
 				padding: 3px 7px;
@@ -338,7 +349,12 @@ $paginationBreakPoint: "600px";
 			a {
 				color: var(--wp--custom--link--color--text);
 				text-transform: inherit;
-				font-size: 0.7rem;
+				font-size: var(--wp--preset--font-size--extra-small);
+				padding: 3px 5px;
+
+				&:not(:last-child) {
+					border-right: 1px solid var(--wp--custom--color--border);
+				}
 
 				&:hover {
 					text-decoration: underline;
@@ -870,6 +886,11 @@ body.topic-edit #bbpress-forums fieldset.bbp-form {
 	background-color: var(--wp--preset--color--vivid-green-cyan);
 	top: var(--wp--preset--spacing--20);
 	border-radius: 2px;
+	color: var(--wp--preset--color--charcoal-1);
+
+	&::before {
+		color: var(--wp--preset--color--charcoal-1);
+	}
 
 	@media screen and (max-width: 480px) {
 		top: -1px;

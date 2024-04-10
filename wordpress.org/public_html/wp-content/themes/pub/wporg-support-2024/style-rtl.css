@@ -2779,6 +2779,10 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .bbp-body ul.topic a:hover {
 	text-decoration: underline;
 }
+.bbpress #bbpress-forums .bbp-body .bbp-topic-content ul,
+.bbpress #bbpress-forums .bbp-body .bbp-reply-content ul {
+	margin-bottom: var(--wp--style--block-gap);
+}
 .bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
 .bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
 .bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
@@ -2935,7 +2939,9 @@ body.category #main .archive-pagination {
 	font-weight: 700;
 }
 .bbpress #bbpress-forums ul.bbp-topic-revision-log {
-	color: var(--wp--preset--color--charcoal-3);
+	color: var(--wp--preset--color--charcoal-1);
+	font-size: var(--wp--preset--font-size--extra-small);
+	border-top: 1px solid var(--wp--custom--color--border);
 }
 .bbpress #bbpress-forums div.bbp-reply-content .bbp-reply-revision-log-item a,
 .bbpress #bbpress-forums div.bbp-topic-content .bbp-topic-revision-log-item a {
@@ -2947,8 +2953,9 @@ body.category #main .archive-pagination {
 	position: absolute;
 	bottom: 0;
 	left: 0;
-	background: var(--wp--preset--color--light-grey-3);
-	padding: 3px 10px;
+	background: none;
+	padding: var(--wp--preset--spacing--10) calc(var(--wp--preset--spacing--20) - 5px);
+	font-size: 0;
 }
 @media screen and (max-width: 480px) {
 	.bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links,
@@ -2966,7 +2973,12 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a {
 	color: var(--wp--custom--link--color--text);
 	text-transform: inherit;
-	font-size: 0.7rem;
+	font-size: var(--wp--preset--font-size--extra-small);
+	padding: 3px 5px;
+}
+.bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links a:not(:last-child),
+.bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a:not(:last-child) {
+	border-left: 1px solid var(--wp--custom--color--border);
 }
 .bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links a:hover,
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a:hover {
@@ -3392,6 +3404,10 @@ body.topic-edit #bbpress-forums fieldset.bbp-form {
 	background-color: var(--wp--preset--color--vivid-green-cyan);
 	top: var(--wp--preset--spacing--20);
 	border-radius: 2px;
+	color: var(--wp--preset--color--charcoal-1);
+}
+.topic-resolved-indicator::before {
+	color: var(--wp--preset--color--charcoal-1);
 }
 @media screen and (max-width: 480px) {
 	.topic-resolved-indicator {
