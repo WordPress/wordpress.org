@@ -79,6 +79,10 @@ class WP_65_Credits extends WP_Credits {
  					'Joen'                => 'Joen Asmussen',
 					'saxonfletcher'       => 'Saxon Fletcher',
 					'darerodz'            => 'David Arenas',
+					'jffng'               => 'Jeff Ong',
+					'mikachan'            => 'Sarah Norris',
+					'pbking'              => 'Jason Crist',
+					'grantmkin'           => 'Grant M. Kinney',
 				],
 			],
 		];
