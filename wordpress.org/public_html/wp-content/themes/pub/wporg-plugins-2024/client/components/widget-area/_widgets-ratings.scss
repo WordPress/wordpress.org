@@ -16,7 +16,6 @@
 	}
 
 	[class*='dashicons-star-'] {
-		color: var( --wp--preset--color--charcoal-2 );
 		display: inline-block;
 		font-size: var( --wp--preset--font-size--large );
 		height: auto;
@@ -62,7 +61,7 @@
 		}
 
 		.counter-bar {
-			background-color: var(--wp--preset--color--charcoal-2);
+			background-color: var(--wp--preset--color--pomegrade-1);
 			display: block;
 		}
 
