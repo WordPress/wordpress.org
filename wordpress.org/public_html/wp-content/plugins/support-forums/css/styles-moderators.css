@@ -1,9 +1,11 @@
-#bbpress-forums .status-archived.even {
-	background-color: #fee !important;
+#bbpress-forums .bbp-topics:not(.full-posts) .status-archived.even,
+#bbpress-forums .bbp-topics:not(.full-posts) .status-archived.odd {
+	background-color: var(--wp--preset--color--pomegrade-3, #ffe9de);
 }
 
-#bbpress-forums .status-archived.odd {
-	background-color: #fdd !important;
+#bbpress-forums .bbp-topics:not(.full-posts) .status-pending.even,
+#bbpress-forums .bbp-topics:not(.full-posts) .status-pending.odd {
+	background-color: var(--wp--preset--color--lemon-3, #fffdd6);
 }
 
 /*--------------------------------------------------------------
