@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 do_action( 'bbp_template_before_topics_loop' ); ?>
 
-<ul id="bbp-forum-<?php bbp_forum_id(); ?>" class="bbp-topics">
+<ul id="bbp-forum-<?php bbp_forum_id(); ?>" class="bbp-topics<?php if (bbp_get_view_title() === 'All Replies') { echo ' full-posts'; } ?>">
 	<li class="bbp-header">
 		<ul class="forum-titles">
 			<li class="bbp-topic-title"><?php esc_html_e( 'Topic', 'bbpress' ); ?></li>

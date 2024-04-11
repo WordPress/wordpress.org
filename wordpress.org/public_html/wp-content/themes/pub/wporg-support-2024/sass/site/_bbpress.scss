@@ -67,6 +67,17 @@ $paginationBreakPoint: "600px";
 		width: 100%;
 	}
 
+	&.bbp-view-all-replies {
+
+		#bbpress-forums .status-pending {
+
+			.even,
+			.odd {
+				background: none;
+			}
+		}
+	}
+
 	#bbpress-forums {
 
 		.bbp-topic-content > div.bbp-template-notice,
@@ -75,7 +86,15 @@ $paginationBreakPoint: "600px";
 		}
 
 		.status-pending {
-			background: none;
+
+			&.even,
+			&.odd {
+				background: none;
+			}
+
+			a {
+				background: none;
+			}
 
 			div.bbp-template-notice {
 				background: var(--wp--preset--color--lemon-3);
@@ -84,7 +103,6 @@ $paginationBreakPoint: "600px";
 
 		.status-archived,
 		.status-spam {
-			background: none !important;
 
 			div.bbp-template-notice {
 				background: var(--wp--preset--color--pomegrade-3);
@@ -105,6 +123,11 @@ $paginationBreakPoint: "600px";
 			.bbp-topic-voice-count,
 			.bbp-topic-reply-count {
 				font-size: var(--wp--preset--font-size--small);
+			}
+
+			ul.forum,
+			ul.topic {
+				border-top-color: var(--wp--custom--color--border);
 			}
 
 			ul.topic a {
@@ -176,7 +199,7 @@ $paginationBreakPoint: "600px";
 		}
 
 		ul.bbp-lead-topic li.bbp-body div.topic {
-			background: transparent;
+			background: var(--wp--preset--color--light-grey-3);
 		}
 
 		.bbp-search-results div.topic .topic-indicator {
