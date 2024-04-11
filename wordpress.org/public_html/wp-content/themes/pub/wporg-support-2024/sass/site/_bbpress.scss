@@ -442,67 +442,39 @@ $paginationBreakPoint: "600px";
 		}
 
 		.create-topic {
-			font-size: 0.8rem;
 
 			@media (min-width: $paginationBreakPoint) {
 				float: left;
-			}
-
-			&::before {
-				color: #000;
-				content: "\f132";
-				font: 400 16px/1 dashicons;
-				margin: 0 4px 0 -4px;
-				vertical-align: middle;
 			}
 		}
 
 		.bbp-create-topic-wrapper {
 			display: flex;
 			flex-direction: column;
-			gap: 16px;
-			padding: 15px 0;
+			gap: 10px;
+			margin-bottom: var(--wp--style--block-gap);
 			text-align: center;
 
 			@media (min-width: 767px) {
 				flex-direction: row;
-				justify-content: space-between;
+				align-items: center;
 			}
 
 			.create-topic {
-				float: none;
-				height: auto;
-				padding: 9px 12px;
 
-				&::before {
-					color: #fff;
-				}
-
-				&.button-secondary::before {
-					color: #000;
-				}
-
-			}
-
-			> span {
-				margin: 0 8px 0 6px;
-				font-size: 0.8rem;
-			}
-
-			.search-form {
-				display: none;
+				@extend .button-primary;
+				// Match search field
+				line-height: var(--wp--custom--button--typography--line-height);
+				padding-inline: var(--wp--custom--form--padding--inline);
+				padding-block: var(--wp--custom--form--padding--block);
 			}
 
 			@media (max-width: 767px) {
 
 				.create-topic,
-				> span {
-					display: block;
+				.search-form,
+				.search-field {
 					width: 100%;
-				}
-
-				> span {
-					margin: 3px 0;
 				}
 			}
 		}

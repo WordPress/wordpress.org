@@ -1367,20 +1367,21 @@ table {
 #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle,
 #bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic,
 .button-secondary {
 	border: 1px solid;
 	border-radius: 3px;
 	box-sizing: border-box;
 	cursor: pointer;
 	display: inline-block;
-	font-size: 0.8rem;
 	height: auto;
-	line-height: 1;
+	line-height: var(--wp--custom--button--typography--line-height);
 	margin: 0;
 	padding: 0 0.8rem;
 	text-decoration: none;
 	white-space: nowrap;
 	-webkit-appearance: none;
+	appearance: none;
 	box-shadow: none;
 }
 
@@ -1422,18 +1423,6 @@ input[type=submit]::-moz-focus-inner {
 	height: 1.25rem;
 	line-height: 1;
 	padding: 0 0.5rem;
-}
-
-a.button, #bbpress-forums .reviews-submit-link > a.btn,
-#bbpress-forums a.subscription-toggle,
-#bbpress-forums a.favorite-toggle,
-a.button-primary,
-#bbpress-forums fieldset.bbp-form a.button.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > a.submit.btn,
-#bbpress-forums fieldset.bbp-form a.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form a.submit.favorite-toggle,
-a.button-secondary {
-	line-height: 1.5625rem;
 }
 
 a.button.button-large, #bbpress-forums .reviews-submit-link > a.button-large.btn,
@@ -1618,7 +1607,7 @@ for a cross of good semantics with the visual */
 ---------------------------------------------------------------------------- */
 .button-primary, #bbpress-forums fieldset.bbp-form .button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
+#bbpress-forums fieldset.bbp-form .submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic,
 .download-button,
 .is-primary,
 input[type=submit],
@@ -1646,7 +1635,7 @@ button[type=submit] {
 }
 .button-primary:visited, #bbpress-forums fieldset.bbp-form .button.submit:visited, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:visited,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:visited,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:visited,
+#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:visited, .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic:visited,
 .download-button:visited,
 .is-primary:visited,
 input[type=submit]:visited,
@@ -1655,13 +1644,13 @@ button[type=submit]:visited {
 }
 .button-primary.hover, #bbpress-forums fieldset.bbp-form .hover.button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .hover.submit.btn,
 #bbpress-forums fieldset.bbp-form .hover.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .hover.submit.favorite-toggle, .button-primary:hover, #bbpress-forums fieldset.bbp-form .button.submit:hover, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:hover,
+#bbpress-forums fieldset.bbp-form .hover.submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .hover.create-topic, .button-primary:hover, #bbpress-forums fieldset.bbp-form .button.submit:hover, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:hover,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:hover,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:hover, .button-primary.focus, #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .focus.submit.btn,
+#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:hover, .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic:hover, .button-primary.focus, #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .focus.submit.btn,
 #bbpress-forums fieldset.bbp-form .focus.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle, .button-primary:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:focus,
+#bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .focus.create-topic, .button-primary:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:focus,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus,
+#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus, .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic:focus,
 .download-button.hover,
 .download-button:hover,
 .download-button.focus,
@@ -1684,9 +1673,9 @@ button[type=submit]:focus {
 }
 .button-primary.focus, #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .focus.submit.btn,
 #bbpress-forums fieldset.bbp-form .focus.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle, .button-primary:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:focus,
+#bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .focus.create-topic, .button-primary:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:focus,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus,
+#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus, .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic:focus,
 .download-button.focus,
 .download-button:focus,
 .is-primary.focus,
@@ -1702,9 +1691,9 @@ button[type=submit]:focus {
 }
 .button-primary.active, #bbpress-forums fieldset.bbp-form .active.button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .active.submit.btn,
 #bbpress-forums fieldset.bbp-form .active.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle, .button-primary.active:hover, .button-primary.active:focus, .button-primary:active, #bbpress-forums fieldset.bbp-form .button.submit:active, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:active,
+#bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .active.create-topic, .button-primary.active:hover, .button-primary.active:focus, .button-primary:active, #bbpress-forums fieldset.bbp-form .button.submit:active, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:active,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:active,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:active,
+#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:active, .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic:active,
 .download-button.active,
 .download-button.active:hover,
 .download-button.active:focus,
@@ -1731,11 +1720,11 @@ button[type=submit]:active {
 }
 .button-primary[disabled], #bbpress-forums fieldset.bbp-form [disabled].button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > [disabled].submit.btn,
 #bbpress-forums fieldset.bbp-form [disabled].submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form [disabled].submit.favorite-toggle, .button-primary:disabled, #bbpress-forums fieldset.bbp-form .button.submit:disabled, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:disabled,
+#bbpress-forums fieldset.bbp-form [disabled].submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper [disabled].create-topic, .button-primary:disabled, #bbpress-forums fieldset.bbp-form .button.submit:disabled, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:disabled,
 #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:disabled,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:disabled, .button-primary.disabled, #bbpress-forums fieldset.bbp-form .disabled.button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .disabled.submit.btn,
+#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:disabled, .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic:disabled, .button-primary.disabled, #bbpress-forums fieldset.bbp-form .disabled.button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .disabled.submit.btn,
 #bbpress-forums fieldset.bbp-form .disabled.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .disabled.submit.favorite-toggle,
+#bbpress-forums fieldset.bbp-form .disabled.submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .disabled.create-topic,
 .download-button[disabled],
 .download-button:disabled,
 .download-button.disabled,
@@ -1757,7 +1746,9 @@ button[type=submit].disabled {
 #bbpress-forums .button-primary.button-hero.subscription-toggle,
 #bbpress-forums .button-primary.button-hero.favorite-toggle, #bbpress-forums fieldset.bbp-form .button.button-hero.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .button-hero.submit.btn,
 #bbpress-forums fieldset.bbp-form .button-hero.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle,
+#bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .button.button-hero.create-topic, .bbpress #bbpress-forums .bbp-create-topic-wrapper .reviews-submit-link > .button-hero.create-topic.btn,
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .button-hero.create-topic.subscription-toggle,
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .button-hero.create-topic.favorite-toggle,
 .download-button.button.button-hero,
 #bbpress-forums .reviews-submit-link > .download-button.button-hero.btn,
 #bbpress-forums .download-button.button-hero.subscription-toggle,
@@ -1780,11 +1771,15 @@ button[type=submit].button.button-hero,
 #bbpress-forums .button-primary.button-hero.active.subscription-toggle,
 #bbpress-forums .button-primary.button-hero.active.favorite-toggle, #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .button-hero.active.submit.btn,
 #bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle, .button-primary.button.button-hero.active:hover, .button-primary.button.button-hero.active:focus, .button-primary.button.button-hero:active, #bbpress-forums .reviews-submit-link > .button-primary.button-hero.btn:active,
+#bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .button.button-hero.active.create-topic, .bbpress #bbpress-forums .bbp-create-topic-wrapper .reviews-submit-link > .button-hero.active.create-topic.btn,
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .button-hero.active.create-topic.subscription-toggle,
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .button-hero.active.create-topic.favorite-toggle, .button-primary.button.button-hero.active:hover, .button-primary.button.button-hero.active:focus, .button-primary.button.button-hero:active, #bbpress-forums .reviews-submit-link > .button-primary.button-hero.btn:active,
 #bbpress-forums .button-primary.button-hero.subscription-toggle:active,
 #bbpress-forums .button-primary.button-hero.favorite-toggle:active, #bbpress-forums fieldset.bbp-form .button.button-hero.submit:active, #bbpress-forums fieldset.bbp-form .reviews-submit-link > .button-hero.submit.btn:active,
 #bbpress-forums fieldset.bbp-form .button-hero.submit.subscription-toggle:active,
-#bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle:active,
+#bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle:active, .bbpress #bbpress-forums .bbp-create-topic-wrapper .button.button-hero.create-topic:active, .bbpress #bbpress-forums .bbp-create-topic-wrapper .reviews-submit-link > .button-hero.create-topic.btn:active,
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .button-hero.create-topic.subscription-toggle:active,
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .button-hero.create-topic.favorite-toggle:active,
 .download-button.button.button-hero.active,
 #bbpress-forums .reviews-submit-link > .download-button.button-hero.active.btn,
 #bbpress-forums .download-button.button-hero.active.subscription-toggle,
@@ -1858,7 +1853,7 @@ button[type=submit].button.button-hero:active,
 
 .button-group > .button-primary, #bbpress-forums fieldset.bbp-form .button-group > .button.submit, #bbpress-forums fieldset.bbp-form .reviews-submit-link.button-group > .submit.btn,
 #bbpress-forums fieldset.bbp-form .button-group > .submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .button-group > .submit.favorite-toggle {
+#bbpress-forums fieldset.bbp-form .button-group > .submit.favorite-toggle, .bbpress #bbpress-forums .bbp-create-topic-wrapper .button-group > .create-topic {
 	z-index: 100;
 }
 
@@ -2424,20 +2419,23 @@ body.single .sidebar {
 --------------------------------------------------------------*/
 .search-form {
 	font-size: 0;
-	margin-bottom: 2rem;
 	max-width: 100%;
 	position: relative;
 }
 .search-form .search-field {
 	border: none;
-	border-radius: 0;
-	box-shadow: none;
+	border-radius: 0 var(--wp--custom--form--border--radius) var(--wp--custom--form--border--radius) 0;
 	display: block;
-	font-size: 1rem;
-	margin: 0 auto;
 	max-width: 100%;
-	padding: 0.5rem;
-	width: 22.7373675443rem;
+	width: 232px;
+	background-color: var(--wp--custom--form--search--color--background);
+	font-size: var(--wp--custom--form--typography--font-size);
+	line-height: var(--wp--custom--button--typography--line-height);
+	color: var(--wp--custom--form--search--color--text);
+	box-shadow: var(--wp--custom--form--color--box-shadow);
+	font-family: inherit;
+	padding-inline: var(--wp--custom--form--padding--inline);
+	padding-block: var(--wp--custom--form--padding--block);
 }
 .search-form .button-search {
 	border-right: none;
@@ -2466,7 +2464,8 @@ body.single .sidebar {
 	color: #32373c;
 	display: block;
 	height: 100%;
-	padding: 0.5rem 1rem;
+	padding-inline: var(--wp--custom--form--padding--block);
+	padding-block: var(--wp--custom--form--padding--block);
 	position: absolute;
 	left: 0;
 	text-shadow: none;
@@ -2511,12 +2510,6 @@ body.single .sidebar {
 	.site-header:not(.home) .search-form .search-field {
 		width: 10rem;
 	}
-}
-.site-main .search-form .search-field {
-	border: 1px solid var(--wp--preset--color--light-grey-1);
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
-	padding: 0.5rem;
-	width: 100%;
 }
 
 .search .site-main {
@@ -3034,60 +3027,34 @@ body.category #main .archive-pagination {
 	display: inline-block;
 	color: #f00;
 }
-.bbpress #bbpress-forums .create-topic {
-	font-size: 0.8rem;
-}
 @media (min-width: 600px) {
 	.bbpress #bbpress-forums .create-topic {
 		float: right;
 	}
 }
-.bbpress #bbpress-forums .create-topic::before {
-	color: #000;
-	content: "\f132";
-	font: 400 16px/1 dashicons;
-	margin: 0 -4px 0 4px;
-	vertical-align: middle;
-}
 .bbpress #bbpress-forums .bbp-create-topic-wrapper {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
-	padding: 15px 0;
+	gap: 10px;
+	margin-bottom: var(--wp--style--block-gap);
 	text-align: center;
 }
 @media (min-width: 767px) {
 	.bbpress #bbpress-forums .bbp-create-topic-wrapper {
 		flex-direction: row;
-		justify-content: space-between;
+		align-items: center;
 	}
 }
 .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic {
-	float: none;
-	height: auto;
-	padding: 9px 12px;
-}
-.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic::before {
-	color: #fff;
-}
-.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic.button-secondary::before {
-	color: #000;
-}
-.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
-	margin: 0 6px 0 8px;
-	font-size: 0.8rem;
-}
-.bbpress #bbpress-forums .bbp-create-topic-wrapper .search-form {
-	display: none;
+	line-height: var(--wp--custom--button--typography--line-height);
+	padding-inline: var(--wp--custom--form--padding--inline);
+	padding-block: var(--wp--custom--form--padding--block);
 }
 @media (max-width: 767px) {
 	.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic,
-	.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
-		display: block;
+	.bbpress #bbpress-forums .bbp-create-topic-wrapper .search-form,
+	.bbpress #bbpress-forums .bbp-create-topic-wrapper .search-field {
 		width: 100%;
-	}
-	.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
-		margin: 3px 0;
 	}
 }
 .bbpress #bbpress-forums .bbp-pagination {
