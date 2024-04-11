@@ -37,7 +37,7 @@
 
 				<?php if ( ! bbp_is_topic_edit() && ! bbp_is_forum_closed() ) : ?>
 
-					<div class="bbp-template-notice">
+					<div class="bbp-template-notice info">
 
 						<?php if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) : ?>
 
