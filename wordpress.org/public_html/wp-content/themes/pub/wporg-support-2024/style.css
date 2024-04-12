@@ -2551,6 +2551,11 @@ body.category #main .archive-pagination {
 	line-height: inherit;
 	overflow: inherit;
 }
+#bbpress-forums h1 {
+	font-size: var(--wp--preset--font-size--heading-1);
+	line-height: var(--wp--custom--heading--level-1--typography--line-height);
+	padding-bottom: unset;
+}
 
 .bbpress main#main .entry-content,
 .bbpress main#main .entry-footer,
@@ -2961,6 +2966,9 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .bbp-pagination .page-numbers:last-child {
 	border-radius: 0 3px 3px 0;
 }
+.bbpress #bbpress-forums h1 + .bbp-pagination {
+	display: none !important;
+}
 .bbpress #bbpress-forums .bbp-topic-pagination a {
 	border: 1px solid #ddd;
 }
@@ -3168,18 +3176,17 @@ body.category #main .archive-pagination {
 	}
 }
 
-.single-forum .bbp-topic-form,
+body.single-forum #bbpress-forums .bbp-topic-form,
 .bbp-view .bbp-topic-form {
-	margin-top: 1rem;
-	padding-top: 1rem;
-	border-top: 1px solid var(--wp--custom--color--border);
+	margin-top: var(--wp--preset--spacing--30);
 	clear: both;
+	border-top: none;
 }
-.single-forum .bbp-topic-form ul,
+body.single-forum #bbpress-forums .bbp-topic-form ul,
 .bbp-view .bbp-topic-form ul {
 	padding: 0 16px !important;
 }
-.single-forum .bbp-topic-form ul li,
+body.single-forum #bbpress-forums .bbp-topic-form ul li,
 .bbp-view .bbp-topic-form ul li {
 	list-style: initial !important;
 }
@@ -3473,15 +3480,12 @@ body.single-topic:not(body.topic-edit) .entry-content header {
 	border: unset;
 	padding: unset;
 }
-body.single-topic:not(body.topic-edit) div.bbp-breadcrumb {
-	float: none;
-}
 
 div.bbp-breadcrumb {
-	font-size: 0.8rem;
+	font-size: var(--wp--preset--font-size--small);
 	margin-bottom: 15px;
 	color: var(--wp--preset--color--charcoal-3);
-	line-height: 27px;
+	float: none;
 }
 div.bbp-breadcrumb p {
 	margin: 0 !important;

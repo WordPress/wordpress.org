@@ -17,6 +17,8 @@
 
 		<div id="split-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-split">
 
+			<h1><?php printf( __( 'Split topic "%s"', 'wporg-forums' ), bbp_get_topic_title() ); ?></h1>
+
 			<form id="split_topic" name="split_topic" method="post" action="<?php the_permalink(); ?>">
 
 				<fieldset class="bbp-form">

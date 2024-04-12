@@ -13,6 +13,8 @@
 
 <div id="bbpress-forums">
 
+	<h1><?php bbp_view_title(); ?></h1>
+
 	<?php do_action( 'wporg_compat_before_single_view' ); ?>
 
 	<?php bbp_set_query_name( bbp_get_view_rewrite_id() ); ?>

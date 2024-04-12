@@ -14,24 +14,27 @@
 
 			<?php do_action( 'bbp_theme_before_topic_form' ); ?>
 
+			<?php if ( bbp_is_topic_edit() ) { ?>
+
+				<h1>
+					<?php printf( __( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), bbp_get_topic_title() ); ?>
+				</h1>
+
+			<?php } else { ?>
+
+				<h2>
+					<?php if ( bbp_is_single_forum() ) {
+						_e( 'Create a new topic in this forum', 'wporg-forums' );
+					} elseif ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+						_e( 'Create a new review', 'wporg-forums' );
+					} else {
+						_e( 'Create a new topic', 'wporg-forums' );
+					} ?>
+				</h2>
+
+			<?php } ?>
+
 			<fieldset class="bbp-form">
-				<legend>
-
-					<?php
-						if ( bbp_is_topic_edit() ) {
-							printf( __( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), bbp_get_topic_title() );
-						} else {
-							if ( bbp_is_single_forum() ) {
-								_e( 'Create a new topic in this forum', 'wporg-forums' );
-							} elseif ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
-								_e( 'Create a new review', 'wporg-forums' );
-							} else {
-								_e( 'Create a new topic', 'wporg-forums' );
-							}
-						}
-					?>
-
-				</legend>
 
 				<?php do_action( 'bbp_theme_before_topic_form_notices' ); ?>
 
