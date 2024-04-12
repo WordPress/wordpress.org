@@ -35,27 +35,33 @@ class Status_Transitions {
 	}
 
 	/**
-	 * Get the list of allowed status transitions for a given plugin.
+	 * Get the list of allowed status transitions for a given plugin status & post.
 	 *
-	 * @param string $post_status Plugin post status.
+	 * @param string   $post_status Plugin post status.
+	 * @param \WP_Post $post        Plugin post object.
 	 *
 	 * @return array An array of allowed post status transitions.
 	 */
-	public static function get_allowed_transitions( $post_status ) {
+	public static function get_allowed_transitions( $post_status, $post ) {
+		// NOTE: $post_status and $post->post_status will differ, as it's used during a pre-update hook.
 		switch ( $post_status ) {
 			case 'new':
 				$transitions = array( 'pending', 'approved', 'rejected' );
 				break;
 			case 'pending':
-				$transitions = array( 'approved', 'rejected' );
+				$transitions = array( 'approved', 'rejected', 'new' );
 				break;
 			case 'approved':
 				// Plugins move from 'approved' to 'publish' on first commit, but cannot be published manually.
 				$transitions = array( 'disabled', 'closed' );
 				break;
 			case 'rejected':
-				// Rejections cannot be recovered.
 				$transitions = array();
+				// If it was rejected less than a week ago, allow it to be recovered.
+				$rejected_date = get_post_meta( $post->ID, '_rejected', true );
+				if ( $rejected_date >= strtotime( '-1 week' ) ) {
+					$transitions[] = 'pending';
+				}
 				break;
 			case 'publish':
 				$transitions = array( 'disabled', 'closed' );
@@ -96,7 +102,7 @@ class Status_Transitions {
 		}
 
 		// ...or it's a plugin admin...
-		if ( current_user_can( 'plugin_approve', $postarr['ID'] ) && in_array( $postarr['post_status'], self::get_allowed_transitions( $old_status ) ) ) {
+		if ( current_user_can( 'plugin_approve', $postarr['ID'] ) && in_array( $postarr['post_status'], self::get_allowed_transitions( $old_status, get_post( $postarr['ID'] ) ) ) ) {
 			return $data;
 		}
 
@@ -157,6 +163,17 @@ class Status_Transitions {
 				$this->save_close_reason( $post->ID );
 				$this->set_translation_status( $post, 'inactive' );
 				break;
+
+			case 'pending':
+				if ( 'rejected' === $old_status ) {
+					$this->restore_rejected_plugin( $post );
+				}
+
+			case 'new':
+				// If it's moved from Pending to new, unasign.
+				if ( 'pending' === $old_status ) {
+					$this->clear_reviewer( $post );
+				}
 		}
 
 		// Record the time a plugin was transitioned into a specific status.
@@ -294,6 +311,25 @@ class Status_Transitions {
 		);
 
 		$email->send();
+	}
+
+	/**
+	 * Restores a rejected plugin.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public function restore_rejected_plugin( $post ) {
+		$slug = $post->post_name;
+		$slug = preg_replace( '!^rejected-(.+)-rejected$!i', '$1', $slug );
+
+		// Change slug back to 'plugin-name'.
+		wp_update_post( array(
+			'ID'        => $post->ID,
+			'post_name' => $slug,
+		) );
+
+		delete_post_meta( $post_id, '_rejection_reason' );
+		delete_post_meta( $post_id, 'plugin_rejected_date' );
 	}
 
 	/**

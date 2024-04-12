@@ -65,6 +65,9 @@ class Controls {
 			case 'closed':
 				$label = __( 'Close', 'wporg-plugins' );
 				break;
+			case 'new':
+				$label = __( 'Mark as Pending Initial Review', 'wporg-plugins' );
+				break;
 			case 'pending':
 			default:
 				$label = __( 'Mark as Pending', 'wporg-plugins' );
@@ -88,7 +91,7 @@ class Controls {
 		$statuses = array( 'new', 'pending' );
 
 		if ( current_user_can( 'plugin_approve', $post ) ) {
-			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status );
+			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status, $post );
 		}
 
 		$close_reasons     = Template::get_close_reasons();
@@ -140,8 +143,7 @@ class Controls {
 			foreach ( $statuses as $status ) {
 				if ( 'pending' === $status && ! $post->assigned_reviewer ) {
 					printf(
-						'<p class="pending-assign"><button onclick="%s" type="submit" name="post_status" value="%s" class="button set-plugin-status button-primary">%s</button></p>',
-						esc_attr( "document.getElementById('assigned_reviewer').value = userSettings.uid" ),
+						'<p class="pending-assign"><button type="submit" name="post_status" value="%s" class="button set-plugin-status pending-and-assign button-primary">%s</button></p>',
 						esc_attr( $status ),
 						esc_attr__( 'Mark as Pending & Assign Review', 'wporg-plugins' ),
 					);
