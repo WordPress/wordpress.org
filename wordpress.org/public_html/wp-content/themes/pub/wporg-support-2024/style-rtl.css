@@ -1038,6 +1038,13 @@ big {
 	z-index: var(--wp--custom--z-index--iso-editor);
 }
 
+.wp-block-quote {
+	font-size: var(--wp--preset--font-size--normal);
+	line-height: var(--wp--custom--body--short-text--typography--line-height);
+	padding-right: var(--wp--preset--spacing--20);
+	font-family: var(--wp--preset--font-family--inter);
+}
+
 :where(.wp-block-search__button-inside .wp-block-search__inside-wrapper) {
 	border: none;
 }
