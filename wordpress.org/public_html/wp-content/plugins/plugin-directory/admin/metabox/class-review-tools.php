@@ -114,7 +114,11 @@ class Review_Tools {
 
 		$zip_files = array();
 		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
-			$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
+			$zip_files[ $zip_file->post_date ] = array(
+				wp_get_attachment_url( $zip_file->ID ),
+				$zip_file,
+				get_attached_file( $zip_file->ID )
+			);
 		}
 
 		if ( $zip_files ) {
@@ -125,10 +129,15 @@ class Review_Tools {
 			echo '<p><strong>Zip files:</strong></p>';
 			echo '<ul class="plugin-zip-files">';
 			foreach ( $zip_files as $zip_date => $zip ) {
-				list( $zip_url, $zip_file ) = $zip;
-				$zip_size                   = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
-				$zip_preview                = Template::preview_link_zip( $slug, $zip_file->ID );
-				$zip_pcp                    = Template::preview_link_zip( $slug, $zip_file->ID, 'pcp' );
+				list( $zip_url, $zip_file, $file_on_disk ) = $zip;
+
+				if ( ! file_exists( $file_on_disk ) ) {
+					continue;
+				}
+
+				$zip_size    = size_format( filesize( $file_on_disk ), 1 );
+				$zip_preview = Template::preview_link_zip( $slug, $zip_file->ID );
+				$zip_pcp     = Template::preview_link_zip( $slug, $zip_file->ID, 'pcp' );
 
 				printf(
 					'<li>%1$s v%2$s <a href="%3$s" title="%4$s">%5$s</a> (%6$s) (<a href="%7$s" target="_blank">preview</a> | <a href="%8$s" target="_blank">pcp</a>)</li>',
