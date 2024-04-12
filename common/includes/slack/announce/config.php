@@ -109,8 +109,10 @@ function get_whitelist() {
 			'chaion07',
 			'chanthaboune',
 			'costdev',
+			'colorful-tones',
 			'danieltj',
 			'desrosj',
+			'fabiankaegy',
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
 			'ironprogrammer',
