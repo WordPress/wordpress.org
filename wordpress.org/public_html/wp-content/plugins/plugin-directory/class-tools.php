@@ -239,6 +239,8 @@ class Tools {
 			$email->send();
 		}
 
+		Tools::subscribe_user_to_forum_threads( $user, $post );
+
 		return $result;
 	}
 
@@ -405,6 +407,8 @@ class Tools {
 			);
 			$email->send();
 		}
+
+		Tools::subscribe_user_to_forum_threads( $user, $post );
 
 		return $result;
 	}
@@ -637,5 +641,40 @@ class Tools {
 			'user_id'              => $user->ID,
 			'comment_content'      => $note,
 		] );
+	}
+
+	/**
+	 * Subscribe a user to the forum topics for a given plugin.
+	 *
+	 * @param WP_User|int $user_id The user to subscribe.
+	 * @param WP_Post     $post    The plugin to subscribe to.
+	 * @return bool
+	 */
+	public static function subscribe_user_to_forum_threads( $user_id, $post = null ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+
+		if ( ! $user_id || ! $post || ! defined( 'PLUGIN_API_INTERNAL_BEARER_TOKEN' ) ) {
+			return false;
+		}
+
+		if ( $user_id instanceof \WP_User ) {
+			$user_id = $user_id->ID;
+		}
+
+		$request = wp_remote_post(
+			'https://wordpress.org/support/wp-json/wporg-support/v1/subscribe-user-to-term',
+			[
+				'body'    => [
+					'type'    => 'plugin',
+					'slug'    => $post->post_name,
+					'user_id' => $user_id,
+				],
+				'headers' => [
+					'Authorization' => 'Bearer ' . PLUGIN_API_INTERNAL_BEARER_TOKEN,
+				],
+			]
+		);
+
+		return 200 === wp_remote_retrieve_response_code( $request );
 	}
 }

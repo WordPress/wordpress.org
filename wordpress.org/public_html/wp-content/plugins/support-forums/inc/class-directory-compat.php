@@ -288,25 +288,7 @@ abstract class Directory_Compat {
 			$this->register_views();
 
 			// Set the term for this view so we can reuse it.
-			$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
-
-			// New compats won't have any support topics or reviews, so will
-			// not yet exist as a compat term.
-			if ( ! $this->term && $this->get_object( $this->slug() ) ) {
-				$term_name = $this->slug();
-				if ( ! sanitize_title( $term_name ) ) {
-					// This happens when the slug is all non-ascii such as %e5%8f%8b%e8%a8%80, which fails to insert.
-					$term_name = urldecode( $term_name );
-				}
-				$term = wp_insert_term( $term_name, $this->taxonomy(), array( 'slug' => $this->slug() ) );
-
-				// Term exists already? Race-condition, or get_term_by() couldn't find $slug..
-				if ( is_wp_error( $term ) && $term->get_error_data( 'term_exists' ) ) {
-					$this->term = get_term( $term->get_error_data( 'term_exists' ) );
-				} elseif ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) {
-					$this->term = get_term( $term['term_id'] );
-				}
-			}
+			$this->initialize_term();
 
 			// Add plugin- and theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar',       array( $this, 'do_view_sidebar' ) );
@@ -344,6 +326,38 @@ abstract class Directory_Compat {
 			}
 
 			$this->loaded = true;
+		}
+	}
+
+	/**
+	 * Initialises the WP_Term for the compat view.
+	 *
+	 * If the term does not exist, it will be created.
+	 */
+	public function initialize_term() {
+		if ( ! $this->slug() ) {
+			return;
+		}
+
+		$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
+
+		if ( $this->term || ! $this->get_object( $this->slug() ) ) {
+			return;
+		}
+
+		$term_name = $this->slug();
+		if ( ! sanitize_title( $term_name ) ) {
+			// This happens when the slug is all non-ascii such as %e5%8f%8b%e8%a8%80, which fails to insert.
+			$term_name = urldecode( $term_name );
+		}
+
+		$term = wp_insert_term( $term_name, $this->taxonomy(), array( 'slug' => $this->slug() ) );
+
+		// Term exists already? Race-condition, or get_term_by() couldn't find $slug..
+		if ( is_wp_error( $term ) && $term->get_error_data( 'term_exists' ) ) {
+			$this->term = get_term( $term->get_error_data( 'term_exists' ) );
+		} elseif ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) {
+			$this->term = get_term( $term['term_id'] );
 		}
 	}
 

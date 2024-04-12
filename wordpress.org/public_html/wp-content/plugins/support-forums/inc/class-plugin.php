@@ -39,6 +39,7 @@ class Plugin {
 	public $plugin_subscriptions = false; // Defined via Support_Compat
 	public $theme_subscriptions  = false; // Defined via Support_Compat
 	public $blocks               = false;
+	public $rest_api             = false;
 
 	/**
 	 * Define whether this is the global forums, or a locale forum.
@@ -73,6 +74,7 @@ class Plugin {
 		$this->stats        = new Stats;
 		$this->emails       = new Emails;
 		$this->audit_log    = new Audit_Log;
+		$this->rest_api     = new REST_API;
 
 		// Set a flag to indicate whether this is the global forums, or a locale forum.
 		$this->is_main_forums = (
