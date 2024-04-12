@@ -108,9 +108,11 @@ function get_whitelist() {
 			'cbringmann', // @Chloé Bringmann on Slack
 			'chaion07',
 			'chanthaboune',
+			'colorful-tones',
 			'costdev',
 			'danieltj',
 			'desrosj',
+			'fabiankaegy',
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
 			'ironprogrammer',
