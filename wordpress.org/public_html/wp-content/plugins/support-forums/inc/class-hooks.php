@@ -713,12 +713,12 @@ class Hooks {
 
 			if ( bbp_current_user_can_access_create_topic_form() ) {
 				$btn = sprintf(
-					'<a class="button button-secondary create-topic" href="#new-topic-0">%s</a>',
+					'<a class="button button-primary create-topic" href="#new-topic-0">%s</a>',
 					$is_reviews ? __( 'Create Review', 'wporg-forums' ) : __( 'Create Topic', 'wporg-forums' )
 				);
 			} elseif ( ! bbp_is_forum_closed() && ! is_user_logged_in() ) {
 				$btn = sprintf(
-					'<a class="button button-secondary create-topic login" href="%s">%s</a>',
+					'<a class="button button-primary create-topic login" href="%s">%s</a>',
 					wp_login_url(),
 					$is_reviews ? __( 'Log in to Create a Review', 'wporg-forums' ) : __( 'Log in to Create a Topic', 'wporg-forums' )
 				);
