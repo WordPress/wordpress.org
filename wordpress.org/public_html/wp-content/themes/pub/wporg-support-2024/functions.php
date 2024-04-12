@@ -6,6 +6,11 @@
  */
 
 /**
+ * Include locale specific styles.
+ */
+require_once get_theme_root() . '/wporg-parent-2021/inc/rosetta-styles.php';
+
+/**
  * Use the ‘Lead Topic’ uses the single topic part
  * allowing styling the lead topic separately from the main reply loop.
  */
