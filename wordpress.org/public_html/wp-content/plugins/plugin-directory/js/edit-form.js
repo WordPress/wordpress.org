@@ -52,10 +52,21 @@
 		},
 
 		setPluginStatus: function() {
-			if ( 'approved' === $(this).val() ) {
+			var $this = $(this),
+				status = $this.val();
+
+			if ( 'new' == status ) {
+				jQuery('#assigned_reviewer').val(0);
+
+			} else if ( 'pending' == status && $this.hasClass('pending-and-assign') ) {
+				jQuery('#assigned_reviewer').val( userSettings.uid );
+
+			} else if ( 'approved' === status ) {
 				return confirm( pluginDirectory.approvePluginAYS );
-			} else if ( 'rejected' === $(this).val() ) {
+
+			} else if ( 'rejected' === status ) {
 				return confirm( pluginDirectory.rejectPluginAYS );
+
 			} else {
 				return true;
 			}

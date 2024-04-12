@@ -550,11 +550,17 @@ class Customizations {
 		// Record the slug change.
 		$plugin = get_post( $postarr['ID'] );
 		if ( $plugin && $plugin->post_name !== $data['post_name'] ) {
-			Tools::audit_log( sprintf(
-				"Slug changed from '%s' to '%s'.",
-				$plugin->post_name,
-				$data['post_name']
-			), $plugin->ID );
+			// Only log if the slugs don't appear to be rejection-related.
+			if (
+				! preg_match( '!^rejected-.+-rejected$!', $post->post_name ) &&
+				! preg_match( '!^rejected-.+-rejected$!', $data['post_name'] )
+			) {
+				Tools::audit_log( sprintf(
+					"Slug changed from '%s' to '%s'.",
+					$plugin->post_name,
+					$data['post_name']
+				), $plugin->ID );
+			}
 		}
 
 		return $data;
