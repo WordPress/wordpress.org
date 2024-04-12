@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator;
 
 class Readme_Validator {
@@ -9,21 +10,34 @@ class Readme_Validator {
 	 * Displays a form to validate readme.txt files and blobs of text.
 	 */
 	public static function display() {
+		$readme_url      = '';
+		$readme_contents = '';
+		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
+			$readme_url = wp_unslash( $_REQUEST['readme'] );
+		}
+
+		if ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
+			$readme_contents = base64_decode( wp_unslash( $_POST['readme_contents'] ), true );
+		}
+
+		// If the user has specified a plugin URL, validate the stable tags readme (Well, try to, we don't know it's exact filename).
+		if ( $readme_url && preg_match( '!^https?://([^./]+\.)?wordpress.org/plugins/(?P<slug>[^/]+)!i', $readme_url, $m ) ) {
+			$plugin = Plugin_Directory::get_plugin_post( $m['slug'] );
+
+			if ( $plugin ) {
+				$readme_url         = 'https://plugins.svn.wordpress.org/' . $plugin->post_name . '/' . ( ( $plugin->stable_tag && 'trunk' != $plugin->stable_tag ) ? 'tags/' . $plugin->stable_tag : 'trunk' ) . '/readme.txt';
+				$_REQUEST['readme'] = $readme_url;
+			}
+		}
+
 		ob_start();
 		?>
 		<div class="wrap">
 			<?php
-			if ( $_REQUEST ) {
-				self::validate_readme();
-			}
+			if ( $readme_contents || $readme_url ) {
+				self::validate_readme( $readme_contents ?: $readme_url );
 
-			$readme_url      = '';
-			$readme_contents = '';
-			if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
-				$readme_url = wp_unslash( $_REQUEST['readme'] );
-			}
-			if ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
-				$readme_contents = base64_decode( wp_unslash( $_POST['readme_contents'] ), true );
+				$readme_contents = Validator::instance()->last_content ?: $readme_contents;
 			}
 			?>
 
@@ -61,18 +75,17 @@ class Readme_Validator {
 
 	/**
 	 * Validates readme.txt contents and adds feedback.
+	 *
+	 * @param string $readme_url_or_contents URL or contents of the readme.txt file.
+	 * @return void
 	 */
-	protected static function validate_readme() {
-		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
-			$errors = Validator::instance()->validate_url( wp_unslash( $_REQUEST['readme'] ) );
+	protected static function validate_readme( $readme_url_or_contents = '' ) {
 
-		} elseif ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
-			$contents = base64_decode( wp_unslash( $_REQUEST['readme_contents'] ), true );
-			if ( ! $contents ) {
-				return;
-			}
+		if ( str_starts_with( $readme_url_or_contents, 'http://' ) || str_starts_with( $readme_url_or_contents, 'https://' ) ) {
+			$errors = Validator::instance()->validate_url( $readme_url_or_contents );
 
-			$errors = Validator::instance()->validate_content( $contents );
+		} elseif ( $readme_url_or_contents ) {
+			$errors = Validator::instance()->validate_content( $readme_url_or_contents );
 
 		} else {
 			return;

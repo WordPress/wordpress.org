@@ -12,6 +12,13 @@ use WordPressdotorg\Plugin_Directory\Trademarks;
 class Validator {
 
 	/**
+	 * Last content validated.
+	 *
+	 * @var string
+	 */
+	public $last_content = '';
+
+	/**
 	 * Fetch the instance of the Validator class.
 	 *
 	 * @static
@@ -85,6 +92,9 @@ class Validator {
 	 */
 	public function validate( $readme ) {
 		$errors = $warnings = $notes = array();
+
+		// Store the last validated content for later use.
+		$this->last_content = $readme;
 
 		// Security note: Keep the data: protocol here, Parser accepts a string HOWEVER
 		// if a submitted readme.txt URL contents were to contain a file or URL-like string,
