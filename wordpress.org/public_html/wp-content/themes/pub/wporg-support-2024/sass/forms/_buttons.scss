@@ -48,7 +48,7 @@
 .button-primary,
 .button-secondary {
 	border: 1px solid;
-	border-radius: 3px;
+	border-radius: 2px;
 	box-sizing: border-box;
 	cursor: pointer;
 	display: inline-block;
@@ -239,6 +239,7 @@ button[type="submit"] {
 
 	&:visited {
 		box-shadow: none;
+		color: var(--wp--custom--button--color--text);
 	}
 
 	&.hover,
@@ -253,7 +254,7 @@ button[type="submit"] {
 	&.focus,
 	&:focus {
 		background-color: var(--wp--custom--button--color--background);
-		box-shadow: inset 0 0 0 3px var(--wp--preset--color--white);
+		box-shadow: inset 0 0 0 3px var(--wp--preset--color--white) !important;
 		outline: 1.5px solid var(--wp--custom--button--focus--border--color);
 		outline-offset: -1.5px;
 	}

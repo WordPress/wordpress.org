@@ -63,10 +63,6 @@ $paginationBreakPoint: "600px";
 		@extend .clear;
 	}
 
-	&.bbp-view-reviews #bbpress-forums .bbp-create-topic-wrapper .search-form {
-		width: 100%;
-	}
-
 	&.bbp-view-all-replies {
 
 		#bbpress-forums .status-pending {
@@ -450,32 +446,15 @@ $paginationBreakPoint: "600px";
 
 		.bbp-create-topic-wrapper {
 			display: flex;
-			flex-direction: column;
+			flex-wrap: wrap;
 			gap: 10px;
 			margin-bottom: var(--wp--style--block-gap);
-			text-align: center;
-
-			@media (min-width: 767px) {
-				flex-direction: row;
-				align-items: center;
-			}
 
 			.create-topic {
-
-				@extend .button-primary;
 				// Match search field
 				line-height: var(--wp--custom--button--typography--line-height);
 				padding-inline: var(--wp--custom--form--padding--inline);
 				padding-block: var(--wp--custom--form--padding--block);
-			}
-
-			@media (max-width: 767px) {
-
-				.create-topic,
-				.search-form,
-				.search-field {
-					width: 100%;
-				}
 			}
 		}
 
@@ -664,11 +643,11 @@ $paginationBreakPoint: "600px";
 	.subscription-toggle,
 	.favorite-toggle {
 
-		@extend .button;
+		@extend .button-primary;
 	}
 
 	.wporg-bbp-term-subscription {
-		margin-bottom: 1rem;
+		margin-bottom: var(--wp--style--block-gap);
 	}
 }
 

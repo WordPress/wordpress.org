@@ -339,19 +339,21 @@ body:not(.trac):not(.home-page) #main {
 
 /*--------------------------------------------------------------
 # .search-form
+# Matches wp-block-search styles
 --------------------------------------------------------------*/
 .search-form {
+	display: inline-block;
 	font-size: 0;
 	max-width: 100%;
 	position: relative;
+	width: 232px;
 
-	// Matches wp-block-search styles
 	.search-field {
 		border: none;
 		border-radius: var(--wp--custom--form--border--radius) 0 0 var(--wp--custom--form--border--radius);
 		display: block;
 		max-width: 100%;
-		width: 232px;
+		width: 100%;
 		background-color: var(--wp--custom--form--search--color--background);
 		font-size: var(--wp--custom--form--typography--font-size);
 		line-height: var(--wp--custom--button--typography--line-height);
