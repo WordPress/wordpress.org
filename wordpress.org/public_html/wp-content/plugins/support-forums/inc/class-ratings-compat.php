@@ -44,12 +44,12 @@ class Ratings_Compat {
 				$filter = 5;
 			}
 			$this->filter = $filter;
-			add_filter( 'posts_clauses', array( $this, 'add_filter_to_posts_clauses' ) );
+			add_filter( 'posts_clauses', array( $this, 'add_filter_to_posts_clauses' ), 10, 2 );
 			add_action( 'pre_get_posts', array( $this, 'no_found_rows' ) );
 			add_filter( 'bbp_topic_pagination', array( $this, 'add_filter_topic_pagination' ) );
 
 			// <meta robots="noindex,follow"> for filtered views.
-			add_filter( 'wp_head', 'wp_no_robots' );
+			add_filter( 'wp_robots', 'wp_robots_no_robots' );
 		}
 
 		// Total reviews count. Can be altered using $this->filter if needed.
@@ -93,10 +93,11 @@ class Ratings_Compat {
 	/**
 	 * Allow ratings view to be filtered by star rating.
 	 */
-	public function add_filter_to_posts_clauses( $clauses ) {
+	public function add_filter_to_posts_clauses( $clauses, $query ) {
 		global $wpdb;
 
-		if ( false !== strpos( $clauses['where'], ".post_type = 'wp_navigation' " ) ) {
+		// Only adjust topic queries.
+		if ( ! in_array( bbp_get_topic_post_type(), (array) $query->get( 'post_type' ) ) ) {
 			return $clauses;
 		}
 
