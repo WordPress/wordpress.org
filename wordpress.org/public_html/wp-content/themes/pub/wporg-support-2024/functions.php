@@ -23,12 +23,12 @@ function add_site_navigation_menus( $menus ) {
 	return array(
 		'forums' => array(
 			array(
-				'label' => __( 'Guidelines', 'wporg-forums' ),
-				'url' => '/guidelines/',
-			),
-			array(
 				'label' => __( 'Welcome to Support', 'wporg-forums' ),
 				'url' => '/welcome/',
+			),
+			array(
+				'label' => __( 'Guidelines', 'wporg-forums' ),
+				'url' => '/guidelines/',
 			),
 			array(
 				'label' => __( 'Get Involved', 'wporg-forums' ),
