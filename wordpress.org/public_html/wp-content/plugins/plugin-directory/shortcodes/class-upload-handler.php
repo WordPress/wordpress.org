@@ -503,6 +503,14 @@ class Upload_Handler {
 		update_post_meta( $plugin_post->ID, '_submitted_zip_size', filesize( get_attached_file( $attachment->ID ) ) );
 		update_post_meta( $plugin_post->ID, '_submitted_zip_loc', $lines_of_code );
 
+		// Keep a log of all plugin names used by the plugin over time.
+		$plugin_names = get_post_meta( $plugin_post->ID, 'plugin_name_history', true ) ?: [];
+		if ( ! isset( $plugin_names[ $this->plugin['Name'] ] ) ) {
+			// [ 'Plugin Name' => '1.2.3', 'Plugin New Name' => '4.5.6' ]
+			$plugin_names[ $this->plugin['Name'] ] = $this->plugin['Version'];
+			update_post_meta( $plugin_post->ID, 'plugin_name_history', wp_slash( $plugin_names ) );
+		}
+
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
 		if ( $updating_existing ) {
