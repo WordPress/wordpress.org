@@ -24,76 +24,72 @@ use Exception;
 use GP;
 use WP_Post;
 use WP_Query;
+use Wporg\TranslationEvents\Attendee\Attendee;
+use Wporg\TranslationEvents\Attendee\Attendee_Repository;
+use Wporg\TranslationEvents\Event\Event_Form_Handler;
+use Wporg\TranslationEvents\Event\Event_Repository_Cached;
+use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 
 class Translation_Events {
-	public const CPT                     = 'translation_event';
-	public const USER_META_KEY_ATTENDING = 'translation-events-attending';
+	public const CPT = 'translation_event';
 
-	public static function get_instance() {
+	public static function get_instance(): Translation_Events {
 		static $instance = null;
 		if ( null === $instance ) {
+			require_once __DIR__ . '/autoload.php';
 			$instance = new self();
 		}
 		return $instance;
 	}
 
+	public static function get_event_repository(): Event_Repository_Interface {
+		static $event_repository = null;
+		if ( null === $event_repository ) {
+			$event_repository = new Event_Repository_Cached( self::get_attendee_repository() );
+		}
+		return $event_repository;
+	}
+
+	public static function get_attendee_repository(): Attendee_Repository {
+		static $attendee_repository = null;
+		if ( null === $attendee_repository ) {
+			$attendee_repository = new Attendee_Repository();
+		}
+		return $attendee_repository;
+	}
+
 	public function __construct() {
-		\add_action( 'wp_ajax_submit_event_ajax', array( $this, 'submit_event_ajax' ) );
-		\add_action( 'wp_ajax_nopriv_submit_event_ajax', array( $this, 'submit_event_ajax' ) );
-		\add_action( 'wp_enqueue_scripts', array( $this, 'register_translation_event_js' ) );
-		\add_action( 'init', array( $this, 'register_event_post_type' ) );
-		\add_action( 'add_meta_boxes', array( $this, 'event_meta_boxes' ) );
-		\add_action( 'save_post', array( $this, 'save_event_meta_boxes' ) );
-		\add_action( 'transition_post_status', array( $this, 'event_status_transition' ), 10, 3 );
-		\add_filter( 'gp_nav_menu_items', array( $this, 'gp_event_nav_menu_items' ), 10, 2 );
-		\add_filter( 'wp_insert_post_data', array( $this, 'generate_event_slug' ), 10, 2 );
-		\add_action( 'gp_init', array( $this, 'gp_init' ) );
-		\add_action( 'gp_before_translation_table', array( $this, 'add_active_events_current_user' ) );
-		\register_activation_hook( __FILE__, array( $this, 'activate' ) );
+		add_action( 'wp_ajax_submit_event_ajax', array( $this, 'submit_event_ajax' ) );
+		add_action( 'wp_ajax_nopriv_submit_event_ajax', array( $this, 'submit_event_ajax' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_translation_event_js' ) );
+		add_action( 'init', array( $this, 'register_event_post_type' ) );
+		add_action( 'add_meta_boxes', array( $this, 'event_meta_boxes' ) );
+		add_action( 'save_post', array( $this, 'save_event_meta_boxes' ) );
+		add_action( 'transition_post_status', array( $this, 'event_status_transition' ), 10, 3 );
+		add_filter( 'gp_nav_menu_items', array( $this, 'gp_event_nav_menu_items' ), 10, 2 );
+		add_filter( 'wp_insert_post_data', array( $this, 'generate_event_slug' ), 10, 2 );
+		add_action( 'gp_init', array( $this, 'gp_init' ) );
+		add_action( 'gp_before_translation_table', array( $this, 'add_active_events_current_user' ) );
+
+		if ( is_admin() ) {
+			Upgrade::upgrade_if_needed();
+		}
 	}
 
 	public function gp_init() {
-		require_once __DIR__ . '/templates/helper-functions.php';
-		require_once __DIR__ . '/includes/active-events-cache.php';
-		require_once __DIR__ . '/includes/event.php';
-		require_once __DIR__ . '/includes/routes/route.php';
-		require_once __DIR__ . '/includes/routes/event/create.php';
-		require_once __DIR__ . '/includes/routes/event/details.php';
-		require_once __DIR__ . '/includes/routes/event/edit.php';
-		require_once __DIR__ . '/includes/routes/event/list.php';
-		require_once __DIR__ . '/includes/routes/user/attend-event.php';
-		require_once __DIR__ . '/includes/routes/user/my-events.php';
-		require_once __DIR__ . '/includes/stats-calculator.php';
-		require_once __DIR__ . '/includes/stats-listener.php';
-
 		GP::$router->add( '/events?', array( 'Wporg\TranslationEvents\Routes\Event\List_Route', 'handle' ) );
 		GP::$router->add( '/events/new', array( 'Wporg\TranslationEvents\Routes\Event\Create_Route', 'handle' ) );
 		GP::$router->add( '/events/edit/(\d+)', array( 'Wporg\TranslationEvents\Routes\Event\Edit_Route', 'handle' ) );
 		GP::$router->add( '/events/attend/(\d+)', array( 'Wporg\TranslationEvents\Routes\User\Attend_Event_Route', 'handle' ), 'post' );
+		GP::$router->add( '/events/host/(\d+)/(\d+)', array( 'Wporg\TranslationEvents\Routes\User\Host_Event_Route', 'handle' ), 'post' );
 		GP::$router->add( '/events/my-events', array( 'Wporg\TranslationEvents\Routes\User\My_Events_Route', 'handle' ) );
 		GP::$router->add( '/events/([a-z0-9_-]+)', array( 'Wporg\TranslationEvents\Routes\Event\Details_Route', 'handle' ) );
 
-		$active_events_cache = new Active_Events_Cache();
-		$stats_listener      = new Stats_Listener( $active_events_cache );
+		$stats_listener = new Stats_Listener(
+			self::get_event_repository(),
+			self::get_attendee_repository(),
+		);
 		$stats_listener->start();
-	}
-
-	public function activate() {
-		global $gp_table_prefix;
-		$create_table = "
-		CREATE TABLE `{$gp_table_prefix}event_actions` (
-			`translate_event_actions_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-			`event_id` int(10) NOT NULL COMMENT 'Post_ID of the translation_event post in the wp_posts table',
-			`original_id` int(10) NOT NULL COMMENT 'ID of the translation',
-			`user_id` int(10) NOT NULL COMMENT 'ID of the user who made the action',
-			`action` enum('approve','create','reject','request_changes') NOT NULL COMMENT 'The action that the user made (create, reject, etc)',
-			`locale` varchar(10) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL COMMENT 'Locale of the translation',
-			`happened_at` datetime NOT NULL COMMENT 'When the action happened, in UTC',
-		PRIMARY KEY (`translate_event_actions_id`),
-		UNIQUE KEY `event_per_translated_original_per_user` (`event_id`,`locale`,`original_id`,`user_id`)
-		) COMMENT='Tracks translation actions that happened during a translation event'";
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		dbDelta( $create_table );
 	}
 
 	/**
@@ -130,7 +126,7 @@ class Translation_Events {
 	 * Add meta boxes for the event post type.
 	 */
 	public function event_meta_boxes() {
-		\add_meta_box( 'event_dates', 'Event Dates', array( $this, 'event_dates_meta_box' ), self::CPT, 'normal', 'high' );
+		add_meta_box( 'event_dates', 'Event Dates', array( $this, 'event_dates_meta_box' ), self::CPT, 'normal', 'high' );
 	}
 
 	/**
@@ -175,205 +171,13 @@ class Translation_Events {
 	}
 
 	/**
-	 * Validate the event dates.
-	 *
-	 * @param string $event_start The event start date.
-	 * @param string $event_end The event end date.
-	 * @return bool Whether the event dates are valid.
-	 * @throws Exception When dates are invalid.
-	 */
-	public function validate_event_dates( string $event_start, string $event_end ): bool {
-		if ( ! $event_start || ! $event_end ) {
-			return false;
-		}
-		$event_start = new DateTime( $event_start );
-		$event_end   = new DateTime( $event_end );
-		if ( $event_start < $event_end ) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
 	 * Handle the event form submission for the creation, editing, and deletion of events. This function is called via AJAX.
 	 */
 	public function submit_event_ajax() {
-		if ( ! is_user_logged_in() ) {
-			wp_send_json_error( esc_html__( 'The user must be logged in.', 'gp-translation-events' ), 403 );
-		}
-		$action           = isset( $_POST['form_name'] ) ? sanitize_text_field( wp_unslash( $_POST['form_name'] ) ) : '';
-		$event_id         = null;
-		$event            = null;
-		$response_message = '';
-		$form_actions     = array( 'draft', 'publish', 'delete' );
-		$is_nonce_valid   = false;
-		$nonce_name       = '_event_nonce';
-		if ( ! in_array( $action, array( 'create_event', 'edit_event', 'delete_event' ), true ) ) {
-			wp_send_json_error( esc_html__( 'Invalid form name.', 'gp-translation-events' ), 403 );
-		}
-		/**
-		 * Filter the ability to create, edit, or delete an event.
-		 *
-		 * @param bool $can_crud_event Whether the user can create, edit, or delete an event.
-		 */
-		$can_crud_event = apply_filters( 'gp_translation_events_can_crud_event', GP::$permission->current_user_can( 'admin' ) );
-		if ( 'create_event' === $action && ( ! $can_crud_event ) ) {
-			wp_send_json_error( esc_html__( 'The user does not have permission to create an event.', 'gp-translation-events' ), 403 );
-		}
-		if ( 'edit_event' === $action ) {
-			$event_id = isset( $_POST['event_id'] ) ? sanitize_text_field( wp_unslash( $_POST['event_id'] ) ) : '';
-			$event    = get_post( $event_id );
-			if ( ! ( $can_crud_event || current_user_can( 'edit_post', $event_id ) || intval( $event->post_author ) === get_current_user_id() ) ) {
-				wp_send_json_error( esc_html__( 'The user does not have permission to edit or delete the event.', 'gp-translation-events' ), 403 );
-			}
-		}
-		if ( 'delete_event' === $action ) {
-			$event_id = isset( $_POST['event_id'] ) ? sanitize_text_field( wp_unslash( $_POST['event_id'] ) ) : '';
-			$event    = get_post( $event_id );
-			if ( ! ( $can_crud_event || current_user_can( 'delete_post', $event->ID ) || get_current_user_id() === $event->post_author ) ) {
-				wp_send_json_error( esc_html__( 'You do not have permission to delete this event.', 'gp-translation-events' ), 403 );
-			}
-		}
-		if ( isset( $_POST[ $nonce_name ] ) ) {
-			$nonce_value = sanitize_text_field( wp_unslash( $_POST[ $nonce_name ] ) );
-			if ( wp_verify_nonce( $nonce_value, $nonce_name ) ) {
-				$is_nonce_valid = true;
-			}
-		}
-		if ( ! $is_nonce_valid ) {
-			wp_send_json_error( esc_html__( 'Nonce verification failed.', 'gp-translation-events' ), 403 );
-		}
-		// This is a list of slugs that are not allowed, as they conflict with the event URLs.
-		$invalid_slugs = array( 'new', 'edit', 'attend', 'my-events' );
-		$title         = isset( $_POST['event_title'] ) ? sanitize_text_field( wp_unslash( $_POST['event_title'] ) ) : '';
-		// This will be sanitized by santitize_post which is called in wp_insert_post.
-		$description    = isset( $_POST['event_description'] ) ? force_balance_tags( wp_unslash( $_POST['event_description'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$event_start    = isset( $_POST['event_start'] ) ? sanitize_text_field( wp_unslash( $_POST['event_start'] ) ) : '';
-		$event_end      = isset( $_POST['event_end'] ) ? sanitize_text_field( wp_unslash( $_POST['event_end'] ) ) : '';
-		$event_timezone = isset( $_POST['event_timezone'] ) ? sanitize_text_field( wp_unslash( $_POST['event_timezone'] ) ) : '';
-		if ( isset( $title ) && in_array( sanitize_title( $title ), $invalid_slugs, true ) ) {
-			wp_send_json_error( esc_html__( 'Invalid slug.', 'gp-translation-events' ), 422 );
-		}
-
-		$is_valid_event_date = false;
-		try {
-			$is_valid_event_date = $this->validate_event_dates( $event_start, $event_end );
-		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Deliberately ignored, handled below.
-		}
-		if ( ! $is_valid_event_date ) {
-			wp_send_json_error( esc_html__( 'Invalid event dates.', 'gp-translation-events' ), 422 );
-		}
-
-		$event_status = '';
-		if ( isset( $_POST['event_form_action'] ) && in_array( $_POST['event_form_action'], $form_actions, true ) ) {
-			$event_status = sanitize_text_field( wp_unslash( $_POST['event_form_action'] ) );
-		}
-
-		if ( ! isset( $_POST['form_name'] ) ) {
-			wp_send_json_error( esc_html__( 'Form name must be set.', 'gp-translation-events' ), 422 );
-		}
-
-		if ( 'create_event' === $action ) {
-			$event_id         = wp_insert_post(
-				array(
-					'post_type'    => self::CPT,
-					'post_title'   => $title,
-					'post_content' => $description,
-					'post_status'  => $event_status,
-				)
-			);
-			$response_message = esc_html__( 'Event created successfully!', 'gp-translation-events' );
-		}
-		if ( 'edit_event' === $action ) {
-			if ( ! isset( $_POST['event_id'] ) ) {
-				wp_send_json_error( esc_html__( 'Event id is required.', 'gp-translation-events' ), 422 );
-			}
-			$event_id = sanitize_text_field( wp_unslash( $_POST['event_id'] ) );
-			$event    = get_post( $event_id );
-			if ( ! $event || self::CPT !== $event->post_type || ! ( current_user_can( 'edit_post', $event->ID ) || intval( $event->post_author ) === get_current_user_id() ) ) {
-				wp_send_json_error( esc_html__( 'Event does not exist.', 'gp-translation-events' ), 404 );
-			}
-			wp_update_post(
-				array(
-					'ID'           => $event_id,
-					'post_title'   => $title,
-					'post_content' => $description,
-					'post_status'  => $event_status,
-				)
-			);
-			$response_message = esc_html__( 'Event updated successfully!', 'gp-translation-events' );
-		}
-		if ( 'delete_event' === $action ) {
-			$event_id = sanitize_text_field( wp_unslash( $_POST['event_id'] ) );
-			$event    = get_post( $event_id );
-			if ( ! $event || self::CPT !== $event->post_type ) {
-				wp_send_json_error( esc_html__( 'Event does not exist.', 'gp-translation-events' ), 404 );
-			}
-			if ( ! ( current_user_can( 'delete_post', $event->ID ) || get_current_user_id() === $event->post_author ) ) {
-				wp_send_json_error( 'You do not have permission to delete this event' );
-			}
-			$stats_calculator = new Stats_Calculator();
-			try {
-				$event_stats = $stats_calculator->for_event( $event );
-			} catch ( Exception $e ) {
-				wp_send_json_error( esc_html__( 'Failed to calculate event stats.', 'gp-translation-events' ), 500 );
-			}
-			if ( ! empty( $event_stats->rows() ) ) {
-				wp_send_json_error( esc_html__( 'Event has translations and cannot be deleted.', 'gp-translation-events' ), 422 );
-			}
-			wp_trash_post( $event_id );
-			$response_message = esc_html__( 'Event deleted successfully!', 'gp-translation-events' );
-		}
-		if ( ! $event_id ) {
-			wp_send_json_error( esc_html__( 'Event could not be created or updated.', 'gp-translation-events' ), 422 );
-		}
-		if ( 'delete_event' !== $_POST['form_name'] ) {
-			try {
-				update_post_meta( $event_id, '_event_start', $this->convert_to_utc( $event_start, $event_timezone ) );
-				update_post_meta( $event_id, '_event_end', $this->convert_to_utc( $event_end, $event_timezone ) );
-			} catch ( Exception $e ) {
-				wp_send_json_error( esc_html__( 'Invalid start or end', 'gp-translation-events' ), 422 );
-			}
-
-			update_post_meta( $event_id, '_event_timezone', $event_timezone );
-		}
-		try {
-			Active_Events_Cache::invalidate();
-		} catch ( Exception $e ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( $e );
-		}
-
-		list( $permalink, $post_name ) = get_sample_permalink( $event_id );
-		$permalink                     = str_replace( '%pagename%', $post_name, $permalink );
-		wp_send_json_success(
-			array(
-				'message'        => $response_message,
-				'eventId'        => $event_id,
-				'eventUrl'       => str_replace( '%pagename%', $post_name, $permalink ),
-				'eventStatus'    => $event_status,
-				'eventEditUrl'   => esc_url( gp_url( '/events/edit/' . $event_id ) ),
-				'eventDeleteUrl' => esc_url( gp_url( '/events/my-events/' ) ),
-			)
-		);
-	}
-
-
-
-
-	/**
-	 * Convert a date time in a time zone to UTC.
-	 *
-	 * @param string $date_time The date time in the time zone.
-	 * @param string $time_zone The time zone.
-	 * @return string The date time in UTC.
-	 * @throws Exception When dates are invalid.
-	 */
-	public function convert_to_utc( string $date_time, string $time_zone ): string {
-		$date_time = new DateTime( $date_time, new DateTimeZone( $time_zone ) );
-		$date_time->setTimezone( new DateTimeZone( 'UTC' ) );
-		return $date_time->format( 'Y-m-d H:i:s' );
+		$form_handler = new Event_Form_Handler( self::get_event_repository(), self::get_attendee_repository() );
+		// Nonce verification is done by the form handler.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$form_handler->handle( $_POST );
 	}
 
 	public function register_translation_event_js() {
@@ -399,19 +203,23 @@ class Translation_Events {
 	 * @param string  $new_status The new post status.
 	 * @param string  $old_status The old post status.
 	 * @param WP_Post $post       The post object.
+	 *
+	 * @throws Exception
 	 */
 	public function event_status_transition( string $new_status, string $old_status, WP_Post $post ): void {
 		if ( self::CPT !== $post->post_type ) {
 			return;
 		}
 		if ( 'publish' === $new_status && ( 'new' === $old_status || 'draft' === $old_status ) ) {
-			$current_user_id         = get_current_user_id();
-			$user_attending_events   = get_user_meta( $current_user_id, self::USER_META_KEY_ATTENDING, true ) ?: array();
-			$is_user_attending_event = in_array( $post->ID, $user_attending_events, true );
-			if ( ! $is_user_attending_event ) {
-				$new_user_attending_events              = $user_attending_events;
-				$new_user_attending_events[ $post->ID ] = true;
-				update_user_meta( $current_user_id, self::USER_META_KEY_ATTENDING, $new_user_attending_events, $user_attending_events );
+			$event_id            = $post->ID;
+			$user_id             = $post->post_author;
+			$attendee_repository = self::get_attendee_repository();
+			$attendee            = $attendee_repository->get_attendee( $event_id, $user_id );
+
+			if ( null === $attendee ) {
+				$attendee = new Attendee( $event_id, $user_id );
+				$attendee->mark_as_host();
+				$attendee_repository->insert_attendee( $attendee );
 			}
 		}
 	}
@@ -465,18 +273,19 @@ class Translation_Events {
 	/**
 	 * Add the active events for the current user before the translation table.
 	 *
-	 * @return void
+	 * @throws Exception
 	 */
 	public function add_active_events_current_user(): void {
-		$user_attending_events = get_user_meta( get_current_user_id(), self::USER_META_KEY_ATTENDING, true ) ?: array();
-		if ( empty( $user_attending_events ) ) {
+		$attendee_repository      = new Attendee_Repository();
+		$user_attending_event_ids = $attendee_repository->get_events_for_user( get_current_user_id() );
+		if ( empty( $user_attending_event_ids ) ) {
 			return;
 		}
 
 		$current_datetime_utc       = ( new DateTime( 'now', new DateTimeZone( 'UTC' ) ) )->format( 'Y-m-d H:i:s' );
 		$user_attending_events_args = array(
 			'post_type'   => self::CPT,
-			'post__in'    => array_keys( $user_attending_events ),
+			'post__in'    => $user_attending_event_ids,
 			'post_status' => 'publish',
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'meta_query'  => array(
@@ -498,6 +307,7 @@ class Translation_Events {
 			'orderby'     => 'meta_value',
 			'order'       => 'ASC',
 		);
+
 		$user_attending_events_query = new WP_Query( $user_attending_events_args );
 		$number_of_events            = $user_attending_events_query->post_count;
 		if ( 0 === $number_of_events ) {

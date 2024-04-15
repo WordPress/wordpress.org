@@ -7,6 +7,9 @@ use DateTimeZone;
 use Exception;
 use GP_Translation;
 use GP_Translation_Set;
+use Wporg\TranslationEvents\Attendee\Attendee_Repository;
+use Wporg\TranslationEvents\Event\Event;
+use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 
 class Stats_Listener {
 	const ACTION_CREATE          = 'create';
@@ -14,10 +17,15 @@ class Stats_Listener {
 	const ACTION_REJECT          = 'reject';
 	const ACTION_REQUEST_CHANGES = 'request_changes';
 
-	private Active_Events_Cache $active_events_cache;
+	private Attendee_Repository $attendee_repository;
+	private Event_Repository_Interface $event_repository;
 
-	public function __construct( Active_Events_Cache $active_events_cache ) {
-		$this->active_events_cache = $active_events_cache;
+	public function __construct(
+		Event_Repository_Interface $event_repository,
+		Attendee_Repository $attendee_repository
+	) {
+		$this->event_repository    = $event_repository;
+		$this->attendee_repository = $attendee_repository;
 	}
 
 	public function start(): void {
@@ -69,8 +77,8 @@ class Stats_Listener {
 	private function handle_action( GP_Translation $translation, int $user_id, string $action, DateTimeImmutable $happened_at ): void {
 		try {
 			// Get events that are active when the action happened, for which the user is registered for.
-			$active_events = $this->get_active_events( $happened_at );
-			$events        = $this->select_events_user_is_registered_for( $active_events, $user_id );
+			$active_events = $this->event_repository->get_current_events();
+			$events        = $this->select_events_user_is_registered_for( $active_events->events, $user_id );
 
 			// phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			/** @var GP_Translation_Set $translation_set Translation set */
@@ -107,61 +115,6 @@ class Stats_Listener {
 	}
 
 	/**
-	 * Get active events at a given time.
-	 *
-	 * @return Event[]
-	 * @throws Exception When it fails to get active events.
-	 */
-	private function get_active_events( DateTimeImmutable $at ): array {
-		$events = $this->active_events_cache->get();
-		if ( null === $events ) {
-			$cache_duration = Active_Events_Cache::CACHE_DURATION;
-			$boundary_start = $at;
-			$boundary_end   = $at->modify( "+$cache_duration seconds" );
-
-			// Get events for which start is before $boundary_end AND end is after $boundary_start.
-			$event_ids = get_posts(
-				array(
-					'post_type'      => Translation_Events::CPT,
-					'post_status'    => 'publish',
-					'posts_per_page' => - 1,
-					'fields'         => 'ids',
-					'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-						array(
-							'key'     => '_event_start',
-							'value'   => $boundary_end->format( 'Y-m-d H:i:s' ),
-							'compare' => '<',
-							'type'    => 'DATETIME',
-						),
-						array(
-							'key'     => '_event_end',
-							'value'   => $boundary_start->format( 'Y-m-d H:i:s' ),
-							'compare' => '>',
-							'type'    => 'DATETIME',
-						),
-					),
-				),
-			);
-
-			$events = array();
-			foreach ( $event_ids as $event_id ) {
-				$meta     = get_post_meta( $event_id );
-				$events[] = Event::from_post_meta( $event_id, $meta );
-			}
-
-			$this->active_events_cache->cache( $events );
-		}
-
-		// Filter out events that aren't actually active at $at.
-		return array_filter(
-			$events,
-			function ( $event ) use ( $at ) {
-				return $event->start() <= $at && $at <= $event->end();
-			}
-		);
-	}
-
-	/**
 	 * Filter an array of events so that it only includes events the given user is attending.
 	 *
 	 * @param Event[] $events Events.
@@ -171,11 +124,11 @@ class Stats_Listener {
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 	private function select_events_user_is_registered_for( array $events, int $user_id ): array {
-		$attending_event_ids = get_user_meta( $user_id, Translation_Events::USER_META_KEY_ATTENDING, true );
+		$attending_event_ids = $this->attendee_repository->get_events_for_user( $user_id );
 		return array_filter(
 			$events,
 			function ( Event $event ) use ( $attending_event_ids ) {
-				return isset( $attending_event_ids[ $event->id() ] );
+				return in_array( $event->id(), $attending_event_ids, true );
 			}
 		);
 	}

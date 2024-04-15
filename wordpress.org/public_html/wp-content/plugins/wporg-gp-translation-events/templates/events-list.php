@@ -7,38 +7,39 @@ namespace Wporg\TranslationEvents;
 
 use DateTime;
 use WP_Query;
+use Wporg\TranslationEvents\Event\Event;
+use Wporg\TranslationEvents\Event\Events_Query_Result;
 
-/** @var WP_Query $current_events_query */
-/** @var WP_Query $upcoming_events_query */
-/** @var WP_Query $past_events_query */
+/** @var Events_Query_Result $current_events_query */
+/** @var Events_Query_Result $upcoming_events_query */
+/** @var Events_Query_Result $past_events_query */
+/** @var Events_Query_Result $user_attending_events_query */
 
 gp_title( __( 'Translation Events', 'gp-translation-events' ) );
 gp_breadcrumb_translation_events();
 gp_tmpl_header();
+$event_page_title = __( 'Translation Events', 'gp-translation-events' );
 gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 ?>
 
 <div class="event-page-wrapper">
-	<h1 class="event_page_title"><?php esc_html_e( 'Translation Events', 'gp-translation-events' ); ?></h1>
 <div class="event-left-col">
 <?php
-if ( $current_events_query->have_posts() ) :
+if ( ! empty( $current_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Current events', 'gp-translation-events' ); ?></h2>
 	<ul class="event-list">
 		<?php
-		while ( $current_events_query->have_posts() ) :
-			$current_events_query->the_post();
-			$event_end = Event::get_end_date_text( get_post_meta( get_the_ID(), '_event_end', true ) );
-			$event_url = gp_url( wp_make_link_relative( get_the_permalink() ) );
+		foreach ( $current_events_query->events as $event ) :
+			$event_url = gp_url( wp_make_link_relative( get_the_permalink( $event->id() ) ) );
 			?>
 			<li class="event-list-item">
-				<a href="<?php echo esc_url( $event_url ); ?>"><?php the_title(); ?></a>
-				<span class="event-list-date"><?php echo esc_html( $event_end ); ?></span>
-				<?php the_excerpt(); ?>
+				<a href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+				<span class="event-list-date">ends <?php $event->end()->print_relative_time_html(); ?></time></span>
+				<?php echo esc_html( get_the_excerpt( $event->id() ) ); ?>
 			</li>
 			<?php
-		endwhile;
+		endforeach;
 		?>
 	</ul>
 
@@ -46,8 +47,8 @@ if ( $current_events_query->have_posts() ) :
 	echo wp_kses_post(
 		paginate_links(
 			array(
-				'total'     => $current_events_query->max_num_pages,
-				'current'   => max( 1, $current_events_query->query_vars['paged'] ),
+				'total'     => $current_events_query->page_count,
+				'current'   => $current_events_query->current_page,
 				'format'    => '?current_events_paged=%#%',
 				'prev_text' => '&laquo; Previous',
 				'next_text' => 'Next &raquo;',
@@ -57,22 +58,22 @@ if ( $current_events_query->have_posts() ) :
 
 	wp_reset_postdata();
 endif;
-if ( $upcoming_events_query->have_posts() ) :
+
+if ( ! empty( $upcoming_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Upcoming events', 'gp-translation-events' ); ?></h2>
 	<ul class="event-list">
 		<?php
-		while ( $upcoming_events_query->have_posts() ) :
-			$upcoming_events_query->the_post();
-			$event_start = ( new DateTime( get_post_meta( get_the_ID(), '_event_start', true ) ) )->format( 'l, F j, Y' );
+		foreach ( $upcoming_events_query->events as $event ) :
+			$event_url = gp_url( wp_make_link_relative( get_the_permalink( $event->id() ) ) );
 			?>
 			<li class="event-list-item">
-				<a href="<?php echo esc_url( gp_url( wp_make_link_relative( get_the_permalink() ) ) ); ?>"><?php the_title(); ?></a>
-				<span class="event-list-date"><?php echo esc_html( $event_start ); ?></span>
-				<?php the_excerpt(); ?>
+				<a href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+				<span class="event-list-date">starts <?php $event->start()->print_relative_time_html(); ?></span>
+				<?php echo esc_html( get_the_excerpt( $event->id() ) ); ?>
 			</li>
 			<?php
-		endwhile;
+		endforeach;
 		?>
 	</ul>
 
@@ -80,8 +81,8 @@ if ( $upcoming_events_query->have_posts() ) :
 	echo wp_kses_post(
 		paginate_links(
 			array(
-				'total'     => $upcoming_events_query->max_num_pages,
-				'current'   => max( 1, $upcoming_events_query->query_vars['paged'] ),
+				'total'     => $upcoming_events_query->page_count,
+				'current'   => $upcoming_events_query->current_page,
 				'format'    => '?upcoming_events_paged=%#%',
 				'prev_text' => '&laquo; Previous',
 				'next_text' => 'Next &raquo;',
@@ -91,27 +92,21 @@ if ( $upcoming_events_query->have_posts() ) :
 
 	wp_reset_postdata();
 endif;
-if ( $past_events_query->have_posts() ) :
+if ( ! empty( $past_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Past events', 'gp-translation-events' ); ?></h2>
 	<ul class="event-list">
 		<?php
-		while ( $past_events_query->have_posts() ) :
-			$past_events_query->the_post();
-			$event_start = ( new DateTime( get_post_meta( get_the_ID(), '_event_start', true ) ) )->format( 'M j, Y' );
-			$event_end   = ( new DateTime( get_post_meta( get_the_ID(), '_event_end', true ) ) )->format( 'M j, Y' );
+		foreach ( $past_events_query->events as $event ) :
+			$event_url = gp_url( wp_make_link_relative( get_the_permalink( $event->id() ) ) );
 			?>
 			<li class="event-list-item">
-				<a href="<?php echo esc_url( gp_url( wp_make_link_relative( get_the_permalink() ) ) ); ?>"><?php the_title(); ?></a>
-				<?php if ( $event_start === $event_end ) : ?>
-					<span class="event-list-date"><?php echo esc_html( $event_start ); ?></span>
-				<?php else : ?>
-					<span class="event-list-date"><?php echo esc_html( $event_start ); ?> - <?php echo esc_html( $event_end ); ?></span>
-				<?php endif; ?>
-				<?php the_excerpt(); ?>
+				<a href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+				<span class="event-list-date">ended <?php $event->end()->print_relative_time_html( 'F j, Y H:i T' ); ?></span>
+				<?php esc_html( get_the_excerpt( $event->id() ) ); ?>
 			</li>
 			<?php
-		endwhile;
+		endforeach;
 		?>
 	</ul>
 
@@ -119,8 +114,8 @@ if ( $past_events_query->have_posts() ) :
 	echo wp_kses_post(
 		paginate_links(
 			array(
-				'total'     => $past_events_query->max_num_pages,
-				'current'   => max( 1, $past_events_query->query_vars['paged'] ),
+				'total'     => $past_events_query->page_count,
+				'current'   => $past_events_query->current_page,
 				'format'    => '?past_events_paged=%#%',
 				'prev_text' => '&laquo; Previous',
 				'next_text' => 'Next &raquo;',
@@ -131,42 +126,40 @@ if ( $past_events_query->have_posts() ) :
 	wp_reset_postdata();
 endif;
 
-if ( 0 === $current_events_query->post_count && 0 === $upcoming_events_query->post_count && 0 === $past_events_query->post_count ) :
+if ( empty( $current_events_query->events ) && empty( $upcoming_events_query->events ) && empty( $past_events_query->post_count ) ) :
 	esc_html_e( 'No events found.', 'gp-translation-events' );
 endif;
 ?>
 </div>
 <?php if ( is_user_logged_in() ) : ?>
 	<div class="event-right-col">
-		<h3 class="">Events I'm Attending</h3>
-		<?php if ( ! $user_attending_events_query->have_posts() ) : ?>
+		<h2>Events I'm Attending</h2>
+		<?php if ( empty( $user_attending_events_query->events ) ) : ?>
 			<p>You don't have any events to attend.</p>
 		<?php else : ?>
 			<ul class="event-attending-list">
 				<?php
-				while ( $user_attending_events_query->have_posts() ) :
-					$user_attending_events_query->the_post();
-					$event_start = ( new DateTime( get_post_meta( get_the_ID(), '_event_start', true ) ) )->format( 'M j, Y' );
-					$event_end   = ( new DateTime( get_post_meta( get_the_ID(), '_event_end', true ) ) )->format( 'M j, Y' );
+				foreach ( $user_attending_events_query->events as $event ) :
+					$event_url = gp_url( wp_make_link_relative( get_the_permalink( $event->id() ) ) );
 					?>
 					<li class="event-list-item">
-						<a href="<?php echo esc_url( gp_url( wp_make_link_relative( get_the_permalink() ) ) ); ?>"><?php the_title(); ?></a>
-						<?php if ( $event_start === $event_end ) : ?>
-							<span class="event-list-date events-i-am-attending"><?php echo esc_html( $event_start ); ?></span>
+						<a href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+						<?php if ( $event->start() === $event->end() ) : ?>
+							<span class="event-list-date events-i-am-attending"><?php $event->start()->print_time_html( 'F j, Y H:i T' ); ?></span>
 						<?php else : ?>
-							<span class="event-list-date events-i-am-attending"><?php echo esc_html( $event_start ); ?> - <?php echo esc_html( $event_end ); ?></span>
+							<span class="event-list-date events-i-am-attending"><?php $event->start()->print_time_html( 'F j, Y H:i T' ); ?> - <?php $event->end()->print_time_html( 'F j, Y H:i T' ); ?></span>
 						<?php endif; ?>
 					</li>
 					<?php
-				endwhile;
+				endforeach;
 				?>
 			</ul>
 			<?php
 				echo wp_kses_post(
 					paginate_links(
 						array(
-							'total'     => $user_attending_events_query->max_num_pages,
-							'current'   => max( 1, $user_attending_events_query->query_vars['paged'] ),
+							'total'     => $user_attending_events_query->page_count,
+							'current'   => $user_attending_events_query->current_page,
 							'format'    => '?user_attending_events_paged=%#%',
 							'prev_text' => '&laquo; Previous',
 							'next_text' => 'Next &raquo;',

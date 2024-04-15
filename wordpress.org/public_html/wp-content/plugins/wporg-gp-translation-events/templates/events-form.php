@@ -5,24 +5,27 @@
 
 namespace Wporg\TranslationEvents;
 
-/** @var string $event_form_title */
+use DateTimeZone;
+use Wporg\TranslationEvents\Event\Event_End_Date;
+use Wporg\TranslationEvents\Event\Event_Start_Date;
+
+/** @var string $event_page_title */
 /** @var string $event_form_name */
-/** @var int $event_id */
+/** @var int    $event_id */
 /** @var string $event_title */
 /** @var string $event_description */
-/** @var string $event_start */
-/** @var string $event_end */
-/** @var string $event_timezone */
+/** @var Event_Start_Date $event_start */
+/** @var Event_End_Date $event_end */
+/** @var DateTimeZone|null $event_timezone */
 /** @var string $event_url */
 /** @var string $css_show_url */
 
-gp_title( __( 'Translation Events' ) . ' - ' . esc_html( $event_form_title . ' - ' . $event_title ) );
-gp_breadcrumb_translation_events( array( esc_html( $event_form_title ) ) );
+gp_title( __( 'Translation Events' ) . ' - ' . esc_html( $event_page_title . ' - ' . $event_title ) );
+gp_breadcrumb_translation_events( array( esc_html( $event_page_title ) ) );
 gp_tmpl_header();
 gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 ?>
 <div class="event-page-wrapper">
-<h2 class="event-page-title"><?php echo esc_html( $event_form_title ); ?></h2>
 <form class="translation-event-form" action="" method="post">
 	<?php wp_nonce_field( '_event_nonce', '_event_nonce' ); ?>
 	<input type="hidden" name="action" value="submit_event_ajax">
@@ -40,21 +43,34 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 	<div>
 		<label for="event-description">Event Description</label>
 		<textarea id="event-description" name="event_description" rows="4" required><?php echo esc_html( $event_description ); ?></textarea>
-	</div>
-	<div>
+		<?php
+		echo wp_kses(
+			Event_Text_Snippet::get_snippet_links(),
+			array(
+				'a'  => array(
+					'href'         => array(),
+					'data-snippet' => array(),
+					'class'        => array(),
+				),
+				'ul' => array( 'class' => array() ),
+				'li' => array(),
+			)
+		);
+		?>
+			<div>
 		<label for="event-start">Start Date</label>
-		<input type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event_start ); ?>" required>
+		<input type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event_start->format( 'Y-m-d H:i' ) ); ?>" required>
 	</div>
 	<div>
 		<label for="event-end">End Date</label>
-		<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event_end ); ?>" required>
+		<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event_end->format( 'Y-m-d H:i' ) ); ?>" required>
 	</div>
 	<div>
 		<label for="event-timezone">Event Timezone</label>
-		<select id="event-timezone" name="event_timezone"  required>
+		<select id="event-timezone" name="event_timezone" required>
 			<?php
 			echo wp_kses(
-				wp_timezone_choice( $event_timezone, get_user_locale() ),
+				wp_timezone_choice( $event_timezone ? $event_timezone->getName() : null, get_user_locale() ),
 				array(
 					'optgroup' => array( 'label' => array() ),
 					'option'   => array(

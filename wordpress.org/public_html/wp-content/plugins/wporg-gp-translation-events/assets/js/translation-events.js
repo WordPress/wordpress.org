@@ -9,6 +9,7 @@
 				}
 				validateEventDates();
 				convertToUserLocalTime();
+				setInterval( convertToUserLocalTime, 10000 );
 
 				$( '.submit-event' ).on(
 					'click',
@@ -27,6 +28,16 @@
 						handleDelete()
 					}
 				);
+
+				$( '.text-snippet' ).on(
+					'click',
+					function ( e ) {
+						e.preventDefault();
+						var textArea        = $( this ).closest( 'div' ).find( 'textarea' );
+						var textAreaContent = textArea.val();
+						textArea.val( textAreaContent + $( this ).data( 'snippet' ) );
+					}
+				);
 			}
 		);
 
@@ -37,6 +48,15 @@
 		 * @param isDraft	  Whether the current event status is a draft or not
 		 */
 		function handleSubmit( eventStatus, isDraft ) {
+			const $form = $( '.translation-event-form' );
+			if ( ! $form[0].reportValidity() ) {
+				return;
+			}
+
+			if ( '' === $( '#event-title' ).val() ) {
+				$gp.notices.error( 'Event title must be set.' );
+				return;
+			}
 			if ( '' === $( '#event-start' ).val() ) {
 				$gp.notices.error( 'Event start date and time must be set.' );
 				return;
@@ -56,7 +76,6 @@
 				}
 			}
 			$( '#event-form-action' ).val( eventStatus );
-			const $form        = $( '.translation-event-form' );
 			const $is_creation = $( '#form-name' ).val() === 'create_event';
 
 			$.ajax(
@@ -148,12 +167,73 @@
 			}
 			timeElements.forEach(
 				function ( timeEl ) {
-					const eventDateObj         = new Date( timeEl.getAttribute( 'datetime' ) );
+					const datetime = timeEl.getAttribute( 'datetime' );
+					if ( ! datetime ) {
+						return;
+					}
+					const eventDateObj = new Date( datetime );
+					timeEl.title       = eventDateObj.toUTCString();
+
 					const userTimezoneOffset   = new Date().getTimezoneOffset();
 					const userTimezoneOffsetMs = userTimezoneOffset * 60 * 1000;
 					const userLocalDateTime    = new Date( eventDateObj.getTime() - userTimezoneOffsetMs );
 
-					const options      = {
+					if ( timeEl.classList.contains( 'relative' ) ) {
+						// Display the relative time.
+						const now    = new Date();
+						let diff     = userLocalDateTime - now;
+						let in_text  = 'in ';
+						let ago_text = '';
+						if ( diff < 0 ) {
+							if ( timeEl.classList.contains( 'future' ) ) {
+								// If an event transitions from future to past, reload the page to move it from active to past events and vice versa.
+								location.reload();
+							}
+							in_text  = '';
+							ago_text = ' ago';
+							diff     = - diff;
+						}
+
+						const seconds    = Math.floor( diff / 1000 );
+						const minutes    = Math.floor( seconds / 60 );
+						const hours      = Math.floor( minutes / 60 );
+						const days       = Math.floor( hours / 24 );
+						const weeks      = Math.floor( days / 7 );
+						const months     = Math.floor( days / 30 );
+						const years      = Math.floor( days / 365.25 );
+						let relativeTime = '';
+						if ( years > 1 ) {
+							if ( ! timeEl.classList.contains( 'hide-if-too-far' ) ) {
+								relativeTime = years + ' year' + ( years > 1 ? 's' : '' );
+							} else {
+								in_text = '';
+							}
+						} else if ( months > 1 ) {
+							if ( ! timeEl.classList.contains( 'hide-if-too-far' ) ) {
+								relativeTime = months + ' month' + ( months > 1 ? 's' : '' );
+							} else {
+								in_text = '';
+							}
+						} else if ( weeks > 1 ) {
+							if ( ! timeEl.classList.contains( 'hide-if-too-far' ) || weeks < 3 ) {
+								relativeTime = weeks + ' week' + ( weeks > 1 ? 's' : '' );
+							} else {
+								in_text = '';
+							}
+						} else if ( days > 0 ) {
+							relativeTime = days + ' day' + ( days > 1 ? 's' : '' );
+						} else if ( hours > 0 ) {
+							relativeTime = hours + ' hour' + ( hours > 1 ? 's' : '' );
+						} else if ( minutes > 0 ) {
+							relativeTime = minutes + ' minute' + ( minutes > 1 ? 's' : '' );
+						} else {
+							relativeTime = 'less than a minute';
+						}
+						timeEl.textContent = in_text + relativeTime + ago_text;
+						return;
+					}
+
+					const options = {
 						weekday: 'short',
 						year: 'numeric',
 						month: 'short',
@@ -162,6 +242,18 @@
 						minute: 'numeric',
 						timeZoneName: 'short'
 					};
+					if ( timeEl.dataset.format ) {
+						if ( timeEl.dataset.format.includes( 'l' ) ) {
+							options.weekday = 'long';
+						} else if ( ! timeEl.dataset.format.includes( 'D' ) ) {
+							delete options.weekday;
+						}
+						if ( timeEl.dataset.format.includes( 'F' ) ) {
+							options.month = 'long';
+						} else if ( timeEl.dataset.format.includes( 'm' ) || timeEl.dataset.format.includes( 'n' ) ) {
+							options.month = 'numeric';
+						}
+					}
 					timeEl.textContent = userLocalDateTime.toLocaleTimeString( navigator.language, options );
 				}
 			);
