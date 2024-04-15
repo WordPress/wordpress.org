@@ -28,6 +28,7 @@
 		margin: 1rem 0;
 		padding: 0;
 
+
 		.counter-container,
 		.counter-container a {
 			text-decoration: none;
@@ -36,12 +37,18 @@
 
 		.counter-container a {
 			font-size: var(--wp--preset--font-size--small);
-		}
 
-		.counter-container a:hover {
-			text-decoration: underline;
-		}
+			&:hover {
+				> span {
+					text-decoration: underline;
+				}
 
+				.counter-back {
+					text-decoration: none;
+				}
+			}
+		}
+	
 		.counter-label {
 			display: inline-block;
 			min-width: 65px;
