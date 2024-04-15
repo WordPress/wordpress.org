@@ -24,7 +24,7 @@ function add_site_navigation_menus( $menus ) {
 		return;
 	}
 
-	if ( get_locale() === 'en_US' ) {
+	if ( substr( get_locale(), 0, 2 ) === 'en' ) {
 		return array(
 			'forums' => array(
 				array(
