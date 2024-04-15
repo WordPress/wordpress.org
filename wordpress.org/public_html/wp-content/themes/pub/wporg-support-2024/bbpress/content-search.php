@@ -1,7 +1,7 @@
 
 <?php bbp_breadcrumb(); ?>
 
-<?php if ( bbp_is_forum_archive() || bbp_is_topic_archive() || bbp_is_search() ) : ?>
+<?php if ( bbp_is_forum_archive() || bbp_is_topic_archive() ) : ?>
 
 	<div class="bbp-search-form">
 
@@ -12,6 +12,8 @@
 <?php endif; ?>
 
 <div id="bbpress-forums">
+
+	<h1><?php bbp_search_title(); ?></h1>
 
 	<?php bbp_set_query_name( 'bbp_search' ); ?>
 

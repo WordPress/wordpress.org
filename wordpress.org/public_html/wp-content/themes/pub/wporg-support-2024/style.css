@@ -2313,25 +2313,6 @@ body.single .sidebar {
 	padding-block: var(--wp--custom--form--padding--block);
 }
 .search-form .button-search {
-	border-left: none;
-	border-radius: 0 2px 2px 0;
-	font-size: 1rem;
-	position: relative;
-	right: auto;
-	top: auto;
-}
-.search-form .button-search:active {
-	background: #006799;
-	border-right: 1px solid #006799;
-	box-shadow: none;
-}
-.search-form .button-search .dashicons {
-	font-size: 1rem;
-}
-.site-header .search-form {
-	display: inline-block;
-}
-.site-header.home .search-form .button-search, .site-main .search-form .button-search {
 	background: transparent;
 	border: none;
 	border-radius: 0;
@@ -2347,52 +2328,13 @@ body.single .sidebar {
 	top: 0;
 	margin: 0;
 }
-.site-header.home .search-form .button-search:focus, .site-main .search-form .button-search:focus {
-	box-shadow: 0 0 2px 1px #33b3db;
+.search-form .button-search:focus-visible {
+	outline: -webkit-focus-ring-color auto 1px;
 }
-.site-header.home .search-form .button-search:active, .site-main .search-form .button-search:active {
+.search-form .button-search:active {
 	background: transparent;
 	border: none;
 	transform: none;
-}
-.site-header.home .search-form .button-search i, .site-main .search-form .button-search i {
-	vertical-align: sub;
-}
-.site-header:not(.home) .search-form {
-	margin: 0;
-}
-.site-header:not(.home) .search-form .search-field {
-	border: 0;
-	border-radius: 2px;
-	display: inline-block;
-	font-size: 1rem;
-	padding: 5px 10px;
-	position: relative;
-	width: 100%;
-}
-@media screen and (min-width: 48em) {
-	.site-header:not(.home) .search-form .search-field {
-		border-radius: 2px 0 0 2px;
-		font-size: 0.64rem;
-		width: 7rem;
-	}
-	.site-header:not(.home) .search-form .search-field + .button-search {
-		display: inline-block;
-		margin-bottom: 0;
-	}
-}
-@media screen and (min-width: 60em) {
-	.site-header:not(.home) .search-form .search-field {
-		width: 10rem;
-	}
-}
-
-.search .site-main {
-	margin-top: 2rem;
-	padding-top: 0;
-}
-.search.search-results .page-header {
-	margin: 2rem 0;
 }
 
 /*--------------------------------------------------------------

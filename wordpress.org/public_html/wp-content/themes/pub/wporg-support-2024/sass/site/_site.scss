@@ -365,108 +365,30 @@ body:not(.trac):not(.home-page) #main {
 	}
 
 	.button-search {
-		border-left: none;
-		border-radius: 0 2px 2px 0;
-		font-size: ms( 0 );
-		position: relative;
-		right: auto;
-		top: auto;
-
-		&:active {
-			background: #006799;
-			border-right: 1px solid #006799;
-			box-shadow: none;
-		}
-
-		.dashicons {
-			font-size: ms( 0 );
-		}
-	}
-
-	.site-header & {
-		display: inline-block;
-	}
-
-	.site-header.home &,
-	.site-main & {
-
-		.button-search {
-			background: transparent;
-			border: none;
-			border-radius: 0;
-			box-shadow: none;
-			color: #32373c;
-			display: block;
-			height: 100%;
-			padding-inline: var(--wp--custom--form--padding--block);
-			padding-block: var(--wp--custom--form--padding--block);
-			position: absolute;
-			right: 0;
-			text-shadow: none;
-			top: 0;
-			margin: 0;
-
-			&:focus {
-				box-shadow: 0 0 2px 1px #33b3db;
-			}
-
-			&:active {
-				background: transparent;
-				border: none;
-				transform: none;
-			}
-
-			i {
-				vertical-align: sub;
-			}
-		}
-	}
-
-	.site-header:not(.home) & {
+		background: transparent;
+		border: none;
+		border-radius: 0;
+		box-shadow: none;
+		color: #32373c;
+		display: block;
+		height: 100%;
+		padding-inline: var(--wp--custom--form--padding--block);
+		padding-block: var(--wp--custom--form--padding--block);
+		position: absolute;
+		right: 0;
+		text-shadow: none;
+		top: 0;
 		margin: 0;
 
-		.search-field {
-			border: 0;
-			border-radius: 2px;
-			display: inline-block;
-			font-size: ms( 0 );
-			padding: 5px 10px;
-			position: relative;
-			width: 100%;
+		&:focus-visible {
+			outline: -webkit-focus-ring-color auto 1px;
 		}
 
-		@media screen and (min-width: $ms-breakpoint) {
-
-			.search-field {
-				border-radius: 2px 0 0 2px;
-				font-size: ms( -4 );
-				width: 7rem;
-			}
-
-			.search-field + .button-search {
-				display: inline-block;
-				margin-bottom: 0;
-			}
+		&:active {
+			background: transparent;
+			border: none;
+			transform: none;
 		}
-
-		@media screen and (min-width: 60em) {
-
-			.search-field {
-				width: 10rem;
-			}
-		}
-	}
-}
-
-.search {
-
-	.site-main {
-		margin-top: 2rem;
-		padding-top: 0;
-	}
-
-	&.search-results .page-header {
-		margin: 2rem 0;
 	}
 }
 

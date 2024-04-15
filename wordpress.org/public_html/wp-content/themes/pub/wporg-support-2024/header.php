@@ -18,11 +18,18 @@ echo do_blocks( '<!-- wp:wporg/global-header {"style":{"border":{"bottom":{"colo
 $is_forums_home = function_exists( 'bbp_is_forum_archive' ) && bbp_is_forum_archive();
 $is_user_profile = function_exists( 'bbp_is_single_user' ) && bbp_is_single_user();
 $is_homepage = is_page_template( 'page-homepage.php' );
+$is_single_forum = function_exists( 'bbp_is_single_forum' ) && bbp_is_single_forum();
+$is_single_topic = function_exists( 'bbp_is_single_topic' ) && bbp_is_single_topic();
+$view_id = function_exists( 'bbp_get_view_id' ) ? bbp_get_view_id() : '';
+$is_reviews = $view_id === 'reviews';
+$is_plugin = $view_id === 'plugin';
+$is_theme = $view_id === 'theme';
 
 echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	? '<!-- wp:pattern {"slug":"wporg-support/local-nav-home"} /-->'
 	: '<!-- wp:pattern {"slug":"wporg-support/local-nav"} /-->'
 );
+
 
 ?>
 
@@ -107,14 +114,14 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					esc_html__( 'A space to ask and discuss all things WordPress.', 'wporg-forums' )
 				)
 			); ?>
-		<?php elseif ( ! $is_user_profile ) : ?>
+		<?php elseif ( ! ( $is_user_profile || $is_reviews || $is_plugin || $is_theme || $is_single_forum ) ) : ?>
 			<?php echo do_blocks(
 				'<!-- wp:group {"style":{"spacing":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
 				<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
 
 					<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
 
-				</div>
+					</div>
 				<!-- /wp:group -->'
 			); ?>
 		<?php endif; ?>

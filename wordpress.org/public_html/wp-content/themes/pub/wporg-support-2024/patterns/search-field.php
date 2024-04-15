@@ -7,13 +7,10 @@ if ( function_exists( 'register_block_pattern' ) ) {
 			'content' => sprintf(
 				'<!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}}}} -->
 				<div id="wporg-search" class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--20);margin-bottom:var(--wp--preset--spacing--20)">
-
-					<!-- wp:search {"label":"%1$s","showLabel":false,"placeholder":"%2$s","width":232,"widthUnit":"px","buttonText":"%1$s","buttonPosition":"button-inside","buttonUseIcon":true} /-->
-
+					%s
 				</div>
 				<!-- /wp:group -->',
-				esc_attr__( 'Search', 'wporg-forums' ),
-				esc_attr__( 'Search forums', 'wporg-forums' ),
+				get_search_form( false )
 			),
 		)
 	);
