@@ -590,9 +590,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				<?php
 				wp_dropdown_users( [
 					'name'              => 'reviewer',
-					'selected'          => intval( $_REQUEST['reviewer'] ?? 0 ),
+					'selected'          => intval( $_REQUEST['reviewer'] ?? '' ),
 					'show_option_none'  => __( 'All Reviewers', 'wporg-plugins' ),
-					'option_none_value' => 0,
+					'option_none_value' => '',
 					'role__in'          => [ 'plugin_admin', 'plugin_reviewer' ],
 				] );
 				submit_button( __( 'Filter', 'wporg-plugins' ), 'secondary', false, false );
