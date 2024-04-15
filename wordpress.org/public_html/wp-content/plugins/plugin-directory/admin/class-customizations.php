@@ -34,6 +34,7 @@ class Customizations {
 
 		add_filter( 'query_vars', array( $this, 'query_vars' ) );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		add_filter( 'posts_search', array( $this, 'posts_search' ), 10, 2 );
 
 		add_action( 'load-edit.php', array( $this, 'bulk_action_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -262,6 +263,34 @@ class Customizations {
 
 			$query->set( 'meta_query', $meta_query );
 		}
+	}
+
+	/**
+	 * Filter searches to search by slug in wp-admin.
+	 *
+	 * WP_Query::parse_search() doesn't allow specifying the post_name field as a searchable field.
+	 *
+	 * @param string    $where    The WHERE clause of the search query.
+	 * @param \WP_Query $wp_query The WP_Query object.
+	 * @return string The WHERE clause of the query.
+	 */
+	public function posts_search( $where, $wp_query ) {
+		global $wpdb;
+
+		if ( ! $where || ! $wp_query->is_main_query() || ! $wp_query->is_search() ) {
+			return $where;
+		}
+
+		// WP_Query::parse_search() is protected, so we'll just do a poor job of it here.
+		$custom_or = $wpdb->prepare(
+			"( {$wpdb->posts}.post_name LIKE %s )",
+			'%' . $wpdb->esc_like( $wp_query->get( 's' ) ) . '%'
+		);
+
+		// Merge the custom column search into the existing search SQL.
+		$where = preg_replace( '#^(\s*AND\s*)(.+)$#i', ' AND ( $2 OR ' . $custom_or . ' )', $where );
+
+		return $where;
 	}
 
 	/**
