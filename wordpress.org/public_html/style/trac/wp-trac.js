@@ -197,7 +197,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		linkMentions: function( selector ) {
 			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
 			var mentionsRegEx = /(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_\-.]{1,20})(?:\b(?!@|＠)|$)/g,
-				mentionsInAttrRegEx = new RegExp( '="[^"]*?' + mentionsRegEx.source + '[\\s\\S]*?"' );
+				mentionsInAttrRegEx = new RegExp( '="[^"]*?' + mentionsRegEx.source + '[\\s\\S]*?"', 'g' );
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function() {
 				var $comment = $( this ).html();
@@ -224,7 +224,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 					// Restore mentions in HTML attributes.
 					if ( placeholders.length ) {
-						$comment = $comment.replace( '__PLACEHOLDER__', function() {
+						$comment = $comment.replace( /__PLACEHOLDER__/g, function() {
 							return placeholders.shift();
 						} );
 					}
