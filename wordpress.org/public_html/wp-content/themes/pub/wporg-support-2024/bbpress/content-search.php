@@ -1,6 +1,3 @@
-
-<?php bbp_breadcrumb(); ?>
-
 <?php if ( bbp_is_forum_archive() || bbp_is_topic_archive() ) : ?>
 
 	<div class="bbp-search-form">

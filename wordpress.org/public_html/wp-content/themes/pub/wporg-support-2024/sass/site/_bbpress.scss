@@ -1176,12 +1176,39 @@ body.single-topic:not(body.topic-edit) {
 
 div.bbp-breadcrumb {
 	font-size: var(--wp--preset--font-size--small);
-	margin-bottom: 15px;
-	color: var(--wp--preset--color--charcoal-3);
+	margin: 0;
 	float: none;
+	padding: 15px 0;
 
 	p {
+		color: var(--wp--preset--color--charcoal-1);
+		position: relative;
+		max-width: 100%;
+		mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
 		margin: 0 !important;
+		overflow-x: auto;
+		text-overflow: clip;
+		white-space: nowrap;
+
+		&::after {
+			content: "";
+			display: inline-block;
+			width: 60px;
+		}
+	}
+
+	a {
+		color: var(--wp--preset--color--charcoal-4);
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	.bbp-breadcrumb-sep {
+		margin: 0 10px;
+		color: var(--wp--preset--color--light-grey-1);
 	}
 }
 

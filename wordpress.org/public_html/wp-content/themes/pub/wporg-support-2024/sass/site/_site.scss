@@ -253,7 +253,7 @@ body:not(.trac):not(.home-page):not(.home) #main {
 }
 
 body:not(.trac):not(.home-page) #main {
-	padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
 }
 
 @media screen and (max-width: 460px) {

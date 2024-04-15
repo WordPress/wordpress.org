@@ -9,8 +9,6 @@
 
 ?>
 
-<?php bbp_breadcrumb(); ?>
-
 <header class="page-header">
 	<h1 class="page-title"><?php printf( __( '%s Forum', 'wporg-forums' ), bbp_get_topic_title() ); ?></h1>
 	<p><?php bbp_forum_content(); ?></p>

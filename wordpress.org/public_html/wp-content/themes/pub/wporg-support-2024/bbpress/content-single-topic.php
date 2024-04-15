@@ -9,8 +9,6 @@
 
 ?>
 
-<?php bbp_breadcrumb(); ?>
-
 <header class="page-header">
 	<h1 class="page-title"><?php bbp_topic_title(); ?></h1>
 </header>

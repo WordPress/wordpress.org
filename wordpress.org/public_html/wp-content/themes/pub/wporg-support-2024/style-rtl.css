@@ -2220,7 +2220,7 @@ body:not(.trac):not(.home-page):not(.home) #main {
 }
 
 body:not(.trac):not(.home-page) #main {
-	padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
 }
 
 @media screen and (max-width: 460px) {
@@ -3432,12 +3432,36 @@ body.single-topic:not(body.topic-edit) .entry-content header {
 
 div.bbp-breadcrumb {
 	font-size: var(--wp--preset--font-size--small);
-	margin-bottom: 15px;
-	color: var(--wp--preset--color--charcoal-3);
+	margin: 0;
 	float: none;
+	padding: 15px 0;
 }
 div.bbp-breadcrumb p {
+	color: var(--wp--preset--color--charcoal-1);
+	position: relative;
+	max-width: 100%;
+	-webkit-mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+	mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
 	margin: 0 !important;
+	overflow-x: auto;
+	text-overflow: clip;
+	white-space: nowrap;
+}
+div.bbp-breadcrumb p::after {
+	content: "";
+	display: inline-block;
+	width: 60px;
+}
+div.bbp-breadcrumb a {
+	color: var(--wp--preset--color--charcoal-4);
+	text-decoration: none;
+}
+div.bbp-breadcrumb a:hover {
+	text-decoration: underline;
+}
+div.bbp-breadcrumb .bbp-breadcrumb-sep {
+	margin: 0 10px;
+	color: var(--wp--preset--color--light-grey-1);
 }
 
 .sidebar .topic-info li.topic-report {

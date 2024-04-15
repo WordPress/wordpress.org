@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /**
  * Single Reply Content Part
@@ -8,8 +8,6 @@
  */
 
 ?>
-	
-<?php bbp_breadcrumb(); ?>
 
 <div id="bbpress-forums">
 

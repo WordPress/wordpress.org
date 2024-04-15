@@ -304,7 +304,7 @@ add_filter( 'comment_post_redirect', 'wporg_support_comment_post_redirect', 10, 
  */
 function wporg_support_breadcrumb() {
 	// Separator
-	$args['sep']             = is_rtl() ? __( '&laquo;', 'wporg-forums' ) : __( '&raquo;', 'wporg-forums' );
+	$args['sep']             = is_rtl() ? __( '\\', 'wporg-forums' ) : __( '/', 'wporg-forums' );
 	$args['pad_sep']         = 1;
 	$args['sep_before']      = '<span class="bbp-breadcrumb-sep">' ;
 	$args['sep_after']       = '</span>';
@@ -315,7 +315,7 @@ function wporg_support_breadcrumb() {
 
 	// Home
 	$args['include_home']    = true;
-	$args['home_text']       = __( 'Forums', 'wporg-forums' );
+	$args['home_text']       = __( 'Home', 'wporg-forums' );
 
 	// Forum root
 	$args['include_root']    = false;

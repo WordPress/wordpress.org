@@ -9,8 +9,6 @@
 
 ?>
 
-<?php bbp_breadcrumb(); ?>
-
 <div id="bbpress-forums">
 
 	<h1><?php bbp_view_title(); ?></h1>

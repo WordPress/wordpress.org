@@ -37,8 +37,9 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-forums' ); ?></a>
 
 	<div id="content" class="site-content">
-		<?php if ( is_front_page() || $is_homepage ) : ?>
-			<?php echo do_blocks(
+		<?php if ( is_front_page() || $is_homepage ) :
+
+			echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
 					<div class="wp-block-group alignfull has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color" style="padding-right:var(--wp--preset--spacing--edge-space);padding-left:var(--wp--preset--spacing--edge-space)">
@@ -75,9 +76,11 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					/* Translators: subhead */
 					__( 'We&#8217;ve got a variety of resources to help you get the most out of WordPress.', 'wporg-forums' )
 				)
-			); ?>
-		<?php elseif ( $is_forums_home ) : ?>
-			<?php echo do_blocks(
+			);
+
+		elseif ( $is_forums_home ) :
+
+			echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
 					<div class="wp-block-group alignfull has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color" style="padding-right:var(--wp--preset--spacing--edge-space);padding-left:var(--wp--preset--spacing--edge-space)">
@@ -113,15 +116,41 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					esc_html__( 'Forums', 'wporg-forums' ),
 					esc_html__( 'A space to ask and discuss all things WordPress.', 'wporg-forums' )
 				)
-			); ?>
-		<?php elseif ( ! ( $is_user_profile || $is_reviews || $is_plugin || $is_theme || $is_single_forum ) ) : ?>
-			<?php echo do_blocks(
-				'<!-- wp:group {"style":{"spacing":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
-				<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+			);
 
-					<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
+		else :
 
-					</div>
-				<!-- /wp:group -->'
-			); ?>
-		<?php endif; ?>
+			if ( ! $is_user_profile ) {
+				echo do_blocks(
+					sprintf(
+						'<!-- wp:group {"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+						<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
+
+							<!-- wp:group -->
+							<div class="wp-block-group alignwide">
+
+								%s
+
+							</div>
+							<!-- /wp:group -->
+
+						</div>
+						<!-- /wp:group -->',
+						bbp_get_breadcrumb()
+					)
+				);
+			}
+
+			if ( ! ( $is_user_profile || $is_reviews || $is_plugin || $is_theme || $is_single_forum ) ) {
+				echo do_blocks(
+					'<!-- wp:group {"style":{"spacing":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+
+						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
+
+						</div>
+					<!-- /wp:group -->'
+				);
+			}
+
+		endif;
