@@ -330,6 +330,10 @@ class WPOrg_WP_Activity_Notifier {
 			'site_url' => site_url(),
 		);
 
+		if ( ! apply_filters( 'wporg_profiles_wp_activity-is_forum_notifiable', true, $args ) ) {
+			return;
+		}
+
 		Profiles\api( $args );
 	}
 
@@ -394,6 +398,10 @@ class WPOrg_WP_Activity_Notifier {
 			'site'     => get_bloginfo( 'name' ),
 			'site_url' => site_url(),
 		);
+
+		if ( ! apply_filters( 'wporg_profiles_wp_activity-is_forum_notifiable', true, $args ) ) {
+			return;
+		}
 
 		Profiles\api( $args );
 	}
