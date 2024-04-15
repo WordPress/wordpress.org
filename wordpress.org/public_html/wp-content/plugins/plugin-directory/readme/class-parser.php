@@ -309,13 +309,13 @@ class Parser {
 			$this->tags = array_filter( $this->tags );
 
 			if ( array_intersect( $this->tags, $this->ignore_tags ) ) {
-				$this->tags = array_diff( $this->tags, $this->ignore_tags );
-				$this->warnings['ignored_tags'] = true;
+				$this->warnings['ignored_tags'] = array_intersect( $this->tags, $this->ignore_tags );
+				$this->tags                     = array_diff( $this->tags, $this->ignore_tags );
 			}
 
 			if ( count( $this->tags ) > 5 ) {
 				$this->warnings['too_many_tags'] = array_slice( $this->tags, 5 );
-				$this->tags = array_slice( $this->tags, 0, 5 );
+				$this->tags                      = array_slice( $this->tags, 0, 5 );
 			}
 		}
 		if ( ! empty( $headers['requires'] ) ) {
