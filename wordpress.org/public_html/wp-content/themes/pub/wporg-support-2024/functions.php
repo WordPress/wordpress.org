@@ -17,6 +17,18 @@ require_once get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/inc/ros
 add_filter( 'bbp_show_lead_topic', '__return_true' );
 
 /**
+ * Register a local nav menu for non-English forums, if it doesn't already exist.
+ */
+function register_local_nav_menu() {
+	if ( substr( get_locale(), 0, 2 ) === 'en' || wp_get_nav_menu_object( 'local-navigation' ) ) {
+		return;
+	}
+
+	register_nav_menu( 'local-navigation', __( 'Local Navigation', 'wporg-forums' ) );
+}
+add_action( 'after_setup_theme', 'register_local_nav_menu' );
+
+/**
  * Provide a list of local navigation menus.
  */
 function add_site_navigation_menus( $menus ) {
@@ -42,7 +54,7 @@ function add_site_navigation_menus( $menus ) {
 			),
 		);
 	} else {
-		$menu_object = wp_get_nav_menu_object( 'navigation' );
+		$local_nav_menu_object = wp_get_nav_menu_object( 'local-navigation' );
 		$menu_items_fallback = array(
 			'forums' => array(
 				 array(
@@ -52,11 +64,11 @@ function add_site_navigation_menus( $menus ) {
 			),
 		);
 
-		if ( ! $menu_object ) {
+		if ( ! $local_nav_menu_object ) {
 			return $menu_items_fallback;
 		}
 
-		$menu_items = wp_get_nav_menu_items( $menu_object->term_id );
+		$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
 
 		if ( ! $menu_items || empty( $menu_items ) ) {
 			return $menu_items_fallback;
