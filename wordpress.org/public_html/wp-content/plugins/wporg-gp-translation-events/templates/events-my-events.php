@@ -6,6 +6,7 @@
 namespace Wporg\TranslationEvents;
 
 use Wporg\TranslationEvents\Event\Events_Query_Result;
+use Wporg\TranslationEvents\Stats\Stats_Calculator;
 
 /** @var Events_Query_Result $events_i_created_query */
 /** @var Events_Query_Result $events_i_host_query */

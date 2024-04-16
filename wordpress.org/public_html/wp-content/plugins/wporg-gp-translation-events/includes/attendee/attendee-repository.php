@@ -119,7 +119,9 @@ class Attendee_Repository {
 	 * Get the hosts' users for an event.
 	 *
 	 * @param int $event_id The id of the event.
-	 * @return array[Attendee] The hosts of the event.
+	 *
+	 * @return Attendee[] The hosts of the event.
+	 * @throws Exception
 	 */
 	public function get_hosts( int $event_id ): array {
 		global $wpdb, $gp_table_prefix;
@@ -127,10 +129,10 @@ class Attendee_Repository {
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		$host_ids = $wpdb->get_col(
+		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"
-				select user_id
+				select event_id, user_id
 				from {$gp_table_prefix}event_attendees
 				where event_id = %d and is_host = 1
 			",
@@ -142,8 +144,10 @@ class Attendee_Repository {
 		// phpcs:enable
 
 		$hosts = array();
-		foreach ( $host_ids as $host_id ) {
-			$hosts[] = $this->get_attendee( $event_id, $host_id );
+		foreach ( $rows as $row ) {
+			$host = new Attendee( $row->event_id, $row->user_id );
+			$host->mark_as_host();
+			$hosts[] = $host;
 		}
 		return $hosts;
 	}

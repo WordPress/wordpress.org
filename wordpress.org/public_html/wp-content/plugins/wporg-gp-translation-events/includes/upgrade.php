@@ -5,6 +5,7 @@ namespace Wporg\TranslationEvents;
 use Exception;
 use WP_Query;
 use Wporg\TranslationEvents\Attendee\Attendee;
+use Wporg\TranslationEvents\Stats\Stats_Calculator;
 
 class Upgrade {
 	private const VERSION        = 2;

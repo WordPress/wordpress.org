@@ -9,7 +9,7 @@ use GP;
 use WP_Error;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
-use Wporg\TranslationEvents\Stats_Calculator;
+use Wporg\TranslationEvents\Stats\Stats_Calculator;
 
 class Event_Form_Handler {
 	private Event_Repository_Interface $event_repository;

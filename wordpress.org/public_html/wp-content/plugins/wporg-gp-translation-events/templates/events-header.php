@@ -39,20 +39,28 @@ use Wporg\TranslationEvents\Event\Event;
 	<p class="event-sub-head">
 			<span class="event-host">
 				<?php
-				if ( 1 === count( $hosts ) ) :
-					esc_html_e( 'Host:', 'gp-translation-events' );
+				if ( count( $hosts ) > 0 ) :
+					if ( 1 === count( $hosts ) ) :
+						esc_html_e( 'Host:', 'gp-translation-events' );
+					else :
+						esc_html_e( 'Hosts:', 'gp-translation-events' );
+					endif;
 				else :
-					esc_html_e( 'Hosts:', 'gp-translation-events' );
+					esc_html_e( 'Created by:', 'gp-translation-events' );
+					?>
+					&nbsp;<a href="<?php echo esc_attr( get_author_posts_url( $user->ID ) ); ?>"><?php echo esc_html( get_the_author_meta( 'display_name', $user->ID ) ); ?></a>
+					<?php
 				endif;
 				?>
 				<?php foreach ( $hosts as $host ) : ?>
-					<?php $user = get_userdata( $host->user_id() ); ?>
-					&nbsp;<a href="<?php echo esc_attr( get_author_posts_url( $user->ID ) ); ?>"><?php echo esc_html( get_the_author_meta( 'display_name', $user->ID ) ); ?></a>
+					&nbsp;<a href="<?php echo esc_attr( get_author_posts_url( $host->user_id() ) ); ?>"><?php echo esc_html( get_the_author_meta( 'display_name', $host->user_id() ) ); ?></a>
 					<?php if ( end( $hosts ) !== $host ) : ?>
 						,
+					<?php else : ?>
+						.
 					<?php endif; ?>
 				<?php endforeach; ?>
-			.</span>
+			</span>
 			<?php $show_edit_button = ( ( $attendee instanceof Attendee && $attendee->is_host() ) || current_user_can( 'edit_post', $event->id() ) ) && $is_editable_event; ?>
 			<?php if ( $show_edit_button ) : ?>
 				<a class="event-page-edit-link" href="<?php echo esc_url( gp_url( 'events/edit/' . $event->id() ) ); ?>"><span class="dashicons dashicons-edit"></span><?php esc_html_e( 'Edit event', 'gp-translation-events' ); ?></a>

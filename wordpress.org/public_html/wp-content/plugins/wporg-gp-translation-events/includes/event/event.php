@@ -2,6 +2,7 @@
 
 namespace Wporg\TranslationEvents\Event;
 
+use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use Throwable;
@@ -84,6 +85,15 @@ class Event {
 
 	public function end(): Event_End_Date {
 		return $this->end;
+	}
+
+	public function is_active(): bool {
+		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+		return $now >= $this->start->utc() && $now < $this->end->utc();
+	}
+
+	public function is_past(): bool {
+		return $this->end->is_in_the_past();
 	}
 
 	public function timezone(): DateTimeZone {

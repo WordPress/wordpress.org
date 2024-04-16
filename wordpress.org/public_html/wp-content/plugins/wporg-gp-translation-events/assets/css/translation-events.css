@@ -100,7 +100,7 @@
 	margin-bottom: 0;
 }
 
-span.event-creator, span.event-you {
+span.event-not-attending {
 	display: block;
 	margin-left: 55px;
 	margin-top: 1em;

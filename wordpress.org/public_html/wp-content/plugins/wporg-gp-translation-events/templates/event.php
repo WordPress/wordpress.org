@@ -11,6 +11,8 @@ use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Event\Event;
 use Wporg\TranslationEvents\Event\Event_End_Date;
 use Wporg\TranslationEvents\Event\Event_Start_Date;
+use Wporg\TranslationEvents\Stats\Event_Stats;
+use Wporg\TranslationEvents\Stats\Stats_Row;
 
 /** @var Attendee_Repository $attendee_repo */
 /** @var Attendee $attendee */
@@ -45,33 +47,25 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 				<ul>
 					<?php foreach ( $contributors as $contributor ) : ?>
 						<li class="event-contributor" title="<?php echo esc_html( implode( ', ', $contributor->locales ) ); ?>">
-							<a href="<?php echo esc_url( get_author_posts_url( $contributor->ID ) ); ?>"><?php echo get_avatar( $contributor->ID, 48 ); ?></a>
-							<a href="<?php echo esc_url( get_author_posts_url( $contributor->ID ) ); ?>"><?php echo esc_html( get_the_author_meta( 'display_name', $contributor->ID ) ); ?></a>
+							<a href="<?php echo esc_url( get_author_posts_url( $contributor->ID ) ); ?>" class="avatar"><?php echo get_avatar( $contributor->ID, 48 ); ?></a>
+							<a href="<?php echo esc_url( get_author_posts_url( $contributor->ID ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $contributor->ID ) ); ?></a>
 							<?php if ( $stats_calculator->is_first_time_contributor( $event_start, $contributor->ID ) ) : ?>
-								<span class="first-time-contributor-tada"></span>
+								<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
 							<?php endif; ?>
 							<?php
 							if ( ! $event->end()->is_in_the_past() ) :
-								if ( ( $attendee instanceof Attendee && $attendee->is_host() ) || current_user_can( 'manage_options' ) ) :
-									if ( $user->ID !== $contributor->ID ) :
-										$_attendee = $attendee_repo->get_attendee( $event_id, $contributor->ID );
-										if ( $_attendee instanceof Attendee ) :
-											echo '<form class="add-remove-user-as-host" method="post" action="' . esc_url( gp_url( "/events/host/$event_id/$contributor->ID" ) ) . '">';
-											if ( $_attendee->is_host() ) :
-												if ( 1 === count( $attendee_repo->get_hosts( $event_id ) ) ) :
-													echo '<input type="submit" class="button is-primary remove-as-host" disabled value="Remove as host"/>';
-												else :
-													echo '<input type="submit" class="button is-primary remove-as-host" value="Remove as host"/>';
-												endif;
-											else :
-												echo '<input type="submit" class="button is-secondary convert-to-host" value="Make co-host"/>';
-											endif;
-											echo '</form>';
-										endif;
-									elseif ( ( $attendee instanceof Attendee && $attendee->is_host() ) ) :
-											echo '<span class="event-you">' . esc_html__( 'You (host)', 'gp-translation-events' ) . '</span>';
+								if ( ( $attendee instanceof Attendee && $attendee->is_host() ) || current_user_can( 'manage_options' ) || $user->ID === $event->author_id() ) :
+									$_attendee = $attendee_repo->get_attendee( $event_id, $contributor->ID );
+									if ( $_attendee instanceof Attendee ) :
+										echo '<form class="add-remove-user-as-host" method="post" action="' . esc_url( gp_url( "/events/host/$event_id/$contributor->ID" ) ) . '">';
+										if ( $_attendee->is_host() ) :
+											echo '<input type="submit" class="button is-primary remove-as-host" value="Remove as host"/>';
 										else :
-											echo '<span class="event-you">' . esc_html__( 'You (event creator)', 'gp-translation-events' ) . '</span>';
+											echo '<input type="submit" class="button is-secondary convert-to-host" value="Make co-host"/>';
+										endif;
+										echo '</form>';
+									else :
+										echo '<span class="event-not-attending">' . esc_html__( 'Not attending', 'gp-translation-events' ) . '</span>';
 									endif;
 								endif;
 							endif;
@@ -81,39 +75,29 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 				</ul>
 			</div>
 		<?php endif; ?>
-		<?php if ( ! empty( $attendees ) && ( ! $event->end()->is_in_the_past() || ( ( $attendee instanceof Attendee && $attendee->is_host() ) || current_user_can( 'manage_options' ) ) ) ) : ?>
+		<?php if ( ! empty( $attendees ) && ( ! $event->end()->is_in_the_past() || ( ( $attendee instanceof Attendee && $attendee->is_host() ) || current_user_can( 'manage_options' ) || $user->ID === $event->author_id() ) ) ) : ?>
 			<div class="event-attendees">
 				<h2><?php esc_html_e( 'Attendees', 'gp-translation-events' ); ?></h2>
 				<ul>
 					<?php foreach ( $attendees as $_user ) : ?>
 						<li class="event-attendee">
-							<a href="<?php echo esc_url( get_author_posts_url( $_user->ID ) ); ?>"><?php echo get_avatar( $_user->ID, 48 ); ?></a>
-							<a href="<?php echo esc_url( get_author_posts_url( $_user->ID ) ); ?>"><?php echo esc_html( get_the_author_meta( 'display_name', $_user->ID ) ); ?></a>
+							<a href="<?php echo esc_url( get_author_posts_url( $_user->ID ) ); ?>" class="avatar"><?php echo get_avatar( $_user->ID, 48 ); ?></a>
+							<a href="<?php echo esc_url( get_author_posts_url( $_user->ID ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $_user->ID ) ); ?></a>
 							<?php if ( $stats_calculator->is_first_time_contributor( $event_start, $_user->ID ) ) : ?>
-								<span class="first-time-contributor-tada"></span>
+								<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
 							<?php endif; ?>
 							<?php
 							if ( ! $event->end()->is_in_the_past() ) :
-								if ( ( $attendee instanceof Attendee && $attendee->is_host() ) || current_user_can( 'manage_options' ) ) :
-									if ( $user->ID !== $_user->ID ) :
-										$_attendee = $attendee_repo->get_attendee( $event_id, $_user->ID );
-										if ( $_attendee instanceof Attendee ) :
-											echo '<form class="add-remove-user-as-host" method="post" action="' . esc_url( gp_url( "/events/host/$event_id/$_user->ID" ) ) . '">';
-											if ( $_attendee->is_host() ) :
-												if ( 1 === count( $attendee_repo->get_hosts( $event_id ) ) ) :
-													echo '<input type="submit" class="button is-primary remove-as-host" disabled value="Remove as host"/>';
-												else :
-													echo '<input type="submit" class="button is-primary remove-as-host" value="Remove as host"/>';
-												endif;
-											else :
-												echo '<input type="submit" class="button is-secondary convert-to-host" value="Make co-host"/>';
-											endif;
-											echo '</form>';
-										endif;
-									elseif ( ( $attendee instanceof Attendee && $attendee->is_host() ) ) :
-											echo '<span class="event-you">' . esc_html__( 'You (host)', 'gp-translation-events' ) . '</span>';
+								if ( ( $attendee instanceof Attendee && $attendee->is_host() ) || current_user_can( 'manage_options' ) || $user->ID === $event->author_id() ) :
+									$_attendee = $attendee_repo->get_attendee( $event_id, $_user->ID );
+									if ( $_attendee instanceof Attendee ) :
+										echo '<form class="add-remove-user-as-host" method="post" action="' . esc_url( gp_url( "/events/host/$event_id/$_user->ID" ) ) . '">';
+										if ( $_attendee->is_host() ) :
+											echo '<input type="submit" class="button is-primary remove-as-host" value="Remove as host"/>';
 										else :
-											echo '<span class="event-you">' . esc_html__( 'You (event creator)', 'gp-translation-events' ) . '</span>';
+											echo '<input type="submit" class="button is-secondary convert-to-host" value="Make co-host"/>';
+										endif;
+										echo '</form>';
 									endif;
 								endif;
 							endif;
@@ -214,7 +198,10 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 								', ',
 								array_map(
 									function ( $contributor ) use ( $stats_calculator, $event_start ) {
-										$append_tada = $stats_calculator->is_first_time_contributor( $event_start, $contributor->ID ) ? '<span class="first-time-contributor-tada"></span>' : '';
+										$append_tada = '';
+										if ( $stats_calculator->is_first_time_contributor( $event_start, $contributor->ID ) ) {
+											$append_tada = '<span class="first-time-contributor-tada" title="' . esc_html__( 'New Translation Contributor', 'gp-translation-events' ) . '"></span>';
+										}
 										return '@' . $contributor->user_login . $append_tada;
 									},
 									$contributors
@@ -224,6 +211,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 						array(
 							'span' => array(
 								'class' => array(),
+								'title' => array(),
 							),
 						)
 					);
@@ -257,11 +245,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 			<?php else : ?>
 				<form class="event-details-attend" method="post" action="<?php echo esc_url( gp_url( "/events/attend/$event_id" ) ); ?>">
 					<?php if ( $attendee instanceof Attendee ) : ?>
-						<?php if ( $attendee->is_host() && ( 1 === count( $attendee_repo->get_hosts( $event_id ) ) ) ) : ?>
-							<input type="submit" class="button is-secondary attending-btn" disabled value="You're attending" />
-						<?php else : ?>
-							<input type="submit" class="button is-secondary attending-btn" value="You're attending" />
-						<?php endif; ?>
+						<input type="submit" class="button is-secondary attending-btn" value="You're attending" />
 					<?php else : ?>
 						<input type="submit" class="button is-primary attend-btn" value="Attend Event"/>
 					<?php endif; ?>
