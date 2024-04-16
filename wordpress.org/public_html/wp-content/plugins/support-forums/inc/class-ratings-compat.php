@@ -81,6 +81,9 @@ class Ratings_Compat {
 			add_filter( 'bbp_get_topic_content', array( $this, 'feed_prepend_rating' ), 10, 2 );
 			add_filter( 'bbp_get_topic_title', array( $this, 'feed_append_rating' ), 10, 2 );
 		}
+
+		// Clear the review/ratings caches upon archive.
+		add_action( 'wporg_bbp_archived_topic', array( $this, 'wporg_bbp_archived_topic' ) );
 	}
 
 	/**
@@ -591,5 +594,18 @@ class Ratings_Compat {
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Clear the rating caches on topic archive.
+	 */
+	public function wporg_bbp_archived_topic( $post_id ) {
+		// Clear the rating caches.
+		\WPORG_Ratings::clear_cache(
+			$post_id,
+			$this->compat,
+			$this->slug,
+			bbp_get_topic_author_id( $post_id )
+		);
 	}
 }
