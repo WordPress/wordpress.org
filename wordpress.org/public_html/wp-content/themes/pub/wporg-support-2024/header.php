@@ -120,7 +120,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 
 		else :
 
-			if ( ! $is_user_profile ) {
+			if ( ! $is_user_profile && ! is_404() ) {
 				echo do_blocks(
 					sprintf(
 						'<!-- wp:group {"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
