@@ -1037,6 +1037,9 @@ big {
 .iso-editor.has-fixed-toolbar .interface-interface-skeleton__header {
 	z-index: var(--wp--custom--z-index--iso-editor);
 }
+.iso-editor pre {
+	background-color: #f0f0f0;
+}
 
 .wp-block-quote {
 	font-size: var(--wp--preset--font-size--normal);
