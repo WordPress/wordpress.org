@@ -309,6 +309,18 @@ $paginationBreakPoint: "600px";
 			padding: 0;
 			clear: left;
 			margin: var(--wp--preset--spacing--20) 0 0;
+
+			code,
+			pre {
+				background-color: var(--wp--preset--color--light-grey-2);
+			}
+
+			pre {
+				padding: var(--wp--preset--spacing--20);
+				border: 1px solid var(--wp--custom--color--border);
+				max-width: 100%;
+				border-radius: 2px;
+			}
 		}
 
 		.bbp-user-replies-created div.bbp-reply-content,

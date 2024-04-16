@@ -975,7 +975,7 @@ address {
 }
 
 pre {
-	background: var(--wp--preset--color--light-grey-1);
+	background: var(--wp--preset--color--light-grey-2);
 	box-sizing: content-box;
 	font-family: "Courier 10 Pitch", Courier, monospace;
 	font-size: 0.8rem;
@@ -2734,6 +2734,19 @@ body.category #main .archive-pagination {
 	padding: 0;
 	clear: right;
 	margin: var(--wp--preset--spacing--20) 0 0;
+}
+.bbpress #bbpress-forums div.bbp-reply-content code,
+.bbpress #bbpress-forums div.bbp-reply-content pre,
+.bbpress #bbpress-forums div.bbp-topic-content code,
+.bbpress #bbpress-forums div.bbp-topic-content pre {
+	background-color: var(--wp--preset--color--light-grey-2);
+}
+.bbpress #bbpress-forums div.bbp-reply-content pre,
+.bbpress #bbpress-forums div.bbp-topic-content pre {
+	padding: var(--wp--preset--spacing--20);
+	border: 1px solid var(--wp--custom--color--border);
+	max-width: 100%;
+	border-radius: 2px;
 }
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-reply-content,
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-topic-content {
