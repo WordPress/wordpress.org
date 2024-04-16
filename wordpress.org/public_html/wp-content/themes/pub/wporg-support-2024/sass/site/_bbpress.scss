@@ -300,6 +300,11 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
+		div.reported_topics {
+			padding-top: 60px;
+			background-color: unset;
+		}
+
 		div.bbp-reply-content,
 		div.bbp-topic-content {
 			padding: 0;
@@ -1116,7 +1121,7 @@ body.single-topic:not(body.topic-edit) {
 				margin-bottom: var(--wp--preset--spacing--30);
 			}
 
-			div.even:not(.topic):not(.reply),
+			div.even:not(.topic):not(.reply):not(.reported_topics),
 			ul.even,
 			div.odd:not(.reply),
 			ul.odd {

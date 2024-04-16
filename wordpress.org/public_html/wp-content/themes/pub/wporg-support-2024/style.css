@@ -1294,7 +1294,6 @@ table {
 
 .author-badge-reporter {
 	background-color: var(--wp--custom--color--thread-reporter);
-	color: var(--wp--preset--color--charcoal-1);
 	right: -2px;
 	left: initial;
 	border-radius: 2px 0 0 2px;
@@ -2732,6 +2731,10 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums div.reported_topics.by-moderator {
 	padding-top: 60px;
 }
+.bbpress #bbpress-forums div.reported_topics {
+	padding-top: 60px;
+	background-color: unset;
+}
 .bbpress #bbpress-forums div.bbp-reply-content,
 .bbpress #bbpress-forums div.bbp-topic-content {
 	padding: 0;
@@ -3404,7 +3407,7 @@ body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.reply.
 	scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
 	margin-bottom: var(--wp--preset--spacing--30);
 }
-body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.even:not(.topic):not(.reply),
+body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.even:not(.topic):not(.reply):not(.reported_topics),
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.even,
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.odd:not(.reply),
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.odd {
