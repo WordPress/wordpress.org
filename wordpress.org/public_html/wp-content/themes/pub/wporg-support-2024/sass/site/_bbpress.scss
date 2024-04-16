@@ -1181,12 +1181,13 @@ div.bbp-breadcrumb {
 	padding: 15px 0;
 
 	p {
-		color: var(--wp--preset--color--charcoal-1);
+		display: flex;
 		position: relative;
 		max-width: 100%;
-		mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
 		margin: 0 !important;
 		overflow-x: auto;
+		mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+		color: var(--wp--preset--color--charcoal-1);
 		text-overflow: clip;
 		white-space: nowrap;
 
