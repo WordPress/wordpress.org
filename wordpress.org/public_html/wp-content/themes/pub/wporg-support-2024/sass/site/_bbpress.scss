@@ -292,10 +292,6 @@ $paginationBreakPoint: "600px";
 		div.reply,
 		div.reported_topics {
 			padding: var(--wp--preset--spacing--20);
-		}
-
-		div.topic,
-		div.reply {
 
 			&.author-has-badge,
 			&.topic-author,

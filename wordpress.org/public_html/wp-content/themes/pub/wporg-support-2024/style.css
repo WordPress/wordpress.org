@@ -2726,7 +2726,10 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums div.topic.author-has-badge, .bbpress #bbpress-forums div.topic.topic-author, .bbpress #bbpress-forums div.topic.by-moderator,
 .bbpress #bbpress-forums div.reply.author-has-badge,
 .bbpress #bbpress-forums div.reply.topic-author,
-.bbpress #bbpress-forums div.reply.by-moderator {
+.bbpress #bbpress-forums div.reply.by-moderator,
+.bbpress #bbpress-forums div.reported_topics.author-has-badge,
+.bbpress #bbpress-forums div.reported_topics.topic-author,
+.bbpress #bbpress-forums div.reported_topics.by-moderator {
 	padding-top: 60px;
 }
 .bbpress #bbpress-forums div.bbp-reply-content,
