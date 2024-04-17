@@ -145,9 +145,9 @@ class Import {
 		}
 
 		if ( $unmet_dependencies ) {
-			$this->warnings['unmet_dependencies'] = $requires_plugins_unmet;
+			$this->warnings['unmet_dependencies'] = $unmet_dependencies;
 
-			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'unmet_dependencies', $requires_plugins_unmet ) );
+			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'unmet_dependencies', $unmet_dependencies ) );
 		}
 		unset( $_requires_plugins, $unmet_dependencies );
 
