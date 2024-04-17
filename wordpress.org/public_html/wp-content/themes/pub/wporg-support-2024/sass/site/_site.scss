@@ -415,14 +415,8 @@ body:not(.trac):not(.home-page) #main {
 .helphub-page,
 .page {
 
-	.entry-header {
-
-		.entry-title {
-
-			@media screen and ( min-width: $ms-breakpoint ) {
-				padding: 0 2rem;
-			}
-		}
+	#main-content {
+		margin-top: 0;
 	}
 
 	.entry-content {

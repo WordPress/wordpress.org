@@ -2355,11 +2355,9 @@ body.single .sidebar {
 # .helphub-page
 # .page
 --------------------------------------------------------------*/
-@media screen and (min-width: 48em) {
-	.helphub-page .entry-header .entry-title,
-	.page .entry-header .entry-title {
-		padding: 0 2rem;
-	}
+.helphub-page #main-content,
+.page #main-content {
+	margin-top: 0;
 }
 .helphub-page .entry-content section,
 .page .entry-content section {
