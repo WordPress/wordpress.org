@@ -39,6 +39,11 @@
 		width: 60%;
 	}
 
+	.languages button {
+		font-size: var(--wp--preset--font-size--small);
+		outline: revert;
+	}
+
 	.languages .popover {
 		margin-top: 8px;
 	}
