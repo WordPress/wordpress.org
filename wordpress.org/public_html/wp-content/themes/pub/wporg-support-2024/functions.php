@@ -17,25 +17,88 @@ require_once get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/inc/ros
 add_filter( 'bbp_show_lead_topic', '__return_true' );
 
 /**
+ * Get the local navigation menu object if it exists.
+ */
+function get_local_nav_menu_object() {
+	$local_nav_menu_locations = get_nav_menu_locations();
+	$local_nav_menu_object = isset( $local_nav_menu_locations['local-navigation'] )
+		? wp_get_nav_menu_object( $local_nav_menu_locations['local-navigation'] )
+		: false;
+
+	return $local_nav_menu_object;
+}
+
+/**
+ * Register a local nav menu for non-English forums, if it doesn't already exist.
+ */
+function register_local_nav_menu() {
+	if ( substr( get_locale(), 0, 2 ) === 'en' || get_local_nav_menu_object() ) {
+		return;
+	}
+
+	register_nav_menu( 'local-navigation', __( 'Local Navigation', 'wporg-forums' ) );
+}
+add_action( 'after_setup_theme', 'register_local_nav_menu' );
+
+/**
  * Provide a list of local navigation menus.
  */
 function add_site_navigation_menus( $menus ) {
-	return array(
-		'forums' => array(
-			array(
-				'label' => __( 'Welcome to Support', 'wporg-forums' ),
-				'url' => '/welcome/',
+	if ( is_admin() ) {
+		return;
+	}
+
+	if ( substr( get_locale(), 0, 2 ) === 'en' ) {
+		return array(
+			'forums' => array(
+				array(
+					'label' => __( 'Welcome to Support', 'wporg-forums' ),
+					'url' => '/welcome/',
+				),
+				array(
+					'label' => __( 'Guidelines', 'wporg-forums' ),
+					'url' => '/guidelines/',
+				),
+				array(
+					'label' => __( 'Get Involved', 'wporg-forums' ),
+					'url' => 'https://make.wordpress.org/support/handbook/contributing-to-the-wordpress-forums/',
+				)
 			),
-			array(
-				'label' => __( 'Guidelines', 'wporg-forums' ),
-				'url' => '/guidelines/',
+		);
+	} else {
+		$local_nav_menu_object = get_local_nav_menu_object();
+		$menu_items_fallback = array(
+			'forums' => array(
+				 array(
+					'label' => __( 'Get Involved', 'wporg-forums' ),
+					'url' => 'https://make.wordpress.org/support/handbook/contributing-to-the-wordpress-forums/',
+				)
 			),
-			array(
-				'label' => __( 'Get Involved', 'wporg-forums' ),
-				'url' => 'https://make.wordpress.org/support/handbook/contributing-to-the-wordpress-forums/',
+		);
+
+		if ( ! $local_nav_menu_object ) {
+			return $menu_items_fallback;
+		}
+
+		$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
+
+		if ( ! $menu_items || empty( $menu_items ) ) {
+			return $menu_items_fallback;
+		}
+
+		return array(
+			'forums' => array_map(
+				function( $menu_item ) {
+					return array(
+						'label' => esc_html( $menu_item->title ),
+						'url' => esc_url( $menu_item->url )
+					);
+				},
+				// Limit local nav items to 3
+				array_slice( $menu_items, 0, 3 )
 			)
-		),
-	);
+		);
+	}
 }
 add_filter( 'wporg_block_navigation_menus', '\add_site_navigation_menus' );
 
