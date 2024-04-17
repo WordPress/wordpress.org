@@ -8,7 +8,7 @@
 /**
  * Include locale specific styles.
  */
-require_once get_theme_root() . '/wporg-parent-2021/inc/rosetta-styles.php';
+require_once get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/inc/rosetta-styles.php';
 
 /**
  * Use the ‘Lead Topic’ uses the single topic part
@@ -119,7 +119,7 @@ add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
  */
 function merge_parent_support_theme_json( $theme_json ) {
 	$support_theme_json_data = $theme_json->get_data();
-	$parent_theme_json_data = json_decode( file_get_contents( get_theme_root_uri() . '/wporg-parent-2021/theme.json' ), true );
+	$parent_theme_json_data = json_decode( file_get_contents( get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/theme.json' ), true );
 
 	if ( ! $parent_theme_json_data ) {
 		return $theme_json;
