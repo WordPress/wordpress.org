@@ -282,9 +282,9 @@ class Blocks {
 				$content = bbp_get_reply( bbp_get_reply_id() )->post_content;
 			} elseif ( bbp_is_topic_edit() ) {
 				$content = get_post_field( 'post_content', bbp_get_topic_id() );
-			} elseif ( 'bbp-edit-reply' === $_POST['action'] ?? '' ) {
+			} elseif ( 'bbp-edit-reply' === ( $_POST['action'] ?? '' ) ) {
 				$content = wp_unslash( $_POST['bbp_reply_content'] ?? '' ) ?: bbp_get_reply( $_POST['bbp_reply_id'] ?? 0 )->post_content;
-			} elseif ( 'bbp-edit-topic' === $_POST['action'] ?? '' ) {
+			} elseif ( 'bbp-edit-topic' === ( $_POST['action'] ?? '' ) ) {
 				$content = wp_unslash( $_POST['bbp_topic_content'] ?? '' ) ?: get_post_field( 'post_content', $_POST['bbp_topic_id'] );
 			}
 
