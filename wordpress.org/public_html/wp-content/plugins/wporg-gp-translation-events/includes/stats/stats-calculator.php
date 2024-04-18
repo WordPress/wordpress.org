@@ -302,38 +302,36 @@ class Stats_Calculator {
 	}
 
 	/**
-	 * Check if a user is a first time contributor.
+	 * Check if a user is a new translation contributor. A new contributor is a user who has made 10 or fewer translations before event start time.
 	 *
 	 * @param Event_Start_Date $event_start The event start date.
 	 * @param int              $user_id      The user ID.
 	 *
-	 * @return bool True if the user is a first time contributor, false otherwise.
+	 * @return bool True if the user is a new translation contributor, false otherwise.
 	 */
-	public function is_first_time_contributor( $event_start, $user_id ) {
+	public function is_new_translation_contributor( $event_start, $user_id ) {
 		global $wpdb, $gp_table_prefix;
-
+		$new_contributor_max_translation_count = 10;
+		$event_start_date_time                 = $event_start->__toString();
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange
-		$users_first_translation_date = $wpdb->get_var(
+		$user_translations_count = $wpdb->get_var(
 			$wpdb->prepare(
 				"
-			select min(date_added) from {$gp_table_prefix}translations where user_id = %d
+			select count(*) from {$gp_table_prefix}translations where user_id = %d and date_added < %s
 		",
 				array(
 					$user_id,
+					$event_start_date_time,
 				)
 			)
 		);
 
-		if ( get_userdata( $user_id ) && ! $users_first_translation_date ) {
+		if ( get_userdata( $user_id ) && ! $user_translations_count ) {
 			return true;
 		}
-		$event_start_date_time  = new DateTimeImmutable( $event_start->__toString(), new DateTimeZone( 'UTC' ) );
-		$first_translation_date = new DateTimeImmutable( $users_first_translation_date, new DateTimeZone( 'UTC' ) );
-		// A first time contributor is someone whose first translation was made not earlier than 24 hours before the event.
-		$event_start_date_time = $event_start_date_time->modify( '-1 day' );
-		return $event_start_date_time <= $first_translation_date;
+		return $user_translations_count <= $new_contributor_max_translation_count;
 	}
 }

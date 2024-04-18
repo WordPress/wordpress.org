@@ -5,6 +5,7 @@
 
 namespace Wporg\TranslationEvents;
 
+use GP_Locales;
 use WP_User;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
@@ -43,13 +44,18 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		</div>
 		<?php if ( ! empty( $contributors ) ) : ?>
 			<div class="event-contributors">
-				<h2><?php esc_html_e( 'Contributors', 'gp-translation-events' ); ?></h2>
+				<h2>
+				<?php
+				// translators: %d is the number of contributors.
+				echo esc_html( sprintf( __( 'Contributors (%d)', 'gp-translation-events' ), number_format_i18n( count( $contributors ) ) ) );
+				?>
+				</h2>
 				<ul>
 					<?php foreach ( $contributors as $contributor ) : ?>
 						<li class="event-contributor" title="<?php echo esc_html( implode( ', ', $contributor->locales ) ); ?>">
 							<a href="<?php echo esc_url( get_author_posts_url( $contributor->ID ) ); ?>" class="avatar"><?php echo get_avatar( $contributor->ID, 48 ); ?></a>
 							<a href="<?php echo esc_url( get_author_posts_url( $contributor->ID ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $contributor->ID ) ); ?></a>
-							<?php if ( $stats_calculator->is_first_time_contributor( $event_start, $contributor->ID ) ) : ?>
+							<?php if ( $stats_calculator->is_new_translation_contributor( $event_start, $contributor->ID ) ) : ?>
 								<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
 							<?php endif; ?>
 							<?php
@@ -77,13 +83,18 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		<?php endif; ?>
 		<?php if ( ! empty( $attendees ) && ( ! $event->end()->is_in_the_past() || ( ( $attendee instanceof Attendee && $attendee->is_host() ) || current_user_can( 'manage_options' ) || $user->ID === $event->author_id() ) ) ) : ?>
 			<div class="event-attendees">
-				<h2><?php esc_html_e( 'Attendees', 'gp-translation-events' ); ?></h2>
+				<h2>
+				<?php
+				// translators: %d is the number of attendees.
+				echo esc_html( sprintf( __( 'Attendees (%d)', 'gp-translation-events' ), number_format_i18n( count( $attendees ) ) ) );
+				?>
+				</h2>
 				<ul>
 					<?php foreach ( $attendees as $_user ) : ?>
 						<li class="event-attendee">
 							<a href="<?php echo esc_url( get_author_posts_url( $_user->ID ) ); ?>" class="avatar"><?php echo get_avatar( $_user->ID, 48 ); ?></a>
 							<a href="<?php echo esc_url( get_author_posts_url( $_user->ID ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $_user->ID ) ); ?></a>
-							<?php if ( $stats_calculator->is_first_time_contributor( $event_start, $_user->ID ) ) : ?>
+							<?php if ( $stats_calculator->is_new_translation_contributor( $event_start, $_user->ID ) ) : ?>
 								<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
 							<?php endif; ?>
 							<?php
@@ -146,9 +157,9 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 						<a href="<?php echo esc_url( gp_url_project( $row->project ) ); ?>"><?php echo esc_html( $project_name ); ?></a> <small> to
 						<?php
 						foreach ( explode( ',', $row->locales ) as $_locale ) {
-							$_locale = \GP_Locales::by_slug( $_locale );
+							$_locale = GP_Locales::by_slug( $_locale );
 							?>
-							<a href="<?php echo esc_url( gp_url_project_locale( $row->project, $_locale, 'default' ) ); ?>"><?php echo esc_html( $_locale->english_name ); ?></a>
+							<a href="<?php echo esc_url( gp_url_project_locale( $row->project, $_locale->slug, 'default' ) ); ?>"><?php echo esc_html( $_locale->english_name ); ?></a>
 							<?php
 						}
 						// translators: %d: Number of contributors.
@@ -199,7 +210,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 								array_map(
 									function ( $contributor ) use ( $stats_calculator, $event_start ) {
 										$append_tada = '';
-										if ( $stats_calculator->is_first_time_contributor( $event_start, $contributor->ID ) ) {
+										if ( $stats_calculator->is_new_translation_contributor( $event_start, $contributor->ID ) ) {
 											$append_tada = '<span class="first-time-contributor-tada" title="' . esc_html__( 'New Translation Contributor', 'gp-translation-events' ) . '"></span>';
 										}
 										return '@' . $contributor->user_login . $append_tada;
