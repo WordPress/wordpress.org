@@ -9,9 +9,6 @@
 	vertical-align: middle;
 	width: 100%;
 
-	@media screen and ( min-width: $ms-breakpoint ) {
-		margin-top: var( --wp--style--block-gap );
-	}
 	@media screen and ( max-width: $ms-breakpoint ) {
 		margin-left: calc( -1 * var( --wp--preset--spacing--edge-space ) );
 		margin-right: calc( -1 * var( --wp--preset--spacing--edge-space ) );
