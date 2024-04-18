@@ -303,6 +303,7 @@ $paginationBreakPoint: "600px";
 		div.reported_topics {
 			padding-top: 60px;
 			background-color: unset;
+			border: 2px solid var(--wp--custom--color--thread-reporter);
 		}
 
 		div.bbp-reply-content,

@@ -1258,10 +1258,6 @@ table {
 }
 
 /* User badges */
-.type-reported_topics {
-	border-left: 2px solid var(--wp--custom--color--thread-reporter);
-}
-
 .author-badge {
 	position: absolute;
 	top: var(--wp--preset--spacing--20);
@@ -2732,6 +2728,7 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums div.reported_topics {
 	padding-top: 60px;
 	background-color: unset;
+	border: 2px solid var(--wp--custom--color--thread-reporter);
 }
 .bbpress #bbpress-forums div.bbp-reply-content,
 .bbpress #bbpress-forums div.bbp-topic-content {
