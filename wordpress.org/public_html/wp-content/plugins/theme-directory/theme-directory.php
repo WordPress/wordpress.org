@@ -607,6 +607,9 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		}
 
 		wp_update_post( $post_args );
+
+		// Subscribe the author to the theme.
+		woprg_themes_subscribe_author_to_theme_forum( get_post( $post_id ) );
 	}
 
 	$content .= sprintf( __( 'Any feedback items are at %s.', 'wporg-themes' ), "https://themes.trac.wordpress.org/ticket/$ticket_id" ) . "\n\n--\n";
@@ -1511,3 +1514,30 @@ function wporg_themes_jetpack_seo_enable( $modules ) {
 	return array_values( array_merge( $modules, array( 'seo-tools' ) ) );
 }
 add_filter( 'jetpack_active_modules', 'wporg_themes_jetpack_seo_enable' );
+
+/**
+ * Subscribe a theme author to their theme support threads upon approval.
+ *
+ * @param WP_Post $post
+ */
+function woprg_themes_subscribe_author_to_theme_forum( $post ) {
+	if ( ! $post || ! defined( 'PLUGIN_API_INTERNAL_BEARER_TOKEN' ) ) {
+		return false;
+	}
+
+	$request = wp_remote_post(
+		'https://wordpress.org/support/wp-json/wporg-support/v1/subscribe-user-to-term',
+		[
+			'body'    => [
+				'type'    => 'theme',
+				'slug'    => $post->post_name,
+				'user_id' => $post->post_author,
+			],
+			'headers' => [
+				'Authorization' => 'Bearer ' . PLUGIN_API_INTERNAL_BEARER_TOKEN,
+			],
+		]
+	);
+
+	return 200 === wp_remote_retrieve_response_code( $request );
+}
