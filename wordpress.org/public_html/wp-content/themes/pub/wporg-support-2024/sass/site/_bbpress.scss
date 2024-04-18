@@ -585,41 +585,37 @@ $paginationBreakPoint: "600px";
 		width: 90px;
 	}
 
-	li.bbp-forum-freshness,
-	li.bbp-topic-freshness {
-		text-align: left;
-	}
+	@media screen and (min-width: 321px) {
 
-	.forum-titles {
+		#bbpress-forums {
 
-		.bbp-topic-voice-count,
-		.bbp-topic-reply-count {
-			overflow: hidden;
+			.bbp-header,
+			.bbp-body {
 
-			&::before {
-				font: 400 16px/1 dashicons;
-				margin-right: 100px;
-				-moz-osx-font-smoothing: grayscale;
-				-webkit-font-smoothing: antialiased;
-
-				@media (min-width: 321px) {
-					font: 400 21px/1 dashicons;
-					margin-left: 20px;
+				li.bbp-topic-title {
+					width: 60%;
 				}
-			}
-		}
 
-		.bbp-topic-voice-count {
+				li.bbp-topic-voice-count,
+				li.bbp-topic-reply-count {
+					text-align: left;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
 
-			&::before {
-				content: "\f307";
-			}
-		}
+				li.bbp-topic-voice-count {
+					width: 12%;
+				}
 
-		.bbp-topic-reply-count {
+				li.bbp-topic-reply-count {
+					width: 8%;
+				}
 
-			&::before {
-				content: "\f125";
+				li.bbp-forum-freshness,
+				li.bbp-topic-freshness {
+					text-align: right;
+					width: 20%;
+				}
 			}
 		}
 	}

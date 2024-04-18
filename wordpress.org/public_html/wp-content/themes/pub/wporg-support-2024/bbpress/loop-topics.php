@@ -22,7 +22,7 @@ $is_all_replies_view = bbp_get_view_id() === 'all-replies';
 		<li class="bbp-header">
 			<ul class="forum-titles">
 				<li class="bbp-topic-title"><?php esc_html_e( 'Topic', 'bbpress' ); ?></li>
-				<li class="bbp-topic-voice-count"><?php esc_html_e( 'Voices', 'bbpress' ); ?></li>
+				<li class="bbp-topic-voice-count"><?php esc_html_e( 'Participants', 'bbpress' ); ?></li>
 				<li class="bbp-topic-reply-count"><?php bbp_show_lead_topic()
 					? esc_html_e( 'Replies', 'bbpress' )
 					: esc_html_e( 'Posts',   'bbpress' );

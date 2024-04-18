@@ -2971,33 +2971,34 @@ body.category #main .archive-pagination {
 .bbpress #wp-link-wrap #wp-link #search-panel label span.search-label {
 	width: 90px;
 }
-.bbpress li.bbp-forum-freshness,
-.bbpress li.bbp-topic-freshness {
-	text-align: right;
-}
-.bbpress .forum-titles .bbp-topic-voice-count,
-.bbpress .forum-titles .bbp-topic-reply-count {
-	overflow: hidden;
-}
-.bbpress .forum-titles .bbp-topic-voice-count::before,
-.bbpress .forum-titles .bbp-topic-reply-count::before {
-	font: 400 16px/1 dashicons;
-	margin-left: 100px;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-}
-@media (min-width: 321px) {
-	.bbpress .forum-titles .bbp-topic-voice-count::before,
-	.bbpress .forum-titles .bbp-topic-reply-count::before {
-		font: 400 21px/1 dashicons;
-		margin-right: 20px;
+@media screen and (min-width: 321px) {
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-title,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-title {
+		width: 60%;
 	}
-}
-.bbpress .forum-titles .bbp-topic-voice-count::before {
-	content: "\f307";
-}
-.bbpress .forum-titles .bbp-topic-reply-count::before {
-	content: "\f125";
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-reply-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-reply-count {
+		text-align: right;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-voice-count {
+		width: 12%;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-reply-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-reply-count {
+		width: 8%;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
+	.bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-freshness {
+		text-align: left;
+		width: 20%;
+	}
 }
 .bbpress #bbpress-forums .bbp-forum-info .bbp-forum-content,
 .bbpress #bbpress-forums p.bbp-topic-meta {
