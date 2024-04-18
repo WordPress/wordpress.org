@@ -24,7 +24,7 @@ add_filter( 'wporg_handbook_toc_should_add_toc', '__return_false' );
 /**
  * Get the local navigation menu object if it exists.
  */
-function get_local_nav_menu_object() {
+function wporg_support_get_local_nav_menu_object() {
 	$local_nav_menu_locations = get_nav_menu_locations();
 	$local_nav_menu_object = isset( $local_nav_menu_locations['local-navigation'] )
 		? wp_get_nav_menu_object( $local_nav_menu_locations['local-navigation'] )
@@ -37,7 +37,7 @@ function get_local_nav_menu_object() {
  * Register a local nav menu for non-English forums, if it doesn't already exist.
  */
 function wporg_support_register_local_nav_menu() {
-	if ( substr( get_locale(), 0, 2 ) === 'en' || get_local_nav_menu_object() ) {
+	if ( substr( get_locale(), 0, 2 ) === 'en' || wporg_support_get_local_nav_menu_object() ) {
 		return;
 	}
 
@@ -71,7 +71,7 @@ function wporg_support_add_site_navigation_menus( $menus ) {
 			),
 		);
 	} else {
-		$local_nav_menu_object = get_local_nav_menu_object();
+		$local_nav_menu_object = wporg_support_get_local_nav_menu_object();
 		$menu_items_fallback = array(
 			'forums' => array(
 				 array(
