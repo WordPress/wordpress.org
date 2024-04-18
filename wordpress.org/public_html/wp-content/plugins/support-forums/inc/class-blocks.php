@@ -64,20 +64,43 @@ class Blocks {
 		add_theme_support( 'responsive-embeds' );
 	}
 
+	/**
+	 * Whether the current pageload appears to be related to the reviews forum.
+	 */
+	protected function is_review_related() {
+		if ( bbp_is_single_forum() ) {
+			return ( bbp_get_forum_id() == Plugin::REVIEWS_FORUM_ID );
+		}
+
+		if ( bbp_is_single_topic() || bbp_is_topic_edit() ) {
+			return ( bbp_get_topic_forum_id() == Plugin::REVIEWS_FORUM_ID );
+		}
+
+		if ( bbp_is_single_view() ) {
+			return ( bbp_get_view_id() == 'reviews' );
+		}
+
+		return false;
+	}
+
 	public function allowed_blocks( $blocks ) {
-		// See ::editor_settings();
-		$blocks[] = 'core/image';
-		$blocks[] = 'core/embed';
+		if ( ! $this->is_review_related() ) {
+			// See ::editor_settings();
+			$blocks[] = 'core/image';
+			$blocks[] = 'core/embed';
+		}
 
 		return array_unique( $blocks );
 	}
 
 	public function editor_settings( $settings ) {
-		// This adds the image block, but only with 'add from url' as an option.
-		$settings['iso']['blocks']['allowBlocks'][] = 'core/image';
+		if ( ! $this->is_review_related() ) {
+			// This adds the image block, but only with 'add from url' as an option.
+			$settings['iso']['blocks']['allowBlocks'][] = 'core/image';
 
-		// Allows embeds and might fix pasting links sometimes not working.
-		$settings['iso']['blocks']['allowBlocks'][] = 'core/embed';
+			// Allows embeds and might fix pasting links sometimes not working.
+			$settings['iso']['blocks']['allowBlocks'][] = 'core/embed';
+		}
 
 		// Adds a navigation button in the toolbar.
 		$settings['toolbar']['navigation'] = false;
