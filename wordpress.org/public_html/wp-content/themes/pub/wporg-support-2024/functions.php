@@ -31,19 +31,19 @@ function get_local_nav_menu_object() {
 /**
  * Register a local nav menu for non-English forums, if it doesn't already exist.
  */
-function register_local_nav_menu() {
+function wporg_support_register_local_nav_menu() {
 	if ( substr( get_locale(), 0, 2 ) === 'en' || get_local_nav_menu_object() ) {
 		return;
 	}
 
 	register_nav_menu( 'local-navigation', __( 'Local Navigation', 'wporg-forums' ) );
 }
-add_action( 'after_setup_theme', 'register_local_nav_menu' );
+add_action( 'after_setup_theme', 'wporg_support_register_local_nav_menu' );
 
 /**
  * Provide a list of local navigation menus.
  */
-function add_site_navigation_menus( $menus ) {
+function wporg_support_add_site_navigation_menus( $menus ) {
 	if ( is_admin() ) {
 		return;
 	}
@@ -100,12 +100,12 @@ function add_site_navigation_menus( $menus ) {
 		);
 	}
 }
-add_filter( 'wporg_block_navigation_menus', '\add_site_navigation_menus' );
+add_filter( 'wporg_block_navigation_menus', 'wporg_support_add_site_navigation_menus' );
 
 /**
  * Register patterns from the patterns directory.
  */
-function register_patterns() {
+function wporg_support_register_patterns() {
 	$pattern_directory = new DirectoryIterator( get_template_directory() . '/patterns/' );
 	foreach ( $pattern_directory as $file ) {
 		if ( $file->isFile() ) {
@@ -113,7 +113,7 @@ function register_patterns() {
 		}
 	}
 }
-add_action( 'init', 'register_patterns' );
+add_action( 'init', 'wporg_support_register_patterns' );
 
 /**
  * Add theme support for some features.
@@ -180,7 +180,7 @@ add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
  *
  * @return WP_Theme_JSON_Data The updated theme.json settings.
  */
-function merge_parent_support_theme_json( $theme_json ) {
+function wporg_support_merge_parent_support_theme_json( $theme_json ) {
 	$support_theme_json_data = $theme_json->get_data();
 	$parent_theme_json_data = json_decode( file_get_contents( get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/theme.json' ), true );
 
@@ -212,7 +212,7 @@ function merge_parent_support_theme_json( $theme_json ) {
 	return $theme_json->update_with( $new_data );
 
 }
-add_filter( 'wp_theme_json_data_theme', 'merge_parent_support_theme_json' );
+add_filter( 'wp_theme_json_data_theme', 'wporg_support_merge_parent_support_theme_json' );
 
 /**
  * Merge two arrays recursively, overwriting keys in the first array with keys from the second array.
