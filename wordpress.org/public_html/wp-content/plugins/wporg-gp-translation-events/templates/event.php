@@ -170,16 +170,33 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 				<?php endforeach; ?>
 				</ul>
 			</div>
-			<details class="event-stats-summary">
-				<summary>View stats summary in text </summary>
+			<details class="event-stats-summary" open>
+				<summary><?php esc_html_e( 'View stats summary in text', 'gp-translation-events' ); ?></summary>
 				<p class="event-stats-text">
 					<?php
+					$new_contributors = array_filter(
+						$contributors,
+						function ( $contributor ) use ( $stats_calculator, $event_start ) {
+							return $stats_calculator->is_new_translation_contributor( $event_start, $contributor->ID );
+						}
+					);
+
+					$new_contributors_text = '';
+					if ( ! empty( $new_contributors ) ) {
+						$new_contributors_text = sprintf(
+							// translators: %d is the number of new contributors.
+							_n( '(%d new contributor 🎉)', '(%d new contributors 🎉)', count( $new_contributors ), 'gp-translation-events' ),
+							count( $new_contributors )
+						);
+					}
+
 					echo wp_kses(
 						sprintf(
-							// translators: %1$s: Event title, %2$d: Number of contributors, %3$d: Number of languages, %4$s: List of languages, %5$d: Number of strings translated, %6$d: Number of strings reviewed.
-							__( 'At the <strong>%1$s</strong> event, %2$d people contributed in %3$d languages (%4$s), translated %5$d strings and reviewed %6$d strings.', 'gp-translation-events' ),
+							// translators: %1$s: Event title, %2$d: Number of contributors, %3$s: is a parenthesis with potential text "x new contributors", %4$d: Number of languages, %5$s: List of languages, %6$d: Number of strings translated, %7$d: Number of strings reviewed.
+							__( 'At the <strong>%1$s</strong> event, we had %2$d people %3$s who contributed in %4$d languages (%5$s), translated %6$d strings and reviewed %7$d strings.', 'gp-translation-events' ),
 							esc_html( $event_title ),
 							esc_html( $event_stats->totals()->users ),
+							$new_contributors_text,
 							count( $event_stats->rows() ),
 							esc_html(
 								implode(
@@ -211,7 +228,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 									function ( $contributor ) use ( $stats_calculator, $event_start ) {
 										$append_tada = '';
 										if ( $stats_calculator->is_new_translation_contributor( $event_start, $contributor->ID ) ) {
-											$append_tada = '<span class="first-time-contributor-tada" title="' . esc_html__( 'New Translation Contributor', 'gp-translation-events' ) . '"></span>';
+											$append_tada = ' <span class="new-contributor" title="' . esc_html__( 'New Translation Contributor', 'gp-translation-events' ) . '">🎉</span>';
 										}
 										return '@' . $contributor->user_login . $append_tada;
 									},
