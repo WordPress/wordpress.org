@@ -461,29 +461,6 @@ body:not(.trac):not(.home-page) #main {
 				scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
 			}
 		}
-
-		.table-of-contents {
-			margin: 0 0 var(--wp--preset--spacing--20) var(--wp--preset--spacing--20);
-
-			.items {
-				font-size: var(--wp--preset--font-size--small);
-
-				li {
-
-					ul {
-						margin-left: 0;
-					}
-
-					a:hover {
-						color: var(--wp--custom--link--color--text);
-					}
-				}
-			}
-		}
-
-		p.toc-jump {
-			margin-bottom: unset;
-		}
 	}
 
 	.entry-footer {

@@ -17,6 +17,11 @@ require_once get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/inc/ros
 add_filter( 'bbp_show_lead_topic', '__return_true' );
 
 /**
+ * Remove the helphub table of contents from the handbook pages.
+ */
+add_filter( 'wporg_handbook_toc_should_add_toc', '__return_false' );
+
+/**
  * Get the local navigation menu object if it exists.
  */
 function get_local_nav_menu_object() {

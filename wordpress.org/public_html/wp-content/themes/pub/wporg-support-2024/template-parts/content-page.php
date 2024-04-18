@@ -18,6 +18,8 @@
 	<div class="entry-content">
 		<div class="container">
 			<?php
+			echo do_blocks( '<!-- wp:wporg/table-of-contents /-->' );
+
 			the_content();
 
 			wp_link_pages( array(

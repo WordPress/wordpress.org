@@ -921,7 +921,6 @@ h4,
 .bbp-view .review-ratings .col-5 > div:first-child,
 h5,
 h6 {
-	clear: both;
 	margin: 0 0 var(--wp--style--block-gap);
 }
 
@@ -929,6 +928,10 @@ h2.comment-reply-title {
 	font-weight: 400;
 	font-size: 1.45rem;
 	line-height: 1.5em;
+}
+
+* + h2 {
+	margin-top: var(--wp--preset--spacing--40);
 }
 
 h3.comment-reply-title {
@@ -1050,6 +1053,24 @@ big {
 
 :where(.wp-block-search__button-inside .wp-block-search__inside-wrapper) {
 	border: none;
+}
+
+.wp-block-wporg-table-of-contents {
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: 2px;
+	margin-bottom: var(--wp--preset--spacing--50);
+}
+@media screen and (min-width: 1300px) {
+	.wp-block-wporg-table-of-contents {
+		float: right;
+		width: 250px;
+		margin-left: var(--wp--style--block-gap);
+		margin-bottom: var(--wp--style--block-gap);
+		padding: var(--wp--preset--spacing--20);
+	}
+}
+.wp-block-wporg-table-of-contents li ul {
+	margin-left: 0;
 }
 
 /*--------------------------------------------------------------
@@ -2395,26 +2416,6 @@ body.single .sidebar {
 .page .entry-content h3.toc-heading:target {
 	border-left-color: var(--wp--preset--color--blueberry-1);
 	scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
-}
-.helphub-page .entry-content .table-of-contents,
-.page .entry-content .table-of-contents {
-	margin: 0 0 var(--wp--preset--spacing--20) var(--wp--preset--spacing--20);
-}
-.helphub-page .entry-content .table-of-contents .items,
-.page .entry-content .table-of-contents .items {
-	font-size: var(--wp--preset--font-size--small);
-}
-.helphub-page .entry-content .table-of-contents .items li ul,
-.page .entry-content .table-of-contents .items li ul {
-	margin-left: 0;
-}
-.helphub-page .entry-content .table-of-contents .items li a:hover,
-.page .entry-content .table-of-contents .items li a:hover {
-	color: var(--wp--custom--link--color--text);
-}
-.helphub-page .entry-content p.toc-jump,
-.page .entry-content p.toc-jump {
-	margin-bottom: unset;
 }
 .helphub-page .entry-footer,
 .page .entry-footer {
