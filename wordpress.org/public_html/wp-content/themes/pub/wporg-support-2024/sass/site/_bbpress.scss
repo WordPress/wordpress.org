@@ -126,6 +126,13 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
+		.bbp-forum-content ul.sticky,
+		.bbp-topics ul.sticky,
+		.bbp-topics ul.super-sticky,
+		.bbp-topics-front ul.super-sticky {
+			background-color: var(--wp--preset--color--lemon-3) !important;
+		}
+
 		.bbp-body {
 
 			.bbp-topic-freshness,

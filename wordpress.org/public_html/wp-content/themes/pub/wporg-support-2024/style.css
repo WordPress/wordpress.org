@@ -2574,6 +2574,12 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .bbp-reply-content p:last-child {
 	margin-bottom: var(--wp--preset--spacing--20);
 }
+.bbpress #bbpress-forums .bbp-forum-content ul.sticky,
+.bbpress #bbpress-forums .bbp-topics ul.sticky,
+.bbpress #bbpress-forums .bbp-topics ul.super-sticky,
+.bbpress #bbpress-forums .bbp-topics-front ul.super-sticky {
+	background-color: var(--wp--preset--color--lemon-3) !important;
+}
 .bbpress #bbpress-forums .bbp-body .bbp-topic-freshness,
 .bbpress #bbpress-forums .bbp-body .bbp-topic-voice-count,
 .bbpress #bbpress-forums .bbp-body .bbp-topic-reply-count {
