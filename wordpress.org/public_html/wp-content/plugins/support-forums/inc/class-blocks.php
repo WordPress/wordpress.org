@@ -79,11 +79,21 @@ class Blocks {
 		// Allows embeds and might fix pasting links sometimes not working.
 		$settings['iso']['blocks']['allowBlocks'][] = 'core/embed';
 
-		// Adds a table of contents button in the toolbar.
-		$settings['toolbar']['toc'] = true;
-
 		// Adds a navigation button in the toolbar.
-		$settings['toolbar']['navigation'] = true;
+		$settings['toolbar']['navigation'] = false;
+
+		// We don't need these on the forums.
+		$settings['unregisterFormatType'][] = 'core/keyboard';
+		$settings['unregisterFormatType'][] = 'core/language';
+		$settings['unregisterFormatType'][] = 'core/non-breaking-space';
+		$settings['unregisterFormatType'][] = 'core/subscript';
+		$settings['unregisterFormatType'][] = 'core/superscript';
+		$settings['unregisterFormatType'][] = 'core/strikethrough';
+		$settings['unregisterFormatType'][] = 'core/underline';
+
+		// WP Calypso editor adds some too.
+		$settings['unregisterFormatType'][] = 'wpcom/justify';
+		$settings['unregisterFormatType'][] = 'wpcom/underline';
 
 		// This will display a support link in an ellipsis menu in the top right of the editor.
 		$settings['iso']['moreMenu'] = true;
