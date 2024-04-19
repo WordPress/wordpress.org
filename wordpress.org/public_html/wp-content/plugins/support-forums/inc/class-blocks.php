@@ -41,9 +41,6 @@ class Blocks {
 		// Hack to make Imgur embeds work. This should be fixed by Imgur.
 		add_filter( 'oembed_remote_get_args', [ $this, 'oembed_remote_get_args' ], 10, 2 );
 
-		// Add block patterns.
-		add_filter( 'init', [ $this, 'register_predefs' ] );
-
 		// Add user opt-out.
 		add_action( 'bbp_user_edit_after', [ $this, 'bbp_user_edit_after' ], 11 );
 		add_action( 'bbp_profile_update', [ $this, 'bbp_profile_update' ], 10, 1 );
