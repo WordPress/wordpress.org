@@ -298,6 +298,12 @@ class Upload {
 									<input type="hidden" name="action" value="upload-additional"/>
 									<input type="hidden" name="plugin_id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
 
+									<label>
+										<?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
+										<textarea name="comment" rows="3" cols="80"></textarea>
+									</label>
+									<br>
+
 									<label class="button button-secondary zip-file">
 										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
 										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
@@ -316,6 +322,9 @@ class Upload {
 								echo '<li><code>' . esc_html( $upload->submitted_name ) . '</code></li>';
 								echo '<li>' . sprintf( __( 'Version: %s', 'wporg-plugins' ), '<code>' . esc_html( $upload->version ) . '</code>' ) . '</li>';
 								echo '<li>' . sprintf( __( 'Upload Date: %s', 'wporg-plugins' ), date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</li>';
+								if ( $upload->post_content ) {
+									echo '<li>' . nl2br( wp_kses_post( $upload->post_content ) ) . '</li>';
+								}
 								if ( array_key_first( $attached_media) === $attachment_post_id ) {
 									printf(
 										'<li><a href="%s" class="%s" target="_blank">%s</a></li>',
@@ -393,6 +402,17 @@ class Upload {
 						);
 						?>
 					</small>
+				</p>
+
+				<p>
+					<label>
+						<?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
+						<textarea name="comment" rows="3" cols="80"><?php
+							if ( ! empty( $_REQUEST['comment'] ) ) {
+								echo esc_textarea( $_REQUEST['comment'] );
+							}
+						?></textarea>
+					</label>
 				</p>
 
 				<p>

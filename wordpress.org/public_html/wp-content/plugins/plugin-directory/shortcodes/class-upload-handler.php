@@ -78,6 +78,7 @@ class Upload_Handler {
 		}
 
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
+		$upload_comment   = trim( wp_unslash( $_POST['comment'] ) );
 		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
@@ -491,9 +492,22 @@ class Upload_Handler {
 			);
 		}
 
-		$attachment = $this->save_zip_file( $plugin_post->ID );
+		$attachment = $this->save_zip_file( $plugin_post->ID, $upload_comment );
 		if ( is_wp_error( $attachment ) ) {
 			return $attachment;
+		}
+
+		// Store the uploaded comment as a plugin audit log.
+		if ( $upload_comment ) {
+			Tools::audit_log(
+				sprintf(
+					"Upload Comment for <a href='%s'>%s</a>\n%s",
+					wp_get_attachment_url( $attachment->ID ),
+					esc_html( $attachment->submitted_name ),
+					esc_html( $upload_comment )
+				),
+				$plugin_post->ID,
+			);
 		}
 
 		// Store metadata about the uploaded ZIP.
@@ -654,7 +668,7 @@ class Upload_Handler {
 	 * @param int $post_id Post ID.
 	 * @return WP_Post|WP_Error Attachment post or upload error.
 	 */
-	public function save_zip_file( $post_id ) {
+	public function save_zip_file( $post_id, $upload_comment ) {
 		$zip_hash = sha1_file( $_FILES['zip_file']['tmp_name'] );
 		if ( in_array( $zip_hash, get_post_meta( $post_id, 'uploaded_zip_hash' ) ?: [], true ) ) {
 			return new WP_Error( 'already_uploaded', __( "You've already uploaded that ZIP file.", 'wporg-plugins' ) );
@@ -668,9 +682,10 @@ class Upload_Handler {
 		add_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 
 		// Store the plugin details against the media as well.
-		$post_details  = array(
+		$post_details = array(
 			'post_title'   => sprintf( '%s Version %s', $this->plugin['Name'], $this->plugin['Version'] ),
 			'post_excerpt' => $this->plugin['Description'],
+			'post_content' => esc_html( $upload_comment )
 		);
 		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details );
 
@@ -764,10 +779,10 @@ class Upload_Handler {
 		}
 
 		$text = sprintf(
-			"New ZIP uploaded by %s, version %s.\n%s\n%s",
+			"New ZIP uploaded by %s, version %s.\nComment: %s\n%s",
 			wp_get_current_user()->user_login,
 			$attachment->version,
-			get_edit_post_link( $post ),
+			$attachment->post_content,
 			wp_get_attachment_url( $attachment->ID )
 		);
 

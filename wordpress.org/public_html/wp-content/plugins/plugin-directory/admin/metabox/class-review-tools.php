@@ -140,7 +140,7 @@ class Review_Tools {
 				$zip_pcp     = Template::preview_link_zip( $slug, $zip_file->ID, 'pcp' );
 
 				printf(
-					'<li>%1$s v%2$s <a href="%3$s" title="%4$s">%5$s</a> (%6$s) (<a href="%7$s" target="_blank">preview</a> | <a href="%8$s" target="_blank">pcp</a>)</li>',
+					'<li>%1$s v%2$s <a href="%3$s" title="%4$s">%5$s</a> (%6$s) (<a href="%7$s" target="_blank">preview</a> | <a href="%8$s" target="_blank">pcp</a>)%9$s</li>',
 					esc_html( $zip_date ),
 					esc_html( $zip_file->version ),
 					esc_url( $zip_url ),
@@ -148,7 +148,8 @@ class Review_Tools {
 					esc_html( $zip_file->submitted_name ),
 					esc_html( $zip_size ),
 					esc_url( $zip_preview ),
-					esc_url( $zip_pcp )
+					esc_url( $zip_pcp ),
+					( $zip_file->post_content ? '<br><div style="padding-left: 2em;">' . nl2br( $zip_file->post_content ) . '</div>' : '' )
 				);
 			}
 			echo '</ul>';
