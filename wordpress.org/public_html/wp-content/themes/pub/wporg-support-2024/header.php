@@ -65,8 +65,8 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					<div class="wp-block-wporg-language-suggest alignfull"></div>
 					<!-- /wp:wporg/language-suggest -->
 
-					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
-					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
 
 						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
 
@@ -106,8 +106,8 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					<div class="wp-block-wporg-language-suggest alignfull"></div>
 					<!-- /wp:wporg/language-suggest -->
 
-					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
-					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
 
 						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
 
@@ -143,12 +143,12 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 
 			if ( ! ( $is_user_profile || $is_reviews || $is_plugin || $is_theme || $is_single_forum ) ) {
 				echo do_blocks(
-					'<!-- wp:group {"style":{"spacing":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
-					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+					'<!-- wp:group {"style":{"spacing":{padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
 
 						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
 
-						</div>
+					</div>
 					<!-- /wp:group -->'
 				);
 			}
