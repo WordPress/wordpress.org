@@ -5,6 +5,9 @@
  * @package WPBBP
  */
 
+// Block files
+require_once __DIR__ . '/src/forums-list/block.php';
+
 /**
  * Include locale specific styles.
  */
@@ -477,53 +480,6 @@ function wporg_support_get_front_page_blocks() {
 	ob_start();
 
 	dynamic_sidebar( 'front-page-blocks' );
-
-	return ob_get_clean();
-}
-
-/**
- * Get the blocks for the front page.
- *
- * @return string
- */
-function wporg_support_get_forums_list() {
-	$forums_count = 0;
-
-	ob_start();
-
-	while ( bbp_forums() ) : bbp_the_forum();
-		$forums_count++;
-		bbp_get_template_part( 'loop', 'single-forum-homepage' );
-	endwhile;
-
-	// Calculate how many spare columns there are to fill at the end of a 3 column grid
-	$columns_to_fill = 3 - ( $forums_count % 3 );
-
-	echo do_blocks(
-		sprintf(
-			'<!-- wp:group {"className":"forums-homepage-themes-plugins span-%1$s"} -->
-			<div class="wp-block-group forums-homepage-themes-plugins span-%1$s">
-
-				<!-- wp:heading {"className":"has-normal-font-size"} -->
-				<h2 class="wp-block-heading has-normal-font-size">%2$s</h2>
-				<!-- /wp:heading -->
-
-				<!-- wp:paragraph -->
-				<p>%3$s</p>
-				<!-- /wp:paragraph -->
-
-			</div>
-			<!-- /wp:group -->',
-			esc_attr( $columns_to_fill ),
-			__( 'Themes &amp; Plugins', 'wporg-forums' ),
-			sprintf(
-				/* translators: 1: Theme Directory URL, 2: Plugin Directory URL */
-				__( 'Looking for help with a WordPress <a href="%1$s">theme</a> or <a href="%2$s">plugin</a>? Head to the theme or plugin\'s page and find the "View support forum" link to visit its specific forum.', 'wporg-forums' ),
-				esc_url( __( 'https://wordpress.org/themes/', 'wporg-forums' ) ),
-				esc_url( __( 'https://wordpress.org/plugins/', 'wporg-forums' ) ),
-			),
-		)
-	);
 
 	return ob_get_clean();
 }

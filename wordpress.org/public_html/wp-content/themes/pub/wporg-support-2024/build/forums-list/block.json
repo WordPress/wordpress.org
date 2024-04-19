@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/forums-list",
+  "version": "0.1.0",
+  "title": "Forums List",
+  "category": "widgets",
+  "icon": "smiley",
+  "description": "Show a list of forums in a grid.",
+  "usesContext": [],
+  "supports": {
+    "html": false
+  },
+  "textdomain": "wporg-forums",
+  "editorScript": "file:./index.js"
+}

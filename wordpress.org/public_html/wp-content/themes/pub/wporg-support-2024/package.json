@@ -4,18 +4,20 @@
 	"description": "Theme for WordPress Support Forums",
 	"main": "index.php",
 	"scripts": {
-		"build": "grunt",
+		"build": "grunt && wp-scripts build",
 		"grunt": "grunt",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "grunt watch"
+		"start": "concurrently \"grunt watch\" \"wp-scripts start\""
 	},
 	"author": "wordpressdotorg",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
 		"@lodder/grunt-postcss": "~3.1.1",
 		"@wordpress/browserslist-config": "~5.33.0",
+		"@wordpress/scripts": "27.1.0",
 		"@wordpress/stylelint-config": "~21.33.0",
 		"autoprefixer": "~10.4.17",
+		"concurrently": "~8.2.2",
 		"grunt": "~1.6.1",
 		"grunt-contrib-watch": "^1.1.0",
 		"grunt-rtlcss": "^2.0.2",
