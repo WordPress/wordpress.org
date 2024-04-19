@@ -24,6 +24,7 @@ class Blocks {
 
 		// Enable theme compatibility CSS.
 		add_filter( 'blocks_everywhere_theme_compat', '__return_true' );
+		add_action( 'wp_head', [ $this, 'expand_theme_compat' ], 1 );
 
 		// Theme Tweaks, these should be moved to the theme.
 		add_filter( 'after_setup_theme', [ $this, 'after_setup_theme' ] );
@@ -57,6 +58,61 @@ class Blocks {
 		add_filter( 'bbp_edit_reply_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
 		add_filter( 'bbp_new_topic_pre_content',  [ $this, 'reverse_twemoji_upon_save' ], 5 );
 		add_filter( 'bbp_edit_topic_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
+	}
+
+	/**
+	 * CSS to expand on Blocks Everywhere support
+	 */
+	public function expand_theme_compat() {
+		wp_add_inline_style(
+			'blocks-everywhere-compat',
+			<<<CSS
+				/* Fix the primary block inserter button */
+				.blocks-everywhere .components-button.is-primary {
+					--wp-components-color-accent: var(--wp--custom--button--color--background);
+					--wp-components-color-accent-darker-10: var(--wp--custom--button--hover--color--background);
+					--wp-components-color-accent-darker-20: var(--wp--custom--button--hover--color--background);
+				}
+				.gutenberg-support .iso-editor .edit-post-header__toolbar button.components-button.is-primary:hover svg {
+					fill: #fff;
+				}
+				.blocks-everywhere .components-button.is-primary {
+					--wp-admin-theme-color: #fff;
+				}
+				.editor-document-tools .editor-document-tools__left>.components-button.is-primary.has-icon.is-pressed {
+					background: var(--wp--custom--button--color--background);
+				}
+				/* Fix the inline new-block button */
+				.block-editor-default-block-appender .block-editor-inserter__toggle.components-button.has-icon:hover {
+					background: var( --wp--preset--color--charcoal-3 );
+				}
+				/* Fix the button selected state */
+				.gutenberg-support .edit-post-header button:not(:hover):not(:active):not(.has-background):not(.is-primary),
+				.gutenberg-support .edit-post-header button.is-pressed:not(.has-background):not(.is-primary) {
+					color: #fff;
+				}
+				/* Editor toolbar buttons */
+				.gutenberg-support .iso-editor .block-editor-block-types-list__list-item:hover span {
+					fill: inherit;
+					color: inherit;
+				}
+				.gutenberg-support .iso-editor .edit-post-header__toolbar button.is-pressed:hover svg {
+					fill: #fff;
+				}
+				/* Fix the accessibility navigation block styles */
+				.block-editor-list-view-leaf.is-selected .block-editor-list-view-block-contents,
+				.block-editor-list-view-leaf.is-selected .components-button.has-icon,
+				.gutenberg-support #bbpress-forums fieldset.bbp-form .block-editor-list-view-tree button:focus,
+				.gutenberg-support #bbpress-forums fieldset.bbp-form .block-editor-list-view-tree button:hover {
+					color: var( --wp--preset--color--charcoal-1 );
+				}
+				/* Fix the accessibility block drag handles */
+				button.components-button.block-selection-button_drag-handle,
+				button.components-button.block-selection-button_select-button {
+					color: #fff !important;
+				}
+			CSS
+		);
 	}
 
 	public function after_setup_theme() {
@@ -101,9 +157,6 @@ class Blocks {
 			// Allows embeds and might fix pasting links sometimes not working.
 			$settings['iso']['blocks']['allowBlocks'][] = 'core/embed';
 		}
-
-		// Adds a navigation button in the toolbar.
-		$settings['toolbar']['navigation'] = false;
 
 		// We don't need these on the forums.
 		$settings['unregisterFormatType'][] = 'core/keyboard';
