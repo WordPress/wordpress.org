@@ -771,12 +771,20 @@ class Upload_Handler {
 			wp_get_attachment_url( $attachment->ID )
 		);
 
-		$result = HelpScout::api(
-			'/v2/conversations/' . $review_email->id . '/notes',
-			[
-				'text'   => $text,
-				'status' => 'active',
+		$name = wp_get_current_user()->display_name ?: wp_get_current_user()->user_login;
+		$payload = [
+			'customer' => [
+				'firstName' => explode( ' ', $name, 2 )[0],
+				'lastName'  => trim( explode( ' ', "{$name} ", 2 )[1] ),
+				'email'     => wp_get_current_user()->user_email,
 			],
+			'text'   => $text,
+			'status' => 'active',
+		];
+
+		$result = HelpScout::api(
+			'/v2/conversations/' . $review_email->id . '/reply',
+			$payload,
 			'POST',
 			$http_response_code
 		);
