@@ -4,33 +4,22 @@
 	"description": "Theme for WordPress Support Forums",
 	"main": "index.php",
 	"scripts": {
-		"build": "grunt && wp-scripts build",
-		"grunt": "grunt",
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "concurrently \"grunt watch\" \"wp-scripts start\""
+		"build": "wp-scripts build",
+		"start": "wp-scripts start",
+		"lint:js": "wp-scripts lint-js src",
+		"lint:css": "wp-scripts lint-style *.css src/**/*.scss",
+		"format": "wp-scripts format src"
 	},
 	"author": "wordpressdotorg",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
-		"@lodder/grunt-postcss": "~3.1.1",
-		"@wordpress/browserslist-config": "~5.33.0",
-		"@wordpress/scripts": "27.1.0",
-		"@wordpress/stylelint-config": "~21.33.0",
-		"autoprefixer": "~10.4.17",
-		"concurrently": "~8.2.2",
-		"grunt": "~1.6.1",
-		"grunt-contrib-watch": "^1.1.0",
-		"grunt-rtlcss": "^2.0.2",
-		"grunt-sass": "~3.1.0",
-		"grunt-stylelint": "^0.18.0",
-		"postcss": "~8.4.33",
-		"sass": "~1.70.0",
-		"stylelint": "^14.2"
+		"@wordpress/scripts": "25.0.0",
+		"rtlcss-webpack-plugin": "4.0.7"
 	},
-	"engines": {
-		"node": ">=16"
+	"eslintConfig": {
+		"extends": "./.eslintrc.js"
 	},
-	"browserslist": [
-		"extends @wordpress/browserslist-config"
-	]
+	"stylelint": {
+		"extends": "./.stylelintrc"
+	}
 }
