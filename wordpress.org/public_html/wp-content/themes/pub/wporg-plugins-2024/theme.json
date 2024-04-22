@@ -153,6 +153,15 @@
 		}
 	},
 	"styles": {
+		"blocks": {
+			"core/post-title": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--eb-garamond)",
+					"fontSize": "36px",
+					"lineHeight": "1.3"
+				}
+			}
+		},
 		"elements": {
 			"h2": {
 				"typography": {
