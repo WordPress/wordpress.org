@@ -70,7 +70,7 @@ class Tools {
 				FROM ratings r
 					LEFT JOIN " . $wpdb->base_prefix . WPORG_SUPPORT_FORUMS_BLOGID . "_posts p ON r.post_id = p.ID
 				WHERE r.object_type = 'plugin' AND r.object_slug = %s AND p.post_status = 'publish'
-				ORDER BY r.review_id DESC
+				ORDER BY r.date DESC
 				LIMIT %d",
 				$post->post_name,
 				$number
