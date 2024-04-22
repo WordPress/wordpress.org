@@ -118,14 +118,6 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
-		.bbp-topic-content,
-		.bbp-reply-content {
-
-			p:last-child {
-				margin-bottom: var(--wp--preset--spacing--20);
-			}
-		}
-
 		.bbp-forum-content ul.sticky,
 		.bbp-topics ul.sticky,
 		.bbp-topics ul.super-sticky,
@@ -305,7 +297,7 @@ $paginationBreakPoint: "600px";
 		div.topic,
 		div.reply,
 		div.reported_topics {
-			padding: var(--wp--preset--spacing--20);
+			padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--20) 40px;
 
 			&.author-has-badge,
 			&.topic-author,
@@ -376,14 +368,6 @@ $paginationBreakPoint: "600px";
 			background: none;
 			padding: var(--wp--preset--spacing--10) calc(var(--wp--preset--spacing--20) - 5px);
 			font-size: 0; // hide the pipe character separators for a11y
-
-			@media screen and ( max-width: 480px ) {
-				padding: 3px 7px;
-			}
-
-			@media screen and (max-width: 767px) {
-				display: block;
-			}
 
 			a {
 				color: var(--wp--custom--link--color--text);
