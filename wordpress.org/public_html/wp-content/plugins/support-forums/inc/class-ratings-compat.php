@@ -122,7 +122,7 @@ class Ratings_Compat {
 	public function add_topic_stars() {
 		if ( bbp_is_single_topic() && Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id() ) {
 			$user_id = bbp_get_topic_author_id();
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
 				echo \WPORG_Ratings::get_dashicons_stars( $rating );
 			}
@@ -174,7 +174,7 @@ class Ratings_Compat {
 
 		if ( bbp_is_single_view() && 'reviews' == bbp_get_view_id() ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
 				$title .= ' ' . \WPORG_Ratings::get_dashicons_stars( $rating );
 			}
@@ -348,6 +348,9 @@ class Ratings_Compat {
 				bbp_get_topic_author_id( $topic_id ),
 				$rating
 			);
+
+			// Store it against the review post for later use.
+			update_post_meta( $topic_id, 'rating', $rating );
 		}
 	}
 
@@ -557,7 +560,7 @@ class Ratings_Compat {
 	public function feed_prepend_rating( $content, $topic_id ) {
 		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 
 			if ( $rating ) {
 				$content = sprintf(
@@ -583,7 +586,7 @@ class Ratings_Compat {
 	public function feed_append_rating( $title, $topic_id ) {
 		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 
 			if ( $rating ) {
 				$title = sprintf(
