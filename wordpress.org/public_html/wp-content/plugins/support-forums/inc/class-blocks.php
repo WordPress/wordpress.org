@@ -108,6 +108,10 @@ class Blocks {
 				button.components-button.block-selection-button_select-button {
 					color: #fff !important;
 				}
+				/* Reset the link editor padding in BE theme-compat. https://meta.trac.wordpress.org/ticket/7606 + https://github.com/Automattic/blocks-everywhere/issues/206 */
+				.gutenberg-support #bbpress-forums fieldset.bbp-form .blocks-everywhere .block-editor-link-control button {
+					padding: inherit;
+				}
 			CSS
 		);
 	}
