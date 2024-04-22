@@ -221,10 +221,12 @@ class Ratings_Compat {
 				$ratings_count_total = isset( $this->ratings_counts ) ? array_sum( $this->ratings_counts) : 0;
 				$stars_title = sprintf(
 					/* translators: %s: number of stars */
-					_n( 'Click to see reviews that provided a rating of %d star',
-					    'Click to see reviews that provided a rating of %d stars',
-					    $rating,
-					    'wporg-forums' ),
+					_n(
+						'Click to see reviews that provided a rating of %d star',
+						'Click to see reviews that provided a rating of %d stars',
+						$rating,
+						'wporg-forums'
+					),
 					$rating
 				);
 				/* translators: %d: number of stars */
@@ -246,7 +248,7 @@ class Ratings_Compat {
 						<span class="counter-bar" style="width:<?php echo esc_attr( $width ); ?>px;height:17px;background-color:#ffc733;float:left;"></span>
 					</span>
 				</a>
-				<span class="counter-count" style="margin-left:5px;"><?php echo esc_html( $ratings_count ); ?></span>
+				<span class="counter-count" style="margin-left:5px;"><?php echo esc_html( number_format_i18n( $ratings_count ) ); ?></span>
 				</div>
 				<?php
 			}
@@ -298,10 +300,12 @@ class Ratings_Compat {
 			echo '<p class="reviews-filtered-msg" style="margin-top:12px;font-size:0.8rem;">';
 			printf(
 				/* translators: %d: number of stars */
-				_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
-				    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
-			        $filter,
-				        'wporg-forums' ) . ' ',
+				_n(
+					'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
+					'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
+					$filter,
+					'wporg-forums'
+				) . ' ',
 				$filter
 			);
 			printf(
