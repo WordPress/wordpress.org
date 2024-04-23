@@ -6,7 +6,10 @@
  *
  * @package WordPressdotorg\Plugin_Directory\Theme
  */
+?>
+<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
 
+<?php
 if ( is_tax( 'plugin_section', 'favorites' ) ) :
 	if ( is_user_logged_in() ) :
 		$current_user = wp_get_current_user();
@@ -38,3 +41,5 @@ else :
 	?><p><?php esc_html_e( 'Sorry, but nothing matched your query.', 'wporg-plugins' ); ?></p><?php
 
 endif;
+?>
+</div>
