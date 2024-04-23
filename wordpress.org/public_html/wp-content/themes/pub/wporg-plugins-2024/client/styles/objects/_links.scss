@@ -2,7 +2,7 @@ body a,
 body .wp-block-post-content a {
 	text-decoration: none;
 
-	&:not(.button, .dashicons):hover {
+	&:not(.button, .dashicons, .wp-block-button__link):hover {
 		text-decoration: underline;
 	}
 }

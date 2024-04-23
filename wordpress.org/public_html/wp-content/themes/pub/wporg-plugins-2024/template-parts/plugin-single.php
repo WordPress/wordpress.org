@@ -28,33 +28,45 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 		<?php the_active_plugin_notice(); ?>
 		<?php the_unconfirmed_releases_notice(); ?>
 
-		<div class="entry-thumbnail">
-			<?php
-			// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-			echo Template::get_plugin_icon( $post, 'html' );
-			?>
+		<div class="entry-heading-container">
+			<div>
+				<div class="entry-thumbnail">
+					<?php
+					// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo Template::get_plugin_icon( $post, 'html' );
+					?>
+				</div>
+
+
+				<div>
+					<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
+					<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo wp_kses_post( $plugin_title ); ?></a></h1>
+					<?php else : ?>
+					<h1 class="plugin-title"><?php echo wp_kses_post( $plugin_title ); ?></h1>
+					<?php endif; ?>
+
+					<span class="byline"><?php the_author_byline(); ?></span>
+				</div>
+			</div>
+			<div class="plugin-actions">
+				<?php the_plugin_favorite_button(); ?>
+
+				<?php if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) : ?>
+					<div class="is-small">
+						<a class="plugin-download wp-block-button__link download-button" href="<?php echo esc_url( Template::download_link() ); ?>"><?php esc_html_e( 'Download', 'wporg-plugins' ); ?></a>
+					</div>
+				<?php endif; ?>
+				<?php if ( Template::is_preview_available() ) : ?>
+					<div class="is-small">
+						<a class="plugin-preview wp-block-button__link is-small download-button" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Live Preview', 'wporg-plugins' ); ?></a>
+					</div>
+				<?php elseif ( Template::preview_link() && Template::is_preview_available( $post, 'edit' ) ) : ?>
+					<div class="is-small">
+						<a class="plugin-preview wp-block-button__link is-small download-button" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Test Preview', 'wporg-plugins' ); ?></a>
+					</div>
+				<?php endif; ?>
+			</div>
 		</div>
-
-		<div class="plugin-actions">
-			<?php the_plugin_favorite_button(); ?>
-
-			<?php if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) : ?>
-				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php esc_html_e( 'Download', 'wporg-plugins' ); ?></a>
-			<?php endif; ?>
-			<?php if ( Template::is_preview_available() ) : ?>
-				<a class="plugin-preview button download-button button-large" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Live Preview', 'wporg-plugins' ); ?></a>
-			<?php elseif ( Template::preview_link() && Template::is_preview_available( $post, 'edit' ) ) : ?>
-				<a class="plugin-preview button download-button button-large" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Test Preview', 'wporg-plugins' ); ?></a>
-			<?php endif; ?>
-		</div>
-
-		<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
-		<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo wp_kses_post( $plugin_title ); ?></a></h1>
-		<?php else : ?>
-		<h1 class="plugin-title"><?php echo wp_kses_post( $plugin_title ); ?></h1>
-		<?php endif; ?>
-
-		<span class="byline"><?php the_author_byline(); ?></span>
 	</header><!-- .entry-header -->
 
 	<span id="description"></span>

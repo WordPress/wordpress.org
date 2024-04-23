@@ -17,9 +17,42 @@
 		border-bottom: 0;
 		padding-top: var( --wp--preset--spacing--40 ); /* This is overridden if we have a banner below. */
 
+		.entry-heading-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+
+			// This is to fix the buttons missing small padding on mobile
+			// Ideally we remove this when we update this single page.
+			@media screen and (max-width: 599px) {
+				--wp--custom--button--spacing--padding--top: 12px;
+				--wp--custom--button--spacing--padding--bottom: 12px;
+				--wp--custom--button--spacing--padding--left: 16px;
+				--wp--custom--button--spacing--padding--right: 16px;
+			}
+
+			@media screen and (min-width: 700px) {
+				flex-direction: row;
+			}
+
+			> *:first-child {
+				flex: 1;
+
+				display: flex;
+				align-items: center;
+			}
+		}
+
 		.plugin-actions {
-			float: right;
-			margin-inline-start: 1rem;
+			margin-top: var(--wp--style--block-gap);
+			display: flex;
+			align-items: center;
+			gap: 8px;
+
+			@media screen and (min-width: 700px) {
+				margin-top: 0;
+				margin-inline-start: 1rem;
+			}
 
 			> div,
 			> .button {
@@ -32,6 +65,7 @@
 					display: none;
 				}
 			}
+			  
 		}
 
 		.plugin-title {
