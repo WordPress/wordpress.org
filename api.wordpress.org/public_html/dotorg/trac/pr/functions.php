@@ -434,5 +434,12 @@ function format_github_content_for_trac_comment( $desc ) {
 	// It shouldn't exist at this point, but if it does, replace it back with it's original content.
 	$desc = str_replace( '~~~TABLEHEADER~~~', '|| ||', $desc );
 
-	return trim( $desc );
+	$desc = trim( $desc );
+
+	// After all this, if it's a HTML comment, we're not interested in syncing it.
+	if ( preg_match( '/[{`]+\s*#!html/i', $desc ) ) {
+		return false;
+	}
+
+	return $desc;
 }
