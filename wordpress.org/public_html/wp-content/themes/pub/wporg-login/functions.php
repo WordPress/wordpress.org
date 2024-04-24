@@ -566,7 +566,7 @@ function wporg_remember_where_user_came_from() {
 		return;
 	}
 
-	setcookie( 'wporg_came_from', $came_from, time() + 10*MINUTE_IN_SECONDS, '/', WPOrg_SSO::get_instance()->get_cookie_host(), true, true );
+	setcookie( 'wporg_came_from', $came_from, time() + 30*MINUTE_IN_SECONDS, '/', WPOrg_SSO::get_instance()->get_cookie_host(), true, true );
 }
 add_action( 'init', 'wporg_remember_where_user_came_from' );
 

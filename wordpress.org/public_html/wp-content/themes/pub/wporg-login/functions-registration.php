@@ -75,16 +75,17 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
 	$pending_user = array(
-		'user_login' => $user_login,
-		'user_email' => $user_email,
-		'user_registered' => gmdate('Y-m-d  H:i:s'),
+		'user_login'          => $user_login,
+		'user_email'          => $user_email,
+		'user_registered'     => gmdate('Y-m-d  H:i:s'),
 		'user_activation_key' => '',
-		'user_profile_key' => $hashed_profile_key,
-		'meta' => $meta + array(
-			'registration_ip'  => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
-			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ) : '' )
+		'user_profile_key'    => $hashed_profile_key,
+		'meta'                => $meta + array(
+			'registration_ip'         => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
+			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ) : '' ),
+			'source'                  => $_COOKIE['wporg_came_from'] ?? '',
 		),
-		'scores' => array(
+		'scores'              => array(
 			'pending' => 1,
 		),
 		'cleared' => 0,
