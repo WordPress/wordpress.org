@@ -24,6 +24,11 @@
 		a {
 			display: block;
 			text-decoration: none;
+
+			&:focus {
+				text-decoration: underline;
+				outline: none;
+			}
 		}
 	}
 
