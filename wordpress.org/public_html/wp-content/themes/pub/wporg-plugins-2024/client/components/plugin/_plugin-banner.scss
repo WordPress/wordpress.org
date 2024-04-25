@@ -8,10 +8,4 @@
 	padding-top: 32.38342%; /* 250px / 722px */
 	vertical-align: middle;
 	width: 100%;
-
-	@media screen and ( max-width: $ms-breakpoint ) {
-		margin-left: calc( -1 * var( --wp--preset--spacing--edge-space ) );
-		margin-right: calc( -1 * var( --wp--preset--spacing--edge-space ) );
-		width: calc( 100% + 2 * var( --wp--preset--spacing--edge-space ) );
-	}
 }
