@@ -72,7 +72,7 @@
 			clear: none;
 			font-size: var( --wp--preset--font-size--heading-3 );
 			font-weight: 400;
-			line-height: 1.1;
+			line-height: var( --wp--custom--heading--level-3--typography--line-height );
 			margin: 0;
 
 			a {
