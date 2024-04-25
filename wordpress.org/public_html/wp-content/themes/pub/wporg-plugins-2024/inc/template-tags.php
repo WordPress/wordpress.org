@@ -380,7 +380,7 @@ function the_previous_version_download( $post = null ) {
 	echo '</select> ';
 
 	printf(
-		'<a href="%s" id="download-previous-link" class="button button-secondary">%s</a>',
+		'<span class="wp-block-button is-small"><a href="%s" id="download-previous-link" class="wp-block-button__link">%s</a></span>',
 		esc_url( Template::download_link( $post, reset( $tags ) ) ),
 		esc_html__( 'Download', 'wporg-plugins' )
 	);
@@ -427,8 +427,8 @@ function the_plugin_community_zone() {
 	);
 	echo '<span class="help">' . esc_attr__( 'Optional. The URL where development happens, such as at github.com.', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
-	echo '<p>';
-	echo '<button class="button button-secondary" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
+	echo '<p class="wp-block-button is-small">';
+	echo '<button class="wp-block-button__link" type="submit">' . esc_html__( 'Save', 'wporg-plugins' ) . '</button>';
 	echo '<span class="success-msg">' . __( 'Saved!', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
 	echo '</form>';
@@ -546,7 +546,7 @@ function the_plugin_self_close_button() {
 	if ( $close_link ) {
 		echo '<form method="POST" action="' . esc_url( $close_link ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
 		// Translators: %s is the plugin name, as defined by the plugin itself.
-		echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
+		echo '<p class="wp-block-button is-small"><button class="wp-block-button__link" type="submit">' . esc_attr( sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() ) ) . '</button></p>';
 		echo '</form>';
 	}
 }
