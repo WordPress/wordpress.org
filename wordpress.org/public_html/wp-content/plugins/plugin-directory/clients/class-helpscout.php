@@ -12,7 +12,7 @@ class HelpScout {
 	/**
 	 * The HTTP timeout for the HelpScout API.
 	 */
-	const TIMEOUT = 15;
+	const TIMEOUT = 30;
 
 	public static function api( $url, $args = null, $method = 'GET', & $response_code = null ) {
 		// Verify the configuration variables are available.

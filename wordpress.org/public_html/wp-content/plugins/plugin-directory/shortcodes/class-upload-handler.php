@@ -804,6 +804,12 @@ class Upload_Handler {
 			$http_response_code
 		);
 
-		return ( 201 === $http_response_code );
+		$success = ( 201 === $http_response_code );
+
+		if ( ! $success ) {
+			trigger_error( "Helpscout update failed: $http_response_code: " . var_export( $result, true ), E_USER_WARNING );
+		}
+
+		return $success;
 	}
 }
