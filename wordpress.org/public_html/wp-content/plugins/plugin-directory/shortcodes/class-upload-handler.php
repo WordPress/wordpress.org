@@ -767,7 +767,7 @@ class Upload_Handler {
 	 *
 	 * @return bool True if the email was updated, false otherwise.
 	 */
-	public function update_review_email( $post, $attachment ) {
+	public static function update_review_email( $post, $attachment ) {
 		$review_email = self::find_review_email( $post );
 		if ( ! $review_email ) {
 			return false;
@@ -788,11 +788,11 @@ class Upload_Handler {
 
 		$name = wp_get_current_user()->display_name ?: wp_get_current_user()->user_login;
 		$payload = [
-			'customer' => [
-				'firstName' => explode( ' ', $name, 2 )[0],
-				'lastName'  => trim( explode( ' ', "{$name} ", 2 )[1] ),
+			'customer' => array_filter( [
+				'firstName' => substr( explode( ' ', $name, 2 )[0], 0, 39 ),
+				'lastName'  => trim( substr( explode( ' ', "{$name} ", 2 )[1], 0, 39 ) ),
 				'email'     => wp_get_current_user()->user_email,
-			],
+			] ),
 			'text'   => $text,
 			'status' => 'active',
 		];
