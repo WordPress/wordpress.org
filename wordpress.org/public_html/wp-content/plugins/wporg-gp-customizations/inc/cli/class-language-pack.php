@@ -274,7 +274,11 @@ class Language_Pack extends WP_CLI_Command {
 	 * @return false|string False on failure, stable tag on success.
 	 */
 	private function get_plugin_stable_tag( $plugin_slug ) {
-		$plugin = @file_get_contents( "https://api.wordpress.org/plugins/info/1.0/{$plugin_slug}.json?fields=stable_tag" );
+		$plugin = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/plugins/info/1.0/{$plugin_slug}.json?fields=stable_tag"
+			)
+		);
 		if ( ! $plugin ) {
 			return false;
 		}
@@ -291,7 +295,11 @@ class Language_Pack extends WP_CLI_Command {
 	 * @return false|string False on failure, version on success.
 	 */
 	private function get_latest_theme_version( $theme_slug ) {
-		$theme = @file_get_contents( "https://api.wordpress.org/themes/info/1.1/?action=theme_information&request[slug]={$theme_slug}" );
+		$theme = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/themes/info/1.1/?action=theme_information&request[slug]={$theme_slug}"
+			)
+		);
 		if ( ! $theme ) {
 			return false;
 		}
@@ -308,7 +316,11 @@ class Language_Pack extends WP_CLI_Command {
 	 * @return false|string False on failure, version on success.
 	 */
 	private function get_latest_plugin_version( $plugin_slug ) {
-		$plugin = @file_get_contents( "https://api.wordpress.org/plugins/info/1.0/{$plugin_slug}.json" );
+		$plugin = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/plugins/info/1.0/{$plugin_slug}.json"
+			)
+		);
 		if ( ! $plugin ) {
 			return false;
 		}

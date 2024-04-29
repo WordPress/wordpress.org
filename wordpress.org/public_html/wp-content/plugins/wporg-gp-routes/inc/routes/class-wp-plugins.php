@@ -149,12 +149,14 @@ class WP_Plugins extends WP_Directory {
 
 		$project->icon = $this->get_plugin_icon( $project, 64 );
 
-		$http_context = stream_context_create( array(
-			'http' => array(
-				'user_agent' => 'WordPress.org Translate',
-			),
-		) );
-		$json = file_get_contents( "https://api.wordpress.org/translations/plugins/1.0/?slug={$project_slug}", null, $http_context );
+		$json = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/translations/plugins/1.0/?slug={$project_slug}",
+				array(
+					'user-agent' => 'WordPress.org Translate',
+				)
+			)
+		);
 		$language_packs = $json && '{' == $json[0] ? json_decode( $json ) : null;
 
 		$this->tmpl( 'projects-wp-plugins-language-packs', get_defined_vars() );

@@ -286,8 +286,14 @@ class Set_Plugin_Project extends WP_CLI_Command {
 	 * @return object|null JSON object on success, null on failure.
 	 */
 	private function get_plugin_details( $slug ) {
-		$http_context = $this->get_http_context();
-		$json = @file_get_contents( "https://api.wordpress.org/plugins/info/1.0/{$slug}.json?fields=stable_tag,short_description", false, $http_context );
+		$json = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/plugins/info/1.0/{$slug}.json?fields=stable_tag,short_description",
+				array(
+					'user-agent' => 'WordPress.org Translate',
+				)
+			)
+		);
 
 		$details = $json && '{' == $json[0] ? json_decode( $json ) : null;
 
@@ -298,16 +304,4 @@ class Set_Plugin_Project extends WP_CLI_Command {
 		return $details;
 	}
 
-	/**
-	 * Creates a stream context with a default HTTP user-agent.
-	 *
-	 * @return resource Stream context with a default HTTP user-agent.
-	 */
-	private function get_http_context() {
-		return stream_context_create( array(
-			'http' => array(
-				'user_agent' => 'WordPress.org Translate',
-			),
-		) );
-	}
 }
