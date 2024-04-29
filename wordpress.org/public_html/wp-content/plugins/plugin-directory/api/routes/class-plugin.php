@@ -38,12 +38,9 @@ class Plugin extends Base {
 	 * @return array A formatted array of all the data for the plugin.
 	 */
 	function plugin_info( $request ) {
-		$plugin_slug = $request['plugin_slug'];
+		$post = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-		global $post;
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-
-		if ( 'publish' != $post->post_status ) {
+		if ( ! $post || 'publish' != $post->post_status ) {
 			// Copy what the REST API does if the param is incorrect
 			return new \WP_Error(
 				'rest_invalid_param',
@@ -57,12 +54,28 @@ class Plugin extends Base {
 			);
 		}
 
+		return $this->plugin_info_data( $request, $post );
+	}
+
+	/**
+	 * The underlying API for the plugin information.
+	 *
+	 * Expects that the input has been validated, and that the $post object is safe for display.
+	 * This is shared with/called from Pending_Plugin too.
+	 *
+	 * @param \WP_REST_Request $request The request object.
+	 * @param \WP_Post         $post    The post object for the plugin.
+	 * @return array The formatted array of all the data for the plugin.
+	 */
+	public function plugin_info_data( $request, $post ) {
+		$GLOBALS['post'] = $post;
+		$plugin_slug     = $post->post_name;
+		$post_id         = $post->ID;
+
 		// Support returning API data in different locales, even on wordpress.org (for api.wordpress.org usage)
 		if ( ! empty( $request['locale'] ) && ! in_array( strtolower( $request['locale'] ), array( 'en_us', 'en' ) ) ) {
 			switch_to_locale( $request['locale'] );
 		}
-
-		$post_id = $post->ID;
 
 		$result            = array();
 		$result['name']    = get_the_title();

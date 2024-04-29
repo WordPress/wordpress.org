@@ -51,6 +51,7 @@ class Plugin_Directory {
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
 		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
+		add_filter( 'wp_get_attachment_url', array( $this, 'add_info_to_zip_url' ), 100, 2 );
 
 		// Add no-index headers where appropriate.
 		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
@@ -1831,6 +1832,37 @@ class Plugin_Directory {
 		} );
 
 		return update_post_meta( $plugin->ID, 'releases', $releases );
+	}
+
+	/**
+	 * Add additional context to ZIP urls.
+	 *
+	 * The ZIP URL will have a 'info' key attached which is a rest api URL to information about the plugin.
+	 *
+	 * @param string $url           The URL to the ZIP file.
+	 * @param int    $attachment_id The attachment ID.
+	 * @return string The URL to the ZIP file.
+	 */
+	public function add_info_to_zip_url( $url, $attachment_id ) {
+		$attachment = get_post( $attachment_id );
+		$post       = get_post( $attachment->post_parent );
+		$token      = $post->{'_pending_access_token'} ?? false;
+
+		if ( ! $url || ! $attachment || ! $post || ! $token || ! current_user_can( 'edit_post', $post->ID ) ) {
+			return $url;
+		}
+
+		$url = add_query_arg(
+			'info',
+			urlencode( rest_url( sprintf(
+				'plugins/v1/pending-plugin/%d-%s/',
+				$post->ID,
+				$token
+			) ) ),
+			$url
+		);
+
+		return $url;
 	}
 
 	/**

@@ -468,9 +468,10 @@ class Upload_Handler {
 
 		// First time submission, track some additional metadata.
 		if ( ! $updating_existing ) {
-			$post_args['meta_input']['_author_ip']        = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
-			$post_args['meta_input']['_submitted_date']   = time();
-			$post_args['meta_input']['_used_upload_token'] = $has_upload_token;
+			$post_args['meta_input']['_author_ip']            = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
+			$post_args['meta_input']['_submitted_date']       = time();
+			$post_args['meta_input']['_used_upload_token']    = $has_upload_token;
+			$post_args['meta_input']['_pending_access_token'] = md5( wp_generate_password( 32, true, true ) );
 		}
 
 		// Add/Update the Plugin Directory entry for this plugin.

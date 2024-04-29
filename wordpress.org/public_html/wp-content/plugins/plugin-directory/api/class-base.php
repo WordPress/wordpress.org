@@ -39,6 +39,7 @@ class Base {
 		new Routes\Plugin_Categorization();
 		new Routes\Plugin_Upload();
 		new Routes\Plugin_Blueprint();
+		new Routes\Pending_Plugin();
 	}
 
 	/**
