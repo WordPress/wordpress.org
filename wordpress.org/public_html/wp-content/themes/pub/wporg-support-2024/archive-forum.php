@@ -11,7 +11,7 @@ get_header(); ?>
 
 	<main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
 
-		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
+		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow entry-content">
 
 			<section>
 				<p><?php printf(

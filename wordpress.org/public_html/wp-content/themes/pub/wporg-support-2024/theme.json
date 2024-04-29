@@ -5,11 +5,6 @@
 		"color": {
 			"palette": [
 				{
-					"slug": "purple-1",
-					"color": "#7a00df",
-					"name": "Purple 1"
-				},
-				{
 					"slug": "light-grey-3",
 					"color": "#fbfbfb",
 					"name": "Light Grey 3"
