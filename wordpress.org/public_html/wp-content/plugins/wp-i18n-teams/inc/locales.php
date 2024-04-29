@@ -260,7 +260,11 @@ function get_core_translation_data() {
 	$projects = [ 'wp/dev', 'wp/dev/cc', 'wp/dev/admin', 'wp/dev/admin/network' ];
 	$counts   = $percentages = [];
 	foreach ( $projects as $project ) {
-		$results = json_decode( file_get_contents( 'https://translate.wordpress.org/api/projects/' . $project ) );
+		$results = json_decode( wp_remote_retrieve_body( wp_safe_remote_get( 'https://translate.wordpress.org/api/projects/' . $project ) ) );
+		if ( ! $results ) {
+			continue;
+		}
+
 		foreach ( $results->translation_sets as $set ) {
 
 			if ( ! isset( $set->wp_locale ) ) {
@@ -293,7 +297,7 @@ function get_core_translation_data() {
 		$percentages[ $locale ] = $percent_complete;
 	}
 
-	set_transient( 'core_translation_data', $percentages, 900 );
+	set_transient( 'core_translation_data', $percentages, 30 * MINUTE_IN_SECONDS );
 
 	return $percentages;
 }
