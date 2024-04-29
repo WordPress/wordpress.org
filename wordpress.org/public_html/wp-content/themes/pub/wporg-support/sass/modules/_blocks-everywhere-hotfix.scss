@@ -13,3 +13,9 @@
 .wp-block-navigation-item .wp-block-navigation-item__content {
 	cursor: pointer;
 }
+
+// See: https://github.com/Automattic/blocks-everywhere/issues/207
+.gutenberg-support #bbpress-forums fieldset.bbp-form .blocks-everywhere {
+	max-width: 100%;
+	min-width: 100%;
+}

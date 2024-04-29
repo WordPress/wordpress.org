@@ -2846,6 +2846,11 @@ p a:hover {
 	cursor: pointer;
 }
 
+.gutenberg-support #bbpress-forums fieldset.bbp-form .blocks-everywhere {
+	max-width: 100%;
+	min-width: 100%;
+}
+
 /*--------------------------------------------------------------
 # Site
 --------------------------------------------------------------*/
