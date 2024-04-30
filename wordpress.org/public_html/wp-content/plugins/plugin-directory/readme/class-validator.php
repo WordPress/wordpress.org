@@ -101,15 +101,8 @@ class Validator {
 		// it could bypass the protections above in validate_url().
 		$readme = new Parser( 'data:text/plain,' . urlencode( $readme ) );
 
-		// Fatal errors.
-		if ( isset( $readme->warnings['invalid_plugin_name_header'] ) ) {
-			$errors['invalid_plugin_name_header'] = $readme->warnings['invalid_plugin_name_header'];
-		} elseif ( empty( $readme->name ) ) {
-			$errors['invalid_plugin_name_header'] = true;
-		}
-
 		if (
-			empty( $errors['invalid_plugin_name_header'] ) &&
+			$readme->name &&
 			( $trademark_check = Trademarks::check( $readme->name, wp_get_current_user() ) )
 		) {
 			$errors['trademarked_name'] = [
@@ -234,13 +227,6 @@ class Validator {
 		}
 
 		switch( $error_code ) {
-			case 'invalid_plugin_name_header':
-				return sprintf(
-					/* translators: 1: 'Plugin Name' section title, 2: 'Plugin Name' */
-					__( 'We cannot find a plugin name in your readme. Plugin names look like: %1$s. Please change %2$s to reflect the actual name of your plugin.', 'wporg-plugins' ),
-					'<code>=== Plugin Name ===</code>',
-					'<code>Plugin Name</code>'
-				);
 			case 'requires_header_ignored':
 				$latest_wordpress_version = defined( 'WP_CORE_STABLE_BRANCH' ) ? WP_CORE_STABLE_BRANCH : '6.5';
 

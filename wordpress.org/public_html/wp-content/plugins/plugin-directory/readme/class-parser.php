@@ -243,8 +243,7 @@ class Parser {
 		if ( $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
 			array_unshift( $contents, $line );
 
-			$this->warnings['invalid_plugin_name_header'] = true;
-			$this->name                                   = false;
+			$this->name = false;
 		}
 
 		// Strip Github style header\n==== underlines.
@@ -254,8 +253,6 @@ class Parser {
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
-			$this->warnings['invalid_plugin_name_header'] = true;
-
 			$this->name = false;
 			$line       = $this->get_first_nonwhitespace( $contents );
 
