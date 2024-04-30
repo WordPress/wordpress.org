@@ -219,7 +219,7 @@ class Meta extends \WP_Widget {
 				<li class="hide-if-no-js">
 					<?php
 					printf(
-						'<strong><a class="plugin-admin" href="%s">%s</a></strong>',
+						'<a class="plugin-admin" href="%s">%s</a>',
 						esc_url( get_permalink() . 'advanced/' ),
 						__( 'Advanced View', 'wporg-plugins' )
 					);
