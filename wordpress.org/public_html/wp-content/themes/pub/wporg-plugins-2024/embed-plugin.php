@@ -78,6 +78,9 @@ if ( ! headers_sent() ) {
 			font-size: 12.8px;
 			font-size: .8rem;
 		}
+		.plugin-rating [class*=dashicons-star-] {
+			color: var(--wp--preset--color--pomegrade-1, #e26f56);
+		}
 		.wp-embed-excerpt {
 			clear: both;
 			color: #32373c;
