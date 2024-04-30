@@ -144,8 +144,12 @@ class Validator {
 			$notes['contributors_missing'] = true;
 		}
 
-		if ( empty( $readme->license ) ) {
+		if ( ! empty( $readme->warnings['license_missing'] ) ) {
 			$warnings['license_missing'] = true;
+		} elseif ( ! empty( $readme->warnings['invalid_license'] ) ) {
+			$errors['invalid_license'] = $readme->warnings['invalid_license'];
+		} elseif ( ! empty( $readme->warnings['unknown_license'] ) ) {
+			$notes['unknown_license'] = $readme->warnings['unknown_license'];
 		}
 
 		if ( isset( $readme->warnings['too_many_tags'] ) ) {
@@ -397,11 +401,29 @@ class Validator {
 				);
 			case 'donate_link_missing':
 				return __( 'No donate link was found', 'wporg-plugins' );
+
 			case 'license_missing':
 				return sprintf(
-					/* translators: 1: 'License' */
-					__( 'The %1$s field is missing or invalid. A GPLv2 or later compatible license should be specified.', 'wporg-plugins' ),
-					'<code>License</code>'
+					/* translators: 1: 'License', 2: Link to a compatible licenses page. */
+					__( 'The %1$s field is missing. <a href="%2$s">A GPLv2 or later compatible license</a> should be specified.', 'wporg-plugins' ),
+					'<code>License</code>',
+					'https://www.gnu.org/licenses/license-list.en.html'
+				);
+
+			case 'invalid_license':
+				return sprintf(
+					/* translators: 1: 'License', 2: Link to a compatible licenses page. */
+					__( 'The %1$s field appears to be invalid. <a href="%2$s">A GPLv2 or later compatible license</a> should be specified.', 'wporg-plugins' ),
+					'<code>License</code>',
+					'https://www.gnu.org/licenses/license-list.en.html'
+				);
+
+			case 'unknown_license':
+				return sprintf(
+					/* translators: 1: 'License', 2: Link to a compatible licenses page. */
+					__( 'The %1$s field could not be validated. <a href="%2$s">A GPLv2 or later compatible license</a> should be specified. The specified license may be compatible.', 'wporg-plugins' ),
+					'<code>License</code>',
+					'https://www.gnu.org/licenses/license-list.en.html'
 				);
 
 			case 'trademarked_name':
