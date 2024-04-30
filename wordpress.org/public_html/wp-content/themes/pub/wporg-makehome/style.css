@@ -258,6 +258,7 @@ section.get-involved article.make-performance   h2 a:before {
 	display: inline-block;
 	background-color: currentColor;
 	margin-right: 6px;
+	vertical-align: top;
 }
 
 section.get-involved article.make-openverse h2 a:before {
@@ -278,9 +279,7 @@ section.get-involved article.featured-group h2:after {
 }
 
 section.get-involved article h2 a {
-	display: flex;
 	font-weight: 600;
-	margin-bottom: 2px;
 }
 
 section.get-involved article div.team-description p {
