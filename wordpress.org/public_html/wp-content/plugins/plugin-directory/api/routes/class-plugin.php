@@ -6,6 +6,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_i18n;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\API\Base;
+use function WordPressdotorg\Plugin_Directory\Theme\get_plugin_status_notice;
 use WP_REST_Server;
 
 /**
@@ -38,9 +39,34 @@ class Plugin extends Base {
 	 * @return array A formatted array of all the data for the plugin.
 	 */
 	function plugin_info( $request ) {
+		global $post;
 		$post = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-		if ( ! $post || 'publish' != $post->post_status ) {
+		// Support returning API data in different locales, even on wordpress.org (for api.wordpress.org usage)
+		if ( ! empty( $request['locale'] ) && ! in_array( strtolower( $request['locale'] ), array( 'en_us', 'en' ) ) ) {
+			switch_to_locale( $request['locale'] );
+		}
+
+		if ( $post && in_array( $post->post_status, [ 'closed', 'disabled' ] ) ) {
+			$close_data = Template::get_close_data( $post );
+
+			$close_text = '';
+			if ( is_callable( '\WordPressdotorg\Plugin_Directory\Theme\get_plugin_status_notice' ) ) {
+				$close_text = strip_tags( get_plugin_status_notice( $post ) );
+			}
+
+			return [
+				'error'       => 'closed',
+				'name'        => get_the_title(),
+				'slug'        => $post->post_name,
+				'description' => $close_text,
+				'closed'      => true,
+				'closed_date' => $close_data['date'] ?: false,
+				'reason'      => $close_data['public'] ? $close_data['reason'] : false,
+				'reason_text' => $close_data['public'] ? $close_data['label'] : false,
+			];
+
+		} elseif ( ! $post || 'publish' != $post->post_status ) {
 			// Copy what the REST API does if the param is incorrect
 			return new \WP_Error(
 				'rest_invalid_param',
@@ -68,14 +94,10 @@ class Plugin extends Base {
 	 * @return array The formatted array of all the data for the plugin.
 	 */
 	public function plugin_info_data( $request, $post ) {
-		$GLOBALS['post'] = $post;
-		$plugin_slug     = $post->post_name;
-		$post_id         = $post->ID;
+		global $post;
 
-		// Support returning API data in different locales, even on wordpress.org (for api.wordpress.org usage)
-		if ( ! empty( $request['locale'] ) && ! in_array( strtolower( $request['locale'] ), array( 'en_us', 'en' ) ) ) {
-			switch_to_locale( $request['locale'] );
-		}
+		$plugin_slug = $post->post_name;
+		$post_id     = $post->ID;
 
 		$result            = array();
 		$result['name']    = get_the_title();

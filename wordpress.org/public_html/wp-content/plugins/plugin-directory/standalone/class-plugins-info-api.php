@@ -136,8 +136,10 @@ class Plugins_Info_API {
 			$this->output( $response, 404 );
 		}
 
-		// Only include the fields requested.
-		$response = $this->remove_unexpected_fields( $response, $request, 'plugin_information' );
+		// Only include the fields requested. If an error is present, we ignore the requested fields.
+		if ( ! isset( $response['error'] ) ) {
+			$response = $this->remove_unexpected_fields( $response, $request, 'plugin_information' );
+		}
 
 		$this->output( (object) $response );
 	}
@@ -255,6 +257,8 @@ class Plugins_Info_API {
 					)
 				), true
 			);
+
+			// Don't include unknown plugins OR closed plugins.
 			if ( isset( $plugin['error'] ) ) {
 				unset( $response['plugins'][ $i ] );
 				continue;

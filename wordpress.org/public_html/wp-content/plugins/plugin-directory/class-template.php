@@ -1059,18 +1059,44 @@ class Template {
 	 * @return string Close/disable reason.
 	 */
 	public static function get_close_reason( $post = null ) {
+		return self::get_close_data( $post )['label'] ?? '';
+	}
+
+	/**
+	 * Returns the close/disable data for a plugin.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 */
+	public static function get_close_data( $post = null ) {
 		$post = get_post( $post );
-
-		$close_reasons = self::get_close_reasons();
-		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
-
-		if ( isset( $close_reasons[ $close_reason ] ) ) {
-			$reason_label = $close_reasons[ $close_reason ];
-		} else {
-			$reason_label = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+		if ( ! $post || ! in_array( $post->post_status, array( 'closed', 'disabled' ), true ) ) {
+			return false;
 		}
 
-		return $reason_label;
+		$result = [
+			'date'      => get_post_meta( $post->ID, 'plugin_closed_date', true ) ?: false,
+			'reason'    => (string) get_post_meta( $post->ID, '_close_reason', true ),
+			'label'     => '',
+			'permanent' => false,
+			'public'    => false,
+		];
+
+		if (
+			'author-request' === $result['reason'] ||
+			! Tools::get_plugin_committers( $post->post_name )
+		) {
+			$result['permanent'] = true;
+		}
+
+		$result['label'] = self::get_close_reasons()[ $result['reason'] ] ?? _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+		$days_closed     = $result['date'] ? (int) ( ( time() - strtotime( $result['date'] ) ) / DAY_IN_SECONDS ) : false;
+
+		// If it's closed for more than 60 days, it's by author request, or we're unsure about the close date, it's publicly known.
+		if ( ! $result['date'] || $days_closed >= 60 || 'author-request' === $result['reason'] ) {
+			$result['public'] = true;
+		}
+
+		return $result;	
 	}
 
 	/**
