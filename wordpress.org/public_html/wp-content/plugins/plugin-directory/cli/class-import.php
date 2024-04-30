@@ -266,8 +266,16 @@ class Import {
 			$plugin->post_title = strip_tags( $headers->Name );
 		}
 
-		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
-		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
+		if ( $readme->short_description ) {
+			$plugin->post_excerpt = $readme->short_description;
+		} elseif ( $headers->Description ) {
+			// Trim to match legacy readme length...
+			$plugin->post_excerpt = $readme->trim_length( wp_strip_all_tags( $headers->Description ), 'short_description' );
+		}
+
+		if ( $content ) {
+			$plugin->post_content = $content;
+		}
 
 		/*
 		 * Bump last updated if:

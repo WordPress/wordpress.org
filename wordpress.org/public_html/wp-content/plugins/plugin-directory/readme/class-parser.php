@@ -545,14 +545,14 @@ class Parser {
 	}
 
 	/**
-	 * @access protected
+	 * Trim a string to a specific length, ensuring that it ends on a full sentence.
 	 *
 	 * @param string $desc
 	 * @param int    $length
 	 * @param string $type   The type of the length, 'char' or 'words'.
 	 * @return string
 	 */
-	protected function trim_length( $desc, $length = 150, $type = 'char' ) {
+	public function trim_length( $desc, $length = 150, $type = 'char' ) {
 		if ( is_string( $length ) ) {
 			$length = $this->maximum_field_lengths[ $length ] ?? $length;
 		}
