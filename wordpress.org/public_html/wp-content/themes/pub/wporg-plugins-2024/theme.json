@@ -8,9 +8,6 @@
 		},
 		"custom": {
 			"form": {
-				"color": {
-					"background": "var(--wp--preset--color--light-grey-2)"
-				},
 				"border": {
 					"width": "1px",
 					"style": "solid",
