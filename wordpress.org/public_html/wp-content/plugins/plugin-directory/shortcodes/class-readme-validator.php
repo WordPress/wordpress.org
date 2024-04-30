@@ -14,6 +14,11 @@ class Readme_Validator {
 		$readme_contents = '';
 		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
 			$readme_url = wp_unslash( $_REQUEST['readme'] );
+
+			// If it's a slug..
+			if ( $readme_url === sanitize_title_with_dashes( $readme_url ) ) {
+				$readme_url = 'https://wordpress.org/plugins/' . $readme_url . '/';
+			}
 		}
 
 		if ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
