@@ -401,9 +401,9 @@ class Template {
 			case 'html':
 
 				if ( $icon_2x && $icon_2x !== $icon ) {
-					return "<img class='plugin-icon' srcset='{$icon}, {$icon_2x} 2x' src='{$icon_2x}'>";
+					return "<img class='plugin-icon' srcset='{$icon}, {$icon_2x} 2x' src='{$icon_2x}' alt=''>";
 				} else {
-					return "<img class='plugin-icon' src='{$icon}'>";
+					return "<img class='plugin-icon' src='{$icon}' alt=''>";
 				}
 				break;
 
