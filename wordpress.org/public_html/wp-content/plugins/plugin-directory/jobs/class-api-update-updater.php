@@ -25,6 +25,7 @@ class API_Update_Updater {
 				LEFT JOIN {$wpdb->prefix}update_source u ON p.ID = u.plugin_id
 				LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'version'
 				LEFT JOIN {$wpdb->postmeta} pm_stable ON p.ID = pm_stable.post_id AND pm_stable.meta_key = 'stable_tag'
+				LEFT JOIN {$wpdb->postmeta} pm_closed ON p.ID = pm_closed.post_id AND pm_closed.meta_key = 'plugin_closed_date'
 			WHERE
 				p.post_type = 'plugin'
 				AND (
@@ -36,8 +37,17 @@ class API_Update_Updater {
 					u.last_updated != p.post_modified OR
 					( u.version != pm.meta_value AND u.version != left( pm.meta_value, 128 ) ) OR
 					( u.stable_tag != pm_stable.meta_value AND u.stable_tag != left( pm_stable.meta_value, 128 ) ) OR
-					( u.available = 1 AND (p.post_status != 'publish' AND p.post_status != 'disabled' ) ) OR
-					( u.available = 0 AND (p.post_status = 'publish' OR p.post_status = 'disabled' ) )
+					( u.available = 1 AND p.post_status NOT IN( 'publish', 'disabled' ) ) OR
+					( u.available = 0 AND p.post_status IN( 'publish', 'disabled' ) ) OR
+					(
+						pm_closed.meta_value IS NOT NULL AND (
+							u.meta NOT LIKE '%closed_at%' OR
+							(
+								u.meta NOT LIKE '%closed_reason%' AND
+								DATE_ADD( pm_closed.meta_value, INTERVAL 60 DAY ) <= NOW()
+							)
+						)
+					)
 				)"
 		);
 
@@ -67,13 +77,24 @@ class API_Update_Updater {
 			return true;
 		}
 
+		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
+		$meta             = array();
+
+		if ( in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
+			$closed_data           = Template::get_close_data( $post );
+			$meta['closed_at']     = $closed_data['date'] ?? false;
+			if ( $closed_data['public'] ?? false ) {
+				$meta['closed_reason'] = $closed_data['reason'];
+				$meta['closed_label']  = $closed_data['label'];
+			}
+		}
 
 		$data = array(
 			'plugin_id'        => $post->ID,
 			'plugin_slug'      => $post->post_name,
-			'available'        => 'publish'      === $post->post_status || 'disabled' === $post->post_status,
-			'version'          => get_post_meta( $post->ID, 'version', true ),
+			'available'        => (int) in_array( $post->post_status, array( 'publish', 'disabled' ) ),
+			'version'          => $version,
 			'stable_tag'       => get_post_meta( $post->ID, 'stable_tag', true ),
 			'plugin_name'      => strip_tags( get_post_meta( $post->ID, 'header_name', true ) ),
 			'plugin_name_san'  => sanitize_title_with_dashes( strip_tags( get_post_meta( $post->ID, 'header_name', true ) ) ),
@@ -81,15 +102,12 @@ class API_Update_Updater {
 			'tested'           => get_post_meta( $post->ID, 'tested', true ),
 			'requires'         => get_post_meta( $post->ID, 'requires', true ),
 			'requires_php'     => get_post_meta( $post->ID, 'requires_php', true ),
-			'requires_plugins' => $requires_plugins ? serialize( get_post_meta( $post->ID, 'requires_plugins', true ) ) : '',
-			'upgrade_notice'   => '',
+			'requires_plugins' => $requires_plugins ? serialize( $requires_plugins ) : '',
+			'upgrade_notice'   => get_post_meta( $post->ID, 'upgrade_notice', true )[ $version ] ?? '',
 			'assets'           => serialize( self::get_plugin_assets( $post ) ),
+			'meta'             => $meta ? serialize( $meta ) : '',
 			'last_updated'     => $post->post_modified,
 		);
-		$upgrade_notice = get_post_meta( $post->ID, 'upgrade_notice', true );
-		if ( isset( $upgrade_notice[ $data['version'] ] ) ) {
-			$data['upgrade_notice'] = $upgrade_notice[ $data['version'] ];
-		}
 
 		if (
 			! $wpdb->update( $wpdb->prefix . 'update_source', $data, array( 'plugin_slug' => $post->post_name ) ) &&
@@ -181,7 +199,8 @@ CREATE TABLE `{$prefix}_update_source` (
   `requires_php` varchar(128) NOT NULL DEFAULT '',
   `requires_plugins` text NOT NULL DEFAULT '',
   `upgrade_notice` text,
-  `assets` text NOT NULL DEFAULT '',
+  `assets` text DEFAULT NULL,
+  `meta` text DEFAULT NULL,
   `last_updated` datetime NOT NULL,
   PRIMARY KEY (`plugin_id`),
   UNIQUE KEY `plugin_slug` (`plugin_slug`),
