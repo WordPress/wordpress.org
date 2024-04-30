@@ -942,7 +942,7 @@ abstract class Directory_Compat {
 				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
 			}
 
-			wp_cache_set( $cache_key, $compat_object, $cache_group, DAY_IN_SECONDS );
+			wp_cache_set( $cache_key, $compat_object, $cache_group, HOUR_IN_SECONDS );
 		}
 		return $compat_object;
 	}
