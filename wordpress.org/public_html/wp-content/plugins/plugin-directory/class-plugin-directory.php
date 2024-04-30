@@ -1034,7 +1034,6 @@ class Plugin_Directory {
 					'rating'      => $order,
 					'num_ratings' => $order,
 				);
-
 				break;
 
 			case 'ratings':
@@ -1074,7 +1073,7 @@ class Plugin_Directory {
 					'type'    => 'DECIMAL(2,1)',
 					'compare' => 'EXISTS',
 				];
-				break;
+        break;
 
 			case 'downloads':
 				$wp_query->query_vars['meta_query']['downloads'] ??= [

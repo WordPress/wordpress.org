@@ -473,3 +473,8 @@ add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_desc
  * Custom template tags for this theme.
  */
 require get_stylesheet_directory() . '/inc/template-tags.php';
+
+/**
+ * Custom Block configuration.
+ */
+require get_stylesheet_directory() . '/inc/block-config.php';
