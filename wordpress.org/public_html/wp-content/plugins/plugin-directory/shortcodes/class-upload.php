@@ -269,7 +269,7 @@ class Upload {
 											</label>
 										</p>
 										<p>
-											<input class="button button-primary" type="submit" value="<?php
+											<input class="wp-block-button__link" type="submit" value="<?php
 												/* translators: Request slug-change button */
 												esc_attr_e( 'Request', 'wporg-plugins' );
 											?>" />
@@ -304,12 +304,12 @@ class Upload {
 									</label>
 									<br>
 
-									<label class="button button-secondary zip-file">
+									<label class="wp-block-button__link zip-file">
 										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
 										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
 									</label>
 
-									<input class="upload-button button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>"/>
+									<input class="upload-button wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>"/>
 								</form>
 								<?php
 								echo '</li>';
@@ -329,7 +329,7 @@ class Upload {
 									printf(
 										'<li><a href="%s" class="%s" target="_blank">%s</a></li>',
 										esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
-										'button button-primary',
+										'wp-block-button__link',
 										__( 'Check with Plugin Check', 'wporg-plugins' )
 									);
 								}
@@ -387,7 +387,7 @@ class Upload {
 				</fieldset> */
 				?>
 
-				<label class="button button-secondary zip-file">
+				<label class="wp-block-button__link zip-file">
 					<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
 					<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
 				</label>
@@ -458,7 +458,7 @@ class Upload {
 					</label>
 				</p>
 
-				<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
+				<input id="upload_button" class="wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 			</form>
 		<?php endif; // ! $submitted_counts->total
 
