@@ -187,10 +187,7 @@ class Validator {
 			$notes['requires_php_header_missing'] = true;
 		}
 
-		if ( isset( $readme->warnings['no_short_description_present'] ) ) {
-			$notes['no_short_description_present'] = $readme->warnings['no_short_description_present'];
-
-		} elseif ( isset( $readme->warnings['trimmed_short_description'] ) ) {
+		if ( isset( $readme->warnings['trimmed_short_description'] ) ) {
 			$warnings['trimmed_short_description'] = $readme->warnings['trimmed_short_description'];
 		}
 
@@ -340,12 +337,6 @@ class Validator {
 					/* translators: %s: list of tags with low usage. */
 					__( 'The following tags are not widely used: %s', 'wporg-plugins' ),
 					'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $data ) ) . '</code>'
-				);
-			case 'no_short_description_present':
-				return sprintf(
-					/* translators: %s: section title */
-					__( 'The %s section is missing. An excerpt was generated from your main plugin description.', 'wporg-plugins' ),
-					'<code>Short Description</code>'
 				);
 			case 'trimmed_short_description':
 				return sprintf(
