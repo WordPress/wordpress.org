@@ -9,9 +9,9 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 	<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu' ); ?></strong></a>
 	<div class="site-branding">
 		<?php if ( is_front_page() && is_home() ) : ?>
-			<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
+			<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php do_action( 'wporg_breathe_before_name', 'front' ); ?><?php bloginfo( 'name' ); ?></a></h1>
 		<?php else : ?>
-			<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></p>
+			<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php do_action( 'wporg_breathe_before_name', 'nonfront' ); ?><?php bloginfo( 'name' ); ?></a></p>
 		<?php endif; ?>
 	</div>
 

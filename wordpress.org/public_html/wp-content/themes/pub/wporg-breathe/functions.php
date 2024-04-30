@@ -325,6 +325,64 @@ function maybe_noindex( $noindex ) {
 add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\maybe_noindex' );
 
 /**
+ * Outputs team icons represented via SVG images using the `svg` tag (as opposed to via CSS).
+ *
+ * While the SVG could easily, and more cleanly, be added via CSS, doing so would not allow the SVGs
+ * to otherwise inherit the link colors (such as on :hover). If the theme changes to move the team
+ * icon outside of the link, or if matching the link color is no longer required, then the SVG
+ * definitions can be moved to CSS.
+ *
+ * Currently handles the following teams:
+ * - Core Performance
+ * - Openverse
+ *
+ * Note: Defining a team's icon in this way also requires adjusting the site's styles to not expect
+ * a ::before content of a dashicon font character. (Search style.css for: Adjustments for teams with SVG icons.)
+ */
+function add_svg_icon_to_site_name() {
+	$site = get_site();
+
+	if ( ! $site ) {
+		return;
+	}
+
+	$svg = [];
+
+	if ( '/openverse/' === $site->path ) :
+		$svg = [
+			'viewbox' => '0 16 200 200',
+			'paths'   => [
+				'M142.044 93.023c16.159 0 29.259-13.213 29.259-29.512 0-16.298-13.1-29.511-29.259-29.511s-29.259 13.213-29.259 29.511c0 16.299 13.1 29.512 29.259 29.512ZM28 63.511c0 16.24 12.994 29.512 29.074 29.512V34C40.994 34 28 47.19 28 63.511ZM70.392 63.511c0 16.24 12.994 29.512 29.074 29.512V34c-15.998 0-29.074 13.19-29.074 29.511ZM142.044 165.975c16.159 0 29.259-13.213 29.259-29.512 0-16.298-13.1-29.511-29.259-29.511s-29.259 13.213-29.259 29.511c0 16.299 13.1 29.512 29.259 29.512ZM70.392 136.414c0 16.257 12.994 29.544 29.074 29.544v-59.006c-15.999 0-29.074 13.204-29.074 29.462ZM28 136.414c0 16.34 12.994 29.544 29.074 29.544v-59.006c-16.08 0-29.074 13.204-29.074 29.462Z',
+			],
+		];
+
+	elseif ( '/performance/' === $site->path ) :
+		$svg = [
+			'viewbox' => '0 8 94 94',
+			'paths'   => [
+				'M39.21 20.85h-11.69c-1.38 0-2.5 1.12-2.5 2.5v11.69c0 1.38 1.12 2.5 2.5 2.5h11.69c1.38 0 2.5-1.12 2.5-2.5v-11.69c0-1.38-1.12-2.5-2.5-2.5z',
+				'M41.71,58.96v11.69c0,.66-.26,1.3-.73,1.77-.47,.47-1.11,.73-1.77,.73h-11.69c-.66,0-1.3-.26-1.77-.73-.47-.47-.73-1.11-.73-1.77v-21.37c0-.4,.1-.79,.28-1.14,.03-.06,.07-.12,.1-.18,.21-.33,.49-.61,.83-.82l11.67-7.04c.44-.27,.95-.39,1.47-.36,.51,.03,1,.23,1.4,.55,.26,.21,.47,.46,.63,.75,.16,.29,.26,.61,.29,.94,.02,.11,.02,.22,.02,.34v5.38s0,.07,0,.11v11.08s0,.04,0,.07Z',
+				'M68.98,30.23v16.84c0,.33-.06,.65-.19,.96-.13,.3-.31,.58-.54,.81l-6.88,6.88c-.23,.23-.51,.42-.81,.54-.3,.13-.63,.19-.96,.19h-13.15c-.66,0-1.3-.26-1.77-.73-.47-.47-.73-1.11-.73-1.77v-11.69c0-.66,.26-1.3,.73-1.77,.47-.47,1.11-.73,1.77-.73h13.08s1.11,0,1.11-1.11-1.11-1.11-1.11-1.11h-13.08c-.66,0-1.3-.26-1.77-.73s-.73-1.11-.73-1.77v-11.69c0-.66,.26-1.3,.73-1.77,.47-.47,1.11-.73,1.77-.73h13.15c.33,0,.65,.06,.96,.19,.3,.13,.58,.31,.81,.54l6.88,6.88c.23,.23,.42,.51,.54,.81,.13,.3,.19,.63,.19,.96Z',
+			],
+		];
+
+	endif;
+
+	if ( empty( $svg['viewbox'] ) || empty( $svg['paths'] ) ) {
+		return;
+	}
+
+	printf( '<svg aria-hidden="true" role="img" viewBox="%s" xmlns="http://www.w3.org/2000/svg">' . "\n", esc_attr( $svg['viewbox'] ) );
+
+	foreach ( $svg['paths'] as $path ) {
+		printf( "\t" . '<path d="%s" stroke="currentColor" fill="currentColor"/>' . "\n", esc_attr( $path ) );
+	}
+
+	echo "</svg>\n";
+}
+add_action( 'wporg_breathe_before_name', __NAMESPACE__ . '\add_svg_icon_to_site_name' );
+
+/**
  * Register translations for plugins without their own GlotPress project.
  */
 // wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php

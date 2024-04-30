@@ -306,6 +306,18 @@ body.wporg-make #headline h2 a:before {
 	vertical-align: middle; /* overrides wp4.css */
 }
 
+/* Adjustments for teams with SVG icons. */
+.wporg-make.make-openverse .site-title a::before,
+.wporg-make.make-performance .site-title a::before {
+	content: '';
+	width: 0;
+}
+.site-title svg {
+	height: 30px;
+	width: 30px;
+	vertical-align: middle;
+}
+
 #secondary-content .navigation-main {
 	margin-top: 32px;
 	text-align: left;
