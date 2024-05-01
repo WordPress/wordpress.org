@@ -542,12 +542,62 @@ function the_plugin_self_close_button() {
 	}
 	echo '</p></div>';
 
-	if ( $close_link ) {
-		echo '<form method="POST" action="' . esc_url( $close_link ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
-		// Translators: %s is the plugin name, as defined by the plugin itself.
-		echo '<p class="wp-block-button is-small"><button class="wp-block-button__link" type="submit">' . esc_attr( sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() ) ) . '</button></p>';
-		echo '</form>';
+	if ( ! $close_link ) {
+		return;
 	}
+
+	// Translators: %s is the plugin name, as defined by the plugin itself.
+	$close_button_text = sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() );
+	?>
+	<button class="show-dialog button" onclick="this.nextElementSibling.showModal()"><?php echo $close_button_text; ?></button>
+	<dialog>
+		<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
+		<strong><?php _e( 'Close your plugin?', 'wporg-plugins' ); ?></strong>
+		<div class="notice notice-warning notice-alt"><p>
+			<?php _e( '<strong>Warning:</strong> Closing a plugin is intended to be a <em>permanent</em> action. There is no way to reopen a plugin without contacting the plugins team.', 'wporg-plugins' ); ?>
+		</p></div>
+
+		<form method="POST" action="<?php echo esc_url( $close_link ); ?>">
+			<p>
+				<label>
+					<input type="checkbox" name="confirm" required />
+					<?php printf(
+						/* translators: %s: The plugin name. */
+						__( 'Yes, I wish to close %s.', 'wporg-plugins' ),
+						'<code>' . get_the_title() . '</code>'
+					); ?>
+				</label>
+			</p>
+			<p>
+				<label>
+					<input type="checkbox" name="confirm" required />
+					<?php _e( 'Yes, I understand that this is permanent.', 'wporg-plugins' ); ?>
+				</label>
+			</p>
+			<p>
+				<label>
+					<input type="checkbox" name="confirm" required />
+					<?php _e( 'I am not working on a newer version to submit to the plugin directory.', 'wporg-plugins' ); ?>
+				</label>
+			</p>
+			<p>
+				<label>
+					<?php printf(
+						/* translators: %s: The plugin slug. */
+						__( 'Please enter the plugin slug %s below.', 'wporg-plugins' ),
+						'<code>' . esc_html( $post->post_name ) . '</code>'
+					); ?><br>
+					<input type="text" name="confirm" pattern="<?php echo esc_attr( $post->post_name ); ?>" required class="has-large-font-size" />
+				</label>
+			</p>
+			<p>
+				<?php printf( __( 'If you have any questions, please contact <a href="mailto:%1$s">%1$s</a> before proceeding with a link to your plugin and your questions.', 'wporg-plugins' ), 'plugins@wordpress.org' ); ?>
+			<p>
+				<input class="button" type="submit" value="<?php echo esc_attr( $close_button_text ); ?>" />
+			</p>
+		</form>
+	</dialog>
+	<?php
 }
 
 /**
