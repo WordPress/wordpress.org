@@ -28,7 +28,6 @@ class Import {
 
 	// Readme fields which get stored in plugin meta
 	public $readme_fields = array(
-		'tested',
 		'donate_link',
 		'license',
 		'license_uri',
@@ -36,6 +35,7 @@ class Import {
 		'screenshots',
 
 		// These headers are stored as post meta, but are handled separately.
+		// 'tested',
 		// 'requires',
 		// 'requires_php',
 	);
@@ -319,21 +319,9 @@ class Import {
 			wp_remove_object_terms( $plugin->ID, 'adopt-me', 'plugin_section' );
 		}
 
-		// Update the tested-up-to value
-		$tested = $readme->tested;
-		if ( function_exists( 'wporg_get_version_equivalents' ) ) {
-			foreach ( wporg_get_version_equivalents() as $latest_compatible_version => $compatible_with ) {
-				if ( in_array( $readme->tested, $compatible_with, true ) ) {
-					$tested = $latest_compatible_version;
-					break;
-				}
-			}
-		}
-
 		// Update all readme meta
 		foreach ( $this->readme_fields as $readme_field ) {
-			$value = ( 'tested' == $readme_field ) ? $tested : $readme->$readme_field;
-			update_post_meta( $plugin->ID, $readme_field, wp_slash( $value ) );
+			update_post_meta( $plugin->ID, $readme_field, wp_slash( $readme->$readme_field ) );
 		}
 
 		// Store the plugin headers we need. Note that 'Version', 'RequiresWP', and 'RequiresPHP' are handled below.
@@ -341,15 +329,29 @@ class Import {
 			update_post_meta( $plugin->ID, $meta_field, ( isset( $headers->$plugin_header ) ? wp_slash( $headers->$plugin_header ) : '' ) );
 		}
 
-		// Update the Requires and Requires PHP fields, prefering those from the Plugin Headers.
+		// Update the Requires, Requires PHP, and Tested up to fields, prefering those from the Plugin Headers.
 		// Unfortunately the value within $headers is not always a well-formed value.
 		$requires     = $readme->requires;
 		$requires_php = $readme->requires_php;
+		$tested       = $readme->tested;
 		if ( $headers->RequiresWP && preg_match( '!^[\d.]{3,}$!', $headers->RequiresWP ) ) {
 			$requires = $headers->RequiresWP;
 		}
 		if ( $headers->RequiresPHP && preg_match( '!^[\d.]{3,}$!', $headers->RequiresPHP ) ) {
 			$requires_php = $headers->RequiresPHP;
+		}
+		if ( $headers->TestedUpTo && preg_match( '!^[\d.]{3,}$!', $headers->TestedUpTo ) ) {
+			$tested = $headers->TestedUpTo;
+		}
+
+		// Sanitize the tested version.
+		if ( function_exists( 'wporg_get_version_equivalents' ) ) {
+			foreach ( wporg_get_version_equivalents() as $latest_compatible_version => $compatible_with ) {
+				if ( in_array( $tested, $compatible_with, true ) ) {
+					$tested = $latest_compatible_version;
+					break;
+				}
+			}
 		}
 
 		// Keep a log of all plugin names used by the plugin over time.
@@ -363,6 +365,7 @@ class Import {
 		update_post_meta( $plugin->ID, 'requires_plugins',   wp_slash( $requires_plugins ) );
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
+		update_post_meta( $plugin->ID, 'tested',             wp_slash( $tested ) );
 		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
 		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
@@ -972,6 +975,10 @@ class Import {
 		// WordPress Plugin Dependencies - See https://meta.trac.wordpress.org/ticket/6921
 		if ( ! isset( $headers['RequiresPlugins'] ) ) {
 			$headers['RequiresPlugins'] = 'Requires Plugins';
+		}
+		// https://meta.trac.wordpress.org/ticket/4621
+		if ( ! isset( $headers['TestedUpTo'] ) ) {
+			$headers['TestedUpTo'] = 'Tested up to';
 		}
 
 		return $headers;
