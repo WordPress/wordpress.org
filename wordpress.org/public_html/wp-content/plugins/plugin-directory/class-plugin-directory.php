@@ -991,6 +991,15 @@ class Plugin_Directory {
 			$s = trim( $s );
 
 			$wp_query->set( 's', $s );
+
+			// If the search is in the block directory, require that.
+			if ( $wp_query->get( 'block_search' ) ) {
+				$wp_query->query_vars['tax_query']['plugin_section'][] = array(
+					'taxonomy' => 'plugin_section',
+					'field'    => 'slug',
+					'terms'    => 'block',
+				);
+			}
 		}
 
 		// By default, all archives are sorted by active installs

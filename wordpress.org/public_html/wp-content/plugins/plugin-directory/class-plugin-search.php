@@ -136,6 +136,51 @@ class Plugin_Search {
 		return $module;
 	}
 
+
+	/**
+	 * Localise the ES fields searched for localised queries.
+	 */
+	public function localise_es_fields( $fields ) {
+		$localised_prefixes = [
+			'all_content',
+			'title',
+			'excerpt',
+			'description',
+		];
+
+		$localised_fields = array();
+
+		foreach ( (array) $fields as $field ) {
+			// title.ngram
+			list( $field, $type ) = explode( '.', $field . '.' );
+			if ( $type ) {
+				$type = ".{$type}";
+			}
+
+			if ( ! in_array( $field, $localised_prefixes ) ) {
+				$localised_fields[] = $field . $type;
+				continue;
+			}
+
+			if ( $this->is_english ) {
+				$localised_fields[] = $field . '_en' . $type;
+				continue;
+			}
+
+			$boost    = '';
+			$en_boost = '^' . $this->en_boost;
+			if ( 'description' === $field ) {
+				$boost = '^' . $this->desc_boost;
+				$en_boost = '^' . $this->desc_en_boost;
+			}
+
+			$localised_fields[] = $field . '_' . $this->locale . $type . $boost;
+			$localised_fields[] = $field . '_en' . $type . $en_boost;
+		}
+
+		return $localised_fields;
+	}
+
 	public function jetpack_search_es_wp_query_args( $args, $query ) {
 
 		// Block Search.
@@ -163,18 +208,7 @@ class Plugin_Search {
 		$this->locale     = get_locale();
 		$this->is_english = ( ! $this->locale || str_starts_with( $this->locale, 'en_' ) );
 
-		if ( $this->is_english ) {
-			$matching_fields = array(
-				'all_content_en',
-			);
-		} else {
-			$matching_fields = array(
-				'all_content_' . $this->locale,
-				'all_content_en^' . $this->en_boost,
-			);
-		}
-
-		$args['query_fields'] = $matching_fields;
+		$args['query_fields'] = $this->localise_es_fields( 'all_content' );
 
 		return $args;
 	}
@@ -204,190 +238,159 @@ class Plugin_Search {
 			];
 		}
 
-		// Set boost on the match query
+		// The should match is where we add the fields to be searched in, and the weighting of them (boost).
+		$should_match = [];
+		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ] ) ) {
+			$should_match = & $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ];
+		}
 
+		$search_phrase = $should_match[0][ 'multi_match' ][ 'query' ] ?? '';
+
+		// The function score is where calculations on fields occur.
+		$function_score = [];
+		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'functions' ] ) ) {
+			$function_score = & $es_query_args[ 'query' ][ 'function_score' ][ 'functions' ];
+		}
+
+		// Set boost on the match query, from jetpack_search_es_wp_query_args.
 		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ][0][ 'multi_match' ] ) ) {
 			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ][0][ 'multi_match' ][ 'boost' ] = 0.1;
 		}
 
-		// Old version had one less level here. Probably unimportant but this makes the unit tests pass.
-		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ][0] ) ) {
-			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ] = $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ][0];
-		}
-
-		// Not sure if this matters, but again it's in the tests
-		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ][ 'operator' ] ) ) {
-			unset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ][ 'operator' ] );
-		}
-
-		// Some extra fields here
-		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ] ) ) {
-			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ][ 'boost' ] = 2;
-			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ][ 'fields' ] = ( $this->is_english ? [
-				0 => 'title_en',
-				1 => 'excerpt_en',
-				2 => 'description_en^1',
-				3 => 'taxonomy.plugin_tags.name',
-			] : [
-				'title_' . $this->locale,
-				'excerpt_' . $this->locale,
-				'description_' . $this->locale . '^' . $this->desc_boost,
-				'title_en^' . $this->en_boost,
-				'excerpt_en^' . $this->en_boost,
-				'description_en^' . $this->desc_en_boost,
+		// This extends the search to additionally search in the title, excerpt, description and plugin_tags.
+		if ( isset( $should_match[0][ 'multi_match' ] ) ) {
+			$should_match[0][ 'multi_match' ][ 'boost' ]  = 2;
+			$should_match[0][ 'multi_match' ][ 'fields' ] = $this->localise_es_fields( [
+				'title',
+				'excerpt',
+				'description',
 				'taxonomy.plugin_tags.name',
 			] );
 		}
 
-		// And some more fancy bits here
-		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ] ) && 1 === count( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ] ) ) {
-			$search_phrase = $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][0][ 'multi_match' ][ 'query' ];
+		// Setup the boosting for various fields.
+		$should_match[] = [
+			'multi_match' => [
+				'query'  => $search_phrase,
+				'fields' => $this->localise_es_fields( [ 'title.ngram' ] ),
+				'type'   => 'phrase',
+				'boost'  => 2,
+			],
+		];
 
-			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][] = [
-				'multi_match' => [
-				'query' => $search_phrase,
-				'fields' => ( $this->is_english ? [
-					0 => 'title_en.ngram',
-				] : [
-					'title_' . $this->locale . '.ngram',
-					'title_en.ngram^' . $this->en_boost,
-				] ),
-				'type' => 'phrase',
-				'boost' => 2,
-				],
-			];
+		// A direct slug match
+		$should_match[] = [
+			'multi_match' => [
+				'query'  => $search_phrase,
+				'fields' => $this->localise_es_fields( 'title', 'slug_text' ),
+				'type'   => 'most_fields',
+				'boost'  => 5,
+			],
+		];
 
-			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][] = [
-				'multi_match' => [
-				  'query' => $search_phrase,
-				  'fields' => ( $this->is_english ? [
-					0 => 'title_en',
-					1 => 'slug_text',
-				  ] : [
-					'title_' . $this->locale,
-					'title_en^' . $this->en_boost,
-					'slug_text',
-				  ] ),
-				  'type' => 'most_fields',
-				  'boost' => 5,
-				],
-			];
-
-			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][] = [
-				'multi_match' => [
-				  'query' => $search_phrase,
-				  'fields' => ( $this->is_english ? [
-					0 => 'excerpt_en',
-					1 => 'description_en^1',
-					2 => 'taxonomy.plugin_tags.name',
-				  ] : [
-					'excerpt_' . $this->locale,
-					'description_' . $this->locale . '^' . $this->desc_boost,
-					'excerpt_en^' . $this->en_boost,
-					'description_en^' . $this->desc_en_boost,
+		$should_match[] = [
+			'multi_match' => [
+				'query'  => $search_phrase,
+				'fields' => $this->localise_es_fields( [
+					'excerpt',
+					'description',
 					'taxonomy.plugin_tags.name',
-				  ] ),
-				  'type' => 'best_fields',
-				  'boost' => 2,
-				],
-			];
+				] ),
+				'type'   => 'best_fields',
+				'boost'  => 2,
+			],
+		];
 
-			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ][] = [
-				'multi_match' => [
-				  'query' => $search_phrase,
-				  'fields' => [
-					0 => 'author',
-					1 => 'contributors',
-				  ],
-				  'type' => 'best_fields',
-				  'boost' => 2,
-				],
-			];
-		}
+		$should_match[] = [
+			'multi_match' => [
+				'query'  => $search_phrase,
+				'fields' => $this->localise_es_fields( [
+					'author',
+					'contributor'
+				] ),
+				'type'   => 'best_fields',
+				'boost'  => 3,
+			],
+		];
 
-		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'functions' ] ) ) {
-			$es_query_args[ 'query' ][ 'function_score' ][ 'functions' ] = [
-				0 => [
-				  'exp' => [
+		// We'll overwrite the default Jetpack Search function scoring with our own.
+		$function_score = [
+			[
+				// The more recent a plugin was updated, the more relevant it is.
+				'exp' => [
 					'plugin_modified' => [
-					  'origin' => date('Y-m-d'),
-					  'offset' => '180d',
-					  'scale' => '360d',
-					  'decay' => 0.5,
+						'origin' => date('Y-m-d'),
+						'offset' => '180d',
+						'scale'  => '360d',
+						'decay'  => 0.5,
 					],
-				  ],
-				],
-				1 => [
-				  'exp' => [
+				]
+			],
+			[
+				// The older a plugins tested-up-to is, the less likely it's relevant.
+				'exp' => [
 					'tested' => [
-					  'origin' => '5.0',
-					  'offset' => 0.1,
-					  'scale' => 0.4,
-					  'decay' => 0.6,
+						'origin' => '5.0',
+						'offset' => 0.1,
+						'scale'  => 0.4,
+						'decay'  => 0.6,
 					],
-				  ],
 				],
-				2 => [
-				  'field_value_factor' => [
-					'field' => 'active_installs',
-					'factor' => 0.375,
+			],
+			[
+				// A higher install base is a sign that the plugin will be relevant to the searcher.
+				'field_value_factor' => [
+					'field'    => 'active_installs',
+					'factor'   => 0.375,
 					'modifier' => 'log2p',
-					'missing' => 1,
-				  ],
+					'missing'  => 1,
 				],
-				3 => [
-				  'filter' => [
+			],
+			[
+				// For plugins with less than 1 million installs, we need to adjust their scores a bit more.
+				'filter' => [
 					'range' => [
-					  'active_installs' => [
-						'lte' => 1000000,
-					  ],
+							'active_installs' => [
+								'lte' => 1000000,
+							],
+						],
 					],
-				  ],
-				  'exp' => [
+				'exp' => [
 					'active_installs' => [
-					  'origin' => 1000000,
-					  'offset' => 0,
-					  'scale' => 900000,
-					  'decay' => 0.75,
+						'origin' => 1000000,
+						'offset' => 0,
+						'scale'  => 900000,
+						'decay'  => 0.75,
 					],
-				  ],
 				],
-				4 => [
-				  'field_value_factor' => [
-					'field' => 'support_threads_resolved',
-					'factor' => 0.25,
+			],
+			[
+				// The more resolved support threads (as a percentage) a plugin has, the more responsive the developer is, and the better experience the end-user will have.
+				'field_value_factor' => [
+					'field'    => 'support_threads_resolved',
+					'factor'   => 0.25,
 					'modifier' => 'log2p',
-					'missing' => 0.5,
-				  ],
+					'missing'  => 0.5,
 				],
-				5 => [
-				  'field_value_factor' => [
-					'field' => 'rating',
-					'factor' => 0.25,
+			],
+			[
+				// A higher rated plugin is more likely to be preferred.
+				'field_value_factor' => [
+					'field'    => 'rating',
+					'factor'   => 0.25,
 					'modifier' => 'sqrt',
-					'missing' => 2.5,
-				  ],
+					'missing'  => 2.5,
 				],
-			];
-		}
+			],
+		];
 
-		// Old version didn't have these
 		unset( $es_query_args[ 'query' ][ 'function_score' ][ 'score_mode' ] );
-		unset( $es_query_args[ 'query' ][ 'function_score' ][ 'max_boost' ] );
-		unset( $es_query_args[ 'aggregations' ] );
+		unset( $es_query_args[ 'query' ][ 'function_score' ][ 'boost_mode' ] );
 
 		// Couple of extra fields wanted in the response, mainly for debugging
 		$es_query_args[ 'fields' ] = [
-			0 => 'slug',
-			1 => 'post_id',
-			2 => 'blog_id',
-		];
-
-		// Old version had things wrapped in an extra query => filtered layer.
-		$es_query_args[ 'query' ] = [
-			'filtered' => [
-				'query' => $es_query_args[ 'query' ]
-			]
+			'slug',
+			'post_id',
 		];
 
 		return $es_query_args;
