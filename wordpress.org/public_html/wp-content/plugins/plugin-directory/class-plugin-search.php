@@ -384,8 +384,8 @@ class Plugin_Search {
 			],
 		];
 
+		unset( $es_query_args[ 'query' ][ 'function_score' ][ 'max_boost' ] );
 		unset( $es_query_args[ 'query' ][ 'function_score' ][ 'score_mode' ] );
-		unset( $es_query_args[ 'query' ][ 'function_score' ][ 'boost_mode' ] );
 
 		// Couple of extra fields wanted in the response, mainly for debugging
 		$es_query_args[ 'fields' ] = [
