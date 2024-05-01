@@ -330,7 +330,7 @@ class Plugin_Search {
 				// The older a plugins tested-up-to is, the less likely it's relevant.
 				'exp' => [
 					'tested' => [
-						'origin' => '5.0',
+						'origin' => sprintf( '%0.1f', defined( 'WP_CORE_STABLE_BRANCH' ) ? WP_CORE_STABLE_BRANCH : $GLOBALS['wp_version'] ),
 						'offset' => 0.1,
 						'scale'  => 0.4,
 						'decay'  => 0.6,
