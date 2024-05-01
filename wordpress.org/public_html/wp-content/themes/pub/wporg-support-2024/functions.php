@@ -1200,6 +1200,8 @@ add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url
  * @return string Filtered content.
  */
 function wporg_support_wrap_standalone_li_tags_in_ul( $content ) {
+	remove_filter( current_filter(), 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
+
 	// No lists? No worries.
 	if ( false === stripos( $content, '<li>' ) ) {
 		return $content;
@@ -1250,8 +1252,23 @@ function wporg_support_wrap_standalone_li_tags_in_ul( $content ) {
 
 	return $content;
 }
-add_filter( 'bbp_get_topic_content', 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
-add_filter( 'bbp_get_reply_content', 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
+
+/**
+ * Maybe wrap standalone <li> tags in <ul> tags.
+ * This only wraps non-block-posts.
+ * 
+ * @see https://meta.trac.wordpress.org/ticket/7618
+ */
+function wporg_support_maybe_wrap_standalone_li_tags_in_ul( $content ) {
+	// If it's not a block post, we'll need to filter it after all transforms.
+	if ( ! has_blocks( $content ) ) {
+		add_filter( current_filter(), 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
+	}
+
+	return $content;
+}
+add_filter( 'bbp_get_topic_content', 'wporg_support_maybe_wrap_standalone_li_tags_in_ul', 1 );
+add_filter( 'bbp_get_reply_content', 'wporg_support_maybe_wrap_standalone_li_tags_in_ul', 1 );
 
 /**
  * Set 'is_single' query var to true on single replies.
