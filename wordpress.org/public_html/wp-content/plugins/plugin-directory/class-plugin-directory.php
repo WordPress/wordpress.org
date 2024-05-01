@@ -1852,15 +1852,12 @@ class Plugin_Directory {
 			return $url;
 		}
 
-		$url = add_query_arg(
-			'info',
-			urlencode( rest_url( sprintf(
-				'plugins/v1/pending-plugin/%d-%s/',
-				$post->ID,
-				$token
-			) ) ),
-			$url
-		);
+		// Append with a anchor, such that CLI environments don't require special handling.
+		$url .= '#wporgapi:' . rest_url( sprintf(
+			'plugins/v1/pending-plugin/%d-%s/',
+			$post->ID,
+			$token
+		) );
 
 		return $url;
 	}

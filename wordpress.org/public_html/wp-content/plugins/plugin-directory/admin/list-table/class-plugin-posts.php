@@ -712,7 +712,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$url  = wp_get_attachment_url( $zip_file->ID );
 			$name = $zip_file->submitted_name;
 			if ( ! $name ) {
-				$name = explode( '?', basename( $url ) )[0];
+				$name = preg_split( '/[?#]/', basename( $url ) )[0];
 				$name = explode( '_', $name, 3 )[2];
 			}
 
