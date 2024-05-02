@@ -1858,7 +1858,7 @@ class Plugin_Directory {
 			$post = get_post( $post->post_parent );
 		}
 
-		if ( ! $url || ! $post || ! current_user_can( 'edit_post', $post->ID ) ) {
+		if ( ! $url || ! $post || 'plugin' !== $post->post_type || ! current_user_can( 'edit_post', $post->ID ) ) {
 			return $url;
 		}
 

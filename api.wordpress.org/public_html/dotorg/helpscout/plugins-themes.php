@@ -21,6 +21,9 @@ Themes owned by this user:
 
 */
 
+// Run as the plugin directory, such that any filters are correct.
+$wp_init_host = 'https://wordpress.org/plugins/';
+
 include __DIR__ . '/common.php';
 
 // $request is the validated HelpScout request.
@@ -165,7 +168,12 @@ function display_items( $post_ids ) {
 					'order'          => 'DESC',
 					'posts_per_page' => 1,
 				] );
-				$download_link = $attachments ? wp_get_attachment_url( $attachments[0]->ID ) : '#';
+				$download_link = $attachments ? wp_get_attachment_url( $attachments[0]->ID ) : '';
+			}
+
+			// Append Info URL.
+			if ( $download_url && class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' ) ) {
+				$download_url = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $download_url, $post );
 			}
 		}
 
