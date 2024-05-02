@@ -1846,29 +1846,24 @@ class Plugin_Directory {
 	/**
 	 * Add additional context to ZIP urls.
 	 *
-	 * The ZIP URL will have a 'info' key attached which is a rest api URL to information about the plugin.
+	 * The ZIP URL will have URL suffixed which is a rest api URL to information about the plugin.
 	 *
 	 * @param string $url           The URL to the ZIP file.
-	 * @param int    $attachment_id The attachment ID.
+	 * @param int    $attachment_id The attachment ID, or post ID.
 	 * @return string The URL to the ZIP file.
 	 */
 	public function add_info_to_zip_url( $url, $attachment_id ) {
-		$attachment = get_post( $attachment_id );
-		$post       = get_post( $attachment->post_parent );
-		$token      = $post->{'_pending_access_token'} ?? false;
+		$post = get_post( $attachment_id );
+		if ( 'attachment' === $post->post_type ) {
+			$post = get_post( $post->post_parent );
+		}
 
-		if ( ! $url || ! $attachment || ! $post || ! $token || ! current_user_can( 'edit_post', $post->ID ) ) {
+		if ( ! $url || ! $post || ! current_user_can( 'edit_post', $post->ID ) ) {
 			return $url;
 		}
 
 		// Append with a anchor, such that CLI environments don't require special handling.
-		$url .= '#wporgapi:' . rest_url( sprintf(
-			'plugins/v1/pending-plugin/%d-%s/',
-			$post->ID,
-			$token
-		) );
-
-		return $url;
+		return API\Routes\Plugin_Review::append_plugin_review_info_url( $url, $post );
 	}
 
 	/**
