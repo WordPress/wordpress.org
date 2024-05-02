@@ -96,10 +96,6 @@ class ZIP_Cleanup {
 				}
 			}
 
-			// Include some log output for debugging.
-			$filename = basename( wp_get_attachment_url( $attachment->ID ) );
-			echo "Removing {$filename} from {$plugin->post_name} after {$days_to_keep} days\n";
-
 			wp_delete_attachment( $attachment->ID, true );
 		}
 	}
