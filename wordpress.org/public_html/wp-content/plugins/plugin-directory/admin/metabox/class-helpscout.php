@@ -6,6 +6,7 @@
  */
 
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
  * Email list for the plugin.
