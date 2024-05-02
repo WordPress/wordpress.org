@@ -94,10 +94,9 @@ class Plugin extends Base {
 	 * @return array The formatted array of all the data for the plugin.
 	 */
 	public function plugin_info_data( $request, $post ) {
-		global $post;
-
-		$plugin_slug = $post->post_name;
-		$post_id     = $post->ID;
+		$GLOBALS['post'] = $post;
+		$plugin_slug     = $post->post_name;
+		$post_id         = $post->ID;
 
 		$result            = array();
 		$result['name']    = get_the_title();
