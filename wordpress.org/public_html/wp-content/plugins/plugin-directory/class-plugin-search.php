@@ -216,24 +216,26 @@ class Plugin_Search {
 	public function jetpack_search_es_query_args( $es_query_args, $query ) {
 		// These are the things that jetpack_search_es_wp_query_args doesn't let us change, so we need to filter the es_query_args late in the code path to add more custom stuff.
 
-		$es_query_args['filter']['and'] ??= [];
+		// Replace any existing filter with an AND for our custom filters.
+		if ( ! isset( $es_query_args['filter']['and'] ) ) {
+			// 'filter' will either be an `and` or term we need to wrap in an `and`.
+			$es_query_args['filter'] = [
+				'and' => $es_query_args['filter'] ? [ $es_query_args['filter'] ] : [],
+			];
+		}
 
-		// Exclude disabled plugins.
+		// Exclude 'disabled' plugins. This is separate from the 'status' field, which is used for the plugin status.
 		$es_query_args['filter']['and'][] = [
 			'term' => [
-				'disabled' => [
-					'value' => false,
-				],
+				'disabled' => false,
 			]
 		];
 
+		// Limit to the Block Directory.
 		if ( $this->is_block_search ) {
-			// Limit to the Block Tax.
 			$es_query_args['filter']['and'][] = [
 				'term' => [
-					'taxonomy.plugin_section.name' => [
-						'value' => 'block'
-					]
+					'taxonomy.plugin_section.slug' => 'block',
 				]
 			];
 		}
