@@ -677,4 +677,53 @@ class Tools {
 
 		return 200 === wp_remote_retrieve_response_code( $request );
 	}
+
+	/**
+	 * Fetch the list of known Helpscout emails for a given post.
+	 *
+	 * @param \WP_Post $post The post to fetch emails for.
+	 * @return array
+	 */
+	public static function get_helpscout_emails( $post, $filters = [] ) {
+		global $wpdb;
+
+		$limit = 999;
+		if ( isset( $filters['limit'] ) ) {
+			$limit = absint( $filters['limit'] );
+			unset( $filters['limit'] );
+		}
+
+		// Trim off the rejected prefix/suffix.
+		$slug   = preg_replace( '/(^rejected-|-rejected(-\d)?$)/i', '', $post->post_name );
+		$wheres = '';
+
+		foreach ( $filters as $key => $value ) { 
+			$wheres .= $wpdb->prepare( 'AND emails.%i LIKE %s ', $key, '%' . $value . '%' );
+		}
+
+		$emails = $wpdb->get_results( $wpdb->prepare(
+			"SELECT emails.*
+				FROM %i emails
+					JOIN %i meta ON emails.id = meta.helpscout_id
+				WHERE meta.meta_key = 'plugins' AND meta.meta_value IN( %s, %s )
+					$wheres
+				ORDER BY `created` DESC
+				LIMIT %d",
+			"{$wpdb->base_prefix}helpscout",
+			"{$wpdb->base_prefix}helpscout_meta",
+			$slug,
+			$post->post_name,
+			$limit
+		) );
+
+		foreach ( $emails as &$email ) {
+			$email->url = 'https://secure.helpscout.net/conversation/' . $email->id . '/' . $email->number;
+		}
+
+		if ( 1 === $limit ) {
+			return reset( $emails );
+		}
+
+		return $emails;
+	}
 }

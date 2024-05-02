@@ -737,26 +737,11 @@ class Upload_Handler {
 	 * @return array|false
 	 */
 	public static function find_review_email( $post ) {
-		global $wpdb;
-
 		if ( ! in_array( $post->post_status, [ 'new', 'pending' ] ) || ! $post->post_name ) {
 			return false;
 		}
 
-		// Find the latest email for this plugin that looks like a review email.
-		return $wpdb->get_row( $wpdb->prepare(
-			"SELECT emails.*
-				FROM %i emails
-					JOIN %i meta ON emails.id = meta.helpscout_id
-				WHERE meta.meta_key = 'plugins' AND meta.meta_value = %s
-					AND emails.subject LIKE %s
-				ORDER BY `created` DESC
-				LIMIT 1",
-			"{$wpdb->base_prefix}helpscout",
-			"{$wpdb->base_prefix}helpscout_meta",
-			$post->post_name,
-			'%Review in Progress:%' // The subject line of the review email.
-		) );
+		return Tools::get_helpscout_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
 	}
 
 	/**

@@ -1,8 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
-use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Tools;
 use WP_Error;
 use WP_REST_Server;
 
@@ -90,7 +90,7 @@ class Plugin_Review extends Base {
 			'ID'            => $post->ID,
 			'post_status'   => $post->post_status,
 			'edit_url'      => add_query_arg( [ 'action' => 'edit', 'post' => $post->ID ], admin_url( 'post.php' ) ),
-			'helpscout'     => null, // Link to Review email (or most recent open email)
+			'helpscout'     => null, // Most recent email details.
 			'submitter'     => [
 				'user_login' => $submitter->user_login,
 				'user_email' => $submitter->user_email,
@@ -105,6 +105,9 @@ class Plugin_Review extends Base {
 		if ( in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
 			$details['download_link'] = null;
 			$details['preview_link']  = null;
+			$details['helpscout']     = Tools::get_helpscout_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+		} else {
+			$details['helpscout']     = Tools::get_helpscout_emails( $post, [ 'limit' => 1 ] );
 		}
 
 		$attachments = get_attached_media( 'application/zip', $post );

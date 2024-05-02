@@ -14,29 +14,15 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
  */
 class HelpScout {
 	public static function display() {
-		global $wpdb;
 		$post = get_post();
 
-		// Trim off the rejected prefix/suffix.
-		$slug   = preg_replace( '/(^rejected-|-rejected(-\d)?$)/i', '', $post->post_name );
-
 		// If the slug is not set, we can't query HelpScout.
-		if ( ! $post->post_name || ! $slug ) {
+		if ( ! $post->post_name ) {
 			echo 'Invalid Slug, cannot query emails.';
 			return;
 		}
 
-		$emails = $wpdb->get_results( $wpdb->prepare(
-			"SELECT emails.*
-				FROM %i emails
-					JOIN %i meta ON emails.id = meta.helpscout_id
-				WHERE meta.meta_key = 'plugins' AND meta.meta_value IN( %s, %s )
-				ORDER BY `created` DESC",
-			"{$wpdb->base_prefix}helpscout",
-			"{$wpdb->base_prefix}helpscout_meta",
-			$slug,
-			$post->post_name
-		) );
+		$emails = Tools::get_helpscout_emails( $post );
 
 		echo '<table class="widefat striped helpscout-emails">';
 		echo '<thead>
@@ -64,7 +50,7 @@ class HelpScout {
 				</tr>\n",
 				sprintf(
 					'<a href="%s" title="%s">%s</a>',
-					esc_url( 'https://secure.helpscout.net/conversation/' . $email->id . '/' . $email->number ),
+					esc_url( $email->url ),
 					esc_attr( $email->preview ),
 					esc_html( $subject )
 				),
