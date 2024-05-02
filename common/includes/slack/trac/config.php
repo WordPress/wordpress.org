@@ -69,6 +69,8 @@ class Core extends Trac {
 		'Upgrade/Install'        => '#core-upgrade-install',
 		'Application Passwords'  => [ '#core-passwords' => true, '#core-restapi' => true ],
 		'Login and Registration' => '#core-passwords',
+		'HTML API'               => '#core-html-api',
+		'Interactivity API'      => '#core-interactivity-api',
 	);
 }
 
