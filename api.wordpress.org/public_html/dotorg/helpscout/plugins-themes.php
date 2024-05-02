@@ -140,6 +140,8 @@ function get_user_items( $user ) {
 }
 
 function display_items( $post_ids ) {
+	global $request;
+
 	echo '<ul>';
 	foreach ( $post_ids as $post_id ) {
 		$post          = get_post( $post_id );
@@ -172,7 +174,11 @@ function display_items( $post_ids ) {
 			}
 
 			// Append Info URL.
-			if ( $download_url && class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' ) ) {
+			if (
+				$download_url &&
+				str_starts_with( $request->mailbox->email ?? '' , 'plugins' ) &&
+				class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' )
+			) {
 				$download_url = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $download_url, $post );
 			}
 		}
