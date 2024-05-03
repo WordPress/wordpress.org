@@ -549,7 +549,7 @@ function the_plugin_self_close_button() {
 	// Translators: %s is the plugin name, as defined by the plugin itself.
 	$close_button_text = sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() );
 	?>
-	<button class="show-dialog button" onclick="this.nextElementSibling.showModal()"><?php echo $close_button_text; ?></button>
+	<div class="wp-block-button is-small"><button class="show-dialog wp-block-button__link" onclick="this.parentNode.nextElementSibling.showModal()"><?php echo $close_button_text; ?></button></div>
 	<dialog>
 		<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
 		<strong><?php _e( 'Close your plugin?', 'wporg-plugins' ); ?></strong>
@@ -592,8 +592,8 @@ function the_plugin_self_close_button() {
 			</p>
 			<p>
 				<?php printf( __( 'If you have any questions, please contact <a href="mailto:%1$s">%1$s</a> before proceeding with a link to your plugin and your questions.', 'wporg-plugins' ), 'plugins@wordpress.org' ); ?>
-			<p>
-				<input class="button" type="submit" value="<?php echo esc_attr( $close_button_text ); ?>" />
+			<p class="wp-block-button is-small">
+				<input class="wp-block-button__link" type="submit" value="<?php echo esc_attr( $close_button_text ); ?>" />
 			</p>
 		</form>
 	</dialog>
@@ -695,7 +695,7 @@ function the_plugin_self_transfer_form() {
 	}
 	echo '</select></p>';
 	// Translators: %s is the plugin name, as defined by the plugin itself.
-	echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'Please transfer %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
+	echo '<p class="wp-block-button is-small"><input class="wp-block-button__link" type="submit" value="' . esc_attr( sprintf( __( 'Please transfer %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
 	echo '</form>';
 
 }
@@ -728,7 +728,7 @@ function the_plugin_release_confirmation_form() {
 		echo '</p></div>';
 
 		echo '<form method="POST" action="' . esc_url( Template::get_enable_release_confirmation_link() ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
-		echo '<p><input class="button" type="submit" value="' . esc_attr__( 'I understand, please enable release confirmations.', 'wporg-plugins' ) . '" /></p>';
+		echo '<p class="wp-block-button is-small"><input class="wp-block-button__link" type="submit" value="' . esc_attr__( 'I understand, please enable release confirmations.', 'wporg-plugins' ) . '" /></p>';
 		echo '</form>';
 
 	} else {
