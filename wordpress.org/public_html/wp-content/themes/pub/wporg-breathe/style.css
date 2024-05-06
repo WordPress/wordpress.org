@@ -418,8 +418,10 @@ input[type="submit"]:hover {
 	}
 
 	body.responsive-show {
-		overflow-y: visible;
-		position: static;
+		overflow-y: hidden;
+		position: fixed !important;
+		padding-top: var(--wp-admin--admin-bar--height, 0px) !important;
+		top: 0px !important;
 	}
 
 	#page {
