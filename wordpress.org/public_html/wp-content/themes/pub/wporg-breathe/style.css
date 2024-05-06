@@ -318,6 +318,10 @@ body.wporg-make #headline h2 a:before {
 	vertical-align: middle;
 }
 
+#secondary-content a {
+	overflow-wrap: anywhere;
+}
+
 #secondary-content .navigation-main {
 	margin-top: 32px;
 	text-align: left;
