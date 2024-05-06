@@ -3,6 +3,21 @@
 namespace WordPressdotorg\Theme\Learn_2024;
 
 /**
+ * Admin.
+ */
+require __DIR__ . '/inc/admin.php';
+
+/**
+ * Capabilities.
+ */
+require __DIR__ . '/inc/capabilities.php';
+
+/**
+ * Taxonomies.
+ */
+require __DIR__ . '/inc/taxonomy.php';
+
+/**
  * Actions and filters.
  */
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
@@ -21,6 +36,14 @@ function enqueue_assets() {
 		array( 'wporg-parent-2021-style', 'wporg-global-fonts' ),
 		filemtime( __DIR__ . '/build/style/style-index.css' )
 	);
+
+	// Preload the heading font(s).
+	if ( is_callable( 'global_fonts_preload' ) ) {
+		/* translators: Subsets can be any of cyrillic, cyrillic-ext, greek, greek-ext, vietnamese, latin, latin-ext. */
+		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg-learn' );
+		// All headings.
+		global_fonts_preload( 'EB Garamond, Inter', $subsets );
+	}
 }
 
 /**
@@ -31,19 +54,19 @@ function add_site_navigation_menus( $menus ) {
 		'learn' => array(
 			array(
 				'label' => __( 'User', 'wporg-learn' ),
-				'url' => '/learning-pathways/user/',
+				'url'   => '/learning-pathways/user/',
 			),
 			array(
 				'label' => __( 'Designer', 'wporg-learn' ),
-				'url' => '/learning-pathways/designer/',
+				'url'   => '/learning-pathways/designer/',
 			),
 			array(
 				'label' => __( 'Contributor', 'wporg-learn' ),
-				'url' => '/learning-pathways/contributor/',
+				'url'   => '/learning-pathways/contributor/',
 			),
 			array(
 				'label' => __( 'Developer', 'wporg-learn' ),
-				'url' => '/learning-pathways/developer/',
+				'url'   => '/learning-pathways/developer/',
 			),
 		),
 	);
