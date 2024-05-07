@@ -41,6 +41,8 @@ class Core extends Trac {
 		'#wp-admin/includes/.*install#'    => '#core-upgrade-install',
 		'application-passwords'            => '#core-passwords',
 		'auth-app'                         => '#core-passwords',
+		'wp-includes/interactivity-api'    => '#core-interactivity-api',
+		'wp-includes/html-api'             => '#core-html-api',
 	);
 
 	/**
