@@ -304,7 +304,43 @@ class Review_Tools {
 					<li><a href='https://plugins.svn.wordpress.org/<?php echo esc_attr( $post->post_name ); ?>/'>Subversion Repository</a></li>
 					<li><a href='https://plugins.trac.wordpress.org/browser/<?php echo esc_attr( $post->post_name ); ?>/'>Browse in Trac</a></li>
 					<li><a href='<?php echo esc_url( Template::download_link() ); ?>'>Download Current Version</a></li>
-					<li><a href='<?php echo esc_url( 'https://playground.wordpress.net/?plugin=' . $post->post_name ); ?>'>Run in playground</a></li>
+
+					<?php
+					// PCP Blueprint.
+					$pcp_blueprint = [
+						'landingPage'         => '/wp-admin/admin.php?page=plugin-check',
+						'phpExtensionBundles' => [
+							'kitchen-sink'
+						],
+						'steps'               => [
+							[
+								'step'     => 'login',
+								'username' => 'admin',
+								'password' => 'password',
+							],
+							[
+								'step'          => 'installPlugin',
+								'options'       => [
+									'activate' => false,
+								],
+								'pluginZipFile' => [
+									'resource' => 'wordpress.org/plugins',
+									'slug'     => $post->post_name,
+								],
+							],
+							[
+								'step'          => 'installPlugin',
+								'pluginZipFile' => [
+									'resource' => 'wordpress.org/plugins',
+									'slug'     => 'plugin-check',
+								],
+							],
+						]
+					];
+					// NOTE: Must be escaped with `esc_attr()` not `esc_url()` as the blueprint is not encoded.
+					$playground_with_pcp = 'https://playground.wordpress.net/#' . json_encode( $pcp_blueprint, JSON_UNESCAPED_SLASHES );
+					?>
+					<li><a href='<?php echo esc_url( 'https://playground.wordpress.net/?plugin=' . $post->post_name ); ?>' target='_blank'>Run in playground</a> (<a href='<?php echo esc_attr( $playground_with_pcp ); ?>' target='_blank'>PCP</a>)</li>
 
 					<?php if ( has_term( 'block', 'plugin_section', $post ) ) : ?>
 						<li><a href='https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=<?php echo esc_attr( $post->post_name ); ?>'>Block Plugin Checker</a></li>
