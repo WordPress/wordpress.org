@@ -472,8 +472,8 @@ function the_plugin_commercial_zone() {
 	);
 	echo '<span class="help">' . esc_attr__( 'Optional. The URL for plugin support, other than its support forum on wordpress.org.', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
-	echo '<p>';
-	echo '<button class="button button-secondary" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
+	echo '<p class="wp-block-button is-small">';
+	echo '<button class="wp-block-button__link" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
 	echo '<span class="success-msg">' . __( 'Saved!', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
 	echo '</form>';
@@ -638,7 +638,7 @@ function the_plugin_self_toggle_preview_button() {
 
 		echo '<form method="POST" action="' . esc_url( $toggle_link ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
 		// Translators: %s is the plugin name, as defined by the plugin itself.
-		echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'Please toggle the Live Preview link for %s', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
+		echo '<p class="wp-block-button is-small"><input class="wp-block-button__link" type="submit" value="' . esc_attr( sprintf( __( 'Please toggle the Live Preview link for %s', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
 		echo '</form>';
 	}
 }
