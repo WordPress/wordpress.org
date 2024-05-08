@@ -32,6 +32,31 @@ function remove_badge( string $badge, $users ) : bool {
 }
 
 /**
+ * Get a list of badges for a given user.
+ *
+ * WARNING: Uncached. Excludes dynamically allocated badges.
+ *
+ * @param $users mixed The user to fetch the badged for. A WP_User/ID/Login/Email.
+ * @return array
+ */
+function get_user_badges( $user ) {
+	global $wpdb;
+
+	$user_id = find_user_id( $user );
+
+	$badges = $wpdb->get_results( $wpdb->prepare(
+		"SELECT slug, name
+			FROM bpmain_wporg_groups_members m
+			JOIN bpmain_wporg_groups g ON m.group_id = g.id
+			WHERE m.user_id = %d
+			ORDER BY slug",
+		$user_id
+	), ARRAY_A );
+
+	return array_column( $badges, 'name', 'slug' );
+}
+
+/**
  * Record an activity item for a user.
  * 
  * @param $component string     The component to be used for the acitivity.
@@ -75,38 +100,37 @@ function update_profile( $field, $value, $user ) {
 /**
  * Assign a badge to a given user.
  * 
- * @param $action string The action to perform; 'add' or 'remove'.
+ * @param $action string The action to perform; 'add', 'remove', 'list'.
  * @param $badge  string The badge group to assign.
  * @param $users  mixed  The user(s) to assign to. A WP_User/ID/Login/Email/Slug (or array of) of the user(s) to assign.
  * @return bool
  */
 function badge_api( string $action, string $badge, $users ) : bool {
-	$users = (array) $users;
-	$users = array_filter( array_map( function( $user ) {
-		// WP_User-like object.
-		if ( is_object( $user ) ) {
-			return $user->ID ?? false;
-		}
-
-		// User ID.
-		if ( is_numeric( $user ) && absint( $user ) == $user ) {
-			return (int) $user;
-		}
-
-		// Support user login / email / slug.
-		$_user = get_user_by( 'login', $user );
-		if ( ! $_user && is_email( $user ) ) {
-			$_user = get_user_by( 'email', $user );
-		}
-		if ( ! $_user ) {
-			$_user = get_user_by( 'slug', $user );
-		}
-
-		return $_user->ID ?? false;
-	}, $users ) );
+	$users = is_object( $users ) ? [ $users ] : (array) $users;
+	$users = array_filter( array_map( __NAMESPACE__ . '\find_user_id', $users ) );
 
 	if ( ! $action || ! $badge || ! $users ) {
 		return false;
+	}
+
+	if ( 'remove' === $action ) {
+		$users = array_filter(
+			$users,
+			function( $user ) use ( $badge ) {
+				return isset( get_user_badges( $user )[ $badge ] );
+			}
+		);
+	} elseif ( 'add' === $action ) {
+		$users = array_filter(
+			$users,
+			function( $user ) use ( $badge ) {
+				return ! isset( get_user_badges( $user )[ $badge ] );
+			}
+		);
+	}
+	// If there are no users now, then the action must have already occured.
+	if ( ! $users ) {
+		return true;
 	}
 
 	$request = api( [
@@ -119,6 +143,35 @@ function badge_api( string $action, string $badge, $users ) : bool {
 
 	// Note: Success or error message may be present in the return cookies.
 	return ( 200 === wp_remote_retrieve_response_code( $request ) );
+}
+
+/**
+ * Find a user ID from a variety of inputs.
+ *
+ * @param $user mixed A WP_User object, user ID, login, email, or slug.
+ * @return int|false
+ */
+function find_user_id( $user ) {
+	// WP_User-like object.
+	if ( is_object( $user ) ) {
+		return $user->ID ?? false;
+	}
+
+	// User ID.
+	if ( is_numeric( $user ) && absint( $user ) == $user ) {
+		return (int) $user;
+	}
+
+	// Support user login / email / slug.
+	$_user = get_user_by( 'login', $user );
+	if ( ! $_user && is_email( $user ) ) {
+		$_user = get_user_by( 'email', $user );
+	}
+	if ( ! $_user ) {
+		$_user = get_user_by( 'slug', $user );
+	}
+
+	return $_user->ID ?? false;
 }
 
 /**
