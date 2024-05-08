@@ -736,6 +736,10 @@ article.state-unresolved {
 	right: initial;
 }
 
+nav.o2-post-actions ul li:last-child {
+	line-height: 1;
+}
+
 /*
  * Private post status
  */
