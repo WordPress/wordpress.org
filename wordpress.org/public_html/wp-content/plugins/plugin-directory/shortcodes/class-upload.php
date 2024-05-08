@@ -327,7 +327,7 @@ class Upload {
 								}
 								if ( array_key_first( $attached_media) === $attachment_post_id ) {
 									printf(
-										'<li><a href="%s" class="%s" target="_blank">%s</a></li>',
+										'<li class="wp-block-button is-small"><a href="%s" class="%s" target="_blank">%s</a></li>',
 										esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
 										'wp-block-button__link',
 										__( 'Check with Plugin Check', 'wporg-plugins' )
