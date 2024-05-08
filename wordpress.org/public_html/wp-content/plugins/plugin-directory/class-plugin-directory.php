@@ -53,6 +53,8 @@ class Plugin_Directory {
 		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
 		add_filter( 'wp_get_attachment_url', array( $this, 'add_info_to_zip_url' ), 100, 2 );
 
+		add_filter( 'wp_resource_hints', array( $this, 'wp_resource_hints' ), 10, 2 );
+
 		// Add no-index headers where appropriate.
 		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
 
@@ -1864,6 +1866,18 @@ class Plugin_Directory {
 
 		// Append with a anchor, such that CLI environments don't require special handling.
 		return API\Routes\Plugin_Review::append_plugin_review_info_url( $url, $post );
+	}
+
+	/**
+	 * Add a dns-prefetch for the CDNs we use.
+	 */
+	function wp_resource_hints( $uris, $type ) {
+		if ( 'dns-prefetch' === $type ) {
+			$uris[] = '//s.w.org';
+			$uris[] = '//ps.w.org';
+		}
+
+		return $uris;
 	}
 
 	/**
