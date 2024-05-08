@@ -494,16 +494,14 @@ class Template {
 
 		switch ( $output ) {
 			case 'html':
-				$id    = "plugin-banner-{$plugin->post_name}";
-				$html  = "<style type='text/css'>";
-				$html .= "#{$id} { background-image: url('{$banner}'); }";
-				if ( ! empty( $banner_2x ) ) {
-					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 120dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
-				}
-				$html .= '</style>';
-				$html .= "<div class='plugin-banner' id='{$id}'></div>";
+				return sprintf(
+					'<div class="plugin-banner" id="%1$s"><img decoding="async" fetchpriority="high" src="%2$s" %3$s %4$s></div>',
+					esc_attr( "plugin-banner-{$plugin->post_name}" ),
+					esc_url( $banner ),
+					! empty( $banner_2x ) ? "srcset='" . esc_url( $banner ) . " 772w, " . esc_url( $banner_2x ) . " 1544w'" : '',
+					! empty( $banner_2x ) ? 'sizes="(min-width: 900px) 1544px, 772px"' : ''
+				);
 
-				return $html;
 				break;
 
 			case 'raw':
