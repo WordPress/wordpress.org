@@ -1,11 +1,6 @@
-.plugin-banner {
-	background-position: 50% 50%;
-	background-size: 100%;
-	background-repeat: no-repeat;
+.plugin-banner img {
+	margin: 0 auto var( --wp--preset--spacing--30 );
 	border-radius: var( --wp--custom--button--border--radius );
-	display: inline-block;
-	margin: 0 auto var( --wp--style--block-gap );
-	padding-top: 32.38342%; /* 250px / 722px */
-	vertical-align: middle;
+	display: block;
 	width: 100%;
 }
