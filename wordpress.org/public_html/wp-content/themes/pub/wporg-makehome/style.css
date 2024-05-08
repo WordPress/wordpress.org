@@ -402,3 +402,10 @@ table.schedule td:focus-within .edit {
 	/* Separated from the block above due to browsers that don't support :focus-within */
 	visibility: visible;
 }
+
+/* @see https://meta.trac.wordpress.org/ticket/6867 */
+/* @see https://github.com/WordPress/meeting-calendar/pull/149 for the eventual(?) upstream fix. */
+.wporg-meeting-calendar__cell strong {
+	font-size: 1.2em;
+}
+
