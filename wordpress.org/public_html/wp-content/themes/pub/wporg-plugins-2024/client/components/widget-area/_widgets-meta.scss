@@ -51,6 +51,7 @@
 
 	.languages .popover-trigger {
 		color: var(--wp--custom--link--color--text);
+		text-decoration: underline;
 
 		&:hover {
 			text-decoration: underline;
@@ -71,6 +72,11 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		width: auto;
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
 	}
 }
 
