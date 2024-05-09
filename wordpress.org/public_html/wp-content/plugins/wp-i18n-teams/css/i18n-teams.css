@@ -88,6 +88,10 @@ td.no-right-border {
 	white-space: nowrap;
 }
 
+.translators-info table a:hover {
+	text-decoration: underline;
+}
+
 /*
  * Details page for an individual locale
  */
