@@ -3,21 +3,9 @@
 
 	.reviews-link {
 		position: absolute;
-		right: 16px;
+		right: 0;
 		top: 0;
-		font-size: var(--wp--preset--font-size--small);
-
-		&:after {
-			position: absolute;
-			content: "\f345";
-			font-family: dashicons;
-			padding-left: 5px;
-			vertical-align: top;
-		}
-	}
-
-	.reviews-link:hover:after {
-		text-decoration: none;
+		font-size: var(--wp--preset--font-size--normal);
 	}
 
 	[class*='dashicons-star-'] {
