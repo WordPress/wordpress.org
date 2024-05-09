@@ -45,7 +45,7 @@ use Wporg\TranslationEvents\Event\Event;
 					else :
 						esc_html_e( 'Created by:', 'gp-translation-events' );
 						?>
-						&nbsp;<a href="<?php echo esc_attr( get_author_posts_url( $user->ID ) ); ?>"><?php echo esc_html( get_the_author_meta( 'display_name', $user->ID ) ); ?></a>
+						&nbsp;<a href="<?php echo esc_attr( get_author_posts_url( $event->author_id() ) ); ?>"><?php echo esc_html( get_the_author_meta( 'display_name', $event->author_id() ) ); ?></a>
 						<?php
 					endif;
 					?>
