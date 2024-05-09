@@ -6,7 +6,8 @@
 
 .translation-event-form #event-title,
 .translation-event-form #event-description {
-	width: 30%;
+	width: auto;
+	resize: both;
 }
 
 .translation-event-form input[type="text"],
@@ -53,6 +54,7 @@
 .event-details-stats table {
 	margin: 1rem;
 }
+
 .event-details-stats table {
 	width: 100%;
 	table-layout: fixed;
@@ -83,7 +85,8 @@
 	font-weight: bold;
 }
 
-.event-contributors li, .event-attendees li {
+.event-contributors li,
+.event-attendees li {
 	display: inline-block;
 	list-style-type: none;
 	margin-right: 1em;
@@ -91,7 +94,9 @@
 	width: 15em;
 }
 
-.event-contributors li .avatar, .event-attendees li .avatar {
+.event-contributors li .avatar,
+.event-attendees li .avatar,
+td a.attendee-avatar .avatar {
 	border-radius: 50%;
 	vertical-align: middle;
 }
@@ -106,6 +111,7 @@ span.event-not-attending {
 	margin-top: 1em;
 	font-size: smaller;
 }
+
 .hide-event-url {
 	display: none;
 }
@@ -246,7 +252,8 @@ span.active-events-before-translation-table a {
 	padding: 0;
 }
 
-input[type="submit"].remove-as-host, input[type="submit"].convert-to-host {
+input[type="submit"].remove-as-host,
+input[type="submit"].convert-to-host {
 	text-align: center;
 	display: inline;
 	margin-top: 1em;
@@ -279,7 +286,7 @@ a.button.is-primary.attend-btn {
 	margin-bottom: 1em;
 }
 
-.event-page-edit-link {
+.event-page-edit-link, .event-page-attendees-link {
 	float: right;
 	text-decoration: none;
 	justify-self: end;
@@ -348,12 +355,80 @@ a.event-page-edit-link:hover {
 	border-bottom: var(--gp-color-btn-primary-bg) thin solid;
 	text-decoration: none;
 }
+
 ul.text-snippets {
 	padding: 0;
 	margin-left: 160px;
 }
+
 .first-time-contributor-tada::after {
 	content: ' 🎉';
+}
+
+ul#translation-links li {
+	margin-bottom: .5em;
+}
+
+.icons li .name {
+	display: none;
+}
+
+.icons li {
+	width: auto !important;
+}
+
+.event-attendees h2,
+.event-contributors h2 {
+	cursor: pointer;
+	display: inline-block;
+}
+
+ul.event-attendees-filter {
+	padding-left: 1rem;
+}
+
+ul.event-attendees-filter li {
+	display: inline;
+	margin-right: .4em;
+}
+
+form.translation-event-form {
+	float: left;
+	width: 85%;
+}
+
+div.event-edit-right {
+	float: right;
+	width: 15%;
+	text-align: right;
+}
+
+.view-event-page {
+	float: right;
+}
+
+a.active-filter {
+	font-weight: bold;
+}
+
+.event-edit-right a.manage-attendees-btn {
+	margin-top: 1em;
+}
+
+#quick-add.loading::after {
+	content: 'Loading...';
+}
+
+#quick-add summary {
+	cursor: pointer;
+}
+
+#quick-add {
+	padding: 0 .5em;
+	border-left: #d9d8d8 thin solid;
+	border-bottom: #d9d8d8 thin solid;
+	max-height: 8em;
+	overflow: auto;
 }
 
 /* show the event-details-right below instead of on the right on mobile */

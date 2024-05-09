@@ -2,11 +2,6 @@
 
 namespace Wporg\TranslationEvents;
 
-use Exception;
-use WP_Query;
-use Wporg\TranslationEvents\Attendee\Attendee;
-use Wporg\TranslationEvents\Stats\Stats_Calculator;
-
 class Upgrade {
 	private const VERSION        = 2;
 	private const VERSION_OPTION = 'wporg_gp_translations_events_version';
@@ -27,17 +22,6 @@ class Upgrade {
 		// Upgrade database schema.
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( self::get_database_schema_sql() );
-
-		// Run version-specific upgrades.
-		$is_running_tests = 'yes' === getenv( 'WPORG_TRANSLATION_EVENTS_TESTS' );
-		if ( $previous_version < 2 && ! $is_running_tests ) {
-			try {
-				self::v2_import_legacy_attendees();
-			} catch ( Exception $e ) {
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				error_log( $e );
-			}
-		}
 
 		update_option( self::VERSION_OPTION, self::VERSION );
 	}
@@ -68,39 +52,5 @@ class Upgrade {
 			INDEX `user` (`user_id`)
 			) COMMENT='Attendees of events';
 		";
-	}
-
-	/**
-	 * Previously, event attendance was tracked through user_meta.
-	 * This function imports this legacy attendance information into the attendees table.
-	 *
-	 * Instead of looping through all users, we consider only users who have contributed to an event.
-	 *
-	 * @throws Exception
-	 */
-	private static function v2_import_legacy_attendees(): void {
-		$query = new WP_Query(
-			array(
-				'post_type'   => Translation_Events::CPT,
-				'post_status' => 'publish',
-			)
-		);
-
-		$events              = $query->get_posts();
-		$stats_calculator    = new Stats_Calculator();
-		$attendee_repository = Translation_Events::get_attendee_repository();
-		foreach ( $events as $event ) {
-			$host_attendee = new Attendee( $event->ID, intval( $event->post_author ) );
-			$host_attendee->mark_as_host();
-			$attendee_repository->insert_attendee( $host_attendee );
-
-			foreach ( $stats_calculator->get_contributors( $event->ID ) as $user ) {
-				$attendee = $attendee_repository->get_attendee( $event->ID, $user->id );
-				if ( ! $attendee ) {
-					$attendee = new Attendee( $event->ID, $user->ID );
-					$attendee_repository->insert_attendee( $attendee );
-				}
-			}
-		}
 	}
 }

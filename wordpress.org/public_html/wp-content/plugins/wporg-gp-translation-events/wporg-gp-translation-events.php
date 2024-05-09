@@ -22,17 +22,23 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use GP;
+use GP_Locales;
 use WP_Post;
 use WP_Query;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
+use Wporg\TranslationEvents\Event\Event_Capabilities;
 use Wporg\TranslationEvents\Event\Event_Form_Handler;
 use Wporg\TranslationEvents\Event\Event_Repository_Cached;
 use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Notifications\Notifications_Send;
+use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Stats\Stats_Listener;
 
 class Translation_Events {
 	public const CPT = 'translation_event';
+
+	private Event_Capabilities $event_capabilities;
 
 	public static function get_instance(): Translation_Events {
 		static $instance = null;
@@ -64,6 +70,7 @@ class Translation_Events {
 		add_action( 'wp_ajax_nopriv_submit_event_ajax', array( $this, 'submit_event_ajax' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_translation_event_js' ) );
 		add_action( 'init', array( $this, 'register_event_post_type' ) );
+		add_action( 'init', array( $this, 'send_notifications' ) );
 		add_action( 'add_meta_boxes', array( $this, 'event_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_event_meta_boxes' ) );
 		add_action( 'transition_post_status', array( $this, 'event_status_transition' ), 10, 3 );
@@ -71,20 +78,40 @@ class Translation_Events {
 		add_filter( 'wp_insert_post_data', array( $this, 'generate_event_slug' ), 10, 2 );
 		add_action( 'gp_init', array( $this, 'gp_init' ) );
 		add_action( 'gp_before_translation_table', array( $this, 'add_active_events_current_user' ) );
+		add_filter( 'wp_post_revision_meta_keys', array( $this, 'wp_post_revision_meta_keys' ) );
+		add_filter( 'pre_wp_unique_post_slug', array( $this, 'pre_wp_unique_post_slug' ), 10, 6 );
 
 		if ( is_admin() ) {
 			Upgrade::upgrade_if_needed();
 		}
+
+		$this->event_capabilities = new Event_Capabilities(
+			self::get_event_repository(),
+			self::get_attendee_repository(),
+			new Stats_Calculator()
+		);
+		$this->event_capabilities->register_hooks();
 	}
 
 	public function gp_init() {
+		$locale = '(' . implode( '|', wp_list_pluck( GP_Locales::locales(), 'slug' ) ) . ')';
+		$slug   = '((?:2[0-9]{3}/)?[a-z0-9_-]+)';
+		$status = '(waiting)';
+		$id     = '(\d+)';
+
 		GP::$router->add( '/events?', array( 'Wporg\TranslationEvents\Routes\Event\List_Route', 'handle' ) );
+		GP::$router->add( '/events/trashed?', array( 'Wporg\TranslationEvents\Routes\Event\List_Trashed_Route', 'handle' ) );
 		GP::$router->add( '/events/new', array( 'Wporg\TranslationEvents\Routes\Event\Create_Route', 'handle' ) );
-		GP::$router->add( '/events/edit/(\d+)', array( 'Wporg\TranslationEvents\Routes\Event\Edit_Route', 'handle' ) );
-		GP::$router->add( '/events/attend/(\d+)', array( 'Wporg\TranslationEvents\Routes\User\Attend_Event_Route', 'handle' ), 'post' );
-		GP::$router->add( '/events/host/(\d+)/(\d+)', array( 'Wporg\TranslationEvents\Routes\User\Host_Event_Route', 'handle' ), 'post' );
+		GP::$router->add( "/events/edit/$id", array( 'Wporg\TranslationEvents\Routes\Event\Edit_Route', 'handle' ) );
+		GP::$router->add( "/events/trash/$id", array( 'Wporg\TranslationEvents\Routes\Event\Trash_Route', 'handle' ) );
+		GP::$router->add( "/events/delete/$id", array( 'Wporg\TranslationEvents\Routes\Event\Delete_Route', 'handle' ) );
+		GP::$router->add( "/events/attend/$id", array( 'Wporg\TranslationEvents\Routes\User\Attend_Event_Route', 'handle' ), 'post' );
+		GP::$router->add( "/events/host/$id/$id", array( 'Wporg\TranslationEvents\Routes\User\Host_Event_Route', 'handle' ), 'post' );
 		GP::$router->add( '/events/my-events', array( 'Wporg\TranslationEvents\Routes\User\My_Events_Route', 'handle' ) );
-		GP::$router->add( '/events/([a-z0-9_-]+)', array( 'Wporg\TranslationEvents\Routes\Event\Details_Route', 'handle' ) );
+		GP::$router->add( "/events/$slug/translations/$locale/$status", array( 'Wporg\TranslationEvents\Routes\Event\Translations_Route', 'handle' ) );
+		GP::$router->add( "/events/$slug/translations/$locale", array( 'Wporg\TranslationEvents\Routes\Event\Translations_Route', 'handle' ) );
+		GP::$router->add( "/events/$slug", array( 'Wporg\TranslationEvents\Routes\Event\Details_Route', 'handle' ) );
+		GP::$router->add( "/events/$slug/attendees", array( 'Wporg\TranslationEvents\Routes\Attendee\List_Route', 'handle' ) );
 
 		$stats_listener = new Stats_Listener(
 			self::get_event_repository(),
@@ -112,13 +139,14 @@ class Translation_Events {
 		);
 
 		$args = array(
-			'labels'      => $labels,
-			'public'      => true,
-			'has_archive' => true,
-			'menu_icon'   => 'dashicons-calendar',
-			'supports'    => array( 'title', 'editor', 'thumbnail', 'revisions' ),
-			'rewrite'     => array( 'slug' => 'events' ),
-			'show_ui'     => false,
+			'labels'       => $labels,
+			'public'       => true,
+			'has_archive'  => true,
+			'hierarchical' => true,
+			'menu_icon'    => 'dashicons-calendar',
+			'supports'     => array( 'title', 'editor', 'thumbnail', 'revisions' ),
+			'rewrite'      => array( 'slug' => 'events' ),
+			'show_ui'      => false,
 		);
 
 		register_post_type( self::CPT, $args );
@@ -162,7 +190,6 @@ class Translation_Events {
 				return;
 			}
 		}
-
 		$fields = array( 'event_start', 'event_end' );
 		foreach ( $fields as $field ) {
 			if ( isset( $_POST[ $field ] ) ) {
@@ -218,8 +245,7 @@ class Translation_Events {
 			$attendee            = $attendee_repository->get_attendee( $event_id, $user_id );
 
 			if ( null === $attendee ) {
-				$attendee = new Attendee( $event_id, $user_id );
-				$attendee->mark_as_host();
+				$attendee = new Attendee( $event_id, $user_id, true );
 				$attendee_repository->insert_attendee( $attendee );
 			}
 		}
@@ -236,7 +262,7 @@ class Translation_Events {
 		if ( 'main' !== $location ) {
 			return $items;
 		}
-		$new[ esc_url( gp_url( '/events/' ) ) ] = esc_html__( 'Events', 'gp-translation-events' );
+		$new[ esc_url( Urls::events_home() ) ] = esc_html__( 'Events', 'gp-translation-events' );
 		return array_merge( $items, $new );
 	}
 
@@ -253,6 +279,9 @@ class Translation_Events {
 	 */
 	public function generate_event_slug( array $data, array $postarr ): array {
 		if ( self::CPT === $data['post_type'] ) {
+			if ( isset( $data['post_name'] ) && preg_match( '/^2[0-9]+$/', $data['post_name'] ) ) {
+				return $data;
+			}
 			if ( 'draft' === $data['post_status'] ) {
 				$data['post_name'] = sanitize_title( $data['post_title'] );
 			}
@@ -277,40 +306,11 @@ class Translation_Events {
 	 * @throws Exception
 	 */
 	public function add_active_events_current_user(): void {
-		$attendee_repository      = new Attendee_Repository();
-		$user_attending_event_ids = $attendee_repository->get_events_for_user( get_current_user_id() );
-		if ( empty( $user_attending_event_ids ) ) {
-			return;
-		}
+		$event_repository            = self::get_event_repository();
+		$user_attending_events_query = $event_repository->get_current_events_for_user( get_current_user_id() );
+		$events                      = $user_attending_events_query->events;
 
-		$current_datetime_utc       = ( new DateTime( 'now', new DateTimeZone( 'UTC' ) ) )->format( 'Y-m-d H:i:s' );
-		$user_attending_events_args = array(
-			'post_type'   => self::CPT,
-			'post__in'    => $user_attending_event_ids,
-			'post_status' => 'publish',
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			'meta_query'  => array(
-				array(
-					'key'     => '_event_start',
-					'value'   => $current_datetime_utc,
-					'compare' => '<=',
-					'type'    => 'DATETIME',
-				),
-				array(
-					'key'     => '_event_end',
-					'value'   => $current_datetime_utc,
-					'compare' => '>=',
-					'type'    => 'DATETIME',
-				),
-			),
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_key'    => '_event_start',
-			'orderby'     => 'meta_value',
-			'order'       => 'ASC',
-		);
-
-		$user_attending_events_query = new WP_Query( $user_attending_events_args );
-		$number_of_events            = $user_attending_events_query->post_count;
+		$number_of_events = count( $events );
 		if ( 0 === $number_of_events ) {
 			return;
 		}
@@ -319,27 +319,17 @@ class Translation_Events {
 		/* translators: %d: Number of events */
 		$content .= sprintf( _n( 'Contributing to %d event:', 'Contributing to %d events:', $number_of_events, 'gp-translation-events' ), $number_of_events );
 		$content .= '&nbsp;&nbsp;';
-		if ( $number_of_events > 3 ) {
-			$counter = 0;
-			while ( $user_attending_events_query->have_posts() && $counter < 2 ) {
-				$user_attending_events_query->the_post();
-				$url      = esc_url( gp_url( '/events/' . get_post_field( 'post_name', get_post() ) ) );
-				$content .= '<span class="active-events-before-translation-table"><a href="' . $url . '" target="_blank">' . get_the_title() . '</a></span>';
-				++$counter;
-			}
 
-			$remaining_events = $number_of_events - 2;
-			$url              = esc_url( gp_url( '/events/' ) );
-			/* translators: %d: Number of remaining events */
-			$content .= '<span class="remaining-events"><a href="' . $url . '" target="_blank">' . sprintf( esc_html__( ' and %d more events.', 'gp-translation-events' ), $remaining_events ) . '</a></span>';
-
-		} else {
-			while ( $user_attending_events_query->have_posts() ) {
-				$user_attending_events_query->the_post();
-				$url      = esc_url( gp_url( '/events/' . get_post_field( 'post_name', get_post() ) ) );
-				$content .= '<span class="active-events-before-translation-table"><a href="' . $url . '" target="_blank">' . get_the_title() . '</a></span>';
-			}
+		foreach ( array_splice( $events, 0, 2 ) as $event ) {
+			$content .= '<span class="active-events-before-translation-table"><a href="' . Urls::event_details( $event->id() ) . '" target="_blank">' . esc_html( $event->title() ) . '</a></span>';
 		}
+
+		if ( $number_of_events > 3 ) {
+			$remaining_events = $number_of_events - 2;
+			/* translators: %d: Number of remaining events */
+			$content .= '<span class="remaining-events"><a href="' . esc_url( Urls::events_home() ) . '" target="_blank">' . sprintf( esc_html__( ' and %d more events.', 'gp-translation-events' ), $remaining_events ) . '</a></span>';
+		}
+
 		$content .= '</div>';
 
 		echo wp_kses(
@@ -358,6 +348,36 @@ class Translation_Events {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Send notifications for the events.
+	 */
+	public function send_notifications() {
+		new Notifications_Send( self::get_event_repository(), self::get_attendee_repository() );
+	}
+
+	/**
+	 * Add the event meta keys to the list of meta keys to keep in post revisions.
+	 *
+	 * @param array $keys The list of meta keys to keep in post revisions.
+	 *
+	 * @return array The modified list of meta keys to keep in post revisions.
+	 */
+	public function wp_post_revision_meta_keys( array $keys ): array {
+		$meta_keys_to_keep = array( '_event_start', '_event_end', '_event_timezone', '_hosts' );
+		return array_merge( $keys, $meta_keys_to_keep );
+	}
+
+	public function pre_wp_unique_post_slug( $override_slug, string $slug, int $post_id, string $post_status, string $post_type, int $post_parent ) {
+		if ( self::CPT !== $post_type || $post_parent ) {
+			return $override_slug;
+		}
+		// Normally the slug is not allowed to be a year, this overrides it since we have a CPT and translate.wordpress.org doesn't have blog posts.
+		if ( preg_match( '/^2[0-9]{3}$/', $slug ) ) {
+			return $slug;
+		}
+		return $override_slug;
 	}
 }
 Translation_Events::get_instance();

@@ -31,6 +31,11 @@ class Event_Repository_Cached extends Event_Repository {
 		return $event_id_or_error;
 	}
 
+	public function trash_event( Event $event ) {
+		parent::trash_event( $event );
+		$this->invalidate_cache();
+	}
+
 	public function delete_event( Event $event ) {
 		parent::delete_event( $event );
 		$this->invalidate_cache();

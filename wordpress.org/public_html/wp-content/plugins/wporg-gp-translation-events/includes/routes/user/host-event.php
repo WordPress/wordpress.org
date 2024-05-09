@@ -7,6 +7,7 @@ use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
+use Wporg\TranslationEvents\Urls;
 
 /**
  * Toggle whether the current user is hosting an event.
@@ -36,12 +37,11 @@ class Host_Event_Route extends Route {
 	public function handle( int $event_id, int $user_id ): void {
 		$current_user = wp_get_current_user();
 		if ( ! $current_user->exists() ) {
-			$this->die_with_error( esc_html__( "Only logged-in users can manage event's hosts.", 'gp-translation-events' ), 403 );
+			$this->die_with_error( esc_html__( "Only logged-in users can manage the event's hosts.", 'gp-translation-events' ), 403 );
 		}
 
-		$current_user_attendee = $this->attendee_repository->get_attendee( $event_id, $current_user->ID );
-		if ( ! current_user_can( 'manage_options' ) && ! $current_user_attendee->is_host() ) {
-			$this->die_with_error( esc_html__( "This user does not have permissions to manage event's hosts.", 'gp-translation-events' ), 403 );
+		if ( ! current_user_can( 'edit_translation_event', $event_id ) ) {
+			$this->die_with_error( esc_html__( "You do not have permissions to manage the event's hosts.", 'gp-translation-events' ), 403 );
 		}
 
 		$event = $this->event_repository->get_event( $event_id );
@@ -59,9 +59,10 @@ class Host_Event_Route extends Route {
 			}
 
 			$this->attendee_repository->update_attendee( $affected_attendee );
+			$this->event_repository->update_event( $event );
 		}
 
-		wp_safe_redirect( gp_url( "/events/{$event->slug()}" ) );
+		wp_safe_redirect( Urls::event_attendees( $event->id() ) );
 		exit;
 	}
 }

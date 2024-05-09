@@ -29,18 +29,13 @@ if ( ! empty( $current_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Current events', 'gp-translation-events' ); ?></h2>
 	<ul class="event-list">
-		<?php
-		foreach ( $current_events_query->events as $event ) :
-			$event_url = gp_url( wp_make_link_relative( get_the_permalink( $event->id() ) ) );
-			?>
+		<?php foreach ( $current_events_query->events as $event ) : ?>
 			<li class="event-list-item">
-				<a href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+				<a href="<?php echo esc_url( Urls::event_details( $event->id() ) ); ?>"><?php echo esc_html( $event->title() ); ?></a>
 				<span class="event-list-date">ends <?php $event->end()->print_relative_time_html(); ?></time></span>
 				<?php echo esc_html( get_the_excerpt( $event->id() ) ); ?>
 			</li>
-			<?php
-		endforeach;
-		?>
+		<?php endforeach; ?>
 	</ul>
 
 	<?php
@@ -63,18 +58,13 @@ if ( ! empty( $upcoming_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Upcoming events', 'gp-translation-events' ); ?></h2>
 	<ul class="event-list">
-		<?php
-		foreach ( $upcoming_events_query->events as $event ) :
-			$event_url = gp_url( wp_make_link_relative( get_the_permalink( $event->id() ) ) );
-			?>
+		<?php foreach ( $upcoming_events_query->events as $event ) : ?>
 			<li class="event-list-item">
-				<a href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+				<a href="<?php echo esc_url( Urls::event_details( $event->id() ) ); ?>"><?php echo esc_html( $event->title() ); ?></a>
 				<span class="event-list-date">starts <?php $event->start()->print_relative_time_html(); ?></span>
 				<?php echo esc_html( get_the_excerpt( $event->id() ) ); ?>
 			</li>
-			<?php
-		endforeach;
-		?>
+		<?php endforeach; ?>
 	</ul>
 
 	<?php
@@ -96,18 +86,13 @@ if ( ! empty( $past_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Past events', 'gp-translation-events' ); ?></h2>
 	<ul class="event-list">
-		<?php
-		foreach ( $past_events_query->events as $event ) :
-			$event_url = gp_url( wp_make_link_relative( get_the_permalink( $event->id() ) ) );
-			?>
+		<?php foreach ( $past_events_query->events as $event ) : ?>
 			<li class="event-list-item">
-				<a href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+				<a href="<?php echo esc_url( Urls::event_details( $event->id() ) ); ?>"><?php echo esc_html( $event->title() ); ?></a>
 				<span class="event-list-date">ended <?php $event->end()->print_relative_time_html( 'F j, Y H:i T' ); ?></span>
 				<?php esc_html( get_the_excerpt( $event->id() ) ); ?>
 			</li>
-			<?php
-		endforeach;
-		?>
+		<?php endforeach; ?>
 	</ul>
 
 	<?php
@@ -138,21 +123,16 @@ endif;
 			<p>You don't have any events to attend.</p>
 		<?php else : ?>
 			<ul class="event-attending-list">
-				<?php
-				foreach ( $user_attending_events_query->events as $event ) :
-					$event_url = gp_url( wp_make_link_relative( get_the_permalink( $event->id() ) ) );
-					?>
+				<?php foreach ( $user_attending_events_query->events as $event ) : ?>
 					<li class="event-list-item">
-						<a href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+						<a href="<?php echo esc_url( Urls::event_details( $event->id() ) ); ?>"><?php echo esc_html( $event->title() ); ?></a>
 						<?php if ( $event->start() === $event->end() ) : ?>
 							<span class="event-list-date events-i-am-attending"><?php $event->start()->print_time_html( 'F j, Y H:i T' ); ?></span>
 						<?php else : ?>
 							<span class="event-list-date events-i-am-attending"><?php $event->start()->print_time_html( 'F j, Y H:i T' ); ?> - <?php $event->end()->print_time_html( 'F j, Y H:i T' ); ?></span>
 						<?php endif; ?>
 					</li>
-					<?php
-				endforeach;
-				?>
+				<?php endforeach; ?>
 			</ul>
 			<?php
 				echo wp_kses_post(

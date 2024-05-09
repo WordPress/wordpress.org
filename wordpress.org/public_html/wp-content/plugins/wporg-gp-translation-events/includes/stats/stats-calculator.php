@@ -3,23 +3,20 @@
 namespace Wporg\TranslationEvents\Stats;
 
 use Exception;
-use WP_Post;
-use WP_User;
-use GP;
 use GP_Locale;
 use GP_Locales;
-use DateTimeImmutable;
-use DateTimeZone;
 
 class Stats_Row {
 	public int $created;
 	public int $reviewed;
+	public int $waiting;
 	public int $users;
 	public ?GP_Locale $language = null;
 
-	public function __construct( $created, $reviewed, $users, ?GP_Locale $language = null ) {
+	public function __construct( $created, $reviewed, $waiting, $users, ?GP_Locale $language = null ) {
 		$this->created  = $created;
 		$this->reviewed = $reviewed;
+		$this->waiting  = $waiting;
 		$this->users    = $users;
 		$this->language = $language;
 	}
@@ -103,8 +100,10 @@ class Stats_Calculator {
 				select locale,
 					sum(action = 'create') as created,
 					count(*) as total,
-					count(distinct user_id) as users
-				from {$gp_table_prefix}event_actions
+					sum(t.status = 'waiting') as waiting,
+					count(distinct ea.user_id) as users
+				from {$gp_table_prefix}event_actions ea
+				left join {$gp_table_prefix}translations t ON ea.original_id = t.original_id and ea.user_id = t.user_id
 				where event_id = %d
 				group by locale with rollup
 			",
@@ -130,9 +129,15 @@ class Stats_Calculator {
 				$lang = null;
 			}
 
+			if ( is_null( $row->waiting ) ) {
+				// The corresponding translations are missing. Could be a unit test or data corruption.
+				$row->waiting = 0;
+			}
+
 			$stats_row = new Stats_Row(
 				$row->created,
 				$row->total - $row->created,
+				$row->waiting,
 				$row->users,
 				$lang
 			);
@@ -145,143 +150,6 @@ class Stats_Calculator {
 		}
 
 		return $stats;
-	}
-
-	/**
-	 * Get contributors for an event.
-	 */
-	public function get_contributors( int $event_id ): array {
-		global $wpdb, $gp_table_prefix;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs thinks we're doing a schema change but we aren't.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-				select user_id, group_concat( distinct locale ) as locales
-				from {$gp_table_prefix}event_actions
-				where event_id = %d
-				group by user_id
-			",
-				array(
-					$event_id,
-				)
-			)
-		);
-		// phpcs:enable
-
-		$users = array();
-		foreach ( $rows as $row ) {
-			$user          = new WP_User( $row->user_id );
-			$user->locales = explode( ',', $row->locales );
-			$users[]       = $user;
-		}
-
-		uasort(
-			$users,
-			function ( $a, $b ) {
-				return strcasecmp( $a->display_name, $b->display_name );
-			}
-		);
-
-		return $users;
-	}
-
-	/**
-	 * Get attendees without contributions for an event.
-	 */
-	public function get_attendees_not_contributing( int $event_id ): array {
-		global $wpdb, $gp_table_prefix;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		$all_attendees_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"
-				select distinct user_id
-				from {$gp_table_prefix}event_attendees
-				where event_id = %d
-			",
-				array(
-					$event_id,
-				)
-			),
-		);
-
-		$contributing_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"
-				select distinct user_id
-				from {$gp_table_prefix}event_actions
-				where event_id = %d
-			",
-				array(
-					$event_id,
-				)
-			)
-		);
-
-		$attendees_not_contributing_ids = array_diff( $all_attendees_ids, $contributing_ids );
-
-		$attendees_not_contributing = array();
-		foreach ( $attendees_not_contributing_ids as $user_id ) {
-			$attendees_not_contributing[] = new WP_User( $user_id );
-		}
-
-		return $attendees_not_contributing;
-	}
-
-	/**
-	 * Get projects for an event.
-	 */
-	public function get_projects( int $event_id ): array {
-		global $wpdb, $gp_table_prefix;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs thinks we're doing a schema change but we aren't.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-				select
-					o.project_id as project,
-					group_concat( distinct e.locale ) as locales,
-					sum(action = 'create') as created,
-					count(*) as total,
-					count(distinct user_id) as users
-				from {$gp_table_prefix}event_actions e, {$gp_table_prefix}originals o
-				where e.event_id = %d and e.original_id = o.id
-				group by o.project_id
-			",
-				array(
-					$event_id,
-				)
-			)
-		);
-		// phpcs:enable
-
-		$projects = array();
-		foreach ( $rows as $row ) {
-			$row->project      = GP::$project->get( $row->project );
-			$project_name      = $row->project->name;
-			$parent_project_id = $row->project->parent_project_id;
-			while ( $parent_project_id ) {
-				$parent_project    = GP::$project->get( $parent_project_id );
-				$parent_project_id = $parent_project->parent_project_id;
-				$project_name      = substr( htmlspecialchars_decode( $parent_project->name ), 0, 35 ) . ' - ' . $project_name;
-			}
-			$projects[ $project_name ] = $row;
-		}
-
-		ksort( $projects );
-
-		return $projects;
 	}
 
 	/**
@@ -299,39 +167,5 @@ class Stats_Calculator {
 		}
 
 		return ! empty( $stats->rows() );
-	}
-
-	/**
-	 * Check if a user is a new translation contributor. A new contributor is a user who has made 10 or fewer translations before event start time.
-	 *
-	 * @param Event_Start_Date $event_start The event start date.
-	 * @param int              $user_id      The user ID.
-	 *
-	 * @return bool True if the user is a new translation contributor, false otherwise.
-	 */
-	public function is_new_translation_contributor( $event_start, $user_id ) {
-		global $wpdb, $gp_table_prefix;
-		$new_contributor_max_translation_count = 10;
-		$event_start_date_time                 = $event_start->__toString();
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange
-		$user_translations_count = $wpdb->get_var(
-			$wpdb->prepare(
-				"
-			select count(*) from {$gp_table_prefix}translations where user_id = %d and date_added < %s
-		",
-				array(
-					$user_id,
-					$event_start_date_time,
-				)
-			)
-		);
-
-		if ( get_userdata( $user_id ) && ! $user_translations_count ) {
-			return true;
-		}
-		return $user_translations_count <= $new_contributor_max_translation_count;
 	}
 }

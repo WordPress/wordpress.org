@@ -8,6 +8,7 @@ use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Stats\Stats_Importer;
 use Wporg\TranslationEvents\Translation_Events;
+use Wporg\TranslationEvents\Urls;
 
 /**
  * Toggle whether the current user is attending an event.
@@ -47,6 +48,9 @@ class Attend_Event_Route extends Route {
 
 		$attendee = $this->attendee_repository->get_attendee( $event->id(), $user_id );
 		if ( $attendee instanceof Attendee ) {
+			if ( $attendee->is_contributor() ) {
+				$this->die_with_error( esc_html__( 'Contributors cannot un-attend the event', 'gp-translation-events' ), 403 );
+			}
 			$this->attendee_repository->remove_attendee( $event->id(), $user_id );
 		} else {
 			$attendee = new Attendee( $event->id(), $user_id );
@@ -59,7 +63,7 @@ class Attend_Event_Route extends Route {
 			}
 		}
 
-		wp_safe_redirect( gp_url( "/events/{$event->slug()}" ) );
+		wp_safe_redirect( Urls::event_details( $event->id() ) );
 		exit;
 	}
 }

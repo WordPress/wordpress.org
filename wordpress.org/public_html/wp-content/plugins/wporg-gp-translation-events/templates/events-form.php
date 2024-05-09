@@ -28,21 +28,24 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 <div class="event-page-wrapper">
 <form class="translation-event-form" action="" method="post">
 	<?php wp_nonce_field( '_event_nonce', '_event_nonce' ); ?>
+	<?php if ( ! $event_id ) : ?>
+		<details id="quick-add"><summary><?php esc_html_e( 'Upcoming WordCamps', 'gp-translation-events' ); ?></summary><div class="loading"></div></details>
+	<?php endif; ?>
 	<input type="hidden" name="action" value="submit_event_ajax">
 	<input type="hidden" id="form-name" name="form_name" value="<?php echo esc_attr( $event_form_name ); ?>">
 	<input type="hidden" id="event-id" name="event_id" value="<?php echo esc_attr( $event_id ); ?>">
 	<input type="hidden" id="event-form-action" name="event_form_action">
 	<div>
-		<label for="event-title">Event Title</label>
-		<input type="text" id="event-title" name="event_title" value="<?php echo esc_html( $event_title ); ?>" required>
+		<label for="event-title"><?php esc_html_e( 'Event Title', 'gp-translation-events' ); ?></label>
+		<input type="text" id="event-title" name="event_title" value="<?php echo esc_html( $event_title ); ?>" required size="42">
 	</div>
 	<div id="event-url" class="<?php echo esc_attr( $css_show_url ); ?>">
-		<label for="event-permalink">Event URL</label>
+		<label for="event-permalink"><?php esc_html_e( 'Event URL', 'gp-translation-events' ); ?></label>
 		<a id="event-permalink" class="event-permalink" href="<?php echo esc_url( $event_url ); ?>" target="_blank"><?php echo esc_url( $event_url ); ?></a>
 	</div>
 	<div>
-		<label for="event-description">Event Description</label>
-		<textarea id="event-description" name="event_description" rows="4" required><?php echo esc_html( $event_description ); ?></textarea>
+		<label for="event-description"><?php esc_html_e( 'Event Description', 'gp-translation-events' ); ?></label>
+		<textarea id="event-description" name="event_description" rows="4" cols="40" required><?php echo esc_html( $event_description ); ?></textarea>
 		<?php
 		echo wp_kses(
 			Event_Text_Snippet::get_snippet_links(),
@@ -58,15 +61,15 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		);
 		?>
 			<div>
-		<label for="event-start">Start Date</label>
+		<label for="event-start"><?php esc_html_e( 'Start Date', 'gp-translation-events' ); ?></label>
 		<input type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event_start->format( 'Y-m-d H:i' ) ); ?>" required>
 	</div>
 	<div>
-		<label for="event-end">End Date</label>
+		<label for="event-end"><?php esc_html_e( 'End Date', 'gp-translation-events' ); ?></label>
 		<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event_end->format( 'Y-m-d H:i' ) ); ?>" required>
 	</div>
 	<div>
-		<label for="event-timezone">Event Timezone</label>
+		<label for="event-timezone"><?php esc_html_e( 'Event Timezone', 'gp-translation-events' ); ?></label>
 		<select id="event-timezone" name="event_timezone" required>
 			<?php
 			echo wp_kses(
@@ -95,8 +98,8 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		<button class="button is-primary save-draft submit-event" type="submit" data-event-status="draft">Save Draft</button>
 		<button class="button is-primary submit-event" type="submit"  data-event-status="publish">Publish Event</button>
 	<?php endif; ?>
-	<?php if ( isset( $create_delete_button ) && $create_delete_button ) : ?>
-		<button id="delete-button" class="button is-destructive delete-event" type="submit" name="submit" value="Delete" style="display: <?php echo esc_attr( $visibility_delete_button ); ?>">Delete Event</button>
+	<?php if ( isset( $create_trash_button ) && $create_trash_button ) : ?>
+		<button id="trash-button" class="button is-destructive trash-event" type="submit" name="submit" value="Delete" style="display: <?php echo esc_attr( $visibility_trash_button ); ?>">Delete Event</button>
 	<?php endif; ?>
 	</div>
 	<div class="clear"></div>
@@ -126,5 +129,10 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 	</div>
 </form>
 </div>
+<?php if ( $event_id ) : ?>
+	<div class="event-edit-right">
+		<a class="manage-attendees-btn button is-primary" href="<?php echo esc_url( Urls::event_attendees( $event_id ) ); ?>"><?php esc_html_e( 'Manage Attendees', 'gp-translation-events' ); ?></a>
+	</div>
+<?php endif; ?>
 <div class="clear"></div>
 <?php gp_tmpl_footer(); ?>

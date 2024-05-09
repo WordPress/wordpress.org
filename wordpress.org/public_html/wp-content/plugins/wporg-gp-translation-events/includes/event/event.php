@@ -87,6 +87,10 @@ class Event {
 		return $this->end;
 	}
 
+	public function is_trashed(): bool {
+		return 'trash' === $this->status;
+	}
+
 	public function is_active(): bool {
 		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 		return $now >= $this->start->utc() && $now < $this->end->utc();
@@ -141,7 +145,7 @@ class Event {
 	 * @throws InvalidStatus
 	 */
 	public function set_status( string $status ): void {
-		if ( ! in_array( $status, array( 'draft', 'publish' ), true ) ) {
+		if ( ! in_array( $status, array( 'draft', 'publish', 'trash' ), true ) ) {
 			throw new InvalidStatus();
 		}
 		$this->status = $status;

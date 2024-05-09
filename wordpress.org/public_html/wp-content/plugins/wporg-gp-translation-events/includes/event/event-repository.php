@@ -20,7 +20,33 @@ class Event_Repository implements Event_Repository_Interface {
 		$this->attendee_repository = $attendee_repository;
 	}
 
+	/**
+	 * Get or create the parent post for the year.
+	 *
+	 * @return int|WP_Error
+	 */
+	private function get_year_post_id( string $year ) {
+		$year_post = get_page_by_path( $year, OBJECT, self::POST_TYPE );
+		if ( ! $year_post ) {
+			return wp_insert_post(
+				array(
+					'post_type'    => self::POST_TYPE,
+					'post_title'   => $year,
+					'post_name'    => $year,
+					'post_status'  => 'publish',
+					'post_content' => '',
+				)
+			);
+		}
+		return $year_post->ID;
+	}
+
 	public function insert_event( Event $event ) {
+		$post_parent = $this->get_year_post_id( $event->start()->utc()->format( 'Y' ) );
+		if ( is_wp_error( $post_parent ) ) {
+			return $post_parent;
+		}
+
 		$event_id_or_error = wp_insert_post(
 			array(
 				'post_type'    => self::POST_TYPE,
@@ -28,6 +54,7 @@ class Event_Repository implements Event_Repository_Interface {
 				'post_title'   => $event->title(),
 				'post_content' => $event->description(),
 				'post_status'  => $event->status(),
+				'post_parent'  => $post_parent,
 			)
 		);
 		if ( $event_id_or_error instanceof WP_Error ) {
@@ -40,6 +67,10 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	public function update_event( Event $event ) {
+		$post_parent = $this->get_year_post_id( $event->start()->utc()->format( 'Y' ) );
+		if ( is_wp_error( $post_parent ) ) {
+			return $post_parent;
+		}
 		$event_id_or_error = wp_update_post(
 			array(
 				'ID'           => $event->id(),
@@ -47,6 +78,7 @@ class Event_Repository implements Event_Repository_Interface {
 				'post_title'   => $event->title(),
 				'post_content' => $event->description(),
 				'post_status'  => $event->status(),
+				'post_parent'  => $post_parent,
 			)
 		);
 		if ( $event_id_or_error instanceof WP_Error ) {
@@ -57,11 +89,37 @@ class Event_Repository implements Event_Repository_Interface {
 		return $event->id();
 	}
 
-	public function delete_event( Event $event ) {
+	public function trash_event( Event $event ) {
 		$result = wp_trash_post( $event->id() );
 		if ( ! $result ) {
 			return false;
 		}
+		return $event;
+	}
+
+	public function delete_event( Event $event ) {
+		$result = wp_delete_post( $event->id(), true );
+		if ( ! $result ) {
+			return false;
+		}
+
+		// Delete attendees.
+		$attendees = $this->attendee_repository->get_attendees( $event->id() );
+		foreach ( $attendees as $attendee ) {
+			$this->attendee_repository->remove_attendee( $event->id(), $attendee->user_id() );
+		}
+
+		// Delete stats.
+		global $wpdb, $gp_table_prefix;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete(
+			"{$gp_table_prefix}event_actions",
+			array( 'event_id' => $event->id() ),
+			array( '%d' ),
+		);
+		// phpcs:enable
+
 		return $event;
 	}
 
@@ -148,6 +206,48 @@ class Event_Repository implements Event_Repository_Interface {
 				'orderby'    => array( 'meta_value', 'ID' ),
 				'order'      => 'DESC',
 			)
+		);
+		// phpcs:enable
+	}
+
+	public function get_trashed_events( int $page = - 1, int $page_size = - 1 ): Events_Query_Result {
+		return $this->execute_events_query(
+			$page,
+			$page_size,
+			array(
+				'post_status' => 'trash',
+			)
+		);
+	}
+
+	public function get_current_events_for_user( int $user_id, int $page = -1, int $page_size = -1 ): Events_Query_Result {
+		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		return $this->execute_events_query(
+			$page,
+			$page_size,
+			array(
+				'meta_query' => array(
+					array(
+						'key'     => '_event_start',
+						'value'   => $now->format( 'Y-m-d H:i:s' ),
+						'compare' => '<=',
+						'type'    => 'DATETIME',
+					),
+					array(
+						'key'     => '_event_end',
+						'value'   => $now->format( 'Y-m-d H:i:s' ),
+						'compare' => '>=',
+						'type'    => 'DATETIME',
+					),
+				),
+				'meta_key'   => '_event_start',
+				'orderby'    => 'meta_value',
+				'order'      => 'ASC',
+			),
+			$this->attendee_repository->get_events_for_user( $user_id ),
 		);
 		// phpcs:enable
 	}
@@ -413,8 +513,17 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	private function update_event_meta( Event $event ) {
+		$hosts     = $this->attendee_repository->get_hosts( $event->id() );
+		$hosts_ids = array_map(
+			function ( $host ) {
+				return $host->user_id();
+			},
+			$hosts
+		);
+		$hosts_ids = implode( ', ', $hosts_ids );
 		update_post_meta( $event->id(), '_event_start', $event->start()->utc()->format( 'Y-m-d H:i:s' ) );
 		update_post_meta( $event->id(), '_event_end', $event->end()->utc()->format( 'Y-m-d H:i:s' ) );
 		update_post_meta( $event->id(), '_event_timezone', $event->timezone()->getName() );
+		update_post_meta( $event->id(), '_hosts', $hosts_ids );
 	}
 }

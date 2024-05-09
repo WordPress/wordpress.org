@@ -25,17 +25,13 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		<ul>
 		<?php
 		foreach ( $events_i_host_query->events as $event ) :
-			list( $permalink, $post_name ) = get_sample_permalink( $event->id() );
-			$permalink                     = str_replace( '%pagename%', $post_name, $permalink );
-			$event_url                     = gp_url( wp_make_link_relative( $permalink ) );
-			$event_edit_url                = gp_url( 'events/edit/' . $event->id() );
-			$stats_calculator              = new Stats_Calculator();
-			$has_stats                     = $stats_calculator->event_has_stats( $event->id() );
+			$stats_calculator = new Stats_Calculator();
+			$has_stats        = $stats_calculator->event_has_stats( $event->id() );
 			?>
 			<li class="event-list-item">
-				<a class="event-link-<?php echo esc_attr( $event->status() ); ?>" href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+				<a class="event-link-<?php echo esc_attr( $event->status() ); ?>" href="<?php echo esc_url( Urls::event_details( $event->id() ) ); ?>"><?php echo esc_html( $event->title() ); ?></a>
 				<?php if ( ! $event->end()->is_in_the_past() && ! $has_stats ) : ?>
-					<a href="<?php echo esc_url( $event_edit_url ); ?>" class="button is-small action edit">Edit</a>
+					<a href="<?php echo esc_url( Urls::event_edit( $event->id() ) ); ?>" class="button is-small action edit">Edit</a>
 				<?php endif; ?>
 				<?php if ( 'draft' === $event->status() ) : ?>
 					<span class="event-label-<?php echo esc_attr( $event->status() ); ?>"><?php echo esc_html( $event->status() ); ?></span>
@@ -72,17 +68,13 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		<ul>
 			<?php
 			foreach ( $events_i_created_query->events as $event ) :
-				list( $permalink, $post_name ) = get_sample_permalink( $event->id() );
-				$permalink                     = str_replace( '%pagename%', $post_name, $permalink );
-				$event_url                     = gp_url( wp_make_link_relative( $permalink ) );
-				$event_edit_url                = gp_url( 'events/edit/' . $event->id() );
-				$stats_calculator              = new Stats_Calculator();
-				$has_stats                     = $stats_calculator->event_has_stats( $event->id() );
+				$stats_calculator = new Stats_Calculator();
+				$has_stats        = $stats_calculator->event_has_stats( $event->id() );
 				?>
 				<li class="event-list-item">
-					<a class="event-link-<?php echo esc_attr( $event->status() ); ?>" href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+					<a class="event-link-<?php echo esc_attr( $event->status() ); ?>" href="<?php echo esc_url( Urls::event_details( $event->id() ) ); ?>"><?php echo esc_html( $event->title() ); ?></a>
 					<?php if ( ! $event->end()->is_in_the_past() && ! $has_stats ) : ?>
-						<a href="<?php echo esc_url( $event_edit_url ); ?>" class="button is-small action edit">Edit</a>
+						<a href="<?php echo esc_url( Urls::event_edit( $event->id() ) ); ?>" class="button is-small action edit">Edit</a>
 					<?php endif; ?>
 					<?php if ( 'draft' === $event->status() ) : ?>
 						<span class="event-label-<?php echo esc_attr( $event->status() ); ?>"><?php echo esc_html( $event->status() ); ?></span>
@@ -117,14 +109,9 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 	<h2><?php esc_html_e( 'Events I attended', 'gp-translation-events' ); ?> </h2>
 	<?php if ( ! empty( $events_i_attended_query->events ) ) : ?>
 		<ul>
-		<?php
-		foreach ( $events_i_attended_query->events as $event ) :
-			list( $permalink, $post_name ) = get_sample_permalink( $event->id() );
-			$permalink                     = str_replace( '%pagename%', $post_name, $permalink );
-			$event_url                     = gp_url( wp_make_link_relative( $permalink ) );
-			?>
+		<?php foreach ( $events_i_attended_query->events as $event ) : ?>
 			<li class="event-list-item">
-				<a class="event-link-<?php echo esc_attr( $event->status() ); ?>" href="<?php echo esc_url( $event_url ); ?>"><?php echo esc_html( $event->title() ); ?></a>
+				<a class="event-link-<?php echo esc_attr( $event->status() ); ?>" href="<?php echo esc_url( Urls::event_details( $event->id() ) ); ?>"><?php echo esc_html( $event->title() ); ?></a>
 				<?php if ( $event->start() === $event->end() ) : ?>
 					<span class="event-list-date events-i-am-attending"><?php $event->start()->print_time_html(); ?></span>
 				<?php else : ?>
