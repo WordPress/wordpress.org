@@ -5,6 +5,11 @@ echo do_blocks( <<<BLOCKS
 	<!-- wp:wporg/filter-bar /-->
 	<!-- wp:wporg/category-navigation /-->
 	<!-- wp:query-title {"type":"search","fontFamily":"inter","className":"section-heading"} /-->
+	<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"className":"wporg-query-filters","layout":{"type":"flex","flexWrap":"nowrap"}} -->
+	<div class="wp-block-group wporg-query-filters">
+		<!-- wp:wporg/query-filter {"key":"sort","multiple":false} /-->
+	</div>
+	<!-- /wp:group -->
 	<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 	<div class="wp-block-query plugin-cards">
 			<!-- wp:post-template {"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"48%"}} -->
