@@ -119,6 +119,7 @@
 				background: white;
 				text-decoration: none;
 				color: var(--wp--preset--color--charcoal-1);
+				font-size: var(--wp--preset--font-size--normal);
 
 				&.active, &:hover {
 					background: var(--wp--preset--color--light-grey-2) !important;
@@ -280,28 +281,21 @@
 		flex: 0 0 auto;
 		font-size: 0.9rem;
 		align-self: flex-end;
-		height: 2rem;
 
-		a::before {
-			content: '\f125';
+		a {
 			display: inline-block;
-			font-family: dashicons;
-			margin-right: 0.4em;
-			vertical-align: top;
-			font-size: 1.2em;
-			max-height: 1em;
-		}
-
-		@media screen and (max-width: 737px) {
-			padding-right: 20px;
+			padding: 0.64rem 0 0.64rem 1.25rem;
+			font-size: var(--wp--preset--font-size--normal);
 		}
 
 		@media screen and (max-width:38em) {
 			border-bottom: 0;
 			display: block;
-			margin-left: 20px;
-			margin-top: 1.5rem;
 			width: 100%;
+
+			a {
+				padding-right: 1.25rem;
+			}
 		}
 	}
 
