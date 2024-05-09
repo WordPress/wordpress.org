@@ -315,6 +315,7 @@ input[type="submit"] {
 
 #secondary-content a {
 	overflow-wrap: anywhere;
+	text-decoration: underline;
 }
 
 #secondary-content .navigation-main {
