@@ -417,6 +417,12 @@ class Plugin_Search {
 			$query->max_num_pages = 50;
 		}
 
+		// Set the number of found plugins, ignoring pagination.
+		$es_result = \Automattic\Jetpack\Search\Classic_Search::instance()->get_last_query_info();
+		if ( $es_result && ! empty( $es_result['response']['results']['total'] ) ) {
+			$query->found_posts = $es_result['response']['results']['total'];
+		}
+
 		return $posts;
 	}
 
