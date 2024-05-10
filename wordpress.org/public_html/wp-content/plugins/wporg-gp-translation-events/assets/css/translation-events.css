@@ -52,10 +52,6 @@
 }
 
 .event-details-stats table {
-	margin: 1rem;
-}
-
-.event-details-stats table {
 	width: 100%;
 	table-layout: fixed;
 }
@@ -64,6 +60,7 @@
 .event-details-stats table td {
 	padding: 1em;
 	text-align: center;
+	vertical-align: middle;
 }
 
 .event-details-stats table td:first-child {
@@ -244,6 +241,7 @@ span.active-events-before-translation-table a {
 
 .event-page-wrapper {
 	margin: 0 auto;
+	padding: 1em 0;
 	width: 80%;
 }
 
@@ -256,7 +254,6 @@ input[type="submit"].remove-as-host,
 input[type="submit"].convert-to-host {
 	text-align: center;
 	display: inline;
-	margin-top: 1em;
 	font-weight: bold;
 }
 
@@ -384,7 +381,7 @@ ul#translation-links li {
 }
 
 ul.event-attendees-filter {
-	padding-left: 1rem;
+	margin-left: 0;
 }
 
 ul.event-attendees-filter li {
@@ -424,11 +421,25 @@ a.active-filter {
 }
 
 #quick-add {
+	margin-top: -1em;
 	padding: 0 .5em;
 	border-left: #d9d8d8 thin solid;
 	border-bottom: #d9d8d8 thin solid;
 	max-height: 8em;
 	overflow: auto;
+}
+
+a.remove-attendee.button {
+	background-color: var(--gp-color-btn-danger-bg);
+	color: var(--gp-color-btn-danger-text);
+	border-color: var(----gp-color-btn-danger-border);
+	margin-left: .1em;
+}
+
+a.remove-attendee.button:hover {
+	background-color: var(--gp-color-btn-danger-hover-bg);
+	color: var(--gp-color-btn-danger-hover-text);
+	border-color: var(----gp-color-btn-danger-hover-border);
 }
 
 /* show the event-details-right below instead of on the right on mobile */

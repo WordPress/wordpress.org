@@ -112,6 +112,7 @@ class Translation_Events {
 		GP::$router->add( "/events/$slug/translations/$locale", array( 'Wporg\TranslationEvents\Routes\Event\Translations_Route', 'handle' ) );
 		GP::$router->add( "/events/$slug", array( 'Wporg\TranslationEvents\Routes\Event\Details_Route', 'handle' ) );
 		GP::$router->add( "/events/$slug/attendees", array( 'Wporg\TranslationEvents\Routes\Attendee\List_Route', 'handle' ) );
+		GP::$router->add( "/events/$id/attendees/remove/$id", array( 'Wporg\TranslationEvents\Routes\Attendee\Remove_Attendee_Route', 'handle' ) );
 
 		$stats_listener = new Stats_Listener(
 			self::get_event_repository(),

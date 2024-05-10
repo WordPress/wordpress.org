@@ -130,7 +130,10 @@ class Event_Repository implements Event_Repository_Interface {
 		}
 
 		try {
-			$meta  = $this->get_event_meta( $id );
+			$meta = $this->get_event_meta( $id );
+			if ( ! $meta ) {
+				return null;
+			}
 			$event = new Event(
 				intval( $post->post_author ),
 				$meta['start'],
@@ -501,9 +504,13 @@ class Event_Repository implements Event_Repository_Interface {
 	/**
 	 * @throws Exception
 	 */
-	private function get_event_meta( int $event_id ): array {
+	private function get_event_meta( int $event_id ): ?array {
 		$meta = get_post_meta( $event_id );
 		$utc  = new DateTimeZone( 'UTC' );
+
+		if ( ! isset( $meta['_event_start'][0], $meta['_event_end'][0], $meta['_event_timezone'][0] ) ) {
+			return null;
+		}
 
 		return array(
 			'start'    => new Event_Start_Date( $meta['_event_start'][0], $utc ),

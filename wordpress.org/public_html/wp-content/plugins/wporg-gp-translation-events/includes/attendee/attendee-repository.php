@@ -66,6 +66,19 @@ class Attendee_Repository {
 				'%d',
 			),
 		);
+
+		$wpdb->delete(
+			"{$gp_table_prefix}event_actions",
+			array(
+				'event_id' => $event_id,
+				'user_id'  => $user_id,
+			),
+			array(
+				'%d',
+				'%d',
+			),
+		);
+
 		// phpcs:enable
 	}
 

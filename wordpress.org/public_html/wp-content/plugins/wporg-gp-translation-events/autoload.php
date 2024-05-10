@@ -33,3 +33,5 @@ require_once __DIR__ . '/includes/stats/stats-listener.php';
 require_once __DIR__ . '/includes/project/project-repository.php';
 require_once __DIR__ . '/includes/translation/translation-repository.php';
 require_once __DIR__ . '/includes/event-text-snippet.php';
+require_once __DIR__ . '/includes/routes/attendee/list.php';
+require_once __DIR__ . '/includes/routes/attendee/remove.php';
