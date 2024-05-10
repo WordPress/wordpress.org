@@ -656,7 +656,8 @@ jQuery( function( $ ) {
 		}
 		echo '<option value="" selected="selected">' . $default . '</option>';
 		if ( in_array( 'focus', $topics ) ) {
-			$focuses = array( 'accessibility', 'administration', 'coding-standards', 'css', 'docs', 'javascript', 'multisite', 'performance', 'privacy', 'rest-api', 'rtl', 'template', 'ui' );
+			$focuses = array( 'accessibility', 'admin', 'coding-standards', 'css', 'docs', 'javascript', 'multisite', 'performance', 'php-compatibility', 'privacy', 'rest-api', 'rtl', 'sustainability', 'template', 'ui', 'ui-copy' );
+			
 			foreach ( $focuses as $focus ) {
 				echo '<option value="focus/' . esc_attr( rawurlencode( $focus ) ) . '">' . $focus . ( $both ? ' (focus)' : '' ) . '</option>';
 			}
