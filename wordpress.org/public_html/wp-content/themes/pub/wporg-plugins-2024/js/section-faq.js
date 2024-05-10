@@ -5,19 +5,7 @@
 		.each( function( index, question ) {
 			var $question = $( question ),
 				$button   = $( '<button />' ),
-				$h3       = $( '<h3 />' ),
-				id        = $question.attr( 'id' );
-
-			// If there is no ID, create our own.
-			if ( ! id ) {
-				id = encodeURIComponent( $question.text().toLowerCase().trim() );
-				$question.attr( 'id', id );
-			}
-
-			$button.attr( 'formaction', id ).on( 'click', function( event ) {
-				event.preventDefault();
-				window.location.hash = id;
-			} );
+				$h3       = $( '<h3 />' );
 
 			$question.html( $h3.html( $button.text( $question.text() ) ) );
 		} )
@@ -40,6 +28,10 @@
 				var scrollPaddingTop = parseInt( $('html').css('scroll-padding-top') || 0 );
 
 				window.scrollTo( 0, $question.offset().top - scrollPaddingTop );
+			}
+
+			if ( $question.prop( 'id' ) ) {
+				window.location.hash = $question.prop( 'id' );
 			}
 		} );
 
