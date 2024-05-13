@@ -847,7 +847,7 @@ class Plugin {
 		if ( current_user_can( 'manage_options' ) ) {
 			return true;
 		}
-		if ( self::is_user_an_wporg_gte( $user ) ) {
+		if ( self::is_user_a_wporg_gte( $user ) ) {
 			return true;
 		}
 
@@ -863,23 +863,27 @@ class Plugin {
 	 *
 	 * @return bool Whether the user is GTE for any of the languages to which the comments in the post belong.
 	 */
-	public static function is_user_an_wporg_gte( WP_User $user ): bool {
+	public static function is_user_a_wporg_gte( WP_User $user ): bool {
 		$locales             = GP_Locales::locales();
 		$gte_email_addresses = wp_cache_get( self::GTE_EMAIL_ADDRESSES, self::CACHE_GROUP );
 
 		if ( false === $gte_email_addresses ) {
+			$gte_email_addresses = array();
 			foreach ( $locales as $locale ) {
-				$gte_email_addresses = self::get_gte_email_addresses( $locale->slug );
+				foreach ( self::get_gte_email_addresses( $locale->slug ) as $email ) {
+					$gte_email_addresses[] = $email;
+				}
 			}
+			$gte_email_addresses = array_unique( $gte_email_addresses );
 
 			wp_cache_set( self::GTE_EMAIL_ADDRESSES, $gte_email_addresses, self::CACHE_GROUP, 12 * HOUR_IN_SECONDS );
 		}
 
-		if ( empty( array_intersect( array( $user->user_email ), $gte_email_addresses ) ) ) {
-			return false;
+		if ( in_array( array( $user->user_email ), $gte_email_addresses ) ) {
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	/**
