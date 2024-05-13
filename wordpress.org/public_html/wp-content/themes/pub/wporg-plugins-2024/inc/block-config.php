@@ -129,7 +129,7 @@ function wporg_query_filter_options_sort() {
 
 function wporg_query_filter_options_business_model() {
 	$options = array(
-		'all'        => __( 'All', 'wporg-plugins' ),
+		''           => __( 'All', 'wporg-plugins' ),
 		'commercial' => __( 'Commercial', 'wporg-plugins' ),
 		'community'  => __( 'Community', 'wporg-plugins' ),
 	);
