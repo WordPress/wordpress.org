@@ -2,8 +2,7 @@
 namespace WordPressdotorg\Theme\Plugins_2024\SearchPage;
 
 echo do_blocks( <<<BLOCKS
-	<!-- wp:wporg/filter-bar /-->
-	<!-- wp:wporg/category-navigation /-->
+	<!-- wp:template-part {"slug":"grid-controls"} /-->
 	<!-- wp:query-title {"type":"search","fontFamily":"inter","className":"section-heading"} /-->
 	<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 	<div class="wp-block-query plugin-cards">

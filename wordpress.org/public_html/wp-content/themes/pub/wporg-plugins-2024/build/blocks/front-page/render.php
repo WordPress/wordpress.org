@@ -19,7 +19,7 @@ $widget_args = array(
 	'after_title'  => '</h2>',
 );
 
-echo do_blocks( '<!-- wp:wporg/filter-bar /--><!-- wp:wporg/category-navigation /-->' );
+echo do_blocks( '<!-- wp:template-part {"slug":"grid-controls"} /-->' );
 
 ?>
 
