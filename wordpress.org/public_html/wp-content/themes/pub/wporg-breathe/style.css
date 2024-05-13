@@ -428,6 +428,16 @@ input[type="submit"]:hover {
 		top: 0px !important;
 	}
 
+	body.responsive-show #o2-responsive-nav {
+		clear: left;
+		overflow: auto;
+		margin-bottom: 1em;
+	}
+
+	body.responsive-show #secondary-content .navigation-main {
+		margin-top: 0;
+	}
+
 	body.responsive-show .wp-block-group.global-header {
 		z-index: 0;
 	}
