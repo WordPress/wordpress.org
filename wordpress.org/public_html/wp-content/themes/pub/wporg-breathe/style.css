@@ -318,6 +318,10 @@ input[type="submit"] {
 	text-decoration: underline;
 }
 
+#secondary-content .widget_wporg_handbook_pages a {
+	text-decoration: none;
+}
+
 #secondary-content .navigation-main {
 	margin-top: 32px;
 	text-align: left;
