@@ -240,6 +240,51 @@ class Plugin_Search {
 			];
 		}
 
+		// Some fields need special mapping.
+		$unknown_es_meta_fields = [
+			// Not stored in a queryable format in meta.last_updated
+			'last_updated'     => 'modifield',
+			// The raw value is not sync'd, only the public numbers
+			'_active_installs' => 'active_installs',
+			// The downloads are stored in the metadata.
+			'downloads'        => 'meta.downloads.long'
+		];
+
+		// Apply sorts...
+		if ( empty( $es_query_args['sort'] ) ) {
+			$orderby      = $query->get( 'orderby' );
+			$meta_clauses = $query->meta_query->get_clauses();
+			foreach ( (array) $orderby as $_orderby => $_order ) {
+				if ( ! is_string( $_orderby ) && is_string( $_order ) ) {
+					$_orderby = $_order;
+					$_order   = $query->get('order');
+				}
+				if ( ! is_string( $_orderby ) || empty( $meta_clauses[ $_orderby ]['key'] ) ) {
+					continue;
+				}
+
+				$key = $meta_clauses[ $_orderby ]['key'];
+
+				// ES doesn't have all keys
+				$key = $unknown_es_meta_fields[ $key ] ?? $key;
+
+				$es_query_args['sort'][] = [
+					$key => array(
+						'order' => $_order,
+					),
+				];
+			}
+
+			// We've added a custom sort, but we still want to sub-sort it by the relevance score.
+			if ( ! empty( $es_query_args['sort'] ) ) {
+				$es_query_args['sort'][] = [
+					'_score' => array(
+						'order' => 'DESC',
+					),
+				];
+			}
+		}
+
 		// The should match is where we add the fields to be searched in, and the weighting of them (boost).
 		$should_match = [];
 		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ] ) ) {
