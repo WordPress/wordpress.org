@@ -121,8 +121,9 @@ class Ratings_Compat {
 	 */
 	public function add_topic_stars() {
 		if ( bbp_is_single_topic() && Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id() ) {
-			$user_id = bbp_get_topic_author_id();
-			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$user_id  = bbp_get_topic_author_id();
+			$topic_id = bbp_get_topic_id();
+			$rating   = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
 				echo \WPORG_Ratings::get_dashicons_stars( $rating );
 			}
