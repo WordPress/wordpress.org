@@ -543,7 +543,7 @@ class Plugin {
 	 * and script loader.
 	 */
 	public function show_admin_bar() {
-		add_action( 'gp_head', 'wp_admin_bar_header' );
+		add_action( 'gp_head', 'wp_enqueue_admin_bar_header_styles' );
 		add_action( 'gp_head', '_admin_bar_bump_cb' );
 
 		gp_enqueue_script( 'admin-bar' );
