@@ -510,7 +510,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		return implode( '', array_map( function( $s ) {
 			if ( strlen( $s ) >= 3 || preg_match( '/^[A-Z]{2}$/', $s ) /* country */ ) {
-				return '<a href="' . add_query_arg( 's', urlencode( $s ), admin_url( 'admin.php?page=user-registrations' ) ) . '">' . esc_html( $s ) . '</a>';
+				return '<a href="' . esc_url( add_query_arg( 's', urlencode( $s ), admin_url( 'admin.php?page=user-registrations' ) ) ) . '">' . esc_html( $s ) . '</a>';
 			}
 			return esc_html( $s );
 		}, $parts ) );
