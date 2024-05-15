@@ -36,9 +36,21 @@
 		} );
 
 	if ( window.location.hash ) {
-		jQuery(
+		var uriHash = window.location.hash.substr(1),
+			uriElement = document.getElementById( uriHash );
+
+		if ( ! uriElement ) {
 			// Decode/Encode here is to work with any existing links that are not fully-encoded, the trim handles whitespace/newlines.
-			document.getElementById( encodeURIComponent( decodeURIComponent( window.location.hash.substr(1) ).trim() ) )
-		).trigger( 'click' );
+			uriHash    = encodeURIComponent( decodeURIComponent( uriHash ) ).trim();
+			uriElement = document.getElementById( uriHash );
+
+			if ( ! uriElement ) {
+				// Perform PHP-style URI encoding. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI#encoding_for_rfc3986
+				uriHash    = uriHash.replace( /[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}` );
+				uriElement = document.getElementById( uriHash );
+			}
+		}
+
+		jQuery( uriElement ).trigger( 'click' );
 	}
 } )( jQuery );
