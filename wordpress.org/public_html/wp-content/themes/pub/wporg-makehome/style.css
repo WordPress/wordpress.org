@@ -288,6 +288,13 @@ section.get-involved article div.team-description p {
 	line-height: 1.5;
 }
 
+.wizard-callout {
+	background-color: #fdffd6;
+	font-size: 1.6em;
+	margin: 6px 10px 12px;
+	padding: 12px;
+}
+
 div.team-meeting {
 	display: block;
 	font-size: 0.8em;

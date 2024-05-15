@@ -7,6 +7,14 @@
 <section class="get-involved">
 	<div class="wrapper">
 		<h2 class="section-title"><?php _e( 'There are many different ways for you to get involved with WordPress:', 'make-wporg' ); ?></h2>
+
+		<div class="wizard-callout">
+		<?php printf(
+			__( 'Not sure which contributor teams match your interests and abilities? Check out our <a href="%s">contributor wizard</a>.', 'make-wporg' ),
+			esc_url( 'https://make.wordpress.org/contribute/' )
+		); ?>
+		</div>
+
 		<div class="make-sites">
 		<?php
 			$sites_query = new WP_Query( 'post_type=make_site&posts_per_page=-1&order=ASC' );
