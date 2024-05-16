@@ -405,9 +405,10 @@ class Import {
 			if ( $changed || count ( get_post_meta( $plugin->ID, 'block_name' ) ) !== count ( $blocks ) ) {
 				delete_post_meta( $plugin->ID, 'block_name' );
 				delete_post_meta( $plugin->ID, 'block_title' );
+
 				foreach ( $blocks as $block ) {
 					add_post_meta( $plugin->ID, 'block_name', $block->name, false );
-					add_post_meta( $plugin->ID, 'block_title', ( $block->title ?: $plugin->post_title ), false );
+					add_post_meta( $plugin->ID, 'block_title', $block->title, false );
 				}
 			}
 		} else {
@@ -842,9 +843,16 @@ class Import {
 			}
 		}
 
-		foreach ( $blocks as $block_name => $block ) {
+		// Set the fallback name for the blocks.
+		foreach ( $blocks as $block_name => &$block ) {
 			if ( empty( $block->title ) ) {
-				$blocks[ $block_name ]->title = $readme->name;
+				$block->title = $block_name;
+				// If the block duplicates the namespace, remove it. 'plugin-slug/plugin-slug-block-name'
+				$block->title = preg_replace( '#^([^/]+)/\\1-?#i', '$1/', $block->title );
+				// Treat any non-wordy characters as spaces.
+				$block->title = preg_replace( '/[^a-z]+/', ' ', $block_name );
+				// Capitalise all words.
+				$block->title = ucwords( $block->title );
 			}
 		}
 
