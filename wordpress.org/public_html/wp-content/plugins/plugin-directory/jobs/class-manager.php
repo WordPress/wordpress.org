@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 use WordPressdotorg\Plugin_Directory\Tools;
+use const \WP_CLI;
 
 /**
  * Manager to wrap up all the logic for Cron tasks.
@@ -30,7 +31,7 @@ class Manager {
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
 
 		// Register the wildcard cron hook tasks.
-		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			// This must be run after plugins_loaded, as that's when Cavalcade hooks in.
 			add_action( 'init', array( $this, 'register_colon_based_hook_handlers' ) );
 		}
@@ -294,6 +295,24 @@ class Manager {
 			'tide_sync'          => array( __NAMESPACE__ . '\Tide_Sync', 'cron_trigger' ),
 		);
 
+		// Add the wildcard cron task above to the specified colon-based hook.
+		$add_callback = static function( $hook ) use( $wildcard_cron_tasks ) {
+			if ( ! str_contains( $hook, ':' ) ) {
+				return;
+			}
+
+			list( $partial_hook, $slug ) = explode( ':', $hook, 2 );
+			$callback                    = $wildcard_cron_tasks[ $partial_hook ] ?? false;
+
+			if ( ! $callback ) {
+				return;
+			}
+
+			if ( ! has_action( $hook, $callback ) ) {
+				add_action( $hook, $callback, 10, PHP_INT_MAX );
+			}
+		};
+
 		if ( is_array( $cron_array ) ) {
 			foreach ( $cron_array as $timestamp => $handlers ) {
 				if ( ! is_numeric( $timestamp ) ) {
@@ -301,16 +320,34 @@ class Manager {
 				}
 
 				foreach ( $handlers as $hook => $jobs ) {
-					$pos = strpos( $hook, ':' );
-					if ( ! $pos ) {
-						continue;
-					}
+					$add_callback( $hook );
+				}
+			}
+		}
 
-					$partial_hook = substr( $hook, 0, $pos );
+		/*
+		 * When jobs are run manually or after-the-fact, we need to find the current job first.
+		 *
+		 * The `CAVALCADE_JOB_ID` constant exists inside Cavalcade, which WordPress.org uses for cron,
+		 * but the constant is only set just before the cron task fires, and is not available at the
+		 * time that this code executes.
+		 *
+		 * We can get the job hook via the job id, either through `$job_id` global that our loader sets,
+		 * or through the WP CLI arguments.
+		 */
+		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			// The WordPress.org cavalcade loader sets the $job_id variable.
+			$job_id = $GLOBALS['job_id'] ?? false;
 
-					if ( isset( $wildcard_cron_tasks[ $partial_hook ] ) ) {
-						add_action( $hook, $wildcard_cron_tasks[ $partial_hook ], 10, PHP_INT_MAX );
-					}
+			// Try to get it from the CLI args. `wp cavalcade run 12345`
+			if ( ! $job_id && in_array( 'run', $GLOBALS['argv'] ) ) {
+				$job_id = $GLOBALS['argv'][ array_search( 'run', $GLOBALS['argv'] ) + 1 ] ?? false;
+			}
+
+			if ( $job_id && class_exists( '\HM\Cavalcade\Plugin\Job' ) ) {
+				$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+				if ( $job ) {
+					$add_callback( $job->hook );
 				}
 			}
 		}
