@@ -402,10 +402,15 @@ class SVN {
 			} else {
 				foreach ( $simple_xml->logentry as $entry ) {
 					$revision = (int) $entry->attributes()['revision'];
+					$actions  = array();
 					$paths    = array();
 
 					foreach ( $entry->paths->children() as $child_path ) {
-						$paths[] = (string) $child_path;
+						$path   = (string) $child_path;
+						$action = (string) ( $child_path->attributes()['action'] ?? 'M' );
+
+						$paths[]          = $path;
+						$actions[ $path ] = $action;
 					}
 
 					$log[ $revision ] = array(
@@ -413,6 +418,7 @@ class SVN {
 						'author'   => (string) $entry->author,
 						'date'     => strtotime( (string) $entry->date ),
 						'paths'    => $paths,
+						'actions'  => $actions,
 						'message'  => (string) $entry->msg,
 					);
 				}
