@@ -1013,25 +1013,41 @@ class Import {
 			if ( $contents && preg_match_all( "#registerBlockType[^{}]{0,500}[(]\s*[\"']([-\w]+/[-\w]+)[\"']\s*,\s*[{]\s*title\s*:[\s\w(]*[\"']([^\"']*)[\"']#ms", $contents, $matches, PREG_SET_ORDER ) ) {
 				foreach ( $matches as $match ) {
 					$blocks[] = (object) [
-						'name' => $match[1],
+						'name'  => $match[1],
 						'title' => $match[2],
 					];
 				}
 			}
 		}
+
 		if ( 'php' === $ext ) {
 			// Parse a php-style register_block_type() call.
 			// Again this assumes literal strings, and only parses the name and title.
 			$contents = file_get_contents( $filename );
+
+			// Search out register_block_type() calls.
 			if ( $contents && preg_match_all( "#register_block_type\s*[(]\s*['\"]([-\w]+/[-\w]+)['\"](?!\s*[.])#ms", $contents, $matches, PREG_SET_ORDER ) ) {
 				foreach ( $matches as $match ) {
 					$blocks[] = (object) [
-						'name' => $match[1],
+						'name'  => $match[1],
 						'title' => null,
 					];
 				}
 			}
+
+			// Search out WP_Block_Type() instances.
+			if ( $contents && preg_match_all( "#new\s+WP_Block_Type\s*[(]\s*['\"]([-\w]+\/[-\w]+)['\"](?!\s*[.])(\s*,[^;]{0,500}['\"]title['\"]\s*=>\s*['\"]([^'\"]+)['\"](?!\s*[.]))?#ms", $contents, $matches, PREG_SET_ORDER ) ) {
+				var_dump( $filename, $matches );
+				foreach ( $matches as $match ) {
+					$blocks[] = (object) [
+						'name'  => $match[1],
+						'title' => $match[3] ?? null,
+					];
+				}
+			}
+
 		}
+
 		if ( 'block.json' === basename( $filename ) ) {
 			// A block.json file should have everything we want.
 			$validator = new Block_JSON\Validator();
