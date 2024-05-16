@@ -111,6 +111,14 @@ tr:last-of-type td {
 	border-bottom: 0;
 }
 
+.fixed-first-col tr > th:first-child,
+.fixed-first-col tr > td:first-child {
+	position: -webkit-sticky;
+	position: sticky;
+	background-color: white;
+	left: 0;
+}
+
 /* wp4.css overrides */
 p a,
 p a:hover {
