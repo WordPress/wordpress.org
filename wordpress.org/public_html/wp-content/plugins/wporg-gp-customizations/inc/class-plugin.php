@@ -87,8 +87,6 @@ class Plugin {
 		add_action( 'admin_bar_init', array( $this, 'show_admin_bar' ) );
 		add_action( 'add_admin_bar_menus', array( $this, 'remove_admin_bar_menus' ) );
 
-		add_action( 'template_redirect', array( $this, 'jetpack_stats' ), 1 );
-
 		// Load the API endpoints.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\REST_API\Base', 'load_endpoints' ) );
 
@@ -526,24 +524,11 @@ class Plugin {
 	}
 
 	/**
-	 * Adds support for Jetpack Stats.
-	 */
-	public function jetpack_stats() {
-		if ( ! function_exists( 'stats_hide_smile_css' ) ) {
-			return;
-		}
-
-		add_action( 'gp_head', 'stats_hide_smile_css' );
-		add_action( 'gp_head', 'stats_admin_bar_head', 100 );
-		add_action( 'gp_footer', array( 'Automattic\Jetpack\Stats\Tracking_Pixel', 'add_to_footer' ), 101 );
-	}
-
-	/**
 	 * Makes admin bar compatible with GlotPress' custom header
 	 * and script loader.
 	 */
 	public function show_admin_bar() {
-		add_action( 'gp_head', 'wp_admin_bar_header' );
+		add_action( 'gp_head', 'wp_enqueue_admin_bar_header_styles' );
 		add_action( 'gp_head', '_admin_bar_bump_cb' );
 
 		gp_enqueue_script( 'admin-bar' );
