@@ -1023,7 +1023,7 @@ class Import {
 			// Parse a php-style register_block_type() call.
 			// Again this assumes literal strings, and only parses the name and title.
 			$contents = file_get_contents( $filename );
-			if ( $contents && preg_match_all( "#register_block_type\s*[(]\s*['\"]([-\w]+/[-\w]+)['\"]#ms", $contents, $matches, PREG_SET_ORDER ) ) {
+			if ( $contents && preg_match_all( "#register_block_type\s*[(]\s*['\"]([-\w]+/[-\w]+)['\"](?!\s*[.])#ms", $contents, $matches, PREG_SET_ORDER ) ) {
 				foreach ( $matches as $match ) {
 					$blocks[] = (object) [
 						'name' => $match[1],
