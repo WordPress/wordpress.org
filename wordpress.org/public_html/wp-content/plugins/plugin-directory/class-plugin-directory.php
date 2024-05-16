@@ -1783,6 +1783,10 @@ class Plugin_Directory {
 
 	/**
 	 * Fetch a specific release of the plugin, by tag.
+	 *
+	 * @param string $plugin Plugin slug.
+	 * @param string $tag    Release tag.
+	 * @return array|bool
 	 */
 	public static function get_release( $plugin, $tag ) {
 		$releases = self::get_releases( $plugin );
@@ -1798,6 +1802,10 @@ class Plugin_Directory {
 
 	/**
 	 * Add a Plugin Release to the internal storage.
+	 *
+	 * @param string $plugin Plugin slug.
+	 * @param array  $data   Release data.
+	 * @return bool
 	 */
 	public static function add_release( $plugin, $data ) {
 		if ( ! isset( $data['tag'] ) ) {
@@ -1843,6 +1851,30 @@ class Plugin_Directory {
 		} );
 
 		return update_post_meta( $plugin->ID, 'releases', $releases );
+	}
+
+	/**
+	 * Remove a Plugin Release from the internal storage.
+	 *
+	 * @param string $plugin Plugin slug.
+	 * @param string $tag    Release tag.
+	 * @return bool
+	 */
+	public static function remove_release( $plugin, $tag ) {
+		$result   = false;
+		$plugin   = self::get_plugin_post( $plugin );
+		$releases = self::get_releases( $plugin );
+
+		// Remove the release in question.
+		foreach ( $releases as $i => $r ) {
+			if ( $r['tag'] === $tag && ! $r['confirmed'] ) {
+				unset( $releases[ $i ] );
+
+				$result = update_post_meta( $plugin->ID, 'releases', $releases );
+			}
+		}
+
+		return $result;
 	}
 
 	/**

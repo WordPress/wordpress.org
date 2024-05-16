@@ -77,9 +77,10 @@ class Import {
 	 *
 	 * @param string $plugin_slug            The slug of the plugin to import.
 	 * @param array  $svn_changed_tags       A list of tags/trunk which the SVN change touched. Optional.
+	 * @param array  $svn_tags_deleted       A list of tags/trunk which were deleted in the SVN change. Optional.
 	 * @param array  $svn_revision_triggered The SVN revision which this import has been triggered by. Optional.
 	 */
-	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_revision_triggered = 0 ) {
+	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_tags_deleted = array(), $svn_revision_triggered = 0 ) {
 		// Reset properties.
 		$this->warnings = [];
 
@@ -191,6 +192,14 @@ class Import {
 					$email->send();
 
 					echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
+				}
+			}
+
+			// Check to see if any of the releases were deleted.
+			foreach ( $svn_tags_deleted as $svn_deleted_tag ) {
+				// Note: Confirmed releases will not be deleted, only unconfirmed ones.
+				if ( Plugin_Directory::remove_release( $plugin, $svn_deleted_tag ) ) {
+					echo "Plugin tag {$svn_deleted_tag} deleted; release removed.\n";
 				}
 			}
 
