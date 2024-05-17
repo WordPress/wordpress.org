@@ -849,8 +849,15 @@ class Import {
 				$block->title = $block_name;
 				// If the block duplicates the namespace, remove it. 'plugin-slug/plugin-slug-block-name'
 				$block->title = preg_replace( '#^([^/]+)/\\1-?#i', '$1/', $block->title );
+				// If the namespace is the slug (w/ or w/o dashes..), remove it.
+				if (
+					str_starts_with( $block->title, $plugin_slug . '/' ) ||
+					str_starts_with( $block->title, str_replace( '-', '', $plugin_slug ) . '/' )
+				) {
+					$block->title = explode( '/', $block->title, 2 )[1];
+				}
 				// Treat any non-wordy characters as spaces.
-				$block->title = preg_replace( '/[^a-z]+/', ' ', $block_name );
+				$block->title = preg_replace( '/[^a-z]+/', ' ', $block->title );
 				// Capitalise all words.
 				$block->title = ucwords( $block->title );
 			}
