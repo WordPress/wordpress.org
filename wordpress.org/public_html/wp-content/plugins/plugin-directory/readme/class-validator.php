@@ -298,6 +298,14 @@ class Validator {
 					'<code>Stable tag</code>',
 					'<code>/trunk/</code>'
 				);
+			case 'stable_tag_invalid_trunk_fallback':
+				return sprintf(
+					/* translators: 1: 'Stable tag', 2: path '/tags/{version}', 3: '/trunk/' */
+					__( 'The %1$s field is invalid, the specified SVN tag %2$s does not exist. %3$s will be used instead.', 'wporg-plugins' ),
+					'<code>Stable Tag</code>',
+					'<code>/tags/' . esc_html( $data ) . '/</code>',
+					'<code>/trunk/</code>'
+				);
 			case 'contributor_ignored':
 				if ( ! $data ) {
 					return sprintf(

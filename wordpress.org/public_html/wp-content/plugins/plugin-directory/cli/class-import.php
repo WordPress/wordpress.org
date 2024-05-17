@@ -628,11 +628,17 @@ class Import {
 			}
 		}
 
+		// Fall back to using `trunk` as stable, if the tag doesn't exist.
 		if ( ! $svn_info || ! $svn_info['result'] ) {
-            $stable_tag = 'trunk';
-            $stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk";
-            $svn_info   = SVN::info( $stable_url );
-        }
+			if ( 'trunk' !== $stable_tag ) {
+				$this->warnings['stable_tag_invalid_trunk_fallback'] = $stable_tag;
+				$this->warnings['stable_tag_invalid']                = true;
+			}
+
+			$stable_tag = 'trunk';
+			$stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk";
+			$svn_info   = SVN::info( $stable_url );
+		}
 
 		if ( ! $svn_info['result'] ) {
 			throw new Exception( 'Could not find stable SVN URL: ' . implode( ' ', reset( $svn_info['errors'] ) ) );
