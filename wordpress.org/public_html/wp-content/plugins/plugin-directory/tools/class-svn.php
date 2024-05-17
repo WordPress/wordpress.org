@@ -429,6 +429,60 @@ class SVN {
 	}
 
 	/**
+	 * Rename a SVN path (or url).
+	 *
+	 * @static
+	 *
+	 * @param string $from    The path of the SVN folder to rename. May be a URL.
+	 * @param string $to      The new path of the SVN folder. May be a URL.
+	 * @param array  $options  Optional. A list of options to pass to SVN. Default: empty array.
+	 * @return array {
+	 *     @type bool        $result   The result of the operation.
+	 *     @type int         $revision The revision.
+	 *     @type false|array $errors   Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function rename( $from, $to, $options = array() ) {
+		$options[] = 'non-interactive';
+		$is_url    = ( preg_match( '#https?://#i', $from ) && preg_match( '#https?://#i', $to ) );
+
+		if ( $is_url ) {
+			// Set the message if not provided.
+			if ( ! isset( $options['message'] ) && ! isset( $options['m'] ) ) {
+				$options['message'] = sprintf( "Rename %s to %s.", basename( $from ), basename( $to ) );
+			}
+
+			if ( empty( $options['username'] ) ) {
+				$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
+				$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+			}
+		}
+
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$esc_from = escapeshellarg( $from );
+		$esc_to   = escapeshellarg( $to );
+
+		$output = self::shell_exec( "svn mv $esc_from $esc_to $esc_options 2>&1" );
+		if ( $is_url && preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
+			$revision = (int) $m['revision'];
+			$result   = true;
+			$errors   = false;
+		} else {
+			$errors   = self::parse_svn_errors( $output );
+			$revision = false;
+
+			if ( $is_url || $errors ) {
+				$result = false;
+			} else {
+				$result = true;
+			}
+		}
+
+		return compact( 'result', 'revision', 'errors' );
+	}
+
+	/**
 	 * Parse and escape the provided SVN arguements for usage on the CLI.
 	 *
 	 * Parameters can be passed as [ param ] or [ param = value ], if the argument is not

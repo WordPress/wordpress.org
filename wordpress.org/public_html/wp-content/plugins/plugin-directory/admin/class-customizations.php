@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin;
 
 use \WordPressdotorg\Plugin_Directory;
 use \WordPressdotorg\Plugin_Directory\Tools;
+use \WordPressdotorg\Plugin_Directory\Tools\SVN;
 use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
@@ -561,33 +562,77 @@ class Customizations {
 	 * @return array The data to insert into the database.
 	 */
 	function check_existing_plugin_slug_on_post_update( $data, $postarr ) {
+		global $wpdb;
+
 		if ( 'plugin' !== $data['post_type'] || ! isset( $postarr['ID'] ) ) {
 			return $data;
 		}
 
-		$existing_plugin = Plugin_Directory\Plugin_Directory::get_plugin_post( $data['post_name'] );
+		// If we can't locate the existing plugin, we can't check for a conflict.
+		$plugin = get_post( $postarr['ID'] );
+		if ( ! $plugin ) {
+			return $data;
+		}
+
+		$old_slug        = $plugin->post_name;
+		$new_slug        = $data['post_name'];
+		$existing_plugin = Plugin_Directory\Plugin_Directory::get_plugin_post( $new_slug );
 
 		// Is there already a plugin with the same slug?
-		if ( $existing_plugin && $existing_plugin->ID != $postarr['ID'] ) {
+		if ( $existing_plugin && $existing_plugin->ID != $plugin->ID ) {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
 				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
-				$data['post_name']
+				$new_slug
 			) );
 		}
 
+		// If the plugin is approved, we'll need to perform a folder rename, and re-grant SVN access.
+		if ( 'approved' === $plugin->post_status ) {
+			// SVN Rename $old_slug to $new_slug
+			$result = SVN::rename(
+				"http://plugins.svn.wordpress.org/{$old_slug}/",
+				"http://plugins.svn.wordpress.org/{$new_slug}/",
+				array(
+					'message' => sprintf( 'Renaming %1$s to %2$s.', $old_slug, $new_slug ),
+				)
+			);
+			if ( $result['errors'] ) {
+				$error = 'Error renaming SVN repository: ' . var_export( $result['errors'], true );
+				Tools::audit_log( $error, $plugin->ID );
+				wp_die( $error ); // Abort before the post is altered.
+			} else {
+				Tools::audit_log(
+					sprintf(
+						'Renamed SVN repository in %s.',
+						'https://plugins.svn.wordpress.org/changeset/' . $result['revision']
+					),
+					$plugin->ID
+				);
+
+				/*
+				 * Migrate Committers to new path.
+				 * As no committers have changed as part of this operation, just update the database.
+				 */
+				$wpdb->update(
+					PLUGINS_TABLE_PREFIX . 'svn_access',
+					[ 'path' => '/' . $new_slug ],
+					[ 'path' => '/' . $old_slug ]
+				);
+			}
+		}
+
 		// Record the slug change.
-		$plugin = get_post( $postarr['ID'] );
-		if ( $plugin && $plugin->post_name !== $data['post_name'] ) {
+		if ( $old_slug !== $new_slug ) {
 			// Only log if the slugs don't appear to be rejection-related.
 			if (
-				! preg_match( '!^rejected-.+-rejected$!', $post->post_name ) &&
-				! preg_match( '!^rejected-.+-rejected$!', $data['post_name'] )
+				! preg_match( '!^rejected-.+-rejected$!', $old_slug ) &&
+				! preg_match( '!^rejected-.+-rejected$!', $new_slug )
 			) {
 				Tools::audit_log( sprintf(
 					"Slug changed from '%s' to '%s'.",
-					$plugin->post_name,
-					$data['post_name']
+					$old_slug,
+					$new_slug
 				), $plugin->ID );
 			}
 		}
@@ -735,8 +780,8 @@ class Customizations {
 		remove_meta_box( 'commentsdiv', 'plugin', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'plugin', 'normal' );
 
-		// Remove slug metabox unless the slug is editable for the current user.
-		if ( ! in_array( $post->post_status, array( 'new', 'pending' ) ) || ! current_user_can( 'plugin_approve', $post ) ) {
+		// Remove slug metabox unless the slug is editable by the current user.
+		if ( ! in_array( $post->post_status, array( 'new', 'pending', 'approved' ) ) || ! current_user_can( 'plugin_approve', $post ) ) {
 			remove_meta_box( 'slugdiv', 'plugin', 'normal' );
 		}
 	}
