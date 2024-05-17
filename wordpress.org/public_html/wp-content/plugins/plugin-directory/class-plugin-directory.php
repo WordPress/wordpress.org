@@ -1888,7 +1888,7 @@ class Plugin_Directory {
 	 */
 	public function add_info_to_zip_url( $url, $attachment_id ) {
 		$post = get_post( $attachment_id );
-		if ( 'attachment' === $post->post_type ) {
+		if ( $post && 'attachment' === $post->post_type && $post->post_parent ) {
 			$post = get_post( $post->post_parent );
 		}
 
