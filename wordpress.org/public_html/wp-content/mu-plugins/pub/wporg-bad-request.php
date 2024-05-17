@@ -182,6 +182,43 @@ add_action( 'send_headers', function() {
 } );
 
 /**
+ * Detect invalid charsets to trackbacks.
+ * Hotfix for https://core.trac.wordpress.org/ticket/60261
+ */
+add_action( 'template_redirect', function() {
+	if ( ! is_trackback() ) {
+		return;
+	}
+
+	$charset = str_replace( array( ',', ' ' ), '', strtoupper( trim( $_POST['charset'] ?? '' ) ) );
+
+	if ( function_exists( 'mb_list_encodings' ) && ! in_array( $charset, mb_list_encodings(), true ) ) {
+		die_bad_request( 'Invalid Charset' );
+	}
+} );
+
+/**
+ * Detect invalid requests to GlotPress
+ *
+ * Hotfix for https://github.com/GlotPress/GlotPress/pull/1835
+ */
+add_action( 'gp_init', function() {
+	$only_array_values = [ 'filter', 'sort' ];
+
+	foreach ( $only_array_values as $query_var ) {
+		if ( isset( $_GET[ $query_var ] ) && ! is_array( $_GET[ $query_var ] ) ) {
+			if ( empty( $_GET[ $query_var ] ) ) {
+				// If it's not set to anything, just silently discard the value.
+				unset( $_GET[ $query_var ], $_REQUEST[ $query_var ] );
+				continue;
+			}
+
+			die_bad_request( "non-array $query_var in GlotPress" );
+		}
+	}
+} );
+
+/**
  * Die with a 400 Bad Request.
  *
  * @param string $reference A unique identifying string to make it easier to read logs.
