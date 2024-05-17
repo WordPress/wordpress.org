@@ -405,9 +405,12 @@ class Builder {
 	 * from the same source files at different times will have the same checksums.
 	 */
 	protected function fix_directory_dates() {
-		// Find all files, output their modified dates, sort reverse numerically, grab the timestamp from the first entry
+		/*
+		 * Find all files, output their modified dates, sort reverse numerically, grab the timestamp from the first entry
+		 * Note: `sort | head` will generate STDERR output. This is expected and not a cause of concern. Silence it to remove red herrings.
+		 */
 		$latest_file_modified_timestamp = $this->exec( sprintf(
-			"find %s -type f -printf '%%T@\n' | sort -nr | head -c 10",
+			"find %s -type f -printf '%%T@\n' | sort -nr 2>/dev/null | head -c 10",
 			escapeshellarg( $this->tmp_build_dir )
 		) );
 		if ( ! $latest_file_modified_timestamp ) {
