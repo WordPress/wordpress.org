@@ -98,8 +98,8 @@ function the_plugin_favorite_button( $post = null ) {
 function the_author_byline( $post = null ) {
 	$post = get_post( $post );
 
-	// Anonymize the author byline when all committers have been removed.
-	if ( ! Tools::get_plugin_committers( $post->post_name ) ) {
+	// Anonymize the author byline if closed permanently (includes no committers).
+	if ( Template::get_close_data( $post )['permanent'] ?? false ) {
 		return;
 	}
 
