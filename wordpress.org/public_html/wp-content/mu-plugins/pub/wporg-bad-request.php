@@ -203,7 +203,7 @@ add_action( 'template_redirect', function() {
  * Hotfix for https://github.com/GlotPress/GlotPress/pull/1835
  */
 add_action( 'gp_init', function() {
-	$only_array_values = [ 'filter', 'sort' ];
+	$only_array_values = [ 'filters', 'sort' ];
 
 	foreach ( $only_array_values as $query_var ) {
 		if ( isset( $_GET[ $query_var ] ) && ! is_array( $_GET[ $query_var ] ) ) {
