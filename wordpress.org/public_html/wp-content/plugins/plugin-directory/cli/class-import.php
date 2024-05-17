@@ -1052,7 +1052,6 @@ class Import {
 
 			// Search out WP_Block_Type() instances.
 			if ( $contents && preg_match_all( "#new\s+WP_Block_Type\s*[(]\s*['\"]([-\w]+\/[-\w]+)['\"](?!\s*[.])(\s*,[^;]{0,500}['\"]title['\"]\s*=>\s*['\"]([^'\"]+)['\"](?!\s*[.]))?#ms", $contents, $matches, PREG_SET_ORDER ) ) {
-				var_dump( $filename, $matches );
 				foreach ( $matches as $match ) {
 					$blocks[] = (object) [
 						'name'  => $match[1],
