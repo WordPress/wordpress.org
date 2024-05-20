@@ -1,8 +1,11 @@
 #bbpress-forums .bbp-topics:not(.full-posts) .status-archived.even,
-#bbpress-forums .bbp-topics:not(.full-posts) .status-archived.odd,
+#bbpress-forums .bbp-topics:not(.full-posts) .status-archived.odd {
+	background-color: var(--wp--preset--color--pomegrade-3, #ffe9de);
+}
+
 #bbpress-forums .bbp-topics:not(.full-posts) .status-spam.even,
 #bbpress-forums .bbp-topics:not(.full-posts) .status-spam.odd {
-	background-color: var(--wp--preset--color--pomegrade-3, #ffe9de);
+	background-color: var(--wp--preset--color--pomegrade-2, ##ffb7a7);
 }
 
 #bbpress-forums .bbp-topics:not(.full-posts) .status-pending.even,
