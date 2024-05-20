@@ -224,6 +224,24 @@ function wporg_query_total_label( $label, $count ) {
 		return;
 	}
 
+	$plugin_business_model = get_query_var( 'plugin_business_model' );
+	if ( $plugin_business_model ) {
+		$term_name = '';
+
+		if ( 'community' === $plugin_business_model ) {
+			$term_name = __( 'community', 'wporg-plugins' );
+		} elseif ( 'commercial' === $plugin_business_model ) {
+			$term_name = __( 'commercial', 'wporg-plugins' );
+		}
+
+		return sprintf(
+			/* Translators: %1$: Number of plugins, %2$s: Plugin category  */
+			_n( '%1$s %2$s plugin', '%1$s %2$s plugins', $count, 'wporg-plugins' ),
+			number_format_i18n( $count ),
+			$term_name
+		);
+	}
+
 	return _n( '%s plugin', '%s plugins', $count, 'wporg-plugins' );
 }
 
