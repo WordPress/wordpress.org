@@ -123,6 +123,7 @@ function get_whitelist() {
 			'monikarao',
 			'mukesh27',
 			'nicolefurlan',
+			'nhrrob',
 			'oglekler',
 			'pbiron',
 			'priethor',
