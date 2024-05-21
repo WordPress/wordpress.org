@@ -2,46 +2,86 @@
 /**
  * Template for event page.
  */
-
-namespace Wporg\TranslationEvents;
+namespace Wporg\TranslationEvents\Templates;
 
 use GP_Locales;
 use WP_User;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Event\Event;
-use Wporg\TranslationEvents\Event\Event_End_Date;
-use Wporg\TranslationEvents\Event\Event_Start_Date;
 use Wporg\TranslationEvents\Stats\Event_Stats;
 use Wporg\TranslationEvents\Stats\Stats_Row;
+use Wporg\TranslationEvents\Templates;
+use Wporg\TranslationEvents\Urls;
 
 /** @var bool $user_is_attending */
 /** @var bool $user_is_contributor */
+/** @var Attendee[] $hosts */
 /** @var Attendee[] $attendees_not_contributing */
 /** @var Attendee[] $contributors */
 /** @var array $new_contributor_ids */
 /** @var Event $event */
-/** @var int $event_id */
-/** @var string $event_title */
-/** @var string $event_description */
-/** @var Event_Start_Date $event_start */
-/** @var Event_End_Date $event_end */
 /** @var Event_Stats $event_stats */
 /** @var array $projects */
 /** @var WP_User $user */
 
-/* translators: %s: Event title. */
-gp_title( sprintf( __( 'Translation Events - %s' ), esc_html( $event_title ) ) );
-gp_breadcrumb_translation_events( array( esc_html( $event_title ) ) );
-gp_tmpl_header();
-$event_page_title = $event_title;
-gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
+Templates::header(
+	array(
+		/* translators: %s: Event title. */
+		'html_title'  => sprintf( __( 'Translation Events - %s' ), esc_html( $event->title() ) ),
+		'page_title'  => function () use ( $event ) {
+			echo esc_html( $event->title() );
+			if ( 'draft' === $event->status() ) : ?>
+				<span class="event-label-draft"><?php echo esc_html( $event->status() ); ?></span>
+			<?php endif; ?>
+			<?php
+		},
+		'breadcrumbs' => array( esc_html( $event->title() ) ),
+		'sub_head'    => function () use ( $event, $user, $hosts ) {
+			?>
+			<span class="event-host">
+				<?php
+				$has_hosts = count( $hosts ) > 0;
+
+				if ( ! $has_hosts ) {
+					$hosts = array( new Attendee( $event->id(), $event->author_id(), true ) );
+				}
+				$hosts_list = array_map(
+					function ( $host ) {
+						$url  = get_author_posts_url( $host->user_id() );
+						$name = get_the_author_meta( 'display_name', $host->user_id() );
+						return '<a href="' . esc_attr( $url ) . '">' . esc_html( $name ) . '</a>';
+					},
+					$hosts
+				);
+
+				if ( ! $has_hosts ) {
+					/* translators: %s: Display name of the user who created the event. */
+					$hosts_string = __( 'Created by: %s', 'gp-translation-events' );
+				} else {
+					/* translators: %s is a comma-separated list of event hosts (=usernames) */
+					$hosts_string = _n( 'Host: %s', 'Hosts: %s', count( $hosts ), 'gp-translation-events' );
+				}
+
+				echo wp_kses(
+					sprintf( $hosts_string, implode( ', ', $hosts_list ) ),
+					array( 'a' => array( 'href' => array() ) )
+				);
+				?>
+			</span>
+			<?php if ( current_user_can( 'edit_translation_event', $event->id() ) ) : ?>
+				<a class="event-page-edit-link" href="<?php echo esc_url( Urls::event_edit( $event->id() ) ); ?>"><span class="dashicons dashicons-edit"></span><?php esc_html_e( 'Edit event', 'gp-translation-events' ); ?></a>
+			<?php endif ?>
+			<?php
+		},
+	),
+);
 ?>
 
 <div class="event-page-wrapper">
 	<div class="event-details-left">
 		<div class="event-page-content">
 			<?php
-				echo wp_kses_post( wpautop( make_clickable( $event_description ) ) );
+				echo wp_kses_post( wpautop( make_clickable( $event->description() ) ) );
 			?>
 		</div>
 		<?php if ( ! empty( $contributors ) ) : ?>
@@ -57,7 +97,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 						<li class="event-contributor" title="<?php echo esc_html( implode( ', ', $contributor->contributed_locales() ) ); ?>">
 							<a href="<?php echo esc_url( get_author_posts_url( $contributor->user_id() ) ); ?>" class="avatar"><?php echo get_avatar( $contributor->user_id(), 48 ); ?></a>
 							<a href="<?php echo esc_url( get_author_posts_url( $contributor->user_id() ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $contributor->user_id() ) ); ?></a>
-							<?php if ( isset( $new_contributor_ids[ $contributor->user_id() ] ) ) : ?>
+							<?php if ( $contributor->is_new_contributor() ) : ?>
 								<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
 							<?php endif; ?>
 						</li>
@@ -78,7 +118,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 						<li class="event-attendee">
 							<a href="<?php echo esc_url( get_author_posts_url( $_attendee->user_id() ) ); ?>" class="avatar"><?php echo get_avatar( $_attendee->user_id(), 48 ); ?></a>
 							<a href="<?php echo esc_url( get_author_posts_url( $_attendee->user_id() ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $_attendee->user_id() ) ); ?></a>
-							<?php if ( isset( $new_contributor_ids[ $_attendee->user_id() ] ) ) : ?>
+							<?php if ( $_attendee->is_new_contributor() ) : ?>
 								<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
 							<?php endif; ?>
 						</li>
@@ -167,7 +207,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 						wp_sprintf(
 							// translators: %1$s: Event title, %2$d: Number of contributors, %3$s: is a parenthesis with potential text "x new contributors", %4$d: Number of languages, %5$l: List of languages, %6$d: Number of strings translated, %7$d: Number of strings reviewed.
 							__( 'At the <strong>%1$s</strong> event, we had %2$d people %3$s who contributed in %4$d languages (%5$l), translated %6$d strings and reviewed %7$d strings.', 'gp-translation-events' ),
-							esc_html( $event_title ),
+							esc_html( $event->title() ),
 							esc_html( $event_stats->totals()->users ),
 							$new_contributors_text,
 							count( $event_stats->rows() ),
@@ -198,7 +238,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 							array_map(
 								function ( $contributor ) {
 									$append_tada = '';
-									if ( isset( $new_contributor_ids[ $contributor->user_id() ] ) ) {
+									if ( $contributor->is_new_contributor() ) {
 											$append_tada = ' <span class="new-contributor" title="' . esc_html__( 'New Translation Contributor', 'gp-translation-events' ) . '">🎉</span>';
 									}
 									return '@' . ( new WP_User( $contributor->user_id() ) )->user_login . $append_tada;
@@ -222,28 +262,28 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		<div class="event-details-date">
 			<p>
 				<span class="event-details-date-label">
-					<?php echo esc_html( $event_start->is_in_the_past() ? __( 'Started', 'gp-translation-events' ) : __( 'Starts', 'gp-translation-events' ) ); ?>:
-					<?php $event_start->print_relative_time_html(); ?>
+					<?php echo esc_html( $event->start()->is_in_the_past() ? __( 'Started', 'gp-translation-events' ) : __( 'Starts', 'gp-translation-events' ) ); ?>:
+					<?php $event->start()->print_relative_time_html(); ?>
 				</span>
-				<?php $event_start->print_time_html(); ?>
+				<?php $event->start()->print_time_html(); ?>
 				<span class="event-details-date-label">
-					<?php echo esc_html( $event_end->is_in_the_past() ? __( 'Ended', 'gp-translation-events' ) : __( 'Ends', 'gp-translation-events' ) ); ?>:
-					<?php $event_end->print_relative_time_html(); ?>
+					<?php echo esc_html( $event->end()->is_in_the_past() ? __( 'Ended', 'gp-translation-events' ) : __( 'Ends', 'gp-translation-events' ) ); ?>:
+					<?php $event->end()->print_relative_time_html(); ?>
 
 				</span>
-				<?php $event_end->print_time_html(); ?>
+				<?php $event->end()->print_time_html(); ?>
 			</p>
 		</div>
 		<?php if ( is_user_logged_in() ) : ?>
 		<div class="event-details-join">
-			<?php if ( $event_end->is_in_the_past() ) : ?>
+			<?php if ( $event->end()->is_in_the_past() ) : ?>
 				<?php if ( $user_is_attending ) : ?>
 					<button disabled="disabled" class="button is-primary attend-btn"><?php esc_html_e( 'You attended', 'gp-translation-events' ); ?></button>
 				<?php endif; ?>
 			<?php elseif ( $user_is_contributor ) : ?>
 				<?php // Contributors can't un-attend so don't show anything. ?>
 			<?php else : ?>
-				<form class="event-details-attend" method="post" action="<?php echo esc_url( Urls::event_toggle_attendee( $event_id ) ); ?>">
+				<form class="event-details-attend" method="post" action="<?php echo esc_url( Urls::event_toggle_attendee( $event->id() ) ); ?>">
 					<?php if ( $user_is_attending ) : ?>
 						<input type="submit" class="button is-secondary attending-btn" value="<?php esc_attr_e( "You're attending", 'gp-translation-events' ); ?>" />
 					<?php else : ?>
@@ -255,7 +295,7 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		<?php else : ?>
 		<div class="event-details-join">
 			<p>
-				<?php if ( ! $event_end->is_in_the_past() ) : ?>
+				<?php if ( ! $event->end()->is_in_the_past() ) : ?>
 					<a href="<?php echo esc_url( wp_login_url() ); ?>" class="button is-primary attend-btn"><?php esc_html_e( 'Login to attend', 'gp-translation-events' ); ?></a>
 				<?php else : ?>
 					<button disabled="disabled" class="button is-primary attend-btn"><?php esc_html_e( 'Event is over', 'gp-translation-events' ); ?></button>
@@ -265,5 +305,5 @@ gp_tmpl_load( 'events-header', get_defined_vars(), __DIR__ );
 		<?php endif; ?>
 	</div>
 </div>
-<div class="clear"></div>
-<?php gp_tmpl_footer(); ?>
+
+<?php Templates::footer(); ?>

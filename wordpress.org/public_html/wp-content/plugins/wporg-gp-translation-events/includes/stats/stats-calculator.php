@@ -97,15 +97,24 @@ class Stats_Calculator {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"
-				select locale,
-					sum(action = 'create') as created,
-					count(*) as total,
-					sum(t.status = 'waiting') as waiting,
-					count(distinct ea.user_id) as users
-				from {$gp_table_prefix}event_actions ea
-				left join {$gp_table_prefix}translations t ON ea.original_id = t.original_id and ea.user_id = t.user_id
-				where event_id = %d
-				group by locale with rollup
+				SELECT
+					ea.locale,
+					SUM( ea.action = 'create' ) AS created,
+					count( ea.translate_event_actions_id ) AS total,
+					SUM( t.status = 'waiting' ) AS waiting,
+					COUNT( DISTINCT ea.user_id ) AS users
+				FROM
+					{$gp_table_prefix}event_actions AS ea
+				LEFT JOIN
+					{$gp_table_prefix}translation_sets AS ts ON ea.locale = ts.locale
+				LEFT JOIN
+					{$gp_table_prefix}translations AS t ON ea.original_id = t.original_id
+				WHERE
+					ea.event_id = %d
+					AND ts.id = t.translation_set_id
+					AND t.status IN ( 'current', 'waiting', 'fuzzy', 'changesrequested' )
+				GROUP BY
+					ea.locale with rollup;
 			",
 				array(
 					$event_id,

@@ -2,8 +2,11 @@
 
 namespace Wporg\TranslationEvents;
 
+use Exception;
+use WP_Query;
+
 class Upgrade {
-	private const VERSION        = 2;
+	private const VERSION        = 3;
 	private const VERSION_OPTION = 'wporg_gp_translations_events_version';
 
 	public static function upgrade_if_needed(): void {
@@ -22,6 +25,17 @@ class Upgrade {
 		// Upgrade database schema.
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( self::get_database_schema_sql() );
+
+		// Run version-specific upgrades.
+		$is_running_tests = 'yes' === getenv( 'WPORG_TRANSLATION_EVENTS_TESTS' );
+		if ( $previous_version < 3 && ! $is_running_tests ) {
+			try {
+				self::v3_set_is_new_contributor();
+			} catch ( Exception $e ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( $e );
+			}
+		}
 
 		update_option( self::VERSION_OPTION, self::VERSION );
 	}
@@ -47,10 +61,73 @@ class Upgrade {
 				`event_id` int(10) NOT NULL COMMENT 'Post_ID of the translation_event post in the wp_posts table',
 				`user_id` int(10) NOT NULL COMMENT 'ID of the user who is attending the event',
 				`is_host` tinyint(1) default 0 not null comment 'Whether the user is a host of the event',
+				`is_new_contributor` tinyint(1) default 0 not null comment 'Whether the user is a new translation contributor',
 			PRIMARY KEY (`translate_event_attendees_id`),
 			UNIQUE KEY `event_per_user` (`event_id`,`user_id`),
 			INDEX `user` (`user_id`)
 			) COMMENT='Attendees of events';
 		";
+	}
+
+	/**
+	 * Set is_new_contributor in attendees table for all events.
+	 */
+	private static function v3_set_is_new_contributor(): void {
+		global $wpdb, $gp_table_prefix;
+
+		$query = new WP_Query(
+			array(
+				'post_type'   => Translation_Events::CPT,
+				'post_status' => 'publish',
+			)
+		);
+
+		$events              = $query->get_posts();
+		$event_repository    = Translation_Events::get_event_repository();
+		$attendee_repository = Translation_Events::get_attendee_repository();
+
+		foreach ( $events as $post ) {
+			$event = $event_repository->get_event( $post->ID );
+			if ( ! $event ) {
+				continue;
+			}
+
+			$attendees = $attendee_repository->get_attendees( $event->id() );
+
+			foreach ( $attendees as $attendee ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+				// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+				$translation_count = $wpdb->get_var(
+					$wpdb->prepare(
+						"
+							select count(*) as cnt
+							from {$gp_table_prefix}translations
+							where user_id = %d
+							  and date_added < %s
+						",
+						array(
+							$attendee->user_id(),
+							$event->start()->format( 'Y-m-d H:i:s' ),
+						),
+					)
+				);
+
+				if ( $translation_count > 10 ) {
+					// Not a new contributor.
+					continue;
+				}
+
+				$wpdb->update(
+					"{$gp_table_prefix}event_attendees",
+					array( 'is_new_contributor' => 1 ),
+					array(
+						'event_id' => $attendee->event_id(),
+						'user_id'  => $attendee->user_id(),
+					)
+				);
+				// phpcs:enable
+			}
+		}
 	}
 }

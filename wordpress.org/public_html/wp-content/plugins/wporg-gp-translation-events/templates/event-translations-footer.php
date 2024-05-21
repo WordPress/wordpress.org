@@ -1,3 +1,8 @@
+<?php
+namespace Wporg\TranslationEvents\Templates;
+
+?>
+
 </div>
 <div class="clear"></div>
 <script type="text/javascript">

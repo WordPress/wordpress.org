@@ -97,10 +97,13 @@ class Event_Form_Handler {
 			} catch ( InvalidStatus $e ) {
 				wp_send_json_error( esc_html__( 'Invalid status.', 'gp-translation-events' ), 422 );
 				return;
-			} catch ( InvalidTitle $e ) {
+			}
+
+			if ( empty( $new_event->title() ) ) {
 				wp_send_json_error( esc_html__( 'Invalid title.', 'gp-translation-events' ), 422 );
 				return;
 			}
+
 			if ( $new_event->end() < new DateTime( 'now', new DateTimeZone( 'UTC' ) ) ) {
 				wp_send_json_error( esc_html__( 'Past events cannot be created or edited.', 'gp-translation-events' ), 422 );
 				return;
@@ -169,7 +172,6 @@ class Event_Form_Handler {
 	 * @throws InvalidStart
 	 * @throws InvalidEnd
 	 * @throws InvalidTimeZone
-	 * @throws InvalidTitle
 	 * @throws InvalidStatus
 	 */
 	// phpcs:enable

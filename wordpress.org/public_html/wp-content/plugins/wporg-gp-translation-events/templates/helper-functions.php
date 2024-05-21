@@ -1,4 +1,5 @@
 <?php
+namespace Wporg\TranslationEvents\Templates;
 
 use Wporg\TranslationEvents\Urls;
 

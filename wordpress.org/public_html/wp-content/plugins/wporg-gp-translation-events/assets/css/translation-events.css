@@ -135,7 +135,8 @@ span.event-list-date.events-i-am-attending {
 	font-weight: normal;
 }
 
-.event-list-item a {
+/* Event title. */
+.event-list-item a:first-child {
 	font-weight: bold;
 	font-size: 1.2em;
 }
@@ -143,6 +144,17 @@ span.event-list-date.events-i-am-attending {
 li.event-list-item {
 	list-style-type: none;
 	margin-bottom: .5em;
+}
+
+.event-list-item-button {
+	text-decoration: none;
+	vertical-align: bottom;
+}
+.event-list-item-button:nth-child(2) { /* The first button. */
+	margin-left: .3em;
+}
+.event-list-item-button.is-destructive {
+	color: var(--gp-color-btn-danger-text);
 }
 
 li.event-list-item p {
@@ -179,6 +191,15 @@ h2.event_page_title {
 
 .event-list-nav li:not(:first-child):not(:last-child):before {
 	content: " | ";
+}
+
+.events-links-to-anchors {
+	width: 80%;
+	margin: 0 auto;
+}
+
+.events-links-to-anchors li {
+	list-style-type: square;
 }
 
 .event-left-col {
@@ -331,11 +352,6 @@ span.event-details-date-label {
 	font-weight: bold;
 	color: #5a5a5a;
 	display: block;
-}
-
-.event-host {
-	display: flex;
-	grid-column: 1;
 }
 
 p.event-sub-head {

@@ -2,11 +2,8 @@
 
 namespace Wporg\TranslationEvents\Routes\Event;
 
-use Wporg\TranslationEvents\Attendee\Attendee;
-use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 use Wporg\TranslationEvents\Routes\Route;
-use Wporg\TranslationEvents\Stats\Stats_Importer;
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Urls;
 
@@ -42,13 +39,14 @@ class Trash_Route extends Route {
 		if ( ! $event->is_trashed() ) {
 			// Trash.
 			$this->event_repository->trash_event( $event );
+			wp_safe_redirect( Urls::events_home() );
 		} else {
 			// Restore.
 			$event->set_status( 'draft' );
 			$this->event_repository->update_event( $event );
+			wp_safe_redirect( Urls::event_edit( $event->id() ) );
 		}
 
-		wp_safe_redirect( Urls::event_edit( $event->id() ) );
 		exit;
 	}
 }

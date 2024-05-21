@@ -9,7 +9,6 @@ use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 use Wporg\TranslationEvents\Project\Project_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Stats\Stats_Calculator;
-use Wporg\TranslationEvents\Translation\Translation_Repository;
 use Wporg\TranslationEvents\Translation_Events;
 
 /**
@@ -18,17 +17,15 @@ use Wporg\TranslationEvents\Translation_Events;
 class Details_Route extends Route {
 	private Event_Repository_Interface $event_repository;
 	private Attendee_Repository $attendee_repository;
-	private Translation_Repository $translation_repository;
 	private Project_Repository $project_repository;
 	private Stats_Calculator $stats_calculator;
 
 	public function __construct() {
 		parent::__construct();
-		$this->event_repository       = Translation_Events::get_event_repository();
-		$this->attendee_repository    = Translation_Events::get_attendee_repository();
-		$this->translation_repository = new Translation_Repository();
-		$this->project_repository     = new Project_Repository();
-		$this->stats_calculator       = new Stats_Calculator();
+		$this->event_repository    = Translation_Events::get_event_repository();
+		$this->attendee_repository = Translation_Events::get_attendee_repository();
+		$this->project_repository  = new Project_Repository();
+		$this->stats_calculator    = new Stats_Calculator();
 	}
 
 	public function handle( string $event_slug ): void {
@@ -45,12 +42,6 @@ class Details_Route extends Route {
 		if ( ! current_user_can( 'view_translation_event', $event->id() ) ) {
 			$this->die_with_error( esc_html__( 'You are not authorized to view this page.', 'gp-translation-events' ), 403 );
 		}
-
-		$event_id          = $event->id();
-		$event_title       = $event->title();
-		$event_description = $event->description();
-		$event_start       = $event->start();
-		$event_end         = $event->end();
 
 		$projects              = $this->project_repository->get_for_event( $event->id() );
 		$attendees             = $this->attendee_repository->get_attendees( $event->id() );
@@ -79,20 +70,12 @@ class Details_Route extends Route {
 			}
 		);
 
-		$contributor_ids = array_map(
+		$new_contributor_ids = array_filter(
+			$contributors,
 			function ( Attendee $contributor ) {
-				return $contributor->user_id();
-			},
-			$contributors
-		);
-
-		$new_contributor_ids = array();
-		$translations_counts = $this->translation_repository->count_translations_before( $contributor_ids, $event->start() );
-		foreach ( $translations_counts as $user_id => $count ) {
-			if ( $count <= 10 ) {
-				$new_contributor_ids[ $user_id ] = true;
+				return $contributor->is_new_contributor();
 			}
-		}
+		);
 
 		try {
 			$event_stats = $this->stats_calculator->for_event( $event->id() );
@@ -102,6 +85,20 @@ class Details_Route extends Route {
 			$this->die_with_error( esc_html__( 'Failed to calculate event stats', 'gp-translation-events' ) );
 		}
 
-		$this->tmpl( 'event', get_defined_vars() );
+		$this->tmpl(
+			'event',
+			array(
+				'event'                      => $event,
+				'user_is_attending'          => $user_is_attending,
+				'user_is_contributor'        => $user_is_contributor,
+				'hosts'                      => $hosts,
+				'attendees_not_contributing' => $attendees_not_contributing,
+				'contributors'               => $contributors,
+				'new_contributor_ids'        => $new_contributor_ids,
+				'event_stats'                => $event_stats,
+				'projects'                   => $projects,
+				'user'                       => $user,
+			),
+		);
 	}
 }
