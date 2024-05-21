@@ -1,6 +1,6 @@
 <?php
 
-\WordPressdotorg\skip_to( '#content' );
+\WordPressdotorg\skip_to( '#primary' );
 
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
