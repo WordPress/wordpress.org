@@ -52,20 +52,11 @@ function get_whitelist() {
 			'arush',
 			'audrasjb',
 			'azhiyadev', // @Hauwa Abashiya on Slack
+			'elblakeo31', // @Blake (Equalify)
 			'joedolson',
 			'joesimpsonjr',
 			'nrqsnchz',
 			'rianrietveld',
-			'ryokuhi',
-			'sarahricker',
-		),
-		'accessibility-docs' => array(
-			'sarahricker',
-		),
-		'accessibility-events' => array(
-			'audrasjb',
-			'joedolson',
-			'nrqsnchz',
 			'ryokuhi',
 			'sarahricker',
 		),
