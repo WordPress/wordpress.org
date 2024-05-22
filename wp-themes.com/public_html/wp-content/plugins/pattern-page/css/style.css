@@ -1,5 +1,6 @@
-* {
-	visibility: hidden;
+/* Hide everything outside of the pattern container */
+:not(#wporg-pattern-preview *) {
+	display: none;
 }
 
 /* We take the block and move it above all the visibly hidden content */
