@@ -196,7 +196,7 @@ class Upload {
 					</p>
 
 					<p>
-						<?php _e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the plugin review team examines it.' ); ?>
+						<?php _e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the plugin review team examines it.', 'wporg-plugins' ); ?>
 					</p>
 
 					<ul>
