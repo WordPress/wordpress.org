@@ -9,6 +9,7 @@ use Translation_Entry;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Templates;
 
 /**
  * Displays the event details page.
@@ -58,7 +59,7 @@ class Translations_Route extends Route {
 			$projects[ $ts->translation_set_id ] = GP::$project->get( $ts->project_id );
 
 		}
-		gp_tmpl_load( 'event-translations-header', get_defined_vars(), $this->template_path );
+		Templates::render( 'event-translations-header', get_defined_vars() );
 
 		foreach ( $translation_sets as $ts ) {
 			$rows = $wpdb->get_results(
@@ -170,9 +171,9 @@ class Translations_Route extends Route {
 
 				$translations[ $row->row_id ] = new Translation_Entry( (array) $row );
 			}
-			gp_tmpl_load( 'translations', get_defined_vars(), $this->template_path );
+			Templates::render( 'translations', get_defined_vars() );
 		}
 
-		gp_tmpl_load( 'event-translations-footer', get_defined_vars(), $this->template_path );
+		Templates::render( 'event-translations-footer', get_defined_vars() );
 	}
 }

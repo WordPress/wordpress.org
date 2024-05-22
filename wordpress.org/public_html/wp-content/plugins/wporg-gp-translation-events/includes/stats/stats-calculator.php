@@ -9,14 +9,12 @@ use GP_Locales;
 class Stats_Row {
 	public int $created;
 	public int $reviewed;
-	public int $waiting;
 	public int $users;
 	public ?GP_Locale $language = null;
 
-	public function __construct( $created, $reviewed, $waiting, $users, ?GP_Locale $language = null ) {
+	public function __construct( $created, $reviewed, $users, ?GP_Locale $language = null ) {
 		$this->created  = $created;
 		$this->reviewed = $reviewed;
-		$this->waiting  = $waiting;
 		$this->users    = $users;
 		$this->language = $language;
 	}
@@ -101,18 +99,10 @@ class Stats_Calculator {
 					ea.locale,
 					SUM( ea.action = 'create' ) AS created,
 					count( ea.translate_event_actions_id ) AS total,
-					SUM( t.status = 'waiting' ) AS waiting,
 					COUNT( DISTINCT ea.user_id ) AS users
-				FROM
-					{$gp_table_prefix}event_actions AS ea
-				LEFT JOIN
-					{$gp_table_prefix}translation_sets AS ts ON ea.locale = ts.locale
-				LEFT JOIN
-					{$gp_table_prefix}translations AS t ON ea.original_id = t.original_id
+				FROM {$gp_table_prefix}event_actions AS ea
 				WHERE
 					ea.event_id = %d
-					AND ts.id = t.translation_set_id
-					AND t.status IN ( 'current', 'waiting', 'fuzzy', 'changesrequested' )
 				GROUP BY
 					ea.locale with rollup;
 			",
@@ -138,15 +128,9 @@ class Stats_Calculator {
 				$lang = null;
 			}
 
-			if ( is_null( $row->waiting ) ) {
-				// The corresponding translations are missing. Could be a unit test or data corruption.
-				$row->waiting = 0;
-			}
-
 			$stats_row = new Stats_Row(
 				$row->created,
 				$row->total - $row->created,
-				$row->waiting,
 				$row->users,
 				$lang
 			);

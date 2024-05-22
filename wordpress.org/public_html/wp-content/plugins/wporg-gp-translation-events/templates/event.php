@@ -134,7 +134,6 @@ Templates::header(
 					<tr>
 						<th scope="col"><?php esc_html_e( 'Translations', 'gp-translation-events' ); ?></th>
 						<th scope="col"><?php esc_html_e( 'Created', 'gp-translation-events' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Waiting', 'gp-translation-events' ); ?></th>
 						<th scope="col"><?php esc_html_e( 'Reviewed', 'gp-translation-events' ); ?></th>
 						<th scope="col"><?php esc_html_e( 'Contributors', 'gp-translation-events' ); ?></th>
 					</tr>
@@ -145,7 +144,6 @@ Templates::header(
 					<tr>
 						<td title="<?php echo esc_html( $_locale ); ?> "><a href="<?php echo esc_url( gp_url_join( gp_url( '/languages' ), $row->language->slug ) ); ?>"><?php echo esc_html( $row->language->english_name ); ?></a></td>
 						<td><a href="<?php echo esc_url( Urls::event_translations( $event->id(), $row->language->slug ) ); ?>"><?php echo esc_html( $row->created ); ?></a></td>
-						<td><a href="<?php echo esc_url( Urls::event_translations( $event->id(), $row->language->slug, 'waiting' ) ); ?>"><?php echo esc_html( $row->waiting ); ?></a></td>
 						<td><?php echo esc_html( $row->reviewed ); ?></td>
 						<td><?php echo esc_html( $row->users ); ?></td>
 					</tr>
@@ -153,7 +151,6 @@ Templates::header(
 					<tr class="event-details-stats-totals">
 						<td>Total</td>
 						<td><?php echo esc_html( $event_stats->totals()->created ); ?></td>
-						<td><?php echo esc_html( $event_stats->totals()->waiting ); ?></td>
 						<td><?php echo esc_html( $event_stats->totals()->reviewed ); ?></td>
 						<td><?php echo esc_html( $event_stats->totals()->users ); ?></td>
 					</tr>
