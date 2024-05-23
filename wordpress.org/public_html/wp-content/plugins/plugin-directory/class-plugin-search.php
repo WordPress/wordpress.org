@@ -21,6 +21,8 @@ class Plugin_Search {
 	protected $en_boost        = 0.00001;
 	protected $desc_boost      = 1;
 	protected $desc_en_boost   = 0.00001;
+	protected $title_boost     = 1;
+	protected $title_en_boost  = 0.5;
 
 	/**
 	 * Fetch the instance of the Plugin_Search class.
@@ -172,6 +174,9 @@ class Plugin_Search {
 			if ( 'description' === $field ) {
 				$boost = '^' . $this->desc_boost;
 				$en_boost = '^' . $this->desc_en_boost;
+			} elseif ( 'title' === $field ) {
+				$boost = '^' . $this->title_boost;
+				$en_boost = '^' . $this->title_en_boost;
 			}
 
 			$localised_fields[] = $field . '_' . $this->locale . $type . $boost;
@@ -203,6 +208,9 @@ class Plugin_Search {
 		// so rather than 0.1 we use a much smaller multiplier of en content
 		$this->en_boost             = 0.00001;
 		$this->desc_en_boost        = $this->desc_boost * $this->en_boost;
+
+		// Most locales don't translate the title, so we only need to boost the title slightly lower.
+		$this->title_en_boost       = $this->title_boost * 0.5;
 
 		// We need to be locale aware for this
 		$this->locale     = get_locale();
@@ -352,11 +360,11 @@ class Plugin_Search {
 				// For plugins with less than 1 million installs, we need to adjust their scores a bit more.
 				'filter' => [
 					'range' => [
-							'active_installs' => [
-								'lte' => 1000000,
-							],
+						'active_installs' => [
+							'lte' => 1000000,
 						],
 					],
+				],
 				'exp' => [
 					'active_installs' => [
 						'origin' => 1000000,
