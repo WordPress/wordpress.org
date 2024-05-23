@@ -316,7 +316,7 @@ class Upload {
 							}
 
 							echo '<li>';
-							echo '<strong>' . __( 'Submitted files:', 'wporg' ) . '</strong><ol>';
+							echo '<strong>' . __( 'Submitted files:', 'wporg-plugins' ) . '</strong><ol>';
 							foreach ( $attached_media as $attachment_post_id => $upload ) {
 								echo '<li><ul>';
 								echo '<li><code>' . esc_html( $upload->submitted_name ) . '</code></li>';
