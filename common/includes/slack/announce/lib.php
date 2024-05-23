@@ -44,6 +44,11 @@ function get_whitelist_for_channel( $channel ) {
 	$parent_channels = get_parent_channels( $channel );
 
 	foreach ( (array) $parent_channels as $parent ) {
+		// Avoid any circular references.
+		if ( ! $parent || $parent === $channel ) {
+			continue;
+		}
+
 		$users = array_merge( $users, $whitelist[ $parent ] ?? [] );
 	}
 
@@ -132,11 +137,11 @@ function get_parent_channels( $channel ) {
 
 	// Some channels parents are not a 1:1 match.
 	switch ( $root ) {
-		case 'accessibility':
 		case 'design':
 		case 'feature':
 		case 'performance':
 		case 'tide':
+		case 'core':
 			$root = 'core';
 			break;
 		case 'mentorship': // Such as #mentorship-cohort-july-2023
@@ -152,23 +157,26 @@ function get_parent_channels( $channel ) {
 		$root = 'core';
 	}
 
-	// No parent channel!
-	if ( $root === $channel ) {
-		return false;
-	}
-
 	$parent_channels = [];
 
 	// For when a channel has multiple parents.
-	switch ( $channel ) {
-		case 'meta-learn':
-			$parent_channels[] = 'training';
-			// Intentional Fallthrough.
-		default:
-			// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel.
-			if ( get_whitelist_for_channel( $root ) ) {
-				$parent_channels[] = $root;
-			}
+
+	// Accessibility is a sub-team of Core, but is a parent channel itself.
+	if ( 'accessibility' === $root ) {
+		$parent_channels[] = 'core';
+	}
+
+	// Learn is a sub-team of Training, plus of #meta.
+	if ( 'meta-learn' === $channel ) {
+		$parent_channels[] = 'training';
+	}
+
+	// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel.
+	if (
+		$root !== $channel &&
+		get_whitelist_for_channel( $root )
+	) {
+		$parent_channels[] = $root;
 	}
 
 	return array_unique( $parent_channels ) ?: false;
