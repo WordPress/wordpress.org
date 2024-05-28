@@ -8,6 +8,7 @@ use GP_Translation;
 use WordPressdotorg\GlotPress\Customizations\CLI\Stats;
 use WordPressdotorg\GlotPress\Customizations\CLI\Duplicate_Translations;
 use WP_CLI;
+use WP_User;
 use function WordPressdotorg\Profiles\assign_badge;
 
 class Plugin {
@@ -26,6 +27,20 @@ class Plugin {
 	 * @var string The source of translations that have been imported.
 	 */
 	private string $imported_source = '';
+
+	/**
+	 * The cache key for the list of GTE email addresses.
+	 *
+	 * @var string
+	 */
+	const GTE_EMAIL_ADDRESSES = 'wporg_gte_email_addresses';
+
+	/**
+	 * The cache group for the list of GTE email addresses.
+	 *
+	 * @var string
+	 */
+	const CACHE_GROUP = 'wporg-translate';
 
 	/**
 	 * Returns always the same instance of this plugin.
@@ -94,6 +109,9 @@ class Plugin {
 
 		// Correct `WP_Locale` for variant locales in project lists.
 		add_filter( 'gp_translation_sets_sort', [ $this, 'filter_gp_translation_sets_sort' ] );
+
+		// CRUD permission for the translation events.
+		add_filter( 'gp_translation_events_can_crud_event', array( $this, 'gp_translation_events_can_crud_event' ), 10, 1 );
 
 		// Add site tour items.
 		if ( isset( $_GET['site_tour'] ) && 'test' == $_GET['site_tour'] ) {
@@ -794,5 +812,104 @@ class Plugin {
 
 		$reasons = isset( $locale_reasons[ $locale ] ) ? $locale_reasons[ $locale ] : array();
 		return array_merge( $default_reasons, $reasons );
+	}
+
+	/**
+	 * Filter the permission to CRUD events for the user.
+	 *
+	 * wp-org-translation-events plugin.
+	 *
+	 * @param bool $can_crud_event Whether the user can CRUD events.
+	 *
+	 * @return bool Whether the user can CRUD events.
+	 */
+	public function gp_translation_events_can_crud_event( bool $can_crud_event ): bool {
+		$user = wp_get_current_user();
+
+		if ( GP::$permission->user_can( $user, 'admin' ) ) {
+			return true;
+		}
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+		if ( self::is_user_a_wporg_gte( $user ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Indicates if the given user is a GTE at translate.wordpress.org.
+	 *
+	 * Caches the GTE email addresses for 12 hours.
+	 *
+	 * @param WP_User $user A user object.
+	 *
+	 * @return bool Whether the user is GTE for any of the languages to which the comments in the post belong.
+	 */
+	public static function is_user_a_wporg_gte( WP_User $user ): bool {
+		$locales             = GP_Locales::locales();
+		$gte_email_addresses = wp_cache_get( self::GTE_EMAIL_ADDRESSES, self::CACHE_GROUP );
+
+		if ( false === $gte_email_addresses ) {
+			$gte_email_addresses = array();
+			foreach ( $locales as $locale ) {
+				foreach ( self::get_gte_email_addresses( $locale->slug ) as $email ) {
+					$gte_email_addresses[] = $email;
+				}
+			}
+			$gte_email_addresses = array_unique( $gte_email_addresses );
+
+			wp_cache_set( self::GTE_EMAIL_ADDRESSES, $gte_email_addresses, self::CACHE_GROUP, 12 * HOUR_IN_SECONDS );
+		}
+
+		if ( in_array( array( $user->user_email ), $gte_email_addresses ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Gets the general translation editors (GTE) emails for the given locale.
+	 *
+	 * @param string $locale The locale. E.g. 'zh-tw'.
+	 *
+	 * @return array The general translation editors (GTE) emails.
+	 */
+	public static function get_gte_email_addresses( string $locale ): array {
+		$email_addresses = array();
+
+		$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
+			return $email_addresses;
+		}
+		$result  = get_sites(
+			array(
+				'locale'     => $gp_locale->wp_locale,
+				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'path'       => '/',
+				'fields'     => 'ids',
+				'number'     => '1',
+			)
+		);
+		$site_id = array_shift( $result );
+		if ( ! $site_id ) {
+			return $email_addresses;
+		}
+
+		$users = get_users(
+			array(
+				'blog_id'     => $site_id,
+				'role'        => 'general_translation_editor',
+				'count_total' => false,
+			)
+		);
+		foreach ( $users as $user ) {
+			$email_addresses[] = $user->data->user_email;
+		}
+
+		return $email_addresses;
 	}
 }
