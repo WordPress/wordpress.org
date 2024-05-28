@@ -25,6 +25,8 @@ class Attendee_Repository {
 			),
 		);
 		// phpcs:enable
+
+		wp_cache_delete( 'events_for_user_' . $attendee->user_id() );
 	}
 
 	/**
@@ -81,52 +83,84 @@ class Attendee_Repository {
 		);
 
 		// phpcs:enable
+		wp_cache_delete( 'events_for_user_' . $user_id );
 	}
 
 	/**
 	 * @throws Exception
 	 */
-	public function get_attendee( int $event_id, int $user_id ): ?Attendee {
+	public function get_attendee_for_event_for_user( int $event_id, int $user_id ): ?Attendee {
+		$attendees = $this->get_attendees_for_events_for_user( array( $event_id ), $user_id );
+		if ( 1 !== count( $attendees ) ) {
+			return null;
+		}
+		return $attendees[ $event_id ];
+	}
+
+	/**
+	 * @var int[] $event_ids
+	 * @return Attendee[] Associative array with event id as key.
+	 * @throws Exception
+	 */
+	public function get_attendees_for_events_for_user( array $event_ids, int $user_id ): array {
+		if ( empty( $event_ids ) ) {
+			return array();
+		}
+
+		// Prevent SQL injection.
+		foreach ( $event_ids as $event_id ) {
+			if ( is_numeric( $event_id ) ) {
+				$event_id = intval( $event_id );
+			}
+			if ( ! is_int( $event_id ) || $event_id <= 0 ) {
+				return array();
+			}
+		}
+
 		global $wpdb, $gp_table_prefix;
+		$event_id_params = implode( ',', array_fill( 0, count( $event_ids ), '%d' ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		$row = $wpdb->get_row(
+		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"
-				select
-					user_id,
-					is_host,
-					is_new_contributor,
-					(
-						select group_concat( distinct locale )
-						from {$gp_table_prefix}event_actions
-						where event_id = attendees.event_id
-						  and user_id = attendees.user_id
-					) as locales
-				from {$gp_table_prefix}event_attendees attendees
-				where event_id = %d
-				  and user_id = %d
-			",
-				array(
-					$event_id,
-					$user_id,
-				),
-			)
+					select
+						event_id,
+						user_id,
+						is_host,
+						is_new_contributor,
+						(
+							select group_concat( distinct locale )
+							from {$gp_table_prefix}event_actions
+							where event_id = attendees.event_id
+							  and user_id = attendees.user_id
+						) as locales
+					from {$gp_table_prefix}event_attendees attendees
+					where event_id in ($event_id_params)
+					  and user_id = %d
+				",
+				array_merge(
+					$event_ids,
+					array( $user_id ),
+				)
+			),
+			OBJECT_K
 		);
 		// phpcs:enable
 
-		if ( ! $row ) {
-			return null;
-		}
-
-		return new Attendee(
-			$event_id,
-			$row->user_id,
-			'1' === $row->is_host,
-			'1' === $row->is_new_contributor,
-			null === $row->locales ? array() : explode( ',', $row->locales ),
+		return array_map(
+			function ( $row ) {
+				return new Attendee(
+					$row->event_id,
+					$row->user_id,
+					'1' === $row->is_host,
+					'1' === $row->is_new_contributor,
+					null === $row->locales ? array() : explode( ',', $row->locales ),
+				);
+			},
+			$rows,
 		);
 	}
 
@@ -211,43 +245,6 @@ class Attendee_Repository {
 			function ( Attendee $attendee ) {
 				return $attendee->is_host();
 			}
-		);
-	}
-
-	/**
-	 * @deprecated
-	 * TODO: This method should be moved out of this class because it's not about attendance,
-	 *       it returns events that match a condition (have a user as attendee), so it belongs in an event repository.
-	 *       However, since we don't have an event repository yet, the method is placed here for now.
-	 *       When the method is moved to an event repository, it should return Event instances instead of event ids.
-	 *
-	 * @return int[] Event ids.
-	 */
-	public function get_events_for_user( int $user_id ): array {
-		global $wpdb, $gp_table_prefix;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-				select event_id
-				from {$gp_table_prefix}event_attendees
-				where user_id = %d
-			",
-				array(
-					$user_id,
-				)
-			)
-		);
-		// phpcs:enable
-
-		return array_map(
-			function ( object $row ) {
-				return intval( $row->event_id );
-			},
-			$rows
 		);
 	}
 }

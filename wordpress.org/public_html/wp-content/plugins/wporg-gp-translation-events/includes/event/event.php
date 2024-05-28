@@ -57,7 +57,9 @@ class Event {
 		string $description
 	) {
 		$this->author_id = $author_id;
-		$this->set_times( $start, $end );
+		$this->validate_times( $start, $end );
+		$this->set_start( $start );
+		$this->set_end( $end );
 		$this->set_timezone( $timezone );
 		$this->set_status( $status );
 		$this->set_title( $title );
@@ -129,13 +131,12 @@ class Event {
 		$this->slug = $slug;
 	}
 
-	/**
-	 * @throws InvalidStart|InvalidEnd
-	 */
-	public function set_times( Event_Start_Date $start, Event_End_Date $end ): void {
-		$this->validate_times( $start, $end );
+	public function set_start( Event_Start_Date $start ): void {
 		$this->start = $start;
-		$this->end   = $end;
+	}
+
+	public function set_end( Event_End_Date $end ): void {
+		$this->end = $end;
 	}
 
 	public function set_timezone( DateTimeZone $timezone ): void {
@@ -164,7 +165,7 @@ class Event {
 	 * @throws InvalidStart
 	 * @throws InvalidEnd
 	 */
-	private function validate_times( Event_Start_Date $start, Event_End_Date $end ) {
+	public function validate_times( Event_Start_Date $start, Event_End_Date $end ) {
 		if ( $end <= $start ) {
 			throw new InvalidEnd();
 		}

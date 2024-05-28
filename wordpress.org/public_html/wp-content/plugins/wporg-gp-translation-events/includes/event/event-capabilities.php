@@ -5,18 +5,25 @@ namespace Wporg\TranslationEvents\Event;
 use Exception;
 use GP;
 use WP_User;
+use DateTimeImmutable;
+use DateTimeZone;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Stats\Stats_Calculator;
 
 class Event_Capabilities {
-	private const MANAGE         = 'manage_translation_events';
-	private const CREATE         = 'create_translation_event';
-	private const VIEW           = 'view_translation_event';
-	private const EDIT           = 'edit_translation_event';
-	private const TRASH          = 'trash_translation_event';
-	private const DELETE         = 'delete_translation_event';
-	private const EDIT_ATTENDEES = 'edit_translation_event_attendees';
+	private const MANAGE           = 'manage_translation_events';
+	private const CREATE           = 'create_translation_event';
+	private const VIEW             = 'view_translation_event';
+	private const EDIT             = 'edit_translation_event';
+	private const TRASH            = 'trash_translation_event';
+	private const DELETE           = 'delete_translation_event';
+	private const EDIT_ATTENDEES   = 'edit_translation_event_attendees';
+	private const EDIT_TITLE       = 'edit_translation_event_title';
+	private const EDIT_DESCRIPTION = 'edit_translation_event_description';
+	private const EDIT_START       = 'edit_translation_event_start';
+	private const EDIT_END         = 'edit_translation_event_end';
+	private const EDIT_TIMEZONE    = 'edit_translation_event_timezone';
 
 	/**
 	 * All the capabilities that concern Events.
@@ -29,6 +36,11 @@ class Event_Capabilities {
 		self::TRASH,
 		self::DELETE,
 		self::EDIT_ATTENDEES,
+		self::EDIT_TITLE,
+		self::EDIT_DESCRIPTION,
+		self::EDIT_START,
+		self::EDIT_END,
+		self::EDIT_TIMEZONE,
 	);
 
 	private Event_Repository_Interface $event_repository;
@@ -64,6 +76,11 @@ class Event_Capabilities {
 			case self::TRASH:
 			case self::DELETE:
 			case self::EDIT_ATTENDEES:
+			case self::EDIT_TITLE:
+			case self::EDIT_DESCRIPTION:
+			case self::EDIT_START:
+			case self::EDIT_END:
+			case self::EDIT_TIMEZONE:
 				if ( ! isset( $args[2] ) || ! is_numeric( $args[2] ) ) {
 					return false;
 				}
@@ -86,6 +103,9 @@ class Event_Capabilities {
 				}
 				if ( self::EDIT_ATTENDEES === $cap ) {
 					return $this->has_edit_attendees( $user, $event );
+				}
+				if ( self::EDIT_TITLE === $cap || self::EDIT_DESCRIPTION === $cap || self::EDIT_START === $cap || self::EDIT_END === $cap || self::EDIT_TIMEZONE === $cap ) {
+					return $this->has_edit_field( $user, $event, $cap );
 				}
 				break;
 		}
@@ -136,14 +156,6 @@ class Event_Capabilities {
 	 * @return bool
 	 */
 	private function has_edit( WP_User $user, Event $event ): bool {
-		if ( $event->end()->is_in_the_past() ) {
-			return false;
-		}
-
-		if ( $this->stats_calculator->event_has_stats( $event->id() ) ) {
-			return false;
-		}
-
 		if ( $event->author_id() === $user->ID ) {
 			return true;
 		}
@@ -152,7 +164,7 @@ class Event_Capabilities {
 			return true;
 		}
 
-		$attendee = $this->attendee_repository->get_attendee( $event->id(), $user->ID );
+		$attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event->id(), $user->ID );
 		if ( ( $attendee instanceof Attendee ) && $attendee->is_host() ) {
 			return true;
 		}
@@ -186,7 +198,7 @@ class Event_Capabilities {
 			return true;
 		}
 
-		$attendee = $this->attendee_repository->get_attendee( $event->id(), $user->ID );
+		$attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event->id(), $user->ID );
 		if ( ( $attendee instanceof Attendee ) && $attendee->is_host() ) {
 			return true;
 		}
@@ -232,9 +244,46 @@ class Event_Capabilities {
 			return true;
 		}
 
-		$attendee = $this->attendee_repository->get_attendee( $event->id(), $user->ID );
+		$attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event->id(), $user->ID );
 		if ( ( $attendee instanceof Attendee ) && $attendee->is_host() ) {
 			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Evaluate whether a user can edit event title for a specific event.
+	 *
+	 * @param WP_User $user  User for which we're evaluating the capability.
+	 * @param Event   $event Event for which we're evaluating the capability.
+	 * @return bool
+	 */
+	private function has_edit_field( WP_User $user, Event $event, $cap ): bool {
+		$now                 = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+		$event_end_plus_1_hr = $event->end()->modify( '+1 hour' );
+
+		if ( self::EDIT_DESCRIPTION === $cap ) {
+			return true;
+		}
+
+		if ( $event->start() > $now ) {
+			return true;
+		}
+
+		if ( $event->is_active() && ! $this->stats_calculator->event_has_stats( $event->id() ) ) {
+			return true;
+		}
+
+		if ( $event->is_active() && $this->stats_calculator->event_has_stats( $event->id() ) ) {
+			return ( self::EDIT_TITLE === $cap || self::EDIT_END === $cap );
+		}
+
+		if ( $event->end()->is_in_the_past() && $now < $event_end_plus_1_hr ) {
+			return ( self::EDIT_TITLE === $cap || self::EDIT_END === $cap );
+		}
+		if ( $event->end()->is_in_the_past() && $now > $event_end_plus_1_hr ) {
+			return ( self::EDIT_DESCRIPTION === $cap );
 		}
 
 		return false;

@@ -111,6 +111,7 @@ class Translation_Events {
 		GP::$router->add( "/events/edit/$id", array( 'Wporg\TranslationEvents\Routes\Event\Edit_Route', 'handle' ) );
 		GP::$router->add( "/events/trash/$id", array( 'Wporg\TranslationEvents\Routes\Event\Trash_Route', 'handle' ) );
 		GP::$router->add( "/events/delete/$id", array( 'Wporg\TranslationEvents\Routes\Event\Delete_Route', 'handle' ) );
+		GP::$router->add( "/events/image/$id", array( 'Wporg\TranslationEvents\Routes\Event\Image_Route', 'handle' ) );
 		GP::$router->add( "/events/attend/$id", array( 'Wporg\TranslationEvents\Routes\User\Attend_Event_Route', 'handle' ), 'post' );
 		GP::$router->add( "/events/host/$id/$id", array( 'Wporg\TranslationEvents\Routes\User\Host_Event_Route', 'handle' ), 'post' );
 		GP::$router->add( '/events/my-events', array( 'Wporg\TranslationEvents\Routes\User\My_Events_Route', 'handle' ) );
@@ -120,10 +121,7 @@ class Translation_Events {
 		GP::$router->add( "/events/$slug/attendees", array( 'Wporg\TranslationEvents\Routes\Attendee\List_Route', 'handle' ) );
 		GP::$router->add( "/events/$id/attendees/remove/$id", array( 'Wporg\TranslationEvents\Routes\Attendee\Remove_Attendee_Route', 'handle' ) );
 
-		$stats_listener = new Stats_Listener(
-			self::get_event_repository(),
-			self::get_attendee_repository(),
-		);
+		$stats_listener = new Stats_Listener( self::get_event_repository() );
 		$stats_listener->start();
 	}
 
@@ -258,7 +256,11 @@ class Translation_Events {
 
 	public function register_translation_event_js() {
 		wp_register_style( 'translation-events-css', plugins_url( 'assets/css/translation-events.css', __FILE__ ), array( 'dashicons' ), filemtime( __DIR__ . '/assets/css/translation-events.css' ) );
-		gp_enqueue_style( 'translation-events-css' );
+		gp_enqueue_styles( 'translation-events-css' );
+		if ( $this->should_load_new_design() ) {
+			wp_register_style( 'new-dotorg-design-css', plugins_url( 'assets/css/new-dotorg-design.css', __FILE__ ), array( 'dashicons' ), filemtime( __DIR__ . '/assets/css/new-dotorg-design.css' ) );
+			gp_enqueue_styles( 'new-dotorg-design-css' );
+		}
 		wp_register_script( 'translation-events-js', plugins_url( 'assets/js/translation-events.js', __FILE__ ), array( 'jquery', 'gp-common' ), filemtime( __DIR__ . '/assets/js/translation-events.js' ), false );
 		gp_enqueue_script( 'translation-events-js' );
 		wp_localize_script(
@@ -294,7 +296,7 @@ class Translation_Events {
 
 			$user_id             = $post->post_author;
 			$attendee_repository = self::get_attendee_repository();
-			$attendee            = $attendee_repository->get_attendee( $event->id(), $user_id );
+			$attendee            = $attendee_repository->get_attendee_for_event_for_user( $event->id(), $user_id );
 
 			if ( null === $attendee ) {
 				$attendee = new Attendee( $event->id(), $user_id, true );
@@ -430,6 +432,15 @@ class Translation_Events {
 			return $slug;
 		}
 		return $override_slug;
+	}
+
+	/**
+	 * Check if the current site is a translate.wordpress.org or a development TLD.
+	 *
+	 * @return bool
+	 */
+	private function should_load_new_design(): bool {
+		return defined( 'TRANSLATION_EVENTS_NEW_DESIGN' ) && TRANSLATION_EVENTS_NEW_DESIGN;
 	}
 }
 Translation_Events::get_instance();

@@ -27,16 +27,19 @@ use Wporg\TranslationEvents\Urls;
 Templates::header(
 	array(
 		/* translators: %s: Event title. */
-		'html_title'  => sprintf( __( 'Translation Events - %s' ), esc_html( $event->title() ) ),
-		'page_title'  => function () use ( $event ) {
+		'html_title'       => sprintf( __( 'Translation Events - %s' ), esc_html( $event->title() ) ),
+		'page_title'       => function () use ( $event ) {
 			echo esc_html( $event->title() );
 			if ( 'draft' === $event->status() ) : ?>
 				<span class="event-label-draft"><?php echo esc_html( $event->status() ); ?></span>
 			<?php endif; ?>
 			<?php
 		},
-		'breadcrumbs' => array( esc_html( $event->title() ) ),
-		'sub_head'    => function () use ( $event, $user, $hosts ) {
+		'html_description' => $event->description(),
+		'url'              => Urls::event_details_absolute( $event->id() ),
+		'image_url'        => Urls::event_image( $event->id() ),
+		'breadcrumbs'      => array( esc_html( $event->title() ) ),
+		'sub_head'         => function () use ( $event, $user, $hosts ) {
 			?>
 			<span class="event-host">
 				<?php

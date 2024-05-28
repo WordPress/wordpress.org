@@ -47,10 +47,10 @@ class Remove_Attendee_Route extends Route {
 			$this->die_with_error( esc_html__( 'You do not have permission to edit this event.', 'gp-translation-events' ), 403 );
 		}
 
-		$attendee = $this->attendee_repository->get_attendee( $event->id(), $user_id );
+		$attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event->id(), $user_id );
 		if ( $attendee instanceof Attendee ) {
 			if ( ! current_user_can( 'edit_translation_event_attendees', $event->id() ) ) {
-				$this->die_with_error( esc_html__( 'You do not have permission to remove this attendee.', 'gp-translation-events' ), 400 );
+				$this->die_with_error( esc_html__( 'You do not have permission to remove this attendee.', 'gp-translation-events' ), 403 );
 			}
 			$this->attendee_repository->remove_attendee( $event->id(), $user_id );
 		}

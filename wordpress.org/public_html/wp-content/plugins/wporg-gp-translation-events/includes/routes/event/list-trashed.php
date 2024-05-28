@@ -25,7 +25,7 @@ class List_Trashed_Route extends Route {
 		}
 
 		if ( ! current_user_can( 'manage_translation_events' ) ) {
-			$this->die_with_error( 'You do not have permission to manage events.' );
+			$this->die_with_error( 'You do not have permission to manage events.', 403 );
 		}
 
 		$current_page = 1;

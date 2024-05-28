@@ -49,6 +49,26 @@ class Urls {
 		return gp_url( '/events/new/' );
 	}
 
+	/**
+	 * Returns the absolute URL to the image for the event.
+	 *
+	 * @param int $event_id The event ID.
+	 *
+	 * @return string
+	 */
+	public static function event_image( int $event_id ): string {
+		return home_url( gp_url( "events/image/$event_id" ) );
+	}
+
+	/**
+	 * Returns the absolute URL to the default event image.
+	 *
+	 * @return string
+	 */
+	public static function event_default_image(): string {
+		return self::event_image( 0 );
+	}
+
 	public static function event_toggle_attendee( int $event_id ): string {
 		return gp_url( "/events/attend/$event_id" );
 	}

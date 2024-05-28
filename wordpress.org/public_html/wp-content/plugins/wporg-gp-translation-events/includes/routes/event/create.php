@@ -21,7 +21,7 @@ class Create_Route extends Route {
 		}
 
 		if ( ! current_user_can( 'create_translation_event' ) ) {
-			$this->die_with_error( 'You do not have permission to create events.' );
+			$this->die_with_error( 'You do not have permission to create events.', 403 );
 		}
 
 		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );

@@ -123,6 +123,11 @@ span.event-not-attending {
 	display: inline-block;
 }
 
+/* Event list */
+li.event-list-item {
+	list-style-type: none;
+	margin-bottom: .5em;
+}
 span.event-list-date {
 	display: block;
 	color: #939393;
@@ -130,28 +135,48 @@ span.event-list-date {
 	font-weight: normal;
 }
 
-span.event-list-date.events-i-am-attending {
-	font-size: .8em;
-	font-weight: normal;
-}
-
-/* Event title. */
+/* Event list: Event title. */
 .event-list-item a:first-child {
 	font-weight: bold;
 	font-size: 1.2em;
 }
 
-li.event-list-item {
-	list-style-type: none;
-	margin-bottom: .5em;
+/* Event list: Event labels. */
+.event-list-item-labels {
+	margin-right: .3em;
+}
+.event-list-item-labels > span {
+	font-weight: 500;
+	color: var(--gp-color-white);
+	font-size: .7em;
+	margin-right: 0.3em;
+	width: 6em;
+	text-align: center;
+	padding: 0.2em 0.5em;
+	border-radius: 1em;
+	text-transform: capitalize;
+}
+.event-list-item-label-draft {
+	background-color: var(--gp-color-attention-fg);
+	color: var(--gp-color-secondary) !important;
+}
+.event-list-item-label-hosting {
+	background-color: var(--gp-color-accent-fg);
+}
+.event-list-item-label-attending {
+	background-color: var(--gp-color-accent-fg);
+}
+.event-list-item-label-hosted {
+	background-color: var(--gp-color-success-fg);
+}
+.event-list-item-label-attended {
+	background-color: var(--gp-color-success-fg);
 }
 
+/* Event list: Event buttons. */
 .event-list-item-button {
 	text-decoration: none;
 	vertical-align: bottom;
-}
-.event-list-item-button:nth-child(2) { /* The first button. */
-	margin-left: .3em;
 }
 .event-list-item-button.is-destructive {
 	color: var(--gp-color-btn-danger-text);
@@ -193,15 +218,6 @@ h2.event_page_title {
 	content: " | ";
 }
 
-.events-links-to-anchors {
-	width: 80%;
-	margin: 0 auto;
-}
-
-.events-links-to-anchors li {
-	list-style-type: square;
-}
-
 .event-left-col {
 	width: 75%;
 	float: left;
@@ -232,8 +248,6 @@ a.event-link-draft {
 	color: #80807f;
 }
 
-span.event-label-draft,
-span.event-details-join-expired,
 span.active-events-before-translation-table {
 	font-weight: 500;
 	color: var(--gp-color-bubble-inactive-project-text);

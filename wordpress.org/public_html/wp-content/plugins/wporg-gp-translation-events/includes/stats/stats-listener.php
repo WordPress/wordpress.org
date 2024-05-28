@@ -7,8 +7,6 @@ use DateTimeZone;
 use Exception;
 use GP_Translation;
 use GP_Translation_Set;
-use Wporg\TranslationEvents\Attendee\Attendee_Repository;
-use Wporg\TranslationEvents\Event\Event;
 use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 
 class Stats_Listener {
@@ -17,15 +15,10 @@ class Stats_Listener {
 	const ACTION_REJECT          = 'reject';
 	const ACTION_REQUEST_CHANGES = 'request_changes';
 
-	private Attendee_Repository $attendee_repository;
 	private Event_Repository_Interface $event_repository;
 
-	public function __construct(
-		Event_Repository_Interface $event_repository,
-		Attendee_Repository $attendee_repository
-	) {
-		$this->event_repository    = $event_repository;
-		$this->attendee_repository = $attendee_repository;
+	public function __construct( Event_Repository_Interface $event_repository ) {
+		$this->event_repository = $event_repository;
 	}
 
 	public function start(): void {
@@ -76,9 +69,8 @@ class Stats_Listener {
 
 	private function handle_action( GP_Translation $translation, int $user_id, string $action, DateTimeImmutable $happened_at ): void {
 		try {
-			// Get events that are active when the action happened, for which the user is registered for.
-			$active_events = $this->event_repository->get_current_events();
-			$events        = $this->select_events_user_is_registered_for( $active_events->events, $user_id );
+			// Get events that are active now, for which the user is registered for.
+			$events = $this->event_repository->get_current_events_for_user( $user_id )->events;
 
 			// phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			/** @var GP_Translation_Set $translation_set Translation set */
@@ -113,24 +105,4 @@ class Stats_Listener {
 			error_log( $exception );
 		}
 	}
-
-	/**
-	 * Filter an array of events so that it only includes events the given user is attending.
-	 *
-	 * @param Event[] $events Events.
-	 *
-	 * @return Event[]
-	 */
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
-	private function select_events_user_is_registered_for( array $events, int $user_id ): array {
-		$attending_event_ids = $this->attendee_repository->get_events_for_user( $user_id );
-		return array_filter(
-			$events,
-			function ( Event $event ) use ( $attending_event_ids ) {
-				return in_array( $event->id(), $attending_event_ids, true );
-			}
-		);
-	}
-	// phpcs:enable
 }

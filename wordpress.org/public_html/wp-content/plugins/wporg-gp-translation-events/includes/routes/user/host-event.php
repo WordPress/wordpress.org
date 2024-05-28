@@ -49,7 +49,7 @@ class Host_Event_Route extends Route {
 			$this->die_with_404();
 		}
 
-		$affected_attendee = $this->attendee_repository->get_attendee( $event_id, $user_id );
+		$affected_attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event_id, $user_id );
 		// The user is attending to the event, so if I don't find the attendee, I won't create it.
 		if ( $affected_attendee instanceof Attendee ) {
 			if ( $affected_attendee->is_host() ) {

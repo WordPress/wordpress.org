@@ -1,0 +1,53 @@
+/* This style is copied from
+https://github.com/WordPress/wporg-mu-plugins/blob/4ab57d37d930c8b8526458fc510568d0fb0050f8/mu-plugins/blocks/global-header-footer/postcss/_common.pcss
+ */
+body {
+	--wp--preset--color--charcoal-2: #23282d;
+	--wp-global-header--background-color: var(--wp--preset--color--charcoal-2);
+	--wp--preset--color--charcoal-4: #656a71;
+	--wp--preset--color--white-opacity-15: #ffffff26;
+}
+
+header#masthead.site-header {
+	height: 60px;
+	gap: 80px;
+	border-top: 1px solid var(--wp--preset--color--white-opacity-15);
+	background-color: var(--wp-global-header--background-color);
+	div.site-branding {
+		p.site-title {
+			font-family: Inter;
+			font-size: 14px;
+			font-weight: 400;
+			line-height: 24px;
+			text-align: left;
+		}
+
+		ul#menu-headline-nav.menu li {
+			font-family: Inter;
+			font-size: 14px;
+			font-weight: 400;
+			line-height: 24px;
+			text-align: left;
+			a {
+				text-decoration: none;
+			}
+		}
+	}
+}
+
+ul.breadcrumb {
+	font-family: Inter;
+	height: 24px;
+	li, li a {
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 24px;
+		text-align: left;
+		color: var(--wp--preset--color--charcoal-4);
+		text-decoration: none;
+	}
+	li:after {
+		color: rgba(217, 217, 217, 1);
+		margin: 0 8px;
+	}
+}

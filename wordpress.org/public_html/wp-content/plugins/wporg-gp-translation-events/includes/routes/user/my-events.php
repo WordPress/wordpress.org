@@ -2,6 +2,7 @@
 
 namespace Wporg\TranslationEvents\Routes\User;
 
+use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
@@ -11,10 +12,12 @@ use Wporg\TranslationEvents\Translation_Events;
  */
 class My_Events_Route extends Route {
 	private Event_Repository_Interface $event_repository;
+	private Attendee_Repository $attendee_repository;
 
 	public function __construct() {
 		parent::__construct();
-		$this->event_repository = Translation_Events::get_event_repository();
+		$this->event_repository    = Translation_Events::get_event_repository();
+		$this->attendee_repository = Translation_Events::get_attendee_repository();
 	}
 
 	public function handle(): void {
@@ -23,52 +26,35 @@ class My_Events_Route extends Route {
 			wp_safe_redirect( wp_login_url( home_url( $wp->request ) ) );
 			exit;
 		}
-		include ABSPATH . 'wp-admin/includes/post.php';
 
-		$_events_i_am_or_will_attend_paged = 1;
-		$_events_i_created_paged           = 1;
-		$_events_i_hosted_paged            = 1;
-		$_events_i_attended_paged          = 1;
+		$user_id = get_current_user_id();
 
+		$page = 1;
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['events_i_am_or_will_attend_paged'] ) ) {
-			$value = sanitize_text_field( wp_unslash( $_GET['events_i_am_or_will_attend_paged'] ) );
+		if ( isset( $_GET['page'] ) ) {
+			$value = sanitize_text_field( wp_unslash( $_GET['page'] ) );
 			if ( is_numeric( $value ) ) {
-				$_events_i_am_or_will_attend_paged = (int) $value;
-			}
-		}
-		if ( isset( $_GET['events_i_created_paged'] ) ) {
-			$value = sanitize_text_field( wp_unslash( $_GET['events_i_created_paged'] ) );
-			if ( is_numeric( $value ) ) {
-				$_events_i_created_paged = (int) $value;
-			}
-		}
-		if ( isset( $_GET['events_i_hosted_paged'] ) ) {
-			$value = sanitize_text_field( wp_unslash( $_GET['events_i_hosted_paged'] ) );
-			if ( is_numeric( $value ) ) {
-				$_events_i_hosted_paged = (int) $value;
-			}
-		}
-		if ( isset( $_GET['events_i_attended_paged'] ) ) {
-			$value = sanitize_text_field( wp_unslash( $_GET['events_i_attended_paged'] ) );
-			if ( is_numeric( $value ) ) {
-				$_events_i_attended_paged = (int) $value;
+				$page = (int) $value;
 			}
 		}
 		// phpcs:enable
 
-		$events_i_am_or_will_attend_query = $this->event_repository->get_current_and_upcoming_events_for_user( get_current_user_id(), $_events_i_am_or_will_attend_paged, 10 );
-		$events_i_created_query           = $this->event_repository->get_events_created_by_user( get_current_user_id(), $_events_i_created_paged, 10 );
-		$events_i_host_query              = $this->event_repository->get_events_hosted_by_user( get_current_user_id(), $_events_i_hosted_paged, 10 );
-		$events_i_attended_query          = $this->event_repository->get_past_events_for_user( get_current_user_id(), $_events_i_attended_paged, 10 );
+		$events = $this->event_repository->get_events_for_user( get_current_user_id(), $page, 10 );
+
+		$event_ids = array_map(
+			function ( $event ) {
+				return $event->id();
+			},
+			$events->events,
+		);
+
+		$current_user_attendee_per_event = $this->attendee_repository->get_attendees_for_events_for_user( $event_ids, $user_id );
 
 		$this->tmpl(
 			'events-my-events',
-			array(
-				'events_i_am_or_will_attend_query' => $events_i_am_or_will_attend_query,
-				'events_i_created_query'           => $events_i_created_query,
-				'events_i_host_query'              => $events_i_host_query,
-				'events_i_attended_query'          => $events_i_attended_query,
+			compact(
+				'events',
+				'current_user_attendee_per_event'
 			),
 		);
 	}

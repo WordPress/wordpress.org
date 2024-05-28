@@ -1,6 +1,7 @@
 <?php
 namespace Wporg\TranslationEvents\Templates\Partials;
 
+use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Event\Event_End_Date;
 use Wporg\TranslationEvents\Event\Event_Start_Date;
 use Wporg\TranslationEvents\Event\Events_Query_Result;
@@ -14,13 +15,15 @@ use Wporg\TranslationEvents\Urls;
 /** @var ?string $date_format */
 /** @var ?bool $relative_time */
 /** @var ?string[] $extra_classes */
+/** @var ?Attendee[] $current_user_attendee_per_event Associative array with event id as key, and Attendee as value. */
 
-$show_start    = $show_start ?? false;
-$show_end      = $show_end ?? false;
-$show_excerpt  = $show_excerpt ?? true;
-$date_format   = $date_format ?? '';
-$relative_time = $relative_time ?? true;
-$extra_classes = isset( $extra_classes ) ? implode( $extra_classes, ' ' ) : '';
+$show_start                      = $show_start ?? false;
+$show_end                        = $show_end ?? false;
+$show_excerpt                    = $show_excerpt ?? true;
+$date_format                     = $date_format ?? '';
+$relative_time                   = $relative_time ?? true;
+$extra_classes                   = isset( $extra_classes ) ? implode( $extra_classes, ' ' ) : '';
+$current_user_attendee_per_event = $current_user_attendee_per_event ?? array();
 
 /**
  * @param Event_Start_Date|Event_End_Date $time
@@ -36,6 +39,9 @@ $print_time = function ( $time ) use ( $date_format, $relative_time ): void {
 
 <ul class="event-list <?php echo esc_attr( $extra_classes ); ?>">
 	<?php foreach ( $query->events as $event ) : ?>
+		<?php
+		$current_user_attendee = $current_user_attendee_per_event[ $event->id() ] ?? null;
+		?>
 		<li class="event-list-item">
 			<?php // Title. ?>
 			<?php // phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace ?>
@@ -43,9 +49,26 @@ $print_time = function ( $time ) use ( $date_format, $relative_time ): void {
 				href="<?php echo esc_url( Urls::event_details( $event->id() ) ); ?>">
 				<?php echo esc_html( $event->title() ); ?>
 			</a>
-			<?php if ( $event->is_draft() ) : ?>
-				<span class="event-label-draft">Draft</span>
-			<?php endif; ?>
+
+			<?php // Labels. ?>
+			<span class="event-list-item-labels">
+				<?php if ( $event->is_draft() ) : ?>
+					<span class="event-list-item-label-draft"><?php echo esc_html__( 'Draft', 'gp-translation-events' ); ?></span>
+				<?php endif; ?>
+				<?php if ( $event->is_past() ) : ?>
+					<?php if ( $current_user_attendee && $current_user_attendee->is_host() ) : ?>
+						<span class="event-list-item-label-hosted"><?php echo esc_html__( 'Hosted', 'gp-translation-events' ); ?></span>
+					<?php elseif ( $current_user_attendee ) : ?>
+						<span class="event-list-item-label-attended"><?php echo esc_html__( 'Attended', 'gp-translation-events' ); ?></span>
+					<?php endif; ?>
+				<?php else : ?>
+					<?php if ( $current_user_attendee && $current_user_attendee->is_host() ) : ?>
+						<span class="event-list-item-label-hosting"><?php echo esc_html__( 'Hosting', 'gp-translation-events' ); ?></span>
+					<?php elseif ( $current_user_attendee ) : ?>
+						<span class="event-list-item-label-attending"><?php echo esc_html__( 'Attending', 'gp-translation-events' ); ?></span>
+					<?php endif; ?>
+				<?php endif; ?>
+			</span>
 
 			<?php // Buttons. ?>
 			<?php if ( current_user_can( 'edit_translation_event', $event->id() ) ) : ?>

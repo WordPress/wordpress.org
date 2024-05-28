@@ -29,7 +29,8 @@ class Event_Form_Handler {
 			wp_send_json_error( esc_html__( 'Invalid form name.', 'gp-translation-events' ), 403 );
 		}
 
-		$event_id = isset( $form_data['event_id'] ) ? sanitize_text_field( wp_unslash( $form_data['event_id'] ) ) : 0;
+		$event_id = isset( $form_data['event_id'] ) ? intval( sanitize_text_field( wp_unslash( $form_data['event_id'] ) ) ) : 0;
+		$event    = null;
 
 		if ( 'create_event' === $action && ( ! current_user_can( 'create_translation_event' ) ) ) {
 			wp_send_json_error( esc_html__( 'You do not have permissions to create events.', 'gp-translation-events' ), 403 );
@@ -54,10 +55,12 @@ class Event_Form_Handler {
 		}
 
 		$response_message = '';
+		if ( $event_id ) {
+			$event = $this->event_repository->get_event( $event_id );
+		}
+
 		if ( 'trash_event' === $action ) {
 			// Trash event.
-			$event_id = intval( sanitize_text_field( wp_unslash( $form_data['event_id'] ) ) );
-			$event    = $this->event_repository->get_event( $event_id );
 			if ( ! $event ) {
 				wp_send_json_error( esc_html__( 'Event does not exist.', 'gp-translation-events' ), 404 );
 			}
@@ -84,6 +87,9 @@ class Event_Form_Handler {
 			// Create or update event.
 
 			try {
+				if ( 'edit_event' === $action && $event ) {
+					$form_data['event_timezone'] = $event->timezone()->getName();
+				}
 				$new_event = $this->parse_form_data( $form_data );
 			} catch ( InvalidTimeZone $e ) {
 				wp_send_json_error( esc_html__( 'Invalid time zone.', 'gp-translation-events' ), 422 );
@@ -101,11 +107,6 @@ class Event_Form_Handler {
 
 			if ( empty( $new_event->title() ) ) {
 				wp_send_json_error( esc_html__( 'Invalid title.', 'gp-translation-events' ), 422 );
-				return;
-			}
-
-			if ( $new_event->end() < new DateTime( 'now', new DateTimeZone( 'UTC' ) ) ) {
-				wp_send_json_error( esc_html__( 'Past events cannot be created or edited.', 'gp-translation-events' ), 422 );
 				return;
 			}
 
@@ -132,10 +133,24 @@ class Event_Form_Handler {
 
 				try {
 					$event->set_status( $new_event->status() );
-					$event->set_title( $new_event->title() );
-					$event->set_description( $new_event->description() );
-					$event->set_timezone( $new_event->timezone() );
-					$event->set_times( $new_event->start(), $new_event->end() );
+					if ( current_user_can( 'edit_translation_event_title', $event->id() ) ) {
+						$event->set_title( $new_event->title() );
+					}
+					if ( current_user_can( 'edit_translation_event_description', $event->id() ) ) {
+						$event->set_description( $new_event->description() );
+					}
+					if ( current_user_can( 'edit_translation_event_timezone', $event->id() ) ) {
+						$event->set_timezone( $new_event->timezone() );
+					}
+
+					$event->validate_times( $new_event->start(), $new_event->end() );
+
+					if ( current_user_can( 'edit_translation_event_start', $event->id() ) ) {
+						$event->set_start( $new_event->start() );
+					}
+					if ( current_user_can( 'edit_translation_event_end', $event->id() ) ) {
+						$event->set_end( $new_event->end() );
+					}
 				} catch ( Exception $e ) {
 					wp_send_json_error( esc_html__( 'Failed to update event.', 'gp-translation-events' ), 422 );
 					return;

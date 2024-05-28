@@ -36,7 +36,7 @@ Templates::header(
 	<input type="hidden" id="event-form-action" name="event_form_action">
 	<div>
 		<label for="event-title"><?php esc_html_e( 'Event Title', 'gp-translation-events' ); ?></label>
-		<input type="text" id="event-title" name="event_title" value="<?php echo esc_html( $event->title() ); ?>" required size="42">
+		<input type="text" id="event-title" name="event_title" value="<?php echo esc_html( $event->title() ); ?>" <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_title', $event->id() ) ?: 'readonly' ); ?> required size="42">
 	</div>
 	<?php $event_url_class = $is_create_form ? 'hide-event-url' : ''; ?>
 	<?php $event_url = $is_create_form ? '' : Urls::event_details_absolute( $event->id() ); ?>
@@ -46,7 +46,7 @@ Templates::header(
 	</div>
 	<div>
 		<label for="event-description"><?php esc_html_e( 'Event Description', 'gp-translation-events' ); ?></label>
-		<textarea id="event-description" name="event_description" rows="4" cols="40" required><?php echo esc_html( $event->description() ); ?></textarea>
+		<textarea id="event-description" name="event_description" rows="4" cols="40" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_description', $event->id() ) ?: 'readonly' ); ?>><?php echo esc_html( $event->description() ); ?></textarea>
 		<?php
 		echo wp_kses(
 			Event_Text_Snippet::get_snippet_links(),
@@ -63,15 +63,15 @@ Templates::header(
 		?>
 			<div>
 		<label for="event-start"><?php esc_html_e( 'Start Date', 'gp-translation-events' ); ?></label>
-		<input type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event->start()->format( 'Y-m-d H:i' ) ); ?>" required>
+		<input type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event->start()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_start', $event->id() ) ?: 'readonly' ); ?> >
 	</div>
 	<div>
 		<label for="event-end"><?php esc_html_e( 'End Date', 'gp-translation-events' ); ?></label>
-		<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->format( 'Y-m-d H:i' ) ); ?>" required>
+		<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() ) ?: 'readonly' ); ?>>
 	</div>
 	<div>
 		<label for="event-timezone"><?php esc_html_e( 'Event Timezone', 'gp-translation-events' ); ?></label>
-		<select id="event-timezone" name="event_timezone" required>
+		<select id="event-timezone" name="event_timezone" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_timezone', $event->id() ) ?: 'disabled' ); ?> >
 			<?php
 			echo wp_kses(
 				wp_timezone_choice( $is_create_form ? null : $event->timezone()->getName(), get_user_locale() ),
