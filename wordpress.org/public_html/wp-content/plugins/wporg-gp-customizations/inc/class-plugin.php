@@ -110,8 +110,8 @@ class Plugin {
 		// Correct `WP_Locale` for variant locales in project lists.
 		add_filter( 'gp_translation_sets_sort', [ $this, 'filter_gp_translation_sets_sort' ] );
 
-		// CRUD permission for the translation events.
-		add_filter( 'gp_translation_events_can_crud_event', array( $this, 'gp_translation_events_can_crud_event' ), 10, 1 );
+		// create permission for the translation events.
+		add_filter( 'user_has_cap', array( $this, 'gp_translation_events_can_create_events' ), 10, 4 );
 
 		// Add site tour items.
 		if ( isset( $_GET['site_tour'] ) && 'test' == $_GET['site_tour'] ) {
@@ -815,28 +815,24 @@ class Plugin {
 	}
 
 	/**
-	 * Filter the permission to CRUD events for the user.
+	 * Filter the permission to create events for the user.
 	 *
 	 * wp-org-translation-events plugin.
 	 *
-	 * @param bool $can_crud_event Whether the user can CRUD events.
-	 *
-	 * @return bool Whether the user can CRUD events.
+	 * @return array All caps the user has.
 	 */
-	public function gp_translation_events_can_crud_event( bool $can_crud_event ): bool {
-		$user = wp_get_current_user();
-
-		if ( GP::$permission->user_can( $user, 'admin' ) ) {
-			return true;
-		}
-		if ( current_user_can( 'manage_options' ) ) {
-			return true;
-		}
-		if ( self::is_user_a_wporg_gte( $user ) ) {
-			return true;
+	public function gp_translation_events_can_create_events( $allcaps, $caps, $args, $user ): array {
+		if ( in_array( 'create_translation_event', $caps, true ) ) {
+			if ( GP::$permission->user_can( $user, 'admin' ) ) {
+				$allcaps['create_translation_event'] = true;
+			} elseif ( current_user_can( 'manage_options' ) ) {
+				$allcaps['create_translation_event'] = true;
+			} elseif ( self::is_user_a_wporg_gte( $user ) ) {
+				$allcaps['create_translation_event'] = true;
+			}
 		}
 
-		return false;
+		return $allcaps;
 	}
 
 	/**
