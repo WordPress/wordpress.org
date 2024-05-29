@@ -864,7 +864,7 @@ class Plugin {
 			wp_cache_set( self::GTE_EMAIL_ADDRESSES, $gte_email_addresses, self::CACHE_GROUP, 12 * HOUR_IN_SECONDS );
 		}
 
-		if ( in_array( array( $user->user_email ), $gte_email_addresses ) ) {
+		if ( in_array( $user->user_email, $gte_email_addresses ) ) {
 			return true;
 		}
 
