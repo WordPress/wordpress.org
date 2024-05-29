@@ -407,11 +407,16 @@ class Hooks {
 	 * as it's a better destination for the users reaching the plugin forum from search engines.
 	 */
 	public function redirect_ask_question_plugin_forum() {
-		if (
-			'plugin' === get_query_var( 'bbp_view' ) &&
-			in_array( get_query_var( 'wporg_plugin' ), array( 'ask-question', 'technical-support', 'email' ) )
-		) {
+		if ( 'plugin' !== get_query_var( 'bbp_view' ) ) {
+			return;
+		}
+
+		if ( in_array( get_query_var( 'wporg_plugin' ), array( 'ask-question', 'technical-support', 'email' ) ) ) {
 			wp_safe_redirect( home_url( '/forum/how-to-and-troubleshooting/' ) );
+			exit;
+
+		} elseif ( in_array( get_query_var( 'wporg_plugin' ), array( 'developer' ) ) ) {
+			wp_safe_redirect( home_url( '/forum/wp-advanced/' ) );
 			exit;
 		}
 	}
