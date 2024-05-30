@@ -222,24 +222,19 @@ class Themes_API {
 	 * Gets theme tags, ordered by how popular they are.
 	 */
 	public function hot_tags() {
-		$cache_key = sanitize_key( __METHOD__ );
-		if ( false === ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) ) {
-			$tags = get_tags( array(
-				'orderby'    => 'count',
-				'order'      => 'DESC',
-				'hide_empty' => false,
-			) );
+		$tags = get_tags( array(
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'hide_empty' => false,
+		) );
 
-			// Format in the API representation.
-			foreach ( $tags as $tag ) {
-				$this->response[ $tag->slug ] = array(
-					'name'  => $tag->name,
-					'slug'  => $tag->slug,
-					'count' => $tag->count,
-				);
-			}
-
-			wp_cache_add( $cache_key, $this->response, $this->cache_group, $this->cache_life );
+		// Format in the API representation.
+		foreach ( $tags as $tag ) {
+			$this->response[ $tag->slug ] = array(
+				'name'  => $tag->name,
+				'slug'  => $tag->slug,
+				'count' => $tag->count,
+			);
 		}
 
 		if ( ! empty( $this->request->number ) ) {
@@ -480,12 +475,6 @@ class Themes_API {
 
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
 
-		// If there is a cached result, return that.
-		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . $this->request->slug . ':' . md5( serialize( $this->fields ) ) );
-		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-			return;
-		}
-
 		if ( !empty( $post ) && 'repopackage' == $post->post_type && $this->request->slug === $post->post_name ) {
 			$this->response = $this->fill_theme( $post );
 		} else {
@@ -502,8 +491,6 @@ class Themes_API {
 				$this->response = (object) array( 'error' => 'Theme not found' ); // Check get_result() if changing this string.
 			}
 		}
-
-		wp_cache_set( $cache_key, $this->response, $this->cache_group, $this->cache_life );
 	}
 
 	/**
@@ -550,12 +537,6 @@ class Themes_API {
 
 		$this->fields = array_merge( $this->fields, $defaults, $this->request->fields );
 
-		// If there is a cached result, return that.
-		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) . serialize( $this->fields ) ) );
-		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-			return;
-		}
-
 		$this->result = $this->perform_wp_query();
 
 		// Basic information about the request.
@@ -575,8 +556,6 @@ class Themes_API {
 		foreach ( (array) $this->result->posts as $theme ) {
 			$this->response->themes[] = $this->fill_theme( $theme );
 		}
-
-		wp_cache_set( $cache_key, $this->response, $this->cache_group, $this->cache_life );
 	}
 
 	public function perform_wp_query() {
@@ -677,6 +656,7 @@ class Themes_API {
 		$theme_shops = new WP_Query( array(
 			'post_type'      => 'theme_shop',
 			'posts_per_page' => -1,
+			// NOTE: This rand() disables WP_Query caching.
 			'orderby'        => 'rand(' . gmdate('YmdH') . ')',
 		) );
 
@@ -703,12 +683,6 @@ class Themes_API {
 	 * @return object
 	 */
 	public function fill_theme( $theme ) {
-		// If there is a cached theme for the current locale, return that.
-		$cache_key = sanitize_key( implode( '-', array( $theme->post_name, md5( serialize( $this->fields ) ), get_locale() ) ) );
-		if ( false !== ( $phil = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-			return $phil;
-		}
-
 		global $wpdb;
 
 		$phil = (object) array(
@@ -942,8 +916,6 @@ class Themes_API {
 			}
 
 		}
-
-		wp_cache_set( $cache_key, $phil, $this->cache_group, $this->cache_life );
 
 		return $phil;
 	}
