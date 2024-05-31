@@ -511,9 +511,9 @@
 			return;
 		}
 		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
-				options.data += '&externalTranslationSource=' + externalSuggestion.suggestion_source;
-				options.data += '&externalTranslationUsed=' + externalSuggestion.translation;
-				externalSuggestion = {};
+			options.data += '&externalTranslationSource=' + encodeURIComponent( externalSuggestion.suggestion_source );
+			options.data += '&externalTranslationUsed=' + encodeURIComponent( externalSuggestion.translation );
+			externalSuggestion = {};
 		}
 	});
 })( jQuery );
