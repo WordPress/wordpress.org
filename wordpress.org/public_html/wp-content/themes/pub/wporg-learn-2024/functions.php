@@ -2,6 +2,8 @@
 
 namespace WordPressdotorg\Theme\Learn_2024;
 
+use function WPOrg_Learn\Sensei\{get_my_courses_page_url};
+
 // Block files
 require_once __DIR__ . '/src/learning-pathway-cards/block.php';
 require_once __DIR__ . '/src/upcoming-online-workshops/block.php';
@@ -106,6 +108,10 @@ function add_site_navigation_menus( $menus ) {
 			'label' => __( 'Online Workshops', 'wporg-learn' ),
 			'url'   => '/online-workshops/',
 		),
+		array(
+			'label' => __( 'My courses', 'wporg-learn' ),
+			'url'   => get_my_courses_page_url(),
+		),
 	);
 
 	$learning_pathways = get_terms(
@@ -136,4 +142,73 @@ function add_site_navigation_menus( $menus ) {
 	$menus['learn'] = $menu;
 
 	return $menus;
+}
+
+/**
+ * Get the titles and descriptions for the learning pathway levels.
+ *
+ * @param string $learning_pathway The learning pathway name.
+ * @return array The content for the learning pathway levels.
+ */
+function get_learning_pathway_level_content( $learning_pathway ) {
+	$content = array(
+		'developer' => array(
+			'beginner' => array(
+				'title' => __( '[TBD Beginner developer title]', 'wporg-learn' ),
+				'description' => __( '[TBD Beginner developer description]', 'wporg-learn' ),
+			),
+			'intermediate' => array(
+				'title' => __( '[TBD Intermediate developer title]', 'wporg-learn' ),
+				'description' => __( '[TBD Intermediate developer description]', 'wporg-learn' ),
+			),
+			'advanced' => array(
+				'title' => __( '[TBD Advanced developer title]', 'wporg-learn' ),
+				'description' => __( '[TBD Advanced developer description]', 'wporg-learn' ),
+			),
+		),
+		'designer' => array(
+			'beginner' => array(
+				'title' => __( 'Begin exploring WordPress', 'wporg-learn' ),
+				'description' => __( 'Discover the design potential of WordPress.', 'wporg-learn' ),
+			),
+			'intermediate' => array(
+				'title' => __( 'Customize your site', 'wporg-learn' ),
+				'description' => __( 'Personalize and own all the details of your WordPress site.', 'wporg-learn' ),
+			),
+			'advanced' => array(
+				'title' => __( 'Elevate your site to stunning levels', 'wporg-learn' ),
+				'description' => __( 'For advanced users that are familiar with code.', 'wporg-learn' ),
+			),
+		),
+		'user' => array(
+			'beginner' => array(
+				'title' => __( '[TBD Beginner user title]', 'wporg-learn' ),
+				'description' => __( '[TBD Beginner user description]', 'wporg-learn' ),
+			),
+			'intermediate' => array(
+				'title' => __( '[TBD Intermediate user title]', 'wporg-learn' ),
+				'description' => __( '[TBD Intermediate user description]', 'wporg-learn' ),
+			),
+			'advanced' => array(
+				'title' => __( '[TBD Advanced user title]', 'wporg-learn' ),
+				'description' => __( '[TBD Advanced user description]', 'wporg-learn' ),
+			),
+		),
+		'contributor' => array(
+			'beginner' => array(
+				'title' => __( '[TBD Beginner contributor title]', 'wporg-learn' ),
+				'description' => __( '[TBD Beginner contributor description]', 'wporg-learn' ),
+			),
+			'intermediate' => array(
+				'title' => __( '[TBD Intermediate contributor title]', 'wporg-learn' ),
+				'description' => __( '[TBD Intermediate contributor description]', 'wporg-learn' ),
+			),
+			'advanced' => array(
+				'title' => __( '[TBD Advanced contributor title]', 'wporg-learn' ),
+				'description' => __( '[TBD Advanced contributor description]', 'wporg-learn' ),
+			),
+		),
+	);
+
+	return $content[ $learning_pathway ];
 }
