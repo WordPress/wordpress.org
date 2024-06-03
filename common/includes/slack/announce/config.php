@@ -118,6 +118,7 @@ function get_whitelist() {
 			'markparnell',
 			'marybaum',
 			'meaganhanes',
+			'meher',
 			'metalandcoffee',
 			'mikachan',
 			'monikarao',
