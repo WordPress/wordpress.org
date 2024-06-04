@@ -14,6 +14,7 @@ add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\filter_site_title_block' );
 add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\filter_navigation_block', 10, 2 );
+add_filter( 'render_block_wporg/language-suggest', __NAMESPACE__ . '\filter_language_suggest' );
 
 /**
  * Provide a list of local navigation menus.
@@ -333,4 +334,24 @@ function filter_navigation_block( $block_content, $block ) {
 	}
 
 	return $block_content;
+}
+
+
+/**
+ * Increase the visibilit of the language suggest bar to recruit translators on plugin page.
+ * 
+ * @see https://github.com/WordPress/wordpress.org/issues/301
+ * 
+ * @param string $block_content
+ * @return string
+ */
+function filter_language_suggest( $block_content ) {
+	if ( ! is_single() ) {
+		return $block_content;
+	}
+
+	$html = new \WP_HTML_Tag_Processor( $block_content );
+	$html->next_tag();
+	$html->add_class( 'is-style-prominent' );
+	return $html->get_updated_html();
 }
