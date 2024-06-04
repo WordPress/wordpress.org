@@ -58,7 +58,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 			<p>
 				<?php
 				printf(
-					__( 'Your plugin review cannot be prioritised over others, to help us approve your plugin sooner, please ensure that you have read the <a href="%s">Security chapter</a> of the Plugin Handbook.', 'wporg-plugins' ),
+					__( 'Your plugin review cannot be prioritized over others, to help us approve your plugin sooner, please ensure that you have read the <a href="%s">Security chapter</a> of the Plugin Handbook.', 'wporg-plugins' ),
 					'https://developer.wordpress.org/apis/security/'
 				);
 				?>
@@ -66,7 +66,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 			<p><?php _e( 'Our three most common reasons for not approving a plugin are:', 'wporg-plugins' ); ?></p>
 			<ul>
 				<li><?php printf( __( 'The plugin contains unescaped output: <a href="%s">Learn about Escaping Data</a>', 'wporg-plugins' ), 'https://developer.wordpress.org/apis/security/escaping/' ); ?></li>
-				<li><?php printf( __( 'The plugin accepts unsanitized data: <a href="%s">Learn about Sanitising Data</a>', 'wporg-plugins' ), 'https://developer.wordpress.org/apis/security/sanitizing/' ); ?></li>
+				<li><?php printf( __( 'The plugin accepts unsanitized data: <a href="%s">Learn about Sanitizing Data</a>', 'wporg-plugins' ), 'https://developer.wordpress.org/apis/security/sanitizing/' ); ?></li>
 				<li><?php printf( __( 'The plugin processes form data without a nonce: <a href="%s">Learn about Nonces</a>', 'wporg-plugins' ), 'https://developer.wordpress.org/apis/security/nonces/' ); ?></li>
 			</ul>
 			<p><?php _e( 'If the code in your plugin falls into one of the above categories, <strong>your plugin will not be approved</strong>. The plugin review team will refer you back to these Handbook pages, adding further delay to the review process.', 'wporg-plugins' ); ?></p>
