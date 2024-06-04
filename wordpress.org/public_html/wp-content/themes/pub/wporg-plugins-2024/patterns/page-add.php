@@ -75,8 +75,14 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 			<p><?php echo wp_kses_post( __( 'Your plugin&#8217;s URL will be populated based on the value of <code>Plugin Name</code> in your main plugin file (the one with the plugin headers). If you set yours as <code>Plugin Name: Boaty McBoatface</code> then your URL will be <code>https://wordpress.org/plugins/boaty-mcboatface</code> and your slug will be <code>boaty-mcboatface</code> for example. If there is an existing plugin with your name, then you will be <code>boaty-mcboatface-2</code> and so on. It behaves exactly like WordPress post names.', 'wporg-plugins' ) ); ?></p>
 			<p><?php echo wp_kses_post( __( 'Once your plugin is approved, it <em>cannot</em> be renamed.', 'wporg-plugins' ) ); ?></p>
 
-			<h3><?php esc_html_e( 'I made a mistake in my plugin name. Should I resubmit?', 'wporg-plugins' ); ?></h3>
-			<p><?php echo wp_kses_post( __( 'Please don&#8217;t! Instead email <code>plugins@wordpress.org</code> and we can rename your plugin as long as it&#8217;s not approved. Since we check emails first, the odds are we&#8217;ll catch it. If we don&#8217;t, just email us and explain the mistake. We&#8217;ll explain what to do.', 'wporg-plugins' ) ); ?></p>
+			<h3><?php esc_html_e( 'I made a mistake in my plugin name. Should I update it?', 'wporg-plugins' ); ?></h3>
+			<p><?php
+				printf(
+					/* translators: Email address */
+					__( 'It depends on what you want to change. If you want to change the plugin <strong>display name</strong> you can update that by updating your plugin files in this page. If what you want to change is the <strong>permalink / slug</strong> of your plugin, you can do that ONCE before we begin with the review (if that&#8217;s available you&#8217;ll see a link to change it on this page). If this is not possible, you will need to contact us at %s, we can change it as long as the plugin has not yet been approved.', 'wporg-plugins' ),
+					'<code>plugins@wordpress.org</code>'
+				);
+			?></p>
 
 			<h3><?php esc_html_e( 'Why can&#8217;t I submit a plugin with certain display names?', 'wporg-plugins' ); ?></h3>
 			<p><?php echo wp_kses_post( __( 'Certain plugin names are prohibited due to trademark abuse. Similarly, we prevent their use in plugin slugs entirely for your protection.', 'wporg-plugins' ) ); ?></p>
