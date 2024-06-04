@@ -62,17 +62,41 @@ class Upload {
 		$uploader      = new Upload_Handler();
 		$upload_result = false;
 
+		/*
+		 * Determine the maximum number of plugins a user can have in the queue.
+		 *
+		 * Plugin owners with more than 1m active installs can have up to 10 plugins in the queue.
+		 *
+		 * @see https://meta.trac.wordpress.org/ticket/76641
+		 */
+		$maximum_plugins_in_queue = 1;
+		$user_active_installs     = array_sum(
+			wp_list_pluck(
+				get_posts( [
+					'author'      => get_current_user_id(),
+					'post_type'   => 'plugin',
+					'post_status' => 'publish', // Only count published plugins.
+					'numberposts' => -1
+				] ),
+				'_active_installs'
+			)
+		);
+		if ( $user_active_installs > 1000000 /* 1m+ */ ) {
+			$maximum_plugins_in_queue = 10;
+		}
+
 		list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
+		$can_submit_new_plugin                        = $submitted_counts->total < $maximum_plugins_in_queue;
 
 		if (
 			! empty( $_POST['_wpnonce'] ) &&
 			! empty( $_FILES['zip_file'] ) &&
 			(
 				// New submission.
-				! $submitted_counts->total &&
 				empty( $_POST['plugin_id'] ) &&
-				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' ) &&
-				'upload' === $_POST['action']
+				'upload' === $_POST['action'] &&
+				$can_submit_new_plugin &&
+				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' )
 			) || (
 				// Existing submission
 				! empty( $_POST['plugin_id'] ) &&
@@ -93,13 +117,14 @@ class Upload {
 
 			// Refresh the lists.
 			list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
+			$can_submit_new_plugin                        = $submitted_counts->total < $maximum_plugins_in_queue;
 
 			if ( ! empty( $message ) ) {
 				echo "<div class='notice notice-{$type} notice-alt'><p>{$message}</p></div>\n";
 			}
 		}
 
-		if ( ! is_wp_error( $upload_result ) || $submitted_counts->total ) :
+		if ( ! is_wp_error( $upload_result ) || $submitted_counts->total /* has a plugin in the review queue */ ) :
 			$plugins       = wp_count_posts( 'plugin', 'readable' );
 			$oldest_plugin = get_posts( [ 'post_type' => 'plugin', 'post_status' => 'new', 'order' => 'ASC', 'orderby' => 'post_date_gmt', 'numberposts' => 1 ] );
 			$queue_length  = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
@@ -358,7 +383,19 @@ class Upload {
 					) .
 					"</p></div>\n";
 
-		} else if ( ! $submitted_counts->total && ( ! $upload_result || is_wp_error( $upload_result ) ) ) : ?>
+		} else if ( $can_submit_new_plugin && ( ! $upload_result || is_wp_error( $upload_result ) ) ) :
+			if ( $maximum_plugins_in_queue > 1 && $submitted_counts->total ) {
+				printf(
+					'<div class="notice notice-info notice-alt"><p>%s</p></div>',
+					sprintf(
+						/* translators: %s: Maximum number of plugins in the queue. */
+						__( 'You can have up to %s plugins in the queue at a time. You may submit an additional plugin for review below.', 'wporg-plugins' ),
+						'<strong>' . number_format_i18n( $maximum_plugins_in_queue ) . '</strong>'
+					)
+				);
+			}
+
+			?>
 			<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 				<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 				<input type="hidden" name="action" value="upload"/>
@@ -460,7 +497,7 @@ class Upload {
 
 				<input id="upload_button" class="wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 			</form>
-		<?php endif; // ! $submitted_counts->total
+		<?php endif; // $can_submit_new_plugin
 
 		return ob_get_clean();
 	}
