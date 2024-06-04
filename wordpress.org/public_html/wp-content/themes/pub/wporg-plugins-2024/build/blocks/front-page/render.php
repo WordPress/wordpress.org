@@ -7,11 +7,11 @@ use WP_Query;
 global $wp_query;
 
 $sections = array(
-	'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
-	'featured'  => __( 'Featured Plugins', 'wporg-plugins' ),
-	'beta'      => __( 'Beta Plugins', 'wporg-plugins' ),
-	'favorites' => __( 'My Favorites', 'wporg-plugins' ),
-	'popular'   => __( 'Popular Plugins', 'wporg-plugins' ),
+	'blocks'    => __( 'Block-Enabled plugins', 'wporg-plugins' ),
+	'featured'  => __( 'Featured plugins', 'wporg-plugins' ),
+	'beta'      => __( 'Beta plugins', 'wporg-plugins' ),
+	'favorites' => __( 'My favorites', 'wporg-plugins' ),
+	'popular'   => __( 'Popular plugins', 'wporg-plugins' ),
 );
 
 $widget_args = array(

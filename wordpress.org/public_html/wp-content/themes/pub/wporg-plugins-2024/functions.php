@@ -400,9 +400,9 @@ add_action( 'wp_head', function() {
  */
 function update_archive_title( $title ) {
 	if ( is_tax( 'plugin_business_model', 'community' ) ) {
-		return __( 'Community Plugins', 'wporg-plugins' );
+		return __( 'Community plugins', 'wporg-plugins' );
 	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
-		return __( 'Commercial Plugins', 'wporg-plugins' );
+		return __( 'Commercial plugins', 'wporg-plugins' );
 	}
 
 	return $title;

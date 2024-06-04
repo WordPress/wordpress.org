@@ -26,7 +26,7 @@ function add_site_navigation_menus( $menus ) {
 	$items = array(
 		'plugins' => array(
 			array(
-				'label' => __( 'My Favorites', 'wporg-plugins' ),
+				'label' => __( 'My favorites', 'wporg-plugins' ),
 				'url' => '/browse/favorites/',
 			),
 			array(
