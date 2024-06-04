@@ -9,7 +9,7 @@
 do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}}} /-->' );
 
 ?>
-<h1 style="margin-bottom:var(--wp--preset--spacing--30);" class="wp-block-post-title"><?php esc_html_e( 'Developer Information', 'wporg-plugins' ); ?></h1>
+<h1 style="margin-bottom:var(--wp--preset--spacing--30);" class="wp-block-post-title"><?php esc_html_e( 'Developer information', 'wporg-plugins' ); ?></h1>
 
 <div class="entry-content">
 	<p>
@@ -49,7 +49,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 		</li>
 	</ul>
 
-	<h3><?php esc_html_e( 'Submission is Simple', 'wporg-plugins' ); ?></h3>
+	<h3><?php esc_html_e( 'Submission is simple', 'wporg-plugins' ); ?></h3>
 	<ol>
 		<li>
 			<?php

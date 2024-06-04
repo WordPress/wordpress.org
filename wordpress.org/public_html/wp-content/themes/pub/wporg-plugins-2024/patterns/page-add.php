@@ -9,7 +9,7 @@
 do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}}} /-->' );
 
 ?>
-<h1 style="margin-bottom:var(--wp--preset--spacing--30);" class="wp-block-post-title"><?php esc_html_e( 'Add Your Plugin', 'wporg-plugins' ); ?></h1>
+<h1 style="margin-bottom:var(--wp--preset--spacing--30);" class="wp-block-post-title"><?php esc_html_e( 'Add your plugin', 'wporg-plugins' ); ?></h1>
 
 <div class="entry-content">
 	<section>
