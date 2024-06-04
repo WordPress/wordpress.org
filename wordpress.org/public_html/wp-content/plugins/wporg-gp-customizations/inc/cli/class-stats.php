@@ -13,12 +13,8 @@ namespace WordPressdotorg\GlotPress\Customizations\CLI;
 require WP_PLUGIN_DIR . '/wp-i18n-teams/wp-i18n-teams.php';
 
 use DateTime;
-use Exception;
-use GP;
 use GP_Locale;
-use GP_Locales;
 use WP_CLI;
-use WP_CLI_Command;
 use WP_Query;
 use WordPressdotorg\GlotPress\Routes\Plugin;
 use function WordPressdotorg\Locales\get_locales;
@@ -162,11 +158,12 @@ class Stats {
 	/**
 	 * Prints the Polyglots stats or stores them on a page.
 	 *
-	 * @param bool $echo_the_values Whether it should print the info in the CLI or stores it on a page.
+	 * @param bool        $echo_the_values Whether it should print the info in the CLI or stores it on a page.
+	 * @param string|null $old_date        The date to compare the stats with. Format: 'Y-m-d'.
 	 *
 	 * @return void
 	 */
-	public function __invoke( bool $echo_the_values = false ) {
+	public function __invoke( bool $echo_the_values = false, string $old_date = null ): void {
 		global $wpdb;
 
 		// This value is only set in the production site (translate.wordpress.org).
@@ -189,8 +186,11 @@ class Stats {
 		$this->print_contributors_per_locale();
 		$this->print_managers_stats();
 		$this->print_most_active_translators();
-		$this->store_stats();
-		$this->print_stats_comparison( gmdate( 'Y-m-d' ) );
+		// Don't store the stats if we execute the command in the CLI, to avoid storing the same stats twice.
+		if ( ! $echo_the_values ) {
+			$this->store_stats();
+		}
+		$this->print_stats_comparison( gmdate( 'Y-m-d' ), $old_date );
 
 		$this->update_page();
 	}
@@ -359,7 +359,7 @@ class Stats {
 	 * Print stats compared week on week.
 	 *
 	 * @param string $current_date The date for which we display the stats.
-	 * @param string $old_date The date to compare the stats with.
+	 * @param string $old_date     The date to compare the stats with.
 	 *
 	 * @return void
 	 */
@@ -374,10 +374,19 @@ class Stats {
 		if ( ! $current_date_data || ! $old_date_data ) {
 			return;
 		}
+
+		$current_datetime = DateTime::createFromFormat( 'Y-m-d', $current_date );
+		$old_datetime     = DateTime::createFromFormat( 'Y-m-d', $old_date );
+		if ( ! $current_datetime || ! $old_datetime ) {
+			return;
+		}
+		$interval        = $current_datetime->diff( $old_datetime );
+		$days_difference = $interval->days;
+
 		if ( ! $this->echo_the_values ) {
-			$this->stats_comparison = $this->create_gutenberg_heading( 'Summary for weekly stats' );
+			$this->stats_comparison = $this->create_gutenberg_heading( "Summary for the last $days_difference days" );
 		} else {
-			$this->print_wpcli_heading( 'Summary for weekly stats' );
+			$this->print_wpcli_heading( "Summary for the last $days_difference days" );
 		}
 		$stats_diff = new \stdClass();
 		foreach ( $current_date_data as $key => $value ) {
@@ -394,10 +403,10 @@ class Stats {
 
 		$code .= 'Requests: There are ' . $current_date_data->requests_unresolved . ' unresolved editor requests out of ' . $current_date_data->requests_total . ' (' . $this->prefix_num( $stats_diff->requests_unresolved ) . ') total and ' . $current_date_data->locale_requests_unresolved . ' unresolved locale requests out of ' . $current_date_data->locale_requests_total . ' (' . $this->prefix_num( $stats_diff->locale_requests_unresolved ) . ') total.' . PHP_EOL . PHP_EOL;
 
-		$code .= 'Translators: There are ' . $current_date_data->translators_gtes . ' (' . $this->prefix_num( $stats_diff->translators_gtes ) . ') GTEs, ' . $current_date_data->translators_ptes . ' (' . $this->prefix_num( $stats_diff->translators_ptes ) . ') PTEs and ' . $current_date_data->translators_contributors . ' (' . $this->prefix_num( $stats_diff->translators_contributors ) . ') translation contributors.' . PHP_EOL;
-		$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL . PHP_EOL;
+		$code .= 'Translators: There are ' . number_format_i18n( $current_date_data->translators_gtes ) . ' (' . $this->prefix_num( $stats_diff->translators_gtes ) . ') GTEs, ' . number_format_i18n( $current_date_data->translators_ptes ) . ' (' . $this->prefix_num( $stats_diff->translators_ptes ) . ') PTEs and ' . number_format_i18n( $current_date_data->translators_contributors ) . ' (' . $this->prefix_num( $stats_diff->translators_contributors ) . ') translation contributors.' . PHP_EOL;
+		$code .= '(A wordpress.org account could have multiple roles over different locale).' . PHP_EOL . PHP_EOL;
 
-		$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $this->prefix_num( round( $stats_diff->wp_translated_sites_pct, 3 ) ) . '%) of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
+		$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $this->prefix_num( round( $stats_diff->wp_translated_sites_pct, 3 ), 3 ) . '%) of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
 		if ( ! $this->echo_the_values ) {
 			$this->stats_comparison .= $this->create_gutenberg_code( $code );
 		} else {
@@ -420,15 +429,16 @@ class Stats {
 	/**
 	 * Prefix numbers greater than zero with plus sign and plus_minus sign if number is zero.
 	 *
-	 * @param int $num Number to be prefixed.
+	 * @param float $number          Number to be prefixed.
+	 * @param int   $number_decimals Number of decimals to be displayed.
 	 *
 	 * @return string Prefixed number
 	 */
-	private function prefix_num( $num ) {
-		if ( 0 === $num ) {
+	private function prefix_num( $number, $number_decimals = 0 ) {
+		if ( 0 === $number ) {
 			return '±0';
 		}
-		return $num > 0 ? sprintf( '+%d', $num ) : $num;
+		return $number > 0 ? sprintf( '+%s', number_format_i18n( $number, $number_decimals ) ) : number_format_i18n( $number, $number_decimals );
 	}
 
 	/**
