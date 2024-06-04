@@ -32,14 +32,14 @@ class Categorization extends \WP_Widget {
 
 		if ( has_term( 'commercial', 'plugin_business_model', $post ) ) {
 			$model_type  = 'commercial';
-			$title       = __( 'Commercial Plugin', 'wporg-plugins' );
+			$title       = __( 'Commercial plugin', 'wporg-plugins' );
 			$url         = get_post_meta( $post->ID, 'external_support_url', true );
 			$link_text   = __( 'Support', 'wporg-plugins' );
 			$description = __( 'This plugin is free but offers additional paid commercial upgrades or support.', 'wporg-plugins' );
 		}
 		elseif ( has_term( 'community', 'plugin_business_model', $post ) ) {
 			$model_type  = 'community';
-			$title       = __( 'Community Plugin', 'wporg-plugins' );
+			$title       = __( 'Community plugin', 'wporg-plugins' );
 			$url         = get_post_meta( $post->ID, 'external_repository_url', true );
 			$link_text   = __( 'Contribute', 'wporg-plugins' );
 			$description = __( 'This plugin is developed and supported by a community.', 'wporg-plugins' );
