@@ -78,7 +78,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 			<h3><?php esc_html_e( 'I made a mistake in my plugin name. Should I update it?', 'wporg-plugins' ); ?></h3>
 			<p><?php
 				printf(
-					/* translators: Email address */
+					/* translators: %s: Email address */
 					__( 'It depends on what you want to change. If you want to change the plugin <strong>display name</strong> you can update that by updating your plugin files in this page. If what you want to change is the <strong>permalink / slug</strong> of your plugin, you can do that ONCE before we begin with the review (if that&#8217;s available you&#8217;ll see a link to change it on this page). If this is not possible, you will need to contact us at %s, we can change it as long as the plugin has not yet been approved.', 'wporg-plugins' ),
 					'<code>plugins@wordpress.org</code>'
 				);
