@@ -75,6 +75,26 @@ class WPORG_Themes_Repo_Package {
 	}
 
 	/**
+	 * Returns the download URL for a theme.
+	 *
+	 * @param string $version Optional.
+	 * @return string
+	 */
+	public function download_url( $version = 'latest-stable' ) {
+		if ( 'latest-stable' === $version ) {
+			$version = $this->latest_version();
+		}
+
+		$url  = 'http://downloads.wordpress.org/theme/';
+		$file = $this->wp_post->post_name . '.' . $version . '.zip';
+
+		$file = preg_replace( '/[^a-z0-9_.-]/i', '', $file );
+		$file = preg_replace( '/[.]+/', '.', $file );
+
+		return set_url_scheme( $url . $file );
+	}
+
+	/**
 	 * Magic getter for a few handy variables.
 	 *
 	 * @param string $name

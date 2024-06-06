@@ -828,7 +828,7 @@ class Themes_API {
 		}
 
 		if ( $this->fields['downloadlink'] ) {
-			$phil->download_link = $this->create_download_link( $theme, $phil->version );
+			$phil->download_link = $repo_package->download_url( $phil->version );
 		}
 
 		if ( $this->fields['tags'] ) {
@@ -860,7 +860,7 @@ class Themes_API {
 			$phil->versions = array();
 
 			foreach ( array_keys( get_post_meta( $theme->ID, '_status', true ) ) as $version ) {
-				$phil->versions[ $version ] = $this->create_download_link( $theme, $version );
+				$phil->versions[ $version ] = $repo_package->download_url( $version );
 			}
 		}
 
@@ -944,24 +944,6 @@ class Themes_API {
 	}
 
 	/* Helper functions */
-
-	/**
-	 * Creates download link.
-	 *
-	 * @param  WP_Post $theme
-	 * @param  string $version
-	 *
-	 * @return string
-	 */
-	private function create_download_link( $theme, $version ) {
-		$url  = 'http://downloads.wordpress.org/theme/';
-		$file = $theme->post_name . '.' . $version . '.zip';
-
-		$file = preg_replace( '/[^a-z0-9_.-]/i', '', $file );
-		$file = preg_replace( '/[.]+/', '.', $file );
-
-		return set_url_scheme( $url . $file );
-	}
 
 	/**
 	 * Fixes mangled descriptions.
