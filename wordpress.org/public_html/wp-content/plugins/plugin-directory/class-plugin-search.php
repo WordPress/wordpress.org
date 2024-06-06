@@ -248,26 +248,33 @@ class Plugin_Search {
 			];
 		}
 
-		// The should match is where we add the fields to be searched in, and the weighting of them (boost).
-		$should_match = [];
-		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ] ) ) {
-			$should_match = & $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ];
-		}
+		// In phrase-search mode, the should is not present, and it's instead simply a `must` query.
+		$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ] ??= [];
 
-		$search_phrase = $should_match[0][ 'multi_match' ][ 'query' ] ?? '';
+		// We'll always be adding function scoring.
+		$es_query_args[ 'query' ][ 'function_score' ][ 'functions' ] ??= [];
+
+		// The should match is where we add the fields to be searched in, and the weighting of them (boost).
+		$should_match   = & $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'should' ];
+
+		// The must match is where the base query is present.
+		$must_match     = & $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ];
 
 		// The function score is where calculations on fields occur.
-		$function_score = [];
-		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'functions' ] ) ) {
-			$function_score = & $es_query_args[ 'query' ][ 'function_score' ][ 'functions' ];
-		}
+		$function_score = & $es_query_args[ 'query' ][ 'function_score' ][ 'functions' ];
+
+		// Determine what's actually being searched for according to ES.
+		$search_phrase  = $must_match[0][ 'multi_match' ][ 'query' ] ?? ( $should_match[0][ 'multi_match' ][ 'query' ] ?? '' );
+
+		// $phrase_search_mode = ( 'phrase' === $must_match[0][ 'multi_match' ][ 'type' ] );
 
 		// Set boost on the match query, from jetpack_search_es_wp_query_args.
-		if ( isset( $es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ][0][ 'multi_match' ] ) ) {
-			$es_query_args[ 'query' ][ 'function_score' ][ 'query' ][ 'bool' ][ 'must' ][0][ 'multi_match' ][ 'boost' ] = 0.1;
+		if ( isset( $must_match[0][ 'multi_match' ] ) ) {
+			$must_match[0][ 'multi_match' ][ 'boost' ] = 0.1;
 		}
 
-		// This extends the search to additionally search in the title, excerpt, description and plugin_tags.
+		// This extends the word search to additionally search in the title, excerpt, description and plugin_tags.
+		// Note: This is not present in phrase searching mode.
 		if ( isset( $should_match[0][ 'multi_match' ] ) ) {
 			$should_match[0][ 'multi_match' ][ 'boost' ]  = 2;
 			$should_match[0][ 'multi_match' ][ 'fields' ] = $this->localise_es_fields( [

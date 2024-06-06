@@ -974,7 +974,7 @@ class Plugin_Directory {
 
 		// Sanitize / cleanup the search query a little bit.
 		if ( $wp_query->is_search() ) {
-			$s = $wp_query->get( 's' );
+			$s = wp_unslash( $wp_query->get( 's' ) );
 			$s = urldecode( $s );
 
 			// If a URL-like request comes in, reduce to a slug
@@ -987,12 +987,18 @@ class Plugin_Directory {
 				$s = mb_substr( $s, 0, 200 );
 			}
 
-			// Trim off special characters, only allowing wordy characters at the end of searches.
-			$s = preg_replace( '!(\W+)$!iu', '', $s );
-			// ..and whitespace
+			// Trim whitespace
 			$s = trim( $s );
 
-			$wp_query->set( 's', $s );
+			// If we're searching for a phrase, only trim non-quotey+wordy characters.
+			if ( str_starts_with( $s, '"' ) || str_starts_with( $s, "'" ) ) {
+				$s = preg_replace( '!(\s*[^\'"\w]+)$!iu', '', $s );
+			} else {
+				// If we're searching for a word, trim all non-wordy characters.
+				$s = preg_replace( '!(\s*\W+)$!iu', '', $s );
+			}
+
+			$wp_query->set( 's', wp_slash( $s ) );
 
 			// If the search is in the block directory, require that.
 			if ( $wp_query->get( 'block_search' ) ) {
