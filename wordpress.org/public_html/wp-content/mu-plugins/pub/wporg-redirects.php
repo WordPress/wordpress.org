@@ -44,8 +44,6 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 
 				// Deprecated About / Testimonials page https://github.com/WordPress/wporg-main-2022/issues/196
 				'/about/testimonials' => '/news/category/community/',
-				// Deprecated About / Swag page https://github.com/WordPress/wporg-main-2022/issues/208
-				'/about/swag'         => 'https://mercantile.wordpress.org/',
 
 				// Hashtag alias for State of the Word
 				'/sotw' => 'https://wordpress.org/state-of-the-word/',
