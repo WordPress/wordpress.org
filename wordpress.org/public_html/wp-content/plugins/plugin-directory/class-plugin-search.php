@@ -289,7 +289,7 @@ class Plugin_Search {
 		$should_match[] = [
 			'multi_match' => [
 				'query'  => $search_phrase,
-				'fields' => $this->localise_es_fields( [ 'title.ngram' ] ),
+				'fields' => $this->localise_es_fields( [ 'title.engram' ] ),
 				'type'   => 'phrase',
 				'boost'  => 2,
 			],
