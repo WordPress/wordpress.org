@@ -55,6 +55,46 @@ class User {
 	}
 
 	/**
+	 * Returns a count of photos published by a user on this calendar day.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes global
+	 *                     author. Default false.
+	 * @return int
+	 */
+	public static function count_published_photos_for_today( $user_id = false ) {
+		if (  ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID ?? 0;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		$today = new \DateTime( 'now', new \DateTimeZone( wp_timezone_string() ) );
+		// Set time to beginning of today.
+		$today->setTime( 0, 0, 0 );
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => 'publish',
+			'author'         => $user_id,
+			'date_query'     => [
+				[
+					'after'     => $today->format( 'Y-m-d H:i:s' ), // After start of today.
+					'inclusive' => true,
+				],
+			],
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		];
+
+		$query = new \WP_Query( $args );
+		return $query->found_posts;
+	}
+
+	/**
 	 * Returns a count of pending photos for a user.
 	 *
 	 * @param int $user_id Optional. The user ID. If not defined, assumes global
