@@ -10,7 +10,7 @@ namespace WordPressdotorg\Photo_Directory;
 class User {
 
 	/**
-	 * Maximum number of pending/concurrent submissions.
+	 * Maximum number of pending/concurrent submissions for infrequent contributors.
 	 *
 	 * Once this threshold is met, a user will be unable to make another
 	 * submission until a current submission is approved or rejected.
@@ -23,13 +23,33 @@ class User {
 	const MAX_PENDING_SUBMISSIONS = 5;
 
 	/**
-	 * The number of published posts before a given user is permitted to toggle
-	 * all of the confirmation checkboxes when submitting a photo.
+	 * Maximum number of pending/concurrent submissions for frequent contributors.
+	 *
+	 * Once this threshold is met, a user will be unable to make another
+	 * submission until a current submission is approved or rejected.
+	 *
+	 * @see `get_concurrent_submission_limit()` for actually retrieving the maximum
+	 * pending submissions for a user, since it can vary based on the user and may
+	 * be filtered.
+	 * @var int
+	 */
+	const MAX_PENDING_SUBMISSIONS_FREQUENT = 10;
+
+	/**
+	 * The number of published photos before a given user is granted additional
+	 * privileges.
+	 *
+	 * Includes, but not necessarily limited to:
+	 * - Increased pending submissions limit.
+	 * - Ability to toggle all of the confirmation checkboxes when submitting a photo.
 	 *
 	 * @var int
 	 */
 	const TOGGLE_ALL_THRESHOLD = 30;
 
+	/**
+	 * Initializes class.
+	 */
 	public static function init() {
 	}
 
@@ -343,6 +363,27 @@ class User {
 	}
 
 	/**
+	 * Determines if a user is considered a frequent contributor.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes current
+	 *                     user. Default false.
+	 * @return bool True if user is considered a frequent contributor, else false.
+	 */
+	public static function is_frequent_contributor( $user_id = false ) {
+		$is_frequent = false;
+
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( $user_id && self::count_published_photos( $user_id ) >= self::TOGGLE_ALL_THRESHOLD ) {
+			$is_frequent = true;
+		}
+
+		return $is_frequent;
+	}
+
+	/**
 	 * Determines if a user is eligible to toggle all confirmation checkboxes on
 	 * the photo upload form.
 	 *
@@ -361,17 +402,7 @@ class User {
 	 * @return bool True if user can toggle confirmation checkboxes, else false.
 	 */
 	public static function can_toggle_confirmation_checkboxes( $user_id = false ) {
-		$can = false;
-
-		if ( ! $user_id ) {
-			$user_id = get_current_user_id();
-		}
-
-		if ( $user_id && self::count_published_photos( $user_id ) >= self::TOGGLE_ALL_THRESHOLD ) {
-			$can = true;
-		}
-
-		return $can;
+		return self::is_frequent_contributor( $user_id );
 	}
 
 	/**
@@ -390,7 +421,11 @@ class User {
 			return 0;
 		}
 
-		return apply_filters( 'wporg_photos_max_concurrent_submissions', self::MAX_PENDING_SUBMISSIONS, $user_id );
+		$limit = self::is_frequent_contributor( $user_id )
+			? self::MAX_PENDING_SUBMISSIONS_FREQUENT
+			: self::MAX_PENDING_SUBMISSIONS;
+
+		return apply_filters( 'wporg_photos_max_concurrent_submissions', $limit, $user_id );
 	}
 
 	/**
