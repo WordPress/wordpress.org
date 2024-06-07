@@ -846,6 +846,22 @@ class Admin {
 		)
 		. "</div>\n";
 
+		// Show number of photos approved on this calendar day.
+		$approved_today_count = User::count_published_photos_for_today();
+		if ( $approved_today_count ) {
+			$approved_today_link = add_query_arg( [
+				'post_type'   => Registrations::get_post_type(),
+				'post_status' => 'publish',
+				'author'      => $authordata->ID,
+			], 'edit.php' );
+			$display_name .= '<div class="user-approved-today-count">'
+				. sprintf(
+					__( '&#x21AA; (today): %s', 'wporg-photos' ),
+					sprintf( '<strong><a href="%s">%d</a></strong>', $approved_today_link, $approved_today_count )
+				)
+				. "</div>\n";
+		}
+
 		// Show number of pending photos if there are any.
 		$pending_count = User::count_pending_photos();
 		if ( $pending_count ) {
