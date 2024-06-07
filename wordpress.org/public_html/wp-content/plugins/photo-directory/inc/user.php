@@ -117,14 +117,17 @@ class User {
 	/**
 	 * Returns a count of rejected photos for a user.
 	 *
-	 * @param int $user_id Optional. The user ID. If not defined, assumes global
-	 *                     author. Default false.
+	 * @param int $user_id                    Optional. The user ID. If not defined,
+	 *                                        assumes global author. Default false.
+	 * @param bool $exclude_submission_errors Optional. Should photos rejected due
+	 *                                        to the 'submission-error' reason be
+	 *                                        excluded from the count? Default true.
 	 * @return int
 	 */
-	public static function count_rejected_photos( $user_id = false ) {
+	public static function count_rejected_photos( $user_id = false, $exclude_submission_errors = true ) {
 		global $wpdb;
 
-		if (  ! $user_id ) {
+		if ( ! $user_id ) {
 			global $authordata;
 
 			$user_id = $authordata->ID;
@@ -134,12 +137,26 @@ class User {
 			return 0;
 		}
 
-		return (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s AND post_author = %d",
-			Registrations::get_post_type(),
-			Rejection::get_post_status(),
-			$user_id
-		) );
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => Rejection::get_post_status(),
+			'author'         => $user_id,
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		];
+
+		if ( $exclude_submission_errors ) {
+			$args['meta_query'] = [
+				[
+					'key'      => 'rejected_reason',
+					'value'    => 'submission-error',
+					'compare'  => '!=',
+				],
+			];
+		}
+
+		$query = new \WP_Query( $args );
+		return $query->found_posts;
 	}
 
 	/**
