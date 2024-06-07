@@ -1100,7 +1100,7 @@ class Admin {
 					<?php if ( $author->user_url ) { ?><a class="photo-contributor-url" rel="noopener noreferrer" href="<?php echo esc_url( $author->user_url ); ?>"><?php } ?>
 					<?php echo $author->display_name; ?>
 					<?php if ( $author->user_url ) { ?></a><?php } ?>
-					<div class="photo-contributor-profile"><a href="https://profiles.wordpress.org/<?php esc_attr_e( $author->user_nicename ); ?>/">@<?php echo $author->user_nicename; ?></a></div>
+					<div class="photo-contributor-profile"><a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $author->user_nicename . '/' ); ?>">@<?php echo $author->user_nicename; ?></a></div>
 				</strong>
 				<ul>
 					<li><?php
