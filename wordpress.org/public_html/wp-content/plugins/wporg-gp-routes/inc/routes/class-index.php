@@ -33,6 +33,6 @@ class Index extends GP_Route {
 	}
 
 	private function _sort_english_name_callback( $a, $b ) {
-		return $a->english_name > $b->english_name;
+		return $a->english_name <=> $b->english_name;
 	}
 }
