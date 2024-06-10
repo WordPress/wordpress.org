@@ -588,7 +588,7 @@ class Customizations {
 		}
 
 		// If the plugin is approved, we'll need to perform a folder rename, and re-grant SVN access.
-		if ( 'approved' === $plugin->post_status ) {
+		if ( 'approved' === $plugin->post_status && $old_slug !== $new_slug ) {
 			// SVN Rename $old_slug to $new_slug
 			$result = SVN::rename(
 				"http://plugins.svn.wordpress.org/{$old_slug}/",
