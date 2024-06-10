@@ -61,9 +61,25 @@ class Blocks {
 	 * CSS to expand on Blocks Everywhere support
 	 */
 	public function expand_theme_compat() {
+		$back_compat_css_vars = '';
+		// The old support theme doesn't have the parent colors defined.
+		if ( 'pub/wporg-support' === get_stylesheet() ) {
+			$back_compat_css_vars = <<<CSS
+				:root {
+					--wp--preset--color--blueberry-1: #3858e9;
+					--wp--preset--color--charcoal-1: #1e1e1e;
+					--wp--preset--color--charcoal-3: #40464d;
+					--wp--preset--color--deep-blueberry: #213fd4;
+					--wp--custom--button--color--background: var(--wp--preset--color--blueberry-1);
+					--wp--custom--button--hover--color--background: var(--wp--preset--color--deep-blueberry);
+				}
+			CSS;
+		}
+
 		wp_add_inline_style(
 			'blocks-everywhere-compat',
 			<<<CSS
+				{$back_compat_css_vars}
 				/* Fix the primary block inserter button */
 				.blocks-everywhere .components-button.is-primary {
 					--wp-components-color-accent: var(--wp--custom--button--color--background);
