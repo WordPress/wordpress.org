@@ -472,6 +472,10 @@ function get_whitelist() {
 			'tobifjellner',
 			'tokyobiyori',
 		),
+		'polyglots-multilingual-community' => array(
+			'courane01', // @Courtney on Slack
+			'estelaris',
+		),
 		'themereview' => array(
 			'acalfieri',
 			'acosmin',
