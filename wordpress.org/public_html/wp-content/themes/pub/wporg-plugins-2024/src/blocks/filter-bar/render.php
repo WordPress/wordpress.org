@@ -3,10 +3,6 @@ namespace WordPressdotorg\Theme\Plugins_2024\FilterBar;
 
 global $wp_query;
 
-if ( isset( $wp_query ) && ( ! empty( $wp_query->query_vars['browse'] ) && 'favorites' === $wp_query->query_vars['browse'] ) ) {
-	return '';
-}
-
 $search_placeholder = esc_attr__( 'Search plugins', 'wporg-plugins' );
 $search_button      = esc_attr__( 'Search plugins', 'wporg-plugins' );
 
