@@ -78,7 +78,7 @@ class Upload_Handler {
 		}
 
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
-		$upload_comment   = trim( wp_unslash( $_POST['comment'] ) );
+		$upload_comment   = trim( wp_unslash( $_POST['comment'] ?? '' ) );
 		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
@@ -422,6 +422,7 @@ class Upload_Handler {
 
 		$post_args = array(
 			'ID'            => $plugin_post->ID ?? 0,
+			'post_author'   => $plugin_post->post_author ?? get_current_user_id(),
 			'post_title'    => $this->plugin['Name'],
 			'post_name'     => $this->plugin_slug,
 			'post_status'   => $plugin_post->post_status ?? 'new',
