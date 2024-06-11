@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use Throwable;
+use Wporg\TranslationEvents\Translation_Events;
 
 class InvalidTimeZone extends Exception {
 	public function __construct( Throwable $previous = null ) {
@@ -95,7 +96,7 @@ class Event {
 	}
 
 	public function is_active(): bool {
-		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+		$now = Translation_Events::now();
 		return $now >= $this->start->utc() && $now < $this->end->utc();
 	}
 

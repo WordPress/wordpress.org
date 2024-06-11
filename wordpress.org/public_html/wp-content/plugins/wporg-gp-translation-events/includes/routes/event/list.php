@@ -2,10 +2,6 @@
 
 namespace Wporg\TranslationEvents\Routes\Event;
 
-use DateTime;
-use DateTimeZone;
-use Exception;
-use WP_Query;
 use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
@@ -22,15 +18,6 @@ class List_Route extends Route {
 	}
 
 	public function handle(): void {
-		$current_datetime_utc = null;
-		try {
-			$current_datetime_utc = ( new DateTime( 'now', new DateTimeZone( 'UTC' ) ) )->format( 'Y-m-d H:i:s' );
-		} catch ( Exception $e ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( $e );
-			$this->die_with_error( esc_html__( 'Something is wrong.', 'gp-translation-events' ) );
-		}
-
 		$_current_events_paged        = 1;
 		$_upcoming_events_paged       = 1;
 		$_past_events_paged           = 1;
@@ -69,7 +56,7 @@ class List_Route extends Route {
 		$user_attending_events_query = $this->event_repository->get_current_and_upcoming_events_for_user( get_current_user_id(), $_user_attending_events_paged, 10 );
 
 		$this->tmpl(
-			'events-list',
+			'home',
 			array(
 				'current_events_query'        => $current_events_query,
 				'upcoming_events_query'       => $upcoming_events_query,

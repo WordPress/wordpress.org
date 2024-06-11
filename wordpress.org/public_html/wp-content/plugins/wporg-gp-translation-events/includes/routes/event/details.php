@@ -86,7 +86,7 @@ class Details_Route extends Route {
 		}
 
 		$this->tmpl(
-			'event',
+			'event-details',
 			array(
 				'event'                      => $event,
 				'user_is_attending'          => $user_is_attending,

@@ -51,7 +51,7 @@ class List_Route extends Route {
 		}
 
 		$this->tmpl(
-			'events-attendees',
+			'event-attendees',
 			array(
 				'event'            => $event,
 				'attendees'        => $attendees,

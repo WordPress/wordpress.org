@@ -12,7 +12,7 @@ use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 use Wporg\TranslationEvents\Templates;
 
 /**
- * Displays the event details page.
+ * Displays the event translations page.
  */
 class Translations_Route extends Route {
 	private Event_Repository_Interface $event_repository;
@@ -59,7 +59,7 @@ class Translations_Route extends Route {
 			$projects[ $ts->translation_set_id ] = GP::$project->get( $ts->project_id );
 
 		}
-		Templates::render( 'event-translations-header', get_defined_vars() );
+		Templates::render( 'translations/header', get_defined_vars() );
 
 		foreach ( $translation_sets as $ts ) {
 			$rows = $wpdb->get_results(
@@ -171,9 +171,9 @@ class Translations_Route extends Route {
 
 				$translations[ $row->row_id ] = new Translation_Entry( (array) $row );
 			}
-			Templates::render( 'translations', get_defined_vars() );
+			Templates::render( 'translations/table', get_defined_vars() );
 		}
 
-		Templates::render( 'event-translations-footer', get_defined_vars() );
+		Templates::render( 'translations/footer', get_defined_vars() );
 	}
 }

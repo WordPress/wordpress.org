@@ -18,6 +18,8 @@
 
 namespace Wporg\TranslationEvents;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Exception;
 use GP;
 use GP_Locales;
@@ -47,10 +49,18 @@ class Translation_Events {
 		return $instance;
 	}
 
+	public static function now(): DateTimeImmutable {
+		static $now = null;
+		if ( null === $now ) {
+			$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+		}
+		return $now;
+	}
+
 	public static function get_event_repository(): Event_Repository_Interface {
 		static $event_repository = null;
 		if ( null === $event_repository ) {
-			$event_repository = new Event_Repository_Cached( self::get_attendee_repository() );
+			$event_repository = new Event_Repository_Cached( self::now(), self::get_attendee_repository() );
 		}
 		return $event_repository;
 	}
@@ -92,6 +102,7 @@ class Translation_Events {
 		}
 
 		$this->event_capabilities = new Event_Capabilities(
+			self::now(),
 			self::get_event_repository(),
 			self::get_attendee_repository(),
 			new Stats_Calculator()
@@ -257,10 +268,6 @@ class Translation_Events {
 	public function register_translation_event_js() {
 		wp_register_style( 'translation-events-css', plugins_url( 'assets/css/translation-events.css', __FILE__ ), array( 'dashicons' ), filemtime( __DIR__ . '/assets/css/translation-events.css' ) );
 		gp_enqueue_styles( 'translation-events-css' );
-		if ( $this->should_load_new_design() ) {
-			wp_register_style( 'new-dotorg-design-css', plugins_url( 'assets/css/new-dotorg-design.css', __FILE__ ), array( 'dashicons' ), filemtime( __DIR__ . '/assets/css/new-dotorg-design.css' ) );
-			gp_enqueue_styles( 'new-dotorg-design-css' );
-		}
 		wp_register_script( 'translation-events-js', plugins_url( 'assets/js/translation-events.js', __FILE__ ), array( 'jquery', 'gp-common' ), filemtime( __DIR__ . '/assets/js/translation-events.js' ), false );
 		gp_enqueue_script( 'translation-events-js' );
 		wp_localize_script(
@@ -360,6 +367,10 @@ class Translation_Events {
 	 * @throws Exception
 	 */
 	public function add_active_events_current_user(): void {
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
 		$event_repository            = self::get_event_repository();
 		$user_attending_events_query = $event_repository->get_current_events_for_user( get_current_user_id() );
 		$events                      = $user_attending_events_query->events;
@@ -408,7 +419,7 @@ class Translation_Events {
 	 * Send notifications for the events.
 	 */
 	public function send_notifications() {
-		new Notifications_Send( self::get_event_repository(), self::get_attendee_repository() );
+		new Notifications_Send( self::now(), self::get_event_repository(), self::get_attendee_repository() );
 	}
 
 	/**
@@ -432,15 +443,6 @@ class Translation_Events {
 			return $slug;
 		}
 		return $override_slug;
-	}
-
-	/**
-	 * Check if the current site is a translate.wordpress.org or a development TLD.
-	 *
-	 * @return bool
-	 */
-	private function should_load_new_design(): bool {
-		return defined( 'TRANSLATION_EVENTS_NEW_DESIGN' ) && TRANSLATION_EVENTS_NEW_DESIGN;
 	}
 }
 Translation_Events::get_instance();
