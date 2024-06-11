@@ -383,6 +383,9 @@ class WPORG_Themes_Upload {
 		// We have a stylesheet, let's set up the theme, theme post, and author.
 		$this->theme = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
 
+		// Find the blueprint(s).
+		$this->blueprints = $this->find_blueprints( $theme_files );
+
 		// We need a screen shot. People love screen shots.
 		if ( ! $this->has_screenshot( $theme_files ) ) {
 			$style_errors->add(
@@ -887,6 +890,32 @@ class WPORG_Themes_Upload {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Find the blueprints included with the theme.
+	 *
+	 * @param array $theme_files The files from the theme.
+	 * @return array
+	 */
+	public function find_blueprints( $theme_files ) {
+		$blueprints = preg_grep( '/preview-blueprint.json/', $theme_files );
+		usort( $blueprints, array( $this, 'sort_by_string_length' ) );
+
+		if ( ! $blueprints ) {
+			return [];
+		}
+
+		$first_blueprint = (string) array_pop( $blueprints );
+		$first_blueprint = json_decode( file_get_contents( $first_blueprint ), true );
+
+		if ( ! $first_blueprint ) {
+			return [];
+		}
+
+		return [
+			'preview' => $first_blueprint
+		];
 	}
 
 	/**
@@ -1409,6 +1438,7 @@ TICKET;
 			'_upload_date'  => $upload_date,
 			'_ticket_id'    => $this->trac_ticket->id,
 			'_screenshot'   => $this->theme->screenshot,
+			'_blueprint'    => $this->blueprints['preview'] ?? false,
 		);
 
 		// Store readme.txt data if present.

@@ -27,6 +27,24 @@ class WPORG_Themes_Repo_Package {
 	}
 
 	/**
+	 * Get an object for a slug.
+	 */
+	public static function get_by_slug( $slug ) {
+		$themes = get_posts( array(
+			'name'        => $slug,
+			'post_type'   => 'repopackage',
+			'post_status' => 'any',
+			'numberposts' => 1,
+		) );
+	
+		if ( empty( $themes ) ) {
+			return false;
+		}
+
+		return new self( $themes[0] );
+	}
+
+	/**
 	 * Returns the screen shot URL for a theme.
 	 *
 	 * @return string
@@ -95,6 +113,19 @@ class WPORG_Themes_Repo_Package {
 	}
 
 	/**
+	 * Returns the preview URL for a theme.
+	 */
+	public function preview_url() {
+		$link = 'https://wp-themes.com/' . $this->wp_post->post_name . '/';
+
+		if ( $this->blueprint || isset( $_GET['playground-preview'] ) ) {
+			$link = 'https://playground.wordpress.net/?mode=seamless&blueprint-url=' . urlencode( rest_url( 'themes/v1/preview-blueprint/' . $this->wp_post->post_name ) );
+		}
+
+		return $link;
+	}
+
+	/**
 	 * Magic getter for a few handy variables.
 	 *
 	 * @param string $name
@@ -112,17 +143,11 @@ class WPORG_Themes_Repo_Package {
 			case 'ticket' :
 				return $this->wp_post->_ticket_id[ $version ] ?? '';
 			case 'requires':
-				$values = $this->wp_post->_requires;
-				if ( isset( $values[ $version ] ) ) {
-					return $values[ $version ];
-				}
-				return '';
+				return $this->wp_post->_requires[ $version ] ?? '';
 			case 'requires-php':
-				$values = $this->wp_post->_requires_php;
-				if ( isset( $values[ $version ] ) ) {
-					return $values[ $version ];
-				}
-				return '';
+				return $this->wp_post->_requires_php[ $version ] ?? '';
+			case 'blueprint':
+				return $this->wp_post->_blueprint[ $version ] ?? '';
 			default:
 				return $this->wp_post->$name;
 		}
