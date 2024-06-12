@@ -323,7 +323,7 @@ class Plugin_Search {
 				'query'  => $search_phrase,
 				'fields' => $this->localise_es_fields( [
 					'author',
-					'contributor'
+					'contributors'
 				] ),
 				'type'   => 'best_fields',
 				'boost'  => 3,
