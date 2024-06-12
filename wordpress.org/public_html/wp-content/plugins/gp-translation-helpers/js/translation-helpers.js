@@ -35,7 +35,7 @@ $gp.translation_helpers = (
 
 				const originalId = $helpers.parent().attr( 'row' ); // eslint-disable-line vars-on-top
 				const replytocom = $helpers.parent().attr( 'replytocom' ); // eslint-disable-line vars-on-top
-				var requestUrl = $gp_translation_helpers_settings.th_url + originalId + '?nohc'; // eslint-disable-line
+				let requestUrl = $gp_translation_helpers_settings.th_url.replace( '{ID}', originalId ) + '?';
 
 				if ( which ) {
 					requestUrl = requestUrl + '&helpers[]=' + which;
