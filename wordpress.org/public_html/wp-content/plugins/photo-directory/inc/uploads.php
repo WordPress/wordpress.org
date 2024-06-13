@@ -770,16 +770,20 @@ class Uploads {
 		$post = get_post( $post_id );
 
 		if ( is_object( $post ) ) {
-			$post->post_name  = $name;
-			$post->post_title = $name;
-			wp_update_post( $post );
+			wp_update_post( [
+				'ID'         => $post->ID,
+				'post_name'  => $name,
+				'post_title' => $name,
+			] );
 
 			// Change the same fields in the attachment to obfuscate the original
 			// filename.
 			$photo_name = wp_unique_post_slug( $name . '-photo', $photo->ID, $photo->post_status, $photo->post_type, $post->ID );
-			$photo->post_name = $photo_name;
-			$photo->post_title = $photo_name;
-			wp_update_post( $photo );
+			wp_update_post( [
+				'ID'         => $photo->ID,
+				'post_name'  => $photo_name,
+				'post_title' => $photo_name,
+			] );
 		}
 	}
 
