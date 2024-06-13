@@ -135,16 +135,16 @@ class Admin {
 		// Note: Not reporting who flagged a post once it has been unflagged.
 		if ( $user_id = Flagged::get_unflagger( $post ) ) {
 			/* translators: 1: URL to the profile of the user who unflagged the photo, 2: The name of the user who unflagged the photo. */
-			$notice = __( '<strong>This photo was unflagged by <a href="%1$s">%2$s</a> and is safe to moderate.', 'wporg-photos' );
+			$notice = __( '<strong>This photo was unflagged by <a href="%1$s">%2$s</a> and is safe to moderate.</strong>', 'wporg-photos' );
 			$notice_type = 'success';
 		}
 		elseif ( $user_id = Flagged::get_flagger( $post ) ) {
 			// A user can't actually flag their own submission. This results from auto-flagging.
 			if ( $user_id === $post->post_author ) {
-				$notice = __( '<strong>This photo was automatically flagged due to potential concerns after image analysis.', 'wporg-photos' );
+				$notice = __( '<strong>This photo was automatically flagged due to potential concerns after image analysis.</strong>', 'wporg-photos' );
 			} else {
 				/* translators: 1: URL to the profile of the user who flagged the photo, 2: The name of the user who flagged the photo. */
-				$notice = __( '<strong>This photo was flagged by <a href="%1$s">%2$s</a>.', 'wporg-photos' );
+				$notice = __( '<strong>This photo was flagged by <a href="%1$s">%2$s</a>.</strong>', 'wporg-photos' );
 			}
 		}
 
