@@ -13,7 +13,7 @@ get_header();
 global $wp_query, $post, $wptv;
 ?>
 <div class="wptv-hero">
-	<h2 class="page-title"><?php
+	<h1 class="page-title"><?php
 		if ( is_category() ) :
 			printf( __( '&#8216;%s&#8217; Videos', 'wptv' ), single_cat_title( '', false ) );
 
@@ -45,7 +45,7 @@ global $wp_query, $post, $wptv;
 
 		endif;
 	?>
-	</h2>
+	</h1>
 </div>
 <div class="container">
 	<div class="primary-content">

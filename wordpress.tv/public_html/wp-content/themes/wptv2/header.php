@@ -38,12 +38,10 @@ global $wptv;
 	<div id="header">
 		<div class="sleeve">
 
-			<?php if ( is_home() ) { ?> 
-			<h1><a class="homelogo" rel="home" href="<?php echo $wptv->home_url( '/' ); ?>"><img src="<?php echo get_template_directory_uri(); ?>/i/wptv-2x.png" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" height="40" width="210" /></a></h1>
-			<?php } else { ?>
-			<a class="homelogo" rel="home" href="<?php echo $wptv->home_url( '/' ); ?>"><img src="<?php echo get_template_directory_uri(); ?>/i/wptv-2x.png" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" height="40" width="210" /></a><
-			<?php } ?>
-			
+			<?php if ( is_front_page() ) { echo '<h1>'; } ?>
+			<a class="homelogo" rel="home" href="<?php echo $wptv->home_url( '/' ); ?>"><img src="<?php echo get_template_directory_uri(); ?>/i/wptv-2x.png" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" height="40" width="210" /></a></h1>
+			<?php if ( is_front_page() ) { echo '</h1>'; } ?>
+
 			<form id="searchform" name="searchform" method="get" action="<?php echo $wptv->home_url( '/' ); ?>">
 				<label for="searchbox" class="screen-reader-text"><?php esc_attr_e( 'Search WordPress.tv', 'wptv' ); ?></label>
 				<input type="search" placeholder="<?php esc_attr_e( 'Search WordPress.tv', 'wptv' ); ?>" id="searchbox" name="s" value="<?php the_search_query(); ?>"  />

@@ -6,9 +6,9 @@ get_header();
 the_post();
 ?>
 <div class="wptv-hero">
-	<h2 class="page-title">
+	<h1 class="page-title">
 		<?php the_title(); ?>
-	</h2>
+	</h1>
 </div>
 
 <div class="container">

@@ -19,16 +19,16 @@ if ( get_query_var( 'paged' ) < 2 && $wp_query->found_posts > 6 ) : ?>
 	<div class="container">
 
 		<?php get_template_part( 'breadcrumbs' ); ?>
-		<h2 class="page-title"><?php single_term_title(); ?></h2>
+		<h1 class="page-title"><?php single_term_title(); ?></h1>
 
 		<?php if ( have_posts() ) : the_post(); ?>
 
 			<div class="main-video">
 				<?php $wptv->the_video(); ?>
-				<h3>
+				<h2>
 					<a href="<?php the_permalink(); ?>" rel="bookmark" class="video-title"><?php the_title(); ?></a>
 					<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
-				</h3>
+				</h2>
 			</div><!-- .main-video -->
 
 		<?php endif; ?>

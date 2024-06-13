@@ -21,7 +21,7 @@ if ( get_query_var( 'paged' ) < 2 && $wp_query->found_posts > 6 ) : ?>
 <div class="wptv-hero group">
 	<div class="container">
 
-		<h2 class="page-title"><?php single_term_title(); ?></h2>
+		<h1 class="page-title"><?php single_term_title(); ?></h1>
 		<div class="desc"><?php echo category_description(); ?></div>
 
 		<?php if ( have_posts() ) : the_post(); ?>
