@@ -237,7 +237,7 @@ div.success p {
 	display: table;
 }
 
-#header h1 {
+#header .homelogo {
 	padding-top: 8px;
 }
 
@@ -2519,7 +2519,7 @@ h3#comments {
 		padding: 0 20px;
 	}
 
-	#header h1 {
+	#header .homelogo {
 		float: left;
 	}
 
