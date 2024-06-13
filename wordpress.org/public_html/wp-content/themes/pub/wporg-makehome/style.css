@@ -296,6 +296,10 @@ section.get-involved article div.team-description p {
 	padding: 12px;
 }
 
+.wizard-callout a {
+	text-decoration: underline;
+}
+
 div.team-meeting {
 	display: block;
 	font-size: 0.8em;
