@@ -542,7 +542,8 @@ body {
 	min-width: 48.5em; /* don't let it get ugly unless responsive */
 }
 body, th, tr {
-	line-height: 1.4; /* I don't know how you people read without this */
+	--wp--custom--body--typography--line-height: 1.4;/* I don't know how you people read without this */
+	line-height: var( --wp--custom--body--typography--line-height );
 }
 hr {
 	border-top: 1px solid #ccc;
