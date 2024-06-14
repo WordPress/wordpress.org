@@ -281,6 +281,10 @@ class WPORG_Themes_Upload {
 		// The version should be set live as it's from SVN.
 		$this->version_status = 'live';
 
+		if ( 'themedropbox' !== $author && function_exists( 'bump_stats_extras' ) ) {
+			bump_stats_extras( 'themes', 'upload_from_svn' );
+		}
+
 		return $this->import( array( // return true | WP_Error
 			// Since this version is already in SVN, we shouldn't try to import it again.
 			'commit_to_svn' => false,
@@ -447,6 +451,8 @@ class WPORG_Themes_Upload {
 		if ( ! $this->theme_post ) {
 			$this->theme_post = $this->get_theme_post();
 		}
+		$is_new_upload = empty( $this->theme_post );
+		$is_update     = ! $is_new_upload;
 
 		// Populate author.
 		if ( ! $this->author ) {
@@ -760,6 +766,11 @@ class WPORG_Themes_Upload {
 
 		// Initiate a GitHub actions run for the theme.
 		$this->trigger_e2e_run();
+
+		// Record stats.
+		if ( function_exists( 'bump_stats_extras' ) ) {
+			bump_stats_extras( 'themes', $is_new_upload ? 'new' : 'update' );
+		}
 
 		// Success!
 		return true;
