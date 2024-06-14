@@ -1558,7 +1558,7 @@ function wporg_themes_status_change_stats( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	if ( 'suspended' == $old_status && 'publish' == $new_status ) {
+	if ( 'suspend' == $old_status && 'publish' == $new_status ) {
 		$stat = 'reinstated';
 	} elseif( 'delist' == $old_status && 'publish' == $new_status ) {
 		$stat = 'relisted';
