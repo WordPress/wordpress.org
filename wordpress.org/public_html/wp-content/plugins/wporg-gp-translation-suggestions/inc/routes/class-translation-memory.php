@@ -277,9 +277,11 @@ class Translation_Memory extends GP_Route {
 	 * @return array
 	 */
 	private function get_deepl_suggestion( string $original_singular, string $locale, string $set_slug ): array {
-		$free_url        = 'https://api-free.deepl.com/v2/translate';
 		$gp_default_sort = get_user_option( 'gp_default_sort' );
 		$deepl_api_key   = gp_array_get( $gp_default_sort, 'deepl_api_key' );
+		$deepl_url_free  = 'https://api-free.deepl.com/v2/translate';
+		$deepl_url_pro   = 'https://api.deepl.com/v2/translate';
+		$deepl_url       = gp_array_get( $gp_default_sort, 'deepl_use_api_pro', false ) ? $deepl_url_pro : $deepl_url_free;
 		if ( empty( trim( $deepl_api_key ) ) ) {
 			return array();
 		}
@@ -291,7 +293,7 @@ class Translation_Memory extends GP_Route {
 			return array();
 		}
 		$deepl_response = wp_remote_post(
-			$free_url,
+			$deepl_url,
 			array(
 				'timeout' => 20,
 				'body'    => array(
