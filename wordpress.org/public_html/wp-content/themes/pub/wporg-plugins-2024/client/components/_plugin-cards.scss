@@ -2,6 +2,11 @@
 	cursor: pointer;
 }
 
+.plugin-cards .is-style-cards-grid li:hover {
+	border: 1px solid var(--wp--preset--color--charcoal-1) !important;
+	background-color: #fff !important; 
+}
+
 @media screen and ( max-width: $ms-breakpoint ) {
 	.plugin-cards .is-style-cards-grid {
 		grid-template-columns: 100%;
