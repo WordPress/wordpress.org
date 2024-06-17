@@ -218,6 +218,7 @@ class Translation_Memory extends GP_Route {
 		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
 		$openai_query .= ' Translate the following text to ' . $gp_locale->english_name . ": \n";
 		$openai_query .= '"' . $original_singular . '"';
+		$openai_model  = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
 
 		$messages = array(
 			array(
@@ -240,7 +241,7 @@ class Translation_Memory extends GP_Route {
 				),
 				'body'    => wp_json_encode(
 					array(
-						'model'       => 'gpt-3.5-turbo',
+						'model'       => $openai_model,
 						'max_tokens'  => 1000,
 						'n'           => 1,
 						'messages'    => $messages,
