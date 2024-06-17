@@ -117,6 +117,22 @@ $deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 		</th>
 	</tr>
 	<tr>
+		<th><label for="default_sort[openai_model]"><?php esc_html_e( 'OpenAI model', 'glotpress' ); ?></label></th>
+		<td>
+			<select name="default_sort[openai_model]" id="default_sort[openai_model]" style="border:revert;">
+				<?php
+				$openai_models = array( 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o' );
+				$openai_model = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
+				foreach ( $openai_models as $model ) {
+					echo '<option value="' . esc_attr( $model ) . '"';
+					selected( $model, $openai_model );
+					echo '>' . esc_html( $model ) . '</option>';
+				}
+				?>
+			</select>
+		</td>
+	</tr>
+	<tr>
 		<th><label for="default_sort[openai_api_key]">
 				<?php esc_html_e( 'OpenAI API Key', 'glotpress' ); ?>
 			</label>
@@ -185,10 +201,10 @@ $deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 			<h4><?php esc_html_e( 'DeepL settings', 'glotpress' ); ?></h4>
 		</th>
 	</tr>
-    <tr>
-        <th><label for="default_sort[deepl_use_api_pro]"><?php esc_html_e( 'Use DeepL API Pro', 'glotpress' ); ?></label></th>
-        <td><input type="checkbox" id="default_sort[deepl_use_api_pro]" name="default_sort[deepl_use_api_pro]" <?php gp_checked( 'on' == gp_array_get( $gp_default_sort, 'deepl_use_api_pro', 'off' ) ); ?> /></td>
-    </tr>
+	<tr>
+		<th><label for="default_sort[deepl_use_api_pro]"><?php esc_html_e( 'Use DeepL API Pro', 'glotpress' ); ?></label></th>
+		<td><input type="checkbox" id="default_sort[deepl_use_api_pro]" name="default_sort[deepl_use_api_pro]" <?php gp_checked( 'on' == gp_array_get( $gp_default_sort, 'deepl_use_api_pro', 'off' ) ); ?> /></td>
+	</tr>
 	<tr>
 		<th><label for="default_sort[deepl_api_key]">
 				<?php esc_html_e( 'DeepL API Key', 'glotpress' ); ?>
