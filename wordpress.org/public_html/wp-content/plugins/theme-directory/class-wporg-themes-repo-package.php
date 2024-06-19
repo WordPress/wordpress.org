@@ -4,7 +4,7 @@
  * Class WPORG_Themes_Repo_Package
  *
  * The WPORG_Themes_Repo_Package class wraps the WP_Post class with theme-specific info.
- * You can create one with new and pass it either a post or post id.
+ * You can create one with new and pass it either a WP_Post, post ID, or slug.
  */
 class WPORG_Themes_Repo_Package {
 
@@ -18,11 +18,39 @@ class WPORG_Themes_Repo_Package {
 	/**
 	 * Construct a new Package for the given post ID or object.
 	 *
-	 * @param WP_Post|int $post
+	 * @param WP_Post|int|slug $wp_post The Post object, Post ID, or theme slug of the package.
 	 */
-	public function __construct( $post = 0 ) {
-		if ( $post ) {
-			$this->wp_post = get_post( $post );
+	public function __construct( $wp_post = 0 ) {
+		global $post;
+		if ( ! $wp_post ) {
+			return;
+		}
+
+		if ( $wp_post instanceof WP_Post ) {
+			$this->wp_post = $wp_post;
+
+		} elseif ( is_numeric( $wp_post ) ) {
+			$this->wp_post = get_post( $wp_post );
+
+		} elseif (
+			is_string( $wp_post ) &&
+			! empty( $post ) &&
+			$post->post_name === $wp_post &&
+			$post->post_type === 'repopackage'
+		) {
+			$this->wp_post = $post;
+
+		} elseif ( is_string( $wp_post ) ) {
+			$theme = get_posts( array(
+				'name'        => $wp_post,
+				'post_type'   => 'repopackage',
+				'post_status' => 'any',
+				'numberposts' => 1,
+			) );
+		
+			if ( $themes ) {
+				$this->wp_post = $theme[0];
+			}
 		}
 	}
 
@@ -95,6 +123,13 @@ class WPORG_Themes_Repo_Package {
 	}
 
 	/**
+	 * Returns the preview URL for a theme.
+	 */
+	public function preview_url() {
+		return 'https://wp-themes.com/' . $this->wp_post->post_name . '/';
+	}
+
+	/**
 	 * Magic getter for a few handy variables.
 	 *
 	 * @param string $name
@@ -112,17 +147,9 @@ class WPORG_Themes_Repo_Package {
 			case 'ticket' :
 				return $this->wp_post->_ticket_id[ $version ] ?? '';
 			case 'requires':
-				$values = $this->wp_post->_requires;
-				if ( isset( $values[ $version ] ) ) {
-					return $values[ $version ];
-				}
-				return '';
+				return $this->wp_post->_requires[ $version ] ?? '';
 			case 'requires-php':
-				$values = $this->wp_post->_requires_php;
-				if ( isset( $values[ $version ] ) ) {
-					return $values[ $version ];
-				}
-				return '';
+				return $this->wp_post->_requires_php[ $version ] ?? '';
 			default:
 				return $this->wp_post->$name;
 		}
