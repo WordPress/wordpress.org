@@ -281,6 +281,10 @@ class WPORG_Themes_Upload {
 		// The version should be set live as it's from SVN.
 		$this->version_status = 'live';
 
+		if ( 'themedropbox' !== $author && function_exists( 'bump_stats_extras' ) ) {
+			bump_stats_extras( 'themes', 'upload_from_svn' );
+		}
+
 		return $this->import( array( // return true | WP_Error
 			// Since this version is already in SVN, we shouldn't try to import it again.
 			'commit_to_svn' => false,
@@ -383,9 +387,6 @@ class WPORG_Themes_Upload {
 		// We have a stylesheet, let's set up the theme, theme post, and author.
 		$this->theme = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
 
-		// Find the blueprint(s).
-		$this->blueprints = $this->find_blueprints( $theme_files );
-
 		// We need a screen shot. People love screen shots.
 		if ( ! $this->has_screenshot( $theme_files ) ) {
 			$style_errors->add(
@@ -450,6 +451,8 @@ class WPORG_Themes_Upload {
 		if ( ! $this->theme_post ) {
 			$this->theme_post = $this->get_theme_post();
 		}
+		$is_new_upload = empty( $this->theme_post );
+		$is_update     = ! $is_new_upload;
 
 		// Populate author.
 		if ( ! $this->author ) {
@@ -764,6 +767,11 @@ class WPORG_Themes_Upload {
 		// Initiate a GitHub actions run for the theme.
 		$this->trigger_e2e_run();
 
+		// Record stats.
+		if ( function_exists( 'bump_stats_extras' ) ) {
+			bump_stats_extras( 'themes', $is_new_upload ? 'new' : 'update' );
+		}
+
 		// Success!
 		return true;
 	}
@@ -890,32 +898,6 @@ class WPORG_Themes_Upload {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Find the blueprints included with the theme.
-	 *
-	 * @param array $theme_files The files from the theme.
-	 * @return array
-	 */
-	public function find_blueprints( $theme_files ) {
-		$blueprints = preg_grep( '/preview-blueprint.json/', $theme_files );
-		usort( $blueprints, array( $this, 'sort_by_string_length' ) );
-
-		if ( ! $blueprints ) {
-			return [];
-		}
-
-		$first_blueprint = (string) array_pop( $blueprints );
-		$first_blueprint = json_decode( file_get_contents( $first_blueprint ), true );
-
-		if ( ! $first_blueprint ) {
-			return [];
-		}
-
-		return [
-			'preview' => $first_blueprint
-		];
 	}
 
 	/**
@@ -1438,7 +1420,6 @@ TICKET;
 			'_upload_date'  => $upload_date,
 			'_ticket_id'    => $this->trac_ticket->id,
 			'_screenshot'   => $this->theme->screenshot,
-			'_blueprint'    => $this->blueprints['preview'] ?? false,
 		);
 
 		// Store readme.txt data if present.

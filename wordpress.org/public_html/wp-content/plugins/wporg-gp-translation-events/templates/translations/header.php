@@ -1,14 +1,18 @@
 <?php
-namespace Wporg\TranslationEvents\Templates;
+namespace Wporg\TranslationEvents\Templates\Translations;
 
 use Wporg\TranslationEvents\Event\Event;
+use Wporg\TranslationEvents\Templates;
 use Wporg\TranslationEvents\Urls;
 
-/** @var Event  $event */
+/** @var Event $event */
 
 /* translators: %s: Event title. */
 gp_title( sprintf( __( 'Translation Events - %s' ), esc_html( $event->title() ) ) );
-gp_breadcrumb_translation_events( array( '<a href="' . esc_url( Urls::event_details( $event->id() ) ) . '">' . esc_html( $event->title() ) . '</a>', __( 'Translations', 'glotpress' ), $locale->english_name ) );
+
+$breadcrumbs = array( '<a href="' . esc_url( Urls::event_details( $event->id() ) ) . '">' . esc_html( $event->title() ) . '</a>', __( 'Translations', 'glotpress' ), $locale->english_name );
+Templates::part( 'breadcrumbs', array( 'extra_items' => $breadcrumbs ) );
+
 gp_enqueue_scripts( array( 'gp-editor', 'gp-translations-page' ) );
 wp_localize_script(
 	'gp-translations-page',

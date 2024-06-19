@@ -45,9 +45,8 @@ class Event_Repository_Cached extends Event_Repository {
 		$this->assert_pagination_arguments( $page, $page_size );
 
 		$cache_duration = self::CACHE_DURATION;
-		$now            = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-		$boundary_start = $now;
-		$boundary_end   = $now->modify( "+$cache_duration seconds" );
+		$boundary_start = $this->now;
+		$boundary_end   = $this->now->modify( "+$cache_duration seconds" );
 
 		$events = wp_cache_get( self::ACTIVE_EVENTS_KEY, '', false, $found );
 		if ( ! $found ) {
@@ -61,8 +60,8 @@ class Event_Repository_Cached extends Event_Repository {
 		$events = array_values(
 			array_filter(
 				$events,
-				function ( $event ) use ( $now ) {
-					return $event->start() <= $now && $now <= $event->end();
+				function ( $event ) {
+					return $event->start() <= $this->now && $this->now <= $event->end();
 				}
 			)
 		);

@@ -43,9 +43,13 @@ $openai_response_code = wp_remote_retrieve_response_code( $openai_response );
 
 $deepl_key      = trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) );
 $deepl_response = null;
+$deepl_url_free = 'https://api-free.deepl.com/v2/usage';
+$deepl_url_pro  = 'https://api.deepl.com/v2/usage';
+$deepl_url      = gp_array_get( $gp_default_sort, 'deepl_use_api_pro', false ) ? $deepl_url_pro : $deepl_url_free;
+
 if ( $deepl_key ) {
 	$deepl_response = wp_remote_get(
-		'https://api-free.deepl.com/v2/usage',
+		$deepl_url,
 		array(
 			'timeout' => 4,
 			'headers' => array(
@@ -55,6 +59,7 @@ if ( $deepl_key ) {
 		)
 	);
 }
+
 $deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 ?>
 
@@ -110,6 +115,22 @@ $deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 		<th>
 			<h4><?php esc_html_e( 'OpenAI (ChatGPT) settings', 'glotpress' ); ?></h4>
 		</th>
+	</tr>
+	<tr>
+		<th><label for="default_sort[openai_model]"><?php esc_html_e( 'OpenAI model', 'glotpress' ); ?></label></th>
+		<td>
+			<select name="default_sort[openai_model]" id="default_sort[openai_model]" style="border:revert;">
+				<?php
+				$openai_models = array( 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o' );
+				$openai_model = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
+				foreach ( $openai_models as $model ) {
+					echo '<option value="' . esc_attr( $model ) . '"';
+					selected( $model, $openai_model );
+					echo '>' . esc_html( $model ) . '</option>';
+				}
+				?>
+			</select>
+		</td>
 	</tr>
 	<tr>
 		<th><label for="default_sort[openai_api_key]">
@@ -181,8 +202,12 @@ $deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 		</th>
 	</tr>
 	<tr>
+		<th><label for="default_sort[deepl_use_api_pro]"><?php esc_html_e( 'Use DeepL API Pro', 'glotpress' ); ?></label></th>
+		<td><input type="checkbox" id="default_sort[deepl_use_api_pro]" name="default_sort[deepl_use_api_pro]" <?php gp_checked( 'on' == gp_array_get( $gp_default_sort, 'deepl_use_api_pro', 'off' ) ); ?> /></td>
+	</tr>
+	<tr>
 		<th><label for="default_sort[deepl_api_key]">
-				<?php esc_html_e( 'DeepL Free API Key', 'glotpress' ); ?>
+				<?php esc_html_e( 'DeepL API Key', 'glotpress' ); ?>
 			</label>
 					<?php
 					if ( gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) > 0 ) {
@@ -221,10 +246,10 @@ $deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 				echo '<br>';
 				if ( 200 != $deepl_response_code ) {
 					echo '<small style="color:red;">';
-					esc_html_e( 'Your DeepL Free API Key is not correct.', 'glotpress' );
+					esc_html_e( 'Your DeepL API Key is not correct.', 'glotpress' );
 				} else {
 					echo '<small style="color:green;">';
-					esc_html_e( 'Your DeepL Free API Key is correct.', 'glotpress' );
+					esc_html_e( 'Your DeepL API Key is correct.', 'glotpress' );
 				}
 				echo '</small>';
 			}

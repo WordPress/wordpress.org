@@ -655,10 +655,10 @@ abstract class Directory_Compat {
 		// Prefix link to plugin/theme support or review forum with context.
 		if ( 'plugin' === $this->compat() ) {
 			/* translators: %s: link to plugin support or review forum */
-			$compat_breadcrumb = __( 'Plugin: %s', 'wporg-forums' );
+			$compat_breadcrumb = str_replace( ' ', '&nbsp;', __( 'Plugin: %s', 'wporg-forums' ) );
 		} else {
 			/* translators: %s: link to theme support or review forum */
-			$compat_breadcrumb = __( 'Theme: %s', 'wporg-forums' );
+			$compat_breadcrumb = str_replace( ' ', '&nbsp;', __( 'Theme: %s', 'wporg-forums' ) );
 		}
 
 		$r[1] = sprintf( $compat_breadcrumb, esc_html( $this->title() ) );

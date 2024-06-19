@@ -153,30 +153,31 @@ class Plugin_Search {
 		$localised_fields = array();
 
 		foreach ( (array) $fields as $field ) {
-			// title.ngram
-			list( $field, $type ) = explode( '.', $field . '.' );
-			if ( $type ) {
-				$type = ".{$type}";
-			}
+			// title.ngram^1
+			preg_match( '!^(?P<field>.+?)(?P<type>\.[a-z]+)?(?P<boost>\^(?P<boostval>[0-9.]+))?$!', $field, $m );
+
+			$field     = $m['field'];
+			$type      = $m['type'] ?? '';
+			$boost     = $m['boost'] ?? '';
+			$boost_val = floatval( $m['boostval'] ?? 1.0 );
 
 			if ( ! in_array( $field, $localised_prefixes ) ) {
-				$localised_fields[] = $field . $type;
+				$localised_fields[] = $field . $type . $boost;
 				continue;
 			}
 
 			if ( $this->is_english ) {
-				$localised_fields[] = $field . '_en' . $type;
+				$localised_fields[] = $field . '_en' . $type . $boost;
 				continue;
 			}
 
-			$boost    = '';
-			$en_boost = '^' . $this->en_boost;
+			$en_boost = '^' . ( $this->en_boost * $boost_val );
 			if ( 'description' === $field ) {
-				$boost = '^' . $this->desc_boost;
-				$en_boost = '^' . $this->desc_en_boost;
+				$boost = '^' . ( $this->desc_boost * $boost_val );
+				$en_boost = '^' . ( $this->desc_en_boost * $boost_val );
 			} elseif ( 'title' === $field ) {
-				$boost = '^' . $this->title_boost;
-				$en_boost = '^' . $this->title_en_boost;
+				$boost = '^' . ( $this->title_boost * $boost_val );
+				$en_boost = '^' . ( $this->title_en_boost * $boost_val );
 			}
 
 			$localised_fields[] = $field . '_' . $this->locale . $type . $boost;
@@ -280,7 +281,7 @@ class Plugin_Search {
 			$should_match[0][ 'multi_match' ][ 'fields' ] = $this->localise_es_fields( [
 				'title',
 				'excerpt',
-				'description',
+				'description^1',
 				'taxonomy.plugin_tags.name',
 			] );
 		}
@@ -310,7 +311,7 @@ class Plugin_Search {
 				'query'  => $search_phrase,
 				'fields' => $this->localise_es_fields( [
 					'excerpt',
-					'description',
+					'description^1',
 					'taxonomy.plugin_tags.name',
 				] ),
 				'type'   => 'best_fields',
@@ -323,7 +324,7 @@ class Plugin_Search {
 				'query'  => $search_phrase,
 				'fields' => $this->localise_es_fields( [
 					'author',
-					'contributor'
+					'contributors'
 				] ),
 				'type'   => 'best_fields',
 				'boost'  => 3,

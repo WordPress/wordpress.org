@@ -235,10 +235,36 @@
 					}
 					const eventDateObj = new Date( datetime );
 					timeEl.title       = eventDateObj.toUTCString();
+					const timeContent  = timeEl.querySelector( 'span' ) ? timeEl.querySelector( 'span' ) : timeEl;
 
 					const userTimezoneOffset   = new Date().getTimezoneOffset();
 					const userTimezoneOffsetMs = userTimezoneOffset * 60 * 1000;
 					const userLocalDateTime    = new Date( eventDateObj.getTime() - userTimezoneOffsetMs );
+
+					const options = {
+						weekday: 'short',
+						year: 'numeric',
+						month: 'short',
+						day: 'numeric',
+						hour: 'numeric',
+						minute: 'numeric',
+						timeZoneName: 'short'
+					};
+					if ( timeEl.classList.contains( 'absolute' ) ) {
+						if ( timeEl.dataset.format ) {
+							if ( timeEl.dataset.format.includes( 'l' ) ) {
+								options.weekday = 'long';
+							} else if ( ! timeEl.dataset.format.includes( 'D' ) ) {
+								delete options.weekday;
+							}
+							if ( timeEl.dataset.format.includes( 'F' ) ) {
+								options.month = 'long';
+							} else if ( timeEl.dataset.format.includes( 'm' ) || timeEl.dataset.format.includes( 'n' ) ) {
+								options.month = 'numeric';
+							}
+						}
+						timeContent.textContent = userLocalDateTime.toLocaleTimeString( navigator.language, options );
+					}
 
 					if ( timeEl.classList.contains( 'relative' ) ) {
 						// Display the relative time.
@@ -259,30 +285,29 @@
 						const seconds    = Math.floor( diff / 1000 );
 						const minutes    = Math.floor( seconds / 60 );
 						const hours      = Math.floor( minutes / 60 );
-						const days       = Math.floor( hours / 24 );
+						let days         = Math.floor( hours / 24 );
 						const weeks      = Math.floor( days / 7 );
 						const months     = Math.floor( days / 30 );
 						const years      = Math.floor( days / 365.25 );
 						let relativeTime = '';
 						if ( years > 1 ) {
-							if ( ! timeEl.classList.contains( 'hide-if-too-far' ) ) {
-								relativeTime = years + ' year' + ( years > 1 ? 's' : '' );
-							} else {
-								in_text = '';
-							}
+							relativeTime = years + ' year' + ( years > 1 ? 's' : '' );
 						} else if ( months > 1 ) {
-							if ( ! timeEl.classList.contains( 'hide-if-too-far' ) ) {
-								relativeTime = months + ' month' + ( months > 1 ? 's' : '' );
+							relativeTime = months + ' month' + ( months > 1 ? 's' : '' );
+						} else if ( weeks > 2 ) {
+							relativeTime = weeks + ' week' + ( weeks > 1 ? 's' : '' );
+						} else if ( weeks === 1 ) {
+							if ( diff < 0 ) {
+								relativeTime = 'last week';
+								ago_text     = '';
 							} else {
-								in_text = '';
-							}
-						} else if ( weeks > 1 ) {
-							if ( ! timeEl.classList.contains( 'hide-if-too-far' ) || weeks < 3 ) {
-								relativeTime = weeks + ' week' + ( weeks > 1 ? 's' : '' );
-							} else {
-								in_text = '';
+								relativeTime = 'next week';
+								in_text      = '';
 							}
 						} else if ( days > 0 ) {
+							if ( hours > 12 ) {
+								days += 1;
+							}
 							relativeTime = days + ' day' + ( days > 1 ? 's' : '' );
 						} else if ( hours > 0 ) {
 							relativeTime = hours + ' hour' + ( hours > 1 ? 's' : '' );
@@ -291,34 +316,16 @@
 						} else {
 							relativeTime = 'less than a minute';
 						}
-						timeEl.textContent = in_text + relativeTime + ago_text;
-						return;
+						if ( timeEl.classList.contains( 'absolute' ) ) {
+							timeContent.textContent += ' (' + in_text + relativeTime + ago_text + ')';
+						} else {
+							timeContent.textContent = in_text + relativeTime + ago_text;
+						}
 					}
 
-					const options = {
-						weekday: 'short',
-						year: 'numeric',
-						month: 'short',
-						day: 'numeric',
-						hour: 'numeric',
-						minute: 'numeric',
-						timeZoneName: 'short'
-					};
-					if ( timeEl.dataset.format ) {
-						if ( timeEl.dataset.format.includes( 'l' ) ) {
-							options.weekday = 'long';
-						} else if ( ! timeEl.dataset.format.includes( 'D' ) ) {
-							delete options.weekday;
-						}
-						if ( timeEl.dataset.format.includes( 'F' ) ) {
-							options.month = 'long';
-						} else if ( timeEl.dataset.format.includes( 'm' ) || timeEl.dataset.format.includes( 'n' ) ) {
-							options.month = 'numeric';
-						}
-					}
-					timeEl.textContent = userLocalDateTime.toLocaleTimeString( navigator.language, options );
 				}
 			);
 		}
-	}( jQuery, $gp )
+	}( jQuery,
+	$gp )
 );

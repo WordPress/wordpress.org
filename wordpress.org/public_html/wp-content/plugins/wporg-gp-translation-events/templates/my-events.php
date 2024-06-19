@@ -28,7 +28,7 @@ Templates::header(
 	else :
 		?>
 		<?php
-		Templates::partial(
+		Templates::part(
 			'event-list',
 			array(
 				'query'                           => $events,

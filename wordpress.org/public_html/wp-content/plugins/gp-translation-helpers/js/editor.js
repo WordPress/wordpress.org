@@ -115,7 +115,7 @@ jQuery( function( $ ) {
 		const postId = $commentform.attr( 'id' ).split( '-' )[ 1 ];
 		const divDiscussion = $commentform.closest( '.meta.discussion' );
 		const rowId = divDiscussion.attr( 'data-row-id' );
-		const requestUrl = $gp_translation_helpers_editor.translation_helper_url + rowId + '?nohc';
+		const requestUrl = $gp_translation_helpers_editor.translation_helper_url.replace( '{ID}', rowId );
 
 		const submitComment = function( formdata ) {
 			$.ajax( {
@@ -278,7 +278,7 @@ jQuery( function( $ ) {
 	 */
 	function loadTabsAndDivs( element ) {
 		const rowId = element.closest( 'tr.editor' ).attr( 'id' ).substring( 7 );
-		const requestUrl = $gp_translation_helpers_editor.translation_helper_url + rowId + '?nohc';
+		const requestUrl = $gp_translation_helpers_editor.translation_helper_url.replace( '{ID}', rowId );
 		if ( translationHelpersCache[ rowId ] !== undefined ) {
 			updateDataInTabs( translationHelpersCache[ rowId ], rowId );
 		} else {
@@ -328,7 +328,7 @@ jQuery( function( $ ) {
 	 */
 	function cacheTranslationHelpersForARow( editor ) {
 		const rowId = editor.attr( 'row' );
-		const requestUrl = $gp_translation_helpers_editor.translation_helper_url + rowId + '?nohc';
+		const requestUrl = $gp_translation_helpers_editor.translation_helper_url.replace( '{ID}', rowId );
 		if ( ! rowId ) {
 			return;
 		}

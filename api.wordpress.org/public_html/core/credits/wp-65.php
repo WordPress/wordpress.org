@@ -830,6 +830,7 @@ class WP_65_Credits extends WP_Credits {
 			'wpsmith',
 			'xknown',
 			'xlthlx',
+			'xronn',
 			'yansern',
 			'yguyon',
 			'youknowriad',

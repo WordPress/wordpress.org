@@ -1,5 +1,5 @@
 <?php
-namespace Wporg\TranslationEvents\Templates;
+namespace Wporg\TranslationEvents\Templates\Translations;
 
 use GP;
 use Wporg\TranslationEvents\Event\Event;

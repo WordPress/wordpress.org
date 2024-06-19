@@ -28,23 +28,19 @@ $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
 // The blocks code sets up the layout, but there is also inline CSS to refine things that aren't supported in classic themes.
-$banner_blocks = '<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}}},"backgroundColor":"black","className":"wporg-homepage-banner","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull wporg-homepage-banner has-black-background-color has-background" style="padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
-<div class="wp-block-group"><!-- wp:image {"sizeSlug":"full","className":"is-resized"} -->
-<figure class="wp-block-image size-full is-resized"><img src="https://wordpress.org/files/2024/03/wcasia-white-rectangle.png" alt="' . esc_attr__( 'WordCamp Asia 2024', 'wporg' ) . '"/></figure>
-<!-- /wp:image -->
-
-<!-- wp:group {"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"style":{"typography":{"lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}},"spacing":{"margin":{"top":"0"}}},"textColor":"white","fontSize":"small"} -->
-<p class="has-white-color has-text-color has-link-color has-small-font-size" style="margin-top:0;line-height:1.6">' . __( 'Watch the Q&amp;A session with the WordPress project&#039;s co-founder, Matt Mullenweg, recorded live from WordCamp Asia 2024. <a href="https://wordpress.org/news/2024/03/highlights-from-wordcamp-asia-2024/">Read the event highlights</a>.', 'wporg' ) . '</p>
+$banner_blocks = '<!-- wp:wporg/link-wrapper {"align":"full","style":{"elements":{"link":{"color":{"text":"var:preset|color|charcoal-1"}}},"spacing":{"padding":{"top":"var:preset|spacing|10","bottom":"var:preset|spacing|10","left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}},"border":{"style":"solid","width":"1px"}},"borderColor":"white","textColor":"charcoal-1","className":"wporg-homepage-banner","layout":{"type":"constrained"},"fontSize":"small"} -->
+<a class="wp-block-wporg-link-wrapper alignfull wporg-homepage-banner has-border-color has-white-border-color has-charcoal-1-color has-text-color has-link-color has-small-font-size" style="border-style:solid;border-width:1px;padding-top:var(--wp--preset--spacing--10);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--10);padding-left:var(--wp--preset--spacing--edge-space)" href="' . __( 'https://wordpress.org/news/2024/05/wordcamp-europe-2024-mid-year-update-and-qa-with-matt-mullenweg/', 'wporg' ) . '"><!-- wp:group {"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center","verticalAlignment":"center"}} -->
+<div class="wp-block-group"><!-- wp:paragraph {"className":"is-style-short-text"} -->
+<p class="is-style-short-text">' . __( 'Matt Mullenweg at WordCamp Europe—streaming live June 15', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}},"spacing":{"margin":{"bottom":"0"}}},"textColor":"white","fontSize":"small"} -->
-<p class="has-white-color has-text-color has-link-color has-small-font-size" style="margin-bottom:0;line-height:1.6">' . __( '<a href="https://www.youtube.com/watch?v=EOF70YJLC5U"><strong>Watch now ↗</strong></a>', 'wporg' ) . '</p>
-<!-- /wp:paragraph --></div>
+<!-- wp:group {"style":{"typography":{"lineHeight":"1"},"spacing":{"padding":{"top":"3px","bottom":"3px","left":"4px","right":"4px"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group" style="padding-top:3px;padding-right:4px;padding-bottom:3px;padding-left:4px;line-height:1"><!-- wp:image {"id":40598,"width":"24px","height":"24px","scale":"cover","sizeSlug":"full","linkDestination":"none","style":{"layout":{"selfStretch":"fixed","flexSize":"24px"}}} -->
+<figure class="wp-block-image size-full is-resized"><img src="https://wordpress.org/files/2024/06/chevron-right-small.png" alt="" class="wp-image-40598" style="object-fit:cover;width:24px;height:24px"/></figure>
+<!-- /wp:image --></div>
 <!-- /wp:group --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group -->';
+<!-- /wp:group --></a>
+<!-- /wp:wporg/link-wrapper -->';
 
 \WordPressdotorg\skip_to( '#masthead' );
 
@@ -57,10 +53,19 @@ get_header( 'wporg' );
 	<style>
 		/* Set a few custom properties as they appear in the parent theme. */
 		.wporg-homepage-banner {
-			--wp--preset--spacing--20: 20px;
-			--wp--preset--spacing--30: 30px;
-			--wp--preset--spacing--60: clamp(20px, calc(10vw - 40px), 80px);
+			--wp--preset--spacing--10: 10px;
+			--wp--preset--spacing--edge-space: 80px;
+			--wp--preset--color--charcoal-0: #1a1919;
+			--wp--preset--color--charcoal-1: #1e1e1e;
+			--wp--preset--color--charcoal-2: #23282d;
+			--wp--preset--color--white: #fff;
+			--wp--preset--color--light-grey-1: #d9d9d9;
+			--wp--preset--color--blueberry-1: #3858e9;
+			--wp--preset--color--deep-blueberry: #213fd4;
 			--wp--preset--font-size--small: 14px;
+		}
+		.has-charcoal-0-background-color {
+			background-color: var(--wp--preset--color--charcoal-0);
 		}
 		.wporg-homepage-banner a:hover {
 			text-decoration: none;
@@ -70,15 +75,9 @@ get_header( 'wporg' );
 			margin-right: auto !important;
 			max-width: 1160px;
 		}
-		.wporg-homepage-banner .is-layout-flex {
-			gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--60);
-		}
-		.wporg-homepage-banner .is-layout-flex > * {
-			flex: 1;
-		}
-		@media (max-width: 650px) {
-			.wporg-homepage-banner .is-layout-flex {
-				flex-direction: column;
+		@media (max-width: 889px) {
+			.wporg-homepage-banner {
+				--wp--preset--spacing--edge-space: 20px;
 			}
 		}
 	</style>

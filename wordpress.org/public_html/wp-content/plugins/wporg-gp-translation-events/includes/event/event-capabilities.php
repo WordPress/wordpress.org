@@ -43,15 +43,18 @@ class Event_Capabilities {
 		self::EDIT_TIMEZONE,
 	);
 
+	private DateTimeImmutable $now;
 	private Event_Repository_Interface $event_repository;
 	private Attendee_Repository $attendee_repository;
 	private Stats_Calculator $stats_calculator;
 
 	public function __construct(
+		DateTimeImmutable $now,
 		Event_Repository_Interface $event_repository,
 		Attendee_Repository $attendee_repository,
 		Stats_Calculator $stats_calculator
 	) {
+		$this->now                 = $now;
 		$this->event_repository    = $event_repository;
 		$this->attendee_repository = $attendee_repository;
 		$this->stats_calculator    = $stats_calculator;
@@ -260,14 +263,13 @@ class Event_Capabilities {
 	 * @return bool
 	 */
 	private function has_edit_field( WP_User $user, Event $event, $cap ): bool {
-		$now                 = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 		$event_end_plus_1_hr = $event->end()->modify( '+1 hour' );
 
 		if ( self::EDIT_DESCRIPTION === $cap ) {
 			return true;
 		}
 
-		if ( $event->start() > $now ) {
+		if ( $event->start() > $this->now ) {
 			return true;
 		}
 
@@ -279,10 +281,10 @@ class Event_Capabilities {
 			return ( self::EDIT_TITLE === $cap || self::EDIT_END === $cap );
 		}
 
-		if ( $event->end()->is_in_the_past() && $now < $event_end_plus_1_hr ) {
+		if ( $event->end()->is_in_the_past() && $this->now < $event_end_plus_1_hr ) {
 			return ( self::EDIT_TITLE === $cap || self::EDIT_END === $cap );
 		}
-		if ( $event->end()->is_in_the_past() && $now > $event_end_plus_1_hr ) {
+		if ( $event->end()->is_in_the_past() && $this->now > $event_end_plus_1_hr ) {
 			return ( self::EDIT_DESCRIPTION === $cap );
 		}
 

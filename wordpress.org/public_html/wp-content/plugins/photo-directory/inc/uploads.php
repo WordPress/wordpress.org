@@ -770,16 +770,20 @@ class Uploads {
 		$post = get_post( $post_id );
 
 		if ( is_object( $post ) ) {
-			$post->post_name  = $name;
-			$post->post_title = $name;
-			wp_update_post( $post );
+			wp_update_post( [
+				'ID'         => $post->ID,
+				'post_name'  => $name,
+				'post_title' => $name,
+			] );
 
 			// Change the same fields in the attachment to obfuscate the original
 			// filename.
 			$photo_name = wp_unique_post_slug( $name . '-photo', $photo->ID, $photo->post_status, $photo->post_type, $post->ID );
-			$photo->post_name = $photo_name;
-			$photo->post_title = $photo_name;
-			wp_update_post( $photo );
+			wp_update_post( [
+				'ID'         => $photo->ID,
+				'post_name'  => $photo_name,
+				'post_title' => $photo_name,
+			] );
 		}
 	}
 
@@ -920,12 +924,18 @@ class Uploads {
 				)
 				. "</div>\n"
 				. sprintf(
-					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d" help="%s"]' . "\n",
+					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d"]' . "\n",
 					$description_shortcode,
 					esc_attr( __( 'Alternative Text (required)', 'wporg-photos' ) ),
-					self::MAX_LENGTH_DESCRIPTION,
-					esc_attr( sprintf( __( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Maximum of %d characters. No HTML.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
+					self::MAX_LENGTH_DESCRIPTION
 				)
+				. '<p class="ugc-help">'
+				. sprintf(
+					__( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Maximum of %d characters. No HTML. <a href="%s">Learn more about alternative text.</a>', 'wporg-photos' ),
+					self::MAX_LENGTH_DESCRIPTION,
+					'https://make.wordpress.org/photos/2024/02/02/alt-text-for-wordpress-photos/'
+				)
+				. '</p>' . "\n"
 				. '<div class="upload-checkbox-wrapper">' . "\n";
 
 				// Checklist of guideline requirements.

@@ -2,17 +2,21 @@
 
 namespace Wporg\TranslationEvents\Notifications;
 
+use DateTimeImmutable;
 use Wporg\TranslationEvents\Event\Event_Repository_Interface;
 
 class Notifications_Schedule {
+	private DateTimeImmutable $now;
 	private Event_Repository_Interface $event_repository;
 
 	/**
 	 * Notifications_Schedule constructor.
 	 *
-	 * @param Event_Repository_Interface $event_repository    Event repository.
+	 * @param DateTimeImmutable          $now              The value of "now".
+	 * @param Event_Repository_Interface $event_repository Event repository.
 	 */
-	public function __construct( Event_Repository_Interface $event_repository ) {
+	public function __construct( DateTimeImmutable $now, Event_Repository_Interface $event_repository ) {
+		$this->now              = $now;
 		$this->event_repository = $event_repository;
 	}
 
@@ -34,13 +38,12 @@ class Notifications_Schedule {
 			$args                  = array(
 				'post_id' => $post_id,
 			);
-			$now                   = time();
 			$new_next_1h_schedule  = $event->start()->getTimestamp() - HOUR_IN_SECONDS;
 			$new_next_24h_schedule = $event->start()->getTimestamp() - 24 * HOUR_IN_SECONDS;
-			if ( $new_next_1h_schedule > $now ) {
+			if ( $new_next_1h_schedule > $this->now->getTimestamp() ) {
 				wp_schedule_single_event( $new_next_1h_schedule, 'wporg_gp_translation_events_email_notifications_1h', $args );
 			}
-			if ( $new_next_24h_schedule > $now ) {
+			if ( $new_next_24h_schedule > $this->now->getTimestamp() ) {
 				wp_schedule_single_event( $new_next_24h_schedule, 'wporg_gp_translation_events_email_notifications_24h', $args );
 			}
 		}

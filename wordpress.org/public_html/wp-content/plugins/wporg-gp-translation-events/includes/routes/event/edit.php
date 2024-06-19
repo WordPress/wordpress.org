@@ -36,10 +36,9 @@ class Edit_Route extends Route {
 		include ABSPATH . 'wp-admin/includes/post.php';
 
 		$this->tmpl(
-			'events-form',
+			'event-edit',
 			array(
-				'is_create_form' => false,
-				'event'          => $event,
+				'event' => $event,
 			),
 		);
 	}

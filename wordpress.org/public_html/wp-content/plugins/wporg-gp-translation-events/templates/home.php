@@ -21,6 +21,18 @@ Templates::header(
 ?>
 
 <div class="event-page-wrapper">
+	<div class="notice" style="padding: .5rem">
+		<?php
+		echo wp_kses(
+			sprintf(
+			// translators: %s is a link to a page about hosting events.
+				__( 'Do you want to host your own event? <a href="%s">Find more information here</a>.', 'gp-translation-events' ),
+				'https://make.wordpress.org/polyglots/2024/05/29/translation-events-inviting-gtes-to-create-and-manage-events/'
+			),
+			array( 'a' => array( 'href' => array() ) )
+		);
+		?>
+	</div>
 <div class="event-left-col">
 <?php
 if ( empty( $current_events_query->events ) && empty( $upcoming_events_query->events ) && empty( $past_events_query->post_count ) ) :
@@ -31,7 +43,7 @@ if ( ! empty( $current_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Current events', 'gp-translation-events' ); ?></h2>
 	<?php
-	Templates::partial(
+	Templates::part(
 		'event-list',
 		array(
 			'query'                  => $current_events_query,
@@ -45,7 +57,7 @@ if ( ! empty( $upcoming_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Upcoming events', 'gp-translation-events' ); ?></h2>
 	<?php
-	Templates::partial(
+	Templates::part(
 		'event-list',
 		array(
 			'query'                  => $upcoming_events_query,
@@ -59,7 +71,7 @@ if ( ! empty( $past_events_query->events ) ) :
 	?>
 	<h2><?php esc_html_e( 'Past events', 'gp-translation-events' ); ?></h2>
 	<?php
-	Templates::partial(
+	Templates::part(
 		'event-list',
 		array(
 			'query'                  => $past_events_query,
@@ -78,7 +90,7 @@ endif;
 			<p>You don't have any events to attend.</p>
 		<?php else : ?>
 			<?php
-			Templates::partial(
+			Templates::part(
 				'event-list',
 				array(
 					'query'                  => $user_attending_events_query,

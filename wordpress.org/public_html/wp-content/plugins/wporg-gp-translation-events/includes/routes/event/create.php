@@ -8,6 +8,7 @@ use Wporg\TranslationEvents\Event\Event;
 use Wporg\TranslationEvents\Event\Event_End_Date;
 use Wporg\TranslationEvents\Event\Event_Start_Date;
 use Wporg\TranslationEvents\Routes\Route;
+use Wporg\TranslationEvents\Translation_Events;
 
 /**
  * Displays the event create page.
@@ -24,7 +25,7 @@ class Create_Route extends Route {
 			$this->die_with_error( 'You do not have permission to create events.', 403 );
 		}
 
-		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+		$now = Translation_Events::now();
 
 		$event = new Event(
 			get_current_user_id(),
@@ -37,10 +38,9 @@ class Create_Route extends Route {
 		);
 
 		$this->tmpl(
-			'events-form',
+			'event-create',
 			array(
-				'is_create_form' => true,
-				'event'          => $event,
+				'event' => $event,
 			),
 		);
 	}

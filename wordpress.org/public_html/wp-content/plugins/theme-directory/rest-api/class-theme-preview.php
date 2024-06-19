@@ -27,8 +27,6 @@ class Theme_Preview {
 			return new WP_Error( 'error', $theme_data->error );
 		}
 
-
-
 		return $this->build_blueprint( $theme_data );
 	}
 
@@ -36,7 +34,7 @@ class Theme_Preview {
 	 * Generate a blueprint for previewing a theme.
 	 */
 	function build_blueprint( $theme_data ) {
-		$repo_package = WPORG_Themes_Repo_Package::get_by_slug( $theme_data->slug );
+		$repo_package = new WPORG_Themes_Repo_Package( $theme_data->slug );
 
 		// Base blueprint.
 		$blueprint = [
@@ -60,14 +58,13 @@ class Theme_Preview {
 		$theme_blueprint          = $repo_package->blueprint;
 		$theme_provided_blueprint = (bool) $theme_blueprint;
 		if ( $theme_blueprint ) {
-			$theme_blueprint = json_decode( json_encode( $theme_blueprint ), true ); // TEMP convert object to array.
 			$blueprint = array_merge( $blueprint, $theme_blueprint );
 		}
 
-		$steps_present = array_unique( wp_list_pluck( $blueprint['steps'], 'step' ) );
-
-		// The steps we'll prepend to the theme-provided list.
-		$missing_steps = [];
+		// The various steps will be in these variables, and added at the end.
+		$requred_steps = [];
+		$theme_steps   = $blueprint['steps'] ?? [];
+		$final_steps   = [];
 
 		// Must run the latest version of WordPress.
 		if ( 'latest' !== $blueprint['preferredVersions']['wp'] ?? '' ) {
@@ -79,117 +76,142 @@ class Theme_Preview {
 			unset( $blueprint['landingPage'] );
 		}
 
-		// Must log the user in.
-		if ( ! in_array( 'login', $steps_present ) ) {
-			$missing_steps[] = [
+		// These steps will always run for the previews.
+		$required_steps = [
+			// Remove any existing themes.
+			[
+				'step' => 'rmdir',
+				'path' => '/wordpress/wp-content/themes/'
+			],
+			[
+				'step' => 'mkdir',
+				'path' => '/wordpress/wp-content/themes/'
+			],
+			// Login as admin.
+			[
 				'step'     => 'login',
 				'username' => 'admin',
 				'password' => 'password'
-			];
-		}
-
-		// Set the default site name & description.
-		if ( ! in_array( 'setSiteOptions', $steps_present ) ) {
-			// Default the site name & description to that of the theme's.
-			$description = $theme_data->sections['description'];
-			// Trim it to the first sentence.
-			if ( $pos = strpos( $description, '.' ) ) {
-				$description = substr( $description, 0, $pos + 1 );
-			}
-
-			$missing_steps[] = [
+			],
+			// Set the default site details. The theme blueprint may replace this.
+			[
 				'step'    => 'setSiteOptions',
 				'options' => [
-					// Technically, we should check any existing setSiteOptions is setting these, but this will do for now.
 					'blogname'        => $theme_data->name,
-					'blogdescription' => $description,
+					'blogdescription' => preg_replace( '![.].+$!',  '.', $theme_data->sections['description'] ), // First sentence only.
 				]
-			];
-		}
+			],
+			// Install parent theme.
+			empty( $theme_data->template ) ? false : [
+				'step'         => 'installTheme',
+				'themeZipFile' => [
+					'resource' => 'wordpress.org/themes',
+					'slug' => $theme_data->template
+				],
+				'options' => [
+					'activate' => false
+				]
+			],
+			// Install the theme.
+			[
+				'step'         => 'installTheme',
+				'themeZipFile' => [
+					'resource' => 'wordpress.org/themes',
+					'slug' => $theme_data->slug
+				]
+			]
+		];
 
-		// Make sure the right themes are installed.
-		$valid_slugs      = array_filter( [ $theme_data->template ?? false, $theme_data->slug ] ); // Order is important, parent must be second, to ensure it's installed first.
-		$installed_themes = [];
-		foreach ( wp_list_filter( $blueprint['steps'], [ 'step' => 'installTheme' ] ) as $i => $step ) {
-			if (
-				// You may only install WordPress.org themes.
-				( 'wordpress.org/themes' != $step['themeZipFile']['resource'] ?? '' ) ||
-				// Must install by slug, not URL.
-				( ! empty( $step['themeZipFile']['url'] ) ) ||
-				// Must not install unexpected themes.
-				( ! in_array( $step['themeZipFile']['slug'] ?? '', $valid_slugs ) )
-			) {
-				unset( $blueprint['steps'][ $i ] );
-				continue;
+		// Filter out any theme provided steps we don't need.
+		$invalid_steps            = [ 'login', 'installThemeStarterContent' ];
+		// Take note of whether the theme wants starter content loaded.
+		$requests_starter_content = (bool) wp_list_filter( $theme_steps, [ 'step' => 'installThemeStarterContent' ] );
+		$theme_steps              = array_filter(
+			$theme_steps,
+			static function( $step ) use( $invalid_steps ) {
+				if ( in_array( $step['step'], $invalid_steps ) ) {
+					return false;
+				}
+
+				// Don't install assets from URLs.
+				if (
+					! empty( $step['themeZipFile']['url'] ) ||
+					! empty( $step['pluginZipFile']['url'] )
+				) {
+					return false;
+				}
+
+				return true;
 			}
-
-			$installed_themes[] = $step['themeZipFile']['slug'];
-		}
-
-		// Make sure the theme & it's parent are installed.
-		foreach ( $valid_slugs as $slug ) {
-			if ( ! in_array( $slug, $installed_themes ) ) {
-				// Prepend install.
-				$missing_steps[] = [
-					'step'         => 'installTheme',
-					'themeZipFile' => [
-						'resource' => 'wordpress.org/themes',
-						'slug' => $slug
-					],
-				];
-			}
-		}
-
-		// Run our steps first.
-		$blueprint['steps'] = array_merge(
-			$missing_steps,
-			array_values( $blueprint['steps'] ?? [] ),
 		);
 
 		// If the theme didn't provide a blueprint, we'll also install the Starter Content. This must be done last.
-		if ( ! $theme_provided_blueprint ) {
-			$blueprint['steps'][] = [
+		// See also: `installThemeStarterContent`. https://github.com/WordPress/wordpress-playground/pull/1521
+		if ( ! $theme_provided_blueprint || $requests_starter_content ) {
+			$final_steps[] = [
 				'step' => 'runPHP',
-				'code' => $this->get_starter_content_loader(),
+				'code' => '<?php
+					playground_add_filter( "plugins_loaded", "importThemeStarterContent_plugins_loaded", 0 );
+					function importThemeStarterContent_plugins_loaded() {
+						/* Set as the admin user, this ensures we can customize the site. */
+						wp_set_current_user(
+							get_users( [ "role" => "Administrator" ] )[0]
+						);
+
+						/*
+						 * Simulate this request as a ajax customizer save, with the current theme in preview mode.
+						 *
+						 * See _wp_customize_include()
+						 */
+						add_filter( "wp_doing_ajax", "__return_true" );
+						$_REQUEST["action"]          = "customize_save";
+						$_REQUEST["wp_customize"]    = "on";
+						$_REQUEST["customize_theme"] = get_stylesheet();
+						$_GET                        = $_REQUEST;
+
+						/* Force the site to be fresh, although it should already be, some themes require this. */
+						add_filter( "pre_option_fresh_site", "__return_true" );
+					}
+
+					require "/wordpress/wp-load.php";
+
+					if ( ! get_theme_starter_content() ) {
+						return;
+					}
+
+					/* Import the Starter Content. */
+					$wp_customize->import_theme_starter_content();
+
+					/* Publish the changeset, which publishes the starter content. */
+					wp_publish_post( $wp_customize->changeset_post_id() );
+				'
 			];
 		}
 
-		// We need to load our custom plugins too.
-		$blueprint['steps'][] = [
-			'step' => 'runPHP',
-			// TODO: The pattern-preview plugin needs post ID 256 to exist, this needs to be created dynamically by the plugin upon load I guess.
-			'code' =>  "<?php require '/wordpress/wp-load.php'; wp_insert_post( [ 'import_id' => 256, 'post_title' => 'Pattern Preview', 'post_type' => 'page', 'post_status' => 'draft' ] );"
-		];
-		$blueprint['steps'][] = [
+		$final_steps[] = [
 			'step' => 'installPlugin',
 			'pluginZipFile' => [
 				'resource' => 'url',
-				'url'      => 'https://raw.githubusercontent.com/dd32/wporg-theme-directory/plugins/pattern-page.zip',
+				'url'      => 'https://raw.githubusercontent.com/WordPress/wordpress.org/add/wp-themes.com/plugins-as-zips/wp-themes.com/public_html/wp-content/plugins/pattern-page.zip',
 			],
 		];
-		$blueprint['steps'][] = [
+
+		$final_steps[] = [
 			'step' => 'installPlugin',
 			'pluginZipFile' => [
 				'resource' => 'url',
-				'url'      => 'https://raw.githubusercontent.com/dd32/wporg-theme-directory/plugins/style-variations.zip',
+				'url'      => 'https://raw.githubusercontent.com/WordPress/wordpress.org/add/wp-themes.com/plugins-as-zips/wp-themes.com/public_html/wp-content/plugins/style-variations.zip',
 			],
 		];
+
+		// Set the steps.
+		$blueprint['steps'] = array_merge(
+			array_filter( $required_steps ),
+			array_values( $theme_steps ),
+			$final_steps
+		);
 
 		return $blueprint;
-	}
-
-	/**
-	 * Get the PHP code to load the Starter Content.
-	 */
-	function get_starter_content_loader() {
-		$plugin = file_get_contents( dirname( __DIR__ ) . '/bin/theme-preview-load-starter-content.php' );
-
-		// Slim the plugin down.
-		$plugin = preg_replace( '!\s*//.+?$!m', '', $plugin );
-		$plugin = preg_replace( '!/[*].+?[*]/!s', '', $plugin );
-		$plugin = preg_replace( '!\s+!', ' ', $plugin );
-
-		return $plugin;
 	}
 }
 new Theme_Preview();

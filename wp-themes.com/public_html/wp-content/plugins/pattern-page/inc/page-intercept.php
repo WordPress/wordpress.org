@@ -8,7 +8,28 @@ namespace WordPressdotorg\PatternPreview\PageIntercept;
  * @return int;
  */
 function get_pattern_page_id() {
-	return 256;
+	$page_id = get_option( 'pattern_page_id' );
+	if ( $page_id ) {
+		return $page_id;
+	}
+
+	// Find the existing page.
+	$page_id = get_page_by_path( 'pattern-page' )->ID ?? 0;
+
+	// Or create it.
+	if ( ! $page_id ) {
+		$page_id = wp_insert_post( [
+			'post_type'   => 'page',
+			'post_parent' => 0,
+			'post_name'   => 'pattern-page',
+			'post_title'  => 'Pattern Previewer',
+			'post_status' => 'draft'
+		] );
+	}
+
+	update_option( 'pattern_page_id', $page_id );
+
+	return $page_id;
 }
 
 /**

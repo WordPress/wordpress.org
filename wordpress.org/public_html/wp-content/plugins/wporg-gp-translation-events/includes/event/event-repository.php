@@ -14,9 +14,11 @@ use Wporg\TranslationEvents\Translation_Events;
 class Event_Repository implements Event_Repository_Interface {
 	private const POST_TYPE = Translation_Events::CPT;
 
+	protected DateTimeImmutable $now;
 	private Attendee_Repository $attendee_repository;
 
-	public function __construct( Attendee_Repository $attendee_repository ) {
+	public function __construct( DateTimeImmutable $now, Attendee_Repository $attendee_repository ) {
+		$this->now                 = $now;
 		$this->attendee_repository = $attendee_repository;
 	}
 
@@ -154,11 +156,9 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	public function get_current_events( int $page = -1, int $page_size = -1 ): Events_Query_Result {
-		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-
 		return $this->get_events_active_between(
-			$now,
-			$now,
+			$this->now,
+			$this->now,
 			array(),
 			$page,
 			$page_size
@@ -166,10 +166,9 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	public function get_upcoming_events( int $page = - 1, int $page_size = - 1 ): Events_Query_Result {
-		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
@@ -177,23 +176,25 @@ class Event_Repository implements Event_Repository_Interface {
 				'meta_query' => array(
 					array(
 						'key'     => '_event_start',
-						'value'   => $now->format( 'Y-m-d H:i:s' ),
+						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
 						'compare' => '>=',
 						'type'    => 'DATETIME',
 					),
 				),
-				'orderby'    => array( 'meta_value', 'ID' ),
-				'order'      => 'ASC',
+				'meta_key'   => '_event_start',
+				'orderby'    => array(
+					'meta_value' => 'ASC',
+					'ID'         => 'ASC',
+				),
 			)
 		);
 		// phpcs:enable
 	}
 
 	public function get_past_events( int $page = - 1, int $page_size = - 1 ): Events_Query_Result {
-		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
@@ -201,13 +202,16 @@ class Event_Repository implements Event_Repository_Interface {
 				'meta_query' => array(
 					array(
 						'key'     => '_event_end',
-						'value'   => $now->format( 'Y-m-d H:i:s' ),
+						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
 						'compare' => '<',
 						'type'    => 'DATETIME',
 					),
 				),
-				'orderby'    => array( 'meta_value', 'ID' ),
-				'order'      => 'DESC',
+				'meta_key'   => '_event_end',
+				'orderby'    => array(
+					'meta_value' => 'DESC',
+					'ID'         => 'DESC',
+				),
 			)
 		);
 		// phpcs:enable
@@ -225,14 +229,17 @@ class Event_Repository implements Event_Repository_Interface {
 
 	public function get_events_for_user( int $user_id, int $page = -1, int $page_size = -1 ): Events_Query_Result {
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
 			array(
 				'post_status' => array( 'publish', 'draft' ),
 				'meta_key'    => '_event_start',
-				'orderby'     => 'meta_value',
-				'order'       => 'DESC',
+				'orderby'     => array(
+					'meta_value' => 'DESC',
+					'ID'         => 'DESC',
+				),
 			),
 			array(),
 			$user_id,
@@ -242,10 +249,9 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	public function get_current_events_for_user( int $user_id, int $page = -1, int $page_size = -1 ): Events_Query_Result {
-		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
@@ -253,20 +259,22 @@ class Event_Repository implements Event_Repository_Interface {
 				'meta_query' => array(
 					array(
 						'key'     => '_event_start',
-						'value'   => $now->format( 'Y-m-d H:i:s' ),
+						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
 						'compare' => '<=',
 						'type'    => 'DATETIME',
 					),
 					array(
 						'key'     => '_event_end',
-						'value'   => $now->format( 'Y-m-d H:i:s' ),
+						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
 						'compare' => '>=',
 						'type'    => 'DATETIME',
 					),
 				),
 				'meta_key'   => '_event_start',
-				'orderby'    => 'meta_value',
-				'order'      => 'ASC',
+				'orderby'    => array(
+					'meta_value' => 'ASC',
+					'ID'         => 'ASC',
+				),
 			),
 			array(),
 			$user_id,
@@ -275,10 +283,9 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	public function get_current_and_upcoming_events_for_user( int $user_id, int $page = -1, int $page_size = -1 ): Events_Query_Result {
-		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
@@ -286,14 +293,16 @@ class Event_Repository implements Event_Repository_Interface {
 				'meta_query' => array(
 					array(
 						'key'     => '_event_end',
-						'value'   => $now->format( 'Y-m-d H:i:s' ),
+						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
 						'compare' => '>',
 						'type'    => 'DATETIME',
 					),
 				),
 				'meta_key'   => '_event_start',
-				'orderby'    => 'meta_value',
-				'order'      => 'ASC',
+				'orderby'    => array(
+					'meta_value' => 'ASC',
+					'ID'         => 'ASC',
+				),
 			),
 			array(),
 			$user_id,
@@ -302,10 +311,9 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	public function get_past_events_for_user( int $user_id, int $page = -1, int $page_size = -1 ): Events_Query_Result {
-		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
@@ -313,15 +321,17 @@ class Event_Repository implements Event_Repository_Interface {
 				'meta_query' => array(
 					array(
 						'key'     => '_event_end',
-						'value'   => $now->format( 'Y-m-d H:i:s' ),
+						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
 						'compare' => '<',
 						'type'    => 'DATETIME',
 					),
 				),
 				'meta_key'   => '_event_start',
 				'meta_type'  => 'DATETIME',
-				'orderby'    => 'meta_value',
-				'order'      => 'DESC',
+				'orderby'    => array(
+					'meta_value' => 'DESC',
+					'ID'         => 'DESC',
+				),
 			),
 			array(),
 			$user_id,
@@ -332,6 +342,7 @@ class Event_Repository implements Event_Repository_Interface {
 	public function get_events_created_by_user( int $user_id, int $page = -1, int $page_size = -1 ): Events_Query_Result {
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
@@ -339,8 +350,10 @@ class Event_Repository implements Event_Repository_Interface {
 				'post_status' => array( 'publish', 'draft' ),
 				'author'      => $user_id,
 				'meta_key'    => '_event_start',
-				'orderby'     => 'meta_value',
-				'order'       => 'DESC',
+				'orderby'     => array(
+					'meta_value' => 'DESC',
+					'ID'         => 'DESC',
+				),
 			)
 		);
 		// phpcs:enable
@@ -372,14 +385,17 @@ class Event_Repository implements Event_Repository_Interface {
 
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
 			array(
 				'post_status' => array( 'publish', 'draft' ),
 				'meta_key'    => '_event_start',
-				'orderby'     => 'meta_value',
-				'order'       => 'DESC',
+				'orderby'     => array(
+					'meta_value' => 'DESC',
+					'ID'         => 'DESC',
+				),
 			),
 			$events_user_is_hosting_ids
 		);
@@ -402,12 +418,13 @@ class Event_Repository implements Event_Repository_Interface {
 
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		$query_args = array(
 			'meta_query' => array(
 				array(
 					'key'     => '_event_start',
 					'value'   => $boundary_end->format( 'Y-m-d H:i:s' ),
-					'compare' => '<',
+					'compare' => '<=',
 					'type'    => 'DATETIME',
 				),
 				array(
@@ -419,7 +436,10 @@ class Event_Repository implements Event_Repository_Interface {
 			),
 			'meta_key'   => '_event_start',
 			'meta_type'  => 'DATETIME',
-			'orderby'    => array( 'meta_value', 'ID' ),
+			'orderby'    => array(
+				'meta_value' => 'ASC',
+				'ID'         => 'ASC',
+			),
 		);
 		// phpcs:enable
 
@@ -459,6 +479,11 @@ class Event_Repository implements Event_Repository_Interface {
 		bool $include_created_by_user = false
 	): Events_Query_Result {
 		$this->assert_pagination_arguments( $page, $page_size );
+
+		// A user who is not logged-in, does not have any events.
+		if ( 0 === $user_id ) {
+			return new Events_Query_Result( array(), $page, 0 );
+		}
 
 		$args = array_replace_recursive(
 			$args,

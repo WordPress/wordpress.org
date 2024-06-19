@@ -3,7 +3,9 @@
 namespace Wporg\TranslationEvents\Notifications;
 
 use DateTime;
+use DateTimeImmutable;
 use DateTimeZone;
+use Exception;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Event\Event;
@@ -15,17 +17,21 @@ class Notifications_Send {
 
 	private Attendee_Repository $attendee_repository;
 	private Event_Repository_Interface $event_repository;
+	private DateTimeImmutable $now;
 
 	/**
 	 * Notifications_Send constructor.
 	 *
+	 * @param DateTimeImmutable          $now                 The value of "now".
 	 * @param Event_Repository_Interface $event_repository    Event repository.
 	 * @param Attendee_Repository        $attendee_repository Attendee repository.
 	 */
 	public function __construct(
+		DateTimeImmutable $now,
 		Event_Repository_Interface $event_repository,
 		Attendee_Repository $attendee_repository
 	) {
+		$this->now                 = $now;
 		$this->event_repository    = $event_repository;
 		$this->attendee_repository = $attendee_repository;
 		add_action( 'wporg_gp_translation_events_email_notifications_1h', array( $this, 'send_notifications' ), 10, 1 );
@@ -38,7 +44,7 @@ class Notifications_Send {
 	 * @param int $post_id Post ID.
 	 *
 	 * @return void
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function send_notifications( int $post_id ) {
 		$event = $this->event_repository->get_event( $post_id );
@@ -152,8 +158,7 @@ class Notifications_Send {
 	 * @return string
 	 */
 	private function calculate_time_until_event( Event_Start_Date $start_date ): string {
-		$now              = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
-		$diff             = $start_date->diff( $now );
+		$diff             = $start_date->diff( $this->now );
 		$days_to_start    = $diff->days;
 		$hours_to_start   = $diff->h;
 		$minutes_to_start = $diff->i;

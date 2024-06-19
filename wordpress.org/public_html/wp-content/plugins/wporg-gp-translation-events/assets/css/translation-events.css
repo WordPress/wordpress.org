@@ -174,7 +174,7 @@ span.event-list-date {
 }
 
 /* Event list: Event buttons. */
-.event-list-item-button {
+a.event-list-item-button:any-link {
 	text-decoration: none;
 	vertical-align: bottom;
 }

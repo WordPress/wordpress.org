@@ -125,5 +125,9 @@ function wporg_themes_process_upload( ) {
 	$upload  = new WPORG_Themes_Upload;
 	$message = $upload->process_upload( $_FILES['zip_file'] );
 
+	if ( ! is_wp_error( $message ) && function_exists( 'bump_stats_extras' ) ) {
+		bump_stats_extras( 'themes', 'upload_by_zip' );
+	}
+
 	return $message;
 }

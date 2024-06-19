@@ -1541,3 +1541,31 @@ function woprg_themes_subscribe_author_to_theme_forum( $post ) {
 
 	return 200 === wp_remote_retrieve_response_code( $request );
 }
+
+/**
+ * Record some stats on theme status changes.
+ *
+ * @param string $new_status
+ * @param string $old_status
+ * @param WP_Post $post
+ */
+function wporg_themes_status_change_stats( $new_status, $old_status, $post ) {
+	if ( 
+		'repopackage' !== $post->post_type ||
+		in_array( $new_status, [ 'draft', 'auto-draft' ] ) ||
+		! function_exists( 'bump_stats_extras' )
+	) {
+		return;
+	}
+
+	if ( 'suspend' == $old_status && 'publish' == $new_status ) {
+		$stat = 'reinstated';
+	} elseif( 'delist' == $old_status && 'publish' == $new_status ) {
+		$stat = 'relisted';
+	} else {
+		$stat = $new_status;
+	}
+ 
+	bump_stats_extras( 'themes', 'status-' . $stat );
+}
+add_action( 'transition_post_status', 'wporg_themes_status_change_stats', 10, 3 );

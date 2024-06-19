@@ -1445,6 +1445,7 @@ body.make-tide #headline h2 a:before { content: '\f10d'; }
 body.make-openverse #headline h2 a:before { content: '\f179'; }
 body.make-test #headline h2 a:before { content: '\f115'; }
 body.make-photos #headline h2 a:before { content: '\f306'; }
+body.make-sustainability #headline h2 a:before { content: '\f11f'; position: relative; top: 2px; }
 
 .make-core .site-title a:before { content: '\f475'; }
 .make-design .site-title a:before { content: '\f309'; }
@@ -1470,6 +1471,7 @@ body.make-photos #headline h2 a:before { content: '\f306'; }
 .make-openverse .site-title a:before { content: '\f179'; }
 .make-test .site-title a:before { content: '\f115'; }
 .make-photos .site-title a:before { content: '\f306'; }
+.make-sustainability .site-title a:before { content: '\f11f'; position: relative; top: 2px; }
 
 #headline .login {
 	font-size: 12px;
