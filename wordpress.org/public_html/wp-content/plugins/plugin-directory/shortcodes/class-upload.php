@@ -489,7 +489,7 @@ class Upload {
 							printf(
 								/* Translators: URL to plugin-check plugin */
 								__( 'I confirm that the plugin has been tested with the <a href="%s">Plugin Check</a> plugin, and all indicated issues resolved (apart from what I believe to be false-positives).', 'wporg-plugins' ),
-								home_url( '/plugins/plugin-check/' )
+								home_url( '/plugin-check/' )
 							);
 						?>
 					</label>
