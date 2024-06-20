@@ -274,7 +274,7 @@ class Table_Of_Contents_Lite {
 		if ( empty( $content ) ) {
 			$content = get_the_content();
 		}
-		preg_match_all( "/(<{$tag}>)(.*)(<\/{$tag}>)/", $content, $matches, PREG_SET_ORDER );
+		preg_match_all( "/<{$tag}(?:\"(?:[^\\\"]|\\\.)*\"|\'(?:[^\\\\\']|\\\.)*\'|[^\'\">])*>(.*?)<\/{$tag}>/", $content, $matches, PREG_SET_ORDER );
 
 		return $matches;
 	}
