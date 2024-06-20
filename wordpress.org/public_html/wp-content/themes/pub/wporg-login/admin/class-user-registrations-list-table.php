@@ -474,6 +474,25 @@ class User_Registrations_List_Table extends WP_List_Table {
 			);
 		}
 
+		$block_reason = (array) ( $item->meta->block_reason ?? [] );
+		if ( $block_reason ) {
+			$first_key = array_keys( $block_reason )[0];
+			$title     = ( is_numeric( $first_key ) ? '' : "{$first_key}: " ) . ( $block_reason[ $first_key ] ?? '' );
+			unset( $block_reason[ $first_key ] );
+
+			if ( wp_is_numeric_array( $block_reason ) && 1 == count( $block_reason ) ) {
+				$details = array_shift( $block_reason );
+			} else {
+				$details = print_r( $block_reason, true );
+			}
+
+			printf(
+				'<abbr title="%s">%s</abbr> ',
+				esc_attr( $details ),
+				esc_html( $title )
+			);
+		}
+
 		$row_actions = [];
 
 		if ( ! $item->created && $item->user_activation_key ) {
