@@ -195,7 +195,7 @@ class Blocks {
 				/* translators: Link title to the WordPress Editor support article. */
 				'title' => __( 'Help & Support', 'wporg-forums' ),
 				/* translators: Link to the WordPress Editor article, used as the forum 'Help & Support' destination. */
-				'url'   => __( 'https://wordpress.org/support/article/wordpress-editor/', 'wporg-forums' ),
+				'url'   => __( 'https://wordpress.org/support/forum-user-guide/block-editor/', 'wporg-forums' ),
 			]
 		];
 
