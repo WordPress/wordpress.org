@@ -34,14 +34,14 @@ class Categorization extends \WP_Widget {
 			$model_type  = 'commercial';
 			$title       = __( 'Commercial plugin', 'wporg-plugins' );
 			$url         = get_post_meta( $post->ID, 'external_support_url', true );
-			$link_text   = __( 'View support', 'wporg-plugins' );
+			$link_text   = __( 'Support', 'wporg-plugins' );
 			$description = __( 'This plugin is free but offers additional paid commercial upgrades or support.', 'wporg-plugins' );
 		}
 		elseif ( has_term( 'community', 'plugin_business_model', $post ) ) {
 			$model_type  = 'community';
 			$title       = __( 'Community plugin', 'wporg-plugins' );
 			$url         = get_post_meta( $post->ID, 'external_repository_url', true );
-			$link_text   = __( 'Contribute to this plugin', 'wporg-plugins' );
+			$link_text   = __( 'Contribute', 'wporg-plugins' );
 			$description = __( 'This plugin is developed and supported by a community.', 'wporg-plugins' );
 		}
 		else {
@@ -54,19 +54,19 @@ class Categorization extends \WP_Widget {
 		<div class="widget categorization-widget categorization-widget-<?php echo esc_attr( $model_type ); ?>">
 			<div class="widget-head">
 				<h2><?php echo esc_html( apply_filters( 'widget_title', $title, $instance, $this->id_base ) ); ?></h2>
-			</div>
-	
-			<p><?php echo esc_html( $description ); ?>
+
 				<?php
 				// Always show URL if there is one, but also output the markup if on the advanced view tab
 				// and the current user can update the categorization options so that the update can be
 				// easily reflected in the widget on the same page. (CSS will prevent a link with an empty
 				// URL from being shown.)
 				if ( $url || ( get_query_var( 'plugin_advanced' ) && current_user_can( 'plugin_admin_edit', $post ) ) ) {
-					printf( '<a class="external-link" href="%1$s" rel="nofollow">%2$s</a>', esc_url( $url ), esc_html( $link_text ) );
+					printf( '<a href="%1$s" rel="nofollow">%2$s</a>', esc_url( $url ), esc_html( $link_text ) );
 				}
 				?>
-			</p>
+			</div>
+	
+			<p><?php echo esc_html( $description ); ?></p>
 		</div>
 		<?php
 		echo $args['after_widget'];

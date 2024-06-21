@@ -38,8 +38,6 @@ class Ratings extends \WP_Widget {
 			$ratings = get_post_meta( $post->ID, 'ratings', true ) ?: array();
 		}
 
-		var_dump($ratings);
-
 		$num_ratings = array_sum( $ratings );
 
 		echo $args['before_widget'];
@@ -47,6 +45,8 @@ class Ratings extends \WP_Widget {
 
 		if ( $rating ) :
 		?>
+			<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' ); ?>"><?php _ex( 'See all', 'reviews', 'wporg-plugins' ); ?></a>
+
 			<div class="rating">
 				<?php echo Template::dashicons_stars( $rating ); ?>
 			</div>
@@ -76,27 +76,16 @@ class Ratings extends \WP_Widget {
 
 		<?php endif; // $rating ?>
 
+		<?php if ( is_user_logged_in() ) : ?>
+			<div class="user-rating">
+				<a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/#new-post' ); ?>"><?php _e( 'Add my review', 'wporg-plugins' ); ?></a>
+			</div>
+		<?php else: ?>
+			<div class="user-rating">
+				<a href="<?php echo esc_url( wp_login_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/#new-post' ) ); ?>" rel="nofollow" title="<?php esc_attr_e( 'Log in to WordPress.org', 'wporg-plugins' ); ?>"><?php _e( 'Log in to submit a review.', 'wporg-plugins' ); ?></a>
+			</div>
 		<?php
-
-			$action_link_url = is_user_logged_in() ? esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/#new-post' ) : esc_url( wp_login_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/#new-post' ) );
-			$action_link_url_text =  is_user_logged_in() ? __( 'Add my review', 'wporg-plugins' ) : __( 'Log in to review.', 'wporg-plugins' );
-
-			$see_all_link_url = esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' );
-			$see_all_link_text = __( 'See all<span class="screen-reader-text"> reviews</span>', 'reviews', 'wporg-plugins' );
-
-			$block_markup = <<<EOT
-				<!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|10"},"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
-					<div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--10)">
-					<a href="$action_link_url">$action_link_url_text</a>
-					<a href="$see_all_link_url">$see_all_link_text</a>
-				</div>
-				<!-- /wp:group -->
-			EOT;
-
-			echo do_blocks( $block_markup );
-		?>
-
-		<?php
+		endif;
 
 		echo $args['after_widget'];
 	}
