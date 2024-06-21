@@ -26,7 +26,7 @@ add_action( 'parse_request', function( $wp ) {
 add_action( 'rest_api_init', function() {
 	global $wp;
 
-	if ( preg_match( '!^/themes/(\d\.\d)/!', $wp->query_vars['rest_route'], $m ) ) {
+	if ( preg_match( '!^/themes/(\d\.\d)/!', $wp->query_vars['rest_route'] ?? '', $m ) ) {
 		define( 'THEMES_API_VERSION', $m[1] );
 	}
 } );
@@ -55,4 +55,5 @@ add_action( 'rest_api_init', function() {
 	include __DIR__ . '/rest-api/class-themes-auto-review.php';
 	include __DIR__ . '/rest-api/class-theme-categorization.php';
 	include __DIR__ . '/rest-api/class-theme-review-stats.php';
+	include __DIR__ . '/rest-api/class-theme-preview.php';
 } );
