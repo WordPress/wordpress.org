@@ -48,7 +48,7 @@ class WPORG_Themes_Repo_Package {
 				'numberposts' => 1,
 			) );
 		
-			if ( $themes ) {
+			if ( $theme ) {
 				$this->wp_post = $theme[0];
 			}
 		}

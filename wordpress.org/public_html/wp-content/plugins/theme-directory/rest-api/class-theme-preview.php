@@ -34,8 +34,9 @@ class Theme_Preview {
 	 * Generate a blueprint for previewing a theme.
 	 */
 	function build_blueprint( $theme_data ) {
-		$repo_package    = new WPORG_Themes_Repo_Package( $theme_data->slug );
-		$theme_blueprint = $repo_package->blueprint;
+		$theme_package   = new WPORG_Themes_Repo_Package( $theme_data->slug );
+		$parent_package  = $theme_data->template ? new WPORG_Themes_Repo_Package( $theme_data->template ) : false;
+		$theme_blueprint = $theme_package->blueprint;
 
 		// Base blueprint.
 		$blueprint = [
@@ -100,12 +101,14 @@ class Theme_Preview {
 					'blogdescription' => preg_replace( '![.].+$!',  '.', $theme_data->sections['description'] ), // First sentence only.
 				]
 			],
+			// Note: The following use `url` to allow setting the caption to the proper theme name.
 			// Install parent theme.
 			empty( $theme_data->template ) ? false : [
 				'step'         => 'installTheme',
 				'themeZipFile' => [
-					'resource' => 'wordpress.org/themes',
-					'slug' => $theme_data->template
+					'resource' => 'url',
+					'url'      => $parent_package->download_url(),
+					'caption'  => "Downloading {$parent_package->post_title}",
 				],
 				'options' => [
 					'activate' => false
@@ -115,8 +118,9 @@ class Theme_Preview {
 			[
 				'step'         => 'installTheme',
 				'themeZipFile' => [
-					'resource' => 'wordpress.org/themes',
-					'slug' => $theme_data->slug
+					'resource' => 'url',
+					'url'      => $theme_package->download_url(),
+					'caption'  => "Downloading {$theme_package->post_title}",
 				]
 			]
 		];
