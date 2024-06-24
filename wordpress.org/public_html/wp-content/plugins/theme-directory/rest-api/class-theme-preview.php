@@ -12,20 +12,62 @@ class Theme_Preview {
 			'callback'            => array( $this, 'preview' ),
 			'permission_callback' => '__return_true',
 		) );
+
+		register_rest_route( 'themes/v1', 'preview-blueprint/(?<slug>[^/]+)', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'set_blueprint' ),
+			'permission_callback' => function( $request ) {
+				$theme_data    = wporg_themes_theme_information( $request['slug'] );
+				$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug );
+
+				if ( ! empty( $theme_data->error ) || ! $theme_package->post_author ) {
+					return false;
+				}
+
+				return (
+					get_current_user_id() === $theme_package->post_author ||
+					current_user_can( 'edit_post', $theme_package->ID )
+				);
+			},
+		) );
 	}
 
 	/**
 	 * Generate a Blueprint for a theme preview.
 	 */
 	function preview( $request ) {
-		$theme_data = wporg_themes_query_api(
-			'theme_information',
-			[ 'slug' => $request->get_param( 'slug' ) ]
-		);
+		$theme_data = wporg_themes_theme_information( $request->get_param( 'slug' ) );
 
 		if ( ! empty( $theme_data->error ) ) {
 			return new WP_Error( 'error', $theme_data->error );
 		}
+
+		return $this->build_blueprint( $theme_data );
+	}
+
+	/**
+	 * Set a Blueprint for a theme preview.
+	 */
+	function set_blueprint( $request ) {
+		$theme_data    = wporg_themes_theme_information( $request['slug'] );
+		$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug );
+
+		if ( ! empty( $theme_data->error ) ) {
+			return new WP_Error( 'error', $theme_data->error );
+		}
+
+		// Validate the blueprint, TODO expand upon this.
+		if (
+			empty( $request['blueprint'] ) ||
+			! is_string( $request['blueprint'] ) ||
+			! ( $decoded_blueprint = json_decode( $request['blueprint'], true) ) ||
+			empty( $decoded_blueprint['steps'] )
+		) {
+			return new WP_Error( 'error', 'Invalid Blueprint provided, verify the JSON validates.' );
+		}
+
+		// Save the blueprint.
+		update_post_meta( $theme_package->ID, 'preview_blueprint', $decoded_blueprint );
 
 		return $this->build_blueprint( $theme_data );
 	}
@@ -36,7 +78,7 @@ class Theme_Preview {
 	function build_blueprint( $theme_data ) {
 		$theme_package   = new WPORG_Themes_Repo_Package( $theme_data->slug );
 		$parent_package  = $theme_data->template ? new WPORG_Themes_Repo_Package( $theme_data->template ) : false;
-		$theme_blueprint = $theme_package->blueprint;
+		$theme_blueprint = $theme_package->preview_blueprint;
 
 		// Base blueprint.
 		$blueprint = [
