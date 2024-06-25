@@ -179,9 +179,21 @@ class Import {
 						]
 					);
 
+					/*
+					 * Trigger the release confirmation email.
+					 *
+					 * This goes to ALL committers, including who commited the change.
+					 * "bot" accounts are NOT emailed, nor are accounts that have web login disabled.
+					 */
+					$who_to_email = array_diff(
+						Tools::get_plugin_committers( $plugin_slug ),
+						$GLOBALS['bot_accounts'] ?? [],
+						$GLOBALS['nologin_accounts'] ?? []
+					);
+
 					$email = new Release_Confirmation_Email(
 						$plugin,
-						Tools::get_plugin_committers( $plugin_slug ),
+						$who_to_email,
 						[
 							'who'     => $last_committer,
 							'readme'  => $readme,
