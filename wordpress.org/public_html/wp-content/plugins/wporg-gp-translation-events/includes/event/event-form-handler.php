@@ -3,6 +3,7 @@
 namespace Wporg\TranslationEvents\Event;
 
 use DateTime;
+use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use WP_Error;
@@ -14,9 +15,9 @@ class Event_Form_Handler {
 	private Event_Repository_Interface $event_repository;
 	private Notifications_Schedule $notifications_schedule;
 
-	public function __construct( Event_Repository_Interface $event_repository ) {
+	public function __construct( DateTimeImmutable $now, Event_Repository_Interface $event_repository ) {
 		$this->event_repository       = $event_repository;
-		$this->notifications_schedule = new Notifications_Schedule( $this->event_repository );
+		$this->notifications_schedule = new Notifications_Schedule( $now, $this->event_repository );
 	}
 
 	public function handle( array $form_data ): void {
