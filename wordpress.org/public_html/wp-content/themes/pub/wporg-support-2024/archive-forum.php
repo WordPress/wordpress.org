@@ -49,11 +49,11 @@ get_header(); ?>
 							<div class="wp-block-column">
 
 								<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"700","lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|blueberry-2"}}}},"textColor":"blueberry-2","className":"is-style-short-text","fontSize":"normal","fontFamily":"inter"} -->
-								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="https://wordpress.org/documentation/">%2$s</a></h3>
+								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="%2$s">%3$s</a></h3>
 								<!-- /wp:heading -->
 
 								<!-- wp:paragraph -->
-								<p>%3$s</p>
+								<p>%4$s</p>
 								<!-- /wp:paragraph -->
 
 							</div>
@@ -63,11 +63,11 @@ get_header(); ?>
 							<div class="wp-block-column">
 
 								<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"700","lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|blueberry-2"}}}},"textColor":"blueberry-2","className":"is-style-short-text","fontSize":"normal","fontFamily":"inter"} -->
-								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="https://make.wordpress.org/support/handbook/">%4$s</a></h3>
+								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="%5$s">%6$s</a></h3>
 								<!-- /wp:heading -->
 
 								<!-- wp:paragraph -->
-								<p>%5$s</p>
+								<p>%7$s</p>
 								<!-- /wp:paragraph -->
 
 							</div>
@@ -91,8 +91,10 @@ get_header(); ?>
 			</div>
 			<!-- /wp:group -->',
 			esc_html__( 'More resources', 'wporg-forums' ),
+			esc_html__( 'https://wordpress.org/documentation/', 'wporg-forums' ),
 			esc_html__( 'Documentation', 'wporg-forums' ),
 			esc_html__( 'Find the information you need to get the most out of WordPress.', 'wporg-forums' ),
+			esc_html__( 'https://make.wordpress.org/support/handbook/', 'wporg-forums' ),
 			esc_html__( 'Support Handbook', 'wporg-forums' ),
 			esc_html__( 'Learn how to get involved and provide support in the forums.', 'wporg-forums' ),
 		)
