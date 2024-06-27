@@ -109,18 +109,23 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		$pending_user['meta']['heuristics'] = wporg_registration_check_private_heuristics( compact( 'user_login', 'user_email' ) );
 	}
 
-	$passes_block_words = wporg_login_check_against_block_words( $pending_user );
+	$passes_heuristics  = 'allow' === $pending_user['meta']['heuristics'];
+	$passes_recaptcha   = (float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 );
+	$has_blocked_word   = wporg_login_has_blocked_word( $pending_user );
+	$passes_block_words = ! $has_blocked_word;
+
+	if ( ! $passes_block_words ) {
+		$pending_user['meta']['block_reason'] ??= [ 'Block words', "{$has_blocked_word} found" ];
+	}
+	if ( ! $passes_recaptcha ) {
+		$pending_user['meta']['block_reason'] ??= 'reCaptcha not met';
+	}
 
 	$pending_user['cleared'] = (
-		'allow' === $pending_user['meta']['heuristics'] &&
-		(float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 ) &&
+		$passes_heuristics &&
+		$passes_recaptcha &&
 		$passes_block_words
 	);
-
-	// Run a filter on the cleared status..
-	if ( ! apply_filters( 'wporg_login_registration_check_user', true, $pending_user ) ) {
-		$pending_user['cleared'] = false;
-	}
 
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
@@ -456,16 +461,12 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 		}
 	}
 
-	// If not manually approved, check against block_words, and any other registration checks that are hooked in.
-	if ( $pending_user['cleared'] < 2 ) {
-		$passes_block_words = wporg_login_check_against_block_words( $pending_user );
-		if ( ! $passes_block_words ) {
-			$pending_user['cleared'] = 0;
-		}
-
-		// Check the filter.
-		if ( ! apply_filters( 'wporg_login_registration_check_user', true, $pending_user ) ) {
-			$pending_user['cleared'] = 0;
+	// If approved (1), and not manually approved (2), perform the check with the new data.
+	if ( $pending_user['cleared'] === 1 ) {
+		$has_blocked_word = wporg_login_has_blocked_word( $pending_user );
+		if ( $has_blocked_word ) {
+			$pending_user['cleared']                = 0;
+			$pending_user['meta']['block_reason'] ??= [ 'Block words', "{$has_blocked_word} found" ];
 		}
 	}
 
@@ -482,9 +483,9 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 /**
  * Check a pending user object against the 'block words' setting.
  * 
- * @return bool
+ * @return bool|string false if no block words found, or the first block word found.
  */
-function wporg_login_check_against_block_words( $user ) {
+function wporg_login_has_blocked_word( $user ) {
 	$block_words = get_option( 'registration_block_words', [] );
 
 	foreach ( $block_words as $word ) {
@@ -492,7 +493,7 @@ function wporg_login_check_against_block_words( $user ) {
 			false !== stripos( $user['user_login'], $word ) ||
 			false !== stripos( $user['user_email'], $word )
 		) {
-			return false;
+			return $word;
 		}
 
 		foreach ( [ 'url', 'from', 'occ', 'interests' ] as $field ) {
@@ -500,10 +501,10 @@ function wporg_login_check_against_block_words( $user ) {
 				! empty( $user['meta'][ $field ] ) &&
 				false !== stripos( $user['meta'][ $field ], $word )
 			) {
-				return false;
+				return $word;
 			}
 		}
 	}
 
-	return true;
+	return false;
 }
