@@ -14,8 +14,7 @@ class SVN_Watcher {
 	 * The cron trigger for the svn import job.
 	 */
 	public static function cron_trigger() {
-		$watcher = new CLI\SVN_Watcher();
-		$watcher->watch();
+		return;
 	}
 
 }
