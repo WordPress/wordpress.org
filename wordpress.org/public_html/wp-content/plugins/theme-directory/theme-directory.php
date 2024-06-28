@@ -1502,6 +1502,11 @@ function wporg_themes_canonical_url( $url ) {
 		$url = home_url( '/' );
 	}
 
+	// Pagination.
+	if ( get_query_var( 'paged' ) > 1 ) {
+		$url .= 'page/' . intval( get_query_var( 'paged' ) ) . '/';
+	}
+
 	return $url;
 }
 add_filter( 'wporg_canonical_url', 'wporg_themes_canonical_url' );
