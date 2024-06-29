@@ -925,7 +925,12 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
-		return compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
+		return apply_filters(
+			'wporg_plugins_export_and_parse_plugin',
+			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' ),
+			$plugin_slug,
+			$this,
+		);
 	}
 
 	/**
