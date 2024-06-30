@@ -66,7 +66,7 @@
 
 	<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"400,"lineHeight":"26px"}},"fontSize":"normal","fontFamily":"inter"} -->
 	<p class="has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:400;line-height:26px">
-		<?php esc_html_e( 'This work is licensed under a ', 'wporg-learn' ); ?><a href="http://creativecommons.org/licenses/by-sa/4.0/" title="<?php esc_html_e( 'Creative Commons Attribution-ShareAlike 4.0 International License', 'wporg-learn' ); ?>"><?php esc_html_e( 'Creative Commons Attribution-ShareAlike 4.0 International License', 'wporg-learn' ); ?></a>.
+		<?php esc_html_e( 'This work is licensed under a ', 'wporg-learn' ); ?><a href="http://creativecommons.org/licenses/by-sa/4.0/" title="<?php esc_attr__( 'Creative Commons Attribution-ShareAlike 4.0 International License', 'wporg-learn' ); ?>"><?php esc_html_e( 'Creative Commons Attribution-ShareAlike 4.0 International License', 'wporg-learn' ); ?></a>.
 	</p>
 	<!-- /wp:paragraph -->
 
