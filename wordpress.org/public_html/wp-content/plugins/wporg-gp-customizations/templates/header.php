@@ -22,10 +22,12 @@ gp_enqueue_scripts( array( 'gp-tour' ) );
 			<nav id="site-navigation" class="navigation-main clear" role="navigation">
 				<button type="button" class="menu-toggle dashicons dashicons-arrow-down-alt2"></button>
 				<?php
-				wp_nav_menu( [
-					'theme_location' => 'wporg_header_subsite_nav',
-					'fallback_cb' => false,
-				] );
+				wp_nav_menu(
+					array(
+						'theme_location' => 'wporg_header_subsite_nav',
+						'fallback_cb'    => false,
+					)
+				);
 				?>
 			</nav>
 		<?php endif; ?>
