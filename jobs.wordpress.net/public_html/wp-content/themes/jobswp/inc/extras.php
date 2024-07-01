@@ -37,7 +37,7 @@ function jobswp_enhanced_image_navigation( $url, $id ) {
 		return $url;
 
 	$image = get_post( $id );
-	if ( ! empty( $image->post_parent ) && $image->post_parent != $id )
+	if ( ! empty( $image->post_parent ) && $image->post_parent !== $id )
 		$url .= '#main';
 
 	return $url;
