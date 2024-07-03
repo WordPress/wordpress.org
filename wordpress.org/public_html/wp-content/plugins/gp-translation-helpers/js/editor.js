@@ -40,11 +40,10 @@ jQuery( function( $ ) {
 		if ( nextEditor.length ) {
 			cacheTranslationHelpersForARow( nextEditor );
 		}
-
-		if ( chatgpt_review_enabled && $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
+		if ( ! $gp_comment_feedback_settings.openai_key || ! $gp_editor_options.can_approve || ( 'waiting' !== translation_status && 'fuzzy' !== translation_status ) ) {
+			tr.find( '.details-chatgpt' ).hide();
+		} else if ( chatgpt_review_enabled ) {
 			fetchOpenAIReviewResponse( rowId, tr, false );
-		} else {
-			tr.find( '.details-chatgpt, .openai-review' ).hide();
 		}
 	} );
 
