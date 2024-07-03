@@ -141,7 +141,7 @@ class Plugin_Committers extends Base {
 		$plugin_post = Plugin_Directory::get_plugin_post( $plugin_slug );
 
 		// Prevent a committer removing themselves, if they're the only committer.
-		if ( $user->user_login == wp_get_current_user()->user_login ) {
+		if ( $user->user_login == wp_get_current_user()->user_login && ! current_user_can( 'plugin_review' ) ) {
 			$committers = Tools::get_plugin_committers( $plugin_slug );
 			if ( count( $committers ) == 1 && in_array( $user->user_login, $committers ) ) {
 				return new WP_Error( 'failed', __( 'Sorry, you must have at least one committer.', 'wporg-plugins' ) );
