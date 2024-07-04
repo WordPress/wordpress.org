@@ -458,6 +458,17 @@ class Import {
 					'revision'  => [ $last_revision ]
 				]
 			);
+		} elseif ( 'trunk' === $stable_tag && version_compare( $version, $plugin->version, '>' ) ) {
+			// This is a new version, released from trunk.
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'       => "trunk@{$version}",
+					'version'   => $version,
+					'committer' => [ $last_committer ],
+					'revision'  => [ $last_revision ]
+				]
+			);
 		}
 
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );

@@ -1728,48 +1728,7 @@ class Plugin_Directory {
 
 		// Meta doesn't exist yet? Lets fill it out.
 		if ( false === $releases || ! is_array( $releases ) ) {
-			update_post_meta( $plugin->ID, 'releases', [] );
-
-			$tags = get_post_meta( $plugin->ID, 'tags', true );
-			if ( $tags ) {
-				foreach ( $tags as $tag_version => $tag ) {
-					self::add_release( $plugin, [
-						'date'                   => strtotime( $tag['date'] ),
-						'tag'                    => $tag['tag'],
-						'version'                => $tag_version,
-						'committer'              => [ $tag['author'] ],
-						'zips_built'             => true, // Old release, assume they were built.
-						'confirmations_required' => 0,    // Old release, assume it's released.
-					] );
-				}
-			} else {
-				// Pull from SVN directly.
-				$svn_tags = Tools\SVN::ls( "https://plugins.svn.wordpress.org/{$plugin->post_name}/tags/", true ) ?: [];
-				foreach ( $svn_tags as $entry ) {
-					// Discard files
-					if ( 'dir' !== $entry['kind'] ) {
-						continue;
-					}
-
-					$tag = $entry['filename'];
-
-					// Prefix the 0 for plugin versions like 0.1
-					if ( '.' == substr( $tag, 0, 1 ) ) {
-						$tag = "0{$tag}";
-					}
-
-					self::add_release( $plugin, [
-						'date'                   => strtotime( $entry['date'] ),
-						'tag'                    => $entry['filename'],
-						'version'                => $tag,
-						'committer'              => [ $entry['author'] ],
-						'zips_built'             => true, // Old release, assume they were built.
-						'confirmations_required' => 0,    // Old release, assume it's released.
-					] );
-				}
-			}
-
-			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+			$releases = self::prefill_releses_meta( $plugin );
 		}
 
 		/**
@@ -1788,17 +1747,76 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Prefill the releases meta for a plugin.
+	 *
+	 * @param \WP_Post $plugin Plugin post object.
+	 * @return array
+	 */
+	public static function prefill_releses_meta( $plugin ) {
+		if ( ! $plugin->releases ) {
+			update_post_meta( $plugin->ID, 'releases', [] );
+		}
+
+		$tags = get_post_meta( $plugin->ID, 'tags', true );
+		if ( $tags ) {
+			foreach ( $tags as $tag_version => $tag ) {
+				self::add_release( $plugin, [
+					'date'                   => strtotime( $tag['date'] ),
+					'tag'                    => $tag['tag'],
+					'version'                => $tag_version,
+					'committer'              => [ $tag['author'] ],
+					'zips_built'             => true, // Old release, assume they were built.
+					'confirmations_required' => 0,    // Old release, assume it's released.
+				] );
+			}
+		} else {
+			// Pull from SVN directly.
+			$svn_tags = Tools\SVN::ls( "https://plugins.svn.wordpress.org/{$plugin->post_name}/tags/", true ) ?: [];
+			foreach ( $svn_tags as $entry ) {
+				// Discard files
+				if ( 'dir' !== $entry['kind'] ) {
+					continue;
+				}
+
+				$tag = $entry['filename'];
+
+				// Prefix the 0 for plugin versions like 0.1
+				if ( '.' == substr( $tag, 0, 1 ) ) {
+					$tag = "0{$tag}";
+				}
+
+				self::add_release( $plugin, [
+					'date'                   => strtotime( $entry['date'] ),
+					'tag'                    => $entry['filename'],
+					'version'                => $tag,
+					'committer'              => [ $entry['author'] ],
+					'zips_built'             => true, // Old release, assume they were built.
+					'confirmations_required' => 0,    // Old release, assume it's released.
+				] );
+			}
+		}
+
+		return get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+	}
+
+	/**
 	 * Fetch a specific release of the plugin, by tag.
 	 *
-	 * @param string $plugin Plugin slug.
-	 * @param string $tag    Release tag.
+	 * @param string $plugin  Plugin slug.
+	 * @param string $version Plugin version / Release tag.
 	 * @return array|bool
 	 */
-	public static function get_release( $plugin, $tag ) {
+	public static function get_release( $plugin, $version ) {
 		$releases = self::get_releases( $plugin );
 
+		// Look for the version released as a tag.
 		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
+		if ( $filtered ) {
+			return array_shift( $filtered );
+		}
 
+		// Look for the tag as a trunk version.
+		$filtered = wp_list_filter( $releases, [ 'tag' => "trunk@{$tag}", 'version' => $tag ] );
 		if ( $filtered ) {
 			return array_shift( $filtered );
 		}
@@ -1835,7 +1853,11 @@ class Plugin_Directory {
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?
 		foreach ( $data as $k => $v ) {
-			$release[ $k ] = $v;
+			if ( is_array( $release[ $k ] ) ) {
+				$release[ $k ] = array_unique( array_merge( $release[ $k ], $v ) );
+			} else {
+				$release[ $k ] = $v;
+			}
 		}
 
 		$releases = self::get_releases( $plugin );
