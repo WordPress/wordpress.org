@@ -228,16 +228,26 @@ class Import {
 			 * then we need to build a new zip for that tag.
 			 *
 			 * This is required as ZIP building occurs at the end of the import process, yet with
-			 * release confirmations the 
+			 * release confirmations that will not be reached when the release isn't yet confirmed.
 			 */
 			if ( ! $release['confirmed'] && ! $touches_stable_tag ) {
 				$zips_to_build = [];
 				foreach ( $svn_changed_tags as $svn_changed_tag ) {
-					// We're not concerned with trunk or stable tags.
-					if ( 'trunk' === $svn_changed_tag || $svn_changed_tag === $stable_tag ) {
+					// Never build the stable tag zips here.
+					if ( $svn_changed_tag === $stable_tag ) {
 						continue;
 					}
 
+					// Always allow trunk to be rebuilt.
+					if ( 'trunk' === $svn_changed_tag ) {
+						$zips_to_build[] = 'trunk';
+						continue;
+					}
+
+					/*
+					 * If the tag is confirmed, but the zips haven't been built, then build them.
+					 * This can be a confirmed release, but one which isn't set as stable.
+					 */
 					$this_release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 					if ( $this_release['confirmed'] && ! $this_release['zips_built'] ) {
 						$zips_to_build[] = $this_release['tag'];
