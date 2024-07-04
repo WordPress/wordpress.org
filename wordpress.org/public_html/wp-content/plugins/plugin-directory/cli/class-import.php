@@ -94,6 +94,7 @@ class Import {
 		$readme             = $data['readme'];
 		$assets             = $data['assets'];
 		$headers            = $data['plugin_headers'];
+		$version            = $headers->Version ?? '';
 		$stable_tag         = $data['stable_tag'];
 		$last_committer     = $data['last_committer'];
 		$last_revision      = $data['last_revision'];
@@ -167,7 +168,7 @@ class Import {
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 				if ( ! $release ) {
 					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
-					$version = ( $svn_changed_tag === $stable_tag ) ? $headers->Version : $svn_changed_tag;
+					$version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
 
 					Plugin_Directory::add_release(
 						$plugin,
@@ -297,7 +298,7 @@ class Import {
 		 * - A tag (or trunk) commit is made to the current stable. The build has changed, even if not new version.
 		 */
 		if (
-			( ! isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) ||
+			( ! $version || $version != get_post_meta( $plugin->ID, 'version', true ) ) ||
 			$plugin->post_modified == '0000-00-00 00:00:00' ||
 			( $svn_changed_tags && in_array( ( $stable_tag ?: 'trunk' ), $svn_changed_tags, true ) )
 		) {
@@ -436,11 +437,24 @@ class Import {
 			delete_post_meta( $plugin->ID, 'block_files' );
 		}
 
+		// Add the release to storage.
+		if ( 'trunk' != $stable_tag ) {
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'       => $stable_tag,
+					'version'   => $version,
+					'committer' => [ $last_committer ],
+					'revision'  => [ $last_revision ]
+				]
+			);
+		}
+
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', wp_slash( $stable_tag ) );
-		update_post_meta( $plugin->ID, 'version',    wp_slash( $headers->Version ) );
+		update_post_meta( $plugin->ID, 'version',    wp_slash( $version ) );
 		// Update the list of tags last, as it controls which ZIPs are present in the 'Previous versions' section and info API.
 		update_post_meta( $plugin->ID, 'tags',       wp_slash( $tagged_versions ) );
 
@@ -511,9 +525,6 @@ class Import {
 					( $release['zips_built'] && $release['confirmations_required'] )
 				) {
 					unset( $versions_to_build[ $i ] );
-				} else {
-					$release['zips_built'] = true;
-					Plugin_Directory::add_release( $plugin, $release );
 				}
 			}
 
@@ -540,6 +551,21 @@ class Import {
 			);
 		} catch ( Exception $e ) {
 			return false;
+		}
+
+		// Mark the ZIPs as being built.
+		foreach ( $versions_to_build as $tag ) {
+			if ( 'trunk' === $tag ) {
+				continue;
+			}
+
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'        => $tag,
+					'zips_built' => true
+				]
+			);
 		}
 
 		return true;
