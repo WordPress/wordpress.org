@@ -1802,11 +1802,11 @@ class Plugin_Directory {
 	/**
 	 * Fetch a specific release of the plugin, by tag.
 	 *
-	 * @param string $plugin  Plugin slug.
-	 * @param string $version Plugin version / Release tag.
+	 * @param string $plugin Plugin slug.
+	 * @param string $tag    Plugin version / Release tag.
 	 * @return array|bool
 	 */
-	public static function get_release( $plugin, $version ) {
+	public static function get_release( $plugin, $tag ) {
 		$releases = self::get_releases( $plugin );
 
 		// Look for the version released as a tag.
