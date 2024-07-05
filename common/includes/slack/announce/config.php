@@ -22,22 +22,18 @@ namespace Dotorg\Slack\Announce;
 function get_whitelist() {
 	$wordcamp_central = array(
 		'_DorsVenabili', // @rocio on Slack
-		'andreamiddleton',
 		'angelasjin',
-		'camikaos',
 		'chanthaboune',
-		'coreymckrill',
 		'courtneypk',
-		'evarlese',
 		'harishanker',
 		'harmonyromo', // @Harmony Romo on Slack
-		'hlashbrooke',
-		'iandunn',
 		'Nao',
+		'peiraisotta',
 		'ryelle',
 	);
 
 	return array(
+		// Note: For #x-y-release-leads / #x-y-feature, #core announce is inherited automatically.
 		'6-4-release-leads' => array(
 			'akshayar', // @akshaya on Slack
 			'cbringmann', // @Chloé Bringmann on Slack
@@ -73,12 +69,15 @@ function get_whitelist() {
 			'danielbachhuber',
 			'schlessera',
 		),
-		'community-events' => array_merge( $wordcamp_central, array(
-			'francina',
-		) ),
+		'community-events' => array(
+			// Inherits from #community-team.
+		),
 		'community-team' => array_merge( $wordcamp_central, array(
 			'francina',
 			'myselfkhayer',
+			'nukaga',
+			'st810amaze',
+			'leogopal',
 		) ),
 		'contributor-day' => array(
 			'camikaos',
