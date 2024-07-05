@@ -109,6 +109,7 @@ class Plugin_Upload_to_SVN extends Base {
 		$version = $headers->Version ?? '0.0';
 
 		// Validate that the version is greater than the existing version.
+		// TODO: It would be helpful to be able to upload security-releases of plugins here too, which will always be older than the existing version.. Perhaps this is not needed.
 		if ( ! version_compare( $version, $post->version, '>' ) ) {
 			return new WP_Error(
 				'version_not_newer',
