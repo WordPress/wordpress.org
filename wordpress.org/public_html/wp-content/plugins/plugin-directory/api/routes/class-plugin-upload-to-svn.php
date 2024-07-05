@@ -7,8 +7,6 @@ use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\API\Base;
-use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
-use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WP_REST_Server;
 use WP_Error;
 
