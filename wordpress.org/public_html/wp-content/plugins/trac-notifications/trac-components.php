@@ -598,11 +598,12 @@ jQuery( function( $ ) {
 			'enhancement'     => 'Open enhancements',
 			'task (blessed)'  => 'Open tasks',
 			'feature request' => 'Open feature requests',
+			'defect (bug)'    => 'Open defects',
 		);
 
 		foreach ( $types as $type => $title ) {
 			$count = $tickets_by_type[ $type ] ?? 0;
-			printf( '<strong>%s: %d<strong> ', $title, $count );
+			printf( '<strong>%s: %d</strong> ', $title, $count );
 			echo $this->trac_query_link( 'View list on Trac', compact( 'component', 'type' ) );
 			echo '<br>';
 		}
