@@ -4,6 +4,8 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use Two_Factor_Core;
+use function WordPressdotorg\Two_Factor\get_js_revalidation_url;
 
 /**
  * The [release-confirmation] shortcode handler.
@@ -66,7 +68,27 @@ class Release_Confirmation {
 		}
 
 		if ( ! self::can_access() && $should_show_access_notice ) {
-			if ( isset( $_REQUEST['send_access_email'] ) ) {
+			if ( Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+				// A Two Factor user needs to have a valid recently re-validated session.
+				printf(
+					'<div class="plugin-notice notice notice-info notice-alt please-revalidate"><p>%s</p></div>',
+					sprintf(
+						__( 'Please <a href="%s">revalidate your two-factor session</a> to perform actions.', 'wporg-plugins'),
+						esc_url( get_js_revalidation_url( get_permalink() ) )
+					)
+				);
+				echo '<script>
+					window.addEventListener( "reValidationComplete", function() {
+						document.querySelector(".please-revalidate").remove();
+
+						document.querySelectorAll(".disabled.disabled-by-2fa").forEach( function( el ) {
+							el.classList.remove("disabled");
+							el.classList.remove("disabled-by-2fa");
+						} );
+					} );
+				</script>';
+
+			} elseif ( isset( $_REQUEST['send_access_email'] ) ) {
 				printf(
 					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 					__( 'Check your email for an access link to perform actions.', 'wporg-plugins')
@@ -249,40 +271,37 @@ class Release_Confirmation {
 			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
 			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
-				if (
-					self::can_access() &&
-					current_user_can( 'plugin_manage_releases', $plugin  )
-				) {
-					$buttons[] = sprintf(
-						'<a href="%s" class="button approve-release button-primary">%s</a>',
-						Template::get_release_confirmation_link( $data['tag'], $plugin ),
-						__( 'Confirm', 'wporg-plugins' )
-					);
-					$buttons[] = sprintf(
-						'<a href="%s" class="button approve-release button-secondary">%s</a>',
-						Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' ),
-						__( 'Discard', 'wporg-plugins' )
-					);
-				} else {
-					$buttons[] = sprintf(
-						'<a class="button approve-release button-secondary disabled">%s</a>',
-						__( 'Confirm', 'wporg-plugins' )
-					);
-					$buttons[] = sprintf(
-						'<a class="button approve-release button-secondary disabled">%s</a>',
-						__( 'Discard', 'wporg-plugins' )
-					);
+				$can_access = self::can_access();
+				$can_manage = current_user_can( 'plugin_manage_releases', $plugin  );
+
+				$disabled_attr  = '';
+				$disabled_class = '';
+				if ( ! $can_access || ! $can_manage ) {
+					$disabled_attr = 'disabled';
+				}
+				if ( $can_manage && ! $can_access ) {
+					$disabled_class = 'disabled disabled-by-2fa';
 				}
 
-			} elseif ( $current_user_confirmed ) {
 				$buttons[] = sprintf(
-					'<a class="button approve-release button-secondary disabled">%s</a>',
-					__( 'Confirmed', 'wporg-plugins' )
+					'<button type="submit" formaction="%s" class="approve-release wp-element-button button %s" %s>%s</button>',
+					$can_manage ? Template::get_release_confirmation_link( $data['tag'], $plugin ) : '',
+					esc_attr( $disabled_class ),
+					esc_attr( $disabled_attr ),
+					__( 'Confirm', 'wporg-plugins' )
 				);
+				$buttons[] = sprintf(
+					'<button type="submit" formaction="%s" class="approve-release wp-element-button button %s" %s>%s</button>',
+					$can_manage ? Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' ) : '',
+					esc_attr( $disabled_class ),
+					esc_attr( $disabled_attr ),
+					__( 'Discard', 'wporg-plugins' )
+				);
+
 			}
 		}
 
-		return implode( ' ', $buttons );
+		return ! $buttons ? '' : '<form>' . implode( ' ', $buttons ) . '</form>';
 	}
 
 	static function can_access() {
@@ -291,19 +310,36 @@ class Release_Confirmation {
 			return true;
 		}
 
-		// Must have an access token..
-		if ( ! is_user_logged_in() || empty( $_COOKIE[ self::COOKIE ] ) ) {
+		if ( ! is_user_logged_in() ) {
 			return false;
 		}
 
-		// ...and it be valid..
-		$token = get_user_meta( get_current_user_id(), self::META_KEY, true );
-		if (
-			$token &&
-			$token['time'] > ( time() - DAY_IN_SECONDS ) &&
-			wp_check_password( $_COOKIE[ self::COOKIE ], $token['token'] )
-		) {
-			return true;
+		// If they have an access token...
+		if ( ! empty( $_COOKIE[ self::COOKIE ] ) ) {
+			// ...and it be valid..
+			$token = get_user_meta( get_current_user_id(), self::META_KEY, true );
+			if (
+				$token &&
+				$token['time'] > ( time() - DAY_IN_SECONDS ) &&
+				wp_check_password( $_COOKIE[ self::COOKIE ], $token['token'] )
+			) {
+				return true;
+			}
+		}
+
+		// If the user uses 2FA, and they've re-validated, they can access.
+		if ( Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+			// Check to see if they've confirmed their 2FA status recently..
+			// TODO: See '2fa_revalidation' user rest-api field.. this needs moving to a shared function.
+
+			$last_validated = Two_Factor_Core::is_current_user_session_two_factor();
+
+			$expiry         = apply_filters( 'two_factor_revalidate_time', 5 * MINUTE_IN_SECONDS, get_current_user_id(), '' );
+			$expires_at     = $last_validated + $expiry;
+
+			if ( $last_validated && $expires_at > time() ) {
+				return true;
+			}
 		}
 
 		return false;
