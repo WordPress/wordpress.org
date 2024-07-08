@@ -5,7 +5,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use Two_Factor_Core;
-use function WordPressdotorg\Two_Factor\get_js_revalidation_url;
+use function WordPressdotorg\Two_Factor\{ get_js_revalidation_url, get_revalidation_status };
 
 /**
  * The [release-confirmation] shortcode handler.
@@ -330,14 +330,8 @@ class Release_Confirmation {
 		// If the user uses 2FA, and they've re-validated, they can access.
 		if ( Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
 			// Check to see if they've confirmed their 2FA status recently..
-			// TODO: See '2fa_revalidation' user rest-api field.. this needs moving to a shared function.
-
-			$last_validated = Two_Factor_Core::is_current_user_session_two_factor();
-
-			$expiry         = apply_filters( 'two_factor_revalidate_time', 5 * MINUTE_IN_SECONDS, get_current_user_id(), '' );
-			$expires_at     = $last_validated + $expiry;
-
-			if ( $last_validated && $expires_at > time() ) {
+			$status = get_revalidation_status();
+			if ( ! $status['needs_revalidate'] ) {
 				return true;
 			}
 		}
