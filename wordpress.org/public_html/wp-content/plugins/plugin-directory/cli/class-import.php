@@ -949,7 +949,7 @@ class Import {
 			$parent = array_filter(
 				$blocks,
 				function( $block ) {
-					return ! isset( $block->parent ) || ! count( $block->parent );
+					return ! isset( $block->parent ) || ! count( $block->parent ) || ! isset( $block->ancestor ) || ! count( $block->ancestor );
 				}
 			);
 
