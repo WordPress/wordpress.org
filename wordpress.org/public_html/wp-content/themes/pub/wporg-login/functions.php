@@ -473,18 +473,22 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 		$from = $_REQUEST['redirect_to'];
 	}
 
-	if ( false !== stripos( $from, 'buddypress.org' ) ) {
+	if ( str_contains( $from, 'buddypress.org' ) ) {
 		$message .= '<strong>' . __( 'BuddyPress is part of WordPress.org', 'wporg' ) . '</strong><br>';
 		$message .= __( 'Log in to your WordPress.org account to contribute to BuddyPress, or get help in the support forums.', 'wporg' );
 	
-	} elseif ( false !== stripos( $from, 'bbpress.org' ) ) {
+	} elseif ( str_contains( $from, 'bbpress.org' ) ) {
 		$message .= '<strong>' . __( 'bbPress is part of WordPress.org', 'wporg' ) . '</strong><br>';
 		$message .= __( 'Log in to your WordPress.org account to contribute to bbPress, or get help in the support forums.', 'wporg' );
 	
-	} elseif ( false !== stripos( $from, 'wordcamp.org' ) ) {
+	} elseif ( str_contains( $from, 'wordcamp.org' ) ) {
 		$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong><br>';
 		$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
 	
+	} elseif ( str_contains( $from, 'learn.wordpress.org' ) ) {
+		$message .= '<strong>' . __( 'Access all of Learn WordPress', 'wporg' ) . '</strong><br>';
+		$message .= __( 'Log in to your WordPress.org account to take or continue a course and track your progress.', 'wporg' );
+
 	} else {
 		$message .= __( 'Log in to your WordPress.org account to contribute to WordPress, get help in the support forum, or rate and review themes and plugins.', 'wporg' );
 	}
