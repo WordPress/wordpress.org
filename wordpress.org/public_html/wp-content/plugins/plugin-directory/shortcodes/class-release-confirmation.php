@@ -352,6 +352,11 @@ class Release_Confirmation {
 		$releases_page = home_url( '/developers/releases/' );
 		if ( $plugin ) {
 			$releases_page = get_permalink( $plugin );
+
+			// Bounce through the login form for when this is being generated outside of a logged in request.
+			if ( ! is_user_logged_in() || $user->ID !== get_current_user_id() ) {
+				$releases_page = wp_login_url( $releases_page );
+			}
 		}
 
 		// For a user with 2FA, they just need to view the page.
@@ -436,13 +441,13 @@ class Release_Confirmation {
 
 		$needs_revalidation = ! self::can_access();
 
-		echo '<p' . ( $needs_revalidation ? ' style="display:none" class="wporg-2fa-hidden"' : '' ) . '>' . __( 'This plugin has a pending release.', 'wporg-plugins' ) . '</p>';
+		echo '<p' . ( $needs_revalidation ? ' style="display:none" class="wporg-2fa-hidden"' : '' ) . '>' . __( 'This plugin has a pending release that requires confirmation.', 'wporg-plugins' ) . '</p>';
 
 		if ( $needs_revalidation ) {
 			printf(
 				'<p class="wporg-2fa-please-revalidate">%s</p>',
 				sprintf(
-					__( 'This plugin has a pending release, Please <a href="%s">revalidate your two-factor session</a> to perform actions.', 'wporg-plugins' ),
+					__( 'This plugin has a pending release that requires confirmation. Please <a href="%s">revalidate your two-factor session</a> to perform actions.', 'wporg-plugins' ),
 					get_js_revalidation_url( get_permalink() )
 				)
 			);
