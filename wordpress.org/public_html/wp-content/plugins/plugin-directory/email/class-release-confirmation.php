@@ -38,7 +38,7 @@ This notice has been sent to all plugin committers.
 			$this->user_text( $this->args['who'] ),
 			$this->args['readme']->name,
 			$this->args['version'] ?? $this->args['headers']->Version,
-			esc_url( Release_Confirmation_Shortcode::generate_access_url( $this->user ) )
+			esc_url( Release_Confirmation_Shortcode::generate_access_url( $this->user, $this->plugin ) )
 		);
 	}
 }

@@ -112,7 +112,7 @@ class Release_Confirmation {
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
-			self::single_plugin_row( $plugin );
+			self::single_plugin( $plugin );
 
 			if ( ! $plugin->release_confirmation ) {
 				$not_enabled[] = $plugin;
@@ -137,8 +137,10 @@ class Release_Confirmation {
 		return ob_get_clean();
 	}
 
-	static function single_plugin_row( $plugin, $include_header = true ) {
-		$releases = Plugin_Directory::get_releases( $plugin );
+	static function single_plugin( $plugin, $releases = false, $include_header = true ) {
+		if ( false === $releases ) {
+			$releases = Plugin_Directory::get_releases( $plugin );
+		}
 
 		if ( $include_header ) {
 			printf(
@@ -305,13 +307,13 @@ class Release_Confirmation {
 	}
 
 	static function can_access() {
-		// Plugin reviewers can always access the release management functionality.
-		if ( current_user_can( 'plugin_review' ) ) {
-			return true;
-		}
-
 		if ( ! is_user_logged_in() ) {
 			return false;
+		}
+
+		// Plugin reviewers can always access the release management functionality, in wp-admin.
+		if ( current_user_can( 'plugin_review' ) && is_admin() ) {
+			return true;
 		}
 
 		// If they have an access token...
@@ -339,12 +341,22 @@ class Release_Confirmation {
 		return false;
 	}
 
-	static function generate_access_url( $user = null ) {
+	static function generate_access_url( $user = null, $plugin = false ) {
 		if ( ! $user ) {
 			$user = wp_get_current_user();
 		}
 		if ( ! $user || ! $user->exists() ) {
 			return false;
+		}
+
+		$releases_page = home_url( '/developers/releases/' );
+		if ( $plugin ) {
+			$releases_page = get_permalink( $plugin );
+		}
+
+		// For a user with 2FA, they just need to view the page.
+		if ( Two_Factor_Core::is_user_using_two_factor( $user->ID ) ) {
+			return $releases_page;
 		}
 
 		$time      = time();
@@ -355,7 +367,7 @@ class Release_Confirmation {
 		$url = add_query_arg(
 			self::URL_PARAM,
 			urlencode( $plaintext ),
-			home_url( '/developers/releases/' )
+			$releases_page
 		);
 
 		return $url;
@@ -389,5 +401,72 @@ class Release_Confirmation {
 
 		// A page with this shortcode has no need to be indexed.
 		add_filter( 'wporg_noindex_request', '__return_true' );
+	}
+
+	/**
+	 * Displays the notice on the plugin front-end.
+	 */
+	static function frontend_notice() {
+		$plugin   = get_post();
+		$releases = Plugin_Directory::get_releases( $plugin ) ?: [];
+
+		$releases_needing_confirmation = [];
+		foreach ( $releases as $release ) {
+			if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
+				$releases_needing_confirmation[] = $release;
+			}
+		}
+
+		if ( ! $releases_needing_confirmation ) {
+			return;
+		}
+
+		// Temporary;
+		if ( ! self::can_access() && ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+			return printf(
+				'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+				sprintf(
+					__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
+					home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
+				)
+			);
+		}
+
+		echo '<div class="plugin-notice notice notice-info notice-alt">';
+
+		$needs_revalidation = ! self::can_access();
+
+		echo '<p' . ( $needs_revalidation ? ' style="display:none" class="wporg-2fa-hidden"' : '' ) . '>' . __( 'This plugin has a pending release.', 'wporg-plugins' ) . '</p>';
+
+		if ( $needs_revalidation ) {
+			printf(
+				'<p class="wporg-2fa-please-revalidate">%s</p>',
+				sprintf(
+					__( 'This plugin has a pending release, Please <a href="%s">revalidate your two-factor session</a> to perform actions.', 'wporg-plugins' ),
+					get_js_revalidation_url( get_permalink() )
+				)
+			);
+			echo '<script>
+					window.addEventListener( "reValidationComplete", function() {
+						try {
+							document.querySelector(".wporg-2fa-please-revalidate").remove();
+							document.querySelector(".wporg-2fa-hidden").style.display = "block";
+
+							document.querySelectorAll(".disabled.disabled-by-2fa").forEach( function( el ) {
+								el.classList.remove("disabled");
+								el.classList.remove("disabled-by-2fa");
+							} );
+						} catch(e) {
+							document.location.reload();
+						}
+					} );
+				</script>';
+		}
+
+		// Show the release actions.
+		self::single_plugin( $plugin, $releases_needing_confirmation, false );
+
+		echo '</div>';
+
 	}
 }

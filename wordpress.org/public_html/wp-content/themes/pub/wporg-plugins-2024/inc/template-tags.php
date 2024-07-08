@@ -13,6 +13,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation;
 
 /**
  * Returns a list of authors.
@@ -263,27 +264,7 @@ function the_unconfirmed_releases_notice() {
 		return;
 	}
 
-	$releases = Plugin_Directory::get_releases( $plugin ) ?: [];
-	$warning  = false;
-
-	foreach ( $releases as $release ) {
-		if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
-			$warning = true;
-			break;
-		}
-	}
-
-	if ( ! $warning ) {
-		return;
-	}
-
-	printf(
-		'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-		sprintf(
-			__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
-			home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
-		)
-	);
+	return Release_Confirmation::frontend_notice();
 }
 
 function the_no_self_management_notice() {
