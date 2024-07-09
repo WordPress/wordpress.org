@@ -12,7 +12,7 @@ require_once __DIR__ . '/src/learning-pathway-header/index.php';
 require_once __DIR__ . '/src/lesson-grid/index.php';
 require_once __DIR__ . '/src/search-results-context/index.php';
 require_once __DIR__ . '/src/upcoming-online-workshops/index.php';
-require_once __DIR__ . '/src/sensei-meta-list/index.php';
+require_once __DIR__ . '/src/sidebar-meta-list/index.php';
 require_once __DIR__ . '/inc/block-config.php';
 require_once __DIR__ . '/inc/block-hooks.php';
 require_once __DIR__ . '/inc/query.php';
@@ -143,8 +143,9 @@ function add_site_navigation_menus( $menus ) {
 			'url'   => '/online-workshops/',
 		),
 		array(
-			'label' => __( 'My courses', 'wporg-learn' ),
-			'url'   => get_my_courses_page_url(),
+			'label'     => __( 'My courses', 'wporg-learn' ),
+			'url'       => get_my_courses_page_url(),
+			'className' => 'has-separator',
 		),
 	);
 
