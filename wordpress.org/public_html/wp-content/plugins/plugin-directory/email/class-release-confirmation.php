@@ -32,8 +32,7 @@ Follow the link below to login and confirm the release.
 
 <%5$s>
 
-This notice has been sent to all plugin committers.
-', 'wporg-plugins' ),
+This notice has been sent to all plugin committers.', 'wporg-plugins' ),
 			$this->user_text( $this->user ),
 			$this->user_text( $this->args['who'] ),
 			$this->args['readme']->name,
