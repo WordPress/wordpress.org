@@ -71,6 +71,22 @@ function github_user_to_user_id( $user ) {
 	return $user_id ? intval( $user_id ) : false;
 }
 
+/**
+ * Save github activity to database.
+ *
+ * @param array $data
+ *
+ * @uses apply_filters() Calls 'wporg_github_added_activity'
+ */
+function save_github_activity( $data ) {
+	$wpdb->insert(
+		'wporg_github_activity',
+		$data
+	);
+
+	do_action( 'wporg_github_added_activity', $data );
+}
+
 $event   = $_SERVER['HTTP_X_GITHUB_EVENT'];
 $payload = get_signed_payload_or_die();
 
@@ -144,8 +160,7 @@ switch ( $event ) {
 		}
 
 		// Pushed commits.
-		$wpdb->insert(
-			'wporg_github_activity',
+		save_github_activity(
 			( $user_id     ? compact( 'user_id' )     : [] ) + // Leave user_id as null if not known.
 			( $github_user ? compact( 'github_user' ) : [] ) + // Leave github_user as null if not known.
 			[
@@ -195,8 +210,7 @@ switch ( $event ) {
 		// Can use Sender here, as they'll be the one to create/close the Issue.
 		$user_id = github_user_to_user_id( $payload->sender->login );
 
-		$wpdb->insert(
-			'wporg_github_activity',
+		save_github_activity(
 			( $user_id ? compact( 'user_id' ) : [] ) + // Leave user_id as null if not known.
 			[
 				'ts'          => gmdate( 'Y-m-d H:i:s' ),
@@ -243,8 +257,7 @@ switch ( $event ) {
 			$event = 'pr_merge';
 		}
 
-		$wpdb->insert(
-			'wporg_github_activity',
+		save_github_activity(
 			( $user_id ? compact( 'user_id' ) : [] ) + // Leave user_id as null if not known.
 			[
 				'ts'          => gmdate( 'Y-m-d H:i:s' ),
