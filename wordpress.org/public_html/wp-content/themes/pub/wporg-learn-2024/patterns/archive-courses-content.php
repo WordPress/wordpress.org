@@ -7,7 +7,7 @@
 
 ?>
 
-<!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained","justifyContent":"left","contentSize":"730px"}} -->
+<!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained","justifyContent":"left","contentSize":"750px"}} -->
 <div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--50)">
 
 	<!-- wp:heading {"level":1} -->
@@ -50,9 +50,7 @@
 
 	<!-- wp:query-no-results -->
 
-		<!-- wp:paragraph {"placeholder":"Add text or blocks that will display when a query returns no results."} -->
-		<p><?php esc_html_e( 'No Courses found.', 'wporg-learn' ); ?></p>
-		<!-- /wp:paragraph -->
+		<!-- wp:pattern {"slug":"wporg-learn-2024/query-no-courses"} /-->
 
 	<!-- /wp:query-no-results -->
 
