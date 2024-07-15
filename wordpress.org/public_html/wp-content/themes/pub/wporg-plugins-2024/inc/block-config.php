@@ -27,12 +27,13 @@ function add_site_navigation_menus( $menus ) {
 	$items = array(
 		'plugins' => array(
 			array(
-				'label' => __( 'My favorites', 'wporg-plugins' ),
-				'url' => '/browse/favorites/',
-			),
-			array(
 				'label' => __( 'Submit a plugin', 'wporg-plugins' ),
 				'url' => '/developers/',
+			),
+			array(
+				'label' => __( 'My favorites', 'wporg-plugins' ),
+				'url' => '/browse/favorites/',
+				'className' => 'has-separator'
 			),
 		),
 		'section-bar' => array(
