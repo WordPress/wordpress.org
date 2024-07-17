@@ -88,4 +88,8 @@ class Urls {
 	public static function event_remove_attendee( int $event_id, int $user_id ): string {
 		return gp_url( "/events/$event_id/attendees/remove/$user_id" );
 	}
+
+	public static function event_toggle_attendance_mode( int $event_id, int $user_id ): string {
+		return gp_url( "/events/attendance-mode/$event_id/$user_id" );
+	}
 }

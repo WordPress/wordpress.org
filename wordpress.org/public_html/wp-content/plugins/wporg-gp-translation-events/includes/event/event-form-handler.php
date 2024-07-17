@@ -152,6 +152,9 @@ class Event_Form_Handler {
 					if ( current_user_can( 'edit_translation_event_end', $event->id() ) ) {
 						$event->set_end( $new_event->end() );
 					}
+					if ( current_user_can( 'edit_translation_event_attendance_mode', $event->id() ) ) {
+						$event->set_attendance_mode( $new_event->attendance_mode() );
+					}
 				} catch ( Exception $e ) {
 					wp_send_json_error( esc_html__( 'Failed to update event.', 'gp-translation-events' ), 422 );
 					return;
@@ -197,10 +200,11 @@ class Event_Form_Handler {
 
 		// This will be sanitized by sanitize_post which is called in wp_insert_post.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$description    = isset( $data['event_description'] ) ? force_balance_tags( wp_unslash( $data['event_description'] ) ) : '';
-		$event_start    = isset( $data['event_start'] ) ? sanitize_text_field( wp_unslash( $data['event_start'] ) ) : '';
-		$event_end      = isset( $data['event_end'] ) ? sanitize_text_field( wp_unslash( $data['event_end'] ) ) : '';
-		$event_timezone = isset( $data['event_timezone'] ) ? sanitize_text_field( wp_unslash( $data['event_timezone'] ) ) : '';
+		$description     = isset( $data['event_description'] ) ? force_balance_tags( wp_unslash( $data['event_description'] ) ) : '';
+		$event_start     = isset( $data['event_start'] ) ? sanitize_text_field( wp_unslash( $data['event_start'] ) ) : '';
+		$event_end       = isset( $data['event_end'] ) ? sanitize_text_field( wp_unslash( $data['event_end'] ) ) : '';
+		$event_timezone  = isset( $data['event_timezone'] ) ? sanitize_text_field( wp_unslash( $data['event_timezone'] ) ) : '';
+		$attendance_mode = isset( $data['event_attendance_mode'] ) ? sanitize_text_field( wp_unslash( $data['event_attendance_mode'] ) ) : 'onsite';
 
 		$event_status = '';
 		if ( isset( $data['event_form_action'] ) && in_array( $data['event_form_action'], array( 'draft', 'publish', 'trash' ), true ) ) {
@@ -233,6 +237,7 @@ class Event_Form_Handler {
 			$event_status,
 			$title,
 			$description,
+			$attendance_mode,
 		);
 		$event->set_id( intval( $event_id ) );
 		return $event;

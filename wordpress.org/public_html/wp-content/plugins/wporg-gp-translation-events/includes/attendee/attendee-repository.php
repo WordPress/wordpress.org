@@ -15,12 +15,13 @@ class Attendee_Repository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
-				"insert ignore into {$gp_table_prefix}event_attendees (event_id, user_id, is_host, is_new_contributor) values (%d, %d, %d, %d)",
+				"insert ignore into {$gp_table_prefix}event_attendees (event_id, user_id, is_host, is_new_contributor, is_remote) values (%d, %d, %d, %d, %d)",
 				array(
 					'event_id'           => $attendee->event_id(),
 					'user_id'            => $attendee->user_id(),
 					'is_host'            => $attendee->is_host() ? 1 : 0,
 					'is_new_contributor' => $attendee->is_new_contributor() ? 1 : 0,
+					'is_remote'          => $attendee->is_remote() ? 1 : 0,
 				),
 			),
 		);
@@ -42,7 +43,10 @@ class Attendee_Repository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			"{$gp_table_prefix}event_attendees",
-			array( 'is_host' => $attendee->is_host() ? 1 : 0 ),
+			array(
+				'is_host'   => $attendee->is_host() ? 1 : 0,
+				'is_remote' => $attendee->is_remote() ? 1 : 0,
+			),
 			array(
 				'event_id' => $attendee->event_id(),
 				'user_id'  => $attendee->user_id(),
@@ -131,6 +135,7 @@ class Attendee_Repository {
 						user_id,
 						is_host,
 						is_new_contributor,
+						is_remote,
 						(
 							select group_concat( distinct locale )
 							from {$gp_table_prefix}event_actions
@@ -158,6 +163,7 @@ class Attendee_Repository {
 					'1' === $row->is_host,
 					'1' === $row->is_new_contributor,
 					null === $row->locales ? array() : explode( ',', $row->locales ),
+					'1' === $row->is_remote,
 				);
 			},
 			$rows,
@@ -183,6 +189,7 @@ class Attendee_Repository {
 					user_id,
 					is_host,
 					is_new_contributor,
+					is_remote,
 					(
 						select group_concat( distinct locale )
 						from {$gp_table_prefix}event_actions
@@ -208,6 +215,7 @@ class Attendee_Repository {
 					'1' === $row->is_host,
 					'1' === $row->is_new_contributor,
 					null === $row->locales ? array() : explode( ',', $row->locales ),
+					'1' === $row->is_remote,
 				);
 			},
 			$rows,

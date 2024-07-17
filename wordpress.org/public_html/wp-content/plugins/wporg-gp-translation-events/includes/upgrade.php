@@ -6,7 +6,7 @@ use Exception;
 use WP_Query;
 
 class Upgrade {
-	private const VERSION        = 3;
+	private const VERSION        = 4;
 	private const VERSION_OPTION = 'wporg_gp_translations_events_version';
 
 	public static function upgrade_if_needed(): void {
@@ -62,6 +62,7 @@ class Upgrade {
 				`user_id` int(10) NOT NULL COMMENT 'ID of the user who is attending the event',
 				`is_host` tinyint(1) default 0 not null comment 'Whether the user is a host of the event',
 				`is_new_contributor` tinyint(1) default 0 not null comment 'Whether the user is a new translation contributor',
+				`is_remote` tinyint(1) default 0 not null comment 'Whether the user attends the event remotely',
 			PRIMARY KEY (`translate_event_attendees_id`),
 			UNIQUE KEY `event_per_user` (`event_id`,`user_id`),
 			INDEX `user` (`user_id`)
