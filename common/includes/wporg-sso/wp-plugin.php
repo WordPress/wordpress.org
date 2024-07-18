@@ -1,4 +1,6 @@
 <?php
+use function WordPressdotorg\Two_Factor\{ user_should_2fa, user_requires_2fa };
+
 /**
  * WordPress-specific WPORG SSO: redirects all WP login and registration screens to our SSO ones.
  *
@@ -26,6 +28,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			// Primarily for logged in users.
 			'updated-tos'     => '/updated-policies',
+			'2fa'             => '/2fa',
 			'logout'          => '/logout',
 
 			// Primarily for logged out users.
@@ -93,6 +96,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 					// Updated TOS interceptor.
 					add_filter( 'send_auth_cookies', [ $this, 'maybe_block_auth_cookies' ], 100, 5 );
+
+					// Maybe nag about 2FA
+					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_enable_2fa' ], 1000, 3 );
 				}
 			}
 		}
@@ -798,6 +804,26 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					'redirect_to',
 					urlencode( $redirect ),
 					home_url( '/updated-policies' )
+				);
+			}
+
+			return $redirect;
+		}
+
+		/**
+		 * Redirects the user to a "please enable 2fa" page.
+		 */
+		public function maybe_redirect_to_enable_2fa( $redirect, $orig_redirect, $user ) {
+			if (
+				! str_contains( $redirect, '/2fa' ) &&
+				! is_wp_error( $user ) &&
+				user_should_2fa( $user ) &&
+				! Two_Factor_Core::is_user_using_two_factor( $user->ID )
+			) {
+				$redirect = add_query_arg(
+					'redirect_to',
+					urlencode( $redirect ),
+					home_url( '/2fa' )
 				);
 			}
 
