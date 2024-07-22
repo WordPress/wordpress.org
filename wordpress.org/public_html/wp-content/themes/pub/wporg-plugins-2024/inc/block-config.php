@@ -5,12 +5,15 @@
 
 namespace WordPressdotorg\Theme\Plugins_2024\Block_Config;
 
+use WordPressdotorg\Plugin_Directory\Tools;
+
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\wporg_query_filter_options_sort' );
 add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg_query_filter_options_business_model' );
 add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wporg_query_filter_options_plugin_category' );
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
+add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\filter_site_title_block' );
 add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\filter_navigation_block', 10, 2 );
@@ -33,7 +36,7 @@ function add_site_navigation_menus( $menus ) {
 			array(
 				'label' => __( 'My favorites', 'wporg-plugins' ),
 				'url' => '/browse/favorites/',
-				'className' => 'has-separator'
+				'className' => 'has-separator',
 			),
 		),
 		'section-bar' => array(
@@ -245,6 +248,36 @@ function wporg_query_total_label( $label, $count ) {
 	}
 
 	return _n( '%s plugin', '%s plugins', $count, 'wporg-plugins' );
+}
+
+/**
+ * Configure the favorite button.
+ *
+ * @param array $settings Array of settings for this filter.
+ * @param int   $post_id  The current post ID.
+ *
+ * @return array|bool Settings array.
+ */
+function get_favorite_settings( $settings, $post_id ) {
+	return array(
+		'is_favorite' => Tools::favorited_plugin( $post_id ),
+		'add_callback' => function( $_post_id ) {
+			$result = (bool) Tools::favorite_plugin( $_post_id, get_current_user_id(), true );
+			// `favorite_plugin` can return false for a number of reasons (not logged in, no plugin found, )
+			if ( ! $result ) {
+				return new \WP_Error( 'favorite-error', 'Plugin could not be favorited.' );
+			}
+			return $result;
+		},
+		'delete_callback' => function( $_post_id ) {
+			$result = (bool) Tools::favorite_plugin( $_post_id, get_current_user_id(), false );
+			// `favorite_plugin` can return false for a number of reasons (not logged in, no plugin found, )
+			if ( ! $result ) {
+				return new \WP_Error( 'unfavorite-error', 'Plugin could not be unfavorited.' );
+			}
+			return $result;
+		},
+	);
 }
 
 /**
