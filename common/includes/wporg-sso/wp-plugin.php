@@ -596,8 +596,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			// Log the user in if successful.
 			if ( $remote_token && $remote_token['valid'] && $remote_token['user'] ) {
+				// Disable stream logging of this "login".
+				add_filter( 'wp_stream_log_data', '__return_false' );
+
 				wp_set_current_user( $remote_token['user']->ID );
 				wp_set_auth_cookie( $remote_token['user']->ID, (bool) $remote_token['remember_me'], true, $remote_token['session_token'] );
+
+				remove_filter( 'wp_stream_log_data', '__return_false' );
 			}
 
 			if ( isset( $_GET['redirect_to'] ) ) {
