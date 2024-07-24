@@ -35,6 +35,9 @@ abstract class Directory_Compat {
 			// Intercept feed requests prior to bbp_request_feed_trap at 10, before Performance::bbp_request_disable_missing_view_feeds at 9
 			add_filter( 'bbp_request', array( $this, 'request' ), 5 );
 
+			// Add feed links to head.
+			add_action( 'wp_head', array( $this, 'meta_link_to_feeds' ) );
+
 			// Add plugin or theme name to view feed titles.
 			add_filter( 'wp_title_rss', array( $this, 'title_correction_for_feed' ) );
 
@@ -359,6 +362,35 @@ abstract class Directory_Compat {
 		} elseif ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) {
 			$this->term = get_term( $term['term_id'] );
 		}
+	}
+
+	/**
+	 * Outputs `link` tags in the page head for the support and reviews feeds.
+	 */
+	public function meta_link_to_feeds() {
+		if ( ! $this->slug() ) {
+			return;
+		}
+
+		echo "\n";
+
+		$title_support_feed = 'theme' === $this->compat()
+			? __( 'Theme Support Feed', 'wporg-forums' )
+			: __( 'Plugin Support Feed', 'wporg-forums' );
+		printf(
+			'<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />' . "\n",
+			esc_attr( $title_support_feed ),
+			esc_url( home_url( sprintf( '/%s/%s/feed/', $this->compat(), $this->slug() ) ) )
+		);
+
+		$title_reviews_feed = 'theme' === $this->compat()
+			? __( 'Theme Reviews Feed', 'wporg-forums' )
+			: __( 'Plugin Reviews Feed', 'wporg-forums' );
+		printf(
+			'<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />' . "\n",
+			esc_attr( $title_reviews_feed ),
+			esc_url( home_url( sprintf( '/%s/%s/reviews/feed/', $this->compat(), $this->slug() ) ) )
+		);
 	}
 
 	public function check_topic_for_compat() {
