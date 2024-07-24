@@ -2,7 +2,7 @@
 
 namespace WordPressdotorg\Theme\Learn_2024;
 
-use function WPOrg_Learn\Sensei\{get_my_courses_page_url};
+use function WPOrg_Learn\Sensei\{get_my_courses_page_url, get_lesson_has_published_course};
 
 // Block files
 require_once __DIR__ . '/src/code/index.php';
@@ -12,8 +12,9 @@ require_once __DIR__ . '/src/learning-pathway-cards/index.php';
 require_once __DIR__ . '/src/learning-pathway-header/index.php';
 require_once __DIR__ . '/src/lesson-grid/index.php';
 require_once __DIR__ . '/src/search-results-context/index.php';
-require_once __DIR__ . '/src/upcoming-online-workshops/index.php';
+require_once __DIR__ . '/src/sensei-progress-bar/index.php';
 require_once __DIR__ . '/src/sidebar-meta-list/index.php';
+require_once __DIR__ . '/src/upcoming-online-workshops/index.php';
 require_once __DIR__ . '/inc/block-config.php';
 require_once __DIR__ . '/inc/block-hooks.php';
 require_once __DIR__ . '/inc/query.php';
@@ -202,28 +203,34 @@ function get_learning_pathway_level_content( $learning_pathway ) {
 			'beginner' => array(
 				'title' => __( 'Beginner WordPress users', 'wporg-learn' ),
 				'description' => __( 'You’re new to WordPress, or building websites, and want the essentials.', 'wporg-learn' ),
+				'see_all_aria_label' => 'Beginner WordPress users: See all learning pathways',
 			),
 			'intermediate' => array(
 				'title' => __( 'Intermediate WordPress users', 'wporg-learn' ),
 				'description' => __( 'You’re comfortable setting up your site and making small changes or you’ve already completed the Beginner course.', 'wporg-learn' ),
+				'see_all_aria_label' => 'Intermediate WordPress users: See all learning pathways',
 			),
 			'advanced' => array(
 				'title' => __( 'Advanced WordPress users', 'wporg-learn' ),
 				'description' => __( 'You’re confident using multiple plugins and know how to customize a Block theme, or you’ve already completed the Intermediate course.', 'wporg-learn' ),
+				'see_all_aria_label' => 'Advanced WordPress users: See all learning pathways',
 			),
 		),
 		'developer' => array(
 			'beginner' => array(
 				'title' => __( 'Beginner development concepts', 'wporg-learn' ),
 				'description' => __( 'You’re new to development or have experience using WordPress’s no-code features and want to do more.', 'wporg-learn' ),
+				'see_all_aria_label' => 'Beginner development concepts: See all learning pathways',
 			),
 			'intermediate' => array(
 				'title' => __( 'Intermediate development concepts', 'wporg-learn' ),
 				'description' => __( 'You’re comfortable writing code and want to extend WordPress with your own plugin or theme.', 'wporg-learn' ),
+				'see_all_aria_label' => 'Intermediate development concepts: See all learning pathways',
 			),
 			'advanced' => array(
 				'title' => __( 'Advanced development concepts', 'wporg-learn' ),
 				'description' => __( 'You’re confident in the WordPress development environment or have already built your own plugin or theme.', 'wporg-learn' ),
+				'see_all_aria_label' => 'Advanced development concepts: See all learning pathways',
 			),
 		),
 	);
@@ -244,6 +251,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 		$breadcrumbs[0]['title'] = 'Home';
 	}
 
+	$post_id = get_the_ID();
 	$post_type = get_post_type();
 
 	if ( is_singular() && 'page' !== $post_type && 'post' !== $post_type ) {
@@ -262,9 +270,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 		// If it's a lesson single page, change the second breadcrumb to the course archive
 		// and insert the lesson course breadcrumb into the third position.
 		if ( is_singular( 'lesson' ) ) {
-			$lesson_course_id = get_post_meta( get_the_ID(), '_lesson_course', true );
-
-			if ( empty( $lesson_course_id ) ) {
+			if ( ! get_lesson_has_published_course( $post_id ) ) {
 				return $breadcrumbs;
 			}
 
@@ -277,6 +283,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 				'title' => $archive_title,
 			);
 
+			$lesson_course_id = get_post_meta( $post_id, '_lesson_course', true );
 			$lesson_course_title = get_the_title( $lesson_course_id );
 			$lesson_course_link = get_permalink( $lesson_course_id );
 			$lesson_course_breadcrumb = array(
@@ -289,7 +296,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 		}
 	} else {
 		// Add the ancestors of the current page to the breadcrumbs.
-		$ancestors = get_post_ancestors( get_the_ID() );
+		$ancestors = get_post_ancestors( $post_id );
 
 		if ( ! empty( $ancestors ) ) {
 			foreach ( $ancestors as $ancestor ) {
@@ -326,7 +333,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
  */
 function set_default_featured_image( $html, $post_id, $post_thumbnail_id, $size, $attr ) {
 	if ( ! $html ) {
-		return '<img src="https://s.w.org/images/learn-thumbnail-fallback.jpg?v=4" alt="" />';
+		return '<img src="https://s.w.org/images/learn-thumbnail-fallback.jpg?v=4" alt="' . esc_attr( get_the_title( $post_id ) ) . '" />';
 	}
 
 	return $html;
