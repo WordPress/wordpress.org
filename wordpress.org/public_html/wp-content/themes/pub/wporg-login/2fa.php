@@ -19,19 +19,27 @@ get_header();
 
 <p>&nbsp;</p>
 
-<p><?php _e( 'WordPress.org now requires that your account be protected by Two-Factor Authentication.', 'wporg' ); ?></p>
+<?php
+if ( $requires_2fa ) {
+	echo '<p>' . __( 'WordPress.org now requires that your account be protected by Two-Factor Authentication.', 'wporg' ) . '</p>';
+} else {
+	echo '<p>' . __( "WordPress.org supports Two-Factor Authentication and you'll soon be required to set it up on your account.", 'wporg' ) . '</p>';
+}
 
 <p>&nbsp;</p>
 
-<p><?php _e( 'Users who are Plugin or Theme Authors, or who have elevated access to any of our Sites &amp; Tools are required to setup Two-Factor Authentication.', 'wporg' ); ?></p>
+<p><?php printf( __( 'For more information on Two-Factor Authentication, <a href="%s">please read our documentation</a>.', 'wporg' ), 'https://developer.wordpress.org/advanced-administration/security/mfa/' ); ?></p>
 
 <p>&nbsp;</p>
+
 
 <a href="<?php echo esc_url( get_edit_account_url() ); ?>"><button class="button-primary"><?php _e( "OK, I'll setup 2FA now.", 'wporg' ); ?></button></a>
 
-<p class="center">
-	<a href="<?php echo esc_url( $redirect_to ); ?>" style="font-style: italic;"><?php _e( "I'll do it later", 'wporg' ); ?></a>
-</p>
+<?php if ( ! $requires_2fa ) { ?>
+	<p class="center">
+		<a href="<?php echo esc_url( $redirect_to ); ?>" style="font-style: italic;"><?php _e( "I'll do it later", 'wporg' ); ?></a>
+	</p>
+<?php } ?>
 
 <p id="nav">
 	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
