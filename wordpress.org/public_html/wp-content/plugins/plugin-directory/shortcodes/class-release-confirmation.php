@@ -90,7 +90,7 @@ class Release_Confirmation {
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
-			self::single_plugin_row( $plugin );
+			self::single_plugin( $plugin );
 
 			if ( ! $plugin->release_confirmation ) {
 				$not_enabled[] = $plugin;
@@ -115,7 +115,7 @@ class Release_Confirmation {
 		return ob_get_clean();
 	}
 
-	static function single_plugin_row( $plugin, $include_header = true ) {
+	static function single_plugin( $plugin, $include_header = true ) {
 		$releases = Plugin_Directory::get_releases( $plugin );
 
 		if ( $include_header ) {
