@@ -17,7 +17,6 @@ echo do_blocks( <<<BLOCKS
 			<!-- /wp:query -->
 		</div>
 		<!-- /wp:group -->
-		{$filter_blocks}
 	</div>
 	<!-- /wp:group -->
 	BLOCKS
