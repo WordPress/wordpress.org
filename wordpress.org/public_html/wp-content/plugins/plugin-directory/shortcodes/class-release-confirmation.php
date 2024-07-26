@@ -112,6 +112,12 @@ class Release_Confirmation {
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
+			printf(
+				'<h2><a href="%s">%s</a></h2>',
+				get_permalink( $plugin ),
+				get_the_title( $plugin )
+			);
+
 			self::single_plugin( $plugin );
 
 			if ( ! $plugin->release_confirmation ) {
@@ -137,17 +143,9 @@ class Release_Confirmation {
 		return ob_get_clean();
 	}
 
-	static function single_plugin( $plugin, $releases = false, $include_header = true ) {
+	static function single_plugin( $plugin, $releases = false ) {
 		if ( false === $releases ) {
 			$releases = Plugin_Directory::get_releases( $plugin );
-		}
-
-		if ( $include_header ) {
-			printf(
-				'<h2><a href="%s">%s</a></h2>',
-				get_permalink( $plugin ),
-				get_the_title( $plugin )
-			);
 		}
 
 		echo '<table class="widefat plugin-releases-listing">
@@ -469,7 +467,7 @@ class Release_Confirmation {
 		}
 
 		// Show the release actions.
-		self::single_plugin( $plugin, $releases_needing_confirmation, false );
+		self::single_plugin( $plugin, $releases_needing_confirmation );
 
 		echo '</div>';
 
