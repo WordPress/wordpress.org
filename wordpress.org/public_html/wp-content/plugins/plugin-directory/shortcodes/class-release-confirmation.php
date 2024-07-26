@@ -412,9 +412,9 @@ class Release_Confirmation {
 	 * @param WP_Post $post The currently displayed post.
 	 * @return void
 	 */
-	static function frontend_unconfirmed_releases_notice( $plugin ) {
-		$plugin   = get_post( $plugin);
-		$releases = Plugin_Directory::get_releases( $plugin ) ?: [];
+	static function frontend_unconfirmed_releases_notice( $post = null ) {
+		$post     = get_post( $post );
+		$releases = Plugin_Directory::get_releases( $post ) ?: [];
 
 		$releases_needing_confirmation = [];
 		foreach ( $releases as $release ) {
