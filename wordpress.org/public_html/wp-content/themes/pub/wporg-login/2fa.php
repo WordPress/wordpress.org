@@ -28,7 +28,7 @@ if ( $requires_2fa ) {
 
 <p>&nbsp;</p>
 
-<p><?php printf( __( 'For more information on Two-Factor Authentication, <a href="%s">please read our documentation</a>.', 'wporg' ), 'https://developer.wordpress.org/advanced-administration/security/mfa/' ); ?></p>
+<p><?php printf( __( 'For more information on Two-Factor Authentication, <a href="%s">please read our documentation</a>.', 'wporg' ), 'https://make.wordpress.org/meta/handbook/tutorials-guides/configuring-two-factor-authentication/' ); ?></p>
 
 <p>&nbsp;</p>
 
