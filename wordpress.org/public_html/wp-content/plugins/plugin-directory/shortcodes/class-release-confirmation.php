@@ -284,14 +284,14 @@ class Release_Confirmation {
 				}
 
 				$buttons[] = sprintf(
-					'<button type="submit" formaction="%s" class="approve-release wp-element-button button %s" %s>%s</button>',
+					'<a href="%s"><button class="approve-release wp-element-button button %s" %s>%s</button></a>',
 					$can_manage ? Template::get_release_confirmation_link( $data['tag'], $plugin ) : '',
 					esc_attr( $disabled_class ),
 					esc_attr( $disabled_attr ),
 					__( 'Confirm', 'wporg-plugins' )
 				);
 				$buttons[] = sprintf(
-					'<button type="submit" formaction="%s" class="approve-release wp-element-button button %s" %s>%s</button>',
+					'<a href="%"><button class="approve-release wp-element-button button %s" %s>%s</button></a>',
 					$can_manage ? Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' ) : '',
 					esc_attr( $disabled_class ),
 					esc_attr( $disabled_attr ),
@@ -301,7 +301,7 @@ class Release_Confirmation {
 			}
 		}
 
-		return ! $buttons ? '' : '<form>' . implode( ' ', $buttons ) . '</form>';
+		return implode( ' ', $buttons );
 	}
 
 	static function can_access() {
