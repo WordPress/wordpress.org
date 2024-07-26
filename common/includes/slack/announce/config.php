@@ -281,6 +281,7 @@ function get_whitelist() {
 			'hellofromTonya', // @hellofromtonya on Slack
 			'ironprogrammer',
 			'justinahinon',
+			'mobarak',
 			'monikarao',
 			'ryan', // @boren on Slack
 			'webtechpooja', // @Pooja Derashri on Slack

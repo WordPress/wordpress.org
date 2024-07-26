@@ -12,18 +12,19 @@ use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Stats\Stats_Calculator;
 
 class Event_Capabilities {
-	private const MANAGE           = 'manage_translation_events';
-	private const CREATE           = 'create_translation_event';
-	private const VIEW             = 'view_translation_event';
-	private const EDIT             = 'edit_translation_event';
-	private const TRASH            = 'trash_translation_event';
-	private const DELETE           = 'delete_translation_event';
-	private const EDIT_ATTENDEES   = 'edit_translation_event_attendees';
-	private const EDIT_TITLE       = 'edit_translation_event_title';
-	private const EDIT_DESCRIPTION = 'edit_translation_event_description';
-	private const EDIT_START       = 'edit_translation_event_start';
-	private const EDIT_END         = 'edit_translation_event_end';
-	private const EDIT_TIMEZONE    = 'edit_translation_event_timezone';
+	private const MANAGE               = 'manage_translation_events';
+	private const CREATE               = 'create_translation_event';
+	private const VIEW                 = 'view_translation_event';
+	private const EDIT                 = 'edit_translation_event';
+	private const TRASH                = 'trash_translation_event';
+	private const DELETE               = 'delete_translation_event';
+	private const EDIT_ATTENDEES       = 'edit_translation_event_attendees';
+	private const EDIT_TITLE           = 'edit_translation_event_title';
+	private const EDIT_DESCRIPTION     = 'edit_translation_event_description';
+	private const EDIT_START           = 'edit_translation_event_start';
+	private const EDIT_END             = 'edit_translation_event_end';
+	private const EDIT_TIMEZONE        = 'edit_translation_event_timezone';
+	private const EDIT_ATTENDANCE_MODE = 'edit_translation_event_attendance_mode';
 
 	/**
 	 * All the capabilities that concern Events.
@@ -41,6 +42,7 @@ class Event_Capabilities {
 		self::EDIT_START,
 		self::EDIT_END,
 		self::EDIT_TIMEZONE,
+		self::EDIT_ATTENDANCE_MODE,
 	);
 
 	private DateTimeImmutable $now;
@@ -84,6 +86,7 @@ class Event_Capabilities {
 			case self::EDIT_START:
 			case self::EDIT_END:
 			case self::EDIT_TIMEZONE:
+			case self::EDIT_ATTENDANCE_MODE:
 				if ( ! isset( $args[2] ) || ! is_numeric( $args[2] ) ) {
 					return false;
 				}
@@ -107,7 +110,7 @@ class Event_Capabilities {
 				if ( self::EDIT_ATTENDEES === $cap ) {
 					return $this->has_edit_attendees( $user, $event );
 				}
-				if ( self::EDIT_TITLE === $cap || self::EDIT_DESCRIPTION === $cap || self::EDIT_START === $cap || self::EDIT_END === $cap || self::EDIT_TIMEZONE === $cap ) {
+				if ( self::EDIT_TITLE === $cap || self::EDIT_DESCRIPTION === $cap || self::EDIT_START === $cap || self::EDIT_END === $cap || self::EDIT_TIMEZONE === $cap || self::EDIT_ATTENDANCE_MODE === $cap ) {
 					return $this->has_edit_field( $user, $event, $cap );
 				}
 				break;

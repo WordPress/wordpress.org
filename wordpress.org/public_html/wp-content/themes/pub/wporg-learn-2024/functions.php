@@ -2,20 +2,24 @@
 
 namespace WordPressdotorg\Theme\Learn_2024;
 
-use function WPOrg_Learn\Sensei\{get_my_courses_page_url};
+use function WPOrg_Learn\Sensei\{get_my_courses_page_url, get_lesson_has_published_course};
 
 // Block files
+require_once __DIR__ . '/src/card-featured-image-a11y/index.php';
+require_once __DIR__ . '/src/code/index.php';
 require_once __DIR__ . '/src/course-grid/index.php';
 require_once __DIR__ . '/src/course-outline/index.php';
 require_once __DIR__ . '/src/learning-pathway-cards/index.php';
 require_once __DIR__ . '/src/learning-pathway-header/index.php';
 require_once __DIR__ . '/src/lesson-grid/index.php';
 require_once __DIR__ . '/src/search-results-context/index.php';
+require_once __DIR__ . '/src/sensei-progress-bar/index.php';
+require_once __DIR__ . '/src/sidebar-meta-list/index.php';
 require_once __DIR__ . '/src/upcoming-online-workshops/index.php';
-require_once __DIR__ . '/src/sensei-meta-list/index.php';
 require_once __DIR__ . '/inc/block-config.php';
 require_once __DIR__ . '/inc/block-hooks.php';
 require_once __DIR__ . '/inc/query.php';
+require_once __DIR__ . '/inc/head.php';
 
 /**
  * Actions and filters.
@@ -36,6 +40,7 @@ add_filter( 'sensei_register_post_type_lesson', function( $args ) {
 add_filter( 'single_template_hierarchy', __NAMESPACE__ . '\modify_single_template' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\set_site_breadcrumbs' );
+add_filter( 'taxonomy_template_hierarchy', __NAMESPACE__ . '\modify_taxonomy_template_hierarchy' );
 
 remove_filter( 'template_include', array( 'Sensei_Templates', 'template_loader' ), 10, 1 );
 
@@ -78,12 +83,21 @@ function enqueue_assets() {
 	// The parent style is registered as `wporg-parent-2021-style`, and will be loaded unless
 	// explicitly unregistered. We can load any child-theme overrides by declaring the parent
 	// stylesheet as a dependency.
+	$style_path = get_stylesheet_directory() . '/build/style/style-index.css';
+	$style_uri = get_stylesheet_directory_uri() . '/build/style/style-index.css';
 	wp_enqueue_style(
 		'wporg-learn-2024-style',
-		get_stylesheet_directory_uri() . '/build/style/style-index.css',
+		$style_uri,
 		array( 'wporg-parent-2021-style', 'wporg-global-fonts' ),
-		filemtime( get_stylesheet_directory() . '/build/style/style-index.css' )
+		filemtime( $style_path )
 	);
+	wp_style_add_data( 'wporg-learn-2024-style', 'path', $style_path );
+
+	$rtl_file = str_replace( '.css', '-rtl.css', $style_path );
+	if ( is_rtl() && file_exists( $rtl_file ) ) {
+		wp_style_add_data( 'wporg-learn-2024-style', 'rtl', 'replace' );
+		wp_style_add_data( 'wporg-learn-2024-style', 'path', $rtl_file );
+	}
 
 	// Preload the heading font(s).
 	if ( is_callable( 'global_fonts_preload' ) ) {
@@ -143,8 +157,9 @@ function add_site_navigation_menus( $menus ) {
 			'url'   => '/online-workshops/',
 		),
 		array(
-			'label' => __( 'My courses', 'wporg-learn' ),
-			'url'   => get_my_courses_page_url(),
+			'label'     => __( 'My courses', 'wporg-learn' ),
+			'url'       => get_my_courses_page_url(),
+			'className' => 'has-separator',
 		),
 	);
 
@@ -190,28 +205,34 @@ function get_learning_pathway_level_content( $learning_pathway ) {
 			'beginner' => array(
 				'title' => __( 'Beginner WordPress users', 'wporg-learn' ),
 				'description' => __( 'You’re new to WordPress, or building websites, and want the essentials.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all beginner WordPress user learning pathways',
 			),
 			'intermediate' => array(
 				'title' => __( 'Intermediate WordPress users', 'wporg-learn' ),
 				'description' => __( 'You’re comfortable setting up your site and making small changes or you’ve already completed the Beginner course.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all intermediate WordPress user learning pathways',
 			),
 			'advanced' => array(
 				'title' => __( 'Advanced WordPress users', 'wporg-learn' ),
 				'description' => __( 'You’re confident using multiple plugins and know how to customize a Block theme, or you’ve already completed the Intermediate course.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all advanced WordPress user learning pathways',
 			),
 		),
 		'developer' => array(
 			'beginner' => array(
 				'title' => __( 'Beginner development concepts', 'wporg-learn' ),
 				'description' => __( 'You’re new to development or have experience using WordPress’s no-code features and want to do more.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all beginner development concepts learning pathways',
 			),
 			'intermediate' => array(
 				'title' => __( 'Intermediate development concepts', 'wporg-learn' ),
 				'description' => __( 'You’re comfortable writing code and want to extend WordPress with your own plugin or theme.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all intermediate development concepts learning pathways',
 			),
 			'advanced' => array(
 				'title' => __( 'Advanced development concepts', 'wporg-learn' ),
 				'description' => __( 'You’re confident in the WordPress development environment or have already built your own plugin or theme.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all advanced development concepts learning pathways',
 			),
 		),
 	);
@@ -232,6 +253,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 		$breadcrumbs[0]['title'] = 'Home';
 	}
 
+	$post_id = get_the_ID();
 	$post_type = get_post_type();
 
 	if ( is_singular() && 'page' !== $post_type && 'post' !== $post_type ) {
@@ -250,9 +272,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 		// If it's a lesson single page, change the second breadcrumb to the course archive
 		// and insert the lesson course breadcrumb into the third position.
 		if ( is_singular( 'lesson' ) ) {
-			$lesson_course_id = get_post_meta( get_the_ID(), '_lesson_course', true );
-
-			if ( empty( $lesson_course_id ) ) {
+			if ( ! get_lesson_has_published_course( $post_id ) ) {
 				return $breadcrumbs;
 			}
 
@@ -265,6 +285,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 				'title' => $archive_title,
 			);
 
+			$lesson_course_id = get_post_meta( $post_id, '_lesson_course', true );
 			$lesson_course_title = get_the_title( $lesson_course_id );
 			$lesson_course_link = get_permalink( $lesson_course_id );
 			$lesson_course_breadcrumb = array(
@@ -277,7 +298,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 		}
 	} else {
 		// Add the ancestors of the current page to the breadcrumbs.
-		$ancestors = get_post_ancestors( get_the_ID() );
+		$ancestors = get_post_ancestors( $post_id );
 
 		if ( ! empty( $ancestors ) ) {
 			foreach ( $ancestors as $ancestor ) {
@@ -314,8 +335,73 @@ function set_site_breadcrumbs( $breadcrumbs ) {
  */
 function set_default_featured_image( $html, $post_id, $post_thumbnail_id, $size, $attr ) {
 	if ( ! $html ) {
-		return '<img src="https://s.w.org/images/learn-thumbnail-fallback.jpg?v=4" alt="" />';
+		return '<img src="https://s.w.org/images/learn-thumbnail-fallback.jpg?v=4" alt="' . esc_attr( get_the_title( $post_id ) ) . '" />';
 	}
 
 	return $html;
+}
+
+/**
+ * Count the number of courses for a given learning pathway and level.
+ *
+ * @param int $learning_pathway_id The ID of the learning pathway.
+ * @param int $level_id The ID of the level.
+ * @return int The number of courses.
+ */
+function count_courses( $learning_pathway_id, $level_id ) {
+	if ( ! $learning_pathway_id || ! $level_id ) {
+		return 0;
+	}
+
+	$args = array(
+		'post_type' => 'course',
+		'post_status' => 'publish',
+		'fields' => 'ids',
+		'tax_query' => array(
+			'relation' => 'AND',
+			array(
+				'taxonomy' => 'learning-pathway',
+				'field'    => 'term_id',
+				'terms'    => $learning_pathway_id,
+			),
+			array(
+				'taxonomy' => 'level',
+				'field'    => 'term_id',
+				'terms'    => $level_id,
+			),
+		),
+	);
+
+	$query = new \WP_Query( $args );
+	return $query->found_posts;
+}
+
+/**
+ * Modify the taxonomy template hierarchy
+ * Only use the the custom Learning Pathway template with level sections if there are enough learning pathways to fill the sections.
+ * Minimum 3 learning pathways in one of the sections, and minimum 2 learning pathways in all sections.
+ *
+ * @param array $templates Array of template files.
+ * @return array $templates Modified array of template files.
+ */
+function modify_taxonomy_template_hierarchy( $templates ) {
+	if ( is_tax( 'learning-pathway' ) ) {
+		$learning_pathway_id = get_queried_object_id();
+
+		$beginner_course_count = count_courses( $learning_pathway_id, get_term_by( 'slug', 'beginner', 'level' )->term_id );
+		$intermediate_course_count = count_courses( $learning_pathway_id, get_term_by( 'slug', 'intermediate', 'level' )->term_id );
+		$advanced_course_count = count_courses( $learning_pathway_id, get_term_by( 'slug', 'advanced', 'level' )->term_id );
+
+		$all_sections_have_2 = $beginner_course_count >= 2 && $intermediate_course_count >= 2 && $advanced_course_count >= 2;
+		$a_section_has_3 = $beginner_course_count >= 3 || $intermediate_course_count >= 3 || $advanced_course_count >= 3;
+
+		$should_use_learning_pathway_sections = $all_sections_have_2 && $a_section_has_3;
+
+		if ( ! $should_use_learning_pathway_sections ) {
+			// Leave only the last template, which is the base taxonomy template.
+			$templates = array( array_pop( $templates ) );
+		}
+	}
+
+	return $templates;
 }

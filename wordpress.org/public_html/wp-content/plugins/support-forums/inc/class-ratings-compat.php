@@ -104,6 +104,11 @@ class Ratings_Compat {
 			return $clauses;
 		}
 
+		// Don't adjust if it's looking for a specific users review, such as, `::review_exists()`
+		if ( $query->get( 'author' ) ) {
+			return $clauses;	
+		}
+
 		$clauses['join']  .= " INNER JOIN ratings ON ( $wpdb->posts.ID = ratings.post_id )";
 		$clauses['where'] .= $wpdb->prepare( " AND ratings.rating = %d", $this->filter );
 

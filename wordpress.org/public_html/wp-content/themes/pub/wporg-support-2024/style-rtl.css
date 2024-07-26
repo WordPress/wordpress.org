@@ -2395,10 +2395,6 @@ body.single .sidebar {
 .page .entry-content section:first-of-type {
 	padding-top: 0;
 }
-.helphub-page .entry-content section + section,
-.page .entry-content section + section {
-	border-top: 2px solid var(--wp--preset--color--light-grey-1);
-}
 .helphub-page .entry-content h2.toc-heading,
 .page .entry-content h2.toc-heading {
 	font-size: var(--wp--preset--font-size--heading-4);

@@ -435,10 +435,6 @@ body:not(.trac):not(.home-page) #main {
 			&:first-of-type {
 				padding-top: 0;
 			}
-
-			& + section {
-				border-top: 2px solid var(--wp--preset--color--light-grey-1);
-			}
 		}
 
 		h2.toc-heading {

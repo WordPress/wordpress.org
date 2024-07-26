@@ -7,7 +7,7 @@
 
 ?>
 
-<!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|20"}}},"layout":{"type":"constrained","justifyContent":"left","contentSize":"730px"}} -->
+<!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|20"}}},"layout":{"type":"constrained","justifyContent":"left","contentSize":"750px"}} -->
 <div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--20)">
 
 	<!-- wp:heading {"level":1} -->
@@ -46,7 +46,7 @@
 
 				<!-- wp:post-excerpt {"showMoreOnNewLine":false,"excerptLength":16,"style":{"typography":{"lineHeight":1.6},"layout":{"selfStretch":"fill","flexSize":null}}} /-->
 
-				<!-- wp:sensei-lms/course-progress {"customBarColor":"var(--wp--custom--color--green-50)","height":8,"className":"wporg-learn-sidebar-course-progress"} /-->
+				<!-- wp:sensei-lms/course-progress {"customBarColor":"var(--wp--custom--color--green-50)","height":8} /-->
 
 				<!-- wp:spacer {"height":"0px","style":{"layout":{"selfStretch":"fixed","flexSize":"0px"}}} -->
 				<div style="height:0px" aria-hidden="true" class="wp-block-spacer"></div>
@@ -54,16 +54,22 @@
 
 				<!-- wp:sensei-lms/course-actions -->
 
-					<!-- wp:sensei-lms/button-take-course {"align":"left"} -->
-					<div class="wp-block-sensei-lms-button-take-course is-style-default wp-block-sensei-button wp-block-button has-text-align-left"><button class="wp-block-button__link"><?php esc_html_e( 'Start Course', 'wporg-learn' ); ?></button></div>
+					<!-- wp:sensei-lms/button-take-course -->
+					<div class="wp-block-sensei-lms-button-take-course is-style-default is-small wp-block-sensei-button wp-block-button">
+						<button class="wp-block-button__link"><?php esc_html_e( 'Take this course', 'wporg-learn' ); ?></button>
+					</div>
 					<!-- /wp:sensei-lms/button-take-course -->
 
-					<!-- wp:sensei-lms/button-continue-course {"align":"left"} -->
-					<div class="wp-block-sensei-lms-button-continue-course is-style-default wp-block-sensei-button wp-block-button has-text-align-left"><a class="wp-block-button__link"><?php esc_html_e( 'Continue', 'wporg-learn' ); ?></a></div>
+					<!-- wp:sensei-lms/button-continue-course -->
+					<div class="wp-block-sensei-lms-button-continue-course is-style-default is-small wp-block-sensei-button wp-block-button">
+						<a class="wp-block-button__link"><?php esc_html_e( 'Continue', 'wporg-learn' ); ?></a>
+					</div>
 					<!-- /wp:sensei-lms/button-continue-course -->
 
-					<!-- wp:sensei-lms/button-view-results {"align":"left","className":"is-style-default"} -->
-					<div class="wp-block-sensei-lms-button-view-results is-style-default wp-block-sensei-button wp-block-button has-text-align-left"><a class="wp-block-button__link"><?php esc_html_e( 'View Results', 'wporg-learn' ); ?></a></div>
+					<!-- wp:sensei-lms/button-view-results -->
+					<div class="wp-block-sensei-lms-button-view-results is-style-default is-small wp-block-sensei-button wp-block-button">
+						<a class="wp-block-button__link"><?php esc_html_e( 'View results', 'wporg-learn' ); ?></a>
+					</div>
 					<!-- /wp:sensei-lms/button-view-results -->
 					
 				<!-- /wp:sensei-lms/course-actions -->
@@ -78,9 +84,7 @@
 
 	<!-- wp:query-no-results -->
 
-		<!-- wp:paragraph {"placeholder":"Add text or blocks that will display when a query returns no results."} -->
-		<p><?php esc_html_e( 'No courses found.', 'wporg-learn' ); ?></p>
-		<!-- /wp:paragraph -->
+		<!-- wp:pattern {"slug":"wporg-learn-2024/query-no-courses"} /-->
 
 	<!-- /wp:query-no-results -->
 

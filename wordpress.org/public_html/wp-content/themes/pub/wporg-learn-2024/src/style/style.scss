@@ -5,7 +5,6 @@
 
 @import "card-grid";
 @import "jetpack";
-@import "local-nav";
 @import "sensei";
 @import "sidebar";
 @import "search";
@@ -13,10 +12,22 @@
 @import "taxonomy";
 @import "wp-components";
 @import "wporg-meeting-calendar";
+@import "rtl";
 
 body {
 	--wp-components-color-accent: var(--wp--preset--color--blueberry-1);
 	--wp-components-color-accent-darker-10: var(--wp--preset--color--deep-blueberry);
+}
+
+// Parent theme sets top margin on these headings, but this breaks
+// vertical alignment with the sidebar on the courses page
+.wp-block-post-content {
+	> h2,
+	> h3 {
+		&:first-child {
+			margin-top: unset;
+		}
+	}
 }
 
 // Ensure nested elements in containers with rounded corners are cropped to match

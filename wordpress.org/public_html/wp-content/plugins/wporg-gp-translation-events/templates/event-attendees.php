@@ -31,6 +31,7 @@ Templates::header(
 		<thead>
 			<tr>
 				<th scope="col"><?php esc_html_e( 'Name', 'gp-translation-events' ); ?></th>
+				<th><?php esc_html_e( 'Remote', 'gp-translation-events' ); ?></th>
 				<th><?php esc_html_e( 'Host', 'gp-translation-events' ); ?></th>
 				<th><?php esc_html_e( 'Action', 'gp-translation-events' ); ?></th>
 			</tr>
@@ -41,6 +42,14 @@ Templates::header(
 					<td>
 						<a class="attendee-avatar" href="<?php echo esc_url( get_author_posts_url( $attendee->user_id() ) ); ?>" class="avatar"><?php echo get_avatar( $attendee->user_id(), 48 ); ?></a>
 						<a href="<?php echo esc_url( get_author_posts_url( $attendee->user_id() ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $attendee->user_id() ) ); ?></a>
+						<?php if ( $attendee->is_new_contributor() ) : ?>
+							<span class="first-time-contributor-tada" title="<?php esc_attr_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
+						<?php endif; ?>
+					</td>
+					<td>
+						<?php if ( $attendee->is_remote() ) : ?>
+							<span><?php esc_html_e( 'Yes', 'gp-translation-events' ); ?></span>
+							<?php endif; ?>
 					</td>
 					<td>
 						<?php if ( $attendee->is_host() ) : ?>
@@ -53,6 +62,9 @@ Templates::header(
 							<input type="submit" class="button is-primary remove-as-host" value="<?php echo esc_attr__( 'Remove as host', 'gp-translation-events' ); ?>"/>
 							<?php else : ?>
 									<input type="submit" class="button is-secondary convert-to-host" value="<?php echo esc_attr__( 'Make co-host', 'gp-translation-events' ); ?>"/>
+							<?php endif; ?>
+							<?php if ( $event->is_hybrid() ) : ?>
+								<a href="<?php echo esc_url( Urls::event_toggle_attendance_mode( $event->id(), $attendee->user_id() ) ); ?>" class="button set-attendance-mode"><?php $attendee->is_remote() ? esc_html_e( 'Set as on-site', 'gp-translation-events' ) : esc_html_e( 'Set as remote', 'gp-translation-events' ); ?></a>
 							<?php endif; ?>
 							<?php if ( ! $attendee->is_host() ) : ?>
 								<a href="<?php echo esc_url( Urls::event_remove_attendee( $event->id(), $attendee->user_id() ) ); ?>" class="button remove-attendee"><?php esc_html_e( 'Remove', 'gp-translation-events' ); ?></a>

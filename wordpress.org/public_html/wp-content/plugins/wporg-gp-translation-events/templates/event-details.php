@@ -101,7 +101,7 @@ Templates::header(
 							<a href="<?php echo esc_url( get_author_posts_url( $contributor->user_id() ) ); ?>" class="avatar"><?php echo get_avatar( $contributor->user_id(), 48 ); ?></a>
 							<a href="<?php echo esc_url( get_author_posts_url( $contributor->user_id() ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $contributor->user_id() ) ); ?></a>
 							<?php if ( $contributor->is_new_contributor() ) : ?>
-								<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
+								<span class="first-time-contributor-tada" title="<?php esc_attr_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
 							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
@@ -284,10 +284,21 @@ Templates::header(
 				<?php // Contributors can't un-attend so don't show anything. ?>
 			<?php else : ?>
 				<form class="event-details-attend" method="post" action="<?php echo esc_url( Urls::event_toggle_attendee( $event->id() ) ); ?>">
+					<?php wp_nonce_field( '_attendee_nonce', '_attendee_nonce' ); ?>
 					<?php if ( $user_is_attending ) : ?>
 						<input type="submit" class="button is-secondary attending-btn" value="<?php esc_attr_e( "You're attending", 'gp-translation-events' ); ?>" />
 					<?php else : ?>
-						<input type="submit" class="button is-primary attend-btn" value="<?php esc_attr_e( 'Attend Event', 'gp-translation-events' ); ?>"/>
+						<?php if ( ! $event->is_remote() ) : ?>
+							<input type="submit" class="button is-primary attend-btn" value="<?php esc_attr_e( 'Attend Event On-site', 'gp-translation-events' ); ?>"/>
+							<?php if ( ! $event->is_hybrid() ) : ?>
+								<p class="onsite-btn-note">
+									<?php echo wp_kses_post( __( '<strong>Note:</strong> This is an onsite-only event. Please only click attend if you are at the event. The host might otherwise remove you.', 'gp-translation-events' ) ); ?>
+								</p>	
+							<?php endif; ?>
+						<?php endif; ?>
+						<?php if ( $event->is_remote() || $event->is_hybrid() ) : ?>
+							<input type="submit" name="attend_remotely" class="button is-primary attend-btn" value="<?php esc_attr_e( 'Attend Event Remotely', 'gp-translation-events' ); ?>"/>
+						<?php endif; ?>
 					<?php endif; ?>
 				</form>
 			<?php endif; ?>

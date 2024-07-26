@@ -17,7 +17,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 get_header( 'top-level-page' );
 the_post();
-$hosting_cache_buster = '6';
+$hosting_cache_buster = '8';
 
 ?>
 

@@ -42,6 +42,7 @@ class Event {
 	private string $status;
 	private string $title;
 	private string $description;
+	private string $attendance_mode;
 
 	/**
 	 * @throws InvalidStart
@@ -55,7 +56,8 @@ class Event {
 		DateTimeZone $timezone,
 		string $status,
 		string $title,
-		string $description
+		string $description,
+		string $attendance_mode = 'onsite'
 	) {
 		$this->author_id = $author_id;
 		$this->validate_times( $start, $end );
@@ -65,6 +67,7 @@ class Event {
 		$this->set_status( $status );
 		$this->set_title( $title );
 		$this->set_description( $description );
+		$this->set_attendance_mode( $attendance_mode );
 	}
 
 	public function id(): int {
@@ -102,6 +105,14 @@ class Event {
 
 	public function is_past(): bool {
 		return $this->end->is_in_the_past();
+	}
+
+	public function is_remote(): bool {
+		return 'remote' === $this->attendance_mode;
+	}
+
+	public function is_hybrid(): bool {
+		return 'hybrid' === $this->attendance_mode;
 	}
 
 	public function timezone(): DateTimeZone {
@@ -144,6 +155,10 @@ class Event {
 		$this->timezone = $timezone;
 	}
 
+	public function attendance_mode(): string {
+		return $this->attendance_mode;
+	}
+
 	/**
 	 * @throws InvalidStatus
 	 */
@@ -160,6 +175,10 @@ class Event {
 
 	public function set_description( string $description ): void {
 		$this->description = $description;
+	}
+
+	public function set_attendance_mode( string $attendance_mode ): void {
+		$this->attendance_mode = $attendance_mode;
 	}
 
 	/**

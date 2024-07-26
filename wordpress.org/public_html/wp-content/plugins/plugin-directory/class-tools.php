@@ -241,6 +241,9 @@ class Tools {
 
 		Tools::subscribe_user_to_forum_threads( $user, $post );
 
+		// Store some user-meta against the committer, so that other code knows this is a current (or past) plugin committer.
+		update_user_meta( $user->ID, 'has_plugins', time() );
+
 		return $result;
 	}
 

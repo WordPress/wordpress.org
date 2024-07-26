@@ -88,7 +88,7 @@
 	list-style-type: none;
 	margin-right: 1em;
 	margin-bottom: .5em;
-	width: 15em;
+	width: 20em;
 }
 
 .event-contributors li .avatar,
@@ -470,6 +470,17 @@ a.remove-attendee.button:hover {
 	background-color: var(--gp-color-btn-danger-hover-bg);
 	color: var(--gp-color-btn-danger-hover-text);
 	border-color: var(----gp-color-btn-danger-hover-border);
+}
+form.add-remove-user-as-host .button {
+	margin-bottom: 4px;
+}
+
+p.onsite-btn-note {
+	font-size: .8em;
+}
+
+label.event-radio-label {
+	width: auto;
 }
 
 /* show the event-details-right below instead of on the right on mobile */

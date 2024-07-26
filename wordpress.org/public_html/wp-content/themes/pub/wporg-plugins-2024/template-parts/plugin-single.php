@@ -37,7 +37,6 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 					?>
 				</div>
 
-
 				<div>
 					<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
 					<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo wp_kses_post( $plugin_title ); ?></a></h1>
@@ -49,22 +48,37 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 				</div>
 			</div>
 			<div class="plugin-actions">
-				<?php the_plugin_favorite_button(); ?>
+				<?php
+				$buttons = '<!-- wp:wporg/favorite-button /-->';
 
-				<?php if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) : ?>
-					<div class="is-small">
-						<a class="plugin-download wp-block-button__link download-button" href="<?php echo esc_url( Template::download_link() ); ?>"><?php esc_html_e( 'Download', 'wporg-plugins' ); ?></a>
-					</div>
-				<?php endif; ?>
-				<?php if ( Template::is_preview_available() ) : ?>
-					<div class="is-small">
-						<a class="plugin-preview wp-block-button__link is-small download-button" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Live Preview', 'wporg-plugins' ); ?></a>
-					</div>
-				<?php elseif ( Template::preview_link() && Template::is_preview_available( $post, 'edit' ) ) : ?>
-					<div class="is-small">
-						<a class="plugin-preview wp-block-button__link is-small download-button" target="_blank" href="<?php echo esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ); ?>"><?php esc_html_e( 'Test Preview', 'wporg-plugins' ); ?></a>
-					</div>
-				<?php endif; ?>
+				if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) {
+					$buttons .= sprintf(
+						'<!-- wp:button {"className":"is-small plugin-download download-button"} -->
+						<div class="wp-block-button is-small plugin-download download-button"><a class="wp-block-button__link wp-element-button" href="%1$s">%2$s</a></div>
+						<!-- /wp:button -->',
+						esc_url( Template::download_link() ),
+						esc_html__( 'Download', 'wporg-plugins' )
+					);
+				}
+				if ( Template::is_preview_available() ) {
+					$buttons .= sprintf(
+						'<!-- wp:button {"className":"is-small is-style-outline plugin-preview download-button"} -->
+						<div class="wp-block-button is-small is-style-outline plugin-preview download-button"><a class="wp-block-button__link wp-element-button" href="%1$s">%2$s</a></div>
+						<!-- /wp:button -->',
+						esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ),
+						esc_html__( 'Live Preview', 'wporg-plugins' )
+					);
+				} elseif ( Template::preview_link() && Template::is_preview_available( $post, 'edit' ) ) {
+					$buttons .= sprintf(
+						'<!-- wp:button {"className":"is-small is-style-outline plugin-preview download-button"} -->
+						<div class="wp-block-button is-small is-style-outline plugin-preview download-button"><a class="wp-block-button__link wp-element-button" href="%1$s">%2$s</a></div>
+						<!-- /wp:button -->',
+						esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ),
+						esc_html__( 'Test Preview', 'wporg-plugins' )
+					);
+				}
+				echo do_blocks( $buttons ); // phpcs:ignore -- Output escaped while building string.
+				?>
 			</div>
 		</div>
 	</header><!-- .entry-header -->

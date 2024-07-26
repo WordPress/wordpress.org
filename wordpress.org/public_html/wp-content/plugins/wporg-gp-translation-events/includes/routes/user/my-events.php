@@ -51,7 +51,7 @@ class My_Events_Route extends Route {
 
 		$current_user_attendee_per_event = $this->attendee_repository->get_attendees_for_events_for_user( $event_ids, $user_id );
 
-		Templates::use_new_design();
+		$this->use_theme();
 		$this->tmpl(
 			'my-events',
 			compact(
