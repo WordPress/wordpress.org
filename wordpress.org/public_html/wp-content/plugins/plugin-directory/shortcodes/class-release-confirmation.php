@@ -284,8 +284,12 @@ class Release_Confirmation {
 	}
 
 	static function can_access() {
-		// Plugin reviewers can always access the release management functionality.
-		if ( current_user_can( 'plugin_review' ) ) {
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+
+		// Plugin reviewers can always access the release management functionality, in wp-admin.
+		if ( current_user_can( 'plugin_review' ) && is_admin() ) {
 			return true;
 		}
 
@@ -357,5 +361,41 @@ class Release_Confirmation {
 
 		// A page with this shortcode has no need to be indexed.
 		add_filter( 'wporg_noindex_request', '__return_true' );
+	}
+
+	/**
+	 * Displays the notice on the plugin front-end.
+	 *
+	 * @param WP_Post $post The currently displayed post.
+	 * @return void
+	 */
+	static function frontend_unconfirmed_releases_notice( $post = null ) {
+		$post = get_post( $post );
+
+		if ( ! $post->release_confirmation || ! current_user_can( 'plugin_admin_edit', $post ) ) {
+			return;
+		}
+
+		$releases = Plugin_Directory::get_releases( $post ) ?: [];
+		$warning  = false;
+
+		foreach ( $releases as $release ) {
+			if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
+				$warning = true;
+				break;
+			}
+		}
+
+		if ( ! $warning ) {
+			return;
+		}
+
+		printf(
+			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+			sprintf(
+				__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
+				home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
+			)
+		);
 	}
 }
