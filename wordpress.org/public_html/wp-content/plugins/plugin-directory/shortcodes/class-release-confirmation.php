@@ -143,10 +143,14 @@ class Release_Confirmation {
 		return ob_get_clean();
 	}
 
-	static function single_plugin( $plugin, $releases = false ) {
-		if ( false === $releases ) {
-			$releases = Plugin_Directory::get_releases( $plugin );
-		}
+	/**
+	 * Display a table containing the releases for a single plugin.
+	 *
+	 * @param WP_Post $plugin
+	 * @param array   $releases Optional. The list of releases to show. If not provided, all will be shown.
+	 */
+	static function single_plugin( $plugin, $releases = null ) {
+		$releases ??= Plugin_Directory::get_releases( $plugin );
 
 		echo '<table class="widefat plugin-releases-listing">
 		<thead>
