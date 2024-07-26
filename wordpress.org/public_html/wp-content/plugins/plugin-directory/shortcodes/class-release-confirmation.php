@@ -269,39 +269,35 @@ class Release_Confirmation {
 	}
 
 	static function get_actions( $plugin, $data ) {
-		$buttons = [];
+		$buttons    = [];
+		$can_access = self::can_access();
+
+		if ( ! current_user_can( 'plugin_manage_releases', $plugin  ) ) {
+			return '';
+		}
 
 		if ( $data['confirmations_required'] && empty( $data['discarded'] ) ) {
 			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
 			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
-				$can_access = self::can_access();
-				$can_manage = current_user_can( 'plugin_manage_releases', $plugin  );
-
-				$disabled_attr  = '';
-				$disabled_class = '';
-				if ( ! $can_access || ! $can_manage ) {
-					$disabled_attr = 'disabled';
-				}
-				if ( $can_manage && ! $can_access ) {
-					$disabled_class = 'disabled disabled-by-2fa';
-				}
+				$disabled_attr  = ! $can_access ? 'disabled' : '';
+				$disabled_class = ! $can_access ? 'disabled disabled-by-2fa' : '';
 
 				$buttons[] = sprintf(
-					'<a href="%s"><button class="approve-release wp-element-button button %s" %s>%s</button></a>',
-					$can_manage ? Template::get_release_confirmation_link( $data['tag'], $plugin ) : '',
+					'<a href="%s"><button class="wp-element-button button %s" %s>%s</button></a>',
+					Template::get_release_confirmation_link( $data['tag'], $plugin ),
 					esc_attr( $disabled_class ),
 					esc_attr( $disabled_attr ),
 					__( 'Confirm', 'wporg-plugins' )
 				);
+
 				$buttons[] = sprintf(
-					'<a href="%"><button class="approve-release wp-element-button button %s" %s>%s</button></a>',
-					$can_manage ? Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' ) : '',
+					'<a href="%s"><button class="wp-element-button button %s" %s>%s</button></a>',
+					Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' ),
 					esc_attr( $disabled_class ),
 					esc_attr( $disabled_attr ),
 					__( 'Discard', 'wporg-plugins' )
 				);
-
 			}
 		}
 
