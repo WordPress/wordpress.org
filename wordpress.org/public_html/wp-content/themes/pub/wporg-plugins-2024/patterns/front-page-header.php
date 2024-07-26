@@ -13,7 +13,7 @@ $description = sprintf(
 		'Extend your WordPress experience! Browse over %s free plugin.',
 		'Extend your WordPress experience! Browse over %s free plugins.',
 		$count,
-		'wporg-themes'
+		'wporg-plugins'
 	),
 	number_format_i18n( $count )
 );
@@ -28,7 +28,7 @@ $description = sprintf(
 	<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--40);">
 	
 		<!-- wp:heading {"level":1,"style":{"typography":{"fontSize":"50px","fontStyle":"normal","fontWeight":"400"}},"fontFamily":"eb-garamond"} -->
-		<h1 class="wp-block-heading has-eb-garamond-font-family" style="font-size:50px;font-style:normal;font-weight:400"><?php esc_html_e( 'Plugins', 'wporg' ); ?></h1>
+		<h1 class="wp-block-heading has-eb-garamond-font-family" style="font-size:50px;font-style:normal;font-weight:400"><?php esc_html_e( 'Plugins', 'wporg-plugins' ); ?></h1>
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"style":{"typography":{"lineHeight":"2.3"}},"textColor":"white"} -->
