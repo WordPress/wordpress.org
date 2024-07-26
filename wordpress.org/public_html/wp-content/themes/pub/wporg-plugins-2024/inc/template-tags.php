@@ -258,13 +258,7 @@ function get_plugin_status_notice( $post = null ) {
 }
 
 function the_unconfirmed_releases_notice() {
-	$plugin = get_post();
-
-	if ( ! $plugin->release_confirmation || ! current_user_can( 'plugin_admin_edit', $plugin ) ) {
-		return;
-	}
-
-	return Release_Confirmation::frontend_notice();
+	return Release_Confirmation::frontend_unconfirmed_releases_notice();
 }
 
 function the_no_self_management_notice() {

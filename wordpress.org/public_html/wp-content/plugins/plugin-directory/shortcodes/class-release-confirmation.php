@@ -408,9 +408,12 @@ class Release_Confirmation {
 
 	/**
 	 * Displays the notice on the plugin front-end.
+	 *
+	 * @param WP_Post $post The currently displayed post.
+	 * @return void
 	 */
-	static function frontend_notice() {
-		$plugin   = get_post();
+	static function frontend_unconfirmed_releases_notice( $plugin ) {
+		$plugin   = get_post( $plugin);
 		$releases = Plugin_Directory::get_releases( $plugin ) ?: [];
 
 		$releases_needing_confirmation = [];
