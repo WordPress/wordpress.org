@@ -289,12 +289,12 @@ class Release_Confirmation {
 		}
 
 		// Plugin reviewers can always access the release management functionality, in wp-admin.
-		if ( current_user_can( 'plugin_review' ) && is_admin() ) {
+		if ( current_user_can( 'plugin_review' ) && ( is_admin() || wp_is_serving_rest_request() ) ) {
 			return true;
 		}
 
 		// Must have an access token..
-		if ( ! is_user_logged_in() || empty( $_COOKIE[ self::COOKIE ] ) ) {
+		if ( empty( $_COOKIE[ self::COOKIE ] ) ) {
 			return false;
 		}
 
