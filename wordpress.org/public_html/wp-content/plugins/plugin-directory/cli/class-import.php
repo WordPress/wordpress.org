@@ -260,8 +260,8 @@ class Import {
 				}
 			}
 
-			// Check that the tag is approved.
-			if ( ! $release['confirmed'] ) {
+			// Check that the tag is approved (If the release needed to be confirmed).
+			if ( ! $release['confirmed'] && $release['confirmations_required'] ) {
 
 				if ( ! in_array( $last_committer, $release['committer'], true ) ) {
 					$release['committer'][] = $last_committer;
