@@ -1,5 +1,5 @@
 <?php
-use function WordPressdotorg\Two_Factor\user_should_2fa;
+use function WordPressdotorg\Two_Factor\{ user_should_2fa, user_requires_2fa };
 
 /**
  * WordPress-specific WPORG SSO: redirects all WP login and registration screens to our SSO ones.
@@ -821,19 +821,34 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function maybe_redirect_to_enable_2fa( $redirect, $orig_redirect, $user ) {
 			if (
-				! str_contains( $redirect, '/enable-2fa' ) &&
-				! is_wp_error( $user ) &&
-				user_should_2fa( $user ) &&
-				! Two_Factor_Core::is_user_using_two_factor( $user->ID )
+				// No valid user.
+				is_wp_error( $user ) ||
+				// Or we're already going there.
+				str_contains( $redirect, '/enable-2fa' ) ||
+				// Or if the user doesn't need 2FA.
+				! user_should_2fa( $user ) ||
+				// Or the user is already using 2FA.
+				Two_Factor_Core::is_user_using_two_factor( $user->ID )
 			) {
-				$redirect = add_query_arg(
-					'redirect_to',
-					urlencode( $redirect ),
-					home_url( '/enable-2fa' )
-				);
+				// Then we don't need to redirect to the enable 2FA page.
+				return $redirect;
 			}
 
-			return $redirect;
+			// If the user doesn't REQUIRE 2FA, only nag ever so often.
+			if ( ! user_requires_2fa( $user ) ) {
+				$nag_interval = WEEK_IN_SECONDS;
+				$last_nagged  = (int) get_user_meta( $user->ID, 'last_2fa_nag', true );
+				if ( $last_nagged && $last_nagged > ( time() - $nag_interval ) ) {
+					return $redirect;
+				}
+			}
+
+			// Redirect to the Enable 2FA nag.
+			return add_query_arg(
+				'redirect_to',
+				urlencode( $redirect ),
+				home_url( '/enable-2fa' )
+			);
 		}
 
 		/**

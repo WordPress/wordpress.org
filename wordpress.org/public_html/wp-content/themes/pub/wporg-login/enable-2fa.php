@@ -11,6 +11,13 @@ $requires_2fa = user_requires_2fa( $user );
 $should_2fa   = user_should_2fa( $user ); // If they're on this page, this should be truthful.
 $redirect_to  = wp_validate_redirect( wp_unslash( $_REQUEST['redirect_to'] ?? '' ), wporg_login_wordpress_url() );
 
+/*
+ * Record the last time we naged the user about 2FA.
+ * See WPORG_SSO::maybe_redirect_to_enable_2fa().
+ * Note, this isn't in the above function, incase the redirect ultimately filtered to elsewhere.
+ */
+update_user_meta( $user->ID, 'last_2fa_nag', time() );
+
 get_header();
 ?>
 
