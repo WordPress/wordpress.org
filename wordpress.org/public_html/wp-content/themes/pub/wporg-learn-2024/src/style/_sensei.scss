@@ -9,7 +9,7 @@ body.sensei {
 	--sensei-button-text-color: var(--wp--preset--color--white);
 
 	--sensei-course-progress-bar-color: var(--wp--custom--color--border);
-	--sensei-course-progress-bar-inner-color: var(--wp--preset--color--blueberry-1);
+	--sensei-course-progress-bar-inner-color: var(--wp--custom--color--green-50);
 	--sensei-lesson-meta-color: var(--wp--preset--color--charcoal-4);
 	--sensei-module-lesson-color: var(--wp--preset--color--charcoal-1);
 
@@ -123,6 +123,11 @@ body.sensei {
 		.wp-block-sensei-lms-quiz .sensei-lms-question-block__header {
 			margin-bottom: var(--wp--preset--spacing--20);
 		}
+
+		#sensei-quiz-list li ul li input,
+		#sensei-quiz-list .sensei-multiple-choice-answer-option-checkbox + label::before {
+			flex-shrink: 0;
+		}
 	}
 
 	section.wp-block-sensei-lms-course-outline {
@@ -133,7 +138,9 @@ body.sensei {
 			header {
 				background-color: var(--wp--preset--color--light-grey-2) !important;
 				color: var(--wp--preset--color--charcoal-1) !important;
-				padding: var(--wp--preset--spacing--20);
+				padding-left: var(--wp--preset--spacing--20);
+				padding-right: var(--wp--preset--spacing--20);
+				cursor: pointer;
 
 				h2 {
 					font-size: var(--wp--preset--font-size--heading-6);
@@ -155,19 +162,26 @@ body.sensei {
 						margin: 4px 8px;
 					}
 				}
-			}
 
-			.wp-block-sensei-lms-course-outline-module__lessons-title {
-				display: none;
+				button.wp-block-sensei-lms-course-outline__arrow {
+					height: 32px;
+					align-items: center;
+				}
 			}
 
 			.wp-block-sensei-lms-collapsible {
+				overflow: unset;
+
+				h3.wp-block-sensei-lms-course-outline-module__lessons-title {
+					display: none;
+				}
+
 				// lesson item that belongs to a module
-				> .wp-block-sensei-lms-course-outline-lesson:first-of-type {
+				> a.wp-block-sensei-lms-course-outline-lesson:first-of-type {
 					padding-top: 5px;
 				}
 
-				> .wp-block-sensei-lms-course-outline-lesson:last-of-type {
+				> a.wp-block-sensei-lms-course-outline-lesson:last-of-type {
 					padding-bottom: 5px;
 				}
 			}
