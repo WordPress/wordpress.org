@@ -606,6 +606,16 @@ class Template {
 
 			// Images in the assets folder - /plugin-name/assets/screenshot-1.png.
 			$format = 'https://plugins.svn.wordpress.org/%1$s/assets/%2$s';
+
+			// TODO, assume all icons are animated for now.
+			if ( false !== stripos( $asset['filename'], 'icon' ) ) {
+				$asset['animated'] = true;
+			}
+
+			if ( ! empty( $asset['animated'] ) ) {
+				$format = 'https://wordpress.org/plugins/remove-animation/%1$s/%2$s';
+				$cdn    = true; // CDN forced here.
+			}
 		}
 
 		$url = sprintf(
@@ -616,6 +626,7 @@ class Template {
 
 		if ( $cdn ) {
 			$url = str_replace( 'plugins.svn.wordpress.org', 'ps.w.org', $url );
+			$url = str_replace( 'wordpress.org', 's.w.org', $url );
 		}
 
 		// Add a cache-buster based on the file revision.

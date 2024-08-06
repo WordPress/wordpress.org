@@ -44,6 +44,7 @@ class Plugin_Directory {
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
+		add_action( 'template_redirect', array( $this, 'remove_animation_route' ), 0 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ), 1 );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'get_the_archive_title_prefix', array( $this, 'filter_get_the_archive_title_prefix' ) );
@@ -563,6 +564,7 @@ class Plugin_Directory {
 
 		// Add a rule for generated plugin icons. geopattern-icon/demo.svg | geopattern-icon/demo_abc123.svg
 		add_rewrite_rule( '^geopattern-icon/([^/_]+)(_([a-f0-9]{6}))?\.svg$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
+		add_rewrite_rule( '^remove-animation/([^/_]+)/([^/_]+)$', 'index.php?name=$matches[1]&noanimationasset=$matches[2]', 'top' );
 
 		// Handle plugin admin requests
 		add_rewrite_rule( '^([^/]+)/advanced/?$', 'index.php?name=$matches[1]&plugin_advanced=1', 'top' );
@@ -1329,6 +1331,7 @@ class Plugin_Directory {
 		$vars[] = 'redirect_plugin_tab';
 		$vars[] = 'plugin_advanced';
 		$vars[] = 'geopattern_icon';
+		$vars[] = 'noanimationasset';
 		$vars[] = 'block_search';
 
 		// Remove support for any query vars the Plugin Directory doesn't support/need on the front-end.
@@ -1625,6 +1628,72 @@ class Plugin_Directory {
 		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + YEAR_IN_SECONDS ) );
 
 		echo $icon->toSVG();
+		die();
+	}
+
+	/**
+	 * Output a plugin asset with animation removed.
+	 */
+	function remove_animation_route() {
+		global $wp;
+
+		if ( ! isset( $wp->query_vars['name'], $wp->query_vars['noanimationasset'] ) ) {
+			return;
+		}
+
+		$slug  = get_query_var( 'name' );
+		$asset = get_query_var( 'noanimationasset' );
+		$url   = "https://plugins.svn.wordpress.org/{$slug}/assets/{$asset}";
+		$req   = wp_safe_remote_get( $url );
+		$body  = wp_remote_retrieve_body( $req );
+
+		if ( 200 !== wp_remote_retrieve_response_code( $req ) || ! $body ) {
+			status_header( 404 );
+			die();
+		}
+
+		// Is it a SVG? Just check for the closing SVG tag as we'll be replacing that.
+		// If it's a SVG without a closing tag, it'll ultimately be treated as a static image and 404.
+		if ( false !== stripos( $body, '</svg>' ) ) {
+			status_header( 200 );
+			header( 'Content-Type: image/svg+xml' );
+			header( 'Content-Disposition: attachment' ); // Force download
+			header( 'X-Content-Type-Options: nosniff' );
+			header( 'Cache-Control: public, max-age=' . YEAR_IN_SECONDS );
+			header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + YEAR_IN_SECONDS ) );
+
+			$body = str_ireplace(
+				'</svg>',
+				// Pause SVG based animations.
+				'<script> SVGRoot.pauseAnimations(); </script>' .
+				// Stop CSS based animations.
+				'<style>* { animation: none !important; }</style>' .
+				'</svg>',
+				$body
+			);
+
+			echo $body;
+
+			die();
+		}
+
+		// Assume loadable image.
+		$img = imagecreatefromstring( $body );
+		if ( ! $img ) {
+			status_header( 404 );
+			die();
+		}
+
+		// Output the image as a single-frame PNG.
+		status_header( 200 );
+		header( 'Content-Type: image/png' );
+		header( 'Cache-Control: public, max-age=' . YEAR_IN_SECONDS );
+		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + YEAR_IN_SECONDS ) );
+
+		imagepng( $img );
+
+		imagedestroy( $img );
+
 		die();
 	}
 
