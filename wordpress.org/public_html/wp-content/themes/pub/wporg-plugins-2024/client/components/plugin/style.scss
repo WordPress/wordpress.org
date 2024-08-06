@@ -345,3 +345,23 @@
 		margin-top: var( --wp--preset--spacing--60 );
 	}
 }
+
+
+.plugin-releases-listing {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.plugin-releases-listing tbody td:nth-child(4) div {
+	font-size: 14px;
+}
+
+.plugin-releases-listing-actions {
+	display: flex;
+	gap: 8px;
+	flex-direction: column;
+
+	@media screen and ( min-width: 34em ) {
+		flex-direction: row;
+	}
+}
