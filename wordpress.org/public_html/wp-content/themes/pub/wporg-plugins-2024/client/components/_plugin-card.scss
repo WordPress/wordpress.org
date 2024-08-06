@@ -27,8 +27,7 @@
 			text-decoration: none;
 
 			&:focus {
-				text-decoration: underline;
-				outline: none;
+				box-shadow: none;
 			}
 		}
 	}
