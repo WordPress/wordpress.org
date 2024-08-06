@@ -124,7 +124,8 @@ class Release_Confirmation {
 	static function single_plugin( $plugin ) {
 		$releases = Plugin_Directory::get_releases( $plugin );
 
-		echo '<table class="widefat plugin-releases-listing">
+		echo '<div class="wp-block-table is-style-stripes">
+		<table class="plugin-releases-listing">
 		<thead>
 			<tr>
 				<th>Version</th>
@@ -132,7 +133,7 @@ class Release_Confirmation {
 				<th>Committer</th>
 				<th>Approval</th>
 				<th>Actions</th>
-		</thead>';
+		</thead></div>';
 
 		if ( ! $releases ) {
 			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
@@ -156,7 +157,7 @@ class Release_Confirmation {
 					<td title="%s">%s</td>
 					<td>%s</td>
 					<td>%s</td>
-					<td>%s</td>
+					<td><div class="plugin-releases-listing-actions">%s</div></td>
 				</tr>',
 				sprintf(
 					'<a href="%s">%s</a>',
