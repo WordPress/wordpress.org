@@ -1,0 +1,141 @@
+.three-up {
+
+	&.helphub-front-page {
+
+		p,
+		ul {
+			text-align: left;
+		}
+
+		> div {
+
+			margin-bottom: 5rem;
+		}
+
+		.icon-wrapper {
+
+			a {
+
+				color: inherit;
+				text-decoration: none;
+			}
+		}
+
+		@media (min-width: $ms-breakpoint) {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: flex-start;
+
+			.archive-block,
+			> div {
+				margin-right: 0;
+				margin-left: 0;
+				width: 30%;
+				font-size: ms( -2 );
+			}
+		}
+	}
+}
+
+#helphub-forum-link {
+
+	margin-top: 5rem;
+
+	span {
+		display: inline-block;
+		font-size: 0.8rem;
+		width: 100%;
+		max-width: 335px;
+	}
+
+	a {
+
+		margin-top: 0.5rem;
+		display: inline-block;
+	}
+}
+
+.archive-pagination {
+	text-align: center;
+	margin-top: 4rem;
+}
+
+body.helphub-with-sidebar {
+
+	.left-sidebar {
+
+		font-size: 0.9rem;
+
+		h2 {
+			font-size: 1.1rem;
+			font-weight: 600;
+			color: $color__text-main;
+		}
+
+		ul {
+			list-style: none;
+			margin: 0;
+
+			li {
+				margin-bottom: 0.8rem;
+
+				ul {
+					margin-left: 1rem;
+				}
+			}
+		}
+
+		@include breakpoint( $sm ) {
+			float: left;
+			padding-right: 3rem;
+			width: $size__site-sidebar;
+
+			& + #main-content {
+				float: right;
+				width: ( 100 - $size__site-sidebar );
+
+				.entry-content .container {
+					width: 100%;
+				}
+			}
+		}
+	}
+}
+
+.helphub-page {
+
+	.entry-header {
+
+		.entry-title {
+
+			@media screen and ( min-width: $ms-breakpoint ) {
+				margin: 0;
+				width: 65%;
+			}
+		}
+	}
+
+	.entry-content {
+
+		section {
+
+			.container {
+
+				figure.wp-block-image {
+					overflow: hidden;
+				}
+
+				@media screen and ( min-width: $ms-breakpoint ) {
+					margin: 0;
+					width: 65%;
+				}
+			}
+		}
+	}
+
+	.comment-respond {
+		padding-bottom: 2rem;
+	}
+}
+

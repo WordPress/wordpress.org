@@ -1,0 +1,40 @@
+body.category {
+
+	#main {
+
+		h1 {
+
+			font-size: 2.2rem;
+			text-align: center;
+		}
+
+		a {
+
+			color: inherit;
+
+			&:hover,
+			&:focus,
+			&:active {
+
+				text-decoration: none;
+				color: $color__link;
+			}
+		}
+
+		article {
+
+			h2 {
+
+				font-size: 1.3rem;
+			}
+		}
+
+		.archive-pagination {
+
+			display: block;
+			margin-top: 20px;
+			text-align: center;
+			width: 100%;
+		}
+	}
+}

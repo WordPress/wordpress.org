@@ -1,0 +1,496 @@
+// Golden ratio
+$phi              : 1.618034          ;
+$golden           : $phi              ;
+
+$double-octave    : 4                 ;
+$major-twelfth    : 3                 ;
+$major-eleventh   : 2.666666667       ;
+$major-tenth      : 2.5               ;
+$octave           : 2                 ;
+$major-seventh    : 1.875             ;
+$minor-seventh    : 1.777777778       ;
+$major-sixth      : 1.666666667       ;
+$minor-sixth      : 1.6               ;
+$fifth            : 1.5               ;
+$augmented-fourth : 1.41421           ;
+$fourth           : 1.333333333       ;
+$major-third      : 1.25              ;
+$minor-third      : 1.2               ;
+$major-second     : 1.125             ;
+$minor-second     : 1.066666667       ;
+
+
+$ms-base:  1em      !default;
+$ms-ratio: $golden  !default;
+$ms-range: null     !default;
+$ms-fluid: true     !default;
+
+
+// Feature testing
+
+
+// Test if the pow() function exists
+@function ms-pow-exists() {
+  @if pow(4, 2) == 16 {
+    @return true;
+  }
+  @return false;
+}
+
+$MS-pow-exists: ms-pow-exists();
+
+// Test if MS was installed via the gem
+@function ms-gem-exists() {
+  @if ms-gem-installed() == true {
+    @return true;
+  }
+  @return false;
+}
+
+$MS-gem-exists: ms-gem-exists();
+
+// If a native exponent function doesnt exist
+// this one is needed.
+@function ms-pow($Base, $Exponent) {
+
+  // Find and remove unit.
+  // Avoids messyness with unit calculations
+  $Unit: $Base * 0 + 1;
+  $Base: $Base/$Unit;
+
+  // This function doesnt support non-interger exponents.
+  // Warn the user about why this is breaking.
+  @if round($Exponent) != $Exponent {
+    @warn "Unfortunately, you need Compass to use non-integer exponents";
+  }
+
+  // Set up the loop, priming the return with the base.
+  $Return: $Base;
+
+  // If the number is positive, multiply it.
+  @if $Exponent > 0 {
+    // Basic feedback loop as exponents
+    // are recursivley multiplied numbers.
+    @for $i from 1 to $Exponent {
+      $Return: $Return * $Base;
+    }
+  }
+
+    // If the number is 0 or negitive
+    // divide instead of multiply.
+  @else {
+    // Libsass doesnt allow negitive values in loops
+    @for $i from (-1 + 1) to (abs($Exponent) + 1) {
+      $Return: $Return / $Base;
+    }
+  }
+
+  // Return is now compounded redy to be returned.
+  // Add the unit back onto the number.
+  @return $Return * $Unit;
+}
+
+
+@function ms-calc($Value, $Base: $ms-base, $Ratio: $ms-ratio) {
+
+  // If pow exists use it.
+  // It supports non-interger values!
+  @if $MS-pow-exists {
+
+    // The formula for figuring out modular scales is:
+    // (r^v)*b
+    @return pow($Ratio, $Value) * $Base;
+  }
+
+    // If not, use ms-pow().
+    // Not as fast or capable of non-integer exponents.
+  @else {
+    @return ms-pow($Ratio, $Value) * $Base;
+  }
+}
+
+
+@function ms-reverse-list($list) {
+  @if length($list) > 1 {
+    @if nth($list, 1) > nth($list, length($list)) {
+      $MS-reversed-list: ();
+      @each $Value in $list {
+        $MS-reversed-list: join($Value, $MS-reversed-list);
+      }
+      @return $MS-reversed-list;
+    }
+  }
+  @return $list;
+}
+
+
+@function ms-generate-list($Value: 0, $Bases: $ms-base, $Ratios: $ms-ratio) {
+
+  // Create blank lists
+  $MS-list: ();
+  $MS-base-list: ();
+
+  // Loop through each ratio AND each base
+  // to generate all possibilities.
+  @each $Ratio in $Ratios {
+    @each $Base in $Bases {
+
+      // Set base variables
+      $MS-base-list: ();
+      $Base-counter: 0;
+
+      // Seed list with an initial value
+      $MS-base-list: $Base;
+
+      // Find values on a positive scale
+      @if $Value >= 0 {
+
+        // Find lower values on the scale
+        $Base-counter: -1;
+        @while ms-calc($Base-counter, $Base, $Ratio) >= nth($Bases, 1) {
+          $MS-base-list: join($MS-base-list, ms-calc($Base-counter, $Base, $Ratio));
+          $Base-counter: $Base-counter - 1;
+        }
+
+        // Ensure the list is smallest to largest
+        $MS-base-list: ms-reverse-list($MS-base-list);
+
+        // Find higher possible values on the scale
+        $Base-counter: 1;
+        @while ms-calc($Base-counter, $Base, $Ratio) <= ms-calc($Value, nth($Bases, 1), $Ratio) {
+          $MS-base-list: join($MS-base-list, ms-calc($Base-counter, $Base, $Ratio));
+          $Base-counter: $Base-counter + 1;
+        }
+      }
+
+        // Find values on a negitive scale
+      @else {
+
+        // Find lower values on the scale
+        $Base-counter: 1;
+        @while ms-calc($Base-counter, $Base, $Ratio) <= nth($Bases, 1) {
+          $MS-base-list: join($MS-base-list, ms-calc($Base-counter, $Base, $Ratio));
+          $Base-counter: $Base-counter + 1;
+        }
+
+        // Ensure the list is smallest to largest
+        $MS-base-list: ms-reverse-list($MS-base-list);
+
+        // Find higher possible values on the scale
+        $Base-counter: -1;
+        @while ms-calc($Base-counter, $Base, $Ratio) >= ms-calc($Value, nth($Bases, 1), $Ratio) {
+          $MS-calc: ms-calc($Base-counter, $Base, $Ratio);
+          // detect if the value excedes the main base value
+          @if $MS-calc < nth($Bases, 1) {
+            $MS-base-list: join($MS-base-list, $MS-calc);
+          }
+          $Base-counter: $Base-counter - 1;
+        }
+
+        // Trim outlier base.
+        @if length($Bases) > 1 {
+          @for $i from 2 through length($Bases) {
+            @if nth($MS-base-list, 1) > nth($Bases, 1) {
+              $MS-new-list: ();
+              @for $i from 2 through length($MS-base-list) {
+                $MS-new-list: join($MS-new-list, nth($MS-base-list, $i));
+              }
+              $MS-base-list: $MS-new-list;
+            }
+          }
+        }
+      }
+
+      // reverse list if its largest to smallest
+      $MS-base-list: ms-reverse-list($MS-base-list);
+
+      // Add new possibilities to the master list
+      $MS-list: append($MS-list, $MS-base-list, comma);
+
+    }
+  }
+
+  // After all the possibilities are found, output a master list
+  @return $MS-list;
+}
+
+
+// List sorting via a modified merge-sort algorythmn
+// http://en.wikipedia.org/wiki/Merge_sort
+
+@function ms-merge($A, $B) {
+
+  $Return: ();
+
+  // Some empty lists get passed through
+  // so just pass the other list throguh
+  @if length($A) == 0 {
+    @return $B;
+  }
+
+  // If lists fit next to each other, just merge them
+  // This helps performance skipping the need to check each value
+  @if nth($A, length($A)) < nth($B, 1) {
+    @return join($A, $B);
+  }
+  @if nth($B, length($B)) < nth($A, 1) {
+    @return join($B, $A);
+  }
+
+  // Counters start at 1
+  $A-counter: 1;
+  $B-counter: 1;
+
+  // Start looping through all numbers in array
+  @while $A-counter <= length($A) and $B-counter <= length($B) {
+
+    // Check if the A value is smaller
+    // Uses or equal to avoid duplicate numbers
+    @if nth($A, $A-counter) <= nth($B, $B-counter) {
+      $Return: join($Return, nth($A, $A-counter));
+      $A-counter: $A-counter + 1;
+    }
+
+      // Check if the B value is smaller
+    @else if nth($A, $A-counter) > nth($B, $B-counter) {
+      $Return: join($Return, nth($B, $B-counter));
+      $B-counter: $B-counter + 1;
+    }
+  }
+
+  // Run through remainder values in the list
+  @while $A-counter <= length($A) {
+    $Current: nth($A, $A-counter);
+    @if $Current != nth($Return, length($Return)) {
+      $Return: join($Return, $Current);
+    }
+    $A-counter: $A-counter + 1;
+  }
+  @while $B-counter <= length($B) {
+    $Current: nth($B, $B-counter);
+    @if $Current != nth($Return, length($Return)) {
+      $Return: join($Return, $Current);
+    }
+    $B-counter: $B-counter + 1;
+  }
+
+  // Done! return is now sorted and complete
+  @return $Return;
+}
+
+
+
+// Pull it all together
+@function ms-sort-list($Lists) {
+
+  $Return: ();
+
+  @each $List in $Lists {
+    @if $Return == () {
+      $Return: $List;
+    }
+    @else {
+      $Return: ms-merge($List, $Return);
+    }
+  }
+
+  // final cleanup of repeated items
+  $Last: null;
+  $New-list: ();
+  @each $Item in $Return {
+    @if $Item != $Last {
+      $New-list: join($New-list, $Item);
+    }
+    $Last: $Item;
+  }
+  $Return: $New-list;
+
+
+  @return $Return;
+}
+
+
+@function ms-round-px($Result) {
+  @if unit($Result) == 'px' {
+    @return round($Result);
+  }
+  @return $Result;
+}
+
+
+// The main function that brings it all together
+@function ms($Value: 0, $Bases: $ms-base, $Ratios: $ms-ratio) {
+
+  // If no multi-base or multi-ratio stuff is going on
+  // then just retrn the basic calculaiton
+  @if length($Bases) == 1 and length($Ratios) == 1 {
+    @return ms-round-px(ms-calc($Value, $Bases, $Ratios));
+  }
+
+  // Do calculations directly in Ruby when avalible
+  @if $MS-gem-exists {
+
+    // Remove units from bases
+    $Unit: nth($Bases, 1) * 0 + 1; // Extracts the unit from the base
+    $Unitless-Bases: ();
+    @each $Base in $Bases {
+      $Base: $Base/$Unit;
+      $Unitless-Bases: join($Unitless-Bases, $Base);
+    }
+
+    // Calculate natively in Ruby
+    @return ms-round-px(ms-gem-func($Value, $Unitless-Bases, $Ratios) * $Unit);
+  }
+
+  // Generate a list of all possible values
+  $Return: ms-generate-list($Value, $Bases, $Ratios);
+
+  // Sort the generated lists
+  $Return: ms-sort-list($Return);
+
+  // Reverse list if its negitive.
+  @if $Value < 0 {
+    $MS-new-return: ();
+    @each $i in $Return {
+      $MS-new-return: join($i, $MS-new-return);
+    }
+    $Return: $MS-new-return;
+  }
+
+  // Normalize value for counting from 1
+  // Because CSS counts things from 1
+  // So Sass does as well
+  // So I get to write fun stuff like this
+  $Value: abs($Value) + 1;
+
+  // Find the correct value in the list
+  $Return: nth($Return, $Value);
+
+  @return ms-round-px($Return);
+}
+
+// Same function, different name, for good measure.
+@function modular-scale($Value: 0, $Bases: $ms-base, $Ratios: $ms-ratio) {
+  @return ms($Value, $Bases, $Ratios);
+}
+
+
+// Outputs a list of values instead of a single value
+@function ms-list($Start: 0, $End: 0, $Bases: $ms-base, $Ratios: $ms-ratio) {
+
+  // Seed results
+  $Positive-return: ();
+  $Negitive-return: ();
+  $Return: ();
+
+  @if $End >= 0 {
+    // Generate a list of all possible values
+    $Positive-return: ms-generate-list($End, $Bases, $Ratios);
+
+    // Sort the generated lists
+    $Positive-return: ms-sort-list($Positive-return);
+
+    // Trim list
+    $Trim-list: ();
+    // If the starting value is a positive number
+    // trim the positive return from that
+    @if $Start >= 0 {
+      @for $i from ($Start + 1) through $End + 1 {
+        $Trim-list: join($Trim-list, nth($Positive-return, $i));
+      }
+    }
+      // If not, then include everything up to the end.
+    @else {
+      @for $i from 1 through $End + 1 {
+        $Trim-list: join($Trim-list, nth($Positive-return, $i));
+      }
+    }
+    $Positive-return: $Trim-list;
+  }
+
+  // Generate a negitive list
+  @if $Start < 0 {
+    // Generate a list of all possible values
+    $Negitive-return: ms-generate-list($Start, $Bases, $Ratios);
+
+    // Sort the generated lists
+    $Negitive-return: ms-sort-list($Negitive-return);
+
+    // Reverse negitive list results.
+    $MS-new-return: ();
+    @each $i in $Negitive-return {
+      $MS-new-return: join($i, $MS-new-return);
+    }
+    $Negitive-return: $MS-new-return;
+
+    // Trim list
+    $Trim-list: ();
+    @if $End < 0 {
+      @for $i from abs($End) through (abs($Start) + 2) {
+        $Trim-list: join(nth($Negitive-return, $i), $Trim-list);
+      }
+    }
+    @else {
+      @for $i from 2 through (abs($Start) + 1) {
+        $Trim-list: join(nth($Negitive-return, $i), $Trim-list);
+      }
+    }
+    $Negitive-return: $Trim-list;
+  }
+
+  // Join both positive and negitive possibilities.
+  $Return: join($Negitive-return, $Positive-return);
+
+  @return $Return;
+}
+
+
+// Stripping units is rarely a best practice and this function
+// should not be used elsewhere
+@function ms-unitless($val) {
+  $val: $val / ($val - $val + 1);
+  @return $val;
+}
+
+// Search config for values
+@function ms-range($x,$y,$range:$ms-range) {
+  @return nth(nth($range,$x),$y);
+}
+
+// Generate calc() function
+@function ms-respond-calc($value, $n, $range: $ms-range, $base: $ms-base) {
+  $val1: ms($value,$base,ms-range($n,1,$range));
+  $val2: ms($value,$base,ms-range($n+1,1,$range));
+  $break1: ms-range($n,2,$range);
+  $break2: ms-range($n+1,2,$range);
+  $diff: ms-unitless($val2) - ms-unitless($val1);
+  @if $ms-fluid {
+    @return calc( #{$val1} + #{$diff} * ( ( 100vw - #{$break1}) / #{ms-unitless($break2) - ms-unitless($break1)} ) );
+  } @else {
+    @return ms($value,$base,ms-range($n,1,$range));
+  }
+}
+
+// Main responsive mixin
+@mixin ms-respond($property, $value, $range: $ms-range, $base: $ms-base) {
+  // If there is no responsive config, just output the property and value
+  @if $ms-range == null {
+    #{$property}: ms($value,$base,$ms-ratio);
+  } @else {
+
+    // Initial value
+    #{$property}: ms($value,$base,ms-range(1,1,$range));
+
+    // Loop through breakpoints
+    @for $i from 1 through (length($range) - 1) {
+      @media (min-width: ms-range($i,2,$range)) and (max-width: ms-range($i+1,2,$range)) {
+        #{$property}: ms-respond-calc($value, $i, $range, $base);
+      }
+    }
+
+    // Final breakpoint is just an override value
+    @media (min-width: ms-range(length($range),2,$range)) {
+      #{$property}: ms($value,$base,ms-range(length($range),1,$range));
+    }
+  }
+}

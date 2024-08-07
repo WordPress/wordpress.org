@@ -436,3 +436,31 @@ add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_desc
  * Custom template tags for this theme.
  */
 require get_stylesheet_directory() . '/inc/template-tags.php';
+
+function filter_plugin_card_classes( $taxonomies, $post_id, $classes, $css_class ) {
+
+	// Only filter on `plugin-card` class.
+	if ( 'plugin-card' != $css_class ) {
+		print_r( $classes  );
+		print_r( $css_class );
+		return $taxonomies;
+	}
+
+	$filtered_taxonomies = [];
+	$skip_taxonomy = [ 'plugin_contributors', 'plugin_committers', 'plugin_support_reps' ];
+	foreach ( $taxonomies as $tax ) {
+		if ( ! in_array( $tax, $skip_taxonomy ) ) {
+			$filtered_taxonomies[] = $tax;
+		}	
+	}
+	return $filtered_taxonomies;
+}
+
+//add_filter( 'post_class_taxonomies', __NAMESPACE__ . '\filter_plugin_card_classes', 10, 4 );
+
+
+add_filter( 'wp_trim_words', function( $text, $num_words, $more, $original_text ) {
+	$text = str_replace( '\n', ' ', $text );
+	echo $original_text;
+	return $text;
+}, 10, 4 );
