@@ -605,7 +605,7 @@ class WP_66_Credits extends WP_Credits {
 			'pmbaldha',
 			'poena',
 			'pooja1210',
-			'pooja9712'.
+			'pooja9712',
 			'povilasstaskus',
 			'ppolo99',
 			'praful2111',
