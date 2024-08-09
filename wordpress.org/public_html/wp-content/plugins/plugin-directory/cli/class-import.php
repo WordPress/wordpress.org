@@ -168,13 +168,13 @@ class Import {
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 				if ( ! $release ) {
 					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
-					$version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
+					$release_version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
 
 					Plugin_Directory::add_release(
 						$plugin,
 						[
 							'tag'       => $svn_changed_tag,
-							'version'   => $version,
+							'version'   => $release_version,
 							'committer' => [ $last_committer ],
 							'revision'  => [ $last_revision ]
 						]
@@ -199,7 +199,7 @@ class Import {
 							'who'     => $last_committer,
 							'readme'  => $readme,
 							'headers' => $headers,
-							'version' => $version,
+							'version' => $release_version,
 						]
 					);
 					$email->send();
