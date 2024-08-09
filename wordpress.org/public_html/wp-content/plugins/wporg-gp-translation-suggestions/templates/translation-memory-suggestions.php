@@ -25,6 +25,9 @@ if ( empty( $suggestions ) ) {
 
 			echo '<span aria-hidden="true" class="translation-suggestion__translation-raw">' . esc_translation( $suggestion['translation'] ) . '</span>';
 
+		if ( $is_user_a_gte_for_locale && 1 == $suggestion['similarity_score'] ) {
+			echo '<button type="button" class="button is-small delete-suggestion">Delete</button>';
+		}
 			echo '<button type="button" class="button is-small copy-suggestion">Copy</button>';
 		echo '</div>';
 		echo '</li>';

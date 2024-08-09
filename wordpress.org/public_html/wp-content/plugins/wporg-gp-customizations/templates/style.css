@@ -3223,6 +3223,10 @@ ul.sidebar-tabs {
 	margin-left: auto;
 }
 
+button.is-small.delete-suggestion {
+	margin-right: 0.5rem;
+}
+
 .meta.other-locales span.locale.unique {
 	margin-right: 14px;
 }

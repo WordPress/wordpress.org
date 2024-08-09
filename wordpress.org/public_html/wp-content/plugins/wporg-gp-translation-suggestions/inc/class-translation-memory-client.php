@@ -12,7 +12,7 @@ require_once ABSPATH . '/wp-includes/wp-diff.php';
 
 class Translation_Memory_Client {
 
-	const API_ENDPOINT = 'https://translate.wordpress.com/api/tm/';
+	const API_ENDPOINT      = 'https://translate.wordpress.com/api/tm/';
 	const API_BULK_ENDPOINT = 'https://translate.wordpress.com/api/tm/-bulk';
 
 	/**
@@ -22,7 +22,7 @@ class Translation_Memory_Client {
 	 * @return true|\WP_Error True on success, WP_Error on failure.
 	 */
 	public static function update( array $translations ) {
-		$requests = [];
+		$requests = array();
 
 		foreach ( $translations as $original_id => $translation_id ) {
 			$translation = GP::$translation->get( $translation_id );
@@ -40,34 +40,36 @@ class Translation_Memory_Client {
 				$locale .= '_' . $translation_set->slug;
 			}
 
-			$requests[] = [
+			$requests[] = array(
 				'source'       => $original->fields(),
-				'translations' => [
-					[
+				'translations' => array(
+					array(
 						'singular' => $translation->translation_0,
 						'plural'   => $translation->translation_1,
 						'locale'   => $locale,
-					],
-				],
-			];
+					),
+				),
+			);
 		}
 
 		if ( ! $requests ) {
 			return new WP_Error( 'no_translations' );
 		}
 
-		$body = wp_json_encode( [
-			'token'    => WPCOM_TM_TOKEN,
-			'requests' => $requests,
-		] );
+		$body = wp_json_encode(
+			array(
+				'token'    => WPCOM_TM_TOKEN,
+				'requests' => $requests,
+			)
+		);
 
 		$request = wp_remote_post(
 			self::API_BULK_ENDPOINT,
-			[
+			array(
 				'timeout'    => 10,
 				'user-agent' => 'WordPress.org Translate',
 				'body'       => $body,
-			]
+			)
 		);
 
 		if ( is_wp_error( $request ) ) {
@@ -100,20 +102,24 @@ class Translation_Memory_Client {
 			return new WP_Error( 'no_token' );
 		}
 
-		$url = add_query_arg( urlencode_deep( [
-			'text'   => $text,
-			'target' => $target_locale,
-			'token'  => WPCOM_TM_TOKEN,
-			'ts'     => time(),
-		] ), self::API_ENDPOINT );
-
+		$url = add_query_arg(
+			urlencode_deep(
+				array(
+					'text'   => $text,
+					'target' => $target_locale,
+					'token'  => WPCOM_TM_TOKEN,
+					'ts'     => time(),
+				)
+			),
+			self::API_ENDPOINT
+		);
 
 		$request = wp_remote_get(
 			$url,
-			[
+			array(
 				'timeout'    => 4,
 				'user-agent' => 'WordPress.org Translate',
-			]
+			)
 		);
 
 		if ( is_wp_error( $request ) ) {
@@ -132,20 +138,33 @@ class Translation_Memory_Client {
 		}
 
 		if ( empty( $result['matches'] ) ) {
-			return [];
+			return array();
 		}
 
-		$suggestions = [];
+		$suggestions = array();
 		foreach ( $result['matches'] as $match ) {
-			$suggestions[] = [
+			$suggestions[] = array(
 				'similarity_score' => $match['score'],
 				'source'           => $match['source'],
 				'translation'      => $match['text'],
 				'diff'             => ( 1 === $match['score'] ) ? null : self::diff( $text, $match['source'] ),
-			];
+			);
 		}
 
 		return $suggestions;
+	}
+
+	/**
+	 * Deletes a translation from translation memory.
+	 *
+	 * @param string $original_string    Original string.
+	 * @param string $translation_string Translation string.
+	 * @param string $locale_slug        Locale slug.
+	 * @param string $set_slug           Translation set slug.
+	 */
+	public static function delete( string $original_string, string $translation_string, string $locale_slug, string $set_slug ):bool {
+		// @todo Implement.
+		return true;
 	}
 
 	/**
@@ -156,7 +175,7 @@ class Translation_Memory_Client {
 	 * @return string HTML markup for the differences between the two texts.
 	 */
 	protected static function diff( $previous_text, $text ) {
-		$diff     = new  Text_Diff( 'auto', [ [ $text ], [ $previous_text ] ] );
+		$diff     = new Text_Diff( 'auto', array( array( $text ), array( $previous_text ) ) );
 		$renderer = new WP_Text_Diff_Renderer_inline();
 
 		return $renderer->render( $diff );
