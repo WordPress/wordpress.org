@@ -428,12 +428,15 @@
 		if ( ! container.length ) {
 			return;
 		}
-		var row               = $( this ).closest( '.translation-suggestion' );
+		var row  = $( this ).closest( '.translation-suggestion' );
+		var rows = editor.find( '.translation-suggestion' );
+
 		var deleteButton      = row.find( '.delete-suggestion' );
 		var originalString    = editor.find( '.original-raw' ).text();
 		var translationString = row.find( '.translation-suggestion__translation' ).text();
 		var originalId        = editor.original_id;
 		var nonce             = container.data( 'nonce' );
+
 		deleteButton.prop( 'disabled', true );
 		$.ajax(
 			{
@@ -449,7 +452,14 @@
 				cache: false,
 				success: function(result) {
 					if ( true === result.success ) {
-						row.remove();
+						rows.filter(
+							function () {
+								var translationRaw = $( this ).find( '.translation-suggestion__translation-raw' ).text().trim();
+								var score          = $( this ).find( '.translation-suggestion__score' ).text().trim();
+
+								return translationRaw === translationString && score === "100%";
+							}
+						).hide();
 					}
 				}
 			}
