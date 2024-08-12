@@ -429,15 +429,22 @@
 			return;
 		}
 		var row  = $( this ).closest( '.translation-suggestion' );
-		var rows = editor.find( '.translation-suggestion' );
+		var rows = editor.find( '.translation-suggestion.with-tooltip.translation' );
 
-		var deleteButton      = row.find( '.delete-suggestion' );
 		var originalString    = editor.find( '.original-raw' ).text();
 		var translationString = row.find( '.translation-suggestion__translation' ).text();
 		var originalId        = editor.original_id;
 		var nonce             = container.data( 'nonce' );
 
-		deleteButton.prop( 'disabled', true );
+		var filteredRows = rows.filter(
+			function() {
+				var translationRaw = $( this ).find( '.translation-suggestion__translation-raw' ).text().trim();
+				var score          = $( this ).find( '.translation-suggestion__score' ).text().trim();
+				return translationRaw === translationString && score === "100%";
+			}
+		);
+
+		filteredRows.find( '.delete-suggestion' ).prop( 'disabled', true );
 		$.ajax(
 			{
 				type: 'POST',
@@ -452,17 +459,16 @@
 				cache: false,
 				success: function(result) {
 					if ( true === result.success ) {
-						rows.filter(
-							function () {
-								var translationRaw = $( this ).find( '.translation-suggestion__translation-raw' ).text().trim();
-								var score          = $( this ).find( '.translation-suggestion__score' ).text().trim();
-
-								return translationRaw === translationString && score === "100%";
+						filteredRows.each(
+							function() {
+								$( this ).remove();
 							}
-						).hide();
+						);
 					}
+
 				}
-			}
+			},
+			100
 		);
 	}
 
