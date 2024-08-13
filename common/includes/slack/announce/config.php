@@ -476,6 +476,12 @@ function get_whitelist() {
 			'courane01', // @Courtney on Slack
 			'estelaris',
 		),
+		'sustainability' => array(
+			'littlebigthing', // @Csaba on Slack
+			'nahuai', // @Nahuai Badiola on Slack
+			'noradriana', // @Nora Ferreirós on Slack
+			'yellowlime', // @Thijs Buijs on Slack
+		),
 		'themereview' => array(
 			'acalfieri',
 			'acosmin',
