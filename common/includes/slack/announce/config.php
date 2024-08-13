@@ -51,7 +51,9 @@ function get_whitelist() {
 			'elblakeo31', // @Blake (Equalify)
 			'joedolson',
 			'joesimpsonjr',
+			'nhrrob',
 			'nrqsnchz',
+			'rcreators', // @Rishi Mehta on Slack
 			'rianrietveld',
 			'ryokuhi',
 			'sarahricker',
