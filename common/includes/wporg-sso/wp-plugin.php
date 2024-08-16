@@ -893,10 +893,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 
 			// If the user logged in with a recovery code..
-			$session_token        = wp_get_session_token() ?: ( $this->last_auth_cookie['token'] ?? '' );
-			$session              = WP_Session_Tokens::get_instance( $user->ID )->get( $session_token );
-			$used_recovery_code   = str_contains( $session['two-factor-provider'] ?? '', 'Backup_Codes' );
-			$codes_available      = Two_Factor_Backup_Codes::codes_remaining_for_user( $user );
+			$session_token      = wp_get_session_token() ?: ( $this->last_auth_cookie['token'] ?? '' );
+			$session            = WP_Session_Tokens::get_instance( $user->ID )->get( $session_token );
+			$used_recovery_code = str_contains( $session['two-factor-provider'] ?? '', 'Backup_Codes' );
+			$codes_available    = Two_Factor_Backup_Codes::codes_remaining_for_user( $user );
 
 			if (
 				// If they didn't use a recovery code,
