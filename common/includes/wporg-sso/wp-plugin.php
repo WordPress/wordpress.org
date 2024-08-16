@@ -888,8 +888,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return $redirect;
 			}
 
-			$current_user = wp_get_current_user();
-
 			// If the user logged in with a recovery code..
 			$session_token        = wp_get_session_token() ?: ( $this->last_auth_cookie['token'] ?? '' );
 			$session              = WP_Session_Tokens::get_instance( $user->ID )->get( $session_token );
