@@ -77,7 +77,7 @@ get_header();
 
 <p>&nbsp;</p>
 
-<p><a href="<?php echo esc_url( $account_settings_url ); ?>"><button class="button-primary"><?php _e( 'Take me to Account Settings', 'wporg-login' ); ?></button></a></p>
+<p><a href="<?php echo esc_url( $account_settings_url ); ?>"><button class="button-primary"><?php _e( 'View my account settings', 'wporg-login' ); ?></button></a></p>
 
 <?php if ( $can_ignore ) { ?>
 	<p id="nav">
