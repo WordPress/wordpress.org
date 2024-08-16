@@ -48,7 +48,7 @@ get_header();
 
 <p><?php
 	if ( $used_recovery_code ) {
-		_e( "You've logged in with a Recovery Code.<br>These codes are intended to be used when you lose access to your authentication device.<br>Please take a moment to review your Account Settings and ensure your Two-Factor settings are updated.", 'wporg-login' );
+		_e( "You've logged in with a Recovery Code.<br>These codes are intended to be used when you lose access to your authentication device.<br>Please take a moment to review your account settings and ensure your Two-Factor settings are up-to-date.", 'wporg-login' );
 	} else {
 		if ( ! $codes_available ) {
 			_e( "Warning! You don't have any Recovery Codes left.", 'wporg-login' );
