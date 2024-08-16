@@ -119,6 +119,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		/**
 		 * Records the last set cookies, because WordPress.
 		 *
+		 * During the WordPress login process, the authentication cookies are not yet available,
+		 * but we need to know the user token (contained in those cookies) to retrieve their session.
+		 * To work around this, we store the set authentication cookies here for later usage.
+		 *
 		 * @see https://core.trac.wordpress.org/ticket/61874
 		 */
 		function record_last_auth_cookie( $auth_cookie, $expire, $expiration, $user_id, $scheme, $token ) {
