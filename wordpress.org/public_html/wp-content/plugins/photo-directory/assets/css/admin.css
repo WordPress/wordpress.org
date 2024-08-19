@@ -132,3 +132,12 @@ body.post-type-photo #wp-content-editor-container {
 .wp-heading-inline #photo-dir-skip-photo {
 	margin-left: 1rem;
 }
+
+.photo-all-exif-container {
+	border-top: 1px solid #ccc;
+	margin-top: 6px;
+	padding-top: 6px;
+}
+.photo-all-exif {
+	overflow-wrap: anywhere;
+}

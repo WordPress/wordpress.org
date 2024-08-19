@@ -592,6 +592,30 @@ class Admin {
 			echo "<dd>{$data['value']}</dd>\n";
 		}
 		echo "</dl>\n";
+
+		// Show ALL EXIF data.
+		$all_exif = Photo::get_all_exif( $parent_id );
+		if ( $all_exif ) {
+			ksort( $all_exif );
+
+			echo '<div class="photo-all-exif-container">';
+			echo '<button id="photo-all-exif-toggle" class="button-link hide-if-no-js" type="button" aria-expanded="true">' . esc_html__( 'Toggle all raw EXIF data', 'wporg-photos' ) . '</button>';
+			echo '<dl class="photo-all-exif">';
+
+			foreach ( $all_exif as $key => $value ) {
+				if ( '' === $value ) {
+					continue;
+				}
+
+				echo '<dt>' . esc_html( $key ) . "</dt>\n";
+				if ( is_array( $value ) ) {
+					$value = '[' . implode( ', ', $value ) . ']';
+				}
+				echo '<dd>' . esc_html( $value ) . "</dd>\n";
+			}
+
+			echo "</dl></div>\n";
+		}
 	}
 
 	/**
