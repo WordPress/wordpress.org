@@ -967,6 +967,63 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	}
 
 	/**
+	 * Strips markups from text and UTF8 encodes it if it appears to be UTF8.
+	 *
+	 * @param string $text Text to strip of tags and UTF8 encode.
+	 * @return string
+	 */
+	public static function _strip_and_utf8_encode( $text ) {
+		$text = wp_kses( $text, 'strip' );
+
+		if ( $text && ! seems_utf8( $text ) ) {
+			$text = utf8_encode( $text );
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Returns all EXIF data for a photo, not just the hardcoded subset returned
+	 * by `wp_read_image_metadata()`.
+	 *
+	 * Also returns the data completely raw, without any reformatting other than
+	 * sanitization.
+	 *
+	 * @param int $post_id The ID of the photo post.
+	 * @return false|array The sanitized raw EXIF data, or false if the file was
+	 *                     not found or `exif_read_data()` is not available.
+	 */
+	public static function get_all_exif( $post_id ) {
+		$image_id = get_post_thumbnail_id( $post_id );
+		$file = get_attached_file( $image_id );
+		$exif = [];
+
+		// Bail if `exif_read_data()` is not available or the file no longer exists.
+		if ( ! is_callable( 'exif_read_data' ) || ! file_exists( $file ) ) {
+			return false;
+		}
+
+		$exif = self::exif_read_data_as_data_stream( $file );
+
+		if ( ! $exif ) {
+			return [];
+		}
+
+		// Ignore EXIF keys that are definitely not worth including.
+		$ignored_exif = apply_filters(
+			'wporg_photos-ignored_exif_keys',
+			[ 'UndefinedTag:0x9AAA' ]
+		);
+		if ( $ignored_exif && is_array( $ignored_exif ) ) {
+			foreach ( $ignored_exif as $key ) {
+				unset( $exif[ $key ] );
+			}
+		}
+
+		return map_deep( $exif, [__CLASS__, '_strip_and_utf8_encode' ] );
+	}
+
+	/**
 	 * Returns the IP address for the photo contributor.
 	 *
 	 * @param int|WP_Post|null The photo post.
