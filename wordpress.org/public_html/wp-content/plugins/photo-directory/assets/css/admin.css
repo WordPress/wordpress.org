@@ -133,6 +133,10 @@ body.post-type-photo #wp-content-editor-container {
 	margin-left: 1rem;
 }
 
+.no-exif {
+	font-style: italic;
+}
+
 .photo-all-exif-container {
 	border-top: 1px solid #ccc;
 	margin-top: 6px;

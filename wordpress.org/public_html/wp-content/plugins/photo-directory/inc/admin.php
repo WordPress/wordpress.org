@@ -583,6 +583,7 @@ class Admin {
 		$exif = Photo::get_exif( $parent_id );
 
 		if ( ! $exif ) {
+			echo '<p class="no-exif">' . esc_html__( 'No EXIF data was found.', 'wporg-photos' ) . "</p>\n";
 			return;
 		}
 
