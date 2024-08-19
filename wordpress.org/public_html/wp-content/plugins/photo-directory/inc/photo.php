@@ -1009,6 +1009,42 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			return [];
 		}
 
+		// Remap deprecated and unmapped properties.
+		// @see https://exiv2.org/tags.html
+		// @see https://github.com/exiftool/exiftool/blob/master/lib/Image/ExifTool/Exif.pm
+		// @see https://github.com/neos/metadata-extractor/blob/master/Classes/Domain/Extractor/ExifExtractor.php#L43
+		$remap = [
+			'GPSVersion'          => 'GPSVersionID',
+			'ISOSpeedRatings'     => 'PhotographicSensitivity',
+			'UndefinedTag:0x001F' => 'GPSHPositioningError',
+			'UndefinedTag:0x8830' => 'SensitivityType',
+			'UndefinedTag:0x8832' => 'RecommendedExposureIndex',
+			'UndefinedTag:0x9010' => 'OffsetTime',
+			'UndefinedTag:0x9011' => 'OffsetTimeOriginal',
+			'UndefinedTag:0x9012' => 'OffsetTimeDigitized',
+			'UndefinedTag:0x9400' => 'Temperature',
+			'UndefinedTag:0x9401' => 'Humidity',
+			'UndefinedTag:0x9402' => 'Pressure',
+			'UndefinedTag:0x9403' => 'WaterDepth',
+			'UndefinedTag:0x9404' => 'Acceleration',
+			'UndefinedTag:0x9405' => 'CameraElevationAngle',
+			'UndefinedTag:0x9999' => 'XiaomiSettings',
+			'UndefinedTag:0xA430' => 'CameraOwnerName',
+			'UndefinedTag:0xA431' => 'BodySerialNumber',
+			'UndefinedTag:0xA432' => 'LensSpecification',
+			'UndefinedTag:0xA433' => 'LensMake',
+			'UndefinedTag:0xA434' => 'LensModel',
+			'UndefinedTag:0xA435' => 'LensSerialNumber',
+			'UndefinedTag:0xA460' => 'CompositeImage',
+			'UndefinedTag:0xA500' => 'Gamma',
+		];
+		foreach ( $remap as $old => $new ) {
+			if ( isset( $exif[ $old ] ) ) {
+				$exif[ $new ] = $exif[ $old ];
+				unset( $exif[ $old ] );
+			}
+		}
+
 		// Ignore EXIF keys that are definitely not worth including.
 		$ignored_exif = apply_filters(
 			'wporg_photos-ignored_exif_keys',
