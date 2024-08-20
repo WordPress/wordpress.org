@@ -37,7 +37,7 @@ get_header();
 ?>
 
 <h2 class="center"><?php
-	if ( $used_recovery_code ) {
+	if ( $used_backup_code ) {
 		_e( 'Backup Code used', 'wporg-login' );
 	} else {
 		_e( 'Account Backup Codes', 'wporg-login' );
