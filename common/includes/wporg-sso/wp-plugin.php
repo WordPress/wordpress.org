@@ -29,6 +29,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Primarily for logged in users.
 			'updated-tos'     => '/updated-policies',
 			'enable-2fa'      => '/enable-2fa',
+			'backup-codes'    => '/backup-codes',
 			'logout'          => '/logout',
 
 			// Primarily for logged out users.
@@ -54,6 +55,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @var array
 		 */
 		static $matched_route_params = array();
+
+		/**
+		 * Holds the last set auth cookie.
+		 *
+		 * @var array
+		 */
+		protected $last_auth_cookie = array();
 
 		/**
 		 * Constructor: add our action(s)/filter(s)
@@ -98,10 +106,27 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					// Updated TOS interceptor.
 					add_filter( 'send_auth_cookies', [ $this, 'maybe_block_auth_cookies' ], 100, 5 );
 
+					// See https://core.trac.wordpress.org/ticket/61874
+					add_action( 'set_auth_cookie', [ $this, 'record_last_auth_cookie' ], 10, 6 );
+
 					// Maybe nag about 2FA
-					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_enable_2fa' ], 1000, 3 );
+					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_backup_codes' ], 500, 3 );
+					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_enable_2fa' ], 1100, 3 );
 				}
 			}
+		}
+
+		/**
+		 * Records the last set cookies, because WordPress.
+		 *
+		 * During the WordPress login process, the authentication cookies are not yet available,
+		 * but we need to know the user token (contained in those cookies) to retrieve their session.
+		 * To work around this, we store the set authentication cookies here for later usage.
+		 *
+		 * @see https://core.trac.wordpress.org/ticket/61874
+		 */
+		function record_last_auth_cookie( $auth_cookie, $expire, $expiration, $user_id, $scheme, $token ) {
+			$this->last_auth_cookie = compact( 'auth_cookie', 'expire', 'expiration', 'user_id', 'scheme', 'token' );
 		}
 
 		/**
@@ -848,6 +873,53 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				'redirect_to',
 				urlencode( $redirect ),
 				home_url( '/enable-2fa' )
+			);
+		}
+
+		/**
+		 * Redirects the user to the 2FA Backup codes nag if needed.
+		 */
+		public function maybe_redirect_to_backup_codes( $redirect, $orig_redirect, $user ) {
+			if (
+				// No valid user.
+				is_wp_error( $user ) ||
+				// Or we're already going there.
+				str_contains( $redirect, '/backup-codes' ) ||
+				// Or the user doesn't use 2FA
+				! Two_Factor_Core::is_user_using_two_factor( $user->ID )
+			) {
+				// Then we don't need to redirect to the enable 2FA page.
+				return $redirect;
+			}
+
+			// If the user logged in with a backup code..
+			$session_token    = wp_get_session_token() ?: ( $this->last_auth_cookie['token'] ?? '' );
+			$session          = WP_Session_Tokens::get_instance( $user->ID )->get( $session_token );
+			$used_backup_code = str_contains( $session['two-factor-provider'] ?? '', 'Backup_Codes' );
+			$codes_available  = Two_Factor_Backup_Codes::codes_remaining_for_user( $user );
+
+			if (
+				// If they didn't use a backup code,
+				! $used_backup_code &&
+				(
+					// They have ample codes available..
+					$codes_available > 3 ||
+					// or they've already been nagged about only having a few left (and actually have them)
+					(
+						$codes_available &&
+						$codes_available >= (int) get_user_meta( $user->ID, 'last_2fa_backup_codes_nag', true )
+					)
+				)
+			) {
+				// No need to nag.
+				return $redirect;
+			}
+
+			// Redirect to the Backup Codes nag.
+			return add_query_arg(
+				'redirect_to',
+				urlencode( $redirect ),
+				home_url( '/backup-codes' )
 			);
 		}
 
