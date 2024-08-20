@@ -29,7 +29,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Primarily for logged in users.
 			'updated-tos'     => '/updated-policies',
 			'enable-2fa'      => '/enable-2fa',
-			'recovery-codes'  => '/recovery-codes',
+			'backup-codes'    => '/backup-codes',
 			'logout'          => '/logout',
 
 			// Primarily for logged out users.
@@ -110,7 +110,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					add_action( 'set_auth_cookie', [ $this, 'record_last_auth_cookie' ], 10, 6 );
 
 					// Maybe nag about 2FA
-					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_recovery_codes' ], 500, 3 );
+					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_backup_codes' ], 500, 3 );
 					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_enable_2fa' ], 1100, 3 );
 				}
 			}
@@ -877,14 +877,14 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
-		 * Redirects the user to the 2FA Recovery codes nag if needed.
+		 * Redirects the user to the 2FA Backup codes nag if needed.
 		 */
-		public function maybe_redirect_to_recovery_codes( $redirect, $orig_redirect, $user ) {
+		public function maybe_redirect_to_backup_codes( $redirect, $orig_redirect, $user ) {
 			if (
 				// No valid user.
 				is_wp_error( $user ) ||
 				// Or we're already going there.
-				str_contains( $redirect, '/recovery-codes' ) ||
+				str_contains( $redirect, '/backup-codes' ) ||
 				// Or the user doesn't use 2FA
 				! Two_Factor_Core::is_user_using_two_factor( $user->ID )
 			) {
@@ -892,22 +892,22 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return $redirect;
 			}
 
-			// If the user logged in with a recovery code..
-			$session_token      = wp_get_session_token() ?: ( $this->last_auth_cookie['token'] ?? '' );
-			$session            = WP_Session_Tokens::get_instance( $user->ID )->get( $session_token );
-			$used_recovery_code = str_contains( $session['two-factor-provider'] ?? '', 'Backup_Codes' );
-			$codes_available    = Two_Factor_Backup_Codes::codes_remaining_for_user( $user );
+			// If the user logged in with a backup code..
+			$session_token    = wp_get_session_token() ?: ( $this->last_auth_cookie['token'] ?? '' );
+			$session          = WP_Session_Tokens::get_instance( $user->ID )->get( $session_token );
+			$used_backup_code = str_contains( $session['two-factor-provider'] ?? '', 'Backup_Codes' );
+			$codes_available  = Two_Factor_Backup_Codes::codes_remaining_for_user( $user );
 
 			if (
-				// If they didn't use a recovery code,
-				! $used_recovery_code &&
+				// If they didn't use a backup code,
+				! $used_backup_code &&
 				(
 					// They have ample codes available..
 					$codes_available > 3 ||
 					// or they've already been nagged about only having a few left (and actually have them)
 					(
 						$codes_available &&
-						$codes_available >= (int) get_user_meta( $user->ID, 'last_2fa_recovery_codes_nag', true )
+						$codes_available >= (int) get_user_meta( $user->ID, 'last_2fa_backup_codes_nag', true )
 					)
 				)
 			) {
@@ -915,11 +915,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return $redirect;
 			}
 
-			// Redirect to the Recovery Codes nag.
+			// Redirect to the Backup Codes nag.
 			return add_query_arg(
 				'redirect_to',
 				urlencode( $redirect ),
-				home_url( '/recovery-codes' )
+				home_url( '/backup-codes' )
 			);
 		}
 
