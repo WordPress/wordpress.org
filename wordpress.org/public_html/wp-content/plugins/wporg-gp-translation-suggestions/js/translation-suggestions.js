@@ -423,6 +423,9 @@
 	function deleteSuggestionFromTM( event ) {
 		event.preventDefault();
 		event.stopImmediatePropagation();
+		if ( ! confirm( 'Are you sure you want to delete this translation from the Translation Memory?' )) {
+			return;
+		}
 		var editor    = $gp.editor.current;
 		var container = editor.find( '.suggestions__translation-memory' );
 		if ( ! container.length ) {
