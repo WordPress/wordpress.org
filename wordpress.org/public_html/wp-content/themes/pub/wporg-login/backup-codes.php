@@ -48,15 +48,15 @@ get_header();
 
 <p><?php
 	if ( $used_backup_code ) {
-		_e( "You've logged in with a Backup Code.<br>These codes are intended to be used when you lose access to your authentication device.<br>Please take a moment to review your account settings and ensure your Two-Factor settings are up-to-date.", 'wporg-login' );
+		_e( "You've logged in with a backup code.<br>These codes are intended to be used when you lose access to your authentication device.<br>Please take a moment to review your account settings and ensure your two-factor settings are up-to-date.", 'wporg-login' );
 	} else {
 		if ( ! $codes_available ) {
-			_e( "Warning! You don't have any Backup Codes left.", 'wporg-login' );
+			_e( 'You do not have any backup codes remaining.', 'wporg-login' );
 		} else {
 			printf(
 				_n(
-					"Warning! You've only got %s Backup Code left.",
-					"Warning! You've only got %s Backup Codes left.",
+					'You have %s backup code remaining.',
+					'You have %s backup codes remaining.',
 					$codes_available,
 					'wporg-login'
 				),
@@ -72,7 +72,7 @@ get_header();
 <p>&nbsp;</p>
 
 <p><?php
-	_e( 'If you run out of Backup Codes and no longer have access to your Authentication device, you are at risk of being locked out of your WordPress.org account if we are unable to verify account ownership.', 'wporg-login' );
+	_e( 'If you run out of backup codes and no longer have access to your authentication device, you are at risk of being locked out of your WordPress.org account if we are unable to verify account ownership.', 'wporg-login' );
 ?></p>
 
 <p>&nbsp;</p>
