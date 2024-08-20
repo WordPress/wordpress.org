@@ -80,6 +80,8 @@ class Uploads {
 
 		// Enqueue scripts.
 		add_action( 'wp_enqueue_scripts',               [ __CLASS__, 'wp_enqueue_scripts' ] );
+		// Adds user's recent submissions above upload form.
+		add_filter( 'wporg_photos_pre_upload_form',     [ __CLASS__, 'output_user_recent_submissions' ] );
 		// Disable upload form and show message if user not allowed to upload.
 		add_filter( 'the_content',                      [ __CLASS__, 'insert_upload_disallowed_notice' ], 1 );
 		// Insert upload form into submit page.
@@ -888,14 +890,6 @@ class Uploads {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) ) {
 			$content .= apply_filters( 'wporg_photos_pre_upload_form', $content );
 
-			if ( User::count_published_photos( get_current_user_id() ) ) {
-				$content .= sprintf(
-					/* translators: %s: URL to current user's photo archive. */
-					'<p>' . __( 'View <a href="%s">your archive of photos</a> to see what you&#8217;ve already had published.', 'wporg-photos' ) . '</p>',
-					get_author_posts_url( get_current_user_id() )
-				);
-			}
-
 			$content .= '<fieldset id="wporg-photo-upload">';
 
 			$content .= sprintf(
@@ -1014,6 +1008,40 @@ class Uploads {
 
 		return $transforms;
 	}
+
+	/**
+	 * Adds current user's 6 most recent photo submissions above upload form.
+	 *
+	 * @param string $content Existing content before the upload form.
+	 * @return string
+	 */
+	public static function output_user_recent_submissions( $content ) {
+		// Bail if user does not have any published photos.
+		if ( ! User::count_published_photos( get_current_user_id() ) ) {
+			return $content;
+		}
+
+		$recent_photos = User::get_recent_photos( get_current_user_id(), 6, false );
+		if ( $recent_photos ) {
+			$content .= '<h2 class="latest-photos">' . esc_html__( 'Your latest published photos', 'wporg-photos' ) . '</h2>' . "\n";
+			$content .= '<div class="photos-grid">' . "\n";
+
+			foreach ( $recent_photos as $photo ) {
+				$content .= Template_Tags\get_photo_as_grid_item( $photo, 'medium', 'post' );
+			}
+
+			$content .= "</div>\n";
+		}
+
+		$content .= sprintf(
+			/* translators: %s: URL to current user's photo archive. */
+			'<p>' . __( 'View <a href="%s">your archive of photos</a> to see everything you&#8217;ve already had published.', 'wporg-photos' ) . '</p>',
+			esc_url( get_author_posts_url( get_current_user_id() ) )
+		);
+
+		return $content;
+	}
+
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Uploads', 'init' ] );
