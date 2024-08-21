@@ -23,14 +23,27 @@ add_action( 'init', function() {
 	}
 } );
 
+/**
+ * Support for https://securitytxt.org/
+ */
 function security_txt() {
+	/*
+	 * Set the expiry date to December 31st / next June 30th, whichever has 6~12 months expiry.
+	 * The RFC recommends that the expiry be less than a year in the future.
+	 */
+	$expires = strtotime( 'Dec 31' );
+	if ( gmdate('z') > 182 ) {
+		$expires = strtotime( 'Jun 30', $expires + WEEK_IN_SECONDS );
+	}
+
 	header( 'Content-Type: text/plain')
 	?>
 Contact: https://hackerone.com/wordpress
-Expires: 2024-12-31T15:00:00.000Z
+Expires: <?php echo gmdate( 'Y-m-d', $expires ); ?>T15:00:00.000Z
 Acknowledgments: https://hackerone.com/wordpress/thanks
 Canonical: https://wordpress.org/.well-known/security.txt
 Policy: https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/
+Preferred-Languages: en
 
 # The above contact is for reporting security issues in core WordPress software itself.
 # For reporting issues in a plugin hosted at wordpress.org, contact plugins@wordpress.org 
