@@ -431,19 +431,27 @@
 		if ( ! container.length ) {
 			return;
 		}
-		var row  = $( this ).closest( '.translation-suggestion' );
-		var rows = editor.find( '.translation-suggestion.with-tooltip.translation' );
+		var row          = $( this ).closest( '.translation-suggestion' );
+		var deleteButton = event.target;
+		var rows         = editor.find( '.translation-suggestion.with-tooltip.translation' );
 
-		var originalString    = editor.find( '.original-raw' ).text();
-		var translationString = row.find( '.translation-suggestion__translation' ).text();
-		var originalId        = editor.original_id;
-		var nonce             = container.data( 'nonce' );
+		var source      = {
+			'source': deleteButton.dataset.sourceSingular,
+			'source_plural': deleteButton.dataset.sourcePlural,
+			'source_context': deleteButton.dataset.sourceContext,
+		};
+		var translation = {
+			'translation': deleteButton.dataset.translation,
+			'translation_plural': deleteButton.dataset.translationPlural,
+		};
+		var originalId  = editor.original_id;
+		var nonce       = container.data( 'nonce' );
 
 		var filteredRows = rows.filter(
 			function() {
 				var translationRaw = $( this ).find( '.translation-suggestion__translation-raw' ).text().trim();
 				var score          = $( this ).find( '.translation-suggestion__score' ).text().trim();
-				return translationRaw === translationString && score === "100%";
+				return translationRaw === deleteButton.dataset.translation && score === "100%";
 			}
 		);
 
@@ -453,9 +461,9 @@
 				type: 'POST',
 				url: window.WPORG_TRANSLATION_MEMORY_API_DELETE_URL,
 				data: {
+					'source': source,
+					'translation': translation,
 					'originalId' : originalId,
-					'originalString': originalString,
-					'translationString': translationString,
 					'nonce': nonce
 				},
 				dataType: 'json',
