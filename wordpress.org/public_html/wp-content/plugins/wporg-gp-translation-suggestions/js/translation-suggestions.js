@@ -26,7 +26,6 @@
 
 	/**
 	 * Stores the external translations used.
-	 *
 	 * @type {object}
 	 */
 	var externalSuggestion = {};
@@ -68,47 +67,39 @@
 		}
 		// Store a string with a space to avoid making the same request another time.
 		storeTheSuggestionInTheCache( type, originalId, ' ' );
-		var xhr = $.ajax(
-			{
-				url: apiUrl,
-				data: {
-					'original': originalId,
-					'translation': translationId,
-					'nonce': nonce
-				},
-				dataType: 'json',
-				cache: false,
-			}
-		);
+		var xhr = $.ajax( {
+			url: apiUrl,
+			data: {
+				'original': originalId,
+				'translation': translationId,
+				'nonce': nonce
+			},
+			dataType: 'json',
+			cache: false,
+		} );
 
-		xhr.done(
-			function( response ) {
-				$container.find( '.suggestions__loading-indicator' ).remove();
-				if ( response.success ) {
-					  $container.append( response.data );
-					  storeTheSuggestionInTheCache( type, originalId, response.data );
-					  removeNoSuggestionsMessage( $container );
-					  copyTranslationMemoryToSidebarTab( $container );
-				} else {
-					$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
-				}
-				$container.addClass( 'initialized' );
-			}
-		);
-
-		xhr.fail(
-			function() {
-				$container.find( '.suggestions__loading-indicator' ).remove();
+		xhr.done( function( response ) {
+			$container.find( '.suggestions__loading-indicator' ).remove();
+			if ( response.success ) {
+				$container.append( response.data );
+				storeTheSuggestionInTheCache( type, originalId, response.data );
+				removeNoSuggestionsMessage( $container );
+				copyTranslationMemoryToSidebarTab( $container );
+			} else {
 				$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
-				$container.addClass( 'initialized' );
 			}
-		);
+			$container.addClass( 'initialized' );
+		} );
 
-		xhr.always(
-			function() {
-				$container.removeClass( 'fetching' );
-			}
-		);
+		xhr.fail( function() {
+			$container.find( '.suggestions__loading-indicator' ).remove();
+			$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
+			$container.addClass( 'initialized' );
+		} );
+
+		xhr.always( function() {
+			$container.removeClass( 'fetching' );
+		} );
 	}
 
 	/**
@@ -118,12 +109,12 @@
 	 */
 	function getSuggestionsForTheFirstRow() {
 		var firstEditor = $( '#translations' ).find( '.editor' ).first();
-		var row_id      = firstEditor.closest( 'tr' ).attr( 'row' );
+		var row_id = firstEditor.closest( 'tr' ).attr( 'row' );
 		if ( ! row_id ) {
 			return;
 		}
-		firstEditor.row_id         = row_id;
-		firstEditor.original_id    = $gp.editor.original_id_from_row_id( row_id );
+		firstEditor.row_id = row_id;
+		firstEditor.original_id = $gp.editor.original_id_from_row_id( row_id );
 		firstEditor.translation_id = $gp.editor.translation_id_from_row_id( row_id );
 		maybeFetchTranslationMemorySuggestions( firstEditor );
 		maybeFetchOpenAISuggestions( firstEditor );
@@ -197,14 +188,14 @@
 
 	add_amount_to_others_tab = function ( sidebarTab, data, originalId ) {
 		let elements = 0;
-		if ( data ? .['helper-history-' + originalId] ) {
+		if ( data?.['helper-history-' + originalId] ) {
 			elements += data['helper-history-' + originalId].count;
 		}
-		if ( data ? .['helper-other-locales-' + originalId] ) {
+		if ( data?.['helper-other-locales-' + originalId] ) {
 			elements += data['helper-other-locales-' + originalId].count;
 		}
-		var editor       = $( '[data-tab="' + sidebarTab + '"]' ).closest( '.editor' );
-		var TMcontainer  = editor.find( '.suggestions__translation-memory' );
+		var editor = $('[data-tab="' + sidebarTab + '"]').closest( '.editor' );
+		var TMcontainer = editor.find( '.suggestions__translation-memory' );
 		var elementsInTM = 0;
 		if ( TMcontainer.length ) {
 			elementsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.translation' ).length;
@@ -212,10 +203,10 @@
 			elementsInTM += TMcontainer.find( '.translation-suggestion.with-tooltip.openai' ).length;
 		}
 		elements += elementsInTM;
-		$( '#summary-translation-memory-' + originalId ).html( 'Translation&nbsp;Memory&nbsp;(' + elementsInTM + ')' );
+		$( '#summary-translation-memory-' + originalId ).html('Translation&nbsp;Memory&nbsp;(' + elementsInTM + ')');
 
 		let content = 'Others&nbsp;(' + elements + ')';
-		$( '[data-tab="' + sidebarTab + '"]' ).html( content );
+		$('[data-tab="' + sidebarTab + '"]').html( content );
 	}
 
 	/**
@@ -226,16 +217,16 @@
 	 * @return {void}
 	 */
 	function copyTranslationMemoryToSidebarTab( $container ){
-		var editor                   = $container.closest( '.editor' );
-		var divSidebarWithDiscussion = editor.find( '.meta.discussion' ).first();
-		var divId                    = divSidebarWithDiscussion.attr( 'data-row-id' );
-		var TMcontainer              = editor.find( '.suggestions__translation-memory' );
-		if ( ! TMcontainer.length ) {
+		var editor = $container.closest( '.editor' );
+	    var divSidebarWithDiscussion = editor.find( '.meta.discussion' ).first();
+		var divId = divSidebarWithDiscussion.attr( 'data-row-id' );
+		var TMcontainer = editor.find( '.suggestions__translation-memory' );
+		if ( !TMcontainer.length ) {
 			return;
 		}
 
 		$( '#sidebar-div-others-translation-memory-content-' + divId ).html( TMcontainer.html() );
-		add_amount_to_others_tab( 'sidebar-tab-others-' + divId, window.translationHelpersCache ? .[ divId ], divId );
+		add_amount_to_others_tab('sidebar-tab-others-' + divId, window.translationHelpersCache?.[ divId ], divId);
 	}
 
 	/**
@@ -276,7 +267,7 @@
 	 */
 	function maybeFetchTranslationMemorySuggestions( editor ) {
 		var $container = editor.find( '.suggestions__translation-memory' );
-		if ( ! $container.length ) {
+		if ( !$container.length ) {
 			return;
 		}
 
@@ -284,15 +275,15 @@
 			return;
 		}
 
-		if ( ! editor.find( 'translation-suggestion.with-tooltip.translation' ).first() ) {
+		if ( !editor.find('translation-suggestion.with-tooltip.translation').first() ) {
 			return;
 		}
 
 		$container.addClass( 'fetching' );
 
-		var originalId    = editor.original_id;
+		var originalId = editor.original_id;
 		var translationId = editor.translation_id;
-		var nonce         = $container.data( 'nonce' );
+		var nonce = $container.data( 'nonce' );
 
 		fetchSuggestions( $container, window.WPORG_TRANSLATION_MEMORY_API_URL, originalId, translationId, nonce, 'TM' );
 	}
@@ -331,15 +322,15 @@
 	 */
 	function maybeFetchExternalSuggestions( editor, type, getExternalSuggestions, apiUrl ) {
 		var $container = editor.find( '.suggestions__translation-memory' );
-		if ( ! $container.length ) {
+		if ( !$container.length ) {
 			return;
 		}
 		if ( true !== getExternalSuggestions ) {
 			return;
 		}
-		var originalId    = editor.original_id;
+		var originalId = editor.original_id;
 		var translationId = editor.translation_id;
-		var nonce         = $container.data( 'nonce' );
+		var nonce = $container.data( 'nonce' );
 
 		fetchSuggestions( $container, apiUrl, originalId, translationId, nonce, type );
 	}
@@ -363,9 +354,9 @@
 
 		$container.addClass( 'fetching' );
 
-		var originalId    = editor.original_id;
+		var originalId = editor.original_id;
 		var translationId = editor.translation_id;
-		var nonce         = $container.data( 'nonce' );
+		var nonce = $container.data( 'nonce' );
 
 		fetchSuggestions( $container, window.WPORG_OTHER_LANGUAGES_API_URL, originalId , translationId,  nonce, 'OL' );
 	}
@@ -396,21 +387,19 @@
 	 * @return {void}
 	 */
 	function removeNoSuggestionsDuplicateMessage( $container ) {
-		var $html            = $( $container );
-		var $paragraphs      = $html.find( 'p' );
+		var $html = $($container);
+		var $paragraphs = $html.find('p');
 		var uniqueParagraphs = [];
 
-		$paragraphs.each(
-			function() {
-				var paragraphText = $( this ).text().trim();
+		$paragraphs.each(function() {
+			var paragraphText = $(this).text().trim();
 
-				if (uniqueParagraphs.indexOf( paragraphText ) === -1) {
-					uniqueParagraphs.push( paragraphText );
-				} else {
-					$( this ).remove();
-				}
+			if (uniqueParagraphs.indexOf(paragraphText) === -1) {
+				uniqueParagraphs.push(paragraphText);
+			} else {
+				$(this).remove();
 			}
-		);
+		});
 	}
 
 	/**
@@ -423,19 +412,17 @@
 	function deleteSuggestionFromTM( event ) {
 		event.preventDefault();
 		event.stopImmediatePropagation();
-		if ( ! confirm( 'Are you sure you want to delete this translation from the Translation Memory?' )) {
+		if ( ! confirm( 'Are you sure you want to delete this translation from the Translation Memory?' ) ) {
 			return;
 		}
-		var editor    = $gp.editor.current;
+		var editor = $gp.editor.current;
 		var container = editor.find( '.suggestions__translation-memory' );
 		if ( ! container.length ) {
 			return;
 		}
-		var row          = $( this ).closest( '.translation-suggestion' );
-		var deleteButton = event.target;
-		var rows         = editor.find( '.translation-suggestion.with-tooltip.translation' );
 
-		var source      = {
+		var deleteButton = event.target;
+		var source = {
 			'source': deleteButton.dataset.sourceSingular,
 			'source_plural': deleteButton.dataset.sourcePlural,
 			'source_context': deleteButton.dataset.sourceContext,
@@ -444,43 +431,37 @@
 			'translation': deleteButton.dataset.translation,
 			'translation_plural': deleteButton.dataset.translationPlural,
 		};
-		var originalId  = editor.original_id;
-		var nonce       = container.data( 'nonce' );
+		var originalId = editor.original_id;
+		var nonce = container.data( 'nonce' );
 
-		var filteredRows = rows.filter(
-			function() {
-				var translationRaw = $( this ).find( '.translation-suggestion__translation-raw' ).text().trim();
-				var score          = $( this ).find( '.translation-suggestion__score' ).text().trim();
-				return translationRaw === deleteButton.dataset.translation && score === "100%";
-			}
-		);
+		var rows = editor.find( '.translation-suggestion.with-tooltip.translation' );
+		var filteredRows = rows.filter( function() {
+			var translationRaw = $( this ).find( '.translation-suggestion__translation-raw' ).text().trim();
+			var score = $( this ).find( '.translation-suggestion__score' ).text().trim();
+			return translationRaw === deleteButton.dataset.translation && score === "100%";
+		});
 
 		filteredRows.find( '.delete-suggestion' ).prop( 'disabled', true );
-		$.ajax(
-			{
-				type: 'POST',
-				url: window.WPORG_TRANSLATION_MEMORY_API_DELETE_URL,
-				data: {
-					'source': source,
-					'translation': translation,
-					'originalId' : originalId,
-					'nonce': nonce
-				},
-				dataType: 'json',
-				cache: false,
-				success: function(result) {
-					if ( true === result.success ) {
-						filteredRows.each(
-							function() {
-								$( this ).remove();
-							}
-						);
-					}
-
-				}
+		$.ajax( {
+			type: 'POST',
+			url: window.WPORG_TRANSLATION_MEMORY_API_DELETE_URL,
+			data: {
+				'source': source,
+				'translation': translation,
+				'originalId' : originalId,
+				'nonce': nonce
 			},
-			100
-		);
+			dataType: 'json',
+			cache: false,
+			success: function( result ) {
+				if( true === result.success ) {
+					filteredRows.each( function() {
+						$( this ).remove();
+					});
+				}
+
+			}
+		}, 100 );
 	}
 
 	function copySuggestion( event ) {
@@ -488,8 +469,8 @@
 			return;
 		}
 
-		var $el          = $( this ).closest( '.translation-suggestion' );
-		var $translation = $el.find( '.translation-suggestion__translation-raw' );
+		var $el = $( this ).closest( '.translation-suggestion' );
+		var $translation = $el.find( '.translation-suggestion__translation-raw');
 		if ( ! $translation.length ) {
 			return;
 		}
@@ -542,11 +523,11 @@
 			maybeFetchOpenAISuggestions( $gp.editor.current );
 			maybeFetchDeeplSuggestions( $gp.editor.current );
 			maybeFetchOtherLanguageSuggestions( $gp.editor.current );
-			var nextEditor = $gp.editor.current.nextAll( 'tr.editor' ).first();
+			var nextEditor = $gp.editor.current.nextAll('tr.editor' ).first();
 			if ( nextEditor.length ) {
-				var row_id                = nextEditor.closest( 'tr' ).attr( 'row' );
-				nextEditor.row_id         = row_id;
-				nextEditor.original_id    = $gp.editor.original_id_from_row_id( row_id );
+				var row_id = nextEditor.closest( 'tr' ).attr( 'row' );
+				nextEditor.row_id = row_id;
+				nextEditor.original_id = $gp.editor.original_id_from_row_id( row_id );
 				nextEditor.translation_id = $gp.editor.translation_id_from_row_id( row_id );
 				maybeFetchTranslationMemorySuggestions( nextEditor );
 				maybeFetchOpenAISuggestions( nextEditor );
@@ -564,11 +545,9 @@
 				.on( 'click', '.translation-suggestion .delete-suggestion', deleteSuggestionFromTM )
 				.on( 'click', '.translation-suggestion', copySuggestion )
 				.on( 'click', '.translation-suggestion', addSuggestion );
-			$( document ).ready(
-				function() {
-					getSuggestionsForTheFirstRow();
-				}
-			);
+			$( document ).ready( function() {
+				getSuggestionsForTheFirstRow();
+			});
 		};
 	})( $gp.editor.install_hooks );
 
@@ -584,23 +563,21 @@
 			return;
 		}
 		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' ) == 'translation' ? 'tm' : $row.data( 'suggestion-source' );
-		externalSuggestion.translation       = $row.find( '.translation-suggestion__translation' ).text();
+		externalSuggestion.translation = $row.find( '.translation-suggestion__translation' ).text();
 
 	}
 
-	// Prefilter ajax requests to add external translations used to the request.
-	$.ajaxPrefilter(
-		function ( options ) {
-			const isSuggestionUsed = Object.keys( externalSuggestion ).length > 0 ? true : false;
+	//Prefilter ajax requests to add external translations used to the request.
+	$.ajaxPrefilter( function ( options ) {
+		const isSuggestionUsed = Object.keys( externalSuggestion ).length  > 0 ? true : false;
 
-			if ( ! externalSuggestion || ! isSuggestionUsed ) {
-				  return;
-			}
-			if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
-				options.data      += '&externalTranslationSource=' + encodeURIComponent( externalSuggestion.suggestion_source );
-				options.data      += '&externalTranslationUsed=' + encodeURIComponent( externalSuggestion.translation );
-				externalSuggestion = {};
-			}
+		if ( ! externalSuggestion || ! isSuggestionUsed ) {
+			return;
 		}
-	);
+		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
+			options.data += '&externalTranslationSource=' + encodeURIComponent( externalSuggestion.suggestion_source );
+			options.data += '&externalTranslationUsed=' + encodeURIComponent( externalSuggestion.translation );
+			externalSuggestion = {};
+		}
+	});
 })( jQuery );
