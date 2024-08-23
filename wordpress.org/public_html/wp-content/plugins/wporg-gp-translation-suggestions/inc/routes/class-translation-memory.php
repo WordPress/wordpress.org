@@ -378,7 +378,7 @@ class Translation_Memory extends GP_Route {
 			return false;
 		}
 
-		$suggestions = Translation_Memory_Client::query( $original->singular, $locale );
+		$suggestions = Translation_Memory_Client::query( $original->singular, $original->plural, $locale );
 		if ( is_wp_error( $suggestions ) ) {
 			return false;
 		}
