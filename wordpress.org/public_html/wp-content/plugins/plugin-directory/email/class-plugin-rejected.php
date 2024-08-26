@@ -5,7 +5,6 @@ use WordPressdotorg\Plugin_Directory\Tools;
 
 class Plugin_Rejected extends Markdown_Base {
 	protected $required_args = [
-		'slug',
 		'submission_date'
 	];
 
@@ -22,7 +21,7 @@ class Plugin_Rejected extends Markdown_Base {
 			// Should be first, to allow placeholders in the rejection reasons too.
 			'###REASON###'          => $this->get_rejection_reason(),
 			'###NAME###'            => $this->plugin->post_title,
-			'###SLUG###'            => $this->plugin->post_name,
+			'###SLUG###'            => ( $this->args['slug'] ?? '' ) ?: $this->plugin->post_name,
 			'###SUBMISSION_DATE###' => $this->args['submission_date'],
 		];
 
@@ -57,23 +56,26 @@ class Plugin_Rejected extends Markdown_Base {
 
 	public function reason_3_month() {
 		return __(
-			"Your plugin has been rejected because it has been roughly 90 days without significant progress being made on the review we sent, from the email address on record.
+			"Your plugin has been rejected because it has been roughly 90 days without significant progress being made on the review we sent to the email address on record at the beginning of the review.
 
 https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#why-was-my-plugin-rejected-after-three-months
 
 <strong>What to do next</strong>
 
-If you no longer wish to have your plugin reviewed, you can simply delete this message. No harm, no foul.
+If you no longer wish to have your plugin reviewed you can simply delete this message. No harm, no foul.
 
-If you do want to finish your review, please reply to this email and let us know. If you don't remember where you were with the review, please email us the latest version of your code and we'll review that.
+If you want to finish your review, please do the following:
+
+- <strong>First</strong>, find the last email we sent you with our latest review, read that email thoroughly and <strong>fix the issues mentioned</strong>.
+- Once your plugin is corrected, you are ready to <a href='https://wordpress.org/plugins/developers/add/'>resubmit it</a> and <strong>reply to this email</strong> so we know you want to continue.
+
+We understand that sometimes emails get lost or mistakenly filed as spam, and it's entirely possible that you never received or seen our previous emails. If you can't find it, let us know and we'll send it to you again.
 
 <strong>Why this happens</strong>
 
-In order to keep the plugin queue manageable, we reject plugins that are not complete after 3 months (90 days). Even with this policy, we have on average 500 plugins waiting on developers to complete their review at any point in time.
+In order to keep the plugin queue manageable, we reject plugins that are not making progress after 3 months (90 days). Even with this policy, we have more than 500 plugins waiting for developers to complete their review at any given time.
 
-All plugins are reviewed within 7 working days of submission, but we understand that emails are sometimes lost or accidentally filed as spam, and it's totally possible you never got our previous emails. Another common cause for this is that you replied from a different email address than you submitted it, causing the email chain to be broken.
-
-Thankfully, a rejection does not mean we can't go forward. If you want to continue, please just reply and let us know.",
+Thankfully, a rejection does not mean we can't go forward. If you want to continue, please just update your plugin, submit it and reply to let us know.",
 			'wporg-plugins'
 		);
 	}
