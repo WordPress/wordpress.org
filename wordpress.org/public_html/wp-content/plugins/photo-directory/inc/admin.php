@@ -87,6 +87,9 @@ class Admin {
 		// Add button to skip current photo in the queue.
 		add_action( "add_meta_boxes_{$post_type}",             [ __CLASS__, 'add_skip_queued_photo_meta_box' ], 10, 2 );
 		add_action( 'admin_init',                              [ __CLASS__, 'admin_redirect_to_next_photo' ] );
+
+		// Shrink height of content editor.
+		add_filter( 'wp_editor_settings',                      [ __CLASS__, 'shrink_editor_height' ], 10, 2 );
 	}
 
 	/**
@@ -1594,6 +1597,23 @@ class Admin {
 		) {
 			$query->set( 'orderby', 'rand' );
 		}
+	}
+
+	/**
+	 * Shrinks the height of the content editor when editing photo posts.
+	 *
+	 * @param array  $settings  Array of editor arguments.
+	 * @param string $editor_id Unique editor identifier.
+	 * @return array
+	 */
+	public static function shrink_editor_height( $settings, $editor_id ) {
+		global $post_type;
+
+		if ( Registrations::get_post_type() === $post_type ) {
+			$settings['editor_height'] = '80px';
+		}
+
+		return $settings;
 	}
 
 }
