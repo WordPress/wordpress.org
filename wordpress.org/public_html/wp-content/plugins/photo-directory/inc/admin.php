@@ -723,7 +723,7 @@ class Admin {
 	 * @param array   $args Associative array of additional data.
 	 */
 	public static function meta_box_photo( $post, $args ) {
-		self::output_photo_in_metabox( $post, [ 900, 450 ], true );
+		echo Template_Tags\get_photo_as_grid_item( $post, [ 900, 450 ], 'image' );
 	}
 
 	/**
@@ -771,7 +771,7 @@ class Admin {
 			}
 
 			// Show the photo.
-			self::output_photo_in_metabox( $photo, 'medium', false );
+			echo Template_Tags\get_photo_as_grid_item( $photo, 'medium', 'edit' );
 
 			$shown_photos++;
 		}
@@ -791,54 +791,6 @@ class Admin {
 			);
 			echo '</div>' . "\n";
 		}
-	}
-
-	/**
-	 * Outputs markup for a photo intended to be shown in an admin metabox.
-	 *
-	 * @param WP_Post      $post             Photo post object.
-	 * @param string|int[] $size             Image size. Accepts any registered image size name, or an
-	 *                                       array of width and height values in pixels (in that order).
-	 * @param bool         $link_to_fullsize Should the image link to its full-sized version? If not, it
-	 *                                       will link to edit the photo post. Default true;
-	 */
-	protected static function output_photo_in_metabox( $post, $size, $link_to_fullsize = true ) {
-		$image_id = get_post_thumbnail_id( $post );
-		if ( ! $image_id ) {
-			return;
-		}
-
-		$pending_notice = '';
-		$classes = 'photo-thumbnail';
-
-		if ( Photo::is_controversial( $image_id ) ) {
-			$classes .= ' blurred';
-		}
-
-		if ( 'pending' === $post->post_status ) {
-			$classes .= ' pending';
-			if ( ! $link_to_fullsize ) {
-				$pending_notice = '<div class="pending-notice">' . __( 'Pending', 'wporg-photos' ) . '</div>';
-			}
-		}
-
-		if ( $link_to_fullsize ) {
-			$link_url = wp_get_attachment_url( $image_id );
-			$label = __( 'View full-sized version of the photo.', 'wporg-photos' );
-		} else {
-			$link_url = get_edit_post_link( $post );
-			$label = sprintf( __( 'Edit photo post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title );
-		}
-
-		printf(
-			'<span><a class="photos-photo-link row-title" href="%s" target="_blank" aria-label="%s"><img class="%s" src="%s" alt="" /></a>%s</span>',
-			esc_url( $link_url ),
-			/* translators: %s: Post title. */
-			esc_attr( $label ),
-			esc_attr( $classes ),
-			esc_url( get_the_post_thumbnail_url( $post->ID, $size ) ),
-			$pending_notice
-		);
 	}
 
 	/**
