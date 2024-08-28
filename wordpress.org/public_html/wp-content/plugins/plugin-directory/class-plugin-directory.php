@@ -790,6 +790,15 @@ class Plugin_Directory {
 			}
 		}
 
+		// If it's a query explicitely for non-plugin-related content, bail.
+		if (
+			! empty( $wp_query->query_vars['post_type'] ) &&
+			'plugin' !== $wp_query->query_vars['post_type'] &&
+			! in_array( 'plugin', (array) $wp_query->query_vars['post_type'], true )
+		) {
+			return;
+		}
+
 		// By default, if no query is made, we're querying /browse/featured/
 		if ( empty( $wp_query->query ) ) {
 			$wp_query->query_vars['browse'] = 'featured';
