@@ -1080,7 +1080,7 @@ class Plugin_Directory {
 			case 'last_updated':
 				$wp_query->query_vars['meta_query']['last_updated'] ??= [
 					'key'     => 'last_updated',
-					'type'    => 'DATE',
+					'type'    => 'DATETIME',
 					'compare' => 'EXISTS',
 				];
 				break;
