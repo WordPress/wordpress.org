@@ -89,7 +89,7 @@ interface Event_Repository_Interface {
 	public function get_past_events( int $page = -1, int $page_size = -1 ): Events_Query_Result;
 
 	/**
-	 * Get events that are trashed.
+	 * Get events that are currently active or happening in the future.
 	 *
 	 * @param int $page      Index of the page to return.
 	 * @param int $page_size Page size.
@@ -97,6 +97,17 @@ interface Event_Repository_Interface {
 	 * @return Events_Query_Result
 	 * @throws Exception
 	 */
+	public function get_current_and_upcoming_events( int $page = - 1, int $page_size = - 1 ): Events_Query_Result;
+
+		/**
+		 * Get events that are trashed.
+		 *
+		 * @param int $page      Index of the page to return.
+		 * @param int $page_size Page size.
+		 *
+		 * @return Events_Query_Result
+		 * @throws Exception
+		 */
 	public function get_trashed_events( int $page = -1, int $page_size = -1 ): Events_Query_Result;
 
 	/**
@@ -185,9 +196,16 @@ class Events_Query_Result {
 	 */
 	public int $current_page;
 
-	public function __construct( array $events, int $current_page, int $page_count ) {
-		$this->events = $events;
+	public array $event_ids;
 
+	public function __construct( array $events, int $current_page, int $page_count ) {
+		$this->events    = $events;
+		$this->event_ids = array_map(
+			function ( $event ) {
+				return $event->id();
+			},
+			$events,
+		);
 		// The call to intval() is required because WP_Query::max_num_pages is sometimes a float, despite being type-hinted as int.
 		$this->page_count   = intval( $page_count );
 		$this->current_page = intval( $current_page );

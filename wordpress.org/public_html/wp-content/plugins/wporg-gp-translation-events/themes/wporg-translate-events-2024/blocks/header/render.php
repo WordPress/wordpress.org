@@ -18,5 +18,3 @@ $html_title = implode( ' | ', array( $attributes['title'], __( 'Translation Even
 		<div class="wp-site-blocks">
 			<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php echo $site_header; ?>
-			<div class="wp-block-group alignfull has-white-background-color has-background" style="padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:18px;padding-left:var(--wp--preset--spacing--edge-space)">
-				<h2 class="wp-block-heading"><?php echo esc_html( $attributes['title'] ); ?></h2>

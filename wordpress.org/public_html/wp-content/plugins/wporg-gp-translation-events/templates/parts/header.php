@@ -21,6 +21,7 @@ $image_url        = $image_url ?? Urls::event_default_image();
 add_action(
 	'gp_head',
 	function () use ( $html_title, $url, $html_description, $image_url ) {
+		echo '<link rel="alternate" type="application/rss+xml" title="' . esc_html__( 'Translating Events &raquo; WordPress Feed', 'gp-translation-events' ) . '" href="' . esc_url( home_url( gp_url( '/events/feed' ) ) ) . '" />' . "\n";
 		echo '<meta name="twitter:card" content="summary" />' . "\n";
 		echo '<meta name="twitter:site" content="@WordPress" />' . "\n";
 		echo '<meta name="twitter:title" content="' . esc_attr( $html_title ) . '" />' . "\n";

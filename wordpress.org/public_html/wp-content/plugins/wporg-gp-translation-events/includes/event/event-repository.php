@@ -121,7 +121,6 @@ class Event_Repository implements Event_Repository_Interface {
 			array( '%d' ),
 		);
 		// phpcs:enable
-
 		return $event;
 	}
 
@@ -144,10 +143,12 @@ class Event_Repository implements Event_Repository_Interface {
 				$post->post_status,
 				$post->post_title,
 				$post->post_content,
+				$post->post_modified_gmt ? new DateTimeImmutable( $post->post_modified_gmt ) : null,
 				$meta['attendance_mode'],
 			);
 			$event->set_id( $post->ID );
 			$event->set_slug( $post->post_name );
+
 			return $event;
 		} catch ( Exception $e ) {
 			// This should not be possible as it means data in the database is invalid.
@@ -214,6 +215,31 @@ class Event_Repository implements Event_Repository_Interface {
 					'ID'         => 'DESC',
 				),
 			)
+		);
+		// phpcs:enable
+	}
+	public function get_current_and_upcoming_events( int $page = - 1, int $page_size = - 1 ): Events_Query_Result {
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		return $this->execute_events_query(
+			$page,
+			$page_size,
+			array(
+				'meta_query' => array(
+					array(
+						'key'     => '_event_end',
+						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
+						'compare' => '>',
+						'type'    => 'DATETIME',
+					),
+				),
+				'meta_key'   => '_event_start',
+				'orderby'    => array(
+					'meta_value' => 'ASC',
+					'ID'         => 'ASC',
+				),
+			),
 		);
 		// phpcs:enable
 	}
@@ -544,11 +570,13 @@ class Event_Repository implements Event_Repository_Interface {
 				$post->post_status,
 				$title,
 				$post->post_content,
+				$post->post_modified_gmt ? new DateTimeImmutable( $post->post_modified_gmt ) : null,
 				$meta['attendance_mode'],
 			);
 			$event->set_id( $post->ID );
 			$event->set_slug( $post->post_name );
 			$events[] = $event;
+
 		}
 
 		return new Events_Query_Result( $events, $page, $query->max_num_pages );

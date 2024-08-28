@@ -1,7 +1,6 @@
 <?php namespace Wporg\TranslationEvents\Theme_2024; ?>
 
-			</div><?php // Close the main wp-block-group div, opened by the header block. ?>
-			<!-- wp:wporg/global-footer /-->
+			<?php echo do_blocks( '<!-- wp:wporg/global-footer /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php wp_footer(); ?>
 		</div><?php // Close the wp-site-blocks div, opened by the header block. ?>
 	</body>

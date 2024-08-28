@@ -40,22 +40,17 @@ class My_Events_Route extends Route {
 		}
 		// phpcs:enable
 
-		$events = $this->event_repository->get_events_for_user( get_current_user_id(), $page, 10 );
+		$events    = $this->event_repository->get_events_for_user( get_current_user_id(), $page, 10 );
+		$event_ids = $events->event_ids;
 
-		$event_ids = array_map(
-			function ( $event ) {
-				return $event->id();
-			},
-			$events->events,
-		);
-
-		$current_user_attendee_per_event = $this->attendee_repository->get_attendees_for_events_for_user( $event_ids, $user_id );
+		$current_user_attendee_per_event = $this->attendee_repository->get_attendees_for_user_for_events( $user_id, $event_ids );
 
 		$this->use_theme();
 		$this->tmpl(
 			'my-events',
 			compact(
 				'events',
+				'event_ids',
 				'current_user_attendee_per_event'
 			),
 		);
