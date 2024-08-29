@@ -279,10 +279,9 @@
 							}
 							in_text  = '';
 							ago_text = ' ago';
-							diff     = - diff;
 						}
 
-						const seconds    = Math.floor( diff / 1000 );
+						const seconds    = Math.floor( Math.abs( diff ) / 1000 );
 						const minutes    = Math.floor( seconds / 60 );
 						const hours      = Math.floor( minutes / 60 );
 						let days         = Math.floor( hours / 24 );
