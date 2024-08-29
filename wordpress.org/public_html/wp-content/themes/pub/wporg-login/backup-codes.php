@@ -32,6 +32,7 @@ if ( ! is_user_logged_in() || ! Two_Factor_Core::is_user_using_two_factor( $user
  * Record the last time we nagged the user about backup codes, as we only want to do this once per code-use.
  */
 update_user_meta( $user->ID, 'last_2fa_backup_codes_nag', $codes_available );
+update_user_meta( $user->ID, 'last_2fa_backup_codes_nag_time', time() );
 
 get_header();
 ?>
