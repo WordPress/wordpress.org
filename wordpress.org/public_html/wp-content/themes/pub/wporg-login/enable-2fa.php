@@ -1,5 +1,5 @@
 <?php
-use function WordPressdotorg\Two_Factor\{ user_requires_2fa, user_should_2fa, get_edit_account_url };
+use function WordPressdotorg\Two_Factor\{ user_requires_2fa, user_should_2fa, get_onboarding_account_url };
 /**
  * The 'Enable 2FA' notification screen.
  *
@@ -48,7 +48,7 @@ get_header();
 
 <p>&nbsp;</p>
 
-<p><a href="<?php echo esc_url( get_edit_account_url() ); ?>"><button class="button-primary"><?php _e( "OK, I'll setup Two-Factor now.", 'wporg-login' ); ?></button></a></p>
+<p><a href="<?php echo esc_url( add_query_arg( 'redirect_to', urlencode( $redirect_to ), get_onboarding_account_url() ) ); ?>"><button class="button-primary"><?php _e( "OK, I'll setup Two-Factor now.", 'wporg-login' ); ?></button></a></p>
 
 <?php if ( ! $requires_2fa ) { ?>
 <p id="nav">
