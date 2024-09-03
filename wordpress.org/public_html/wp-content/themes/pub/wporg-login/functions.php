@@ -61,7 +61,7 @@ add_filter( 'xmlrpc_methods', '__return_empty_array' );
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20230504' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), filemtime( __DIR__ . '/stylesheets/login.css' ) );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
 
