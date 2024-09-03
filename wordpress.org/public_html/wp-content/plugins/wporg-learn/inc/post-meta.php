@@ -22,6 +22,7 @@ add_action( 'save_post_wporg_workshop', __NAMESPACE__ . '\save_workshop_meta_fie
 add_action( 'save_post_meeting', __NAMESPACE__ . '\save_meeting_metabox_fields' );
 add_action( 'admin_footer', __NAMESPACE__ . '\render_locales_list' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
+add_action( 'wp_insert_post', __NAMESPACE__ . '\set_default_lesson_preview', 10, 3 );
 
 /**
  * Register all post meta keys.
@@ -51,21 +52,34 @@ function register_lesson_meta() {
 			},
 		),
 	);
+}
 
-	register_post_meta(
-		'lesson',
-		'_lesson_archive_excluded',
-		array(
-			'description'       => __( 'Whether the lesson should be excluded from archive views.', 'wporg-learn' ),
-			'type'              => 'string',
-			'single'            => true,
-			'sanitize_callback' => 'sanitize_text_field',
-			'show_in_rest'      => true,
-			'auth_callback'     => function( $allowed, $meta_key, $post_id ) {
-				return current_user_can( 'edit_post', $post_id );
-			},
-		),
-	);
+/**
+ * Set public preview to be enabled on lessons created within a course by default.
+ * This post meta is registered by Sensei with no default value, so we set it here on lesson creation.
+ *
+ * @param int     $post_ID Post ID.
+ * @param WP_Post $post    Post object.
+ * @param bool    $update  Whether this is an existing post being updated.
+ */
+function set_default_lesson_preview( $post_ID, $post, $update ) {
+	// Only run for new lessons.
+	if ( $update || 'lesson' !== $post->post_type ) {
+		return;
+	}
+
+	// Check if the lesson belongs to a course.
+	$course_id = get_post_meta( $post_ID, '_lesson_course', true );
+
+	if ( empty( $course_id ) ) {
+		return;
+	}
+
+	$existing_value = get_post_meta( $post_ID, '_lesson_preview', true );
+
+	if ( '' === $existing_value ) {
+		update_post_meta( $post_ID, '_lesson_preview', 'preview' );
+	}
 }
 
 /**
@@ -483,13 +497,6 @@ function render_metabox_workshop_details( WP_Post $post ) {
 	$duration_interval = get_workshop_duration( $post, 'interval' );
 	$locales           = get_locales_with_english_names();
 	$captions          = get_post_meta( $post->ID, 'video_caption_language' ) ?: array();
-	$all_lessons       = get_posts( array(
-		'post_type'      => 'lesson',
-		'post_status'    => 'publish',
-		'posts_per_page' => 999,
-		'orderby'        => 'title',
-		'order'          => 'asc',
-	) );
 
 	require get_views_path() . 'metabox-workshop-details.php';
 }
@@ -576,9 +583,6 @@ function save_workshop_meta_fields( $post_id ) {
 		}
 	}
 
-	$lesson_id = filter_input( INPUT_POST, 'linked-lesson-id', FILTER_SANITIZE_NUMBER_INT );
-	update_post_meta( $post_id, 'linked_lesson_id', $lesson_id );
-
 	$presenter_wporg_username = filter_input( INPUT_POST, 'presenter-wporg-username' );
 	$presenter_usernames      = array_map( 'trim', explode( ',', $presenter_wporg_username ) );
 	delete_post_meta( $post_id, 'presenter_wporg_username' );
@@ -649,7 +653,6 @@ function render_locales_list() {
 function enqueue_editor_assets() {
 	enqueue_expiration_date_assets();
 	enqueue_language_meta_assets();
-	enqueue_lesson_archive_excluded_meta_assets();
 	enqueue_lesson_featured_meta_assets();
 	enqueue_duration_meta_assets();
 }
@@ -704,31 +707,6 @@ function enqueue_language_meta_assets() {
 		);
 
 		wp_set_script_translations( 'wporg-learn-language-meta', 'wporg-learn' );
-	}
-}
-
-/**
- * Enqueue scripts for the archive excluded lesson meta block.
- */
-function enqueue_lesson_archive_excluded_meta_assets() {
-	global $typenow;
-
-	if ( 'lesson' === $typenow ) {
-		$script_asset_path = get_build_path() . 'lesson-archive-excluded-meta.asset.php';
-		if ( ! file_exists( $script_asset_path ) ) {
-			wp_die( 'You need to run `yarn start` or `yarn build` to build the required assets.' );
-		}
-
-		$script_asset = require( $script_asset_path );
-		wp_enqueue_script(
-			'wporg-learn-lesson-archive-excluded-meta',
-			get_build_url() . 'lesson-archive-excluded-meta.js',
-			$script_asset['dependencies'],
-			$script_asset['version'],
-			true
-		);
-
-		wp_set_script_translations( 'wporg-learn-lesson-archive-excluded-meta', 'wporg-learn' );
 	}
 }
 

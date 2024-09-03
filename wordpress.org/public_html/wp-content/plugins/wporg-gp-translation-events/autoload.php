@@ -15,6 +15,7 @@ require_once __DIR__ . '/includes/routes/event/list.php';
 require_once __DIR__ . '/includes/routes/event/image.php';
 require_once __DIR__ . '/includes/routes/event/list-trashed.php';
 require_once __DIR__ . '/includes/routes/event/translations.php';
+require_once __DIR__ . '/includes/routes/event/rss.php';
 require_once __DIR__ . '/includes/routes/user/attend-event.php';
 require_once __DIR__ . '/includes/routes/user/host-event.php';
 require_once __DIR__ . '/includes/routes/user/my-events.php';

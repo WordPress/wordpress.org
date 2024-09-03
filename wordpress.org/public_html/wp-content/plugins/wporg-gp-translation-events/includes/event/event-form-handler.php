@@ -237,6 +237,7 @@ class Event_Form_Handler {
 			$event_status,
 			$title,
 			$description,
+			null,
 			$attendance_mode,
 		);
 		$event->set_id( intval( $event_id ) );

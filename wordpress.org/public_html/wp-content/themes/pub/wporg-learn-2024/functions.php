@@ -2,7 +2,9 @@
 
 namespace WordPressdotorg\Theme\Learn_2024;
 
-use function WPOrg_Learn\Sensei\{get_my_courses_page_url, get_lesson_has_published_course};
+use WP_HTML_Tag_Processor;
+use function WPOrg_Learn\Sensei\{get_lesson_has_published_course};
+use function WordPressdotorg\Theme\Learn_2024\Template_Helpers\{get_my_courses_page_url};
 
 // Block files
 require_once __DIR__ . '/src/card-featured-image-a11y/index.php';
@@ -11,24 +13,37 @@ require_once __DIR__ . '/src/course-grid/index.php';
 require_once __DIR__ . '/src/course-outline/index.php';
 require_once __DIR__ . '/src/learning-pathway-cards/index.php';
 require_once __DIR__ . '/src/learning-pathway-header/index.php';
+require_once __DIR__ . '/src/lesson-course-info/index.php';
 require_once __DIR__ . '/src/lesson-grid/index.php';
+require_once __DIR__ . '/src/lesson-standalone/index.php';
 require_once __DIR__ . '/src/search-results-context/index.php';
 require_once __DIR__ . '/src/sensei-progress-bar/index.php';
 require_once __DIR__ . '/src/sidebar-meta-list/index.php';
 require_once __DIR__ . '/src/upcoming-online-workshops/index.php';
 require_once __DIR__ . '/inc/block-config.php';
 require_once __DIR__ . '/inc/block-hooks.php';
-require_once __DIR__ . '/inc/query.php';
 require_once __DIR__ . '/inc/head.php';
+require_once __DIR__ . '/inc/query.php';
+require_once __DIR__ . '/inc/template-helpers.php';
 
 /**
  * Actions and filters.
  */
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
+add_action( 'sensei_quiz_question_inside_after', __NAMESPACE__ . '\sensei_question_add_closing_fieldset' );
+// Attached at 50 to inject after title, description, etc, so that only answers are in the fieldset.
+add_action( 'sensei_quiz_question_inside_before', __NAMESPACE__ . '\sensei_question_add_opening_fieldset', 50 );
+add_action( 'wp', __NAMESPACE__ . '\dequeue_lesson_archive_video_scripts', 20 );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\maybe_enqueue_sensei_assets', 100 );
+// Attached at 11 to run after scripts are registered, but before they are enqueued.
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\defer_scripts', 11 );
 
+// Remove Jetpack CSS on frontend
+add_filter( 'jetpack_implode_frontend_css', '__return_false', 99 );
 add_filter( 'post_thumbnail_html', __NAMESPACE__ . '\set_default_featured_image', 10, 5 );
+add_filter( 'search_template_hierarchy', __NAMESPACE__ . '\modify_search_template' );
+add_filter( 'sensei_learning_mode_lesson_status_icon', __NAMESPACE__ . '\modify_lesson_status_icon_add_aria', 10, 2 );
 add_filter( 'sensei_register_post_type_course', function( $args ) {
 	$args['has_archive'] = 'courses';
 	return $args;
@@ -38,9 +53,10 @@ add_filter( 'sensei_register_post_type_lesson', function( $args ) {
 	return $args;
 } );
 add_filter( 'single_template_hierarchy', __NAMESPACE__ . '\modify_single_template' );
+add_filter( 'taxonomy_template_hierarchy', __NAMESPACE__ . '\modify_taxonomy_template_hierarchy' );
+add_filter( 'wp_get_attachment_image_attributes', __NAMESPACE__ . '\eager_load_first_card_rows_images', 10, 3 );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\set_site_breadcrumbs' );
-add_filter( 'taxonomy_template_hierarchy', __NAMESPACE__ . '\modify_taxonomy_template_hierarchy' );
 
 remove_filter( 'template_include', array( 'Sensei_Templates', 'template_loader' ), 10, 1 );
 
@@ -55,6 +71,27 @@ function modify_single_template( $templates ) {
 		array_unshift( $templates, 'single-lesson.html' );
 	} elseif ( is_singular( 'quiz' ) ) {
 		array_unshift( $templates, 'single-quiz.html' );
+	}
+
+	return $templates;
+}
+
+/**
+ * Modify the search template hierarchy to use search-all templates.
+ *
+ * @param array $templates Array of template files.
+ * @return array
+ */
+function modify_search_template( $templates ) {
+	// Should not change the search result template of course, lesson, and learning-pathway.
+	// Currently, they each use their specific templates: archive-course, archive-lesson, and taxonomy-learning-pathway,
+	// which have their own dedicated UI and filters.
+	if (
+		is_search() &&
+		! ( is_post_type_archive( 'course' ) || is_post_type_archive( 'lesson' ) ) &&
+		! is_tax( 'learning-pathway' )
+		) {
+			array_unshift( $templates, 'search-all' );
 	}
 
 	return $templates;
@@ -109,6 +146,29 @@ function enqueue_assets() {
 }
 
 /**
+ * Eagerly load the images for the first row of cards, for performance (LCP metric).
+ *
+ * @param array   $attr       The image attributes.
+ * @param WP_Post $attachment The attachment post object.
+ * @param string  $size       The image size.
+ * @return array The modified image attributes.
+ */
+function eager_load_first_card_rows_images( $attr, $attachment, $size ) {
+	static $image_count = 0;
+
+	if ( is_front_page() || is_archive() || is_search() || is_page( 'my-courses' ) ) {
+		$image_count++;
+
+		if ( $image_count <= 3 ) {
+			$attr['loading'] = 'eager';
+			$attr['fetchpriority'] = 'high';
+		}
+	}
+
+	return $attr;
+}
+
+/**
  * Sensei doesn't enqueue learning mode styles for Lessons which are not part of a course.
  * Enqueue the styles and add the required body class if needed.
  */
@@ -125,6 +185,92 @@ function maybe_enqueue_sensei_assets() {
 
 			return $classes;
 		} );
+	}
+}
+
+/**
+ * Defer frontend script loading for performance optimization.
+ */
+function defer_scripts() {
+	if ( is_admin() ) {
+		return;
+	}
+
+	// Attempt to defer loading of all these scripts which are in the head.
+	// This is not guaranteed as it depends on the loading strategy of their dependant script.
+	$scripts = array(
+		'jetpack-block-subscriptions',
+		'jquery-core',
+		'jquery-migrate',
+		'lodash',
+		'moment',
+		'react',
+		'react-dom',
+		'react-jsx-runtime',
+		'utils',
+		'wp-a11y',
+		'wp-compose',
+		'wp-data',
+		'wp-date',
+		'wp-deprecated',
+		'wp-dom',
+		'wp-dom-ready',
+		'wp-element',
+		'wp-escape-html',
+		'wp-hooks',
+		'wp-html-entities',
+		'wp-i18n',
+		'wp-is-shallow-equal',
+		'wp-keycodes',
+		'wp-polyfill',
+		'wp-primitives',
+		'wp-priority-queue',
+		'wp-private-apis',
+		'wp-redux-routine',
+		'wp-rich-text',
+		'wp-url',
+		'wp-warning',
+		'wporg-calendar-script',
+	);
+
+	foreach ( $scripts as $script ) {
+		wp_script_add_data( $script, 'strategy', 'defer' );
+		wp_script_add_data( $script, 'group', 0 );
+	}
+}
+
+/**
+ * Dequeue Sensei video scripts loaded on lessons archive.
+ * Sensei LMS and Sensei Pro both enqueue video player scripts for lesson posts,
+ * but these are not needed on archives and cause performance issues.
+ *
+ * See class Sensei_Pro_Interactive_Blocks\Interactive_Blocks::enqueue_frontend_assets().
+ * See class Sensei_Course_Video_Settings::enqueue_frontend_scripts().
+ */
+function dequeue_lesson_archive_video_scripts() {
+	if ( is_admin() || ! is_post_type_archive( 'lesson' ) ) {
+		return;
+	}
+
+	global $wp_filter;
+
+	if ( isset( $wp_filter['wp_enqueue_scripts'] ) ) {
+		foreach ( $wp_filter['wp_enqueue_scripts']->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $key => $callback ) {
+				if ( is_array( $callback['function'] ) ) {
+					$caller = $callback['function'][0];
+					$name = $callback['function'][1];
+
+					if (
+						( 'enqueue_frontend_scripts' === $name || 'enqueue_frontend_assets' === $name )
+						&& is_object( $caller )
+						&& ( get_class( $caller ) === 'Sensei_Course_Video_Settings' || get_class( $caller ) === 'Sensei_Pro_Interactive_Blocks\Interactive_Blocks' )
+					) {
+						remove_action( 'wp_enqueue_scripts', $callback['function'], $priority );
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -335,7 +481,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
  */
 function set_default_featured_image( $html, $post_id, $post_thumbnail_id, $size, $attr ) {
 	if ( ! $html ) {
-		return '<img src="https://s.w.org/images/learn-thumbnail-fallback.jpg?v=4" alt="' . esc_attr( get_the_title( $post_id ) ) . '" />';
+		return '<img src="https://s.w.org/images/learn-thumbnail-fallback.jpg?v=5" alt="' . esc_attr( get_the_title( $post_id ) ) . '" />';
 	}
 
 	return $html;
@@ -404,4 +550,55 @@ function modify_taxonomy_template_hierarchy( $templates ) {
 	}
 
 	return $templates;
+}
+
+/**
+ * Filter the lesson status icon.
+ *
+ * @param string $icon   The icon HTML.
+ * @param string $status The lesson status.
+ *
+ * @return string The updated icon HTML with aria data.
+ */
+function modify_lesson_status_icon_add_aria( $icon, $status ) {
+	// These statuses have been copied from Sensei\Blocks\Course_Theme\Course_Navigation\ICONS.
+	$labels = array(
+		'not-started' => __( 'Not started', 'wporg-learn' ),
+		'in-progress' => __( 'In progress', 'wporg-learn' ),
+		'ungraded'    => __( 'Ungraded', 'wporg-learn' ),
+		'completed'   => __( 'Completed', 'wporg-learn' ),
+		'failed'      => __( 'Failed', 'wporg-learn' ),
+		'locked'      => __( 'Locked', 'wporg-learn' ),
+		'preview'     => __( 'Preview', 'wporg-learn' ),
+	);
+
+	if ( ! isset( $labels[ $status ] ) ) {
+		return $icon;
+	}
+
+	$html = new WP_HTML_Tag_Processor( $icon );
+	$html->next_tag( 'svg' );
+	$html->set_attribute( 'aria-label', $labels[ $status ] );
+	$html->set_attribute( 'role', 'img' );
+	return $html->get_updated_html();
+}
+
+/**
+ * Use the "before question" hook to open a fieldset and add a ledgend to label the input options.
+ *
+ * @param int $question_id The question ID.
+ */
+function sensei_question_add_opening_fieldset( $question_id ) {
+	$title = strip_tags( get_the_title( $question_id ) );
+	?>
+	<fieldset>
+		<legend class="screen-reader-text"><?php echo esc_html( $title ); ?></legend>
+	<?php
+}
+
+/**
+ * Use the "after question" hook to close the fieldset opened in `sensei_question_add_opening_fieldset`.
+ */
+function sensei_question_add_closing_fieldset() {
+	echo '</fieldset>';
 }

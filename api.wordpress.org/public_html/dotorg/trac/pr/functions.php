@@ -289,6 +289,9 @@ function determine_trac_ticket( $pr ) {
 		// Then any trac instance.
 		'!(?P<trac>[a-z]+).trac.wordpress.org/ticket/(?P<id>\d+)!i',
 
+		// Any GitHub defined ticket autolink references.
+		'!(?:(?P<trac>Core|Meta)-|ticket:)(?P<id>\d+)!i', // Core-1234, Meta-1234, ticket:1234
+
 		// Now for just plain ticket references without a trac instance.
 		'!(?:^|\s)#WP(\d+)!', // #WP1234
 		'!(?:^|\s)#(\d{4,5})!', // #1234
@@ -319,7 +322,7 @@ function determine_trac_ticket( $pr ) {
 
 				// If a Trac-specific link is detected, use that trac.
 				if ( ! empty( $m['trac'] ) ) {
-					$trac = $m['trac'];
+					$trac = strtolower( $m['trac'] );
 				}
 
 				return [ $trac, $id ];

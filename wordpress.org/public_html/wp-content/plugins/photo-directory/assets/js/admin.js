@@ -91,6 +91,23 @@ document.addEventListener('DOMContentLoaded', function () {
 		document.querySelector('#photoskip')?.remove();
 		document.querySelector('label[for="photoskip-hide"]')?.remove();
 	}
+
+	// Handle toggle for full listing of EXIF data.
+	const exifContainer = document.querySelector('.photo-all-exif');
+	const exifToggle = document.querySelector('#photo-all-exif-toggle');
+	if (exifContainer && exifToggle) {
+		function toggleAllEXIF(event) {
+			const newExpandState = exifContainer.classList.toggle('hidden');
+			exifToggle.setAttribute('aria-expanded', newExpandState ? 'false' : 'true');
+			event.preventDefault();
+		}
+		// Hide the full EXIF data by default.
+		exifContainer.classList.add('hidden');
+		exifToggle.setAttribute('aria-expanded', 'false');
+		// Clicking the toggle should toggle the visibility of the EXIF data.
+		exifToggle.addEventListener('click', toggleAllEXIF, true);
+	}
+
 }, false);
 
 /**

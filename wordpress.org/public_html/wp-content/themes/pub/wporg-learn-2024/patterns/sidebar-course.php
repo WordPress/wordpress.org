@@ -7,7 +7,7 @@
  * @package wporg-learn-2024
  */
 
-use function WPOrg_Learn\Sensei\{get_my_courses_page_url};
+use function WordPressdotorg\Theme\Learn_2024\Template_Helpers\{get_my_courses_page_url};
 
 $completed_course = Sensei_Utils::user_completed_course( get_the_ID() );
 $current_post     = get_post();
@@ -67,7 +67,7 @@ $current_post     = get_post();
 			
 			<!-- wp:button {"textAlign":"center","width":100,"style":{"typography":{"lineHeight":0,"fontStyle":"normal","fontWeight":"400"},"spacing":{"padding":{"left":"var:preset|spacing|10","right":"var:preset|spacing|10"}}},"className":"aligncenter is-style-outline","fontFamily":"inter"} -->
 			<div class="wp-block-button has-custom-width wp-block-button__width-100 aligncenter is-style-outline has-inter-font-family" style="font-style:normal;font-weight:400">
-				<a class="wp-block-button__link has-text-align-center wp-element-button" href="https://wordpress.org/playground/demo/?step=playground&amp;theme=twentytwentythree" style="padding-right:var(--wp--preset--spacing--10);padding-left:var(--wp--preset--spacing--10)" target="_blank" rel="noreferrer noopener"><?php esc_html_e( 'Practice on a private demo site', 'wporg-learn' ); ?></a>
+				<a class="wp-block-button__link has-text-align-center wp-element-button" href="https://playground.wordpress.net/?networking=yes" style="padding-right:var(--wp--preset--spacing--10);padding-left:var(--wp--preset--spacing--10)" target="_blank" rel="noreferrer noopener"><?php esc_html_e( 'Practice on a private demo site', 'wporg-learn' ); ?></a>
 			</div>
 			<!-- /wp:button -->
 		

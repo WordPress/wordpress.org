@@ -466,6 +466,8 @@ function the_plugin_danger_zone() {
 
 	echo '<hr>';
 
+	echo '<div class="plugin-danger-zone">';
+
 	echo '<h2>' . esc_html__( 'The Danger Zone', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'The following features are restricted to plugin committers only. They exist to allow plugin developers more control over their work.', 'wporg-plugins' ) . '</p>';
@@ -488,6 +490,8 @@ function the_plugin_danger_zone() {
 		// Output the toggle preview button.
 		the_plugin_self_toggle_preview_button();
 	}
+
+	echo '</div>';
 
 }
 

@@ -127,18 +127,16 @@ class HelpHub_Post_Types_Post_Type {
 			add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 			add_filter( 'post_updated_messages', array( $this, 'updated_messages' ) );
 
-			if ( 'edit.php' === $pagenow && isset( $_GET['post_type'] ) && $this->post_type === $_GET['post_type'] ) { // WPCS: input var ok; CSRF ok.
-				add_filter(
-					'manage_edit-' . $this->post_type . '_columns', array(
-						$this,
-						'register_custom_column_headings',
-					), 10, 1
-				);
-				add_action( 'manage_posts_custom_column', array( $this, 'register_custom_columns' ), 10, 2 );
+			if ( 'post' !== $this->post_type ) {
+				$screen_id = 'edit-' . $this->post_type;
+				add_filter( 'manage_' . $screen_id . '_columns', array( $this, 'register_custom_column_headings' ) );
+				add_filter( 'manage_' . $screen_id . '_sortable_columns', array( $this, 'register_custom_column_sorts' ) );
+				add_action( 'manage_' . $this->post_type . '_posts_custom_column', array( $this, 'register_custom_columns' ), 10, 2 );
 			}
 		}
 		add_action( 'admin_init', array( $this, 'add_menu_order' ) );
 		add_action( 'after_setup_theme', array( $this, 'ensure_post_thumbnails_support' ) );
+		add_filter( 'jetpack_sitemap_post_types', array( $this, 'add_post_type_to_sitemaps' ) );
 	} // End __construct()
 
 	/**
@@ -232,8 +230,13 @@ class HelpHub_Post_Types_Post_Type {
 		switch ( $column_name ) {
 			case 'image':
 				// Displays img tag.
+				// phpcs:ignore
 				echo $this->get_image( $id, 40 );
-				/* @codingStandardsIgnoreLine */
+				break;
+			case 'menu_order':
+				// Displays menu order value
+				// phpcs:ignore
+				echo get_post_field( 'menu_order', $id );
 				break;
 			default:
 				break;
@@ -251,7 +254,9 @@ class HelpHub_Post_Types_Post_Type {
 	 * @return array $defaults
 	 */
 	public function register_custom_column_headings( $defaults ) {
-		$new_columns = array();
+		$new_columns = array(
+			'menu_order' => __( 'Order', 'wporg-forums' ),
+		);
 
 		$last_item = array();
 
@@ -275,6 +280,23 @@ class HelpHub_Post_Types_Post_Type {
 
 		return $defaults;
 	} // End register_custom_column_headings()
+
+	/**
+	 * Enable sorting on columns.
+	 *
+	 * @param array $cols An array of sortable columns.
+	 * @return array Updated list of columns.
+	 */
+	public function register_custom_column_sorts( $cols ) {
+		$cols['menu_order'] = array(
+			'menu_order',
+			true,
+			__( 'Order', 'wporg-forums' ),
+			__( 'Table ordered by order.', 'wporg-forums' ),
+		);
+
+		return $cols;
+	} // End register_custom_column_sorts()
 
 	/**
 	 * Update messages for the post type admin.
@@ -793,6 +815,19 @@ class HelpHub_Post_Types_Post_Type {
 	 */
 	public function add_menu_order() {
 		add_post_type_support( 'post', 'page-attributes' );
-	} // End ens
+	} // End add_menu_order
 
+	/**
+	 * Filter the post types Jetpack uses to generate the sitemaps.
+	 *
+	 * @param string[] $post_types Current list of post types.
+	 *
+	 * @return string[]
+	 */
+	public function add_post_type_to_sitemaps( $post_types ) {
+		if ( ! in_array( $this->post_type, $post_types ) ) {
+			$post_types[] = $this->post_type;
+		}
+		return $post_types;
+	} // End add_post_type_to_sitemaps
 } // End Class

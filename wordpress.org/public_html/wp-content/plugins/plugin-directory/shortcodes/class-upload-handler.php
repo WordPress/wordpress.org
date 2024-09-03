@@ -764,13 +764,20 @@ class Upload_Handler {
 			return false;
 		}
 
-		$text = sprintf(
-			"New ZIP uploaded by %s, version %s.\nComment: %s\n%s",
+		$text = "This is an automated message to confirm that we have received your updated plugin file.\n\n";
+		$text .= sprintf(
+			"File updated by %s, version %s.\n",
 			wp_get_current_user()->user_login,
-			$attachment->version,
-			$attachment->post_content,
-			wp_get_attachment_url( $attachment->ID )
+			$attachment->version
 		);
+
+		// Was a comment added?
+		if ( $attachment->post_content ) {
+			$text .= "Comment: " . $attachment->post_content . "\n";
+		}
+
+		// Append the ZIP URL.
+		$text .= "\n" . wp_get_attachment_url( $attachment->ID );
 
 		$name = wp_get_current_user()->display_name ?: wp_get_current_user()->user_login;
 		$payload = [

@@ -1,6 +1,11 @@
+// Align the subscribed button to the left
 /* stylelint-disable-next-line max-line-length */
 .wp-block-jetpack-subscriptions.wp-block-jetpack-subscriptions__supports-newline:not(.wp-block-jetpack-subscriptions__use-newline) p#subscribe-submit {
-	justify-content: start;
+	justify-content: flex-start;
+}
+
+.wp-block-jetpack-subscriptions .wp-block-button__link {
+	font-weight: 600;
 }
 
 .wp-block-jetpack-contact-form-container .contact-form {

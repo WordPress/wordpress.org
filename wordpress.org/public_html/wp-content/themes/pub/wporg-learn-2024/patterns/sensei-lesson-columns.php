@@ -15,6 +15,14 @@
 
 		<!-- wp:sensei-lms/course-navigation /-->
 
+		<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|light-grey-1","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|20"}}},"layout":{"type":"constrained"}} -->
+		<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--light-grey-1);border-top-width:1px;padding-top:var(--wp--preset--spacing--20)">
+
+			<!-- wp:pattern {"slug":"wporg-learn-2024/content-feedback"} /-->
+
+		</div>
+		<!-- /wp:group -->
+
 	</div>
 	<!-- /wp:sensei-lms/ui -->
 
@@ -29,12 +37,12 @@
 
 		<!-- wp:post-content {"layout":{"inherit":true}} /-->
 
-		<!-- wp:group {"style":{"spacing":{"margin":{"top":"40px"}}},"layout":{"type":"constrained"}} -->
-		<div class="wp-block-group" style="margin-top:40px">
+		<!-- wp:group {"style":{"spacing":{"margin":{"top":"40px"}}},"layout":{"type":"constrained"},"className":"sensei-lesson-footer"} -->
+		<div class="wp-block-group sensei-lesson-footer" style="margin-top:40px">
 			<!-- wp:sensei-lms/page-actions {"style":{"spacing":{"blockGap":"43px"}}} /-->
 
-			<!-- wp:group {"style":{"spacing":{"margin":{"top":"20px"}}},"className":"sensei-lesson-footer"} -->
-			<div class="wp-block-group sensei-lesson-footer" style="margin-top:20px">
+			<!-- wp:group {"style":{"spacing":{"margin":{"top":"20px"}}}} -->
+			<div class="wp-block-group" style="margin-top:20px">
 
 				<!-- wp:pattern {"slug":"wporg-learn-2024/sensei-lesson-actions"} /-->
 

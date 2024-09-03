@@ -115,14 +115,6 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					</li>
 				<?php endif; ?>
 
-				<li class="<?php if ( wporg_bbp_is_single_user_edit_account() ) : ?>current<?php endif; ?>">
-					<span class="bbp-user-edit-account-link">
-						<a href="//profiles.wordpress.org/me/profile/edit/group/3">
-							<?php esc_html_e( 'Edit Account', 'wporg-forums' ); ?>
-						</a>
-					</span>
-				</li>
-
 				<li class="<?php if ( bbp_is_single_user_edit() ) :?>current<?php endif; ?>">
 					<span class="bbp-user-edit-link">
 						<a href="<?php bbp_user_profile_edit_url(); ?>" title="<?php

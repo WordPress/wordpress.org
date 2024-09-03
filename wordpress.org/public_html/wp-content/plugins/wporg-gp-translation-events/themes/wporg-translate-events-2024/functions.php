@@ -6,8 +6,15 @@ use Wporg\TranslationEvents\Urls;
 
 function register_blocks(): void {
 	include_once __DIR__ . '/blocks/header/index.php';
+	include_once __DIR__ . '/blocks/event-excerpt/index.php';
+	include_once __DIR__ . '/blocks/event-date/index.php';
+	include_once __DIR__ . '/blocks/event-template/index.php';
+	include_once __DIR__ . '/blocks/event-title/index.php';
+	include_once __DIR__ . '/blocks/event-list/index.php';
 	include_once __DIR__ . '/blocks/footer/index.php';
 	include_once __DIR__ . '/blocks/pages/events/my-events/index.php';
+	include_once __DIR__ . '/blocks/event-attendance-mode/index.php';
+	include_once __DIR__ . '/blocks/event-flag/index.php';
 }
 
 add_action(
@@ -21,7 +28,6 @@ add_action(
 	'wporg_translate_events_theme_init',
 	function (): void {
 		register_blocks();
-
 		add_action(
 			'wp_head',
 			function (): void {
@@ -146,15 +152,35 @@ function render_page( string $template_path, string $title, array $attributes ):
 	// are registered.
 	ob_start();
 	require $template_path;
-	$page_content = do_blocks( ob_get_clean() );
+	$rendered_template = ob_get_clean();
+	$page_title        = esc_html( $title );
+	$page_content      = do_blocks(
+		<<<BLOCKS
+		<!-- wp:group {"tagName":"main","style":{"spacing":{"blockGap":"0px"}},"className":"entry-content","layout":{"type":"constrained"}} -->
+		<main class="wp-block-group entry-content">
+			<!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|20","left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space","bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->
+			<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--edge-space)">
+				<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+				<div class="wp-block-group page-upcoming-title-past-wrapper">
+					<!-- wp:heading --><h2 class="wp-block-heading">$page_title</h2><!-- /wp:heading -->
+				</div>
+				<!-- /wp:group -->
+
+				<!-- wp:group {"layout":{"type":"inherit","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+				<div class="wp-block-group">$rendered_template</div>
+				<!-- /wp:group -->
+			</div>
+			<!-- /wp:group -->
+		</main>
+		<!-- /wp:group -->
+		BLOCKS
+	);
 
 	$header_json = wp_json_encode( array( 'title' => $title ) );
-
-	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo do_blocks(
+	echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		<<<BLOCKS
 		<!-- wp:wporg-translate-events-2024/header $header_json /-->
-			$page_content
+		$page_content
 		<!-- wp:wporg-translate-events-2024/footer /-->
 		BLOCKS
 	);

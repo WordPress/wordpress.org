@@ -1,5 +1,5 @@
 <?php
-use function WordPressdotorg\Two_Factor\user_should_2fa;
+use function WordPressdotorg\Two_Factor\{ user_should_2fa, user_requires_2fa };
 
 /**
  * WordPress-specific WPORG SSO: redirects all WP login and registration screens to our SSO ones.
@@ -29,6 +29,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Primarily for logged in users.
 			'updated-tos'     => '/updated-policies',
 			'enable-2fa'      => '/enable-2fa',
+			'backup-codes'    => '/backup-codes',
 			'logout'          => '/logout',
 
 			// Primarily for logged out users.
@@ -56,6 +57,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		static $matched_route_params = array();
 
 		/**
+		 * Holds the last set auth cookie.
+		 *
+		 * @var array
+		 */
+		protected $last_auth_cookie = array();
+
+		/**
 		 * Constructor: add our action(s)/filter(s)
 		 */
 		public function __construct() {
@@ -80,6 +88,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				add_action( 'wp_login', array( $this, 'record_last_logged_in' ), 10, 2 );
 				add_action( 'profile_update', array( $this, 'record_last_password_change' ), 10, 3 );
+				add_action( 'wp_set_password', array( $this, 'record_last_password_change_reset' ), 10, 3 );
 
 				add_action( 'login_form_logout', array( $this, 'login_form_logout' ) );
 
@@ -97,10 +106,27 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					// Updated TOS interceptor.
 					add_filter( 'send_auth_cookies', [ $this, 'maybe_block_auth_cookies' ], 100, 5 );
 
+					// See https://core.trac.wordpress.org/ticket/61874
+					add_action( 'set_auth_cookie', [ $this, 'record_last_auth_cookie' ], 10, 6 );
+
 					// Maybe nag about 2FA
-					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_enable_2fa' ], 1000, 3 );
+					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_backup_codes' ], 500, 3 );
+					add_filter( 'login_redirect', [ $this, 'maybe_redirect_to_enable_2fa' ], 1100, 3 );
 				}
 			}
+		}
+
+		/**
+		 * Records the last set cookies, because WordPress.
+		 *
+		 * During the WordPress login process, the authentication cookies are not yet available,
+		 * but we need to know the user token (contained in those cookies) to retrieve their session.
+		 * To work around this, we store the set authentication cookies here for later usage.
+		 *
+		 * @see https://core.trac.wordpress.org/ticket/61874
+		 */
+		function record_last_auth_cookie( $auth_cookie, $expire, $expiration, $user_id, $scheme, $token ) {
+			$this->last_auth_cookie = compact( 'auth_cookie', 'expire', 'expiration', 'user_id', 'scheme', 'token' );
 		}
 
 		/**
@@ -820,19 +846,81 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function maybe_redirect_to_enable_2fa( $redirect, $orig_redirect, $user ) {
 			if (
-				! str_contains( $redirect, '/enable-2fa' ) &&
-				! is_wp_error( $user ) &&
-				user_should_2fa( $user ) &&
-				! Two_Factor_Core::is_user_using_two_factor( $user->ID )
+				// No valid user.
+				is_wp_error( $user ) ||
+				// Or we're already going there.
+				str_contains( $redirect, '/enable-2fa' ) ||
+				// Or if the user doesn't need 2FA.
+				! user_should_2fa( $user ) ||
+				// Or the user is already using 2FA.
+				Two_Factor_Core::is_user_using_two_factor( $user->ID )
 			) {
-				$redirect = add_query_arg(
-					'redirect_to',
-					urlencode( $redirect ),
-					home_url( '/enable-2fa' )
-				);
+				// Then we don't need to redirect to the enable 2FA page.
+				return $redirect;
 			}
 
-			return $redirect;
+			// If the user doesn't REQUIRE 2FA, only nag ever so often.
+			if ( ! user_requires_2fa( $user ) ) {
+				$nag_interval = WEEK_IN_SECONDS;
+				$last_nagged  = (int) get_user_meta( $user->ID, 'last_2fa_nag', true );
+				if ( $last_nagged && $last_nagged > ( time() - $nag_interval ) ) {
+					return $redirect;
+				}
+			}
+
+			// Redirect to the Enable 2FA nag.
+			return add_query_arg(
+				'redirect_to',
+				urlencode( $redirect ),
+				home_url( '/enable-2fa' )
+			);
+		}
+
+		/**
+		 * Redirects the user to the 2FA Backup codes nag if needed.
+		 */
+		public function maybe_redirect_to_backup_codes( $redirect, $orig_redirect, $user ) {
+			if (
+				// No valid user.
+				is_wp_error( $user ) ||
+				// Or we're already going there.
+				str_contains( $redirect, '/backup-codes' ) ||
+				// Or the user doesn't use 2FA
+				! Two_Factor_Core::is_user_using_two_factor( $user->ID )
+			) {
+				// Then we don't need to redirect to the enable 2FA page.
+				return $redirect;
+			}
+
+			// If the user logged in with a backup code..
+			$session_token    = wp_get_session_token() ?: ( $this->last_auth_cookie['token'] ?? '' );
+			$session          = WP_Session_Tokens::get_instance( $user->ID )->get( $session_token );
+			$used_backup_code = str_contains( $session['two-factor-provider'] ?? '', 'Backup_Codes' );
+			$codes_available  = Two_Factor_Backup_Codes::codes_remaining_for_user( $user );
+
+			if (
+				// If they didn't use a backup code,
+				! $used_backup_code &&
+				(
+					// They have ample codes available..
+					$codes_available > 3 ||
+					// or they've already been nagged about only having a few left (and actually have them)
+					(
+						$codes_available &&
+						$codes_available >= (int) get_user_meta( $user->ID, 'last_2fa_backup_codes_nag', true )
+					)
+				)
+			) {
+				// No need to nag.
+				return $redirect;
+			}
+
+			// Redirect to the Backup Codes nag.
+			return add_query_arg(
+				'redirect_to',
+				urlencode( $redirect ),
+				home_url( '/backup-codes' )
+			);
 		}
 
 		/**
@@ -866,6 +954,16 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function record_last_password_change( $user_id, $old_data, $new_data ) {
 			if ( $old_data->user_pass !== $new_data['user_pass'] ) {
+				update_user_meta( $user_id, 'last_password_change', gmdate( 'Y-m-d H:i:s' ) );
+			}
+		}
+
+		/**
+		 * Record the last date a user changed their password via password reset.
+		 */
+		public function record_last_password_change_reset( $password, $user_id, $old_user_data ) {
+			$user = get_user_by( 'id', $user_id );
+			if ( $old_user_data->user_pass !== $user->user_pass ) {
 				update_user_meta( $user_id, 'last_password_change', gmdate( 'Y-m-d H:i:s' ) );
 			}
 		}

@@ -87,6 +87,9 @@ class Admin {
 		// Add button to skip current photo in the queue.
 		add_action( "add_meta_boxes_{$post_type}",             [ __CLASS__, 'add_skip_queued_photo_meta_box' ], 10, 2 );
 		add_action( 'admin_init',                              [ __CLASS__, 'admin_redirect_to_next_photo' ] );
+
+		// Shrink height of content editor.
+		add_filter( 'wp_editor_settings',                      [ __CLASS__, 'shrink_editor_height' ], 10, 2 );
 	}
 
 	/**
@@ -583,6 +586,7 @@ class Admin {
 		$exif = Photo::get_exif( $parent_id );
 
 		if ( ! $exif ) {
+			echo '<p class="no-exif">' . esc_html__( 'No EXIF data was found.', 'wporg-photos' ) . "</p>\n";
 			return;
 		}
 
@@ -592,6 +596,30 @@ class Admin {
 			echo "<dd>{$data['value']}</dd>\n";
 		}
 		echo "</dl>\n";
+
+		// Show ALL EXIF data.
+		$all_exif = Photo::get_all_exif( $parent_id );
+		if ( $all_exif ) {
+			ksort( $all_exif );
+
+			echo '<div class="photo-all-exif-container">';
+			echo '<button id="photo-all-exif-toggle" class="button-link hide-if-no-js" type="button" aria-expanded="true">' . esc_html__( 'Toggle all raw EXIF data', 'wporg-photos' ) . '</button>';
+			echo '<dl class="photo-all-exif">';
+
+			foreach ( $all_exif as $key => $value ) {
+				if ( '' === $value ) {
+					continue;
+				}
+
+				echo '<dt>' . esc_html( $key ) . "</dt>\n";
+				if ( is_array( $value ) ) {
+					$value = '[' . implode( ', ', $value ) . ']';
+				}
+				echo '<dd>' . esc_html( $value ) . "</dd>\n";
+			}
+
+			echo "</dl></div>\n";
+		}
 	}
 
 	/**
@@ -698,7 +726,7 @@ class Admin {
 	 * @param array   $args Associative array of additional data.
 	 */
 	public static function meta_box_photo( $post, $args ) {
-		self::output_photo_in_metabox( $post, [ 900, 450 ], true );
+		echo Template_Tags\get_photo_as_grid_item( $post, [ 900, 450 ], 'image' );
 	}
 
 	/**
@@ -746,7 +774,7 @@ class Admin {
 			}
 
 			// Show the photo.
-			self::output_photo_in_metabox( $photo, 'medium', false );
+			echo Template_Tags\get_photo_as_grid_item( $photo, 'medium', 'edit' );
 
 			$shown_photos++;
 		}
@@ -766,54 +794,6 @@ class Admin {
 			);
 			echo '</div>' . "\n";
 		}
-	}
-
-	/**
-	 * Outputs markup for a photo intended to be shown in an admin metabox.
-	 *
-	 * @param WP_Post      $post             Photo post object.
-	 * @param string|int[] $size             Image size. Accepts any registered image size name, or an
-	 *                                       array of width and height values in pixels (in that order).
-	 * @param bool         $link_to_fullsize Should the image link to its full-sized version? If not, it
-	 *                                       will link to edit the photo post. Default true;
-	 */
-	protected static function output_photo_in_metabox( $post, $size, $link_to_fullsize = true ) {
-		$image_id = get_post_thumbnail_id( $post );
-		if ( ! $image_id ) {
-			return;
-		}
-
-		$pending_notice = '';
-		$classes = 'photo-thumbnail';
-
-		if ( Photo::is_controversial( $image_id ) ) {
-			$classes .= ' blurred';
-		}
-
-		if ( 'pending' === $post->post_status ) {
-			$classes .= ' pending';
-			if ( ! $link_to_fullsize ) {
-				$pending_notice = '<div class="pending-notice">' . __( 'Pending', 'wporg-photos' ) . '</div>';
-			}
-		}
-
-		if ( $link_to_fullsize ) {
-			$link_url = wp_get_attachment_url( $image_id );
-			$label = __( 'View full-sized version of the photo.', 'wporg-photos' );
-		} else {
-			$link_url = get_edit_post_link( $post );
-			$label = sprintf( __( 'Edit photo post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title );
-		}
-
-		printf(
-			'<span><a class="photos-photo-link row-title" href="%s" target="_blank" aria-label="%s"><img class="%s" src="%s" alt="" /></a>%s</span>',
-			esc_url( $link_url ),
-			/* translators: %s: Post title. */
-			esc_attr( $label ),
-			esc_attr( $classes ),
-			esc_url( get_the_post_thumbnail_url( $post->ID, $size ) ),
-			$pending_notice
-		);
 	}
 
 	/**
@@ -1617,6 +1597,23 @@ class Admin {
 		) {
 			$query->set( 'orderby', 'rand' );
 		}
+	}
+
+	/**
+	 * Shrinks the height of the content editor when editing photo posts.
+	 *
+	 * @param array  $settings  Array of editor arguments.
+	 * @param string $editor_id Unique editor identifier.
+	 * @return array
+	 */
+	public static function shrink_editor_height( $settings, $editor_id ) {
+		global $post_type;
+
+		if ( Registrations::get_post_type() === $post_type ) {
+			$settings['editor_height'] = '80px';
+		}
+
+		return $settings;
 	}
 
 }

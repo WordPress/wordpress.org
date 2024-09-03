@@ -153,8 +153,23 @@ class Import {
 		}
 		unset( $_requires_plugins, $unmet_dependencies );
 
+		/*
+		 * If a tag has been deleted, we should also remove any unconfirmed releases.
+		 * NOTE: remove_release() will not remove a confirmed release, but will remove a discarded release.
+		 *
+		 * Additionally; this must occur before the below release confirmation checks,
+		 * if the trunk readme has it's stable_tag set to one of these deleted (now non-existent) tags,
+		 * then $stable_tag will be set to the fallback 'trunk', causing the RC checks to fail.
+		 */
+		foreach ( $svn_tags_deleted as $svn_deleted_tag ) {
+			if ( Plugin_Directory::remove_release( $plugin, $svn_deleted_tag ) ) {
+				echo "Plugin tag {$svn_deleted_tag} deleted; release removed.\n";
+			}
+		}
+
 		// Release confirmation
 		if ( $plugin->release_confirmation ) {
+			// If the stable tag is trunk, we shouldn't continue, as we don't support that for RC.
 			if ( 'trunk' === $stable_tag ) {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
@@ -168,13 +183,13 @@ class Import {
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 				if ( ! $release ) {
 					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
-					$version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
+					$release_version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
 
 					Plugin_Directory::add_release(
 						$plugin,
 						[
 							'tag'       => $svn_changed_tag,
-							'version'   => $version,
+							'version'   => $release_version,
 							'committer' => [ $last_committer ],
 							'revision'  => [ $last_revision ]
 						]
@@ -199,20 +214,12 @@ class Import {
 							'who'     => $last_committer,
 							'readme'  => $readme,
 							'headers' => $headers,
-							'version' => $version,
+							'version' => $release_version,
 						]
 					);
 					$email->send();
 
 					echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
-				}
-			}
-
-			// Check to see if any of the releases were deleted.
-			foreach ( $svn_tags_deleted as $svn_deleted_tag ) {
-				// Note: Confirmed releases will not be deleted, only unconfirmed ones.
-				if ( Plugin_Directory::remove_release( $plugin, $svn_deleted_tag ) ) {
-					echo "Plugin tag {$svn_deleted_tag} deleted; release removed.\n";
 				}
 			}
 
@@ -260,8 +267,8 @@ class Import {
 				}
 			}
 
-			// Check that the tag is approved.
-			if ( ! $release['confirmed'] ) {
+			// Check that the tag is approved (If the release needed to be confirmed).
+			if ( ! $release['confirmed'] && $release['confirmations_required'] ) {
 
 				if ( ! in_array( $last_committer, $release['committer'], true ) ) {
 					$release['committer'][] = $last_committer;
