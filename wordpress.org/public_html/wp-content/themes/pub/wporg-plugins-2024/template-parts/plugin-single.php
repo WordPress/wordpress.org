@@ -74,7 +74,15 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 						<div class="wp-block-button is-small is-style-outline plugin-preview download-button"><a class="wp-block-button__link wp-element-button" href="%1$s">%2$s</a></div>
 						<!-- /wp:button -->',
 						esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ),
-						esc_html__( 'Test Preview', 'wporg-plugins' )
+						esc_html__( 'Test Preview', 'wporg-plugins' ) . ' <span class="dashicons dashicons-hidden" title="' . esc_attr__( 'Only visible to you', 'wporg-plugins' ) . '"></span>'
+					);
+				} else {
+					$buttons .= sprintf(
+						'<!-- wp:button {"className":"is-small is-style-outline plugin-preview download-button"} -->
+						<div class="wp-block-button is-small is-style-outline plugin-preview download-button"><a class="wp-block-button__link wp-element-button" href="%1$s">%2$s</a></div>
+						<!-- /wp:button -->',
+						esc_attr( get_the_permalink() . 'advanced/#live-preview' ),
+						esc_html__( 'Preview Not Available', 'wporg-plugins' ) . ' <span class="dashicons dashicons-hidden" title="' . esc_attr__( 'Only visible to you', 'wporg-plugins' ) . '"></span>'
 					);
 				}
 				echo do_blocks( $buttons ); // phpcs:ignore -- Output escaped while building string.

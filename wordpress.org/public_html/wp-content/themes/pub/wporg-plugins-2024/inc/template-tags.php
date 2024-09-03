@@ -590,12 +590,12 @@ function the_plugin_self_toggle_preview_button() {
 		return;
 	}
 
-	echo '<h4>' . esc_html__( 'Toggle Live Preview', 'wporg-plugins' ) . '</h4>';
+	echo '<h4 id="live-preview">' . esc_html__( 'Toggle Live Preview', 'wporg-plugins' ) . '</h4>';
 	$preview_status = get_post_meta( $post->ID, '_public_preview', true ) ? 'enabled' : 'disabled';
 	if ( 'enabled' === $preview_status ) {
-		echo '<p>' . esc_html__( 'The Live Preview link to Playground is currently enabled. Use the toggle button to disable it.', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . wp_kses( sprintf( __( 'The <a href="%s">Live Preview link to Playground</a> is currently enabled. Use the toggle button to disable it.', 'wporg-plugins' ), 'https://developer.wordpress.org/plugins/wordpress-org/previews-and-blueprints/' ), array( 'a' => array( 'href' => array() ) ) ) . '</p>';
 	} else {
-		echo '<p>' . esc_html__( 'The Live Preview link to Playground is currently disabled. Use the toggle button to enable it.', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . wp_kses( sprintf( __( 'The <a href="%s">Live Preview link to Playground</a> is currently disabled. Use the toggle button to enable it.', 'wporg-plugins' ), 'https://developer.wordpress.org/plugins/wordpress-org/previews-and-blueprints/#committing-a-blueprint-to-subversion' ), array( 'a' => array( 'href' => array() ) ) ) . '</p>';
 	}
 
 	$blueprints = get_post_meta( $post->ID, 'assets_blueprints', true );
