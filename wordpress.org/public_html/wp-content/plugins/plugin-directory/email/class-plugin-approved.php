@@ -30,7 +30,7 @@ To answer some common questions:
 
 * You must use SVN to upload your code -- we are unable to do that for you
 * Your SVN username is `%2$s` and is case sensitive.
-* Generate your SVN password in your [WordPress.org profile](https://profiles.wordpress.org/%2$s/profile/edit/group/3/?screen=svn-password).
+* Generate your SVN password in your [WordPress.org profile](https://profiles.wordpress.org/%4$s/profile/edit/group/3/?screen=svn-password).
 * SVN will not accept your email address as a username
 * Due to the size of the directory, it may take 72 hours before all search results are properly updated
 
@@ -68,7 +68,8 @@ Enjoy!', 'wporg-plugins' );
 			$email_text,
 			$this->plugin->post_title,
 			$this->user->user_login,
-			$this->plugin->post_name
+			$this->plugin->post_name,
+			$this->user->user_nicename
 		);
 	}
 }
