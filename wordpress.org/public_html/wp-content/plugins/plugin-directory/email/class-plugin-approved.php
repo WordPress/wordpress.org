@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Email;
 
 use WordPressdotorg\Plugin_Directory\Tools;
 
-class Plugin_Approved extends Base {
+class Plugin_Approved extends Markdown_Base {
 	protected $required_args = [];
 
 	function subject() {
@@ -14,7 +14,7 @@ class Plugin_Approved extends Base {
 		);
 	}
 
-	function body() {
+	function markdown() {
 		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug */
 		$email_text = __(
 'Congratulations, the plugin hosting request for %1$s has been approved.
@@ -29,35 +29,35 @@ Once your account access has been activated, you may upload your code using a SV
 To answer some common questions:
 
 * You must use SVN to upload your code -- we are unable to do that for you
-* Your SVN username is %2$s and is case sensitive.
-* Generate your SVN password in your <a href="https://profiles.wordpress.org/%2$s/profile/edit/group/3/?screen=svn-password">WordPress.org profile</a>.
+* Your SVN username is `%2$s` and is case sensitive.
+* Generate your SVN password in your [WordPress.org profile](https://profiles.wordpress.org/%2$s/profile/edit/group/3/?screen=svn-password).
 * SVN will not accept your email address as a username
 * Due to the size of the directory, it may take 72 hours before all search results are properly updated
 
 To help you get started, here are some links:
 
-Using Subversion with the WordPress Plugin Directory:
+Using Subversion with the WordPress Plugin Directory:<br>
 https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/
 
-Generating your SVN Password:
+Generating your SVN Password:<br>
 https://make.wordpress.org/meta/handbook/tutorials-guides/svn-access/
 
-FAQ about the WordPress Plugin Directory:
+FAQ about the WordPress Plugin Directory:<br>
 https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
 
-WordPress Plugin Directory readme.txt standard:
+WordPress Plugin Directory readme.txt standard:<br>
 https://wordpress.org/plugins/developers/#readme
 
-A readme.txt validator:
+A readme.txt validator:<br>
 https://wordpress.org/plugins/developers/readme-validator/
 
-Plugin Assets (header images, etc):
+Plugin Assets (header images, etc):<br>
 https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
 
-WordPress Plugin Directory Guidelines:
+WordPress Plugin Directory Guidelines:<br>
 https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
 
-Block Specific Plugin Guidelines:
+Block Specific Plugin Guidelines:<br>
 https://developer.wordpress.org/plugins/wordpress-org/block-specific-plugin-guidelines/
 
 If you have issues or questions, please reply to this email and let us know.
