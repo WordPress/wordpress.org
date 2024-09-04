@@ -29,8 +29,8 @@ Once your account access has been activated, you may upload your code using a SV
 To answer some common questions:
 
 * You must use SVN to upload your code -- we are unable to do that for you
-* Your SVN username is %2$s and your password is the same as you use to log in to WordPress.org
-* Your username is case sensitive
+* Your SVN username is %2$s and is case sensitive.
+* Generate your SVN password in your <a hre="https://profiles.wordpress.org/%2$s/profile/edit/group/3/?screen=svn-password">WordPress.org profile</a>. 
 * SVN will not accept your email address as a username
 * Due to the size of the directory, it may take 72 hours before all search results are properly updated
 
@@ -38,6 +38,9 @@ To help you get started, here are some links:
 
 Using Subversion with the WordPress Plugin Directory:
 https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/
+
+Generating your SVN Password:
+https://make.wordpress.org/meta/handbook/tutorials-guides/svn-access/
 
 FAQ about the WordPress Plugin Directory:
 https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
