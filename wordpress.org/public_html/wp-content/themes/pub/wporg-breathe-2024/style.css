@@ -175,8 +175,8 @@ input[type="submit"] {
 .site-branding {
 	box-sizing: border-box;
 	margin: 0 auto;
-	max-width: 1024px;
-	padding: 0 10px;
+	max-width: var(--wp--style--global--wide-size);
+	padding: 0 var(--wp--preset--spacing--edge-space);
 }
 
 .site-header {
@@ -931,9 +931,9 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 	color: #333;
 	line-height: 1.45;
 	width: 100%;
-	max-width: 940px;
+	max-width: var(--wp--style--global--wide-size);
 	margin: 1.5rem auto;
-	padding: 0;
+	padding: 40px var(--wp--preset--spacing--edge-space);
 }
 
 .make-welcome .entry-content h4,
