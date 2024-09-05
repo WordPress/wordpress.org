@@ -15,7 +15,7 @@ class Plugin_Approved extends Markdown_Base {
 	}
 
 	function markdown() {
-		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug */
+		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug, 4: link to plugin authors profile */
 		$email_text = __(
 'Congratulations, the plugin hosting request for %1$s has been approved.
 
@@ -64,7 +64,6 @@ If you have issues or questions, please reply to this email and let us know.
 
 Enjoy!', 'wporg-plugins' );
 
-		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug, 4: link to plugin authors profile */
 		return sprintf(
 			$email_text,
 			$this->plugin->post_title,
