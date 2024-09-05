@@ -362,6 +362,15 @@ class Hooks {
 	public function redirect_legacy_urls() {
 		global $wp_query, $wp;
 
+		// Account information is no longer set in the support forums.
+		// We don't use `wp_get_current_user()` because super admins often reset data for other users.
+		if ( preg_match( '!^users/(?P<username>[^/]+)/edit/account!i', $wp->request, $matches ) ) {
+			$username = urlencode( $matches['username'] );
+			$url = "//profiles.wordpress.org/{$username}/profile/edit/group/3";
+			wp_safe_redirect( $url, 301 );
+			exit;
+		};
+
 		// A user called 'profile' exists, but override it.
 		if ( 'profile' === get_query_var( 'bbp_user' ) ) {
 			if ( is_user_logged_in() ) {
