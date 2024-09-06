@@ -2,6 +2,15 @@
 	"$schema": "https://schemas.wp.org/trunk/theme.json",
 	"version": 2,
 	"settings": {
+		"color": {
+			"palette": [
+				{
+					"slug": "light-grey-3",
+					"color": "#fbfbfb",
+					"name": "Light Grey 3"
+				}
+			]
+		},
 		"custom": {
 			"button": {
 				"disabled": {

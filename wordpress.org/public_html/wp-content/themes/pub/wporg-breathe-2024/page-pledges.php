@@ -6,7 +6,7 @@
  * Note: Pledges is a simulated page, rather than actually existing in the database; see `mu-plugins/make-network/team-pledges.php`.
  */
 
-namespace WordPressdotorg\Make\Breathe;
+namespace WordPressdotorg\Make\Breathe_2024;
 use WordPressdotorg\Make\Pledges;
 
 defined( 'WPINC' ) || die();

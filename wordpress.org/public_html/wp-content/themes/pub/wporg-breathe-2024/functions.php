@@ -1,5 +1,5 @@
 <?php
-namespace WordPressdotorg\Make\Breathe;
+namespace WordPressdotorg\Make\Breathe_2024;
 
 /**
  * Sets up theme defaults.
@@ -55,7 +55,7 @@ function wporg_breathe_scripts() {
 	// Preload the heading font(s).
 	if ( is_callable( 'global_fonts_preload' ) ) {
 		/* translators: Subsets can be any of cyrillic, cyrillic-ext, greek, greek-ext, vietnamese, latin, latin-ext. */
-		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg-forums' );
+		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg-breathe' );
 		// All headings.
 		global_fonts_preload( 'Inter', $subsets );
 	}
@@ -162,6 +162,65 @@ function _merge_by_slug( ...$arrays ) {
 
 	return $result;
 }
+
+/**
+ * Register patterns from the patterns directory.
+ */
+function wporg_breathe_register_patterns() {
+	$pattern_directory = new \DirectoryIterator( get_stylesheet_directory() . '/patterns/' );
+	foreach ( $pattern_directory as $file ) {
+		if ( $file->isFile() ) {
+			require $file->getPathname();
+		}
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\wporg_breathe_register_patterns' );
+
+/**
+ * Get the primary navigation menu object if it exists.
+ */
+function wporg_breathe_get_local_nav_menu_object() {
+	$local_nav_menu_locations = get_nav_menu_locations();
+	$local_nav_menu_object = isset( $local_nav_menu_locations['primary'] )
+		? wp_get_nav_menu_object( $local_nav_menu_locations['primary'] )
+		: false;
+
+	return $local_nav_menu_object;
+}
+
+/**
+ * Provide a list of local navigation menus.
+ */
+function wporg_breathe_add_site_navigation_menus( $menus ) {
+	if ( is_admin() ) {
+		return;
+	}
+	$local_nav_menu_object = wporg_breathe_get_local_nav_menu_object();
+
+	if ( ! $local_nav_menu_object ) {
+		return array();
+	}
+
+	$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
+
+	if ( ! $menu_items || empty( $menu_items ) ) {
+		return array();
+	}
+
+	return array(
+		'breathe' => array_map(
+			function( $menu_item ) {
+				return array(
+					'label' => esc_html( $menu_item->title ),
+					'url' => esc_url( $menu_item->url )
+				);
+			},
+			// Limit local nav items to 4
+			array_slice( $menu_items, 0, 4 )
+		)
+	);
+}
+add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\wporg_breathe_add_site_navigation_menus' );
 
 /**
  * Add postMessage support for site title and description in the customizer.
@@ -285,7 +344,7 @@ function welcome_box() {
 				id="make-welcome-toggle"
 				data-show="<?php esc_attr_e( 'Show welcome box', 'wporg' ); ?>"
 				data-hide="<?php esc_attr_e( 'Hide welcome box', 'wporg' ); ?>"
-			><?php _e( 'Hide welcome box', 'wporg' ); ?></button>
+			><span><?php _e( 'Hide welcome box', 'wporg' ); ?></span></button>
 		</div>
 		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo $cookie; ?>" data-hash="<?php echo $content_hash; ?>">
 			<script type="text/javascript">

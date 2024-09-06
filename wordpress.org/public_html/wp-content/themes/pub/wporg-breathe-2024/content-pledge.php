@@ -1,6 +1,6 @@
 <?php
 
-namespace WordPressdotorg\Make\Breathe;
+namespace WordPressdotorg\Make\Breathe_2024;
 
 defined( 'WPINC' ) || die();
 

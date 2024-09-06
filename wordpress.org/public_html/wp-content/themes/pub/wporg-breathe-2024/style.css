@@ -22,15 +22,28 @@ a[href^="https://wordpress.slack.com"]::before {
 	background-repeat: no-repeat;
 }
 
-body, button, input, select, textarea,
-.site-header .site-title {
-	font-family: 'Open Sans', sans-serif;
-	font-size: var(--wp--preset--font-size--normal);
+p,
+ul,
+ol,
+#primary,
+#secondary aside,
+.entry-meta,
+.comment-meta {
+	font-size: inherit;
+	line-height: inherit;
 }
 
-p, ul, ol,
-#primary,
-#secondary aside {
+p,
+ul,
+ol {
+	margin-top: var(--wp--style--block-gap);
+	margin-bottom: 0;
+}
+
+ul ul,
+ul ol,
+ol ol,
+ol ul {
 	font-size: inherit;
 }
 
@@ -40,20 +53,17 @@ p, ul, ol,
 	margin-right: 25px;
 }
 
-h1 {
-	font-size: 1.8em;
-}
-
-h2 {
-	font-size: 1.6em;
-}
-
-h3 {
-	font-size: 1.4em;
-}
-
+h1,
+h2,
+h3,
 h4 {
-	font-size: 1.2em;
+	color: var(--wp--preset--color--charcoal-1);
+}
+
+h2,
+h3,
+h4 {
+	margin: var(--wp--preset--spacing--30) 0 0;
 }
 
 .entry-content .reports.ticket-reports {
@@ -119,16 +129,6 @@ tr:last-of-type td {
 	left: 0;
 }
 
-/* wp4.css overrides */
-p a,
-p a:hover {
-	border-bottom: none;
-}
-
-input[type="submit"] {
-	height: auto;
-}
-
 /*
  * 2021 global header/footer
  */
@@ -168,82 +168,19 @@ input[type="submit"] {
 	text-align: center;
 }
 
+.wp-block-wporg-local-navigation-bar {
+	padding-left: var(--wp--preset--spacing--edge-space);
+	padding-right: var(--wp--preset--spacing--edge-space);
+}
+
 /* site */
 
 .site,
-.custom-menu .site,
-.site-branding {
+.custom-menu .site {
 	box-sizing: border-box;
 	margin: 0 auto;
 	max-width: var(--wp--style--global--wide-size);
 	padding: 0 var(--wp--preset--spacing--edge-space);
-}
-
-.site-header {
-	background: #0073aa;
-	float: none;
-	margin: 0 0 4em;
-	padding: 18px 0;
-	width: auto;
-}
-
-.site-header .site-branding {
-	height: 32px;
-}
-
-.site-header .site-title {
-	line-height: 1;
-	margin: 0;
-	padding: 0;
-}
-
-.site-header .site-title a {
-	color: #fff;
-	font-size: 28px;
-	font-weight: 300;
-	line-height: 1;
-}
-
-.no-sidebar .site-header {
-	background: #0073aa;
-}
-
-.no-sidebar .site-header .hgroup {
-	text-align: unset;
-}
-
-.no-sidebar .site-header .site-title {
-	font-size: unset;
-}
-
-@media (max-width: 510px) {
-	.site-header .site-title {
-		margin-top: 4px;
-	}
-	.site-header .site-title a {
-		font-size: 17px;
-		font-size: 4.5vw;
-	}
-}
-
-@media (max-width: 400px) {
-	.site-header .site-title {
-		max-width: 295px;
-	}
-}
-
-@media (max-width: 320px) {
-	.site-header .site-title {
-        max-width: 240px;
-	}
-    .site-header .site-title a {
-		font-size: 13px;
-		font-size: 4.2vw;
-	}
-}
-
-.site-header .site-title a:hover {
-	color: rgba( 255, 255, 255, 0.8 );
 }
 
 .navigation-main {
@@ -310,12 +247,7 @@ input[type="submit"] {
 }
 
 /* Adjustments for teams with SVG icons. */
-.wporg-make.make-openverse .site-title a::before,
-.wporg-make.make-performance .site-title a::before {
-	content: '';
-	width: 0;
-}
-.site-title svg {
+.wp-block-site-title svg {
 	height: 30px;
 	width: 30px;
 	vertical-align: middle;
@@ -352,13 +284,20 @@ input[type="submit"] {
 /*
  * p2-breathe/style.css overrides
  */
-body {
-	line-height: 1.5;
-}
 
-ul ul, ul ol,
-ol ol, ol ul {
-	font-size: inherit;
+article.post .entry-content h2,
+article.post .entry-content h3,
+article.post .entry-content h4,
+article.post .entry-content h5,
+article#post-new .entry-content h2,
+article#post-new .entry-content h3,
+article#post-new .entry-content h4,
+article#post-new .entry-content h5,
+article.page .entry-content h2,
+article.page .entry-content h3,
+article.page .entry-content h4,
+article.page .entry-content h5 {
+	margin: var(--wp--preset--spacing--30) 0 0;
 }
 
 a,
@@ -376,6 +315,15 @@ a:active,
 .o2-xpost-entry-date:hover,
 .o2-comment-actions ul li a:before,
 .o2-comment-actions ul li a span {
+	color: var(--wp--custom--link--color--text, #3858e9);
+}
+
+a:hover,
+h1 a:hover,
+.entry-meta .entry-actions:hover a:hover,
+.comment-meta .comment-actions:hover a:hover,
+#media-buttons .button:hover,
+.responsive-link {
 	color: var(--wp--custom--link--color--text, #3858e9);
 }
 
@@ -407,15 +355,15 @@ button,
 html input[type="button"],
 input[type="reset"],
 input[type="submit"] {
-	text-shadow: inherit;
+	text-shadow: unset;
+	box-shadow: unset;
 }
 
 button:hover,
 html input[type="button"]:hover,
 input[type="reset"]:hover,
 input[type="submit"]:hover {
-	/* remove box-shaddows from buttons that likely won't look good with it */
-	box-shadow: inherit;
+	box-shadow: unset;
 }
 
 @media only screen and (max-width: 480px) {
@@ -919,17 +867,14 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 }
 
 .make-welcome {
-	background: #eee;
-	/* jQuery slideUp overrides the margin, causing the animation to be a bit funky. !important stops that. */
-	margin: -4em 0 4em 0 !important;
+	background: var(--wp--preset--color--light-grey-3);
 	padding: 2em 1em;
 	position: relative;
 	width: 100%;
+	margin-bottom: var(--wp--preset--spacing--40);
 }
 
 .make-welcome .entry-content {
-	color: #333;
-	line-height: 1.45;
 	width: 100%;
 	max-width: var(--wp--style--global--wide-size);
 	margin: 1.5rem auto;
@@ -939,20 +884,12 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 .make-welcome .entry-content h4,
 .make-welcome .entry-content h3,
 .make-welcome .entry-content h2 {
-	margin: 14px 0;
+	font-size: var(--wp--preset--font-size--normal);
+	font-weight: 600;
 }
 
 .make-welcome .entry-content p {
 	display: inline;
-}
-
-.make-welcome .entry-content h4,
-.make-welcome .entry-content h3,
-.make-welcome .entry-content h2,
-.make-welcome .entry-content .welcome p:first-child {
-	font-weight: normal;
-	font-size: 1.125em;
-	font-family: "Open Sans", serif;
 }
 
 .make-welcome .entry-content .column {
@@ -971,10 +908,13 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 }
 
 .make-welcome .entry-meta {
-	margin: 1em;
+	margin: 0;
 	position: absolute;
-	right: 0;
-	top: 0;
+	right: var(--wp--preset--spacing--edge-space);
+	top: var(--wp--preset--spacing--20);
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.8;
+	font-weight: normal;
 }
 
 .make-welcome .entry-meta .post-edit-link {
@@ -991,6 +931,15 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 	-webkit-appearance: none;
 	padding: 0;
 	text-shadow: none;
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.8;
+	font-weight: normal;
+	color: var(--wp--preset--color--charcoal-1);
+}
+
+.make-welcome .entry-meta .post-edit-link:hover,
+.make-welcome .entry-meta [type="button"] span:hover {
+	text-decoration: underline;
 }
 
 .make-welcome .entry-meta [type="button"]:focus {
@@ -1026,11 +975,6 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 		font-size: 22px;
 		margin: 12px 0 23px;
 	}
-
-	.make-welcome .entry-content h4,
-	.make-welcome .entry-content p {
-		margin-bottom: 14px;
-	}
 }
 
 @media screen and (max-width: 1000px) {
@@ -1038,7 +982,6 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 	.make-welcome .entry-content .widget-area {
 		clear: both;
 		float: none;
-		padding: 0 20px;
 		width: auto;
 	}
 }
@@ -1726,14 +1669,6 @@ h2.toc-heading + h3.toc-heading:target {
 	background-repeat: no-repeat;
 	height: 24px;
 	width: 24px;
-}
-
-/* Override wp4.css form styles for o2 */
-#page .text {
-	height: auto !important;
-	background-color: white !important;
-	font-family: 'Open Sans' !important;
-	font-size: inherit;
 }
 
 .notice {
