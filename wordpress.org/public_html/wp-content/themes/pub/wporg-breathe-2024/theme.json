@@ -159,46 +159,5 @@
 				}
 			]
 		}
-	},
-	"styles": {
-		"elements": {
-			"h1": {
-				"spacing": {
-					"margin": {
-						"top": "0",
-						"bottom": "var(--wp--style--block-gap)"
-					}
-				}
-			},
-			"h2": {
-				"typography": {
-					"fontSize": "var(--wp--preset--font-size--heading-4)",
-					"fontWeight": "600"
-				},
-				"spacing": {
-					"margin": {
-						"top": "0",
-						"bottom": "var(--wp--style--block-gap)"
-					}
-				}
-			},
-			"h3": {
-				"typography": {
-					"fontSize": "var(--wp--preset--font-size--heading-5)",
-					"fontWeight": "600"
-				}
-			},
-			"h4": {
-				"typography": {
-					"fontSize": "var(--wp--preset--font-size--heading-6)",
-					"fontWeight": "600"
-				}
-			},
-			"h5": {
-				"typography": {
-					"fontSize": "var(--wp--preset--font-size--heading-6)"
-				}
-			}
-		}
 	}
 }

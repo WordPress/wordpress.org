@@ -35,9 +35,13 @@ ol,
 
 p,
 ul,
-ol {
-	margin-top: var(--wp--style--block-gap);
-	margin-bottom: 0;
+ol,
+h1,
+h2,
+h3,
+h4 {
+	margin-top: 0;
+	margin-bottom: var(--wp--style--block-gap);
 }
 
 ul ul,
@@ -62,8 +66,23 @@ h4 {
 
 h2,
 h3,
+h4,
+.content-area h1,
+.content-area h2 {
+	font-weight: 600;
+}
+
+h1,
+h2 {
+	font-size: var(--wp--preset--font-size--heading-3);
+}
+
+h3 {
+	font-size: var(--wp--preset--font-size--heading-5);
+}
+
 h4 {
-	margin: var(--wp--preset--spacing--30) 0 0;
+	fontSize: var(--wp--preset--font-size--heading-6);
 }
 
 .entry-content .reports.ticket-reports {
@@ -459,8 +478,8 @@ input[type="submit"]:hover {
 }
 
 .widget-title {
-	line-height: 1.2;
-	font-size: 1.4em;
+	line-height: inherit;
+	font-size: inherit;
 }
 
 .post-type-archive-handbook aside[id^="handbook"] .widget-title,
@@ -877,8 +896,8 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 .make-welcome .entry-content {
 	width: 100%;
 	max-width: var(--wp--style--global--wide-size);
-	margin: 1.5rem auto;
-	padding: 40px var(--wp--preset--spacing--edge-space);
+	margin: 0 auto;
+	padding: 40px var(--wp--preset--spacing--edge-space) 30px;
 }
 
 .make-welcome .entry-content h4,
@@ -886,10 +905,6 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 .make-welcome .entry-content h2 {
 	font-size: var(--wp--preset--font-size--normal);
 	font-weight: 600;
-}
-
-.make-welcome .entry-content p {
-	display: inline;
 }
 
 .make-welcome .entry-content .column {
