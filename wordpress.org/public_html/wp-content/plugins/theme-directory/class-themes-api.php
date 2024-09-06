@@ -41,34 +41,35 @@ class Themes_API {
 	 * @var array
 	 */
 	public $fields = array(
-		'description'        => false,
-		'downloaded'         => false,
-		'downloadlink'       => false,
-		'last_updated'       => false,
-		'creation_time'      => false,
-		'parent'             => false,
-		'rating'             => false,
-		'ratings'            => false,
-		'reviews_url'        => false,
-		'screenshot_count'   => false,
-		'screenshot_url'     => true,
-		'screenshots'        => false,
-		'sections'           => false,
-		'tags'               => false,
-		'template'           => false,
-		'versions'           => false,
-		'theme_url'          => false,
-		'extended_author'    => false,
-		'photon_screenshots' => false,
-		'active_installs'    => false,
-		'requires'           => false,
-		'requires_php'       => false,
-		'trac_tickets'       => false,
-		'is_commercial'      => false,
-		'is_community'       => false,
+		'description'             => false,
+		'downloaded'              => false,
+		'downloadlink'            => false,
+		'last_updated'            => false,
+		'creation_time'           => false,
+		'parent'                  => false,
+		'rating'                  => false,
+		'ratings'                 => false,
+		'reviews_url'             => false,
+		'screenshot_count'        => false,
+		'screenshot_url'          => true,
+		'screenshots'             => false,
+		'sections'                => false,
+		'tags'                    => false,
+		'template'                => false,
+		'versions'                => false,
+		'theme_url'               => false,
+		'homepage'                => false,
+		'extended_author'         => false,
+		'photon_screenshots'      => false,
+		'active_installs'         => false,
+		'requires'                => false,
+		'requires_php'            => false,
+		'trac_tickets'            => false,
+		'is_commercial'           => false,
+		'is_community'            => false,
 		'external_repository_url' => false,
-		'external_support_url' => false,
-		'upload_date'        => false,
+		'external_support_url'    => false,
+		'upload_date'             => false,
 	);
 
 	/**
@@ -141,6 +142,17 @@ class Themes_API {
 					$this->bad_input = true;
 				}
 			}
+		}
+
+		// Standardise the 'fields' parameter.
+		if ( ! isset( $this->request->fields ) ) {
+			$this->request->fields = [];
+		} elseif ( wp_is_numeric_array( $this->request->fields ) ) {
+			// [ 'field1', 'field2' ] => [ 'field1' => true, 'field2' => true ]
+			$this->request->fields = array_combine( $this->request->fields, array_fill( 0, count( $this->request->fields ), true ) );
+		} else {
+			// [ 'field1' => 1, 'field2' => 'false'] => [ 'field1' => true, 'field2' => false ]
+			$this->request->fields = array_map( 'wp_validate_boolean', $this->request->fields );
 		}
 
 		// The locale we should use is specified by the request
@@ -471,8 +483,6 @@ class Themes_API {
 			$defaults['external_support_url'] = true;
 		}
 
-		$this->request->fields = (array) ( $this->request->fields ?? [] );
-
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
 
 		if ( !empty( $post ) && 'repopackage' == $post->post_type && $this->request->slug === $post->post_name ) {
@@ -532,8 +542,6 @@ class Themes_API {
 			$defaults['external_repository_url'] = true;
 			$defaults['external_support_url'] = true;
 		}
-
-		$this->request->fields = (array) ( $this->request->fields ?? [] );
 
 		$this->fields = array_merge( $this->fields, $defaults, $this->request->fields );
 
