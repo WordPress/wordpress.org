@@ -31,13 +31,12 @@ function after_setup_theme() {
 add_action( 'after_setup_theme', __NAMESPACE__ . '\after_setup_theme', 11 );
 
 /**
- * Enqueue scripts and styles.
- *
- * Enqueue existing wordpress.org/support stylesheets
- * @link https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/style
+ * Enqueue styles.
  */
-function wporg_breathe_scripts() {
+function wporg_breathe_styles() {
 	wp_dequeue_style( 'wp4-styles' );
+	wp_dequeue_style( 'breathe-style' );
+	wp_enqueue_style( 'p2-breathe', get_template_directory_uri() . '/style.css' );
 
 	wp_enqueue_style(
 		'wporg-parent-2021-style',
@@ -45,12 +44,15 @@ function wporg_breathe_scripts() {
 		[ 'wporg-global-fonts' ],
 		filemtime( get_theme_root() . '/wporg-parent-2021/build/style.css' )
 	);
+
 	wp_enqueue_style(
 		'wporg-parent-2021-block-styles',
 		get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css',
 		[ 'wporg-global-fonts' ],
 		filemtime( get_theme_root() . '/wporg-parent-2021/build/block-styles.css' )
 	);
+
+	wp_enqueue_style( 'wporg-breathe', get_stylesheet_uri(), array( 'p2-breathe' ), filemtime( __DIR__ . '/style.css' ) );
 
 	// Preload the heading font(s).
 	if ( is_callable( 'global_fonts_preload' ) ) {
@@ -60,7 +62,7 @@ function wporg_breathe_scripts() {
 		global_fonts_preload( 'Inter', $subsets );
 	}
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_breathe_scripts' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_breathe_styles', 11 );
 
 /**
  * Merge the support theme's theme.json into the parent theme.json.
@@ -268,14 +270,6 @@ add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\no_robots' );
 function customize_partial_blogname() {
 	bloginfo( 'name' );
 }
-
-function styles() {
-	wp_dequeue_style( 'breathe-style' );
-	wp_enqueue_style( 'p2-breathe', get_template_directory_uri() . '/style.css' );
-
-	wp_enqueue_style( 'wporg-breathe', get_stylesheet_uri(), array( 'p2-breathe' ), filemtime( __DIR__ . '/style.css' ) );
-}
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\styles', 11 );
 
 function scripts() {
 	wp_enqueue_script( 'wporg-breathe-chapters', get_stylesheet_directory_uri() . '/js/chapters.js', array( 'jquery' ), '20200127' );
