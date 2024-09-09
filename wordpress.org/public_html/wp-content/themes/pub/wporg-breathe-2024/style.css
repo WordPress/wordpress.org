@@ -1,5 +1,5 @@
 /*
- * Theme Name: WordPress.org Breathe
+ * Theme Name: WordPress.org Breathe 2024
  * Template: p2-breathe
  * Description: Child theme of P2 Breathe, with modifications specifically for WordPress.org.
  * Supports Oxygen: true
@@ -265,12 +265,104 @@ tr:last-of-type td {
 	font-size: 0.75em;
 }
 
+/* Title icon */
+
+.wporg-make .wp-block-site-title a:before,
+body.wporg-make #headline h2 a:before {
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
+	font: normal 24px/1 'dashicons';
+	vertical-align: middle;
+	width: 32px;
+}
+
+body.make-core #headline h2 a:before { content: '\f475'; }
+body.make-design #headline h2 a:before { content: '\f309'; }
+body.make-mobile #headline h2 a:before { content: '\f470'; }
+body.make-accessibility #headline h2 a:before { content: '\f483'; }
+body.make-polyglots #headline h2 a:before { content: '\f326'; }
+body.make-support #headline h2 a:before { content: '\f125'; }
+body.make-themes #headline h2 a:before { content: '\f100'; }
+body.make-plugins #headline h2 a:before { content: '\f106'; }
+body.make-docs #headline h2 a:before { content: '\f105'; }
+body.make-community #headline h2 a:before { content: '\f307'; }
+body.make-meta #headline h2 a:before { content: '\f325'; }
+body.make-training #headline h2 a:before { content: '\f118'; }
+body.make-flow #headline h2 a:before { content: '\f115'; }
+body.make-tv #headline h2 a:before { content: '\f235'; }
+body.make-marketing #headline h2 a:before { content: '\f130'; }
+body.make-cli #headline h2 a:before { content: '\f345'; }
+body.make-hosting #headline h2 a:before { content: '\f176'; }
+
+.make-core .wp-block-site-title a:before { content: '\f475'; }
+.make-design .wp-block-site-title a:before { content: '\f309'; }
+.make-mobile .wp-block-site-title a:before { content: '\f470'; }
+.make-accessibility .wp-block-site-title a:before { content: '\f483'; }
+.make-polyglots .wp-block-site-title a:before { content: '\f326'; }
+.make-support .wp-block-site-title a:before { content: '\f125'; }
+.make-themes .wp-block-site-title a:before { content: '\f100'; }
+.make-plugins .wp-block-site-title a:before { content: '\f106'; }
+.make-docs .wp-block-site-title a:before { content: '\f105'; }
+.make-community .wp-block-site-title a:before { content: '\f307'; }
+.make-meta .wp-block-site-title a:before { content: '\f325'; }
+.make-training .wp-block-site-title a:before { content: '\f118'; }
+.make-systems .wp-block-site-title a:before { content: '\f107'; }
+.make-flow .wp-block-site-title a:before { content: '\f115'; }
+.make-tv .wp-block-site-title a:before { content: '\f235'; }
+.make-marketing .wp-block-site-title a:before { content: '\f130'; }
+.make-cli .wp-block-site-title a:before { content: '\f345'; }
+.make-hosting .wp-block-site-title a:before { content: '\f176'; }
+
 /* Adjustments for teams with SVG icons. */
+.wporg-make.make-openverse .wp-block-site-title a::before,
+.wporg-make.make-performance .wp-block-site-title a::before {
+	display: none;
+}
+
 .wp-block-site-title svg {
 	height: 30px;
 	width: 30px;
 	vertical-align: middle;
 }
+
+/* Post form */
+
+.o2-editor .o2-editor-wrapper {
+	border-radius: 2px;
+	border: var(--wp--custom--form--border--width) var(--wp--custom--form--border--style) var(--wp--custom--form--border--color);
+}
+
+.o2-editor .o2-editor-footer .o2-editor-tabs li.selected a {
+	border-top: 1px #fff solid;
+	background: #fff;
+}
+
+.o2-editor .o2-editor-footer .o2-editor-tabs li a {
+	padding: 0.25em 1.2em 0.5em 1.2em;
+	background: var(--wp--preset--color--light-grey-2);
+	border: 1px solid var(--wp--preset--color--charcoal-5);
+	border-top: 1px solid var(--wp--preset--color--light-grey-2);
+	vertical-align: middle;
+	-webkit-border-bottom-left-radius: 3px;
+	-webkit-border-bottom-right-radius: 3px;
+	-moz-border-radius-bottomleft: 3px;
+	-moz-border-radius-bottomright: 3px;
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	font-family: "Inter", sans-serif;
+	font-size: 12px;
+	border-left: 0px;
+}
+
+.o2-editor .o2-editor-footer .o2-editor-tabs li:first-of-type {
+	border-left: 1px solid var(--wp--preset--color--charcoal-5);
+}
+
+.o2-editor .o2-editor-footer .o2-editor-tabs li a:before {
+	content: none;
+}
+
+/* Sidebar */
 
 #secondary-content a {
 	overflow-wrap: anywhere;
@@ -499,11 +591,11 @@ input[type="submit"]:hover {
 	margin-bottom: 3rem;
 }
 .widget_search input[type="search"], #subscribe-email input[type="email"] {
-	width: 90%;
+	width: 100%;
 	box-sizing: border-box;
 	padding: 1rem;
 	font-size: 14px;
-	border: 1px solid #eee;
+	border-radius: 2px;
 }
 
 #secondary-content .widget {
@@ -544,15 +636,25 @@ input[type="submit"]:hover {
 	}
 }
 
+article.post .o2-post,
+article#post-new .o2-post,
+article.page .o2-post {
+	padding-top: var(--wp--preset--spacing--50);
+}
+
 .o2-post {
-	border-top: 2px solid #ddd;
+	border-top: 1px solid var(--wp--custom--color--border);
+	margin-top: 40px;
 }
+
 .o2-post .o2-post {
-	border-top: 1px solid #ddd;
+	border-top-width: 1px;
 }
+
 .page .o2-post {
 	padding: 0 !important;
 }
+
 .page .o2-post .entry-content {
 	padding: 0;
 }
@@ -560,12 +662,24 @@ input[type="submit"]:hover {
 .o2-post #searchform {
 	margin-bottom: 1.5em;
 }
+
 .o2-post #searchform:last-child {
 	margin-bottom: 5em;
 }
+
 .o2-post #searchform #searchsubmit {
 	height: 33.5px;
 	padding-bottom: .6em;
+}
+
+.single-post article.post .o2-post {
+	padding-top: 0;
+	margin-top: 0;
+	border-top: none;
+}
+
+.o2-post-comments .o2-comment .comment-content {
+	margin-left: 45px;
 }
 
 pre, code {
@@ -923,7 +1037,7 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 }
 
 .make-welcome .entry-meta {
-	margin: 0;
+	margin: 0 !important;
 	position: absolute;
 	right: var(--wp--preset--spacing--edge-space);
 	top: var(--wp--preset--spacing--20);

@@ -1,7 +1,11 @@
 <?php
 ob_start();
 do_action('wporg_breathe_before_name', 'front');
-$team_icon = ob_get_clean();
+$before_name_front = ob_get_clean();
+
+ob_start();
+do_action('wporg_breathe_before_name', 'nonfront');
+$before_name_nonfront = ob_get_clean();
 
 if ( function_exists( 'register_block_pattern' ) ) {
 	register_block_pattern(
@@ -19,7 +23,7 @@ if ( function_exists( 'register_block_pattern' ) ) {
 
 				<!-- /wp:wporg/local-navigation-bar -->',
 				esc_url( home_url() ),
-				$team_icon,
+				is_front_page() && is_home() ? $before_name_front : $before_name_nonfront,
 				esc_html( get_bloginfo('name') )
 			),
 		)
