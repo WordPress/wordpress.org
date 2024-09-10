@@ -186,9 +186,16 @@ tr:last-of-type td {
 	text-align: center;
 }
 
+/* Local navigation */
+
 .wp-block-wporg-local-navigation-bar {
 	padding-left: var(--wp--preset--spacing--edge-space);
 	padding-right: var(--wp--preset--spacing--edge-space);
+}
+
+/* For sites with no welcome box */
+.wp-block-wporg-local-navigation-bar + .site {
+	margin-top: var(--wp--preset--spacing--50);
 }
 
 /* site */
