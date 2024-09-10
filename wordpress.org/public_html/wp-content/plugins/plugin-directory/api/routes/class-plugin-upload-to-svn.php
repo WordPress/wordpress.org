@@ -9,6 +9,8 @@ use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WP_REST_Server;
 use WP_Error;
+use WP_User;
+use function WordPressdotorg\Security\SVNPasswords\check_svn_password;
 
 /**
  * An API Endpoint to upload a new version of a plugin to SVN.
@@ -59,18 +61,27 @@ class Plugin_Upload_to_SVN extends Base {
 
 		$user = false;
 		if ( ! empty( $_SERVER['PHP_AUTH_USER'] ) && empty( $_SERVER['PHP_AUTH_PW'] ) ) {
-			/**
-			 * Disable 2FA requirement for application passwords for this request.
+			/*
+			 * Check the given credentials against SVN auth.
 			 *
-			 * This should be temporary, until such a time as our SVN authentication
-			 * can be updated to support Application Passwords.
+			 * Add a callback to auth by SVN password, this ensures that existing rate limits are applied.
 			 *
-			 * TODO: The earlier auth hook will have ended with the following error if 2FA was required:
-			 * `{"code":"incorrect_password","message":"The provided password is an invalid application password."}`
+			 * The Two-Factor plugin blocks all API auth if 2FA is required, so we need to bypass that.
 			 */
 			add_filter( 'two_factor_user_api_login_enable', '__return_true' );
+			remove_filter( 'authenticate', 'wp_authenticate_cookie', 30 );
+			remove_filter( 'authenticate', 'wp_authenticate_email_password', 20 );
+			remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
+			remove_filter( 'authenticate', 'wp_authenticate_application_password', 20 );
 
-			// TODO: Attach a filter to remove auth-by-user-pass and auth-by-svn-pass
+			add_filter( 'authenticate', static function( $user, $username, $password ) {
+				if ( $user instanceof WP_User ) {
+					return $user;
+				}
+
+				$user = check_svn_password( $username, $password, true /* must be svn password */ );
+			}, 20, 3 );
+
 			$user = wp_authenticate( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 			if ( ! $user || is_wp_error( $user ) ) {
 				return $user;
