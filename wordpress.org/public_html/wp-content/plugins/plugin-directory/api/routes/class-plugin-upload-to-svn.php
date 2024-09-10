@@ -51,39 +51,52 @@ class Plugin_Upload_to_SVN extends Base {
 	}
 
 	public function permission_check( $request ) {
-		// Auth should have been done by BASIC Auth.
-		if ( empty( $_SERVER['PHP_AUTH_USER'] ) || empty( $_SERVER['PHP_AUTH_PW'] ) ) {
-			return false;
-		}
-
 		/**
-		 * Disable 2FA requirement for application passwords for this request.
-		 *
-		 * This should be temporary, until such a time as our SVN authentication
-		 * can be updated to support Application Passwords.
-		 *
-		 * TODO: The earlier auth hook will have ended with the following error if 2FA was required:
-		 * `{"code":"incorrect_password","message":"The provided password is an invalid application password."}`
+		 * Auth should be either:
+		 * a) SVN Password provided via BASIC Auth.
+		 * b) 2FA'd user.
 		 */
-		add_filter( 'two_factor_user_api_login_enable', '__return_true' );
 
-		// TODO: This will need to change if SVN Auth changes to a dedicated password. This should be done by attaching a new auth filter for it.
-		$user = wp_authenticate( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
-		if ( ! $user || is_wp_error( $user ) ) {
-			return $user;
-		}
+		$user = false;
+		if ( ! empty( $_SERVER['PHP_AUTH_USER'] ) && empty( $_SERVER['PHP_AUTH_PW'] ) ) {
+			/**
+			 * Disable 2FA requirement for application passwords for this request.
+			 *
+			 * This should be temporary, until such a time as our SVN authentication
+			 * can be updated to support Application Passwords.
+			 *
+			 * TODO: The earlier auth hook will have ended with the following error if 2FA was required:
+			 * `{"code":"incorrect_password","message":"The provided password is an invalid application password."}`
+			 */
+			add_filter( 'two_factor_user_api_login_enable', '__return_true' );
 
-		// Check if the user is a committer.
-		$committers = Tools::get_plugin_committers( $request['plugin_slug'], false );
-		if ( in_array( $user->user_login, $committers, true ) ) {
+			// TODO: Attach a filter to remove auth-by-user-pass and auth-by-svn-pass
+			$user = wp_authenticate( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
+			if ( ! $user || is_wp_error( $user ) ) {
+				return $user;
+			}
 
 			// 2FA will have prevented this happening earlier.
 			wp_set_current_user( $user );
 
-			return true;
+		} else {
+			// Check the current user is 2FA'd.
+			// TODO ^
+			$user = wp_get_current_user();
 		}
 
-		return new WP_Error( 'not_a_committer', 'The authorized user is not a committer.', 403 );
+		// If no user, bail.
+		if ( ! $user || ! $user->exists() ) {
+			return false;
+		}
+
+		// Check if the user is a committer.
+		$committers = Tools::get_plugin_committers( $request['plugin_slug'], false );
+		if ( ! in_array( $user->user_login, $committers, true ) ) {
+			return new WP_Error( 'not_a_committer', 'The authorized user is not a committer.', 403 );
+		}
+
+		return true;
 	}
 
 	/**
