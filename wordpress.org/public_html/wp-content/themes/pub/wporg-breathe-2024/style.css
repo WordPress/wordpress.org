@@ -656,19 +656,21 @@ input[type="submit"]:hover {
 	}
 
 	#secondary-toggle {
-		margin-left: 22px;
-		margin-right: 0px;
+		margin-left: var(--wp--preset--spacing--edge-space);
+		margin-right: 0;
+		margin-top: -12px;
 	}
 
 	#main #secondary-toggle {
 		margin-left: 4px;
-		margin-right: 18px;
-		margin-top: 22px;
+		margin-right: var(--wp--style--block-gap);
+		margin-top: 20px;
 	}
 
 	#secondary-toggle:before {
 		top: 0;
-		color: #fff;
+		color: var(--wp--preset--color--charcoal-4);
+		font-size: 24px;
 	}
 
 	body.responsive-show #secondary-toggle:before {
@@ -678,9 +680,9 @@ input[type="submit"]:hover {
 
 	#secondary-toggle svg {
 		background-color: #fff;
-		fill: #0073aa;
-		height: 42px;
-		width: 42px;
+		fill: var(--wp--preset--color--charcoal-4);
+		height: 36px;
+		width: 36px;
 	}
 
 }
@@ -1018,7 +1020,7 @@ article.type-handbook.status-private .o2-post:after {
 }
 
 .widget {
-	margin: 0 0 4em;
+	margin: 0 0 var(--wp--preset--spacing--40);
 	padding: 0;
 }
 
@@ -1171,7 +1173,7 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 
 .make-welcome {
 	background: var(--wp--preset--color--light-grey-3);
-	padding: 2em 1em;
+	padding: 2em 0;
 	position: relative;
 	width: 100%;
 	margin-bottom: var(--wp--preset--spacing--40);
