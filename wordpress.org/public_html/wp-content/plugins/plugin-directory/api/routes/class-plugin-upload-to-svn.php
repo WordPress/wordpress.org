@@ -102,7 +102,8 @@ class Plugin_Upload_to_SVN extends Base {
 				return new WP_Error( 'not_2fa', 'The authorized user does not have 2FA enabled.', 403 );
 			}
 			if ( $status->needs_revalidate ) {
-				wp_redirect( get_revalidate_url( ) );
+				// TODO Uhhhh... We kinda need to revalidate, yet we need the ZIP file that they've submitted.. Store it somewhere?
+				wp_redirect( get_revalidate_url( /* TODO, current rest-api-endpoint url here... */ ) );
 				die();
 			}
 
