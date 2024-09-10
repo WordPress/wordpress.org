@@ -11,6 +11,7 @@ use WP_REST_Server;
 use WP_Error;
 use WP_User;
 use function WordPressdotorg\Security\SVNPasswords\check_svn_password;
+use function WordPressdotorg\Two_Factor\{ get_revalidation_status, get_revalidate_url }; // PR https://github.com/WordPress/wporg-two-factor/pull/283
 
 /**
  * An API Endpoint to upload a new version of a plugin to SVN.
@@ -91,8 +92,21 @@ class Plugin_Upload_to_SVN extends Base {
 			wp_set_current_user( $user );
 
 		} else {
+			if ( ! is_user_logged_in() ) {
+				return false;
+			}
+
 			// Check the current user is 2FA'd.
-			// TODO ^
+			$status = get_revalidation_status();
+			if ( ! $status->last_validated ) {
+				return new WP_Error( 'not_2fa', 'The authorized user does not have 2FA enabled.', 403 );
+			}
+			if ( $status->needs_revalidate ) {
+				wp_redirect( get_revalidate_url( ) );
+				die();
+			}
+
+			// User must have confirmed 2FA to get here.
 			$user = wp_get_current_user();
 		}
 
@@ -103,15 +117,18 @@ class Plugin_Upload_to_SVN extends Base {
 
 		// Check if the user is a committer.
 		$committers = Tools::get_plugin_committers( $request['plugin_slug'], false );
-		if ( ! in_array( $user->user_login, $committers, true ) ) {
-			return new WP_Error( 'not_a_committer', 'The authorized user is not a committer.', 403 );
+		if ( $user && in_array( $user->user_login, $committers, true ) ) {
+			return true;
 		}
 
-		return true;
+		return new WP_Error( 'not_a_committer', 'The authorized user is not a committer.', 403 );
 	}
 
 	/**
 	 * Process a ZIP upload and commit it to SVN.
+	 *
+	 * @param \WP_REST_Request $request The request object.
+	 * @return array|WP_Error
 	 */
 	public function upload( $request ) {
 		global $post;
