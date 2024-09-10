@@ -121,9 +121,12 @@ class Plugin_Upload_to_SVN extends Base {
 		}
 		$version = $headers->Version ?? '0.0';
 
-		// Validate that the version is greater than the existing version.
-		// TODO: It would be helpful to be able to upload security-releases of plugins here too, which will always be older than the existing version.. Perhaps this is not needed.
-		if ( ! version_compare( $version, $post->version, '>' ) ) {
+		/*
+		 * Validate that the version is greater than the existing version.
+		 *
+		 * Note: This prevents uploading a security release for a previous branch. Those should be done via SVN directly.
+		 */
+		if ( ! $version || ! version_compare( $version, $post->version, '>' ) ) {
 			return new WP_Error(
 				'version_not_newer',
 				sprintf(
@@ -150,108 +153,90 @@ class Plugin_Upload_to_SVN extends Base {
 		}
 
 		// Import the files expected. Skip error validation for now, if it fails other steps will catch it.
-		SVN::up( $svn_tmp . '/trunk/', [ 'depth' => 'files' ] );
+		SVN::up( $svn_tmp . '/trunk/', [ 'set-depth' => 'infinity' ] );
 		SVN::up( $svn_tmp . '/tags/', [ 'depth' => 'immediates' ] );
 
+		$trunk_folder   = $svn_tmp . '/trunk';
 		$new_tag_folder = $svn_tmp . '/tags/' . $version;
 		if ( is_dir( $new_tag_folder ) ) {
 			return new WP_Error(
 				'version_exists',
 				sprintf(
-					'The version %s already exists in SVN.',
+					'The version %s is already tagged in SVN.',
 					esc_html( $version )
 				),
 				400
 			);
 		}
 
-		// Determine the latest (yet older) version of the plugin tags.
-		$latest_tag = (static function() use ( $svn_tmp, $version ) {
-			// GitHub versions often have a leading `v`, remove it.
-			$version = preg_replace( '/^v(\d+)/', '$1', $version );
+		// Empty the trunk folder, as we'll overwrite it with the newly uploaded data.
+		Filesystem::rmdir( $trunk_folder );
 
-			$tags = glob( $svn_tmp . '/tags/*', GLOB_ONLYDIR );
-			$tags = array_map( 'basename', $tags );
+		// Copy plugin files into trunk.
+		Filesystem::copy( $plugin_root, $trunk_folder, true );
+		SVN::add_remove( $trunk_folder );
 
-			// GitHub versions often have a leading `v`, remove it.
-			$tags = preg_replace( '/^v(\d+)/', '$1', $tags );
-
-			$tags = array_filter( $tags, function( $tag ) use ( $version ) {
-				return version_compare( $tag, $version, '<' );
-			} );
-
-			usort( $tags, 'version_compare' );
-
-			return array_pop( $tags );
-		})();
-
-		// TODO: This should probably always overwrite trunk, and copy that to the tag.
-
-		// If we have a latest tag, use it as the base for the new tag.
-		if ( $latest_tag ) {
-			$result = SVN::up( $svn_tmp . '/tags/' . $latest_tag, [ 'set-depth' => 'infinity' ] );
-			if ( $result['result'] ) {
-				$result = SVN::copy( $svn_tmp . '/tags/' . $latest_tag, $new_tag_folder );
-			}
-			if ( ! $result['result'] ) {
-				return new WP_Error( 'copy_failed', 'Failed to copy the new tag directory.', 500 );
-			}
-
-			// Remove all files from the new tag folder, in prep for overwriting, now that the SVN metadata is set.
-			Filesystem::rmdir( $new_tag_folder );
-		}
-		if ( ! mkdir( $new_tag_folder ) ) {
-			return new WP_Error( 'mkdir_failed', 'Failed to create the new tag directory.', 500 );
-		} else {
-			SVN::add( $new_tag_folder ); // May fail, if the copy was used.
-		}
-
-		// Copy plugin files into the new tag.
-		Filesystem::copy( $plugin_root, $new_tag_folder, true );
-		SVN::add_remove( $new_tag_folder );
-
-		/**
-		 * When we're setting the upload as stable, we'll do some additional things:
-		 *  - Overwrite the trunk readme with the version supplied.
-		 *  - Ensure that the Stable Tag in the trunk readme is updated to the new tag.
+		/*
+		 * Ensure the version is set as stable.
+		 * 1) Find the readme file in trunk.
+		 * 2) Set the value to the new tag we'll create, if it's not already set to that.
 		 *
 		 * TODO: This should be a separate step that can be run individually as well, for https://meta.trac.wordpress.org/ticket/5484
 		 */
-		if ( $request['set_as_stable'] ) {
-			$readme = Import::find_readme_file( $svn_tmp . '/trunk/' );
-			// Overwrite the trunk readme with the new version.
-			$plugin_readme = Import::find_readme_file( $plugin_root );
-			if ( $plugin_readme ) {
-				copy( $plugin_readme, $readme ); // Will overwrite any existing.
+		$readme = Import::find_readme_file( $svn_tmp . '/trunk/' );
+		if ( ! $readme ) {
+			return new WP_Error( 'no_readme', 'Unable to find a readme file.', 500 );
+		}
 
-				SVN::add( $readme ); // May fail if a readme was already in place.
-			}
+		$readme_contents = file_get_contents( $readme );
+		if ( ! preg_match( '!^[\s*]*Stable Tag:\s*' . preg_quote( $version, '!' ) . '(\r)?$!mi' ) ) {
+			$new_contents = preg_replace( '/^([\s*]*Stable Tag):\s*.+(\r)?$/mi', "\\1: $version\\2", $readme_contents, 1 );
 
-			if ( ! $readme ) {
-				return new WP_Error( 'no_readme', 'Unable to find a readme.txt file.', 500 );
-			}
-
-			// Update Stable Tag with the new version number, in the event it wasn't already.
-			$readme_contents = file_get_contents( $readme );
-			$new_contents    = preg_replace( '/^([\s*]*Stable Tag):\s*.+(\r)?$/mi', "\\1: $version\\2", $readme_contents, 1 );
+			// If it's unchanged, can we add the header if required?
 			if ( $readme_contents === $new_contents ) {
-				// TODO: Can we add the header if required?
-				return new WP_Error( 'stable_tag_not_updated', 'The Stable Tag was not able to be updated in the readme. Please ensure a "Stable Tag: x.y" header exists in your readme.', 500 );
+				return new WP_Error(
+					'stable_tag_not_updated',
+					'The Stable Tag was not able to be updated in the readme. Please ensure a "Stable Tag: x.y" header exists in your readme.',
+					500
+				);
 			}
+
 			file_put_contents( $readme, $new_contents );
 		}
 
-		$commit = SVN::commit(
-			$svn_tmp,
-			sprintf(
+		// Finally, now copy trunk to the tag.
+		$result = SVN::copy( $trunk_folder, $new_tag_folder );
+		if ( ! $result['result'] ) {
+			return new WP_Error( 'copy_failed', 'Failed to create the new tag directory.', 500 );
+		}
+
+		// Are we authing by user or the plugin directory?
+		$commit_options = [];
+		if ( ! empty( $_SERVER['PHP_AUTH_USER'] ) ) {
+			$commit_options = [
+				'username' => $_SERVER['PHP_AUTH_USER'],
+				'password' => $_SERVER['PHP_AUTH_PW'] . 'nonono',
+			];
+
+			$message = sprintf(
 				'Adding version %s of %s',
 				$version,
 				$post->post_name
-			),
-			[
-				'username' => $_SERVER['PHP_AUTH_USER'],
-				'password' => $_SERVER['PHP_AUTH_PW'] . 'nonono'
-			]
+			);
+		} else {
+			$message = sprintf(
+				'Adding version %s of %s by %s',
+				$version,
+				$post->post_name,
+				wp_get_current_user()->user_login
+			);
+		}
+
+		// Commit the new version.
+		$commit = SVN::commit(
+			$svn_tmp,
+			$message,
+			$commit_options
 		);
 		if ( ! $commit['result'] ) {
 			return new WP_Error( 'commit_failed', 'An error occured during the SVN commit.', 500 );
