@@ -263,6 +263,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					throw new Exception( $activity_id );
 				} elseif ( false === $activity_id || intval( $activity_id ) <= 0 ) {
 					throw new Exception( '-1 Unable to save activity' );
+				} else {
+					$this->maybe_update_last_activity();
 				}
 
 				$response = '1';
@@ -274,6 +276,36 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			die( $response );
+		}
+
+		/**
+		 *
+		 * Adds/Updates user meta to track last activity.
+		 *
+		 */
+		public static function maybe_update_last_activity() {
+
+			$user = self::get_user( $_POST['user'] );
+			
+			if ( ! $user ) {
+				return;
+			}
+			
+			$user_activity_cache_key = 'wporg-user-activity-logger-' . $user->ID;
+
+			// Adds some caching to avoid unnecessary updates since we only store day.
+			$user_activity_cache = wp_cache_get( $user_activity_cache_key );
+
+			if ( $user_activity_cache ) {
+				return;
+			}
+
+			// Only store date since we aim to cache for a day.
+			update_user_meta( $user->ID, 'last_activity_tracker', date( 'Y-m-d 00:00:00' ) ); 
+			wp_cache_set( $user_activity_cache_key, '1', '', DAY_IN_SECONDS );
+
+			return;
+
 		}
 
 		/**

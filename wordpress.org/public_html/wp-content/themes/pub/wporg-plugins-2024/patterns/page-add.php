@@ -18,7 +18,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 				<?php
 				printf(
 					/* translators: 1: URL to plugin guidelines, 2: URL to plugin developer FAQ. */
-					wp_kses_post( __( 'Before you submit your plugin, we ask you to review our <a href="%1$s">Guidelines</a> and read the <a href="%2$s">Frequently Asked Questions</a>. A brief selections of common questions are listed below the form.', 'wporg-plugins' ) ),
+					wp_kses_post( __( 'Before you submit your plugin, we ask you to review our <a href="%1$s">Guidelines</a> and read the <a href="%2$s">Frequently Asked Questions</a>. A brief selection of common questions is available below the form.', 'wporg-plugins' ) ),
 					esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/' ),
 					esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' )
 				);

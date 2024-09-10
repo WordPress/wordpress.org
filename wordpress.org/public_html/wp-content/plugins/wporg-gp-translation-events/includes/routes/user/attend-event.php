@@ -31,6 +31,13 @@ class Attend_Event_Route extends Route {
 	}
 
 	public function handle( int $event_id ): void {
+		$nonce_name = '_attendee_nonce';
+		if ( isset( $_POST['_attendee_nonce'] ) ) {
+			$nonce_value = sanitize_text_field( wp_unslash( $_POST['_attendee_nonce'] ) );
+			if ( ! wp_verify_nonce( $nonce_value, $nonce_name ) ) {
+				$this->die_with_error( esc_html__( 'You are not authorized to change the attendance mode of this attendee', 'gp-translation-events' ), 403 );
+			}
+		}
 		$user = wp_get_current_user();
 		if ( ! $user ) {
 			$this->die_with_error( esc_html__( 'Only logged-in users can attend events', 'gp-translation-events' ), 403 );
@@ -46,14 +53,16 @@ class Attend_Event_Route extends Route {
 			$this->die_with_error( esc_html__( 'Cannot attend or un-attend a past event', 'gp-translation-events' ), 403 );
 		}
 
-		$attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event->id(), $user_id );
+		$attendee           = $this->attendee_repository->get_attendee_for_event_for_user( $event->id(), $user_id );
+		$is_remote_attendee = isset( $_POST['attend_remotely'] );
+
 		if ( $attendee instanceof Attendee ) {
 			if ( $attendee->is_contributor() ) {
 				$this->die_with_error( esc_html__( 'Contributors cannot un-attend the event', 'gp-translation-events' ), 403 );
 			}
 			$this->attendee_repository->remove_attendee( $event->id(), $user_id );
 		} else {
-			$attendee = new Attendee( $event->id(), $user_id );
+			$attendee = new Attendee( $event->id(), $user_id, false, false, array(), $is_remote_attendee );
 			$this->attendee_adder->add_to_event( $event, $attendee );
 		}
 

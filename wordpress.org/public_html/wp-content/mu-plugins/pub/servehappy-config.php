@@ -13,7 +13,7 @@ namespace WordPressdotorg\API\Serve_Happy;
 define( 'RECOMMENDED_PHP', '7.4' );
 
 // The oldest branch of PHP which WordPress core still works with.
-define( 'MINIMUM_PHP', '7.0' );
+define( 'MINIMUM_PHP', '7.2.24' );
 
 // The lowest branch of PHP which is actively supported.
 define( 'SUPPORTED_PHP', '7.4' );

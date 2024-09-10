@@ -6,8 +6,10 @@
 
 	.wp-block-group,
 	.wp-block-post-title,
-	.wp-block-post-excerpt {
+	.wp-block-post-excerpt,
+	.wp-block-post-featured-image {
 		max-width: 100%;
+		min-width: 100%;
 	}
 
 	.course,
@@ -17,16 +19,14 @@
 			align-items: center;
 
 			&::before {
-				// 'clock' icon
-				content: "\f469";
-				/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-				font-family: dashicons;
+				content: "";
 				display: block;
 				width: 24px;
 				height: 24px;
 				font-size: 24px;
 				line-height: 1;
 				margin-right: 6px;
+				background: url(../../assets/icon-clock.svg) no-repeat;
 			}
 		}
 
@@ -75,9 +75,47 @@
 			left: 24px;
 		}
 
+		.sensei-lms-course-list-featured-label__image-wrapper {
+			min-width: 100%;
+		}
+
 		.sensei-lms-course-list-featured-label__text,
 		.taxonomy-level {
 			display: none;
+		}
+
+		.wp-block-wporg-learn-course-status {
+			display: inline-block;
+			padding: 4px var(--wp--preset--spacing--10);
+			border-radius: 2px;
+			text-decoration: none;
+			color: var(--wp--preset--color--charcoal-1);
+			background-color: var(--wp--preset--color--light-grey-2);
+
+			&.is-completed {
+				background-color: var(--wp--preset--color--acid-green-3);
+				color: var(--wp--custom--color--green-70);
+			}
+		}
+	}
+
+	.lesson {
+		.wp-block-post-terms a {
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+
+		.wp-block-wporg-learn-learning-duration + .wp-block-post-terms {
+			margin-left: calc(var(--wp--style--block-gap) * -1);
+
+			&::before {
+				content: "•";
+				margin: 0 var(--wp--preset--spacing--10);
+				color: var(--wp--preset--color--charcoal-5);
+			}
 		}
 	}
 

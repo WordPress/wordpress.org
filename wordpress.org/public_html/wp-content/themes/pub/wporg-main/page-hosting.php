@@ -17,7 +17,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 get_header( 'top-level-page' );
 the_post();
-$hosting_cache_buster = '6';
+$hosting_cache_buster = '8';
 
 ?>
 
@@ -104,7 +104,7 @@ $hosting_cache_buster = '6';
 							</a>
 						</h2>
 
-						<p>At WordPress.com, we've built an automatically scalable and secure platform optimized for the latest WordPress has to offer.  Start a free website or blog today with everything you need to grow. Get lightning-fast and reliable performance with our global CDN, high-frequency CPUs, multi-datacenter failover, secure login, integrated visitor stats, and more. With managed hosting and the 24/7 support of our dedicated WordPress experts, you'll be well taken care of.</p>
+						<p>Get lightning-fast WordPress hosting with full support for your plugins and themes, built by the biggest contributor to WordPress Core. Whether you&#8217;re a first-time blogger or an advanced developer, you&#8217;ll find all the features you&#8217;ll ever need, from intuitive site building and monetization tools, to GitHub deployments, staging sites, WP-CLI, SSH, and more. Scale without stress thanks to unlimited bandwidth, traffic, and visitors—plus 24/7 security.</p>
 
 						<div class="forum">
 							<a href="https://wordpress.org/search/wordpress.com/?in=support_forums">Forum threads about WordPress.com &raquo;</a>

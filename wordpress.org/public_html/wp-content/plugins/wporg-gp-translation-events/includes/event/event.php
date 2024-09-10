@@ -42,6 +42,8 @@ class Event {
 	private string $status;
 	private string $title;
 	private string $description;
+	private DateTimeImmutable $updated_at;
+	private string $attendance_mode;
 
 	/**
 	 * @throws InvalidStart
@@ -55,7 +57,9 @@ class Event {
 		DateTimeZone $timezone,
 		string $status,
 		string $title,
-		string $description
+		string $description,
+		DateTimeImmutable $updated_at = null,
+		string $attendance_mode = 'onsite'
 	) {
 		$this->author_id = $author_id;
 		$this->validate_times( $start, $end );
@@ -65,6 +69,8 @@ class Event {
 		$this->set_status( $status );
 		$this->set_title( $title );
 		$this->set_description( $description );
+		$this->set_updated_at( $updated_at );
+		$this->set_attendance_mode( $attendance_mode );
 	}
 
 	public function id(): int {
@@ -104,6 +110,14 @@ class Event {
 		return $this->end->is_in_the_past();
 	}
 
+	public function is_remote(): bool {
+		return 'remote' === $this->attendance_mode;
+	}
+
+	public function is_hybrid(): bool {
+		return 'hybrid' === $this->attendance_mode;
+	}
+
 	public function timezone(): DateTimeZone {
 		return $this->timezone;
 	}
@@ -122,6 +136,10 @@ class Event {
 
 	public function description(): string {
 		return $this->description;
+	}
+
+	public function updated_at(): DateTimeImmutable {
+		return $this->updated_at;
 	}
 
 	public function set_id( int $id ): void {
@@ -144,6 +162,10 @@ class Event {
 		$this->timezone = $timezone;
 	}
 
+	public function attendance_mode(): string {
+		return $this->attendance_mode;
+	}
+
 	/**
 	 * @throws InvalidStatus
 	 */
@@ -160,6 +182,14 @@ class Event {
 
 	public function set_description( string $description ): void {
 		$this->description = $description;
+	}
+
+	public function set_updated_at( DateTimeImmutable $updated_at = null ): void {
+		$this->updated_at = $updated_at ?? Translation_Events::now();
+	}
+
+	public function set_attendance_mode( string $attendance_mode ): void {
+		$this->attendance_mode = $attendance_mode;
 	}
 
 	/**

@@ -361,6 +361,38 @@ body.page {
 	text-align: right;
 }
 
+.latest-photos h3 {
+	font-size: 1.25rem;
+	font-weight: 400;
+}
+.photos-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill,minmax(150px, 1fr));
+	grid-auto-rows: 100px;
+	row-gap: 8px;
+	justify-items: center;
+}
+.photos-grid > span {
+	position: relative;
+}
+.photos-photo-link {
+	display: inline-block;
+	overflow: hidden;
+}
+.photos-photo-link img {
+	max-width: 100%;
+}
+.photos-photo-link img:active,
+.photos-photo-link img:hover {
+	border: 4px solid #fff;
+}
+.photos-grid .photos-photo-link img {
+	height: 100px;
+	width: 150px;
+	object-fit: cover;
+	transition: all .25s;
+}
+
 .navigation {
 	grid-column: 1 / -1;
 	margin-top: 1rem;

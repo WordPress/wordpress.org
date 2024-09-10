@@ -813,7 +813,7 @@ class Rejection {
 		}
 
 		$selected = self::get_rejection_reason( $post );
-		$is_disabled = in_array( get_post_status( $post ), [ 'trash', self::get_post_status() ] );
+		$is_disabled = in_array( get_post_status( $post ), [ 'publish', 'trash', self::get_post_status() ] );
 
 		echo "<style>
 			.reject-fields textarea { width: 100%; }
@@ -825,6 +825,9 @@ class Rejection {
 			.reject-action input[type=submit] { background-color: #b32d2e; border-color: #b32d2e; color: white; }
 			.reject-action.post-is-rejected input[type=submit] { background-color: #2271b1; border-color: #2271b1; }
 			.reject-action input[type=submit]:hover { background-color: #8f2424; border-color: #8f2424; color: white; }
+
+			.reject-warn-if-published { border:1px solid #856404; background-color: #fff3cd; color: #856404; padding: 8px; margin-bottom: 0.5rem; }
+			.reject-warn-if-about-to-reject-published { border: 1px solid #721c24; background-color: #f8d7da; color: #721c24; padding: 8px 12px; margin-bottom: 0.5rem; }
 		</style>\n";
 
 		echo '<div class="reject-fields">';
@@ -837,12 +840,25 @@ class Rejection {
 			document.addEventListener('DOMContentLoaded', function () {
 				// Bind changing of value of rejection reason dropdown to toggle whether reject or publish button is enabled.
 				const rejectSelect = document.querySelector('#rejected_reason');
-				rejectSelect.addEventListener('change', (event) => {
+				rejectSelect?.addEventListener('change', (event) => {
 					const hasRejectReason = Boolean(event.target.value);
 					// Publish button should be disabled if a rejection reason is selected.
 					document.querySelector('#publish').disabled = hasRejectReason;
 					// Reject button should be disabled if no rejection reason is selected.
 					document.querySelector('#reject-post').disabled = !hasRejectReason;
+					// Notice of rejection of published post should be shown if post is published.
+					const rejectPublishWarn = document.querySelector('.reject-warn-if-about-to-reject-published');
+					if ( rejectPublishWarn ) {
+						rejectPublishWarn.style.display = ( hasRejectReason ? 'block' : 'none' );
+					}
+				});
+
+				// Bind checkbox for enabling rejection of published photo.
+				const cbRejectPublished = document.querySelector('#reject-warn-if-reject-published');
+				cbRejectPublished?.addEventListener('change', (event) => {
+					if (rejectSelect) {
+						rejectSelect.disabled = !event.target.checked;
+					}
 				});
 
 				// Fire the select change event so the Reject button gets disabled initially.
@@ -851,6 +867,14 @@ class Rejection {
 			} );
 		</script>
 JS;
+
+		// Show a notice if the post is already published and a checkbox for enabling rejection field.
+		if ( 'publish' === get_post_status( $post ) ) {
+			echo '<div class="reject-warn-if-published">';
+			echo '<label class="warn-if-reject-published-container"><input id="reject-warn-if-reject-published" type="checkbox" name="reject_warn_if_reject_published" />';
+			esc_html_e( 'Allow rejection of published photo?', 'wporg-photos' );
+			echo "</label></div>\n";
+		}
 
 		echo '<label for="rejected_reason">' . __( 'Reject due to:', 'wporg-photos' ) . '<br>';
 		printf(
@@ -885,6 +909,13 @@ JS;
 		echo '</label>';
 
 		echo "</div></div>\n";
+
+		// Output a notice adjacent to reject button for use if about to reject a published post.
+		if ( 'publish' === get_post_status( $post ) ) {
+			echo '<div class="reject-warn-if-about-to-reject-published" style="display:none;" >';
+			esc_html_e( 'Warning: You are about to reject a published photo!', 'wporg-photos' );
+			echo "</div>\n";
+		}
 
 		$is_rejected = self::is_post_rejected( $post );
 

@@ -121,7 +121,7 @@ $deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 		<td>
 			<select name="default_sort[openai_model]" id="default_sort[openai_model]" style="border:revert;">
 				<?php
-				$openai_models = array( 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o' );
+				$openai_models = array( 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini' );
 				$openai_model = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
 				foreach ( $openai_models as $model ) {
 					echo '<option value="' . esc_attr( $model ) . '"';

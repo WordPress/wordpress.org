@@ -22,6 +22,7 @@ add_action( 'save_post_wporg_workshop', __NAMESPACE__ . '\save_workshop_meta_fie
 add_action( 'save_post_meeting', __NAMESPACE__ . '\save_meeting_metabox_fields' );
 add_action( 'admin_footer', __NAMESPACE__ . '\render_locales_list' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
+add_action( 'wp_insert_post', __NAMESPACE__ . '\set_default_lesson_preview', 10, 3 );
 
 /**
  * Register all post meta keys.
@@ -51,6 +52,34 @@ function register_lesson_meta() {
 			},
 		),
 	);
+}
+
+/**
+ * Set public preview to be enabled on lessons created within a course by default.
+ * This post meta is registered by Sensei with no default value, so we set it here on lesson creation.
+ *
+ * @param int     $post_ID Post ID.
+ * @param WP_Post $post    Post object.
+ * @param bool    $update  Whether this is an existing post being updated.
+ */
+function set_default_lesson_preview( $post_ID, $post, $update ) {
+	// Only run for new lessons.
+	if ( $update || 'lesson' !== $post->post_type ) {
+		return;
+	}
+
+	// Check if the lesson belongs to a course.
+	$course_id = get_post_meta( $post_ID, '_lesson_course', true );
+
+	if ( empty( $course_id ) ) {
+		return;
+	}
+
+	$existing_value = get_post_meta( $post_ID, '_lesson_preview', true );
+
+	if ( '' === $existing_value ) {
+		update_post_meta( $post_ID, '_lesson_preview', 'preview' );
+	}
 }
 
 /**
@@ -468,13 +497,6 @@ function render_metabox_workshop_details( WP_Post $post ) {
 	$duration_interval = get_workshop_duration( $post, 'interval' );
 	$locales           = get_locales_with_english_names();
 	$captions          = get_post_meta( $post->ID, 'video_caption_language' ) ?: array();
-	$all_lessons       = get_posts( array(
-		'post_type'      => 'lesson',
-		'post_status'    => 'publish',
-		'posts_per_page' => 999,
-		'orderby'        => 'title',
-		'order'          => 'asc',
-	) );
 
 	require get_views_path() . 'metabox-workshop-details.php';
 }
@@ -560,9 +582,6 @@ function save_workshop_meta_fields( $post_id ) {
 			add_post_meta( $post_id, 'video_caption_language', $caption );
 		}
 	}
-
-	$lesson_id = filter_input( INPUT_POST, 'linked-lesson-id', FILTER_SANITIZE_NUMBER_INT );
-	update_post_meta( $post_id, 'linked_lesson_id', $lesson_id );
 
 	$presenter_wporg_username = filter_input( INPUT_POST, 'presenter-wporg-username' );
 	$presenter_usernames      = array_map( 'trim', explode( ',', $presenter_wporg_username ) );

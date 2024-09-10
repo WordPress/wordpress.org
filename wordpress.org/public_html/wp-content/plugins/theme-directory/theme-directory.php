@@ -617,6 +617,9 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 	$content .= 'https://make.wordpress.org/themes';
 
 	wp_mail( get_user_by( 'id', $post->post_author )->user_email, $subject, $content, 'From: "WordPress Theme Directory" <themes@wordpress.org>' );
+
+	// Store some user-meta against the theme author, so that other code knows this is a current (or past) theme author.
+	update_user_meta( $post->post_author, 'has_themes', time() );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_approve_version', 10, 3 );
 

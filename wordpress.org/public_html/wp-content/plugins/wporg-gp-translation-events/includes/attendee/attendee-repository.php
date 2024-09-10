@@ -5,6 +5,9 @@ namespace Wporg\TranslationEvents\Attendee;
 use Exception;
 
 class Attendee_Repository {
+
+	private array $cached_current_user_attendee = array();
+
 	/**
 	 * @throws Exception
 	 */
@@ -15,12 +18,13 @@ class Attendee_Repository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
-				"insert ignore into {$gp_table_prefix}event_attendees (event_id, user_id, is_host, is_new_contributor) values (%d, %d, %d, %d)",
+				"insert ignore into {$gp_table_prefix}event_attendees (event_id, user_id, is_host, is_new_contributor, is_remote) values (%d, %d, %d, %d, %d)",
 				array(
 					'event_id'           => $attendee->event_id(),
 					'user_id'            => $attendee->user_id(),
 					'is_host'            => $attendee->is_host() ? 1 : 0,
 					'is_new_contributor' => $attendee->is_new_contributor() ? 1 : 0,
+					'is_remote'          => $attendee->is_remote() ? 1 : 0,
 				),
 			),
 		);
@@ -42,7 +46,10 @@ class Attendee_Repository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			"{$gp_table_prefix}event_attendees",
-			array( 'is_host' => $attendee->is_host() ? 1 : 0 ),
+			array(
+				'is_host'   => $attendee->is_host() ? 1 : 0,
+				'is_remote' => $attendee->is_remote() ? 1 : 0,
+			),
 			array(
 				'event_id' => $attendee->event_id(),
 				'user_id'  => $attendee->user_id(),
@@ -90,11 +97,45 @@ class Attendee_Repository {
 	 * @throws Exception
 	 */
 	public function get_attendee_for_event_for_user( int $event_id, int $user_id ): ?Attendee {
-		$attendees = $this->get_attendees_for_events_for_user( array( $event_id ), $user_id );
+		$attendees = $this->get_attendees_for_user_for_events( $user_id, array( $event_id ), );
 		if ( 1 !== count( $attendees ) ) {
 			return null;
 		}
 		return $attendees[ $event_id ];
+	}
+
+	public function is_user_attending( int $event_id, int $user_id ): ?Attendee {
+		if ( ! isset( $this->cached_current_user_attendee[ $user_id ] ) ) {
+			$this->cached_current_user_attendee[ $user_id ] = $this->get_attendees_for_user_for_events( $user_id );
+		}
+		$is_attending = $this->cached_current_user_attendee[ $user_id ][ $event_id ] ?? null;
+
+		return $is_attending;
+	}
+
+	/**
+	 * @var int $user_id
+	 * @return object
+	 * @throws Exception
+	 */
+	public function get_user_attended_events( int $user_id ): array {
+		global $wpdb, $gp_table_prefix;
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+		$event_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"
+					select
+						event_id
+					from {$gp_table_prefix}event_attendees attendees
+					where user_id = %d
+				",
+				$user_id
+			)
+		);
+		// phpcs:enable
+		return $event_ids;
 	}
 
 	/**
@@ -102,11 +143,7 @@ class Attendee_Repository {
 	 * @return Attendee[] Associative array with event id as key.
 	 * @throws Exception
 	 */
-	public function get_attendees_for_events_for_user( array $event_ids, int $user_id ): array {
-		if ( empty( $event_ids ) ) {
-			return array();
-		}
-
+	public function get_attendees_for_user_for_events( int $user_id, array $event_ids = array() ): array {
 		// Prevent SQL injection.
 		foreach ( $event_ids as $event_id ) {
 			if ( is_numeric( $event_id ) ) {
@@ -118,7 +155,12 @@ class Attendee_Repository {
 		}
 
 		global $wpdb, $gp_table_prefix;
+		$and_event_ids   = '';
 		$event_id_params = implode( ',', array_fill( 0, count( $event_ids ), '%d' ) );
+		if ( ! empty( $event_ids ) ) {
+			$and_event_ids = 'and event_id in (' . $event_id_params . ')';
+
+		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
@@ -131,6 +173,7 @@ class Attendee_Repository {
 						user_id,
 						is_host,
 						is_new_contributor,
+						is_remote,
 						(
 							select group_concat( distinct locale )
 							from {$gp_table_prefix}event_actions
@@ -138,18 +181,16 @@ class Attendee_Repository {
 							  and user_id = attendees.user_id
 						) as locales
 					from {$gp_table_prefix}event_attendees attendees
-					where event_id in ($event_id_params)
-					  and user_id = %d
+					where user_id = %d {$and_event_ids}
 				",
 				array_merge(
-					$event_ids,
 					array( $user_id ),
+					$event_ids
 				)
 			),
 			OBJECT_K
 		);
 		// phpcs:enable
-
 		return array_map(
 			function ( $row ) {
 				return new Attendee(
@@ -158,6 +199,7 @@ class Attendee_Repository {
 					'1' === $row->is_host,
 					'1' === $row->is_new_contributor,
 					null === $row->locales ? array() : explode( ',', $row->locales ),
+					'1' === $row->is_remote,
 				);
 			},
 			$rows,
@@ -183,6 +225,7 @@ class Attendee_Repository {
 					user_id,
 					is_host,
 					is_new_contributor,
+					is_remote,
 					(
 						select group_concat( distinct locale )
 						from {$gp_table_prefix}event_actions
@@ -208,6 +251,7 @@ class Attendee_Repository {
 					'1' === $row->is_host,
 					'1' === $row->is_new_contributor,
 					null === $row->locales ? array() : explode( ',', $row->locales ),
+					'1' === $row->is_remote,
 				);
 			},
 			$rows,

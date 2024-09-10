@@ -26,16 +26,18 @@ class Release_Confirmation extends Base {
 
 %2$s has committed a new version of %3$s - %4$s.
 
-An email confirmation is required before the new version will be released.
+Action is required before the new version will be released.
 
 Follow the link below to login and confirm the release.
 
-<%5$s>', 'wporg-plugins' ),
+<%5$s>
+
+This notice has been sent to all plugin committers.', 'wporg-plugins' ),
 			$this->user_text( $this->user ),
 			$this->user_text( $this->args['who'] ),
 			$this->args['readme']->name,
 			$this->args['version'] ?? $this->args['headers']->Version,
-			esc_url( Release_Confirmation_Shortcode::generate_access_url( $this->user ) )
+			esc_url( Release_Confirmation_Shortcode::generate_access_url( $this->user, $this->plugin ) )
 		);
 	}
 }

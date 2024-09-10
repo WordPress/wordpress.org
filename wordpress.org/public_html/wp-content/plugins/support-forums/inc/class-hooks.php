@@ -2,6 +2,8 @@
 
 namespace WordPressdotorg\Forums;
 
+use function WordPressdotorg\Two_Factor\get_edit_account_url;
+
 class Hooks {
 
 	const SITE_URL_META = '_wporg_bbp_topic_site_url';
@@ -361,6 +363,14 @@ class Hooks {
 	 */
 	public function redirect_legacy_urls() {
 		global $wp_query, $wp;
+
+		// Account information is no longer set in the support forums.
+		// We don't use `wp_get_current_user()` because super admins often reset data for other users.
+		if ( preg_match( '!^users/(?P<username>[^/]+)/edit/account!i', $wp->request, $matches ) ) {
+			$url = get_edit_account_url( get_user_by( 'slug', $matches['username'] ) );
+			wp_safe_redirect( $url, 301 );
+			exit;
+		};
 
 		// A user called 'profile' exists, but override it.
 		if ( 'profile' === get_query_var( 'bbp_user' ) ) {

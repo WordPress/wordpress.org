@@ -589,6 +589,10 @@ form {
 		margin-bottom: 48px;
 	}
 
+	#login .button-primary {
+		float: none;
+	}
+
 	#login #nav {
 		bottom: -48px;
 	}

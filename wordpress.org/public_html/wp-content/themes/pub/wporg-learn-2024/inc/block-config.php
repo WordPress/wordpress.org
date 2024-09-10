@@ -6,6 +6,9 @@
 namespace WordPressdotorg\Theme\Learn_2024\Block_Config;
 
 use function WPOrg_Learn\Post_Meta\{get_available_post_type_locales};
+use Sensei_Learner;
+
+add_filter( 'wporg_query_filter_options_content_type', __NAMESPACE__ . '\get_content_type_options' );
 
 add_filter( 'wporg_query_filter_options_language', __NAMESPACE__ . '\get_language_options' );
 add_filter( 'wporg_query_filter_options_archive_language', __NAMESPACE__ . '\get_language_options_by_post_type' );
@@ -21,15 +24,48 @@ add_filter( 'wporg_query_filter_options_learning_pathway_topic', __NAMESPACE__ .
 add_filter( 'query_vars', __NAMESPACE__ . '\add_student_course_filter_query_vars' );
 add_filter( 'wporg_query_filter_options_student_course', __NAMESPACE__ . '\get_student_course_options' );
 add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters' );
+add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\modify_course_query' );
 
 /**
- * Get the current URL.
+ * Get the filtered URL by removing the page query var.
+ * If the path retains "page," the filtered result might be a 404 page.
  *
- * @return string The current URL.
+ * @return string The filtered URL.
  */
-function get_current_url() {
+function get_filtered_url() {
 	global $wp;
-	return home_url( add_query_arg( array(), $wp->request ) );
+	$filtered_path = preg_replace( '#page/\d+/?$#', '', $wp->request );
+	return home_url( $filtered_path );
+}
+
+/**
+ * Get the content type options.
+ * Used for the search filters and the archive filters.
+ *
+ * @param array $options The options for this filter.
+ * @return array New list of custom content type options.
+ */
+function get_content_type_options( $options ) {
+	global $wp_query;
+
+	$options = array(
+		'any' => __( 'Any', 'wporg-learn' ),
+		'course' => __( 'Course', 'wporg-learn' ),
+		'lesson' => __( 'Lesson', 'wporg-learn' ),
+	);
+
+	$post_type = $wp_query->get( 'post_type' );
+	$selected_slug = is_string( $post_type ) ? $post_type : 'any';
+	$label = $options[ $selected_slug ] ?? $options['any'];
+
+	return array(
+		'label' => sprintf( __( 'Type: %s', 'wporg-learn' ), $label ),
+		'title' => __( 'Content type', 'wporg-learn' ),
+		'key' => 'post_type',
+		'action' => get_filtered_url(),
+		'options' => $options,
+		'selected' => array( $selected_slug ),
+	);
 }
 
 /**
@@ -65,31 +101,25 @@ function create_level_options( $levels ) {
 		$levels,
 	);
 
-	$label = __( 'Level', 'wporg-learn' );
+	$label = __( 'All', 'wporg-learn' );
 
 	$selected_slug = $wp_query->get( 'wporg_lesson_level' );
 	if ( $selected_slug ) {
 		// Find the selected level from $levels by slug and then get the name.
-		$selected_level = array_filter(
-			$levels,
-			function ( $level ) use ( $selected_slug ) {
-				return $level->slug === $selected_slug;
-			}
-		);
+		$selected_level = wp_list_filter( $levels, array( 'slug' => $selected_slug ) );
 		if ( ! empty( $selected_level ) ) {
 			$selected_level = array_shift( $selected_level );
 			$label = $selected_level->name;
 		}
 	} else {
 		$selected_slug = 'all';
-		$label = __( 'All', 'wporg-learn' );
 	}
 
 	return array(
-		'label' => $label,
+		'label' => sprintf( __( 'Level: %s', 'wporg-learn' ), $label ),
 		'title' => __( 'Level', 'wporg-learn' ),
 		'key' => 'wporg_lesson_level',
-		'action' => get_current_url(),
+		'action' => get_filtered_url(),
 		'options' => array_combine( wp_list_pluck( $levels, 'slug' ), wp_list_pluck( $levels, 'name' ) ),
 		'selected' => array( $selected_slug ),
 	);
@@ -231,7 +261,7 @@ function create_topic_options( $topics ) {
 		'label' => $label,
 		'title' => __( 'Filter', 'wporg-learn' ),
 		'key' => 'wporg_workshop_topic',
-		'action' => get_current_url(),
+		'action' => get_filtered_url(),
 		'options' => array_combine( wp_list_pluck( $topics, 'slug' ), wp_list_pluck( $topics, 'name' ) ),
 		'selected' => $selected,
 	);
@@ -338,6 +368,33 @@ function get_learning_pathway_topic_options( $options ) {
 }
 
 /**
+ * Find the value in a multidimensional array by key.
+ *
+ * @param array  $array The array to search.
+ * @param string $key The key to search for.
+ * @return mixed|null The value if found, null otherwise.
+ */
+function find_value_by_key( $array, $key ) {
+	if ( ! is_array( $array ) ) {
+		return null;
+	}
+
+	if ( isset( $array['key'] ) && $key === $array['key'] && isset( $array['value'] ) ) {
+		return $array['value'];
+	}
+
+	foreach ( $array as $element ) {
+		$result = find_value_by_key( $element, $key );
+
+		if ( null !== $result ) {
+			return $result;
+		}
+	}
+
+	return null;
+}
+
+/**
  * Get the meta query values by key.
  *
  * @param WP_Query $query The query.
@@ -346,13 +403,9 @@ function get_learning_pathway_topic_options( $options ) {
  */
 function get_meta_query_values_by_key( $query, $key ) {
 	if ( isset( $query->query_vars['meta_query'] ) ) {
-		$meta_query = $query->query_vars['meta_query'];
+		$values = find_value_by_key( $query->query_vars['meta_query'], $key );
 
-		foreach ( $meta_query as $meta ) {
-			if ( isset( $meta['key'] ) && $meta['key'] === $key && ! empty( $meta['value'] ) ) {
-				return $meta['value'];
-			}
-		}
+		return is_array( $values ) ? $values : array();
 	}
 
 	return array();
@@ -367,8 +420,8 @@ function get_meta_query_values_by_key( $query, $key ) {
 function create_language_options( $languages ) {
 	global $wp_query;
 
-	// If there are no languages, or the only language is en_US, don't show the filter.
-	if ( empty( $languages ) || ( 1 === count( $languages ) && isset( $languages['en_US'] ) ) ) {
+	// If there are no languages, or the only language is en_US, or a search is set, don't show the filter.
+	if ( empty( $languages ) || ( 1 === count( $languages ) && isset( $languages['en_US'] ) ) || $wp_query->get( 's' ) ) {
 		return array();
 	}
 	// Otherwise if there are other languages and en_US is not listed, add it to the top,
@@ -389,7 +442,7 @@ function create_language_options( $languages ) {
 		'label' => $label,
 		'title' => __( 'Filter', 'wporg-learn' ),
 		'key' => 'language',
-		'action' => get_current_url(),
+		'action' => get_filtered_url(),
 		'options' => $languages,
 		'selected' => $selected,
 	);
@@ -472,29 +525,14 @@ function get_student_course_options( $options ) {
 		'completed' => __( 'Completed', 'wporg-learn' ),
 	);
 
-	$selected_slug = $wp_query->get( $key );
-	if ( $selected_slug ) {
-		// Find the selected option from $options by slug and then get the name.
-		$selected_option = array_filter(
-			$options,
-			function ( $option, $slug ) use ( $selected_slug ) {
-				return $slug === $selected_slug;
-			},
-			ARRAY_FILTER_USE_BOTH
-		);
-		if ( ! empty( $selected_option ) ) {
-			$label = array_shift( $selected_option );
-		}
-	} else {
-		$selected_slug = 'all';
-		$label = __( 'All', 'wporg-learn' );
-	}
+	$selected_slug = $wp_query->get( $key ) ? $wp_query->get( $key ) : 'all';
+	$label = $options[ $selected_slug ] ?? $options['all'];
 
 	return array(
-		'label' => $label,
+		'label' => sprintf( __( 'Status: %s', 'wporg-learn' ), $label ),
 		'title' => __( 'Completion status', 'wporg-learn' ),
 		'key' => $key,
-		'action' => get_current_url(),
+		'action' => get_filtered_url(),
 		'options' => $options,
 		'selected' => array( $selected_slug ),
 	);
@@ -505,7 +543,7 @@ function get_student_course_options( $options ) {
  *
  * Enables combining filters by building up the correct URL on submit,
  * for example courses using a topic and a level:
- *   ?wporg_workshop_topic[]=extending-wordpress&wporg_lesson_level[]=beginner`
+ *   ?wporg_workshop_topic[]=extending-wordpress&wporg_lesson_level=beginner`
  *
  * @param string $key The key for the current filter.
  */
@@ -556,4 +594,39 @@ function inject_other_filters( $key ) {
 	if ( isset( $wp_query->query['s'] ) ) {
 		printf( '<input type="hidden" name="s" value="%s" />', esc_attr( $wp_query->query['s'] ) );
 	}
+}
+
+/**
+ * Modify the course query on the 'My Courses' page to display courses according to the filter status.
+ * Corresponds to https://github.com/Automattic/sensei/blob/trunk/includes/blocks/course-list/class-sensei-course-list-student-course-filter.php#L95
+ *
+ * @param array $query The course query.
+ * @return array The modified course query.
+ */
+function modify_course_query( $query ) {
+	if ( get_the_ID() === Sensei()->settings->get_my_courses_page_id() ) {
+		$key             = get_student_course_filter_query_var_name();
+		$selected_option = isset( $_GET[ $key ] ) ? sanitize_text_field( wp_unslash( $_GET[ $key ] ) ) : '';
+
+		// The courses query with 'active' and 'completed' statuses have already been filtered in Sensei LMS, and can correctly display the course lists.
+		// See https://github.com/Automattic/sensei/blob/trunk/includes/blocks/course-list/class-sensei-course-list-student-course-filter.php#L114-L123.
+		if ( ! empty( $selected_option ) && ( 'active' === $selected_option || 'completed' === $selected_option ) ) {
+			return $query;
+		}
+
+		$learner_manager = Sensei_Learner::instance();
+		$user_id         = get_current_user_id();
+		$args            = array(
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		);
+
+		// The courses query with 'all' or any other statuses.
+		$courses_query = $learner_manager->get_enrolled_courses_query( $user_id, $args );
+		$course_ids    = $courses_query->posts;
+
+		$query['post__in'] = $course_ids;
+	}
+
+	return $query;
 }

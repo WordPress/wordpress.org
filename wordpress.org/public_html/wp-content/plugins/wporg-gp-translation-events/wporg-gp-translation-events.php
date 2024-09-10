@@ -3,7 +3,7 @@
  * Plugin Name: Translation Events
  * Plugin URI: https://github.com/WordPress/wporg-gp-translation-events/
  * Description: A WordPress plugin for creating translation events.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires at least: 6.4
  * Tested up to: 6.4
  * Requires PHP: 7.4
@@ -82,11 +82,14 @@ class Translation_Events {
 	}
 
 	public function __construct() {
+		register_theme_directory( __DIR__ . '/themes' );
+
 		add_action( 'wp_ajax_submit_event_ajax', array( $this, 'submit_event_ajax' ) );
 		add_action( 'wp_ajax_nopriv_submit_event_ajax', array( $this, 'submit_event_ajax' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_translation_event_js' ) );
 		add_action( 'init', array( $this, 'register_event_post_type' ) );
 		add_action( 'init', array( $this, 'send_notifications' ) );
+		add_action( 'init', array( $this, 'remove_incorrect_rss_feed' ) );
 		add_action( 'add_meta_boxes', array( $this, 'event_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_event_meta_boxes' ) );
 		add_action( 'transition_post_status', array( $this, 'event_status_transition' ), 10, 3 );
@@ -126,14 +129,36 @@ class Translation_Events {
 		GP::$router->add( "/events/attend/$id", array( 'Wporg\TranslationEvents\Routes\User\Attend_Event_Route', 'handle' ), 'post' );
 		GP::$router->add( "/events/host/$id/$id", array( 'Wporg\TranslationEvents\Routes\User\Host_Event_Route', 'handle' ), 'post' );
 		GP::$router->add( '/events/my-events', array( 'Wporg\TranslationEvents\Routes\User\My_Events_Route', 'handle' ) );
+		GP::$router->add( '/events/feed', array( 'Wporg\TranslationEvents\Routes\Event\Rss_Route', 'handle' ) );
+		GP::$router->add( '/events/rss', array( 'Wporg\TranslationEvents\Routes\Event\Rss_Route', 'handle' ) );
 		GP::$router->add( "/events/$slug/translations/$locale/$status", array( 'Wporg\TranslationEvents\Routes\Event\Translations_Route', 'handle' ) );
 		GP::$router->add( "/events/$slug/translations/$locale", array( 'Wporg\TranslationEvents\Routes\Event\Translations_Route', 'handle' ) );
 		GP::$router->add( "/events/$slug", array( 'Wporg\TranslationEvents\Routes\Event\Details_Route', 'handle' ) );
 		GP::$router->add( "/events/$slug/attendees", array( 'Wporg\TranslationEvents\Routes\Attendee\List_Route', 'handle' ) );
 		GP::$router->add( "/events/$id/attendees/remove/$id", array( 'Wporg\TranslationEvents\Routes\Attendee\Remove_Attendee_Route', 'handle' ) );
+		GP::$router->add( "/events/attendance-mode/$id/$id", array( 'Wporg\TranslationEvents\Routes\User\Attendance_Mode_Route', 'handle' ), 'get' );
 
 		$stats_listener = new Stats_Listener( self::get_event_repository() );
 		$stats_listener->start();
+	}
+
+	public function register_translation_event_js() {
+		wp_register_script(
+			'translation-events-js',
+			plugins_url( 'assets/js/translation-events.js', __FILE__ ),
+			array( 'jquery', 'gp-common' ),
+			filemtime( __DIR__ . '/assets/js/translation-events.js' ),
+			false
+		);
+		gp_enqueue_script( 'translation-events-js' );
+		wp_localize_script(
+			'translation-events-js',
+			'$translation_event',
+			array(
+				'url'          => admin_url( 'admin-ajax.php' ),
+				'_event_nonce' => wp_create_nonce( self::CPT ),
+			)
+		);
 	}
 
 	/**
@@ -157,6 +182,7 @@ class Translation_Events {
 		$args = array(
 			'labels'       => $labels,
 			'public'       => true,
+			'show_in_rest' => true,
 			'has_archive'  => true,
 			'hierarchical' => true,
 			'menu_icon'    => 'dashicons-calendar',
@@ -263,21 +289,6 @@ class Translation_Events {
 		// Nonce verification is done by the form handler.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$form_handler->handle( $_POST );
-	}
-
-	public function register_translation_event_js() {
-		wp_register_style( 'translation-events-css', plugins_url( 'assets/css/translation-events.css', __FILE__ ), array( 'dashicons' ), filemtime( __DIR__ . '/assets/css/translation-events.css' ) );
-		gp_enqueue_styles( 'translation-events-css' );
-		wp_register_script( 'translation-events-js', plugins_url( 'assets/js/translation-events.js', __FILE__ ), array( 'jquery', 'gp-common' ), filemtime( __DIR__ . '/assets/js/translation-events.js' ), false );
-		gp_enqueue_script( 'translation-events-js' );
-		wp_localize_script(
-			'translation-events-js',
-			'$translation_event',
-			array(
-				'url'          => admin_url( 'admin-ajax.php' ),
-				'_event_nonce' => wp_create_nonce( self::CPT ),
-			)
-		);
 	}
 
 	/**
@@ -423,6 +434,13 @@ class Translation_Events {
 	}
 
 	/**
+	 * Remove the incorrect RSS feed.
+	 */
+	public function remove_incorrect_rss_feed() {
+		remove_action( 'wp_head', 'feed_links', 2 );
+	}
+
+	/**
 	 * Add the event meta keys to the list of meta keys to keep in post revisions.
 	 *
 	 * @param array $keys The list of meta keys to keep in post revisions.
@@ -430,7 +448,7 @@ class Translation_Events {
 	 * @return array The modified list of meta keys to keep in post revisions.
 	 */
 	public function wp_post_revision_meta_keys( array $keys ): array {
-		$meta_keys_to_keep = array( '_event_start', '_event_end', '_event_timezone', '_hosts' );
+		$meta_keys_to_keep = array( '_event_start', '_event_end', '_event_timezone', '_hosts', '_event_attendance_mode' );
 		return array_merge( $keys, $meta_keys_to_keep );
 	}
 

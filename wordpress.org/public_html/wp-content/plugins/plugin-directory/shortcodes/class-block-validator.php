@@ -23,7 +23,7 @@ class Block_Validator {
 				<label for="plugin_url"><?php _e( 'Plugin repo URL', 'wporg-plugins' ); ?></label>
 				<div class="block-validator__plugin-input-container">
 					<input type="text" class="block-validator__plugin-input" id="plugin_url" name="plugin_url" placeholder="https://plugins.svn.wordpress.org/" value="<?php echo esc_attr( $plugin_url ); ?>" />
-					<input type="submit" class="button button-secondary block-validator__plugin-submit" value="<?php esc_attr_e( 'Check Plugin!', 'wporg-plugins' ); ?>" />
+					<input type="submit" class="wp-block-button__link block-validator__plugin-submit" value="<?php esc_attr_e( 'Check Plugin!', 'wporg-plugins' ); ?>" />
 					<?php wp_nonce_field( 'validate-block-plugin', 'block-nonce' ); ?>
 				</div>
 			</form>
@@ -35,11 +35,14 @@ class Block_Validator {
 				<?php wp_nonce_field( 'wporg-block-upload', 'block-upload-nonce' ); ?>
 				<input type="hidden" name="action" value="upload"/>
 
-				<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
-				<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
+				<div class="plugin-upload-form-controls">
+					<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+					<label id="zip-file-label" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
 
-				<input id="upload_button" name="block-directory-upload" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
-
+					<div class="wp-block-button is-small">
+						<input id="upload_button" name="block-directory-upload" class="wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
+					</div>
+				</div>
 				<p>
 					<small>
 						<?php
@@ -56,7 +59,7 @@ class Block_Validator {
 				<?php
 				$upload_script = '
 					( function ( $ ) {
-						var $label = $( "label.button" ),
+						var $label = $( "#zip-file-label" ),
 							labelText = $label.text();
 						$( "#zip_file" )
 							.on( "change", function( event ) {

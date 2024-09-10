@@ -90,7 +90,13 @@ class Release_Confirmation {
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
-			self::single_plugin_row( $plugin );
+			printf(
+				'<h2><a href="%s">%s</a></h2>',
+				get_permalink( $plugin ),
+				get_the_title( $plugin )
+			);
+
+			self::single_plugin( $plugin );
 
 			if ( ! $plugin->release_confirmation ) {
 				$not_enabled[] = $plugin;
@@ -115,18 +121,11 @@ class Release_Confirmation {
 		return ob_get_clean();
 	}
 
-	static function single_plugin_row( $plugin, $include_header = true ) {
+	static function single_plugin( $plugin ) {
 		$releases = Plugin_Directory::get_releases( $plugin );
 
-		if ( $include_header ) {
-			printf(
-				'<h2><a href="%s">%s</a></h2>',
-				get_permalink( $plugin ),
-				get_the_title( $plugin )
-			);
-		}
-
-		echo '<table class="widefat plugin-releases-listing">
+		echo '<div class="wp-block-table is-style-stripes">
+		<table class="plugin-releases-listing">
 		<thead>
 			<tr>
 				<th>Version</th>
@@ -134,7 +133,7 @@ class Release_Confirmation {
 				<th>Committer</th>
 				<th>Approval</th>
 				<th>Actions</th>
-		</thead>';
+		</thead></div>';
 
 		if ( ! $releases ) {
 			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
@@ -158,7 +157,7 @@ class Release_Confirmation {
 					<td title="%s">%s</td>
 					<td>%s</td>
 					<td>%s</td>
-					<td>%s</td>
+					<td><div class="plugin-releases-listing-actions">%s</div></td>
 				</tr>',
 				sprintf(
 					'<a href="%s">%s</a>',
@@ -286,13 +285,17 @@ class Release_Confirmation {
 	}
 
 	static function can_access() {
-		// Plugin reviewers can always access the release management functionality.
-		if ( current_user_can( 'plugin_review' ) ) {
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+
+		// Plugin reviewers can always access the release management functionality, in wp-admin.
+		if ( current_user_can( 'plugin_review' ) && ( is_admin() || wp_is_serving_rest_request() ) ) {
 			return true;
 		}
 
 		// Must have an access token..
-		if ( ! is_user_logged_in() || empty( $_COOKIE[ self::COOKIE ] ) ) {
+		if ( empty( $_COOKIE[ self::COOKIE ] ) ) {
 			return false;
 		}
 
@@ -359,5 +362,41 @@ class Release_Confirmation {
 
 		// A page with this shortcode has no need to be indexed.
 		add_filter( 'wporg_noindex_request', '__return_true' );
+	}
+
+	/**
+	 * Displays the notice on the plugin front-end.
+	 *
+	 * @param WP_Post $post The currently displayed post.
+	 * @return void
+	 */
+	static function frontend_unconfirmed_releases_notice( $post = null ) {
+		$post = get_post( $post );
+
+		if ( ! $post->release_confirmation || ! current_user_can( 'plugin_admin_edit', $post ) ) {
+			return;
+		}
+
+		$releases = Plugin_Directory::get_releases( $post ) ?: [];
+		$warning  = false;
+
+		foreach ( $releases as $release ) {
+			if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
+				$warning = true;
+				break;
+			}
+		}
+
+		if ( ! $warning ) {
+			return;
+		}
+
+		printf(
+			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+			sprintf(
+				__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
+				home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
+			)
+		);
 	}
 }

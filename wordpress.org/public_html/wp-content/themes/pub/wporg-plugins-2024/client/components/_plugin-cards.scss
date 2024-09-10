@@ -7,6 +7,12 @@
 	background-color: #fff !important; 
 }
 
+.plugin-cards .is-style-cards-grid li:focus-within {
+	border-radius: 2px;
+	box-shadow: 0 0 0 1.5px var(--wp--custom--link--color--text);
+	border-color: transparent;
+}
+
 @media screen and ( max-width: $ms-breakpoint ) {
 	.plugin-cards .is-style-cards-grid {
 		grid-template-columns: 100%;

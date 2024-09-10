@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/includes/upgrade.php';
 require_once __DIR__ . '/includes/urls.php';
+require_once __DIR__ . '/includes/theme-loader.php';
 require_once __DIR__ . '/includes/templates.php';
 require_once __DIR__ . '/includes/routes/route.php';
 require_once __DIR__ . '/includes/routes/attendee/list.php';
@@ -14,6 +15,7 @@ require_once __DIR__ . '/includes/routes/event/list.php';
 require_once __DIR__ . '/includes/routes/event/image.php';
 require_once __DIR__ . '/includes/routes/event/list-trashed.php';
 require_once __DIR__ . '/includes/routes/event/translations.php';
+require_once __DIR__ . '/includes/routes/event/rss.php';
 require_once __DIR__ . '/includes/routes/user/attend-event.php';
 require_once __DIR__ . '/includes/routes/user/host-event.php';
 require_once __DIR__ . '/includes/routes/user/my-events.php';
@@ -35,3 +37,4 @@ require_once __DIR__ . '/includes/project/project-repository.php';
 require_once __DIR__ . '/includes/event-text-snippet.php';
 require_once __DIR__ . '/includes/routes/attendee/list.php';
 require_once __DIR__ . '/includes/routes/attendee/remove.php';
+require_once __DIR__ . '/includes/routes/user/attendance-mode.php';

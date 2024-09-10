@@ -13,6 +13,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation;
 
 /**
  * Returns a list of authors.
@@ -257,33 +258,7 @@ function get_plugin_status_notice( $post = null ) {
 }
 
 function the_unconfirmed_releases_notice() {
-	$plugin = get_post();
-
-	if ( ! $plugin->release_confirmation || ! current_user_can( 'plugin_admin_edit', $plugin ) ) {
-		return;
-	}
-
-	$releases = Plugin_Directory::get_releases( $plugin ) ?: [];
-	$warning  = false;
-
-	foreach ( $releases as $release ) {
-		if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
-			$warning = true;
-			break;
-		}
-	}
-
-	if ( ! $warning ) {
-		return;
-	}
-
-	printf(
-		'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-		sprintf(
-			__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
-			home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
-		)
-	);
+	return Release_Confirmation::frontend_unconfirmed_releases_notice();
 }
 
 function the_no_self_management_notice() {
@@ -491,6 +466,8 @@ function the_plugin_danger_zone() {
 
 	echo '<hr>';
 
+	echo '<div class="plugin-danger-zone">';
+
 	echo '<h2>' . esc_html__( 'The Danger Zone', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'The following features are restricted to plugin committers only. They exist to allow plugin developers more control over their work.', 'wporg-plugins' ) . '</p>';
@@ -513,6 +490,8 @@ function the_plugin_danger_zone() {
 		// Output the toggle preview button.
 		the_plugin_self_toggle_preview_button();
 	}
+
+	echo '</div>';
 
 }
 

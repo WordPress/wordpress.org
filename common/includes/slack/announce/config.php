@@ -51,7 +51,9 @@ function get_whitelist() {
 			'elblakeo31', // @Blake (Equalify)
 			'joedolson',
 			'joesimpsonjr',
+			'nhrrob',
 			'nrqsnchz',
+			'rcreators', // @Rishi Mehta on Slack
 			'rianrietveld',
 			'ryokuhi',
 			'sarahricker',
@@ -131,6 +133,7 @@ function get_whitelist() {
 			'rajinsharwar', // @Rajin Sharwar on Slack
 			'sabernhardt',
 			'sncoker', // @shawntellecoker on Slack
+			'stoyangeorgiev', // @Stoyan Georgiev on Slack
 			'thelmachido', // @thelmachido-zw on Slack
 			'thewebprincess',
 			'webcommsat', // @abhanonstopnewsuk on Slack
@@ -281,6 +284,7 @@ function get_whitelist() {
 			'hellofromTonya', // @hellofromtonya on Slack
 			'ironprogrammer',
 			'justinahinon',
+			'mobarak',
 			'monikarao',
 			'ryan', // @boren on Slack
 			'webtechpooja', // @Pooja Derashri on Slack
@@ -474,6 +478,12 @@ function get_whitelist() {
 		'polyglots-multilingual-community' => array(
 			'courane01', // @Courtney on Slack
 			'estelaris',
+		),
+		'sustainability' => array(
+			'littlebigthing', // @Csaba on Slack
+			'nahuai', // @Nahuai Badiola on Slack
+			'noradriana', // @Nora Ferreirós on Slack
+			'yellowlime', // @Thijs Buijs on Slack
 		),
 		'themereview' => array(
 			'acalfieri',
