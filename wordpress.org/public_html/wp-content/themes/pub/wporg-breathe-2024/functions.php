@@ -217,8 +217,8 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 					'url' => esc_url( $menu_item->url )
 				);
 			},
-			// Limit local nav items to 4
-			array_slice( $menu_items, 0, 4 )
+			// Limit local nav items to 6
+			array_slice( $menu_items, 0, 6 )
 		)
 	);
 }
