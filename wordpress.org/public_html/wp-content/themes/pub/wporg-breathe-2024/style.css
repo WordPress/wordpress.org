@@ -40,8 +40,7 @@ h1,
 h2,
 h3,
 h4 {
-	margin-top: 0;
-	margin-bottom: var(--wp--style--block-gap);
+	margin: 0 0 var(--wp--style--block-gap);
 }
 
 ul ul,
@@ -82,7 +81,7 @@ h3 {
 }
 
 h4 {
-	fontSize: var(--wp--preset--font-size--heading-6);
+	font-size: var(--wp--preset--font-size--heading-6);
 }
 
 .entry-content .reports.ticket-reports {
@@ -375,6 +374,7 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 .o2-comment-cancel.primary,
 .o2-new-comment-cancel.primary {
 	border: none;
+	border-radius: 2px;
 	background: var(--wp--custom--button--color--background);
 	font-weight: 600;
 	color: var(--wp--custom--button--color--text);
@@ -409,6 +409,39 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 	border: var(--wp--custom--button--border--width) solid currentColor;
 }
 
+.o2-save,
+.o2-cancel,
+.o2-comment-save,
+.o2-comment-cancel,
+.o2-new-comment-cancel {
+	color: var(--wp--custom--button--outline--color--text);
+	border-color: var(--wp--custom--button--outline--border--color);
+	border-radius: 2px;
+	background: var(--wp--custom--button--outline--color--background);
+	font-family: inherit;
+	font-weight: 600 !important;
+	line-height: var(--wp--custom--button--typography--line-height);
+	padding-top: var(--wp--custom--button--spacing--padding--top);
+	padding-bottom: var(--wp--custom--button--spacing--padding--bottom);
+	padding-left: var(--wp--custom--button--spacing--padding--left);
+	padding-right: var(--wp--custom--button--spacing--padding--right);
+}
+
+.o2-save:hover,
+.o2-cancel:hover,
+.o2-comment-save:hover,
+.o2-comment-cancel:hover,
+.o2-new-comment-cancel:hover {
+	color: var(--wp--custom--button--outline--hover--color--text);
+	border-color: var(--wp--custom--button--outline--hover--border--color);
+	background: var(--wp--custom--button--outline--hover--color--background);
+}
+
+.o2-save:focus,
+.o2-cancel:focus,
+.o2-comment-save:focus,
+.o2-comment-cancel:focus,
+.o2-new-comment-cancel:focus,
 .o2-save.primary:focus,
 .o2-cancel.primary:focus,
 .o2-comment-save.primary:focus,
@@ -419,29 +452,47 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 	outline-offset: -1.5px;
 }
 
-/* .o2-editor .o2-editor-footer > a,
-.o2-save.primary,
-.o2-cancel.primary,
-.o2-comment-save.primary,
-.o2-comment-cancel.primary,
-.o2-new-comment-cancel.primary {
+.o2-save:focus,
+.o2-cancel:focus,
+.o2-comment-save:focus,
+.o2-comment-cancel:focus,
+.o2-new-comment-cancel:focus {
+	color: var(--wp--custom--button--outline--focus--color--text);
+	border-color: var(--wp--custom--button--outline--focus--border--color);
+	background: var(--wp--custom--button--outline--focus--color--background);
+	box-shadow: inset 0 0 0 2px var(--wp--preset--color--white);
 }
 
-.o2-editor .o2-editor-footer > a {
-	color: var(--wp--preset--color--blueberry-1);
-	background: transparent;
-	border: 1px solid;
+div.o2-comment-footer-actions ul li > a {
+	font-family: inherit;
+	color: var(--wp--custom--link--color--text);
+	opacity: 1;
 }
 
-.o2-editor .o2-editor-footer > .o2-save.primary,
-.o2-editor .o2-editor-footer > .o2-cancel.primary,
-.o2-editor .o2-editor-footer > .o2-comment-save.primary,
-.o2-editor .o2-editor-footer > .o2-comment-cancel.primary,
-.o2-editor .o2-editor-footer > .o2-new-comment-cancel.primary {
-	color: var(--wp--custom--button--color--text);
-	background: var(--wp--custom--button--color--background);
-	border: none;
-} */
+div.o2-comment-footer-actions ul li > a:before,
+div.o2-comment-footer-actions ul li > a:hover:before {
+	color: inherit;
+}
+
+nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericon:hover:before {
+	color: var(--wp--custom--link--color--text);
+}
+
+nav.o2-post-actions ul {
+	padding-left: unset;
+}
+
+nav.o2-dropdown-actions ul li > a.genericon:before,
+nav.o2-dropdown-actions ul li > span > a.genericon:before {
+	color: inherit;
+}
+
+nav.o2-dropdown-actions ul li > a:hover,
+nav.o2-dropdown-actions ul li > span > a:hover,
+nav.o2-dropdown-actions ul li > a:focus,
+nav.o2-dropdown-actions ul li > span > a:focus {
+	color: var(--wp--custom--link--color--text);
+}
 
 /* Sidebar */
 
@@ -489,7 +540,7 @@ article.page .entry-content h2,
 article.page .entry-content h3,
 article.page .entry-content h4,
 article.page .entry-content h5 {
-	margin: var(--wp--preset--spacing--30) 0 0;
+	margin: var(--wp--preset--spacing--30) 0 var(--wp--style--block-gap);
 }
 
 a,
@@ -1035,7 +1086,45 @@ article.type-handbook.status-private .o2-post:after {
 
 nav.o2-post-footer-actions ul li > a,
 nav.o2-post-footer-actions ul li > span > a {
-	width: inherit;
+	color: var(--wp--custom--button--outline--color--text);
+	border-color: var(--wp--custom--button--outline--border--color);
+	background: var(--wp--custom--button--outline--color--background);
+	padding: 0.5em 1em;
+	font-size: var(--wp--preset--font-size--small);
+	font-family: inherit;
+}
+
+nav.o2-post-footer-actions ul li > a:hover,
+nav.o2-post-footer-actions ul li > span > a:hover,
+.post-comments-subscribed nav.o2-post-footer-actions .o2-follow:hover {
+	color: var(--wp--custom--button--outline--hover--color--text);
+	border-color: var(--wp--custom--button--outline--hover--border--color);
+	background: var(--wp--custom--button--outline--hover--color--background);
+}
+
+nav.o2-post-footer-actions ul li > a:focus,
+nav.o2-post-footer-actions ul li > span > a:focus {
+	background-color: var(--wp--custom--button--outline--focus--color--background);
+	box-shadow: inset 0 0 0 3px var(--wp--preset--color--white);
+	outline: 1.5px solid var(--wp--custom--button--focus--border--color);
+	border-color: var(--wp--custom--button--outline--focus--border--color);
+	color: var(--wp--custom--button--outline--focus--color--text);
+	outline-offset: -1.5px;
+}
+
+nav.o2-post-footer-actions .o2-reply-count {
+	color: inherit;
+}
+
+.post-comments-subscribed nav.o2-post-footer-actions .o2-follow {
+	color: var(--wp--custom--button--color--text);
+	border-color: var(--wp--custom--button--border--color);
+	background: var(--wp--custom--button--color--background);
+}
+
+nav.o2-post-footer-actions ul li > a.genericon:before,
+nav.o2-post-footer-actions ul li > span > a.genericon:before {
+	display: none;
 }
 
 nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
