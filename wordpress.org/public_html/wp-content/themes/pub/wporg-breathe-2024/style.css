@@ -22,6 +22,16 @@ a[href^="https://wordpress.slack.com"]::before {
 	background-repeat: no-repeat;
 }
 
+/* Override the Open Sans font for o2 plugin UI elements, and set to use the body font */
+[class*="o2"]:not(body) {
+	font-family: inherit !important;
+}
+/* The rule above can set Genericon wrappers to the body font, so set the actual icon element to the correct font */
+.genericon:before,
+.genericon:after {
+	font-family: "Genericons";
+}
+
 p,
 ul,
 ol,
@@ -385,7 +395,6 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 	background: var(--wp--custom--button--color--background);
 	font-weight: 600;
 	color: var(--wp--custom--button--color--text);
-	font-family: inherit;
 	line-height: var(--wp--custom--button--typography--line-height);
 	padding-top: calc(var(--wp--custom--button--spacing--padding--top) + var(--wp--custom--button--border--width));
 	padding-bottom: calc(var(--wp--custom--button--spacing--padding--bottom) + var(--wp--custom--button--border--width));
@@ -425,7 +434,6 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 	border-color: var(--wp--custom--button--outline--border--color);
 	border-radius: 2px;
 	background: var(--wp--custom--button--outline--color--background);
-	font-family: inherit;
 	font-weight: 600 !important;
 	line-height: var(--wp--custom--button--typography--line-height);
 	padding-top: var(--wp--custom--button--spacing--padding--top);
@@ -471,7 +479,6 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 }
 
 div.o2-comment-footer-actions ul li > a {
-	font-family: inherit;
 	color: var(--wp--custom--link--color--text);
 	opacity: 1;
 }
@@ -489,9 +496,41 @@ nav.o2-post-actions ul {
 	padding-left: unset;
 }
 
+nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericon:before {
+	color: inherit;
+}
+
+nav.o2-dropdown-actions ul {
+	border-color: var(--wp--custom--color--border);
+	box-shadow: unset;
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+nav.o2-dropdown-actions ul li {
+	line-height: 1;
+}
+
+nav.o2-dropdown-actions ul li > a.o2-actions-border-top,
+nav.o2-dropdown-actions ul li > span > a.o2-actions-border-top {
+	border-top-color: var(--wp--custom--color--border);
+}
+
 nav.o2-dropdown-actions ul li > a.genericon:before,
 nav.o2-dropdown-actions ul li > span > a.genericon:before {
 	color: inherit;
+}
+
+nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericon:hover,
+nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.open {
+	background: unset;
+}
+
+nav.o2-dropdown-actions ul li > a,
+nav.o2-dropdown-actions ul li > span > a {
+	color: inherit;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 400;
 }
 
 nav.o2-dropdown-actions ul li > a:hover,
@@ -961,9 +1000,10 @@ article.state-unresolved {
  */
 .post.sticky .o2-post {
 	border: 0;
-	border-top: 2px solid #ddd;
-	background: #e5f5fa;
-	padding-top: 3em;
+	border-top: none;
+	background: var(--wp--preset--color--blueberry-4);
+	padding-top: 40px !important;
+	margin-top: 40px;
 	position: relative;
 }
 
@@ -971,12 +1011,14 @@ article.state-unresolved {
 	content: "\f109";
 	font-family: dashicons;
 	position: absolute;
-	top: -2px;
-	right: 45px;
-	color: #fff;
-	font-size: 18px;
-	padding: 13px 5px 0px;
-	background: #00a0d2;
+	top: 44px;
+	right: 60px;
+	font-size: var(--wp--preset--font-size--small);
+	padding: 4px;
+	background: var(--wp--preset--color--blueberry-1);
+	border-radius: 2px;
+	line-height: 14px;
+	color: var(--wp--preset--color--white);
 }
 
 .rtl .sticky .o2-post:after {
@@ -1103,7 +1145,6 @@ nav.o2-post-footer-actions ul li > span > a {
 	background: var(--wp--custom--button--outline--color--background);
 	padding: 0.5em 1em;
 	font-size: var(--wp--preset--font-size--small);
-	font-family: inherit;
 }
 
 nav.o2-post-footer-actions ul li > a:hover,
