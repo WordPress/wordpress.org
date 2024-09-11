@@ -535,6 +535,10 @@ nav.o2-dropdown-actions ul li > span > a:focus {
  * p2-breathe/style.css overrides
  */
 
+article.post .entry-title {
+	margin: var(--wp--preset--spacing--30) 0 var(--wp--style--block-gap);
+}
+
 article.post .entry-content h2,
 article.post .entry-content h3,
 article.post .entry-content h4,
@@ -547,7 +551,7 @@ article.page .entry-content h2,
 article.page .entry-content h3,
 article.page .entry-content h4,
 article.page .entry-content h5 {
-	margin: var(--wp--preset--spacing--30) 0 var(--wp--style--block-gap);
+	margin: var(--wp--preset--spacing--40) 0 var(--wp--style--block-gap);
 }
 
 a,
@@ -876,7 +880,6 @@ article.page .entry-title,
 .post-content {
 	display: block;
 	clear: both;
-	padding-top: 15px;
 }
 
 .o2-xpost-content {
