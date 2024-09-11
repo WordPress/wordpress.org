@@ -817,10 +817,10 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *
 	 * @param int   $post_id          The ID of the photo post type post.
 	 * @param array $skip_likelihoods Likelihoods to skip due to not being of concern.
-	 *                                Default ['very_unlikely', 'unlikely'].
+	 *                                Default ['very_unlikely', 'unlikely', 'possible'].
 	 * @return array
 	 */
-	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely' ] ) {
+	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely', 'possible' ] ) {
 		$flags = [];
 		$safe_search_flags = self::get_raw_moderation_assessment( $post_id );
 
