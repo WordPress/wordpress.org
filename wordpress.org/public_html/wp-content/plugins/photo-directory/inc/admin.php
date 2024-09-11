@@ -1015,7 +1015,7 @@ class Admin {
 	public static function show_moderator() {
 		global $post;
 
-		if ( ! $post || 'publish' !== $post->post_status ) {
+		if ( ! $post ) {
 			return;
 		}
 
