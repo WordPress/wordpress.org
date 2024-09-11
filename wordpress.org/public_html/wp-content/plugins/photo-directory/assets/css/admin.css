@@ -127,6 +127,7 @@ body.post-type-photo #wp-content-editor-container {
 }
 #photos_info dd {
 	margin-left: 1.5rem;
+	overflow-wrap: break-word;
 }
 
 .wp-heading-inline #photo-dir-skip-photo {
