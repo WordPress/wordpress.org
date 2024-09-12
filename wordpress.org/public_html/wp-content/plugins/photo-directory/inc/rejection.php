@@ -857,6 +857,16 @@ class Rejection {
 				const cbRejectPublished = document.querySelector('#reject-warn-if-reject-published');
 				cbRejectPublished?.addEventListener('change', (event) => {
 					if (rejectSelect) {
+						// If disabled, then undo any changes towards doing the rejection.
+						if ( !event.target.checked ) {
+							const inputRejectNoteToUser = document.querySelector('#moderator_note_to_user');
+							// Remove rejection note to user.
+							inputRejectNoteToUser.value = '';
+							// Unset rejection reason.
+							rejectSelect.value = '';
+							rejectSelect.dispatchEvent(new Event('change'));
+						}
+						// Disable rejection dropdown.
 						rejectSelect.disabled = !event.target.checked;
 					}
 				});
@@ -868,7 +878,7 @@ class Rejection {
 		</script>
 JS;
 
-		// Show a notice if the post is already published and a checkbox for enabling rejection field.
+		// Show a notice if the post is already published and add a checkbox for enabling rejection field.
 		if ( 'publish' === get_post_status( $post ) ) {
 			echo '<div class="reject-warn-if-published">';
 			echo '<label class="warn-if-reject-published-container"><input id="reject-warn-if-reject-published" type="checkbox" name="reject_warn_if_reject_published" />';
