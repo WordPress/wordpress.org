@@ -123,7 +123,8 @@
 			}
 		},
 		"layout": {
-			"contentSize": "960px"
+			"contentSize": "960px",
+			"wideSize": "1320px"
 		},
 		"typography": {
 			"fontSizes": [
