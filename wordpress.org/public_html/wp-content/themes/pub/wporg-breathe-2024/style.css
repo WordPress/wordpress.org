@@ -544,7 +544,19 @@ nav.o2-dropdown-actions ul li > span > a:focus {
 
 #secondary-content a {
 	overflow-wrap: anywhere;
+}
+
+#secondary-content .textwidget a,
+#secondary-content .widget_team_pledges a,
+#secondary-content a:hover {
 	text-decoration: underline;
+}
+
+#secondary-content .widget-title,
+#secondary-content h3 {
+	margin: 0 0 var(--wp--preset--spacing--10);
+	line-height: var(--wp--custom--heading--level-5--typography--line-height);
+	font-size: var(--wp--preset--font-size--heading-5);
 }
 
 #secondary-content .widget_wporg_handbook_pages a {
@@ -566,8 +578,29 @@ nav.o2-dropdown-actions ul li > span > a:focus {
 	color: #0073aa;
 }
 
-#secondary-content .navigation-main ul li:hover > a,
-#secondary-content .navigation-main ul li.current-menu-item a {
+#secondary #subscribe-submit.is-link {
+	text-align: start;
+}
+
+li.o2-filter-widget-item a {
+	padding: unset;
+	margin-bottom: 5px;
+}
+
+li.o2-filter-widget-item a:hover {
+	background: unset;
+	color: var(--wp--custom--link--color--text);
+}
+
+li.o2-filter-widget-item a.o2-filter-widget-selected {
+	background: unset;
+	font-weight: 600;
+	color: var(--wp--custom--link--color--text);
+}
+
+li.o2-filter-widget-item a:hover:before,
+li.o2-filter-widget-item a.o2-filter-widget-selected:before {
+	color: inherit;
 }
 
 /*
@@ -753,11 +786,6 @@ input[type="submit"]:hover {
 	}
 }
 
-.widget-title {
-	line-height: inherit;
-	font-size: inherit;
-}
-
 .post-type-archive-handbook aside[id^="handbook"] .widget-title,
 .post-type-archive-handbook aside[id^="nav_menu"] .widget-title,
 .single-handbook aside[id^="handbook"] .widget-title,
@@ -771,15 +799,10 @@ input[type="submit"]:hover {
 	color: inherit;
 }
 
-.widget.widget_search {
-	margin-bottom: 3rem;
-}
-.widget_search input[type="search"], #subscribe-email input[type="email"] {
-	width: 100%;
+.widget_search input[type="search"],
+#subscribe-email input[type="email"] {
 	box-sizing: border-box;
-	padding: 1rem;
-	font-size: 14px;
-	border-radius: 2px;
+	width: 100%;
 }
 
 #secondary-content .widget {
@@ -1073,7 +1096,7 @@ article.type-handbook.status-private .o2-post:after {
 
 .widget {
 	margin: 0 0 var(--wp--preset--spacing--40);
-	padding: 0;
+	padding: unset;
 }
 
 /* Hide image upload button. No image uploads on make blogs. */
