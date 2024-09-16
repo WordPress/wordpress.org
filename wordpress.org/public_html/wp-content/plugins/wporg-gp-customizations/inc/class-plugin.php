@@ -630,6 +630,7 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
 		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Stats_Print' );
+		WP_CLI::add_command( 'wporg-translate reengagement', __NAMESPACE__ . '\CLI\Reengagement' );
 
 	}
 
