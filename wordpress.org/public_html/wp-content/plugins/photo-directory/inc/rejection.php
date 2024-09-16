@@ -416,13 +416,48 @@ class Rejection {
 	 * @param int $user_id User ID.
 	 * @return WP_Post[] Array of rejected photo posts.
 	 */
-	public static function get_user_rejections( $user_id ) {
-		return get_posts( [
-			'posts_per_page' => 99,
+	public static function get_user_rejections( $user_id, $args = [] ) {
+		$args = wp_parse_args(
+			$args,
+			[
+				'fields'         => 'all',
+				'posts_per_page' => 99,
+			]
+		);
+
+		return get_posts( array_merge( $args, [
 			'author'         => (int) $user_id,
 			'post_status'    => Rejection::get_post_status(),
 			'post_type'      => Registrations::get_post_type(),
-		] );
+		] ) );
+	}
+
+	/**
+	 * Returns an array of the reasons and respective counts for all of the user's rejections.
+	 *
+	 * @param int $user_id The user ID.
+	 * @return int Associative array of rejection reasons and the counts for how many rejections
+	 *             the user has for each reason. This does not include rejection reasons for which
+	 *             the user does not have any rejections.
+	 */
+	public static function get_user_rejection_reasons( $user_id ) {
+		global $wpdb;
+		$reasons = [];
+		$rejection_ids = self::get_user_rejections( $user_id, [ 'fields' => 'ids', 'posts_per_page' => -1 ] );
+
+		if ( $rejection_ids ) {
+			$rejection_ids = implode( ',', array_map( 'absint', $rejection_ids ) );
+			$results = $wpdb->get_results( $n = $wpdb->prepare(
+				"SELECT pm.meta_value as rejection_reason, COUNT(*) as count FROM {$wpdb->postmeta} pm WHERE pm.post_id IN ($rejection_ids) AND meta_key = %s GROUP BY pm.meta_value",
+				'rejected_reason'
+			), ARRAY_A );
+
+			foreach ( $results as $item ) {
+				$reasons[ $item['rejection_reason'] ] = (int) $item['count'];
+			}
+		}
+
+		return $reasons;
 	}
 
 	/**
