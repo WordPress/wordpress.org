@@ -1,9 +1,6 @@
 <?php
 /**
- * Plugin Name: WPORG GlotPress Customizations
- * Description: Customizations for GlotPress.
- *
- * This WP-CLI command sends an email to translators who for the first time had a translation approved.
+ * This class sends an email to translators who for the first time had a translation approved.
  *
  * @package wporg-gp-customizations
  */
@@ -11,13 +8,14 @@
 namespace WordPressdotorg\GlotPress\Customizations\CLI;
 
 use DateTime;
+use GP_Locale;
 use WP_CLI;
-use WP_CLI_Command;
+use WP_Query;
 
 /**
  * Sends an email to translators who for the first time had a translation approved.
  */
-class Reengagement extends WP_CLI_Command {
+class Reengagement_First_Translation {
 	/**
 	 * The date for the check.
 	 *
@@ -56,66 +54,47 @@ class Reengagement extends WP_CLI_Command {
 	/**
 	 * Send an email to translators who for the first time today had a translation approved.
 	 *
-	 * ## OPTIONS
+	 * @param string $date    The date for the check.
+	 * @param bool   $dry_run If set, the command will not send any emails and won't store the reengagement options.
 	 *
-	 * [--date=<start_date>]
-	 * : The date for the check.
-	 *   If not provided, defaults to today.
-	 *
-	 * [--dry-run]
-	 * : If set, the command will not send any emails and won't store the reengagement options.
-	 *
-	 * ## EXAMPLES
-	 *
-	 *     # Show the emails who should receive the notification, without sending them.
-	 *     wp wporg-translate reengagement --dry-run --url=translate.wordpress.org
-	 *
-	 *     # Send an email for the users who have had their first translation approved on 2023-10-25.
-	 *     wp wporg-translate reengagement --date=2024-09-13 --url=translate.wordpress.org
-	 *
-	 * @param array $args       Positional arguments.
-	 * @param array $assoc_args Associative arguments.
+	 * @return void
 	 */
-	public function __invoke( array $args, array $assoc_args ) {
+	public function __invoke( string $date = null, bool $dry_run = false ) {
 		global $wpdb;
 
-		$this->set_dates( $assoc_args );
+		$this->set_dates( $date );
+		$this->dry_run = $dry_run;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$this->highest_id_translation = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->gp_translations}" );
-		$this->dry_run                = isset( $assoc_args['dry-run'] );
 		$translators                  = $this->get_translators_with_approved_translation_specific_day();
-		WP_CLI::line( print_r( $translators, true ) );
-		$first_time_translators = $this->get_translators_with_first_translation_specific_day( $translators );
-		WP_CLI::line( print_r( $first_time_translators, true ) );
+		$first_time_translators       = $this->get_translators_with_first_translation_specific_day( $translators );
 		$this->send_email_to_translators( $first_time_translators );
 	}
 
 	/**
 	 * Set the dates for the check.
 	 *
-	 * @param array $assoc_args Associative arguments.
+	 * @param string|null $date The date for the check.
 	 */
-	private function set_dates( array $assoc_args ) {
+	private function set_dates( ?string $date ) {
 		$yesterday  = gmdate( 'Y-m-d', strtotime( 'yesterday' ) );
 		$this->date = $yesterday;
 
-		if ( isset( $assoc_args['date'] ) ) {
-			$input_date  = $assoc_args['date'];
+		if ( isset( $date ) ) {
+			;
 			$date_format = 'Y-m-d';
 			$start_date  = '2010-02-17';
 			$end_date    = $yesterday;
 
-			$d = DateTime::createFromFormat( $date_format, $input_date );
-			if ( $d && $d->format( $date_format ) === $input_date ) {
-				if ( $input_date >= $start_date && $input_date <= $end_date ) {
-					$this->date = $input_date;
+			$d = DateTime::createFromFormat( $date_format, $date );
+			if ( $d && $d->format( $date_format ) === $date ) {
+				if ( $date >= $start_date && $date <= $end_date ) {
+					$this->date = $date;
 				}
 			}
 		}
 		$this->start_date = $this->date . ' 00:00:00';
 		$this->end_date   = $this->date . ' 23:59:59';
-		WP_CLI::line( "Start date: {$this->start_date}" );
-		WP_CLI::line( "End date: {$this->end_date}" );
 	}
 
 	/**
@@ -170,6 +149,7 @@ class Reengagement extends WP_CLI_Command {
 		$first_time_translators = array();
 
 		foreach ( $translators as $translator_id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$first_translation_date = $wpdb->get_var(
 				$wpdb->prepare(
 					"SELECT MIN(date_modified) 
@@ -214,7 +194,7 @@ class Reengagement extends WP_CLI_Command {
 			// translators: Email subject.
 			$subject = __( 'Your first translation has been approved!', 'wporg' );
 			$message = sprintf(
-				// translators: Email body. %s: Display name.
+			// translators: Email body. %s: Display name.
 				esc_html__(
 					'Congratulations %s,
 			
@@ -239,5 +219,4 @@ The Global Polyglots Team
 			}
 		}
 	}
-
 }

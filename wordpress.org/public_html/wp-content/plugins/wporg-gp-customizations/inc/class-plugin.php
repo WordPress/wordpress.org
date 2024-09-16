@@ -7,6 +7,7 @@ use GP_Locales;
 use GP_Translation;
 use WordPressdotorg\GlotPress\Customizations\CLI\Stats;
 use WordPressdotorg\GlotPress\Customizations\CLI\Duplicate_Translations;
+use WordPressdotorg\GlotPress\Customizations\CLI\Reengagement_First_Translation;
 use WP_CLI;
 use WP_User;
 use function WordPressdotorg\Profiles\assign_badge;
@@ -92,6 +93,7 @@ class Plugin {
 		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
 		add_action( 'wporg_translate_update_polyglots_stats', [ $this, 'update_polyglots_stats' ] );
 		add_action( 'wporg_translate_duplicate_translations', [ $this, 'duplicate_translations' ] );
+		add_action( 'wporg_translate_reengagement_notifications', array( $this, 'reengagement_notifications' ) );
 		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
 		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
 		add_action( 'gp_translations_imported', array( $this, 'log_imported_translations' ) );
@@ -222,6 +224,9 @@ class Plugin {
 		if ( ! wp_next_scheduled( 'wporg_translate_duplicate_translations' ) ) {
 			wp_schedule_event( time(), 'daily', 'wporg_translate_duplicate_translations' );
 		}
+		if ( ! wp_next_scheduled( 'wporg_translate_reengagement_notifications' ) ) {
+			wp_schedule_event( time(), 'daily', 'wporg_translate_reengagement_notifications' );
+		}
 	}
 
 	/**
@@ -285,6 +290,15 @@ class Plugin {
 		$duplicates( false, true, false, false );
 	}
 
+	/**
+	 * Send reengagement notifications to translators who had their first translation approved.
+	 *
+	 * @return void
+	 */
+	public function reengagement_notifications() {
+		$reengagement_first_translation = new Reengagement_First_Translation();
+		$reengagement_first_translation();
+	}
 	/**
 	 * Applies capital_P_dangit() on translations.
 	 *
@@ -630,7 +644,7 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
 		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Stats_Print' );
-		WP_CLI::add_command( 'wporg-translate reengagement', __NAMESPACE__ . '\CLI\Reengagement' );
+		WP_CLI::add_command( 'wporg-translate reengagement', __NAMESPACE__ . '\CLI\Reengagement_First_Translation_CLI' );
 
 	}
 
