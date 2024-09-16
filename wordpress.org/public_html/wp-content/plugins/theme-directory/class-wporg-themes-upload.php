@@ -1786,7 +1786,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 	}
 
 	/**
-	 * Log a Theme Upload to the slack `#themereview-firehose` channel.
+	 * Log a Theme Upload to the slack `#themes-review-firehose` channel.
 	 * 
 	 * @param string $status Whether the upload was 'allowed' or 'blocked'.
 	 */
@@ -1983,6 +1983,6 @@ The WordPress Themes Team', 'wporg-themes' ),
 			$send->set_icon( ':x:' );
 		}
 
-		$send->send( '#themereview-firehose' );
+		$send->send( '#themes-review-firehose' );
 	}
 }
