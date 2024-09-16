@@ -1169,6 +1169,50 @@ class Admin {
 				}
 			?>
 			</div>
+			<div class="photo-contributor-rejection-stats">
+				<h4><?php esc_html_e( 'Rejection stats:', 'wporg-photos' ); ?></h4>
+				<?php
+					$rejection_reasons = Rejection::get_user_rejection_reasons( $author->ID );
+					$submission_errors_key = 'submission-error';
+					$submission_errors_count = 0;
+
+					// Omit submission errors since they don't count as rejections, but do note the count.
+					if ( ! empty( $rejection_reasons[ $submission_errors_key ] ) ) {
+						$submission_errors_count = $rejection_reasons[ $submission_errors_key ];
+						unset( $rejection_reasons[ $submission_errors_key ] );
+					}
+
+					$total_rejections = array_reduce( array_values( $rejection_reasons ), function ( $total, $i ) { return $total += $i; }, 0 );
+					$all_reasons = Rejection::get_rejection_reasons();
+
+					if ( $rejection_reasons ) {
+						echo '<table>';
+						echo '<tr><th>' . __( 'Reason', 'wporg-photos' ) . '</th><th>' . __( 'Total', 'wporg-photos' ) . '</th><th>%</th></tr>';
+					}
+					foreach ( $rejection_reasons as $reason => $count ) {
+						echo '<tr>';
+						echo '<td title="' . esc_attr( $all_reasons[ $reason ]['label'] ?? '' ) . '">' . esc_html( $reason ) . '</td>';
+						echo '<td>' . number_format_i18n( $count ) . '</td>';
+						echo '<td>' . number_format_i18n( ( $count / $total_rejections ) * 100, 2 ) . '%</td>';
+						echo "</tr>\n";
+					}
+					if ( $rejection_reasons ) {
+						echo "</table>\n";
+					}
+
+					echo '<p>';
+					/* translators: %s: Rejection rate as a percentage. */
+					printf( __( 'Total rejection rate: %s', 'wporg-photos'), '<strong>' . round( ( $total_rejections / ( $photos_count + $total_rejections ) ) * 100, 2 ) .'%</strong>' );
+					echo "</p>\n";
+
+					if ( $submission_errors_count ) {
+						echo '<p>';
+						/* translators: %s: The number of submission errors. */
+						printf( __( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), $submission_errors_count );
+						echo "</p>\n";
+					}
+				?>
+			</div>
 		</div>
 
 		<?php

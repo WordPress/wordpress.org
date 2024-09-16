@@ -1,6 +1,14 @@
 .photos-random .pagination-links {
 	display: none;
 }
+.photo-contributor-rejection-stats {
+	width: 100%;
+}
+.photo-contributor-rejection-stats table {
+	text-align: left;
+	width: 100%;
+}
+
 .fixed .column-wporg-photo { font-weight: bold; width: 180px; }
 .status-flagged {
 	background-color: rgba(255,150,150,0.15);
