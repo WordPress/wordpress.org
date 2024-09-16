@@ -207,7 +207,13 @@ class Rejection {
 			'moderator_note_to_user' => [
 				'input_in_metabox' => true,
 				'meta_config'      => [
-					'description' => __( 'A message sent to the user by the moderator within the approval/rejection email.', 'wporg-photos' ),
+					'description' => __( 'A message sent to the user by the moderator within the rejection email.', 'wporg-photos' ),
+				],
+			],
+			'moderator_note_to_user_on_publish' => [
+				'input_in_metabox' => true,
+				'meta_config'      => [
+					'description' => __( 'A message sent to the user by the moderator within the approval email.', 'wporg-photos' ),
 				],
 			],
 			'moderator_private_note' => [
@@ -365,23 +371,33 @@ class Rejection {
 	/**
 	 * Returns the note the moderator has for the user.
 	 *
-	 * @param int|WP_Post The post or post ID.
+	 * There are two types of notes to user:
+	 * - 'publish': A note sent to the user when a photo is published.
+	 * - 'reject': A note sent to the user when a photo is rejected.
+	 *
+	 * It is possible for both types of notes to apply to a photo. However, it currently does not make sense
+	 * for two separate notes of a given type to be possible, nor does the implementation support it.
+	 *
+	 * @param int|WP_Post $post The post or post ID.
+	 * @param string      $type The note type. Either 'reject' or 'publish'. Default 'reject'.
 	 * @return string
 	 */
-	public static function get_moderator_note_to_user( $post ) {
+	public static function get_moderator_note_to_user( $post, $type = 'reject' ) {
 		$post = get_post( $post );
 
 		if ( ! $post ) {
 			return '';
 		}
 
-		return get_post_meta( $post->ID, 'moderator_note_to_user', true );
+		$meta_key = ( 'publish' === $type ) ? 'moderator_note_to_user_on_publish' : 'moderator_note_to_user';
+
+		return get_post_meta( $post->ID, $meta_key, true );
 	}
 
 	/**
 	 * Returns the private note left by the moderator.
 	 *
-	 * @param int|WP_Post The post or post ID.
+	 * @param int|WP_Post $post The post or post ID.
 	 * @return string
 	 */
 	public static function get_moderator_private_note( $post ) {
@@ -846,6 +862,45 @@ class Rejection {
 					document.querySelector('#publish').disabled = hasRejectReason;
 					// Reject button should be disabled if no rejection reason is selected.
 					document.querySelector('#reject-post').disabled = !hasRejectReason;
+					// Rejection note to user should be disabled if no rejection reason is selected.
+					const inputRejectNoteToUser = document.querySelector('#moderator_note_to_user');
+					if ( inputRejectNoteToUser ) {
+						inputRejectNoteToUser.disabled = !hasRejectReason || rejectSelect.disabled;
+						const rejectNoteToUser = document.querySelector('.moderator_note_to_user');
+						// Potentially hide the note input based on whether the dropdown has a value.
+						rejectNoteToUser.style.display = !hasRejectReason ? 'none' : 'block';
+						// If choosing to not reject photo, then delete the rejection note content to avoid it being saved.
+						if ( !hasRejectReason ) {
+							inputRejectNoteToUser.value = '';
+						}
+					}
+
+					// Handling for the note-to-user fields for a pending photo (to facilitate only showing one at a time).
+					const pendingPublishNoteToUser = document.querySelector('.pending_moderator_note_to_user.moderator_note_to_user_on_publish');
+					const pendingRejectNoteToUser = document.querySelector('.pending_moderator_note_to_user.moderator_note_to_user');
+					if ( pendingPublishNoteToUser && pendingRejectNoteToUser ) {
+						// Hide one of the note-to-user fields if awaiting initial moderation.
+						pendingPublishNoteToUser.style.display = ( hasRejectReason ? 'none' : 'block' );
+						pendingRejectNoteToUser.style.display = ( hasRejectReason ? 'block' : 'none' );
+
+						// When a note field gets hidden, transfer note field value to other note then clear it out.
+						if ( 'none' === pendingPublishNoteToUser.style.display ) {
+							const pendingPublishNote = pendingPublishNoteToUser.querySelector('textarea').value;
+							// Transfer value from approval note to rejection note if it had a value.
+							if ( pendingPublishNote ) {
+								pendingRejectNoteToUser.querySelector('textarea').value = pendingPublishNote;
+							}
+							pendingPublishNoteToUser.querySelector('textarea').value = '';
+						} else {
+							const pendingRejectNote = pendingRejectNoteToUser.querySelector('textarea').value;
+							// Transfer value from rejection note to approval note if it had a value.
+							if ( pendingRejectNote ) {
+								pendingPublishNoteToUser.querySelector('textarea').value = pendingRejectNote;
+							}
+							pendingRejectNoteToUser.querySelector('textarea').value = '';
+						}
+					}
+
 					// Notice of rejection of published post should be shown if post is published.
 					const rejectPublishWarn = document.querySelector('.reject-warn-if-about-to-reject-published');
 					if ( rejectPublishWarn ) {
@@ -903,11 +958,22 @@ JS;
 
 		echo '<div class="reject-additional-fields">';
 
+		// Assign a class only if the post is currently in a pending state.
+		$note_to_user_label_class = ( $is_disabled ? '' : ' pending_moderator_note_to_user' );
+
 		// Markup for optional note to send to user in rejection email.
-		echo '<label for="moderator_note_to_user">' . __( '(Optional) Note to user:', 'wporg-photos' );
-		echo '<p class="description"><em>' . __( 'Included in approval/rejection email.', 'wporg-photos' ) . '</em></p>';
+		echo '<label for="moderator_note_to_user" class="moderator_note_to_user' . esc_attr( $note_to_user_label_class ) . '">' . __( '(Optional) Note to user on rejection:', 'wporg-photos' );
+		echo '<p class="description"><em>' . __( 'Included in rejection email.', 'wporg-photos' ) . '</em></p>';
 		echo '<textarea id="moderator_note_to_user" name="moderator_note_to_user" rows="4"' . disabled( true, $is_disabled, false ) . '>';
-		echo esc_textarea( self::get_moderator_note_to_user( $post ) );
+		echo esc_textarea( self::get_moderator_note_to_user( $post, 'reject' ) );
+		echo '</textarea>';
+		echo '</label>';
+
+		// Markup for optional note sent to user in approval email.
+		echo '<label for="moderator_note_to_user_on_publish" class="moderator_note_to_user_on_publish' . esc_attr( $note_to_user_label_class ) . '">' . __( '(Optional) Note to user on approval:', 'wporg-photos' );
+		echo '<p class="description"><em>' . __( 'Included in approval email.', 'wporg-photos' ) . '</em></p>';
+		echo '<textarea id="moderator_note_to_user_on_publish" name="moderator_note_to_user_on_publish" rows="4"' . disabled( true, $is_disabled, false ) . '>';
+		echo esc_textarea( self::get_moderator_note_to_user( $post, 'publish' ) );
 		echo '</textarea>';
 		echo '</label>';
 
@@ -1074,7 +1140,7 @@ JS;
 			case 'rejected_reason':
 				echo self::get_rejection_reason( $post_id );
 				// Add asterisk to denote there was a moderator note to user.
-				if ( self::get_moderator_note_to_user( $post_id ) ) {
+				if ( self::get_moderator_note_to_user( $post_id, 'reject' ) || self::get_moderator_note_to_user( $post_id, 'publish' ) ) {
 					echo '*';
 				}
 				break;
