@@ -101,9 +101,9 @@ class Meta extends Trac {
 		'wordcamp.org/'                         => '#meta-wordcamp',
 		'wporg-photos/'                         => [ '#meta' => true, '#photos' => true ],
 		'photo-directory/'                      => [ '#meta' => true, '#photos' => true ],
-		'wporg-themes/'                         => [ '#meta' => true, '#themereview' => true ],
-		'theme-directory/'                      => [ '#meta' => true, '#themereview' => true ],
-		'wp-themes.com/'                        => [ '#meta' => true, '#themereview' => true ],
+		'wporg-themes/'                         => [ '#meta' => true, '#themes' => true ],
+		'theme-directory/'                      => [ '#meta' => true, '#themes' => true ],
+		'wp-themes.com/'                        => [ '#meta' => true, '#themes' => true ],
 		'wporg-plugins/'                        => [ '#meta' => true, '#pluginreview' => true ],
 		'wporg-plugins-2024/'                   => [ '#meta' => true, '#pluginreview' => true ],
 		'plugin-directory/'                     => [ '#meta' => true, '#pluginreview' => true ],
@@ -122,9 +122,9 @@ class Meta extends Trac {
 		'WordPress.tv'                  => '#wptv',
 		'WordCamp Site & Plugins'       => '#meta-wordcamp',
 		'HelpHub'                       => '#meta-helphub',
-		'Theme Review'                  => '#themereview',
+		'Theme Review'                  => '#themes',
 		'Photo Directory'               => [ '#meta' => true, '#photos' => true ],
-		'Theme Directory'               => [ '#meta' => true, '#themereview' => true ],
+		'Theme Directory'               => [ '#meta' => true, '#themes' => true ],
 		'Plugin Directory'              => [ '#meta' => true, '#pluginreview' => true ],
 		'Support Forums'                => [ '#meta' => true, '#forums' => true ],
 	);
@@ -199,6 +199,7 @@ class Plugins extends Trac {
 }
 
 class Themes extends Trac {
+	protected $firehose_channel = '#themes-review-firehose';
 }
 
 class i18n extends Trac {

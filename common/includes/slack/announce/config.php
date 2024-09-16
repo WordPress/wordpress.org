@@ -485,7 +485,7 @@ function get_whitelist() {
 			'noradriana', // @Nora Ferreirós on Slack
 			'yellowlime', // @Thijs Buijs on Slack
 		),
-		'themereview' => array(
+		'themes' => array(
 			'acalfieri',
 			'acosmin',
 			'aristath',

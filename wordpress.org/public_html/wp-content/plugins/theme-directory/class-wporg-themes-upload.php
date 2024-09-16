@@ -1643,7 +1643,7 @@ You can help speed up the process by making sure that your theme follows all of 
 <https://make.wordpress.org/themes/handbook/get-involved/become-a-reviewer/>
 
 ** Questions? **
-If you have questions you can ask the reviewer in the ticket or chat with us on Slack in the #themereview channel.
+If you have questions you can ask the reviewer in the ticket or chat with us on Slack in the #themes channel.
 <https://chat.wordpress.org/>
 
 Subscribe to the Themes Team blog to stay up to date with the latest requirements and the ongoing work to improve the review process:
