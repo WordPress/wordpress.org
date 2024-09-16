@@ -84,14 +84,17 @@ h4,
 h1,
 h2 {
 	font-size: var(--wp--preset--font-size--heading-3);
+	line-height: var(--wp--custom--heading--level-2--typography--line-height);
 }
 
 h3 {
 	font-size: var(--wp--preset--font-size--heading-5);
+	line-height: var(--wp--custom--heading--level-5--typography--line-height);
 }
 
 h4 {
 	font-size: var(--wp--preset--font-size--heading-6);
+	line-height: var(--wp--custom--heading--level-6--typography--line-height);
 }
 
 .entry-content .reports.ticket-reports {
@@ -211,7 +214,9 @@ tr:last-of-type td {
 /* site */
 
 .site,
-.custom-menu .site {
+.custom-menu .site,
+.post-type-archive-handbook #main,
+.single-handbook #main {
 	box-sizing: border-box;
 	margin: 0 auto;
 	max-width: var(--wp--style--global--wide-size);
@@ -521,6 +526,21 @@ nav.o2-dropdown-actions ul li > span > a.genericon:before {
 	color: inherit;
 }
 
+@media (max-width: 640px) {
+	nav.o2-dropdown-actions ul li > a,
+	nav.o2-dropdown-actions ul li > span > a {
+		line-height: 1.5;
+	}
+
+	nav.o2-dropdown-actions ul li > a.genericon:before,
+	nav.o2-dropdown-actions ul li > span > a.genericon:before {
+		font-size: var(--wp--preset--font-size--normal);
+		top: unset;
+		left: unset;
+		line-height: 1.25;
+	}
+}
+
 nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericon:hover,
 nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.open {
 	background: unset;
@@ -557,10 +577,6 @@ nav.o2-dropdown-actions ul li > span > a:focus {
 	margin: 0 0 var(--wp--preset--spacing--10);
 	line-height: var(--wp--custom--heading--level-5--typography--line-height);
 	font-size: var(--wp--preset--font-size--heading-5);
-}
-
-#secondary-content .widget_wporg_handbook_pages a {
-	text-decoration: none;
 }
 
 #secondary-content .navigation-main {
@@ -792,9 +808,7 @@ input[type="submit"]:hover {
 .single-handbook aside[id^="nav_menu"] .widget-title {
 	font-size: 16px;
 	text-transform: uppercase;
-	letter-spacing: 1px;
 	background-color: transparent;
-	padding: 1rem 12px 1rem 8px;
 	margin-bottom: 0;
 	color: inherit;
 }
@@ -846,7 +860,16 @@ input[type="submit"]:hover {
 article.post .o2-post,
 article#post-new .o2-post,
 article.page .o2-post {
-	padding-top: var(--wp--preset--spacing--50);
+	padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--20) var(--wp--preset--spacing--20);
+}
+
+@media screen and (max-width: 640px) {
+	article.post .o2-post,
+	article#post-new .o2-post,
+	article.page .o2-post {
+		padding-left: unset;
+		padding-right: unset;
+	}
 }
 
 .o2-post {
@@ -1034,7 +1057,7 @@ article.state-unresolved {
 	content: "\f109";
 	font-family: dashicons;
 	position: absolute;
-	top: 44px;
+	top: 45px;
 	right: 60px;
 	font-size: var(--wp--preset--font-size--small);
 	padding: 4px;
@@ -1468,8 +1491,10 @@ article.page p.contributor-name {
 
 .post-type-archive-handbook .site-main .widget-area,
 .single-handbook .site-main .widget-area {
-	float: left;
-	margin-right: 4%;
+	width: unset;
+	float: unset;
+	grid-row-start: 1;
+	grid-row-end: 3;
 }
 .handbook-header {
 	line-height: 2em;
@@ -1479,7 +1504,7 @@ article.page p.contributor-name {
 }
 
 .single-handbook .content-area h1 {
-	margin-top: 0;
+	margin: 0 0 var(--wp--style--block-gap);
 	padding-top: 0;
 }
 
@@ -1511,12 +1536,16 @@ article.page p.contributor-name {
 	font-weight: 300;
 }
 
-@media(max-width: 876px) {
+@media (max-width: 876px) {
 	.handbook-name-container {
 		padding-left: 22px;
 		padding-right: 36px;
 		width: 100%;
 		margin-left: 0;
+	}
+
+	.single-handbook .content-area h1 {
+		padding-right: 40px;
 	}
 }
 
@@ -1622,22 +1651,16 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 
 .handbook-breadcrumbs {
-	position: absolute;
-	top: 4rem;
-	left: 280px;
-	font-size: 1.25rem;
-	padding-right: 34px;
+	grid-column-start: 2;
+	font-size: var(--wp--preset--font-size--small);
+	align-self: center;
 }
 
 .rtl .handbook-breadcrumbs {
 	left: inherit;
-	right: 280px;
+	right: calc(25% + var(--wp--preset--spacing--edge-space));
 	padding-left: 34px;
 	padding-right: inherit;
-}
-
-.single-handbook .handbook-breadcrumbs ~ #primary {
-	padding-top: 9rem;
 }
 
 .single-handbook .handbook-name-container ~ .handbook-breadcrumbs {
@@ -1654,19 +1677,6 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 
 @media (max-width: 876px) {
-	.handbook-breadcrumbs {
-		top: 3rem;
-		left: 22px;
-	}
-
-	.single-handbook .handbook-breadcrumbs ~ #primary {
-		padding-top: 7rem;
-	}
-
-	.single-handbook .handbook-name-container ~ .handbook-breadcrumbs {
-		top: 6rem;
-	}
-
 	.single-handbook .handbook-name-container ~ .handbook-breadcrumbs ~ #primary {
 		padding-top: 14rem;
 	}
@@ -1675,7 +1685,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 /** Table of Contents */
 .post-type-archive-handbook div.table-of-contents,
 .single-handbook div.table-of-contents {
-	float: right;
+	float: inline-end;
 	width: 250px;
 	background: #f7f7f7;
 	border: 1px solid #eee;
@@ -1694,15 +1704,11 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 
 .single-handbook div.table-of-contents {
 	background-color: #fff;
-	box-shadow: 0 0 8px rgba(0,0,0,0.1);
-	border-radius: 3px;
+	border-radius: 2px;
+	border: 1px solid var(--wp--custom--color--border);
 }
 
 @media (min-width: 971px) {
-	.post-type-archive-handbook div.table-of-contents,
-	.single-handbook div.table-of-contents {
-		margin: 0 -30px 15px 15px;
-	}
 
 	.rtl.post-type-archive-handbook div.table-of-contents,
 	.rtl.single-handbook div.table-of-contents {
@@ -1716,23 +1722,28 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 .single-handbook div.table-of-contents h2,
 .single-handbook div.table-of-contents h3 {
 	margin: 0;
-	padding: 7px 12px;
-	font-size: 1.3em;
-	color: #32373c;
-	text-transform: uppercase;
-	border-bottom: 1px solid #eee;
+	padding: 10px 12px;
+	font-size: var(--wp--preset--font-size--small);
+	border-bottom: 1px solid var(--wp--custom--color--border);
 }
 
 .post-type-archive-handbook ul.items,
 .single-handbook ul.items {
 	margin: 0;
+	padding: 10px 12px;
 	list-style-type: none;
-	padding: 1rem;
+	line-height: var(--wp--custom--body--short-text--typography--line-height);
+}
+
+.post-type-archive-handbook ul.items ul,
+.single-handbook ul.items ul {
+	margin-left: unset;
 }
 
 .post-type-archive-handbook ul.items li,
 .single-handbook ul.items li {
 	padding: 4px;
+	font-size: var(--wp--preset--font-size--small);
 }
 
 .post-type-archive-handbook ul.items li ul li,
@@ -1749,32 +1760,40 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 
 .post-type-archive-handbook ul.items li a:hover,
 .single-handbook ul.items li a:hover {
-	color: #0073aa;
 	text-decoration: underline;
 }
 
-/* Highlight current heading and adjust scroll position for fixed toolbar */
-.toc-heading:target {
-	position: relative;
-	padding-top: 50px;
-	margin-top: -50px;
+.toc-heading a:before {
+	margin: 2px 5px 0 !important;
+	font-size: var(--wp--preset--font-size--small);
 }
 
-/* Remove negative margin because there is no jump link before these headlines */
-.entry-content h2.toc-heading:first-of-type:target,
-.entry-content h3.toc-heading:first-of-type:target,
-h2.toc-heading + h3.toc-heading:target {
-	margin-top: 0;
+@media (max-width: 876px) {
+	.toc-heading a:before {
+		width: 20px !important;
+		height: 20px !important;
+	}
 }
+
+@media (min-width: 877px) {
+	:not(:hover) .toc-heading a:before {
+		content: "";
+	}
+}
+
+/* Highlight current heading and adjust scroll position for fixed toolbar */
+.toc-heading {
+	position: relative;
+	scroll-margin-top: 50px;
+}
+
 
 .toc-heading:target:before {
 	content: '';
 	position: absolute;
 	left: -40px;
-	top: 50px;
-	border-left: 5px solid #0073aa;
-	height: 50%;
-	height: calc(100% - 50px);
+	border-left: 5px solid var(--wp--preset--color--blueberry-1);
+	height: 100%;
 }
 
 .rtl .toc-heading:target:before {
@@ -1784,19 +1803,16 @@ h2.toc-heading + h3.toc-heading:target {
 	border-right: 5px solid #0073aa;
 }
 
-@media(max-width: 876px) {
+@media (max-width: 876px) {
 	.toc-heading:target:before {
 		left: -10px;
-	}
-	.toc-heading:target:before {
-		left: inherit;
-		right: -10px;
 	}
 }
 
 .toc-jump {
 	position: relative;
-	height: 50px;
+	margin-bottom: unset;
+	font-size: var(--wp--preset--font-size--extra-small) !important;
 }
 
 .toc-jump:after {
@@ -1833,123 +1849,122 @@ h2.toc-heading + h3.toc-heading:target {
 	margin-bottom: 0.6em;
 }
 
-.menu-table-of-contents-container {
-  font-size: 0.8em;
-}
 .menu-table-of-contents-container ul {
-  margin-left: 0;
-  padding-left: 0;
-  list-style: none;
+	margin-left: 0;
+	padding-left: 0;
+	list-style: none;
 }
+
 #secondary .menu-table-of-contents-container ul li {
-  margin: 1px 0;
-  padding: 0;
-  position: relative;
+	padding: 0;
+	position: relative;
 }
+
 #secondary .menu-table-of-contents-container ul ul {
-	margin-left: 12px;
-	border-left: 2px solid #21759b;
+	margin-left: var(--wp--style--block-gap);
 }
+
 .menu-table-of-contents-container ul li .expandable {
-  display: flex;
-  flex-direction: row-reverse;
-  align-items: stretch;
-  position: relative;
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: stretch;
+	position: relative;
 }
+
 .menu-table-of-contents-container ul li .dashicons {
-  position: absolute;
-  right: 0;
-  cursor: pointer;
-  padding: 8px 4px;
-  display: inline-block;
-  width: auto;
-  height: 100%;
-  color: #0073aa;
-  background-color: #fafafa;
-  border: 0;
-  border-left: 1px solid rgba(0,0,0,0.05);
-  border-radius: 0;
-  box-shadow: none;
-  -webkit-appearance: none;
+	position: absolute;
+	right: 0;
+	cursor: pointer;
+	padding: 8px 4px;
+	display: inline-block;
+	width: auto;
+	height: 100%;
+	background-color: #fafafa;
+	border: 0;
+	border-left: none;
+	color: var(--wp--preset--color--charcoal-1);
+	background: none;
+	font-size: var(--wp--preset--font-size--small);
+	border-radius: 0;
+	box-shadow: none;
+	-webkit-appearance: none;
 }
-.menu-table-of-contents-container ul li .dashicons:hover,
-.menu-table-of-contents-container ul li .dashicons:focus {
-  color: #fff;
-  background-color: #0073aa;
-}
+
 .menu-table-of-contents-container ul li.open > div > .dashicons {
-  transform: rotate(180deg);
-  border-right: 1px solid rgba(0,0,0,0.05);
-  border-left: none;
+	transform: rotate(180deg);
+	border: none;
 }
-.menu-table-of-contents-container .current_page_ancestor:not(.open) .expandable .dashicons:not(:focus),
-.menu-table-of-contents-container .current_page_item > .expandable .dashicons:not(:focus) {
-	background: #fff;
-	color: #0073aa;
-}
+
 .menu-table-of-contents-container ul a {
-  display: block;
-  width: 100%;
-  padding: 8px 8px 8px 13px;
-  text-decoration: none;
+	display: block;
+	width: 100%;
+	padding: 8px 0;
+	text-decoration: none;
+	font-size: var(--wp--preset--font-size--small);
 }
+
+.menu-table-of-contents-container ul a:focus {
+	text-decoration: underline;
+}
+
 .menu-table-of-contents-container ul li.menu-item-has-children > .expandable > a {
 	padding-right: 32px;
 }
-.menu-table-of-contents-container ul a:hover,
-.menu-table-of-contents-container ul a:focus {
-  color: #fff;
-  background-color: #0073aa;
-}
-.menu-table-of-contents-container .current_page_ancestor .expandable .dashicons:hover,
-.menu-table-of-contents-container .current_page_item .expandable .dashicons:hover {
-  background-color: #0073aa !important;
-  color: #fff !important;
-}
+
 .menu-table-of-contents-container ul a.active,
 .menu-table-of-contents-container .current-menu-item > a {
-  color: #555;
-  background-color: #fff;
-  font-weight: bold;
+	background-color: #fff;
+	font-weight: bold;
 }
 
-.menu-table-of-contents-container > ul > li.open > div > a:not(:focus) {
-  color: #0073aa;
-}
-.menu-table-of-contents-container > ul > li.open > div > a:hover {
-  color: #fff;
-  background-color: #0073aa;
-}
 .menu-table-of-contents-container ul.default-open {
-  display: block !important;
+	display: block !important;
 }
+
 .menu-table-of-contents-container .current-menu-item ul,
 .menu-table-of-contents-container .current-menu-ancestor ul {
 	display: block;
 }
+
 .menu-table-of-contents-container .children {
-  overflow: hidden;
-  display: none;
+	overflow: hidden;
+	display: none;
 }
 
 /* New handbook design */
 .post-type-archive-handbook #page,
 .single-handbook #page {
-	background: linear-gradient(to right, #fafafa 40%, #fff 40%);
 	max-width: 100%;
 	padding: 0;
 }
 
-.rtl.post-type-archive-handbook #page,
-.rtl.single-handbook #page {
-	background: linear-gradient(to left, #fafafa 40%, #fff 40%);
-}
-
 .post-type-archive-handbook #main,
 .single-handbook #main {
-	max-width: 1024px;
-	margin: 0 auto;
-	display: flex;
+	display: grid;
+	grid-template-columns: 25% auto;
+	grid-template-rows: 40px auto;
+	column-gap: 60px;
+	padding-top: var(--wp--preset--spacing--40);
+}
+
+@media (max-width: 876px) {
+	post-type-archive-handbook #main,
+	.single-handbook #main {
+		grid-template-columns: auto;
+		column-gap: unset;
+	}
+}
+
+.post-type-archive-handbook #primary,
+.single-handbook #primary {
+	width: 100%;
+}
+
+.post-type-archive-handbook #main:before,
+.post-type-archive-handbook #main:after,
+.single-handbook #main:before,
+.single-handbook #main:after {
+	display: none;
 }
 
 .post-type-archive-handbook header,
@@ -1961,14 +1976,13 @@ h2.toc-heading + h3.toc-heading:target {
 .single-handbook #secondary {
 	clear: left;
 	margin: 0;
-	background: #fafafa;
 }
 
 .post-type-archive-handbook #primary,
 .single-handbook #primary {
-	padding: 4rem 0 4rem 4rem;
-	background: #fff;
-	box-sizing: border-box;
+	position: relative;
+	padding: unset;
+	grid-column-start: 2;
 }
 
 .rtl.post-type-archive-handbook #primary,
@@ -1977,33 +1991,16 @@ h2.toc-heading + h3.toc-heading:target {
 	padding-right: 4rem;
 }
 
-@media(max-width: 876px) {
-	.post-type-archive-handbook #primary,
-	.single-handbook #primary {
-		padding: 4rem 20px;
-	}
-}
-
-.post-type-archive-handbook #secondary-content,
-.single-handbook #secondary-content {
-	padding-top: 4rem;
-}
-
 .post-type-archive-handbook .widget_wporg_handbook_pages,
 .single-handbook .widget_wporg_handbook_pages {
 	background-color: transparent;
 }
 
-.post-type-archive-handbook nav.o2-post-actions button,
-.single-handbook nav.o2-post-actions button {
-	margin-right: 16.8px;
-	top: 10px;
-}
-
-.post-type-archive-handbook nav.o2-post-actions ul,
-.single-handbook nav.o2-post-actions ul {
-	margin-right: 16.8px;
-	top: 9px;
+.post-type-archive-handbook nav.o2-post-actions,
+.single-handbook nav.o2-post-actions {
+	position: absolute;
+	top: -36px;
+	inset-inline-end: 0;
 }
 
 @media (max-width: 550px) {
@@ -2016,8 +2013,13 @@ h2.toc-heading + h3.toc-heading:target {
 		right: initial;
 	}
 
-	.single-handbook .handbook-breadcrumbs ~ #primary {
-		padding-top: 10rem;
+	.post-type-archive-handbook nav.o2-post-actions,
+	.single-handbook nav.o2-post-actions {
+		top: -6px;
+	}
+
+	.single-handbook .o2-post {
+		position: relative;
 	}
 }
 

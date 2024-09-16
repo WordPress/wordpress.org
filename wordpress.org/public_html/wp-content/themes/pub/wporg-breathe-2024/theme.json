@@ -160,5 +160,16 @@
 				}
 			]
 		}
+	},
+	"styles": {
+		"blocks": {
+			"core/quote": {
+				"spacing": {
+					"margin": {
+						"bottom": "var(--wp--style--block-gap)"
+					}
+				}
+			}
+		}
 	}
 }
