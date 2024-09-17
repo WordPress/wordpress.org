@@ -219,7 +219,8 @@ class Reengagement_First_Translation {
 				'
 Congratulations %1$s,
 <br><br>
-Your <a href="%2$s" target="_blank">first translation</a> in <a href="%3$s" target="_blank">this project</a> has been approved. Keep up the great work!
+Your <a href="%2$s" target="_blank">first translation</a> at WordPress.org,
+included in <a href="%3$s" target="_blank">this project</a>, has been approved. Keep up the great work!
 <br><br>
 Have a nice day
 <br><br>
