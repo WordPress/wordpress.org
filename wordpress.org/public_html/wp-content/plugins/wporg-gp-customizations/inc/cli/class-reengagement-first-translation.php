@@ -8,6 +8,7 @@
 namespace WordPressdotorg\GlotPress\Customizations\CLI;
 
 use DateTime;
+use GP;
 use GP_Locale;
 use WP_CLI;
 use WP_Query;
@@ -110,7 +111,7 @@ class Reengagement_First_Translation {
 		// $first_id = 0;
 		// Todo: Change this to 0
 		$first_id = 120_000_000;
-
+		// Split the query in batches to avoid timeouts.
 		do {
 			$query = $wpdb->prepare(
 				"SELECT DISTINCT user_id 
@@ -137,11 +138,11 @@ class Reengagement_First_Translation {
 	}
 
 	/**
-	 * Get translators' id with the first translation approved on a specific day.
+	 * Get translators' id with the first translation approved on a specific day and the id of the first translation.
 	 *
 	 * @param array $translators An array with the translators' id.
 	 *
-	 * @return array
+	 * @return array An array with the translators' id as key and the id of the first translation.
 	 */
 	private function get_translators_with_first_translation_specific_day( array $translators ): array {
 		global $wpdb;
@@ -150,16 +151,16 @@ class Reengagement_First_Translation {
 
 		foreach ( $translators as $translator_id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$first_translation_date = $wpdb->get_var(
+			$result = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT MIN(date_modified) 
-                 FROM `{$wpdb->gp_translations}` 
-                 WHERE user_id = %d",
+					"SELECT MIN(date_modified) as first_translation_date, id
+						FROM `{$wpdb->gp_translations}`
+						WHERE user_id = %d",
 					$translator_id
 				)
 			);
-			if ( $first_translation_date && gmdate( 'Y-m-d', strtotime( $first_translation_date ) ) === $this->date ) {
-				$first_time_translators[] = $translator_id;
+			if ( $result && gmdate( 'Y-m-d', strtotime( $result->first_translation_date ) ) === $this->date ) {
+				$first_time_translators[ $translator_id ] = $result->id;
 			}
 		}
 
@@ -174,12 +175,29 @@ class Reengagement_First_Translation {
 	 * @return void
 	 */
 	private function send_email_to_translators( array $first_time_translators ): void {
-		foreach ( $first_time_translators as $translator_id ) {
+		foreach ( $first_time_translators as $translator_id => $translation_id ) {
 
 			$user = get_user_by( 'id', $translator_id );
 			if ( ! $user ) {
 				continue;
 			}
+
+			$translation = GP::$translation->get( $translation_id );
+			if ( ! $translation ) {
+				continue;
+			}
+
+			$original = GP::$original->get( $translation->original_id );
+			if ( ! $original ) {
+				continue;
+			}
+
+			$project = GP::$project->get( $original->project_id );
+			if ( ! $project ) {
+				continue;
+			}
+
+			$translation_set = GP::$translation_set->get( $translation->translation_set_id );
 
 			$reengagement_options = get_user_meta( $translator_id, 'gp_reengagement', true );
 
@@ -191,27 +209,45 @@ class Reengagement_First_Translation {
 				continue;
 			}
 
+			$translation_url = gp_url_join( gp_url_public_root(), 'projects', $project->path, $translation_set->locale, '/', $translation_set->slug ) . '?filters%5Bstatus%5D=either&filters%5Boriginal_id%5D=' . $original->id . '&filters%5Btranslation_id%5D=' . $translation->id;
+			$project_url     = gp_url_join( gp_url_public_root(), 'projects', $project->path, $translation_set->locale, '/', $translation_set->slug );
+
 			// translators: Email subject.
 			$subject = __( 'Your first translation has been approved!', 'wporg' );
 			$message = sprintf(
-			// translators: Email body. %s: Display name.
-				esc_html__(
-					'Congratulations %s,
-			
-Your first translation at https://translate.wordpress.org has been approved. Keep up the great work!
-			
+			// translators: Email body. %1$s: Display name. %2$s: Translation URL. %3$s: Project URL.
+				'
+Congratulations %1$s,
+<br><br>
+Your <a href="%2$s" target="_blank">first translation</a> in <a href="%3$s" target="_blank">this project</a> has been approved. Keep up the great work!
+<br><br>
 Have a nice day
-			
+<br><br>
 The Global Polyglots Team
-			',
-					'wporg'
+',
+				$user->display_name,
+				$translation_url,
+				$project_url
+			);
+
+			$allowed_html = array(
+				'a'  => array(
+					'href'   => array(),
+					'target' => array(),
 				),
-				$user->display_name
+				'br' => array(),
+			);
+
+			$message = wp_kses( $message, $allowed_html );
+
+			$headers = array(
+				'Content-Type: text/html; charset=UTF-8',
+				'From: Translating WordPress.org <no-reply@wordpress.org>',
 			);
 
 			if ( ! $this->dry_run ) {
 				WP_CLI::line( "Sending email to: {$user->user_email}" );
-				wp_mail( $user->user_email, $subject, $message );
+				wp_mail( $user->user_email, $subject, $message, $headers );
 				$reengagement_options['first_translation_approved_date'] = current_time( 'mysql' );
 				update_user_meta( $translator_id, 'gp_reengagement', $reengagement_options );
 			} else {
