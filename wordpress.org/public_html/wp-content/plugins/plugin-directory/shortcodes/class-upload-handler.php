@@ -658,7 +658,12 @@ class Upload_Handler {
 			// WordPress.org only..
 			! function_exists( 'notify_slack' )
 		) {
-			return true;
+			// If we can't run plugin-check, we'll just return a pass.
+			return [
+				'verdict' => true,
+				'results' => [],
+				'html'    => '',
+			];
 		}
 
 		// Run plugin check via CLI
