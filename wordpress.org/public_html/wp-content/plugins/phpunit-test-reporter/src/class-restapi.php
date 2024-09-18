@@ -113,22 +113,76 @@ class RestAPI {
 			);
 		}
 
-		$current_user = wp_get_current_user();
+		$env = isset( $parameters['env'] ) ? json_decode( $parameters['env'], true ) : array();
 
-		$args = array(
+		$php_version = '';
+		if ( isset( $env['php_version'] ) ) {
+			$parts = explode( '.', $env['php_version'] );
+			$php_version = $parts[0] . '.' . $parts[1];
+		}
+
+		$db_version = ! empty( $parameters['mysql_version'] ) ? $parameters['mysql_version'] : 'Unknown';
+		$env_name   = ! empty( $env['label'] ) ? wp_kses( $env['label'], [] ) : '';
+
+		$current_user = wp_get_current_user();
+		$tax_query    = [
+			'relation' => 'AND',
+		];
+
+		if ( $php_version ) {
+			$tax_query[] = array(
+				'taxonomy' => 'php-version',
+				'terms'    => [ $php_version ],
+				'field'    => 'name',
+			);
+		}
+
+		if ( $db_version ) {
+			$tax_query[] = array(
+				'taxonomy' => 'db-version',
+				'terms'    => [ $db_version ],
+				'field'    => 'name',
+			);
+		}
+
+		$meta_query = [];
+
+		if ( $env_name ) {
+			$meta_query[] = array(
+				'key'   => 'environment_name',
+				'value' => $env_name,
+			);
+		}
+
+		// Check to see if the test result already exist.
+		$results = get_posts( array(
 			'post_parent' => $parent_id,
 			'post_type'   => 'result',
 			'numberposts' => 1,
 			'author'      => $current_user->ID,
-		);
+			'tax_query'   => $tax_query,
+			'meta_query'  => $meta_query,
+		) );
 
-		// Check to see if the test result already exist.
-		$results = get_posts( $args );
 		if ( $results ) {
 			$post_id = $results[0]->ID;
 		} else {
-			$results = array(
-				'post_title'   => $current_user->user_login . ' - ' . $slug,
+			$post_title = $current_user->user_login . ' - ' . $slug;
+
+			if ( $env_name ) {
+				$post_title .= ' - ' . $env_name;
+			}
+
+			if ( $php_version ) {
+				$post_title .= ' - ' . $php_version;
+			}
+
+			if ( $db_version ) {
+				$post_title .= ' - ' . $db_version;
+			}
+
+			$args = array(
+				'post_title'   => $post_title,
 				'post_content' => '',
 				'post_status'  => 'publish',
 				'post_author'  => $current_user->ID,
@@ -137,18 +191,34 @@ class RestAPI {
 			);
 
 			// Store the results.
-			$post_id = wp_insert_post( $results, true );
+			$post_id = wp_insert_post( $args, true );
 		}
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
 		}
 
+		wp_set_object_terms( $post_id, array( $php_version ), 'php-version' );
+		wp_set_object_terms( $post_id, array( $db_version ), 'db-version' );
+
 		$env     = isset( $parameters['env'] ) ? json_decode( $parameters['env'], true ) : array();
 		$results = isset( $parameters['results'] ) ? json_decode( $parameters['results'], true ) : array();
 
 		update_post_meta( $post_id, 'env', $env );
 		update_post_meta( $post_id, 'results', $results );
+		update_post_meta( $post_id, 'environment_name', $env_name );
+
+		$outcome = 'Unknown';
+
+		if ( ! empty( $results['failures'] ) ) {
+			$outcome = 'Failed';
+		} elseif ( ! empty( $results['errors'] ) ) {
+			$outcome = 'Errored';
+		} else {
+			$outcome = 'Passed';
+		}
+
+		wp_set_object_terms( $post_id, $outcome, 'report-result' );
 
 		self::maybe_send_email_notifications( $parent_id );
 
@@ -166,6 +236,92 @@ class RestAPI {
 		$response->header( 'Content-Type', 'application/json' );
 
 		return $response;
+	}
+
+	private static function get_new_failures( $post_id ) {
+		$p         = get_post( $post_id );
+		$parent_id = $p->post_parent;
+
+		$post_terms = wp_get_object_terms( $post_id, array( 'php-version', 'db-version' ) );
+
+		if ( is_wp_error( $post_terms ) ) {
+			return [];
+		}
+
+		$tax_query  = [];
+		$meta_query = [];
+
+		foreach ( $post_terms as $term ) {
+			if ( 'php-version' === $term['taxonomy'] ) {
+				$tax_query[] = array(
+					'taxonomy' => 'php-version',
+					'terms'    => [ $term['term_id'] ],
+				);
+			}
+
+			if ( 'db-version' === $term['taxonomy'] ) {
+				$tax_query[] = array(
+					'taxonomy' => 'db-version',
+					'terms'    => [ $term['term_id'] ],
+				);
+			}
+		}
+
+		$env_name = get_post_meta( $post_id, 'environment_name', true );
+
+		if ( ! empty( $env_name ) ) {
+			$meta_query [] = array(
+				'key'   => 'environment_name',
+				'value' => $env_name,
+			);
+		}
+
+		$previous_results = get_posts( array(
+			'post_parent__not_in' => [ $parent_id ],
+			'post_type'           => 'result',
+			'numberposts'         => 1,
+			'author'              => $p->post_author,
+			'tax_query'           => $tax_query,
+			'meta_query'          => $meta_query,
+		) );
+
+		$new_failures      = [];
+		$current_failures  = self::get_failures( $post_id );
+		$previous_failures = [];
+
+		if ( ! empty( $previous_results ) )  {
+			$previous_failures = self::get_failures( $previous_results[0]->ID );
+		}
+
+		// Find new failures that didn't exist in the previous run.
+
+		foreach( $current_failures as $test_suite => $test_cases ) {
+			foreach( $test_cases as $test_case ) {
+				if (
+				  ! isset( $previous_failures[ $test_suite] ) ||
+				  ! in_array( $test_case, $previous_failures[ $test_suite ] )
+				) {
+					$new_failures[] = "$test_suite::$test_case";
+				}
+			}
+		}
+
+		return $new_failures;
+	}
+
+	private static function get_failures( $post_id ) {
+		$results = get_post_meta( $post_id, 'results', true );
+		if ( empty( $results['failures'] ) && empty( $results['errors'] ) ) {
+			return [];
+		}
+
+		$failures = [];
+
+		foreach ( $results['testsuites'] as $suite_name => $testsuite ) {
+			$failures[ $suite_name ] = array_keys( $testsuite['testcases'] );
+		}
+
+		return $failures;
 	}
 
 	/**
@@ -204,21 +360,35 @@ class RestAPI {
 			if ( $wpdevbot_result->ID === $result->ID ) {
 				continue;
 			}
+
 			// If the test result is failed and we haven't yet sent an
 			// email notification, then let the reporter know.
-			if ( self::is_failed_result( $result )
-				&& ! get_post_meta( $result->ID, 'ptr_reported_failure', true ) ) {
-				$user = get_user_by( 'id', $result->post_author );
-				if ( $user ) {
-					$subject = '[Host Test Results] Test failure for ' . $result->post_name;
-					$body    = 'Hi there,' . PHP_EOL . PHP_EOL
-						. "We've detected a WordPress PHPUnit test failure on your hosting environment. Please review when you have a moment: "
-						. get_permalink( $result->ID ) . PHP_EOL . PHP_EOL
-						. 'Thanks,' . PHP_EOL . PHP_EOL
-						. 'WordPress.org Hosting Community';
-					wp_mail( $user->user_email, $subject, $body );
-					update_post_meta( $result->ID, 'ptr_reported_failure', true );
+			if (
+			  self::is_failed_result( $result )	&&
+			  ! get_post_meta( $result->ID, 'ptr_reported_failure', true )
+			) {
+				$new_failures = self::get_new_failures( $result->ID );
+
+				if ( empty( $new_failures ) ) {
+					continue;
 				}
+
+				$user = get_user_by( 'id', $result->post_author );
+				if ( ! $user ) {
+					continue;
+				}
+
+				$subject = '[Host Test Results] Test failure for ' . $result->post_name;
+				$body    = 'Hi there,' . PHP_EOL . PHP_EOL
+					. "We've detected a new WordPress PHPUnit test failure on your hosting environment. Please review when you have a moment: "
+					. get_permalink( $result->ID ) . PHP_EOL . PHP_EOL
+					. 'New failures:' . PHP_EOL . PHP_EOL
+					. implode( PHP_EOL, $new_failures ) . PHP_EOL . PHP_EOL
+					. 'Thanks,' . PHP_EOL . PHP_EOL
+					. 'WordPress.org Hosting Community';
+
+				wp_mail( $user->user_email, $subject, $body );
+				update_post_meta( $result->ID, 'ptr_reported_failure', true );
 			}
 		}
 
@@ -227,7 +397,7 @@ class RestAPI {
 	/**
 	 * Whether or not a given result is a failed result.
 	 *
-	 * @param WP_Post $post Result post object.
+	 * @param \WP_Post $post Result post object.
 	 * @return boolean
 	 */
 	private static function is_failed_result( $post ) {

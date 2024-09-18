@@ -1,36 +1,53 @@
 <?php
 use PTR\Display;
 
-echo Display::get_display_css(); ?>
+echo Display::get_display_css();
 
-<table>
+foreach ( $revisions as $revision ) :
+
+  $rev_id = (int) ltrim( $revision->post_name, 'r' );
+?>
+
+<div class="ptr-test-reporter-single-revision">
+	<a href="<?php echo esc_url( sprintf( 'https://core.trac.wordpress.org/changeset/%d', $rev_id ) ); ?>">
+		r<?php echo $rev_id; ?>
+	</a>: <?php echo esc_attr( apply_filters( 'the_title', $revision->post_title ) ); ?>
+</div>
+
+<table class="ptr-test-reporter-table alignwide">
 	<thead>
 		<tr>
-			<th style="width:100px">Revision</th>
-			<th>Host</th>
-			<th>PHP Version</th>
+			<th style="width:100px">Status</th>
+			<th style="width:150px">PHP Version</th>
 			<th>Database Version</th>
 		</tr>
 	</thead>
 	<tbody>
-		<?php
-		$total_cols = 5;
-		foreach ( $revisions as $revision ) :
-			$rev_id = (int) ltrim( $revision->post_name, 'r' );
-			?>
-			<tr>
-				<th colspan="<?php echo (int) $total_cols; ?>"><a href="<?php echo esc_url( sprintf( 'https://core.trac.wordpress.org/changeset/%d', $rev_id ) ); ?>">r<?php echo (int) $rev_id; ?></a>: <?php echo wp_kses_post( apply_filters( 'the_title', $revision->post_title ) ); ?></th>
-			</tr>
+
 			<?php
-			$query_args   = array(
+			$query_args = array(
 				'posts_per_page' => $posts_per_page,
+				'author'         => $post_author ?? null,
 				'post_type'      => 'result',
 				'post_parent'    => $revision->ID,
-				'orderby'        => 'post_title',
-				'order'          => 'ASC',
+				'orderby'        => [ 'author' => 'ASC', 'env_name_clause' => 'ASC' ],
+				'meta_query'     => array(
+					'relation' => 'OR',
+					'env_name_clause' => array(
+						'key'     => 'environment_name',
+						'compare' => 'EXISTS',
+					),
+					array(
+						'key'     => 'environment_name',
+						'compare' => 'NOT EXISTS',
+					)
+				),
 			);
 			$report_query = new WP_Query( $query_args );
 			if ( ! empty( $report_query->posts ) ) :
+
+          $prev_author = null;
+
 				foreach ( $report_query->posts as $report ) :
 					$status       = 'Errored';
 					$status_title = 'No results found for test.';
@@ -55,35 +72,42 @@ echo Display::get_display_css(); ?>
 								'extra_attr' => 'style="vertical-align: middle;margin-right:5px;"',
 							)
 						);
-						if ( ! empty( $user->user_url ) ) {
-							$host .= '</a>';
-						}
-						if ( ! empty( $user->user_url ) ) {
-							$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
-						}
-						$host .= $user->display_name;
+
+						$host .= Display::get_display_reporter_name( $report->post_author );
+
 						if ( ! empty( $user->user_url ) ) {
 							$host .= '</a>';
 						}
 					}
 					?>
+        <?php if ( $prev_author !== $host ): ?>
+          <tr>
+            <td colspan="3">
+              <?php echo wp_kses_post( $host ); ?>
+            </td>
+          </tr>
+
+        <?php endif; ?>
 				<tr>
-					<td><a href="<?php echo esc_url( get_permalink( $report->ID ) ); ?>" title="<?php echo esc_attr( $status_title ); ?>" class="<?php echo esc_attr( 'ptr-status-badge ptr-status-badge-' . strtolower( $status ) ); ?>"><?php echo esc_html( $status ); ?></a></td>
-					<td><?php echo wp_kses_post( $host ); ?></td>
+					<td>
+						<a href="<?php echo esc_url( get_permalink( $report->ID ) ); ?>" title="<?php echo esc_attr( $status_title ); ?>" class="<?php echo esc_attr( 'ptr-status-badge ptr-status-badge-' . strtolower( $status ) ); ?>">
+							<?php echo esc_html( $status ); ?>
+						</a>
+					</td>
 					<td><?php echo esc_html( Display::get_display_php_version( $report->ID ) ); ?></td>
 					<td><?php echo esc_html( Display::get_display_mysql_version( $report->ID ) ); ?></td>
 				</tr>
 					<?php
+			    $prev_author = $host;
 				endforeach;
 			else :
 				?>
 				<tr>
-					<td></td>
-					<td colspan="<?php echo (int) $total_cols - 1; ?>">
+					<td colspan="3">
 						No reports for changeset.
 					</td>
 				</tr>
 			<?php endif; ?>
-		<?php endforeach; ?>
 	</tbody>
 </table>
+<?php endforeach;
