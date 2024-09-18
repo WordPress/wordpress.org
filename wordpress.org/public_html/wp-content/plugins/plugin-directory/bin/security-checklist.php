@@ -16,7 +16,7 @@ if ( 'cli' != php_sapi_name() ) {
 
 ob_start();
 
-$opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:', 'top:', 'async', 'create', 'author:', 'caped', 'mapfile:' ) );
+$opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:', 'top:', 'new:', 'installs:', 'async', 'create', 'author:', 'caped', 'mapfile:' ) );
 
 // Guess the default parameters:
 if ( empty( $opts ) && $argc == 2 ) {
@@ -299,6 +299,9 @@ function display_checklist_for_plugin( $plugin_slug, $include_closed = true ) {
 
 	$recent_releases = array_slice( $post->releases ?: [], 0, 10 );
 	#var_dump( $recent_releases );
+	echo "Current version $post->version\n";
+	echo human_time_diff( get_post_modified_time( 'U', true, $post ), current_time( 'U', true ) ) . "\n";
+	display_version_matrix( $post->post_name, $post->version );
 
 	echo "Recent Releases:\n";
 	foreach ( $recent_releases as $release ) {
@@ -314,7 +317,7 @@ function display_checklist_for_plugin( $plugin_slug, $include_closed = true ) {
 	#
 	$yesterday = (new \DateTime('yesterday'))->format( 'Y-m-d' );
 	$version_usage = $wpdb->get_results( $wpdb->prepare( "SELECT rev2_plugin_daily_stats.plugin_id, plugin_name, name, `value`, `count` FROM `plugin_list` LEFT JOIN `rev2_plugin_daily_stats` USING (plugin_id) WHERE plugin_name= %s AND `date` = %s AND name='usage' GROUP BY rev2_plugin_daily_stats.plugin_id, name, `value` ORDER BY `value` DESC", $post->post_name, $yesterday ) );
-	var_dump( $version_usage );
+	#var_dump( $version_usage );
 	$all_cves = get_cves_for_plugin( $post->post_name );
 	#var_dump( 'all_cves', $all_cves );
 	$total_usage = 0;
@@ -340,17 +343,40 @@ function display_checklist_for_plugin( $plugin_slug, $include_closed = true ) {
 	return true;
 }
 
-function display_version_matrix( $plugin_slug ) {
+function display_version_matrix( $plugin_slug, $plugin_version ) {
 	global $wpdb;
 
-	$version_usage = $wpdb->get_results( $wpdb->prepare( "SELECT rev2_plugin_daily_stats.plugin_id, plugin_name, name, `value`, `count` FROM `plugin_list` LEFT JOIN                     `rev2_plugin_daily_stats` USING (plugin_id) WHERE plugin_name= %s AND `date` = %s AND name='usage' GROUP BY rev2_plugin_daily_stats.plugin_id, name, `value` ORDER BY `value` DESC",     $post->post_name, $yesterday ) );
+	#$version_usage = $wpdb->get_results( $wpdb->prepare( "SELECT rev2_plugin_daily_stats.plugin_id, plugin_name, name, `value`, `count` FROM `plugin_list` LEFT JOIN                     `rev2_plugin_daily_stats` USING (plugin_id) WHERE plugin_name= %s AND `date` = %s AND name='usage' GROUP BY rev2_plugin_daily_stats.plugin_id, name, `value` ORDER BY `value` DESC",     $post->post_name, $yesterday ) );
 
-	$plugin_id = $wpdb>get_var( $wpdb->prepare( "SELECT plugin_id FROM plugin_list WHERE plugin_name = %s", $plugin_slug ) );
+	$plugin_id = $wpdb->get_var( $wpdb->prepare( "SELECT plugin_id FROM plugin_list WHERE plugin_name = %s", $plugin_slug ) );
 	if ( !$plugin_id ) {
+		#var_dump( $plugin_id, $wpdb->last_query, $wpdb->last_error );
 		return false;
 	}
 	#$versions = $wpdb->get_results( $wpdb->prepare( "SELECT version, version_desc, count(*) FROM `plugins_installed` INNER JOIN wp_versions USING(url_id) INNER JOIN wp_version_list USING(wp_version_id) WHERE plugin_id = %d GROUP BY version, wp_version_id ORDER BY version, version_desc DESC 
-
+	$versions = $wpdb->get_results( $wpdb->prepare( "SELECT version_desc, count(*) AS cc FROM `plugins_installed` INNER JOIN wp_versions USING(url_id) INNER JOIN wp_version_list USING(wp_version_id) WHERE plugin_id = %d AND version = %s GROUP BY wp_version_id ORDER BY version_desc DESC", $plugin_id, $plugin_version ) );
+	#var_dump( $wpdb->last_query, $wpdb->last_error, $versions );
+	$max_cc = max( wp_list_pluck( $versions, 'cc' ) );
+	$total = array_sum( wp_list_pluck( $versions, 'cc' ) );
+	$skipped = 0;
+	for ( $i=0; $i < min( 10, count($versions) ); $i++ ) {
+		if ( $versions[$i]->cc / $total < 0.001 ) {
+			$skipped += $versions[$i]->cc;
+			continue; // skip very small numbers
+		}
+		echo str_pad( $versions[$i]->version_desc, 20 );
+		echo str_pad( number_format( $versions[$i]->cc / $total * 100.0, 1 ) . '%', 8);
+		echo str_repeat( '▧', $versions[$i]->cc / $max_cc * 50 );
+		echo "\n";
+	}
+	// Everything not explicitly displayed
+	$remainder = $skipped + array_sum( wp_list_pluck( array_slice( $versions, 10 ), 'cc' ) );
+	if ( $remainder ) {
+		echo "Others              ";
+		echo str_pad( number_format( $remainder / $total * 100.0, 1 ) . '%', 8 );
+		echo "\n";
+	}
+	echo number_format( $total ), " total\n";
 
 }
 
@@ -450,20 +476,37 @@ if ( $opts['author'] ) {
 	}
 
 }
-if ( $opts['top'] ) {
+if ( $opts['top'] || $opts['new'] ) {
 	while (@ob_end_flush());
 
-	$args = [
-		'post_status' => 'publish',
-		'post_type' => 'plugin',
-		'meta_key' => 'active_installs',
-		'orderby' => 'meta_value_num',
-		'order' => 'DESC',
-		'posts_per_page' => intval( $opts['top'] ?: 5 )
-	];
+	if ( $opts['top'] ) {
+		$args = [
+			'post_status' => 'publish',
+			'post_type' => 'plugin',
+			'meta_key' => 'active_installs',
+			'orderby' => 'meta_value_num',
+			'order' => 'DESC',
+			'posts_per_page' => intval( $opts['top'] ?: 5 )
+		];
+	} else {
+		$args = [
+			'post_status' => 'publish',
+			'post_type' => 'plugin',
+			'orderby' => 'post_modified_gmt',
+			'order' => 'DESC',
+			'posts_per_page' => intval( $opts['new'] ?: 5 )
+		];
+		if ( $opts['installs'] > 0 ) {
+			$args[ 'meta_key' ] = 'active_installs';
+			$args[ 'meta_value' ] = intval( $opts['installs'] );
+			$args[' meta_compare' ] = '>=';
+		}
+		var_dump( $args );
+	}
 
 	$last_active_installs = null;
 	$q = new \WP_Query( $args );
+	var_dump( $q->request );
 	foreach ( $q->posts as $i => $post ) {
 		echo "#$i\n";
 		display_checklist_for_plugin( $post->post_name );
