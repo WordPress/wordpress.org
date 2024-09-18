@@ -398,18 +398,21 @@ class Upload_Handler {
 		}
 
 		// Pass it through Plugin Check and see how great this plugin really is.
-		// We're not actually using this right now.
 		$plugin_check_result = $this->check_plugin();
 
-		if ( ! $plugin_check_result && ! $has_upload_token ) {
-			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
-
-			return new WP_Error( 'failed_checks', $error . ' ' . sprintf(
-				/* translators: 1: Plugin Check Plugin URL, 2: https://make.wordpress.org/plugins */
-				__( 'Please correct the listed problems with your plugin and upload it again. You can also use the <a href="%1$s">Plugin Check Plugin</a> to test your plugin before uploading. If you have any questions about this please post them to %2$s.', 'wporg-plugins' ),
-				'https://wordpress.org/plugins/plugin-check/',
-				'<a href="https://make.wordpress.org/plugins">https://make.wordpress.org/plugins</a>'
-			) );
+		if ( ! $plugin_check_result['verdict'] && ! $has_upload_token ) {
+			return new WP_Error(
+				'failed_checks',
+				__( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' ) . ' ' .
+				sprintf(
+					/* translators: 1: Plugin Check Plugin URL, 2: plugins email. */
+					__( 'Please correct the listed problems with your plugin and upload it again. You can also use the <a href="%1$s">Plugin Check Plugin</a> to test your plugin before uploading. If you have any questions about this please contact %2$s.', 'wporg-plugins' ),
+					'https://wordpress.org/plugins/plugin-check/',
+					'<a href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>'
+				) .
+				'</p><p>' .
+				( $plugin_check_result['html'] ?? '' )
+			);
 		}
 
 		// Passed all tests!
@@ -493,7 +496,7 @@ class Upload_Handler {
 			);
 		}
 
-		$attachment = $this->save_zip_file( $plugin_post->ID, $upload_comment );
+		$attachment = $this->save_zip_file( $plugin_post->ID, $upload_comment, $plugin_check_result );
 		if ( is_wp_error( $attachment ) ) {
 			return $attachment;
 		}
@@ -550,7 +553,7 @@ class Upload_Handler {
 		$email->send();
 
 		$message = sprintf(
-			/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
+			/* translators: 1: plugin name, 2: plugin slug */
 			__( 'Thank you for uploading %1$s to the WordPress Plugin Directory. Your plugin has been given the initial slug of %2$s, however that is subject to change based on the results of your code review. If this slug is incorrect, please change it below. Remember, a plugin slug cannot be changed once your plugin is approved.' ),
 			esc_html( $this->plugin['Name'] ),
 			'<code>' . $this->plugin_slug . '</code>'
@@ -569,7 +572,10 @@ class Upload_Handler {
 
 		$message .= __( 'Note: Reviews are currently in English only. We apologize for the inconvenience.', 'wporg-plugins' );
 
-		$message .= '</p>';
+		// Append the plugin check results.
+		if ( ! empty( $plugin_check_result['html'] ) ) {
+			$message .= $plugin_check_result['html'];
+		}
 
 		// Success!
 		return $message;
@@ -640,36 +646,156 @@ class Upload_Handler {
 	/**
 	 * Sends a plugin through Plugin Check.
 	 *
-	 * @return bool Whether the plugin passed the checks.
+	 * @return array The results of the plugin check.
 	 */
 	public function check_plugin() {
-		return true;
 		// Run the checks.
-		// @todo Include plugin checker.
-		// Pass $this->plugin_root as the plugin root.
-		$result = true;
-
-		// Display the errors.
-		if ( $result ) {
-			$verdict = array( 'pc-pass', __( 'Pass', 'wporg-plugins' ) );
-		} else {
-			$verdict = array( 'pc-fail', __( 'Fail', 'wporg-plugins' ) );
+		if (
+			! defined( 'WPCLI' ) ||
+			! defined( 'WP_CLI_CONFIG_PATH' ) ||
+			// The plugin must be activated in order to have plugin-check run.
+			! defined( 'WP_PLUGIN_CHECK_VERSION' ) ||
+			// WordPress.org only..
+			! function_exists( 'notify_slack' )
+		) {
+			return true;
 		}
 
-		echo '<h4>' . sprintf( __( 'Results of Automated Plugin Scanning: %s', 'wporg-plugins' ), vsprintf( '<span class="%1$s">%2$s</span>', $verdict ) ) . '</h4>';
-		echo '<ul class="tc-result">' . __( 'Result', 'wporg-plugins' ) . '</ul>';
-		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' ) . '</p></div>';
+		// Run plugin check via CLI
+		$start_time = microtime(1);
+		exec(
+			'export WP_CLI_CONFIG_PATH=' . escapeshellarg( WP_CLI_CONFIG_PATH ) . '; ' .
+			'timeout 30 ' . // Timeout after 30s if plugin-check is not done.
+			WPCLI . ' --url=https://wordpress.org/plugins ' .
+			' plugin check --error-severity=7 --format=json ' . escapeshellarg( $this->plugin_root ),
+			$output,
+			$return_code
+		);
+		$total_time = microtime(1) - $start_time;
 
-		return $result;
+		/**
+		 * Anything that plugin-check outputs that we want to discard completely.
+		 */
+		$is_ignored_code = static function( $code ) {
+			$ignored_codes = [
+			];
+
+			return (
+				in_array( $code, $ignored_codes, true ) ||
+				// All the Readme parser warnings are duplicated, we'll exclude those.
+				str_starts_with( $code, 'readme_parser_warnings_' )
+			);
+		};
+
+		/*
+		 * Convert the output into an array.
+		 * Format:
+		 * FILE: example.extension
+		 * [{.....}]
+		 *
+		 * FILE: example2.extension
+		 * [{.....}]
+		 */
+		$verdict  = true;
+		$results  = [];
+		foreach ( array_chunk( $output, 3 ) as $file_result ) {
+			if ( ! str_starts_with( $file_result[0], 'FILE:' ) ) {
+				continue;
+			}
+
+			$filename = trim( explode( ':' , $file_result[0], 2 )[1] );
+			$json     = json_decode( $file_result[1], true );
+
+			foreach ( $json as $record ) {
+				$record['file'] = $filename;
+
+				if ( $is_ignored_code( $record['code'] ) ) {
+					continue;
+				}
+
+				$results[] = $record;
+
+				// Record submission stats.
+				if ( function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
+					bump_stats_extra( 'plugin-check-' . $record['type'], $record['code'] );
+				}
+
+				// Determine if it failed the checks.
+				if ( $verdict && 'ERROR' === $record['type'] ) {
+					$verdict = false;
+				}
+			}
+		}
+
+		// Generage the HTML for the Plugin Check output.
+		$html = sprintf(
+			'<strong>' . __( 'Results of Automated Plugin Scanning: %s', 'wporg-plugins' ) . '</strong>',
+			$verdict ? __( 'Pass', 'wporg-plugins' ) : __( 'Fail', 'wporg-plugins' )
+		);
+		if ( $results ) {
+			$html .= '<ul class="pc-result" style="list-style: disc">';
+			foreach ( $results as $result ) {
+				$html .= sprintf(
+					'<li>%s <a href="%s">%s</a>: %s</li>',
+					esc_html( $result['file'] ),
+					esc_url( $result['docs'] ?? '' ),
+					esc_html( $result['type'] . ' ' . $result['code'] ),
+					esc_html( $result['message'] )
+				);
+			}
+			$html .= '</ul>';
+		}
+		$html .= __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' );
+
+		// If the upload is blocked; log it.
+		if ( ! $verdict || true ) { // TODO: Temporarily logging all to slack, as it's not output to the submitter.
+			// Slack dm the logs.
+			$zip_name = reset( $_FILES )['name'];
+			$failpass = $verdict ? 'passed' : 'failed';
+			if ( $return_code > 1 ) { // TODO: Temporary, as we're always hitting this branch.
+				$failpass = ' errored: ' . $return_code;
+			}
+			$text     = "Plugin check {$failpass} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s\n";
+
+			// List the errors, then the warnings (which may be truncated).
+			foreach ( [ wp_list_filter( $results, [ 'type' => 'ERROR' ] ), wp_list_filter( $results, [ 'type' => 'ERROR' ], 'NOT' ) ] as $result_set ) {
+				foreach ( $result_set as $result ) {
+					$text .= " - {$result['file']}: {$result['type']} - {$result['code']}: {$result['message']}\n";
+				}
+			}
+
+			notify_slack( PLUGIN_CHECK_LOGS_SLACK_CHANNEL, $text, wp_get_current_user(), true );
+		} elseif ( $return_code ) {
+			// Log plugin-check timing out.
+			$zip_name   = reset( $_FILES )['name'];
+			$text       = "Plugin check error {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s\n";
+			notify_slack( PLUGIN_CHECK_LOGS_SLACK_CHANNEL, $text, wp_get_current_user(), true );
+		}
+
+		// TODO: Payload to always pass, and not show anything to the submitter, temporary.
+		return [
+			'verdict' => true,
+			'results' => $results,
+			'html'    => '',
+		];
+
+		// Return the results.
+		return [
+			'verdict' => $verdict,
+			'results' => $results,
+			'html'    => $html,
+		];
 	}
 
 	/**
 	 * Saves zip file and attaches it to the plugin post.
 	 *
 	 * @param int $post_id Post ID.
+	 * @param string $upload_comment Comment for the upload.
+	 * @param array|bool $plugin_check_result Plugin check results.
 	 * @return WP_Post|WP_Error Attachment post or upload error.
 	 */
-	public function save_zip_file( $post_id, $upload_comment ) {
+	public function save_zip_file( $post_id, $upload_comment, $plugin_check_result = false ) {
 		$zip_hash = sha1_file( $_FILES['zip_file']['tmp_name'] );
 		if ( in_array( $zip_hash, get_post_meta( $post_id, 'uploaded_zip_hash' ) ?: [], true ) ) {
 			return new WP_Error( 'already_uploaded', __( "You've already uploaded that ZIP file.", 'wporg-plugins' ) );
@@ -699,6 +825,11 @@ class Upload_Handler {
 			// Save some basic details with the ZIP.
 			update_post_meta( $attachment->ID, 'version', $this->plugin['Version'] );
 			update_post_meta( $attachment->ID, 'submitted_name', $original_name );
+
+			if ( $plugin_check_result ) {
+				update_post_meta( $attachment->ID, 'pc_verdict', $plugin_check_result['verdict'] );
+				update_post_meta( $attachment->ID, 'pc_results', $plugin_check_result['results'] );
+			}
 
 			// And record this ZIP as having been uploaded.
 			add_post_meta( $post_id, 'uploaded_zip_hash', $zip_hash );
