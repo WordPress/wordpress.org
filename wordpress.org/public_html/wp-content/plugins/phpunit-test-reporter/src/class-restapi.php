@@ -252,17 +252,17 @@ class RestAPI {
 		$meta_query = [];
 
 		foreach ( $post_terms as $term ) {
-			if ( 'php-version' === $term['taxonomy'] ) {
+			if ( 'php-version' === $term->taxonomy ) {
 				$tax_query[] = array(
 					'taxonomy' => 'php-version',
-					'terms'    => [ $term['term_id'] ],
+					'terms'    => [ $term->term_id ],
 				);
 			}
 
-			if ( 'db-version' === $term['taxonomy'] ) {
+			if ( 'db-version' === $term->taxonomy ) {
 				$tax_query[] = array(
 					'taxonomy' => 'db-version',
-					'terms'    => [ $term['term_id'] ],
+					'terms'    => [ $term->term_id ],
 				);
 			}
 		}
