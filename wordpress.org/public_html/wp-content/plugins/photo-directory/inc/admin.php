@@ -1169,6 +1169,8 @@ class Admin {
 				}
 			?>
 			</div>
+
+			<?php if ( $rejected_count ) : ?>
 			<div class="photo-contributor-rejection-stats">
 				<h4><?php esc_html_e( 'Rejection stats:', 'wporg-photos' ); ?></h4>
 				<?php
@@ -1213,6 +1215,8 @@ class Admin {
 					}
 				?>
 			</div>
+			<?php endif; ?>
+
 		</div>
 
 		<?php
