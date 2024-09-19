@@ -49,6 +49,13 @@ class Upload_Handler {
 	public $plugin_slug;
 
 	/**
+	 * The plugin post object, if known.
+	 *
+	 * @var \WP_Post
+	 */
+	public $plugin_post;
+
+	/**
 	 * Get set up to run tests on the uploaded plugin.
 	 */
 	public function __construct() {
@@ -85,6 +92,7 @@ class Upload_Handler {
 		$plugin_post       = $for_plugin ? get_post( $for_plugin ) : false;
 		$updating_existing = (bool) $plugin_post;
 		$this->plugin_slug = $plugin_post->post_name ?? '';
+		$this->plugin_post = $plugin_post;
 
 		if ( $for_plugin && ! $updating_existing ) {
 			return new WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
@@ -484,6 +492,9 @@ class Upload_Handler {
 			return $plugin_post;
 		}
 
+		// Store it now that we have it.
+		$this->plugin_post = $plugin_post;
+
 		// Record the submitter.
 		if ( ! $updating_existing ) {
 			Tools::audit_log(
@@ -676,7 +687,7 @@ class Upload_Handler {
 			$output,
 			$return_code
 		);
-		$total_time = microtime(1) - $start_time;
+		$total_time = round( microtime(1) - $start_time, 1 );
 
 		/**
 		 * Anything that plugin-check outputs that we want to discard completely.
@@ -739,33 +750,60 @@ class Upload_Handler {
 		);
 		if ( $results ) {
 			$html .= '<ul class="pc-result" style="list-style: disc">';
-			foreach ( $results as $result ) {
-				$html .= sprintf(
-					'<li>%s <a href="%s">%s</a>: %s</li>',
-					esc_html( $result['file'] ),
-					esc_url( $result['docs'] ?? '' ),
-					esc_html( $result['type'] . ' ' . $result['code'] ),
-					esc_html( $result['message'] )
-				);
+			// Display errors, and then warnings.
+			foreach ( [ wp_list_filter( $results, [ 'type' => 'ERROR' ] ), wp_list_filter( $results, [ 'type' => 'ERROR' ], 'NOT' ) ] as $result_set ) {
+				foreach ( $result_set as $result ) {
+					$html .= sprintf(
+						'<li>%s <a href="%s">%s</a>: %s</li>',
+						esc_html( $result['file'] ),
+						esc_url( $result['docs'] ?? '' ),
+						esc_html( $result['type'] . ' ' . $result['code'] ),
+						esc_html( $result['message'] )
+					);
+				}
 			}
 			$html .= '</ul>';
 		}
 		$html .= __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' );
 
-		// If the upload is blocked; log it.
+		// If the upload is blocked; log it to slack.
 		if ( ! $verdict || true ) { // TODO: Temporarily logging all to slack, as it's not output to the submitter.
 			// Slack dm the logs.
 			$zip_name = reset( $_FILES )['name'];
-			$failpass = $verdict ? 'passed' : 'failed';
+			$failpass = $verdict ? ':white_check_mark: passed' : ':x: failed';
 			if ( $return_code > 1 ) { // TODO: Temporary, as we're always hitting this branch.
-				$failpass = ' errored: ' . $return_code;
+				$failpass = ' :rotating_light: errored: ' . $return_code;
 			}
-			$text     = "Plugin check {$failpass} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s\n";
 
-			// List the errors, then the warnings (which may be truncated).
-			foreach ( [ wp_list_filter( $results, [ 'type' => 'ERROR' ] ), wp_list_filter( $results, [ 'type' => 'ERROR' ], 'NOT' ) ] as $result_set ) {
-				foreach ( $result_set as $result ) {
-					$text .= " - {$result['file']}: {$result['type']} - {$result['code']}: {$result['message']}\n";
+			$plugin_name_slug = $this->plugin['Name'] . ' (' . $this->plugin_slug . ')';
+			// If we have a post object, link to it.
+			if ( $this->plugin_post ) {
+				$edit_post_link   = admin_url( 'post.php?post=' . $this->plugin_post->ID . '&action=edit' ); // Can't use get_edit_post_link() as the user can't edit the post.
+				$plugin_name_slug = "<{$edit_post_link}|{$plugin_name_slug}>";
+			}
+
+			$text = "{$failpass} for {$zip_name}: {$plugin_name_slug} took {$total_time}s\n";
+
+			// Include a simplified / merged version of the results for review.
+			$group_by_code = [ 'ERROR' => [], 'WARNING' => [] ];
+			foreach ( $results as $result ) {
+				$group_by_code[ $result['type'] ][ $result['code'] ] ??= [];
+				$group_by_code[ $result['type'] ][ $result['code'] ][] = $result;
+			}
+			foreach ( $group_by_code as $type => $codes ) {
+				foreach ( $codes as $code_results ) {
+					$text .= "• *{$type}: {$code_results[0]['code']}*";
+					if ( 1 === count( $code_results ) ) {
+						$text .= ": {$code_results[0]['message']}\n";
+					} else {
+						$text .= "\n";
+						foreach ( array_unique( wp_list_pluck( $code_results, 'message' ) ) as $i => $message ) {
+							$multiplier = count( wp_list_filter( $code_results, [ 'message' => $message ] ) );
+							$multiplier = $multiplier > 1 ? " {$multiplier}x" : '';
+
+							$text .= " {$i}. {$multiplier} {$message}\n";
+						}
+					}
 				}
 			}
 
@@ -773,7 +811,7 @@ class Upload_Handler {
 		} elseif ( $return_code ) {
 			// Log plugin-check timing out.
 			$zip_name   = reset( $_FILES )['name'];
-			$text       = "Plugin check error {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s\n";
+			$text       = ":rotating_light: Error: {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s\n";
 			notify_slack( PLUGIN_CHECK_LOGS_SLACK_CHANNEL, $text, wp_get_current_user(), true );
 		}
 
