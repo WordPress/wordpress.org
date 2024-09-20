@@ -121,7 +121,7 @@ class RestAPI {
 			$php_version = $parts[0] . '.' . $parts[1];
 		}
 
-		$db_version = ! empty( $parameters['mysql_version'] ) ? $parameters['mysql_version'] : 'Unknown';
+		$db_version = ! empty( $env['mysql_version'] ) ? $env['mysql_version'] : 'Unknown';
 		$env_name   = ! empty( $env['label'] ) ? wp_kses( $env['label'], [] ) : '';
 
 		$current_user = wp_get_current_user();

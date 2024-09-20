@@ -371,7 +371,7 @@ class Display {
 	public static function get_display_reporter_name( $reporter_id ) {
 		$reporter = new \WP_User( $reporter_id );
 
-		if ( empty( $reporter->display_name ) ) {
+		if ( ! empty( $reporter->display_name ) ) {
 			return esc_html( $reporter->display_name );
 		}
 
