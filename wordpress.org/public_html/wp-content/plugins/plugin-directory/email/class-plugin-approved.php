@@ -30,7 +30,7 @@ To answer some common questions:
 
 * You must use SVN to upload your code -- we are unable to do that for you
 * Your SVN username is `%2$s` and is case sensitive.
-* Generate your SVN password in your [WordPress.org profile](%4$s).
+* You can <strong>set up your SVN credentials</strong> (if you haven\'t already) in the "Account & Security" section of your [WordPress.org profile](%4$s).
 * SVN will not accept your email address as a username
 * Due to the size of the directory, it may take 72 hours before all search results are properly updated
 
