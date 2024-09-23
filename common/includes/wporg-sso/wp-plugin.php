@@ -90,6 +90,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				add_action( 'profile_update', array( $this, 'record_last_password_change' ), 10, 3 );
 				add_action( 'wp_set_password', array( $this, 'record_last_password_change_reset' ), 10, 3 );
 
+				add_filter( 'auth_cookie_expiration', array( $this, 'auth_cookie_expiration' ), 10, 2 );
+
 				add_action( 'login_form_logout', array( $this, 'login_form_logout' ) );
 
 				add_filter( 'salt', array( $this, 'salt' ), 10, 2 );
@@ -842,6 +844,21 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
+		 * Shorten the session timeout for users who haven't setup 2FA.
+		 *
+		 * Acts as if the user didn't check the remember-me box.
+		 */
+		public function auth_cookie_expiration( $expiration, $user_id ) {
+			$user = get_user_by( 'id', $user_id );
+
+			if ( $user && user_should_2fa( $user ) && ! Two_Factor_Core::is_user_using_two_factor( $user_id ) ) {
+				$expiration = min( $expiration, 2 * DAY_IN_SECONDS );
+			}
+
+			return $expiration;
+		}
+
+		/**
 		 * Redirects the user to a "please enable 2fa" page after login.
 		 */
 		public function maybe_redirect_to_enable_2fa( $redirect, $orig_redirect, $user ) {
@@ -861,7 +878,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			// If the user doesn't REQUIRE 2FA, only nag ever so often.
 			if ( ! user_requires_2fa( $user ) ) {
-				$nag_interval = WEEK_IN_SECONDS;
+				$nag_interval = 2 * DAY_IN_SECONDS;
 				$last_nagged  = (int) get_user_meta( $user->ID, 'last_2fa_nag', true );
 				if ( $last_nagged && $last_nagged > ( time() - $nag_interval ) ) {
 					return $redirect;
