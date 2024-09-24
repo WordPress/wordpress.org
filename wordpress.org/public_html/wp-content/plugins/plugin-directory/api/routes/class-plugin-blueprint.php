@@ -43,15 +43,41 @@ class Plugin_Blueprint extends Base {
 			$this->developer_blueprint( $request, $plugin );
 		}
 
-        $blueprints = get_post_meta( $plugin->ID, 'assets_blueprints', true );
-        // Note: for now, only use a file called `blueprint.json`.
+		$blueprints = get_post_meta( $plugin->ID, 'assets_blueprints', true );
+		// Note: for now, only use a file called `blueprint.json`.
 		if ( !isset( $blueprints['blueprint.json'] ) ) {
 			return new \WP_Error( 'no_blueprint', 'File not found', array( 'status' => 404 ) );
-        }
-        $blueprint = $blueprints['blueprint.json'];
-        if ( !$blueprint || !isset( $blueprint['contents'] ) || !is_string( $blueprint['contents'] ) ) {
+		}
+		$blueprint = $blueprints['blueprint.json'];
+		if ( !$blueprint || !isset( $blueprint['contents'] ) || !is_string( $blueprint['contents'] ) ) {
 			return new \WP_Error( 'invalid_blueprint', 'Invalid file', array( 'status' => 500 ) );
-        }
+		}
+
+		if ( $request->get_param('lang') && 'en' !== strtolower( substr( $request->get_param('lang'), 0, 2 ) ) ) {
+			// Check if there's already a setSiteLanguage step
+			$blueprint_data = json_decode( $blueprint['contents'] );
+			if ( isset( $blueprint_data->steps ) ) {
+				if ( !in_array( 'setSiteLanguage', wp_list_pluck( $blueprint_data->steps, 'step' ) ) ) {
+					// Add setSiteLanguage as the final step
+					array_push( $blueprint_data->steps, 
+						(object)[
+							'step' => 'setSiteLanguage',
+							'language' => sanitize_text_field( $request->get_param('lang') )
+						]
+					);
+				}
+			} else {
+				// No steps in blueprint, so create one
+				$blueprint_data->steps = [
+					(object)[
+						'step' => 'setSiteLanguage',
+						'language' => sanitize_text_field( $request->get_param('lang') )
+					]
+				];
+			}
+			header( 'Access-Control-Allow-Origin: *' );
+			return $blueprint_data;
+		}
 
 		// Configure this elsewhere?
 		header( 'Access-Control-Allow-Origin: *' );

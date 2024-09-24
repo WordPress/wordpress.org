@@ -751,7 +751,7 @@ class Template {
 	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
 	 * @return false|string The preview url. False if no preview is configured.
 	 */
-	public static function preview_link( $post = null ) {
+	public static function preview_link( $post = null, $locale = null ) {
 		$post = get_post( $post );
 
 		$blueprints = self::get_blueprints( $post );
@@ -761,7 +761,11 @@ class Template {
 		}
 		$blueprint = $blueprints['blueprint.json'];
 
-		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), esc_attr($blueprint['url'] ) );
+		$blueprint_url = $blueprint['url'];
+		$locale = $locale ?? get_locale();
+		$blueprint_url = add_query_arg( 'lang', $locale, $blueprint_url );
+
+		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), rawurlencode($blueprint_url) );
 	}
 
 	/**
