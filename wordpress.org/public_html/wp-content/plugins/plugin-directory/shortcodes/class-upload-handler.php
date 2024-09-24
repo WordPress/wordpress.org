@@ -683,8 +683,10 @@ class Upload_Handler {
 			'export WP_CLI_CONFIG_PATH=' . escapeshellarg( WP_CLI_CONFIG_PATH ) . '; ' .
 			'timeout 30 ' . // Timeout after 30s if plugin-check is not done.
 			WPCLI . ' --url=https://wordpress.org/plugins ' .
-			' plugin check --error-severity=7 --warning-severity=6 --categories=plugin_repo ' .
-			'--format=json ' . escapeshellarg( $this->plugin_root ),
+			'plugin check ' .
+			'--error-severity=7 --warning-severity=6 --categories=plugin_repo --format=json ' .
+			'--slug=' . escapeshellarg( $this->plugin_slug ) . ' ' .
+			escapeshellarg( $this->plugin_root ),
 			$output,
 			$return_code
 		);
