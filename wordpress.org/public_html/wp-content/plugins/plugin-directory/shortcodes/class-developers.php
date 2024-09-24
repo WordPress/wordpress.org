@@ -88,6 +88,40 @@ class Developers {
 
 		$output .= '<h3>' . __( 'Interested in development?', 'wporg-plugins' ) . '</h3>';
 
+		if ( $post->development_link ) {
+			$host = wp_parse_url( $post->development_link, PHP_URL_HOST );
+
+			$named_locations = [
+				'github.com' => __( 'GitHub', 'wporg-plugins' ),
+				'gitlab.com' => __( 'GitLab', 'wporg-plugins' ),
+			];
+
+			if ( isset( $named_locations[ $host ] ) ) {
+				$output .= '<p>' . sprintf(
+					/* translators: 1: Platform the plugin is hosted on, eg. GitHub. 2: Link to development location. */
+					__( 'Plugin development occurs on %1$s in %2$s.', 'wporg-plugins' ),
+					esc_html( $named_locations[ $host ] ),
+					sprintf(
+						// <a href="https://github.com/user/repo">user/repo</a>
+						'<a href="%s">%s</a>',
+						esc_url( $post->development_link ),
+						esc_html( trim( wp_parse_url( $post->development_link, PHP_URL_PATH ), '/' ) )
+					)
+				) . '</p>';
+			} else {
+				$output .= '<p>' . sprintf(
+					/* translators: %s: Link to development location. */
+					__( 'Plugin development occurs on %s.', 'wporg-plugins' ),
+					sprintf(
+						// <a href="https://example.org/path/here">example.org</a>.
+						'<a href="%s">%s</a>',
+						esc_url( $post->development_link ),
+						esc_html( $host )
+					)
+				) . '</p>';
+			}
+		}
+
 		if ( is_user_logged_in() ) {
 			$subscribed = Tools::subscribed_to_plugin_commits( $post, get_current_user_id() );
 			$email_url  = esc_url( add_query_arg( array(

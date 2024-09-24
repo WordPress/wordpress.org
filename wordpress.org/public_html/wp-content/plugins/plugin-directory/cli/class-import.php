@@ -33,6 +33,7 @@ class Import {
 		'license_uri',
 		'upgrade_notice',
 		'screenshots',
+		'development_link',
 
 		// These headers are stored as post meta, but are handled separately.
 		// 'tested',
