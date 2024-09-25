@@ -191,36 +191,62 @@ function wporg_breathe_get_local_nav_menu_object() {
 }
 
 /**
+ * Add a login link to the local nav if there is no logged in user.
+ */
+function _maybe_add_login_item_to_menu( $menus ) {
+	if ( is_user_logged_in() ) {
+		return $menus;
+	}
+
+	$login_item = array(
+		'label' => __( 'Log in', 'wporg-learn' ),
+		'url' => wp_login_url( $redirect_url ),
+	);
+
+	if ( $menus['breathe'] ) {
+		$login_item['className'] = 'has-separator';
+		$menus['breathe'][] = $login_item;
+	} else {
+		$menus['breathe'] = array( $login_item );
+	}
+
+	return $menus;
+}
+
+/**
  * Provide a list of local navigation menus.
  */
 function wporg_breathe_add_site_navigation_menus( $menus ) {
 	if ( is_admin() ) {
 		return;
 	}
+
 	$local_nav_menu_object = wporg_breathe_get_local_nav_menu_object();
 
 	if ( ! $local_nav_menu_object ) {
-		return array();
+		return _maybe_add_login_item_to_menu( $menus );
 	}
 
 	$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
 
 	if ( ! $menu_items || empty( $menu_items ) ) {
-		return array();
+		return _maybe_add_login_item_to_menu( $menus );
 	}
 
-	return array(
-		'breathe' => array_map(
-			function( $menu_item ) {
-				return array(
-					'label' => esc_html( $menu_item->title ),
-					'url' => esc_url( $menu_item->url )
-				);
-			},
-			// Limit local nav items to 6
-			array_slice( $menu_items, 0, 6 )
-		)
+	$menu = array_map(
+		function( $menu_item ) {
+			return array(
+				'label' => esc_html( $menu_item->title ),
+				'url' => esc_url( $menu_item->url )
+			);
+		},
+		// Limit local nav items to 6
+		array_slice( $menu_items, 0, 6 )
 	);
+
+	$menus['breathe'] = $menu;
+
+	return _maybe_add_login_item_to_menu( $menus );
 }
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\wporg_breathe_add_site_navigation_menus' );
 
