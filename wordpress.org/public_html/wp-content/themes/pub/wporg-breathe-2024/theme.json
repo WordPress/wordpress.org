@@ -169,6 +169,13 @@
 						"bottom": "var(--wp--style--block-gap)"
 					}
 				}
+			},
+			"wporg/notice": {
+				"spacing": {
+					"margin": {
+						"bottom": "var(--wp--style--block-gap)"
+					}
+				}
 			}
 		}
 	}

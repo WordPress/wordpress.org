@@ -207,7 +207,8 @@ tr:last-of-type td {
 }
 
 /* For sites with no welcome box */
-.wp-block-wporg-local-navigation-bar + .site {
+.wp-block-wporg-local-navigation-bar + .site,
+.custom-menu .wp-block-wporg-local-navigation-bar + .site {
 	margin-top: var(--wp--preset--spacing--50);
 }
 
@@ -292,7 +293,7 @@ tr:last-of-type td {
 body.wporg-make #headline h2 a:before {
 	-webkit-font-smoothing: antialiased;
 	display: inline-block;
-	font: normal 24px/1 'dashicons';
+	font: normal 24px/var(--wp--custom--body--small--typography--line-height) 'dashicons';
 	vertical-align: middle;
 	width: 32px;
 }
@@ -562,8 +563,20 @@ nav.o2-dropdown-actions ul li > span > a:focus {
 
 /* Sidebar */
 
+#secondary-content {
+	line-height: var(--wp--custom--body--short-text--typography--line-height);
+}
+
 #secondary-content a {
 	overflow-wrap: anywhere;
+}
+
+#secondary-content ul {
+	margin-top: var(--wp--style--block-gap);
+}
+
+#secondary-content .wp-block-latest-comments {
+	padding-left: unset;
 }
 
 #secondary-content .textwidget a,
@@ -640,6 +653,15 @@ article.page .entry-content h3,
 article.page .entry-content h4,
 article.page .entry-content h5 {
 	margin: var(--wp--preset--spacing--40) 0 var(--wp--style--block-gap);
+}
+
+article.post .entry-content h2 + h3,
+article.post .entry-content h3 + h4,
+article.post .entry-content h4 + h5,
+article.page .entry-content h2 + h3,
+article.page .entry-content h3 + h4,
+article.page .entry-content h4 + h5 {
+	margin-top: var(--wp--style--block-gap);
 }
 
 a,
@@ -934,6 +956,16 @@ article#post-new .o2-post,
 article.page .o2-post,
 .entry-date {
 	display: block;
+}
+
+article.page .o2-post {
+	border-top: none;
+}
+
+article.page .entry-header .entry-meta .o2-post-actions {
+	position: absolute;
+	right: 0;
+	top: -70px;
 }
 
 .o2-xpost-author .entry-date,
@@ -1287,6 +1319,7 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 .make-welcome .entry-content h3,
 .make-welcome .entry-content h2 {
 	font-size: var(--wp--preset--font-size--normal);
+	line-height: var(--wp--custom--body--short-text--typography--line-height);
 	font-weight: 600;
 }
 
@@ -1370,8 +1403,8 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 	}
 
 	.make-welcome .entry-content .welcome p:first-child {
-		font-size: 22px;
-		margin: 12px 0 23px;
+		font-size: var(--wp--preset--font-size--heading-4);
+		line-height: var(--wp--custom--body--short-text--typography--line-height);
 	}
 }
 
@@ -2030,7 +2063,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 
 /** Make Core local nav items with icons only **/
 .wp-block-wporg-local-navigation-bar .wp-block-navigation-item a:before {
-	font: 20px/1 'dashicons';
+	font: 20px/var(--wp--custom--body--small--typography--line-height) 'dashicons';
 	display: inline-block;
 	-webkit-font-smoothing: antialiased;
 	vertical-align: middle;
