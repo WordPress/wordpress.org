@@ -199,7 +199,7 @@ function _maybe_add_login_item_to_menu( $menus ) {
 	}
 
 	$login_item = array(
-		'label' => __( 'Log in', 'wporg-learn' ),
+		'label' => __( 'Log in', 'wporg-breathe' ),
 		'url' => wp_login_url( $redirect_url ),
 	);
 
