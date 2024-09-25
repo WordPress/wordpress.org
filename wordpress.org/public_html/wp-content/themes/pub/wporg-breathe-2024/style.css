@@ -571,7 +571,7 @@ nav.o2-dropdown-actions ul li > span > a:focus {
 	overflow-wrap: anywhere;
 }
 
-#secondary-content ul {
+body.blog #secondary-content ul {
 	margin-top: var(--wp--style--block-gap);
 }
 
