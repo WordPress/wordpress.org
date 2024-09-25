@@ -194,15 +194,15 @@ class Plugin_Blueprint extends Base {
 		$helper_zip = self::get_zip_url_by_slug( 'playground-review-helper' );
 		if ( $helper_zip && $install_prh ) {
 			$steps[] = (object)[
-					'step' => 'installPlugin',
-					'pluginZipFile' => [
-						'resource' => 'url',
-						'url'      => $helper_zip,
-					],
-					'options' => (object)[
-						'activate' => (bool)$activate_plugin
-					]
-				];
+				'step' => 'installPlugin',
+				'pluginZipFile' => [
+					'resource' => 'url',
+					'url'      => $helper_zip,
+				],
+				'options' => (object)[
+					'activate' => (bool)$activate_plugin
+				]
+			];
 		}
 
 		// Dependencies next
@@ -223,22 +223,56 @@ class Plugin_Blueprint extends Base {
 
 		// Now the plugin itself
 		$steps[] = (object)[
-					'step' => 'installPlugin',
-					'pluginZipFile' => (object)[
-						'resource' => 'url',
-						'url'      => $zip_url,
-					],
-					'options' => (object)[
-						'activate' => (bool)$activate_plugin
-					]
-				];
+			'step' => 'installPlugin',
+			'pluginZipFile' => (object)[
+				'resource' => 'url',
+				'url'      => $zip_url,
+			],
+			'options' => (object)[
+				'activate' => (bool)$activate_plugin
+			]
+		];
+
+		/*
+		 * Maybe rename the plugin to exist in the expected folder.
+		 *
+		 * Temporary workaround for https://github.com/WordPress/wordpress-playground/issues/1802
+		 */
+		if ( ! str_starts_with( 'https://downloads.wordpress.org/', $zip_url ) ) {
+			$steps[] = (object)[
+				'step' => 'runPHP',
+				'code' => '<?php
+					include "/wordpress/wp-load.php";
+					$expected_slug = ' . var_export( $plugin->post_name, true ) . ';
+					$expected_plugins = ' . var_export( array_merge( [ 'plugin-check', 'playground-review-helper' ], $dependencies ), true ) . ';
+					$installed_plugins = array_diff(
+						array_map( "basename", glob( WP_PLUGIN_DIR . "/*", GLOB_ONLYDIR ) ),
+						$expected_plugins
+					);
+					if ( 1 === count( $installed_plugins) ) {
+						$plugin_dir = reset( $installed_plugins );
+						if ( $plugin_dir !== $expected_slug ) {
+							if ( rename( WP_PLUGIN_DIR . "/" . $plugin_dir, WP_PLUGIN_DIR . "/" . $expected_slug ) ) {
+								$active_plugins = get_option( "active_plugins" );
+								foreach ( $active_plugins as &$active_plugin ) {
+									if ( 0 === strpos( $active_plugin, $plugin_dir ) ) {
+										$active_plugin = $expected_slug . substr( $active_plugin, strlen( $plugin_dir ) );
+									}
+								}
+								update_option( "active_plugins", $active_plugins );
+							}
+						}
+					}
+				'
+			];
+		}
 
 		// Finally log in
 		$steps[] = (object)[
-					'step' => 'login',
-					'username' => 'admin',
-					'password' => 'password',
-				];
+			'step' => 'login',
+			'username' => 'admin',
+			'password' => 'password',
+		];
 
 		$zip_blueprint->steps = $steps;
 
