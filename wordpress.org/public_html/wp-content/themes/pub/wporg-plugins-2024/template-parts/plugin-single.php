@@ -18,6 +18,8 @@ $content   = Plugin_Directory::instance()->split_post_content_into_pages( get_th
 $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
 
 $plugin_title = $is_closed ? $post->post_name : get_the_title();
+
+$show_release_beta = isset( $_GET['show_release_beta'] );
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'alignwide' ); ?>>
@@ -99,7 +101,9 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			</li>
 		<?php endif; ?>
 		<li id="tablink-developers"><a href="<?php the_permalink(); ?>#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
-		<li id="tablink-releases"><a href="<?php the_permalink(); ?>#releases"><?php esc_html_e( 'Releases', 'wporg-plugins' ); ?></a></li>
+		<?php if ( $show_release_beta ) : ?>
+			<li id="tablink-releases"><a href="<?php the_permalink(); ?>#releases"><?php esc_html_e( 'Releases', 'wporg-plugins' ); ?></a></li>
+		<?php endif; ?>
 		<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
 			<li id="tablink-advanced"><a href="<?php the_permalink(); ?>advanced/"><?php esc_html_e( 'Advanced View', 'wporg-plugins' ); ?></a></li>
 		<?php endif; ?>
@@ -116,8 +120,13 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			get_template_part( 'template-parts/section-advanced' );
 		} else {
 			$plugin_sections_titles = Template::get_plugin_section_titles();
+			$content_section_list = array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog' );
 
-			foreach ( array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog', 'releases' ) as $section_slug ) {
+			if ( $show_release_beta ) {
+				$content_section_list[] = 'releases';
+			}
+
+			foreach ( $content_section_list as $section_slug ) {
 				$section_content = '';
 				$section_title   = $plugin_sections_titles[ $section_slug ] ?? '';
 
