@@ -978,6 +978,10 @@ article.page .o2-post {
 	border-top: none;
 }
 
+.single-post article.post .entry-meta {
+	margin-top: unset;
+}
+
 .o2-post-comments .o2-comment .comment-content {
 	margin-left: 45px;
 }
