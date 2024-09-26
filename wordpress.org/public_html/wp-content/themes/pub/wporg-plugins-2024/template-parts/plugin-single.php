@@ -87,6 +87,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 	<span id="reviews"></span>
 	<span id="installation"></span>
 	<span id="developers"></span>
+	<span id="releases"></span>
 	<span id="advanced" class="<?php if ( get_query_var( 'plugin_advanced' ) ) { echo 'displayed'; } ?>"></span>
 	<span id="section-links">
 		<ul class="tabs clear">
@@ -98,6 +99,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			</li>
 		<?php endif; ?>
 		<li id="tablink-developers"><a href="<?php the_permalink(); ?>#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
+		<li id="tablink-releases"><a href="<?php the_permalink(); ?>#releases"><?php esc_html_e( 'Releases', 'wporg-plugins' ); ?></a></li>
 		<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
 			<li id="tablink-advanced"><a href="<?php the_permalink(); ?>advanced/"><?php esc_html_e( 'Advanced View', 'wporg-plugins' ); ?></a></li>
 		<?php endif; ?>
@@ -115,7 +117,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 		} else {
 			$plugin_sections_titles = Template::get_plugin_section_titles();
 
-			foreach ( array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog' ) as $section_slug ) {
+			foreach ( array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog', 'releases' ) as $section_slug ) {
 				$section_content = '';
 				$section_title   = $plugin_sections_titles[ $section_slug ] ?? '';
 

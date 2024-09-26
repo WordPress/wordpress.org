@@ -599,6 +599,7 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugin-upload', array( __NAMESPACE__ . '\Shortcodes\Upload', 'display' ) );
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
 		add_shortcode( 'wporg-plugins-reviews', array( __NAMESPACE__ . '\Shortcodes\Reviews', 'display' ) );
+		add_shortcode( 'wporg-plugins-releases', array( __NAMESPACE__ . '\Shortcodes\Releases', 'display' ) );
 		add_shortcode( 'readme-validator', array( __NAMESPACE__ . '\Shortcodes\Readme_Validator', 'display' ) );
 		add_shortcode( 'block-validator', array( __NAMESPACE__ . '\Shortcodes\Block_Validator', 'display' ) );
 
@@ -618,6 +619,7 @@ class Plugin_Directory {
 			'wporg-plugin-upload',
 			'wporg-plugins-screenshots',
 			'wporg-plugins-reviews',
+			'wporg-plugins-releases',
 			'readme-validator',
 			'block-validator',
 			'release-confirmation',
@@ -1715,6 +1717,7 @@ class Plugin_Directory {
 			'screenshots' => '[wporg-plugins-screenshots]',
 			'developers'  => '[wporg-plugins-developers]',
 			'reviews'     => '[wporg-plugins-reviews]',
+			'releases'    => '[wporg-plugins-releases]',
 		);
 
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {

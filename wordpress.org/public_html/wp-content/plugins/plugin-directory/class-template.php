@@ -353,6 +353,7 @@ class Template {
 			'developers'   => _x( 'Contributors &amp; Developers', 'plugin tab title', 'wporg-plugins' ),
 			'other_notes'  => _x( 'Other Notes', 'plugin tab title', 'wporg-plugins' ),
 			'blocks'       => _x( 'Blocks', 'plugin tab title', 'wporg-plugins' ),
+			'releases'     => _x( 'Releases', 'plugin tab title', 'wporg-plugins' ),
 		];
 	}
 
