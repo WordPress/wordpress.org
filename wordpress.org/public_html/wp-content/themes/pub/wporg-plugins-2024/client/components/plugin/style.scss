@@ -235,7 +235,7 @@
 		position:fixed;
 	}
 
-	span#releases:not(:target) ~ span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#advanced:not(.displayed) ~ #section-links .tabs li#tablink-description,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#releases:not(:target) ~ span#advanced:not(.displayed) ~ #section-links .tabs li#tablink-description,
 	span#reviews:target ~ #section-links .tabs li#tablink-reviews,
 	span#installation:target ~ #section-links .tabs li#tablink-installation,
 	span#developers:target ~ #section-links .tabs li#tablink-developers,
