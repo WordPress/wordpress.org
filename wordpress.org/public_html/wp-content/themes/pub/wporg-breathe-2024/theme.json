@@ -183,6 +183,11 @@
 				"spacing": {
 					"margin": {
 						"bottom": "var(--wp--style--block-gap)"
+					},
+					"padding": {
+						"top": "var(--wp--custom--margin--horizontal)",
+						"right": "var(--wp--custom--margin--horizontal)",
+						"bottom": "var(--wp--custom--margin--horizontal)"
 					}
 				}
 			},

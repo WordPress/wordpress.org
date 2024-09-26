@@ -934,7 +934,7 @@ article.page .o2-post {
 }
 
 @media screen and (max-width: 640px) {
-	article.post .o2-post,
+	article.post .o2-post:not(.sticky .o2-post):not(.state-resolved .o2-post):not(.state-unresolved .o2-post),
 	article#post-new .o2-post,
 	article.page .o2-post {
 		padding-left: unset;
@@ -942,9 +942,13 @@ article.page .o2-post {
 	}
 }
 
-.o2-post {
+.o2-post:not(.state-resolved .o2-post):not(.state-unresolved .o2-post):not(.sticky .o2-post) {
 	border-top: 1px solid var(--wp--custom--color--border);
 	margin-top: 40px;
+}
+
+article.post[class*="state-"].status-private .o2-post {
+	border: none;
 }
 
 .o2-post .o2-post {
@@ -1120,9 +1124,37 @@ body > a.grav-tilt-parent {
 /*
  * Resolved/unresolved
  */
+
 article.state-resolved,
 article.state-unresolved {
-	border-top: 0;
+	margin-top: 40px;
+}
+
+article.state-resolved .o2-post,
+article.state-unresolved .o2-post {
+	padding-top: 40px;
+}
+
+article.state-resolved:not(.status-private),
+article.state-unresolved:not(.status-private) {
+	border: 1px solid var(--wp--custom--color--border);
+	border-left-width: 0;
+	border-top-right-radius: 2px;
+	border-bottom-right-radius: 2px;
+}
+
+/* Adjust to align with border */
+article.state-resolved:not(.status-private):before,
+article.state-unresolved:not(.status-private):before {
+	top: -1px;
+	height: calc(100% + 2px);
+}
+
+@media (max-width: 876px) {
+	.state-resolved,
+	.state-unresolved {
+		border-top: unset;
+	}
 }
 
 /*
@@ -1164,12 +1196,13 @@ nav.o2-post-actions ul li:last-child {
  * Private post status
  */
 article.status-private,
-article.status-private .comment.alt {
+article.status-private .comment.alt,
+article.status-private .comment.alt .comment.alt {
 	background: #fef0f0;
 }
 
 .post.status-private .o2-post {
-	padding-top: 3em;
+	padding-top: 40px;
 	position: relative;
 }
 
@@ -1177,12 +1210,14 @@ article.status-private .comment.alt {
 	content: "\f530";
 	font-family: dashicons;
 	position: absolute;
-	top: -2px;
-	right: 45px;
-	color: #fff;
-	font-size: 18px;
-	padding: 13px 5px 0px;
+	top: 45px;
+	right: 60px;
+	font-size: var(--wp--preset--font-size--small);
+	padding: 4px;
 	background: #dc3232;
+	border-radius: 2px;
+	line-height: 14px;
+	color: var(--wp--preset--color--white);
 }
 
 article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericon,
