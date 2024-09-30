@@ -448,7 +448,6 @@ require get_stylesheet_directory() . '/inc/template-tags.php';
 function set_rating_data( $data, $post_id ) {
 	$post = get_post( $post_id );
 
-
 	if ( class_exists( '\WPORG_Ratings' ) ) {
 		$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
 		$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
