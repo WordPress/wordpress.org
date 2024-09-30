@@ -436,3 +436,41 @@ add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_desc
  * Custom template tags for this theme.
  */
 require get_stylesheet_directory() . '/inc/template-tags.php';
+
+/**
+ * Update ratings blocks with real rating data.
+ *
+ * @param array $data    Rating data.
+ * @param int   $post_id Current post.
+ *
+ * @return array
+ */
+function set_rating_data( $data, $post_id ) {
+	$post = get_post( $post_id );
+
+
+	if ( class_exists( '\WPORG_Ratings' ) ) {
+		$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
+		$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
+	}else {
+		$rating  = get_post_meta( $post->ID, 'rating', true ) ?: 0;
+		$ratings = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+	}
+
+	/**
+	 * Why do we multiply the average rating by 20?
+	 * The themes API does it this way, and the rating plugin was built to fit that. 
+	 * Instead of redoing everything, multiplying here keeps things simple and works well.
+	 *
+	 * @see theme-directory/class-themes-api.php for more info.
+	 */
+	$adjusted_rating = $rating * 20;
+
+	return array(
+		'rating' => $adjusted_rating,
+		'ratingsCount' => array_sum( $ratings ),
+		'ratings' => $ratings,
+		'supportUrl' => esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' )
+	);
+}
+add_filter( 'wporg_ratings_data', __NAMESPACE__ . '\set_rating_data', 10, 2 );
