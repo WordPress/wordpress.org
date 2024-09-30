@@ -32,54 +32,36 @@ class Ratings extends \WP_Widget {
 
 		if ( class_exists( '\WPORG_Ratings' ) ) {
 			$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
-			$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
 		} else {
 			$rating  = get_post_meta( $post->ID, 'rating', true ) ?: 0;
-			$ratings = get_post_meta( $post->ID, 'ratings', true ) ?: array();
 		}
-
-		$num_ratings = array_sum( $ratings );
 
 		echo $args['before_widget'];
 		echo $args['before_title'] . $title . $args['after_title'];
 
-		if ( $rating ) :
-		?>
-			<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' ); ?>"><?php _ex( 'See all', 'reviews', 'wporg-plugins' ); ?></a>
-
-			<div class="rating">
-				<?php echo Template::dashicons_stars( $rating ); ?>
-			</div>
-
-			<ul class="ratings-list">
-				<?php
-				foreach ( range( 5, 1 ) as $stars ) :
-					$rating_bar_width = $num_ratings ? 100 * $ratings[ $stars ] / $num_ratings : 0;
-					?>
-					<li class="counter-container">
-						<a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/?filter=' . $stars ); ?>">
-							<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-plugins' ), $stars ); ?></span>
-					<span class="counter-back">
-						<span class="counter-bar" style="width: <?php echo $rating_bar_width; ?>%;"></span>
-					</span>
-							<span class="counter-count"><?php echo number_format_i18n( $ratings[ $stars ] ); ?></span>
-						</a>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-
-		<?php else : ?>
+		if ( $rating ) {
+			echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' );
+			echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' );
+		} else { ?>
 
 			<div class="rating">
 				<p><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></p>
 			</div>
 
-		<?php endif; // $rating ?>
+		<?php } // $rating ?>
 
 		<?php if ( is_user_logged_in() ) : ?>
-			<div class="user-rating">
-				<a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/#new-post' ); ?>"><?php _e( 'Add my review', 'wporg-plugins' ); ?></a>
+			<div class="ratings-footer">
+				<div class="user-rating">
+					<a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/#new-post' ); ?>"><?php _e( 'Add my review', 'wporg-plugins' ); ?></a>
+				</div>
+				<?php if ( $rating ) : ?>
+					<div class="user-rating">
+						<a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' ); ?>"><?php _e( 'See all', 'wporg-plugins' ); ?></a>
+					</div>
+				<?php endif; ?>
 			</div>
+
 		<?php else: ?>
 			<div class="user-rating">
 				<a href="<?php echo esc_url( wp_login_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/#new-post' ) ); ?>" rel="nofollow" title="<?php esc_attr_e( 'Log in to WordPress.org', 'wporg-plugins' ); ?>"><?php _e( 'Log in to submit a review.', 'wporg-plugins' ); ?></a>
