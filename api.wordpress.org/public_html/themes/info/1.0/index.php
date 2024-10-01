@@ -97,7 +97,7 @@ switch ( $action ) {
 			}
 
 			foreach ( $slugs as $slug ) {
-				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
+				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+$/', $slug ) ) {
 					send_error( 'Invalid slugs provided' );
 				}
 
@@ -110,7 +110,7 @@ switch ( $action ) {
 			if ( ! $slug ) {
 				send_error( 'Slug not provided' );
 			}
-			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
+			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+$/', $slug ) ) {
 				send_error( 'Invalid slug provided' );
 			}
 
