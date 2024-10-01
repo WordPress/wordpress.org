@@ -5,6 +5,13 @@
  * Supports Oxygen: true
  */
 
+body {
+	color: var(--wp--preset--color--charcoal-1);
+	font-family: var(--wp--preset--font-family--inter);
+	font-size: var(--wp--preset--font-size--normal);
+	line-height: var(--wp--custom--body--typography--line-height);
+}
+
 /* Show a Slack icon in front of Slack links. */
 a[href^="https://wordpress.slack.com"] {
 	word-break: break-all;
