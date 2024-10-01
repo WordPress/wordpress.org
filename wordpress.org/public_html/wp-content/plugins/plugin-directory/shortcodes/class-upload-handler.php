@@ -770,7 +770,7 @@ class Upload_Handler {
 		$html .= __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' );
 
 		// If the upload is blocked; log it to slack.
-		if ( ! $verdict || true ) { // TODO: Temporarily logging all to slack, as it's not output to the submitter.
+		if ( ! $verdict ) {
 			// Slack dm the logs.
 			$zip_name = reset( $_FILES )['name'];
 			$failpass = $verdict ? ':white_check_mark: passed' : ':x: failed';
@@ -817,13 +817,6 @@ class Upload_Handler {
 			$text       = ":rotating_light: Error: {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s\n";
 			notify_slack( PLUGIN_CHECK_LOGS_SLACK_CHANNEL, $text, wp_get_current_user(), true );
 		}
-
-		// TODO: Payload to always pass, and not show anything to the submitter, temporary.
-		return [
-			'verdict' => true,
-			'results' => $results,
-			'html'    => '',
-		];
 
 		// Return the results.
 		return [
