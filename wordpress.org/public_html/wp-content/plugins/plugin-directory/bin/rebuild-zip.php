@@ -16,8 +16,17 @@ $opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'versions:', 'async' )
 
 // Guess the default parameters:
 if ( empty( $opts ) && $argc == 2 ) {
-	$opts['plugin'] = $argv[1];
-	$argv[1]        = '--plugin ' . $argv[1];
+	if ( preg_match( '#^https?://downloads.w(ordpress)?.org/plugin/(?P<slug>[a-z0-9-]+)(\.(?P<version>.+))?\.zip$#', $argv[1], $m ) ) {
+
+		$opts['plugin'] = $m['slug'];
+		$argv[1]        = '--plugin ' . $m['slug'];
+
+		$opts['versions'] = $m['version'] ?: 'trunk';
+		$argv[2]	      = '--versions ' . $opts['versions'];
+	} else {
+		$opts['plugin'] = $argv[1];
+		$argv[1]        = '--plugin ' . $argv[1];
+	}
 }
 if ( empty( $opts ) && $argc == 3 ) {
 	$opts['plugin'] = $argv[1];
@@ -39,7 +48,10 @@ if ( empty( $opts['versions'] ) ) {
 foreach ( array( 'url', 'abspath', 'plugin' ) as $opt ) {
 	if ( empty( $opts[ $opt ] ) ) {
 		fwrite( STDERR, "Missing Parameter: $opt\n" );
-		fwrite( STDERR, "Usage: php {$argv[0]} --plugin hello-dolly --versions 1.0,trunk --abspath /home/example/public_html --url https://wordpress.org/plugins/\n" );
+		fwrite( STDERR, "Usage: \n" );
+		fwrite( STDERR, "\tphp {$argv[0]} --plugin hello-dolly --versions 1.0,trunk\n" );
+		fwrite( STDERR, "\tphp {$argv[0]} https://downloads.wordpress.org/plugin/hello-dolly.1.0.zip\n" );
+		fwrite( STDERR, "\tphp {$argv[0]} --plugin hello-dolly --versions 1.0,trunk --abspath /home/example/public_html --url https://wordpress.org/plugins/\n" );
 		fwrite( STDERR, "--url and --abspath will be guessed if possible.\n" );
 		fwrite( STDERR, "--versions if skipped will rebuild all tags/trunk.\n" );
 		exit( 1 );
