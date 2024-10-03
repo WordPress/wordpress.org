@@ -94,7 +94,7 @@ $hosting_cache_buster = '9';
                         <div class="forum">
                             <a href="https://wordpress.org/search/Hostinger/?in=support_forums">Forum threads about Hostinger &raquo;</a>
 							<br />
-							<a href="https://wordpress.org/five-for-the-future/pledge/hostinger-international//">Here's their Five for the Future page &raquo;</a>
+							<a href="https://wordpress.org/five-for-the-future/pledge/hostinger-international/">Here's their Five for the Future page &raquo;</a>
 						</div>
                     </div>
 
@@ -119,7 +119,8 @@ $hosting_cache_buster = '9';
 							<a href="https://wordpress.org/five-for-the-future/pledge/dreamhost/">Here's their Five for the Future page &raquo;</a>
 						</div>
 					</div>
-					
+				</section>
+
 				<section class="col-8">
 					<h2>Host Feedback</h2>
 
