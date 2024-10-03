@@ -340,7 +340,9 @@ class Test_Patterns extends TestCase {
 
 		$this->assertAllPatternsMatchSearchTerm( $patterns, $search_term );
 
-		$this->markTestIncomplete(); // todo the following code works, but `WordPressdotorg\Pattern_Directory\Search\modify_es_query_args` isn't boosting the primary locale yet
+		// The following test works, but `WordPressdotorg\Pattern_Directory\Search\modify_es_query_args` isn't boosting the primary locale yet.
+		// See https://github.com/WordPress/pattern-directory/issues/347
+		$this->markTestIncomplete();
 
 		$actualOrder = array_column( array_column( $patterns, 'meta' ), 'wpop_locale'  );
 
