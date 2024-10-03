@@ -290,7 +290,7 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_search_title_match_boosted_above_description_match() : void {
-		$search_term = 'image';
+		$search_term = 'heading';
 		$locale      = 'en_US';
 
 		$response = send_request( "/patterns/1.0/?search=$search_term&pattern-keywords=11&locale=$locale" );
@@ -307,8 +307,8 @@ class Test_Patterns extends TestCase {
 
 		usort( $expectedPatterns, function( $a, $b ) use ( $search_term ) {
 			$adjustment       = 0;
-			$found_in_title_a = false === stripos( $search_term, $a->title->rendered );
-			$found_in_title_b = false === stripos( $search_term, $b->title->rendered );
+			$found_in_title_a = false !== stripos( $search_term, $a->title->rendered );
+			$found_in_title_b = false !== stripos( $search_term, $b->title->rendered );
 
 			if ( $found_in_title_a && ! $found_in_title_b ) {
 				$adjustment = -1;
