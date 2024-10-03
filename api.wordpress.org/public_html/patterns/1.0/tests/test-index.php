@@ -9,7 +9,7 @@ use Requests_Response;
  */
 class Test_Patterns extends TestCase {
 	/**
-	 * Asserts that an HTTP response is valid and contains a pattern.
+	 * Asserts that an HTTP response is valid and contains items matching the pattern format.
 	 *
 	 * @param Requests_Response $response
 	 */
@@ -19,10 +19,12 @@ class Test_Patterns extends TestCase {
 		$patterns = json_decode( $response->body );
 		$this->assertIsArray( $patterns );
 		$this->assertGreaterThan( 0, count( $patterns ) );
-		$this->assertIsString( $patterns[0]->title->rendered );
-		$this->assertIsInt( $patterns[0]->meta->wpop_viewport_width );
-		$this->assertIsArray( $patterns[0]->category_slugs );
-		$this->assertIsArray( $patterns[0]->keyword_slugs );
+		foreach ( $patterns as $pattern ) {
+			$this->assertIsString( $pattern->title->rendered );
+			$this->assertIsInt( $pattern->meta->wpop_viewport_width );
+			$this->assertIsArray( $pattern->category_slugs );
+			$this->assertIsArray( $pattern->keyword_slugs );
+		}
 	}
 
 	/**
