@@ -72,7 +72,7 @@ $hosting_cache_buster = '9';
 						<div class="forum">
 							<a href="https://wordpress.org/search/Bluehost/?in=support_forums">Forum threads about Bluehost &raquo;</a>
 							<br />
-							<a href="https://wordpress.org/five-for-the-future/pledge/bluehost/">Find out how Bluehost is shaping the future of WordPress &raquo;</a>
+							<a href="https://wordpress.org/five-for-the-future/pledge/bluehost/">Here's their Five for the Future page &raquo;</a>
 						</div>
 					</div>
 
@@ -94,7 +94,7 @@ $hosting_cache_buster = '9';
                         <div class="forum">
                             <a href="https://wordpress.org/search/Hostinger/?in=support_forums">Forum threads about Hostinger &raquo;</a>
 							<br />
-							<a href="https://wordpress.org/five-for-the-future/pledge/hostinger-international//">Find out how Hostinger is shaping the future of WordPress &raquo;</a>
+							<a href="https://wordpress.org/five-for-the-future/pledge/hostinger-international//">Here's their Five for the Future page &raquo;</a>
 						</div>
                     </div>
 
@@ -116,7 +116,7 @@ $hosting_cache_buster = '9';
 						<div class="forum">
 							<a href="https://wordpress.org/search/DreamHost/?in=support_forums">Forum threads about DreamHost &raquo;</a>
 							<br />
-							<a href="https://wordpress.org/five-for-the-future/pledge/dreamhost/">Find out how Dreamhost is shaping the future of WordPress &raquo;</a>
+							<a href="https://wordpress.org/five-for-the-future/pledge/dreamhost/">Here's their Five for the Future page &raquo;</a>
 						</div>
 					</div>
 					
