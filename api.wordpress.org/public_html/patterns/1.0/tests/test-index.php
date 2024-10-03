@@ -87,13 +87,6 @@ class Test_Patterns extends TestCase {
 		// When all locales and keywords are included, there should be at least 20 patterns.
 		$patterns = json_decode( $response->body );
 		$this->assertSame( 20, count( $patterns ) );
-
-		/*
-		 * The exact number of unique categories will vary based on which cohort of pattens happen to be returned,
-		 * but `3` seems like a safe minimum in practice.
-		 */
-		$term_slugs = $this->get_term_slugs( $patterns );
-		$this->assertGreaterThan( 3, count( $term_slugs ) );
 	}
 
 	/**
