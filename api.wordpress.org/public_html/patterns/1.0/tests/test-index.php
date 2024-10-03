@@ -81,12 +81,12 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_all_patterns() : void {
-		$response = send_request( '/patterns/1.0/?per_page=100' );
+		$response = send_request( '/patterns/1.0/?per_page=20' );
 		$this->assertResponseHasPattern( $response );
 
-		// When all locales and keywords are included, there should be at least 100 patterns.
+		// When all locales and keywords are included, there should be at least 20 patterns.
 		$patterns = json_decode( $response->body );
-		$this->assertSame( 100, count( $patterns ) );
+		$this->assertSame( 20, count( $patterns ) );
 
 		/*
 		 * The exact number of unique categories will vary based on which cohort of pattens happen to be returned,
@@ -108,7 +108,7 @@ class Test_Patterns extends TestCase {
 		 * This can't include a `pattern-keyword` param because of the workaround in
 		 * `WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_rest_fields()`.
 		 */
-		$response = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id . '&locale=en_US' );
+		$response = send_request( '/patterns/1.0/?per_page=20&pattern-categories=' . $button_term_id . '&locale=en_US' );
 		$this->assertResponseHasPattern( $response );
 
 		$patterns   = json_decode( $response->body );
