@@ -253,7 +253,7 @@ class Test_Patterns extends TestCase {
 
 			// The Core keyword (11) is hardcoded in `test_search_patterns()`, so don't need to specify it here.
 			"only match Core posts" => array(
-				'search_term'       => 'two buttons', // Post ID 727.
+				'search_term'       => 'Two images with text and buttons', // Post ID 727.
 				'locale'            => 'en_US',
 				'match_expected'    => false,
 				'expected_post_ids' => false,
