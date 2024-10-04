@@ -365,9 +365,9 @@ tr:last-of-type td {
 body.wporg-make #headline h2 a:before {
 	-webkit-font-smoothing: antialiased;
 	display: inline-block;
-	font: normal 24px/var(--wp--custom--body--small--typography--line-height) 'dashicons';
+	font: normal 20px/var(--wp--custom--body--small--typography--line-height) 'dashicons';
 	vertical-align: middle;
-	width: 32px;
+	margin-right: 9px;
 }
 
 body.make-core #headline h2 a:before { content: '\f475'; }
@@ -414,9 +414,10 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 }
 
 .wp-block-site-title svg {
-	height: 30px;
-	width: 30px;
+	height: 24px;
+	width: 24px;
 	vertical-align: middle;
+	margin-right: 9px;
 }
 
 /* Post form */

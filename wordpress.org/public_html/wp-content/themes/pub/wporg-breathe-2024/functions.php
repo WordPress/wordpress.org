@@ -591,7 +591,7 @@ function add_svg_icon_to_site_name() {
 		printf( "\t" . '<path d="%s" stroke="currentColor" fill="currentColor"/>' . "\n", esc_attr( $path ) );
 	}
 
-	echo "</svg>\n";
+	echo "</svg>";
 }
 add_action( 'wporg_breathe_before_name', __NAMESPACE__ . '\add_svg_icon_to_site_name' );
 
