@@ -514,7 +514,6 @@ function get_whitelist() {
 			'annezazu',
 			'arasae', // @Sarah (She/Her) on Slack
 			'azhiyadev', // @Hauwa Abashiya on Slack
-			'bsanevans',
 			'chanthaboune',
 			'chetan200891',
 			'chrisbadgett',
@@ -528,6 +527,7 @@ function get_whitelist() {
 			'hardeepasrani',
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
+			'kaitohm',
 			'lada7042',
 			'meaganhanes',
 			'mrfoxtalbot',
