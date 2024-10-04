@@ -1392,7 +1392,7 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
 }
 
 .make-welcome {
-	background: var(--wp--preset--color--light-grey-3);
+	background: var(--wp--preset--color--light-grey-2);
 	padding: 2em 0;
 	position: relative;
 	width: 100%;
