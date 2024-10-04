@@ -2,7 +2,7 @@
 
 \WordPressdotorg\skip_to( '#primary' );
 
-echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+echo do_blocks( '<!-- wp:wporg/global-header {"style":{"border":{"bottom":{"color":"var:preset|color|white-opacity-15","style":"solid","width":"1px"}}}} /-->' );
 
 echo do_blocks( '<!-- wp:pattern {"slug":"wporg-breathe/local-nav"} /-->' );
 
