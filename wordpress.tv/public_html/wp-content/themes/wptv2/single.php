@@ -27,6 +27,10 @@ the_post();
 <div class="container">
 	<div class="primary-content">
 		<div id="content">
+			<?php if ( get_the_excerpt() ) : ?>
+				<h3>Description</h3>
+				<div class="video-description"><?php the_excerpt(); ?></div>
+			<?php endif; ?>
 			<div id="comments">
 				<?php comments_template(); ?>
 			</div>
