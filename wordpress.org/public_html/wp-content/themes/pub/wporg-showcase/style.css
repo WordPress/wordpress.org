@@ -853,6 +853,9 @@ a.wpsc-hero-learnmore {
 		margin-top: 1.5em;
 		clear: both;
 	}
+	.home .main-content h2 {
+		margin-top: 40px;
+	}
 
 	.wpsc-hero.group {
 		display: none !important;
