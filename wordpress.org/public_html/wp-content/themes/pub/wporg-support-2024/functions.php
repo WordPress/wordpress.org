@@ -83,6 +83,7 @@ function wporg_support_add_site_navigation_menus( $menus ) {
 			$menu[] = array(
 				'label' => __( 'Log in', 'wporg-forums' ),
 				'url' => wp_login_url( $redirect_url ),
+				'className' => 'has-separator',
 			);
 		}
 
@@ -114,6 +115,7 @@ function wporg_support_add_site_navigation_menus( $menus ) {
 		$menu[] = array(
 			'label' => __( 'Log in', 'wporg-forums' ),
 			'url' => wp_login_url( $redirect_url ),
+			'className' => 'has-separator',
 		);
 	}
 
