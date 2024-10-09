@@ -104,7 +104,7 @@ get_header();
 		);
 	}
 	?>
-
+	<?php do_action( 'register_form' ); ?>
 	<p class="login-tos checkbox <?php if ( $terms_of_service_error ) { echo 'message error'; } ?>">
 		<label for="terms_of_service">
 			<input name="terms_of_service" type="checkbox" id="terms_of_service" value="<?php echo esc_attr( TOS_REVISION ); ?>" <?php checked( $terms_of_service, TOS_REVISION ); ?> required="required">

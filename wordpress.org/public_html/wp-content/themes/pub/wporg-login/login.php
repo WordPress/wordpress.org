@@ -38,6 +38,7 @@ if ( ! empty( $_REQUEST['redirect_to'] ) ) {
 			</button>
 		</span>
 	</p>
+	<?php do_action( 'login_form' ); ?>
 	<p class="login-remember"><label><input name="rememberme" type="checkbox" id="rememberme" value="forever" /> <?php _e( 'Remember Me', 'wporg-login' ); ?></label></p>
 	<p class="login-submit">
 		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Log In', 'wporg-login' ); ?>" />
