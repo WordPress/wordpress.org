@@ -168,6 +168,9 @@ class Rejection {
 
 		// Use JS to inject rejected post status into post submit box.
 		add_action( 'admin_footer',                            [ __CLASS__, 'output_js_to_modify_post_status_in_submitbox_dropdown' ] );
+
+		// Register dashboard widget.
+		add_action( 'wp_dashboard_setup',                      [ __CLASS__, 'dashboard_setup' ] );
 	}
 
 	/**
@@ -310,12 +313,17 @@ class Rejection {
 	 * @param string $field  Optional. If a specific reason is specified, this
 	 *                       is the specific attribute of the reason to return.
 	 *                       Empty string returns all data for reason. Default ''.
+	 * @param bool   $include_approval Optional. Should the approval entry (which is
+	 *                       technically not a rejection) be included? Default false.
 	 * @return array|string
 	 */
-	public static function get_rejection_reasons( $reason = '', $field = '' ) {
+	public static function get_rejection_reasons( $reason = '', $field = '', $include_approval = false ) {
 		// Return all reasons if one wasn't specified.
 		if ( ! $reason ) {
 			$reasons = self::$rejection_reasons;
+			if ( ! $include_approval ) {
+				unset( $reasons[''] );
+			}
 			uasort( $reasons, function( $a, $b ) {
 				return strcmp( $a['label'], $b['label'] );
 			} );
@@ -366,6 +374,30 @@ class Rejection {
 		}
 
 		return $rejection_reason;
+	}
+
+	/**
+	 * Returns a count of rejections for each rejection reason.
+	 *
+	 * @return array Associate array of rejection reason keys and their respective rejection counts.
+	 */
+	public static function count_rejections_per_reason() {
+		global $wpdb;
+
+		$reasons = self::get_rejection_reasons();
+		$reasons_keys = array_keys( $reasons );
+
+		$results = $wpdb->get_results( $wpdb->prepare(
+			"SELECT meta_value AS rejection_reason, COUNT(*) AS count FROM $wpdb->postmeta WHERE meta_key = %s GROUP BY meta_value",
+			'rejected_reason'
+		) );
+
+		$return = [];
+		foreach ( $results as $row ) {
+			$return[ $row->rejection_reason ] = $row->count;
+		}
+
+		return $return;
 	}
 
 	/**
@@ -981,7 +1013,7 @@ JS;
 			'<select id="rejected_reason" name="rejected_reason"%s>',
 			disabled( true, $is_disabled, false )
 		);
-		foreach ( self::get_rejection_reasons() as $reason => $args ) {
+		foreach ( self::get_rejection_reasons( '', '', true ) as $reason => $args ) {
 			printf(
 				'<option value="%s"%s>%s</option>' . "\n",
 				esc_attr( $reason ),
@@ -1301,6 +1333,62 @@ JS;
 
 JS;
 		}
+	}
+
+	/**
+	 * Registers the admin dashboard.
+	 */
+	public static function dashboard_setup() {
+		if ( current_user_can( 'edit_photos' ) ) {
+			wp_add_dashboard_widget(
+				'dashboard_photo_rejections',
+				__( 'Rejection Stats', 'wporg-photos' ),
+				[ __CLASS__, 'dashboard_photo_rejections' ],
+				null,
+				null,
+				'column3'
+			);
+		}
+	}
+
+	/**
+	 * Outputs the photo rejection stats dashboard widget.
+	 */
+	public static function dashboard_photo_rejections() {
+		echo '<div class="main">';
+
+		// Get list of all rejection types.
+		$rejection_reasons = self::get_rejection_reasons();
+		ksort( $rejection_reasons );
+		$rejection_reasons_counts = self::count_rejections_per_reason();
+
+		// Omit submission errors since they aren't true rejections.
+		unset( $rejection_reasons['submission-error'] );
+		unset( $rejection_reasons_counts['submission-error'] );
+
+		echo '<table id="dashboard-photo-rejection-stats" class="wp-list-table widefat fixed striped table-view-list">';
+		echo '<thead><tr>';
+		echo '<th>' . __( 'Rejection reason', 'wporg-photos' ) . '</th>';
+		echo '<th class="col-num col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
+		echo '<th class="col-num col-percent-rejected" title="' . esc_attr( 'Percentage of overall rejections', 'wporg-photos' ) . '">%</th>';
+		echo '</tr></thead>';
+		echo '<tbody>';
+
+		$total_rejections = array_sum( $rejection_reasons_counts );
+
+		foreach ( $rejection_reasons as $reason => $data ) {
+			$data['count'] = $rejection_reasons_counts[ $reason ];
+
+			echo '<tr>';
+			echo '<td title="' . esc_attr( $data['label'] ) . '">' . esc_html( $reason ) . '</td>';
+			echo '<td>' . number_format_i18n( $data['count'] ) . '</td>';
+			echo '<td>' . round( ( $data['count'] / $total_rejections ) * 100, 2 ) . '%</td>';
+			echo "</tr>\n";
+		}
+
+		echo '<tr class="row-sum"><td>' . __( 'Total', 'wporg-photos' ) . '</td><td>' . number_format_i18n( $total_rejections ) . '</td><td>100%</td></tr>';
+		echo '</tbody></table>';
+		echo '</div>';
 	}
 
 }

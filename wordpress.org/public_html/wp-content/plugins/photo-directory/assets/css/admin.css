@@ -157,3 +157,13 @@ body.post-type-photo #wp-content-editor-container {
 .photo-all-exif {
 	overflow-wrap: anywhere;
 }
+
+#dashboard-photo-rejection-stats .col-num {
+	width: 50px;
+}
+#dashboard-photo-rejection-stats .row-sum {
+	font-weight: bold;
+}
+#dashboard-photo-rejection-stats .row-sum td {
+	border-top: 1px solid #c3c4c7;
+}
