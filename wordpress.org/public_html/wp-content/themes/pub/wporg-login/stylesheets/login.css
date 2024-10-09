@@ -224,6 +224,7 @@ strong {
 
 p.intro, #login .message {
 	margin-bottom: 24px !important;
+	text-wrap: pretty;
 }
 
 #login .message + #login_error {
