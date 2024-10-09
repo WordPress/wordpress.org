@@ -2065,16 +2065,26 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 
 .post-type-archive-handbook #main,
 .single-handbook #main {
+	padding-bottom: var(--wp--preset--spacing--edge-space);
+}
+
+.post-type-archive-handbook #main:has(#secondary),
+.single-handbook #main:has(#secondary) {
 	display: grid;
 	grid-template-columns: 25% auto;
-	grid-template-rows: 40px auto;
+	grid-template-rows: auto;
 	column-gap: 60px;
 	padding-top: var(--wp--preset--spacing--40);
 }
 
+.post-type-archive-handbook #main:has(#secondary):has(.handbook-breadcrumbs),
+.single-handbook #main:has(#secondary):has(.handbook-breadcrumbs) {
+	grid-template-rows: 40px auto;
+}
+
 @media (max-width: 876px) {
-	post-type-archive-handbook #main,
-	.single-handbook #main {
+	post-type-archive-handbook #main:has(#secondary),
+	.single-handbook #main:has(#secondary) {
 		grid-template-columns: auto;
 		column-gap: unset;
 	}
