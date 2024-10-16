@@ -295,18 +295,23 @@ class Import {
 			$content = "<!--section=description-->\n{$headers->Description}";
 		}
 
-		// Use the Readme name, as long as it's not the plugin slug.
-		if (
-			$readme->name &&
-			$readme->name !== $plugin->post_name
-		) {
-			$plugin->post_title = $readme->name;
-		} elseif ( $headers->Name ) {
+		// Use the Plugin name by default, falling back to the readme name (if availble) only in the event of a missing header.
+		if ( $headers->Name ) {
 			$plugin->post_title = strip_tags( $headers->Name );
+		} elseif ( $readme->name ) {
+			$plugin->post_title = $readme->name;
 		}
 
-		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
-		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
+		if ( $headers->Description ) {
+			// Trim to match legacy readme length...
+			$plugin->post_excerpt = $readme->trim_length( wp_strip_all_tags( $headers->Description ), 'short_description' );
+		} elseif ( $readme->short_description ) {
+			$plugin->post_excerpt = $readme->short_description;
+		}
+
+		if ( $content ) {
+			$plugin->post_content = $content;
+		}
 
 		/*
 		 * Bump last updated if:

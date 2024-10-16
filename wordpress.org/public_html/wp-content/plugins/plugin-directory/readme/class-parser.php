@@ -243,8 +243,7 @@ class Parser {
 		if ( $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
 			array_unshift( $contents, $line );
 
-			$this->warnings['invalid_plugin_name_header'] = true;
-			$this->name                                   = false;
+			$this->name = false;
 		}
 
 		// Strip Github style header\n==== underlines.
@@ -254,8 +253,6 @@ class Parser {
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
-			$this->warnings['invalid_plugin_name_header'] = true;
-
 			$this->name = false;
 			$line       = $this->get_first_nonwhitespace( $contents );
 
@@ -469,22 +466,16 @@ class Parser {
 		$this->upgrade_notice = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
 		$this->faq            = array_map( array( $this, 'parse_markdown' ), $this->faq );
 
-		// Use the first line of the description for the short description if not provided.
-		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
-			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
-			$this->warnings['no_short_description_present'] = true;
-		}
-
 		// Sanitize and trim the short_description to match requirements.
-		$this->short_description = $this->sanitize_text( $this->short_description );
-		$this->short_description = $this->parse_markdown( $this->short_description );
-		$this->short_description = wp_strip_all_tags( $this->short_description );
-		$short_description       = $this->trim_length( $this->short_description, 'short_description' );
-		if ( $short_description !== $this->short_description ) {
-			if ( empty( $this->warnings['no_short_description_present'] ) ) {
+		if ( $this->short_description ) {
+			$this->short_description = $this->sanitize_text( $this->short_description );
+			$this->short_description = $this->parse_markdown( $this->short_description );
+			$this->short_description = wp_strip_all_tags( $this->short_description );
+			$short_description       = $this->trim_length( $this->short_description, 'short_description' );
+			if ( $short_description !== $this->short_description ) {
 				$this->warnings['trimmed_short_description'] = true;
+				$this->short_description                     = $short_description;
 			}
-			$this->short_description = $short_description;
 		}
 
 		if ( isset( $this->sections['screenshots'] ) ) {
@@ -549,14 +540,14 @@ class Parser {
 	}
 
 	/**
-	 * @access protected
+	 * Trim a string to a specific length, ensuring that it ends on a full sentence.
 	 *
 	 * @param string $desc
 	 * @param int    $length
 	 * @param string $type   The type of the length, 'char' or 'words'.
 	 * @return string
 	 */
-	protected function trim_length( $desc, $length = 150, $type = 'char' ) {
+	public function trim_length( $desc, $length = 150, $type = 'char' ) {
 		if ( is_string( $length ) ) {
 			$length = $this->maximum_field_lengths[ $length ] ?? $length;
 		}
