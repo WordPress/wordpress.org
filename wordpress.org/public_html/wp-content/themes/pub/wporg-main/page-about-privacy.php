@@ -154,7 +154,7 @@ the_post();
 					<p><?php esc_html_e( 'Although most changes are likely to be minor, WordPress.org may change its Privacy Policy from time to time, and at WordPress.org&#8217;s sole discretion. WordPress.org encourages visitors to frequently check this page for any changes to its Privacy Policy. Your continued use of this site after any change in this Privacy Policy will constitute your acceptance of such change.', 'wporg' ); ?></p>
 
 					<h2><?php esc_html_e( 'Contact', 'wporg' ); ?></h2>
-					<p><?php printf( esc_html__( 'Please contact us if you have any questions about our privacy policy or information we hold about you by emailing %s.', 'wporg' ), 'dpo@wordpress.org' ); ?></p>
+					<p><?php printf( esc_html__( 'Please contact us if you have any questions about our privacy policy or information we hold about you by emailing %s.', 'wporg' ), '<a href="mailto:dpo@wordpress.org">dpo@wordpress.org</a>' ); ?></p>
 
 					<p><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" src="https://s.w.org/images/home/ccbysa40.png"></a></p>
 				</section>
