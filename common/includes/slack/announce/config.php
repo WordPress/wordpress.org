@@ -288,6 +288,8 @@ function get_whitelist() {
 			'monikarao',
 			'ryan', // @boren on Slack
 			'webtechpooja', // @Pooja Derashri on Slack
+			'oglekler',
+			'krupajnanda',
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'anlino', // @andersnoren on Slack
