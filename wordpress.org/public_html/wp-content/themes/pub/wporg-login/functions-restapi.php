@@ -174,10 +174,7 @@ function wporg_login_rest_email_in_use( $request ) {
 function wporg_login_rest_resend_confirmation_email( $request ) {
 	$account = $request['account'];
 
-	$success_message = sprintf(
-		__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ),
-		'<code>' . esc_html( $account ) . '</code>'
-	);
+	$success_message = __( 'A confirmation email has been resent.', 'wporg' );
 
 	$pending_user = wporg_get_pending_user( $request['account'] );
 	if ( ! $pending_user || $pending_user['created'] || ! $pending_user['user_activation_key'] ) {
