@@ -72,6 +72,10 @@ class Rejection {
 				'label' => __( 'Not a photo: Not a photo (e.g. screenshot, digital art)', 'wporg-photos' ),
 				'email' => __( 'The image did not appear to be a photograph. We do not accept screenshots, digital art, or other non-photographic images.', 'wporg-photos' ),
 			],
+			'not_exceptional'    => [
+				'label' => __( 'Not exceptional: Nothing special', 'wporg-photos' ),
+				'email' => __( 'The photo did not stand out as being exceptional in quality or subject matter.', 'wporg-photos' ),
+			],
 			'other'         => [
 				'label' => __( 'See below: Reason specified below', 'wporg-photos' ),
 				'email' => '',
