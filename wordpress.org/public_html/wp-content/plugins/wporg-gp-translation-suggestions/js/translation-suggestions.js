@@ -401,6 +401,69 @@
 			}
 		});
 	}
+
+	/**
+	 * Removes a suggestion from the TM.
+	 *
+	 * @param {object} event
+	 *
+	 * @return {void}
+	 */
+	function deleteSuggestionFromTM( event ) {
+		event.preventDefault();
+		event.stopImmediatePropagation();
+		if ( ! confirm( 'Are you sure you want to delete this translation from the Translation Memory?' ) ) {
+			return;
+		}
+		var editor = $gp.editor.current;
+		var container = editor.find( '.suggestions__translation-memory' );
+		if ( ! container.length ) {
+			return;
+		}
+
+		var deleteButton = event.target;
+		var source = {
+			'source': deleteButton.dataset.sourceSingular,
+			'source_plural': deleteButton.dataset.sourcePlural,
+			'source_context': deleteButton.dataset.sourceContext,
+		};
+		var translation = {
+			'translation': deleteButton.dataset.translation,
+			'translation_plural': deleteButton.dataset.translationPlural,
+		};
+		var originalId = editor.original_id;
+		var nonce = container.data( 'nonce' );
+
+		var rows = editor.find( '.translation-suggestion.with-tooltip.translation' );
+		var filteredRows = rows.filter( function() {
+			var translationRaw = $( this ).find( '.translation-suggestion__translation-raw' ).text().trim();
+			var score = $( this ).find( '.translation-suggestion__score' ).text().trim();
+			return translationRaw === deleteButton.dataset.translation && score === "100%";
+		});
+
+		filteredRows.find( '.delete-suggestion' ).prop( 'disabled', true );
+		$.ajax( {
+			type: 'POST',
+			url: window.WPORG_TRANSLATION_MEMORY_API_DELETE_URL,
+			data: {
+				'source': source,
+				'translation': translation,
+				'originalId' : originalId,
+				'nonce': nonce
+			},
+			dataType: 'json',
+			cache: false,
+			success: function( result ) {
+				if( true === result.success ) {
+					filteredRows.each( function() {
+						$( this ).remove();
+					});
+				}
+
+			}
+		}, 100 );
+	}
+
 	function copySuggestion( event ) {
 		if ( 'A' === event.target.tagName ) {
 			return;
@@ -479,6 +542,7 @@
 			original();
 
 			$( $gp.editor.table )
+				.on( 'click', '.translation-suggestion .delete-suggestion', deleteSuggestionFromTM )
 				.on( 'click', '.translation-suggestion', copySuggestion )
 				.on( 'click', '.translation-suggestion', addSuggestion );
 			$( document ).ready( function() {
