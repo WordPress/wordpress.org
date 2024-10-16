@@ -99,7 +99,7 @@ get_header();
 		<input type="text" name="user_email" value="<?php echo esc_attr( $pending_user['user_email'] ); ?>" size="20" maxlength="100" />
 	</p>
 
-	<?php if ( ! $pending_user['created'] ) : ?>
+	<?php if ( ! $pending_user['cleared'] ) : ?>
 		<p class="login-profile-intro">
 			<?php esc_html_e( 'While waiting for approval, you can get a head start by adding some optional details to your profile.', 'wporg' ); ?>
 		</p>
