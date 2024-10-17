@@ -193,6 +193,11 @@ class Controls {
 			</tr>
 
 			<tr>
+				<td><?php _e( 'Submitted:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php printf( '<span title="%s">%s ago</span> (%s)', esc_attr( $post->_submitted_date ), human_time_diff( strtotime( $post->_submitted_date ) ), esc_html( gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 ) ) ); ?></strong></td>
+			</tr>
+
+			<tr>
 				<td><?php _e( 'Installs:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php echo Template::active_installs( false, $post ); ?></strong></td>
 			</tr>
