@@ -2140,6 +2140,10 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	inset-inline-end: 0;
 }
 
+.search-results nav.o2-post-actions {
+	display: none;
+}
+
 @media (max-width: 550px) {
 	nav.o2-post-actions ul {
 		left: initial;
