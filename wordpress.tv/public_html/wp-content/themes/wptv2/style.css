@@ -2712,4 +2712,17 @@ h3#comments {
 	.entry .contact-form textarea {
 		width: 98%;
 	}
+
+	.wptv-hero .secondary-videos li {
+		max-width: initial;
+	}
+
+	.wptv-hero .secondary-videos li a {
+		display: block;
+	}
+
+	.wptv-hero .secondary-videos .video-thumbnail img {
+		width: 100%;
+		height: auto;
+	}
 }
