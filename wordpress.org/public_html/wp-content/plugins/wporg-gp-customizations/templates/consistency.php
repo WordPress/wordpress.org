@@ -14,7 +14,7 @@ gp_tmpl_header();
 	<p class="consistency-fields">
 		<span class="consistency-field">
 			<label for="original">Original</label>
-			<input id="original" type="text" name="search" required value="<?php echo gp_esc_attr_with_entities( $search ); ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
+			<input id="original" type="text" name="search" required value="<?php echo esc_html( $search ); ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
 		</span>
 
 		<span class="consistency-field">
@@ -85,23 +85,81 @@ if ( $performed_search && ! $results ) {
 	echo '<div class="notice"><p>No results were found.</p></div>';
 
 } elseif ( $performed_search && $results ) {
-	$translations_unique_count = count( $translations_unique );
+	$translations_unique_count  = count( $translations_unique );
 	$has_different_translations = $translations_unique_count > 1;
 	if ( ! $has_different_translations ) {
-		echo '<div class="notice"><p>All originals have the same translations.</p></div>';
+		echo '<div class="notice">';
+		echo '<p>All originals have the same translations.</p>';
+		if ( $notice_message ) {
+			// esc_html() is not needed here because $notice_message is already escaped.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<p>' . $notice_message . '</p>';
+		}
+		echo '</div>'; // .notice
 	} else {
-		echo '<div id="translations-overview" class="notice wporg-notice-warning"><p>There are ' . $translations_unique_count . ' different translations. <a id="toggle-translations-unique" href="#show">View</a></p>';
-		echo '<ul class="translations-unique hidden">';
+		if ( $is_current_user_gte_for_locale ) {
+			echo '<form action="/consistency" method="post" class="bulk-update-form">';
+			echo '<input type="hidden" name="nonce" value="' . wp_create_nonce( 'bulk-update-consistency' ) . '">';
+			echo '<input type="hidden" name="set" value="' . esc_translation( $set ) . '">';
+			echo '<input type="hidden" name="search" value="' . esc_html( $search ) . '">';
+			echo '<input type="hidden" name="search_case_sensitive" value="' . esc_translation( $search_case_sensitive ) . '">';
+			echo '<input type="hidden" name="project" value="' . esc_translation( $project ) . '">';
+		}
+		echo '<div id="translations-overview" class="notice wporg-notice-warning"><p>There are ' . $translations_unique_count . ' different translations. <a id="toggle-translations-unique" href="#show">Hide</a></p>';
+		echo '<div class="translations-unique">';
+		if ( ! empty( $error_message ) ) {
+			if ( 1 == count( $error_message ) ) {
+				echo '<div class="error"><p>There is an error: ' . esc_html( $error_message[0] ) . '</p></div>';
+			} else {
+				echo '<div class="error">There are some errors:<ul>';
+				foreach ( $error_message as $error ) {
+					echo '<li>' . esc_html( $error ) . '</li>';
+				}
+				echo '</ul></div>';
+			}
+		}
+		if ( $notice_message ) {
+			// esc_html() is not needed here because $notice_message is already escaped.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<div class="notice"><p>' . $notice_message . '</p></div>';
+		}
+		if ( $is_current_user_gte_for_locale ) {
+			echo '<p>To make bulk updates:</p>';
+			echo '<ol class="bulk-update-notice">';
+			echo '<li>Check the translations you want to update.</li>';
+			echo '<li>Select the translation you want to use as replacement.</li>';
+			echo '<li>Click the "Update translations" button.</li>';
+			echo '</ol>';
+		}
+		echo '<ul class="translations-unique">';
 		foreach ( $translations_unique_counts as $translation => $count ) {
 			printf(
-				'<li>%s <small>(%s)</small> <a class="anchor-jumper with-tooltip" aria-label="Go to translation" href="#%s">&darr;</a></li>',
+				'<li>%s <small>(%s)</small> <a class="anchor-jumper with-tooltip" aria-label="Go to translation" href="#%s">&darr;</a>',
 				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) ),
 				1 === $count ? $count . ' time' : $count . ' times',
 				esc_attr( 't-' . md5( $translation ) )
 			);
+			if ( $is_current_user_gte_for_locale ) {
+				echo '<small>Update with: </small>';
+				echo '<select name="translation[' . esc_html( $translation ) . ']" id="replace-' . esc_html( $translation ) . '">';
+				echo '<option value="wporg-bulk-update-do-not-update">Don\'t update this translation</option>';
+				foreach ( $translations_unique as $unique_translation ) {
+					if ( $unique_translation === $translation ) {
+						continue;
+					}
+					echo '<option value="' . esc_attr( $unique_translation ) . '">' . esc_html( $unique_translation ) . '</option>';
+				}
+				echo '</select>';
+			}
+			echo '</li>';
 		}
-		echo '</ul>';
-		echo '</div>';
+		echo '</ul>'; // .translations-unique
+		if ( $is_current_user_gte_for_locale ) {
+			echo '<button type="submit" class="button is-primary consistency-update-form-submit">Update translations</button>';
+		}
+		echo '</form>'; // .bulk-update-form
+		echo '</div>'; // .translations-unique
+		echo '</div>'; // #translations-overview
 	}
 
 	?>
@@ -142,11 +200,11 @@ if ( $performed_search && ! $results ) {
 					continue;
 				}
 
-				$project_name = $result->project_name;
+				$project_name      = $result->project_name;
 				$parent_project_id = $result->project_parent_id;
 				$is_active = $result->active;
 				while ( $parent_project_id ) {
-					$parent_project = GP::$project->get( $parent_project_id );
+					$parent_project    = GP::$project->get( $parent_project_id );
 					$parent_project_id = $parent_project->parent_project_id;
 					$project_name = "{$parent_project->name} - {$project_name}";
 					$is_active = $is_active && $parent_project->active;
@@ -206,14 +264,18 @@ if ( $performed_search && ! $results ) {
 }
 ?>
 
-<script>
-	jQuery( document ).ready( function( $ ) {
-		$( '#toggle-translations-unique' ).on( 'click', function( event ) {
-			event.preventDefault();
-			$( '.translations-unique' ).toggleClass( 'hidden' );
+	<script>
+		jQuery(document).ready(function ($) {
+			$('#toggle-translations-unique').on('click', function (event) {
+				event.preventDefault();
+				$('div.translations-unique').toggleClass('hidden');
+				if ( 'View' === $('#toggle-translations-unique').text() ) {
+					$('#toggle-translations-unique').text('Hide');
+				} else {
+					$('#toggle-translations-unique').text('View');
+				}
+			});
 		});
-
-	});
-</script>
+	</script>
 
 <?php gp_tmpl_footer();
