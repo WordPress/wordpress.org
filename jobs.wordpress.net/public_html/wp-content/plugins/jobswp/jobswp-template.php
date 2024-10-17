@@ -98,7 +98,7 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 		$jobscnt = sprintf( _n( '%d job', '%d jobs', $jobscnt, 'jobswp' ), $jobscnt );
 	}
 
-	$link .= " <span class='posts-count'>($orig_jobscnt)</span> $after";
+	$link   .= " <span class='posts-count'>($orig_jobscnt)</span> $after";
 	$output .= $link;
     $output .= '<div class="grid_2 omega jobs-count">';
 
@@ -192,7 +192,7 @@ function jobswp_field_value( $field, $option_value = '' ) {
 	if ( $val ) {
 		if ( in_array( $field, array( 'category', 'howtoapply_method', 'jobtype' ) ) )
 			return selected( $val, $option_value, false );
-		elseif ( 'job_description' == $field )
+		elseif ( 'job_description' === $field )
 			return $val;
 		else
 			return "value='$val'";

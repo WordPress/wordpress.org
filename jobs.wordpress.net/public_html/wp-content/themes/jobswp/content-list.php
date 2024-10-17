@@ -43,7 +43,7 @@
 			if ( ! $category )
 				$category = array_pop( get_the_terms( get_the_ID(), 'job_category') );
 
-			$link = '';
+			$link  = '';
 			$link .= '<a href="' . esc_attr( get_term_link( $category, 'job_category' ) ) . '" ';
 			$link .= 'title="'. esc_attr( sprintf( __( 'View all jobs filed under %s', 'jobswp' ), $category->name ) ) . '"';
 			$link .= '>';

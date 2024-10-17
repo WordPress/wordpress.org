@@ -65,9 +65,9 @@
 				$val = jobswp_get_job_meta( get_the_ID(), $fname );
 				if ( $val ) :
 		?>
-					<dl class="job-<?php echo $fname; ?>">
-						<dt><?php echo $flabel; ?></dt>
-						<dd><?php echo $val; ?></dd>
+					<dl class="job-<?php echo esc_attr( $fname ); ?>">
+						<dt><?php echo esc_html( $flabel ); ?></dt>
+						<dd><?php echo esc_html( $val ); ?></dd>
 					</dl>
 		<?php
 				endif;
