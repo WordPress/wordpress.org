@@ -982,6 +982,10 @@ article.post[class*="state-"].status-private .o2-post {
 	/* border: none; */
 }
 
+article.handbook .entry-meta {
+	position: relative;
+}
+
 .single-post article.post {
 	border-top: unset;
 }
@@ -2138,10 +2142,6 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	position: absolute;
 	top: -36px;
 	inset-inline-end: 0;
-}
-
-.search-results nav.o2-post-actions {
-	display: none;
 }
 
 @media (max-width: 550px) {
