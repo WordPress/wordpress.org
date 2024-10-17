@@ -2,6 +2,11 @@
 namespace WordPressdotorg\Make\Breathe_2024;
 
 /**
+ * Include locale specific styles.
+ */
+require_once get_theme_root() . '/wporg-parent-2021/inc/rosetta-styles.php';
+
+/**
  * Sets up theme defaults.
  */
 function after_setup_theme() {

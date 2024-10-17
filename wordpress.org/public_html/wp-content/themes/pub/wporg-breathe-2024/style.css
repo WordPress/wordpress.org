@@ -432,7 +432,7 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 }
 
 .o2-editor .o2-editor-footer .o2-editor-tabs li:first-of-type {
-	border-left-color: var(--wp--custom--form--border--color);
+	border-inline-start-color: var(--wp--custom--form--border--color);
 	border-top-color: var(--wp--custom--form--border--color);
 	-webkit-border-bottom-left-radius: 2px;
 	-webkit-border-bottom-right-radius: 2px;
@@ -1190,7 +1190,7 @@ article.state-unresolved:not(.status-private):before {
 }
 
 .rtl .sticky .o2-post:after {
-	left: 45px;
+	left: 60px;
 	right: initial;
 }
 
@@ -1526,8 +1526,8 @@ nav.o2-post-footer-actions div.jetpack-likes-widget-wrapper {
  * 404 Page
  */
 
-.error404 #nav-below {
-	border: none;
+body.error404 {
+	background-color: unset;
 }
 
 /*
@@ -2070,10 +2070,13 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 
 .post-type-archive-handbook #main:has(#secondary),
 .single-handbook #main:has(#secondary) {
+	--column-gap: 60px;
+	--secondary-width: 240px;
+
 	display: grid;
-	grid-template-columns: 25% auto;
+	grid-template-columns: var(--secondary-width) calc(100% - var(--secondary-width) - var(--column-gap));
 	grid-template-rows: auto;
-	column-gap: 60px;
+	column-gap: var(--column-gap);
 	padding-top: var(--wp--preset--spacing--40);
 }
 
@@ -2085,8 +2088,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 @media (max-width: 876px) {
 	post-type-archive-handbook #main:has(#secondary),
 	.single-handbook #main:has(#secondary) {
-		grid-template-columns: auto;
-		column-gap: unset;
+		display: block;
 	}
 }
 
