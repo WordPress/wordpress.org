@@ -7,14 +7,14 @@ if ( $job_categories ) :
 
 // Groups jobs according to job category.
 foreach ( $job_categories as $i => $category ) {
-	$job_category_jobs[ $category->slug ] = Jobs_Dot_WP::get_jobs_for_category( $category );
-	$latest_post = $job_category_jobs[ $category->slug ][0];
+	$job_category_jobs[ $category->slug ]   = Jobs_Dot_WP::get_jobs_for_category( $category );
+	$latest_post                            = $job_category_jobs[ $category->slug ][0];
 	// Add key for sorting.
 	$job_categories[ $i ]->latest_post_date = $latest_post ? $latest_post->post_date : '0';
 }
 
-// Sort job categories according to recency of latest post.
 $job_categories = wp_list_sort( $job_categories, [ 'latest_post_date' => 'DESC', 'name' => 'ASC' ] );
+// Sort job categories according to recency of latest post.
 
 // Display the categories and their jobs.
 foreach ( $job_categories as $category ) {
