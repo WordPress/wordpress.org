@@ -177,6 +177,7 @@ class Release_Confirmation {
 		}
 
 		echo '</table>';
+		echo '</div>';
 	}
 
 	static function get_approval_text( $plugin, $data ) {
