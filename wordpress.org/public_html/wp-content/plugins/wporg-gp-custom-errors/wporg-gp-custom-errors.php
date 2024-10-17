@@ -16,6 +16,20 @@ class WPorg_GP_Custom_Translation_Errors {
 	const WORPRESS_CORE_PROJECT_ID = 1;
 
 	/**
+	 * The parent WordPress core project ID.
+	 *
+	 * @var int
+	 */
+	const CONTEXT_ENUM_CHECK_LIST = [
+		'text direction' => [ 'ltr', 'rtl' ],
+		'Open Sans font: on or off' => [ 'on', 'off' ],
+		'Open Sans font: add new subset (greek, cyrillic, vietnamese)' => [ 'no-subset', 'greek', 'cyrillic', 'vietnamese' ],
+		'Word count type. Do not translate!' => [ 'characters_excluding_spaces', 'characters_including_spaces', 'words' ],
+		'decline months names: on or off' => [ 'on', 'off' ],
+		'Comment number declension: on or off' => [ 'on', 'off' ],
+	];
+
+	/**
 	 * Registers all methods starting with error_ with GlotPress.
 	 */
 	public function __construct() {
@@ -39,8 +53,11 @@ class WPorg_GP_Custom_Translation_Errors {
 	 */
 	public function is_core_project( GP_Original $gp_original ): bool {
 		$project = GP::$project->get( $gp_original->project_id );
-		$project = GP::$project->get( $project->parent_project_id );
+		if ( self::WORPRESS_CORE_PROJECT_ID == $project->parent_project_id ) {
+			return true;
+		}
 
+		$project = GP::$project->get( $project->parent_project_id );
 		if ( self::WORPRESS_CORE_PROJECT_ID == $project->parent_project_id ) {
 			return true;
 		} else {
@@ -169,10 +186,10 @@ class WPorg_GP_Custom_Translation_Errors {
 		if ( ! $this->is_core_project( $gp_original ) ) {
 			return true;
 		}
-		if ( is_null( $gp_original->context ) ) {
+		if ( is_null( $gp_original->comment ) ) {
 			return true;
 		}
-		if ( ! str_contains( $gp_original->context, 'timezone date format' ) ) {
+		if ( strpos( $gp_original->comment, 'https://www.php.net/manual/datetime.format.php' ) === false ) {
 			return true;
 		}
 
@@ -186,7 +203,81 @@ class WPorg_GP_Custom_Translation_Errors {
 			return esc_html__( 'The translation has empty spaces, new lines or another similar elements.', 'glotpress' );
 		}
 
-		return esc_html__( 'Must be a valid timezone date format.', 'glotpress' );
+		return esc_html__( 'Must be a valid date format.', 'glotpress' );
+	}
+
+	/**
+	 * Adds an error for text direction.
+	 *
+	 * @param string      $original    The original string.
+	 * @param string      $translation The translated string.
+	 * @param GP_Original $gp_original The GP_original object.
+	 * @param GP_Locale   $locale      The locale.
+	 * @return string|true The error message or true if no error.
+	 */
+	public function error_check_enum_list( $original, $translation, $gp_original, $locale ) {
+		if ( ! $this->is_core_project( $gp_original ) ) {
+			return true;
+		}
+		if ( is_null( $gp_original->context ) ) {
+			return true;
+		}
+		if ( !isset(self::CONTEXT_ENUM_CHECK_LIST[$gp_original->context])) {
+			return true;
+		}
+		if ( in_array( $translation, self::CONTEXT_ENUM_CHECK_LIST[$gp_original->context]) ) {
+			return true;
+		}
+
+		return esc_html__(
+			'Must be ' . $this->array_to_string( self::CONTEXT_ENUM_CHECK_LIST[$gp_original->context] ),
+			'glotpress'
+		);
+	}
+
+	/**
+	 * Adds an error for text direction.
+	 *
+	 * @param string      $original    The original string.
+	 * @param string      $translation The translated string.
+	 * @param GP_Original $gp_original The GP_original object.
+	 * @param GP_Locale   $locale      The locale.
+	 * @return string|true The error message or true if no error.
+	 */
+	public function error_check_integer( $original, $translation, $gp_original, $locale ) {
+		if ( ! $this->is_core_project( $gp_original ) ) {
+			return true;
+		}
+		if ( is_null( $gp_original->context ) ) {
+			return true;
+		}
+		if (
+			! in_array($gp_original->context, [
+				'draft_length',
+				'minimum input length for searching post links',
+				'comment_excerpt_length',
+				'excerpt_length',
+			])
+		) {
+			return true;
+		}
+
+		if ( absint( $translation ) == $translation ) {
+			return true;
+		}
+
+		return esc_html__( 'The translation has to be a number.', 'glotpress' );
+	}
+
+	private function array_to_string( $array ) {
+		$str = implode('’, ’', $array);
+		$lastCommaPos = strrpos($str, ',');
+
+		if ($lastCommaPos !== false) {
+			$str = substr_replace($str, ' or', $lastCommaPos, 1);
+		}
+
+		return '’' . $str . '’';
 	}
 }
 
@@ -196,7 +287,7 @@ class WPorg_GP_Custom_Translation_Errors {
  * @return WPorg_GP_Custom_Translation_Errors
  */
 function wporg_gp_custom_translation_errors() {
-	 global $wporg_gp_custom_translation_errors;
+	global $wporg_gp_custom_translation_errors;
 
 	if ( ! isset( $wporg_gp_custom_translation_errors ) ) {
 		$wporg_gp_custom_translation_errors = new WPorg_GP_Custom_Translation_Errors();
