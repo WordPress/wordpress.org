@@ -19,7 +19,7 @@ global $wptv;
 <div class="wptv-hero group">
 	<div class="container">
 
-		<h2 class="page-title"><?php single_term_title(); ?></h2>
+		<h1 class="page-title"><?php single_term_title(); ?></h1>
 		<div class="desc"><?php echo category_description(); ?></div>
 
 		<?php if ( $featured->have_posts() ) : $featured->the_post(); ?>

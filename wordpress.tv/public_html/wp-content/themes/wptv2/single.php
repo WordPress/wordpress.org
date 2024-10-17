@@ -15,7 +15,7 @@ the_post();
 	<div class="container">
 
 		<?php get_template_part( 'breadcrumbs' ); ?>
-		<h2 class="video-title"><?php the_title(); ?></h2>
+		<h1 class="video-title"><?php the_title(); ?></h1>
 
 		<div class="the-video">
 			<?php $wptv->the_video(); ?>

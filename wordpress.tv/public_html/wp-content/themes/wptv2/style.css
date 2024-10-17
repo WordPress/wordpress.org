@@ -237,7 +237,7 @@ div.success p {
 	display: table;
 }
 
-#header h1 {
+#header .homelogo {
 	padding-top: 8px;
 }
 
@@ -1929,7 +1929,7 @@ h4 {
 	margin: 20px 0 10px;
 }
 
-h5 {
+h5, .video-meta-heading {
 	font-size: 12px;
 	font-weight: bold;
 	text-transform: uppercase;
@@ -2519,7 +2519,7 @@ h3#comments {
 		padding: 0 20px;
 	}
 
-	#header h1 {
+	#header .homelogo {
 		float: left;
 	}
 
