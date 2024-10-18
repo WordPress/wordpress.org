@@ -483,7 +483,7 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 	
 	} elseif ( str_contains( $from, 'wordcamp.org' ) || str_contains( $from, 'events.wordpress.org' ) ) {
 
-		if ( !empty( $_REQUEST['wcname'] ) ) {
+		if ( ! empty( $_REQUEST['wcname'] ) ) {
 			$message .= '<strong>' . sprintf( __( 'Register for %s', 'wporg' ), esc_html( $_REQUEST['wcname'] ) ) . '</strong>';
 			$message .=  __( 'Log in to your WordPress.org account. If you don\'t have one, you can <a href="/register">create an account</a>.', 'wporg' );
 		} else {
