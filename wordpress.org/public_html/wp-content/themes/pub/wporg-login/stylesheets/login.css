@@ -241,7 +241,6 @@ p.intro, #login .message {
 p.intro strong {
 	display: block;
 	margin-bottom: 8px;
-	text-align: center;
 }
 
 #login .message + #login_error {
