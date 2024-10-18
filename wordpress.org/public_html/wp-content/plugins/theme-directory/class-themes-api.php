@@ -710,7 +710,7 @@ class Themes_API {
 				// WordPress.org user details.
 				'user_nicename' => $author->user_nicename,
 				'profile'       => 'https://profiles.wordpress.org/' . $author->user_nicename . '/',
-				'avatar'        => 'https://secure.gravatar.com/avatar/' . md5( $author->user_email ) . '?s=96&d=monsterid&r=g',
+				'avatar'        => 'https://secure.gravatar.com/avatar/' . hash( 'sha256', $author->user_email ) . '?s=96&d=monsterid&r=g',
 				'display_name'  => $author->display_name ?: $author->user_nicename,
 
 				// Theme headers details.
