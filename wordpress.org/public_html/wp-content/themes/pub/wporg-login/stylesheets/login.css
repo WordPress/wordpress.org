@@ -238,6 +238,11 @@ p.intro, #login .message {
 	text-wrap: pretty;
 }
 
+p.intro strong {
+	display: block;
+	margin-bottom: 8px;
+}
+
 #login .message + #login_error {
 	margin-top: 0 !important;
 	border-top: 1px solid #f5f5f5;
