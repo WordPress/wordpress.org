@@ -21,7 +21,7 @@ if ( empty( $fields ) ) {
 ?>
 <p class="login-website">
 	<label for="user_website"><?php _e( 'Website', 'wporg' ); ?></label>
-	<input type="text" name="user_fields[url]" id="user_url" class="input" value="<?php echo esc_attr( $fields['url'] ?? '' ); ?>" size="20" placeholder="https://" data-pattern-after-blur="(https?://)?([a-zA-Z0-9-]+\.\S+)?" />
+	<input type="text" name="user_fields[url]" id="user_url" class="input" value="<?php echo esc_attr( $fields['url'] ?? '' ); ?>" size="20" placeholder="https://" data-pattern-after-blur="(https?:\/\/)?([a-zA-Z0-9\-]+\.\S+)?" />
 	<span class="invalid-message"><?php _e( 'That URL appears to be invalid.', 'wporg' ); ?></span>
 </p>
 
