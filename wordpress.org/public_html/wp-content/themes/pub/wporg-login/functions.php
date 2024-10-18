@@ -474,19 +474,22 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 	}
 
 	if ( str_contains( $from, 'buddypress.org' ) ) {
-		$message .= '<strong>' . __( 'BuddyPress is part of WordPress.org', 'wporg' ) . '</strong><br>';
+		$message .= '<strong>' . __( 'BuddyPress is part of WordPress.org', 'wporg' ) . '</strong>';
 		$message .= __( 'Log in to your WordPress.org account to contribute to BuddyPress, or get help in the support forums.', 'wporg' );
 	
 	} elseif ( str_contains( $from, 'bbpress.org' ) ) {
-		$message .= '<strong>' . __( 'bbPress is part of WordPress.org', 'wporg' ) . '</strong><br>';
+		$message .= '<strong>' . __( 'bbPress is part of WordPress.org', 'wporg' ) . '</strong>';
 		$message .= __( 'Log in to your WordPress.org account to contribute to bbPress, or get help in the support forums.', 'wporg' );
-	
-	} elseif ( str_contains( $from, 'wordcamp.org' ) ) {
-		$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong><br>';
-		$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
-	
+	} elseif ( str_contains( $from, 'wordcamp.org' ) || str_contains( $from, 'events.wordpress.org' ) ) {
+		if ( ! empty( $_REQUEST['wcname'] ) ) {
+			$message .= '<strong>' . sprintf( __( 'Register for %s', 'wporg' ), esc_html( $_REQUEST['wcname'] ) ) . '</strong>';
+			$message .=  __( 'Log in to your WordPress.org account. If you don\'t have one, you can <a href="/register">create an account</a>.', 'wporg' );
+		} else {
+			$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong>';
+			$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
+		}
 	} elseif ( str_contains( $from, 'learn.wordpress.org' ) ) {
-		$message .= '<strong>' . __( 'Access all of Learn WordPress', 'wporg' ) . '</strong><br>';
+		$message .= '<strong>' . __( 'Access all of Learn WordPress', 'wporg' ) . '</strong>';
 		$message .= __( 'Log in to your WordPress.org account to take or continue a course and track your progress.', 'wporg' );
 
 	} else {
