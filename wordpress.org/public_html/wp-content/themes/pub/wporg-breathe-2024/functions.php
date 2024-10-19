@@ -608,3 +608,31 @@ add_action( 'wporg_breathe_before_name', __NAMESPACE__ . '\add_svg_icon_to_site_
 __( 'Pending Review: %s', 'wporg' );
 __( 'Submit for review', 'wporg' );
 _n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
+
+/**
+ * Modify the search block's form action for handbook pages.
+ *
+ * @param string $block_content The block content about to be appended.
+ * @param array  $block         The full block, including name and attributes.
+ * @return string Modified block content.
+ */
+function modify_handbook_search_block_action( $block_content, $block ) {
+	if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() ) {
+		$html = wp_html_split( $block_content );
+		
+		foreach ( $html as &$token ) {
+			if ( 0 === strpos( $token, '<form' ) ) {
+				$token = preg_replace(
+					'/action="[^"]*"/',
+					'action="' . esc_url( home_url( '/handbook/' ) ) . '"',
+					$token
+				);
+				break;
+			}
+		}
+		
+		$block_content = implode( '', $html );
+	}
+	return $block_content;
+}
+add_filter( 'render_block_core/search', __NAMESPACE__ . '\modify_handbook_search_block_action', 10, 2 );

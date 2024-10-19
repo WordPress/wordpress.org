@@ -982,6 +982,10 @@ article.post[class*="state-"].status-private .o2-post {
 	/* border: none; */
 }
 
+article.handbook .entry-meta {
+	position: relative;
+}
+
 .single-post article.post {
 	border-top: unset;
 }
