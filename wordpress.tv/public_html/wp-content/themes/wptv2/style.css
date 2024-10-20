@@ -1507,12 +1507,12 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	color: #d54e21;
 }
 
-#comments a:focus {
+#comments a {
 	text-decoration: underline;
 }
 
 #comments .commenttext a, #comments .commenttext a:link, #comments .commenttext a:visited {
-	color: #21759b;;
+	color: #21759b;
 }
 
 #respond {
@@ -1577,7 +1577,7 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 }
 
 #commentform p {
-	font-size: 10px;
+	font-size: 16px;
 	margin-bottom: 5px;
 }
 
@@ -1625,6 +1625,7 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 
 .commenttext p {
 	margin-bottom: 1em;
+	font-size: 16px;
 }
 
 .comment .pd-rating {
@@ -1929,6 +1930,7 @@ h4 {
 	margin: 20px 0 10px;
 }
 
+.video-info h4,
 h5 {
 	font-size: 12px;
 	font-weight: bold;
@@ -1946,7 +1948,7 @@ h5 {
 }
 
 .breadcrumb {
-	color: #8B8B8B;
+	color: #6d6d6d;
 
 	font-size: 13px;
 	text-transform: uppercase;
@@ -1955,12 +1957,12 @@ h5 {
 }
 
 .breadcrumb a {
-	color: #8B8B8B;
+	color: #6d6d6d;
 }
 
 .breadcrumb a:hover,
 .breadcrumb a:focus {
-	color: #464646;
+	color: #21759b;
 }
 
 .breadcrumb a:focus {
@@ -2215,6 +2217,19 @@ body:not(.single) .video-info {
 .video-info p {
 	/*text-transform: capitalize;*/
 	margin: 0 0 12px 0;
+}
+
+#content > h3 {
+	margin-top: 5px;
+}
+
+.video-description p {
+	margin-bottom: 1em;
+	font-size: 16px;
+}
+
+.video-description a {
+	text-decoration: underline;
 }
 
 /* Video Player and Placeholder */
@@ -2640,7 +2655,7 @@ h3#comments {
 
 	.secondary-content {
 		flex: 0 0 200px;
-		margin: -20px 0 50px 40px;
+		margin: 0 0 50px 40px;
 	}
 
 	.secondary-content li.widget {
