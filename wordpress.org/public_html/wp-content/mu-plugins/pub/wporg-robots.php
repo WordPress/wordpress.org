@@ -18,7 +18,10 @@ function wporg_robots_txt( $robots ) {
 		           "Allow: /locale/$\n" .
 		           "Allow: /locale/*/glossary/$\n" .
 		           "Allow: /locale/*/stats/plugins/$\n" .
-		           "Allow: /locale/*/stats/themes/$\n";
+		           "Allow: /locale/*/stats/themes/$\n" .
+		           "Allow: /events/rss\n" .
+		           "Allow: /events/feed\n" .
+		           "Allow: /events/*/*\n";
 
 	} elseif ( 'wordpress.org' === $blog_details->domain ) {
 		// WordPress.org/search/ should not be indexed.
