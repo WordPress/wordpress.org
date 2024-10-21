@@ -147,6 +147,10 @@ class Hooks {
 		if ( 'wordpress.org' === get_blog_details()->domain ) {
 			add_filter( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
 		}
+
+		// Show any post edits as authored by support moderator for non-moderators.
+		add_filter( 'bbp_get_reply_revision_log', array( $this, 'bbp_get_public_revision_log' ), 10, 2 );
+		add_filter( 'bbp_get_topic_revision_log', array( $this, 'bbp_get_public_revision_log' ), 10, 2 );
 	}
 
 	/**
@@ -1504,4 +1508,69 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		return $new_role;
 	}
 
+	/**
+	 * Anonymise the revision log for non-moderators.
+	 *
+	 * This is a modified version of the bbPress functions:
+	 *  - bbp_get_topic_revision_log
+	 *  - bbp_get_reply_revision_log
+	 *
+	 * @param string $html The revision log HTML.
+	 * @param int    $id   The topic or reply ID.
+	 * @return string
+	 */
+	public function bbp_get_public_revision_log( $html, $id ) {
+		if ( current_user_can( 'moderate' ) ) {
+			return $html;
+		}
+
+		if ( bbp_is_topic( $id ) ) {
+			$type         = 'topic';
+			$post         = bbp_get_topic( $id );
+			$revision_log = bbp_get_topic_raw_revision_log( $id );
+			$revisions    = bbp_get_topic_revisions( $post );
+		} else {
+			$type         = 'reply';
+			$post         = bbp_get_reply( $id );
+			$revision_log = bbp_get_reply_raw_revision_log( $id );
+			$revisions    = bbp_get_reply_revisions( $post );
+		}
+
+		$html = "\n\n" . '<ul id="bbp-' . esc_attr( $type ) . '-revision-log-' . esc_attr( $id ) . '" class="bbp-' . esc_attr( $type ) . '-revision-log">' . "\n\n";
+
+		foreach ( $revisions as $revision ) {
+			$author_id = $revision_log[ $revision->ID ]['author'] ?? $revision->post_author;
+			$reason    = $revision_log[ $revision->ID ]['reason'] ?? '';
+			$by_author = ( $author_id == $post->post_author );
+			$since     = bbp_get_time_since( bbp_convert_date( $revision->post_modified ) );
+
+			$html .= "\t" . '<li id="bbp-' . esc_attr( $type ) . '-revision-log-' . esc_attr( $reply_id ) . '-item-' . esc_attr( $revision->ID ) . '" class="bbp-' . esc_attr( $type ) . '-revision-log-item">' . "\n";
+
+			if ( $reason && $by_author ) {
+				/* translators: 1: time since '2 minutes ago', 2: reason for edit */
+				$text = esc_html__( 'Modified %1$s. Reason: %2$s', 'wporg-forums' );
+			} elseif ( $by_author ) {
+				/* translators: 1: time since '2 minutes ago' */
+				$text = esc_html__( 'Modified %1$s.', 'wporg-forums' );
+			} elseif ( $reason ) {
+				/* translators: 1: time since '2 minutes ago', 2: reason for edit */
+				$text = esc_html__( 'Modified %1$s by a moderator. Reason: %2$s', 'wporg-forums' );
+			} else {
+				/* translators: 1: time since '2 minutes ago' */
+				$text = esc_html__( 'Modified %1$s by a moderator.', 'wporg-forums' );
+			}
+
+			$html .= sprintf(
+				"\t\t{$text}\n",
+				esc_html( $since ),
+				esc_html( $reason )
+			);
+
+			$html .= "\t" . '</li>' . "\n";
+		}
+
+		$html .= "\n" . '</ul>' . "\n\n";
+
+		return $html;
+	}
 }
