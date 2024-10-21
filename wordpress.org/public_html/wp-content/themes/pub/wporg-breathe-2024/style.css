@@ -706,7 +706,10 @@ li.o2-filter-widget-item a.o2-filter-widget-selected:before {
 
 .o2-live-comments-container p.o2-live-item-text {
 	font-size: var(--wp--preset--font-size--small);
-	padding-top: 5px;
+}
+
+.o2-live-comments-container span.entry-date {
+	font-size: var(--wp--preset--font-size--extra-small);
 }
 
 /*
