@@ -1886,6 +1886,10 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	border: 1px solid var(--wp--custom--color--border);
 }
 
+.single-handbook div.table-of-contents .items strong {
+	font-weight: 400;
+}
+
 @media (min-width: 971px) {
 
 	.rtl.post-type-archive-handbook div.table-of-contents,
