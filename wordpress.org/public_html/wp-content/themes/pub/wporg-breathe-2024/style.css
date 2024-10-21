@@ -704,6 +704,11 @@ li.o2-filter-widget-item a.o2-filter-widget-selected:before {
 	color: inherit;
 }
 
+.o2-live-comments-container p.o2-live-item-text {
+	font-size: var(--wp--preset--font-size--small);
+	padding-top: 5px;
+}
+
 /*
  * p2-breathe/style.css overrides
  */
@@ -768,8 +773,10 @@ h1 a:hover,
 .entry-meta .entry-tags,
 .comment-meta .comment-date,
 .comment-meta .comment-actions,
-.o2-reply-count {
-	color: #555;
+.o2-reply-count,
+.o2-xpost-author .entry-date, .o2-xpost-entry-date {
+	color: var(--wp--preset--color--charcoal-2, #23282d);
+	font-size: var(--wp--preset--font-size--extra-small);
 }
 
 body,
@@ -1018,6 +1025,10 @@ article.handbook .entry-meta {
 	padding-bottom: .6em;
 }
 
+article.post .entry-meta {
+	line-height: 28px;
+}
+
 .single-post article.post .entry-meta {
 	margin-top: unset;
 }
@@ -1037,6 +1048,46 @@ article.page .entry-header .entry-meta .o2-post-actions {
 	position: absolute;
 	right: 0;
 	top: -65px;
+}
+
+article.post.tag-p2-xpost a.author-avatar img.avatar {
+	width: 32px !important;
+	height: 32px !important;
+}
+
+.tag-p2-xpost .avatar {
+	border: unset;
+	box-shadow: unset;
+}
+
+.o2-comment .comment-meta {
+	padding-top: 6px;
+}
+
+.tag-p2-xpost .o2-comment .comment-meta,
+.tag-p2-xpost .o2-comment .comment-content {
+	margin-left: 35px;
+}
+ 
+.o2-xpost-author {
+	margin: 5px 0 0 0;
+	line-height: 1.3;
+}
+
+.o2-xpost-author a {
+	margin-right: 6px;
+}
+
+.o2-xpost-author .entry-date {
+	padding-left: unset;
+}
+ 
+article.post.tag-p2-xpost {
+	padding-bottom: 32px;
+}
+
+article.post.tag-p2-xpost .o2-comment {
+	border-top: unset;
 }
 
 .o2-xpost-author .entry-date,
@@ -1964,7 +2015,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 .post-type-archive-handbook #secondary aside.widget_nav_menu,
 .single-handbook #secondary aside.widget_wporg_handbook_pages,
 .single-handbook #secondary aside.widget_nav_menu {
-	font-size: 16px;
+	font-size: var(--wp--preset--font-size--normal);
 }
 
 .widget_wporg_handbook_pages h1 {
