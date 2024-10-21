@@ -243,10 +243,13 @@ class Status_Transitions {
 	 * Create a SVN repository for this plugin.
 	 *
 	 * @param \WP_Post $post          Post object.
-	 * @param \WP_User $plugin_author Plugin author.
+	 * @param \WP_User $plugin_author Plugin author. Optional.
 	 * @return bool
 	 */
-	public function approved_create_svn_repo( $post, $plugin_author ) {
+	public function approved_create_svn_repo( $post, $plugin_author = null ) {
+		$post            = get_post( $post );
+		$plugin_author ??= get_user_by( 'id', $post->post_author );
+
 		$dir = Filesystem::temp_directory( $post->post_name );
 		foreach ( array( 'assets', 'tags', 'trunk' ) as $folder ) {
 			mkdir( "$dir/$folder", 0777 );
@@ -268,10 +271,23 @@ class Status_Transitions {
 		}
 		*/
 
-		$result = SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
+		$result = SVN::import(
+			$dir,
+			'http://plugins-testing.svn.wordpress.org/' . $post->post_name,
+			sprintf(
+				'Adding %1$s by %2$s.',
+				html_entity_decode( $post->post_title ),
+				$plugin_author->user_login
+			)
+		);
 
+		// Record the last failure attempt.
 		if ( $result['errors'] ) {
 			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'], true ), $post->ID );
+
+			// Retry in a minute.
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'plugin_directory_create_svn_repo', [ $post->ID, $plugin_author->ID ] );
+
 			return false;
 		}
 

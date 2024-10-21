@@ -26,6 +26,7 @@ class Manager {
 		add_action( 'plugin_directory_translation_sync', array( __NAMESPACE__ . '\Translation_Sync', 'cron_trigger' ) );
 		add_action( 'plugin_directory_zip_cleanup', array( __NAMESPACE__ . '\Zip_Cleanup', 'cron_trigger' ) );
 		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
+		add_action( 'plugin_directory_create_svn_repo', array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ) );
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
