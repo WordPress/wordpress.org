@@ -999,6 +999,10 @@ article.post .o2-post .more-link {
 	margin-bottom: var(--wp--preset--spacing--10);
 }
 
+article.post.sticky .o2-post .more-link {
+	border-color: var(--wp--custom--button--border--color);
+}
+
 article.post .o2-post .more-link:hover {
 	background-color: var(--wp--custom--button--outline--hover--color--background);
 	border-color: var(--wp--custom--button--outline--hover--border--color);
