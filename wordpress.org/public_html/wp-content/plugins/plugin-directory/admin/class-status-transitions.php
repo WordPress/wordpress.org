@@ -273,7 +273,7 @@ class Status_Transitions {
 
 		$result = SVN::import(
 			$dir,
-			'http://plugins-testing.svn.wordpress.org/' . $post->post_name,
+			'http://plugins.svn.wordpress.org/' . $post->post_name,
 			sprintf(
 				'Adding %1$s by %2$s.',
 				html_entity_decode( $post->post_title ),
