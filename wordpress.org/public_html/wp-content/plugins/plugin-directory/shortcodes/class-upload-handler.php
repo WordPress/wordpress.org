@@ -681,7 +681,7 @@ class Upload_Handler {
 		$start_time = microtime(1);
 		exec(
 			'export WP_CLI_CONFIG_PATH=' . escapeshellarg( WP_CLI_CONFIG_PATH ) . '; ' .
-			'timeout 30 ' . // Timeout after 30s if plugin-check is not done.
+			'timeout 45 ' . // Timeout after 45s if plugin-check is not done.
 			WPCLI . ' --url=https://wordpress.org/plugins ' .
 			'plugin check ' .
 			'--error-severity=7 --warning-severity=6 --categories=plugin_repo --format=json ' .
