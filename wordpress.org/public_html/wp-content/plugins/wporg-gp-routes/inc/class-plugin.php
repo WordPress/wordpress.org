@@ -159,6 +159,7 @@ class Plugin {
 			GP::$router->prepend( "/locale/$locale/$sets/stats(?:/(plugins|themes))?", array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_plugin_theme_overview' ) );
 			GP::$router->prepend( '/stats', array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_overview' ) );
 			GP::$router->prepend( '/consistency', array( __NAMESPACE__ . '\Routes\Consistency', 'get_search_form' ) );
+			GP::$router->prepend( '/consistency', array( __NAMESPACE__ . '\Routes\Consistency', 'bulk_update' ), 'post' );
 
 			// Project routes.
 			GP::$router->prepend( "/projects/wp-plugins/$project", array( __NAMESPACE__ . '\Routes\WP_Plugins', 'get_plugin_projects' ) );
