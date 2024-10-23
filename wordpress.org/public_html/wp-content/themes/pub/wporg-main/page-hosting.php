@@ -56,7 +56,7 @@ $hosting_cache_buster = '9';
 
 					<div class="partner">
 						<h2>
-							<a href="https://www.bluehost.com/wordpress-hosting" rel="nofollow">
+							<a href="https://www.bluehost.com/wordpress/wordpress-hosting?siteid=46156037" rel="nofollow">
 								<img
 									alt=""
 									src="https://s.w.org/hosting/bluehost.png?<?php echo $hosting_cache_buster; ?>"

@@ -180,6 +180,11 @@
 				}
 			},
 			"core/quote": {
+				"typography": {
+					"fontSize": "inherit",
+					"lineHeight": "inherit",
+					"fontFamily": "inherit"
+				},
 				"spacing": {
 					"margin": {
 						"bottom": "var(--wp--style--block-gap)"
@@ -189,6 +194,9 @@
 						"right": "var(--wp--custom--margin--horizontal)",
 						"bottom": "var(--wp--custom--margin--horizontal)"
 					}
+				},
+				"border": {
+					"style": "none"
 				}
 			},
 			"wporg/notice": {

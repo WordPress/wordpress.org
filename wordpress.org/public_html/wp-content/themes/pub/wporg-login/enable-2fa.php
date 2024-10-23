@@ -30,29 +30,29 @@ update_user_meta( $user->ID, 'last_2fa_nag', time() );
 get_header();
 ?>
 
-<h2 class="center"><?php _e( 'Two-Factor Authentication', 'wporg-login' ); ?></h2>
+<h2 class="center"><?php _e( 'Two-Factor Authentication', 'wporg' ); ?></h2>
 
 <p>&nbsp;</p>
 
 <p><?php
 	if ( $requires_2fa ) {
-		_e( 'WordPress.org now requires that your account be protected by two-factor authentication. Some capabilities may be limited until your account is protected.', 'wporg-login' );
+		_e( 'WordPress.org now requires that your account be protected by two-factor authentication. Some capabilities may be limited until your account is protected.', 'wporg' );
 	} else {
-		_e( "WordPress.org supports two-factor authentication and you'll soon be required to configure it on your account.", 'wporg-login' );
+		_e( "WordPress.org supports two-factor authentication and you'll soon be required to configure it on your account.", 'wporg' );
 	}
 ?></p>
 
 <p>&nbsp;</p>
 
-<p><?php printf( __( 'For more information on our two-factor options, please read the <a href="%s" target="_blank">documentation</a>.', 'wporg-login' ), 'https://make.wordpress.org/meta/handbook/tutorials-guides/configuring-two-factor-authentication/' ); ?></p>
+<p><?php printf( __( 'For more information on our two-factor options, please read the <a href="%s" target="_blank">documentation</a>.', 'wporg' ), 'https://make.wordpress.org/meta/handbook/tutorials-guides/configuring-two-factor-authentication/' ); ?></p>
 
 <p>&nbsp;</p>
 
-<p><a href="<?php echo esc_url( add_query_arg( 'redirect_to', urlencode( $redirect_to ), get_onboarding_account_url() ) ); ?>"><button class="button-primary"><?php _e( "OK, I'll setup Two-Factor now.", 'wporg-login' ); ?></button></a></p>
+<p><a href="<?php echo esc_url( add_query_arg( 'redirect_to', urlencode( $redirect_to ), get_onboarding_account_url() ) ); ?>"><button class="button-primary"><?php _e( "OK, I'll setup Two-Factor now.", 'wporg' ); ?></button></a></p>
 
 <?php if ( ! $requires_2fa ) { ?>
 <p id="nav">
-	<a href="<?php echo esc_url( $redirect_to ); ?>" style="font-style: italic;"><?php _e( "I'll do it later", 'wporg-login' ); ?></a>
+	<a href="<?php echo esc_url( $redirect_to ); ?>" style="font-style: italic;"><?php _e( "I'll do it later", 'wporg' ); ?></a>
 </p>
 <?php } ?>
 
