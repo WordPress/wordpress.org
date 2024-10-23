@@ -4,6 +4,8 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use Two_Factor_Core;
+use function WordPressdotorg\Two_Factor\{ get_js_revalidation_url, get_revalidation_status };
 
 /**
  * The [release-confirmation] shortcode handler.
@@ -66,7 +68,27 @@ class Release_Confirmation {
 		}
 
 		if ( ! self::can_access() && $should_show_access_notice ) {
-			if ( isset( $_REQUEST['send_access_email'] ) ) {
+			if ( Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+				// A Two Factor user needs to have a valid recently re-validated session.
+				printf(
+					'<div class="plugin-notice notice notice-info notice-alt please-revalidate"><p>%s</p></div>',
+					sprintf(
+						__( 'Please <a href="%s">revalidate your two-factor session</a> to perform actions.', 'wporg-plugins'),
+						esc_url( get_js_revalidation_url( get_permalink() ) )
+					)
+				);
+				echo '<script>
+					window.addEventListener( "reValidationComplete", function() {
+						document.querySelector(".please-revalidate").remove();
+
+						document.querySelectorAll(".disabled.disabled-by-2fa").forEach( function( el ) {
+							el.classList.remove("disabled");
+							el.classList.remove("disabled-by-2fa");
+						} );
+					} );
+				</script>';
+
+			} elseif ( isset( $_REQUEST['send_access_email'] ) ) {
 				printf(
 					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 					__( 'Check your email for an access link to perform actions.', 'wporg-plugins')
@@ -121,8 +143,14 @@ class Release_Confirmation {
 		return ob_get_clean();
 	}
 
-	static function single_plugin( $plugin ) {
-		$releases = Plugin_Directory::get_releases( $plugin );
+	/**
+	 * Display a table containing the releases for a single plugin.
+	 *
+	 * @param WP_Post $plugin
+	 * @param array   $releases Optional. The list of releases to show. If not provided, all will be shown.
+	 */
+	static function single_plugin( $plugin, $releases = null ) {
+		$releases ??= Plugin_Directory::get_releases( $plugin );
 
 		echo '<div class="wp-block-table is-style-stripes">
 		<table class="plugin-releases-listing">
@@ -243,41 +271,34 @@ class Release_Confirmation {
 	}
 
 	static function get_actions( $plugin, $data ) {
-		$buttons = [];
+		$buttons    = [];
+		$can_access = self::can_access();
+
+		if ( ! current_user_can( 'plugin_manage_releases', $plugin  ) ) {
+			return '';
+		}
 
 		if ( $data['confirmations_required'] && empty( $data['discarded'] ) ) {
 			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
 			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
-				if (
-					self::can_access() &&
-					current_user_can( 'plugin_manage_releases', $plugin  )
-				) {
-					$buttons[] = sprintf(
-						'<a href="%s" class="button approve-release button-primary">%s</a>',
-						Template::get_release_confirmation_link( $data['tag'], $plugin ),
-						__( 'Confirm', 'wporg-plugins' )
-					);
-					$buttons[] = sprintf(
-						'<a href="%s" class="button approve-release button-secondary">%s</a>',
-						Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' ),
-						__( 'Discard', 'wporg-plugins' )
-					);
-				} else {
-					$buttons[] = sprintf(
-						'<a class="button approve-release button-secondary disabled">%s</a>',
-						__( 'Confirm', 'wporg-plugins' )
-					);
-					$buttons[] = sprintf(
-						'<a class="button approve-release button-secondary disabled">%s</a>',
-						__( 'Discard', 'wporg-plugins' )
-					);
-				}
+				$disabled_attr  = ! $can_access ? 'disabled' : '';
+				$disabled_class = ! $can_access ? 'disabled disabled-by-2fa' : '';
 
-			} elseif ( $current_user_confirmed ) {
 				$buttons[] = sprintf(
-					'<a class="button approve-release button-secondary disabled">%s</a>',
-					__( 'Confirmed', 'wporg-plugins' )
+					'<a href="%s"><button class="wp-element-button button %s" %s>%s</button></a>',
+					Template::get_release_confirmation_link( $data['tag'], $plugin ),
+					esc_attr( $disabled_class ),
+					esc_attr( $disabled_attr ),
+					__( 'Confirm', 'wporg-plugins' )
+				);
+
+				$buttons[] = sprintf(
+					'<a href="%s"><button class="wp-element-button button %s" %s>%s</button></a>',
+					Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' ),
+					esc_attr( $disabled_class ),
+					esc_attr( $disabled_attr ),
+					__( 'Discard', 'wporg-plugins' )
 				);
 			}
 		}
@@ -295,30 +316,52 @@ class Release_Confirmation {
 			return true;
 		}
 
-		// Must have an access token..
-		if ( empty( $_COOKIE[ self::COOKIE ] ) ) {
-			return false;
-		}
+		// If they have an access token...
+		if ( ! empty( $_COOKIE[ self::COOKIE ] ) ) {
+			// ...and it be valid..
+			$token = get_user_meta( get_current_user_id(), self::META_KEY, true );
+			if (
+				$token &&
+				$token['time'] > ( time() - DAY_IN_SECONDS ) &&
+				wp_check_password( $_COOKIE[ self::COOKIE ], $token['token'] )
+			) {
+				return true;
+			}
+    }
 
-		// ...and it be valid..
-		$token = get_user_meta( get_current_user_id(), self::META_KEY, true );
-		if (
-			$token &&
-			$token['time'] > ( time() - DAY_IN_SECONDS ) &&
-			wp_check_password( $_COOKIE[ self::COOKIE ], $token['token'] )
-		) {
-			return true;
+		// If the user uses 2FA, and they've re-validated, they can access.
+		if ( Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+			// Check to see if they've confirmed their 2FA status recently..
+			$status = get_revalidation_status();
+			if ( ! $status['needs_revalidate'] ) {
+				return true;
+			}
 		}
 
 		return false;
 	}
 
-	static function generate_access_url( $user = null ) {
+	static function generate_access_url( $user = null, $plugin = false ) {
 		if ( ! $user ) {
 			$user = wp_get_current_user();
 		}
 		if ( ! $user || ! $user->exists() ) {
 			return false;
+		}
+
+		$releases_page = home_url( '/developers/releases/' );
+		if ( $plugin ) {
+			$releases_page = get_permalink( $plugin );
+
+			// Bounce through the login form for when this is being generated outside of a logged in request.
+			if ( ! is_user_logged_in() || $user->ID !== get_current_user_id() ) {
+				$releases_page = wp_login_url( $releases_page );
+			}
+		}
+
+		// For a user with 2FA, they just need to view the page.
+		if ( Two_Factor_Core::is_user_using_two_factor( $user->ID ) ) {
+			return $releases_page;
 		}
 
 		$time      = time();
@@ -329,7 +372,7 @@ class Release_Confirmation {
 		$url = add_query_arg(
 			self::URL_PARAM,
 			urlencode( $plaintext ),
-			home_url( '/developers/releases/' )
+			$releases_page
 		);
 
 		return $url;
@@ -372,32 +415,66 @@ class Release_Confirmation {
 	 * @return void
 	 */
 	static function frontend_unconfirmed_releases_notice( $post = null ) {
-		$post = get_post( $post );
-
-		if ( ! $post->release_confirmation || ! current_user_can( 'plugin_admin_edit', $post ) ) {
-			return;
-		}
-
+		$post     = get_post( $post );
 		$releases = Plugin_Directory::get_releases( $post ) ?: [];
-		$warning  = false;
 
+		$releases_needing_confirmation = [];
 		foreach ( $releases as $release ) {
 			if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
-				$warning = true;
-				break;
+				$releases_needing_confirmation[] = $release;
 			}
 		}
 
-		if ( ! $warning ) {
+		if ( ! $releases_needing_confirmation ) {
 			return;
 		}
 
-		printf(
-			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-			sprintf(
-				__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
-				home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
-			)
-		);
+		// Temporary;
+		if ( ! self::can_access() && ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+			return printf(
+				'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+				sprintf(
+					__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
+					home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
+				)
+			);
+		}
+
+		echo '<div class="plugin-notice notice notice-info notice-alt">';
+
+		$needs_revalidation = ! self::can_access();
+
+		echo '<p' . ( $needs_revalidation ? ' style="display:none" class="wporg-2fa-hidden"' : '' ) . '>' . __( 'This plugin has a pending release that requires confirmation.', 'wporg-plugins' ) . '</p>';
+
+		if ( $needs_revalidation ) {
+			printf(
+				'<p class="wporg-2fa-please-revalidate">%s</p>',
+				sprintf(
+					__( 'This plugin has a pending release that requires confirmation. Please <a href="%s">revalidate your two-factor session</a> to perform actions.', 'wporg-plugins' ),
+					get_js_revalidation_url( get_permalink() )
+				)
+			);
+			echo '<script>
+					window.addEventListener( "reValidationComplete", function() {
+						try {
+							document.querySelector(".wporg-2fa-please-revalidate").remove();
+							document.querySelector(".wporg-2fa-hidden").style.display = "block";
+
+							document.querySelectorAll(".disabled.disabled-by-2fa").forEach( function( el ) {
+								el.classList.remove("disabled");
+								el.classList.remove("disabled-by-2fa");
+							} );
+						} catch(e) {
+							document.location.reload();
+						}
+					} );
+				</script>';
+		}
+
+		// Show the release actions.
+		self::single_plugin( $plugin, $releases_needing_confirmation );
+
+		echo '</div>';
+
 	}
 }
