@@ -3,16 +3,18 @@
 namespace WordPressdotorg\Theme_Preview\Style_Variations\Global_Style_Page;
 
 /**
- * Uses custom page if query string is present to display style variation cards.
+ * Bypass the template loader to show the "card view" when query string is present.
+ *
+ * @param string $template The path of the template to include.
+ *
+ * @return string Updated template path.
  */
-function redirect_to_style_page() {
+function inject_style_card_view( $template ) {
 	if ( ! isset( $_GET['card_view'] ) ) {
-		return;
+		return $template;
 	}
 
-	include dirname( __DIR__ ) . '/views/card.php';
-	exit;
-
+	return dirname( __DIR__ ) . '/views/card.php';
 }
 
-add_action( 'template_redirect', __NAMESPACE__ . '\redirect_to_style_page' );
+add_action( 'template_include', __NAMESPACE__ . '\inject_style_card_view', 100 );
