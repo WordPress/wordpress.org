@@ -16,7 +16,7 @@ if ( have_posts() ) :
 ?>
 
 	<div class="wptv-hero">
-		<h2 class="page-title"><?php esc_html_e( 'Archives', 'wptv' ); ?></h2>
+		<h1 class="page-title"><?php esc_html_e( 'Archives', 'wptv' ); ?></h1>
 	</div>
 	<div class="container">
 		<div class="primary-content">
@@ -32,7 +32,7 @@ if ( have_posts() ) :
 					<div class="video-description">
 						<div class="video-info">
 
-							<h5><?php esc_html_e( 'Published', 'wptv' ); ?></h5>
+							<h2 class="video-meta-heading"><?php esc_html_e( 'Published', 'wptv' ); ?></h2>
 							<p class="video-date"><?php the_date(); ?></p>
 
 							<?php if ( $post->post_excerpt ) : ?>
@@ -40,10 +40,10 @@ if ( have_posts() ) :
 							<?php
 								endif;
 
-								$wptv->the_terms( 'event',    '<h5>Event</h5><p class="video-event">',       '<br /> ', '</p>' );
-								$wptv->the_terms( 'speakers', '<h5>Speakers</h5><p class="video-speakers">', '<br /> ', '</p>' );
-								$wptv->the_terms( 'post_tag', '<h5>Tags</h5><p class="video-tags">',         '<br /> ', '</p>' );
-								$wptv->the_terms( 'language', '<h5>Language</h5><p class="video-lang">',     '<br /> ', '</p>' );
+								$wptv->the_terms( 'event',    '<h2 class="video-meta-heading">Event</h2><p class="video-event">',       '<br /> ', '</p>' );
+								$wptv->the_terms( 'speakers', '<h2 class="video-meta-heading">Speakers</h2><p class="video-speakers">', '<br /> ', '</p>' );
+								$wptv->the_terms( 'post_tag', '<h2 class="video-meta-heading">Tags</h2><p class="video-tags">',         '<br /> ', '</p>' );
+								$wptv->the_terms( 'language', '<h2 class="video-meta-heading">Language</h2><p class="video-lang">',     '<br /> ', '</p>' );
 							?>
 						</div><!-- .video-info -->
 					</div>

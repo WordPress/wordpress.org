@@ -23,18 +23,18 @@ get_header(); ?>
 		<?php while ( $featured->have_posts() ) : $featured->the_post(); ?>
 		<div class="main-video">
 			<?php $wptv->the_video(); ?>
-			<h3>
+			<h2>
 				<a href="<?php the_permalink(); ?>" rel="bookmark" class="video-title"><?php the_title(); ?></a>
 				<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
-			</h3>
+			</h2>
 		</div><!-- .main-video -->
 		<?php endwhile; // $featured->have_posts ?>
 
 		<div class="secondary-videos">
-			<h3>
+			<h2>
 				<?php esc_html_e( 'WordCampTV', 'wptv' ); ?>
 				<a href="<?php echo home_url( '/category/wordcamptv/' ); ?>" class="view-more"><?php _e( 'More &rarr;', 'wptv' ); ?></a>
-			</h3>
+			</h2>
 			<ul>
 				<?php
 					$featured = new WP_Query( array( // WordCampTV Featured
@@ -79,7 +79,7 @@ get_header(); ?>
 		<?php
 			if ( have_posts() ) :
 		?>
-		<h3><?php esc_html_e( 'Latest Videos', 'wptv' ); ?></h3>
+		<h2><?php esc_html_e( 'Latest Videos', 'wptv' ); ?></h2>
 		<ul class="video-list four-col">
 
 			<?php while ( have_posts() ) : the_post(); ?>
@@ -108,7 +108,7 @@ get_header(); ?>
 
 			if ( $popular->have_posts() ) :
 		?>
-		<h3><?php esc_html_e( 'Popular Videos', 'wptv' ); ?></h3>
+		<h2><?php esc_html_e( 'Popular Videos', 'wptv' ); ?></h2>
 		<ul class="video-list four-col">
 
 			<?php while ( $popular->have_posts() ) : $popular->the_post(); ?>
