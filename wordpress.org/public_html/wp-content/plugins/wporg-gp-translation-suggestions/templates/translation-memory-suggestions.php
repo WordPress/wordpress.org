@@ -25,6 +25,9 @@ if ( empty( $suggestions ) ) {
 
 			echo '<span aria-hidden="true" class="translation-suggestion__translation-raw">' . esc_translation( $suggestion['translation'] ) . '</span>';
 
+		if ( $is_user_a_gte_for_locale && 1 == $suggestion['similarity_score'] ) {
+			echo '<button type="button" class="button is-small delete-suggestion" data-source-singular="' . esc_attr( $suggestion['source'] ) . '" data-source-plural="' . esc_attr( $suggestion['source_plural'] ) . '" data-source-context="' . esc_attr( $suggestion['source_context'] ) . '" data-translation="' . esc_attr( $suggestion['translation'] ) . '" data-translation-plural="' . esc_attr( $suggestion['translation_plural'] ) . '">Delete</button>';
+		}
 			echo '<button type="button" class="button is-small copy-suggestion">Copy</button>';
 		echo '</div>';
 		echo '</li>';

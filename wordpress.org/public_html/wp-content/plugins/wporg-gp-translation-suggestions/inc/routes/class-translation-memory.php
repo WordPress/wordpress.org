@@ -5,7 +5,10 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions\Routes;
 use GP;
 use GP_Locales;
 use GP_Route;
+use GP_Translation;
 use WordPressdotorg\GlotPress\TranslationSuggestions\Translation_Memory_Client;
+use WP_User;
+use function cli\err;
 use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 
 class Translation_Memory extends GP_Route {
@@ -42,16 +45,17 @@ class Translation_Memory extends GP_Route {
 			$locale .= '_' . $set_slug;
 		}
 
-		$suggestions = Translation_Memory_Client::query( $original->singular, $locale );
+		$suggestions = Translation_Memory_Client::query( $original->singular, $original->plural, $locale );
 
 		if ( is_wp_error( $suggestions ) ) {
 			wp_send_json_error( $suggestions->get_error_code() );
 		}
 
+		$is_user_a_gte_for_locale = $this->is_user_a_gte_for_locale( wp_get_current_user(), $locale );
 		wp_send_json_success(
 			gp_tmpl_get_output(
 				'translation-memory-suggestions',
-				compact( 'suggestions', 'type' ),
+				compact( 'suggestions', 'type', 'is_user_a_gte_for_locale' ),
 				PLUGIN_DIR . '/templates/'
 			)
 		);
@@ -168,6 +172,40 @@ class Translation_Memory extends GP_Route {
 				PLUGIN_DIR . '/templates/'
 			)
 		);
+	}
+
+	/**
+	 * Deletes a suggestion from the translation memory.
+	 *
+	 * @param string $project_path Project path.
+	 * @param string $locale_slug  Locale slug.
+	 * @param string $set_slug     Set slug.
+	 *
+	 * @return void
+	 */
+	public function delete_suggestion( string $project_path, string $locale_slug, string $set_slug ): bool {
+		$source      = gp_post( 'source' );
+		$translation = gp_post( 'translation' );
+		$original_id = gp_post( 'originalId' );
+		$nonce       = gp_post( 'nonce' );
+		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
+			wp_send_json_error( 'invalid_nonce' );
+		}
+
+		if ( empty( $source ) || empty( $translation ) ) {
+			wp_send_json_error( 'missing_data' );
+		}
+
+		if ( ! $this->is_user_a_gte_for_locale( wp_get_current_user(), $locale_slug ) ) {
+			wp_send_json_error( 'user_cannot_delete' );
+		}
+
+		$result = Translation_Memory_Client::delete( $source, $translation, $locale_slug, $set_slug );
+		if ( ! $result ) {
+			wp_send_json_error( 'delete_failed' );
+		}
+
+		wp_send_json_success();
 	}
 
 	/**
@@ -340,7 +378,7 @@ class Translation_Memory extends GP_Route {
 			return false;
 		}
 
-		$suggestions = Translation_Memory_Client::query( $original->singular, $locale );
+		$suggestions = Translation_Memory_Client::query( $original->singular, $original->plural, $locale );
 		if ( is_wp_error( $suggestions ) ) {
 			return false;
 		}
@@ -532,6 +570,52 @@ class Translation_Memory extends GP_Route {
 			$gp_external_translations[ $external_same_translations_used ] = $same_translations_used;
 		}
 		update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
+	}
+
+	/**
+	 * Determine if the user is a GTE for the given locale.
+	 *
+	 * @param WP_User $user   User.
+	 * @param string  $locale Locale set.
+	 *
+	 * @return bool
+	 */
+	private function is_user_a_gte_for_locale( WP_User $user, string $locale ): bool {
+		$locale_slug = explode( '_', $locale )[0];
+		$locale      = GP_Locales::by_slug( $locale_slug );
+		if ( ! $locale ) {
+			return false;
+		}
+
+		$result  = get_sites(
+			array(
+				'locale'     => $locale->wp_locale,
+				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'path'       => '/',
+				'fields'     => 'ids',
+				'number'     => '1',
+			)
+		);
+		$site_id = array_shift( $result );
+		if ( ! $site_id ) {
+			return false;
+		}
+
+		$users = get_users(
+			array(
+				'blog_id'     => $site_id,
+				'role'        => 'general_translation_editor',
+				'count_total' => false,
+			)
+		);
+
+		foreach ( $users as $gte_user ) {
+			if ( $gte_user->id === $user->id ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
 
