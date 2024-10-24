@@ -55,6 +55,7 @@ ul,
 ol,
 h1,
 h2,
+.content-area h2,
 h3,
 h4 {
 	margin: 0 0 var(--wp--style--block-gap);
@@ -80,28 +81,12 @@ h4 {
 	color: var(--wp--preset--color--charcoal-1);
 }
 
+h1,
 h2,
 h3,
 h4,
-.content-area h1,
 .content-area h2 {
 	font-weight: 600;
-}
-
-h1,
-h2 {
-	font-size: var(--wp--preset--font-size--heading-3);
-	line-height: var(--wp--custom--heading--level-2--typography--line-height);
-}
-
-h3 {
-	font-size: var(--wp--preset--font-size--heading-5);
-	line-height: var(--wp--custom--heading--level-5--typography--line-height);
-}
-
-h4 {
-	font-size: var(--wp--preset--font-size--heading-6);
-	line-height: var(--wp--custom--heading--level-6--typography--line-height);
 }
 
 .entry-content .reports.ticket-reports {
@@ -224,6 +209,7 @@ tr:last-of-type td {
 	text-align: center;
 }
 
+p.has-background,
 .wp-block-group.has-background {
 	padding: var(--wp--preset--spacing--20);
 }
@@ -660,8 +646,6 @@ body.blog #secondary-content ul {
 #secondary-content .widget-title,
 #secondary-content h3 {
 	margin: 0 0 var(--wp--preset--spacing--10);
-	line-height: var(--wp--custom--heading--level-5--typography--line-height);
-	font-size: var(--wp--preset--font-size--heading-5);
 }
 
 #secondary-content .navigation-main {
@@ -910,7 +894,7 @@ input[type="submit"]:hover {
 .post-type-archive-handbook aside[id^="nav_menu"] .widget-title,
 .single-handbook aside[id^="handbook"] .widget-title,
 .single-handbook aside[id^="nav_menu"] .widget-title {
-	font-size: 16px;
+	font-size: var(--wp--preset--font-size--normal) !important;
 	text-transform: uppercase;
 	background-color: transparent;
 	margin-bottom: 0;
@@ -928,12 +912,9 @@ input[type="submit"]:hover {
 }
 
 .o2-app-page-title {
-  margin: 0 0 1.5em 0 !important;
-  padding: 0;
-  font-weight: 400;
-  font-size: 1.5em;
-  line-height: 1.1;
-  text-transform: none;
+	margin: 0 0 var(--wp--preset--spacing--50) 0 !important;
+	padding: 0;
+	text-transform: none;
 }
 
 .o2-app-page-title a {
@@ -1071,6 +1052,10 @@ article.post .entry-meta {
 	line-height: 28px;
 }
 
+.entry-author {
+	font-size: var(--wp--preset--font-size--heading-4);
+}
+
 .single-post article.post .entry-meta {
 	margin-top: unset;
 }
@@ -1089,7 +1074,7 @@ article.page .o2-post,
 article.page .entry-header .entry-meta .o2-post-actions {
 	position: absolute;
 	right: 0;
-	top: -65px;
+	top: -100px;
 }
 
 article.post.tag-p2-xpost a.author-avatar img.avatar {
@@ -1962,7 +1947,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 .single-handbook div.table-of-contents h3 {
 	margin: 0;
 	padding: 10px 12px;
-	font-size: var(--wp--preset--font-size--small);
+	font-size: var(--wp--preset--font-size--small) !important;
 	border-bottom: 1px solid var(--wp--custom--color--border);
 }
 
