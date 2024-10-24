@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "wporg/release-checks",
+	"version": "0.1.0",
+	"title": "Displays release checks.",
+	"category": "design",
+	"icon": "",
+	"description": "A block to display release checks",
+	"textdomain": "wporg",
+	"attributes": {},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php",
+	"style": "file:./style-index.css"
+}

@@ -21,6 +21,10 @@ require_once( __DIR__ . '/src/blocks/front-page/index.php' );
 require_once( __DIR__ . '/src/blocks/search-page/index.php' );
 require_once( __DIR__ . '/src/blocks/single-plugin/index.php' );
 require_once( __DIR__ . '/src/blocks/plugin-card/index.php' );
+require_once( __DIR__ . '/src/blocks/releases/index.php' );
+require_once( __DIR__ . '/src/blocks/release-checks/index.php' );
+require_once( __DIR__ . '/src/blocks/release-flags/index.php' );
+require_once( __DIR__ . '/src/blocks/release-changelog/index.php' );
 
 // Block Configs
 require_once( __DIR__ . '/inc/block-config.php' );
