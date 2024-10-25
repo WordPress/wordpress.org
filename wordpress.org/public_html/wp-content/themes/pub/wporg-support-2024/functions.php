@@ -9,6 +9,7 @@
  * Include locale specific styles.
  */
 require_once get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/inc/rosetta-styles.php';
+require_once( __DIR__ . '/inc/block-config.php' );
 
 /**
  * Use the ‘Lead Topic’ uses the single topic part
@@ -1557,50 +1558,3 @@ function bb_is_intl_forum() {
  * Include the Strings for the supporg/update-php page.
  */
 include_once __DIR__ . '/helphub-update-php-strings.php';
-
-
-/**
- * Update ratings blocks with real rating data.
- *
- * @param array $data    Rating data.
- * @param int   $post_id Current post.
- *
- * @return array
- */
-function wporg_set_rating_data( $data, $post_id ) {
-	$post = wporg_support_get_compat_object();
-
-	if ( class_exists( '\WPORG_Ratings' ) ) {
-		$rating  = \WPORG_Ratings::get_avg_rating( $post->type, $post->post_name ) ?: 0;
-		$ratings = \WPORG_Ratings::get_rating_counts( $post->type, $post->post_name ) ?: array();
-	}
-
-	/**
-	 * Why do we multiply the average rating by 20?
-	 * The themes API does it this way, and the rating plugin was built to fit that. 
-	 * Instead of redoing everything, multiplying here keeps things simple and works well.
-	 *
-	 * @see theme-directory/class-themes-api.php for more info.
-	 */
-	$adjusted_rating = $rating * 20;
-
-	return array(
-		'rating' => $adjusted_rating,
-		'ratingsCount' => array_sum( $ratings ),
-		'ratings' => $ratings,
-		'supportUrl' => esc_url( sprintf( home_url( '/%s/%s/reviews/' ), $post->type, $post->post_name ) )
-	);
-}
-
-add_filter( 'wporg_ratings_data', 'wporg_set_rating_data', 10, 2 );
-
-function wporg_render_block_context( $context, $parsed_block, $parent_block ) {
-
-	if ( in_array( $parsed_block['blockName'], [ 'wporg/ratings-stars', 'wporg/ratings-bars'  ] ) ) {
-		$context = array_merge( $context, [ 'postId' => wporg_support_get_compat_object()->ID ] );
-	}
-
-	return $context;
-}
-
-add_filter( 'render_block_context', 'wporg_render_block_context', 10, 3	 );
