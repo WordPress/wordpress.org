@@ -4,6 +4,7 @@
  *
  * @package WPBBP
  */
+
 get_header(); ?>
 
 <main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
