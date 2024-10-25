@@ -4,13 +4,12 @@
  *
  * @package WPBBP
  */
-
+global $wp_query;
 get_header(); ?>
 
 <main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
 
 		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
-
 		<div class="entry-content">
 			<?php while ( have_posts() ) : the_post(); ?>
 

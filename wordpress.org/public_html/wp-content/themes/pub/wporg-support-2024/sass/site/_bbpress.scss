@@ -1344,8 +1344,8 @@ div.bbp-breadcrumb {
 	.review-ratings {
 
 		@extend .clear;
-		margin-bottom: ms(0);
-		padding-bottom: 10px;
+		margin-bottom: var(--wp--preset--spacing--20);
+		padding-bottom: var(--wp--preset--spacing--20);
 		border-bottom: 1px solid var(--wp--custom--color--border);
 		display: flex;
 		flex-direction: row-reverse;
@@ -1354,7 +1354,6 @@ div.bbp-breadcrumb {
 			font-size: ms(-2);
 			margin: 0;
 			min-width: 40%;
-			border-top: 1px solid var(--wp--custom--color--border);
 			flex-shrink: 0;
 
 			.reviews-total-count {
