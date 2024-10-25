@@ -225,7 +225,7 @@ class Ratings_Compat {
 	</div>
 	<div class="col-5">
 		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
-			<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); ?>
+		<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); ?>
 		<div class="reviews-submit-link">
 		<?php
 			if ( is_user_logged_in() ) {
