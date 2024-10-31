@@ -238,6 +238,27 @@ class Template {
 		return version_compare( $version_to_check_against, $tested_up_to, '>' );
 	}
 
+ 	/**
+	 * Checks if the plugin is many years out of date.
+	 *
+	 * @static
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return bool True if the plugin is obsolete, false otherwise.
+	 */
+	public static function is_plugin_obsolete( $post = null ) {
+			$post = get_post( $post );
+			$tested_up_to             = (string) $post->tested;
+			$version_to_check_against = (string) ( self::get_current_major_wp_version() - 3.5 ); // 35 major releases behind is at least 10 years.
+
+			$last_updated             = new \DateTime( $post->last_updated ?: $post->post_modified_gmt );
+			$date_threshold           = new \DateTime( '10 years ago' );
+
+			// A plugin is obsolete if it hasn't been updated in a long time AND hasn't been tested against a modern version.
+			return version_compare( $version_to_check_against, $tested_up_to, '>' )
+				&& $last_updated < $date_threshold;
+	}
+
 	/**
 	 * Returns a string representing the number of active installations for an item.
 	 *
@@ -722,6 +743,26 @@ class Template {
 	}
 
 	/**
+	 * Determine whether or not we should show a primary Download button for a given plugin.
+	 * Generally yes, but there are exceptions for closed and very old buttons.
+	 *
+	 * @param int|\WP_Post|null $post	Optional. Post ID or object. Defaults to global $post.
+	 * @return bool	True if the button should be shown; false otherwise.
+	 */
+	public static function is_download_available( $post = null ) {
+			$post = get_post( $post );
+
+			if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) {
+				// We usually want to have a download button for published plugins; but not if it's ancient.
+				if ( ! self::is_plugin_obsolete( $post ) ) {
+					return true;
+				}
+			}
+
+			return false;
+	}
+
+	/**
 	 * Is a live preview available for the plugin, and allowed for the current user to view?
 	 *
 	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
@@ -1117,7 +1158,7 @@ class Template {
 			$result['public'] = true;
 		}
 
-		return $result;	
+		return $result;
 	}
 
 	/**
