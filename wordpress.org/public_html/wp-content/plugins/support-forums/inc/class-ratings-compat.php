@@ -212,18 +212,7 @@ class Ratings_Compat {
 		add_filter( 'bbp_get_topic_last_topic_title', array( $this, 'undo_topic_title' ), 10, 1 );
 ?>
 <div class="review-ratings">
-	<div class="col-3">
-		<div class="reviews-about" style="display:none;"><?php echo esc_html( $this->object->post_title ); ?></div>
-		<div class="reviews-total-count"><?php
-			printf(
-				/* translators: %s: number of reviews */
-				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
-				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
-			);
-		?></div>
-		<?php echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' ); ?>
-	</div>
-	<div class="col-5">
+	<div>
 		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
 		<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); ?>
 		<div class="reviews-submit-link">
@@ -251,6 +240,17 @@ class Ratings_Compat {
 			}
 		?>
 		</div>
+	</div>
+	<div>
+		<div class="reviews-about" style="display:none;"><?php echo esc_html( $this->object->post_title ); ?></div>
+		<div class="reviews-total-count"><?php
+			printf(
+				/* translators: %s: number of reviews */
+				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
+				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
+			);
+		?></div>
+		<?php echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' ); ?>
 	</div>
 </div>
 		<?php
