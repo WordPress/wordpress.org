@@ -58,15 +58,15 @@ function wporg_set_rating_data( $data, $post_id ) {
  * @return array The modified block context.
  */
 function wporg_render_block_context( $context, $parsed_block, $parent_block ) {
-    if ( isset( $parsed_block['blockName'] ) && 
-         in_array( $parsed_block['blockName'], [ 'wporg/ratings-stars', 'wporg/ratings-bars' ], true ) ) {
+	if ( isset( $parsed_block['blockName'] ) && 
+		in_array( $parsed_block['blockName'], [ 'wporg/ratings-stars', 'wporg/ratings-bars' ], true ) ) {
 
-        $compat_object = wporg_support_get_compat_object();
+		$compat_object = wporg_support_get_compat_object();
 
-        if ( $compat_object ) {
-            $context = array_merge( $context, [ 'postId' => $compat_object->ID ] );
-        }
-    }
+		if ( $compat_object ) {
+			$context = array_merge( $context, [ 'postId' => $compat_object->ID ] );
+		}
+	}
 
-    return $context;
+	return $context;
 }
