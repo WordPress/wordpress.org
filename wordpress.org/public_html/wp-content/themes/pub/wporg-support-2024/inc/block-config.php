@@ -3,6 +3,8 @@
  * Set up configuration for dynamic blocks.
  */
 
+namespace WordPressdotorg\Forums\Block_Config;
+
 /**
  * Actions and filters.
  */
@@ -20,10 +22,12 @@ add_filter( 'wporg_ratings_data', 'wporg_set_rating_data', 10, 2 );
 function wporg_set_rating_data( $data, $post_id ) {
 	$post = wporg_support_get_compat_object();
 
-	if ( class_exists( '\WPORG_Ratings' ) ) {
-		$rating  = \WPORG_Ratings::get_avg_rating( $post->type, $post->post_name ) ?: 0;
-		$ratings = \WPORG_Ratings::get_rating_counts( $post->type, $post->post_name ) ?: array();
+	if ( ! class_exists( '\WPORG_Ratings' ) ) {
+		return '';
 	}
+
+	$rating  = \WPORG_Ratings::get_avg_rating( $post->type, $post->post_name ) ?: 0;
+	$ratings = \WPORG_Ratings::get_rating_counts( $post->type, $post->post_name ) ?: array();
 
 	/**
 	 * Why do we multiply the average rating by 20?
