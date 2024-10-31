@@ -8,8 +8,8 @@ namespace WordPressdotorg\Forums\Block_Config;
 /**
  * Actions and filters.
  */
-add_filter( 'render_block_context', 'wporg_render_block_context', 10, 3	);
-add_filter( 'wporg_ratings_data', 'wporg_set_rating_data', 10, 2 );
+add_filter( 'render_block_context', __NAMESPACE__ . '\wporg_render_block_context', 10, 3 );
+add_filter( 'wporg_ratings_data', __NAMESPACE__ . '\wporg_set_rating_data', 10, 2 );
 
 /**
  * Update ratings blocks with real rating data.
