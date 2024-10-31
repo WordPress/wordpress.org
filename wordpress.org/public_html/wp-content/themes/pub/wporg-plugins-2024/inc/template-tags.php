@@ -177,7 +177,12 @@ function get_plugin_status_notice( $post = null ) {
 
 	switch ( $post_status ) {
 		case 'publish':
-			if ( Template::is_plugin_outdated( $post ) ) {
+			if ( Template::is_plugin_obsolete( $post ) ) {
+				$message = sprintf(
+					$warning_notice,
+					__( '<strong>This plugin is obsolete.</strong> It has not been maintained in many years, and should not be used on a new site. It is available here for archival and historical reasons.', 'wporg-plugins' )
+				);
+			} elseif ( Template::is_plugin_outdated( $post ) ) {
 				$message = sprintf(
 					$warning_notice,
 					__( 'This plugin <strong>hasn&#146;t been tested with the latest 3 major releases of WordPress</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' )
