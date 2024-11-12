@@ -23,7 +23,7 @@ function wporg_set_rating_data( $data, $post_id ) {
 	$post = wporg_support_get_compat_object();
 
 	if ( ! class_exists( '\WPORG_Ratings' ) ) {
-		return '';
+		return $data;
 	}
 
 	$rating  = \WPORG_Ratings::get_avg_rating( $post->type, $post->post_name ) ?: 0;
