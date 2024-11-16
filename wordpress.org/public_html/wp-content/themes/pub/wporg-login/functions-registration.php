@@ -74,6 +74,11 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	$profile_key        = wp_generate_password( 24, false, false );
 	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
+	$source = $_COOKIE['wporg_came_from'] ?? '';
+	if ( $source ) {
+		$source = remove_query_arg( [ 'SAMLRequest', 'RelayState' ], $source );
+	}
+
 	$pending_user = array(
 		'user_login'          => $user_login,
 		'user_email'          => $user_email,
@@ -83,7 +88,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		'meta'                => $meta + array(
 			'registration_ip'         => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
 			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ) : '' ),
-			'source'                  => $_COOKIE['wporg_came_from'] ?? '',
+			'source'                  => $source,
 		),
 		'scores'              => array(
 			'pending' => 1,

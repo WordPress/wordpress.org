@@ -61,6 +61,8 @@ class Translations_Route extends Route {
 		}
 		Templates::render( 'translations/header', get_defined_vars() );
 
+		$editor_options = array();
+
 		foreach ( $translation_sets as $ts ) {
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(

@@ -9,8 +9,6 @@ get_header(); ?>
 
 <?php $is_landing_page = wporg_is_handbook_landing_page(); ?>
 
-<?php get_sidebar( 'handbook' ); ?>
-
 <?php if ( 'handbook' !== wporg_get_current_handbook() ) { ?>
 <div class="handbook-name-container">
 	<div class="handbook-name"><span>
@@ -55,6 +53,8 @@ get_header(); ?>
 	</div> <!-- .site-content -->
 
 </div> <!-- #primary -->
+
+<?php get_sidebar( 'handbook' ); ?>
 
 <?php get_footer(); ?>
 

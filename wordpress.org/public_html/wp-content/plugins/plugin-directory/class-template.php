@@ -1083,6 +1083,19 @@ class Template {
 			'public'    => false,
 		];
 
+		/*
+		 * If the date is unknown, fallback to the last_updated time (then to post_modified_gmt, then to post_date_gmt..).
+		 *
+		 * This is not strictly correct, but the consistency in data is more important than the exact date, where the plugins
+		 * without the closed metadata are likely closed pre-2018.
+		 */
+		if ( ! $result['date'] ) {
+			$result['date'] = $post->last_updated ?: $post->post_modified_gmt;
+			if ( '0000-00-00 00:00:00' === $result['date'] ) {
+				$result['date'] = $post->post_date_gmt;
+			}
+		}
+
 		if (
 			'author-request' === $result['reason'] ||
 			! Tools::get_plugin_committers( $post->post_name )
@@ -1090,10 +1103,16 @@ class Template {
 			$result['permanent'] = true;
 		}
 
-		$result['label'] = self::get_close_reasons()[ $result['reason'] ] ?? _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
-		$days_closed     = $result['date'] ? (int) ( ( time() - strtotime( $result['date'] ) ) / DAY_IN_SECONDS ) : false;
+		$result['label'] = self::get_close_reasons()[ $result['reason'] ] ?? false;
+
+		// If not known reason, use 'unknown'.
+		if ( ! $result['label'] ) {
+			$result['reason'] = 'unknown';
+			$result['label']  = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+		}
 
 		// If it's closed for more than 60 days, it's by author request, or we're unsure about the close date, it's publicly known.
+		$days_closed = $result['date'] ? (int) ( ( time() - strtotime( $result['date'] ) ) / DAY_IN_SECONDS ) : false;
 		if ( ! $result['date'] || $days_closed >= 60 || 'author-request' === $result['reason'] ) {
 			$result['public'] = true;
 		}

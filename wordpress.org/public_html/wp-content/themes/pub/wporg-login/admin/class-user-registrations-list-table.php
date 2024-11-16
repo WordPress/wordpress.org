@@ -39,44 +39,43 @@ class User_Registrations_List_Table extends WP_List_Table {
 			]
 		];
 
-		$default      = 'all';
-		$current_view = $_REQUEST['view'] ?? $default;
+		$current_view = $this->get_current_view();
 
 		if ( ! empty( $_GET['s'] ) ) {
-			$default = 'search';
 			$views[0] = [
 				'search', 'All search results'
 			];
 
 			array_unshift( $views, [ 'all', 'All' ] );
-
-			if ( 'all' === $current_view ) {
-				$current_view = 'search';
-			}
 		}
 
 		return array_map(
 			function( $item ) use ( $current_view ) {
 				global $wpdb;
 
-				$count = $wpdb->get_var(
-					"SELECT count(*) FROM {$wpdb->base_prefix}user_pending_registrations registrations " .
-					$this->get_join_where_sql( $item[0] )
-				);
+				$view      = $item[0];
+				$is_search = ( ! empty( $_GET['s'] ) && 'all' != $view );
 
-				$url = admin_url( 'admin.php?page=user-registrations' );
-				if ( !empty( $_GET['s'] ) && 'all' != $item[0] ) {
-					$url = add_query_arg( 's', urlencode( $_GET['s'] ), $url );
+				// If we're searching, and the search didn't have any results, all the "sub views" are 0.
+				if ( $is_search && ! $this->get_view_total_count( 'search' ) ) {
+					$count = 0;
+				} else {
+					$count = $this->get_view_total_count( $view );
 				}
 
-				if ( 'all' !== $item[0] ) {
-					$url = add_query_arg( 'view', $item[0], $url );
+				$url = admin_url( 'admin.php?page=user-registrations' );
+				if ( $is_search ) {
+					$url = add_query_arg( 's', urlencode( wp_unslash( $_GET['s'] ) ), $url );
+				}
+
+				if ( 'all' !== $view ) {
+					$url = add_query_arg( 'view', $view, $url );
 				}
 
 				return sprintf(
 					'<a href="%s" class="%s">%s <span class="count">(%s)</span></a>',
 					$url,
-					$current_view === $item[0] ? 'current' : '',
+					$current_view === $view ? 'current' : '',
 					$item[1],
 					number_format_i18n( $count ),
 				);
@@ -84,6 +83,61 @@ class User_Registrations_List_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Get the current view to display.
+	 *
+	 * @return string
+	 */
+	protected function get_current_view() {
+		$view = $_REQUEST['view'] ?? false;
+		if ( ! $view ) {
+			$view = 'all';
+			if ( ! empty( $_GET['s'] ) ) {
+				$view = 'search';
+			}
+		}
+
+		if ( 'all' === $view && ! empty( $_GET['s'] ) ) {
+			$view = 'search';
+		}
+
+		return $view;
+	}
+
+	/**
+	 * Get the total count for a given view.
+	 *
+	 * @param string $view The view to get the count for.
+	 * @return int
+	 */
+	protected function get_view_total_count( $view ) {
+		global $wpdb;
+		static $counts = [];
+
+		// Search view has no results if no search term...
+		if ( 'search' === $view && empty( $_GET['s'] ) ) {
+			return 0;
+		}
+
+		$current_view = $this->get_current_view();
+		if ( $view === $current_view ) {
+			return $this->get_pagination_arg( 'total_items' );
+		}
+
+		$counts[ $view ] ??= $wpdb->get_var(
+			"SELECT count(*) FROM {$wpdb->base_prefix}user_pending_registrations registrations " .
+			$this->get_join_where_sql( $view )
+		);
+
+		return $counts[ $view ];
+	}
+
+	/**
+	 * Get the SQL WHERE clause for a given view.
+	 *
+	 * @param string $view The view to get the WHERE clause for.
+	 * @return string
+	 */
 	protected function get_view_sql_where( $view ) {
 		switch ( $view ) {
 			case 'pending':
@@ -108,6 +162,12 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 	}
 
+	/**
+	 * Get the SQL JOIN and WHERE clause for a given view.
+	 *
+	 * @param string $view The view to get the JOIN and WHERE clause for.
+	 * @return string
+	 */
 	protected function get_join_where_sql( $view = null ) {
 		global $wpdb;
 
@@ -123,21 +183,30 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 			// Limit searches to where they're likely, for performance.
 			if ( str_contains( $search_term, '@' ) ) {
-				// Looks like an email, so just search the emails.
-				$where .= $wpdb->prepare(
-					"AND registrations.user_email LIKE %s",
-					$search_like
-				);
+				// If it looks like a full email, exact match.
+				if ( preg_match( '/^.{3,}@.+[.].+$/', $search_term ) ) {
+					// Looks like an email, so just search the emails.
+					$where .= $wpdb->prepare(
+						"AND registrations.user_email = %s",
+						$search_term
+					);
+				} else {
+					// Otherwise, a wildcard on the email.
+					$where .= $wpdb->prepare(
+						"AND registrations.user_email LIKE %s",
+						$search_like
+					);
+				}
 			} elseif (
 				// If it looks like an IP
 				preg_match( '/^\d{1,3}\.[0-9.]*$/', $search_term ) ||
 				// Or it looks like a country code, 
-				preg_match( '/^[A-Z]{2}/', $search_term )
+				preg_match( '/^[A-Z]{2}$/', $search_term )
 			) {
-				// then only look in metadata.
+				// then only look in metadata, case sensitive.
 				$where .= $wpdb->prepare(
-					"AND registrations.meta LIKE %s",
-					$search_like
+					"AND registrations.meta LIKE BINARY %s",
+					'%"' . $wpdb->esc_like( $search_term ) . '%' // Anchor it with a " at the start of the field.
 				);
 			} else {
 				// Otherwise, search everything.

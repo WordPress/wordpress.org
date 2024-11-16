@@ -5,6 +5,8 @@
  * @package wporg-breathe
  */
 
+use function WordPressdotorg\Make\Breathe_2024\{ breathe_content_nav };
+
 get_header(); ?>
 
 <?php $is_handbook = function_exists( 'wporg_is_handbook' ) && wporg_is_handbook(); ?>

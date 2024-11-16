@@ -386,6 +386,9 @@ function get_whitelist() {
 			'santanainniss',
 			'SeReedMedia',
 		),
+		'media-corps' => array(
+			'eidolonnight',
+		),
 		'meta' => array(
 			'coreymckrill',
 			'courane01', // @Courtney on Slack
@@ -445,6 +448,13 @@ function get_whitelist() {
 			'topher1kenobe',
 			'katiejrichards',
 			'marcusskyverge',
+		),
+		'playground' => array(
+			'akirk',
+			'bph',
+			'berislav.grgicak',
+			'bpayton',
+			'zieladam',
 		),
 		'polyglots' => array(
 			'Amieiro',

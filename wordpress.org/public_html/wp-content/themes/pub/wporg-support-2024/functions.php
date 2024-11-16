@@ -9,6 +9,7 @@
  * Include locale specific styles.
  */
 require_once get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/inc/rosetta-styles.php';
+require_once( __DIR__ . '/inc/block-config.php' );
 
 /**
  * Use the ‘Lead Topic’ uses the single topic part
@@ -1343,6 +1344,17 @@ function wporg_is_single_user_profile( bool $is_single_user_profile ) : bool {
 	return $is_single_user_profile;
 }
 add_filter( 'bbp_is_single_user_profile', 'wporg_is_single_user_profile' );
+
+/**
+ * Get the URL for the forums welcome page.
+ * This is translated so the URL can be customized per locale.
+ *
+ * @return string
+ */
+function wporg_support_get_welcome_url() {
+	/* Translators: URL for the welcome page. Check whether your site has a custom slug, eg. https://es.wordpress.org/support/bienvenida/ */
+	return __( 'https://wordpress.org/support/welcome/', 'wporg-forums' );
+}
 
 
 /** bb Base *******************************************************************/

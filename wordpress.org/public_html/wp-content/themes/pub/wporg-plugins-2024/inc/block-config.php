@@ -14,6 +14,7 @@ add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wpor
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
 add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
+add_filter( 'wporg_ratings_data', __NAMESPACE__ . '\set_rating_data', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\filter_site_title_block' );
 add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\filter_navigation_block', 10, 2 );
@@ -286,6 +287,42 @@ function get_favorite_settings( $settings, $post_id ) {
 			}
 			return $result;
 		},
+	);
+}
+
+/**
+ * Update ratings blocks with real rating data.
+ *
+ * @param array $data    Rating data.
+ * @param int   $post_id Current post.
+ *
+ * @return array
+ */
+function set_rating_data( $data, $post_id ) {
+	$post = get_post( $post_id );
+
+	if ( class_exists( '\WPORG_Ratings' ) ) {
+		$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
+		$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
+	} else {
+		$rating  = get_post_meta( $post->ID, 'rating', true ) ?: 0;
+		$ratings = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+	}
+
+	/**
+	 * Why do we multiply the average rating by 20?
+	 * The themes API does it this way, and the rating plugin was built to fit that. 
+	 * Instead of redoing everything, multiplying here keeps things simple and works well.
+	 *
+	 * @see theme-directory/class-themes-api.php for more info.
+	 */
+	$adjusted_rating = $rating * 20;
+
+	return array(
+		'rating' => $adjusted_rating,
+		'ratingsCount' => array_sum( $ratings ),
+		'ratings' => $ratings,
+		'supportUrl' => esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' )
 	);
 }
 
