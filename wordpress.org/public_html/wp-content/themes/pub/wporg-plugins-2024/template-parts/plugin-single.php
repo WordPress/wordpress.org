@@ -18,6 +18,8 @@ $content   = Plugin_Directory::instance()->split_post_content_into_pages( get_th
 $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
 
 $plugin_title = $is_closed ? $post->post_name : get_the_title();
+
+$show_release_beta = isset( $_GET['show_release_beta'] ) || ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED );
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'alignwide' ); ?>>
@@ -47,6 +49,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 					<span class="byline"><?php the_author_byline(); ?></span>
 				</div>
 			</div>
+			
 			<div class="plugin-actions">
 				<?php
 				$buttons = '<!-- wp:wporg/favorite-button /-->';
@@ -87,6 +90,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 	<span id="reviews"></span>
 	<span id="installation"></span>
 	<span id="developers"></span>
+	<span id="releases"></span>
 	<span id="advanced" class="<?php if ( get_query_var( 'plugin_advanced' ) ) { echo 'displayed'; } ?>"></span>
 	<span id="section-links">
 		<ul class="tabs clear">
@@ -98,6 +102,9 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			</li>
 		<?php endif; ?>
 		<li id="tablink-developers"><a href="<?php the_permalink(); ?>#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
+		<?php if ( $show_release_beta ) : ?>
+			<li id="tablink-releases"><a href="<?php the_permalink(); ?>#releases"><?php esc_html_e( 'Releases', 'wporg-plugins' ); ?></a></li>
+		<?php endif; ?>
 		<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
 			<li id="tablink-advanced"><a href="<?php the_permalink(); ?>advanced/"><?php esc_html_e( 'Advanced View', 'wporg-plugins' ); ?></a></li>
 		<?php endif; ?>
@@ -114,11 +121,15 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			get_template_part( 'template-parts/section-advanced' );
 		} else {
 			$plugin_sections_titles = Template::get_plugin_section_titles();
+			$content_section_list = array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog' );
 
-			foreach ( array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog' ) as $section_slug ) {
+			if ( $show_release_beta ) {
+				$content_section_list[] = 'releases';
+			}
+
+			foreach ( $content_section_list as $section_slug ) {
 				$section_content = '';
 				$section_title   = $plugin_sections_titles[ $section_slug ] ?? '';
-
 				if ( $is_closed && in_array( $section_slug, [ 'screenshots', 'installation', 'faq', 'changelog' ], true ) ) {
 					// Don't show these sections when closed.
 					$section_content = '';
@@ -134,6 +145,13 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 					$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
 				}
 
+				if ( 'releases' === $section_slug ) {
+					echo '<div id="tab-releases">';
+					block_template_part( 'releases' );
+					echo '</div>';
+					continue;
+				}
+
 				if ( empty( $section_content ) ) {
 					continue;
 				}
@@ -142,6 +160,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			}
 		} // plugin_advanced.
 		?>
+
 	</div><!-- .entry-content -->
 
 	<div class="entry-meta">

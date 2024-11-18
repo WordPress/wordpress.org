@@ -557,7 +557,7 @@ class Plugin_Directory {
 
 		// Add duplicate search rule which will be hit before the following old-plugin tab rules
 		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
-		
+
 		// Add additional tags endpoint, to avoid being caught in old-plugins tab rules. See: https://meta.trac.wordpress.org/ticket/6819.
 		add_rewrite_rule( '^tags/([^/]+)/?$', 'index.php?plugin_tags=$matches[1]', 'top' );
 
@@ -1735,9 +1735,15 @@ class Plugin_Directory {
 		$plugin   = self::get_plugin_post( $plugin );
 		$releases = get_post_meta( $plugin->ID, 'releases', true );
 
-		// Meta doesn't exist yet? Lets fill it out.
+		// Data doesn't exist yet? Lets fill it out.
 		if ( false === $releases || ! is_array( $releases ) ) {
-			$releases = self::prefill_releses_meta( $plugin );
+			$releases = self::prefill_releases_meta( $plugin );
+
+			// FIXME: limit creation of data while we're testing. Remove this for production.
+			// For now we'll mirror the releases postmeta into the CPT. If/when we're confident the behaviour is identical, we can remove the postmeta part.
+			if ( in_array( 'wordpressdotorg', Tools::get_plugin_committers( $plugin->ID ) ) ) {
+				Plugin_Release::instance()->update_releases( $plugin, $releases );
+			}
 		}
 
 		/**
@@ -1756,15 +1762,12 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Prefill the releases meta for a plugin.
+	 * Prefill the releases meta items for a plugin.
 	 *
 	 * @param \WP_Post $plugin Plugin post object.
 	 * @return array
 	 */
-	public static function prefill_releses_meta( $plugin ) {
-		if ( ! $plugin->releases ) {
-			update_post_meta( $plugin->ID, 'releases', [] );
-		}
+	public static function prefill_releases_meta( $plugin ) {
 
 		$tags = get_post_meta( $plugin->ID, 'tags', true );
 		if ( $tags ) {
