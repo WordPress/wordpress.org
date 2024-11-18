@@ -1,8 +1,6 @@
 <?php
 
 $content = do_blocks( <<<BLOCKS
-<!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}}},"layout":{"type":"default"}} -->
-<div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--20);margin-bottom:var(--wp--preset--spacing--20)">
 <!-- wp:query {"queryId":9,"query":{"perPage":3,"pages":0,"offset":0,"postType":"page","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false,"parents":[]}} -->
 <div class="wp-block-query"><!-- wp:post-template -->
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"width":"1px"}},"borderColor":"light-grey-1","layout":{"type":"constrained","justifyContent":"left"}} -->
@@ -41,13 +39,12 @@ $content = do_blocks( <<<BLOCKS
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 <!-- /wp:post-template --></div>
-<!-- /wp:query --></div>
-<!-- /wp:group -->
+<!-- /wp:query -->
 BLOCKS
 );
 
 printf(
-    '<div %1$s>%2$s</div>',
+    '<div %1$s>%2$s<div>',
     get_block_wrapper_attributes(),
     $content
 );
