@@ -1,0 +1,61 @@
+/*!*******************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/blocks/release-menu-options/style.scss ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************/
+.wporg-release-menu-options {
+  position: relative;
+  display: flex;
+}
+.wporg-release-menu-options summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 16px;
+  list-style: none;
+}
+.wporg-release-menu-options summary:hover {
+  background-color: var(--wp--preset--color--light-grey-2);
+}
+.wporg-release-menu-options summary:focus {
+  outline-color: var(--wp--custom--button--outline--focus--border--color);
+}
+.wporg-release-menu-options[open] summary {
+  background-color: var(--wp--preset--color--charcoal-1);
+  color: var(--wp--preset--color--white);
+}
+.wporg-release-menu-options svg {
+  fill: currentColor;
+}
+.wporg-release-menu-options summary::-webkit-details-marker {
+  display: none;
+}
+
+.wporg-release-menu-options-content {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100000;
+  min-width: 200px;
+  margin: 4px 0 0;
+  padding: var(--wp--preset--spacing--10);
+  border: 1px solid var(--wp--preset--color--light-grey-1);
+  border-radius: 2px;
+  background-color: #fff;
+}
+.wporg-release-menu-options-content button {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: var(--wp--preset--spacing--10);
+}
+.wporg-release-menu-options-content button:hover {
+  background-color: var(--wp--preset--color--light-grey-2);
+  color: var(--wp--preset--color--charcoal-1);
+}
+
+/*# sourceMappingURL=style-index.css.map*/

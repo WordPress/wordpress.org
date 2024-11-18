@@ -1,0 +1,64 @@
+.wporg-release-menu-options {
+	position: relative;
+	display: flex;
+
+	summary {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 2px;
+		cursor: pointer;
+		line-height: 16px;
+		list-style: none;
+	}
+
+	summary:hover {
+		background-color: var(--wp--preset--color--light-grey-2);
+	}
+
+	summary:focus {
+		outline-color: var(--wp--custom--button--outline--focus--border--color);
+	}
+
+	&[open] summary {
+		background-color: var(--wp--preset--color--charcoal-1);
+		color: var(--wp--preset--color--white);
+	}
+
+	svg {
+		fill: currentColor;
+	}
+
+	summary::-webkit-details-marker {
+		display: none;
+	}
+}
+
+.wporg-release-menu-options-content {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	z-index: 100000;
+	min-width: 200px;
+	margin: 4px 0 0;
+	padding: var(--wp--preset--spacing--10);
+	border: 1px solid var(--wp--preset--color--light-grey-1);
+	border-radius: 2px;
+	background-color: #fff;
+
+	button {
+		display: block;
+		width: 100%;
+		background: none;
+		border: none;
+		text-align: left;
+		padding: var(--wp--preset--spacing--10);
+	}
+
+	button:hover {
+		background-color: var(--wp--preset--color--light-grey-2);
+		color: var(--wp--preset--color--charcoal-1);
+	}
+}

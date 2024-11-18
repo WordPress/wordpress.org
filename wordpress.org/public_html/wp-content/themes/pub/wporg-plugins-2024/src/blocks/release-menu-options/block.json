@@ -1,0 +1,17 @@
+{
+  "apiVersion": 2,
+  "name": "wporg/release-menu-options",
+  "title": "Dropdown menu for release",
+  "category": "widgets",
+  "icon": "menu",
+  "description": "Display the dropdown menu option for a release.",
+  "supports": {
+    "html": false
+  },
+  "usesContext": [ "postId" ],
+  "textdomain": "wporg",
+  "editorScript": "file:./index.js",
+  "viewScriptModule": "file:./view.js",
+	"style": "file:./style-index.css",
+  "render": "file:./render.php"
+}

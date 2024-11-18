@@ -7,6 +7,7 @@ namespace WordPressdotorg\Theme\Plugins_2024\Block_Config;
 
 use WordPressdotorg\Plugin_Directory\Tools;
 
+add_action( 'init', __NAMESPACE__ . '\handle_publish_action' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\wporg_query_filter_options_sort' );
 add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg_query_filter_options_business_model' );
@@ -434,4 +435,17 @@ function filter_language_suggest( $block_content ) {
 	$html->next_tag();
 	$html->add_class( 'is-style-prominent' );
 	return $html->get_updated_html();
+}
+
+/**
+ * Handle form that publishes or discards a release.
+ */
+function handle_publish_action() {
+    if ( isset( $_POST['publish_release_nonce'] ) && wp_verify_nonce( $_POST['publish_release_nonce'], 'publish-release-action' ) ) {
+		if ( 'publish' === $_POST['action'] ) {
+			var_dump('publish: not yet implemented');
+		} elseif ('discard' === $_POST['action']) {
+			var_dump('discard: not yet implemented');
+		}
+    }
 }

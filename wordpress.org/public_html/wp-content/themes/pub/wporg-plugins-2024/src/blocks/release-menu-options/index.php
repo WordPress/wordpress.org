@@ -1,12 +1,12 @@
 <?php
 /**
- * Block Name: Releases
- * Description: A block to display releases.
+ * Block Name: Release Menu Options
+ * Description: A block to display release option.
  *
  * @package wporg
  */
 
-namespace WordPressdotorg\Theme\Plugins_2024\Releases;
+namespace WordPressdotorg\Theme\Plugins_2024\ReleaseMenuOptions;
 
 add_action( 'init', __NAMESPACE__ . '\init' );
 
@@ -18,5 +18,5 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @see https://developer.wordpress.org/reference/functions/register_block_type/
  */
 function init() {
-	register_block_type( __DIR__ . '/../../../build/blocks/releases' );
+	register_block_type( __DIR__ . '/../../../build/blocks/release-menu-options' );
 }

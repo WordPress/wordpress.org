@@ -2,9 +2,9 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/blocks/release-confirmation/index.js":
+/***/ "./src/blocks/release-menu-options/index.js":
 /*!**************************************************!*\
-  !*** ./src/blocks/release-confirmation/index.js ***!
+  !*** ./src/blocks/release-menu-options/index.js ***!
   \**************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -19,8 +19,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_server_side_render__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_server_side_render__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./block.json */ "./src/blocks/release-confirmation/block.json");
-/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./style.scss */ "./src/blocks/release-confirmation/style.scss");
+/* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./block.json */ "./src/blocks/release-menu-options/block.json");
+/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./style.scss */ "./src/blocks/release-menu-options/style.scss");
 
 /**
  * WordPress dependencies
@@ -53,9 +53,9 @@ function Edit({
 
 /***/ }),
 
-/***/ "./src/blocks/release-confirmation/style.scss":
+/***/ "./src/blocks/release-menu-options/style.scss":
 /*!****************************************************!*\
-  !*** ./src/blocks/release-confirmation/style.scss ***!
+  !*** ./src/blocks/release-menu-options/style.scss ***!
   \****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -115,13 +115,13 @@ module.exports = window["wp"]["serverSideRender"];
 
 /***/ }),
 
-/***/ "./src/blocks/release-confirmation/block.json":
+/***/ "./src/blocks/release-menu-options/block.json":
 /*!****************************************************!*\
-  !*** ./src/blocks/release-confirmation/block.json ***!
+  !*** ./src/blocks/release-menu-options/block.json ***!
   \****************************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"wporg/release-confirmation","version":"0.1.0","title":"Release confirmation banner.","category":"design","icon":"","description":"A block to display release confirmation banner.","textdomain":"wporg","attributes":{},"supports":{"html":false},"usesContext":["postId"],"editorScript":"file:./index.js","render":"file:./render.php","style":"file:./style-index.css"}');
+module.exports = JSON.parse('{"apiVersion":2,"name":"wporg/release-menu-options","title":"Dropdown menu for release","category":"widgets","icon":"menu","description":"Display the dropdown menu option for a release.","supports":{"html":false},"usesContext":["postId"],"textdomain":"wporg","editorScript":"file:./index.js","viewScriptModule":"file:./view.js","style":"file:./style-index.css","render":"file:./render.php"}');
 
 /***/ })
 
@@ -237,8 +237,8 @@ module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
-/******/ 			"blocks/release-confirmation/index": 0,
-/******/ 			"blocks/release-confirmation/style-index": 0
+/******/ 			"blocks/release-menu-options/index": 0,
+/******/ 			"blocks/release-menu-options/style-index": 0
 /******/ 		};
 /******/ 		
 /******/ 		// no chunk on demand loading
@@ -290,7 +290,7 @@ module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["blocks/release-confirmation/style-index"], () => (__webpack_require__("./src/blocks/release-confirmation/index.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["blocks/release-menu-options/style-index"], () => (__webpack_require__("./src/blocks/release-menu-options/index.js")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

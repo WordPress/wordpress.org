@@ -1,1 +1,11 @@
-.wp-block-wporg-release-status{border:1px solid var(--wp--preset--color--blueberry-3);border-radius:var(--wp--custom--button--border--radius);font-size:var(--wp--preset--font-size--extra-small);padding:2px 10px}
+/*!*************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/blocks/release-status/style.scss ***!
+  \*************************************************************************************************************************************************************************************************************************************************************/
+.wp-block-wporg-release-status {
+  padding: 2px 10px;
+  border: 1px solid var(--wp--preset--color--blueberry-3);
+  font-size: var(--wp--preset--font-size--extra-small);
+  border-radius: var(--wp--custom--button--border--radius);
+}
+
+/*# sourceMappingURL=style-index.css.map*/

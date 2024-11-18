@@ -52,13 +52,13 @@ module.exports = window["wp"]["serverSideRender"];
 
 /***/ }),
 
-/***/ "./src/blocks/filter-bar/block.json":
-/*!******************************************!*\
-  !*** ./src/blocks/filter-bar/block.json ***!
-  \******************************************/
+/***/ "./src/blocks/release-date/block.json":
+/*!********************************************!*\
+  !*** ./src/blocks/release-date/block.json ***!
+  \********************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"wporg/filter-bar","version":"0.2.0","title":"Filter Bar","category":"design","icon":"","description":"Adds a filter bar","textdomain":"wporg","attributes":{},"supports":{"html":false},"editorScript":"file:./index.js","render":"file:./render.php"}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"wporg/release-date","version":"0.1.0","title":"Release Date.","category":"design","icon":"","description":"A block to display release date","textdomain":"wporg","attributes":{},"supports":{"html":false},"usesContext":["postId"],"editorScript":"file:./index.js","render":"file:./render.php","style":"file:./style-index.css"}');
 
 /***/ })
 
@@ -133,9 +133,9 @@ module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-/*!****************************************!*\
-  !*** ./src/blocks/filter-bar/index.js ***!
-  \****************************************/
+/*!******************************************!*\
+  !*** ./src/blocks/release-date/index.js ***!
+  \******************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
@@ -147,7 +147,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_server_side_render__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_server_side_render__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./block.json */ "./src/blocks/filter-bar/block.json");
+/* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./block.json */ "./src/blocks/release-date/block.json");
 
 /**
  * WordPress dependencies
