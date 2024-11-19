@@ -63,17 +63,6 @@ __webpack_require__.r(__webpack_exports__);
 
 (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('wporg-release-menu-options', {
   actions: {
-    handleMenuItemClick: event => {
-      const itemId = event.target.dataset.itemId;
-      switch (itemId) {
-        case 'download':
-          alert('download: not implemented');
-          break;
-        case 'playground':
-          alert('playground: not implemented');
-          break;
-      }
-    },
     handleFocusOut: event => {
       const details = event.target.closest('details');
       if (details && !details.contains(event.relatedTarget)) {

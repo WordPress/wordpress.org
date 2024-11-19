@@ -45,17 +45,18 @@
   border-radius: 2px;
   background-color: #fff;
 }
-.wporg-release-menu-options-content button {
+.wporg-release-menu-options-content a {
   display: block;
   width: 100%;
   background: none;
   border: none;
   text-align: left;
   padding: var(--wp--preset--spacing--10);
-}
-.wporg-release-menu-options-content button:hover {
-  background-color: var(--wp--preset--color--light-grey-2);
+  text-decoration: none;
   color: var(--wp--preset--color--charcoal-1);
+}
+.wporg-release-menu-options-content a:hover {
+  background-color: var(--wp--preset--color--light-grey-2);
 }
 
 /*# sourceMappingURL=style-index.css.map*/
