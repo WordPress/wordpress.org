@@ -40,7 +40,7 @@ class Plugin_Release {
 			'public'              => false,
 			'show_ui'             => false,
 			'exclude_from_search' => true,
-			'publicly_queryable'  => false,
+			'publicly_queryable'  => true,
 			'show_in_rest'        => true, // FIXME: maybe?
 			'supports'            => array( 'title', 'editor' ), // TBD
 			'rewrite'             => false,

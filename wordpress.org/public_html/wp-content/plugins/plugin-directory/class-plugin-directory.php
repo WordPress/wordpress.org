@@ -67,6 +67,8 @@ class Plugin_Directory {
 		// Search
 		Plugin_Search::instance();
 
+		Plugin_Release::instance();
+
 		// Add upload size limit to limit plugin ZIP file uploads to 10M
 		add_filter( 'upload_size_limit', function( $size ) {
 			return 10 * MB_IN_BYTES;
