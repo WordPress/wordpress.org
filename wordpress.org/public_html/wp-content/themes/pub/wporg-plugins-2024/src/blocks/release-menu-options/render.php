@@ -11,6 +11,30 @@ if ( ! $post ) {
 	return;
 }
 
+$download_link = Template::download_link( $post->post_parent, get_post_meta( $post->ID, 'release_version', true ) );
+
+$blueprint = <<<BLUEPRINT
+{
+	"login":true,
+	"steps": [
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "url",
+				"url": "$download_link"
+			}
+		}
+	]
+}
+BLUEPRINT;
+
+/**
+ * Blueprint is base64 encoded to be passed as a URL parameter.
+ *
+ * @see https://wordpress.github.io/wordpress-playground/blueprints/tutorial/how-to-load-run-blueprints#base64-encoded-blueprints
+ */
+$encoded_blueprint_url = 'https://playground.wordpress.net/#' . base64_encode( $blueprint );
+
 ?>
  <div data-wp-interactive="wporg-release-menu-options">
 	<details  class="wporg-release-menu-options" data-wp-on--focusout="actions.handleFocusOut">
@@ -21,10 +45,10 @@ if ( ! $post ) {
 			<span class="screen-reader-text">Toggle menu</span>
 		</summary>
 		<div class="wporg-release-menu-options-content">
-			<a href="<?php echo esc_url( Template::download_link( $post->post_parent, get_post_meta( $post->ID, 'release_version', true ) ) ); ?>">
+			<a href="<?php echo esc_url( $download_link ); ?>">
 				<?php echo esc_html_e( 'Download', 'wporg-plugins' ); ?>
 			</a>
-			<a href="playground link">
+			<a href="<?php echo esc_url( $encoded_blueprint_url ); ?>" target="_blank">
 				<?php echo esc_html_e( 'Load in Playground', 'wporg-plugins' ); ?>
 			</a>
 		</div>
