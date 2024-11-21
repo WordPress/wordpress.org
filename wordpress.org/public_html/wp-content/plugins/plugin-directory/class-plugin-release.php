@@ -74,13 +74,11 @@ class Plugin_Release {
 	public function add_release( $plugin, $release ) {
 		$plugin_id = ( get_post( $plugin ) )->ID;
 
-		// Make sure we don't accidentally add junk from a sandbox while tinkering.
-		die( "Not yet ready for use" );
 
-		$release_date = date( 'Y-m-d H:i:s', strtotime( $tag['date'] ) );
-		$committer_user_id = get_user_by( 'login', $tag['author'] )->ID;
+		$release_date = date( 'Y-m-d H:i:s', $release['date'] );
+		$committer_user_id = get_user_by( 'login', reset( $release['committer'] ) )->ID;
 		if ( ! $committer_user_id ) {
-			return new WP_Error( 'invalid_committer', 'Invalid committer' );
+			return new \WP_Error( 'invalid_committer', 'Invalid committer' );
 		}
 
 		$release_id = wp_insert_post( array(
@@ -108,17 +106,20 @@ class Plugin_Release {
 	 * Update existing release info.
 	 */
 	public function update_release( $release_id, $release ) {
-		// Make sure we don't accidentally add junk from a sandbox while tinkering.
-		die( "Not yet ready for use" );
 
-		$release_date = date( 'Y-m-d H:i:s', strtotime( $tag['date'] ) );
-		$committer_user_id = get_user_by( 'login', $tag['author'] )->ID;
+		$release_date = date( 'Y-m-d H:i:s', $release['date'] );
+		$committer_user_id = get_user_by( 'login', reset( $release['committer'] ) )->ID;
 		if ( ! $committer_user_id ) {
-			return new WP_Error( 'invalid_committer', 'Invalid committer' );
+			return new \WP_Error( 'invalid_committer', 'Invalid committer' );
+		}
+
+		$release_post = get_post( $release_id );
+		if ( ! $release_post || 'plugin_release' !== $release_post->post_type ) {
+			return new \WP_Error( 'invalid_release', 'Invalid release' );
 		}
 
 		$release_id = wp_update_post( array(
-			'ID'           => $release_id,
+				'ID'           => $release_id,
 			'post_type'   => 'plugin_release',
 			'post_title'  => $release['version'],
 			'post_parent' => $plugin_id,
@@ -139,35 +140,64 @@ class Plugin_Release {
 		return $release_id;
 	}
 
+	function delete_release( $release_id ) {
+		$release_post = get_post( $release_id );
+		if ( ! $release_post || 'plugin_release' !== $release_post->post_type ) {
+			return new \WP_Error( 'invalid_release', 'Invalid release' );
+		}
+		return var_dump( __FUNCTION__, $release_id );
+		return wp_delete_post( $release_id, false ); // FIXME: change to true for force delete when this is ready and WELL TESTED.
+	}
+
 	/**
 	 * Update all release info for a plugin. This will insert or update each release, and remove any unknown releases.
+	 *
+	 * @param int|WP_Post $plugin The plugin post.
+	 * @param array $releases An array of release data. Should be a complete array of all releases.
+	 * @return int|WP_Error The number of changes made.
 	 */
 	public function update_releases( $plugin, $releases ) {
 		$plugin_id = ( get_post( $plugin ) )->ID;
 
-		// Make sure we don't accidentally add junk from a sandbox while tinkering.
-		die( "Not yet ready for use" );
+		if ( 'plugin' !== get_post_type( $plugin ) ) {
+			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
+		}
 
 		$changed = false;
 
 		// The current releases, if any, that need to be updated.
 		$current_releases = $this->get_releases( $plugin );
 		$current_versions = wp_list_pluck( $current_releases, 'post_title', 'ID' );
+		#var_dump( $current_versions, $releases ); die;
 
 		// Add or update each release.
 		foreach ( $releases as $release ) {
-			if ( ! isset( $current_versions[ $release['version'] ] ) ) {
-				$changed = $changed | (bool)$this->add_release( $plugin, $release );
+			if ( ! in_array( $release['version'], $current_versions ) ) {
+				$r = $this->add_release( $plugin, $release );
+				fputs( STDERR, 'update: ' . var_export( $r, true ) );
+				if ( is_wp_error( $r ) ) {
+					return $r;
+				}
+				++ $changed;
 			} else {
-				$release_id = $current_versions[ $release['version'] ];
-				$changed = $changed | (bool)$this->update_release( $release_id, $release );
+				$release_id = array_search( $release['version'], $current_versions );
+				$r = $this->update_release( $release_id, $release );
+				fputs( STDERR, 'update: ' . var_export( $r, true ) );
+				if ( is_wp_error( $r ) ) {
+					return $r;
+				}
+				++ $changed;
 			}
 		}
 
 		// Remove any releases that are no longer present.
 		foreach ( $current_releases as $release_id => $release ) {
 			if ( ! in_array( $release->post_title, wp_list_pluck( $releases, 'version' ) ) ) {
-				$changed = $changed | (bool)wp_delete_post( $release_id, true ); // Force delete.
+				$r = $this->delete_release( $release_id );
+				if ( is_wp_error( $r ) ) {
+					return $r;
+				}
+				++ $changed;
 			}
 		}
 
