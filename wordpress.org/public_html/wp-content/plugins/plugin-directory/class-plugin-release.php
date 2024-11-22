@@ -72,8 +72,12 @@ class Plugin_Release {
 	 * Add release info for a plugin.
 	 */
 	public function add_release( $plugin, $release ) {
-		$plugin_id = ( get_post( $plugin ) )->ID;
+		$plugin = get_post( $plugin );
+		$plugin_id = $plugin->ID;
 
+		if ( !$plugin || 'plugin' !== $plugin->post_type ) {
+			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
+		}
 
 		$release_date = date( 'Y-m-d H:i:s', $release['date'] );
 		$committer_user_id = get_user_by( 'login', reset( $release['committer'] ) )->ID;
@@ -81,10 +85,10 @@ class Plugin_Release {
 			return new \WP_Error( 'invalid_committer', 'Invalid committer' );
 		}
 
-#		$release_id = wp_insert_post( array(
-		var_dump( 'wp_insert_post', array(
+		$release_id = wp_insert_post( array(
 			'post_type'   => 'plugin_release',
 			'post_title'  => $release['version'],
+			'post_name'   => $plugin->post_name . '-' . $release['version'],
 			'post_parent' => $plugin_id,
 			'post_status' => 'publish',
 			'post_date'   => $release_date, // And/or post_date_gmt?
@@ -119,12 +123,17 @@ class Plugin_Release {
 			return new \WP_Error( 'invalid_release', 'Invalid release' );
 		}
 
-#		$release_id = wp_update_post( array(
-		var_dump( 'wp_update_post', array(
+		$parent_plugin = get_post( $release_post->post_parent );
+		if ( ! $parent_plugin || 'plugin' !== $parent_plugin->post_type ) {
+			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
+		}
+
+		$release_id = wp_update_post( array(
 			'ID'           => $release_id,
 			'post_type'   => 'plugin_release',
 			'post_title'  => $release['version'],
-			'post_parent' => $plugin_id,
+			'post_name'   => $parent_plugin->post_name . '-' . $release['version'],
+			'post_parent' => $parent_plugin->ID,
 			'post_status' => 'publish',
 			'post_date'   => $release_date, // And/or post_date_gmt?
 			// Mirrors the metadata.
@@ -147,7 +156,7 @@ class Plugin_Release {
 		if ( ! $release_post || 'plugin_release' !== $release_post->post_type ) {
 			return new \WP_Error( 'invalid_release', 'Invalid release' );
 		}
-		return var_dump( __FUNCTION__, $release_id );
+
 		return wp_delete_post( $release_id, false ); // FIXME: change to true for force delete when this is ready and WELL TESTED.
 	}
 
@@ -170,21 +179,23 @@ class Plugin_Release {
 		// The current releases, if any, that need to be updated.
 		$current_releases = $this->get_releases( $plugin );
 		$current_versions = wp_list_pluck( $current_releases, 'post_title', 'ID' );
-		#var_dump( 'current_versions', $current_versions, 'releases', $releases ); die;
 
 		// Add or update each release.
 		foreach ( $releases as $release ) {
 			if ( ! in_array( $release['version'], $current_versions ) ) {
+				// Add a CPT for the release if one does not yet exist.
 				$r = $this->add_release( $plugin, $release );
-				fputs( STDERR, 'add: ' . var_export( $r, true ) . "\n" );
+				#fputs( STDERR, 'add: ' . var_export( $r, true ) . "\n" );
 				if ( is_wp_error( $r ) ) {
 					return $r;
 				}
 				++ $changed;
 			} else {
+				// Update an existing CPT for the release.
+				// Note that this will update the CPT even if no data has changed.
 				$release_id = array_search( $release['version'], $current_versions );
 				$r = $this->update_release( $release_id, $release );
-				fputs( STDERR, 'update: ' . var_export( $r, true ) . "\n" );
+				#fputs( STDERR, 'update: ' . var_export( $r, true ) . "\n" );
 				if ( is_wp_error( $r ) ) {
 					return $r;
 				}
@@ -197,14 +208,17 @@ class Plugin_Release {
 			// A CPT that doesn't exist in the $releases array should be removed.
 			if ( ! in_array( $release_version, wp_list_pluck( $releases, 'version' ) ) ) {
 				$r = $this->delete_release( $release_id );
+				#fputs( STDERR, 'delete: ' . var_export( $r, true ) . "\n" );
 				if ( is_wp_error( $r ) ) {
 					return $r;
 				}
 				++ $changed;
 			}
+			// If there are multiple releases with the same version (title), remove all but the first.
+			// TODO: Not sure this code should stay.
 			if ( $release_id !==  array_search( $release_version, $current_versions ) ) {
-				var_dump( "duplicate release", $release_id, $release_version );
 				$r = $this->delete_release( $release_id );
+				#fputs( STDERR, 'delete dupe: ' . var_export( $r, true ) . "\n" );
 				if ( is_wp_error( $r ) ) {
 					return $r;
 				}
