@@ -1743,7 +1743,7 @@ class Plugin_Directory {
 
 			// FIXME: limit creation of data while we're testing. Remove this for production.
 			// For now we'll mirror the releases postmeta into the CPT. If/when we're confident the behaviour is identical, we can remove the postmeta part.
-			if ( in_array( 'wordpressdotorg', Tools::get_plugin_committers( $plugin->ID ) ) ) {
+			if ( false && in_array( 'wordpressdotorg', Tools::get_plugin_committers( $plugin->ID ) ) ) {
 				Plugin_Release::instance()->update_releases( $plugin, $releases );
 			}
 		}
