@@ -81,7 +81,8 @@ class Plugin_Release {
 			return new \WP_Error( 'invalid_committer', 'Invalid committer' );
 		}
 
-		$release_id = wp_insert_post( array(
+#		$release_id = wp_insert_post( array(
+		var_dump( 'wp_insert_post', array(
 			'post_type'   => 'plugin_release',
 			'post_title'  => $release['version'],
 			'post_parent' => $plugin_id,
@@ -118,8 +119,9 @@ class Plugin_Release {
 			return new \WP_Error( 'invalid_release', 'Invalid release' );
 		}
 
-		$release_id = wp_update_post( array(
-				'ID'           => $release_id,
+#		$release_id = wp_update_post( array(
+		var_dump( 'wp_update_post', array(
+			'ID'           => $release_id,
 			'post_type'   => 'plugin_release',
 			'post_title'  => $release['version'],
 			'post_parent' => $plugin_id,
@@ -168,13 +170,13 @@ class Plugin_Release {
 		// The current releases, if any, that need to be updated.
 		$current_releases = $this->get_releases( $plugin );
 		$current_versions = wp_list_pluck( $current_releases, 'post_title', 'ID' );
-		#var_dump( $current_versions, $releases ); die;
+		#var_dump( 'current_versions', $current_versions, 'releases', $releases ); die;
 
 		// Add or update each release.
 		foreach ( $releases as $release ) {
 			if ( ! in_array( $release['version'], $current_versions ) ) {
 				$r = $this->add_release( $plugin, $release );
-				fputs( STDERR, 'update: ' . var_export( $r, true ) );
+				fputs( STDERR, 'add: ' . var_export( $r, true ) . "\n" );
 				if ( is_wp_error( $r ) ) {
 					return $r;
 				}
@@ -182,7 +184,7 @@ class Plugin_Release {
 			} else {
 				$release_id = array_search( $release['version'], $current_versions );
 				$r = $this->update_release( $release_id, $release );
-				fputs( STDERR, 'update: ' . var_export( $r, true ) );
+				fputs( STDERR, 'update: ' . var_export( $r, true ) . "\n" );
 				if ( is_wp_error( $r ) ) {
 					return $r;
 				}
@@ -191,8 +193,17 @@ class Plugin_Release {
 		}
 
 		// Remove any releases that are no longer present.
-		foreach ( $current_releases as $release_id => $release ) {
-			if ( ! in_array( $release->post_title, wp_list_pluck( $releases, 'version' ) ) ) {
+		foreach ( $current_versions as $release_id => $release_version ) {
+			// A CPT that doesn't exist in the $releases array should be removed.
+			if ( ! in_array( $release_version, wp_list_pluck( $releases, 'version' ) ) ) {
+				$r = $this->delete_release( $release_id );
+				if ( is_wp_error( $r ) ) {
+					return $r;
+				}
+				++ $changed;
+			}
+			if ( $release_id !==  array_search( $release_version, $current_versions ) ) {
+				var_dump( "duplicate release", $release_id, $release_version );
 				$r = $this->delete_release( $release_id );
 				if ( is_wp_error( $r ) ) {
 					return $r;
