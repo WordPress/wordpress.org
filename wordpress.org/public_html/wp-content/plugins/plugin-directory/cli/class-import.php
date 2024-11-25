@@ -7,6 +7,7 @@ use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
+use WordPressdotorg\Plugin_Directory\Plugin_Release;
 use WordPressdotorg\Plugin_Directory\Readme\{ Parser as Readme_Parser, Validator as Readme_Validator };
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -165,6 +166,23 @@ class Import {
 			if ( Plugin_Directory::remove_release( $plugin, $svn_deleted_tag ) ) {
 				echo "Plugin tag {$svn_deleted_tag} deleted; release removed.\n";
 			}
+		}
+
+		// TODO: Test and confirm that this is the correct behavior.
+		if ( 'trunk' === $stable_tag ) {
+			// Create or update a 'draft' release CPT for trunk changes.
+			// Note that this will only create a new draft if the version doesn't already exist as a release.
+			// TODO: refine this behaviour. (Maybe compare revision numbers?)
+			$r = Plugin_Release::instance()->add_or_update_draft_release(
+				$plugin,
+				[
+					'tag'       => 'trunk',
+					'version'   => $version, // TODO: Is this correct?
+					'committer' => [ $last_committer ],
+					'revision'  => [ $last_revision ]
+				]
+				);
+
 		}
 
 		// Release confirmation

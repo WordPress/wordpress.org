@@ -85,12 +85,14 @@ class Plugin_Release {
 			return new \WP_Error( 'invalid_committer', 'Invalid committer' );
 		}
 
+		$post_status = ( 'trunk' === $release['tag'] ) ? 'draft' : 'publish';
+
 		$release_id = wp_insert_post( array(
 			'post_type'   => 'plugin_release',
 			'post_title'  => $release['version'],
 			'post_name'   => $plugin->post_name . '-' . $release['version'],
 			'post_parent' => $plugin_id,
-			'post_status' => 'publish',
+			'post_status' => $post_status,
 			'post_date'   => $release_date, // And/or post_date_gmt?
 			// Mirrors the metadata.
 			'meta_input'  => array(
@@ -128,13 +130,15 @@ class Plugin_Release {
 			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
 		}
 
+		$post_status = ( 'trunk' === $release['tag'] ) ? 'draft' : 'publish';
+
 		$release_id = wp_update_post( array(
 			'ID'           => $release_id,
 			'post_type'   => 'plugin_release',
 			'post_title'  => $release['version'],
 			'post_name'   => $parent_plugin->post_name . '-' . $release['version'],
 			'post_parent' => $parent_plugin->ID,
-			'post_status' => 'publish',
+			'post_status' => $post_status,
 			'post_date'   => $release_date, // And/or post_date_gmt?
 			// Mirrors the metadata.
 			'meta_input'  => array(
@@ -147,6 +151,42 @@ class Plugin_Release {
 			),
 			// TODO: what else? Could store the changelog or other content at the point of release for comparison purposes.
 		) );
+
+		return $release_id;
+	}
+
+	/**
+	 * Save draft (trunk) release for a plugin.
+	 */
+	public function add_or_update_draft_release( $plugin, $release ) {
+		$plugin = get_post( $plugin );
+		$plugin_id = $plugin->ID;
+
+		// Tag must be 'trunk' for this to be a draft release.
+		if ( 'trunk' !== $release['tag'] ) {
+			return new \WP_Error( 'invalid_tag', 'Invalid tag' );
+		}
+
+		// Version must be set; we'll only add/update if it doesn't match an existing non-draft release.
+		if ( empty( $release['version'] ) ) {
+			return new \WP_Error( 'invalid_version', 'Invalid version' );
+		}
+
+		if ( !$plugin || 'plugin' !== $plugin->post_type ) {
+			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
+		}
+
+		// If a release with this version already exists, don't create a draft.
+		if ( $this->get_release( $plugin, $release['version'] ) ) {
+			return new \WP_Error( 'release_exists', 'Release already exists' );
+		}
+
+		$draft_id = $this->get_release( $plugin, 'trunk' );
+		if ( $draft_id ) {
+			$release_id = $this->update_release( $draft_id, $release );
+		} else {
+			$release_id = $this->add_release( $plugin, $release );
+		}
 
 		return $release_id;
 	}
@@ -235,11 +275,17 @@ class Plugin_Release {
 	public function get_release( $plugin, $version ) {
 		$plugin_id = ( get_post( $plugin ) )->ID;
 
+		// Note that the post_status is 'draft' for trunk releases.
+		$post_status = ( 'trunk' === $version ) ? 'draft' : 'publish';
+
 		$release = get_posts( array(
 			'post_type'      => 'plugin_release',
 			'posts_per_page' => 1,
 			'post_parent'    => $plugin_id,
 			'post_title'     => $version,
+			'post_status'    => $post_status,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
 		) );
 
 		return $release ? $release[0] : null;
