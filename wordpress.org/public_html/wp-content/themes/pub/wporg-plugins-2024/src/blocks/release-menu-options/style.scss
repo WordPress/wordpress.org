@@ -1,65 +1,37 @@
 .wporg-release-menu-options {
-	position: relative;
-	display: flex;
+	.wp-block-navigation__submenu-container {
+		top: calc( 100% + 4px ) !important;
+		right: 0 !important;
+		left: auto !important;
+	}
 
-	summary {
-		display: flex;
-		align-items: center;
-		justify-content: center;
+	.wp-block-navigation-item {
+		background-color: initial; /* Stops the hidden overflow on focus */
+	}
+
+	.wp-block-navigation__submenu-icon {
+		display: none; /* Hide dropdown caret */
+	}
+
+	/* Manually apply screen reader text styles */
+	button > .wp-block-navigation-item__label {
+		word-wrap: normal !important;
+		border: 0;
+		clip-path: inset(50%);
+		height: 1px;
+		margin: -1px;
+		overflow: hidden;
+		padding: 0;
+		position: absolute;
+		width: 1px;
+	}
+
+	button {
+		content: '';
+		background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' aria-hidden='true' focusable='false'%3E%3Cpath d='M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z'%3E%3C/path%3E%3C/svg>");
+		background-repeat: no-repeat;
+		background-position: center;
 		width: 32px;
 		height: 32px;
-		border-radius: 2px;
-		cursor: pointer;
-		line-height: 16px;
-		list-style: none;
-	}
-
-	summary:hover {
-		background-color: var(--wp--preset--color--light-grey-2);
-	}
-
-	summary:focus {
-		outline-color: var(--wp--custom--button--outline--focus--border--color);
-	}
-
-	&[open] summary {
-		background-color: var(--wp--preset--color--charcoal-1);
-		color: var(--wp--preset--color--white);
-	}
-
-	svg {
-		fill: currentColor;
-	}
-
-	summary::-webkit-details-marker {
-		display: none;
-	}
-}
-
-.wporg-release-menu-options-content {
-	position: absolute;
-	top: 100%;
-	right: 0;
-	z-index: 100000;
-	min-width: 200px;
-	margin: 4px 0 0;
-	padding: var(--wp--preset--spacing--10);
-	border: 1px solid var(--wp--preset--color--light-grey-1);
-	border-radius: 2px;
-	background-color: #fff;
-
-	a {
-		display: block;
-		width: 100%;
-		background: none;
-		border: none;
-		text-align: left;
-		padding: var(--wp--preset--spacing--10);
-		text-decoration: none;
-		color: var(--wp--preset--color--charcoal-1);
-	}
-
-	a:hover {
-		background-color: var(--wp--preset--color--light-grey-2);
 	}
 }
