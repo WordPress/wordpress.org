@@ -3,10 +3,10 @@
   "apiVersion": 2,
   "name": "wporg/release-status",
   "version": "0.1.0",
-  "title": "Release status.",
+  "title": "Release Status",
   "category": "design",
   "icon": "",
-  "description": "A block to display release status",
+  "description": "A block to display release status.",
   "textdomain": "wporg",
   "attributes": {},
   "supports": {

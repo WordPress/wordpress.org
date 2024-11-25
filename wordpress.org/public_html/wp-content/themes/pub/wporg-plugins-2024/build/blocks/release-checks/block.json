@@ -3,10 +3,10 @@
   "apiVersion": 2,
   "name": "wporg/release-checks",
   "version": "0.1.0",
-  "title": "Displays release checks.",
+  "title": "Release checks.",
   "category": "design",
   "icon": "",
-  "description": "A block to display release checks",
+  "description": "A block to display release checks.",
   "textdomain": "wporg",
   "attributes": {},
   "supports": {

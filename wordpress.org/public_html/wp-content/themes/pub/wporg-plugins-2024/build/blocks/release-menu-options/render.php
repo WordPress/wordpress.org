@@ -35,22 +35,29 @@ BLUEPRINT;
  */
 $encoded_blueprint_url = 'https://playground.wordpress.net/#' . base64_encode( $blueprint );
 
-?>
- <div data-wp-interactive="wporg-release-menu-options">
-	<details  class="wporg-release-menu-options" data-wp-on--focusout="actions.handleFocusOut">
-		<summary>
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-				<path d="M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z"></path>
-			</svg>
-			<span class="screen-reader-text">Toggle menu</span>
-		</summary>
-		<div class="wporg-release-menu-options-content">
-			<a href="<?php echo esc_url( $download_link ); ?>">
-				<?php echo esc_html_e( 'Download', 'wporg-plugins' ); ?>
-			</a>
-			<a href="<?php echo esc_url( $encoded_blueprint_url ); ?>" target="_blank">
-				<?php echo esc_html_e( 'Load in Playground', 'wporg-plugins' ); ?>
-			</a>
-		</div>
-	</details>
-</div>
+$download_link = sprintf(
+	'<!-- wp:navigation-link {"label":"%1$s","url":"%2$s","kind":"custom"} /-->',
+	esc_html( 'Download', 'wporg-plugins' ),
+	esc_url( $download_link )
+);
+
+$blueprint_link = sprintf(
+	'<!-- wp:navigation-link {"label":"%1$s","url":"%2$s","kind":"custom","opensInNewTab":true} /-->',
+	esc_html( 'Load in Playground', 'wporg-plugins' ),
+	esc_url( $encoded_blueprint_url )
+);
+
+$subnav = sprintf(
+	'<!-- wp:navigation-submenu {"label":"%1$s"} -->%2$s %3$s<!-- /wp:navigation-submenu -->',
+	esc_html( 'Release options', 'wporg-plugins' ),
+	$download_link,
+	$blueprint_link
+);
+
+$navigation = sprintf(
+	'<!-- wp:navigation {"overlayMenu":"never","openSubmenusOnClick":true,"ariaLabel":"%1$s","className":"wporg-release-menu-options"} -->%2$s<!-- /wp:navigation -->',
+	esc_html( 'Release options', 'release options label', 'wporg-plugins' ),
+	$subnav
+);
+
+echo do_blocks( $navigation );

@@ -3,7 +3,7 @@
   "apiVersion": 2,
   "name": "wporg/release-confirmation",
   "version": "0.1.0",
-  "title": "Release confirmation banner.",
+  "title": "Release Confirmation Banner.",
   "category": "design",
   "icon": "",
   "description": "A block to display release confirmation banner.",
