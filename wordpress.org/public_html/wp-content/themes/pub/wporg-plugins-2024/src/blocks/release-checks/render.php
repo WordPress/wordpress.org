@@ -4,7 +4,6 @@ if ( ! current_user_can( 'plugin_admin_edit', $post ) ) {
     return;
 }
 
-
 $current_post_id = $block->context['postId'];
 if ( ! $current_post_id ) {
 	return;

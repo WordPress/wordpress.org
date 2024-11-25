@@ -1,7 +1,7 @@
 <?php
 /**
- * Block Name: Releases
- * Description: A block to display releases.
+ * Block Name: Release Confirmation Banner
+ * Description: A block to display release confirmation banner.
  *
  * @package wporg
  */

@@ -1,7 +1,7 @@
 {
   "apiVersion": 2,
   "name": "wporg/release-menu-options",
-  "title": "Dropdown menu for release",
+  "title": "Release Menu Options",
   "category": "widgets",
   "icon": "menu",
   "description": "Display the dropdown menu option for a release.",

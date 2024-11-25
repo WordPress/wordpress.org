@@ -3,10 +3,10 @@
 	"apiVersion": 2,
 	"name": "wporg/release-date",
 	"version": "0.1.0",
-	"title": "Release Date.",
+	"title": "Release Date",
 	"category": "design",
 	"icon": "",
-	"description": "A block to display release date",
+	"description": "A block to display release date.",
 	"textdomain": "wporg",
 	"attributes": {},
 	"supports": {

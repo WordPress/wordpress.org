@@ -1,7 +1,7 @@
 <?php
 /**
  * Block Name: Release Menu Options
- * Description: A block to display release option.
+ * Description: Display the dropdown menu option for a release.
  *
  * @package wporg
  */
