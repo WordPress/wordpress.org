@@ -102,6 +102,7 @@ class Plugin_Release {
 				'release_committer' => $release['committer'],
 				'release_zips_built' => $release['zips_built'],
 				'release_confirmations_required' => $release['confirmations_required'],
+				'release_revision' => $release['revision'],
 			),
 			// TODO: what else? Could store the changelog or other content at the point of release for comparison purposes.
 		) );
@@ -148,6 +149,7 @@ class Plugin_Release {
 				'release_committer' => $release['committer'],
 				'release_zips_built' => $release['zips_built'],
 				'release_confirmations_required' => $release['confirmations_required'],
+				'release_revision' => $release['revision'],
 			),
 			// TODO: what else? Could store the changelog or other content at the point of release for comparison purposes.
 		) );
@@ -176,9 +178,20 @@ class Plugin_Release {
 			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
 		}
 
-		// If a release with this version already exists, don't create a draft.
-		if ( $this->get_release( $plugin, $release['version'] ) ) {
-			return new \WP_Error( 'release_exists', 'Release already exists' );
+		// If there's already a published release for this plugin, we only create a draft if there are unreleased trunk commits.
+		$last_release = $this->get_release( $plugin, null );
+		if ( $last_release ) {
+			if ( !empty( $release[ 'revision' ] ) ) {
+				// Don't create a draft unless the revision number is higher than the last release.
+				if ( max( $release['revision'] ) <= max( $last_release->release_revision ) ) {
+					return false; // Not an error, just skip.
+				}
+			} else {
+				// If we don't have revision numbers, use dates. Maybe this should be removed.
+				if ( strtotime( $release['date'] ) <= strtotime( $last_release->release_date ) ) {
+					return false; // Not an error, just skip.
+				}
+			}
 		}
 
 		$draft_id = $this->get_release( $plugin, 'trunk' );
