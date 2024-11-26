@@ -86,10 +86,11 @@ class Plugin_Release {
 		}
 
 		$post_status = ( 'trunk' === $release['tag'] ) ? 'draft' : 'publish';
+		$post_title = ( 'trunk' === $release['tag'] ) ? 'trunk' : $release['version'];
 
 		$release_id = wp_insert_post( array(
 			'post_type'   => 'plugin_release',
-			'post_title'  => $release['version'],
+			'post_title'  => $post_title,
 			'post_name'   => $plugin->post_name . '-' . $release['version'],
 			'post_parent' => $plugin_id,
 			'post_status' => $post_status,
@@ -132,11 +133,12 @@ class Plugin_Release {
 		}
 
 		$post_status = ( 'trunk' === $release['tag'] ) ? 'draft' : 'publish';
+		$post_title = ( 'trunk' === $release['tag'] ) ? 'trunk' : $release['version'];
 
 		$release_id = wp_update_post( array(
-			'ID'           => $release_id,
+			'ID'           => $release_post->ID,
 			'post_type'   => 'plugin_release',
-			'post_title'  => $release['version'],
+			'post_title'  => $post_title,
 			'post_name'   => $parent_plugin->post_name . '-' . $release['version'],
 			'post_parent' => $parent_plugin->ID,
 			'post_status' => $post_status,
@@ -167,11 +169,6 @@ class Plugin_Release {
 		// Tag must be 'trunk' for this to be a draft release.
 		if ( 'trunk' !== $release['tag'] ) {
 			return new \WP_Error( 'invalid_tag', 'Invalid tag' );
-		}
-
-		// Version must be set; we'll only add/update if it doesn't match an existing non-draft release.
-		if ( empty( $release['version'] ) ) {
-			return new \WP_Error( 'invalid_version', 'Invalid version' );
 		}
 
 		if ( !$plugin || 'plugin' !== $plugin->post_type ) {
