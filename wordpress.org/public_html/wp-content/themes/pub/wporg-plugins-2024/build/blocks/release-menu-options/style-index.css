@@ -1,1 +1,40 @@
-.wporg-release-menu-options .wp-block-navigation__submenu-container{left:auto!important;right:0!important;top:calc(100% + 4px)!important}.wporg-release-menu-options .wp-block-navigation-item{background-color:initial}.wporg-release-menu-options .wp-block-navigation__submenu-icon{display:none}.wporg-release-menu-options button>.wp-block-navigation-item__label{word-wrap:normal!important;border:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px}.wporg-release-menu-options button{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 aria-hidden=%27true%27%3E%3Cpath d=%27M13 19h-2v-2h2zm0-6h-2v-2h2zm0-6h-2V5h2z%27/%3E%3C/svg%3E");background-position:50%;background-repeat:no-repeat;content:"";height:32px;width:32px}
+/*!*******************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/blocks/release-menu-options/style.scss ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************/
+.wporg-release-menu-options {
+  /* Manually apply screen reader text styles */
+}
+.wporg-release-menu-options .wp-block-navigation__submenu-container {
+  top: calc(100% + 4px) !important;
+  right: 0 !important;
+  left: auto !important;
+}
+.wporg-release-menu-options .wp-block-navigation-item {
+  background-color: initial;
+  /* Stops the hidden overflow on focus */
+}
+.wporg-release-menu-options .wp-block-navigation__submenu-icon {
+  display: none;
+  /* Hide dropdown caret */
+}
+.wporg-release-menu-options button > .wp-block-navigation-item__label {
+  word-wrap: normal !important;
+  border: 0;
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+.wporg-release-menu-options button {
+  content: "";
+  background-image: url("data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 width=%2724%27 height=%2724%27 aria-hidden=%27true%27 focusable=%27false%27%3E%3Cpath d=%27M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z%27%3E%3C/path%3E%3C/svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 32px;
+  height: 32px;
+}
+
+/*# sourceMappingURL=style-index.css.map*/
