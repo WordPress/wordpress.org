@@ -5,7 +5,7 @@
 <!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--20);margin-bottom:var(--wp--preset--spacing--20)">
 	
-	<!-- wp:query {"queryId":9,"query":{"perPage":10,"pages":0,"offset":0,"postType":"plugin_release","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false}} -->
+	<!-- wp:query {"queryId":9,"query":{"perPage":100,"pages":0,"offset":0,"postType":"plugin_release","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false}} -->
 	<div class="wp-block-query">
 		<!-- wp:post-template -->
 		<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"width":"1px","radius":"2px"}},"borderColor":"light-grey-1","layout":{"type":"default","justifyContent":"left"}} -->
@@ -40,7 +40,11 @@
 	<!-- wp:query-pagination-next /-->
 	<!-- /wp:query-pagination -->
 
-	<!-- wp:pattern {"slug":"wporg-plugins-2024/releases-no-results"} /-->
+	<!-- wp:query-no-results -->
+		<!-- wp:paragraph -->
+		<p>There are no releases yet</p>
+		<!-- /wp:paragraph -->
+	<!-- /wp:query-no-results -->
 	
 	</div>
 	<!-- /wp:query -->
