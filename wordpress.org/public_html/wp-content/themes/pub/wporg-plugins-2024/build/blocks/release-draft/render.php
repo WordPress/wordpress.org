@@ -32,7 +32,7 @@ if ( ! $latest_draft_query->have_posts() ) {
 
 // Fetch the latest draft post.
 $latest_draft_query->the_post();
-$post_title = get_the_title();
+$post_title = __( 'Trunk', 'wporg-plugins' );
 
 $markup = <<<HTML
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"width":"1px","radius":"2px"}},"borderColor":"light-grey-1","layout":{"type":"default","justifyContent":"left"}} -->
@@ -73,5 +73,3 @@ printf(
 
 // Reset global post data.
 wp_reset_postdata();
-
-?>
