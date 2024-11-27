@@ -12,6 +12,11 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
+/**
+ * Custom template tags for this theme.
+ */
+require get_stylesheet_directory() . '/inc/template-tags.php';
+
 
 // Block Files
 require_once( __DIR__ . '/src/blocks/archive-page/index.php' );
@@ -442,6 +447,79 @@ function update_archive_description( $description ) {
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
 
 /**
- * Custom template tags for this theme.
+ * Generates a Trac changeset link for a plugin.
+ *
+ * @param string $parent_id The plugin ID.
+ * @param string $previous_version The previous version of the plugin.
+ * @param string $current_version The current version of the plugin. Default is 'trunk'.
+ *
+ * @return string The Trac changeset link.
  */
-require get_stylesheet_directory() . '/inc/template-tags.php';
+function get_trac_changeset_link( $parent_id, $previous_version, $current_version = 'trunk' ) {
+	$plugin = get_post( $parent_id);
+
+	if ( ! $plugin ) {
+		return '';
+	}
+
+	$current_path = ( 'trunk' === $current_version )
+		? 'trunk'
+		: 'tags/' . $current_version;
+
+	return sprintf(
+		'https://plugins.trac.wordpress.org/changeset?old_path=/%1$s/%2$s&new_path=/%1$s/tags/%3$s',
+		$plugin->post_name,
+		$current_path,
+		$previous_version
+	);
+}
+
+/**
+ * Get the releases for a plugin.
+ *
+ * @param WP_Post $parent_id The release post.
+ *
+ * @return WP_Post[] The releases for the plugin.
+ */
+function get_releases( $parent_id ) {
+	$args = array(
+		'post_type'      => 'plugin_release',
+		'posts_per_page' => -1,
+		'post_parent'    => $parent_id,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+	);
+	
+	return get_posts( $args );
+}
+
+/**
+ * Get the previous version of a plugin.
+ *
+ * @param WP_Post $release_post The current release post.
+ * @param WP_Post[] $release List of releases.
+ *
+ * @return string|null The previous version of the plugin.
+ */
+function get_previous_version( $release_post, $releases ) {
+	$previous_version = null;
+
+	if ( empty( $releases ) ) {
+		return $previous_version;
+	}
+
+	if( 'draft' === $release_post->post_status ) {
+		return get_post_meta( $releases[0]->ID, 'release_version', true );
+	}
+
+	foreach ( $releases as $key => $release ) {
+		if ( $release->ID === $release_post->ID ) {
+			if ( isset( $releases[ $key + 1 ] ) ) {
+				return get_post_meta( $releases[ $key + 1 ]->ID, 'release_version', true );
+			}
+			break;
+		}
+	}
+
+	return $previous_version;
+}

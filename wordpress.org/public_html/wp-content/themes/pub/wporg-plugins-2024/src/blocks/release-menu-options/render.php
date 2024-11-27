@@ -1,38 +1,18 @@
 <?php
 
 use WordPressdotorg\Plugin_Directory\Template;
+use function WordPressdotorg\Plugin_Directory\Theme\{get_releases,get_trac_changeset_link,get_previous_version};
 
 if ( ! $block->context['postId'] ) {
 	return;
 }
 
-$post = get_post( $block->context['postId'] );
-if ( ! $post ) {
+$release_post = get_post( $block->context['postId'] );
+if ( ! $release_post ) {
 	return;
 }
 
-$args = array(
-	'post_type'      => 'plugin_release',
-	'posts_per_page' => -1,
-	'post_parent'    => $post->post_parent,
-	'orderby'        => 'date',
-	'order'          => 'DESC',
-);
-
-$releases = get_posts( $args );
-
-$current_version = get_post_meta( $post->ID, 'release_version', true );
-$previous_version = null;
-
-foreach ( $releases as $key => $release ) {
-	if ( $release->ID === $post->ID ) {
-		if ( isset( $releases[ $key + 1 ] ) ) {
-			$previous_version = get_post_meta( $releases[ $key + 1 ]->ID, 'release_version', true );
-		}
-		break;
-	}
-}
-
+$current_version = get_post_meta( $release_post->ID, 'release_version', true );
 
 /**
  * Blueprint is base64 encoded to be passed as a URL parameter.
@@ -46,7 +26,7 @@ $blueprint = wp_json_encode( [
 			'step' => 'installPlugin',
 			'pluginData' => [
 				'resource' => 'url',
-				'url' => Template::download_link( $post->post_parent, $current_version )
+				'url' => Template::download_link( $release_post->post_parent, $current_version )
 			]
 		]
 	]
@@ -67,21 +47,14 @@ $blueprint_link = sprintf(
 );
 
 $changes_link = '';
+$releases = get_releases( $release_post->post_parent );
+$previous_version = get_previous_version( $release_post, $releases );
 
 if ( null !== $previous_version ) {
-	$plugin = get_post( $post->post_parent );
-
 	$changes_link = sprintf(
 		'<!-- wp:navigation-link {"label":"%1$s","url":"%2$s","kind":"custom","opensInNewTab":true} /-->',
 		esc_html( 'View changes', 'wporg-plugins' ),
-		esc_url( 
-			sprintf( 
-				'https://plugins.trac.wordpress.org/changeset?old_path=/%1$s/tags/%2$s&new_path=/%1$s/tags/%3$s',
-				$plugin->post_name,
-				$current_version,
-				$previous_version 
-			)
-		)
+		esc_url( get_trac_changeset_link( $release_post->post_parent, $previous_version, $current_version ) )
 	);
 }
 
