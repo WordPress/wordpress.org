@@ -1,0 +1,22 @@
+/*!*******************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/blocks/release-draft-result/style.scss ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************/
+.wp-block-wporg-release-draft-result {
+  margin: 0 0 var(--wp--preset--spacing--10) 0 !important;
+  padding-left: var(--wp--preset--spacing--30);
+  position: relative;
+}
+.wp-block-wporg-release-draft-result:before {
+  content: "";
+  display: flex;
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 2px;
+  left: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27%23E26F56%27 viewBox=%270 0 24 24%27 width=%2724%27 height=%2724%27 aria-hidden=%27true%27 focusable=%27false%27%3E%3Cpath d=%27M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z%27%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/*# sourceMappingURL=style-index.css.map*/

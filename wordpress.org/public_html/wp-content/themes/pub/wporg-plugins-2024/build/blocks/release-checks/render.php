@@ -9,10 +9,6 @@ if ( ! $current_post_id ) {
 	return;
 }
 
-if ( 'publish' === get_post_status( $block->context['postId'] ) ) {
-    return;
-}
-
 ?>
 
 <!-- wp:heading {"level":4,"fontSize":"normal"} -->

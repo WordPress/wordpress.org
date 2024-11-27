@@ -9,10 +9,6 @@ if ( ! $post ) {
 	return;
 }
 
-if( 'publish' === $post->post_status) {
-	return;
-}
-
 $copy = sprintf(
 	'This release was last updated on %s by %s.',
 	date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $post->post_modified ) ),

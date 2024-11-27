@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "wporg/release-check-item",
+	"version": "0.1.0",
+	"title": "Release Check Item",
+	"category": "design",
+	"icon": "",
+	"description": "A block to display release draft check item.",
+	"textdomain": "wporg",
+	"attributes": {
+		"text":{
+			"type": "string",
+			"default": ""
+		},
+		"type":{
+			"type": "string",
+			"default": "success"
+		}
+	},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php",
+	"style": "file:./style-index.css"
+}
