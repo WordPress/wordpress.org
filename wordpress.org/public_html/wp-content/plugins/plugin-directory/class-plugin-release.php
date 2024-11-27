@@ -292,7 +292,7 @@ class Plugin_Release {
 			'post_type'      => 'plugin_release',
 			'posts_per_page' => 1,
 			'post_parent'    => $plugin_id,
-			'post_title'     => $version,
+			'title'          => $version,
 			'post_status'    => $post_status,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
