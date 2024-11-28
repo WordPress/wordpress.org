@@ -2,29 +2,15 @@
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/blocks/release-check-item/style.scss ***!
   \*****************************************************************************************************************************************************************************************************************************************************************/
 .wp-block-wporg-release-check-item {
-  margin: 0 0 var(--wp--preset--spacing--10) var(--wp--preset--spacing--10) !important;
+  display: flex;
+  margin: 0 !important;
   position: relative;
+  gap: 8px;
 }
-.wp-block-wporg-release-check-item summary {
+.wp-block-wporg-release-check-item > div:first-child {
+  height: 25px;
   display: flex;
-  cursor: default;
-}
-.wp-block-wporg-release-check-item summary:before {
-  content: "";
-  display: flex;
-  width: 24px;
-  height: 24px;
-  left: 0;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 width=%2724%27 height=%2724%27 aria-hidden=%27true%27 focusable=%27false%27%3E%3Cpath d=%27M10.6 6L9.4 7l4.6 5-4.6 5 1.2 1 5.4-6z%27%3E%3C/path%3E%3C/svg%3E");
-}
-.wp-block-wporg-release-check-item[open] summary:before {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox=%270 0 24 24%27 xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 aria-hidden=%27true%27 focusable=%27false%27%3E%3Cpath d=%27M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z%27%3E%3C/path%3E%3C/svg%3E");
-}
-.wp-block-wporg-release-check-item summary::marker {
-  display: none;
-  content: "";
+  align-items: center;
 }
 
 /*# sourceMappingURL=style-index.css.map*/

@@ -121,7 +121,7 @@ module.exports = window["wp"]["serverSideRender"];
   \**************************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"wporg/release-check-item","version":"0.1.0","title":"Release Check Item","category":"design","icon":"","description":"A block to display release draft check item.","textdomain":"wporg","attributes":{"status":{"type":"string","enum":["error","warning","success"],"default":"success"},"text":{"type":"string"}},"supports":{"html":false},"editorScript":"file:./index.js","render":"file:./render.php","style":"file:./style-index.css"}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"wporg/release-check-item","version":"0.1.0","title":"Release Check Item","category":"design","icon":"","description":"A block to display release draft check item.","textdomain":"wporg","attributes":{"status":{"type":"string","enum":["error","warning","success"],"default":"success"}},"supports":{"html":false},"editorScript":"file:./index.js","render":"file:./render.php","style":"file:./style-index.css"}');
 
 /***/ })
 

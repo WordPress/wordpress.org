@@ -1,7 +1,7 @@
 <?php
 
 if ( ! current_user_can( 'plugin_admin_edit', $post ) ) {
-    return;
+	return;
 }
 
 if ( ! $block->context['postId'] ) {
@@ -16,18 +16,18 @@ if ( ! $post ) {
 
 // get release for the post
 $query_args = [
-    'post_type'      => 'plugin_release',
-    'posts_per_page' => 1,
-    'post_parent'    => $post->ID,
-    'orderby'        => 'date',
-    'post_status'    => 'draft',
-    'order'          => 'DESC',
+	'post_type'      => 'plugin_release',
+	'posts_per_page' => 1,
+	'post_parent'    => $post->ID,
+	'orderby'        => 'date',
+	'post_status'    => 'draft',
+	'order'          => 'DESC',
 ];
 
 $latest_draft_query = new WP_Query( $query_args );
 
 if ( ! $latest_draft_query->have_posts() ) {
-    return;
+	return;
 }
 
 // Fetch the latest draft post.
