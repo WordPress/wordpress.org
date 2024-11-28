@@ -170,7 +170,7 @@ class Import {
 		}
 
 		// TODO: Test and confirm that this is the correct behavior.
-		if ( 'trunk' === $stable_tag ) {
+		if ( in_array( 'trunk', $svn_changed_tags ) ) {
 			// Create or update a 'draft' release CPT for trunk changes.
 			// Note that this will only create a new draft if the version doesn't already exist as a release.
 			// TODO: refine this behaviour. (Maybe compare revision numbers?)
