@@ -362,6 +362,7 @@ class Plugin_Release {
 			'post_title'  => $new_tag,
 			'meta_input'  => array(
 				'release_tag_revision' => $tag_result['revision'], // Do we need this?
+				'release_tag'          => $new_tag, // Was 'trunk'
 			),
 		) );
 
