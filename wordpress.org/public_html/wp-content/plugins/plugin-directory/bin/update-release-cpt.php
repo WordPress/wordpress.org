@@ -13,7 +13,7 @@ if ( 'cli' != php_sapi_name() ) {
 
 ob_start();
 
-$opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:', 'async', 'create' ) );
+$opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:', 'async', 'publish' ) );
 
 // Guess the default parameters:
 if ( empty( $opts ) && $argc == 2 ) {
@@ -34,7 +34,7 @@ if ( empty( $opts['changed-tags'] ) ) {
 }
 
 $opts['async']  = isset( $opts['async'] );
-$opts['create'] = isset( $opts['create'] );
+$opts['publish'] = isset( $opts['publish'] );
 
 foreach ( array( 'url', 'abspath', 'plugin' ) as $opt ) {
 	if ( empty( $opts[ $opt ] ) ) {
@@ -83,4 +83,13 @@ if ( is_wp_error( $updated ) ) {
 	die();
 }
 echo "Updated " . number_format( $updated ) . " releases for $plugin_slug\n";
+
+if ( $opts['publish'] ) {
+	$published = Plugin_Release::instance()->publish_release( $plugin );
+	if ( is_wp_error( $published ) ) {
+		fwrite( STDERR, "Failed to publish releases for $plugin_slug: " . $published->get_error_message() . "\n" );
+		die();
+	}
+	echo "Published release post ID = " . $published . "\n";
+}
 
