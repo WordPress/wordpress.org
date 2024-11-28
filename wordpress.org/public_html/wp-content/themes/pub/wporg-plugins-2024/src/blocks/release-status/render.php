@@ -15,6 +15,6 @@ if( 'draft' !== $post->post_status ) {
 
 ?>
 
-<div <?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>>
+<div <?php echo wp_kses_data( get_block_wrapper_attributes() ); ?>>
 	<?php echo get_post_status_object( $post->post_status )->label; ?>
 </div>

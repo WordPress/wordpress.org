@@ -14,5 +14,3 @@ if( 'publish' !== $post->post_status ) {
 }
 
 echo do_blocks( '<!-- wp:post-date {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"fontSize":"extra-small"} /-->' );
-
-?>

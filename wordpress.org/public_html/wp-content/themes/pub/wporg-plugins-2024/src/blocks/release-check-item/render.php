@@ -1,4 +1,4 @@
-<li <?php echo wp_kses_data( get_block_wrapper_attributes() ); // phpcs:ignore ?>>
+<li <?php echo wp_kses_data( get_block_wrapper_attributes() ); ?>>
 	<div>
 		<?php if ( 'error' === $block->attributes['status'] ) : ?>
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

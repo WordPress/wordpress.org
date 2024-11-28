@@ -16,12 +16,12 @@ $previous_version = get_previous_version( $release_post, $releases );
 
 $copy = sprintf(
 	/* translators: %s: URL to the changeset */
-	__( 'You have some <a href="%s">unpublished changes</a>. Would you like to release these changes?', 'wporg-plugins'),
+	__( 'You have some <a href="%s">unpublished changes</a>. Would you like to release these changes?', 'wporg-plugins' ),
 	get_trac_changeset_link( $release_post->post_parent, $previous_version )
 );
 
 ?>
-<form method="post" <?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>>
+<form method="post" <?php echo wp_kses_data( get_block_wrapper_attributes() ); ?>>
 	<input type="hidden" name="publish_release_nonce" value="<?php echo esc_attr( wp_create_nonce( 'publish-release-action' ) ); ?>">
 
 	<!-- wp:group {"style":{"border":{"radius":"2px"},"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}}},"backgroundColor":"blueberry-4","layout":{"type":"constrained"}} -->
