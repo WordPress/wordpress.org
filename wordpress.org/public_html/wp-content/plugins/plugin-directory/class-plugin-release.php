@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 
+use WordPressdotorg\Plugin_Directory\Tools\SVN;
+
 /**
  * The Plugin Release class encapsulates the plugin release CPT and related code.
  * Used for storing and interacting with plugin releases; ie versions of a plugin that are made available for download.
@@ -299,6 +301,71 @@ class Plugin_Release {
 		) );
 
 		return $release ? $release[0] : null;
+	}
+
+	/**
+	 * Publish a draft release (ie trunk).
+	 * This will use svn to tag the release, and then publish the release post.
+	 *
+	 * Note: As yet untested.
+	 */
+	public function publish_release( $plugin ) {
+		$plugin = get_post( $plugin );
+
+		// TODO: current_user_can()? Or other checks?
+
+		$draft = $this->get_release( $plugin, 'trunk' );
+		if ( ! $draft ) {
+			return new \WP_Error( 'no_draft', 'No draft release found' );
+		}
+
+		$new_tag = $draft->release_version;
+		if ( $this->get_release( $plugin, $new_tag ) ) {
+			return new \WP_Error( 'tag_exists', 'Tag already exists', $new_tag );
+		}
+
+		if ( !$draft->plugin_check_result || ! $draft->plugin_check_result['verdict'] ) {
+			return new \WP_Error( 'plugin_check_failed', 'Plugin check failed' );
+		}
+
+		// TODO: Should import warnings exist on the release CPT?
+		if ( $plugin->_import_warnings ) {
+			// These warnings are likely (always?) present because the tag hasn't been created yet.
+			$ignored_warnings = [
+				'stable_tag_invalid_trunk_fallback' => 1,
+				'stable_tag_invalid' => 1,
+			];
+			// Stop here if other warnings are present.
+			if ( array_diff_key( $plugin->_import_warnings, $ignored_warnings ) ) {
+				return new \WP_Error( 'import_warnings', 'Import warnings', $plugin->_import_warnings );
+			}
+		}
+
+		// TODO: What sanitizing or cross-checking do we need here?
+		$trunk_url = 'https://plugins.svn.wordpress.org/' . $plugin->post_name . '/trunk';
+		$tag_url = 'https://plugins.svn.wordpress.org/' . $plugin->post_name . '/tags/' . $new_tag;
+
+		// TODO: Decide if we're committing this as a specific user. Also any other options needed.
+		// Note that since this is a url-to-url copy, the commit happens immediately.
+		$svn_options = [
+			'message' => 'Tagging ' . $new_tag . ' from trunk@' . reset( $draft->release_revision ), // Commit message. i18n?
+		];
+		$tag_result = SVN::copy( $trunk_url, $tag_url, $svn_options );
+
+		if ( !$tag_result || ! $tag_result['result'] ) {
+			return new \WP_Error( 'svn_error', 'SVN error', $tag_result['errors'] );
+		}
+
+		$release_id = wp_update_post( array(
+			'ID'          => $draft->ID,
+			'post_status' => 'publish',
+			'post_title'  => $new_tag,
+			'meta_input'  => array(
+				'release_tag_revision' => $tag_result['revision'], // Do we need this?
+			),
+		) );
+
+		return $release_id;
 	}
 
 }
