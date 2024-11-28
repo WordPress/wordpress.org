@@ -35,8 +35,8 @@ if ( ! wp_is_numeric_array( $import_warnings ) ) {
 $warnings = '';
 foreach ( $import_warnings as $error_code => $error_data ) {
 	$warnings .= sprintf(
-		'<!-- wp:wporg/release-check-item {"type":"%1$s","text":"%2$s"} /-->',
-		'error',
+		'<!-- wp:wporg/release-check-item {"status":"%1$s"} -->%2$s<!-- /wp:wporg/release-check-item -->',
+		'warning',
 		$error_data
 	);
 }

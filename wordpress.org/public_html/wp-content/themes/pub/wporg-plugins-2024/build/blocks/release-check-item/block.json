@@ -9,13 +9,17 @@
   "description": "A block to display release draft check item.",
   "textdomain": "wporg",
   "attributes": {
-    "text": {
+    "status": {
       "type": "string",
-      "default": ""
-    },
-    "type": {
-      "type": "string",
+      "enum": [
+        "error",
+        "warning",
+        "success"
+      ],
       "default": "success"
+    },
+    "text": {
+      "type": "string"
     }
   },
   "supports": {
