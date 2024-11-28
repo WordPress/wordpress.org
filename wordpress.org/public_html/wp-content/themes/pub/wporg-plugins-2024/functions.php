@@ -509,13 +509,13 @@ function get_previous_version( $release_post, $releases ) {
 	}
 
 	if( 'draft' === $release_post->post_status ) {
-		return get_post_meta( $releases[0]->ID, 'release_version', true );
+		return get_post_meta( $releases[0]->ID, 'release_tag', true );
 	}
 
 	foreach ( $releases as $key => $release ) {
 		if ( $release->ID === $release_post->ID ) {
 			if ( isset( $releases[ $key + 1 ] ) ) {
-				return get_post_meta( $releases[ $key + 1 ]->ID, 'release_version', true );
+				return get_post_meta( $releases[ $key + 1 ]->ID, 'release_tag', true );
 			}
 			break;
 		}
