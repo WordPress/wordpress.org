@@ -1,29 +1,12 @@
 .wp-block-wporg-release-check-item {
-    margin: 0 0 var(--wp--preset--spacing--10) var(--wp--preset--spacing--10) !important;
-    position: relative;
+	display: flex;
+	margin: 0 !important;
+	position: relative;
+	gap: 8px;
 
-    summary {
-        display: flex;
-        cursor: default;
-    }
-
-    summary:before {
-        content: '';
-        display: flex;
-        width: 24px;
-        height: 24px;
-        left: 0;
-        background-repeat: no-repeat;
-		background-position: center;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' aria-hidden='true' focusable='false'%3E%3Cpath d='M10.6 6L9.4 7l4.6 5-4.6 5 1.2 1 5.4-6z'%3E%3C/path%3E%3C/svg%3E");
-    }
-
-    &[open] summary:before {
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' width='24' height='24' aria-hidden='true' focusable='false'%3E%3Cpath d='M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z'%3E%3C/path%3E%3C/svg%3E");
-    }
- 
-    summary::marker {
-        display: none;
-        content: '';
-    }
+	> div:first-child {
+		height: 25px;
+		display: flex;
+		align-items: center;
+	}
 }

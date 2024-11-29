@@ -17,9 +17,6 @@
         "success"
       ],
       "default": "success"
-    },
-    "text": {
-      "type": "string"
     }
   },
   "supports": {

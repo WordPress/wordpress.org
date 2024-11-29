@@ -13,9 +13,6 @@
 			"type": "string",
 			"enum": [ "error", "warning", "success" ],
 			"default": "success"
-		},
-		"text": {	
-			"type": "string"
 		}
 	},
 	"supports": {
