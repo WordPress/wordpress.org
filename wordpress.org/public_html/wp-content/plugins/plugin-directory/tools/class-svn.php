@@ -595,7 +595,7 @@ class SVN {
 	 *                     warning/error_code/error_message if detected.
 	 */
 	protected static function parse_svn_errors( $output ) {
-		if ( preg_match_all( '!^svn: (?P<warning>warning:)?\s*(?<error_code>[EW]\d+):\s*(?P<error_message>.+)$!im', $output, $messages, PREG_SET_ORDER ) ) {
+		if ( preg_match_all( '!^svn: (?P<warning>warning:)?\s*(?<error_code>[EW]\d+):\s*(?P<error_message>.+)$!im', $output ?? '', $messages, PREG_SET_ORDER ) ) {
 
 			// We only want the string keys - strip out the numeric keys
 			$messages = array_map( function ( $item ) {
