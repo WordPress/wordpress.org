@@ -171,19 +171,6 @@ function _merge_by_slug( ...$arrays ) {
 }
 
 /**
- * Register patterns from the patterns directory.
- */
-function wporg_breathe_register_patterns() {
-	$pattern_directory = new \DirectoryIterator( get_stylesheet_directory() . '/patterns/' );
-	foreach ( $pattern_directory as $file ) {
-		if ( $file->isFile() ) {
-			require $file->getPathname();
-		}
-	}
-}
-add_action( 'init', __NAMESPACE__ . '\wporg_breathe_register_patterns' );
-
-/**
  * Get the primary navigation menu object if it exists.
  */
 function wporg_breathe_get_local_nav_menu_object() {
@@ -242,9 +229,13 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 
 	$menu = array_map(
 		function( $menu_item ) {
+			global $wp;
+			$is_current_page = trailingslashit( $menu_item->url ) === trailingslashit( home_url( $wp->request ) );
+
 			return array(
 				'label' => esc_html( $menu_item->title ),
-				'url' => esc_url( $menu_item->url )
+				'url' => esc_url( $menu_item->url ),
+				'className' => $is_current_page ? 'current-menu-item' : '',
 			);
 		},
 		// Limit local nav items to 6
@@ -343,6 +334,7 @@ add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 function welcome_box() {
 	$welcome      = get_page_by_path( 'welcome' );
 	$cookie       = 'welcome-' . get_current_blog_id();
+	$path         = get_blog_details()->path;
 	$hash         = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
 	$content_hash = $welcome ? md5( $welcome->post_content ) : '';
 
@@ -376,12 +368,16 @@ function welcome_box() {
 		</div>
 		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo $cookie; ?>" data-hash="<?php echo $content_hash; ?>">
 			<script type="text/javascript">
-				var elContent = document.getElementById( 'make-welcome-content' );
+				const elContent = document.getElementById( 'make-welcome-content' );
+
 				if ( elContent ) {
-					if ( -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash ) ) {
-						var elToggle = document.getElementById( 'make-welcome-toggle' ),
-							elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' ),
-							elContainer = document.querySelector( '.make-welcome' );
+					const hasCookieSetToHidden = -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash );
+					const isHome = window.location.pathname === '<?php echo esc_js( $path ); ?>';
+
+					if ( hasCookieSetToHidden || ! isHome ) {
+						const elToggle = document.getElementById( 'make-welcome-toggle' );
+						const elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' );
+						const elContainer = document.querySelector( '.make-welcome' );
 
 						// It's hidden, hide it ASAP.
 						elContent.className += " hidden";
@@ -685,3 +681,39 @@ function breathe_content_nav( $nav_id ) {
 	</nav><!-- #<?php echo esc_html( $nav_id ); ?> -->
 	<?php
 }
+
+/**
+ * Modify rendering of the site-title block.
+ * Insert the team icon before the anchor tag, if it exists.
+ * 
+ * On the project and updates sites, update the text and link so that in the local nav
+ * it appears as if pages from these sites belong to the home site, and not separate blogs.
+ */
+function modify_site_title_block( $block_content, $block ) {
+	ob_start();
+	do_action('wporg_breathe_before_name', 'front');
+	$icon = ob_get_clean();
+	
+	// Insert the icon inside the anchor tag, before the text
+	$block_content = preg_replace(
+		'/(<a\b[^>]*>)(.*?)(<\/a>)/',
+		'$1' . $icon . '$2$3',
+		$block_content
+	);
+	
+	$site = get_site();
+	// On the project and updates sites replace the link with a Make home page link
+	if ( '/project/' === $site->path || '/updates/' === $site->path ) {
+		$make_home_url = 'https://' . $site->domain;
+		$block_content = preg_replace( 
+			'/<a\b[^>]*>(.*?)<\/a>/',
+			'<a target="_self" rel="home" href="' . esc_url( $make_home_url ) . '">' . 
+			esc_html__( 'Make WordPress', 'wporg-breathe' ) . 
+			'</a>', 
+			$block_content 
+		);
+	}
+
+	return $block_content;
+}
+add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\modify_site_title_block', 10, 2 );

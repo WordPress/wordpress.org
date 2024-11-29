@@ -14,10 +14,12 @@ defined( 'WPINC' ) || die();
  * Actions and filters.
  */
 add_action( 'init', __NAMESPACE__ . '\register' );
+add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_lesson_metaboxes' );
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_lesson_plan_metaboxes' );
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_workshop_metaboxes' );
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_meeting_metaboxes' );
 add_action( 'save_post_lesson-plan', __NAMESPACE__ . '\save_lesson_plan_metabox_fields' );
+add_action( 'save_post_lesson', __NAMESPACE__ . '\save_lesson_meta_fields' );
 add_action( 'save_post_wporg_workshop', __NAMESPACE__ . '\save_workshop_meta_fields' );
 add_action( 'save_post_meeting', __NAMESPACE__ . '\save_meeting_metabox_fields' );
 add_action( 'admin_footer', __NAMESPACE__ . '\render_locales_list' );
@@ -28,11 +30,11 @@ add_action( 'wp_insert_post', __NAMESPACE__ . '\set_default_lesson_preview', 10,
  * Register all post meta keys.
  */
 function register() {
+	register_common_meta();
 	register_course_meta();
 	register_lesson_meta();
 	register_lesson_plan_meta();
 	register_workshop_meta();
-	register_misc_meta();
 }
 
 /**
@@ -160,48 +162,12 @@ function register_workshop_meta() {
 
 	register_post_meta(
 		$post_type,
-		'video_url',
-		array(
-			'description'       => __( "The URL of the Workshop's video.", 'wporg_learn' ),
-			'type'              => 'string',
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		)
-	);
-
-	register_post_meta(
-		$post_type,
 		'duration',
 		array(
 			'description'       => __( 'The duration in seconds of the workshop. Should be converted to a human readable string for display.', 'wporg_learn' ),
 			'type'              => 'integer',
 			'single'            => true,
 			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		)
-	);
-
-	register_post_meta(
-		$post_type,
-		'presenter_wporg_username',
-		array(
-			'description'       => __( 'The WordPress.org user name of a presenter for this workshop.', 'wporg_learn' ),
-			'type'              => 'string',
-			'single'            => false,
-			'sanitize_callback' => 'sanitize_user',
-			'show_in_rest'      => true,
-		)
-	);
-
-	register_post_meta(
-		$post_type,
-		'other_contributor_wporg_username',
-		array(
-			'description'       => __( 'The WordPress.org user name of "other contributor" for this workshop.', 'wporg_learn' ),
-			'type'              => 'string',
-			'single'            => false,
-			'sanitize_callback' => 'sanitize_user',
 			'show_in_rest'      => true,
 		)
 	);
@@ -236,7 +202,7 @@ function register_workshop_meta() {
  *
  * For multiple post types, for example.
  */
-function register_misc_meta() {
+function register_common_meta() {
 	// Expiration field.
 	$post_types = array( 'lesson-plan', 'wporg_workshop', 'course', 'lesson' );
 	foreach ( $post_types as $post_type ) {
@@ -290,6 +256,56 @@ function register_misc_meta() {
 				'auth_callback'     => function() {
 					return current_user_can( 'edit_courses' ) || current_user_can( 'edit_lessons' );
 				},
+			)
+		);
+	}
+
+	// Presenter field.
+	$post_types = array( 'wporg_workshop', 'lesson' );
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'presenter_wporg_username',
+			array(
+				'description'       => __( 'The WordPress.org user name of a presenter for this workshop.', 'wporg_learn' ),
+				'type'              => 'string',
+				'single'            => false,
+				'sanitize_callback' => 'sanitize_user',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+
+	// Other contributor field.
+	$post_types = array( 'wporg_workshop', 'lesson' );
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'other_contributor_wporg_username',
+			array(
+				'description'       => __( 'The WordPress.org user name of "other contributor" for this workshop.', 'wporg_learn' ),
+				'type'              => 'string',
+				'single'            => false,
+				'sanitize_callback' => 'sanitize_user',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+
+	// Video URL field.
+	$post_types = array( 'wporg_workshop', 'lesson' );
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'video_url',
+			array(
+				'description'       => 'wporg_workshop' === $post_type
+					? __( "The URL of the Workshop's video.", 'wporg_learn' )
+					: __( "The URL of the Lesson's video.", 'wporg_learn' ),
+				'type'              => 'string',
+				'single'            => true,
+				'sanitize_callback' => 'esc_url_raw',
+				'show_in_rest'      => true,
 			)
 		);
 	}
@@ -474,6 +490,37 @@ function save_lesson_plan_metabox_fields( $post_id ) {
 }
 
 /**
+ * Add meta boxes to the Edit Lesson screen.
+ *
+ * Todo these should be replaced with block editor panels.
+ */
+function add_lesson_metaboxes() {
+	add_meta_box(
+		'lesson-presenters',
+		__( 'Presenters', 'wporg_learn' ),
+		__NAMESPACE__ . '\render_metabox_workshop_presenters',
+		'lesson',
+		'side'
+	);
+
+	add_meta_box(
+		'lesson-other-contributors',
+		__( 'Other Contributors', 'wporg_learn' ),
+		__NAMESPACE__ . '\render_metabox_workshop_other_contributors',
+		'lesson',
+		'side'
+	);
+
+	add_meta_box(
+		'lesson-video-url',
+		__( 'Video URL (Reference only)', 'wporg_learn' ),
+		__NAMESPACE__ . '\render_metabox_lesson_video',
+		'lesson',
+		'side'
+	);
+}
+
+/**
  * Add meta boxes to the Edit Workshop screen.
  *
  * Todo these should be replaced with block editor panels.
@@ -536,6 +583,15 @@ function render_metabox_workshop_details( WP_Post $post ) {
 	$captions          = get_post_meta( $post->ID, 'video_caption_language' ) ?: array();
 
 	require get_views_path() . 'metabox-workshop-details.php';
+}
+
+/**
+ * Render the Lesson Video meta box.
+ *
+ * @param WP_Post $post
+ */
+function render_metabox_lesson_video( WP_Post $post ) {
+	require get_views_path() . 'metabox-lesson-video.php';
 }
 
 /**
@@ -640,7 +696,52 @@ function save_workshop_meta_fields( $post_id ) {
 
 	// This language meta field is rendered in the editor sidebar using a PluginDocumentSettingPanel block,
 	// which won't save the field on publish if it has the default value.
-	// Our custom workshops query for locale prioritized tutorials (see functions.php `wporg_archive_query_prioritize_locale`)
+	// Our custom query for locale prioritized tutorials (see locale.php `wporg_archive_query_prioritize_locale`)
+	// depends on it being set, so we force it to be updated after saving:
+	$language         = get_post_meta( $post_id, 'language', true );
+	$language_default = 'en_US';
+	if ( ! isset( $language ) || $language_default === $language ) {
+		update_post_meta( $post_id, 'language', $language_default );
+	}
+}
+
+/**
+ * Update the post meta values from the meta fields when the post is saved.
+ *
+ * @param int $post_id
+ */
+function save_lesson_meta_fields( $post_id ) {
+	if ( wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// This nonce field is rendered in the Lesson Video metabox.
+	$nonce = filter_input( INPUT_POST, 'lesson-metabox-nonce' );
+	if ( ! wp_verify_nonce( $nonce, 'lesson-metaboxes' ) ) {
+		return;
+	}
+
+	$presenter_wporg_username = filter_input( INPUT_POST, 'presenter-wporg-username' );
+	$presenter_usernames      = array_map( 'trim', explode( ',', $presenter_wporg_username ) );
+	delete_post_meta( $post_id, 'presenter_wporg_username' );
+	if ( is_array( $presenter_usernames ) ) {
+		foreach ( $presenter_usernames as $username ) {
+			add_post_meta( $post_id, 'presenter_wporg_username', $username );
+		}
+	}
+
+	$other_contributor_wporg_username = filter_input( INPUT_POST, 'other-contributor-wporg-username' );
+	$other_contributor_usernames      = array_map( 'trim', explode( ',', $other_contributor_wporg_username ) );
+	delete_post_meta( $post_id, 'other_contributor_wporg_username' );
+	if ( is_array( $other_contributor_usernames ) ) {
+		foreach ( $other_contributor_usernames as $username ) {
+			add_post_meta( $post_id, 'other_contributor_wporg_username', $username );
+		}
+	}
+
+	// This language meta field is rendered in the editor sidebar using a PluginDocumentSettingPanel block,
+	// which won't save the field on publish if it has the default value.
+	// Our custom query for locale prioritized lessons (see locale.php `wporg_archive_query_prioritize_locale`)
 	// depends on it being set, so we force it to be updated after saving:
 	$language         = get_post_meta( $post_id, 'language', true );
 	$language_default = 'en_US';

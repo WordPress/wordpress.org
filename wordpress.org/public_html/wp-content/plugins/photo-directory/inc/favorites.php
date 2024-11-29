@@ -149,7 +149,9 @@ class Favorites {
 	 * Adds the rewrite rule for the 'favorites' URL endpoint.
 	 */
 	public static function add_rewrite_rule() {
+		add_rewrite_rule( '^' . self::PATH . '/([^/]*)/page/?([0-9]{1,})/?', 'index.php?' . self::QUERY_VAR_USER_FAVORITES . '=$matches[1]&paged=$matches[2]', 'top' );
 		add_rewrite_rule( '^' . self::PATH . '/([^/]*)/?', 'index.php?' . self::QUERY_VAR_USER_FAVORITES . '=$matches[1]', 'top' );
+		add_rewrite_rule( '^' . self::PATH . '/page/?([0-9]{1,})/?$', 'index.php?' . self::QUERY_VAR_MY_FAVORITES . '=1&paged=$matches[1]', 'top' );
 		add_rewrite_rule( '^' . self::PATH . '/?$', 'index.php?' . self::QUERY_VAR_MY_FAVORITES . '=1', 'top' );
 	}
 
@@ -236,6 +238,8 @@ class Favorites {
 		$favorites_user = get_query_var( self::QUERY_VAR_USER_FAVORITES );
 		if ( $favorites_user ) {
 			$new_template = locate_template( [ 'user-favorites.php' ] );
+			// Find a block template if there is one. Will fall back to the PHP template if none found.
+			$new_template = locate_block_template( $new_template, 'user-favorites', [ 'user-favorites.php' ] );
 			if ( $new_template ) {
 				// Even if no favorites were found, don't treat the request as a 404.
 				$wp_query->is_archive = true;
@@ -708,7 +712,7 @@ class Favorites {
 
 			if ( $paged ) {
 				/* translators: 1: current page number, 2: total number of pages. */
-				$title_parts['page'] = sprintf( __( 'Page %1$s of %2$s', 'wporg-plugins' ), $pages, $max_page );
+				$title_parts['page'] = sprintf( __( 'Page %1$s of %2$s', 'wporg-plugins' ), $paged, $max_page );
 			}
 		}
 

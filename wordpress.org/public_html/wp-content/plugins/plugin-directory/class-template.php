@@ -987,6 +987,8 @@ class Template {
 			$endpoint = 'plugin/%s/release-confirmation/%s';
 		} elseif ( 'discard' === $what ) {
 			$endpoint = 'plugin/%s/release-confirmation/%s/discard';
+		} elseif ( 'undo-discard' === $what ) {
+			$endpoint = 'plugin/%s/release-confirmation/%s/undo-discard';
 		} else {
 			return '';
 		}

@@ -98,6 +98,7 @@ $hosting_cache_buster = '9';
 						</div>
                     </div>
 
+<?php /*
 					<div class="partner">
 						<h2>
 							<a href="https://www.dreamhost.com/wordpress-hosting/" rel="nofollow">
@@ -119,6 +120,8 @@ $hosting_cache_buster = '9';
 							<a href="https://wordpress.org/five-for-the-future/pledge/dreamhost/">Here's their Five for the Future page &raquo;</a>
 						</div>
 					</div>
+ */ ?>	
+	
 				</section>
 
 				<section class="col-8">

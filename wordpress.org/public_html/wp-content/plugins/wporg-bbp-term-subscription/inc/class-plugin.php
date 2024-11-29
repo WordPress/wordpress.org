@@ -661,6 +661,7 @@ To unsubscribe from future emails, click here:
 			'taxonomy'   => $taxonomy,
 			'meta_key'   => self::META_KEY,
 			'meta_value' => $user_id,
+			'hide_empty' => false,
 		) );
 
 		// Default to false if empty.
