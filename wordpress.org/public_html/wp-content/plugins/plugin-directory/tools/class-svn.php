@@ -213,7 +213,9 @@ class SVN {
 	 * }
 	 */
 	public static function add( $file ) {
-		$options[]   = 'non-interactive';
+		$options = [
+			'non-interactive'
+		];
 		$esc_options = self::parse_esc_parameters( $options );
 
 		$esc_file     = escapeshellarg( $file );
@@ -226,6 +228,74 @@ class SVN {
 			$result = false;
 			$errors = self::parse_svn_errors( $output );
 		}
+
+		return compact( 'result', 'errors' );
+	}
+
+	/**
+	 * Mark removed files as deleted, and add any new files.
+	 *
+	 * @static
+	 * @param string $path The folder to add/remove files from.
+	 * @return array {
+	 *    @type bool        $result   The result of the operation.
+	 *    @type false|array $errors   Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function add_remove( $path ) {
+		$options = [
+			'no-ignore',
+			'non-interactive',
+		];
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$output = '';
+		$esc_path = escapeshellarg( $path );
+
+		// Leading ! => Remove file
+		$output  .= self::shell_exec( "svn status {$esc_options} {$esc_path} | grep ^! | cut -c9- | xargs svn rm {}" );
+		// Leading ? => Add file
+		$output  .= self::shell_exec( "svn status {$esc_options} {$esc_path} | grep ^? | cut -c9- | xargs svn add {}" );
+
+		$errors   = self::parse_svn_errors( $output );
+		$result   = ! $errors;
+
+		return compact( 'result', 'errors' );
+	}
+
+	/**
+	 * Copy a file or folder in a SVN checkout.
+	 *
+	 * @static
+	 * @param string $source      The path of the file to copy.
+	 * @param string $destination The path to copy the file to.
+	 * @return array {
+	 *    @type bool        $result   The result of the operation.
+	 *    @type false|array $errors   Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function copy( $source, $destination ) {
+		$options = [
+			'non-interactive',
+		];
+		$esc_options = self::parse_esc_parameters( $options );
+
+		if ( ! is_dir( $source ) || is_dir( $destination ) ) {
+			return [
+				'result' => false,
+				'errors' => [
+					'Source must be a directory, destination must not exist.',
+				],
+			];
+		}
+
+		$esc_source      = escapeshellarg( $source );
+		$esc_destination = escapeshellarg( $destination );
+
+		$output = self::shell_exec( "svn copy $esc_options $esc_source $esc_destination 2>&1" );
+
+		$errors = self::parse_svn_errors( $output );
+		$result = ! $errors;
 
 		return compact( 'result', 'errors' );
 	}
