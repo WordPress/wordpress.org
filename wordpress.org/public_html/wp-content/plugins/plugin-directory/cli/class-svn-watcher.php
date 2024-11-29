@@ -94,9 +94,20 @@ class SVN_Watcher {
 		$plugins = array();
 
 		foreach ( $logs['log'] as $log ) {
-			// Discard automated changes, these should not trigger plugin imports
-			if ( defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) && PLUGIN_SVN_MANAGEMENT_USER == $log['author'] ) {
-				continue;
+			// Discard some commits from the plugin management user.
+			if (
+				defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) &&
+				PLUGIN_SVN_MANAGEMENT_USER == $log['author']
+			) {
+				// If the commit matches the "new repo created" message, we'll skip it.
+				if ( preg_match( '/^Adding (.+) by (.+)\.$/i', $log['msg'] ) ) {
+					continue;
+				}
+
+				// If the commit includes an "author" byline, we'll use that as the actual author.
+				if ( preg_match( '/^Author: (.+)\.$/im', $log['msg'], $matches ) ) {
+					$log['author'] = $matches[1];
+				}
 			}
 
 			$plugin_slug = explode( '/', $log['paths'][0] )[1];
