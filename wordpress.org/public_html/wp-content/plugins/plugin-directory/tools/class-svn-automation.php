@@ -162,6 +162,27 @@ class SVN_Automation {
 			$readme_contents = file_get_contents( $readme_file );
 			$readme_parsed   = new Parser( $readme_contents );
 
+			// If there's no stable tag present in the readme, add it.
+			if (
+				'' === $readme_parsed->stable_tag &&
+				! preg_match( '!^[\s*]*Stable Tag:!i', $readme_contents )
+			) {
+				// Find the first header..
+				$valid_headers = array_keys( $readme_parsed->valid_headers );
+				$valid_headers = array_map( function( $header ) {
+					return preg_quote( $header, '!' );
+				}, $valid_headers );
+				$valid_headers = implode( '|', $valid_headers );
+
+				$readme_contents = preg_replace(
+					$regex = '/^(([\s*]*)(' . $valid_headers . '):.+([\r\n]+))/mi',
+					// Prepend the Stable Tag line to the first header, using the same line-ending and prefix.
+					"\\2Stable Tag: {$version}\\4\\1",
+					$readme_contents,
+					1 // Only replace the first header.
+				);
+			}
+
 			// If the version is different, update the stable tag.
 			if ( $version !== $readme_parsed->stable_tag ) {
 				$new_contents = preg_replace( '/^([\s*]*Stable Tag):\s*.+(\r)?$/mi', "\\1: $version\\2", $readme_contents, 1 );
