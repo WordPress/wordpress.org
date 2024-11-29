@@ -120,6 +120,8 @@ class SVN_Automation {
 
 		// Add new files to SVN, remove the old ones.
 		SVN::add_remove( $trunk_path );
+
+		return true;
 	}
 
 	/**
@@ -185,7 +187,12 @@ class SVN_Automation {
 
 			// If the version is different, update the stable tag.
 			if ( $version !== $readme_parsed->stable_tag ) {
-				$new_contents = preg_replace( '/^([\s*]*Stable Tag):\s*.+(\r)?$/mi', "\\1: $version\\2", $readme_contents, 1 );
+				$new_contents = preg_replace(
+					'/^([\s*]*Stable Tag):\s*.+(\r)?$/mi',
+					"\\1: $version\\2",
+					$readme_contents,
+					1
+				);
 				file_put_contents( $readme_file, $new_contents );
 			}
 
@@ -222,11 +229,11 @@ class SVN_Automation {
 
 		/*
 		 * NOTE: This commits as the plugin management user.
-		 * the Author byline is added to the commit message to show the actual actor.
+		 * The Author byline is added to the commit message to show the actual actor.
 		 */
 		$result = SVN::commit(
 			$this->svn_tmp,
-			"{$this->plugin->post_name}: {$message}\nAuthor: {$username}"
+			"{$this->plugin->post_name}: {$message}\nAuthor: {$username}."
 		);
 
 		return (bool) $result['result'];
