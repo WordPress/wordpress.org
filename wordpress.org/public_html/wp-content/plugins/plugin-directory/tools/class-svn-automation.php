@@ -123,6 +123,72 @@ class SVN_Automation {
 	}
 
 	/**
+	 * Create a tag from the current version in trunk.
+	 *
+	 * @param bool $update_stable_tag Whether to update the stable tag.
+	 * @return bool|WP_Error true on success, WP_Error on failure.
+	 */
+	public function create_tag_from_trunk( $update_stable_tag = true ) {
+		if ( ! $this->svn_tmp ) {
+			return new WP_Error( 'svn_tmp_not_found', 'SVN temp directory not found.' );
+		}
+
+		// Determine version of trunk
+		$trunk_path = $this->svn_tmp . '/trunk/';
+		$headers    = Import::find_plugin_headers( $trunk_path, 2 );
+		$version    = $headers->Version ?? '';
+
+		if ( empty( $version ) ) {
+			return new WP_Error( 'no_plugin', 'No plugin was detected, or an invalid version is specified.', 400 );
+		}
+
+		// check no tag exists for that version
+		$new_tag_path = $this->svn_tmp . '/tags/' . $version . '/';
+		if ( is_dir( $new_tag_path ) ) {
+			return new WP_Error( 'tag_exists', 'A tag already exists for this version.', 400 );
+		}
+
+		$this->default_commit_message = "Creating {$version} tag.";
+
+		// update the stable_tag in the readme.xxx file.
+		if ( $update_stable_tag ) {
+			$this->default_commit_message = "Creating {$version} tag and marking as stable.";
+
+			$readme_file = Import::find_readme_file( $trunk_path );
+			if ( ! $readme_file ) {
+				return new WP_Error( 'no_readme', 'Unable to find a readme file.', 500 );
+			}
+
+			$readme_contents = file_get_contents( $readme_file );
+			$readme_parsed   = new Parser( $readme_contents );
+
+			// If the version is different, update the stable tag.
+			if ( $version !== $readme_parsed->stable_tag ) {
+				$new_contents = preg_replace( '/^([\s*]*Stable Tag):\s*.+(\r)?$/mi', "\\1: $version\\2", $readme_contents, 1 );
+				file_put_contents( $readme_file, $new_contents );
+			}
+
+			// Again, check the readme has the expected version.
+			$readme_parsed = new Parser( $readme_file );
+			if ( $readme_parsed->stable_tag !== $version ) {
+				return new WP_Error(
+					'stable_tag_not_updated',
+					'The Stable Tag was not able to be updated in the readme. Please ensure a "Stable Tag: x.y" header exists in your readme.',
+					500
+				);
+			}
+		}
+
+		// copy trunk to tags
+		$result = SVN::copy( $trunk_path, $new_tag_path );
+		if ( ! $result['result'] ) {
+			return new WP_Error( 'copy_failed', 'Failed to copy trunk to the tag.', 500 );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Commit the changes to SVN.
 	 *
 	 * @param string $message Optional. The commit message.
