@@ -11,7 +11,7 @@ use WordPressdotorg\Plugin_Directory\Tools\SVN_Automation;
  */
 class Plugin_ZIP_Import {
 
-	public static function queue( $plugin_slug, $zip_post_id, $set_as_stable = true, $author_id = null ) {
+	public static function queue( $plugin_slug, $zip_reference, $set_as_stable = true, $author_id = null ) {
 		// If there's another ZIP import already scheduled, abort.
 		if ( Manager::get_scheduled_time( "import_zip:{$plugin_slug}", 'last' ) ) {
 			return false;
@@ -24,7 +24,7 @@ class Plugin_ZIP_Import {
 			"import_zip:{$plugin_slug}",
 			array(
 				$plugin_slug,
-				$zip_post_id,
+				$zip_reference,
 				$set_as_stable,
 				$author_id,
 			)
@@ -34,28 +34,48 @@ class Plugin_ZIP_Import {
 	/**
 	 * The cron trigger for the import job.
 	 *
-	 * @param string $plugin_slug   The plugin slug.
-	 * @param int    $zip_post_id   The ZIP post ID.
-	 * @param bool   $set_as_stable Whether to set the imported ZIP as the stable version.
-	 * @param int    $author_id     The author ID for the import.
+	 * @param string     $plugin_slug   The plugin slug.
+	 * @param int|string $zip_reference The ZIP post ID, or URL to ZIP.
+	 * @param bool       $set_as_stable Whether to set the imported ZIP as the stable version.
+	 * @param int        $author_id     The author ID for the import.
 	 */
-	public static function cron_trigger( $plugin_slug, $zip_post_id, $set_as_stable, $author_id ) {
+	public static function cron_trigger( $plugin_slug, $zip_reference, $set_as_stable, $author_id ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 
-		// Fetch the ZIP details.
-		$zip = get_post( $zip_post_id );
-		if ( ! $zip ) {
-			fwrite( STDERR, "[{$plugin_slug}] ZIP Import Failed: ZIP post not found.\n" );
+		if ( is_numeric( $zip_reference ) ) {
+			// Fetch the ZIP details.
+			$zip = get_post( $zip_post_id );
+			if ( ! $zip ) {
+				fwrite( STDERR, "[{$plugin_slug}] ZIP Import Failed: ZIP post not found.\n" );
+				return false;
+			}
+
+			// Use the ZIP post author if no author ID is provided.
+			if ( ! $author_id ) {
+				$author_id = $zip->post_author;
+			}
+
+			// Local path to the ZIP.
+			$zip_filepath = get_attached_file( $zip->ID );
+		} elseif ( $zip_reference && preg_match( '/^https?:\/\//', $zip_reference ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+
+			// Download the ZIP.
+			$zip_filepath = download_url( $zip_reference );
+			if ( is_wp_error( $zip_filepath ) ) {
+				fwrite( STDERR, "[{$plugin_slug}] ZIP Import Failed: " . $zip_filepath->get_error_message() . "\n" );
+				return false;
+			}
+
+			// Cleanup the ZIP on shutdown.
+			add_action( 'shutdown', function() use ( $zip_filepath ) {
+				unlink( $zip_filepath );
+			} );
+
+		} else {
+			fwrite( STDERR, "[{$plugin_slug}] ZIP Import Failed: Invalid ZIP reference.\n" );
 			return false;
 		}
-
-		// Use the ZIP post author if no author ID is provided.
-		if ( ! $author_id ) {
-			$author_id = $zip->post_author;
-		}
-
-		// Local path to the ZIP.
-		$zip_filepath = get_attached_file( $zip->ID );
 
 		// Start the automated SVN process.
 		$svn_automations = new SVN_Automations( $plugin );
