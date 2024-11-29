@@ -264,43 +264,6 @@ class SVN {
 	}
 
 	/**
-	 * Copy a file or folder in a SVN checkout.
-	 *
-	 * @static
-	 * @param string $source      The path of the file to copy.
-	 * @param string $destination The path to copy the file to.
-	 * @return array {
-	 *    @type bool        $result   The result of the operation.
-	 *    @type false|array $errors   Whether any errors or warnings were encountered.
-	 * }
-	 */
-	public static function copy( $source, $destination ) {
-		$options = [
-			'non-interactive',
-		];
-		$esc_options = self::parse_esc_parameters( $options );
-
-		if ( ! is_dir( $source ) || is_dir( $destination ) ) {
-			return [
-				'result' => false,
-				'errors' => [
-					'Source must be a directory, destination must not exist.',
-				],
-			];
-		}
-
-		$esc_source      = escapeshellarg( $source );
-		$esc_destination = escapeshellarg( $destination );
-
-		$output = self::shell_exec( "svn copy $esc_options $esc_source $esc_destination 2>&1" );
-
-		$errors = self::parse_svn_errors( $output );
-		$result = ! $errors;
-
-		return compact( 'result', 'errors' );
-	}
-
-	/**
 	 * Commit changes in a SVN checkout.
 	 *
 	 * @static
@@ -513,13 +476,54 @@ class SVN {
 	 * }
 	 */
 	public static function rename( $from, $to, $options = array() ) {
+		return SVN::_copy_rename_helper( 'mv', $from, $to, $options );
+	}
+
+	/**
+	 * Copy a file or folder in a SVN checkout.
+	 *
+	 * @static
+	 *
+	 * @param string $source      The path of the file to copy. May be a URL.
+	 * @param string $destination The path to copy the file to. May be a URL.
+	 * @param array  $options  Optional. A list of options to pass to SVN. Default: empty array.
+	 * @return array {
+	 *    @type bool        $result   The result of the operation.
+	 *    @type int         $revision The revision.
+	 *    @type false|array $errors   Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function copy( $from, $to, $options = array() ) {
+		return SVN::_copy_rename_helper( 'cp', $from, $to, $options = array() );
+	}
+
+	/**
+	 * Helper function for copy and rename operations.
+	 *
+	 * @static
+	 * @param string $svn_op  The SVN operation to perform. 'cp' or 'mv'.
+	 * @param string $from    The path of the SVN folder to rename. May be a URL.
+	 * @param string $to      The new path of the SVN folder. May be a URL.
+	 * @param array  $options Optional. A list of options to pass to SVN. Default: empty array.
+	 * @return array {
+	 *    @type bool        $result   The result of the operation.
+	 *    @type int         $revision The revision.
+	 *    @type false|array $errors   Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function _copy_rename_helper( $svn_op, $from, $to, $options = array() ) {
 		$options[] = 'non-interactive';
 		$is_url    = ( preg_match( '#https?://#i', $from ) && preg_match( '#https?://#i', $to ) );
 
 		if ( $is_url ) {
 			// Set the message if not provided.
 			if ( ! isset( $options['message'] ) && ! isset( $options['m'] ) ) {
-				$options['message'] = sprintf( "Rename %s to %s.", basename( $from ), basename( $to ) );
+				$options['message'] = sprintf(
+					"%s %s to %s.",
+					'mv' === $svn_op ? 'Rename' : 'Copy',
+					basename( $from ),
+					basename( $to )
+				);
 			}
 
 			if ( empty( $options['username'] ) ) {
@@ -530,10 +534,11 @@ class SVN {
 
 		$esc_options = self::parse_esc_parameters( $options );
 
+		$esc_op   = escapeshellarg( $svn_op );
 		$esc_from = escapeshellarg( $from );
 		$esc_to   = escapeshellarg( $to );
 
-		$output = self::shell_exec( "svn mv $esc_from $esc_to $esc_options 2>&1" );
+		$output = self::shell_exec( "svn $esc_op $esc_from $esc_to $esc_options 2>&1" );
 		if ( $is_url && preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
