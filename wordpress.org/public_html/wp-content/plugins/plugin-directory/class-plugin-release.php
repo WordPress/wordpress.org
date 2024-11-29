@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use WordPressdotorg\Plugin_Directory\Cli\Import;
 
 /**
  * The Plugin Release class encapsulates the plugin release CPT and related code.
@@ -106,6 +107,7 @@ class Plugin_Release {
 				'release_zips_built' => $release['zips_built'],
 				'release_confirmations_required' => $release['confirmations_required'],
 				'release_revision' => $release['revision'],
+				'release_commit_log' => $release['commit_log'] ?? null,
 			),
 			// TODO: what else? Could store the changelog or other content at the point of release for comparison purposes.
 		) );
@@ -154,6 +156,7 @@ class Plugin_Release {
 				'release_zips_built' => $release['zips_built'],
 				'release_confirmations_required' => $release['confirmations_required'],
 				'release_revision' => $release['revision'],
+				'release_commit_log' => $release['commit_log'] ?? null,
 			),
 			// TODO: what else? Could store the changelog or other content at the point of release for comparison purposes.
 		) );
@@ -193,6 +196,13 @@ class Plugin_Release {
 			}
 		}
 
+		// Store the commit log in postmeta. We'll only do this for drafts.
+		$last_release_revision = max( $last_release->release_revision );
+		if ( $last_release_revision && $release['revision'] ) {
+			$trunk_url = Import::PLUGIN_SVN_BASE . '/' . $plugin->post_name . '/trunk';
+			$commit_log = SVN::log( $trunk_url, [ $last_release_revision, max( $release['revision'] ) ] );
+			$release['commit_log'] = $commit_log['log'] ?? null;
+		}
 		$draft_id = $this->get_release( $plugin, 'trunk' );
 		if ( $draft_id ) {
 			$release_id = $this->update_release( $draft_id, $release );
@@ -356,12 +366,17 @@ class Plugin_Release {
 			return new \WP_Error( 'svn_error', 'SVN error', $tag_result['errors'] );
 		}
 
+		// Include the tag revision in the release post list of revisions.
+		// This is so that we can easily tell if there are trunk commits after the release.
+		$release_revisions = array_merge( $draft->release_revision, [ $tag_result['revision'] ] );
+
 		$release_id = wp_update_post( array(
 			'ID'          => $draft->ID,
 			'post_status' => 'publish',
 			'post_title'  => $new_tag,
 			'meta_input'  => array(
-				'release_tag_revision' => $tag_result['revision'], // Do we need this?
+				'release_revision'     => $release_revisions,
+				#'release_tag_revision' => $tag_result['revision'], // Do we need this? Probably not.
 				'release_tag'          => $new_tag, // Was 'trunk'
 			),
 		) );
