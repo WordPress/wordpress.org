@@ -104,6 +104,7 @@ function scripts() {
 	wp_enqueue_script( 'grofiles-cards' );
 
 	if ( is_singular( get_photo_post_type() ) ) {
+		wp_enqueue_script( 'wporg-photos-favorite', get_stylesheet_directory_uri() . '/js/favorite.js', [], filemtime( __DIR__ . '/js/favorite.js' ), true );
 		wp_enqueue_script( 'wporg-photos-attribution', get_stylesheet_directory_uri() . '/js/attribution.js', [], filemtime( __DIR__ . '/js/attribution.js' ), true );
 		wp_localize_script(
 			'wporg-photos-attribution',

@@ -17,7 +17,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 get_header( 'top-level-page' );
 the_post();
-$hosting_cache_buster = '8';
+$hosting_cache_buster = '9';
 
 ?>
 
@@ -33,8 +33,30 @@ $hosting_cache_buster = '8';
 
 				<section>
 					<div class="partner">
+                        <h2>
+                            <a href="https://pressable.com/" rel="nofollow">
+                                <img
+                                    alt=""
+                                    src="https://s.w.org/hosting/pressable.png?<?php echo $hosting_cache_buster; ?>"
+                                    height="100"
+                                    width="100"
+                                />
+                                Pressable
+                            </a>
+                        </h2>
+
+						<p>Pressable delivers reliable, scalable WordPress hosting that empowers businesses and agencies to grow with confidence. Built on the powerful WP Cloud platform by Automattic, Pressable ensures your WordPress sites run smoothly, securely, and with unmatched performance. Whether you're managing a single site or thousands, our 24/7 expert support and seamless hosting experience allow you to focus on what matters most - your business. From free staging environments to automatic backups and global edge caching, we take care of the heavy lifting so you can create, build, and grow with peace of mind.</p>
+
+                        <div class="forum">
+							<a href="https://wordpress.org/search/Pressable/?in=support_forums">Forum threads about Pressable &raquo;</a>
+							<br />
+							<a href="https://wordpress.org/five-for-the-future/pledge/automattic/">Pressable is owned by Automattic, here's their Five for the Future Page &raquo;</a>
+						</div>
+					</div>			
+
+					<div class="partner">
 						<h2>
-							<a href="https://www.bluehost.com/wordpress-hosting" rel="nofollow">
+							<a href="https://www.bluehost.com/wordpress/wordpress-hosting?siteid=46156037" rel="nofollow">
 								<img
 									alt=""
 									src="https://s.w.org/hosting/bluehost.png?<?php echo $hosting_cache_buster; ?>"
@@ -49,8 +71,11 @@ $hosting_cache_buster = '8';
 
 						<div class="forum">
 							<a href="https://wordpress.org/search/Bluehost/?in=support_forums">Forum threads about Bluehost &raquo;</a>
+							<br />
+							<a href="https://wordpress.org/five-for-the-future/pledge/bluehost/">Here's their Five for the Future page &raquo;</a>
 						</div>
 					</div>
+
                     <div class="partner">
                         <h2>
                             <a href="https://www.hostinger.com/special/wordpress" rel="nofollow">
@@ -68,9 +93,12 @@ $hosting_cache_buster = '8';
 
                         <div class="forum">
                             <a href="https://wordpress.org/search/Hostinger/?in=support_forums">Forum threads about Hostinger &raquo;</a>
-                        </div>
+							<br />
+							<a href="https://wordpress.org/five-for-the-future/pledge/hostinger-international/">Here's their Five for the Future page &raquo;</a>
+						</div>
                     </div>
 
+<?php /*
 					<div class="partner">
 						<h2>
 							<a href="https://www.dreamhost.com/wordpress-hosting/" rel="nofollow">
@@ -88,28 +116,12 @@ $hosting_cache_buster = '8';
 
 						<div class="forum">
 							<a href="https://wordpress.org/search/DreamHost/?in=support_forums">Forum threads about DreamHost &raquo;</a>
+							<br />
+							<a href="https://wordpress.org/five-for-the-future/pledge/dreamhost/">Here's their Five for the Future page &raquo;</a>
 						</div>
 					</div>
-					
-					<div class="partner">
-						<h2>
-							<a href="https://wordpress.com/wordpress-hosting/" rel="nofollow">
-								<img
-									alt=""
-									src="https://s.w.org/style/images/about/WordPress-logotype-wmark.png?<?php echo $hosting_cache_buster; ?>"
-									height="100"
-									width="100"
-								/>
-								WordPress.com
-							</a>
-						</h2>
-
-						<p>Get lightning-fast WordPress hosting with full support for your plugins and themes, built by the biggest contributor to WordPress Core. Whether you&#8217;re a first-time blogger or an advanced developer, you&#8217;ll find all the features you&#8217;ll ever need, from intuitive site building and monetization tools, to GitHub deployments, staging sites, WP-CLI, SSH, and more. Scale without stress thanks to unlimited bandwidth, traffic, and visitors—plus 24/7 security.</p>
-
-						<div class="forum">
-							<a href="https://wordpress.org/search/wordpress.com/?in=support_forums">Forum threads about WordPress.com &raquo;</a>
-						</div>
-					</div>
+ */ ?>	
+	
 				</section>
 
 				<section class="col-8">

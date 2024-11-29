@@ -2,6 +2,11 @@
 namespace WordPressdotorg\Make\Breathe_2024;
 
 /**
+ * Include locale specific styles.
+ */
+require_once get_theme_root() . '/wporg-parent-2021/inc/rosetta-styles.php';
+
+/**
  * Sets up theme defaults.
  */
 function after_setup_theme() {
@@ -166,19 +171,6 @@ function _merge_by_slug( ...$arrays ) {
 }
 
 /**
- * Register patterns from the patterns directory.
- */
-function wporg_breathe_register_patterns() {
-	$pattern_directory = new \DirectoryIterator( get_stylesheet_directory() . '/patterns/' );
-	foreach ( $pattern_directory as $file ) {
-		if ( $file->isFile() ) {
-			require $file->getPathname();
-		}
-	}
-}
-add_action( 'init', __NAMESPACE__ . '\wporg_breathe_register_patterns' );
-
-/**
  * Get the primary navigation menu object if it exists.
  */
 function wporg_breathe_get_local_nav_menu_object() {
@@ -191,36 +183,68 @@ function wporg_breathe_get_local_nav_menu_object() {
 }
 
 /**
+ * Add a login link to the local nav if there is no logged in user.
+ */
+function _maybe_add_login_item_to_menu( $menus ) {
+	if ( is_user_logged_in() ) {
+		return $menus;
+	}
+
+	global $wp;
+	$redirect_url = home_url( $wp->request );
+	$login_item = array(
+		'label' => __( 'Log in', 'wporg-breathe' ),
+		'url' => wp_login_url( $redirect_url ),
+	);
+
+	if ( $menus['breathe'] ) {
+		$login_item['className'] = 'has-separator';
+		$menus['breathe'][] = $login_item;
+	} else {
+		$menus['breathe'] = array( $login_item );
+	}
+
+	return $menus;
+}
+
+/**
  * Provide a list of local navigation menus.
  */
 function wporg_breathe_add_site_navigation_menus( $menus ) {
 	if ( is_admin() ) {
 		return;
 	}
+
 	$local_nav_menu_object = wporg_breathe_get_local_nav_menu_object();
 
 	if ( ! $local_nav_menu_object ) {
-		return array();
+		return _maybe_add_login_item_to_menu( $menus );
 	}
 
 	$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
 
 	if ( ! $menu_items || empty( $menu_items ) ) {
-		return array();
+		return _maybe_add_login_item_to_menu( $menus );
 	}
 
-	return array(
-		'breathe' => array_map(
-			function( $menu_item ) {
-				return array(
-					'label' => esc_html( $menu_item->title ),
-					'url' => esc_url( $menu_item->url )
-				);
-			},
-			// Limit local nav items to 4
-			array_slice( $menu_items, 0, 4 )
-		)
+	$menu = array_map(
+		function( $menu_item ) {
+			global $wp;
+			$is_current_page = trailingslashit( $menu_item->url ) === trailingslashit( home_url( $wp->request ) );
+
+			return array(
+				'label' => esc_html( $menu_item->title ),
+				'url' => esc_url( $menu_item->url ),
+				'className' => $is_current_page ? 'current-menu-item' : '',
+			);
+		},
+		// Limit local nav items to 6
+		array_slice( $menu_items, 0, 6 )
 	);
+
+	$menus['breathe'] = $menu;
+
+	return _maybe_add_login_item_to_menu( $menus );
 }
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\wporg_breathe_add_site_navigation_menus' );
 
@@ -310,6 +334,7 @@ add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 function welcome_box() {
 	$welcome      = get_page_by_path( 'welcome' );
 	$cookie       = 'welcome-' . get_current_blog_id();
+	$path         = get_blog_details()->path;
 	$hash         = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
 	$content_hash = $welcome ? md5( $welcome->post_content ) : '';
 
@@ -331,6 +356,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
+		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu' ); ?></strong></a>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
@@ -342,12 +368,16 @@ function welcome_box() {
 		</div>
 		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo $cookie; ?>" data-hash="<?php echo $content_hash; ?>">
 			<script type="text/javascript">
-				var elContent = document.getElementById( 'make-welcome-content' );
+				const elContent = document.getElementById( 'make-welcome-content' );
+
 				if ( elContent ) {
-					if ( -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash ) ) {
-						var elToggle = document.getElementById( 'make-welcome-toggle' ),
-							elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' ),
-							elContainer = document.querySelector( '.make-welcome' );
+					const hasCookieSetToHidden = -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash );
+					const isHome = window.location.pathname === '<?php echo esc_js( $path ); ?>';
+
+					if ( hasCookieSetToHidden || ! isHome ) {
+						const elToggle = document.getElementById( 'make-welcome-toggle' );
+						const elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' );
+						const elContainer = document.querySelector( '.make-welcome' );
 
 						// It's hidden, hide it ASAP.
 						elContent.className += " hidden";
@@ -564,7 +594,7 @@ function add_svg_icon_to_site_name() {
 		printf( "\t" . '<path d="%s" stroke="currentColor" fill="currentColor"/>' . "\n", esc_attr( $path ) );
 	}
 
-	echo "</svg>\n";
+	echo "</svg>";
 }
 add_action( 'wporg_breathe_before_name', __NAMESPACE__ . '\add_svg_icon_to_site_name' );
 
@@ -576,3 +606,114 @@ add_action( 'wporg_breathe_before_name', __NAMESPACE__ . '\add_svg_icon_to_site_
 __( 'Pending Review: %s', 'wporg' );
 __( 'Submit for review', 'wporg' );
 _n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
+
+/**
+ * Modify the search block's form action for handbook pages.
+ *
+ * @param string $block_content The block content about to be appended.
+ * @param array  $block         The full block, including name and attributes.
+ * @return string Modified block content.
+ */
+function modify_handbook_search_block_action( $block_content, $block ) {
+	if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() ) {
+		$html = wp_html_split( $block_content );
+		
+		foreach ( $html as &$token ) {
+			if ( 0 === strpos( $token, '<form' ) ) {
+				$token = preg_replace(
+					'/action="[^"]*"/',
+					'action="' . esc_url( home_url( '/handbook/' ) ) . '"',
+					$token
+				);
+				break;
+			}
+		}
+		
+		$block_content = implode( '', $html );
+	}
+	return $block_content;
+}
+add_filter( 'render_block_core/search', __NAMESPACE__ . '\modify_handbook_search_block_action', 10, 2 );
+
+/**
+ * Display navigation to next/previous pages when applicable
+ * Customized to fix issues with heading hierarchy.
+ */
+function breathe_content_nav( $nav_id ) {
+	global $wp_query, $post;
+
+	// Don't print empty markup on single pages if there's nowhere to navigate.
+	if ( is_single() ) {
+		$previous = ( is_attachment() ) ? get_post( $post->post_parent ) : get_adjacent_post( false, '', true );
+		$next = get_adjacent_post( false, '', false );
+
+		if ( ! $next && ! $previous )
+			return;
+	}
+
+	// Don't print empty markup in archives if there's only one page.
+	if ( $wp_query->max_num_pages < 2 && ( is_home() || is_archive() || is_search() ) )
+		return;
+
+	$nav_class = ( is_single() ) ? 'navigation-post' : 'navigation-paging';
+
+	?>
+	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo $nav_class; ?>">
+		<h2 class="screen-reader-text"><?php _e( 'Post navigation', 'p2-breathe' ); ?></h2>
+
+	<?php if ( is_single() ) : // navigation links for single posts ?>
+
+		<?php previous_post_link( '<div class="nav-previous">%link</div>', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'p2-breathe' ) . '</span> %title' ); ?>
+		<?php next_post_link( '<div class="nav-next">%link</div>', '%title <span class="meta-nav">' . _x( '&rarr;', 'Next post link', 'p2-breathe' ) . '</span>' ); ?>
+
+	<?php elseif ( $wp_query->max_num_pages > 1 && ( is_home() || is_archive() || is_search() ) ) : // navigation links for home, archive, and search pages ?>
+
+		<?php if ( get_next_posts_link() ) : ?>
+		<div class="nav-previous"><?php next_posts_link( __( '<span class="meta-nav">&larr;</span> Older posts', 'p2-breathe' ) ); ?></div>
+		<?php endif; ?>
+
+		<?php if ( get_previous_posts_link() ) : ?>
+		<div class="nav-next"><?php previous_posts_link( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'p2-breathe' ) ); ?></div>
+		<?php endif; ?>
+
+	<?php endif; ?>
+
+	</nav><!-- #<?php echo esc_html( $nav_id ); ?> -->
+	<?php
+}
+
+/**
+ * Modify rendering of the site-title block.
+ * Insert the team icon before the anchor tag, if it exists.
+ * 
+ * On the project and updates sites, update the text and link so that in the local nav
+ * it appears as if pages from these sites belong to the home site, and not separate blogs.
+ */
+function modify_site_title_block( $block_content, $block ) {
+	ob_start();
+	do_action('wporg_breathe_before_name', 'front');
+	$icon = ob_get_clean();
+	
+	// Insert the icon inside the anchor tag, before the text
+	$block_content = preg_replace(
+		'/(<a\b[^>]*>)(.*?)(<\/a>)/',
+		'$1' . $icon . '$2$3',
+		$block_content
+	);
+	
+	$site = get_site();
+	// On the project and updates sites replace the link with a Make home page link
+	if ( '/project/' === $site->path || '/updates/' === $site->path ) {
+		$make_home_url = 'https://' . $site->domain;
+		$block_content = preg_replace( 
+			'/<a\b[^>]*>(.*?)<\/a>/',
+			'<a target="_self" rel="home" href="' . esc_url( $make_home_url ) . '">' . 
+			esc_html__( 'Make WordPress', 'wporg-breathe' ) . 
+			'</a>', 
+			$block_content 
+		);
+	}
+
+	return $block_content;
+}
+add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\modify_site_title_block', 10, 2 );

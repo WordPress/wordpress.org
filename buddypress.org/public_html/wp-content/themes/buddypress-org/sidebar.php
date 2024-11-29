@@ -13,7 +13,7 @@
 				</a>
 			</div><!-- #item-header-avatar -->
 
-			<?php bp_nav_menu(); ?>
+			<?php bp_nav_menu( array( 'depth' => 1 ) ); ?>
 
 		<?php endif; ?>
 

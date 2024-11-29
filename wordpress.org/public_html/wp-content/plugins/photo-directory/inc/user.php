@@ -75,13 +75,15 @@ class User {
 	}
 
 	/**
-	 * Returns a count of photos published by a user on this calendar day.
+	 * Returns a count of photos of a given post status(es) by a user on this calendar day.
 	 *
-	 * @param int $user_id Optional. The user ID. If not defined, assumes global
-	 *                     author. Default false.
+	 * @param string|string[] $post_status Optional. The post status(es) of photos to find.
+	 *                                     Default 'publish'.
+	 * @param int             $user_id     Optional. The user ID. If not defined, assumes
+	 *                                     global author. Default false.
 	 * @return int
 	 */
-	public static function count_published_photos_for_today( $user_id = false ) {
+	public static function count_photos_for_today( $post_status = 'publish', $user_id = false ) {
 		if (  ! $user_id ) {
 			global $authordata;
 
@@ -98,7 +100,7 @@ class User {
 
 		$args = [
 			'post_type'      => Registrations::get_post_type(),
-			'post_status'    => 'publish',
+			'post_status'    => $post_status,
 			'author'         => $user_id,
 			'date_query'     => [
 				[

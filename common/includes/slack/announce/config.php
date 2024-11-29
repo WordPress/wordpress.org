@@ -288,6 +288,8 @@ function get_whitelist() {
 			'monikarao',
 			'ryan', // @boren on Slack
 			'webtechpooja', // @Pooja Derashri on Slack
+			'oglekler',
+			'krupajnanda',
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'anlino', // @andersnoren on Slack
@@ -364,6 +366,7 @@ function get_whitelist() {
 		),
 		'hosting' => array(
 			'andrew.taylor', // @ataylorme on Slack
+			'chaion07',
 			'Crixu',
 			'kirasong',
 			'jadonn',
@@ -372,6 +375,7 @@ function get_whitelist() {
 			'amykamala', // @amy kamala on Slack
 			'brechtryckaert',
 			'brettface',
+			'zunaid321', // @Zunaid Amin on Slack
 		),
 		'marketing' => array(
 			'bernard0omnisend', // Bernard Meyer on Slack
@@ -383,6 +387,9 @@ function get_whitelist() {
 			'robinwpdeveloper',
 			'santanainniss',
 			'SeReedMedia',
+		),
+		'media-corps' => array(
+			'eidolonnight',
 		),
 		'meta' => array(
 			'coreymckrill',
@@ -444,6 +451,13 @@ function get_whitelist() {
 			'katiejrichards',
 			'marcusskyverge',
 		),
+		'playground' => array(
+			'akirk',
+			'bph',
+			'berislav.grgicak',
+			'bpayton',
+			'zieladam',
+		),
 		'polyglots' => array(
 			'Amieiro',
 			'casiepa', // @Pascal on Slack
@@ -485,7 +499,7 @@ function get_whitelist() {
 			'noradriana', // @Nora Ferreirós on Slack
 			'yellowlime', // @Thijs Buijs on Slack
 		),
-		'themereview' => array(
+		'themes' => array(
 			'acalfieri',
 			'acosmin',
 			'aristath',
@@ -514,7 +528,6 @@ function get_whitelist() {
 			'annezazu',
 			'arasae', // @Sarah (She/Her) on Slack
 			'azhiyadev', // @Hauwa Abashiya on Slack
-			'bsanevans',
 			'chanthaboune',
 			'chetan200891',
 			'chrisbadgett',
@@ -528,6 +541,7 @@ function get_whitelist() {
 			'hardeepasrani',
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
+			'kaitohm',
 			'lada7042',
 			'meaganhanes',
 			'mrfoxtalbot',

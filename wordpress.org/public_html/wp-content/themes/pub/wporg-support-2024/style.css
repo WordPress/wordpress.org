@@ -918,7 +918,7 @@ h1,
 h2,
 h3,
 h4,
-.bbp-view .review-ratings .col-5 > div:first-child,
+.bbp-view .review-ratings > div:last-child > div:first-child,
 h5,
 h6 {
 	margin: 0 0 var(--wp--style--block-gap);
@@ -1980,9 +1980,8 @@ fieldset label {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear::before, .bbp-view .review-ratings::before, .bbpress main#main::before,
+.clear::before, .bbpress main#main::before,
 .clear::after,
-.bbp-view .review-ratings::after,
 .bbpress main#main::after,
 .entry-content::before,
 .entry-content::after,
@@ -1999,7 +1998,7 @@ fieldset label {
 	table-layout: fixed;
 }
 
-.clear::after, .bbp-view .review-ratings::after, .bbpress main#main::after,
+.clear::after, .bbpress main#main::after,
 .entry-content::after,
 .comment-content::after,
 .site-header::after,
@@ -3557,51 +3556,49 @@ div.bbp-breadcrumb .bbp-breadcrumb-sep {
 # Plugin / Theme specific support pages
 --------------------------------------------------------------*/
 .bbp-view .review-ratings {
-	margin-bottom: 1rem;
-	padding-bottom: 10px;
+	margin-bottom: var(--wp--preset--spacing--20);
+	padding-bottom: var(--wp--preset--spacing--20);
 	border-bottom: 1px solid var(--wp--custom--color--border);
 	display: flex;
-	flex-direction: row-reverse;
 }
-.bbp-view .review-ratings .col-3 {
+.bbp-view .review-ratings > div:first-child {
 	font-size: 0.8rem;
-	margin: 0;
-	min-width: 40%;
-	border-top: 1px solid var(--wp--custom--color--border);
+	width: 60%;
+	min-width: 54%;
 	flex-shrink: 0;
 }
-.bbp-view .review-ratings .col-3 .reviews-total-count {
+.bbp-view .review-ratings > div:last-child {
+	margin: 0 0 10px 0;
+	padding-right: 10px;
+	min-width: 40%;
+	font-size: 0.8rem;
+}
+.bbp-view .review-ratings > div:last-child .reviews-total-count {
 	font-weight: 700;
 	padding-bottom: 5px;
 	padding-top: 5px;
 }
-.bbp-view .review-ratings .col-3 .counter-bar {
-	background-color: var(--wp--preset--color--pomegrade-1) !important;
-}
-.bbp-view .review-ratings .col-5 {
-	margin: 0 0 10px 0;
-	padding-right: 10px;
-	width: 60%;
-	min-width: 54%;
-	font-size: 0.8rem;
-}
-.bbp-view .review-ratings .col-5 > div:first-child {
+.bbp-view .review-ratings > div:last-child > div:first-child {
 	margin-top: 0;
 }
-.bbp-view .review-ratings .col-5 .wporg-ratings {
+.bbp-view .review-ratings > div:last-child .wporg-ratings {
 	display: inline-block;
 	margin-right: 1rem;
 }
-.bbp-view .review-ratings .col-5 .reviews-submit-link {
+.bbp-view .review-ratings > div:last-child .reviews-submit-link {
 	margin-top: 1rem;
 }
 @media (max-width: 499px) {
 	.bbp-view .review-ratings {
-		flex-direction: column-reverse;
+		flex-direction: column;
 	}
-	.bbp-view .review-ratings .col-3, .bbp-view .review-ratings .col-5 {
+	.bbp-view .review-ratings > div:first-child {
 		width: 100%;
+		margin-bottom: 20px;
 	}
+}
+.bbp-view .reviews-submit-link {
+	margin-top: 10px;
 }
 
 /*--------------------------------------------------------------

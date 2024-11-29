@@ -11,6 +11,8 @@
  * @package p2-breathe
  */
 
+use function WordPressdotorg\Make\Breathe_2024\{ breathe_content_nav };
+
 get_header(); ?>
 
 	<div id="primary" class="content-area">

@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Template;
+use Two_Factor_Core;
+use function WordPressdotorg\Two_Factor\{ user_requires_2fa, get_onboarding_account_url };
 
 class Upload {
 
@@ -52,6 +54,18 @@ class Upload {
 				/* translators: Login URL */
 				__( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ),
 				esc_url( wp_login_url() )
+			) . '</p></div>';
+		}
+
+		// Require 2FA for plugin authors on upload.
+		if (
+			user_requires_2fa( wp_get_current_user() ) &&
+			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
+		) {
+			return '<div class="notice notice-error notice-alt"><p>' . sprintf(
+				/* translators: Setup 2FA url */
+				__( 'Before you can upload a new plugin, <a href="%s">please enable two-factor authentication</a>.', 'wporg-plugins' ),
+				esc_url( get_onboarding_account_url() )
 			) . '</p></div>';
 		}
 

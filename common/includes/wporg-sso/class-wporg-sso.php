@@ -18,7 +18,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 *
 		 * @var int
 		 */
-		const REMOTE_TOKEN_TIMEOUT = 5;
+		const REMOTE_TOKEN_TIMEOUT = 300;
 
 		const VALID_HOSTS = [
 			'wordpress.org',

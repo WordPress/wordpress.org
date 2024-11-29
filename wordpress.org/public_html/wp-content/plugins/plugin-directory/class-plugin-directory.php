@@ -1869,6 +1869,14 @@ class Plugin_Directory {
 			}
 		}
 
+		/*
+		 * Allow a discarded release to be reset.
+		 * See API\Routes\Plugin_Release_Confirmation::undo_discard_release()
+		 */
+		if ( isset( $data['undo-discard'] ) && ! empty( $release['discarded'] ) && empty( $data['discarded'] ) ) {
+			unset( $release['discarded'] );
+		}
+
 		$releases = self::get_releases( $plugin );
 
 		// Find any other releases using this slug (as in the case of updates) and remove it.

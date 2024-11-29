@@ -61,6 +61,26 @@ class Plugin_Release_Confirmation extends Base {
 			'permission_callback' => [ $this, 'permission_can_access_plugin' ],
 		] );
 
+		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/undo-discard', [
+			'methods'             => \WP_REST_Server::READABLE, // TODO: This really should be a POST
+			'callback'            => [ $this, 'undo_discard_release' ],
+			'args'                => [
+				'plugin_slug' => [
+					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
+				],
+				'plugin_tag' => [
+					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
+				]
+			],
+			'permission_callback' => function( $request ) {
+				if ( current_user_can( 'plugin_review' ) ) {
+					return $this->permission_can_access_plugin( $request );
+				}
+
+				return false;
+			},
+		] );
+
 		register_rest_route( 'plugins/v1', '/release-confirmation-access', [
 			'methods'             => \WP_REST_Server::READABLE,
 			'callback'            => [ $this, 'send_access_email' ],
@@ -235,6 +255,44 @@ class Plugin_Release_Confirmation extends Base {
 			'user' => $user_login,
 			'time' => time(),
 		];
+
+		Plugin_Directory::add_release( $plugin, $release );
+
+		return $result;
+	}
+
+	/**
+	 * A simple endpoint to undo discarding a release.
+	 */
+	public function undo_discard_release( $request ) {
+		$plugin     = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+		$tag        = $request['plugin_tag'];
+		$release    = Plugin_Directory::get_release( $plugin, $tag );
+		$result     = [
+			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
+		];
+		header( 'Location: ' . $result['location'] );
+
+		if ( ! $release || empty( $release['discarded'] ) ) {
+			// Not found or not discarded.
+			$result['confirmed'] = false;
+			return $result;
+		}
+
+		// Log this action.
+		Tools::audit_log(
+			sprintf(
+				'Release %s discard reverted. Originally discarded by %s at %s',
+				$tag,
+				$release['discarded']['user'],
+				date( 'Y-m-d H:i:s', $release['discarded']['time'] )
+			),
+			$plugin
+		);
+
+		// Remove the discard state.
+		unset( $release['discarded'] );
+		$release['undo-discard'] = true;
 
 		Plugin_Directory::add_release( $plugin, $release );
 

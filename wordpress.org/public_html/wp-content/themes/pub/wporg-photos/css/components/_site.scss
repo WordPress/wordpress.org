@@ -35,6 +35,7 @@ summary {
 	border-radius: 2px;
 	border-style: solid;
 	border-width: 0;
+	flex: 0 0 100%;
 	margin-bottom: 2rem;
 	overflow: auto;
 	padding: 1.25em 1.25em 1.25em 3.25em;
@@ -151,6 +152,13 @@ body.search  {
 					background-color: #eee;
 				}
 			}
+
+			&.user-no-favorites {
+				grid-column: 1/-1;
+				margin-left: 0;
+				margin-right: 0;
+				text-align: left;
+			}
 		}
 
 		article.photo-placeholder .entry-content,
@@ -247,7 +255,15 @@ body.single-photo {
 	}
 
 	.entry-header {
+		align-items: flex-start;
+		display: flex;
+		flex-flow: row wrap;
 		margin-bottom: 1rem;
+
+		.photo-author {
+			flex: 1;
+			padding-top: 2px;
+		}
 	}
 
 	.entry-footer {
@@ -422,7 +438,8 @@ body.page {
 	text-align: right;
 }
 
-.photo-author {
+.photo-author-link,
+.photo-favoriter {
 	img {
 		border-radius: 50%;
 		margin-right: 0.4rem;
@@ -516,7 +533,6 @@ body.page {
 	padding: 0;
 	display: grid;
 	position: relative;
-	float: right;
 
 	.download-title {
 		border: none;
@@ -545,8 +561,8 @@ body.page {
 		padding: 0.5em 0;
 		position: absolute;
 		min-width: 15ch;
-		left: 40%;
-		top: 100%;
+		left: 37%;
+		top: 102%;
 		transform: rotateX(-90deg) translateX(-50%);
 		transform-origin: top center;
 		visibility: hidden;

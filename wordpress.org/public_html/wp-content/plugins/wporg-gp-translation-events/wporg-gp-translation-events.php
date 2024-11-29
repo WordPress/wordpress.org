@@ -391,13 +391,13 @@ class Translation_Events {
 			return;
 		}
 
-		$content = '<div id="active-events-before-translation-table" class="active-events-before-translation-table">';
+		$content = '<div id="active-events-before-translation-table" class="active-events-before-translation-table" style="width: 100%; border: 1px solid var(--gp-color-border-default); background: var(--gp-color-status-waiting-subtle); margin: 1rem 0; padding: 0.3rem 0.8rem;">';
 		/* translators: %d: Number of events */
 		$content .= sprintf( _n( 'Contributing to %d event:', 'Contributing to %d events:', $number_of_events, 'gp-translation-events' ), $number_of_events );
 		$content .= '&nbsp;&nbsp;';
 
 		foreach ( array_splice( $events, 0, 2 ) as $event ) {
-			$content .= '<span class="active-events-before-translation-table"><a href="' . Urls::event_details( $event->id() ) . '" target="_blank">' . esc_html( $event->title() ) . '</a></span>';
+			$content .= '<span class="active-events-before-translation-table" style="font-weight: 500; color: var(--gp-color-bubble-inactive-project-text); border: 1px solid var(--gp-color-bubble-inactive-project-text); font-size: .7em; margin-right: 0.3em; width: 6em; text-align: center; padding: 0.2em 0.5em; border-radius: 1em; text-transform: capitalize;"><a href="' . Urls::event_details( $event->id() ) . '" target="_blank" style="color: var(--gp-color-bubble-inactive-project-text); text-decoration: none;">' . esc_html( $event->title() ) . '</a></span>';
 		}
 
 		if ( $number_of_events > 3 ) {
@@ -414,17 +414,21 @@ class Translation_Events {
 				'div'  => array(
 					'id'    => array(),
 					'class' => array(),
+					'style' => array(),
 				),
 				'span' => array(
 					'class' => array(),
+					'style' => array(),
 				),
 				'a'    => array(
 					'href'   => array(),
 					'target' => array(),
+					'style'  => array(),
 				),
 			)
 		);
 	}
+
 
 	/**
 	 * Send notifications for the events.

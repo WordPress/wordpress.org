@@ -1343,19 +1343,23 @@ div.bbp-breadcrumb {
 	// Review page
 	.review-ratings {
 
-		@extend .clear;
-		margin-bottom: ms(0);
-		padding-bottom: 10px;
+		margin-bottom: var(--wp--preset--spacing--20);
+		padding-bottom: var(--wp--preset--spacing--20);
 		border-bottom: 1px solid var(--wp--custom--color--border);
 		display: flex;
-		flex-direction: row-reverse;
 
-		.col-3 {
+		> div:first-child {
 			font-size: ms(-2);
-			margin: 0;
-			min-width: 40%;
-			border-top: 1px solid var(--wp--custom--color--border);
+			width: 60%;
+			min-width: 54%;
 			flex-shrink: 0;
+		}
+
+		> div:last-child {
+			margin: 0 0 10px 0;
+			padding-right: 10px;
+			min-width: 40%;
+			font-size: ms(-2);
 
 			.reviews-total-count {
 				font-weight: 700;
@@ -1363,20 +1367,7 @@ div.bbp-breadcrumb {
 				padding-top: 5px;
 			}
 
-			.counter-bar {
-				background-color: var(--wp--preset--color--pomegrade-1) !important;
-			}
-		}
-
-		.col-5 {
-			margin: 0 0 10px 0;
-			padding-right: 10px;
-			width: 60%;
-			min-width: 54%;
-			font-size: ms(-2);
-
 			> div:first-child {
-
 				@extend h4;
 				margin-top: 0;
 			}
@@ -1392,11 +1383,16 @@ div.bbp-breadcrumb {
 		}
 
 		@media (max-width: 499px) {
-			flex-direction: column-reverse;
+			flex-direction: column;
 
-			.col-3, .col-5 {
+			> div:first-child {
 				width: 100%;
+				margin-bottom: 20px;
 			}
 		}
+	}
+
+	.reviews-submit-link {
+		margin-top: 10px;
 	}
 }

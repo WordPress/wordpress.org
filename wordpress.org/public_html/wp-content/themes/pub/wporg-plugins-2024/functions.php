@@ -23,6 +23,7 @@ require_once( __DIR__ . '/src/blocks/single-plugin/index.php' );
 require_once( __DIR__ . '/src/blocks/plugin-card/index.php' );
 
 // Block Configs
+require_once( __DIR__ . '/inc/block-bindings.php' );
 require_once( __DIR__ . '/inc/block-config.php' );
 
 /**

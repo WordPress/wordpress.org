@@ -23,10 +23,10 @@ get_header();
 						/* translators: Search query. */
 						esc_html__( 'Photos contributed by: %s', 'wporg-photos' ),
 						sprintf(
-							'<a href="%s" class="photo-author">%s</a>',
+							'<a href="%s" class="photo-author-link">%s</a>',
 							esc_url( 'https://profiles.wordpress.org/' . get_the_author_meta( 'nicename' ) . '/' ),
 							get_avatar( get_the_author_meta( 'ID' ), 32 ) . get_the_author_meta( 'display_name' )
-										)
+						)
 					);
 					?>
 				</h2>

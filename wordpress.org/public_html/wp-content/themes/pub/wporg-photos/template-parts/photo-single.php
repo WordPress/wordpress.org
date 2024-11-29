@@ -8,6 +8,7 @@
  */
 
 namespace WordPressdotorg\Photo_Directory\Theme;
+use WordPressdotorg\Photo_Directory\Favorites;
 use WordPressdotorg\Photo_Directory\Random;
 use WordPressdotorg\Photo_Directory\Template_Tags;
 
@@ -28,12 +29,16 @@ $photo_id = get_post_thumbnail_id();
 				);
 			?></div>
 		<?php endif; ?>
+		<div class="photo-author">
 		<?php printf(
-			'<a href="%s" class="photo-author">%s</a>',
+			'<a href="%s" class="photo-author-link" text="%s">%s</a>',
 			esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
+			esc_attr__( 'View contributor&#39;s photos' ),
 			get_avatar( get_the_author_meta( 'ID' ), 32 ) . get_the_author_meta( 'display_name' )
 		);
 		?>
+		</div>
+		<?php Favorites::get_photo_favorites_markup(); ?>
 		<div class="photos-download">
 			<button type="button" class="download-title download-button button button-large" aria-expanded="false" aria-controls="downloads-dropdown">
 				<?php _e( 'Download', 'wporg-photos' ); ?>
@@ -88,7 +93,7 @@ $photo_id = get_post_thumbnail_id();
 				esc_attr( wp_get_attachment_image_srcset( $photo_id ) ),
 				sprintf(
 					/* translators: %s: The alternative text for the photo. */
-					'View larger photo: %s',
+					__( 'View larger photo: %s', 'wporg-photos' ),
 					esc_attr( $alt_text )
 				)
 			);
