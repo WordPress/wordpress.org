@@ -177,12 +177,16 @@ class Import {
 			$release = Plugin_Release::instance()->add_or_update_draft_release(
 				$plugin,
 				[
-					'tag'       => 'trunk',
-					'version'   => $version, // TODO: Is this correct?
-					'committer' => [ $last_committer ],
-					'revision'  => [ $last_revision ]
+					'tag'              => 'trunk',
+					'version'          => $version, // TODO: Is this correct?
+					'committer'        => [$last_committer],
+					'revision'         => [$last_revision],
+					'tested'           => $readme->tested,
+					'requires'	       => $headers->RequiresWP,
+					'requires_php'	   => $headers->RequiresPHP,
+					'requires_plugins' => $requires_plugins,
 				]
-				);
+			);
 
 			// While we're at it, run plugin check and store the results.
 			// FIXME: Maybe this belongs in export_and_parse_plugin()? The readme checker is run there.
