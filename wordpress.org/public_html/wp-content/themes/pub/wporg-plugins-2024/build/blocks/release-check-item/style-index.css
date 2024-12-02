@@ -6,6 +6,7 @@
   margin: 0 !important;
   position: relative;
   gap: 8px;
+  list-style: none;
 }
 .wp-block-wporg-release-check-item > div:first-child {
   height: 25px;

@@ -9,10 +9,9 @@ if ( ! $post ) {
 	return;
 }
 
-if( 'draft' !== $post->post_status ) {
+if('draft' != $post->post_s) {
 	return;
 }
-
 ?>
 
 <div <?php echo wp_kses_data( get_block_wrapper_attributes() ); ?>>

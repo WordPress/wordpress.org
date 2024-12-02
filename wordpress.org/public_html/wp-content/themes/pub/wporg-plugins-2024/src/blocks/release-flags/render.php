@@ -1,4 +1,7 @@
 <?php
+/**
+ * Renders the release flags block.
+ */
 
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 
@@ -10,26 +13,25 @@ if ( ! $block->context['postId'] ) {
 	return;
 }
 
-$post = get_post( $block->context['postId'] );
+$release_post = get_post( $block->context['postId'] );
 
-if ( 'draft' !== $post->post_status ) {
+if ( 'draft' !== $release_post->post_status ) {
 	return;
 }
 
 // Warnings are currently associated to the plugin post, not the release post.
-$import_warnings = get_post_meta( $post->post_parent, '_import_warnings', true );
+$import_warnings = get_post_meta( $release_post->post_parent, '_import_warnings', true );
 
 if ( ! $import_warnings ) {
 	return;
 }
 
+// Back-compat; previously this was an array of numeric-indexed human-readable strings.
 if ( ! wp_is_numeric_array( $import_warnings ) ) {
 	// error_code => error_data, convert to error_code => human_readable_error.
 	foreach ( $import_warnings as $error_code => $error_data ) {
 		$import_warnings[ $error_code ] = Readme_Validator::instance()->translate_code_to_message( $error_code, $error_data );
 	}
-} else {
-	// Back-compat; previously this was an array of numeric-indexed human-readable strings.
 }
 
 $warnings = '';
@@ -48,8 +50,9 @@ $heading = sprintf(
 	esc_attr__( 'Flags', 'wporg-plugins' )
 );
 
-printf( '<div %1$s>%2$s<ul>%3$s</ul></div>', 
-	get_block_wrapper_attributes(),
-	do_blocks( $heading ),
-	do_blocks( $warnings ) 
+printf(
+	'<div %1$s>%2$s<ul>%3$s</ul></div>',
+	wp_kses_data( get_block_wrapper_attributes() ),
+	do_blocks( $heading ), //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	do_blocks( $warnings ) //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 );

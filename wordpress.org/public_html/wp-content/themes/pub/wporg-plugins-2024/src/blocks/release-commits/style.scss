@@ -1,0 +1,22 @@
+.wp-block-wporg-release-commits {
+	margin-top: 0 !important;
+
+	ul {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		list-style: none;
+	}
+
+	li {
+		display: flex;
+		gap: 8px;
+	}
+}
+
+.wp-block-wporg-release-commit-author {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 500;
+}

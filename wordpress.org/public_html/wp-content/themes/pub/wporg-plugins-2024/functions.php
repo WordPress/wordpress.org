@@ -27,6 +27,7 @@ require_once( __DIR__ . '/src/blocks/search-page/index.php' );
 require_once( __DIR__ . '/src/blocks/single-plugin/index.php' );
 require_once( __DIR__ . '/src/blocks/plugin-card/index.php' );
 require_once( __DIR__ . '/src/blocks/release-checks/index.php' );
+require_once( __DIR__ . '/src/blocks/release-commits/index.php' );
 require_once( __DIR__ . '/src/blocks/release-confirmation/index.php' );
 require_once( __DIR__ . '/src/blocks/release-date/index.php' );
 require_once( __DIR__ . '/src/blocks/release-draft/index.php' );

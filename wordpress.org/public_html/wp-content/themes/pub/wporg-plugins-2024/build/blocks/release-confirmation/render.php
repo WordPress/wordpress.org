@@ -1,6 +1,6 @@
 <?php
 
-use function WordPressdotorg\Plugin_Directory\Theme\{get_releases,get_trac_changeset_link,get_previous_version};
+use function WordPressdotorg\Plugin_Directory\Theme\{get_previous_version};
 
 if ( ! $block->context['postId'] ) {
 	return;
@@ -10,15 +10,6 @@ $release_post = get_post( $block->context['postId'] );
 if ( ! $release_post ) {
 	return;
 }
-
-$releases = get_releases( $release_post->post_parent );
-$previous_version = get_previous_version( $release_post, $releases );
-
-$copy = sprintf(
-	/* translators: %s: URL to the changeset */
-	__( 'You have some <a href="%s">unpublished changes</a>. Would you like to release these changes?', 'wporg-plugins' ),
-	get_trac_changeset_link( $release_post->post_parent, $previous_version )
-);
 
 ?>
 <form method="post" <?php echo wp_kses_data( get_block_wrapper_attributes() ); ?>>
@@ -30,7 +21,7 @@ $copy = sprintf(
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"fontSize":"small"} -->
-		<p  class="has-small-font-size"><?php echo wp_kses_post( $copy ); ?></p>
+		<p  class="has-small-font-size"><?php echo wp_kses_post( __( 'Would you like to release these changes?', 'wporg-plugins' ) ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:group {"className":"wporg-release-confirmation-actions","layout":{"type":"flex","flexWrap":"nowrap"}} -->

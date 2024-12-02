@@ -33,6 +33,7 @@ if ( ! $latest_draft_query->have_posts() ) {
 // Fetch the latest draft post.
 $latest_draft_query->the_post();
 $post_title = __( 'Trunk', 'wporg-plugins' );
+$intro_text = __( 'There are unpublished changes in your trunk folder.', 'wporg-plugins' );
 
 $markup = <<<HTML
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"width":"1px","radius":"2px"}},"borderColor":"light-grey-1","layout":{"type":"default","justifyContent":"left"}} -->
@@ -53,14 +54,19 @@ $markup = <<<HTML
 			</div>
 			<!-- /wp:group -->
 
+			<!-- wp:paragraph -->
+			<p>$intro_text</p>
+			<!-- /wp:paragraph -->
+
 			</div> 
 			<!-- /wp:group -->
 		</div>
 		<!-- /wp:group -->
 
-		<!-- wp:wporg/release-confirmation /-->
+		<!-- wp:wporg/release-commits /-->
 		<!-- wp:wporg/release-checks /-->
 		<!-- wp:wporg/release-flags /-->
+		<!-- wp:wporg/release-confirmation /-->
 	</div>
 <!-- /wp:group -->
 HTML;
