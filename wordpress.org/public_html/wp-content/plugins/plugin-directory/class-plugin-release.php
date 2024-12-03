@@ -173,7 +173,6 @@ class Plugin_Release {
 	 */
 	public function add_or_update_draft_release( $plugin, $release ) {
 		$plugin = get_post( $plugin );
-		$plugin_id = $plugin->ID;
 
 		// Tag must be 'trunk' for this to be a draft release.
 		if ( 'trunk' !== $release['tag'] ) {
