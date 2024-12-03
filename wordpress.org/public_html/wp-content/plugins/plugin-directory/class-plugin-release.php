@@ -72,6 +72,36 @@ class Plugin_Release {
 	}
 
 	/**
+	 * Check if a plugin has any release CPTs stored.
+	 * Note that this intentionally does not count draft releases. If needed, we can add a parameter to support that.
+	 */
+	public function has_releases( $plugin ) {
+		$release = $this->get_release( $plugin, null );
+		return ! empty( $release );
+	}
+
+	/**
+	 * Backfill releases for a plugin, if none exist. This uses the releases postmeta to populate the CPTs.
+	 */
+	public function maybe_backfill_releases( $plugin ) {
+		$plugin = get_post( $plugin );
+
+		if ( !$plugin || 'plugin' !== $plugin->post_type ) {
+			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
+		}
+
+		// This will backfill the releases postmeta if needed.
+		$releases_postmeta = Plugin_Directory::get_releases( $plugin );
+
+		// Add or update the release CPTs using postmeta.
+		if ( $releases_postmeta && ! $this->has_releases( $plugin ) ) {
+			return $this->update_releases( $plugin, $releases_postmeta );
+		}
+
+		return false;
+	}
+
+	/**
 	 * Add release info for a plugin.
 	 */
 	public function add_release( $plugin, $release ) {

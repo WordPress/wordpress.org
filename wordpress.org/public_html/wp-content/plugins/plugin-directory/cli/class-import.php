@@ -171,6 +171,10 @@ class Import {
 
 		// TODO: Test and confirm that this is the correct behavior.
 		if ( in_array( 'trunk', $svn_changed_tags ) ) {
+			// Backfill Release CPTs if needed. This should only happen once per plugin.
+			// Doing this here as a relatively safe way to distribute the load of backfilling.
+			Plugin_Release::instance()->maybe_backfill_releases( $plugin );
+
 			// Create or update a 'draft' release CPT for trunk changes.
 			// Note that this will only create a new draft if the version doesn't already exist as a release.
 			// TODO: refine this behaviour. (Maybe compare revision numbers?)

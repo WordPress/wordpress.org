@@ -1740,12 +1740,6 @@ class Plugin_Directory {
 		// Data doesn't exist yet? Lets fill it out.
 		if ( false === $releases || ! is_array( $releases ) ) {
 			$releases = self::prefill_releases_meta( $plugin );
-
-			// FIXME: limit creation of data while we're testing. Remove this for production.
-			// For now we'll mirror the releases postmeta into the CPT. If/when we're confident the behaviour is identical, we can remove the postmeta part.
-			if ( false && in_array( 'wordpressdotorg', Tools::get_plugin_committers( $plugin->ID ) ) ) {
-				Plugin_Release::instance()->update_releases( $plugin, $releases );
-			}
 		}
 
 		/**
