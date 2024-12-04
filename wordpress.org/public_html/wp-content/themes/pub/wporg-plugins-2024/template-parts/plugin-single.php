@@ -147,7 +147,7 @@ $show_release_beta = isset( $_GET['show_release_beta'] ) || ( defined( 'WPORG_SA
 
 				if ( 'releases' === $section_slug ) {
 					echo '<div id="tab-releases">';
-					block_template_part( 'releases' );
+					block_template_part( 'release-page' );
 					echo '</div>';
 					continue;
 				}

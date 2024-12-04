@@ -12,7 +12,7 @@ if ( ! $release_post ) {
 }
 
 ?>
-<form method="post" <?php echo wp_kses_data( get_block_wrapper_attributes() ); ?>>
+<form <?php echo wp_kses_data( get_block_wrapper_attributes() ); ?>>
 	<input type="hidden" name="publish_release_nonce" value="<?php echo esc_attr( wp_create_nonce( 'publish-release-action' ) ); ?>">
 
 	<!-- wp:group {"style":{"border":{"radius":"2px"},"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}}},"backgroundColor":"blueberry-4","layout":{"type":"constrained"}} -->

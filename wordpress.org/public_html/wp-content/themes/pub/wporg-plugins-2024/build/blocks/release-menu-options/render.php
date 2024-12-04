@@ -1,7 +1,7 @@
 <?php
 
 use WordPressdotorg\Plugin_Directory\Template;
-use function WordPressdotorg\Plugin_Directory\Theme\{get_releases,get_trac_changeset_link,get_previous_version};
+use function WordPressdotorg\Plugin_Directory\Theme\{get_releases, get_previous_version, get_trac_changeset_link, get_blueprint_url};
 
 if ( ! $block->context['postId'] ) {
 	return;
@@ -14,30 +14,10 @@ if ( ! $release_post ) {
 
 $current_version = get_post_meta( $release_post->ID, 'release_version', true );
 
-/**
- * Blueprint is base64 encoded to be passed as a URL parameter.
- *
- * @see https://wordpress.github.io/wordpress-playground/blueprints/tutorial/how-to-load-run-blueprints#base64-encoded-blueprints
- */
-$blueprint = wp_json_encode( [
-	'login' => true,
-	'steps' => [
-		[
-			'step' => 'installPlugin',
-			'pluginData' => [
-				'resource' => 'url',
-				'url' => Template::download_link( $release_post->post_parent, $current_version )
-			]
-		]
-	]
-] );
-
-$encoded_blueprint_url = 'https://playground.wordpress.net/#' . base64_encode( $blueprint );
-
 $download_link = sprintf(
 	'<!-- wp:navigation-link {"label":"%1$s","url":"%2$s","kind":"custom"} /-->',
 	esc_html( 'Download', 'wporg-plugins' ),
-	esc_url( $download_link )
+	esc_url( get_blueprint_url( Template::download_link( $release_post->post_parent, $current_version ) ) )
 );
 
 $blueprint_link = sprintf(
@@ -46,8 +26,8 @@ $blueprint_link = sprintf(
 	esc_url( $encoded_blueprint_url )
 );
 
-$changes_link = '';
-$releases = get_releases( $release_post->post_parent );
+$changes_link     = '';
+$releases         = get_releases( $release_post->post_parent );
 $previous_version = get_previous_version( $release_post, $releases );
 
 if ( null !== $previous_version ) {

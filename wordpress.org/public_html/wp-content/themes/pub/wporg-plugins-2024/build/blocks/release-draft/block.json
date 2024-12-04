@@ -10,7 +10,8 @@
   "textdomain": "wporg",
   "attributes": {},
   "supports": {
-    "html": false
+    "html": false,
+    "interactivity": true
   },
   "usesContext": [
     "postId"

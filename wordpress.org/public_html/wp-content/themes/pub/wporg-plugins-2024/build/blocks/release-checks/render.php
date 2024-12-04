@@ -70,6 +70,8 @@ function get_error_type_counts( $result ) {
 
 /**
  * Get the test run message.
+ * 
+ * @param object $plugin_check_errors The plugin check errors.
  *
  * @return string The test run message.
  */
@@ -108,16 +110,14 @@ function get_test_run_message( $plugin_check_errors ) {
 		);
 	}
 
-	$mm = sprintf(
-		/* translators: %1$s is a link to the Plugin Check (PCP) tool. */
-		__( '%1$s completed with %2$s.', 'wporg-plugins' ),
-		$plugin_check_link,
-		$message
-	);
-
 	return sprintf(
-		'<div>%1$s<ul>%2$s</ul></div>',
-		$mm,
+		'<div>%1$s%2$s</div>',
+		sprintf(
+		/* translators: %1$s is a link to the Plugin Check (PCP) tool. */
+			__( '%1$s completed with %2$s.', 'wporg-plugins' ),
+			$plugin_check_link,
+			$message
+		),
 		format_plugin_check_results( $plugin_check_errors['results'] ),
 	);
 }

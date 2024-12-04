@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/release-details-form",
+  "version": "0.1.0",
+  "title": "Release Confirmation Banner.",
+  "category": "design",
+  "icon": "",
+  "description": "A block to display release confirmation banner.",
+  "textdomain": "wporg",
+  "attributes": {},
+  "supports": {
+    "html": false,
+    "interactivity": true
+  },
+  "usesContext": [
+    "postId"
+  ],
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php",
+  "style": "file:./style-index.css"
+}

@@ -4,5 +4,8 @@
 	ul {
 		margin-top: var(--wp--preset--spacing--10);
 		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 	}
 }
