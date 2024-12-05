@@ -361,7 +361,10 @@ class Release_Confirmation {
 		if ( Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
 			// Check to see if they've confirmed their 2FA status recently..
 			$status = get_revalidation_status();
-			if ( ! $status['needs_revalidate'] ) {
+
+			if ( wp_is_serving_rest_request() && $status['can_save'] ) {
+				return true;
+			} elseif ( ! $status['needs_revalidate'] ) {
 				return true;
 			}
 		}
