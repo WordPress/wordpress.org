@@ -24,12 +24,6 @@ if ( $user ) {
 			'extra_attr' => 'style="vertical-align: middle;margin-right:5px;"',
 		)
 	);
-	if ( ! empty( $user->user_url ) ) {
-		$host .= '</a>';
-	}
-	if ( ! empty( $user->user_url ) ) {
-		$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
-	}
 	$host .= $user->display_name;
 	if ( ! empty( $user->user_url ) ) {
 		$host .= '</a>';
@@ -53,6 +47,25 @@ if ( $parent ) :
 	<tr>
 		<td><strong>Host</strong></td>
 		<td><?php echo wp_kses_post( $host ); ?></td>
+	</tr>
+	<tr>
+		<td><strong>Test Date</strong></td>
+		<td>
+			<?php the_date(); ?>
+			<?php the_time(); ?>
+		</td>
+	</tr>
+	<tr>
+		<td><strong>Execution Time</strong></td>
+		<td>
+			<?php echo esc_html( Display::get_display_time( $report->ID ) ); ?>
+		</td>
+	</tr>
+	<tr>
+		<td><strong>Environment Name</strong></td>
+		<td>
+			<?php echo esc_html( Display::get_display_environment_name( $report->ID ) ); ?>
+		</td>
 	</tr>
 	<tr>
 		<td><strong>PHP Version</strong></td>

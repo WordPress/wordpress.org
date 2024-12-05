@@ -74,6 +74,11 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	$profile_key        = wp_generate_password( 24, false, false );
 	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
+	$source = $_COOKIE['wporg_came_from'] ?? '';
+	if ( $source ) {
+		$source = remove_query_arg( [ 'SAMLRequest', 'RelayState' ], $source );
+	}
+
 	$pending_user = array(
 		'user_login'          => $user_login,
 		'user_email'          => $user_email,
@@ -83,7 +88,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		'meta'                => $meta + array(
 			'registration_ip'         => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
 			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ) : '' ),
-			'source'                  => $_COOKIE['wporg_came_from'] ?? '',
+			'source'                  => $source,
 		),
 		'scores'              => array(
 			'pending' => 1,
@@ -306,6 +311,19 @@ function wporg_delete_pending_user( $pending_user ) {
 }
 
 /**
+ * Update BuddyPress xProfile data.
+ * 
+ * @param int    $user_id    The ID of the user.
+ * @param string $field_name The name of the field to update.
+ * @param mixed  $value      The value to set for the field.
+ */
+function wporg_update_user_profile_fields( $user_id, $field_name, $value ) {
+	if ( function_exists( 'WordPressdotorg\Profiles\update_profile' ) ) {
+		WordPressdotorg\Profiles\update_profile( $field_name, $value, $user_id );
+	}
+}
+
+/**
  * Create a user record from a pending record.
  */
 function wporg_login_create_user_from_pending( $pending_user, $password = false ) {
@@ -367,19 +385,28 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 	foreach ( array( 'url', 'from', 'occ', 'interests', $tos_meta_key ) as $field ) {
 		if ( !empty( $pending_user['meta'][ $field ] ) ) {
 			$value = $pending_user['meta'][ $field ];
-			if ( 'url' == $field ) {
-				wp_update_user( array( 'ID' => $user_id, 'user_url' => $value ) );
 
-				// Update BuddyPress xProfile data.
-				if ( function_exists( 'WordPressdotorg\Profiles\update_profile' ) ) {
-					WordPressdotorg\Profiles\update_profile( 'Website URL', $value, $user_id );
-				}
+			// Map to xProfile labels.
+			$profile_labels = [
+				'url' => 'Website URL',
+				'from' => 'Current Location',
+				'occ' => 'Job Title',
+				'interests' => 'Interests',
+			];
+
+			if( 'url' == $field ) {
+				wp_update_user( [ 'ID' => $user_id, 'user_url' => $value ] );
 			} else {
 				if ( $value ) {
 					update_user_meta( $user_id, $field, $value );
 				} else {
 					delete_user_meta( $user_id, $field );
 				}
+			}
+
+			// Update the xprofile field.
+			if ( isset( $profile_labels[$field] ) ) {
+				wporg_update_user_profile_fields( $user_id, $profile_labels[$field], $value );
 			}
 		}
 	}

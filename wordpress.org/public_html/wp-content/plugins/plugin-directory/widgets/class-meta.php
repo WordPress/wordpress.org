@@ -60,18 +60,20 @@ class Meta extends \WP_Widget {
 
 			<li>
 				<?php
-				$modified_time = get_post_modified_time();
+				$last_updated = get_post_meta( $post->ID, 'last_updated', true );
+				// Fallback to modified timestamp if meta unavailable.
+				$last_updated = $last_updated ? strtotime( $last_updated ) : get_post_modified_time( 'U', true );
 
 				// Fallback for approved plugins that are not published yet.
-				if ( $modified_time < 0 ) {
-					$modified_time = get_post_time();
+				if ( ! $last_updated || $last_updated < 0 ) {
+					$last_updated = get_post_time( 'U', true );
 				}
 
 				printf(
 					/* translators: %s: time since the last update */
 					__( 'Last updated %s', 'wporg-plugins' ),
 					/* translators: %s: time since the last update */
-					'<strong>' . wp_kses( sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $modified_time ) . '</span>' ), array( 'span' => true ) ) . '</strong>'
+					'<strong>' . wp_kses( sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $last_updated ) . '</span>' ), array( 'span' => true ) ) . '</strong>'
 				);
 				?>
 			</li>

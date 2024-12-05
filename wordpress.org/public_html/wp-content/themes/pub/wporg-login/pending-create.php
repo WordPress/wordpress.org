@@ -128,7 +128,11 @@ if ( isset( $_POST['user_pass'] ) ) {
 	if ( 'local' === wp_get_environment_type() ) {
 		wp_safe_redirect( home_url() );
 	} else {
-		wp_safe_redirect( 'https://wordpress.org/support/' );
+		if ( ! empty( $_COOKIE['wporg_came_from'] ) ) {
+			wp_safe_redirect( $_COOKIE['wporg_came_from'] );
+		} else {
+			wp_safe_redirect( 'https://wordpress.org/support/' );
+		}
 	}
 
 	die();
@@ -176,7 +180,7 @@ get_header();
 				<input type="password" data-reveal="1" data-pw="<?php echo esc_attr( wp_generate_password( 16 ) ); ?>" name="user_pass" id="pass1" class="input" size="20" value="" autocomplete="off" aria-describedby="pass-strength-result" />
 			</span>
 
-			<button type="button" class="button button-secondary wp-hide-pw hide-if-no-js" aria-label="<?php esc_attr_e( 'Hide password', 'wporg-login' ); ?>">
+			<button type="button" class="button button-secondary wp-hide-pw hide-if-no-js" aria-label="<?php esc_attr_e( 'Hide password', 'wporg' ); ?>">
 				<span class="dashicons dashicons-hidden" aria-hidden="true"></span>
 			</button>
 			<div id="pass-strength-result" class="hide-if-no-js" aria-live="polite"><?php _e( 'Strength indicator', 'wporg' ); ?></div>

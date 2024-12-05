@@ -150,6 +150,9 @@ function get_parent_channels( $channel ) {
 		case 'community':
 			$root = 'community-team';
 			break;
+		case 'media':
+			$root = 'media-corps';
+			break;
 	}
 
 	// Such as #6-4-release-leads, or #6-1-site-editor-merge

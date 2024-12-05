@@ -58,9 +58,9 @@ if ( $deepl_key ) {
 			),
 		)
 	);
+	$deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 }
 
-$deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 ?>
 
 <table class="form-table">

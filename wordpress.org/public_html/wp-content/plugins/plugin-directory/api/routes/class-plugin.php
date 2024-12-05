@@ -61,7 +61,7 @@ class Plugin extends Base {
 				'slug'        => $post->post_name,
 				'description' => $close_text,
 				'closed'      => true,
-				'closed_date' => $close_data['date'] ?: false,
+				'closed_date' => $close_data['date'] ? gmdate( 'Y-m-d', strtotime( $close_data['date'] ) ) : false,
 				'reason'      => $close_data['public'] ? $close_data['reason'] : false,
 				'reason_text' => $close_data['public'] ? $close_data['label'] : false,
 			];
@@ -164,13 +164,19 @@ class Plugin extends Base {
 		$result['ratings'] = array_map( 'intval', $result['ratings'] );
 		krsort( $result['ratings'] );
 
+		// Determine the last_updated date.
+		$last_updated = $post->last_updated ?: $post->post_modified_gmt; // Prefer the post_meta unless not set.
+		if ( '0000-00-00 00:00:00' === $last_updated ) {
+			$last_updated = $post->post_date_gmt;
+		}
+
 		$result['num_ratings']              = array_sum( $result['ratings'] );
 		$result['support_url']              = 'https://wordpress.org/support/plugin/' . urlencode( $plugin_slug ) . '/';
 		$result['support_threads']          = intval( get_post_meta( $post_id, 'support_threads', true ) );
 		$result['support_threads_resolved'] = intval( get_post_meta( $post_id, 'support_threads_resolved', true ) );
 		$result['active_installs']          = intval( get_post_meta( $post_id, 'active_installs', true ) );
 		$result['downloaded']               = intval( get_post_meta( $post_id, 'downloads', true ) );
-		$result['last_updated']             = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $post->post_modified_gmt ) );
+		$result['last_updated']             = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $last_updated ) );
 		$result['added']                    = gmdate( 'Y-m-d', strtotime( $post->post_date_gmt ) );
 		$result['homepage']                 = get_post_meta( $post_id, 'header_plugin_uri', true );
 		$result['sections']                 = array();

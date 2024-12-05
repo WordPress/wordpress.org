@@ -2,6 +2,9 @@
 
 namespace WordPressdotorg\Forums;
 
+use function WordPressdotorg\Two_Factor\get_edit_account_url;
+use function WordPressdotorg\Slack\{activate as slack_activate, deactivate as slack_deactivate};
+
 class Hooks {
 
 	const SITE_URL_META = '_wporg_bbp_topic_site_url';
@@ -361,6 +364,14 @@ class Hooks {
 	 */
 	public function redirect_legacy_urls() {
 		global $wp_query, $wp;
+
+		// Account information is no longer set in the support forums.
+		// We don't use `wp_get_current_user()` because super admins often reset data for other users.
+		if ( preg_match( '!^users/(?P<username>[^/]+)/edit/account!i', $wp->request, $matches ) ) {
+			$url = get_edit_account_url( get_user_by( 'slug', $matches['username'] ) );
+			wp_safe_redirect( $url, 301 );
+			exit;
+		};
 
 		// A user called 'profile' exists, but override it.
 		if ( 'profile' === get_query_var( 'bbp_user' ) ) {
@@ -1453,6 +1464,14 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			// Destroy all of their WordPress sessions.
 			$manager = \WP_Session_Tokens::get_instance( $user->ID );
 			$manager->destroy_all();
+
+			// Deactivate their Slack account if they have one.
+			if (
+				function_exists( 'WordPressdotorg\Slack\deactivate' ) &&
+				slack_deactivate( $user )
+			) {
+				update_user_meta( $user->ID, '_activate_slack_if_reactivated', time() );
+			}
 		} else if (
 			$password_broken &&
 			! $user_has_blocked_role
@@ -1470,6 +1489,15 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			);
 
 			clean_user_cache( $user );
+
+			// If we auto-deactivated a user, reactivate their Slack account.
+			if (
+				function_exists( 'WordPressdotorg\Slack\activate' ) &&
+				get_user_meta( $user->ID, '_activate_slack_if_reactivated', true )
+			) {
+				slack_activate( $user );
+				delete_user_meta( $user->ID, '_activate_slack_if_reactivated' );
+			}
 		}
 
 		// It's a filter, return the value.

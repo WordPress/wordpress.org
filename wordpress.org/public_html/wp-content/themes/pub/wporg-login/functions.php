@@ -61,7 +61,7 @@ add_filter( 'xmlrpc_methods', '__return_empty_array' );
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20230504' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), filemtime( __DIR__ . '/stylesheets/login.css' ) );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
 
@@ -474,19 +474,22 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 	}
 
 	if ( str_contains( $from, 'buddypress.org' ) ) {
-		$message .= '<strong>' . __( 'BuddyPress is part of WordPress.org', 'wporg' ) . '</strong><br>';
+		$message .= '<strong>' . __( 'BuddyPress is part of WordPress.org', 'wporg' ) . '</strong>';
 		$message .= __( 'Log in to your WordPress.org account to contribute to BuddyPress, or get help in the support forums.', 'wporg' );
 	
 	} elseif ( str_contains( $from, 'bbpress.org' ) ) {
-		$message .= '<strong>' . __( 'bbPress is part of WordPress.org', 'wporg' ) . '</strong><br>';
+		$message .= '<strong>' . __( 'bbPress is part of WordPress.org', 'wporg' ) . '</strong>';
 		$message .= __( 'Log in to your WordPress.org account to contribute to bbPress, or get help in the support forums.', 'wporg' );
-	
-	} elseif ( str_contains( $from, 'wordcamp.org' ) ) {
-		$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong><br>';
-		$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
-	
+	} elseif ( str_contains( $from, 'wordcamp.org' ) || str_contains( $from, 'events.wordpress.org' ) ) {
+		if ( ! empty( $_REQUEST['wcname'] ) ) {
+			$message .= '<strong>' . sprintf( __( 'Register for %s', 'wporg' ), esc_html( $_REQUEST['wcname'] ) ) . '</strong>';
+			$message .=  __( 'Log in to your WordPress.org account. If you don\'t have one, you can <a href="/register">create an account</a>.', 'wporg' );
+		} else {
+			$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong>';
+			$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
+		}
 	} elseif ( str_contains( $from, 'learn.wordpress.org' ) ) {
-		$message .= '<strong>' . __( 'Access all of Learn WordPress', 'wporg' ) . '</strong><br>';
+		$message .= '<strong>' . __( 'Access all of Learn WordPress', 'wporg' ) . '</strong>';
 		$message .= __( 'Log in to your WordPress.org account to take or continue a course and track your progress.', 'wporg' );
 
 	} else {

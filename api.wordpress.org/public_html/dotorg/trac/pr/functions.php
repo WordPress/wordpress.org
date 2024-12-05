@@ -388,10 +388,33 @@ function format_github_content_for_trac_comment( $desc ) {
 	$desc = preg_replace_callback(
 		'#^(?P<indent>[ >]*)```(?P<format>[a-z]+$)(?P<code>.+?)```$#sm',
 		function( $m ) {
+			$format = trim( $m['format'] );
+
+			// The HTML code block in trac renders actual HTML, set it as an XML code block for syntax highlighting.
+			if ( 'html' === $format ) {
+				$format = 'xml';
+			}
+
+			/*
+			 * Some other code processor types can end up rendering badly on Trac, limit to expected safe types.
+			 *
+			 * See https://trac.edgewall.org/wiki/1.1/WikiProcessors#AvailableProcessors
+			 */
+			$supported_formats = [ 'xml', 'php', 'js', 'javascript', 'sql', 'sh' ];
+			if ( ! in_array( $format, $supported_formats ) ) {
+				$format = 'default';
+			}
+
+			$code = trim( $m['code'] );
+			// replace a blank indented line at the end of the code block with.. nothing.
+			if ( $m['indent'] ) {
+				$code = preg_replace( "#\n[ >]+$#", '', $code );
+			}
+
 			return
 				$m['indent'] . "{{{\n" .
-				$m['indent'] . "#!" . trim( $m['format'] ) . "\n" .
-				trim( $m['code'] ) . "\n" .
+				$m['indent'] . "#!" . $format . "\n" .
+				$code . "\n" .
 				$m['indent'] . "}}}\n";
 		},
 		$desc

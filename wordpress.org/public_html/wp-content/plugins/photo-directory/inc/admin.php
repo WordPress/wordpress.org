@@ -294,9 +294,10 @@ class Admin {
 	/**
 	 * Determines if the 'Photo' column should be added to a post listing table.
 	 *
+	 * @param bool $include_rejected Optional. Include the 'reject' post status? Default false.
 	 * @return bool True if the 'Photo' column should be added; else false.
 	 */
-	public static function should_include_photo_column() {
+	public static function should_include_photo_column( $include_rejected = false ) {
 		$screen = get_current_screen();
 		$post_type = Registrations::get_post_type();
 
@@ -307,6 +308,9 @@ class Admin {
 		];
 
 		$post_statuses = Photo::get_post_statuses_with_photo();
+		if ( $include_rejected ) {
+			$post_statuses[] = Rejection::get_post_status();
+		}
 
 		return (
 			// Screen is known.
@@ -779,6 +783,10 @@ class Admin {
 			$shown_photos++;
 		}
 
+		if ( ! $shown_photos ) {
+			echo '<p>' . __( 'This contributor does not have any other submitted photos.', 'wporg-photos' ) . "</p>\n";
+		}
+
 		echo '</div>' . "\n";
 
 		if ( count( $recent_subs ) > $photos_in_grid ) {
@@ -806,16 +814,19 @@ class Admin {
 	public static function add_published_photos_count_to_author( $display_name ) {
 		global $authordata;
 
-		if ( ! is_admin() || ! self::should_include_photo_column() ) {
+		if ( ! is_admin() || ! self::should_include_photo_column( true ) ) {
 			return $display_name;
 		}
 
 		// Close link to contributor's listing of photos.
 		$display_name .= '</a>';
 
+		$post_type     = Registrations::get_post_type();
+		$reject_status = Rejection::get_post_status();
+
 		// Show number of approved photos.
 		$approved_link = add_query_arg( [
-			'post_type'   => Registrations::get_post_type(),
+			'post_type'   => $post_type,
 			'post_status' => 'publish',
 			'author'      => $authordata->ID,
 		], 'edit.php' );
@@ -827,10 +838,10 @@ class Admin {
 		. "</div>\n";
 
 		// Show number of photos approved on this calendar day.
-		$approved_today_count = User::count_published_photos_for_today();
+		$approved_today_count = User::count_photos_for_today( 'publish' );
 		if ( $approved_today_count ) {
 			$approved_today_link = add_query_arg( [
-				'post_type'   => Registrations::get_post_type(),
+				'post_type'   => $post_type,
 				'post_status' => 'publish',
 				'author'      => $authordata->ID,
 			], 'edit.php' );
@@ -846,7 +857,7 @@ class Admin {
 		$pending_count = User::count_pending_photos();
 		if ( $pending_count ) {
 			$pending_link = add_query_arg( [
-				'post_type'   => Registrations::get_post_type(),
+				'post_type'   => $post_type,
 				'post_status' => 'pending',
 				'author'      => $authordata->ID,
 			], 'edit.php' );
@@ -863,8 +874,8 @@ class Admin {
 		$rejection_count = User::count_rejected_photos( $authordata->ID );
 		if ( $rejection_count ) {
 			$rejected_link = add_query_arg( [
-				'post_type'   => Registrations::get_post_type(),
-				'post_status' => Rejection::get_post_status(),
+				'post_type'   => $post_type,
+				'post_status' => $reject_status,
 				'author'      => $authordata->ID,
 			], 'edit.php' );
 			$display_name .= '<div class="user-rejected-count">'
@@ -872,6 +883,22 @@ class Admin {
 					/* translators: %s: Count of user rejections linked to listing of their rejections. */
 					_n( 'Rejected: <strong>%s</strong>', 'Rejected: <strong>%s</strong>', $rejection_count, 'wporg-photos' ),
 					sprintf( '<a href="%s">%d</a>', $rejected_link, $rejection_count )
+				)
+				. "</div>\n";
+		}
+
+		// Show number of photos rejected on this calendar day.
+		$rejected_today_count = User::count_photos_for_today( $reject_status );
+		if ( $rejected_today_count ) {
+			$rejected_today_link = add_query_arg( [
+				'post_type'   => $post_type,
+				'post_status' => $reject_status,
+				'author'      => $authordata->ID,
+			], 'edit.php' );
+			$display_name .= '<div class="user-rejected-today-count">'
+				. sprintf(
+					__( '&#x21AA; (today): %s', 'wporg-photos' ),
+					sprintf( '<strong><a href="%s">%d</a></strong>', $rejected_today_link, $rejected_today_count )
 				)
 				. "</div>\n";
 		}
@@ -1015,7 +1042,7 @@ class Admin {
 	public static function show_moderator() {
 		global $post;
 
-		if ( ! $post || 'publish' !== $post->post_status ) {
+		if ( ! $post ) {
 			return;
 		}
 
@@ -1169,6 +1196,54 @@ class Admin {
 				}
 			?>
 			</div>
+
+			<?php if ( $rejected_count ) : ?>
+			<div class="photo-contributor-rejection-stats">
+				<h4><?php esc_html_e( 'Rejection stats:', 'wporg-photos' ); ?></h4>
+				<?php
+					$rejection_reasons = Rejection::get_user_rejection_reasons( $author->ID );
+					$submission_errors_key = 'submission-error';
+					$submission_errors_count = 0;
+
+					// Omit submission errors since they don't count as rejections, but do note the count.
+					if ( ! empty( $rejection_reasons[ $submission_errors_key ] ) ) {
+						$submission_errors_count = $rejection_reasons[ $submission_errors_key ];
+						unset( $rejection_reasons[ $submission_errors_key ] );
+					}
+
+					$total_rejections = array_reduce( array_values( $rejection_reasons ), function ( $total, $i ) { return $total += $i; }, 0 );
+					$all_reasons = Rejection::get_rejection_reasons();
+
+					if ( $rejection_reasons ) {
+						echo '<table>';
+						echo '<tr><th>' . __( 'Reason', 'wporg-photos' ) . '</th><th>' . __( 'Total', 'wporg-photos' ) . '</th><th>%</th></tr>';
+					}
+					foreach ( $rejection_reasons as $reason => $count ) {
+						echo '<tr>';
+						echo '<td title="' . esc_attr( $all_reasons[ $reason ]['label'] ?? '' ) . '">' . esc_html( $reason ) . '</td>';
+						echo '<td>' . number_format_i18n( $count ) . '</td>';
+						echo '<td>' . number_format_i18n( ( $count / $total_rejections ) * 100, 2 ) . '%</td>';
+						echo "</tr>\n";
+					}
+					if ( $rejection_reasons ) {
+						echo "</table>\n";
+					}
+
+					echo '<p>';
+					/* translators: %s: Rejection rate as a percentage. */
+					printf( __( 'Total rejection rate: %s', 'wporg-photos'), '<strong>' . round( ( $total_rejections / ( $photos_count + $total_rejections ) ) * 100, 2 ) .'%</strong>' );
+					echo "</p>\n";
+
+					if ( $submission_errors_count ) {
+						echo '<p>';
+						/* translators: %s: The number of submission errors. */
+						printf( __( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), $submission_errors_count );
+						echo "</p>\n";
+					}
+				?>
+			</div>
+			<?php endif; ?>
+
 		</div>
 
 		<?php

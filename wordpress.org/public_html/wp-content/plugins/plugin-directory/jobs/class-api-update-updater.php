@@ -82,11 +82,13 @@ class API_Update_Updater {
 		$meta             = array();
 
 		if ( in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
-			$closed_data           = Template::get_close_data( $post );
-			$meta['closed_at']     = $closed_data['date'] ?? false;
-			if ( $closed_data['public'] ?? false ) {
-				$meta['closed_reason'] = $closed_data['reason'];
-				$meta['closed_label']  = $closed_data['label'];
+			$closed_data = Template::get_close_data( $post );
+			if ( $closed_data ) {
+				// Close date is sometimes unknown, only include the Day of closure.
+				$meta['closed_at'] = $closed_data['date'] ? gmdate( 'Y-m-d', strtotime( $closed_data['date'] ) ) : false;
+				if ( $closed_data['public'] ) {
+					$meta['closed_reason'] = $closed_data['reason'] ?: 'unknown';
+				}
 			}
 		}
 

@@ -12,63 +12,213 @@ body.sensei {
 	--sensei-course-progress-bar-inner-color: var(--wp--custom--color--green-50);
 	--sensei-lesson-meta-color: var(--wp--preset--color--charcoal-4);
 	--sensei-module-lesson-color: var(--wp--preset--color--charcoal-1);
+	--sensei-lm-mobile-header-height: 60px;
 
-	.sensei-course-theme-header-content > .wp-block-group {
-		row-gap: 0;
+	.wp-block-sensei-lms-course-theme-notices:empty {
+		display: none;
 	}
 
-	.sensei-course-theme__columns .sensei-course-theme__sidebar ~ .sensei-course-theme__main-content {
-		--sensei-lm-sidebar-width: calc(280px + (var(--wp--preset--spacing--edge-space) * 2) - 24px);
-
-		@media (max-width: 782px) {
-			--sensei-lm-sidebar-width: 0;
+	.sensei-course-theme-header-content {
+		> .wp-block-group {
+			row-gap: 0;
 		}
 
-		@media (min-width: 890px) {
-			padding-right: calc(var(--wp--preset--spacing--edge-space) - 24px);
+		.sensei-course-theme__header__info {
+			gap: var(--wp--preset--spacing--30);
+		}
+
+		.wp-block-sensei-lms-exit-course {
+			margin-left: var(--wp--preset--spacing--30);
+
+			&::before {
+				content: "";
+				display: inline-block;
+				height: 100%;
+				border-right: 1px solid var(--sensei-course-progress-bar-color);
+				position: absolute;
+				margin-left: -30px;
+				top: 0;
+			}
+		}
+	}
+
+	.sensei-course-theme-course-progress-bar {
+		height: 1px !important;
+		display: flex;
+		align-items: center;
+
+		.sensei-course-theme-course-progress-bar-inner {
+			border-top-right-radius: 5px !important;
+			border-bottom-right-radius: 5px !important;
+			height: 4px !important;
+			z-index: 1;
+		}
+	}
+
+	.sensei-course-theme__columns {
+		margin-top: calc(var(--sensei-lm-header-height) + var(--sensei-wpadminbar-offset, 0px)) !important;
+
+		.sensei-course-theme__sidebar ~ .sensei-course-theme__main-content {
+			--sensei-lm-sidebar-width: calc(280px + (var(--wp--preset--spacing--edge-space) * 2) - 24px);
+			margin-top: 0;
+
+			> * {
+				margin-left: unset;
+				margin-right: unset;
+			}
+
+			@media (max-width: 782px) {
+				--sensei-lm-sidebar-width: 0;
+			}
+
+			@media (min-width: 890px) {
+				padding-right: calc(var(--wp--preset--spacing--edge-space) - 24px);
+			}
+
+			// Remove the border on module title.
+			h3.wp-block-sensei-lms-course-theme-lesson-module {
+				padding-left: unset;
+				border: none;
+				color: var(--wp--preset--color--charcoal-4);
+				margin-block-start: 0;
+			}
+
+			.wp-block-sensei-lms-course-theme-notices {
+				margin-block-end: 39px;
+				margin-block-start: var(--wp--preset--spacing--40);
+
+				.sensei-course-theme-lesson-quiz-notice {
+					display: flex;
+					flex-direction: column;
+					align-items: start;
+					gap: 0;
+
+					.sensei-course-theme-lesson-quiz-notice__content {
+						.sensei-course-theme-lesson-quiz-notice__title {
+							font-size: var(--wp--preset--font-size--normal);
+							font-weight: 600;
+							font-family: var(--wp--preset--font-family--inter);
+						}
+
+						.sensei-course-theme-lesson-quiz-notice__text {
+							font-size: var(--wp--preset--font-size--normal);
+							font-family: var(--wp--preset--font-family--inter);
+						}
+					}
+
+					.sensei-course-theme-lesson-quiz-notice__description {
+						margin-block-start: 0;
+						margin-block-end: 0;
+						font-size: var(--wp--preset--font-size--normal);
+						font-family: var(--wp--preset--font-family--inter);
+					}
+
+					.sensei-course-theme-lesson-quiz-notice__actions {
+						margin-top: var(--wp--preset--spacing--20);
+
+						> div {
+							background-color: var(--wp--preset--color--blueberry-1);
+
+							&:hover {
+								background-color: var(--wp--preset--color--deep-blueberry) !important;
+							}
+
+							> a {
+								color: var(--wp--preset--color--white) !important;
+								font-size: var(--wp--preset--font-size--normal);
+								font-weight: 600;
+								font-family: var(--wp--preset--font-family--inter);
+								padding: 15px var(--wp--preset--spacing--30);
+
+								&:hover {
+									background-color: var(--wp--preset--color--deep-blueberry) !important;
+								}
+
+								> svg {
+									display: none;
+								}
+							}
+						}
+					}
+				}
+
+			}
+		}
+	}
+
+	.sensei-lms-course-navigation-module__summary,
+	.sensei-lms-course-navigation-lesson {
+		margin-top: 12px;
+		font-size: var(--wp--preset--font-size--small);
+		line-height: 24px;
+
+		.sensei-lms-course-navigation-lesson__link {
+			color: var(--wp--preset--color--charcoal-4);
+			align-items: flex-start;
+
+			.sensei-lms-course-navigation-lesson__status {
+				margin-top: 6px;
+
+				&[aria-label="Preview"] {
+					display: none;
+
+					+ .sensei-lms-course-navigation-lesson__title {
+						padding-left: 0;
+						margin-left: 18px;
+						text-decoration: none;
+						display: list-item;
+						list-style-type: disc;
+						list-style-position: outside;
+					}
+				}
+			}
+		}
+
+		.sensei-lms-course-navigation-lesson__extra[aria-label^="Preview"] {
+			display: none;
 		}
 	}
 
 	.sensei-course-theme__sidebar {
 		row-gap: 40px;
-	}
 
-	// Remove the border on module title.
-	.wp-block-sensei-lms-course-theme-lesson-module {
-		padding-left: unset;
-		border: none;
-	}
+		.sensei-lms-course-navigation__modules {
+			gap: var(--wp--preset--spacing--20);
+			margin-left: -6px;
 
-	.sensei-lms-course-navigation-module__header {
-		.sensei-collapsible__toggle.sensei-lms-course-navigation-module__button {
-			flex-direction: row-reverse;
-			align-items: flex-start;
-			gap: 0;
+			.sensei-lms-course-navigation-module__lessons.sensei-collapsible__content,
+			.sensei-lms-course-navigation-module__summary {
+				padding-left: 24px;
+			}
+
+			.sensei-lms-course-navigation-module__header {
+				.sensei-collapsible__toggle.sensei-lms-course-navigation-module__button {
+					flex-direction: row-reverse;
+					align-items: flex-start;
+					gap: 0;
+
+					.sensei-lms-course-navigation-module__title {
+						font-weight: 700;
+						font-size: var(--wp--preset--font-size--small);
+						color: var(--wp--preset--color--charcoal-1);
+						margin-top: unset;
+						align-self: center;
+					}
+
+					.sensei-lms-course-navigation-module__collapsible-icon {
+						margin-top: -3px;
+					}
+				}
+			}
 		}
-	}
 
-	.sensei-lms-course-navigation-module__title {
-		font-weight: 700;
-		font-size: var(--wp--preset--font-size--small);
-		color: var(--wp--preset--color--charcoal-1);
-		margin-top: unset;
-	}
-
-	.sensei-lms-course-navigation-module__lessons.sensei-collapsible__content,
-	.sensei-lms-course-navigation-module__summary {
-		padding-left: 24px;
-	}
-
-	.sensei-lms-course-navigation-module__summary {
-		font-size: var(--wp--preset--font-size--xsmall);
-	}
-
-	.sensei-lms-course-navigation-lesson {
-		font-size: var(--wp--preset--font-size--small);
-
-		&.status-in-progress,
-		&.status-not-started {
-			--sensei-module-lesson-color: var(--wp--preset--color--charcoal-4);
+		.sensei-lms-course-navigation__lessons {
+			.sensei-lms-course-navigation-lesson {
+				&.status-in-progress,
+				&.status-not-started {
+					--sensei-module-lesson-color: var(--wp--preset--color--charcoal-4);
+				}
+			}
 		}
 	}
 
@@ -82,6 +232,11 @@ body.sensei {
 				margin: unset;
 				display: flex;
 				gap: var(--wp--preset--spacing--10);
+				justify-content: space-between;
+
+				@media screen and (max-width: 782px) {
+					flex-direction: column;
+				}
 
 				> *,
 				.sensei-buttons-container__button-block {
@@ -111,64 +266,314 @@ body.sensei {
 		}
 	}
 
-	@media screen and (max-width: 782px) {
-		.sensei-lesson-footer .sensei-lesson-actions-nav {
-			width: 100%;
+	.wp-block-sensei-lms-lesson-actions {
+		.wp-block-sensei-lms-button-view-quiz,
+		.wp-block-sensei-lms-button-complete-lesson {
+			> button {
+				font-weight: 600 !important;
+				line-height: 1;
+			}
+		}
+
+		.wp-block-sensei-lms-button-view-quiz {
+			&:hover {
+				background-color: var(--wp--preset--color--deep-blueberry) !important;
+			}
+		}
+
+		.wp-block-sensei-lms-button-complete-lesson {
+			background-color: var(--wp--custom--color--green-50) !important;
+			border-color: transparent;
+
+			&:hover {
+				background-color: var(--wp--custom--color--green-60) !important;
+			}
+
+			> button {
+				&:focus,
+				&:focus-visible {
+					outline: var(--wp--custom--color--green-50);
+				}
+			}
+		}
+
+		@media screen and (max-width: 782px) {
+			.sensei-lesson-actions-nav a {
+				width: 100% !important;
+			}
 		}
 	}
 
 	&.quiz {
-		#sensei-quiz-list .question-title {
-			font-size: var(--wp--preset--font-size--heading-4);
+		.wp-block-wporg-notice {
+			display: grid;
 		}
 
-		.wp-block-sensei-lms-quiz .wp-block-sensei-lms-quiz-question {
-			margin-top: var(--wp--preset--spacing--40);
-		}
+		.wp-block-sensei-lms-course-theme-notices {
+			margin-block-start: 0;
 
-		.wp-block-sensei-lms-quiz .sensei-lms-question-block__header {
-			margin-bottom: var(--wp--preset--spacing--20);
-		}
+			.sensei-course-theme-quiz-graded-notice {
+				padding: 40px;
+				margin-bottom: var(--wp--preset--spacing--40);
 
-		#sensei-quiz-list fieldset {
-			padding: 0;
-			border: none;
+				.sensei-course-theme-quiz-graded-notice__title {
+					font-size: var(--wp--preset--font-size--heading-5);
+					font-weight: 600;
+					margin-block-start: 0;
+				}
 
-			ul {
-				margin-top: 0;
+				.sensei-course-theme-quiz-graded-notice__text {
+					font-size: var(--wp--preset--font-size--normal);
+				}
+
+				.sensei-course-theme-quiz-graded-notice__actions {
+					gap: var(--wp--preset--spacing--20);
+
+					.wp-block-button {
+
+						@media screen and (max-width: 782px) {
+							width: 100%;
+						}
+
+						> a {
+							font-size: var(--wp--preset--font-size--normal);
+							font-weight: 600;
+							width: 100%;
+
+							&:focus,
+							&:focus-visible {
+								border: none;
+								outline-offset: 3.5px;
+								outline: 1.5px solid var(--wp--preset--color--blueberry-1);
+							}
+
+							&:hover {
+								background-color: var(--wp--preset--color--deep-blueberry) !important;
+							}
+						}
+					}
+
+					.sensei-course-theme-quiz-graded-notice__reset-quiz-form {
+						margin-left: 0;
+
+						@media screen and (max-width: 782px) {
+							width: 100%;
+						}
+
+						> button {
+							font-size: var(--wp--preset--font-size--normal);
+							font-weight: 600;
+							border: 1px solid var(--wp--preset--color--blueberry-1);
+							width: 100%;
+
+							&:focus,
+							&:focus-visible {
+								outline-offset: 2.5px;
+								outline: 1.5px solid var(--wp--preset--color--blueberry-1);
+								color: var(--wp--preset--color--white);
+								background-color: var(--wp--preset--color--blueberry-1);
+
+								&:hover {
+									background-color: var(--sensei-button-outline-hover-color) !important;
+									outline: none;
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
-		#sensei-quiz-list li ul li input,
-		#sensei-quiz-list .sensei-multiple-choice-answer-option-checkbox + label::before {
-			flex-shrink: 0;
+
+		.entry-content {
+			margin-top: 0;
+
+			#sensei-quiz-list {
+				margin-block-end: 0;
+
+				.wp-block-sensei-lms-quiz-question {
+					margin-top: 0;
+
+					&:not(:first-of-type) {
+						margin-top: var(--wp--preset--spacing--40);
+					}
+				}
+
+				.sensei-lms-question-block__header {
+					margin-bottom: var(--wp--preset--spacing--20);
+
+					.question-title {
+						font-size: var(--wp--preset--font-size--heading-6);
+						font-family: var(--wp--preset--font-family--inter);
+						font-weight: 600;
+					}
+				}
+
+				fieldset {
+					padding: 0;
+					border: none;
+
+					.answers {
+						margin-top: 0;
+
+						li > label {
+							font-family: var(--wp--preset--font-family--inter);
+							font-size: 16px;
+							font-weight: 400;
+						}
+
+						li > input,
+						.sensei-multiple-choice-answer-option-checkbox + label::before {
+							flex-shrink: 0;
+						}
+
+						li > input:focus,
+						.sensei-multiple-choice-answer-option-checkbox:focus + label::before {
+							outline: 1.5px solid var(--wp--preset--color--blueberry-1);
+							outline-offset: 1.5px;
+						}
+
+						.sensei-multiple-choice-answer-option-checkbox {
+							// Checkboxes need to be displayed, otherwise keyboard nav will not work.
+							// The following code is copied from `screen-reader-text` so that the checkboxes
+							// exist on the page, but are not shown visually. The visual checkboxes are added
+							// by `::before` on the label.
+							display: initial !important;
+							clip: rect(1px, 1px, 1px, 1px);
+							word-wrap: normal !important;
+							border: 0;
+							clip-path: inset(50%);
+							height: 1px;
+							margin: -1px;
+							overflow: hidden;
+							padding: 0;
+							position: absolute;
+							width: 1px;
+
+							+ label {
+								margin-left: 0;
+							}
+						}
+					}
+
+					.sensei-lms-question__answer-feedback {
+						margin-bottom: 0;
+						font-size: var(--wp--preset--font-size--small);
+					}
+				}
+			}
 		}
 
-		#sensei-quiz-list li ul li input:focus,
-		#sensei-quiz-list .sensei-multiple-choice-answer-option-checkbox:focus + label::before {
-			outline: 1.5px solid var(--wp--preset--color--blueberry-1);
-			outline-offset: 1.5px;
-		}
 
-		#sensei-quiz-list .sensei-multiple-choice-answer-option-checkbox {
-			// Checkboxes need to be displayed, otherwise keyboard nav will not work.
-			// The following code is copied from `screen-reader-text` so that the checkboxes
-			// exist on the page, but are not shown visually. The visual checkboxes are added
-			// by `::before` on the label.
-			display: initial !important;
-			clip: rect(1px, 1px, 1px, 1px);
-			word-wrap: normal !important;
-			border: 0;
-			clip-path: inset(50%);
-			height: 1px;
-			margin: -1px;
-			overflow: hidden;
-			padding: 0;
-			position: absolute;
-			width: 1px;
+		.sensei-course-theme__quiz__footer__wrapper {
+			padding-bottom: var(--wp--preset--spacing--50);
 
-			+ label {
-				margin-left: 0;
+			a,
+			button {
+				font-weight: 600 !important;
+				line-height: 1;
+				font-size: var(--wp--preset--font-size--normal);
+				padding: 17px 32px !important;
+			}
+
+			.wp-block-sensei-lms-quiz-actions {
+
+				@media screen and (max-width: 782px) {
+					flex-direction: column;
+					gap: var(--wp--preset--spacing--20);
+				}
+
+				> .sensei-course-theme__button {
+					display: none;
+				}
+
+				.wp-block-button {
+
+					@media screen and (max-width: 782px) {
+						width: 100%;
+					}
+
+					> a {
+						width: 100%;
+
+						&:focus,
+						&:focus-visible {
+							outline-offset: 4.5px;
+							outline: 1.5px solid var(--wp--preset--color--blueberry-1);
+							color: var(--wp--preset--color--white);
+							background-color: var(--wp--preset--color--blueberry-1);
+							border: none;
+						}
+
+						&:hover {
+							background-color: var(--wp--preset--color--deep-blueberry) !important;
+						}
+					}
+				}
+
+				.sensei-quiz-actions-primary {
+
+					@media screen and (max-width: 782px) {
+						width: 100%;
+					}
+
+					.sensei-quiz-action {
+						background-color: var(--wp--custom--color--green-50);
+						border-color: transparent !important;
+
+						&:hover {
+							background-color: var(--wp--custom--color--green-60);
+						}
+
+						> button {
+							&:focus,
+							&:focus-visible {
+								outline: var(--wp--custom--color--green-50);
+							}
+						}
+					}
+				}
+
+				.sensei-quiz-actions-secondary {
+
+					@media screen and (max-width: 782px) {
+						flex-direction: column;
+						width: 100%;
+					}
+					gap: var(--wp--preset--spacing--20);
+
+					.sensei-quiz-action {
+						border: solid 1px var(--sensei-secondary-color);
+						border-radius: 2px;
+						text-align: center;
+
+						@media screen and (max-width: 782px) {
+							width: 100%;
+						}
+
+						&:hover {
+							background-color: var(--sensei-button-outline-hover-color);
+						}
+
+						> button {
+							color: var(--sensei-primary-color);
+							text-decoration: none !important;
+							width: 100%;
+
+							&:focus,
+							&:focus-visible {
+								background-color: var(--wp--custom--button--outline--focus--color--background);
+								color: var(--wp--custom--button--outline--hover--color--text);
+								box-shadow: inset 0 0 0 3px var(--wp--preset--color--white);
+
+								&:hover {
+									background-color: var(--sensei-button-outline-hover-color);
+									color: var(--sensei-primary-color);
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -345,6 +750,16 @@ body.sensei {
 	.sensei-course-theme__header--standalone {
 		.sensei-course-theme-header-content {
 			border-bottom: 1px solid var(--wp--custom--color--border);
+
+			div:nth-of-type(2)::before {
+				content: "";
+				display: inline-block;
+				height: 100%;
+				border-right: 1px solid var(--sensei-course-progress-bar-color);
+				position: absolute;
+				margin-left: -30px;
+				top: 0;
+			}
 		}
 
 		// Also hide the leading slash for the Lesson title breadcrumb when it is hidden.
@@ -393,8 +808,17 @@ body.sensei-course-theme {
 
 		@media screen and (max-width: 782px) {
 			top: calc(var(--sensei-lm-header-height));
+			left: 0;
+			right: 0;
 			margin-left: unset;
 			margin-right: unset;
+
+			.sensei-course-theme-course-progress-bar-inner {
+				border-top-left-radius: 0;
+				border-bottom-left-radius: 0;
+				position: relative;
+				top: -0.5px;
+			}
 		}
 	}
 

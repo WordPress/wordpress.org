@@ -390,7 +390,7 @@ class Moderation {
 
 		// Check for moderator's note to user.
 		$mod_note = '';
-		$mod_note_to_user = Rejection::get_moderator_note_to_user( $post );
+		$mod_note_to_user = Rejection::get_moderator_note_to_user( $post, 'publish' );
 		if ( $mod_note_to_user ) {
 			$mod_note = "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n{$mod_note_to_user}\n";
 		}
@@ -474,7 +474,7 @@ https://wordpress.org/photos/
 		}
 
 		// Check for moderator's note to user.
-		$mod_note = Rejection::get_moderator_note_to_user( $post );
+		$mod_note = Rejection::get_moderator_note_to_user( $post, 'reject' );
 		if ( $mod_note ) {
 			$rejection_message .= "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n" . $mod_note . "\n";
 		}
@@ -547,7 +547,7 @@ https://wordpress.org/photos/
 		}
 
 		// Check for moderator's note to user.
-		$mod_note = Rejection::get_moderator_note_to_user( $post );
+		$mod_note = Rejection::get_moderator_note_to_user( $post, 'reject' );
 		if ( $mod_note ) {
 			$rejection_message .= "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n" . $mod_note . "\n";
 		}

@@ -1059,7 +1059,11 @@ class Stats {
 
 		$commenters_number = number_format_i18n( count( $commenters_with_comment_count ) );
 		foreach ( $commenters_with_comment_count as $user_id => $comment_number ) {
-			$user                  = get_user_by( 'id', $user_id );
+			$user = get_user_by( 'id', $user_id );
+			if ( ! $user ) {
+				continue;
+			}
+
 			$user->comments_number = $comment_number;
 			$commenters[]          = $user;
 		}
@@ -1093,7 +1097,7 @@ class Stats {
 			} else {
 				$tabs = "\t\t";
 			}
-			$url             = 'https://profiles.wordpress.org/' . sanitize_title_with_dashes( $commenter->user_login );
+			$url             = 'https://profiles.wordpress.org/' . $commenter->user_nicename . '/';
 			$comments_number = number_format_i18n( $commenter->comments_number );
 			$code           .= " - {$commenter->user_login}: {$tabs} {$comments_number} comments. Profile: {$url}" . PHP_EOL;
 		}

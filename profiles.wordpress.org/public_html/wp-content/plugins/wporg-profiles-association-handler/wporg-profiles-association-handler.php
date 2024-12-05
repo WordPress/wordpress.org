@@ -254,7 +254,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 						$users_altered++;
 					}
 				} elseif ( 'remove' == $command ) {
-					if ( groups_is_user_member( $group_id, $user_id ) ) {
+					if ( groups_is_user_member( $user_id, $group_id ) ) {
 						groups_leave_group( $group_id, $user_id );
 						$users_altered++;
 					}

@@ -51,6 +51,32 @@ class User {
 	 * Initializes class.
 	 */
 	public static function init() {
+		// Show empty state page for users without contributed photos.
+		add_action( 'pre_handle_404', [ __CLASS__, 'prevent_author_404s' ], 10, 2 );
+	}
+
+	/**
+	 * Prevents 404s for all author pages.
+	 *
+	 * By default, core will only prevent 404s on empty author archives
+	 * if the author is a member of the site. This preempts the handler
+	 * to prevent 404s for all author pages.
+	 *
+	 * @param bool     $preempt  Whether to short-circuit default header status handling. Default false.
+	 * @param WP_Query $query WordPress Query object.
+	 * @return bool
+	 */
+	public static function prevent_author_404s( $preempt, $query ) {
+		if ( ! $query->is_main_query() ) {
+			return $preempt;
+		}
+
+		$author = $query->get( 'author' );
+		if ( $query->is_author && is_numeric( $author ) && $author > 0 ) {
+			return true;
+		}
+
+		return $preempt;
 	}
 
 	/**
@@ -75,13 +101,15 @@ class User {
 	}
 
 	/**
-	 * Returns a count of photos published by a user on this calendar day.
+	 * Returns a count of photos of a given post status(es) by a user on this calendar day.
 	 *
-	 * @param int $user_id Optional. The user ID. If not defined, assumes global
-	 *                     author. Default false.
+	 * @param string|string[] $post_status Optional. The post status(es) of photos to find.
+	 *                                     Default 'publish'.
+	 * @param int             $user_id     Optional. The user ID. If not defined, assumes
+	 *                                     global author. Default false.
 	 * @return int
 	 */
-	public static function count_published_photos_for_today( $user_id = false ) {
+	public static function count_photos_for_today( $post_status = 'publish', $user_id = false ) {
 		if (  ! $user_id ) {
 			global $authordata;
 
@@ -98,7 +126,7 @@ class User {
 
 		$args = [
 			'post_type'      => Registrations::get_post_type(),
-			'post_status'    => 'publish',
+			'post_status'    => $post_status,
 			'author'         => $user_id,
 			'date_query'     => [
 				[

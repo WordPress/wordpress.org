@@ -4,6 +4,7 @@
  * The Account section has been modified so that email and password link to the `/edit/account/` page, which is
  * the canonical locations for those settings.
  */
+use function WordPressdotorg\Two_Factor\get_edit_account_url;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -108,7 +109,7 @@ defined( 'ABSPATH' ) || exit;
 		<div>
 			<label for="email"><?php esc_html_e( 'Email', 'bbpress' ); ?></label>
 			<?php bbp_displayed_user_field( 'user_email', 'edit' ); ?>
-			(<a href="<?php bbp_user_profile_edit_url(); ?>account/">edit</a>)
+			(<a href="<?php echo get_edit_account_url( bbp_get_displayed_user_id() ); ?>">edit</a>)
 		</div>
 
 		<div>
@@ -119,7 +120,7 @@ defined( 'ABSPATH' ) || exit;
 			<p id="security">
 				<?php printf(
 					__( 'Your password and two-factor authentication settings can be changed in <a href="%s">the Account section</a>.', 'wporg' ),
-					bbp_get_user_profile_edit_url() . 'account/'
+					get_edit_account_url( bbp_get_displayed_user_id() )
 				); ?>
 			</p>
 		</div>

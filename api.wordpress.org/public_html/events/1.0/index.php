@@ -1588,35 +1588,31 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  * Pin one-off events.
  */
 function pin_one_off_events( $events, $current_time ) {
-	$madrid_utc_offset = 1 * HOUR_IN_SECONDS; // Central European Standard Time - GMT+1
+	$tokyo_utc_offset = 9 * HOUR_IN_SECONDS; // JST: UTC+9
 
 	$sotw = array(
 		'type'                 => 'wordcamp',
-		'title'                => 'State of the Word - Watch Now', // Remove "watch now" next year, see date note below.
+		'title'                => 'State of the Word 2024 – Tokyo, Japan',
 		// `utm_source` is `private` because it would have to be set by the WP install, we don't need it, and tracking it could be a privacy concern.
-		'url'                  => 'https://wordpress.org/state-of-the-word/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2023',
+		'url'                  => 'https://wordpress.org/state-of-the-word/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2024',
 		'meetup'               => '',
 		'meetup_url'           => '',
-
-		// This year they requested the event to show up for a few days after it was over. The API does that no
-		// problem, but in Core `WP_Community_Events::trim_events()` will remove it. This is a hack to make the
-		// event show up, but it will probably confuse people about when it actual was, because the date will be
-		// wrong. Don't do this again next year, only show the event in the lead up to it. The pinned News item
-		// will still show it to people after the event.
-		'date'                 => '2023-12-14 15:00:00',
-		'end_date'             => '2023-12-14 16:30:00',
-		'start_unix_timestamp' => strtotime( '2023-12-14 15:00:00' ) - $madrid_utc_offset,
-		'end_unix_timestamp'   => strtotime( '2023-12-14 16:30:00' ) - $madrid_utc_offset,
+		// Local time for the event location.
+		'date'                 => '2024-12-16 18:00:00',
+		'end_date'             => '2024-12-16 20:00:00',
+		// Unix timestamp (UTC).
+		'start_unix_timestamp' => strtotime( '2024-12-16 18:00:00' ) - $tokyo_utc_offset,
+		'end_unix_timestamp'   => strtotime( '2024-12-16 20:00:00' ) - $tokyo_utc_offset,
 
 		'location' => array(
 			'location'  => 'Online',
-			'country'   => 'ES',
-			'latitude'  => 40.41446998218856,
-			'longitude' => -3.695042334019202,
+			'country'   => 'JP',
+			'latitude'  => 35.652832,
+			'longitude' => 139.839478,
 		),
 	);
 
-	if ( $current_time > strtotime( 'December 9, 2023' ) && $current_time < strtotime( 'December 14, 2023' ) ) {
+	if ( $current_time > strtotime( 'December 11, 2024' ) && $current_time < strtotime( 'December 17, 2024' ) ) {
 		array_unshift( $events, $sotw );
 	}
 

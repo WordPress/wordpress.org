@@ -29,6 +29,7 @@ require_once __DIR__ . '/inc/template-helpers.php';
 /**
  * Actions and filters.
  */
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_admin_assets' );
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'sensei_quiz_question_inside_after', __NAMESPACE__ . '\sensei_question_add_closing_fieldset' );
 // Attached at 50 to inject after title, description, etc, so that only answers are in the fieldset.
@@ -38,6 +39,7 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\maybe_enqueue_sensei_assets', 100 );
 // Attached at 11 to run after scripts are registered, but before they are enqueued.
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\defer_scripts', 11 );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\remove_sensei_course_archive_js', 100 );
 
 // Remove Jetpack CSS on frontend
 add_filter( 'jetpack_implode_frontend_css', '__return_false', 99 );
@@ -54,6 +56,7 @@ add_filter( 'sensei_register_post_type_lesson', function( $args ) {
 } );
 add_filter( 'single_template_hierarchy', __NAMESPACE__ . '\modify_single_template' );
 add_filter( 'taxonomy_template_hierarchy', __NAMESPACE__ . '\modify_taxonomy_template_hierarchy' );
+add_filter( 'wp_calculate_image_sizes', __NAMESPACE__ . '\modify_grid_image_sizes', 10, 5 );
 add_filter( 'wp_get_attachment_image_attributes', __NAMESPACE__ . '\eager_load_first_card_rows_images', 10, 3 );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\set_site_breadcrumbs' );
@@ -116,6 +119,20 @@ function setup() {
 /**
  * Enqueue scripts and styles.
  */
+function enqueue_admin_assets() {
+	$style_path = get_stylesheet_directory() . '/build/style/index.css';
+	$style_uri = get_stylesheet_directory_uri() . '/build/style/index.css';
+	wp_enqueue_style(
+		'wporg-learn-2024-admin-style',
+		$style_uri,
+		array(),
+		filemtime( $style_path )
+	);
+}
+
+/**
+ * Enqueue scripts and styles.
+ */
 function enqueue_assets() {
 	// The parent style is registered as `wporg-parent-2021-style`, and will be loaded unless
 	// explicitly unregistered. We can load any child-theme overrides by declaring the parent
@@ -166,6 +183,17 @@ function eager_load_first_card_rows_images( $attr, $attachment, $size ) {
 	}
 
 	return $attr;
+}
+
+/**
+ * Modify the image sizes attribute to improve performance by loading the size that is closest to the grid column width.
+ */
+function modify_grid_image_sizes( $sizes, $size, $image_src, $image_meta, $attachment_id ) {
+	if ( is_front_page() || is_archive() || is_search() || is_page( 'my-courses' ) ) {
+		return '(max-width: 750px) 100vw, (max-width: 1270px) 50vw, (max-width: 1320px) 33vw, 350px';
+	}
+
+	return $sizes;
 }
 
 /**
@@ -240,6 +268,19 @@ function defer_scripts() {
 }
 
 /**
+ * Remove Sensei course archive JavaScript for performance.
+ * Not needed as we don't display Sensei course order controls.
+ */
+function remove_sensei_course_archive_js() {
+	if ( is_admin() || ! is_post_type_archive( 'course' ) ) {
+		return;
+	}
+
+	wp_dequeue_script( 'sensei-course-archive-js' );
+	wp_deregister_script( 'sensei-course-archive-js' );
+}
+
+/**
  * Dequeue Sensei video scripts loaded on lessons archive.
  * Sensei LMS and Sensei Pro both enqueue video player scripts for lesson posts,
  * but these are not needed on archives and cause performance issues.
@@ -308,6 +349,14 @@ function add_site_navigation_menus( $menus ) {
 			'className' => 'has-separator',
 		),
 	);
+	if ( ! is_user_logged_in() ) {
+		global $wp;
+		$redirect_url = home_url( $wp->request );
+		$menu[] = array(
+			'label' => __( 'Log in', 'wporg-learn' ),
+			'url' => wp_login_url( $redirect_url ),
+		);
+	}
 
 	$learning_pathways = get_terms(
 		array(

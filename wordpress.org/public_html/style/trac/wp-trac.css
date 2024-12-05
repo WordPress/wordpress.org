@@ -947,7 +947,7 @@ span.contributor-label[title]:hover {
 	display: inherit;
 }
 span.time-ago {
-	font-size: 0.85em;
+	font-size: 12px;
 }
 span.time-ago a.timeline {
 	border: none;
