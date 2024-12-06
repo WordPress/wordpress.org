@@ -137,6 +137,7 @@ class Trademarks {
 	public static $trademark_exceptions = array(
 		'adobe.com'             => array( 'adobe' ),
 		'automattic.com'        => array( 'akismet', 'akismet-', 'jetpack', 'jetpack-', 'wordpress', 'wp-', 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
+		'woothemes.com'         => array( 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
 		'facebook.com'          => array( 'facebook', 'instagram', 'oculus', 'whatsapp' ),
 		'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
 		'trustpilot.com'        => array( 'trustpilot' ),

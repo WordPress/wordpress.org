@@ -536,6 +536,7 @@ function get_whitelist() {
 			'colorful tones', // @colorful-tones on Slack
 			'courane01', // @Courtney on Slack
 			'courtneypk',
+			'devmuhib', // @Muhibul Haque on Slack
 			'digitalchild',
 			'eboxnet',
 			'fikekomala',
