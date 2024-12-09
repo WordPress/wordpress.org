@@ -40,6 +40,7 @@ class Base {
 		new Routes\Plugin_Upload();
 		new Routes\Plugin_Blueprint();
 		new Routes\Plugin_Review();
+		new Routes\Plugin_Publish();
 	}
 
 	/**

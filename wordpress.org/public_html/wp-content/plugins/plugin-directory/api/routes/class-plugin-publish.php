@@ -10,7 +10,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WP_REST_Response;
 use WP_REST_Server;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
-use WordPressdotorg\Plugin_Directory\Plugin_Directory\Plugin_Release;
+use WordPressdotorg\Plugin_Directory\Plugin_Release;
 use WordPressdotorg\Plugin_Directory\API\Base;
 
 /**
@@ -26,7 +26,7 @@ class Plugin_Publish extends Base {
 	public function __construct() {
 		register_rest_route(
 			'plugins/v2',
-			'/plugin/(?P<plugin_slug>[^/]+)/publish',
+			'/plugin/(?P<plugin_slug>[^/]+)/release', // FIXME: 'release' or 'publish' or something else?
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'publish_release' ),
@@ -59,7 +59,7 @@ class Plugin_Publish extends Base {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 		// Will return either a WP_Error, or the post ID of the published release CPT.
 		// Maybe it should return the version string instead, or an object with more details? The whole CPT?
-		$result = Plugin_Release::publish_release( $plugin );
+		$result = Plugin_Release::instance()->publish_release( $plugin );
 
 		return new WP_REST_Response( $result );
 	}
