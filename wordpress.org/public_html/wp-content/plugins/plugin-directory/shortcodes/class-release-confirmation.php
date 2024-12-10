@@ -277,13 +277,13 @@ class Release_Confirmation {
 						$confirm_message = sprintf(
 							/* translators: 1: Version number, 2: Plugin name. */
 							__( 'Confirm your Two-Factor Authentication to release version %1$s of %2$s.', 'wporg-plugins' ),
-							$data['tag'],
+							esc_html( $data['version'] ),
 							$plugin->post_title
 						);
 						$discard_message = sprintf(
 							/* translators: 1: Version number, 2: Plugin name. */
 							__( 'Confirm your Two-Factor Authentication to discard the release %1$s for %2$s.', 'wporg-plugins' ),
-							$data['tag'],
+							esc_html( $data['version'] ),
 							$plugin->post_title
 						);
 					}
