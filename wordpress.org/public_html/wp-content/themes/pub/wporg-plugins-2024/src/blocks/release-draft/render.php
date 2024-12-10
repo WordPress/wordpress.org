@@ -42,13 +42,15 @@ $latest_draft_query->the_post();
 
 $new_version = get_post_meta( get_the_ID(), 'release_version', true );
 
-$post_title    = sprintf(
-	__( 'Trunk (v.%s)', 'wporg-plugins' ),
-	$new_version
-);
+
 $intro_text    = __( 'There are unpublished changes in your trunk folder.', 'wporg-plugins' );
 $button_text   = __( 'Create release', 'wporg-plugins' );
 $publish_title = __( 'Create release', 'wporg-plugins' );
+$post_title    = sprintf(
+	/* translators: %s: New version number */
+	__( 'Trunk (v.%s)', 'wporg-plugins' ),
+	$new_version
+);
 
 $markup = <<<HTML
 <div data-wp-bind--hidden="state.isCreatingRelease">
