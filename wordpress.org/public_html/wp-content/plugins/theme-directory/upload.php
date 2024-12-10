@@ -1,4 +1,10 @@
 <?php
+use function WordPressdotorg\Two_Factor\{
+	Revalidation\get_status as get_revalidation_status,
+	Revalidation\get_url as get_revalidation_url,
+	Revalidation\enqueue_assets as enqueue_2fa_revalidation_assets,
+	get_onboarding_account_url as get_2fa_onboarding_account_url
+};
 
 /**
  * Registers the upload shortcode.
@@ -39,6 +45,14 @@ function wporg_themes_render_upload_shortcode() {
 		);
 	}
 
+	if ( ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+		return sprintf(
+			'<p>' . __( 'Before you can upload a new theme, <a href="%s">please enable Two-Factor Authentication</a>.', 'wporg-themes' ) . '</p>',
+			get_2fa_onboarding_account_url()
+		);
+	}
+	enqueue_2fa_revalidation_assets();
+
 	$notice       = '';
 	$terms_notice = '';
 
@@ -71,7 +85,14 @@ function wporg_themes_render_upload_shortcode() {
 	}
 
 	return $notice . '<h2>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h2>
-		<form enctype="multipart/form-data" id="upload_form" method="POST" action="" onsubmit="jQuery(\'#upload_button\').attr(\'disabled\',\'disabled\'); return true;">
+		<form
+			enctype="multipart/form-data"
+			id="upload_form"
+			method="POST"
+			action=""
+			onsubmit="document.getElementById(\'upload_button\').disabled = true"
+			data-2fa-required
+		>
 			' . wp_nonce_field( 'wporg-themes-upload', '_wpnonce', true, false ) . '
 			<input type="hidden" name="action" value="upload"/>
 			<input type="file" id="zip_file" name="zip_file" size="25" accept=".zip" required />
@@ -101,6 +122,17 @@ function wporg_themes_process_upload( ) {
 		return new WP_Error(
 			'not_logged_in',
 			__( 'You must be logged in to upload a new theme.', 'wporg-themes' )
+		);
+	}
+
+	$revalidation_status = get_revalidation_status();
+	if ( ! $revalidation_status || ! $revalidation_status['can_save'] ) {
+		return new WP_Error(
+			'2fa_required',
+			sprintf(
+				__( 'Two-Factor Authentication Required. Please validate your <a href="%s">two-factor authentication before uploading</a>.', 'wporg-themes' ),
+				esc_url( get_revalidation_url( get_permalink() ) ) // Note: This is included mostly for fallback cases, the JS should prevent this ever being seen.
+			)
 		);
 	}
 
