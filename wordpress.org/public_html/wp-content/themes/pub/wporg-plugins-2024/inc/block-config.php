@@ -7,7 +7,6 @@ namespace WordPressdotorg\Theme\Plugins_2024\Block_Config;
 
 use WordPressdotorg\Plugin_Directory\Tools;
 
-add_action( 'init', __NAMESPACE__ . '\handle_publish_action' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\wporg_query_filter_options_sort' );
 add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg_query_filter_options_business_model' );
@@ -31,14 +30,14 @@ function add_site_navigation_menus( $menus ) {
 	$url = 'https://' . $_SERVER['HTTP_HOST'] . parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 
 	$items = array(
-		'plugins' => array(
+		'plugins'     => array(
 			array(
 				'label' => __( 'Submit a plugin', 'wporg-plugins' ),
-				'url' => '/developers/',
+				'url'   => '/developers/',
 			),
 			array(
-				'label' => __( 'My favorites', 'wporg-plugins' ),
-				'url' => '/browse/favorites/',
+				'label'     => __( 'My favorites', 'wporg-plugins' ),
+				'url'       => '/browse/favorites/',
 				'className' => 'has-separator',
 			),
 		),
@@ -49,7 +48,7 @@ function add_site_navigation_menus( $menus ) {
 			),
 			array(
 				'label' => __( 'Community', 'wporg-plugins' ),
-				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=community' ) :  esc_url( $url . '?plugin_business_model=community' ),
+				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=community' ) : esc_url( $url . '?plugin_business_model=community' ),
 				'term'  => get_term_by( 'slug', 'community', 'plugin_business_model' ),
 			),
 			array(
@@ -74,15 +73,15 @@ function add_site_navigation_menus( $menus ) {
 				'label' => __( 'Popular', 'wporg-plugins' ),
 				'term'  => get_term_by( 'slug', 'popular', 'plugin_section' ),
 			),*/
-		)
+		),
 	);
 
 	if ( ! is_user_logged_in() ) {
 		global $wp;
-		$redirect_url = home_url( $wp->request );
+		$redirect_url       = home_url( $wp->request );
 		$items['plugins'][] = array(
 			'label' => __( 'Log in', 'wporg-plugins' ),
-			'url' => wp_login_url( $redirect_url ),
+			'url'   => wp_login_url( $redirect_url ),
 		);
 	}
 
@@ -108,7 +107,7 @@ function wporg_query_filter_options_sort() {
 	global $wp_query;
 	$orderby = strtolower( $wp_query->query['orderby'] ?? '' );
 	$order   = strtolower( $wp_query->query['order'] ?? '' );
-	$sort     = $orderby . ( $order ? '_' . $order : '' );
+	$sort    = $orderby . ( $order ? '_' . $order : '' );
 
 	$options = array(
 		'relevance'       => __( 'Relevance', 'wporg-plugins' ),
@@ -140,7 +139,7 @@ function wporg_query_filter_options_sort() {
 		'key'      => 'orderby',
 		'action'   => '',
 		'options'  => $options,
-		'selected' => [ $sort ],
+		'selected' => array( $sort ),
 	);
 }
 
@@ -150,7 +149,7 @@ function wporg_query_filter_options_business_model() {
 		'commercial' => __( 'Commercial', 'wporg-plugins' ),
 		'community'  => __( 'Community', 'wporg-plugins' ),
 	);
-	$label = __( 'Type', 'wporg-plugins' );
+	$label   = __( 'Type', 'wporg-plugins' );
 	if ( get_query_var( 'plugin_business_model' ) && isset( $options[ get_query_var( 'plugin_business_model' ) ] ) ) {
 		$label = sprintf( __( 'Type: %s', 'wporg-plugins' ), $options[ get_query_var( 'plugin_business_model' ) ] );
 	}
@@ -160,25 +159,25 @@ function wporg_query_filter_options_business_model() {
 		'title'    => __( 'Type', 'wporg-plugins' ),
 		'key'      => 'plugin_business_model',
 		'action'   => '',
-		'options'  => $options ,
-		'selected' => [ get_query_var( 'plugin_business_model' ) ],
+		'options'  => $options,
+		'selected' => array( get_query_var( 'plugin_business_model' ) ),
 	);
 }
 
 function wporg_query_filter_options_plugin_category() {
-	$options = [];
+	$options = array();
 
-	foreach ( get_terms( 'plugin_category', [ 'hide_empty' => true ] ) as $term ) {
+	foreach ( get_terms( 'plugin_category', array( 'hide_empty' => true ) ) as $term ) {
 		$options[ $term->slug ] = $term->name;
 	}
-	
+
 	$count = count( (array) get_query_var( 'plugin_category' ) );
 	$label = sprintf(
 		/* translators: The dropdown label for filtering, %s is the selected term count. */
 		_n( 'Categories <span>%s</span>', 'Categories <span>%s</span>', number_format_i18n( $count ), 'wporg-plugins' ),
 		$count
 	);
-	
+
 	return array(
 		'label'    => $label,
 		'title'    => __( 'Category', 'wporg-plugins' ),
@@ -229,10 +228,9 @@ function wporg_query_filter_in_form( $key ) {
 	}
 
 	// Temporary for feature flag
-	if ( isset( $_GET['show_filters'] )  ) {
+	if ( isset( $_GET['show_filters'] ) ) {
 		echo '<input type="hidden" name="show_filters" value="1" />';
 	}
-
 }
 
 function wporg_query_total_label( $label, $count ) {
@@ -272,8 +270,8 @@ function wporg_query_total_label( $label, $count ) {
  */
 function get_favorite_settings( $settings, $post_id ) {
 	return array(
-		'is_favorite' => Tools::favorited_plugin( $post_id ),
-		'add_callback' => function( $_post_id ) {
+		'is_favorite'     => Tools::favorited_plugin( $post_id ),
+		'add_callback'    => function ( $_post_id ) {
 			$result = (bool) Tools::favorite_plugin( $_post_id, get_current_user_id(), true );
 			// `favorite_plugin` can return false for a number of reasons (not logged in, no plugin found, )
 			if ( ! $result ) {
@@ -281,7 +279,7 @@ function get_favorite_settings( $settings, $post_id ) {
 			}
 			return $result;
 		},
-		'delete_callback' => function( $_post_id ) {
+		'delete_callback' => function ( $_post_id ) {
 			$result = (bool) Tools::favorite_plugin( $_post_id, get_current_user_id(), false );
 			// `favorite_plugin` can return false for a number of reasons (not logged in, no plugin found, )
 			if ( ! $result ) {
@@ -313,7 +311,7 @@ function set_rating_data( $data, $post_id ) {
 
 	/**
 	 * Why do we multiply the average rating by 20?
-	 * The themes API does it this way, and the rating plugin was built to fit that. 
+	 * The themes API does it this way, and the rating plugin was built to fit that.
 	 * Instead of redoing everything, multiplying here keeps things simple and works well.
 	 *
 	 * @see theme-directory/class-themes-api.php for more info.
@@ -321,10 +319,10 @@ function set_rating_data( $data, $post_id ) {
 	$adjusted_rating = $rating * 20;
 
 	return array(
-		'rating' => $adjusted_rating,
+		'rating'       => $adjusted_rating,
 		'ratingsCount' => array_sum( $ratings ),
-		'ratings' => $ratings,
-		'supportUrl' => esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' )
+		'ratings'      => $ratings,
+		'supportUrl'   => esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' ),
 	);
 }
 
@@ -338,7 +336,8 @@ function filter_search_block( $block_content ) {
 	// Remove the required attribute
 	$block_content = preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
 
-	/* Temporarily disable this until filters are enabled.
+	/*
+	Temporarily disable this until filters are enabled.
 	// Insert the current query filters into the search form.
 	ob_start();
 	wporg_query_filter_in_form( 's' );
@@ -368,9 +367,9 @@ function filter_site_title_block( $block_content ) {
 
 /**
  * Filter the navigation to add the current item indicator when no business model is selected.
- * 
+ *
  * @param string $block_content
- * @param array $block
+ * @param array  $block
  * @return string
  */
 function filter_navigation_block( $block_content, $block ) {
@@ -383,10 +382,10 @@ function filter_navigation_block( $block_content, $block ) {
 
 	if ( get_query_var( 'plugin_business_model' ) ) {
 
-		// The menu doesn't select properly if viewing /tags/ or /browse/. 
+		// The menu doesn't select properly if viewing /tags/ or /browse/.
 		if ( get_query_var( 'browse' ) || get_query_var( 'plugin_tags' ) ) {
 			$tags = new \WP_HTML_Tag_Processor( $block_content );
-			
+
 			while ( $tags->next_tag( 'li' ) ) {
 				$tags->set_bookmark( 'parent-li' );
 				$tags->next_tag( 'a' );
@@ -421,9 +420,9 @@ function filter_navigation_block( $block_content, $block ) {
 
 /**
  * Increase the visibilit of the language suggest bar to recruit translators on plugin page.
- * 
+ *
  * @see https://github.com/WordPress/wordpress.org/issues/301
- * 
+ *
  * @param string $block_content
  * @return string
  */
@@ -438,21 +437,14 @@ function filter_language_suggest( $block_content ) {
 	return $html->get_updated_html();
 }
 
-/**
- * Handle form that publishes or discards a release.
- */
-function handle_publish_action() {
-    if ( isset( $_POST['publish_release_nonce'] ) && wp_verify_nonce( $_POST['publish_release_nonce'], 'publish-release-action' ) ) {
-		if ( 'publish' === $_POST['action'] ) {
-			var_dump('publish: not yet implemented');
-		} elseif ('discard' === $_POST['action']) {
-			var_dump('discard: not yet implemented');
-		}
-    }
-}
-
 /*
  * Filter the query to show only the children of the plugin.
+ *
+ * @param array $query The query arguments.
+ * @param string $block The block name.
+ * @param WP_Post $page The current page.
+ *
+ * @return array
  */
 function modify_block_query_var( $query, $block, $page ) {
 	if ( 'plugin_release' !== $query['post_type'] ) {

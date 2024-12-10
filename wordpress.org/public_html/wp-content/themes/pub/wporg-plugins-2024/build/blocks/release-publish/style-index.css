@@ -1,0 +1,30 @@
+/*!**************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/blocks/release-publish/style.scss ***!
+  \**************************************************************************************************************************************************************************************************************************************************************/
+.wp-block-wporg-release-publish label {
+  display: block;
+}
+.wp-block-wporg-release-publish .wp-block-wporg-release-result-item > div:last-child > div {
+  color: var(--wp--preset--color--charcoal-4);
+}
+
+.wp-block-wporg-release-publish-user-confirm {
+  margin-top: var(--wp--preset--spacing--20);
+}
+
+.wp-block-wporg-release-publish-actions {
+  display: flex;
+  margin-top: var(--wp--preset--spacing--20);
+  gap: 8px;
+}
+.wp-block-wporg-release-publish-actions button[disabled] {
+  opacity: 0.5;
+}
+
+.wp-block-wporg-release-publish-spinner {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+/*# sourceMappingURL=style-index.css.map*/

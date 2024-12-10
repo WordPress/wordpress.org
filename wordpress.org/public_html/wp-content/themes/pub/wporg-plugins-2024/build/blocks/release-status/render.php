@@ -4,12 +4,12 @@ if ( ! $block->context['postId'] ) {
 	return;
 }
 
-$post = get_post( $block->context['postId'] );
-if ( ! $post ) {
+$release_post = get_post( $block->context['postId'] );
+if ( ! $release_post ) {
 	return;
 }
 
-if('draft' != $post->post_s) {
+if ( 'draft' != $release_post->post_status ) {
 	return;
 }
 ?>
