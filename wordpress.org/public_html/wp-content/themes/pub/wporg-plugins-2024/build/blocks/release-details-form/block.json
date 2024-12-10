@@ -14,8 +14,7 @@
     "interactivity": true
   },
   "usesContext": [
-    "postId",
-    "pluginSlug"
+    "postId"
   ],
   "editorScript": "file:./index.js",
   "render": "file:./render.php",

@@ -121,7 +121,7 @@ module.exports = window["wp"]["serverSideRender"];
   \**************************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"wporg/release-draft","version":"0.1.0","title":"Release Draft","category":"design","icon":"","description":"A block to display release draft.","textdomain":"wporg","attributes":{},"supports":{"html":false,"interactivity":true},"usesContext":["postId"],"editorScript":"file:./index.js","render":"file:./render.php","style":"file:./style-index.css"}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"wporg/release-draft","version":"0.1.0","title":"Release Draft","category":"design","icon":"","description":"A block to display release draft.","textdomain":"wporg","attributes":{},"supports":{"html":false,"interactivity":true},"usesContext":["postId"],"editorScript":"file:./index.js","render":"file:./render.php","style":"file:./style-index.css","viewScriptModule":"file:./view.js"}');
 
 /***/ })
 

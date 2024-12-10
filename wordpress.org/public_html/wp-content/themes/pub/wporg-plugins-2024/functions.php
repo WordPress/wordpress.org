@@ -28,13 +28,15 @@ require_once __DIR__ . '/src/blocks/single-plugin/index.php';
 require_once __DIR__ . '/src/blocks/plugin-card/index.php';
 require_once __DIR__ . '/src/blocks/release-checks/index.php';
 require_once __DIR__ . '/src/blocks/release-commits/index.php';
+require_once __DIR__ . '/src/blocks/release-confirmation/index.php';
+require_once __DIR__ . '/src/blocks/release-date/index.php';
 require_once __DIR__ . '/src/blocks/release-draft/index.php';
-require_once __DIR__ . '/src/blocks/card/index.php';
-require_once __DIR__ . '/src/blocks/release-publish/index.php';
-require_once __DIR__ . '/src/blocks/release-result-item/index.php';
+require_once __DIR__ . '/src/blocks/release-details-form/index.php';
+require_once __DIR__ . '/src/blocks/release-check-item/index.php';
 require_once __DIR__ . '/src/blocks/release-flags/index.php';
 require_once __DIR__ . '/src/blocks/release-menu-options/index.php';
 require_once __DIR__ . '/src/blocks/release-page/index.php';
+require_once __DIR__ . '/src/blocks/release-status/index.php';
 
 // Block Configs
 require_once __DIR__ . '/inc/block-bindings.php';
@@ -461,47 +463,21 @@ function update_archive_description( $description ) {
 }
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
 
-
-/**
- * Get's the plugin post object.
- *
- * @return WP_Post The plugin post object.
- */
-function get_plugin() {
-	global $post;
-
-	if ( 'plugin_release' === $post->post_type ) {
-		return get_post( $post->post_parent );
-	}
-
-	return $post;
-}
-
-/**
- * Filter the archive title to use custom string for business model.
- *
- * @return string Plugin slug.
- */
-function get_plugin_slug() {
-	$plugin = get_plugin();
-
-	if ( ! $plugin ) {
-		return '';
-	}
-
-	return $plugin->post_name;
-}
-
 /**
  * Generates a Trac changeset link for a plugin.
  *
+ * @param string $parent_id The plugin ID.
  * @param string $previous_version The previous version of the plugin.
  * @param string $current_version The current version of the plugin. Default is 'trunk'.
  *
  * @return string The Trac changeset link.
  */
-function get_trac_changeset_link( $previous_version, $current_version = 'trunk' ) {
-	$plugin_slug = get_plugin_slug();
+function get_trac_changeset_link( $parent_id, $previous_version, $current_version = 'trunk' ) {
+	$plugin = get_post( $parent_id );
+
+	if ( ! $plugin ) {
+		return '';
+	}
 
 	$current_path = ( 'trunk' === $current_version )
 		? 'trunk'
@@ -509,7 +485,7 @@ function get_trac_changeset_link( $previous_version, $current_version = 'trunk' 
 
 	return sprintf(
 		'https://plugins.trac.wordpress.org/changeset?old_path=/%1$s/%2$s&new_path=/%1$s/tags/%3$s',
-		$plugin_slug,
+		$plugin->post_name,
 		$current_path,
 		$previous_version
 	);
@@ -517,17 +493,16 @@ function get_trac_changeset_link( $previous_version, $current_version = 'trunk' 
 
 /**
  * Get the releases for a plugin.
-
+ *
+ * @param WP_Post $parent_id The release post.
  *
  * @return WP_Post[] The releases for the plugin.
  */
-function get_releases() {
-	$plugin = get_plugin();
-
+function get_releases( $parent_id ) {
 	$args = array(
 		'post_type'      => 'plugin_release',
 		'posts_per_page' => -1,
-		'post_parent'    => $plugin->ID,
+		'post_parent'    => $parent_id,
 		'orderby'        => 'date',
 		'order'          => 'DESC',
 	);
@@ -539,7 +514,7 @@ function get_releases() {
  * Get the previous version of a plugin.
  *
  * @param WP_Post   $release_post The current release post.
- * @param WP_Post[] $releases List of releases.
+ * @param WP_Post[] $release List of releases.
  *
  * @return string|null The previous version of the plugin.
  */
@@ -574,6 +549,7 @@ function get_previous_version( $release_post, $releases ) {
  * @return WP_Post|null The latest release of the plugin.
  */
 function get_latest_release( $plugin_id ) {
+
 	$releases = get_releases( $plugin_id );
 
 	if ( empty( $releases ) ) {
@@ -599,9 +575,8 @@ function get_blueprint_url( $download_url ) {
 	 */
 	$blueprint = wp_json_encode(
 		array(
-			'login'       => true,
-			'landingPage' => '/wp-admin/plugins.php',
-			'steps'       => array(
+			'login' => true,
+			'steps' => array(
 				array(
 					'step'       => 'installPlugin',
 					'pluginData' => array(
@@ -614,152 +589,4 @@ function get_blueprint_url( $download_url ) {
 	);
 
 	return 'https://playground.wordpress.net/#' . base64_encode( $blueprint );
-}
-
-/**
- * Get the link to the revision log for a set of commits.
- *
- * @param array $commits The commits to get the log link for.
- *
- * @return string The link to the revision log.
- */
-function get_revision_log_link( $commits ) {
-	$plugin_slug = get_plugin_slug();
-
-	$base_url = sprintf(
-		'https://plugins.trac.wordpress.org/log/%s/trunk',
-		$plugin_slug
-	);
-
-	if ( count( $commits ) < 2 ) {
-		return $base_url;
-	}
-
-	$latest_commit   = reset( $commits );
-	$earliest_commit = end( $commits );
-
-	return sprintf(
-		'%1$s?rev=%2$s&stop_rev=%3$s',
-		$base_url,
-		$latest_commit['revision'],
-		$earliest_commit['revision'],
-	);
-}
-
-/**
- * Get the link to the revision log for a set of commits.
- *
- * @param array $commits The commits to get the log link for.
- *
- * @return string The link to the revision log.
- */
-function get_revision_changeset_link( $commits ) {
-	global $post;
-
-	$plugin_slug = get_plugin_slug();
-
-	if ( count( $commits ) < 2 ) {
-		return sprintf(
-			'https://plugins.trac.wordpress.org/log/%s/trunk',
-			$plugin_slug
-		);
-	}
-
-	$latest_commit   = reset( $commits );
-	$earliest_commit = end( $commits );
-
-	return sprintf(
-		'https://plugins.trac.wordpress.org/changeset?new=%2$s@%1$s/trunk&old=%3$s@%1$s/trunk',
-		$plugin_slug,
-		$earliest_commit['revision'],
-		$latest_commit['revision'],
-	);
-}
-
-/**
- * Formats plugin check results into an HTML list.
- *
- * @param array $results The plugin check results.
- * @return string HTML formatted results.
- */
-function format_plugin_check_results( $results ) {
-	if ( empty( $results ) ) {
-		return '<p>' . __( 'No issues found.', 'wporg-plugins' ) . '</p>';
-	}
-
-	$output = '<ul class="wp-block-wporg-release-checks-results">';
-
-	foreach ( $results as $result ) {
-		$type_class = isset( $result['type'] ) ? strtolower( $result['type'] ) : '';
-
-		$output .= sprintf(
-			'<li>%1$s %2$s</li>',
-			esc_html( $result['message'] ),
-			! empty( $result['docs'] )
-				? sprintf(
-					'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
-					esc_url( $result['docs'] ),
-					__( 'More Information', 'wporg-plugins' )
-				)
-				: ''
-		);
-	}
-
-	$output .= '</ul>';
-
-	return $output;
-}
-
-/**
- * Get the test run message.
- *
- * @param object $plugin_check_errors The plugin check errors.
- *
- * @return string The test run message.
- */
-function get_test_run_message( $plugin_check_errors ) {
-	$plugin_check_link = sprintf(
-		'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
-		esc_url( 'https://wordpress.org/plugins/plugin-check' ),
-		esc_html__( 'Plugin Check (PCP)', 'wporg-plugins' )
-	);
-
-	if ( $plugin_check_errors['verdict'] ) {
-		return sprintf(
-			/* translators: %1$s is a link to the Plugin Check (PCP) tool. */
-			__( '%1$s found no issues.', 'wporg-plugins' ),
-			$plugin_check_link
-		);
-	}
-
-	$result_count = count( $plugin_check_errors['results'] );
-	$message      = sprintf(
-		/* translators: %s number of issues reported from test. */
-		_n( '%s issue', '%s issues', $result_count, 'wporg-plugins' ),
-		$result_count
-	);
-
-	return sprintf(
-		'<div>%1$s%2$s</div>',
-		sprintf(
-		/* translators: %1$s is a link to the Plugin Check (PCP) tool. */
-			__( '%1$s completed with %2$s.', 'wporg-plugins' ),
-			$plugin_check_link,
-			$message
-		),
-		format_plugin_check_results( $plugin_check_errors['results'] ),
-	);
-}
-
-/**
- * Get the download link for a plugin.
- *
- * @param string $version The version of the plugin to download.
- *
- * @return string The download link for the plugin.
- */
-function get_download_link( $version ) {
-	$plugin = get_plugin();
-
-	return Template::download_link( $plugin , $version );
 }

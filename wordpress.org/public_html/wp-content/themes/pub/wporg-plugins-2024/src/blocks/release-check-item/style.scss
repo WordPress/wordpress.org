@@ -1,0 +1,13 @@
+.wp-block-wporg-release-check-item {
+	display: flex;
+	margin: 0 !important;
+	position: relative;
+	gap: 8px;
+	list-style: none;
+
+	> div:first-child {
+		height: 25px;
+		display: flex;
+		align-items: center;
+	}
+}

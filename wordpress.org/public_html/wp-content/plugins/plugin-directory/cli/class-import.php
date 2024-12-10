@@ -5,8 +5,10 @@ use Exception;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
+use WordPressdotorg\Plugin_Directory\Plugin_Check;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
+use WordPressdotorg\Plugin_Directory\Plugin_Release;
 use WordPressdotorg\Plugin_Directory\Readme\{ Parser as Readme_Parser, Validator as Readme_Validator };
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -164,6 +166,43 @@ class Import {
 		foreach ( $svn_tags_deleted as $svn_deleted_tag ) {
 			if ( Plugin_Directory::remove_release( $plugin, $svn_deleted_tag ) ) {
 				echo "Plugin tag {$svn_deleted_tag} deleted; release removed.\n";
+			}
+		}
+
+		// TODO: Test and confirm that this is the correct behavior.
+		if ( in_array( 'trunk', $svn_changed_tags ) ) {
+			// Backfill Release CPTs if needed. This should only happen once per plugin.
+			// Doing this here as a relatively safe way to distribute the load of backfilling.
+			Plugin_Release::instance()->maybe_backfill_releases( $plugin );
+
+			// Create or update a 'draft' release CPT for trunk changes.
+			// Note that this will only create a new draft if the version doesn't already exist as a release.
+			// TODO: refine this behaviour. (Maybe compare revision numbers?)
+			$release = Plugin_Release::instance()->add_or_update_draft_release(
+				$plugin,
+				[
+					'tag'              => 'trunk',
+					'version'          => $version, // TODO: Is this correct?
+					'committer'        => [$last_committer],
+					'revision'         => [$last_revision],
+					'tested'           => $readme->tested,
+					'requires'	       => $headers->RequiresWP,
+					'requires_php'	   => $headers->RequiresPHP,
+					'requires_plugins' => $requires_plugins,
+				]
+			);
+
+			// While we're at it, run plugin check and store the results.
+			// FIXME: Maybe this belongs in export_and_parse_plugin()? The readme checker is run there.
+			$plugin_export_dir = $data['tmp_dir'] . '/export';
+			if ( $release && ! is_wp_error( $release ) ) {
+				$plugin_check_result = Plugin_Check::run_checks( $plugin->post_name, $plugin_export_dir );
+				#var_dump( $plugin_check_result );
+				if ( $plugin_check_result ) {
+					update_post_meta( $release, 'plugin_check_result', $plugin_check_result );
+				} else {
+					delete_post_meta( $release, 'plugin_check_result' );
+				}
 			}
 		}
 

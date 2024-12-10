@@ -4,5 +4,9 @@
 .wp-block-wporg-release-draft {
   font-size: var(--wp--preset--font-size--small);
 }
+.wp-block-wporg-release-draft ul {
+  margin-top: var(--wp--preset--spacing--10);
+  padding: 0;
+}
 
 /*# sourceMappingURL=style-index.css.map*/
