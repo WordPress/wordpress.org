@@ -249,7 +249,6 @@ class Release_Confirmation {
 
 	static function get_actions( $plugin, $data ) {
 		$buttons    = [];
-		$can_access = self::can_access();
 		$using_2fa  = Two_Factor_Core::is_user_using_two_factor( get_current_user_id() );
 
 		if ( ! current_user_can( 'plugin_manage_releases', $plugin  ) ) {
