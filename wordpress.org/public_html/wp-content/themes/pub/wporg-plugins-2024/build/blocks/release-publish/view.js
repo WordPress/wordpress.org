@@ -1,1 +1,141 @@
-import*as e from"@wordpress/interactivity";var t={d:(e,r)=>{for(var s in r)t.o(r,s)&&!t.o(e,s)&&Object.defineProperty(e,s,{enumerable:!0,get:r[s]})},o:(e,t)=>Object.prototype.hasOwnProperty.call(e,t)};const r=(i={getContext:()=>e.getContext,store:()=>e.store},n={},t.d(n,i),n),{state:s}=(0,r.store)("async-action-block",{state:{get userHasConfirmed(){return s.hasConfirmed},get isDefaultState(){return!s.isPublishing&&!s.isPublished&&!s.hasError},get isPublishingState(){return s.isPublishing},get isPublishedState(){return s.isPublished}},actions:{handleReleaseConfirm(){s.hasConfirmed=!s.hasConfirmed},handleBackClick(e){e.preventDefault(),s.isCreatingRelease=!1,s.hasConfirmed=!1},handlePageReload(){window.location.reload()},*handleSubmit(e){e.preventDefault(),s.isPublishing=!0,s.errorMessage="";const{pluginSlug:t,nonce:i,apiURL:n}=(0,r.getContext)();try{const e=yield fetch(n,{method:"POST",headers:{"Content-Type":"application/json","X-WP-Nonce":i},body:JSON.stringify({plugin_slug:t})});if(!e.ok)try{const t=yield e.json();throw new Error(t.message)}catch(e){throw new Error("An error occurred while publishing the release.")}s.isPublished=!0}catch(e){s.errorMessage=e.message,s.hasError=!0,s.isPublishing=!1}finally{s.isPublishing=!1}}}});var i,n;
+import * as __WEBPACK_EXTERNAL_MODULE__wordpress_interactivity_8e89b257__ from "@wordpress/interactivity";
+/******/ var __webpack_modules__ = ({
+
+/***/ "@wordpress/interactivity":
+/*!*******************************************!*\
+  !*** external "@wordpress/interactivity" ***!
+  \*******************************************/
+/***/ ((module) => {
+
+var x = y => { var x = {}; __webpack_require__.d(x, y); return x; }
+var y = x => () => x
+module.exports = __WEBPACK_EXTERNAL_MODULE__wordpress_interactivity_8e89b257__;
+
+/***/ })
+
+/******/ });
+/************************************************************************/
+/******/ // The module cache
+/******/ var __webpack_module_cache__ = {};
+/******/ 
+/******/ // The require function
+/******/ function __webpack_require__(moduleId) {
+/******/ 	// Check if module is in cache
+/******/ 	var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 	if (cachedModule !== undefined) {
+/******/ 		return cachedModule.exports;
+/******/ 	}
+/******/ 	// Create a new module (and put it into the cache)
+/******/ 	var module = __webpack_module_cache__[moduleId] = {
+/******/ 		// no module.id needed
+/******/ 		// no module.loaded needed
+/******/ 		exports: {}
+/******/ 	};
+/******/ 
+/******/ 	// Execute the module function
+/******/ 	__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 
+/******/ 	// Return the exports of the module
+/******/ 	return module.exports;
+/******/ }
+/******/ 
+/************************************************************************/
+/******/ /* webpack/runtime/make namespace object */
+/******/ (() => {
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = (exports) => {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/ })();
+/******/ 
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+/*!********************************************!*\
+  !*** ./src/blocks/release-publish/view.js ***!
+  \********************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/interactivity */ "@wordpress/interactivity");
+/**
+ * WordPress dependencies
+ */
+
+const {
+  state
+} = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('async-action-block', {
+  state: {
+    get userHasConfirmed() {
+      return state.hasConfirmed;
+    },
+    get isDefaultState() {
+      return !state.isPublishing && !state.isPublished && !state.hasError;
+    },
+    get isPublishingState() {
+      return state.isPublishing;
+    },
+    get isPublishedState() {
+      return state.isPublished;
+    }
+  },
+  actions: {
+    handleReleaseConfirm() {
+      state.hasConfirmed = !state.hasConfirmed;
+    },
+    handleBackClick(event) {
+      event.preventDefault();
+      state.isCreatingRelease = false;
+
+      // Make user reconfirm.
+      state.hasConfirmed = false;
+    },
+    handlePageReload() {
+      window.location.reload();
+    },
+    *handleSubmit(event) {
+      event.preventDefault();
+      state.isPublishing = true;
+      state.errorMessage = '';
+      const {
+        pluginSlug,
+        nonce,
+        apiURL
+      } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      try {
+        const response = yield fetch(apiURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': nonce
+          },
+          body: JSON.stringify({
+            plugin_slug: pluginSlug
+          })
+        });
+        if (!response.ok) {
+          try {
+            const error = yield response.json();
+            throw new Error(error.message);
+          } catch (error) {
+            // Handle cases where json is not returned, like a gateway timeout.
+            throw new Error('An error occurred while publishing the release.');
+          }
+        }
+        state.isPublished = true;
+      } catch (error) {
+        state.errorMessage = error.message;
+        state.hasError = true;
+        state.isPublishing = false;
+      } finally {
+        state.isPublishing = false;
+      }
+    }
+  }
+});
+})();
+
+
+//# sourceMappingURL=view.js.map

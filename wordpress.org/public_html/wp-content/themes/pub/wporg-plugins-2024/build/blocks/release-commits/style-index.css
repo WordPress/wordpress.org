@@ -1,1 +1,35 @@
-.wp-block-wporg-release-commits{margin-top:0!important}.wp-block-wporg-release-commit-list{display:flex;flex-direction:column;gap:8px;list-style:none}.wp-block-wporg-release-commit-list li{align-items:center;display:flex;gap:inherit}.wp-block-wporg-release-commit-author{align-items:center;display:flex;font-weight:500;gap:8px}.wp-block-wporg-release-commit-by-line{font-size:12px}.wp-block-wporg-release-commit-by-line,.wp-block-wporg-release-commit-by-line a{color:var(--wp--preset--color--charcoal-4)!important}
+/*!**************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/blocks/release-commits/style.scss ***!
+  \**************************************************************************************************************************************************************************************************************************************************************/
+.wp-block-wporg-release-commits {
+  margin-top: 0 !important;
+}
+
+.wp-block-wporg-release-commit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+.wp-block-wporg-release-commit-list li {
+  display: flex;
+  gap: inherit;
+  align-items: center;
+}
+
+.wp-block-wporg-release-commit-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.wp-block-wporg-release-commit-by-line {
+  color: var(--wp--preset--color--charcoal-4) !important;
+  font-size: 12px;
+}
+.wp-block-wporg-release-commit-by-line a {
+  color: var(--wp--preset--color--charcoal-4) !important;
+}
+
+/*# sourceMappingURL=style-index.css.map*/

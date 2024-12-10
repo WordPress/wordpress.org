@@ -40,10 +40,15 @@ if ( ! $latest_draft_query->have_posts() ) {
 // Fetch the latest draft post.
 $latest_draft_query->the_post();
 
-$post_title         = __( 'Trunk', 'wporg-plugins' );
-$intro_text         = __( 'There are unpublished changes in your trunk folder.', 'wporg-plugins' );
-$button_text        = __( 'Create release', 'wporg-plugins' );
-$publish_title      = __( 'Create release', 'wporg-plugins' );
+$new_version = get_post_meta( get_the_ID(), 'release_version', true );
+
+$post_title    = sprintf(
+	__( 'Trunk (v.%s)', 'wporg-plugins' ),
+	$new_version
+);
+$intro_text    = __( 'There are unpublished changes in your trunk folder.', 'wporg-plugins' );
+$button_text   = __( 'Create release', 'wporg-plugins' );
+$publish_title = __( 'Create release', 'wporg-plugins' );
 
 $markup = <<<HTML
 <div data-wp-bind--hidden="state.isCreatingRelease">

@@ -17,7 +17,7 @@ if ( ! $release_post ) {
 }
 
 $current_version    = get_post_meta( $release_post->ID, 'release_version', true );
-$download_link      = get_download_link( $release_post->post_parent, $current_version );
+$download_link      = get_download_link( $current_version );
 $download_link_html = sprintf(
 	'<!-- wp:navigation-link {"label":"%1$s","url":"%2$s","kind":"custom"} /-->',
 	__( 'Download', 'wporg-plugins' ),
