@@ -379,6 +379,15 @@ class Release_Confirmation {
 			return false;
 		}
 
+		$url = home_url( '/developers/releases/' );
+
+		// 2FA doesn't need a token
+		if ( Two_Factor_Core::is_user_using_two_factor( $user ) ) {
+			return $url;
+		}
+
+		// User is not using 2FA, proceed with adding a token to the URL.
+
 		$time      = time();
 		$plaintext = wp_generate_password( 24, false );
 		$token     = wp_hash_password( $plaintext );
@@ -387,7 +396,7 @@ class Release_Confirmation {
 		$url = add_query_arg(
 			self::URL_PARAM,
 			urlencode( $plaintext ),
-			home_url( '/developers/releases/' )
+			$url
 		);
 
 		return $url;
