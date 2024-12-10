@@ -68,49 +68,48 @@ const {
   state
 } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('async-action-block', {
   state: {
-    preSubmitting: false,
-    isWaiting: false,
-    isComplete: false,
-    errorMessage: ''
+    get userHasConfirmed() {
+      return state.hasConfirmed;
+    }
   },
   actions: {
-    handlePreSubmit(event) {
-      event.preventDefault();
-      console.log('called');
-      state.preSubmitting = true;
+    handleReleaseConfirm() {
+      state.hasConfirmed = !state.hasConfirmed;
     },
     handleBackClick(event) {
       event.preventDefault();
-      state.preSubmitting = false;
+      state.isCreatingRelease = false;
+
+      // Make user reconfirm.
+      state.hasConfirmed = false;
     },
     *handleSubmit(event) {
-      // Prevent default form submission
       event.preventDefault();
-
-      // Set waiting state
       state.isWaiting = true;
-      state.isComplete = false;
       state.errorMessage = '';
-      state.btnText = 'Processing...';
+      const {
+        pluginSlug,
+        nonce,
+        apiURL
+      } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       try {
-        const response = yield fetch('/plugins/wp-json/plugins/v2/plugin/clapback/release', {
+        const response = yield fetch(apiURL, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': nonce
+          },
+          body: JSON.stringify({
+            plugin_slug: pluginSlug
+          })
         });
         const data = yield response.json();
 
         // Update state based on response
-        if (data.success) {
-          state.isComplete = true;
-        } else {
+        if (data.success) {} else {
           state.errorMessage = data.message || 'Action failed';
-          state.btnText = 'failed';
         }
       } catch (error) {
-        debugger;
-        state.btnText = 'failed...';
         state.errorMessage = 'Network error occurred';
       } finally {
         state.isWaiting = false;

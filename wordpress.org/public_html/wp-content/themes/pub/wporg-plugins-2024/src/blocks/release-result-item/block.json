@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "wporg/release-result-item",
+	"version": "0.1.0",
+	"title": "Release Result Item",
+	"category": "design",
+	"icon": "",
+	"description": "A block to display release draft result item.",
+	"textdomain": "wporg",
+	"attributes": {
+		"status": {
+			"type": "string",
+			"enum": [ "error", "warning", "success" ]
+		}
+	},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php",
+	"style": "file:./style-index.css"
+}

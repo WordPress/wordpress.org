@@ -1,0 +1,49 @@
+.wporg-spinner {
+	--local-size: 16px;
+	--spinner-color: var(--wp--custom--spinner--color, var(--wp--preset--color--blueberry-1, currentColor));
+	--background-stroke-color: rgb(221, 221, 221);
+
+	width: var(--local-size);
+	height: var(--local-size);
+	display: inline-block;
+	background-color: transparent;
+	position: relative;
+}
+
+/* Static outer circle */
+.wporg-spinner::before {
+	content: '';
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	border: 1.5px solid var(--background-stroke-color);
+	display: block;
+	box-sizing: border-box;
+}
+
+/* Rotating semicircle (arc) */
+.wporg-spinner::after {
+	content: '';
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	border: 1.5px solid transparent;
+	border-top-color: var(--spinner-color);
+	border-right-color: var(--spinner-color);
+	display: block;
+	box-sizing: border-box;
+	animation: wporg-spinner-rotate 1.4s linear infinite;
+	transform-origin: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+@keyframes wporg-spinner-rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}

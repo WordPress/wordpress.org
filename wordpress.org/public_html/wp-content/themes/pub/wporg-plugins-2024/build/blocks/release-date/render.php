@@ -1,15 +1,20 @@
 <?php
+/**
+ * Render the release date block.
+ *
+ * @package wporg-plugins
+ */
 
 if ( ! $block->context['postId'] ) {
 	return;
 }
 
-$post = get_post( $block->context['postId'] );
-if ( ! $post ) {
+$release_post = get_post( $block->context['postId'] );
+if ( ! $release_post ) {
 	return;
 }
 
-if ( 'publish' !== $post->post_status ) {
+if ( 'publish' !== $release_post->post_status ) {
 	return 3;
 }
 
