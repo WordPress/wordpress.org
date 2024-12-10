@@ -5,7 +5,11 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use Two_Factor_Core;
-use function WordPressdotorg\Two_Factor\Revalidation\{ get_status as get_revalidation_status, get_js_url as get_revalidation_js_url };
+use function WordPressdotorg\Two_Factor\{
+	Revalidation\get_status as get_revalidation_status,
+	Revalidation\get_js_url as get_revalidation_js_url,
+	get_onboarding_account_url as get_2fa_onboarding_url
+};
 
 /**
  * The [release-confirmation] shortcode handler.
@@ -15,8 +19,6 @@ use function WordPressdotorg\Two_Factor\Revalidation\{ get_status as get_revalid
 class Release_Confirmation {
 
 	const SHORTCODE = 'release-confirmation';
-	const COOKIE    = 'release_confirmation_access_token';
-	const META_KEY  = '_release_confirmation_access_token';
 	const URL_PARAM = 'access_token';
 
 	/**
@@ -60,32 +62,15 @@ class Release_Confirmation {
 
 		ob_start();
 
-		$should_show_access_notice = false;
-		// Plugin authors using 2FA don't need to use the email access token.
+		// If the user is not using 2FA, show a notice.
 		if ( ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
-			foreach ( $plugins as $plugin ) {
-				if ( $plugin->release_confirmation ) {
-					$should_show_access_notice = true;
-				}
-			}
-		}
-
-		if ( ! self::can_access() && $should_show_access_notice ) {
-			if ( isset( $_REQUEST['send_access_email'] ) ) {
-				printf(
-					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-					__( 'Check your email for an access link to perform actions.', 'wporg-plugins')
-				);
-			} else {
-				printf(
-					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-					sprintf(
-						/* translators: %s: URL */
-						__( 'Check your email for an access link, or <a href="%s">request a new email</a> to perform actions.', 'wporg-plugins'),
-						Template::get_release_confirmation_access_link()
-					)
-				);
-			}
+			printf(
+				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
+				sprintf(
+					__( 'Your account has elevated privileges and requires extra security before you can manage plugin releases. Please <a href="%s">enable two-factor authentication now</a>.', 'wporg-plugins' ),
+					get_2fa_onboarding_url()
+				)
+			);
 		}
 
 		echo '<p>' . __( 'This page is for authorized committers to view and manage releases of their plugins. Plugins with confirmations enabled require an extra action on this page to approve each new release.', 'wporg-plugins' ) . '</p>';
@@ -248,74 +233,58 @@ class Release_Confirmation {
 	}
 
 	static function get_actions( $plugin, $data ) {
-		$buttons    = [];
-		$using_2fa  = Two_Factor_Core::is_user_using_two_factor( get_current_user_id() );
+		$buttons = [];
 
-		if ( ! current_user_can( 'plugin_manage_releases', $plugin  ) ) {
-			return '';
-		}
+		if (
+			! is_user_logged_in() ||
+			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ||
+			! current_user_can( 'plugin_manage_releases', $plugin  ) ||
 
-		if ( ! $data['confirmations_required'] ) {
+			// No need to show actions if the release can't be confirmed, or is already confirmed
+			! $data['confirmations_required'] ||
+			$data['confirmed']
+		) {
 			return '';
 		}
 
 		if ( empty( $data['discarded'] ) ) {
 			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
-			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
-				if ( $using_2fa || self::can_access() ) {
-					$confirm_link = Template::get_release_confirmation_link( $data['tag'], $plugin );
-					$discard_link = Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' );
+			if ( ! $current_user_confirmed ) {
+				$confirm_link = Template::get_release_confirmation_link( $data['tag'], $plugin );
+				$discard_link = Template::get_release_confirmation_link( $data['tag'], $plugin, 'discard' );
 
-					// When using 2FA, we need to re-validate before confirming or discarding.
-					$confirm_message = '';
-					$discard_message = '';
-					if ( $using_2fa ) {
-						$confirm_link = get_revalidation_js_url( $confirm_link );
-						$discard_link = get_revalidation_js_url( $discard_link );
+				$confirm_link = get_revalidation_js_url( $confirm_link );
+				$discard_link = get_revalidation_js_url( $discard_link );
 
-						$confirm_message = sprintf(
+				$buttons[] = sprintf(
+					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
+					$confirm_link,
+					esc_attr(
+						sprintf(
 							/* translators: 1: Version number, 2: Plugin name. */
 							__( 'Confirm your Two-Factor Authentication to release version %1$s of %2$s.', 'wporg-plugins' ),
 							esc_html( $data['version'] ),
 							$plugin->post_title
-						);
-						$discard_message = sprintf(
+						)
+					),
+					__( 'Confirm', 'wporg-plugins' )
+				);
+
+				$buttons[] = sprintf(
+					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
+					$discard_link,
+					esc_attr(
+						sprintf(
 							/* translators: 1: Version number, 2: Plugin name. */
 							__( 'Confirm your Two-Factor Authentication to discard the release %1$s for %2$s.', 'wporg-plugins' ),
 							esc_html( $data['version'] ),
 							$plugin->post_title
-						);
-					}
-
-					$buttons[] = sprintf(
-						'<a href="%s" class="wp-element-button button approve-release" data-2fa-message="%s">%s</a>',
-						$confirm_link,
-						esc_attr( $confirm_message ),
-						__( 'Confirm', 'wporg-plugins' )
-					);
-					$buttons[] = sprintf(
-						'<a href="%s" class="wp-element-button button approve-release" data-2fa-message="%s">%s</a>',
-						$discard_link,
-						esc_attr( $discard_message ),
-						__( 'Discard', 'wporg-plugins' )
-					);
-				} else {
-					$buttons[] = sprintf(
-						'<a class="wp-element-button button approve-release disabled">%s</a>',
-						__( 'Confirm', 'wporg-plugins' )
-					);
-					$buttons[] = sprintf(
-						'<a class="wp-element-button button approve-release disabled">%s</a>',
-						__( 'Discard', 'wporg-plugins' )
-					);
-				}
-
-			} elseif ( $current_user_confirmed ) {
-				$buttons[] = sprintf(
-					'<a class="wp-element-button button approve-release disabled">%s</a>',
-					__( 'Confirmed', 'wporg-plugins' )
+						)
+					),
+					__( 'Discard', 'wporg-plugins' )
 				);
+
 			}
 		} elseif (
 			$data['discarded'] &&
@@ -333,90 +302,14 @@ class Release_Confirmation {
 		return implode( ' ', $buttons );
 	}
 
-	static function can_access() {
-		if ( ! is_user_logged_in() ) {
-			return false;
-		}
-
-		// Plugin reviewers can always access the release management functionality, in wp-admin.
-		if ( current_user_can( 'plugin_review' ) && ( is_admin() || wp_is_serving_rest_request() ) ) {
-			return true;
-		}
-
-		// Email access token..
-		if ( ! empty( $_COOKIE[ self::COOKIE ] ) ) {
-			// ...and it be valid..
-			$token = get_user_meta( get_current_user_id(), self::META_KEY, true );
-			if (
-				$token &&
-				$token['time'] > ( time() - DAY_IN_SECONDS ) &&
-				wp_check_password( $_COOKIE[ self::COOKIE ], $token['token'] )
-			) {
-				return true;
-			}
-		}
-
-		// If the user uses 2FA, and they've re-validated, they can access.
-		if ( Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
-			// Check to see if they've confirmed their 2FA status recently..
-			$status = get_revalidation_status();
-
-			if ( wp_is_serving_rest_request() && $status['can_save'] ) {
-				return true;
-			} elseif ( ! $status['needs_revalidate'] ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	static function generate_access_url( $user = null ) {
-		if ( ! $user ) {
-			$user = wp_get_current_user();
-		}
-		if ( ! $user || ! $user->exists() ) {
-			return false;
-		}
-
-		$url = home_url( '/developers/releases/' );
-
-		// 2FA doesn't need a token
-		if ( Two_Factor_Core::is_user_using_two_factor( $user ) ) {
-			return $url;
-		}
-
-		// User is not using 2FA, proceed with adding a token to the URL.
-
-		$time      = time();
-		$plaintext = wp_generate_password( 24, false );
-		$token     = wp_hash_password( $plaintext );
-		update_user_meta( $user->ID, self::META_KEY, compact( 'token', 'time' ) );
-
-		$url = add_query_arg(
-			self::URL_PARAM,
-			urlencode( $plaintext ),
-			$url
-		);
-
-		return $url;
+		return home_url( '/developers/releases/' );
 	}
 
 	static function template_redirect() {
 		$post = get_post();
 		if ( ! $post || ! is_page() || ! has_shortcode( $post->post_content, self::SHORTCODE ) ) {
 			return;
-		}
-
-		// Migrate URL param to cookie.
-		if ( isset( $_REQUEST[ self::URL_PARAM ] ) ) {
-			setcookie( self::COOKIE, $_REQUEST[ self::URL_PARAM ], time() + DAY_IN_SECONDS, '/plugins/', 'wordpress.org', true, true );
-		}
-
-		// Expire the cookie when needed. This is not for security, only performance / cleanliness.
-		if ( isset( $_COOKIE[ self::COOKIE ] ) && ! self::can_access() ) {
-			unset( $_COOKIE[ self::COOKIE ] );
-			setcookie( self::COOKIE, false, time() - DAY_IN_SECONDS );
 		}
 
 		// This page requires login.
