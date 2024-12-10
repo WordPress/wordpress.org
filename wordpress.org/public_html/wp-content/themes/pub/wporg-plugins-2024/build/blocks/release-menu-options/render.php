@@ -5,7 +5,7 @@
  * @package wporg-plugins
  */
 
-use function WordPressdotorg\Plugin_Directory\Theme\{get_releases, get_previous_version, get_trac_changeset_link, get_blueprint_url, get_download_link};
+use function WordPressdotorg\Plugin_Directory\Theme\{get_previous_version, get_trac_changeset_link, get_blueprint_url, get_download_link};
 
 if ( ! $block->context['postId'] ) {
 	return;
@@ -16,8 +16,8 @@ if ( ! $release_post ) {
 	return;
 }
 
-$current_version = get_post_meta( $release_post->ID, 'release_version', true );
-$download_link = get_download_link( $release_post->post_parent, $current_version );
+$current_version    = get_post_meta( $release_post->ID, 'release_version', true );
+$download_link      = get_download_link( $release_post->post_parent, $current_version );
 $download_link_html = sprintf(
 	'<!-- wp:navigation-link {"label":"%1$s","url":"%2$s","kind":"custom"} /-->',
 	__( 'Download', 'wporg-plugins' ),
@@ -30,9 +30,8 @@ $blueprint_link_html = sprintf(
 	esc_url( get_blueprint_url( get_download_link( $current_version ) ) )
 );
 
-$changes_link_html     = '';
-$releases         = get_releases();
-$previous_version = get_previous_version( $release_post, $releases );
+$changes_link_html = '';
+$previous_version  = get_previous_version( $release_post );
 
 if ( null !== $previous_version ) {
 	$changes_link_html = sprintf(

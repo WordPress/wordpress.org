@@ -543,8 +543,12 @@ function get_releases() {
  *
  * @return string|null The previous version of the plugin.
  */
-function get_previous_version( $release_post, $releases ) {
+function get_previous_version( $release_post, $releases = array() ) {
 	$previous_version = null;
+
+	if ( empty( $releases ) ) {
+		$releases = get_releases();
+	}
 
 	if ( empty( $releases ) ) {
 		return $previous_version;
