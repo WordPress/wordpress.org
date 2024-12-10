@@ -20,7 +20,7 @@ if ( ! $release_post ) {
 }
 
 $current_version = get_post_meta( $block->context['postId'], 'release_version', true );
-$tested_up_to    = '6.7';// get_post_meta( $block->context['postId'], 'release_tested', true );
+$tested_up_to    = get_post_meta( $block->context['postId'], 'release_tested', true );
 
 /**
  * Returns whether the tested_up_to value is recent.
@@ -84,9 +84,6 @@ function get_release_check_item( $status, $content ) {
 /**
  * Generate the block content for the version number check item.
  *
- * @param bool   $verdict Whether the version number is valid.
- * @param string $value The current version number.
- *
  * @return string The block content.
  */
 function get_changelog_check_item() {
@@ -104,8 +101,7 @@ function get_changelog_check_item() {
 /**
  * Generate the block content for the version number check item.
  *
- * @param bool   $verdict Whether the version number is valid.
- * @param string $value The current version number.
+ * @param bool $post Release post.
  *
  * @return string The block content.
  */
