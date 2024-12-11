@@ -186,6 +186,8 @@ class Plugin_Release {
 				'release_zips_built' => $release['zips_built'],
 				'release_confirmations_required' => $release['confirmations_required'],
 				'release_revision' => $release['revision'],
+				'release_revision_final' => $release['revision_final'] ?? null,
+				'release_revision_prior' => $release['revision_prior'] ?? null,
 				'release_commit_log' => $release['commit_log'] ?? null,
 				'release_tested' => $release['tested'] ?? null,
 				'release_requires_php' => $release['requires_php'] ?? null,
@@ -276,7 +278,14 @@ class Plugin_Release {
 		$current_versions = wp_list_pluck( $current_releases, 'post_title', 'ID' );
 
 		// Add or update each release.
-		foreach ( $releases as $release ) {
+		// Go backwards so we can store the previous revision number for each.
+		foreach ( array_reverse( $releases ) as $release ) {
+			$release_revision = max( $release['revision'] );
+			// revision_final is the svn rev number that corresponds to the release tag.
+			// revision_prior is the svn rev number of the previous release.
+			// revision_prior:revision_final is the range of svn rev numbers that are included in this release (noting that you'll need to be specific about paths)
+			$release['revision_final'] = $release_revision;
+			$release['revision_prior'] = $last_release_revision ?? null; // TODO: is there a reasonable way to get the initial import revision number?
 			if ( ! in_array( $release['version'], $current_versions ) ) {
 				// Add a CPT for the release if one does not yet exist.
 				$r = $this->add_release( $plugin, $release );
@@ -296,6 +305,7 @@ class Plugin_Release {
 				}
 				++ $changed;
 			}
+			$last_release_revision = $release_revision;
 		}
 
 		// Remove any releases that are no longer present.
