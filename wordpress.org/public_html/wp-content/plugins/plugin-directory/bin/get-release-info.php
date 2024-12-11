@@ -79,24 +79,24 @@ if ( is_wp_error( $releases ) ) {
 }
 
 foreach( $releases as $release ) {
-	echo "ID: " . $release->ID . "\n";
-	echo "Release version: " . $release->post_title . "\n";
-	echo "Tag: " . $release->release_tag . "\n";
-	echo "Post date GMT: " . $release->post_date_gmt . "\n";
+	echo "ID:                     " . $release->ID . "\n";
+	echo "Status:                 " . $release->post_status . "\n";
+	echo "Release version:        " . $release->post_title . "\n";
+	echo "Tag:                    " . $release->release_tag . "\n";
+	echo "Post date GMT:          " . $release->post_date_gmt . "\n";
 	if ( $release->release_date ) {
-		echo "Date: " . ( new \DateTime( '@' . $release->release_date ) )->format( 'Y-m-d H:i:s' ) . "\n";
+		echo "Date:                   " . ( new \DateTime( '@' . $release->release_date ) )->format( 'Y-m-d H:i:s' ) . "\n";
 	}
-	echo "Committers: " . implode( ', ', $release->release_committer ) . "\n";
-	echo "Zips built: " . ( $release->release_zips_built ? 'Yes' : 'No' ) . "\n";
+	echo "Committers:             " . implode( ', ', $release->release_committer ) . "\n";
+	echo "Zips built:             " . ( $release->release_zips_built ? 'Yes' : 'No' ) . "\n";
 	echo "Confirmations required: " . ( $release->release_confirmations_required ? 'Yes' : 'No' ) . "\n";
-	echo "Release revision: " . $release->revision_final . "\n";
-	echo "Previous version rev: " . $release->revision_prior . "\n";
-	echo "Revisions: " . implode( ',',  $release->release_revisions ) . "\n";
+	echo "Release revision:       " . $release->revision_final . "\n";
+	echo "Previous version rev:   " . $release->revision_prior . "\n";
 	if ( $release->release_commit_log ) {
 		echo "Commit log:\n";
-		foreach( array_reverse( $release->release_commit_log ) as $commit ) {
-			echo ( new \DateTime( '@' . $commit['date'] ) )->format( 'Y-m-d' ) . " - ";
-			echo $commit['author'] . ' r' . $commit['revision'] . " - " . \wp_trim_words( $commit['message'] ) . "\n";
+		foreach( $release->release_commit_log as $commit ) {
+			echo "  " . ( new \DateTime( '@' . $commit['date'] ) )->format( 'Y-m-d' ) . " - ";
+			echo "  " . $commit['author'] . ' r' . $commit['revision'] . " - " . \wp_trim_words( $commit['message'] ) . "\n";
 		}
 	}
 	echo "-----------------------------------\n";
