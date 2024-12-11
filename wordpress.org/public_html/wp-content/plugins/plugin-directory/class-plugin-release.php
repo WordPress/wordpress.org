@@ -286,6 +286,14 @@ class Plugin_Release {
 			// revision_prior:revision_final is the range of svn rev numbers that are included in this release (noting that you'll need to be specific about paths)
 			$release['revision_final'] = $release_revision;
 			$release['revision_prior'] = $last_release_revision ?? null; // TODO: is there a reasonable way to get the initial import revision number?
+
+			// FIXME: Is it safe to run this here? Should this be conditional on the context in which we're running? Only on add? Something else?
+			if ( $release['revision_final'] && $release['revision_prior'] ) {
+				$trunk_url = Import::PLUGIN_SVN_BASE . '/' . $plugin->post_name . '/trunk';
+				$commit_log = SVN::log( $trunk_url, [ $release['revision_prior'], $release['revision_final'] ] );
+				$release['commit_log'] = $commit_log['log'] ?? null;
+			}
+
 			if ( ! in_array( $release['version'], $current_versions ) ) {
 				// Add a CPT for the release if one does not yet exist.
 				$r = $this->add_release( $plugin, $release );
