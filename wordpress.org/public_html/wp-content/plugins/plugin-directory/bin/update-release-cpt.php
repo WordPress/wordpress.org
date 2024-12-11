@@ -77,7 +77,7 @@ if ( empty( $plugin->releases ) ) {
 
 echo "Updating releases for $plugin_slug...\n";
 
-$updated = Plugin_Release::instance()->update_releases( $plugin, $plugin->releases );
+$updated = Plugin_Release::instance()->maybe_backfill_releases( $plugin, true ); // true = force update
 if ( is_wp_error( $updated ) ) {
 	fwrite( STDERR, "Failed to update releases for $plugin_slug: " . $updated->get_error_message() . "\n" );
 	die();

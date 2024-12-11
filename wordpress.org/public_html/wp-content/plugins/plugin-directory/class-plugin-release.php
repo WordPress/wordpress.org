@@ -83,22 +83,53 @@ class Plugin_Release {
 	/**
 	 * Backfill releases for a plugin, if none exist. This uses the releases postmeta to populate the CPTs.
 	 */
-	public function maybe_backfill_releases( $plugin ) {
+	public function maybe_backfill_releases( $plugin, $force = false ) {
 		$plugin = get_post( $plugin );
 
 		if ( !$plugin || 'plugin' !== $plugin->post_type ) {
 			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
 		}
 
-		// This will backfill the releases postmeta if needed.
-		$releases_postmeta = Plugin_Directory::get_releases( $plugin );
+		if ( $this->has_releases( $plugin ) && ! $force ) {
+			return false;
+		}
 
-		// Add or update the release CPTs using postmeta.
-		if ( $releases_postmeta && ! $this->has_releases( $plugin ) ) {
-			return $this->update_releases( $plugin, $releases_postmeta );
+		$releases_from_tags = $this->get_releases_from_svn_tags( $plugin );
+
+		// Add or update the release CPTs using the svn data.
+		if ( $releases_from_tags ) {
+			return $this->update_releases( $plugin, $releases_from_tags );
 		}
 
 		return false;
+	}
+
+	// This roughly mimics Plugin_Directory::prefill_releases_meta(), but includes a bit more detail.
+	public function get_releases_from_svn_tags( $plugin ) {
+		$plugin = get_post( $plugin );
+
+		if ( !$plugin || 'plugin' !== $plugin->post_type ) {
+			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
+		}
+
+		$svn_tags = Tools\SVN::ls( "https://plugins.svn.wordpress.org/{$plugin->post_name}/tags/", true ) ?: [];
+
+		$releases = [];
+		foreach ( $svn_tags as $tag ) {
+			if ( 'dir' !== $tag['kind'] ) {
+				continue;
+			}
+
+			$releases[] = [
+				'date' => strtotime( $tag['date'] ),
+				'tag' => $tag['filename'],
+				'version' => $tag['filename'],
+				'committer' => [ $tag['author'] ],
+				'revision' => [ $tag['revision'] ],
+			];
+		}
+
+		return $releases;
 	}
 
 	/**
