@@ -248,28 +248,34 @@ class Plugin_Release {
 
 		// If there's already a published release for this plugin, we only create a draft if there are unreleased trunk commits.
 		$last_release = $this->get_release( $plugin, null );
+
+		$trunk_url   = Import::PLUGIN_SVN_BASE . '/' . $plugin->post_name . '/trunk';
+		$svn_options = array( 'limit' => 100 ); // Safety limit.
+		$commit_log  = null;
+
 		if ( $last_release ) {
-			if ( !empty( $release[ 'revision' ] ) ) {
+			if ( ! empty( $release['revision'] ) ) {
 				// Don't create a draft unless the revision number is higher than the last release.
 				if ( max( $release['revision'] ) <= max( $last_release->release_revision ) ) {
 					return false; // Not an error, just skip.
 				}
-			} else {
-				// If we don't have revision numbers, use dates. Maybe this should be removed.
-				if ( strtotime( $release['date'] ) <= strtotime( $last_release->release_date ) ) {
-					return false; // Not an error, just skip.
-				}
-			}
 
-			// Store the commit log in postmeta. We'll only do this for drafts.
-			$last_release_revision = max( $last_release->release_revision );
-			if ( $last_release_revision && $release['revision'] ) {
-				$trunk_url = Import::PLUGIN_SVN_BASE . '/' . $plugin->post_name . '/trunk';
-				$svn_options = [ 'limit' => 100 ]; // Safety limit
-				$commit_log = SVN::log( $trunk_url, [ max( $release['revision'] ), $last_release_revision ], $svn_options );
-				$release['commit_log'] = $commit_log['log'] ?? null;
+				// Get commits from last release revision to current revision.
+				$last_release_revision = max( $last_release->release_revision );
+				if ( $last_release_revision ) {
+					$commit_log = SVN::log( $trunk_url, array( max( $release['revision'] ), $last_release_revision ), $svn_options );
+				}
+			} elseif ( strtotime( $release['date'] ) <= strtotime( $last_release->release_date ) ) {
+				// If we don't have revision numbers, use dates. Maybe this should be removed.
+				return false; // Not an error, just skip.
 			}
+		} else {
+			// No previous release - get commits from revision '1' to 'head'.
+			$commit_log = SVN::log( $trunk_url, array( '1', 'HEAD' ), $svn_options );
 		}
+
+		// Store the commit log in postmeta. We'll only do this for drafts.
+		$release['commit_log'] = $commit_log['log'] ?? null;
 
 		$draft_id = $this->get_release( $plugin, 'trunk' );
 		if ( $draft_id ) {
