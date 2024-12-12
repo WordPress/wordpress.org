@@ -32,7 +32,6 @@ require_once __DIR__ . '/src/blocks/release-draft/index.php';
 require_once __DIR__ . '/src/blocks/card/index.php';
 require_once __DIR__ . '/src/blocks/release-publish/index.php';
 require_once __DIR__ . '/src/blocks/release-result-item/index.php';
-require_once __DIR__ . '/src/blocks/release-flags/index.php';
 require_once __DIR__ . '/src/blocks/release-menu-options/index.php';
 require_once __DIR__ . '/src/blocks/release-page/index.php';
 
