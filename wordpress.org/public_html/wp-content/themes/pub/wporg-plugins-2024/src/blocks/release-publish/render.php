@@ -39,6 +39,7 @@ $form_context = array(
 	'nonce'               => wp_create_nonce( 'wp_rest' ),
 	'apiURL'              => esc_url( rest_url( 'plugins/v2/plugin/' . $plugin_slug . '/publish' ) ),
 	'genericErrorMessage' => __( 'An error occurred while publishing the release.', 'wporg-plugins' ),
+	'tooltipMessage'      => __( 'Please fill out this field.', 'wporg-plugins' ),
 );
 
 /**
@@ -96,7 +97,7 @@ wp_interactivity_state(
 					)
 				)
 				?>
-			<ul>
+			<ul class="wp-block-wporg-release-publish-checklist">
 				<?php echo get_view_diff_check_item( $release_post ); ?>   
 				<?php echo get_changelog_check_item(); ?>   
 				<?php echo get_tested_up_to_check_item( $tested_up_to_pass, $tested_up_to ); ?>     

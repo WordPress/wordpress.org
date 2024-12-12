@@ -8,6 +8,8 @@
 
 namespace WordPressdotorg\Theme\Plugins_2024\ReleaseChecks;
 
+use function WordPressdotorg\Plugin_Directory\Theme\get_plugin_slug;
+
 add_action( 'init', __NAMESPACE__ . '\init' );
 
 /**
@@ -46,9 +48,14 @@ function format_plugin_check_results( $results ) {
 		$output .= do_blocks(
 			sprintf(
 				'<!-- wp:heading {"level":5,"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
-				<h5 class="wp-block-heading" style="margin-top:0;margin-bottom:0">%s</h5>
+				<h5 class="wp-block-heading" style="margin-top:0;margin-bottom:0"><a target="_blank" href="%1$s">%2$s</a></h5>
 				<!-- /wp:heading -->',
-				esc_html( $file_name )
+				sprintf(
+					'https://plugins.trac.wordpress.org/browser/%1$s/trunk/%2$s',
+					esc_html( get_plugin_slug() ),
+					$file_name
+				),
+				$file_name
 			)
 		);
 
