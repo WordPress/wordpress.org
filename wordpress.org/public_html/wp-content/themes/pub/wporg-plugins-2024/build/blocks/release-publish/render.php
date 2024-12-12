@@ -6,8 +6,12 @@
  */
 
 use WordPressdotorg\Plugin_Directory\Template;
-use function WordPressdotorg\Plugin_Directory\Theme\{get_latest_release, get_plugin, get_plugin_slug};
+use function WordPressdotorg\Plugin_Directory\Theme\{get_latest_release, get_plugin, get_plugin_slug, user_can_edit_plugin};
 use function WordPressdotorg\Theme\Plugins_2024\ReleasePublish\{has_recently_been_tested, get_view_diff_check_item, get_changelog_check_item, get_tested_up_to_check_item, get_version_number_check_item};
+
+if ( ! user_can_edit_plugin() ) {
+	return;
+}
 
 // Ensure the block context has a valid post ID.
 if ( empty( $block->context['postId'] ) ) {

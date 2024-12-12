@@ -5,7 +5,9 @@
  * @package wporg-plugins
  */
 
-if ( ! current_user_can( 'plugin_admin_edit', $post ) ) {
+use function WordPressdotorg\Plugin_Directory\Theme\{get_plugin_slug, user_can_edit_plugin};
+
+if ( ! user_can_edit_plugin() ) {
 	return;
 }
 
@@ -42,14 +44,17 @@ $latest_draft_query->the_post();
 
 $new_version = get_post_meta( get_the_ID(), 'release_version', true );
 
-
-$intro_text    = __( 'There are unpublished changes in your trunk folder.', 'wporg-plugins' );
-$button_text   = __( 'Create release', 'wporg-plugins' );
-$publish_title = __( 'Create release', 'wporg-plugins' );
-$post_title    = sprintf(
-	/* translators: %s: New version number */
+$publish_text = __( 'Create release', 'wporg-plugins' );
+$slug         = get_plugin_slug();
+$intro_text   = sprintf(
+	/* translators: %s: URL to the plugin's trunk folder */
+	__( 'There are unpublished changes in your <a href="%s">trunk</a> folder.', 'wporg-plugins' ),
+	esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" )
+);
+$post_title = sprintf(
+	/* translators: %s: Plugin version number */
 	__( 'Trunk (v.%s)', 'wporg-plugins' ),
-	$new_version
+	esc_html( $new_version )
 );
 
 $markup = <<<HTML
@@ -66,7 +71,7 @@ $markup = <<<HTML
 		<div class="wp-block-group wporg-release-confirmation-actions" style="padding-top:var(--wp--preset--spacing--10);">	
 			<div class="wp-block-button is-small">
 				<button data-wp-on--click="actions.handlePreSubmit" class="wp-block-button__link wp-element-button">
-					$button_text
+					$publish_text
 				</button>
 			</div>
 		</div>
@@ -75,7 +80,7 @@ $markup = <<<HTML
 </div>
 
 <div data-wp-bind--hidden="!state.isCreatingRelease">
-	<!-- wp:wporg/card {"title":"$publish_title"} -->
+	<!-- wp:wporg/card {"title":"$publish_text"} -->
 		<!-- wp:wporg/release-publish /-->
 	<!-- /wp:wporg/card -->
 </div>

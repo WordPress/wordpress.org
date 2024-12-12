@@ -688,3 +688,18 @@ function get_download_link( $version ) {
 
 	return Template::download_link( $plugin, $version );
 }
+
+/**
+ * Get the support URL for a plugin.
+ *
+ * @return bool Whether the can edit this plugin.
+ */
+function user_can_edit_plugin() {
+	$plugin = get_plugin();
+
+	if ( empty( $plugin ) ) {
+		return false;
+	}
+
+	return current_user_can( 'plugin_admin_edit', $plugin );
+}

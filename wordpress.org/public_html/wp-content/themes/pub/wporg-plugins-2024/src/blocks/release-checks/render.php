@@ -39,28 +39,27 @@ if ( empty( $plugin_check_errors ) ) {
 // Warnings are currently associated to the plugin post, not the release post.
 $import_warnings = get_post_meta( get_plugin()->ID, '_import_warnings', true );
 
-if ( $import_warnings ) {
-	// Back-compat; previously this was an array of numeric-indexed human-readable strings.
-	if ( ! wp_is_numeric_array( $import_warnings ) ) {
-		// error_code => error_data, convert to error_code => human_readable_error.
+// Merge in warnings into the plugin check errors.
+if ( ! empty( $import_warnings ) && ! wp_is_numeric_array( $import_warnings ) ) {
 
-		foreach ( $import_warnings as $error_code => $error_data ) {
-			$import_warnings[ $error_code ] = Readme_Validator::instance()->translate_code_to_message( $error_code, $error_data );
-		}
-	}
-
-	$warnings = '';
 	foreach ( $import_warnings as $error_code => $error_data ) {
 
-		// Skip these warnings,they are not relevant to the release.
+		// These warnings exist because they haven't release it.
+		// TODO: Remove the logic that sets those warnings.
 		if ( in_array( $error_code, array( 'stable_tag_invalid_trunk_fallback', 'stable_tag_invalid' ), true ) ) {
 			continue;
 		}
 
-		$blocks .= sprintf(
-			'<!-- wp:wporg/release-result-item {"status":"warning"} --><div>%s</div><!-- /wp:wporg/release-result-item -->',
-			$error_data
+		$plugin_check_errors['results'][] = array(
+			'line'    => 0,
+			'column'  => 0,
+			'type'    => 'WARNING',
+			'code'    => $error_code,
+			'message' => Readme_Validator::instance()->translate_code_to_message( $error_code, $error_data ),
+			'file'    => 'readme.txt',
 		);
+
+		$plugin_check_errors['verdict'] = false;
 	}
 }
 

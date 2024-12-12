@@ -36,28 +36,26 @@ function format_plugin_check_results( $results ) {
 
 	$grouped_by_file = array();
 	foreach ( $results as $plugin_error ) {
-		$grouped_by_file[ $plugin_error['file'] ][] = $plugin_error;
+		$grouped_by_file[ strtolower( $plugin_error['file'] ) ][] = $plugin_error;
 	}
 
-	// Loop through grouped errors and output them
 	foreach ( $grouped_by_file as $file_name => $list ) {
 		$output .= '<li>';
 
 		// For some reason, we need to render the block otherwise it won't render.
-		$output .= do_blocks( sprintf(
-			'<!-- wp:heading {"level":5,"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
-			<h5 class="wp-block-heading" style="margin-top:0;margin-bottom:0">%s</h5>
-			<!-- /wp:heading -->',
-			esc_html( $file_name )
-		) );
+		$output .= do_blocks(
+			sprintf(
+				'<!-- wp:heading {"level":5,"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+				<h5 class="wp-block-heading" style="margin-top:0;margin-bottom:0">%s</h5>
+				<!-- /wp:heading -->',
+				esc_html( $file_name )
+			)
+		);
 
 		$output .= '<ul>';
-
 		foreach ( $list as $plugin_error ) {
-			$type_class = isset( $plugin_error['type'] ) ? strtolower( $plugin_error['type'] ) : '';
-
 			$output .= '<li>';
-			$output .= esc_html( $plugin_error['message'] );
+			$output .= wp_kses_post( $plugin_error['message'] );
 			if ( ! empty( $plugin_error['docs'] ) ) {
 				$output .= sprintf(
 					' <a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
@@ -67,8 +65,8 @@ function format_plugin_check_results( $results ) {
 			}
 			$output .= '</li>';
 		}
-
 		$output .= '</ul>';
+
 		$output .= '</li>';
 	}
 

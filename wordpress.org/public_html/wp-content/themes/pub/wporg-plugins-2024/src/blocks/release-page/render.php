@@ -25,10 +25,6 @@ $markup = <<<HTML
 <!-- wp:wporg/release-draft /-->
 
 <div data-wp-bind--hidden="state.isCreatingRelease">
-	<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
-	<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
-	<!-- /wp:spacer -->
-
 	<!-- wp:pattern {"slug":"wporg-plugins-2024/release-list"} /-->
 </div>
 HTML;
