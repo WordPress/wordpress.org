@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getElement } from '@wordpress/interactivity';
 
 const { state } = store( 'wporg/publish-draft', {
 	state: {
@@ -35,10 +35,21 @@ const { state } = store( 'wporg/publish-draft', {
 		*handleSubmit( event ) {
 			event.preventDefault();
 
+			const { pluginSlug, nonce, apiURL, genericErrorMessage, tooltipMessage } = getContext();
+			
+			// Replicate form validation.
+			if ( ! state.hasConfirmed ) {
+				const input = document.getElementById( 'confirm-release' );
+
+				input.setCustomValidity( tooltipMessage );
+				input.reportValidity();
+
+				return false;
+			}
+
 			state.isPublishing = true;
 			state.errorMessage = '';
-
-			const { pluginSlug, nonce, apiURL, genericErrorMessage } = getContext();
+			state.hasError = false;
 
 			try {
 				const response = yield fetch( apiURL, {

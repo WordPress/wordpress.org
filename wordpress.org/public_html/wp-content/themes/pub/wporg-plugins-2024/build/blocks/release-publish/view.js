@@ -97,14 +97,24 @@ const {
     },
     *handleSubmit(event) {
       event.preventDefault();
-      state.isPublishing = true;
-      state.errorMessage = '';
       const {
         pluginSlug,
         nonce,
         apiURL,
-        genericErrorMessage
+        genericErrorMessage,
+        tooltipMessage
       } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+
+      // Replicate form validation.
+      if (!state.hasConfirmed) {
+        const input = document.getElementById('confirm-release');
+        input.setCustomValidity(tooltipMessage);
+        input.reportValidity();
+        return false;
+      }
+      state.isPublishing = true;
+      state.errorMessage = '';
+      state.hasError = false;
       try {
         const response = yield fetch(apiURL, {
           method: 'POST',
