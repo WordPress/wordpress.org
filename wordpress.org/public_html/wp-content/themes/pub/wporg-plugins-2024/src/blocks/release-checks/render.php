@@ -4,8 +4,10 @@
  *
  * @package wporg-plugins
  */
+use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 
-use function WordPressdotorg\Plugin_Directory\Theme\{format_plugin_check_results, get_test_run_message};
+use function WordPressdotorg\Theme\Plugins_2024\ReleaseChecks\{format_plugin_check_results, get_test_run_message};
+use function WordPressdotorg\Plugin_Directory\Theme\{get_latest_release, get_plugin};
 
 if ( ! current_user_can( 'plugin_admin_edit', $post ) ) {
 	return;
@@ -34,8 +36,36 @@ if ( empty( $plugin_check_errors ) ) {
 	return;
 }
 
+// Warnings are currently associated to the plugin post, not the release post.
+$import_warnings = get_post_meta( get_plugin()->ID, '_import_warnings', true );
+
+if ( $import_warnings ) {
+	// Back-compat; previously this was an array of numeric-indexed human-readable strings.
+	if ( ! wp_is_numeric_array( $import_warnings ) ) {
+		// error_code => error_data, convert to error_code => human_readable_error.
+
+		foreach ( $import_warnings as $error_code => $error_data ) {
+			$import_warnings[ $error_code ] = Readme_Validator::instance()->translate_code_to_message( $error_code, $error_data );
+		}
+	}
+
+	$warnings = '';
+	foreach ( $import_warnings as $error_code => $error_data ) {
+
+		// Skip these warnings,they are not relevant to the release.
+		if ( in_array( $error_code, array( 'stable_tag_invalid_trunk_fallback', 'stable_tag_invalid' ), true ) ) {
+			continue;
+		}
+
+		$blocks .= sprintf(
+			'<!-- wp:wporg/release-result-item {"status":"warning"} --><div>%s</div><!-- /wp:wporg/release-result-item -->',
+			$error_data
+		);
+	}
+}
+
 // Create a block with the overall status.
-$status_block = sprintf(
+$blocks = sprintf(
 	'<!-- wp:wporg/release-result-item {"status":"%1$s"} -->%2$s<!-- /wp:wporg/release-result-item -->',
 	$plugin_check_errors['verdict'] ? 'success' : 'warning',
 	get_test_run_message( $plugin_check_errors )
@@ -44,5 +74,5 @@ $status_block = sprintf(
 printf(
 	'<ul %1$s>%2$s</ul>',
 	wp_kses_data( get_block_wrapper_attributes() ),
-	do_blocks( $status_block ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	do_blocks( $blocks ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 );

@@ -1,12 +1,12 @@
 /**
- * Binds click events to navigate on plugin card click.    
+ * Binds click events to navigate on plugin card click.
  */
-document.addEventListener( 'DOMContentLoaded', function() {
+document.addEventListener( 'DOMContentLoaded', function () {
 	var cards = document.querySelectorAll( '.plugin-cards li' );
 
 	if ( cards ) {
-		cards.forEach( function( card ) {
-			card.addEventListener( 'click', function( event ) {
+		cards.forEach( function ( card ) {
+			card.addEventListener( 'click', function ( event ) {
 				var selectedText = window.getSelection().toString();
 
 				// Keep regular anchor tag function
@@ -25,6 +25,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 					window.location.href = link;
 				}
 			} );
-		} )
+		} );
 	}
 } );

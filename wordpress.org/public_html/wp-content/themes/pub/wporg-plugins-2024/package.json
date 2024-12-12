@@ -13,8 +13,10 @@
     "build:old:js": "wp-scripts build client/theme.js --webpack-src-dir=client --output-path=js/build",
     "build:js": "wp-scripts build --experimental-modules",
     "build": "npm run build:css && npm run build:js",
-    "format:js": "wp-scripts format client",
-    "lint:js": "wp-scripts lint-js client",
+    "format:client": "wp-scripts format client",
+	"format:src": "wp-scripts format src",
+    "lint:client": "wp-scripts lint-js client",
+	"lint:src": "wp-scripts lint-js src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

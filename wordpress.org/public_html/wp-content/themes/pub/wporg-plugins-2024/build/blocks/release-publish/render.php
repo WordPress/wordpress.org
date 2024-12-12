@@ -5,7 +5,9 @@
  * @package WordPressdotorg\Plugin_Directory
  */
 
-use function WordPressdotorg\Plugin_Directory\Theme\{get_blueprint_url, get_latest_release, get_plugin_slug, get_revision_changeset_link};
+use WordPressdotorg\Plugin_Directory\Template;
+use function WordPressdotorg\Plugin_Directory\Theme\{get_latest_release, get_plugin, get_plugin_slug};
+use function WordPressdotorg\Theme\Plugins_2024\ReleasePublish\{has_recently_been_tested, get_view_diff_check_item, get_changelog_check_item, get_tested_up_to_check_item, get_version_number_check_item};
 
 // Ensure the block context has a valid post ID.
 if ( empty( $block->context['postId'] ) ) {
@@ -20,187 +22,7 @@ if ( ! $release_post ) {
 }
 
 $current_version = get_post_meta( $block->context['postId'], 'release_version', true );
-$tested_up_to    = '6.7';// get_post_meta( $block->context['postId'], 'release_tested', true );
-
-/**
- * Returns whether the tested_up_to value is recent.
- *
- * @param string $tested_up_to The tested up to value.
- *
- * @return bool Whether the tested up to value is recent.
- */
-function has_recently_been_tested( $tested_up_to ) {
-	global $wp_version;
-
-	// If the tested up to value is empty, it's not recent.
-	if ( empty( $tested_up_to ) ) {
-		return false;
-	}
-
-	$latest_release = $wp_version;
-
-	if ( defined( 'WP_CORE_STABLE_BRANCH' ) ) {
-		$latest_release = WP_CORE_STABLE_BRANCH;
-	}
-
-	$tested_major = (int) explode( '.', $tested_up_to )[0];
-	$latest_major = (int) explode( '.', $latest_release )[0];
-
-	return $tested_major >= $latest_major;
-}
-
-/**
- * Generate the HTML for a release item content block.
- *
- * @param string $label   The label for the item.
- * @param string $content The additional content or description.
- * @return string The formatted HTML content for the release item.
- */
-function get_release_item_content( $label, $content ) {
-	return sprintf(
-		'<div><strong>%1$s</strong><div>%2$s</div></div>',
-		esc_html( $label ),
-		wp_kses_post( $content )
-	);
-}
-
-/**
- * Generate a release check item block with a specific status.
- *
- * @param string $status  The status of the check item ('success' or 'error').
- * @param string $content The content to display inside the block.
- * @return string The formatted block content.
- */
-function get_release_check_item( $status, $content ) {
-	return do_blocks(
-		sprintf(
-			'<!-- wp:wporg/release-result-item {"status":"%1$s"} -->%2$s<!-- /wp:wporg/release-result-item -->',
-			esc_attr( $status ),
-			$content
-		)
-	);
-}
-
-/**
- * Generate the block content for the version number check item.
- *
- * @param bool   $verdict Whether the version number is valid.
- * @param string $value The current version number.
- *
- * @return string The block content.
- */
-function get_changelog_check_item() {
-	$label     = __( 'Update your changelog with key changes.', 'wporg-plugins' );
-	$info_text = sprintf(
-		'<a target="_blank" href="%s">Learn more</a> about writing useful changelogs.',
-		esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#what-should-be-in-my-changelog' ),
-	);
-
-	$content = get_release_item_content( $label, $info_text );
-
-	return get_release_check_item( 'default', $content );
-}
-
-/**
- * Generate the block content for the version number check item.
- *
- * @param bool   $verdict Whether the version number is valid.
- * @param string $value The current version number.
- *
- * @return string The block content.
- */
-function get_view_diff_check_item( $post ) {
-	$label     = __( 'Review your changes.', 'wporg-plugins' );
-	$commits   = get_post_meta( $post->ID, 'release_commit_log', true );
-	$info_text = sprintf(
-		/* translators: %s: URL to the plugin in the Plugin Directory */
-		__( 'Double-check <a target="_blank" href="%s">your changeset</a> before publishing.', 'wporg-plugins' ),
-		esc_url( get_revision_changeset_link( $commits ) )
-	);
-	$content = get_release_item_content( $label, $info_text );
-
-	return get_release_check_item( 'default', $content );
-}
-
-/**
- * Generate the block content for the version number check item.
- *
- * @param bool   $verdict Whether the version number is valid.
- * @param string $value The current version number.
- *
- * @return string The block content.
- */
-function get_version_number_check_item( $verdict, $value ) {
-	$label = __( 'Increment your version number.', 'wporg-plugins' );
-
-	$info_text = sprintf(
-		/* translators: %s: The current version number */
-		__( 'New version: %s', 'wporg-plugins' ),
-		'<code>' . $value . '</code>',
-	);
-
-	$status = '';
-
-	if ( ! $verdict ) {
-		$status    = 'error';
-		$info_text = sprintf(
-			/* translators: %s: The current version number */
-			__( 'Your plugin\'s version number %s must be incremented before you can publish.', 'wporg-plugins' ),
-			'<code>' . $value . '</code>',
-		);
-	}
-
-	$content = get_release_item_content( $label, $info_text );
-
-	return get_release_check_item( $status, $content );
-}
-
-/**
- * Generate the block content for the "Tested up to" check item.
- *
- * @param bool   $verdict Whether the tested up to value is recent.
- * @param string $value The tested up to value.
- *
- * @return string The block content.
- */
-function get_tested_up_to_check_item( $verdict, $value ) {
-	$label  = __(
-		'Test your plugin with the latest version of WordPress.',
-		'wporg-plugins'
-	);
-	$status = '';
-
-	$info_text = sprintf(
-		/* translators: %s: The Tested Up to value */
-		__( 'Tested up to: %s', 'wporg-plugins' ),
-		'<code>' . $value . '</code>',
-	);
-
-	if ( empty( $value ) ) {
-		$value     = __( 'Unknown', 'wporg-plugins' );
-		$status    = 'error';
-		$info_text = __( 'We weren\'t able to determine your "Tested up to" value.', 'wporg-plugins' );
-	} elseif ( ! $verdict ) {
-		$status    = 'warning';
-		$info_text = sprintf(
-			/* translators: %s: URL to the plugin in the Plugin Directory */
-			__( 'Tested up to is %1$s. <a target="_blank" href="%2$s">Test it now in Playground</a> and update your <code>readme.txt</code>. ', 'wporg-plugins' ),
-			'<code>' . $value . '</code>',
-			esc_url(
-				get_blueprint_url(
-					sprintf(
-						'https://downloads.wordpress.org/plugin/%s.zip',
-						get_plugin_slug(),
-					)
-				)
-			)
-		);
-	}
-
-	$content = get_release_item_content( $label, $info_text );
-
-	return get_release_check_item( $status, $content );
-}
+$tested_up_to    = get_post_meta( $block->context['postId'], 'release_tested', true );
 
 $latest_release    = get_latest_release( $release_post->post_parent );
 $last_version      = get_post_meta( $latest_release->ID, 'release_version', true );
@@ -215,10 +37,10 @@ $form_context = array(
 );
 
 /**
- * Create initial state for the async-action-block.
+ * Create initial state for the wporg/publish-draft.
  */
 wp_interactivity_state(
-	'async-action-block',
+	'wporg/publish-draft',
 	array(
 		'hasConfirmed' => false,
 		'isPublishing' => false,
@@ -231,11 +53,24 @@ wp_interactivity_state(
 ?>
 
 <div 
-	data-wp-interactive="async-action-block" 	
+	data-wp-interactive="wporg/publish-draft" 	
 	<?php echo wp_kses_data( get_block_wrapper_attributes() ); ?> 
 	<?php echo wp_interactivity_data_wp_context( $form_context ); ?>
 	>
 	<div data-wp-bind--hidden="!state.isDefaultState">
+		<div data-wp-bind--hidden="!state.hasError">
+		<?php
+			echo do_blocks(
+				'<!-- wp:wporg/notice {"type":"warning"} -->
+				<div class="wp-block-wporg-notice is-warning-notice">
+				<div class="wp-block-wporg-notice__icon"></div>
+				<div class="wp-block-wporg-notice__content"><p data-wp-text="state.errorMessage"></p></div>
+				</div>
+				<!-- /wp:wporg/notice -->'
+			);
+			?>
+		</div>
+
 		<?php
 			echo do_blocks(
 				sprintf(
@@ -273,7 +108,6 @@ wp_interactivity_state(
 					id="confirm-release" type="checkbox" required>
 					<?php esc_html_e( 'I have completed the checklist and I\'m ready to publish this release.', 'wporg-plugins' ); ?>
 				</label>
-				
 			</div>
 
 			<div class="wp-block-group wp-block-wporg-release-publish-actions">
@@ -314,37 +148,61 @@ wp_interactivity_state(
 
 
 	<div data-wp-bind--hidden="!state.isPublishedState">
-	<p><?php
-		printf(
-			/* translators: %s is the plugin version number. */
-			__( 'Your release v.%s is now live!', 'wporg-plugins' ),
-			esc_html( $current_version )
-		);
-		?>
-	</p>
-
-		<div>
-			<div class="wp-block-button is-small">
-				<a 
-					class="wp-block-button__link wp-element-button"
-					data-wp-on-async--click="actions.handlePageReload"
-				>
-					<?php esc_html_e( 'View releases', 'wporg-plugins' ); ?>
-				</a>
-			</div>
-		</div>
-	</div>
-
-	<div data-wp-bind--hidden="!state.hasError">
-		<?php
-			echo do_blocks(
-				'<!-- wp:wporg/notice {"type":"warning"} -->
-				<div class="wp-block-wporg-notice is-warning-notice">
-				<div class="wp-block-wporg-notice__icon"></div>
-				<div class="wp-block-wporg-notice__content"><p data-wp-text="state.errorMessage"></p></div>
-				</div>
-				<!-- /wp:wporg/notice -->'
+		<p>
+			<?php
+			printf(
+				/* translators: %s is the plugin version number. */
+				esc_html__( 'Great news! Version %s of your plugin is now live!', 'wporg-plugins' ),
+				'<code>' . esc_html( $current_version ) . '</code>'
 			);
 			?>
+		</p>
+		<p>
+			<?php esc_html_e( 'To make the most of your release, consider the following:', 'wporg-plugins' ); ?>
+			<ul>
+			<li>
+				<strong>
+					<a target="_blank" href="https://developer.wordpress.org/plugins/wordpress-org/previews-and-blueprints/">
+						<?php esc_html_e( 'Add a blueprint', 'wporg-plugins' ); ?>
+					</a>
+				</strong>: 
+				<?php esc_html_e( 'Help users try out your plugin easily.', 'wporg-plugins' ); ?>
+			</li>
+			<li>
+				<strong>
+					<?php esc_html_e( "Review your plugin's page", 'wporg-plugins' ); ?>
+				</strong>: 
+				<?php esc_html_e( 'Ensure the information is clear and effective.', 'wporg-plugins' ); ?>
+			</li>
+				<li>
+					<?php
+					printf(
+						/* translators: 1: Support forum URL, 2: Plugin reviews URL */
+						__( '<strong>Engage with your audience</strong>: Monitor your <a target="_blank" href="%1$s">support forum</a> and <a target="_blank" href="%2$s">plugin reviews</a> for feedback.', 'wporg-plugins' ),
+						esc_url( Template::get_support_url( get_plugin() ) ),
+						esc_url( 'https://wordpress.org/support/plugin/' . $plugin_slug . '/reviews/' )
+					);
+					?>
+				</li>
+			</ul>
+			<?php
+
+			printf(
+				/* translators: 1: Plugin Developer FAQ URL, 2: Slack channel URL */
+				__( 'Have any questions? Check out the <a target="_blank" href="%1$s">Plugin Developer FAQ</a> or join the <a target="_blank" href="%2$s">#pluginreview</a> channel on Slack.', 'wporg-plugins' ),
+				esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' ),
+				esc_url( 'https://wordpress.slack.com/archives/C1LBM36LC ' )
+			);
+			?>
+
+		</p>
+
+		<div class="wp-block-wporg-release-publish-actions">
+			<div class="wp-block-button is-small">
+				<button data-wp-on-async--click="actions.handlePageReload" class="wp-block-button__link wp-element-button">
+					<?php esc_html_e( 'View releases', 'wporg-plugins' ); ?>
+				</button>
+			</div>
+		</div>
 	</div>
 </div>

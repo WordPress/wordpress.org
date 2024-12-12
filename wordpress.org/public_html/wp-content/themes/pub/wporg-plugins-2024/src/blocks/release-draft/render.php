@@ -83,7 +83,7 @@ HTML;
 
 printf(
 	'<div %1$s %2$s>%3$s</div>',
-	'data-wp-interactive="async-action-block"',
+	'data-wp-interactive="wporg/publish-draft"',
 	wp_kses_data( get_block_wrapper_attributes() ),
 	do_blocks( $markup ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 );

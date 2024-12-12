@@ -66,7 +66,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const {
   state
-} = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('async-action-block', {
+} = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('wporg/publish-draft', {
   actions: {
     handlePreSubmit(event) {
       event.preventDefault();

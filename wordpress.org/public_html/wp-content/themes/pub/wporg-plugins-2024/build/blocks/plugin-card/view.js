@@ -4,7 +4,7 @@ var __webpack_exports__ = {};
   !*** ./src/blocks/plugin-card/view.js ***!
   \****************************************/
 /**
- * Binds click events to navigate on plugin card click.    
+ * Binds click events to navigate on plugin card click.
  */
 document.addEventListener('DOMContentLoaded', function () {
   var cards = document.querySelectorAll('.plugin-cards li');

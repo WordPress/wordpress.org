@@ -461,7 +461,6 @@ function update_archive_description( $description ) {
 }
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
 
-
 /**
  * Get's the plugin post object.
  *
@@ -493,31 +492,7 @@ function get_plugin_slug() {
 }
 
 /**
- * Generates a Trac changeset link for a plugin.
- *
- * @param string $previous_version The previous version of the plugin.
- * @param string $current_version The current version of the plugin. Default is 'trunk'.
- *
- * @return string The Trac changeset link.
- */
-function get_trac_changeset_link( $previous_version, $current_version = 'trunk' ) {
-	$plugin_slug = get_plugin_slug();
-
-	$current_path = ( 'trunk' === $current_version )
-		? 'trunk'
-		: 'tags/' . $current_version;
-
-	return sprintf(
-		'https://plugins.trac.wordpress.org/changeset?old_path=/%1$s/%2$s&new_path=/%1$s/tags/%3$s',
-		$plugin_slug,
-		$current_path,
-		$previous_version
-	);
-}
-
-/**
  * Get the releases for a plugin.
-
  *
  * @return WP_Post[] The releases for the plugin.
  */
@@ -651,6 +626,29 @@ function get_revision_log_link( $commits ) {
 }
 
 /**
+ * Generates a Trac changeset link for a plugin.
+ *
+ * @param string $previous_version The previous version of the plugin.
+ * @param string $current_version The current version of the plugin. Default is 'trunk'.
+ *
+ * @return string The Trac changeset link.
+ */
+function get_trac_changeset_link( $previous_version, $current_version = 'trunk' ) {
+	$plugin_slug = get_plugin_slug();
+
+	$current_path = ( 'trunk' === $current_version )
+		? 'trunk'
+		: 'tags/' . $current_version;
+
+	return sprintf(
+		'https://plugins.trac.wordpress.org/changeset?old_path=/%1$s/%2$s&new_path=/%1$s/tags/%3$s',
+		$plugin_slug,
+		$current_path,
+		$previous_version
+	);
+}
+
+/**
  * Get the link to the revision log for a set of commits.
  *
  * @param array $commits The commits to get the log link for.
@@ -658,11 +656,9 @@ function get_revision_log_link( $commits ) {
  * @return string The link to the revision log.
  */
 function get_revision_changeset_link( $commits ) {
-	global $post;
-
 	$plugin_slug = get_plugin_slug();
 
-	if ( count( $commits ) < 2 ) {
+	if ( empty( $commits ) || count( $commits ) < 2 ) {
 		return sprintf(
 			'https://plugins.trac.wordpress.org/log/%s/trunk',
 			$plugin_slug
@@ -681,81 +677,6 @@ function get_revision_changeset_link( $commits ) {
 }
 
 /**
- * Formats plugin check results into an HTML list.
- *
- * @param array $results The plugin check results.
- * @return string HTML formatted results.
- */
-function format_plugin_check_results( $results ) {
-	if ( empty( $results ) ) {
-		return '<p>' . __( 'No issues found.', 'wporg-plugins' ) . '</p>';
-	}
-
-	$output = '<ul class="wp-block-wporg-release-checks-results">';
-
-	foreach ( $results as $result ) {
-		$type_class = isset( $result['type'] ) ? strtolower( $result['type'] ) : '';
-
-		$output .= sprintf(
-			'<li>%1$s %2$s</li>',
-			esc_html( $result['message'] ),
-			! empty( $result['docs'] )
-				? sprintf(
-					'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
-					esc_url( $result['docs'] ),
-					__( 'More Information', 'wporg-plugins' )
-				)
-				: ''
-		);
-	}
-
-	$output .= '</ul>';
-
-	return $output;
-}
-
-/**
- * Get the test run message.
- *
- * @param object $plugin_check_errors The plugin check errors.
- *
- * @return string The test run message.
- */
-function get_test_run_message( $plugin_check_errors ) {
-	$plugin_check_link = sprintf(
-		'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
-		esc_url( 'https://wordpress.org/plugins/plugin-check' ),
-		esc_html__( 'Plugin Check (PCP)', 'wporg-plugins' )
-	);
-
-	if ( $plugin_check_errors['verdict'] ) {
-		return sprintf(
-			/* translators: %1$s is a link to the Plugin Check (PCP) tool. */
-			__( '%1$s found no issues.', 'wporg-plugins' ),
-			$plugin_check_link
-		);
-	}
-
-	$result_count = count( $plugin_check_errors['results'] );
-	$message      = sprintf(
-		/* translators: %s number of issues reported from test. */
-		_n( '%s issue', '%s issues', $result_count, 'wporg-plugins' ),
-		$result_count
-	);
-
-	return sprintf(
-		'<div>%1$s%2$s</div>',
-		sprintf(
-		/* translators: %1$s is a link to the Plugin Check (PCP) tool. */
-			__( '%1$s completed with %2$s.', 'wporg-plugins' ),
-			$plugin_check_link,
-			$message
-		),
-		format_plugin_check_results( $plugin_check_errors['results'] ),
-	);
-}
-
-/**
  * Get the download link for a plugin.
  *
  * @param string $version The version of the plugin to download.
@@ -765,5 +686,5 @@ function get_test_run_message( $plugin_check_errors ) {
 function get_download_link( $version ) {
 	$plugin = get_plugin();
 
-	return Template::download_link( $plugin , $version );
+	return Template::download_link( $plugin, $version );
 }

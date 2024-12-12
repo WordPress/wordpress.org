@@ -4,6 +4,9 @@
 .wp-block-wporg-release-publish label {
   display: block;
 }
+.wp-block-wporg-release-publish form ul {
+  padding: 0;
+}
 .wp-block-wporg-release-publish .wp-block-wporg-release-result-item > div:last-child > div {
   color: var(--wp--preset--color--charcoal-4);
 }

@@ -34,22 +34,21 @@ $markup = <<<HTML
 HTML;
 
 /**
- * Create initial state for the async-action-block.
+ * Create initial state for the wporg/publish-draft.
  */
 wp_interactivity_state(
-	'async-action-block',
+	'wporg/publish-draft',
 	array(
 		'isCreatingRelease' => false,
 	)
 );
 
 /**
- * Create initial context for the async-action-block.
+ * Create initial context for the wporg/publish-draft.
  */
-
 printf(
 	'<div %1$s %2$s>%3$s</div>',
 	wp_kses_data( get_block_wrapper_attributes() ),
-	'data-wp-interactive="async-action-block"',
+	'data-wp-interactive="wporg/publish-draft"',
 	do_blocks( $markup ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 );

@@ -66,13 +66,13 @@ __webpack_require__.r(__webpack_exports__);
 
 const {
   state
-} = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('async-action-block', {
+} = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('wporg/publish-draft', {
   state: {
     get userHasConfirmed() {
       return state.hasConfirmed;
     },
     get isDefaultState() {
-      return !state.isPublishing && !state.isPublished && !state.hasError;
+      return !state.isPublishing && !state.isPublished;
     },
     get isPublishingState() {
       return state.isPublishing;
@@ -129,6 +129,7 @@ const {
         state.errorMessage = error.message;
         state.hasError = true;
         state.isPublishing = false;
+        state.hasConfirmed = false;
       } finally {
         state.isPublishing = false;
       }

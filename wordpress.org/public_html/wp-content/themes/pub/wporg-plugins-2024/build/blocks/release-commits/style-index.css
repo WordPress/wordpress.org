@@ -10,6 +10,7 @@
   flex-direction: column;
   gap: 8px;
   list-style: none;
+  padding: 0;
 }
 .wp-block-wporg-release-commit-list li {
   display: flex;

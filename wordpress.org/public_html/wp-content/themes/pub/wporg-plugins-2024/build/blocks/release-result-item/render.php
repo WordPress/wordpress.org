@@ -1,3 +1,13 @@
+<?php
+/**
+ * Block Name: Release Result Item
+ * Description: A block to display release result item view.
+ *
+ * @package wporg
+ */
+
+?>
+
 <li <?php echo wp_kses_data( get_block_wrapper_attributes() ); ?>>
 	<div>
 		<?php if ( 'error' === $block->attributes['status'] ) : ?>

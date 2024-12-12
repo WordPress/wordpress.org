@@ -1,11 +1,11 @@
 /**
  * WordPress dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store } from '@wordpress/interactivity';
 
-const { state } = store('async-action-block', {
+const { state } = store( 'wporg/publish-draft', {
 	actions: {
-		handlePreSubmit(event) {
+		handlePreSubmit( event ) {
 			event.preventDefault();
 			state.isCreatingRelease = true;
 
@@ -13,12 +13,12 @@ const { state } = store('async-action-block', {
 				'.wp-block-wporg-release-page'
 			);
 
-			if (element) {
-				element.scrollIntoView({
+			if ( element ) {
+				element.scrollIntoView( {
 					behavior: 'instant',
 					block: 'center',
-				});
+				} );
 			}
 		},
 	},
-});
+} );

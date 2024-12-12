@@ -3,6 +3,10 @@
 		display: block;
 	}
 
+	form ul {
+		padding: 0;
+	}
+
 	.wp-block-wporg-release-result-item > div:last-child > div  {
 		color: var(--wp--preset--color--charcoal-4);
 	}
