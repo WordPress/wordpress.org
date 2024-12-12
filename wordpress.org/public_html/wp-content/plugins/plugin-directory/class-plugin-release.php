@@ -266,7 +266,8 @@ class Plugin_Release {
 		$last_release_revision = max( $last_release->release_revision );
 		if ( $last_release_revision && $release['revision'] ) {
 			$trunk_url = Import::PLUGIN_SVN_BASE . '/' . $plugin->post_name . '/trunk';
-			$commit_log = SVN::log( $trunk_url, [ $last_release_revision, max( $release['revision'] ) ] );
+			$svn_options = [ 'limit' => 100 ]; // Safety limit
+			$commit_log = SVN::log( $trunk_url, [ max( $release['revision'] ), $last_release_revision ], $svn_options );
 			$release['commit_log'] = $commit_log['log'] ?? null;
 		}
 		$draft_id = $this->get_release( $plugin, 'trunk' );
@@ -308,20 +309,25 @@ class Plugin_Release {
 		$current_releases = $this->get_releases( $plugin );
 		$current_versions = wp_list_pluck( $current_releases, 'post_title', 'ID' );
 
+		// Sort the releases by revision number ascending.
+		usort( $releases, function( $a, $b ) {
+			return max($a['revision']) <=> max($b['revision']);
+		} );
+
 		// Add or update each release.
-		// Go backwards so we can store the previous revision number for each.
-		foreach ( array_reverse( $releases ) as $release ) {
+		foreach ( $releases as $release ) {
 			$release_revision = max( $release['revision'] );
 			// revision_final is the svn rev number that corresponds to the release tag.
 			// revision_prior is the svn rev number of the previous release.
 			// revision_prior:revision_final is the range of svn rev numbers that are included in this release (noting that you'll need to be specific about paths)
-			$release['revision_final'] = $release_revision;
-			$release['revision_prior'] = $last_release_revision ?? null; // TODO: is there a reasonable way to get the initial import revision number?
+			$release['revision_final'] = $release_revision ?? 'HEAD';
+			$release['revision_prior'] = $last_release_revision ?? '1'; // TODO: is there a reasonable way to get the initial import revision number?
 
 			// FIXME: Is it safe to run this here? Should this be conditional on the context in which we're running? Only on add? Something else?
 			if ( $release['revision_final'] && $release['revision_prior'] ) {
 				$trunk_url = Import::PLUGIN_SVN_BASE . '/' . $plugin->post_name . '/trunk';
-				$commit_log = SVN::log( $trunk_url, [ $release['revision_prior'], $release['revision_final'] ] );
+				$svn_options = [ 'limit' => 100 ]; // Safety limit
+				$commit_log = SVN::log( $trunk_url, [ $release['revision_final'], $release['revision_prior'] ], $svn_options );
 				$release['commit_log'] = $commit_log['log'] ?? null;
 			}
 
