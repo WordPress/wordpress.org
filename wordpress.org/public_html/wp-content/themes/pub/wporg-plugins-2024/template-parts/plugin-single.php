@@ -49,7 +49,6 @@ $show_release_beta = isset( $_GET['show_release_beta'] ) || ( defined( 'WPORG_SA
 					<span class="byline"><?php the_author_byline(); ?></span>
 				</div>
 			</div>
-			
 			<div class="plugin-actions">
 				<?php
 				$buttons = '<!-- wp:wporg/favorite-button /-->';
@@ -130,6 +129,7 @@ $show_release_beta = isset( $_GET['show_release_beta'] ) || ( defined( 'WPORG_SA
 			foreach ( $content_section_list as $section_slug ) {
 				$section_content = '';
 				$section_title   = $plugin_sections_titles[ $section_slug ] ?? '';
+
 				if ( $is_closed && in_array( $section_slug, [ 'screenshots', 'installation', 'faq', 'changelog' ], true ) ) {
 					// Don't show these sections when closed.
 					$section_content = '';
