@@ -86,8 +86,6 @@ wp_interactivity_state(
 				),
 			);
 			?>
-
-		<form data-wp-on-async--submit="actions.handleSubmit">
 			<?php
 				echo do_blocks(
 					sprintf(
@@ -120,6 +118,7 @@ wp_interactivity_state(
 					<button 
 						type="submit"
 						class="wp-block-button__link wp-element-button"
+						data-wp-on-async--click="actions.handleSubmit"
 					>
 						<?php
 						printf(
@@ -141,7 +140,6 @@ wp_interactivity_state(
 					</button>
 				</div>
 			</div>
-		</form>
 	</div>
 
 	<div data-wp-bind--hidden="!state.isPublishingState">
