@@ -20,10 +20,6 @@
 	display: flex;
 	margin-top: var(--wp--preset--spacing--20);
 	gap: 8px;
-
-	button[disabled] {
-		opacity: 0.5;
-	}
 }
 
 .wp-block-wporg-release-publish-spinner {

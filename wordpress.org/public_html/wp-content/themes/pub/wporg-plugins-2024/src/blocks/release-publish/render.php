@@ -146,9 +146,9 @@ wp_interactivity_state(
 
 	<div data-wp-bind--hidden="!state.isPublishingState">
 		<div class="wp-block-wporg-release-publish-spinner">
-				<span class="wporg-spinner"></span>
-				<?php esc_html_e( 'Publishing your release...', 'wporg-plugins' ); ?>
-			</div>
+			<span class="wporg-spinner"></span>
+			<?php esc_html_e( 'Publishing your release...', 'wporg-plugins' ); ?>
+		</div>
 	</div>
 
 

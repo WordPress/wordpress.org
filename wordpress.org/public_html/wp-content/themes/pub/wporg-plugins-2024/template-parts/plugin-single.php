@@ -160,7 +160,6 @@ $show_release_beta = isset( $_GET['show_release_beta'] ) || ( defined( 'WPORG_SA
 			}
 		} // plugin_advanced.
 		?>
-
 	</div><!-- .entry-content -->
 
 	<div class="entry-meta">

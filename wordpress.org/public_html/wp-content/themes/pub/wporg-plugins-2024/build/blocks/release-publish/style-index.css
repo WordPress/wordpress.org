@@ -20,9 +20,6 @@
   margin-top: var(--wp--preset--spacing--20);
   gap: 8px;
 }
-.wp-block-wporg-release-publish-actions button[disabled] {
-  opacity: 0.5;
-}
 
 .wp-block-wporg-release-publish-spinner {
   align-items: center;

@@ -23,7 +23,6 @@ function init() {
 	register_block_type( __DIR__ . '/../../../build/blocks/release-publish' );
 }
 
-
 /**
  * Returns whether the tested_up_to value is recent.
  *

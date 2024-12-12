@@ -13,7 +13,7 @@
 		"html": false,
 		"interactivity": true
 	},
-	"usesContext": [ "postId", "pluginSlug" ],
+	"usesContext": [ "postId" ],
 	"editorScript": "file:./index.js",
 	"render": "file:./render.php",
 	"style": "file:./style-index.css",
