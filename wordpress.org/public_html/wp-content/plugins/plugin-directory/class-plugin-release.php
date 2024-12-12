@@ -260,16 +260,17 @@ class Plugin_Release {
 					return false; // Not an error, just skip.
 				}
 			}
+
+			// Store the commit log in postmeta. We'll only do this for drafts.
+			$last_release_revision = max( $last_release->release_revision );
+			if ( $last_release_revision && $release['revision'] ) {
+				$trunk_url = Import::PLUGIN_SVN_BASE . '/' . $plugin->post_name . '/trunk';
+				$svn_options = [ 'limit' => 100 ]; // Safety limit
+				$commit_log = SVN::log( $trunk_url, [ max( $release['revision'] ), $last_release_revision ], $svn_options );
+				$release['commit_log'] = $commit_log['log'] ?? null;
+			}
 		}
 
-		// Store the commit log in postmeta. We'll only do this for drafts.
-		$last_release_revision = max( $last_release->release_revision );
-		if ( $last_release_revision && $release['revision'] ) {
-			$trunk_url = Import::PLUGIN_SVN_BASE . '/' . $plugin->post_name . '/trunk';
-			$svn_options = [ 'limit' => 100 ]; // Safety limit
-			$commit_log = SVN::log( $trunk_url, [ max( $release['revision'] ), $last_release_revision ], $svn_options );
-			$release['commit_log'] = $commit_log['log'] ?? null;
-		}
 		$draft_id = $this->get_release( $plugin, 'trunk' );
 		if ( $draft_id ) {
 			$release_id = $this->update_release( $draft_id, $release );
