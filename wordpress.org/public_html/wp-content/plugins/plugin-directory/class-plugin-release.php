@@ -169,6 +169,7 @@ class Plugin_Release {
 				'release_confirmations_required' => $release['confirmations_required'],
 				'release_revision' => $release['revision'],
 				'release_commit_log' => $release['commit_log'] ?? null,
+				'release_tested' => $release['tested'] ?? null,
 			),
 			// TODO: what else? Could store the changelog or other content at the point of release for comparison purposes.
 		) );
