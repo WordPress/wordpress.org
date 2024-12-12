@@ -90,8 +90,8 @@ foreach( $releases as $release ) {
 	echo "Committers:             " . implode( ', ', $release->release_committer ) . "\n";
 	echo "Zips built:             " . ( $release->release_zips_built ? 'Yes' : 'No' ) . "\n";
 	echo "Confirmations required: " . ( $release->release_confirmations_required ? 'Yes' : 'No' ) . "\n";
-	echo "Release revision:       " . $release->revision_final . "\n";
-	echo "Previous version rev:   " . $release->revision_prior . "\n";
+	echo "Release revision:       " . $release->release_revision_final . "\n";
+	echo "Previous version rev:   " . $release->release_revision_prior . "\n";
 	if ( $release->release_commit_log ) {
 		echo "Commit log:\n";
 		foreach( $release->release_commit_log as $commit ) {
