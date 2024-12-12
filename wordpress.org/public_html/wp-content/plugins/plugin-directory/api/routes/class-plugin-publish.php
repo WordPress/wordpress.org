@@ -26,7 +26,7 @@ class Plugin_Publish extends Base {
 	public function __construct() {
 		register_rest_route(
 			'plugins/v2',
-			'/plugin/(?P<plugin_slug>[^/]+)/release', // FIXME: 'release' or 'publish' or something else?
+			'/plugin/(?P<plugin_slug>[^/]+)/publish',
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'publish_release' ),
