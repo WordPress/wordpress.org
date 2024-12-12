@@ -38,7 +38,7 @@ const { state } = store( 'wporg/publish-draft', {
 			state.isPublishing = true;
 			state.errorMessage = '';
 
-			const { pluginSlug, nonce, apiURL } = getContext();
+			const { pluginSlug, nonce, apiURL, genericErrorMessage } = getContext();
 
 			try {
 				const response = yield fetch( apiURL, {
@@ -59,7 +59,7 @@ const { state } = store( 'wporg/publish-draft', {
 					} catch ( error ) {
 						// Handle cases where json is not returned, like a gateway timeout.
 						throw new Error(
-							'An error occurred while publishing the release.'
+							genericErrorMessage
 						);
 					}
 				}

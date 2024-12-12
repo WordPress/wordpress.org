@@ -31,9 +31,10 @@ $tested_up_to_pass = has_recently_been_tested( $tested_up_to );
 
 $plugin_slug  = get_plugin_slug();
 $form_context = array(
-	'pluginSlug' => $plugin_slug,
-	'nonce'      => wp_create_nonce( 'wp_rest' ),
-	'apiURL'     => esc_url( rest_url( 'plugins/v2/plugin/' . $plugin_slug . '/publish' ) ),
+	'pluginSlug'          => $plugin_slug,
+	'nonce'               => wp_create_nonce( 'wp_rest' ),
+	'apiURL'              => esc_url( rest_url( 'plugins/v2/plugin/' . $plugin_slug . '/publish' ) ),
+	'genericErrorMessage' => __( 'An error occurred while publishing the release.', 'wporg-plugins' ),
 );
 
 /**

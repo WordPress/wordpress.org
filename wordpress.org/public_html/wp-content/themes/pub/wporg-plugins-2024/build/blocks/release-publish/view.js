@@ -102,7 +102,8 @@ const {
       const {
         pluginSlug,
         nonce,
-        apiURL
+        apiURL,
+        genericErrorMessage
       } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       try {
         const response = yield fetch(apiURL, {
@@ -121,7 +122,7 @@ const {
             throw new Error(error.message);
           } catch (error) {
             // Handle cases where json is not returned, like a gateway timeout.
-            throw new Error('An error occurred while publishing the release.');
+            throw new Error(genericErrorMessage);
           }
         }
         state.isPublished = true;
