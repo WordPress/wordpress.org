@@ -42,6 +42,10 @@ class Plugin_Publish extends Base {
 
 	/**
 	 * Validate that the user can manage a given plugin.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return bool
 	 */
 	public function permission_can_access_plugin( $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
@@ -55,12 +59,10 @@ class Plugin_Publish extends Base {
 	 * @return WP_REST_Response
 	 */
 	public function publish_release( $request ) {
-
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 		// Will return either a WP_Error, or the post ID of the published release CPT.
-		// Maybe it should return the version string instead, or an object with more details? The whole CPT?
 		$result = Plugin_Release::instance()->publish_release( $plugin );
 
-		return new WP_REST_Response( $result );
+		return $result;
 	}
 }

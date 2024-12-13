@@ -413,7 +413,9 @@ class Plugin_Release {
 	 * Publish a draft release (ie trunk).
 	 * This will use svn to tag the release, and then publish the release post.
 	 *
-	 * Note: As yet untested.
+	 * @param int|WP_Post $plugin The plugin post.
+	 *
+	 * @return int|WP_Error The ID of the published release post, or a WP_Error object.
 	 */
 	public function publish_release( $plugin ) {
 		$plugin = get_post( $plugin );
@@ -422,16 +424,16 @@ class Plugin_Release {
 
 		$draft = $this->get_release( $plugin, 'trunk' );
 		if ( ! $draft ) {
-			return new \WP_Error( 'no_draft', 'No draft release found' );
+			return new \WP_Error( 'no_draft', __( 'We could not find a draft to release.', 'wporg-plugins' ) );
 		}
 
 		$new_tag = $draft->release_version;
 		if ( $this->get_release( $plugin, $new_tag ) ) {
-			return new \WP_Error( 'tag_exists', 'Tag already exists', $new_tag );
+			return new \WP_Error( 'tag_exists', __( 'This version has already been released.', 'wporg-plugins' ), $new_tag );
 		}
 
 		if ( !$draft->plugin_check_result || ! $draft->plugin_check_result['verdict'] ) {
-			return new \WP_Error( 'plugin_check_failed', 'Plugin check failed' );
+			return new \WP_Error( 'plugin_check_failed', __( 'Please review and address the issues identified by the static code analysis tool before releasing.', 'wporg-plugins' ) );
 		}
 
 		// TODO: Should import warnings exist on the release CPT?
@@ -459,7 +461,7 @@ class Plugin_Release {
 		$tag_result = SVN::copy( $trunk_url, $tag_url, $svn_options );
 
 		if ( !$tag_result || ! $tag_result['result'] ) {
-			return new \WP_Error( 'svn_error', 'SVN error', $tag_result['errors'] );
+			return new \WP_Error( 'svn_error', __( 'The release failed. Please wait a few minutes and try again.', 'wporg-plugins' ), $tag_result['errors'] );
 		}
 
 		// Include the tag revision in the release post list of revisions.
