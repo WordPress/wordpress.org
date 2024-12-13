@@ -634,7 +634,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					$commit.append( firstLine + '&hellip;' );
 
 					author = $el.find( '.username' ).data( 'username' );
-					$commit.append( ' by <a href="https://profiles.wordpress.org/' + author + '">@' + author + '</a>' );
+					$commit.append( ' by&nbsp;<a href="https://profiles.wordpress.org/' + author + '">@' + author + '</a>' );
 
 					date = $el.find( '.time-ago' ).html();
 					$commit.append( ' ' + date );
@@ -1957,7 +1957,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 							{ href: data.changes.html_url, title: data.title },
 							'#' + data.number + ' ' + data.title
 						) +
-						' by ' +
+						' by&nbsp;' +
 						htmlElement( 'a', { href: data.user.url }, '@' + data.user.name ) +
 					'</div>' +
 					'<div>' +

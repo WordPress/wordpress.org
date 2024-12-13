@@ -1847,17 +1847,18 @@ class Plugin_Directory {
 		$plugin = self::get_plugin_post( $plugin );
 
 		$release = self::get_release( $plugin, $data['tag'] ) ?: [
-			'date'                   => time(),
-			'tag'                    => '',
-			'version'                => '',
+			'date'                     => time(),
+			'tag'                      => '',
+			'version'                  => '',
 			// Assume zips built if no release confirmation.
-			'zips_built'             => ! $plugin->release_confirmation,
-			'confirmations'          => [],
+			'zips_built'               => ! $plugin->release_confirmation,
+			'zips_built_from_revision' => 0,
+			'confirmations'            => [],
 			// Confirmed by default if no release confiration.
-			'confirmed'              => ! $plugin->release_confirmation,
-			'confirmations_required' => (int) $plugin->release_confirmation,
-			'committer'              => [],
-			'revision'               => [],
+			'confirmed'                => ! $plugin->release_confirmation,
+			'confirmations_required'   => (int) $plugin->release_confirmation,
+			'committer'                => [],
+			'revision'                 => [],
 		];
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?

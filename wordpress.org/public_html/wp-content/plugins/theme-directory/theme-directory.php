@@ -1561,7 +1561,7 @@ function wporg_themes_status_change_stats( $new_status, $old_status, $post ) {
 	if ( 
 		'repopackage' !== $post->post_type ||
 		in_array( $new_status, [ 'draft', 'auto-draft' ] ) ||
-		! function_exists( 'bump_stats_extras' )
+		! function_exists( 'bump_stats_extra' )
 	) {
 		return;
 	}
@@ -1574,6 +1574,6 @@ function wporg_themes_status_change_stats( $new_status, $old_status, $post ) {
 		$stat = $new_status;
 	}
  
-	bump_stats_extras( 'themes', 'status-' . $stat );
+	bump_stats_extra( 'themes', 'status-' . $stat );
 }
 add_action( 'transition_post_status', 'wporg_themes_status_change_stats', 10, 3 );

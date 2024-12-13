@@ -19,6 +19,9 @@ class Search {
 		add_filter( 'posts_search',         [ __CLASS__, 'tag_where_for_search' ], 10, 2 );
 		add_filter( 'posts_groupby',        [ __CLASS__, 'tag_groupby_for_search' ], 10, 2 );
 		add_filter( 'posts_search_orderby', [ __CLASS__, 'tag_orderby_for_search' ], 10, 2 );
+
+		// Disable ElasticSearch so that the search customization can take effect.
+		add_filter( 'jetpack_search_should_handle_query', '__return_false' );
 	}
 
 	/**

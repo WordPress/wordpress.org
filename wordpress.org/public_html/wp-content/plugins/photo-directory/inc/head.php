@@ -90,7 +90,7 @@ class Head {
 				"@context"           => 'https://schema.org',
 				"@type"              => 'ImageObject',
 				'contentUrl'         => wp_get_attachment_image_src( get_post_thumbnail_id(), 'full' )[0] ?? '',
-				'license'            => 'https://creativecommons.org/share-your-work/public-domain/cc0/',
+				'license'            => 'https://creativecommons.org/publicdomain/zero/1.0/',
 				'acquireLicensePage' => "https://wordpress.org/photos/license/",
 				'creditText'         => $contributor_name,
 				'creator' => [

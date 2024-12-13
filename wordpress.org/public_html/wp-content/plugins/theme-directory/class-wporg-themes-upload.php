@@ -281,8 +281,8 @@ class WPORG_Themes_Upload {
 		// The version should be set live as it's from SVN.
 		$this->version_status = 'live';
 
-		if ( 'themedropbox' !== $author && function_exists( 'bump_stats_extras' ) ) {
-			bump_stats_extras( 'themes', 'upload_from_svn' );
+		if ( 'themedropbox' !== $author && function_exists( 'bump_stats_extra' ) ) {
+			bump_stats_extra( 'themes', 'upload_by_svn' );
 		}
 
 		return $this->import( array( // return true | WP_Error
@@ -768,8 +768,8 @@ class WPORG_Themes_Upload {
 		$this->trigger_e2e_run();
 
 		// Record stats.
-		if ( function_exists( 'bump_stats_extras' ) ) {
-			bump_stats_extras( 'themes', $is_new_upload ? 'new' : 'update' );
+		if ( function_exists( 'bump_stats_extra' ) ) {
+			bump_stats_extra( 'themes', $is_new_upload ? 'new' : 'update' );
 		}
 
 		// Success!

@@ -48,6 +48,9 @@ class Plugin_Import {
 		$importer = new CLI\Import();
 		try {
 			$importer->import_from_svn( $plugin_slug, $tags_touched, $tags_deleted, $revision );
+
+			// Schedule a job to import any i18n changes from this commit
+			Plugin_i18n_Import::queue( $plugin_slug, $plugin_data );
 		} catch ( Exception $e ) {
 			fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
 		} finally {
@@ -56,9 +59,6 @@ class Plugin_Import {
 				update_post_meta( $importer->plugin->ID, '_import_warnings', $importer->warnings );
 			}
 		}
-
-		// Schedule a job to import any i18n changes from this commit
-		Plugin_i18n_Import::queue( $plugin_slug, $plugin_data );
 
 		// Re-schedule any other jobs for this plugin to NOW()
 		$hook = current_filter();

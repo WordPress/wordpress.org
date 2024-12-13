@@ -11,6 +11,20 @@ use const \WP_CLI;
 class Manager {
 
 	/**
+	 * The cron tasks that are triggered by a colon-based hook.
+	 *
+	 * @see Manager::register_colon_based_hook_handlers()
+	 * @static
+	 * @var array
+	 */
+	public static $wildcard_cron_tasks = array(
+		'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
+		'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
+		'import_zip'         => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
+		'tide_sync'          => array( __NAMESPACE__ . '\Tide_Sync', 'cron_trigger' ),
+	);
+
+	/**
 	 * Add all the actions for cron tasks and schedules.
 	 */
 	public function __construct() {
@@ -290,20 +304,14 @@ class Manager {
 	public function register_colon_based_hook_handlers() {
 		$cron_array = get_option( 'cron' );
 
-		$wildcard_cron_tasks = array(
-			'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
-			'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
-			'tide_sync'          => array( __NAMESPACE__ . '\Tide_Sync', 'cron_trigger' ),
-		);
-
 		// Add the wildcard cron task above to the specified colon-based hook.
-		$add_callback = static function( $hook ) use( $wildcard_cron_tasks ) {
+		$add_callback = static function( $hook ) {
 			if ( ! str_contains( $hook, ':' ) ) {
 				return;
 			}
 
-			list( $partial_hook, $slug ) = explode( ':', $hook, 2 );
-			$callback                    = $wildcard_cron_tasks[ $partial_hook ] ?? false;
+			$partial_hook = explode( ':', $hook )[0];
+			$callback     = self::$wildcard_cron_tasks[ $partial_hook ] ?? false;
 
 			if ( ! $callback ) {
 				return;
@@ -364,5 +372,73 @@ class Manager {
 		Tools::clear_memory_heavy_variables();
 	}
 
+	/**
+	 * Fetch all the cron jobs for a plugin.
+	 *
+	 * @static
+	 *
+	 * @param \WP_Post $plugin    The plugin post object.
+	 * @param array    $args      Additional arguments to filter the jobs. See \HM\Cavalcade\Plugin\Job::get_jobs_by_query() for more details.
+	 * @param bool     $with_logs Whether to fetch logs for the jobs.
+	 * @return array
+	 */
+	public static function get_plugin_cron_jobs( \WP_Post $plugin, $args = [], $with_logs = false ) {
+		global $wpdb;
+
+		if ( ! class_exists( '\HM\Cavalcade\Plugin\Job' ) ) {
+			return [];
+		}
+
+		$args['statuses'] ??= [ 'waiting', 'running', 'completed', 'failed', 'cancelled' ];
+		$args['limit']    ??= 20;
+		$args['args']     ??= null; // All jobs, regardless of args.
+
+		$jobs = [];
+		foreach ( self::$wildcard_cron_tasks as $job_prefix => $callback ) {
+			$args['hook'] = $job_prefix . ':' . $plugin->post_name;
+			$jobs = array_merge(
+				$jobs,
+				\HM\Cavalcade\Plugin\Job::get_jobs_by_query( $args )
+			);
+		}
+
+		// Fetch logs for the tasks.
+		if ( $with_logs ) {
+			$log_table = str_replace( 'jobs', 'logs', \HM\Cavalcade\Plugin\Job::get_table() );
+			foreach ( $jobs as &$job ) {
+				// Fetch logs for the task.
+				$job->logs = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT status, timestamp, content FROM %i WHERE job = %d ORDER BY id DESC LIMIT 20",
+						$log_table,
+						$job->id
+					)
+				);
+				// Decode the JSON content.
+				array_walk( $job->logs, static function( &$log ) {
+					$log->content = json_decode( $log->content, true ) ?: $log->content;
+				} );
+			}
+		}
+
+		// Sort jobs based on last run.
+		usort( $jobs, static function( $a, $b ) {
+			$a_last_log = 0;
+			$b_last_log = 0;
+			if ( $a->logs ) {
+				$a_last_log = max( array_map( 'strtotime', wp_list_pluck( $a->logs, 'timestamp' ) ) );
+			}
+			if ( $b->logs ) {
+				$b_last_log = max( array_map( 'strtotime', wp_list_pluck( $b->logs, 'timestamp' ) ) );
+			}
+
+			$a_last_log = max( $a->start, $a_last_log );
+			$b_last_log = max( $b->start, $b_last_log );
+
+			return $a_last_log <=> $b_last_log;
+		} );
+
+		return $jobs;
+	}
 }
 

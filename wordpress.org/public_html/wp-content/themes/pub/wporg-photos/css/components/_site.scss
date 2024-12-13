@@ -153,6 +153,7 @@ body.search  {
 				}
 			}
 
+			&.user-no-photos,
 			&.user-no-favorites {
 				grid-column: 1/-1;
 				margin-left: 0;
