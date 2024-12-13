@@ -1,157 +1,13 @@
 /******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/blocks/release-menu-options/style.scss":
-/*!****************************************************!*\
-  !*** ./src/blocks/release-menu-options/style.scss ***!
-  \****************************************************/
-/***/ (() => {
-
-throw new Error("Module build failed (from ./node_modules/mini-css-extract-plugin/dist/loader.js):\nHookWebpackError: Module build failed (from ./node_modules/sass-loader/dist/cjs.js):\nSassError: expected \")\".\n   ╷\n32 │         background-image: url(data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' aria-hidden='true' focusable='false'%3E%3Cpath d='M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z'%3E%3C/path%3E%3C/svg>\");\n   │                                   ^\n   ╵\n  src/blocks/release-menu-options/style.scss 32:29  root stylesheet\n    at tryRunOrWebpackError (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/HookWebpackError.js:88:9)\n    at __webpack_require_module__ (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:5049:12)\n    at __webpack_require__ (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:5006:18)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:5077:20\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3485:9)\n    at done (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3527:9)\n    at Hook.eval [as callAsync] (eval at create (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)\n    at Hook.CALL_ASYNC_DELEGATE [as _callAsync] (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/Hook.js:18:14)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4984:43\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3482:9)\n    at timesSync (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:2297:7)\n    at Object.eachLimit (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3463:5)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4949:16\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3485:9)\n    at timesSync (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:2297:7)\n    at Object.eachLimit (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3463:5)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4917:15\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3485:9)\n    at done (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3527:9)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4864:8\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:3347:32\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/HookWebpackError.js:68:3\n    at Hook.eval [as callAsync] (eval at create (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)\n    at Cache.store (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Cache.js:107:20)\n    at ItemCacheFacade.store (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/CacheFacade.js:137:15)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:3347:11\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Cache.js:93:5\n    at Hook.eval [as callAsync] (eval at create (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)\n    at Cache.get (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Cache.js:75:18)\n    at ItemCacheFacade.get (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/CacheFacade.js:111:15)\n    at Compilation._codeGenerationModule (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:3318:9)\n    at codeGen (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4852:11)\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3482:9)\n    at timesSync (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:2297:7)\n    at Object.eachLimit (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3463:5)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4882:14\n    at processQueue (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/util/processAsyncTree.js:55:4)\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)\n-- inner error --\nError: Module build failed (from ./node_modules/sass-loader/dist/cjs.js):\nSassError: expected \")\".\n   ╷\n32 │         background-image: url(data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' aria-hidden='true' focusable='false'%3E%3Cpath d='M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z'%3E%3C/path%3E%3C/svg>\");\n   │                                   ^\n   ╵\n  src/blocks/release-menu-options/style.scss 32:29  root stylesheet\n    at Object.<anonymous> (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/src/blocks/release-menu-options/style.scss:1:7)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/javascript/JavascriptModulesPlugin.js:441:11\n    at Hook.eval [as call] (eval at create (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/HookCodeFactory.js:19:10), <anonymous>:7:1)\n    at Hook.CALL_DELEGATE [as _call] (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/Hook.js:14:14)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:5051:39\n    at tryRunOrWebpackError (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/HookWebpackError.js:83:7)\n    at __webpack_require_module__ (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:5049:12)\n    at __webpack_require__ (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:5006:18)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:5077:20\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3485:9)\n    at done (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3527:9)\n    at Hook.eval [as callAsync] (eval at create (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)\n    at Hook.CALL_ASYNC_DELEGATE [as _callAsync] (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/Hook.js:18:14)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4984:43\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3482:9)\n    at timesSync (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:2297:7)\n    at Object.eachLimit (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3463:5)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4949:16\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3485:9)\n    at timesSync (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:2297:7)\n    at Object.eachLimit (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3463:5)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4917:15\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3485:9)\n    at done (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3527:9)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4864:8\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:3347:32\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/HookWebpackError.js:68:3\n    at Hook.eval [as callAsync] (eval at create (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:15:1)\n    at Cache.store (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Cache.js:107:20)\n    at ItemCacheFacade.store (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/CacheFacade.js:137:15)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:3347:11\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Cache.js:93:5\n    at Hook.eval [as callAsync] (eval at create (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:16:1)\n    at Cache.get (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Cache.js:75:18)\n    at ItemCacheFacade.get (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/CacheFacade.js:111:15)\n    at Compilation._codeGenerationModule (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:3318:9)\n    at codeGen (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4852:11)\n    at symbolIterator (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3482:9)\n    at timesSync (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:2297:7)\n    at Object.eachLimit (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/neo-async/async.js:3463:5)\n    at /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/Compilation.js:4882:14\n    at processQueue (/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/webpack/lib/util/processAsyncTree.js:55:4)\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)\n\nGenerated code for /home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!/home/wporg/public_html/wp-content/themes/pub/wporg-plugins-2024/src/blocks/release-menu-options/style.scss\n1 | throw new Error(\"Module build failed (from ./node_modules/sass-loader/dist/cjs.js):\\nSassError: expected \\\")\\\".\\n   ╷\\n32 │         background-image: url(data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' aria-hidden='true' focusable='false'%3E%3Cpath d='M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z'%3E%3C/path%3E%3C/svg>\\\");\\n   │                                   ^\\n   ╵\\n  src/blocks/release-menu-options/style.scss 32:29  root stylesheet\");");
-
-/***/ }),
-
-/***/ "react":
-/*!************************!*\
-  !*** external "React" ***!
-  \************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = window["React"];
-
-/***/ }),
-
-/***/ "@wordpress/block-editor":
-/*!*************************************!*\
-  !*** external ["wp","blockEditor"] ***!
-  \*************************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = window["wp"]["blockEditor"];
-
-/***/ }),
-
-/***/ "@wordpress/blocks":
-/*!********************************!*\
-  !*** external ["wp","blocks"] ***!
-  \********************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = window["wp"]["blocks"];
-
-/***/ }),
-
-/***/ "@wordpress/components":
-/*!************************************!*\
-  !*** external ["wp","components"] ***!
-  \************************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = window["wp"]["components"];
-
-/***/ }),
-
-/***/ "@wordpress/server-side-render":
-/*!******************************************!*\
-  !*** external ["wp","serverSideRender"] ***!
-  \******************************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = window["wp"]["serverSideRender"];
-
-/***/ }),
-
-/***/ "./src/blocks/release-menu-options/block.json":
-/*!****************************************************!*\
-  !*** ./src/blocks/release-menu-options/block.json ***!
-  \****************************************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = JSON.parse('{"apiVersion":2,"name":"wporg/release-menu-options","title":"Release Menu Options","category":"widgets","icon":"menu","description":"Display the dropdown menu option for a release.","supports":{"html":false},"usesContext":["postId"],"textdomain":"wporg","editorScript":"file:./index.js","style":"file:./style-index.css","render":"file:./render.php"}');
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
+/***/ "./src/blocks/release-menu-options/index.js":
 /*!**************************************************!*\
   !*** ./src/blocks/release-menu-options/index.js ***!
   \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
@@ -194,8 +50,249 @@ function Edit({
   edit: Edit,
   save: () => null
 });
-})();
 
+/***/ }),
+
+/***/ "./src/blocks/release-menu-options/style.scss":
+/*!****************************************************!*\
+  !*** ./src/blocks/release-menu-options/style.scss ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "react":
+/*!************************!*\
+  !*** external "React" ***!
+  \************************/
+/***/ ((module) => {
+
+module.exports = window["React"];
+
+/***/ }),
+
+/***/ "@wordpress/block-editor":
+/*!*************************************!*\
+  !*** external ["wp","blockEditor"] ***!
+  \*************************************/
+/***/ ((module) => {
+
+module.exports = window["wp"]["blockEditor"];
+
+/***/ }),
+
+/***/ "@wordpress/blocks":
+/*!********************************!*\
+  !*** external ["wp","blocks"] ***!
+  \********************************/
+/***/ ((module) => {
+
+module.exports = window["wp"]["blocks"];
+
+/***/ }),
+
+/***/ "@wordpress/components":
+/*!************************************!*\
+  !*** external ["wp","components"] ***!
+  \************************************/
+/***/ ((module) => {
+
+module.exports = window["wp"]["components"];
+
+/***/ }),
+
+/***/ "@wordpress/server-side-render":
+/*!******************************************!*\
+  !*** external ["wp","serverSideRender"] ***!
+  \******************************************/
+/***/ ((module) => {
+
+module.exports = window["wp"]["serverSideRender"];
+
+/***/ }),
+
+/***/ "./src/blocks/release-menu-options/block.json":
+/*!****************************************************!*\
+  !*** ./src/blocks/release-menu-options/block.json ***!
+  \****************************************************/
+/***/ ((module) => {
+
+module.exports = JSON.parse('{"apiVersion":2,"name":"wporg/release-menu-options","title":"Release Menu Options","category":"widgets","icon":"menu","description":"Display the dropdown menu option for a release.","supports":{"html":false},"usesContext":["postId"],"textdomain":"wporg","editorScript":"file:./index.js","style":"file:./style-index.css","render":"file:./render.php"}');
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/chunk loaded */
+/******/ 	(() => {
+/******/ 		var deferred = [];
+/******/ 		__webpack_require__.O = (result, chunkIds, fn, priority) => {
+/******/ 			if(chunkIds) {
+/******/ 				priority = priority || 0;
+/******/ 				for(var i = deferred.length; i > 0 && deferred[i - 1][2] > priority; i--) deferred[i] = deferred[i - 1];
+/******/ 				deferred[i] = [chunkIds, fn, priority];
+/******/ 				return;
+/******/ 			}
+/******/ 			var notFulfilled = Infinity;
+/******/ 			for (var i = 0; i < deferred.length; i++) {
+/******/ 				var chunkIds = deferred[i][0];
+/******/ 				var fn = deferred[i][1];
+/******/ 				var priority = deferred[i][2];
+/******/ 				var fulfilled = true;
+/******/ 				for (var j = 0; j < chunkIds.length; j++) {
+/******/ 					if ((priority & 1 === 0 || notFulfilled >= priority) && Object.keys(__webpack_require__.O).every((key) => (__webpack_require__.O[key](chunkIds[j])))) {
+/******/ 						chunkIds.splice(j--, 1);
+/******/ 					} else {
+/******/ 						fulfilled = false;
+/******/ 						if(priority < notFulfilled) notFulfilled = priority;
+/******/ 					}
+/******/ 				}
+/******/ 				if(fulfilled) {
+/******/ 					deferred.splice(i--, 1)
+/******/ 					var r = fn();
+/******/ 					if (r !== undefined) result = r;
+/******/ 				}
+/******/ 			}
+/******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/jsonp chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded and loading chunks
+/******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
+/******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
+/******/ 		var installedChunks = {
+/******/ 			"blocks/release-menu-options/index": 0,
+/******/ 			"blocks/release-menu-options/style-index": 0
+/******/ 		};
+/******/ 		
+/******/ 		// no chunk on demand loading
+/******/ 		
+/******/ 		// no prefetching
+/******/ 		
+/******/ 		// no preloaded
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 		
+/******/ 		__webpack_require__.O.j = (chunkId) => (installedChunks[chunkId] === 0);
+/******/ 		
+/******/ 		// install a JSONP callback for chunk loading
+/******/ 		var webpackJsonpCallback = (parentChunkLoadingFunction, data) => {
+/******/ 			var chunkIds = data[0];
+/******/ 			var moreModules = data[1];
+/******/ 			var runtime = data[2];
+/******/ 			// add "moreModules" to the modules object,
+/******/ 			// then flag all "chunkIds" as loaded and fire callback
+/******/ 			var moduleId, chunkId, i = 0;
+/******/ 			if(chunkIds.some((id) => (installedChunks[id] !== 0))) {
+/******/ 				for(moduleId in moreModules) {
+/******/ 					if(__webpack_require__.o(moreModules, moduleId)) {
+/******/ 						__webpack_require__.m[moduleId] = moreModules[moduleId];
+/******/ 					}
+/******/ 				}
+/******/ 				if(runtime) var result = runtime(__webpack_require__);
+/******/ 			}
+/******/ 			if(parentChunkLoadingFunction) parentChunkLoadingFunction(data);
+/******/ 			for(;i < chunkIds.length; i++) {
+/******/ 				chunkId = chunkIds[i];
+/******/ 				if(__webpack_require__.o(installedChunks, chunkId) && installedChunks[chunkId]) {
+/******/ 					installedChunks[chunkId][0]();
+/******/ 				}
+/******/ 				installedChunks[chunkId] = 0;
+/******/ 			}
+/******/ 			return __webpack_require__.O(result);
+/******/ 		}
+/******/ 		
+/******/ 		var chunkLoadingGlobal = self["webpackChunkwporg_plugins_2024"] = self["webpackChunkwporg_plugins_2024"] || [];
+/******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
+/******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["blocks/release-menu-options/style-index"], () => (__webpack_require__("./src/blocks/release-menu-options/index.js")))
+/******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
+/******/ 	
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
