@@ -91,6 +91,8 @@ const {
 
       // Make user reconfirm.
       state.hasConfirmed = false;
+      state.hasError = false;
+      state.errorMessage = '';
     },
     handlePageReload() {
       window.location.reload();
