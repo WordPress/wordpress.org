@@ -176,7 +176,7 @@ wp_interactivity_state(
 				<strong>
 					<?php esc_html_e( "Review your plugin's page", 'wporg-plugins' ); ?>
 				</strong>: 
-				<?php esc_html_e( 'Ensure the information is clear and effective.', 'wporg-plugins' ); ?>
+				<?php esc_html_e( 'Ensure the information is clear, concise and effective.', 'wporg-plugins' ); ?>
 			</li>
 				<li>
 					<?php
