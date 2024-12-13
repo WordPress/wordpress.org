@@ -11,8 +11,16 @@
 
 	li {
 		display: flex;
+		flex-direction: column;
 		gap: inherit;
-		align-items: center;
+		margin-bottom: var(--wp--preset--spacing--10);
+
+		// media query	
+		@media (min-width: 650px) {
+			flex-direction: row;
+			align-items: center;
+			margin-bottom: 0;
+		}
 	}
 }
 

@@ -108,11 +108,10 @@ function get_changelog_check_item() {
  */
 function get_view_diff_check_item( $post ) {
 	$label     = __( 'Review your changes.', 'wporg-plugins' );
-	$commits   = get_post_meta( $post->ID, 'release_commit_log', true );
 	$info_text = sprintf(
 		/* translators: %s: URL to the plugin in the Plugin Directory */
 		__( 'Double-check <a target="_blank" href="%s">your changeset</a> before publishing.', 'wporg-plugins' ),
-		esc_url( get_revision_changeset_link( $commits ) )
+		esc_url( get_revision_changeset_link( $post ) )
 	);
 	$content = get_release_item_content( $label, $info_text );
 

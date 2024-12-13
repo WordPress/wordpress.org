@@ -5,6 +5,8 @@
  * @package wporg-plugins
  */
 
+use function WordPressdotorg\Plugin_Directory\Theme\get_releases;
+
 if ( ! $block->context['postId'] ) {
 	return;
 }

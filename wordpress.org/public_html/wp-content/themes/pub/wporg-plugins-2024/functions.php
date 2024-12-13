@@ -510,38 +510,54 @@ function get_releases() {
 }
 
 /**
- * Get the previous version of a plugin.
+ * Get the previous release of a plugin.
  *
- * @param WP_Post   $release_post The current release post.
- * @param WP_Post[] $releases List of releases.
+ * @param WP_Post $release_post The current release post.
  *
- * @return string|null The previous version of the plugin.
+ * @return WP_Post|null The previous release of the plugin.
  */
-function get_previous_version( $release_post, $releases = array() ) {
-	$previous_version = null;
+function get_previous_release( $release_post ) {
+	$releases = get_releases();
 
 	if ( empty( $releases ) ) {
-		$releases = get_releases();
+		return null;
 	}
 
-	if ( empty( $releases ) ) {
-		return $previous_version;
-	}
-
+	// If we are draft. The first item is the latest release.
+	// If we only have one release and we are looking for we don't have a previous release.
 	if ( 'draft' === $release_post->post_status ) {
-		return get_post_meta( $releases[0]->ID, 'release_tag', true );
+		return $releases[0];
+	} elseif ( count( $releases ) === 1 ) {
+		return null;
 	}
 
 	foreach ( $releases as $key => $release ) {
 		if ( $release->ID === $release_post->ID ) {
 			if ( isset( $releases[ $key + 1 ] ) ) {
-				return get_post_meta( $releases[ $key + 1 ]->ID, 'release_tag', true );
+				return $releases[ $key + 1 ];
 			}
 			break;
 		}
 	}
 
-	return $previous_version;
+	return null;
+}
+
+/**
+ * Get the previous version of a plugin.
+ *
+ * @param WP_Post $release_post The current release post.
+ *
+ * @return string|null The previous version of the plugin.
+ */
+function get_previous_version( $release_post ) {
+	$previous_release = get_previous_release( $release_post );
+
+	if ( empty( $previous_release ) ) {
+		return null;
+	}
+
+	return get_post_meta( $previous_release->ID, 'release_tag', true );
 }
 
 /**
@@ -640,7 +656,7 @@ function get_trac_changeset_link( $previous_version, $current_version = 'trunk' 
 		: 'tags/' . $current_version;
 
 	return sprintf(
-		'https://plugins.trac.wordpress.org/changeset?old_path=/%1$s/%2$s&new_path=/%1$s/tags/%3$s',
+		'https://plugins.trac.wordpress.org/changeset?new_path=/%1$s/%2$s&old_path=/%1$s/tags/%3$s',
 		$plugin_slug,
 		$current_path,
 		$previous_version
@@ -650,28 +666,42 @@ function get_trac_changeset_link( $previous_version, $current_version = 'trunk' 
 /**
  * Get the link to the revision log for a set of commits.
  *
- * @param array $commits The commits to get the log link for.
+ * @param WP_Post $release_post The release post.
  *
  * @return string The link to the revision log.
  */
-function get_revision_changeset_link( $commits ) {
-	$plugin_slug = get_plugin_slug();
+function get_revision_changeset_link( $release_post ) {
+	if ( empty( $release_post ) ) {
+		return '';
+	}
 
-	if ( empty( $commits ) || count( $commits ) < 2 ) {
+	$plugin_slug = get_plugin_slug();
+	$commits     = get_post_meta( $release_post->ID, 'release_commit_log', true );
+
+	if ( empty( $commits ) ) {
 		return sprintf(
 			'https://plugins.trac.wordpress.org/log/%s/trunk',
 			$plugin_slug
 		);
 	}
 
-	$latest_commit   = reset( $commits );
-	$earliest_commit = end( $commits );
+	$previous_release = get_previous_release( $release_post );
+	$latest_commit    = reset( $commits );
+	$previous_commit  = end( $commits );
+
+	if ( ! empty( $previous_release ) ) {
+		$previous_commits = get_post_meta( $previous_release->ID, 'release_commit_log', true );
+
+		if ( ! empty( $previous_commits ) ) {
+			$previous_commit = max( $previous_commits );
+		}
+	}
 
 	return sprintf(
 		'https://plugins.trac.wordpress.org/changeset?new=%2$s@%1$s/trunk&old=%3$s@%1$s/trunk',
 		$plugin_slug,
 		$earliest_commit['revision'],
-		$latest_commit['revision'],
+		$previous_commit['revision'],
 	);
 }
 

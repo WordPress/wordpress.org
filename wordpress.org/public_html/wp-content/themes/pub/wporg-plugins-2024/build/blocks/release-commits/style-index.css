@@ -14,8 +14,16 @@
 }
 .wp-block-wporg-release-commit-list li {
   display: flex;
+  flex-direction: column;
   gap: inherit;
-  align-items: center;
+  margin-bottom: var(--wp--preset--spacing--10);
+}
+@media (min-width: 650px) {
+  .wp-block-wporg-release-commit-list li {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 0;
+  }
 }
 
 .wp-block-wporg-release-commit-author {

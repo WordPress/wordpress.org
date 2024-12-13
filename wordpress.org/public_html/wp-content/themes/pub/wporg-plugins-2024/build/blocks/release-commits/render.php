@@ -62,7 +62,7 @@ $sliced_commits  = array_slice( $commits, 0, $maximum_commits );
 							get_plugin_slug()
 						)
 					),
-					esc_html( $commit['message'] )
+					esc_html( wp_trim_words( $commit['message'], 7 ) )
 				);
 				?>
 				</span>
