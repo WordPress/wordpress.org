@@ -29,4 +29,8 @@
   gap: 6px;
 }
 
+.wp-block-wporg-release-publish-error {
+  margin-top: var(--wp--preset--spacing--10);
+}
+
 /*# sourceMappingURL=style-index.css.map*/

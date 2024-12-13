@@ -68,10 +68,11 @@ const { state } = store( 'wporg/publish-draft', {
 						const error = yield response.json();
 						throw new Error( error.message );
 					} catch ( error ) {
-						// Handle cases where json is not returned, like a gateway timeout.
-						throw new Error(
-							genericErrorMessage
-						);
+						if ( error instanceof SyntaxError ) {
+							// Handle cases where json is not returned, like a gateway timeout.
+							throw new Error( genericErrorMessage );
+						}
+						throw error;
 					}
 				}
 

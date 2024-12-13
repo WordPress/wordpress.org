@@ -1,9 +1,10 @@
 .wp-block-wporg-release-publish {
+
 	label {
 		display: block;
 	}
 
-	.wp-block-wporg-release-result-item > div:last-child > div  {
+	.wp-block-wporg-release-result-item > div:last-child > div {
 		color: var(--wp--preset--color--charcoal-4);
 		font-size: var(--wp--preset--font-size--extra-small);
 	}
@@ -27,4 +28,8 @@
 	align-items: center;
 	display: flex;
 	gap: 6px;
+}
+
+.wp-block-wporg-release-publish-error {
+	margin-top: var(--wp--preset--spacing--10);
 }

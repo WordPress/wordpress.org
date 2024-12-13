@@ -1,6 +1,6 @@
 .wp-block-wporg-release-checks {
 	padding: 0;
-	
+
 
 	.wp-block-heading {
 		font-size: var(--wp--preset--font-size--small);
@@ -8,15 +8,15 @@
 }
 
 .wp-block-wporg-release-checks-results {
-    list-style: none;
+	list-style: none;
 	padding-left: 12px;
-    border-left: 4px solid var(--wp--preset--color--light-grey-1);
-    
+	border-left: 4px solid var(--wp--preset--color--light-grey-1);
+
 	li ul {
 		list-style: disc;
 	}
 
-    li:not(:last-child) {
-        margin-bottom: 8px;
-    }
+	li:not(:last-child) {
+		margin-bottom: 8px;
+	}
 }

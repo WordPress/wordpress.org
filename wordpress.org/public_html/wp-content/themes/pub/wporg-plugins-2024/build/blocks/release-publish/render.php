@@ -64,19 +64,6 @@ wp_interactivity_state(
 	<?php echo wp_interactivity_data_wp_context( $form_context ); ?>
 	>
 	<div data-wp-bind--hidden="!state.isDefaultState">
-		<div data-wp-bind--hidden="!state.hasError">
-		<?php
-			echo do_blocks(
-				'<!-- wp:wporg/notice {"type":"warning"} -->
-				<div class="wp-block-wporg-notice is-warning-notice">
-				<div class="wp-block-wporg-notice__icon"></div>
-				<div class="wp-block-wporg-notice__content"><p data-wp-text="state.errorMessage"></p></div>
-				</div>
-				<!-- /wp:wporg/notice -->'
-			);
-			?>
-		</div>
-
 		<?php
 			echo do_blocks(
 				sprintf(
@@ -112,6 +99,19 @@ wp_interactivity_state(
 					id="confirm-release" type="checkbox" required>
 					<?php esc_html_e( 'I have completed the checklist and I\'m ready to publish this release.', 'wporg-plugins' ); ?>
 				</label>
+			</div>
+
+			<div class="wp-block-wporg-release-publish-error" data-wp-bind--hidden="!state.hasError">
+			<?php
+				echo do_blocks(
+					'<!-- wp:wporg/notice {"type":"warning"} -->
+					<div class="wp-block-wporg-notice is-warning-notice">
+					<div class="wp-block-wporg-notice__icon"></div>
+					<div class="wp-block-wporg-notice__content"><p data-wp-text="state.errorMessage"></p></div>
+					</div>
+					<!-- /wp:wporg/notice -->'
+				);
+				?>
 			</div>
 
 			<div class="wp-block-group wp-block-wporg-release-publish-actions">

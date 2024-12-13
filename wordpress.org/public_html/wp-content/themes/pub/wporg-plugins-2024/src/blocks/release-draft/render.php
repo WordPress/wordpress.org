@@ -39,6 +39,8 @@ if ( ! $latest_draft_query->have_posts() ) {
 	return;
 }
 
+
+
 // Fetch the latest draft post.
 $latest_draft_query->the_post();
 

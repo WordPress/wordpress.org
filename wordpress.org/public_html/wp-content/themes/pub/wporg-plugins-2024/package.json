@@ -17,6 +17,7 @@
     "format:src": "wp-scripts format src",
     "lint:client": "wp-scripts lint-js client",
     "lint:src": "wp-scripts lint-js src",
+	"lint:css": "wp-scripts lint-style 'src/**/*.scss'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
