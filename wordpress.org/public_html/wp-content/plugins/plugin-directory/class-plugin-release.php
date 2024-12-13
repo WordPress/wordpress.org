@@ -432,22 +432,25 @@ class Plugin_Release {
 			return new \WP_Error( 'tag_exists', __( 'This version has already been released.', 'wporg-plugins' ), $new_tag );
 		}
 
-		if ( !$draft->plugin_check_result || ! $draft->plugin_check_result['verdict'] ) {
-			return new \WP_Error( 'plugin_check_failed', __( 'Please review and address the issues identified by the static code analysis tool before releasing.', 'wporg-plugins' ) );
-		}
+		/*
+		* We won't be block on plugin check or import warnings yet
+		*/
+		// if ( !$draft->plugin_check_result || ! $draft->plugin_check_result['verdict'] ) {
+		// 	return new \WP_Error( 'plugin_check_failed', __( 'Please review and address the issues identified by the static code analysis tool before releasing.', 'wporg-plugins' ) );
+		// }
 
 		// TODO: Should import warnings exist on the release CPT?
-		if ( $plugin->_import_warnings ) {
-			// These warnings are likely (always?) present because the tag hasn't been created yet.
-			$ignored_warnings = [
-				'stable_tag_invalid_trunk_fallback' => 1,
-				'stable_tag_invalid' => 1,
-			];
-			// Stop here if other warnings are present.
-			if ( array_diff_key( $plugin->_import_warnings, $ignored_warnings ) ) {
-				return new \WP_Error( 'import_warnings', 'Import warnings', $plugin->_import_warnings );
-			}
-		}
+		// if ( $plugin->_import_warnings ) {
+		// 	// These warnings are likely (always?) present because the tag hasn't been created yet.
+		// 	$ignored_warnings = [
+		// 		'stable_tag_invalid_trunk_fallback' => 1,
+		// 		'stable_tag_invalid' => 1,
+		// 	];
+		// 	// Stop here if other warnings are present.
+		// 	if ( array_diff_key( $plugin->_import_warnings, $ignored_warnings ) ) {
+		// 		return new \WP_Error( 'import_warnings', 'Import warnings', $plugin->_import_warnings );
+		// 	}
+		// }
 
 		// TODO: What sanitizing or cross-checking do we need here?
 		$trunk_url = 'https://plugins.svn.wordpress.org/' . $plugin->post_name . '/trunk';
