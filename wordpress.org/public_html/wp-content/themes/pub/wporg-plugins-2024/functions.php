@@ -21,6 +21,7 @@ require_once( __DIR__ . '/src/blocks/front-page/index.php' );
 require_once( __DIR__ . '/src/blocks/search-page/index.php' );
 require_once( __DIR__ . '/src/blocks/single-plugin/index.php' );
 require_once( __DIR__ . '/src/blocks/plugin-card/index.php' );
+require_once( __DIR__ . '/src/blocks/plugin-section/index.php' );
 
 // Block Configs
 require_once( __DIR__ . '/inc/block-bindings.php' );

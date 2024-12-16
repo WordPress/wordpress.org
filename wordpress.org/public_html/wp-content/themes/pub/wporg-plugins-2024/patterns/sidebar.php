@@ -8,6 +8,12 @@
 // This pattern can be expanded as more widgets are converted to blocks and/or block bindings.
 ?>
 
+<!-- wp:legacy-widget {"idBase":"plugin_categorization","instance":{}} /-->
+
+<!-- wp:legacy-widget {"idBase":"plugin_adopt_me","instance":{}} /-->
+
+<!-- wp:legacy-widget {"idBase":"plugin_meta","instance":{}} /-->
+
 <!-- wp:group -->
 <div class="wp-block-group">
 	<!-- wp:heading {"className":"widget-title"} -->
@@ -31,3 +37,9 @@
 	<!-- /wp:group -->
 </div>
 <!-- /wp:group -->
+
+<!-- wp:legacy-widget {"idBase":"plugin_contributors","instance":{}} /-->
+
+<!-- wp:legacy-widget {"idBase":"plugin_support","instance":{}} /-->
+
+<!-- wp:legacy-widget {"idBase":"plugin_donate","instance":{}} /-->
