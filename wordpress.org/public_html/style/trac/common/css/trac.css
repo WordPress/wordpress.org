@@ -528,7 +528,7 @@ h2 .trac-count, h3 .trac-count {
  font-size: 9px;
  padding: .8em;
  position: relative;
- margin: 0 1em 1em;
+
 }
 #prefs input, #prefs select { font-size: 9px; vertical-align: middle }
 #prefs fieldset {
