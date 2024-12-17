@@ -221,9 +221,9 @@ abstract class WP_Credits {
 			if ( $user->user_nicename == 'nacin' ) // I stopped taking Spanish in 11th grade, don't show me as a validator when I'm testing things.
 				continue;
 			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$validators[ $user->user_nicename ] = array( $this->_encode( $user->display_name ), md5( $user->user_email ), $user->user_nicename );
+				$validators[ $user->user_nicename ] = array( $this->_encode( $user->display_name ), hash( 'sha256', $user->user_email ), $user->user_nicename );
 			else
-				$validators[ $user->user_nicename ] = array( $user->user_nicename, md5( $user->user_email ), $user->user_nicename );
+				$validators[ $user->user_nicename ] = array( $user->user_nicename, hash( 'sha256', $user->user_email ), $user->user_nicename );
 		}
 
 		return $validators;
@@ -299,14 +299,14 @@ abstract class WP_Credits {
 				$this->names_in_groups[] = strtolower( $k );
 
 				if ( ! empty( $person[2] ) ) {
-					// array( 'Andrew Nacin', 'Lead Developer', 'md5 hash' )
+					// array( 'Andrew Nacin', 'Lead Developer', 'sha256 hash' )
 					$new_data['title'] = $person[1];
 					$new_data['hash'] = $person[2];
 				} elseif ( empty( $person[1] ) ) {
 					// array( 'Andrew Nacin' )
 					$fetch_emails_from_user_cache[ $k ] = $group_slug;
 				} elseif ( strlen( $person[1] ) === 32 && preg_match('/^[a-f0-9]{32}$/', $person[1] ) ) {
-					// array( 'Andrew Nacin', 'md5 hash' )
+					// array( 'Andrew Nacin', 'sha256 hash' )
 					$new_data['hash'] = $person[1];
 				} else {
 					// array( 'Andrew Nacin', 'Lead Developer' )
@@ -315,8 +315,8 @@ abstract class WP_Credits {
 				}
 
 				// Temporary:
-				if ( strlen( $new_data['hash'] ) != 32 || strpos( $new_data['hash'], '@' ) ) {
-					$new_data['hash'] = md5( $new_data['hash'] );
+				if ( strlen( $new_data['hash'] ) != 64 || strpos( $new_data['hash'], '@' ) ) {
+					$new_data['hash'] = hash( 'sha256', $new_data['hash'] );
 				}
 
 				$group_data['data'][ $k ] = array_values( $new_data );
@@ -330,7 +330,7 @@ abstract class WP_Credits {
 				$user_id = wp_cache_get( $username, 'userlogins' );
 				if ( $user_id ) {
 					if ( $user_object = wp_cache_get( $user_id, 'users' ) ) {
-						$groups[ $group ]['data'][ $username ][1] = md5( strtolower( $user_object->user_email ) );
+						$groups[ $group ]['data'][ $username ][1] = hash( 'sha256', strtolower( $user_object->user_email ) );
 					} else {
 						$fetch_emails_from_db[ $username ] = $group;
 					}
@@ -341,7 +341,7 @@ abstract class WP_Credits {
 			if ( $fetch_emails_from_db ) {
 				$fetched = $wpdb->get_results( "SELECT user_login, ID, user_email FROM $wpdb->users WHERE user_login IN ('" . implode( "', '", array_keys( $fetch_emails_from_db ) ) . "')", OBJECT_K );
 				foreach ( $fetched as $username => $row ) {
-					$groups[ $fetch_emails_from_db[ $username ] ]['data'][ $username ][1] = md5( strtolower( $row->user_email ) );
+					$groups[ $fetch_emails_from_db[ $username ] ]['data'][ $username ][1] = hash( 'sha256', strtolower( $row->user_email ) );
 					wp_cache_add( $username, $row->ID, 'userlogins' );
 				}
 			}
