@@ -12,19 +12,32 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
+/**
+ * Custom template tags for this theme.
+ */
+require get_stylesheet_directory() . '/inc/template-tags.php';
+
 
 // Block Files
-require_once( __DIR__ . '/src/blocks/archive-page/index.php' );
-require_once( __DIR__ . '/src/blocks/category-navigation/index.php' );
-require_once( __DIR__ . '/src/blocks/filter-bar/index.php' );
-require_once( __DIR__ . '/src/blocks/front-page/index.php' );
-require_once( __DIR__ . '/src/blocks/search-page/index.php' );
-require_once( __DIR__ . '/src/blocks/single-plugin/index.php' );
-require_once( __DIR__ . '/src/blocks/plugin-card/index.php' );
+require_once __DIR__ . '/src/blocks/archive-page/index.php';
+require_once __DIR__ . '/src/blocks/category-navigation/index.php';
+require_once __DIR__ . '/src/blocks/filter-bar/index.php';
+require_once __DIR__ . '/src/blocks/front-page/index.php';
+require_once __DIR__ . '/src/blocks/search-page/index.php';
+require_once __DIR__ . '/src/blocks/single-plugin/index.php';
+require_once __DIR__ . '/src/blocks/plugin-card/index.php';
+require_once __DIR__ . '/src/blocks/release-checks/index.php';
+require_once __DIR__ . '/src/blocks/release-commits/index.php';
+require_once __DIR__ . '/src/blocks/release-draft/index.php';
+require_once __DIR__ . '/src/blocks/card/index.php';
+require_once __DIR__ . '/src/blocks/release-publish/index.php';
+require_once __DIR__ . '/src/blocks/release-result-item/index.php';
+require_once __DIR__ . '/src/blocks/release-menu-options/index.php';
+require_once __DIR__ . '/src/blocks/release-page/index.php';
 
 // Block Configs
-require_once( __DIR__ . '/inc/block-bindings.php' );
-require_once( __DIR__ . '/inc/block-config.php' );
+require_once __DIR__ . '/inc/block-bindings.php';
+require_once __DIR__ . '/inc/block-config.php';
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -48,13 +61,16 @@ function setup() {
 	 * Switch default core markup for search form, comment form, and comments
 	 * to output valid HTML5.
 	 */
-	add_theme_support( 'html5', array(
-		'search-form',
-		'comment-form',
-		'comment-list',
-		'gallery',
-		'caption',
-	) );
+	add_theme_support(
+		'html5',
+		array(
+			'search-form',
+			'comment-form',
+			'comment-list',
+			'gallery',
+			'caption',
+		)
+	);
 
 	add_theme_support( 'wp4-styles' );
 }
@@ -87,11 +103,11 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], filemtime( __DIR__ . '/css/style.css' ) );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), array( 'dashicons', 'open-sans' ), filemtime( __DIR__ . '/css/style.css' ) );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
-	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
-	wp_enqueue_style( 'wporg-parent-2021-block-styles', get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css', [ 'wporg-global-fonts' ] );
+	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', array( 'wporg-global-fonts' ) );
+	wp_enqueue_style( 'wporg-parent-2021-block-styles', get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css', array( 'wporg-global-fonts' ) );
 
 	// Make jQuery a footer script.
 	wp_scripts()->add_data( 'jquery', 'group', 1 );
@@ -108,11 +124,15 @@ function scripts() {
 		$post = get_post();
 		if ( $post && current_user_can( 'plugin_admin_edit', $post ) ) {
 			wp_enqueue_script( 'wporg-plugins-categorization', get_stylesheet_directory_uri() . '/js/section-categorization.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-categorization.js' ), true );
-			wp_localize_script( 'wporg-plugins-categorization', 'categorizationOptions', [
-				'restUrl'    => get_rest_url(),
-				'restNonce'  => wp_create_nonce( 'wp_rest' ),
-				'pluginSlug' => $post->post_name,
-			] );
+			wp_localize_script(
+				'wporg-plugins-categorization',
+				'categorizationOptions',
+				array(
+					'restUrl'    => get_rest_url(),
+					'restNonce'  => wp_create_nonce( 'wp_rest' ),
+					'pluginSlug' => $post->post_name,
+				)
+			);
 		}
 	}
 
@@ -120,18 +140,22 @@ function scripts() {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), false, true );
 		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20220929', true );
 
-		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
-			'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
-			'l10n' => array(
-				'date'      => __( 'Date', 'wporg-plugins' ),
-				'downloads' => __( 'Downloads', 'wporg-plugins' ),
-				'noData'    => __( 'No data yet', 'wporg-plugins' ),
-				'today'     => __( 'Today', 'wporg-plugins' ),
-				'yesterday' => __( 'Yesterday', 'wporg-plugins' ),
-				'last_week' => __( 'Last 7 Days', 'wporg-plugins' ),
-				'all_time'  => __( 'All Time', 'wporg-plugins' ),
-			),
-		) );
+		wp_localize_script(
+			'wporg-plugins-stats',
+			'pluginStats',
+			array(
+				'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
+				'l10n' => array(
+					'date'      => __( 'Date', 'wporg-plugins' ),
+					'downloads' => __( 'Downloads', 'wporg-plugins' ),
+					'noData'    => __( 'No data yet', 'wporg-plugins' ),
+					'today'     => __( 'Today', 'wporg-plugins' ),
+					'yesterday' => __( 'Yesterday', 'wporg-plugins' ),
+					'last_week' => __( 'Last 7 Days', 'wporg-plugins' ),
+					'all_time'  => __( 'All Time', 'wporg-plugins' ),
+				),
+			)
+		);
 	}
 
 	// The plugin submission page: /developers/add/
@@ -141,9 +165,9 @@ function scripts() {
 
 	// React is currently only used on detail pages.
 	if ( is_single() ) {
-		$assets_path = dirname( __FILE__ ) . '/js/build/theme.asset.php';
+		$assets_path = __DIR__ . '/js/build/theme.asset.php';
 		if ( file_exists( $assets_path ) ) {
-			$script_info = require( $assets_path );
+			$script_info = require $assets_path;
 			wp_enqueue_script(
 				'wporg-plugins-client',
 				get_stylesheet_directory_uri() . '/js/build/theme.js',
@@ -155,7 +179,7 @@ function scripts() {
 				'wporg-plugins-client',
 				'localeData',
 				array(
-					'' => array(
+					''            => array(
 						'Plural-Forms' => _x( 'nplurals=2; plural=n != 1;', 'plural forms', 'wporg-plugins' ),
 						'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
 						'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ),
@@ -185,7 +209,7 @@ add_filter( 'jetpack_mentions_should_load_ui', '__return_false', 11 );
  * @return string
  */
 function loader_src( $src, $handle ) {
-	$cdn_urls = [
+	$cdn_urls = array(
 		'dashicons',
 		'wp-embed',
 		'jquery-core',
@@ -198,7 +222,7 @@ function loader_src( $src, $handle ) {
 		'wporg-plugins-stats',
 		'wporg-plugins-client',
 		'wporg-plugins-faq',
-	];
+	);
 
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		return $src;
@@ -210,7 +234,7 @@ function loader_src( $src, $handle ) {
 	}
 
 	// Remove version argument.
-	if ( in_array( $handle, [ 'open-sans' ], true ) ) {
+	if ( in_array( $handle, array( 'open-sans' ), true ) ) {
 		$src = remove_query_arg( 'ver', $src );
 	}
 
@@ -234,7 +258,7 @@ add_action( 'template_redirect', __NAMESPACE__ . '\content' );
  * @return array
  */
 function custom_body_class( $classes ) {
-	$post = get_post();	
+	$post = get_post();
 
 	$classes[] = 'no-js';
 
@@ -324,13 +348,13 @@ function social_meta_data() {
 	$site_title = function_exists( '\WordPressdotorg\site_brand' ) ? \WordPressdotorg\site_brand() : 'WordPress.org';
 
 	if ( is_front_page() ) {
-		$og_fields = [
+		$og_fields = array(
 			'og:title'       => __( 'WordPress Plugins', 'wporg-plugins' ),
 			'og:description' => __( 'Choose from thousands of free plugins to build, customize, and enhance your WordPress website.', 'wporg-plugins' ),
 			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => home_url(),
-		];
+		);
 		foreach ( $og_fields as $property => $content ) {
 			printf(
 				'<meta property="%1$s" content="%2$s" />' . "\n",
@@ -385,13 +409,16 @@ add_action( 'wp_head', __NAMESPACE__ . '\social_meta_data' );
 function strong_archive_title( $term ) {
 	return '<strong>' . $term . '</strong>';
 }
-add_action( 'wp_head', function() {
-	add_filter( 'post_type_archive_title', __NAMESPACE__ . '\strong_archive_title' );
-	add_filter( 'single_term_title', __NAMESPACE__ . '\strong_archive_title' );
-	add_filter( 'single_cat_title', __NAMESPACE__ . '\strong_archive_title' );
-	add_filter( 'single_tag_title', __NAMESPACE__ . '\strong_archive_title' );
-	add_filter( 'get_the_date', __NAMESPACE__ . '\strong_archive_title' );
-} );
+add_action(
+	'wp_head',
+	function () {
+		add_filter( 'post_type_archive_title', __NAMESPACE__ . '\strong_archive_title' );
+		add_filter( 'single_term_title', __NAMESPACE__ . '\strong_archive_title' );
+		add_filter( 'single_cat_title', __NAMESPACE__ . '\strong_archive_title' );
+		add_filter( 'single_tag_title', __NAMESPACE__ . '\strong_archive_title' );
+		add_filter( 'get_the_date', __NAMESPACE__ . '\strong_archive_title' );
+	}
+);
 
 /**
  * Filter the archive title to use custom string for business model.
@@ -402,7 +429,7 @@ add_action( 'wp_head', function() {
 function update_archive_title( $title ) {
 	if ( is_tax( 'plugin_business_model', 'community' ) ) {
 		return __( 'Community plugins', 'wporg-plugins' );
-	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
+	} elseif ( is_tax( 'plugin_business_model', 'commercial' ) ) {
 		return __( 'Commercial plugins', 'wporg-plugins' );
 	}
 
@@ -422,7 +449,7 @@ function update_archive_description( $description ) {
 	// The description in the DB has <p> tags. Add them manually for consistency.
 	if ( is_tax( 'plugin_business_model', 'community' ) ) {
 		$contents = '<p>' . __( 'These plugins are developed and supported by a community.', 'wporg-plugins' ) . '</p>';
-	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
+	} elseif ( is_tax( 'plugin_business_model', 'commercial' ) ) {
 		$contents = '<p>' . __( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' ) . '</p>';
 	}
 
@@ -434,6 +461,274 @@ function update_archive_description( $description ) {
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
 
 /**
- * Custom template tags for this theme.
+ * Get's the plugin post object.
+ *
+ * @return WP_Post The plugin post object.
  */
-require get_stylesheet_directory() . '/inc/template-tags.php';
+function get_plugin() {
+	global $post;
+
+	if ( 'plugin_release' === $post->post_type ) {
+		return get_post( $post->post_parent );
+	}
+
+	return $post;
+}
+
+/**
+ * Filter the archive title to use custom string for business model.
+ *
+ * @return string Plugin slug.
+ */
+function get_plugin_slug() {
+	$plugin = get_plugin();
+
+	if ( ! $plugin ) {
+		return '';
+	}
+
+	return $plugin->post_name;
+}
+
+/**
+ * Get the releases for a plugin.
+ *
+ * @return WP_Post[] The releases for the plugin.
+ */
+function get_releases() {
+	$plugin = get_plugin();
+
+	$args = array(
+		'post_type'      => 'plugin_release',
+		'posts_per_page' => -1,
+		'post_parent'    => $plugin->ID,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+	);
+
+	return get_posts( $args );
+}
+
+/**
+ * Get the previous release of a plugin.
+ *
+ * @param WP_Post $release_post The current release post.
+ *
+ * @return WP_Post|null The previous release of the plugin.
+ */
+function get_previous_release( $release_post ) {
+	$releases = get_releases();
+
+	if ( empty( $releases ) ) {
+		return null;
+	}
+
+	// If we are draft. The first item is the latest release.
+	// If we only have one release and we are looking for we don't have a previous release.
+	if ( 'draft' === $release_post->post_status ) {
+		return $releases[0];
+	} elseif ( count( $releases ) === 1 ) {
+		return null;
+	}
+
+	foreach ( $releases as $key => $release ) {
+		if ( $release->ID === $release_post->ID ) {
+			if ( isset( $releases[ $key + 1 ] ) ) {
+				return $releases[ $key + 1 ];
+			}
+			break;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Get the previous version of a plugin.
+ *
+ * @param WP_Post $release_post The current release post.
+ *
+ * @return string|null The previous version of the plugin.
+ */
+function get_previous_version( $release_post ) {
+	$previous_release = get_previous_release( $release_post );
+
+	if ( empty( $previous_release ) ) {
+		return null;
+	}
+
+	return get_post_meta( $previous_release->ID, 'release_tag', true );
+}
+
+/**
+ * Get the latest release of a plugin.
+ *
+ * @param int $plugin_id The plugin ID.
+ *
+ * @return WP_Post|null The latest release of the plugin.
+ */
+function get_latest_release( $plugin_id ) {
+	$releases = get_releases( $plugin_id );
+
+	if ( empty( $releases ) ) {
+		return null;
+	}
+
+	return $releases[0];
+}
+
+
+/**
+ * Get the blueprint URL for playground testing.
+ *
+ * @param string $download_url The URL to download the plugin from.
+ *
+ * @return string The URL to load the plugin in the playground.
+ */
+function get_blueprint_url( $download_url ) {
+	/**
+	 * Blueprint is base64 encoded to be passed as a URL parameter.
+	 *
+	 * @see https://wordpress.github.io/wordpress-playground/blueprints/tutorial/how-to-load-run-blueprints#base64-encoded-blueprints
+	 */
+	$blueprint = wp_json_encode(
+		array(
+			'login'       => true,
+			'landingPage' => '/wp-admin/plugins.php',
+			'steps'       => array(
+				array(
+					'step'       => 'installPlugin',
+					'pluginData' => array(
+						'resource' => 'url',
+						'url'      => $download_url,
+					),
+				),
+			),
+		)
+	);
+
+	return 'https://playground.wordpress.net/#' . base64_encode( $blueprint );
+}
+
+/**
+ * Get the link to the revision log for a set of commits.
+ *
+ * @param array $commits The commits to get the log link for.
+ *
+ * @return string The link to the revision log.
+ */
+function get_revision_log_link( $commits ) {
+	$plugin_slug = get_plugin_slug();
+
+	$base_url = sprintf(
+		'https://plugins.trac.wordpress.org/log/%s/trunk',
+		$plugin_slug
+	);
+
+	if ( count( $commits ) < 2 ) {
+		return $base_url;
+	}
+
+	$latest_commit   = reset( $commits );
+	$earliest_commit = end( $commits );
+
+	return sprintf(
+		'%1$s?rev=%2$s&stop_rev=%3$s',
+		$base_url,
+		$latest_commit['revision'],
+		$earliest_commit['revision'],
+	);
+}
+
+/**
+ * Generates a Trac changeset link for a plugin.
+ *
+ * @param string $previous_version The previous version of the plugin.
+ * @param string $current_version The current version of the plugin. Default is 'trunk'.
+ *
+ * @return string The Trac changeset link.
+ */
+function get_trac_changeset_link( $previous_version, $current_version = 'trunk' ) {
+	$plugin_slug = get_plugin_slug();
+
+	$current_path = ( 'trunk' === $current_version )
+		? 'trunk'
+		: 'tags/' . $current_version;
+
+	return sprintf(
+		'https://plugins.trac.wordpress.org/changeset?new_path=/%1$s/%2$s&old_path=/%1$s/tags/%3$s',
+		$plugin_slug,
+		$current_path,
+		$previous_version
+	);
+}
+
+/**
+ * Get the link to the revision log for a set of commits.
+ *
+ * @param WP_Post $release_post The release post.
+ *
+ * @return string The link to the revision log.
+ */
+function get_revision_changeset_link( $release_post ) {
+	if ( empty( $release_post ) ) {
+		return '';
+	}
+
+	$plugin_slug = get_plugin_slug();
+	$commits     = get_post_meta( $release_post->ID, 'release_commit_log', true );
+
+	if ( empty( $commits ) ) {
+		return sprintf(
+			'https://plugins.trac.wordpress.org/log/%s/trunk',
+			$plugin_slug
+		);
+	}
+
+	$previous_release = get_previous_release( $release_post );
+	$latest_commit    = reset( $commits );
+	$previous_commit  = end( $commits );
+
+	if ( ! empty( $previous_release ) ) {
+		$previous_commits = get_post_meta( $previous_release->ID, 'release_commit_log', true );
+
+		if ( ! empty( $previous_commits ) ) {
+			$previous_commit = max( $previous_commits );
+		}
+	}
+
+	return sprintf(
+		'https://plugins.trac.wordpress.org/changeset?new=%2$s@%1$s/trunk&old=%3$s@%1$s/trunk',
+		$plugin_slug,
+		$earliest_commit['revision'],
+		$previous_commit['revision'],
+	);
+}
+
+/**
+ * Get the download link for a plugin.
+ *
+ * @param string $version The version of the plugin to download.
+ *
+ * @return string The download link for the plugin.
+ */
+function get_download_link( $version ) {
+	$plugin = get_plugin();
+
+	return Template::download_link( $plugin, $version );
+}
+
+/**
+ * Get the support URL for a plugin.
+ *
+ * @return bool Whether the can edit this plugin.
+ */
+function user_can_edit_plugin() {
+	$plugin = get_plugin();
+
+	if ( empty( $plugin ) ) {
+		return false;
+	}
+
+	return current_user_can( 'plugin_admin_edit', $plugin );
+}

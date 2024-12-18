@@ -13,6 +13,7 @@ add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg
 add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wporg_query_filter_options_plugin_category' );
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
+add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\modify_block_query_var', 9, 3 );
 add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
 add_filter( 'wporg_ratings_data', __NAMESPACE__ . '\set_rating_data', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
@@ -434,4 +435,23 @@ function filter_language_suggest( $block_content ) {
 	$html->next_tag();
 	$html->add_class( 'is-style-prominent' );
 	return $html->get_updated_html();
+}
+
+/*
+ * Filter the query to show only the children of the plugin.
+ *
+ * @param array $query The query arguments.
+ * @param string $block The block name.
+ * @param WP_Post $page The current page.
+ *
+ * @return array
+ */
+function modify_block_query_var( $query, $block, $page ) {
+	if ( 'plugin_release' !== $query['post_type'] ) {
+		return $query;
+	}
+
+	$query['post_parent'] = get_the_ID();
+
+	return $query;
 }

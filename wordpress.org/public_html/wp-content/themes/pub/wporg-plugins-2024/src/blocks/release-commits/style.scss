@@ -1,0 +1,41 @@
+.wp-block-wporg-release-commits {
+	margin-top: 0 !important;
+}
+
+.wp-block-wporg-release-commit-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	list-style: none;
+	padding: 0;
+
+	li {
+		display: flex;
+		flex-direction: column;
+		gap: inherit;
+		margin-bottom: var(--wp--preset--spacing--10);
+
+		// media query	
+		@media (min-width: 650px) {
+			flex-direction: row;
+			align-items: center;
+			margin-bottom: 0;
+		}
+	}
+}
+
+.wp-block-wporg-release-commit-author {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 500;
+}
+
+.wp-block-wporg-release-commit-by-line {
+	color: var(--wp--preset--color--charcoal-4) !important;
+	font-size: 12px;
+
+	a {
+		color: var(--wp--preset--color--charcoal-4) !important;
+	}
+}
