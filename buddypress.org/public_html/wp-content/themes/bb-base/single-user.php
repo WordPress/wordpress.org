@@ -11,7 +11,7 @@ get_header(); ?>
 
 	<?php do_action( 'bbp_before_main_content' ); ?>
 
-	<h3 id="bbpress-user"><?php bbp_displayed_user_field( 'display_name' ); ?> (@<?php bbp_displayed_user_field( 'user_nicename' ); ?>)</h3>
+	<h2 id="bbpress-user"><?php bbp_displayed_user_field( 'display_name' ); ?> (@<?php bbp_displayed_user_field( 'user_nicename' ); ?>)</h2>
 
 	<div id="bbp-user-<?php bbp_current_user_id(); ?>" class="bbp-single-user">
 		<div class="entry-content">

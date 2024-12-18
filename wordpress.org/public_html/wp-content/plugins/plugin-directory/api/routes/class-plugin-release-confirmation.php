@@ -6,9 +6,12 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
-use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation as Release_Confirmation_Shortcode;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation_Enabled as Release_Confirmation_Enabled_Email;
-use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation_Access as Release_Confirmation_Access_Email;
+use Two_Factor_Core;
+use function WordPressdotorg\Two_Factor\Revalidation\{
+	get_status as get_revalidation_status,
+	get_url as get_revalidation_url,
+};
 
 /**
  * An API endpoint for closing a particular plugin.
@@ -81,14 +84,6 @@ class Plugin_Release_Confirmation extends Base {
 			},
 		] );
 
-		register_rest_route( 'plugins/v1', '/release-confirmation-access', [
-			'methods'             => \WP_REST_Server::READABLE,
-			'callback'            => [ $this, 'send_access_email' ],
-			'args'                => [
-			],
-			'permission_callback' => 'is_user_logged_in',
-		] );
-
 		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );
 	}
 
@@ -118,10 +113,31 @@ class Plugin_Release_Confirmation extends Base {
 	public function permission_can_access_plugin( $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-		return (
-			Release_Confirmation_Shortcode::can_access() &&
-			current_user_can( 'plugin_manage_releases', $plugin )
-		);
+		if ( ! $plugin || ! current_user_can( 'plugin_manage_releases', $plugin ) ) {
+			return false;
+		}
+
+		// Check to see if they've confirmed their 2FA status recently..
+		$status = get_revalidation_status();
+		if ( $status && $status['can_save'] ) {
+			return true;
+		}
+
+		// Before we say no, check if the user just needs to validate their 2FA.
+		if ( $status && $status['needs_revalidate'] && 'GET' === $request->get_method() ) {
+			$current_rest_url = add_query_arg(
+				array(
+					'_wpnonce'         => wp_create_nonce( 'wp_rest' ),
+					'_wp_http_referer' => wp_get_referer(),
+				),
+				get_rest_url( null, $request->get_route() )
+			);
+
+			wp_safe_redirect( get_revalidation_url( $current_rest_url ) );
+			exit;
+		}
+
+		return false;
 	}
 
 	/**
@@ -295,24 +311,6 @@ class Plugin_Release_Confirmation extends Base {
 		$release['undo-discard'] = true;
 
 		Plugin_Directory::add_release( $plugin, $release );
-
-		return $result;
-	}
-
-	/**
-	 * Send a Access email
-	 */
-	public function send_access_email( $request ) {
-		$result = [
-			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
-		];
-		$result['location'] = add_query_arg( 'send_access_email', '1', $result['location'] );
-		header( 'Location: ' . $result['location'] );
-
-		$email = new Release_Confirmation_Access_Email(
-			wp_get_current_user()
-		);
-		$result['sent'] = $email->send();
 
 		return $result;
 	}

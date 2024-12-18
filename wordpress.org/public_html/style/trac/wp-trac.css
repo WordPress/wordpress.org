@@ -2489,7 +2489,6 @@ a.mention.me {
 	border: 1px solid #ccc;
 	display: table;
 	margin: 0;
-	max-width: 56em;
 	padding: 0 1em;
 	position: relative;
 	width: 100%;
@@ -2502,7 +2501,14 @@ a.mention.me {
 }
 #github-prs ul.pull-requests li div {
 	display: table-cell;
-	padding: 0.5em 0;
+	padding: 0.5em 0.25em;
+}
+#github-prs ul.pull-requests li div:first-of-type {
+	padding-left: 0;
+}
+#github-prs ul.pull-requests li div:last-of-type {
+	white-space: nowrap;
+	padding-right: 0;
 }
 #github-prs ul.pull-requests li > div:first-of-type > a:first-of-type {
 	display: inline-block;

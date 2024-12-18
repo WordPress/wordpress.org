@@ -349,7 +349,7 @@ class User_Notes {
 
 			$this->user_notes[ $user_id ]->html .= sprintf(
 				'<div class="bbp-template-notice warning">%s %s</div>' . "\n",
-				apply_filters( 'comment_text', $note->text, null, array() ),
+				apply_filters( 'comment_text', esc_html( $note->text ), null, array() ),
 				sprintf( '<p class="wporg-bbp-user-note-meta">%s</p>' . "\n",
 					implode( ' | ', $note_meta )
 				)

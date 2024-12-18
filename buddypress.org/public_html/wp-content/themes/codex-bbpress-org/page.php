@@ -1,6 +1,6 @@
 <?php get_header(); ?>
 <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
-				<h3 id="post-<?php the_ID(); ?>"><?php the_title(); ?></h3>
+				<h2 id="post-<?php the_ID(); ?>"><?php the_title(); ?></h2>
 				<div style="margin-bottom: 20px;"><?php echo codex_get_breadcrumb(); ?></div>
 				<?php if ( get_the_content() ) :
 
@@ -23,7 +23,7 @@
 	global $post;
 
 	$args         = array( 'order' => 'ASC', );
-	$revisions    = wp_get_post_revisions( get_queried_object_id(), $args );	
+	$revisions    = wp_get_post_revisions( get_queried_object_id(), $args );
 	$post_authors = array( $post->post_author => 1 );
 	foreach( (array)$revisions as $revision ) {
 		if ( ! $revision->post_author ) {
@@ -41,7 +41,7 @@
 	global $codex_contributors;
 	$codex_contributors = array_reverse( $post_authors, true );
 ?>
-				
+
 <?php locate_template( array( 'sidebar.php' ), true ); ?>
 
 <?php get_footer(); ?>

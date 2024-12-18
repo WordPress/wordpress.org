@@ -74,7 +74,7 @@ get_header();
 			'text'  => sprintf(
 				/* translators: URL to CC0 license. */
 				__( 'All photos are <a href="%s">CC0 licensed</a>. No rights are reserved, so you are free to use the photos anywhere, for any purpose, without the need for attribution.' , 'wporg-photos' ),
-				esc_url( 'https://creativecommons.org/share-your-work/public-domain/cc0/' )
+				esc_url( 'https://creativecommons.org/publicdomain/zero/1.0/' )
 			),
 		), $widget_args );
 

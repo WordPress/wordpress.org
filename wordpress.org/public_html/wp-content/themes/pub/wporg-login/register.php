@@ -112,7 +112,7 @@ get_header();
 				$localised_domain = parse_url( wporg_login_wordpress_url(), PHP_URL_HOST );
 				printf(
 					/* translators: %s: List of linked policies, for example: <a>Privacy Policy</a> and <a>Terms of Service</a> */
-					_n( 'I have read and accept the %s.', 'I have read and accept the %s.', 1, 'wporg' ),
+					_n( 'I have read and accept the %s', 'I have read and accept the %s', 1, 'wporg' ),
 					wp_sprintf_l( '%l', [
 						"<a href='https://{$localised_domain}/about/privacy/'>" . __( 'Privacy Policy', 'wporg' ) . '</a>',
 						// "<a href='https://{$localised_domain}/about/terms-of-service/'>" . __( 'Terms of Service', 'wporg' ) . '</a>',

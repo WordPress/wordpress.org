@@ -586,7 +586,7 @@ function the_plugin_self_toggle_preview_button() {
 	$post            = get_post();
 	$toggle_link     = Template::get_self_toggle_preview_link( $post );
 
-	if ( ! current_user_can( 'plugin_self_close', $post ) ) {
+	if ( ! current_user_can( 'plugin_toggle_public_preview', $post ) ) {
 		return;
 	}
 

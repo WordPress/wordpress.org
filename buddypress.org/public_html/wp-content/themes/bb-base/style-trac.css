@@ -1,0 +1,1329 @@
+/* =Trac
+-------------------------------------------------------------- */
+
+/* Global */
+body.trac {
+	min-width: 0;
+}
+
+body.trac a:hover,
+body.trac #ticket table.properties a:hover {
+	background-color: transparent;
+}
+
+body.trac a.trac-rawlink:hover:before,
+body.trac a.trac-ziplink:hover:before,
+body.trac a.ext-link:hover:before,
+body.trac a.mail-link:hover:before {
+	border: none;
+	text-decoration: none;
+}
+
+body.trac a.attachment {
+	display: inline;
+}
+
+body.trac .create-new-ticket.button {
+	margin: 0;
+	padding: 0;
+}
+
+body.trac fieldset {
+	position: relative;
+	border-radius: var(--bbbase-border-radius);
+}
+
+body.trac label {
+	user-select: none;
+	cursor: pointer;
+}
+
+body.trac input[type=text],
+body.trac input.textwidget,
+body.trac textarea {
+	font: 14px/16px sans-serif;
+	padding: 8px 10px;
+	color: #333;
+	border: 1px solid #ccc;
+}
+
+body.trac input[type=text],
+body.trac input.textwidget {
+	border-radius: var(--bbbase-border-radius);
+}
+
+body.trac .trac-resizable textarea {
+	border-radius: 0;
+	width: 100% !important;
+	resize: none;
+}
+
+body.trac table .trac-resizable textarea {
+	border-width: 1px 0;
+}
+
+body.trac :link,
+body.trac :visited {
+	border-bottom: 0 solid transparent;
+}
+
+body.trac ul,
+body.trac li {
+	border: none;
+}
+
+body.trac ul,
+body.trac ol {
+    padding-left: 20px;
+    margin: 0;
+}
+
+body.trac .buttons {
+	margin: 30px 0;
+	text-align: right;
+}
+
+body.trac .buttons input {
+	margin: 0 0 0 10px;
+}
+
+body.trac table.listing thead th {
+	font-size: 14px;
+	background: #eee;
+	border: none;
+	padding: 8px 10px;
+	margin: 0;
+}
+
+body.trac table.listing tbody td {
+	font-size: 14px;
+	background: #fff;
+	border: none;
+	padding: 8px 10px;
+	margin: 0;
+}
+
+body.trac table.listing code {
+	background-color: #f0f0f0;
+}
+
+/* Subnav - Adminbar */
+body.trac #subnav {
+	border: none;
+	direction: ltr;
+	color: #c3c4c7;
+	font-size: 13px;
+	font-weight: 400;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	line-height: 2.46153846;
+	height: 32px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 99999;
+	background: #1d2327;
+	/* Only visible in Windows High Contrast mode */
+	outline: 1px solid transparent;
+}
+
+body.trac #subnav * {
+	height: auto;
+	width: auto;
+	margin: 0;
+	padding: 0;
+	position: static;
+	text-shadow: none;
+	text-transform: none;
+	letter-spacing: normal;
+	font-size: 13px;
+	font-weight: 400;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-style: normal;
+	line-height: 2.46153846;
+	border-radius: 0;
+	box-sizing: content-box;
+	transition: none;
+	-webkit-font-smoothing: subpixel-antialiased; /* Prevent Safari from switching to standard antialiasing on hover */
+	-moz-osx-font-smoothing: auto; /* Prevent Firefox from inheriting from themes that use other values */
+}
+
+body.trac #subnav a {
+	padding: 0 8px 0 7px;
+	display: inline-block;
+	height: 100%;
+}
+
+body.trac #subnav a,
+body.trac #subnav a:hover,
+body.trac #subnav a img,
+body.trac #subnav a img:hover {
+	border: none;
+	text-decoration: none;
+	background: none;
+	box-shadow: none;
+}
+
+body.trac #subnav a:focus,
+body.trac #subnav a:active,
+body.trac #subnav input[type="text"],
+body.trac #subnav input[type="password"],
+body.trac #subnav input[type="number"],
+body.trac #subnav input[type="search"],
+body.trac #subnav input[type="email"],
+body.trac #subnav input[type="url"],
+body.trac #subnav select,
+body.trac #subnav textarea,
+body.trac #subnav div {
+	box-shadow: none;
+}
+
+body.trac #subnav a:focus {
+	/* Inherits transparent outline only visible in Windows High Contrast mode */
+	outline-offset: -1px;
+}
+
+body.trac #subnav ul,
+body.trac #subnav ul li,
+body.trac #subnav ul li a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+}
+
+body.trac #subnav ul,
+body.trac #subnav ul li {
+	background: none;
+	clear: none;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	text-indent: 0;
+	z-index: 99999;
+}
+
+body.trac #subnav-inner {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+body.trac #subnav-inner ul li {
+	list-style: none;
+	margin: 0;
+	text-align: right;
+}
+body.trac #subnav-inner ul li a {
+	text-decoration: none;
+	color: #555;
+}
+
+body.trac #subnav-inner ul li:hover a,
+body.trac #subnav-inner ul li:hover a:focus {
+    background: #2c3338;
+    color: #72aee6;
+}
+
+body.trac #subnav #nav-user:before {
+	font: normal 20px/1 'dashicons';
+	color: rgba(240, 246, 252, .6); /* Not variable */
+	content: '\f120';
+	float: left;
+	-webkit-font-smoothing: antialiased;
+	padding: 7px;
+	flex-shrink: 0;
+	margin-right: auto;
+}
+
+body.trac #subnav #nav-user {
+	width: 100%;
+}
+
+body.trac #subnav #nav-user a {
+	color: #f0f0f1;
+}
+
+body.trac #subnav #nav-user li.first:has(.trac-author-user) {
+	color: transparent; /* Sneaky! */
+}
+
+body.trac #subnav #nav-user span.trac-author-user {
+	color: #72aee6;
+}
+
+/* Wrappers */
+body.trac #banner,
+body.trac #mainnav {
+	background-color: var(--bbbase-grey-background-color-low-contrast);
+}
+
+body.trac #banner,
+body.trac #mainnav,
+body.trac #ctxtnav {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 60px;
+	padding: 0;
+	margin: 0;
+	max-width: 100%;
+	overflow: visible;
+}
+
+body.trac #banner ul,
+body.trac #banner ul li,
+body.trac #mainnav ul,
+body.trac #mainnav ul li,
+body.trac #ctxtnav ul,
+body.trac #ctxtnav ul li {
+	float: none;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	font: 100 16px/1.5 Inter, sans-serif;
+}
+
+/* Banner & Search */
+body.trac #banner {
+	min-height: 100px;
+}
+
+body.trac #banner form#search {
+	height: auto;
+	padding: 0;
+	margin: 0;
+}
+
+body.trac #banner form#search input {
+	font-size: 16px;
+	font-weight: 400;
+	padding: 10px 15px;
+	border-radius: var(--bbbase-border-radius);
+}
+
+body.trac #banner form#search input[type=text] {
+	min-width: 250px;
+}
+
+/* Main Navigation */
+body.trac #mainnav {
+	border-bottom: 1px solid var(--bbbase-grey-border-color-low-contrast) !important;
+}
+
+body.trac #mainnav ul,
+body.trac #mainnav ul li,
+body.trac #mainnav ul li :link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 60px;
+	padding: 0;
+	margin: 0;
+}
+
+body.trac #mainnav ul li :link {
+	box-sizing: border-box;
+	padding: 0 15px;
+	border: 1px solid transparent !important;
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+}
+
+body.trac #mainnav li.active :link {
+	margin-top: 2px;
+	background-color: #fff;
+	color: #000;
+	border: 1px solid var(--bbbase-grey-border-color-low-contrast) !important;
+	border-bottom-color: transparent !important;
+}
+
+body.trac #mainnav li:not(.active) :link:hover {
+	background-color: #fafafa;
+	border: 1px solid rgba(0, 0, 0, 0.1) !important;
+	border-bottom: 1px solid transparent !important;
+}
+
+/* Main Wrapper */
+body.trac #main {
+	padding: 0 !important;
+	margin: 0 !important;
+	display: block;
+}
+
+body.trac #main p {
+	margin: 30px 0;
+}
+
+body.trac #main .date p {
+	margin: 0;
+}
+
+body.trac #main p:first-child {
+	margin-top: 0;
+}
+
+body.trac #main p:last-child {
+	margin-bottom: 0;
+}
+
+body.trac #main,
+body.trac #main th,
+body.trac #main tr,
+body.trac #main h1,
+body.trac #main h2,
+body.trac #main h3,
+body.trac #main h4 {
+	font-family: sans-serif;
+}
+
+body.trac #main > h1 {
+	display: none;
+}
+
+/* Notices */
+body.trac #main .wp-notice {
+	margin: 0;
+	padding: 30px;
+}
+
+body.trac #main .wp-notice p:first-child {
+	margin-top: 0;
+}
+
+body.trac #main .wp-notice p:last-child {
+	margin-bottom: 0;
+}
+
+body.trac #main .newticket-not-here .support,
+body.trac #main .newticket-not-here .security {
+    margin-bottom: 0;
+}
+
+/* Alt Links */
+body.trac #main #altlinks {
+	float: none;
+	text-align: center;
+	margin: 30px 0;
+	max-width: none;
+}
+
+body.trac #main #altlinks .preferences-link {
+	float: none;
+	margin: 0 0 0 auto;
+	padding: 20px;
+}
+
+body.trac #main #altlinks > a,
+body.trac #main #altlinks h3,
+body.trac #main #altlinks li {
+    font-size: 14px;
+}
+
+/* Context Nav */
+body.trac #ctxtnav {
+	border-bottom: 1px solid var(--bbbase-grey-border-color-low-contrast) !important;
+}
+
+body.trac #ctxtnav:not(:has(a)) {
+	display: none;
+}
+
+body.trac #ctxtnav ul {
+	display: flex;
+	gap: 30px;
+}
+
+body.trac #ctxtnav a,
+body.trac #ctxtnav a:hover,
+body.trac #ctxtnav a:active {
+	background-color: transparent;
+	text-decoration: none;
+}
+
+body.trac #ctxtnav a:hover,
+body.trac #ctxtnav a:active {
+	opacity: 0.8;
+}
+
+/* Meta Nav */
+body.trac #metanav {
+    font-size: 14px;
+    top: auto;
+    right: auto;
+    line-height: 24px;
+    padding-top: .5em;
+}
+
+body.trac #metanav:after {
+    clear: both;
+    display: block;
+}
+
+body.trac #metanav a,
+body.trac #metanav a:visited,
+body.trac #metanav form.trac-logout button {
+    color: initial;
+}
+
+body.trac #metanav li.last {
+    padding-right: .75em;
+}
+
+/* Banner Search */
+body.trac #banner form#search {
+	float: none;
+	margin-top: 0;
+}
+
+/* Content */
+body.trac #content {
+	padding: 0;
+	margin: 60px auto 0 auto;
+	display: flex;
+	flex-direction: column;
+	font-size: 16px;
+}
+
+body.trac #content h1 {
+	margin-bottom: 30px;
+}
+
+body.trac #content .milestones {
+	margin: 0;
+	padding: 0;
+}
+
+/* Timeline */
+body.trac #content.timeline h2,
+body.trac #content.roadmap .milestone .info h2 a {
+	font-size: 18px;
+	border: none;
+	margin: 0;
+	padding: 10px 15px;
+	border-radius: 0;
+	background-color: #eee;
+}
+
+body.trac #content.timeline dl {
+	font-size: 16px;
+	line-height: 1.6em;
+	margin: 30px 15px;
+}
+
+body.trac #content.timeline dt:before {
+	margin-top: 2px;
+}
+
+body.trac #content.timeline dt a {
+	padding: 8px 15px;
+}
+
+body.trac #content.timeline dt .time {
+    color: #999;
+    font-size: 16px;
+	width: 50px;
+	display: inline-block;
+}
+
+body.trac #content.timeline dd {
+	font-size: 14px;
+	margin: 2px 0 15px 95px;
+	min-height: 30px;
+}
+
+/* Prefs */
+body.trac #content.prefs #tabs {
+	padding: 0;
+	margin: 0 auto;
+}
+
+body.trac #content.prefs #tabs li {
+	list-style: none;
+	padding: 15px;
+}
+
+body.trac #content.prefs #tabcontent {
+	margin: 0 0 60px;
+	padding: 60px 0 0 0;
+}
+
+body.trac #content #prefs {
+	background: #eee;
+	border-radius: var(--bbbase-border-radius);
+	padding: 20px;
+	margin: 30px 0;
+	float: none;
+	font-size: 15px;
+	border: 1px solid #ccc;
+	order: 2;
+}
+
+body.trac #content #prefs + label:has(input[type=checkbox]),
+body.trac #content #prefs + div:has(input[type=checkbox]) {
+	margin: 6px 0;
+	display: flex;
+	align-items: center;
+	justify-content: left;
+}
+body.trac #content #prefs + label:has(input[type=checkbox]) input[type=checkbox],
+body.trac #content #prefs + div:has(input[type=checkbox]) input[type=checkbox] {
+	margin-right: 6px;
+}
+
+body.trac #content #prefs label:hover {
+	color: #21759b;
+	cursor: pointer;
+}
+
+body.trac #content #prefs > div > label + br {
+	display: none;
+}
+
+body.trac #content #prefs input,
+body.trac #content #prefs select {
+	padding: 8px 12px;
+	border-radius: var(--bbbase-border-radius);
+}
+
+body.trac #content #prefs fieldset {
+	border-radius: var(--bbbase-border-radius);
+	border: 1px solid #ccc;
+	padding: 10px 20px 20px 20px;
+	margin: 10px 0;
+}
+
+body.trac #content #prefs fieldset legend {
+	font-size: 14px;
+	margin-left: 0px;
+}
+
+body.trac #prefs .buttons input[type=button],
+body.trac #prefs .buttons input[type=submit],
+body.trac .inlinebuttons input[type=button],
+body.trac .inlinebuttons input[type=submit] {
+	font-size: 13px;
+	height: auto;
+	line-height: 13px;
+	margin: 0;
+	font-weight: 400;
+}
+
+/* Roadmap */
+body.trac #content.roadmap .milestone {
+	margin: 0 0 30px 0;
+}
+
+body.trac #content.roadmap .milestone .info h2 {
+	border: none;
+	background: none;
+}
+
+body.trac #content.roadmap .milestone .info .date,
+body.trac #content.roadmap .milestone .info .percent,
+body.trac #content.roadmap .milestone .info .legend {
+    font-size: 16px;
+    font-style: normal;
+}
+body.trac #content.roadmap .milestone .info .date {
+    color: #888;
+	font-weight: 600;
+    margin: 0 20px 10px 20px;
+}
+
+body.trac #content.roadmap .milestone .info .percent,
+body.trac #content.roadmap .milestone .info .legend {
+	margin: 10px;
+}
+
+body.trac #content.roadmap .milestone .info .legend {
+	color: var(--bbbase-brightest-white);
+}
+
+body.trac #content.roadmap .milestone .info .legend span {
+	margin: 0 0 0 10px;
+	text-transform: capitalize;
+}
+
+body.trac #content.roadmap .milestone .description {
+    margin: 0 20px;
+}
+
+body.trac table.progress,
+body.trac .trac-groupprogress {
+	border: none;
+    width: 50%;
+    max-width: 50%;
+	margin: 0 15px;
+	background: var(--bbbase-light-background-color-low-contrast);
+}
+
+body.trac table.progress td.open {
+    background: var(--bbbase-light-background-color-low-contrast);
+}
+
+body.trac table.progress td.closed {
+	background: var(--bbbase-button-background-color);
+}
+
+/* Wiki */
+body.trac div.trac-content {
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+
+body.trac pre.wiki,
+body.trac pre.literal-block {
+    background: #ffe;
+    border: 1px solid #aa0;
+    box-shadow: 0 0 1em #eee;
+	font-size: 15px;
+    border-radius: var(--bbbase-border-radius);
+    margin: 20px 0;
+    padding: 15px 20px;
+    overflow: auto;
+}
+
+body.trac .wikipage {
+	padding: 0;
+	margin: 0 0 60px 0;
+}
+
+body.trac .wikipage h1 {
+    margin: 0 0 30px 0;
+}
+
+body.trac .wikipage h2 {
+	font-size: 18px;
+	padding: 15px 20px;
+	margin: 0;
+	border: none;
+	background-color: #eee;
+}
+
+body.trac .wikipage h3 {
+	font-size: 16px;
+	padding: 15px 20px;
+	margin: 0;
+	border: none;
+	background-color: #fafafa;
+}
+
+body.trac #pagepath {
+	display: none;
+}
+
+body.trac .wikitoolbar {
+	margin: 0;
+	padding: 10px;
+	height: 30px;
+}
+
+body.trac .wikitoolbar a {
+	padding: 5px;
+	margin: 0;
+	border: 1px solid transparent;
+}
+
+body.trac .wikitoolbar a:hover,
+body.trac .wikitoolbar a:active {
+	text-decoration: none;
+	border: 1px solid #ccc;
+}
+
+body.trac #field-description-help,
+body.trac label[for=comment] {
+    position: absolute;
+	top: 10px;
+	right: 10px;
+	font-size: 12px;
+}
+
+/* Reports */
+body.trac #content.report div.reports ~ #help,
+body.trac #content.report div.reports,
+body.trac #content.report > h1,
+body.trac #content.report > form,
+body.trac #content.report #description,
+body.trac #content.report > .buttons,
+body.trac #content.report > .paging,
+body.trac #content.report > #report-notfound,
+body.trac #content.report > #report-notfound + #help {
+	width: 100%;
+    max-width: 940px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.trac #content.report div.reports > div {
+	position: relative;
+	padding: 20px;
+	margin-bottom: 20px;
+	background: var(--bbbase-grey-background-color-low-contrast);
+}
+
+body.trac #content.report div.reports > h2 {
+    border-bottom: none;
+	margin-top: 30px;
+}
+
+body.trac #content.report h3 {
+	border: none;
+}
+
+body.trac #content.report .inlinebuttons input[type=button],
+body.trac #content.report .inlinebuttons input[type=submit] {
+	margin-left: 5px;
+	color: var(--bbbase-button-background-color);
+	background: transparent;
+}
+
+
+/* Tickets */
+body.trac div#ticket {
+	border-radius: var(--bbbase-border-radius);
+	margin: 0 0 30px 0;
+	padding: 30px;
+}
+
+body.trac #ticket > h2 .trac-id {
+	font-size: 22px;
+	margin-right: 10px;
+}
+
+body.trac div#ticket .date {
+	top: 0;
+	font-size: 14px;
+}
+
+body.trac h1#trac-ticket-title {
+	font-size: 25px;
+	margin: 0;
+	padding: 30px 0;
+}
+
+body.trac div#ticket h2 .trac-status a,
+body.trac div#ticket h2 .trac-type a {
+	display: inline-block;
+	font-weight: 200;
+	font-size: 12px;
+	padding: 6px 10px;
+	color: #999;
+	border: 1px solid #999;
+	border-radius: 50px;
+	background-color: #eee;
+	margin-right: 8px;
+}
+
+body.trac div#ticket h2 .trac-status a:hover,
+body.trac div#ticket h2 .trac-status a:active,
+body.trac div#ticket h2 .trac-type a:hover,
+body.trac div#ticket h2 .trac-type a:active {
+	text-decoration: none;
+	background-color: transparent;
+}
+
+body.trac #ticket table.properties,
+body.trac #ticket table.properties .description {
+    border-top: 1px solid transparent;
+}
+
+body.trac #ticket table.properties > tbody > tr {
+    border-bottom: 1px solid transparent;
+}
+
+body.trac #ticket table.properties > tbody > tr > td,
+body.trac #ticket table.properties > tbody > tr > th {
+    line-height: 1.4;
+    font-size: 16px;
+}
+
+body.trac #properties {
+	white-space: nowrap;
+}
+
+body.trac #properties label {
+	font-size: 14px;
+}
+
+body.trac #ticket div.description h3 {
+    border-bottom: 1px solid #ddd;
+    color: #666;
+	font-size: 18px;
+	padding: 15px 0;
+	margin: 0 0 30px 0;
+	font-weight: 600;
+}
+
+body.trac div#commits,
+body.trac div#attachments,
+body.trac div#github-prs,
+body.trac div#trac-add-comment,
+body.trac div#ticketchange + div {
+	margin-bottom: 30px;
+	border: 1px solid #ccc;
+	border-radius: var(--bbbase-border-radius);
+	overflow: hidden;
+}
+
+body.trac div#commits > div.commits,
+body.trac div#attachments > div.attachments,
+body.trac div#github-prs > ul.pull-requests,
+body.trac div#trac-add-comment fieldset {
+	border: none;
+}
+
+body.trac #attachments:empty {
+	display: none;
+}
+
+body.trac #content.ticket {
+	max-width: 940px;
+}
+
+body.trac #content.ticket h3.foldable {
+	font-size: 17px;
+	margin: 0;
+	padding: 0;
+}
+body.trac #content.ticket h3.foldable a {
+	display: block;
+	margin: 0;
+	padding: 10px;
+	background-color: #f0f0f0;
+}
+
+body.trac #content.ticket div#github-prs + div.collapsed h3.foldable {
+	margin: 0 0 30px 0;
+}
+
+body.trac #content.ticket div#github-prs + div:not(.collapsed) h3.foldable {
+	margin: 30px 0;
+}
+
+body.trac #content.ticket #propertyform[action*="/newticket"] fieldset {
+    padding: 30px;
+    border: 1px solid var(--bbbase-grey-border-color-low-contrast);
+    background: var(--bbbase-light-background-color-low-contrast);
+}
+
+body.trac #content.ticket #propertyform[action*="/newticket"] fieldset fieldset {
+	padding: 0;
+}
+
+body.trac #github-prs ul.pull-requests {
+    margin: 0;
+    padding: 0;
+    position: relative;
+	border-collapse: collapse;
+	border: 1px solid #ccc;
+	width: calc(100% - 2px);
+}
+
+body.trac #github-prs ul.pull-requests li {
+	width: auto;
+}
+
+body.trac #github-prs ul.pull-requests li:not(:last-child) {
+	border-bottom: 1px solid #ccc;
+}
+
+body.trac #github-prs ul.pull-requests li div {
+	padding: 12px;
+    text-align: left;
+	border: none;
+}
+
+body.trac #github-prs ul.pull-requests li:not(.loading) div,
+body.trac #github-prs ul.pull-requests li div:not(:first-child) {
+	white-space: nowrap;
+}
+
+body.trac #github-prs ul.pull-requests li.loading div {
+    white-space: initial;
+	padding: 30px;
+}
+
+body.trac #github-prs ul.pull-requests li > div:first-of-type > a:first-of-type {
+    vertical-align: top;
+}
+
+body.trac #github-prs .button {
+    color: #fff;
+    white-space: nowrap;
+	font-size: 12px;
+	padding: 5px 8px;
+	background-color: #f0f0f0;
+	color: #aaa;
+	border: 1px solid #ccc;
+	border-radius: var(--bbbase-border-radius);
+}
+
+@media screen and (max-width: 820px) {
+	body.trac #github-prs ul.pull-requests li div:first-child {
+		padding-bottom: 0;
+	}
+}
+
+body.trac #changelog .changes,
+body.trac #ticketchange .changes,
+body.trac div.change ul.changes {
+    margin: 20px 0;
+    padding: 30px;
+    border: 1px solid #009933;
+    float: none;
+    box-shadow: none;
+    background: rgba(0,255,0,0.1);
+    color: inherit;
+    word-break: break-word;
+}
+
+body.trac #changelog h3,
+body.trac #ticketchange h3 {
+    border-bottom: 1px solid #d7d7d7;
+    box-shadow: none;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    font-size: 100%;
+    font-weight: normal;
+}
+
+body.trac div#content.ticket #prefs {
+	border: 1px solid #ccc;
+	margin: 0;
+	background: #f0f0f0;
+}
+
+body.trac div#content.ticket #prefs div {
+	display: block;
+	margin: 5px;
+}
+
+body.trac #trac-edit-warning {
+	margin: 30px;
+}
+
+body.trac #trac-add-comment .ticket-reopen-notice {
+	margin: 10px 0 20px;
+}
+
+body.trac #trac-add-comment #comment {
+	font-size: 15px;
+	padding: 15px;
+}
+
+body.trac div#ticketchange + div {
+	background: #fafafa;
+}
+
+body.trac #modify {
+	padding: 30px;
+}
+
+body.trac #modify fieldset {
+	padding: 30px;
+	margin-bottom: 30px;
+}
+
+body.trac #modify fieldset fieldset {
+	padding: 0;
+	margin: 0;
+}
+
+body.trac #modify fieldset:last-child {
+	margin-bottom: 0;
+}
+
+body.trac #modify fieldset legend {
+	font-size: 18px;
+	margin: 0 10px;
+}
+
+/* Browser */
+body.trac #content.browser {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	gap: 30px;
+	margin-bottom: 60px;
+}
+
+body.trac #content.browser h1,
+body.trac #content.browser #anydiff,
+body.trac #content.browser #help {
+	flex-basis: 100%;
+	margin-bottom: 0;
+}
+
+body.trac #content.browser #anydiff,
+body.trac #content.browser #help {
+	text-align: right;
+}
+
+body.trac #content.browser #diffrev,
+body.trac #content.browser #jumprev,
+body.trac #content.browser #jumploc {
+    float: none;
+    font-size: 16px;
+    margin: 0 20px 0 0;
+}
+
+body.trac #content.browser #diffrev input,
+body.trac #content.browser #jumprev input,
+body.trac #content.browser #jumploc select,
+body.trac #content.browser #jumploc input {
+    font-size: 16px;
+    margin: 0;
+}
+
+body.trac #content.browser #info .props {
+    list-style: none;
+    margin: 0;
+    padding: 20px;
+	font-family: monospace;
+}
+body.trac #content.browser #info .props li:not(:last-of-type) {
+	margin-bottom: 20px;
+}
+
+/* Changeset */
+body.trac #main .message.searchable p {
+	margin: 15px 0;
+}
+
+body.trac #main .message.searchable p:first-of-type {
+	margin-top: 0;
+}
+
+body.trac #main .message.searchable p:last-of-type {
+	margin-bottom: 0;
+}
+
+body.trac #file-legend {
+    margin: 0;
+}
+
+body.trac .legend {
+	font-size: 16px;
+	padding: 0;
+	margin: 0;
+}
+
+body.trac #main #info {
+	background: var(--bbbase-grey-background-color-low-contrast);
+	border: 1px solid var(--bbbase-grey-border-color-low-contrast);
+}
+
+body.trac #main #info th,
+body.trac #main #info td {
+	padding: 20px;
+}
+
+body.trac #main #info tr:first-child th,
+body.trac #main #info tr:first-child td {
+	padding-bottom: 10px;
+}
+
+body.trac #main #info tr:last-child th,
+body.trac #main #info tr:last-child td {
+	padding-top: 10px;
+}
+
+/* Admin */
+body.trac #content.admin {
+	float: none;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 30px;
+	margin-bottom: 60px;
+}
+
+body.trac #content.admin h1 {
+	float: none;
+	flex-basis: 100%;
+	margin-bottom: 0;
+}
+
+body.trac #content.admin #tabs {
+	float: none;
+	flex: 0 0 auto;
+	width: 200px;
+	margin: 0;
+	padding: 0;
+	border-radius: var(--bbbase-border-radius);
+	background-color: var(--bbbase-grey-background-color-low-contrast);
+}
+
+body.trac #content.admin #tabs > ul {
+    margin: 20px 0 0 0;
+    padding: 0;
+}
+
+body.trac #content.admin #tabs > ul:not(:last-of-type) {
+	border-bottom: 1px solid var(--bbbase-grey-border-color-low-contrast)
+}
+
+body.trac #content.admin #tabs > ul > li {
+	margin: 15px;
+}
+
+body.trac #content.admin #tabs > ul > li > ul {
+	margin: 8px -21px 0 -21px;
+}
+
+body.trac #content.admin #tabs li {
+	list-style: none;
+	margin: 0;
+}
+
+body.trac #content.admin #tabs li li:hover {
+	background: var(--bbbase-button-background-color);
+}
+body.trac #content.admin #tabs li li.active {
+    background: var(--bbbase-button-background-color);
+    color: var(--bbbase-brightest-white);
+    border: none;
+}
+
+body.trac #content.admin #tabs li :link,
+body.trac #content.admin #tabs li :visited {
+    border: none;
+    display: block;
+	border-radius: 0;
+	padding: 8px 10px;
+	margin: 0;
+	text-decoration: none;
+}
+
+body.trac #content.admin #tabs li li.active :link,
+body.trac #content.admin #tabs li li.active :visited {
+	color: var(--bbbase-brightest-white);
+}
+
+body.trac #content.admin #tabs li li:hover a {
+	color: var(--bbbase-brightest-white);
+}
+
+body.trac #content.admin #tabcontent {
+	float: none;
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+body.trac #content.admin #tabcontent p.hint {
+	margin: 0;
+	padding: 0 20px 20px 20px;
+}
+body.trac #content.admin #tabcontent input {
+	max-width: 400px;
+}
+body.trac #content.admin #tabcontent fieldset {
+	margin-bottom: 30px;
+}
+body.trac #content.admin #tabcontent .field td:first-child {
+	width: 210px;
+	text-align: right;
+	padding-right: 20px;
+}
+
+/* System Messages */
+body.trac #notice.system-message,
+body.trac #notice.system-message,
+body.trac #warning.system-message,
+body.trac .warning.system-message {
+    max-width: 880px;
+    padding: 30px;
+    margin: 30px auto -30px;
+	font-size: 16px;
+    background-color: #ffe;
+    border-color: #e6db55;
+    border-radius: var(--bbbase-border-radius);
+}
+
+body.trac div.system-message .trac-close-msg {
+	border: none;
+	color: var(--bbbase-grey-border-color-low-contrast);
+	text-decoration: none;
+	text-transform: uppercase;
+	padding: 3px 5px;
+	margin: 0;
+}
+
+/* Footer */
+body.trac #footer {
+	width: 100%;
+	background-color: #f4f4f4;
+	display: flex;
+	justify-content: center;
+	box-sizing: border-box;
+	max-width: none;
+	font-size: 12px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	height: auto;
+}
+
+/* Mock-admin bar */
+@media screen {
+	html {
+		margin: 32px 0 0 0 !important;
+	}
+}
+@media screen and ( max-width: 782px ) {
+	html {
+		margin: 46px 0 0 0 !important;
+	}
+	body.trac #subnav {
+		height: 46px;
+	}
+	body.trac #subnav #nav-user:before {
+		font-size: 28px;
+		margin-left: 5px;
+	}
+
+	body.trac #mainnav ul,
+	body.trac #mainnav ul li,
+	body.trac #mainnav ul li :link {
+		height: 100%;
+		width: 100%;
+		border-radius: 0 !important;
+		border: none !important;
+		margin: 0;
+	}
+	body.trac #mainnav ul li :link {
+		padding: 10px;
+		border: none !important;
+	}
+	body.trac #mainnav ul li.active :link,
+	body.trac #mainnav ul li:not(.active) :link:hover {
+		border: none !important;
+		margin: 0;
+	}
+	body.trac #mainnav li {
+		width: 100%;
+	}
+	body.trac #mainnav ul {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	}
+
+	body.trac #search input[type=submit] {
+		display: none;
+	}
+}
+
+/* Trac Overrides */
+@media screen and ( max-width: 770px ) {
+    body.trac #banner {
+        position: relative;
+        top: auto;
+        margin-bottom: auto;
+    }
+}

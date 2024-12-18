@@ -11,7 +11,6 @@ use WordPressdotorg\Plugin_Directory\Readme\{ Parser as Readme_Parser, Validator
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Tools\Block_e2e;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Zip\Builder;
@@ -109,6 +108,20 @@ class Import {
 		if ( $readme->warnings ) {
 			$this->warnings = array_merge( $this->warnings, $readme->warnings );
 		}
+
+		/**
+		 * Fire an import action, now that we've exported most of the plugin data.
+		 *
+		 * NOTE: This is prior to any validation checks.
+		 *
+		 * @param Import  $this                   The Plugin Importer object.
+		 * @param WP_Post $plugin                 The plugin being imported.
+		 * @param array   $data                   The data from the import process.
+		 * @param array   $svn_changed_tags       The list of SVN tags/trunk affected to trigger the import.
+		 * @param array   $svn_tags_deleted       The list of SVN tags/trunk deleted in the import.
+		 * @param int     $svn_revision_triggered The SVN revision that triggered the import.
+		 */
+		do_action( 'wporg_plugins_import', $this, $plugin, $data, $svn_changed_tags, $svn_tags_deleted, $svn_revision_triggered );
 
 		// Validate various headers:
 
@@ -280,11 +293,35 @@ class Import {
 				// Update with ^
 				Plugin_Directory::add_release( $plugin, $release );
 
+				/**
+				 * Fire an action to let other code know this plugin has a pending release.
+				 *
+				 * @param WP_Post $plugin  The plugin being imported.
+				 * @param array   $release The release data.
+				 * @param array   $data    The data from the import process.
+				 */
+				do_action( 'wporg_plugins_import_release_pending', $plugin, $release, $data );
+
 				throw new Exception( "Plugin release {$stable_tag} not confirmed." );
 			}
 
 			// At this point we can assume that the release was confirmed, and should be imported.
 		}
+
+		/**
+		 * Fire an import action, now that we've exported the plugin data, and validates that it's ready for release.
+		 *
+		 * NOTE: This fires after Release Confirmation, such that the plugin is 100% ready to be released.
+		 *
+		 * @param Import  $this                   The Plugin Importer object.
+		 * @param WP_Post $plugin                 The plugin being imported.
+		 * @param array   $release                The release data. Only present if the plugin uses Release Confirmation.
+		 * @param array   $data                   The data from the import process.
+		 * @param array   $svn_changed_tags       The list of SVN tags/trunk affected to trigger the import.
+		 * @param array   $svn_tags_deleted       The list of SVN tags/trunk deleted in the import.
+		 * @param int     $svn_revision_triggered The SVN revision that triggered the import.
+		 */
+		do_action( 'wporg_plugins_import_process', $this, $plugin, $release ?? false, $data, $svn_changed_tags, $svn_tags_deleted, $svn_revision_triggered );
 
 		$content = '';
 		if ( $readme->sections ) {
@@ -493,11 +530,6 @@ class Import {
 		// Import Tide data
 		Tide_Sync::sync_data( $plugin->post_name );
 
-		// Run the Block Directory e2e tests if applicable.
-		if ( has_term( 'block', 'plugin_section', $plugin->ID ) ) {
-			Block_e2e::run( $plugin->post_name );
-		}
-
 		/**
 		 * Action that fires after a plugin is imported.
 		 *
@@ -590,8 +622,9 @@ class Import {
 			Plugin_Directory::add_release(
 				$plugin,
 				[
-					'tag'        => $tag,
-					'zips_built' => true
+					'tag'                      => $tag,
+					'zips_built'               => true,
+					'zips_built_from_revision' => ( $zip_builder->plugins_revision ?? 0 ) ?: $svn_revision_triggered,
 				]
 			);
 		}

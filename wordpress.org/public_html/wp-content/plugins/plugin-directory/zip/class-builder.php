@@ -28,6 +28,9 @@ class Builder {
 	// The SVN url of the plugin version being packaged.
 	protected $plugin_version_svn_url = '';
 
+	// The revision of the plugin that was just packaged.
+	public $plugins_revision = 0;
+
 	/**
 	 * Generate a ZIP for a provided Plugin tags.
 	 *
@@ -380,6 +383,9 @@ class Builder {
 		if ( ! $res['result'] ) {
 			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
 		}
+
+		// Store the SVN revision that's been used for the ZIP in a property for later.
+		$this->plugins_revision = $res['revision'];
 
 		// Verify that the specified plugin zip will contain files.
 		if ( ! array_diff( scandir( $this->tmp_build_dir ), array( '.', '..' ) ) ) {

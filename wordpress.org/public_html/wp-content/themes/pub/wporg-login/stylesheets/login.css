@@ -497,16 +497,16 @@ body.route-pending-profile p {
 }
 
 .login-profile-intro {
-    margin-top: 20px !important;
-    border-top: 1px solid #d9d9d9;
-    padding-top: 16px;
+	margin-top: 20px !important;
+	border-top: 1px solid #d9d9d9;
+	padding-top: 16px;
 }
 
-form p.checkbox.error {
+form#registerform p.checkbox.error {
 	color: #dc3232;
 }
 
-form p.checkbox label {
+form#registerform p.checkbox label {
 	position: relative;
 	display: block;
 	padding-left: 24px;
@@ -514,30 +514,30 @@ form p.checkbox label {
 	line-height: 19px;
 }
 
-.rtl form p.checkbox label {
+.rtl form#registerform p.checkbox label {
 	padding-left: 0;
 	padding-right: 24px;
 }
 
 @media screen and (max-width: 782px) {
-	form p.checkbox label {
+	form#registerform p.checkbox label {
 		padding-left: 33px;
 	}
 
-	.rtl form p.checkbox label {
+	.rtl form#registerform p.checkbox label {
 		padding-left: 0;
 		padding-right: 33px;
 	}
 }
 
-form p.checkbox label input {
+form#registerform p.checkbox label input {
 	position: absolute;
 	top: 0;
 	left: 0;
 	margin: 2px 0 0;
 }
 
-.rtl form p.checkbox label input {
+.rtl form#registerform p.checkbox label input {
 	left: auto;
 	right: 0;
 }

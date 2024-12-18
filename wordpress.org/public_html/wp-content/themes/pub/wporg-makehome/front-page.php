@@ -73,7 +73,7 @@
 	for (var i=0; i<nodes.length; ++i) {
 		var node = nodes[i];
 		if (node.className === 'date') {
-			var d = parse_date(node.getAttribute('date-time'));
+			var d = parse_date(node.getAttribute('datetime'));
 			if (d) {
 				node.textContent = format_time(d);
 			}

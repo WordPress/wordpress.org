@@ -134,7 +134,7 @@ class Uploads {
 			'photo_license'            => sprintf(
 				/* translators: %s: Link to CC0 license */
 				__( 'I am making this photo available under the <a href="%s">CC0 license</a>. People will be able to use this image for any purpose, including resale, marketing, branding, etc without cost or attribution.', 'wporg-photos' ),
-				'https://creativecommons.org/share-your-work/public-domain/cc0/'
+				'https://creativecommons.org/publicdomain/zero/1.0/'
 			),
 			'photo_photograph'         => __( 'Photo is an actual photograph and not a screenshot or digital art.', 'wporg-photos' ),
 			'photo_high_quality'       => __( 'Photo is high quality (well composed and lit, not blurry, etc).', 'wporg-photos' ),
@@ -945,7 +945,7 @@ class Uploads {
 				$content .= "</div>\n"; // End upload-checkbox-wrapper.
 
 				$content .= sprintf(
-					'[input type="submit" class="button-primary" value="%s"]' . "\n",
+					'[input type="submit" class="button-primary wp-block-button__link wp-element-button" value="%s"]' . "\n",
 					esc_attr( __( 'Submit', 'wporg-photos' ) )
 				)
 				. '[recaptcha]' . "\n";

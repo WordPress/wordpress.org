@@ -275,6 +275,7 @@ class Status_Transitions {
 			$dir,
 			'http://plugins.svn.wordpress.org/' . $post->post_name,
 			sprintf(
+				// WARNING: When changing this, please update the regex in SVN_Watcher::get_plugin_changes_between().
 				'Adding %1$s by %2$s.',
 				html_entity_decode( $post->post_title ),
 				$plugin_author->user_login

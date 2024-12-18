@@ -679,18 +679,61 @@ class Upload_Handler {
 
 		// Run plugin check via CLI
 		$start_time = microtime(1);
-		exec(
-			'export WP_CLI_CONFIG_PATH=' . escapeshellarg( WP_CLI_CONFIG_PATH ) . '; ' .
-			'timeout 45 ' . // Timeout after 45s if plugin-check is not done.
-			WPCLI . ' --url=https://wordpress.org/plugins ' .
-			'plugin check ' .
-			'--error-severity=7 --warning-severity=6 --categories=plugin_repo --format=json ' .
-			'--slug=' . escapeshellarg( $this->plugin_slug ) . ' ' .
-			escapeshellarg( $this->plugin_root ),
-			$output,
-			$return_code
+		$env_vars   = [
+			'PATH'               => $_ENV['PATH'] ?? '/usr/local/bin:/usr/bin:/bin',
+			'WP_CLI_CONFIG_PATH' => WP_CLI_CONFIG_PATH,
+		];
+		$command    = WPCLI . ' --url=https://wordpress.org/plugins ' .
+		              'plugin check ' .
+		              '--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
+		              '--categories=plugin_repo --format=json ' .
+		              '--slug=' . escapeshellarg( $this->plugin_slug ) . ' ' .
+		              escapeshellarg( $this->plugin_root );
+
+		$plugin_check_process = proc_open(
+			$command,
+			[
+				1 => [ 'pipe', 'w' ], // STDOUT
+				2 => [ 'pipe', 'w' ], // STDERR
+			],
+			$pipes,
+			null,
+			$env_vars
 		);
-		$total_time = round( microtime(1) - $start_time, 1 );
+		if ( ! $plugin_check_process ) {
+			// If we can't run plugin-check, we'll just return a pass.
+			return [
+				'verdict' => true,
+				'results' => [],
+				'html'    => '',
+			];
+		}
+		do {
+			usleep( 100000 ); // 0.1s
+
+			$total_time = round( microtime(1) - $start_time, 1 );
+
+			$proc_status = proc_get_status( $plugin_check_process );
+			$return_code = $proc_status['exitcode'] ?? 1;
+
+			if ( $total_time >= 45 && $proc_status['running'] ) {
+				// Terminate it.
+				proc_terminate( $plugin_check_process );
+			}
+		} while ( $proc_status['running'] && $total_time <= 60 ); // 60s max, just in case.
+
+		$output = stream_get_contents( $pipes[1] );
+		$stderr = rtrim( stream_get_contents( $pipes[2] ), "\n" );
+
+		// Remove ABSPATH from the output if present.
+		$output = str_replace( ABSPATH, '/', $output );
+		$output = str_replace( str_replace( '/', '\/', ABSPATH ), '\/', $output ); // JSON encoded
+		$stderr = str_replace( ABSPATH, '/', $stderr );
+
+		// Close the process.
+		fclose( $pipes[1] );
+		fclose( $pipes[2] );
+		proc_close( $plugin_check_process );
 
 		/**
 		 * Anything that plugin-check outputs that we want to discard completely.
@@ -715,8 +758,10 @@ class Upload_Handler {
 		 * FILE: example2.extension
 		 * [{.....}]
 		 */
-		$verdict  = true;
-		$results  = [];
+		$verdict         = true;
+		$results         = [];
+		$results_by_type = [];
+		$output          = explode( "\n", $output );
 		foreach ( array_chunk( $output, 3 ) as $file_result ) {
 			if ( ! str_starts_with( $file_result[0], 'FILE:' ) ) {
 				continue;
@@ -733,6 +778,9 @@ class Upload_Handler {
 				}
 
 				$results[] = $record;
+
+				$results_by_type[ $record['type'] ] ??= [];
+				$results_by_type[ $record['type'] ][] = $record;
 
 				// Record submission stats.
 				if ( function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
@@ -754,20 +802,37 @@ class Upload_Handler {
 		if ( $results ) {
 			$html .= '<ul class="pc-result" style="list-style: disc">';
 			// Display errors, and then warnings.
-			foreach ( [ wp_list_filter( $results, [ 'type' => 'ERROR' ] ), wp_list_filter( $results, [ 'type' => 'ERROR' ], 'NOT' ) ] as $result_set ) {
+			foreach ( [ 'ERROR', 'ERRORS_LOW_SEVERITY', 'WARNING', 'WARNING_LOW_SEVERITY' ] as $result_type ) {
+				$result_set = $results_by_type[ $result_type ] ?? [];
+				if ( empty( $result_set ) ) {
+					continue;
+				}
+
+				// ERROR or WARNING
+				$result_label = str_replace( '_LOW_SEVERITY', '', $result_type );
+
+				$maybe_false_positive  = '';
+				if ( str_ends_with( $result_type, 'LOW_SEVERITY' ) ) {
+					$result_label .= '*';
+					$maybe_false_positive = __( 'This may be a false-positive, and will be manually checked by a reviewer.', 'wporg-plugins' );
+				}
+
 				foreach ( $result_set as $result ) {
 					$html .= sprintf(
-						'<li>%s <a href="%s">%s</a>: %s</li>',
+						'<li>%s <a href="%s" title="%s">%s</a>: %s</li>',
 						esc_html( $result['file'] ),
 						esc_url( $result['docs'] ?? '' ),
-						esc_html( $result['type'] . ' ' . $result['code'] ),
-						esc_html( $result['message'] )
+						esc_attr( $maybe_false_positive ),
+						esc_html( "{$result_label}: {$result['code']}" ),
+						$result['message'] // Already escaped.
 					);
 				}
 			}
 			$html .= '</ul>';
+
+			$html .= '<p>' . __( 'The above may contain false-positives. If you believe an error or warning is incorrect or a false-positive, please do not work around it. A reviewer will manually confirm this during the review process.', 'wporg-plugins' ) . '</p>';
 		}
-		$html .= __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' );
+		$html .= '<p>' . __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' ) . '</p>';
 
 		// If the upload is blocked; log it to slack.
 		if ( ! $verdict ) {
@@ -814,7 +879,13 @@ class Upload_Handler {
 		} elseif ( $return_code ) {
 			// Log plugin-check timing out.
 			$zip_name   = reset( $_FILES )['name'];
-			$text       = ":rotating_light: Error: {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s\n";
+			$output     = implode( "\n", $output );
+			$debug      = '';
+			if ( $output || $stderr ) {
+				$debug = trim( "{$output}\n===\n{$stderr}", "\n=" );
+				$debug = "\n```{$debug}```";
+			}
+			$text       = ":rotating_light: Error: {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s{$debug}";
 			notify_slack( PLUGIN_CHECK_LOGS_SLACK_CHANNEL, $text, wp_get_current_user(), true );
 		}
 

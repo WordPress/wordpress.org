@@ -54,7 +54,7 @@ if ( bb_base_is_codex() ) {
 function bb_base_register_stylesheets() {
 
 	// Version of CSS
-	$version = '20221108';
+	$version = '202412180001';
 
 	// Base theme styling
 	wp_enqueue_style( 'bb-base',   get_template_directory_uri()   . '/style.css', false,                         $version, 'screen' );
@@ -77,10 +77,9 @@ function bb_base_topic_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Forum Search', 'bborg'); ?></h3>
+			<h2><?php _e( 'Forum Search', 'bborg'); ?></h2>
 			<label class="screen-reader-text hidden" for="ts"><?php _e( 'Search for:', 'bborg' ); ?></label>
-			<input type="text" value="<?php echo bb_base_topic_search_query(); ?>" name="ts" id="ts" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
+			<input type="text" value="<?php echo bb_base_topic_search_query(); ?>" name="ts" id="ts" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -92,10 +91,9 @@ function bb_base_reply_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Reply Search', 'bborg'); ?></h3>
+			<h2><?php _e( 'Reply Search', 'bborg'); ?></h2>
 			<label class="screen-reader-text hidden" for="rs"><?php _e( 'Search for:', 'bborg' ); ?></label>
-			<input type="text" value="<?php echo bb_base_reply_search_query(); ?>" name="rs" id="rs" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
+			<input type="text" value="<?php echo bb_base_reply_search_query(); ?>" name="rs" id="rs" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -107,10 +105,9 @@ function bb_base_plugin_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Plugin Search', 'bborg'); ?></h3>
+			<h2><?php _e( 'Plugin Search', 'bborg'); ?></h2>
 			<label class="screen-reader-text hidden" for="ps"><?php _e( 'Search for:', 'bborg' ); ?></label>
-			<input type="text" value="<?php echo bb_base_plugin_search_query(); ?>" name="ps" id="ts" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
+			<input type="text" value="<?php echo bb_base_plugin_search_query(); ?>" name="ps" id="ts" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -196,7 +193,7 @@ function bb_base_single_topic_description() {
 	<?php if ( !empty( $last_reply  ) ) : ?>
 		<li class="topic-freshness-author"><?php
 			/* translators: %s: reply author link */
-			printf( __( 'Last reply from: %s', 'bborg' ),
+			printf( __( 'Last voice: %s', 'bborg' ),
 				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) )
 			);
 		?></li>
@@ -204,7 +201,7 @@ function bb_base_single_topic_description() {
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="topic-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( __( 'Last activity: %s', 'bborg' ), $time_since );
+			printf( __( 'About %s', 'bborg' ), $time_since );
 		?></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
@@ -263,7 +260,7 @@ function bb_base_single_forum_description() {
 	<?php if ( !empty( $last_active  ) ) : ?>
 		<li class="forum-freshness-author"><?php
 			/* translators: %s: post author link */
-			printf( __( 'Last post by: %s', 'bborg' ),
+			printf( __( 'Last voice: %s', 'bborg' ),
 				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) )
 			);
 		?></li>
@@ -271,7 +268,7 @@ function bb_base_single_forum_description() {
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="forum-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( __( 'Last activity: %s', 'bborg' ), $time_since );
+			printf( __( 'About %s', 'bborg' ), $time_since );
 		?></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
@@ -615,3 +612,13 @@ function bb_base_login_redirect() {
 	}
 }
 add_action( 'bbp_template_redirect', 'bb_base_login_redirect', 11 );
+
+/**
+ * Enlarge the single-user-details avatar size.
+ *
+ * @author johnjamesjacoby
+ */
+function bb_base_override_single_user_details_avatar_size( $size = 150 ) {
+	return 200;
+}
+add_filter( 'bbp_single_user_details_avatar_size', 'bb_base_override_single_user_details_avatar_size' );

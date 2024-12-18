@@ -776,6 +776,16 @@ class Customizations {
 			);
 		}
 
+		// For highly trusted users, add a cron-jobs metabox for debugging plugin imports.
+		if ( is_super_admin() || 'production' !== wp_get_environment_type() ) {
+			add_meta_box(
+				'cron-logs',
+				'Cron Job Logs',
+				array( __NAMESPACE__ . '\Metabox\Cron_Logs', 'display' ),
+				'plugin', 'normal', 'low'
+			);
+		}
+
 		// Remove unnecessary metaboxes.
 		remove_meta_box( 'commentsdiv', 'plugin', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'plugin', 'normal' );

@@ -698,10 +698,9 @@ class Themes_API {
 			'slug' => $theme->post_name,
 		);
 
-		$repo_package  = new WPORG_Themes_Repo_Package( $theme->ID );
-		$phil->version = $repo_package->latest_version();
-
-		$phil->preview_url = "https://wp-themes.com/{$theme->post_name}/";
+		$repo_package      = new WPORG_Themes_Repo_Package( $theme->ID );
+		$phil->version     = $repo_package->latest_version();
+		$phil->preview_url = $repo_package->preview_url();
 
 		$author = get_user_by( 'id', $theme->post_author );
 
@@ -710,7 +709,7 @@ class Themes_API {
 				// WordPress.org user details.
 				'user_nicename' => $author->user_nicename,
 				'profile'       => 'https://profiles.wordpress.org/' . $author->user_nicename . '/',
-				'avatar'        => 'https://secure.gravatar.com/avatar/' . md5( $author->user_email ) . '?s=96&d=monsterid&r=g',
+				'avatar'        => 'https://secure.gravatar.com/avatar/' . hash( 'sha256', $author->user_email ) . '?s=96&d=monsterid&r=g',
 				'display_name'  => $author->display_name ?: $author->user_nicename,
 
 				// Theme headers details.

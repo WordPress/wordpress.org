@@ -430,6 +430,23 @@ function get_learning_pathway_level_content( $learning_pathway ) {
 				'see_all_aria_label' => 'See all advanced development concepts learning pathways',
 			),
 		),
+		'designer' => array(
+			'beginner' => array(
+				'title' => __( 'Beginner WordPress design', 'wporg-learn' ),
+				'description' => __( 'You’re new to designing for the web or want to learn how to use the Site Editor to customize a theme.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all beginner WordPress design learning pathways',
+			),
+			'intermediate' => array(
+				'title' => __( 'Intermediate WordPress design', 'wporg-learn' ),
+				'description' => __( 'You’re comfortable with web design best practices and using the Site Editor’s design tools.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all intermediate WordPress design learning pathways',
+			),
+			'advanced' => array(
+				'title' => __( 'Advanced WordPress design', 'wporg-learn' ),
+				'description' => __( 'You’re confident with customizing a Block theme, creating patterns, and integrating plugins.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all advanced WordPress design learning pathways',
+			),
+		),
 	);
 
 	return $content[ $learning_pathway ];
