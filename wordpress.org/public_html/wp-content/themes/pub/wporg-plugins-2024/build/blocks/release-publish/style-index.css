@@ -5,7 +5,7 @@
   display: block;
 }
 .wp-block-wporg-release-publish .wp-block-wporg-release-result-item > div:last-child > div {
-  color: var(--wp--preset--color--charcoal-4);
+  color: var(--wp--preset--color--charcoal-3);
   font-size: var(--wp--preset--font-size--extra-small);
 }
 
