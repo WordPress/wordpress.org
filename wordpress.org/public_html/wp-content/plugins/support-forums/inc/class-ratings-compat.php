@@ -324,6 +324,14 @@ class Ratings_Compat {
 			return;
 		}
 
+		if ( defined( 'WPORG_HOLIDAY_MODE' ) && WPORG_HOLIDAY_MODE ) {
+			bbp_add_error( 'bbp_wporg_holiday_mode', sprintf(
+				__( '<strong>Error</strong>: Reviews are unavailable. Please check back after the <a href="%s">holiday break</a>.', 'wporg-forums' ),
+				'https://wordpress.org/news/2024/12/holiday-break/'
+			) );
+			return;
+		}
+
 		$topic_content = false;
 		if ( ! empty( $_POST['bbp_topic_content'] ) ) {
 			// Apply the new-topic pre-content filters. This allows for various forum hooks to remove links.
@@ -337,7 +345,7 @@ class Ratings_Compat {
 				false !== stripos( $topic_content, 'http://' )
 			)
 		) {
-			// Send this review to pending after it gets published. 
+			// Send this review to pending after it gets published.
 			setcookie( 'wporg_review_to_pending', 'links_blocked', time() + HOUR_IN_SECONDS, '/support/', 'wordpress.org', true, true );
 
 			bbp_add_error(
@@ -495,6 +503,16 @@ class Ratings_Compat {
 			return;
 		}
 
+		if ( defined( 'WPORG_HOLIDAY_MODE' ) && WPORG_HOLIDAY_MODE ) {
+			echo '<div class="bbp-template-notice error">';
+			printf(
+				__( 'Reviews are unavailable. Please check back after the <a href="%s">holiday break</a>.', 'wporg-forums' ),
+				'https://wordpress.org/news/2024/12/holiday-break/'
+			);
+			echo '</div>';
+			return;
+		}
+
 		printf(
 			'<label for="rating">%s</label>',
 			__( 'Your Rating:', 'wporg-forums' )
@@ -527,7 +545,7 @@ class Ratings_Compat {
 				$content = sprintf(
 					"<p>%s</p>\n%s",
 					sprintf(
-						__( 'Rating: %s', 'wporg-forums' ),	
+						__( 'Rating: %s', 'wporg-forums' ),
 						sprintf(
 							_n( '%s star', '%s stars', $rating, 'wporg-forums' ),
 							$rating
