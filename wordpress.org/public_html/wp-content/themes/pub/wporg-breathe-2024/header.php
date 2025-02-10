@@ -36,7 +36,7 @@ if ( is_front_page() && is_home() ) {
 				<!-- wp:navigation {"icon":"menu","overlayBackgroundColor":"charcoal-2","overlayTextColor":"white","layout":{"type":"flex","orientation":"horizontal"},"fontSize":"small","menuSlug":"breathe"} /-->
 
 			<!-- /wp:wporg/local-navigation-bar -->',
-			esc_url( $is_updates_or_project ? $make_home_url : home_url() ),
+			esc_url( $is_updates_or_project ? $make_home_url : home_url( '/' ) ),
 			$before_name,
 			$is_updates_or_project
 				? esc_html__( 'Make WordPress', 'wporg-breathe' )
