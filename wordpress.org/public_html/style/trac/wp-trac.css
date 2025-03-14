@@ -730,6 +730,7 @@ input[type=text], input.textwidget, textarea {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	font-size: 13px;
+	padding: 0 6px;
 }
 input[name="description"] {
 	width: 100%;
