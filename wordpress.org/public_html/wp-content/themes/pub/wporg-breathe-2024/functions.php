@@ -735,3 +735,25 @@ function modify_site_title_block( $block_content, $block ) {
 	return $block_content;
 }
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\modify_site_title_block', 10, 2 );
+
+/**
+ * Inject a script to trigger Prism (syntax highlighter) after o2 content is rendered.
+ */
+add_action(
+	'wp_footer',
+	function () {
+		wp_add_inline_script(
+			'mkaz-code-syntax-prism-js',
+			'jQuery( document ).on(
+				"ready.o2",
+				function () {
+					setTimeout( () => Prism.highlightAll(), 10 );
+					console.log( "test" );
+				}
+			);',
+			'after'
+		);
+	}
+);
+// Ensure assets are loaded, regardless of what's there on page load.
+add_filter( 'mkaz_code_syntax_force_loading', '__return_true' );
