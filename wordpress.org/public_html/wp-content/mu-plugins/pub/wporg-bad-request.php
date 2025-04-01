@@ -141,6 +141,15 @@ add_action( 'xmlrpc_call', function() {
 }, 1 );
 
 /**
+ * Disable Demo XMLRPC endpoints that are easy to trigger noisy fatals with invalid inputs.
+ */
+add_filter( 'xmlrpc_methods', function( $methods ) {
+	unset( $methods['demo.addTwoNumbers'] );
+
+	return $methods;
+} );
+
+/**
  * Detect invalid requests from over hungry vulnerability scanners.
  */
 add_action( 'send_headers', function() {
