@@ -21,7 +21,6 @@ class Manager {
 		'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
 		'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
 		'import_zip'         => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
-		'tide_sync'          => array( __NAMESPACE__ . '\Tide_Sync', 'cron_trigger' ),
 	);
 
 	/**

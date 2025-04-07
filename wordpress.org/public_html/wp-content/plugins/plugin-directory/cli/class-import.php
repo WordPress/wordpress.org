@@ -3,7 +3,6 @@ namespace WordPressdotorg\Plugin_Directory\CLI;
 
 use Exception;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
-use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
@@ -526,9 +525,6 @@ class Import {
 		// Ensure that the API gets the updated data
 		API_Update_Updater::update_single_plugin( $plugin->post_name );
 		Plugins_Info_API::flush_plugin_information_cache( $plugin->post_name );
-
-		// Import Tide data
-		Tide_Sync::sync_data( $plugin->post_name );
 
 		/**
 		 * Action that fires after a plugin is imported.
