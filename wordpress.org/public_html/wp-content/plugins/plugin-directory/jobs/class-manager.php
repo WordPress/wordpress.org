@@ -301,8 +301,6 @@ class Manager {
 	 * These cron tasks are in the form of 'import_plugin:$slug', this maps them to their expected handlers.
 	 */
 	public function register_colon_based_hook_handlers() {
-		$cron_array = get_option( 'cron' );
-
 		// Add the wildcard cron task above to the specified colon-based hook.
 		$add_callback = static function( $hook ) {
 			if ( ! str_contains( $hook, ':' ) ) {
@@ -321,15 +319,16 @@ class Manager {
 			}
 		};
 
-		if ( is_array( $cron_array ) ) {
-			foreach ( $cron_array as $timestamp => $handlers ) {
-				if ( ! is_numeric( $timestamp ) ) {
-					continue;
-				}
+		// Flush the Cavalcade jobs cache, we need fresh data from the database
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
 
-				foreach ( $handlers as $hook => $jobs ) {
-					$add_callback( $hook );
-				}
+		foreach ( _get_cron_array() as $timestamp => $handlers ) {
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $handlers as $hook => $jobs ) {
+				$add_callback( $hook );
 			}
 		}
 
