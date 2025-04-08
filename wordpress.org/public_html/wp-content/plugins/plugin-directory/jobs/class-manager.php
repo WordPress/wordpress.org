@@ -301,6 +301,8 @@ class Manager {
 	 * These cron tasks are in the form of 'import_plugin:$slug', this maps them to their expected handlers.
 	 */
 	public function register_colon_based_hook_handlers() {
+		global $wpdb;
+
 		// Add the wildcard cron task above to the specified colon-based hook.
 		$add_callback = static function( $hook ) {
 			if ( ! str_contains( $hook, ':' ) ) {
@@ -342,8 +344,11 @@ class Manager {
 		 * We can get the job hook via the job id, either through `$job_id` global that our loader sets,
 		 * or through the WP CLI arguments.
 		 */
-		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			// The WordPress.org cavalcade loader sets the $job_id variable.
+		if (
+			class_exists( '\HM\Cavalcade\Plugin\Job' ) &&
+			( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) )
+		) {
+			// The WordPress.org cavalcade loader sets the $job_id variable, check there first.
 			$job_id = $GLOBALS['job_id'] ?? false;
 
 			// Try to get it from the CLI args. `wp cavalcade run 12345`
@@ -351,8 +356,22 @@ class Manager {
 				$job_id = $GLOBALS['argv'][ array_search( 'run', $GLOBALS['argv'] ) + 1 ] ?? false;
 			}
 
-			if ( $job_id && class_exists( '\HM\Cavalcade\Plugin\Job' ) ) {
+			if ( $job_id && is_numeric( $job_id ) ) {
 				$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+
+				// This shouldn't occur, but if it does and we're using HyperDB, retry against a master DB server.
+				if (
+					! $job &&
+					isset( $wpdb->srtm ) &&
+					is_callable( [ $wpdb, 'send_reads_to_masters' ] )
+				) {
+					$srtm = $wpdb->srtm;
+					$wpdb->send_reads_to_masters();
+					$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+					$wpdb->srtm = $srtm;
+				}
+
+				// If we're running a job, add the callback for the job if it hasn't already been done.
 				if ( $job ) {
 					$add_callback( $job->hook );
 				}
