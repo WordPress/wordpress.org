@@ -443,10 +443,12 @@ function get_whitelist() {
 		),
 		'core-performance' => array(
 			// #core (inc committers) already included via get_parent_channel().
+			'b1ink0',
 			'clarkeemily', // @Emily Clarke on Slack
 			'joegrainger', // @Joe Grainger on Slack
 			'mukesh27',
 			'mxbclang', // @Bethany Chobanian Lang (they/them) on Slack
+			'shyamgadde',
 		),
 		'photos' => array(
 			'topher1kenobe',
