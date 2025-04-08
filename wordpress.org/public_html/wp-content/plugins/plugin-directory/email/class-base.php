@@ -21,7 +21,7 @@ abstract class Base {
 	abstract public function body();
 
 	// Internal use only.
-	protected $users = false;
+	protected $users = [];
 
 	/**
 	 * @param $plugin  The plugin this email relates to.
