@@ -592,11 +592,11 @@ class SVN {
 	 * @access protected
 	 *
 	 * @param string $command The command to be executed.
-	 * @return mixed The output from the executed command or NULL if an error occurred or the command produces no
-	 *               output.
+	 * @return mixed The output from the executed command, empty string if an error occurred or the command
+	 *               produces no output.
 	 */
 	protected static function shell_exec( $command ) {
-		return shell_exec( 'export LC_CTYPE="en_US.UTF-8" LANG="en_US.UTF-8"; ' . $command );
+		return shell_exec( 'export LC_CTYPE="en_US.UTF-8" LANG="en_US.UTF-8"; ' . $command ) ?? '';
 	}
 }
 
