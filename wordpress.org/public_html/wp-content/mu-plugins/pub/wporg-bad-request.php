@@ -41,6 +41,29 @@ add_action( 'parse_request', function( $wp ) {
 }, 0 );
 
 /**
+ * Detect invalid query parameters being passed in Core query fields, before the 'request' action.
+ * Generally causing warnings & fatals in `wp_resolve_numeric_slug_conflicts()`.
+ */
+add_filter( 'do_parse_request', function( $process ) {
+	if ( $process ) {
+		// See https://github.com/WordPress/wordpress-develop/blob/50fb4086b7afbfa012c5d1f2eeff79b1bae3b00e/src/wp-includes/rewrite.php#L400-L407
+		$wp_resolve_numeric_slug_conflict_fields = [
+			'year',
+			'monthnum',
+			'day'
+		];
+
+		foreach ( $wp_resolve_numeric_slug_conflict_fields as $field ) {
+			if ( isset( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+				die_bad_request( "non-scalar $field in do_parse_request" );
+			}
+		}
+	}
+
+	return $process;
+}, 1001 );
+
+/**
  * Check a set of internal query variables against the WordPress WP_Query values to detect invalid input.
  */
 function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
