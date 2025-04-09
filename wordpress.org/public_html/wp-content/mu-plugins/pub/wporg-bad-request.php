@@ -41,6 +41,15 @@ add_action( 'parse_request', function( $wp ) {
 }, 0 );
 
 /**
+ * Detect invalid query parameters being passed in Core query fields on requests that bbPress is intercepting.
+ */
+add_filter( 'bbp_request', function( $query_vars ) {
+	check_for_invalid_query_vars( $query_vars, '$bbp_request' );
+
+	return $query_vars;
+}, 0 );
+
+/**
  * Detect invalid query parameters being passed in Core query fields, before the 'request' action.
  * Generally causing warnings & fatals in `wp_resolve_numeric_slug_conflicts()`.
  */
