@@ -59,7 +59,7 @@ class Committers extends \WP_Widget {
 						<?php echo Template::encode( $committer->display_name ); ?>
 					</a><br>
 
-					<?php if ( current_user_can( 'plugin_remove_committer', $post ) ) : ?>
+					<?php if ( $committer->user_login !== wp_get_current_user()->user_login && current_user_can( 'plugin_remove_committer', $post ) ) : ?>
 					<small>
 						<?php echo current_user_can( 'plugin_review' ) ? esc_html( $committer->user_email ) . ' ' : ''; ?>
 						<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
@@ -68,7 +68,8 @@ class Committers extends \WP_Widget {
 				</li>
 			<?php endforeach; ?>
 
-			<?php if ( current_user_can( 'plugin_add_committer', $post ) ) : ?>
+			<?php
+            if ( current_user_can( 'plugin_add_committer', $post ) ) : ?>
 			<li class="new">
 				<form id="add-committer" action="POST">
 					<input type="text" name="committer" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
