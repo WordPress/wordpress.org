@@ -2977,14 +2977,14 @@ body.category #main .archive-pagination {
 	}
 	.bbpress #bbpress-forums .bbp-header li.bbp-topic-reply-count,
 	.bbpress #bbpress-forums .bbp-body li.bbp-topic-reply-count {
-		width: 8%;
+		width: 10%;
 	}
 	.bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
 	.bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
 	.bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
 	.bbpress #bbpress-forums .bbp-body li.bbp-topic-freshness {
 		text-align: left;
-		width: 20%;
+		width: 18%;
 	}
 }
 .bbpress #bbpress-forums .bbp-forum-info .bbp-forum-content,
