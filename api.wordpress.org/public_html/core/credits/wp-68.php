@@ -398,7 +398,6 @@ class WP_68_Credits extends WP_Credits {
 			'iamshubhamsp',
 			'iamtakashi',
 			'iandunn',
-			'ideag',
 			'ikamal',
 			'ilovecats7',
 			'im3dabasia1',
