@@ -56,6 +56,10 @@ class WP_68_Credits extends WP_Credits {
 					'oandregal'           => 'André Maneiro',
 					'jonsurrell'          => 'Jon Surrell',
 					'yogeshbhutkar'       => 'Yogesh Bhutkar',
+					'mukesh27'            => 'Mukesh Panchal',
+					'nikunj8866'          => 'Nikunj Hatkar',
+					'karthickmurugan'     => 'Karthick Murugan',
+					'krupaly2k'           => 'Krupal Lakhia',
 				],
 			],
 		];
