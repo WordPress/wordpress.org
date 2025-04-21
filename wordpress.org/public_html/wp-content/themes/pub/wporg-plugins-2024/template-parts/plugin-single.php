@@ -49,7 +49,13 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			</div>
 			<div class="plugin-actions">
 				<?php
+				/**
+				 * Retrieve the plugin donate link.
+				 *
+				 * @var string $donate_link The donation URL from post meta.
+				 */
 				$donate_link = get_post_meta( get_the_ID(), 'donate_link', true );
+
 				$buttons = '<!-- wp:wporg/favorite-button /-->';
 
 				if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) {
