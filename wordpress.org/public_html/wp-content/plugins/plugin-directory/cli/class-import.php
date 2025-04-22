@@ -747,6 +747,16 @@ class Import {
 		$last_committer = $svn_info['result']['Last Changed Author'] ?? '';
 		$last_revision  = $svn_info['result']['Last Changed Rev'] ?? 0;
 
+		/*
+		 * Before we check out the plugin, ensure that it has *files* in the folder.
+		 *
+		 * Some plugins accidentally copy their entire SVN repo into the tagged folder, which
+		 * causes a recursive checkout many multiple gigabytes in size, causing issues for WordPress.org.
+		 */
+		if ( ! wp_list_filter( SVN::ls( $stable_url, true ), [ 'kind' => 'file' ] ) ) {
+			throw new Exception( "Could not create SVN export of {$stable_url}: Path appears not to have any files." );
+		}
+
 		$svn_export = SVN::export(
 			$stable_url,
 			$tmp_dir . '/export',
