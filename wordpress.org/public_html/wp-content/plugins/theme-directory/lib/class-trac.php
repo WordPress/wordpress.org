@@ -62,7 +62,7 @@ class Trac {
 			$attr = new IXR_Value( array(), 'struct' );
 		}
 
-		$ok = $this->rpc->query( 'ticket.create', $subj, $desc, $attr );
+		$ok = $this->rpc_query_retry( 5, 'ticket.create', $subj, $desc, $attr );
 		if ( ! $ok ) {
 			trigger_error( 'Trac: ticket.create: ' . $this->rpc->error->message, E_USER_WARNING );
 
@@ -85,14 +85,19 @@ class Trac {
 	 */
 	public function ticket_update( $id, $comment, $attr = array(), $notify = false ) {
 		if ( empty( $attr['_ts'] ) ) {
-			$get         = $this->ticket_get( $id );
+			$get = $this->ticket_get( $id );
+			if ( ! $get ) {
+				trigger_error( 'Trac: ticket.update: Couldn\'t get: ' . $this->rpc->error->message, E_USER_WARNING );
+				return false;
+			}
+
 			$attr['_ts'] = $get['_ts'];
 		}
 		if ( empty( $attr['action'] ) ) {
 			$attr['action'] = 'leave';
 		}
 
-		$ok = $this->rpc->query( 'ticket.update', $id, $comment, $attr, $notify );
+		$ok = $this->rpc_query_retry( 5, 'ticket.update', $id, $comment, $attr, $notify );
 		if ( ! $ok ) {
 			trigger_error( 'Trac: ticket.update: ' . $this->rpc->error->message, E_USER_WARNING );
 
@@ -124,8 +129,11 @@ class Trac {
 	 * @return [id, time_created, time_changed, attributes] or false on failure.
 	 */
 	public function ticket_get( $id ) {
-		$ok = $this->rpc->query( 'ticket.get', $id );
+		$ok = $this->rpc_query_retry( 5, 'ticket.get', $id );
+	
 		if ( ! $ok ) {
+			trigger_error( 'Trac: ticket.get: ' . $this->rpc->error->message, E_USER_WARNING );
+
 			return false;
 		}
 
@@ -137,4 +145,30 @@ class Trac {
 
 		return $response;
 	}
+
+	/**
+	 * Queries Trac RPC with a backoff retry.
+	 *
+	 * @param int $retries Number of retries.
+	 * @param mixed ...$args Arguments to pass to the query.
+	 */
+	public function rpc_query_retry( $retries, ...$args ) {
+		$ok    = false;
+		$retry = 0;
+		while ( ! $ok && $retry < $retries ) {
+			if ( $retry ) {
+				sleep( $retry );
+			}
+			$retry++;
+
+			$ok = call_user_func_array( [ $this->rpc, 'query' ], $args );
+		}
+
+		if ( ! $ok ) {
+			trigger_error( 'Trac: rpc query retry failed: ' . $args[0] . ' ' . $this->rpc->error->message, E_USER_WARNING );
+		}
+
+		return $ok;
+	}
+
 }
