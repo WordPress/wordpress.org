@@ -1157,19 +1157,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
-				'url'        => 'https://europe.wordcamp.org/2022/',
+				'url'        => 'https://europe.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'                 => '2022-06-02 00:00:00',
-				'end_date'             => '2022-06-04 00:00:00',
-				'start_unix_timestamp' => strtotime( '2022-06-02 00:00:00' ) - 1 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2022-06-04 00:00:00' ) - 1 * HOUR_IN_SECONDS,
+				'date'                 => '2025-06-05 00:00:00',
+				'end_date'             => '2025-06-07 00:00:00',
+				'start_unix_timestamp' => strtotime( '2025-06-05 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-06-07 00:00:00' ) - 2 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Porto',
-					'country'   => 'PT',
-					'latitude'  => 41.147,
-					'longitude' => -8.625,
+					'location'  => 'Basel',
+					'country'   => 'CH',
+					'latitude'  => 47.5627438,
+					'longitude' => 7.5993872,
 				),
 			),
 		),
@@ -1184,22 +1184,23 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://us.wordcamp.org/2021/',
+				'url'        => 'https://us.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2021-10-01 00:00:00',
-				'end_date'   => '2021-10-02 00:00:00',
-				'start_unix_timestamp' => strtotime( '2021-10-01 00:00:00' ) - 5 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2021-10-02 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				'date'       => '2025-08-26 00:00:00',
+				'end_date'   => '2025-08-29 00:00:00',
+				'start_unix_timestamp' => strtotime( '2025-08-26 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-08-29 00:00:00' ) - 5 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Online',
+					'location'  => 'Portland, Oregon',
 					'country'   => 'US',
-					'latitude'  => 38.6532135,
-					'longitude' => -90.3136733,
+					'latitude'  => 45.5283308,
+					'longitude' => -122.6634712,
 				),
 			),
 		),
+
 	);
 
 	return $events;
