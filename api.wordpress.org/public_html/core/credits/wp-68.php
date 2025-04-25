@@ -630,6 +630,7 @@ class WP_68_Credits extends WP_Credits {
 			'moxie',
 			'mp518',
 			'mr660',
+			'mrashishjain',
 			'mreishus',
 			'mrfoxtalbot',
 			'mrtortai',
