@@ -34,7 +34,7 @@ class Trac {
 	 */
 	public function __construct( $username, $password, $host, $path = '/', $port = 80, $ssl = false ) {
 		// Assume URL to $host, ignore $path, $port, $ssl.
-		$this->rpc = new WP_HTTP_IXR_Client( $host, false, false, 60 );
+		$this->rpc = new WP_HTTP_IXR_Client( $host, false, false, 90 );
 
 		$http_basic_auth  = 'Basic ';
 		$http_basic_auth .= base64_encode( $username . ':' . $password );
@@ -162,6 +162,18 @@ class Trac {
 			$retry++;
 
 			$ok = call_user_func_array( [ $this->rpc, 'query' ], $args );
+
+			// Don't retry on creation tasks, if it's a HTTP timeout. Retry on other errors.
+			if (
+				! $ok &&
+				str_contains( $this->rpc->error->message, 'Operation timed out' ) &&
+				(
+					str_contains( $args[0], 'create' ) ||
+					str_contains( $args[0], 'update' )
+				)
+			) {
+				break;
+			}
 		}
 
 		if ( ! $ok ) {
