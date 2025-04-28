@@ -1492,7 +1492,7 @@ TICKET;
 		// Check to see if the theme already exists in SVN.
 		$this->exec_with_notify( self::SVN . " ls https://themes.svn.wordpress.org/{$this->theme_slug}/", $output, $return_var );
 		if ( $return_var < 1 ) {
-			$svn_versions = explode( "\n", $svn_versions );
+			$svn_versions = explode( "\n", $output );
 			$svn_versions = array_map( 'trim', $svn_versions );
 
 			if ( in_array( $this->theme->display( 'Version' ), $svn_versions, true ) ) {
