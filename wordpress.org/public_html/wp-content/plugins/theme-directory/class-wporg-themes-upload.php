@@ -1492,8 +1492,10 @@ TICKET;
 		// Check to see if the theme already exists in SVN.
 		$this->exec_with_notify( self::SVN . " ls https://themes.svn.wordpress.org/{$this->theme_slug}/", $output, $return_var );
 		if ( $return_var < 1 ) {
-			$svn_versions = explode( "\n", $output );
-			$svn_versions = array_map( 'trim', $svn_versions );
+			// SVN ls output is one line per version, with a `/` appended to versions.
+			$svn_versions = array_map( function( $line ) {
+				return trim( $line, "/\r\n\t " );
+			}, $output );
 
 			if ( in_array( $this->theme->display( 'Version' ), $svn_versions, true ) ) {
 				return new WP_Error( 'version_exists_in_svn', 'version_exists_in_svn' ); // Intentionally not translated or human-readable-text.
