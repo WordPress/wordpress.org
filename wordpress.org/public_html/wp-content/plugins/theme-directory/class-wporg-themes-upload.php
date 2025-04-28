@@ -720,7 +720,17 @@ class WPORG_Themes_Upload {
 
 		// Create a new version in SVN.
 		if ( $args['commit_to_svn'] ) {
+
 			$result = $this->add_to_svn();
+
+			// Use a specific check for when the version already exists in SVN.
+			if ( is_wp_error( $result ) && $result->get_error_code() === 'version_exists_in_svn' ) {
+				return new WP_Error(
+					'version_exists_in_svn',
+					__( "The theme version already exists in SVN. Please check the version you're uploading doesn't already exist.", 'wporg-themes' )
+				);
+			}
+
 			if ( ! $result || is_wp_error( $result ) ) {
 				return new WP_Error(
 					'failed_svn_commit',
@@ -1476,10 +1486,19 @@ TICKET;
 			return $this->add_to_svn_via_svn_import();
 		}
 
-		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
-
 		// Keeps a copy of the output of the commands for debugging.
 		$output = array();
+
+		// Check to see if the theme already exists in SVN.
+		$this->exec_with_notify( self::SVN . " ls https://themes.svn.wordpress.org/{$this->theme_slug}/", $output, $return_var );
+		if ( $return_var < 1 ) {
+			$svn_versions = explode( "\n", $svn_versions );
+			$svn_versions = array_map( 'trim', $svn_versions );
+
+			if ( in_array( $this->theme->display( 'Version' ), $svn_versions, true ) ) {
+				return new WP_Error( 'version_exists_in_svn', 'version_exists_in_svn' ); // Intentionally not translated or human-readable-text.
+			}
+		}
 
 		// Theme exists, attempt to do a copy from old version to new.
 		$this->exec_with_notify( self::SVN . " co https://themes.svn.wordpress.org/{$this->theme_slug}/ {$this->tmp_svn_dir} --depth=empty", $output, $return_var );
@@ -1488,7 +1507,8 @@ TICKET;
 		}
 
 		// Try to copy the previous version over.
-		$prev_version = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
+		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
+		$prev_version    = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
 		$this->exec_with_notify( self::SVN . " cp $prev_version $new_version_dir", $output, $return_var );
 		if ( $return_var > 0 ) {
 			return $this->add_to_svn_via_svn_import();
