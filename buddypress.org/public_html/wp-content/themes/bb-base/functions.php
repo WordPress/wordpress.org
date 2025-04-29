@@ -130,7 +130,7 @@ function bb_base_topic_search_query( $escaped = true ) {
 
 function bb_base_reply_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['rs'] ) ) {
+	if ( empty( $_GET['rs'] ) || ! is_scalar( $_GET['rs'] ) ) {
 		return false;
 	}
 
