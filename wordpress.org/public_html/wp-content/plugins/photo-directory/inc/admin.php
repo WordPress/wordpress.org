@@ -1174,7 +1174,7 @@ class Admin {
 		}
 
 		$author = get_user_by( 'id', $post->post_author );
-		$photos_count = User::count_published_photos( $author->ID );
+		$published_count = User::count_published_photos( $author->ID );
 		$account_created = explode( ' ', $author->user_registered )[0];
 		?>
 		<style>
@@ -1206,9 +1206,9 @@ class Admin {
 						/* translators: %s: Linked number of photos submitted by user. */
 						printf(
 							__( 'Published photos: <strong>%s</strong>', 'wporg-photos' ),
-							( 0 === $photos_count )
-								? $photos_count
-								: sprintf( '<a href="%s">%s</a>', get_author_posts_url( $author->ID ), $photos_count )
+							( 0 === $published_count )
+								? $published_count
+								: sprintf( '<a href="%s">%s</a>', esc_url( get_author_posts_url( $author->ID ) ), $published_count )
 						);
 					?></li>
 					<li><?php
@@ -1306,8 +1306,16 @@ class Admin {
 					}
 
 					echo '<p>';
-					/* translators: %s: Rejection rate as a percentage. */
-					printf( __( 'Total rejection rate: %s', 'wporg-photos'), '<strong>' . round( ( $total_rejections / ( $photos_count + $total_rejections ) ) * 100, 2 ) .'%</strong>' );
+					$total_count = $published_count + $total_rejections;
+					$rejection_rate = $total_count
+						? round( ( $total_rejections / $total_count ) * 100, 2 )
+						: 0;
+
+					printf(
+						/* translators: %s: Rejection rate as a percentage. */
+						__( 'Total rejection rate: %s', 'wporg-photos'),
+						'<strong>' . $rejection_rate .'%</strong>'
+					);
 					echo "</p>\n";
 
 					if ( $submission_errors_count ) {
