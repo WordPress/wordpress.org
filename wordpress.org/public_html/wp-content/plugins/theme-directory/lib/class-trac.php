@@ -62,7 +62,7 @@ class Trac {
 			$attr = new IXR_Value( array(), 'struct' );
 		}
 
-		$ok = $this->rpc_query_retry( 5, 'ticket.create', $subj, $desc, $attr );
+		$ok = $this->rpc->query( 'ticket.create', $subj, $desc, $attr );
 		if ( ! $ok ) {
 			trigger_error( 'Trac: ticket.create: ' . $this->rpc->error->message, E_USER_WARNING );
 
@@ -97,7 +97,7 @@ class Trac {
 			$attr['action'] = 'leave';
 		}
 
-		$ok = $this->rpc_query_retry( 5, 'ticket.update', $id, $comment, $attr, $notify );
+		$ok = $this->rpc->query( 'ticket.update', $id, $comment, $attr, $notify );
 		if ( ! $ok ) {
 			trigger_error( 'Trac: ticket.update: ' . $this->rpc->error->message, E_USER_WARNING );
 
@@ -114,7 +114,7 @@ class Trac {
 	 * @return bool|mixed
 	 */
 	public function ticket_query( $search ) {
-		$ok = $this->rpc->query( 'ticket.query', $search );
+		$ok = $this->rpc_query_retry( 3, 'ticket.query', $search );
 		if ( ! $ok ) {
 			return false;
 		}
@@ -162,18 +162,6 @@ class Trac {
 			$retry++;
 
 			$ok = call_user_func_array( [ $this->rpc, 'query' ], $args );
-
-			// Don't retry on creation tasks, if it's a HTTP timeout. Retry on other errors.
-			if (
-				! $ok &&
-				str_contains( $this->rpc->error->message, 'Operation timed out' ) &&
-				(
-					str_contains( $args[0], 'create' ) ||
-					str_contains( $args[0], 'update' )
-				)
-			) {
-				break;
-			}
 		}
 
 		if ( ! $ok ) {
