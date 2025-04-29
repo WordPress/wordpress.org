@@ -2506,7 +2506,7 @@ a.mention.me {
 #github-prs ul.pull-requests li div:first-of-type {
 	padding-left: 0;
 }
-#github-prs ul.pull-requests li div:last-of-type {
+#github-prs ul.pull-requests li div:nth-of-type(n+2):last-of-type {
 	white-space: nowrap;
 	padding-right: 0;
 }
