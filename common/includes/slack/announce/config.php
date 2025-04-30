@@ -468,10 +468,10 @@ function get_whitelist() {
 			'chaion07',
 			'CoachBirgit',
 			'deconf',
-			'evarlese',
 			'felipeelia',
+			'jainnidhi', // @nidhijain on Slack 
 			'kharisblank', // @kharisulistiyo on Slack
-			'Nao',
+			'luisrull',
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
@@ -484,9 +484,9 @@ function get_whitelist() {
 			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
-			'evarlese',
 			'felipeelia',
-			'Nao',
+			'jainnidhi', // @nidhijain on Slack 
+			'luisrull',
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
