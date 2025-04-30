@@ -736,7 +736,7 @@ class Import {
 		}
 
 		if ( ! $svn_info['result'] ) {
-			throw new Exception( 'Could not find stable SVN URL: ' . implode( ' ', reset( $svn_info['errors'] ) ) );
+			throw new Exception( 'Could not find stable SVN URL: ' . ( $svn_info['errors'] ? implode( ' ', reset( $svn_info['errors'] ) ) : 'Unknown error' ) );
 		}
 
 		$last_modified = false;
@@ -771,7 +771,7 @@ class Import {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
-			throw new Exception( 'Could not create SVN export: ' . implode( ' ', reset( $svn_export['errors'] ) ) );
+			throw new Exception( 'Could not create SVN export: ' . ( $svn_export['errors'] ? implode( ' ', reset( $svn_export['errors'] ) ) : 'Unknown error' ) );
 		}
 
 		// The readme may not actually exist, but that's okay.
