@@ -382,7 +382,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 									// But make sure to show our custom screen when needed
 									$get['redirect_to'] = $this->_get_safer_redirect_to();
 								}
-								$this->_safe_redirect( add_query_arg( $get, $this->sso_host_url . '/wp-login.php' ), 301 );
+								$this->_safe_redirect( add_query_arg( urlencode_deep( $get ), $this->sso_host_url . '/wp-login.php' ), 301 );
 								return;
 							} else {
 								// Else let the theme render, or redirect if logged in
@@ -504,7 +504,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$lostpassword_url = $this->sso_host_url . '/lostpassword';
 
 			if ( ! empty( $redirect ) ) {
-				$lostpassword_url = add_query_arg( 'redirect_to', $redirect, $lostpassword_url );
+				$lostpassword_url = add_query_arg( 'redirect_to', urlencode( $redirect ), $lostpassword_url );
 			}
 
 			return $lostpassword_url;
@@ -704,7 +704,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Default to the logout confirmation screen, or back to the source site if possible.
 			$redirect_to = $this->sso_host_url . '/loggedout';
 			if ( ! empty( $_REQUEST['redirect_to'] ) ) {
-				$requested_redirect_to = urldecode( wp_unslash( $_REQUEST['redirect_to'] ) );
+				$requested_redirect_to = wp_unslash( $_REQUEST['redirect_to'] );
 				$redirect_to           = add_query_arg( 'redirect_to', urlencode( $requested_redirect_to ), $redirect_to );
 
 				// If the requested redirect_to is valid, use it.
