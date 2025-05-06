@@ -568,7 +568,7 @@ function get_whitelist() {
 			'SamSuresh',
 		),
 		'wceu' => array(
-			'vertizio', // @Pascal on Slack
+			'casiepa', // @Pascal on Slack
 		),
 		'wcus' => array(
 			'cronkled', // @alx on Slack
@@ -584,6 +584,7 @@ function get_whitelist() {
 			'casiepa', // @Pascal on Slack
 			'JerrySarcastic',
 			'mgelves', // @maugelves on Slack
+			'nilovelez',
 			'nishasingh',
 			'rahuldsarker',
 			'RoseAppleMedia',
