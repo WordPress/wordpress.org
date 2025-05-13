@@ -482,14 +482,17 @@ function get_whitelist() {
 		),
 		'polyglots-events' => array(
 			'casiepa', // @Pascal on Slack
+			'chaion07',
 			'CoachBirgit',
 			'deconf',
 			'felipeelia',
 			'jainnidhi', // @nidhijain on Slack 
+			'kharisblank', // @kharisulistiyo on Slack
 			'luisrull',
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
+			'spiraltee', // @Tosin on Slack
 			'tobifjellner',
 			'tokyobiyori',
 		),
