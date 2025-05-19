@@ -991,7 +991,7 @@ class WP_67_Credits extends WP_Credits {
 			[ 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ],
 			[ 'Thickbox', 'https://codylindley.com/thickbox/' ],
 			[ 'TinyMCE', 'https://www.tinymce.com/' ],
-			[ 'Twemoji', 'https://github.com/twitter/twemoji' ],
+			[ 'Twemoji', 'https://github.com/jdecked/twemoji' ],
 			[ 'Underscore.js', 'https://underscorejs.org/' ],
 			[ 'whatwg-fetch', 'https://github.com/github/fetch' ],
 			[ 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ],
