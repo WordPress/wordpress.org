@@ -41,11 +41,24 @@ class Trac {
 
 		$this->rpc->headers['Authorization'] = $http_basic_auth;
 
-		// themes.trac requires both the Authorization header and the logged in Cookie.
-		$user = get_user_by( 'login', $username );
-		if ( $user ) {
-			$this->rpc->headers['Cookie'] = LOGGED_IN_COOKIE . '=' . wp_generate_auth_cookie( $user->ID, time() + HOUR_IN_SECONDS, 'logged_in' );
+		// themes.trac requires both the Authorization header and the logged in cookie.
+		$logged_in = get_transient( "trac_logged_in_cookie_{$username}" );
+		if (
+			! $logged_in ||
+			! wp_validate_auth_cookie( $logged_in, 'logged_in' )
+		) {
+			// Generate a new WordPress user session, daily.
+			$user      = get_user_by( 'login', $username );
+			$logged_in = wp_generate_auth_cookie( $user->ID, time() + 2 * DAY_IN_SECONDS, 'logged_in' );
+
+			// Cache the session for 1 day.
+			set_transient( "trac_logged_in_cookie_{$username}", $logged_in, DAY_IN_SECONDS );
+
+			// Wait a moment for the session to become active before using it.
+			sleep( 1 );
 		}
+
+		$this->rpc->headers['Cookie'] = LOGGED_IN_COOKIE . '=' . $logged_in;
 
 	}
 
