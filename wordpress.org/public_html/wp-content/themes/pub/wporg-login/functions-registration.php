@@ -278,7 +278,7 @@ function wporg_update_pending_user( $pending_user ) {
 	// Allow altering the user fields.
 	$pending_user = apply_filters( 'wporg_login_registration_update_pending_user', $pending_user );
 
-	$pending_user['meta']   = json_encode( $pending_user['meta'] );
+	$pending_user['meta']   = json_encode( $pending_user['meta'], JSON_UNESCAPED_SLASHES );
 	$pending_user['scores'] = json_encode( $pending_user['scores'] );
 
 	if ( empty( $pending_user['pending_id'] ) ) {
