@@ -44,24 +44,26 @@
 	</ul>
 
 	<?php if ( $locale_data['localized_core_url'] ) : ?>
-		<ul id="locale-download">
-			<li class="button download-button">
-				<a href="<?php echo esc_url( $locale_data['localized_core_url'] ); ?>" role="button">
-					<?php printf( __( 'Download WordPress in %s', 'wporg' ), $locale->english_name ); ?>
+		<div id="locale-download" class="wp-block-buttons is-layout-flex wp-block-buttons-is-layout-flex">
+			<div class="wp-block-button">
+				<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( $locale_data['localized_core_url'] ); ?>">
+					<?php
+					// translators: %s is the english variant of the locale name.
+					printf( __( 'Download WordPress in %s', 'wporg' ), $locale->english_name );
+					?>
 				</a>
-			</li>
-
+			</div>
 			<?php if ( $locale_data['language_pack_url'] ) : ?>
-				<li class="button download-button">
-					<a href="<?php echo esc_url( $locale_data['language_pack_url'] ); ?>" role="button">
+				<div class="wp-block-button is-style-outline">
+					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( $locale_data['language_pack_url'] ); ?>" role="button">
 						<?php
-						// translators: %s is the latest version
+						// translators: %s is the latest version.
 						printf( __( 'Download language pack (%s)', 'wporg' ), $locale_data['language_pack_version'] );
 						?>
 					</a>
-				</li>
+				</div>
 			<?php endif; ?>
-		</ul>
+		</div>
 	<?php endif;  ?>
 </div>
 
