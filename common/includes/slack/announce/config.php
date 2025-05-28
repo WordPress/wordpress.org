@@ -141,6 +141,9 @@ function get_whitelist() {
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
 		) ),
+		'core-ai' => array_merge( get_committers(), array(
+			'isotropic', // @James LePage on Slack
+		) ),
 		'core-upgrade-install' => array_merge( get_committers(), array(
 			'afragen',
 			'audrasjb',
