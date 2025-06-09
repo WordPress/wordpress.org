@@ -187,7 +187,7 @@ add_filter( 'xmlrpc_methods', function( $methods ) {
 add_action( 'send_headers', function() {
 	if ( isset( $_REQUEST['EGOTEC'] ) ) {
 		die_bad_request( 'EGOTEC request parameter set' );
-	} elseif ( str_contains( $_SERVER['REQUEST_URI'], 'acunetix' ) ) {
+	} elseif ( str_contains( $_SERVER['REQUEST_URI'], '$acunetix' ) ) {
 		die_bad_request( 'acunetix request' );
 	}
 } );
