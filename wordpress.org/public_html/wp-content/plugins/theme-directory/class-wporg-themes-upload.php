@@ -285,6 +285,11 @@ class WPORG_Themes_Upload {
 			bump_stats_extra( 'themes', 'upload_by_svn' );
 		}
 
+		// Run in the context of the author.
+		if ( $this->author ) {
+			set_current_user( $this->author->id );
+		}
+
 		return $this->import( array( // return true | WP_Error
 			// Since this version is already in SVN, we shouldn't try to import it again.
 			'commit_to_svn' => false,

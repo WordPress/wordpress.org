@@ -129,7 +129,7 @@ function wporg_themes_init() {
 				'menu_name'          => __( 'Packages', 'wporg-themes' ),
 			),
 			'description' => __( 'A package', 'wporg-themes' ),
-			'supports'    => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
+			'supports'    => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes', 'wporg-internal-notes', 'wporg-log-notes' ),
 			'taxonomies'  => array( 'category', 'post_tag', 'type' ),
 			'public'      => true,
 			'show_ui'     => true,
@@ -1603,3 +1603,18 @@ function wporg_themes_has_theme( $user_id = 0, $status = [ 'publish', 'draft' ] 
 
 	return (bool) $themes;
 }
+
+/**
+ * Log metadata changes to internal notes.
+ *
+ * @param array $meta_keys The meta keys to log.
+ * @return array
+ */
+function wporg_themes_log_version_changes( $meta_keys ) {
+	$meta_keys[] = '_live_version';
+	$meta_keys[] = 'external_support_url';
+	$meta_keys[] = 'external_repository_url';
+
+	return $meta_keys;
+}
+add_filter( 'wporg_internal_notes_logging_allowed_postmeta_keys', 'wporg_themes_log_version_changes' );
