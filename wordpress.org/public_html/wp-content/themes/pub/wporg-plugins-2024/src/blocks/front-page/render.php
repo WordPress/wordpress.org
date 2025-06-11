@@ -7,11 +7,11 @@ use WP_Query;
 global $wp_query;
 
 $sections = array(
-	'blocks'    => __( 'Block-Enabled plugins', 'wporg-plugins' ),
 	'featured'  => __( 'Featured plugins', 'wporg-plugins' ),
 	'beta'      => __( 'Beta plugins', 'wporg-plugins' ),
 	'favorites' => __( 'My favorites', 'wporg-plugins' ),
 	'popular'   => __( 'Popular plugins', 'wporg-plugins' ),
+	'blocks'    => __( 'Block-Enabled plugins', 'wporg-plugins' ),
 );
 
 $widget_args = array(
@@ -35,7 +35,7 @@ echo do_blocks( '<!-- wp:template-part {"slug":"grid-controls"} /-->' );
 		$section_args = array(
 			'post_type'      => 'plugin',
 			'post_status'    => 'publish',
-			'posts_per_page' => 4,
+			'posts_per_page' => 6,
 			'browse'         => $browse,
 		);
 
