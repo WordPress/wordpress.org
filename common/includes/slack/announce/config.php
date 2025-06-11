@@ -562,6 +562,7 @@ function get_whitelist() {
 			'piyopiyofox',
 			'psykro', // @Jonathan on Slack
 			'richtabor',
+			'rjekic',
 			'sumitsingh',
 			'trynet',
 			'webtechpooja', // @Pooja Derashri on Slack
