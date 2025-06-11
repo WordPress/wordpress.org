@@ -392,7 +392,7 @@ function wporg_themes_author_lookup() {
 	}
 	exit;
 }
-add_action('wp_ajax_author-lookup', 'wporg_themes_author_lookup');
+add_action( 'wp_ajax_author-lookup', 'wporg_themes_author_lookup' );
 
 
 /* UPDATING THEME VERSIONS */
@@ -1579,6 +1579,42 @@ function wporg_themes_status_change_stats( $new_status, $old_status, $post ) {
 add_action( 'transition_post_status', 'wporg_themes_status_change_stats', 10, 3 );
 
 /**
+ * Record the date a theme was put into it's current status.
+ *
+ * @param string $new_status
+ * @param string $old_status
+ * @param WP_Post $post
+ */
+function wporg_themes_status_change_metadata( $new_status, $old_status, $post ) {
+	$tracked_statii = [
+		'publish',
+		'suspend',
+		'delist',
+	];
+
+	if ( 
+		'repopackage' !== $post->post_type ||
+		$new_status === $old_status ||
+		(
+			! in_array( $new_status, $tracked_statii ) &&
+			! in_array( $old_status, $tracked_statii )
+		)
+	) {
+		return;
+	}
+
+	foreach ( $tracked_statii as $status ) {
+		delete_post_meta( $post->ID, "_{$status}_date" );
+	}
+
+	if ( in_array( $new_status, $tracked_statii ) ) {
+		update_post_meta( $post->ID, "_{$new_status}_date", current_time( 'mysql' ) );
+	}
+
+}
+add_action( 'transition_post_status', 'wporg_themes_status_change_metadata', 10, 3 );
+
+/**
  * Check if a user has any themes.
  *
  * @param int|WP_User $user_id
@@ -1611,6 +1647,14 @@ function wporg_themes_has_theme( $user_id = 0, $status = [ 'publish', 'draft' ] 
  * @return array
  */
 function wporg_themes_log_metadata_changes( $meta_keys ) {
+	// Don't keep track of the page template, we don't use that.
+	$meta_keys = array_diff(
+		$meta_keys,
+		array(
+			'_wp_page_template'
+		)
+	);
+
 	$meta_keys[] = '_live_version';
 	$meta_keys[] = 'external_support_url';
 	$meta_keys[] = 'external_repository_url';
