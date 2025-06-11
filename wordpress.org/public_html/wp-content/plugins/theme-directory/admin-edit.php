@@ -610,6 +610,11 @@ function wporg_themes_save_meta_box_data( $post_id ) {
 		return;
 	}
 
+	// This is specific to the repopackage post type.
+	if ( 'repopackage' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
 	// Only run once.
 	remove_action( 'save_post', __FUNCTION__ );
 
