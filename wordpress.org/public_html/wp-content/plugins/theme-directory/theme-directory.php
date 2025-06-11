@@ -155,7 +155,7 @@ function wporg_themes_init() {
 				'parent_item_colon'  => __( 'Parent Theme Shop:', 'wporg-themes' ),
 				'menu_name'          => __( 'Theme Shops', 'wporg-themes' ),
 			),
-			'supports'            => array( 'title', 'editor', 'author', 'custom-fields' ),
+			'supports'            => array( 'title', 'editor', 'author', 'custom-fields', 'wporg-internal-notes', 'wporg-log-notes'  ),
 			'public'              => false,
 			'show_ui'             => true,
 			'exclude_from_search' => true,
@@ -1610,11 +1610,11 @@ function wporg_themes_has_theme( $user_id = 0, $status = [ 'publish', 'draft' ] 
  * @param array $meta_keys The meta keys to log.
  * @return array
  */
-function wporg_themes_log_version_changes( $meta_keys ) {
+function wporg_themes_log_metadata_changes( $meta_keys ) {
 	$meta_keys[] = '_live_version';
 	$meta_keys[] = 'external_support_url';
 	$meta_keys[] = 'external_repository_url';
 
 	return $meta_keys;
 }
-add_filter( 'wporg_internal_notes_logging_allowed_postmeta_keys', 'wporg_themes_log_version_changes' );
+add_filter( 'wporg_internal_notes_logging_allowed_postmeta_keys', 'wporg_themes_log_metadata_changes' );
