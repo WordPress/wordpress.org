@@ -26,7 +26,7 @@ get_header();
 			esc_url( $redirect_to ),
 			esc_html( $hostname )
 		);
-		echo '<p>';
+		echo '</p>';
 	}
 ?>
 
