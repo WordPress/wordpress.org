@@ -76,6 +76,10 @@ class Stats extends GP_Route {
 				continue;
 			}
 
+			if ( ! isset( $translation_locale_statuses[ $locale_key ]['waiting'] ) ) {
+				$translation_locale_statuses[ $locale_key ]['waiting'] = 0;
+			}
+
 			/*
 			 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
 			 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
@@ -91,9 +95,6 @@ class Stats extends GP_Route {
 				continue;
 			}
 
-			if ( ! isset( $translation_locale_statuses[ $locale_key ]['waiting'] ) ) {
-				$translation_locale_statuses[ $locale_key ]['waiting'] = 0;
-			}
 			$translation_locale_statuses[ $locale_key ]['waiting'] += (int) $set->waiting_strings;
 		}
 		unset( $rows, $locale_key, $set );
