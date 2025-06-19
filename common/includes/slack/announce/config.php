@@ -291,6 +291,7 @@ function get_whitelist() {
 			'mobarak',
 			'monikarao',
 			'ryan', // @boren on Slack
+			'SirLouen',
 			'webtechpooja', // @Pooja Derashri on Slack
 			'oglekler',
 			'krupajnanda',
