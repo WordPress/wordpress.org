@@ -386,6 +386,10 @@ class Official_WordPress_Events {
 					}
 				}
 
+				if ( ! empty( $event['Hide from Event Feeds'] ) ) {
+					continue;
+				}
+
 				$events[] = new Official_WordPress_Event( $event );
 			}
 		}
