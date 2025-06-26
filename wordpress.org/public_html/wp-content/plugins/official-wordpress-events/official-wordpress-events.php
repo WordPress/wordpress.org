@@ -377,6 +377,12 @@ class Official_WordPress_Events {
 								$event['country_code'] = strtoupper( $value );
 							}
 							break;
+
+						case 'Hide from Event Feeds':
+							if ( $value ) {
+								$event['status'] = 'hidden';
+							}
+							break;
 					}
 				}
 
@@ -384,10 +390,6 @@ class Official_WordPress_Events {
 					if ( empty( $event['end_timestamp'] ) || $event['end_timestamp'] < $event['start_timestamp'] ) {
 						$event['end_timestamp'] = $event['start_timestamp'];
 					}
-				}
-
-				if ( ! empty( $event['Hide from Event Feeds'] ) ) {
-					continue;
 				}
 
 				$events[] = new Official_WordPress_Event( $event );
