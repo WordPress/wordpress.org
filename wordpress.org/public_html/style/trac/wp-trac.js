@@ -284,23 +284,31 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				}
 				el = li.find('.trac-rawlink');
 				href = el.attr('href');
-				if ( ! href.match(/\.(jpg|jpeg|png|gif|svg)$/i) ) {
-					return;
-				}
 				appendTo = li.parent().parent(); // div.change
-				image = new Image();
-				image.src = href;
-				image.onload = function() {
-					$('<img />')
+				if ( href.match(/\.(jpg|jpeg|png|gif|svg)$/i) ) {
+					image = new Image();
+					image.src = href;
+					image.onload = function() {
+						$('<img />')
+							.attr({
+								src: href,
+								width: image.width,
+								height: image.height,
+								class: 'trac-image-preview'
+							})
+							.appendTo( appendTo )
+							.wrap( '<a href="' + href.replace('/raw-attachment/', '/attachment/') + '" />' );
+					};
+				} else if ( href.match(/\.(mp4|mov)$/i) ) {
+					$('<video />')
 						.attr({
 							src: href,
-							width: image.width,
-							height: image.height,
-							class: 'trac-image-preview'
+							class: 'trac-image-preview',
+							controls: true,
+							preload: 'metadata',
 						})
-						.appendTo( appendTo )
-						.wrap( '<a href="' + href.replace('/raw-attachment/', '/attachment/') + '" />' );
-				};
+						.appendTo( appendTo );
+				}
 			});
 
 			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );
