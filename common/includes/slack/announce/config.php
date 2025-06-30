@@ -105,6 +105,7 @@ function get_whitelist() {
 			'colorful-tones',
 			'danieltj',
 			'desrosj',
+			'estelaris',
 			'fabiankaegy',
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
@@ -140,6 +141,7 @@ function get_whitelist() {
 			'webcommsat', // @abhanonstopnewsuk on Slack
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
+			'zunaid321', // @Zunaid Amin on Slack
 		) ),
 		'core-ai' => array_merge( get_committers(), array(
 			'isotropic', // @James LePage on Slack
