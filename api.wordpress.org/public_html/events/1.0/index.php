@@ -1187,10 +1187,12 @@ function get_regional_wordcamp_data() {
 				'url'        => 'https://us.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2025-08-26 00:00:00',
-				'end_date'   => '2025-08-29 00:00:00',
-				'start_unix_timestamp' => strtotime( '2025-08-26 00:00:00' ) - 5 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2025-08-29 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				// Local time
+				'date'       => '2025-08-26 09:00:00',
+				'end_date'   => '2025-08-29 17:00:00',
+				// GMT which due to local being GMT-7, GMT is ahead by 7h.
+				'start_unix_timestamp' => strtotime( '2025-08-26 09:00:00' ) + 7 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-08-29 17:00:00' ) + 7 * HOUR_IN_SECONDS,
 
 				'location' => array(
 					'location'  => 'Portland, Oregon',
