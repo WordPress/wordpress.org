@@ -466,6 +466,7 @@ function get_whitelist() {
 			'bph',
 			'berislav.grgicak',
 			'bpayton',
+			'fellyph',
 			'zieladam',
 		),
 		'polyglots' => array(
