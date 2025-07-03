@@ -283,8 +283,8 @@ class Status_Transitions {
 		);
 
 		// Record the last failure attempt.
-		if ( $result['errors'] ) {
-			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'], true ), $post->ID );
+		if ( ! $result['result'] ) {
+			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'] ?: $result, true ), $post->ID );
 
 			// Retry in a minute.
 			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'plugin_directory_create_svn_repo', [ $post->ID, $plugin_author->ID ] );
