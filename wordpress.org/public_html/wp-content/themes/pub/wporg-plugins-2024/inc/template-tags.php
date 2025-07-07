@@ -478,6 +478,9 @@ function the_plugin_danger_zone() {
 	// Output the Release Confirmation form.
 	the_plugin_release_confirmation_form();
 
+	// Output the phased rollout settings.
+	the_phased_rollout_settings();
+
 	if ( 'publish' != $post->post_status ) {
 		// A reminder of the closed status.
 		the_active_plugin_notice();
@@ -771,4 +774,60 @@ function the_author_notice( $post = null ) {
 			wp_kses_post( $import_warnings )
 		);
 	}
+}
+
+/**
+ * Displays the "phased rollout" settings for a plugin.
+ */
+function the_phased_rollout_settings() {
+	$post = get_post();
+	if ( ! current_user_can( 'plugin_manage_releases', $post ) ) {
+		return;
+	}
+	$rollout = $post->phased_rollout ?: '';
+
+	$options = [
+		''           => __( 'Immediate (default)', 'wporg-plugins' ),
+		'slow'       => __( 'Slow rollout', 'wporg-plugins' ),
+		'extra-slow' => __( 'Extra slow rollout', 'wporg-plugins' ),
+		'cautious'   => __( 'Cautious rollout', 'wporg-plugins' ),
+		'custom'     => __( 'Custom rollout', 'wporg-plugins' ),
+	];
+
+	$descriptions = [
+		''          => __( 'Plugin updates will be made available to sites as soon as they ask about updates.', 'wporg-plugins' ),
+		'slow'      => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 2 days.', 'wporg-plugins' ),
+		'extra-slow'=> __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 3 days.', 'wporg-plugins' ),
+		'cautious'  => __( 'Plugin updates will be released to 1% of sites for the first 6 hours, increasing to 10% by day 2, and to 100% of sites within 5 days.', 'wporg-plugins' ),
+//		'custom'    => __( 'Plugin updates will be released to a custom percentage of sites, as defined by the plugin author.', 'wporg-plugins' ),
+	];
+
+	echo '<h4>' . __( 'Phased rollout', 'wporg-plugins' ) . '</h4>';
+
+	echo '<p>' .
+		__( 'Phased rollout of a plugin initially delivers updates to a small selection of sites, increasing over time.', 'wporg-plugins' ) .
+		' ' .
+		__( 'This allows for the plugin author to limit the impact of a change in a plugin which may negatively impact user experience, to receive that feedback, and resolve the issue before the plugin update is delivered to all websites.', 'wporg-plugins' ) .
+		'</p>';
+
+	echo '<form method="POST" action="' . esc_url( Template::get_phased_rollout_link() ) . '">';
+	echo '<select id="phased_rollout" name="phased_rollout">';
+	foreach ( $options as $value => $label ) {
+		echo '<option value="' . esc_attr( $value ) . '" ' . selected( $rollout, $value, false ) . disabled( 'custom', $value, false ) . ' data-description="' . esc_attr( $descriptions[ $value ] ?? '' ) . '">' . $label . '</option>';
+	}
+	echo '</select>';
+
+	echo '<div class="help">' . esc_html( $descriptions[ $rollout ] ?? '' ) . '</div>';
+	echo '<script>
+		jQuery( document ).ready( function( $ ) {
+			$( "#phased_rollout" ).change( function() {
+				$( this ).next( ".help" ).text( $( this ).find( "option:selected" ).data( "description" ) );
+			} );
+		} );
+	</script>';
+
+	echo '<p class="wp-block-button is-small">';
+	echo '<input class="wp-block-button__link" type="submit" value="' . esc_attr__( 'Save', 'wporg-plugins' ) . '" />';
+	echo '</p>';
+	echo '</form>';
 }

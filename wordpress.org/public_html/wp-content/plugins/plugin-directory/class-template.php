@@ -1002,6 +1002,22 @@ class Template {
 	}
 
 	/**
+	 * Generates a link to enable Release Confirmations.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string URL to enable confirmations.
+	 */
+	public static function get_phased_rollout_link( $post = null ) {
+		$post = get_post( $post );
+
+		return add_query_arg(
+			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/phased-rollout' )
+		);
+	}
+
+
+	/**
 	 * Returns the reasons for closing or disabling a plugin.
 	 *
 	 * @return array Close/disable reason labels.
