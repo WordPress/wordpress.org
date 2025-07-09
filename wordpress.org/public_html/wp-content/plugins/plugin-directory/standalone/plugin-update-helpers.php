@@ -87,17 +87,47 @@ function phased_rollout_should_update( object $update_details ) {
 		case 'custom':
 			$percent = $phase_details['percentage'] ?? 100;
 
-		// Straight curve, start at 5%, increases to 100% over the next 48hrs (2d).
+		/*
+		 * Straight curve, start at 5%, increases to 100% over the next 48hrs (2d).
+		 *
+		 * At 6 hours,  the percentage is 5 + (6/48) * 95  = 16.875%
+		 * At 12 hours, the percentage is 5 + (12/48) * 95 = 28.75%
+		 * At 24 hours, the percentage is 5 + (24/48) * 95 = 52.5%
+		 * At 36 hours, the percentage is 5 + (36/48) * 95 = 72.25%
+		 * At 48 hours, the percentage is 5 + (48/48) * 95 = 100%
+		 */
 		case 'slow':
 			$percent = 5 + ( $hours_since_release / 48 ) * 95;
 			break;
 
-		// Polynomial curve, starts at 5%, increases to 100% over the next 72hrs (3d).
+		/*
+		 * Polynomial curve, starts at 5%, increases to 100% over the next 72hrs (3d).
+		 *
+		 * At 6 hours,  the percentage is 9 * ( 1.0345 ** 6  ) - 3.9 = 7.13%
+		 * At 12 hours, the percentage is 9 * ( 1.0345 ** 12 ) - 3.9 = 9.62%
+		 * At 24 hours, the percentage is 9 * ( 1.0345 ** 24 ) - 3.9 = 16.41%
+		 * At 36 hours, the percentage is 9 * ( 1.0345 ** 36 ) - 3.9 = 26.61%
+		 * At 48 hours, the percentage is 9 * ( 1.0345 ** 48 ) - 3.9 = 41.95%
+		 * At 60 hours, the percentage is 9 * ( 1.0345 ** 60 ) - 3.9 = 64.97%
+		 * At 72 hours, the percentage is 9 * ( 1.0345 ** 72 ) - 3.9 = 100%
+		 */
 		case 'extra-slow':
 			$percent = 9 * ( 1.0345 ** $hours_since_release ) - 3.9;
 			break;
 
-		// Polynomial curve, starts at 1%, with an increase to 100% over the next 120hrs (5d).
+		/*
+		 * Polynomial curve, starts at 1%, with an increase to 100% over the next 120hrs (5d).
+		 *
+		 * At 6 hours,  the percentage is 11 * ( 1.0195 ** 6  ) - 10 = 2.35%
+		 * At 12 hours, the percentage is 11 * ( 1.0195 ** 12 ) - 10 = 3.87%
+		 * At 24 hours, the percentage is 11 * ( 1.0195 ** 24 ) - 10 = 7.49%
+		 * At 36 hours, the percentage is 11 * ( 1.0195 ** 36 ) - 10 = 12%
+		 * At 48 hours, the percentage is 11 * ( 1.0195 ** 48 ) - 10 = 17.8%
+		 * At 72 hours, the percentage is 11 * ( 1.0195 ** 72 ) - 10 = 34.18%
+		 * At 96 hours, the percentage is 11 * ( 1.0195 ** 96 ) - 10 = 60.24%
+		 * At 120 hours, the percentage is 11 * ( 1.0195 ** 120 ) - 10 = 101.65 ~= 100%
+		 *
+		 */
 		case 'cautious':
 			$percent = 11 * ( 1.0195 ** $hours_since_release ) - 10;
 			break;
