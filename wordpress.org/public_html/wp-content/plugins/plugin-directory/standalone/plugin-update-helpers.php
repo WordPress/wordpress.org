@@ -15,9 +15,13 @@ namespace WordPressdotorg\Plugin_Directory\Standalone;
  * Return the current sites update-percentage.
  *
  * @global $wp_url
+ *
+ * @param string $slug    The plugin slug.
+ * @param string $version The plugin version.
+ *
  * @return float 0...100.00
  */
-function get_site_percentage() {
+function get_site_percentage( string $slug = '', string $version = '' ) {
 	global $wp_url;
 
 	/*
@@ -35,10 +39,8 @@ function get_site_percentage() {
 		return 100;
 	}
 
-	// TODO: We probably need to have this be based on ( site_domain, plugin_slug, version ) instead.
-
 	// $site_step represents an integer from 0 to 4095.
-	$site_step   = base_convert( substr( md5( $site_domain ), 0, 3 ), 16, 10 );
+	$site_step   = base_convert( substr( md5( "{$site_domain}|{$slug}|{$version}" ), 0, 3 ), 16, 10 );
 	$site_percent = $site_step / 4095 * 100;
 
 	return $site_percent;
@@ -47,10 +49,11 @@ function get_site_percentage() {
 /**
  * Determine if the site should update based on the phased rollout details.
  *
- * @param object|array $phase_details The details of the phased rollout.
+ * @param object $update_details The plugin update details.
  * @return bool True if the site should update, false otherwise.
  */
-function phased_rollout_should_update( $phase_details ) {
+function phased_rollout_should_update( object $update_details ) {
+	$phase_details = $update_details->meta->phased_rollout ?? false;
 	if ( ! $phase_details ) {
 		return true;
 	}
@@ -63,7 +66,7 @@ function phased_rollout_should_update( $phase_details ) {
 	 * }
 	 */
 
-	$site_percent = get_site_percentage();
+	$site_percent = get_site_percentage( $update_details->plugin_slug, $update_details->version );
 
 	// If the phased percentage is set directly in the details.
 	if ( isset( $phase_details->percentage ) && $phase_details->percentage >= $site_percent ) {
