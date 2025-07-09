@@ -56,7 +56,7 @@ function get_site_percentage( string $slug = '', string $version = '' ) {
  */
 function phased_rollout_should_update( object $update_details ) {
 	$phase_details = $update_details->meta->phased_rollout ?? false;
-	if ( ! $phase_details || empty( $phase_details['time'] ) ) {
+	if ( ! $phase_details ) {
 		return true;
 	}
 
@@ -83,7 +83,7 @@ function phased_rollout_should_update( object $update_details ) {
 			$percent = 100;
 			break;
 
-		// Custom defined by the plugin author.
+		// Custom defined by the plugin author, they must update this value in settings.
 		case 'custom':
 			$percent = $phase_details['percentage'] ?? 100;
 
