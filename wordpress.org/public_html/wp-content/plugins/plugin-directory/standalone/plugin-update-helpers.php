@@ -28,7 +28,7 @@ function get_site_percentage( string $slug = '', string $version = '' ) {
 	 * If the site URL hasn't been extracted already, pull it from the global.
 	 * NOTE: This may be set by the tests or other codepaths that run before this function.
 	 */
-	if ( ! $wp_url && preg_match( '#^WordPress/.+; (http.+)$#i', $_SERVER['HTTP_USER_AGENT'] ?? '', $m ) ) {
+	if ( empty( $wp_url ) && preg_match( '#^WordPress/.+; (http.+)$#i', $_SERVER['HTTP_USER_AGENT'] ?? '', $m ) ) {
 		$wp_url = $m[1];
 	}
 
