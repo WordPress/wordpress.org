@@ -795,7 +795,7 @@ function the_phased_rollout_settings() {
 	];
 
 	$descriptions = [
-		''          => __( 'Plugin updates will be made available to sites as soon as they ask about updates.', 'wporg-plugins' ),
+		''          => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
 		'slow'      => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 2 days.', 'wporg-plugins' ),
 		'extra-slow'=> __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 3 days.', 'wporg-plugins' ),
 		'cautious'  => __( 'Plugin updates will be released to 1% of sites for the first 6 hours, increasing to 10% by day 2, and to 100% of sites within 5 days.', 'wporg-plugins' ),
@@ -813,7 +813,12 @@ function the_phased_rollout_settings() {
 	echo '<form method="POST" action="' . esc_url( Template::get_phased_rollout_link() ) . '">';
 	echo '<select id="phased_rollout" name="phased_rollout">';
 	foreach ( $options as $value => $label ) {
-		echo '<option value="' . esc_attr( $value ) . '" ' . selected( $rollout, $value, false ) . disabled( 'custom', $value, false ) . ' data-description="' . esc_attr( $descriptions[ $value ] ?? '' ) . '">' . $label . '</option>';
+		echo '<option ' .
+			'value="' . esc_attr( $value ) . '" ' .
+			selected( $rollout, $value, false ) .
+			disabled( 'custom', $value, false ) .
+			' data-description="' . esc_attr( $descriptions[ $value ] ?? '' ) .
+			'">' . $label . '</option>';
 	}
 	echo '</select>';
 
