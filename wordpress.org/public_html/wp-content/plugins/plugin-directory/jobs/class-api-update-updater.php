@@ -92,14 +92,19 @@ class API_Update_Updater {
 			}
 		}
 
-		if ( $post->phased_rollout ) {
+		$release = Plugin_Directory::get_release( $post->ID, $version );
+		if ( $release && $release['phased_rollout'] ) {
+			// If the release has a phased rollout, use that.
+			$meta['phased_rollout'] = array(
+				'strategy' => $release['phased_rollout'],
+				'time'     => max( $release['confirmations'] ),
+			);
+		} elseif ( $post->phased_rollout ) {
 			$meta['phased_rollout'] = array(
 				'strategy' => $post->phased_rollout,
-				// TODO: This should be the release time of the update, is this correct?
-				'time'     => strtotime( $post->post_modified ),
+				'time'     => $release ? max( $release['confirmations'] ) : strtotime( $post->post_modified ),
 			);
 		}
-		// TODO: Per-release phased rollout details from Release Confirmation should override the above.
 
 		$data = array(
 			'plugin_id'        => $post->ID,
