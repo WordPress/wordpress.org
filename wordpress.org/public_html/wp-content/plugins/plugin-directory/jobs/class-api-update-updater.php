@@ -92,6 +92,15 @@ class API_Update_Updater {
 			}
 		}
 
+		if ( $post->phased_rollout ) {
+			$meta['phased_rollout'] = array(
+				'strategy' => $post->phased_rollout,
+				// TODO: This should be the release time of the update, is this correct?
+				'time'     => strtotime( $post->post_modified ),
+			);
+		}
+		// TODO: Per-release phased rollout details from Release Confirmation should override the above.
+
 		$data = array(
 			'plugin_id'        => $post->ID,
 			'plugin_slug'      => $post->post_name,

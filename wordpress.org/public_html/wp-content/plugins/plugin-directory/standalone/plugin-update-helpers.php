@@ -76,15 +76,24 @@ function phased_rollout_should_update( $phase_details ) {
 		return true;
 	}
 
+	/*
+	 * $phase_details are expected to be in the format of...
+	 * {
+	 *   "strategy": "slow",
+	 *   "time": Release time in seconds since the epoch,
+	 * }
+	 */
+
 	$site_percent = get_site_percentage();
 
 	// If the phased percentage is set directly in the details.
 	if ( isset( $phase_details->percentage ) && $phase_details->percentage >= $site_percent ) {
+		// TODO: This is the 'custom' strategy, which is not yet implemented.
 		return true;
 	}
 
+	// If no time is set, assume the update is available.
 	if ( empty( $phase_details['time'] ) ) {
-		// If no time is set, assume the update is available.
 		return true;
 	}
 
@@ -135,6 +144,7 @@ function phased_rollout_should_update( $phase_details ) {
 
 	// There's a better formula for this I'm sure, but this will do to start with.
 	// y = a . log(bx+c)
+	// TODO: This is totally broken and does not return a percentage at all. Should probably switch to a map instead.
 	$percent = $a * log( $b * $hours_since_release + $c );
 
 	return ( $site_percent <= $percent );

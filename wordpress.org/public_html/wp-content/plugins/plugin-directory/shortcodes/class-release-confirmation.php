@@ -164,6 +164,8 @@ class Release_Confirmation {
 				self::get_approval_text( $plugin, $data ),
 				self::get_actions( $plugin, $data )
 			);
+
+			// TODO: per-release phased rollout settings should be available here.
 		}
 
 		echo '</table>';
