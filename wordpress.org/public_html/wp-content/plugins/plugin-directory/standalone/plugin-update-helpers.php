@@ -49,12 +49,14 @@ function get_site_percentage( string $slug = '', string $version = '' ) {
 /**
  * Determine if the site should update based on the phased rollout details.
  *
+ * @link https://www.desmos.com/calculator/59sl7efajq
+ *
  * @param object $update_details The plugin update details.
  * @return bool True if the site should update, false otherwise.
  */
 function phased_rollout_should_update( object $update_details ) {
 	$phase_details = $update_details->meta->phased_rollout ?? false;
-	if ( ! $phase_details ) {
+	if ( ! $phase_details || empty( $phase_details['time'] ) ) {
 		return true;
 	}
 
@@ -63,71 +65,47 @@ function phased_rollout_should_update( object $update_details ) {
 	 * {
 	 *   "strategy": "slow",
 	 *   "time": Release time in seconds since the epoch,
+	 *   "percentage": If the strategy is "custom", this is the percentage of sites that should receive the update.
 	 * }
 	 */
 
-	$site_percent = get_site_percentage( $update_details->plugin_slug, $update_details->version );
-
-	// If the phased percentage is set directly in the details.
-	if ( isset( $phase_details->percentage ) && $phase_details->percentage >= $site_percent ) {
-		// TODO: This is the 'custom' strategy, which is not yet implemented.
-		return true;
-	}
-
-	// If no time is set, assume the update is available.
-	if ( empty( $phase_details['time'] ) ) {
-		return true;
-	}
-
+	$site_percent        = get_site_percentage( $update_details->plugin_slug, $update_details->version );
 	$hours_since_release = ( time() - $phase_details['time'] ) / 3600;
+
+	if ( $hours_since_release >= 120 ) {
+		// If more than 5 days have passed, assume the update is available.
+		return true;
+	}
 
 	switch( $phase_details['strategy'] ?? 'immediate' ) {
 		default:
 		case 'immediate':
-			// Immediate updates are always applied.
-			return true;
+			$percent = 100;
+			break;
 
-		// Start at 5%, increases to 100% over the next 48hrs.
+		// Custom defined by the plugin author.
+		case 'custom':
+			$percent = $phase_details['percentage'] ?? 100;
+
+		// Straight curve, start at 5%, increases to 100% over the next 48hrs (2d).
 		case 'slow':
-			$a = -1037.12128;
-			$b = -0.00391789;
-			$c = 0.988961;
+			$percent = 5 + ( $hours_since_release / 48 ) * 95;
 			break;
 
-		// Starts at 5%, increases to 100% over the next 72hrs
+		// Polynomial curve, starts at 5%, increases to 100% over the next 72hrs (3d).
 		case 'extra-slow':
-			$a = 58.4925;
-			$b = -0.0111363;
-			$c = 0.821332;
+			$percent = 9 * ( 1.0345 ** $hours_since_release ) - 3.9;
 			break;
 
-		// Starts at 1%, 
+		// Polynomial curve, starts at 1%, with an increase to 100% over the next 120hrs (5d).
 		case 'cautious':
-			$a = -41.46565;
-			$b = 0.0078509;
-			$c = 0.945984;
+			$percent = 11 * ( 1.0195 ** $hours_since_release ) - 10;
 			break;
-
-		case 'should-switch-to-static-map';
-			$map = [
-				0 => 0.01, // 1%
-				1 => 0.05, // 5%
-				2 => 0.10, // 10%
-				3 => 0.20, // 20%
-				4 => 0.30, // 30%
-				5 => 0.40, // 40%
-				6 => 0.50, // 50%
-				7 => 0.60, // 60%
-				8 => 0.70, // 70%
-				9 => 0.80, // 80%
-				10 => 0.90, // 90%
-			];
 	}
 
-	// There's a better formula for this I'm sure, but this will do to start with.
-	// y = a . log(bx+c)
-	// TODO: This is totally broken and does not return a percentage at all. Should probably switch to a map instead.
-	$percent = $a * log( $b * $hours_since_release + $c );
+	if ( $percent >= 100 ) {
+		return true;
+	}
 
 	return ( $site_percent <= $percent );
 }
