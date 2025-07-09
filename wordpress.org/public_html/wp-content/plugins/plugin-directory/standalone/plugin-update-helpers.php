@@ -20,11 +20,6 @@ namespace WordPressdotorg\Plugin_Directory\Standalone;
 function get_site_percentage() {
 	global $wp_url;
 
-	static $site_percent;
-	if ( $site_percent ) {
-		return $site_percent;
-	}
-
 	/*
 	 * If the site URL hasn't been extracted already, pull it from the global.
 	 * NOTE: This may be set by the tests or other codepaths that run before this function.
@@ -33,33 +28,17 @@ function get_site_percentage() {
 		$wp_url = $m[1];
 	}
 
-	// If no URL is set, delay the update until fully rolled out.
-	if ( ! $wp_url ) {
+	$site_domain = strtolower( parse_url( $wp_url, PHP_URL_HOST ) );
+
+	// If we've reached this point and have no URL, delay the update until 100% is reached.
+	if ( ! $site_domain ) {
 		return 100;
 	}
 
-	$site_url = strtolower( $wp_url );
-
-	// Strip off the scheme.
-	if ( $pos = strpos( $site_url, '://' ) ) {
-		$site_url = substr( $site_url, $pos + 3 );
-	}
-	// ... and path.
-	if (
-		( $pos = strpos( $site_url, '/' ) ) ||
-		( $pos = strpos( $site_url, '?' ) ) ||
-		( $pos = strpos( $site_url, '#' ) )
-	) {
-		$site_url = substr( $site_url, 0, $pos );
-	}
-
-	// Again, if we've reached this point and have no URL, delay the update.
-	if ( ! $site_url ) {
-		return 100;
-	}
+	// TODO: We probably need to have this be based on ( site_domain, plugin_slug, version ) instead.
 
 	// $site_step represents an integer from 0 to 4095.
-	$site_step   = base_convert( substr( md5( $site_url ), 0, 3 ), 16, 10 );
+	$site_step   = base_convert( substr( md5( $site_domain ), 0, 3 ), 16, 10 );
 	$site_percent = $site_step / 4095 * 100;
 
 	return $site_percent;
