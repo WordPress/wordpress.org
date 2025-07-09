@@ -32,7 +32,7 @@ function get_site_percentage( string $slug = '', string $version = '' ) {
 		$wp_url = $m[1];
 	}
 
-	$site_domain = strtolower( parse_url( $wp_url, PHP_URL_HOST ) );
+	$site_domain = strtolower( parse_url( $wp_url, PHP_URL_HOST ) ?: '' );
 
 	// If we've reached this point and have no URL, delay the update until 100% is reached.
 	if ( ! $site_domain ) {
