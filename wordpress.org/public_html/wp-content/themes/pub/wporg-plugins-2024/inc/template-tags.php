@@ -787,19 +787,21 @@ function the_phased_rollout_settings() {
 	$rollout = $post->phased_rollout ?: '';
 
 	$options = [
-		''           => __( 'Immediate (default)', 'wporg-plugins' ),
-		'slow'       => __( 'Slow rollout', 'wporg-plugins' ),
-		'extra-slow' => __( 'Extra slow rollout', 'wporg-plugins' ),
-		'cautious'   => __( 'Cautious rollout', 'wporg-plugins' ),
-		'custom'     => __( 'Custom rollout', 'wporg-plugins' ),
+		''                    => __( 'Immediate (default)', 'wporg-plugins' ),
+		'manual-updates-24hr' => __( 'Manual updates only (24 hours)', 'wporg-plugins' ),
+		'slow'                => __( 'Slow rollout', 'wporg-plugins' ),
+		'extra-slow'          => __( 'Extra slow rollout', 'wporg-plugins' ),
+		'cautious'            => __( 'Cautious rollout', 'wporg-plugins' ),
+		'custom'              => __( 'Custom rollout', 'wporg-plugins' ),
 	];
 
 	$descriptions = [
-		''          => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
-		'slow'      => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 2 days.', 'wporg-plugins' ),
-		'extra-slow'=> __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 3 days.', 'wporg-plugins' ),
-		'cautious'  => __( 'Plugin updates will be released to 1% of sites for the first 6 hours, increasing to 10% by day 2, and to 100% of sites within 5 days.', 'wporg-plugins' ),
-//		'custom'    => __( 'Plugin updates will be released to a custom percentage of sites, as defined by the plugin author.', 'wporg-plugins' ),
+		''                    => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
+		'manual-updates-24hr' => __( 'Plugin updates will be released to all sites, but automatic updates will be disabled for 24 hours. After that, sites will receive the update as normal.', 'wporg-plugins' ),
+		'slow'                => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 2 days.', 'wporg-plugins' ),
+		'extra-slow'          => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 3 days.', 'wporg-plugins' ),
+		'cautious'            => __( 'Plugin updates will be released to 1% of sites for the first 6 hours, increasing to 10% by day 2, and to 100% of sites within 5 days.', 'wporg-plugins' ),
+//		'custom'            => __( 'Plugin updates will be released to a custom percentage of sites, as defined by the plugin author.', 'wporg-plugins' ),
 	];
 
 	echo '<h4>' . __( 'Phased rollout', 'wporg-plugins' ) . '</h4>';

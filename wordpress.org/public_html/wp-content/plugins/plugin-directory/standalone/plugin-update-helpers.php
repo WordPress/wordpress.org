@@ -78,6 +78,22 @@ function phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_
 		return $plugin_info;
 	}
 
+	// If the strategy is manual updates only for the first 24hrs, then we can just disable the sites ability to perform autoupdates.
+	if ( 'manual-updates-24hr' === $strategy ) {
+
+		// The flag used here is only operable in WordPress 6.6+.
+		// See https://core.trac.wordpress.org/ticket/52796
+		$meets_wp_version = $req_wp_version_base && version_compare( $req_wp_version_base, '6.6', '>=' );
+
+		// If less than 24 hours have passed, do not update.
+		if ( $meets_wp_version && $hours_since_release <= 24 ) {
+			$plugin_info->disable_autoupdates = true;
+		}
+		// Else: The plugin update is unchanged, sites will update.
+
+		return $plugin_info;
+	}
+
 	$do_not_offer_update = false;
 
 	// Handle the percent-based strategies.
