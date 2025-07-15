@@ -47,45 +47,102 @@ function get_site_percentage( string $slug = '', string $version = '' ) {
 }
 
 /**
- * Determine if the site should update based on the phased rollout details.
+ * This function acts as a filter on the update that's presented to the site.
+ *
+ * @global string $wp_url         The WordPress site URL. Extracted from the HTTP User Agent header.
+ * @global string $req_wp_version The WordPress client version.
+ *
+ * @param object $plugin_info       The plugin update details.
+ * @param object $plugin_details    The plugin details.
+ * @param string $installed_version The currently installed version of the plugin.
+ * @param string $wp_version        The WordPress version. Empty if not a WordPress client.
+ * @return object The updated plugin update details.
+ */
+function phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_version ) {
+	global $wp_url, $req_wp_version_base;
+
+	$strategy = $phase_details['strategy'] ?? false;
+	if ( ! $strategy ) {
+		return $plugin_info;
+	}
+
+	// This is effectively a NOOP strategy, no changes.
+	if ( 'immediate' === $strategy ) {
+		return $plugin_info;
+	}
+
+	// Calculate the number of hours since the plugin was released.
+	$hours_since_release = ( time() - $plugin_details->meta->release_time ) / 3600;
+	if ( $hours_since_release > 120 ) {
+		// If more than 5 days have passed, always assume the update is available.
+		return $plugin_info;
+	}
+
+	$do_not_offer_update = false;
+
+	// Handle the percent-based strategies.
+	$plugin_percent_rollout = phased_rollout_get_plugin_percent( $strategy, $hours_since_release, $plugin_details );
+	if ( $plugin_percent_rollout !== false ) {
+
+		$site_percent = get_site_percentage( $plugin_details->plugin_slug, $plugin_details->version );
+
+		if ( $site_percent > $plugin_percent_rollout ) {
+			$do_not_offer_update = true;
+		}
+	}
+
+	// If the site should not update, we'll return the last-version if possible.
+	if ( $do_not_offer_update ) {
+		$plugin_info->version = $plugin_details->meta->last_version ?? $installed_version;
+
+		// Match update-check API.
+		unset(
+			$plugin_info->tested,
+			$plugin_info->requires_php,
+			$plugin_info->requires_plugins,
+			$plugin_info->compatibility,
+			$plugin_info->upgrade_notice
+		);
+	}
+
+	return $plugin_info;
+}
+
+/**
+ * Get the percentage of sites that should receive the update for the plugin.
  *
  * @link https://www.desmos.com/calculator/59sl7efajq
  *
- * @param object $update_details The plugin update details.
- * @return bool True if the site should update, false otherwise.
+ * @param string $strategy            The rollout strategy.
+ * @param float  $hours_since_release The number of hours since the plugin was released.
+ * @param object $update_details      The plugin update details.
+ *
+ * @return float|false The percentage of sites that should receive the update, or false invalid details.
  */
-function phased_rollout_should_update( object $update_details ) {
+function phased_rollout_get_plugin_percent( string $strategy, float $hours_since_release, object $update_details ) {
+	$percent_based_strategies = [
+		'custom',
+		'slow',
+		'extra-slow',
+		'cautious',
+	];
+
 	$phase_details = $update_details->meta->phased_rollout ?? false;
-	if ( ! $phase_details ) {
-		return true;
+
+	if (
+		! $phase_details ||
+		! in_array( $strategy, $percent_based_strategies, true )
+	) {
+		return false;
 	}
 
-	/*
-	 * $phase_details are expected to be in the format of...
-	 * {
-	 *   "strategy": "slow",
-	 *   "time": Release time in seconds since the epoch,
-	 *   "percentage": If the strategy is "custom", this is the percentage of sites that should receive the update.
-	 * }
-	 */
-
-	$site_percent        = get_site_percentage( $update_details->plugin_slug, $update_details->version );
-	$hours_since_release = ( time() - $phase_details['time'] ) / 3600;
-
-	if ( $hours_since_release >= 120 ) {
-		// If more than 5 days have passed, assume the update is available.
-		return true;
-	}
-
-	switch( $phase_details['strategy'] ?? 'immediate' ) {
+	switch( $strategy ) {
 		default:
-		case 'immediate':
-			$percent = 100;
-			break;
+			return false;
 
 		// Custom defined by the plugin author, they must update this value in settings.
 		case 'custom':
-			$percent = $phase_details['percentage'] ?? 100;
+			return $phase_details['percentage'] ?? 100;
 
 		/*
 		 * Straight curve, start at 5%, increases to 100% over the next 48hrs (2d).
@@ -97,8 +154,7 @@ function phased_rollout_should_update( object $update_details ) {
 		 * At 48 hours, the percentage is 5 + (48/48) * 95 = 100%
 		 */
 		case 'slow':
-			$percent = 5 + ( $hours_since_release / 48 ) * 95;
-			break;
+			return 5 + ( $hours_since_release / 48 ) * 95;
 
 		/*
 		 * Polynomial curve, starts at 5%, increases to 100% over the next 72hrs (3d).
@@ -112,8 +168,7 @@ function phased_rollout_should_update( object $update_details ) {
 		 * At 72 hours, the percentage is 9 * ( 1.0345 ** 72 ) - 3.9 = 100%
 		 */
 		case 'extra-slow':
-			$percent = 9 * ( 1.0345 ** $hours_since_release ) - 3.9;
-			break;
+			return 9 * ( 1.0345 ** $hours_since_release ) - 3.9;
 
 		/*
 		 * Polynomial curve, starts at 1%, with an increase to 100% over the next 120hrs (5d).
@@ -129,13 +184,9 @@ function phased_rollout_should_update( object $update_details ) {
 		 *
 		 */
 		case 'cautious':
-			$percent = 11 * ( 1.0195 ** $hours_since_release ) - 10;
-			break;
+			return 11 * ( 1.0195 ** $hours_since_release ) - 10;
 	}
 
-	if ( $percent >= 100 ) {
-		return true;
-	}
-
-	return ( $site_percent <= $percent );
+	// If we reach this point, something is wrong.
+	return false;
 }
