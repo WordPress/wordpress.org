@@ -239,7 +239,7 @@ class Plugins_Info_API {
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 30 ); // Short expiry for when we've got issues
 			} else {
 				$response = $response->data;
-				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
+				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, $this->query_plugins_cache_duration( $request ) );
 			}
 		}
 
@@ -283,6 +283,22 @@ class Plugins_Info_API {
 	 */
 	protected function query_plugins_cache_key( $request ) {
 		return 'query_plugins:' . md5( serialize( $request->query_plugins_params_for_query() ) ) . ':' . ( $request->locale ?: 'en_US' );
+	}
+
+	/**
+	 * Returns the cache duration for a Query Plugins request.
+	 *
+	 * @param Plugins_Info_API_Request $request The request object.
+	 * @return int The cache duration in seconds.
+	 */
+	protected function query_plugins_cache_duration( $request ) {
+		// New / Updated plugins get a much shorter cache duration.
+		if ( in_array( $request->browse, array( 'new', 'updated' ) ) ) {
+			return 900; // 15 minutes.
+		}
+
+		// Defaults to 6 hours otherwise.
+		return self::CACHE_EXPIRY;
 	}
 
 	/**
