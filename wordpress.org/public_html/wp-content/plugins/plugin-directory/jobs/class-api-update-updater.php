@@ -79,7 +79,11 @@ class API_Update_Updater {
 
 		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
-		$meta             = array();
+		$meta             = array(
+			'release_time'    => strtotime( $post->post_modified ),
+			'last_version'    => $post->last_version ?? '',
+			'last_stable_tag' => $post->last_stable_tag ?? '',
+		);
 
 		if ( in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
 			$closed_data = Template::get_close_data( $post );
@@ -93,16 +97,17 @@ class API_Update_Updater {
 		}
 
 		$release = Plugin_Directory::get_release( $post->ID, $version );
+		if ( $release ) {
+			$meta['release_time'] = max( $release['confirmations'] );
+		}
 		if ( $release && $release['phased_rollout'] ) {
 			// If the release has a phased rollout, use that.
 			$meta['phased_rollout'] = array(
 				'strategy' => $release['phased_rollout'],
-				'time'     => max( $release['confirmations'] ),
 			);
 		} elseif ( $post->phased_rollout ) {
 			$meta['phased_rollout'] = array(
 				'strategy' => $post->phased_rollout,
-				'time'     => $release ? max( $release['confirmations'] ) : strtotime( $post->post_modified ),
 			);
 		}
 

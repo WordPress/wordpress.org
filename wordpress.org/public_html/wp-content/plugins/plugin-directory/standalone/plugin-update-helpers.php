@@ -14,7 +14,7 @@ namespace WordPressdotorg\Plugin_Directory\Standalone;
 /**
  * Return the current sites update-percentage.
  *
- * @global $wp_url
+ * @global string $wp_url         The WordPress site URL. Extracted from the HTTP User Agent header.
  *
  * @param string $slug    The plugin slug.
  * @param string $version The plugin version.
