@@ -746,7 +746,7 @@ function the_author_notice( $post = null ) {
 		printf(
 			'<div class="notice notice-alt notice-%s">%s</div>',
 			esc_attr( $notice['type'] ),
-			'<p><strong>' . __( 'A note from the Plugin Review team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			'<p><strong>' . __( 'A note from the Plugins Team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
 			wp_kses_post( $notice['html'] ) // Should have wrapping <p> tags.
 		);
 	}
