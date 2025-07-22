@@ -749,7 +749,7 @@ function the_author_notice( $post = null ) {
 		printf(
 			'<div class="notice notice-alt notice-%s">%s</div>',
 			esc_attr( $notice['type'] ),
-			'<p><strong>' . __( 'A note from the Plugin Review team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			'<p><strong>' . __( 'A note from the Plugins Team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
 			wp_kses_post( $notice['html'] ) // Should have wrapping <p> tags.
 		);
 	}
@@ -786,24 +786,6 @@ function the_phased_rollout_settings() {
 	}
 	$rollout = $post->phased_rollout ?: '';
 
-	$options = [
-		''                    => __( 'Immediate (default)', 'wporg-plugins' ),
-		'manual-updates-24hr' => __( 'Manual updates only (24 hours)', 'wporg-plugins' ),
-		'slow'                => __( 'Slow rollout', 'wporg-plugins' ),
-		'extra-slow'          => __( 'Extra slow rollout', 'wporg-plugins' ),
-		'cautious'            => __( 'Cautious rollout', 'wporg-plugins' ),
-		'custom'              => __( 'Custom rollout', 'wporg-plugins' ),
-	];
-
-	$descriptions = [
-		''                    => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
-		'manual-updates-24hr' => __( 'Plugin updates will be released to all sites, but automatic updates will be disabled for 24 hours. After that, sites will receive the update as normal.', 'wporg-plugins' ),
-		'slow'                => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 2 days.', 'wporg-plugins' ),
-		'extra-slow'          => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 3 days.', 'wporg-plugins' ),
-		'cautious'            => __( 'Plugin updates will be released to 1% of sites for the first 6 hours, increasing to 10% by day 2, and to 100% of sites within 5 days.', 'wporg-plugins' ),
-//		'custom'            => __( 'Plugin updates will be released to a custom percentage of sites, as defined by the plugin author.', 'wporg-plugins' ),
-	];
-
 	echo '<h4>' . __( 'Phased rollout', 'wporg-plugins' ) . '</h4>';
 
 	echo '<p>' .
@@ -814,17 +796,17 @@ function the_phased_rollout_settings() {
 
 	echo '<form method="POST" action="' . esc_url( Template::get_phased_rollout_link() ) . '">';
 	echo '<select id="phased_rollout" name="phased_rollout">';
-	foreach ( $options as $value => $label ) {
+	foreach ( Template::get_rollout_strategies() as $slug => $set ) {
 		echo '<option ' .
-			'value="' . esc_attr( $value ) . '" ' .
-			selected( $rollout, $value, false ) .
-			disabled( 'custom', $value, false ) .
-			' data-description="' . esc_attr( $descriptions[ $value ] ?? '' ) .
-			'">' . $label . '</option>';
+			'value="' . esc_attr( $slug ) . '" ' .
+			selected( $rollout, $slug, false ) .
+			disabled( 'custom', $slug, false ) .
+			' data-description="' . esc_attr( $set['description'] ) .
+			'">' . $set['name'] . '</option>';
 	}
 	echo '</select>';
 
-	echo '<div class="help">' . esc_html( $descriptions[ $rollout ] ?? '' ) . '</div>';
+	echo '<div class="help">' . esc_html( Template::get_rollout_strategies()[ $rollout ]['description'] ?? '' ) . '</div>';
 	echo '<script>
 		jQuery( document ).ready( function( $ ) {
 			$( "#phased_rollout" ).change( function() {

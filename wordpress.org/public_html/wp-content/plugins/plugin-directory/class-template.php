@@ -1385,4 +1385,34 @@ class Template {
 
 		return $sorted;
 	}
+
+	static function get_rollout_strategies() {
+		return [
+			'' => [
+				'name' => __( 'Immediate (default)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
+			],
+			'manual-updates-24hr' => [
+				'name' => __( 'Manual updates only (24 hours)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites, but automatic updates will be disabled for 24 hours. After that, sites will receive the update as normal.', 'wporg-plugins' ),
+			],
+			/*
+			[
+				'name' => __( 'Slow rollout', 'wporg-plugins' ),
+				'slug' => 'slow',
+				'description' => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 2 days.', 'wporg-plugins' ),
+			],
+			[
+				'name' => __( 'Extra slow rollout', 'wporg-plugins' ),
+				'slug' => 'extra-slow',
+				'description' => __( 'Plugin updates will be released to 5% of sites for the first 6 hours, increasing to 100% over the next 3 days.', 'wporg-plugins' ),
+			],
+			[
+				'name' => __( 'Cautious rollout', 'wporg-plugins' ),
+				'slug' => 'cautious',
+				'description' => __( 'Plugin updates will be released to 1% of sites for the first 6 hours, increasing to 10% by day 2, and to 100% of sites within 5 days.', 'wporg-plugins' ),
+			]
+			*/
+		];
+	}
 }
