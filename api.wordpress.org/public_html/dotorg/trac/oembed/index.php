@@ -24,16 +24,18 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = wp_unslash( $_REQUEST['url'] ?? '' );
+$url = $_REQUEST['url'] ?? '';
+$url = is_string( $url ) ? wp_unslash( $url ) : '';
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );
 
 if (
+	! $url ||
+	'GET' !== $_SERVER['REQUEST_METHOD'] ||
 	// meta|core are the only tracs embedable.
 	// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
-	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone|ticketgraph|ticket|changeset|query)([/?]|$)!i', $url, $m ) ||
-	'GET' !== $_SERVER['REQUEST_METHOD']
+	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone|ticketgraph|ticket|changeset|query)([/?]|$)!i', $url, $m )
 ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
 	die();
