@@ -223,12 +223,3 @@ function phased_rollout_get_plugin_percent( string $strategy, float $hours_since
 	// If we reach this point, something is wrong.
 	return false;
 }
-=======
- * @return object The plugin update details.
- */
-function alter_update( $plugin_info, $plugin_details, $installed_version ) {
-	global $wp_url, $req_wp_version_base;
-
-	return $plugin_info;
-}
->>>>>>> trunk
