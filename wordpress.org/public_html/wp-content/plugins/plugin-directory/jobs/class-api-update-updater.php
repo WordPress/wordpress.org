@@ -105,8 +105,8 @@ class API_Update_Updater {
 			$meta['release_time'] = max( $release['confirmations'] );
 		}
 
+		// Add phased rollout strategy data if needed.
 		if ( $release && $release['phased_rollout'] ) {
-			// If the release has a phased rollout, use that.
 			$meta['phased_rollout'] = array(
 				'strategy' => $release['phased_rollout'],
 			);
