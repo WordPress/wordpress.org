@@ -80,7 +80,7 @@ class API_Update_Updater {
 		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
 		$meta             = array(
-			'release_time'    => strtotime( $post->post_modified ),
+			'release_time'    => strtotime( $post->version_date ?: $post->post_modified ),
 			'last_version'    => $post->last_version ?? '',
 			'last_stable_tag' => $post->last_stable_tag ?? '',
 		);
@@ -96,10 +96,15 @@ class API_Update_Updater {
 			}
 		}
 
-		$release = Plugin_Directory::get_release( $post->ID, $version );
-		if ( $release ) {
+		$release = Plugin_Directory::get_release( $post, $version );
+		if (
+			$release &&
+			$release['confirmations_required'] &&
+			$release['confirmations']
+		) {
 			$meta['release_time'] = max( $release['confirmations'] );
 		}
+
 		if ( $release && $release['phased_rollout'] ) {
 			// If the release has a phased rollout, use that.
 			$meta['phased_rollout'] = array(

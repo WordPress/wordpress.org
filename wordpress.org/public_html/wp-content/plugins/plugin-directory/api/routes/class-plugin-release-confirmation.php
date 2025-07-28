@@ -37,7 +37,7 @@ class Plugin_Release_Confirmation extends Base {
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)', [
-			'methods'             => \WP_REST_Server::READABLE, // TODO: This really should be a POST
+			'methods'             => 'GET, POST', // TODO: Remove GET.
 			'callback'            => [ $this, 'confirm_release' ],
 			'args'                => [
 				'plugin_slug' => [
@@ -51,7 +51,7 @@ class Plugin_Release_Confirmation extends Base {
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/discard', [
-			'methods'             => \WP_REST_Server::READABLE, // TODO: This really should be a POST
+			'methods'             => 'GET, POST', // TODO: Remove GET.
 			'callback'            => [ $this, 'discard_release' ],
 			'args'                => [
 				'plugin_slug' => [
@@ -65,7 +65,7 @@ class Plugin_Release_Confirmation extends Base {
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/undo-discard', [
-			'methods'             => \WP_REST_Server::READABLE, // TODO: This really should be a POST
+			'methods'             => 'GET, POST', // TODO: Remove GET.
 			'callback'            => [ $this, 'undo_discard_release' ],
 			'args'                => [
 				'plugin_slug' => [

@@ -7,9 +7,27 @@ namespace WordPressdotorg\Plugin_Directory\Standalone;
  *
  * NOTE: This file is executed without WordPress being loaded.
  *       Please ensure no WordPress dependencies, or other plugin file dependencies are added.
+ *       Certain methods are polyfilled in that environment with no-op variants such as __() and apply_filters().
  *
  * @link https://api.wordpress.org/plugins/update-check/{1.0,1.1}/
  */
+
+/**
+ * This function acts as a filter on the update that's presented to the site.
+ *
+ * @param object $plugin_info       The plugin update details.
+ * @param object $plugin_details    The plugin details.
+ * @param string $installed_version The currently installed version of the plugin.
+ * @param string $wp_version        The WordPress version. Empty if not a WordPress client. Excludes `-alpha` type suffixes.
+ * @param string $wp_url            The WordPress site URL. Extracted from the HTTP User Agent header.
+ * @return object The plugin update details.
+ */
+function alter_update( $plugin_info, $plugin_details, $installed_version, $wp_version, $wp_url ) {
+
+	$plugin_info = phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_version );
+
+	return $plugin_info;
+}
 
 /**
  * Return the current sites update-percentage.
@@ -49,13 +67,12 @@ function get_site_percentage( string $slug = '', string $version = '' ) {
 /**
  * This function acts as a filter on the update that's presented to the site.
  *
- * @global string $wp_url         The WordPress site URL. Extracted from the HTTP User Agent header.
- * @global string $req_wp_version The WordPress client version.
+ * @global string $wp_url              The WordPress site URL. Extracted from the HTTP User Agent header.
+ * @global string $req_wp_version_base The WordPress client version. Empty if not a WordPress client. Excludes `-alpha` type suffixes.
  *
  * @param object $plugin_info       The plugin update details.
  * @param object $plugin_details    The plugin details.
  * @param string $installed_version The currently installed version of the plugin.
- * @param string $wp_version        The WordPress version. Empty if not a WordPress client.
  * @return object The updated plugin update details.
  */
 function phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_version ) {
@@ -206,3 +223,12 @@ function phased_rollout_get_plugin_percent( string $strategy, float $hours_since
 	// If we reach this point, something is wrong.
 	return false;
 }
+=======
+ * @return object The plugin update details.
+ */
+function alter_update( $plugin_info, $plugin_details, $installed_version ) {
+	global $wp_url, $req_wp_version_base;
+
+	return $plugin_info;
+}
+>>>>>>> trunk

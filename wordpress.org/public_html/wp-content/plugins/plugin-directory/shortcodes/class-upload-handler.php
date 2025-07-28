@@ -359,7 +359,7 @@ class Upload_Handler {
 		if ( $readme_plugin_post && trim( $readme->name ) ) {
 			$error = __( 'README Error: The plugin has already been submitted.', 'wporg-plugins' );
 
-			if ( $readme_plugin_post->post_author != get_current_user_id() ) {
+			if ( reset( $readme_plugin_post )->post_author != get_current_user_id() ) {
 				return new WP_Error( 'already_submitted', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 					__( 'There is already a plugin with the name %1$s in the directory. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),

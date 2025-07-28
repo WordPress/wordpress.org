@@ -81,7 +81,8 @@ class Release_Confirmation {
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
 			printf(
-				'<h2><a href="%s">%s</a></h2>',
+				'<h2 id="releases-%s"><a href="%s">%s</a></h2>',
+				esc_attr( $plugin->post_name ),
 				get_permalink( $plugin ),
 				get_the_title( $plugin )
 			);
@@ -116,14 +117,14 @@ class Release_Confirmation {
 
 		echo '<div class="wp-block-table is-style-stripes">
 		<table class="plugin-releases-listing">
+		<colgroup>
+			<col width="25%">
+		</colgroup>
 		<thead>
 			<tr>
-				<th>Version</th>
-				<th>Date</th>
-				<th>Committer</th>
-				<th>Approval</th>
-				<th>Actions</th>
-		</thead></div>';
+				<th>' . _x( 'Release', 'Releases Table header', 'wporg-plugins' ) . '</th>
+				<th>&nbsp;</th>
+		</thead>';
 
 		if ( ! $releases ) {
 			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
@@ -136,33 +137,45 @@ class Release_Confirmation {
 			foreach ( $data['committer'] as $i => $login ) {
 				$data['committer'][ $i ] = sprintf(
 					'<a href="%s">%s</a>',
-					'https://profiles.wordpress.org/' . get_user_by( 'login', $login )->user_nicename . '/',
+					'https://profiles.wordpress.org/' . ( get_user_by( 'login', $login )->user_nicename ?? '' ) . '/',
 					esc_html( $login )
 				);
 			}
 
 			printf(
 				'<tr>
-					<td>%s</td>
-					<td title="%s">%s</td>
-					<td>%s</td>
-					<td>%s</td>
-					<td><div class="plugin-releases-listing-actions">%s</div></td>
+					<td>%s<br><small>%s</small></td>
+					<td>
+						<form method="POST">
+							<div class="plugin-releases-listing-actions">%s</div>
+							%s
+						</form>
+					</td>
 				</tr>',
 				sprintf(
-					'<a href="%s">%s</a>',
-					esc_url( sprintf(
-						'https://plugins.trac.wordpress.org/browser/%s/tags/%s/',
-						$plugin->post_name,
-						$data['tag']
-					) ),
-					esc_html( $data['version'] )
+					__( 'Version %s', 'wporg-plugins' ),
+					sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( sprintf(
+							'https://plugins.trac.wordpress.org/browser/%s/tags/%s/',
+							$plugin->post_name,
+							$data['tag']
+						) ),
+						esc_html( $data['version'] )
+					),
 				),
-				esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
-				esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
-				implode( ', ', $data['committer'] ),
-				self::get_approval_text( $plugin, $data ),
-				self::get_actions( $plugin, $data )
+				sprintf(
+					/* translators: 1: time eg. '3 hours ago', 2: the committer(s). */
+					__( 'Released %1$s by %2$s', 'wporg-plugins' ),
+					sprintf(
+						'<span title="%s">%s</span>',
+						esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
+						esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
+					),
+					implode( ', ', $data['committer'] ),
+				),
+				self::get_actions( $plugin, $data ),
+				self::get_approval_text( $plugin, $data )
 			);
 
 			// TODO: per-release phased rollout settings should be available here.
@@ -170,6 +183,11 @@ class Release_Confirmation {
 
 		echo '</table>';
 		echo '</div>';
+		echo '<style>
+			.plugin-releases-listing-actions {
+				float: right;
+			}
+		</style>';
 	}
 
 	static function get_approval_text( $plugin, $data ) {
@@ -281,7 +299,7 @@ class Release_Confirmation {
 				$discard_link = get_revalidation_js_url( $discard_link );
 
 				$buttons[] = sprintf(
-					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
+					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
 					$confirm_link,
 					esc_attr(
 						sprintf(
@@ -295,7 +313,7 @@ class Release_Confirmation {
 				);
 
 				$buttons[] = sprintf(
-					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
+					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
 					$discard_link,
 					esc_attr(
 						sprintf(
