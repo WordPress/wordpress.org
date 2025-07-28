@@ -94,8 +94,12 @@ class API_Update_Updater {
 			}
 		}
 
-		$release = Plugin_Directory::get_release( $post->ID, $version );
-		if ( $release ) {
+		$release = Plugin_Directory::get_release( $post, $version );
+		if (
+			$release &&
+			$release->confirmations_required &&
+			$release['confirmations']
+		) {
 			$meta['release_time'] = max( $release['confirmations'] );
 		}
 
