@@ -32,7 +32,7 @@ function alter_update( $plugin_info, $plugin_details, $installed_version, $wp_ve
 /**
  * Return the current sites update-percentage.
  *
- * @global string $wp_url         The WordPress site URL. Extracted from the HTTP User Agent header.
+ * @global string $wp_url The WordPress site URL. Extracted from the HTTP User Agent header.
  *
  * @param string $slug    The plugin slug.
  * @param string $version The plugin version.
@@ -67,16 +67,12 @@ function get_site_percentage( string $slug = '', string $version = '' ) {
 /**
  * This function acts as a filter on the update that's presented to the site.
  *
- * @global string $wp_url              The WordPress site URL. Extracted from the HTTP User Agent header.
- * @global string $req_wp_version_base The WordPress client version. Empty if not a WordPress client. Excludes `-alpha` type suffixes.
- *
  * @param object $plugin_info       The plugin update details.
  * @param object $plugin_details    The plugin details.
  * @param string $installed_version The currently installed version of the plugin.
  * @return object The updated plugin update details.
  */
 function phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_version ) {
-	global $wp_url, $req_wp_version_base;
 
 	$strategy = $phase_details['strategy'] ?? false;
 	if ( ! $strategy ) {
