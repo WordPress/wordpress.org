@@ -175,10 +175,9 @@ class Release_Confirmation {
 					implode( ', ', $data['committer'] ),
 				),
 				self::get_actions( $plugin, $data ),
-				self::get_approval_text( $plugin, $data )
+				self::get_approval_text( $plugin, $data ) .
+					self::get_release_strategy( $plugin, $data )
 			);
-
-			// TODO: per-release phased rollout settings should be available here.
 		}
 
 		echo '</table>';
@@ -341,6 +340,54 @@ class Release_Confirmation {
 		}
 
 		return implode( ' ', $buttons );
+	}
+
+	static function get_release_strategy( $plugin, $data ) {
+		if ( ! current_user_can( 'plugin_manage_releases', $plugin ) ) {
+			return '';
+		}
+
+		if ( ! $data['confirmations_required'] || ! empty( $data['discarded'] ) ) {
+			return '';
+		}
+
+		$rollout = $data['rollout_strategy'] ?? '';
+
+		if ( $data['confirmed'] ) {
+			if ( $rollout ) {
+				ob_start();
+				echo '<div class="release-strategy">';
+				echo '<h3>' . __( 'Release Strategy', 'wporg-plugins' ) . '</h3>';
+				echo '<p>' . __( 'This release has been confirmed, and the rollout strategy is set.', 'wporg-plugins' ) . '</p>';
+				echo '<pre>' . esc_html( print_r( $data['rollout_strategy'], true ) ) . '</pre>';
+				echo '</div>';
+
+				return ob_get_clean();
+			}
+			return '';
+		}
+
+		ob_start();
+		echo '<div class="release-strategy">';
+		echo '<h3>Release Strategy</h3>';
+		echo '<p>WordPress sites check for plugin updates multiple times per day, and may attempt to automatically update if the site owner has enabled automatic updates. This immediate rollout strategy can result in many users installing a plugin before the author becomes aware of any issues with the update. By using this feature you can choose how (and when) sites automatically install your plugin update.</p>';
+		echo '<label for="rollout_strategy">' . __( 'Rollout Strategy', 'wporg-plugins' ) . '</label>';
+
+		echo '<select id="rollout_strategy" name="rollout_strategy" onchange="this.nextElementSibling.innerHTML = this.options[this.selectedIndex].dataset.description;">';
+		foreach ( Template::get_rollout_strategies() as $slug => $set ) {
+			echo '<option ' .
+				'value="' . esc_attr( $slug ) . '" ' .
+				selected( $rollout, $slug, false ) .
+				disabled( 'custom', $slug, false ) .
+				' data-description="' . esc_attr( $set['description'] ) .
+				'">' . $set['name'] . '</option>';
+		}
+		echo '</select>';
+		echo '<div class="help">' . esc_html( Template::get_rollout_strategies()[ $rollout ]['description'] ?? '' ) . '</div>';
+
+		echo '</div>';
+
+		return ob_get_clean();
 	}
 
 	static function generate_access_url( $user = null ) {
