@@ -516,6 +516,16 @@ class Import {
 
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
+		// If we've got a new version, store the last version in the plugin meta.
+		if ( $version && $version !== $post->version ) {
+			update_post_meta( $plugin->ID, 'last_version', wp_slash( $post->version ) );
+			update_post_meta( $plugin->ID, 'last_stable_tag', wp_slash( $current_stable_tag ) );
+			update_post_meta( $plugin->ID, 'last_version_date', wp_slash( $post->version_date ) );
+
+			// Keep the date of the last version change, this often differs from the last_updated/post_modified dates.
+			update_post_meta( $plugin->ID, 'version_date', wp_slash( current_time( 'mysql' ) ) );
+		}
+
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', wp_slash( $stable_tag ) );
 		update_post_meta( $plugin->ID, 'version',    wp_slash( $version ) );

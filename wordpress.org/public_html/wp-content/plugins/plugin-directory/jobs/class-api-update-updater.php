@@ -79,7 +79,9 @@ class API_Update_Updater {
 
 		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
-		$meta             = array();
+		$meta             = array(
+			'release_time' => strtotime( $post->version_date ?: $post->post_modified ),
+		);
 
 		if ( in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
 			$closed_data = Template::get_close_data( $post );
@@ -90,6 +92,11 @@ class API_Update_Updater {
 					$meta['closed_reason'] = $closed_data['reason'] ?: 'unknown';
 				}
 			}
+		}
+
+		$release = Plugin_Directory::get_release( $post->ID, $version );
+		if ( $release ) {
+			$meta['release_time'] = max( $release['confirmations'] );
 		}
 
 		$data = array(
