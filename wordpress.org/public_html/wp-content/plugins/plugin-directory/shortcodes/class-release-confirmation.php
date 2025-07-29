@@ -297,7 +297,7 @@ class Release_Confirmation {
 				$discard_link = get_revalidation_js_url( $discard_link );
 
 				$buttons[] = sprintf(
-					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
+					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
 					$confirm_link,
 					esc_attr(
 						sprintf(
@@ -311,7 +311,7 @@ class Release_Confirmation {
 				);
 
 				$buttons[] = sprintf(
-					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
+					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
 					$discard_link,
 					esc_attr(
 						sprintf(
