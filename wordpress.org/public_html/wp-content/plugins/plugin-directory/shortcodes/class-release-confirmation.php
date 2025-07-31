@@ -364,9 +364,9 @@ class Release_Confirmation {
 		echo '<select
 			id="rollout_strategy"
 			name="rollout_strategy"
-			onchange="this.nextElementSibling.innerText = this.options[this.selectedIndex].dataset.description;"
-			' . disabled( $data['confirmed'], true, false ) . '
-			>';
+			onchange="this.nextElementSibling.innerText = this.options[this.selectedIndex].dataset.description;"'
+			. disabled( $data['confirmed'], true, false ) .
+			'>';
 		foreach ( Template::get_rollout_strategies() as $slug => $set ) {
 			printf(
 				'<option value="%s" data-description="%s" %s>%s</option>',
