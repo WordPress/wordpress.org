@@ -3,11 +3,11 @@ namespace WordPressdotorg\Plugin_Directory\Standalone;
 
 /**
  * This file contains some functions that are used in the plugin update-check API.
- * The API is currently closed source, but these functions are made public through this file.
+ * The API is currently not open-source, but these functions are made public through this file.
  *
  * NOTE: This file is executed without WordPress being loaded.
  *       Please ensure no WordPress dependencies, or other plugin file dependencies are added.
- *       Certain methods are polyfilled in that environment with no-op variants such as __() and apply_filters().
+ *       Certain methods MAY BE polyfilled in that environment with no-op variants such as __() and apply_filters().
  *
  * @link https://api.wordpress.org/plugins/update-check/{1.0,1.1}/
  */
@@ -24,13 +24,16 @@ namespace WordPressdotorg\Plugin_Directory\Standalone;
  */
 function alter_update( $plugin_info, $plugin_details, $installed_version, $wp_version, $wp_url ) {
 
+	// Apply the Phased Rollout / Staged Rollout / Gradual Rollout strategy to the plugin update.
 	$plugin_info = phased_rollout( $plugin_info, $plugin_details, $installed_version );
 
 	return $plugin_info;
 }
 
 /**
- * This function acts as a filter on the update that's presented to the site.
+ * Apply the Phased / Staged rollout strategies to the plugin update.
+ *
+ * @see https://meta.trac.wordpress.org/ticket/8009
  *
  * @param object $plugin_info       The plugin update details.
  * @param object $plugin_details    The plugin details.
@@ -38,32 +41,29 @@ function alter_update( $plugin_info, $plugin_details, $installed_version, $wp_ve
  * @return object The updated plugin update details.
  */
 function phased_rollout( $plugin_info, $plugin_details, $installed_version ) {
-	$strategy = $plugin_info['meta']['rollout']['strategy'] ?? false;
-	if ( ! $strategy ) {
-		return $plugin_info;
-	}
+	$strategy = $plugin_info->meta->rollout['strategy'] ?? false;
 
-	// This is effectively a NOOP strategy, no changes.
-	if ( 'immediate' === $strategy ) {
+	// If no strategy is set, or it's immediate, return the plugin info unchanged.
+	if ( ! $strategy || 'immediate' === $strategy ) {
 		return $plugin_info;
 	}
 
 	// Calculate the number of hours since the plugin was released.
-	$hours_since_release = ( time() - $plugin_details->meta->release_time ) / 3600;
+	$hours_since_release = ( time() - ( $plugin_details->meta->release_time ?? 0 ) ) / 3600 /* HOUR_IN_SECONDS */;
+
+	// If more than 5 days have passed, always assume the update is available.
 	if ( $hours_since_release > 120 ) {
-		// If more than 5 days have passed, always assume the update is available.
 		return $plugin_info;
 	}
 
-	// If the strategy is manual updates only for the first 24hrs, then we can just disable the sites ability to perform autoupdates.
-	if ( 'manual-updates-24hr' === $strategy ) {
+	// If the strategy is manual updates only for the first 24hrs, and we've not passed that, then disable auto-updates.
+	if (
+		'manual-updates-24hr' === $strategy &&
+		$hours_since_release <= 24
+	) {
+		$plugin_info->disable_autoupdates = true;
 
-		// If less than 24 hours have passed, do not update.
-		if ( $hours_since_release <= 24 ) {
-			$plugin_info->disable_autoupdates = true;
-		}
-		// Else: The plugin update is unchanged, sites will update.
-
+		// Early return to avoid further processing.
 		return $plugin_info;
 	}
 
@@ -152,7 +152,7 @@ function phased_rollout_get_plugin_percent( string $strategy, float $hours_since
 		'cautious',
 	];
 
-	$phase_details = $update_details->meta->rollout->strategy ?? false;
+	$phase_details = $update_details->meta->rollout ?? false;
 
 	if (
 		! $phase_details ||
