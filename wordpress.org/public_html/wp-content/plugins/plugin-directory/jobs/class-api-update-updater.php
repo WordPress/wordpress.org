@@ -80,7 +80,9 @@ class API_Update_Updater {
 		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
 		$meta             = array(
-			'release_time' => strtotime( $post->version_date ?: $post->post_modified ),
+			'release_time'    => strtotime( $post->version_date ?: $post->post_modified ),
+			'last_version'    => $post->last_version ?? '',
+			'last_stable_tag' => $post->last_stable_tag ?? '',
 		);
 
 		if ( in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
@@ -101,6 +103,13 @@ class API_Update_Updater {
 			$release['confirmations']
 		) {
 			$meta['release_time'] = max( $release['confirmations'] );
+		}
+
+		// Add phased rollout strategy data if needed.
+		if ( $release && ! empty( $release['rollout_strategy'] ) ) {
+			$meta['rollout'] = array(
+				'strategy' => $release['rollout_strategy'],
+			);
 		}
 
 		$data = array(
