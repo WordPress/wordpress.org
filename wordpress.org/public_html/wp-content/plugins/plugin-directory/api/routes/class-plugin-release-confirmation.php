@@ -206,6 +206,13 @@ class Plugin_Release_Confirmation extends Base {
 		$result     = [
 			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
 		];
+
+		$result['location'] = preg_replace(
+			'/(#.+)?$/',
+			'#releases-' . urlencode( $plugin->post_name ),
+			$result['location']
+		);
+
 		header( 'Location: ' . $result['location'] );
 
 		if ( ! $release || ! empty( $release['confirmed'][ $user_login ] ) || ! empty( $release['discarded'] ) ) {
@@ -222,6 +229,11 @@ class Plugin_Release_Confirmation extends Base {
 		if ( count( $release['confirmations'] ) >= $release['confirmations_required'] ) {
 			$release['confirmed']      = true;
 			$result['fully_confirmed'] = true;
+		}
+
+		// Store the release strategy if provided, overwriting any previous choice.
+		if ( isset( $request['rollout_strategy'] ) ) {
+			$release['rollout_strategy'] = wp_unslash( $request['rollout_strategy'] );
 		}
 
 		Plugin_Directory::add_release( $plugin, $release );

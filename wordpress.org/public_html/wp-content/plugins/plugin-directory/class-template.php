@@ -1369,4 +1369,22 @@ class Template {
 
 		return $sorted;
 	}
+
+	/**
+	 * Get the available rollout strategies for plugin updates.
+	 *
+	 * @return array
+	 */
+	static function get_rollout_strategies() {
+		return [
+			'' => [
+				'name' => __( 'Immediate (default)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
+			],
+			'manual-updates-24hr' => [
+				'name' => __( 'Manual updates only (24 hours)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites, but automatic updates will be disabled for 24 hours. After that, sites will receive the update as normal.', 'wporg-plugins' ),
+			],
+		];
+	}
 }

@@ -175,7 +175,8 @@ class Release_Confirmation {
 					implode( ', ', $data['committer'] ),
 				),
 				self::get_actions( $plugin, $data ),
-				self::get_approval_text( $plugin, $data )
+				self::get_approval_text( $plugin, $data ) .
+					self::get_rollout_strategy( $plugin, $data )
 			);
 		}
 
@@ -339,6 +340,55 @@ class Release_Confirmation {
 		}
 
 		return implode( ' ', $buttons );
+	}
+
+	/**
+	 * Display the Rollout Strategy options for a given plugin release.
+	 *
+	 * @param WP_Post $plugin The plugin post object.
+	 * @param array   $data   The release data.
+	 * @return string HTML for the rollout strategy options.
+	 */
+	static function get_rollout_strategy( $plugin, $data ) {
+		if ( ! current_user_can( 'plugin_manage_releases', $plugin ) ) {
+			return '';
+		}
+
+		if ( ! $data['confirmations_required'] || ! empty( $data['discarded'] ) ) {
+			return '';
+		}
+
+		$rollout = $data['rollout_strategy'] ?? '';
+		if ( $data['confirmed'] && ! $rollout ) {
+			// If the release is confirmed, but no rollout strategy was set for the release, don't display the UI.
+			return '';
+		}
+
+		ob_start();
+		echo '<div class="release-strategy">';
+		echo '<h3>' . __( 'Rollout Strategy', 'wporg-plugins' ) . '</h3>';
+
+		echo '<select
+			id="rollout_strategy"
+			name="rollout_strategy"
+			onchange="this.nextElementSibling.innerText = this.options[this.selectedIndex].dataset.description;"'
+			. disabled( $data['confirmed'], true, false ) .
+			'>';
+		foreach ( Template::get_rollout_strategies() as $slug => $set ) {
+			printf(
+				'<option value="%s" data-description="%s" %s>%s</option>',
+				esc_attr( $slug ),
+				esc_attr( $set['description'] ),
+				selected( $rollout, $slug, false ),
+				esc_html( $set['name'] )
+			);
+		}
+		echo '</select>';
+		echo '<div class="help">' . esc_html( Template::get_rollout_strategies()[ $rollout ]['description'] ?? '' ) . '</div>';
+
+		echo '</div>';
+
+		return ob_get_clean();
 	}
 
 	static function generate_access_url( $user = null ) {
