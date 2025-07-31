@@ -478,8 +478,8 @@ function the_plugin_danger_zone() {
 	// Output the Release Confirmation form.
 	the_plugin_release_confirmation_form();
 
-	// Output the phased rollout settings.
-	the_phased_rollout_settings();
+	// Output the rollout settings.
+	the_rollout_settings();
 
 	if ( 'publish' != $post->post_status ) {
 		// A reminder of the closed status.
@@ -779,14 +779,14 @@ function the_author_notice( $post = null ) {
 /**
  * Displays the "phased rollout" settings for a plugin.
  */
-function the_phased_rollout_settings() {
+function the_rollout_settings() {
 	$post = get_post();
 	if ( ! current_user_can( 'plugin_manage_releases', $post ) ) {
 		return;
 	}
 	$rollout = $post->phased_rollout ?: '';
 
-	echo '<h4>' . __( 'Phased rollout', 'wporg-plugins' ) . '</h4>';
+	echo '<h4>' . __( 'Rollout Strategy', 'wporg-plugins' ) . '</h4>';
 
 	echo '<p>' .
 		__( 'Phased rollout of a plugin initially delivers updates to a small selection of sites, increasing over time.', 'wporg-plugins' ) .
@@ -795,25 +795,22 @@ function the_phased_rollout_settings() {
 		'</p>';
 
 	echo '<form method="POST" action="' . esc_url( Template::get_phased_rollout_link() ) . '">';
-	echo '<select id="phased_rollout" name="phased_rollout">';
+	echo '<select
+			id="rollout_strategy"
+			name="rollout_strategy"
+			onchange="this.nextElementSibling.innerText = this.options[this.selectedIndex].dataset.description;"
+			>';
 	foreach ( Template::get_rollout_strategies() as $slug => $set ) {
-		echo '<option ' .
-			'value="' . esc_attr( $slug ) . '" ' .
-			selected( $rollout, $slug, false ) .
-			disabled( 'custom', $slug, false ) .
-			' data-description="' . esc_attr( $set['description'] ) .
-			'">' . $set['name'] . '</option>';
+		printf(
+			'<option value="%s" data-description="%s" %s>%s</option>',
+			esc_attr( $slug ),
+			esc_attr( $set['description'] ),
+			selected( $rollout, $slug, false ),
+			esc_html( $set['name'] )
+		);
 	}
 	echo '</select>';
-
 	echo '<div class="help">' . esc_html( Template::get_rollout_strategies()[ $rollout ]['description'] ?? '' ) . '</div>';
-	echo '<script>
-		jQuery( document ).ready( function( $ ) {
-			$( "#phased_rollout" ).change( function() {
-				$( this ).next( ".help" ).text( $( this ).find( "option:selected" ).data( "description" ) );
-			} );
-		} );
-	</script>';
 
 	echo '<p class="wp-block-button is-small">';
 	echo '<input class="wp-block-button__link" type="submit" value="' . esc_attr__( 'Save', 'wporg-plugins' ) . '" />';

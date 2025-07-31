@@ -176,7 +176,7 @@ class Release_Confirmation {
 				),
 				self::get_actions( $plugin, $data ),
 				self::get_approval_text( $plugin, $data ) .
-					self::get_release_strategy( $plugin, $data )
+					self::get_rollout_strategy( $plugin, $data )
 			);
 		}
 
@@ -342,7 +342,7 @@ class Release_Confirmation {
 		return implode( ' ', $buttons );
 	}
 
-	static function get_release_strategy( $plugin, $data ) {
+	static function get_rollout_strategy( $plugin, $data ) {
 		if ( ! current_user_can( 'plugin_manage_releases', $plugin ) ) {
 			return '';
 		}
