@@ -206,6 +206,13 @@ class Plugin_Release_Confirmation extends Base {
 		$result     = [
 			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
 		];
+
+		$result['location'] = preg_replace(
+			'/(#.+)?$/',
+			'#releases-' . urlencode( $plugin->post_name ),
+			$result['location']
+		);
+
 		header( 'Location: ' . $result['location'] );
 
 		if ( ! $release || ! empty( $release['confirmed'][ $user_login ] ) || ! empty( $release['discarded'] ) ) {
