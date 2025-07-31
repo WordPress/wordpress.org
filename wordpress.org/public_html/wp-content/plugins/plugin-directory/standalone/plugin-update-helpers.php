@@ -82,8 +82,8 @@ function phased_rollout( $plugin_info, $plugin_details, $installed_version ) {
 
 	// If the site should not update, we'll return the last-version if possible.
 	if ( $do_not_offer_update ) {
-		$last_version         = $plugin_details->meta->last_version ?? '';
-		$plugin_info->version = $last_version ?: $installed_version;
+		$plugin_info->version    = ( $plugin_details->meta->last_version ?? '' ) ?: $installed_version;
+		$plugin_info->stable_tag = ( $plugin_details->meta->last_stable_tag ?? '' ) ?: $installed_version;
 
 		// Match update-check API.
 		unset(
