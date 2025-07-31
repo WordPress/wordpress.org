@@ -106,13 +106,13 @@ class API_Update_Updater {
 		}
 
 		// Add phased rollout strategy data if needed.
-		if ( $release && $release['phased_rollout'] ) {
-			$meta['phased_rollout'] = array(
-				'strategy' => $release['phased_rollout'],
+		if ( $release && ! empty( $release['rollout_strategy'] ) ) {
+			$meta['rollout'] = array(
+				'strategy' => $release['rollout_strategy'],
 			);
-		} elseif ( $post->phased_rollout ) {
-			$meta['phased_rollout'] = array(
-				'strategy' => $post->phased_rollout,
+		} elseif ( $post->rollout_strategy ) {
+			$meta['rollout'] = array(
+				'strategy' => $post->rollout_strategy,
 			);
 		}
 

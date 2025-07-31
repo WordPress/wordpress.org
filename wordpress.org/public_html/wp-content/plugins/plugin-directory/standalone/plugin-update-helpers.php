@@ -24,44 +24,9 @@ namespace WordPressdotorg\Plugin_Directory\Standalone;
  */
 function alter_update( $plugin_info, $plugin_details, $installed_version, $wp_version, $wp_url ) {
 
-	$plugin_info = phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_version );
+	$plugin_info = phased_rollout( $plugin_info, $plugin_details, $installed_version );
 
 	return $plugin_info;
-}
-
-/**
- * Return the current sites update-percentage.
- *
- * @global string $wp_url The WordPress site URL. Extracted from the HTTP User Agent header.
- *
- * @param string $slug    The plugin slug.
- * @param string $version The plugin version.
- *
- * @return float 0...100.00
- */
-function get_site_percentage( string $slug = '', string $version = '' ) {
-	global $wp_url;
-
-	/*
-	 * If the site URL hasn't been extracted already, pull it from the global.
-	 * NOTE: This may be set by the tests or other codepaths that run before this function.
-	 */
-	if ( empty( $wp_url ) && preg_match( '#^WordPress/.+; (http.+)$#i', $_SERVER['HTTP_USER_AGENT'] ?? '', $m ) ) {
-		$wp_url = $m[1];
-	}
-
-	$site_domain = strtolower( parse_url( $wp_url, PHP_URL_HOST ) ?: '' );
-
-	// If we've reached this point and have no URL, delay the update until 100% is reached.
-	if ( ! $site_domain ) {
-		return 100;
-	}
-
-	// $site_step represents an integer from 0 to 4095.
-	$site_step   = base_convert( substr( md5( "{$site_domain}|{$slug}|{$version}" ), 0, 3 ), 16, 10 );
-	$site_percent = $site_step / 4095 * 100;
-
-	return $site_percent;
 }
 
 /**
@@ -72,9 +37,8 @@ function get_site_percentage( string $slug = '', string $version = '' ) {
  * @param string $installed_version The currently installed version of the plugin.
  * @return object The updated plugin update details.
  */
-function phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_version ) {
-
-	$strategy = $phase_details['strategy'] ?? false;
+function phased_rollout( $plugin_info, $plugin_details, $installed_version ) {
+	$strategy = $plugin_info['meta']['rollout']['strategy'] ?? false;
 	if ( ! $strategy ) {
 		return $plugin_info;
 	}
@@ -118,7 +82,8 @@ function phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_
 
 	// If the site should not update, we'll return the last-version if possible.
 	if ( $do_not_offer_update ) {
-		$plugin_info->version = $plugin_details->meta->last_version ?? $installed_version;
+		$last_version         = $plugin_details->meta->last_version ?? '';
+		$plugin_info->version = $last_version ?: $installed_version;
 
 		// Match update-check API.
 		unset(
@@ -131,6 +96,41 @@ function phased_rollout_alter_update( $plugin_info, $plugin_details, $installed_
 	}
 
 	return $plugin_info;
+}
+
+/**
+ * Return the current sites update-percentage.
+ *
+ * @global string $wp_url The WordPress site URL. Extracted from the HTTP User Agent header.
+ *
+ * @param string $slug    The plugin slug.
+ * @param string $version The plugin version.
+ *
+ * @return float 0...100.00
+ */
+function get_site_percentage( string $slug = '', string $version = '' ) {
+	global $wp_url;
+
+	/*
+	 * If the site URL hasn't been extracted already, pull it from the global.
+	 * NOTE: This may be set by the tests or other codepaths that run before this function.
+	 */
+	if ( empty( $wp_url ) && preg_match( '#^WordPress/.+; (http.+)$#i', $_SERVER['HTTP_USER_AGENT'] ?? '', $m ) ) {
+		$wp_url = $m[1];
+	}
+
+	$site_domain = strtolower( parse_url( $wp_url, PHP_URL_HOST ) ?: '' );
+
+	// If we've reached this point and have no URL, delay the update until 100% is reached.
+	if ( ! $site_domain ) {
+		return 100;
+	}
+
+	// $site_step represents an integer from 0 to 4095.
+	$site_step   = base_convert( substr( md5( "{$site_domain}|{$slug}|{$version}" ), 0, 3 ), 16, 10 );
+	$site_percent = $site_step / 4095 * 100;
+
+	return $site_percent;
 }
 
 /**
@@ -152,7 +152,7 @@ function phased_rollout_get_plugin_percent( string $strategy, float $hours_since
 		'cautious',
 	];
 
-	$phase_details = $update_details->meta->phased_rollout ?? false;
+	$phase_details = $update_details->meta->rollout->strategy ?? false;
 
 	if (
 		! $phase_details ||
