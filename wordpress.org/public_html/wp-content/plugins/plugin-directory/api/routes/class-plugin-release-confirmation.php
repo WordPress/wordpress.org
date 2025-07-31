@@ -231,6 +231,11 @@ class Plugin_Release_Confirmation extends Base {
 			$result['fully_confirmed'] = true;
 		}
 
+		// Store the release strategy if provided, overwriting any previous choice.
+		if ( isset( $request['rollout_strategy'] ) ) {
+			$release['rollout_strategy'] = $request['rollout_strategy'];
+		}
+
 		Plugin_Directory::add_release( $plugin, $release );
 
 		// Trigger the import for the plugin.
