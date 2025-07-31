@@ -1386,6 +1386,11 @@ class Template {
 		return $sorted;
 	}
 
+	/**
+	 * Get the available rollout strategies for plugin updates.
+	 *
+	 * @return array
+	 */
 	static function get_rollout_strategies() {
 		return [
 			'' => [

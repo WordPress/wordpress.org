@@ -342,6 +342,13 @@ class Release_Confirmation {
 		return implode( ' ', $buttons );
 	}
 
+	/**
+	 * Display the Rollout Strategy options for a given plugin release.
+	 *
+	 * @param WP_Post $plugin The plugin post object.
+	 * @param array   $data   The release data.
+	 * @return string HTML for the rollout strategy options.
+	 */
 	static function get_rollout_strategy( $plugin, $data ) {
 		if ( ! current_user_can( 'plugin_manage_releases', $plugin ) ) {
 			return '';
