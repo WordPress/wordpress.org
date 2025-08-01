@@ -220,6 +220,23 @@ class Controls {
 				<td><strong><?php echo Template::active_installs( false, $post ); ?></strong></td>
 			</tr>
 
+			<?php if (
+				function_exists( 'WordPressdotorg\Stats\plugin_active_installs' ) &&
+				$post->version &&
+				'publish' === $post->post_status
+			): ?>
+			<tr>
+				<td><?php echo esc_html( "Installs of {$post->version}:" ); ?></td>
+				<td><strong><?php
+					echo Template::format_active_installs_for_display(
+						Template::sanitize_active_installs(
+							\WordPressdotorg\Stats\plugin_active_installs( $post->post_name, $post->version )
+						)
+					);
+				?></strong></td>
+			</tr>
+			<?php endif; ?>
+
 			<?php if ( $post->tested ) : ?>
 			<tr>
 				<td><?php _e( 'Tested With:', 'wporg-plugins' ); ?></td>

@@ -249,21 +249,68 @@ class Template {
 	 */
 	public static function active_installs( $full = true, $post = null ) {
 		$post  = get_post( $post );
-		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0;
+		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0; // Already sanitized to a round number.
 
 		if ( 'closed' === $post->post_status ) {
 			$text = __( 'N/A', 'wporg-plugins' );
-		} elseif ( $count < 10 ) {
-			$text = __( 'Fewer than 10', 'wporg-plugins' );
-		} elseif ( $count >= 1000000 ) {
-			$million_count = intdiv( $count, 1000000 );
-			/* translators: %d: The integer number of million active installs */
-			$text = sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
 		} else {
-			$text = number_format_i18n( $count ) . '+';
+			$text = self::format_active_installs_for_display( $count );
 		}
 
 		return $full ? sprintf( __( '%s active installations', 'wporg-plugins' ), $text ) : $text;
+	}
+
+	/**
+	 * Formats the active installs count for display.
+	 *
+	 * @static
+	 *
+	 * @param int $count The active installs count.
+	 * @return string The formatted count.
+	 */
+	public static function format_active_installs_for_display( $count ) {
+		if ( $count < 10 ) {
+			return __( 'Fewer than 10', 'wporg-plugins' );
+		}
+
+		if ( $count >= 1000000 ) {
+			$million_count = intdiv( $count, 1000000 );
+
+			/* translators: %d: The integer number of million active installs */
+			return sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
+		}
+
+		return number_format_i18n( $count ) . '+';
+	}
+
+	/**
+	 * Sanitizes the Active Install count number to a rounded display value.
+	 *
+	 * @static
+	 *
+	 * @param int $active_installs The raw active install number.
+	 * @return int The sanitized version for display.
+	 */
+	public static function sanitize_active_installs( $active_installs ) {
+		if ( $active_installs > 10000000 ) {
+			// 10 million +
+			return 10000000;
+		} elseif ( $active_installs > 1000000 ) {
+			$round = 1000000;
+		} elseif ( $active_installs > 100000 ) {
+			$round = 100000;
+		} elseif ( $active_installs > 10000 ) {
+			$round = 10000;
+		} elseif ( $active_installs > 1000 ) {
+			$round = 1000;
+		} elseif ( $active_installs > 100 ) {
+			$round = 100;
+		} else {
+			// Rounded to ten, else 0
+			$round = 10;
+		}
+
+		return floor( $active_installs / $round ) * $round;
 	}
 
 	/**
