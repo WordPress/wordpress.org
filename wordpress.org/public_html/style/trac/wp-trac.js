@@ -692,6 +692,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				$( '#fullsearch #milestone' ).next().remove().end().remove();
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
 			}
+
+			// Batch Modify should require a comment.
+			$( '#batchmod_value_comment' ).prop( 'required', true );
 		},
 
 		// If we're not dealing with a trusted bug gardener:
