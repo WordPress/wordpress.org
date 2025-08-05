@@ -319,7 +319,7 @@ class Plugins_Info_API {
 
 		$number_items_requested = 100;
 		if ( ! empty( $request->number ) ) {
-			$number_items_requested = $request->number;
+			$number_items_requested = (int) $request->number;
 		}
 
 		if ( count( $response ) > $number_items_requested ) {
