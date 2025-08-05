@@ -158,6 +158,16 @@ class API_Update_Updater {
 			}
 		}
 
+		// Sync the latest version to Stats.
+		if ( function_exists( '\WordPressdotorg\Stats\sync_latest_version' ) ) {
+			\WordPressdotorg\Stats\sync_latest_version(
+				'plugin', 
+				array(
+					$plugin_slug => $version
+				)
+			);
+		}
+
 		return true;
 	}
 
