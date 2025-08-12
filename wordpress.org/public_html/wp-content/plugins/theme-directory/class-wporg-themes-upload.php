@@ -702,7 +702,12 @@ class WPORG_Themes_Upload {
 
 		// Pass it through Theme Check and see how great this theme really is.
 		if ( $args['run_themecheck'] ) {
+			ob_start();
 			$result = $this->check_theme();
+			$theme_check_output = ob_get_clean();
+
+			// Output the Theme Check results. This is the only HTML that this function outputs.
+			echo $theme_check_output;
 
 			if ( ! $result && $args['block_on_themecheck'] ) {
 				// Log it to slack.
@@ -715,7 +720,8 @@ class WPORG_Themes_Upload {
 						__( 'Your theme has failed the theme check. Please correct the problems with it and upload it again. You can also use the <a href="%1$s">Theme Check Plugin</a> to test your theme before uploading. If you have any questions about this please post them to %2$s.', 'wporg-themes' ),
 						'//wordpress.org/plugins/theme-check/',
 						'<a href="https://make.wordpress.org/themes">https://make.wordpress.org/themes</a>'
-					)
+					),
+					$theme_check_output
 				);
 			}
 		}

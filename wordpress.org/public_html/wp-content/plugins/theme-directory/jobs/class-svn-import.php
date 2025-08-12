@@ -132,6 +132,13 @@ class SVN_Import {
 				}
 			}
 
+			$error_message = $return->get_error_message();
+
+			// For theme check failures, include the HTML output by the TC functions.
+			if ( 'failed_theme_check' === $return->get_error_code() ) {
+				$error_message .= '<br><br>' . $return->get_error_data( 'failed_theme_check' );
+			}
+
 			/*
 			 * Otherwise email the author about this problem.
 			 * NOTE: This email has a HTML content type, as Theme Check output is HTML.
@@ -156,12 +163,13 @@ class SVN_Import {
 					),
 					esc_html( $uploader->author->display_name ?: $uploader->author->user_login ),
 					$uploader->theme->display('Name') . ' ' . $uploader->theme->display('Version'),
-					'<div style="margin-left: 30px">' . $return->get_error_message() . '</div>',
+					'<div style="margin-left: 30px">' . $error_message . '</div>',
 					'https://make.wordpress.org/themes/handbook/review/required/'
 				),
 				[
 					'From: "WordPress Theme Directory" <themes@wordpress.org>',
-					'Content-Type: text/html; charset=UTF-8'
+					'Content-Type: text/html; charset=UTF-8',
+					'BCC: themes@wordpress.org'
 				]
 			);
 		}
