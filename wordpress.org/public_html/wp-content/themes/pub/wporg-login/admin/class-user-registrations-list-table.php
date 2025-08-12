@@ -492,11 +492,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$ips[] = $ip . ' ' . $meta->{$field . '_ip_country'};
 		}
 
-		echo implode( ', ', array_map( array( $this, 'link_to_Search' ), array_unique( $ips ) ) );
+		echo implode( ', ', array_map( array( $this, 'link_to_search' ), array_unique( $ips ) ) );
 
 		echo '<hr>';
 
-		foreach ( [ 'url', 'from', 'occ', 'interests', 'source' ] as $field ) {
+		foreach ( [ 'url', 'from', 'occ', 'interests', 'source', 'bypass' ] as $field ) {
 			if ( !empty( $meta->$field ) ) {
 				printf( "%s: %s<br>", esc_html( $field ), $this->link_to_search( $meta->$field ) );
 			}

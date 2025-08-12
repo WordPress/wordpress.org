@@ -132,6 +132,12 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		$passes_block_words
 	);
 
+	// If the signup has a bypass-spam-checks token, approve it.
+	if ( ! $pending_user['cleared'] && wporg_reg_has_signup_token( $pending_user ) ) {
+		$pending_user['cleared']        = 1;
+		$pending_user['meta']['bypass'] = 'yes';
+	}
+
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
 		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
@@ -495,6 +501,12 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 			$pending_user['cleared']                = 0;
 			$pending_user['meta']['block_reason'] ??= [ 'Block words', "{$has_blocked_word} found" ];
 		}
+	}
+
+	// If the signup has a bypass-spam-checks token, approve it.
+	if ( ! $pending_user['cleared'] && wporg_reg_has_signup_token( $pending_user ) ) {
+		$pending_user['cleared']        = 1;
+		$pending_user['meta']['bypass'] = 'yes';
 	}
 
 	if ( $pending_user ) {
