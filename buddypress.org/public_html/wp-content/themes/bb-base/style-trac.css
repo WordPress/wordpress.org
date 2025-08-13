@@ -975,6 +975,7 @@ body.trac div#ticketchange + div {
 	border: var(--bbbase-wrapper-border);
 	border-radius: var(--bbbase-border-radius);
 	overflow: hidden;
+	box-sizing: border-box;
 }
 
 body.trac div#commits > div.commits,
