@@ -1001,7 +1001,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function record_last_password_change_reset( $password, $user_id, $old_user_data ) {
 			$user = get_user_by( 'id', $user_id );
-			if ( $old_user_data->user_pass !== $user->user_pass ) {
+
+			// https://core.trac.wordpress.org/ticket/22114#comment:32
+			$old_user_pass = is_object( $old_user_data ) ? $old_user_data->user_pass : ( is_array( $old_user_data ) ? $old_user_data['user_pass'] : '' );
+
+			if ( $old_user_pass !== $user->user_pass ) {
 				update_user_meta( $user_id, 'last_password_change', gmdate( 'Y-m-d H:i:s' ) );
 			}
 		}
