@@ -597,10 +597,8 @@ input[type="submit"]:hover {
 	margin-bottom: 5em;
 }
 .o2-post #searchform #searchsubmit {
-	padding-block: var(--wp--custom--form--padding--block);
-    padding-inline: var(--wp--custom--form--padding--inline);
-    font-size: var(--wp--custom--form--typography--font-size);
-    line-height: var(--wp--custom--form--typography--line-height);
+	height: 33.5px;
+	padding-bottom: .6em;
 }
 
 pre, code {

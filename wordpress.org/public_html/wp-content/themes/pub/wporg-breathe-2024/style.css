@@ -1133,8 +1133,10 @@ article.handbook .entry-meta {
 }
 
 .o2-post #searchform #searchsubmit {
-	height: 33.5px;
-	padding-bottom: .6em;
+	padding-block: var(--wp--custom--form--padding--block);
+    padding-inline: var(--wp--custom--form--padding--inline);
+    font-size: var(--wp--custom--form--typography--font-size);
+    line-height: var(--wp--custom--form--typography--line-height);
 }
 
 article.post .entry-meta {
