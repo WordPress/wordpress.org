@@ -19,10 +19,7 @@ class Index extends GP_Route {
 	public function get_locales() {
 		$existing_locales = Plugin::get_existing_locales();
 
-		$locales = array();
-		foreach ( $existing_locales as $locale ) {
-			$locales[] = GP_Locales::by_slug( $locale );
-		}
+		$locales = array_filter( array_map( array( 'GP_Locales', 'by_slug' ), Plugin::get_existing_locales() ) );
 		usort( $locales, array( $this, '_sort_english_name_callback' ) );
 		unset( $existing_locales );
 
