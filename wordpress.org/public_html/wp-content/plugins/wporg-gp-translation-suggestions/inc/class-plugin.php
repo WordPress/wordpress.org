@@ -102,6 +102,7 @@ class Plugin {
 		GP::$router->prepend( "/$set/-get-other-language-suggestions", array( __NAMESPACE__ . '\Routes\Other_Languages', 'get_suggestions' ) );
 		GP::$router->prepend( "/$set/-get-tm-openai-suggestions", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'get_openai_suggestions' ) );
 		GP::$router->prepend( "/$set/-get-tm-deepl-suggestions", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'get_deepl_suggestions' ) );
+		GP::$router->prepend( "/$set/-delete-tm-suggestion", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'delete_suggestion' ), 'post' );
 	}
 
 	/**
@@ -148,11 +149,12 @@ class Plugin {
 		wp_add_inline_script(
 			'gp-translation-suggestions',
 			sprintf(
-				"window.WPORG_TRANSLATION_MEMORY_API_URL = %s;\nwindow.WPORG_TRANSLATION_MEMORY_OPENAI_API_URL = %s;\nwindow.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL = %s;\nwindow.WPORG_OTHER_LANGUAGES_API_URL = %s;",
+				"window.WPORG_TRANSLATION_MEMORY_API_URL = %s;\nwindow.WPORG_TRANSLATION_MEMORY_OPENAI_API_URL = %s;\nwindow.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL = %s;\nwindow.WPORG_OTHER_LANGUAGES_API_URL = %s;\nwindow.WPORG_TRANSLATION_MEMORY_API_DELETE_URL = %s;",
 				wp_json_encode( gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-tm-suggestions' ) ) ),
 				wp_json_encode( gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-tm-openai-suggestions' ) ) ),
 				wp_json_encode( gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-tm-deepl-suggestions' ) ) ),
-				wp_json_encode( gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-other-language-suggestions' ) ) )
+				wp_json_encode( gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-other-language-suggestions' ) ) ),
+				wp_json_encode( gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-delete-tm-suggestion' ) ) )
 			)
 		);
 	}

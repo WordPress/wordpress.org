@@ -3,6 +3,7 @@
 namespace WordPressdotorg\GlotPress\TranslationSuggestions;
 
 use GP;
+use GP_Locale;
 use Text_Diff;
 use WP_Error;
 use WP_Http;
@@ -91,22 +92,24 @@ class Translation_Memory_Client {
 	/**
 	 * Queries translation memory for a string.
 	 *
-	 * @param string $text          Text to search translations for.
-	 * @param string $target_locale Locale to search in.
-	 * @return array|\WP_Error      List of suggestions on success, WP_Error on failure.
+	 * @param string $text               Singular text to search translations for.
+	 * @param null|string $text_plural   Plural text to search translations for.
+	 * @param string $target_locale      Locale to search in.
+	 *
+	 * @return array|\WP_Error           List of suggestions on success, WP_Error on failure.
 	 */
-	public static function query( string $text, string $target_locale ) {
+	public static function query( string $text, $text_plural, string $target_locale ) {
 		if ( ! defined( 'WPCOM_TM_TOKEN' ) ) {
 			return new WP_Error( 'no_token' );
 		}
 
 		$url = add_query_arg( urlencode_deep( [
-			'text'   => $text,
-			'target' => $target_locale,
-			'token'  => WPCOM_TM_TOKEN,
-			'ts'     => time(),
+			'text'        => $text,
+			'text_plural' => $text_plural,
+			'target'      => $target_locale,
+			'token'       => WPCOM_TM_TOKEN,
+			'ts'          => time(),
 		] ), self::API_ENDPOINT );
-
 
 		$request = wp_remote_get(
 			$url,
@@ -138,14 +141,61 @@ class Translation_Memory_Client {
 		$suggestions = [];
 		foreach ( $result['matches'] as $match ) {
 			$suggestions[] = [
-				'similarity_score' => $match['score'],
-				'source'           => $match['source'],
-				'translation'      => $match['text'],
-				'diff'             => ( 1 === $match['score'] ) ? null : self::diff( $text, $match['source'] ),
+				'similarity_score'   => $match['score'],
+				'source'             => $match['source'],
+				'source_plural'	     => $match['source_plural'],
+				'source_context'     => $match['source_context'],
+				'translation'        => $match['text'],
+				'translation_plural' => $match['text_plural'],
+				'diff'               => ( 1 === $match['score'] ) ? null : self::diff( $text, $match['source'] ),
 			];
 		}
 
 		return $suggestions;
+	}
+
+	/**
+	 * Deletes a translation from translation memory.
+	 *
+	 * @param array  $source      Array with the original string (singular and plural) and the context.
+	 * @param array  $translation Array with the translation (singular and plural).
+	 * @param string $locale_slug Locale slug.
+	 * @param string $set_slug    Translation set slug.
+	 *
+	 * @return bool
+	 */
+	public static function delete( array $source, array $translation, string $locale_slug, string $set_slug ):bool {
+		$locale = $locale_slug;
+		if ( 'default' !== $set_slug ) {
+			$locale .= '_' . $set_slug;
+		}
+		$body = wp_json_encode(
+			array(
+				'token'    => WPCOM_TM_TOKEN,
+				'source'       => $source,
+				'translation' => array(
+					'singular' => $translation['translation'],
+					'plural'   => $translation['translation_plural'],
+					'locale'   => $locale,
+				)
+			)
+		);
+		$request = wp_remote_post(
+			self::API_BULK_ENDPOINT,
+			array(
+				'method'    => 'DELETE',
+				'timeout'    => 10,
+				'user-agent' => 'WordPress.org Translate',
+				'body'       => $body,
+			)
+		);
+		if ( is_wp_error( $request ) ) {
+			return false;
+		}
+		if ( WP_Http::OK !== wp_remote_retrieve_response_code( $request ) ) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
