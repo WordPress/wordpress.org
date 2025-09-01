@@ -219,7 +219,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						}
 
 						var meClass = ( username === wpTrac.currentUser ) ? ' me' : '';
-						return pre + '<a class="mention' + meClass + '" href="https://profiles.wordpress.org/' + username + '">@' + username + '</a>';
+						return pre + '<a class="mention' + meClass + '" href="https://profiles.wordpress.org/' + username + '/">@' + username + '</a>';
 					} );
 
 					// Restore mentions in HTML attributes.
@@ -360,7 +360,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				username = el.text();
 				if ( 0 === username.indexOf( 'logged in as' ) ) {
 					username = username.replace( 'logged in as ', '' );
-					el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username }).text( username ) ).prepend( 'logged in as ');
+					el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username + '/' }).text( username ) ).prepend( 'logged in as ');
 				}
 			})(jQuery);
 
@@ -642,7 +642,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					$commit.append( firstLine + '&hellip;' );
 
 					author = $el.find( '.username' ).data( 'username' );
-					$commit.append( ' by&nbsp;<a href="https://profiles.wordpress.org/' + author + '">@' + author + '</a>' );
+					$commit.append( ' by&nbsp;<a href="https://profiles.wordpress.org/' + author + '/">@' + author + '</a>' );
 
 					date = $el.find( '.time-ago' ).html();
 					$commit.append( ' ' + date );
