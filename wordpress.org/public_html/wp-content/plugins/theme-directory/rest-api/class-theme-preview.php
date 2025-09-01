@@ -7,18 +7,69 @@ use WPORG_Themes_Repo_Package;
 class Theme_Preview {
 
 	function __construct() {
-		register_rest_route( 'themes/v1', 'preview-blueprint/(?<slug>[^/]+)', array(
+		register_rest_route( 'themes/v1', 'preview-blueprint/(?<slug>[^/]+)(/(?<version>[^/]+))?', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'preview' ),
+			'args'                => array(
+				'slug' => array(
+					'type'              => 'string',
+					'required'          => 'true',
+					'sanitize_callback' => 'sanitize_key',
+				),
+				'version' => array(
+					'type'              => 'string',
+					'required'          => 'false',
+					'sanitize_callback' => static function ( $value ) {
+						if ( ! is_string( $value ) ) {
+							return '';
+						}
+						return preg_replace( '/[^0-9a-zA-Z.-]/', '', $value );
+					},
+				),
+				// If the theme isn't (yet) published, this can be set to force loading the post.
+				'preview_id' => array(
+					'type'              => 'integer',
+					'required'          => false,
+					'sanitize_callback' => 'absint',
+				),
+				// Whether to enable WP_DEBUG. ie. for testing.
+				'debug' => array(
+					'type'              => 'boolean',
+					'required'          => false,
+					'default'           => false,
+					'sanitize_callback' => 'rest_sanitize_boolean',
+				),
+				// Whether to install the Theme Unit TestData.
+				'install_theme_testdata' => array(
+					'type'              => 'boolean',
+					'required'          => false,
+					'default'           => false,
+					'sanitize_callback' => 'rest_sanitize_boolean',
+				),
+				// Whether to install the Theme Previewer plugins.
+				'theme_previewer' => array(
+					'type'              => 'boolean',
+					'required'          => false,
+					'default'           => true,
+					'sanitize_callback' => 'rest_sanitize_boolean',
+				),
+			),
 			'permission_callback' => '__return_true',
 		) );
 
 		register_rest_route( 'themes/v1', 'preview-blueprint/(?<slug>[^/]+)', array(
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'set_blueprint' ),
+			'args'                => array(
+				'slug' => array(
+					'type'              => 'string',
+					'required'          => 'true',
+					'sanitize_callback' => 'sanitize_key',
+				),
+			),
 			'permission_callback' => function( $request ) {
-				$theme_data    = wporg_themes_theme_information( $request['slug'] );
-				$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug );
+				$theme_data    = wporg_themes_theme_information( $request['slug'] ?? '' );
+				$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug ?? '', $request['version'] ?? false );
 
 				if ( ! empty( $theme_data->error ) || ! $theme_package->post_author ) {
 					return false;
@@ -36,13 +87,26 @@ class Theme_Preview {
 	 * Generate a Blueprint for a theme preview.
 	 */
 	function preview( $request ) {
+		// If the theme isn't (yet) published, use the post_id hint.
+		if ( is_numeric( $request->get_param( 'preview_id' ) ) ) {
+			$preview_post = get_post( (int) $request->get_param( 'preview_id' ) );
+			if (
+				$preview_post &&
+				'repopackage' === $preview_post->post_type &&
+				'publish' !== $preview_post->post_status &&
+				$preview_post->post_name === $request->get_param( 'slug' )
+			) {
+				$GLOBALS['post'] = $preview_post;
+			}
+		}
+
 		$theme_data = wporg_themes_theme_information( $request->get_param( 'slug' ) );
 
 		if ( ! empty( $theme_data->error ) ) {
 			return new WP_Error( 'error', $theme_data->error );
 		}
 
-		return $this->build_blueprint( $theme_data );
+		return $this->build_blueprint( $request, $theme_data, $request['version'] ?? false );
 	}
 
 	/**
@@ -69,21 +133,21 @@ class Theme_Preview {
 		// Save the blueprint.
 		update_post_meta( $theme_package->ID, 'preview_blueprint', $decoded_blueprint );
 
-		return $this->build_blueprint( $theme_data );
+		return $this->build_blueprint( $request, $theme_data, false );
 	}
 
 	/**
 	 * Generate a blueprint for previewing a theme.
 	 */
-	function build_blueprint( $theme_data ) {
-		$theme_package   = new WPORG_Themes_Repo_Package( $theme_data->slug );
+	function build_blueprint( $request, $theme_data, $version = false ) {
+		$theme_package   = new WPORG_Themes_Repo_Package( $theme_data->slug, $version );
 		$parent_package  = $theme_data->template ? new WPORG_Themes_Repo_Package( $theme_data->template ) : false;
 		$theme_blueprint = $theme_package->preview_blueprint;
 
 		// Base blueprint.
 		$blueprint = [
 			'preferredVersions' => [
-				'php' => '8.0',
+				'php' => defined( 'RECOMMENDED_PHP' ) ? RECOMMENDED_PHP : substr( phpversion(), 0, 3 ),
 				'wp'  => 'latest'
 			],
 			// Sadly many themes require the full kitchen-sink.
@@ -135,19 +199,37 @@ class Theme_Preview {
 				'username' => 'admin',
 				'password' => 'password'
 			],
+			! $request->get_param( 'debug' ) ? false :
+				[
+					'step' => 'defineWpConfigConsts',
+					'consts' => [
+						'WP_DEBUG' => true
+					]
+				],
 			// Set the default site details. The theme blueprint may replace this.
 			[
 				'step'    => 'setSiteOptions',
 				'options' => [
-					'blogname'        => $theme_data->name,
+					'blogname'        => $version ? "$theme_data->name $version" : $theme_data->name,
 					'blogdescription' => preg_replace( '![.].+$!',  '.', $theme_data->sections['description'] ), // First sentence only.
+				]
+			],
+			// Special case: BuddyPress.
+			! ( $theme_data->tags && in_array( 'buddypress', $theme_data->tags, true ) ) ? false : [
+				'step' => 'installPlugin',
+				'pluginData' => [
+					'resource' => 'wordpress.org/plugins',
+					'slug'     => 'buddypress',
+				],
+				'options' => [
+					'activate' => true
 				]
 			],
 			// Note: The following use `url` to allow setting the caption to the proper theme name.
 			// Install parent theme.
 			empty( $theme_data->template ) ? false : [
 				'step'         => 'installTheme',
-				'themeZipFile' => [
+				'themeData' => [
 					'resource' => 'url',
 					'url'      => $parent_package->download_url(),
 					'caption'  => "Downloading {$parent_package->post_title}",
@@ -159,10 +241,14 @@ class Theme_Preview {
 			// Install the theme.
 			[
 				'step'         => 'installTheme',
-				'themeZipFile' => [
+				'themeData' => [
 					'resource' => 'url',
 					'url'      => $theme_package->download_url(),
-					'caption'  => "Downloading {$theme_package->post_title}",
+					'caption'  => "Downloading {$theme_package->post_title}" . ( $version ? " $version" : '' ),
+				],
+				'options' => [
+					// Import the Starter Content if the theme didn't provide a blueprint.
+					'importStarterContent' => ( ! $theme_blueprint ),
 				]
 			]
 		];
@@ -174,17 +260,28 @@ class Theme_Preview {
 				// Don't install assets from URLs.
 				if (
 					! empty( $step['themeZipFile']['url'] ) ||
-					! empty( $step['pluginZipFile']['url'] )
+					! empty( $step['themeData']['url'] ) ||
+					! empty( $step['pluginZipFile']['url'] ) ||
+					! empty( $step['pluginData']['url'] )
 				) {
 					return false;
 				}
 
 				// Don't need to install the theme again.
 				if ( 'installTheme' === $step['step'] ) {
-					if ( $theme_data->slug === ( $step['themeZipFile']['slug'] ?? '' ) ) {
+					if (
+						$theme_data->slug === ( $step['themeZipFile']['slug'] ?? '' ) ||
+						$theme_data->slug === ( $step['themeData']['slug'] ?? '' )
+					) {
 						return false;
 					}
-					if ( ! empty( $theme_data->template ) && $theme_data->template === ( $step['themeZipFile']['slug'] ?? '' ) ) {
+					if (
+						! empty( $theme_data->template ) &&
+						(
+							$theme_data->template === ( $step['themeZipFile']['slug'] ?? '' ) ||
+							$theme_data->template === ( $step['themeData']['slug'] ?? '' )
+						)
+					) {
 						return false;
 					}
 				}
@@ -193,37 +290,39 @@ class Theme_Preview {
 			}
 		);
 
-		// Fill in a theme starter content step if specified.
-		// See: `installThemeStarterContent`. https://github.com/WordPress/wordpress-playground/pull/1521
-		foreach ( $theme_steps as $i => $step ) {
-			if ( 'installThemeStarterContent' === $step['step'] ) {
-				$theme_steps[ $i ] = $this->get_install_starter_content_step();
-			}
+		// Install the Theme Previewer plugins.
+		if ( $request->get_param( 'theme_previewer' ) ) {
+			/*
+			 * TODO: These artifacts need to be hosted somewhere better.
+			 */
+
+			$final_steps[] = [
+				'step' => 'installPlugin',
+				'pluginData' => [
+					'resource' => 'url',
+					'url'      => 'https://raw.githubusercontent.com/WordPress/wordpress.org/trunk/wp-themes.com/public_html/wp-content/plugins/pattern-page.zip',
+				],
+			];
+			$final_steps[] = [
+				'step' => 'installPlugin',
+				'pluginData' => [
+					'resource' => 'url',
+					'url'      => 'https://raw.githubusercontent.com/WordPress/wordpress.org/trunk/wp-themes.com/public_html/wp-content/plugins/style-variations.zip',
+				],
+			];
 		}
 
-		// If the theme didn't provide a blueprint, we'll also install the Starter Content. This must be done last.
-		// See also: `installThemeStarterContent`. https://github.com/WordPress/wordpress-playground/pull/1521
-		if ( ! $theme_blueprint ) {
-			$final_steps[] = $this->get_install_starter_content_step();
+		// Install the Theme TestData if requested.
+		if ( $request->get_param( 'install_theme_testdata' ) ) {
+			$final_steps[] = [
+				'step' => 'importWxr',
+				'file' => [
+					'resource' => 'url',
+					'url'      => 'https://raw.githubusercontent.com/WordPress/theme-test-data/master/themeunittestdata.wordpress.xml',
+					'caption'  => 'Downloading theme testing content'
+				]
+			];
 		}
-
-		/*
-		 * TODO: These artifacts need to be hosted somewhere better. 
-		 */
-		$final_steps[] = [
-			'step' => 'installPlugin',
-			'pluginZipFile' => [
-				'resource' => 'url',
-				'url'      => 'https://raw.githubusercontent.com/WordPress/wordpress.org/trunk/wp-themes.com/public_html/wp-content/plugins/pattern-page.zip',
-			],
-		];
-		$final_steps[] = [
-			'step' => 'installPlugin',
-			'pluginZipFile' => [
-				'resource' => 'url',
-				'url'      => 'https://raw.githubusercontent.com/WordPress/wordpress.org/trunk/wp-themes.com/public_html/wp-content/plugins/style-variations.zip',
-			],
-		];
 
 		// Set the steps.
 		$blueprint['steps'] = array_merge(
@@ -233,50 +332,6 @@ class Theme_Preview {
 		);
 
 		return $blueprint;
-	}
-
-	/**
-	 * Returns a formed step to install the starter content.
-	 */
-	function get_install_starter_content_step() {
-		return [
-			'step' => 'runPHP',
-			'code' => '<?php
-				playground_add_filter( "plugins_loaded", "importThemeStarterContent_plugins_loaded", 0 );
-				function importThemeStarterContent_plugins_loaded() {
-					/* Set as the admin user, this ensures we can customize the site. */
-					wp_set_current_user(
-						get_users( [ "role" => "Administrator" ] )[0]
-					);
-
-					/*
-					 * Simulate this request as a ajax customizer save, with the current theme in preview mode.
-					 *
-					 * See _wp_customize_include()
-					 */
-					add_filter( "wp_doing_ajax", "__return_true" );
-					$_REQUEST["action"]          = "customize_save";
-					$_REQUEST["wp_customize"]    = "on";
-					$_REQUEST["customize_theme"] = get_stylesheet();
-					$_GET                        = $_REQUEST;
-
-					/* Force the site to be fresh, although it should already be, some themes require this. */
-					add_filter( "pre_option_fresh_site", "__return_true" );
-				}
-
-				require "/wordpress/wp-load.php";
-
-				if ( ! get_theme_starter_content() ) {
-					return;
-				}
-
-				/* Import the Starter Content. */
-				$wp_customize->import_theme_starter_content();
-
-				/* Publish the changeset, which publishes the starter content. */
-				wp_publish_post( $wp_customize->changeset_post_id() );
-			'
-		];
 	}
 }
 new Theme_Preview();
