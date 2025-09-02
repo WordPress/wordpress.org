@@ -113,6 +113,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			tracker_text: 'WordPress.org News GitHub Repository',
 			enable_copy: true
 		},
+		'Playground': {
+			tracker: 'https://github.com/WordPress/wordpress-playground/issues/new',
+			tracker_text: 'WordPress Playground GitHub Repository',
+			enable_copy: true
+		},
 		'bbpress.org' : {
 			tracker: 'https://bbpress.trac.wordpress.org/newticket?component=Site+-+bbPress.org',
 			tracker_text: 'bbPress Trac instance',
