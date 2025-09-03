@@ -1133,7 +1133,11 @@ class Template {
 		}
 
 		if (
+			// Assume by-author-request is permanent.
 			'author-request' === $result['reason'] ||
+			// Likewise for when it's closed due to merged-to-core.
+			'merged-into-core' === $result['reason'] ||
+			// Or if it's closed without committers.
 			! Tools::get_plugin_committers( $post->post_name )
 		) {
 			$result['permanent'] = true;
@@ -1147,9 +1151,16 @@ class Template {
 			$result['label']  = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
 		}
 
-		// If it's closed for more than 60 days, it's by author request, or we're unsure about the close date, it's publicly known.
+		// These reasons are never embargoed, and are shown immediately.
+		$unembargoed_closure_reasons = array(
+			'author-request',
+			'unused',
+			'merged-into-core',
+		);
+
+		// If it's closed for more than 60 days, it's not embargoed, or we're unsure about the close date, it's publicly known.
 		$days_closed = $result['date'] ? (int) ( ( time() - strtotime( $result['date'] ) ) / DAY_IN_SECONDS ) : false;
-		if ( ! $result['date'] || $days_closed >= 60 || 'author-request' === $result['reason'] ) {
+		if ( ! $result['date'] || $days_closed >= 60 || in_array( $result['reason'], $unembargoed_closure_reasons, true ) ) {
 			$result['public'] = true;
 		}
 
