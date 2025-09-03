@@ -152,7 +152,119 @@ class Template {
 
 		$schema[] = $software_application;
 
+		// FAQPage schema.
+		$content     = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content( $plugin ) );
+		$faq_content = isset( $content['faq'] ) ? $content['faq'] : '';
+		$faq_schema  = self::build_plugin_faq_schema( $faq_content );
+
+		if ( $faq_schema ) {
+			$schema[] = $faq_schema;
+		}
+
 		return $schema;
+	}
+
+	/**
+	 * Builds an FAQPage schema object from plugin content structured with <dl><dt><dd>.
+	 *
+	 * @param string $faq_content Raw plugin content containing FAQ markup.
+	 * @return array|null FAQPage schema or null if none found.
+	 */
+	protected static function build_plugin_faq_schema( $faq_content ) {
+		if ( empty( $faq_content ) || false === strpos( $faq_content, '<dl' ) ) {
+			return null;
+		}
+
+		$document_internal_errors = libxml_use_internal_errors( true );
+
+		$document = new \DOMDocument();
+		$document->loadHTML( $faq_content );
+
+		libxml_use_internal_errors( $document_internal_errors );
+
+		$faq_entities = [];
+		$dts          = $document->getElementsByTagName( 'dt' );
+
+		if ( 0 === $dts->length ) {
+			return null;
+		}
+
+		foreach ( $dts as $dt ) {
+			$question = sanitize_text_field( $dt->textContent );
+
+			// Find the next <dd> sibling.
+			$dd = $dt->nextSibling;
+			while ( $dd && 'dd' !== $dd->nodeName ) {
+				$dd = $dd->nextSibling;
+			}
+			if ( ! $dd ) {
+				continue;
+			}
+
+			// Collect and sanitize answer HTML.
+			$answer_html = '';
+			foreach ( $dd->childNodes as $child ) {
+				$answer_html .= $dd->ownerDocument->saveHTML( $child );
+			}
+
+			$faq_entities[] = [
+				"@type" => "Question",
+				"name"  => $question,
+				"acceptedAnswer" => [
+					"@type" => "Answer",
+					"text"  => self::sanitize_faq_answer_html( $answer_html ),
+				],
+			];
+		}
+
+		if ( ! $faq_entities ) {
+			return null;
+		}
+
+		return [
+			"@context"   => "https://schema.org",
+			"@type"      => "FAQPage",
+			"mainEntity" => $faq_entities,
+		];
+	}
+
+	/**
+	 * Sanitizes FAQ answer HTML for use in FAQPage schema.
+	 *
+	 * Allows only tags supported by Google rich results:
+	 * <h1>-<h6>, <p>, <div>, <ul>, <ol>, <li>, <a href>, <br>, <b>, <strong>, <i>, <em>.
+	 *
+	 * @link https://developers.google.com/search/docs/appearance/structured-data/faqpage#answer
+	 *
+	 * @param string $html Raw FAQ answer HTML.
+	 * @return string Sanitized HTML.
+	 */
+	protected static function sanitize_faq_answer_html( $html ) {
+		$allowed_tags = array(
+			'h1'     => array(),
+			'h2'     => array(),
+			'h3'     => array(),
+			'h4'     => array(),
+			'h5'     => array(),
+			'h6'     => array(),
+			'br'     => array(),
+			'ol'     => array(),
+			'ul'     => array(),
+			'li'     => array(),
+			'p'      => array(),
+			'div'    => array(),
+			'b'      => array(),
+			'strong' => array(),
+			'i'      => array(),
+			'em'     => array(),
+			'a'      => array(
+				'href' => true,
+			),
+		);
+
+		$html = wp_kses( $html, $allowed_tags );
+
+		return $html;
 	}
 
 	/**
