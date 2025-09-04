@@ -150,8 +150,11 @@ class Theme_Preview {
 		$is_theme_review = $params['review'] ?? false;
 		$version         = $params['version'] ?? false;
 		$theme_package   = new WPORG_Themes_Repo_Package( $theme_data->slug, $version );
-		$parent_package  = $theme_data->template ? new WPORG_Themes_Repo_Package( $theme_data->template ) : false;
 		$theme_blueprint = $theme_package->preview_blueprint;
+		$parent_package  = false;
+		if ( isset( $theme_data->template ) && $theme_data->template !== $theme_data->slug ) {
+			$parent_package = new WPORG_Themes_Repo_Package( $theme_data->template );
+		}
 
 		// Base blueprint.
 		$blueprint = [
@@ -213,7 +216,7 @@ class Theme_Preview {
 				'step'    => 'setSiteOptions',
 				'options' => [
 					'blogname'        => $theme_data->name . ( $version ? " $version" : '' ),
-					'blogdescription' => preg_replace( '![.].+$!',  '.', $theme_data->sections['description'] ), // First sentence only.
+					'blogdescription' => preg_replace( '![.].+$!',  '.', $theme_data->sections['description'] ?? '' ), // First sentence only.
 				]
 			],
 			// Special case: BuddyPress.
@@ -229,7 +232,7 @@ class Theme_Preview {
 			],
 			// Note: The following use `url` to allow setting the caption to the proper theme name.
 			// Install parent theme.
-			empty( $theme_data->template ) ? false : [
+			! $parent_package ? false : [
 				'step'         => 'installTheme',
 				'themeData' => [
 					'resource' => 'url',
@@ -258,7 +261,7 @@ class Theme_Preview {
 		// Filter out any theme provided steps we don't want.
 		$theme_steps = array_filter(
 			$theme_steps,
-			static function( $step ) use( $invalid_steps ) {
+			static function( $step ) {
 				// Don't install assets from URLs.
 				if (
 					! empty( $step['themeZipFile']['url'] ) ||
