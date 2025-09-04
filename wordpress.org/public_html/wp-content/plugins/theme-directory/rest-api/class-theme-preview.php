@@ -202,7 +202,7 @@ class Theme_Preview {
 			[
 				'step'    => 'setSiteOptions',
 				'options' => [
-					'blogname'        => $version ? "$theme_data->name $version" : $theme_data->name,
+					'blogname'        => $theme_data->name . ( $version ? " $version" : '' ),
 					'blogdescription' => preg_replace( '![.].+$!',  '.', $theme_data->sections['description'] ), // First sentence only.
 				]
 			],
