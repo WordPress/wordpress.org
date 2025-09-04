@@ -57,6 +57,32 @@ class Theme_Preview {
 			'permission_callback' => '__return_true',
 		) );
 
+		register_rest_route( 'themes/v1', 'review-blueprint/((?<post_id>[\d]+)-)?(?<slug>[^/]+)/(?<version>[0-9a-z.-_]+)', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'review' ),
+			'args'                => array(
+				'slug' => array(
+					'type'              => 'string',
+					'required'          => true,
+					'sanitize_callback' => 'sanitize_key',
+				),
+				'version' => array(
+					'type'              => 'string',
+					'required'          => true,
+					'sanitize_callback' => static function ( $value ) {
+						return is_string( $value ) ? $value : '';
+					},
+				),
+				// If the theme isn't (yet) published, this can be set to force loading the post.
+				'post_id' => array(
+					'type'              => 'integer',
+					'required'          => false,
+					'sanitize_callback' => 'absint',
+				)
+			),
+			'permission_callback' => '__return_true',
+		) );
+
 		register_rest_route( 'themes/v1', 'preview-blueprint/(?<slug>[^/]+)', array(
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'set_blueprint' ),
@@ -84,29 +110,37 @@ class Theme_Preview {
 	}
 
 	/**
+	 * Generate a Blueprint for a theme review.
+	 */
+	function review( $request ) {
+		// If the theme isn't (yet) published, use the post_id hint.
+		$preview_post = get_post( (int) $request->get_param( 'post_id' ) );
+		if (
+			$preview_post &&
+			'repopackage' === $preview_post->post_type &&
+			'publish' !== $preview_post->post_status &&
+			$preview_post->post_name === $request->get_param( 'slug' )
+		) {
+			$GLOBALS['post'] = $preview_post;
+		}
+
+		return $this->build_blueprint( $request, [
+			'version' => $request->get_param( 'version' ),
+			'review'  => true,
+		] );
+	}
+
+	/**
 	 * Generate a Blueprint for a theme preview.
 	 */
 	function preview( $request ) {
-		// If the theme isn't (yet) published, use the post_id hint.
-		if ( is_numeric( $request->get_param( 'preview_id' ) ) ) {
-			$preview_post = get_post( (int) $request->get_param( 'preview_id' ) );
-			if (
-				$preview_post &&
-				'repopackage' === $preview_post->post_type &&
-				'publish' !== $preview_post->post_status &&
-				$preview_post->post_name === $request->get_param( 'slug' )
-			) {
-				$GLOBALS['post'] = $preview_post;
-			}
-		}
-
 		$theme_data = wporg_themes_theme_information( $request->get_param( 'slug' ) );
 
 		if ( ! empty( $theme_data->error ) ) {
 			return new WP_Error( 'error', $theme_data->error );
 		}
 
-		return $this->build_blueprint( $request, $theme_data, $request['version'] ?? false );
+		return $this->build_blueprint( $request, $theme_data );
 	}
 
 	/**
@@ -139,7 +173,9 @@ class Theme_Preview {
 	/**
 	 * Generate a blueprint for previewing a theme.
 	 */
-	function build_blueprint( $request, $theme_data, $version = false ) {
+	function build_blueprint( $request, $theme_data, $params ) {
+		$is_theme_review = $params['review'] ?? false;
+		$version         = $params['version'] ?? false;
 		$theme_package   = new WPORG_Themes_Repo_Package( $theme_data->slug, $version );
 		$parent_package  = $theme_data->template ? new WPORG_Themes_Repo_Package( $theme_data->template ) : false;
 		$theme_blueprint = $theme_package->preview_blueprint;
@@ -199,13 +235,6 @@ class Theme_Preview {
 				'username' => 'admin',
 				'password' => 'password'
 			],
-			! $request->get_param( 'debug' ) ? false :
-				[
-					'step' => 'defineWpConfigConsts',
-					'consts' => [
-						'WP_DEBUG' => true
-					]
-				],
 			// Set the default site details. The theme blueprint may replace this.
 			[
 				'step'    => 'setSiteOptions',
@@ -291,7 +320,7 @@ class Theme_Preview {
 		);
 
 		// Install the Theme Previewer plugins.
-		if ( $request->get_param( 'theme_previewer' ) ) {
+		if ( ! $is_theme_review ) {
 			/*
 			 * TODO: These artifacts need to be hosted somewhere better.
 			 */
@@ -312,8 +341,29 @@ class Theme_Preview {
 			];
 		}
 
-		// Install the Theme TestData if requested.
-		if ( $request->get_param( 'install_theme_testdata' ) ) {
+		// Theme Review specifics.
+		if ( $is_theme_review ) {
+			// Enable Debug mode.
+			$final_steps[] = [
+				'step' => 'defineWpConfigConsts',
+				'consts' => [
+					'WP_DEBUG' => true
+				]
+			];
+
+			// Install Theme Check.
+			$final_steps[] = [
+				'step' => 'installPlugin',
+				'pluginData' => [
+					'resource' => 'wordpress.org/plugins',
+					'slug'     => 'theme-check',
+				],
+				'options' => [
+					'activate' => true
+				]
+			];
+
+			// Install the test content.
 			$final_steps[] = [
 				'step' => 'importWxr',
 				'file' => [

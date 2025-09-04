@@ -1161,17 +1161,7 @@ class WPORG_Themes_Upload {
 
 		$live_preview_link = add_query_arg(
 			'blueprint-url',
-			urlencode(
-				add_query_arg(
-					[
-						'preview_id' => $this->theme_post->ID,
-						'debug' => 'true',
-						'theme_previewer' => 'false',
-						'install_theme_testdata' => 'true',
-					],
-					rest_url( 'themes/v1/preview-blueprint/' . $this->theme_slug . '/' . $this->theme->display( 'Version' ) )
-				)
-			),
+			urlencode( rest_url( 'themes/v1/review-blueprint/' . $this->theme_post->ID . '-' . $this->theme_slug . '/' . $this->theme->display( 'Version' ) ) ),
 			'https://playground.wordpress.net/'
 		);
 
