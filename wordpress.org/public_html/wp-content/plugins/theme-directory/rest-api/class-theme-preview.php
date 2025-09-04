@@ -57,8 +57,8 @@ class Theme_Preview {
 				),
 			),
 			'permission_callback' => function( $request ) {
-				$theme_data    = wporg_themes_theme_information( $request['slug'] ?? '' );
-				$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug ?? '', $request['version'] ?? false );
+				$theme_data    = wporg_themes_theme_information( $request['slug'] );
+				$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug );
 
 				if ( ! empty( $theme_data->error ) || ! $theme_package->post_author ) {
 					return false;
