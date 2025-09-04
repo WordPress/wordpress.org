@@ -7,60 +7,30 @@ use WPORG_Themes_Repo_Package;
 class Theme_Preview {
 
 	function __construct() {
-		register_rest_route( 'themes/v1', 'preview-blueprint/(?<slug>[^/]+)(/(?<version>[^/]+))?', array(
+		register_rest_route( 'themes/v1', 'preview-blueprint/(?<slug>[^/]+)', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'preview' ),
+			'permission_callback' => '__return_true',
 			'args'                => array(
 				'slug' => array(
 					'type'              => 'string',
 					'required'          => 'true',
 					'sanitize_callback' => 'sanitize_key',
 				),
-				'version' => array(
-					'type'              => 'string',
-					'required'          => 'false',
-					'sanitize_callback' => static function ( $value ) {
-						if ( ! is_string( $value ) ) {
-							return '';
-						}
-						return preg_replace( '/[^0-9a-zA-Z.-]/', '', $value );
-					},
-				),
-				// If the theme isn't (yet) published, this can be set to force loading the post.
-				'preview_id' => array(
-					'type'              => 'integer',
-					'required'          => false,
-					'sanitize_callback' => 'absint',
-				),
-				// Whether to enable WP_DEBUG. ie. for testing.
-				'debug' => array(
-					'type'              => 'boolean',
-					'required'          => false,
-					'default'           => false,
-					'sanitize_callback' => 'rest_sanitize_boolean',
-				),
-				// Whether to install the Theme Unit TestData.
-				'install_theme_testdata' => array(
-					'type'              => 'boolean',
-					'required'          => false,
-					'default'           => false,
-					'sanitize_callback' => 'rest_sanitize_boolean',
-				),
-				// Whether to install the Theme Previewer plugins.
-				'theme_previewer' => array(
-					'type'              => 'boolean',
-					'required'          => false,
-					'default'           => true,
-					'sanitize_callback' => 'rest_sanitize_boolean',
-				),
 			),
-			'permission_callback' => '__return_true',
 		) );
 
 		register_rest_route( 'themes/v1', 'review-blueprint/((?<post_id>[\d]+)-)?(?<slug>[^/]+)/(?<version>[0-9a-z.-_]+)', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'review' ),
+			'permission_callback' => '__return_true',
 			'args'                => array(
+				// If the theme isn't (yet) published, this can be set to force loading the post.
+				'post_id' => array(
+					'type'              => 'integer',
+					'required'          => false,
+					'sanitize_callback' => 'absint',
+				),
 				'slug' => array(
 					'type'              => 'string',
 					'required'          => true,
@@ -73,14 +43,7 @@ class Theme_Preview {
 						return is_string( $value ) ? $value : '';
 					},
 				),
-				// If the theme isn't (yet) published, this can be set to force loading the post.
-				'post_id' => array(
-					'type'              => 'integer',
-					'required'          => false,
-					'sanitize_callback' => 'absint',
-				)
 			),
-			'permission_callback' => '__return_true',
 		) );
 
 		register_rest_route( 'themes/v1', 'preview-blueprint/(?<slug>[^/]+)', array(
