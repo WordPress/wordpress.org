@@ -155,7 +155,7 @@ class Template {
 		// FAQPage schema.
 		$content     = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content( $plugin ) );
 		$faq_content = isset( $content['faq'] ) ? $content['faq'] : '';
-		$faq_schema  = self::build_plugin_faq_schema( $faq_content );
+		$faq_schema  = self::build_plugin_faq_schema( $faq_content, get_permalink( $plugin ) );
 
 		if ( $faq_schema ) {
 			$schema[] = $faq_schema;
@@ -168,9 +168,10 @@ class Template {
 	 * Builds an FAQPage schema object from plugin content structured with <dl><dt><dd>.
 	 *
 	 * @param string $faq_content Raw plugin content containing FAQ markup.
+	 * @param string $plugin_url  The URL of the plugin page.
 	 * @return array|null FAQPage schema or null if none found.
 	 */
-	protected static function build_plugin_faq_schema( $faq_content ) {
+	protected static function build_plugin_faq_schema( $faq_content, $plugin_url ) {
 		if ( empty( $faq_content ) || false === strpos( $faq_content, '<dl' ) ) {
 			return null;
 		}
@@ -224,6 +225,8 @@ class Template {
 		return [
 			"@context"   => "https://schema.org",
 			"@type"      => "FAQPage",
+			"@id"        => $plugin_url,
+			"url"        => $plugin_url,
 			"mainEntity" => $faq_entities,
 		];
 	}
