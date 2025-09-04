@@ -37,11 +37,8 @@ class Theme_Preview {
 					'sanitize_callback' => 'sanitize_key',
 				),
 				'version' => array(
-					'type'              => 'string',
-					'required'          => true,
-					'sanitize_callback' => static function ( $value ) {
-						return is_string( $value ) ? $value : '';
-					},
+					'type'     => 'string',
+					'required' => true,
 				),
 			),
 		) );
