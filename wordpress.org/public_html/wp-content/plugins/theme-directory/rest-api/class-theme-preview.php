@@ -20,7 +20,7 @@ class Theme_Preview {
 			),
 		) );
 
-		register_rest_route( 'themes/v1', 'review-blueprint/((?<post_id>[\d]+)-)?(?<slug>[^/]+)/(?<version>[0-9a-z.-_]+)', array(
+		register_rest_route( 'themes/v1', 'review-blueprint/((?<post_id>[\d]+)-)?(?<slug>[^/]+)/(?<version>[0-9a-z.-_]+)?', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'review' ),
 			'permission_callback' => '__return_true',
@@ -38,7 +38,7 @@ class Theme_Preview {
 				),
 				'version' => array(
 					'type'     => 'string',
-					'required' => true,
+					'required' => false,
 				),
 			),
 		) );
@@ -132,8 +132,17 @@ class Theme_Preview {
 
 	/**
 	 * Generate a blueprint for previewing a theme.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @param object $theme_data Theme data as returned by wporg_themes_theme_information
+	 * @param array $params {
+	 * 		Optional parameters.
+	 * 		@type bool $review If true, generate a blueprint for theme review.
+	 * 		@type string $version Optional. The version string, empty for latest version.
+	 * }
+	 * @return array The blueprint.
 	 */
-	function build_blueprint( $request, $theme_data, $params ) {
+	function build_blueprint( $request, $theme_data, $params = array() ) {
 		$is_theme_review = $params['review'] ?? false;
 		$version         = $params['version'] ?? false;
 		$theme_package   = new WPORG_Themes_Repo_Package( $theme_data->slug, $version );
