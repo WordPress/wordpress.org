@@ -702,9 +702,12 @@ class WPORG_Themes_Upload {
 
 		// Pass it through Theme Check and see how great this theme really is.
 		if ( $args['run_themecheck'] ) {
+			// Disable error reporting for when this is run via CLI.
+			$error_reporting = error_reporting(0);
 			ob_start();
 			$result = $this->check_theme();
 			$theme_check_output = ob_get_clean();
+			error_reporting( $error_reporting );
 
 			// Output the Theme Check results. This is the only HTML that this function outputs.
 			echo $theme_check_output;
