@@ -156,6 +156,10 @@ class Theme_Preview {
 			$parent_package = new WPORG_Themes_Repo_Package( $theme_data->template );
 		}
 
+		if ( empty( $theme_package->wp_post ) ) {
+			return new WP_Error( 'not_found', 'Theme not found.' );
+		}
+
 		// Base blueprint.
 		$blueprint = [
 			'preferredVersions' => [
