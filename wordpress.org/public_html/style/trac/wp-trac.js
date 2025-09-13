@@ -1,5 +1,5 @@
 /* globals wpTracAutoCompleteUsers, wpTracContributorLabels, wpTracCurrentUser */
-var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList, bugTrackerLocations, $body;
+var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTerms, coreFocusesList, bugTrackerLocations, $body;
 
 (function($){
 
@@ -131,6 +131,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 	};
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major', 'dev-reviewed' ];
+	hideFromNewTickets  = [ 'needs-refresh', 'changes-requested', 'reporter-feedback', 'dev-feedback', 'close', 'has-dev-note', 'needs-dev-note', 'add-to-field-guide', 'has-privacy-review', 'has-copy-review', 'commit', 'early', 'i18n-change', 'fixed-major', 'dev-reviewed' ];
 
 	// phpDocumentor tags, but also a few common @-terms.
 	reservedTerms = [
@@ -1227,6 +1228,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					$.each( coreKeywordList, function( k ) {
 						// Don't show special (permission-based) ones.
 						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) ) {
+							return;
+						}
+						// Don't show workflow keywords such as 'reporter-feedback' for new ticket.
+						if ( wpTrac.isNewTicket() && -1 !== $.inArray( k, hideFromNewTickets ) ) {
 							return;
 						}
 						elements.add.append( '<option value="' + k + ( -1 !== $.inArray( k, keywords ) ? '" disabled="disabled">* ' : '">' ) + k + '</option>' );
