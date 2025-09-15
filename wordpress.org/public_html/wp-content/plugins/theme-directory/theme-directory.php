@@ -129,7 +129,7 @@ function wporg_themes_init() {
 				'menu_name'          => __( 'Packages', 'wporg-themes' ),
 			),
 			'description' => __( 'A package', 'wporg-themes' ),
-			'supports'    => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
+			'supports'    => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes', 'wporg-internal-notes', 'wporg-log-notes' ),
 			'taxonomies'  => array( 'category', 'post_tag', 'type' ),
 			'public'      => true,
 			'show_ui'     => true,
@@ -155,7 +155,7 @@ function wporg_themes_init() {
 				'parent_item_colon'  => __( 'Parent Theme Shop:', 'wporg-themes' ),
 				'menu_name'          => __( 'Theme Shops', 'wporg-themes' ),
 			),
-			'supports'            => array( 'title', 'editor', 'author', 'custom-fields' ),
+			'supports'            => array( 'title', 'editor', 'author', 'custom-fields', 'wporg-internal-notes', 'wporg-log-notes'  ),
 			'public'              => false,
 			'show_ui'             => true,
 			'exclude_from_search' => true,
@@ -392,7 +392,7 @@ function wporg_themes_author_lookup() {
 	}
 	exit;
 }
-add_action('wp_ajax_author-lookup', 'wporg_themes_author_lookup');
+add_action( 'wp_ajax_author-lookup', 'wporg_themes_author_lookup' );
 
 
 /* UPDATING THEME VERSIONS */
@@ -607,6 +607,9 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		}
 
 		wp_update_post( $post_args );
+
+		// Subscribe the author to the theme.
+		woprg_themes_subscribe_author_to_theme_forum( get_post( $post_id ) );
 	}
 
 	$content .= sprintf( __( 'Any feedback items are at %s.', 'wporg-themes' ), "https://themes.trac.wordpress.org/ticket/$ticket_id" ) . "\n\n--\n";
@@ -614,6 +617,9 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 	$content .= 'https://make.wordpress.org/themes';
 
 	wp_mail( get_user_by( 'id', $post->post_author )->user_email, $subject, $content, 'From: "WordPress Theme Directory" <themes@wordpress.org>' );
+
+	// Store some user-meta against the theme author, so that other code knows this is a current (or past) theme author.
+	update_user_meta( $post->post_author, 'has_themes', time() );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_approve_version', 10, 3 );
 
@@ -1499,6 +1505,11 @@ function wporg_themes_canonical_url( $url ) {
 		$url = home_url( '/' );
 	}
 
+	// Pagination.
+	if ( get_query_var( 'paged' ) > 1 ) {
+		$url .= 'page/' . intval( get_query_var( 'paged' ) ) . '/';
+	}
+
 	return $url;
 }
 add_filter( 'wporg_canonical_url', 'wporg_themes_canonical_url' );
@@ -1511,3 +1522,143 @@ function wporg_themes_jetpack_seo_enable( $modules ) {
 	return array_values( array_merge( $modules, array( 'seo-tools' ) ) );
 }
 add_filter( 'jetpack_active_modules', 'wporg_themes_jetpack_seo_enable' );
+
+/**
+ * Subscribe a theme author to their theme support threads upon approval.
+ *
+ * @param WP_Post $post
+ */
+function woprg_themes_subscribe_author_to_theme_forum( $post ) {
+	if ( ! $post || ! defined( 'PLUGIN_API_INTERNAL_BEARER_TOKEN' ) ) {
+		return false;
+	}
+
+	$request = wp_remote_post(
+		'https://wordpress.org/support/wp-json/wporg-support/v1/subscribe-user-to-term',
+		[
+			'body'    => [
+				'type'    => 'theme',
+				'slug'    => $post->post_name,
+				'user_id' => $post->post_author,
+			],
+			'headers' => [
+				'Authorization' => 'Bearer ' . PLUGIN_API_INTERNAL_BEARER_TOKEN,
+			],
+		]
+	);
+
+	return 200 === wp_remote_retrieve_response_code( $request );
+}
+
+/**
+ * Record some stats on theme status changes.
+ *
+ * @param string $new_status
+ * @param string $old_status
+ * @param WP_Post $post
+ */
+function wporg_themes_status_change_stats( $new_status, $old_status, $post ) {
+	if ( 
+		'repopackage' !== $post->post_type ||
+		in_array( $new_status, [ 'draft', 'auto-draft' ] ) ||
+		! function_exists( 'bump_stats_extra' )
+	) {
+		return;
+	}
+
+	if ( 'suspend' == $old_status && 'publish' == $new_status ) {
+		$stat = 'reinstated';
+	} elseif( 'delist' == $old_status && 'publish' == $new_status ) {
+		$stat = 'relisted';
+	} else {
+		$stat = $new_status;
+	}
+ 
+	bump_stats_extra( 'themes', 'status-' . $stat );
+}
+add_action( 'transition_post_status', 'wporg_themes_status_change_stats', 10, 3 );
+
+/**
+ * Record the date a theme was put into it's current status.
+ *
+ * @param string $new_status
+ * @param string $old_status
+ * @param WP_Post $post
+ */
+function wporg_themes_status_change_metadata( $new_status, $old_status, $post ) {
+	$tracked_statii = [
+		'publish',
+		'suspend',
+		'delist',
+	];
+
+	if ( 
+		'repopackage' !== $post->post_type ||
+		$new_status === $old_status ||
+		(
+			! in_array( $new_status, $tracked_statii ) &&
+			! in_array( $old_status, $tracked_statii )
+		)
+	) {
+		return;
+	}
+
+	foreach ( $tracked_statii as $status ) {
+		delete_post_meta( $post->ID, "_{$status}_date" );
+	}
+
+	if ( in_array( $new_status, $tracked_statii ) ) {
+		update_post_meta( $post->ID, "_{$new_status}_date", current_time( 'mysql' ) );
+	}
+
+}
+add_action( 'transition_post_status', 'wporg_themes_status_change_metadata', 10, 3 );
+
+/**
+ * Check if a user has any themes.
+ *
+ * @param int|WP_User $user_id
+ * @param array       $status  The status of the themes to check for.
+ *
+ * @return bool
+ */
+function wporg_themes_has_theme( $user_id = 0, $status = [ 'publish', 'draft' ] ) {
+	if ( is_object( $user_id ) ) {
+		$user_id = $user_id->ID;
+	} elseif ( ! $user_id ) {
+		$user_id = get_current_user_id();
+	}
+
+	$themes = get_posts( [
+		'post_type'   => 'repopackage',
+		'post_status' => $status,
+		'author'      => $user_id,
+		'numberposts' => 1,
+		'fields'      => 'ids',
+	] );
+
+	return (bool) $themes;
+}
+
+/**
+ * Log metadata changes to internal notes.
+ *
+ * @param array $meta_keys The meta keys to log.
+ * @return array
+ */
+function wporg_themes_log_metadata_changes( $meta_keys ) {
+	// Don't keep track of the page template, we don't use that.
+	$meta_keys = array_diff(
+		$meta_keys,
+		array(
+			'_wp_page_template'
+		)
+	);
+
+	$meta_keys[] = '_live_version';
+	$meta_keys[] = 'external_support_url';
+	$meta_keys[] = 'external_repository_url';
+
+	return $meta_keys;
+}
+add_filter( 'wporg_internal_notes_logging_allowed_postmeta_keys', 'wporg_themes_log_metadata_changes' );

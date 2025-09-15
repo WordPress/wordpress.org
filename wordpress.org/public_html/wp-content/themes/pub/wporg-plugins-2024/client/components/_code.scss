@@ -1,0 +1,17 @@
+pre {
+    padding: 20px;
+    background-color: #f7f7f7;
+    border: 1px solid var(--wp--preset--color--light-grey-1);
+    border-radius: 2px;
+    overflow: scroll;
+}
+
+code {
+    display: inline-block;
+    line-height: var(--wp--custom--body--extra-small--typography--line-height);
+    background: var(--wp--preset--color--light-grey-2);
+    border-radius: 2px;
+    padding-inline-start: 3px;
+    padding-inline-end: 3px;
+    max-width: 100%;
+}

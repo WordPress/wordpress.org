@@ -1,0 +1,161 @@
+/*!
+Theme Name: WordPress.org Translation Events 2024
+Theme URI: https://wordpress.org
+Author: wordpressdotorg
+Author URI: https://wordpress.org
+Description: Theme for the WordPress.org Translation Events.
+Version: 2024.0.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: wporg-translate-events-2024
+Template: wporg-parent-2021
+*/
+
+/*
+ * Layout
+ */
+body {
+	--wp--custom--layout--wide-size: 1600px;
+}
+.wp-site-blocks .is-layout-constrained,
+.wp-block-post-content-is-layout-constrained {
+	& .alignwide {
+		max-width: var(--wp--custom--layout--wide-size) !important;
+	}
+}
+.wporg-marker-list__container {
+	padding-left: 0;
+}
+
+.wporg-marker-list__container .wporg-marker-list-item {
+		border: 1px solid var(--wp--preset--color--light-grey-1);
+		border-bottom: none;
+		padding: var(--wp--preset--spacing--20);
+		list-style: none;
+		font-size: var(--wp--preset--font-size--small);
+	}
+	
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__title {
+	float: left;
+}
+
+ .wporg-marker-list__container .wporg-marker-list-item:first-child {
+			border-radius: 2px 2px 0 0;
+		}
+
+.wporg-marker-list__container .wporg-marker-list-item:last-child {
+			border-radius: 0 0 2px 2px;
+			border-bottom: 1px solid var(--wp--preset--color--light-grey-1);
+		}
+
+.wporg-marker-list__container span.my-event-flag {
+    width: 43px;
+    height: 28px;
+    padding: 4px 8px;
+    gap: 10px;
+    border-radius: 2px 0 0 0;
+    background: #EFF2FF;
+    margin-left: 4px; 
+    font-size: .8em; 
+}
+
+ @media (min-width: 960px) {
+
+.wporg-marker-list__container .wporg-marker-list-item {
+			display: grid;
+			align-items: start;
+			gap: var(--wp--preset--spacing--20);
+			grid-template-columns: 45% 1fr 2fr;
+	}
+		}
+
+@media (min-width: 1080px) {
+
+.wporg-marker-list__container .wporg-marker-list-item {
+			font-size: var(--wp--preset--font-size--normal);
+	}
+		}
+
+@media (min-width: 1280px) {
+
+.wporg-marker-list__container .wporg-marker-list-item {
+			grid-template-columns: 60% 1fr 1fr;
+	}
+		}
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__title {
+			margin: 0;
+			font-family: var(--wp--preset--font-family--inter);
+			font-size: var(--wp--preset--font-size--small);
+			line-height: var(--wp--custom--body--typography--line-height);
+			--wp--preset--spacing--30: 0;
+		}
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__title a {
+				-webkit-text-decoration: none;
+				text-decoration: none;
+			}
+
+@media (min-width: 1080px) {
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__title {
+				font-size: var(--wp--preset--font-size--normal);
+		}
+			}
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__attendance-mode::first-letter {
+			    text-transform: capitalize;
+			}
+
+@media (max-width: 781px) {
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__attendance-mode {
+				margin-top: 2px;
+				margin-bottom: -2px;
+		}
+			}
+
+@media (min-width: 600px) {
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__attendance-mode {
+				display: inline;
+		}
+			}
+
+@media (min-width: 600px) {
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__date-time {
+				display: inline-flex;
+				justify-content: flex-end;
+				white-space: nowrap;
+				align-items: center;
+		}
+			}
+
+@media (min-width: 1280px) {
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__date-time {
+				display: flex;
+		}
+			}
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__attendance-mode::after,
+		.wporg-marker-list__container .wporg-marker-list-item .wporg-google-map__date::after {
+			content: "";
+			margin-top: -1px; /* vertical-middle doesn't subtract the size of the element */
+			margin-left: 10px;
+			margin-right: 10px;
+			height: 3px;
+			width: 3px;
+			border-radius: 3px;
+			background: var(--wp--preset--color--charcoal-5);
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+@media (max-width: 599px),(min-width: 960px) {
+
+.wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__attendance-mode::after {
+				display: none;
+		}
+			}

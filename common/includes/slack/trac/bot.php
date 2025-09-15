@@ -6,12 +6,12 @@ class Bot {
 	const default_trac = 'core';
 
 	static private $default_tracs = array(
-		'#themereview'  => 'themes',
-		'#bbpress'      => 'bbpress',
-		'#buddypress'   => 'buddypress',
-		'#glotpress'    => 'glotpress',
-		'#meta'         => 'meta',
-		'#outreach'     => false,
+		'#themes'     => 'themes',
+		'#bbpress'    => 'bbpress',
+		'#buddypress' => 'buddypress',
+		'#glotpress'  => 'glotpress',
+		'#meta'       => 'meta',
+		'#outreach'   => false,
 	);
 
 	// Channels that are primarily GitHub issues, where digit-only tickets should not be expanded.

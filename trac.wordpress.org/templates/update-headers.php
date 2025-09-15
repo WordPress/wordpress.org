@@ -4,8 +4,21 @@
 // Avoid PHP Warnings from 'unexpected' tag attributes.
 libxml_use_internal_errors( true );
 
+function fetch_url( $url ) {
+	$context = stream_context_create( [
+		'http' => [
+			'header' => 'User-Agent: WordPRess.org Trac Template Updater',
+		]
+	] );
+
+	// Don't use the CDN here, just in case.
+	$url = str_replace( '/s.w.org/', '/wordpress.org/', $url );
+
+	return file_get_contents( $url, false, $context );
+}
+
 function domdocument_from_url( $url ) {
-	$html = file_get_contents( $url );
+	$html = fetch_url( $url );
 
 	/*
 	 * Escape HTML within Javascript strings.
@@ -127,7 +140,7 @@ function save_domdocument( $file, $dom ) {
 			}
 
 			$url  = str_replace( 'wordpress.org', 's.w.org', $url );
-			$hash = md5( file_get_contents( $url ) );
+			$hash = md5( fetch_url( $url ) );
 
 			if ( preg_match( '/([?&;](ver|v)=[^&]+)/i', $url, $m ) ) {
 				$url = str_replace( $m[0], $m[0] . '-' . $hash, $url );
@@ -183,7 +196,7 @@ foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
 // Swap out the shortcut icon for a Trac one. #6072
 $icon_url = 'https://s.w.org/style/trac/common/trac.ico';
 foreach ( ( new DOMXPath( $wporg_head ) )->query( '//link[@rel="icon"]' ) as $icon ) {
-	$hash = md5( file_get_contents( $icon_url ) );
+	$hash = md5( fetch_url( $icon_url ) );
 	$icon->setAttribute( 'href', $icon_url . '?v=' . $hash );
 }
 

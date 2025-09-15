@@ -1,60 +1,34 @@
 /**
- * Loops through children of container and set visiblity to 'visible'.
- */
-const makeVisible = ( children ) => {
-    for ( var i = 0; i < children.length; i++ ){
-        var child = children[i];
-        child.style.visibility = 'visible';
-
-        if( child.children.length > 0 ) {
-            makeVisible( child.children );
-        }
-    }
-}
-
-/**
- * Move the pattern to the top of the page.
- */
-const adjustOffset = ( element ) => {
-    const { top, height } = element.getBoundingClientRect();
-    element.style.transform = `translate(0, -${ top }px)`;
-
-    // If the element is smaller than the window width, we'll center it
-    if( height < window.innerHeight ) {
-        element.style.height = '100vh';
-    }
-}
-
-/**
  * Since we are using a theme template, but hiding everything but 'wporg-pattern-preview',
  * we should erase layouts that could stop our element from displaying full width.
  * If we don't, we get previews that only take up half of the viewport.
- * 
+ * Reset all the container padding so that there is no extra whitespace around the pattern.
  */
 const setParentDisplay = ( element ) => {
     let currElement = element;
 
     while( currElement.parentElement ){
         currElement.parentElement.style.display = 'block';
+		currElement.parentElement.style.padding = '0';
+		currElement.parentElement.style.margin = '0';
 
         currElement = currElement.parentElement;
     }
 }
 
 /**
- * We set all elements to visibility: hidden in CSS and then turn visibility on for our pattern container.
- * This allows us to preview the page without any distractions, like header, footer, etc...
+ * All elements outside of the preview container are hidden (with CSS, display: none),
+ * to display just the pattern, so only the parent elements of the container
+ * need to be unhidden.
  */
 const init = () => {
     var container = document.getElementById( 'wporg-pattern-preview' );
 
-    if( ! container ) {
+    if ( ! container ) {
         return;
     }
 
-    makeVisible( container.children );
     setParentDisplay( container );
-    adjustOffset( container );
 }   
 
 window.addEventListener( 'load', init );

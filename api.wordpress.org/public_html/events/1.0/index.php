@@ -1084,6 +1084,8 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
  *
  * Externalizing this makes it easier to test the `maybe_add_regional_wordcamps` function.
  *
+ * TODO: Figure out a way to automate this, as the current manual process is not sustainable.
+ *
  * @return array
  */
 function get_regional_wordcamp_data() {
@@ -1101,19 +1103,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Asia',
-				'url'        => 'https://asia.wordcamp.org/2024/',
+				'url'        => 'https://asia.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2024-03-07 00:00:00',
-				'end_date'   => '2024-03-09 00:00:00',
-				'start_unix_timestamp' => strtotime( '2024-03-07 00:00:00' ) - 8 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2024-03-09 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'date'       => '2025-02-20 00:00:00',
+				'end_date'   => '2025-02-22 00:00:00',
+				'start_unix_timestamp' => strtotime( '2025-02-20 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-02-22 00:00:00' ) - 8 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Taipei, Taiwan',
-					'country'   => 'TW',
-					'latitude'  => 25.0333949,
-					'longitude' => 121.5661024,
+					'location'  => 'Manila, Philippines',
+					'country'   => 'PH',
+					'latitude'  => 14.5544983,
+					'longitude' => 120.9830332,
 				),
 			),
 		),
@@ -1155,19 +1157,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
-				'url'        => 'https://europe.wordcamp.org/2022/',
+				'url'        => 'https://europe.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'                 => '2022-06-02 00:00:00',
-				'end_date'             => '2022-06-04 00:00:00',
-				'start_unix_timestamp' => strtotime( '2022-06-02 00:00:00' ) - 1 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2022-06-04 00:00:00' ) - 1 * HOUR_IN_SECONDS,
+				'date'                 => '2025-06-05 00:00:00',
+				'end_date'             => '2025-06-07 00:00:00',
+				'start_unix_timestamp' => strtotime( '2025-06-05 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-06-07 00:00:00' ) - 2 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Porto',
-					'country'   => 'PT',
-					'latitude'  => 41.147,
-					'longitude' => -8.625,
+					'location'  => 'Basel',
+					'country'   => 'CH',
+					'latitude'  => 47.5627438,
+					'longitude' => 7.5993872,
 				),
 			),
 		),
@@ -1182,22 +1184,25 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://us.wordcamp.org/2021/',
+				'url'        => 'https://us.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2021-10-01 00:00:00',
-				'end_date'   => '2021-10-02 00:00:00',
-				'start_unix_timestamp' => strtotime( '2021-10-01 00:00:00' ) - 5 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2021-10-02 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				// Local time
+				'date'       => '2025-08-26 09:00:00',
+				'end_date'   => '2025-08-29 17:00:00',
+				// GMT which due to local being GMT-7, GMT is ahead by 7h.
+				'start_unix_timestamp' => strtotime( '2025-08-26 09:00:00' ) + 7 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-08-29 17:00:00' ) + 7 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Online',
+					'location'  => 'Portland, Oregon',
 					'country'   => 'US',
-					'latitude'  => 38.6532135,
-					'longitude' => -90.3136733,
+					'latitude'  => 45.5283308,
+					'longitude' => -122.6634712,
 				),
 			),
 		),
+
 	);
 
 	return $events;
@@ -1305,6 +1310,16 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			if ( ! empty( $location['country'] ) && strtoupper( $data['event']['location']['country'] ) === strtoupper( $location['country'] ) ) {
 				$regional_wordcamps[] = $data['event'];
 			}
+		}
+
+		// Special case: Show WordCamp Asia to all of asia until it's over.
+		if (
+			'asia' === $region &&
+			! empty( $location['country'] ) &&
+			$current_time <= $data['event']['end_unix_timestamp'] &&
+			in_array( strtoupper( $location['country'] ), $data['regional_countries'], true )
+		) {
+			$regional_wordcamps[] = $data['event'];
 		}
 
 		// After the promo ends, the event will just be displayed to everyone in the normal search radius (2 weeks
@@ -1588,35 +1603,31 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  * Pin one-off events.
  */
 function pin_one_off_events( $events, $current_time ) {
-	$madrid_utc_offset = 1 * HOUR_IN_SECONDS; // Central European Standard Time - GMT+1
+	$tokyo_utc_offset = 9 * HOUR_IN_SECONDS; // JST: UTC+9
 
 	$sotw = array(
 		'type'                 => 'wordcamp',
-		'title'                => 'State of the Word - Watch Now', // Remove "watch now" next year, see date note below.
+		'title'                => 'State of the Word 2024 – Tokyo, Japan',
 		// `utm_source` is `private` because it would have to be set by the WP install, we don't need it, and tracking it could be a privacy concern.
-		'url'                  => 'https://wordpress.org/state-of-the-word/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2023',
+		'url'                  => 'https://wordpress.org/state-of-the-word/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2024',
 		'meetup'               => '',
 		'meetup_url'           => '',
-
-		// This year they requested the event to show up for a few days after it was over. The API does that no
-		// problem, but in Core `WP_Community_Events::trim_events()` will remove it. This is a hack to make the
-		// event show up, but it will probably confuse people about when it actual was, because the date will be
-		// wrong. Don't do this again next year, only show the event in the lead up to it. The pinned News item
-		// will still show it to people after the event.
-		'date'                 => '2023-12-14 15:00:00',
-		'end_date'             => '2023-12-14 16:30:00',
-		'start_unix_timestamp' => strtotime( '2023-12-14 15:00:00' ) - $madrid_utc_offset,
-		'end_unix_timestamp'   => strtotime( '2023-12-14 16:30:00' ) - $madrid_utc_offset,
+		// Local time for the event location.
+		'date'                 => '2024-12-16 18:00:00',
+		'end_date'             => '2024-12-16 20:00:00',
+		// Unix timestamp (UTC).
+		'start_unix_timestamp' => strtotime( '2024-12-16 18:00:00' ) - $tokyo_utc_offset,
+		'end_unix_timestamp'   => strtotime( '2024-12-16 20:00:00' ) - $tokyo_utc_offset,
 
 		'location' => array(
 			'location'  => 'Online',
-			'country'   => 'ES',
-			'latitude'  => 40.41446998218856,
-			'longitude' => -3.695042334019202,
+			'country'   => 'JP',
+			'latitude'  => 35.652832,
+			'longitude' => 139.839478,
 		),
 	);
 
-	if ( $current_time > strtotime( 'December 9, 2023' ) && $current_time < strtotime( 'December 14, 2023' ) ) {
+	if ( $current_time > strtotime( 'December 11, 2024' ) && $current_time < strtotime( 'December 17, 2024' ) ) {
 		array_unshift( $events, $sotw );
 	}
 

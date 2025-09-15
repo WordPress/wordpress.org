@@ -32,6 +32,7 @@ class Capabilities {
 			'plugin_remove_support_rep',
 			'plugin_self_transfer',
 			'plugin_self_close',
+			'plugin_toggle_public_preview',
 			'plugin_manage_releases',
 		);
 		if ( ! in_array( $cap, $handled_caps ) ) {
@@ -55,6 +56,13 @@ class Capabilities {
 		// Start over, we'll specify all caps below.
 		$required_caps = array();
 
+		// Plugin Committers need to have 2FA to be able to perform any of these actions.
+		if ( function_exists( 'WordPressdotorg\Two_Factor\user_requires_2fa' ) && class_exists( 'Two_Factor_Core' ) ) {
+			if ( \WordPressdotorg\Two_Factor\user_requires_2fa( $user ) && ! \Two_Factor_Core::is_user_using_two_factor( $user->ID ) ) {
+				$required_caps[] = 'do_not_allow';
+			}
+		}
+
 		// Certain actions require the plugin to be published.
 		if (
 			'publish' !== $post->post_status &&
@@ -63,6 +71,7 @@ class Capabilities {
 				array(
 					'plugin_self_transfer',
 					'plugin_self_close',
+					'plugin_toggle_public_preview'
 				)
 			)
 		) {
@@ -87,6 +96,7 @@ class Capabilities {
 				array(
 					'plugin_self_close',
 					'plugin_self_transfer',
+					'plugin_toggle_public_preview',
 					'plugin_add_committer',
 					'plugin_remove_committer',
 				)

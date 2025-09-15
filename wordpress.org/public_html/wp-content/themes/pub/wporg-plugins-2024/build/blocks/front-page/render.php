@@ -7,11 +7,11 @@ use WP_Query;
 global $wp_query;
 
 $sections = array(
-	'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
-	'featured'  => __( 'Featured Plugins', 'wporg-plugins' ),
-	'beta'      => __( 'Beta Plugins', 'wporg-plugins' ),
-	'favorites' => __( 'My Favorites', 'wporg-plugins' ),
-	'popular'   => __( 'Popular Plugins', 'wporg-plugins' ),
+	'featured'  => __( 'Featured plugins', 'wporg-plugins' ),
+	'beta'      => __( 'Beta plugins', 'wporg-plugins' ),
+	'favorites' => __( 'My favorites', 'wporg-plugins' ),
+	'popular'   => __( 'Popular plugins', 'wporg-plugins' ),
+	'blocks'    => __( 'Block-Enabled plugins', 'wporg-plugins' ),
 );
 
 $widget_args = array(
@@ -19,7 +19,7 @@ $widget_args = array(
 	'after_title'  => '</h2>',
 );
 
-echo do_blocks( '<!-- wp:wporg/filter-bar /--><!-- wp:wporg/category-navigation /-->' );
+echo do_blocks( '<!-- wp:template-part {"slug":"grid-controls"} /-->' );
 
 ?>
 
@@ -35,7 +35,7 @@ echo do_blocks( '<!-- wp:wporg/filter-bar /--><!-- wp:wporg/category-navigation 
 		$section_args = array(
 			'post_type'      => 'plugin',
 			'post_status'    => 'publish',
-			'posts_per_page' => 4,
+			'posts_per_page' => 6,
 			'browse'         => $browse,
 		);
 
@@ -118,7 +118,7 @@ echo do_blocks( '<!-- wp:wporg/filter-bar /--><!-- wp:wporg/category-navigation 
 <aside id="secondary" class="widget-area" role="complementary">
 	<?php
 	the_widget( 'WP_Widget_Text', array(
-		'title' => __( 'Add Your Plugin', 'wporg-plugins' ),
+		'title' => __( 'Add your plugin', 'wporg-plugins' ),
 		'text'  => sprintf(
 			/* translators: URL to Developers page. */
 			__( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Find out how to <a href="%s">host your plugin</a> on WordPress.org.', 'wporg-plugins' ),
@@ -127,7 +127,7 @@ echo do_blocks( '<!-- wp:wporg/filter-bar /--><!-- wp:wporg/category-navigation 
 	), $widget_args );
 
 	the_widget( 'WP_Widget_Text', array(
-		'title' => __( 'Create a Plugin', 'wporg-plugins' ),
+		'title' => __( 'Create a plugin', 'wporg-plugins' ),
 		'text'  => sprintf(
 			/* translators: URL to Developer Handbook. */
 			__( 'Building a plugin has never been easier. Read through the <a href="%s">Plugin Developer Handbook</a> to learn all about WordPress plugin development.', 'wporg-plugins' ),
@@ -136,10 +136,10 @@ echo do_blocks( '<!-- wp:wporg/filter-bar /--><!-- wp:wporg/category-navigation 
 	), $widget_args );
 
 	the_widget( 'WP_Widget_Text', array(
-		'title' => __( 'Stay Up-to-Date', 'wporg-plugins' ),
+		'title' => __( 'Stay up-to-date', 'wporg-plugins' ),
 		'text'  => sprintf(
 			/* translators: URL to make/plugins site. */
-			__( 'Plugin development is constantly changing with each new WordPress release. Keep up with the latest changes by following the <a href="%s">Plugin Review Team&#8217;s blog</a>.', 'wporg-plugins' ),
+			__( 'Plugin development is constantly changing with each new WordPress release. Keep up with the latest changes by following the <a href="%s">Plugins Team&#8217;s blog</a>.', 'wporg-plugins' ),
 			esc_url( 'https://make.wordpress.org/plugins/' )
 		),
 	), $widget_args );

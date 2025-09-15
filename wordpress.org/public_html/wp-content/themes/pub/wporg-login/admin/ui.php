@@ -380,7 +380,7 @@ add_action( 'admin_post_login_block', function() {
 
 	check_admin_referer( 'block_' . $email );
 
-	wporg_login_block_registration( $user );
+	wporg_login_block_registration( $email );
 
 	if ( isset( $_GET['ajax'] ) ) {
 		die( wporg_login_admin_action_text( 'blocked' ) );

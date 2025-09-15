@@ -150,10 +150,14 @@ class Locale_Support implements Site {
 	 */
 	public function limit_editable_roles( $roles ) {
 		if ( ! is_super_admin() ) {
-			return [ 'subscriber' => $roles['subscriber'] ];
+			return [
+				'subscriber'      => $roles['subscriber'],
+				'helphub_manager' => $roles['helphub_manager'],
+				'helphub_editor'  => $roles['helphub_editor'],
+			];
 		}
 
-		$roles = array_intersect_key( $roles, array_flip( [ 'subscriber', 'administrator' ] ) );
+		$roles = array_intersect_key( $roles, array_flip( [ 'subscriber', 'administrator', 'helphub_manager', 'helphub_editor' ] ) );
 
 		return $roles;
 	}

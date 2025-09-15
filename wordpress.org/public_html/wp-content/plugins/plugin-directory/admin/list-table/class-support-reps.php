@@ -153,6 +153,9 @@ class Support_Reps extends \WP_List_Table {
 		if ( ! ( $user_object instanceof \WP_User ) ) {
 			$user_object = get_userdata( (int) $user_object );
 		}
+
+		if ( $user_object === false ) return false;
+		
 		$user_object->filter                = 'display';
 		list( $columns, $hidden, $primary ) = $this->get_column_info();
 

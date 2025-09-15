@@ -52,6 +52,7 @@ class WP_63_Credits extends WP_Credits {
  					'Joen'                => 'Joen Asmussen',
 					'jameskoster'         => 'James Koster',
 					'saxonfletcher'       => 'Saxon Fletcher',
+					'poena'               => 'Carolina Nymark',
 				],
 			],
 			'contributing-developers' => [
@@ -59,7 +60,6 @@ class WP_63_Credits extends WP_Credits {
 				'type'    => 'titles',
 				'shuffle' => true,
 				'data'    => [
-					'poena'               => 'Carolina Nymark',
 					'get_dave'            => 'David Smith',
 					'sabernhardt'         => 'Stephen Bernhardt',
 					'afercia'             => 'Andrea Fercia',

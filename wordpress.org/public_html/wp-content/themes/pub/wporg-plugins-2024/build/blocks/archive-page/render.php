@@ -7,14 +7,15 @@ global $wp_query;
 if ( ! $wp_query->have_posts() ) {
 	status_header( 404 );
 	nocache_headers();
-}	
+}
 
 // TODO: There's no block for this.
 $archive_description = get_the_archive_description();
 
 echo do_blocks( <<<BLOCKS
-	<!-- wp:wporg/filter-bar /-->	
-	<!-- wp:wporg/category-navigation /-->
+<!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|40"}}},"layout":{"type":"default"}} -->
+<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--40)">
+	<!-- wp:template-part {"slug":"grid-controls"} /-->
 	<!-- wp:query-title {"type":"archive","fontFamily":"inter","style":{"typography":{"fontStyle":"normal","fontWeight":"600"},"spacing":{"margin":{"bottom":"var:preset|spacing|10"}}},"fontSize":"heading-5"} /-->
 	{$archive_description}
 	<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
@@ -24,6 +25,8 @@ echo do_blocks( <<<BLOCKS
 			<!-- /wp:post-template -->
 		</div>
 	<!-- /wp:query -->
+</div>
+<!-- /wp:group -->
 BLOCKS
 );
 

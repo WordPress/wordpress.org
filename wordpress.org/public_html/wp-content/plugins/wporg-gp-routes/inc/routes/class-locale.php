@@ -998,7 +998,9 @@ class Locale extends GP_Route {
 	}
 
 	private function _encode( $raw ) {
-		$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
+		if ( 'UTF-8' !== mb_detect_encoding( $raw, 'UTF-8', true ) ) {
+			$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, Windows-1252, ISO-8859-1' );
+		}
 		return ent2ncr( htmlspecialchars_decode( htmlentities( $raw, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
 }

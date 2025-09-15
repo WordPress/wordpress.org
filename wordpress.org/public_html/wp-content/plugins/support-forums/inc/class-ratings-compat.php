@@ -81,6 +81,9 @@ class Ratings_Compat {
 			add_filter( 'bbp_get_topic_content', array( $this, 'feed_prepend_rating' ), 10, 2 );
 			add_filter( 'bbp_get_topic_title', array( $this, 'feed_append_rating' ), 10, 2 );
 		}
+
+		// Clear the review/ratings caches upon archive.
+		add_action( 'wporg_bbp_archived_topic', array( $this, 'wporg_bbp_archived_topic' ) );
 	}
 
 	/**
@@ -101,6 +104,11 @@ class Ratings_Compat {
 			return $clauses;
 		}
 
+		// Don't adjust if it's looking for a specific users review, such as, `::review_exists()`
+		if ( $query->get( 'author' ) ) {
+			return $clauses;
+		}
+
 		$clauses['join']  .= " INNER JOIN ratings ON ( $wpdb->posts.ID = ratings.post_id )";
 		$clauses['where'] .= $wpdb->prepare( " AND ratings.rating = %d", $this->filter );
 
@@ -118,8 +126,9 @@ class Ratings_Compat {
 	 */
 	public function add_topic_stars() {
 		if ( bbp_is_single_topic() && Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id() ) {
-			$user_id = bbp_get_topic_author_id();
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$user_id  = bbp_get_topic_author_id();
+			$topic_id = bbp_get_topic_id();
+			$rating   = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
 				echo \WPORG_Ratings::get_dashicons_stars( $rating );
 			}
@@ -171,7 +180,7 @@ class Ratings_Compat {
 
 		if ( bbp_is_single_view() && 'reviews' == bbp_get_view_id() ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
 				$title .= ' ' . \WPORG_Ratings::get_dashicons_stars( $rating );
 			}
@@ -203,63 +212,9 @@ class Ratings_Compat {
 		add_filter( 'bbp_get_topic_last_topic_title', array( $this, 'undo_topic_title' ), 10, 1 );
 ?>
 <div class="review-ratings">
-	<div class="col-3">
-		<div class="reviews-about" style="display:none;"><?php echo esc_html( $this->object->post_title ); ?></div>
-		<div class="reviews-total-count"><?php
-			printf(
-				/* translators: %s: number of reviews */
-				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
-				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
-			);
-		?></div>
-		<?php
-			foreach ( array( 5, 4, 3, 2, 1 ) as $rating ) {
-				$ratings_count = isset( $this->ratings_counts[ $rating ] ) ? $this->ratings_counts[ $rating ] : 0;
-				$ratings_count_total = isset( $this->ratings_counts ) ? array_sum( $this->ratings_counts) : 0;
-				$stars_title = sprintf(
-					/* translators: %s: number of stars */
-					_n( 'Click to see reviews that provided a rating of %d star',
-					    'Click to see reviews that provided a rating of %d stars',
-					    $rating,
-					    'wporg-forums' ),
-					$rating
-				);
-				/* translators: %d: number of stars */
-				$stars_text = sprintf(
-					/* translators: %d: number of stars */
-					_n( '%d star', '%d stars', $rating, 'wporg-forums' ),
-					$rating
-				);
-				$width = 0;
-				if ( $ratings_count && $ratings_count_total ) {
-					$width = 100 * ( $ratings_count / $ratings_count_total );
-				}
-				?>
-				<div class="counter-container">
-				<a href="<?php echo esc_url( sprintf( home_url( '/%s/%s/reviews/?filter=%s' ), $this->compat, $this->slug, $rating ) ); ?>"
-					title="<?php echo esc_attr( $stars_title ); ?>">
-					<span class="counter-label" style="float:left;margin-right:5px;min-width:58px;"><?php echo esc_html( $stars_text ); ?></span>
-					<span class="counter-back" style="height:17px;width:100px;background-color:#ececec;float:left;">
-						<span class="counter-bar" style="width:<?php echo esc_attr( $width ); ?>px;height:17px;background-color:#ffc733;float:left;"></span>
-					</span>
-				</a>
-				<span class="counter-count" style="margin-left:5px;"><?php echo esc_html( $ratings_count ); ?></span>
-				</div>
-				<?php
-			}
-		?>
-	</div>
-	<div class="col-5">
+	<div>
 		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
-		<?php
-			echo \WPORG_Ratings::get_dashicons_stars( $this->avg_rating );
-			printf(
-				/* translators: 1: number of stars in rating, 2: total number of stars (5) */
-				__( '%1$s out of %2$s stars', 'wporg-forums' ),
-				round( isset( $this->avg_rating ) ? $this->avg_rating : 0, 1 ),
-				'<span>5</span>'
-			);
-		?>
+		<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); ?>
 		<div class="reviews-submit-link">
 		<?php
 			if ( is_user_logged_in() ) {
@@ -286,6 +241,17 @@ class Ratings_Compat {
 		?>
 		</div>
 	</div>
+	<div>
+		<div class="reviews-about" style="display:none;"><?php echo esc_html( $this->object->post_title ); ?></div>
+		<div class="reviews-total-count"><?php
+			printf(
+				/* translators: %s: number of reviews */
+				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
+				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
+			);
+		?></div>
+		<?php echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' ); ?>
+	</div>
 </div>
 		<?php
 		// If current listing is filtered by rating, display message indicating this,
@@ -295,10 +261,12 @@ class Ratings_Compat {
 			echo '<p class="reviews-filtered-msg" style="margin-top:12px;font-size:0.8rem;">';
 			printf(
 				/* translators: %d: number of stars */
-				_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
-				    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
-			        $filter,
-				        'wporg-forums' ) . ' ',
+				_n(
+					'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
+					'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
+					$filter,
+					'wporg-forums'
+				) . ' ',
 				$filter
 			);
 			printf(
@@ -341,6 +309,9 @@ class Ratings_Compat {
 				bbp_get_topic_author_id( $topic_id ),
 				$rating
 			);
+
+			// Store it against the review post for later use.
+			update_post_meta( $topic_id, 'rating', $rating );
 		}
 	}
 
@@ -550,7 +521,7 @@ class Ratings_Compat {
 	public function feed_prepend_rating( $content, $topic_id ) {
 		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 
 			if ( $rating ) {
 				$content = sprintf(
@@ -576,7 +547,7 @@ class Ratings_Compat {
 	public function feed_append_rating( $title, $topic_id ) {
 		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 
 			if ( $rating ) {
 				$title = sprintf(
@@ -591,5 +562,18 @@ class Ratings_Compat {
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Clear the rating caches on topic archive.
+	 */
+	public function wporg_bbp_archived_topic( $post_id ) {
+		// Clear the rating caches.
+		\WPORG_Ratings::clear_cache(
+			$post_id,
+			$this->compat,
+			$this->slug,
+			bbp_get_topic_author_id( $post_id )
+		);
 	}
 }

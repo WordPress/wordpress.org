@@ -18,8 +18,10 @@ function wporg_themes_pre_get_posts( $query ) {
 		return;
 	}
 
-	// Default to the ~featured~ popular view
-	if ( empty( $query->query ) ) {
+	// Default to the popular view if this is a default query (ignore `paged`,
+	// so that `/themes/page/2/` correctly loads popular results).
+	$query_vars = array_diff( array_keys( $query->query ), [ 'paged' ] );
+	if ( empty( $query_vars ) ) {
 		$query->query_vars['browse'] = 'popular';
 	}
 

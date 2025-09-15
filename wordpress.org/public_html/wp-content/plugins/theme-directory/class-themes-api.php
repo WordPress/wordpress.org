@@ -41,34 +41,35 @@ class Themes_API {
 	 * @var array
 	 */
 	public $fields = array(
-		'description'        => false,
-		'downloaded'         => false,
-		'downloadlink'       => false,
-		'last_updated'       => false,
-		'creation_time'      => false,
-		'parent'             => false,
-		'rating'             => false,
-		'ratings'            => false,
-		'reviews_url'        => false,
-		'screenshot_count'   => false,
-		'screenshot_url'     => true,
-		'screenshots'        => false,
-		'sections'           => false,
-		'tags'               => false,
-		'template'           => false,
-		'versions'           => false,
-		'theme_url'          => false,
-		'extended_author'    => false,
-		'photon_screenshots' => false,
-		'active_installs'    => false,
-		'requires'           => false,
-		'requires_php'       => false,
-		'trac_tickets'       => false,
-		'is_commercial'      => false,
-		'is_community'       => false,
+		'description'             => false,
+		'downloaded'              => false,
+		'downloadlink'            => false,
+		'last_updated'            => false,
+		'creation_time'           => false,
+		'parent'                  => false,
+		'rating'                  => false,
+		'ratings'                 => false,
+		'reviews_url'             => false,
+		'screenshot_count'        => false,
+		'screenshot_url'          => true,
+		'screenshots'             => false,
+		'sections'                => false,
+		'tags'                    => false,
+		'template'                => false,
+		'versions'                => false,
+		'theme_url'               => false,
+		'homepage'                => false,
+		'extended_author'         => false,
+		'photon_screenshots'      => false,
+		'active_installs'         => false,
+		'requires'                => false,
+		'requires_php'            => false,
+		'trac_tickets'            => false,
+		'is_commercial'           => false,
+		'is_community'            => false,
 		'external_repository_url' => false,
-		'external_support_url' => false,
-		'upload_date'        => false,
+		'external_support_url'    => false,
+		'upload_date'             => false,
 	);
 
 	/**
@@ -141,6 +142,17 @@ class Themes_API {
 					$this->bad_input = true;
 				}
 			}
+		}
+
+		// Standardise the 'fields' parameter.
+		if ( ! isset( $this->request->fields ) ) {
+			$this->request->fields = [];
+		} elseif ( wp_is_numeric_array( $this->request->fields ) ) {
+			// [ 'field1', 'field2' ] => [ 'field1' => true, 'field2' => true ]
+			$this->request->fields = array_combine( $this->request->fields, array_fill( 0, count( $this->request->fields ), true ) );
+		} else {
+			// [ 'field1' => 1, 'field2' => 'false'] => [ 'field1' => true, 'field2' => false ]
+			$this->request->fields = array_map( 'wp_validate_boolean', $this->request->fields );
 		}
 
 		// The locale we should use is specified by the request
@@ -222,24 +234,19 @@ class Themes_API {
 	 * Gets theme tags, ordered by how popular they are.
 	 */
 	public function hot_tags() {
-		$cache_key = sanitize_key( __METHOD__ );
-		if ( false === ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) ) {
-			$tags = get_tags( array(
-				'orderby'    => 'count',
-				'order'      => 'DESC',
-				'hide_empty' => false,
-			) );
+		$tags = get_tags( array(
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'hide_empty' => false,
+		) );
 
-			// Format in the API representation.
-			foreach ( $tags as $tag ) {
-				$this->response[ $tag->slug ] = array(
-					'name'  => $tag->name,
-					'slug'  => $tag->slug,
-					'count' => $tag->count,
-				);
-			}
-
-			wp_cache_add( $cache_key, $this->response, $this->cache_group, $this->cache_life );
+		// Format in the API representation.
+		foreach ( $tags as $tag ) {
+			$this->response[ $tag->slug ] = array(
+				'name'  => $tag->name,
+				'slug'  => $tag->slug,
+				'count' => $tag->count,
+			);
 		}
 
 		if ( ! empty( $this->request->number ) ) {
@@ -476,15 +483,7 @@ class Themes_API {
 			$defaults['external_support_url'] = true;
 		}
 
-		$this->request->fields = (array) ( $this->request->fields ?? [] );
-
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
-
-		// If there is a cached result, return that.
-		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . $this->request->slug . ':' . md5( serialize( $this->fields ) ) );
-		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-			return;
-		}
 
 		if ( !empty( $post ) && 'repopackage' == $post->post_type && $this->request->slug === $post->post_name ) {
 			$this->response = $this->fill_theme( $post );
@@ -502,8 +501,6 @@ class Themes_API {
 				$this->response = (object) array( 'error' => 'Theme not found' ); // Check get_result() if changing this string.
 			}
 		}
-
-		wp_cache_set( $cache_key, $this->response, $this->cache_group, $this->cache_life );
 	}
 
 	/**
@@ -546,15 +543,7 @@ class Themes_API {
 			$defaults['external_support_url'] = true;
 		}
 
-		$this->request->fields = (array) ( $this->request->fields ?? [] );
-
 		$this->fields = array_merge( $this->fields, $defaults, $this->request->fields );
-
-		// If there is a cached result, return that.
-		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) . serialize( $this->fields ) ) );
-		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-			return;
-		}
 
 		$this->result = $this->perform_wp_query();
 
@@ -575,8 +564,6 @@ class Themes_API {
 		foreach ( (array) $this->result->posts as $theme ) {
 			$this->response->themes[] = $this->fill_theme( $theme );
 		}
-
-		wp_cache_set( $cache_key, $this->response, $this->cache_group, $this->cache_life );
 	}
 
 	public function perform_wp_query() {
@@ -677,6 +664,7 @@ class Themes_API {
 		$theme_shops = new WP_Query( array(
 			'post_type'      => 'theme_shop',
 			'posts_per_page' => -1,
+			// NOTE: This rand() disables WP_Query caching.
 			'orderby'        => 'rand(' . gmdate('YmdH') . ')',
 		) );
 
@@ -703,12 +691,6 @@ class Themes_API {
 	 * @return object
 	 */
 	public function fill_theme( $theme ) {
-		// If there is a cached theme for the current locale, return that.
-		$cache_key = sanitize_key( implode( '-', array( $theme->post_name, md5( serialize( $this->fields ) ), get_locale() ) ) );
-		if ( false !== ( $phil = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-			return $phil;
-		}
-
 		global $wpdb;
 
 		$phil = (object) array(
@@ -716,10 +698,9 @@ class Themes_API {
 			'slug' => $theme->post_name,
 		);
 
-		$repo_package  = new WPORG_Themes_Repo_Package( $theme->ID );
-		$phil->version = $repo_package->latest_version();
-
-		$phil->preview_url = "https://wp-themes.com/{$theme->post_name}/";
+		$repo_package      = new WPORG_Themes_Repo_Package( $theme->ID );
+		$phil->version     = $repo_package->latest_version();
+		$phil->preview_url = $repo_package->preview_url();
 
 		$author = get_user_by( 'id', $theme->post_author );
 
@@ -728,7 +709,7 @@ class Themes_API {
 				// WordPress.org user details.
 				'user_nicename' => $author->user_nicename,
 				'profile'       => 'https://profiles.wordpress.org/' . $author->user_nicename . '/',
-				'avatar'        => 'https://secure.gravatar.com/avatar/' . md5( $author->user_email ) . '?s=96&d=monsterid&r=g',
+				'avatar'        => 'https://secure.gravatar.com/avatar/' . hash( 'sha256', $author->user_email ) . '?s=96&d=monsterid&r=g',
 				'display_name'  => $author->display_name ?: $author->user_nicename,
 
 				// Theme headers details.
@@ -854,7 +835,7 @@ class Themes_API {
 		}
 
 		if ( $this->fields['downloadlink'] ) {
-			$phil->download_link = $this->create_download_link( $theme, $phil->version );
+			$phil->download_link = $repo_package->download_url( $phil->version );
 		}
 
 		if ( $this->fields['tags'] ) {
@@ -886,7 +867,7 @@ class Themes_API {
 			$phil->versions = array();
 
 			foreach ( array_keys( get_post_meta( $theme->ID, '_status', true ) ) as $version ) {
-				$phil->versions[ $version ] = $this->create_download_link( $theme, $version );
+				$phil->versions[ $version ] = $repo_package->download_url( $version );
 			}
 		}
 
@@ -943,8 +924,6 @@ class Themes_API {
 
 		}
 
-		wp_cache_set( $cache_key, $phil, $this->cache_group, $this->cache_life );
-
 		return $phil;
 	}
 
@@ -972,24 +951,6 @@ class Themes_API {
 	}
 
 	/* Helper functions */
-
-	/**
-	 * Creates download link.
-	 *
-	 * @param  WP_Post $theme
-	 * @param  string $version
-	 *
-	 * @return string
-	 */
-	private function create_download_link( $theme, $version ) {
-		$url  = 'http://downloads.wordpress.org/theme/';
-		$file = $theme->post_name . '.' . $version . '.zip';
-
-		$file = preg_replace( '/[^a-z0-9_.-]/i', '', $file );
-		$file = preg_replace( '/[.]+/', '.', $file );
-
-		return set_url_scheme( $url . $file );
-	}
 
 	/**
 	 * Fixes mangled descriptions.

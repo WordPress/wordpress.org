@@ -24,6 +24,7 @@ class Blocks {
 
 		// Enable theme compatibility CSS.
 		add_filter( 'blocks_everywhere_theme_compat', '__return_true' );
+		add_action( 'wp_head', [ $this, 'expand_theme_compat' ], 1 );
 
 		// Theme Tweaks, these should be moved to the theme.
 		add_filter( 'after_setup_theme', [ $this, 'after_setup_theme' ] );
@@ -39,9 +40,6 @@ class Blocks {
 
 		// Hack to make Imgur embeds work. This should be fixed by Imgur.
 		add_filter( 'oembed_remote_get_args', [ $this, 'oembed_remote_get_args' ], 10, 2 );
-
-		// Add block patterns.
-		add_filter( 'init', [ $this, 'register_predefs' ] );
 
 		// Add user opt-out.
 		add_action( 'bbp_user_edit_after', [ $this, 'bbp_user_edit_after' ], 11 );
@@ -59,31 +57,136 @@ class Blocks {
 		add_filter( 'bbp_edit_topic_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
 	}
 
+	/**
+	 * CSS to expand on Blocks Everywhere support
+	 */
+	public function expand_theme_compat() {
+		$back_compat_css_vars = '';
+		// The old support theme doesn't have the parent colors defined.
+		if ( 'pub/wporg-support' === get_stylesheet() ) {
+			$back_compat_css_vars = <<<CSS
+				:root {
+					--wp--preset--color--blueberry-1: #3858e9;
+					--wp--preset--color--charcoal-1: #1e1e1e;
+					--wp--preset--color--charcoal-3: #40464d;
+					--wp--preset--color--deep-blueberry: #213fd4;
+					--wp--custom--button--color--background: var(--wp--preset--color--blueberry-1);
+					--wp--custom--button--hover--color--background: var(--wp--preset--color--deep-blueberry);
+				}
+			CSS;
+		}
+
+		wp_add_inline_style(
+			'blocks-everywhere-compat',
+			<<<CSS
+				{$back_compat_css_vars}
+				/* Fix the primary block inserter button */
+				.blocks-everywhere .components-button.is-primary {
+					--wp-components-color-accent: var(--wp--custom--button--color--background);
+					--wp-components-color-accent-darker-10: var(--wp--custom--button--hover--color--background);
+					--wp-components-color-accent-darker-20: var(--wp--custom--button--hover--color--background);
+				}
+				.gutenberg-support .iso-editor .edit-post-header__toolbar button.components-button.is-primary:hover svg {
+					fill: #fff;
+				}
+				.blocks-everywhere .components-button.is-primary {
+					--wp-admin-theme-color: #fff;
+				}
+				.editor-document-tools .editor-document-tools__left>.components-button.is-primary.has-icon.is-pressed {
+					background: var(--wp--custom--button--color--background);
+				}
+				/* Fix the inline new-block button */
+				.block-editor-default-block-appender .block-editor-inserter__toggle.components-button.has-icon:hover {
+					background: var( --wp--preset--color--charcoal-3 );
+				}
+				/* Fix the button selected state */
+				.gutenberg-support .edit-post-header button:not(:hover):not(:active):not(.has-background):not(.is-primary),
+				.gutenberg-support .edit-post-header button.is-pressed:not(.has-background):not(.is-primary) {
+					color: #fff;
+				}
+				/* Editor toolbar buttons */
+				.gutenberg-support .iso-editor .block-editor-block-types-list__list-item:hover span {
+					fill: inherit;
+					color: inherit;
+				}
+				.gutenberg-support .iso-editor .edit-post-header__toolbar button.is-pressed:hover svg {
+					fill: #fff;
+				}
+				/* Fix the accessibility navigation block styles */
+				.block-editor-list-view-leaf.is-selected .block-editor-list-view-block-contents,
+				.block-editor-list-view-leaf.is-selected .components-button.has-icon,
+				.gutenberg-support #bbpress-forums fieldset.bbp-form .block-editor-list-view-tree button:focus,
+				.gutenberg-support #bbpress-forums fieldset.bbp-form .block-editor-list-view-tree button:hover {
+					color: var( --wp--preset--color--charcoal-1 );
+				}
+				/* Fix the accessibility block drag handles */
+				button.components-button.block-selection-button_drag-handle,
+				button.components-button.block-selection-button_select-button {
+					color: #fff !important;
+				}
+				/* Reset the link editor padding in BE theme-compat. https://meta.trac.wordpress.org/ticket/7606 + https://github.com/Automattic/blocks-everywhere/issues/206 */
+				.gutenberg-support #bbpress-forums fieldset.bbp-form .blocks-everywhere .block-editor-link-control button {
+					padding: inherit;
+				}
+			CSS
+		);
+	}
+
 	public function after_setup_theme() {
 		// This will make embeds resize properly.
 		add_theme_support( 'responsive-embeds' );
 	}
 
+	/**
+	 * Whether the current pageload appears to be related to the reviews forum.
+	 */
+	protected function is_review_related() {
+		if ( bbp_is_single_forum() ) {
+			return ( bbp_get_forum_id() == Plugin::REVIEWS_FORUM_ID );
+		}
+
+		if ( bbp_is_single_topic() || bbp_is_topic_edit() ) {
+			return ( bbp_get_topic_forum_id() == Plugin::REVIEWS_FORUM_ID );
+		}
+
+		if ( bbp_is_single_view() ) {
+			return ( bbp_get_view_id() == 'reviews' );
+		}
+
+		return false;
+	}
+
 	public function allowed_blocks( $blocks ) {
-		// See ::editor_settings();
-		$blocks[] = 'core/image';
-		$blocks[] = 'core/embed';
+		if ( ! $this->is_review_related() ) {
+			// See ::editor_settings();
+			$blocks[] = 'core/image';
+			$blocks[] = 'core/embed';
+		}
 
 		return array_unique( $blocks );
 	}
 
 	public function editor_settings( $settings ) {
-		// This adds the image block, but only with 'add from url' as an option.
-		$settings['iso']['blocks']['allowBlocks'][] = 'core/image';
+		if ( ! $this->is_review_related() ) {
+			// This adds the image block, but only with 'add from url' as an option.
+			$settings['iso']['blocks']['allowBlocks'][] = 'core/image';
 
-		// Allows embeds and might fix pasting links sometimes not working.
-		$settings['iso']['blocks']['allowBlocks'][] = 'core/embed';
+			// Allows embeds and might fix pasting links sometimes not working.
+			$settings['iso']['blocks']['allowBlocks'][] = 'core/embed';
+		}
 
-		// Adds a table of contents button in the toolbar.
-		$settings['toolbar']['toc'] = true;
+		// We don't need these on the forums.
+		$settings['unregisterFormatType'][] = 'core/keyboard';
+		$settings['unregisterFormatType'][] = 'core/language';
+		$settings['unregisterFormatType'][] = 'core/non-breaking-space';
+		$settings['unregisterFormatType'][] = 'core/subscript';
+		$settings['unregisterFormatType'][] = 'core/superscript';
+		$settings['unregisterFormatType'][] = 'core/strikethrough';
+		$settings['unregisterFormatType'][] = 'core/underline';
 
-		// Adds a navigation button in the toolbar.
-		$settings['toolbar']['navigation'] = true;
+		// WP Calypso editor adds some too.
+		$settings['unregisterFormatType'][] = 'wpcom/justify';
+		$settings['unregisterFormatType'][] = 'wpcom/underline';
 
 		// This will display a support link in an ellipsis menu in the top right of the editor.
 		$settings['iso']['moreMenu'] = true;
@@ -92,7 +195,7 @@ class Blocks {
 				/* translators: Link title to the WordPress Editor support article. */
 				'title' => __( 'Help & Support', 'wporg-forums' ),
 				/* translators: Link to the WordPress Editor article, used as the forum 'Help & Support' destination. */
-				'url'   => __( 'https://wordpress.org/support/article/wordpress-editor/', 'wporg-forums' ),
+				'url'   => __( 'https://wordpress.org/support/forum-user-guide/block-editor/', 'wporg-forums' ),
 			]
 		];
 
@@ -103,10 +206,6 @@ class Blocks {
 				'screencast',
 			]
 		) );
-
-		// Add patterns.
-		$settings['editor']['__experimentalBlockPatterns'] = WP_Block_Patterns_Registry::get_instance()->get_all_registered();
-		$settings['editor']['__experimentalBlockPatternCategories'] = WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
 
 		// Enable the custom paragraph that converts HTML and PHP code into a code block.
 		$settings['replaceParagraphCode'] = true;
@@ -276,18 +375,22 @@ class Blocks {
 		$use_it            = ( $enabled_for_user && $enabled_for_forum );
 
 		if ( $use_it ) {
-			$reply_id = bbp_is_reply_edit() ? bbp_get_reply_id() : ( ( bbp_is_post_request() && ! empty( $_POST['action'] ) && 'bbp-edit-reply' === $_POST['action'] ) ? $_POST['bbp_reply_id'] : 0 );
-			$topic_id = bbp_is_topic_edit() ? bbp_get_topic_id() : ( ( bbp_is_post_request() && ! empty( $_POST['action'] ) && 'bbp-edit-topic' === $_POST['action'] ) ? $_POST['bbp_topic_id'] : 0 );
+			$content = false;
 
-			// If we're editing a post made without the editor, let's respect that.
-			if ( $reply_id ) {
-				$reply = bbp_get_reply( $reply_id );
+			if ( bbp_is_reply_edit() ) {
+				$content = bbp_get_reply( bbp_get_reply_id() )->post_content;
+			} elseif ( bbp_is_topic_edit() ) {
+				$content = get_post_field( 'post_content', bbp_get_topic_id() );
+			} elseif ( 'bbp-edit-reply' === ( $_POST['action'] ?? '' ) ) {
+				$content = wp_unslash( $_POST['bbp_reply_content'] ?? '' ) ?: bbp_get_reply( $_POST['bbp_reply_id'] ?? 0 )->post_content;
+			} elseif ( 'bbp-edit-topic' === ( $_POST['action'] ?? '' ) ) {
+				$content = wp_unslash( $_POST['bbp_topic_content'] ?? '' ) ?: get_post_field( 'post_content', $_POST['bbp_topic_id'] );
+			}
 
-				if ( $reply && ! has_blocks( $reply->post_content ) ) {
-					$use_it = false;
-				}
-			} elseif ( $topic_id ) {
-				if ( ! has_blocks( get_post_field( 'post_content', $topic_id ) ) ) {
+			if ( $content ) {
+				// Similar to has_blocks(), but optimized for forum use.
+				$content = trim( $content );
+				if ( ! str_starts_with( $content, '<!-- wp:' ) || ! str_ends_with( $content, '-->' ) ) {
 					$use_it = false;
 				}
 			}
@@ -326,122 +429,4 @@ class Blocks {
 		return wp_slash( $content ); // Expect slashed.
 	}
 
-	/**
-	 * Register pre-defs for the forums.
-	 */
-	public function register_predefs() {
-		$registered = WP_Block_Patterns_Registry::get_instance()->get_all_registered();
-		foreach ( $registered as $pattern ) {
-			unregister_block_pattern( $pattern['name'] );
-		}
-
-		$registered = WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
-		foreach ( $registered as $pattern ) {
-			unregister_block_pattern_category( $pattern['name'] );
-		}
-
-		register_block_pattern_category( 'predef', [ 'label' => 'Pre-defined Replies' ] );
-
-		register_block_pattern( 'wordpress-org/no-dashboard', [
-			'title'      => 'Cannot Access Dashboard',
-			'categories' => [ 'predef' ],
-			'content'    => '
-				<!-- wp:paragraph -->
-				<p>Try <a href="https://wordpress.org/support/article/faq-troubleshooting/#how-to-deactivate-all-plugins-when-not-able-to-access-the-administrative-menus">manually resetting your plugins</a> (no Dashboard access required). If that resolves the issue, reactivate each one individually until you find the cause.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>If that does not resolve the issue, access your server via <a href="https://wordpress.org/support/article/ftp-clients/">SFTP or FTP</a>, or a file manager in your hosting account\'s control panel, navigate to <code>/wp-content/themes/</code> and rename the directory of your currently active theme. This will force the default theme to activate and hopefully rule-out a theme-specific issue (theme functions can interfere like plugins).</p>
-				<!-- /wp:paragraph -->',
-		] );
-
-		register_block_pattern( 'wordpress-org/theme-conflict', [
-			'title'      => 'Error Related to Plugin or Theme Conflict',
-			'categories' => [ 'predef' ],
-			'content'    => '
-				<!-- wp:paragraph -->
-				<p>This may be a plugin or theme conflict. Please attempt to disable all plugins, and use one of the default (Twenty*) themes. If the problem goes away, enable them one by one to identify the source of your troubles.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>If you can install plugins, install and activate "Health Check": <a href="https://wordpress.org/plugins/health-check/">https://wordpress.org/plugins/health-check/</a></p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>It will add some additional features under the menu item under Tools &gt; Site Health.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>On its troubleshooting tab, you can Enable Troubleshooting Mode. This will disable all plugins, switch to a standard WordPress theme (if available), allow you to turn your plugins on and off and switch between themes, <strong>without affecting normal visitors to your site</strong>. This allows you to test for various compatibility issues.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>There’s a more detailed description about how to use the Health Check plugin and its Troubleshooting Mode at <a href="https://make.wordpress.org/support/handbook/appendix/troubleshooting-using-the-health-check/">https://make.wordpress.org/support/handbook/appendix/troubleshooting-using-the-health-check/</a></p>
-				<!-- /wp:paragraph -->',
-		] );
-
-		register_block_pattern( 'wordpress-org/missing-files', [
-			'title'      => 'Error Related to Missing or Damaged Core Files',
-			'categories' => [ 'predef' ],
-			'content'    => '
-				<!-- wp:paragraph -->
-				<p>Try <a href="https://wordpress.org/download/">downloading WordPress</a> again, access your server via <a href="https://wordpress.org/support/article/ftp-clients/">SFTP or FTP</a>, or a file manager in your hosting account\'s control panel, and delete then replace your copies of everything <strong>except</strong> the `wp-config.php` file and the <code>/wp-content/</code> directory with fresh copies from the download. This will effectively replace all of your core files without damaging your content and settings.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>Some uploaders tend to be unreliable when overwriting files, so don\'t forget to delete the original files before replacing them.</p>
-				<!-- /wp:paragraph -->',
-		] );
-
-		register_block_pattern( 'wordpress-org/oom', [
-			'title'      => 'Out of Memory Errors',
-			'categories' => [ 'predef' ],
-			'content'    => '
-				<!-- wp:paragraph -->
-				<p>If you\'re seeing this error either suddenly (no specific task was done to cause the error) or frequently, try deactivating all plugins to rule-out a plugin-specific issue and try switching themes to rule-out a theme-specific issue.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>Otherwise, here are three ways to increase PHP\'s memory allocation:</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:list {"ordered":true} -->
-				<ol><!-- wp:list-item -->
-				<li>If you can edit or override the system <code>php.ini</code> file, increase the memory limit. For example, <code>memory_limit = 128M</code></li>
-				<!-- /wp:list-item -->
-
-				<!-- wp:list-item -->
-				<li>If you cannot edit or override the system <code>php.ini</code> file, add <code>php_value memory_limit 128M</code> to your <code>.htaccess</code> file.</li>
-				<!-- /wp:list-item -->
-
-				<!-- wp:list-item -->
-				<li>If neither of these work, it\'s time to ask your hosting provider to temporarily increase PHP\'s memory allocation on your account.</li>
-				<!-- /wp:list-item --></ol>
-				<!-- /wp:list -->
-
-				<!-- wp:paragraph -->
-				<p>(in the above examples, the limit is set to 128MB)</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p><a href="https://make.wordpress.org/support/handbook/giving-good-support/pre-defined-replies/#error-500-internal-server-error"><strong>Error 500: Internal Server Error</strong></a></p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>Internal server errors (error 500) are often caused by plugin or theme function conflicts, so if you have access to your admin panel, try deactivating all plugins. If you don\'t have access to your admin panel, try <a href="https://wordpress.org/support/article/faq-troubleshooting/#how-to-deactivate-all-plugins-when-not-able-to-access-the-administrative-menus">manually resetting your plugins</a> (no Dashboard access required). If that resolves the issue, reactivate each one individually until you find the cause.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>If that does not resolve the issue, try switching to the default theme for your version of WordPress to rule-out a theme-specific issue. If you don\'t have access to your admin panel, access your server via <a href="https://wordpress.org/support/article/ftp-clients/">SFTP or FTP</a>, or a file manager in your hosting account\'s control panel, navigate to <code>/wp-content/themes/</code> and rename the directory of your currently active theme. This will force the default theme to activate and hopefully rule-out a theme-specific issue.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>If that does not resolve the issue, it\'s possible that a <code>.htaccess</code> rule could be the source of the problem. To check for this, access your server via SFTP or FTP, or a file manager in your hosting account\'s control panel, and rename the <code>.htaccess</code> file. If you can\'t find a <code>.htaccess</code> file, make sure that you have set your SFTP or FTP client to view invisible files.</p>
-				<!-- /wp:paragraph -->
-
-				<!-- wp:paragraph -->
-				<p>If you weren’t able to resolve the issue by either resetting your plugins and theme or renaming your <code>.htaccess</code> file, we may be able to help, but we\'ll need a more detailed error message. Internal server errors are usually described in more detail in the server error log. If you have access to your server error log, generate the error again, note the date and time, then immediately check your server error log for any errors that occurred during that time period. If you don’t have access to your server error log, ask your hosting provider to look for you.</p>
-				<!-- /wp:paragraph -->',
-		] );
-	}
 }

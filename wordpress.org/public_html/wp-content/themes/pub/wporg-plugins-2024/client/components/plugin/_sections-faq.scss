@@ -35,6 +35,8 @@
 			margin-bottom: 0;
 			color: var( --wp--custom--link--color--text );
 			font-size: var( --wp--preset--font-size--normal );
+			font-weight: 400;
+			text-decoration: underline;
 
 			button {
 				all: inherit;

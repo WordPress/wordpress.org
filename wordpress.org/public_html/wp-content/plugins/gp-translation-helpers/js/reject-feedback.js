@@ -39,7 +39,6 @@
 								bulkTranslationStatus.push( translationStatus );
 								return selectedRow.attr( 'row' );
 							}
-							$( this ).prop( 'checked', false );
 							return null;
 						},
 					).get();

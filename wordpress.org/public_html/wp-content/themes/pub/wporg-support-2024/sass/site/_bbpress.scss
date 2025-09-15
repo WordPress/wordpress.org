@@ -15,6 +15,13 @@
 		line-height: var(--wp--custom--heading--level-1--typography--line-height);
 		padding-bottom: unset;
 	}
+
+	hr {
+		border-color: var(--wp--custom--color--border);
+		border-style: solid;
+		border-width: 1px 0 0;
+		margin-bottom: var(--wp--style--block-gap);
+	}
 }
 
 $paginationBreakPoint: "600px";
@@ -111,12 +118,11 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
-		.bbp-topic-content,
-		.bbp-reply-content {
-
-			p:last-child {
-				margin-bottom: var(--wp--preset--spacing--20);
-			}
+		.bbp-forum-content ul.sticky,
+		.bbp-topics ul.sticky,
+		.bbp-topics ul.super-sticky,
+		.bbp-topics-front ul.super-sticky {
+			background-color: var(--wp--preset--color--lemon-3) !important;
 		}
 
 		.bbp-body {
@@ -291,11 +297,7 @@ $paginationBreakPoint: "600px";
 		div.topic,
 		div.reply,
 		div.reported_topics {
-			padding: var(--wp--preset--spacing--20);
-		}
-
-		div.topic,
-		div.reply {
+			padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--20) 40px;
 
 			&.author-has-badge,
 			&.topic-author,
@@ -304,11 +306,29 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
+		div.reported_topics {
+			padding-top: 60px;
+			background-color: unset;
+			border: 2px solid var(--wp--custom--color--thread-reporter);
+		}
+
 		div.bbp-reply-content,
 		div.bbp-topic-content {
 			padding: 0;
 			clear: left;
 			margin: var(--wp--preset--spacing--20) 0 0;
+
+			code,
+			pre {
+				background-color: var(--wp--preset--color--light-grey-2);
+			}
+
+			pre {
+				padding: var(--wp--preset--spacing--20);
+				border: 1px solid var(--wp--custom--color--border);
+				max-width: 100%;
+				border-radius: 2px;
+			}
 		}
 
 		.bbp-user-replies-created div.bbp-reply-content,
@@ -348,14 +368,6 @@ $paginationBreakPoint: "600px";
 			background: none;
 			padding: var(--wp--preset--spacing--10) calc(var(--wp--preset--spacing--20) - 5px);
 			font-size: 0; // hide the pipe character separators for a11y
-
-			@media screen and ( max-width: 480px ) {
-				padding: 3px 7px;
-			}
-
-			@media screen and (max-width: 767px) {
-				display: block;
-			}
 
 			a {
 				color: var(--wp--custom--link--color--text);
@@ -564,41 +576,37 @@ $paginationBreakPoint: "600px";
 		width: 90px;
 	}
 
-	li.bbp-forum-freshness,
-	li.bbp-topic-freshness {
-		text-align: left;
-	}
+	@media screen and (min-width: 321px) {
 
-	.forum-titles {
+		#bbpress-forums {
 
-		.bbp-topic-voice-count,
-		.bbp-topic-reply-count {
-			overflow: hidden;
+			.bbp-header,
+			.bbp-body {
 
-			&::before {
-				font: 400 16px/1 dashicons;
-				margin-right: 100px;
-				-moz-osx-font-smoothing: grayscale;
-				-webkit-font-smoothing: antialiased;
-
-				@media (min-width: 321px) {
-					font: 400 21px/1 dashicons;
-					margin-left: 20px;
+				li.bbp-topic-title {
+					width: 60%;
 				}
-			}
-		}
 
-		.bbp-topic-voice-count {
+				li.bbp-topic-voice-count,
+				li.bbp-topic-reply-count {
+					text-align: left;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
 
-			&::before {
-				content: "\f307";
-			}
-		}
+				li.bbp-topic-voice-count {
+					width: 12%;
+				}
 
-		.bbp-topic-reply-count {
+				li.bbp-topic-reply-count {
+					width: 8%;
+				}
 
-			&::before {
-				content: "\f125";
+				li.bbp-forum-freshness,
+				li.bbp-topic-freshness {
+					text-align: right;
+					width: 20%;
+				}
 			}
 		}
 	}
@@ -1108,7 +1116,7 @@ body.single-topic:not(body.topic-edit) {
 				margin-bottom: var(--wp--preset--spacing--30);
 			}
 
-			div.even:not(.topic):not(.reply),
+			div.even:not(.topic):not(.reply):not(.reported_topics),
 			ul.even,
 			div.odd:not(.reply),
 			ul.odd {
@@ -1176,12 +1184,40 @@ body.single-topic:not(body.topic-edit) {
 
 div.bbp-breadcrumb {
 	font-size: var(--wp--preset--font-size--small);
-	margin-bottom: 15px;
-	color: var(--wp--preset--color--charcoal-3);
+	margin: 0;
 	float: none;
+	padding: 15px 0;
 
 	p {
+		display: flex;
+		position: relative;
+		max-width: 100%;
 		margin: 0 !important;
+		overflow-x: auto;
+		mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+		color: var(--wp--preset--color--charcoal-1);
+		text-overflow: clip;
+		white-space: nowrap;
+
+		&::after {
+			content: "";
+			display: inline-block;
+			width: 60px;
+		}
+	}
+
+	a {
+		color: var(--wp--preset--color--charcoal-4);
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	.bbp-breadcrumb-sep {
+		margin: 0 10px;
+		color: var(--wp--preset--color--light-grey-1);
 	}
 }
 
@@ -1307,19 +1343,23 @@ div.bbp-breadcrumb {
 	// Review page
 	.review-ratings {
 
-		@extend .clear;
-		margin-bottom: ms(0);
-		padding-bottom: 10px;
+		margin-bottom: var(--wp--preset--spacing--20);
+		padding-bottom: var(--wp--preset--spacing--20);
 		border-bottom: 1px solid var(--wp--custom--color--border);
 		display: flex;
-		flex-direction: row-reverse;
 
-		.col-3 {
+		> div:first-child {
 			font-size: ms(-2);
-			margin: 0;
-			min-width: 40%;
-			border-top: 1px solid var(--wp--custom--color--border);
+			width: 60%;
+			min-width: 54%;
 			flex-shrink: 0;
+		}
+
+		> div:last-child {
+			margin: 0 0 10px 0;
+			padding-right: 10px;
+			min-width: 40%;
+			font-size: ms(-2);
 
 			.reviews-total-count {
 				font-weight: 700;
@@ -1327,20 +1367,7 @@ div.bbp-breadcrumb {
 				padding-top: 5px;
 			}
 
-			.counter-bar {
-				background-color: var(--wp--preset--color--pomegrade-1) !important;
-			}
-		}
-
-		.col-5 {
-			margin: 0 0 10px 0;
-			padding-right: 10px;
-			width: 60%;
-			min-width: 54%;
-			font-size: ms(-2);
-
 			> div:first-child {
-
 				@extend h4;
 				margin-top: 0;
 			}
@@ -1356,11 +1383,16 @@ div.bbp-breadcrumb {
 		}
 
 		@media (max-width: 499px) {
-			flex-direction: column-reverse;
+			flex-direction: column;
 
-			.col-3, .col-5 {
+			> div:first-child {
 				width: 100%;
+				margin-bottom: 20px;
 			}
 		}
+	}
+
+	.reviews-submit-link {
+		margin-top: 10px;
 	}
 }

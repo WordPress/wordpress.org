@@ -95,18 +95,18 @@ class Report_Topic {
 			);
 		}
 
-        $content .= sprintf(
-            '<p class="topic-report-origin">%s</p>',
-            sprintf(
-                // translators: 1: The link to the original topic, with the topic title as its text.
-                __( 'Reported topic: %s', 'wporg-forums' ),
-                sprintf(
-                    '<a href="%s">%s</a>',
-                    esc_url( bbp_get_topic_permalink( get_post_field( 'post_parent', get_the_ID() ) ) ),
-                    esc_html( bbp_get_topic_title( get_post_field( 'post_parent', get_the_ID() ) ) )
-                )
-            )
-        );
+		$content .= sprintf(
+			'<p class="topic-report-origin">%s</p>',
+			sprintf(
+				// translators: 1: The link to the original topic, with the topic title as its text.
+				__( 'Reported topic: %s', 'wporg-forums' ),
+				sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( bbp_get_topic_permalink( get_post_field( 'post_parent', get_the_ID() ) ) ),
+					esc_html( bbp_get_topic_title( get_post_field( 'post_parent', get_the_ID() ) ) )
+				)
+			)
+		);
 
 		$replies = get_comments( array(
 			'post_id' => get_the_ID(),
@@ -220,7 +220,7 @@ class Report_Topic {
 		);
 
 		$email_text = sprintf(
-            // translators: 1: The users displayname. 2: The title of the reported topic. 3: The message response from a moderator.
+			// translators: 1: The users displayname. 2: The title of the reported topic. 3: The message response from a moderator.
 			__( '%1$s,
 
 You recently reported the topic "%2$s".
@@ -244,7 +244,10 @@ The WordPress.org Team',
 		wp_mail(
 			$reporter->user_email,
 			__( 'A topic you reported has been reviewed', 'wporg-forums' ),
-			$email_text
+			$email_text,
+			[
+				'From: ' . get_bloginfo( 'name' ) . '<' . MODERATION_EMAIL . '>',
+			]
 		);
 
 		// The report has been resolved, so remove the modlook tag.
@@ -664,11 +667,11 @@ The WordPress.org Team',
 			ob_start();
 			?>
 
-            <form action="" method="post">
+			<form action="" method="post">
 				<?php wp_nonce_field( $action ); ?>
-                <input type="hidden" name="wporg-support-report-topic" value="<?php echo esc_attr( bbp_get_topic_id() ); ?>">
+				<input type="hidden" name="wporg-support-report-topic" value="<?php echo esc_attr( bbp_get_topic_id() ); ?>">
 
-                <label for="topic-report-reason"><?php _e( 'Report this topic for:', 'wporg-forums' ); ?></label>
+				<label for="topic-report-reason"><?php _e( 'Report this topic for:', 'wporg-forums' ); ?></label>
 				<?php
 				wp_dropdown_categories(
 					array(
@@ -683,15 +686,15 @@ The WordPress.org Team',
 				);
 				?>
 
-                <p>
-                    <label for="topic-report-reason-details"><?php _e( 'Why are you reporting this topic:', 'wporg-forums' ); ?></label>
-                    <textarea type="text" name="topic-report-reason-details" id="topic-report-reason-details" class="widefat" required="required"></textarea>
-                </p>
+				<p>
+					<label for="topic-report-reason-details"><?php _e( 'Why are you reporting this topic:', 'wporg-forums' ); ?></label>
+					<textarea type="text" name="topic-report-reason-details" id="topic-report-reason-details" class="widefat" required="required"></textarea>
+				</p>
 
 				<?php $this->show_frontend_notices(); ?>
 
-                <input type="submit" name="submit" value="<?php esc_attr_e( 'Submit report', 'wporg-forums' ); ?>">
-            </form>
+				<input type="submit" name="submit" value="<?php esc_attr_e( 'Submit report', 'wporg-forums' ); ?>">
+			</form>
 			<?php
 			$report_text = ob_get_clean();
 		}

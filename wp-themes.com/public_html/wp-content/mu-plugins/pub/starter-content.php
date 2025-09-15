@@ -228,12 +228,18 @@ class Starter_Content {
 					ltrim( $image_data['file'], '/' )
 				);
 
-				$image_sizes = wp_get_registered_image_subsizes();
-				$width       = 0;
-				$height      = 0;
-				if ( ! empty( $image_sizes[ $size ] ) ) {
-					$width  = $image_sizes[ $size ]['width'];
-					$height = $image_sizes[ $size ]['height'];
+				if ( is_array( $size ) ) {
+					$width  = $size[0] ?? 0;
+					$height = $size[1] ?? 0;
+				} else {
+					$image_sizes = wp_get_registered_image_subsizes();
+					$width       = 0;
+					$height      = 0;
+
+					if ( ! empty( $image_sizes[ $size ] ) ) {
+						$width  = $image_sizes[ $size ]['width'];
+						$height = $image_sizes[ $size ]['height'];
+					}
 				}
 
 				return array( $image_url, $width, $height );

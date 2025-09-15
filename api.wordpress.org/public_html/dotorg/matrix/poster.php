@@ -2,7 +2,7 @@
 
 namespace Dotorg\Matrix;
 
-const MATRIX_INTEGRATIONS_ENABLED = true;
+const MATRIX_INTEGRATIONS_ENABLED = false;
 
 class Poster {
 	const HOMESERVER_NAME = 'community.wordpress.org';

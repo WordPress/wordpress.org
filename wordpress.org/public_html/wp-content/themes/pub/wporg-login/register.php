@@ -20,6 +20,17 @@ if ( is_user_logged_in() ) {
 	exit;
 }
 
+$user_registration_available = true;
+$registration_source         = $_COOKIE['wporg_came_from'] ?? ( $_REQUEST['from'] ?? '' );
+$is_wordcamp_registration    = (
+	str_contains( $registration_source, '.wordcamp.org' ) ||
+	str_contains( $registration_source, 'events.wordpress.org')
+);
+
+if ( defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY && ! $is_wordcamp_registration ) {
+	$user_registration_available = false;
+}
+
 $error_user_login = $error_user_email = $error_recapcha_status = $terms_of_service_error = false;
 if ( $_POST ) {
 
@@ -44,7 +55,7 @@ if ( $_POST ) {
 	$terms_of_service_error = ! $terms_of_service || $terms_of_service > TOS_REVISION;
 
 	// handle user registrations.
-	if ( ! $error_user_login && ! $error_user_email && ! $terms_of_service_error ) {
+	if ( $user_registration_available && ! $error_user_login && ! $error_user_email && ! $terms_of_service_error ) {
 
 		$recaptcha = wporg_login_check_recapcha_status( 'register', false /* Allow low scores to pass through */ );
 
@@ -67,7 +78,12 @@ if ( $_POST ) {
 wp_enqueue_script( 'wporg-registration' );
 
 get_header();
+
 ?>
+
+<?php if ( ! $user_registration_available ) : ?>
+		<p><?php printf( __( 'New user registration is currently unavailable. Please check back after the <a href="%s">holiday break</a>.', 'wporg' ), 'https://wordpress.org/news/2024/12/holiday-break/' ); ?></p>
+<?php else: ?>
 
 <p class="intro"><?php _e( 'Create a WordPress.org account to start contributing to WordPress, get help in the support forums, or rate and review themes and plugins.', 'wporg' ); ?></p>
 
@@ -104,7 +120,7 @@ get_header();
 		);
 	}
 	?>
-
+	<?php do_action( 'register_form' ); ?>
 	<p class="login-tos checkbox <?php if ( $terms_of_service_error ) { echo 'message error'; } ?>">
 		<label for="terms_of_service">
 			<input name="terms_of_service" type="checkbox" id="terms_of_service" value="<?php echo esc_attr( TOS_REVISION ); ?>" <?php checked( $terms_of_service, TOS_REVISION ); ?> required="required">
@@ -112,7 +128,7 @@ get_header();
 				$localised_domain = parse_url( wporg_login_wordpress_url(), PHP_URL_HOST );
 				printf(
 					/* translators: %s: List of linked policies, for example: <a>Privacy Policy</a> and <a>Terms of Service</a> */
-					_n( 'I have read and accept the %s.', 'I have read and accept the %s.', 1, 'wporg' ),
+					_n( 'I have read and accept the %s', 'I have read and accept the %s', 1, 'wporg' ),
 					wp_sprintf_l( '%l', [
 						"<a href='https://{$localised_domain}/about/privacy/'>" . __( 'Privacy Policy', 'wporg' ) . '</a>',
 						// "<a href='https://{$localised_domain}/about/terms-of-service/'>" . __( 'Terms of Service', 'wporg' ) . '</a>',
@@ -140,6 +156,8 @@ get_header();
 	</p>
 
 </form>
+
+<?php endif; // WPORG_ON_HOLIDAY else ?>
 
 <p id="nav">
 	<a href="/" title="<?php esc_attr_e( 'Already have an account?', 'wporg' ); ?>"><?php _e( 'Already have an account?', 'wporg' ); ?></a> &nbsp; • &nbsp;

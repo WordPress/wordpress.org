@@ -78,6 +78,14 @@ class Moderators {
 		add_action( 'bbp_theme_before_reply_author_details',    array( $this, 'show_anon_mod_name' ) );
 		add_filter( 'user_has_cap',                             array( $this, 'anon_moderator_user_has_cap' ), 10, 4 );
 		add_filter( 'wporg_notifications_pre_notify_matchers',  array( $this, 'notify_mod_of_at_mention' ), 10, 2 );
+
+		// Hide reply archives for the @moderator account.
+		add_filter( 'bbp_get_user_replies_created', array( $this, 'filter_query_hide_moderator' ), 10, 2 );
+		add_filter( 'bbp_get_user_topics_started',  array( $this, 'filter_query_hide_moderator' ), 10, 2 );
+		add_filter( 'bbp_get_user_engagements',     array( $this, 'filter_query_hide_moderator' ), 10, 2 );
+
+		// Don't include @moderator activity on profiles.
+		add_filter( 'wporg_profiles_wp_activity-is_forum_notifiable', array( $this, 'hide_moderator_profile_activity' ), 10, 2 );
 	}
 
 	/**
@@ -155,7 +163,12 @@ class Moderators {
 
 	public function enqueue_styles() {
 		if ( current_user_can( 'moderate' ) ) {
-			wp_enqueue_style( 'support-forums-moderators', plugins_url( 'css/styles-moderators.css', __DIR__ ), array(), '20170710' );
+			wp_enqueue_style(
+				'support-forums-moderators',
+				plugins_url( 'css/styles-moderators.css', __DIR__ ),
+				array(),
+				filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'css/styles-moderators.css' )
+			);
 		}
 	}
 
@@ -1249,5 +1262,42 @@ class Moderators {
 		}
 
 		return $matchers;
+	}
+
+	/**
+	 * Disable activity queries for the moderator user, from non-moderators.
+	 *
+	 * @param bool $query   The user query.
+	 * @param int  $user_id The user ID.
+	 */
+	public function filter_query_hide_moderator( $query, $user_id ) {
+		if ( ! current_user_can( 'moderate' ) ) {
+			// For the bbp_get_user_engagements filter
+			if ( ! $user_id || ! is_numeric( $user_id ) ) {
+				$user_id = bbp_get_displayed_user_id();
+			}
+
+			$moderator_user = get_user_by( 'slug', 'moderator' );
+			if ( $moderator_user->ID === $user_id ) {
+				return false;
+			}
+		}
+
+		return $query;
+	}
+
+	/**
+	 * Don't send @moderator actions to profiles.wordpress.org
+	 *
+	 * @param bool  $returnval Whether to send the profile activity or not.
+	 * @param array $args      The data that will be sent to the activity API.
+	 * @return bool $returnval
+	 */
+	public function hide_moderator_profile_activity( $returnval, $args ) {
+		if ( 'moderator' == ( $args['user'] ?? '' ) ) {
+			return false;
+		}
+
+		return $returnval;
 	}
 }

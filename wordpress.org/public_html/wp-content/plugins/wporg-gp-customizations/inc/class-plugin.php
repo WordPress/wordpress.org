@@ -8,6 +8,7 @@ use GP_Translation;
 use WordPressdotorg\GlotPress\Customizations\CLI\Stats;
 use WordPressdotorg\GlotPress\Customizations\CLI\Duplicate_Translations;
 use WP_CLI;
+use WP_User;
 use function WordPressdotorg\Profiles\assign_badge;
 
 class Plugin {
@@ -26,6 +27,20 @@ class Plugin {
 	 * @var string The source of translations that have been imported.
 	 */
 	private string $imported_source = '';
+
+	/**
+	 * The cache key for the list of GTE email addresses.
+	 *
+	 * @var string
+	 */
+	const GTE_EMAIL_ADDRESSES = 'wporg_gte_email_addresses';
+
+	/**
+	 * The cache group for the list of GTE email addresses.
+	 *
+	 * @var string
+	 */
+	const CACHE_GROUP = 'wporg-translate';
 
 	/**
 	 * Returns always the same instance of this plugin.
@@ -87,8 +102,6 @@ class Plugin {
 		add_action( 'admin_bar_init', array( $this, 'show_admin_bar' ) );
 		add_action( 'add_admin_bar_menus', array( $this, 'remove_admin_bar_menus' ) );
 
-		add_action( 'template_redirect', array( $this, 'jetpack_stats' ), 1 );
-
 		// Load the API endpoints.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\REST_API\Base', 'load_endpoints' ) );
 
@@ -96,6 +109,9 @@ class Plugin {
 
 		// Correct `WP_Locale` for variant locales in project lists.
 		add_filter( 'gp_translation_sets_sort', [ $this, 'filter_gp_translation_sets_sort' ] );
+
+		// create permission for the translation events.
+		add_filter( 'user_has_cap', array( $this, 'gp_translation_events_can_create_events' ), 10, 4 );
 
 		// Add site tour items.
 		if ( isset( $_GET['site_tour'] ) && 'test' == $_GET['site_tour'] ) {
@@ -526,24 +542,11 @@ class Plugin {
 	}
 
 	/**
-	 * Adds support for Jetpack Stats.
-	 */
-	public function jetpack_stats() {
-		if ( ! function_exists( 'stats_hide_smile_css' ) ) {
-			return;
-		}
-
-		add_action( 'gp_head', 'stats_hide_smile_css' );
-		add_action( 'gp_head', 'stats_admin_bar_head', 100 );
-		add_action( 'gp_footer', array( 'Automattic\Jetpack\Stats\Tracking_Pixel', 'add_to_footer' ), 101 );
-	}
-
-	/**
 	 * Makes admin bar compatible with GlotPress' custom header
 	 * and script loader.
 	 */
 	public function show_admin_bar() {
-		add_action( 'gp_head', 'wp_admin_bar_header' );
+		add_action( 'gp_head', 'wp_enqueue_admin_bar_header_styles' );
 		add_action( 'gp_head', '_admin_bar_bump_cb' );
 
 		gp_enqueue_script( 'admin-bar' );
@@ -809,5 +812,100 @@ class Plugin {
 
 		$reasons = isset( $locale_reasons[ $locale ] ) ? $locale_reasons[ $locale ] : array();
 		return array_merge( $default_reasons, $reasons );
+	}
+
+	/**
+	 * Filter the permission to create events for the user.
+	 *
+	 * wp-org-translation-events plugin.
+	 *
+	 * @return array All caps the user has.
+	 */
+	public function gp_translation_events_can_create_events( $allcaps, $caps, $args, $user ): array {
+		if ( in_array( 'create_translation_event', $caps, true ) ) {
+			if ( GP::$permission->user_can( $user, 'admin' ) ) {
+				$allcaps['create_translation_event'] = true;
+			} elseif ( current_user_can( 'manage_options' ) ) {
+				$allcaps['create_translation_event'] = true;
+			} elseif ( self::is_user_a_wporg_gte( $user ) ) {
+				$allcaps['create_translation_event'] = true;
+			}
+		}
+
+		return $allcaps;
+	}
+
+	/**
+	 * Indicates if the given user is a GTE at translate.wordpress.org.
+	 *
+	 * Caches the GTE email addresses for 12 hours.
+	 *
+	 * @param WP_User $user A user object.
+	 *
+	 * @return bool Whether the user is GTE for any of the languages to which the comments in the post belong.
+	 */
+	public static function is_user_a_wporg_gte( WP_User $user ): bool {
+		$locales             = GP_Locales::locales();
+		$gte_email_addresses = wp_cache_get( self::GTE_EMAIL_ADDRESSES, self::CACHE_GROUP );
+
+		if ( false === $gte_email_addresses ) {
+			$gte_email_addresses = array();
+			foreach ( $locales as $locale ) {
+				foreach ( self::get_gte_email_addresses( $locale->slug ) as $email ) {
+					$gte_email_addresses[] = $email;
+				}
+			}
+			$gte_email_addresses = array_unique( $gte_email_addresses );
+
+			wp_cache_set( self::GTE_EMAIL_ADDRESSES, $gte_email_addresses, self::CACHE_GROUP, 12 * HOUR_IN_SECONDS );
+		}
+
+		if ( in_array( $user->user_email, $gte_email_addresses ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Gets the general translation editors (GTE) emails for the given locale.
+	 *
+	 * @param string $locale The locale. E.g. 'zh-tw'.
+	 *
+	 * @return array The general translation editors (GTE) emails.
+	 */
+	public static function get_gte_email_addresses( string $locale ): array {
+		$email_addresses = array();
+
+		$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
+			return $email_addresses;
+		}
+		$result  = get_sites(
+			array(
+				'locale'     => $gp_locale->wp_locale,
+				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'path'       => '/',
+				'fields'     => 'ids',
+				'number'     => '1',
+			)
+		);
+		$site_id = array_shift( $result );
+		if ( ! $site_id ) {
+			return $email_addresses;
+		}
+
+		$users = get_users(
+			array(
+				'blog_id'     => $site_id,
+				'role'        => 'general_translation_editor',
+				'count_total' => false,
+			)
+		);
+		foreach ( $users as $user ) {
+			$email_addresses[] = $user->data->user_email;
+		}
+
+		return $email_addresses;
 	}
 }

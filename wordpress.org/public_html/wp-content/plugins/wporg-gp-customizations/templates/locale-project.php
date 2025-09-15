@@ -426,9 +426,10 @@ if ( 'wp-plugins' === $project->path ) {
 				<?php
 				foreach ( $locale_contributors['editors']['project'] as $editor ) {
 					printf(
-						'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
+						'<li><a href="https://profiles.wordpress.org/%s/">%s</a> <a href="https://profiles.wordpress.org/%s/">%s</a></li>',
 						$editor->nicename,
 						get_avatar( $editor->email, 40 ),
+						$editor->nicename,
 						$editor->display_name ?: $editor->nicename
 					);
 				}

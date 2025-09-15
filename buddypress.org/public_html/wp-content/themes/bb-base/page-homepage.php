@@ -4,7 +4,7 @@ Template Name: Homepage
 */
 get_header(); ?>
 
-<h3 id="post-home"><?php _e( 'Recent Topics', 'bbporg' ); ?></h3>
+<h2 id="post-home"><?php _e( 'Recent Topics', 'bbporg' ); ?></h2>
 
 <?php if ( function_exists( 'is_bbpress' )  ) : ?>
 <div id="bbpress-forums">

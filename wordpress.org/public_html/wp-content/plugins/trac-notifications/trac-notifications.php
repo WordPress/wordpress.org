@@ -103,6 +103,7 @@ class wporg_trac_notifications {
 				'rtl',
 				'sustainability',
 				'template',
+				'tests',
 				'ui',
 				'ui-copy',
 			);
@@ -230,7 +231,7 @@ class wporg_trac_notifications {
 		}
 
 		$ticket               = $meta['get_trac_ticket'];
-		$focuses              = $meta['get_trac_ticket_focuses'];
+		$focuses              = $meta['get_trac_ticket_focuses'] ?? '';
 		$notifications        = $meta['get_trac_notifications_for_user'];
 		$ticket_sub           = $meta['get_trac_ticket_subscription_status_for_user'];
 		$ticket_subscriptions = $meta['get_trac_ticket_subscriptions'];

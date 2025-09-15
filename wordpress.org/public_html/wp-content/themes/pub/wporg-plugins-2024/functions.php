@@ -23,6 +23,7 @@ require_once( __DIR__ . '/src/blocks/single-plugin/index.php' );
 require_once( __DIR__ . '/src/blocks/plugin-card/index.php' );
 
 // Block Configs
+require_once( __DIR__ . '/inc/block-bindings.php' );
 require_once( __DIR__ . '/inc/block-config.php' );
 
 /**
@@ -400,9 +401,9 @@ add_action( 'wp_head', function() {
  */
 function update_archive_title( $title ) {
 	if ( is_tax( 'plugin_business_model', 'community' ) ) {
-		return __( 'Community Plugins', 'wporg-plugins' );
+		return __( 'Community plugins', 'wporg-plugins' );
 	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
-		return __( 'Commercial Plugins', 'wporg-plugins' );
+		return __( 'Commercial plugins', 'wporg-plugins' );
 	}
 
 	return $title;

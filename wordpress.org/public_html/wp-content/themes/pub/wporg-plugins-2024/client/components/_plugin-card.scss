@@ -10,6 +10,7 @@
 	}
 
 	.entry-title {
+		margin-bottom: 2px !important;
 		line-height: 1.3;
 
 		display: block;
@@ -22,7 +23,12 @@
 		-webkit-box-orient: vertical;
 
 		a {
+			display: block;
 			text-decoration: none;
+
+			&:focus {
+				box-shadow: none;
+			}
 		}
 	}
 
@@ -42,10 +48,19 @@
 		span {
 			display: inline-block;
 			overflow: hidden;
-			white-space: nowrap;
+			line-height: var( --wp--preset--font-size--normal );
+			color: var( --wp--preset--color--charcoal-4 );
 
 			&.plugin-author {
 				width: 100%;
+
+				span {
+					color: var( --wp--preset--color--charcoal-1 );
+				}
+
+				path {
+					fill: var( --wp--preset--color--charcoal-1 );
+				}
 			}
 
 			svg {

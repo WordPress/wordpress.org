@@ -159,7 +159,7 @@ function render() {
 function render_team_list( $teams, $checked = array(), $for_parent = 0 ) {
 	if ( $for_parent ) {
 		$teams = array_filter( $teams, function( $t ) use ( $for_parent ) {
-			return $for_parent === $t->parent->id ?? 0;
+			return $for_parent === ( $t->parent->id ?? 0 );
 		} );
 
 		if ( ! $teams ) {

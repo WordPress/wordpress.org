@@ -144,8 +144,12 @@ class Validator {
 			$notes['contributors_missing'] = true;
 		}
 
-		if ( empty( $readme->license ) ) {
+		if ( ! empty( $readme->warnings['license_missing'] ) ) {
 			$warnings['license_missing'] = true;
+		} elseif ( ! empty( $readme->warnings['invalid_license'] ) ) {
+			$errors['invalid_license'] = $readme->warnings['invalid_license'];
+		} elseif ( ! empty( $readme->warnings['unknown_license'] ) ) {
+			$notes['unknown_license'] = $readme->warnings['unknown_license'];
 		}
 
 		if ( isset( $readme->warnings['too_many_tags'] ) ) {
@@ -294,6 +298,14 @@ class Validator {
 					'<code>Stable tag</code>',
 					'<code>/trunk/</code>'
 				);
+			case 'stable_tag_invalid_trunk_fallback':
+				return sprintf(
+					/* translators: 1: 'Stable tag', 2: path '/tags/{version}', 3: '/trunk/' */
+					__( 'The %1$s field is invalid, the specified SVN tag %2$s does not exist. %3$s will be used instead.', 'wporg-plugins' ),
+					'<code>Stable Tag</code>',
+					'<code>/tags/' . esc_html( $data ) . '/</code>',
+					'<code>/trunk/</code>'
+				);
 			case 'contributor_ignored':
 				if ( ! $data ) {
 					return sprintf(
@@ -329,7 +341,7 @@ class Validator {
 				return sprintf(
 					/* translators: %s: list of tags not supported */
 					__( 'One or more tags were ignored. The following tags are not permitted: %s', 'wporg-plugins' ),
-					'<code>' . implode( '</code>, <code>', $readme->ignore_tags ) . '</code>'
+					'<code>' . implode( '</code>, <code>', $data ) . '</code>'
 				);
 			case 'low_usage_tags':
 				return sprintf(
@@ -397,11 +409,29 @@ class Validator {
 				);
 			case 'donate_link_missing':
 				return __( 'No donate link was found', 'wporg-plugins' );
+
 			case 'license_missing':
 				return sprintf(
-					/* translators: 1: 'License' */
-					__( 'The %1$s field is missing or invalid. A GPLv2 or later compatible license should be specified.', 'wporg-plugins' ),
-					'<code>License</code>'
+					/* translators: 1: 'License', 2: Link to a compatible licenses page. */
+					__( 'The %1$s field is missing. <a href="%2$s">A GPLv2 or later compatible license</a> should be specified.', 'wporg-plugins' ),
+					'<code>License</code>',
+					'https://www.gnu.org/licenses/license-list.en.html'
+				);
+
+			case 'invalid_license':
+				return sprintf(
+					/* translators: 1: 'License', 2: Link to a compatible licenses page. */
+					__( 'The %1$s field appears to be invalid. <a href="%2$s">A GPLv2 or later compatible license</a> should be specified.', 'wporg-plugins' ),
+					'<code>License</code>',
+					'https://www.gnu.org/licenses/license-list.en.html'
+				);
+
+			case 'unknown_license':
+				return sprintf(
+					/* translators: 1: 'License', 2: Link to a compatible licenses page. */
+					__( 'The %1$s field could not be validated. <a href="%2$s">A GPLv2 or later compatible license</a> should be specified. The specified license may be compatible.', 'wporg-plugins' ),
+					'<code>License</code>',
+					'https://www.gnu.org/licenses/license-list.en.html'
 				);
 
 			case 'trademarked_name':

@@ -111,6 +111,14 @@ tr:last-of-type td {
 	border-bottom: 0;
 }
 
+.fixed-first-col tr > th:first-child,
+.fixed-first-col tr > td:first-child {
+	position: -webkit-sticky;
+	position: sticky;
+	background-color: white;
+	left: 0;
+}
+
 /* wp4.css overrides */
 p a,
 p a:hover {
@@ -301,9 +309,25 @@ input[type="submit"] {
 	font-size: 0.75em;
 }
 
-.wporg-make .site-title a:before,
-body.wporg-make #headline h2 a:before {
-	vertical-align: middle; /* overrides wp4.css */
+/* Adjustments for teams with SVG icons. */
+.wporg-make.make-openverse .site-title a::before,
+.wporg-make.make-performance .site-title a::before {
+	content: '';
+	width: 0;
+}
+.site-title svg {
+	height: 30px;
+	width: 30px;
+	vertical-align: middle;
+}
+
+#secondary-content a {
+	overflow-wrap: anywhere;
+	text-decoration: underline;
+}
+
+#secondary-content .widget_wporg_handbook_pages a {
+	text-decoration: none;
 }
 
 #secondary-content .navigation-main {
@@ -406,8 +430,24 @@ input[type="submit"]:hover {
 	}
 
 	body.responsive-show {
-		overflow-y: visible;
-		position: static;
+		overflow-y: hidden;
+		position: fixed !important;
+		padding-top: var(--wp-admin--admin-bar--height, 0px) !important;
+		top: 0px !important;
+	}
+
+	body.responsive-show #o2-responsive-nav {
+		clear: left;
+		overflow: auto;
+		margin-bottom: 1em;
+	}
+
+	body.responsive-show #secondary-content .navigation-main {
+		margin-top: 0;
+	}
+
+	body.responsive-show .wp-block-group.global-header {
+		z-index: 0;
 	}
 
 	#page {
@@ -717,6 +757,10 @@ article.state-unresolved {
 .rtl .sticky .o2-post:after {
 	left: 45px;
 	right: initial;
+}
+
+nav.o2-post-actions ul li:last-child {
+	line-height: 1;
 }
 
 /*

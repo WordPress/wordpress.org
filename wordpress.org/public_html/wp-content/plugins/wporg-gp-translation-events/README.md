@@ -1,5 +1,7 @@
 # wporg-gp-translation-events
 
+Here we are implementing Translation Events, as discussed in our Polyglots Make P2 Post: [Translation Events Prototype](https://make.wordpress.org/polyglots/2024/02/28/translation-events-prototype/).
+
 ## Development environment
 First follow [instructions to install `wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/#prerequisites).
 
@@ -39,4 +41,10 @@ You can run tests in `wp-env` with the following command:
 
 ```shell
 composer dev:test
+```
+
+If you want to run only one test, you can use the following command:
+
+```shell
+composer dev:test -- --filter methods_name
 ```

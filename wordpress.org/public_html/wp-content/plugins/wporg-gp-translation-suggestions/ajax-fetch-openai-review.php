@@ -54,6 +54,7 @@ $glossary_query = substr( $_POST['data']['glossary_query'], 0, 1000 );
 $messages = array();
 $openai_query .= 'For the english text  "' . addslashes( $original_singular ) . '", is "' . addslashes( $translation ) . '" a correct translation in ' . addslashes( $language ) . '?';
 $openai_query  = ( $is_retry ) ? 'Are you sure that ' . $openai_query : $openai_query;
+$openai_model  = gp_array_get( $default_sort, 'openai_model', 'gpt-3.5-turbo' );
 if ( $glossary_query ) {
 	$messages[] = array(
 		'role'    => 'system',
@@ -77,7 +78,7 @@ $openai_response = wp_remote_post(
 		),
 		'body'    => wp_json_encode(
 			array(
-				'model'       => 'gpt-3.5-turbo',
+				'model'       => $openai_model,
 				'max_tokens'  => 1000,
 				'n'           => 1,
 				'messages'    => $messages,

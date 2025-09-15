@@ -30,7 +30,7 @@ class Release_Confirmation {
 		echo "</select><span class='hidden'>&nbsp;Don't forget to save the changes!</span></p>";
 
 		if ( $post->release_confirmation ) {
-			Release_Confirmation_Shortcode::single_plugin_row( $post, $include_header = false );
+			Release_Confirmation_Shortcode::single_plugin( $post );
 		}
 	}
 

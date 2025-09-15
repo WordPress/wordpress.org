@@ -58,8 +58,8 @@ function get_svns() {
 			'url'         => 'https://buddypress.svn.wordpress.org',
 			'trac'        => 'https://buddypress.trac.wordpress.org',
 			'trac_table'  => 'trac_buddypress',
-			'rev_table'   => false,
-			'props_table' => false,
+			'rev_table'   => 'trac_buddypress_revisions',
+			'props_table' => 'trac_buddypress_props',
 		],
 		'bbpress' => [
 			'slug'        => 'bbpress',
@@ -67,8 +67,8 @@ function get_svns() {
 			'url'         => 'https://bbpress.svn.wordpress.org',
 			'trac'        => 'https://bbpress.trac.wordpress.org',
 			'trac_table'  => 'trac_bbpress',
-			'rev_table'   => false,
-			'props_table' => false,
+			'rev_table'   => 'trac_bbpress_revisions',
+			'props_table' => 'trac_bbpress_props',
 		],
 	];
 }
@@ -88,6 +88,8 @@ function import_revisions( $svn ) {
 
 	$last_revision = $wpdb->get_var( "SELECT max(id) FROM {$db_table}" );
 	if ( ! is_numeric( $last_revision ) ) {
+		$last_revision = 0;
+		// When setting up a new table, this needs to be commented out to force the import.
 		trigger_error( "Can't find max row for {$db_table} to import {$svn_url} revisions.", E_USER_WARNING );
 		return false;
 	}
@@ -170,9 +172,19 @@ function import_revisions( $svn ) {
 
 				$wpdb->insert( $props_table, $data );
 
-				// Auto-assign Meta Contributor badge for matched meta contributions.
-				if ( $user_id && 'meta' === $slug && function_exists( 'WordPressdotorg\Profiles\assign_badge' ) ) {
-					assign_badge( 'meta-contributor', $user_id );
+				// Auto-assign some Contributor badges.
+				if ( $user_id && function_exists( 'WordPressdotorg\Profiles\assign_badge' ) ) {
+					switch ( $slug ) {
+						case 'meta':
+							assign_badge( 'meta-contributor', $user_id );
+							break;
+						case 'bbpress':
+							assign_badge( 'bbpress-contributor', $user_id );
+							break;
+						case 'buddypress':
+							assign_badge( 'buddypress-contributor', $user_id );
+							break;
+					}
 				}
 			}
 		}

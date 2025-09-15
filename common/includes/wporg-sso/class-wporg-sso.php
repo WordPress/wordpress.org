@@ -18,7 +18,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 *
 		 * @var int
 		 */
-		const REMOTE_TOKEN_TIMEOUT = 5;
+		const REMOTE_TOKEN_TIMEOUT = 300;
 
 		const VALID_HOSTS = [
 			'wordpress.org',
@@ -27,10 +27,11 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			'wordcamp.org'
 		];
 
-		public $sso_host       = 'login.wordpress.org';
-		public $sso_host_url   = '';
-		public $sso_login_url  = '';
-		public $sso_signup_url = '';
+		public $sso_host        = 'login.wordpress.org';
+		public $sso_cookie_host = '.wordpress.org';
+		public $sso_host_url    = '';
+		public $sso_login_url   = '';
+		public $sso_signup_url  = '';
 
 		public $host   = '';
 		public $script = '';
@@ -50,6 +51,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				if ( parse_url( home_url(), PHP_URL_PORT ) ) {
 					$this->sso_host .= ':' . parse_url( home_url(), PHP_URL_PORT );
 				}
+
+				$this->sso_cookie_host = defined( 'COOKIE_DOMAIN' ) ? COOKIE_DOMAIN : '';
 			} else {
 				$this->sso_host_url = 'https://' . $this->sso_host;
 			}
@@ -204,6 +207,11 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			if ( strstr( $host, '/' ) ) {
 				$host = parse_url( $host, PHP_URL_HOST );
+			}
+
+			// Bail if the string did not actually have a hostname within it.
+			if ( empty( $host ) ) {
+				return false;
 			}
 
 			if ( $host === $this->sso_host ) {

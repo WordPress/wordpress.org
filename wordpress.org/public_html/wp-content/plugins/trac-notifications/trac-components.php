@@ -37,6 +37,19 @@ class Make_Core_Trac_Components {
 		return 'https://' . $this->trac . '.trac.wordpress.org';
 	}
 
+	function get_component_url( $component ) {
+		if ( 'core' === $this->trac ) {
+			// Core has a rewrite for /component/(.+) to a report.
+			return $this->trac_url() . '/component/' . rawurlencode( $component );
+		} elseif ( 'meta' === $this->trac ) {
+			// Meta has the same report, but with no rewrite
+			return $this->trac_url() . '/report/19?COMPONENT=' . rawurlencode( $component );
+		} else {
+			// Otherwise, just query for open tickets.
+			return $this->trac_url() . '/query?status=!closed&component=' . rawurlencode( $component );
+		}
+	}
+
 	function trac_name() {
 		return ucfirst( $this->trac );
 	}
@@ -598,11 +611,12 @@ jQuery( function( $ ) {
 			'enhancement'     => 'Open enhancements',
 			'task (blessed)'  => 'Open tasks',
 			'feature request' => 'Open feature requests',
+			'defect (bug)'    => 'Open defects',
 		);
 
 		foreach ( $types as $type => $title ) {
 			$count = $tickets_by_type[ $type ] ?? 0;
-			printf( '<strong>%s: %d<strong> ', $title, $count );
+			printf( '<strong>%s: %d</strong> ', $title, $count );
 			echo $this->trac_query_link( 'View list on Trac', compact( 'component', 'type' ) );
 			echo '<br>';
 		}
@@ -656,7 +670,8 @@ jQuery( function( $ ) {
 		}
 		echo '<option value="" selected="selected">' . $default . '</option>';
 		if ( in_array( 'focus', $topics ) ) {
-			$focuses = array( 'accessibility', 'administration', 'coding-standards', 'css', 'docs', 'javascript', 'multisite', 'performance', 'privacy', 'rest-api', 'rtl', 'template', 'ui' );
+			$focuses = array( 'accessibility', 'admin', 'coding-standards', 'css', 'docs', 'javascript', 'multisite', 'performance', 'php-compatibility', 'privacy', 'rest-api', 'rtl', 'sustainability', 'template', 'ui', 'ui-copy' );
+			
 			foreach ( $focuses as $focus ) {
 				echo '<option value="focus/' . esc_attr( rawurlencode( $focus ) ) . '">' . $focus . ( $both ? ' (focus)' : '' ) . '</option>';
 			}
@@ -713,7 +728,7 @@ jQuery( function( $ ) {
 		if ( ! empty( $this->breakdown_component_type[ $component ] ) ) {
 			$open_tickets = array_sum( $this->breakdown_component_type[ $component ] );
 		}
-		echo '<td class="right"><a href="' . $this->trac_url() . '/component/' . esc_attr( rawurlencode( $component ) ) . '">' . $open_tickets . '</a></td>';
+		echo '<td class="right"><a href="' . esc_attr( $this->get_component_url( $component ) ) . '">' . $open_tickets . '</a></td>';
 		if ( $history['change'] ) {
 			$count = sprintf( "%+d", $history['change'] );
 			if ( $history['change'] > 0 ) {
