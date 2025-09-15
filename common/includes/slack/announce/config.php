@@ -144,7 +144,7 @@ function get_whitelist() {
 			'webcommsat', // @abhanonstopnewsuk on Slack
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack,
-			'wildworks' // @Aki Hamano on Slack
+			'wildworks', // @Aki Hamano on Slack
 		) ),
 		'core-upgrade-install' => array_merge( get_committers(), array(
 			'afragen',
