@@ -104,8 +104,8 @@ function get_whitelist() {
 			'cbringmann', // @Chloé Bringmann on Slack
 			'chaion07',
 			'chanthaboune',
-			'costdev',
 			'colorful-tones',
+			'costdev',
 			'danieltj',
 			'desrosj',
 			'estelaris',
@@ -145,6 +145,7 @@ function get_whitelist() {
 			'webcommsat', // @abhanonstopnewsuk on Slack
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
+			'wildworks', // @Aki Hamano on Slack
 			'zunaid321', // @Zunaid Amin on Slack
 		) ),
 		'core-ai' => array_merge( get_committers(), array(
@@ -480,7 +481,7 @@ function get_whitelist() {
 			'CoachBirgit',
 			'deconf',
 			'felipeelia',
-			'jainnidhi', // @nidhijain on Slack 
+			'jainnidhi', // @nidhijain on Slack
 			'kharisblank', // @kharisulistiyo on Slack
 			'luisrull',
 			'ocean90',
@@ -497,7 +498,7 @@ function get_whitelist() {
 			'CoachBirgit',
 			'deconf',
 			'felipeelia',
-			'jainnidhi', // @nidhijain on Slack 
+			'jainnidhi', // @nidhijain on Slack
 			'kharisblank', // @kharisulistiyo on Slack
 			'luisrull',
 			'ocean90',
