@@ -11,13 +11,13 @@ get_header(); ?>
 
 	<main id="main" class="wp-block-group alignfull site-main is-layout-constrained wp-block-group-is-layout-constrained" role="main">
 
-		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow">
+		<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow entry-content">
 
 			<section>
 				<p><?php printf(
-					/* Translators: forums URL */
+					/* Translators: forums welcome page URL */
 					__( 'Our community-based support forums are a great place to learn, share, and help each other. <a href="%s">Find out how to get started</a>.', 'wporg-forums' ),
-					esc_url( site_url( '/welcome/' ) )
+					esc_url( wporg_support_get_welcome_url() )
 				) ?></p>
 			</section>
 
@@ -49,11 +49,11 @@ get_header(); ?>
 							<div class="wp-block-column">
 
 								<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"700","lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|blueberry-2"}}}},"textColor":"blueberry-2","className":"is-style-short-text","fontSize":"normal","fontFamily":"inter"} -->
-								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="https://wordpress.org/documentation/">%2$s</a></h3>
+								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="%2$s">%3$s</a></h3>
 								<!-- /wp:heading -->
 
 								<!-- wp:paragraph -->
-								<p>%3$s</p>
+								<p>%4$s</p>
 								<!-- /wp:paragraph -->
 
 							</div>
@@ -63,11 +63,11 @@ get_header(); ?>
 							<div class="wp-block-column">
 
 								<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"700","lineHeight":1.6},"elements":{"link":{"color":{"text":"var:preset|color|blueberry-2"}}}},"textColor":"blueberry-2","className":"is-style-short-text","fontSize":"normal","fontFamily":"inter"} -->
-								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="https://make.wordpress.org/support/handbook/">%4$s</a></h3>
+								<h3 class="wp-block-heading is-style-short-text has-blueberry-2-color has-text-color has-link-color has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:700;line-height:1.6"><a href="%5$s">%6$s</a></h3>
 								<!-- /wp:heading -->
 
 								<!-- wp:paragraph -->
-								<p>%5$s</p>
+								<p>%7$s</p>
 								<!-- /wp:paragraph -->
 
 							</div>
@@ -91,8 +91,10 @@ get_header(); ?>
 			</div>
 			<!-- /wp:group -->',
 			esc_html__( 'More resources', 'wporg-forums' ),
+			esc_html__( 'https://wordpress.org/documentation/', 'wporg-forums' ),
 			esc_html__( 'Documentation', 'wporg-forums' ),
 			esc_html__( 'Find the information you need to get the most out of WordPress.', 'wporg-forums' ),
+			esc_html__( 'https://make.wordpress.org/support/handbook/', 'wporg-forums' ),
 			esc_html__( 'Support Handbook', 'wporg-forums' ),
 			esc_html__( 'Learn how to get involved and provide support in the forums.', 'wporg-forums' ),
 		)

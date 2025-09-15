@@ -51,6 +51,9 @@ class Plugin_Directory {
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
 		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
+		add_filter( 'wp_get_attachment_url', array( $this, 'add_info_to_zip_url' ), 100, 2 );
+
+		add_filter( 'wp_resource_hints', array( $this, 'wp_resource_hints' ), 10, 2 );
 
 		// Add no-index headers where appropriate.
 		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
@@ -787,6 +790,15 @@ class Plugin_Directory {
 			}
 		}
 
+		// If it's a query explicitely for non-plugin-related content, bail.
+		if (
+			! empty( $wp_query->query_vars['post_type'] ) &&
+			'plugin' !== $wp_query->query_vars['post_type'] &&
+			! in_array( 'plugin', (array) $wp_query->query_vars['post_type'], true )
+		) {
+			return;
+		}
+
 		// By default, if no query is made, we're querying /browse/featured/
 		if ( empty( $wp_query->query ) ) {
 			$wp_query->query_vars['browse'] = 'featured';
@@ -971,7 +983,7 @@ class Plugin_Directory {
 
 		// Sanitize / cleanup the search query a little bit.
 		if ( $wp_query->is_search() ) {
-			$s = $wp_query->get( 's' );
+			$s = wp_unslash( $wp_query->get( 's' ) );
 			$s = urldecode( $s );
 
 			// If a URL-like request comes in, reduce to a slug
@@ -984,12 +996,27 @@ class Plugin_Directory {
 				$s = mb_substr( $s, 0, 200 );
 			}
 
-			// Trim off special characters, only allowing wordy characters at the end of searches.
-			$s = preg_replace( '!(\W+)$!iu', '', $s );
-			// ..and whitespace
+			// Trim whitespace
 			$s = trim( $s );
 
-			$wp_query->set( 's', $s );
+			// If we're searching for a phrase, only trim non-quotey+wordy characters.
+			if ( str_starts_with( $s, '"' ) || str_starts_with( $s, "'" ) ) {
+				$s = preg_replace( '!(\s*[^\'"\w]+)$!iu', '', $s );
+			} else {
+				// If we're searching for a word, trim all non-wordy characters.
+				$s = preg_replace( '!(\s*\W+)$!iu', '', $s );
+			}
+
+			$wp_query->set( 's', wp_slash( $s ) );
+
+			// If the search is in the block directory, require that.
+			if ( $wp_query->get( 'block_search' ) ) {
+				$wp_query->query_vars['tax_query']['plugin_section'][] = array(
+					'taxonomy' => 'plugin_section',
+					'field'    => 'slug',
+					'terms'    => 'block',
+				);
+			}
 		}
 
 		// By default, all archives are sorted by active installs
@@ -1062,7 +1089,7 @@ class Plugin_Directory {
 			case 'last_updated':
 				$wp_query->query_vars['meta_query']['last_updated'] ??= [
 					'key'     => 'last_updated',
-					'type'    => 'DATE',
+					'type'    => 'DATETIME',
 					'compare' => 'EXISTS',
 				];
 				break;
@@ -1708,50 +1735,9 @@ class Plugin_Directory {
 		$plugin   = self::get_plugin_post( $plugin );
 		$releases = get_post_meta( $plugin->ID, 'releases', true );
 
-		// Meta doesn't exist yet? Lets fill it out.
+		// Data doesn't exist yet? Lets fill it out.
 		if ( false === $releases || ! is_array( $releases ) ) {
-			update_post_meta( $plugin->ID, 'releases', [] );
-
-			$tags = get_post_meta( $plugin->ID, 'tags', true );
-			if ( $tags ) {
-				foreach ( $tags as $tag_version => $tag ) {
-					self::add_release( $plugin, [
-						'date'                   => strtotime( $tag['date'] ),
-						'tag'                    => $tag['tag'],
-						'version'                => $tag_version,
-						'committer'              => [ $tag['author'] ],
-						'zips_built'             => true, // Old release, assume they were built.
-						'confirmations_required' => 0,    // Old release, assume it's released.
-					] );
-				}
-			} else {
-				// Pull from SVN directly.
-				$svn_tags = Tools\SVN::ls( "https://plugins.svn.wordpress.org/{$plugin->post_name}/tags/", true ) ?: [];
-				foreach ( $svn_tags as $entry ) {
-					// Discard files
-					if ( 'dir' !== $entry['kind'] ) {
-						continue;
-					}
-
-					$tag = $entry['filename'];
-
-					// Prefix the 0 for plugin versions like 0.1
-					if ( '.' == substr( $tag, 0, 1 ) ) {
-						$tag = "0{$tag}";
-					}
-
-					self::add_release( $plugin, [
-						'date'                   => strtotime( $entry['date'] ),
-						'tag'                    => $entry['filename'],
-						'version'                => $tag,
-						'committer'              => [ $entry['author'] ],
-						'zips_built'             => true, // Old release, assume they were built.
-						'confirmations_required' => 0,    // Old release, assume it's released.
-					] );
-				}
-			}
-
-			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+			$releases = self::prefill_releases_meta( $plugin );
 		}
 
 		/**
@@ -1770,13 +1756,76 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Prefill the releases meta items for a plugin.
+	 *
+	 * @param \WP_Post $plugin Plugin post object.
+	 * @return array
+	 */
+	public static function prefill_releases_meta( $plugin ) {
+		if ( ! $plugin->releases ) {
+			update_post_meta( $plugin->ID, 'releases', [] );
+		}
+
+		$tags = get_post_meta( $plugin->ID, 'tags', true );
+		if ( $tags ) {
+			foreach ( $tags as $tag_version => $tag ) {
+				self::add_release( $plugin, [
+					'date'                   => strtotime( $tag['date'] ),
+					'tag'                    => $tag['tag'],
+					'version'                => $tag_version,
+					'committer'              => [ $tag['author'] ],
+					'zips_built'             => true, // Old release, assume they were built.
+					'confirmations_required' => 0,    // Old release, assume it's released.
+				] );
+			}
+		} else {
+			// Pull from SVN directly.
+			$svn_tags = Tools\SVN::ls( "https://plugins.svn.wordpress.org/{$plugin->post_name}/tags/", true ) ?: [];
+			foreach ( $svn_tags as $entry ) {
+				// Discard files
+				if ( 'dir' !== $entry['kind'] ) {
+					continue;
+				}
+
+				$tag = $entry['filename'];
+
+				// Prefix the 0 for plugin versions like 0.1
+				if ( '.' == substr( $tag, 0, 1 ) ) {
+					$tag = "0{$tag}";
+				}
+
+				self::add_release( $plugin, [
+					'date'                   => strtotime( $entry['date'] ),
+					'tag'                    => $entry['filename'],
+					'version'                => $tag,
+					'committer'              => [ $entry['author'] ],
+					'zips_built'             => true, // Old release, assume they were built.
+					'confirmations_required' => 0,    // Old release, assume it's released.
+				] );
+			}
+		}
+
+		return get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+	}
+
+	/**
 	 * Fetch a specific release of the plugin, by tag.
+	 *
+	 * @param string $plugin Plugin slug.
+	 * @param string $tag    Plugin version / Release tag.
+	 * @return array|bool
 	 */
 	public static function get_release( $plugin, $tag ) {
 		$releases = self::get_releases( $plugin );
 
+		// Look for the version released as a tag.
 		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
+		if ( $filtered ) {
+			return array_shift( $filtered );
+		}
 
+		// Look for the tag as a trunk version.
+		$filtered = wp_list_filter( $releases, [ 'tag' => "trunk@{$tag}", 'version' => $tag ] );
 		if ( $filtered ) {
 			return array_shift( $filtered );
 		}
@@ -1786,6 +1835,10 @@ class Plugin_Directory {
 
 	/**
 	 * Add a Plugin Release to the internal storage.
+	 *
+	 * @param string $plugin Plugin slug.
+	 * @param array  $data   Release data.
+	 * @return bool
 	 */
 	public static function add_release( $plugin, $data ) {
 		if ( ! isset( $data['tag'] ) ) {
@@ -1794,22 +1847,35 @@ class Plugin_Directory {
 		$plugin = self::get_plugin_post( $plugin );
 
 		$release = self::get_release( $plugin, $data['tag'] ) ?: [
-			'date'                   => time(),
-			'tag'                    => '',
-			'version'                => '',
+			'date'                     => time(),
+			'tag'                      => '',
+			'version'                  => '',
 			// Assume zips built if no release confirmation.
-			'zips_built'             => ! $plugin->release_confirmation,
-			'confirmations'          => [],
+			'zips_built'               => ! $plugin->release_confirmation,
+			'zips_built_from_revision' => 0,
+			'confirmations'            => [],
 			// Confirmed by default if no release confiration.
-			'confirmed'              => ! $plugin->release_confirmation,
-			'confirmations_required' => (int) $plugin->release_confirmation,
-			'committer'              => [],
-			'revision'               => [],
+			'confirmed'                => ! $plugin->release_confirmation,
+			'confirmations_required'   => (int) $plugin->release_confirmation,
+			'committer'                => [],
+			'revision'                 => [],
 		];
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?
 		foreach ( $data as $k => $v ) {
-			$release[ $k ] = $v;
+			if ( isset( $release[ $k ] ) && is_array( $release[ $k ] ) ) {
+				$release[ $k ] = array_unique( array_merge( $release[ $k ], $v ) );
+			} else {
+				$release[ $k ] = $v;
+			}
+		}
+
+		/*
+		 * Allow a discarded release to be reset.
+		 * See API\Routes\Plugin_Release_Confirmation::undo_discard_release()
+		 */
+		if ( isset( $data['undo-discard'] ) && ! empty( $release['discarded'] ) && empty( $data['discarded'] ) ) {
+			unset( $release['discarded'] );
 		}
 
 		$releases = self::get_releases( $plugin );
@@ -1831,6 +1897,65 @@ class Plugin_Directory {
 		} );
 
 		return update_post_meta( $plugin->ID, 'releases', $releases );
+	}
+
+	/**
+	 * Remove a Plugin Release from the internal storage.
+	 *
+	 * @param string $plugin Plugin slug.
+	 * @param string $tag    Release tag.
+	 * @return bool
+	 */
+	public static function remove_release( $plugin, $tag ) {
+		$result   = false;
+		$plugin   = self::get_plugin_post( $plugin );
+		$releases = self::get_releases( $plugin );
+
+		// Remove the release in question.
+		foreach ( $releases as $i => $r ) {
+			if ( $r['tag'] === $tag && ! $r['confirmed'] ) {
+				unset( $releases[ $i ] );
+
+				$result = update_post_meta( $plugin->ID, 'releases', $releases );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Add additional context to ZIP urls.
+	 *
+	 * The ZIP URL will have URL suffixed which is a rest api URL to information about the plugin.
+	 *
+	 * @param string $url           The URL to the ZIP file.
+	 * @param int    $attachment_id The attachment ID, or post ID.
+	 * @return string The URL to the ZIP file.
+	 */
+	public function add_info_to_zip_url( $url, $attachment_id ) {
+		$post = get_post( $attachment_id );
+		if ( $post && 'attachment' === $post->post_type && $post->post_parent ) {
+			$post = get_post( $post->post_parent );
+		}
+
+		if ( ! $url || ! $post || 'plugin' !== $post->post_type || ! current_user_can( 'edit_post', $post->ID ) ) {
+			return $url;
+		}
+
+		// Append with a anchor, such that CLI environments don't require special handling.
+		return API\Routes\Plugin_Review::append_plugin_review_info_url( $url, $post );
+	}
+
+	/**
+	 * Add a dns-prefetch for the CDNs we use.
+	 */
+	function wp_resource_hints( $uris, $type ) {
+		if ( 'dns-prefetch' === $type ) {
+			$uris[] = '//s.w.org';
+			$uris[] = '//ps.w.org';
+		}
+
+		return $uris;
 	}
 
 	/**

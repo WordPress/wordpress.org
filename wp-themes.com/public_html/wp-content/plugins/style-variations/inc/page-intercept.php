@@ -2,6 +2,8 @@
 
 namespace WordPressdotorg\Theme_Preview\Style_Variations\Page_Intercept;
 
+use function WordPressdotorg\Theme_Preview\Style_Variations\get_style_variations;
+
 /**
  * Return the name of the pattern from the $_GET request.
  *
@@ -29,7 +31,7 @@ function get_variation_from_query() {
 	/**
 	 * Retrieve all variations and match to make sure we have one with the same title.
 	 */
-	$variations = \WP_Theme_JSON_Resolver::get_style_variations();
+	$variations = get_style_variations();
 	if ( empty( $variations ) ) {
 		return false;
 	}
@@ -98,12 +100,12 @@ function filter_theme_json_user( $theme_json ) {
 /**
  * We need to call gutenberg's filter `theme_json_user` to make sure the styles are applied to the page.
  * This use to work for both the page and card but a core change stopped that.
- * 
+ *
  * See: https://core.trac.wordpress.org/ticket/56812
- * 
+ *
  * We now need to also call the core filter `wp_theme_json_data_user` to get the card preview to work.
  * Hopefully this code can be remove when we have a better component to use.
- * 
+ *
  * Ref: https://github.com/WordPress/gutenberg/issues/44886
 
  */

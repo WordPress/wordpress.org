@@ -92,12 +92,12 @@ switch ( $action ) {
 			$slugs = $request->slugs ?? '';
 			$slugs = is_array( $slugs ) ? $slugs : explode( ',', $slugs );
 
-			if ( ! $slug ) {
+			if ( ! $slugs ) {
 				send_error( 'Slugs not provided' );
 			}
 
 			foreach ( $slugs as $slug ) {
-				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
+				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+$/', $slug ) ) {
 					send_error( 'Invalid slugs provided' );
 				}
 
@@ -110,7 +110,7 @@ switch ( $action ) {
 			if ( ! $slug ) {
 				send_error( 'Slug not provided' );
 			}
-			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
+			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+$/', $slug ) ) {
 				send_error( 'Invalid slug provided' );
 			}
 
@@ -146,6 +146,14 @@ $api->set_status_header();
 echo $api->get_result( $format );
 
 // Cache when a theme doesn't exist. See the validation handler above.
-if ( 'theme_information' == $action && isset( $slug ) && 404 == http_response_code() ) {
+if (
+	'theme_information' == $action &&
+	isset( $slug ) &&
+	404 == http_response_code() &&
+	// Validate that the theme doesn't exist for update-checks, as a sanity check.
+	! wp_cache_get( $slug, 'theme-update-check' ) &&
+	// And that there were no DB errors.
+	empty( $wpdb->last_error )
+) {
 	wp_cache_set( $slug, 'not_found', 'theme_information_error', WEEK_IN_SECONDS );
 }

@@ -189,13 +189,53 @@ class Controls {
 
 			<tr>
 				<td><?php _e( 'Updated:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php printf( '<span title="%s">%s ago</span>', esc_attr( $post->last_updated ), human_time_diff( strtotime( $post->last_updated ) ) ); ?></strong></td>
+				<td><strong><?php
+					printf(
+						'<span title="%s">%s ago</span>',
+						esc_attr( $post->last_updated ),
+						human_time_diff( strtotime( $post->last_updated ) )
+					);
+				?></strong></td>
+			</tr>
+
+			<tr>
+				<td><?php _e( 'Submitted:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php
+					$submitted_date = min( array_filter( [
+						$post->_submitted_date,           // Submitted date stored since 2017-04-11
+						$post->_approved,                 // The approval date is the next best thing.
+						strtotime( $post->post_date_gmt ) // Fallback to the post_date, which should be similar to approval date.
+					] ) );
+
+					printf(
+						'<span title="%s">%s ago</span>',
+						esc_attr( gmdate( 'Y-m-d H:i:s', $submitted_date ) ),
+						human_time_diff( $submitted_date )
+					);
+				?></strong></td>
 			</tr>
 
 			<tr>
 				<td><?php _e( 'Installs:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php echo Template::active_installs( false, $post ); ?></strong></td>
 			</tr>
+
+			<?php if (
+				function_exists( 'WordPressdotorg\Stats\plugin_active_installs' ) &&
+				$post->version &&
+				'publish' === $post->post_status
+			): ?>
+			<tr>
+				<td><?php echo esc_html( "Installs of {$post->version}:" ); ?></td>
+				<td><strong><?php
+					echo Template::format_active_installs_for_display(
+						Template::sanitize_active_installs(
+							\WordPressdotorg\Stats\plugin_active_installs( $post->post_name, $post->version )
+						)
+					);
+				?></strong></td>
+			</tr>
+			<?php endif; ?>
 
 			<?php if ( $post->tested ) : ?>
 			<tr>

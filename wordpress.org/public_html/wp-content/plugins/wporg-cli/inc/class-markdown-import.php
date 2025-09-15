@@ -13,7 +13,7 @@ class Markdown_Import {
 	private static $nonce_name = 'wporg-cli-markdown-source-nonce';
 	private static $submit_name = 'wporg-cli-markdown-import';
 	private static $supported_post_types = array( 'handbook' );
-	private static $posts_per_page = 100;
+	private static $posts_per_page = -1;
 
 	/**
 	 * Register our cron task if it doesn't already exist

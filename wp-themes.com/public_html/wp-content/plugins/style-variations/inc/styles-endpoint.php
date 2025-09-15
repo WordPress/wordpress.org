@@ -2,8 +2,10 @@
 
 namespace WordPressdotorg\Theme_Preview\Style_Variations\API_Endpoint;
 
+use function WordPressdotorg\Theme_Preview\Style_Variations\get_style_variations;
+
 function endpoint_handler() {
-	$variations = \WP_Theme_JSON_Resolver::get_style_variations();
+	$variations = get_style_variations();
 	$theme_slug = get_option( 'stylesheet' );
 	$styles     = array();
 
@@ -25,7 +27,7 @@ function endpoint_handler() {
 		 */
 		foreach ( $variations as $variation ) {
 			$title = strtolower( $variation['title'] );
-			$link  = add_query_arg( 'style_variation', urlencode( $title ), $base );;
+			$link  = add_query_arg( 'style_variation', urlencode( $title ), $base );
 
 			$styles[] = array(
 				'title'        => $title,

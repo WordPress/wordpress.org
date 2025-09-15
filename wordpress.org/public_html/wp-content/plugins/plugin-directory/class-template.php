@@ -249,21 +249,68 @@ class Template {
 	 */
 	public static function active_installs( $full = true, $post = null ) {
 		$post  = get_post( $post );
-		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0;
+		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0; // Already sanitized to a round number.
 
 		if ( 'closed' === $post->post_status ) {
 			$text = __( 'N/A', 'wporg-plugins' );
-		} elseif ( $count < 10 ) {
-			$text = __( 'Fewer than 10', 'wporg-plugins' );
-		} elseif ( $count >= 1000000 ) {
-			$million_count = intdiv( $count, 1000000 );
-			/* translators: %d: The integer number of million active installs */
-			$text = sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
 		} else {
-			$text = number_format_i18n( $count ) . '+';
+			$text = self::format_active_installs_for_display( $count );
 		}
 
 		return $full ? sprintf( __( '%s active installations', 'wporg-plugins' ), $text ) : $text;
+	}
+
+	/**
+	 * Formats the active installs count for display.
+	 *
+	 * @static
+	 *
+	 * @param int $count The active installs count.
+	 * @return string The formatted count.
+	 */
+	public static function format_active_installs_for_display( $count ) {
+		if ( $count < 10 ) {
+			return __( 'Fewer than 10', 'wporg-plugins' );
+		}
+
+		if ( $count >= 1000000 ) {
+			$million_count = intdiv( $count, 1000000 );
+
+			/* translators: %d: The integer number of million active installs */
+			return sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
+		}
+
+		return number_format_i18n( $count ) . '+';
+	}
+
+	/**
+	 * Sanitizes the Active Install count number to a rounded display value.
+	 *
+	 * @static
+	 *
+	 * @param int $active_installs The raw active install number.
+	 * @return int The sanitized version for display.
+	 */
+	public static function sanitize_active_installs( $active_installs ) {
+		if ( $active_installs > 10000000 ) {
+			// 10 million +
+			return 10000000;
+		} elseif ( $active_installs > 1000000 ) {
+			$round = 1000000;
+		} elseif ( $active_installs > 100000 ) {
+			$round = 100000;
+		} elseif ( $active_installs > 10000 ) {
+			$round = 10000;
+		} elseif ( $active_installs > 1000 ) {
+			$round = 1000;
+		} elseif ( $active_installs > 100 ) {
+			$round = 100;
+		} else {
+			// Rounded to ten, else 0
+			$round = 10;
+		}
+
+		return floor( $active_installs / $round ) * $round;
 	}
 
 	/**
@@ -401,9 +448,9 @@ class Template {
 			case 'html':
 
 				if ( $icon_2x && $icon_2x !== $icon ) {
-					return "<img class='plugin-icon' srcset='{$icon}, {$icon_2x} 2x' src='{$icon_2x}'>";
+					return "<img class='plugin-icon' srcset='{$icon}, {$icon_2x} 2x' src='{$icon_2x}' alt=''>";
 				} else {
-					return "<img class='plugin-icon' src='{$icon}'>";
+					return "<img class='plugin-icon' src='{$icon}' alt=''>";
 				}
 				break;
 
@@ -494,16 +541,14 @@ class Template {
 
 		switch ( $output ) {
 			case 'html':
-				$id    = "plugin-banner-{$plugin->post_name}";
-				$html  = "<style type='text/css'>";
-				$html .= "#{$id} { background-image: url('{$banner}'); }";
-				if ( ! empty( $banner_2x ) ) {
-					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 120dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
-				}
-				$html .= '</style>';
-				$html .= "<div class='plugin-banner' id='{$id}'></div>";
+				return sprintf(
+					'<div class="plugin-banner" id="%1$s"><img decoding="async" fetchpriority="high" alt="" src="%2$s" %3$s %4$s></div>',
+					esc_attr( "plugin-banner-{$plugin->post_name}" ),
+					esc_url( $banner ),
+					! empty( $banner_2x ) ? "srcset='" . esc_url( $banner ) . " 772w, " . esc_url( $banner_2x ) . " 1544w'" : '',
+					! empty( $banner_2x ) ? 'sizes="(min-width: 900px) 1544px, 772px"' : ''
+				);
 
-				return $html;
 				break;
 
 			case 'raw':
@@ -753,7 +798,7 @@ class Template {
 	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
 	 * @return false|string The preview url. False if no preview is configured.
 	 */
-	public static function preview_link( $post = null ) {
+	public static function preview_link( $post = null, $locale = null ) {
 		$post = get_post( $post );
 
 		$blueprints = self::get_blueprints( $post );
@@ -763,7 +808,11 @@ class Template {
 		}
 		$blueprint = $blueprints['blueprint.json'];
 
-		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), esc_attr($blueprint['url'] ) );
+		$blueprint_url = $blueprint['url'];
+		$locale = $locale ?? get_locale();
+		$blueprint_url = add_query_arg( 'lang', $locale, $blueprint_url );
+
+		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), rawurlencode($blueprint_url) );
 	}
 
 	/**
@@ -985,6 +1034,8 @@ class Template {
 			$endpoint = 'plugin/%s/release-confirmation/%s';
 		} elseif ( 'discard' === $what ) {
 			$endpoint = 'plugin/%s/release-confirmation/%s/discard';
+		} elseif ( 'undo-discard' === $what ) {
+			$endpoint = 'plugin/%s/release-confirmation/%s/undo-discard';
 		} else {
 			return '';
 		}
@@ -994,19 +1045,6 @@ class Template {
 		return add_query_arg(
 			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
 			$url
-		);
-	}
-
-	/**
-	 * Generates a link to email the release confirmation link.
-	 *
-	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
-	 * @return string URL to enable confirmations.
-	 */
-	public static function get_release_confirmation_access_link() {
-		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
-			home_url( 'wp-json/plugins/v1/release-confirmation-access' )
 		);
 	}
 
@@ -1059,18 +1097,74 @@ class Template {
 	 * @return string Close/disable reason.
 	 */
 	public static function get_close_reason( $post = null ) {
+		return self::get_close_data( $post )['label'] ?? '';
+	}
+
+	/**
+	 * Returns the close/disable data for a plugin.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 */
+	public static function get_close_data( $post = null ) {
 		$post = get_post( $post );
-
-		$close_reasons = self::get_close_reasons();
-		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
-
-		if ( isset( $close_reasons[ $close_reason ] ) ) {
-			$reason_label = $close_reasons[ $close_reason ];
-		} else {
-			$reason_label = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+		if ( ! $post || ! in_array( $post->post_status, array( 'closed', 'disabled' ), true ) ) {
+			return false;
 		}
 
-		return $reason_label;
+		$result = [
+			'date'      => get_post_meta( $post->ID, 'plugin_closed_date', true ) ?: false,
+			'reason'    => (string) get_post_meta( $post->ID, '_close_reason', true ),
+			'label'     => '',
+			'permanent' => false,
+			'public'    => false,
+		];
+
+		/*
+		 * If the date is unknown, fallback to the last_updated time (then to post_modified_gmt, then to post_date_gmt..).
+		 *
+		 * This is not strictly correct, but the consistency in data is more important than the exact date, where the plugins
+		 * without the closed metadata are likely closed pre-2018.
+		 */
+		if ( ! $result['date'] ) {
+			$result['date'] = $post->last_updated ?: $post->post_modified_gmt;
+			if ( '0000-00-00 00:00:00' === $result['date'] ) {
+				$result['date'] = $post->post_date_gmt;
+			}
+		}
+
+		if (
+			// Assume by-author-request is permanent.
+			'author-request' === $result['reason'] ||
+			// Likewise for when it's closed due to merged-to-core.
+			'merged-into-core' === $result['reason'] ||
+			// Or if it's closed without committers.
+			! Tools::get_plugin_committers( $post->post_name )
+		) {
+			$result['permanent'] = true;
+		}
+
+		$result['label'] = self::get_close_reasons()[ $result['reason'] ] ?? false;
+
+		// If not known reason, use 'unknown'.
+		if ( ! $result['label'] ) {
+			$result['reason'] = 'unknown';
+			$result['label']  = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+		}
+
+		// These reasons are never embargoed, and are shown immediately.
+		$unembargoed_closure_reasons = array(
+			'author-request',
+			'unused',
+			'merged-into-core',
+		);
+
+		// If it's closed for more than 60 days, it's not embargoed, or we're unsure about the close date, it's publicly known.
+		$days_closed = $result['date'] ? (int) ( ( time() - strtotime( $result['date'] ) ) / DAY_IN_SECONDS ) : false;
+		if ( ! $result['date'] || $days_closed >= 60 || in_array( $result['reason'], $unembargoed_closure_reasons, true ) ) {
+			$result['public'] = true;
+		}
+
+		return $result;	
 	}
 
 	/**
@@ -1332,5 +1426,23 @@ class Template {
 		}
 
 		return $sorted;
+	}
+
+	/**
+	 * Get the available rollout strategies for plugin updates.
+	 *
+	 * @return array
+	 */
+	static function get_rollout_strategies() {
+		return [
+			'' => [
+				'name' => __( 'Immediate (default)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
+			],
+			'manual-updates-24hr' => [
+				'name' => __( 'Manual updates only (24 hours)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites, but automatic updates will be disabled for 24 hours. After that, sites will receive the update as normal.', 'wporg-plugins' ),
+			],
+		];
 	}
 }

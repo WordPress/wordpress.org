@@ -918,10 +918,9 @@ h1,
 h2,
 h3,
 h4,
-.bbp-view .review-ratings .col-5 > div:first-child,
+.bbp-view .review-ratings > div:last-child > div:first-child,
 h5,
 h6 {
-	clear: both;
 	margin: 0 0 var(--wp--style--block-gap);
 }
 
@@ -929,6 +928,10 @@ h2.comment-reply-title {
 	font-weight: 400;
 	font-size: 1.45rem;
 	line-height: 1.5em;
+}
+
+* + h2 {
+	margin-top: var(--wp--preset--spacing--40);
 }
 
 h3.comment-reply-title {
@@ -975,7 +978,7 @@ address {
 }
 
 pre {
-	background: var(--wp--preset--color--light-grey-1);
+	background: var(--wp--preset--color--light-grey-2);
 	box-sizing: content-box;
 	font-family: "Courier 10 Pitch", Courier, monospace;
 	font-size: 0.8rem;
@@ -1037,6 +1040,9 @@ big {
 .iso-editor.has-fixed-toolbar .interface-interface-skeleton__header {
 	z-index: var(--wp--custom--z-index--iso-editor);
 }
+.iso-editor pre {
+	background-color: #f0f0f0;
+}
 
 .wp-block-quote {
 	font-size: var(--wp--preset--font-size--normal);
@@ -1047,6 +1053,24 @@ big {
 
 :where(.wp-block-search__button-inside .wp-block-search__inside-wrapper) {
 	border: none;
+}
+
+.wp-block-wporg-table-of-contents {
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: 2px;
+	margin-bottom: var(--wp--preset--spacing--50);
+}
+@media screen and (min-width: 1300px) {
+	.wp-block-wporg-table-of-contents {
+		float: right;
+		width: 250px;
+		margin-left: var(--wp--style--block-gap);
+		margin-bottom: var(--wp--style--block-gap);
+		padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--20) 0;
+	}
+}
+.wp-block-wporg-table-of-contents li ul {
+	margin-left: 0;
 }
 
 /*--------------------------------------------------------------
@@ -1100,10 +1124,6 @@ blockquote p {
 p.has-background {
 	display: inline-block;
 	padding: var(--wp--preset--spacing--20);
-}
-
-a:visited {
-	color: var(--wp--preset--color--purple-1);
 }
 
 ul, ol {
@@ -1255,10 +1275,6 @@ table {
 }
 
 /* User badges */
-.type-reported_topics {
-	border-right: 2px solid var(--wp--custom--color--thread-reporter);
-}
-
 .author-badge {
 	position: absolute;
 	top: var(--wp--preset--spacing--20);
@@ -1291,7 +1307,6 @@ table {
 
 .author-badge-reporter {
 	background-color: var(--wp--custom--color--thread-reporter);
-	color: var(--wp--preset--color--charcoal-1);
 	right: -2px;
 	left: initial;
 	border-radius: 2px 0 0 2px;
@@ -1965,9 +1980,8 @@ fieldset label {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear::before, .bbp-view .review-ratings::before, .bbpress main#main::before,
+.clear::before, .bbpress main#main::before,
 .clear::after,
-.bbp-view .review-ratings::after,
 .bbpress main#main::after,
 .entry-content::before,
 .entry-content::after,
@@ -1984,7 +1998,7 @@ fieldset label {
 	table-layout: fixed;
 }
 
-.clear::after, .bbp-view .review-ratings::after, .bbpress main#main::after,
+.clear::after, .bbpress main#main::after,
 .entry-content::after,
 .comment-content::after,
 .site-header::after,
@@ -2008,6 +2022,11 @@ fieldset label {
 
 .wp-block-navigation-item .wp-block-navigation-item__content {
 	cursor: pointer;
+}
+
+.gutenberg-support #bbpress-forums fieldset.bbp-form .blocks-everywhere {
+	max-width: 100%;
+	min-width: 100%;
 }
 
 /*--------------------------------------------------------------
@@ -2220,7 +2239,7 @@ body:not(.trac):not(.home-page):not(.home) #main {
 }
 
 body:not(.trac):not(.home-page) #main {
-	padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
 }
 
 @media screen and (max-width: 460px) {
@@ -2313,25 +2332,6 @@ body.single .sidebar {
 	padding-block: var(--wp--custom--form--padding--block);
 }
 .search-form .button-search {
-	border-left: none;
-	border-radius: 0 2px 2px 0;
-	font-size: 1rem;
-	position: relative;
-	right: auto;
-	top: auto;
-}
-.search-form .button-search:active {
-	background: #006799;
-	border-right: 1px solid #006799;
-	box-shadow: none;
-}
-.search-form .button-search .dashicons {
-	font-size: 1rem;
-}
-.site-header .search-form {
-	display: inline-block;
-}
-.site-header.home .search-form .button-search, .site-main .search-form .button-search {
 	background: transparent;
 	border: none;
 	border-radius: 0;
@@ -2347,52 +2347,13 @@ body.single .sidebar {
 	top: 0;
 	margin: 0;
 }
-.site-header.home .search-form .button-search:focus, .site-main .search-form .button-search:focus {
-	box-shadow: 0 0 2px 1px #33b3db;
+.search-form .button-search:focus-visible {
+	outline: -webkit-focus-ring-color auto 1px;
 }
-.site-header.home .search-form .button-search:active, .site-main .search-form .button-search:active {
+.search-form .button-search:active {
 	background: transparent;
 	border: none;
 	transform: none;
-}
-.site-header.home .search-form .button-search i, .site-main .search-form .button-search i {
-	vertical-align: sub;
-}
-.site-header:not(.home) .search-form {
-	margin: 0;
-}
-.site-header:not(.home) .search-form .search-field {
-	border: 0;
-	border-radius: 2px;
-	display: inline-block;
-	font-size: 1rem;
-	padding: 5px 10px;
-	position: relative;
-	width: 100%;
-}
-@media screen and (min-width: 48em) {
-	.site-header:not(.home) .search-form .search-field {
-		border-radius: 2px 0 0 2px;
-		font-size: 0.64rem;
-		width: 7rem;
-	}
-	.site-header:not(.home) .search-form .search-field + .button-search {
-		display: inline-block;
-		margin-bottom: 0;
-	}
-}
-@media screen and (min-width: 60em) {
-	.site-header:not(.home) .search-form .search-field {
-		width: 10rem;
-	}
-}
-
-.search .site-main {
-	margin-top: 2rem;
-	padding-top: 0;
-}
-.search.search-results .page-header {
-	margin: 2rem 0;
 }
 
 /*--------------------------------------------------------------
@@ -2411,11 +2372,9 @@ body.single .sidebar {
 # .helphub-page
 # .page
 --------------------------------------------------------------*/
-@media screen and (min-width: 48em) {
-	.helphub-page .entry-header .entry-title,
-	.page .entry-header .entry-title {
-		padding: 0 2rem;
-	}
+.helphub-page #main-content,
+.page #main-content {
+	margin-top: 0;
 }
 .helphub-page .entry-content section,
 .page .entry-content section {
@@ -2435,10 +2394,6 @@ body.single .sidebar {
 .page .entry-content section:first-of-type {
 	padding-top: 0;
 }
-.helphub-page .entry-content section + section,
-.page .entry-content section + section {
-	border-top: 2px solid var(--wp--preset--color--light-grey-1);
-}
 .helphub-page .entry-content h2.toc-heading,
 .page .entry-content h2.toc-heading {
 	font-size: var(--wp--preset--font-size--heading-4);
@@ -2457,26 +2412,6 @@ body.single .sidebar {
 .page .entry-content h3.toc-heading:target {
 	border-left-color: var(--wp--preset--color--blueberry-1);
 	scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
-}
-.helphub-page .entry-content .table-of-contents,
-.page .entry-content .table-of-contents {
-	margin: 0 0 var(--wp--preset--spacing--20) var(--wp--preset--spacing--20);
-}
-.helphub-page .entry-content .table-of-contents .items,
-.page .entry-content .table-of-contents .items {
-	font-size: var(--wp--preset--font-size--small);
-}
-.helphub-page .entry-content .table-of-contents .items li ul,
-.page .entry-content .table-of-contents .items li ul {
-	margin-left: 0;
-}
-.helphub-page .entry-content .table-of-contents .items li a:hover,
-.page .entry-content .table-of-contents .items li a:hover {
-	color: var(--wp--custom--link--color--text);
-}
-.helphub-page .entry-content p.toc-jump,
-.page .entry-content p.toc-jump {
-	margin-bottom: unset;
 }
 .helphub-page .entry-footer,
 .page .entry-footer {
@@ -2563,6 +2498,12 @@ body.category #main .archive-pagination {
 	line-height: var(--wp--custom--heading--level-1--typography--line-height);
 	padding-bottom: unset;
 }
+#bbpress-forums hr {
+	border-color: var(--wp--custom--color--border);
+	border-style: solid;
+	border-width: 1px 0 0;
+	margin-bottom: var(--wp--style--block-gap);
+}
 
 .bbpress main#main .entry-content,
 .bbpress main#main .entry-footer,
@@ -2626,9 +2567,11 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .status-spam div.bbp-template-notice {
 	background: var(--wp--preset--color--pomegrade-3);
 }
-.bbpress #bbpress-forums .bbp-topic-content p:last-child,
-.bbpress #bbpress-forums .bbp-reply-content p:last-child {
-	margin-bottom: var(--wp--preset--spacing--20);
+.bbpress #bbpress-forums .bbp-forum-content ul.sticky,
+.bbpress #bbpress-forums .bbp-topics ul.sticky,
+.bbpress #bbpress-forums .bbp-topics ul.super-sticky,
+.bbpress #bbpress-forums .bbp-topics-front ul.super-sticky {
+	background-color: var(--wp--preset--color--lemon-3) !important;
 }
 .bbpress #bbpress-forums .bbp-body .bbp-topic-freshness,
 .bbpress #bbpress-forums .bbp-body .bbp-topic-voice-count,
@@ -2776,19 +2719,40 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums div.topic,
 .bbpress #bbpress-forums div.reply,
 .bbpress #bbpress-forums div.reported_topics {
-	padding: var(--wp--preset--spacing--20);
+	padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--20) 40px;
 }
 .bbpress #bbpress-forums div.topic.author-has-badge, .bbpress #bbpress-forums div.topic.topic-author, .bbpress #bbpress-forums div.topic.by-moderator,
 .bbpress #bbpress-forums div.reply.author-has-badge,
 .bbpress #bbpress-forums div.reply.topic-author,
-.bbpress #bbpress-forums div.reply.by-moderator {
+.bbpress #bbpress-forums div.reply.by-moderator,
+.bbpress #bbpress-forums div.reported_topics.author-has-badge,
+.bbpress #bbpress-forums div.reported_topics.topic-author,
+.bbpress #bbpress-forums div.reported_topics.by-moderator {
 	padding-top: 60px;
+}
+.bbpress #bbpress-forums div.reported_topics {
+	padding-top: 60px;
+	background-color: unset;
+	border: 2px solid var(--wp--custom--color--thread-reporter);
 }
 .bbpress #bbpress-forums div.bbp-reply-content,
 .bbpress #bbpress-forums div.bbp-topic-content {
 	padding: 0;
 	clear: left;
 	margin: var(--wp--preset--spacing--20) 0 0;
+}
+.bbpress #bbpress-forums div.bbp-reply-content code,
+.bbpress #bbpress-forums div.bbp-reply-content pre,
+.bbpress #bbpress-forums div.bbp-topic-content code,
+.bbpress #bbpress-forums div.bbp-topic-content pre {
+	background-color: var(--wp--preset--color--light-grey-2);
+}
+.bbpress #bbpress-forums div.bbp-reply-content pre,
+.bbpress #bbpress-forums div.bbp-topic-content pre {
+	padding: var(--wp--preset--spacing--20);
+	border: 1px solid var(--wp--custom--color--border);
+	max-width: 100%;
+	border-radius: 2px;
 }
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-reply-content,
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-topic-content {
@@ -2822,18 +2786,6 @@ body.category #main .archive-pagination {
 	background: none;
 	padding: var(--wp--preset--spacing--10) calc(var(--wp--preset--spacing--20) - 5px);
 	font-size: 0;
-}
-@media screen and (max-width: 480px) {
-	.bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links,
-	.bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links {
-		padding: 3px 7px;
-	}
-}
-@media screen and (max-width: 767px) {
-	.bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links,
-	.bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links {
-		display: block;
-	}
 }
 .bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links a,
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a {
@@ -3006,33 +2958,34 @@ body.category #main .archive-pagination {
 .bbpress #wp-link-wrap #wp-link #search-panel label span.search-label {
 	width: 90px;
 }
-.bbpress li.bbp-forum-freshness,
-.bbpress li.bbp-topic-freshness {
-	text-align: left;
-}
-.bbpress .forum-titles .bbp-topic-voice-count,
-.bbpress .forum-titles .bbp-topic-reply-count {
-	overflow: hidden;
-}
-.bbpress .forum-titles .bbp-topic-voice-count::before,
-.bbpress .forum-titles .bbp-topic-reply-count::before {
-	font: 400 16px/1 dashicons;
-	margin-right: 100px;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-}
-@media (min-width: 321px) {
-	.bbpress .forum-titles .bbp-topic-voice-count::before,
-	.bbpress .forum-titles .bbp-topic-reply-count::before {
-		font: 400 21px/1 dashicons;
-		margin-left: 20px;
+@media screen and (min-width: 321px) {
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-title,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-title {
+		width: 60%;
 	}
-}
-.bbpress .forum-titles .bbp-topic-voice-count::before {
-	content: "\f307";
-}
-.bbpress .forum-titles .bbp-topic-reply-count::before {
-	content: "\f125";
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-reply-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-reply-count {
+		text-align: left;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-voice-count {
+		width: 12%;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-reply-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-reply-count {
+		width: 8%;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
+	.bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-freshness {
+		text-align: right;
+		width: 20%;
+	}
 }
 .bbpress #bbpress-forums .bbp-forum-info .bbp-forum-content,
 .bbpress #bbpress-forums p.bbp-topic-meta {
@@ -3443,7 +3396,7 @@ body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.reply.
 	scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
 	margin-bottom: var(--wp--preset--spacing--30);
 }
-body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.even:not(.topic):not(.reply),
+body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.even:not(.topic):not(.reply):not(.reported_topics),
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.even,
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.odd:not(.reply),
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.odd {
@@ -3490,12 +3443,37 @@ body.single-topic:not(body.topic-edit) .entry-content header {
 
 div.bbp-breadcrumb {
 	font-size: var(--wp--preset--font-size--small);
-	margin-bottom: 15px;
-	color: var(--wp--preset--color--charcoal-3);
+	margin: 0;
 	float: none;
+	padding: 15px 0;
 }
 div.bbp-breadcrumb p {
+	display: flex;
+	position: relative;
+	max-width: 100%;
 	margin: 0 !important;
+	overflow-x: auto;
+	-webkit-mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+	mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+	color: var(--wp--preset--color--charcoal-1);
+	text-overflow: clip;
+	white-space: nowrap;
+}
+div.bbp-breadcrumb p::after {
+	content: "";
+	display: inline-block;
+	width: 60px;
+}
+div.bbp-breadcrumb a {
+	color: var(--wp--preset--color--charcoal-4);
+	text-decoration: none;
+}
+div.bbp-breadcrumb a:hover {
+	text-decoration: underline;
+}
+div.bbp-breadcrumb .bbp-breadcrumb-sep {
+	margin: 0 10px;
+	color: var(--wp--preset--color--light-grey-1);
 }
 
 .sidebar .topic-info li.topic-report {
@@ -3578,51 +3556,49 @@ div.bbp-breadcrumb p {
 # Plugin / Theme specific support pages
 --------------------------------------------------------------*/
 .bbp-view .review-ratings {
-	margin-bottom: 1rem;
-	padding-bottom: 10px;
+	margin-bottom: var(--wp--preset--spacing--20);
+	padding-bottom: var(--wp--preset--spacing--20);
 	border-bottom: 1px solid var(--wp--custom--color--border);
 	display: flex;
-	flex-direction: row-reverse;
 }
-.bbp-view .review-ratings .col-3 {
+.bbp-view .review-ratings > div:first-child {
 	font-size: 0.8rem;
-	margin: 0;
-	min-width: 40%;
-	border-top: 1px solid var(--wp--custom--color--border);
+	width: 60%;
+	min-width: 54%;
 	flex-shrink: 0;
 }
-.bbp-view .review-ratings .col-3 .reviews-total-count {
+.bbp-view .review-ratings > div:last-child {
+	margin: 0 0 10px 0;
+	padding-right: 10px;
+	min-width: 40%;
+	font-size: 0.8rem;
+}
+.bbp-view .review-ratings > div:last-child .reviews-total-count {
 	font-weight: 700;
 	padding-bottom: 5px;
 	padding-top: 5px;
 }
-.bbp-view .review-ratings .col-3 .counter-bar {
-	background-color: var(--wp--preset--color--pomegrade-1) !important;
-}
-.bbp-view .review-ratings .col-5 {
-	margin: 0 0 10px 0;
-	padding-right: 10px;
-	width: 60%;
-	min-width: 54%;
-	font-size: 0.8rem;
-}
-.bbp-view .review-ratings .col-5 > div:first-child {
+.bbp-view .review-ratings > div:last-child > div:first-child {
 	margin-top: 0;
 }
-.bbp-view .review-ratings .col-5 .wporg-ratings {
+.bbp-view .review-ratings > div:last-child .wporg-ratings {
 	display: inline-block;
 	margin-right: 1rem;
 }
-.bbp-view .review-ratings .col-5 .reviews-submit-link {
+.bbp-view .review-ratings > div:last-child .reviews-submit-link {
 	margin-top: 1rem;
 }
 @media (max-width: 499px) {
 	.bbp-view .review-ratings {
-		flex-direction: column-reverse;
+		flex-direction: column;
 	}
-	.bbp-view .review-ratings .col-3, .bbp-view .review-ratings .col-5 {
+	.bbp-view .review-ratings > div:first-child {
 		width: 100%;
+		margin-bottom: 20px;
 	}
+}
+.bbp-view .reviews-submit-link {
+	margin-top: 10px;
 }
 
 /*--------------------------------------------------------------

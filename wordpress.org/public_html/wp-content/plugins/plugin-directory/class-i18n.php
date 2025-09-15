@@ -83,17 +83,17 @@ class I18n {
 		_x( 'Utilities & Tools', 'Plugin Category Name', 'wporg-plugins' );
 
 		// Section terms.
-		_x( 'Adopt Me', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Beta Plugins', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Block-Enabled Plugins', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'My Favorites', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Featured Plugins', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Popular Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Adopt me', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Beta plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Block-Enabled plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'My favorites', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Featured plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Popular plugins', 'Plugin Section Name', 'wporg-plugins' );
 		/* translators: Block plugins are single-block plugins, not block-enabled plugins. */
-		_x( 'Block Plugins', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'New Plugins', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Recently Updated Plugins', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Preview-Enabled Plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Block plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'New plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Recently updated plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Preview-Enabled plugins', 'Plugin Section Name', 'wporg-plugins' );
 
 		// Section descriptions.
 		_x( 'Plugins that have been offered for adoption by others.', 'Plugin Section Description', 'wporg-plugins' );

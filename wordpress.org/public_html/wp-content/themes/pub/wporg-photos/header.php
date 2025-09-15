@@ -21,6 +21,11 @@ $menu_items = array(
 	'/random/'     => __( 'Random', 'wporg-photos' ),
 );
 
+// Only logged-in users have favorites.
+if ( is_user_logged_in() ) {
+	$menu_items[ '/favorites/' ] = __( 'Favorites', 'wporg-photos' );
+}
+
 if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
 	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 } else {

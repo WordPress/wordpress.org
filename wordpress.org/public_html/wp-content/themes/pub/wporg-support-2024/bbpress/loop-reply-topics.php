@@ -4,7 +4,7 @@
 	<li class="bbp-header">
 		<ul class="forum-titles">
 			<li class="bbp-topic-title"><?php esc_html_e( 'Topic', 'wporg-forums' ); ?></li>
-			<li class="bbp-topic-voice-count"><?php esc_html_e( 'Voices', 'wporg-forums' ); ?></li>
+			<li class="bbp-topic-voice-count"><?php esc_html_e( 'Participants', 'wporg-forums' ); ?></li>
 			<li class="bbp-topic-reply-count"><?php bbp_show_lead_topic()
 				? esc_html_e( 'Replies', 'wporg-forums' )
 				: esc_html_e( 'Posts',   'wporg-forums' );

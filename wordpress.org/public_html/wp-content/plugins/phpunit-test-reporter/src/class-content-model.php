@@ -42,6 +42,60 @@ class Content_Model {
 				),
 			)
 		);
+
+		register_taxonomy(
+			'php-version',
+			array( 'result' ),
+			array(
+				'labels'       => array(
+					'name'          => __( 'PHP Versions', 'ptr' ),
+					'singular_name' => __( 'PHP Version', 'ptr' ),
+				),
+				'hierarchical'               => false,
+				'public'                     => false,
+				'show_ui'                    => true,
+				'show_admin_column'          => true,
+				'show_in_nav_menus'          => false,
+				'show_tagcloud'              => false,
+				'show_in_rest'               => true,
+			)
+		);
+
+		register_taxonomy(
+			'db-version',
+			array( 'result' ),
+			array(
+				'labels'       => array(
+					'name'          => __( 'Database Versions', 'ptr' ),
+					'singular_name' => __( 'Database Version', 'ptr' ),
+				),
+				'hierarchical'               => false,
+				'public'                     => false,
+				'show_ui'                    => true,
+				'show_admin_column'          => true,
+				'show_in_nav_menus'          => false,
+				'show_tagcloud'              => false,
+				'show_in_rest'               => true,
+			)
+		);
+
+		register_taxonomy(
+			'report-result',
+			array( 'result' ),
+			array(
+				'labels'       => array(
+					'name'          => __( 'Result Status', 'ptr' ),
+					'singular_name' => __( 'Result Status', 'ptr' ),
+				),
+				'hierarchical'               => false,
+				'public'                     => false,
+				'show_ui'                    => true,
+				'show_admin_column'          => true,
+				'show_in_nav_menus'          => false,
+				'show_tagcloud'              => false,
+				'show_in_rest'               => true,
+			)
+		);
 	}
 
 	/**

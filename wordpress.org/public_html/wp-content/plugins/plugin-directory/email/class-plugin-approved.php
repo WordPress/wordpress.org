@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Email;
 
 use WordPressdotorg\Plugin_Directory\Tools;
 
-class Plugin_Approved extends Base {
+class Plugin_Approved extends Markdown_Base {
 	protected $required_args = [];
 
 	function subject() {
@@ -14,8 +14,8 @@ class Plugin_Approved extends Base {
 		);
 	}
 
-	function body() {
-		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug */
+	function markdown() {
+		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug, 4: link to plugin authors profile */
 		$email_text = __(
 'Congratulations, the plugin hosting request for %1$s has been approved.
 
@@ -29,32 +29,35 @@ Once your account access has been activated, you may upload your code using a SV
 To answer some common questions:
 
 * You must use SVN to upload your code -- we are unable to do that for you
-* Your SVN username is %2$s and your password is the same as you use to log in to WordPress.org
-* Your username is case sensitive
+* Your SVN username is `%2$s` and is case sensitive.
+* You can <strong>set up your SVN credentials</strong> (if you haven\'t already) in the "Account & Security" section of your [WordPress.org profile](%4$s).
 * SVN will not accept your email address as a username
 * Due to the size of the directory, it may take 72 hours before all search results are properly updated
 
 To help you get started, here are some links:
 
-Using Subversion with the WordPress Plugin Directory:
+Using Subversion with the WordPress Plugin Directory:<br>
 https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/
 
-FAQ about the WordPress Plugin Directory:
+Generating your SVN Password:<br>
+https://make.wordpress.org/meta/handbook/tutorials-guides/svn-access/
+
+FAQ about the WordPress Plugin Directory:<br>
 https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
 
-WordPress Plugin Directory readme.txt standard:
+WordPress Plugin Directory readme.txt standard:<br>
 https://wordpress.org/plugins/developers/#readme
 
-A readme.txt validator:
+A readme.txt validator:<br>
 https://wordpress.org/plugins/developers/readme-validator/
 
-Plugin Assets (header images, etc):
+Plugin Assets (header images, etc):<br>
 https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
 
-WordPress Plugin Directory Guidelines:
+WordPress Plugin Directory Guidelines:<br>
 https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
 
-Block Specific Plugin Guidelines:
+Block Specific Plugin Guidelines:<br>
 https://developer.wordpress.org/plugins/wordpress-org/block-specific-plugin-guidelines/
 
 If you have issues or questions, please reply to this email and let us know.
@@ -65,7 +68,8 @@ Enjoy!', 'wporg-plugins' );
 			$email_text,
 			$this->plugin->post_title,
 			$this->user->user_login,
-			$this->plugin->post_name
+			$this->plugin->post_name,
+			"https://profiles.wordpress.org/{$this->user->user_nicename}/profile/edit/group/3/?screen=svn-password"
 		);
 	}
 }

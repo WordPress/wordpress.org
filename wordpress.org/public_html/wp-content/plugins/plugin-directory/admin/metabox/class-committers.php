@@ -98,7 +98,7 @@ class Committers {
 
 		check_ajax_referer( "remove-committer-$id" );
 
-		if ( ! current_user_can( 'plugin_remove_committer', $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+		if ( ! current_user_can( 'plugin_remove_committer', $post_id ) ) {
 			wp_die( -1 );
 		}
 

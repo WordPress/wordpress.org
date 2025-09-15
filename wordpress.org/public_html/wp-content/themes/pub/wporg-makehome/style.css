@@ -235,6 +235,7 @@ section.get-involved article.make-training       h2 a:before { content: '\f118';
 section.get-involved article.make-flow           h2 a:before { content: '\f115'; }
 section.get-involved article.make-tv             h2 a:before { content: '\f235'; }
 section.get-involved article.make-marketing      h2 a:before { content: '\f130'; }
+section.get-involved article.make-media-corps    h2 a:before { content: '\f130'; }
 section.get-involved article.make-cli            h2 a:before { content: '\f345'; }
 section.get-involved article.make-hosting        h2 a:before { content: '\f176'; }
 section.get-involved article.make-tide           h2 a:before { content: '\f10d'; }
@@ -248,7 +249,7 @@ section.get-involved article.make-performance   h2 a:before {
 	content: ".";
 	text-indent: -999px;
 	width: 18px;
-	height: 18px;
+	height: 22px;
 	-webkit-mask-repeat: no-repeat;
 	-webkit-mask-position: bottom;
 	-webkit-mask-size: 20px;
@@ -258,6 +259,7 @@ section.get-involved article.make-performance   h2 a:before {
 	display: inline-block;
 	background-color: currentColor;
 	margin-right: 6px;
+	vertical-align: top;
 }
 
 section.get-involved article.make-openverse h2 a:before {
@@ -285,6 +287,17 @@ section.get-involved article div.team-description p {
 	display: inline;
 	font-size: 1em;
 	line-height: 1.5;
+}
+
+.wizard-callout {
+	background-color: #fdffd6;
+	font-size: 1.6em;
+	margin: 6px 10px 12px;
+	padding: 12px;
+}
+
+.wizard-callout a {
+	text-decoration: underline;
 }
 
 div.team-meeting {
@@ -401,3 +414,10 @@ table.schedule td:focus-within .edit {
 	/* Separated from the block above due to browsers that don't support :focus-within */
 	visibility: visible;
 }
+
+/* @see https://meta.trac.wordpress.org/ticket/6867 */
+/* @see https://github.com/WordPress/meeting-calendar/pull/149 for the eventual(?) upstream fix. */
+.wporg-meeting-calendar__cell strong {
+	font-size: 1.2em;
+}
+

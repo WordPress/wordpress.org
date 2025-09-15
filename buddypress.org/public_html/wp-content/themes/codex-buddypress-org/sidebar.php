@@ -18,7 +18,7 @@
 
 			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->post_parent );
 			$rel = '<ul>' . $children . '</ul>';
-			echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Similar</h3>' . $rel . '</div>';
+			echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Similar</h2>' . $rel . '</div>';
 			$show_related = false;
 			*/
 
@@ -26,7 +26,7 @@
 			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->ID);
 			if ( $children ) {
 				$rel = '<ul>' . $children . '</ul>';
-				echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Subpages</h3>' . $rel . '</div>';
+				echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Subpages</h2>' . $rel . '</div>';
 				$show_related = false;
 			}
 		} ?>
@@ -43,7 +43,7 @@
 						$rel .= '<li><a href="' . get_permalink($related->ID) . '" title="' . $title . '">' . $title . '</a></li>';
 					}
 					$rel = '<ul>' . $rel . '</ul>';
-					echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Related</h3>' . $rel . '</div>';
+					echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Related</h2>' . $rel . '</div>';
 				}
 			}
 		?>
@@ -77,7 +77,7 @@
 
 		if ( !empty( $codex_contributors ) ) {
 			echo '<div class="section-contributors widget">';
-			echo '<h3 class="widgettitle">Top Authors</h3>';
+			echo '<h2 class="widgettitle">Top Authors</h2>';
 			$codex_contributors = array_slice( $codex_contributors, 0, 5, true );
 			foreach( (array)$codex_contributors as $contributor_id => $count ) {
 				$userdata = get_userdata( $contributor_id );

@@ -96,7 +96,7 @@ class Consistency extends GP_Route {
 
 		$sets = wp_cache_get( 'translation-sets', $this->cache_group );
 
-		if ( false === $sets ) {
+		if ( empty( $sets ) ) {
 			$_sets = $wpdb->get_results( "SELECT name, locale, slug FROM {$wpdb->gp_translation_sets} GROUP BY locale, slug ORDER BY name" );
 
 			$sets = array();

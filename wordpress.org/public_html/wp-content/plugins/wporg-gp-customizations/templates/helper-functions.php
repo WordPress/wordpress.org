@@ -367,6 +367,24 @@ function wporg_references_wordpress_org_github( $source_url, $project, $file, $l
 		} elseif ( str_contains( $file, '/themes/wporg-gutenberg/' ) ) {
 			$source_url = "https://github.com/WordPress/wporg-gutenberg/blob/trunk/{$file}#L{$line}";
 		}
+
+	} elseif ( 'meta/rosetta' === $project->path ) {
+
+		// For Rosetta plugins, they're stored in the WordPress.org svn path.
+		if ( str_starts_with( $file, 'plugins/' ) && str_contains( $source_url, 'meta.trac.wordpress.org' ) ) {
+			$source_url = str_replace( '/global.wordpress.org/', '/wordpress.org/', $source_url );
+
+		// Not all Rosetta mu-plugins are public, don't attempt to link to them.
+		} elseif(
+			str_starts_with( $file, 'mu-plugins/' ) &&
+			! (
+				str_starts_with( $file, 'mu-plugins/downloads/' ) ||
+				str_starts_with( $file, 'mu-plugins/roles/' ) ||
+				str_starts_with( $file, 'mu-plugins/showcase/' )
+			)
+		) {
+			$source_url = false;
+		}
 	}
 
 	return $source_url;

@@ -13,7 +13,7 @@ class Plugin_Import {
 
 	public static function queue( $plugin_slug, $plugin_data ) {
 		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
-		$when_to_run = time() + 10;
+		$when_to_run = time() + 5;
 		if ( $next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' ) ) {
 			$when_to_run = $next_scheduled + HOUR_IN_SECONDS;
 		}
@@ -35,17 +35,22 @@ class Plugin_Import {
 
 		// Set some default values if not included from the caller.
 		$plugin_data['tags_touched']   ??= array( 'trunk' );
+		$plugin_data['tags_deleted']   ??= array();
 		$plugin_data['revisions']      ??= [ 0 ];
 		$plugin_data['readme_touched'] ??= true;
 		$plugin_data['code_touched']   ??= true;
 		$plugin_data['assets_touched'] ??= true;
 
 		$tags_touched = $plugin_data['tags_touched'];
+		$tags_deleted = $plugin_data['tags_deleted'];
 		$revision     = max( (array) $plugin_data['revisions'] );
 
 		$importer = new CLI\Import();
 		try {
-			$importer->import_from_svn( $plugin_slug, $tags_touched, $revision );
+			$importer->import_from_svn( $plugin_slug, $tags_touched, $tags_deleted, $revision );
+
+			// Schedule a job to import any i18n changes from this commit
+			Plugin_i18n_Import::queue( $plugin_slug, $plugin_data );
 		} catch ( Exception $e ) {
 			fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
 		} finally {
@@ -54,9 +59,6 @@ class Plugin_Import {
 				update_post_meta( $importer->plugin->ID, '_import_warnings', $importer->warnings );
 			}
 		}
-
-		// Schedule a job to import any i18n changes from this commit
-		Plugin_i18n_Import::queue( $plugin_slug, $plugin_data );
 
 		// Re-schedule any other jobs for this plugin to NOW()
 		$hook = current_filter();

@@ -62,7 +62,7 @@ class Support extends \WP_Widget {
 		<?php endif; ?>
 
 		<p>
-			<a class="button button-secondary" href="<?php echo esc_url( $support_url ); ?>"><?php _e( 'View support forum', 'wporg-plugins' ); ?></a>
+			<a href="<?php echo esc_url( $support_url ); ?>"><?php _e( 'View support forum', 'wporg-plugins' ); ?></a>
 		</p>
 
 		<?php

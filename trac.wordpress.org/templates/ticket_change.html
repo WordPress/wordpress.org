@@ -11,6 +11,24 @@ Arguments:
  - has_edit_comment=False: True if the user is allowed to edit all comments
  - preview=False: True if rendering a change preview
 -->
+<?python
+import re
+def wporg_wiki_to_html(context, wikidom, escape_newlines=None):
+
+	# Syntax highlight HTML blocks.
+	wikidom = re.sub( r'{{{\s*#!html', '{{{#!xml \n HTML', wikidom, flags=re.IGNORECASE )
+
+	# Unsupported code types get converted to plaintext.
+	wikidom = re.sub( r'{{{\s*#!(?!CommitTicketReference|xml|php|js|javascript|css|sql|sh|table|tr|th|td|diff)(\S+)\s', '{{{#!default \n \\1', wikidom, flags=re.IGNORECASE )
+
+	# Long code blocks (20k+) should be truncated to 10k characters.
+	wikidom = re.sub( r'{{{(.{10000}?).{10000,}?(}}}|$)', '{{{\\1 \n\nWordPress.org: Please note that this content has been truncated for display.\n }}}', wikidom, flags=re.DOTALL )
+
+	# Convert WikiMarkup.
+	wikidom = wiki_to_html( context, wikidom, escape_newlines )
+
+	return wikidom;
+?>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:py="http://genshi.edgewall.org/"
       xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -137,7 +155,7 @@ ${edited_comment if edited_comment is not None else change.comment}</textarea>
     <py:choose>
       <py:when test="'author' in change" py:with="wporg_user = wporg_sanitize_user_nicename(change.author)">
         <span class="avatar" py:if="change">
-          <span class="username-line"><a href="https://profiles.wordpress.org/${wporg_user}" class="profile-link">
+          <span class="username-line"><a href="https://profiles.wordpress.org/${wporg_user}/" class="profile-link">
             <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" alt="" /> @<span class="username" data-username="${change.author}" data-nicename="${wporg_user}">${authorinfo(change.author)}</span></a></span>
           <py:if test="'date' in change">
             <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
@@ -219,13 +237,13 @@ ${edited_comment if edited_comment is not None else change.comment}</textarea>
     <div py:when="str(cnum) == cnum_edit"
          py:with="text = edited_comment if edited_comment is not None else change.comment"
          class="comment searchable ticketdraft" style="${'display: none' if not text else None}" xml:space="preserve">
-      ${wiki_to_html(context, text, escape_newlines=preserve_newlines)}
+      ${wporg_wiki_to_html(context, text, escape_newlines=preserve_newlines)}
     </div>
     <div py:when="show_history" class="comment searchable" xml:space="preserve">
-      ${wiki_to_html(context, change.comment_history[int(cversion)].comment, escape_newlines=preserve_newlines)}
+      ${wporg_wiki_to_html(context, change.comment_history[int(cversion)].comment, escape_newlines=preserve_newlines)}
     </div>
     <div py:when="change.comment" class="comment searchable" xml:space="preserve">
-      ${wiki_to_html(context, change.comment, escape_newlines=preserve_newlines)}
+      ${wporg_wiki_to_html(context, change.comment, escape_newlines=preserve_newlines)}
     </div>
   </py:choose>
   <div py:if="not show_editor and len(change.comment_history) > 1" py:choose=""

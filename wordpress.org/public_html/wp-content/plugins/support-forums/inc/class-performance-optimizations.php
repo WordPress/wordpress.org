@@ -333,7 +333,12 @@ class Performance_Optimizations {
 
 	public function enqueue_styles() {
 		if ( current_user_can( 'participate' ) ) {
-			wp_enqueue_style( 'support-forums-participants', plugins_url( 'css/styles-participants.css', __DIR__ ), array(), '20230919' );
+			wp_enqueue_style(
+				'support-forums-participants',
+				plugins_url( 'css/styles-participants.css', __DIR__ ),
+				array(),
+				filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'css/styles-participants.css' )
+			);
 		}
 	}
 

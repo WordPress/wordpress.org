@@ -817,10 +817,10 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *
 	 * @param int   $post_id          The ID of the photo post type post.
 	 * @param array $skip_likelihoods Likelihoods to skip due to not being of concern.
-	 *                                Default ['very_unlikely', 'unlikely'].
+	 *                                Default ['very_unlikely', 'unlikely', 'possible'].
 	 * @return array
 	 */
-	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely' ] ) {
+	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely', 'possible' ] ) {
 		$flags = [];
 		$safe_search_flags = self::get_raw_moderation_assessment( $post_id );
 
@@ -933,7 +933,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 
 			switch ( $key ) {
 				case 'aperture':
-					$value = 'f/' . $value;
+					$value = '&#402;/' . $value;
 					break;
 				case 'created_timestamp':
 					$label = 'Created';
@@ -964,6 +964,99 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Strips markups from text and UTF8 encodes it if it appears to be UTF8.
+	 *
+	 * @param string $text Text to strip of tags and UTF8 encode.
+	 * @return string
+	 */
+	public static function _strip_and_utf8_encode( $text ) {
+		$text = wp_kses( $text, 'strip' );
+
+		if ( $text && ! seems_utf8( $text ) ) {
+			$text = utf8_encode( $text );
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Returns all EXIF data for a photo, not just the hardcoded subset returned
+	 * by `wp_read_image_metadata()`.
+	 *
+	 * Also returns the data completely raw, without any reformatting other than
+	 * sanitization.
+	 *
+	 * @param int $post_id The ID of the photo post.
+	 * @return false|array The sanitized raw EXIF data, or false if the file was
+	 *                     not found or `exif_read_data()` is not available.
+	 */
+	public static function get_all_exif( $post_id ) {
+		$image_id = get_post_thumbnail_id( $post_id );
+		$file = get_attached_file( $image_id );
+		$exif = [];
+
+		// Bail if `exif_read_data()` is not available or the file no longer exists.
+		if ( ! is_callable( 'exif_read_data' ) || ! file_exists( $file ) ) {
+			return false;
+		}
+
+		$exif = self::exif_read_data_as_data_stream( $file );
+
+		if ( ! $exif ) {
+			return [];
+		}
+
+		// Remap deprecated and unmapped properties.
+		// @see https://exiv2.org/tags.html
+		// @see https://github.com/exiftool/exiftool/blob/master/lib/Image/ExifTool/Exif.pm
+		// @see https://github.com/neos/metadata-extractor/blob/master/Classes/Domain/Extractor/ExifExtractor.php#L43
+		$remap = [
+			'GPSVersion'          => 'GPSVersionID',
+			'ISOSpeedRatings'     => 'PhotographicSensitivity',
+			'UndefinedTag:0x001F' => 'GPSHPositioningError',
+			'UndefinedTag:0x8830' => 'SensitivityType',
+			'UndefinedTag:0x8832' => 'RecommendedExposureIndex',
+			'UndefinedTag:0x9010' => 'OffsetTime',
+			'UndefinedTag:0x9011' => 'OffsetTimeOriginal',
+			'UndefinedTag:0x9012' => 'OffsetTimeDigitized',
+			'UndefinedTag:0x9400' => 'Temperature',
+			'UndefinedTag:0x9401' => 'Humidity',
+			'UndefinedTag:0x9402' => 'Pressure',
+			'UndefinedTag:0x9403' => 'WaterDepth',
+			'UndefinedTag:0x9404' => 'Acceleration',
+			'UndefinedTag:0x9405' => 'CameraElevationAngle',
+			'UndefinedTag:0x9999' => 'XiaomiSettings',
+			'UndefinedTag:0xA430' => 'CameraOwnerName',
+			'UndefinedTag:0xA431' => 'BodySerialNumber',
+			'UndefinedTag:0xA432' => 'LensSpecification',
+			'UndefinedTag:0xA433' => 'LensMake',
+			'UndefinedTag:0xA434' => 'LensModel',
+			'UndefinedTag:0xA435' => 'LensSerialNumber',
+			'UndefinedTag:0xA460' => 'CompositeImage',
+			'UndefinedTag:0xA500' => 'Gamma',
+		];
+		foreach ( $remap as $old => $new ) {
+			if ( isset( $exif[ $old ] ) ) {
+				$exif[ $new ] = $exif[ $old ];
+				unset( $exif[ $old ] );
+			}
+		}
+
+		// Ignore EXIF keys that are definitely not worth including.
+		$ignored_exif = apply_filters(
+			'wporg_photos-ignored_exif_keys',
+			[ 'UndefinedTag:0x9AAA' ]
+		);
+		if ( $ignored_exif && is_array( $ignored_exif ) ) {
+			foreach ( $ignored_exif as $key ) {
+				unset( $exif[ $key ] );
+			}
+		}
+
+		return map_deep( $exif, [__CLASS__, '_strip_and_utf8_encode' ] );
 	}
 
 	/**

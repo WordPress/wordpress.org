@@ -22,7 +22,7 @@ class Resource implements User {
 		return strtolower( str_replace( __NAMESPACE__ . '\\', '', $class ) );
 	}
 
-	function get( Trac $trac, $id ) {
+	static function get( Trac $trac, $id ) {
 		$key = $trac->get_slug() . ':' . static::get_resource_type() . ':' . $id;
 		if ( isset( static::$instances[ $key ] ) ) {
 			return static::$instances[ $key ];

@@ -542,7 +542,8 @@ body {
 	min-width: 48.5em; /* don't let it get ugly unless responsive */
 }
 body, th, tr {
-	line-height: 1.4; /* I don't know how you people read without this */
+	--wp--custom--body--typography--line-height: 1.4;/* I don't know how you people read without this */
+	line-height: var( --wp--custom--body--typography--line-height );
 }
 hr {
 	border-top: 1px solid #ccc;
@@ -946,7 +947,7 @@ span.contributor-label[title]:hover {
 	display: inherit;
 }
 span.time-ago {
-	font-size: 0.85em;
+	font-size: 12px;
 }
 span.time-ago a.timeline {
 	border: none;
@@ -2488,7 +2489,6 @@ a.mention.me {
 	border: 1px solid #ccc;
 	display: table;
 	margin: 0;
-	max-width: 56em;
 	padding: 0 1em;
 	position: relative;
 	width: 100%;
@@ -2501,7 +2501,14 @@ a.mention.me {
 }
 #github-prs ul.pull-requests li div {
 	display: table-cell;
-	padding: 0.5em 0;
+	padding: 0.5em 0.25em;
+}
+#github-prs ul.pull-requests li div:first-of-type {
+	padding-left: 0;
+}
+#github-prs ul.pull-requests li div:nth-of-type(n+2):last-of-type {
+	white-space: nowrap;
+	padding-right: 0;
 }
 #github-prs ul.pull-requests li > div:first-of-type > a:first-of-type {
 	display: inline-block;

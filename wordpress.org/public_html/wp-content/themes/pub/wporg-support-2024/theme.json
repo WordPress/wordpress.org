@@ -5,11 +5,6 @@
 		"color": {
 			"palette": [
 				{
-					"slug": "purple-1",
-					"color": "#7a00df",
-					"name": "Purple 1"
-				},
-				{
 					"slug": "light-grey-3",
 					"color": "#fbfbfb",
 					"name": "Light Grey 3"
@@ -30,7 +25,7 @@
 				"plugin-author": "var(--wp--preset--color--pomegrade-1)",
 				"theme-author": "var(--wp--preset--color--vivid-purple)",
 				"thread-starter": "var(--wp--preset--color--acid-green-2)",
-				"thread-reporter": "var(--wp--preset--color--lemon-1)"
+				"thread-reporter": "var(--wp--preset--color--vivid-red)"
 			},
 			"form": {
 				"border": {

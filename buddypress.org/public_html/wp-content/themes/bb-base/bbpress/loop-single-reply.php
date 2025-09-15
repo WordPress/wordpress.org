@@ -26,21 +26,27 @@ if ( bbp_is_single_user_replies() ) : ?>
 
 		<?php do_action( 'bbp_theme_before_reply_author_details' ); ?>
 
-		<?php bbp_reply_author_link( array( 'sep' => '<br />', 'show_role' => true, 'size' => 100 ) ); ?>
+		<?php bbp_reply_author_link( array( 'sep' => '', 'type' => 'avatar', 'show_role' => false, 'size' => 80 ) ); ?>
 
-		<?php bbp_user_nicename( bbp_get_reply_author_id(), array( 'before' => '<p class="bbp-user-nicename">@', 'after' => '</p>' ) ); ?>
+		<div class="bbp-reply-author-info">
+
+			<?php bbp_user_nicename( bbp_get_reply_author_id(), array( 'before' => '<p class="bbp-user-nicename">@', 'after' => '</p>' ) ); ?>
+
+			<?php bbp_reply_author_role( array( 'topic_id' => bbp_get_reply_id() ) ); ?>
+
+			<?php if ( is_super_admin() ) : ?>
+
+				<?php do_action( 'bbp_theme_before_reply_author_admin_details' ); ?>
+
+				<div class="bbp-reply-ip"><?php bbp_author_ip( bbp_get_reply_id() ); ?></div>
+
+				<?php do_action( 'bbp_theme_after_reply_author_admin_details' ); ?>
+
+			<?php endif; ?>
+
+		</div>
 
 		<p class="bbp-reply-post-date"><a href="<?php bbp_reply_url(); ?>" title="#<?php bbp_reply_id(); ?>" class="bbp-reply-permalink"><?php bbp_reply_post_date( bbp_get_reply_id(), true ); ?></a></p>
-
-		<?php if ( is_super_admin() ) : ?>
-
-			<?php do_action( 'bbp_theme_before_reply_author_admin_details' ); ?>
-
-			<div class="bbp-reply-ip"><?php bbp_author_ip( bbp_get_reply_id() ); ?></div>
-
-			<?php do_action( 'bbp_theme_after_reply_author_admin_details' ); ?>
-
-		<?php endif; ?>
 
 		<?php do_action( 'bbp_theme_after_reply_author_details' ); ?>
 

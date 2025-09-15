@@ -129,6 +129,11 @@ function get_user_email_for_email( $request ) {
 		$user = false;
 	}
 
+	// Is this is a bounce for an email that we have included the username in the subject for?
+	if ( preg_match( '#Are your plugins ready, (.+?)[?]#i', $subject, $m ) ) {
+		$user = get_user_by( 'login', $m[1] );
+	}
+
 	// Determine if this is a bounce, and if so, find out who for.
 	if ( ! $user && $email && $email_id ) {
 		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $customer->fname ?? false ), ( $customer->first ?? false ), ( $customer->lname ?? false ), ( $customer->last ?? false ) ] ) ) );
@@ -318,6 +323,21 @@ function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
 				'post_status' => 'any',
 			] );
 		}
+
+		// If that really didn't work, check the plugin_name_history
+		if ( ! $plugins ) {
+			$plugins = get_posts( [
+				'post_type'   => 'plugin',
+				'post_status' => 'any',
+				'meta_query'  => [
+					[
+						'key'     => 'plugin_name_history',
+						'compare' => 'LIKE',
+						'value'   => '"' . trim( $m['title'] ) . '"',
+					],
+				]
+			] );
+		}
 		restore_current_blog();
 
 		// As we're searching by title, multiple plugins may come up.
@@ -481,7 +501,7 @@ function get_wporg_user_for_helpscout_user( $hs_id, $instance = false ) {
 	}
 
 	if ( $user ) {
-		wp_cache_set( $cache_key, $user->ID, 'helpscout-users', MONTH_IN_SECONDS );
+		wp_cache_set( $cache_key, $user->ID, 'helpscout-users', DAY_IN_SECONDS );
 	}
 
 	return $user;

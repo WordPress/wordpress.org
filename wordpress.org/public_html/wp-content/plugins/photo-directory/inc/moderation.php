@@ -390,7 +390,7 @@ class Moderation {
 
 		// Check for moderator's note to user.
 		$mod_note = '';
-		$mod_note_to_user = Rejection::get_moderator_note_to_user( $post );
+		$mod_note_to_user = Rejection::get_moderator_note_to_user( $post, 'publish' );
 		if ( $mod_note_to_user ) {
 			$mod_note = "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n{$mod_note_to_user}\n";
 		}
@@ -474,7 +474,7 @@ https://wordpress.org/photos/
 		}
 
 		// Check for moderator's note to user.
-		$mod_note = Rejection::get_moderator_note_to_user( $post );
+		$mod_note = Rejection::get_moderator_note_to_user( $post, 'reject' );
 		if ( $mod_note ) {
 			$rejection_message .= "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n" . $mod_note . "\n";
 		}
@@ -547,7 +547,7 @@ https://wordpress.org/photos/
 		}
 
 		// Check for moderator's note to user.
-		$mod_note = Rejection::get_moderator_note_to_user( $post );
+		$mod_note = Rejection::get_moderator_note_to_user( $post, 'reject' );
 		if ( $mod_note ) {
 			$rejection_message .= "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n" . $mod_note . "\n";
 		}
@@ -612,22 +612,9 @@ https://wordpress.org/photos/
 			$flags[ 'face detected' ] = 'very_likely';
 		}
 
-		// Flag if user has past rejections.
-		$rejections = Rejection::get_user_rejections( $post->post_author );
-		if ( $rejections ) {
-			$rejections_count = count( $rejections );
-
-			// Don't count submission errors.
-			$submission_errors_count = array_reduce( $rejections, function ( $count, $item ) {
-				$reason = Rejection::get_rejection_reason( $item );
-				if ( 'submission-error' === $reason ) {
-					$count++;
-				}
-				return $count;
-			}, 0 );
-			$rejections_count -= $submission_errors_count;
-
-			if ( $rejections_count > 0 ) {
+		// Flag if user has notable number of past rejections.
+		$rejections_count = User::count_rejected_photos( $post->post_author );
+		if ( $rejections_count ) {
 				$rejections_level = $message = '';
 
 				$rejections_percentage = $rejections_count / ( $rejections_count + $published_photos_count );
@@ -656,7 +643,6 @@ https://wordpress.org/photos/
 				if ( $rejections_level && $message ) {
 					$flags[ sprintf( $message, round( $rejections_percentage * 100 , 0 ) ) ] = $rejections_level;
 				}
-			}
 		}
 
 		$user = get_user_by( 'id', $post->post_author );
@@ -814,16 +800,18 @@ https://wordpress.org/photos/
 			#dashboard-photo-moderators .col-num-rejected {
 				width: 50px;
 			}
+			#dashboard-photo-moderators .col-last-mod-date {
+				width: 80px;
+			}
 CSS;
 		echo "</style>\n";
 
 		echo '<table id="dashboard-photo-moderators" class="wp-list-table widefat fixed striped table-view-list">';
 		echo '<thead><tr>';
-		echo '<th>' . __( 'Username', 'wporg-photos' ) . '</th>';
-		echo '<th>' . __( 'Name', 'wporg-photos' ) . '</th>';
+		echo '<th>' . __( 'Moderator', 'wporg-photos' ) . '</th>';
 		echo '<th class="col-num-approved" title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
 		echo '<th class="col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
-		echo '<th>' . __( 'Last Moderated', 'wporg-photos' ) . '</th>';
+		echo '<th class="col-last-mod-date">' . __( 'Last Moderated', 'wporg-photos' ) . '</th>';
 		echo '</tr></thead>';
 		echo '<tbody>';
 
@@ -837,8 +825,14 @@ CSS;
 			}
 
 			echo '<tr>';
-			echo '<td>' . sprintf( '<a href="%s">%s</a>', esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ), $user->user_nicename ) . '</td>';
-			echo '<td>' . esc_html( $user->display_name ) . '</td>';
+			echo '<td>';
+			printf(
+				'<a href="%s">@%s</a><br>%s',
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				esc_html( $user->user_nicename ),
+				esc_html( $user->display_name )
+			);
+			echo '</td>';
 
 			$base_edit_url = add_query_arg( [ 'post_type' => Registrations::get_post_type(), 'author' => $user->ID ], admin_url( 'edit.php' ) );
 			echo '<td>' . ( $count_approved ? sprintf(

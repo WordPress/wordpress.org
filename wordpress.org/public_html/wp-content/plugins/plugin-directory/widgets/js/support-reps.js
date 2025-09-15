@@ -1,4 +1,5 @@
-(
+document.addEventListener( 'DOMContentLoaded' , function() {
+	(
 	/**
 	 * @param {Object} $
 	 * @param {Object} wp
@@ -72,3 +73,4 @@
 				} ).fail( logError );
 			} );
 	} )( window.jQuery, window.wp, window.supportRepsWidget );
+})

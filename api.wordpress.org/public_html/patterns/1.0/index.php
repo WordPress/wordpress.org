@@ -8,7 +8,6 @@ namespace WordPressdotorg\API\Patterns;
  * This is cached by nginx, so we don't have to worry about the performance costs of loading WP, and don't need to
  * do any any object caching.
  */
-
 main( $_SERVER['QUERY_STRING'] );
 
 /**
@@ -21,13 +20,17 @@ function flush_handler( $buffer ) {
 
 	// Remove CORS header added by REST API.
 	header_remove( 'access-control-allow-headers' );
+	header_remove( 'access-control-expose-headers' );
 
 	$replace = true;
 
 	foreach ( headers_list() as $header ) {
-		if ( 'Link: ' === substr( $header, 0, 6) ) {
+		if (
+			str_starts_with( $header, 'Link: ' ) &&
+			str_contains( $header, 'wp-json' )
+		) {
 			$new_header = str_replace( 'https://wordpress.org/patterns/wp-json/wp/v2/wporg-pattern', 'https://api.wordpress.org/patterns/1.0', $header );
-			$new_header = str_replace( 'https://wordpress.org/patterns/wp-json/', 'https://api.wordpress.org/patterns/1.0/', $new_header );
+			$new_header = str_replace( 'https://wordpress.org/patterns/wp-json/',                    'https://api.wordpress.org/patterns/1.0/', $new_header );
 			if ( $new_header !== $header ) {
 				header( $new_header, $replace );
 				$replace = false; // Only replace the first time.

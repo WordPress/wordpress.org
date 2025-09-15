@@ -10,7 +10,7 @@ namespace WordPressdotorg\Photo_Directory;
 class User {
 
 	/**
-	 * Maximum number of pending/concurrent submissions.
+	 * Maximum number of pending/concurrent submissions for infrequent contributors.
 	 *
 	 * Once this threshold is met, a user will be unable to make another
 	 * submission until a current submission is approved or rejected.
@@ -23,14 +23,60 @@ class User {
 	const MAX_PENDING_SUBMISSIONS = 5;
 
 	/**
-	 * The number of published posts before a given user is permitted to toggle
-	 * all of the confirmation checkboxes when submitting a photo.
+	 * Maximum number of pending/concurrent submissions for frequent contributors.
+	 *
+	 * Once this threshold is met, a user will be unable to make another
+	 * submission until a current submission is approved or rejected.
+	 *
+	 * @see `get_concurrent_submission_limit()` for actually retrieving the maximum
+	 * pending submissions for a user, since it can vary based on the user and may
+	 * be filtered.
+	 * @var int
+	 */
+	const MAX_PENDING_SUBMISSIONS_FREQUENT = 10;
+
+	/**
+	 * The number of published photos before a given user is granted additional
+	 * privileges.
+	 *
+	 * Includes, but not necessarily limited to:
+	 * - Increased pending submissions limit.
+	 * - Ability to toggle all of the confirmation checkboxes when submitting a photo.
 	 *
 	 * @var int
 	 */
 	const TOGGLE_ALL_THRESHOLD = 30;
 
+	/**
+	 * Initializes class.
+	 */
 	public static function init() {
+		// Show empty state page for users without contributed photos.
+		add_action( 'pre_handle_404', [ __CLASS__, 'prevent_author_404s' ], 10, 2 );
+	}
+
+	/**
+	 * Prevents 404s for all author pages.
+	 *
+	 * By default, core will only prevent 404s on empty author archives
+	 * if the author is a member of the site. This preempts the handler
+	 * to prevent 404s for all author pages.
+	 *
+	 * @param bool     $preempt  Whether to short-circuit default header status handling. Default false.
+	 * @param WP_Query $query WordPress Query object.
+	 * @return bool
+	 */
+	public static function prevent_author_404s( $preempt, $query ) {
+		if ( ! $query->is_main_query() ) {
+			return $preempt;
+		}
+
+		$author = $query->get( 'author' );
+		if ( $query->is_author && is_numeric( $author ) && $author > 0 ) {
+			return true;
+		}
+
+		return $preempt;
 	}
 
 	/**
@@ -52,6 +98,48 @@ class User {
 		}
 
 		return count_user_posts( $user_id, Registrations::get_post_type(), true );
+	}
+
+	/**
+	 * Returns a count of photos of a given post status(es) by a user on this calendar day.
+	 *
+	 * @param string|string[] $post_status Optional. The post status(es) of photos to find.
+	 *                                     Default 'publish'.
+	 * @param int             $user_id     Optional. The user ID. If not defined, assumes
+	 *                                     global author. Default false.
+	 * @return int
+	 */
+	public static function count_photos_for_today( $post_status = 'publish', $user_id = false ) {
+		if (  ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID ?? 0;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		$today = new \DateTime( 'now', new \DateTimeZone( wp_timezone_string() ) );
+		// Set time to beginning of today.
+		$today->setTime( 0, 0, 0 );
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => $post_status,
+			'author'         => $user_id,
+			'date_query'     => [
+				[
+					'after'     => $today->format( 'Y-m-d H:i:s' ), // After start of today.
+					'inclusive' => true,
+				],
+			],
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		];
+
+		$query = new \WP_Query( $args );
+		return $query->found_posts;
 	}
 
 	/**
@@ -117,14 +205,17 @@ class User {
 	/**
 	 * Returns a count of rejected photos for a user.
 	 *
-	 * @param int $user_id Optional. The user ID. If not defined, assumes global
-	 *                     author. Default false.
+	 * @param int $user_id                    Optional. The user ID. If not defined,
+	 *                                        assumes global author. Default false.
+	 * @param bool $exclude_submission_errors Optional. Should photos rejected due
+	 *                                        to the 'submission-error' reason be
+	 *                                        excluded from the count? Default true.
 	 * @return int
 	 */
-	public static function count_rejected_photos( $user_id = false ) {
+	public static function count_rejected_photos( $user_id = false, $exclude_submission_errors = true ) {
 		global $wpdb;
 
-		if (  ! $user_id ) {
+		if ( ! $user_id ) {
 			global $authordata;
 
 			$user_id = $authordata->ID;
@@ -134,12 +225,26 @@ class User {
 			return 0;
 		}
 
-		return (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s AND post_author = %d",
-			Registrations::get_post_type(),
-			Rejection::get_post_status(),
-			$user_id
-		) );
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => Rejection::get_post_status(),
+			'author'         => $user_id,
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		];
+
+		if ( $exclude_submission_errors ) {
+			$args['meta_query'] = [
+				[
+					'key'      => 'rejected_reason',
+					'value'    => 'submission-error',
+					'compare'  => '!=',
+				],
+			];
+		}
+
+		$query = new \WP_Query( $args );
+		return $query->found_posts;
 	}
 
 	/**
@@ -286,6 +391,27 @@ class User {
 	}
 
 	/**
+	 * Determines if a user is considered a frequent contributor.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes current
+	 *                     user. Default false.
+	 * @return bool True if user is considered a frequent contributor, else false.
+	 */
+	public static function is_frequent_contributor( $user_id = false ) {
+		$is_frequent = false;
+
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( $user_id && self::count_published_photos( $user_id ) >= self::TOGGLE_ALL_THRESHOLD ) {
+			$is_frequent = true;
+		}
+
+		return $is_frequent;
+	}
+
+	/**
 	 * Determines if a user is eligible to toggle all confirmation checkboxes on
 	 * the photo upload form.
 	 *
@@ -304,17 +430,7 @@ class User {
 	 * @return bool True if user can toggle confirmation checkboxes, else false.
 	 */
 	public static function can_toggle_confirmation_checkboxes( $user_id = false ) {
-		$can = false;
-
-		if ( ! $user_id ) {
-			$user_id = get_current_user_id();
-		}
-
-		if ( $user_id && self::count_published_photos( $user_id ) >= self::TOGGLE_ALL_THRESHOLD ) {
-			$can = true;
-		}
-
-		return $can;
+		return self::is_frequent_contributor( $user_id );
 	}
 
 	/**
@@ -333,7 +449,11 @@ class User {
 			return 0;
 		}
 
-		return apply_filters( 'wporg_photos_max_concurrent_submissions', self::MAX_PENDING_SUBMISSIONS, $user_id );
+		$limit = self::is_frequent_contributor( $user_id )
+			? self::MAX_PENDING_SUBMISSIONS_FREQUENT
+			: self::MAX_PENDING_SUBMISSIONS;
+
+		return apply_filters( 'wporg_photos_max_concurrent_submissions', $limit, $user_id );
 	}
 
 	/**

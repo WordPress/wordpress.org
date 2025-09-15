@@ -520,7 +520,7 @@ class WPTV_Anon_Upload {
 								$cats = explode( ',', $cats );
 								foreach ( $cats as $cat ) {
 									if ( intval( $cat ) ) {
-										echo '<a href="#in-category-' . $cat . '" class="anon-cat-link" title="Click to approve">Unknown?</a>, ';
+										echo '<a href="#in-category-' . $cat . '-2" class="anon-cat-link" title="Click to approve">Unknown?</a>, ';
 									}
 								}
 							?>

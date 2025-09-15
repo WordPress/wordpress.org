@@ -25,8 +25,8 @@ function bootstrap(): void {
  */
 function enqueue_assets(): void {
 	if ( is_singular() && false !== strpos( get_post()->post_content, '[wp-locales' ) ) {
-		wp_enqueue_style( 'wp-i18n-teams', plugins_url( 'css/i18n-teams.css', PLUGIN_FILE ), [], 13 );
-		wp_enqueue_script( 'wp-i18n-teams', plugins_url( 'js/i18n-teams.js', PLUGIN_FILE ), [ 'jquery', 'o2-app' ], 5 );
+		wp_enqueue_style( 'wp-i18n-teams', plugins_url( 'css/i18n-teams.css', PLUGIN_FILE ), [], filemtime( dirname( __DIR__ ) . '/css/i18n-teams.css' ) );
+		wp_enqueue_script( 'wp-i18n-teams', plugins_url( 'js/i18n-teams.js', PLUGIN_FILE ), [ 'jquery', 'o2-app' ], filemtime( dirname( __DIR__ ) . '/js/i18n-teams.js' ) );
 	}
 }
 
@@ -260,7 +260,11 @@ function get_core_translation_data() {
 	$projects = [ 'wp/dev', 'wp/dev/cc', 'wp/dev/admin', 'wp/dev/admin/network' ];
 	$counts   = $percentages = [];
 	foreach ( $projects as $project ) {
-		$results = json_decode( file_get_contents( 'https://translate.wordpress.org/api/projects/' . $project ) );
+		$results = json_decode( wp_remote_retrieve_body( wp_safe_remote_get( 'https://translate.wordpress.org/api/projects/' . $project ) ) );
+		if ( ! $results ) {
+			continue;
+		}
+
 		foreach ( $results->translation_sets as $set ) {
 
 			if ( ! isset( $set->wp_locale ) ) {
@@ -293,7 +297,7 @@ function get_core_translation_data() {
 		$percentages[ $locale ] = $percent_complete;
 	}
 
-	set_transient( 'core_translation_data', $percentages, 900 );
+	set_transient( 'core_translation_data', $percentages, 30 * MINUTE_IN_SECONDS );
 
 	return $percentages;
 }

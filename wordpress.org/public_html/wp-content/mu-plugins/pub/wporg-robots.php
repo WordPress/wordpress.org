@@ -18,7 +18,8 @@ function wporg_robots_txt( $robots ) {
 		           "Allow: /locale/$\n" .
 		           "Allow: /locale/*/glossary/$\n" .
 		           "Allow: /locale/*/stats/plugins/$\n" .
-		           "Allow: /locale/*/stats/themes/$\n";
+		           "Allow: /locale/*/stats/themes/$\n" .
+		           "Allow: /events/\n";
 
 	} elseif ( 'wordpress.org' === $blog_details->domain ) {
 		// WordPress.org/search/ should not be indexed.
@@ -82,6 +83,7 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 	}
 
 	// Should all sub-sites sitemaps be included?
+	$should_include_subsite_sitemaps = false;
 	if (
 		'developer.wordpress.org' === $blog_details->domain ||
 		'make.wordpress.org' === $blog_details->domain

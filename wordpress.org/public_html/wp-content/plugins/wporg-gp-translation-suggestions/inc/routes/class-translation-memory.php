@@ -218,6 +218,7 @@ class Translation_Memory extends GP_Route {
 		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
 		$openai_query .= ' Translate the following text to ' . $gp_locale->english_name . ": \n";
 		$openai_query .= '"' . $original_singular . '"';
+		$openai_model  = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
 
 		$messages = array(
 			array(
@@ -240,7 +241,7 @@ class Translation_Memory extends GP_Route {
 				),
 				'body'    => wp_json_encode(
 					array(
-						'model'       => 'gpt-3.5-turbo',
+						'model'       => $openai_model,
 						'max_tokens'  => 1000,
 						'n'           => 1,
 						'messages'    => $messages,
@@ -277,9 +278,11 @@ class Translation_Memory extends GP_Route {
 	 * @return array
 	 */
 	private function get_deepl_suggestion( string $original_singular, string $locale, string $set_slug ): array {
-		$free_url        = 'https://api-free.deepl.com/v2/translate';
 		$gp_default_sort = get_user_option( 'gp_default_sort' );
 		$deepl_api_key   = gp_array_get( $gp_default_sort, 'deepl_api_key' );
+		$deepl_url_free  = 'https://api-free.deepl.com/v2/translate';
+		$deepl_url_pro   = 'https://api.deepl.com/v2/translate';
+		$deepl_url       = gp_array_get( $gp_default_sort, 'deepl_use_api_pro', false ) ? $deepl_url_pro : $deepl_url_free;
 		if ( empty( trim( $deepl_api_key ) ) ) {
 			return array();
 		}
@@ -290,19 +293,24 @@ class Translation_Memory extends GP_Route {
 		if ( $this->is_TM_translation_100_accurate( $original_singular, $locale, $set_slug ) ) {
 			return array();
 		}
-		$deepl_response = wp_remote_post(
-			$free_url,
-			array(
-				'timeout' => 20,
-				'body'    => array(
-					'auth_key'    => $deepl_api_key,
-					'text'        => $original_singular,
-					'source_lang' => 'EN',
-					'target_lang' => $target_lang,
-					'formality'   => $this->get_language_formality( $target_lang, $set_slug ),
-				),
+
+		$options = array(
+			'timeout' => 20,
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'DeepL-Auth-Key ' . $deepl_api_key,
 			),
+			'body' => wp_json_encode( array(
+				'text'        => array( $original_singular ),
+				'target_lang' => $target_lang,
+				'formality'   => $this->get_language_formality( $target_lang, $set_slug ),
+			)),
 		);
+		$deepl_response = wp_remote_post(
+			$deepl_url,
+			$options
+		);
+
 		if ( is_wp_error( $deepl_response ) ) {
 			return array();
 		}
@@ -486,7 +494,7 @@ class Translation_Memory extends GP_Route {
 	 *
 	 * @return void
 	 */
-	public function update_external_translations( $translation ) {
+	public static function update_external_translations( $translation ) {
 		$is_source_set    = isset( $_POST['externalTranslationSource'] ) && isset( $_POST['externalTranslationUsed'] );
 		$is_request_valid = is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name && 'translations_post' === GP::$current_route->last_method_called;
 		if ( ! $is_request_valid || ! $is_source_set || ! $translation ) {

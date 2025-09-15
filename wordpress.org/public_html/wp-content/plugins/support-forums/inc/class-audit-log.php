@@ -224,7 +224,9 @@ class Audit_Log {
 				'> ' . str_replace(
 					"\n",
 					"\n> ",
-					$note_text
+					htmlspecialchars_decode(
+						$note_text
+					)
 				)
 			);
 

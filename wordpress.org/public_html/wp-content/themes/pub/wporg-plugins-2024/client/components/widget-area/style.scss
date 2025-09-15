@@ -7,4 +7,8 @@
 		font-size: var( --wp--preset--font-size--heading-1 );
 		font-weight: var( --wp--custom--heading--typography--font-weight );
 	}
+
+	.textwidget {
+		text-wrap: pretty;
+	}
 }

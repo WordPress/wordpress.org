@@ -112,7 +112,7 @@ class Trademarks {
 		'windows-',
 		'wocommerce',
 		'woocom-',
-		'woocommerce',  // technically ending with '-for-woocommerce' is allowed.
+		'woocommerce', // technically ending with '-for-woocommerce' is allowed.
 		'woocomerce',
 		'woo-commerce',
 		'woo-',
@@ -137,6 +137,7 @@ class Trademarks {
 	public static $trademark_exceptions = array(
 		'adobe.com'             => array( 'adobe' ),
 		'automattic.com'        => array( 'akismet', 'akismet-', 'jetpack', 'jetpack-', 'wordpress', 'wp-', 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
+		'woothemes.com'         => array( 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
 		'facebook.com'          => array( 'facebook', 'instagram', 'oculus', 'whatsapp' ),
 		'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
 		'trustpilot.com'        => array( 'trustpilot' ),
@@ -145,6 +146,10 @@ class Trademarks {
 		'yoast.com'             => array( 'yoast' ),
 		'opera.com'             => array( 'opera-' ),
 		'adobe.com'             => array( 'adobe-' ),
+		'stripe.com'            => array( 'stripe-' ),
+
+		// Published plugins can use 'wp-'.
+		'published-plugin'      => array( 'wp-' ),
 	);
 
 	/**
@@ -297,6 +302,11 @@ class Trademarks {
 		$exceptions = [];
 		foreach ( $committers as $user ) {
 			$exceptions = array_merge( $exceptions, self::get_user_exceptions( $user ) );
+		}
+
+		// A published plugin gets some exceptions too.
+		if ( $post && in_array( $post->post_status, [ 'publish', 'closed', 'disabled', 'approved' ] ) ) {
+			$exceptions[] = 'published-plugin';
 		}
 
 		return array_unique( $exceptions );

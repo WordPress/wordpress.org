@@ -7,11 +7,11 @@ use WP_Query;
 global $wp_query;
 
 $sections = array(
-	'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
-	'featured'  => __( 'Featured Plugins', 'wporg-plugins' ),
-	'beta'      => __( 'Beta Plugins', 'wporg-plugins' ),
-	'favorites' => __( 'My Favorites', 'wporg-plugins' ),
-	'popular'   => __( 'Popular Plugins', 'wporg-plugins' ),
+	'blocks'    => __( 'Block-Enabled plugins', 'wporg-plugins' ),
+	'featured'  => __( 'Featured plugins', 'wporg-plugins' ),
+	'beta'      => __( 'Beta plugins', 'wporg-plugins' ),
+	'favorites' => __( 'My favorites', 'wporg-plugins' ),
+	'popular'   => __( 'Popular plugins', 'wporg-plugins' ),
 );
 
 $widget_args = array(
@@ -139,7 +139,7 @@ echo do_blocks( '<!-- wp:wporg/filter-bar /--><!-- wp:wporg/category-navigation 
 		'title' => __( 'Stay Up-to-Date', 'wporg-plugins' ),
 		'text'  => sprintf(
 			/* translators: URL to make/plugins site. */
-			__( 'Plugin development is constantly changing with each new WordPress release. Keep up with the latest changes by following the <a href="%s">Plugin Review Team&#8217;s blog</a>.', 'wporg-plugins' ),
+			__( 'Plugin development is constantly changing with each new WordPress release. Keep up with the latest changes by following the <a href="%s">Plugins Team&#8217;s blog</a>.', 'wporg-plugins' ),
 			esc_url( 'https://make.wordpress.org/plugins/' )
 		),
 	), $widget_args );

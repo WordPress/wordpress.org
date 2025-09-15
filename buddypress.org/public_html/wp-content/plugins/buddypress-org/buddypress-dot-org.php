@@ -61,11 +61,16 @@ function bporg_admin_redirect() {
 
 	// Allow registered unprivileged admin-ajax.php requests for
 	// profiles.wordpress.org to pass through.
-	if (	'profiles.wordpress.org' == $_SERVER['HTTP_HOST']
-			&& isset( $_REQUEST['action'] )
-			&& has_action( 'wp_ajax_nopriv_' . $_REQUEST['action'] )
+	if (
+		'profiles.wordpress.org' == $_SERVER['HTTP_HOST'] &&
+		isset( $_REQUEST['action'] ) &&
+		(
+			has_action( 'wp_ajax_nopriv_' . $_REQUEST['action'] ) ||
+			in_array( $_REQUEST['action'], [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce' ] )
 		)
+	) {
 		return;
+	}
 
 	wp_safe_redirect( home_url( '/' ) );
 	die;

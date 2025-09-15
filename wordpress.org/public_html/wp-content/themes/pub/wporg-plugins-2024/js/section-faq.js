@@ -5,19 +5,7 @@
 		.each( function( index, question ) {
 			var $question = $( question ),
 				$button   = $( '<button />' ),
-				$h3       = $( '<h3 />' ),
-				id        = $question.attr( 'id' );
-
-			// If there is no ID, create our own.
-			if ( ! id ) {
-				id = encodeURIComponent( $question.text().toLowerCase().trim() );
-				$question.attr( 'id', id );
-			}
-
-			$button.attr( 'formaction', id ).on( 'click', function( event ) {
-				event.preventDefault();
-				window.location.hash = id;
-			} );
+				$h3       = $( '<h3 />' );
 
 			$question.html( $h3.html( $button.text( $question.text() ) ) );
 		} )
@@ -41,12 +29,28 @@
 
 				window.scrollTo( 0, $question.offset().top - scrollPaddingTop );
 			}
+
+			if ( $question.prop( 'id' ) ) {
+				window.location.hash = $question.prop( 'id' );
+			}
 		} );
 
 	if ( window.location.hash ) {
-		jQuery(
+		var uriHash = window.location.hash.substr(1),
+			uriElement = document.getElementById( uriHash );
+
+		if ( ! uriElement ) {
 			// Decode/Encode here is to work with any existing links that are not fully-encoded, the trim handles whitespace/newlines.
-			document.getElementById( encodeURIComponent( decodeURIComponent( window.location.hash.substr(1) ).trim() ) )
-		).trigger( 'click' );
+			uriHash    = encodeURIComponent( decodeURIComponent( uriHash ) ).trim();
+			uriElement = document.getElementById( uriHash );
+
+			if ( ! uriElement ) {
+				// Perform PHP-style URI encoding. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI#encoding_for_rfc3986
+				uriHash    = uriHash.replace( /[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}` );
+				uriElement = document.getElementById( uriHash );
+			}
+		}
+
+		jQuery( uriElement ).trigger( 'click' );
 	}
 } )( jQuery );

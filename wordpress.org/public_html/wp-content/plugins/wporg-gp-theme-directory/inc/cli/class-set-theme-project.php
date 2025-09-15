@@ -325,7 +325,11 @@ class Set_Theme_Project extends WP_CLI_Command {
 		if ( $this->temp_dir ) {
 			$esc_theme_dir = escapeshellarg( $this->temp_dir . $theme_slug );
 			`rm -rf {$esc_theme_dir}`;
-			@unlink( $this->temp_dir . $theme_slug . '.pot' );
+
+			$pot_file = $this->temp_dir . $theme_slug . '.pot';
+			if ( file_exists( $pot_file ) ) {
+				unlink( $pot_file );
+			}
 		}
 	}
 

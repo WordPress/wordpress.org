@@ -4,7 +4,7 @@ if ( have_posts() ) :
 	while ( have_posts() ) :
 		the_post();
 		?>
-			<h3 id="post-<?php the_ID(); ?>"><a href="<?php the_permalink() ?>" rel="bookmark"><?php the_title(); ?></a></h3>
+			<h2 id="post-<?php the_ID(); ?>"><a href="<?php the_permalink() ?>" rel="bookmark"><?php the_title(); ?></a></h2>
 			<cite>
 				<?php
 				/* translators: 1: post date, 2: post author */

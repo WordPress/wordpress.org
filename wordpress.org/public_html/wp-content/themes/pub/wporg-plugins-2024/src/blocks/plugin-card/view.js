@@ -6,8 +6,13 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 	if ( cards ) {
 		cards.forEach( function( card ) {
-			card.addEventListener( 'click', function() {
+			card.addEventListener( 'click', function( event ) {
 				var selectedText = window.getSelection().toString();
+
+				// Keep regular anchor tag function
+				if ( 'a' === event.target.tagName.toLowerCase() ) {
+					return;
+				}
 
 				// If they are selecting text, let's not navigate.
 				if ( '' !== selectedText ) {

@@ -129,7 +129,7 @@ body.route-pending-create {
  */
 
 body {
-	color: #555d66;
+	color: #1e1e1e;
 	font-size: 14px;
 }
 
@@ -140,14 +140,15 @@ body {
 }
 
 a {
-	color: #555d66 !important;
+	color: #3858e9; !important;
 	text-decoration: underline !important;
 	font-weight: normal;
 	outline: 0;
 }
 
 a:hover, a:active {
-	text-decoration: underline;
+	color: #3858e9; !important;
+	text-decoration: none !important;
 }
 
 h2 {
@@ -172,6 +173,15 @@ strong {
 	text-align: center;
 }
 
+code {
+	color: #1e1e1e;
+	background-color: #f6f6f6;
+	border-radius: 2px;
+	line-height: 1.67;
+	padding: 3px !important;
+	font-weight: 600;
+}
+
 .wp-core-ui .button-primary {
 	-webkit-box-shadow: none;
 	box-shadow: none;
@@ -191,6 +201,7 @@ strong {
 	position: relative;
 	-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
 	box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+	text-wrap: pretty;
 }
 
 #login h1 {
@@ -224,6 +235,12 @@ strong {
 
 p.intro, #login .message {
 	margin-bottom: 24px !important;
+	text-wrap: pretty;
+}
+
+p.intro strong {
+	display: block;
+	margin-bottom: 8px;
 }
 
 #login .message + #login_error {
@@ -390,6 +407,7 @@ body.route-linkexpired #login .message {
 	padding-left: 24px;
 	padding-right: 24px;
 	margin-right: -24px;
+	background: #fbfbfb;
 }
 
 body.route-register #login .message p,
@@ -446,8 +464,8 @@ body.rtl.route-register .message.error .avatar {
 }
 
 body.route-pending-profile #login .message.info {
-	margin-top: -24px;
-	width: 350px;
+	width: calc(100% + 48px);
+	box-shadow: none;
 }
 
 body.route-pending-profile #login .message.info,
@@ -464,11 +482,31 @@ body.route-pending-create input.disabled {
 	margin-bottom: 0;
 }
 
-form p.checkbox.error {
+body.route-pending-profile #login  {
+	width: 450px;
+}
+
+body.route-pending-profile h2  {
+	margin-bottom: 16px;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+body.route-pending-profile p {
+	margin-bottom: 16px;
+}
+
+.login-profile-intro {
+	margin-top: 20px !important;
+	border-top: 1px solid #d9d9d9;
+	padding-top: 16px;
+}
+
+form#registerform p.checkbox.error {
 	color: #dc3232;
 }
 
-form p.checkbox label {
+form#registerform p.checkbox label {
 	position: relative;
 	display: block;
 	padding-left: 24px;
@@ -476,30 +514,30 @@ form p.checkbox label {
 	line-height: 19px;
 }
 
-.rtl form p.checkbox label {
+.rtl form#registerform p.checkbox label {
 	padding-left: 0;
 	padding-right: 24px;
 }
 
 @media screen and (max-width: 782px) {
-	form p.checkbox label {
+	form#registerform p.checkbox label {
 		padding-left: 33px;
 	}
 
-	.rtl form p.checkbox label {
+	.rtl form#registerform p.checkbox label {
 		padding-left: 0;
 		padding-right: 33px;
 	}
 }
 
-form p.checkbox label input {
+form#registerform p.checkbox label input {
 	position: absolute;
 	top: 0;
 	left: 0;
 	margin: 2px 0 0;
 }
 
-.rtl form p.checkbox label input {
+.rtl form#registerform p.checkbox label input {
 	left: auto;
 	right: 0;
 }
@@ -587,6 +625,10 @@ form {
 	#login {
 		margin-top: 52px;
 		margin-bottom: 48px;
+	}
+
+	#login .button-primary {
+		float: none;
 	}
 
 	#login #nav {

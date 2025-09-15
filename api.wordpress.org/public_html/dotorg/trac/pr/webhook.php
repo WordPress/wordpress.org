@@ -222,13 +222,18 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			$comment_author = $user->user_login;
 		}
 
+		$comment_body = format_github_content_for_trac_comment( $payload->comment->body );
+		if ( ! $comment_body ) {
+			die( 'No comment body' );
+		}
+
 		$comment_body = sprintf(
 			$comment_template,
 			$payload->comment->id,
 			$authorship,
 			$payload->comment->html_url,
 			'PR #' . $payload->issue->number,
-			format_github_content_for_trac_comment( $payload->comment->body )
+			$comment_body
 		);
 
 		foreach ( $tickets as $t ) {

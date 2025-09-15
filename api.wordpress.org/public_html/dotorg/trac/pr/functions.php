@@ -135,7 +135,7 @@ function api_request( $url, $args = null, $headers = [], $method = null ) {
 		'method'        => $method ?: ( is_null( $args ) ? 'GET' : 'POST' ),
 		'user_agent'    => 'WordPress.org Trac; trac.WordPress.org',
 		'max_redirects' => 0,
-		'timeout'       => 5,
+		'timeout'       => 10,
 		'ignore_errors' => true,
 		'header'        => array_merge(
 			[
@@ -266,7 +266,7 @@ function determine_trac_ticket( $pr ) {
 
 			// If a specific trac is mentioned within the PR body (and only that trac)
 			elseif (
-				preg_match_all( '!/(?P<trac>[a-z]+).trac.wordpress.org/!i', $body, $m ) &&
+				preg_match_all( '!/(?P<trac>[a-z]+).trac.wordpress.org/!i', $pr->body, $m ) &&
 				1 === count( array_unique( $m[0] ) )
 			) {
 				$trac = $m['trac'][0];
@@ -288,6 +288,9 @@ function determine_trac_ticket( $pr ) {
 
 		// Then any trac instance.
 		'!(?P<trac>[a-z]+).trac.wordpress.org/ticket/(?P<id>\d+)!i',
+
+		// Any GitHub defined ticket autolink references.
+		'!(?:(?P<trac>Core|Meta)-|ticket:)(?P<id>\d+)!i', // Core-1234, Meta-1234, ticket:1234
 
 		// Now for just plain ticket references without a trac instance.
 		'!(?:^|\s)#WP(\d+)!', // #WP1234
@@ -319,7 +322,7 @@ function determine_trac_ticket( $pr ) {
 
 				// If a Trac-specific link is detected, use that trac.
 				if ( ! empty( $m['trac'] ) ) {
-					$trac = $m['trac'];
+					$trac = strtolower( $m['trac'] );
 				}
 
 				return [ $trac, $id ];
@@ -383,12 +386,35 @@ function format_github_content_for_trac_comment( $desc ) {
 
 	// Convert Code blocks.
 	$desc = preg_replace_callback(
-		'#^(?P<indent>[ >]*)```(?P<format>[a-z]+$)(?P<code>.+?)```$#sm',
+		'#^(?P<indent>[ >]*)```[ ]*(?P<format>[a-z]+$)(?P<code>.+?)```$#sm',
 		function( $m ) {
+			$format = trim( $m['format'] );
+
+			// The HTML code block in trac renders actual HTML, set it as an XML code block for syntax highlighting.
+			if ( 'html' === $format ) {
+				$format = 'xml';
+			}
+
+			/*
+			 * Some other code processor types can end up rendering badly on Trac, limit to expected safe types.
+			 *
+			 * See https://trac.edgewall.org/wiki/1.1/WikiProcessors#AvailableProcessors
+			 */
+			$supported_formats = [ 'xml', 'php', 'js', 'javascript', 'css', 'sql', 'sh', 'diff' ];
+			if ( ! in_array( $format, $supported_formats ) ) {
+				$format = 'default';
+			}
+
+			$code = trim( $m['code'] );
+			// replace a blank indented line at the end of the code block with.. nothing.
+			if ( $m['indent'] ) {
+				$code = preg_replace( "#\n[ >]+$#", '', $code );
+			}
+
 			return
 				$m['indent'] . "{{{\n" .
-				$m['indent'] . "#!" . trim( $m['format'] ) . "\n" .
-				trim( $m['code'] ) . "\n" .
+				$m['indent'] . "#!" . $format . "\n" .
+				$code . "\n" .
 				$m['indent'] . "}}}\n";
 		},
 		$desc
@@ -434,5 +460,12 @@ function format_github_content_for_trac_comment( $desc ) {
 	// It shouldn't exist at this point, but if it does, replace it back with it's original content.
 	$desc = str_replace( '~~~TABLEHEADER~~~', '|| ||', $desc );
 
-	return trim( $desc );
+	$desc = trim( $desc );
+
+	// After all this, if it's a HTML comment, we're not interested in syncing it.
+	if ( preg_match( '/[{`]+\s*#!html/i', $desc ) ) {
+		return false;
+	}
+
+	return $desc;
 }

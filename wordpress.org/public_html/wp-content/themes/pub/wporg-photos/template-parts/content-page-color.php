@@ -32,7 +32,7 @@ $terms = get_terms( [ 'taxonomy' => $tax_name, 'hide_empty' => false ] );
 
 		<div class="entry-content">
 			<span></span>
-			<a href="<?php echo esc_url( get_term_link( $term->term_id ) ); ?>"><?php echo $term->name; ?> (<?php echo $term->count; ?>)</a>
+			<a href="<?php echo esc_url( get_term_link( $term->term_id ) ); ?>"><?php echo $term->name; ?> (<?php echo number_format_i18n( $term->count ); ?>)</a>
 		</div><!-- .entry-content -->
 
 		<footer class="entry-footer">

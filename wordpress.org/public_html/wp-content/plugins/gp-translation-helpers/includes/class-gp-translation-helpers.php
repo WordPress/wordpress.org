@@ -187,7 +187,7 @@ class GP_Translation_Helpers {
 		}
 
 		$translation_helpers_settings = array(
-			'th_url'   => gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-translation-helpers' ) ),
+			'th_url'   => gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-translation-helpers', '{ID}' ) ),
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'gp_optin_optout' ),
 		);
@@ -424,7 +424,7 @@ class GP_Translation_Helpers {
 			'gp-translation-helpers-editor',
 			'$gp_translation_helpers_editor',
 			array(
-				'translation_helper_url' => gp_url_project( $translation_set['project']->path, gp_url_join( $translation_set['locale_slug'], $translation_set['translation_set']->slug, '-get-translation-helpers' ) ),
+				'translation_helper_url' => gp_url_project( $translation_set['project']->path, gp_url_join( $translation_set['locale_slug'], $translation_set['translation_set']->slug, '-get-translation-helpers', '{ID}' ) ),
 				'reply_text'             => esc_attr__( 'Reply' ),
 				'cancel_reply_text'      => esc_html__( 'Cancel reply' ),
 			)
