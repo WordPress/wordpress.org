@@ -200,6 +200,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			} elseif (
 				// If it looks like an IP
 				preg_match( '/^\d{1,3}\.[0-9.]*$/', $search_term ) ||
+				preg_match( '/^[0-9a-f]+:[0-9a-f:]*$/', $search_term ) ||
 				// Or it looks like a country code, 
 				preg_match( '/^[A-Z]{2}$/', $search_term )
 			) {
