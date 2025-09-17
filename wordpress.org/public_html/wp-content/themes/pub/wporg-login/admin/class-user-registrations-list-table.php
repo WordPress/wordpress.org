@@ -592,7 +592,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 	}
 
 	function link_to_search( $s ) {
-		$parts = preg_split( '/([^\w\.-])/ui', $s, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$parts = preg_split( '#([^\w\.:/-])#ui', $s, -1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( ! $parts ) {
 			$parts = array( $s );
 		}
