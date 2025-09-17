@@ -35,7 +35,12 @@ if (
 	'GET' !== $_SERVER['REQUEST_METHOD'] ||
 	// meta|core are the only tracs embedable.
 	// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
-	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone|ticketgraph|ticket|changeset|query)([/?]|$)!i', $url, $m )
+	! (
+		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>ticket|changeset)/\d+$!i', $url, $m ) ||
+		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>query)[?].+$!i', $url, $m ) ||
+		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone)/[a-z0-9.]+[ ]?[a-z0-9.]*$!i', $url, $m ) ||
+		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>ticketgraph)([?]component=[^&]+)?$!i', $url, $m )
+	)
 ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
 	die();
@@ -128,7 +133,13 @@ $html = wp_remote_retrieve_body(
 	)
 );
 
-if ( ! $html ) {
+if (
+	! $html ||
+	(
+		! str_starts_with( $html, '<' ) &&
+		str_contains( $html, 'TracError: ' )
+	)
+) {
 	$output = '<h1>Temporarily Unavailable</h1>';
 	wp_cache_set( $cache_key, $output, 'trac-oembed', MINUTE_IN_SECONDS );
 	die( $output );
