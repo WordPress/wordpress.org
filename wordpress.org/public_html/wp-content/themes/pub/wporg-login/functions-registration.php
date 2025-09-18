@@ -400,7 +400,7 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 				'interests' => 'Interests',
 			];
 
-			if( 'url' == $field ) {
+			if ( 'url' == $field ) {
 				wp_update_user( [ 'ID' => $user_id, 'user_url' => $value ] );
 			} else {
 				if ( $value ) {
@@ -416,6 +416,9 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 			}
 		}
 	}
+
+	// Update their Profile name with their chosen user login for now.
+	wporg_update_user_profile_fields( $user_id, 'Name', $user_login );
 
 	return get_user_by( 'id', $user_id );
 }
