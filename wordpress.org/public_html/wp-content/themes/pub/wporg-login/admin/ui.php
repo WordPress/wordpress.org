@@ -353,6 +353,11 @@ add_action( 'admin_post_login_mark_as_cleared', function() {
 
 	$user = wporg_get_pending_user( $email );
 	if ( $user ) {
+		// If a spectator role is specified, note that.
+		if ( ( $_REQUEST['role'] ?? '' ) === 'spectator' ) {
+			$user['meta']['role'] = 'spectator';
+		}
+
 		$user['cleared'] = 2;
 		wporg_update_pending_user( $user );
 

@@ -420,6 +420,12 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 	// Update their Profile name with their chosen user login for now.
 	wporg_update_user_profile_fields( $user_id, 'Name', $user_login );
 
+	// If a role is specified, set that.
+	if ( ( $pending_user['meta']['role'] ?? '' ) === 'spectator' && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+		$user = new WP_User( $user_id, '', WPORG_SUPPORT_FORUMS_BLOGID );
+		$user->set_role( 'bbp_spectator' );
+	}
+
 	return get_user_by( 'id', $user_id );
 }
 

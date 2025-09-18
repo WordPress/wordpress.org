@@ -516,7 +516,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 	function column_scores( $item ) {
 
-		echo ( $item->cleared ? 'Passed' : 'Failed' ) . '<br>';
+		echo ( $item->cleared ? 'Passed' : 'Failed' );
+		if ( $item->cleared && 'spectator' === ( $item->meta->role ?? '' ) ) {
+			echo ' (mark as: spectator)';
+		}
+		echo '<br>';
 
 		foreach ( $item->scores as $type => $val ) {
 			printf(
@@ -584,6 +588,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			);
 			$url = wp_nonce_url( $url, 'clear_' . $item->user_email );
 			$row_actions['approve-reg'] = '<a href="' . esc_url( $url ) . '">Approve</a>';
+			$row_actions['approve-spectator'] = '<a href="' . esc_url( add_query_arg( 'role', 'spectator', $url ) ) . '">Approve as Spectator</a>';
 		}
 
 		if ( $row_actions ) {
