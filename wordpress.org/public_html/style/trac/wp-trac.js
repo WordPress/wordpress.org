@@ -291,7 +291,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				el = li.find('.trac-rawlink');
 				href = el.attr('href');
 				appendTo = li.parent().parent(); // div.change
-				if ( href.match(/\.(jpg|jpeg|png|gif|svg)$/i) ) {
+				if ( href.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i) ) {
 					image = new Image();
 					image.src = href;
 					image.onload = function() {
@@ -305,7 +305,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 							.appendTo( appendTo )
 							.wrap( '<a href="' + href.replace('/raw-attachment/', '/attachment/') + '" />' );
 					};
-				} else if ( href.match(/\.(mp4|mov)$/i) ) {
+				} else if ( href.match(/\.(mp4|mov|webm)$/i) ) {
 					$('<video />')
 						.attr({
 							src: href,
