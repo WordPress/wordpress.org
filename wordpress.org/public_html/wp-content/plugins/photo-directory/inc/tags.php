@@ -206,11 +206,14 @@ class Tags {
 			if ( is_wp_error( $updated ) ) {
 				$message = $updated->get_error_message();
 			} else {
-				self::add_slug_redirect( $old_slug, $new_slug, $taxonomy );
+				// Only create redirect if the tag has posts.
+				if ( $term->count > 0 ) {
+					self::add_slug_redirect( $old_slug, $new_slug, $taxonomy );
+				}
 
 				$message = sprintf(
 					/* translators: %s: New term name */
-					__( 'Change term slug to <strong>%s</strong>.', 'wporg-photos' ),
+					__( 'Changed term slug to <strong>%s</strong>.', 'wporg-photos' ),
 					esc_html( $new_name )
 				);
 			}
