@@ -50,6 +50,16 @@ class Moderation {
 	const FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE = 0.50;
 
 	/**
+	 * Name of user meta key that acts as a flag for whether the user can manage photo_tags.
+	 *
+	 * Note: There are additional checks, such as the user also being a moderator or admin,
+	 * that are also considered.
+	 *
+	 * @var string
+	 */
+	const USER_META_CAN_MANAGE_PHOTO_TAGS = 'can_manage_photo_tags';
+
+	/**
 	 * Initializes component.
 	 */
 	public static function init() {
@@ -66,6 +76,9 @@ class Moderation {
 
 		// Disable moderating own posts.
 		add_filter( 'user_has_cap',                       [ __CLASS__, 'disable_own_post_editing' ], 10, 4 );
+
+		// Assign caps to moderators who can manage photo_tags.
+		add_filter( 'map_meta_cap',                       [ __CLASS__, 'assign_cap_manage_photo_tags' ], 10, 3 );
 
 		// Add column to users table with count of photos moderated.
 		add_filter( 'manage_users_columns',               [ __CLASS__, 'add_moderated_count_column' ] );
@@ -206,6 +219,47 @@ class Moderation {
 		}
 
 		return $caps;
+	}
+
+	/**
+	 * Allows management of photo tags to admins and to moderators who can manage photo_tags.
+	 *
+	 * By default, photo moderators are not permitted to edit photo_tags. However,
+	 * if the user has the 'can_manage_photo_tags' user meta set to 1, they can.
+	 *
+	 * @param string[] $caps    Primitive capabilities required of the user.
+	 * @param string   $cap     Capability being checked.
+	 * @param int      $user_id The user ID.
+	 * @return string[]
+	 */
+	public static function assign_cap_manage_photo_tags( $caps, $cap, $user_id ) {
+		// Bail early if this is not for the 'manage_photo_tags' cap.
+		if ( 'manage_photo_tags' !== $cap ) {
+			return $caps;
+		}
+
+		$is_caped = function_exists( 'is_caped' ) && is_caped( $user_id );
+
+		if ( ! is_user_member_of_blog() && ! $is_caped ) {
+			return $caps;
+		}
+
+		$allowed = (
+			// User is caped.
+			$is_caped
+		||
+			// User is admin.
+			user_can( $user_id, 'manage_options' )
+		||
+			// User can moderate photos and has associated user meta key set.
+			(
+				user_can( $user_id, 'edit_photos' )
+			&&
+				get_user_meta( $user_id, self::USER_META_CAN_MANAGE_PHOTO_TAGS, true )
+			)
+		);
+
+		return $allowed ? [ 'exist' ] : [ 'do_not_allow' ];
 	}
 
 	/**
