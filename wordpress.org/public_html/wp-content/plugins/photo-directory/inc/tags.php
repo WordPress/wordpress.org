@@ -15,9 +15,6 @@ class Tags {
 	/** @var bool Indicates if merge processing has started, to prevent re-entrancy. */
 	private static $processing_merge = false;
 
-	/** @var array The old terms. */
-	protected static $old_terms = [];
-
 	/** @var string[] Memoized array of taxonomies that have merge functionality enabled, as determined by `get_mergeable_taxonomies()`. */
 	protected static $mergeable_taxonomies = [];
 
@@ -37,6 +34,9 @@ class Tags {
 		// Prevent creation of terms that remap to existing terms.
 		add_filter( 'pre_insert_term', [ __CLASS__, 'prevent_remapped_term_creation' ], 10, 3 );
 
+		// Handle quick edit merge.
+		add_action( 'wp_ajax_inline-save-tax',      [ __CLASS__, 'maybe_handle_quick_edit_merge' ], 1 );
+
 		if ( is_admin() ) {
 			self::init_admin();
 		}
@@ -48,11 +48,15 @@ class Tags {
 	public static function init_admin() {
 		foreach ( self::get_mergeable_taxonomies() as $taxonomy ) {
 			add_action( "{$taxonomy}_edit_form_fields", [ __CLASS__, 'inject_custom_slug_description' ], 20, 2 );
-			add_action( "edit_{$taxonomy}",             [ __CLASS__, 'capture_old_slug' ], 1, 2 );
-			add_action( "edited_{$taxonomy}",           [ __CLASS__, 'process_merge_rename' ], 10, 2 );
+			add_action( "edited_{$taxonomy}",           [ __CLASS__, 'process_rename' ], 10, 2 );
 		}
 		add_action( 'admin_notices',              [ __CLASS__, 'admin_notices' ] );
+		add_action( 'load-edit-tags.php',         [ __CLASS__, 'maybe_handle_term_merge_submit' ] );
 		add_filter( 'redirect_term_location',     [ __CLASS__, 'maybe_redirect_merged_term' ], 10, 2 );
+
+		// Hide the new tag form and prevent direct tag creation.
+		add_action( "{$taxonomy}_add_form",       [ __CLASS__, 'hide_add_tag_form' ], 1 );
+		add_filter( 'pre_insert_term',            [ __CLASS__, 'prevent_direct_tag_creation' ], 10, 3 );
 	}
 
 	/**
@@ -108,41 +112,55 @@ class Tags {
 	}
 
 	/**
-	 * Stores the name and slug of term being edited before changes are saved.
+	 * Hides the new tag form for mergeable taxonomies.
 	 *
-	 * @param int $term_id The ID of the term just edited.
-	 * @param int $tt_id   The term taxonomy ID.
+	 * @param string $taxonomy The taxonomy slug.
 	 */
-	public static function capture_old_slug( $term_id, $tt_id ) {
-		// Get taxonomy from the term.
-		$term = get_term( $term_id );
-		if ( ! $term instanceof \WP_Term ) {
-			return;
+	public static function hide_add_tag_form( $taxonomy ) {
+		if (
+			self::is_mergeable_taxonomy( $taxonomy )
+			&& isset( $_GET['post_type'] )
+			&& Registrations::get_post_type() === $_GET['post_type']
+		) {
+			echo '<style>#col-left { display: none !important; } #col-right { float: none !important; width: 100% !important; }</style>';
 		}
-		$taxonomy = $term->taxonomy;
-
-		if ( ! self::is_mergeable_taxonomy( $taxonomy ) ) {
-			return;
-		}
-
-		self::$old_terms[ $taxonomy ][ $term_id ] = [
-			'name' => $term->name,
-			'slug' => $term->slug,
-		];
 	}
 
 	/**
-	 * Handles tag merge/rename.
+	 * Prevents direct tag creation for mergeable taxonomies.
+	 *
+	 * @param mixed  $term     The term data.
+	 * @param string $taxonomy The taxonomy.
+	 * @param array  $args     Additional arguments.
+	 * @return mixed|WP_Error The term data or WP_Error to prevent creation.
+	 */
+	public static function prevent_direct_tag_creation( $term, $taxonomy, $args ) {
+		if ( self::is_mergeable_taxonomy( $taxonomy ) ) {
+			$post_type = $_POST['post_type'] ?? '';
+			$photo_post_type = Registrations::get_post_type();
+			// Check if this is coming from the add tag form (and not programmatic).
+			if (
+				wp_doing_ajax()
+				&& isset( $_POST['action'] )
+				&& 'add-tag' === $_POST['action']
+				&& $photo_post_type === $post_type
+			) {
+				return new \WP_Error( 'tag_creation_disabled',
+					__( 'Direct tag creation is disabled. Please use the merge functionality instead.', 'wporg-photos' )
+				);
+			}
+		}
+
+		return $term;
+	}
+
+	/**
+	 * Handles tag rename.
 	 *
 	 * @param int $term_id The ID of the term just edited.
 	 * @param int $tt_id   The term taxonomy ID.
 	 */
-	public static function process_merge_rename( $term_id, $tt_id ) {
-		// Bail if function has already been invoked (prevents recursion).
-		if ( self::$processing_merge ) {
-			return;
-		}
-
+	public static function process_rename( $term_id, $tt_id ) {
 		// Get taxonomy from the term.
 		$term = get_term( $term_id );
 		if ( ! $term instanceof \WP_Term ) {
@@ -155,76 +173,247 @@ class Tags {
 			return;
 		}
 
-		// Old term data was captured earlier.
-		$old_data = self::$old_terms[ $taxonomy ][ $term_id ] ?? [ 'name' => '', 'slug' => '' ];
-		$old_name = $old_data['name'];
-		$old_slug = $old_data['slug'];
+		// Get the old slug and count from the transient.
+		$key  = self::pre_rename_key( $taxonomy, $term_id );
+		$data = get_transient( $key );
 
-		// Get new term data.
-		$new_slug = ( $term instanceof \WP_Term ) ? $term->slug : '';
-		$new_name = ( $term instanceof \WP_Term ) ? $term->name : '';
-
-		// Mimic core and auto-generate slug from name if no slug was provided.
-		if ( '' === $new_slug ) {
-			$new_slug = sanitize_title( $new_name );
-		}
-
-		// Bail if no change in slug.
-		if ( ! $new_slug || $old_slug === $new_slug ) {
+		// Bail if there was no pre-rename note.
+		if ( false === $data || ! is_array( $data ) ) {
 			return;
 		}
 
-		// Check if target tag exists.
+		// Remove the transient.
+		delete_transient( $key );
+
+		// Old term data was captured earlier.
+		$old_slug  = isset( $data['old_slug'] ) ? sanitize_title( $data['old_slug'] ) : '';
+		$old_count = isset( $data['count'] ) ? (int) $data['count'] : 0;
+		$new_slug  = $term->slug;
+
+		// Only act when slug actually changed and the old term had posts.
+		if ( $old_slug && $new_slug && $old_slug !== $new_slug && $old_count > 0 ) {
+			self::add_slug_redirect( $old_slug, $new_slug, $taxonomy );
+		}
+	}
+
+	/**
+	 * Handles merging tags and setting a redirect when the user attempts to rename
+	 * a term to a slug that already exists.
+	 */
+	public static function maybe_handle_term_merge_submit() {
+		// Bail if merge is already in progress.
+		if ( self::$processing_merge ) {
+			return;
+		}
+
+		// Bail if not a POST request.
+		if ( 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+			return;
+		}
+
+		// Bail if not an edited tag request.
+		if ( empty( $_POST['action'] ) || 'editedtag' !== $_POST['action'] ) {
+			return;
+		}
+
+		// Bail if not a mergeable taxonomy.
+		$taxonomy = isset( $_POST['taxonomy'] ) ? sanitize_key( $_POST['taxonomy'] ) : '';
+		if ( ! self::is_mergeable_taxonomy( $taxonomy ) ) {
+			return;
+		}
+
+		// Bail if no from term ID.
+		$from_term_id = isset( $_POST['tag_ID'] ) ? (int) $_POST['tag_ID'] : 0;
+		if ( $from_term_id <= 0 ) {
+			return;
+		}
+
+		// Bail if user doesn't have the capability.
+		if ( ! current_user_can( 'edit_term', $from_term_id ) ) {
+			return;
+		}
+		check_admin_referer( 'update-tag_' . $from_term_id );
+
+		$new_slug_raw = isset( $_POST['slug'] ) ? wp_unslash( $_POST['slug'] ) : '';
+		$new_slug     = sanitize_title( $new_slug_raw );
+
+		// Bail if the slug field was not changed or is empty.
+		if ( '' === $new_slug ) {
+			return;
+		}
+
+		// Bail if from term doesn't exist.
+		$from = get_term( $from_term_id, $taxonomy );
+		if ( ! $from || is_wp_error( $from ) ) {
+			return;
+		}
+
+		// Bail if user didn't actually change the slug.
+		if ( $new_slug === $from->slug ) {
+			return;
+		}
+
+		// Bail if the term doesn't exist.
 		$exists = term_exists( $new_slug, $taxonomy );
-		$to_term_id = is_array( $exists ) ? (int) $exists['term_id'] : (int) $exists;
-
-		self::$processing_merge = true;
-
-		// Merge terms if target term exists.
-		if ( $to_term_id && $to_term_id !== $term_id ) {
-			self::merge_terms( $term_id, $to_term_id, $taxonomy );
-			$new_term = get_term( $to_term_id, $taxonomy );
-
-			self::add_slug_redirect( $old_slug, $new_term->slug, $taxonomy );
-
-			set_transient( "photo_directory_tag_merge_redirect_{$term_id}", $to_term_id, 60 );
-
-			$message = sprintf(
-				/* translators: 1: Old term, 2: Existing term */
-				__( 'Merged term <strong>%1$s</strong> into <strong>%2$s</strong>.', 'wporg-photos' ),
-				esc_html( $old_name ),
-				esc_html( $new_term->name )
+		if ( ! $exists || is_wp_error( $exists ) ) {
+			// Queue up a transient to store the old slug and count for later use by `process_rename()`.
+			set_transient(
+				self::pre_rename_key( $taxonomy, $from_term_id ),
+				[
+					'old_slug' => $from->slug,
+					'count'    => (int) $from->count,
+				],
+				5 * MINUTE_IN_SECONDS
 			);
 
-		// Else just rename existing term.
-		} else {
-			$updated = wp_update_term( $term_id, $taxonomy, [
-				'name' => $new_name,
-				'slug' => $new_slug,
-			] );
+			// Let core handle the new, unique slug.
+			return;
+		}
 
-			if ( is_wp_error( $updated ) ) {
-				$message = $updated->get_error_message();
-			} else {
-				// Only create redirect if the tag has posts.
-				if ( $term->count > 0 ) {
-					self::add_slug_redirect( $old_slug, $new_slug, $taxonomy );
-				}
+		// Bail if the term ID is invalid.
+		$to_term_id = is_array( $exists ) ? (int) $exists['term_id'] : (int) $exists;
+		if ( $to_term_id <= 0 || $to_term_id === $from_term_id ) {
+			return;
+		}
 
-				$message = sprintf(
-					/* translators: %s: New term name */
-					__( 'Changed term slug to <strong>%s</strong>.', 'wporg-photos' ),
-					esc_html( $new_name )
-				);
+		// Keep the old before we mutate/delete it.
+		$old_slug   = $from->slug;
+		$old_count  = (int) $from->count;
+		$to         = get_term( $to_term_id, $taxonomy );
+		$to_name    = $to && ! is_wp_error( $to ) ? $to->name : '';
+
+		// Merge terms.
+		self::$processing_merge = true;
+		self::merge_terms( $from_term_id, $to_term_id, $taxonomy );
+
+		// Add redirect only if the old term actually had posts assigned.
+		if ( $old_count > 0 ) {
+			self::add_slug_redirect( $old_slug, $to->slug, $taxonomy );
+		}
+
+		self::queue_admin_notice( [
+			'type' => 'success',
+			'message' => sprintf(
+				/* translators: 1: Old term name, 2: New/existing term name */
+				__( 'Merged term "%1$s" into "%2$s".', 'wporg-photos' ),
+				$from->name,
+				$to_name
+			)
+		] );
+
+		// Redirect to surviving term’s edit screen, skipping core's updater.
+		$location = add_query_arg(
+			[
+				'action'   => 'edit',
+				'post_type' => Registrations::get_post_type(),
+				'taxonomy' => $taxonomy,
+				'tag_ID'   => $to_term_id,
+			],
+			admin_url( 'term.php' )
+		);
+		wp_safe_redirect( $location );
+		exit;
+	}
+
+	/**
+	 * Handles quick edit merge.
+	 */
+	public static function maybe_handle_quick_edit_merge() {
+		// Security and context checks mirror core.
+		check_ajax_referer( 'taxinlineeditnonce', '_inline_edit' );
+
+		// Bail if merge is already in progress.
+		if ( self::$processing_merge ) {
+			return;
+		}
+
+		// Bail if not a mergeable taxonomy.
+		$taxonomy = isset( $_POST['taxonomy'] ) ? sanitize_key( $_POST['taxonomy'] ) : '';
+		if ( ! self::is_mergeable_taxonomy( $taxonomy ) ) {
+			return; // Let core proceed.
+		}
+
+		// Bail if no from term ID.
+		$from_id = isset( $_POST['tax_ID'] ) ? (int) $_POST['tax_ID'] : 0;
+		if ( $from_id <= 0 || ! current_user_can( 'edit_term', $from_id ) ) {
+			return;
+		}
+
+		// Bail if from term doesn't exist.
+		$from = get_term( $from_id, $taxonomy );
+		if ( ! $from || is_wp_error( $from ) ) {
+			return;
+		}
+
+		$new_slug_raw = isset( $_POST['slug'] ) ? wp_unslash( $_POST['slug'] ) : '';
+		$new_slug     = sanitize_title( $new_slug_raw );
+
+		// Bail if the slug field was not changed or is empty.
+		if ( '' === $new_slug || $new_slug === $from->slug ) {
+			return;
+		}
+
+		$exists = term_exists( $new_slug, $taxonomy );
+
+		// Bail if no existing term, but stash old slug/count so process_rename() can add a redirect.
+		if ( ! $exists || is_wp_error( $exists ) ) {
+			set_transient(
+				self::pre_rename_key( $taxonomy, $from_id ),
+				[
+					'old_slug' => $from->slug,
+					'count'    => (int) $from->count,
+				],
+				5 * MINUTE_IN_SECONDS
+			);
+			// Core's wp_ajax_inline_save_tax() will perform wp_update_term().
+			return;
+		}
+
+		// Bail if the to term ID is invalid or the same as the from term ID.
+		$to_id = is_array( $exists ) ? (int) $exists['term_id'] : (int) $exists;
+		if ( $to_id <= 0 || $to_id === $from_id ) {
+			return;
+		}
+
+		// Perform merge and produce the same kind of response core would.
+		$old_count = (int) $from->count;
+		self::$processing_merge = true;
+		self::merge_terms( $from_id, $to_id, $taxonomy );
+
+		if ( $old_count > 0 ) {
+			$to_slug = get_term_field( 'slug', $to_id, $taxonomy );
+			if ( ! is_wp_error( $to_slug ) && $to_slug ) {
+				self::add_slug_redirect( $from->slug, $to_slug, $taxonomy );
 			}
 		}
 
-		// Queue up an admin notice.
-		set_transient( 'photo_directory_tag_merge_admin_notice', $message, 30 );
+		// Render the updated row HTML for the surviving term, just like core does.
+		$tag           = get_term( $to_id, $taxonomy );
+		$wp_list_table = _get_list_table( 'WP_Terms_List_Table', [ 'screen' => 'edit-' . $taxonomy ] );
 
-		self::$processing_merge = false;
+		// Compute level for hierarchical taxonomies (tags will just be level 0).
+		$level  = 0;
+		$parent = $tag && ! is_wp_error( $tag ) ? (int) $tag->parent : 0;
+		while ( $parent > 0 ) {
+			$parent_tag = get_term( $parent, $taxonomy );
+			$parent     = $parent_tag ? (int) $parent_tag->parent : 0;
+			++$level;
+		}
 
-		return;
+		$wp_list_table->single_row( $tag, $level );
+		// Stop core's default AJAX handler from running.
+		wp_die();
+	}
+
+	/**
+	 * Generates a transient key for pre-rename data.
+	 *
+	 * @param string $taxonomy The taxonomy slug.
+	 * @param int    $term_id  The term ID.
+	 * @return string The transient key.
+	 */
+	protected static function pre_rename_key( $taxonomy, $term_id ) {
+		return "photos_tags_pre_rename_{$taxonomy}_{$term_id}";
 	}
 
 	/**
@@ -247,8 +436,8 @@ class Tags {
 		}
 
 		foreach ( $object_ids as $object_id ) {
-			wp_remove_object_terms( $object_id, $from_term_id, $taxonomy );
-			wp_add_object_terms( $object_id, $to_term_id, $taxonomy );
+			wp_add_object_terms( $object_id, [ $to_term_id ], $taxonomy );
+			wp_remove_object_terms( $object_id, [ $from_term_id ], $taxonomy );
 		}
 
 		// Now that no objects use it, delete the old term.
@@ -256,16 +445,32 @@ class Tags {
 	}
 
 	/**
+	 * Queues an admin notice.
+	 *
+	 * @param string $message The message to queue.
+	 */
+	public static function queue_admin_notice( $message ) {
+		set_transient( 'photo_directory_tag_merge_admin_notice', $message, 30 );
+	}
+
+	/**
 	 * Outputs admin notice if one is queued.
 	 */
 	public static function admin_notices() {
-		if ( $msg = get_transient( 'photo_directory_tag_merge_admin_notice' ) ) {
-			printf(
-				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
-				wp_kses_post( $msg )
-			);
-			delete_transient( 'photo_directory_tag_merge_admin_notice' );
+		$data = get_transient( 'photo_directory_tag_merge_admin_notice' );
+		if ( ! $data ) {
+			return;
 		}
+		delete_transient( 'photo_directory_tag_merge_admin_notice' );
+
+		$type    = in_array( $data['type'], [ 'success', 'warning', 'error', 'info' ], true ) ? $data['type'] : 'success';
+		$message = $data['message'];
+
+		printf(
+			'<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
+			esc_attr( $type ),
+			wp_kses_post( $message )
+		);
 	}
 
 	/**
@@ -579,6 +784,73 @@ class Tags {
 		}
 
 		return true;
+	}
+
+	/**
+	 * API function to rename or merge tags.
+	 *
+	 * Use this instead of `wp_update_term()` to "rename to existing slug = merge".
+	 *
+	 * @return array|WP_Error Result of `wp_update_term()` on simple rename, or ['merged' => true, 'to_term_id' => X] on merge.
+	 */
+	public static function rename_or_merge( int $term_id, string $taxonomy, string $new_slug ) {
+		// Bail if not a mergeable taxonomy.
+		if ( ! self::is_mergeable_taxonomy( $taxonomy ) ) {
+			return new WP_Error( 'invalid_taxonomy', __( 'Taxonomy is not merge-enabled.', 'your-textdomain' ) );
+		}
+
+		$new_slug = sanitize_title( $new_slug );
+		$from     = get_term( $term_id, $taxonomy );
+
+		// Bail if the term doesn't exist.
+		if ( ! $from || is_wp_error( $from ) ) {
+			return new WP_Error( 'invalid_term', __( 'Term not found.', 'wporg-photos' ) );
+		}
+
+		// Bail if the new slug is the same as the old slug.
+		if ( '' === $new_slug || $new_slug === $from->slug ) {
+			// Nothing to do.
+			return [ 'term_id' => $term_id ];
+		}
+
+		// Handle a merge.
+		$exists = term_exists( $new_slug, $taxonomy );
+		if ( $exists && ! is_wp_error( $exists ) ) {
+			$to_term_id = is_array( $exists ) ? (int) $exists['term_id'] : (int) $exists;
+			if ( $to_term_id && $to_term_id !== $term_id ) {
+				if ( self::$processing_merge ) {
+					return new WP_Error( 'reentrancy', __( 'Merge already in progress.', 'wporg-photos' ) );
+				}
+				self::$processing_merge = true;
+
+				$old_count = (int) $from->count;
+				$old_slug  = $from->slug;
+				self::merge_terms( $term_id, $to_term_id, $taxonomy );
+
+				if ( $old_count > 0 ) {
+					$to = get_term( $to_term_id, $taxonomy );
+					if ( $to && ! is_wp_error( $to ) ) {
+						self::add_slug_redirect( $old_slug, $to->slug, $taxonomy );
+					}
+				}
+
+				self::$processing_merge = false;
+				return [ 'merged' => true, 'to_term_id' => $to_term_id ];
+			}
+		}
+
+		// Handle a simple rename.
+		$result = wp_update_term( $term_id, $taxonomy, [ 'slug' => $new_slug ] );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		// Optional: add redirect if old term had posts.
+		if ( (int) $from->count > 0 ) {
+			self::add_slug_redirect( $from->slug, $new_slug, $taxonomy );
+		}
+
+		return $result;
 	}
 
 }
