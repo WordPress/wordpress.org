@@ -659,7 +659,7 @@ class Upload_Handler {
 	 *
 	 * @return array The results of the plugin check.
 	 */
-	public function check_plugin() {
+	public function check_plugin( $mode = 'new' ) {
 		// Run the checks.
 		if (
 			! defined( 'WPCLI' ) ||
@@ -687,6 +687,7 @@ class Upload_Handler {
 		              'plugin check ' .
 		              '--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
 		              '--categories=plugin_repo --format=json ' .
+									'--mode=' . escapeshellarg( $mode ) . ' ' .
 		              '--slug=' . escapeshellarg( $this->plugin_slug ) . ' ' .
 		              escapeshellarg( $this->plugin_root );
 
