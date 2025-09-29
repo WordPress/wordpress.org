@@ -31,7 +31,7 @@
 			}
 
 			if ( $question.prop( 'id' ) ) {
-				window.location.hash = $question.prop( 'id' );
+				//window.location.hash = $question.prop( 'id' );
 			}
 		} );
 
