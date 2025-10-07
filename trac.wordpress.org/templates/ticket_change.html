@@ -14,6 +14,8 @@ Arguments:
 <?python
 import re
 def wporg_wiki_to_html(context, wikidom, escape_newlines=None):
+	if ( 'skip-render' in req.environ['QUERY_STRING'] and 'TRAC_ADMIN' in perm('admin') ):
+		return wikidom[ :1000 ]
 
 	# Syntax highlight HTML blocks.
 	wikidom = re.sub( r'{{{\s*#!html', '{{{#!xml \n HTML', wikidom, flags=re.IGNORECASE )
