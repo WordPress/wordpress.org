@@ -659,37 +659,21 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$type    = 'wordcamp_speaker_add';
 				$item_id = $_POST['speaker_id'];
 
-				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
-					$action = sprintf(
-						'Confirmed as a speaker for <a href="%s">%s</a>',
-						esc_url( $_POST['url'] ),
-						$_POST['wordcamp_name']
-					);
-				} else {
-					$action = sprintf(
-						'Confirmed as a speaker for <a href="%s">%s</a>',
-						esc_url( $_POST['url'] ),
-						$_POST['wordcamp_name']
-					);
-				}
+				$action = sprintf(
+					'Confirmed as a speaker for <a href="%s">%s</a>',
+					esc_url( $_POST['url'] ),
+					$_POST['wordcamp_name']
+				);
 
 			} elseif ( isset( $_POST['organizer_id'] ) && ! empty( $_POST['organizer_id'] ) ) {
 				$type    = 'wordcamp_organizer_add';
 				$item_id = $_POST['organizer_id'];
 
-				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
-					$action = sprintf(
-						'Joined the organizing team for <a href="%s">%s</a>',
-						esc_url( $_POST['url'] ),
-						$_POST['wordcamp_name']
-					);
-				} else {
-					$action = sprintf(
-						'Joined the organizing team for <a href="%s">%s</a>',
-						esc_url( $_POST['url'] ),
-						$_POST['wordcamp_name']
-					);
-				}
+				$action = sprintf(
+					'Joined the organizing team for <a href="%s">%s</a>',
+					esc_url( $_POST['url'] ),
+					$_POST['wordcamp_name']
+				);
 
 			} elseif ( isset( $_POST['type'] ) && 'mentor_assign' === $_POST['type'] ) {
 				$type          = 'wordcamp_mentor_assign';
@@ -1108,3 +1092,4 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 if ( class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 	new WPOrg_Profiles_Activity_Handler();
 }
+
