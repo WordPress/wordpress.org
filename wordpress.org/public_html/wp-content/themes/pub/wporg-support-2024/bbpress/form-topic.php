@@ -265,6 +265,19 @@
 	<div id="no-topic-<?php bbp_topic_id(); ?>" class="bbp-no-topic">
 		<div class="bbp-template-notice">
 			<p><?php _e( 'You cannot create new topics at this time.', 'wporg-forums' ); ?></p>
+			<?php if ( current_user_can( bbp_get_spectator_role() ) ) : ?>
+				<p><?php
+					printf(
+						__( 'This may be caused by your account being marked as a brand or shared company account.', 'wporg-forums' ) . '<br>' .
+						/* translators: %s: Link to https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/ */
+						__( '<a href="%s">Please read this announcement</a> for more information.', 'wporg-forums' ) . '<br>' .
+						/* translators: %s: Email address. */
+						__( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ),
+						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
+						WordPressdotorg\Forums\MODERATION_EMAIL
+					);
+				?></p>
+			<?php endif; ?>
 		</div>
 	</div>
 
