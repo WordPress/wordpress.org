@@ -1485,17 +1485,25 @@ function bb_base_single_topic_description() {
 		$wp_version = WordPressdotorg\Forums\Version_Dropdown\get_topic_version( $topic_id );
 	}
 
-	?>
+	$forum_hidden = false;
+	if ( class_exists( 'WordPressdotorg\Forums\Support_Compat' ) ) {
+		$forum_hidden = in_array( bbp_get_topic_forum_id(), WordPressdotorg\Forums\Support_Compat::HIDDEN_FORUMS, true );
+	}
 
-	<li class="topic-forum"><?php
-		/* translators: %s: forum title */
-		printf( __( 'In: %s', 'wporg-forums' ),
+	if ( ! $forum_hidden ) {
+		echo '<li class="topic-forum">';
+		printf(
+			/* translators: %s: forum title */
+			__( 'In: %s', 'wporg-forums' ),
 			sprintf( '<a href="%s">%s</a>',
 				esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id() ) ),
 				bbp_get_topic_forum_title()
 			)
 		);
-	?></li>
+		echo '</li>';
+	}
+
+	?>
 	<?php if ( !empty( $reply_count ) ) : ?>
 		<li class="reply-count"><?php echo $reply_count; ?></li>
 	<?php endif; ?>
