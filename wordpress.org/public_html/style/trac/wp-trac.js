@@ -35,7 +35,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
 		'i18n-change' : 'A string change, used only after string freeze.',
 		'good-first-bug': 'This ticket is great for a new contributor to work on, generally because it is easy or well-contained.',
-		'fixed-major': 'The commits of this ticket need to be backported.'
+		'fixed-major': 'The commits of this ticket need to be backported.',
+		'gutenberg-merge': 'This ticket is a backport request from Gutenberg.'
 	};
 
 	coreFocusesList = {
@@ -130,7 +131,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 		}
 	};
 
-	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major', 'dev-reviewed' ];
+	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major', 'dev-reviewed', 'gutenberg-merge' ];
 	hideFromNewTickets  = [ 'needs-refresh', 'changes-requested', 'reporter-feedback', 'dev-feedback', 'close', 'has-dev-note', 'needs-dev-note', 'add-to-field-guide', 'has-privacy-review', 'has-copy-review', 'commit', 'early', 'i18n-change', 'fixed-major', 'dev-reviewed' ];
 
 	// phpDocumentor tags, but also a few common @-terms.
@@ -2233,3 +2234,4 @@ if ( ! String.prototype.replaceAll ) {
 
 	};
 }
+
