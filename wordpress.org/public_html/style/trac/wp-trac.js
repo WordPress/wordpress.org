@@ -35,7 +35,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
 		'i18n-change' : 'A string change, used only after string freeze.',
 		'good-first-bug': 'This ticket is great for a new contributor to work on, generally because it is easy or well-contained.',
-		'fixed-major': 'The commits of this ticket need to be backported.'
+		'fixed-major': 'The commits of this ticket need to be backported.',
+		'gutenberg-merge-request': 'This ticket is a backport request from the Gutenberg.'
 	};
 
 	coreFocusesList = {
