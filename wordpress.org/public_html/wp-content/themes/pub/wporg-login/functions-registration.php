@@ -401,6 +401,11 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 			];
 
 			if ( 'url' == $field ) {
+				// If the URL contains WordPress.org, just skip it.
+				if ( str_contains( strtolower( $value ), 'wordpress.org' ) ) {
+					continue;
+				}
+
 				wp_update_user( [ 'ID' => $user_id, 'user_url' => $value ] );
 			} else {
 				if ( $value ) {
