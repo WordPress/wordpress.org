@@ -556,24 +556,6 @@ class Official_WordPress_Events {
 				'max_event_date' => strtotime( '+1 year' ),
 			)
 		);
-
-		if ( empty( $meetups ) || is_wp_error( $meetups ) ) {
-			// Temp workaround for a Meetup.com bug - It seems that the date filters above have ceased to work.
-			// As a result, we'll query for events in the future and then filter out any far-future events.
-			$meetups = $meetup_client->get_network_events(
-				array(
-					'status' => 'upcoming',
-					'min_event_date' => false,
-					'max_event_date' => false,
-				)
-			);
-			if ( $meetups ) {
-				$meetups = array_filter( $meetups, function( $meetup ) {
-					return strtotime( $meetup['dateTime'] ) <= strtotime( '+1 year' );
-				} );
-			}
-		}
-
 		if ( ! empty( $meetup_client->error->errors ) ) {
 			$this->log( 'Failed to fetch meetups: ' . wp_json_encode( $meetup_client->error ), true );
 			return $events;
