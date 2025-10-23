@@ -297,11 +297,14 @@ function get_whitelist() {
 			'justinahinon',
 			'mobarak',
 			'monikarao',
+			'mosescursor', // @Moses Cursor on Slack
+			'nikunj8866',
 			'ryan', // @boren on Slack
 			'SirLouen',
 			'webtechpooja', // @Pooja Derashri on Slack
 			'oglekler',
 			'krupajnanda',
+			'psykro', // @Jonathan on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'anlino', // @andersnoren on Slack
