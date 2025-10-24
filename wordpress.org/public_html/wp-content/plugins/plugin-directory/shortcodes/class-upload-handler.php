@@ -767,10 +767,9 @@ class Upload_Handler {
 		} elseif ( $return_code ) {
 			// Log plugin-check timing out.
 			$zip_name   = reset( $_FILES )['name'] ?? '';
-			$output     = implode( "\n", $output );
 			$debug      = '';
-			if ( $output || $stderr ) {
-				$debug = trim( "{$output}\n===\n{$stderr}", "\n=" );
+			if ( $result['output'] || $result['stderr'] ) {
+				$debug = trim( "{$result['output']}\n===\n{$result['stderr']}", "\n=" );
 				$debug = "\n```{$debug}```";
 			}
 			$text       = ":rotating_light: Error: {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s{$debug}";
