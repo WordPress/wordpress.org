@@ -21,6 +21,7 @@ class Manager {
 		'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
 		'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
 		'import_zip'         => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
+		'scan_plugin'        => array( __NAMESPACE__ . '\Plugin_Updates_PCP', 'cron_trigger' ),
 	);
 
 	/**
@@ -40,6 +41,9 @@ class Manager {
 		add_action( 'plugin_directory_zip_cleanup', array( __NAMESPACE__ . '\Zip_Cleanup', 'cron_trigger' ) );
 		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
 		add_action( 'plugin_directory_create_svn_repo', array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ) );
+
+		// Hook into the plugin import process to queue a job.
+		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Updates_PCP', 'wporg_plugins_imported' ), 10, 5 );
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
