@@ -202,6 +202,13 @@ class Plugin_Updates_PCP {
 		$email->send();
 	}
 
+	/**
+	 * Notifies a Slack channel about the PCP results.
+	 *
+	 * @param object $plugin  The plugin post object.
+	 * @param array  $results The results from PCP.
+	 * @param string $tag     The tag that was scanned.
+	 */
 	public static function notify_slack_channel( $plugin, $results, $tag ) {
 
 		// Don't alert the channel for plugins that have already been closed
@@ -305,6 +312,10 @@ class Plugin_Updates_PCP {
 	/**
 	 * Sends a plugin through Plugin Check.
 	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param string $path        The local path to the plugin.
+	 * @param string $tag         The tag being scanned.
+	 * @param string $mode        The mode to run plugin-check in. 'new' or 'update'.
 	 * @return array The results of the plugin check.
 	 */
 	public static function run_plugin_check( $plugin_slug, $path, $tag = '', $mode = 'new' ) {
@@ -328,7 +339,7 @@ class Plugin_Updates_PCP {
 					'plugin check ' .
 					'--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
 					'--categories=plugin_repo --format=json ' .
-					// '--mode=' . escapeshellarg( $mode ) . ' ' . // Not implemented yet.
+					'--mode=' . escapeshellarg( $mode ) . ' ' .
 					'--slug=' . escapeshellarg( $plugin_slug ) . ' ' .
 					escapeshellarg( $path );
 
