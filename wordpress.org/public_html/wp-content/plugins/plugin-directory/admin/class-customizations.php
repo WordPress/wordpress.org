@@ -746,6 +746,13 @@ class Customizations {
 			'plugin', 'normal', 'high'
 		);
 
+		add_meta_box(
+			'cron-logs',
+			'Cron Job Logs',
+			array( __NAMESPACE__ . '\Metabox\Cron_Logs', 'display' ),
+			'plugin', 'normal', 'low'
+		);
+
 		if ( 'new' !== $post->post_status && 'pending' != $post->post_status ) {
 			add_meta_box(
 				'plugin-committers',
@@ -773,16 +780,6 @@ class Customizations {
 				__( 'Author Notice (Displayed on the plugins page to Plugin Authors)', 'wporg-plugins' ),
 				array( __NAMESPACE__ . '\Metabox\Author_Notice', 'display' ),
 				'plugin', 'normal', 'high'
-			);
-		}
-
-		// For highly trusted users, add a cron-jobs metabox for debugging plugin imports.
-		if ( is_super_admin() || 'production' !== wp_get_environment_type() ) {
-			add_meta_box(
-				'cron-logs',
-				'Cron Job Logs',
-				array( __NAMESPACE__ . '\Metabox\Cron_Logs', 'display' ),
-				'plugin', 'normal', 'low'
 			);
 		}
 
