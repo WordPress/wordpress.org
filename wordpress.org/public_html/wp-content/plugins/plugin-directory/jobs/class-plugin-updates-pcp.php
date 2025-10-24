@@ -339,7 +339,7 @@ class Plugin_Updates_PCP {
 					'plugin check ' .
 					'--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
 					'--categories=plugin_repo --format=json ' .
-					'--mode=' . escapeshellarg( $mode ) . ' ' .
+					// '--mode=' . escapeshellarg( $mode ) . ' ' .
 					'--slug=' . escapeshellarg( $plugin_slug ) . ' ' .
 					escapeshellarg( $path );
 
