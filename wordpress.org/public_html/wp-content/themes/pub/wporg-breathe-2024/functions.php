@@ -57,7 +57,7 @@ function wporg_breathe_styles() {
 		filemtime( get_theme_root() . '/wporg-parent-2021/build/block-styles.css' )
 	);
 
-	wp_enqueue_style( 'wporg-breathe', get_stylesheet_uri(), array( 'p2-breathe' ), filemtime( __DIR__ . '/style.css' ) );
+	wp_enqueue_style( 'wporg-breathe', get_stylesheet_uri(), array( 'p2-breathe', 'dashicons' ), filemtime( __DIR__ . '/style.css' ) );
 
 	// Preload the heading font(s).
 	if ( is_callable( 'global_fonts_preload' ) ) {
