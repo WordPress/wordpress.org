@@ -677,10 +677,11 @@ class Upload_Handler {
 			return $default_return;
 		}
 
-		$verdict     = $result['verdict'];
-		$results     = $result['results'];
-		$return_code = $result['return_code'];
-		$total_time  = $result['total_time'];
+		$verdict         = $result['verdict'];
+		$results         = $result['results'];
+		$results_by_type = $result['results_by_type'];
+		$return_code     = $result['return_code'];
+		$total_time      = $result['total_time'];
 
 		// Generage the HTML for the Plugin Check output.
 		$html = sprintf(
