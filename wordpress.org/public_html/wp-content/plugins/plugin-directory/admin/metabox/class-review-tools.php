@@ -323,14 +323,14 @@ class Review_Tools {
 								'options'       => [
 									'activate' => false,
 								],
-								'pluginZipFile' => [
+								'pluginData' => [
 									'resource' => 'wordpress.org/plugins',
 									'slug'     => $post->post_name,
 								],
 							],
 							[
 								'step'          => 'installPlugin',
-								'pluginZipFile' => [
+								'pluginData' => [
 									'resource' => 'wordpress.org/plugins',
 									'slug'     => 'plugin-check',
 								],

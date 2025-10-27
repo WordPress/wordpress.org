@@ -1324,35 +1324,50 @@ class Import {
 				$decoded_file[ 'steps' ] = array_values( array_filter( $decoded_file[ 'steps' ] ) );
 
 				foreach ( $decoded_file[ 'steps' ] as &$step ) {
-					// Normalize a "install plugin from url" to a install-by-slug.
+					// Normalize a "install (plugin|theme) from url" to a install-by-slug.
 					if (
-						'installPlugin' === $step['step'] &&
-						isset( $step['pluginZipFile']['url'] ) &&
-						preg_match( '!^https?://downloads\.wordpress\.org/plugin/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step['pluginZipFile']['url'], $m )
+						'installPlugin' === $step['step'] ||
+						'installTheme' === $step['step']
 					) {
-						$step[ 'pluginZipFile' ] = [
-							'resource' => 'wordpress.org/plugins',
-							'slug'     => $m['slug']
+						$keys = [
+							'pluginZipFile',
+							'pluginData',
+							'themeZipFile',
+							'themeData'
 						];
+						foreach ( $keys as $key ) {
+							if ( preg_match( '!^https?://downloads\.wordpress\.org/[^/]+/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step[ $key ]['url'] ?? '', $m ) ) {
+								unset( $step[ $key ] );
+
+								if ( 'installPlugin' === $step['step'] ) {
+									$step[ 'pluginData' ] = [
+										'resource' => 'wordpress.org/plugins',
+										'slug'     => $m['slug']
+									];
+								} else {
+									$step[ 'themeData' ] = [
+										'resource' => 'wordpress.org/themes',
+										'slug'     => $m['slug']
+									];
+								}
+							}
+						}
 					}
 
-					// Normalize a "install theme from url" to a install-by-slug.
-					if (
-						'installTheme' === $step['step'] &&
-						isset( $step['themeZipFile']['url'] ) &&
-						preg_match( '!^https?://downloads\.wordpress\.org/theme/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step['themeZipFile']['url'], $m )
-					) {
-						$step[ 'themeZipFile' ] = [
-							'resource' => 'wordpress.org/themes',
-							'slug'     => $m['slug']
-						];
+					// Upgrade from pluginZipFile to pluginData by slug where possible.
+					if ( isset( $step['pluginZipFile']['slug'] ) ) {
+						$step['pluginData'] = array(
+							'resource' => 'wordpress.org/plugins',
+							'slug'     => $step['pluginZipFile']['slug'],
+						);
+						unset( $step['pluginZipFile'] );
 					}
 
 					// Check if this is a "install this plugin" step.
 					if (
 						'installPlugin' === $step['step'] &&
-						isset( $step['pluginZipFile']['slug'] ) &&
-						$plugin_slug === $step['pluginZipFile']['slug']
+						isset( $step['pluginData']['slug'] ) &&
+						$plugin_slug === $step['pluginData']['slug']
 					) {
 						$has_self_install_step = true;
 
@@ -1367,7 +1382,7 @@ class Import {
 			if ( ! $has_self_install_step && 'akismet' !== $plugin_slug ) {
 				$decoded_file['steps'][] = array(
 					'step' => 'installPlugin',
-					'pluginZipFile' => array(
+					'pluginData' => array(
 						'resource' => 'wordpress.org/plugins',
 						'slug'     => $plugin_slug,
 					),
