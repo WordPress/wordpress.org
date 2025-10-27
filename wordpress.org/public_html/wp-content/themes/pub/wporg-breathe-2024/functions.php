@@ -632,12 +632,15 @@ add_action( 'wporg_breathe_before_name', __NAMESPACE__ . '\add_svg_icon_to_site_
 
 /**
  * Register translations for plugins without their own GlotPress project.
+ * This is in a function to avoid calling translation functions too early (at theme inclusion time).
  */
-// wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
-/* translators: %s: Post title */
-__( 'Pending Review: %s', 'wporg' );
-__( 'Submit for review', 'wporg' );
-_n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
+function __translations_in_private_functions() {
+	// wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
+	/* translators: %s: Post title */
+	__( 'Pending Review: %s', 'wporg' );
+	__( 'Submit for review', 'wporg' );
+	_n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
+}
 
 /**
  * Modify the search block's form action for handbook pages.
