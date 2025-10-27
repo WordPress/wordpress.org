@@ -931,7 +931,9 @@ class Import {
 				$relative_filename = str_replace( "$base_dir/", '', $filename );
 				$potential_block_directories[] = dirname( $relative_filename );
 				foreach ( $blocks_in_file as $block ) {
-					$blocks[ $block->name ] = $block;
+					if ( ! empty( $block->name ) ) {
+						$blocks[ $block->name ] = $block;
+					}
 
 					$extracted_files = $this->extract_file_paths_from_block_json( $block, dirname( $relative_filename ) );
 					if ( ! empty( $extracted_files ) ) {
