@@ -1371,9 +1371,9 @@ class Import {
 					) {
 						$has_self_install_step = true;
 
-						if ( true != $step['options']['activate'] ) {
-							$step[ 'options' ][ 'activate' ] = true;
-						}
+						// Ensure the step activates the plugin.
+						$step['options'] ??= [];
+						$step['options']['activate'] = true;
 					}
 				}
 			}
