@@ -1711,7 +1711,7 @@ class Plugin_Directory {
 	public function split_post_content_into_pages( $content ) {
 		$_pages        = preg_split( '#<!--section=(.+?)-->#', ltrim( $content ), - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		$content_pages = array(
-			'screenshots' => '[wporg-plugins-screenshots]',
+			'screenshots' => '<!-- wp:pattern {"slug":"wporg-plugins-2024/section-screenshots"} /-->',
 			'developers'  => '[wporg-plugins-developers]',
 			'reviews'     => '[wporg-plugins-reviews]',
 		);

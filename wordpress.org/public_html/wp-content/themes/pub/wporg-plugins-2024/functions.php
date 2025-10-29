@@ -139,33 +139,6 @@ function scripts() {
 		wp_enqueue_script( 'wporg-plugins-upload', get_stylesheet_directory_uri() . '/js/upload.js', array( 'wp-api', 'jquery' ), filemtime( __DIR__ . '/js/upload.js' ), true );
 	}
 
-	// React is currently only used on detail pages.
-	if ( is_single() ) {
-		$assets_path = dirname( __FILE__ ) . '/js/build/theme.asset.php';
-		if ( file_exists( $assets_path ) ) {
-			$script_info = require( $assets_path );
-			wp_enqueue_script(
-				'wporg-plugins-client',
-				get_stylesheet_directory_uri() . '/js/build/theme.js',
-				$script_info['dependencies'],
-				$script_info['version'],
-				true
-			);
-			wp_localize_script(
-				'wporg-plugins-client',
-				'localeData',
-				array(
-					'' => array(
-						'Plural-Forms' => _x( 'nplurals=2; plural=n != 1;', 'plural forms', 'wporg-plugins' ),
-						'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
-						'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ),
-					),
-					'screenshots' => __( 'Screenshots', 'wporg-plugins' ),
-				)
-			);
-		}
-	}
-
 	// No Jetpack scripts needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
 	wp_dequeue_script( 'devicepx' );
@@ -196,7 +169,6 @@ function loader_src( $src, $handle ) {
 		'wporg-plugins-popover',
 		'wporg-plugins-locale-banner',
 		'wporg-plugins-stats',
-		'wporg-plugins-client',
 		'wporg-plugins-faq',
 	];
 
