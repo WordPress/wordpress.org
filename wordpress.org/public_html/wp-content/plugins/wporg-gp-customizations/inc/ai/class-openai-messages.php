@@ -71,7 +71,7 @@ class OpenAI_Messages {
 	public function build_translation_messages(): array {
 		$custom_prompt  = sanitize_text_field( $this->get_custom_prompt() );
 		$glossary_query = sanitize_text_field( $this->build_glossary_query() );
-		$user_query     = sanitize_text_field( $this->build_user_query() );
+		$user_query     = $this->build_user_query();
 
 		$messages = array(
 			array(
