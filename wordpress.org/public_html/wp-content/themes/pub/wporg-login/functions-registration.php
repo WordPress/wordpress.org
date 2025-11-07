@@ -133,7 +133,11 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	);
 
 	// If the signup has a bypass-spam-checks token, approve it.
-	if ( ! $pending_user['cleared'] && wporg_reg_has_signup_token( $pending_user ) ) {
+	if (
+		! $pending_user['cleared'] &&
+		wporg_reg_has_signup_token( $pending_user ) &&
+		'block' !== ( $pending_user['meta']['heuristics'] ?? '' )
+	) {
 		$pending_user['cleared']        = 1;
 		$pending_user['meta']['bypass'] = 'yes';
 	}
