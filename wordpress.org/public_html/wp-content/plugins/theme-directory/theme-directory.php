@@ -799,6 +799,7 @@ function wporg_themes_get_header_data( $theme_file ) {
 	 * guarantee that the server will be happy with the User Agent.
 	 */
 	if ( str_contains( $theme_file, '://' ) ) {
+		include_once ABSPATH . '/wp-admin/includes/file.php'; // For wp_tempnam().
 		$request = wp_remote_get(
 			$theme_file,
 			[
