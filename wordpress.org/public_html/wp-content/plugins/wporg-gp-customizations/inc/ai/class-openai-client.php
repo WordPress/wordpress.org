@@ -178,23 +178,23 @@ class OpenAI_Client {
 
 		if ( is_wp_error( $response ) ) {
 			$this->set_error( 'API request failed: ' . $response->get_error_message() );
-			$this->log_error( $endpoint, $response->get_error_message() );
+			$this->log_error( $endpoint, $response->get_error_message(), $response );
 			return false;
 		}
 
-		$status_code  = wp_remote_retrieve_response_code( $response );
+		$status_code = wp_remote_retrieve_response_code( $response );
 		if ( 200 !== $status_code ) {
 			$error_message = wp_remote_retrieve_response_message( $response );
 			$this->set_error( "API request failed with status {$status_code}: {$error_message}" );
-			$this->log_error( $endpoint, "Status {$status_code}: {$error_message}" );
+			$this->log_error( $endpoint, "Status {$status_code}: {$error_message}", $response );
 			return false;
 		}
-		
+
 		$body_content = wp_remote_retrieve_body( $response );
-		$decoded = json_decode( $body_content, true );
+		$decoded      = json_decode( $body_content, true );
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
 			$this->set_error( 'Failed to decode API response: ' . json_last_error_msg() );
-			$this->log_error( $endpoint, 'JSON decode error: ' . json_last_error_msg() );
+			$this->log_error( $endpoint, 'JSON decode error: ' . json_last_error_msg(), $response );
 			return false;
 		}
 
@@ -262,13 +262,22 @@ class OpenAI_Client {
 	/**
 	 * Log an error.
 	 *
+	 * Ignores 429 errors in production to reduce log noise.
+	 *
 	 * @param string $endpoint Endpoint that failed.
 	 * @param string $message  Error message.
+	 * @param mixed  $response Optional. Response object (WP_Error or HTTP response array).
 	 */
-	private function log_error( string $endpoint, string $message ): void {
+	private function log_error( string $endpoint, string $message, $response = null ): void {
 		if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 			wp_send_json_error( array( 'OpenAI API Error [' . $endpoint . ']', $message ) );
 		} else {
+			if ( $response && ! is_wp_error( $response ) ) {
+				$status_code = wp_remote_retrieve_response_code( $response );
+				if ( 429 === $status_code ) {
+					return;
+				}
+			}
 			trigger_error( 'OpenAI API Error [' . $endpoint . ']: ' . $message, E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
