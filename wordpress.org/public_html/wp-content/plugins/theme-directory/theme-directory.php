@@ -804,6 +804,7 @@ function wporg_themes_get_header_data( $theme_file ) {
 			[
 				'user-agent' => 'WordPress.org Theme Directory',
 				'stream'     => true,
+				'filename'   => wp_tempnam( 'style.css' ),
 			]
 		);
 		$theme_file = $request['filename'] ?? false;
