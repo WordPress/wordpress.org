@@ -119,6 +119,9 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	$has_blocked_word   = wporg_login_has_blocked_word( $pending_user );
 	$passes_block_words = ! $has_blocked_word;
 
+	if ( ! $passes_heuristics ) {
+		$pending_user['meta']['block_reason'] ??= 'Heuristics check failed';
+	}
 	if ( ! $passes_block_words ) {
 		$pending_user['meta']['block_reason'] ??= [ 'Block words', "{$has_blocked_word} found" ];
 	}
