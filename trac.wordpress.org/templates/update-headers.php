@@ -155,7 +155,7 @@ function save_domdocument( $file, $dom ) {
 				$url = addcslashes( $url, '/' );
 			}
 
-			return $quote . $url;
+			return $quote . $url . $quote;
 		},
 		$html
 	);
