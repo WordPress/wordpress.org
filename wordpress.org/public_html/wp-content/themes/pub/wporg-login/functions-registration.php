@@ -143,6 +143,19 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	) {
 		$pending_user['cleared']        = 1;
 		$pending_user['meta']['bypass'] = 'yes';
+
+		// Clear the block reason if it doesn't contain specific information.
+		if (
+			in_array(
+				$pending_user['meta']['block_reason'] ?? false,
+				[
+					'Heuristics check failed',
+					'reCaptcha not met',
+				]
+			)
+		) {
+			unset( $pending_user['meta']['block_reason'] );
+		}
 	}
 
 	$inserted = wporg_update_pending_user( $pending_user );
@@ -240,7 +253,8 @@ function wporg_get_pending_user( $who ) {
 	}
 
 	$pending_user = $wpdb->get_row( $wpdb->prepare(
-		"SELECT * FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE %i = %s LIMIT 1",
+		'SELECT * FROM %i WHERE %i = %s LIMIT 1',
+		"{$wpdb->base_prefix}user_pending_registrations",
 		$field,
 		$who
 	), ARRAY_A );
@@ -270,13 +284,30 @@ function wporg_get_pending_user_by_email_wildcard( $email ) {
 	$email_base     = preg_replace( '/[+][^@]+@/i', '@', $email ); // abc+def@ghi => abc@ghi
 
 	$matching_email = $wpdb->get_var( $sql = $wpdb->prepare(
-		"SELECT `user_email` FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE ( `user_email` = %s OR `user_email` LIKE %s ) LIMIT 1",
+		'SELECT `user_email` FROM %i WHERE ( `user_email` = %s OR `user_email` LIKE %s ) LIMIT 1',
+		"{$wpdb->base_prefix}user_pending_registrations",
 		$email_base,
 		$email_wildcard
 	) );
 
 	if ( $matching_email ) {
 		return wporg_get_pending_user( $matching_email );
+	}
+
+	// If gmail, check to see if there's a match ignoring dots and plus addressing.
+	if ( str_ends_with( strtolower( $email ), '@gmail.com' ) && substr_count( $email, '.' ) > 1 ) {
+		$gmail_base = str_replace( '.', '', explode( '@', $email )[0] );
+		$gmail_base = preg_replace( '/[+].*$/', '', $gmail_base );
+
+		$matching_email = $wpdb->get_var( $sql = $wpdb->prepare(
+			'SELECT `user_email` FROM %i WHERE `user_email` = %s LIMIT 1',
+			"{$wpdb->base_prefix}user_pending_registrations",
+			$gmail_base . '@gmail.com'
+		) );
+
+		if ( $matching_email ) {
+			return wporg_get_pending_user( $matching_email );
+		}
 	}
 
 	return false;

@@ -395,10 +395,10 @@ function wporg_login_admin_settings_page_log_changes( $nicename, $before, $after
 	$changes = '';
 
 	if ( $before && $removed ) {
-		$changes .= rtrim( '> -`' . implode( "`\n-`", $removed ), '`-' ) . "`\n";
+		$changes .= rtrim( '> -`' . implode( "`\n> -`", $removed ), '`-' ) . "`\n";
 	}
 	if ( $after && $added ) {
-		$changes .= rtrim( '> +`' . implode( "`\n+`", $added ), '`+' ) . "`\n";
+		$changes .= rtrim( '> +`' . implode( "`\n> +`", $added ), '`+' ) . "`\n";
 	}
 
 	if ( ! $changes ) {
