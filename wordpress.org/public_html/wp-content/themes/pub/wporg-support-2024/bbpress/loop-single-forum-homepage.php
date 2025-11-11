@@ -1,7 +1,25 @@
-<a href="<?php bbp_forum_permalink(); ?>" title="<?php bbp_forum_title(); ?>" id="bbp-forum-<?php bbp_forum_id(); ?>" <?php bbp_forum_class( bbp_get_forum_id(), array( 'wp-block-wporg-link-wrapper', 'is-layout-flow', 'wp-block-wporg-link-wrapper-is-layout-flow' ) ); ?>>
+<?php
 
-	<h3 class="wp-block-heading has-inter-font-family has-normal-font-size"><?php bbp_forum_title(); ?></h3>
+echo do_blocks(
+	sprintf( '
+		<!-- wp:wporg/link-wrapper {"className":"wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow %1$s"} -->
+		<a href="%2$s" title="%3$s" id="%4$s" class="wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow %1$s">
 
-	<p><?php bbp_forum_content(); ?></p>
+			<!-- wp:heading {"className":"has-inter-font-family has-normal-font-size"} -->
+			<h3 class="wp-block-heading has-inter-font-family has-normal-font-size">%5$s</h3>
+			<!-- /wp:heading -->
 
-</a><!-- #bbp-forum-<?php bbp_forum_id(); ?> -->
+			<!-- wp:paragraph -->
+			<p>%6$s</p>
+			<!-- /wp:paragraph -->
+
+		</a>
+		<!-- /wp:wporg/link-wrapper -->',
+		esc_attr( bbp_get_forum_class( bbp_get_forum_id() ) ),
+		esc_url( bbp_get_forum_permalink() ),
+		esc_attr( bbp_get_forum_title() ),
+		esc_attr( 'bbp-forum-' . bbp_get_forum_id() ),
+		esc_html( bbp_get_forum_title() ),
+		esc_html( bbp_get_forum_content() )
+	)
+);
