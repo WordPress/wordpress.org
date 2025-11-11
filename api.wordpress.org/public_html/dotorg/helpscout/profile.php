@@ -27,15 +27,27 @@ if ( $email ) {
 		if ( ! empty( $request->customer->email ) && strcasecmp( $request->customer->email, $user->user_email ) ) {
 			$html .= '<p>Account Email: ' . esc_html( $user->user_email ) . '</p>';
 		}
+
+		if ( in_array( 'bbp_blocked', $user->wporg_419_capabilities ?? [], true ) ) {
+			$html .= '<p><strong>Forums Status: BLOCKED</strong></p>';
+		} elseif ( in_array( 'bbp_spectator', $user->wporg_419_capabilities ?? [], true ) ) {
+			$html .= '<p><strong>Forums Status: Spectator</strong></p>';
+		}
 	} else {
 		$html .= '<p>No profile found</p>';
+	}
+
+	$gmail_dotless = $request->customer->email;
+	if ( str_ends_with( strtolower( $gmail_dotless ), '@gmail.com' ) ) {
+		$gmail_dotless = str_replace( '.', '', strstr( $gmail_dotless, '@', true ) ) . '@gmail.com';
 	}
 
 	// See if they have a pending user account.
 	$records = $wpdb->get_results( $wpdb->prepare(
 		"SELECT * FROM {$wpdb->base_prefix}user_pending_registrations
-		WHERE user_email = %s OR user_email LIKE %s",
+		WHERE user_email = %s OR user_email = %s OR user_email LIKE %s",
 		$request->customer->email,
+		$gmail_dotless,
 		str_replace( '@', '+%@', $wpdb->esc_like( $request->customer->email ) ) // Handle plus addressing.
 	) );
 	if ( $records ) {
