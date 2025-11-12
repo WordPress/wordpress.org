@@ -150,10 +150,10 @@ class Rosetta_Downloads {
 				?>
 			</p>
 
-			<table class="widefat fixed striped" style="max-width:400px">
+			<table class="widefat fixed striped" style="max-width:410px">
 				<thead>
 					<tr>
-						<th scope="col" style="width:80px"><?php _e( 'Locale', 'rosetta' ); ?></th>
+						<th scope="col"><?php _e( 'Locale', 'rosetta' ); ?></th>
 						<th scope="col" style="text-align:right"><?php _e( 'Release Package', 'rosetta' ); ?></th>
 						<th scope="col" style="text-align:right"><?php _e( 'Language Pack', 'rosetta' ); ?></th>
 					</tr>
