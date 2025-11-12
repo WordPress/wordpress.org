@@ -142,6 +142,7 @@ class Trademarks {
 		'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
 		'trustpilot.com'        => array( 'trustpilot' ),
 		'microsoft.com'         => array( 'bing-', 'microsoft-' ),
+		'yandex-team.com'       => array( 'yandex-' ),
 		'yandex-team.ru'        => array( 'yandex-' ),
 		'yoast.com'             => array( 'yoast' ),
 		'opera.com'             => array( 'opera-' ),
