@@ -180,21 +180,26 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 			$search_term = wp_unslash( $_GET['s'] );
 			$search_like = '%' . $wpdb->esc_like( $search_term ) . '%';
-
+			
 			// Limit searches to where they're likely, for performance.
 			if ( str_contains( $search_term, '@' ) ) {
+				$san_search_term = wporg_sanitize_email_for_search( $search_term );
+				$san_search_like = '%' . $wpdb->esc_like( $san_search_term ) . '%';
+
 				// If it looks like a full email, exact match.
 				if ( preg_match( '/^.{3,}@.+[.].+$/', $search_term ) ) {
 					// Looks like an email, so just search the emails.
 					$where .= $wpdb->prepare(
-						"AND registrations.user_email = %s",
-						$search_term
+						"AND ( registrations.user_email = %s OR registrations.user_email_san = %s )",
+						$search_term,
+						$san_search_term
 					);
 				} else {
 					// Otherwise, a wildcard on the email.
 					$where .= $wpdb->prepare(
-						"AND registrations.user_email LIKE %s",
-						$search_like
+						"AND ( registrations.user_email LIKE %s OR registrations.user_email_san LIKE %s )",
+						$search_like,
+						$san_search_like
 					);
 				}
 			} elseif (
@@ -215,10 +220,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 					"AND (
 						registrations.user_login LIKE %s OR
 						registrations.user_email LIKE %s OR
+						registrations.user_email_san LIKE %s OR
 						registrations.meta LIKE %s OR
 						description.meta_value LIKE %s
 					)",
-					$search_like, $search_like, $search_like, $search_like
+					$search_like, $search_like, $search_like, $search_like, $search_like
 				);
 			}
 		}

@@ -259,6 +259,16 @@ function wporg_get_pending_user( $who ) {
 		$who
 	), ARRAY_A );
 
+	// Try again on the sanitized field..
+	if ( ! $pending_user && 'user_email' === $field ) {
+		$who          = wporg_sanitize_email_for_search( $who );
+		$pending_user = $wpdb->get_row( $wpdb->prepare(
+			'SELECT * FROM %i WHERE user_email_san = %s LIMIT 1',
+			"{$wpdb->base_prefix}user_pending_registrations",
+			$who
+		), ARRAY_A );
+	}
+
 	if ( ! $pending_user ) {
 		return false;
 	}
@@ -275,49 +285,15 @@ function wporg_get_pending_user( $who ) {
 }
 
 /**
- * Fetches a pending user record from the database by "inbox", ignoring plus addressing.
- */
-function wporg_get_pending_user_by_email_wildcard( $email ) {
-	global $wpdb;
-
-	$email_wildcard = preg_replace( '/[+][^@]+@/i', '+%@', $wpdb->esc_like( $email ) );  // abc+def@ghi => abc+%@ghi
-	$email_base     = preg_replace( '/[+][^@]+@/i', '@', $email ); // abc+def@ghi => abc@ghi
-
-	$matching_email = $wpdb->get_var( $sql = $wpdb->prepare(
-		'SELECT `user_email` FROM %i WHERE ( `user_email` = %s OR `user_email` LIKE %s ) LIMIT 1',
-		"{$wpdb->base_prefix}user_pending_registrations",
-		$email_base,
-		$email_wildcard
-	) );
-
-	if ( $matching_email ) {
-		return wporg_get_pending_user( $matching_email );
-	}
-
-	// If gmail, check to see if there's a match ignoring dots and plus addressing.
-	if ( str_ends_with( strtolower( $email ), '@gmail.com' ) && substr_count( $email, '.' ) > 1 ) {
-		$gmail_base = str_replace( '.', '', explode( '@', $email )[0] );
-		$gmail_base = preg_replace( '/[+].*$/', '', $gmail_base );
-
-		$matching_email = $wpdb->get_var( $sql = $wpdb->prepare(
-			'SELECT `user_email` FROM %i WHERE `user_email` = %s LIMIT 1',
-			"{$wpdb->base_prefix}user_pending_registrations",
-			$gmail_base . '@gmail.com'
-		) );
-
-		if ( $matching_email ) {
-			return wporg_get_pending_user( $matching_email );
-		}
-	}
-
-	return false;
-}
-
-/**
  * Update the pending user record, similar to `wp_update_user()` but for the not-yet-created user record.
  */
 function wporg_update_pending_user( $pending_user ) {
 	global $wpdb;
+
+	// Ensure we have the sanitized email for searching purposes.
+	if ( empty( $pending_user['user_email_san'] ) && ! empty( $pending_user['user_email'] ) ) {
+		$pending_user['user_email_san'] = wporg_sanitize_email_for_search( $pending_user['user_email'] );
+	}
 
 	// Allow altering the user fields.
 	$pending_user = apply_filters( 'wporg_login_registration_update_pending_user', $pending_user );
@@ -602,4 +578,23 @@ function wporg_login_has_blocked_word( $user ) {
 	}
 
 	return false;
+}
+
+/**
+ * Sanitize an email into it's canonical form for searching.
+ *
+ * @param string $email The email address to sanitize.
+ * @return string The sanitized email address.
+ */
+function wporg_sanitize_email_for_search( $email ) {
+	$email_san = strtolower( $email );
+	$email_san = trim( $email_san );
+
+	// Remove plus addressing for the sanitized email.
+	$email_san = preg_replace( '/[+][^@]+@/i', '@', $email_san );
+
+	// Filter it when needed.
+	$email_san = apply_filters( 'wporg_sanitize_email_for_search', $email_san, $email );
+
+	return $email_san;
 }

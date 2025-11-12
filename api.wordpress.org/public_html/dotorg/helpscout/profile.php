@@ -5,12 +5,16 @@ namespace WordPressdotorg\API\HelpScout;
 
 include __DIR__ . '/common.php';
 
+// Include the registration functions.. wporg_sanitize_email_for_search().
+include_once WP_CONTENT_DIR . '/themes/pub/wporg-login/functions-registration.php';
+
 // $request is the validated HelpScout request.
 $request = get_request();
 
 // default empty output
 $html = '';
 $user = false;
+
 $email = get_user_email_for_email( $request );
 
 // Look up a user based on email address
@@ -37,18 +41,15 @@ if ( $email ) {
 		$html .= '<p>No profile found</p>';
 	}
 
-	$gmail_dotless = $request->customer->email;
-	if ( str_ends_with( strtolower( $gmail_dotless ), '@gmail.com' ) ) {
-		$gmail_dotless = str_replace( '.', '', strstr( $gmail_dotless, '@', true ) ) . '@gmail.com';
-	}
-
 	// See if they have a pending user account.
 	$records = $wpdb->get_results( $wpdb->prepare(
-		"SELECT * FROM {$wpdb->base_prefix}user_pending_registrations
-		WHERE user_email = %s OR user_email = %s OR user_email LIKE %s",
+		"SELECT * FROM %i
+		WHERE ( user_email = %s OR user_email_san = %s OR user_email = %s OR user_email_san = %s )",
+		"{$wpdb->base_prefix}user_pending_registrations",
 		$request->customer->email,
-		$gmail_dotless,
-		str_replace( '@', '+%@', $wpdb->esc_like( $request->customer->email ) ) // Handle plus addressing.
+		wporg_sanitize_email_for_search( $request->customer->email ),
+		$email,
+		wporg_sanitize_email_for_search( $email )
 	) );
 	if ( $records ) {
 		$html .= '<p>Signups found:</p>';
@@ -116,4 +117,5 @@ if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', $request->ticket->subje
 }
 
 // response to HS is just HTML to display in the sidebar
+header( 'Content-Type: application/json; charset=utf-8' );
 echo json_encode( array( 'html' => $html ) );
