@@ -45,10 +45,11 @@ function render_wp_locales_shortcode(): string {
 	} else {
 		require_once GLOTPRESS_LOCALES_PATH;
 		$locale = GP_Locales::by_field( 'wp_locale', $_GET['locale'] );
-		if ( $locale ) {
+		if ( $locale && 'en_US' !== $locale->wp_locale ) {
 			$locale_data = get_extended_locale_data( $locale );
 			include PLUGIN_DIR . '/views/locale-details.php';
 		} else {
+			status_header( 404 );
 			printf(
 				'<div class="callout callout-warning"><p>%s</p><p><a href="%s">%s</a></p></div>',
 				sprintf(
