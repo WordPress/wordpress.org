@@ -1742,10 +1742,7 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
  */
 function add_click_tracking( $url, $event ) {
 	// Inconsistent in API, sometimes arrays.
-	if ( is_array( $event ) ) {
-		$event = (object) $event;
-		$event->location = (object) $event->location;
-	}
+	$event = (object) $event;
 
 	// Start down under.
 	if ( empty( $event->country ) || 'AU' !== strtoupper( $event->country ) ) {
