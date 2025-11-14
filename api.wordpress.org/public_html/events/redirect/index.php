@@ -12,8 +12,9 @@ require_once $base_dir . '/includes/hyperdb/bb-10-hyper-db.php';
 // for bump_stats_extra().
 include_once WPORGPATH . 'wp-content/mu-plugins/1-stats-extra.php';
 
+// Cache in browsers for a day, but not server.
+header( 'Cache-Control: private, max-age=86400' );
 allow_cors_requests();
-header( 'Cache-Control: private, max-age=86400' ); // Cache in browsers for an hour, but not server.
 
 $event     = false;
 $url       = urldecode( $_REQUEST['url'] ); // Fallback incase of unexpected DB failure.
