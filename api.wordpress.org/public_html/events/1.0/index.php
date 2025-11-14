@@ -302,7 +302,7 @@ function build_response( $location, $location_args ) {
  */
 function is_client_core( $user_agent ) {
 	// This doesn't simply return the value of `strpos()` because `0` means `true` in this context
-	if ( false === strpos( $user_agent, 'WordPress/' ) ) {
+	if ( false === strpos( $user_agent, 'WordPress/' ) && false === strpos( $user_agent, 'WordPress.com/' ) ) {
 		return false;
 	}
 
