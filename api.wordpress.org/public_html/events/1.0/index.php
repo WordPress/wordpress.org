@@ -1747,6 +1747,11 @@ function add_click_tracking( $url, $event ) {
 		$event->location = (object) $event->location;
 	}
 
+	// Start down under.
+	if ( empty( $event->country ) || 'AU' !== strtoupper( $event->country ) ) {
+		return $url;
+	}
+
 	// Need both type and source_id to build the tracked link.
 	if ( empty( $event->type ) || empty( $event->source_id ) ) {
 		return $url;
