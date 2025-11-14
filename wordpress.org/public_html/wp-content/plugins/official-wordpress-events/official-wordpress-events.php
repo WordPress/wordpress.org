@@ -101,8 +101,6 @@ class Official_WordPress_Events {
 	 * be careful to maintain consistency when making any changes to this.
 	 */
 	public function prime_events_cache() {
-		global $wpdb;
-
 		$this->log( 'started call #' . did_action( 'owpe_prime_events_cache' ) );
 
 		if ( did_action( 'owpe_prime_events_cache' ) > 1 ) {
@@ -116,7 +114,6 @@ class Official_WordPress_Events {
 
 		foreach ( $events as $event ) {
 			$row_values = array(
-				'id'              => null,
 				'type'            => $event->type,
 				'source_id'       => $event->source_id,
 				'status'          => $event->status,
@@ -140,18 +137,52 @@ class Official_WordPress_Events {
 				continue;
 			}
 
-			/*
-			 * Insert the events into the table, without creating duplicates
-			 *
-			 * Note: Since replace() is matching against a unique key rather than the primary `id` key, it's
-			 * expected for each row to be deleted and re-inserted, making the IDs increment each time.
-			 *
-			 * See http://stackoverflow.com/a/12205366/450127
-			 */
-			$wpdb->replace( self::EVENTS_TABLE, $row_values );
+			$this->insert_on_duplicate_key_update(
+				$wpdb->prefix . self::EVENTS_TABLE,
+				$row_values,
+				array_keys( $row_values )
+			);
 		}
 
 		$this->log( "finished job\n\n" );
+	}
+
+	/**
+	 * INSERT INTO ... ON DUPLICATE KEY UPDATE ... helper
+	 *
+	 * @param string $table
+	 * @param array  $data
+	 * @param array  $update_keys
+	 */
+	protected function insert_on_duplicate_key_update( $table, $data, $update_keys ) {
+		global $wpdb;
+
+		$sql         = 'INSERT INTO %i (';
+		$args        = array( $table );
+		$fields_sql  = '';
+		$values_sql  = '';
+		$values_args = [];
+		foreach ( $data as $field => $value ) {
+			$fields_sql .= '%i, ';
+			$values_sql .= '%s, ';
+
+			$args[]        = $field;
+			$values_args[] = $value;
+		}
+		$sql .= rtrim( $fields_sql, ', ' ) . ') VALUES ( ' . rtrim( $values_sql, ', ' ) . ') ';
+
+		$args = array_merge( $args, $values_args );
+		unset( $values_args );
+
+		$sql .= 'ON DUPLICATE KEY UPDATE ';
+		foreach ( $update_keys as $field ) {
+			$sql .= '%i = VALUES(%i), ';
+			$args[] = $field;
+			$args[] = $field;
+		}
+		$sql = rtrim( $sql, ', ' );
+
+		$wpdb->query( $wpdb->prepare( $sql, ...$args ) );
 	}
 
 	/**
