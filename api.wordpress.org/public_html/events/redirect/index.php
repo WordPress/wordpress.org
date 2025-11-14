@@ -71,7 +71,6 @@ if ( function_exists( 'bump_stats_extra' ) ) {
 	}
 }
 
-/*
 if ( $type && $source_id && $event ) {
 	$wpdb->query(
 		$wpdb->prepare(
@@ -81,4 +80,3 @@ if ( $type && $source_id && $event ) {
 		)
 	);
 }
-*/

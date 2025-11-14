@@ -130,6 +130,8 @@ class Official_WordPress_Events {
 				'country'         => $event->country_code,
 				'latitude'        => $event->latitude,
 				'longitude'       => $event->longitude,
+				'clicks'          => 0,
+				'created_at'      => gmdate( 'Y-m-d H:i:s' ),
 			);
 
 			// Latitude and longitude are required by the database, so skip events that don't have one.
@@ -137,10 +139,15 @@ class Official_WordPress_Events {
 				continue;
 			}
 
+			$keys_not_to_update = array(
+				'clicks',
+				'created_at',
+			);
+
 			$this->insert_on_duplicate_key_update(
 				$wpdb->prefix . self::EVENTS_TABLE,
 				$row_values,
-				array_keys( $row_values )
+				array_diff( array_keys( $row_values ), $keys_not_to_update )
 			);
 		}
 
