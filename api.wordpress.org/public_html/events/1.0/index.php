@@ -908,7 +908,7 @@ function get_events( $args = array() ) {
 
 	$raw_events = $wpdb->get_results( $wpdb->prepare(
 		"SELECT
-			`type`, `title`, `url`,
+			`type`, `source_id`, `title`, `url`,
 			`meetup`, `meetup_url`,
 			`date_utc`, `date_utc_offset`, `end_date`,
 			`location`, `country`, `latitude`, `longitude`
@@ -933,7 +933,7 @@ function get_events( $args = array() ) {
 		$events[] = array(
 			'type'       => $event->type,
 			'title'      => $event->title,
-			'url'        => $event->url,
+			'url'        => add_click_tracking( $event->url, $event ),
 			'meetup'     => $event->meetup,
 			'meetup_url' => $event->meetup_url,
 
@@ -1326,6 +1326,10 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 		// before the event until it's over).
 	}
 
+	foreach ( $regional_wordcamps as &$event ) {
+		$event['url'] = add_click_tracking( $event['url'], $event );
+	}
+
 	return array_merge( $regional_wordcamps, $local_events );
 }
 
@@ -1452,7 +1456,7 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time, $user_co
 	if ( false === $next_online_camp ) {
 		$raw_camp = $wpdb->get_row( "
 			SELECT
-				`title`, `url`, `meetup`, `meetup_url`, `date_utc`, `date_utc_offset`, `end_date`, `country`, `latitude`, `longitude`
+				`type`, `source_id`, `title`, `url`, `meetup`, `meetup_url`, `date_utc`, `date_utc_offset`, `end_date`, `country`, `latitude`, `longitude`
 			FROM `wporg_events`
 			WHERE
 				type     = 'wordcamp'  AND
@@ -1465,7 +1469,8 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time, $user_co
 
 		if ( isset( $raw_camp->url ) ) {
 			$next_online_camp = array(
-				'type'       => 'wordcamp',
+				'type'       => $raw_camp->type,
+				'source_id'  => $raw_camp->source_id,
 				'title'      => $raw_camp->title,
 				'url'        => $raw_camp->url,
 				'meetup'     => $raw_camp->meetup,
@@ -1522,6 +1527,9 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time, $user_co
 		 * potentially-interesting event, and crowding out local events.
 		 */
 		if ( $camp_is_in_users_country || $camp_is_in_next_two_weeks ) {
+
+			$next_online_camp['url'] = add_click_tracking( $next_online_camp['url'], $next_online_camp );
+
 			array_unshift( $events, $next_online_camp );
 		}
 	}
@@ -1565,7 +1573,7 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
 			$next_discussion_group = array(
 				'type'       => 'meetup',
 				'title'      => $raw_discussion_group->title,
-				'url'        => $raw_discussion_group->url,
+				'url'        => add_click_tracking( $raw_discussion_group->url, $raw_discussion_group ),
 				'meetup'     => $raw_discussion_group->meetup,
 				'meetup_url' => $raw_discussion_group->meetup_url,
 
@@ -1628,6 +1636,7 @@ function pin_one_off_events( $events, $current_time ) {
 	);
 
 	if ( $current_time > strtotime( 'December 11, 2024' ) && $current_time < strtotime( 'December 17, 2024' ) ) {
+		$sotw['url'] = add_click_tracking( $sotw['url'], $sotw );
 		array_unshift( $events, $sotw );
 	}
 
@@ -1722,6 +1731,33 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 			'max' => rad2deg( $maximum_lon ),
 		),
 	);
+}
+
+/**
+ * Add click tracking through a redirect.
+ *
+ * @param string $url The original URL.
+ * @param object $event The event object.
+ * @return string The tracked URL.
+ */
+function add_click_tracking( $url, $event ) {
+	// Inconsistent in API, sometimes arrays.
+	if ( is_array( $event ) ) {
+		$event = (object) $event;
+		$event->location = (object) $event->location;
+	}
+
+	// Need both type and source_id to build the tracked link.
+	if ( empty( $event->type ) || empty( $event->source_id ) ) {
+		return $url;
+	}
+
+	$tracked_link = 'https://api.wordpress.org/events/redirect/';
+	$tracked_link .= '?' . urlencode( $event->type ) . '=' . urlencode( $event->source_id );
+	$tracked_link .= '&url=' . urlencode( $url );
+	$tracked_link .= '&source=' . ( is_client_core( $_SERVER['HTTP_USER_AGENT'] ) ? 'core' : 'api' );
+
+	return $tracked_link;
 }
 
 main();
