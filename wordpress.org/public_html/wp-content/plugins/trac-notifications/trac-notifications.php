@@ -114,7 +114,7 @@ class wporg_trac_notifications {
 	function make_components_tree( $components ) {
 		$tree = array();
 		$subcomponents = array(
-			'Comments'          => array( 'Pings/Trackbacks' ),
+			'Comments'          => array( 'Notes', 'Pings/Trackbacks' ),
 			'Editor'            => array( 'Autosave', 'Quick/Bulk Edit', 'TinyMCE' ),
 			'Formatting'        => array( 'Charset', 'Shortcodes' ),
 			'Media'             => array( 'Embeds', 'Gallery', 'Upload' ),
