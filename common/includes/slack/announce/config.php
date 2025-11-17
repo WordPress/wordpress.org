@@ -84,6 +84,9 @@ function get_whitelist() {
 			'st810amaze',
 			'leogopal',
 		) ),
+		'content-creators' => array(
+			'annezazu',
+		),
 		'contributor-day' => array(
 			'camikaos',
 			'cronkled', // @alx on Slack
