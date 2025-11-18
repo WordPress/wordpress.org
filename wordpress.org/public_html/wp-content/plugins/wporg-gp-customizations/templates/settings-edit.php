@@ -131,7 +131,8 @@ if ( $deepl_key ) {
 										'gpt-4.1', 
 										'gpt-5-nano', 
 										'gpt-5-mini', 
-										'gpt-5' );
+										'gpt-5', 
+										'gpt-5.1' );
 				$openai_model = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
 				foreach ( $openai_models as $model ) {
 					echo '<option value="' . esc_attr( $model ) . '"';
