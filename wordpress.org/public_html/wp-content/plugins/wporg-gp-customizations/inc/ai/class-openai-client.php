@@ -144,7 +144,13 @@ class OpenAI_Client {
 			$body['presence_penalty']  = 0;
 			$body['reasoning_effort']  = 'minimal';
 			$body['verbosity']         = 'low';
+
+			// For gpt-5.1 specifically
+			if ( preg_match( '/^gpt-5\.1(?:$|-)/i', $this->model ) ) {
+				$body['reasoning_effort'] = 'none';
+			}
 		}
+		
 		$response = $this->request( '/chat/completions', $body );
 		if ( false === $response ) {
 			return false;
