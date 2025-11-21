@@ -306,34 +306,37 @@
 </py:match>
 
 <!--! Mark user-generated-content links as nofollow ugc. -->
+<?python
+import re
+def wporg_link_is_wporg_url(url):
+	return None != re.match( r'([^>]*href=")?https?://([a-z0-9.-]+\.)?(wordpress\.(org|net)|buddypress\.org|bbpress\.org|wordcamp\.org)/', url, flags=re.IGNORECASE )
+
+def wporg_replace_link_markup( m ):
+	if 'ext-link' not in m.group(1):
+		return '<' + 'a' + m.group(1) + m.group(2)
+
+	# Remove ext-link and set as ugc.
+	if wporg_link_is_wporg_url( m.group(1) ):
+		return '<' + 'a rel="ugc" ' + m.group(1).replace('class="ext-link"', '') + m.group(2)
+
+	# Keep ext-link, and set ugc nofollow.
+	return '<' + 'a rel="ugc nofollow" ' + m.group(1) + m.group(2)
+
+from genshi.core import TEXT, Markup
+def wporg_nofollow_ugc(stream):
+	for kind, data, pos in stream:
+		if kind is TEXT and isinstance( data, Markup ) and ( 'ext-link' in data ):
+			data = re.sub( r'<a([^>]+)(>.+?</a>)', wporg_replace_link_markup, data, flags=re.IGNORECASE )
+			data = Markup( data );
+		yield kind, data, pos
+?>
 <div py:match="div[contains(@class,'description') or contains(@class,'comment') or contains(@class,'attachments')]" py:attrs="select('@*')">
-	<?python
-	
-	import re
-	def wporg_link_is_wporg_url(url):
-		return None != re.match( r'([^>]*href=")?https?://([a-z0-9.-]+\.)?(wordpress\.(org|net)|buddypress\.org|bbpress\.org|wordcamp\.org)/', url, flags=re.IGNORECASE )
-
-	def wporg_replace_link_markup( m ):
-		if 'ext-link' not in m.group(1):
-			return '<' + 'a' + m.group(1) + m.group(2)
-
-		# Remove ext-link and set as ugc.
-		if wporg_link_is_wporg_url( m.group(1) ):
-			return '<' + 'a rel="ugc" ' + m.group(1).replace('class="ext-link"', '') + m.group(2)
-
-		# Keep ext-link, and set ugc nofollow.
-		return '<' + 'a rel="ugc nofollow" ' + m.group(1) + m.group(2)
-
-	from genshi.core import TEXT, Markup
-	def wporg_nofollow_ugc(stream):
-		for kind, data, pos in stream:
-			if kind is TEXT and isinstance( data, Markup ) and ( 'ext-link' in data ):
-				data = re.sub( r'<a([^>]+)(>.+?</a>)', wporg_replace_link_markup, data, flags=re.IGNORECASE )
-				data = Markup( data );
-			yield kind, data, pos
-	?>
 	${wporg_nofollow_ugc(select('*|comment()|text()'))}
 </div>
+<!--! Attachment description -->
+<td py:match="td[@class='message searchable']" py:attrs="select('@*')">
+	${wporg_nofollow_ugc(select('*|comment()|text()'))}
+</td>
 
 <body py:match="body" id="wordpress-org" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
 	<!--! WP.org Global Header -->
