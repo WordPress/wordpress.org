@@ -178,14 +178,6 @@ class Upload {
 						) ),
 						'<strong>' . number_format_i18n( $queue_length ) . '</strong>'
 					);
-				} else {
-					echo '</p><p>';
-					printf(
-						/* translators: plugins@wordpress.org */
-						__( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
-						'plugins@wordpress.org'
-					);
-					echo '</p>';
 				}
 				?>
 				</p>
