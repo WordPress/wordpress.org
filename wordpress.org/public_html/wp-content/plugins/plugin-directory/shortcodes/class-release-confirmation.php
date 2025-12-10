@@ -312,7 +312,7 @@ class Release_Confirmation {
 				);
 
 				$buttons[] = sprintf(
-					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</button>',
+					'<button formaction="%s" class="wp-element-button button discard-release" data-2fa-required data-2fa-message="%s">%s</button>',
 					$discard_link,
 					esc_attr(
 						sprintf(
