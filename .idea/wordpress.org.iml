@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/api.wordpress.org/public_html" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common/includes" isTestSource="false" packagePrefix="Dotorg" />
+      <sourceFolder url="file://$MODULE_DIR$/wordpress.org/public_html/wp-content/plugins/plugin-directory/libs/geopattern-1.1.0" isTestSource="false" packagePrefix="RedeyeVentures" />
+      <sourceFolder url="file://$MODULE_DIR$/wordpress.org/public_html/wp-content/plugins/plugin-directory/libs/michelf-php-markdown-1.6.0" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wordpressfoundation.org/public_html/content/plugins/wpf-stripe/stripe-php/lib" isTestSource="false" packagePrefix="Stripe" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
