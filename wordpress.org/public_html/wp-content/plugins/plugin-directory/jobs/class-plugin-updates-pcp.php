@@ -335,7 +335,8 @@ class Plugin_Updates_PCP {
 			'PATH'               => $_ENV['PATH'] ?? '/usr/local/bin:/usr/bin:/bin',
 			'WP_CLI_CONFIG_PATH' => WP_CLI_CONFIG_PATH,
 		];
-		$command    = WPCLI . ' --url=https://wordpress.org/plugins ' .
+		// Timeout after 45s, kill after 60s.
+		$command    = 'timeout -k 15s 45s ' . WPCLI . ' --url=https://wordpress.org/plugins ' .
 					'plugin check ' .
 					'--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
 					'--categories=plugin_repo --format=json ' .
@@ -361,19 +362,17 @@ class Plugin_Updates_PCP {
 				'html'    => '',
 			];
 		}
-		do {
-			usleep( 100000 ); // 0.1s
 
-			$total_time = round( microtime(1) - $start_time, 1 );
+		// Wait for it to finish, checking every 0.5s.
+		do {
+			usleep( 50000 ); // 0.5s
+
+			$total_time  = round( microtime(1) - $start_time, 1 );
 
 			$proc_status = proc_get_status( $plugin_check_process );
 			$return_code = $proc_status['exitcode'] ?? 1;
 
-			if ( $total_time >= 45 && $proc_status['running'] ) {
-				// Terminate it.
-				proc_terminate( $plugin_check_process );
-			}
-		} while ( $proc_status['running'] && $total_time <= 60 ); // 60s max, just in case.
+		} while ( $proc_status['running'] && $total_time <= 65 ); // max, just in case
 
 		$output = stream_get_contents( $pipes[1] );
 		$stderr = rtrim( stream_get_contents( $pipes[2] ), "\n" );
