@@ -248,6 +248,13 @@ class Trademarks {
 						// Yes the slug ENDS with 'for-TRADEMARK'.
 						continue; // Check the next trademark
 					}
+
+					// Also allow pattern like "for-something-and-TRADEMARK".
+					$for_and_trademark = '-for-.*-and-' . preg_quote( $trademark, '/' ) . '$';
+					if ( preg_match( '/' . $for_and_trademark . '/', $plugin_slug ) ) {
+						// Slug contains 'for-{something}-and-TRADEMARK' at the end.
+						continue; // Check the next trademark
+					}
 				}
 
 				// The term cannot exist anywhere in the plugin slug, and it's not a for-use exception.
