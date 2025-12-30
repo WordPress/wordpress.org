@@ -333,6 +333,40 @@ body.trac #banner form#search input[type=text] {
 	min-width: 250px;
 }
 
+body.trac #banner {
+	flex-wrap: wrap;
+}
+
+body.trac #banner form#search {
+	flex: 0 0 100%;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+body.trac #banner #metanav {
+	position: static;
+	float: none;
+	top: auto;
+	right: auto;
+	left: auto;
+	flex: 0 0 100%;
+	width: 100%;
+	margin: 0;
+	padding: .5em 0 0;
+	display: flex;
+	justify-content: center;
+}
+
+body.trac #banner #metanav ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
 /* Main Navigation */
 body.trac #mainnav {
 	border-bottom: 1px solid var(--bbbase-grey-border-color-low-contrast) !important;
