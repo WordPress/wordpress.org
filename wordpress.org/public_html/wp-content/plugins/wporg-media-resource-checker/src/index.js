@@ -22,7 +22,7 @@ import { getAuthority } from '@wordpress/url';
 /**
  * Internal dependencies
  */
-import { ALLOWED_DOMAINS } from './utils';
+import { ALLOWED_RESOURCES } from './utils';
 import { useHasInvalidSource } from './hooks';
 import './style.scss';
 
@@ -37,7 +37,7 @@ const BlockEditWithWarning = ( { BlockEdit, siteUrl, mediaUrl, ...props } ) => {
 	const siteAuthority = getAuthority( siteUrl );
 	const allowedDomainList = [
 		siteAuthority,
-		...ALLOWED_DOMAINS.map( ( domain ) => domain.authority ),
+		...ALLOWED_RESOURCES.map( ( resource ) => resource.authority ),
 	];
 
 	return (

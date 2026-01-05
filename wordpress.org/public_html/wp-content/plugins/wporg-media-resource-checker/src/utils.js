@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { isBlobURL } from '@wordpress/blob';
-import { getAuthority } from '@wordpress/url';
+import { getAuthority, isURL } from '@wordpress/url';
 
 // List of blocks to check.
 const BLOCKS_TO_CHECK = [
@@ -23,19 +23,20 @@ const BLOCKS_TO_CHECK = [
 	},
 ];
 
-// List of allowed domain regexes.
-export const ALLOWED_DOMAINS = [
+// List of allowed resources.
+export const ALLOWED_RESOURCES = [
 	{
 		authority: 'wordpress.org',
-		regex: /^(.*\.)?wordpress\.org$/,
+		domainRegex: /^(.*\.)?wordpress\.org$/,
 	},
 	{
 		authority: 'w.org',
-		regex: /^(.*\.)?w\.org$/,
+		domainRegex: /^(.*\.)?w\.org$/,
 	},
 	{
 		authority: 'wp.com',
-		regex: /^(.*\.)?wp\.com$/,
+		domainRegex: /^(.*\.)?wp\.com$/,
+		pathRegex: /^\/wordpress\.org\//,
 	},
 ];
 
@@ -59,6 +60,15 @@ export const getBlockMediaResourceToCheck = ( blockName, attributes ) => {
 /**
  * Checks whether the block has an invalid resource.
  *
+ * The following URLs are allowed; any other URLs will not be
+ * recommended as media resource URLs:
+ *
+ * - https://wordpress.org/image.jpg
+ * - https://make.wordpress.org/image.jpg
+ * - https://w.org/image.jpg
+ * - https://s.w.org/images/core/6.9/image.jpg
+ * - https://i0.wp.com/wordpress.org/image.jpg
+ *
  * @param {string} mediaUrl The media URL to check.
  * @param {string} siteUrl The site URL.
  * @return {boolean} True if the resource is invalid.
@@ -71,6 +81,11 @@ export const isInvalidResource = ( mediaUrl, siteUrl ) => {
 	// If no URL, cannot determine.
 	if ( ! mediaUrl || isBlobURL( mediaUrl ) ) {
 		return false;
+	}
+
+	// If the media URL doesn't look like a URL, it means the media is not an external resource.
+	if ( ! isURL( mediaUrl ) ) {
+		return true;
 	}
 
 	const siteAuthority = getAuthority( siteUrl );
@@ -87,14 +102,22 @@ export const isInvalidResource = ( mediaUrl, siteUrl ) => {
 	}
 
 	// Check if the authority is from an allowed domain.
-	if (
-		ALLOWED_DOMAINS.some( ( domain ) =>
-			mediaAuthority.match( domain.regex )
-		)
-	) {
-		return false;
+	const allowedResource = ALLOWED_RESOURCES.find( ( resource ) =>
+		mediaAuthority.match( resource.domainRegex )
+	);
+
+	if ( ! allowedResource ) {
+		return true;
 	}
 
-	// The media is not from an allowed domain.
-	return true;
+	// If pathRegex is defined, also check the path.
+	if ( allowedResource.pathRegex ) {
+		const url = new URL( mediaUrl );
+		const path = url.pathname;
+		if ( ! path || ! allowedResource.pathRegex.test( path ) ) {
+			return true;
+		}
+	}
+
+	return false;
 };
