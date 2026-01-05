@@ -30,6 +30,10 @@ export const ALLOWED_DOMAINS = [
 		regex: /^(.*\.)?wordpress\.org$/,
 	},
 	{
+		authority: 'w.org',
+		regex: /^(.*\.)?w\.org$/,
+	},
+	{
 		authority: 'wp.com',
 		regex: /^(.*\.)?wp\.com$/,
 	},
