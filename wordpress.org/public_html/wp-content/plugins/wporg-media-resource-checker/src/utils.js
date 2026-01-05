@@ -72,6 +72,11 @@ export const isInvalidResource = ( mediaUrl, siteUrl ) => {
 	const siteAuthority = getAuthority( siteUrl );
 	const mediaAuthority = getAuthority( mediaUrl );
 
+	// If the media authority is not set, it means the resource is not a valid URL.
+	if ( ! mediaAuthority ) {
+		return true;
+	}
+
 	// If the authority is the same, it means the resource is from the site.
 	if ( siteAuthority === mediaAuthority ) {
 		return false;
