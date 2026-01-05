@@ -8,9 +8,9 @@
  * License:     GPLv2 or later
  */
 
-namespace WPOrg_Media_Resource_Checker;
+namespace WordPressdotorg\Media_Resource_Checker;
 
-use function WPOrg_Media_Resource_Checker\{ get_build_path, get_build_url };
+use function WordPressdotorg\Media_Resource_Checker\{ get_build_path, get_build_url };
 
 defined( 'WPINC' ) || die();
 
