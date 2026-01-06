@@ -527,8 +527,8 @@ class Upload_Handler {
 		}
 
 		// Store metadata about the uploaded ZIP.
-		// Count lines of PHP code, this is not 100% accurate but it's a good indicator.
-		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
+		// Count lines of PHP code, this is not 100% accurate but it's a good indicator. Excludes 'vendor', 'vendor-prefixed', and 'vendor_prefixed' directories.
+		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -not -path '*/vendor/*' -not -path '*/vendor*prefixed/*' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
 
 		update_post_meta( $plugin_post->ID, '_submitted_zip_size', filesize( get_attached_file( $attachment->ID ) ) );
 		update_post_meta( $plugin_post->ID, '_submitted_zip_loc', $lines_of_code );
