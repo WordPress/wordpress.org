@@ -705,6 +705,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			echo '-';
 			return;
 		}
+		
+		// Get only the last zip item.
+		$media = array_slice( $media, -1 );
 
 		foreach ( $media as $zip_file ) {
 			$zip_size = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
