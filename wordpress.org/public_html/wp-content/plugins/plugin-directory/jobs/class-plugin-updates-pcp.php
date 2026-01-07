@@ -445,6 +445,11 @@ class Plugin_Updates_PCP {
 			$filename = trim( explode( ':' , $file_result[0], 2 )[1] );
 			$json     = json_decode( $file_result[1], true );
 
+			// If the JSON is invalid, corrupted, or partial, skip it.
+			if ( ! is_array( $json ) ) {
+				continue;
+			}
+
 			foreach ( $json as $record ) {
 				$record['file'] = $filename;
 
