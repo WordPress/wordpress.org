@@ -706,6 +706,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			return;
 		}
 
+		// Only display the latest.
+		$media = array_slice( $media, -1 );
+
 		foreach ( $media as $zip_file ) {
 			$zip_size = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
 
@@ -717,7 +720,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			}
 
 			printf(
-				'<a href="%1$s">%2$s</a> v%3$s<br>%4$s<br>(<a href="%5$s" target="_blank">test</a> | <a href="%6$s" target="_blank">pcp</a>)<br></li>',
+				'<a href="%1$s">%2$s</a> v%3$s<br>%4$s<br>(<a href="%5$s" target="_blank">test</a> | <a href="%6$s" target="_blank">pcp</a>)<br>',
 				esc_url( $url ),
 				esc_html( $name ),
 				esc_html( $zip_file->version ),
