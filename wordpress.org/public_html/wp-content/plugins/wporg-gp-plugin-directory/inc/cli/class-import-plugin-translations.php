@@ -28,6 +28,9 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 	 *
 	 * [--set=<set>]
 	 * : Translation set slug: Default: "default"
+	 *
+	 * [--user_id=<user_id>]
+	 * : User ID to attribute the import to. Default: Anonymous
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$file = basename( $args[2] );
@@ -64,6 +67,16 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 			WP_CLI::error( "Couldn't load translations from file! [$file]" );
 		}
 
+		if ( ! empty( $assoc_args['user_id'] ) ) {
+			$user_id       = (int) $assoc_args['user_id'];
+			$previous_user = get_current_user_id(); 
+			if ( ! get_user_by( 'id', $user_id ) ) {
+				WP_CLI::error( "User not found! [$file]" );
+			}
+
+			wp_set_current_user( $user_id );
+		}
+
 		add_filter( 'gp_translation_set_import_over_existing', '__return_false' );
 		add_filter( 'gp_translation_set_import_status', array( $this, '__string_status_waiting' ) );
 
@@ -72,6 +85,10 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 
 		remove_filter( 'gp_translation_set_import_status', '__string_status_waiting' );
 		remove_filter( 'gp_translation_set_import_over_existing', '__return_false' );
+
+		if ( ! empty( $assoc_args['user_id'] ) && isset( $previous_user ) ) {
+			wp_set_current_user( $previous_user );
+		}
 
 		WP_CLI::success( "Imported $imported strings for {$locale->english_name} [$file]" );
 	}
