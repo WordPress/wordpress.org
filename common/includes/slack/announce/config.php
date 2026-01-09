@@ -378,6 +378,10 @@ function get_whitelist() {
 			'mariaojob', // @Mary Job on Slack
 			'sterndata',
 		),
+		'gatherpress' => array(
+			'mauteri',
+			'patricia70', // @patriciabt on Slack
+		),
 		'glotpress' => array(
 			'Amieiro',
 			'ocean90',
