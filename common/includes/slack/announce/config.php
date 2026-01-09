@@ -70,6 +70,13 @@ function get_whitelist() {
 			'DJPaul',
 			'johnjamesjacoby', // @jjj on Slack
 		),
+        'campusconnect' => array(
+            'evarlese',     // @erica on Slack
+            'webtechpooja', // @Pooja Derashri on Slack
+            'anandau14',    // @Anand on Slack
+            'devmuhib',     // @Muhibul Haque on Slack
+            'mosescursor',  // @Moses Cursor on Slack
+        ),
 		'cli' => array(
 			'danielbachhuber',
 			'schlessera',
