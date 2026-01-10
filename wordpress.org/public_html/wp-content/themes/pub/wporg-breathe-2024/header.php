@@ -7,7 +7,7 @@ echo do_blocks( '<!-- wp:wporg/global-header {"style":{"border":{"bottom":{"colo
 if ( is_front_page() && is_home() ) {
 	echo do_blocks( '<!-- wp:wporg/local-navigation-bar {"className":"has-display-contents","backgroundColor":"charcoal-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}}}}},"textColor":"white","fontSize":"small"} -->
 
-		<!-- wp:site-title {"style":{"typography":{"fontStyle":"normal","fontWeight":"400"}},"fontSize":"small","fontFamily":"inter"} /-->
+		<!-- wp:site-title {"style":{"typography":{"fontStyle":"normal","fontWeight":"400"}},"fontSize":"small","fontFamily":"inter","color":{"text":"var:preset|color|white"},":hover":{"color":{"text":"var:preset|color|white"}} /-->
 
 		<!-- wp:navigation {"icon":"menu","overlayBackgroundColor":"charcoal-2","overlayTextColor":"white","layout":{"type":"flex","orientation":"horizontal"},"fontSize":"small","menuSlug":"breathe"} /-->
 
