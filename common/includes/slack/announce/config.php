@@ -74,6 +74,15 @@ function get_whitelist() {
 			'danielbachhuber',
 			'schlessera',
 		),
+		'campusconnect' => array(
+			// Inherits from #community-team.
+			// Additional Campus Connect mentors:
+			'evarlese',     // @erica on Slack
+			'webtechpooja', // @Pooja Derashri on Slack
+			'anandau14',    // @Anand on Slack
+			'devmuhib',     // @Muhibul Haque on Slack
+			'mosescursor',  // @Moses Cursor on Slack
+		),
 		'community-events' => array(
 			// Inherits from #community-team.
 		),
