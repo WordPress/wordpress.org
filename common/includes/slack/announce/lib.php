@@ -147,6 +147,8 @@ function get_parent_channels( $channel ) {
 		case 'mentorship': // Such as #mentorship-cohort-july-2023
 			$root = 'contributor-mentorship';
 			break;
+		case 'campusconnect':
+		case 'wpcredits':
 		case 'community':
 			$root = 'community-team';
 			break;
