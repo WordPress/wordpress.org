@@ -6,7 +6,8 @@ use stdClass;
  * Main entry point
  */
 function main() {
-	global $cache_group, $cache_life;
+	// Note: $location and $response are included for use in wrapping APIs which utilise this.
+	global $cache_group, $cache_life, $location, $response;
 
 	validate_request();
 
@@ -296,17 +297,12 @@ function build_response( $location, $location_args ) {
  * There isn't a good way to do that, though, so plugins will still get unexpected results.
  * They can set a custom user agent to get the raw data, though.
  *
- * @param string $user_agent
+ * @param string $user_agent Optional. The user agent to check. Defaults to the current request's user agent.
  *
  * @return bool
  */
-function is_client_core( $user_agent ) {
-	// This doesn't simply return the value of `strpos()` because `0` means `true` in this context
-	if ( false === strpos( $user_agent, 'WordPress/' ) ) {
-		return false;
-	}
-
-	return true;
+function is_client_core( $user_agent = null ) {
+	return str_starts_with( $user_agent ?? $_SERVER['HTTP_USER_AGENT'], 'WordPress/' );
 }
 
 /**
