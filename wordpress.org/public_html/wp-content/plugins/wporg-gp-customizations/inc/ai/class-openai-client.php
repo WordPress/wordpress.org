@@ -268,7 +268,7 @@ class OpenAI_Client {
 	/**
 	 * Log an error.
 	 *
-	 * Ignores 429 errors in production to reduce log noise.
+	 * Ignores 401/429 errors in production to reduce log noise.
 	 *
 	 * @param string $endpoint Endpoint that failed.
 	 * @param string $message  Error message.
@@ -280,7 +280,7 @@ class OpenAI_Client {
 		} else {
 			if ( $response && ! is_wp_error( $response ) ) {
 				$status_code = wp_remote_retrieve_response_code( $response );
-				if ( 429 === $status_code ) {
+				if ( 429 === $status_code || 401 === $status_code ) {
 					return;
 				}
 			}
