@@ -240,7 +240,7 @@ class Plugin_Updates_PCP {
 			return;
 		}
 
-		$active_installs = get_post_meta( $plugin->ID, 'active_installs', true );
+		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
 
 		$body = sprintf( "Detected errors in *%s*\n", $plugin->post_title );
 		if ( $active_installs >= 10000 ) {
