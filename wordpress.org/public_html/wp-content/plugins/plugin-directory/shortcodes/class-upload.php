@@ -35,7 +35,7 @@ class Upload {
 				$plugin->review_email = Upload_Handler::find_review_email( $plugin );
 
 				if ( $plugin->review_email && 'closed' !== $plugin->review_email->status ) {
-					$plugin->status = __( "Being Reviewed &#8212; We've got your email. This plugin is currently waiting on action from our review team.", 'wporg-plugins' );
+					$plugin->status = __( "Being Reviewed &#8212; We've got your email. This plugin is currently waiting on action from our plugins team.", 'wporg-plugins' );
 				}
 			} elseif ( 'approved' === $plugin->post_status ) {
 				$plugin->status = __( 'Approved &#8212; Please check your email for instructions on uploading your plugin.', 'wporg-plugins' );
@@ -178,14 +178,6 @@ class Upload {
 						) ),
 						'<strong>' . number_format_i18n( $queue_length ) . '</strong>'
 					);
-				} else {
-					echo '</p><p>';
-					printf(
-						/* translators: plugins@wordpress.org */
-						__( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
-						'plugins@wordpress.org'
-					);
-					echo '</p>';
 				}
 				?>
 				</p>
@@ -235,7 +227,7 @@ class Upload {
 					</p>
 
 					<p>
-						<?php _e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the plugin review team examines it.', 'wporg-plugins' ); ?>
+						<?php _e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the Plugins Team examines it.', 'wporg-plugins' ); ?>
 					</p>
 
 					<ul>

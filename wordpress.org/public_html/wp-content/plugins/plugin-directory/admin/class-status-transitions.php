@@ -244,9 +244,10 @@ class Status_Transitions {
 	 *
 	 * @param \WP_Post $post          Post object.
 	 * @param \WP_User $plugin_author Plugin author. Optional.
+	 * @param int      $retry         Retry number. Do not manually set. Optional.
 	 * @return bool
 	 */
-	public function approved_create_svn_repo( $post, $plugin_author = null ) {
+	public function approved_create_svn_repo( $post, $plugin_author = null, $retry = 0 ) {
 		$post            = get_post( $post );
 		$plugin_author ??= get_user_by( 'id', $post->post_author );
 
@@ -283,11 +284,18 @@ class Status_Transitions {
 		);
 
 		// Record the last failure attempt.
-		if ( $result['errors'] ) {
-			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'], true ), $post->ID );
+		if ( ! $result['result'] ) {
+			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'] ?: $result, true ), $post->ID );
 
-			// Retry in a minute.
-			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'plugin_directory_create_svn_repo', [ $post->ID, $plugin_author->ID ] );
+			// If we're running in a cron task, log the errors.
+			if ( wp_doing_cron() ) {
+				fwrite( STDERR, 'Error creating SVN repository for plugin ID ' . $post->ID . ': ' . var_export( $result, true ) );
+			}
+
+			// Retry in a minute, with increasing 5 minute backoffs.
+			$retry_delay = max( $retry * 5, 1 ) * MINUTE_IN_SECONDS;
+			$retry++;
+			wp_schedule_single_event( time() + $retry_delay, 'create_svn_repo:' . $post->post_name, [ $post->ID, $plugin_author->ID, $retry ] );
 
 			return false;
 		}

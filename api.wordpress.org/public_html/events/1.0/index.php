@@ -6,7 +6,8 @@ use stdClass;
  * Main entry point
  */
 function main() {
-	global $cache_group, $cache_life;
+	// Note: $location and $response are included for use in wrapping APIs which utilise this.
+	global $cache_group, $cache_life, $location, $response;
 
 	validate_request();
 
@@ -296,17 +297,12 @@ function build_response( $location, $location_args ) {
  * There isn't a good way to do that, though, so plugins will still get unexpected results.
  * They can set a custom user agent to get the raw data, though.
  *
- * @param string $user_agent
+ * @param string $user_agent Optional. The user agent to check. Defaults to the current request's user agent.
  *
  * @return bool
  */
-function is_client_core( $user_agent ) {
-	// This doesn't simply return the value of `strpos()` because `0` means `true` in this context
-	if ( false === strpos( $user_agent, 'WordPress/' ) ) {
-		return false;
-	}
-
-	return true;
+function is_client_core( $user_agent = null ) {
+	return str_starts_with( $user_agent ?? $_SERVER['HTTP_USER_AGENT'], 'WordPress/' );
 }
 
 /**
@@ -1084,6 +1080,8 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
  *
  * Externalizing this makes it easier to test the `maybe_add_regional_wordcamps` function.
  *
+ * TODO: Figure out a way to automate this, as the current manual process is not sustainable.
+ *
  * @return array
  */
 function get_regional_wordcamp_data() {
@@ -1101,19 +1099,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Asia',
-				'url'        => 'https://asia.wordcamp.org/2024/',
+				'url'        => 'https://asia.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2024-03-07 00:00:00',
-				'end_date'   => '2024-03-09 00:00:00',
-				'start_unix_timestamp' => strtotime( '2024-03-07 00:00:00' ) - 8 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2024-03-09 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'date'       => '2025-02-20 00:00:00',
+				'end_date'   => '2025-02-22 00:00:00',
+				'start_unix_timestamp' => strtotime( '2025-02-20 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-02-22 00:00:00' ) - 8 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Taipei, Taiwan',
-					'country'   => 'TW',
-					'latitude'  => 25.0333949,
-					'longitude' => 121.5661024,
+					'location'  => 'Manila, Philippines',
+					'country'   => 'PH',
+					'latitude'  => 14.5544983,
+					'longitude' => 120.9830332,
 				),
 			),
 		),
@@ -1155,19 +1153,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
-				'url'        => 'https://europe.wordcamp.org/2022/',
+				'url'        => 'https://europe.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'                 => '2022-06-02 00:00:00',
-				'end_date'             => '2022-06-04 00:00:00',
-				'start_unix_timestamp' => strtotime( '2022-06-02 00:00:00' ) - 1 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2022-06-04 00:00:00' ) - 1 * HOUR_IN_SECONDS,
+				'date'                 => '2025-06-05 00:00:00',
+				'end_date'             => '2025-06-07 00:00:00',
+				'start_unix_timestamp' => strtotime( '2025-06-05 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-06-07 00:00:00' ) - 2 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Porto',
-					'country'   => 'PT',
-					'latitude'  => 41.147,
-					'longitude' => -8.625,
+					'location'  => 'Basel',
+					'country'   => 'CH',
+					'latitude'  => 47.5627438,
+					'longitude' => 7.5993872,
 				),
 			),
 		),
@@ -1182,22 +1180,25 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://us.wordcamp.org/2021/',
+				'url'        => 'https://us.wordcamp.org/2025/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2021-10-01 00:00:00',
-				'end_date'   => '2021-10-02 00:00:00',
-				'start_unix_timestamp' => strtotime( '2021-10-01 00:00:00' ) - 5 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2021-10-02 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				// Local time
+				'date'       => '2025-08-26 09:00:00',
+				'end_date'   => '2025-08-29 17:00:00',
+				// GMT which due to local being GMT-7, GMT is ahead by 7h.
+				'start_unix_timestamp' => strtotime( '2025-08-26 09:00:00' ) + 7 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2025-08-29 17:00:00' ) + 7 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Online',
+					'location'  => 'Portland, Oregon',
 					'country'   => 'US',
-					'latitude'  => 38.6532135,
-					'longitude' => -90.3136733,
+					'latitude'  => 45.5283308,
+					'longitude' => -122.6634712,
 				),
 			),
 		),
+
 	);
 
 	return $events;
@@ -1305,6 +1306,16 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			if ( ! empty( $location['country'] ) && strtoupper( $data['event']['location']['country'] ) === strtoupper( $location['country'] ) ) {
 				$regional_wordcamps[] = $data['event'];
 			}
+		}
+
+		// Special case: Show WordCamp Asia to all of asia until it's over.
+		if (
+			'asia' === $region &&
+			! empty( $location['country'] ) &&
+			$current_time <= $data['event']['end_unix_timestamp'] &&
+			in_array( strtoupper( $location['country'] ), $data['regional_countries'], true )
+		) {
+			$regional_wordcamps[] = $data['event'];
 		}
 
 		// After the promo ends, the event will just be displayed to everyone in the normal search radius (2 weeks

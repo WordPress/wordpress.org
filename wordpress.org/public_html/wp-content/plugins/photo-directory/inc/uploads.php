@@ -61,7 +61,7 @@ class Uploads {
 	public static function init() {
 		/* Image restrictions. */
 
-		add_filter( 'big_image_size_threshold',         [ __CLASS__, 'big_image_size_threshold' ] );
+		add_filter( 'big_image_size_threshold',         [ __CLASS__, 'big_image_size_threshold' ], 99999 );
 
 		/* Frontend Uploader customizations. */
 

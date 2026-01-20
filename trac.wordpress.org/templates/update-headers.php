@@ -128,10 +128,13 @@ function save_domdocument( $file, $dom ) {
 	/*
 	 * Use CDN assets, to avoid CORS issues.
 	 * Until https://github.com/WordPress/wporg-mu-plugins/pull/430 is resolved.
+	 *
+	 * NOTE: Quote is included here to avoid matching in inlined CSS or JS.
 	 */
 	$html = preg_replace_callback(
-		'!(?P<url>https:[\\\/]+wordpress.org[\\\/]+wp-(includes|content)[\\\/]+[^\'"]+)!i',
+		'!(?P<quote>[\'"])(?P<url>https:[\\\/]+wordpress.org[\\\/]+wp-(includes|content)[\\\/]+[^\'"]+)\\1!i',
 		function( $m ) {
+			$quote   = $m['quote'];
 			$url     = $m['url'];
 			$escaped = false !== strpos( $url, '\/' );
 
@@ -152,7 +155,7 @@ function save_domdocument( $file, $dom ) {
 				$url = addcslashes( $url, '/' );
 			}
 
-			return $url;
+			return $quote . $url . $quote;
 		},
 		$html
 	);

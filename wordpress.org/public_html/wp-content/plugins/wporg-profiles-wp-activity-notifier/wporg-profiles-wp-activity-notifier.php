@@ -263,6 +263,10 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
+		if ( 'comment' !== $comment->comment_type ) {
+			return;
+		}
+
 		if ( ! $comment->user_id ) {
 			return;
 		}

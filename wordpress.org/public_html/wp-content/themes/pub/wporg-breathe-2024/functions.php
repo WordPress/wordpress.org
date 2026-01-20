@@ -57,12 +57,12 @@ function wporg_breathe_styles() {
 		filemtime( get_theme_root() . '/wporg-parent-2021/build/block-styles.css' )
 	);
 
-	wp_enqueue_style( 'wporg-breathe', get_stylesheet_uri(), array( 'p2-breathe' ), filemtime( __DIR__ . '/style.css' ) );
+	wp_enqueue_style( 'wporg-breathe', get_stylesheet_uri(), array( 'p2-breathe', 'dashicons' ), filemtime( __DIR__ . '/style.css' ) );
 
 	// Preload the heading font(s).
 	if ( is_callable( 'global_fonts_preload' ) ) {
 		/* translators: Subsets can be any of cyrillic, cyrillic-ext, greek, greek-ext, vietnamese, latin, latin-ext. */
-		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg-breathe' );
+		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg' );
 		// All headings.
 		global_fonts_preload( 'Inter', $subsets );
 	}
@@ -193,7 +193,7 @@ function _maybe_add_login_item_to_menu( $menus ) {
 	global $wp;
 	$redirect_url = home_url( $wp->request );
 	$login_item = array(
-		'label' => __( 'Log in', 'wporg-breathe' ),
+		'label' => __( 'Log in', 'wporg' ),
 		'url' => wp_login_url( $redirect_url ),
 	);
 
@@ -594,6 +594,20 @@ function add_svg_icon_to_site_name() {
 			'pathStroke' => 'none',
 		];
 
+	elseif ( '/ai/' === $site->path ) :
+		$svg = [
+			'viewbox' => '0 0 20 20',
+			'paths'   => [
+				'M17 5H16V3H11V5H9V3H4V5H3C1.9 5 1 5.9 1 7V15C1 16.1 1.9 17 3 17H17C18.1 17 19 16.1 19 15V7C19 5.9 18.1 5 17 5ZM17.5 15C17.5 15.3 17.3 15.5 17 15.5H3C2.7 15.5 2.5 15.3 2.5 15V7C2.5 6.7 2.7 6.5 3 6.5H17C17.3 6.5 17.5 6.7 17.5 7V15Z',
+				'M14 10L14.1474 10.3983C14.3406 10.9206 14.4373 11.1817 14.6278 11.3722C14.8183 11.5627 15.0794 11.6594 15.6017 11.8526L16 12L15.6017 12.1474C15.0794 12.3406 14.8183 12.4373 14.6278 12.6278C14.4373 12.8183 14.3406 13.0794 14.1474 13.6017L14 14L13.8526 13.6017C13.6594 13.0794 13.5627 12.8183 13.3722 12.6278C13.1817 12.4373 12.9206 12.3406 12.3983 12.1474L12 12L12.3983 11.8526C12.9206 11.6594 13.1817 11.5627 13.3722 11.3722C13.5627 11.1817 13.6594 10.9206 13.8526 10.3983L14 10Z',
+				'M12 8L12.0737 8.19915C12.1703 8.46029 12.2186 8.59086 12.3139 8.68611C12.4091 8.78136 12.5397 8.82968 12.8009 8.92631L13 9L12.8009 9.07369C12.5397 9.17032 12.4091 9.21864 12.3139 9.31389C12.2186 9.40914 12.1703 9.53971 12.0737 9.80085L12 10L11.9263 9.80085C11.8297 9.53971 11.7814 9.40914 11.6861 9.31389C11.5909 9.21864 11.4603 9.17032 11.1991 9.07369L11 9L11.1991 8.92631C11.4603 8.82968 11.5909 8.78136 11.6861 8.68611C11.7814 8.59086 11.8297 8.46029 11.9263 8.19915L12 8Z',
+				'M10.25 10L10.3421 10.2489C10.4629 10.5754 10.5233 10.7386 10.6424 10.8576C10.7614 10.9767 10.9246 11.0371 11.2511 11.1579L11.5 11.25L11.2511 11.3421C10.9246 11.4629 10.7614 11.5233 10.6424 11.6424C10.5233 11.7614 10.4629 11.9246 10.3421 12.2511L10.25 12.5L10.1579 12.2511C10.0371 11.9246 9.97671 11.7614 9.85764 11.6424C9.73857 11.5233 9.57536 11.4629 9.24893 11.3421L9 11.25L9.24893 11.1579C9.57536 11.0371 9.73857 10.9767 9.85764 10.8576C9.97671 10.7386 10.0371 10.5754 10.1579 10.2489L10.25 10Z'
+			],
+			'pathFillRule' => 'evenodd',
+			'pathClipRule' => 'evenodd',
+			'pathStroke' => 'none',
+		];
+
 	endif;
 
 	if ( empty( $svg['viewbox'] ) || empty( $svg['paths'] ) ) {
@@ -618,12 +632,15 @@ add_action( 'wporg_breathe_before_name', __NAMESPACE__ . '\add_svg_icon_to_site_
 
 /**
  * Register translations for plugins without their own GlotPress project.
+ * This is in a function to avoid calling translation functions too early (at theme inclusion time).
  */
-// wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
-/* translators: %s: Post title */
-__( 'Pending Review: %s', 'wporg' );
-__( 'Submit for review', 'wporg' );
-_n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
+function __translations_in_private_functions() {
+	// wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
+	/* translators: %s: Post title */
+	__( 'Pending Review: %s', 'wporg' );
+	__( 'Submit for review', 'wporg' );
+	_n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
+}
 
 /**
  * Modify the search block's form action for handbook pages.
@@ -677,21 +694,21 @@ function breathe_content_nav( $nav_id ) {
 
 	?>
 	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo $nav_class; ?>">
-		<h2 class="screen-reader-text"><?php _e( 'Post navigation', 'p2-breathe' ); ?></h2>
+		<h2 class="screen-reader-text"><?php _e( 'Post navigation', 'wporg' ); ?></h2>
 
 	<?php if ( is_single() ) : // navigation links for single posts ?>
 
-		<?php previous_post_link( '<div class="nav-previous">%link</div>', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'p2-breathe' ) . '</span> %title' ); ?>
-		<?php next_post_link( '<div class="nav-next">%link</div>', '%title <span class="meta-nav">' . _x( '&rarr;', 'Next post link', 'p2-breathe' ) . '</span>' ); ?>
+		<?php previous_post_link( '<div class="nav-previous">%link</div>', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'wporg' ) . '</span> %title' ); ?>
+		<?php next_post_link( '<div class="nav-next">%link</div>', '%title <span class="meta-nav">' . _x( '&rarr;', 'Next post link', 'wporg' ) . '</span>' ); ?>
 
 	<?php elseif ( $wp_query->max_num_pages > 1 && ( is_home() || is_archive() || is_search() ) ) : // navigation links for home, archive, and search pages ?>
 
 		<?php if ( get_next_posts_link() ) : ?>
-		<div class="nav-previous"><?php next_posts_link( __( '<span class="meta-nav">&larr;</span> Older posts', 'p2-breathe' ) ); ?></div>
+		<div class="nav-previous"><?php next_posts_link( __( '<span class="meta-nav">&larr;</span> Older posts', 'wporg' ) ); ?></div>
 		<?php endif; ?>
 
 		<?php if ( get_previous_posts_link() ) : ?>
-		<div class="nav-next"><?php previous_posts_link( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'p2-breathe' ) ); ?></div>
+		<div class="nav-next"><?php previous_posts_link( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'wporg' ) ); ?></div>
 		<?php endif; ?>
 
 	<?php endif; ?>
@@ -726,7 +743,7 @@ function modify_site_title_block( $block_content, $block ) {
 		$block_content = preg_replace( 
 			'/<a\b[^>]*>(.*?)<\/a>/',
 			'<a target="_self" rel="home" href="' . esc_url( $make_home_url ) . '">' . 
-			esc_html__( 'Make WordPress', 'wporg-breathe' ) . 
+			esc_html__( 'Make WordPress', 'wporg' ) . 
 			'</a>', 
 			$block_content 
 		);
@@ -735,3 +752,25 @@ function modify_site_title_block( $block_content, $block ) {
 	return $block_content;
 }
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\modify_site_title_block', 10, 2 );
+
+/**
+ * Inject a script to trigger Prism (syntax highlighter) after o2 content is rendered.
+ */
+add_action(
+	'wp_footer',
+	function () {
+		wp_add_inline_script(
+			'mkaz-code-syntax-prism-js',
+			'jQuery( document ).on(
+				"ready.o2",
+				function () {
+					setTimeout( () => Prism.highlightAll(), 10 );
+					console.log( "test" );
+				}
+			);',
+			'after'
+		);
+	}
+);
+// Ensure assets are loaded, regardless of what's there on page load.
+add_filter( 'mkaz_code_syntax_force_loading', '__return_true' );

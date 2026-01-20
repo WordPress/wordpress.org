@@ -1,5 +1,5 @@
 /* globals wpTracAutoCompleteUsers, wpTracContributorLabels, wpTracCurrentUser */
-var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList, bugTrackerLocations, $body;
+var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTerms, coreFocusesList, bugTrackerLocations, $body;
 
 (function($){
 
@@ -14,8 +14,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'2nd-opinion' : 'A second opinion is desired for the problem or solution.',
 		'close' : 'The ticket is a candidate for closure.',
 		'needs-testing' : 'Patch has a particular need for testing.',
-		'has-testing-info' : 'Steps have been provided to reproduce the issue or test a patch.',
-		'needs-testing-info' : 'A more detailed testing procedure is needed to reproduce the issue, or to validate a patch works as expected.',
+		'has-test-info' : 'Steps have been provided to reproduce the issue or test a patch.',
+		'needs-test-info' : 'A more detailed testing procedure is needed to reproduce the issue, or to validate a patch works as expected.',
 		'needs-design' : 'A designer should create a prototype of how the suggested changes should look/behave before writing code.',
 		'needs-design-feedback' : 'A designer should review and give feedback on the proposed changes.',
 		'has-unit-tests' : 'Proposed solution has unit test coverage.',
@@ -35,7 +35,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
 		'i18n-change' : 'A string change, used only after string freeze.',
 		'good-first-bug': 'This ticket is great for a new contributor to work on, generally because it is easy or well-contained.',
-		'fixed-major': 'The commits of this ticket need to be backported.'
+		'fixed-major': 'The commits of this ticket need to be backported.',
+		'gutenberg-merge': 'This ticket is a backport request from Gutenberg.'
 	};
 
 	coreFocusesList = {
@@ -43,7 +44,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'accessibility' : 'Accessibility focus.',
 		'javascript' : 'Heavy JavaScript focus.',
 		'css' : 'CSS focus.',
-		// 'unit tests' : 'PHP or JS unit tests.',
+		'tests' : 'Ticket solely aimed at adding tests, but assigned a more specific component.',
 		'docs' : 'Inline documentation focus.',
 		'rtl' : 'Right-to-left languages.',
 		'administration' : 'Administration related, but assigned a more specific component.',
@@ -113,6 +114,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			tracker_text: 'WordPress.org News GitHub Repository',
 			enable_copy: true
 		},
+		'Playground': {
+			tracker: 'https://github.com/WordPress/wordpress-playground/issues/new',
+			tracker_text: 'WordPress Playground GitHub Repository',
+			enable_copy: true
+		},
 		'bbpress.org' : {
 			tracker: 'https://bbpress.trac.wordpress.org/newticket?component=Site+-+bbPress.org',
 			tracker_text: 'bbPress Trac instance',
@@ -125,7 +131,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		}
 	};
 
-	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major', 'dev-reviewed' ];
+	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major', 'dev-reviewed', 'gutenberg-merge' ];
+	hideFromNewTickets  = [ 'needs-refresh', 'changes-requested', 'reporter-feedback', 'dev-feedback', 'close', 'has-dev-note', 'needs-dev-note', 'add-to-field-guide', 'has-privacy-review', 'has-copy-review', 'commit', 'early', 'i18n-change', 'fixed-major', 'dev-reviewed' ];
 
 	// phpDocumentor tags, but also a few common @-terms.
 	reservedTerms = [
@@ -219,7 +226,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						}
 
 						var meClass = ( username === wpTrac.currentUser ) ? ' me' : '';
-						return pre + '<a class="mention' + meClass + '" href="https://profiles.wordpress.org/' + username + '">@' + username + '</a>';
+						return pre + '<a class="mention' + meClass + '" href="https://profiles.wordpress.org/' + username + '/">@' + username + '</a>';
 					} );
 
 					// Restore mentions in HTML attributes.
@@ -284,23 +291,31 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				}
 				el = li.find('.trac-rawlink');
 				href = el.attr('href');
-				if ( ! href.match(/\.(jpg|jpeg|png|gif|svg)$/i) ) {
-					return;
-				}
 				appendTo = li.parent().parent(); // div.change
-				image = new Image();
-				image.src = href;
-				image.onload = function() {
-					$('<img />')
+				if ( href.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i) ) {
+					image = new Image();
+					image.src = href;
+					image.onload = function() {
+						$('<img />')
+							.attr({
+								src: href,
+								width: image.width,
+								height: image.height,
+								class: 'trac-image-preview'
+							})
+							.appendTo( appendTo )
+							.wrap( '<a href="' + href.replace('/raw-attachment/', '/attachment/') + '" />' );
+					};
+				} else if ( href.match(/\.(mp4|mov|webm)$/i) ) {
+					$('<video />')
 						.attr({
 							src: href,
-							width: image.width,
-							height: image.height,
-							class: 'trac-image-preview'
+							class: 'trac-image-preview',
+							controls: true,
+							preload: 'metadata',
 						})
-						.appendTo( appendTo )
-						.wrap( '<a href="' + href.replace('/raw-attachment/', '/attachment/') + '" />' );
-				};
+						.appendTo( appendTo );
+				}
 			});
 
 			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );
@@ -352,7 +367,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				username = el.text();
 				if ( 0 === username.indexOf( 'logged in as' ) ) {
 					username = username.replace( 'logged in as ', '' );
-					el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username }).text( username ) ).prepend( 'logged in as ');
+					el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username + '/' }).text( username ) ).prepend( 'logged in as ');
 				}
 			})(jQuery);
 
@@ -634,7 +649,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					$commit.append( firstLine + '&hellip;' );
 
 					author = $el.find( '.username' ).data( 'username' );
-					$commit.append( ' by&nbsp;<a href="https://profiles.wordpress.org/' + author + '">@' + author + '</a>' );
+					$commit.append( ' by&nbsp;<a href="https://profiles.wordpress.org/' + author + '/">@' + author + '</a>' );
 
 					date = $el.find( '.time-ago' ).html();
 					$commit.append( ' ' + date );
@@ -684,6 +699,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				$( '#fullsearch #milestone' ).next().remove().end().remove();
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
 			}
+
+			// Batch Modify should require a comment.
+			$( '#batchmod_value_comment' ).prop( 'required', true );
 		},
 
 		// If we're not dealing with a trusted bug gardener:
@@ -1213,6 +1231,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) ) {
 							return;
 						}
+						// Don't show workflow keywords such as 'reporter-feedback' for new ticket.
+						if ( wpTrac.isNewTicket() && -1 !== $.inArray( k, hideFromNewTickets ) ) {
+							return;
+						}
 						elements.add.append( '<option value="' + k + ( -1 !== $.inArray( k, keywords ) ? '" disabled="disabled">* ' : '">' ) + k + '</option>' );
 					});
 				},
@@ -1243,10 +1265,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						wpTrac.workflow.removeKeyword( 'has-patch' );
 					}
 
-					if ( 'has-testing-info' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'needs-testing-info' );
-					} else if ( 'needs-testing-info' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'has-testing-info' );
+					if ( 'has-test-info' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'needs-test-info' );
+					} else if ( 'needs-test-info' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'has-test-info' );
 					}
 
 					if ( 'has-unit-tests' === keyword ) {
@@ -2212,3 +2234,4 @@ if ( ! String.prototype.replaceAll ) {
 
 	};
 }
+

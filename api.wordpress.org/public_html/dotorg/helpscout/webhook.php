@@ -33,7 +33,7 @@ function openverse_webhook( $event, $request ) {
 		'convo.created' === $event &&
 		isset( $request->mailboxId ) && HELPSCOUT_OPENVERSE_MAILBOXID === $request->mailboxId
 	) {
-		$subject = $request->subject;
+		$subject = $request->subject ?? ( $request->preview ?? '' );
 		$url     = $request->_links->web->href;
 
 		wp_safe_remote_post(

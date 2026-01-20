@@ -1377,12 +1377,15 @@ JS;
 		$total_rejections = array_sum( $rejection_reasons_counts );
 
 		foreach ( $rejection_reasons as $reason => $data ) {
-			$data['count'] = $rejection_reasons_counts[ $reason ];
+			$data['count'] = $rejection_reasons_counts[ $reason ] ?? 0;
+			$rejection_pct = $total_rejections
+				? round( ( $data['count'] / $total_rejections ) * 100, 2 )
+				: 0;
 
 			echo '<tr>';
 			echo '<td title="' . esc_attr( $data['label'] ) . '">' . esc_html( $reason ) . '</td>';
 			echo '<td>' . number_format_i18n( $data['count'] ) . '</td>';
-			echo '<td>' . round( ( $data['count'] / $total_rejections ) * 100, 2 ) . '%</td>';
+			echo '<td>' . $rejection_pct . '%</td>';
 			echo "</tr>\n";
 		}
 

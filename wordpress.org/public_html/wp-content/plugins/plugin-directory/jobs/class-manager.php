@@ -21,7 +21,8 @@ class Manager {
 		'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
 		'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
 		'import_zip'         => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
-		'tide_sync'          => array( __NAMESPACE__ . '\Tide_Sync', 'cron_trigger' ),
+		'scan_plugin'        => array( __NAMESPACE__ . '\Plugin_Updates_PCP', 'cron_trigger' ),
+		'create_svn_repo'    => array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ),
 	);
 
 	/**
@@ -40,7 +41,9 @@ class Manager {
 		add_action( 'plugin_directory_translation_sync', array( __NAMESPACE__ . '\Translation_Sync', 'cron_trigger' ) );
 		add_action( 'plugin_directory_zip_cleanup', array( __NAMESPACE__ . '\Zip_Cleanup', 'cron_trigger' ) );
 		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
-		add_action( 'plugin_directory_create_svn_repo', array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ) );
+
+		// Hook into the plugin import process to queue a job.
+		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Updates_PCP', 'wporg_plugins_imported' ), 10, 5 );
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
@@ -302,7 +305,7 @@ class Manager {
 	 * These cron tasks are in the form of 'import_plugin:$slug', this maps them to their expected handlers.
 	 */
 	public function register_colon_based_hook_handlers() {
-		$cron_array = get_option( 'cron' );
+		global $wpdb;
 
 		// Add the wildcard cron task above to the specified colon-based hook.
 		$add_callback = static function( $hook ) {
@@ -322,15 +325,16 @@ class Manager {
 			}
 		};
 
-		if ( is_array( $cron_array ) ) {
-			foreach ( $cron_array as $timestamp => $handlers ) {
-				if ( ! is_numeric( $timestamp ) ) {
-					continue;
-				}
+		// Flush the Cavalcade jobs cache, we need fresh data from the database
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
 
-				foreach ( $handlers as $hook => $jobs ) {
-					$add_callback( $hook );
-				}
+		foreach ( _get_cron_array() as $timestamp => $handlers ) {
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $handlers as $hook => $jobs ) {
+				$add_callback( $hook );
 			}
 		}
 
@@ -344,8 +348,11 @@ class Manager {
 		 * We can get the job hook via the job id, either through `$job_id` global that our loader sets,
 		 * or through the WP CLI arguments.
 		 */
-		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			// The WordPress.org cavalcade loader sets the $job_id variable.
+		if (
+			class_exists( '\HM\Cavalcade\Plugin\Job' ) &&
+			( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) )
+		) {
+			// The WordPress.org cavalcade loader sets the $job_id variable, check there first.
 			$job_id = $GLOBALS['job_id'] ?? false;
 
 			// Try to get it from the CLI args. `wp cavalcade run 12345`
@@ -353,8 +360,22 @@ class Manager {
 				$job_id = $GLOBALS['argv'][ array_search( 'run', $GLOBALS['argv'] ) + 1 ] ?? false;
 			}
 
-			if ( $job_id && class_exists( '\HM\Cavalcade\Plugin\Job' ) ) {
+			if ( $job_id && is_numeric( $job_id ) ) {
 				$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+
+				// This shouldn't occur, but if it does and we're using HyperDB, retry against a master DB server.
+				if (
+					! $job &&
+					isset( $wpdb->srtm ) &&
+					is_callable( [ $wpdb, 'send_reads_to_masters' ] )
+				) {
+					$srtm = $wpdb->srtm;
+					$wpdb->send_reads_to_masters();
+					$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+					$wpdb->srtm = $srtm;
+				}
+
+				// If we're running a job, add the callback for the job if it hasn't already been done.
 				if ( $job ) {
 					$add_callback( $job->hook );
 				}

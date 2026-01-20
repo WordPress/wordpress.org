@@ -34,7 +34,7 @@ $hosting_cache_buster = '9';
 				<section>
 					<div class="partner">
                         <h2>
-                            <a href="https://pressable.com/host-with-pressable-wporg" rel="nofollow">
+                            <a href="https://pressable.com/host-with-pressable-wporg/" rel="nofollow">
                                 <img
                                     alt=""
                                     src="https://s.w.org/hosting/pressable.png?<?php echo $hosting_cache_buster; ?>"

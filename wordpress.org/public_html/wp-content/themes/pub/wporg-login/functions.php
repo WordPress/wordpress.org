@@ -465,12 +465,13 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 	$message = '';
 
 	$from = 'wordpress.org';
+	// Make sure value is a string since it is compared next.
 	if ( $redirect_to ) {
-		$from = $redirect_to;
+		$from = sanitize_text_field( $redirect_to );
 	} elseif ( !empty( $_REQUEST['from'] ) ) {
-		$from = $_REQUEST['from'];
+		$from = sanitize_text_field( $_REQUEST['from'] );
 	} elseif ( !empty( $_REQUEST['redirect_to'] ) ) {
-		$from = $_REQUEST['redirect_to'];
+		$from = sanitize_text_field( $_REQUEST['redirect_to'] );
 	}
 
 	if ( str_contains( $from, 'buddypress.org' ) ) {
@@ -568,7 +569,8 @@ function wporg_remember_where_user_came_from() {
 		return;
 	}
 
-	$came_from = $_REQUEST['redirect_to'] ?? ( $_SERVER['HTTP_REFERER'] ?? '' );
+	// Make sure value is a string, since setcookie requires it to be.
+	$came_from = sanitize_text_field( $_REQUEST['redirect_to'] ?? ( $_SERVER['HTTP_REFERER'] ?? '' ) );
 	if ( ! $came_from ) {
 		return;
 	}

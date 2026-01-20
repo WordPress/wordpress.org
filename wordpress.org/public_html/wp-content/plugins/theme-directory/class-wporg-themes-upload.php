@@ -285,6 +285,11 @@ class WPORG_Themes_Upload {
 			bump_stats_extra( 'themes', 'upload_by_svn' );
 		}
 
+		// Run in the context of the author.
+		if ( $this->author ) {
+			set_current_user( $this->author->id );
+		}
+
 		return $this->import( array( // return true | WP_Error
 			// Since this version is already in SVN, we shouldn't try to import it again.
 			'commit_to_svn' => false,
@@ -697,7 +702,15 @@ class WPORG_Themes_Upload {
 
 		// Pass it through Theme Check and see how great this theme really is.
 		if ( $args['run_themecheck'] ) {
+			// Disable error reporting for when this is run via CLI.
+			$error_reporting = error_reporting(0);
+			ob_start();
 			$result = $this->check_theme();
+			$theme_check_output = ob_get_clean();
+			error_reporting( $error_reporting );
+
+			// Output the Theme Check results. This is the only HTML that this function outputs.
+			echo $theme_check_output;
 
 			if ( ! $result && $args['block_on_themecheck'] ) {
 				// Log it to slack.
@@ -710,7 +723,8 @@ class WPORG_Themes_Upload {
 						__( 'Your theme has failed the theme check. Please correct the problems with it and upload it again. You can also use the <a href="%1$s">Theme Check Plugin</a> to test your theme before uploading. If you have any questions about this please post them to %2$s.', 'wporg-themes' ),
 						'//wordpress.org/plugins/theme-check/',
 						'<a href="https://make.wordpress.org/themes">https://make.wordpress.org/themes</a>'
-					)
+					),
+					$theme_check_output
 				);
 			}
 		}
@@ -720,7 +734,17 @@ class WPORG_Themes_Upload {
 
 		// Create a new version in SVN.
 		if ( $args['commit_to_svn'] ) {
+
 			$result = $this->add_to_svn();
+
+			// Use a specific check for when the version already exists in SVN.
+			if ( is_wp_error( $result ) && $result->get_error_code() === 'version_exists_in_svn' ) {
+				return new WP_Error(
+					'version_exists_in_svn',
+					__( "The theme version already exists in SVN. Please check the version you're uploading doesn't already exist.", 'wporg-themes' )
+				);
+			}
+
 			if ( ! $result || is_wp_error( $result ) ) {
 				return new WP_Error(
 					'failed_svn_commit',
@@ -1138,91 +1162,11 @@ class WPORG_Themes_Upload {
 		// ZIP location
 		$theme_zip_link = "https://downloads.wordpress.org/theme/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1";
 
-		// Build the Live Preview Blueprint & URL.
-		 $blueprint_parent_step = '';
-		 if (
-			$this->theme->parent() &&
-			in_array( 'buddypress', $this->theme->get( 'Tags' ) )
-		) {
-			$blueprint_parent_step = <<<BLUEPRINT_PARENT_BP
-			{
-				"step": "installPlugin",
-				"pluginZipFile": {
-					"resource": "wordpress.org/plugins",
-					"slug": "buddypress"
-				},
-				"options": {
-					"activate": true
-				}
-			},
-			BLUEPRINT_PARENT_BP;
-		} elseif ( $this->theme->parent() ) {
-			$blueprint_parent_step = <<<BLUEPRINT_PARENT_THEME
-			{
-				"step": "installTheme",
-				"themeZipFile": {
-					"resource": "wordpress.org/themes",
-					"slug": "{$this->theme->get_template()}"
-				}
-			},
-			BLUEPRINT_PARENT_THEME;
-		}
-
-		// NOTE: The username + password included below are only used for the local in-browser environment, and are not a secret.
-		$blueprint = <<<BLUEPRINT
-		{
-			"preferredVersions": {
-				"php": "7.4",
-				"wp": "latest"
-			},
-			"steps": [
-				{
-					"step": "login",
-					"username": "admin",
-					"password": "password"
-				},
-				{
-					"step": "defineWpConfigConsts",
-					"consts": {
-						"WP_DEBUG": true
-					}
-				},
-				{
-					"step": "importFile",
-					"file": {
-						"resource": "url",
-						"url": "https://raw.githubusercontent.com/WordPress/theme-test-data/master/themeunittestdata.wordpress.xml",
-						"caption": "Downloading theme testing content"
-					},
-					"progress": {
-						"caption": "Installing theme testing content"
-					}
-				},
-				{
-					"step": "installPlugin",
-					"pluginZipFile": {
-						"resource": "wordpress.org/plugins",
-						"slug": "theme-check"
-					},
-					"options": {
-						"activate": true
-					}
-				},
-				{$blueprint_parent_step}
-				{
-					"step": "installTheme",
-					"themeZipFile": {
-						"resource": "url",
-						"url": "{$theme_zip_link}",
-						"caption": "Downloading the theme"
-					}
-				}
-			]
-		}
-		BLUEPRINT;
-
-		// NOTE: The json_encode( json_decode() ) is to remove the whitespaces used above for readability.
-		$live_preview_link = 'https://playground.wordpress.net/#' . json_encode( json_decode( $blueprint ) );
+		$live_preview_link = add_query_arg(
+			'blueprint-url',
+			urlencode( rest_url( 'themes/v1/review-blueprint/' . $this->theme_post->ID . '-' . $this->theme_slug . '/' . $this->theme->display( 'Version' ) ) ),
+			'https://playground.wordpress.net/'
+		);
 
 		// Hacky way to prevent a problem with xml-rpc.
 		$this->trac_ticket->description = <<<TICKET
@@ -1476,10 +1420,21 @@ TICKET;
 			return $this->add_to_svn_via_svn_import();
 		}
 
-		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
-
 		// Keeps a copy of the output of the commands for debugging.
 		$output = array();
+
+		// Check to see if the theme already exists in SVN.
+		$this->exec_with_notify( self::SVN . " ls https://themes.svn.wordpress.org/{$this->theme_slug}/", $output, $return_var );
+		if ( $return_var < 1 ) {
+			// SVN ls output is one line per version, with a `/` appended to versions.
+			$svn_versions = array_map( function( $line ) {
+				return trim( $line, "/\r\n\t " );
+			}, $output );
+
+			if ( in_array( $this->theme->display( 'Version' ), $svn_versions, true ) ) {
+				return new WP_Error( 'version_exists_in_svn', 'version_exists_in_svn' ); // Intentionally not translated or human-readable-text.
+			}
+		}
 
 		// Theme exists, attempt to do a copy from old version to new.
 		$this->exec_with_notify( self::SVN . " co https://themes.svn.wordpress.org/{$this->theme_slug}/ {$this->tmp_svn_dir} --depth=empty", $output, $return_var );
@@ -1488,7 +1443,8 @@ TICKET;
 		}
 
 		// Try to copy the previous version over.
-		$prev_version = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
+		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
+		$prev_version    = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
 		$this->exec_with_notify( self::SVN . " cp $prev_version $new_version_dir", $output, $return_var );
 		if ( $return_var > 0 ) {
 			return $this->add_to_svn_via_svn_import();

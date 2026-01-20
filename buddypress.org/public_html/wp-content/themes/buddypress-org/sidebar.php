@@ -1,4 +1,5 @@
 </div>
+
 <div class="sidebar">
 
 	<?php if ( function_exists( 'is_buddypress' ) && is_buddypress() ) : ?>
@@ -106,14 +107,6 @@
 			</div>
 
 		<?php endif; ?>
-
-	<?php elseif ( is_front_page() || is_404() ) : ?>
-
-		<div>
-			<h2><?php _e( 'Theme Development', 'bporg' ); ?></h2>
-			<p><a href="https://www.packtpub.com/web-development/buddypress-theme-development"><img width="225" alt="<?php esc_attr_e( 'BuddyPress Theme Development. A book by Tammie Lister', 'bporg' ); ?>" src="<?php echo get_stylesheet_directory_uri(); ?>/images/buddypress-packt.jpg"/></a></p>
-			<p class="book-description"><?php _e( 'An in-depth guide to designing, developing, and testing your very own custom BuddyPress theme.', 'bporg' ); ?></p>
-		</div>
 
 	<?php elseif ( is_page( array( 'plugins' ) ) ) : ?>
 

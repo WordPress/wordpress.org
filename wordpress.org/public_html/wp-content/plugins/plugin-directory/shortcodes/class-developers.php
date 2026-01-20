@@ -88,6 +88,15 @@ class Developers {
 
 		$output .= '<h3>' . __( 'Interested in development?', 'wporg-plugins' ) . '</h3>';
 
+		$output .= '<p>' . sprintf(
+			/* translators: 1: Trac URL, 2: SVN repository URL, 3: development log URL, 4: RSS URL */
+			__( '<a href="%1$s">Browse the code</a>, check out the <a href="%2$s">SVN repository</a>, or subscribe to the <a href="%3$s">development log</a> by <a href="%4$s">RSS</a>.', 'wporg-plugins' ),
+			esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
+			esc_url( "https://plugins.svn.wordpress.org/{$slug}/" ),
+			esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
+			esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" )
+		) . '</p>';
+
 		if ( is_user_logged_in() ) {
 			$subscribed = Tools::subscribed_to_plugin_commits( $post, get_current_user_id() );
 			$email_url  = esc_url( add_query_arg( array(
@@ -95,25 +104,25 @@ class Developers {
 				( $subscribed ? 'unsubscribe' : 'subscribe' ) => '1',
 			), home_url( "wp-json/plugins/v1/plugin/{$slug}/commit-subscription" ) ) );
 
-			$output .= '<p>' . sprintf(
-				/* translators: 1: Trac URL, 2: SVN repository URL, 3: development log URL, 4: email subscription URL, 5: RSS URL */
-				__( '<a href="%1$s">Browse the code</a>, check out the <a href="%2$s">SVN repository</a>, or subscribe to the <a href="%3$s">development log</a> by <a href="%4$s">email</a> or <a href="%5$s">RSS</a>.', 'wporg-plugins' ),
-				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
-				esc_url( "https://plugins.svn.wordpress.org/{$slug}/" ),
-				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
-				$email_url,
-				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" )
-			) . '</p>';
-		} else {
-			$output .= '<p>' . sprintf(
-				/* translators: 1: Trac URL, 2: SVN repository URL, 3: development log URL, 4: RSS URL */
-				__( '<a href="%1$s">Browse the code</a>, check out the <a href="%2$s">SVN repository</a>, or subscribe to the <a href="%3$s">development log</a> by <a href="%4$s">RSS</a>.', 'wporg-plugins' ),
-				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
-				esc_url( "https://plugins.svn.wordpress.org/{$slug}/" ),
-				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
-				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" )
-			) . '</p>';
+			if ( $subscribed ) {
+				$output .= '<div class="notice notice-info notice-alt"><p>' . sprintf(
+					/* translators: 1: email subscription URL */
+					__( 'You are currently receiving emails for each plugin commit <a href="%1$s">unsubscribe by clicking here</a>.', 'wporg-plugins' ),
+					$email_url
+				) . '</p></div>';
+			} else {
+				$output .= '<p>' . sprintf(
+					/* translators: 1: email subscription URL, 2: Confirm of subscribe-by-email */
+					__( 'You can also subscribe to emails for each plugin commit by <a href="%1$s" onclick="confirm(%2$s)">clicking here</a>.', 'wporg-plugins' ),
+					$email_url,
+					esc_attr( wp_json_encode( sprintf(
+						__( 'Are you sure you want to subscribe to email notifications for each commit to %s?', 'wporg-plugins' ),
+						$title
+					) ) )
+				) . '</p>';
+			}
 		}
+
 		$output .= '</div>';
 
 		return $output;

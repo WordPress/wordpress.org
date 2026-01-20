@@ -249,21 +249,68 @@ class Template {
 	 */
 	public static function active_installs( $full = true, $post = null ) {
 		$post  = get_post( $post );
-		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0;
+		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0; // Already sanitized to a round number.
 
 		if ( 'closed' === $post->post_status ) {
 			$text = __( 'N/A', 'wporg-plugins' );
-		} elseif ( $count < 10 ) {
-			$text = __( 'Fewer than 10', 'wporg-plugins' );
-		} elseif ( $count >= 1000000 ) {
-			$million_count = intdiv( $count, 1000000 );
-			/* translators: %d: The integer number of million active installs */
-			$text = sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
 		} else {
-			$text = number_format_i18n( $count ) . '+';
+			$text = self::format_active_installs_for_display( $count );
 		}
 
 		return $full ? sprintf( __( '%s active installations', 'wporg-plugins' ), $text ) : $text;
+	}
+
+	/**
+	 * Formats the active installs count for display.
+	 *
+	 * @static
+	 *
+	 * @param int $count The active installs count.
+	 * @return string The formatted count.
+	 */
+	public static function format_active_installs_for_display( $count ) {
+		if ( $count < 10 ) {
+			return __( 'Fewer than 10', 'wporg-plugins' );
+		}
+
+		if ( $count >= 1000000 ) {
+			$million_count = intdiv( $count, 1000000 );
+
+			/* translators: %d: The integer number of million active installs */
+			return sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
+		}
+
+		return number_format_i18n( $count ) . '+';
+	}
+
+	/**
+	 * Sanitizes the Active Install count number to a rounded display value.
+	 *
+	 * @static
+	 *
+	 * @param int $active_installs The raw active install number.
+	 * @return int The sanitized version for display.
+	 */
+	public static function sanitize_active_installs( $active_installs ) {
+		if ( $active_installs > 10000000 ) {
+			// 10 million +
+			return 10000000;
+		} elseif ( $active_installs > 1000000 ) {
+			$round = 1000000;
+		} elseif ( $active_installs > 100000 ) {
+			$round = 100000;
+		} elseif ( $active_installs > 10000 ) {
+			$round = 10000;
+		} elseif ( $active_installs > 1000 ) {
+			$round = 1000;
+		} elseif ( $active_installs > 100 ) {
+			$round = 100;
+		} else {
+			// Rounded to ten, else 0
+			$round = 10;
+		}
+
+		return floor( $active_installs / $round ) * $round;
 	}
 
 	/**
@@ -1086,7 +1133,11 @@ class Template {
 		}
 
 		if (
+			// Assume by-author-request is permanent.
 			'author-request' === $result['reason'] ||
+			// Likewise for when it's closed due to merged-to-core.
+			'merged-into-core' === $result['reason'] ||
+			// Or if it's closed without committers.
 			! Tools::get_plugin_committers( $post->post_name )
 		) {
 			$result['permanent'] = true;
@@ -1100,9 +1151,16 @@ class Template {
 			$result['label']  = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
 		}
 
-		// If it's closed for more than 60 days, it's by author request, or we're unsure about the close date, it's publicly known.
+		// These reasons are never embargoed, and are shown immediately.
+		$unembargoed_closure_reasons = array(
+			'author-request',
+			'unused',
+			'merged-into-core',
+		);
+
+		// If it's closed for more than 60 days, it's not embargoed, or we're unsure about the close date, it's publicly known.
 		$days_closed = $result['date'] ? (int) ( ( time() - strtotime( $result['date'] ) ) / DAY_IN_SECONDS ) : false;
-		if ( ! $result['date'] || $days_closed >= 60 || 'author-request' === $result['reason'] ) {
+		if ( ! $result['date'] || $days_closed >= 60 || in_array( $result['reason'], $unembargoed_closure_reasons, true ) ) {
 			$result['public'] = true;
 		}
 
@@ -1368,5 +1426,23 @@ class Template {
 		}
 
 		return $sorted;
+	}
+
+	/**
+	 * Get the available rollout strategies for plugin updates.
+	 *
+	 * @return array
+	 */
+	static function get_rollout_strategies() {
+		return [
+			'' => [
+				'name' => __( 'Immediate (default)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
+			],
+			'manual-updates-24hr' => [
+				'name' => __( 'Manual updates only (24 hours)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites, but automatic updates will be disabled for 24 hours. After that, sites will receive the update as normal.', 'wporg-plugins' ),
+			],
+		];
 	}
 }

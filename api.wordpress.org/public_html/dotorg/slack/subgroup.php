@@ -47,7 +47,7 @@ function die_text( $text ) {
 }
 
 // Confirm it came from Slack.
-if ( $_POST['token'] !== WEBHOOK_TOKEN ) {
+if ( ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ?? '' ) ) {
 	die( "Invalid Token" );
 }
 

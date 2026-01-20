@@ -21,12 +21,15 @@ class SVN_Repo_Creation {
 		// Check to see if the repo exists..
 		$exists = SVN::ls( 'http://plugins.svn.wordpress.org/' . $post->post_name . '/' );
 		if ( $exists ) {
+			fwrite( STDERR, 'SVN Repository already exists for plugin ID ' . $post->ID . ' ' . var_export( $exists, true ) );
 			return;
 		}
 
 		$created = Status_Transitions::instance()->approved_create_svn_repo( $post, $author_id );
 		if ( $created ) {
 			Tools::audit_log( 'Created SVN Repository.', $post->ID );
+		} else {
+			fwrite( STDERR, 'Failed to create SVN Repository for plugin ID ' . $post->ID );
 		}
 	}
 

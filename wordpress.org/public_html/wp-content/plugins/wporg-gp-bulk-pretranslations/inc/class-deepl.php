@@ -49,18 +49,21 @@ class Deepl extends Pretranslation {
 			return false;
 		}
 
+		$options = array(
+			'timeout' => 20,
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'DeepL-Auth-Key ' . $deepl_api_key,
+			),
+			'body' => wp_json_encode( array(
+				'text'        => array( $original->singular ),
+				'target_lang' => $target_lang,
+				'formality'   => $this->get_language_formality( $target_lang, $locale->slug ),
+			)),
+		);
 		$deepl_response = wp_remote_post(
 			$deepl_url,
-			array(
-				'timeout' => 20,
-				'body'    => array(
-					'auth_key'    => $deepl_api_key,
-					'text'        => $original->singular,
-					'source_lang' => 'EN',
-					'target_lang' => $target_lang,
-					'formality'   => $this->get_language_formality( $target_lang, $locale->slug ),
-				),
-			),
+			$options
 		);
 		if ( is_wp_error( $deepl_response ) ) {
 			return false;

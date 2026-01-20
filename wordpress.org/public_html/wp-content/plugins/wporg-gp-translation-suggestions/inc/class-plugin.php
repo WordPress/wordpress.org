@@ -5,6 +5,7 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions;
 use GP;
 use GP_Locales;
 use WordPressdotorg\GlotPress\TranslationSuggestions\Routes\Translation_Memory;
+use WordPressdotorg\GlotPress\Bulk_Pretranslations\Deepl;
 
 class Plugin {
 
@@ -130,7 +131,9 @@ class Plugin {
 		$gp_default_sort         = get_user_option( 'gp_default_sort' );
 		$get_openai_translations = ! empty( trim( gp_array_get( $gp_default_sort, 'openai_api_key' ) ) );
 		$get_deepl_translations  = ! empty( trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ) );
-
+		$deepl 				     = new DeepL();
+		$deepl_locale 		     = $deepl->get_deepl_locale( $args['locale_slug'] );
+		
 		wp_localize_script(
 			'gp-translation-suggestions',
 			'gpTranslationSuggestions',
@@ -139,12 +142,12 @@ class Plugin {
 				'get_external_translations' => array(
 					'get_openai_translations' => $get_openai_translations,
 					'get_deepl_translations'  => $get_deepl_translations,
+					'get_deepl_locale'        => $deepl_locale,
 				),
 			)
 		);
 
 		gp_enqueue_script( 'gp-translation-suggestions' );
-
 		wp_add_inline_script(
 			'gp-translation-suggestions',
 			sprintf(

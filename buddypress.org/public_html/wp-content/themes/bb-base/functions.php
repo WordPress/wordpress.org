@@ -54,7 +54,7 @@ if ( bb_base_is_codex() ) {
 function bb_base_register_stylesheets() {
 
 	// Version of CSS
-	$version = '202501140001';
+	$version = '202508050001';
 
 	// Base theme styling
 	wp_enqueue_style( 'bb-base',   get_template_directory_uri()   . '/style.css', false,                         $version, 'screen' );
@@ -130,7 +130,7 @@ function bb_base_topic_search_query( $escaped = true ) {
 
 function bb_base_reply_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['rs'] ) ) {
+	if ( empty( $_GET['rs'] ) || ! is_scalar( $_GET['rs'] ) ) {
 		return false;
 	}
 

@@ -373,6 +373,20 @@ class Builder {
 			$svn_params[] = 'ignore-externals';
 		}
 
+		/*
+		 * Before we check out the plugin, ensure that it has *files* in the folder.
+		 *
+		 * Some plugins accidentally copy their entire SVN repo into the tagged folder, which
+		 * causes a recursive checkout many multiple gigabytes in size, causing issues for WordPress.org.
+		 */
+		$remote_files = SVN::ls( $this->plugin_version_svn_url, true );
+		if (
+			$remote_files && 
+			! wp_list_filter( $remote_files, [ 'kind' => 'file' ] )
+		) {
+			throw new Exception( __METHOD__ . ": Could not create SVN export of {$this->plugin_version_svn_url}: Path appears not to have any files." );
+		}
+
 		$res = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		// Handle tags which we store as 0.blah but are in /tags/.blah
 		if ( ! $res['result'] && '0.' == substr( $this->version, 0, 2 ) ) {

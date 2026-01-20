@@ -106,6 +106,7 @@ function the_author_byline( $post = null ) {
 
 	$url    = get_author_posts_url( $post->post_author ); 
 	$author = strip_tags( get_the_author_meta( 'display_name', $post->post_author ) ) ?: get_the_author();
+
 	$author = $url ? '<a class="url fn n" href="' . esc_url( $url ) . '">' . $author . '</a>' : $author;
 
 	/* translators: post author. */
@@ -649,16 +650,27 @@ function the_plugin_self_transfer_form() {
 
 	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> Transferring a plugin is intended to be <em>permanent</em>. There is no way to get plugin ownership back without contacting the plugin team.', 'wporg-plugins' ) . '</p></div>';
 
-	$users = [];
+	$disabled_users = [];
+	$users          = [];
 	foreach ( Tools::get_plugin_committers( $post->post_name ) as $user_login ) {
 		$user = get_user_by( 'login', $user_login );
 		if ( $user->ID != get_current_user_id() ) {
 			$users[] = $user;
+
+			// Mark users as disabled if they don't have 2FA enabled, as plugins can't be transferred to users without 2FA.
+			if ( class_exists( 'Two_Factor_Core' ) && ! \Two_Factor_Core::is_user_using_two_factor( $user->ID ) ) {
+				$disabled_users[ $user->ID ] = true;
+			}
 		}
 	}
 	if ( ! $users ) {
 		echo '<div class="plugin-notice notice notice-error notice-alt"><p>' . __( 'To transfer a plugin, you must first add the new owner as a committer.', 'wporg-plugins' ) . '</p></div>';
 		return;
+	}
+
+	// Users must have 2FA enabled to be able to transfer a plugin.
+	if ( $disabled_users ) {
+		echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . __( 'Only users with Two-Factor authentication enabled can be selected.', 'wporg-plugins' ) . '</p></div>';
 	}
 
 	echo '<form method="POST" action="' . esc_url( Template::get_self_transfer_link() ) . '" onsubmit="return ( 0 != document.getElementById(\'transfer-new-owner\').value ) && confirm( jQuery(this).prev(\'.notice\').text() );">';
@@ -667,12 +679,14 @@ function the_plugin_self_transfer_form() {
 	echo '<option value="0">---</option>';
 	foreach ( $users as $user ) {
 		printf(
-			'<option value="%d">%s</option>' . "\n",
+			'<option value="%d" %s>%s</option>' . "\n",
 			esc_attr( $user->ID ),
+			disabled( isset( $disabled_users[ $user->ID ] ), true, false ),
 			esc_html( $user->display_name . ' (' . $user->user_login . ')' )
 		);
 	}
 	echo '</select></p>';
+
 	// Translators: %s is the plugin name, as defined by the plugin itself.
 	echo '<p class="wp-block-button is-small"><input class="wp-block-button__link" type="submit" value="' . esc_attr( sprintf( __( 'Please transfer %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
 	echo '</form>';
@@ -732,7 +746,7 @@ function the_author_notice( $post = null ) {
 		printf(
 			'<div class="notice notice-alt notice-%s">%s</div>',
 			esc_attr( $notice['type'] ),
-			'<p><strong>' . __( 'A note from the Plugin Review team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			'<p><strong>' . __( 'A note from the Plugins Team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
 			wp_kses_post( $notice['html'] ) // Should have wrapping <p> tags.
 		);
 	}

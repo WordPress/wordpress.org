@@ -68,6 +68,7 @@ If you want to finish your review, please do the following:
 
 - <strong>First</strong>, find the last email we sent you with our latest review, read that email thoroughly and <strong>fix the issues mentioned</strong>.
 - Once your plugin is corrected, you are ready to <a href='https://wordpress.org/plugins/developers/add/'>resubmit it</a> and <strong>reply to this email</strong> so we know you want to continue.
+- You will then have to <strong>wait</strong> your turn for the team to review your plugin again.
 
 We understand that sometimes emails get lost or mistakenly filed as spam, and it's entirely possible that you never received or seen our previous emails. If you can't find it, let us know and we'll send it to you again.
 

@@ -337,7 +337,7 @@ class Starter_Content {
 						}
 
 						if ( ! empty( $item['title'] ) && ! empty( $item['url'] ) ) {
-							$menu_items[] = (object) $item;
+							$menu_items[] = new \WP_Post( (object) $item );
 							continue;
 						}
 
@@ -354,7 +354,7 @@ class Starter_Content {
 								$item['url']   = get_permalink( $id );
 								$item['title'] = $post_data['post_title'];
 
-								$menu_items[] = (object) $item;
+								$menu_items[] = new \WP_Post( (object) $item );
 								continue;
 							}
 						}

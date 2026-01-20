@@ -1,6 +1,6 @@
 <?php
 /**
- * Post handling customizations.
+ * Flagged photo (aka potentially sensitive content) functionality.
  *
  * @package WordPressdotorg\Photo_Directory
  */
@@ -47,9 +47,8 @@ class Flagged {
 		// Add post state indicator.
 		add_filter( 'display_post_states',                   [ __CLASS__, 'display_post_states' ], 10, 2 );
 
-		// Add count of user's flagged photos in author column.
-		//     Note: Priority after Admin::add_published_photos_count_to_author()
-		add_filter( 'the_author',                            [ __CLASS__, 'add_flagged_photos_count_to_author' ], 11 );
+		// Output count of user's flagged photos in author column.
+		add_filter( 'photo_author_column_data_end',          [ __CLASS__, 'output_flagged_photos_count_to_author' ] );
 
 		// Add support to the post edit page.
 		add_action( 'admin_footer-post.php',                 [ __CLASS__, 'output_js_for_post_edit_support' ] );
@@ -239,7 +238,7 @@ class Flagged {
 		$count_indicator = $flagged_count
 			? "<span class=\"update-plugins count-{$flagged_count}\"><span class=\"plugin-count\">{$flagged_count}</span></span>"
 			: '';
- 
+
 		// Add 'Flagged' link if user can read flagged photos.
 		add_submenu_page(
 			$path,
@@ -264,34 +263,26 @@ class Flagged {
 	}
 
 	/**
-	 * Appends the count of the published photos to author names in photo post
-	 * listings.
+	 * Outputs the count of the flagged photos for the post's author.
 	 *
-	 * @param string $display_name The author's display name.
-	 * @return string
+	 * @param WP_Post $post Post object.
 	 */
-	public static function add_flagged_photos_count_to_author( $display_name ) {
-		global $authordata;
-
-		if ( ! is_admin() || ! Admin::should_include_photo_column() ) {
-			return $display_name;
-		}
-
-		// Close link to contributor's listing of photos.
-		$display_name .= '</a>';
+	public static function output_flagged_photos_count_to_author( $post ) {
+		$author_id = (int) get_post_field( 'post_author', $post );
+		$output = '';
 
 		// Show number of flagged photos.
-		$flagged_count = User::count_flagged_photos( $authordata->ID );
+		$flagged_count = User::count_flagged_photos( $author_id );
 		$flagged_link = '';
 		if ( $flagged_count ) {
 			if ( current_user_can( self::get_capability() ) ) {
 				$flagged_link = add_query_arg( [
 					'post_type'   => Registrations::get_post_type(),
 					'post_status' => self::get_post_status(),
-					'author'      => $authordata->ID,
+					'author'      => $author_id,
 				], 'edit.php' );
 			}
-			$display_name .= '<div class="user-flagged-count">'
+			$output .= '<div class="user-flagged-count">'
 				. sprintf(
 					/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
 					_n( 'Flagged: <strong>%s</strong>', 'Flagged: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
@@ -300,10 +291,9 @@ class Flagged {
 				. "</div>\n";
 		}
 
-		// Prevent unbalanced tag.
-		$display_name .= '<a>';
-
-		return $display_name;
+		if ( $output ) {
+			echo $output;
+		}
 	}
 
 	/**

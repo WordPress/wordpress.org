@@ -57,8 +57,10 @@ function get_users_with_badge( string $badge ) : array {
 		"SELECT user_id
 			FROM bpmain_wporg_groups_members m
 			JOIN bpmain_wporg_groups g ON m.group_id = g.id
-			WHERE g.slug = %s AND m.is_confirmed = 1 AND m.is_banned = 0",
-		$badge
+			WHERE g.slug = %s AND m.is_confirmed = 1 AND m.is_banned = 0
+			ORDER BY date_modified DESC
+			LIMIT 10000", // Arbitrary high limit to avoid extra huge result sets.
+		$badge,
 	) );
 
 	return array_map( 'intval', $users );
@@ -85,6 +87,26 @@ function get_user_badges( $user ) {
 			ORDER BY slug",
 		$user_id
 	), ARRAY_A );
+
+	return array_column( $badges, 'name', 'slug' );
+}
+
+/**
+ * Get a list of all available badges.
+ *
+ * WARNING: Uncached.
+ *
+ * @return array An array of badge names keyed by slug.
+ */
+function get_badges() {
+	global $wpdb;
+
+	$badges = $wpdb->get_results(
+		"SELECT slug, name
+			FROM bpmain_wporg_groups
+			ORDER BY name",
+		ARRAY_A
+	);
 
 	return array_column( $badges, 'name', 'slug' );
 }
@@ -226,6 +248,17 @@ function find_user_id( $user ) {
 	// User ID.
 	if ( is_numeric( $user ) && absint( $user ) == $user ) {
 		return (int) $user;
+	}
+
+	$_user = false;
+
+	// If it looks like a profile url, extract the slug.
+	if ( is_string( $user ) && str_starts_with( $user, 'https://profiles.wordpress.org/' ) ) {
+
+		$user = trim( str_replace( 'https://profiles.wordpress.org/', '', $user ), '/' );
+		$user = explode( '/', $user )[0];
+
+		return get_user_by( 'slug', $user )->ID ?? false;
 	}
 
 	// Support user login / email / slug.

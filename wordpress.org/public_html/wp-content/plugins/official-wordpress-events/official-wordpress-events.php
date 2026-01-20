@@ -377,6 +377,12 @@ class Official_WordPress_Events {
 								$event['country_code'] = strtoupper( $value );
 							}
 							break;
+
+						case 'Hide from Event Feeds':
+							if ( $value ) {
+								$event['status'] = 'hidden';
+							}
+							break;
 					}
 				}
 
@@ -593,7 +599,8 @@ class Official_WordPress_Events {
 			$longitude       = ! empty( $meetup['venue']['lon'] ) ? $meetup['venue']['lon'] : $meetup['group']['lon'];
 
 			if ( ! empty( $meetup['venue']['localized_location'] ) ) {
-				$location = $meetup['venue']['localized_location'];
+				$location       = $meetup['venue']['localized_location'];
+				$location_parts = [];
 			} else {
 				$geocoded_location = $this->reverse_geocode( $latitude, $longitude );
 				$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location );

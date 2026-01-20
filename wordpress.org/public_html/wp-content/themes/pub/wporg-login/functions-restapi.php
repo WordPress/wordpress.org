@@ -114,11 +114,6 @@ function wporg_login_rest_email_in_use( $request ) {
 	// Check we don't have a pending registration for that email.
 	$pending = wporg_get_pending_user( $email );
 
-	// And that there's no pending account signups for other emails for that inbox.
-	if ( ! $pending && str_contains( $email, '+' ) ) {
-		$pending = wporg_get_pending_user_by_email_wildcard( $email );
-	}
-
 	if ( $pending && ! $pending['created'] && ! $pending['cleared'] ) {
 		// Account is in pending state, but requires manual human review, don't suggest sending a reset email.
 		$sso = WPOrg_SSO::get_instance();

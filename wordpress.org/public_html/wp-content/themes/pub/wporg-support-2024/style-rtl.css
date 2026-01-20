@@ -1073,6 +1073,15 @@ big {
 	margin-right: 0;
 }
 
+/* https://github.com/WordPress/gutenberg/pull/65891 Remove with GB 20.9+ */
+.wp-block-code {
+	direction: ltr;
+	text-align: initial;
+}
+.wp-block-code code {
+	direction: ltr;
+	text-align: initial;
+}
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/

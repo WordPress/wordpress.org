@@ -39,7 +39,7 @@ if ( is_front_page() && is_home() ) {
 			esc_url( $is_updates_or_project ? $make_home_url : home_url( '/' ) ),
 			$before_name,
 			$is_updates_or_project
-				? esc_html__( 'Make WordPress', 'wporg-breathe' )
+				? esc_html__( 'Make WordPress', 'wporg' )
 				: esc_html( get_bloginfo('name') )
 		)
 	);

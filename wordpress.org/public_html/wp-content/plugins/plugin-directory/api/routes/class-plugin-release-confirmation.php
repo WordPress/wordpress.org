@@ -37,7 +37,7 @@ class Plugin_Release_Confirmation extends Base {
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)', [
-			'methods'             => \WP_REST_Server::READABLE, // TODO: This really should be a POST
+			'methods'             => 'GET, POST', // TODO: Remove GET.
 			'callback'            => [ $this, 'confirm_release' ],
 			'args'                => [
 				'plugin_slug' => [
@@ -51,7 +51,7 @@ class Plugin_Release_Confirmation extends Base {
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/discard', [
-			'methods'             => \WP_REST_Server::READABLE, // TODO: This really should be a POST
+			'methods'             => 'GET, POST', // TODO: Remove GET.
 			'callback'            => [ $this, 'discard_release' ],
 			'args'                => [
 				'plugin_slug' => [
@@ -65,7 +65,7 @@ class Plugin_Release_Confirmation extends Base {
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/undo-discard', [
-			'methods'             => \WP_REST_Server::READABLE, // TODO: This really should be a POST
+			'methods'             => 'GET, POST', // TODO: Remove GET.
 			'callback'            => [ $this, 'undo_discard_release' ],
 			'args'                => [
 				'plugin_slug' => [
@@ -206,6 +206,13 @@ class Plugin_Release_Confirmation extends Base {
 		$result     = [
 			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
 		];
+
+		$result['location'] = preg_replace(
+			'/(#.+)?$/',
+			'#releases-' . urlencode( $plugin->post_name ),
+			$result['location']
+		);
+
 		header( 'Location: ' . $result['location'] );
 
 		if ( ! $release || ! empty( $release['confirmed'][ $user_login ] ) || ! empty( $release['discarded'] ) ) {
@@ -222,6 +229,11 @@ class Plugin_Release_Confirmation extends Base {
 		if ( count( $release['confirmations'] ) >= $release['confirmations_required'] ) {
 			$release['confirmed']      = true;
 			$result['fully_confirmed'] = true;
+		}
+
+		// Store the release strategy if provided, overwriting any previous choice.
+		if ( isset( $request['rollout_strategy'] ) ) {
+			$release['rollout_strategy'] = wp_unslash( $request['rollout_strategy'] );
 		}
 
 		Plugin_Directory::add_release( $plugin, $release );

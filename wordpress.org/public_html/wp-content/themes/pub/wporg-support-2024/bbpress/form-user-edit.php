@@ -12,32 +12,32 @@ defined( 'ABSPATH' ) || exit;
 
 <form id="bbp-your-profile" method="post" enctype="multipart/form-data">
 
-	<h2 class="entry-title"><?php esc_html_e( 'Name', 'bbpress' ); ?></h2>
+	<h2 class="entry-title"><?php esc_html_e( 'Name', 'wporg-forums' ); ?></h2>
 
 	<?php do_action( 'bbp_user_edit_before' ); ?>
 
 	<fieldset class="bbp-form">
-		<legend><?php esc_html_e( 'Name', 'bbpress' ); ?></legend>
+		<legend><?php esc_html_e( 'Name', 'wporg-forums' ); ?></legend>
 
 		<?php do_action( 'bbp_user_edit_before_name' ); ?>
 
 		<div>
-			<label for="first_name"><?php esc_html_e( 'First Name', 'bbpress' ); ?></label>
+			<label for="first_name"><?php esc_html_e( 'First Name', 'wporg-forums' ); ?></label>
 			<input type="text" name="first_name" id="first_name" value="<?php bbp_displayed_user_field( 'first_name', 'edit' ); ?>" class="regular-text" />
 		</div>
 
 		<div>
-			<label for="last_name"><?php esc_html_e( 'Last Name', 'bbpress' ); ?></label>
+			<label for="last_name"><?php esc_html_e( 'Last Name', 'wporg-forums' ); ?></label>
 			<input type="text" name="last_name" id="last_name" value="<?php bbp_displayed_user_field( 'last_name', 'edit' ); ?>" class="regular-text" />
 		</div>
 
 		<div>
-			<label for="nickname"><?php esc_html_e( 'Nickname', 'bbpress' ); ?></label>
+			<label for="nickname"><?php esc_html_e( 'Nickname', 'wporg-forums' ); ?></label>
 			<input type="text" name="nickname" id="nickname" value="<?php bbp_displayed_user_field( 'nickname', 'edit' ); ?>" class="regular-text" />
 		</div>
 
 		<div>
-			<label for="display_name"><?php esc_html_e( 'Display Name', 'bbpress' ); ?></label>
+			<label for="display_name"><?php esc_html_e( 'Display Name', 'wporg-forums' ); ?></label>
 
 			<?php bbp_edit_user_display_name(); ?>
 
@@ -47,15 +47,15 @@ defined( 'ABSPATH' ) || exit;
 
 	</fieldset>
 
-	<h2 class="entry-title"><?php esc_html_e( 'Contact Info', 'bbpress' ); ?></h2>
+	<h2 class="entry-title"><?php esc_html_e( 'Contact Info', 'wporg-forums' ); ?></h2>
 
 	<fieldset class="bbp-form">
-		<legend><?php esc_html_e( 'Contact Info', 'bbpress' ); ?></legend>
+		<legend><?php esc_html_e( 'Contact Info', 'wporg-forums' ); ?></legend>
 
 		<?php do_action( 'bbp_user_edit_before_contact' ); ?>
 
 		<div>
-			<label for="url"><?php esc_html_e( 'Website', 'bbpress' ); ?></label>
+			<label for="url"><?php esc_html_e( 'Website', 'wporg-forums' ); ?></label>
 			<input type="text" name="url" id="url" value="<?php bbp_displayed_user_field( 'user_url', 'edit' ); ?>" maxlength="200" class="regular-text code" />
 		</div>
 
@@ -73,20 +73,20 @@ defined( 'ABSPATH' ) || exit;
 	</fieldset>
 
 	<h2 class="entry-title"><?php bbp_is_user_home_edit()
-		? esc_html_e( 'About Yourself', 'bbpress' )
-		: esc_html_e( 'About the user', 'bbpress' );
+		? esc_html_e( 'About Yourself', 'wporg-forums' )
+		: esc_html_e( 'About the user', 'wporg-forums' );
 	?></h2>
 
 	<fieldset class="bbp-form">
 		<legend><?php bbp_is_user_home_edit()
-			? esc_html_e( 'About Yourself', 'bbpress' )
-			: esc_html_e( 'About the user', 'bbpress' );
+			? esc_html_e( 'About Yourself', 'wporg-forums' )
+			: esc_html_e( 'About the user', 'wporg-forums' );
 		?></legend>
 
 		<?php do_action( 'bbp_user_edit_before_about' ); ?>
 
 		<div>
-			<label for="description"><?php esc_html_e( 'Biographical Info', 'bbpress' ); ?></label>
+			<label for="description"><?php esc_html_e( 'Biographical Info', 'wporg-forums' ); ?></label>
 			<textarea name="description" id="description" rows="5" cols="30"><?php bbp_displayed_user_field( 'description', 'edit' ); ?></textarea>
 		</div>
 
@@ -94,20 +94,20 @@ defined( 'ABSPATH' ) || exit;
 
 	</fieldset>
 
-	<h2 class="entry-title"><?php esc_html_e( 'Account', 'bbpress' ); ?></h2>
+	<h2 class="entry-title"><?php esc_html_e( 'Account', 'wporg-forums' ); ?></h2>
 
 	<fieldset class="bbp-form">
-		<legend><?php esc_html_e( 'Account', 'bbpress' ); ?></legend>
+		<legend><?php esc_html_e( 'Account', 'wporg-forums' ); ?></legend>
 
 		<?php do_action( 'bbp_user_edit_before_account' ); ?>
 
 		<div>
-			<label for="user_login"><?php esc_html_e( 'Username', 'bbpress' ); ?></label>
+			<label for="user_login"><?php esc_html_e( 'Username', 'wporg-forums' ); ?></label>
 			<input type="text" name="user_login" id="user_login" value="<?php bbp_displayed_user_field( 'user_login', 'edit' ); ?>" maxlength="100" disabled="disabled" class="regular-text" />
 		</div>
 
 		<div>
-			<label for="email"><?php esc_html_e( 'Email', 'bbpress' ); ?></label>
+			<label for="email"><?php esc_html_e( 'Email', 'wporg-forums' ); ?></label>
 			<?php bbp_displayed_user_field( 'user_email', 'edit' ); ?>
 			(<a href="<?php echo get_edit_account_url( bbp_get_displayed_user_id() ); ?>">edit</a>)
 		</div>
@@ -126,7 +126,7 @@ defined( 'ABSPATH' ) || exit;
 		</div>
 
 		<div>
-			<label for="locale"><?php esc_html_e( 'Language', 'bbpress' ); ?></label>
+			<label for="locale"><?php esc_html_e( 'Language', 'wporg-forums' ); ?></label>
 
 			<?php bbp_edit_user_language(); ?>
 		</div>
@@ -136,20 +136,20 @@ defined( 'ABSPATH' ) || exit;
 
 	<?php if ( ! bbp_is_user_home_edit() && current_user_can( 'promote_user', bbp_get_displayed_user_id() ) ) : ?>
 
-		<h2 class="entry-title"><?php esc_html_e( 'User Role', 'bbpress' ); ?></h2>
+		<h2 class="entry-title"><?php esc_html_e( 'User Role', 'wporg-forums' ); ?></h2>
 
 		<fieldset class="bbp-form">
-			<legend><?php esc_html_e( 'User Role', 'bbpress' ); ?></legend>
+			<legend><?php esc_html_e( 'User Role', 'wporg-forums' ); ?></legend>
 
 			<?php do_action( 'bbp_user_edit_before_role' ); ?>
 
 			<?php if ( is_multisite() && is_super_admin() && current_user_can( 'manage_network_options' ) ) : ?>
 
 				<div>
-					<label for="super_admin"><?php esc_html_e( 'Network Role', 'bbpress' ); ?></label>
+					<label for="super_admin"><?php esc_html_e( 'Network Role', 'wporg-forums' ); ?></label>
 					<label>
 						<input class="checkbox" type="checkbox" id="super_admin" name="super_admin"<?php checked( is_super_admin( bbp_get_displayed_user_id() ) ); ?> />
-						<?php esc_html_e( 'Grant this user super admin privileges for the Network.', 'bbpress' ); ?>
+						<?php esc_html_e( 'Grant this user super admin privileges for the Network.', 'wporg-forums' ); ?>
 					</label>
 				</div>
 
@@ -166,7 +166,7 @@ defined( 'ABSPATH' ) || exit;
 	<?php do_action( 'bbp_user_edit_after' ); ?>
 
 	<fieldset class="submit">
-		<legend><?php esc_html_e( 'Save Changes', 'bbpress' ); ?></legend>
+		<legend><?php esc_html_e( 'Save Changes', 'wporg-forums' ); ?></legend>
 		<div>
 			<?php bbp_edit_user_form_fields(); ?>
 
@@ -177,8 +177,8 @@ defined( 'ABSPATH' ) || exit;
 			<input type="hidden" name="email" value="<?php bbp_displayed_user_field( 'user_email', 'edit' ); ?>" />
 
 			<button type="submit" id="bbp_user_edit_submit" name="bbp_user_edit_submit" class="button submit user-submit"><?php bbp_is_user_home_edit()
-				? esc_html_e( 'Update Profile', 'bbpress' )
-				: esc_html_e( 'Update User',    'bbpress' );
+				? esc_html_e( 'Update Profile', 'wporg-forums' )
+				: esc_html_e( 'Update User',    'wporg-forums' );
 			?></button>
 		</div>
 	</fieldset>

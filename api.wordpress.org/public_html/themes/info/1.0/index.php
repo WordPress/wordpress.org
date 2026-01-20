@@ -72,7 +72,7 @@ if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 	$request = isset( $_REQUEST['request'] ) ? (object) wp_unslash( $_REQUEST['request'] ) : '';
 	$format = 'json';
 } else {
-	$post_request = isset( $_POST['request'] ) ? urldecode( wp_unslash( $_POST['request'] ) ) : '';
+	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? urldecode( wp_unslash( $_POST['request'] ) ) : '';
 	if ( $post_request && ( preg_match( '~[;{}][OC]:\+?\d+:~', $post_request ) || 0 !== strpos( $post_request, 'O:8:"stdClass":' ) ) ) {
 		die( 'error' );
 	}

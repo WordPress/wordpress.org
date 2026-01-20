@@ -121,7 +121,18 @@ if ( $deepl_key ) {
 		<td>
 			<select name="default_sort[openai_model]" id="default_sort[openai_model]" style="border:revert;">
 				<?php
-				$openai_models = array( 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini' );
+				$openai_models = array( 'gpt-3.5-turbo', 
+										'gpt-4', 
+										'gpt-4-turbo', 
+										'gpt-4o-mini', 
+										'gpt-4o',
+										'gpt-4.1-nano', 
+										'gpt-4.1-mini', 
+										'gpt-4.1', 
+										'gpt-5-nano', 
+										'gpt-5-mini', 
+										'gpt-5', 
+										'gpt-5.1' );
 				$openai_model = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
 				foreach ( $openai_models as $model ) {
 					echo '<option value="' . esc_attr( $model ) . '"';
@@ -193,7 +204,7 @@ if ( $deepl_key ) {
 		<td><textarea class="openai_custom_prompt" id="default_sort[openai_custom_prompt]" name="default_sort[openai_custom_prompt]" placeholder="Enter your custom prompt for ChatGPT translation suggestions"><?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_custom_prompt', '' ) ); ?></textarea></td>
 	</tr>
 	<tr>
-		<th><label for="default_sort[openai_temperature]"><?php esc_html_e( 'Temperature', 'glotpress' ); ?></label></th>
+		<th><label for="default_sort[openai_temperature]"><?php esc_html_e( 'Temperature (if is available in the model)', 'glotpress' ); ?></label></th>
 		<td><input type="number" min="0" max="2" step=".1" class="openai_temperature" id="default_sort[openai_temperature]" name="default_sort[openai_temperature]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_temperature', 0 ) ); ?>" placeholder="Enter your OpenAI key" /></td>
 	</tr>
 	<tr>

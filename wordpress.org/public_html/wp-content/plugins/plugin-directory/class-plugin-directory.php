@@ -638,7 +638,6 @@ class Plugin_Directory {
 	public function register_widgets() {
 		register_widget( __NAMESPACE__ . '\Widgets\Donate' );
 		register_widget( __NAMESPACE__ . '\Widgets\Meta' );
-		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
 		register_widget( __NAMESPACE__ . '\Widgets\Support' );
 		register_widget( __NAMESPACE__ . '\Widgets\Committers' );
 		register_widget( __NAMESPACE__ . '\Widgets\Contributors' );

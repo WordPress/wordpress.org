@@ -79,7 +79,11 @@ class API_Update_Updater {
 
 		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
-		$meta             = array();
+		$meta             = array(
+			'release_time'    => strtotime( $post->version_date ?: $post->post_modified ),
+			'last_version'    => $post->last_version ?? '',
+			'last_stable_tag' => $post->last_stable_tag ?? '',
+		);
 
 		if ( in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
 			$closed_data = Template::get_close_data( $post );
@@ -90,6 +94,22 @@ class API_Update_Updater {
 					$meta['closed_reason'] = $closed_data['reason'] ?: 'unknown';
 				}
 			}
+		}
+
+		$release = Plugin_Directory::get_release( $post, $version );
+		if (
+			$release &&
+			$release['confirmations_required'] &&
+			$release['confirmations']
+		) {
+			$meta['release_time'] = max( $release['confirmations'] );
+		}
+
+		// Add phased rollout strategy data if needed.
+		if ( $release && ! empty( $release['rollout_strategy'] ) ) {
+			$meta['rollout'] = array(
+				'strategy' => $release['rollout_strategy'],
+			);
 		}
 
 		$data = array(
@@ -136,6 +156,16 @@ class API_Update_Updater {
 					. ":{$locale}";
 				wp_cache_delete( $cache_key, 'plugin_api_info' );
 			}
+		}
+
+		// Sync the latest version to Stats.
+		if ( function_exists( '\WordPressdotorg\Stats\sync_latest_version' ) ) {
+			\WordPressdotorg\Stats\sync_latest_version(
+				'plugin', 
+				array(
+					$plugin_slug => $version
+				)
+			);
 		}
 
 		return true;

@@ -3,7 +3,6 @@ namespace WordPressdotorg\Plugin_Directory\CLI;
 
 use Exception;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
-use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
@@ -517,6 +516,16 @@ class Import {
 
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
+		// If we've got a new version, store the last version in the plugin meta.
+		if ( $version && $version !== $plugin->version ) {
+			update_post_meta( $plugin->ID, 'last_version', wp_slash( $plugin->version ) );
+			update_post_meta( $plugin->ID, 'last_stable_tag', wp_slash( $current_stable_tag ) );
+			update_post_meta( $plugin->ID, 'last_version_date', wp_slash( $plugin->version_date ) );
+
+			// Keep the date of the last version change, this often differs from the last_updated/post_modified dates.
+			update_post_meta( $plugin->ID, 'version_date', wp_slash( current_time( 'mysql' ) ) );
+		}
+
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', wp_slash( $stable_tag ) );
 		update_post_meta( $plugin->ID, 'version',    wp_slash( $version ) );
@@ -526,9 +535,6 @@ class Import {
 		// Ensure that the API gets the updated data
 		API_Update_Updater::update_single_plugin( $plugin->post_name );
 		Plugins_Info_API::flush_plugin_information_cache( $plugin->post_name );
-
-		// Import Tide data
-		Tide_Sync::sync_data( $plugin->post_name );
 
 		/**
 		 * Action that fires after a plugin is imported.
@@ -740,7 +746,7 @@ class Import {
 		}
 
 		if ( ! $svn_info['result'] ) {
-			throw new Exception( 'Could not find stable SVN URL: ' . implode( ' ', reset( $svn_info['errors'] ) ) );
+			throw new Exception( 'Could not find stable SVN URL: ' . ( $svn_info['errors'] ? implode( ' ', reset( $svn_info['errors'] ) ) : 'Unknown error' ) );
 		}
 
 		$last_modified = false;
@@ -750,6 +756,16 @@ class Import {
 
 		$last_committer = $svn_info['result']['Last Changed Author'] ?? '';
 		$last_revision  = $svn_info['result']['Last Changed Rev'] ?? 0;
+
+		/*
+		 * Before we check out the plugin, ensure that it has *files* in the folder.
+		 *
+		 * Some plugins accidentally copy their entire SVN repo into the tagged folder, which
+		 * causes a recursive checkout many multiple gigabytes in size, causing issues for WordPress.org.
+		 */
+		if ( ! wp_list_filter( SVN::ls( $stable_url, true ), [ 'kind' => 'file' ] ) ) {
+			throw new Exception( "Could not create SVN export of {$stable_url}: Path appears not to have any files." );
+		}
 
 		$svn_export = SVN::export(
 			$stable_url,
@@ -765,7 +781,7 @@ class Import {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
-			throw new Exception( 'Could not create SVN export: ' . implode( ' ', reset( $svn_export['errors'] ) ) );
+			throw new Exception( 'Could not create SVN export: ' . ( $svn_export['errors'] ? implode( ' ', reset( $svn_export['errors'] ) ) : 'Unknown error' ) );
 		}
 
 		// The readme may not actually exist, but that's okay.
@@ -915,7 +931,9 @@ class Import {
 				$relative_filename = str_replace( "$base_dir/", '', $filename );
 				$potential_block_directories[] = dirname( $relative_filename );
 				foreach ( $blocks_in_file as $block ) {
-					$blocks[ $block->name ] = $block;
+					if ( ! empty( $block->name ) ) {
+						$blocks[ $block->name ] = $block;
+					}
 
 					$extracted_files = $this->extract_file_paths_from_block_json( $block, dirname( $relative_filename ) );
 					if ( ! empty( $extracted_files ) ) {
@@ -1308,41 +1326,56 @@ class Import {
 				$decoded_file[ 'steps' ] = array_values( array_filter( $decoded_file[ 'steps' ] ) );
 
 				foreach ( $decoded_file[ 'steps' ] as &$step ) {
-					// Normalize a "install plugin from url" to a install-by-slug.
+					// Normalize a "install (plugin|theme) from url" to a install-by-slug.
 					if (
-						'installPlugin' === $step['step'] &&
-						isset( $step['pluginZipFile']['url'] ) &&
-						preg_match( '!^https?://downloads\.wordpress\.org/plugin/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step['pluginZipFile']['url'], $m )
+						'installPlugin' === $step['step'] ||
+						'installTheme' === $step['step']
 					) {
-						$step[ 'pluginZipFile' ] = [
-							'resource' => 'wordpress.org/plugins',
-							'slug'     => $m['slug']
+						$keys = [
+							'pluginZipFile',
+							'pluginData',
+							'themeZipFile',
+							'themeData'
 						];
+						foreach ( $keys as $key ) {
+							if ( preg_match( '!^https?://downloads\.wordpress\.org/[^/]+/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step[ $key ]['url'] ?? '', $m ) ) {
+								unset( $step[ $key ] );
+
+								if ( 'installPlugin' === $step['step'] ) {
+									$step[ 'pluginData' ] = [
+										'resource' => 'wordpress.org/plugins',
+										'slug'     => $m['slug']
+									];
+								} else {
+									$step[ 'themeData' ] = [
+										'resource' => 'wordpress.org/themes',
+										'slug'     => $m['slug']
+									];
+								}
+							}
+						}
 					}
 
-					// Normalize a "install theme from url" to a install-by-slug.
-					if (
-						'installTheme' === $step['step'] &&
-						isset( $step['themeZipFile']['url'] ) &&
-						preg_match( '!^https?://downloads\.wordpress\.org/theme/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step['themeZipFile']['url'], $m )
-					) {
-						$step[ 'themeZipFile' ] = [
-							'resource' => 'wordpress.org/themes',
-							'slug'     => $m['slug']
-						];
+					// Upgrade from pluginZipFile to pluginData by slug where possible.
+					if ( isset( $step['pluginZipFile']['slug'] ) ) {
+						$step['pluginData'] = array(
+							'resource' => 'wordpress.org/plugins',
+							'slug'     => $step['pluginZipFile']['slug'],
+						);
+						unset( $step['pluginZipFile'] );
 					}
 
 					// Check if this is a "install this plugin" step.
 					if (
 						'installPlugin' === $step['step'] &&
-						isset( $step['pluginZipFile']['slug'] ) &&
-						$plugin_slug === $step['pluginZipFile']['slug']
+						isset( $step['pluginData']['slug'] ) &&
+						$plugin_slug === $step['pluginData']['slug']
 					) {
 						$has_self_install_step = true;
 
-						if ( true != $step['options']['activate'] ) {
-							$step[ 'options' ][ 'activate' ] = true;
-						}
+						// Ensure the step activates the plugin.
+						$step['options'] ??= [];
+						$step['options']['activate'] = true;
 					}
 				}
 			}
@@ -1351,7 +1384,7 @@ class Import {
 			if ( ! $has_self_install_step && 'akismet' !== $plugin_slug ) {
 				$decoded_file['steps'][] = array(
 					'step' => 'installPlugin',
-					'pluginZipFile' => array(
+					'pluginData' => array(
 						'resource' => 'wordpress.org/plugins',
 						'slug'     => $plugin_slug,
 					),

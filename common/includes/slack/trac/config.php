@@ -43,12 +43,27 @@ class Core extends Trac {
 		'auth-app'                         => '#core-passwords',
 		'wp-includes/interactivity-api'    => '#core-interactivity-api',
 		'wp-includes/html-api'             => '#core-html-api',
+		'.devcontainer'                    => '#core-build-test-tools',
+		'.github'                          => '#core-build-test-tools',
+		'tools'                            => '#core-build-test-tools',
+		'.prettier.js'                     => '#core-build-test-tools',
+		'.env.example'                     => '#core-build-test-tools',
+		'composer.json'                    => '#core-build-test-tools',
+		'docker-compose.yml'               => '#core-build-test-tools',
+		'Gruntfile.js'                     => '#core-build-test-tools',
+		'webpack.config.js'                => '#core-build-test-tools',
+		'wp-tests-config-sample.php'       => '#core-build-test-tools',
+		'#\.n(v|p)mrc#'                    => '#core-build-test-tools',
+		'#\.version-support-[a-z]+\.json'  => '#core-build-test-tools',
+		'#^package(-lock)?\.json$#'        => '#core-build-test-tools',
+		'#^php[a-z]+\.xml\.dist$#'         => '#core-build-test-tools',
 	);
 
 	/**
 	 * Components or focuses that cause new tickets to be piped to particular channels.
 	 */
 	protected $ticket_component_filters = array(
+		'Build/Test Tools'       => '#core-build-test-tools',
 		'Bundled Theme'          => '#core-themes',
 		'Customize'              => '#core-customize',
 		'Date/Time'              => '#core-datetime',

@@ -65,7 +65,7 @@ body.trac input[type=text],
 body.trac input.textwidget,
 body.trac textarea {
 	font: var(--bbbase-font-input);
-	padding: 8px 10px;
+	padding: var(--bbbase-form-field-input-padding);
 	color: var(--bbbase-darkest-text-color-low-contrast);
 	border: var(--bbbase-wrapper-border);
 }
@@ -102,7 +102,7 @@ body.trac ol {
 }
 
 body.trac .buttons {
-	margin: 30px 0;
+	margin: var(--bbbase-default-gap) 0;
 	text-align: right;
 }
 
@@ -114,7 +114,7 @@ body.trac table.listing thead th {
 	font-size: 14px;
 	background: var(--bbbase-wrapper-background-color);
 	border: none;
-	padding: 8px 10px;
+	padding: var(--bbbase-form-field-input-padding);
 	margin: 0;
 }
 
@@ -122,7 +122,7 @@ body.trac table.listing tbody td {
 	font-size: 14px;
 	background: var(--bbbase-brightest-white);
 	border: none;
-	padding: 8px 10px;
+	padding: var(--bbbase-form-field-input-padding);
 	margin: 0;
 }
 
@@ -380,7 +380,7 @@ body.trac #main {
 }
 
 body.trac #main p {
-	margin: 30px 0;
+	margin: var(--bbbase-default-gap) 0;
 }
 
 body.trac #main .date p {
@@ -410,15 +410,20 @@ body.trac #main > h1 {
 }
 
 /* Notices */
+body.trac #main .wp-caution,
 body.trac #main .wp-notice {
 	margin: 0;
-	padding: 30px;
+	padding: var(--bbbase-default-gap);
+	border-radius: var(--bbbase-border-radius);
+	border: var(--bbbase-wrapper-border);
 }
 
+body.trac #main .wp-caution p:first-child,
 body.trac #main .wp-notice p:first-child {
 	margin-top: 0;
 }
 
+body.trac #main .wp-caution p:last-child,
 body.trac #main .wp-notice p:last-child {
 	margin-bottom: 0;
 }
@@ -432,7 +437,7 @@ body.trac #main .newticket-not-here .security {
 body.trac #main #altlinks {
 	float: none;
 	text-align: center;
-	margin: 30px 0;
+	margin: var(--bbbase-default-gap) 0;
 	max-width: none;
 }
 
@@ -459,7 +464,7 @@ body.trac #ctxtnav:not(:has(a)) {
 
 body.trac #ctxtnav ul {
 	display: flex;
-	gap: 30px;
+	gap: var(--bbbase-default-gap);
 }
 
 body.trac #ctxtnav a,
@@ -515,7 +520,7 @@ body.trac #content {
 }
 
 body.trac #content h1 {
-	margin-bottom: 30px;
+	margin-bottom: var(--bbbase-default-gap);
 }
 
 body.trac #content .milestones {
@@ -537,7 +542,7 @@ body.trac #content.roadmap .milestone .info h2 a {
 body.trac #content.timeline dl {
 	font-size: 16px;
 	line-height: 1.6em;
-	margin: 30px 15px;
+	margin: var(--bbbase-default-gap) 15px;
 }
 
 body.trac #content.timeline dt:before {
@@ -558,7 +563,7 @@ body.trac #content.timeline dt .time {
 body.trac #content.timeline dd {
 	font-size: 14px;
 	margin: 2px 0 15px 95px;
-	min-height: 30px;
+	min-height: var(--bbbase-default-gap);
 }
 
 /* Prefs */
@@ -581,7 +586,7 @@ body.trac #content #prefs {
 	background: var(--bbbase-wrapper-background-color);
 	border-radius: var(--bbbase-border-radius);
 	padding: 20px;
-	margin: 30px 0;
+	margin: var(--bbbase-default-gap) 0;
 	float: none;
 	font-size: 15px;
 	border: var(--bbbase-wrapper-border);
@@ -595,7 +600,7 @@ body.trac #content #prefs select {
 
 body.trac #content #prefs .choice {
 	float: none;
-	margin: 0 0 30px 0;
+	margin: 0 0 var(--bbbase-default-gap) 0;
 	border: none;
 }
 
@@ -656,13 +661,13 @@ body.trac .inlinebuttons input[type=submit] {
 /* Roadmap */
 body.trac div.milestone {
 	margin: 0;
-	padding: 30px;
+	padding: var(--bbbase-default-gap);
 }
 
 body.trac .milestone .info h2 {
 	border: none;
 	background: none;
-	margin: -30px -30px 0 -30px;
+	margin: var(--bbbase-default-gap-negative) var(--bbbase-default-gap-negative) 0 var(--bbbase-default-gap-negative);
 }
 
 body.trac .milestone .info .date,
@@ -718,7 +723,7 @@ body.trac #content.milestone .info {
 }
 
 body.trac #content.milestone .description {
-	margin: 30px 0;
+	margin: var(--bbbase-default-gap) 0;
 	order: 2;
 }
 
@@ -751,7 +756,7 @@ body.trac #stats {
 }
 
 body.trac #stats {
-	margin: 0 0 30px 0;
+	margin: 0 0 var(--bbbase-default-gap) 0;
 	float: none;
 	width: auto;
 	max-width: none
@@ -796,7 +801,7 @@ body.trac .wikipage {
 }
 
 body.trac .wikipage h1 {
-    margin: 0 0 30px 0;
+    margin: 0 0 var(--bbbase-default-gap) 0;
 }
 
 body.trac .wikipage h2 {
@@ -822,7 +827,7 @@ body.trac #pagepath {
 body.trac .wikitoolbar {
 	margin: 0;
 	padding: 10px;
-	height: 30px;
+	height: var(--bbbase-default-gap);
 }
 
 body.trac .wikitoolbar a {
@@ -870,7 +875,7 @@ body.trac #content.report div.reports > div {
 
 body.trac #content.report div.reports > h2 {
     border-bottom: none;
-	margin-top: 30px;
+	margin-top: var(--bbbase-default-gap);
 }
 
 body.trac #content.report h3 {
@@ -888,8 +893,8 @@ body.trac #content.report .inlinebuttons input[type=submit] {
 /* Tickets */
 body.trac div#ticket {
 	border-radius: var(--bbbase-border-radius);
-	margin: 0 0 30px 0;
-	padding: 30px;
+	margin: 0 0 var(--bbbase-default-gap) 0;
+	padding: var(--bbbase-default-gap);
 }
 
 body.trac #ticket > h2 .trac-id {
@@ -905,7 +910,7 @@ body.trac div#ticket .date {
 body.trac h1#trac-ticket-title {
 	font-size: 25px;
 	margin: 0;
-	padding: 30px 0;
+	padding: var(--bbbase-default-gap) 0;
 }
 
 body.trac div#ticket h2 .trac-status a,
@@ -957,7 +962,7 @@ body.trac #ticket div.description h3 {
     color: var(--bbbase-darkest-text-color-low-contrast);
 	font-size: 20px;
 	padding: 25px 0 0 0;
-	margin: -10px 0 30px 0;
+	margin: -10px 0 var(--bbbase-default-gap) 0;
 	font-weight: 600;
 }
 
@@ -966,10 +971,11 @@ body.trac div#attachments,
 body.trac div#github-prs,
 body.trac div#trac-add-comment,
 body.trac div#ticketchange + div {
-	margin-bottom: 30px;
+	margin-bottom: var(--bbbase-default-gap);
 	border: var(--bbbase-wrapper-border);
 	border-radius: var(--bbbase-border-radius);
 	overflow: hidden;
+	box-sizing: border-box;
 }
 
 body.trac div#commits > div.commits,
@@ -1000,15 +1006,15 @@ body.trac #content.ticket h3.foldable a {
 }
 
 body.trac #content.ticket div#github-prs + div.collapsed h3.foldable {
-	margin: 0 0 30px 0;
+	margin: 0 0 var(--bbbase-default-gap) 0;
 }
 
 body.trac #content.ticket div#github-prs + div:not(.collapsed) h3.foldable {
-	margin: 30px 0;
+	margin: var(--bbbase-default-gap) 0;
 }
 
 body.trac #content.ticket #propertyform[action*="/newticket"] fieldset {
-    padding: 30px;
+    padding: var(--bbbase-default-gap);
     border: 1px solid var(--bbbase-grey-border-color-low-contrast);
     background: var(--bbbase-light-background-color-low-contrast);
 }
@@ -1047,7 +1053,7 @@ body.trac #github-prs ul.pull-requests li div:not(:first-child) {
 
 body.trac #github-prs ul.pull-requests li.loading div {
     white-space: initial;
-	padding: 30px;
+	padding: var(--bbbase-default-gap);
 }
 
 body.trac #github-prs ul.pull-requests li > div:first-of-type > a:first-of-type {
@@ -1075,7 +1081,7 @@ body.trac #changelog .changes,
 body.trac #ticketchange .changes,
 body.trac div.change ul.changes {
     margin: 20px 0;
-    padding: 30px;
+    padding: var(--bbbase-default-gap);
     border: 1px solid #009933;
     float: none;
     box-shadow: none;
@@ -1106,11 +1112,11 @@ body.trac div#content.ticket #prefs div {
 }
 
 body.trac #content.ticket #ticketchange {
-	margin: 30px 0;
+	margin: var(--bbbase-default-gap) 0;
 }
 
 body.trac #trac-edit-warning {
-	margin: 30px;
+	margin: var(--bbbase-default-gap);
 }
 
 body.trac #trac-add-comment .ticket-reopen-notice {
@@ -1127,12 +1133,12 @@ body.trac div#ticketchange + div {
 }
 
 body.trac #modify {
-	padding: 30px;
+	padding: var(--bbbase-default-gap);
 }
 
 body.trac #modify fieldset {
-	padding: 30px;
-	margin-bottom: 30px;
+	padding: var(--bbbase-default-gap);
+	margin-bottom: var(--bbbase-default-gap);
 }
 
 body.trac #modify fieldset fieldset {
@@ -1154,7 +1160,7 @@ body.trac #content.browser {
 	display: flex;
 	flex-wrap: wrap;
 	flex-direction: row;
-	gap: 30px;
+	gap: var(--bbbase-default-gap);
 	margin-bottom: 60px;
 }
 
@@ -1379,7 +1385,7 @@ body.trac #content.admin {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-	gap: 30px;
+	gap: var(--bbbase-default-gap);
 	margin-bottom: 60px;
 }
 
@@ -1435,7 +1441,7 @@ body.trac #content.admin #tabs li :visited {
     border: none;
     display: block;
 	border-radius: 0;
-	padding: 8px 10px;
+	padding: var(--bbbase-form-field-input-padding);
 	margin: 0;
 	text-decoration: none;
 }
@@ -1464,7 +1470,7 @@ body.trac #content.admin #tabcontent input {
 	max-width: 400px;
 }
 body.trac #content.admin #tabcontent fieldset {
-	margin-bottom: 30px;
+	margin-bottom: var(--bbbase-default-gap);
 }
 body.trac #content.admin #tabcontent .field td:first-child {
 	width: 210px;
@@ -1478,8 +1484,8 @@ body.trac #notice.system-message,
 body.trac #warning.system-message,
 body.trac .warning.system-message {
     max-width: 880px;
-    padding: 30px;
-    margin: 30px auto -30px;
+    padding: var(--bbbase-default-gap);
+    margin: var(--bbbase-default-gap) auto var(--bbbase-default-gap-negative);
 	font-size: 16px;
     background-color: var(--bbbase-message-background-color);
     border: var(--bbbase-message-border);

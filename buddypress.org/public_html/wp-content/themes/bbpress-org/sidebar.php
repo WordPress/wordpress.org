@@ -1,4 +1,14 @@
 </div>
+
+<?php
+
+// Skip on front & 404
+if ( is_front_page() || is_404() ) :
+	return;
+endif;
+
+?>
+
 <div class="sidebar">
 
 	<?php if ( ( ! is_front_page() && is_bbpress() ) || is_page( 'new-topic' ) ) : ?>
@@ -90,14 +100,6 @@
 			</div>
 
 		<?php endif; ?>
-
-	<?php elseif ( is_front_page() || is_404() ) : ?>
-
-		<div>
-			<h2><?php _e( 'bbPress Complete', 'bbporg' ); ?></h2>
-			<p><a href="https://www.packtpub.com/web-development/bbpress-complete"><img width="225" alt="<?php esc_attr_e( 'bbPress Complete', 'bbporg' ); ?>" src="<?php echo get_stylesheet_directory_uri(); ?>/images/bbpress-packt.jpg"/></a></p>
-			<p class="book-description"><?php _e( 'A step-by-step guide to creating, managing, and growing a community around your WordPress website.', 'bbporg' ); ?></p>
-		</div>
 
 	<?php elseif ( is_page( array( 'plugins', 116247 ) ) ) : ?>
 

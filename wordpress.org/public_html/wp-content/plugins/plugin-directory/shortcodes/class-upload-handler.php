@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
 use WP_Error;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Updates_PCP;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
@@ -359,7 +360,7 @@ class Upload_Handler {
 		if ( $readme_plugin_post && trim( $readme->name ) ) {
 			$error = __( 'README Error: The plugin has already been submitted.', 'wporg-plugins' );
 
-			if ( $readme_plugin_post->post_author != get_current_user_id() ) {
+			if ( reset( $readme_plugin_post )->post_author != get_current_user_id() ) {
 				return new WP_Error( 'already_submitted', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 					__( 'There is already a plugin with the name %1$s in the directory. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
@@ -526,8 +527,8 @@ class Upload_Handler {
 		}
 
 		// Store metadata about the uploaded ZIP.
-		// Count lines of PHP code, this is not 100% accurate but it's a good indicator.
-		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
+		// Count lines of PHP code, this is not 100% accurate but it's a good indicator. Excludes 'vendor', 'vendor-prefixed', and 'vendor_prefixed' directories.
+		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -not -path '*/vendor/*' -not -path '*/vendor*prefixed/*' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
 
 		update_post_meta( $plugin_post->ID, '_submitted_zip_size', filesize( get_attached_file( $attachment->ID ) ) );
 		update_post_meta( $plugin_post->ID, '_submitted_zip_loc', $lines_of_code );
@@ -655,144 +656,32 @@ class Upload_Handler {
 	}
 
 	/**
-	 * Sends a plugin through Plugin Check.
+	 * Checks the uploaded plugin via Plugin Check.
 	 *
 	 * @return array The results of the plugin check.
 	 */
 	public function check_plugin() {
-		// Run the checks.
-		if (
-			! defined( 'WPCLI' ) ||
-			! defined( 'WP_CLI_CONFIG_PATH' ) ||
-			// The plugin must be activated in order to have plugin-check run.
-			! defined( 'WP_PLUGIN_CHECK_VERSION' ) ||
-			// WordPress.org only..
-			! function_exists( 'notify_slack' )
-		) {
-			// If we can't run plugin-check, we'll just return a pass.
-			return [
-				'verdict' => true,
-				'results' => [],
-				'html'    => '',
-			];
-		}
-
-		// Run plugin check via CLI
-		$start_time = microtime(1);
-		$env_vars   = [
-			'PATH'               => $_ENV['PATH'] ?? '/usr/local/bin:/usr/bin:/bin',
-			'WP_CLI_CONFIG_PATH' => WP_CLI_CONFIG_PATH,
+		// If we can't run plugin-check, we'll just return a pass.
+		$default_return = [
+			'verdict' => true,
+			'results' => [],
+			'html'    => '',
 		];
-		$command    = WPCLI . ' --url=https://wordpress.org/plugins ' .
-		              'plugin check ' .
-		              '--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
-		              '--categories=plugin_repo --format=json ' .
-		              '--slug=' . escapeshellarg( $this->plugin_slug ) . ' ' .
-		              escapeshellarg( $this->plugin_root );
 
-		$plugin_check_process = proc_open(
-			$command,
-			[
-				1 => [ 'pipe', 'w' ], // STDOUT
-				2 => [ 'pipe', 'w' ], // STDERR
-			],
-			$pipes,
-			null,
-			$env_vars
-		);
-		if ( ! $plugin_check_process ) {
-			// If we can't run plugin-check, we'll just return a pass.
-			return [
-				'verdict' => true,
-				'results' => [],
-				'html'    => '',
-			];
+		if ( ! function_exists( 'notify_slack' ) ) {
+			return $default_return;
 		}
-		do {
-			usleep( 100000 ); // 0.1s
 
-			$total_time = round( microtime(1) - $start_time, 1 );
-
-			$proc_status = proc_get_status( $plugin_check_process );
-			$return_code = $proc_status['exitcode'] ?? 1;
-
-			if ( $total_time >= 45 && $proc_status['running'] ) {
-				// Terminate it.
-				proc_terminate( $plugin_check_process );
-			}
-		} while ( $proc_status['running'] && $total_time <= 60 ); // 60s max, just in case.
-
-		$output = stream_get_contents( $pipes[1] );
-		$stderr = rtrim( stream_get_contents( $pipes[2] ), "\n" );
-
-		// Remove ABSPATH from the output if present.
-		$output = str_replace( ABSPATH, '/', $output );
-		$output = str_replace( str_replace( '/', '\/', ABSPATH ), '\/', $output ); // JSON encoded
-		$stderr = str_replace( ABSPATH, '/', $stderr );
-
-		// Close the process.
-		fclose( $pipes[1] );
-		fclose( $pipes[2] );
-		proc_close( $plugin_check_process );
-
-		/**
-		 * Anything that plugin-check outputs that we want to discard completely.
-		 */
-		$is_ignored_code = static function( $code ) {
-			$ignored_codes = [
-			];
-
-			return (
-				in_array( $code, $ignored_codes, true ) ||
-				// All the Readme parser warnings are duplicated, we'll exclude those.
-				str_starts_with( $code, 'readme_parser_warnings_' )
-			);
-		};
-
-		/*
-		 * Convert the output into an array.
-		 * Format:
-		 * FILE: example.extension
-		 * [{.....}]
-		 *
-		 * FILE: example2.extension
-		 * [{.....}]
-		 */
-		$verdict         = true;
-		$results         = [];
-		$results_by_type = [];
-		$output          = explode( "\n", $output );
-		foreach ( array_chunk( $output, 3 ) as $file_result ) {
-			if ( ! str_starts_with( $file_result[0], 'FILE:' ) ) {
-				continue;
-			}
-
-			$filename = trim( explode( ':' , $file_result[0], 2 )[1] );
-			$json     = json_decode( $file_result[1], true );
-
-			foreach ( $json as $record ) {
-				$record['file'] = $filename;
-
-				if ( $is_ignored_code( $record['code'] ) ) {
-					continue;
-				}
-
-				$results[] = $record;
-
-				$results_by_type[ $record['type'] ] ??= [];
-				$results_by_type[ $record['type'] ][] = $record;
-
-				// Record submission stats.
-				if ( function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
-					bump_stats_extra( 'plugin-check-' . $record['type'], $record['code'] );
-				}
-
-				// Determine if it failed the checks.
-				if ( $verdict && 'ERROR' === $record['type'] ) {
-					$verdict = false;
-				}
-			}
+		$result = Plugin_Updates_PCP::run_plugin_check( $this->plugin_slug, $this->plugin_root, '' /* should be stable tag */, 'new' );
+		if ( false === $result ) {
+			return $default_return;
 		}
+
+		$verdict         = $result['verdict'];
+		$results         = $result['results'];
+		$results_by_type = $result['results_by_type'];
+		$return_code     = $result['return_code'];
+		$total_time      = $result['total_time'];
 
 		// Generage the HTML for the Plugin Check output.
 		$html = sprintf(
@@ -837,7 +726,7 @@ class Upload_Handler {
 		// If the upload is blocked; log it to slack.
 		if ( ! $verdict ) {
 			// Slack dm the logs.
-			$zip_name = reset( $_FILES )['name'];
+			$zip_name = reset( $_FILES )['name'] ?? '';
 			$failpass = $verdict ? ':white_check_mark: passed' : ':x: failed';
 			if ( $return_code > 1 ) { // TODO: Temporary, as we're always hitting this branch.
 				$failpass = ' :rotating_light: errored: ' . $return_code;
@@ -878,11 +767,11 @@ class Upload_Handler {
 			notify_slack( PLUGIN_CHECK_LOGS_SLACK_CHANNEL, $text, wp_get_current_user(), true );
 		} elseif ( $return_code ) {
 			// Log plugin-check timing out.
-			$zip_name   = reset( $_FILES )['name'];
-			$output     = implode( "\n", $output );
+			$zip_name   = reset( $_FILES )['name'] ?? '';
 			$debug      = '';
-			if ( $output || $stderr ) {
-				$debug = trim( "{$output}\n===\n{$stderr}", "\n=" );
+			if ( $result['output'] || $result['stderr'] ) {
+				$output = is_string( $result['output'] ) ? $result['output'] : implode( "\n", (array) $result['output'] );
+				$debug = trim( "{$output}\n===\n{$result['stderr']}", "\n=" );
 				$debug = "\n```{$debug}```";
 			}
 			$text       = ":rotating_light: Error: {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s{$debug}";
