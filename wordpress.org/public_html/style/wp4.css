@@ -47,6 +47,7 @@ pre {
 
 pre a { font-weight: normal; }
 
+a:link, /* https://wordpress.slack.com/archives/C02QB2JS7/p1768980644711199 */
 a {
 	color: #21759b;
 	text-decoration: none;
@@ -1008,6 +1009,7 @@ input[type=submit]:disabled,
 .button-primary,
 .download-button,
 .button-primary:visited,
+.entry-content a.button-primary:visited, // Twentytwelve, as used on make/chat
 .download-button:visited {
 	background: #0085ba;
 	border-color: #0073aa #006799 #006799;
