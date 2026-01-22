@@ -74,7 +74,7 @@ jobs:
         uses: WordPress/props-bot-action@trunk
         with:
           # Since the commit of truth is done in SVN, this outputs props the way core does them.
-          # If git `Co-authored-by` props are prefered, delete this line.
+          # If git `Co-authored-by` props are preferred, delete this line.
           format: 'svn'
 
       - name: Remove the props-bot label
