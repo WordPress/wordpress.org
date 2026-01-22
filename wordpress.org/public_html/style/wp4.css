@@ -1009,7 +1009,7 @@ input[type=submit]:disabled,
 .button-primary,
 .download-button,
 .button-primary:visited,
-.entry-content a.button-primary:visited, // Twentytwelve, as used on make/chat
+.entry-content a.button-primary:visited, /* Twentytwelve, as used on make/chat */
 .download-button:visited {
 	background: #0085ba;
 	border-color: #0073aa #006799 #006799;
