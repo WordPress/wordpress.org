@@ -991,7 +991,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * Record the last date a user changed their password.
 		 */
 		public function record_last_password_change( $user_id, $old_data, $new_data ) {
-			if ( $old_data->user_pass !== $new_data['user_pass'] ) {
+			if (
+				$old_data->user_pass !== $new_data['user_pass'] &&
+				apply_filters( 'wporg_record_last_password_change', true, $user_id )
+			) {
 				update_user_meta( $user_id, 'last_password_change', gmdate( 'Y-m-d H:i:s' ) );
 			}
 		}
@@ -1005,7 +1008,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// https://core.trac.wordpress.org/ticket/22114#comment:32
 			$old_user_pass = is_object( $old_user_data ) ? $old_user_data->user_pass : ( is_array( $old_user_data ) ? $old_user_data['user_pass'] : '' );
 
-			if ( $old_user_pass !== $user->user_pass ) {
+			if (
+				$old_user_pass !== $user->user_pass &&
+				apply_filters( 'wporg_record_last_password_change', true, $user_id )
+			) {
 				update_user_meta( $user_id, 'last_password_change', gmdate( 'Y-m-d H:i:s' ) );
 			}
 		}
