@@ -42,7 +42,7 @@ class WP_Plugins extends WP_Directory {
 			if ( 'default' != $set->locale_slug ) {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
-			$sub_project = str_replace( "$project_path/", '', $set->path );
+			$sub_project = str_replace( "$project->path/", '', $set->path );
 			$sub_projects[ $sub_project ] = true;
 
 			/*
