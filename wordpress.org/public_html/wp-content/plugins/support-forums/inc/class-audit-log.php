@@ -204,10 +204,11 @@ class Audit_Log {
 				$action_text = 'Note added';
 			}
 
-			$user_edit_url = bbp_get_user_profile_edit_url( $user_id );
-
-			// On login.wordpress.org, the link should direct to the global forums.
-			if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && WPORG_LOGIN_REGISTER_BLOGID == get_current_blog_id() ) {
+			// If we're on a Rosetta network, and bbPress is active, link to the local profile edit page.
+			if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK && function_exists( 'bbp_get_user_profile_edit_url' ) ) {
+				$user_edit_url = bbp_get_user_profile_edit_url( $user_id );
+			} else {
+				// Link to the global WordPress.org profile edit page.
 				$user_edit_url = sprintf( 'https://wordpress.org/support/users/%s/edit/', get_userdata( $user_id )->user_nicename );
 			}
 
