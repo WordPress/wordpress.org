@@ -268,12 +268,21 @@ function the_no_self_management_notice() {
 	// Check if they can access plugin management, but can't add committers.
 	// This means the plugin has limited self-management functionalities, for security.
 	if (
-		current_user_can( 'plugin_admin_edit', $post ) &&
-		! current_user_can( 'plugin_add_committer', $post )
+		(
+			current_user_can( 'plugin_admin_edit', $post ) &&
+			! current_user_can( 'plugin_add_committer', $post )
+		) || (
+			// Show the notice to plugin reviewers when it's limited. See class-capabilities.php.
+			is_object_in_term( $post->ID, 'plugin_section', array( 'beta', 'featured' ) ) &&
+			current_user_can( 'plugin_review' )
+		)
 	) {
 		printf(
 			'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
-			__( 'Management of this plugin has been limited for security reasons. Please contact the plugins team for assistance to add/remove committers, or to perform other actions that are unavailable.', 'wporg-plugins' )
+			sprintf(
+				__( 'Management of this plugin has been limited for security reasons. Please contact the <a href="mailto:%1$s">plugins team (%1$s)</a> for assistance to add/remove committers, or to perform other actions that are unavailable.', 'wporg-plugins' ),
+				'plugins@wordpress.org'
+			)
 		);
 	}
 }
