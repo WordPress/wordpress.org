@@ -386,6 +386,24 @@ class Official_WordPress_Events {
 					}
 				}
 
+				// Correct any WordCamp events that have an invalid location specified.
+				if ( $event['location'] != 'online' && ! str_contains( $event['location'], ',' ) ) {
+					$geocoded_location = implode(
+						',',
+						array_filter(
+							array(
+								$wordcamp['_venue_city'] ?: $event['location'],
+								$wordcamp['_venue_country_name'] ?: $wordcamp['_host_country_name'],
+							)
+						)
+					);
+
+					if ( $geocoded_location ) {
+						$event['location'] = $geocoded_location;
+					}
+				}
+
+				// Ensure end timestamp is never before start timestamp.
 				if ( $event['start_timestamp'] ) {
 					if ( empty( $event['end_timestamp'] ) || $event['end_timestamp'] < $event['start_timestamp'] ) {
 						$event['end_timestamp'] = $event['start_timestamp'];
