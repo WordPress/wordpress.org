@@ -967,6 +967,20 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	}
 
 	/**
+	 * Determines if a photo has EXIF data.
+	 *
+	 * @param array $exif_keys Optional. EXIF keys to check for. An empty array will
+	 *                         check if any EXIF data exists. Default empty array.
+	 * @param int   $post_id   Optional. Post ID. Default null, indicating the current post.
+	 * @return bool True if the photo has EXIF data, else false.
+	 */
+	public static function has_exif( $exif_keys = [], $post_id = null ) {
+		$post_id = $post_id ?: get_the_ID();
+		$exif = self::get_exif( $post_id, $exif_keys );
+		return ! empty( $exif );
+	}
+
+	/**
 	 * Strips markups from text and UTF8 encodes it if it appears to be UTF8.
 	 *
 	 * @param string $text Text to strip of tags and UTF8 encode.
