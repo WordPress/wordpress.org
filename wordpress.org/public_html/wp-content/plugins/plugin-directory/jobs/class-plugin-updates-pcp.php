@@ -339,6 +339,7 @@ class Plugin_Updates_PCP {
 		$command    = 'timeout -k 15s 45s ' . WPCLI . ' --url=https://wordpress.org/plugins ' .
 					'plugin check ' .
 					'--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
+					'--exclude-checks=prefixing ' .
 					'--categories=plugin_repo --format=json ' .
 					// '--mode=' . escapeshellarg( $mode ) . ' ' .
 					'--slug=' . escapeshellarg( $plugin_slug ) . ' ' .
