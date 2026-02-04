@@ -101,6 +101,8 @@ class Official_WordPress_Events {
 	 * be careful to maintain consistency when making any changes to this.
 	 */
 	public function prime_events_cache() {
+		global $wpdb;
+
 		$this->log( 'started call #' . did_action( 'owpe_prime_events_cache' ) );
 
 		if ( did_action( 'owpe_prime_events_cache' ) > 1 ) {
@@ -184,7 +186,7 @@ class Official_WordPress_Events {
 
 		$field_placeholders = implode( ', ', $field_placeholders );
 		$value_placeholders = implode( ', ', $value_placeholders );
-		$duplicate_sets     = implode( ', ', $duplicate_placehodlers );
+		$duplicate_sets     = implode( ', ', $duplicate_sets );
 
 		return $wpdb->query( $wpdb->prepare(
 			"INSERT INTO %i ( {$field_placeholders} ) VALUES ( {$value_placeholders} ) ON DUPLICATE KEY UPDATE {$duplicate_sets}",
