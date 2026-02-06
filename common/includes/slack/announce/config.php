@@ -128,6 +128,7 @@ function get_whitelist() {
 			'James Roberts', // @jamesroberts on Slack
 			'JeffPaul',
 			'JoshuaWold',
+			'juanmaguitar',
 			'justinahinon',
 			'karmatosed',
 			'laurora', // @laura on Slack
