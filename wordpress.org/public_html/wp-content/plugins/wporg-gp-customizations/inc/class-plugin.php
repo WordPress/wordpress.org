@@ -314,6 +314,7 @@ class Plugin {
 			! $translation->id &&
 			! empty( $args['user_id'] ) &&
 			'waiting' === $args['status'] &&
+			! empty( GP::$current_route ) &&
 			GP::$current_route->class_name === 'GP_Route_Translation' &&
 			GP::$current_route->last_method_called === 'translations_post'
 		) {
