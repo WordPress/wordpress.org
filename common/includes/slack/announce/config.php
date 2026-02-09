@@ -306,18 +306,22 @@ function get_whitelist() {
 			'Boniu91', // @Piotrek Boniu on Slack
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
+			'huzaifaalmesbah', // @Huzaifa Al Mesbah on Slack
 			'ironprogrammer',
+			'juanmaguitar', // @JuanMa on Slack
 			'justinahinon',
+			'krupajnanda',
 			'mobarak',
 			'monikarao',
 			'mosescursor', // @Moses Cursor on Slack
 			'nikunj8866',
+			'oglekler',
+			'ozgursar',
+			'psykro', // @Jonathan on Slack
+			'r1k0',
 			'ryan', // @boren on Slack
 			'SirLouen',
 			'webtechpooja', // @Pooja Derashri on Slack
-			'oglekler',
-			'krupajnanda',
-			'psykro', // @Jonathan on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'anlino', // @andersnoren on Slack
