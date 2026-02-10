@@ -20,8 +20,8 @@ def wporg_wiki_to_html(context, wikidom, escape_newlines=None):
 	# Hard limit of 100k characters rendered.
 	wikidom = wikidom[ :100000 ]
 
-	# Hard limit of 500 links per text, do not render.
-	if ( wikidom.count('://') > 500 ):
+	# Hard limit of 1000 links per text, do not render.
+	if ( wikidom.count('://') > 1000 ):
 		return ''
 
 	# Hard limit of 500 dynamic elements per text, do not render.
