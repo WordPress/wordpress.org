@@ -105,9 +105,9 @@ function wporg_handle_authorize_application_login(): void {
 					if ( $success_url ) {
 						$redirect = add_query_arg(
 							array(
-								'site_url'   => urlencode( 'https://wordpress.org' ),
-								'user_login' => urlencode( wp_get_current_user()->user_login ),
-								'password'   => urlencode( $new_password ),
+								'site_url'   => 'https://wordpress.org',
+								'user_login' => wp_get_current_user()->user_login,
+								'password'   => $new_password,
 							),
 							$success_url
 						);
@@ -502,8 +502,8 @@ function wporg_validate_authorize_app_request( array $request, WP_User $user ): 
 						continue;
 					}
 
-					$host = wp_parse_url( $request[ $key ], PHP_URL_HOST );
-					if ( ! $host || ! in_array( $host, $allowed_hosts, true ) ) {
+					$host = strtolower( wp_parse_url( $request[ $key ], PHP_URL_HOST ) );
+					if ( ! $host || ! in_array( $host, array_map( 'strtolower', $allowed_hosts ), true ) ) {
 						$error->add( 'unauthorized_redirect', __( 'The callback URL does not point to an allowed domain.' ) );
 					}
 				}
