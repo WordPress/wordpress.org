@@ -529,6 +529,10 @@ function wporg_validate_authorize_app_request( array $request, WP_User $user ): 
  * @param WP_User $user         The user who authorized the application.
  */
 function wporg_render_mcp_config( string $new_password, array $request, WP_User $user ): void {
+	if ( ( $request['app_id'] ?? '' ) !== 'c4c73a54-96d7-47b9-9bdc-1a66b9b04505' ) {
+		return;
+	}
+
 	$mcp_config = array(
 		'mcpServers' => array(
 			'wporg-mcp-server' => array(
