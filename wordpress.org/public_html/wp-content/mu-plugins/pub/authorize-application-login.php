@@ -6,6 +6,11 @@
 
 declare( strict_types = 1 );
 
+// Only load on login.wordpress.org.
+if ( get_current_blog_id() !== 350 ) {
+	return;
+}
+
 /**
  * Returns the registered applications, their names, and allowed callback domains.
  *
