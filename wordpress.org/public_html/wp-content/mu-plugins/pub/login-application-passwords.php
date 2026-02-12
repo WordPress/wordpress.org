@@ -7,7 +7,8 @@
 declare( strict_types = 1 );
 
 // Only load on login.wordpress.org.
-if ( get_current_blog_id() !== 350 ) {
+// Limit to the login site on WordPress.org. Intentionally available to all sites in local environments.
+if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && get_current_blog_id() !== WPORG_LOGIN_REGISTER_BLOGID ) {
 	return;
 }
 
@@ -65,7 +66,7 @@ function wporg_handle_authorize_application_login(): void {
 		// Re-validate POST values (don't trust hidden form fields).
 		$user         = wp_get_current_user();
 		$allowed_apps = wporg_get_allowed_apps();
-		$app_name     = isset( $allowed_apps[ $app_id ] ) ? $allowed_apps[ $app_id ]['name'] : '';
+		$app_name     = $allowed_apps[ $app_id ]['name'] ?? '';
 		$request      = compact( 'app_name', 'app_id', 'success_url', 'reject_url' );
 
 		$is_valid = wporg_validate_authorize_app_request( $request, $user );
@@ -142,7 +143,7 @@ function wporg_handle_authorize_application_login(): void {
 
 	$user         = wp_get_current_user();
 	$allowed_apps = wporg_get_allowed_apps();
-	$app_name     = isset( $allowed_apps[ $app_id ] ) ? $allowed_apps[ $app_id ]['name'] : '';
+	$app_name     = $allowed_apps[ $app_id ]['name'] ?? '';
 	$request      = compact( 'app_name', 'app_id', 'success_url', 'reject_url' );
 
 	$is_valid = wporg_validate_authorize_app_request( $request, $user );
