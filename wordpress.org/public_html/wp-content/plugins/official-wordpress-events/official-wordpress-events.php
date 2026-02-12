@@ -145,7 +145,7 @@ class Official_WordPress_Events {
 			);
 
 			$this->insert_on_duplicate_key_update(
-				$wpdb->prefix . self::EVENTS_TABLE,
+				self::EVENTS_TABLE,
 				$row_values,
 				array_diff( array_keys( $row_values ), $keys_not_to_update )
 			);
