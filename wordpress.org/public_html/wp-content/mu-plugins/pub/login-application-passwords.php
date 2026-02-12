@@ -6,7 +6,6 @@
 
 declare( strict_types = 1 );
 
-// Only load on login.wordpress.org.
 // Limit to the login site on WordPress.org. Intentionally available to all sites in local environments.
 if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && get_current_blog_id() !== WPORG_LOGIN_REGISTER_BLOGID ) {
 	return;
@@ -111,9 +110,9 @@ function wporg_handle_authorize_application_login(): void {
 					if ( $success_url ) {
 						$redirect = add_query_arg(
 							array(
-								'site_url'   => 'https://wordpress.org',
-								'user_login' => wp_get_current_user()->user_login,
-								'password'   => $new_password,
+								'site_url'   => urlencode( 'https://wordpress.org' ),
+								'user_login' => urlencode( wp_get_current_user()->user_login ),
+								'password'   => urlencode( $new_password ),
 							),
 							$success_url
 						);
@@ -315,7 +314,7 @@ function wporg_authorize_application_login_message( WP_Error $errors, string $re
 
 	$allowed_apps = wporg_get_allowed_apps();
 	$app_id       = $query['app_id'] ?? '';
-	$app_name     = isset( $allowed_apps[ $app_id ] ) ? $allowed_apps[ $app_id ]['name'] : '';
+	$app_name     = $allowed_apps[ $app_id ]['name'] ?? '';
 
 	if ( $app_name ) {
 		/* translators: 1: Website name, 2: Application name. */
