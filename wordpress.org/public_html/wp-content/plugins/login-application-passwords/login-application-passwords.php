@@ -12,10 +12,8 @@
 
 declare( strict_types = 1 );
 
-// Limit to the login site on WordPress.org. Intentionally available to all sites in local environments.
-if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && get_current_blog_id() !== WPORG_LOGIN_REGISTER_BLOGID ) {
-	return;
-}
+require_once __DIR__ . '/clients/mcp/class-mcp-authorization.php';
+add_action( 'login_init', array( MCP_Authorization::class, 'init' ) );
 
 /**
  * Returns the registered applications, their names, and allowed callback domains.
@@ -404,7 +402,7 @@ function wporg_authorize_application_login_message( WP_Error $errors, string $re
 add_filter( 'wp_login_errors', 'wporg_authorize_application_login_message', 10, 2 );
 
 /**
- * Outputs custom CSS for the authorize_application action on the login page.
+ * Enqueues the authorize_application stylesheet on the login page.
  */
 function wporg_authorize_application_login_styles(): void {
 	global $action;
@@ -413,63 +411,12 @@ function wporg_authorize_application_login_styles(): void {
 		return;
 	}
 
-	?>
-	<style>
-		.login-action-authorize_application #login {
-			width: 420px;
-			max-width: 90vw;
-		}
-
-		.login-action-authorize_application h2 {
-			margin-bottom: 1em;
-		}
-
-		.login form p.authorize-application-details {
-			color: #50575e;
-			font-size: 14px;
-			line-height: 1.6;
-			margin: 0;
-		}
-
-		.login .authorize-application-submit {
-			display: flex;
-			gap: 12px;
-			margin: 2em 0 0 !important;
-			padding: 0;
-		}
-
-		.login .authorize-application-submit.submit .button {
-			flex: 1;
-			text-align: center;
-			padding: 6px 0;
-		}
-
-		.login p.description {
-			margin-top: 1.5em;
-			padding-top: 1.5em;
-			border-top: 1px solid #f0f0f1;
-			font-size: 12px;
-			color: #787c82;
-			overflow-wrap: break-word;
-			line-height: 1.6;
-		}
-
-		.login p.description code {
-			font-size: 11px;
-			background: #f6f7f7;
-			padding: 2px 5px;
-			border-radius: 2px;
-		}
-
-		.login .authorize-application-password-display .input {
-			font-family: Consolas, Monaco, monospace;
-			text-align: center;
-			letter-spacing: 1px;
-			width: 100%;
-		}
-
-	</style>
-	<?php
+	wp_enqueue_style(
+		'login-authorize-application',
+		plugins_url( 'css/authorize-application.css', __FILE__ ),
+		array(),
+		filemtime( __DIR__ . '/css/authorize-application.css' )
+	);
 }
 add_action( 'login_enqueue_scripts', 'wporg_authorize_application_login_styles' );
 
