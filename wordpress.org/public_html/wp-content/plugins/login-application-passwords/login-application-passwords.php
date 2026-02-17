@@ -6,6 +6,8 @@
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/
  * License:     GPLv2 or later
+ *
+ * @package login-application-passwords
  */
 
 declare( strict_types = 1 );
@@ -25,12 +27,64 @@ if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && get_current_blog_id() !== WPORG
  * @return array<string, array{name: string, hosts: string[]}> Map of app_id UUID => app config.
  */
 function wporg_get_allowed_apps(): array {
-	return array(
-		'c4c73a54-96d7-47b9-9bdc-1a66b9b04505' => array(
-			'name'  => 'WordPress.org MCP',
-			'hosts' => array(),
-		),
-	);
+	/**
+	 * Filters the registered applications allowed to use the application password authorization flow.
+	 *
+	 * Each entry must be keyed by a valid UUID (the app_id) and contain an array
+	 * with 'name' (non-empty string) and optionally 'hosts' (array of allowed
+	 * callback domains). If 'hosts' is omitted, it defaults to an empty array,
+	 * meaning the app does not support callback URLs.
+	 *
+	 * Example:
+	 *
+	 *     add_filter( 'wporg_login_application_passwords_allowed_apps', function ( $apps ) {
+	 *         $apps['c4c73a54-96d7-47b9-9bdc-1a66b9b04505'] = array(
+	 *             'name'  => 'My Application',
+	 *             'hosts' => array( 'example.com' ),
+	 *         );
+	 *         return $apps;
+	 *     } );
+	 *
+	 * @param array<string, array{name: string, hosts?: string[]}> $apps Map of app_id UUID => app config.
+	 */
+	$apps = apply_filters( 'wporg_login_application_passwords_allowed_apps', array() );
+
+	$validated = array();
+
+	foreach ( $apps as $app_id => $config ) {
+		$config = wp_parse_args( $config, array( 'hosts' => array() ) );
+
+		if ( ! wp_is_uuid( $app_id ) ) {
+			_doing_it_wrong(
+				__FUNCTION__,
+				sprintf( 'App ID must be a valid UUID. Got: %s', esc_html( $app_id ) ),
+				'1.0.0'
+			);
+			continue;
+		}
+
+		if ( ! is_array( $config ) || empty( $config['name'] ) || ! is_string( $config['name'] ) ) {
+			_doing_it_wrong(
+				__FUNCTION__,
+				sprintf( 'App "%s" must have a non-empty "name" string.', esc_html( $app_id ) ),
+				'1.0.0'
+			);
+			continue;
+		}
+
+		if ( ! is_array( $config['hosts'] ) ) {
+			_doing_it_wrong(
+				__FUNCTION__,
+				sprintf( 'App "%s" "hosts" must be an array.', esc_html( $app_id ) ),
+				'1.0.0'
+			);
+			continue;
+		}
+
+		$validated[ $app_id ] = $config;
+	}
+
+	return $validated;
 }
 
 /**
@@ -56,14 +110,15 @@ function wporg_handle_authorize_application_login(): void {
 	$new_password = '';
 
 	// Handle form submission.
-	if ( 'POST' === $_SERVER['REQUEST_METHOD']
+	if ( isset( $_SERVER['REQUEST_METHOD'] )
+		&& 'POST' === $_SERVER['REQUEST_METHOD']
 		&& isset( $_POST['wp_action'] ) && 'authorize_application_password' === $_POST['wp_action']
 	) {
 		check_admin_referer( 'authorize_application_password' );
 
-		$app_id      = sanitize_text_field( wp_unslash( $_POST['app_id'] ) );
-		$success_url = sanitize_url( wp_unslash( $_POST['success_url'] ) );
-		$reject_url  = sanitize_url( wp_unslash( $_POST['reject_url'] ) );
+		$app_id      = sanitize_text_field( wp_unslash( $_POST['app_id'] ?? '' ) );
+		$success_url = sanitize_url( wp_unslash( $_POST['success_url'] ?? '' ) );
+		$reject_url  = sanitize_url( wp_unslash( $_POST['reject_url'] ?? '' ) );
 		$redirect    = '';
 
 		// Re-validate POST values (don't trust hidden form fields).
@@ -75,13 +130,13 @@ function wporg_handle_authorize_application_login(): void {
 		$is_valid = wporg_validate_authorize_app_request( $request, $user );
 		if ( is_wp_error( $is_valid ) ) {
 			wp_die(
-				implode( ' ', $is_valid->get_error_messages() ),
-				__( 'Cannot Authorize Application' )
+				wp_kses_post( implode( ' ', $is_valid->get_error_messages() ) ),
+				esc_html__( 'Cannot Authorize Application' )
 			);
 		}
 
 		if ( isset( $_POST['reject'] ) ) {
-			$redirect = $reject_url ?: admin_url();
+			$redirect = $reject_url ?: admin_url(); // phpcs:ignore Universal.Operators.DisallowShortTernary
 		} elseif ( isset( $_POST['approve'] ) ) {
 			// Revoke any existing password for this app_id.
 			if ( $app_id ) {
@@ -114,9 +169,9 @@ function wporg_handle_authorize_application_login(): void {
 					if ( $success_url ) {
 						$redirect = add_query_arg(
 							array(
-								'site_url'   => urlencode( 'https://wordpress.org' ),
-								'user_login' => urlencode( wp_get_current_user()->user_login ),
-								'password'   => urlencode( $new_password ),
+								'site_url'   => rawurlencode( 'https://wordpress.org' ),
+								'user_login' => rawurlencode( wp_get_current_user()->user_login ),
+								'password'   => rawurlencode( $new_password ),
 							),
 							$success_url
 						);
@@ -126,15 +181,22 @@ function wporg_handle_authorize_application_login(): void {
 		}
 
 		if ( $redirect ) {
-			// Explicitly not using wp_safe_redirect b/c sends to arbitrary domain.
-			wp_redirect( $redirect );
+			$allowed_hosts = $allowed_apps[ $app_id ]['hosts'] ?? array();
+			add_filter(
+				'allowed_redirect_hosts',
+				function ( $hosts ) use ( $allowed_hosts ) {
+					return array_merge( $hosts, $allowed_hosts );
+				}
+			);
+
+			wp_safe_redirect( $redirect );
 			exit;
 		}
 	}
 
 	// Extract and validate request parameters.
 	$app_id      = sanitize_text_field( wp_unslash( $_REQUEST['app_id'] ?? '' ) );
-	$success_url = sanitize_url( wp_unslash( $_REQUEST['success_url'] ?? '' ) ) ?: null;
+	$success_url = sanitize_url( wp_unslash( $_REQUEST['success_url'] ?? '' ) ) ?: null; // phpcs:ignore Universal.Operators.DisallowShortTernary
 
 	if ( ! empty( $_REQUEST['reject_url'] ) ) {
 		$reject_url = sanitize_url( wp_unslash( $_REQUEST['reject_url'] ) );
@@ -152,8 +214,8 @@ function wporg_handle_authorize_application_login(): void {
 	$is_valid = wporg_validate_authorize_app_request( $request, $user );
 	if ( is_wp_error( $is_valid ) ) {
 		wp_die(
-			implode( ' ', $is_valid->get_error_messages() ),
-			__( 'Cannot Authorize Application' )
+			wp_kses_post( implode( ' ', $is_valid->get_error_messages() ) ),
+			esc_html__( 'Cannot Authorize Application' )
 		);
 	}
 
@@ -165,12 +227,12 @@ function wporg_handle_authorize_application_login(): void {
 		}
 
 		wp_die(
-			$message,
-			__( 'Cannot Authorize Application' ),
+			esc_html( $message ),
+			esc_html__( 'Cannot Authorize Application' ),
 			array(
 				'response'  => 501,
-				'link_text' => __( 'Go Back' ),
-				'link_url'  => $reject_url ? add_query_arg( 'error', 'disabled', $reject_url ) : admin_url(),
+				'link_text' => esc_html__( 'Go Back' ),
+				'link_url'  => esc_url( $reject_url ? add_query_arg( 'error', 'disabled', $reject_url ) : admin_url() ),
 			)
 		);
 	}
@@ -209,27 +271,27 @@ function wporg_handle_authorize_application_login(): void {
 					</label>
 				</p>
 				<input id="new-application-password-value" type="text" class="input" readonly="readonly" value="<?php echo esc_attr( WP_Application_Passwords::chunk_password( $new_password ) ); ?>" />
-				<p class="description"><?php _e( 'Be sure to save this in a safe location. You will not be able to retrieve it.' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Be sure to save this in a safe location. You will not be able to retrieve it.' ); ?></p>
 			</div>
 			<?php
 			/** This action is documented in wp-admin/authorize-application.php */
 			do_action( 'wp_authorize_application_password_form_approved_no_js', $new_password, $request, $user );
 			?>
 		<?php else : ?>
-			<h2 class="authorize-application-heading"><?php _e( 'Authorize Application' ); ?></h2>
+			<h2 class="authorize-application-heading"><?php esc_html_e( 'Authorize Application' ); ?></h2>
 
 			<?php if ( $app_name ) : ?>
 				<p class="authorize-application-details">
 					<?php
 					printf(
 						/* translators: %s: Application name. */
-						__( '%s would like to connect to your account. Only approve this if you trust this application.' ),
+						esc_html__( '%s would like to connect to your account. Only approve this if you trust this application.' ),
 						'<strong>' . esc_html( $app_name ) . '</strong>'
 					);
 					?>
 				</p>
 			<?php else : ?>
-				<p class="authorize-application-details"><?php _e( 'An application would like to connect to your account. Only approve this if you trust this application.' ); ?></p>
+				<p class="authorize-application-details"><?php esc_html_e( 'An application would like to connect to your account. Only approve this if you trust this application.' ); ?></p>
 			<?php endif; ?>
 
 			<?php
@@ -257,7 +319,7 @@ function wporg_handle_authorize_application_login(): void {
 							);
 						}
 
-						printf( $message, admin_url( 'my-sites.php' ), number_format_i18n( $blogs_count ) );
+						printf( wp_kses_post( $message ), esc_url( admin_url( 'my-sites.php' ) ), esc_html( number_format_i18n( $blogs_count ) ) );
 						?>
 					</p>
 					<?php
@@ -279,11 +341,11 @@ function wporg_handle_authorize_application_login(): void {
 					$host = wp_parse_url( $success_url, PHP_URL_HOST );
 					printf(
 						/* translators: %s: The host the user is being redirected to. */
-						__( 'You will be redirected to %s.' ),
+						esc_html__( 'You will be redirected to %s.' ),
 						'<strong>' . esc_html( $host ) . '</strong>'
 					);
 				} else {
-					_e( 'You will be given a password to manually enter into the application in question.' );
+					esc_html_e( 'You will be given a password to manually enter into the application in question.' );
 				}
 				?>
 			</p>
@@ -321,16 +383,16 @@ function wporg_authorize_application_login_message( WP_Error $errors, string $re
 	$app_name     = $allowed_apps[ $app_id ]['name'] ?? '';
 
 	if ( $app_name ) {
-		/* translators: 1: Website name, 2: Application name. */
 		$message = sprintf(
-			__( 'Please log in to %1$s to authorize %2$s to connect to your account.' ),
+			/* translators: 1: Website name, 2: Application name. */
+			esc_html__( 'Please log in to %1$s to authorize %2$s to connect to your account.' ),
 			get_bloginfo( 'name', 'display' ),
 			'<strong>' . esc_html( $app_name ) . '</strong>'
 		);
 	} else {
-		/* translators: %s: Website name. */
 		$message = sprintf(
-			__( 'Please log in to %s to proceed with authorization.' ),
+			/* translators: %s: Website name. */
+			esc_html__( 'Please log in to %s to proceed with authorization.' ),
 			get_bloginfo( 'name', 'display' )
 		);
 	}
@@ -356,10 +418,6 @@ function wporg_authorize_application_login_styles(): void {
 		.login-action-authorize_application #login {
 			width: 420px;
 			max-width: 90vw;
-		}
-
-		.login-action-authorize_application #login:has(.mcp-config-display) {
-			width: 540px;
 		}
 
 		.login-action-authorize_application h2 {
@@ -410,47 +468,6 @@ function wporg_authorize_application_login_styles(): void {
 			width: 100%;
 		}
 
-		form:has(.mcp-config-display) .authorize-application-password-display {
-			display: none;
-		}
-
-		.login .mcp-config-display textarea {
-			font-family: Consolas, Monaco, monospace;
-			font-size: 12px;
-			line-height: 1.5;
-			width: 100%;
-			background: #f6f7f7;
-			border: 1px solid #dcdcde;
-			border-radius: 4px;
-			resize: none;
-			padding: 12px;
-			margin-top: 1em;
-			box-sizing: border-box;
-		}
-
-		.login .mcp-config-display #copy-mcp-config {
-			float: none;
-			width: 100%;
-			text-align: center;
-			margin-top: 12px;
-			padding: 6px 0;
-		}
-
-		.login .mcp-config-display .client-notes {
-			margin: 1.5em 0 0;
-			padding: 0;
-			list-style: none;
-			font-size: 12px;
-			color: #50575e;
-			line-height: 1.8;
-		}
-
-		.login .mcp-config-display .client-notes code {
-			font-size: 11px;
-			background: #f6f7f7;
-			padding: 2px 5px;
-			border-radius: 2px;
-		}
 	</style>
 	<?php
 }
@@ -467,7 +484,7 @@ add_action( 'login_enqueue_scripts', 'wporg_authorize_application_login_styles' 
  *
  * @return true|WP_Error True if valid, WP_Error otherwise.
  */
-function wporg_validate_authorize_app_request( array $request, WP_User $user ): true|WP_Error {
+function wporg_validate_authorize_app_request( array $request, WP_User $user ): bool|WP_Error {
 	$error = new WP_Error();
 
 	// Validate redirect URLs.
@@ -530,72 +547,3 @@ function wporg_validate_authorize_app_request( array $request, WP_User $user ): 
 	return true;
 }
 
-/**
- * Renders the MCP client configuration after application password creation.
- *
- * @param string  $new_password The newly created application password.
- * @param array   $request      The request data.
- * @param WP_User $user         The user who authorized the application.
- */
-function wporg_render_mcp_config( string $new_password, array $request, WP_User $user ): void {
-	if ( ( $request['app_id'] ?? '' ) !== 'c4c73a54-96d7-47b9-9bdc-1a66b9b04505' ) {
-		return;
-	}
-
-	$mcp_config = array(
-		'mcpServers' => array(
-			'wporg-mcp-server' => array(
-				'command' => 'npx',
-				'args'    => array( '-y', '@automattic/mcp-wordpress-remote@latest' ),
-				'env'     => array(
-					'WP_API_URL'      => rest_url( 'mcp/wporg' ),
-					'WP_API_USERNAME' => $user->user_login,
-					'WP_API_PASSWORD' => WP_Application_Passwords::chunk_password( $new_password ),
-				),
-			),
-		),
-	);
-	$json = wp_json_encode( $mcp_config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-	$json = str_replace( '    ', '  ', $json ); // Use 2-space indentation instead of PHP's default 4-space.
-
-	?>
-	<div class="mcp-config-display">
-		<h2><?php esc_html_e( 'Set Up Your MCP Client' ); ?></h2>
-		<label for="mcp-config" class="authorize-application-details">
-			<?php esc_html_e( 'Copy the configuration below and add it to your MCP client.' ); ?>
-		</label>
-		<textarea id="mcp-config" readonly rows="14"><?php echo esc_textarea( $json ); ?></textarea>
-		<button type="button" class="button button-primary button-large" id="copy-mcp-config"><?php esc_html_e( 'Copy' ); ?></button>
-		<ul class="client-notes">
-			<li><strong>Claude Desktop</strong> &mdash; <?php esc_html_e( 'Settings &rarr; Developer &rarr; Edit Config.' ); ?></li>
-			<li><strong>Claude Code</strong> &mdash; <?php
-				/* translators: %s: file name */
-				printf( esc_html__( 'Add to %s in your project directory.' ), '<code>.mcp.json</code>' );
-			?></li>
-			<li><strong>Cursor</strong> &mdash; <?php esc_html_e( 'Settings &rarr; Tools and MCP &rarr; Add Custom MCP.' ); ?></li>
-			<li><strong>VS Code</strong> &mdash; <?php
-				printf(
-					/* translators: 1: file path, 2: old key, 3: new key */
-					esc_html__( 'Save as %1$s &mdash; use %2$s instead of %3$s.' ),
-					'<code>.vscode/mcp.json</code>',
-					'<code>servers</code>',
-					'<code>mcpServers</code>'
-				);
-			?></li>
-		</ul>
-	</div>
-	<script>
-	document.getElementById( 'copy-mcp-config' ).addEventListener( 'click', function() {
-		const textarea = document.getElementById( 'mcp-config' );
-		navigator.clipboard.writeText( textarea.value ).then( function() {
-			const btn = document.getElementById( 'copy-mcp-config' );
-			btn.textContent = '<?php echo esc_js( esc_html__( 'Copied!' ) ); ?>';
-			setTimeout( function() {
-				btn.textContent = '<?php echo esc_js( esc_html__( 'Copy' ) ); ?>';
-			}, 2000 );
-		} );
-	} );
-	</script>
-	<?php
-}
-add_action( 'wp_authorize_application_password_form_approved_no_js', 'wporg_render_mcp_config', 10, 3 );
