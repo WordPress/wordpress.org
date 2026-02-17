@@ -5,6 +5,9 @@
  * Registers the WordPress.org MCP server as an allowed application and
  * renders the client configuration after password creation.
  *
+ * Authorization link:
+ * https://login.wordpress.org/wp-login.php?action=authorize_application&app_id=c4c73a54-96d7-47b9-9bdc-1a66b9b04505
+ *
  * @package login-application-passwords
  */
 
