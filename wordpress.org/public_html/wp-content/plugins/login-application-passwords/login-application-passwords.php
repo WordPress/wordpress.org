@@ -1,7 +1,11 @@
 <?php
 /**
- * Plugin Name: Application Password Authorization on Login
+ * Plugin Name: Login Application Passwords
  * Description: Provides the application password authorization flow on wp-login.php.
+ * Version:     1.0.0
+ * Author:      WordPress.org
+ * Author URI:  https://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 declare( strict_types = 1 );
