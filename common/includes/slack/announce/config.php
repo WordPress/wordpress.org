@@ -408,6 +408,7 @@ function get_whitelist() {
 			'kirasong',
 			'jadonn',
 			'JavierCasares',
+			'jazzs3quence',
 			'jessibelle',
 			'amykamala', // @amy kamala on Slack
 			'brechtryckaert',
