@@ -3,7 +3,8 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Helpscout, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
