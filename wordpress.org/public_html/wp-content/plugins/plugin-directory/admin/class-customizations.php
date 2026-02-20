@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin;
 use \WordPressdotorg\Plugin_Directory;
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Tools\SVN;
+use \WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
@@ -742,7 +743,7 @@ class Customizations {
 		add_meta_box(
 			'emailsdiv',
 			__( 'Emails', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Helpscout', 'display' ),
+			array( Helpscout::class, 'admin_metabox_display' ),
 			'plugin', 'normal', 'high'
 		);
 

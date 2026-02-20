@@ -9,9 +9,10 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Trademarks;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
-use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
+use WordPressdotorg\Plugin_Directory\Clients\Helpscout as Helpscout_Client;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submission_Email;
 
 /**
@@ -872,7 +873,7 @@ class Upload_Handler {
 			return false;
 		}
 
-		return Tools::get_helpscout_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+		return Helpscout::get_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
 	}
 
 	/**
@@ -920,7 +921,7 @@ class Upload_Handler {
 			'status' => 'active',
 		];
 
-		$result = HelpScout::api(
+		$result = Helpscout_Client::api(
 			'/v2/conversations/' . $review_email->id . '/reply',
 			$payload,
 			'POST',

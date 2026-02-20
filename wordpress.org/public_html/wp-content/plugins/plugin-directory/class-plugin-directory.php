@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Helpscout, Stats_Report, Upload_Token };
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
@@ -52,6 +52,7 @@ class Plugin_Directory {
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
 		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
 		add_filter( 'wp_get_attachment_url', array( $this, 'add_info_to_zip_url' ), 100, 2 );
+		add_action( 'post_updated', [ Helpscout::class, 'post_updated' ], 10, 3 );
 
 		add_filter( 'wp_resource_hints', array( $this, 'wp_resource_hints' ), 10, 2 );
 
