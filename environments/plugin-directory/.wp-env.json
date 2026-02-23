@@ -1,0 +1,31 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.1",
+	"testsEnvironment": false,
+	"plugins": [
+		"../../wordpress.org/public_html/wp-content/plugins/plugin-directory",
+		"https://downloads.wordpress.org/plugin/plugin-check.zip",
+		"https://downloads.wordpress.org/plugin/jetpack.zip",
+		"https://downloads.wordpress.org/plugin/glotpress.zip"
+	],
+	"themes": [
+		"../../wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024",
+		"WordPress/wporg-parent-2021#build"
+	],
+	"mappings": {
+		"wp-content/mu-plugins": "../../wordpress.org/public_html/wp-content/mu-plugins/pub",
+		"wp-content/mu-plugins/wporg-ratings-mock.php": "../mocks/wporg-ratings.php",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
+		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "../mocks/wporg-mu-plugins-loader.php",
+		"wp-content/mu-plugins/wporg-query-filter.php": "../mocks/wporg-query-filter.php",
+		"wp-content/env-bin": "./bin"
+	},
+	"lifecycleScripts": {
+		"afterStart": "npx wp-env run cli wp eval-file wp-content/env-bin/import-plugins.php"
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/plugins/glotpress/locales/locales.php",
+		"PLUGINS_TABLE_PREFIX": "wp_"
+	}
+}

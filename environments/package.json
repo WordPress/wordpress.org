@@ -1,0 +1,11 @@
+{
+	"name": "wporg-environments",
+	"private": true,
+	"description": "Local development environments for WordPress.org",
+	"engines": {
+		"node": ">=20"
+	},
+	"devDependencies": {
+		"@wordpress/env": "^11"
+	}
+}
