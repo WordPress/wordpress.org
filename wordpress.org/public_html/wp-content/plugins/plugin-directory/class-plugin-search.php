@@ -69,6 +69,9 @@ class Plugin_Search {
 
 		if ( class_exists( '\Automattic\Jetpack\Search\Classic_Search' ) ) {
 			\Automattic\Jetpack\Search\Classic_Search::instance();
+		} elseif ( class_exists( 'Jetpack_Search' ) ) {
+			// Old(er) Jetpack, load the classic search module.
+			\Jetpack_Search::instance()->setup();
 		}
 
 		if ( 'production' !== wp_get_environment_type() ) {
