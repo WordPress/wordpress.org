@@ -5,16 +5,26 @@
 libxml_use_internal_errors( true );
 
 function fetch_url( $url ) {
+	global $http_response_header;
+
 	$context = stream_context_create( [
 		'http' => [
-			'header' => 'User-Agent: WordPRess.org Trac Template Updater',
+			'header' => 'User-Agent: WordPress.org Trac Template Updater',
 		]
 	] );
 
 	// Don't use the CDN here, just in case.
 	$url = str_replace( '/s.w.org/', '/wordpress.org/', $url );
 
-	return file_get_contents( $url, false, $context );
+	$result = file_get_contents( $url, false, $context );
+
+	if ( str_contains( $http_response_header[0], '429' ) ) {
+		echo "\tHit a rate limit, pausing.. retry.. \n";
+		sleep( 5 );
+		return fetch_url( $url );
+	}
+
+	return $result;
 }
 
 function domdocument_from_url( $url ) {
@@ -97,7 +107,7 @@ function save_domdocument( $file, $dom ) {
 			}
 
 			// For non-javascript, remove the CDATA tags.
-			if ( $type && in_array( strtolower( $type ), [ 'importmap', /* 'module' */ ] ) ) {
+			if ( $type && in_array( strtolower( $type ), [ 'importmap', 'speculationrules' /* 'module' */ ] ) ) {
 				return "<script{$attr}>{$code}</script>";
 			}
 
