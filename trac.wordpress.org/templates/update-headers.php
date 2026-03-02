@@ -30,21 +30,6 @@ function fetch_url( $url ) {
 function domdocument_from_url( $url ) {
 	$html = fetch_url( $url );
 
-	/*
-	 * Escape HTML within Javascript strings.
-	 * DomDocument doesn't handle HTML tags within Javascript strings.
-	 * See https://stackoverflow.com/questions/40703313/php-domdocument-errors-while-parsing-unescaped-strings
-	 */
-	$html = preg_replace_callback(
-		'!<script([^>]+)>(.*?)</script>!ism',
-		function( $m ) {
-			$escaped = $m[2];
-			$escaped = str_replace( array( '<', '>' ), array( '\x3C',  '\x3E' ), $escaped );
-			return "<script{$m[1]}>{$escaped}</script>";
-		},
-		$html
-	);
-
 	// Ensure it's treated as UTF8, we'll assume if there's no <body> tag it's just a HTML blob.
 	if ( ! strpos( $html, '<body' ) ) {
 		$html = '<!DOCTYPE html>
@@ -107,7 +92,7 @@ function save_domdocument( $file, $dom ) {
 			}
 
 			// For non-javascript, remove the CDATA tags.
-			if ( $type && in_array( strtolower( $type ), [ 'importmap', 'speculationrules' /* 'module' */ ] ) ) {
+			if ( $type && in_array( strtolower( $type ), [ 'importmap', 'speculationrules', 'application/json' /* 'module' */ ] ) ) {
 				return "<script{$attr}>{$code}</script>";
 			}
 
