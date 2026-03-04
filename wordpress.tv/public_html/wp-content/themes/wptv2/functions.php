@@ -373,7 +373,7 @@ class WordPressTV_Theme {
 	 * Filters the blog_upload_space option
 	 */
 	function blog_upload_space() {
-		return 1024 * 1024 * 15; // 15 terabytes
+		return 1024 * 1024 * 25; // 25 terabytes
 	}
 
 	/**
