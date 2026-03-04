@@ -1752,10 +1752,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				// This seems to be the easiest place to find the current Ticket ID..
 				var canonical = $( 'link[rel="canonical"]' ).prop( 'href' );
 				if ( canonical ) {
-					let match = canonical.match( /\/ticket\/(\d+)$/ );
-					if ( match && match[1] ) {
-						ticket = match[1];
-					}
+					ticket = canonical.match( /\/ticket\/(\d+)$/ )?.[1];
 				}
 
 				if ( ! ticket ) {
