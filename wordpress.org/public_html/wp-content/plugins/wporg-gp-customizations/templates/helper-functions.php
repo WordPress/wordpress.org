@@ -359,6 +359,7 @@ function wporg_references( $project, $entry ) {
  */
 function wporg_references_wordpress_org_github( $source_url, $project, $file, $line ) {
 	if ( 'meta/wordpress-org' === $project->path ) {
+
 		// wporg-mu-plugins is mu-plugins/ based, but NOT those in mu-plugins/pub
 		if ( str_starts_with( $file, 'mu-plugins/' ) && ! str_starts_with( $file, 'mu-plugins/pub/' ) ) {
 			$source_url = "https://github.com/WordPress/wporg-mu-plugins/blob/trunk/{$file}#L{$line}";
@@ -366,6 +367,12 @@ function wporg_references_wordpress_org_github( $source_url, $project, $file, $l
 		// wporg-gutenberg theme is pretty unique path..
 		} elseif ( str_contains( $file, '/themes/wporg-gutenberg/' ) ) {
 			$source_url = "https://github.com/WordPress/wporg-gutenberg/blob/trunk/{$file}#L{$line}";
+		} elseif ( str_contains( $file, 'wporg-main-2022' ) ) {
+			$source_url = "https://github.com/WordPress/wporg-main-2022/blob/trunk/{$file}#L{$line}";
+		} elseif ( str_contains( $file, 'wporg-parent-2021' ) ) {
+			$source_url = "https://github.com/WordPress/wporg-parent-2021/blob/trunk/{$file}#L{$line}";
+		} elseif ( str_contains( $file, 'wporg-make-2024' ) ) {
+			$source_url = "https://github.com/WordPress/wporg-make-2024/blob/trunk/{$file}#L{$line}";
 		}
 
 	} elseif ( 'meta/rosetta' === $project->path ) {
@@ -384,6 +391,11 @@ function wporg_references_wordpress_org_github( $source_url, $project, $file, $l
 			)
 		) {
 			$source_url = false;
+		}
+
+	} elseif ( 'meta/themes' === $project->path ) {
+		if ( str_contains( $file, 'wporg-themes-2024' ) ) {
+			$source_url = "https://github.com/WordPress/wporg-theme-directory/blob/trunk/{$file}#L{$line}";
 		}
 	}
 
