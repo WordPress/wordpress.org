@@ -188,6 +188,15 @@ foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
 		continue;
 	}
 
+	// Skip <link rel="alternate">
+	if (
+		$node instanceOf DomElement &&
+		'link' === $node->tagName &&
+		'alternate' === $node->getAttribute( 'rel' )
+	) {
+		continue;
+	}
+
 	$html_node->appendChild( $wporg_head->importNode( $node, true ) );
 }
 
