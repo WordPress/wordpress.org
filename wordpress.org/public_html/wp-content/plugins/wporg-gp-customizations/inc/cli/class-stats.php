@@ -163,7 +163,7 @@ class Stats {
 	 *
 	 * @return void
 	 */
-	public function __invoke( bool $echo_the_values = false, string $old_date = null ): void {
+	public function __invoke( bool $echo_the_values = false, ?string $old_date = null ): void {
 		global $wpdb;
 
 		// This value is only set in the production site (translate.wordpress.org).
@@ -1628,7 +1628,7 @@ class Stats {
 	 * @param  int|null $year Year fot the stats.
 	 * @return array
 	 */
-	private function get_forums_stats( string $type, int $year = null ): array {
+	private function get_forums_stats( string $type, ?int $year = null ): array {
 		global $wpdb;
 
 		$date_constraint = '';
