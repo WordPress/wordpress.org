@@ -84,7 +84,7 @@ class JWT
         string $algo = 'HS256',
         int $maxAge = 3600,
         int $leeway = 0,
-        string $pass = null
+        ?string $pass = null
     ) {
         $this->validateConfig($key, $algo, $maxAge, $leeway);
 
@@ -143,18 +143,23 @@ class JWT
      * Decode JWT token and return original payload.
      *
      * @param string $token
+     * @param bool   $verify
      *
      * @throws JWTException
      *
      * @return array
      */
-    public function decode(string $token): array
+    public function decode(string $token, bool $verify = true): array
     {
         if (\substr_count($token, '.') < 2) {
             throw new JWTException('Invalid token: Incomplete segments', static::ERROR_TOKEN_INVALID);
         }
 
         $token = \explode('.', $token, 3);
+        if (!$verify) {
+            return (array) $this->urlSafeDecode($token[1]);
+        }
+
         $this->validateHeader((array) $this->urlSafeDecode($token[0]));
 
         // Validate signature.
@@ -174,7 +179,7 @@ class JWT
      *
      * @param int|null $timestamp
      */
-    public function setTestTimestamp(int $timestamp = null): self
+    public function setTestTimestamp(?int $timestamp = null): self
     {
         $this->timestamp = $timestamp;
 

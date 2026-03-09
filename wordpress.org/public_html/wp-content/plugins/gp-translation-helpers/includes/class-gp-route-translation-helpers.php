@@ -250,7 +250,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 *
 	 * @return string                   JSON with the content of each section.
 	 */
-	public function ajax_translation_helpers_locale( string $project_path, string $locale_slug, string $set_slug, int $original_id, int $translation_id = null ) {
+	public function ajax_translation_helpers_locale( string $project_path, string $locale_slug, string $set_slug, int $original_id, ?int $translation_id = null ) {
 		return $this->ajax_translation_helpers( $project_path, $original_id, $translation_id, $locale_slug, $set_slug );
 	}
 
@@ -267,7 +267,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 *
 	 * @return void                         Prints the JSON with the content of each section.
 	 */
-	public function ajax_translation_helpers( string $project_path, int $original_id, int $translation_id = null, string $locale_slug = null, string $set_slug = null ): void {
+	public function ajax_translation_helpers( string $project_path, int $original_id, ?int $translation_id = null, ?string $locale_slug = null, ?string $set_slug = null ): void {
 		$project = GP::$project->by_path( $project_path );
 		if ( ! $project ) {
 			$this->die_with_404();
@@ -347,7 +347,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 *
 	 * @return string                   The full permalink.
 	 */
-	public static function get_permalink( string $project_path, ?int $original_id, string $set_slug = null, string $locale_slug = null ): string {
+	public static function get_permalink( string $project_path, ?int $original_id, ?string $set_slug = null, ?string $locale_slug = null ): string {
 		$permalink = $project_path . '/' . $original_id;
 		if ( $set_slug && $locale_slug ) {
 			$permalink .= '/' . $locale_slug . '/' . $set_slug;

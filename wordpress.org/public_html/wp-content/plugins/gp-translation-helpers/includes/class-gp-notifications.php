@@ -207,7 +207,7 @@ class GP_Notifications {
 	 *
 	 * @return array The emails to be notified from the thread comments.
 	 */
-	public static function get_commenters_email_addresses( array $comments, string $email_address_to_ignore = null ): array {
+	public static function get_commenters_email_addresses( array $comments, ?string $email_address_to_ignore = null ): array {
 		$email_addresses = array();
 		foreach ( $comments as $comment ) {
 			if ( $email_address_to_ignore !== $comment->comment_author_email ) {

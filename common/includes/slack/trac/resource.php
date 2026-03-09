@@ -6,6 +6,8 @@ use Dotorg\Slack\User;
 class Resource implements User {
 
 	protected $data;
+	protected $trac;
+	protected $id;
 
 	static protected $instances = array();
 
