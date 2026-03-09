@@ -162,20 +162,20 @@ function wporg_themes_scripts() {
 			'query'    => wporg_themes_get_themes_for_query(),
 			'settings' => array(
 				'title'        => array(
-					'default'  => "%s &#124; ${title_suffix}",
-					'home'     => __( 'WordPress Themes', 'wporg-themes' ) . " &#124; ${title_suffix}",
-					'theme'    => '%s - ' . __( 'WordPress theme', 'wporg-themes' ) . " &#124; ${title_suffix}",
+					'default'  => "%s &#124; {$title_suffix}",
+					'home'     => __( 'WordPress Themes', 'wporg-themes' ) . " &#124; {$title_suffix}",
+					'theme'    => '%s - ' . __( 'WordPress theme', 'wporg-themes' ) . " &#124; {$title_suffix}",
 					/* translators: %s: theme author name */
 					'author'   => sprintf(
 							__( 'Themes by %s', 'wporg-themes' ),
 							// The Javascript doesn't handle the author route, so we can just hard-code the author name in here for now.
 							is_author() ? ( get_queried_object()->display_name ?: get_queried_object()->user_nicename ) : '%s'
-					) . " &#124; ${title_suffix}",
+					) . " &#124; {$title_suffix}",
 					/* translators: %s: Category/Browse section */
-					'tax'      => __( 'WordPress Themes: %s Free', 'wporg-themes' ) . " &#124; ${title_suffix}",
+					'tax'      => __( 'WordPress Themes: %s Free', 'wporg-themes' ) . " &#124; {$title_suffix}",
 					/* translators: %s: Search term */
-					'search'   => __( 'Search Results for &#8220;%s&#8221;', 'wporg-themes' ) . " &#124; ${title_suffix}",
-					'notfound' => __( 'Page not found', 'wporg-themes' ) . " &#124; ${title_suffix}",
+					'search'   => __( 'Search Results for &#8220;%s&#8221;', 'wporg-themes' ) . " &#124; {$title_suffix}",
+					'notfound' => __( 'Page not found', 'wporg-themes' ) . " &#124; {$title_suffix}",
 				),
 				'isMobile'     => wp_is_mobile(),
 				'postsPerPage' => get_option( 'posts_per_page' ),
