@@ -986,7 +986,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 * @param string $text Text to strip of tags and UTF8 encode.
 	 * @return string
 	 */
-	public static function _strip_and_mb_convert_encoding( $text, 'UTF-8', 'ISO-8859-1' ) {
+	public static function _strip_and_utf8_encode( $text ) {
 		$text = wp_kses( $text, 'strip' );
 
 		if ( $text && ! seems_utf8( $text ) ) {
