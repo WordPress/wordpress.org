@@ -1,0 +1,45 @@
+.login-action-authorize_application #login:has(.mcp-config-display) {
+	width: 540px;
+}
+
+form:has(.mcp-config-display) .authorize-application-password-display {
+	display: none;
+}
+
+.login .mcp-config-display textarea {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 12px;
+	line-height: 1.5;
+	width: 100%;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	resize: none;
+	padding: 12px;
+	margin-top: 1em;
+	box-sizing: border-box;
+}
+
+.login .mcp-config-display #copy-mcp-config {
+	float: none;
+	width: 100%;
+	text-align: center;
+	margin-top: 12px;
+	padding: 6px 0;
+}
+
+.login .mcp-config-display .client-notes {
+	margin: 1.5em 0 0;
+	padding: 0;
+	list-style: none;
+	font-size: 12px;
+	color: #50575e;
+	line-height: 1.8;
+}
+
+.login .mcp-config-display .client-notes code {
+	font-size: 11px;
+	background: #f6f7f7;
+	padding: 2px 5px;
+	border-radius: 2px;
+}

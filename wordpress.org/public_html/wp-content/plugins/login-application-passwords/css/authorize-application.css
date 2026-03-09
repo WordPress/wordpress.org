@@ -1,0 +1,52 @@
+.login-action-authorize_application #login {
+	width: 420px;
+	max-width: 90vw;
+}
+
+.login-action-authorize_application h2 {
+	margin-bottom: 1em;
+}
+
+.login form p.authorize-application-details {
+	color: #50575e;
+	font-size: 14px;
+	line-height: 1.6;
+	margin: 0;
+}
+
+.login .authorize-application-submit {
+	display: flex;
+	gap: 12px;
+	margin: 2em 0 0 !important;
+	padding: 0;
+}
+
+.login .authorize-application-submit.submit .button {
+	flex: 1;
+	text-align: center;
+	padding: 6px 0;
+}
+
+.login p.description {
+	margin-top: 1.5em;
+	padding-top: 1.5em;
+	border-top: 1px solid #f0f0f1;
+	font-size: 12px;
+	color: #787c82;
+	overflow-wrap: break-word;
+	line-height: 1.6;
+}
+
+.login p.description code {
+	font-size: 11px;
+	background: #f6f7f7;
+	padding: 2px 5px;
+	border-radius: 2px;
+}
+
+.login .authorize-application-password-display .input {
+	font-family: Consolas, Monaco, monospace;
+	text-align: center;
+	letter-spacing: 1px;
+	width: 100%;
+}
