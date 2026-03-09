@@ -17,7 +17,7 @@ use Wporg\TranslationEvents\Translation_Events;
  */
 abstract class Event_Date extends DateTimeImmutable {
 	protected $event_timezone;
-	public function __construct( string $date, ?DateTimeZone $timezone = null ) {
+	public function __construct( string $date, DateTimeZone $timezone = null ) {
 		if ( ! $timezone ) {
 			$timezone = new DateTimeZone( 'UTC' );
 		}

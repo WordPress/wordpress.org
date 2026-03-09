@@ -9,25 +9,25 @@ use Throwable;
 use Wporg\TranslationEvents\Translation_Events;
 
 class InvalidTimeZone extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
+	public function __construct( Throwable $previous = null ) {
 		parent::__construct( 'Event time zone is invalid', 0, $previous );
 	}
 }
 
 class InvalidStart extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
+	public function __construct( Throwable $previous = null ) {
 		parent::__construct( 'Event start is invalid', 0, $previous );
 	}
 }
 
 class InvalidEnd extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
+	public function __construct( Throwable $previous = null ) {
 		parent::__construct( 'Event end is invalid', 0, $previous );
 	}
 }
 
 class InvalidStatus extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
+	public function __construct( Throwable $previous = null ) {
 		parent::__construct( 'Event status is invalid', 0, $previous );
 	}
 }
@@ -58,7 +58,7 @@ class Event {
 		string $status,
 		string $title,
 		string $description,
-		?DateTimeImmutable $updated_at = null,
+		DateTimeImmutable $updated_at = null,
 		string $attendance_mode = 'onsite'
 	) {
 		$this->author_id = $author_id;
@@ -184,7 +184,7 @@ class Event {
 		$this->description = $description;
 	}
 
-	public function set_updated_at( ?DateTimeImmutable $updated_at = null ): void {
+	public function set_updated_at( DateTimeImmutable $updated_at = null ): void {
 		$this->updated_at = $updated_at ?? Translation_Events::now();
 	}
 
