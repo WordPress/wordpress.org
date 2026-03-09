@@ -4,6 +4,18 @@ namespace Dotorg\Slack\Trac;
 
 class Comment_Handler {
 
+	protected $send;
+	protected $lines;
+	protected $trac;
+	protected $title;
+	protected $author;
+	protected $comment;
+	protected $changes;
+	protected $ticket_id;
+	protected $ticket_url;
+	protected $comment_id;
+	protected $comment_url;
+
 	function __construct( \Dotorg\Slack\Send $send, array $email_message ) {
 		$this->send  = $send;
 		$this->lines = $email_message;
