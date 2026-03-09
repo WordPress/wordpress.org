@@ -38,7 +38,7 @@ function register_callbacks() : void {
 /**
  * Add a activity when strings are suggested and approved.
  */
-function add_single_translation_activity( GP_Translation $new_translation, GP_Translation $previous_translation = null ) : void {
+function add_single_translation_activity( GP_Translation $new_translation, ?GP_Translation $previous_translation = null ) : void {
 	if ( ! should_notify( $new_translation->user_id ) ) {
 		return;
 	}
