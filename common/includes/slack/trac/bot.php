@@ -17,6 +17,7 @@ class Bot {
 	// Channels that are primarily GitHub issues, where digit-only tickets should not be expanded.
 	static protected $github_channels = array(
 		'#core-editor',
+		'#core-ai',
 	);
 
 	protected $parsed = array();
