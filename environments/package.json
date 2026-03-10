@@ -6,7 +6,8 @@
 		"node": ">=20"
 	},
 	"scripts": {
-		"wp-env:plugin-directory": "wp-env start --config plugin-directory/.wp-env.json"
+		"plugins:env": "wp-env start --config plugin-directory/.wp-env.json",
+		"plugins:refresh": "wp-env run cli -- wp option delete wporg_env_imported && wp-env run cli wp eval-file wp-content/env-bin/import-plugins.php"
 	},
 	"devDependencies": {
 		"@wordpress/env": "^11"
