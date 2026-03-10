@@ -63,7 +63,10 @@ class Release_Confirmation {
 		ob_start();
 
 		// If the user is not using 2FA, show a notice.
-		if ( ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+		if (
+			class_exists( 'Two_Factor_Core' ) &&
+			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
+		) {
 			printf(
 				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
@@ -277,8 +280,8 @@ class Release_Confirmation {
 
 		if (
 			! is_user_logged_in() ||
-			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ||
 			! current_user_can( 'plugin_manage_releases', $plugin  ) ||
+			( class_exists( 'Two_Factor_Core' ) && ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) ||
 
 			// No need to show actions if the release can't be confirmed, or is already confirmed
 			! $data['confirmations_required'] ||

@@ -6,9 +6,7 @@
 		"../wordpress.org/public_html/wp-content/plugins/plugin-directory",
 		"https://downloads.wordpress.org/plugin/plugin-check.zip",
 		"https://downloads.wordpress.org/plugin/jetpack.zip",
-		"https://downloads.wordpress.org/plugin/glotpress.zip",
-		"https://downloads.wordpress.org/plugin/two-factor.zip",
-		"WordPress/wporg-two-factor#build"
+		"https://downloads.wordpress.org/plugin/glotpress.zip"
 	],
 	"themes": [
 		"../wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024",

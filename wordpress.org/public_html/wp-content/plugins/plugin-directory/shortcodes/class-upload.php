@@ -59,6 +59,8 @@ class Upload {
 
 		// Require 2FA for plugin authors on upload.
 		if (
+			function_exists( 'WordPressdotorg\Two_Factor\user_requires_2fa' ) &&
+			class_exists( 'Two_Factor_Core' ) &&
 			user_requires_2fa( wp_get_current_user() ) &&
 			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
 		) {
