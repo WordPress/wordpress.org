@@ -175,7 +175,7 @@ class Stats_Report {
 			"{$wpdb->base_prefix}helpscout",
 		), ARRAY_A );
 
-		$stats['in_queue_pending_why'] = array_map( 'intval', $stats['in_queue_pending_why'] );
+		$stats['in_queue_pending_why'] = array_map( 'intval', $stats['in_queue_pending_why'] ?? [] );
 
 		// # of plugins currently in the queue (new + pending)
 		$stats['in_queue'] = $stats['in_queue_new'] + $stats['in_queue_pending'];
