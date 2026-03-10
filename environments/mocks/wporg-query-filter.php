@@ -9,7 +9,7 @@ namespace WordPressdotorg\Env;
 /**
  * Intercept queries to production-only tables and return empty results.
  *
- * Tables filtered: translate_*, trac_*, svn_access, helpscout*, wporg_locales, language_packs.
+ * Tables filtered: translate_*, trac_*, wp_svn_access, wp_helpscout, wp_helpscout_meta, wporg_locales, language_packs.
  */
 add_filter( 'query', function ( $query ) {
 	global $wpdb;
@@ -22,7 +22,6 @@ add_filter( 'query', function ( $query ) {
 	$blocked_prefixes = [
 		'translate_',
 		'trac_',
-		'helpscout',
 	];
 
 	foreach ( $blocked_prefixes as $prefix ) {
@@ -32,7 +31,9 @@ add_filter( 'query', function ( $query ) {
 	}
 
 	$blocked_tables = [
-		'svn_access',
+		'wp_svn_access',
+		'wp_helpscout',
+		'wp_helpscout_meta',
 		'wporg_locales',
 		'language_packs',
 	];
