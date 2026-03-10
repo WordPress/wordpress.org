@@ -199,32 +199,34 @@ class Stats_Report {
 		// Help Scout Queue
 		// --------------
 
-		$start_datetime = gmdate( 'Y-m-d\T00:00:00\Z', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) );
-		$end_datetime   = gmdate( 'Y-m-d\T23:59:59\Z', strtotime( $args['date'] ) );
+		if ( defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
+			$start_datetime = gmdate( 'Y-m-d\T00:00:00\Z', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) );
+			$end_datetime   = gmdate( 'Y-m-d\T23:59:59\Z', strtotime( $args['date'] ) );
 
-		$api_payload = [
-			'start'     => $start_datetime,
-			'end'       => $end_datetime,
-			'mailboxes' => defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ? HELPSCOUT_PLUGINS_MAILBOXID : 0,
-		];
+			$api_payload = [
+				'start'     => $start_datetime,
+				'end'       => $end_datetime,
+				'mailboxes' => HELPSCOUT_PLUGINS_MAILBOXID,
+			];
 
-		$company_report  = HelpScout::api( '/v2/reports/company', $api_payload );
-		$mailbox_overall = HelpScout::api( '/v2/reports/conversations', $api_payload );
-		$email_report    = HelpScout::api( '/v2/reports/email', $api_payload );
+			$company_report  = HelpScout::api( '/v2/reports/company', $api_payload );
+			$mailbox_overall = HelpScout::api( '/v2/reports/conversations', $api_payload );
+			$email_report    = HelpScout::api( '/v2/reports/email', $api_payload );
 
-		// If any of the API's are unavailable, make it obvious that the requests have failed, but returning 0's for everything.
-		if ( ! $company_report || ! $mailbox_overall || ! $email_report ) {
-			$company_report = $mailbox_overall = $email_report = false;
+			// If any of the API's are unavailable, make it obvious that the requests have failed, but returning 0's for everything.
+			if ( ! $company_report || ! $mailbox_overall || ! $email_report ) {
+				$company_report = $mailbox_overall = $email_report = false;
+			}
+
+			$stats['helpscout_queue_total_conversations']     = $mailbox_overall->current->totalConversations ?? 0;
+			$stats['helpscout_queue_new_conversations']       = $mailbox_overall->current->newConversations ?? 0;
+			$stats['helpscout_queue_customers']               = $mailbox_overall->current->customers ?? 0;
+			$stats['helpscout_queue_conversations_per_day']   = $mailbox_overall->current->conversationsPerDay ?? 0;
+			$stats['helpscout_queue_busiest_day']             = gmdate( 'l', strtotime( 'Sunday +' . ( $mailbox_overall->busiestDay->day ?? 0 ) . ' days' ) ); // Hacky? but works
+			$stats['helpscout_queue_messages_received']       = $mailbox_overall->current->messagesReceived ?? 0;
+			$stats['helpscout_queue_replies_sent']            = $company_report->current->totalReplies;
+			$stats['helpscout_queue_emails_created']          = $email_report->current->volume->emailsCreated ?? 0;
 		}
-
-		$stats['helpscout_queue_total_conversations']     = $mailbox_overall->current->totalConversations ?? 0;
-		$stats['helpscout_queue_new_conversations']       = $mailbox_overall->current->newConversations ?? 0;
-		$stats['helpscout_queue_customers']               = $mailbox_overall->current->customers ?? 0;
-		$stats['helpscout_queue_conversations_per_day']   = $mailbox_overall->current->conversationsPerDay ?? 0;
-		$stats['helpscout_queue_busiest_day']             = gmdate( 'l', strtotime( 'Sunday +' . ( $mailbox_overall->busiestDay->day ?? 0 ) . ' days' ) ); // Hacky? but works
-		$stats['helpscout_queue_messages_received']       = $mailbox_overall->current->messagesReceived ?? 0;
-		$stats['helpscout_queue_replies_sent']            = $company_report->current->totalReplies;
-		$stats['helpscout_queue_emails_created']          = $email_report->current->volume->emailsCreated ?? 0;
 
 		return $stats;
 	}
