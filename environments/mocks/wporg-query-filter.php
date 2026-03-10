@@ -31,9 +31,9 @@ add_filter( 'query', function ( $query ) {
 	}
 
 	$blocked_tables = [
-		'wp_svn_access',
-		'wp_helpscout',
-		'wp_helpscout_meta',
+		$wpdb->prefix . 'svn_access',
+		$wpdb->prefix . 'helpscout',
+		$wpdb->prefix . 'helpscout_meta',
 		'wporg_locales',
 		'language_packs',
 	];
