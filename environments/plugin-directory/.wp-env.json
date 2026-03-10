@@ -13,7 +13,7 @@
 		"WordPress/wporg-parent-2021#build"
 	],
 	"mappings": {
-		"wp-content/mu-plugins": "../../wordpress.org/public_html/wp-content/mu-plugins/pub",
+		"wp-content/mu-plugins/pub": "../../wordpress.org/public_html/wp-content/mu-plugins/pub",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "../mocks/wporg-mu-plugins-loader.php",
 		"wp-content/mu-plugins/wporg-query-filter.php": "../mocks/wporg-query-filter.php",
