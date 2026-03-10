@@ -1,0 +1,7 @@
+{
+	"core": "WordPress/WordPress#master",
+	"plugins": [
+		".",
+		"https://downloads.wordpress.org/plugin/jetpack.latest-stable.zip"
+	]
+}
