@@ -44,12 +44,12 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		'donate_link'       => true,
 	);
 
-	function setUp(): void {
+	function setUp() {
 		parent::setUp();
 		add_filter( 'http_headers_useragent', array( $this, 'filter_http_headers_useragent' ) );
 	}
 
-	function tearDown(): void {
+	function tearDown() {
 		remove_filter( 'http_headers_useragent', array( $this, 'filter_http_headers_useragent' ) );
 		parent::tearDown();
 	}

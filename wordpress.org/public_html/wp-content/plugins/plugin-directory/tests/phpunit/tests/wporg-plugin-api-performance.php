@@ -44,12 +44,12 @@ class Tests_Plugins_API_Performance extends WP_UnitTestCase {
 		'contributors'      => true,
 	);
 
-	function setUp(): void {
+	function setUp() {
 		parent::setUp();
 		add_filter( 'http_headers_useragent', array( $this, 'filter_http_headers_useragent' ) );
 	}
 
-	function tearDown(): void {
+	function tearDown() {
 		remove_filter( 'http_headers_useragent', array( $this, 'filter_http_headers_useragent' ) );
 		parent::tearDown();
 	}
@@ -64,7 +64,7 @@ class Tests_Plugins_API_Performance extends WP_UnitTestCase {
 
 	}
 
-	static function tearDownAfterClass(): void {
+	static function tearDownAfterClass() {
 		global $wporg_plugin_api_performance;
 
 		echo 'Performance summary for ' . get_called_class() . ":\n";
