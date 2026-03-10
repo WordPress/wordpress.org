@@ -154,28 +154,31 @@ class Stats_Report {
 		);
 
 		// # Break down the plugins in the queue, based on if we're still waiting on a reply.
-		$stats['in_queue_pending_why'] = $wpdb->get_row( $wpdb->prepare(
-			'SELECT
-				SUM( IF( active = 0 AND closed > 0, 1, 0 ) ) AS `author`,
-				SUM( IF( active > 0, 1, 0 ) ) AS `reviewer`,
-				SUM( IF( active = 0 AND closed = 0, 1, 0 ) ) AS `noemail`
-			FROM (
-				SELECT
-					p.post_name,
-					SUM( IF( emails.status = "closed", 1, 0 ) ) AS `closed`,
-					SUM( IF( emails.status = "active", 1, 0 ) ) AS `active`
-				FROM %i p
-					LEFT JOIN %i meta ON meta.meta_key = "plugins" AND meta.meta_value = p.post_name
-					LEFT JOIN %i emails ON meta.helpscout_id = emails.id
-				WHERE p.post_status = "pending"
-				GROUP BY p.ID
-			) subquery',
-			$wpdb->posts,
-			"{$wpdb->base_prefix}helpscout_meta",
-			"{$wpdb->base_prefix}helpscout",
-		), ARRAY_A );
+		// Requires the helpscout tables to exist.
+		if ( defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
+			$stats['in_queue_pending_why'] = $wpdb->get_row( $wpdb->prepare(
+				'SELECT
+					SUM( IF( active = 0 AND closed > 0, 1, 0 ) ) AS `author`,
+					SUM( IF( active > 0, 1, 0 ) ) AS `reviewer`,
+					SUM( IF( active = 0 AND closed = 0, 1, 0 ) ) AS `noemail`
+				FROM (
+					SELECT
+						p.post_name,
+						SUM( IF( emails.status = "closed", 1, 0 ) ) AS `closed`,
+						SUM( IF( emails.status = "active", 1, 0 ) ) AS `active`
+					FROM %i p
+						LEFT JOIN %i meta ON meta.meta_key = "plugins" AND meta.meta_value = p.post_name
+						LEFT JOIN %i emails ON meta.helpscout_id = emails.id
+					WHERE p.post_status = "pending"
+					GROUP BY p.ID
+				) subquery',
+				$wpdb->posts,
+				"{$wpdb->base_prefix}helpscout_meta",
+				"{$wpdb->base_prefix}helpscout",
+			), ARRAY_A );
 
-		$stats['in_queue_pending_why'] = array_map( 'intval', $stats['in_queue_pending_why'] ?? [] );
+			$stats['in_queue_pending_why'] = array_map( 'intval', $stats['in_queue_pending_why'] ?? [] );
+		}
 
 		// # of plugins currently in the queue (new + pending)
 		$stats['in_queue'] = $stats['in_queue_new'] + $stats['in_queue_pending'];
@@ -530,7 +533,7 @@ class Stats_Report {
 				/* translators: %d: number of pending plugins */
 				printf(
 					__( '&rarr; (pending; waiting on author)* : %d', 'wporg-plugins' ),
-					esc_html( $stats['in_queue_pending_why']['author'] )
+					esc_html( $stats['in_queue_pending_why']['author'] ?? 0 )
 				);
 			?>
 			</li>
@@ -539,11 +542,11 @@ class Stats_Report {
 				/* translators: %d: number of pending plugins */
 				printf(
 					__( '&rarr; (pending; waiting on reviewer)* : %d', 'wporg-plugins' ),
-					esc_html( $stats['in_queue_pending_why']['reviewer'] )
+					esc_html( $stats['in_queue_pending_why']['reviewer'] ?? 0 )
 				);
 			?>
 			</li>
-			<?php if ( $stats['in_queue_pending_why']['noemail'] ) : ?>
+			<?php if ( ! empty( $stats['in_queue_pending_why']['noemail'] ) ) : ?>
 				<li>
 				<?php
 					/* translators: %d: number of pending plugins */
@@ -556,6 +559,7 @@ class Stats_Report {
 			<?php endif; ?>
 		</ul>
 
+		<?php if ( defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) : ?>
 		<h3><?php _e( 'Help Scout Queue Stats', 'wporg-plugins' ); ?></h3>
 
 		<ul style="font-family:Courier New;">
@@ -624,6 +628,7 @@ class Stats_Report {
 			?>
 			</li>
 		</ul>
+		<?php endif; ?>
 
 		<ul style="font-style:italic;">
 			<li><code>*</code> : <?php _e( "Stat reflects current size of queue and does not take into account 'date' or 'day' interval", 'wporg-plugins' ); ?></li>

@@ -40,6 +40,8 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 	$blocked_prefixes = [
 		'translate_',
 		'trac_',
+		$wpdb->prefix . 'helpscout',
+		'stats_extras',
 	];
 
 	foreach ( $blocked_prefixes as $prefix ) {
@@ -50,8 +52,6 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 
 	$blocked_tables = [
 		$wpdb->prefix . 'svn_access',
-		$wpdb->prefix . 'helpscout',
-		$wpdb->prefix . 'helpscout_meta',
 		'wporg_locales',
 		'language_packs',
 	];
@@ -60,9 +60,9 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 		return $no_op_query;
 	}
 
-	// Also block queries that JOIN against missing tables (get_table_from_query only returns the primary table).
-	foreach ( $blocked_tables as $blocked_table ) {
-		if ( str_contains( $query, $blocked_table ) ) {
+	// Also block queries that reference missing tables in JOINs (get_table_from_query only returns the primary table).
+	foreach ( $blocked_prefixes as $prefix ) {
+		if ( str_contains( $query, $prefix ) ) {
 			return $no_op_query;
 		}
 	}
