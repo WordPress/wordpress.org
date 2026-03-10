@@ -219,6 +219,7 @@ function import_plugin( $base_url, $slug ) {
 		'support_threads'          => $plugin->support_threads ?? 0,
 		'support_threads_resolved' => $plugin->support_threads_resolved ?? 0,
 		'donate_link'              => $plugin->donate_link ?? '',
+		'last_updated'             => $plugin->last_updated ?? '',
 		'header_author'            => wp_strip_all_tags( $plugin->author ?? '' ),
 		'header_plugin_uri'        => $plugin->homepage ?? '',
 	);

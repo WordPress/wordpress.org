@@ -1,9 +1,26 @@
 #!/bin/bash
 #
-# Runs after wp-env start. Sets up permalinks and imports plugins.
+# Runs after wp-env start. Sets up permalinks, creates pages, and imports plugins.
 #
 
 CONFIG="--config plugin-directory/.wp-env.json"
+WP="npx wp-env $CONFIG run cli --"
 
-npx wp-env $CONFIG run cli -- wp rewrite structure '/%postname%/' --hard
-npx wp-env $CONFIG run cli wp eval-file wp-content/env-bin/import-plugins.php
+# Set up permalinks.
+$WP wp rewrite structure '/%postname%/' --hard
+
+# Create pages that exist on wordpress.org/plugins (if they don't already exist).
+# Parent: /developers/
+$WP wp post create --post_type=page --post_status=publish --post_title='Developer Information' --post_name='developers' --porcelain 2>/dev/null || true
+DEVELOPERS_ID=$($WP wp post list --post_type=page --name=developers --field=ID 2>/dev/null)
+
+if [ -n "$DEVELOPERS_ID" ]; then
+	# Children of /developers/
+	$WP wp post create --post_type=page --post_status=publish --post_title='Add your Plugin' --post_name='add' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Readme Validator' --post_name='readme-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Block Plugin Checker' --post_name='block-plugin-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Release Management' --post_name='releases' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
+fi
+
+# Import plugins from wordpress.org.
+$WP wp eval-file wp-content/env-bin/import-plugins.php
