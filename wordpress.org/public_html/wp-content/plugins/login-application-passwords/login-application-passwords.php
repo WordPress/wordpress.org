@@ -248,7 +248,7 @@ function wporg_handle_authorize_application_login(): void {
 	login_header( $title, '', $wp_error );
 
 	?>
-	<form action="<?php echo esc_url( site_url( 'wp-login.php?action=authorize_application', 'login_post' ) ); ?>" method="post" class="authorize-application-form">
+	<form action="<?php echo esc_url( site_url( 'wp-login.php?action=authorize_application', 'login' ) ); ?>" method="post" class="authorize-application-form">
 		<?php wp_nonce_field( 'authorize_application_password' ); ?>
 		<input type="hidden" name="wp_action" value="authorize_application_password" />
 		<input type="hidden" name="app_id" value="<?php echo esc_attr( $app_id ); ?>" />
@@ -317,7 +317,7 @@ function wporg_handle_authorize_application_login(): void {
 							);
 						}
 
-						printf( wp_kses_post( $message ), esc_url( admin_url( 'my-sites.php' ) ), esc_html( number_format_i18n( $blogs_count ) ) );
+						printf( wp_kses_post( $message ), esc_url( get_admin_url( array_key_first( $blogs ), 'my-sites.php' ) ), esc_html( number_format_i18n( $blogs_count ) ) );
 						?>
 					</p>
 					<?php
