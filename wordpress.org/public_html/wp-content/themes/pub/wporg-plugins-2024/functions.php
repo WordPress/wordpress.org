@@ -351,7 +351,7 @@ function social_meta_data() {
 	}
 
 	$icon   = Template::get_plugin_icon();
-	$banner = Template::get_plugin_banner();
+	$banner = Template::get_plugin_banner() ?: [];
 
 	$banner['banner']    = $banner['banner'] ?? false;
 	$banner['banner_2x'] = $banner['banner_2x'] ?? false;
