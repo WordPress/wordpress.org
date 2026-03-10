@@ -205,9 +205,9 @@ class Stats_Report {
 		$api_payload = [
 			'start'     => $start_datetime,
 			'end'       => $end_datetime,
-			'mailboxes' => HELPSCOUT_PLUGINS_MAILBOXID,
+			'mailboxes' => defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ? HELPSCOUT_PLUGINS_MAILBOXID : 0,
 		];
-		
+
 		$company_report  = HelpScout::api( '/v2/reports/company', $api_payload );
 		$mailbox_overall = HelpScout::api( '/v2/reports/conversations', $api_payload );
 		$email_report    = HelpScout::api( '/v2/reports/email', $api_payload );

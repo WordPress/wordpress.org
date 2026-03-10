@@ -60,5 +60,12 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 		return $no_op_query;
 	}
 
+	// Also block queries that JOIN against missing tables (get_table_from_query only returns the primary table).
+	foreach ( $blocked_tables as $blocked_table ) {
+		if ( str_contains( $query, $blocked_table ) ) {
+			return $no_op_query;
+		}
+	}
+
 	return $query;
 } );
