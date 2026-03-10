@@ -200,7 +200,8 @@ function loader_src( $src, $handle ) {
 		'wporg-plugins-faq',
 	];
 
-	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
+	$use_cdn = ( 'production' === wp_get_environment_type() ) || ( defined( 'USE_WPORG_CDN' ) && USE_WPORG_CDN );
+	if ( ! $use_cdn ) {
 		return $src;
 	}
 
