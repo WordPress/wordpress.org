@@ -5,6 +5,9 @@
 	"engines": {
 		"node": ">=20"
 	},
+	"scripts": {
+		"wp-env:plugin-directory": "wp-env start --config plugin-directory/.wp-env.json"
+	},
 	"devDependencies": {
 		"@wordpress/env": "^11"
 	}

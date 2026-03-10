@@ -1,6 +1,6 @@
 {
 	"core": "WordPress/WordPress#master",
-	"phpVersion": "8.1",
+	"phpVersion": "8.4",
 	"testsEnvironment": false,
 	"plugins": [
 		"../../wordpress.org/public_html/wp-content/plugins/plugin-directory",
@@ -14,7 +14,6 @@
 	],
 	"mappings": {
 		"wp-content/mu-plugins": "../../wordpress.org/public_html/wp-content/mu-plugins/pub",
-		"wp-content/mu-plugins/wporg-ratings-mock.php": "../mocks/wporg-ratings.php",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "../mocks/wporg-mu-plugins-loader.php",
 		"wp-content/mu-plugins/wporg-query-filter.php": "../mocks/wporg-query-filter.php",
