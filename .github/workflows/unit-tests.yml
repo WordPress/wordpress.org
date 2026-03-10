@@ -1,9 +1,8 @@
 name: Unit Tests
 
 on:
-  push:
-    branches: [ trunk ]
   pull_request:
+  push:
     branches: [ trunk ]
 
 jobs:
@@ -51,3 +50,36 @@ jobs:
       - name: Run PHPUnit
         working-directory: ${{ matrix.working-directory }}
         run: phpunit ${{ matrix.phpunit-args }}
+
+  # WordPress-dependent PHP tests — require wp-env (Docker).
+  php-wordpress:
+    name: "WP: ${{ matrix.name }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Handbook Plugin
+            plugin-directory: wordpress.org/public_html/wp-content/plugins/handbook
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install wp-env
+        run: npm -g install @wordpress/env
+
+      - name: Start wp-env
+        working-directory: ${{ matrix.plugin-directory }}
+        run: wp-env start
+
+      - name: Install PHPUnit Polyfills
+        working-directory: ${{ matrix.plugin-directory }}
+        run: wp-env run tests-cli composer require --dev yoast/phpunit-polyfills:^4.0 --working-dir=/wordpress-phpunit
+
+      - name: Run PHPUnit
+        working-directory: ${{ matrix.plugin-directory }}
+        run: wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename ${{ matrix.plugin-directory }}) phpunit --no-configuration --bootstrap phpunit/bootstrap.php phpunit/tests/
