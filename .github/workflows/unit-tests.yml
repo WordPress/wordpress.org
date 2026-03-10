@@ -1,0 +1,53 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ trunk ]
+  pull_request:
+    branches: [ trunk ]
+
+jobs:
+  # Standalone PHP tests — no WordPress or database dependency.
+  php-standalone:
+    name: "PHP: ${{ matrix.name }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Serve Happy API
+            working-directory: api.wordpress.org/public_html/core/serve-happy/1.0
+            phpunit-args: "--no-configuration --exclude-group serve-happy-live-http --bootstrap tests/bootstrap.php tests/"
+          - name: Browse Happy API
+            working-directory: api.wordpress.org/public_html/core/browse-happy/1.0
+            phpunit-args: "--no-configuration tests/phpunit/tests/"
+          - name: Slack Trac Bot
+            working-directory: common/includes/tests/slack/trac
+            phpunit-args: "bot.php"
+          - name: Slack Props Library
+            working-directory: common/includes/slack/props/tests
+            phpunit-args: "--bootstrap /tmp/phpunit-bootstrap.php ."
+            bootstrap: wpdb-stub
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: phpunit:^11
+
+      - name: Create wpdb stub bootstrap
+        if: matrix.bootstrap == 'wpdb-stub'
+        run: |
+          cat > /tmp/phpunit-bootstrap.php << 'PHPEOF'
+          <?php
+          class wpdbStub {
+              public function prepare( $query, ...$args ) { return $query; }
+              public function get_results( $query, $output = 'OBJECT' ) { return []; }
+          }
+          PHPEOF
+
+      - name: Run PHPUnit
+        working-directory: ${{ matrix.working-directory }}
+        run: phpunit ${{ matrix.phpunit-args }}
