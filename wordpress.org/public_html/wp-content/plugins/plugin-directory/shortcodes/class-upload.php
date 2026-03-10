@@ -390,7 +390,7 @@ class Upload {
 					'https://wordpress.org/news/2024/12/holiday-break/'
 				)
 			);
-		} else if ( function_exists( 'is_email_address_unsafe' ) && is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
+		} else if ( function_exists( 'is_email_address_unsafe' ) /* multisite-only */ && is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
 			echo '<div class="notice notice-error notice-alt"><p>' .
 				sprintf(
 					/* translators: %s: Profile edit url. */
