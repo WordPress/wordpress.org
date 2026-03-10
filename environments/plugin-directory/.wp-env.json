@@ -20,7 +20,7 @@
 		"wp-content/env-bin": "./bin"
 	},
 	"lifecycleScripts": {
-		"afterStart": "npx wp-env run cli wp eval-file wp-content/env-bin/import-plugins.php"
+		"afterStart": "npx wp-env --config plugin-directory/.wp-env.json run cli wp eval-file wp-content/env-bin/import-plugins.php"
 	},
 	"config": {
 		"WP_DEBUG": true,
