@@ -24,7 +24,7 @@ A local instance of the WordPress.org Plugin Directory with the plugin directory
 **Start:**
 
 ```bash
-npm run plugins:env
+npm run plugins:env start
 ```
 
 **What it includes:**
@@ -36,7 +36,13 @@ npm run plugins:env
 - Mock mu-plugins for production-only dependencies (query filter, mu-plugins loader)
 - Auto-imports ~30 plugins from WordPress.org on first start (featured, popular, beta)
 
-**Re-import plugins:**
+**Import a plugin by slug:**
+
+```bash
+npm run plugins:import -- akismet
+```
+
+**Re-seed plugins** (clears import flag, then re-imports):
 
 ```bash
 npm run plugins:refresh
@@ -71,13 +77,13 @@ npx wp-env run phpunit phpunit -c /var/www/html/wp-content/plugins/handbook/phpu
 
 ```bash
 # Stop the environment
-npx wp-env stop
+npm run plugins:env stop
 
 # Destroy the environment (removes all data)
-npx wp-env destroy
+npm run plugins:env destroy
 
 # View logs
-npx wp-env logs
+npm run plugins:env logs
 ```
 
 All commands should be run from the `environments/` directory unless otherwise noted.
