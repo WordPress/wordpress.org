@@ -240,7 +240,7 @@ function wporg_query_filter_in_form( $key ) {
 function wporg_query_total_label( $label, $count ) {
 
 	if ( ! is_search() ) {
-		return;
+		return '';
 	}
 
 	$plugin_business_model = get_query_var( 'plugin_business_model' );
