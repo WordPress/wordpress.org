@@ -3,27 +3,28 @@
 	"phpVersion": "8.4",
 	"testsEnvironment": false,
 	"plugins": [
-		"../../wordpress.org/public_html/wp-content/plugins/plugin-directory",
+		"../wordpress.org/public_html/wp-content/plugins/plugin-directory",
 		"https://downloads.wordpress.org/plugin/plugin-check.zip",
 		"https://downloads.wordpress.org/plugin/jetpack.zip",
 		"https://downloads.wordpress.org/plugin/glotpress.zip"
 	],
 	"themes": [
-		"../../wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024",
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024",
 		"WordPress/wporg-parent-2021#build"
 	],
 	"mappings": {
-		"wp-content/mu-plugins/pub": "../../wordpress.org/public_html/wp-content/mu-plugins/pub",
+		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
-		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "../mocks/wporg-mu-plugins-loader.php",
-		"wp-content/mu-plugins/wporg-query-filter.php": "../mocks/wporg-query-filter.php",
-		"wp-content/env-bin": "./bin"
+		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "./mocks/wporg-mu-plugins-loader.php",
+		"wp-content/mu-plugins/wporg-query-filter.php": "./mocks/wporg-query-filter.php",
+		"wp-content/env-bin": "./plugin-directory/bin"
 	},
 	"lifecycleScripts": {
 		"afterStart": "npx wp-env --config plugin-directory/.wp-env.json run cli wp eval-file wp-content/env-bin/import-plugins.php"
 	},
 	"config": {
 		"WP_DEBUG": true,
+		"WP_TESTS_TITLE": "WordPress.org Plugins",
 		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/plugins/glotpress/locales/locales.php",
 		"PLUGINS_TABLE_PREFIX": "wp_"
 	}

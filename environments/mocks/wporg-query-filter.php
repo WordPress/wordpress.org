@@ -7,14 +7,29 @@
 namespace WordPressdotorg\Env;
 
 /**
+ * Exposes the protected wpdb::get_table_from_query() method.
+ */
+class Table_Extractor extends \wpdb {
+	public function __construct() {
+		// No-op: we only need access to get_table_from_query().
+	}
+
+	public function get_table( $query ) {
+		return $this->get_table_from_query( $query );
+	}
+}
+
+$table_extractor = new Table_Extractor();
+
+/**
  * Intercept queries to production-only tables and return empty results.
  *
- * Tables filtered: translate_*, trac_*, wp_svn_access, wp_helpscout, wp_helpscout_meta, wporg_locales, language_packs.
+ * Tables filtered: translate_*, trac_*, {prefix}svn_access, {prefix}helpscout*, wporg_locales, language_packs.
  */
-add_filter( 'query', function ( $query ) {
+add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 	global $wpdb;
 
-	$table = $wpdb->get_table_from_query( $query );
+	$table = $table_extractor->get_table( $query );
 	if ( ! $table ) {
 		return $query;
 	}
