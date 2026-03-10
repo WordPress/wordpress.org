@@ -34,6 +34,9 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 		return $query;
 	}
 
+	// This needs to be an actual query, to prevent WPDB returning $wpdb->last_query.
+	$no_op_query = "SELECT * FROM $wpdb->posts WHERE 0=1";
+
 	$blocked_prefixes = [
 		'translate_',
 		'trac_',
@@ -41,7 +44,7 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 
 	foreach ( $blocked_prefixes as $prefix ) {
 		if ( str_starts_with( $table, $prefix ) ) {
-			return '';
+			return $no_op_query;
 		}
 	}
 
@@ -54,7 +57,7 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 	];
 
 	if ( in_array( $table, $blocked_tables, true ) ) {
-		return '';
+		return $no_op_query;
 	}
 
 	return $query;
