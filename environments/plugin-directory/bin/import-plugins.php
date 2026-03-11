@@ -181,6 +181,16 @@ function import_plugin( $base_url, $slug ) {
 	$description = '';
 	if ( ! empty( $plugin->sections ) ) {
 		foreach ( $plugin->sections as $section_name => $section_content ) {
+			// The API returns simplified FAQ markup (h4/p), convert back to dl/dt/dd for the theme.
+			if ( 'faq' === $section_name ) {
+				$section_content = str_replace(
+					array( '<h4>', '</h4>', '<p>',  '</p>'  ),
+					array( '<dt><h3>', '</h3></dt>', '<dd>', '</dd>' ),
+					$section_content
+				);
+				$section_content = '<dl>' . $section_content . '</dl>';
+			}
+
 			$description .= "<!--section={$section_name}-->\n{$section_content}\n<!--/section-->\n\n";
 		}
 	}
@@ -243,7 +253,38 @@ function import_plugin( $base_url, $slug ) {
 	}
 
 	if ( ! empty( $plugin->screenshots ) ) {
-		update_post_meta( $post->ID, 'screenshots', (array) $plugin->screenshots );
+		$captions         = array();
+		$assets           = array();
+		$screenshot_num   = 1;
+
+		foreach ( (array) $plugin->screenshots as $shot ) {
+			$shot = (object) $shot;
+
+			if ( ! empty( $shot->caption ) ) {
+				$captions[ $screenshot_num ] = $shot->caption;
+			}
+
+			if ( ! empty( $shot->src ) ) {
+				$parsed = wp_parse_url( $shot->src );
+				$rev    = '';
+				if ( ! empty( $parsed['query'] ) ) {
+					parse_str( $parsed['query'], $query_args );
+					$rev = $query_args['rev'] ?? '';
+				}
+				$assets[] = array(
+					'filename'   => basename( $parsed['path'] ?? '' ),
+					'resolution' => (string) $screenshot_num,
+					'locale'     => '',
+					'revision'   => $rev,
+					'location'   => '',
+				);
+			}
+
+			$screenshot_num++;
+		}
+
+		update_post_meta( $post->ID, 'screenshots', $captions );
+		update_post_meta( $post->ID, 'assets_screenshots', $assets );
 	}
 
 	if ( ! empty( $plugin->requires_plugins ) ) {
