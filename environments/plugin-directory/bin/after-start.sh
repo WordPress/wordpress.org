@@ -17,9 +17,9 @@ DEVELOPERS_ID=$($WP wp post list --post_type=page --name=developers --field=ID 2
 if [ -n "$DEVELOPERS_ID" ]; then
 	# Children of /developers/
 	$WP wp post create --post_type=page --post_status=publish --post_title='Add your Plugin' --post_name='add' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
-	$WP wp post create --post_type=page --post_status=publish --post_title='Readme Validator' --post_name='readme-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
-	$WP wp post create --post_type=page --post_status=publish --post_title='Block Plugin Checker' --post_name='block-plugin-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
-	$WP wp post create --post_type=page --post_status=publish --post_title='Release Management' --post_name='releases' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Readme Validator' --post_content='[readme-validator]' --post_name='readme-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Block Plugin Checker' --post_content='[block-validator]' --post_name='block-plugin-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Release Management' --post_content='[release-confirmation]' --post_name='releases' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
 fi
 
 # Import plugins from wordpress.org.
