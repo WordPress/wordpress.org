@@ -22,10 +22,7 @@ form:has(.mcp-config-display) .authorize-application-password-display {
 
 .login .mcp-config-display #copy-mcp-config {
 	float: none;
-	width: 100%;
-	text-align: center;
 	margin-top: 12px;
-	padding: 6px 0;
 }
 
 .login .mcp-config-display .client-notes {

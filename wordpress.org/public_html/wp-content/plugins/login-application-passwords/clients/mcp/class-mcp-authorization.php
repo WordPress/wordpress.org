@@ -69,7 +69,7 @@ class MCP_Authorization {
 					'command' => 'npx',
 					'args'    => array( '-y', '@automattic/mcp-wordpress-remote@latest' ),
 					'env'     => array(
-						'WP_API_URL'      => rest_url( 'mcp/wporg' ),
+						'WP_API_URL'      => get_rest_url( 1, 'mcp/wporg' ),
 						'WP_API_USERNAME' => $user->user_login,
 						'WP_API_PASSWORD' => WP_Application_Passwords::chunk_password( $new_password ),
 					),
