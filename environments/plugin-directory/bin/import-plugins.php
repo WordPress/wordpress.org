@@ -9,6 +9,7 @@
 namespace WordPressdotorg\Plugin_Directory\Env;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -301,7 +302,7 @@ function import_plugin( $base_url, $slug ) {
 		wp_set_object_terms( $post->ID, $tags, 'plugin_tags' );
 	}
 
-	// Contributors — create users and set terms.
+	// Contributors — create users and set terms, and grant committer access.
 	if ( ! empty( $plugin->contributors ) ) {
 		$contributor_slugs = array();
 		foreach ( (array) $plugin->contributors as $nicename => $data ) {
@@ -309,6 +310,11 @@ function import_plugin( $base_url, $slug ) {
 			ensure_user( $nicename, $data );
 		}
 		wp_set_object_terms( $post->ID, $contributor_slugs, 'plugin_contributors' );
+
+		// Mark all contributors as committers in the svn_access table.
+		foreach ( $contributor_slugs as $slug ) {
+			Tools::grant_plugin_committer( $post, $slug );
+		}
 	}
 
 	// Business model (ProperCase).

@@ -24,7 +24,7 @@ $table_extractor = new Table_Extractor();
 /**
  * Intercept queries to production-only tables and return empty results.
  *
- * Tables filtered: translate_*, trac_*, {prefix}svn_access, {prefix}helpscout*, wporg_locales, language_packs.
+ * Tables filtered: translate_*, trac_*, {prefix}helpscout*, wporg_locales, language_packs.
  */
 add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 	global $wpdb;
@@ -51,7 +51,6 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 	}
 
 	$blocked_tables = [
-		$wpdb->prefix . 'svn_access',
 		'wporg_locales',
 		'language_packs',
 	];

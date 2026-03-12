@@ -22,5 +22,8 @@ if [ -n "$DEVELOPERS_ID" ]; then
 	$WP wp post create --post_type=page --post_status=publish --post_title='Release Management' --post_content='[release-confirmation]' --post_name='releases' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
 fi
 
+# Create stub database tables that exist outside WordPress on production.
+$WP wp db import wp-content/env-bin/database-tables.sql
+
 # Import plugins from wordpress.org.
 $WP wp eval-file wp-content/env-bin/import-plugins.php
