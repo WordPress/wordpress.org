@@ -37,5 +37,10 @@ fi
 # Create stub database tables that exist outside WordPress on production.
 $WP wp db import wp-content/env-bin/database-tables.sql
 
+# Create browse section terms.
+for SECTION in featured popular beta blocks new favorites; do
+	$WP wp term create plugin_section "$SECTION" --slug="$SECTION" 2>/dev/null || true
+done
+
 # Import plugins from wordpress.org.
 $WP wp eval-file wp-content/env-bin/import-plugins.php

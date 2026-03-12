@@ -29,13 +29,6 @@ $browse_sections = array( 'featured', 'popular', 'beta' );
 
 update_option( 'blogname', 'Plugin Directory' );
 
-// Ensure browse section terms exist (ProperCase).
-foreach ( array( 'featured', 'popular', 'beta', 'blocks', 'new', 'favorites' ) as $section ) {
-	if ( ! term_exists( $section, 'plugin_section' ) ) {
-		wp_insert_term( ucwords( $section ), 'plugin_section', array( 'slug' => $section ) );
-	}
-}
-
 /**
  * Fetch slugs for a given browse section.
  */
