@@ -6,6 +6,7 @@
 	<testsuites>
 		<testsuite name="plugin-directory">
 			<directory suffix=".php">tests/</directory>
+			<exclude>tests/bootstrap.php</exclude>
 			<exclude>tests/wporg-url-schemes.php</exclude>
 			<exclude>tests/wporg-plugin-api.php</exclude>
 			<exclude>tests/wporg-plugin-api-performance.php</exclude>

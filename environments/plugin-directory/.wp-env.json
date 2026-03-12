@@ -24,6 +24,7 @@
 	},
 	"config": {
 		"WP_DEBUG": true,
+		"JETPACK_DEV_DEBUG": true,
 		"WP_TESTS_TITLE": "WordPress.org Plugins",
 		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php",
 		"PLUGINS_TABLE_PREFIX": "wp_"
