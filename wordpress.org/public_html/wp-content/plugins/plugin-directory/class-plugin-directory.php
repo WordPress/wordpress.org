@@ -1445,12 +1445,15 @@ class Plugin_Directory {
 		// We've disabled WordPress's default 404 redirects, so we'll handle them ourselves.
 		if ( is_404() ) {
 
-			// [1] => plugins [2] => example-plugin-name [3..] => random().
-			$path = explode( '/', trailingslashit( explode( '?', $_SERVER['REQUEST_URI'] )[0] ) );
+			$path_prefix = wp_parse_url( home_url('/'), PHP_URL_PATH );
+			$path        = substr( $_SERVER['REQUEST_URI'], strlen( $path_prefix ) );
+			// [0] => example-plugin-name [1..] => random().
+			$path        = explode( '/', trailingslashit( explode( '?', $path )[0] ) );
+			$path_base   = $path[0];
 
-			if ( 'tags' === $path[2] ) {
-				if ( isset( $path[3] ) && ! empty( $path[3] ) ) {
-					wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ), 301 );
+			if ( 'tags' === $path_base ) {
+				if ( isset( $path[1] ) && ! empty( $path[1] ) ) {
+					wp_safe_redirect( home_url( '/search/' . urlencode( $path[1] ) . '/' ), 301 );
 					die();
 				} else {
 					wp_safe_redirect( home_url( '/' ), 301 );
@@ -1459,10 +1462,10 @@ class Plugin_Directory {
 			}
 
 			// The about page is now over at /developers/.
-			if ( 'about' === $path[2] ) {
-				if ( isset( $path[3] ) && 'add' == $path[3] ) {
+			if ( 'about' === $path_base ) {
+				if ( isset( $path[1] ) && 'add' == $path[1] ) {
 					wp_safe_redirect( home_url( '/developers/add/' ), 301 );
-				} elseif ( isset( $path[3] ) && 'validator' == $path[3] ) {
+				} elseif ( isset( $path[1] ) && 'validator' == $path[1] ) {
 					wp_safe_redirect( home_url( '/developers/readme-validator/' ), 301 );
 				} else {
 					wp_safe_redirect( home_url( '/developers/' ), 301 );
@@ -1471,13 +1474,13 @@ class Plugin_Directory {
 			}
 
 			// Browse 404s.
-			if ( 'browse' === $path[2] ) {
+			if ( 'browse' === $path_base ) {
 				wp_safe_redirect( home_url( '/' ), 301 );
 				die();
 			}
 
 			// The readme.txt page.
-			if ( 'readme.txt' === $path[2] ) {
+			if ( 'readme.txt' === $path_base ) {
 				status_header( 200 );
 				header( 'Content-type: text/plain' );
 				echo file_get_contents( __DIR__ . '/readme/readme.txt' );
@@ -1485,7 +1488,7 @@ class Plugin_Directory {
 			}
 
 			// Handle any plugin redirects.
-			if ( $path[2] && ( $plugin = self::get_plugin_post( $path[2] ) ) ) {
+			if ( $path_base && ( $plugin = self::get_plugin_post( $path_base ) ) ) {
 				$permalink = get_permalink( $plugin->ID );
 				if ( parse_url( $permalink, PHP_URL_PATH ) != $_SERVER['REQUEST_URI'] ) {
 					wp_safe_redirect( $permalink, 301 );
@@ -1494,8 +1497,8 @@ class Plugin_Directory {
 			}
 
 			// Otherwise, let's redirect to the search page.
-			if ( isset( $path[2] ) && ! empty( $path[2] ) ) {
-				wp_safe_redirect( home_url( '/search/' . urlencode( $path[2] ) . '/' ), 301 );
+			if ( isset( $path_base ) && ! empty( $path_base ) ) {
+				wp_safe_redirect( home_url( '/search/' . urlencode( $path_base ) . '/' ), 301 );
 				die();
 			}
 		}
