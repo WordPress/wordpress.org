@@ -79,6 +79,7 @@ function ensure_user( $nicename, $data ) {
 	wp_insert_user( array(
 		'user_login'    => $nicename,
 		'user_nicename' => $nicename,
+		'user_email'    => $nicename . '@example.invalid',
 		'display_name'  => $display_name,
 		'user_pass'     => wp_generate_password(),
 		'role'          => 'subscriber',
