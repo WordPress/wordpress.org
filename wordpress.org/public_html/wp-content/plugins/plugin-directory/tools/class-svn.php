@@ -342,6 +342,10 @@ class SVN {
 		$xml    = simplexml_load_string( $output );
 		libxml_use_internal_errors( $errors );
 
+		if ( ! $xml || ! isset( $xml->list ) ) {
+			return false;
+		}
+
 		$files = [];
 		foreach ( $xml->list->children() as $entry ) {
 			$files[] = [
