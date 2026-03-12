@@ -179,20 +179,27 @@ function import_plugin( $base_url, $slug ) {
 	}
 
 	// Build post_content from sections.
+	// Format matches the real import: <!--section=name--> markers with no closing tags.
 	$description = '';
 	if ( ! empty( $plugin->sections ) ) {
 		foreach ( $plugin->sections as $section_name => $section_content ) {
-			// The API returns simplified FAQ markup (h4/p), convert back to dl/dt/dd for the theme.
-			if ( 'faq' === $section_name ) {
-				$section_content = str_replace(
-					array( '<h4>', '</h4>', '<p>',  '</p>'  ),
-					array( '<dt><h3>', '</h3></dt>', '<dd>', '</dd>' ),
-					$section_content
-				);
-				$section_content = '<dl>' . $section_content . '</dl>';
+			// These sections are rendered via shortcodes, not stored in post_content.
+			if ( in_array( $section_name, array( 'screenshots', 'reviews' ), true ) ) {
+				continue;
 			}
 
-			$description .= "<!--section={$section_name}-->\n{$section_content}\n<!--/section-->\n\n";
+			// The API returns FAQ markup as <dt id="..">Q</h4><p><p>A</p></p>.
+			// Convert to the <dl><dt><h3>Q</h3></dt><dd>A</dd></dl> format used in production.
+			if ( 'faq' === $section_name ) {
+				$section_content = preg_replace(
+					'#<dt[^>]*>\s*(.+?)\s*</h4>\s*<p>\s*(.*?)\s*</p>\s*(?=<dt|$)#s',
+					"<dt><h3>\\1</h3></dt>\n<dd>\\2</dd>\n",
+					$section_content
+				);
+				$section_content = '<dl>' . trim( $section_content ) . '</dl>';
+			}
+
+			$description .= "\n\n<!--section={$section_name}-->\n{$section_content}";
 		}
 	}
 
