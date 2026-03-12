@@ -25,6 +25,11 @@ class Release_Confirmation {
 	 * @return string
 	 */
 	static function display() {
+		// In the rest-api, just return the shortcode tag, so it can be rendered properly in the app or other consumers.
+		if ( wp_is_serving_rest_request() ) {
+			return '[' . self::SHORTCODE . ']';
+		}
+
 		$plugins = Tools::get_users_write_access_plugins( wp_get_current_user() );
 
 		if ( ! $plugins ) {
