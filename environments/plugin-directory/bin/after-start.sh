@@ -6,6 +6,18 @@
 CONFIG="--config plugin-directory/.wp-env.json"
 WP="npx wp-env $CONFIG run cli --"
 
+# Install CLI tools needed by the plugin directory (svn, unzip, etc.).
+# Both containers have passwordless sudo for the host user.
+WPENV="npx wp-env $CONFIG run"
+
+# wordpress container (Debian).
+$WPENV wordpress sudo bash -c \
+	'command -v svn > /dev/null || (apt-get -qy update && apt-get -qy install subversion unzip zip)'
+
+# cli container (Alpine).
+$WPENV cli sudo sh -c \
+	'command -v svn > /dev/null || apk add --no-cache subversion unzip zip coreutils'
+
 # Set up permalinks.
 $WP wp rewrite structure '/%postname%/' --hard
 
