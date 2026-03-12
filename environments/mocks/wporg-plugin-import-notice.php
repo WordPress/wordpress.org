@@ -16,7 +16,7 @@ add_action( 'admin_notices', function () {
 	}
 
 	printf(
-		'<div class="notice notice-info"><p>This plugin has not been imported yet. Run <code>npm run plugins:import %s</code> to import it.</p></div>',
+		'<div class="notice notice-info"><p>This plugin has not been imported yet. If it exists on plugins.svn, run <code>npm run plugins:import %s</code> to import it.</p></div>',
 		esc_html( $post->post_name )
 	);
 } );
