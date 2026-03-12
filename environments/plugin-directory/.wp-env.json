@@ -1,5 +1,5 @@
 {
-	"core": "WordPress/WordPress#master",
+	"core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
 	"phpVersion": "8.4",
 	"testsEnvironment": false,
 	"plugins": [
@@ -13,9 +13,9 @@
 		"WordPress/wporg-parent-2021#build"
 	],
 	"mappings": {
-		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
+		"wp-content/mu-plugins/": "../wordpress.org/public_html/wp-content/mu-plugins/",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
-		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "./mocks/wporg-mu-plugins-loader.php",
+		"wp-content/mu-plugins/mu-plugins-loader.php": "./mocks/mu-plugins-loader.php",
 		"wp-content/mu-plugins/wporg-query-filter.php": "./mocks/wporg-query-filter.php",
 		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/wporg-dev-login.php",
 		"wp-content/env-bin": "./plugin-directory/bin"

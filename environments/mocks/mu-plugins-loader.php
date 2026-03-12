@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: wporg-mu-plugins Loader
+ * Plugin Name: mu-plugins Loader
  * Description: Bootstraps mu-plugins from pub/ and wporg-mu-plugins/ directories.
  */
 
