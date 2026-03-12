@@ -5,8 +5,7 @@
 	"plugins": [
 		"../wordpress.org/public_html/wp-content/plugins/plugin-directory",
 		"https://downloads.wordpress.org/plugin/plugin-check.zip",
-		"https://downloads.wordpress.org/plugin/jetpack.zip",
-		"https://downloads.wordpress.org/plugin/glotpress.zip"
+		"https://downloads.wordpress.org/plugin/jetpack.zip"
 	],
 	"themes": [
 		"../wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024",
@@ -26,7 +25,7 @@
 	"config": {
 		"WP_DEBUG": true,
 		"WP_TESTS_TITLE": "WordPress.org Plugins",
-		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/plugins/glotpress/locales/locales.php",
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php",
 		"PLUGINS_TABLE_PREFIX": "wp_"
 	}
 }
