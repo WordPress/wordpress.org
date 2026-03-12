@@ -49,6 +49,11 @@ class Upload {
 	 * Renders the upload shortcode.
 	 */
 	public static function display() {
+		// In the rest-api, just return the shortcode tag, so it can be rendered properly in the app or other consumers.
+		if ( wp_is_serving_rest_request() ) {
+			return '[wporg-plugin-upload]';
+		}
+
 		if ( ! is_user_logged_in() ) {
 			return '<div class="notice notice-error notice-alt"><p>' . sprintf(
 				/* translators: Login URL */
