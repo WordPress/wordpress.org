@@ -64,6 +64,8 @@ class Upload {
 
 		// Require 2FA for plugin authors on upload.
 		if (
+			function_exists( 'WordPressdotorg\Two_Factor\user_requires_2fa' ) &&
+			class_exists( 'Two_Factor_Core' ) &&
 			user_requires_2fa( wp_get_current_user() ) &&
 			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
 		) {
@@ -393,7 +395,7 @@ class Upload {
 					'https://wordpress.org/news/2024/12/holiday-break/'
 				)
 			);
-		} else if ( is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
+		} else if ( function_exists( 'is_email_address_unsafe' ) /* multisite-only */ && is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
 			echo '<div class="notice notice-error notice-alt"><p>' .
 				sprintf(
 					/* translators: %s: Profile edit url. */
