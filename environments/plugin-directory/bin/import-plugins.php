@@ -154,7 +154,7 @@ function convert_assets( $api_assets, $resolution_map ) {
 /**
  * Import a single plugin and return the post, or null if skipped/failed.
  */
-function import_plugin( $base_url, $slug ) {
+function import_plugin( $base_url, $slug, $existing_post = null ) {
 	$response = wp_remote_get( "{$base_url}/plugin/{$slug}" );
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 		return null;
@@ -216,7 +216,13 @@ function import_plugin( $base_url, $slug ) {
 		$post_args['post_author'] = $author_id;
 	}
 
-	$post = Plugin_Directory::create_plugin_post( $post_args );
+	if ( $existing_post ) {
+		$post_args['ID'] = $existing_post->ID;
+		wp_update_post( $post_args );
+		$post = get_post( $existing_post->ID );
+	} else {
+		$post = Plugin_Directory::create_plugin_post( $post_args );
+	}
 
 	if ( is_wp_error( $post ) || ! $post ) {
 		return null;
@@ -348,22 +354,18 @@ foreach ( $browse_sections as $section ) {
 			'numberposts' => 1,
 		) );
 
-		if ( $existing ) {
-			wp_set_object_terms( $existing[0]->ID, $section, 'plugin_section', true );
-			continue;
-		}
-
-		$post = import_plugin( $base_url, $slug );
+		$post = import_plugin( $base_url, $slug, $existing[0] ?? null );
 		if ( ! $post ) {
 			continue;
 		}
 
 		wp_set_object_terms( $post->ID, $section, 'plugin_section', true );
-		echo "    Imported: {$post->post_title} ({$slug})\n";
+		$action = $existing ? 'Updated' : 'Imported';
+		echo "    {$action}: {$post->post_title} ({$slug})\n";
 		$imported++;
 	}
 
-	echo "  {$section}: {$imported} new plugins imported.\n\n";
+	echo "  {$section}: {$imported} plugins imported/updated.\n\n";
 }
 
 // Flush rewrite rules to generate .htaccess.
