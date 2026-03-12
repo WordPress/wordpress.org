@@ -1446,7 +1446,7 @@ class Plugin_Directory {
 		if ( is_404() ) {
 
 			$path_prefix = wp_parse_url( home_url('/'), PHP_URL_PATH );
-			$path        = substr( $_SERVER['REQUEST_URI'], strlen( $plugins_prefix ) );
+			$path        = substr( $_SERVER['REQUEST_URI'], strlen( $path_prefix ) );
 			// [0] => example-plugin-name [1..] => random().
 			$path        = explode( '/', trailingslashit( explode( '?', $path )[0] ) );
 			$path_base   = $path[0];
