@@ -24,7 +24,7 @@ class SVN {
 		$esc_url = escapeshellarg( $url );
 
 		$options[]   = 'non-interactive';
-		if ( empty( $options['username'] ) ) {
+		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
 		}
@@ -74,9 +74,17 @@ class SVN {
 	public static function import( $path, $url, $message, $options = array() ) {
 		$options[] = 'non-interactive';
 		$options['m'] = $message;
-		if ( empty( $options['username'] ) ) {
+		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
+		if ( empty( $options['username'] ) ) {
+			return [
+				'result'   => false,
+				'revision' => false,
+				'errors'   => [ 'No SVN credentials configured.' ],
+			];
 		}
 
 		$esc_options = self::parse_esc_parameters( $options );
@@ -249,9 +257,17 @@ class SVN {
 	public static function commit( $checkout, $message, $options = array() ) {
 		$options[] = 'non-interactive';
 		$options['m'] = $message;
-		if ( empty( $options['username'] ) ) {
+		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
+		if ( empty( $options['username'] ) ) {
+			return [
+				'result'   => false,
+				'revision' => false,
+				'errors'   => [ 'No SVN credentials configured.' ],
+			];
 		}
 
 		$esc_options = self::parse_esc_parameters( $options );
@@ -289,9 +305,17 @@ class SVN {
 	public static function mkdir( $url, $message, $options = array() ) {
 		$options[] = 'non-interactive';
 		$options['m'] = $message;
-		if ( empty( $options['username'] ) ) {
+		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
+		if ( empty( $options['username'] ) ) {
+			return [
+				'result'   => false,
+				'revision' => false,
+				'errors'   => [ 'No SVN credentials configured.' ],
+			];
 		}
 
 		$esc_options = self::parse_esc_parameters( $options );
@@ -341,6 +365,10 @@ class SVN {
 		$errors = libxml_use_internal_errors( true );
 		$xml    = simplexml_load_string( $output );
 		libxml_use_internal_errors( $errors );
+
+		if ( ! $xml || ! isset( $xml->list ) ) {
+			return false;
+		}
 
 		$files = [];
 		foreach ( $xml->list->children() as $entry ) {
@@ -495,9 +523,17 @@ class SVN {
 				);
 			}
 
-			if ( empty( $options['username'] ) ) {
+			if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 				$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 				$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+			}
+
+			if ( empty( $options['username'] ) ) {
+				return [
+					'result'   => false,
+					'revision' => false,
+					'errors'   => [ 'No SVN credentials configured.' ],
+				];
 			}
 		}
 
