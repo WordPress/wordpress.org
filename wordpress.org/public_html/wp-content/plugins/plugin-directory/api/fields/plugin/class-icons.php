@@ -15,7 +15,12 @@ class Icons {
 				'description' => __( 'Plugin icon.', 'wporg-plugins' ),
 				'type'        => 'object',
 				'context'     => [ 'view' ],
-				'properties'  => [ 'svg', 'icon', 'icon_x2', 'generated' ],
+				'properties'  => [
+					'svg'       => [ 'type' => 'string' ],
+					'icon'      => [ 'type' => 'string' ],
+					'icon_x2'   => [ 'type' => 'string' ],
+					'generated' => [ 'type' => 'boolean' ],
+				],
 			],
 		] );
 	}

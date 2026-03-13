@@ -16,7 +16,10 @@ class Banners {
 				'description' => __( 'Plugin banner.', 'wporg-plugins' ),
 				'type'        => 'object',
 				'context'     => [ 'view' ],
-				'properties'  => [ 'banner', 'banner_x2' ],
+				'properties'  => [
+					'banner'    => [ 'type' => 'string' ],
+					'banner_x2' => [ 'type' => 'string' ],
+				],
 			],
 		] );
 	}

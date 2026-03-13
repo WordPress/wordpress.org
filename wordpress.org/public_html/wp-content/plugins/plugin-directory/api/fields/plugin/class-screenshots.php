@@ -17,7 +17,10 @@ class Screenshots {
 				'description' => __( 'Plugin screenshots.', 'wporg-plugins' ),
 				'type'        => 'object',
 				'context'     => [ 'view' ],
-				'properties'  => [ 'src', 'caption' ],
+				'properties'  => [
+					'src'     => [ 'type' => 'string' ],
+					'caption' => [ 'type' => 'string' ],
+				],
 			],
 		] );
 	}
