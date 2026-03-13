@@ -5,6 +5,8 @@
  * Fetches plugin slugs from featured, popular, and beta browse views,
  * imports full data for each using the /wp/v2/plugin REST API endpoint,
  * and tags them with the appropriate section terms.
+ *
+ * Plugin data is fetched in batches to reduce HTTP requests.
  */
 
 namespace WordPressdotorg\Plugin_Directory\Env;
@@ -25,6 +27,7 @@ if ( get_option( 'wporg_env_imported' ) ) {
 update_option( 'wporg_env_imported', time() );
 
 $per_section     = 15;
+$batch_size      = 10;
 $base_url        = 'https://wordpress.org/plugins/wp-json';
 $browse_sections = array( 'featured', 'popular', 'beta', 'blocks', 'new', 'updated' );
 
@@ -53,6 +56,40 @@ function fetch_slugs( $base_url, $section, $count ) {
 	}
 
 	return array_slice( $slugs, 0, $count );
+}
+
+/**
+ * Fetch plugin data for multiple slugs in a single REST API call.
+ *
+ * @param string $base_url REST API base URL.
+ * @param array  $slugs    Plugin slugs to fetch.
+ * @return array Keyed by slug, values are REST API response arrays.
+ */
+function fetch_plugins_batch( $base_url, $slugs ) {
+	$query = http_build_query( array(
+		'slug'     => $slugs,
+		'_embed'   => 1,
+		'per_page' => count( $slugs ),
+	) );
+
+	$response = wp_remote_get( "{$base_url}/wp/v2/plugin?{$query}", array( 'timeout' => 60 ) );
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return array();
+	}
+
+	$results = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( ! is_array( $results ) ) {
+		return array();
+	}
+
+	$plugins = array();
+	foreach ( $results as $data ) {
+		if ( ! empty( $data['slug'] ) ) {
+			$plugins[ $data['slug'] ] = $data;
+		}
+	}
+
+	return $plugins;
 }
 
 /**
@@ -92,20 +129,9 @@ function extract_embedded_terms( $data ) {
 }
 
 /**
- * Import a single plugin using the /wp/v2/plugin endpoint.
+ * Import a single plugin from pre-fetched REST API data.
  */
-function import_plugin( $base_url, $slug, $existing_post = null ) {
-	$response = wp_remote_get( "{$base_url}/wp/v2/plugin?slug={$slug}&_embed" );
-	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-		return null;
-	}
-
-	$results = json_decode( wp_remote_retrieve_body( $response ), true );
-	if ( empty( $results[0]['slug'] ) ) {
-		return null;
-	}
-
-	$data       = $results[0];
+function save_plugin( $data, $existing_post = null ) {
 	$meta       = $data['meta'] ?? [];
 	$taxonomies = extract_embedded_terms( $data );
 
@@ -207,9 +233,28 @@ foreach ( $browse_sections as $section ) {
 	$slugs = fetch_slugs( $base_url, $section, $per_section );
 	echo "  Found " . count( $slugs ) . " slugs.\n";
 
+	// Fetch plugin data in batches.
+	$all_plugin_data = array();
+	foreach ( array_chunk( $slugs, $batch_size ) as $batch ) {
+		$batch_data      = fetch_plugins_batch( $base_url, $batch );
+		$all_plugin_data = array_merge( $all_plugin_data, $batch_data );
+
+		$fetched = array_intersect_key( array_flip( $batch ), $batch_data );
+		$missing = array_diff( $batch, array_keys( $batch_data ) );
+		if ( $missing ) {
+			echo "  Skipped (not found): " . implode( ', ', $missing ) . "\n";
+		}
+	}
+
+	echo "  Fetched " . count( $all_plugin_data ) . " plugins, importing...\n";
+
 	$imported = 0;
 	foreach ( $slugs as $slug ) {
-		echo "    Importing {$slug}...";
+		if ( ! isset( $all_plugin_data[ $slug ] ) ) {
+			continue;
+		}
+
+		echo "    {$slug}...";
 
 		$existing = get_posts( array(
 			'post_type'   => 'plugin',
@@ -218,7 +263,7 @@ foreach ( $browse_sections as $section ) {
 			'numberposts' => 1,
 		) );
 
-		$post = import_plugin( $base_url, $slug, $existing[0] ?? null );
+		$post = save_plugin( $all_plugin_data[ $slug ], $existing[0] ?? null );
 		if ( ! $post ) {
 			echo " failed.\n";
 			continue;
