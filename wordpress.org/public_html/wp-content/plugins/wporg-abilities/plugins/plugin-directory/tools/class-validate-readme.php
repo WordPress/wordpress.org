@@ -27,7 +27,7 @@ class Validate_Readme extends Ability_Base {
 			'wporg/plugins/plugin-directory/validate-readme',
 			array(
 				'label'               => 'Validate Plugin Readme',
-				'description'         => 'Validates a WordPress plugin readme.txt file and returns errors, warnings, and notes.',
+				'description'         => 'Validates a WordPress plugin readme.txt or readme.md file and returns errors, warnings, and notes. Accepts either the file content directly or a URL to fetch it from.',
 				'category'            => 'wporg-plugins-plugin-directory',
 				'input_schema'        => array(
 					'type'       => 'object',
@@ -36,8 +36,11 @@ class Validate_Readme extends Ability_Base {
 							'type'        => 'string',
 							'description' => 'The full text content of the readme.txt or readme.md file to validate.',
 						),
+						'url'     => array(
+							'type'        => 'string',
+							'description' => 'URL to a readme.txt or readme.md file to fetch and validate. Must end in readme.txt or readme.md.',
+						),
 					),
-					'required'   => array( 'content' ),
 				),
 				'output_schema'       => array(
 					'type'       => 'object',
@@ -74,9 +77,9 @@ class Validate_Readme extends Ability_Base {
 	}
 
 	/**
-	 * Validate the provided readme content.
+	 * Validate the provided readme content or URL.
 	 *
-	 * @param array $input The tool input containing 'content'.
+	 * @param array $input The tool input containing 'content' or 'url'.
 	 * @return array MCP tool result.
 	 */
 	public static function execute( array $input ): array {
@@ -88,7 +91,15 @@ class Validate_Readme extends Ability_Base {
 			);
 		}
 
-		$results = Validator::instance()->validate_content( $input['content'] );
+		if ( ! empty( $input['url'] ) ) {
+			$results = Validator::instance()->validate_url( $input['url'] );
+		} elseif ( ! empty( $input['content'] ) ) {
+			$results = Validator::instance()->validate_content( $input['content'] );
+		} else {
+			return array(
+				'error' => 'Provide either "content" or "url".',
+			);
+		}
 
 		// Convert HTML messages to markdown/plain text for AI agent consumption.
 		foreach ( $results as $type => $items ) {
