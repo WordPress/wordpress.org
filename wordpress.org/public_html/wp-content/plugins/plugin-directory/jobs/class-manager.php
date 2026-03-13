@@ -423,11 +423,13 @@ class Manager {
 			);
 		}
 
+		// Convert to stdClass to avoid dynamic property deprecation on Job objects.
+		$jobs = array_map( static fn( $job ) => (object) (array) $job, $jobs );
+
 		// Fetch logs for the tasks.
 		if ( $with_logs ) {
 			$log_table = str_replace( 'jobs', 'logs', \HM\Cavalcade\Plugin\Job::get_table() );
-			foreach ( $jobs as &$job ) {
-				// Fetch logs for the task.
+			foreach ( $jobs as $job ) {
 				$job->logs = $wpdb->get_results(
 					$wpdb->prepare(
 						"SELECT status, timestamp, content FROM %i WHERE job = %d ORDER BY id DESC LIMIT 20",
@@ -444,19 +446,10 @@ class Manager {
 
 		// Sort jobs based on last run.
 		usort( $jobs, static function( $a, $b ) {
-			$a_last_log = 0;
-			$b_last_log = 0;
-			if ( $a->logs ) {
-				$a_last_log = max( array_map( 'strtotime', wp_list_pluck( $a->logs, 'timestamp' ) ) );
-			}
-			if ( $b->logs ) {
-				$b_last_log = max( array_map( 'strtotime', wp_list_pluck( $b->logs, 'timestamp' ) ) );
-			}
+			$a_last = max( $a->start, ! empty( $a->logs ) ? max( array_map( 'strtotime', wp_list_pluck( $a->logs, 'timestamp' ) ) ) : 0 );
+			$b_last = max( $b->start, ! empty( $b->logs ) ? max( array_map( 'strtotime', wp_list_pluck( $b->logs, 'timestamp' ) ) ) : 0 );
 
-			$a_last_log = max( $a->start, $a_last_log );
-			$b_last_log = max( $b->start, $b_last_log );
-
-			return $a_last_log <=> $b_last_log;
+			return $a_last <=> $b_last;
 		} );
 
 		return $jobs;
