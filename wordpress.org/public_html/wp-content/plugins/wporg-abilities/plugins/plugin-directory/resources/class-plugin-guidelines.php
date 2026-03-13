@@ -9,14 +9,14 @@ declare( strict_types = 1 );
 
 namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory\Resources;
 
-use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Resource_Base;
+use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Ability_Base;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Plugin_Guidelines class.
  */
-class Plugin_Guidelines extends Resource_Base {
+class Plugin_Guidelines extends Ability_Base {
 
 	/**
 	 * Register this resource as an ability.

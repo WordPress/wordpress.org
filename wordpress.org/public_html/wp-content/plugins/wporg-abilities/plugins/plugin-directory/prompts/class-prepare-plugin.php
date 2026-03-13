@@ -86,7 +86,7 @@ Read the `wporg://plugins/plugin-directory/plugin-headers` resource for the full
 
 ## Step 3: Validate readme.txt
 
-Use the `wporg/validate-readme` tool with the contents of `{$plugin_path}/readme.txt`.
+Use the `wporg/plugins/plugin-directory/validate-readme` tool with the contents of `{$plugin_path}/readme.txt`.
 
 If no readme.txt exists, create one following the `wporg://plugins/plugin-directory/readme-standard` resource.
 

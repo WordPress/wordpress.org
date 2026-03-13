@@ -54,7 +54,6 @@ class MCP_Server {
 				array(
 					'WordPress.org MCP Server — provides tools, resources, and prompts for interacting with WordPress.org services.',
 					'Use prompts/list to discover available workflows for specific tasks. Browse wporg://* resources for reference documentation.',
-					'All write operations require authentication via application password. To set up authentication, visit: https://login.wordpress.org/?action=authorize_application&app_id=c4c73a54-96d7-47b9-9bdc-1a66b9b04505',
 				)
 			),
 			'v1.0.0',
