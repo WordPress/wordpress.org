@@ -26,7 +26,7 @@ update_option( 'wporg_env_imported', time() );
 
 $per_section     = 15;
 $base_url        = 'https://wordpress.org/plugins/wp-json';
-$browse_sections = array( 'featured', 'popular', 'beta', 'new', 'updated' );
+$browse_sections = array( 'featured', 'popular', 'beta', 'blocks', 'new', 'updated' );
 
 update_option( 'blogname', 'Plugin Directory' );
 
@@ -122,18 +122,34 @@ function import_plugin( $base_url, $slug, $existing_post = null ) {
 
 	// Build the post args from the REST API response.
 	// The plugin post type doesn't support 'title', so use header_name meta instead.
+	// Use last_updated for post_modified to match production behavior.
+	$last_updated  = $meta['last_updated'] ?? '';
 	$post_args = array(
-		'post_title'   => $meta['header_name'] ?? $data['slug'],
-		'post_name'    => $data['slug'],
-		'post_status'  => 'publish',
-		'post_content' => $data['raw_content'] ?? '',
-		'post_excerpt' => $data['raw_excerpt'] ?? '',
-		'post_date'    => $data['date'] ?? '',
+		'post_title'        => $meta['header_name'] ?? $data['slug'],
+		'post_name'         => $data['slug'],
+		'post_status'       => 'publish',
+		'post_content'      => $data['raw_content'] ?? '',
+		'post_excerpt'      => $data['raw_excerpt'] ?? '',
+		'post_date'         => $data['date'] ?? '',
+		'post_date_gmt'     => $data['date_gmt'] ?? '',
+		'post_modified'     => $last_updated ?: ( $data['date'] ?? '' ),
+		'post_modified_gmt' => $last_updated ? get_gmt_from_date( $last_updated ) : ( $data['date_gmt'] ?? '' ),
 	);
 
 	if ( $author_id ) {
 		$post_args['post_author'] = $author_id;
 	}
+
+	// Preserve our custom dates through wp_insert_post/wp_update_post.
+	$preserve_dates = function( $data ) use ( $post_args ) {
+		foreach ( array( 'post_date', 'post_date_gmt', 'post_modified', 'post_modified_gmt' ) as $key ) {
+			if ( ! empty( $post_args[ $key ] ) ) {
+				$data[ $key ] = $post_args[ $key ];
+			}
+		}
+		return $data;
+	};
+	add_filter( 'wp_insert_post_data', $preserve_dates );
 
 	if ( $existing_post ) {
 		$post_args['ID'] = $existing_post->ID;
@@ -142,6 +158,8 @@ function import_plugin( $base_url, $slug, $existing_post = null ) {
 	} else {
 		$post = Plugin_Directory::create_plugin_post( $post_args );
 	}
+
+	remove_filter( 'wp_insert_post_data', $preserve_dates );
 
 	if ( is_wp_error( $post ) || ! $post ) {
 		return null;
@@ -152,6 +170,11 @@ function import_plugin( $base_url, $slug, $existing_post = null ) {
 		if ( '' !== $value && null !== $value ) {
 			update_post_meta( $post->ID, $key, wp_slash( $value ) );
 		}
+	}
+
+	// Store underscore-prefixed meta used internally for sorting/queries.
+	if ( ! empty( $meta['active_installs'] ) ) {
+		update_post_meta( $post->ID, '_active_installs', (int) $meta['active_installs'] );
 	}
 
 	// Taxonomies from embedded terms.

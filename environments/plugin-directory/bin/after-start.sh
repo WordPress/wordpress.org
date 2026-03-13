@@ -39,10 +39,20 @@ fi
 # Create stub database tables that exist outside WordPress on production.
 $WP wp db import wp-content/env-bin/database-tables.sql
 
-# Create browse section terms.
+# Create browse section terms with proper display names.
 echo "Creating browse sections..."
-for SECTION in featured popular beta blocks new updated favorites; do
-	$WP wp term create plugin_section "$SECTION" --slug="$SECTION" 2>/dev/null && echo "  Created section: $SECTION" || true
+declare -A SECTIONS=(
+	[featured]="Featured"
+	[popular]="Popular"
+	[beta]="Beta"
+	[blocks]="Block-Enabled"
+	[new]="New"
+	[updated]="Recently Updated"
+	[favorites]="Favorites"
+)
+for SLUG in "${!SECTIONS[@]}"; do
+	NAME="${SECTIONS[$SLUG]}"
+	$WP wp term create plugin_section "$NAME" --slug="$SLUG" 2>/dev/null && echo "  Created section: $NAME ($SLUG)" || true
 done
 
 # Import plugins from wordpress.org.
