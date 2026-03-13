@@ -607,6 +607,11 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 		! (
 			'login.wordpress.org' == $redirect_host &&
 			str_contains( $redirect_qv, 'response_type=code' )
+		) &&
+		// Don't override if the redirect is back to an application password authorization.
+		! (
+			'login.wordpress.org' == $redirect_host &&
+			str_contains( $redirect_qv, 'action=authorize_application' )
 		)
 	) {
 		if ( wp_validate_redirect( $_COOKIE['wporg_came_from'] ) ) {
