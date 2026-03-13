@@ -2083,8 +2083,8 @@ class Plugin_Directory {
 	 * @return \WP_Post|\WP_Error
 	 */
 	public static function create_plugin_post( array $args ) {
-		$title = $args['post_title'] ?: $args['post_name'];
-		$slug  = $args['post_name'] ?: sanitize_title( $title );
+		$title = ( $args['post_title'] ?? '' ) ?: $args['post_name'];
+		$slug  = ( $args['post_name'] ?? '' ) ?: sanitize_title( $title );
 
 		// Remove null items (date-related fields) to fallback to the defaults below.
 		$args = array_filter(
