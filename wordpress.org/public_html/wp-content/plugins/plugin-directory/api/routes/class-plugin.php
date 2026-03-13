@@ -80,7 +80,117 @@ class Plugin extends Base {
 			);
 		}
 
+		if ( 'raw' === ( $request['context'] ?? '' ) ) {
+			return $this->plugin_raw_data( $post );
+		}
+
 		return $this->plugin_info_data( $request, $post );
+	}
+
+	/**
+	 * Public meta keys safe to expose in the raw context.
+	 */
+	const RAW_PUBLIC_META_KEYS = [
+		'version',
+		'stable_tag',
+		'tested',
+		'requires',
+		'requires_php',
+		'requires_plugins',
+		'active_installs',
+		'downloads',
+		'rating',
+		'num_ratings',
+		'ratings',
+		'support_threads',
+		'support_threads_resolved',
+		'donate_link',
+		'last_updated',
+		'header_author',
+		'header_plugin_uri',
+		'assets_icons',
+		'assets_banners',
+		'assets_screenshots',
+		'screenshots',
+		'all_blocks',
+		'block_files',
+		'author_block_count',
+		'author_block_rating',
+		'tagged_versions',
+		'sections',
+		'tags',
+		'assets_banners_color',
+		'assets_blueprints',
+		'upgrade_notice',
+		'external_support_url',
+		'external_repository_url',
+	];
+
+	/**
+	 * Taxonomies to include in the raw context.
+	 */
+	const RAW_PUBLIC_TAXONOMIES = [
+		'plugin_tags',
+		'plugin_contributors',
+		'plugin_business_model',
+		'plugin_section',
+	];
+
+	/**
+	 * Return raw plugin post data with public meta and taxonomy terms.
+	 *
+	 * Skips the transformations applied by plugin_info_data() so the data
+	 * can be imported directly into another environment.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return array
+	 */
+	protected function plugin_raw_data( $post ) {
+		$result = [
+			'post' => [
+				'post_title'   => $post->post_title,
+				'post_name'    => $post->post_name,
+				'post_content' => $post->post_content,
+				'post_excerpt' => $post->post_excerpt,
+				'post_status'  => $post->post_status,
+				'post_date'    => $post->post_date,
+				'post_modified'=> $post->post_modified,
+				'post_author'  => [
+					'user_nicename' => get_the_author_meta( 'user_nicename', $post->post_author ),
+					'display_name'  => get_the_author_meta( 'display_name', $post->post_author ),
+				],
+			],
+			'meta'       => [],
+			'taxonomies' => [],
+		];
+
+		foreach ( self::RAW_PUBLIC_META_KEYS as $key ) {
+			$value = get_post_meta( $post->ID, $key, true );
+			if ( '' !== $value && false !== $value ) {
+				$result['meta'][ $key ] = $value;
+			}
+		}
+
+		foreach ( self::RAW_PUBLIC_TAXONOMIES as $taxonomy ) {
+			$terms = get_the_terms( $post->ID, $taxonomy );
+			if ( $terms && ! is_wp_error( $terms ) ) {
+				$result['taxonomies'][ $taxonomy ] = array_map( function ( $term ) use ( $taxonomy ) {
+					$data = [
+						'slug' => $term->slug,
+						'name' => $term->name,
+					];
+
+					if ( 'plugin_contributors' === $taxonomy ) {
+						$user = get_user_by( 'slug', $term->slug );
+						$data['display_name'] = $user ? $user->display_name : $term->name;
+					}
+
+					return $data;
+				}, $terms );
+			}
+		}
+
+		return $result;
 	}
 
 	/**

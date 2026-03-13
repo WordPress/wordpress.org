@@ -3,7 +3,8 @@
  * Import plugins from WordPress.org for local development.
  *
  * Fetches plugin slugs from featured, popular, and beta browse views,
- * imports full data for each, and tags them with the appropriate section terms.
+ * imports full data for each using the raw API context, and tags them
+ * with the appropriate section terms.
  */
 
 namespace WordPressdotorg\Plugin_Directory\Env;
@@ -57,153 +58,61 @@ function fetch_slugs( $base_url, $section, $count ) {
 /**
  * Ensure a WordPress user exists for a contributor.
  *
- * @param string        $nicename User nicename/slug.
- * @param object|string $data     Contributor data from the API.
+ * @param string $nicename     User nicename/slug.
+ * @param string $display_name Display name.
  */
-function ensure_user( $nicename, $data ) {
+function ensure_user( $nicename, $display_name = '' ) {
 	if ( get_user_by( 'slug', $nicename ) ) {
 		return;
 	}
-
-	$display_name = is_object( $data ) && ! empty( $data->display_name )
-		? $data->display_name
-		: $nicename;
 
 	wp_insert_user( array(
 		'user_login'    => $nicename,
 		'user_nicename' => $nicename,
 		'user_email'    => $nicename . '@example.invalid',
-		'display_name'  => $display_name,
+		'display_name'  => $display_name ?: $nicename,
 		'user_pass'     => wp_generate_password(),
 		'role'          => 'subscriber',
 	) );
 }
 
 /**
- * Convert API icon URLs to the internal assets_icons format.
- */
-function convert_icons( $api_icons ) {
-	$resolution_map = array(
-		'1x' => '128x128',
-		'2x' => '256x256',
-		'svg' => false,
-	);
-
-	return convert_assets( (array) $api_icons, $resolution_map );
-}
-
-/**
- * Convert API banner URLs to the internal assets_banners format.
- */
-function convert_banners( $api_banners ) {
-	$resolution_map = array(
-		'low'  => '772x250',
-		'high' => '1544x500',
-	);
-
-	return convert_assets( (array) $api_banners, $resolution_map );
-}
-
-/**
- * Convert API asset URLs to the internal asset array format.
- *
- * @param array $api_assets     Key => URL pairs from the API.
- * @param array $resolution_map Key => resolution string map.
- * @return array Internal asset entries.
- */
-function convert_assets( $api_assets, $resolution_map ) {
-	$assets = array();
-
-	foreach ( $api_assets as $key => $url ) {
-		if ( 'default' === $key || empty( $url ) ) {
-			continue;
-		}
-
-		$parsed   = wp_parse_url( $url );
-		$filename = basename( $parsed['path'] ?? '' );
-		$rev      = '';
-
-		if ( ! empty( $parsed['query'] ) ) {
-			parse_str( $parsed['query'], $query_args );
-			$rev = $query_args['rev'] ?? '';
-		}
-
-		$resolution = $resolution_map[ $key ] ?? '';
-		if ( ! $resolution && preg_match( '/(\d+x\d+)/', $filename, $m ) ) {
-			$resolution = $m[1];
-		}
-
-		$assets[] = array(
-			'filename'   => $filename,
-			'resolution' => $resolution ?: '',
-			'locale'     => '',
-			'revision'   => $rev,
-			'location'   => '',
-		);
-	}
-
-	return $assets;
-}
-
-/**
- * Import a single plugin and return the post, or null if skipped/failed.
+ * Import a single plugin using the raw API context.
  */
 function import_plugin( $base_url, $slug, $existing_post = null ) {
-	$response = wp_remote_get( "{$base_url}/plugin/{$slug}" );
+	$response = wp_remote_get( "{$base_url}/plugin/{$slug}?context=raw" );
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 		return null;
 	}
 
-	$plugin = json_decode( wp_remote_retrieve_body( $response ) );
-	if ( empty( $plugin->slug ) ) {
+	$data = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( empty( $data['post']['post_name'] ) ) {
 		return null;
 	}
 
+	$raw_post = $data['post'];
+	$raw_meta = $data['meta'] ?? [];
+	$raw_tax  = $data['taxonomies'] ?? [];
+
 	// Ensure the plugin author user exists.
 	$author_id = 0;
-	if ( ! empty( $plugin->author_profile ) ) {
-		$author_slug = trim( wp_parse_url( $plugin->author_profile, PHP_URL_PATH ), '/' );
-		if ( $author_slug ) {
-			ensure_user( $author_slug, (object) array( 'display_name' => wp_strip_all_tags( $plugin->author ?? $author_slug ) ) );
-			$author_user = get_user_by( 'slug', $author_slug );
-			if ( $author_user ) {
-				$author_id = $author_user->ID;
-			}
+	if ( ! empty( $raw_post['post_author']['user_nicename'] ) ) {
+		$author_slug = $raw_post['post_author']['user_nicename'];
+		ensure_user( $author_slug, $raw_post['post_author']['display_name'] ?? '' );
+		$author_user = get_user_by( 'slug', $author_slug );
+		if ( $author_user ) {
+			$author_id = $author_user->ID;
 		}
 	}
 
-	// Build post_content from sections.
-	// Format matches the real import: <!--section=name--> markers with no closing tags.
-	$description = '';
-	if ( ! empty( $plugin->sections ) ) {
-		foreach ( $plugin->sections as $section_name => $section_content ) {
-			// These sections are rendered via shortcodes, not stored in post_content.
-			if ( in_array( $section_name, array( 'screenshots', 'reviews' ), true ) ) {
-				continue;
-			}
-
-			// The API returns FAQ markup as <dt id="..">Q</h4><p><p>A</p></p>.
-			// Convert to the <dl><dt><h3>Q</h3></dt><dd>A</dd></dl> format used in production.
-			if ( 'faq' === $section_name ) {
-				$section_content = preg_replace(
-					'#<dt[^>]*>\s*(.+?)\s*</h4>\s*<p>\s*(.*?)\s*</p>\s*(?=<dt|$)#s',
-					"<dt><h3>\\1</h3></dt>\n<dd>\\2</dd>\n",
-					$section_content
-				);
-				$section_content = '<dl>' . trim( $section_content ) . '</dl>';
-			}
-
-			$description .= "\n\n<!--section={$section_name}-->\n{$section_content}";
-		}
-	}
-
+	// Build the post args directly from raw data.
 	$post_args = array(
-		'post_title'   => $plugin->name,
-		'post_name'    => $plugin->slug,
+		'post_title'   => $raw_post['post_title'],
+		'post_name'    => $raw_post['post_name'],
 		'post_status'  => 'publish',
-		'post_content' => $description,
-		'post_excerpt' => $plugin->short_description ?? '',
-		'post_date'    => ! empty( $plugin->added ) ? $plugin->added . ' 00:00:00' : null,
+		'post_content' => $raw_post['post_content'],
+		'post_excerpt' => $raw_post['post_excerpt'],
+		'post_date'    => $raw_post['post_date'],
 	);
 
 	if ( $author_id ) {
@@ -222,111 +131,31 @@ function import_plugin( $base_url, $slug, $existing_post = null ) {
 		return null;
 	}
 
-	// Post meta.
-	$meta = array(
-		'version'                  => $plugin->version ?? '',
-		'stable_tag'               => $plugin->stable_tag ?? $plugin->version ?? 'trunk',
-		'tested'                   => $plugin->tested ?? '',
-		'requires'                 => $plugin->requires ?? '',
-		'requires_php'             => $plugin->requires_php ?? '',
-		'active_installs'          => $plugin->active_installs ?? 0,
-		'_active_installs'         => $plugin->active_installs ?? 0,
-		'downloads'                => $plugin->downloaded ?? 0,
-		'rating'                   => isset( $plugin->rating ) ? ( $plugin->rating / 20 ) : 0,
-		'num_ratings'              => $plugin->num_ratings ?? 0,
-		'support_threads'          => $plugin->support_threads ?? 0,
-		'support_threads_resolved' => $plugin->support_threads_resolved ?? 0,
-		'donate_link'              => $plugin->donate_link ?? '',
-		'last_updated'             => $plugin->last_updated ?? '',
-		'header_author'            => wp_strip_all_tags( $plugin->author ?? '' ),
-		'header_plugin_uri'        => $plugin->homepage ?? '',
-	);
-
-	foreach ( $meta as $key => $value ) {
-		if ( $value !== '' && $value !== null ) {
-			update_post_meta( $post->ID, $key, $value );
+	// Store all meta values directly — no conversion needed.
+	foreach ( $raw_meta as $key => $value ) {
+		if ( '' !== $value && null !== $value ) {
+			update_post_meta( $post->ID, $key, wp_slash( $value ) );
 		}
 	}
 
-	if ( ! empty( $plugin->ratings ) ) {
-		update_post_meta( $post->ID, 'ratings', (array) $plugin->ratings );
-	}
-
-	if ( ! empty( $plugin->icons ) ) {
-		update_post_meta( $post->ID, 'assets_icons', convert_icons( $plugin->icons ) );
-	}
-
-	if ( ! empty( $plugin->banners ) ) {
-		update_post_meta( $post->ID, 'assets_banners', convert_banners( $plugin->banners ) );
-	}
-
-	if ( ! empty( $plugin->screenshots ) ) {
-		$captions         = array();
-		$assets           = array();
-		$screenshot_num   = 1;
-
-		foreach ( (array) $plugin->screenshots as $shot ) {
-			$shot = (object) $shot;
-
-			if ( ! empty( $shot->caption ) ) {
-				$captions[ $screenshot_num ] = $shot->caption;
+	// Taxonomies.
+	foreach ( $raw_tax as $taxonomy => $terms ) {
+		if ( 'plugin_contributors' === $taxonomy ) {
+			// Create users and grant committer access.
+			$slugs = array();
+			foreach ( $terms as $term ) {
+				$slugs[] = $term['slug'];
+				ensure_user( $term['slug'], $term['display_name'] ?? '' );
 			}
+			wp_set_object_terms( $post->ID, $slugs, $taxonomy );
 
-			if ( ! empty( $shot->src ) ) {
-				$parsed = wp_parse_url( $shot->src );
-				$rev    = '';
-				if ( ! empty( $parsed['query'] ) ) {
-					parse_str( $parsed['query'], $query_args );
-					$rev = $query_args['rev'] ?? '';
-				}
-				$assets[] = array(
-					'filename'   => basename( $parsed['path'] ?? '' ),
-					'resolution' => (string) $screenshot_num,
-					'locale'     => '',
-					'revision'   => $rev,
-					'location'   => '',
-				);
+			foreach ( $slugs as $contributor_slug ) {
+				Tools::grant_plugin_committer( $post, $contributor_slug );
 			}
-
-			$screenshot_num++;
+		} else {
+			$term_slugs = wp_list_pluck( $terms, 'slug' );
+			wp_set_object_terms( $post->ID, $term_slugs, $taxonomy );
 		}
-
-		update_post_meta( $post->ID, 'screenshots', $captions );
-		update_post_meta( $post->ID, 'assets_screenshots', $assets );
-	}
-
-	if ( ! empty( $plugin->requires_plugins ) ) {
-		update_post_meta( $post->ID, 'requires_plugins', $plugin->requires_plugins );
-	}
-
-	if ( ! empty( $plugin->blocks ) ) {
-		update_post_meta( $post->ID, 'all_blocks', (array) $plugin->blocks );
-	}
-
-	// Tags (ProperCase).
-	if ( ! empty( $plugin->tags ) ) {
-		$tags = array_map( 'ucwords', array_values( (array) $plugin->tags ) );
-		wp_set_object_terms( $post->ID, $tags, 'plugin_tags' );
-	}
-
-	// Contributors — create users and set terms, and grant committer access.
-	if ( ! empty( $plugin->contributors ) ) {
-		$contributor_slugs = array();
-		foreach ( (array) $plugin->contributors as $nicename => $data ) {
-			$contributor_slugs[] = $nicename;
-			ensure_user( $nicename, $data );
-		}
-		wp_set_object_terms( $post->ID, $contributor_slugs, 'plugin_contributors' );
-
-		// Mark all contributors as committers in the svn_access table.
-		foreach ( $contributor_slugs as $slug ) {
-			Tools::grant_plugin_committer( $post, $slug );
-		}
-	}
-
-	// Business model (ProperCase).
-	if ( ! empty( $plugin->business_model ) ) {
-		wp_set_object_terms( $post->ID, ucwords( $plugin->business_model ), 'plugin_business_model' );
 	}
 
 	return $post;

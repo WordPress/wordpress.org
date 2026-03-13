@@ -13,7 +13,13 @@ class Ratings {
 				'description' => __( 'Plugin ratings.', 'wporg-pluginss' ),
 				'type'        => 'object',
 				'context'     => [ 'view' ],
-				'properties'  => [ '1', '2', '3', '4', '5' ],
+				'properties'  => [
+					'1' => [ 'type' => 'integer' ],
+					'2' => [ 'type' => 'integer' ],
+					'3' => [ 'type' => 'integer' ],
+					'4' => [ 'type' => 'integer' ],
+					'5' => [ 'type' => 'integer' ],
+				],
 			],
 		] );
 	}
