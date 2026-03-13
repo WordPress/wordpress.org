@@ -3,8 +3,8 @@
  * Import plugins from WordPress.org for local development.
  *
  * Fetches plugin slugs from featured, popular, and beta browse views,
- * imports full data for each using the raw API context, and tags them
- * with the appropriate section terms.
+ * imports full data for each using the /wp/v2/plugin REST API endpoint,
+ * and tags them with the appropriate section terms.
  */
 
 namespace WordPressdotorg\Plugin_Directory\Env;
@@ -25,7 +25,7 @@ if ( get_option( 'wporg_env_imported' ) ) {
 update_option( 'wporg_env_imported', time() );
 
 $per_section     = 10;
-$base_url        = 'https://wordpress.org/plugins/wp-json/plugins/v1';
+$base_url        = 'https://wordpress.org/plugins/wp-json';
 $browse_sections = array( 'featured', 'popular', 'beta' );
 
 update_option( 'blogname', 'Plugin Directory' );
@@ -38,7 +38,7 @@ function fetch_slugs( $base_url, $section, $count ) {
 	$page  = 1;
 
 	while ( count( $slugs ) < $count ) {
-		$response = wp_remote_get( "{$base_url}/query-plugins/?browse={$section}&page={$page}" );
+		$response = wp_remote_get( "{$base_url}/plugins/v1/query-plugins/?browse={$section}&page={$page}" );
 		if ( is_wp_error( $response ) ) {
 			break;
 		}
@@ -77,42 +77,57 @@ function ensure_user( $nicename, $display_name = '' ) {
 }
 
 /**
- * Import a single plugin using the raw API context.
+ * Extract taxonomy terms grouped by taxonomy from an embedded REST response.
+ */
+function extract_embedded_terms( $data ) {
+	$terms = array();
+
+	foreach ( $data['_embedded']['wp:term'] ?? [] as $group ) {
+		foreach ( $group as $term ) {
+			$terms[ $term['taxonomy'] ][] = $term;
+		}
+	}
+
+	return $terms;
+}
+
+/**
+ * Import a single plugin using the /wp/v2/plugin endpoint.
  */
 function import_plugin( $base_url, $slug, $existing_post = null ) {
-	$response = wp_remote_get( "{$base_url}/plugin/{$slug}?context=raw" );
+	$response = wp_remote_get( "{$base_url}/wp/v2/plugin?slug={$slug}&_embed" );
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 		return null;
 	}
 
-	$data = json_decode( wp_remote_retrieve_body( $response ), true );
-	if ( empty( $data['post']['post_name'] ) ) {
+	$results = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( empty( $results[0]['slug'] ) ) {
 		return null;
 	}
 
-	$raw_post = $data['post'];
-	$raw_meta = $data['meta'] ?? [];
-	$raw_tax  = $data['taxonomies'] ?? [];
+	$data       = $results[0];
+	$meta       = $data['meta'] ?? [];
+	$taxonomies = extract_embedded_terms( $data );
 
 	// Ensure the plugin author user exists.
-	$author_id = 0;
-	if ( ! empty( $raw_post['post_author']['user_nicename'] ) ) {
-		$author_slug = $raw_post['post_author']['user_nicename'];
-		ensure_user( $author_slug, $raw_post['post_author']['display_name'] ?? '' );
-		$author_user = get_user_by( 'slug', $author_slug );
+	$author_id  = 0;
+	$author     = $data['_embedded']['author'][0] ?? [];
+	if ( ! empty( $author['slug'] ) ) {
+		ensure_user( $author['slug'], $author['name'] ?? '' );
+		$author_user = get_user_by( 'slug', $author['slug'] );
 		if ( $author_user ) {
 			$author_id = $author_user->ID;
 		}
 	}
 
-	// Build the post args directly from raw data.
+	// Build the post args from the REST API response.
 	$post_args = array(
-		'post_title'   => $raw_post['post_title'],
-		'post_name'    => $raw_post['post_name'],
+		'post_title'   => $data['title']['rendered'] ?? '',
+		'post_name'    => $data['slug'],
 		'post_status'  => 'publish',
-		'post_content' => $raw_post['post_content'],
-		'post_excerpt' => $raw_post['post_excerpt'],
-		'post_date'    => $raw_post['post_date'],
+		'post_content' => $data['raw_content'] ?? '',
+		'post_excerpt' => $data['raw_excerpt'] ?? '',
+		'post_date'    => $data['date'] ?? '',
 	);
 
 	if ( $author_id ) {
@@ -131,25 +146,25 @@ function import_plugin( $base_url, $slug, $existing_post = null ) {
 		return null;
 	}
 
-	// Store all meta values directly — no conversion needed.
-	foreach ( $raw_meta as $key => $value ) {
+	// Store meta values from the standard REST meta object.
+	foreach ( $meta as $key => $value ) {
 		if ( '' !== $value && null !== $value ) {
 			update_post_meta( $post->ID, $key, wp_slash( $value ) );
 		}
 	}
 
-	// Taxonomies.
-	foreach ( $raw_tax as $taxonomy => $terms ) {
+	// Taxonomies from embedded terms.
+	foreach ( $taxonomies as $taxonomy => $terms ) {
 		if ( 'plugin_contributors' === $taxonomy ) {
 			// Create users and grant committer access.
-			$slugs = array();
+			$contributor_slugs = array();
 			foreach ( $terms as $term ) {
-				$slugs[] = $term['slug'];
-				ensure_user( $term['slug'], $term['display_name'] ?? '' );
+				$contributor_slugs[] = $term['slug'];
+				ensure_user( $term['slug'], $term['display_name'] ?? $term['name'] ?? '' );
 			}
-			wp_set_object_terms( $post->ID, $slugs, $taxonomy );
+			wp_set_object_terms( $post->ID, $contributor_slugs, $taxonomy );
 
-			foreach ( $slugs as $contributor_slug ) {
+			foreach ( $contributor_slugs as $contributor_slug ) {
 				Tools::grant_plugin_committer( $post, $contributor_slug );
 			}
 		} else {

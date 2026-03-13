@@ -219,6 +219,7 @@ class Plugin_Directory {
 			'rewrite'           => false,
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_section',
@@ -252,6 +253,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
@@ -297,6 +299,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',
@@ -329,6 +332,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
@@ -404,151 +408,8 @@ class Plugin_Directory {
 			'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 
-		/**
-		 * TODO
-		 * Use register_rest_field() to add array and object meta data to the API:
-		 * ratings, upgrade_notice, contributors, screenshots, sections, assets_screenshots,
-		 * assets_icons, assets_banners,
-		 */
-
-		register_meta( 'post', 'rating', array(
-			'type'         => 'number',
-			'description'  => __( 'Overall rating of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// todo 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'active_installs', array(
-			'type'              => 'integer',
-			'description'       => __( 'Number of installations.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'downloads', array(
-			'type'              => 'integer',
-			'description'       => __( 'Number of downloads.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'tested', array(
-			'description'  => __( 'The version of WordPress the plugin was tested with.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'requires', array(
-			'description'  => __( 'The minimum version of WordPress the plugin needs to run.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'requires_php', array(
-			'description'  => __( 'The minimum version of PHP the plugin needs to run.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'stable_tag', array(
-			'description'  => __( 'Stable version of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'donate_link', array(
-			'description'       => __( 'Link to donate to the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'version', array(
-			'description'  => __( 'Current stable version.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_name', array(
-			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_plugin_uri', array(
-			'description'       => __( 'URL to the homepage of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'header_name', array(
-			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_author', array(
-			'description'  => __( 'Name of the plugin author.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_author_uri', array(
-			'description'       => __( 'URL to the homepage of the author.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'header_description', array(
-			'description'  => __( 'Description of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'assets_icons', array(
-			'type'         => 'UserDefinedarray',
-			'description'  => __( 'Icon images of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'assets_banners_color', array(
-			'description'  => __( 'Fallback color for the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'support_threads', array(
-			'type'              => 'integer',
-			'description'       => __( 'Amount of support threads for the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'support_threads_resolved', array(
-			'type'              => 'integer',
-			'description'       => __( 'Amount of resolved support threads for the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
+		// Register all REST API meta and custom fields.
+		API\Plugin_Fields::register();
 
 		// Add the browse/* views.
 		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated|preview)' );
