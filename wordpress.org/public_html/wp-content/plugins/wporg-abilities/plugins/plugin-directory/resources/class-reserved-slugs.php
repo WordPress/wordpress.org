@@ -5,6 +5,8 @@
  * @package WordPressdotorg\Abilities\Plugins\Plugin_Directory\Resources
  */
 
+// phpcs:disable WordPress.WP.CapitalPDangit.MisspelledInText -- Lowercase "wordpress" is intentional (slugs).
+
 declare( strict_types = 1 );
 
 namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory\Resources;

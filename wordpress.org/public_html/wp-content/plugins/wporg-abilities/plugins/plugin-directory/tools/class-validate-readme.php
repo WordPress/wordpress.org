@@ -67,9 +67,9 @@ class Validate_Readme extends Ability_Base {
 				'meta'                => array(
 					'mcp'         => array( 'type' => 'tool' ),
 					'annotations' => array(
-						'readonly'     => true,
-						'idempotent'   => true,
-						'destructive'  => false,
+						'readonly'    => true,
+						'idempotent'  => true,
+						'destructive' => false,
 					),
 				),
 			)

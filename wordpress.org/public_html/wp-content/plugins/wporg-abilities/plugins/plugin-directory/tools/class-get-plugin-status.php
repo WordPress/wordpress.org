@@ -34,7 +34,7 @@ class Get_Plugin_Status extends Ability_Base {
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
-						'plugin_slug'    => array(
+						'plugin_slug'  => array(
 							'type'        => 'string',
 							'description' => 'The plugin slug as assigned during submission.',
 						),
@@ -108,9 +108,9 @@ class Get_Plugin_Status extends Ability_Base {
 				'meta'                => array(
 					'mcp'         => array( 'type' => 'tool' ),
 					'annotations' => array(
-						'readonly'     => true,
-						'idempotent'   => true,
-						'destructive'  => false,
+						'readonly'    => true,
+						'idempotent'  => true,
+						'destructive' => false,
 					),
 				),
 			)
@@ -166,13 +166,15 @@ class Get_Plugin_Status extends Ability_Base {
 	 * @return \WP_Post|null
 	 */
 	private static function get_plugin_post( string $slug ): ?\WP_Post {
-		$posts = get_posts( array(
-			'post_type'   => 'plugin',
-			'name'        => $slug,
-			'post_status' => 'any',
-			'author'      => get_current_user_id(),
-			'numberposts' => 1,
-		) );
+		$posts = get_posts(
+			array(
+				'post_type'   => 'plugin',
+				'name'        => $slug,
+				'post_status' => 'any',
+				'author'      => get_current_user_id(),
+				'numberposts' => 1,
+			)
+		);
 
 		return $posts[0] ?? null;
 	}
@@ -212,7 +214,7 @@ class Get_Plugin_Status extends Ability_Base {
 		if ( 'rejected' === $post->post_status ) {
 			$reason = get_post_meta( $post->ID, '_rejection_reason', true );
 			if ( $reason ) {
-				$reasons      = class_exists( Template::class ) ? Template::get_rejection_reasons() : array();
+				$reasons                  = class_exists( Template::class ) ? Template::get_rejection_reasons() : array();
 				$data['rejection_reason'] = $reasons[ $reason ] ?? $reason;
 			}
 		}
@@ -291,6 +293,7 @@ class Get_Plugin_Status extends Ability_Base {
 
 				$feedback[] = array(
 					'from' => 'customer' === $thread->type ? 'author' : 'reviewer',
+					// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout API property.
 					'date' => $thread->createdAt ?? '',
 					'body' => $body,
 				);

@@ -107,7 +107,8 @@ Results are classified by severity:
 - All submissions are also manually reviewed by the WordPress.org plugin review team
 - A clean PCP report speeds up the review process significantly
 - More info: https://wordpress.org/plugins/plugin-check/
-MD,
+MD
+				,
 				'mimeType' => 'text/markdown',
 			),
 		);
