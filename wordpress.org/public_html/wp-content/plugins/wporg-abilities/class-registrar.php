@@ -7,7 +7,11 @@
  * @package WordPressdotorg\Abilities
  */
 
+declare( strict_types = 1 );
+
 namespace WordPressdotorg\Abilities;
+
+use WordPressdotorg\Abilities\Plugins\Plugin_Directory;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,11 +32,30 @@ class Registrar {
 	 * Register ability categories.
 	 */
 	public static function register_categories(): void {
+		wp_register_ability_category(
+			'wporg-plugins-plugin-directory',
+			array(
+				'label'       => 'Plugin Directory',
+				'description' => 'Tools, resources, and prompts for the WordPress.org plugin directory.',
+			)
+		);
 	}
 
 	/**
 	 * Register abilities.
 	 */
 	public static function register_abilities(): void {
+		// Resources.
+		Plugin_Directory\Resources\Plugin_Guidelines::register();
+		Plugin_Directory\Resources\Readme_Standard::register();
+		Plugin_Directory\Resources\Plugin_Headers::register();
+		Plugin_Directory\Resources\Reserved_Slugs::register();
+		Plugin_Directory\Resources\Plugin_Check_Guide::register();
+		Plugin_Directory\Resources\Plugin_FAQ::register();
+
+		// Prompts.
+		Plugin_Directory\Prompts\Prepare_Plugin::register();
+		Plugin_Directory\Prompts\Run_Plugin_Check::register();
+		Plugin_Directory\Prompts\Address_Review_Feedback::register();
 	}
 }

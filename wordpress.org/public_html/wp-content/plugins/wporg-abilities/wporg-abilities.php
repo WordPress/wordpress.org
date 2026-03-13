@@ -13,6 +13,8 @@
  * @package WordPressdotorg\Abilities
  */
 
+declare( strict_types = 1 );
+
 namespace WordPressdotorg\Abilities;
 
 use WP\MCP\Core\McpAdapter;
