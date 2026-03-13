@@ -11,12 +11,13 @@ WP="npx wp-env $CONFIG run cli --"
 WPENV="npx wp-env $CONFIG run"
 
 # wordpress container (Debian).
+echo "Installing CLI tools..."
 $WPENV wordpress sudo bash -c \
-	'command -v svn > /dev/null || (apt-get -qy update && apt-get -qy install subversion unzip zip)'
+	'command -v svn > /dev/null || (apt-get -qy update && apt-get -qy install subversion unzip zip) > /dev/null 2>&1'
 
 # cli container (Alpine).
 $WPENV cli sudo sh -c \
-	'command -v svn > /dev/null || apk add --no-cache subversion unzip zip coreutils'
+	'command -v svn > /dev/null || apk add --no-cache -q subversion unzip zip coreutils > /dev/null 2>&1'
 
 # Set up permalinks.
 $WP wp rewrite structure '/%postname%/' --hard
