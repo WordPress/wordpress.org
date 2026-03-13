@@ -121,8 +121,9 @@ function import_plugin( $base_url, $slug, $existing_post = null ) {
 	}
 
 	// Build the post args from the REST API response.
+	// The plugin post type doesn't support 'title', so use header_name meta instead.
 	$post_args = array(
-		'post_title'   => $data['title']['rendered'] ?? '',
+		'post_title'   => $meta['header_name'] ?? $data['slug'],
 		'post_name'    => $data['slug'],
 		'post_status'  => 'publish',
 		'post_content' => $data['raw_content'] ?? '',
