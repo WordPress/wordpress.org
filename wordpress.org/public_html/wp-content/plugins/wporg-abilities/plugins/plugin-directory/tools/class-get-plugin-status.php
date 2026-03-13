@@ -279,6 +279,32 @@ class Get_Plugin_Status extends Ability_Base {
 				continue;
 			}
 
+			// When only the latest reviewer message is needed, find it directly.
+			if ( ! $full_history ) {
+				foreach ( $threads as $thread ) {
+					if ( in_array( $thread->type ?? '', array( 'reply', 'message' ), true ) ) {
+						$body = $thread->body ?? '';
+						if ( $body ) {
+							$body = self::html_to_text( $body );
+							$body = self::strip_boilerplate( $body );
+						}
+
+						return array(
+							array(
+								'from' => 'reviewer',
+								// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout API property.
+								'date' => $thread->createdAt ?? '',
+								'body' => $body,
+							),
+						);
+					}
+				}
+
+				// No reviewer message found in this email, try next.
+				continue;
+			}
+
+			// Full history: process all threads.
 			foreach ( $threads as $thread ) {
 				// Skip internal notes and system events — only include customer and agent messages.
 				if ( ! in_array( $thread->type ?? '', array( 'customer', 'reply', 'message' ), true ) ) {
@@ -301,18 +327,7 @@ class Get_Plugin_Status extends Ability_Base {
 		}
 
 		// Return in chronological order (oldest first) so it reads as a conversation.
-		$feedback = array_reverse( $feedback );
-
-		// By default, return only the most recent reviewer message.
-		if ( ! $full_history ) {
-			for ( $i = count( $feedback ) - 1; $i >= 0; $i-- ) {
-				if ( 'reviewer' === $feedback[ $i ]['from'] ) {
-					return array( $feedback[ $i ] );
-				}
-			}
-		}
-
-		return $feedback;
+		return array_reverse( $feedback );
 	}
 
 	/**
