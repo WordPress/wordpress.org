@@ -222,7 +222,7 @@ function save_plugin( $data, $existing_post = null ) {
 $imported_slugs = array();
 
 foreach ( $browse_sections as $section ) {
-	echo "Fetching {$per_section} plugins from '{$section}'...\n";
+	echo "Fetching plugins in '{$section}' section...\n";
 
 	$slugs = fetch_slugs( $base_url, $section, $per_section );
 	echo "  Found " . count( $slugs ) . " slugs.\n";
