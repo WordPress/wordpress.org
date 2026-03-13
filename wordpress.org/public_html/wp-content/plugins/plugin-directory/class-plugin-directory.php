@@ -281,6 +281,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
@@ -408,7 +409,6 @@ class Plugin_Directory {
 			'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 
-		// Register all REST API meta and custom fields.
 		API\Plugin_Fields::register();
 
 		// Add the browse/* views.

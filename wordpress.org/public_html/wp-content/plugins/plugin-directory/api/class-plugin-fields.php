@@ -23,99 +23,99 @@ class Plugin_Fields {
 	 */
 	private static function register_meta(): void {
 		register_meta( 'post', 'version', [
-			'description'  => __( 'Current stable version.', 'wporg-plugins' ),
+			'description'  => 'Current stable version.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'stable_tag', [
-			'description'  => __( 'Stable version of the plugin.', 'wporg-plugins' ),
+			'description'  => 'Stable version of the plugin.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'tested', [
-			'description'  => __( 'The version of WordPress the plugin was tested with.', 'wporg-plugins' ),
+			'description'  => 'The version of WordPress the plugin was tested with.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'requires', [
-			'description'  => __( 'The minimum version of WordPress the plugin needs to run.', 'wporg-plugins' ),
+			'description'  => 'The minimum version of WordPress the plugin needs to run.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'requires_php', [
-			'description'  => __( 'The minimum version of PHP the plugin needs to run.', 'wporg-plugins' ),
+			'description'  => 'The minimum version of PHP the plugin needs to run.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'requires_plugins', [
-			'description'  => __( 'Comma-separated slugs of required plugins.', 'wporg-plugins' ),
+			'description'  => 'Comma-separated slugs of required plugins.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'header_name', [
-			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
+			'description'  => 'Name of the plugin.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'header_author', [
-			'description'  => __( 'Name of the plugin author.', 'wporg-plugins' ),
+			'description'  => 'Name of the plugin author.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'header_description', [
-			'description'  => __( 'Description of the plugin.', 'wporg-plugins' ),
+			'description'  => 'Description of the plugin.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'assets_banners_color', [
-			'description'  => __( 'Fallback color for the plugin.', 'wporg-plugins' ),
+			'description'  => 'Fallback color for the plugin.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'last_updated', [
-			'description'  => __( 'Date the plugin was last updated.', 'wporg-plugins' ),
+			'description'  => 'Date the plugin was last updated.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'external_support_url', [
-			'description'  => __( 'External support URL.', 'wporg-plugins' ),
+			'description'  => 'External support URL.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'external_repository_url', [
-			'description'  => __( 'External repository URL.', 'wporg-plugins' ),
+			'description'  => 'External repository URL.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'donate_link', [
-			'description'       => __( 'Link to donate to the plugin.', 'wporg-plugins' ),
+			'description'       => 'Link to donate to the plugin.',
 			'single'            => true,
 			'sanitize_callback' => 'esc_url_raw',
 			'show_in_rest'      => true,
 		] );
 
 		register_meta( 'post', 'header_plugin_uri', [
-			'description'       => __( 'URL to the homepage of the plugin.', 'wporg-plugins' ),
+			'description'       => 'URL to the homepage of the plugin.',
 			'single'            => true,
 			'sanitize_callback' => 'esc_url_raw',
 			'show_in_rest'      => true,
 		] );
 
 		register_meta( 'post', 'header_author_uri', [
-			'description'       => __( 'URL to the homepage of the author.', 'wporg-plugins' ),
+			'description'       => 'URL to the homepage of the author.',
 			'single'            => true,
 			'sanitize_callback' => 'esc_url_raw',
 			'show_in_rest'      => true,
@@ -123,21 +123,21 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'rating', [
 			'type'         => 'number',
-			'description'  => __( 'Overall rating of the plugin.', 'wporg-plugins' ),
+			'description'  => 'Overall rating of the plugin.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'author_block_rating', [
 			'type'         => 'number',
-			'description'  => __( 'Average rating of blocks by this author.', 'wporg-plugins' ),
+			'description'  => 'Average rating of blocks by this author.',
 			'single'       => true,
 			'show_in_rest' => true,
 		] );
 
 		register_meta( 'post', 'active_installs', [
 			'type'              => 'integer',
-			'description'       => __( 'Number of installations.', 'wporg-plugins' ),
+			'description'       => 'Number of installations.',
 			'single'            => true,
 			'sanitize_callback' => 'absint',
 			'show_in_rest'      => true,
@@ -145,7 +145,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'downloads', [
 			'type'              => 'integer',
-			'description'       => __( 'Number of downloads.', 'wporg-plugins' ),
+			'description'       => 'Number of downloads.',
 			'single'            => true,
 			'sanitize_callback' => 'absint',
 			'show_in_rest'      => true,
@@ -153,7 +153,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'num_ratings', [
 			'type'              => 'integer',
-			'description'       => __( 'Number of ratings.', 'wporg-plugins' ),
+			'description'       => 'Number of ratings.',
 			'single'            => true,
 			'sanitize_callback' => 'absint',
 			'show_in_rest'      => true,
@@ -161,7 +161,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'support_threads', [
 			'type'              => 'integer',
-			'description'       => __( 'Amount of support threads for the plugin.', 'wporg-plugins' ),
+			'description'       => 'Amount of support threads for the plugin.',
 			'single'            => true,
 			'sanitize_callback' => 'absint',
 			'show_in_rest'      => true,
@@ -169,7 +169,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'support_threads_resolved', [
 			'type'              => 'integer',
-			'description'       => __( 'Amount of resolved support threads for the plugin.', 'wporg-plugins' ),
+			'description'       => 'Amount of resolved support threads for the plugin.',
 			'single'            => true,
 			'sanitize_callback' => 'absint',
 			'show_in_rest'      => true,
@@ -177,7 +177,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'author_block_count', [
 			'type'              => 'integer',
-			'description'       => __( 'Number of blocks by this author.', 'wporg-plugins' ),
+			'description'       => 'Number of blocks by this author.',
 			'single'            => true,
 			'sanitize_callback' => 'absint',
 			'show_in_rest'      => true,
@@ -185,7 +185,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'sections', [
 			'type'         => 'array',
-			'description'  => __( 'List of readme section names present for the plugin.', 'wporg-plugins' ),
+			'description'  => 'List of readme section names present for the plugin.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -197,7 +197,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'tags', [
 			'type'         => 'object',
-			'description'  => __( 'Tagged SVN versions with metadata (tag, author, date).', 'wporg-plugins' ),
+			'description'  => 'Tagged SVN versions with metadata (tag, author, date).',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -209,7 +209,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'upgrade_notice', [
 			'type'         => 'object',
-			'description'  => __( 'Upgrade notices keyed by version.', 'wporg-plugins' ),
+			'description'  => 'Upgrade notices keyed by version.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -221,7 +221,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'ratings', [
 			'type'         => 'object',
-			'description'  => __( 'Rating breakdown by star count.', 'wporg-plugins' ),
+			'description'  => 'Rating breakdown by star count.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -233,7 +233,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'assets_icons', [
 			'type'         => 'object',
-			'description'  => __( 'Icon images of the plugin.', 'wporg-plugins' ),
+			'description'  => 'Icon images of the plugin.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -245,7 +245,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'assets_banners', [
 			'type'         => 'object',
-			'description'  => __( 'Banner images of the plugin.', 'wporg-plugins' ),
+			'description'  => 'Banner images of the plugin.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -257,7 +257,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'assets_blueprints', [
 			'type'         => 'object',
-			'description'  => __( 'Plugin blueprint asset data keyed by filename.', 'wporg-plugins' ),
+			'description'  => 'Plugin blueprint asset data keyed by filename.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -270,7 +270,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'all_blocks', [
 			'type'         => 'object',
-			'description'  => __( 'Block data provided by the plugin.', 'wporg-plugins' ),
+			'description'  => 'Block data provided by the plugin.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -282,7 +282,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'tagged_versions', [
 			'type'         => 'array',
-			'description'  => __( 'Tagged SVN versions of the plugin.', 'wporg-plugins' ),
+			'description'  => 'Tagged SVN versions of the plugin.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -294,7 +294,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'block_files', [
 			'type'         => 'array',
-			'description'  => __( 'Block JSON file paths.', 'wporg-plugins' ),
+			'description'  => 'Block JSON file paths.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -306,7 +306,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'assets_screenshots', [
 			'type'         => 'object',
-			'description'  => __( 'Screenshot asset data keyed by filename.', 'wporg-plugins' ),
+			'description'  => 'Screenshot asset data keyed by filename.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -318,7 +318,7 @@ class Plugin_Fields {
 
 		register_meta( 'post', 'screenshots', [
 			'type'         => 'object',
-			'description'  => __( 'Screenshot captions keyed by screenshot number.', 'wporg-plugins' ),
+			'description'  => 'Screenshot captions keyed by screenshot number.',
 			'single'       => true,
 			'show_in_rest' => [
 				'schema' => [
@@ -336,9 +336,9 @@ class Plugin_Fields {
 	private static function register_rest_fields(): void {
 		// Resolved asset URLs — computed from raw meta, not stored directly.
 		register_rest_field( 'plugin', 'banners', [
-			'get_callback' => fn( array $object ): array => Template::get_plugin_banner( $object['id'] ),
+			'get_callback' => fn( array $object ): array => Template::get_plugin_banner( $object['id'] ) ?: [],
 			'schema'       => [
-				'description' => __( 'Plugin banner URLs.', 'wporg-plugins' ),
+				'description' => 'Plugin banner URLs.',
 				'type'        => 'object',
 				'context'     => [ 'view' ],
 				'properties'  => [
@@ -351,7 +351,7 @@ class Plugin_Fields {
 		register_rest_field( 'plugin', 'icons', [
 			'get_callback' => fn( array $object ): array => Template::get_plugin_icon( $object['id'] ),
 			'schema'       => [
-				'description' => __( 'Plugin icon URLs.', 'wporg-plugins' ),
+				'description' => 'Plugin icon URLs.',
 				'type'        => 'object',
 				'context'     => [ 'view' ],
 				'properties'  => [
@@ -372,7 +372,7 @@ class Plugin_Fields {
 				Template::get_screenshots( $object['id'] )
 			) ),
 			'schema'       => [
-				'description' => __( 'Plugin screenshot URLs with captions.', 'wporg-plugins' ),
+				'description' => 'Plugin screenshot URLs with captions.',
 				'type'        => 'array',
 				'context'     => [ 'view' ],
 				'items'       => [
@@ -388,7 +388,7 @@ class Plugin_Fields {
 		register_rest_field( 'plugin', 'raw_content', [
 			'get_callback' => fn( array $object ): string => get_post( $object['id'] )?->post_content ?? '',
 			'schema'       => [
-				'description' => __( 'Raw post content.', 'wporg-plugins' ),
+				'description' => 'Raw post content.',
 				'type'        => 'string',
 				'context'     => [ 'view' ],
 			],
@@ -397,7 +397,7 @@ class Plugin_Fields {
 		register_rest_field( 'plugin', 'raw_excerpt', [
 			'get_callback' => fn( array $object ): string => get_post( $object['id'] )?->post_excerpt ?? '',
 			'schema'       => [
-				'description' => __( 'Raw post excerpt.', 'wporg-plugins' ),
+				'description' => 'Raw post excerpt.',
 				'type'        => 'string',
 				'context'     => [ 'view' ],
 			],
@@ -412,7 +412,7 @@ class Plugin_Fields {
 				return $user ? $user->display_name : $term['name'];
 			},
 			'schema'       => [
-				'description' => __( 'Display name of the contributor.', 'wporg-plugins' ),
+				'description' => 'Display name of the contributor.',
 				'type'        => 'string',
 				'context'     => [ 'view', 'embed' ],
 			],
@@ -425,7 +425,7 @@ class Plugin_Fields {
 				return $user ? get_avatar_url( $user->ID, [ 'size' => 96 ] ) : '';
 			},
 			'schema'       => [
-				'description' => __( 'Avatar URL of the contributor.', 'wporg-plugins' ),
+				'description' => 'Avatar URL of the contributor.',
 				'type'        => 'string',
 				'context'     => [ 'view', 'embed' ],
 			],
@@ -434,7 +434,7 @@ class Plugin_Fields {
 		register_rest_field( 'plugin_contributors', 'profile', [
 			'get_callback' => fn( array $term ): string => 'https://profiles.wordpress.org/' . $term['slug'] . '/',
 			'schema'       => [
-				'description' => __( 'Profile URL of the contributor.', 'wporg-plugins' ),
+				'description' => 'Profile URL of the contributor.',
 				'type'        => 'string',
 				'context'     => [ 'view', 'embed' ],
 			],
