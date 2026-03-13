@@ -270,9 +270,15 @@ class Get_Plugin_Status extends Ability_Base {
 			return array();
 		}
 
-		$feedback = array();
+		$feedback       = array();
+		$submitted_date = (int) get_post_meta( $post->ID, '_submitted_date', true );
 
 		foreach ( $emails as $email ) {
+			// Skip emails from prior submissions that happened to share this slug.
+			if ( $submitted_date && strtotime( $email->created ) < $submitted_date ) {
+				continue;
+			}
+
 			$threads = self::get_conversation_threads( (int) $email->id );
 
 			if ( ! $threads ) {
