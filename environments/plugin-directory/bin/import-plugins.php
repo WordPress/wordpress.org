@@ -37,25 +37,17 @@ update_option( 'blogname', 'Plugin Directory' );
  * Fetch slugs for a given browse section.
  */
 function fetch_slugs( $base_url, $section, $count ) {
-	$slugs = array();
-	$page  = 1;
-
-	while ( count( $slugs ) < $count ) {
-		$response = wp_remote_get( "{$base_url}/plugins/v1/query-plugins/?browse={$section}&page={$page}" );
-		if ( is_wp_error( $response ) ) {
-			break;
-		}
-
-		$data = json_decode( wp_remote_retrieve_body( $response ) );
-		if ( empty( $data->plugins ) ) {
-			break;
-		}
-
-		$slugs = array_merge( $slugs, $data->plugins );
-		$page++;
+	$response = wp_remote_get( "{$base_url}/plugins/v1/query-plugins/?browse={$section}&posts_per_page={$count}" );
+	if ( is_wp_error( $response ) ) {
+		return array();
 	}
 
-	return array_slice( $slugs, 0, $count );
+	$data = json_decode( wp_remote_retrieve_body( $response ) );
+	if ( empty( $data->plugins ) ) {
+		return array();
+	}
+
+	return array_unique( $data->plugins );
 }
 
 /**
@@ -227,19 +219,24 @@ function save_plugin( $data, $existing_post = null ) {
 }
 
 // Main loop.
+$imported_slugs = array();
+
 foreach ( $browse_sections as $section ) {
 	echo "Fetching {$per_section} plugins from '{$section}'...\n";
 
 	$slugs = fetch_slugs( $base_url, $section, $per_section );
 	echo "  Found " . count( $slugs ) . " slugs.\n";
 
-	// Fetch plugin data in batches.
+	// Separate new slugs from already-imported ones.
+	$new_slugs      = array_diff( $slugs, $imported_slugs );
+	$existing_slugs = array_intersect( $slugs, $imported_slugs );
+
+	// Fetch plugin data only for new slugs.
 	$all_plugin_data = array();
-	foreach ( array_chunk( $slugs, $batch_size ) as $batch ) {
+	foreach ( array_chunk( $new_slugs, $batch_size ) as $batch ) {
 		$batch_data      = fetch_plugins_batch( $base_url, $batch );
 		$all_plugin_data = array_merge( $all_plugin_data, $batch_data );
 
-		$fetched = array_intersect_key( array_flip( $batch ), $batch_data );
 		$missing = array_diff( $batch, array_keys( $batch_data ) );
 		if ( $missing ) {
 			echo "  Skipped (not found): " . implode( ', ', $missing ) . "\n";
@@ -248,34 +245,42 @@ foreach ( $browse_sections as $section ) {
 
 	echo "  Fetched " . count( $all_plugin_data ) . " plugins, importing...\n";
 
-	$imported = 0;
-	foreach ( $slugs as $slug ) {
-		if ( ! isset( $all_plugin_data[ $slug ] ) ) {
-			continue;
-		}
-
-		echo "    {$slug}...";
-
+	// Tag already-imported plugins with this section.
+	foreach ( $existing_slugs as $slug ) {
 		$existing = get_posts( array(
 			'post_type'   => 'plugin',
 			'name'        => $slug,
 			'post_status' => 'any',
 			'numberposts' => 1,
 		) );
+		if ( $existing ) {
+			wp_set_object_terms( $existing[0]->ID, $section, 'plugin_section', true );
+			echo "    {$slug}... {$existing[0]->post_title} (tagged)\n";
+		}
+	}
 
-		$post = save_plugin( $all_plugin_data[ $slug ], $existing[0] ?? null );
+	// Import new plugins.
+	$imported = 0;
+	foreach ( $new_slugs as $slug ) {
+		if ( ! isset( $all_plugin_data[ $slug ] ) ) {
+			continue;
+		}
+
+		echo "    {$slug}...";
+
+		$post = save_plugin( $all_plugin_data[ $slug ] );
 		if ( ! $post ) {
 			echo " failed.\n";
 			continue;
 		}
 
 		wp_set_object_terms( $post->ID, $section, 'plugin_section', true );
-		$action = $existing ? 'updated' : 'done';
-		echo " {$post->post_title} ({$action})\n";
+		$imported_slugs[] = $slug;
+		echo " {$post->post_title} (done)\n";
 		$imported++;
 	}
 
-	echo "  {$section}: {$imported} plugins imported/updated.\n\n";
+	echo "  {$section}: {$imported} new, " . count( $existing_slugs ) . " tagged.\n\n";
 }
 
 // Flush rewrite rules to generate .htaccess.
