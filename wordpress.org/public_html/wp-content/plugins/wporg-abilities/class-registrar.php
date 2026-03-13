@@ -55,6 +55,7 @@ class Registrar {
 
 		// Tools.
 		Plugin_Directory\Tools\Validate_Readme::register();
+		Plugin_Directory\Tools\Get_Plugin_Status::register();
 
 		// Prompts.
 		Plugin_Directory\Prompts\Prepare_Plugin::register();

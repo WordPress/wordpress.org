@@ -39,11 +39,35 @@ class Validate_Readme extends Ability_Base {
 					),
 					'required'   => array( 'content' ),
 				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'errors'   => array(
+							'type'                 => 'object',
+							'description'          => 'Validation errors that must be fixed before submission.',
+							'additionalProperties' => array( 'type' => 'string' ),
+						),
+						'warnings' => array(
+							'type'                 => 'object',
+							'description'          => 'Warnings that should be reviewed and fixed if applicable.',
+							'additionalProperties' => array( 'type' => 'string' ),
+						),
+						'notes'    => array(
+							'type'                 => 'object',
+							'description'          => 'Informational notes and suggestions.',
+							'additionalProperties' => array( 'type' => 'string' ),
+						),
+					),
+				),
 				'execute_callback'    => array( __CLASS__, 'execute' ),
 				'permission_callback' => '__return_true',
 				'meta'                => array(
 					'mcp'         => array( 'type' => 'tool' ),
-					'annotations' => array( 'readonly' => true ),
+					'annotations' => array(
+						'readonly'     => true,
+						'idempotent'   => true,
+						'destructive'  => false,
+					),
 				),
 			)
 		);

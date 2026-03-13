@@ -27,10 +27,18 @@ class Ability_Base {
 	const DEVELOPER_BLOG_ID = 33;
 
 	/**
-	 * Register the plugin-directory autoloader if it hasn't been loaded yet.
+	 * Blog ID for the plugin directory (wordpress.org/plugins) in the multisite network.
 	 *
-	 * This is needed when abilities reference classes from the plugin-directory
-	 * plugin (e.g. Readme\Validator, Trademarks) that may not be autoloaded yet.
+	 * @var int
+	 */
+	const PLUGINS_BLOG_ID = 367;
+
+	/**
+	 * Load the plugin-directory autoloader and switch to the plugins blog.
+	 *
+	 * Registers the plugin-directory autoloader so abilities can reference classes
+	 * like Readme\Validator and Trademarks, and switches to the plugins blog so
+	 * queries run against the correct posts table.
 	 */
 	protected static function maybe_load_plugin_directory(): void {
 		static $loaded = false;
@@ -50,6 +58,8 @@ class Ability_Base {
 			'WordPressdotorg\\Plugin_Directory',
 			WP_PLUGIN_DIR . '/plugin-directory'
 		);
+
+		switch_to_blog( self::PLUGINS_BLOG_ID );
 
 		$loaded = true;
 	}
