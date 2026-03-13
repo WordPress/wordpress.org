@@ -22,24 +22,26 @@ $WPENV cli sudo sh -c \
 $WP wp rewrite structure '/%postname%/' --hard
 
 # Create pages that exist on wordpress.org/plugins (if they don't already exist).
+echo "Creating pages..."
 # Parent: /developers/
-$WP wp post create --post_type=page --post_status=publish --post_title='Developer Information' --post_name='developers' --porcelain 2>/dev/null || true
+$WP wp post create --post_type=page --post_status=publish --post_title='Developer Information' --post_name='developers' --porcelain 2>/dev/null && echo "  Created page: /developers/" || true
 DEVELOPERS_ID=$($WP wp post list --post_type=page --name=developers --field=ID 2>/dev/null)
 
 if [ -n "$DEVELOPERS_ID" ]; then
 	# Children of /developers/
-	$WP wp post create --post_type=page --post_status=publish --post_title='Add your Plugin' --post_name='add' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
-	$WP wp post create --post_type=page --post_status=publish --post_title='Readme Validator' --post_content='[readme-validator]' --post_name='readme-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
-	$WP wp post create --post_type=page --post_status=publish --post_title='Block Plugin Checker' --post_content='[block-validator]' --post_name='block-plugin-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
-	$WP wp post create --post_type=page --post_status=publish --post_title='Release Management' --post_content='[release-confirmation]' --post_name='releases' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Add your Plugin' --post_name='add' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null && echo "  Created page: /developers/add/" || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Readme Validator' --post_content='[readme-validator]' --post_name='readme-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null && echo "  Created page: /developers/readme-validator/" || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Block Plugin Checker' --post_content='[block-validator]' --post_name='block-plugin-validator' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null && echo "  Created page: /developers/block-plugin-validator/" || true
+	$WP wp post create --post_type=page --post_status=publish --post_title='Release Management' --post_content='[release-confirmation]' --post_name='releases' --post_parent=$DEVELOPERS_ID --porcelain 2>/dev/null && echo "  Created page: /developers/releases/" || true
 fi
 
 # Create stub database tables that exist outside WordPress on production.
 $WP wp db import wp-content/env-bin/database-tables.sql
 
 # Create browse section terms.
-for SECTION in featured popular beta blocks new favorites; do
-	$WP wp term create plugin_section "$SECTION" --slug="$SECTION" 2>/dev/null || true
+echo "Creating browse sections..."
+for SECTION in featured popular beta blocks new updated favorites; do
+	$WP wp term create plugin_section "$SECTION" --slug="$SECTION" 2>/dev/null && echo "  Created section: $SECTION" || true
 done
 
 # Import plugins from wordpress.org.

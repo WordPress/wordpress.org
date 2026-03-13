@@ -24,9 +24,9 @@ if ( get_option( 'wporg_env_imported' ) ) {
 
 update_option( 'wporg_env_imported', time() );
 
-$per_section     = 10;
+$per_section     = 15;
 $base_url        = 'https://wordpress.org/plugins/wp-json';
-$browse_sections = array( 'featured', 'popular', 'beta' );
+$browse_sections = array( 'featured', 'popular', 'beta', 'new', 'updated' );
 
 update_option( 'blogname', 'Plugin Directory' );
 
@@ -186,6 +186,8 @@ foreach ( $browse_sections as $section ) {
 
 	$imported = 0;
 	foreach ( $slugs as $slug ) {
+		echo "    Importing {$slug}...";
+
 		$existing = get_posts( array(
 			'post_type'   => 'plugin',
 			'name'        => $slug,
@@ -195,12 +197,13 @@ foreach ( $browse_sections as $section ) {
 
 		$post = import_plugin( $base_url, $slug, $existing[0] ?? null );
 		if ( ! $post ) {
+			echo " failed.\n";
 			continue;
 		}
 
 		wp_set_object_terms( $post->ID, $section, 'plugin_section', true );
-		$action = $existing ? 'Updated' : 'Imported';
-		echo "    {$action}: {$post->post_title} ({$slug})\n";
+		$action = $existing ? 'updated' : 'done';
+		echo " {$post->post_title} ({$action})\n";
 		$imported++;
 	}
 
