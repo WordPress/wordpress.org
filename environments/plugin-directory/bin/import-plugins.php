@@ -27,7 +27,7 @@ if ( get_option( 'wporg_env_imported' ) ) {
 update_option( 'wporg_env_imported', time() );
 
 $per_section     = 15;
-$batch_size      = 10;
+$batch_size      = $per_section;
 $base_url        = 'https://wordpress.org/plugins/wp-json';
 $browse_sections = array( 'featured', 'popular', 'beta', 'blocks', 'new', 'updated' );
 
