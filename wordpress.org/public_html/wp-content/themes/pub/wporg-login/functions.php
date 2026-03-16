@@ -591,9 +591,9 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 	}
 
 	// If the redirect is to a url that doesn't seem right, override it.
-	$redirect_host = parse_url( $redirect, PHP_URL_HOST );
-	$redirect_qv   = parse_url( $redirect, PHP_URL_QUERY );
-	$proper_host   = parse_url( $_COOKIE['wporg_came_from'], PHP_URL_HOST );
+	$redirect_host = parse_url( $redirect, PHP_URL_HOST ) ?? '';
+	$redirect_qv   = parse_url( $redirect, PHP_URL_QUERY ) ?? '';
+	$proper_host   = parse_url( $_COOKIE['wporg_came_from'], PHP_URL_HOST ) ?? '';
 	if (
 		$redirect_host != $proper_host &&
 		in_array(
