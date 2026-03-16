@@ -10,7 +10,7 @@ class Committer_Added extends Base {
 		parent::__construct( $plugin, $users, $args );
 
 		// Notify the plugins team of committer changes on featured plugins as a safety-net.
-		if ( $this->plugin && is_object_in_term( $this->plugin->ID, 'plugin_section', 'featured' ) ) {
+		if ( $this->plugin && is_object_in_term( $this->plugin->ID, 'plugin_section', array( 'featured', 'beta' ) ) ) {
 			$plugins_team = get_user_by( 'email', PLUGIN_TEAM_EMAIL );
 			if ( $plugins_team ) {
 				$this->users[] = $plugins_team;

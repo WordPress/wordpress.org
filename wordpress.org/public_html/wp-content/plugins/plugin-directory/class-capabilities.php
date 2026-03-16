@@ -111,9 +111,9 @@ class Capabilities {
 			$required_caps[] = 'do_not_allow';
 		}
 
-		// For featured plugins, only the owner can manage committers.
+		// For featured/beta plugins, only the owner can manage committers.
 		if (
-			$is_featured &&
+			( $is_featured || $is_beta ) &&
 			$user_id != $post->post_author &&
 			in_array( $cap, array( 'plugin_add_committer', 'plugin_remove_committer' ) )
 		) {
