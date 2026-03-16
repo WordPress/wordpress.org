@@ -290,10 +290,12 @@ function the_no_self_management_notice() {
 			'plugins@wordpress.org'
 		);
 	} else {
+		$owner = get_user_by( 'ID', $post->post_author );
 		$message = sprintf(
-			/* translators: 1: section name (Beta/Featured), 2: plugins team email address */
-			__( 'This plugin is listed in the %1$s section. Some management features have been limited for security reasons. Only the plugin owner can manage committers. Please contact the <a href="mailto:%2$s">plugins team (%2$s)</a> for assistance with closing or transferring this plugin.', 'wporg-plugins' ),
+			/* translators: 1: section name (Beta/Featured), 2: plugin owner display name, 3: plugins team email address */
+			__( 'This plugin is listed in the %1$s section. Some management features have been limited for security reasons. Only the plugin owner (%2$s) can manage committers. Please contact the <a href="mailto:%3$s">plugins team (%3$s)</a> for assistance with closing or transferring this plugin.', 'wporg-plugins' ),
 			$section,
+			esc_html( $owner->display_name ),
 			'plugins@wordpress.org'
 		);
 	}
