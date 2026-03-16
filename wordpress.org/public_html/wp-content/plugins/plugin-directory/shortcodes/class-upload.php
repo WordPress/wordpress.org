@@ -261,7 +261,7 @@ class Upload {
 							);
 							?>
 							<?php if ( $can_change_slug ) : ?>
-								<a href="#" class="hide-if-no-js" onclick="this.nextElementSibling.showModal()"><?php _e( 'change', 'wporg-plugins' ); ?></a>
+								<a href="#" class="hide-if-no-js" onclick="event.preventDefault(); this.nextElementSibling.showModal()"><?php _e( 'change', 'wporg-plugins' ); ?></a>
 								<dialog class="slug-change hide-if-no-js">
 									<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
 									<strong><?php _e( 'Request to change your plugin slug', 'wporg-plugins' ); ?></strong>

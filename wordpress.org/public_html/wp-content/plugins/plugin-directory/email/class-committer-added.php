@@ -6,6 +6,18 @@ use WordPressdotorg\Plugin_Directory\Tools;
 class Committer_Added extends Base {
 	protected $required_args = [ 'committer' ];
 
+	public function __construct( $plugin, $users = [], $args = [] ) {
+		parent::__construct( $plugin, $users, $args );
+
+		// Notify the plugins team of committer changes on featured plugins as a safety-net.
+		if ( $this->plugin && is_object_in_term( $this->plugin->ID, 'plugin_section', array( 'featured', 'beta' ) ) ) {
+			$plugins_team = get_user_by( 'email', PLUGIN_TEAM_EMAIL );
+			if ( $plugins_team ) {
+				$this->users[] = $plugins_team;
+			}
+		}
+	}
+
 	function subject() {
 		return sprintf(
 			/* translators: 1: Plugin Name */
