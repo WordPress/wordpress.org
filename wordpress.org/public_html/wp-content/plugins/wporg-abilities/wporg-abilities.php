@@ -37,8 +37,8 @@ Autoloader\register_class_path( __NAMESPACE__, __DIR__ );
 // Initialize MCP adapter and register server.
 McpAdapter::instance();
 
-$action = defined( 'WP_CLI' ) && constant( 'WP_CLI' ) ? 'init' : 'rest_api_init';
+$hook = defined( 'WP_CLI' ) && constant( 'WP_CLI' ) ? 'init' : 'rest_api_init';
 
-add_action( $action, array( Registrar::class, 'init' ) );
+add_action( $hook, array( Registrar::class, 'init' ) );
 add_action( 'mcp_adapter_init', array( MCP_Server::class, 'register' ) );
 add_filter( 'mcp_adapter_create_default_server', '__return_false' );

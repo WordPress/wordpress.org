@@ -5,10 +5,13 @@
  * @package WordPressdotorg\Abilities\Plugins\Plugin_Directory\Resources
  */
 
+// phpcs:disable WordPress.WP.CapitalPDangit.MisspelledInText -- Lowercase "wordpress" is intentional (slugs).
+
 declare( strict_types = 1 );
 
 namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory\Resources;
 
+use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Ability_Base;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Review_Tools;
 use WordPressdotorg\Plugin_Directory\Trademarks;
 
@@ -17,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Reserved_Slugs class.
  */
-class Reserved_Slugs {
+class Reserved_Slugs extends Ability_Base {
 
 	/**
 	 * Register this resource as an ability.
@@ -45,7 +48,7 @@ class Reserved_Slugs {
 	 * @return array MCP resource contents array.
 	 */
 	public static function execute(): array {
-		self::maybe_load_plugin_directory_autoloader();
+		self::maybe_load_plugin_directory();
 
 		if ( class_exists( Trademarks::class ) && class_exists( Review_Tools::class ) ) {
 			$text = self::get_dynamic_content();
@@ -59,27 +62,6 @@ class Reserved_Slugs {
 				'text'     => $text,
 				'mimeType' => 'text/markdown',
 			),
-		);
-	}
-
-	/**
-	 * Register the plugin-directory autoloader if it hasn't been loaded yet.
-	 */
-	private static function maybe_load_plugin_directory_autoloader(): void {
-		if ( class_exists( Trademarks::class, false ) ) {
-			return;
-		}
-
-		$autoloader = WP_PLUGIN_DIR . '/plugin-directory/class-autoloader.php';
-
-		if ( ! file_exists( $autoloader ) ) {
-			return;
-		}
-
-		require_once $autoloader;
-		\WordPressdotorg\Plugin_Directory\Autoloader\register_class_path(
-			'WordPressdotorg\\Plugin_Directory',
-			WP_PLUGIN_DIR . '/plugin-directory'
 		);
 	}
 

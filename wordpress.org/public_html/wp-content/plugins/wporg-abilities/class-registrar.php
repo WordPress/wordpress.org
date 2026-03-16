@@ -53,6 +53,10 @@ class Registrar {
 		Plugin_Directory\Resources\Plugin_Check_Guide::register();
 		Plugin_Directory\Resources\Plugin_FAQ::register();
 
+		// Tools.
+		Plugin_Directory\Tools\Validate_Readme::register();
+		Plugin_Directory\Tools\Get_Plugin_Status::register();
+
 		// Prompts.
 		Plugin_Directory\Prompts\Prepare_Plugin::register();
 		Plugin_Directory\Prompts\Run_Plugin_Check::register();

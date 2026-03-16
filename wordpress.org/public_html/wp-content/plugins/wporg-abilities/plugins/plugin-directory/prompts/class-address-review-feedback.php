@@ -59,9 +59,9 @@ class Address_Review_Feedback {
 		$text = <<<MD
 Help me address the review feedback for my plugin `{$plugin_slug}` submitted to the WordPress.org plugin directory.
 
-## Step 1: Fetch Review Feedback
+## Step 1: Fetch Plugin Status and Review Feedback
 
-Use the `wporg/get-review-feedback` tool with slug `{$plugin_slug}` to retrieve the reviewer's feedback.
+Use the `wporg/plugins/plugin-directory/get-plugin-status` tool with slug `{$plugin_slug}` to retrieve the latest reviewer feedback. If the plugin status is not "pending", there is no actionable feedback to address.
 
 ## Step 2: Parse Each Issue
 
