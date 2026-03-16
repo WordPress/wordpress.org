@@ -17,7 +17,7 @@
 		"wp-content/mu-plugins/mu-plugins-loader.php": "./mocks/mu-plugins-loader.php",
 		"wp-content/mu-plugins/wporg-query-filter.php": "./mocks/wporg-query-filter.php",
 		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/wporg-dev-login.php",
-		"wp-content/mu-plugins/wporg-plugins-local-reminders.php": "./mocks/wporg-plugins-local-reminders.php",
+		"wp-content/mu-plugins/wporg-plugins-local-reminders.php": "./mu-plugin-local-reminders.php",
 		"wp-content/env-bin": "./plugin-directory/bin"
 	},
 	"lifecycleScripts": {

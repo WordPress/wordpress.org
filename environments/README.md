@@ -27,15 +27,6 @@ A local instance of the WordPress.org Plugin Directory with the plugin directory
 npm run plugins:env start
 ```
 
-**What it includes:**
-
-- Plugin Directory plugin (from the repository)
-- Plugin Check, Jetpack, and GlotPress plugins
-- wporg-plugins-2024 theme with wporg-parent-2021
-- wporg-mu-plugins (from the `WordPress/wporg-mu-plugins` build branch)
-- Mock mu-plugins for production-only dependencies (query filter, mu-plugins loader)
-- Auto-imports ~30 plugins from WordPress.org on first start (featured, popular, beta)
-
 **Import a plugin by slug:**
 
 ```bash
