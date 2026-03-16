@@ -6,6 +6,15 @@ use WordPressdotorg\Plugin_Directory\Tools;
 class Committer_Added extends Base {
 	protected $required_args = [ 'committer' ];
 
+	public function __construct( $plugin, $users = [], $args = [] ) {
+		parent::__construct( $plugin, $users, $args );
+
+		// BCC the plugins team on committer changes for featured plugins as a safety-net.
+		if ( $this->plugin && is_object_in_term( $this->plugin->ID, 'plugin_section', 'featured' ) ) {
+			$this->notify_plugins_team = true;
+		}
+	}
+
 	function subject() {
 		return sprintf(
 			/* translators: 1: Plugin Name */

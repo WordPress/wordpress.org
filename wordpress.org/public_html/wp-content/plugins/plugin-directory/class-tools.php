@@ -239,11 +239,6 @@ class Tools {
 			$email->send();
 		}
 
-		// Notify the plugins team of committer changes on featured plugins as a safety-net.
-		if ( is_object_in_term( $post->ID, 'plugin_section', 'featured' ) ) {
-			Tools::notify_plugins_team_of_committer_change( $post, $user, 'added' );
-		}
-
 		Tools::subscribe_user_to_forum_threads( $user, $post );
 
 		// Store some user-meta against the committer, so that other code knows this is a current (or past) plugin committer.
@@ -292,46 +287,7 @@ class Tools {
 			$post
 		);
 
-		// Notify the plugins team of committer changes on featured plugins as a safety-net.
-		if ( is_object_in_term( $post->ID, 'plugin_section', 'featured' ) ) {
-			Tools::notify_plugins_team_of_committer_change( $post, $user, 'removed' );
-		}
-
 		return $result;
-	}
-
-	/**
-	 * Notify the plugins team when a committer is added or removed from a featured plugin.
-	 *
-	 * @param \WP_Post $post   The plugin post.
-	 * @param \WP_User $user   The committer being added or removed.
-	 * @param string   $action 'added' or 'removed'.
-	 */
-	protected static function notify_plugins_team_of_committer_change( $post, $user, $action ) {
-		$who = wp_get_current_user();
-
-		$subject = sprintf(
-			/* translators: 1: action (added/removed), 2: plugin name */
-			__( '[WordPress Plugin Directory] Committer %1$s on featured plugin %2$s', 'wporg-plugins' ),
-			$action,
-			$post->post_title
-		);
-
-		$body = sprintf(
-			"%s has been %s as a committer on the featured plugin %s by %s.\n\nPlugin: %s\n\nThis is an automated notification for committer changes on featured plugins.",
-			$user->user_login,
-			$action,
-			$post->post_title,
-			$who->user_login,
-			get_permalink( $post )
-		);
-
-		wp_mail(
-			Email\PLUGIN_TEAM_EMAIL,
-			$subject,
-			$body,
-			sprintf( 'From: "%s" <%s>', 'WordPress Plugin Directory', Email\PLUGIN_TEAM_EMAIL )
-		);
 	}
 
 	/**
