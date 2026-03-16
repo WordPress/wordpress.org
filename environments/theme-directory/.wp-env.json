@@ -10,13 +10,14 @@
 		"WordPress/wporg-parent-2021#build"
 	],
 	"mappings": {
-		"wp-content/wporg-theme-directory": "WordPress/wporg-theme-directory",
+		"wp-content/wporg-theme-directory": "WordPress/wporg-theme-directory#build",
 		"wp-content/mu-plugins/": "../wordpress.org/public_html/wp-content/mu-plugins/",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/mu-plugins/mu-plugins-loader.php": "./mocks/mu-plugins-loader.php",
 		"wp-content/mu-plugins/wporg-query-filter.php": "./mocks/wporg-query-filter.php",
 		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/wporg-dev-login.php",
 		"wp-content/mu-plugins/wporg-ratings.php": "./theme-directory/mock-wporg-ratings.php",
+		"wp-content/mu-plugins/wporg-theme-directory-path.php": "./theme-directory/mu-plugin-theme-directory.php",
 		"wp-content/env-bin": "./theme-directory/bin"
 	},
 	"lifecycleScripts": {
