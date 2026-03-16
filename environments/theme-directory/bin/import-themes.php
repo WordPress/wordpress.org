@@ -124,16 +124,11 @@ function save_theme( $theme ) {
 		return null;
 	}
 
-	// Build the _status meta (version => status map) from the versions list.
-	$status = array();
-	if ( ! empty( $theme['versions'] ) ) {
-		foreach ( $theme['versions'] as $version => $url ) {
-			$status[ $version ] = 'live';
-		}
-	} elseif ( ! empty( $theme['version'] ) ) {
-		$status[ $theme['version'] ] = 'live';
+	// Build the _status meta — only store the current version to match latest_version() expectations.
+	if ( ! empty( $theme['version'] ) ) {
+		$status = array( $theme['version'] => 'live' );
+		update_post_meta( $post_id, '_status', $status );
 	}
-	update_post_meta( $post_id, '_status', $status );
 
 	// Set the current live version.
 	if ( ! empty( $theme['version'] ) ) {
