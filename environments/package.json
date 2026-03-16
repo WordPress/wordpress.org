@@ -8,7 +8,9 @@
 	"scripts": {
 		"plugins:env": "wp-env --config plugin-directory/.wp-env.json",
 		"plugins:import": "npm run plugins:env -- run cli -- php wp-content/plugins/plugin-directory/bin/import-plugin.php --create --plugin",
-		"plugins:refresh": "npm run plugins:env -- run cli -- wp option delete wporg_env_imported && npm run plugins:env -- run cli wp eval-file wp-content/env-bin/import-plugins.php"
+		"plugins:refresh": "npm run plugins:env -- run cli -- wp option delete wporg_env_imported && npm run plugins:env -- run cli wp eval-file wp-content/env-bin/import-plugins.php",
+		"themes:env": "wp-env --config theme-directory/.wp-env.json",
+		"themes:refresh": "npm run themes:env -- run cli -- wp option delete wporg_themes_env_imported && npm run themes:env -- run cli wp eval-file wp-content/env-bin/import-themes.php"
 	},
 	"devDependencies": {
 		"@wordpress/env": "^11"

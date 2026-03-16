@@ -47,6 +47,24 @@ npm run plugins:refresh
 npx wp-env run cli wp <command>
 ```
 
+### Theme Directory
+
+A local instance of the WordPress.org Theme Directory with the theme directory plugin, theme, and supporting mu-plugins.
+
+**Start:**
+
+```bash
+npm run themes:env start
+```
+
+**Re-seed themes** (clears import flag, then re-imports):
+
+```bash
+npm run themes:refresh
+```
+
+**Access:** `http://localhost:8888`
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.
