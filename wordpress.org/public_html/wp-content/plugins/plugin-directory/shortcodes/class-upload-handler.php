@@ -68,6 +68,113 @@ class Upload_Handler {
 	}
 
 	/**
+	 * Whether uploads are currently accepted for the current user.
+	 *
+	 * @param bool $is_update Whether this is an update to an existing plugin.
+	 * @return true|WP_Error True if uploads are accepted, WP_Error otherwise.
+	 */
+	public static function accepting_uploads( bool $is_update = false ) {
+		if ( defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY ) {
+			return new WP_Error(
+				'submissions_paused',
+				__( 'New plugin submissions are temporarily disabled during the holiday break.', 'wporg-plugins' )
+			);
+		}
+
+		if (
+			function_exists( 'WordPressdotorg\Two_Factor\user_requires_2fa' ) &&
+			class_exists( '\Two_Factor_Core' ) &&
+			\WordPressdotorg\Two_Factor\user_requires_2fa( wp_get_current_user() ) &&
+			! \Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
+		) {
+			return new WP_Error(
+				'2fa_required',
+				__( 'Two-factor authentication must be enabled on your account before submitting plugins.', 'wporg-plugins' )
+			);
+		}
+
+		if ( ! $is_update && function_exists( 'is_email_address_unsafe' ) && is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
+			return new WP_Error(
+				'unsafe_email',
+				__( 'Your email host has email deliverability problems. Please update your email address first.', 'wporg-plugins' )
+			);
+		}
+
+		if ( ! $is_update ) {
+			$capacity = self::has_queue_capacity();
+			if ( is_wp_error( $capacity ) ) {
+				return $capacity;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the current user has capacity to submit another plugin to the queue.
+	 *
+	 * Authors can have 1 plugin in the queue, or 10 if they have 1M+ total active installs.
+	 *
+	 * @return true|WP_Error True if under the limit, WP_Error with 'count' and 'maximum' data otherwise.
+	 */
+	public static function has_queue_capacity() {
+		$maximum = 1;
+
+		$user_active_installs = array_sum(
+			wp_list_pluck(
+				get_posts(
+					array(
+						'author'      => get_current_user_id(),
+						'post_type'   => 'plugin',
+						'post_status' => 'publish',
+						'numberposts' => -1,
+					)
+				),
+				'_active_installs'
+			)
+		);
+
+		if ( $user_active_installs > 1000000 ) {
+			$maximum = 10;
+		}
+
+		$in_queue = get_posts(
+			array(
+				'post_type'   => 'plugin',
+				'post_status' => array( 'new', 'pending', 'approved' ),
+				'author'      => get_current_user_id(),
+				'numberposts' => -1,
+				'fields'      => 'ids',
+			)
+		);
+
+		$count = count( $in_queue );
+
+		if ( $count >= $maximum ) {
+			return new WP_Error(
+				'queue_limit',
+				sprintf(
+					/* translators: 1: number of plugins in queue, 2: maximum allowed */
+					_n(
+						'You already have %1$d plugin in the review queue (maximum %2$d). Please wait for your existing submission to be reviewed.',
+						'You already have %1$d plugins in the review queue (maximum %2$d). Please wait for your existing submissions to be reviewed.',
+						$count,
+						'wporg-plugins'
+					),
+					$count,
+					$maximum
+				),
+				array(
+					'count'   => $count,
+					'maximum' => $maximum,
+				)
+			);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Processes the plugin upload.
 	 *
 	 * Runs various tests and creates plugin post.
@@ -814,7 +921,17 @@ class Upload_Handler {
 			'post_excerpt' => $this->plugin['Description'],
 			'post_content' => esc_html( $upload_comment )
 		);
-		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details );
+
+		/**
+		 * Filters the overrides passed to media_handle_upload() when saving a plugin ZIP.
+		 *
+		 * The overrides array is forwarded to wp_handle_upload(). See the
+		 * $overrides parameter of wp_handle_upload() for accepted keys.
+		 *
+		 * @param array $overrides Upload overrides.
+		 */
+		$overrides  = apply_filters( 'wporg_plugin_upload_overrides', array( 'test_form' => false ) );
+		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details, $overrides );
 
 		remove_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		remove_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
