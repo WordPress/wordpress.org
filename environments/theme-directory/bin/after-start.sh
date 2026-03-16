@@ -15,6 +15,13 @@ $WPENV wordpress sudo bash -c \
 $WPENV cli sudo sh -c \
 	'command -v unzip > /dev/null || apk add --no-cache -q unzip zip coreutils > /dev/null 2>&1'
 
+# Symlink the theme from the mapped wporg-theme-directory repo.
+echo "Setting up theme..."
+$WPENV wordpress bash -c \
+	'ln -sfn /var/www/html/wp-content/wporg-theme-directory/source/wp-content/themes/wporg-themes-2024 /var/www/html/wp-content/themes/wporg-themes-2024'
+$WPENV cli sh -c \
+	'ln -sfn /var/www/html/wp-content/wporg-theme-directory/source/wp-content/themes/wporg-themes-2024 /var/www/html/wp-content/themes/wporg-themes-2024'
+
 # Set up permalinks and tag base.
 $WP wp rewrite structure '/%postname%/' --hard
 $WP wp rewrite flush --hard
