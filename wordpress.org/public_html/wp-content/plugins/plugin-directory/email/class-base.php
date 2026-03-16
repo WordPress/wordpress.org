@@ -20,9 +20,6 @@ abstract class Base {
 	abstract public function subject();
 	abstract public function body();
 
-	// Whether to BCC the plugins team on this email.
-	protected $notify_plugins_team = false;
-
 	// Internal use only.
 	protected $users = [];
 
@@ -109,15 +106,16 @@ abstract class Base {
 		$body  = $this->body();
 		$body .= "\n\n" . $this->get_email_signature();
 
-		$headers = [
-			sprintf( 'From: "%s" <%s>', 'WordPress Plugin Directory', PLUGIN_TEAM_EMAIL ),
-		];
-
-		if ( $this->notify_plugins_team ) {
-			$headers[] = 'BCC: ' . PLUGIN_TEAM_EMAIL;
-		}
-
-		return wp_mail( $email, $subject, $body, $headers );
+		return wp_mail(
+			$email,
+			$subject,
+			$body,
+			sprintf(
+				'From: "%s" <%s>',
+				'WordPress Plugin Directory',
+				PLUGIN_TEAM_EMAIL
+			)
+		);
 	}
 
 	/**
