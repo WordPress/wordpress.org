@@ -62,7 +62,15 @@ jobs:
       matrix:
         include:
           - name: Handbook Plugin
-            plugin-directory: wordpress.org/public_html/wp-content/plugins/handbook
+            working-directory: wordpress.org/public_html/wp-content/plugins/handbook
+            container: tests-cli
+            plugin-name: handbook
+            phpunit-args: "--no-configuration --bootstrap phpunit/bootstrap.php phpunit/tests/"
+          - name: Plugin Directory
+            working-directory: environments
+            wp-env-args: "--config plugin-directory/.wp-env.json"
+            container: cli
+            plugin-name: plugin-directory
     steps:
       - uses: actions/checkout@v4
 
@@ -75,13 +83,13 @@ jobs:
         run: npm -g install @wordpress/env
 
       - name: Start wp-env
-        working-directory: ${{ matrix.plugin-directory }}
-        run: wp-env start
+        working-directory: ${{ matrix.working-directory }}
+        run: wp-env ${{ matrix.wp-env-args || '' }} start
 
       - name: Install PHPUnit Polyfills
-        working-directory: ${{ matrix.plugin-directory }}
-        run: wp-env run tests-cli composer require --dev yoast/phpunit-polyfills:^4.0 --working-dir=/wordpress-phpunit
+        working-directory: ${{ matrix.working-directory }}
+        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} composer require --dev yoast/phpunit-polyfills:^4.0 --working-dir=/wordpress-phpunit
 
       - name: Run PHPUnit
-        working-directory: ${{ matrix.plugin-directory }}
-        run: wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename ${{ matrix.plugin-directory }}) phpunit --no-configuration --bootstrap phpunit/bootstrap.php phpunit/tests/
+        working-directory: ${{ matrix.working-directory }}
+        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} --env-cwd=wp-content/plugins/${{ matrix.plugin-name }} phpunit ${{ matrix.phpunit-args || '' }}

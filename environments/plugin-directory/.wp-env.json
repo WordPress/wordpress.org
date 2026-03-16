@@ -1,0 +1,33 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"../wordpress.org/public_html/wp-content/plugins/plugin-directory",
+		"https://downloads.wordpress.org/plugin/plugin-check.zip",
+		"https://downloads.wordpress.org/plugin/jetpack.zip"
+	],
+	"themes": [
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024",
+		"WordPress/wporg-parent-2021#build"
+	],
+	"mappings": {
+		"wp-content/mu-plugins/": "../wordpress.org/public_html/wp-content/mu-plugins/",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
+		"wp-content/mu-plugins/mu-plugins-loader.php": "./mocks/mu-plugins-loader.php",
+		"wp-content/mu-plugins/wporg-query-filter.php": "./mocks/wporg-query-filter.php",
+		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/wporg-dev-login.php",
+		"wp-content/mu-plugins/wporg-plugins-local-reminders.php": "./plugin-directory/mu-plugin-local-reminders.php",
+		"wp-content/env-bin": "./plugin-directory/bin"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash plugin-directory/bin/after-start.sh"
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"JETPACK_DEV_DEBUG": true,
+		"WP_TESTS_TITLE": "WordPress.org Plugins",
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php",
+		"PLUGINS_TABLE_PREFIX": "wp_"
+	}
+}
