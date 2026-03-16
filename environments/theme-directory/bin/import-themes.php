@@ -151,13 +151,14 @@ function save_theme( $theme ) {
 		}
 	}
 
-	// Screenshot URL.
-	if ( ! empty( $theme['screenshot_url'] ) ) {
-		$screenshot_url = $theme['screenshot_url'];
-		if ( str_starts_with( $screenshot_url, '//' ) ) {
-			$screenshot_url = 'https:' . $screenshot_url;
+	// Screenshot — stored as a version-keyed array mapping version => filename.
+	if ( ! empty( $theme['version'] ) ) {
+		$screenshots = get_post_meta( $post_id, '_screenshot', true ) ?: array();
+		if ( ! is_array( $screenshots ) ) {
+			$screenshots = array();
 		}
-		update_post_meta( $post_id, '_screenshot', $screenshot_url );
+		$screenshots[ $theme['version'] ] = 'screenshot.png';
+		update_post_meta( $post_id, '_screenshot', $screenshots );
 	}
 
 	// Tags.
