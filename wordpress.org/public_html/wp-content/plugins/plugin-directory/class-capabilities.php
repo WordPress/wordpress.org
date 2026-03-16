@@ -111,6 +111,15 @@ class Capabilities {
 			$required_caps[] = 'do_not_allow';
 		}
 
+		// For featured plugins, only the owner can manage committers.
+		if (
+			$is_featured &&
+			$user_id != $post->post_author &&
+			in_array( $cap, array( 'plugin_add_committer', 'plugin_remove_committer' ) )
+		) {
+			$required_caps[] = 'plugin_review';
+		}
+
 		// Committers
 		$committers = Tools::get_plugin_committers( $post->post_name );
 		// If there are no committers, use the plugin author if the plugin is published.
