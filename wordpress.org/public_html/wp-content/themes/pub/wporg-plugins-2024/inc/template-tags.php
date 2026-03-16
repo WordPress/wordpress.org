@@ -265,26 +265,31 @@ function the_unconfirmed_releases_notice() {
 function the_no_self_management_notice() {
 	$post = get_post();
 
-	// Check if they can access plugin management, but can't add committers.
-	// This means the plugin has limited self-management functionalities, for security.
+	$is_beta     = is_object_in_term( $post->ID, 'plugin_section', 'beta' );
+	$is_featured = is_object_in_term( $post->ID, 'plugin_section', 'featured' );
+
+	// Check if the plugin is in a section with limited self-management, and the user can manage it.
 	if (
-		(
-			current_user_can( 'plugin_admin_edit', $post ) &&
-			! current_user_can( 'plugin_add_committer', $post )
-		) || (
-			// Show the notice to plugin reviewers when it's limited. See class-capabilities.php.
-			is_object_in_term( $post->ID, 'plugin_section', array( 'beta', 'featured' ) ) &&
+		! ( $is_beta || $is_featured ) ||
+		! (
+			current_user_can( 'plugin_admin_edit', $post ) ||
 			current_user_can( 'plugin_review' )
 		)
 	) {
-		printf(
-			'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
-			sprintf(
-				__( 'Management of this plugin has been limited for security reasons. Please contact the <a href="mailto:%1$s">plugins team (%1$s)</a> for assistance to add/remove committers, or to perform other actions that are unavailable.', 'wporg-plugins' ),
-				'plugins@wordpress.org'
-			)
-		);
+		return;
 	}
+
+	$section = $is_beta ? __( 'Beta', 'wporg-plugins' ) : __( 'Featured', 'wporg-plugins' );
+
+	printf(
+		'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
+		sprintf(
+			/* translators: 1: section name (Beta/Featured), 2: plugins team email address */
+			__( 'This plugin is listed in the %1$s section. Some management features have been limited for security reasons. Please contact the <a href="mailto:%2$s">plugins team (%2$s)</a> for assistance with closing or transferring this plugin.', 'wporg-plugins' ),
+			$section,
+			'plugins@wordpress.org'
+		)
+	);
 }
 
 /**
