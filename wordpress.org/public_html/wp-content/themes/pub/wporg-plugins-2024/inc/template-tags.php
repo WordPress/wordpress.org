@@ -280,15 +280,27 @@ function the_no_self_management_notice() {
 	}
 
 	$section = $is_beta ? __( 'Beta', 'wporg-plugins' ) : __( 'Featured', 'wporg-plugins' );
+	$is_owner = get_current_user_id() == $post->post_author;
 
-	printf(
-		'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
-		sprintf(
+	if ( $is_owner ) {
+		$message = sprintf(
 			/* translators: 1: section name (Beta/Featured), 2: plugins team email address */
 			__( 'This plugin is listed in the %1$s section. Some management features have been limited for security reasons. Please contact the <a href="mailto:%2$s">plugins team (%2$s)</a> for assistance with closing or transferring this plugin.', 'wporg-plugins' ),
 			$section,
 			'plugins@wordpress.org'
-		)
+		);
+	} else {
+		$message = sprintf(
+			/* translators: 1: section name (Beta/Featured), 2: plugins team email address */
+			__( 'This plugin is listed in the %1$s section. Some management features have been limited for security reasons. Only the plugin owner can manage committers. Please contact the <a href="mailto:%2$s">plugins team (%2$s)</a> for assistance with closing or transferring this plugin.', 'wporg-plugins' ),
+			$section,
+			'plugins@wordpress.org'
+		);
+	}
+
+	printf(
+		'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
+		$message
 	);
 }
 
