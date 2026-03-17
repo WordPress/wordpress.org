@@ -1,8 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Template;
-use Two_Factor_Core;
-use function WordPressdotorg\Two_Factor\{ user_requires_2fa, get_onboarding_account_url };
+use function WordPressdotorg\Two_Factor\get_onboarding_account_url;
 
 class Upload {
 
@@ -62,17 +61,13 @@ class Upload {
 			) . '</p></div>';
 		}
 
-		// Require 2FA for plugin authors on upload.
-		if (
-			function_exists( 'WordPressdotorg\Two_Factor\user_requires_2fa' ) &&
-			class_exists( 'Two_Factor_Core' ) &&
-			user_requires_2fa( wp_get_current_user() ) &&
-			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
-		) {
+		// Check 2FA before proceeding.
+		$preconditions = Upload_Handler::accepting_uploads();
+		if ( is_wp_error( $preconditions ) && '2fa_required' === $preconditions->get_error_code() ) {
 			return '<div class="notice notice-error notice-alt"><p>' . sprintf(
 				/* translators: Setup 2FA url */
 				__( 'Before you can upload a new plugin, <a href="%s">please enable two-factor authentication</a>.', 'wporg-plugins' ),
-				esc_url( get_onboarding_account_url() )
+				esc_url( function_exists( 'WordPressdotorg\Two_Factor\get_onboarding_account_url' ) ? get_onboarding_account_url() : 'https://profiles.wordpress.org/me/profile/security' )
 			) . '</p></div>';
 		}
 
@@ -83,31 +78,8 @@ class Upload {
 		$uploader      = new Upload_Handler();
 		$upload_result = false;
 
-		/*
-		 * Determine the maximum number of plugins a user can have in the queue.
-		 *
-		 * Plugin owners with more than 1m active installs can have up to 10 plugins in the queue.
-		 *
-		 * @see https://meta.trac.wordpress.org/ticket/76641
-		 */
-		$maximum_plugins_in_queue = 1;
-		$user_active_installs     = array_sum(
-			wp_list_pluck(
-				get_posts( [
-					'author'      => get_current_user_id(),
-					'post_type'   => 'plugin',
-					'post_status' => 'publish', // Only count published plugins.
-					'numberposts' => -1
-				] ),
-				'_active_installs'
-			)
-		);
-		if ( $user_active_installs > 1000000 /* 1m+ */ ) {
-			$maximum_plugins_in_queue = 10;
-		}
-
 		list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
-		$can_submit_new_plugin                        = $submitted_counts->total < $maximum_plugins_in_queue;
+		$can_submit_new_plugin                        = ! is_wp_error( $preconditions );
 
 		if (
 			! empty( $_POST['_wpnonce'] ) &&
@@ -138,7 +110,7 @@ class Upload {
 
 			// Refresh the lists.
 			list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
-			$can_submit_new_plugin                        = $submitted_counts->total < $maximum_plugins_in_queue;
+			$can_submit_new_plugin                        = ! is_wp_error( Upload_Handler::has_queue_capacity() );
 
 			if ( ! empty( $message ) ) {
 				echo "<div class='notice notice-{$type} notice-alt'><p>{$message}</p></div>\n";
@@ -387,7 +359,7 @@ class Upload {
 
 		<?php endif; // ! is_wp_error( $upload_result )
 
-		if ( defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY ) {
+		if ( is_wp_error( $preconditions ) && 'submissions_paused' === $preconditions->get_error_code() ) {
 			printf(
 				'<div class="notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
@@ -395,7 +367,7 @@ class Upload {
 					'https://wordpress.org/news/2024/12/holiday-break/'
 				)
 			);
-		} else if ( function_exists( 'is_email_address_unsafe' ) /* multisite-only */ && is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
+		} else if ( is_wp_error( $preconditions ) && 'unsafe_email' === $preconditions->get_error_code() ) {
 			echo '<div class="notice notice-error notice-alt"><p>' .
 				sprintf(
 					/* translators: %s: Profile edit url. */
@@ -405,16 +377,6 @@ class Upload {
 					"</p></div>\n";
 
 		} else if ( $can_submit_new_plugin && ( ! $upload_result || is_wp_error( $upload_result ) ) ) :
-			if ( $maximum_plugins_in_queue > 1 && $submitted_counts->total ) {
-				printf(
-					'<div class="notice notice-info notice-alt"><p>%s</p></div>',
-					sprintf(
-						/* translators: %s: Maximum number of plugins in the queue. */
-						__( 'You can have up to %s plugins in the queue at a time. You may submit an additional plugin for review below.', 'wporg-plugins' ),
-						'<strong>' . number_format_i18n( $maximum_plugins_in_queue ) . '</strong>'
-					)
-				);
-			}
 
 			?>
 			<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
