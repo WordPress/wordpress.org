@@ -51,6 +51,7 @@ TEXT
 						),
 						'zip_url'       => array(
 							'type'        => 'string',
+							'format'      => 'uri',
 							'description' => 'URL to download the plugin ZIP from. Must be a publicly accessible HTTPS URL ending in .zip. Preferred for larger plugins. Provide exactly one of zip_url or zip_base64.',
 						),
 						'plugin_slug'   => array(

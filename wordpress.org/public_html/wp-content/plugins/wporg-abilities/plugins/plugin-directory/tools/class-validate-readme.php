@@ -34,11 +34,12 @@ class Validate_Readme extends Ability_Base {
 					'properties' => array(
 						'content' => array(
 							'type'        => 'string',
-							'description' => 'The full text content of the readme.txt or readme.md file to validate.',
+							'description' => 'The full text content of the readme.txt or readme.md file to validate. Provide either content or url, not both.',
 						),
 						'url'     => array(
 							'type'        => 'string',
-							'description' => 'URL to a readme.txt or readme.md file to fetch and validate. Must end in readme.txt or readme.md.',
+							'format'      => 'uri',
+							'description' => 'URL to a readme.txt or readme.md file to fetch and validate. Must end in readme.txt or readme.md. Provide either url or content, not both.',
 						),
 					),
 				),

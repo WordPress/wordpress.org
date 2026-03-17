@@ -36,9 +36,8 @@ class Ability_Base {
 	/**
 	 * Load the plugin-directory autoloader and switch to the plugins blog.
 	 *
-	 * Registers the plugin-directory autoloader so abilities can reference classes
-	 * like Readme\Validator and Trademarks, and switches to the plugins blog so
-	 * queries run against the correct posts table.
+	 * Permanently switches to the plugins blog for the remainder of the request.
+	 * All plugin-directory abilities expect to run in this context.
 	 */
 	protected static function maybe_load_plugin_directory(): void {
 		static $loaded = false;

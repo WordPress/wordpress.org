@@ -92,15 +92,9 @@ If no readme.txt exists, create one following the `wporg://plugins/plugin-direct
 
 ## Step 4: Run Plugin Check Locally
 
-Run the Plugin Check (PCP) plugin locally using WP-CLI:
+Use the `wporg/plugins/plugin-directory/run-plugin-check` prompt with plugin_path `{$plugin_path}` to run and resolve all Plugin Check issues.
 
-```bash
-wp plugin check {$plugin_path} --categories=plugin_repo --format=json --error-severity=7 --warning-severity=6 --include-low-severity-errors --exclude-checks=prefixing
-```
-
-If PCP is not installed, install it first: `wp plugin install plugin-check --activate`
-
-Fix all ERRORs before proceeding. See `wporg://plugins/plugin-directory/plugin-check-guide` for details.
+Fix all ERRORs before proceeding.
 
 ## Step 5: Check Slug Availability
 

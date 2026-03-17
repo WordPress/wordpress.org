@@ -9,12 +9,14 @@ declare( strict_types = 1 );
 
 namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory\Resources;
 
+use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Ability_Base;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Plugin_Check_Guide class.
  */
-class Plugin_Check_Guide {
+class Plugin_Check_Guide extends Ability_Base {
 
 	/**
 	 * Register this resource as an ability.

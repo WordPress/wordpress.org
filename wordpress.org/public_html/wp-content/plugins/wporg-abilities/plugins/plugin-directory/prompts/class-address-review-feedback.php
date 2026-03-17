@@ -79,12 +79,9 @@ For each issue:
 
 ## Step 4: Re-validate
 
-After all fixes:
-1. Re-run Plugin Check locally to ensure no new issues were introduced:
-```bash
-wp plugin check {$plugin_slug} --categories=plugin_repo --format=json --error-severity=7 --warning-severity=6 --include-low-severity-errors --exclude-checks=prefixing
-```
-2. Review the fixes against `wporg://plugins/plugin-directory/plugin-guidelines`
+After all fixes, use the `wporg/plugins/plugin-directory/run-plugin-check` prompt with the plugin path to re-run Plugin Check and ensure no new issues were introduced.
+
+Review the fixes against `wporg://plugins/plugin-directory/plugin-guidelines`.
 
 ## Step 5: Resubmit
 
