@@ -299,8 +299,8 @@ class Upload {
 							remove_filter( 'get_attached_media_args', $get_attached_media_args );
 
 							if ( $can_upload_extras ) {
-								echo '<li>';
-								echo '<a href="#" class="show-upload-additional hide-if-no-js">' . sprintf( __( 'Upload new version of %s for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
+								echo '<li class="wp-block-button is-small">';
+								echo '<a href="#" class="show-upload-additional hide-if-no-js wp-block-button__link">' . sprintf( __( 'Upload new version of %s for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
 
 								?>
 								<form class="plugin-upload-form hidden" enctype="multipart/form-data" method="POST" action="">
