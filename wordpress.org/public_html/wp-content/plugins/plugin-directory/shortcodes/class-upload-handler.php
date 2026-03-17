@@ -120,19 +120,19 @@ class Upload_Handler {
 	public static function has_queue_capacity() {
 		$maximum = 1;
 
-		$user_active_installs = array_sum(
-			wp_list_pluck(
-				get_posts(
-					array(
-						'author'      => get_current_user_id(),
-						'post_type'   => 'plugin',
-						'post_status' => 'publish',
-						'numberposts' => -1,
-					)
-				),
-				'_active_installs'
-			)
+		$active_installs = wp_list_pluck(
+			get_posts(
+				array(
+					'author'      => get_current_user_id(),
+					'post_type'   => 'plugin',
+					'post_status' => 'publish',
+					'numberposts' => -1,
+				)
+			),
+			'_active_installs'
 		);
+
+		$user_active_installs = array_sum( array_map( 'absint', $active_installs ) );
 
 		if ( $user_active_installs > 1000000 ) {
 			$maximum = 10;
