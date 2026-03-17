@@ -474,8 +474,8 @@ TEXT
 			return null;
 		}
 
-		// Allow the plugin author or users with approve_plugins capability.
-		if ( get_current_user_id() === (int) $post->post_author || current_user_can( 'approve_plugins' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- approve_plugins is registered by the plugin-directory plugin.
+		// Allow the plugin author or users with plugin_approve capability.
+		if ( get_current_user_id() === (int) $post->post_author || current_user_can( 'plugin_approve' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- plugin_approve is registered by the plugin-directory plugin.
 			return $post;
 		}
 

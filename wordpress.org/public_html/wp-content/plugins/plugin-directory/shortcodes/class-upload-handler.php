@@ -208,7 +208,7 @@ class Upload_Handler {
 		}
 
 		// Allow plugin reviewers to bypass some restrictions.
-		if ( $updating_existing && current_user_can( 'approve_plugins' ) && ! $has_upload_token ) {
+		if ( $updating_existing && current_user_can( 'plugin_approve' ) && ! $has_upload_token ) {
 			$has_upload_token = true;
 		}
 
