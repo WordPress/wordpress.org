@@ -382,58 +382,8 @@ class Upload {
 			<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 				<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 				<input type="hidden" name="action" value="upload"/>
-				<?php
-				if ( ! empty( $_REQUEST['upload_token'] ) ) {
-					printf(
-						'<input type="hidden" name="upload_token" value="%s"/>',
-						esc_attr( $_REQUEST['upload_token'] )
-					);
 
-					if ( ! $uploader->has_valid_upload_token() ) {
-						printf(
-							'<div class="notice notice-error notice-alt"><p>%s</p></div>',
-							esc_html__( 'The token provided is invalid for this user.', 'wporg-plugins')
-						);
-					}
-				}
-				?>
-				<?php
-				/*
-				<fieldset>
-					<legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
-					<ul class="category-checklist">
-						<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
-					</ul>
-				</fieldset> */
-				?>
-
-				<label class="wp-block-button__link zip-file">
-					<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
-					<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
-				</label>
-
-				<p>
-					<small>
-						<?php
-						printf(
-							/* translators: Maximum allowed file size. */
-							esc_html__( 'Maximum allowed file size: %s', 'wporg-plugins' ),
-							esc_html( size_format( wp_max_upload_size() ) )
-						);
-						?>
-					</small>
-				</p>
-
-				<p>
-					<label>
-						<?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
-						<textarea name="comment" rows="3" cols="80"><?php
-							if ( ! empty( $_REQUEST['comment'] ) ) {
-								echo esc_textarea( $_REQUEST['comment'] );
-							}
-						?></textarea>
-					</label>
-				</p>
+                <h3><?php esc_html_e( 'Please, read and check the following before uploading your plugin', 'wporg-plugins' ); ?></h3>
 
 				<p>
 					<label>
@@ -477,6 +427,68 @@ class Upload {
 						?>
 					</label>
 				</p>
+
+                <h3><?php esc_html_e( 'Plugin Naming', 'wporg-plugins' ); ?></h3>
+                <p><?php echo wp_kses_post( __( '<strong>Generic names</strong> that <strong>resemble existing plugins in the directory</strong> (e.g., “AI Writer”, “Image Optimization”) won’t be accepted, even if the slug is available.', 'wporg-plugins' ) ); ?></p>
+                <p><?php echo wp_kses_post( __( 'Instead, please <strong>start your plugin name with a unique or coined term</strong>, such as your brand, alias, or organization name (e.g., “Acme AI Writer”, “WriteralAI - AI Writter”, “Acme Image Optimization”, “Imageralia - Image Optimization”).', 'wporg-plugins' ) ); ?></p>
+
+                <h3><?php esc_html_e( 'Plugin Ownership', 'wporg-plugins' ); ?></h3>
+                <p><?php echo wp_kses_post( __( 'If the name begins with a project, organization, or trademark, it will <strong>only be accepted if the submitter is the verified owner</strong>. Ownership may be verified through the email domain in the <a href="https://profiles.wordpress.org/profile/edit" target="_blank">user profile</a> (e.g., “john@acme.example”).', 'wporg-plugins' ) ); ?></p>
+
+                <h3><?php esc_html_e( 'Are you ready? Upload the .zip file for your plugin', 'wporg-plugins' ); ?></h3>
+
+                <?php
+                if ( ! empty( $_REQUEST['upload_token'] ) ) {
+                    printf(
+                            '<input type="hidden" name="upload_token" value="%s"/>',
+                            esc_attr( $_REQUEST['upload_token'] )
+                    );
+
+                    if ( ! $uploader->has_valid_upload_token() ) {
+                        printf(
+                                '<div class="notice notice-error notice-alt"><p>%s</p></div>',
+                                esc_html__( 'The token provided is invalid for this user.', 'wporg-plugins')
+                        );
+                    }
+                }
+                ?>
+                <?php
+                /*
+                <fieldset>
+                    <legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
+                    <ul class="category-checklist">
+                        <?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
+                    </ul>
+                </fieldset> */
+                ?>
+
+                <label class="wp-block-button__link zip-file">
+                    <input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
+                    <span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
+                </label>
+
+                <div>
+                    <small>
+                        <?php
+                        printf(
+                        /* translators: Maximum allowed file size. */
+                                esc_html__( 'Maximum allowed file size: %s', 'wporg-plugins' ),
+                                esc_html( size_format( wp_max_upload_size() ) )
+                        );
+                        ?>
+                    </small>
+                </div>
+
+                <p>
+                    <label>
+                        <?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
+                        <textarea name="comment" rows="3" cols="80"><?php
+                            if ( ! empty( $_REQUEST['comment'] ) ) {
+                                echo esc_textarea( $_REQUEST['comment'] );
+                            }
+                            ?></textarea>
+                    </label>
+                </p>
 
 				<input id="upload_button" class="wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 			</form>
