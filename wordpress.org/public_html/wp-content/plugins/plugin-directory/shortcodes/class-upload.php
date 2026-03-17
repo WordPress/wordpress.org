@@ -433,7 +433,20 @@ class Upload {
                 <p><?php echo wp_kses_post( __( 'Instead, please <strong>start your plugin name with a unique or coined term</strong>, such as your brand, alias, or organization name (e.g., “Acme AI Writer”, “WriteralAI - AI Writter”, “Acme Image Optimization”, “Imageralia - Image Optimization”).', 'wporg-plugins' ) ); ?></p>
 
                 <h3><?php esc_html_e( 'Plugin Ownership', 'wporg-plugins' ); ?></h3>
-                <p><?php echo wp_kses_post( __( 'If the name begins with a project, organization, or trademark, it will <strong>only be accepted if the submitter is the verified owner</strong>. Ownership may be verified through the email domain in the <a href="https://profiles.wordpress.org/profile/edit" target="_blank">user profile</a> (e.g., “john@acme.example”).', 'wporg-plugins' ) ); ?></p>
+                <p><?php printf(
+                    /* translators: 1: User profile URL. */
+                            wp_kses_post(
+                                    __( 'Names that <strong>begin</strong> with a project, organization, or trademark are <strong>only accepted if submitted by the verified owner</strong>. Ownership can be <strong>confirmed through the email domain in your <a href="%1$s" target="_blank">user profile</a></strong> - update it before submitting.', 'wporg-plugins' )
+                            ),
+                            esc_url( 'https://profiles.wordpress.org/profile/edit' )
+                    ); ?>
+                <br>
+                <?php echo wp_kses_post( __( '<i>For example, use an official Acme email domain (e.g., “john@acme.example”) for a plugin named “Acme AI Writer”.</i>', 'wporg-plugins' ) ); ?>
+                </p>
+                <p><?php echo wp_kses_post( __( '<strong>If you don’t own the entity, don’t imply affiliation</strong>. Place their name <strong>at the end</strong> and <strong>make the distinction clear</strong>.', 'wporg-plugins' ) ); ?>
+                <br>
+                <?php echo wp_kses_post( __( '<i>For example, if you don’t own “Acme” use a structure like: “{your-distinguible-plugin-name} for Acme” (e.g., “WriteralAI – AI Writer for Acme”).</i>', 'wporg-plugins' ) ); ?>
+                </p>
 
                 <h3><?php esc_html_e( 'Are you ready? Upload the .zip file for your plugin', 'wporg-plugins' ); ?></h3>
 
