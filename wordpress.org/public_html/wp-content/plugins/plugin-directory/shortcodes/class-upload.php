@@ -216,17 +216,16 @@ class Upload {
 						$can_change_slug   = ( 'new' === $plugin->post_status && ! $plugin->{'_wporg_plugin_original_slug'} );
 						$can_upload_extras = in_array( $plugin->post_status, array( 'new', 'pending' ), true );
 
-						echo '<li>';
-							echo '<strong>' . esc_html( $plugin->post_title ) . '</strong>';
-							echo '<ul>';
+						echo '<li class="plugin-submission-item">';
+							echo '<div class="plugin-submission-name">' . esc_html( $plugin->post_title ) . '</div>';
 							printf(
-								'<li>%s</li>',
+								'<div class="plugin-submission-status">%s</div>',
 								sprintf(
 									__( 'Review status: %s', 'wporg-plugins' ),
 									$plugin->status
 								)
 							);
-							echo '<li>';
+							echo '<div class="plugin-submission-assigned-slug">';
 							printf(
 								__( 'Current assigned slug: %s', 'wporg-plugins' ),
 								'<code>' . esc_html( $plugin->post_name ) . '</code>'
@@ -288,7 +287,7 @@ class Upload {
 								</dialog>
 							<?php
 							endif; // $can_change_slug
-							echo '</li>';
+							echo '</div>';
 
 							add_filter( 'get_attached_media_args', $get_attached_media_args = function( $args ) {
 								$args['orderby'] = 'post_date';
@@ -299,8 +298,8 @@ class Upload {
 							remove_filter( 'get_attached_media_args', $get_attached_media_args );
 
 							if ( $can_upload_extras ) {
-								echo '<li class="wp-block-button is-small">';
-								echo '<a href="#" class="show-upload-additional hide-if-no-js wp-block-button__link">' . sprintf( __( 'Upload new version of %s for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
+								echo '<div class="plugin-submission-update-code wp-block-button is-small">';
+								echo '<a href="#" class="show-upload-additional hide-if-no-js wp-block-button__link">' . sprintf( __( 'Upload updated "%s" plugin for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
 
 								?>
 								<form class="plugin-upload-form hidden" enctype="multipart/form-data" method="POST" action="">
@@ -322,33 +321,50 @@ class Upload {
 									<input class="upload-button wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>"/>
 								</form>
 								<?php
-								echo '</li>';
+								echo '</div>';
 							}
 
-							echo '<li>';
-							echo '<strong>' . __( 'Submitted files:', 'wporg-plugins' ) . '</strong><ol>';
+							echo '<div class="plugin-submission-submitted-files">';
+							echo '<strong>' . __( 'Submitted files:', 'wporg-plugins' ) . '</strong>';
 							foreach ( $attached_media as $attachment_post_id => $upload ) {
-								echo '<li><ul>';
-								echo '<li><code>' . esc_html( $upload->submitted_name ) . '</code></li>';
-								echo '<li>' . sprintf( __( 'Version: %s', 'wporg-plugins' ), '<code>' . esc_html( $upload->version ) . '</code>' ) . '</li>';
-								echo '<li>' . sprintf( __( 'Upload Date: %s', 'wporg-plugins' ), date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</li>';
-								if ( $upload->post_content ) {
-									echo '<li>' . nl2br( wp_kses_post( $upload->post_content ) ) . '</li>';
-								}
-								if ( array_key_first( $attached_media) === $attachment_post_id ) {
-									printf(
-										'<li class="wp-block-button is-small"><a href="%s" class="%s" target="_blank">%s</a></li>',
-										esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
-										'wp-block-button__link',
-										__( 'Check with Plugin Check', 'wporg-plugins' )
-									);
-								}
-								echo '</ul></li>';
-							}
-							echo '</ol>';
+                                echo '<div class="plugin-submission-file">';
+                                echo '<table class="plugin-submission-file__meta">';
+                                echo '<tbody>';
 
-							echo '</li>';
-							echo '</ul>';
+                                echo '<tr>';
+                                echo '<th scope="row">' . esc_html__( 'Upload Date:', 'wporg-plugins' ) . '</th>';
+                                echo '<td>' . esc_html( date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</td>';
+                                echo '</tr>';
+
+                                echo '<tr>';
+                                echo '<th scope="row">' . esc_html__( 'File:', 'wporg-plugins' ) . '</th>';
+                                echo '<td><code>' . esc_html( $upload->submitted_name ) . '</code></td>';
+                                echo '</tr>';
+
+                                echo '<tr>';
+                                echo '<th scope="row">' . esc_html__( 'Version:', 'wporg-plugins' ) . '</th>';
+                                echo '<td><code>' . esc_html( $upload->version ) . '</code></td>';
+                                echo '</tr>';
+
+                                echo '</tbody>';
+                                echo '</table>';
+
+                                if ( $upload->post_content ) {
+                                    echo '<div class="plugin-submission-file__notes">' . nl2br( wp_kses_post( $upload->post_content ) ) . '</div>';
+                                }
+
+                                if ( array_key_first( $attached_media ) === $attachment_post_id ) {
+                                    printf(
+                                            '<div class="plugin-submission-file__pcp wp-block-button is-small"><a href="%s" class="%s" target="_blank">%s</a></div>',
+                                            esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
+                                            'wp-block-button__link',
+                                            __( 'Check with Plugin Check', 'wporg-plugins' )
+                                    );
+                                }
+                                echo '</div>';
+							}
+
+							echo '</div>';
 						echo "</li>\n";
 					}
 					?>

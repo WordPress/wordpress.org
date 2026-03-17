@@ -66,3 +66,34 @@
 	}
 	
 }
+
+.plugin-submission-item {
+	&>div, .plugin-submission-file>div {
+		margin-top: 0.4rem;
+		margin-bottom: 0.4rem;
+	}
+	.plugin-submission-name {
+		font-weight: bold;
+		font-size: 1.2rem;
+	}
+	.plugin-submission-update-code {
+		margin-top: 0.6rem;
+		margin-bottom: 1rem;
+		.show-upload-additional{
+			display: inline-block;
+		}
+	}
+	.plugin-submission-file {
+		border-inline-start: 2px solid black;
+		padding: 0.4rem 1rem;
+		.plugin-submission-file__meta th {
+			text-align: start;
+		}
+		.plugin-submission-file__pcp{
+			display: inline-block;
+		}
+		&+.plugin-submission-file {
+			margin-top: 1rem;
+		}
+	}
+}
