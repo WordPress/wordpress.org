@@ -218,6 +218,13 @@ class Upload {
 
 						echo '<li class="plugin-submission-item">';
 							echo '<div class="plugin-submission-name">' . esc_html( $plugin->post_title ) . '</div>';
+                            printf(
+                                 '<div class="plugin-submission-submited-date">%s</div>',
+                                 sprintf(
+                                    __( 'Submitted on: %s', 'wporg-plugins' ),
+                                    esc_html( date_i18n( get_option( 'date_format' ), $plugin->post_date_gmt ) )
+                                 )
+                            );
 							printf(
 								'<div class="plugin-submission-status">%s</div>',
 								sprintf(
