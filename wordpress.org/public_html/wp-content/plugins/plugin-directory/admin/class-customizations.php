@@ -139,10 +139,10 @@ class Customizations {
 					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js',PLUGIN_FILE ), array( 'wp-util', 'wp-lists', 'wp-api' ), filemtime( PLUGIN_DIR . '/js/edit-form.js') );
 
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
-						'approvePluginAYS'    => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
-						'rejectPluginAYS'     => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
-						'removeCommitterAYS'  => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
-						'removeSupportRepAYS' => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+						'approvePluginConfirm' => __( 'Double-click to Approve', 'wporg-plugins' ),
+						'rejectPluginAYS'      => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
+						'removeCommitterAYS'   => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+						'removeSupportRepAYS'  => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
 					) );
 					break;
 
