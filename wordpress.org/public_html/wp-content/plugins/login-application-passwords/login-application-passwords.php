@@ -442,6 +442,12 @@ function wporg_validate_authorize_app_request( array $request, WP_User $user ): 
 			continue;
 		}
 
+		// Allow loopback redirects per RFC 8252 Section 7.3.
+		$host = strtolower( wp_parse_url( $request[ $key ], PHP_URL_HOST ) ?? '' );
+		if ( in_array( $host, array( '127.0.0.1', '[::1]' ), true ) ) {
+			continue;
+		}
+
 		if ( ! wp_http_validate_url( $request[ $key ] ) ) {
 			$error->add( 'invalid_redirect_url', __( 'The provided URL is not valid.' ) );
 		} elseif ( 'https' !== wp_parse_url( $request[ $key ], PHP_URL_SCHEME ) && ! $is_local ) {

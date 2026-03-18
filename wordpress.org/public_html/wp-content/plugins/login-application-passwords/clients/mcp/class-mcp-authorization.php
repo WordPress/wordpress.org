@@ -45,7 +45,7 @@ class MCP_Authorization {
 	public static function register( array $apps ): array {
 		$apps[ self::APP_ID ] = array(
 			'name'  => 'WordPress.org MCP',
-			'hosts' => array(),
+			'hosts' => array( '127.0.0.1' ),
 		);
 
 		return $apps;
@@ -60,6 +60,11 @@ class MCP_Authorization {
 	 */
 	public static function render_config( string $new_password, array $request, WP_User $user ): void {
 		if ( ( $request['app_id'] ?? '' ) !== self::APP_ID ) {
+			return;
+		}
+
+		// Credentials were already sent via the success_url redirect.
+		if ( ! empty( $request['success_url'] ) ) {
 			return;
 		}
 
