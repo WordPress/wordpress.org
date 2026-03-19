@@ -54,7 +54,7 @@ class Prepare_Plugin {
 	 */
 	public static function execute( array $input ): array {
 		// Defensive fallback — input_schema marks plugin_path as required but the framework may not enforce it.
-		$plugin_path = $input['plugin_path'] ?? '{plugin_path}';
+		$plugin_path = sanitize_text_field( $input['plugin_path'] ?? '{plugin_path}' );
 
 		$text = <<<MD
 Prepare the plugin at `{$plugin_path}` for submission to the WordPress.org plugin directory. Follow each step in order and report results:

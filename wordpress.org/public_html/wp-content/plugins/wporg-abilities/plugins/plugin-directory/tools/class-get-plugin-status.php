@@ -122,7 +122,7 @@ class Get_Plugin_Status extends Ability_Base {
 	 *
 	 * @return true|\WP_Error
 	 */
-	public static function check_permission() {
+	public static function check_permission(): bool|\WP_Error {
 		if ( get_current_user_id() > 0 ) {
 			return true;
 		}
