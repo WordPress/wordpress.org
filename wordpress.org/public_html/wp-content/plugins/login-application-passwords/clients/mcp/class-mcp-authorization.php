@@ -72,7 +72,7 @@ class MCP_Authorization {
 			'mcpServers' => array(
 				'wporg-mcp-server' => array(
 					'command' => 'npx',
-					'args'    => array( '-y', '@automattic/mcp-wordpress-remote@latest' ),
+					'args'    => array( '-y', '@automattic/mcp-wordpress-remote@^0.2' ),
 					'env'     => array(
 						'WP_API_URL'      => get_rest_url( 1, 'mcp/wporg' ),
 						'WP_API_USERNAME' => $user->user_login,
@@ -91,6 +91,9 @@ class MCP_Authorization {
 			<label for="mcp-config" class="authorize-application-details">
 				<?php esc_html_e( 'Copy the configuration below and add it to your MCP client.' ); ?>
 			</label>
+			<p class="description">
+				<strong><?php esc_html_e( 'This configuration contains your application password. Do not commit it to source control.' ); ?></strong>
+			</p>
 			<textarea id="mcp-config" readonly rows="14"><?php echo esc_textarea( $json ); ?></textarea>
 			<button type="button" class="button button-primary button-large" id="copy-mcp-config" data-copied="<?php esc_attr_e( 'Copied!' ); ?>"><?php esc_html_e( 'Copy' ); ?></button>
 			<ul class="client-notes">
