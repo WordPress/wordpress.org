@@ -433,11 +433,11 @@ TEXT
 	 * @return string|array Temp file path on success, or error response array on failure.
 	 */
 	private static function prepare_zip_from_base64( string $base64 ): array|string {
-		if ( strlen( $base64 ) > 64 * MB_IN_BYTES ) {
+		if ( strlen( $base64 ) > wp_max_upload_size() ) {
 			return self::error_response(
 				'zip_too_large',
-				'The zip_base64 payload exceeds the 64 MB limit.',
-				'Use zip_url instead for larger plugins.'
+				sprintf( 'The zip_base64 payload exceeds the %s upload limit.', size_format( wp_max_upload_size() ) ),
+				'Reduce the plugin ZIP file size and try again.'
 			);
 		}
 

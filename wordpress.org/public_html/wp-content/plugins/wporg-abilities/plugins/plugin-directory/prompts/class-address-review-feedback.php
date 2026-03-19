@@ -54,7 +54,7 @@ class Address_Review_Feedback {
 	 */
 	public static function execute( array $input ): array {
 		// Defensive fallback — input_schema marks plugin_slug as required but the framework may not enforce it.
-		$plugin_slug = sanitize_title( $input['plugin_slug'] ?? '{plugin_slug}' );
+		$plugin_slug = sanitize_text_field( $input['plugin_slug'] ?? '{plugin_slug}' );
 
 		$text = <<<MD
 Help me address the review feedback for my plugin `{$plugin_slug}` submitted to the WordPress.org plugin directory.
