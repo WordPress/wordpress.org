@@ -54,7 +54,8 @@ class Run_Plugin_Check {
 	 */
 	public static function execute( array $input ): array {
 		// Defensive fallback — input_schema marks plugin_path as required but the framework may not enforce it.
-		$plugin_path = sanitize_text_field( $input['plugin_path'] ?? '{plugin_path}' );
+		$plugin_path     = sanitize_text_field( $input['plugin_path'] ?? '{plugin_path}' );
+		$plugin_path_arg = escapeshellarg( $plugin_path );
 
 		$text = <<<MD
 Run the WordPress Plugin Check (PCP) tool against the plugin at `{$plugin_path}`.
@@ -88,7 +89,7 @@ wp plugin install plugin-check --activate
 Use the exact flags that WordPress.org uses during submission review:
 
 ```bash
-wp plugin check {$plugin_path} \\
+wp plugin check {$plugin_path_arg} \\
   --categories=plugin_repo \\
   --format=json \\
   --error-severity=7 \\
