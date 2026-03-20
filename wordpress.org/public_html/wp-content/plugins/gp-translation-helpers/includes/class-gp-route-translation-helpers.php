@@ -347,7 +347,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 *
 	 * @return string                      The full permalink.
 	 */
-	public static function get_permalink( string $project_path, $original_id, ?string $set_slug = null, ?string $locale_slug = null ): string {
+	public static function get_permalink( string $project_path, string|int|null $original_id, ?string $set_slug = null, ?string $locale_slug = null ): string {
 		$permalink = $project_path . '/' . $original_id;
 		if ( $set_slug && $locale_slug ) {
 			$permalink .= '/' . $locale_slug . '/' . $set_slug;
