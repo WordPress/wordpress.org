@@ -400,7 +400,8 @@ class Composer_Repository {
 				'type' => 'zip',
 			),
 			'require'     => array(
-				'php' => '>=' . $php_version,
+				'php'                            => '>=' . $php_version,
+				'roots/wordpress-core-installer' => '^3.0',
 			),
 			'suggest'     => array(
 				'ext-curl'      => 'Performs remote request operations.',
