@@ -677,6 +677,10 @@ class Plugin_Directory {
 
 		// Set up custom queries for the /browse/ URLs
 		switch ( $wp_query->get( 'browse' ) ) {
+			case 'featured':
+				$wp_query->query_vars['orderby'] ??= 'RAND(' . gmdate( 'Ymd' ) . ')';
+				break;
+
 			case 'beta':
 				$wp_query->query_vars['orderby'] ??= 'last_updated';
 
