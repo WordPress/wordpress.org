@@ -293,6 +293,7 @@ class Get_Plugin_Status extends Ability_Base {
 						if ( $body ) {
 							$body = self::html_to_text( $body );
 							$body = self::strip_boilerplate( $body );
+							$body = self::wrap_feedback( $body );
 						}
 
 						return array(
@@ -321,6 +322,7 @@ class Get_Plugin_Status extends Ability_Base {
 				if ( $body ) {
 					$body = self::html_to_text( $body );
 					$body = self::strip_boilerplate( $body );
+					$body = self::wrap_feedback( $body );
 				}
 
 				$feedback[] = array(
@@ -407,5 +409,17 @@ class Get_Plugin_Status extends Ability_Base {
 		set_site_transient( $cache_key, $threads, 5 * MINUTE_IN_SECONDS );
 
 		return $threads;
+	}
+
+	/**
+	 * Wrap feedback text in delimiters to separate content from instructions.
+	 *
+	 * @param string $body The feedback body.
+	 * @return string
+	 */
+	private static function wrap_feedback( string $body ): string {
+		$body = str_replace( array( '<feedback>', '</feedback>' ), '', $body );
+
+		return "<feedback>\n{$body}\n</feedback>";
 	}
 }
