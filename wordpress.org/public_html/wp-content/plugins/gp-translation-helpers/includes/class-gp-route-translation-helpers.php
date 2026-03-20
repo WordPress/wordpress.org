@@ -341,13 +341,13 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 * @since 0.0.2
 	 *
 	 * @param string      $project_path The project path. E.g. "wp/dev".
-	 * @param int|null    $original_id  The original id. E.g. "2440".
-	 * @param string|null $set_slug     The translation set slug. E.g. "default".
-	 * @param string|null $locale_slug  Optional. The locale slug. E.g. "es".
+	 * @param string|int|null $original_id  The original id. E.g. "2440".
+	 * @param string|null    $set_slug     The translation set slug. E.g. "default".
+	 * @param string|null    $locale_slug  Optional. The locale slug. E.g. "es".
 	 *
-	 * @return string                   The full permalink.
+	 * @return string                      The full permalink.
 	 */
-	public static function get_permalink( string $project_path, ?int $original_id, ?string $set_slug = null, ?string $locale_slug = null ): string {
+	public static function get_permalink( string $project_path, $original_id, ?string $set_slug = null, ?string $locale_slug = null ): string {
 		$permalink = $project_path . '/' . $original_id;
 		if ( $set_slug && $locale_slug ) {
 			$permalink .= '/' . $locale_slug . '/' . $set_slug;
