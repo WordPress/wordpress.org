@@ -256,6 +256,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			return $cache[ $post->ID ];
 		}
 
+		$original_id = (int) $original_id;
+
 		$original = GP::$original->get( $original_id );
 		if ( ! $original ) {
 			return $cache[ $post->ID ];
