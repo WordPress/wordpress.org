@@ -75,7 +75,7 @@ class Sync_Plugin_Translations extends WP_CLI_Command {
 			$current_translations->add_entry( $translation );
 			$current_translations_map[ $translation->key() ] = [
 				'user_id'  => $translation->user_id,
-				'status'   => $translation->translation_status,
+				'status'   => $translation->status,
 				'warnings' => $translation->warnings,
 			];
 
