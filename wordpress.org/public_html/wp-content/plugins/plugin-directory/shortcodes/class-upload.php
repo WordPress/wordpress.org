@@ -232,6 +232,34 @@ class Upload {
 									$plugin->status
 								)
 							);
+                            if( 'pending' === $plugin->post_status &&
+                                !empty($plugin->review_email) &&
+                                !empty($plugin->review_email->subject) && !empty($plugin->review_email->created)) {
+                                printf(
+                                        '<div class="plugin-submission-email">✉️✔️ %s</div>',
+                                        sprintf(
+                                                __( 'Our team emailed you on <strong>%s</strong> regarding your submission. The subject line is: "<strong>%s</strong>".', 'wporg-plugins' ),
+                                                esc_html( date_i18n( get_option( 'date_format' ), strtotime( $plugin->review_email->created ) ) ),
+                                                esc_html( $plugin->review_email->subject )
+                                        )
+                                );
+                                echo '<div class="plugin-submission-email-clarification">';
+                                esc_html_e('Please follow the instructions in that email to continue the review process. If you don’t see it in your inbox, check your spam or junk folder. You may also want to add plugins@wordpress.org to your email whitelist to ensure you receive future updates.', 'wporg-plugins');
+                                echo '</div>';
+                            }
+                            if('new' === $plugin->post_status){
+                                printf(
+                                        '<div class="plugin-submission-email">✉️⏳ %s</div>',
+                                        sprintf(
+                                                __( 'Please be patient and wait for the review email. It will be sent to your email address, <strong>%s</strong>, with the subject line: "<strong>%s</strong>".', 'wporg-plugins' ),
+                                                esc_html( get_userdata( $plugin->post_author )->user_email ),
+                                                '[WordPress Plugin Directory] Review in Progress: '.$plugin->post_title
+                                        )
+                                );
+                                echo '<div class="plugin-submission-email-clarification">';
+                                esc_html_e('Be sure to check your spam folder, and consider adding plugins@wordpress.org to your email whitelist to ensure the message does not get missed.', 'wporg-plugins');
+                                echo '</div>';
+                            }
 							echo '<div class="plugin-submission-assigned-slug">';
 							printf(
 								__( 'Current assigned slug: %s', 'wporg-plugins' ),
