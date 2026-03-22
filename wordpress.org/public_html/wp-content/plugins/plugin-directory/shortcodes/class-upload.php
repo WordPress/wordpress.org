@@ -222,7 +222,7 @@ class Upload {
                                  '<div class="plugin-submission-submited-date">%s</div>',
                                  sprintf(
                                     __( 'Submitted on: %s', 'wporg-plugins' ),
-                                    esc_html( date_i18n( get_option( 'date_format' ), $plugin->post_date_gmt ) )
+                                    esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->post_date_gmt ) ) )
                                  )
                             );
 							printf(
@@ -239,7 +239,7 @@ class Upload {
                                         '<div class="plugin-submission-email">✉️✔️ %s</div>',
                                         sprintf(
                                                 __( 'Our team emailed you on <strong>%s</strong> regarding your submission. The subject line is: "<strong>%s</strong>".', 'wporg-plugins' ),
-                                                esc_html( date_i18n( get_option( 'date_format' ), strtotime( $plugin->review_email->created ) ) ),
+                                                esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->review_email->created ) ) ),
                                                 esc_html( $plugin->review_email->subject )
                                         )
                                 );
@@ -368,7 +368,7 @@ class Upload {
 
                                 echo '<tr>';
                                 echo '<th scope="row">' . esc_html__( 'Upload Date:', 'wporg-plugins' ) . '</th>';
-                                echo '<td>' . esc_html( date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</td>';
+                                echo '<td>' . esc_html( wp_date( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</td>';
                                 echo '</tr>';
 
                                 echo '<tr>';
