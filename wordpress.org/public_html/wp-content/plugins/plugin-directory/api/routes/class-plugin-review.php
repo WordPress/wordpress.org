@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
+use WordPressdotorg\Plugin_Directory\Admin\Metabox\Reviewer;
 use WP_Error;
 use WP_REST_Server;
 
@@ -22,6 +23,13 @@ class Plugin_Review extends Base {
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'plugin_review_info' ),
 			'permission_callback' => array( $this, 'plugin_info_permission_check' ),
+		) );
+
+		// An API Endpoint to change the status of a plugin from new to pending and assign the current user as reviewer.
+		register_rest_route( 'plugins/v1', '/plugin-review/(?P<plugin_id>\d+)/assign', array(
+			'methods'             => WP_REST_Server::EDITABLE,
+			'callback'            => array( $this, 'assign_reviewer' ),
+			'permission_callback' => array( $this, 'assign_reviewer_permissions_check' ),
 		) );
 	}
 
@@ -135,5 +143,44 @@ class Plugin_Review extends Base {
 		$details['download_link'] = self::append_plugin_review_info_url( $details['download_link'], $post );
 
 		return $details;
+	}
+
+	/**
+	 * Permission check for assigning a reviewer.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool
+	 */
+	public function assign_reviewer_permissions_check( $request ) {
+		return current_user_can( 'plugin_approve' );
+	}
+
+	/**
+	 * Endpoint to change the status of a plugin from new to pending and assign the current user as reviewer.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool|WP_Error
+	 */
+	public function assign_reviewer( $request ) {
+		$post = get_post( $request['plugin_id'] );
+
+		if ( ! $post || 'plugin' !== $post->post_type ) {
+			return new WP_Error( 'plugin_not_found', 'Plugin not found', [ 'status' => 404 ] );
+		}
+
+		if ( 'new' !== $post->post_status ) {
+			return new WP_Error( 'invalid_status', 'Plugin is not in "new" status', [ 'status' => 400 ] );
+		}
+
+		// Change status to pending.
+		wp_update_post( [
+			'ID'          => $post->ID,
+			'post_status' => 'pending',
+		] );
+
+		// Assign current user as reviewer.
+		Reviewer::set_reviewer( $post->ID, get_current_user_id() );
+
+		return true;
 	}
 }
