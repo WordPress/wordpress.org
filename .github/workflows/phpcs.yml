@@ -1,0 +1,27 @@
+name: PHPCS
+
+on:
+  pull_request:
+  push:
+    branches: [ trunk ]
+
+jobs:
+  phpcs:
+    name: PHPCS
+    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: cs2pr, phpcs, wp-coding-standards/wpcs
+
+      - name: Run PHPCS
+        continue-on-error: true
+        run: phpcs --report=checkstyle | cs2pr
