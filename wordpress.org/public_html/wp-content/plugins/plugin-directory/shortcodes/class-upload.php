@@ -120,7 +120,16 @@ class Upload {
 		if ( ! is_wp_error( $upload_result ) || $submitted_counts->total /* has a plugin in the review queue */ ) :
 			$plugins       = wp_count_posts( 'plugin', 'readable' );
 			$oldest_plugin = get_posts( [ 'post_type' => 'plugin', 'post_status' => 'new', 'order' => 'ASC', 'orderby' => 'post_date_gmt', 'numberposts' => 1 ] );
-			$queue_length  = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
+            $queue_length_in_days = 0;
+            $queue_oldest_new_plugin_date_with_offset = '';
+            if(!empty($oldest_plugin)) {
+                $queue_length_in_days = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
+                // It adds a 36 hours offset to avoid confusion related to timezones and for it to be at least the previous day of the latest submission.
+                $queue_oldest_new_plugin_date_with_offset = date_i18n(
+                        get_option( 'date_format' ),
+                        strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) - ( 36 * HOUR_IN_SECONDS )
+                );
+            }
 			?>
 
 			<div class="plugin-queue-message notice notice-info notice-alt">
@@ -141,23 +150,22 @@ class Upload {
 					);
 				}
 
-				// If the queue is currently beyond 10 days, display a warning to that effect.
-				if ( $queue_length > 10 ) {
-					echo '</p><p>';
-					esc_html_e( 'The review queue is currently longer than normal, we apologize for the delays and ask for patience.', 'wporg-plugins' );
+                if($plugins->new > 0 && !empty($queue_oldest_new_plugin_date_with_offset)) {
+                    echo '</p><p>';
+                    printf(
+                    /* translators: %s: Date of the oldest new plugin in the queue, with a 36 hours offset. */
+                            esc_html( __(
+                                    'All plugins that have been submitted before %s have received an initial response by email to their submission.',
+                                    'wporg-plugins'
+                            ) ),
+                            '<strong>' . esc_html( $queue_oldest_new_plugin_date_with_offset ) . '</strong>'
+                    );
 
-					echo '</p><p>';
-					printf(
-						/* translators: %s: Number of days. Only displayed if > 10 */
-						esc_html( _n(
-							'The current wait for an initial review is at least %s day.',
-							'The current wait for an initial review is at least %s days.',
-							$queue_length,
-							'wporg-plugins'
-						) ),
-						'<strong>' . number_format_i18n( $queue_length ) . '</strong>'
-					);
-				}
+                    // If the queue is currently beyond 10 days, display a warning to that effect.
+                    if($queue_length_in_days >= 10) {
+                        echo ' '.__( 'The review queue is currently longer than normal, we apologize for the delays and ask for patience.', 'wporg-plugins' );
+                    }
+                }
 				?>
 				</p>
 			</div>
