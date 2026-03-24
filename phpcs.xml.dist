@@ -82,9 +82,14 @@
 		<exclude name="Squiz.Commenting.FileComment.Missing" />
 		<exclude name="Squiz.Commenting.ClassComment.Missing" />
 		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
+		<exclude name="Squiz.Commenting.FunctionComment.Missing" />
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 		<exclude name="Squiz.Commenting.VariableComment.Missing" />
 		<exclude name="Squiz.Commenting.VariableComment.MissingVar" />
+
+		<!-- Requiring full stops on inline/param comments is pedantic. -->
+		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
+		<exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop" />
 
 		<!-- Package tags add clutter without value. -->
 		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
@@ -107,6 +112,16 @@
 
 		<!-- WordPress translators comments require no space after //. -->
 		<exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" />
+	</rule>
+
+	<!-- Commented-out code is sometimes intentional for reference. -->
+	<rule ref="Squiz.PHP.CommentedOutCode.Found">
+		<severity>0</severity>
+	</rule>
+
+	<!-- Custom capabilities are valid in the WordPress.org environment. -->
+	<rule ref="WordPress.WP.Capabilities.Unknown">
+		<severity>0</severity>
 	</rule>
 
 	<rule ref="WordPress-Extra">
