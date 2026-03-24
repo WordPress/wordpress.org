@@ -165,7 +165,7 @@ TEXT
 	 *
 	 * @return true|\WP_Error
 	 */
-	public static function check_permission() {
+	public static function check_permission(): bool|\WP_Error {
 		if ( get_current_user_id() > 0 ) {
 			return true;
 		}
@@ -242,10 +242,10 @@ TEXT
 			'size'     => filesize( $temp_path ),
 		);
 
-		$_POST['comment'] = $input['comment'] ?? '';
+		$_POST['comment'] = sanitize_text_field( $input['comment'] ?? '' );
 
 		if ( ! empty( $input['upload_token'] ) ) {
-			$_REQUEST['upload_token'] = $input['upload_token'];
+			$_REQUEST['upload_token'] = sanitize_text_field( $input['upload_token'] );
 		}
 
 		// Skip is_uploaded_file() check — file was fetched via URL or decoded from base64, not uploaded via HTTP.
@@ -357,7 +357,7 @@ TEXT
 	 * @param array $input The tool input.
 	 * @return string|array Temp file path on success, or error response array on failure.
 	 */
-	private static function prepare_zip_file( array $input ) {
+	private static function prepare_zip_file( array $input ): array|string {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 
 		if ( ! empty( $input['zip_url'] ) ) {
@@ -381,7 +381,7 @@ TEXT
 	 * @param string $url The URL to download.
 	 * @return string|array Temp file path on success, or error response array on failure.
 	 */
-	private static function prepare_zip_from_url( string $url ) {
+	private static function prepare_zip_from_url( string $url ): array|string {
 		$url = esc_url_raw( $url );
 
 		if ( 'https' !== wp_parse_url( $url, PHP_URL_SCHEME ) ) {
@@ -400,7 +400,21 @@ TEXT
 			);
 		}
 
-		$temp_path = download_url( $url, 300 );
+		// Do not allow link-local addresses.
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( $host ) {
+			$ip    = gethostbyname( $host );
+			$parts = array_map( 'intval', explode( '.', $ip ) );
+			if ( 169 === $parts[0] && 254 === $parts[1] ) {
+				return self::error_response(
+					'invalid_url',
+					'The URL is not allowed.',
+					'Provide a publicly accessible HTTPS URL that does not point to an internal network address.'
+				);
+			}
+		}
+
+		$temp_path = download_url( $url );
 		if ( is_wp_error( $temp_path ) ) {
 			return self::error_response(
 				'download_failed',
@@ -418,7 +432,15 @@ TEXT
 	 * @param string $base64 The base64-encoded ZIP data.
 	 * @return string|array Temp file path on success, or error response array on failure.
 	 */
-	private static function prepare_zip_from_base64( string $base64 ) {
+	private static function prepare_zip_from_base64( string $base64 ): array|string {
+		if ( strlen( $base64 ) > wp_max_upload_size() ) {
+			return self::error_response(
+				'zip_too_large',
+				sprintf( 'The zip_base64 payload exceeds the %s upload limit.', size_format( wp_max_upload_size() ) ),
+				'Reduce the plugin ZIP file size and try again.'
+			);
+		}
+
 		$zip_data = base64_decode( $base64, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decoding a ZIP file, not obfuscated code.
 		if ( false === $zip_data ) {
 			return self::error_response(
@@ -460,27 +482,21 @@ TEXT
 	 * @return \WP_Post|null
 	 */
 	private static function find_plugin_post( string $slug ): ?\WP_Post {
-		$posts = get_posts(
-			array(
-				'post_type'   => 'plugin',
-				'name'        => $slug,
-				'post_status' => 'any',
-				'numberposts' => 1,
-			)
+		$query_args = array(
+			'post_type'   => 'plugin',
+			'name'        => $slug,
+			'post_status' => 'any',
+			'numberposts' => 1,
 		);
 
-		$post = $posts[0] ?? null;
-
-		if ( ! $post ) {
-			return null;
+		// Scope to the current user unless they can review plugins.
+		if ( ! current_user_can( 'plugin_approve' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- plugin_approve is registered by the plugin-directory plugin.
+			$query_args['author'] = get_current_user_id();
 		}
 
-		// Allow the plugin author or users with plugin_approve capability.
-		if ( get_current_user_id() === (int) $post->post_author || current_user_can( 'plugin_approve' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- plugin_approve is registered by the plugin-directory plugin.
-			return $post;
-		}
+		$posts = get_posts( $query_args );
 
-		return null;
+		return $posts[0] ?? null;
 	}
 
 	/**

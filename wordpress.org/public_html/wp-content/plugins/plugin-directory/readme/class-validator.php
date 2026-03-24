@@ -38,9 +38,10 @@ class Validator {
 	public function validate_url( $url ) {
 		$url = esc_url_raw( $url );
 
+		$path = wp_parse_url( $url, PHP_URL_PATH ) ?? '';
 		if (
-			strtolower( substr( $url, -10 ) ) != 'readme.txt' &&
-			strtolower( substr( $url, -9 ) ) != 'readme.md'
+			! str_ends_with( strtolower( $path ), 'readme.txt' ) &&
+			! str_ends_with( strtolower( $path ), 'readme.md' )
 		) {
 			$error = sprintf(
 				/* translators: 1: readme.txt 2: readme.md */

@@ -62,7 +62,8 @@ class MCP_Server {
 			NullMcpObservabilityHandler::class,
 			$components['tools'],
 			$components['resources'],
-			$components['prompts']
+			$components['prompts'],
+			'is_user_logged_in' // Public transport; individual abilities handle their own auth.
 		);
 	}
 

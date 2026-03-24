@@ -6,6 +6,11 @@ form:has(.mcp-config-display) .authorize-application-password-display {
 	display: none;
 }
 
+.login .mcp-config-display p.description {
+	border: none;
+	color: inherit;
+}
+
 .login .mcp-config-display textarea {
 	font-family: Consolas, Monaco, monospace;
 	font-size: 12px;
