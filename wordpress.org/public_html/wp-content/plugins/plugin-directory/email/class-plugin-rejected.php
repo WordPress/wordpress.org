@@ -98,6 +98,25 @@ We ask you <strong>not</strong> resubmit the plugin, and reply to this email ins
 		);
 	}
 
+	public function reason_common_plugin() {
+		return __(
+			"We have rejected your plugin submission because it addresses a functionality (e.g., scroll to top, post duplication, maintenance mode, post view counter, log viewer, admin dashboard notes, image optimisation, etc) that is already widely available in the directory.
+
+The WordPress plugin ecosystem thrives on innovation, and we encourage you to explore its vast potential by creating unique solutions that fill unmet needs.
+
+Please consider developing plugins that offer fresh value to users. We'd be excited to review your plugin in the future!
+
+<strong>What to do next</strong>
+
+Don't worry! We encourage you to iterate and submit something new-WordPress's potential is limitless!
+
+Please do not resubmit the plugin, even if you believe we are incorrect.
+
+Instead, reply to this email and explain the situation so we can properly direct you forward. If you resubmit this plugin without replying and communicating with us first, your account will be suspended.",
+			'wporg-plugins'
+		);
+	}
+
 	public function reason_duplicate_copy() {
 		return __(
 			"Your plugin has been rejected because it is a duplicate of another plugin, already hosted on WordPress.org
