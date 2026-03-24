@@ -23,7 +23,7 @@ class Plugin_Headers extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/plugin-headers',
+			'wporg/plugins--plugin-directory--plugin-headers',
 			array(
 				'label'               => 'Plugin File Headers',
 				'description'         => 'Required and optional PHP file headers for WordPress plugins.',

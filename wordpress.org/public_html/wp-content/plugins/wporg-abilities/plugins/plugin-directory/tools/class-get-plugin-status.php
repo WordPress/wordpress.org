@@ -26,7 +26,7 @@ class Get_Plugin_Status extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/get-plugin-status',
+			'wporg/plugins--plugin-directory--get-plugin-status',
 			array(
 				'label'               => 'Get Plugin Status',
 				'description'         => 'Retrieves the current status and any reviewer feedback for a plugin owned by the authenticated user. Returns the plugin status (new, pending, approved, rejected, published, closed, or disabled), key dates, and review correspondence when in review. Only returns results for plugins associated with the authenticated account.',

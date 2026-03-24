@@ -24,7 +24,7 @@ class Submit_Plugin extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/submit-plugin',
+			'wporg/plugins--plugin-directory--submit-plugin',
 			array(
 				'label'               => 'Submit Plugin',
 				'description'         => <<<'TEXT'

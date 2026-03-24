@@ -41,7 +41,7 @@ class MCP_Server {
 		$components = self::get_wporg_components();
 
 		if ( empty( $components['tools'] ) && empty( $components['resources'] ) && empty( $components['prompts'] ) ) {
-			return;
+			trigger_error( 'WordPressdotorg\Abilities\MCP_Server::register — No wporg/ abilities were found.', E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- Intentional warning for misconfiguration.
 		}
 
 		$adapter->create_server(

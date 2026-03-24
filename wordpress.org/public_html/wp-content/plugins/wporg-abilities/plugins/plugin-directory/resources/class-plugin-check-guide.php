@@ -23,7 +23,7 @@ class Plugin_Check_Guide extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/plugin-check-guide',
+			'wporg/plugins--plugin-directory--plugin-check-guide',
 			array(
 				'label'               => 'Plugin Check (PCP) Guide',
 				'description'         => 'How to install, run, and interpret the Plugin Check plugin locally before submitting to WordPress.org.',

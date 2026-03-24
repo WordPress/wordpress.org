@@ -21,7 +21,7 @@ class Run_Plugin_Check {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/run-plugin-check',
+			'wporg/plugins--plugin-directory--run-plugin-check',
 			array(
 				'label'               => 'Run Plugin Check',
 				'description'         => 'Instructions for running the Plugin Check (PCP) plugin locally to validate a plugin before submission.',
