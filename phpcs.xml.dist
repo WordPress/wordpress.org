@@ -9,6 +9,9 @@
 	<!-- Exclude 3rd-party files -->
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/plugins/plugin-directory/libs/*</exclude-pattern>
+	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
+	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
 
 	<!-- Exclude JS/CSS files. -->
 	<exclude-pattern>*.js[x]?</exclude-pattern>
@@ -19,7 +22,7 @@
 	<arg name="extensions" value="php" />
 
 	<!-- WordPress.org runs recent versions of WordPress. -->
-	<config name="minimum_wp_version" value="6.8"/>
+	<config name="minimum_wp_version" value="6.9"/>
 
 	<!-- Check for PHP cross-version compatibility. -->
 	<config name="testVersion" value="8.4-"/>
