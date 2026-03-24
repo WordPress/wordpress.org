@@ -62,7 +62,29 @@
 				jQuery('#assigned_reviewer').val( userSettings.uid );
 
 			} else if ( 'approved' === status ) {
-				return confirm( pluginDirectory.approvePluginAYS );
+				var timeForDoubleClick = 1000;
+				var lastClick = $this.data( 'lastClick' ) || 0,
+					now = Date.now();
+
+				if ( now - lastClick > 0 && now - lastClick < timeForDoubleClick ) {
+					return true;
+				}
+
+				$this.data( 'lastClick', now );
+
+				// Make it clear that a double click is needed.
+				if ( ! $this.data( 'originalText' ) ) {
+					$this.data( 'originalText', $this.text() );
+				}
+
+				$this.text( pluginDirectory.approvePluginConfirm );
+
+				setTimeout( function() {
+					$this.text( $this.data( 'originalText' ) );
+					$this.data( 'lastClick', 0 );
+				}, timeForDoubleClick );
+
+				return false;
 
 			} else if ( 'rejected' === status ) {
 				return confirm( pluginDirectory.rejectPluginAYS );
