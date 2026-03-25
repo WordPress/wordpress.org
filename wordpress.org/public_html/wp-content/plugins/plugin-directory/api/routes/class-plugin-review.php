@@ -152,7 +152,9 @@ class Plugin_Review extends Base {
 	 * @return bool
 	 */
 	public function assign_reviewer_permissions_check( $request ) {
-		return current_user_can( 'plugin_approve' );
+		$plugin_id = absint( $request['plugin_id'] );
+		return $plugin_id && current_user_can( 'edit_post', $plugin_id ) &&
+		       ( current_user_can( 'plugin_approve' ) || current_user_can( 'plugin_review' ) );
 	}
 
 	/**
@@ -173,13 +175,29 @@ class Plugin_Review extends Base {
 		}
 
 		// Change status to pending.
-		wp_update_post( [
-			'ID'          => $post->ID,
-			'post_status' => 'pending',
-		] );
+		$update_result = wp_update_post(
+			[
+				'ID'          => $post->ID,
+				'post_status' => 'pending',
+			],
+			true
+		);
+
+		if ( is_wp_error( $update_result ) ) {
+			$update_result->add_data( [ 'status' => 500 ] );
+			return $update_result;
+		}
+
+		if ( 0 === $update_result ) {
+			return new WP_Error( 'plugin_status_not_updated', 'Failed to update plugin status', [ 'status' => 500 ] );
+		}
 
 		// Assign current user as reviewer.
-		Reviewer::set_reviewer( $post->ID, get_current_user_id() );
+		$result = Reviewer::set_reviewer( $post->ID, get_current_user_id() );
+
+		if ( ! $result ) {
+			return new WP_Error( 'reviewer_not_assigned', 'Failed to assign reviewer', [ 'status' => 500 ] );
+		}
 
 		return true;
 	}
