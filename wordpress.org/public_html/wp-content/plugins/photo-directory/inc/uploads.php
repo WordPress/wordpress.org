@@ -820,7 +820,9 @@ class Uploads {
 
 		$file = array_shift( $_FILES );
 
-		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), $file['name'][0] );
+		$orig_filename = sanitize_file_name( $file['name'][0] );
+
+		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), $orig_filename );
 		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filesize' ), $file['size'][0] );
 
 		// Store hash of file.
