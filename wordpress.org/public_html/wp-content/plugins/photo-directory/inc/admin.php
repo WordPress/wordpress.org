@@ -1354,7 +1354,7 @@ class Admin {
 
 		// Output original filename.
 		if ( $orig_filename = get_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), true ) ) {
-			printf( $format, 'original-filename', __( 'Original file name', 'wporg-photos' ), $orig_filename );
+			printf( $format, 'original-filename', __( 'Original file name', 'wporg-photos' ), esc_htmk( $orig_filename ) );
 		}
 
 		// Output moderator.
