@@ -153,35 +153,12 @@ class Plugin_Review extends Base {
 	 * @return bool
 	 */
 	public function assign_reviewer_permissions_check( $request ) {
-		$user_id = intval( $request->get_header( 'X-API-User' ) );
-		$api_key = $request->get_header( 'X-API-Key' );
-
-		if ( ! $user_id || ! $api_key ) {
-			return new WP_Error( 'rest_forbidden', 'Missing credentials.', [ 'status' => 401 ] );
-		}
-
-		// Validate the scoped key — returns true, false, or WP_Error (rate limited).
-		$validation = Scoped_API_Key::validate( $user_id, $api_key, 'plugin-review' );
-
-		if ( is_wp_error( $validation ) ) {
-			return $validation;
-		}
-
-		if ( ! $validation ) {
-			return new WP_Error( 'rest_forbidden', 'Invalid or insufficient API key.', [ 'status' => 403 ] );
-		}
-
-		// Now check the user actually has the right WordPress capabilities.
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user ) {
-			return false;
-		}
-
+		Scoped_API_Key::authenticate( $request, 'plugin-review' );
 		$plugin_id = absint( $request['plugin_id'] );
 
 		return $plugin_id
-		       && user_can( $user, 'edit_post', $plugin_id )
-		       && ( user_can( $user, 'plugin_approve' ) || user_can( $user, 'plugin_review' ) );
+		       && current_user_can( 'edit_post', $plugin_id )
+		       && ( current_user_can( 'plugin_approve' ) || current_user_can( 'plugin_review' ) );
 	}
 
 	/**
@@ -191,8 +168,8 @@ class Plugin_Review extends Base {
 	 * @return bool|WP_Error
 	 */
 	public function assign_reviewer( $request ) {
-		$post = get_post( $request['plugin_id'] );
-		$user_id = intval( $request->get_header( 'X-API-User' ) );
+		$plugin_id = absint( $request['plugin_id'] );
+		$post = get_post( $plugin_id );
 
 		if ( ! $post || 'plugin' !== $post->post_type ) {
 			return new WP_Error( 'plugin_not_found', 'Plugin not found', [ 'status' => 404 ] );
@@ -203,7 +180,6 @@ class Plugin_Review extends Base {
 		}
 
 		// Change status to pending.
-		wp_set_current_user( $user_id );
 		$update_result = wp_update_post(
 			[
 				'ID'          => $post->ID,
@@ -211,7 +187,6 @@ class Plugin_Review extends Base {
 			],
 			true
 		);
-		wp_set_current_user( 0 );
 
 		if ( is_wp_error( $update_result ) ) {
 			$update_result->add_data( [ 'status' => 500 ] );
@@ -223,7 +198,7 @@ class Plugin_Review extends Base {
 		}
 
 		// Assign current user as reviewer.
-		$result = Reviewer::set_reviewer( $post->ID, $user_id );
+		$result = Reviewer::set_reviewer( $post->ID, get_current_user_id() );
 
 		if ( ! $result ) {
 			return new WP_Error( 'reviewer_not_assigned', 'Failed to assign reviewer', [ 'status' => 500 ] );
