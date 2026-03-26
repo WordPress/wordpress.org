@@ -1161,6 +1161,27 @@ input[type="submit"].submit-job {
 	margin-bottom: 4px;
 }
 
+/* SI Contact Form overrides for feedback page */
+#FSContact1 {
+	width: 100% !important;
+	max-width: 600px;
+}
+
+#FSContact1 input[type="text"],
+#FSContact1 input[type="email"] {
+	width: 100% !important;
+}
+
+#FSContact1 textarea {
+	width: 100% !important;
+	max-width: 100% !important;
+	min-height: 150px;
+}
+
+#FSContact1 #fscf_submit_div1 {
+	padding-top: var(--space-20) !important;
+}
+
 
 /* ============================================
    Notices
