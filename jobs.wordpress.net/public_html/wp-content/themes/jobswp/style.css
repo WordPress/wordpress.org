@@ -1178,6 +1178,10 @@ input[type="submit"].submit-job {
 	min-height: 150px;
 }
 
+#FSContact1 #fscf_captcha_code1 {
+	width: 170px !important;
+}
+
 #FSContact1 #fscf_submit_div1 {
 	padding-top: var(--space-20) !important;
 }
