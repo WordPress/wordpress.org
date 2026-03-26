@@ -47,6 +47,24 @@ npm run plugins:refresh
 npx wp-env run cli wp <command>
 ```
 
+### Jobs
+
+A local instance of jobs.wordpress.net with the JobsWP plugin, theme, sample job categories, and sample job posts.
+
+**Start:**
+
+```bash
+npm run jobs:env start
+```
+
+**Access:** `http://localhost:8888`
+
+**WP CLI:**
+
+```bash
+npm run jobs:env -- run cli -- wp <command>
+```
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.
@@ -67,14 +85,17 @@ npx wp-env run phpunit phpunit -c /var/www/html/wp-content/plugins/handbook/phpu
 ## Common Commands
 
 ```bash
-# Stop the environment
+# Stop an environment (replace plugins with jobs, etc.)
 npm run plugins:env stop
+npm run jobs:env stop
 
-# Destroy the environment (removes all data)
+# Destroy an environment (removes all data)
 npm run plugins:env destroy
+npm run jobs:env destroy
 
 # View logs
 npm run plugins:env logs
+npm run jobs:env logs
 ```
 
 All commands should be run from the `environments/` directory unless otherwise noted.
