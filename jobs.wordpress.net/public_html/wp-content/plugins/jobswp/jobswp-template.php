@@ -100,17 +100,15 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 
 	$link .= " <span class='posts-count'>($orig_jobscnt)</span> $after";
 	$output .= $link;
-    $output .= '<div class="grid_2 omega jobs-count">';
+	$output .= '<div class="jobs-count">';
 
-	$output .= '<a href="' . $feed_link . '"><div class="dashicons dashicons-rss"></div></a><span>' . $jobscnt . '</span></div>
+	$output .= '<a href="' . $feed_link . '">RSS</a> <span>' . $jobscnt . '</span></div>
 		</div>
-		<div class="clear"></div>
 		<div class="row job-list-col-labels">
-			<div class="job-date grid_2 alpha">Date Posted</div>
-			<div class="job-title grid_4">Job Title</div>
-			<div class="job-type grid_1 alpha omega">Job Type</div>
-			<div class="job-location grid_2 omega">Location</div>
-			<div class="clear"></div>
+			<div class="job-date">Date Posted</div>
+			<div class="job-title">Job Title</div>
+			<div class="job-type">Job Type</div>
+			<div class="job-location">Location</div>
 		</div>';
 
 	echo $output;

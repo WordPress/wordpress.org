@@ -16,10 +16,30 @@ $WP wp rewrite structure '/%postname%/' --hard
 # Activate the jobswp theme.
 $WP wp theme activate jobswp
 
+# Remove default widgets to match production (sidebar only has the hardcoded Position Types list).
+echo "Clearing default sidebar widgets..."
+$WP wp widget reset sidebar-1 > /dev/null 2>&1 || true
+
 # Create pages that exist on jobs.wordpress.net (if they don't already exist).
 echo "Creating pages..."
-$WP wp post create --post_type=page --post_status=publish --post_title='Post a Job' --post_name='post-a-job' --porcelain > /dev/null 2>&1 && echo "  Created page: /post-a-job/" || true
-$WP wp post create --post_type=page --post_status=publish --post_title='Remove a Job' --post_name='remove-a-job' --porcelain > /dev/null 2>&1 && echo "  Created page: /remove-a-job/" || true
+create_page_if_missing() {
+	local slug="$1"
+	local title="$2"
+	local content="${3:-}"
+	EXISTING=$($WP wp post list --post_type=page --name="$slug" --format=count 2>/dev/null)
+	if [ "$EXISTING" -gt 0 ] 2>/dev/null; then
+		echo "  Page /$slug/ already exists, skipping..."
+	else
+		if [ -n "$content" ]; then
+			$WP wp post create --post_type=page --post_status=publish --post_author=1 --post_title="$title" --post_name="$slug" --post_content="$content" --porcelain > /dev/null 2>&1 && echo "  Created page: /$slug/" || true
+		else
+			$WP wp post create --post_type=page --post_status=publish --post_author=1 --post_title="$title" --post_name="$slug" --porcelain > /dev/null 2>&1 && echo "  Created page: /$slug/" || true
+		fi
+	fi
+}
+create_page_if_missing 'post-a-job' 'Post a Job'
+create_page_if_missing 'remove-a-job' 'Remove a Job'
+create_page_if_missing 'faq' 'FAQ' '<h2>General</h2><dl><dt>What is this site?</dt><dd>This is a job board for WordPress-related jobs. Anyone can post a job opening or browse available positions.</dd><dt>How long do job postings stay up?</dt><dd>Job postings remain active for 21 days from the date of approval, after which they are automatically removed.</dd><dt>How much does it cost to post a job?</dt><dd>Posting a job is completely free.</dd></dl><h2>For Employers</h2><dl><dt>What kinds of jobs can I post?</dt><dd>Any job that is directly related to WordPress. This includes development, design, support, writing, translation, and more.</dd><dt>What is NOT acceptable for a job posting?</dt><dd>Jobs that are not related to WordPress, jobs that require payment from applicants, and jobs offering illegally low compensation are not acceptable.</dd><dt>How do I remove my job posting?</dt><dd>When you submit a job, you receive a job token. Use that token on the Remove a Job page to remove your listing at any time.</dd></dl>'
 
 # Create job categories.
 echo "Creating job categories..."

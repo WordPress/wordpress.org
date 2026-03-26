@@ -24,7 +24,7 @@
 
 <form class="post-job" method="post" action="">
 
-<div class="post-job-contact-info grid_5 alpha omega">
+<div class="post-job-contact-info">
 	<h3 class="post-field-section-header"><?php _e( 'Job Poster Contact Information', 'jobswp' ); ?></h3>
 	<div class="post-field-section-subheader"><?php _e( '(this information is not publicly displayed)', 'jobswp' ); ?></div>
 
@@ -35,7 +35,7 @@
 	<?php jobswp_text_field( 'email', __( 'Email Address', 'jobswp' ), true, 'email', __( 'This is the email address you would use in contacting us and for us to contact you.', 'jobswp' ) ); ?>
 </div>
 
-<div class="post-job-company-info grid_4 alpha omega">
+<div class="post-job-company-info">
 
 	<h3 class="post-field-section-header"><?php _e( 'Company Information', 'jobswp' ); ?></h3>
 	<div class="post-field-section-subheader"><?php _e( '(publicly displayed)', 'jobswp' ); ?></div>
@@ -68,7 +68,7 @@
 <div class="post-job-job-info">
 	<h3 class="post-field-section-header"><?php _e( 'Job Details', 'jobswp' ); ?></h3>
 
-	<div class="grid_5 alpha omega">
+	<div class="post-job-half">
 
 		<?php jobswp_text_field( 'job_title', __( 'Job Title', 'jobswp' ), true ); ?>
 
@@ -76,7 +76,7 @@
 
 	</div>
 
-	<div class="grid_3 alpha omega">
+	<div class="post-job-half">
 
 		<div class="post-job-input">
 			<label for="category"><?php _e( 'Category', 'jobswp' ); ?>*</label>
@@ -101,7 +101,7 @@
 
 	<div class="clear"></div>
 
-	<div class="grid_9 alpha omega">
+	<div class="post-job-full">
 
 		<div class="post-job-input">
 			<label for="job_description"><?php _e( 'Job Description', 'jobswp' ); ?>*</label>
@@ -141,7 +141,7 @@
 	<?php } else {
 		$button_label = __( 'Submit Job', 'jobswp' );
 	} ?>
-	<input class="submit-job" id="submit-job" type="submit" name="submitjob" value="<?php echo esc_attr( $button_label ); ?>" />
+	<input class="btn btn-primary submit-job" id="submit-job" type="submit" name="submitjob" value="<?php echo esc_attr( $button_label ); ?>" />
 </div>
 
 </div>

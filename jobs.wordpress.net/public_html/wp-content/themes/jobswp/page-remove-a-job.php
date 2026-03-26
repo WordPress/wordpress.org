@@ -7,10 +7,7 @@
 
 get_header(); ?>
 
-<?php get_sidebar(); ?>
-
-	<div id="primary" class="content-area grid_9">
-		<main id="main" class="site-main" role="main">
+	<main>
 
 	<?php if ( have_posts() ) : ?>
 		<?php /* Start the Loop */ ?>
@@ -57,12 +54,12 @@ get_header(); ?>
 
 						<?php do_action( 'jobswp_remove_job_form' ); ?>
 
-						<input class="submit-job" type="submit" name="submitjob" value="<?php _e( 'Remove job', 'jobswp' ); ?>" />
+						<input class="btn btn-primary submit-job" type="submit" name="submitjob" value="<?php _e( 'Remove job', 'jobswp' ); ?>" />
 
 					</form>
 				</div>
 
-				<?php edit_post_link( __( 'Edit', 'jobswp' ), '<footer class="entry-meta grid_9"><span class="edit-link">', '</span></footer>' ); ?>
+				<?php edit_post_link( __( 'Edit', 'jobswp' ), '<footer class="entry-meta"><span class="edit-link">', '</span></footer>' ); ?>
 			</div><!-- .entry-content -->
 		</article><!-- #post-## -->
 
@@ -76,7 +73,6 @@ get_header(); ?>
 
 	<?php endif; ?>
 
-		</main><!-- #main -->
-	</div><!-- #primary -->
+	</main>
 
 <?php get_footer(); ?>
