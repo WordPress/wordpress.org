@@ -33,21 +33,21 @@ get_header(); ?>
 
 	<?php elseif ( have_posts() ) : ?>
 
-		<?php while ( have_posts() ) : the_post(); ?>
+		<?php
+		while ( have_posts() ) :
+			the_post();
 
-			<?php
-				if ( is_page() ) {
-					$content_type = 'page';
-				} elseif ( is_single() ) {
-					$content_type = 'single';
-				} else {
-					$content_type = get_post_format();
-				}
+			if ( is_page() ) {
+				$content_type = 'page';
+			} elseif ( is_single() ) {
+				$content_type = 'single';
+			} else {
+				$content_type = get_post_format();
+			}
 
-				get_template_part( 'content', $content_type );
-			?>
-
-		<?php endwhile; ?>
+			get_template_part( 'content', $content_type );
+		endwhile;
+		?>
 
 	<?php else : ?>
 

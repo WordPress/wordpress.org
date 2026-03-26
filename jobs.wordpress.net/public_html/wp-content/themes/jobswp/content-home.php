@@ -15,14 +15,14 @@ $remote_count   = 0;
 $categories_with_jobs = 0;
 
 if ( $job_categories ) {
-	foreach ( $job_categories as $cat ) {
-		$jobs = Jobs_Dot_WP::get_jobs_for_category( $cat );
+	foreach ( $job_categories as $job_cat ) {
+		$jobs = Jobs_Dot_WP::get_jobs_for_category( $job_cat );
 		if ( ! empty( $jobs ) ) {
 			$categories_with_jobs++;
 			foreach ( $jobs as $job ) {
 				if ( ! isset( $category_map[ $job->ID ] ) ) {
-					$all_jobs[]                 = $job;
-					$category_map[ $job->ID ]   = $cat->slug;
+					$all_jobs[]               = $job;
+					$category_map[ $job->ID ] = $job_cat->slug;
 					$total_jobs++;
 
 					$location = get_post_meta( $job->ID, 'location', true );
@@ -41,13 +41,15 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 <!-- Hero Section -->
 <section class="hero">
 	<div class="hero__inner">
-		<h1><?php
+		<h1>
+			<?php
 			printf(
 				/* translators: %s: highlighted word "Opportunity" */
 				esc_html__( 'Find Your Next WordPress %s', 'jobswp' ),
 				'<span class="hero__highlight">' . esc_html__( 'Opportunity', 'jobswp' ) . '</span>'
 			);
-		?></h1>
+			?>
+		</h1>
 		<p><?php esc_html_e( 'Browse open positions across the WordPress ecosystem — from development to design, support to community.', 'jobswp' ); ?></p>
 		<div class="hero__actions">
 			<a href="#jobs" class="btn btn-primary"><?php esc_html_e( 'Browse Jobs', 'jobswp' ); ?></a>
@@ -76,8 +78,8 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 	<div class="filters__pills">
 		<button class="filter-pill active" data-category="all"><?php esc_html_e( 'All', 'jobswp' ); ?></button>
 		<?php if ( $job_categories ) : ?>
-			<?php foreach ( $job_categories as $cat ) : ?>
-				<button class="filter-pill" data-category="<?php echo esc_attr( $cat->slug ); ?>"><?php echo esc_html( $cat->name ); ?></button>
+			<?php foreach ( $job_categories as $job_cat ) : ?>
+				<button class="filter-pill" data-category="<?php echo esc_attr( $job_cat->slug ); ?>"><?php echo esc_html( $job_cat->name ); ?></button>
 			<?php endforeach; ?>
 		<?php endif; ?>
 	</div>
@@ -96,8 +98,8 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 				$location = get_post_meta( $job->ID, 'location', true );
 				$jobtype  = jobswp_get_job_meta( $job->ID, 'jobtype' );
 
-				$is_remote = empty( $location ) || 'N/A' === $location || stripos( $location, 'remote' ) !== false || stripos( $location, 'anywhere' ) !== false;
-				$location_display = $is_remote ? __( 'Remote', 'jobswp' ) : esc_html( $location );
+				$is_remote        = empty( $location ) || 'N/A' === $location || stripos( $location, 'remote' ) !== false || stripos( $location, 'anywhere' ) !== false;
+				$location_display = $is_remote ? __( 'Remote', 'jobswp' ) : $location;
 				$location_icon    = $is_remote ? '&#127758;' : '&#128205;';
 
 				$type_icon = '&#128188;';
@@ -116,29 +118,33 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 						<p class="job-card__company"><?php echo esc_html( $company ); ?></p>
 					<?php endif; ?>
 					<div class="job-card__meta">
-						<span><?php echo $location_icon . ' ' . esc_html( $location_display ); ?></span>
+						<span><?php echo wp_kses( $location_icon, array() ) . ' ' . esc_html( $location_display ); ?></span>
 						<?php if ( $jobtype && 'N/A' !== $jobtype ) : ?>
-							<span><?php echo $type_icon . ' ' . esc_html( $jobtype ); ?></span>
+							<span><?php echo wp_kses( $type_icon, array() ) . ' ' . esc_html( $jobtype ); ?></span>
 						<?php endif; ?>
 					</div>
-					<p class="job-card__date"><?php
+					<p class="job-card__date">
+						<?php
 						printf(
 							/* translators: %s: date the job was posted */
 							esc_html__( 'Posted %s', 'jobswp' ),
 							esc_html( get_the_date( 'F j, Y', $job->ID ) )
 						);
-					?></p>
+						?>
+					</p>
 				</a>
 			<?php endforeach; ?>
 		<?php else : ?>
 			<div class="jobs-empty">
-				<p><?php
+				<p>
+					<?php
 					printf(
 						/* translators: %s: URL to post a job */
-						__( 'No jobs are currently posted. Would you like to <a href="%s">post a job</a>?', 'jobswp' ),
+						wp_kses_post( __( 'No jobs are currently posted. Would you like to <a href="%s">post a job</a>?', 'jobswp' ) ),
 						esc_url( home_url( '/post-a-job/' ) )
 					);
-				?></p>
+					?>
+				</p>
 			</div>
 		<?php endif; ?>
 	</div>

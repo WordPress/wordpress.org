@@ -33,9 +33,9 @@ $fields = array(
 					$job_cats = get_the_terms( get_the_ID(), 'job_category' );
 					if ( $job_cats && ! is_wp_error( $job_cats ) ) :
 						foreach ( $job_cats as $job_cat ) :
-					?>
-						<span class="job-card__badge"><?php echo esc_html( $job_cat->name ); ?></span>
-					<?php
+							?>
+							<span class="job-card__badge"><?php echo esc_html( $job_cat->name ); ?></span>
+							<?php
 						endforeach;
 					endif;
 					?>
@@ -59,15 +59,16 @@ $fields = array(
 	<aside class="job-sidebar">
 		<div class="job-sidebar__card">
 			<h3><?php esc_html_e( 'Job Details', 'jobswp' ); ?></h3>
-			<?php foreach ( $fields as $fname => $flabel ) :
+			<?php
+			foreach ( $fields as $fname => $flabel ) :
 				$val = jobswp_get_job_meta( get_the_ID(), $fname );
 				if ( $val ) :
-			?>
-				<div class="job-sidebar__detail">
-					<span class="job-sidebar__detail-label"><?php echo esc_html( $flabel ); ?></span>
-					<span class="job-sidebar__detail-value"><?php echo $val; ?></span>
-				</div>
-			<?php
+					?>
+					<div class="job-sidebar__detail">
+						<span class="job-sidebar__detail-label"><?php echo esc_html( $flabel ); ?></span>
+						<span class="job-sidebar__detail-value"><?php echo wp_kses_post( $val ); ?></span>
+					</div>
+					<?php
 				endif;
 			endforeach;
 			?>

@@ -54,7 +54,7 @@ get_header(); ?>
 
 						<?php do_action( 'jobswp_remove_job_form' ); ?>
 
-						<input class="btn btn-primary submit-job" type="submit" name="submitjob" value="<?php _e( 'Remove job', 'jobswp' ); ?>" />
+						<input class="btn btn-primary submit-job" type="submit" name="submitjob" value="<?php esc_attr_e( 'Remove job', 'jobswp' ); ?>" />
 
 					</form>
 				</div>

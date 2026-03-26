@@ -40,9 +40,9 @@
 			global $category;
 			echo '<p class="all-job-categories">';
 			if ( ! $category ) {
-				$terms    = get_the_terms( get_the_ID(), 'job_category' );
-				$category = $terms ? array_pop( $terms ) : null;
-			}
+			$terms    = get_the_terms( get_the_ID(), 'job_category' );
+			$category = $terms ? array_pop( $terms ) : null;
+		}
 
 			$link = '';
 			$link .= '<a href="' . esc_attr( get_term_link( $category, 'job_category' ) ) . '" ';

@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		</a>
 		<div class="site-header__right">
 			<nav class="site-header__nav">
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>"<?php if ( is_front_page() ) echo ' class="active"'; ?>><?php esc_html_e( 'Jobs', 'jobswp' ); ?></a>
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>"<?php if ( is_front_page() ) { echo ' class="active"'; } ?>><?php esc_html_e( 'Jobs', 'jobswp' ); ?></a>
 				<a href="<?php echo esc_url( home_url( '/faq/' ) ); ?>"><?php esc_html_e( 'FAQ', 'jobswp' ); ?></a>
 				<a href="<?php echo esc_url( home_url( '/post-a-job/' ) ); ?>" class="btn btn-primary btn-sm"><?php esc_html_e( 'Post a Job', 'jobswp' ); ?></a>
 			</nav>
