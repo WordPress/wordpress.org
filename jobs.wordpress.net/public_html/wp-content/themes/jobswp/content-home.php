@@ -134,18 +134,20 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 					</p>
 				</a>
 			<?php endforeach; ?>
-		<?php else : ?>
-			<div class="jobs-empty">
-				<p>
-					<?php
-					printf(
-						/* translators: %s: URL to post a job */
-						wp_kses_post( __( 'No jobs are currently posted. Would you like to <a href="%s">post a job</a>?', 'jobswp' ) ),
-						esc_url( home_url( '/post-a-job/' ) )
-					);
-					?>
-				</p>
-			</div>
 		<?php endif; ?>
+		<div class="jobs-empty" <?php echo ! empty( $all_jobs ) ? 'style="display:none"' : ''; ?>>
+			<p>
+				<?php
+				echo wp_kses(
+					sprintf(
+						/* translators: %s: URL to post a job */
+						__( 'There are no jobs in this category. If you are hiring, you can <a href="%s">post a new job</a>.', 'jobswp' ),
+						esc_url( home_url( '/post-a-job/' ) )
+					),
+					array( 'a' => array( 'href' => array() ) )
+				);
+				?>
+			</p>
+		</div>
 	</div>
 </section>

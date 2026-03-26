@@ -142,6 +142,19 @@
 		$button_label = __( 'Submit Job', 'jobswp' );
 	} ?>
 	<input class="btn btn-primary submit-job" id="submit-job" type="submit" name="submitjob" value="<?php echo esc_attr( $button_label ); ?>" />
+
+	<p class="post-job-remove-note">
+		<?php
+		echo wp_kses(
+			sprintf(
+				/* translators: %s: URL to the remove a job page */
+				__( 'Looking to remove a job? Visit the <a href="%s">job removal page</a>.', 'jobswp' ),
+				esc_url( home_url( '/remove-a-job/' ) )
+			),
+			array( 'a' => array( 'href' => array() ) )
+		);
+		?>
+	</p>
 </div>
 
 </div>

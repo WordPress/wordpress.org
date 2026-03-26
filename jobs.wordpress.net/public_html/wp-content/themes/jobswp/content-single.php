@@ -66,7 +66,19 @@ $fields = array(
 					?>
 					<div class="job-sidebar__detail">
 						<span class="job-sidebar__detail-label"><?php echo esc_html( $flabel ); ?></span>
-						<span class="job-sidebar__detail-value"><?php echo wp_kses_post( $val ); ?></span>
+						<span class="job-sidebar__detail-value">
+						<?php
+						echo wp_kses(
+							$val,
+							array(
+								'a' => array(
+									'href' => array(),
+									'rel'  => array(),
+								),
+							)
+						);
+						?>
+					</span>
 					</div>
 					<?php
 				endif;
