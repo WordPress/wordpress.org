@@ -39,7 +39,7 @@
 		if ( is_front_page() ) {
 			global $category;
 			echo '<p class="all-job-categories">';
-			if ( ! $category ) {
+		if ( ! $category ) {
 			$terms    = get_the_terms( get_the_ID(), 'job_category' );
 			$category = $terms ? array_pop( $terms ) : null;
 		}
