@@ -45,6 +45,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 			<nav class="site-header__nav">
 				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" <?php echo is_front_page() ? 'class="active"' : ''; ?>><?php esc_html_e( 'Jobs', 'jobswp' ); ?></a>
 				<a href="<?php echo esc_url( home_url( '/faq/' ) ); ?>" <?php echo is_page( 'faq' ) ? 'class="active"' : ''; ?>><?php esc_html_e( 'FAQ', 'jobswp' ); ?></a>
+				<a href="<?php echo esc_url( home_url( '/feedback/' ) ); ?>" <?php echo is_page( 'feedback' ) ? 'class="active"' : ''; ?>><?php esc_html_e( 'Feedback', 'jobswp' ); ?></a>
 				<a href="<?php echo esc_url( home_url( '/post-a-job/' ) ); ?>" class="btn btn-primary btn-sm"><?php esc_html_e( 'Post a Job', 'jobswp' ); ?></a>
 			</nav>
 			<button class="mobile-menu-toggle" aria-label="<?php esc_attr_e( 'Toggle menu', 'jobswp' ); ?>">
