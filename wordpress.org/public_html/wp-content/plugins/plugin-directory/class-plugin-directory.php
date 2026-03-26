@@ -1,7 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 
-use WordPressdotorg\Plugin_Directory\Admin\{ Customizations, User_Profile };
+use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Stats_Report, Upload_Token };
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
@@ -110,7 +110,6 @@ class Plugin_Directory {
 		 */
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
 			Customizations::instance();
-			User_Profile::instance();
 			Author_Cards::instance();
 			Stats_Report::instance();
 			Upload_Token::instance();
