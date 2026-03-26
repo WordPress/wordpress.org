@@ -5,7 +5,7 @@
  * @package jobswp
  */
 ?>
-	<div id="secondary" class="widget-area grid_3" role="complementary">
+	<div id="secondary" class="widget-area" role="complementary">
 		<?php do_action( 'before_sidebar' ); ?>
 
 			<aside id="cats" class="widget">

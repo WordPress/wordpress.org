@@ -80,51 +80,13 @@ function jobswp_widgets_init() {
 add_action( 'widgets_init', 'jobswp_widgets_init' );
 
 /**
- * Registers the CSS stylesheet files.
- */
-function jobswp_register_styles() {
-	wp_register_style(
-		'open-sans',
-		'//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,300,400,600&subset=latin-ext,latin',
-		false,
-		'20130605'
-	);
-
-	wp_register_style(
-		'dashicons',
-		get_template_directory_uri() . '/css/dashicons.css',
-		false,
-		filemtime( get_template_directory() . '/css/dashicons.css' )
-	);
-}
-add_action( 'wp_enqueue_scripts', 'jobswp_register_styles', 1 );
-
-/**
  * Enqueue scripts and styles
  */
 function jobswp_scripts() {
-	wp_enqueue_style( '996-normalize', get_template_directory_uri() . '/css/996/normalize.css' );
-	wp_enqueue_style( '996-base',      get_template_directory_uri() . '/css/996/base.css' );
-	wp_enqueue_style( '996-grid',      get_template_directory_uri() . '/css/996/grid.css' );
-	wp_enqueue_style( '996-style',     get_template_directory_uri() . '/css/996/style.css' );
-	wp_enqueue_style( 'dashicons' );
-	wp_enqueue_style( 'open-sans' );
-	wp_enqueue_style( 'jobswp-style', get_stylesheet_uri(), array(), '20221207' );
+	wp_enqueue_style( 'jobswp-style', get_stylesheet_uri(), array(), '20260326' );
 
-	wp_enqueue_script( 'jobswp-navigation', get_template_directory_uri() . '/js/navigation.js', array( 'jquery'), '20131107', true );
+	wp_enqueue_script( 'jobswp-main', get_template_directory_uri() . '/js/main.js', array(), '20260326', true );
 	wp_enqueue_script( 'jobswp-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20130115', true );
-
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		wp_enqueue_script( 'comment-reply' );
-	}
-
-	if ( is_singular() && wp_attachment_is_image() ) {
-		wp_enqueue_script( 'jobswp-keyboard-image-navigation', get_template_directory_uri() . '/js/keyboard-image-navigation.js', array( 'jquery' ), '20120202' );
-	}
-
-	/* Modernizr disbabled because it causes Safari to whitescreen */
-//	wp_enqueue_script( 'modernizr',    get_template_directory_uri() . '/996/modernizr-2.6.2.min.js' );
-//	wp_enqueue_script( 'modernizr',    get_template_directory_uri() . '/996/modernizr-2.6.2.js' );
 }
 add_action( 'wp_enqueue_scripts', 'jobswp_scripts' );
 
@@ -147,7 +109,7 @@ add_action( 'wp', 'jobswp_author_archives_404' );
  * - empty job category archives
  * - search results
  */
-function jobswp_noindex() {
+function jobswp_noindex( $robots ) {
 	global $wp_query;
 
 	if (
@@ -155,10 +117,13 @@ function jobswp_noindex() {
 	||
 		( is_tax( 'job_category' ) && 0 === $wp_query->found_posts )
 	) {
-		wp_no_robots();
+		$robots['noindex']  = true;
+		$robots['nofollow'] = true;
 	}
+
+	return $robots;
 }
-add_action( 'wp_head', 'jobswp_noindex', 9 );
+add_filter( 'wp_robots', 'jobswp_noindex' );
 
 /**
  * Add a body class incorporating page slug.
@@ -179,11 +144,6 @@ function jobswp_add_page_slug_to_body_class( $classes ) {
 add_filter( 'body_class', 'jobswp_add_page_slug_to_body_class' );
 
 /**
- * Implement the Custom Header feature.
- */
-//require get_template_directory() . '/inc/custom-header.php';
-
-/**
  * Custom template tags for this theme.
  */
 require get_template_directory() . '/inc/template-tags.php';
@@ -192,13 +152,3 @@ require get_template_directory() . '/inc/template-tags.php';
  * Custom functions that act independently of the theme templates.
  */
 require get_template_directory() . '/inc/extras.php';
-
-/**
- * Customizer additions.
- */
-require get_template_directory() . '/inc/customizer.php';
-
-/**
- * Load Jetpack compatibility file.
- */
-require get_template_directory() . '/inc/jetpack.php';
