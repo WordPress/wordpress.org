@@ -11,7 +11,7 @@ class Scoped_API_Key {
 
 	const RATE_LIMIT_PER_WEEK = 2000;
 
-	const META_KEY = '_scoped_api_keys';
+	const META_KEY = '_wporg_plugin_scoped_api_keys';
 
 	/**
 	 * Generate a new scoped API key for a user.
@@ -105,37 +105,6 @@ class Scoped_API_Key {
 	private static function get_client_ip(): string {
 		$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 		return filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '0.0.0.0';
-	}
-
-	/**
-	 * Authenticate a request using a user ID and API key.
-	 *
-	 * @param WP_REST_Request $request The REST request object containing the headers.
-	 * @param string $scope The required scope for the API key.
-	 *
-	 * @return true|WP_Error True if authentication is successful, or a WP_Error object on failure.
-	 */
-	public static function authenticate( $request, $scope ) {
-		$user_id = intval( $request->get_header( 'X-API-User' ) );
-		$api_key = $request->get_header( 'X-API-Key' );
-
-		if ( ! $user_id || ! $api_key ) {
-			return new WP_Error( 'rest_forbidden', 'Missing credentials.', [ 'status' => 401 ] );
-		}
-
-		// Validate the scoped key — returns true, false, or WP_Error (rate limited).
-		$validation = Scoped_API_Key::validate( $user_id, $api_key, $scope );
-
-		if ( is_wp_error( $validation ) ) {
-			return $validation;
-		}
-
-		if ( ! $validation ) {
-			return new WP_Error( 'rest_forbidden', 'Invalid or insufficient API key.', [ 'status' => 403 ] );
-		} else {
-			wp_set_current_user( $user_id );
-			return true;
-		}
 	}
 
 	/**
