@@ -54,32 +54,54 @@ Plugin Check is the automated tool WordPress.org uses to validate plugin submiss
 
 ## Prerequisites
 
-Plugin Check requires a WordPress environment with WP-CLI. If you don't have one, use `wp-env`:
+Running Plugin Check via WordPress Playground CLI requires only **Node.js** (v20+). No Docker, no local WordPress installation. Playground boots a temporary WordPress instance via WebAssembly.
 
-```bash
-npx @wordpress/env start
+If you already have a WordPress environment with WP-CLI, you can skip Playground and run `wp plugin check` directly (see "WP-CLI Flags Reference" below).
+
+## Running Plugin Check via Playground CLI
+
+Create one temporary file and run one command. This installs Plugin Check automatically.
+
+### 1. Create `blueprint.json`
+
+```json
+{
+  "steps": [
+    {"step": "installPlugin", "pluginData": {"resource": "wordpress.org/plugins", "slug": "plugin-check"}},
+    {"step": "wp-cli", "command": "wp plugin activate plugin-check"}
+  ]
+}
 ```
 
-Then prefix all `wp` commands with `npx wp-env run cli`, e.g.:
+### 2. Run the check
 
 ```bash
-npx wp-env run cli wp plugin install plugin-check -- --activate
+npx @wp-playground/cli php \
+  --blueprint=blueprint.json \
+  --mount=/path/to/my-plugin:/wordpress/wp-content/plugins/my-plugin \
+  --quiet \
+  -- /tmp/wp-cli.phar plugin check my-plugin \
+  --categories=plugin_repo --format=json \
+  --error-severity=7 --warning-severity=6 \
+  --include-low-severity-errors --exclude-checks=prefixing
 ```
 
-## Installation
+Results are printed to stdout. `Success: Checks complete. No errors found.` means the plugin passed all checks.
 
-```bash
-wp plugin install plugin-check --activate
+For **remote zip files**, replace the `--mount` for the plugin with an `installPlugin` blueprint step:
+
+```json
+{"step": "installPlugin", "pluginData": {"resource": "url", "url": "https://example.com/my-plugin.zip"}}
 ```
 
-Or install from WP Admin: Plugins → Add New → search "Plugin Check".
+For **local zip files**, extract the zip to a temporary directory and mount the extracted folder.
 
-## Running Plugin Check via WP-CLI
+## WP-CLI Flags Reference
 
-Use the exact flags that WordPress.org uses during submission review:
+These are the exact flags WordPress.org uses during submission review:
 
 ```bash
-wp plugin check {plugin-directory-or-file} \
+wp plugin check {plugin-slug} \
   --categories=plugin_repo \
   --format=json \
   --error-severity=7 \
