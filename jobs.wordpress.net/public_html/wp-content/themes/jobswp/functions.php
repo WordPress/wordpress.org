@@ -83,10 +83,10 @@ add_action( 'widgets_init', 'jobswp_widgets_init' );
  * Enqueue scripts and styles
  */
 function jobswp_scripts() {
-	wp_enqueue_style( 'jobswp-style', get_stylesheet_uri(), array(), '20260326' );
+	wp_enqueue_style( 'jobswp-style', get_stylesheet_uri(), array(), filemtime( get_stylesheet_directory() . '/style.css' ) );
 
-	wp_enqueue_script( 'jobswp-main', get_template_directory_uri() . '/js/main.js', array(), '20260326', true );
-	wp_enqueue_script( 'jobswp-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20130115', true );
+	wp_enqueue_script( 'jobswp-main', get_template_directory_uri() . '/js/main.js', array(), filemtime( get_template_directory() . '/js/main.js' ), true );
+	wp_enqueue_script( 'jobswp-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), filemtime( get_template_directory() . '/js/skip-link-focus-fix.js' ), true );
 }
 add_action( 'wp_enqueue_scripts', 'jobswp_scripts' );
 

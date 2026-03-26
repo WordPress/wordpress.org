@@ -41,17 +41,20 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 					$method = 'phone';
 			}
 			if ( 'email' == $method ) {
-				$val = sprintf( __( 'Via <a href="%s">email</a>', 'jobswp' ), esc_attr( 'mailto:' . sanitize_email( $val ) ) );
+				$val = sprintf(
+					/* translators: %s: mailto link wrapping the word "email". */
+					__( 'Via %s', 'jobswp' ),
+					sprintf( '<a href="%s">email</a>', esc_attr( 'mailto:' . sanitize_email( $val ) ) )
+				);
 			} elseif ( 'web' == $method ) {
 				// Prepend 'http://' if no protocol was specified by job poster
 				if ( 0 !== strpos( $val, 'http' ) )
 					$val = 'http://' . $val;
 				$val = sprintf(
-					/* translators: %s: Link to job application web form. */
+					/* translators: %s: Link wrapping the words "web form". */
 					__( 'Via %s', 'jobswp' ),
 					sprintf(
-						/* translators: %s: URL to job application web form. */
-						'<a href="%s" rel="nofollow ugc noopener">' . __( 'web form', 'jobswp' ) . '</a>',
+						'<a href="%s" rel="nofollow ugc noopener">web form</a>',
 						esc_url( $val )
 					)
 				);

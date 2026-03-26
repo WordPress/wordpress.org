@@ -368,7 +368,7 @@ label {
 	border-bottom: 1px solid var(--color-light-grey-1);
 	background: var(--color-white);
 	position: sticky;
-	top: 0;
+	top: var(--wp-admin--admin-bar--height, 0px);
 	z-index: 100;
 }
 
@@ -884,7 +884,7 @@ label {
 /* Sidebar */
 .job-sidebar {
 	position: sticky;
-	top: 90px;
+	top: calc(var(--wp-admin--admin-bar--height, 0px) + 90px);
 }
 
 .job-sidebar__card {
