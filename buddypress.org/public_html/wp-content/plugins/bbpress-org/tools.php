@@ -83,4 +83,3 @@ function bbporg_make_user_spammer() {
 	// Redirect without _GET
 	bbp_redirect( bbp_get_user_profile_url( $user_id ) );
 }
-add_action( 'bbp_template_redirect', 'bbporg_make_user_spammer' );
