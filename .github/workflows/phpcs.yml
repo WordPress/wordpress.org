@@ -1,0 +1,43 @@
+name: Static Analysis (PHP Linting)
+
+on:
+  pull_request:
+    paths:
+    - '**.php'
+    - phpcs.xml.dist
+    - composer.json
+    - .github/workflows/phpcs.yml
+    - .github/bin/phpcs-branch.php
+  push:
+    branches: [trunk]
+    paths:
+    - '**.php'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phpcs:
+    name: PHP Coding Standards
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        coverage: none
+        tools: composer:v2
+      env:
+        COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install Composer dependencies
+      run: composer install --no-interaction --prefer-dist
+
+    - name: Lint PHP
+      run: BASE_REF=${{ github.base_ref }} php .github/bin/phpcs-branch.php
