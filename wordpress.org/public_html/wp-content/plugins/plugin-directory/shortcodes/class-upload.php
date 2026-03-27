@@ -106,6 +106,10 @@ class Upload {
 			} else {
 				$type    = 'success';
 				$message = $upload_result;
+
+				if ( function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
+					bump_stats_extra( 'plugin-upload-source', 'webform' );
+				}
 			}
 
 			// Refresh the lists.

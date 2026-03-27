@@ -311,6 +311,10 @@ TEXT
 			$response['next_steps'] = 'Your updated ZIP has been received. If your plugin is being reviewed, respond to the review email to let the reviewer know. Use wporg://plugins/plugin-directory/get-plugin-status with slug "' . $handler->plugin_slug . '" to check status.';
 		}
 
+		if ( function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
+			bump_stats_extra( 'plugin-upload-source', 'mcp' );
+		}
+
 		return $response;
 	}
 
