@@ -72,6 +72,8 @@ class Customizations {
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 		add_action( 'wp_ajax_plugin-svn-sync', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'svn_sync' ) );
 		add_action( 'wp_ajax_plugin-set-reviewer', array( __NAMESPACE__ . '\Metabox\Reviewer', 'xhr_set_reviewer' ) );
+		add_action( 'wp_ajax_plugin-elasticsearch', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_response' ) );
+		add_action( 'wp_ajax_plugin-elasticsearch-reindex', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_reindex' ) );
 
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
@@ -783,6 +785,13 @@ class Customizations {
 				'plugin', 'normal', 'high'
 			);
 		}
+
+		add_meta_box(
+			'plugin-elasticsearch',
+			__( 'ElasticSearch Index', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'display' ),
+			'plugin', 'normal', 'low'
+		);
 
 		// Remove unnecessary metaboxes.
 		remove_meta_box( 'commentsdiv', 'plugin', 'normal' );
