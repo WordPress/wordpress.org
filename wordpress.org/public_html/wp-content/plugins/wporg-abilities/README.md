@@ -49,3 +49,32 @@ wp_register_ability_category(
 3. Add ability classes under `tools/`, `resources/`, and `prompts/` subdirectories, then register them in `Registrar::register_abilities()`.
 
 The MCP server auto-discovers all abilities whose name starts with `wporg/`.
+
+## Sandbox testing
+
+To test abilities against a dotorg sandbox, configure the MCP server to point at your sandbox IP. Create a `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "wporg-sandbox": {
+      "command": "npx",
+      "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+      "env": {
+        "WP_API_URL": "https://<sandbox-ip>/wp-json/mcp/wporg",
+        "WP_API_USERNAME": "<your-wp-username>",
+        "WP_API_PASSWORD": "<your-application-password>",
+        "CUSTOM_HEADERS": "{\"Host\": \"wordpress.org\"}",
+        "SOCKS_PROXY": "socks5://127.0.0.1:8080",
+        "USE_SYSTEM_PROXY": "true",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      }
+    }
+  }
+}
+```
+
+- `CUSTOM_HEADERS` sets the Host header so the sandbox routes the request correctly.
+- `SOCKS_PROXY` and `USE_SYSTEM_PROXY` route traffic through the proxy SOCKS5 tunnel. `USE_SYSTEM_PROXY` must be `true` or the proxy env var is ignored.
+- `NODE_TLS_REJECT_UNAUTHORIZED` disables TLS verification since the certificate won't match the sandbox IP.
+- Follow the [Using the MCP Server](https://developer.wordpress.org/plugins/wordpress-org/using-the-mcp-server/) guide to connect your WordPress.org account and use the application password from that setup.
