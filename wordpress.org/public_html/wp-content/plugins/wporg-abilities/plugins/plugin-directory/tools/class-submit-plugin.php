@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory\Tools;
 
 use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Ability_Base;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
 
 defined( 'ABSPATH' ) || exit;
@@ -206,13 +207,12 @@ TEXT
 		// Step 3: Resolve $plugin_post_id.
 		$plugin_post_id = 0;
 		if ( $is_update ) {
-			$slug = sanitize_title( $input['plugin_slug'] );
-			$post = self::find_plugin_post( $slug );
+			$post = Plugin_Directory::get_plugin_post( $input['plugin_slug'] );
 
 			if ( ! $post ) {
 				return self::error_response(
 					'plugin_not_found',
-					sprintf( 'No plugin with slug "%s" was found for your account.', $slug ),
+					sprintf( 'No plugin with slug "%s" was found for your account.', sanitize_title( $input['plugin_slug'] ) ),
 					'Use wporg://plugins/plugin-directory/get-plugin-status to check your plugin slugs.'
 				);
 			}
@@ -473,30 +473,6 @@ TEXT
 		}
 
 		return $temp_path;
-	}
-
-	/**
-	 * Find a plugin post owned by the current user or accessible to a plugin reviewer.
-	 *
-	 * @param string $slug The plugin slug.
-	 * @return \WP_Post|null
-	 */
-	private static function find_plugin_post( string $slug ): ?\WP_Post {
-		$query_args = array(
-			'post_type'   => 'plugin',
-			'name'        => $slug,
-			'post_status' => 'any',
-			'numberposts' => 1,
-		);
-
-		// Scope to the current user unless they can review plugins.
-		if ( ! current_user_can( 'plugin_approve' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- plugin_approve is registered by the plugin-directory plugin.
-			$query_args['author'] = get_current_user_id();
-		}
-
-		$posts = get_posts( $query_args );
-
-		return $posts[0] ?? null;
 	}
 
 	/**
