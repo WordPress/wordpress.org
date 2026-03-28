@@ -99,6 +99,10 @@ class Theme_Preview {
 
 		$theme_data = wporg_themes_theme_information( $request->get_param( 'slug' ) );
 
+		if ( ! empty( $theme_data->error ) ) {
+			return new WP_Error( 'error', $theme_data->error );
+		}
+
 		return $this->build_blueprint(
 			$theme_data,
 			[
