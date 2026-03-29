@@ -215,6 +215,7 @@ add_action( 'send_headers', function() {
 		'source_email',
 		'source_f_name',
 		'source_name',
+		'email-share-nonce',
 	];
 
 	foreach ( $share_by_email_fields as $field ) {
