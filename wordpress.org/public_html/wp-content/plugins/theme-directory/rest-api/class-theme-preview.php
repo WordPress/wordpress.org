@@ -91,7 +91,11 @@ class Theme_Preview {
 	 * Generate a Blueprint for a theme review.
 	 */
 	function review( $request ) {
-		// If the theme isn't (yet) published, use the post_id hint.
+		/*
+		 * If the theme isn't (yet) published, use the post_id hint.
+		 * Security Note:
+		 *   As theme reviews are public (themes.trac.wordpress.org) we don't validate permissions here.
+		 */
 		$preview_post = get_post( (int) $request->get_param( 'post_id' ) );
 		if (
 			$preview_post &&
