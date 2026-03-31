@@ -291,7 +291,7 @@ class Moderation {
 		}
 
 		// Bail if user isn't a moderator.
-		if ( ! user_can( $user->ID, 'edit_photos' ) ) {
+		if ( empty( $caps['edit_photos'] ) ) {
 			return $caps;
 		}
 
