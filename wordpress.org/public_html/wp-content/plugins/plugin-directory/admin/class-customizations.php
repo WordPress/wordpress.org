@@ -826,7 +826,7 @@ class Customizations {
 		if ( 'internal-note' === $comment->comment_type && isset( $_REQUEST['mode'] ) && 'single' === $_REQUEST['mode'] ) {
 			$allowed_actions = array( 'reply' => true );
 
-			if ( current_user_can( 'manage_comments' ) ) {
+			if ( current_user_can( 'moderate_comments' ) ) {
 				$allowed_actions['trash']     = true;
 				$allowed_actions['untrash']   = true;
 				$allowed_actions['quickedit'] = true;

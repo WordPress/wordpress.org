@@ -44,9 +44,85 @@
 
 		<!-- Short array syntax is already used throughout the codebase. -->
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax" />
+	</rule>
 
-		<!-- Custom capabilities are valid in the WordPress.org environment; an allowlist is proposed in PR #583. -->
-		<exclude name="WordPress.WP.Capabilities.Unknown" />
+	<!-- Custom capabilities used across the WordPress.org environment. -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<!-- Plugin Directory -->
+				<element value="plugin_add_committer"/>
+				<element value="plugin_add_support_rep"/>
+				<element value="plugin_admin_edit"/>
+				<element value="plugin_admin_view"/>
+				<element value="plugin_approve"/>
+				<element value="plugin_close"/>
+				<element value="plugin_dashboard_access"/>
+				<element value="plugin_disable"/>
+				<element value="plugin_edit"/>
+				<element value="plugin_edit_others"/>
+				<element value="plugin_edit_pending"/>
+				<element value="plugin_manage_releases"/>
+				<element value="plugin_reject"/>
+				<element value="plugin_remove_committer"/>
+				<element value="plugin_remove_support_rep"/>
+				<element value="plugin_review"/>
+				<element value="plugin_self_close"/>
+				<element value="plugin_self_transfer"/>
+				<element value="plugin_set_category"/>
+				<element value="plugin_set_section"/>
+				<element value="plugin_toggle_public_preview"/>
+				<!-- Theme Directory -->
+				<element value="suspend_themes"/>
+				<element value="reinstate_themes"/>
+				<element value="theme_configure_categorization_options"/>
+				<!-- PHPUnit Test Reporter -->
+				<element value="edit_results"/>
+				<element value="publish_results"/>
+				<element value="edit_others_results"/>
+				<element value="read_private_results"/>
+				<!-- Translation Events -->
+				<element value="manage_translation_events"/>
+				<element value="create_translation_event"/>
+				<element value="view_translation_event"/>
+				<element value="edit_translation_event"/>
+				<element value="trash_translation_event"/>
+				<element value="delete_translation_event"/>
+				<element value="edit_translation_event_attendees"/>
+				<element value="edit_translation_event_title"/>
+				<element value="edit_translation_event_description"/>
+				<element value="edit_translation_event_start"/>
+				<element value="edit_translation_event_end"/>
+				<element value="edit_translation_event_timezone"/>
+				<element value="edit_translation_event_attendance_mode"/>
+				<!-- Support Forums -->
+				<element value="keep_gate"/>
+				<element value="moderate"/>
+				<element value="throttle"/>
+				<element value="participate"/>
+				<element value="spectate"/>
+				<element value="assign_topic_tags"/>
+				<!-- Photo Directory -->
+				<element value="edit_photos"/>
+				<element value="delete_photos"/>
+				<element value="delete_others_photos"/>
+				<element value="publish_photos"/>
+				<element value="edit_others_photos"/>
+				<element value="edit_published_photos"/>
+				<element value="delete_published_photos"/>
+				<element value="delete_private_photos"/>
+				<element value="edit_private_photos"/>
+				<element value="read_private_photos"/>
+				<element value="manage_photo_tags"/>
+				<!-- Learn -->
+				<element value="manage_workshop_internal_notes"/>
+				<element value="edit_courses"/>
+				<element value="edit_lessons"/>
+				<element value="edit_any_learn_content"/>
+				<!-- HelpHub -->
+				<element value="manage_helphub"/>
+			</property>
+		</properties>
 	</rule>
 
 	<!-- PHPUnit requires test files to be named after the test class they contain. -->
