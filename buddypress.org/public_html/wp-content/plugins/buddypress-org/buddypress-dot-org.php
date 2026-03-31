@@ -52,12 +52,7 @@ add_action( 'bbp_admin_loaded', 'bporg_remove_dashboard_widget' );
  * @return if user is an admin
  */
 function bporg_admin_redirect() {
-	if (       is_super_admin()
-			|| current_user_can( 'contributor'   )
-			|| current_user_can( 'author'        )
-			|| current_user_can( 'editor'        )
-			|| current_user_can( 'administrator' )
-		)
+	if ( is_super_admin() || current_user_can( 'edit_posts' ) )
 		return;
 
 	// Allow registered unprivileged admin-ajax.php requests for
