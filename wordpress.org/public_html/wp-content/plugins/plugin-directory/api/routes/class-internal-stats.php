@@ -23,6 +23,21 @@ class Internal_Stats extends Base {
 			'methods'             => \WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'bulk_update_stats' ),
 			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
+			'args' => array(
+				'plugins' => array(
+					'required'             => true,
+					'type'                 => 'object',
+					'additionalProperties' => array(
+						'type'       => 'object',
+						'properties' => array(
+							'active_installs'          => array( 'type' => 'integer' ),
+							'usage'                    => array( 'type' => 'object' ),
+							'support_threads'          => array( 'type' => 'integer' ),
+							'support_threads_resolved' => array( 'type' => 'integer' ),
+						),
+					),
+				),
+			),
 		) );
 	}
 
