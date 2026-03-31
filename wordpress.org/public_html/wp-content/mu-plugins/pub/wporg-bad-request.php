@@ -203,6 +203,26 @@ add_action( 'send_headers', function() {
 } );
 
 /**
+ * Detect non-scalar values in Pattern Directory query parameters.
+ *
+ * Scanners pass nested arrays like `curation[$in][]=all` which cause PHP
+ * warnings downstream when the value is used in esc_attr().
+ */
+add_action( 'send_headers', function() {
+	if ( ! str_contains( $_SERVER['REQUEST_URI'], 'wordpress.org/patterns/' ) ) {
+		return;
+	}
+
+	$scalar_only = [ 'curation', 'pattern-categories' ];
+
+	foreach ( $scalar_only as $field ) {
+		if ( isset( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+			die_bad_request( "non-scalar $field in \$_REQUEST" );
+		}
+	}
+} );
+
+/**
  * Detect invalid requests from vulnerability scanners to Jetpack Share by Email forms.
  */
 add_action( 'send_headers', function() {
