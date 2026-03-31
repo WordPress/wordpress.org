@@ -4,10 +4,15 @@ namespace WordPressdotorg\Forums;
 
 class Ratings_Compat {
 
-	var $compat   = null;
-	var $slug     = null;
-	var $object   = null;
-	var $taxonomy = null;
+	var $compat             = null;
+	var $slug               = null;
+	var $object             = null;
+	var $taxonomy           = null;
+	var $ratings_counts     = null;
+	var $avg_rating         = null;
+	var $reviews_count      = null;
+	var $review_exists      = null;
+	var $review_topic_query = null;
 
 	var $filter = false;
 
