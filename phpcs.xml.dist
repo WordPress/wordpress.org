@@ -73,6 +73,8 @@
 				<element value="plugin_set_section"/>
 				<element value="plugin_toggle_public_preview"/>
 				<!-- Theme Directory -->
+				<element value="suspend_theme"/>
+				<element value="reinstate_theme"/>
 				<element value="suspend_themes"/>
 				<element value="reinstate_themes"/>
 				<element value="theme_configure_categorization_options"/>
@@ -96,6 +98,10 @@
 				<element value="edit_translation_event_timezone"/>
 				<element value="edit_translation_event_attendance_mode"/>
 				<!-- Support Forums -->
+				<element value="bbp_forums_admin"/>
+				<element value="edit_topic"/>
+				<element value="edit_reply"/>
+				<element value="read_topic"/>
 				<element value="keep_gate"/>
 				<element value="moderate"/>
 				<element value="throttle"/>
