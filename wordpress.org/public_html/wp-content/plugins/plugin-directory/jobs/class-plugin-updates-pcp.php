@@ -358,9 +358,16 @@ class Plugin_Updates_PCP {
 		if ( ! $plugin_check_process ) {
 			// If we can't run plugin-check, we'll just return a pass.
 			return [
-				'verdict' => true,
-				'results' => [],
-				'html'    => '',
+				'verdict'         => true,
+				'results'         => [],
+				'results_by_type' => [],
+				'files'           => [],
+				'totals'          => [ 'errors' => 0, 'warnings' => 0 ],
+				'return_code'     => 0,
+				'output'          => [],
+				'stderr'          => '',
+				'total_time'      => 0,
+				'hash'            => '',
 			];
 		}
 
