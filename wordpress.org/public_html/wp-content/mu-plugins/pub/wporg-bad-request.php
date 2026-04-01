@@ -209,7 +209,7 @@ add_action( 'send_headers', function() {
  * warnings downstream when the value is used in esc_attr().
  */
 add_action( 'send_headers', function() {
-	if ( ! str_contains( $_SERVER['REQUEST_URI'], 'wordpress.org/patterns/' ) ) {
+	if ( ! str_starts_with( $_SERVER['REQUEST_URI'], '/patterns/' ) ) {
 		return;
 	}
 
