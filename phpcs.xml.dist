@@ -47,6 +47,7 @@
 	</rule>
 
 	<!-- Custom capabilities used across the WordPress.org environment. -->
+	<!-- Please note: Using custom capabilities is allowed, just document them here please! -->
 	<rule ref="WordPress.WP.Capabilities">
 		<properties>
 			<property name="custom_capabilities" type="array">
