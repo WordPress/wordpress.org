@@ -8,6 +8,7 @@ use \WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
+use \WordPressdotorg\Plugin_Directory\Jobs\Plugin_Automated_Review;
 
 use const \WordPressdotorg\Plugin_Directory\PLUGIN_FILE;
 use const \WordPressdotorg\Plugin_Directory\PLUGIN_DIR;
@@ -71,6 +72,7 @@ class Customizations {
 		add_filter( 'wp_ajax_delete-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 		add_action( 'wp_ajax_plugin-svn-sync', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'svn_sync' ) );
+		add_action( 'wp_ajax_plugin-automated-review', array( Plugin_Automated_Review::class, 'ajax_run_review' ) );
 		add_action( 'wp_ajax_plugin-set-reviewer', array( __NAMESPACE__ . '\Metabox\Reviewer', 'xhr_set_reviewer' ) );
 		add_action( 'wp_ajax_plugin-elasticsearch', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_response' ) );
 		add_action( 'wp_ajax_plugin-elasticsearch-reindex', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_reindex' ) );
