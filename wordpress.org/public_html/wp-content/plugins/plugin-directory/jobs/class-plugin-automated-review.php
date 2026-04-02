@@ -49,7 +49,7 @@ class Plugin_Automated_Review {
 
 		$hook = 'automated_review:' . $plugin_post->post_name;
 
-		if ( ! wp_next_scheduled( $hook ) ) {
+		if ( ! wp_next_scheduled( $hook, array( $plugin_post->post_name ) ) ) {
 			wp_schedule_single_event( time() + HOUR_IN_SECONDS, $hook, array( $plugin_post->post_name ) );
 		}
 	}
@@ -61,6 +61,10 @@ class Plugin_Automated_Review {
 	 * @return array|false The parsed review results, or false on failure.
 	 */
 	public static function cron_trigger( string $plugin_slug ): array|false {
+		if ( ! function_exists( 'wp_supports_ai' ) || ! wp_supports_ai() ) {
+			return false;
+		}
+
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 		if ( ! $plugin ) {
 			return false;
@@ -132,9 +136,13 @@ class Plugin_Automated_Review {
 			wp_send_json_success( $result );
 		}
 
+		if ( ! function_exists( 'wp_supports_ai' ) || ! wp_supports_ai() ) {
+			wp_send_json_error( 'AI support is not available.' );
+		}
+
 		$hook = 'automated_review:' . $plugin_slug;
 
-		if ( wp_next_scheduled( $hook ) ) {
+		if ( wp_next_scheduled( $hook, array( $plugin_slug ) ) ) {
 			wp_send_json_success( 'Automated review is already queued.' );
 		}
 
@@ -363,7 +371,7 @@ class Plugin_Automated_Review {
 
 			$full_path = $plugin_dir . '/' . $entry['path'];
 			if ( file_exists( $full_path ) ) {
-				return file_get_contents( $full_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				return (string) file_get_contents( $full_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
 		}
 
@@ -490,13 +498,15 @@ class Plugin_Automated_Review {
 		};
 		add_filter( 'wp_ai_client_default_request_timeout', $set_timeout );
 
-		$result = wp_ai_client_prompt( $user_prompt )
-			->using_system_instruction( $system_prompt )
-			->as_json_response( $schema )
-			->using_max_tokens( $max_tokens )
-			->generate_text_result();
-
-		remove_filter( 'wp_ai_client_default_request_timeout', $set_timeout );
+		try {
+			$result = wp_ai_client_prompt( $user_prompt )
+				->using_system_instruction( $system_prompt )
+				->as_json_response( $schema )
+				->using_max_tokens( $max_tokens )
+				->generate_text_result();
+		} finally {
+			remove_filter( 'wp_ai_client_default_request_timeout', $set_timeout );
+		}
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
@@ -570,7 +580,7 @@ class Plugin_Automated_Review {
 			$prompt .= $pcp_summary['formatted'] . "\n";
 		}
 
-		$system_prompt = file_get_contents( __DIR__ . '/automated-review/triage-prompt.md' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$system_prompt = (string) file_get_contents( __DIR__ . '/automated-review/triage-prompt.md' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		return self::call_ai( $prompt, $system_prompt, self::get_triage_result_schema(), 4096 );
 	}
@@ -972,7 +982,7 @@ class Plugin_Automated_Review {
 			}
 		}
 
-		$system_prompt = file_get_contents( __DIR__ . '/automated-review/synthesis-prompt.md' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$system_prompt = (string) file_get_contents( __DIR__ . '/automated-review/synthesis-prompt.md' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		return self::call_ai( $prompt, $system_prompt, self::get_result_schema(), 16384 );
 	}
