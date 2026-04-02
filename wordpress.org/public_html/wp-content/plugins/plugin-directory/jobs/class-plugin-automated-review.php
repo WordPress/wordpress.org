@@ -304,7 +304,7 @@ class Plugin_Automated_Review {
 	 * @param string $plugin_dir Path to the extracted plugin.
 	 * @return array { @type string[] $all, @type array[] $source }
 	 */
-	protected static function collect_files( string $plugin_dir ): array {
+	public static function collect_files( string $plugin_dir ): array {
 		$iterator = new \RecursiveIteratorIterator(
 			new \RecursiveDirectoryIterator( $plugin_dir, \FilesystemIterator::SKIP_DOTS ),
 			\RecursiveIteratorIterator::LEAVES_ONLY
@@ -377,7 +377,7 @@ class Plugin_Automated_Review {
 	 * @param array  $source_files Collected source files.
 	 * @return string Readme content, or empty string.
 	 */
-	protected static function find_readme_content( string $plugin_dir, array $source_files ): string {
+	public static function find_readme_content( string $plugin_dir, array $source_files ): string {
 		foreach ( $source_files as $entry ) {
 			if ( ! preg_match( '/(?:^|[\/])readme\.(txt|md)$/i', $entry['path'] ) ) {
 				continue;
@@ -416,7 +416,7 @@ class Plugin_Automated_Review {
 	 * @param array  $pcp_results Full PCP results array.
 	 * @return string Formatted PCP findings, or empty string.
 	 */
-	protected static function format_pcp_for_file( string $file_path, array $pcp_results ): string {
+	public static function format_pcp_for_file( string $file_path, array $pcp_results ): string {
 		$file_findings = array();
 
 		foreach ( $pcp_results as $result ) {
@@ -446,7 +446,7 @@ class Plugin_Automated_Review {
 	 * @param array $pcp_results Full PCP results array.
 	 * @return array Summary with errors, warnings, error_files, and formatted string.
 	 */
-	protected static function summarize_pcp_results( array $pcp_results ): array {
+	public static function summarize_pcp_results( array $pcp_results ): array {
 		if ( empty( $pcp_results ) ) {
 			return array(
 				'errors'      => 0,
@@ -660,7 +660,7 @@ class Plugin_Automated_Review {
 	 * @param array $file_priorities Raw file priorities from AI or default triage.
 	 * @return array Map of path => priority.
 	 */
-	protected static function normalize_file_priorities( array $file_priorities ): array {
+	public static function normalize_file_priorities( array $file_priorities ): array {
 		if ( empty( $file_priorities ) ) {
 			return array();
 		}
@@ -688,7 +688,7 @@ class Plugin_Automated_Review {
 	 * @param array $pcp_results  Full PCP results array.
 	 * @return array
 	 */
-	protected static function build_default_triage( array $source_files, array $pcp_results ): array {
+	public static function build_default_triage( array $source_files, array $pcp_results ): array {
 		$priorities  = array();
 		$error_files = array();
 
@@ -744,7 +744,7 @@ class Plugin_Automated_Review {
 	 * @param array $triage       Triage data including file priorities.
 	 * @return array[]
 	 */
-	protected static function build_batches( array $source_files, array $triage ): array {
+	public static function build_batches( array $source_files, array $triage ): array {
 		$file_priorities = $triage['file_priorities'] ?? array();
 
 		$reviewable = array();
@@ -1014,7 +1014,7 @@ class Plugin_Automated_Review {
 	 * @param array $review Review result with blockers, warnings, and info arrays.
 	 * @return string One of 'reject', 'needs_changes', or 'approve'.
 	 */
-	protected static function determine_verdict( array $review ): string {
+	public static function determine_verdict( array $review ): string {
 		if ( ! empty( $review['blockers'] ) ) {
 			return 'reject';
 		}
@@ -1032,7 +1032,7 @@ class Plugin_Automated_Review {
 	 * @param array $batch_results Results from all batch reviews.
 	 * @return array
 	 */
-	protected static function build_fallback_result( array $batch_results ): array {
+	public static function build_fallback_result( array $batch_results ): array {
 		$blockers = array();
 		$warnings = array();
 		$info     = array();
@@ -1205,7 +1205,7 @@ class Plugin_Automated_Review {
 	 * @param array $finding A finding with title, description, and locations.
 	 * @return string
 	 */
-	protected static function format_finding( array $finding ): string {
+	public static function format_finding( array $finding ): string {
 		$output  = sprintf( "\n<strong>%s</strong>\n", esc_html( $finding['title'] ) );
 		$output .= esc_html( $finding['description'] ) . "\n";
 
