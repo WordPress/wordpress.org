@@ -269,14 +269,7 @@ class Plugin_Automated_Review {
 			$review = self::build_fallback_result( $batch_results );
 		}
 
-		// Enforce verdict consistency — blockers always mean reject.
-		if ( ! empty( $review['blockers'] ) && 'reject' !== $review['verdict'] ) {
-			$review['verdict'] = 'reject';
-		}
-
-		if ( ! isset( $review['verdict'] ) ) {
-			return false;
-		}
+		$review['verdict'] = self::determine_verdict( $review );
 
 		return array(
 			'review'      => $review,
@@ -333,7 +326,7 @@ class Plugin_Automated_Review {
 			$relative_path = str_replace( $plugin_dir . '/', '', $file->getPathname() );
 
 			foreach ( $skip_dirs as $skip ) {
-				if ( str_starts_with( $relative_path, $skip . '/' ) ) {
+				if ( str_starts_with( $relative_path, $skip . '/' ) || str_contains( $relative_path, '/' . $skip . '/' ) ) {
 					continue 2;
 				}
 			}
@@ -988,6 +981,28 @@ class Plugin_Automated_Review {
 	}
 
 	/**
+	 * Determine the verdict from a review result's findings.
+	 *
+	 * Blockers always mean reject. Warnings mean needs_changes. Otherwise approve.
+	 * This is the single source of truth for verdict logic — both the AI synthesis
+	 * path and the fallback path use it to override the AI's verdict.
+	 *
+	 * @param array $review Review result with blockers, warnings, and info arrays.
+	 * @return string One of 'reject', 'needs_changes', or 'approve'.
+	 */
+	protected static function determine_verdict( array $review ): string {
+		if ( ! empty( $review['blockers'] ) ) {
+			return 'reject';
+		}
+
+		if ( ! empty( $review['warnings'] ) ) {
+			return 'needs_changes';
+		}
+
+		return 'approve';
+	}
+
+	/**
 	 * Build a fallback result by aggregating batch findings without AI synthesis.
 	 *
 	 * @param array $batch_results Results from all batch reviews.
@@ -1017,7 +1032,6 @@ class Plugin_Automated_Review {
 			}
 		}
 
-		// Never approve if any batches were skipped or failed — coverage is incomplete.
 		$has_incomplete = false;
 		foreach ( $batch_results as $batch ) {
 			if ( ! empty( $batch['error'] ) ) {
@@ -1026,20 +1040,26 @@ class Plugin_Automated_Review {
 			}
 		}
 
-		$verdict = ! empty( $blockers ) ? 'reject' : ( ! empty( $warnings ) || $has_incomplete ? 'needs_changes' : 'approve' );
-
-		$summary = sprintf( 'Automated review found %d blocker(s), %d warning(s), and %d info item(s). Synthesis was unavailable; results aggregated without deduplication.', count( $blockers ), count( $warnings ), count( $info ) );
-		if ( $has_incomplete ) {
-			$summary .= ' Some batches were skipped or failed — review coverage is incomplete.';
-		}
-
-		return array(
-			'verdict'  => $verdict,
-			'summary'  => $summary,
+		$result = array(
+			'verdict'  => '',
+			'summary'  => sprintf( 'Automated review found %d blocker(s), %d warning(s), and %d info item(s). Synthesis was unavailable; results aggregated without deduplication.', count( $blockers ), count( $warnings ), count( $info ) ),
 			'blockers' => $blockers,
 			'warnings' => $warnings,
 			'info'     => $info,
 		);
+
+		if ( $has_incomplete ) {
+			$result['summary']   .= ' Some batches were skipped or failed — review coverage is incomplete.';
+			$result['warnings'][] = array(
+				'title'       => 'Incomplete review coverage',
+				'description' => 'Some review batches were skipped or failed. Not all files were reviewed.',
+				'locations'   => array(),
+			);
+		}
+
+		$result['verdict'] = self::determine_verdict( $result );
+
+		return $result;
 	}
 
 	/*
