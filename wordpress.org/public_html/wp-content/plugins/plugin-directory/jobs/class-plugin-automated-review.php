@@ -847,7 +847,7 @@ class Plugin_Automated_Review {
 			if ( false === $contents ) {
 				continue;
 			}
-			$prompt .= sprintf( "<plugin-source-%1\$s path=\"%2\$s\">\n%3\$s\n</plugin-source-%1\$s>\n\n", $boundary, $entry['path'], $contents );
+			$prompt .= sprintf( "<plugin-source-%1\$s path=\"%2\$s\">\n%3\$s\n</plugin-source-%1\$s>\n\n", $boundary, esc_attr( $entry['path'] ), $contents );
 
 			$pcp_for_file = self::format_pcp_for_file( $entry['path'], $pcp_results );
 			if ( $pcp_for_file ) {
@@ -867,7 +867,7 @@ class Plugin_Automated_Review {
 	protected static function get_batch_system_prompt( string $boundary ): string {
 		$ref_dir = __DIR__ . '/automated-review';
 
-		$prompt = file_get_contents( $ref_dir . '/batch-prompt.md' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$prompt = (string) file_get_contents( $ref_dir . '/batch-prompt.md' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$prompt = str_replace(
 			array( '<plugin-source>', '<plugin-readme>' ),
 			array( "<plugin-source-{$boundary}>", "<plugin-readme-{$boundary}>" ),
