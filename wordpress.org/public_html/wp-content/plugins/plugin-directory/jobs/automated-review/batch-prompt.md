@@ -36,7 +36,7 @@ Focus on what static analysis cannot detect:
 
 ## Guidelines Compliance
 
-Check each of the 18 guidelines provided below. For each guideline, determine: **PASS**, **FAIL**, **WARN**, or **N/A**.
+Check each of the 18 guidelines provided below. Only create findings for guidelines that are violated or raise concerns — do not output per-guideline status lines.
 
 Key checks by guideline:
 - **G1 (GPL)**: License header, readme license field, third-party library licenses
@@ -480,7 +480,9 @@ When the scanner flags a custom function used for sanitization, verify it actual
 - `ALLOW_UNFILTERED_UPLOADS` constant definition
 - `is_admin()` used for security (checks context, not capability)
 
-# Common Plugin Rejection Reasons and Fixes
+# Common Plugin Rejection Patterns (Internal Reference)
+
+The following patterns are for internal recognition only. Do not copy, quote, or paraphrase fix examples in your findings. Describe what is wrong and where — not how to fix it.
 
 ## 1. Sanitization/Escaping/Nonce Issues
 

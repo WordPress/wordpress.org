@@ -272,6 +272,18 @@ class Plugin_Automated_Review {
 			$review = self::build_fallback_result( $batch_results );
 		}
 
+		// If any batches were skipped or failed, inject a warning so determine_verdict() won't approve.
+		foreach ( $batch_results as $batch ) {
+			if ( ! empty( $batch['error'] ) ) {
+				$review['warnings'][] = array(
+					'title'       => 'Incomplete review coverage',
+					'description' => 'Some review batches were skipped or failed. Not all files were reviewed.',
+					'locations'   => array(),
+				);
+				break;
+			}
+		}
+
 		$review['verdict'] = self::determine_verdict( $review );
 
 		return array(
@@ -885,7 +897,7 @@ class Plugin_Automated_Review {
 			$prompt .= "\n\n" . $guidelines;
 		} else {
 			// Fall back to bundled reference when DevHub is unreachable.
-			$prompt .= "\n\n" . file_get_contents( $ref_dir . '/guidelines.md' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$prompt .= "\n\n" . (string) file_get_contents( $ref_dir . '/guidelines.md' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		}
 
 		return $prompt;
@@ -1044,34 +1056,13 @@ class Plugin_Automated_Review {
 			}
 		}
 
-		$has_incomplete = false;
-		foreach ( $batch_results as $batch ) {
-			if ( ! empty( $batch['error'] ) ) {
-				$has_incomplete = true;
-				break;
-			}
-		}
-
-		$result = array(
+		return array(
 			'verdict'  => '',
 			'summary'  => sprintf( 'Automated review found %d blocker(s), %d warning(s), and %d info item(s). Synthesis was unavailable; results aggregated without deduplication.', count( $blockers ), count( $warnings ), count( $info ) ),
 			'blockers' => $blockers,
 			'warnings' => $warnings,
 			'info'     => $info,
 		);
-
-		if ( $has_incomplete ) {
-			$result['summary']   .= ' Some batches were skipped or failed — review coverage is incomplete.';
-			$result['warnings'][] = array(
-				'title'       => 'Incomplete review coverage',
-				'description' => 'Some review batches were skipped or failed. Not all files were reviewed.',
-				'locations'   => array(),
-			);
-		}
-
-		$result['verdict'] = self::determine_verdict( $result );
-
-		return $result;
 	}
 
 	/*
