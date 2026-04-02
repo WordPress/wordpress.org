@@ -76,7 +76,7 @@ class Plugin_Automated_Review {
 			return false;
 		}
 
-		$attachment = $attachments[ max( array_keys( $attachments ) ) ];
+		$attachment = end( $attachments );
 		$plugin_dir = Filesystem::unzip( get_attached_file( $attachment->ID ) );
 		if ( ! $plugin_dir ) {
 			Tools::audit_log( 'Automated review failed: Could not extract plugin files.', $plugin );
@@ -199,6 +199,9 @@ class Plugin_Automated_Review {
 		if ( ! $triage || empty( $triage['file_priorities'] ) ) {
 			$triage = self::build_default_triage( $source_files, $pcp_results );
 		}
+
+		// Attach full file list to triage so batch prompts can reference it for structure checks.
+		$triage['all_files'] = $all_files;
 
 		// Phase 2: Batch reviews.
 		$batches = self::build_batches( $source_files, $triage );
@@ -325,13 +328,19 @@ class Plugin_Automated_Review {
 
 			$relative_path = str_replace( $plugin_dir . '/', '', $file->getPathname() );
 
+			$all_files[] = $relative_path;
+
+			$in_skip_dir = false;
 			foreach ( $skip_dirs as $skip ) {
 				if ( str_starts_with( $relative_path, $skip . '/' ) || str_contains( $relative_path, '/' . $skip . '/' ) ) {
-					continue 2;
+					$in_skip_dir = true;
+					break;
 				}
 			}
 
-			$all_files[] = $relative_path;
+			if ( $in_skip_dir ) {
+				continue;
+			}
 
 			$ext = strtolower( $file->getExtension() );
 			if ( in_array( $ext, $text_extensions, true ) ) {
@@ -826,6 +835,9 @@ class Plugin_Automated_Review {
 		}
 		if ( ! empty( $triage['custom_sanitizers'] ) ) {
 			$prompt .= "\nCustom sanitization functions to verify: " . implode( ', ', $triage['custom_sanitizers'] ) . "\n";
+		}
+		if ( ! empty( $triage['all_files'] ) ) {
+			$prompt .= "\n=== All Plugin Files ===\n" . implode( "\n", $triage['all_files'] ) . "\n";
 		}
 
 		$prompt .= "\n=== Files to Review ===\n\n";

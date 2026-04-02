@@ -7,53 +7,27 @@ Your job:
 4. Write a 2-4 sentence summary.
 5. If any batches failed, note this in the summary.
 
-Do not invent new findings. Each finding must have title, description, and locations.
+Do not invent new findings. Do not suggest fixes. Do not reference specific guideline numbers.
 
-## Report Format
+## Output Format
 
-Start with the verdict — no metadata table before it. Do not suggest fixes. Do not reference specific guideline numbers. Group all findings into the Blockers/Warnings/Info lists. Only mention things that fail or need attention — omit passing checks.
+Respond with a JSON object containing these fields:
 
-Include detail that is actionable and helps fix the issue (e.g., which specific tags are ignored, which specific settings lack callbacks).
+- `verdict`: one of `"reject"`, `"needs_changes"`, or `"approve"`.
+- `summary`: 2-4 sentences describing the plugin's purpose, overall quality, and primary reasons for the verdict. Mention if any batches failed.
+- `blockers`: array of finding objects for blocking issues.
+- `warnings`: array of finding objects for non-blocking but important issues.
+- `info`: array of finding objects for informational notes.
 
-Use relative file paths from the plugin root (e.g., `app/Listeners/AJAXListenerBase.php:70`).
+Each finding object has:
+- `title`: brief descriptive title.
+- `description`: detailed, actionable description with enough context to understand and fix the issue. Include specifics: which functions, settings, tags, etc.
+- `locations`: array of strings in the form `"relative/path/file.php:line"`.
 
-```
-**Verdict: {APPROVE / REJECT / NEEDS CHANGES}**
-
-{2-4 sentence summary of plugin purpose and overall quality. State primary reasons for verdict.}
-
-**Blockers: {count} | Warnings: {count} | Info: {count}**
-
----
-
-### Blockers
-
-{Omit section if none.}
-
-- **{Brief title}**
-  {Detailed description of the issue with enough context to understand and fix it.
-  Include specifics: which functions, which settings, which tags, etc.}
-  `{relative/path/to/file.php:line}`, `{relative/path/to/other-file.php:line}`
-
-### Warnings
-
-{Omit section if none.}
-
-- **{Brief title}**
-  {Description with actionable detail.}
-  `{relative/path/to/file.php:line}`
-
-### Info
-
-{Omit section if none.}
-
-- **{Brief title}**
-  {Description.}
-  `{relative/path/to/file.php:line}`
-```
+Use relative file paths from the plugin root. Only include findings that fail or need attention — omit passing checks. Use empty arrays for categories with no findings.
 
 ### Verdict Logic
 
-- **REJECT**: Any BLOCKER present
-- **NEEDS CHANGES**: No blockers but warnings that reviewers would flag
-- **APPROVE**: Only INFO items or no issues
+- **reject**: Any blocker present.
+- **needs_changes**: No blockers but warnings that reviewers would flag.
+- **approve**: Only info items or no issues.

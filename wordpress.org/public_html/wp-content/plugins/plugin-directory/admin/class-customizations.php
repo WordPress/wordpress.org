@@ -1,17 +1,17 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin;
 
-use \WordPressdotorg\Plugin_Directory;
-use \WordPressdotorg\Plugin_Directory\Tools;
-use \WordPressdotorg\Plugin_Directory\Tools\SVN;
-use \WordPressdotorg\Plugin_Directory\Tools\Helpscout;
-use \WordPressdotorg\Plugin_Directory\Template;
-use \WordPressdotorg\Plugin_Directory\Readme\Validator;
-use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
+use WordPressdotorg\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
+use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Readme\Validator;
+use WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Automated_Review;
 
-use const \WordPressdotorg\Plugin_Directory\PLUGIN_FILE;
-use const \WordPressdotorg\Plugin_Directory\PLUGIN_DIR;
+use const WordPressdotorg\Plugin_Directory\PLUGIN_FILE;
+use const WordPressdotorg\Plugin_Directory\PLUGIN_DIR;
 
 /**
  * All functionality related to the Administration interface.
