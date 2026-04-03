@@ -77,7 +77,13 @@ class Plugin_Automated_Review {
 		}
 
 		$attachment = end( $attachments );
-		$plugin_dir = Filesystem::unzip( get_attached_file( $attachment->ID ) );
+		$zip_path   = get_attached_file( $attachment->ID );
+		if ( ! $zip_path || ! file_exists( $zip_path ) ) {
+			Tools::audit_log( 'Automated review failed: ZIP file path is missing or invalid.', $plugin );
+			return false;
+		}
+
+		$plugin_dir = Filesystem::unzip( $zip_path );
 		if ( ! $plugin_dir ) {
 			Tools::audit_log( 'Automated review failed: Could not extract plugin files.', $plugin );
 			return false;

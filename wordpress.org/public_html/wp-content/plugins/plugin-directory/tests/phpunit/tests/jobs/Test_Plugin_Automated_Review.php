@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName.NotHyphenatedLowercase -- PHPUnit requires class name to match filename.
 /**
  * Tests for Plugin_Automated_Review job.
  *
