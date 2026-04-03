@@ -7,6 +7,8 @@
  * @package WordPressdotorg\Abilities
  */
 
+declare( strict_types = 1 );
+
 namespace WordPressdotorg\Abilities\Autoloader;
 
 /**
@@ -55,15 +57,15 @@ class Autoloader {
 	/**
 	 * Loads a class if it starts with `$this->prefix`.
 	 *
-	 * @param string $class The class to be loaded.
+	 * @param string $class_name The class to be loaded.
 	 */
-	public function load( $class ) {
-		if ( strpos( $class, $this->prefix . self::NS_SEPARATOR ) !== 0 ) {
+	public function load( $class_name ) {
+		if ( strpos( $class_name, $this->prefix . self::NS_SEPARATOR ) !== 0 ) {
 			return;
 		}
 
 		// Strip prefix from the start (ala PSR-4).
-		$class = substr( $class, $this->prefix_length + 1 );
+		$class = substr( $class_name, $this->prefix_length + 1 );
 		$class = strtolower( $class );
 		$file  = '';
 

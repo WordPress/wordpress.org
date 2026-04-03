@@ -24,6 +24,9 @@ abstract class Directory_Compat {
 	abstract protected function do_view_header();
 
 	var $loaded       = false;
+	var $slug         = null;
+	var $ratings      = null;
+	var $stickies     = null;
 	var $authors      = null;
 	var $contributors = null;
 	var $support_reps = null;

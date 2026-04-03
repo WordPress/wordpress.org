@@ -168,3 +168,9 @@ body.post-type-photo #wp-content-editor-container {
 #dashboard-photo-rejection-stats .row-sum td {
 	border-top: 1px solid #c3c4c7;
 }
+
+/* Fix overflow issue related to https://core.trac.wordpress.org/ticket/64547 */
+body.post-type-photo #major-publishing-actions {
+	display: block;
+}
+

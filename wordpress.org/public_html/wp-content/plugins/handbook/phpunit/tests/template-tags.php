@@ -4,13 +4,13 @@ defined( 'ABSPATH' ) or die();
 
 class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 
-	public function setUp() {
+	public function setUp(): void {
 		parent::setup();
 
 		WPorg_Handbook_Init::init();
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 
 		WPorg_Handbook_Init::reset( true );

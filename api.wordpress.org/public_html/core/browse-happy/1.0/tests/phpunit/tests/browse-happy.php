@@ -853,6 +853,12 @@ class Tests_Browse_Happy extends \PHPUnit\Framework\TestCase {
 			return;
 		}
 
+		// Internet Explorer is always flagged as needing an upgrade.
+		if ( 'Internet Explorer' === $parsed['name'] ) {
+			$this->assertTrue( $parsed['upgrade'] );
+			return;
+		}
+
 		$versions = get_browser_current_versions();
 
 		if ( ! empty( $versions[ $parsed['name'] ] ) ) {

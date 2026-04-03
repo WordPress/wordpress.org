@@ -244,7 +244,7 @@ class Duplicate_Translations {
 	private function notify_duplicates() {
 		$mysql_error = '';
 		$message     = '';
-		$matrix_room = 'polyglots-duplicated-translations';
+		$channel     = 'polyglots-duplicated-translations';
 		$send_result = false;
 
 		if ( $this->last_sql_error ) {
@@ -260,16 +260,15 @@ class Duplicate_Translations {
 		}
 		$message .= $mysql_error;
 
-		require_once '/home/api/public_html/dotorg/matrix/poster.php';
-		$send_result = \DotOrg\Matrix\Poster::force_send( $matrix_room, $message );
+		notify_slack( $channel, $message );
 
 		if ( $this->verbose ) {
 			if ( $send_result ) {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo "Message sent to the " . $matrix_room . ' room: ' . $message . "\n";
+				echo "Message sent to the " . $channel . ' room: ' . $message . "\n";
 			} else {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo "Message not sent to the " . $matrix_room . ' room: ' . $message . "\n";
+				echo "Message not sent to the " . $channel . ' room: ' . $message . "\n";
 			}
 		}
 

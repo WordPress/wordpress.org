@@ -8,7 +8,9 @@ _get_list_table( 'WP_Posts_List_Table' );
 
 class Plugin_Posts extends \WP_Posts_List_Table {
 
-	protected $column_order = [
+	protected $sticky_posts_count = 0;
+	protected $is_trash           = false;
+	protected $column_order       = [
 		'cb',
 		'title',
 		'author',

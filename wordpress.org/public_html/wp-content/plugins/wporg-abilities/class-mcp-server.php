@@ -2,10 +2,12 @@
 /**
  * MCP Server for WordPress.org.
  *
- * Creates a custom MCP server that exposes all WordPress.org abilities as tools.
+ * Creates a custom MCP server that exposes WordPress.org abilities as tools, resources, and prompts.
  *
  * @package WordPressdotorg\Abilities
  */
+
+declare( strict_types = 1 );
 
 namespace WordPressdotorg\Abilities;
 
@@ -36,10 +38,10 @@ class MCP_Server {
 	 * @param McpAdapter $adapter The MCP adapter instance.
 	 */
 	public static function register( McpAdapter $adapter ): void {
-		$tools = self::get_wporg_ability_names();
+		$components = self::get_wporg_components();
 
-		if ( empty( $tools ) ) {
-			return;
+		if ( empty( $components['tools'] ) && empty( $components['resources'] ) && empty( $components['prompts'] ) ) {
+			trigger_error( 'WordPressdotorg\Abilities\MCP_Server::register — No wporg/ abilities were found.', E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- Intentional warning for misconfiguration.
 		}
 
 		$adapter->create_server(
@@ -47,35 +49,70 @@ class MCP_Server {
 			'mcp',
 			'wporg',
 			'WordPress.org MCP Server',
-			'MCP server for WordPress.org services.',
+			implode(
+				"\n\n",
+				array(
+					'WordPress.org MCP Server — provides tools, resources, and prompts for interacting with WordPress.org services.',
+					'Use prompts/list to discover available workflows for specific tasks. Browse wporg://* resources for reference documentation.',
+				)
+			),
 			'v1.0.0',
 			array( HttpTransport::class ),
 			ErrorLogMcpErrorHandler::class,
 			NullMcpObservabilityHandler::class,
-			$tools
+			$components['tools'],
+			$components['resources'],
+			$components['prompts'],
+			'is_user_logged_in' // Public transport; individual abilities handle their own auth.
 		);
 	}
 
 	/**
-	 * Get all registered WordPress.org ability names.
+	 * Get all registered WordPress.org abilities categorized by MCP component type.
 	 *
-	 * Discovers abilities by querying the WordPress ability registry
-	 * for any ability whose name starts with 'wporg/'.
+	 * Discovers abilities whose name starts with 'wporg/' and categorizes them
+	 * based on their meta['mcp']['type'] value: 'resource', 'prompt', or 'tool' (default).
 	 *
-	 * @return string[] Array of ability names.
+	 * @return array {
+	 *     Abilities grouped by MCP component type.
+	 *
+	 *     @type string[] $tools     Tool ability names.
+	 *     @type string[] $resources Resource ability names.
+	 *     @type string[] $prompts   Prompt ability names.
+	 * }
 	 */
-	private static function get_wporg_ability_names(): array {
-		$abilities = wp_get_abilities();
-		$tools     = array();
+	private static function get_wporg_components(): array {
+		$abilities  = wp_get_abilities();
+		$components = array(
+			'tools'     => array(),
+			'resources' => array(),
+			'prompts'   => array(),
+		);
 
 		foreach ( $abilities as $ability ) {
 			$name = $ability->get_name();
 
-			if ( str_starts_with( $name, 'wporg/' ) ) {
-				$tools[] = $name;
+			if ( ! str_starts_with( $name, 'wporg/' ) ) {
+				continue;
+			}
+
+			$meta = $ability->get_meta();
+			$type = $meta['mcp']['type'] ?? 'tool';
+
+			switch ( $type ) {
+				case 'resource':
+					$components['resources'][] = $name;
+					break;
+				case 'prompt':
+					$components['prompts'][] = $name;
+					break;
+				case 'tool':
+				default:
+					$components['tools'][] = $name;
+					break;
 			}
 		}
 
-		return $tools;
+		return $components;
 	}
 }

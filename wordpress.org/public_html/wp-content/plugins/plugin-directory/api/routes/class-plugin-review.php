@@ -2,7 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Template;
-use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WP_Error;
 use WP_REST_Server;
 
@@ -105,9 +105,9 @@ class Plugin_Review extends Base {
 		if ( in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
 			$details['download_link'] = null;
 			$details['preview_link']  = null;
-			$details['helpscout']     = Tools::get_helpscout_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+			$details['helpscout']     = Helpscout::get_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
 		} else {
-			$details['helpscout']     = Tools::get_helpscout_emails( $post, [ 'limit' => 1 ] );
+			$details['helpscout']     = Helpscout::get_emails( $post, [ 'limit' => 1 ] );
 		}
 
 		$attachments = get_attached_media( 'application/zip', $post );

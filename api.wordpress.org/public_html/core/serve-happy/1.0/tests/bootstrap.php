@@ -5,11 +5,6 @@ if ( function_exists( 'xdebug_disable' ) ) {
 	xdebug_disable();
 }
 
-// PHP 6+ Compatibility.
-if ( class_exists( '\PHPUnit\Runner\Version' ) && version_compare( \PHPUnit\Runner\Version::id(), '6.0', '>=' ) ) {
-	class_alias( '\PHPUnit\Framework\TestCase', 'PHPUnit_Framework_TestCase' );
-}
-
 // Error Output handler for the API.
 function bail( $code, $message, $status = 400, $http_code_text = '' ) {
 	return compact( 'code', 'message', 'status' );

@@ -117,6 +117,10 @@ class Plugin_Release_Confirmation extends Base {
 			return false;
 		}
 
+		if ( ! class_exists( 'Two_Factor_Core' ) ) {
+			return true;
+		}
+
 		// Check to see if they've confirmed their 2FA status recently..
 		$status = get_revalidation_status();
 		if ( $status && $status['can_save'] ) {

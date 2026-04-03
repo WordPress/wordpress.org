@@ -63,6 +63,35 @@ input#post_author_username {
 	border: 0;
 }
 
+.comments-meta-box .column-comment p + p {
+	margin-top: 1em;
+}
+
+.comments-meta-box .comment-body.comment-collapsed {
+	max-height: 100px;
+	overflow: hidden;
+	position: relative;
+}
+
+.comments-meta-box .comment-body.comment-collapsed::after {
+	content: '';
+	display: block;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 40px;
+	background: linear-gradient( to bottom, rgba( 255, 255, 255, 0 ), var( --comment-bg, #fff ) );
+}
+
+.comments-meta-box .comment-toggle {
+	display: block;
+	margin: 1em 0;
+	cursor: pointer;
+	color: #0073aa;
+	text-decoration: none;
+}
+
 .comments-meta-box .inside .row-actions {
 	line-height:18px;
 }

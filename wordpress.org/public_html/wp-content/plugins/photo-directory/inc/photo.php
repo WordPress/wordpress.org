@@ -385,13 +385,13 @@ $exif = self::exif_read_data_as_data_stream( $file );
 
 		foreach ( array( 'title', 'caption', 'credit', 'copyright', 'camera', 'iso' ) as $key ) {
 			if ( $meta[ $key ] && ! seems_utf8( $meta[ $key ] ) ) {
-				$meta[ $key ] = utf8_encode( $meta[ $key ] );
+				$meta[ $key ] = mb_convert_encoding( $meta[ $key ], 'UTF-8', 'ISO-8859-1' );
 			}
 		}
 
 		foreach ( $meta['keywords'] as $key => $keyword ) {
 			if ( ! seems_utf8( $keyword ) ) {
-				$meta['keywords'][ $key ] = utf8_encode( $keyword );
+				$meta['keywords'][ $key ] = mb_convert_encoding( $keyword, 'UTF-8', 'ISO-8859-1' );
 			}
 		}
 
@@ -990,7 +990,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		$text = wp_kses( $text, 'strip' );
 
 		if ( $text && ! seems_utf8( $text ) ) {
-			$text = utf8_encode( $text );
+			$text = mb_convert_encoding( $text, 'UTF-8', 'ISO-8859-1' );
 		}
 
 		return $text;

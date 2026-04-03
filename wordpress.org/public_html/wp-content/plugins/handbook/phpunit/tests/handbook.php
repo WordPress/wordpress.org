@@ -17,7 +17,7 @@ class WPorg_Handbook_Handbook_Test extends WP_UnitTestCase {
 
 	protected $handbook;
 
-	public function setUp() {
+	public function setUp(): void {
 		parent::setup();
 		WPorg_Handbook_Init::init();
 
@@ -25,7 +25,7 @@ class WPorg_Handbook_Handbook_Test extends WP_UnitTestCase {
 		$this->handbook = reset( $handbooks );
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 
 		foreach ( WPorg_Handbook_Init::get_handbook_objects() as $obj ) {
@@ -455,7 +455,7 @@ class WPorg_Handbook_Handbook_Test extends WP_UnitTestCase {
 
 		$this->assertTrue( isset( $wp_registered_sidebars[ 'handbook' ] ) );
 		$this->assertSame(
-			[ 'name', 'id', 'description', 'class', 'before_widget', 'after_widget', 'before_title', 'after_title', 'before_sidebar', 'after_sidebar' ],
+			[ 'name', 'id', 'description', 'class', 'before_widget', 'after_widget', 'before_title', 'after_title', 'before_sidebar', 'after_sidebar', 'show_in_rest' ],
 			array_keys( $wp_registered_sidebars[ 'handbook' ] )
 		);
 		$this->assertEquals( 'handbook', $wp_registered_sidebars[ 'handbook' ]['id'] );

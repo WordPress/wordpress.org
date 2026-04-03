@@ -18,6 +18,7 @@ class GP_Locale {
 	public $country_code;
 	public $wp_locale; // This should only be set for locales that are officially supported on translate.wordpress.org.
 	public $slug;
+	public $root_slug; // This is for locale variants parent locale, see 'wp-i18n-teams' plugin.
 	public $nplurals = 2;
 	public $plural_expression = 'n != 1';
 	public $google_code = null;

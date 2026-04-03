@@ -1,0 +1,20 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"../jobs.wordpress.net/public_html/wp-content/plugins/jobswp"
+	],
+	"themes": [
+		"../jobs.wordpress.net/public_html/wp-content/themes/jobswp"
+	],
+	"mappings": {
+		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/wporg-dev-login.php"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash jobs/bin/after-start.sh"
+	},
+	"config": {
+		"WP_DEBUG": true
+	}
+}

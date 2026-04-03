@@ -10,6 +10,11 @@ class Readme_Validator {
 	 * Displays a form to validate readme.txt files and blobs of text.
 	 */
 	public static function display() {
+		// In the rest-api, just return the shortcode tag, so it can be rendered properly in the app or other consumers.
+		if ( wp_is_serving_rest_request() ) {
+			return '[readme-validator]';
+		}
+
 		$readme_url      = '';
 		$readme_contents = '';
 		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {

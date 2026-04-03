@@ -759,13 +759,13 @@ class Themes_API {
 
 		if ( $this->fields['ratings'] ) {
 			// Amount of reviews for each rating level.
-			$phil->ratings = \WPORG_Ratings::get_rating_counts( 'theme', $theme->post_name );
+			$phil->ratings = class_exists( 'WPORG_Ratings' ) ? WPORG_Ratings::get_rating_counts( 'theme', $theme->post_name ) : 0;
 		}
 
 		if ( $this->fields['rating'] ) {
 			// Return a % rating; Rating range: 0~5.
-			$phil->rating = \WPORG_Ratings::get_avg_rating( 'theme', $theme->post_name ) * 20;
-			$phil->num_ratings = \WPORG_Ratings::get_rating_count( 'theme', $theme->post_name );
+			$phil->rating      = class_exists( 'WPORG_Ratings' ) ? WPORG_Ratings::get_avg_rating( 'theme', $theme->post_name ) * 20 : 0;
+			$phil->num_ratings = class_exists( 'WPORG_Ratings' ) ? WPORG_Ratings::get_rating_count( 'theme', $theme->post_name ) : 0;
 		}
 
 		if ( $this->fields['reviews_url'] ) {
