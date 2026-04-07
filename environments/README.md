@@ -50,8 +50,7 @@ npx wp-env run cli wp <command>
 **Run tests:**
 
 ```bash
-npm run plugins:test:env start   # First time only — starts test containers
-npm run plugins:test             # Run PHPUnit
+npm run plugins:test
 ```
 
 ### Jobs
