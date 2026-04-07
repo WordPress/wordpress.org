@@ -162,6 +162,53 @@ class Review_Tools {
 				</label>';
 		}
 
+		// Automated review button.
+		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) && function_exists( 'wp_supports_ai' ) && wp_supports_ai() && current_user_can( 'plugin_review' ) ) {
+			$review_nonce = wp_create_nonce( 'wporg_plugins_automated_review-' . $slug );
+			printf(
+				'<p><button class="button button-secondary" id="automated-review-btn" data-slug="%s" data-nonce="%s">Run Automated Review</button> <span id="automated-review-status"></span></p>',
+				esc_attr( $slug ),
+				esc_attr( $review_nonce )
+			);
+			?>
+			<script>
+				jQuery( function( $ ) {
+					$( '#automated-review-btn' ).on( 'click', function( e ) {
+						e.preventDefault();
+
+						var $btn    = $( this ),
+							$status = $( '#automated-review-status' );
+
+						$btn.prop( 'disabled', true );
+						$status.text( 'Running automated review…' );
+
+						$.post( ajaxurl, {
+							action:   'plugin-automated-review',
+							slug:     $btn.data( 'slug' ),
+							sync:     1,
+							_wpnonce: $btn.data( 'nonce' )
+						} ).done( function( response ) {
+							$status.text( response.success ? 'Done. Refresh to see results.' : ( response.data || 'Failed.' ) );
+							if ( ! response.success ) {
+								$btn.prop( 'disabled', false );
+							}
+						} ).fail( function() {
+							$status.text( 'Request failed.' );
+							$btn.prop( 'disabled', false );
+						} );
+					} );
+				} );
+			</script>
+			<?php
+			$last_review = get_post_meta( $post->ID, '_automated_review_timestamp', true );
+			if ( $last_review ) {
+				printf(
+					'<p class="description">Last automated review: %s</p>',
+					esc_html( human_time_diff( $last_review ) . ' ago' )
+				);
+			}
+		}
+
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 			$slug_restricted = [];
 			$slug_reserved   = [];

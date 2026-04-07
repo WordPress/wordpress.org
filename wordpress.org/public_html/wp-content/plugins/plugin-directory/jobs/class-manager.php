@@ -22,6 +22,7 @@ class Manager {
 		'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
 		'import_zip'         => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
 		'scan_plugin'        => array( __NAMESPACE__ . '\Plugin_Updates_PCP', 'cron_trigger' ),
+		'automated_review'   => array( __NAMESPACE__ . '\Plugin_Automated_Review', 'cron_trigger' ),
 		'create_svn_repo'    => array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ),
 	);
 
@@ -44,6 +45,9 @@ class Manager {
 
 		// Hook into the plugin import process to queue a job.
 		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Updates_PCP', 'wporg_plugins_imported' ), 10, 5 );
+
+		// Queue an automated review when a plugin is uploaded.
+		add_action( 'plugin_upload', array( __NAMESPACE__ . '\Plugin_Automated_Review', 'queue' ), 10, 2 );
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
