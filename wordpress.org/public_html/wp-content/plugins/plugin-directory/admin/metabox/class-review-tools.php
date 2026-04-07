@@ -10,6 +10,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_i18n_Import;
 
 /**
  * The Plugin Review metabox.
@@ -378,9 +379,20 @@ class Review_Tools {
 				);
 				?>
 				<a id="svn-sync" class="button button-secondary" href="<?php echo esc_url( $svn_sync_url ); ?>">Trigger svn sync</a>
+				<?php
+				$i18n_import_url = add_query_arg(
+					array(
+						'action'      => 'plugin-i18n-import',
+						'slug'        => $post->post_name,
+						'_ajax_nonce' => wp_create_nonce( 'wporg_plugins_i18n_import-' . $post->post_name ),
+					),
+					admin_url( 'admin-ajax.php' )
+				);
+				?>
+				<a id="i18n-import" class="button button-secondary" href="<?php echo esc_url( $i18n_import_url ); ?>">Trigger i18n import</a>
 				<script>
 				jQuery( function( $ ) {
-					$( '#svn-sync' ).click( function( e ) {
+					$( '#svn-sync, #i18n-import' ).click( function( e ) {
 						e.preventDefault();
 
 						var $this = $(this),
@@ -465,5 +477,37 @@ class Review_Tools {
 		);
 
 		die( "Queued SVN import for {$plugin_slug}." );
+	}
+
+	/**
+	 * admin-ajax.php handler for queueing a plugin i18n import.
+	 */
+	static function i18n_import() {
+		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) );
+
+		check_ajax_referer( 'wporg_plugins_i18n_import-' . $plugin_slug );
+
+		$plugin     = \WordPressdotorg\Plugin_Directory\Plugin_Directory::get_plugin_post( $plugin_slug );
+		$stable_tag = $plugin ? $plugin->stable_tag : '';
+
+		$tags_touched = [ 'trunk' ];
+		if ( $stable_tag && 'trunk' !== $stable_tag ) {
+			$tags_touched[] = $stable_tag;
+		}
+
+		Plugin_i18n_Import::queue(
+			$plugin_slug,
+			array(
+				'tags_touched'   => $tags_touched,
+				'code_touched'   => true,
+				'readme_touched' => true,
+				'assets_touched' => true,
+				'revisions'      => [],
+				'source'         => 'wp-admin i18n-import button',
+			),
+			0
+		);
+
+		die( "Queued i18n import for {$plugin_slug}." );
 	}
 }
