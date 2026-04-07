@@ -158,17 +158,13 @@
 
 					<?php do_action( 'bbp_theme_before_topic_form_tags' ); ?>
 
+					<?php if ( bbp_allow_topic_tags() ) : ?>
 					<p>
-						<label for="bbp_topic_tags"><?php
-							if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
-								_e( 'Review Tags:', 'wporg-forums' );
-							} else {
-								_e( 'Topic Tags:', 'wporg-forums' );
-							}
-						?></label><br />
+						<label for="bbp_topic_tags"><?php _e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
 						<input type="text" value="<?php bbp_form_topic_tags(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" aria-describedby="bbp_topic_tags_description" <?php disabled( bbp_is_topic_spam() ); ?> /><br />
 						<em id="bbp_topic_tags_description"><?php esc_html_e( 'Separate tags with commas', 'wporg-forums' ); ?></em>
 					</p>
+					<?php endif; ?>
 
 					<?php do_action( 'bbp_theme_after_topic_form_tags' ); ?>
 
