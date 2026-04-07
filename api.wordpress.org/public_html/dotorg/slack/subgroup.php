@@ -144,8 +144,8 @@ switch ( $command ) {
 			[
 				'channel' => $group['id'],
 				'text'    => sprintf(
-					'Group %s created by <@%s>.',
-					$new_group['channel']['name'],
+					'Group <#%s> created by <@%s>.',
+					$new_group['channel']['id'],
 					$_POST['user_id']
 				),
 				'as_user' => true,
@@ -165,7 +165,7 @@ switch ( $command ) {
 			]
 		);
 
-		die_text( sprintf( "Group %s created.", $new_group['group']['name'] ) );
+		die_text( sprintf( "Group <#%s> created.", $new_group['channel']['id'] ) );
 
 	case 'invite':
 	case 'join':
