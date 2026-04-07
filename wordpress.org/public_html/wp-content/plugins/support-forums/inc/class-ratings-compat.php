@@ -74,6 +74,9 @@ class Ratings_Compat {
 		add_action( 'wporg_compat_after_single_view', array( $this, 'add_topic_form' ) );
 		add_action( 'bbp_theme_before_topic_form_content', array( $this, 'add_topic_form_stars' ), 8 );
 
+		// Hide tags field on plugin reviews.
+		add_filter( 'bbp_allow_topic_tags', array( $this, 'show_topic_form_tags' ) );
+
 		// Check to see if a topic is being created/edited.
 		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
@@ -489,6 +492,16 @@ class Ratings_Compat {
 			?></li>
 		</ul>
 		<?php
+	}
+
+	/**
+	 * Hide the tags field when displaying the plugin review form.
+	 */
+	public function show_topic_form_tags( $show ) {
+		if ( Plugin::REVIEWS_FORUM_ID === bbp_get_topic_forum_id() ) {
+			return false;
+		}
+		return $show;
 	}
 
 	public function add_topic_form_stars() {
