@@ -89,11 +89,6 @@ if ( empty( $found ) ) {
 	die_text( "@wordpressdotorg isn't here." );
 }
 
-// Can't call this from a subgroup.
-if ( $pos = strpos( $group['name'], '-' ) ) {
-	die_text( sprintf( 'Call this from the main `%s` group.', substr( $group['name'], 0, $pos ) ) );
-}
-
 // Get the current groups members.
 $members = api_call(
 	// https://api.slack.com/methods/conversations.members
