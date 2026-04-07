@@ -124,7 +124,7 @@ class Review_Tools {
 
 		if ( $zip_files ) {
 			uksort( $zip_files, function ( $a, $b ) {
-				return strtotime( $a ) < strtotime( $b );
+				return strtotime( $b ) <=> strtotime( $a );
 			} );
 
 			echo '<p><strong>Zip files:</strong></p>';
