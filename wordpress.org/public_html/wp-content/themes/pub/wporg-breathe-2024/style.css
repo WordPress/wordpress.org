@@ -1164,6 +1164,7 @@ nav.o2-post-actions button {
 
 .o2-post-comments .o2-comment {
 	padding: var(--wp--preset--spacing--10) 0;
+	scroll-margin-top: 50px;
 }
 
 .o2-post-comments .o2-comment .o2-comment-header {
