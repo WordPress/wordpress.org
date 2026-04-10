@@ -309,7 +309,12 @@ function die_bad_request( $reference = '' ) {
 	if (
 		'production' === wp_get_environment_type() &&
 		function_exists( 'wporg_error_reporter' ) &&
-		! empty( $_COOKIE['wporg_logged_in'] )
+		(
+			// If we've loaded WordPress, use the validated cookie value, otherwise, cookie being present.
+			did_action( 'init' ) ?
+				is_user_logged_in() :
+				! empty( $_COOKIE['wporg_logged_in'] )
+		)
 	) {
 		wporg_error_reporter( E_USER_NOTICE, "400 Bad Request: $reference", __FILE__, __LINE__ );
 	}
