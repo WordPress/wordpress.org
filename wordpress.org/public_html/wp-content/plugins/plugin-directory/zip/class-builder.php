@@ -22,6 +22,7 @@ class Builder {
 
 	protected $slug       = '';
 	protected $version    = '';
+	protected $versions   = [];
 	protected $context    = '';
 	protected $stable_tag = '';
 
