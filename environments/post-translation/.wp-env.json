@@ -11,6 +11,6 @@
 		"GLOTPRESS_TABLE_PREFIX": "wp_gp_"
 	},
 	"lifecycleScripts": {
-		"afterStart": "wp-env run cli wp rewrite structure '/%postname%/' && wp-env run cli wp eval \"require_once ABSPATH . 'wp-admin/includes/upgrade.php'; require_once WP_PLUGIN_DIR . '/GlotPress/gp-includes/schema.php'; dbDelta( gp_schema_get() );\""
+		"afterStart": "bash post-translation/bin/after-start.sh"
 	}
 }
