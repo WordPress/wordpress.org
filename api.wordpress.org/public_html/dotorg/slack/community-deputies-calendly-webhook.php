@@ -17,7 +17,16 @@ function api_request( $url ) {
 		return false;
 	}
 
-	$req = wp_remote_get(
+	if ( 'api.calendly.com' !== parse_url( $url, PHP_URL_HOST ) ) {
+		trigger_error(
+			'Invalid URL provided to api_request, only api.calendly.com URLs are allowed.',
+			E_USER_WARNING
+		);
+
+		return false;
+	}
+
+	$req = wp_safe_remote_get(
 		$url,
 		[
 			'headers' => [
@@ -40,15 +49,17 @@ function api_request( $url ) {
 }
 
 // Check the request is valid.
-if ( empty( $_GET['secret'] ) || $_GET['secret'] !== COMMUNITY_CALENDLY_SECRET ) {
-	die();
+if ( empty( $_GET['secret'] ) || ! hash_equals( COMMUNITY_CALENDLY_SECRET, $_GET['secret'] ) ) {
+	header( 'HTTP/1.1 403 Forbidden' );
+	die( 'Invalid secret provided.' );
 }
 
 $HTTP_RAW_POST_DATA  = file_get_contents( 'php://input' );
 $request_body_parsed = json_decode( $HTTP_RAW_POST_DATA );
 $event               = $request_body_parsed->event ?? '';
 if ( ! $event ) {
-	die();
+	header( 'HTTP/1.1 400 Bad Request' );
+	die( 'Invalid event provided.' );
 }
 
 // Get the event details.
