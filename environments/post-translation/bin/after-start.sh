@@ -14,8 +14,4 @@ $WP wp rewrite structure '/%postname%/' --hard
 echo "Creating GlotPress tables..."
 $WP wp eval "require_once ABSPATH . 'wp-admin/includes/upgrade.php'; require_once WP_PLUGIN_DIR . '/GlotPress/gp-includes/schema.php'; dbDelta( gp_schema_get() );"
 
-# Activate the theme.
-echo "Activating theme..."
-$WP wp theme activate wporg-main
-
 echo "Post Translation environment ready."
