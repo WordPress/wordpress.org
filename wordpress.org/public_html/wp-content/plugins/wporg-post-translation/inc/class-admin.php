@@ -7,7 +7,7 @@ namespace WordPressdotorg\Post_Translation;
 class Admin {
 	public static function init() {
 		add_action( 'save_post', [ __CLASS__, 'on_save_post' ], 10, 2 );
-		add_action( 'post_translation_import', [ __CLASS__, 'handle_import' ], 10, 3 );
+		add_action( 'post_translation_import', [ __CLASS__, 'handle_import' ], 10, 4 );
 	}
 
 	/**
@@ -24,7 +24,8 @@ class Admin {
 		}
 
 		$source_blog_id = get_current_blog_id();
-		$args           = [ $post_id, $source_blog_id, $project ];
+		$permalink      = get_permalink( $post );
+		$args           = [ $post_id, $source_blog_id, $project, $permalink ];
 
 		if ( wp_next_scheduled( 'post_translation_import', $args ) ) {
 			return;
@@ -47,7 +48,7 @@ class Admin {
 	 * On WordPress.org, this runs on translate.w.org and switches to the
 	 * source blog to fetch post content. On single-site, it runs directly.
 	 */
-	public static function handle_import( $post_id, $source_blog_id, $project ) {
+	public static function handle_import( $post_id, $source_blog_id, $project, $permalink = '' ) {
 		require_once __DIR__ . '/class-importer.php';
 
 		$importer     = new Importer( $project );
@@ -65,8 +66,12 @@ class Admin {
 			return;
 		}
 
-		$strings   = Post_Parser::post_to_strings( $post );
-		$reference = get_permalink( $post );
+		$strings = Post_Parser::post_to_strings( $post );
+
+		// Use the permalink captured at save time if available.
+		if ( ! $permalink ) {
+			$permalink = get_permalink( $post );
+		}
 
 		if ( $needs_switch ) {
 			restore_current_blog();
@@ -76,6 +81,6 @@ class Admin {
 			return;
 		}
 
-		$importer->import( $strings, $reference );
+		$importer->import( $strings, $permalink );
 	}
 }
