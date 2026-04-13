@@ -2,7 +2,15 @@
 	"core": "WordPress/WordPress#master",
 	"testsEnvironment": false,
 	"plugins": [
-		"../../wordpress.org/public_html/wp-content/plugins/wporg-post-translation",
-		"../../wordpress.org/public_html/wp-content/plugins/glotpress-translate-bridge"
-	]
+		"../wordpress.org/public_html/wp-content/plugins/wporg-post-translation",
+		"../wordpress.org/public_html/wp-content/plugins/glotpress-translate-bridge",
+		"GlotPress/GlotPress"
+	],
+	"config": {
+		"GP_URL_BASE": "/glotpress/",
+		"GLOTPRESS_TABLE_PREFIX": "wp_gp_"
+	},
+	"lifecycleScripts": {
+		"afterStart": "wp rewrite structure '/%postname%/' && wp eval \"require_once ABSPATH . 'wp-admin/includes/upgrade.php'; require_once WP_PLUGIN_DIR . '/GlotPress/gp-includes/schema.php'; dbDelta( gp_schema_get() );\""
+	}
 }

@@ -37,9 +37,24 @@ require_once $_tests_dir . '/includes/functions.php';
 define( 'WPORG_POST_TRANSLATION_PLUGIN_DIR', dirname( __DIR__ ) );
 
 /**
+ * GlotPress requires pretty permalinks. Set them before WP fully loads.
+ */
+tests_add_filter( 'pre_option_permalink_structure', function () {
+	return '/%postname%/';
+} );
+
+/**
  * Manually load the plugins being tested.
  */
 function _manually_load_plugins() {
+	// Load GlotPress if available.
+	foreach ( [ 'GlotPress/glotpress.php', 'glotpress/glotpress.php' ] as $gp_file ) {
+		if ( file_exists( WP_PLUGIN_DIR . '/' . $gp_file ) ) {
+			require WP_PLUGIN_DIR . '/' . $gp_file;
+			break;
+		}
+	}
+
 	// Load the bridge dependency.
 	$bridge_path = WPORG_POST_TRANSLATION_PLUGIN_DIR . '/../glotpress-translate-bridge/glotpress-translate-bridge.php';
 	if ( file_exists( $bridge_path ) ) {
@@ -52,3 +67,9 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugins' );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// If GlotPress is loaded, install its database tables for tests.
+if ( class_exists( 'GP' ) && function_exists( 'gp_schema_get' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	dbDelta( gp_schema_get() );
+}
