@@ -71,6 +71,7 @@ jobs:
             wp-env-args: "--config post-translation/.wp-env.json"
             container: cli
             plugin-name: wporg-post-translation
+            phpunit-bin: /wordpress-phpunit/vendor/bin/phpunit
           - name: Plugin Directory
             working-directory: environments
             wp-env-args: "--config plugin-directory/.wp-env.json"
@@ -95,6 +96,11 @@ jobs:
         working-directory: ${{ matrix.working-directory }}
         run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} composer require --dev yoast/phpunit-polyfills:^4.0 --working-dir=/wordpress-phpunit
 
+      - name: Downgrade PHPUnit for WP test suite compat
+        if: matrix.phpunit-bin
+        working-directory: ${{ matrix.working-directory }}
+        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} composer require --dev phpunit/phpunit:^9.0 -W --working-dir=/wordpress-phpunit
+
       - name: Run PHPUnit
         working-directory: ${{ matrix.working-directory }}
-        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} --env-cwd=wp-content/plugins/${{ matrix.plugin-name }} phpunit ${{ matrix.phpunit-args || '' }}
+        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} --env-cwd=wp-content/plugins/${{ matrix.plugin-name }} ${{ matrix.phpunit-bin || 'phpunit' }} ${{ matrix.phpunit-args || '' }}
