@@ -49,7 +49,7 @@ class Test_Plugin extends WP_UnitTestCase {
 		$project = get_translation_project( $post_id );
 
 		$this->assertIsString( $project );
-		$this->assertStringStartsWith( 'disabled/posttranslation/', $project );
+		$this->assertStringStartsWith( 'post-content/', $project );
 	}
 
 	/**
@@ -58,7 +58,7 @@ class Test_Plugin extends WP_UnitTestCase {
 	public function test_site_project_slug() {
 		$project = get_site_project();
 
-		$this->assertStringStartsWith( 'disabled/posttranslation/', $project );
+		$this->assertStringStartsWith( 'post-content/', $project );
 		$this->assertStringNotContainsString( 'https://', $project );
 		$this->assertStringNotContainsString( 'http://', $project );
 	}

@@ -12,7 +12,7 @@ namespace WordPressdotorg\Post_Translation;
 defined( 'ABSPATH' ) || exit;
 
 const TEXTDOMAIN_PREFIX = 'dynamic-glotpress/';
-const PROJECT_BASE      = 'disabled/posttranslation';
+const PROJECT_BASE      = 'post-content';
 const META_KEY_ENABLED  = '_post_translation_enabled';
 
 /**

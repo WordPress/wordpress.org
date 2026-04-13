@@ -126,19 +126,20 @@ class Importer {
 	 * Create the GlotPress project and its translation sets.
 	 */
 	protected function create_project() {
-		$parent = GP::$project->by_path( PROJECT_BASE );
+		$parent = $this->get_or_create_parent_project();
 
 		if ( ! $parent ) {
 			return false;
 		}
 
 		$slug = trim( str_replace( PROJECT_BASE, '', $this->project_path ), '/' );
+		$name = get_bloginfo( 'name' ) ?: $slug;
 
 		$project = GP::$project->create_and_select( [
-			'name'              => $slug,
+			'name'              => $name,
 			'slug'              => $slug,
 			'parent_project_id' => $parent->id,
-			'description'       => 'Post content translations for ' . $slug,
+			'description'       => 'Post content translations for ' . $name,
 			'active'            => 1,
 		] );
 
@@ -159,6 +160,25 @@ class Importer {
 		}
 
 		return $project;
+	}
+
+	/**
+	 * Get or create the parent "Post Content" project.
+	 */
+	protected function get_or_create_parent_project() {
+		$parent = GP::$project->by_path( PROJECT_BASE );
+
+		if ( $parent ) {
+			return $parent;
+		}
+
+		return GP::$project->create_and_select( [
+			'name'              => 'Post Content',
+			'slug'              => PROJECT_BASE,
+			'parent_project_id' => null,
+			'description'       => 'Translations for WordPress post and page content.',
+			'active'            => 1,
+		] );
 	}
 
 	/**

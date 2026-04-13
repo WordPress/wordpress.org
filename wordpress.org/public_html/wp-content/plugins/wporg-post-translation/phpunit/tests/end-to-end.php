@@ -35,34 +35,11 @@ class Test_End_To_End extends WP_UnitTestCase {
 			return;
 		}
 
-		// Create the base parent project (disabled/posttranslation).
+		// Create the parent "Post Content" project.
 		self::$parent_project = GP::$project->create( [
-			'name'              => 'Post Translation',
-			'slug'              => 'posttranslation',
+			'name'              => 'Post Content',
+			'slug'              => 'post-content',
 			'parent_project_id' => null,
-			'active'            => 1,
-		] );
-
-		// Need the full path hierarchy. Create 'disabled' first if needed.
-		$disabled = GP::$project->by_path( 'disabled' );
-		if ( ! $disabled ) {
-			$disabled = GP::$project->create( [
-				'name'              => 'Disabled',
-				'slug'              => 'disabled',
-				'parent_project_id' => null,
-				'active'            => 0,
-			] );
-		}
-
-		// Re-create posttranslation under disabled.
-		if ( self::$parent_project ) {
-			self::$parent_project->delete();
-		}
-
-		self::$parent_project = GP::$project->create( [
-			'name'              => 'Post Translation',
-			'slug'              => 'posttranslation',
-			'parent_project_id' => $disabled->id,
 			'active'            => 1,
 		] );
 
