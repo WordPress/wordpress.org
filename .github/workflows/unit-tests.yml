@@ -68,8 +68,8 @@ jobs:
             phpunit-args: "--no-configuration --bootstrap phpunit/bootstrap.php phpunit/tests/"
           - name: Plugin Directory
             working-directory: environments
-            wp-env-args: "--config plugin-directory/.wp-env.json"
-            container: cli
+            wp-env-args: "--config plugin-directory/.wp-env.test.json"
+            container: tests-cli
             plugin-name: plugin-directory
     steps:
       - uses: actions/checkout@v4
