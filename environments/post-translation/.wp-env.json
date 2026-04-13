@@ -7,7 +7,7 @@
 		"GlotPress/GlotPress"
 	],
 	"mappings": {
-		"wp-content/mu-plugins": "./mocks/mu-plugins"
+		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/mu-plugins/wporg-dev-login.php"
 	},
 	"config": {
 		"GP_URL_BASE": "/glotpress/",
