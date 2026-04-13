@@ -27,4 +27,9 @@ if ( class_exists( 'GP' ) && class_exists( 'GP_Permission' ) ) {
 }
 "
 
+# Set site locale to Spanish so translations are applied on the frontend.
+echo "Setting locale to Spanish..."
+$WP wp language core install es_ES
+$WP wp site switch-language es_ES
+
 echo "Post Translation environment ready."
