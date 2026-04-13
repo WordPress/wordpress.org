@@ -30,13 +30,13 @@ class Admin {
 			return;
 		}
 
-		// Schedule the import to run on translate.w.org where GlotPress is loaded.
-		if ( defined( 'WPORG_TRANSLATE_BLOGID' ) ) {
+		// On WordPress.org multisite, schedule the import on translate.w.org.
+		if ( defined( 'WPORG_TRANSLATE_BLOGID' ) && is_multisite() ) {
 			switch_to_blog( WPORG_TRANSLATE_BLOGID );
 			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'post_translation_import', $args );
 			restore_current_blog();
 		} else {
-			// Local/dev: run on the same site.
+			// Local/dev or single-site: run on the same site.
 			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'post_translation_import', $args );
 		}
 	}
@@ -44,27 +44,33 @@ class Admin {
 	/**
 	 * Handle the scheduled import cron event.
 	 *
-	 * Runs on translate.w.org. Fetches fresh post content from the source site
-	 * and imports strings into the GlotPress project.
+	 * On WordPress.org, this runs on translate.w.org and switches to the
+	 * source blog to fetch post content. On single-site, it runs directly.
 	 */
 	public static function handle_import( $post_id, $source_blog_id, $project ) {
 		require_once __DIR__ . '/class-importer.php';
 
-		$importer = new Importer( $project );
+		$importer     = new Importer( $project );
+		$needs_switch = is_multisite() && get_current_blog_id() !== $source_blog_id;
 
-		// Fetch the post content from the source site.
-		switch_to_blog( $source_blog_id );
+		if ( $needs_switch ) {
+			switch_to_blog( $source_blog_id );
+		}
 
 		$post = get_post( $post_id );
 		if ( ! $post || 'publish' !== $post->post_status ) {
-			restore_current_blog();
+			if ( $needs_switch ) {
+				restore_current_blog();
+			}
 			return;
 		}
 
 		$strings   = Post_Parser::post_to_strings( $post );
 		$reference = get_permalink( $post );
 
-		restore_current_blog();
+		if ( $needs_switch ) {
+			restore_current_blog();
+		}
 
 		if ( empty( $strings ) ) {
 			return;
