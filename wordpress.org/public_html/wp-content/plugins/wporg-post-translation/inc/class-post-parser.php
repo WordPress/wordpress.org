@@ -21,7 +21,7 @@ require_once __DIR__ . '/parsers/class-shortcode-block.php';
  * them with translations.
  */
 class Post_Parser {
-	protected $parsers  = [];
+	protected $parsers = [];
 	protected $fallback;
 
 	public function __construct() {
@@ -108,7 +108,7 @@ class Post_Parser {
 		$has_changes  = false;
 
 		foreach ( $strings as $string ) {
-			$translated = $translate_fn( $string );
+			$translated              = $translate_fn( $string );
 			$replacements[ $string ] = $translated;
 
 			if ( $string !== $translated ) {
@@ -186,7 +186,7 @@ class Post_Parser {
 	/**
 	 * Decode unicode escape sequences in serialized block output.
 	 *
-	 * serialize_blocks() encodes unicode characters in attributes as \uXXXX
+	 * Serialize_blocks() encodes unicode characters in attributes as \uXXXX
 	 * sequences. This decodes them back, except for characters that would
 	 * interfere with block comment delimiters.
 	 *

@@ -26,6 +26,7 @@ interface Block_Parser {
 /**
  * Trait for common DOM manipulation utilities.
  */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 trait Dom_Utils {
 	/**
 	 * Load HTML content into a DOMDocument, handling encoding.
@@ -51,7 +52,7 @@ trait Dom_Utils {
 		}
 
 		$html = '';
-		foreach ( $wrap->childNodes as $child ) {
+		foreach ( $wrap->childNodes as $child ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOMNode property.
 			$html .= $doc->saveHTML( $child );
 		}
 
@@ -66,6 +67,7 @@ trait Dom_Utils {
  * <strong>, <em>, etc., DOM processing can corrupt these tags. This trait
  * provides methods to encode them before processing and decode them after.
  */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 trait Swap_Tags {
 	private static $safe_tags = [ 'strong', 'em', 'b', 'i', 'code', 'br', 'span', 'abbr', 'sub', 'sup', 'mark' ];
 

@@ -8,7 +8,8 @@ namespace WordPressdotorg\Post_Translation\Parsers;
  * text nodes and optionally alt/title attributes from images and links.
  */
 class Basic_Text implements Block_Parser {
-	use Dom_Utils, Swap_Tags;
+	use Dom_Utils;
+	use Swap_Tags;
 
 	public function to_strings( array $block ): array {
 		$html = $block['innerHTML'] ?? '';
@@ -27,7 +28,7 @@ class Basic_Text implements Block_Parser {
 		// Get all text nodes that contain visible content.
 		$text_nodes = $xpath->query( '//div[@id="wrap"]//text()[normalize-space()]' );
 		foreach ( $text_nodes as $node ) {
-			$text = trim( $this->decode_tags( $node->nodeValue ) );
+			$text = trim( $this->decode_tags( $node->nodeValue ) ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOMNode property.
 			if ( '' !== $text ) {
 				$strings[] = $text;
 			}

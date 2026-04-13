@@ -88,9 +88,12 @@ class Test_Plugin extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create();
 		update_post_meta( $post_id, '_post_translation_enabled', true );
 
-		add_filter( 'post_translation_project', function () {
-			return 'custom/project';
-		} );
+		add_filter(
+			'post_translation_project',
+			function () {
+				return 'custom/project';
+			}
+		);
 
 		$this->assertEquals( 'custom/project', get_translation_project( $post_id ) );
 

@@ -14,15 +14,19 @@ class Editor {
 	 * Register the post meta field for the block editor.
 	 */
 	public static function register_meta() {
-		register_post_meta( '', META_KEY_ENABLED, [
-			'show_in_rest'  => true,
-			'single'        => true,
-			'type'          => 'boolean',
-			'default'       => false,
-			'auth_callback' => function () {
-				return current_user_can( 'edit_posts' );
-			},
-		] );
+		register_post_meta(
+			'',
+			META_KEY_ENABLED,
+			[
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'boolean',
+				'default'       => false,
+				'auth_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+			]
+		);
 	}
 
 	/**

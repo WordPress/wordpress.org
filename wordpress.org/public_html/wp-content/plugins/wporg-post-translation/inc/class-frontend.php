@@ -68,8 +68,8 @@ class Frontend {
 		$locale = get_locale();
 
 		// Check transient cache with compound key.
-		$cache_key  = self::cache_key( $post->ID, $locale );
-		$cached     = get_transient( $cache_key );
+		$cache_key = self::cache_key( $post->ID, $locale );
+		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached ) {
 			return $cached ?: $content;
@@ -129,7 +129,7 @@ class Frontend {
 		foreach ( $strings as $string ) {
 			$translated = self::translate_string( $string, $project );
 			if ( $translated !== $string ) {
-				$content = str_replace( $string, wp_kses_post( $translated ), $content );
+				$content         = str_replace( $string, wp_kses_post( $translated ), $content );
 				$has_translation = true;
 			}
 		}

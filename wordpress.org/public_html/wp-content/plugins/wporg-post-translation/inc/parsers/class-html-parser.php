@@ -41,7 +41,6 @@ class HTML_Parser implements Block_Parser {
 					}
 				}
 			}
-
 		}
 
 		// Extract attribute values from any tag in the block HTML.
@@ -108,7 +107,6 @@ class HTML_Parser implements Block_Parser {
 	protected function tag_pattern( string $tag ): string {
 		return '#<' . $tag . '(?:\s[^>]*)?>(?P<content>.*?)</' . $tag . '>#is';
 	}
-
 }
 
 /**
@@ -116,6 +114,7 @@ class HTML_Parser implements Block_Parser {
  *
  * For example, '/h[1-6]/' matches any heading tag.
  */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 class HTML_Regex_Parser extends HTML_Parser {
 	protected function tag_pattern( string $tag ): string {
 		// Strip delimiters from the regex pattern.

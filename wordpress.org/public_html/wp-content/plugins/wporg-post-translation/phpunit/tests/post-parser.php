@@ -156,7 +156,7 @@ class Test_Post_Parser extends WP_UnitTestCase {
 		$parser  = new Post_Parser();
 		$strings = $parser->extract_strings( $content );
 
-		$this->assertCount( 1, array_filter( $strings, fn( $s ) => $s === 'Same text' ) );
+		$this->assertCount( 1, array_filter( $strings, fn( $s ) => 'Same text' === $s ) );
 	}
 
 	/**
@@ -166,12 +166,15 @@ class Test_Post_Parser extends WP_UnitTestCase {
 		$content = '<!-- wp:paragraph --><p>Hello World</p><!-- /wp:paragraph -->';
 		$parser  = new Post_Parser();
 
-		$translated = $parser->translate_content( $content, function ( $string ) {
-			if ( 'Hello World' === $string ) {
-				return 'Hola Mundo';
+		$translated = $parser->translate_content(
+			$content,
+			function ( $text ) {
+				if ( 'Hello World' === $text ) {
+					return 'Hola Mundo';
+				}
+				return $text;
 			}
-			return $string;
-		} );
+		);
 
 		$this->assertStringContainsString( 'Hola Mundo', $translated );
 		$this->assertStringNotContainsString( 'Hello World', $translated );
@@ -187,9 +190,12 @@ class Test_Post_Parser extends WP_UnitTestCase {
 			. '</div><!-- /wp:group -->';
 
 		$parser     = new Post_Parser();
-		$translated = $parser->translate_content( $content, function ( $string ) {
-			return strrev( $string );
-		} );
+		$translated = $parser->translate_content(
+			$content,
+			function ( $text ) {
+				return strrev( $text );
+			}
+		);
 
 		$this->assertStringContainsString( 'eltiT', $translated );
 		$this->assertStringContainsString( 'txet ydoB', $translated );
@@ -202,9 +208,12 @@ class Test_Post_Parser extends WP_UnitTestCase {
 		$content = '<!-- wp:paragraph --><p>No translation</p><!-- /wp:paragraph -->';
 		$parser  = new Post_Parser();
 
-		$result = $parser->translate_content( $content, function ( $string ) {
-			return $string; // Identity - no translation.
-		} );
+		$result = $parser->translate_content(
+			$content,
+			function ( $text ) {
+				return $text; // Identity - no translation.
+			}
+		);
 
 		$this->assertFalse( $result );
 	}
@@ -244,9 +253,12 @@ class Test_Post_Parser extends WP_UnitTestCase {
 		$content = '<!-- wp:paragraph --><p>Hello 🌍 World</p><!-- /wp:paragraph -->';
 		$parser  = new Post_Parser();
 
-		$translated = $parser->translate_content( $content, function ( $string ) {
-			return str_replace( 'Hello', 'Hola', $string );
-		} );
+		$translated = $parser->translate_content(
+			$content,
+			function ( $text ) {
+				return str_replace( 'Hello', 'Hola', $text );
+			}
+		);
 
 		$this->assertStringContainsString( '🌍', $translated );
 		$this->assertStringContainsString( 'Hola', $translated );
@@ -268,10 +280,13 @@ class Test_Post_Parser extends WP_UnitTestCase {
 	 * Test the block parsers filter allows adding custom parsers.
 	 */
 	public function test_custom_parser_filter() {
-		add_filter( 'post_translation_block_parsers', function ( $parsers ) {
-			$parsers['custom/testimonial'] = new \WordPressdotorg\Post_Translation\Parsers\HTML_Parser( 'blockquote' );
-			return $parsers;
-		} );
+		add_filter(
+			'post_translation_block_parsers',
+			function ( $parsers ) {
+				$parsers['custom/testimonial'] = new \WordPressdotorg\Post_Translation\Parsers\HTML_Parser( 'blockquote' );
+				return $parsers;
+			}
+		);
 
 		$content = '<!-- wp:custom/testimonial --><blockquote>Great product!</blockquote><!-- /wp:custom/testimonial -->';
 		$parser  = new Post_Parser();

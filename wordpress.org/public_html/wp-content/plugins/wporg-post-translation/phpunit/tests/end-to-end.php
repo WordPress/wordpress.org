@@ -98,7 +98,7 @@ class Test_End_To_End extends WP_UnitTestCase {
 		$gp_project = GP::$project->by_path( $project );
 		$this->assertNotNull( $gp_project, 'GlotPress project should have been created.' );
 
-		$originals = GP::$original->by_project_id( $gp_project->id );
+		$originals        = GP::$original->by_project_id( $gp_project->id );
 		$singular_strings = wp_list_pluck( $originals, 'singular' );
 
 		$this->assertContains( 'About Us', $singular_strings );
@@ -137,8 +137,8 @@ class Test_End_To_End extends WP_UnitTestCase {
 		$importer2->import( $strings2, get_permalink( $post2 ) );
 
 		// Verify both posts' strings are present.
-		$gp_project = GP::$project->by_path( $project );
-		$originals  = GP::$original->by_project_id( $gp_project->id );
+		$gp_project       = GP::$project->by_path( $project );
+		$originals        = GP::$original->by_project_id( $gp_project->id );
 		$singular_strings = wp_list_pluck( $originals, 'singular' );
 
 		$this->assertContains( 'Page One', $singular_strings, 'First post title should still exist.' );
@@ -177,7 +177,7 @@ class Test_End_To_End extends WP_UnitTestCase {
 		$this->assertNotNull( $translation_set, 'Spanish translation set should exist.' );
 
 		// Find the original for "This is a test."
-		$originals = GP::$original->by_project_id( $gp_project->id );
+		$originals     = GP::$original->by_project_id( $gp_project->id );
 		$test_original = null;
 		foreach ( $originals as $original ) {
 			if ( 'This is a test.' === $original->singular ) {
@@ -206,7 +206,7 @@ class Test_End_To_End extends WP_UnitTestCase {
 		$this->assertEquals( 'Esto es una prueba.', $translated );
 
 		// 4. Verify the frontend translates block content.
-		$parser = new Post_Parser();
+		$parser             = new Post_Parser();
 		$translated_content = $parser->translate_content(
 			get_post( $post_id )->post_content,
 			function ( $string ) use ( $project ) {
@@ -281,8 +281,8 @@ class Test_End_To_End extends WP_UnitTestCase {
 		$importer = new Importer( $project );
 		$result   = $importer->import( $strings, get_permalink( $post_id ) );
 
-		$gp_project = GP::$project->by_path( $project );
-		$originals  = GP::$original->by_project_id( $gp_project->id );
+		$gp_project       = GP::$project->by_path( $project );
+		$originals        = GP::$original->by_project_id( $gp_project->id );
 		$singular_strings = wp_list_pluck( $originals, 'singular' );
 
 		$this->assertContains( 'Complex Page', $singular_strings );
@@ -313,7 +313,7 @@ class Test_End_To_End extends WP_UnitTestCase {
 		$this->assertNotNull( $gp_project );
 
 		// Should have inherited the Spanish translation set from the parent.
-		$sets = GP::$translation_set->by_project_id( $gp_project->id );
+		$sets    = GP::$translation_set->by_project_id( $gp_project->id );
 		$locales = wp_list_pluck( $sets, 'locale' );
 
 		$this->assertContains( 'es', $locales, 'Spanish set should be inherited from parent.' );
