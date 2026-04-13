@@ -1,0 +1,11 @@
+<phpunit
+	bootstrap="phpunit/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	>
+	<testsuites>
+		<testsuite name="wporg-post-translation">
+			<directory suffix=".php">./phpunit/tests/</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

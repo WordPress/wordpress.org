@@ -65,6 +65,24 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
+### Post Translation
+
+A local instance for the Post Translation plugin with the GlotPress Translate Bridge dependency.
+
+**Start:**
+
+```bash
+npm run post-translation:env start
+```
+
+**Run tests:**
+
+```bash
+npm run post-translation:env -- run cli --env-cwd=wp-content/plugins/wporg-post-translation phpunit
+```
+
+**Access:** `http://localhost:8888`
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.

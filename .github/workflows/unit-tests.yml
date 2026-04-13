@@ -66,6 +66,11 @@ jobs:
             container: tests-cli
             plugin-name: handbook
             phpunit-args: "--no-configuration --bootstrap phpunit/bootstrap.php phpunit/tests/"
+          - name: Post Translation
+            working-directory: environments
+            wp-env-args: "--config post-translation/.wp-env.json"
+            container: cli
+            plugin-name: wporg-post-translation
           - name: Plugin Directory
             working-directory: environments
             wp-env-args: "--config plugin-directory/.wp-env.json"
