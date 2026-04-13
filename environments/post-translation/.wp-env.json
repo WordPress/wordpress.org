@@ -6,6 +6,13 @@
 		"../wordpress.org/public_html/wp-content/plugins/glotpress-translate-bridge",
 		"GlotPress/GlotPress"
 	],
+	"themes": [
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg-main",
+		"WordPress/wporg-parent-2021#build"
+	],
+	"mappings": {
+		"wp-content/mu-plugins": "./mocks/mu-plugins"
+	},
 	"config": {
 		"GP_URL_BASE": "/glotpress/",
 		"GLOTPRESS_TABLE_PREFIX": "wp_gp_"
