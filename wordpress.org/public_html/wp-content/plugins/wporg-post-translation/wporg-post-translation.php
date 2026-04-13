@@ -27,10 +27,12 @@ function bootstrap() {
 	require_once __DIR__ . '/inc/class-frontend.php';
 	require_once __DIR__ . '/inc/class-admin.php';
 	require_once __DIR__ . '/inc/class-editor.php';
+	require_once __DIR__ . '/inc/class-cli.php';
 
 	Admin::init();
 	Frontend::init();
 	Editor::init();
+	CLI::init();
 }
 add_action( 'init', __NAMESPACE__ . '\bootstrap', 9 );
 
