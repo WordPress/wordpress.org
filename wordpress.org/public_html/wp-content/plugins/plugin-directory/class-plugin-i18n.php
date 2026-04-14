@@ -390,9 +390,9 @@ class Plugin_I18n {
 	public function mark_gp_original( $original_id, $original, $content ) {
 		$marker = "___TRANSLATION_{$original_id}___";
 
-		// Normalize whitespace in the original to handle trimming/spacing mismatches
+		// Trim the original to handle leading/trailing whitespace mismatches
 		// between what GlotPress imported and what the readme parser rendered.
-		$original = trim( preg_replace( '/\s+/', ' ', $original ) );
+		$original = trim( $original );
 
 		if ( trim( $content ) === $original ) {
 			$content = $marker;
