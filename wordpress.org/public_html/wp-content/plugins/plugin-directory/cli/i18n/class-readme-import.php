@@ -107,7 +107,7 @@ class Readme_Import extends I18n_Import {
 			if ( preg_match_all( '~<li>(?!<p>)([\s\S]*?)(</li>|\s*<ul>)~', $section_text, $matches ) ) {
 				if ( ! empty( $matches[1] ) ) {
 					foreach ( $matches[1] as $text ) {
-						$section_strings = $this->handle_translator_comment( $section_strings, $text, "{$section_key} list item" );
+						$section_strings = $this->handle_translator_comment( $section_strings, trim( $text ), "{$section_key} list item" );
 						if ( 'changelog' === $section_key ) {
 							$str_priorities[ $text ] = -1;
 						}

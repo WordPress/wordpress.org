@@ -392,17 +392,63 @@ class Plugin_I18n {
 
 		if ( $original === $content ) {
 			$content = $marker;
+		} elseif ( trim( $original ) === trim( $content ) ) {
+			$content = $marker;
 		} else {
-			$original = preg_quote( $original, '/' );
+			$original_quoted = preg_quote( $original, '/' );
+
+			// Build a whitespace-normalized version of the original for fallback matching.
+			$original_normalized       = $this->normalize_whitespace( $original );
+			$original_normalized_quoted = preg_quote( $original_normalized, '/' );
 
 			if ( false === strpos( $content, '<' ) ) {
-				$content = preg_replace( "/\b{$original}\b/", $marker, $content );
+				$content = preg_replace( "/\b{$original_quoted}\b/", $marker, $content );
+
+				// Fallback: try matching with normalized whitespace.
+				if ( false === strpos( $content, $marker ) ) {
+					$content = preg_replace( "/\b{$original_normalized_quoted}\b/", $marker, $this->normalize_whitespace( $content ) );
+				}
 			} else {
-				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
+				// Try exact match within a single HTML tag pair.
+				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original_quoted}(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
+
+				// Fallback: try matching with trimmed whitespace inside tag pairs.
+				if ( false === strpos( $content, $marker ) ) {
+					$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>)\s*{$original_quoted}\s*(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
+				}
+
+				// Fallback: match inside nested tags, e.g. <li><p>ORIGINAL</p></li>.
+				if ( false === strpos( $content, $marker ) ) {
+					$content = preg_replace(
+						"/(<([a-z0-9]*)\b[^>]*>\s*<([a-z0-9]*)\b[^>]*>)\s*{$original_quoted}\s*(<\/\\3>\s*<\/\\2>)/m",
+						"\${1}{$marker}\${4}",
+						$content
+					);
+				}
+
+				// Fallback: try normalized whitespace in single tag pair.
+				if ( false === strpos( $content, $marker ) ) {
+					$normalized_content = $this->normalize_whitespace( $content );
+					$result = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original_normalized_quoted}(<\/\\2>)/m", "\${1}{$marker}\${3}", $normalized_content );
+
+					if ( false !== strpos( $result, $marker ) ) {
+						$content = $result;
+					}
+				}
 			}
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Normalizes whitespace in a string by collapsing consecutive whitespace to a single space.
+	 *
+	 * @param string $string The string to normalize.
+	 * @return string The normalized string.
+	 */
+	public function normalize_whitespace( $string ) {
+		return trim( preg_replace( '/\s+/', ' ', $string ) );
 	}
 
 	/**
