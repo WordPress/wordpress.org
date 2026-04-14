@@ -394,7 +394,7 @@ class Plugin_I18n {
 		// between what GlotPress imported and what the readme parser rendered.
 		$original = trim( preg_replace( '/\s+/', ' ', $original ) );
 
-		if ( $original === trim( $content ) ) {
+		if ( trim( $content ) === $original ) {
 			$content = $marker;
 		} else {
 			$original = preg_quote( $original, '/' );
