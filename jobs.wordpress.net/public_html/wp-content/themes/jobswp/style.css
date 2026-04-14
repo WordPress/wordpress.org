@@ -1287,6 +1287,44 @@ input[type="submit"].submit-job {
 	color: var(--color-charcoal-4);
 }
 
+.page-faq .entry-content dd ul {
+	margin: var(--space-10) 0 0;
+	padding-left: var(--space-20);
+	list-style: disc;
+}
+
+.page-faq .entry-content dd ul ul {
+	margin-top: 4px;
+	list-style: circle;
+}
+
+.page-faq .entry-content dd li {
+	margin-bottom: 6px;
+	line-height: 1.6;
+}
+
+.page-faq .entry-content dd a {
+	color: var(--color-blueberry-1);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+}
+
+.page-faq .entry-content dd a:hover {
+	color: var(--color-deep-blueberry);
+}
+
+.page-faq .entry-content > p:first-child {
+	font-size: var(--font-size-base);
+	color: var(--color-charcoal-4);
+	margin-bottom: var(--space-30);
+}
+
+.page-faq .entry-content > p:first-child a {
+	color: var(--color-blueberry-1);
+	text-decoration: underline;
+}
+
 
 /* ============================================
    Category & Search Archive Pages
