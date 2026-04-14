@@ -259,6 +259,67 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		) );
 	}
 
+	/**
+	 * Get tickets with the most multi-person activity in a given time window.
+	 *
+	 * Returns tickets sorted by number of distinct participants, then by
+	 * total change count. Only includes tickets with activity from at least
+	 * $min_participants distinct people.
+	 *
+	 * @param int $days           Number of days to look back.
+	 * @param int $min_participants Minimum distinct authors to qualify.
+	 * @param int $limit          Maximum tickets to return.
+	 * @return array
+	 */
+	function get_active_tickets( $days = 14, $min_participants = 3, $limit = 15 ) {
+		$days = max( 1, min( 90, (int) $days ) );
+		$min_participants = max( 2, (int) $min_participants );
+		$limit = max( 1, min( 50, (int) $limit ) );
+
+		// Trac stores timestamps in microseconds.
+		$since = ( time() - ( 86400 * $days ) ) * 1000000;
+
+		$rows = $this->db->get_results( $this->db->prepare(
+			"SELECT tc.ticket,
+			        t.summary,
+			        t.status,
+			        t.type,
+			        t.component,
+			        t.priority,
+			        t.milestone,
+			        t.owner,
+			        COUNT(*) AS change_count,
+			        COUNT(DISTINCT tc.author) AS participant_count,
+			        MAX(tc.time) AS last_activity
+			 FROM ticket_change tc
+			 INNER JOIN ticket t ON tc.ticket = t.id
+			 WHERE tc.time >= %s
+			   AND tc.field <> 'cc'
+			   AND NOT (tc.field = 'comment' AND tc.newvalue = '')
+			 GROUP BY tc.ticket
+			 HAVING participant_count >= %d
+			 ORDER BY participant_count DESC, change_count DESC
+			 LIMIT %d",
+			$since,
+			$min_participants,
+			$limit
+		), ARRAY_A );
+
+		if ( ! $rows ) {
+			return array();
+		}
+
+		// Normalize types for JSON.
+		foreach ( $rows as &$row ) {
+			$row['ticket']            = (int) $row['ticket'];
+			$row['change_count']      = (int) $row['change_count'];
+			$row['participant_count'] = (int) $row['participant_count'];
+			$row['last_activity']     = (int) ( $row['last_activity'] / 1000000 ); // Convert to unix seconds.
+		}
+
+		return $rows;
+	}
+
 	function get_user_anonymization_items( $username ) {
 		$ticket_subscriptions = $this->get_trac_ticket_subscriptions_for_user( $username );
 		$ticket_notifications = $this->get_trac_notifications_for_user( $username );
