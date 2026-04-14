@@ -45,9 +45,10 @@ add_action( 'bbp_admin_loaded', 'bporg_remove_dashboard_widget' );
 /**
  * A cheap and effective way to keep non-admins out of wp-admin.
  *
+ * Note: This is not for security, this is a UX enhancement to prevent a user landing in wp-admin when they can't do anything.
+ *
  * @author johnjamesjacoby
  * @since 1.0
- * @todo flesh this out a bit more
  * @return if user is an admin
  */
 function bporg_admin_redirect() {
@@ -66,7 +67,7 @@ function bporg_admin_redirect() {
 		isset( $_REQUEST['action'] ) &&
 		(
 			has_action( 'wp_ajax_nopriv_' . $_REQUEST['action'] ) ||
-			in_array( $_REQUEST['action'], [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce' ] )
+			in_array( $_REQUEST['action'], [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce', 'wporg_xprofile_field_suggestions' ] )
 		)
 	) {
 		return;

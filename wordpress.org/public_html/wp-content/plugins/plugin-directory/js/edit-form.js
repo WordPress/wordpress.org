@@ -111,6 +111,8 @@
 				if ( 'object' == typeof response && response.responses[0] ) {
 					$commentsList.append( response.responses[0].data ).show();
 
+					PluginEdit.collapseComments( $commentsList );
+
 					$( 'a[className*=\':\']' ).unbind();
 
 					if ( 0 === location.hash.indexOf( '#comment-' ) ) {
@@ -239,6 +241,43 @@
 		// Disable any file input fields, to prevent the browser sending it.
 		uploadZipDisable: function() {
 			$(this).find('input[type="file"]').prop( 'disabled', true );
+		},
+
+		collapseComments: function( $list ) {
+			var maxHeight = 100;
+
+			$list.find( '.column-comment' ).each( function() {
+				var $col  = $( this ),
+					$body = $col.find( '> :not(.row-actions)' ).wrapAll( '<div class="comment-body"></div>' ).parent(),
+					$actions = $col.find( '.row-actions' );
+
+				if ( $body.prop( 'scrollHeight' ) <= maxHeight ) {
+					return;
+				}
+
+				// Match the fade gradient to the row's background color.
+				var bg = $col.closest( 'tr' ).css( 'background-color' );
+				if ( bg ) {
+					$body.css( '--comment-bg', bg );
+				}
+
+				$body.addClass( 'comment-collapsed' );
+
+				var $toggle = $( '<a class="comment-toggle">Show more</a>' );
+				$toggle.on( 'click', function( e ) {
+					e.preventDefault();
+
+					if ( $body.hasClass( 'comment-collapsed' ) ) {
+						$body.removeClass( 'comment-collapsed' );
+						$toggle.text( 'Show less' );
+					} else {
+						$body.addClass( 'comment-collapsed' );
+						$toggle.text( 'Show more' );
+					}
+				} );
+
+				$toggle.insertBefore( $actions );
+			} );
 		}
 
 	};

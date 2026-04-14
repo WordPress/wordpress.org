@@ -329,7 +329,7 @@ function wporg_handle_authorize_application_login(): void {
 			?>
 
 			<p class="submit authorize-application-submit">
-				<input type="submit" name="approve" class="button button-primary button-large" value="<?php esc_attr_e( 'Approve' ); ?>" aria-describedby="auth-app-description" />
+				<input type="submit" name="approve" class="button button-primary button-large" autofocus value="<?php esc_attr_e( 'Approve' ); ?>" aria-describedby="auth-app-description" />
 				<input type="submit" name="reject" class="button button-large" value="<?php esc_attr_e( 'Reject' ); ?>" aria-describedby="auth-app-description" />
 			</p>
 

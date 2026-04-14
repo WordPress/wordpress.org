@@ -95,7 +95,7 @@ class MCP_Authorization {
 				<strong><?php esc_html_e( 'This configuration contains your application password. Do not commit it to source control.' ); ?></strong>
 			</p>
 			<textarea id="mcp-config" readonly rows="14"><?php echo esc_textarea( $json ); ?></textarea>
-			<button type="button" class="button button-primary button-large" id="copy-mcp-config" data-copied="<?php esc_attr_e( 'Copied!' ); ?>"><?php esc_html_e( 'Copy' ); ?></button>
+			<button type="button" class="button button-primary button-large" id="copy-mcp-config" autofocus data-copied="<?php esc_attr_e( 'Copied!' ); ?>"><?php esc_html_e( 'Copy' ); ?></button>
 			<ul class="client-notes">
 				<li><strong>Claude Desktop</strong> &mdash; <?php esc_html_e( 'Settings &rarr; Developer &rarr; Edit Config.' ); ?></li>
 				<li><strong>Claude Code</strong> &mdash; 

@@ -54,10 +54,15 @@ class Theme_Preview {
 				),
 			),
 			'permission_callback' => function( $request ) {
-				$theme_data    = wporg_themes_theme_information( $request['slug'] );
+				$theme_data = wporg_themes_theme_information( $request['slug'] );
+
+				if ( ! empty( $theme_data->error ) ) {
+					return false;
+				}
+
 				$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug );
 
-				if ( ! empty( $theme_data->error ) || ! $theme_package->post_author ) {
+				if ( ! $theme_package->post_author ) {
 					return false;
 				}
 
@@ -86,7 +91,11 @@ class Theme_Preview {
 	 * Generate a Blueprint for a theme review.
 	 */
 	function review( $request ) {
-		// If the theme isn't (yet) published, use the post_id hint.
+		/*
+		 * If the theme isn't (yet) published, use the post_id hint.
+		 * Security Note:
+		 *   As theme reviews are public (themes.trac.wordpress.org) we don't validate permissions here.
+		 */
 		$preview_post = get_post( (int) $request->get_param( 'post_id' ) );
 		if (
 			$preview_post &&
@@ -98,6 +107,10 @@ class Theme_Preview {
 		}
 
 		$theme_data = wporg_themes_theme_information( $request->get_param( 'slug' ) );
+
+		if ( ! empty( $theme_data->error ) ) {
+			return new WP_Error( 'error', $theme_data->error );
+		}
 
 		return $this->build_blueprint(
 			$theme_data,
@@ -112,12 +125,13 @@ class Theme_Preview {
 	 * Set a Blueprint for a theme preview.
 	 */
 	function set_blueprint( $request ) {
-		$theme_data    = wporg_themes_theme_information( $request['slug'] );
-		$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug );
+		$theme_data = wporg_themes_theme_information( $request['slug'] );
 
 		if ( ! empty( $theme_data->error ) ) {
 			return new WP_Error( 'error', $theme_data->error );
 		}
+
+		$theme_package = new WPORG_Themes_Repo_Package( $theme_data->slug );
 
 		// Validate the blueprint, TODO expand upon this.
 		if (

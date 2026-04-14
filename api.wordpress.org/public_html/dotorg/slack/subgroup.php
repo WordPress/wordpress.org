@@ -89,11 +89,6 @@ if ( empty( $found ) ) {
 	die_text( "@wordpressdotorg isn't here." );
 }
 
-// Can't call this from a subgroup.
-if ( $pos = strpos( $group['name'], '-' ) ) {
-	die_text( sprintf( 'Call this from the main `%s` group.', substr( $group['name'], 0, $pos ) ) );
-}
-
 // Get the current groups members.
 $members = api_call(
 	// https://api.slack.com/methods/conversations.members
@@ -149,8 +144,8 @@ switch ( $command ) {
 			[
 				'channel' => $group['id'],
 				'text'    => sprintf(
-					'Group %s created by <@%s>.',
-					$new_group['channel']['name'],
+					'Group <#%s> created by <@%s>.',
+					$new_group['channel']['id'],
 					$_POST['user_id']
 				),
 				'as_user' => true,
@@ -170,7 +165,7 @@ switch ( $command ) {
 			]
 		);
 
-		die_text( sprintf( "Group %s created.", $new_group['group']['name'] ) );
+		die_text( sprintf( "Group <#%s> created.", $new_group['channel']['id'] ) );
 
 	case 'invite':
 	case 'join':

@@ -5,6 +5,8 @@
  * It must work without any other dependencies, such as WordPress.
  */
 class Trac_Notifications_DB implements Trac_Notifications_API {
+	public $db;
+
 	function __construct( $db ) {
 		$this->db = $db;
 	}

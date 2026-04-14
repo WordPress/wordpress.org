@@ -87,11 +87,18 @@ class Readme_Import extends I18n_Import {
 		$section_strings = [];
 
 		foreach ( $readme->sections as $section_key => $section_text ) {
-			if ( 'changelog' !== $section_key ) { // No need to scan non-translatable version headers in changelog.
-				if ( preg_match_all( '~<(h[3-4]|dt)[^>]*>([^<].+)</\1>~', $section_text, $matches ) ) {
-					if ( ! empty( $matches[2] ) ) {
-						foreach ( $matches[2] as $text ) {
-							$section_strings = $this->handle_translator_comment( $section_strings, $text, "{$section_key} header" );
+			
+			if ( preg_match_all( '~<(h[3-4]|dt)[^>]*>([^<].+)</\1>~', $section_text, $matches ) ) {
+				if ( ! empty( $matches[2] ) ) {
+					foreach ( $matches[2] as $text ) {
+						// No need to include non-translatable version headers in changelog.
+						if ( 'changelog' === $section_key && preg_match( '!^v?\d+(\.\d+)*$!i', trim( $text ) ) ) {
+							continue;
+						}
+
+						$section_strings = $this->handle_translator_comment( $section_strings, $text, "{$section_key} header" );
+						if ( 'changelog' === $section_key ) {
+							$str_priorities[ $text ] = -1;
 						}
 					}
 				}

@@ -12,6 +12,8 @@ declare( strict_types = 1 );
 
 namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory;
 
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -46,19 +48,11 @@ class Ability_Base {
 			return;
 		}
 
-		$autoloader = WP_PLUGIN_DIR . '/plugin-directory/class-autoloader.php';
-
-		if ( ! file_exists( $autoloader ) ) {
-			return;
-		}
-
-		require_once $autoloader;
-		\WordPressdotorg\Plugin_Directory\Autoloader\register_class_path(
-			'WordPressdotorg\\Plugin_Directory',
-			WP_PLUGIN_DIR . '/plugin-directory'
-		);
-
 		switch_to_blog( self::PLUGINS_BLOG_ID );
+
+		require_once WP_PLUGIN_DIR . '/plugin-directory/plugin-directory.php';
+
+		Plugin_Directory::instance()->init();
 
 		$loaded = true;
 	}
