@@ -5,10 +5,7 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
-namespace WordPressdotorg\Plugin_Directory\Tests;
-
 use WordPressdotorg\Plugin_Directory\Plugin_I18n;
-use WP_UnitTestCase;
 
 /**
  * @group i18n
@@ -108,7 +105,7 @@ class Plugin_I18n_Test extends WP_UnitTestCase {
 	 * Test matching with normalized whitespace in plain text.
 	 */
 	public function test_mark_gp_original_normalized_whitespace_plain_text() {
-		$content = "Hello   World";
+		$content = 'Hello   World';
 		$result  = $this->i18n->mark_gp_original( 1, 'Hello World', $content );
 
 		$this->assertSame( '___TRANSLATION_1___', $result );
@@ -179,9 +176,9 @@ class Plugin_I18n_Test extends WP_UnitTestCase {
 	 */
 	public function test_mark_gp_original_issue_601_list_item_whitespace() {
 		// Simulates a <li> where the GlotPress original was not trimmed but the rendered content is slightly different.
-		$content = '<li>Choose your methods: Enable one or more authentication providers</li>';
-		$original = "Choose your methods: Enable one or more authentication providers";
-		$result = $this->i18n->mark_gp_original( 1, $original, $content );
+		$content  = '<li>Choose your methods: Enable one or more authentication providers</li>';
+		$original = 'Choose your methods: Enable one or more authentication providers';
+		$result   = $this->i18n->mark_gp_original( 1, $original, $content );
 
 		$this->assertSame( '<li>___TRANSLATION_1___</li>', $result );
 	}
