@@ -96,7 +96,7 @@ class Readme_Import extends I18n_Import {
 							continue;
 						}
 
-						$section_strings = $this->handle_translator_comment( $section_strings, $text, "{$section_key} header" );
+						$section_strings = $this->handle_translator_comment( $section_strings, trim( $text ), "{$section_key} header" );
 						if ( 'changelog' === $section_key ) {
 							$str_priorities[ $text ] = -1;
 						}
