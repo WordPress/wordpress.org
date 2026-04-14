@@ -102,4 +102,24 @@ class Plugin_I18n_Test extends TestCase {
 
 		$this->assertSame( '<li>___TRANSLATION_1___</li>', $result );
 	}
+
+	/**
+	 * List items followed by a nested <ul> instead of </li>.
+	 */
+	public function test_mark_gp_original_li_followed_by_nested_ul() {
+		$content = '<li>Parent item<ul><li>Child</li></ul></li>';
+		$result  = $this->i18n->mark_gp_original( 1, 'Parent item', $content );
+
+		$this->assertSame( '<li>___TRANSLATION_1___<ul><li>Child</li></ul></li>', $result );
+	}
+
+	/**
+	 * List items followed by a nested <ol> instead of </li>.
+	 */
+	public function test_mark_gp_original_li_followed_by_nested_ol() {
+		$content = '<li>Parent item<ol><li>Child</li></ol></li>';
+		$result  = $this->i18n->mark_gp_original( 1, 'Parent item', $content );
+
+		$this->assertSame( '<li>___TRANSLATION_1___<ol><li>Child</li></ol></li>', $result );
+	}
 }
