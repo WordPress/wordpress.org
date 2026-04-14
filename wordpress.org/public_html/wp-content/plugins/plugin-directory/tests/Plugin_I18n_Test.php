@@ -41,7 +41,7 @@ class Plugin_I18n_Test extends TestCase {
 	public function test_mark_gp_original_content_has_whitespace() {
 		$result = $this->i18n->mark_gp_original( 1, 'Hello World', '  Hello World  ' );
 
-		$this->assertSame( '___TRANSLATION_1___', $result );
+		$this->assertSame( '  ___TRANSLATION_1___  ', $result );
 	}
 
 	public function test_mark_gp_original_plain_text() {
