@@ -390,65 +390,23 @@ class Plugin_I18n {
 	public function mark_gp_original( $original_id, $original, $content ) {
 		$marker = "___TRANSLATION_{$original_id}___";
 
-		if ( $original === $content ) {
-			$content = $marker;
-		} elseif ( trim( $original ) === trim( $content ) ) {
+		// Normalize whitespace in the original to handle trimming/spacing mismatches
+		// between what GlotPress imported and what the readme parser rendered.
+		$original = trim( preg_replace( '/\s+/', ' ', $original ) );
+
+		if ( $original === trim( $content ) ) {
 			$content = $marker;
 		} else {
-			$original_quoted = preg_quote( $original, '/' );
-
-			// Build a whitespace-normalized version of the original for fallback matching.
-			$original_normalized       = $this->normalize_whitespace( $original );
-			$original_normalized_quoted = preg_quote( $original_normalized, '/' );
+			$original = preg_quote( $original, '/' );
 
 			if ( false === strpos( $content, '<' ) ) {
-				$content = preg_replace( "/\b{$original_quoted}\b/", $marker, $content );
-
-				// Fallback: try matching with normalized whitespace.
-				if ( false === strpos( $content, $marker ) ) {
-					$content = preg_replace( "/\b{$original_normalized_quoted}\b/", $marker, $this->normalize_whitespace( $content ) );
-				}
+				$content = preg_replace( "/\b{$original}\b/", $marker, $content );
 			} else {
-				// Try exact match within a single HTML tag pair.
-				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original_quoted}(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
-
-				// Fallback: try matching with trimmed whitespace inside tag pairs.
-				if ( false === strpos( $content, $marker ) ) {
-					$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>)\s*{$original_quoted}\s*(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
-				}
-
-				// Fallback: match inside nested tags, e.g. <li><p>ORIGINAL</p></li>.
-				if ( false === strpos( $content, $marker ) ) {
-					$content = preg_replace(
-						"/(<([a-z0-9]*)\b[^>]*>\s*<([a-z0-9]*)\b[^>]*>)\s*{$original_quoted}\s*(<\/\\3>\s*<\/\\2>)/m",
-						"\${1}{$marker}\${4}",
-						$content
-					);
-				}
-
-				// Fallback: try normalized whitespace in single tag pair.
-				if ( false === strpos( $content, $marker ) ) {
-					$normalized_content = $this->normalize_whitespace( $content );
-					$result = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original_normalized_quoted}(<\/\\2>)/m", "\${1}{$marker}\${3}", $normalized_content );
-
-					if ( false !== strpos( $result, $marker ) ) {
-						$content = $result;
-					}
-				}
+				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>)\s*{$original}\s*(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
 			}
 		}
 
 		return $content;
-	}
-
-	/**
-	 * Normalizes whitespace in a string by collapsing consecutive whitespace to a single space.
-	 *
-	 * @param string $string The string to normalize.
-	 * @return string The normalized string.
-	 */
-	public function normalize_whitespace( $string ) {
-		return trim( preg_replace( '/\s+/', ' ', $string ) );
 	}
 
 	/**
