@@ -5,20 +5,21 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Plugin_I18n;
 
 /**
  * @group i18n
  */
-class Plugin_I18n_Test extends WP_UnitTestCase {
+class Plugin_I18n_Test extends TestCase {
 
 	/**
 	 * @var Plugin_I18n
 	 */
 	protected $i18n;
 
-	public function set_up() {
-		parent::set_up();
+	protected function setUp(): void {
+		parent::setUp();
 
 		// Use reflection to create an instance without the constructor (which requires cache globals).
 		$reflection = new \ReflectionClass( Plugin_I18n::class );
