@@ -88,7 +88,7 @@ class Readme_Import extends I18n_Import {
 
 		foreach ( $readme->sections as $section_key => $section_text ) {
 			
-			if ( preg_match_all( '~<(h[3-4]|dt)[^>]*>([^<].+)</\1>~', $section_text, $matches ) ) {
+			if ( preg_match_all( '~<(h[1-6]|dt)[^>]*>([^<].+)</\1>~', $section_text, $matches ) ) {
 				if ( ! empty( $matches[2] ) ) {
 					foreach ( $matches[2] as $text ) {
 						// No need to include non-translatable version headers in changelog.
