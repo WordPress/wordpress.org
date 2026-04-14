@@ -390,14 +390,10 @@ class Plugin_I18n {
 	public function mark_gp_original( $original_id, $original, $content ) {
 		$marker = "___TRANSLATION_{$original_id}___";
 
-		// Trim the original to handle leading/trailing whitespace mismatches
-		// between what GlotPress imported and what the readme parser rendered.
-		$original = trim( $original );
-
-		if ( trim( $content ) === $original ) {
+		if ( $original === $content ) {
 			$content = $marker;
 		} else {
-			$original = preg_quote( $original, '/' );
+			$original = preg_quote( trim( $original ), '/' );
 
 			if ( ! str_contains( $content, '<' ) ) {
 				$content = preg_replace( "/\b{$original}\b/", $marker, $content );
