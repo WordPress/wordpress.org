@@ -406,7 +406,7 @@ class Plugin_I18n {
 
 				// Nested lists: match <li>STRING<ul> or <li>STRING<ol>.
 				if ( ! str_contains( $content, $marker ) ) {
-					$content = preg_replace( "/(<li\b[^>]*>)\s*{$original}\s*(<[uo]l>)/m", "\${1}{$marker}\${2}", $content );
+					$content = preg_replace( "/(<li\b[^>]*>)\s*{$original}\s*(<[uo]l\b[^>]*>)/m", "\${1}{$marker}\${2}", $content );
 				}
 			}
 		}
