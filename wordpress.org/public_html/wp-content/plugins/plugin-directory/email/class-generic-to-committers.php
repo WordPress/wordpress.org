@@ -48,7 +48,7 @@ class Generic_To_Committers extends Base {
 
 	private function replace_placeholders( $text ) {
 		$items = [
-			'###PLUGIN###'            => $this->plugin->post_title,
+			'###PLUGIN###'            => $this->plugin_title(),
 			'###URL###'               => get_permalink( $this->plugin ),
 			'###SLUG###'              => $this->plugin->post_name,
 			'###USER###'              => $this->user_text( $this->user ),
