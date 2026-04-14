@@ -172,8 +172,8 @@ if ( ! function_exists( 'jobswp_posted_on' ) ) :
  * Prints HTML with meta information for the current post-date/time and author.
  */
 function jobswp_posted_on() {
-	printf(
-		__( '<span class="posted-on">Posted %1$s</span>', 'jobswp' ),
+	printf( // phpcs:ignore Generic.WhiteSpace.ScopeIndent.Incorrect -- Whole file uses this indentation.
+		wp_kses_post( __( '<span class="posted-on">Posted %1$s</span>', 'jobswp' ) ),
 		sprintf( '<a href="%1$s" rel="bookmark"><time class="entry-date published" datetime="%2$s">%3$s</time></a>',
 			esc_url( get_permalink() ),
 			esc_attr( get_the_date( 'c' ) ),
