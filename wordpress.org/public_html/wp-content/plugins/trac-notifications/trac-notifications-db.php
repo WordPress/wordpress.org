@@ -272,38 +272,37 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 	 * @return array
 	 */
 	function get_active_tickets( $days = 14, $min_participants = 3, $limit = 15 ) {
-		$days = max( 1, min( 90, (int) $days ) );
-		$min_participants = max( 2, (int) $min_participants );
-		$limit = max( 1, min( 50, (int) $limit ) );
+		$days             = (int) max( 1, min( 90, (int) $days ) );
+		$min_participants = (int) max( 2, (int) $min_participants );
+		$limit            = (int) max( 1, min( 50, (int) $limit ) );
 
 		// Trac stores timestamps in microseconds.
 		$since = ( time() - ( 86400 * $days ) ) * 1000000;
 
-		$rows = $this->db->get_results( $this->db->prepare(
+		// Note: Prepare not used here intentionally, due to lack of unquoted %d support. Variables savely cast above.
+		$rows = $this->db->get_results(
 			"SELECT tc.ticket,
-			        t.summary,
-			        t.status,
-			        t.type,
-			        t.component,
-			        t.priority,
-			        t.milestone,
-			        t.owner,
-			        COUNT(*) AS change_count,
-			        COUNT(DISTINCT tc.author) AS participant_count,
-			        MAX(tc.time) AS last_activity
-			 FROM ticket_change tc
-			 INNER JOIN ticket t ON tc.ticket = t.id
-			 WHERE tc.time >= %s
-			   AND tc.field <> 'cc'
-			   AND NOT (tc.field = 'comment' AND tc.newvalue = '')
-			 GROUP BY tc.ticket
-			 HAVING participant_count >= %d
-			 ORDER BY participant_count DESC, change_count DESC
-			 LIMIT %d",
-			$since,
-			$min_participants,
-			$limit
-		), ARRAY_A );
+				t.summary,
+				t.status,
+				t.type,
+				t.component,
+				t.priority,
+				t.milestone,
+				t.owner,
+				COUNT(*) AS change_count,
+				COUNT(DISTINCT tc.author) AS participant_count,
+				MAX(tc.time) AS last_activity
+			FROM ticket_change tc
+				INNER JOIN ticket t ON tc.ticket = t.id
+			WHERE tc.time >= $since
+				AND tc.field <> 'cc'
+				AND NOT (tc.field = 'comment' AND tc.newvalue = '')
+				AND tc.author NOT IN ( 'slackbot', 'prbot' )
+			GROUP BY tc.ticket
+				HAVING participant_count >= $min_participants
+			ORDER BY participant_count DESC, change_count DESC
+			LIMIT $limit"
+		);
 
 		if ( ! $rows ) {
 			return array();
