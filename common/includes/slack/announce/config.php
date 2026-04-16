@@ -259,6 +259,7 @@ function get_whitelist() {
 		) ),
 		'core-passwords' => array_merge( get_committers(), array(
 			'georgestephanis',
+			'masteradhoc',
 			'valendesigns',
 		) ),
 		'core-php' => array_merge( get_committers(), array(
