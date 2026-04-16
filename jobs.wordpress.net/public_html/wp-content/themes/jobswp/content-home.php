@@ -35,6 +35,14 @@ if ( $job_categories ) {
 	}
 }
 
+// Sort all jobs in reverse chronological order by date posted, making it easier to scan for newly posted jobs.
+usort(
+	$all_jobs,
+	static function ( $a, $b ) {
+		return array( $b->post_date, $b->ID ) <=> array( $a->post_date, $a->ID );
+	}
+);
+
 $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) : 0;
 ?>
 
