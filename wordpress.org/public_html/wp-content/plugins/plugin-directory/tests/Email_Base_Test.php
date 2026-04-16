@@ -6,7 +6,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use WordPressdotorg\Plugin_Directory\Email\Base;
+use WordPressdotorg\Plugin_Directory\Email\Plugin_Approved;
 
 /**
  * @group email
@@ -14,111 +14,97 @@ use WordPressdotorg\Plugin_Directory\Email\Base;
 class Email_Base_Test extends TestCase {
 
 	/**
-	 * Build a Base subclass instance with a fake plugin post, bypassing the
+	 * Invoke Base::plugin_title() against a fake plugin post, bypassing the
 	 * real constructor (which loads plugins from the DB).
 	 */
-	private function make_email( string $post_title ) {
-		// Anonymous subclass to expose the protected plugin_title() method.
-		$class = new class() extends Base {
-			public function subject() {}
-			public function body() {}
-			public function expose_plugin_title() {
-				return $this->plugin_title();
-			}
-		};
-
-		$reflection = new ReflectionClass( $class );
+	private function plugin_title( string $post_title ): string {
+		// Plugin_Approved is a concrete Base subclass. Any subclass works since
+		// plugin_title() lives on Base itself.
+		$reflection = new ReflectionClass( Plugin_Approved::class );
 		$email      = $reflection->newInstanceWithoutConstructor();
 
-		$plugin_prop = new ReflectionProperty( Base::class, 'plugin' );
+		$plugin_prop = $reflection->getProperty( 'plugin' );
 		$plugin_prop->setAccessible( true );
 		$plugin_prop->setValue( $email, (object) [ 'post_title' => $post_title ] );
 
-		return $email;
+		$method = $reflection->getMethod( 'plugin_title' );
+		$method->setAccessible( true );
+
+		return $method->invoke( $email );
 	}
 
 	public function test_plain_title_is_unchanged() {
-		$email = $this->make_email( 'My Plugin' );
-
-		$this->assertSame( 'My Plugin', $email->expose_plugin_title() );
+		$this->assertSame( 'My Plugin', $this->plugin_title( 'My Plugin' ) );
 	}
 
 	public function test_ampersand_entity() {
-		$email = $this->make_email( 'JLPoints&amp;Rewards' );
-
-		$this->assertSame( 'JLPoints&Rewards', $email->expose_plugin_title() );
+		$this->assertSame( 'JLPoints&Rewards', $this->plugin_title( 'JLPoints&amp;Rewards' ) );
 	}
 
 	public function test_registered_trademark_entity() {
-		$email = $this->make_email( 'Subscription DNA&reg;' );
-
-		$this->assertSame( 'Subscription DNA®', $email->expose_plugin_title() );
+		$this->assertSame( 'Subscription DNA®', $this->plugin_title( 'Subscription DNA&reg;' ) );
 	}
 
 	public function test_trademark_entity() {
-		$email = $this->make_email( 'Eventify&trade; - Simple Events' );
-
-		$this->assertSame( 'Eventify™ - Simple Events', $email->expose_plugin_title() );
+		$this->assertSame( 'Eventify™ - Simple Events', $this->plugin_title( 'Eventify&trade; - Simple Events' ) );
 	}
 
 	public function test_copyright_entity() {
-		$email = $this->make_email( '&copy;Feed' );
-
-		$this->assertSame( '©Feed', $email->expose_plugin_title() );
+		$this->assertSame( '©Feed', $this->plugin_title( '&copy;Feed' ) );
 	}
 
 	public function test_accented_character_entities() {
-		$email = $this->make_email( 'Anonima&ccedil;&atilde;o CTDO' );
-
-		$this->assertSame( 'Anonimação CTDO', $email->expose_plugin_title() );
+		$this->assertSame( 'Anonimação CTDO', $this->plugin_title( 'Anonima&ccedil;&atilde;o CTDO' ) );
 	}
 
 	public function test_numeric_entities() {
-		$email = $this->make_email( '&#9733;&#9733;&#9733; FLASH ROTATOR GALLERY &#9733;&#9733;&#9733;' );
-
-		$this->assertSame( '★★★ FLASH ROTATOR GALLERY ★★★', $email->expose_plugin_title() );
+		$this->assertSame(
+			'★★★ FLASH ROTATOR GALLERY ★★★',
+			$this->plugin_title( '&#9733;&#9733;&#9733; FLASH ROTATOR GALLERY &#9733;&#9733;&#9733;' )
+		);
 	}
 
 	public function test_hex_numeric_entity() {
-		$email = $this->make_email( '&#x1F3E6; Exchs &amp; Currency Converter' );
-
-		$this->assertSame( '🏦 Exchs & Currency Converter', $email->expose_plugin_title() );
+		$this->assertSame(
+			'🏦 Exchs & Currency Converter',
+			$this->plugin_title( '&#x1F3E6; Exchs &amp; Currency Converter' )
+		);
 	}
 
 	public function test_quote_entities_are_decoded() {
-		$email = $this->make_email( 'Joe&#039;s &quot;Best&quot; Plugin' );
-
-		$this->assertSame( "Joe's \"Best\" Plugin", $email->expose_plugin_title() );
+		$this->assertSame(
+			"Joe's \"Best\" Plugin",
+			$this->plugin_title( 'Joe&#039;s &quot;Best&quot; Plugin' )
+		);
 	}
 
 	public function test_html5_only_entity() {
 		// &apos; is HTML5 only; ENT_HTML5 flag is required to decode it.
-		$email = $this->make_email( 'Poppy&apos;s videos' );
-
-		$this->assertSame( "Poppy's videos", $email->expose_plugin_title() );
+		$this->assertSame( "Poppy's videos", $this->plugin_title( 'Poppy&apos;s videos' ) );
 	}
 
 	public function test_non_breaking_space() {
-		$email = $this->make_email( 'Filter Everything&nbsp;— WordPress Filters' );
-
-		$this->assertSame( "Filter Everything\u{00A0}— WordPress Filters", $email->expose_plugin_title() );
+		$this->assertSame(
+			"Filter Everything\u{00A0}— WordPress Filters",
+			$this->plugin_title( 'Filter Everything&nbsp;— WordPress Filters' )
+		);
 	}
 
 	public function test_degree_entity() {
-		$email = $this->make_email( 'feuerball3D - 360&deg; animations' );
-
-		$this->assertSame( 'feuerball3D - 360° animations', $email->expose_plugin_title() );
+		$this->assertSame(
+			'feuerball3D - 360° animations',
+			$this->plugin_title( 'feuerball3D - 360&deg; animations' )
+		);
 	}
 
 	public function test_already_decoded_utf8_passes_through() {
-		$email = $this->make_email( 'ReFlex Gallery » WordPress Photo Gallery' );
-
-		$this->assertSame( 'ReFlex Gallery » WordPress Photo Gallery', $email->expose_plugin_title() );
+		$this->assertSame(
+			'ReFlex Gallery » WordPress Photo Gallery',
+			$this->plugin_title( 'ReFlex Gallery » WordPress Photo Gallery' )
+		);
 	}
 
 	public function test_empty_title() {
-		$email = $this->make_email( '' );
-
-		$this->assertSame( '', $email->expose_plugin_title() );
+		$this->assertSame( '', $this->plugin_title( '' ) );
 	}
 }
