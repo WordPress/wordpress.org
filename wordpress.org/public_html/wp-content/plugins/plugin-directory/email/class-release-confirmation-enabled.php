@@ -10,7 +10,7 @@ class Release_Confirmation_Enabled extends Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( 'Release confirmation now required for %s', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -31,7 +31,7 @@ For more information, please read the following handbook article:
 %6$s', 'wporg-plugins' ),
 			$this->user_text( $this->user ),
 			$this->user_text( $this->who ),
-			$this->plugin->post_title,
+			$this->plugin_title(),
 			get_permalink( $this->plugin ),
 			$this->plugin->post_name,
 			'https://developer.wordpress.org/plugins/wordpress-org/release-confirmation-emails/'
