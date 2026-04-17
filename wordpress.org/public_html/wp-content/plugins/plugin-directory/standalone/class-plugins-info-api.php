@@ -6,6 +6,7 @@ class Plugins_Info_API {
 	const CACHE_GROUP       = 'plugin_api_info';
 	const CACHE_EXPIRY      = 21600; // 6 hour cache, wporg_object_cache will spread this out.
 	const LONG_CACHE_EXPIRY = 86400; // 24 hour cache, wporg_object_cache will spread this out.
+	const QUERY_CACHEBUSTER = 2; // Increment to force query caches (including search) to be refreshed.
 
 	protected $format  = 'json';
 	protected $jsonp   = false;
@@ -17,7 +18,7 @@ class Plugins_Info_API {
 	);
 
 	function __construct( $format = 'json' ) {
-		if ( is_array( $format ) && 'jsonp' == $format[0] ) {
+		if ( is_array( $format ) && 'jsonp' == $format[0] && is_string( $format[1] ) ) {
 			$this->jsonp = preg_replace( '/[^a-zA-Z0-9_]/', '', $format[1] );
 			$format      = 'jsonp';
 		}
@@ -282,7 +283,7 @@ class Plugins_Info_API {
 	 * Generates a cache key for a given query_plugins request.
 	 */
 	protected function query_plugins_cache_key( $request ) {
-		return 'query_plugins:' . md5( serialize( $request->query_plugins_params_for_query() ) ) . ':' . ( $request->locale ?: 'en_US' );
+		return 'query_plugins:' . self::QUERY_CACHEBUSTER . ':' . md5( serialize( $request->query_plugins_params_for_query() ) );
 	}
 
 	/**

@@ -814,14 +814,14 @@ class Upload_Handler {
 					$maybe_false_positive = __( 'This may be a false-positive, and will be manually checked by a reviewer.', 'wporg-plugins' );
 				}
 
-				foreach ( $result_set as $result ) {
+				foreach ( $result_set as $check_result ) {
 					$html .= sprintf(
 						'<li>%s <a href="%s" title="%s">%s</a>: %s</li>',
-						esc_html( $result['file'] ),
-						esc_url( $result['docs'] ?? '' ),
+						esc_html( $check_result['file'] ),
+						esc_url( $check_result['docs'] ?? '' ),
 						esc_attr( $maybe_false_positive ),
-						esc_html( "{$result_label}: {$result['code']}" ),
-						$result['message'] // Already escaped.
+						esc_html( "{$result_label}: {$check_result['code']}" ),
+						$check_result['message'] // Already escaped.
 					);
 				}
 			}
@@ -851,9 +851,9 @@ class Upload_Handler {
 
 			// Include a simplified / merged version of the results for review.
 			$group_by_code = [ 'ERROR' => [], 'WARNING' => [] ];
-			foreach ( $results as $result ) {
-				$group_by_code[ $result['type'] ][ $result['code'] ] ??= [];
-				$group_by_code[ $result['type'] ][ $result['code'] ][] = $result;
+			foreach ( $results as $check_result ) {
+				$group_by_code[ $check_result['type'] ][ $check_result['code'] ] ??= [];
+				$group_by_code[ $check_result['type'] ][ $check_result['code'] ][] = $check_result;
 			}
 			foreach ( $group_by_code as $type => $codes ) {
 				foreach ( $codes as $code_results ) {

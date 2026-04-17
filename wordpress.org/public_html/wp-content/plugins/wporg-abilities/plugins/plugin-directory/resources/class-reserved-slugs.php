@@ -27,7 +27,7 @@ class Reserved_Slugs extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/reserved-slugs',
+			'wporg/plugins--plugin-directory--reserved-slugs',
 			array(
 				'label'               => 'Reserved & Trademarked Slugs',
 				'description'         => 'Plugin slug terms that are reserved or trademarked and cannot be used in new plugin submissions.',

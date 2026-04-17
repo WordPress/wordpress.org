@@ -24,7 +24,7 @@ class Validate_Readme extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/validate-readme',
+			'wporg/plugins--plugin-directory--validate-readme',
 			array(
 				'label'               => 'Validate Plugin Readme',
 				'description'         => 'Validates a WordPress plugin readme.txt or readme.md file and returns errors, warnings, and notes. Accepts either the file content directly or a URL to fetch it from.',

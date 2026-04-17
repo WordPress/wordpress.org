@@ -21,7 +21,7 @@ class Prepare_Plugin {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/prepare-plugin-for-submission',
+			'wporg/plugins--plugin-directory--prepare-plugin-for-submission',
 			array(
 				'label'               => 'Prepare Plugin for Submission',
 				'description'         => 'Guided workflow to prepare a WordPress plugin for submission to the WordPress.org plugin directory.',
@@ -86,13 +86,13 @@ Read the `wporg://plugins/plugin-directory/plugin-headers` resource for the full
 
 ## Step 3: Validate readme.txt
 
-Use the `wporg/plugins/plugin-directory/validate-readme` tool with the contents of `{$plugin_path}/readme.txt`.
+Use the `wporg/plugins--plugin-directory--validate-readme` tool with the contents of `{$plugin_path}/readme.txt`.
 
 If no readme.txt exists, create one following the `wporg://plugins/plugin-directory/readme-standard` resource.
 
 ## Step 4: Run Plugin Check Locally
 
-Use the `wporg/plugins/plugin-directory/run-plugin-check` prompt with plugin_path `{$plugin_path}` to run and resolve all Plugin Check issues.
+Use the `wporg/plugins--plugin-directory--run-plugin-check` prompt with plugin_path `{$plugin_path}` to run and resolve all Plugin Check issues.
 
 Fix all ERRORs before proceeding.
 
@@ -114,7 +114,7 @@ Summarize the results as a pass/fail checklist. These match the confirmations re
 - [ ] readme.txt validates without errors
 - [ ] Slug is available and not reserved/trademarked
 
-All confirmations must be true before the plugin can be submitted via `wporg/submit-plugin`.
+All confirmations must be true before the plugin can be submitted via `wporg/plugins--plugin-directory--submit-plugin`.
 
 Constraints:
 - Only 1 plugin can be in the submission queue at a time

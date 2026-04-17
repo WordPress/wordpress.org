@@ -22,6 +22,7 @@ class Builder {
 
 	protected $slug       = '';
 	protected $version    = '';
+	protected $versions   = [];
 	protected $context    = '';
 	protected $stable_tag = '';
 
@@ -395,7 +396,7 @@ class Builder {
 			$res                          = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		}
 		if ( ! $res['result'] ) {
-			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
+			throw new Exception( __METHOD__ . ': ' . ( $res['errors'][0]['error_message'] ?? 'unknown error' ), 404 );
 		}
 
 		// Store the SVN revision that's been used for the ZIP in a property for later.
@@ -403,7 +404,7 @@ class Builder {
 
 		// Verify that the specified plugin zip will contain files.
 		if ( ! array_diff( scandir( $this->tmp_build_dir ), array( '.', '..' ) ) ) {
-			throw new Exception( ___METHOD__ . ': No files exist in the plugin directory', 404 );
+			throw new Exception( __METHOD__ . ': No files exist in the plugin directory', 404 );
 		}
 
 		// Cleanup any symlinks that shouldn't be there

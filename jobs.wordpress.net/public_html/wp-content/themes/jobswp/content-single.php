@@ -1,82 +1,89 @@
 <?php
 /**
+ * Template for displaying a single job post.
+ *
  * @package jobswp
  */
+
+$fields = array(
+	'company'    => __( 'Company', 'jobswp' ),
+	'jobtype'    => __( 'Job Type', 'jobswp' ),
+	'location'   => __( 'Location', 'jobswp' ),
+	'budget'     => __( 'Budget', 'jobswp' ),
+	'howtoapply' => __( 'How to Apply', 'jobswp' ),
+);
 ?>
 
-<div class="entry-article">
+<div class="breadcrumb">
+	<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Jobs', 'jobswp' ); ?></a>
+	<span class="separator">/</span>
+	<?php the_title(); ?>
+</div>
 
-	<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-	<header class="entry-header">
-		<h1 class="entry-title"><?php the_title(); ?></h1>
+<div class="job-detail">
+	<div class="job-detail__main">
+		<div class="job-detail__header">
+			<h1><?php the_title(); ?></h1>
 
-		<div class="entry-meta">
-			<?php jobswp_posted_on(); ?>
+			<div class="job-detail__meta">
+				<?php jobswp_posted_on(); ?>
 
-			<span class="job-categories">
-				<?php echo get_the_category_list(); ?>
-				<?php
+				<span class="job-categories">
+					<?php
 					$job_cats = get_the_terms( get_the_ID(), 'job_category' );
 					if ( $job_cats && ! is_wp_error( $job_cats ) ) :
 						foreach ( $job_cats as $job_cat ) :
-				?>
-					<span class="job-cat-item job-cat-item-<?php echo esc_attr( $job_cat->slug ); ?>"><?php echo esc_html( $job_cat->name ); ?></span>
-				<?php
+							?>
+							<span class="job-card__badge"><?php echo esc_html( $job_cat->name ); ?></span>
+							<?php
 						endforeach;
 					endif;
-				?>
-			</span>
-		</div><!-- .entry-meta -->
-	</header><!-- .entry-header -->
+					?>
+				</span>
+			</div>
+		</div>
 
-	<div class="clear"></div>
+		<div class="job-detail__body">
+			<?php the_content(); ?>
+		</div>
 
-	<div class="entry-main grid_6 alpha">
-
-	<div class="entry-content">
-		<?php the_content(); ?>
-		<?php
-			wp_link_pages( array(
-				'before' => '<div class="page-links">' . __( 'Pages:', 'jobswp' ),
-				'after'  => '</div>',
-			) );
-		?>
-	</div><!-- .entry-content -->
-
-	<footer class="entry-meta grid_6">
-		<?php
-			// Don't show edit link when template is used to embed post in a page.
-			if ( ! is_page() )
+		<footer>
+			<?php
+			if ( ! is_page() ) {
 				edit_post_link( __( 'Edit', 'jobswp' ), '<span class="edit-link">', '</span>' );
-		?>
-	</footer><!-- .entry-meta -->
+			}
+			?>
+		</footer>
 	</div>
 
-	<div class="job-meta grid_3 omega">
-		<?php
-			$fields = array(
-				'company'    => __( 'Company', 'jobswp' ),
-				'jobtype'    => __( 'Job Type', 'jobswp' ),
-				'location'   => __( 'Location', 'jobswp' ),
-				'budget'     => __( 'Budget', 'jobswp' ),
-				'howtoapply' => __( 'How to Apply', 'jobswp' ),
-			);
+	<aside class="job-sidebar">
+		<div class="job-sidebar__card">
+			<h3><?php esc_html_e( 'Job Details', 'jobswp' ); ?></h3>
+			<?php
 			foreach ( $fields as $fname => $flabel ) :
 				$val = jobswp_get_job_meta( get_the_ID(), $fname );
 				if ( $val ) :
-		?>
-					<dl class="job-<?php echo $fname; ?>">
-						<dt><?php echo $flabel; ?></dt>
-						<dd><?php echo $val; ?></dd>
-					</dl>
-		<?php
+					?>
+					<div class="job-sidebar__detail">
+						<span class="job-sidebar__detail-label"><?php echo esc_html( $flabel ); ?></span>
+						<span class="job-sidebar__detail-value">
+						<?php
+						echo wp_kses(
+							$val,
+							array(
+								'a' => array(
+									'href' => array(),
+									'rel'  => array(),
+								),
+							)
+						);
+						?>
+					</span>
+					</div>
+					<?php
 				endif;
 			endforeach;
-		?>
-	</div>
-
-	<div class="clear"></div>
-
-	</article><!-- #post-## -->
-
+			?>
+		</div>
+	</aside>
 </div>

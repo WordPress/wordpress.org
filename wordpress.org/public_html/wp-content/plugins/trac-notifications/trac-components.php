@@ -6,6 +6,7 @@ class Make_Core_Trac_Components {
 	const POST_TYPE_NAME = 'component';
 
 	protected $trac;
+	public $api;
 
 	protected $tracs_supported = array( 'core', 'meta' );
 

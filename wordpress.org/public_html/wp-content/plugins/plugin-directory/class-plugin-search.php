@@ -40,13 +40,18 @@ class Plugin_Search {
 	 * @access private
 	 */
 	private function __construct() {
-		if ( isset( $_GET['s'] ) ) {
-			return false;
+		if (
+			// Don't load Jetpack Search if it's a front-end ?s=... query, as we'll be redirecting away anyway.
+			isset( $_GET['s'] ) &&
+			// Running super-early, before wp_is_serving_rest_request() returns truthful.
+			! str_contains( $_SERVER['REQUEST_URI'] ?? '', '/wp-json/' ) &&
+			// Never return early in an API context.
+			( ! defined( 'WPORG_IS_API' ) || ! WPORG_IS_API )
+		) {
+			return;
 		}
 
 		add_action( 'init', array( $this, 'init' ) );
-
-		return false;
 	}
 
 	public function init() {
@@ -273,7 +278,7 @@ class Plugin_Search {
 		$should_match[] = [
 			'multi_match' => [
 				'query'  => $search_phrase,
-				'fields' => $this->localise_es_fields( 'title', 'slug_text' ),
+				'fields' => $this->localise_es_fields( [ 'title', 'slug_text' ] ),
 				'type'   => 'most_fields',
 				'boost'  => 5,
 			],

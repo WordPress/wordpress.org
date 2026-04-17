@@ -546,7 +546,7 @@ class Locale extends GP_Route {
 		unset( $contributors, $editor_ids );
 
 		uasort( $locale_contributors['contributors'], function( $a, $b ) {
-			return $a->total_count < $b->total_count;
+			return $b->total_count <=> $a->total_count;
 		} );
 
 		return $locale_contributors;

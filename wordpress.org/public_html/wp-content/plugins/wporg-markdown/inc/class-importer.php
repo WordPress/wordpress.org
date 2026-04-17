@@ -33,12 +33,12 @@ abstract class Importer {
 	/**
 	 * Posts per page to query for.
 	 *
-	 * This needs to be set at least as high as the number of pages being
-	 * imported, but should not be unbounded (-1).
+	 * Unbounded due to the expectation that the number of pages being imported
+	 * is bound by the manifest size.
 	 *
 	 * @var int
 	 */
-	protected $posts_per_page = 500;
+	protected $posts_per_page = -1;
 
 	/**
 	 * Data about existing handbook pages.

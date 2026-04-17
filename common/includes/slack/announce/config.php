@@ -163,6 +163,7 @@ function get_whitelist() {
 		) ),
 		'core-ai' => array_merge( get_committers(), array(
 			'isotropic', // @James LePage on Slack
+            'neel33', // @Neill McShea on Slack
 		) ),
 		'core-upgrade-install' => array_merge( get_committers(), array(
 			'afragen',
@@ -258,6 +259,7 @@ function get_whitelist() {
 		) ),
 		'core-passwords' => array_merge( get_committers(), array(
 			'georgestephanis',
+			'masteradhoc',
 			'valendesigns',
 		) ),
 		'core-php' => array_merge( get_committers(), array(

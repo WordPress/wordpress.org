@@ -62,7 +62,29 @@
 				jQuery('#assigned_reviewer').val( userSettings.uid );
 
 			} else if ( 'approved' === status ) {
-				return confirm( pluginDirectory.approvePluginAYS );
+				var timeForDoubleClick = 1000;
+				var lastClick = $this.data( 'lastClick' ) || 0,
+					now = Date.now();
+
+				if ( now - lastClick > 0 && now - lastClick < timeForDoubleClick ) {
+					return true;
+				}
+
+				$this.data( 'lastClick', now );
+
+				// Make it clear that a double click is needed.
+				if ( ! $this.data( 'originalText' ) ) {
+					$this.data( 'originalText', $this.text() );
+				}
+
+				$this.text( pluginDirectory.approvePluginConfirm );
+
+				setTimeout( function() {
+					$this.text( $this.data( 'originalText' ) );
+					$this.data( 'lastClick', 0 );
+				}, timeForDoubleClick );
+
+				return false;
 
 			} else if ( 'rejected' === status ) {
 				return confirm( pluginDirectory.rejectPluginAYS );
@@ -88,6 +110,8 @@
 
 				if ( 'object' == typeof response && response.responses[0] ) {
 					$commentsList.append( response.responses[0].data ).show();
+
+					PluginEdit.collapseComments( $commentsList );
 
 					$( 'a[className*=\':\']' ).unbind();
 
@@ -217,6 +241,43 @@
 		// Disable any file input fields, to prevent the browser sending it.
 		uploadZipDisable: function() {
 			$(this).find('input[type="file"]').prop( 'disabled', true );
+		},
+
+		collapseComments: function( $list ) {
+			var maxHeight = 100;
+
+			$list.find( '.column-comment' ).each( function() {
+				var $col  = $( this ),
+					$body = $col.find( '> :not(.row-actions)' ).wrapAll( '<div class="comment-body"></div>' ).parent(),
+					$actions = $col.find( '.row-actions' );
+
+				if ( $body.prop( 'scrollHeight' ) <= maxHeight ) {
+					return;
+				}
+
+				// Match the fade gradient to the row's background color.
+				var bg = $col.closest( 'tr' ).css( 'background-color' );
+				if ( bg ) {
+					$body.css( '--comment-bg', bg );
+				}
+
+				$body.addClass( 'comment-collapsed' );
+
+				var $toggle = $( '<a class="comment-toggle">Show more</a>' );
+				$toggle.on( 'click', function( e ) {
+					e.preventDefault();
+
+					if ( $body.hasClass( 'comment-collapsed' ) ) {
+						$body.removeClass( 'comment-collapsed' );
+						$toggle.text( 'Show less' );
+					} else {
+						$body.addClass( 'comment-collapsed' );
+						$toggle.text( 'Show more' );
+					}
+				} );
+
+				$toggle.insertBefore( $actions );
+			} );
 		}
 
 	};

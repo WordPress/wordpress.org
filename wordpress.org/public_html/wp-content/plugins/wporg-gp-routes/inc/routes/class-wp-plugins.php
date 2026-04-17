@@ -97,7 +97,7 @@ class WP_Plugins extends WP_Directory {
 			}
 		} );
 
-		$project->icon = $this->get_plugin_icon( $project, 64 );
+		$icon = $this->get_plugin_icon( $project, 64 );
 
 		$this->tmpl( 'projects-wp-plugins', get_defined_vars() );
 	}
@@ -114,7 +114,7 @@ class WP_Plugins extends WP_Directory {
 			return $this->die_with_404();
 		}
 
-		$project->icon = $this->get_plugin_icon( $project, 64 );
+		$icon = $this->get_plugin_icon( $project, 64 );
 
 		$contributors_by_locale = gp_get_meta( 'wp-plugins', $project->id, 'contributors-by-locale' );
 		if ( ! $contributors_by_locale || $contributors_by_locale['last_updated'] + HOUR_IN_SECONDS < time() ) {
@@ -147,7 +147,7 @@ class WP_Plugins extends WP_Directory {
 			return $this->die_with_404();
 		}
 
-		$project->icon = $this->get_plugin_icon( $project, 64 );
+		$icon = $this->get_plugin_icon( $project, 64 );
 
 		$json = wp_remote_retrieve_body(
 			wp_safe_remote_get(
