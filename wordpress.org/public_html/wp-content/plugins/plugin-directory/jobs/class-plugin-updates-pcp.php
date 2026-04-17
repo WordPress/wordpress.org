@@ -136,6 +136,11 @@ class Plugin_Updates_PCP {
 	public static function notify_plugin_authors( $plugin, $results, $tag ) {
 		ob_start();
 
+		echo "After your latest update, we automatically scanned your plugin and found issues that need to be resolved.\n\n";
+		echo "Please do not reply to this email, as replies are not monitored.\n";
+		echo "To inspect and fix these issues in detail, install and run the Plugin Check tool:\n";
+		echo "https://wordpress.org/plugins/plugin-check/\n\n";
+
 		printf(
 			"Found %d errors in %d files.\n\n",
 			$results[ 'totals' ][ 'errors' ],
@@ -178,6 +183,8 @@ class Plugin_Updates_PCP {
 				}
 			}
 		}
+
+		echo "Thanks for your cooperation and for helping make WordPress safer.\n";
 
 		$body = ob_get_clean();
 
@@ -341,7 +348,7 @@ class Plugin_Updates_PCP {
 					'--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
 					'--exclude-checks=prefixing ' .
 					'--categories=plugin_repo --format=json ' .
-					// '--mode=' . escapeshellarg( $mode ) . ' ' .
+					'--mode=' . escapeshellarg( $mode ) . ' ' .
 					'--slug=' . escapeshellarg( $plugin_slug ) . ' ' .
 					escapeshellarg( $path );
 
