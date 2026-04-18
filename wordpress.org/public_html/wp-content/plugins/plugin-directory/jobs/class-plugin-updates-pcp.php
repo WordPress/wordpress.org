@@ -136,7 +136,7 @@ class Plugin_Updates_PCP {
 	public static function notify_plugin_authors( $plugin, $results, $tag ) {
 		ob_start();
 
-		echo "After your latest update, we automatically scanned your plugin and found issues that need to be resolved.\n\n";
+		echo "After your latest update, we automatically scanned your plugin and found issues that need to be checked and resolved as needed.\n\n";
 		echo "Please do not reply to this email, as replies are not monitored.\n";
 		echo "To inspect and fix these issues in detail, install and run the Plugin Check tool:\n";
 		echo "https://wordpress.org/plugins/plugin-check/\n\n";
