@@ -183,7 +183,8 @@ class Plugin_Updates_PCP {
 			}
 		}
 
-		echo "Thanks for your cooperation and for helping make WordPress safer.\n";
+		echo "Thanks for helping keep the WordPress plugin directory safe for everyone.\n";
+		echo "Please do not reply to this email, as replies are not monitored.\n";
 
 		$body = ob_get_clean();
 
