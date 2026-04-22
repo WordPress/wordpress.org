@@ -146,23 +146,21 @@ function get_user_details( $user ) {
 
 /**
  * Record an activity item for a user.
- * 
+ *
  * @param $component string     The component to be used for the acitivity.
  * @param $type      string     The type of the activity in that component.
  * @param $user      int|string ID, Login, or Slug of user.
  * @param $args      array      The args for the activity item. See `bp_activity_add()`.
  */
 function add_activity( string $component, string $type, $user, array $args ) {
-	$request = api( [
+	return queue( array_merge( $args, [
 		'action'    => 'wporg_handle_activity',
 		'source'    => 'generic',
 		'component' => $component,
 		'type'      => $type,
 		'user'      => $user,
-		'args'      => $args,
-	] );
-
-	return ( 200 === wp_remote_retrieve_response_code( $request ) );
+		'user_id'   => find_user_id( $user ),
+	] ) );
 }
 
 /**
@@ -174,15 +172,13 @@ function add_activity( string $component, string $type, $user, array $args ) {
  * @return bool
  */
 function update_profile( $field, $value, $user ) {
-	$request = api( [
+	return queue( [
 		'action' => 'wporg_update_profile',
-		'user'   => $user instanceOf WP_User ? $user->ID : $user,
+		'user'   => $user instanceOf WP_User ? $user->ID : find_user_id( $user ),
 		'fields' => [
 			$field => $value
 		],
 	] );
-
-	return ( 200 === wp_remote_retrieve_response_code( $request ) );
 }
 
 /**
@@ -221,16 +217,13 @@ function badge_api( string $action, string $badge, $users = array() ) : bool {
 		return true;
 	}
 
-	$request = api( [
+	return queue( [
 		'action'  => 'wporg_handle_association',
 		'source'  => 'generic-badge',
 		'command' => $action,
 		'users'   => $users,
 		'badge'   => $badge,
 	] );
-
-	// Note: Success or error message may be present in the return cookies.
-	return ( 200 === wp_remote_retrieve_response_code( $request ) );
 }
 
 /**
@@ -271,6 +264,36 @@ function find_user_id( $user ) {
 	}
 
 	return $_user->ID ?? false;
+}
+
+/**
+ * Queue a profiles sync request for later processing.
+ *
+ * @param array $args The request arguments. Must include 'action'.
+ * @return bool
+ */
+function queue( array $args ) : bool {
+	global $wpdb;
+
+	// Outside production there's no CLI worker draining the sync queue, so dispatch
+	// synchronously through the AJAX handler to exercise the full code path.
+	if ( 'production' !== wp_get_environment_type() ) {
+		$response = api( $args );
+
+		return ! is_wp_error( $response ) && 200 == wp_remote_retrieve_response_code( $response );
+	}
+
+	$action = $args['action'];
+	unset( $args['action'] );
+
+	return (bool) $wpdb->insert(
+		'bpmain_wporg_profiles_sync_queue',
+		[
+			'action' => $action,
+			'args'   => wp_json_encode( $args ),
+		],
+		[ '%s', '%s' ]
+	);
 }
 
 /**
