@@ -206,7 +206,13 @@ class Photo {
 			return false;
 		}
 
-		list( , , $image_type ) = wp_getimagesize( $file );
+		$image_size = wp_getimagesize( $file );
+
+		if ( false === $image_size ) {
+			return false;
+		}
+
+		list( , , $image_type ) = $image_size;
 
 		/*
 		 * EXIF contains a bunch of data we'll probably never need formatted in ways
