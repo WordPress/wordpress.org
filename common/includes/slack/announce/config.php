@@ -363,6 +363,7 @@ function get_whitelist() {
 			'chrisvanpatten',
 			'Clorith',
 			'DrewAPicture', // @drew on Slack
+			'estelaris',
 			'hlashbrooke',
 			'Kenshino',
 			'lizkaraffa',
