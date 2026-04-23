@@ -818,10 +818,20 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 			'text' => [ 'type' => 'mrkdwn', 'text' => '_No active subgroups._' ],
 		];
 	} else {
+		$first = true;
 		foreach ( $active as $g ) {
-			$count   = count( get_members( $g['id'] ) );
-			$purpose = format_purpose( $g );
-			$lines   = [ "*<#{$g['id']}>*" ];
+			if ( ! $first ) {
+				$blocks[] = [ 'type' => 'divider' ];
+			}
+			$first = false;
+			$members   = get_members( $g['id'] );
+			$count     = count( $members );
+			$is_member = in_array( $user_id, $members, true );
+			$purpose   = format_purpose( $g );
+			// <#C…> renders as a generic "Private channel" placeholder for
+			// non-members — show the actual name instead.
+			$name_md   = $is_member ? "<#{$g['id']}>" : "#{$g['name']}";
+			$lines     = [ "*{$name_md}*" ];
 			if ( $purpose ) {
 				$lines[] = $purpose;
 			}
@@ -873,7 +883,12 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 			'type' => 'section',
 			'text' => [ 'type' => 'mrkdwn', 'text' => '*Archived*' ],
 		];
+		$first = true;
 		foreach ( $archived as $g ) {
+			if ( ! $first ) {
+				$blocks[] = [ 'type' => 'divider' ];
+			}
+			$first = false;
 			$purpose = format_purpose( $g );
 			$lines   = [ "`{$g['name']}`" ];
 			if ( $purpose ) {
