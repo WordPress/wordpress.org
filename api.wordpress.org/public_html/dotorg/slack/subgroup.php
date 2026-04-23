@@ -205,20 +205,20 @@ function handle_block_action( $payload ) {
 			$root_view = $meta['root_view'] ?? '';
 
 			if ( $reopen_id ) {
-				$info          = api_call( 'conversations.info', [ 'channel' => $reopen_id ] );
-				$reopened_name = $info['channel']['name'] ?? 'unknown';
-
 				$result = api_call( 'conversations.unarchive', [
 					'channel' => $reopen_id,
 				], SUBGROUP_USER_TOKEN );
 
 				if ( ! empty( $result['ok'] ) ) {
-					// Make sure the bot is a member so the channel shows up in
-					// the home listing afterwards.
+					// Pull the bot in if it wasn't a member pre-archive.
+					// already_in_channel is fine to ignore.
 					api_call( 'conversations.invite', [
 						'channel' => $reopen_id,
 						'users'   => SUBGROUP_BOT_USER_ID,
 					], SUBGROUP_USER_TOKEN );
+
+					$info          = api_call( 'conversations.info', [ 'channel' => $reopen_id ] );
+					$reopened_name = $info['channel']['name'] ?? 'unknown';
 
 					api_call( 'chat.postMessage', [
 						'channel' => $parent_id,
@@ -642,12 +642,34 @@ function finalize_create( $new_id, $name, $creator, $parent_id, $parent_name, $u
 }
 
 function list_all_private_channels( $include_archived = false ) {
-	$r = api_call( 'conversations.list', [
+	$bot = api_call( 'conversations.list', [
 		'exclude_archived' => ! $include_archived,
 		'types'            => 'private_channel',
 		'limit'            => 999,
 	] );
-	return $r['channels'] ?? [];
+	$channels = $bot['channels'] ?? [];
+
+	if ( ! $include_archived ) {
+		return $channels;
+	}
+
+	// Fill in archived channels the bot was never a member of by also asking
+	// via the owner user token, which sees everything the owner is in.
+	$user = api_call( 'conversations.list', [
+		'exclude_archived' => false,
+		'types'            => 'private_channel',
+		'limit'            => 999,
+	], SUBGROUP_USER_TOKEN );
+	$merged = [];
+	foreach ( $channels as $g ) {
+		$merged[ $g['id'] ] = $g;
+	}
+	foreach ( $user['channels'] ?? [] as $g ) {
+		if ( ! isset( $merged[ $g['id'] ] ) ) {
+			$merged[ $g['id'] ] = $g;
+		}
+	}
+	return array_values( $merged );
 }
 
 function find_private_channel_by_name( $name ) {
