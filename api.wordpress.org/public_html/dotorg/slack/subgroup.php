@@ -2,7 +2,28 @@
 
 namespace Dotorg\Slack\Subgroup;
 
+require dirname( dirname( __DIR__ ) ) . '/init.php';
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
+
+load_object_cache();
+
+const CACHE_GROUP                 = 'api-slack-subgroup';
+const CACHE_TTL_ACTIVE_CHANNELS   = 120;     // Users can create channels outside this app.
+const CACHE_TTL_ARCHIVED_CHANNELS = 3600;    // Archives are slower-moving.
+const CACHE_TTL_MEMBERS           = 600;     // Memberships change more slowly than creation.
+
+function cache_key_members( $channel_id ) {
+	return 'members_' . $channel_id;
+}
+
+function invalidate_channel_lists() {
+	wp_cache_delete( 'bot_active_channels', CACHE_GROUP );
+	wp_cache_delete( 'archived_channels', CACHE_GROUP );
+}
+
+function invalidate_members( $channel_id ) {
+	wp_cache_delete( cache_key_members( $channel_id ), CACHE_GROUP );
+}
 
 function api_call( $method, $content = array(), $token = null ) {
 	$content['token'] = $token ?: SUBGROUP_BOT_TOKEN;
@@ -28,6 +49,9 @@ function ack_and_finish() {
 	if ( function_exists( 'fastcgi_finish_request' ) ) {
 		fastcgi_finish_request();
 	}
+	// Slack only cares about the ACK; the work that follows can take as long
+	// as it needs.
+	set_time_limit( 0 );
 }
 
 function verify_slack_signature( $body ) {
@@ -131,6 +155,7 @@ function handle_block_action( $payload ) {
 					'channel' => $channel_to_join,
 					'users'   => $user_id,
 				] );
+				invalidate_members( $channel_to_join );
 			}
 
 			$parent_id   = $meta['parent'] ?? '';
@@ -217,6 +242,9 @@ function handle_block_action( $payload ) {
 						'users'   => SUBGROUP_BOT_USER_ID,
 					], SUBGROUP_USER_TOKEN );
 
+					invalidate_channel_lists();
+					invalidate_members( $reopen_id );
+
 					$info          = api_call( 'conversations.info', [ 'channel' => $reopen_id ] );
 					$reopened_name = $info['channel']['name'] ?? 'unknown';
 
@@ -256,6 +284,8 @@ function handle_block_action( $payload ) {
 				], SUBGROUP_USER_TOKEN );
 
 				if ( ! empty( $result['ok'] ) ) {
+					invalidate_channel_lists();
+
 					// Don't link the archived channel — viewers who weren't
 					// members can't reach it anyway, and the mention renders
 					// as a strikethrough dead link.
@@ -363,6 +393,8 @@ function handle_rename_submission( $payload ) {
 
 	// Empty ACK closes just the rename modal, returning the user to Manage.
 	ack_and_finish();
+
+	invalidate_channel_lists();
 
 	api_call( 'chat.postMessage', [
 		'channel' => $parent_id,
@@ -535,6 +567,8 @@ function handle_conflict_submission( $payload ) {
 			return;
 		}
 
+		invalidate_channel_lists();
+
 		$new = api_call( 'conversations.create', [
 			'name'       => $original_name,
 			'is_private' => true,
@@ -628,6 +662,9 @@ function finalize_create( $new_id, $name, $creator, $parent_id, $parent_name, $u
 		], SUBGROUP_USER_TOKEN );
 	}
 
+	invalidate_channel_lists();
+	invalidate_members( $new_id );
+
 	// Include the name in backticks so non-members (who see <#C…> as a dead
 	// strikethrough) still get the channel name.
 	$verb = $reopened ? 'has reopened archived channel' : 'has created new channel';
@@ -642,34 +679,52 @@ function finalize_create( $new_id, $name, $creator, $parent_id, $parent_name, $u
 }
 
 function list_all_private_channels( $include_archived = false ) {
-	$bot = api_call( 'conversations.list', [
-		'exclude_archived' => ! $include_archived,
-		'types'            => 'private_channel',
-		'limit'            => 999,
-	] );
-	$channels = $bot['channels'] ?? [];
+	$active = wp_cache_get( 'bot_active_channels', CACHE_GROUP );
+	if ( false === $active ) {
+		$r      = api_call( 'conversations.list', [
+			'exclude_archived' => true,
+			'types'            => 'private_channel',
+			'limit'            => 999,
+		] );
+		$active = $r['channels'] ?? [];
+		wp_cache_set( 'bot_active_channels', $active, CACHE_GROUP, CACHE_TTL_ACTIVE_CHANNELS );
+	}
 
 	if ( ! $include_archived ) {
-		return $channels;
+		return $active;
 	}
 
-	// Fill in archived channels the bot was never a member of by also asking
-	// via the owner user token, which sees everything the owner is in.
-	$user = api_call( 'conversations.list', [
-		'exclude_archived' => false,
-		'types'            => 'private_channel',
-		'limit'            => 999,
-	], SUBGROUP_USER_TOKEN );
-	$merged = [];
-	foreach ( $channels as $g ) {
-		$merged[ $g['id'] ] = $g;
-	}
-	foreach ( $user['channels'] ?? [] as $g ) {
-		if ( ! isset( $merged[ $g['id'] ] ) ) {
-			$merged[ $g['id'] ] = $g;
+	$archived = wp_cache_get( 'archived_channels', CACHE_GROUP );
+	if ( false === $archived ) {
+		// Ask via both tokens — user token surfaces archived channels the bot
+		// was never a member of.
+		$bot  = api_call( 'conversations.list', [
+			'exclude_archived' => false,
+			'types'            => 'private_channel',
+			'limit'            => 999,
+		] );
+		$user = api_call( 'conversations.list', [
+			'exclude_archived' => false,
+			'types'            => 'private_channel',
+			'limit'            => 999,
+		], SUBGROUP_USER_TOKEN );
+
+		$archived = [];
+		foreach ( $bot['channels'] ?? [] as $g ) {
+			if ( ! empty( $g['is_archived'] ) ) {
+				$archived[ $g['id'] ] = $g;
+			}
 		}
+		foreach ( $user['channels'] ?? [] as $g ) {
+			if ( ! empty( $g['is_archived'] ) && ! isset( $archived[ $g['id'] ] ) ) {
+				$archived[ $g['id'] ] = $g;
+			}
+		}
+		$archived = array_values( $archived );
+		wp_cache_set( 'archived_channels', $archived, CACHE_GROUP, CACHE_TTL_ARCHIVED_CHANNELS );
 	}
-	return array_values( $merged );
+
+	return array_merge( $active, $archived );
 }
 
 function find_private_channel_by_name( $name ) {
@@ -691,11 +746,17 @@ function find_channel( $channel_id ) {
 }
 
 function get_members( $channel_id ) {
-	$r = api_call( 'conversations.members', [
-		'channel' => $channel_id,
-		'limit'   => 999,
-	] );
-	return $r['members'] ?? [];
+	$key     = cache_key_members( $channel_id );
+	$members = wp_cache_get( $key, CACHE_GROUP );
+	if ( false === $members ) {
+		$r       = api_call( 'conversations.members', [
+			'channel' => $channel_id,
+			'limit'   => 999,
+		] );
+		$members = $r['members'] ?? [];
+		wp_cache_set( $key, $members, CACHE_GROUP, CACHE_TTL_MEMBERS );
+	}
+	return $members;
 }
 
 function format_purpose( $channel ) {
