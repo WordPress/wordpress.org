@@ -731,9 +731,7 @@ function build_home_view( $parent, $subgroups, $user_id ) {
 			$is_member = in_array( $user_id, $members, true );
 			$count     = count( $members );
 			$purpose   = format_purpose( $g );
-			// <#C…> renders as a generic "Private channel" placeholder for
-			// non-members — show the actual name instead.
-			$name_md   = $is_member ? "<#{$g['id']}>" : "#{$g['name']}";
+			$name_md   = $is_member ? "<#{$g['id']}>" : "`{$g['name']}`";
 			$lines     = [ "*{$name_md}*" ];
 			if ( $purpose ) {
 				$lines[] = $purpose;
@@ -828,9 +826,7 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 			$count     = count( $members );
 			$is_member = in_array( $user_id, $members, true );
 			$purpose   = format_purpose( $g );
-			// <#C…> renders as a generic "Private channel" placeholder for
-			// non-members — show the actual name instead.
-			$name_md   = $is_member ? "<#{$g['id']}>" : "#{$g['name']}";
+			$name_md   = $is_member ? "<#{$g['id']}>" : "`{$g['name']}`";
 			$lines     = [ "*{$name_md}*" ];
 			if ( $purpose ) {
 				$lines[] = $purpose;
