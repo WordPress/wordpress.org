@@ -2,10 +2,7 @@
 
 namespace Dotorg\Slack\Subgroup;
 
-require dirname( dirname( __DIR__ ) ) . '/init.php';
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
-
-load_object_cache();
 
 const CACHE_GROUP                 = 'api-slack-subgroup';
 const CACHE_TTL_ACTIVE_CHANNELS   = 120;     // Users can create channels outside this app.
