@@ -133,29 +133,62 @@ function handle_block_action( $payload ) {
 				] );
 			}
 
-			$parent = find_channel( $meta['parent'] ?? '' );
-			if ( $parent ) {
-				refresh_home_view( $view_id, $parent, $user_id );
+			$parent_id   = $meta['parent'] ?? '';
+			$parent_name = $meta['parent_name'] ?? '';
+			if ( $parent_id && $parent_name ) {
+				refresh_home_view( $view_id, [ 'id' => $parent_id, 'name' => $parent_name ], $user_id );
 			}
 			return;
 
 		case 'open_manage_modal':
-			$parent = find_channel( $meta['parent'] ?? '' );
-			if ( ! $parent ) {
+			$parent_id   = $meta['parent'] ?? '';
+			$parent_name = $meta['parent_name'] ?? '';
+			if ( ! $parent_id || ! $parent_name ) {
 				return;
 			}
-			api_call( 'views.push', [
+			// get_members runs once per subgroup, so a full manage build can
+			// exceed Slack's 3s trigger_id budget. Push a loading view now and
+			// views.update with the real content afterwards.
+			$loading = [
+				'type'             => 'modal',
+				'callback_id'      => 'subgroup_manage',
+				'title'            => [ 'type' => 'plain_text', 'text' => 'Manage subgroups' ],
+				'close'            => [ 'type' => 'plain_text', 'text' => 'Close' ],
+				'private_metadata' => json_encode( [
+					'parent'      => $parent_id,
+					'parent_name' => $parent_name,
+					'user'        => $user_id,
+					'root_view'   => $view_id,
+				] ),
+				'blocks'           => [
+					[ 'type' => 'section', 'text' => [ 'type' => 'mrkdwn', 'text' => '_Loading subgroups…_' ] ],
+				],
+			];
+			$pushed = api_call( 'views.push', [
 				'trigger_id' => $payload['trigger_id'] ?? '',
-				'view'       => json_encode( build_manage_view( $parent, $user_id, $view_id ) ),
+				'view'       => json_encode( $loading ),
+			] );
+
+			ack_and_finish();
+
+			if ( empty( $pushed['ok'] ) ) {
+				return;
+			}
+			$parent = [ 'id' => $parent_id, 'name' => $parent_name ];
+			api_call( 'views.update', [
+				'view_id' => $pushed['view']['id'],
+				'view'    => json_encode( build_manage_view( $parent, $user_id, $view_id ) ),
 			] );
 			return;
 
 		case 'rename_subgroup':
-			$channel_id = $action['value'] ?? '';
-			$parent     = find_channel( $meta['parent'] ?? '' );
-			if ( ! $channel_id || ! $parent ) {
+			$channel_id  = $action['value'] ?? '';
+			$parent_id   = $meta['parent'] ?? '';
+			$parent_name = $meta['parent_name'] ?? '';
+			if ( ! $channel_id || ! $parent_id || ! $parent_name ) {
 				return;
 			}
+			$parent       = [ 'id' => $parent_id, 'name' => $parent_name ];
 			$info         = api_call( 'conversations.info', [ 'channel' => $channel_id ] );
 			$current_name = $info['channel']['name'] ?? '';
 			api_call( 'views.push', [
@@ -194,8 +227,9 @@ function handle_block_action( $payload ) {
 				}
 			}
 
-			$parent = find_channel( $parent_id );
-			if ( $parent ) {
+			$parent_name = $meta['parent_name'] ?? '';
+			if ( $parent_id && $parent_name ) {
+				$parent = [ 'id' => $parent_id, 'name' => $parent_name ];
 				api_call( 'views.update', [
 					'view_id' => $view_id,
 					'view'    => json_encode( build_manage_view( $parent, $user_id, $root_view ) ),
@@ -232,8 +266,9 @@ function handle_block_action( $payload ) {
 				}
 			}
 
-			$parent = find_channel( $parent_id );
-			if ( $parent ) {
+			$parent_name = $meta['parent_name'] ?? '';
+			if ( $parent_id && $parent_name ) {
+				$parent = [ 'id' => $parent_id, 'name' => $parent_name ];
 				// Refresh the manage view (so the archived row disappears).
 				api_call( 'views.update', [
 					'view_id' => $view_id,
@@ -248,11 +283,12 @@ function handle_block_action( $payload ) {
 			return;
 
 		case 'open_create_modal':
-			// views.push needs the trigger_id, which expires in 3s. Do it synchronously.
-			$parent = find_channel( $meta['parent'] ?? '' );
-			if ( ! $parent ) {
+			$parent_id   = $meta['parent'] ?? '';
+			$parent_name = $meta['parent_name'] ?? '';
+			if ( ! $parent_id || ! $parent_name ) {
 				return;
 			}
+			$parent = [ 'id' => $parent_id, 'name' => $parent_name ];
 			api_call( 'views.push', [
 				'trigger_id' => $payload['trigger_id'] ?? '',
 				'view'       => json_encode( build_create_view( $parent, $user_id, $view_id ) ),
@@ -333,8 +369,8 @@ function handle_rename_submission( $payload ) {
 		'text'    => sprintf( '<@%s> renamed `%s` to <#%s> (`%s`).', $user_id, $current_name, $channel_id, $new_name ),
 	] );
 
-	$parent = find_channel( $parent_id );
-	if ( $parent ) {
+	if ( $parent_name ) {
+		$parent = [ 'id' => $parent_id, 'name' => $parent_name ];
 		if ( $manage_view ) {
 			api_call( 'views.update', [
 				'view_id' => $manage_view,
@@ -439,7 +475,7 @@ function handle_create_submission( $payload ) {
 	// Close the create view; root view is now on top again.
 	ack_and_finish();
 
-	finalize_create( $new_id, $name, $creator, $parent_id, $user_id, $purpose, $topic, $strategy, $selected_users, $root_view, false );
+	finalize_create( $new_id, $name, $creator, $parent_id, $parent_name, $user_id, $purpose, $topic, $strategy, $selected_users, $root_view, false );
 }
 
 function handle_conflict_submission( $payload ) {
@@ -549,7 +585,7 @@ function handle_conflict_submission( $payload ) {
 	echo json_encode( [ 'response_action' => 'clear' ] );
 	ack_and_finish();
 
-	finalize_create( $archived_id, $archived_name, $creator, $parent_id, $user_id, $purpose, $topic, $strategy, $selected_users, $root_view, true );
+	finalize_create( $archived_id, $archived_name, $creator, $parent_id, $parent_name, $user_id, $purpose, $topic, $strategy, $selected_users, $root_view, true );
 }
 
 /**
@@ -560,7 +596,7 @@ function handle_conflict_submission( $payload ) {
  * Everything that touches $new_id has to run as the owner until the bot is
  * invited in — hence SUBGROUP_USER_TOKEN for purpose/topic/invite.
  */
-function finalize_create( $new_id, $name, $creator, $parent_id, $user_id, $purpose, $topic, $strategy, $selected_users, $root_view, $reopened ) {
+function finalize_create( $new_id, $name, $creator, $parent_id, $parent_name, $user_id, $purpose, $topic, $strategy, $selected_users, $root_view, $reopened ) {
 	if ( $purpose ) {
 		api_call( 'conversations.setPurpose', [ 'channel' => $new_id, 'purpose' => $purpose ], SUBGROUP_USER_TOKEN );
 	}
@@ -600,11 +636,8 @@ function finalize_create( $new_id, $name, $creator, $parent_id, $user_id, $purpo
 		'text'    => sprintf( '<@%s> %s: <#%s> (`%s`)', $user_id, $verb, $new_id, $name ),
 	] );
 
-	if ( $root_view ) {
-		$parent = find_channel( $parent_id );
-		if ( $parent ) {
-			refresh_home_view( $root_view, $parent, $user_id );
-		}
+	if ( $root_view && $parent_name ) {
+		refresh_home_view( $root_view, [ 'id' => $parent_id, 'name' => $parent_name ], $user_id );
 	}
 }
 
@@ -698,7 +731,10 @@ function build_home_view( $parent, $subgroups, $user_id ) {
 			$is_member = in_array( $user_id, $members, true );
 			$count     = count( $members );
 			$purpose   = format_purpose( $g );
-			$lines     = [ "*<#{$g['id']}>*" . ( $is_member ? "  ✓ you're in" : '' ) ];
+			// <#C…> renders as a generic "Private channel" placeholder for
+			// non-members — show the actual name instead.
+			$name_md   = $is_member ? "<#{$g['id']}>" : "#{$g['name']}";
+			$lines     = [ "*{$name_md}*" ];
 			if ( $purpose ) {
 				$lines[] = $purpose;
 			}
@@ -744,7 +780,11 @@ function build_home_view( $parent, $subgroups, $user_id ) {
 		'callback_id'      => 'subgroup_home',
 		'title'            => [ 'type' => 'plain_text', 'text' => 'Subgroups' ],
 		'close'            => [ 'type' => 'plain_text', 'text' => 'Close' ],
-		'private_metadata' => json_encode( [ 'parent' => $parent['id'], 'user' => $user_id ] ),
+		'private_metadata' => json_encode( [
+			'parent'      => $parent['id'],
+			'parent_name' => $parent['name'],
+			'user'        => $user_id,
+		] ),
 		'blocks'           => $blocks,
 	];
 }
@@ -858,9 +898,10 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 		'title'            => [ 'type' => 'plain_text', 'text' => 'Manage subgroups' ],
 		'close'            => [ 'type' => 'plain_text', 'text' => 'Close' ],
 		'private_metadata' => json_encode( [
-			'parent'    => $parent['id'],
-			'user'      => $user_id,
-			'root_view' => $root_view_id,
+			'parent'      => $parent['id'],
+			'parent_name' => $parent['name'],
+			'user'        => $user_id,
+			'root_view'   => $root_view_id,
 		] ),
 		'blocks'           => $blocks,
 	];
