@@ -159,3 +159,107 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 		</div>
 	</div>
 </section>
+
+<?php
+// "Open to Work" candidates section.
+	$candidates_per_page = 10;
+	$candidates_page     = isset( $_GET['cp'] ) ? max( 1, absint( $_GET['cp'] ) ) : 1;
+	$candidates_result   = jobswp_get_open_to_work_candidates( $candidates_page, $candidates_per_page );
+	$paged_candidates    = $candidates_result['candidates'];
+	$total_candidates    = $candidates_result['total'];
+	$total_pages         = $candidates_result['pages'];
+	if ( ! empty( $paged_candidates ) ) :
+?>
+<!-- Open to Work Section -->
+<section class="candidates-section" id="candidates">
+	<div class="candidates-section__inner">
+		<div class="candidates-section__header">
+			<div>
+				<h2><?php esc_html_e( 'People Open to Work', 'jobswp' ); ?></h2>
+				<p><?php esc_html_e( 'WordPress community members who are looking for their next opportunity.', 'jobswp' ); ?></p>
+			</div>
+			<span class="candidates-section__count">
+				<?php
+				printf(
+					/* translators: %s: number of candidates */
+					esc_html( _n( '%s person', '%s people', $total_candidates, 'jobswp' ) ),
+					esc_html( number_format_i18n( $total_candidates ) )
+				);
+				?>
+			</span>
+		</div>
+		<div class="candidates-grid">
+			<?php foreach ( $paged_candidates as $candidate ) : ?>
+				<?php
+				$current_role    = '';
+				$current_company = '';
+
+				if ( ! empty( $candidate->positions ) ) {
+					$latest          = $candidate->positions[0];
+					$current_role    = isset( $latest->role ) ? $latest->role : '';
+					$current_company = isset( $latest->company ) ? $latest->company : '';
+				}
+				?>
+				<a href="<?php echo esc_url( $candidate->profile_url ); ?>" class="candidate-card" target="_blank" rel="noopener noreferrer">
+					<div class="candidate-card__avatar">
+						<img src="<?php echo esc_url( 'https://wordpress.org/grav-redirect.php?user=' . urlencode( $candidate->user_login ) . '&s=80' ); ?>" alt="" width="80" height="80" loading="lazy">
+					</div>
+					<div class="candidate-card__info">
+						<span class="candidate-card__badge"><?php esc_html_e( 'Open to Work', 'jobswp' ); ?></span>
+						<h3 class="candidate-card__name"><?php echo esc_html( $candidate->display_name ); ?></h3>
+						<?php if ( $current_role || $current_company ) : ?>
+							<p class="candidate-card__role">
+								<?php echo esc_html( $current_role ); ?>
+								<?php if ( $current_company ) : ?>
+									<span class="candidate-card__company"><?php echo esc_html( $current_company ); ?></span>
+								<?php endif; ?>
+							</p>
+						<?php endif; ?>
+					</div>
+					<span class="candidate-card__arrow">&#8594;</span>
+				</a>
+			<?php endforeach; ?>
+		</div>
+		<?php if ( $total_pages > 1 ) : ?>
+			<nav class="candidates-pagination" aria-label="<?php esc_attr_e( 'Candidates pagination', 'jobswp' ); ?>">
+				<?php if ( $candidates_page > 1 ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( 'cp', $candidates_page - 1, home_url( '/' ) ) . '#candidates' ); ?>" class="candidates-pagination__link">&larr; <?php esc_html_e( 'Previous', 'jobswp' ); ?></a>
+				<?php else : ?>
+					<span class="candidates-pagination__link candidates-pagination__link--disabled">&larr; <?php esc_html_e( 'Previous', 'jobswp' ); ?></span>
+				<?php endif; ?>
+
+				<span class="candidates-pagination__info">
+					<?php
+					printf(
+						/* translators: 1: current page, 2: total pages */
+						esc_html__( 'Page %1$s of %2$s', 'jobswp' ),
+						esc_html( $candidates_page ),
+						esc_html( $total_pages )
+					);
+					?>
+				</span>
+
+				<?php if ( $candidates_page < $total_pages ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( 'cp', $candidates_page + 1, home_url( '/' ) ) . '#candidates' ); ?>" class="candidates-pagination__link"><?php esc_html_e( 'Next', 'jobswp' ); ?> &rarr;</a>
+				<?php else : ?>
+					<span class="candidates-pagination__link candidates-pagination__link--disabled"><?php esc_html_e( 'Next', 'jobswp' ); ?> &rarr;</span>
+				<?php endif; ?>
+			</nav>
+		<?php endif; ?>
+		<p class="candidates-section__cta">
+			<?php
+			echo wp_kses(
+				sprintf(
+					/* translators: %s: URL to update WordPress.org profile */
+					__( 'Want to appear here? <a href="%s">Update your WordPress.org profile</a> and toggle "Open to Work" in the Jobs section.', 'jobswp' ),
+					'https://profiles.wordpress.org/me/profile/edit/'
+				),
+				array( 'a' => array( 'href' => array() ) )
+			);
+			?>
+		</p>
+	</div>
+</section>
+<?php
+	endif;
+?>
