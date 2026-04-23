@@ -23,18 +23,49 @@ function invalidate_members( $channel_id ) {
 }
 
 function api_call( $method, $content = array(), $token = null ) {
-	$content['token'] = $token ?: SUBGROUP_BOT_TOKEN;
-	$content = http_build_query( $content );
-	$context = stream_context_create( array(
-	    'http' => array(
-		'method'  => 'POST',
-		'header'  => 'Content-Type: application/x-www-form-urlencoded' . PHP_EOL,
-		'content' => $content,
-	    ),
-	) );
+	$results = api_multi_call( [ [ $method, $content, $token ] ] );
+	return $results[0];
+}
 
-	$response = file_get_contents( 'https://slack.com/api/' . $method, false, $context );
-	return json_decode( $response, true );
+/*
+ * Fire N Slack API calls in parallel via curl_multi. $calls is a list of
+ * [ $method, $content, $token ] triples; returns a same-ordered list of
+ * decoded responses (null if the request failed outright).
+ */
+function api_multi_call( $calls ) {
+	$mh      = curl_multi_init();
+	$handles = [];
+	foreach ( $calls as $i => $c ) {
+		[ $method, $content, $token ] = $c;
+		$content['token'] = $token ?: SUBGROUP_BOT_TOKEN;
+		$ch = curl_init();
+		curl_setopt_array( $ch, [
+			CURLOPT_URL            => 'https://slack.com/api/' . $method,
+			CURLOPT_POST           => true,
+			CURLOPT_POSTFIELDS     => http_build_query( $content ),
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_HTTPHEADER     => [ 'Content-Type: application/x-www-form-urlencoded' ],
+		] );
+		curl_multi_add_handle( $mh, $ch );
+		$handles[ $i ] = $ch;
+	}
+
+	do {
+		$status = curl_multi_exec( $mh, $running );
+		if ( $running ) {
+			curl_multi_select( $mh );
+		}
+	} while ( $running && CURLM_OK === $status );
+
+	$out = [];
+	foreach ( $handles as $i => $ch ) {
+		$body      = curl_multi_getcontent( $ch );
+		$out[ $i ] = $body ? json_decode( $body, true ) : null;
+		curl_multi_remove_handle( $mh, $ch );
+		curl_close( $ch );
+	}
+	curl_multi_close( $mh );
+	return $out;
 }
 
 /*
@@ -693,18 +724,18 @@ function list_all_private_channels( $include_archived = false ) {
 
 	$archived = wp_cache_get( 'archived_channels', CACHE_GROUP );
 	if ( false === $archived ) {
-		// Ask via both tokens — user token surfaces archived channels the bot
-		// was never a member of.
-		$bot  = api_call( 'conversations.list', [
+		// The user-token listing is slow (returns every private channel the
+		// owner has ever been in). Fire it alongside the bot-token listing so
+		// the cold-cache wait is max(bot, user) instead of bot+user.
+		$params = [
 			'exclude_archived' => false,
 			'types'            => 'private_channel',
 			'limit'            => 999,
+		];
+		[ $bot, $user ] = api_multi_call( [
+			[ 'conversations.list', $params, null ],
+			[ 'conversations.list', $params, SUBGROUP_USER_TOKEN ],
 		] );
-		$user = api_call( 'conversations.list', [
-			'exclude_archived' => false,
-			'types'            => 'private_channel',
-			'limit'            => 999,
-		], SUBGROUP_USER_TOKEN );
 
 		$archived = [];
 		foreach ( $bot['channels'] ?? [] as $g ) {
@@ -740,6 +771,32 @@ function find_channel( $channel_id ) {
 		}
 	}
 	return null;
+}
+
+/*
+ * Populate the member-list cache for every channel in $channel_ids that isn't
+ * already cached, using a single parallel batch. Avoids N sequential round-trips
+ * when rendering a listing.
+ */
+function prime_members_cache( array $channel_ids ) {
+	$to_fetch = [];
+	foreach ( array_unique( $channel_ids ) as $id ) {
+		if ( false === wp_cache_get( cache_key_members( $id ), CACHE_GROUP ) ) {
+			$to_fetch[] = $id;
+		}
+	}
+	if ( ! $to_fetch ) {
+		return;
+	}
+	$calls = [];
+	foreach ( $to_fetch as $id ) {
+		$calls[] = [ 'conversations.members', [ 'channel' => $id, 'limit' => 999 ], null ];
+	}
+	$results = api_multi_call( $calls );
+	foreach ( $to_fetch as $i => $id ) {
+		$members = $results[ $i ]['members'] ?? [];
+		wp_cache_set( cache_key_members( $id ), $members, CACHE_GROUP, CACHE_TTL_MEMBERS );
+	}
 }
 
 function get_members( $channel_id ) {
@@ -806,6 +863,7 @@ function build_home_view( $parent, $subgroups, $user_id ) {
 			'text' => [ 'type' => 'mrkdwn', 'text' => '_No subgroups yet._' ],
 		];
 	} else {
+		prime_members_cache( array_column( $subgroups, 'id' ) );
 		foreach ( $subgroups as $g ) {
 			$members   = get_members( $g['id'] );
 			$is_member = in_array( $user_id, $members, true );
@@ -896,12 +954,8 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 			'text' => [ 'type' => 'mrkdwn', 'text' => '_No active subgroups._' ],
 		];
 	} else {
-		$first = true;
+		prime_members_cache( array_column( $active, 'id' ) );
 		foreach ( $active as $g ) {
-			if ( ! $first ) {
-				$blocks[] = [ 'type' => 'divider' ];
-			}
-			$first = false;
 			$members   = get_members( $g['id'] );
 			$count     = count( $members );
 			$is_member = in_array( $user_id, $members, true );
@@ -959,12 +1013,7 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 			'type' => 'section',
 			'text' => [ 'type' => 'mrkdwn', 'text' => '*Archived*' ],
 		];
-		$first = true;
 		foreach ( $archived as $g ) {
-			if ( ! $first ) {
-				$blocks[] = [ 'type' => 'divider' ];
-			}
-			$first = false;
 			$purpose = format_purpose( $g );
 			$lines   = [ "`{$g['name']}`" ];
 			if ( $purpose ) {
@@ -981,6 +1030,17 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 				],
 			];
 		}
+	}
+
+	// Slack caps modal views at 100 blocks. Truncate defensively and tell the
+	// user how many rows were hidden.
+	if ( count( $blocks ) > 99 ) {
+		$dropped = count( $blocks ) - 98;
+		$blocks  = array_slice( $blocks, 0, 98 );
+		$blocks[] = [
+			'type' => 'section',
+			'text' => [ 'type' => 'mrkdwn', 'text' => sprintf( '_…and %d more rows not shown (Slack 100-block limit)._', $dropped ) ],
+		];
 	}
 
 	return [
