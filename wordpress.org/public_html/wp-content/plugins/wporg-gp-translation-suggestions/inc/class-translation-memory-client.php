@@ -45,8 +45,8 @@ class Translation_Memory_Client {
 
 		$translations = array_values( (array) $translations );
 
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			\WP_CLI::log( sprintf( 'Translation Memory: processing %d translation(s).', count( $translations ) ) );
+		if ( wp_doing_cron() ) {
+			printf( "Translation Memory: processing %d translation(s).\n", count( $translations ) );
 		}
 
 		return self::send_batch( $translations );
