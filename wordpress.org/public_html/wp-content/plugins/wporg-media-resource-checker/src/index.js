@@ -23,7 +23,7 @@ import { getAuthority } from '@wordpress/url';
  * Internal dependencies
  */
 import { ALLOWED_RESOURCES } from './utils';
-import { useHasInvalidSource } from './hooks';
+import { useHasInvalidResource } from './hooks';
 import './style.scss';
 
 /**
@@ -112,7 +112,7 @@ const withMediaResourceChecker = createHigherOrderComponent( ( BlockEdit ) => {
 	return ( props ) => {
 		const { name, attributes } = props;
 
-		const { hasInvalidResource, siteUrl, mediaUrl } = useHasInvalidSource(
+		const { hasInvalidResource, siteUrl, mediaUrl } = useHasInvalidResource(
 			name,
 			attributes
 		);
@@ -142,7 +142,7 @@ const withInvalidResourceClassName = createHigherOrderComponent(
 		return ( props ) => {
 			const { name, attributes, wrapperProps = {} } = props;
 
-			const { hasInvalidResource } = useHasInvalidSource(
+			const { hasInvalidResource } = useHasInvalidResource(
 				name,
 				attributes
 			);

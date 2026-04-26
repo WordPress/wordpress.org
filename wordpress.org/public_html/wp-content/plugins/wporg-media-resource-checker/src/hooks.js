@@ -16,7 +16,7 @@ import { getBlockMediaResourceToCheck, isInvalidResource } from './utils';
  * @param {Object} attributes The block attributes.
  * @return {Object} Object containing hasInvalidResource, siteUrl, and mediaUrl.
  */
-export const useHasInvalidSource = ( name, attributes ) => {
+export const useHasInvalidResource = ( name, attributes ) => {
 	const siteUrl = useSelect( ( select ) => {
 		const siteData = select( coreStore ).getEntityRecord(
 			'root',
