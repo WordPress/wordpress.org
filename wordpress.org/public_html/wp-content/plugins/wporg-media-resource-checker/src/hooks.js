@@ -28,7 +28,7 @@ export const useHasInvalidResource = ( name, attributes ) => {
 	const mediaUrl = getBlockMediaResourceToCheck( name, attributes );
 
 	const hasInvalidResource =
-		mediaUrl && isInvalidResource( mediaUrl, siteUrl );
+		!! mediaUrl && isInvalidResource( mediaUrl, siteUrl );
 
 	return {
 		hasInvalidResource,
