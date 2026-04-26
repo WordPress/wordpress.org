@@ -51,7 +51,7 @@ export const getBlockMediaResourceToCheck = ( blockName, attributes ) => {
 	if ( ! blockToCheck ) {
 		return null;
 	}
-	return attributes[ blockToCheck.urlKey ];
+	return attributes?.[ blockToCheck.urlKey ] ?? null;
 };
 
 /**
