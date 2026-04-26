@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WordPress.org Media Resource Checker
  * Description: Displays warnings in the block editor when media resources are from domains other than the recommended ones.
- * Version:     1.0
+ * Version:     1.0.0
  * Author:      WordPress.org
  * Author URI:  http://wordpress.org/
  * License:     GPLv2 or later
