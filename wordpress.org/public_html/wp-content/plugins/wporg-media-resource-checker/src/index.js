@@ -36,8 +36,10 @@ import './style.scss';
 const BlockEditWithWarning = ( { BlockEdit, siteUrl, mediaUrl, ...props } ) => {
 	const siteAuthority = getAuthority( siteUrl );
 	const allowedDomainList = [
-		siteAuthority,
-		...ALLOWED_RESOURCES.map( ( resource ) => resource.authority ),
+		...new Set( [
+			siteAuthority,
+			...ALLOWED_RESOURCES.map( ( resource ) => resource.authority ),
+		] ),
 	];
 
 	return (
