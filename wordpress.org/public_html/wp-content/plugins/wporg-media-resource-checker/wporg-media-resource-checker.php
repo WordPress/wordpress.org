@@ -43,4 +43,5 @@ function enqueue_block_editor_assets() {
 		[],
 		$script_asset['version']
 	);
+	wp_style_add_data( 'wporg-media-resource-checker', 'rtl', 'replace' );
 }
