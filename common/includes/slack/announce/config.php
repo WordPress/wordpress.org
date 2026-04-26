@@ -74,6 +74,15 @@ function get_whitelist() {
 			'danielbachhuber',
 			'schlessera',
 		),
+		'campusconnect' => array(
+			// Inherits from #community-team.
+			// Additional Campus Connect mentors:
+			'evarlese',     // @erica on Slack
+			'webtechpooja', // @Pooja Derashri on Slack
+			'anandau14',    // @Anand on Slack
+			'devmuhib',     // @Muhibul Haque on Slack
+			'mosescursor',  // @Moses Cursor on Slack
+		),
 		'community-events' => array(
 			// Inherits from #community-team.
 		),
@@ -119,6 +128,7 @@ function get_whitelist() {
 			'James Roberts', // @jamesroberts on Slack
 			'JeffPaul',
 			'JoshuaWold',
+			'juanmaguitar',
 			'justinahinon',
 			'karmatosed',
 			'laurora', // @laura on Slack
@@ -153,6 +163,7 @@ function get_whitelist() {
 		) ),
 		'core-ai' => array_merge( get_committers(), array(
 			'isotropic', // @James LePage on Slack
+            'neel33', // @Neill McShea on Slack
 		) ),
 		'core-upgrade-install' => array_merge( get_committers(), array(
 			'afragen',
@@ -248,6 +259,7 @@ function get_whitelist() {
 		) ),
 		'core-passwords' => array_merge( get_committers(), array(
 			'georgestephanis',
+			'masteradhoc',
 			'valendesigns',
 		) ),
 		'core-php' => array_merge( get_committers(), array(
@@ -296,18 +308,22 @@ function get_whitelist() {
 			'Boniu91', // @Piotrek Boniu on Slack
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
+			'huzaifaalmesbah', // @Huzaifa Al Mesbah on Slack
 			'ironprogrammer',
+			'juanmaguitar', // @JuanMa on Slack
 			'justinahinon',
+			'krupajnanda',
 			'mobarak',
 			'monikarao',
 			'mosescursor', // @Moses Cursor on Slack
 			'nikunj8866',
+			'oglekler',
+			'ozgursar',
+			'psykro', // @Jonathan on Slack
+			'r1k0',
 			'ryan', // @boren on Slack
 			'SirLouen',
 			'webtechpooja', // @Pooja Derashri on Slack
-			'oglekler',
-			'krupajnanda',
-			'psykro', // @Jonathan on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'anlino', // @andersnoren on Slack
@@ -347,6 +363,7 @@ function get_whitelist() {
 			'chrisvanpatten',
 			'Clorith',
 			'DrewAPicture', // @drew on Slack
+			'estelaris',
 			'hlashbrooke',
 			'Kenshino',
 			'lizkaraffa',
@@ -378,6 +395,10 @@ function get_whitelist() {
 			'mariaojob', // @Mary Job on Slack
 			'sterndata',
 		),
+		'gatherpress' => array(
+			'mauteri',
+			'patricia70', // @patriciabt on Slack
+		),
 		'glotpress' => array(
 			'Amieiro',
 			'ocean90',
@@ -390,6 +411,7 @@ function get_whitelist() {
 			'kirasong',
 			'jadonn',
 			'JavierCasares',
+			'jazzs3quence',
 			'jessibelle',
 			'amykamala', // @amy kamala on Slack
 			'brechtryckaert',

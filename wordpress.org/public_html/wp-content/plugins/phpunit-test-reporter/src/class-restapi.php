@@ -13,6 +13,30 @@ class RestAPI {
 	public static function register_routes() {
 		register_rest_route(
 			'wp-unit-test-api/v1',
+			'rtc-performance-results',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'add_performance_results_callback' ),
+				'args'                => array(
+					'results' => array(
+						'required'          => true,
+						'description'       => 'Performance test results in JSON format.',
+						'type'              => 'string',
+						'validate_callback' => array( __CLASS__, 'validate_callback' ),
+					),
+					'env'     => array(
+						'required'          => true,
+						'description'       => 'JSON blob containing environment information.',
+						'type'              => 'string',
+						'validate_callback' => array( __CLASS__, 'validate_callback' ),
+					),
+				),
+				'permission_callback' => array( __CLASS__, 'permission' ),
+			)
+		);
+
+		register_rest_route(
+			'wp-unit-test-api/v1',
 			'results',
 			array(
 				'methods'             => 'POST',
@@ -93,6 +117,72 @@ class RestAPI {
 			);
 		}
 		return true;
+	}
+
+	public static function add_performance_results_callback( $data ) {
+		$parameters = $data->get_params();
+
+		$env     = json_decode( $parameters['env'], true );
+		$results = json_decode( $parameters['results'], true );
+
+		$php_version = '';
+		if ( ! empty( $env['php_version'] ) ) {
+			$parts       = explode( '.', $env['php_version'] );
+			$php_version = $parts[0] . '.' . $parts[1];
+		}
+
+		$db_version = ! empty( $env['mysql_version'] ) ? $env['mysql_version'] : '';
+		$wp_version = ! empty( $env['wp_version'] ) ? wp_kses( $env['wp_version'], [] ) : '';
+		$env_name   = ! empty( $env['label'] ) ? wp_kses( $env['label'], [] ) : '';
+
+		$current_user = wp_get_current_user();
+
+		$post_title = $current_user->user_login;
+		if ( $env_name ) {
+			$post_title .= ' - ' . $env_name;
+		}
+		if ( $wp_version ) {
+			$post_title .= ' - WP ' . $wp_version;
+		}
+		if ( $php_version ) {
+			$post_title .= ' - PHP ' . $php_version;
+		}
+
+		$post_id = wp_insert_post(
+			array(
+				'post_title'   => $post_title,
+				'post_content' => '',
+				'post_status'  => 'publish',
+				'post_author'  => $current_user->ID,
+				'post_type'    => 'rtc-perf-result',
+			),
+			true
+		);
+
+		if ( is_wp_error( $post_id ) ) {
+			return $post_id;
+		}
+
+		if ( $php_version ) {
+			wp_set_object_terms( $post_id, array( $php_version ), 'php-version' );
+		}
+		if ( $db_version ) {
+			wp_set_object_terms( $post_id, array( $db_version ), 'db-version' );
+		}
+		update_post_meta( $post_id, 'env', $env );
+		update_post_meta( $post_id, 'results', $results );
+		update_post_meta( $post_id, 'environment_name', $env_name );
+
+		$response = new \WP_REST_Response(
+			array(
+				'id'   => $post_id,
+				'link' => get_permalink( $post_id ),
+			)
+		);
+		$response->set_status( 201 );
+		$response->header( 'Content-Type', 'application/json' );
+
+		return $response;
 	}
 
 	public static function add_results_callback( $data ) {

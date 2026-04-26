@@ -200,7 +200,8 @@ function loader_src( $src, $handle ) {
 		'wporg-plugins-faq',
 	];
 
-	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
+	$use_cdn = ( 'production' === wp_get_environment_type() ) || ( defined( 'USE_WPORG_CDN' ) && USE_WPORG_CDN );
+	if ( ! $use_cdn ) {
 		return $src;
 	}
 
@@ -350,7 +351,7 @@ function social_meta_data() {
 	}
 
 	$icon   = Template::get_plugin_icon();
-	$banner = Template::get_plugin_banner();
+	$banner = Template::get_plugin_banner() ?: [];
 
 	$banner['banner']    = $banner['banner'] ?? false;
 	$banner['banner_2x'] = $banner['banner_2x'] ?? false;

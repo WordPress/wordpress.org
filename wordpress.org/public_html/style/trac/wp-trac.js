@@ -119,6 +119,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 			tracker_text: 'WordPress Playground GitHub Repository',
 			enable_copy: true
 		},
+		'Showcase': {
+			tracker: 'https://github.com/WordPress/wporg-showcase-2022/issues/new',
+			tracker_text: 'WordPress.org Showcase GitHub Repository',
+			enable_copy: true,
+			allow_bypass: true
+		},
 		'bbpress.org' : {
 			tracker: 'https://bbpress.trac.wordpress.org/newticket?component=Site+-+bbPress.org',
 			tracker_text: 'bbPress Trac instance',
@@ -1750,11 +1756,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				}
 
 				// This seems to be the easiest place to find the current Ticket ID..
-				var canonical = $( 'link[rel="canonical"]' ).prop( 'href' );
-				if ( canonical ) {
-					ticket = canonical.match( /\/ticket\/(\d+)$/ )[1];
-				}
-
+				ticket = $( 'link[rel="canonical"]' )?.prop( 'href')?.match( /\/ticket\/(\d+)$/ )?.[1];
 				if ( ! ticket ) {
 					return;
 				}

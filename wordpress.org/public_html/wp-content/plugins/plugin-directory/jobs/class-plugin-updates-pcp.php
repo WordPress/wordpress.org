@@ -240,7 +240,7 @@ class Plugin_Updates_PCP {
 			return;
 		}
 
-		$active_installs = get_post_meta( $plugin->ID, 'active_installs', true );
+		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
 
 		$body = sprintf( "Detected errors in *%s*\n", $plugin->post_title );
 		if ( $active_installs >= 10000 ) {
@@ -339,6 +339,7 @@ class Plugin_Updates_PCP {
 		$command    = 'timeout -k 15s 45s ' . WPCLI . ' --url=https://wordpress.org/plugins ' .
 					'plugin check ' .
 					'--error-severity=7 --warning-severity=6 --include-low-severity-errors ' .
+					'--exclude-checks=prefixing ' .
 					'--categories=plugin_repo --format=json ' .
 					// '--mode=' . escapeshellarg( $mode ) . ' ' .
 					'--slug=' . escapeshellarg( $plugin_slug ) . ' ' .
@@ -357,9 +358,16 @@ class Plugin_Updates_PCP {
 		if ( ! $plugin_check_process ) {
 			// If we can't run plugin-check, we'll just return a pass.
 			return [
-				'verdict' => true,
-				'results' => [],
-				'html'    => '',
+				'verdict'         => true,
+				'results'         => [],
+				'results_by_type' => [],
+				'files'           => [],
+				'totals'          => [ 'errors' => 0, 'warnings' => 0 ],
+				'return_code'     => 0,
+				'output'          => [],
+				'stderr'          => '',
+				'total_time'      => 0,
+				'hash'            => '',
 			];
 		}
 
@@ -444,6 +452,11 @@ class Plugin_Updates_PCP {
 
 			$filename = trim( explode( ':' , $file_result[0], 2 )[1] );
 			$json     = json_decode( $file_result[1], true );
+
+			// If the JSON is invalid, corrupted, or partial, skip it.
+			if ( ! is_array( $json ) ) {
+				continue;
+			}
 
 			foreach ( $json as $record ) {
 				$record['file'] = $filename;

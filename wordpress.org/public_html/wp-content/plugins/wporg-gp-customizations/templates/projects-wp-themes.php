@@ -21,7 +21,7 @@ gp_tmpl_header();
 	<div class="project-box">
 		<div class="project-box-header">
 			<div class="project-icon">
-				<?php echo $project->icon; ?>
+				<?php echo $icon; ?>
 			</div>
 
 			<ul class="project-meta">

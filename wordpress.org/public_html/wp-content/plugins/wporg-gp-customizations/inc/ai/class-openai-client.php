@@ -83,10 +83,10 @@ class OpenAI_Client {
 
 		$this->api_key     = $config['openai_api_key'] ?? gp_array_get( $user_options, 'openai_api_key', '' );
 		$this->model       = $config['model'] ?? gp_array_get( $user_options, 'openai_model', 'gpt-3.5-turbo' );
-		$this->temperature = $config['temperature'] ?? gp_array_get( $user_options, 'openai_temperature', 0 );
+		$this->temperature = $config['temperature'] ?? (float) gp_array_get( $user_options, 'openai_temperature', 0 );
 		$this->timeout     = $config['timeout'] ?? 20;
 
-		if ( ! is_float( $this->temperature ) || $this->temperature < 0 || $this->temperature > 2 ) {
+		if ( $this->temperature < 0 || $this->temperature > 2 ) {
 			$this->temperature = 0;
 		}
 		// Temperature is not supported in some models (o1, o3, o4, gpt-5 series).
@@ -268,7 +268,7 @@ class OpenAI_Client {
 	/**
 	 * Log an error.
 	 *
-	 * Ignores 429 errors in production to reduce log noise.
+	 * Ignores 401/429 errors in production to reduce log noise.
 	 *
 	 * @param string $endpoint Endpoint that failed.
 	 * @param string $message  Error message.
@@ -280,7 +280,7 @@ class OpenAI_Client {
 		} else {
 			if ( $response && ! is_wp_error( $response ) ) {
 				$status_code = wp_remote_retrieve_response_code( $response );
-				if ( 429 === $status_code ) {
+				if ( 429 === $status_code || 401 === $status_code ) {
 					return;
 				}
 			}

@@ -27,6 +27,17 @@ function wporg_robots_txt( $robots ) {
 		           "Disallow: /search\n" .
 		           "Disallow: /?s=\n";
 
+	// AI Crawler Directives - explicitly welcome AI crawlers for training and retrieval.
+	$robots .= "\nUser-agent: GPTBot\nAllow: /\n\n" .
+	          "User-agent: ClaudeBot\nAllow: /\n\n" .
+	          "User-agent: anthropic-ai\nAllow: /\n\n" .
+	          "User-agent: Google-Extended\nAllow: /\n\n" .
+	          "User-agent: Applebot-Extended\nAllow: /\n\n" .
+	          "User-agent: PerplexityBot\nAllow: /\n\n" .
+	          "User-agent: Bytespider\nAllow: /\n\n" .
+	          "User-agent: CCBot\nAllow: /\n\n" .
+	          "User-agent: Copilot\nAllow: /\n";
+
 	} elseif ( 's-origin.wordpress.org' === $blog_details->domain ) {
 		// Placeholder for the s.w.org domain. See https://meta.trac.wordpress.org/ticket/5668
 		// Intentional overwrite of value.

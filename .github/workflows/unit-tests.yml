@@ -1,0 +1,95 @@
+name: Unit Tests
+
+on:
+  pull_request:
+  push:
+    branches: [ trunk ]
+
+jobs:
+  # Standalone PHP tests — no WordPress or database dependency.
+  php-standalone:
+    name: "PHP: ${{ matrix.name }}"
+    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Serve Happy API
+            working-directory: api.wordpress.org/public_html/core/serve-happy/1.0
+            phpunit-args: "--no-configuration --exclude-group serve-happy-live-http --bootstrap tests/bootstrap.php tests/"
+          - name: Browse Happy API
+            working-directory: api.wordpress.org/public_html/core/browse-happy/1.0
+            phpunit-args: "--no-configuration tests/phpunit/tests/"
+          - name: Slack Trac Bot
+            working-directory: common/includes/tests/slack/trac
+            phpunit-args: "bot.php"
+          - name: Slack Props Library
+            working-directory: common/includes/slack/props/tests
+            phpunit-args: "--bootstrap /tmp/phpunit-bootstrap.php ."
+            bootstrap: wpdb-stub
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: phpunit:^11
+
+      - name: Create wpdb stub bootstrap
+        if: matrix.bootstrap == 'wpdb-stub'
+        run: |
+          cat > /tmp/phpunit-bootstrap.php << 'PHPEOF'
+          <?php
+          class wpdbStub {
+              public function prepare( $query, ...$args ) { return $query; }
+              public function get_results( $query, $output = 'OBJECT' ) { return []; }
+          }
+          PHPEOF
+
+      - name: Run PHPUnit
+        working-directory: ${{ matrix.working-directory }}
+        run: phpunit ${{ matrix.phpunit-args }}
+
+  # WordPress-dependent PHP tests — require wp-env (Docker).
+  php-wordpress:
+    name: "WP: ${{ matrix.name }}"
+    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Handbook Plugin
+            working-directory: wordpress.org/public_html/wp-content/plugins/handbook
+            container: tests-cli
+            plugin-name: handbook
+            phpunit-args: "--no-configuration --bootstrap phpunit/bootstrap.php phpunit/tests/"
+          - name: Plugin Directory
+            working-directory: environments
+            wp-env-args: "--config plugin-directory/.wp-env.test.json"
+            container: tests-cli
+            plugin-name: plugin-directory
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install wp-env
+        run: npm -g install @wordpress/env
+
+      - name: Start wp-env
+        working-directory: ${{ matrix.working-directory }}
+        run: wp-env ${{ matrix.wp-env-args || '' }} start
+
+      - name: Install PHPUnit Polyfills
+        working-directory: ${{ matrix.working-directory }}
+        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} composer require --dev yoast/phpunit-polyfills:^4.0 --working-dir=/wordpress-phpunit
+
+      - name: Run PHPUnit
+        working-directory: ${{ matrix.working-directory }}
+        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} --env-cwd=wp-content/plugins/${{ matrix.plugin-name }} phpunit ${{ matrix.phpunit-args || '' }}

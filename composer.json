@@ -1,0 +1,24 @@
+{
+	"name": "wordpress/wordpress.org",
+	"description": "WordPress.org website code",
+	"homepage": "https://wordpress.org",
+	"license": "GPL-2.0-or-later",
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"require-dev": {
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
+		"wp-coding-standards/wpcs": "^3.3.0",
+		"phpcompatibility/phpcompatibility-wp": "*",
+		"sirbrillig/phpcs-changed": "^2.12.0",
+		"phpunit/phpunit": "^11.0",
+		"yoast/phpunit-polyfills": "^4.0"
+	},
+	"scripts": {
+		"lint": "phpcs",
+		"format": "phpcbf -p",
+		"phpcs-changed": "BASE_REF=trunk php .github/bin/phpcs-branch.php"
+	}
+}

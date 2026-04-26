@@ -2,8 +2,6 @@
 namespace WordPressdotorg\Plugin_Directory\API;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
-use WordPressdotorg\Plugin_Directory\Plugin_I18n;
-use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * @package WordPressdotorg_Plugin_Directory
@@ -14,7 +12,6 @@ class Base {
 	 */
 	public static function init() {
 		self::load_routes();
-		self::load_fields();
 	}
 
 	/**
@@ -39,17 +36,6 @@ class Base {
 		new Routes\Plugin_Upload();
 		new Routes\Plugin_Blueprint();
 		new Routes\Plugin_Review();
-	}
-
-	/**
-	 * Loads all API field for existing WordPress object types we offer.
-	 */
-	public static function load_fields() {
-		new Fields\Plugin\Banners();
-		new Fields\Plugin\Icons();
-		new Fields\Plugin\Rating();
-		new Fields\Plugin\Ratings();
-		new Fields\Plugin\Screenshots();
 	}
 
 	/**

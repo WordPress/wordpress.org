@@ -22,7 +22,7 @@
 			) );
 		?>
 
-		<?php edit_post_link( __( 'Edit', 'jobswp' ), '<footer class="entry-meta grid_9"><span class="edit-link">', '</span></footer>' ); ?>
+		<?php edit_post_link( __( 'Edit', 'jobswp' ), '<footer class="entry-meta"><span class="edit-link">', '</span></footer>' ); ?>
 	</div><!-- .entry-content -->
 </article><!-- #post-## -->
 

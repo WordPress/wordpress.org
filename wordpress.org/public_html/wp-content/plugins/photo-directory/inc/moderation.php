@@ -793,7 +793,7 @@ https://wordpress.org/photos/
 				'meta_query'     => User::get_moderator_meta_query( $user_id, true ),
 			] );
 
-			$output = $query->found_posts;
+			$output = number_format_i18n( $query->found_posts );
 		}
 
 		return $output;

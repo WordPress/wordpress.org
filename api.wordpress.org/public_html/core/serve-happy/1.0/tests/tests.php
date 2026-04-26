@@ -1,11 +1,11 @@
 <?php
 namespace WordPressdotorg\API\Serve_Happy;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group serve-happy
  */
-class Tests_API_Responses extends PHPUnit_Framework_TestCase {
+class Tests_API_Responses extends TestCase {
 
 	function dataprovider_determine_request_valid() {
 		return [

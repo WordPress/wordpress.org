@@ -116,7 +116,6 @@ class Official_WordPress_Events {
 
 		foreach ( $events as $event ) {
 			$row_values = array(
-				'id'              => null,
 				'type'            => $event->type,
 				'source_id'       => $event->source_id,
 				'status'          => $event->status,
@@ -133,6 +132,7 @@ class Official_WordPress_Events {
 				'country'         => $event->country_code,
 				'latitude'        => $event->latitude,
 				'longitude'       => $event->longitude,
+				'created_at'      => gmdate( 'Y-m-d H:i:s' ),
 			);
 
 			// Latitude and longitude are required by the database, so skip events that don't have one.
@@ -140,18 +140,61 @@ class Official_WordPress_Events {
 				continue;
 			}
 
-			/*
-			 * Insert the events into the table, without creating duplicates
-			 *
-			 * Note: Since replace() is matching against a unique key rather than the primary `id` key, it's
-			 * expected for each row to be deleted and re-inserted, making the IDs increment each time.
-			 *
-			 * See http://stackoverflow.com/a/12205366/450127
-			 */
-			$wpdb->replace( self::EVENTS_TABLE, $row_values );
+			$keys_not_to_update = array(
+				'created_at',
+			);
+
+			$this->insert_on_duplicate_key_update(
+				self::EVENTS_TABLE,
+				$row_values,
+				array_diff( array_keys( $row_values ), $keys_not_to_update )
+			);
 		}
 
 		$this->log( "finished job\n\n" );
+	}
+
+	/**
+	 * INSERT INTO ... ON DUPLICATE KEY UPDATE ... helper
+	 *
+	 * @param string $table       The table to insert into.
+	 * @param array  $data        Associative array of field => value pairs to insert.
+	 * @param array  $update_keys Array of field names to update on duplicate key.
+	 */
+	protected function insert_on_duplicate_key_update( string $table, array $data, array $update_keys ) {
+		global $wpdb;
+
+		$field_placeholders = [];
+		$value_placeholders = [];
+		$duplicate_sets     = [];
+		$field_args         = [];
+		$values_args        = [];
+		$duplicate_args     = [];
+		foreach ( $data as $field => $value ) {
+			$field_placeholders[] = '%i';
+			$value_placeholders[] = '%s';
+
+			$field_args[]  = $field;
+			$values_args[] = $value;
+
+			if ( $update_keys && in_array( $field, $update_keys, true ) ) {
+				$duplicate_sets[] = '%i = VALUES(%i)';
+				$duplicate_args[] = $field;
+				$duplicate_args[] = $field;
+			}
+		}
+
+		$field_placeholders = implode( ', ', $field_placeholders );
+		$value_placeholders = implode( ', ', $value_placeholders );
+		$duplicate_sets     = implode( ', ', $duplicate_sets );
+
+		return $wpdb->query( $wpdb->prepare(
+			"INSERT INTO %i ( {$field_placeholders} ) VALUES ( {$value_placeholders} ) ON DUPLICATE KEY UPDATE {$duplicate_sets}",
+			$table,
+			...$field_args,
+			...$values_args,
+			...$duplicate_args
+		) );
 	}
 
 	/**
@@ -386,6 +429,26 @@ class Official_WordPress_Events {
 					}
 				}
 
+				// Correct any WordCamp events that have an invalid location specified.
+				if ( $event['location'] != 'online' && ! str_contains( $event['location'], ',' ) ) {
+					$geocoded_location = implode(
+						', ',
+						array_filter(
+							array(
+								$wordcamp->{'_venue_city'} ?: $event['location'],
+								$wordcamp->{'_venue_country_name'} ?: $wordcamp->{'_host_country_name'},
+							)
+						)
+					);
+
+					if ( str_contains( $geocoded_location, ',' ) ) {
+						$this->log( "Using $geocoded_location instead of {$event['location']} for WordCamp {$wordcamp->id}" );
+
+						$event['location'] = $geocoded_location;
+					}
+				}
+
+				// Ensure end timestamp is never before start timestamp.
 				if ( $event['start_timestamp'] ) {
 					if ( empty( $event['end_timestamp'] ) || $event['end_timestamp'] < $event['start_timestamp'] ) {
 						$event['end_timestamp'] = $event['start_timestamp'];

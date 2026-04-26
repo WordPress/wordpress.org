@@ -199,7 +199,7 @@ class WPOrg_WP_Activity_Notifier {
 			'url'       => get_permalink( $post->ID ),
 		);
 
-		Profiles\api( $args );
+		Profiles\queue( $args );
 	}
 
 	/**
@@ -287,7 +287,7 @@ class WPOrg_WP_Activity_Notifier {
 			'url'        => get_comment_link( $comment ),
 		);
 
-		Profiles\api( $args );
+		Profiles\queue( $args );
 	}
 
 	/**
@@ -338,7 +338,7 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
-		Profiles\api( $args );
+		Profiles\queue( $args );
 	}
 
 	/**
@@ -407,7 +407,7 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
-		Profiles\api( $args );
+		Profiles\queue( $args );
 	}
 
 	/**

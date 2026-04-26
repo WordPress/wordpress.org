@@ -762,6 +762,9 @@ class WPORG_Themes_Upload {
 			}
 		}
 
+		// Create or update the theme post before Trac so the post ID is available for the preview link.
+		$this->create_or_update_theme_post();
+
 		// Create a Trac ticket for this theme version.
 		if ( $args['create_trac_ticket'] ) {
 			// Get all Trac ticket information set up.
@@ -770,10 +773,14 @@ class WPORG_Themes_Upload {
 			// Talk to Trac and let them know about our new version. Or new theme.
 			$ticket_id = $this->create_or_update_trac_ticket();
 
-			if ( ! $ticket_id  ) {
+			if ( ! $ticket_id ) {
 				if ( $args['commit_to_svn'] ) {
 					// Since it's been added to SVN at this point, remove it from SVN to prevent future issues.
 					$this->remove_from_svn( 'Trac ticket creation failed.' );
+				}
+
+				if ( $is_new_upload && $this->theme_post ) {
+					wp_delete_post( $this->theme_post->ID, true );
 				}
 
 				return new WP_Error(
@@ -785,10 +792,20 @@ class WPORG_Themes_Upload {
 					)
 				);
 			}
+
+			// Write the ticket ID to post meta now that the Trac ticket exists.
+			$this->update_versioned_meta( '_ticket_id', $ticket_id );
+			add_post_meta( $this->theme_post->ID, sanitize_key( '_trac_ticket_' . $this->theme->get( 'Version' ) ), $ticket_id );
 		}
 
-		// Add a or update the Theme Directory entry for this theme.
-		$this->create_or_update_theme_post();
+		/*
+		 * Discard versions that are awaiting review, and maybe set this upload as live.
+		 * This runs after Trac ticket creation since auto-approved updates change version_status to 'live'.
+		 */
+		wporg_themes_update_version_status( $this->theme_post->ID, $this->theme->get( 'Version' ), $this->version_status );
+
+		// Refresh the post to include all meta written above.
+		$this->theme_post = $this->get_theme_post();
 
 		// Send theme author an email for peace of mind.
 		$this->send_email_notification();
@@ -1330,19 +1347,28 @@ TICKET;
 	}
 
 	/**
+	 * Update a versioned post meta value for the current theme version.
+	 *
+	 * @param string $meta_key   The meta key to update.
+	 * @param mixed  $meta_value The meta value to set for the current version.
+	 */
+	protected function update_versioned_meta( $meta_key, $meta_value ) {
+		$post_id   = $this->theme_post->ID;
+		$meta_data = array_filter( (array) get_post_meta( $post_id, $meta_key, true ) );
+
+		$meta_data[ $this->theme->get( 'Version' ) ] = $meta_value;
+
+		update_post_meta( $post_id, $meta_key, $meta_data );
+	}
+
+	/**
 	 * Creates or updates a theme post.
 	 */
 	public function create_or_update_theme_post() {
 		$upload_date = current_time( 'mysql' );
 
-		// If we already have a post, get its ID.
-		if ( ! empty( $this->theme_post ) ) {
-			$post_id = $this->theme_post->ID;
-			// see wporg_themes_approve_version() for where the post is updated.
-
-		// Otherwise create it for this new theme.
-		} else {
-
+		// Create a new theme post if one doesn't exist yet.
+		if ( empty( $this->theme_post ) ) {
 			// Filter the tags to those that exist on the site already.
 			$tags = array_intersect(
 				$this->theme->get( 'Tags' ),
@@ -1366,6 +1392,8 @@ TICKET;
 				'post_type'      => 'repopackage',
 				'tags_input'     => $tags,
 			) );
+
+			$this->theme_post = get_post( $post_id );
 		}
 
 		// Finally, add post meta.
@@ -1376,7 +1404,6 @@ TICKET;
 			'_requires'     => $this->sanitize_version_like_field( $this->theme->get( 'RequiresWP' ), 'requires' ),
 			'_requires_php' => $this->sanitize_version_like_field( $this->theme->get( 'RequiresPHP' ) ),
 			'_upload_date'  => $upload_date,
-			'_ticket_id'    => $this->trac_ticket->id,
 			'_screenshot'   => $this->theme->screenshot,
 		);
 
@@ -1386,22 +1413,7 @@ TICKET;
 		}
 
 		foreach ( $post_meta as $meta_key => $meta_value ) {
-			$meta_data = array_filter( (array) get_post_meta( $post_id, $meta_key, true ) );
-			$meta_data[ $this->theme->get( 'Version' ) ] = $meta_value;
-			update_post_meta( $post_id, $meta_key, $meta_data );
-		}
-
-		// Add an additional row with the trac ticket ID, to make it possible to find the post by this ID later.
-		if ( $post_meta['_ticket_id'] ) {
-			add_post_meta( $post_id, sanitize_key( '_trac_ticket_' . $this->theme->get( 'Version' ) ), $post_meta['_ticket_id'] );
-		}
-
-		// Discard versions that are awaiting review, and maybe set this upload as live.
-		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), $this->version_status );
-
-		// refresh the post to avoid stale data.
-		if ( $post_id ) {
-			$this->theme_post = $this->get_theme_post();
+			$this->update_versioned_meta( $meta_key, $meta_value );
 		}
 	}
 

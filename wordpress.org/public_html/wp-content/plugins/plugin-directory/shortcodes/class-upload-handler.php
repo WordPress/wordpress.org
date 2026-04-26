@@ -9,9 +9,10 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Trademarks;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
-use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
+use WordPressdotorg\Plugin_Directory\Clients\Helpscout as Helpscout_Client;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submission_Email;
 
 /**
@@ -67,6 +68,113 @@ class Upload_Handler {
 	}
 
 	/**
+	 * Whether uploads are currently accepted for the current user.
+	 *
+	 * @param bool $is_update Whether this is an update to an existing plugin.
+	 * @return true|WP_Error True if uploads are accepted, WP_Error otherwise.
+	 */
+	public static function accepting_uploads( bool $is_update = false ) {
+		if ( defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY ) {
+			return new WP_Error(
+				'submissions_paused',
+				__( 'New plugin submissions are temporarily disabled during the holiday break.', 'wporg-plugins' )
+			);
+		}
+
+		if (
+			function_exists( 'WordPressdotorg\Two_Factor\user_requires_2fa' ) &&
+			class_exists( '\Two_Factor_Core' ) &&
+			\WordPressdotorg\Two_Factor\user_requires_2fa( wp_get_current_user() ) &&
+			! \Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
+		) {
+			return new WP_Error(
+				'2fa_required',
+				__( 'Two-factor authentication must be enabled on your account before submitting plugins.', 'wporg-plugins' )
+			);
+		}
+
+		if ( ! $is_update && function_exists( 'is_email_address_unsafe' ) && is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
+			return new WP_Error(
+				'unsafe_email',
+				__( 'Your email host has email deliverability problems. Please update your email address first.', 'wporg-plugins' )
+			);
+		}
+
+		if ( ! $is_update ) {
+			$capacity = self::has_queue_capacity();
+			if ( is_wp_error( $capacity ) ) {
+				return $capacity;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the current user has capacity to submit another plugin to the queue.
+	 *
+	 * Authors can have 1 plugin in the queue, or 10 if they have 1M+ total active installs.
+	 *
+	 * @return true|WP_Error True if under the limit, WP_Error with 'count' and 'maximum' data otherwise.
+	 */
+	public static function has_queue_capacity() {
+		$maximum = 1;
+
+		$active_installs = wp_list_pluck(
+			get_posts(
+				array(
+					'author'      => get_current_user_id(),
+					'post_type'   => 'plugin',
+					'post_status' => 'publish',
+					'numberposts' => -1,
+				)
+			),
+			'_active_installs'
+		);
+
+		$user_active_installs = array_sum( array_map( 'absint', $active_installs ) );
+
+		if ( $user_active_installs > 1000000 ) {
+			$maximum = 10;
+		}
+
+		$in_queue = get_posts(
+			array(
+				'post_type'   => 'plugin',
+				'post_status' => array( 'new', 'pending', 'approved' ),
+				'author'      => get_current_user_id(),
+				'numberposts' => -1,
+				'fields'      => 'ids',
+			)
+		);
+
+		$count = count( $in_queue );
+
+		if ( $count >= $maximum ) {
+			return new WP_Error(
+				'queue_limit',
+				sprintf(
+					/* translators: 1: number of plugins in queue, 2: maximum allowed */
+					_n(
+						'You already have %1$d plugin in the review queue (maximum %2$d). Please wait for your existing submission to be reviewed.',
+						'You already have %1$d plugins in the review queue (maximum %2$d). Please wait for your existing submissions to be reviewed.',
+						$count,
+						'wporg-plugins'
+					),
+					$count,
+					$maximum
+				),
+				array(
+					'count'   => $count,
+					'maximum' => $maximum,
+				)
+			);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Processes the plugin upload.
 	 *
 	 * Runs various tests and creates plugin post.
@@ -100,7 +208,7 @@ class Upload_Handler {
 		}
 
 		// Allow plugin reviewers to bypass some restrictions.
-		if ( $updating_existing && current_user_can( 'approve_plugins' ) && ! $has_upload_token ) {
+		if ( $updating_existing && current_user_can( 'plugin_approve' ) && ! $has_upload_token ) {
 			$has_upload_token = true;
 		}
 
@@ -527,8 +635,8 @@ class Upload_Handler {
 		}
 
 		// Store metadata about the uploaded ZIP.
-		// Count lines of PHP code, this is not 100% accurate but it's a good indicator.
-		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
+		// Count lines of PHP code, this is not 100% accurate but it's a good indicator. Excludes 'vendor', 'vendor-prefixed', and 'vendor_prefixed' directories.
+		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -not -path '*/vendor/*' -not -path '*/vendor*prefixed/*' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
 
 		update_post_meta( $plugin_post->ID, '_submitted_zip_size', filesize( get_attached_file( $attachment->ID ) ) );
 		update_post_meta( $plugin_post->ID, '_submitted_zip_loc', $lines_of_code );
@@ -706,14 +814,14 @@ class Upload_Handler {
 					$maybe_false_positive = __( 'This may be a false-positive, and will be manually checked by a reviewer.', 'wporg-plugins' );
 				}
 
-				foreach ( $result_set as $result ) {
+				foreach ( $result_set as $check_result ) {
 					$html .= sprintf(
 						'<li>%s <a href="%s" title="%s">%s</a>: %s</li>',
-						esc_html( $result['file'] ),
-						esc_url( $result['docs'] ?? '' ),
+						esc_html( $check_result['file'] ),
+						esc_url( $check_result['docs'] ?? '' ),
 						esc_attr( $maybe_false_positive ),
-						esc_html( "{$result_label}: {$result['code']}" ),
-						$result['message'] // Already escaped.
+						esc_html( "{$result_label}: {$check_result['code']}" ),
+						$check_result['message'] // Already escaped.
 					);
 				}
 			}
@@ -743,9 +851,9 @@ class Upload_Handler {
 
 			// Include a simplified / merged version of the results for review.
 			$group_by_code = [ 'ERROR' => [], 'WARNING' => [] ];
-			foreach ( $results as $result ) {
-				$group_by_code[ $result['type'] ][ $result['code'] ] ??= [];
-				$group_by_code[ $result['type'] ][ $result['code'] ][] = $result;
+			foreach ( $results as $check_result ) {
+				$group_by_code[ $check_result['type'] ][ $check_result['code'] ] ??= [];
+				$group_by_code[ $check_result['type'] ][ $check_result['code'] ][] = $check_result;
 			}
 			foreach ( $group_by_code as $type => $codes ) {
 				foreach ( $codes as $code_results ) {
@@ -813,7 +921,17 @@ class Upload_Handler {
 			'post_excerpt' => $this->plugin['Description'],
 			'post_content' => esc_html( $upload_comment )
 		);
-		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details );
+
+		/**
+		 * Filters the overrides passed to media_handle_upload() when saving a plugin ZIP.
+		 *
+		 * The overrides array is forwarded to wp_handle_upload(). See the
+		 * $overrides parameter of wp_handle_upload() for accepted keys.
+		 *
+		 * @param array $overrides Upload overrides.
+		 */
+		$overrides  = apply_filters( 'wporg_plugin_upload_overrides', array( 'test_form' => false ) );
+		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details, $overrides );
 
 		remove_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		remove_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
@@ -872,7 +990,7 @@ class Upload_Handler {
 			return false;
 		}
 
-		return Tools::get_helpscout_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+		return Helpscout::get_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
 	}
 
 	/**
@@ -920,7 +1038,7 @@ class Upload_Handler {
 			'status' => 'active',
 		];
 
-		$result = HelpScout::api(
+		$result = Helpscout_Client::api(
 			'/v2/conversations/' . $review_email->id . '/reply',
 			$payload,
 			'POST',

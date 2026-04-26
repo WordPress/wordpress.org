@@ -126,6 +126,24 @@ final class HelpHub_Post_Types {
 		require_once( dirname( __FILE__ ) . '/class-helphub-post-types-post-type.php' );
 		require_once( dirname( __FILE__ ) . '/class-helphub-post-types-taxonomy.php' );
 
+		register_activation_hook( __FILE__, array( $this, 'install' ) );
+
+		// Delay post type and taxonomy registration until init to avoid loading translations too early.
+		add_action( 'init', array( $this, 'register_post_types_and_taxonomies' ), 0 );
+		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
+		add_action( 'pre_get_posts', array( $this, 'fix_archive_category' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
+	} // End __construct()
+
+	/**
+	 * Register post types and taxonomies.
+	 *
+	 * Hooked to init to avoid loading translations too early.
+	 *
+	 * @access public
+	 * @since  1.0.0
+	 */
+	public function register_post_types_and_taxonomies() {
 		$this->post_types['post']            = new HelpHub_Post_Types_Post_Type(
 			'post',
 			__( 'Post', 'wporg-forums' ),
@@ -161,18 +179,9 @@ final class HelpHub_Post_Types {
 			'wordpress-versions'
 		);
 
-		/* Post Types - End */
-
-		// Register an example taxonomy. To register more taxonomies, duplicate this line.
 		$this->taxonomies['helphub_category']      = new HelpHub_Post_Types_Taxonomy( array( 'post', 'helphub_article' ), 'category', __( 'Category', 'wporg-forums' ), __( 'Categories', 'wporg-forums' ) );
 		$this->taxonomies['helphub_major_release'] = new HelpHub_Post_Types_Taxonomy( 'helphub_version', 'helphub_major_release', __( 'Major Release', 'wporg-forums' ), __( 'Major Releases', 'wporg-forums' ) );
-
-		register_activation_hook( __FILE__, array( $this, 'install' ) );
-
-		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
-		add_action( 'pre_get_posts', array( $this, 'fix_archive_category' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
-	} // End __construct()
+	}
 
 	/**
 	 * Main HelpHub_Post_Types Instance

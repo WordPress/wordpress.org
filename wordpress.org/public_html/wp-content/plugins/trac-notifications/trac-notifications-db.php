@@ -5,6 +5,8 @@
  * It must work without any other dependencies, such as WordPress.
  */
 class Trac_Notifications_DB implements Trac_Notifications_API {
+	public $db;
+
 	function __construct( $db ) {
 		$this->db = $db;
 	}
@@ -255,6 +257,66 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			'authenticated' => 1,
 			'name'          => $name
 		) );
+	}
+
+	/**
+	 * Get tickets with the most multi-person activity in a given time window.
+	 *
+	 * Returns tickets sorted by number of distinct participants, then by
+	 * total change count. Only includes tickets with activity from at least
+	 * $min_participants distinct people.
+	 *
+	 * @param int $days           Number of days to look back.
+	 * @param int $min_participants Minimum distinct authors to qualify.
+	 * @param int $limit          Maximum tickets to return.
+	 * @return array
+	 */
+	function get_active_tickets( $days = 14, $min_participants = 3, $limit = 15 ) {
+		$days             = (int) max( 1, min( 90, (int) $days ) );
+		$min_participants = (int) max( 2, (int) $min_participants );
+		$limit            = (int) max( 1, min( 50, (int) $limit ) );
+
+		// Trac stores timestamps in microseconds.
+		$since = ( time() - ( 86400 * $days ) ) * 1000000;
+
+		// Note: Prepare not used here intentionally, due to lack of unquoted %d support. Variables savely cast above.
+		$rows = $this->db->get_results(
+			"SELECT tc.ticket,
+				t.summary,
+				t.status,
+				t.type,
+				t.component,
+				t.priority,
+				t.milestone,
+				t.owner,
+				COUNT(*) AS change_count,
+				COUNT(DISTINCT tc.author) AS participant_count,
+				MAX(tc.time) AS last_activity
+			FROM ticket_change tc
+				INNER JOIN ticket t ON tc.ticket = t.id
+			WHERE tc.time >= $since
+				AND tc.field <> 'cc'
+				AND NOT (tc.field = 'comment' AND tc.newvalue = '')
+				AND tc.author NOT IN ( 'slackbot', 'prbot' )
+			GROUP BY tc.ticket
+				HAVING participant_count >= $min_participants
+			ORDER BY participant_count DESC, change_count DESC
+			LIMIT $limit"
+		);
+
+		if ( ! $rows ) {
+			return array();
+		}
+
+		// Normalize types for JSON.
+		foreach ( $rows as &$row ) {
+			$row['ticket']            = (int) $row['ticket'];
+			$row['change_count']      = (int) $row['change_count'];
+			$row['participant_count'] = (int) $row['participant_count'];
+			$row['last_activity']     = (int) ( $row['last_activity'] / 1000000 ); // Convert to unix seconds.
+		}
+
+		return $rows;
 	}
 
 	function get_user_anonymization_items( $username ) {

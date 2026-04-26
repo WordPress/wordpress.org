@@ -248,8 +248,8 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
-				sprintf( __( 'Error fetching repository %s: %s', 'wporg-plugins' ), $svn_url, $export['errors'][0]['error_code'] ),
-				$export['errors']
+				sprintf( __( 'Error fetching repository %s: %s', 'wporg-plugins' ), $svn_url, $export['errors'][0]['error_code'] ?? 'unknown error' ),
+				$export['errors'] ?? array()
 			);
 			return false;
 		}

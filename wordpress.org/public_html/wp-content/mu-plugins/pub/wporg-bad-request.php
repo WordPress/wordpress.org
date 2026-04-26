@@ -95,6 +95,14 @@ function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
 		'tag_slug__and' => true,
 	];
 
+	// Fields that must be an array if set.
+	$must_be_array_fields = [
+		// Core treats this as an array before casting strings to arrays.
+		// See Theme Directory above.
+		// https://core.trac.wordpress.org/ticket/60745
+		'tag_slug__and' => true,
+	];
+
 	// Some fields only accept numeric values.
 	$must_be_num = [
 		'm'             => true,
@@ -123,6 +131,8 @@ function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
 			if ( array_filter( $vars[ $field ], function( $item ) { return ! is_scalar( $item ); } ) ) {
 				die_bad_request( "non-scalar value in {$field}[] in $ref" );
 			}
+		} elseif ( isset( $must_be_array_fields[ $field ] ) && ! is_array( $vars[ $field ] ) ) {
+			die_bad_request( "non-array $field in $ref" );
 		} else if ( ! is_scalar( $vars[ $field ] ) ) {
 			die_bad_request( "non-scalar $field in $ref" );
 		}
@@ -193,6 +203,26 @@ add_action( 'send_headers', function() {
 } );
 
 /**
+ * Detect non-scalar values in Pattern Directory query parameters.
+ *
+ * Scanners pass nested arrays like `curation[$in][]=all` which cause PHP
+ * warnings downstream when the value is used in esc_attr().
+ */
+add_action( 'send_headers', function() {
+	if ( ! str_starts_with( $_SERVER['REQUEST_URI'], '/patterns/' ) ) {
+		return;
+	}
+
+	$scalar_only = [ 'curation', 'pattern-categories' ];
+
+	foreach ( $scalar_only as $field ) {
+		if ( isset( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+			die_bad_request( "non-scalar $field in \$_REQUEST" );
+		}
+	}
+} );
+
+/**
  * Detect invalid requests from vulnerability scanners to Jetpack Share by Email forms.
  */
 add_action( 'send_headers', function() {
@@ -205,6 +235,7 @@ add_action( 'send_headers', function() {
 		'source_email',
 		'source_f_name',
 		'source_name',
+		'email-share-nonce',
 	];
 
 	foreach ( $share_by_email_fields as $field ) {
@@ -269,6 +300,22 @@ add_action( 'gp_init', function() {
 } );
 
 /**
+ * Detect invalid requests to the multisite user activation page.
+ * We don't use this at all on WordPress.org and it causes PHP fatals
+ * due to the mismatch between active themes and no plugins.
+ */
+add_action( 'init', function() {
+	if ( ! defined( 'WP_INSTALLING' ) || ! WP_INSTALLING ) {
+		return;
+	}
+
+	$path = parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH );
+	if ( str_ends_with( $path, '/wp-activate.php' ) ) {
+		die_bad_request( 'Invalid request to wp-activate.php' );
+	}
+} );
+
+/**
  * Die with a 400 Bad Request.
  *
  * @param string $reference A unique identifying string to make it easier to read logs.
@@ -278,7 +325,12 @@ function die_bad_request( $reference = '' ) {
 	if (
 		'production' === wp_get_environment_type() &&
 		function_exists( 'wporg_error_reporter' ) &&
-		! empty( $_COOKIE['wporg_logged_in'] )
+		(
+			// If we've loaded WordPress, use the validated cookie value, otherwise, cookie being present.
+			did_action( 'init' ) ?
+				is_user_logged_in() :
+				! empty( $_COOKIE['wporg_logged_in'] )
+		)
 	) {
 		wporg_error_reporter( E_USER_NOTICE, "400 Bad Request: $reference", __FILE__, __LINE__ );
 	}
