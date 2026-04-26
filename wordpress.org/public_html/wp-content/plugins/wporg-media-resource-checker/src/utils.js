@@ -8,17 +8,14 @@ import { getAuthority, isURL } from '@wordpress/url';
 const BLOCKS_TO_CHECK = [
 	{
 		name: 'core/image',
-		idKey: 'id',
 		urlKey: 'url',
 	},
 	{
 		name: 'core/video',
-		idKey: 'id',
 		urlKey: 'src',
 	},
 	{
 		name: 'core/cover',
-		idKey: 'id',
 		urlKey: 'url',
 	},
 ];
