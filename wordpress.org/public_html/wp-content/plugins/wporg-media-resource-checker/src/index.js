@@ -54,7 +54,10 @@ const BlockEditWithWarning = ( { BlockEdit, siteUrl, mediaUrl, ...props } ) => {
 										aria-expanded={ isOpen }
 										aria-haspopup="true"
 										onClick={ onToggle }
-										label={ __( 'Media resource error' ) }
+										label={ __(
+											'Media resource error',
+											'wporg'
+										) }
 										icon={ caution }
 										className="wporg-media-resource-checker-toolbar-button"
 									/>
@@ -67,7 +70,7 @@ const BlockEditWithWarning = ( { BlockEdit, siteUrl, mediaUrl, ...props } ) => {
 									<p>
 										{ __(
 											'This media resource is from a domain other than the recommended ones.',
-											'wporg-media-resource-checker'
+											'wporg'
 										) }
 									</p>
 									<p>
@@ -80,7 +83,7 @@ const BlockEditWithWarning = ( { BlockEdit, siteUrl, mediaUrl, ...props } ) => {
 									<p>
 										{ __(
 											'Please use a media resource from the following recommended domains:',
-											'wporg-media-resource-checker'
+											'wporg'
 										) }
 									</p>
 									<ul>

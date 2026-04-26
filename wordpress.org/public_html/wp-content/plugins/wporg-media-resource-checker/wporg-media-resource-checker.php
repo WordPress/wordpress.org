@@ -37,7 +37,7 @@ function enqueue_block_editor_assets() {
 		$script_asset['version'],
 		true
 	);
-	wp_set_script_translations( 'wporg-media-resource-checker', 'wporg-media-resource-checker' );
+	wp_set_script_translations( 'wporg-media-resource-checker', 'wporg' );
 }
 
 
