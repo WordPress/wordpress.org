@@ -83,7 +83,7 @@ export const isInvalidResource = ( mediaUrl, siteUrl ) => {
 		return false;
 	}
 
-	// If the media URL doesn't look like a URL, it means the media is not an external resource.
+	// The media URL should normally be a URL, but treat it as invalid if it is not.
 	if ( ! isURL( mediaUrl ) ) {
 		return true;
 	}
