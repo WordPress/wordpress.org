@@ -38,7 +38,11 @@ const BlockEditWithWarning = ( { BlockEdit, siteUrl, mediaUrl, ...props } ) => {
 	const allowedDomainList = [
 		...new Set( [
 			siteAuthority,
-			...ALLOWED_RESOURCES.map( ( resource ) => resource.authority ),
+			...ALLOWED_RESOURCES.map( ( resource ) =>
+				resource.pathLabel
+					? `${ resource.authority }${ resource.pathLabel }`
+					: resource.authority
+			),
 		] ),
 	];
 

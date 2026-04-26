@@ -34,6 +34,7 @@ export const ALLOWED_RESOURCES = [
 		authority: 'wp.com',
 		domainRegex: /^(.*\.)?wp\.com$/,
 		pathRegex: /^\/wordpress\.org\//,
+		pathLabel: '/wordpress.org/',
 	},
 ];
 
