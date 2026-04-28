@@ -238,9 +238,19 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 				'className' => $is_current_page ? 'current-menu-item' : '',
 			);
 		},
-		// Limit local nav items to 6
-		array_slice( $menu_items, 0, 6 )
+		// Limit local nav items to 5 to leave room for the prepended "People" item below.
+		array_slice( $menu_items, 0, 5 )
 	);
+
+	// Prepend "People" — Five for the Future team contributor directory.
+	global $wp;
+	$people_url        = home_url( '/pledges/' );
+	$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
+	array_unshift( $menu, array(
+		'label'     => esc_html__( 'People', 'wporg-5ftf' ),
+		'url'       => esc_url( $people_url ),
+		'className' => $is_pledges_active ? 'current-menu-item' : '',
+	) );
 
 	$menus['breathe'] = $menu;
 
