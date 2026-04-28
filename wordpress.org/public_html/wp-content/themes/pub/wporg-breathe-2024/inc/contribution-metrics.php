@@ -56,9 +56,9 @@ function team_to_trac( string $slug ): string {
 /**
  * Categorise a wporg_github_activity row's `category` field into a weight tier.
  *
- *   high   — merged PRs (pr_merge / pr_merged)
- *   medium — pushes (commits), opened/closed PRs, closed issues (triage action)
- *   low    — opened issues, reopened PRs, anything else
+ * High tier   — merged PRs (pr_merge / pr_merged).
+ * Medium tier — pushes (commits), opened/closed PRs, closed issues (triage action).
+ * Low tier    — opened issues, reopened PRs, anything else.
  *
  * @return string 'high' | 'medium' | 'low'
  */
@@ -135,8 +135,10 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 	// ------------------------------------------------------------------
 	$trac = team_to_trac( $team_slug );
 	if ( $trac ) {
+		// $trac is a value from a hardcoded whitelist (team_to_trac); $placeholders is "%d,%d,...".
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare(
 			"SELECT p.user_id, COUNT(*) AS n, MAX(r.date) AS last_ts
 			 FROM trac_{$trac}_props p
@@ -164,7 +166,9 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 	// ------------------------------------------------------------------
 	// 2. GitHub activity — tiered by category.
 	// ------------------------------------------------------------------
+	// $placeholders is "%d,%d,...", built from the $user_ids count.
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$rows = $wpdb->get_results( $wpdb->prepare(
 		"SELECT user_id, category, repo, COUNT(*) AS n, MAX(ts) AS last_ts
 		 FROM wporg_github_activity
@@ -244,21 +248,30 @@ function format_active_bucket( $last_activity_ts ): array {
 	if ( $days_since <= 7 ) {
 		// translators: %d: number of days
 		$bucket = sprintf( _n( '%d day ago', '%d days ago', $days_since, 'wporg-5ftf' ), $days_since );
-		return array( 'bucket' => $bucket, 'class' => 'active-recent' );
+		return array(
+			'bucket' => $bucket,
+			'class'  => 'active-recent',
+		);
 	}
 
 	if ( $days_since <= 30 ) {
 		$weeks = max( 1, (int) round( $days_since / 7 ) );
 		// translators: %d: number of weeks
 		$bucket = sprintf( _n( '%d week ago', '%d weeks ago', $weeks, 'wporg-5ftf' ), $weeks );
-		return array( 'bucket' => $bucket, 'class' => 'active-month' );
+		return array(
+			'bucket' => $bucket,
+			'class'  => 'active-month',
+		);
 	}
 
 	if ( $days_since <= 180 ) {
 		$months = max( 1, (int) round( $days_since / 30 ) );
 		// translators: %d: number of months
 		$bucket = sprintf( _n( '%d month ago', '%d months ago', $months, 'wporg-5ftf' ), $months );
-		return array( 'bucket' => $bucket, 'class' => 'active-quarter' );
+		return array(
+			'bucket' => $bucket,
+			'class'  => 'active-quarter',
+		);
 	}
 
 	return array(

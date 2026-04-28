@@ -39,22 +39,25 @@ $metrics = ContributionMetrics\get_team_contribution_metrics(
 );
 
 foreach ( $contributors as $uid => &$c ) {
-	$m                            = isset( $metrics[ $uid ] ) ? $metrics[ $uid ] : ContributionMetrics\empty_metrics();
-	$bucket                       = ContributionMetrics\format_active_bucket( $m['last_activity'] );
-	$c['_metrics_high']           = (int) $m['high_count'];
-	$c['_metrics_medium']         = (int) $m['medium_count'];
-	$c['_metrics_low']            = (int) $m['low_count'];
-	$c['_metrics_weighted']       = (int) $m['weighted_volume'];
-	$c['_metrics_active_bucket']  = $bucket['bucket'];
-	$c['_metrics_active_class']   = $bucket['class'];
-	$c['_metrics_top_repos']      = array_keys( $m['top_repos'] );
-	$c['_metrics_window_days']    = $window_days;
+	$user_metrics                = isset( $metrics[ $uid ] ) ? $metrics[ $uid ] : ContributionMetrics\empty_metrics();
+	$bucket                      = ContributionMetrics\format_active_bucket( $user_metrics['last_activity'] );
+	$c['_metrics_high']          = (int) $user_metrics['high_count'];
+	$c['_metrics_medium']        = (int) $user_metrics['medium_count'];
+	$c['_metrics_low']           = (int) $user_metrics['low_count'];
+	$c['_metrics_weighted']      = (int) $user_metrics['weighted_volume'];
+	$c['_metrics_active_bucket'] = $bucket['bucket'];
+	$c['_metrics_active_class']  = $bucket['class'];
+	$c['_metrics_top_repos']     = array_keys( $user_metrics['top_repos'] );
+	$c['_metrics_window_days']   = $window_days;
 }
 unset( $c );
 
-uasort( $contributors, function( $a, $b ) {
-	return $b['_metrics_weighted'] - $a['_metrics_weighted'];
-} );
+uasort(
+	$contributors,
+	function ( $a, $b ) {
+		return $b['_metrics_weighted'] - $a['_metrics_weighted'];
+	}
+);
 
 // Split the list into active (verified output in window) vs inactive.
 // The spec is explicit: directory ranks by recent shipped work and decays
@@ -151,18 +154,19 @@ wp_enqueue_script(
 					// home_url('/pledges/') already includes the team site path, so no REQUEST_URI concat.
 					$base_url   = home_url( '/pledges/' );
 					$window_url = function ( $w ) use ( $base_url ) {
-						return $w === ContributionMetrics\WINDOW_DAYS_DEFAULT
-							? esc_url( $base_url )
-							: esc_url( add_query_arg( 'window', $w, $base_url ) );
+						if ( ContributionMetrics\WINDOW_DAYS_DEFAULT === $w ) {
+							return $base_url;
+						}
+						return add_query_arg( 'window', $w, $base_url );
 					};
 					?>
 					<div class="pledges-toolbar">
 						<div class="pledges-filters" role="group" aria-label="<?php esc_attr_e( 'Filter contributors', 'wporg-5ftf' ); ?>">
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Time window', 'wporg-5ftf' ); ?></span>
-								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>" href="<?php echo $window_url( 30 ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>" href="<?php echo $window_url( 90 ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>" href="<?php echo $window_url( 180 ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $window_url( 30 ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $window_url( 90 ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $window_url( 180 ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
 							</div>
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Sponsorship', 'wporg-5ftf' ); ?></span>

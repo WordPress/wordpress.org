@@ -94,14 +94,20 @@ foreach ( $row_attrs as $k => $v ) {
 					$repo_short = array_map(
 						function ( $r ) {
 							$slash = strrpos( $r, '/' );
-							return $slash !== false ? substr( $r, $slash + 1 ) : $r;
+							return false !== $slash ? substr( $r, $slash + 1 ) : $r;
 						},
 						array_slice( $top_repos, 0, 2 )
+					);
+					$repo_html  = array_map(
+						function ( $r ) {
+							return '<strong>' . esc_html( $r ) . '</strong>';
+						},
+						$repo_short
 					);
 					$summary   .= ' &middot; ' . sprintf(
 						/* translators: %s: comma-separated list of GitHub repo short names */
 						__( 'in %s', 'wporg-5ftf' ),
-						implode( ', ', array_map( function ( $r ) { return '<strong>' . esc_html( $r ) . '</strong>'; }, $repo_short ) )
+						implode( ', ', $repo_html )
 					);
 				}
 

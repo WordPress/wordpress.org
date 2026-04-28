@@ -246,11 +246,12 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 	global $wp;
 	$people_url        = home_url( '/pledges/' );
 	$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
-	array_unshift( $menu, array(
+	$people_item       = array(
 		'label'     => esc_html__( 'People', 'wporg-5ftf' ),
 		'url'       => esc_url( $people_url ),
 		'className' => $is_pledges_active ? 'current-menu-item' : '',
-	) );
+	);
+	array_unshift( $menu, $people_item );
 
 	$menus['breathe'] = $menu;
 
