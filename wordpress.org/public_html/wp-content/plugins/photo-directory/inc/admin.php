@@ -1267,8 +1267,14 @@ class Admin {
 			<?php
 				// Output photo contributor IP address.
 				if ( $contrib_ip = Photo::get_contributor_ip( $post->ID ) ) {
-					/* translators: %s: IP address for contributor. */
-					printf( __( 'Contributor IP address: <strong>%s</strong>', 'wporg-photos' ), sanitize_text_field( $contrib_ip ) );
+					// Set a class based on the IP address type.
+					$ip_class = strpos( $contrib_ip, ':' ) === false ? 'ipv4' : 'ipv6';
+					printf(
+						/* translators: 1: Class for IP address type, 2: IP address for contributor. */
+						wp_kses_post( __( 'Contributor IP address: <strong class="%1$s">%2$s</strong>', 'wporg-photos' ) ),
+						esc_attr( $ip_class ),
+						esc_html( $contrib_ip )
+					);
 				}
 			?>
 			</div>

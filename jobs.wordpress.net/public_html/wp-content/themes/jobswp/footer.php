@@ -40,6 +40,7 @@
 					<h4><?php esc_html_e( 'WordPress Jobs', 'jobswp' ); ?></h4>
 					<ul>
 						<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Current Openings', 'jobswp' ); ?></a></li>
+						<li><a href="<?php echo esc_url( home_url( '/#candidates' ) ); ?>"><?php esc_html_e( 'Browse Candidates', 'jobswp' ); ?></a></li>
 						<li><a href="<?php echo esc_url( home_url( '/post-a-job/' ) ); ?>"><?php esc_html_e( 'Post a Job', 'jobswp' ); ?></a></li>
 						<li><a href="<?php echo esc_url( home_url( '/faq/' ) ); ?>"><?php esc_html_e( 'FAQ', 'jobswp' ); ?></a></li>
 						<li><a href="<?php echo esc_url( home_url( '/remove-a-job/' ) ); ?>"><?php esc_html_e( 'Remove a Job', 'jobswp' ); ?></a></li>
