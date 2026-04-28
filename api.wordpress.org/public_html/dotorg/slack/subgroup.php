@@ -968,15 +968,18 @@ function format_purpose( $channel ) {
 }
 
 /*
- * Channels ending in -team are private workspaces for a (often public) base
- * channel — `#wcus-team` for `#wcus`. Subgroups should follow the base
- * channel's name (`wcus-foo`), not the team's (`wcus-team-foo`), so users in
- * the public base channel discover them naturally. Notifications still go to
- * the channel where /subgroup was invoked.
+ * Channels ending in -team or -planning are private workspaces for a (often
+ * public) base channel — `#wcus-team` or `#wcus-planning` for `#wcus`.
+ * Subgroups should follow the base channel's name (`wcus-foo`), not the
+ * workspace's (`wcus-team-foo`), so users in the public base channel discover
+ * them naturally. Notifications still go to the channel where /subgroup was
+ * invoked.
  */
 function derive_prefix_name( $channel_name ) {
-	if ( substr( $channel_name, -5 ) === '-team' ) {
-		return substr( $channel_name, 0, -5 );
+	foreach ( [ '-team', '-planning' ] as $suffix ) {
+		if ( str_ends_with( $channel_name, $suffix ) ) {
+			return substr( $channel_name, 0, -strlen( $suffix ) );
+		}
 	}
 	return $channel_name;
 }
@@ -989,6 +992,9 @@ function get_subgroups( $parent_name, $include_archived = false ) {
 			$out[] = $g;
 		}
 	}
+	usort( $out, function ( $a, $b ) {
+		return strcmp( $a['name'], $b['name'] );
+	} );
 	return $out;
 }
 
@@ -1138,7 +1144,7 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 						'value'     => $g['id'],
 						'confirm'   => [
 							'title'   => [ 'type' => 'plain_text', 'text' => 'Rotate channel?' ],
-							'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive <#{$g['id']}> with a year suffix and create a fresh `{$g['name']}` with only you as a member." ],
+							'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive `{$g['name']}` with a year suffix and create a fresh copy with only you as a member." ],
 							'confirm' => [ 'type' => 'plain_text', 'text' => 'Rotate' ],
 							'deny'    => [ 'type' => 'plain_text', 'text' => 'Cancel' ],
 						],
@@ -1151,7 +1157,7 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 						'value'     => $g['id'],
 						'confirm'   => [
 							'title'   => [ 'type' => 'plain_text', 'text' => 'Archive channel?' ],
-							'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive <#{$g['id']}>?" ],
+							'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive `{$g['name']}`?" ],
 							'confirm' => [ 'type' => 'plain_text', 'text' => 'Archive' ],
 							'deny'    => [ 'type' => 'plain_text', 'text' => 'Cancel' ],
 							'style'   => 'danger',
@@ -1245,7 +1251,7 @@ function build_rename_view( $parent, $channel_id, $current_name, $user_id, $mana
 				'type' => 'section',
 				'text' => [
 					'type' => 'mrkdwn',
-					'text' => sprintf( 'Renaming <#%s>.', $channel_id ),
+					'text' => sprintf( 'Renaming `%s`.', $current_name ),
 				],
 			],
 			[
