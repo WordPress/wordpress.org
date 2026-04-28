@@ -144,7 +144,7 @@ class Hooks {
 		add_filter( 'pre_oembed_result', array( $this, 'pre_oembed_result_dont_embed_wordpress_org_anchors' ), 20, 2 );
 
 		// Break users sessions / passwords when they get blocked, on the main forums only.
-		if ( 'wordpress.org' === get_blog_details()->domain ) {
+		if ( function_exists( 'get_blog_details' ) && 'wordpress.org' === get_blog_details()->domain ) {
 			add_filter( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
 		}
 	}
