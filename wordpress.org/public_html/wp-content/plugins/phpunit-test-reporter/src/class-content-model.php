@@ -54,6 +54,16 @@ class Content_Model {
 				'show_ui'            => true,
 				'show_in_rest'       => true,
 				'hierarchical'       => false,
+				'map_meta_cap'       => true,
+				'capabilities'       => array(
+					'edit_post'          => 'edit_rtc_perf_result',
+					'edit_posts'         => 'edit_rtc_perf_results',
+					'edit_others_posts'  => 'edit_others_rtc_perf_results',
+					'publish_posts'      => 'publish_rtc_perf_results',
+					'read_post'          => 'read_rtc_perf_result',
+					'read_private_posts' => 'read_private_rtc_perf_results',
+					'delete_post'        => 'delete_rtc_perf_result',
+				),
 				'supports'           => array(
 					'title',
 					'author',
@@ -135,6 +145,8 @@ class Content_Model {
 		if ( $role ) {
 			$role->add_cap( 'edit_results' );
 			$role->add_cap( 'publish_results' );
+			$role->add_cap( 'edit_rtc_perf_results' );
+			$role->add_cap( 'publish_rtc_perf_results' );
 		}
 		$role = get_role( 'administrator' );
 		if ( $role ) {
@@ -142,6 +154,10 @@ class Content_Model {
 			$role->add_cap( 'edit_others_results' );
 			$role->add_cap( 'publish_results' );
 			$role->add_cap( 'read_private_results' );
+			$role->add_cap( 'edit_rtc_perf_results' );
+			$role->add_cap( 'edit_others_rtc_perf_results' );
+			$role->add_cap( 'publish_rtc_perf_results' );
+			$role->add_cap( 'read_private_rtc_perf_results' );
 		}
 	}
 
