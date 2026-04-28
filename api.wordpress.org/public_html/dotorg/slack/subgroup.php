@@ -340,6 +340,19 @@ function handle_block_action( $payload ) {
 			}
 			return;
 
+		case 'rotate_subgroup':
+			ack_and_finish();
+
+			$rotate_id   = $action['value'] ?? '';
+			$parent_id   = $meta['parent'] ?? '';
+			$parent_name = $meta['parent_name'] ?? '';
+			$root_view   = $meta['root_view'] ?? '';
+
+			if ( $rotate_id && $parent_id && $parent_name ) {
+				rotate_subgroup( $rotate_id, $parent_id, $parent_name, $user_id, $view_id, $root_view );
+			}
+			return;
+
 		case 'open_create_modal':
 			$parent_id   = $meta['parent'] ?? '';
 			$parent_name = $meta['parent_name'] ?? '';
@@ -385,7 +398,7 @@ function handle_rename_submission( $payload ) {
 	$current_name = $meta['current_name'] ?? '';
 
 	$new_name = trim( $values['name']['value']['value'] ?? '' );
-	$prefix   = $parent_name . '-';
+	$prefix   = derive_prefix_name( $parent_name ) . '-';
 
 	if ( strpos( $new_name, $prefix ) !== 0 || strlen( $new_name ) <= strlen( $prefix ) ) {
 		header( 'Content-Type: application/json' );
@@ -458,7 +471,7 @@ function handle_create_submission( $payload ) {
 	$strategy       = $values['strategy']['value']['selected_option']['value'] ?? 'all';
 	$selected_users = $values['users']['value']['selected_users'] ?? [];
 
-	$prefix = $parent_name . '-';
+	$prefix = derive_prefix_name( $parent_name ) . '-';
 	if ( strpos( $name, $prefix ) !== 0 || strlen( $name ) <= strlen( $prefix ) ) {
 		header( 'Content-Type: application/json' );
 		echo json_encode( [
@@ -558,7 +571,7 @@ function handle_conflict_submission( $payload ) {
 	$action       = $values['action']['value']['selected_option']['value'] ?? 'unarchive';
 	$new_archived = trim( $values['new_name_for_archived']['value']['value'] ?? '' );
 
-	$prefix = $parent_name . '-';
+	$prefix = derive_prefix_name( $parent_name ) . '-';
 
 	if ( $action === 'rename' ) {
 		if ( strpos( $new_archived, $prefix ) !== 0 || strlen( $new_archived ) <= strlen( $prefix ) ) {
@@ -622,7 +635,7 @@ function handle_conflict_submission( $payload ) {
 			'text'    => sprintf( '<@%s> renamed archived channel `%s` to `%s` to free the name.', $user_id, $archived_name, $new_archived ),
 		] );
 
-		finalize_create( $new_id, $original_name, $creator, $parent_id, $user_id, $purpose, $topic, $strategy, $selected_users, $root_view, false );
+		finalize_create( $new_id, $original_name, $creator, $parent_id, $parent_name, $user_id, $purpose, $topic, $strategy, $selected_users, $root_view, false );
 		return;
 	}
 
@@ -703,6 +716,131 @@ function finalize_create( $new_id, $name, $creator, $parent_id, $parent_name, $u
 
 	if ( $root_view && $parent_name ) {
 		refresh_home_view( $root_view, [ 'id' => $parent_id, 'name' => $parent_name ], $user_id );
+	}
+}
+
+/*
+ * Rotate a subgroup: rename the existing channel with a year suffix, archive
+ * it, then create a fresh channel with the same name (purpose/topic carried
+ * over) seeded with just the triggering user. Useful when a long-running
+ * channel accumulates context that's no longer relevant — e.g. annual events.
+ */
+function rotate_subgroup( $channel_id, $parent_id, $parent_name, $user_id, $manage_view_id, $root_view ) {
+	$info = api_call( 'conversations.info', [ 'channel' => $channel_id ] );
+	$orig = $info['channel'] ?? null;
+	if ( ! $orig ) {
+		return;
+	}
+
+	$orig_name = $orig['name'];
+	$purpose   = $orig['purpose']['value'] ?? '';
+	$topic     = $orig['topic']['value'] ?? '';
+	$year      = pick_archive_year( $orig );
+
+	// Try `name-YEAR`, then `name-YEAR-2`, etc. on collision. Slack caps
+	// channel names at 80 chars; trim the base if needed.
+	$rename = null;
+	for ( $i = 1; $i <= 9; $i++ ) {
+		$candidate = $orig_name . '-' . $year . ( $i > 1 ? "-{$i}" : '' );
+		if ( strlen( $candidate ) > 80 ) {
+			$tail      = '-' . $year . ( $i > 1 ? "-{$i}" : '' );
+			$candidate = substr( $orig_name, 0, 80 - strlen( $tail ) ) . $tail;
+		}
+		$rename = api_call( 'conversations.rename', [
+			'channel' => $channel_id,
+			'name'    => $candidate,
+		], SUBGROUP_USER_TOKEN );
+		if ( ! empty( $rename['ok'] ) ) {
+			$archived_name = $candidate;
+			break;
+		}
+		if ( ( $rename['error'] ?? '' ) !== 'name_taken' ) {
+			break;
+		}
+	}
+
+	if ( empty( $rename['ok'] ) ) {
+		api_call( 'chat.postEphemeral', [
+			'channel' => $parent_id,
+			'user'    => $user_id,
+			'text'    => sprintf( 'Could not rotate `%s`: %s', $orig_name, $rename['error'] ?? 'unknown' ),
+		] );
+		return;
+	}
+
+	$arch = api_call( 'conversations.archive', [
+		'channel' => $channel_id,
+	], SUBGROUP_USER_TOKEN );
+	if ( empty( $arch['ok'] ) ) {
+		// Roll back the rename so the channel is left as we found it.
+		api_call( 'conversations.rename', [
+			'channel' => $channel_id,
+			'name'    => $orig_name,
+		], SUBGROUP_USER_TOKEN );
+		api_call( 'chat.postEphemeral', [
+			'channel' => $parent_id,
+			'user'    => $user_id,
+			'text'    => sprintf( 'Could not archive `%s` during rotate: %s', $archived_name, $arch['error'] ?? 'unknown' ),
+		] );
+		return;
+	}
+
+	$new = api_call( 'conversations.create', [
+		'name'       => $orig_name,
+		'is_private' => true,
+	], SUBGROUP_USER_TOKEN );
+	if ( empty( $new['ok'] ) ) {
+		api_call( 'chat.postEphemeral', [
+			'channel' => $parent_id,
+			'user'    => $user_id,
+			'text'    => sprintf( 'Rotated `%s` → `%s` and archived, but creating the replacement failed: %s', $orig_name, $archived_name, $new['error'] ?? 'unknown' ),
+		] );
+		invalidate_channel_lists();
+		return;
+	}
+
+	$new_id  = $new['channel']['id'];
+	$creator = $new['channel']['creator'] ?? '';
+
+	if ( $purpose ) {
+		api_call( 'conversations.setPurpose', [ 'channel' => $new_id, 'purpose' => $purpose ], SUBGROUP_USER_TOKEN );
+	}
+	// Roll the topic year forward — "WCUS 2024 design" becomes "WCUS 2025
+	// design" on the rotated channel. First match only, digit-bounded so we
+	// don't mangle dates like 20240501. No-op if the topic has no year.
+	$new_topic = $topic
+		? preg_replace( '/(?<!\d)' . preg_quote( $year, '/' ) . '(?!\d)/', (string) ( (int) $year + 1 ), $topic, 1 )
+		: '';
+	if ( $new_topic ) {
+		api_call( 'conversations.setTopic', [ 'channel' => $new_id, 'topic' => $new_topic ], SUBGROUP_USER_TOKEN );
+	}
+
+	$invitees = array_values( array_diff( array_unique( [ $user_id, SUBGROUP_BOT_USER_ID ] ), [ $creator ] ) );
+	if ( $invitees ) {
+		api_call( 'conversations.invite', [
+			'channel' => $new_id,
+			'users'   => implode( ',', $invitees ),
+		], SUBGROUP_USER_TOKEN );
+	}
+
+	invalidate_channel_lists();
+	invalidate_members( $new_id );
+	invalidate_members( $channel_id );
+
+	// Don't link the archived channel — non-members see a strikethrough
+	// dead link. New channel is fine to link.
+	api_call( 'chat.postMessage', [
+		'channel' => $parent_id,
+		'text'    => sprintf( '<@%s> rotated `%s`: archived as `%s`, fresh <#%s> created.', $user_id, $orig_name, $archived_name, $new_id ),
+	] );
+
+	$parent = [ 'id' => $parent_id, 'name' => $parent_name ];
+	api_call( 'views.update', [
+		'view_id' => $manage_view_id,
+		'view'    => json_encode( build_manage_view( $parent, $user_id, $root_view ) ),
+	] );
+	if ( $root_view ) {
+		refresh_home_view( $root_view, $parent, $user_id );
 	}
 }
 
@@ -829,8 +967,22 @@ function format_purpose( $channel ) {
 	return $purpose;
 }
 
+/*
+ * Channels ending in -team are private workspaces for a (often public) base
+ * channel — `#wcus-team` for `#wcus`. Subgroups should follow the base
+ * channel's name (`wcus-foo`), not the team's (`wcus-team-foo`), so users in
+ * the public base channel discover them naturally. Notifications still go to
+ * the channel where /subgroup was invoked.
+ */
+function derive_prefix_name( $channel_name ) {
+	if ( substr( $channel_name, -5 ) === '-team' ) {
+		return substr( $channel_name, 0, -5 );
+	}
+	return $channel_name;
+}
+
 function get_subgroups( $parent_name, $include_archived = false ) {
-	$prefix = $parent_name . '-';
+	$prefix = derive_prefix_name( $parent_name ) . '-';
 	$out    = [];
 	foreach ( list_all_private_channels( $include_archived ) as $g ) {
 		if ( strpos( $g['name'], $prefix ) === 0 ) {
@@ -981,6 +1133,18 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 					],
 					[
 						'type'      => 'button',
+						'text'      => [ 'type' => 'plain_text', 'text' => 'Rotate' ],
+						'action_id' => 'rotate_subgroup',
+						'value'     => $g['id'],
+						'confirm'   => [
+							'title'   => [ 'type' => 'plain_text', 'text' => 'Rotate channel?' ],
+							'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive <#{$g['id']}> with a year suffix and create a fresh `{$g['name']}` with only you as a member." ],
+							'confirm' => [ 'type' => 'plain_text', 'text' => 'Rotate' ],
+							'deny'    => [ 'type' => 'plain_text', 'text' => 'Cancel' ],
+						],
+					],
+					[
+						'type'      => 'button',
 						'text'      => [ 'type' => 'plain_text', 'text' => 'Archive' ],
 						'style'     => 'danger',
 						'action_id' => 'archive_subgroup',
@@ -1059,7 +1223,7 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 }
 
 function build_rename_view( $parent, $channel_id, $current_name, $user_id, $manage_view_id, $root_view_id ) {
-	$prefix = $parent['name'] . '-';
+	$prefix = derive_prefix_name( $parent['name'] ) . '-';
 
 	return [
 		'type'             => 'modal',
@@ -1101,7 +1265,7 @@ function build_rename_view( $parent, $channel_id, $current_name, $user_id, $mana
 }
 
 function build_create_view( $parent, $user_id, $root_view_id ) {
-	$prefix = $parent['name'] . '-';
+	$prefix = derive_prefix_name( $parent['name'] ) . '-';
 
 	return [
 		'type'             => 'modal',
@@ -1196,9 +1360,23 @@ function build_create_view( $parent, $user_id, $root_view_id ) {
 	];
 }
 
+function pick_archive_year( $channel ) {
+	// Prefer a year named in the topic/purpose ("WordCamp US 2024") so the
+	// archived name reflects what the channel was *for*, not when it was
+	// archived. Fall back to creation year, then current year.
+	$text = ( $channel['topic']['value'] ?? '' ) . ' ' . ( $channel['purpose']['value'] ?? '' );
+	if ( preg_match( '/(?<!\d)(20\d{2})(?!\d)/', $text, $m ) ) {
+		return $m[1];
+	}
+	if ( ! empty( $channel['created'] ) ) {
+		return date( 'Y', (int) $channel['created'] );
+	}
+	return date( 'Y' );
+}
+
 function build_conflict_view( $archived, $ctx ) {
-	$prefix    = $ctx['parent_name'] . '-';
-	$suffix    = '-archived-' . date( 'Ymd' );
+	$prefix    = derive_prefix_name( $ctx['parent_name'] ) . '-';
+	$suffix    = '-' . pick_archive_year( $archived );
 	$suggested = $ctx['original_name'] . $suffix;
 	if ( strlen( $suggested ) > 80 ) {
 		$suggested = substr( $ctx['original_name'], 0, 80 - strlen( $suffix ) ) . $suffix;
