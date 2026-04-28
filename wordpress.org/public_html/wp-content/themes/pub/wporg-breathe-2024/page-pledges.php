@@ -150,23 +150,21 @@ wp_enqueue_script(
 						</span>
 					</div>
 
-					<?php
-					// home_url('/pledges/') already includes the team site path, so no REQUEST_URI concat.
-					$base_url   = home_url( '/pledges/' );
-					$window_url = function ( $w ) use ( $base_url ) {
-						if ( ContributionMetrics\WINDOW_DAYS_DEFAULT === $w ) {
-							return $base_url;
-						}
-						return add_query_arg( 'window', $w, $base_url );
-					};
-					?>
 					<div class="pledges-toolbar">
 						<div class="pledges-filters" role="group" aria-label="<?php esc_attr_e( 'Filter contributors', 'wporg-5ftf' ); ?>">
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Time window', 'wporg-5ftf' ); ?></span>
-								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $window_url( 30 ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $window_url( 90 ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $window_url( 180 ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
+								<?php
+								// home_url('/pledges/') already includes the team site path, so no REQUEST_URI concat needed.
+								$pledges_url   = home_url( '/pledges/' );
+								$default_w     = ContributionMetrics\WINDOW_DAYS_DEFAULT;
+								$url_for_30    = 30 === $default_w ? $pledges_url : add_query_arg( 'window', 30, $pledges_url );
+								$url_for_90    = 90 === $default_w ? $pledges_url : add_query_arg( 'window', 90, $pledges_url );
+								$url_for_180   = 180 === $default_w ? $pledges_url : add_query_arg( 'window', 180, $pledges_url );
+								?>
+								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_30 ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_90 ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_180 ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
 							</div>
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Sponsorship', 'wporg-5ftf' ); ?></span>
@@ -210,18 +208,14 @@ wp_enqueue_script(
 						}
 
 						if ( $show_inactive && $inactive_contributors ) {
-							?>
-							<div class="pledges-inactive-divider">
-								<span><?php
-									echo esc_html( sprintf(
-										/* translators: 1: count, 2: window in days */
-										_n( '%1$d contributor with no verified contributions in the last %2$d days', '%1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
-										$inactive_count,
-										$window_days
-									) );
-								?></span>
-							</div>
-							<?php
+							$inactive_label = sprintf(
+								/* translators: 1: count, 2: window in days */
+								_n( '%1$d contributor with no verified contributions in the last %2$d days', '%1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+								$inactive_count,
+								$window_days
+							);
+							echo '<div class="pledges-inactive-divider"><span>' . esc_html( $inactive_label ) . '</span></div>';
+
 							foreach ( $inactive_contributors as $contributor ) {
 								$rank++;
 								$contributor['_rank'] = $rank;
