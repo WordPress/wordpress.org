@@ -250,13 +250,10 @@ function run( $data ) {
 		return;
 	}
 
-	// Default to an @here, unless explicitely an @channel OR it's a private group.
+	// Default to an @here, unless explicitely an @channel.
 	$command = 'here';
 	if ( $data['command'] === '/at-channel' ) {
 		$command = 'channel';
-	} elseif ( $channel === 'privategroup' ) {
-		// @channel and @group are interchangeable.
-		$command = 'group';
 	}
 
 	// Use their Slack Display name, falling back to their WordPress.org login if that's not available.
