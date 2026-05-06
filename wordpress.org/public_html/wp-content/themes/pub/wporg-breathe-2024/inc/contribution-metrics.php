@@ -48,7 +48,7 @@ function team_has_tracking_data( string $slug ): bool {
 
 /**
  * Resolve a user-provided window-days value to one of the allowed buckets.
- * Falls back to the default (90) on anything else.
+ * Falls back to WINDOW_DAYS_DEFAULT on anything else.
  */
 function resolve_window_days( $raw ): int {
 	$n = (int) $raw;
@@ -132,7 +132,11 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 		return array();
 	}
 
-	$cache_key = CACHE_PREFIX . $team_slug . '_w' . $window_days . '_' . md5( implode( ',', $user_ids ) );
+	// Sort so the cache key is order-independent: same user set hits the same key
+	// even if the upstream contributor list re-orders.
+	$cache_user_ids = $user_ids;
+	sort( $cache_user_ids );
+	$cache_key = CACHE_PREFIX . $team_slug . '_w' . $window_days . '_' . md5( implode( ',', $cache_user_ids ) );
 	$cached    = wp_cache_get( $cache_key, CACHE_GROUP );
 	if ( false !== $cached ) {
 		return $cached;

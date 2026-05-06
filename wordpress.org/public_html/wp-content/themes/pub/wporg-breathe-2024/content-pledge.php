@@ -23,7 +23,7 @@ $weighted    = (int) ( $contributor['_metrics_weighted'] ?? 0 );
 $high        = (int) ( $contributor['_metrics_high'] ?? 0 );
 $medium      = (int) ( $contributor['_metrics_medium'] ?? 0 );
 $top_repos   = $contributor['_metrics_top_repos'] ?? array();
-$window_days = (int) ( $contributor['_metrics_window_days'] ?? 90 );
+$window_days = (int) ( $contributor['_metrics_window_days'] ?? ContributionMetrics\WINDOW_DAYS_DEFAULT );
 
 // Data attributes used by client-side filter / sort.
 $row_attrs = array(
@@ -76,16 +76,20 @@ foreach ( $row_attrs as $k => $v ) {
 				$parts = array();
 				if ( $high > 0 ) {
 					$parts[] = sprintf(
-						/* translators: %d: number of high-weight contributions */
-						_n( '<strong>%d high-weight</strong> contribution', '<strong>%d high-weight</strong> contributions', $high, 'wporg-5ftf' ),
-						$high
+						/* translators: 1: <strong> tag, 2: number of high-weight contributions, 3: </strong> tag */
+						_n( '%1$s%2$d high-weight%3$s contribution', '%1$s%2$d high-weight%3$s contributions', $high, 'wporg-5ftf' ),
+						'<strong>',
+						$high,
+						'</strong>'
 					);
 				}
 				if ( $medium > 0 ) {
 					$parts[] = sprintf(
-						/* translators: %d: number of medium-weight contributions */
-						_n( '<strong>%d medium</strong>', '<strong>%d medium</strong>', $medium, 'wporg-5ftf' ),
-						$medium
+						/* translators: 1: <strong> tag, 2: number of medium-weight contributions, 3: </strong> tag */
+						_n( '%1$s%2$d medium%3$s', '%1$s%2$d medium%3$s', $medium, 'wporg-5ftf' ),
+						'<strong>',
+						$medium,
+						'</strong>'
 					);
 				}
 				$summary = implode( ' &middot; ', $parts );

@@ -1,12 +1,13 @@
 /*
  * Page Pledges — Five for the Future redesign Page 1.
- * Client-side filter + sort over the cards already rendered server-side.
+ * Client-side filter over the cards already rendered server-side.
  *
- * Filters: sponsorship (all/independent/sponsored). Time window is currently a
- * UI-only placeholder until contribution-window aggregation ships.
+ * Filters: sponsorship (all/independent/sponsored). The time window is server-side
+ * (?window=30|90|180); chips are <a> links that reload the page so the aggregator
+ * runs against the new window.
  *
- * Sorts: weighted (default), raw, alpha. Non-destructive — all cards stay in DOM,
- * order is rewritten via Array.prototype.sort and re-appended.
+ * Visibility is non-destructive — all cards stay in DOM, hidden via the `hidden`
+ * attribute, and visible cards are re-ranked from 01 on every state change.
  */
 
 ( function () {
@@ -27,9 +28,7 @@
 	var hiwKey = 'wporg-pledges-hiw-dismissed';
 
 	var state = {
-		window: '30',
 		sponsorship: 'independent',
-		sort: 'weighted',
 	};
 
 	/**
@@ -55,32 +54,13 @@
 	}
 
 	/**
-	 * Apply filter + sort + render counts.
+	 * Apply filter + render counts.
 	 */
 	function apply() {
-		// Sort.
-		var sortKey = state.sort;
-		var sorted = cards.slice().sort( function ( a, b ) {
-			if ( sortKey === 'weighted' ) {
-				return parseInt( b.dataset.weighted || '0', 10 ) - parseInt( a.dataset.weighted || '0', 10 );
-			}
-			if ( sortKey === 'raw' ) {
-				return parseInt( b.dataset.raw || '0', 10 ) - parseInt( a.dataset.raw || '0', 10 );
-			}
-			if ( sortKey === 'alpha' ) {
-				return ( a.dataset.name || '' ).localeCompare( b.dataset.name || '' );
-			}
-			return 0;
-		} );
-
-		// Re-append in sorted order.
-		sorted.forEach( function ( card ) {
-			grid.appendChild( card );
-		} );
-
-		// Filter (visibility) + re-rank visible cards in sorted order.
+		// Filter (visibility) + re-rank visible cards. Server-side order is preserved
+		// (already sorted by weighted_volume desc in page-pledges.php).
 		var visibleCount = 0;
-		sorted.forEach( function ( card ) {
+		cards.forEach( function ( card ) {
 			var matches = true;
 			if ( state.sponsorship !== 'all' && card.dataset.sponsorship !== state.sponsorship ) {
 				matches = false;
