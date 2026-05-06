@@ -551,3 +551,123 @@
 .template-pledges-v2 .team-contributor {
 	display: none;
 }
+
+/* ------------------------------------------------------------------ */
+/* Guide page — shown for teams without wired-up contribution data.    */
+/* ------------------------------------------------------------------ */
+
+.template-pledges-guide .pledges-guide-intro {
+	background: var(--wp--preset--color--light-grey-2, #f6f7f7);
+	border: 1px solid var(--wp--preset--color--light-grey-1, #e6e7e9);
+	border-radius: 8px;
+	padding: 16px 18px;
+	margin-bottom: 28px;
+	font-size: 15px;
+	line-height: 1.55;
+	color: var(--wp--preset--color--charcoal-2, #2c3338);
+}
+
+.template-pledges-guide .pledges-guide-intro p {
+	margin: 0 0 8px;
+}
+
+.template-pledges-guide .pledges-guide-intro p:last-child {
+	margin-bottom: 0;
+}
+
+.template-pledges-guide .pledges-guide-intro code {
+	background: #fff;
+	padding: 1px 5px;
+	border-radius: 4px;
+	font-size: 13px;
+}
+
+.pledges-guide-steps {
+	list-style: none;
+	counter-reset: pledges-guide;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.pledges-guide-step {
+	counter-increment: pledges-guide;
+	background: #fff;
+	border: 1px solid var(--wp--preset--color--light-grey-1, #e6e7e9);
+	border-radius: 8px;
+	padding: 18px 22px 18px 64px;
+	position: relative;
+}
+
+.pledges-guide-step::before {
+	content: counter( pledges-guide );
+	position: absolute;
+	left: 18px;
+	top: 18px;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--charcoal-1, #1d2327);
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: ui-monospace, "Menlo", monospace;
+	font-size: 14px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.pledges-guide-step h3 {
+	margin: 0 0 6px;
+	font-size: 17px;
+	font-weight: 600;
+	letter-spacing: -.005em;
+	color: var(--wp--preset--color--charcoal-1, #1d2327);
+	line-height: 1.3;
+}
+
+.pledges-guide-step p {
+	margin: 0 0 8px;
+	font-size: 15px;
+	line-height: 1.55;
+	color: var(--wp--preset--color--charcoal-3, #5d6166);
+}
+
+.pledges-guide-step p:last-child {
+	margin-bottom: 0;
+}
+
+.pledges-guide-step code {
+	background: var(--wp--preset--color--light-grey-2, #f6f7f7);
+	padding: 1px 5px;
+	border-radius: 4px;
+	font-size: 13px;
+	color: var(--wp--preset--color--charcoal-1, #1d2327);
+}
+
+.pledges-guide-link {
+	display: inline-block;
+	font-size: 14px;
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.pledges-guide-link:hover,
+.pledges-guide-link:focus {
+	text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+	.pledges-guide-step {
+		padding: 18px 18px 18px 18px;
+	}
+
+	.pledges-guide-step::before {
+		position: static;
+		margin-bottom: 10px;
+	}
+}

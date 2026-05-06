@@ -19,6 +19,118 @@ require_once __DIR__ . '/inc/contribution-metrics.php';
 get_header();
 
 $current_team = Pledges\get_current_team();
+
+wp_enqueue_style(
+	'wporg-breathe-page-pledges',
+	get_stylesheet_directory_uri() . '/css/page-pledges.css',
+	array( 'wporg-breathe' ),
+	filemtime( __DIR__ . '/css/page-pledges.css' )
+);
+
+// ------------------------------------------------------------------
+// Teams without wired-up tracking get an invitation page instead of
+// the directory. Renders the legacy /pledges/ context as an invite to
+// help bring contribution tracking to the team.
+// ------------------------------------------------------------------
+if ( ! ContributionMetrics\team_has_tracking_data( $current_team->post_name ) ) {
+	$team_slug    = $current_team->post_name;
+	$handbook_url = 'https://make.wordpress.org/' . $team_slug . '/handbook/';
+	/* translators: %s: team name */
+	$handbook_label = sprintf( __( 'Open the %s Handbook', 'wporg-5ftf' ), $current_team->post_title );
+	?>
+	<div id="primary" class="content-area">
+		<div class="site-content template-pledges template-pledges-guide" role="main">
+
+			<header class="page-header pledges-hero">
+				<h1 class="page-title">
+					<?php echo esc_html( sprintf( __( 'People contributing to %s', 'wporg-5ftf' ), $current_team->post_title ) ); ?>
+				</h1>
+				<p class="pledges-subtitle">
+					<?php esc_html_e( 'Help bring contribution tracking to this team.', 'wporg-5ftf' ); ?>
+				</p>
+			</header>
+
+			<article id="post-pledges" class="page type-page status-publish hentry pledges-article">
+				<div class="entry-content">
+
+					<div class="pledges-guide-intro">
+						<p>
+							<?php
+							echo wp_kses_data( sprintf(
+								/* translators: %s: team name */
+								__( 'We don\'t yet have automated contribution tracking for the <strong>%s</strong> team. Sponsors, recruiters, and team reps can\'t see who is shipping verified work — only a list of people who opted in.', 'wporg-5ftf' ),
+								esc_html( $current_team->post_title )
+							) );
+							?>
+						</p>
+						<p>
+							<strong><?php esc_html_e( 'You could lead this. Here is the path:', 'wporg-5ftf' ); ?></strong>
+						</p>
+					</div>
+
+					<ol class="pledges-guide-steps">
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Review the team handbook', 'wporg-5ftf' ); ?></h3>
+							<p><?php esc_html_e( 'Read it cover to cover. Understand what this team works on, how decisions get made, who the team reps are, and what existing recognition looks like.', 'wporg-5ftf' ); ?></p>
+							<p><a class="pledges-guide-link" href="<?php echo esc_url( $handbook_url ); ?>"><?php echo esc_html( $handbook_label ); ?></a></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Join the team on Slack', 'wporg-5ftf' ); ?></h3>
+							<p>
+								<?php
+								echo wp_kses_data( sprintf(
+									/* translators: %s: team channel name e.g. #core */
+									__( 'Most coordination happens in <code>#%s</code> on the Make WordPress Slack workspace.', 'wporg-5ftf' ),
+									esc_html( $team_slug )
+								) );
+								?>
+							</p>
+							<p><a class="pledges-guide-link" href="https://make.wordpress.org/chat/"><?php esc_html_e( 'Get a Slack account', 'wporg-5ftf' ); ?></a></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Attend one or two team meetings', 'wporg-5ftf' ); ?></h3>
+							<p><?php esc_html_e( 'Meeting times are in the handbook. Show up, introduce yourself, listen. Do not propose anything yet — just get a sense of the rhythm and the open work.', 'wporg-5ftf' ); ?></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Propose a metrics discussion', 'wporg-5ftf' ); ?></h3>
+							<p><?php esc_html_e( 'Once you have earned standing in the team, propose a discussion (in a meeting or async) to define what counts as a verified contribution. What types of work? What weights? Which signals should be tracked, and which intentionally ignored?', 'wporg-5ftf' ); ?></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Collect, store, and cache the agreed metrics', 'wporg-5ftf' ); ?></h3>
+							<p><?php esc_html_e( 'Wire the agreed signals into the wp.org data pipeline alongside the existing Trac and GitHub aggregation. Add per-source ingest, indexed storage, and hour-cached aggregation matching the existing pattern.', 'wporg-5ftf' ); ?></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Wire this page up', 'wporg-5ftf' ); ?></h3>
+							<p>
+								<?php
+								echo wp_kses_data( sprintf(
+									/* translators: 1: file path, 2: constant name */
+									__( 'Update <code>%1$s</code> to include the team and its new data source, then add the team\'s slug to <code>%2$s</code>. This page will switch from this guide to the contributor directory automatically.', 'wporg-5ftf' ),
+									'inc/contribution-metrics.php',
+									'TEAMS_WITH_DATA'
+								) );
+								?>
+							</p>
+						</li>
+					</ol>
+
+				</div>
+			</article>
+
+		</div>
+	</div>
+	<div style="display: none;"><div id="content"></div></div>
+	<?php
+	get_sidebar();
+	get_footer();
+	return;
+}
+
 $contributors = Pledges\get_team_contributors(
 	$current_team->post_name,
 	$current_team->post_title
@@ -88,12 +200,6 @@ foreach ( $contributors as $c ) {
 	}
 }
 
-wp_enqueue_style(
-	'wporg-breathe-page-pledges',
-	get_stylesheet_directory_uri() . '/css/page-pledges.css',
-	array( 'wporg-breathe' ),
-	filemtime( __DIR__ . '/css/page-pledges.css' )
-);
 wp_enqueue_script(
 	'wporg-breathe-page-pledges',
 	get_stylesheet_directory_uri() . '/js/page-pledges.js',

@@ -29,6 +29,24 @@ const CACHE_GROUP         = '5ftf';
 const CACHE_PREFIX        = '5ftf_contrib_metrics_v1_';
 
 /**
+ * Teams that currently have wired-up contribution tracking. Other teams render
+ * an invitation/guide page (page-pledges.php branches on this).
+ *
+ * To enable a new team:
+ *   1. Define what counts as a verified contribution with the team.
+ *   2. Wire the data source into get_team_contribution_metrics().
+ *   3. Add the team's post_name slug to this list.
+ */
+const TEAMS_WITH_DATA = array( 'core', 'meta' );
+
+/**
+ * Whether the given team has wired-up contribution tracking.
+ */
+function team_has_tracking_data( string $slug ): bool {
+	return in_array( $slug, TEAMS_WITH_DATA, true );
+}
+
+/**
  * Resolve a user-provided window-days value to one of the allowed buckets.
  * Falls back to the default (90) on anything else.
  */
