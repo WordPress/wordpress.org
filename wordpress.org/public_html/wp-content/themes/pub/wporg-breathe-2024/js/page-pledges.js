@@ -25,6 +25,10 @@
 	var resultPhrase = document.getElementById( 'pledges-result-phrase' );
 	var emptyState = document.getElementById( 'pledges-empty' );
 	var divider = grid.querySelector( '.pledges-inactive-divider' );
+	// When the empty state is showing, the empty-state-extra link already offers
+	// "Show inactive contributors" — the standalone toggle below would just
+	// duplicate the same CTA, so hide it whenever the empty state is on.
+	var inactiveToggle = document.querySelector( '.pledges-inactive-toggle' );
 	var hiwBanner = document.getElementById( 'pledges-howitworks' );
 	var hiwDismiss = hiwBanner && hiwBanner.querySelector( '.pledges-howitworks-dismiss' );
 	var hiwKey = 'wporg-pledges-hiw-dismissed';
@@ -93,8 +97,15 @@
 		}
 
 		// Empty state shows only when nothing is visible at all.
+		var showEmpty = ( activeVisible + inactiveVisible ) === 0;
 		if ( emptyState ) {
-			emptyState.hidden = ( activeVisible + inactiveVisible ) > 0;
+			emptyState.hidden = ! showEmpty;
+		}
+
+		// Hide the standalone "Show inactive" toggle when the empty state takes
+		// over — the empty state already carries the same CTA inline.
+		if ( inactiveToggle ) {
+			inactiveToggle.hidden = showEmpty;
 		}
 
 		// Result count is "active contributors" — inactive cards don't belong here.

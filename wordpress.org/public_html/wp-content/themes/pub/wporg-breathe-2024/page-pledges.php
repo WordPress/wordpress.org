@@ -354,9 +354,31 @@ foreach ( $contributors as $c ) {
 					<div class="pledges-empty" id="pledges-empty" hidden>
 						<p><?php esc_html_e( 'No contributors match the selected filters.', 'wporg-5ftf' ); ?></p>
 						<button type="button" class="pledges-empty-reset"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></button>
+						<?php if ( $inactive_contributors && ! $show_inactive ) : ?>
+							<p class="pledges-empty-extra">
+								<a href="<?php echo esc_url( add_query_arg( 'show_inactive', '1' ) ); ?>">
+									<?php
+									echo esc_html( sprintf(
+										/* translators: 1: count, 2: window in days */
+										_n( 'Show %1$d contributor with no verified contributions in the last %2$d days', 'Show %1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+										$inactive_count,
+										$window_days
+									) );
+									?>
+								</a>
+							</p>
+						<?php endif; ?>
 					</div>
 
-					<?php if ( $inactive_contributors ) : ?>
+					<?php
+					// Standalone inactive toggle: only renders when there's an active list
+					// to anchor it to (or when inactive is already shown, so the user can
+					// hide it). When active_count is 0 the empty state already carries the
+					// "Show inactive" suggestion, so showing the standalone toggle below
+					// would just duplicate the same CTA.
+					$show_standalone_toggle = $inactive_contributors && ( $active_count > 0 || $show_inactive );
+					?>
+					<?php if ( $show_standalone_toggle ) : ?>
 						<p class="pledges-inactive-toggle">
 							<?php if ( $show_inactive ) : ?>
 								<a href="<?php echo esc_url( remove_query_arg( 'show_inactive' ) ); ?>">
