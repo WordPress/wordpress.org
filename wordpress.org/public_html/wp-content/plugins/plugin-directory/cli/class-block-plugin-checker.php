@@ -1019,18 +1019,39 @@ class Block_Plugin_Checker {
 	}
 
 	/**
-	 * Check that the plugin uses `wp_set_script_translations`.
+	 * Check that the plugin uses `wp_set_script_translations`, either directly or via
+	 * `register_block_type()` / `register_block_type_from_metadata()` with a `textdomain`
+	 * declared in `block.json` (since WP 5.7, core auto-registers translations in that case).
 	 */
 	function check_for_translation_function() {
 		$functions = wp_list_pluck( $this->php_function_calls, 0 );
-		if ( ! in_array( 'wp_set_script_translations', $functions ) ) {
-			$this->record_result(
-				__FUNCTION__,
-				'warning',
-				__( 'No translations are loaded for the scripts.', 'wporg-plugins' ),
-				'wp_set_script_translations'
-			);
+
+		if ( in_array( 'wp_set_script_translations', $functions, true ) ) {
+			return;
 		}
+
+		$registers_block_from_metadata = (
+			in_array( 'register_block_type', $functions, true ) ||
+			in_array( 'register_block_type_from_metadata', $functions, true )
+		);
+		$has_block_json_textdomain = false;
+		foreach ( (array) $this->blocks as $block ) {
+			if ( ! empty( $block->textdomain ) ) {
+				$has_block_json_textdomain = true;
+				break;
+			}
+		}
+
+		if ( $registers_block_from_metadata && $has_block_json_textdomain ) {
+			return;
+		}
+
+		$this->record_result(
+			__FUNCTION__,
+			'warning',
+			__( 'No translations are loaded for the scripts.', 'wporg-plugins' ),
+			'wp_set_script_translations'
+		);
 	}
 
 	/**
