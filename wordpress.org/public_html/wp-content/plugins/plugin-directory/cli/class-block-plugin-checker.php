@@ -1059,8 +1059,10 @@ class Block_Plugin_Checker {
 	 * `register_block_type_from_metadata()` or `register_block_type()` with a
 	 * non-classic first argument such as `__DIR__` or a path expression).
 	 *
-	 * Cached so callers (and tests, via reflection) can re-use the result without
-	 * re-scanning the source tree.
+	 * Uses `$php_function_calls` (already collected by `find_php_functions()`) to
+	 * avoid re-scanning the whole source tree: only files where `register_block_type`
+	 * was actually recorded need to be opened to inspect the first argument.
+	 * Cached so callers (and tests, via reflection) can re-use the result.
 	 *
 	 * @return bool
 	 */
@@ -1071,31 +1073,34 @@ class Block_Plugin_Checker {
 
 		$this->registers_block_from_metadata = false;
 
-		if ( empty( $this->path_to_plugin ) ) {
-			return $this->registers_block_from_metadata;
+		// register_block_type_from_metadata() is metadata-based by definition.
+		$files_with_register_block_type = array();
+		foreach ( (array) $this->php_function_calls as $call ) {
+			list( $name, , $file ) = $call;
+			if ( 'register_block_type_from_metadata' === $name ) {
+				$this->registers_block_from_metadata = true;
+				return $this->registers_block_from_metadata;
+			}
+			if ( 'register_block_type' === $name ) {
+				$files_with_register_block_type[ $file ] = true;
+			}
 		}
 
-		foreach ( Filesystem::list_files( $this->path_to_plugin, true, '!\.php$!i' ) as $filename ) {
+		/*
+		 * register_block_type() with anything other than a 'namespace/name' string
+		 * literal as its first argument is metadata-based — the argument is a path,
+		 * __DIR__, dirname() expression, etc. The classic name form does not
+		 * trigger core's automatic wp_set_script_translations() wiring.
+		 *
+		 * `\s*+` is possessive so the engine can't backtrack into the whitespace
+		 * and bypass the negative lookahead.
+		 */
+		foreach ( array_keys( $files_with_register_block_type ) as $filename ) {
 			$contents = file_get_contents( $filename );
 			if ( false === $contents ) {
 				continue;
 			}
 
-			// register_block_type_from_metadata() is metadata-based by definition.
-			if ( preg_match( '#\bregister_block_type_from_metadata\s*\(#', $contents ) ) {
-				$this->registers_block_from_metadata = true;
-				break;
-			}
-
-			/*
-			 * register_block_type() with anything other than a 'namespace/name' string
-			 * literal as its first argument is metadata-based — the argument is a path,
-			 * __DIR__, dirname() expression, etc. The classic name form does not
-			 * trigger core's automatic wp_set_script_translations() wiring.
-			 *
-			 * `\s*+` is possessive so the engine can't backtrack into the whitespace
-			 * and bypass the negative lookahead.
-			 */
 			if ( preg_match( '#\bregister_block_type\s*\(\s*+(?![\'"][\w-]+/[\w-]+[\'"]\s*[,)])#', $contents ) ) {
 				$this->registers_block_from_metadata = true;
 				break;
