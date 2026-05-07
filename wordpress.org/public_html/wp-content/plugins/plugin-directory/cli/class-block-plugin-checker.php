@@ -430,10 +430,7 @@ class Block_Plugin_Checker {
 					[ $filename, $php_calls->get_error_data() ]
 				);
 			} else {
-				/*
-				 * Each file's calls are numerically indexed from 0, so `+=` would
-				 * drop later files where the keys collide. Append instead.
-				 */
+				// Append, not union — per-file calls share numeric keys from 0 so `+=` would drop later files.
 				array_push( $all_calls, ...$php_calls );
 			}
 		}
