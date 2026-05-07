@@ -430,7 +430,11 @@ class Block_Plugin_Checker {
 					[ $filename, $php_calls->get_error_data() ]
 				);
 			} else {
-				$all_calls += $php_calls;
+				/*
+				 * Each file's calls are numerically indexed from 0, so `+=` would
+				 * drop later files where the keys collide. Append instead.
+				 */
+				array_push( $all_calls, ...$php_calls );
 			}
 		}
 
@@ -1030,7 +1034,7 @@ class Block_Plugin_Checker {
 			return;
 		}
 
-		$registers_block_from_metadata = (
+		$registers_block_type = (
 			in_array( 'register_block_type', $functions, true ) ||
 			in_array( 'register_block_type_from_metadata', $functions, true )
 		);
@@ -1042,7 +1046,7 @@ class Block_Plugin_Checker {
 			}
 		}
 
-		if ( $registers_block_from_metadata && $has_block_json_textdomain ) {
+		if ( $registers_block_type && $has_block_json_textdomain ) {
 			return;
 		}
 
