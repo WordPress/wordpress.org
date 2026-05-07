@@ -281,7 +281,7 @@
 
 .pledges-card {
 	display: grid;
-	grid-template-columns: 40px 56px 1fr auto;
+	grid-template-columns: 56px 56px 1fr auto;
 	gap: 18px;
 	padding: 16px 18px;
 	border: 1px solid var(--wp--preset--color--light-grey-1, #e6e7e9);
@@ -304,12 +304,13 @@
 
 .pledges-card-rank {
 	font-family: ui-monospace, "Menlo", monospace;
-	font-size: 14px;
-	font-weight: 600;
-	color: var(--wp--preset--color--charcoal-3, #5d6166);
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--wp--preset--color--charcoal-2, #2c3338);
 	font-variant-numeric: tabular-nums;
 	text-align: right;
-	line-height: 1.2;
+	line-height: 1;
+	letter-spacing: -.02em;
 }
 
 .pledges-card-avatar img {
@@ -326,7 +327,7 @@
 .pledges-card-identity {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: baseline;
+	align-items: center;
 	gap: 6px 12px;
 	margin-bottom: 6px;
 }
@@ -395,10 +396,9 @@
 
 .pledges-card-meta {
 	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 6px;
-	min-width: 120px;
+	align-items: center;
+	justify-content: flex-end;
+	min-width: 96px;
 }
 
 .pledges-card-active {
@@ -519,18 +519,67 @@
 /* ------------------------------------------------------------------ */
 
 @media (max-width: 720px) {
+	/* Drop the dedicated rank column on narrow viewports. The body text was
+	   getting squeezed to ~170px on a 375px screen — 7+ wrapped lines per card.
+	   The rank moves into a small corner badge (top-right), the avatar column
+	   stays leftmost, body gets the full remaining width, and the weighted
+	   score becomes a full-width footer separated by a thin rule. */
 	.pledges-card {
-		grid-template-columns: 36px 56px 1fr;
+		position: relative;
+		grid-template-columns: 48px 1fr;
 		grid-template-rows: auto auto;
+		gap: 10px 14px;
+		padding: 16px 14px;
+		align-items: start;
+	}
+
+	.pledges-card-rank {
+		position: absolute;
+		top: 12px;
+		right: 14px;
+		font-size: 16px;
+		font-weight: 600;
+		padding: 2px 8px;
+		background: var(--wp--preset--color--light-grey-2, #f6f7f7);
+		color: var(--wp--preset--color--charcoal-3, #5d6166);
+		border-radius: 4px;
+		line-height: 1.4;
+		letter-spacing: 0;
+	}
+
+	.pledges-card-avatar {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.pledges-card-avatar img {
+		width: 48px;
+		height: 48px;
+	}
+
+	.pledges-card-body {
+		grid-column: 2;
+		grid-row: 1;
+		/* Reserve space for the rank badge so the identity row doesn't crash
+		   into it on narrow widths. */
+		padding-right: 44px;
 	}
 
 	.pledges-card-meta {
-		grid-column: 2 / 4;
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-start;
-		gap: 12px;
+		grid-column: 1 / 3;
+		grid-row: 2;
+		justify-content: flex-end;
 		min-width: 0;
+		margin-top: 4px;
+		padding-top: 10px;
+		border-top: 1px solid var(--wp--preset--color--light-grey-2, #f6f7f7);
+	}
+
+	/* The active pill lives in the identity row now; let it wrap with the
+	   other chips (status, etc.) instead of taking its own line. */
+	.pledges-card-active {
+		font-size: 12px;
+		padding: 2px 8px;
 	}
 
 	.pledges-toolbar {
@@ -544,6 +593,26 @@
 
 	.pledges-sort {
 		justify-content: flex-end;
+	}
+
+	/* Tighter "How this page works" affordance — the desktop padding eats
+	   ~340px vertical on mobile, pushing the directory below the fold. */
+	.pledges-howitworks {
+		grid-template-columns: 22px 1fr auto;
+		gap: 10px;
+		padding: 12px 14px;
+		font-size: 14px;
+	}
+
+	.pledges-howitworks-icon {
+		width: 18px;
+		height: 18px;
+		font-size: 11px;
+	}
+
+	.pledges-howitworks-body p {
+		font-size: 14px;
+		line-height: 1.5;
 	}
 }
 

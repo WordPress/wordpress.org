@@ -351,6 +351,11 @@ foreach ( $contributors as $c ) {
 						?>
 					</div>
 
+					<div class="pledges-empty" id="pledges-empty" hidden>
+						<p><?php esc_html_e( 'No contributors match the selected filters.', 'wporg-5ftf' ); ?></p>
+						<button type="button" class="pledges-empty-reset"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></button>
+					</div>
+
 					<?php if ( $inactive_contributors ) : ?>
 						<p class="pledges-inactive-toggle">
 							<?php if ( $show_inactive ) : ?>
@@ -377,11 +382,6 @@ foreach ( $contributors as $c ) {
 							<?php endif; ?>
 						</p>
 					<?php endif; ?>
-
-					<div class="pledges-empty" id="pledges-empty" hidden>
-						<p><?php esc_html_e( 'No contributors match the selected filters.', 'wporg-5ftf' ); ?></p>
-						<button type="button" class="pledges-empty-reset"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></button>
-					</div>
 
 				<?php else : ?>
 

@@ -76,6 +76,15 @@ $is_initially_hidden = 'independent' !== $status_class;
 				}
 				?>
 			</span>
+			<span class="pledges-card-active pledges-card-active-<?php echo esc_attr( $active_class ); ?>">
+				<?php
+				echo esc_html( sprintf(
+					/* translators: %s: relative time bucket, e.g. "3 days ago" */
+					__( 'active %s', 'wporg-5ftf' ),
+					$active_bucket
+				) );
+				?>
+			</span>
 		</div>
 
 		<p class="pledges-card-summary">
@@ -143,15 +152,6 @@ $is_initially_hidden = 'independent' !== $status_class;
 	</div>
 
 	<aside class="pledges-card-meta">
-		<span class="pledges-card-active pledges-card-active-<?php echo esc_attr( $active_class ); ?>">
-			<?php
-			echo esc_html( sprintf(
-				/* translators: %s: relative time bucket, e.g. "3 days ago" */
-				__( 'active %s', 'wporg-5ftf' ),
-				$active_bucket
-			) );
-			?>
-		</span>
 		<span class="pledges-card-weight">
 			<strong><?php echo esc_html( number_format_i18n( $weighted ) ); ?></strong>
 			<span class="pledges-card-weight-label"><?php esc_html_e( 'weighted', 'wporg-5ftf' ); ?></span>
