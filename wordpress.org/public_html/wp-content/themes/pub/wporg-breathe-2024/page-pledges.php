@@ -297,12 +297,12 @@ foreach ( $contributors as $c ) {
 								data-plural="<?php echo esc_attr__( 'active contributors (of %d total)', 'wporg-5ftf' ); ?>"
 								data-total="<?php echo esc_attr( $total_count ); ?>"
 							><?php
-							echo esc_html( sprintf(
-								/* translators: %d: total count */
-								_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $active_count, 'wporg-5ftf' ),
-								$total_count
-							) );
-							?></span>
+								echo esc_html( sprintf(
+									/* translators: %d: total count */
+									_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $active_count, 'wporg-5ftf' ),
+									$total_count
+								) );
+								?></span>
 						</span>
 					</p>
 

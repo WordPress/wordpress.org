@@ -213,7 +213,7 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 
 	// ------------------------------------------------------------------
 	// 2. GitHub activity — tiered by category. Scoped to the team's repo
-	//    allowlist so cross-team work doesn't leak into the directory.
+	// allowlist so cross-team work doesn't leak into the directory.
 	// ------------------------------------------------------------------
 	$github_repos = team_to_github_repos( $team_slug );
 	$rows         = array();
