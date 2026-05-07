@@ -39,6 +39,7 @@ class Block_Plugin_Checker {
 	protected $block_json_validation = array();
 	protected $block_assets = array();
 	protected $php_function_calls = array();
+	protected $registers_block_from_metadata = null;
 
 	/**
 	 * Constructor.
@@ -1020,9 +1021,11 @@ class Block_Plugin_Checker {
 	}
 
 	/**
-	 * Check that the plugin uses `wp_set_script_translations`, either directly or via
-	 * `register_block_type()` / `register_block_type_from_metadata()` with a `textdomain`
-	 * declared in `block.json` (since WP 5.7, core auto-registers translations in that case).
+	 * Check that the plugin loads script translations. WordPress 5.7+ auto-registers
+	 * translations only when blocks are registered from metadata (e.g.
+	 * `register_block_type( __DIR__ )` or `register_block_type_from_metadata()`)
+	 * with a `textdomain` in `block.json`. The classic `register_block_type( 'ns/name', $args )`
+	 * form does not auto-load translations.
 	 */
 	function check_for_translation_function() {
 		$functions = wp_list_pluck( $this->php_function_calls, 0 );
@@ -1031,10 +1034,6 @@ class Block_Plugin_Checker {
 			return;
 		}
 
-		$registers_block_type = (
-			in_array( 'register_block_type', $functions, true ) ||
-			in_array( 'register_block_type_from_metadata', $functions, true )
-		);
 		$has_block_json_textdomain = false;
 		foreach ( (array) $this->blocks as $block ) {
 			if ( ! empty( $block->textdomain ) ) {
@@ -1043,7 +1042,7 @@ class Block_Plugin_Checker {
 			}
 		}
 
-		if ( $registers_block_type && $has_block_json_textdomain ) {
+		if ( $this->plugin_registers_block_from_metadata() && $has_block_json_textdomain ) {
 			return;
 		}
 
@@ -1053,6 +1052,57 @@ class Block_Plugin_Checker {
 			__( 'No translations are loaded for the scripts.', 'wporg-plugins' ),
 			'wp_set_script_translations'
 		);
+	}
+
+	/**
+	 * Whether the plugin registers a block from its `block.json` metadata (via
+	 * `register_block_type_from_metadata()` or `register_block_type()` with a
+	 * non-classic first argument such as `__DIR__` or a path expression).
+	 *
+	 * Cached so callers (and tests, via reflection) can re-use the result without
+	 * re-scanning the source tree.
+	 *
+	 * @return bool
+	 */
+	protected function plugin_registers_block_from_metadata() {
+		if ( null !== $this->registers_block_from_metadata ) {
+			return $this->registers_block_from_metadata;
+		}
+
+		$this->registers_block_from_metadata = false;
+
+		if ( empty( $this->path_to_plugin ) ) {
+			return $this->registers_block_from_metadata;
+		}
+
+		foreach ( Filesystem::list_files( $this->path_to_plugin, true, '!\.php$!i' ) as $filename ) {
+			$contents = file_get_contents( $filename );
+			if ( false === $contents ) {
+				continue;
+			}
+
+			// register_block_type_from_metadata() is metadata-based by definition.
+			if ( preg_match( '#\bregister_block_type_from_metadata\s*\(#', $contents ) ) {
+				$this->registers_block_from_metadata = true;
+				break;
+			}
+
+			/*
+			 * register_block_type() with anything other than a 'namespace/name' string
+			 * literal as its first argument is metadata-based — the argument is a path,
+			 * __DIR__, dirname() expression, etc. The classic name form does not
+			 * trigger core's automatic wp_set_script_translations() wiring.
+			 *
+			 * `\s*+` is possessive so the engine can't backtrack into the whitespace
+			 * and bypass the negative lookahead.
+			 */
+			if ( preg_match( '#\bregister_block_type\s*\(\s*+(?![\'"][\w-]+/[\w-]+[\'"]\s*[,)])#', $contents ) ) {
+				$this->registers_block_from_metadata = true;
+				break;
+			}
+		}
+
+		return $this->registers_block_from_metadata;
 	}
 
 	/**
