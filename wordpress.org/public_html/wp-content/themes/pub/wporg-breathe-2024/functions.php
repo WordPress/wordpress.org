@@ -70,37 +70,6 @@ function wporg_breathe_styles() {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_breathe_styles', 11 );
 
 /**
- * Enqueue the page-pledges assets here (rather than in the template body) so
- * the stylesheet reaches <head> via wp_print_styles. Enqueuing inside the
- * template runs after get_header() and would force a footer-emitted <link>,
- * which causes a visible FOUC on the redesigned grid.
- */
-function wporg_breathe_pledges_assets() {
-	if ( ! is_page_template( 'page-pledges.php' ) ) {
-		return;
-	}
-
-	$dir = get_stylesheet_directory();
-	$uri = get_stylesheet_directory_uri();
-
-	wp_enqueue_style(
-		'wporg-breathe-page-pledges',
-		$uri . '/css/page-pledges.css',
-		array( 'wporg-breathe' ),
-		filemtime( $dir . '/css/page-pledges.css' )
-	);
-
-	wp_enqueue_script(
-		'wporg-breathe-page-pledges',
-		$uri . '/js/page-pledges.js',
-		array(),
-		filemtime( $dir . '/js/page-pledges.js' ),
-		true
-	);
-}
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_breathe_pledges_assets', 12 );
-
-/**
  * Merge the support theme's theme.json into the parent theme.json.
  *
  * @param WP_Theme_JSON_Data $theme_json Parsed support theme.json.

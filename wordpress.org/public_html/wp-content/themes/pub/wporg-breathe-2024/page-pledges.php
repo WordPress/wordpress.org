@@ -16,13 +16,31 @@ defined( 'WPINC' ) || die();
 
 require_once __DIR__ . '/inc/contribution-metrics.php';
 
+// Enqueue BEFORE get_header() so wp_print_styles (priority 8 on wp_head)
+// flushes the <link> into <head>. Enqueuing after get_header() would miss
+// that flush and force the late-styles fallback to emit the <link> near
+// </body>, causing a visible FOUC on the redesigned grid.
+//
+// /pledges/ is a virtual route registered by the team-pledges mu-plugin, so
+// is_page_template() never reports it — we can't gate via wp_enqueue_scripts
+// in functions.php. Template-level enqueue is the correct seam.
+wp_enqueue_style(
+	'wporg-breathe-page-pledges',
+	get_stylesheet_directory_uri() . '/css/page-pledges.css',
+	array( 'wporg-breathe' ),
+	filemtime( __DIR__ . '/css/page-pledges.css' )
+);
+wp_enqueue_script(
+	'wporg-breathe-page-pledges',
+	get_stylesheet_directory_uri() . '/js/page-pledges.js',
+	array(),
+	filemtime( __DIR__ . '/js/page-pledges.js' ),
+	true
+);
+
 get_header();
 
 $current_team = Pledges\get_current_team();
-
-// page-pledges.css and js/page-pledges.js are enqueued from functions.php on
-// the wp_enqueue_scripts action so they reach <head> instead of being emitted
-// in the footer via late-styles fallback (which causes a visible FOUC).
 
 // ------------------------------------------------------------------
 // Teams without wired-up tracking get an invitation page instead of
