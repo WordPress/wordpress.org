@@ -5,6 +5,7 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\CLI\Block_Plugin_Checker;
 
@@ -13,6 +14,7 @@ use WordPressdotorg\Plugin_Directory\CLI\Block_Plugin_Checker;
  *
  * @group block-validator
  */
+#[CoversMethod( Block_Plugin_Checker::class, 'check_for_translation_function' )]
 class Block_Plugin_Checker_Translation_Test extends TestCase {
 
 	/**
