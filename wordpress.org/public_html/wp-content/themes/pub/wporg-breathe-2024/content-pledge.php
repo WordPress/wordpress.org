@@ -25,13 +25,16 @@ $medium      = (int) ( $contributor['_metrics_medium'] ?? 0 );
 $top_repos   = $contributor['_metrics_top_repos'] ?? array();
 $window_days = (int) ( $contributor['_metrics_window_days'] ?? ContributionMetrics\WINDOW_DAYS_DEFAULT );
 
-// Data attributes used by client-side filter / sort.
+// Data attributes used by client-side filter. `data-active` lets the JS exclude
+// inactive cards from the "active contributors" result count and toggle the
+// inactive divider when filters empty its section.
 $row_attrs = array(
 	'data-rank'        => (int) ( $contributor['_rank'] ?? 0 ),
 	'data-weighted'    => $weighted,
 	'data-raw'         => $high + $medium,
 	'data-name'        => strtolower( $contributor['name'] ?? '' ),
 	'data-sponsorship' => $status_class,
+	'data-active'      => $weighted > 0 ? '1' : '0',
 );
 
 $attrs_html = '';
@@ -39,9 +42,15 @@ foreach ( $row_attrs as $k => $v ) {
 	$attrs_html .= sprintf( ' %s="%s"', esc_attr( $k ), esc_attr( $v ) );
 }
 
+// Default sponsorship filter is "Independent" (matches the JS state and the
+// is-on chip in page-pledges.php). Pre-hide sponsored cards so the browser
+// paints the filtered view immediately; otherwise the footer-loaded JS hides
+// them after first paint, producing a visible flash of every card.
+$is_initially_hidden = 'independent' !== $status_class;
+
 ?>
 
-<article class="pledges-card" <?php echo $attrs_html; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+<article class="pledges-card"<?php echo $is_initially_hidden ? ' hidden' : ''; ?> <?php echo $attrs_html; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 	<span class="pledges-card-rank" aria-hidden="true"><?php echo esc_html( str_pad( (string) $contributor['_rank'], 2, '0', STR_PAD_LEFT ) ); ?></span>
 
 	<div class="pledges-card-avatar">
@@ -86,7 +95,7 @@ foreach ( $row_attrs as $k => $v ) {
 				if ( $medium > 0 ) {
 					$parts[] = sprintf(
 						/* translators: 1: <strong> tag, 2: number of medium-weight contributions, 3: </strong> tag */
-						_n( '%1$s%2$d medium%3$s', '%1$s%2$d medium%3$s', $medium, 'wporg-5ftf' ),
+						_n( '%1$s%2$d medium%3$s contribution', '%1$s%2$d medium%3$s contributions', $medium, 'wporg-5ftf' ),
 						'<strong>',
 						$medium,
 						'</strong>'

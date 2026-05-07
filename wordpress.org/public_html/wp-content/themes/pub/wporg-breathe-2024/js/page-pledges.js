@@ -22,7 +22,9 @@
 		grid.querySelectorAll( '.pledges-card' )
 	);
 	var resultCount = document.getElementById( 'pledges-result-count' );
+	var resultPhrase = document.getElementById( 'pledges-result-phrase' );
 	var emptyState = document.getElementById( 'pledges-empty' );
+	var divider = grid.querySelector( '.pledges-inactive-divider' );
 	var hiwBanner = document.getElementById( 'pledges-howitworks' );
 	var hiwDismiss = hiwBanner && hiwBanner.querySelector( '.pledges-howitworks-dismiss' );
 	var hiwKey = 'wporg-pledges-hiw-dismissed';
@@ -59,7 +61,11 @@
 	function apply() {
 		// Filter (visibility) + re-rank visible cards. Server-side order is preserved
 		// (already sorted by weighted_volume desc in page-pledges.php).
-		var visibleCount = 0;
+		// `activeVisible` drives the result count beneath "active contributors";
+		// `rankCounter` numbers every visible card sequentially across the divider.
+		var activeVisible = 0;
+		var inactiveVisible = 0;
+		var rankCounter = 0;
 		cards.forEach( function ( card ) {
 			var matches = true;
 			if ( state.sponsorship !== 'all' && card.dataset.sponsorship !== state.sponsorship ) {
@@ -67,22 +73,47 @@
 			}
 			card.hidden = ! matches;
 			if ( matches ) {
-				visibleCount++;
+				rankCounter++;
 				var rankEl = card.querySelector( '.pledges-card-rank' );
 				if ( rankEl ) {
-					rankEl.textContent = String( visibleCount ).padStart( 2, '0' );
+					rankEl.textContent = String( rankCounter ).padStart( 2, '0' );
+				}
+				if ( card.dataset.active === '1' ) {
+					activeVisible++;
+				} else {
+					inactiveVisible++;
 				}
 			}
 		} );
 
-		// Empty state.
-		if ( emptyState ) {
-			emptyState.hidden = visibleCount > 0;
+		// Hide the inactive divider when the current filter empties its section,
+		// so users don't see an orphan "N contributors with no verified..." label.
+		if ( divider ) {
+			divider.hidden = inactiveVisible === 0;
 		}
 
-		// Result count.
+		// Empty state shows only when nothing is visible at all.
+		if ( emptyState ) {
+			emptyState.hidden = ( activeVisible + inactiveVisible ) > 0;
+		}
+
+		// Result count is "active contributors" — inactive cards don't belong here.
 		if ( resultCount ) {
-			resultCount.textContent = visibleCount;
+			resultCount.textContent = activeVisible;
+		}
+
+		// Rebuild the phrase so the singular/plural form follows the live visible
+		// count instead of being frozen at the server-rendered $active_count.
+		// (Two-form approximation; for fully plural-aware locales we'd swap this
+		// for wp.i18n._n once the script depends on @wordpress/i18n.)
+		if ( resultPhrase ) {
+			var total = parseInt( resultPhrase.dataset.total || '0', 10 );
+			var template = activeVisible === 1
+				? resultPhrase.dataset.singular
+				: resultPhrase.dataset.plural;
+			if ( template ) {
+				resultPhrase.textContent = template.replace( '%d', String( total ) );
+			}
 		}
 	}
 

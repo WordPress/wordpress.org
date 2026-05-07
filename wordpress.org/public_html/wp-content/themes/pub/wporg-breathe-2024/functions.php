@@ -70,6 +70,37 @@ function wporg_breathe_styles() {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_breathe_styles', 11 );
 
 /**
+ * Enqueue the page-pledges assets here (rather than in the template body) so
+ * the stylesheet reaches <head> via wp_print_styles. Enqueuing inside the
+ * template runs after get_header() and would force a footer-emitted <link>,
+ * which causes a visible FOUC on the redesigned grid.
+ */
+function wporg_breathe_pledges_assets() {
+	if ( ! is_page_template( 'page-pledges.php' ) ) {
+		return;
+	}
+
+	$dir = get_stylesheet_directory();
+	$uri = get_stylesheet_directory_uri();
+
+	wp_enqueue_style(
+		'wporg-breathe-page-pledges',
+		$uri . '/css/page-pledges.css',
+		array( 'wporg-breathe' ),
+		filemtime( $dir . '/css/page-pledges.css' )
+	);
+
+	wp_enqueue_script(
+		'wporg-breathe-page-pledges',
+		$uri . '/js/page-pledges.js',
+		array(),
+		filemtime( $dir . '/js/page-pledges.js' ),
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_breathe_pledges_assets', 12 );
+
+/**
  * Merge the support theme's theme.json into the parent theme.json.
  *
  * @param WP_Theme_JSON_Data $theme_json Parsed support theme.json.
@@ -215,15 +246,42 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 		return;
 	}
 
+	// Build the "People" item once, gated on the team-pledges simulator being
+	// available on the current site. /pledges/ is a virtual page registered by
+	// mu-plugins/make-network/team-pledges.php, so prepending the link without
+	// the simulator results in a 404 on non-team subsites (and would fatal in
+	// page-pledges.php when get_current_team() returns null). Hoisted above the
+	// early returns so team sites without a primary nav still surface People.
+	$people_item = null;
+	if ( function_exists( 'WordPressdotorg\\Make\\Pledges\\get_current_team' ) ) {
+		$team = \WordPressdotorg\Make\Pledges\get_current_team();
+		if ( $team ) {
+			global $wp;
+			$people_url        = home_url( '/pledges/' );
+			$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
+			$people_item       = array(
+				'label'     => esc_html__( 'People', 'wporg-5ftf' ),
+				'url'       => esc_url( $people_url ),
+				'className' => $is_pledges_active ? 'current-menu-item' : '',
+			);
+		}
+	}
+
 	$local_nav_menu_object = wporg_breathe_get_local_nav_menu_object();
 
 	if ( ! $local_nav_menu_object ) {
+		if ( $people_item ) {
+			$menus['breathe'] = array( $people_item );
+		}
 		return _maybe_add_login_item_to_menu( $menus );
 	}
 
 	$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
 
 	if ( ! $menu_items || empty( $menu_items ) ) {
+		if ( $people_item ) {
+			$menus['breathe'] = array( $people_item );
+		}
 		return _maybe_add_login_item_to_menu( $menus );
 	}
 
@@ -238,20 +296,14 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 				'className' => $is_current_page ? 'current-menu-item' : '',
 			);
 		},
-		// Limit local nav items to 5 to leave room for the prepended "People" item below.
-		array_slice( $menu_items, 0, 5 )
+		// Cap the inherited local-nav at 5 when we're prepending People (total = 6),
+		// or 6 when there's no People item to add.
+		array_slice( $menu_items, 0, $people_item ? 5 : 6 )
 	);
 
-	// Prepend "People" — Five for the Future team contributor directory.
-	global $wp;
-	$people_url        = home_url( '/pledges/' );
-	$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
-	$people_item       = array(
-		'label'     => esc_html__( 'People', 'wporg-5ftf' ),
-		'url'       => esc_url( $people_url ),
-		'className' => $is_pledges_active ? 'current-menu-item' : '',
-	);
-	array_unshift( $menu, $people_item );
+	if ( $people_item ) {
+		array_unshift( $menu, $people_item );
+	}
 
 	$menus['breathe'] = $menu;
 

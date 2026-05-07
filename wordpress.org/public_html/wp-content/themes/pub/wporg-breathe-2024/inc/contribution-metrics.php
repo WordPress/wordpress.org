@@ -72,6 +72,32 @@ function team_to_trac( string $slug ): string {
 }
 
 /**
+ * Map a team slug to the GitHub repos whose activity counts toward that team's
+ * weighted_volume.
+ *
+ * The wporg_github_activity table collects events across every WordPress/* repo
+ * into a single global table. Without scoping, a contributor's PRs to unrelated
+ * repos (e.g. openverse, plugins) would inflate weighted_volume on every team
+ * page they appear on, and the "in <repo>" card summary would surface non-team
+ * repos as evidence of team contribution.
+ *
+ * Returns an empty array when the team has no mapped repos — the GitHub branch
+ * of get_team_contribution_metrics() is skipped in that case.
+ *
+ * Repo slugs match the value stored in wporg_github_activity.repo (typically
+ * 'owner/name' as reported by the GitHub webhook ingest).
+ *
+ * @return string[]
+ */
+function team_to_github_repos( string $slug ): array {
+	$map = array(
+		'core' => array( 'WordPress/wordpress-develop', 'WordPress/gutenberg' ),
+		'meta' => array( 'WordPress/wporg-main', 'WordPress/wporg-mu-plugins' ),
+	);
+	return isset( $map[ $slug ] ) ? $map[ $slug ] : array();
+}
+
+/**
  * Categorise a wporg_github_activity row's `category` field into a weight tier.
  *
  * High tier   — merged PRs (pr_merge / pr_merged).
@@ -186,20 +212,30 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 	}
 
 	// ------------------------------------------------------------------
-	// 2. GitHub activity — tiered by category.
+	// 2. GitHub activity — tiered by category. Scoped to the team's repo
+	//    allowlist so cross-team work doesn't leak into the directory.
 	// ------------------------------------------------------------------
-	// $placeholders is "%d,%d,...", built from the $user_ids count.
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$rows = $wpdb->get_results( $wpdb->prepare(
-		"SELECT user_id, category, repo, COUNT(*) AS n, MAX(ts) AS last_ts
-		 FROM wporg_github_activity
-		 WHERE user_id IN ($placeholders)
-		   AND ts >= DATE_SUB(NOW(), INTERVAL %d DAY)
-		 GROUP BY user_id, category, repo",
-		$args
-	) );
-	// phpcs:enable
+	$github_repos = team_to_github_repos( $team_slug );
+	$rows         = array();
+	if ( ! empty( $github_repos ) ) {
+		$repo_placeholders = implode( ',', array_fill( 0, count( $github_repos ), '%s' ) );
+		$github_args       = array_merge( $user_ids, array( $window_days ), $github_repos );
+
+		// $placeholders / $repo_placeholders are built from internal counts only
+		// (user_id count and the hardcoded repo allowlist size).
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT user_id, category, repo, COUNT(*) AS n, MAX(ts) AS last_ts
+			 FROM wporg_github_activity
+			 WHERE user_id IN ($placeholders)
+			   AND ts >= DATE_SUB(NOW(), INTERVAL %d DAY)
+			   AND repo IN ($repo_placeholders)
+			 GROUP BY user_id, category, repo",
+			$github_args
+		) );
+		// phpcs:enable
+	}
 
 	foreach ( $rows as $r ) {
 		$uid = (int) $r->user_id;
@@ -218,9 +254,15 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 			$metrics[ $uid ]['top_repos'][ $r->repo ] += $n;
 		}
 
-		$ts = $r->last_ts ? strtotime( $r->last_ts ) : 0;
-		if ( $ts > (int) $metrics[ $uid ]['last_activity'] ) {
-			$metrics[ $uid ]['last_activity'] = $ts;
+		// Per spec, the active-X-ago bucket is keyed off non-low recency only.
+		// Low-tier signals (opened issues, reopened PRs) don't count toward
+		// weighted_volume, so they shouldn't make a card render "active today"
+		// while its body says "no verified contributions in the last N days".
+		if ( 'low' !== $tier ) {
+			$ts = $r->last_ts ? strtotime( $r->last_ts ) : 0;
+			if ( $ts > (int) $metrics[ $uid ]['last_activity'] ) {
+				$metrics[ $uid ]['last_activity'] = $ts;
+			}
 		}
 	}
 

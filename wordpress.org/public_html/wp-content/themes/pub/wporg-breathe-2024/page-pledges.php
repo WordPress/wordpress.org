@@ -20,12 +20,9 @@ get_header();
 
 $current_team = Pledges\get_current_team();
 
-wp_enqueue_style(
-	'wporg-breathe-page-pledges',
-	get_stylesheet_directory_uri() . '/css/page-pledges.css',
-	array( 'wporg-breathe' ),
-	filemtime( __DIR__ . '/css/page-pledges.css' )
-);
+// page-pledges.css and js/page-pledges.js are enqueued from functions.php on
+// the wp_enqueue_scripts action so they reach <head> instead of being emitted
+// in the footer via late-styles fallback (which causes a visible FOUC).
 
 // ------------------------------------------------------------------
 // Teams without wired-up tracking get an invitation page instead of
@@ -200,14 +197,6 @@ foreach ( $contributors as $c ) {
 	}
 }
 
-wp_enqueue_script(
-	'wporg-breathe-page-pledges',
-	get_stylesheet_directory_uri() . '/js/page-pledges.js',
-	array(),
-	filemtime( __DIR__ . '/js/page-pledges.js' ),
-	true
-);
-
 ?>
 
 <div id="primary" class="content-area">
@@ -242,11 +231,12 @@ wp_enqueue_script(
 						<span class="pledges-health-num"><?php echo esc_html( number_format_i18n( $total_count ) ); ?></span>
 						<span class="pledges-health-text">
 							<?php
+							// $total_count is the static opt-in roster (active + inactive); the window
+							// scopes the rank line below, not this banner. Don't conflate the two.
 							echo wp_kses_data( sprintf(
-								/* translators: 1: team name, 2: window in days */
-								__( 'opted-in contributors to %1$s in the last %2$d days.', 'wporg-5ftf' ),
-								'<strong>' . esc_html( $current_team->post_title ) . '</strong>',
-								$window_days
+								/* translators: %s: team name */
+								__( 'opted-in contributors to %s.', 'wporg-5ftf' ),
+								'<strong>' . esc_html( $current_team->post_title ) . '</strong>'
 							) );
 							?>
 						</span>
@@ -262,11 +252,13 @@ wp_enqueue_script(
 								<span class="pledges-filter-label"><?php esc_html_e( 'Time window', 'wporg-5ftf' ); ?></span>
 								<?php
 								// home_url('/pledges/') already includes the team site path, so no REQUEST_URI concat needed.
+								// Carry show_inactive forward so changing the window doesn't silently collapse the inactive list.
 								$pledges_url   = home_url( '/pledges/' );
+								$base_url      = $show_inactive ? add_query_arg( 'show_inactive', '1', $pledges_url ) : $pledges_url;
 								$default_w     = ContributionMetrics\WINDOW_DAYS_DEFAULT;
-								$url_for_30    = 30 === $default_w ? $pledges_url : add_query_arg( 'window', 30, $pledges_url );
-								$url_for_90    = 90 === $default_w ? $pledges_url : add_query_arg( 'window', 90, $pledges_url );
-								$url_for_180   = 180 === $default_w ? $pledges_url : add_query_arg( 'window', 180, $pledges_url );
+								$url_for_30    = 30 === $default_w ? $base_url : add_query_arg( 'window', 30, $base_url );
+								$url_for_90    = 90 === $default_w ? $base_url : add_query_arg( 'window', 90, $base_url );
+								$url_for_180   = 180 === $default_w ? $base_url : add_query_arg( 'window', 180, $base_url );
 								?>
 								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_30 ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
 								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_90 ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
@@ -291,16 +283,26 @@ wp_enqueue_script(
 							) );
 							?>
 						</strong>
+						<?php
+						// The result phrase is a JS-controlled template so the singular/plural
+						// form follows the visible-card count after client-side filtering, instead
+						// of being baked at render time against $active_count and drifting (e.g.
+						// "1 active contributors").
+						?>
 						<span class="pledges-result-count">
 							<span id="pledges-result-count"><?php echo esc_html( $active_count ); ?></span>
-							<?php
+							<span
+								id="pledges-result-phrase"
+								data-singular="<?php echo esc_attr__( 'active contributor (of %d total)', 'wporg-5ftf' ); ?>"
+								data-plural="<?php echo esc_attr__( 'active contributors (of %d total)', 'wporg-5ftf' ); ?>"
+								data-total="<?php echo esc_attr( $total_count ); ?>"
+							><?php
 							echo esc_html( sprintf(
-								/* translators: 1: active count, 2: total count */
-								_n( 'active contributor (of %2$d total)', 'active contributors (of %2$d total)', $active_count, 'wporg-5ftf' ),
-								$active_count,
+								/* translators: %d: total count */
+								_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $active_count, 'wporg-5ftf' ),
 								$total_count
 							) );
-							?>
+							?></span>
 						</span>
 					</p>
 
