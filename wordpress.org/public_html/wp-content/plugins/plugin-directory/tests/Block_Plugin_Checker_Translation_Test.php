@@ -9,6 +9,8 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\CLI\Block_Plugin_Checker;
 
 /**
+ * Verifies the rules under which the block validator's translation check fires.
+ *
  * @group block-validator
  */
 class Block_Plugin_Checker_Translation_Test extends TestCase {
@@ -47,6 +49,9 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 		return $checker->get_results( 'warning', 'check_for_translation_function' );
 	}
 
+	/**
+	 * A direct wp_set_script_translations() call satisfies the check (existing behavior).
+	 */
 	public function test_direct_wp_set_script_translations_call_passes() {
 		$warnings = $this->run_check(
 			array( 'wp_set_script_translations' ),
@@ -55,33 +60,61 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 		$this->assertEmpty( $warnings );
 	}
 
+	/**
+	 * Pairing register_block_type() with a textdomain in block.json triggers core's
+	 * automatic wp_set_script_translations() registration since WP 5.7.
+	 */
 	public function test_register_block_type_with_textdomain_passes() {
 		$warnings = $this->run_check(
 			array( 'register_block_type' ),
-			array( (object) array( 'name' => 'plugin/main', 'textdomain' => 'plugin' ) )
-		);
-		$this->assertEmpty( $warnings );
-	}
-
-	public function test_register_block_type_from_metadata_with_textdomain_passes() {
-		$warnings = $this->run_check(
-			array( 'register_block_type_from_metadata' ),
-			array( (object) array( 'name' => 'plugin/main', 'textdomain' => 'plugin' ) )
-		);
-		$this->assertEmpty( $warnings );
-	}
-
-	public function test_textdomain_on_any_block_is_sufficient() {
-		$warnings = $this->run_check(
-			array( 'register_block_type' ),
 			array(
-				(object) array( 'name' => 'plugin/a' ),
-				(object) array( 'name' => 'plugin/b', 'textdomain' => 'plugin' ),
+				(object) array(
+					'name'       => 'plugin/main',
+					'textdomain' => 'plugin',
+				),
 			)
 		);
 		$this->assertEmpty( $warnings );
 	}
 
+	/**
+	 * The legacy alias register_block_type_from_metadata() should be recognized
+	 * identically to register_block_type().
+	 */
+	public function test_register_block_type_from_metadata_with_textdomain_passes() {
+		$warnings = $this->run_check(
+			array( 'register_block_type_from_metadata' ),
+			array(
+				(object) array(
+					'name'       => 'plugin/main',
+					'textdomain' => 'plugin',
+				),
+			)
+		);
+		$this->assertEmpty( $warnings );
+	}
+
+	/**
+	 * Multiple blocks: a textdomain on any one of them is enough to satisfy the check.
+	 */
+	public function test_textdomain_on_any_block_is_sufficient() {
+		$warnings = $this->run_check(
+			array( 'register_block_type' ),
+			array(
+				(object) array( 'name' => 'plugin/a' ),
+				(object) array(
+					'name'       => 'plugin/b',
+					'textdomain' => 'plugin',
+				),
+			)
+		);
+		$this->assertEmpty( $warnings );
+	}
+
+	/**
+	 * Calling register_block_type() without any block.json textdomain still warns -
+	 * core won't auto-register translations, so the original guidance is correct.
+	 */
 	public function test_register_block_type_without_textdomain_warns() {
 		$warnings = $this->run_check(
 			array( 'register_block_type' ),
@@ -90,14 +123,26 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 		$this->assertCount( 1, $warnings );
 	}
 
+	/**
+	 * A textdomain in block.json with no PHP register call won't actually load
+	 * translations, so the warning should still fire.
+	 */
 	public function test_textdomain_in_block_json_without_register_call_warns() {
 		$warnings = $this->run_check(
 			array(),
-			array( (object) array( 'name' => 'plugin/main', 'textdomain' => 'plugin' ) )
+			array(
+				(object) array(
+					'name'       => 'plugin/main',
+					'textdomain' => 'plugin',
+				),
+			)
 		);
 		$this->assertCount( 1, $warnings );
 	}
 
+	/**
+	 * No translation signals at all: warning expected.
+	 */
 	public function test_no_translation_signals_warns() {
 		$warnings = $this->run_check( array(), array() );
 		$this->assertCount( 1, $warnings );
