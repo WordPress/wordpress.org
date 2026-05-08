@@ -1,0 +1,9 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fixture/block-with-textdomain",
+	"title": "Block With Textdomain",
+	"category": "widgets",
+	"textdomain": "block-plugin-with-textdomain",
+	"editorScript": "file:./index.js"
+}

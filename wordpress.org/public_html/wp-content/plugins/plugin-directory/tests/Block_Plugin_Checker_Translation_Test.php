@@ -94,4 +94,31 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 		$warnings = $this->run_check( array(), array() );
 		$this->assertCount( 1, $warnings );
 	}
+
+	/**
+	 * End-to-end against a real fixture plugin: a `register_block_type_from_metadata( __DIR__ )`
+	 * call plus a `block.json` declaring a `textdomain` should not trigger the warning.
+	 */
+	public function test_fixture_plugin_with_metadata_textdomain_passes() {
+		$fixture_path = __DIR__ . '/fixtures/block-plugin-with-textdomain';
+
+		$reflection = new ReflectionClass( Block_Plugin_Checker::class );
+		$checker    = $reflection->newInstanceWithoutConstructor();
+
+		$path_prop = $reflection->getProperty( 'path_to_plugin' );
+		$path_prop->setAccessible( true );
+		$path_prop->setValue( $checker, $fixture_path );
+
+		$blocks_prop = $reflection->getProperty( 'blocks' );
+		$blocks_prop->setAccessible( true );
+		$blocks_prop->setValue( $checker, $checker->find_blocks( $fixture_path ) );
+
+		$calls_prop = $reflection->getProperty( 'php_function_calls' );
+		$calls_prop->setAccessible( true );
+		$calls_prop->setValue( $checker, $checker->find_php_functions( $fixture_path ) );
+
+		$checker->check_for_translation_function();
+
+		$this->assertEmpty( $checker->get_results( 'warning', 'check_for_translation_function' ) );
+	}
 }
