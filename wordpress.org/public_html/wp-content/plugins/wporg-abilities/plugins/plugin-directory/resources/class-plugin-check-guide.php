@@ -44,6 +44,18 @@ class Plugin_Check_Guide extends Ability_Base {
 	 * @return array MCP resource contents array.
 	 */
 	public static function execute(): array {
+		/*
+		 * The blueprint below intentionally activates `--all` plugins and copies the
+		 * Plugin Check object-cache.php drop-in. Both are required for runtime checks
+		 * (enqueued script size/scope, non-blocking scripts, etc.) to register —
+		 * Plugin Check gates them on `is_plugin_active()` and on the drop-in being
+		 * present. Without both, only static checks run.
+		 *
+		 * The `cp` step must remain the LAST step. Plugin Check registers a WP-CLI
+		 * `after_invoke` hook that auto-deletes the drop-in whenever any `wp plugin`
+		 * subcommand finishes, so any `wp plugin …` step added after the `cp` will
+		 * silently revert runtime checks to static-only.
+		 */
 		return array(
 			array(
 				'uri'      => 'wporg://plugins/plugin-directory/plugin-check-guide',
@@ -68,7 +80,10 @@ Create one temporary file and run one command. This installs Plugin Check automa
 {
   "steps": [
     {"step": "installPlugin", "pluginData": {"resource": "wordpress.org/plugins", "slug": "plugin-check"}},
-    {"step": "wp-cli", "command": "wp plugin activate plugin-check"}
+    {"step": "wp-cli", "command": "wp plugin activate --all"},
+    {"step": "cp",
+      "fromPath": "/wordpress/wp-content/plugins/plugin-check/drop-ins/object-cache.copy.php",
+      "toPath": "/wordpress/wp-content/object-cache.php"}
   ]
 }
 ```

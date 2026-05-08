@@ -46,6 +46,9 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 				'/about/testimonials' => '/news/category/community/',
 				// Deprecated About / Swag page https://github.com/WordPress/wporg-main-2022/issues/208
 				'/about/swag'         => 'https://mercantile.wordpress.org/',
+				'/shop'               => 'https://mercantile.wordpress.org/',
+				'/store'              => 'https://mercantile.wordpress.org/',
+				'/swag'               => 'https://mercantile.wordpress.org/',
 
 				// Hashtag alias for State of the Word
 				'/sotw' => 'https://wordpress.org/state-of-the-word/',
@@ -214,17 +217,29 @@ function wporg_redirect_site_not_found() {
 		case '2023.wordpress.org':
 		case '2024.wordpress.org':
 		case '2025.wordpress.org':
+		case '2026.wordpress.org':
+		case '2027.wordpress.org':
+		case '2028.wordpress.org':
+		case '2029.wordpress.org':
+		case '2030.wordpress.org':
 			$location = 'https://' . explode( '.', $host )[0] . '.wordpress.net/';
 			break;
 
 		case 'slack.wordpress.org':
 		case 'chat.wordpress.org':
+		case 'community.wordpress.org':
 			$location = 'https://make.wordpress.org/chat/';
 			break;
 
-		case 'community.wordpress.org':
-			$location    = 'https://make.wordpress.org/chat/matrix/';
-			$status_code = 302;
+		case 'plugins.wordpress.org':
+		case 'themes.wordpress.org':
+			$location = 'https://wordpress.org/' . explode( '.', $host )[0] . '/';
+			break;
+
+		case 'shop.wordpress.org':
+		case 'store.wordpress.org':
+		case 'swag.wordpress.org':
+			$location = 'https://mercantile.wordpress.org/';
 			break;
 
 		// Plural => Singular

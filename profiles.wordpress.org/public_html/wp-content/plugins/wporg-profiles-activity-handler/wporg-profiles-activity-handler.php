@@ -32,6 +32,21 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 	class WPOrg_Profiles_Activity_Handler {
 
 		/**
+		 * @var WPOrg_Profiles_Activity_Handler|null
+		 */
+		protected static $instance = null;
+
+		/**
+		 * Returns the shared instance, constructing it on first call.
+		 *
+		 * Used by both the bootstrap at the bottom of this file and by the
+		 * CLI queue processor to avoid duplicate hook registration.
+		 */
+		public static function get_instance() {
+			return self::$instance ??= new self();
+		}
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
@@ -81,7 +96,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Actions to run on the 'plugins_loaded' filter.
 		 */
 		public function plugins_loaded() {
-			add_action( 'wp_ajax_nopriv_wporg_handle_activity', array( $this, 'handle_activity' ) );
+			add_action( 'wp_ajax_nopriv_wporg_handle_activity', array( $this, 'ajax_handle_activity' ) );
 		}
 
 		/**
@@ -155,17 +170,18 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
-		 * Checks that required POST arguments are defined and have a value.
+		 * Checks that required arguments are defined and have a value.
 		 *
 		 * Ends request and reports on any missing arguments, if necessary.
 		 *
-		 * @param array $args The array of required POST arguments.
+		 * @param array $args The array of required argument names.
+		 * @param array $data The request data to check against.
 		 */
-		protected function require_args( $args ) {
+		protected function require_args( $args, array $data ) {
 			$missing = array();
 
 			foreach ( $args as $arg ) {
-				if ( empty( $_POST[ $arg ] ) ) {
+				if ( empty( $data[ $arg ] ) ) {
 					$missing[] = $arg;
 				}
 			}
@@ -176,114 +192,118 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
-		 * Primary AJAX handler.
+		 * AJAX wrapper for handle_activity().
 		 *
-		 * Funnels incoming requests to appropriate sub-handler based on
-		 * $_POST['source'] value.
-		 *
-		 * By default (and for security), this does nothing. The filter
-		 * 'wporg_is_valid_activity_request' must be hooked in order to provide
-		 * the appropriate validity checks on the request to permit the incoming
-		 * activity notification to be handled.
-		 *
-		 * TODO: Make this a generic handler and require sub-handlers to
-		 * register themselves.
+		 * Validates the request, delegates to handle_activity(), and dies with the result.
 		 */
-		public function handle_activity() {
+		public function ajax_handle_activity() {
 			try {
-				/*
-				 * This is useful for testing on your sandbox.
-				 *
-				 * e.g., Edit `$_POST['user_id']` so that activity goes to a test account rather than a real one.
-				 */
 				do_action( 'wporg_profiles_before_handle_activity' );
 
-				// Return error if not a valid activity request.
 				if ( true !== apply_filters( 'wporg_is_valid_activity_request', false ) ) {
-					throw new Exception( '-1 Not a valid activity request' );
+					status_header( 400 );
+					die( '-1 Not a valid activity request' );
 				}
 
-				// Return error if activities are not enabled.
-				if ( ! bp_is_active( 'activity' ) ) {
-					throw new Exception( '-1 Activity component not activated' );
+				$result = $this->handle_activity( wp_unslash( $_POST ) );
+
+				if ( is_wp_error( $result ) ) {
+					$status = $result->get_error_data()['status'] ?? 500;
+					status_header( $status );
+					trigger_error( $result->get_error_message(), E_USER_WARNING );
+					die( '-1 ' . $result->get_error_message() );
 				}
 
-				$source = sanitize_text_field( $_POST['source'] ?? $_POST['component'] );
-
-				// The original `action` was the `admin-ajax.php` action, which is no longer needed.
-				// Renaming this allows simple handlers to pass the sanitized $_POST directly to `bp_activity_add()`.
-				$_POST['action'] = $_POST['message'] ?? '';
-
-				// Slack and GlotPress sometimes include user IDs in a different location, and they always use
-				// `sanitize_activity()`, which checks for a valid user ID. Checking here too adds complexity and
-				// is unnecessary.
-				if ( ! in_array( $source, array( 'slack', 'glotpress' ), true ) ) {
-					if ( empty( $_POST['user'] ) && empty( $_POST['user_id'] ) ) {
-						throw new Exception( '-1 No user specified.' );
-					}
-				}
-
-				// Disable default BP moderation
-				remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2 );
-				remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2 );
-
-				// Disable requirement that user have a display_name set
-				remove_filter( 'bp_activity_before_save', 'bporg_activity_requires_display_name' );
-
-				// If an activity doesn't require special logic, then `add_activity()` can be called directly. Compare
-				// Learn and Slack to see the difference.
-				switch ( $source ) {
-					case 'forum':
-						$activity_id = $this->handle_forum_activity();
-						break;
-					case 'learn':
-						$activity_id = bp_activity_add( $this->sanitize_activity( $_POST ) );
-						break;
-					case 'glotpress':
-						$activity_id = $this->handle_glotpress_activity( $_POST );
-						break;
-					case 'plugin':
-						$activity_id = $this->handle_plugin_activity();
-						break;
-					case 'theme':
-						$activity_id = $this->handle_theme_activity();
-						break;
-					case 'trac':
-						$activity_id = $this->handle_trac_activity();
-						break;
-					case 'wordcamp':
-						$activity_id = $this->handle_wordcamp_activity();
-						break;
-					case 'wordpress':
-						$activity_id = $this->handle_wordpress_activity();
-						break;
-					case 'slack':
-						$activity_id = $this->handle_slack_activity();
-						break;
-					default:
-						throw new Exception( '-1 Unrecognized activity source' );
-						break;
-				}
-
-				if ( is_wp_error( $activity_id ) ) {
-					throw new Exception( '-1 Unable to save activity: ' . $activity_id->get_error_message() );
-				} elseif ( str_starts_with( $activity_id, '-1' ) ) {
-					throw new Exception( $activity_id );
-				} elseif ( false === $activity_id || intval( $activity_id ) <= 0 ) {
-					throw new Exception( '-1 Unable to save activity' );
-				} else {
-					$this->maybe_update_last_activity();
-				}
-
-				$response = '1';
-
+				die( '1' );
 			} catch ( Exception $exception ) {
+				status_header( 500 );
 				trigger_error( $exception->getMessage(), E_USER_WARNING );
+				die( '-1 ' . $exception->getMessage() );
+			}
+		}
 
-				$response = $exception->getMessage();
+		/**
+		 * Primary handler for activity requests.
+		 *
+		 * Funnels incoming requests to appropriate sub-handler based on
+		 * $data['source'] value.
+		 *
+		 * @param array $data The request data.
+		 * @return true|WP_Error
+		 */
+		public function handle_activity( array $data ) {
+			if ( ! bp_is_active( 'activity' ) ) {
+				return new WP_Error( 'activity_inactive', 'Activity component not activated', [ 'status' => 500 ] );
 			}
 
-			die( $response );
+			$source = sanitize_text_field( $data['source'] ?? $data['component'] );
+
+			// The original `action` was the `admin-ajax.php` action, which is no longer needed.
+			// Renaming this allows simple handlers to pass the sanitized data directly to `bp_activity_add()`.
+			$data['action'] = $data['message'] ?? '';
+
+			// Slack and GlotPress sometimes include user IDs in a different location, and they always use
+			// `sanitize_activity()`, which checks for a valid user ID. Checking here too adds complexity and
+			// is unnecessary.
+			if ( ! in_array( $source, array( 'slack', 'glotpress' ), true ) ) {
+				if ( empty( $data['user'] ) && empty( $data['user_id'] ) ) {
+					return new WP_Error( 'no_user', 'No user specified.', [ 'status' => 400 ] );
+				}
+			}
+
+			// Disable default BP moderation
+			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2 );
+			remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2 );
+
+			// Disable requirement that user have a display_name set
+			remove_filter( 'bp_activity_before_save', 'bporg_activity_requires_display_name' );
+
+			// If an activity doesn't require special logic, then `add_activity()` can be called directly. Compare
+			// Learn and Slack to see the difference.
+			switch ( $source ) {
+				case 'forum':
+					$activity_id = $this->handle_forum_activity( $data );
+					break;
+				case 'generic':
+				case 'learn':
+					$activity_id = bp_activity_add( $this->sanitize_activity( $data ) );
+					break;
+				case 'glotpress':
+					$activity_id = $this->handle_glotpress_activity( $data );
+					break;
+				case 'plugin':
+					$activity_id = $this->handle_plugin_activity( $data );
+					break;
+				case 'theme':
+					$activity_id = $this->handle_theme_activity( $data );
+					break;
+				case 'trac':
+					$activity_id = $this->handle_trac_activity( $data );
+					break;
+				case 'wordcamp':
+					$activity_id = $this->handle_wordcamp_activity( $data );
+					break;
+				case 'wordpress':
+					$activity_id = $this->handle_wordpress_activity( $data );
+					break;
+				case 'slack':
+					$activity_id = $this->handle_slack_activity( $data );
+					break;
+				default:
+					return new WP_Error( 'unknown_source', 'Unrecognized activity source', [ 'status' => 400 ] );
+			}
+
+			if ( is_wp_error( $activity_id ) ) {
+				return new WP_Error( 'activity_failed', 'Unable to save activity: ' . $activity_id->get_error_message(), [ 'status' => 500 ] );
+			} elseif ( is_string( $activity_id ) && str_starts_with( $activity_id, '-1' ) ) {
+				return new WP_Error( 'activity_failed', $activity_id, [ 'status' => 500 ] );
+			} elseif ( false === $activity_id || intval( $activity_id ) <= 0 ) {
+				return new WP_Error( 'activity_failed', 'Unable to save activity', [ 'status' => 500 ] );
+			}
+
+			$this->maybe_update_last_activity( $data );
+
+			return true;
 		}
 
 		/**
@@ -291,9 +311,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Adds/Updates user meta to track last activity.
 		 *
 		 */
-		public static function maybe_update_last_activity() {
+		public static function maybe_update_last_activity( array $data = array() ) {
 
-			$user = self::get_user( $_POST['user'] ?? ( $_POST['user_id'] ?? 0 ) );
+			$user = self::get_user( $data['user'] ?? ( $data['user_id'] ?? 0 ) );
 			if ( ! $user ) {
 				return;
 			}
@@ -316,7 +336,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
-		 * Sanitize `$_POST` args intended for `bp_activity_add()`.
+		 * Sanitize request args intended for `bp_activity_add()`.
 		 *
 		 * @throws Exception
 		 */
@@ -373,13 +393,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 *  - Removing a topic
 		 *  - Removing a topic reply
 		 */
-		private function handle_forum_activity() {
-			$user = self::get_user( $_POST['user'] );
+		private function handle_forum_activity( array $data ) {
+			$user = self::get_user( $data['user'] );
 			$type = '';
 
 			// Check for valid user.
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
+				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] );
 			}
 
 			// Check for valid forum activities.
@@ -389,8 +409,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'create-reply' => 'forum_reply_create',
 				'remove-reply' => 'forum_reply_remove',
 			);
-			if ( ! empty( $_POST['activity'] ) && ! empty( $activities[ $_POST['activity'] ] ) ) {
-				$type = $activities[ $_POST['activity'] ];
+			if ( ! empty( $data['activity'] ) && ! empty( $activities[ $data['activity'] ] ) ) {
+				$type = $activities[ $data['activity'] ];
 			} else {
 				return '-1 Unrecognized forum activity.';
 			}
@@ -407,12 +427,12 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			} else {
 				$required_args[] = 'post_id';
 			}
-			$this->require_args( $required_args );
+			$this->require_args( $required_args, $data );
 
 			// Determine 'item_id' value based on context.
 			$item_id = in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ?
-				intval( $_POST['topic_id'] ) :
-				intval( $_POST['post_id'] );
+				intval( $data['topic_id'] ) :
+				intval( $data['post_id'] );
 
 			// Find an existing activity uniquely identified by the reported criteria.
 			// For a creation, this prevents duplication and permits a previously
@@ -424,7 +444,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'component'         => 'forums',
 				'type'              => str_replace( 'remove', 'create', $type ),
 				'item_id'           => $item_id,
-				'secondary_item_id' => intval( $_POST['forum_id'] ),
+				'secondary_item_id' => intval( $data['forum_id'] ),
 			);
 			$activity_id  = bp_activity_get_activity_id( $args );
 			$activity_obj = $activity_id ? new BP_Activity_Activity( $activity_id ) : false;
@@ -442,30 +462,30 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				if ( 'forum_topic_create' === $type ) {
 					$action = sprintf(
 						'Created a topic, <i><a href="%s">%s</a></i>, on the site %s',
-						esc_url( $_POST['url'] ),
-						esc_html( $_POST['title'] ),
-						esc_html( $_POST['site'] )
+						esc_url( $data['url'] ),
+						esc_html( $data['title'] ),
+						esc_html( $data['site'] )
 					);
 
 				} else {
 					 // Action message for reply creation.
 					$action = sprintf(
 						'Posted a <a href="%s">reply</a> to <i>%s</i>, on the site %s',
-						esc_url( $_POST['url'] ),
-						esc_html( $_POST['title'] ),
-						esc_html( $_POST['site'] )
+						esc_url( $data['url'] ),
+						esc_html( $data['title'] ),
+						esc_html( $data['site'] )
 					);
 				}
 
 				$args = array(
 					'user_id'           => $user->ID,
 					'action'            => $action,
-					'content'           => esc_html( $_POST['message'] ),
-					'primary_link'      => esc_url( $_POST['url'] ),
+					'content'           => esc_html( $data['message'] ),
+					'primary_link'      => esc_url( $data['url'] ),
 					'component'         => 'forums',
 					'type'              => $type,
 					'item_id'           => $item_id,
-					'secondary_item_id' => intval( $_POST['forum_id'] ),
+					'secondary_item_id' => intval( $data['forum_id'] ),
 					'hide_sitewide'     => false,
 				);
 
@@ -496,25 +516,25 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Recognized activities:
 		 *  - Creating new plugin
 		 */
-		private function handle_plugin_activity() {
-			$user = self::get_user( $_POST['user'] );
+		private function handle_plugin_activity( array $data ) {
+			$user = self::get_user( $data['user'] );
 
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
+				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] );
 			}
 
 			$args = array(
 				'user_id'           => $user->ID,
 				'action'            => sprintf(
 					'Released a new plugin, <a href="%s">%s</a>',
-					esc_url( $_POST['url'] ),
-					$_POST['title']
+					esc_url( $data['url'] ),
+					$data['title']
 				),
 				'content'           => '',
-				'primary_link'      => $_POST['url'],
+				'primary_link'      => $data['url'],
 				'component'         => 'plugins',
 				'type'              => 'plugin_create',
-				'item_id'           => intval( $_POST['plugin_id'] ),
+				'item_id'           => intval( $data['plugin_id'] ),
 				'secondary_item_id' => false,
 				'hide_sitewide'     => false,
 			);
@@ -528,25 +548,25 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Recognized activities:
 		 *  - Creating new theme
 		 */
-		private function handle_theme_activity() {
-			$user = self::get_user( $_POST['user'] );
+		private function handle_theme_activity( array $data ) {
+			$user = self::get_user( $data['user'] );
 
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
+				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] );
 			}
 
 			$args = array(
 				'user_id'           => $user->ID,
 				'action'            => sprintf(
 					'Released a new theme, <a href="%s">%s</a>',
-					esc_url( $_POST['url'] ),
-					$_POST['title']
+					esc_url( $data['url'] ),
+					$data['title']
 				),
 				'content'           => '',
-				'primary_link'      => $_POST['url'],
+				'primary_link'      => $data['url'],
 				'component'         => 'themes',
 				'type'              => 'theme_create',
-				'item_id'           => intval( $_POST['theme_id'] ),
+				'item_id'           => intval( $data['theme_id'] ),
 				'secondary_item_id' => false,
 				'hide_sitewide'     => false,
 			);
@@ -563,37 +583,37 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 *  - Making a commit
 		 *  - Receiving props on a commit
 		 */
-		private function handle_trac_activity() {
-			$user = self::get_user( $_POST['user'] );
+		private function handle_trac_activity( array $data ) {
+			$user = self::get_user( $data['user'] );
 
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
+				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] );
 			}
 
-			if ( ! empty( $_POST['description'] ) ) {
+			if ( ! empty( $data['description'] ) ) {
 
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( 'Created a new ticket in %s Trac', $_POST['trac'] ),
-					'content'           => $_POST['title'],
+					'action'            => sprintf( 'Created a new ticket in %s Trac', $data['trac'] ),
+					'content'           => $data['title'],
 					'component'         => 'tracs',
 					'type'              => 'trac_ticket_create',
-					'item_id'           => intval( $_POST['id'] ),
+					'item_id'           => intval( $data['id'] ),
 					'secondary_item_id' => false,
 					'hide_sitewide'     => false,
 				);
 
 				return bp_activity_add( $args );
 
-			} elseif ( ! empty( $_POST['comment'] ) ) {
+			} elseif ( ! empty( $data['comment'] ) ) {
 
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( 'Posted a reply to <i>%s</i> in %s Trac', $_POST['title'], $_POST['trac'] ),
-					'content'           => $_POST['comment'],
+					'action'            => sprintf( 'Posted a reply to <i>%s</i> in %s Trac', $data['title'], $data['trac'] ),
+					'content'           => $data['comment'],
 					'component'         => 'tracs',
 					'type'              => 'trac_comment_create',
-					'item_id'           => intval( $_POST['id'] ),
+					'item_id'           => intval( $data['id'] ),
 					'secondary_item_id' => false,
 					'hide_sitewide'     => false,
 				);
@@ -605,11 +625,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				// Record commit to committer's activity stream
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( 'Committed [%s] to %s Trac', $_POST['changeset'], $_POST['trac'] ),
-					'content'           => $_POST['message'],
+					'action'            => sprintf( 'Committed [%s] to %s Trac', $data['changeset'], $data['trac'] ),
+					'content'           => $data['message'],
 					'component'         => 'tracs',
 					'type'              => 'trac_commit_create',
-					'item_id'           => intval( $_POST['changeset'] ),
+					'item_id'           => intval( $data['changeset'] ),
 					'secondary_item_id' => false,
 					'hide_sitewide'     => false,
 				);
@@ -618,7 +638,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				// Record props for each listed user
 				$regex = '/props\s+((?:(?:\w+\b(?<!\bfixes))(?:[,][ ]*)?)+)/i';
-				preg_match_all( $regex, $_POST['message'], $matches );
+				preg_match_all( $regex, $data['message'], $matches );
 				$usernames = explode( ',', $matches[1][0] );
 				$usernames = array_map( 'trim', $usernames );
 				$usernames = array_filter( $usernames );
@@ -629,11 +649,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					}
 					$args = array(
 						'user_id'           => $user->ID,
-						'action'            => sprintf( 'Received props in %s', $_POST['trac'] ),
-						'content'           => $_POST['message'],
+						'action'            => sprintf( 'Received props in %s', $data['trac'] ),
+						'content'           => $data['message'],
 						'component'         => 'tracs',
 						'type'              => 'trac_props_mention',
-						'item_id'           => intval( $_POST['changeset'] ),
+						'item_id'           => intval( $data['changeset'] ),
 						'secondary_item_id' => false,
 						'hide_sitewide'     => false,
 					);
@@ -647,70 +667,70 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		/**
 		 * Handles incoming activities for WordCamp.
 		 */
-		private function handle_wordcamp_activity() {
-			$user = self::get_user( $_POST['user'] );
+		private function handle_wordcamp_activity( array $data ) {
+			$user = self::get_user( $data['user'] );
 			$type = '';
 
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
+				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] );
 			}
 
-			if ( isset( $_POST['speaker_id'] ) && ! empty( $_POST['speaker_id'] ) ) {
+			if ( isset( $data['speaker_id'] ) && ! empty( $data['speaker_id'] ) ) {
 				$type    = 'wordcamp_speaker_add';
-				$item_id = $_POST['speaker_id'];
+				$item_id = $data['speaker_id'];
 
 				$action = sprintf(
 					'Confirmed as a speaker for <a href="%s">%s</a>',
-					esc_url( $_POST['url'] ),
-					$_POST['wordcamp_name']
+					esc_url( $data['url'] ),
+					$data['wordcamp_name']
 				);
 
-			} elseif ( isset( $_POST['organizer_id'] ) && ! empty( $_POST['organizer_id'] ) ) {
+			} elseif ( isset( $data['organizer_id'] ) && ! empty( $data['organizer_id'] ) ) {
 				$type    = 'wordcamp_organizer_add';
-				$item_id = $_POST['organizer_id'];
+				$item_id = $data['organizer_id'];
 
 				$action = sprintf(
 					'Joined the organizing team for <a href="%s">%s</a>',
-					esc_url( $_POST['url'] ),
-					$_POST['wordcamp_name']
+					esc_url( $data['url'] ),
+					$data['wordcamp_name']
 				);
 
-			} elseif ( isset( $_POST['type'] ) && 'mentor_assign' === $_POST['type'] ) {
+			} elseif ( isset( $data['type'] ) && 'mentor_assign' === $data['type'] ) {
 				$type          = 'wordcamp_mentor_assign';
-				$item_id       = absint( $_POST['wordcamp_id'] );
-				$wordcamp_name = sanitize_text_field( $_POST['wordcamp_name'] );
+				$item_id       = absint( $data['wordcamp_id'] );
+				$wordcamp_name = sanitize_text_field( $data['wordcamp_name'] );
 
-				if ( empty( $_POST['url'] ) ) {
+				if ( empty( $data['url'] ) ) {
 					$action = 'Started mentoring ' . $wordcamp_name;
 				} else {
 					$action = sprintf(
 						'Started mentoring <a href="%s">%s</a>',
-						sanitize_url( $_POST['url'] ),
+						sanitize_url( $data['url'] ),
 						$wordcamp_name
 					);
 				}
 
-			} elseif ( isset( $_POST['attendee_id'] ) && ! empty( $_POST['attendee_id'] ) ) {
-				$item_id = $_POST['attendee_id'];
+			} elseif ( isset( $data['attendee_id'] ) && ! empty( $data['attendee_id'] ) ) {
+				$item_id = $data['attendee_id'];
 
-				if ( 'attendee_registered' == $_POST['activity_type'] ) {
+				if ( 'attendee_registered' == $data['activity_type'] ) {
 					$type = 'wordcamp_attendee_add';
 
 					$action = sprintf(
 						'Registered to attend <a href="%s">%s</a>',
-						esc_url( $_POST['url'] ),
-						$_POST['wordcamp_name']
+						esc_url( $data['url'] ),
+						$data['wordcamp_name']
 					);
 
-				} elseif ( 'attendee_checked_in' == $_POST['activity_type'] ) {
+				} elseif ( 'attendee_checked_in' == $data['activity_type'] ) {
 					$type  = 'wordcamp_attendee_checked_in';
-					$order = absint( $_POST['checked_in_count'] );
+					$order = absint( $data['checked_in_count'] );
 
 					$action = sprintf(
 						'Is the %s person to arrive at <a href="%s">%s</a>',
 						$this->append_ordinal_suffix( $order ),
-						esc_url( $_POST['url'] ),
-						$_POST['wordcamp_name']
+						esc_url( $data['url'] ),
+						$data['wordcamp_name']
 					);
 				}
 			}
@@ -723,11 +743,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'user_id'           => $user->ID,
 				'action'            => $action,
 				'content'           => '',
-				'primary_link'      => $_POST['url'] ?? '',
+				'primary_link'      => $data['url'] ?? '',
 				'component'         => 'wordcamp',
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
-				'secondary_item_id' => intval( $_POST['wordcamp_id'] ),
+				'secondary_item_id' => intval( $data['wordcamp_id'] ),
 				'hide_sitewide'     => false,
 			);
 
@@ -766,29 +786,29 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		/**
 		 * Handles incoming activities for a WordPress install.
 		 */
-		private function handle_wordpress_activity() {
-			$user = self::get_user( $_POST['user'] );
-			$content      = $_POST['content'];
-			$primary_link = sanitize_url( $_POST['url'] );
+		private function handle_wordpress_activity( array $data ) {
+			$user = self::get_user( $data['user'] );
+			$content      = $data['content'];
+			$primary_link = sanitize_url( $data['url'] );
 
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
+				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] );
 			}
 
-			if ( isset( $_POST['comment_id'] ) && ! empty( $_POST['comment_id'] ) ) {
+			if ( isset( $data['comment_id'] ) && ! empty( $data['comment_id'] ) ) {
 				$type    = 'blog_comment_create';
-				$item_id = $_POST['comment_id'];
+				$item_id = $data['comment_id'];
 				$action  = sprintf(
 					'Wrote a <a href="%s">comment</a> on the post <i>%s</i>, on the site %s',
-					esc_url( $_POST['url'] ),
-					$_POST['title'],
-					$_POST['blog']
+					esc_url( $data['url'] ),
+					$data['title'],
+					$data['blog']
 				);
-			} elseif ( isset( $_POST['type'] ) && 'new' === $_POST['type'] ) {
+			} elseif ( isset( $data['type'] ) && 'new' === $data['type'] ) {
 				$type    = 'blog_post_create';
-				$item_id = $_POST['post_id'];
+				$item_id = $data['post_id'];
 
-				switch ( $_POST['post_type'] ) {
+				switch ( $data['post_type'] ) {
 					case 'wporg_workshop':
 						$post_type = 'workshop';
 						break;
@@ -802,7 +822,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						break;
 
 					case 'handbook':
-					case str_contains( $_POST['post_type'], '-handbook' ):
+					case str_contains( $data['post_type'], '-handbook' ):
 						$post_type = 'handbook page';
 						break;
 
@@ -813,29 +833,29 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$action = sprintf(
 					'Wrote a new %s, <i><a href="%s">%s</a></i>, on the site %s',
 					$post_type,
-					esc_url( $_POST['url'] ),
-					$_POST['title'],
-					$_POST['blog']
+					esc_url( $data['url'] ),
+					$data['title'],
+					$data['blog']
 				);
-			} elseif ( isset( $_POST['type'] ) && 'update' === $_POST['type'] ) {
+			} elseif ( isset( $data['type'] ) && 'update' === $data['type'] ) {
 				// Handbooks are currently the only post type that send notifications of updates.
 				$type    = 'blog_handbook_update';
-				$item_id = $_POST['post_id'];
+				$item_id = $data['post_id'];
 				$action  = ''; // Will be set by `digest_bump()`
 				$content = false;
-				$primary_link = sanitize_url( $_POST['blog_url'] ); // To group digest entries by site.
+				$primary_link = sanitize_url( $data['blog_url'] ); // To group digest entries by site.
 
 				$singular = sprintf(
 					'Updated a handbook page on <a href="%s">%s</a>.',
-					sanitize_url( $_POST['blog_url'] ),
-					sanitize_text_field( $_POST['blog'] )
+					sanitize_url( $data['blog_url'] ),
+					sanitize_text_field( $data['blog'] )
 				);
 
 				$plural = sprintf(
 					'Made %s updates to handbook pages on <a href="%s">%s</a>.',
 					'%d',
-					sanitize_url( $_POST['blog_url'] ),
-					sanitize_text_field( $_POST['blog'] )
+					sanitize_url( $data['blog_url'] ),
+					sanitize_text_field( $data['blog'] )
 				);
 			}
 
@@ -868,8 +888,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 *
 		 * @return bool|string `true` if all activities are added, string error message if any of them fail.
 		 */
-		protected function handle_slack_activity() {
-			$activity_type  = sanitize_text_field( $_POST['activity'] );
+		protected function handle_slack_activity( array $data ) {
+			$activity_type  = sanitize_text_field( $data['activity'] );
 			$user_case_args = array();
 			$errors         = '';
 
@@ -881,7 +901,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			switch ( $activity_type ) {
 				case 'props_given':
-					$user_case_args = $this->handle_props_given( $_POST );
+					$user_case_args = $this->handle_props_given( $data );
 					break;
 
 				default:
@@ -1090,6 +1110,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 } /* if class_exists */
 
 if ( class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
-	new WPOrg_Profiles_Activity_Handler();
+	WPOrg_Profiles_Activity_Handler::get_instance();
 }
 

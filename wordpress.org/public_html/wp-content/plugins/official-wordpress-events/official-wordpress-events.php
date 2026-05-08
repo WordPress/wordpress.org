@@ -16,6 +16,8 @@ class Official_WordPress_Events {
 	const MEETUP_MEMBER_ID      = 72560962;
 	const CACHEBUSTER           = 3;
 
+	public $log = [];
+
 	/*
 	 * @todo
 	 *
@@ -773,6 +775,10 @@ class Official_WordPress_Events {
 		}
 
 		foreach ( $address_components as $component ) {
+			if ( empty( $component->types[0] ) ) {
+				continue;
+			}
+
 			if ( 'locality' == $component->types[0] ) {
 				$address['city'] = $component->short_name;
 

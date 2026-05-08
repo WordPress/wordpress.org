@@ -87,3 +87,47 @@ $fields = array(
 		</div>
 	</aside>
 </div>
+
+<?php
+// "Consider These Candidates" section on single job pages.
+	$single_result     = jobswp_get_open_to_work_candidates( 1, 4 );
+	$single_candidates = $single_result['candidates'];
+	if ( ! empty( $single_candidates ) ) :
+?>
+<div class="job-detail-candidates">
+	<div class="job-detail-candidates__inner">
+		<h3><?php esc_html_e( 'WordPress Professionals Open to Work', 'jobswp' ); ?></h3>
+		<div class="job-detail-candidates__grid">
+			<?php foreach ( $single_candidates as $person ) : ?>
+				<?php
+				$role    = ! empty( $person->positions[0]->role ) ? $person->positions[0]->role : '';
+				$company = ! empty( $person->positions[0]->company ) ? $person->positions[0]->company : '';
+				?>
+				<a href="<?php echo esc_url( $person->profile_url ); ?>" class="candidate-card candidate-card--compact" target="_blank" rel="noopener noreferrer">
+					<div class="candidate-card__avatar">
+						<img src="<?php echo esc_url( 'https://wordpress.org/grav-redirect.php?user=' . urlencode( $person->user_login ) . '&s=64' ); ?>" alt="" width="64" height="64" loading="lazy">
+					</div>
+					<div class="candidate-card__info">
+						<span class="candidate-card__badge"><?php esc_html_e( 'Open to Work', 'jobswp' ); ?></span>
+						<h3 class="candidate-card__name"><?php echo esc_html( $person->display_name ); ?></h3>
+						<?php if ( $role || $company ) : ?>
+							<p class="candidate-card__role">
+								<?php echo esc_html( $role ); ?>
+								<?php if ( $company ) : ?>
+									<span class="candidate-card__company"><?php echo esc_html( $company ); ?></span>
+								<?php endif; ?>
+							</p>
+						<?php endif; ?>
+					</div>
+					<span class="candidate-card__arrow">&#8594;</span>
+				</a>
+			<?php endforeach; ?>
+		</div>
+		<p class="job-detail-candidates__cta">
+			<a href="<?php echo esc_url( home_url( '/#candidates' ) ); ?>"><?php esc_html_e( 'View all candidates &rarr;', 'jobswp' ); ?></a>
+		</p>
+	</div>
+</div>
+<?php
+	endif;
+?>

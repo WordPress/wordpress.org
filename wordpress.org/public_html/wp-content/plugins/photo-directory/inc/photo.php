@@ -206,7 +206,13 @@ class Photo {
 			return false;
 		}
 
-		list( , , $image_type ) = wp_getimagesize( $file );
+		$image_size = wp_getimagesize( $file );
+
+		if ( false === $image_size ) {
+			return false;
+		}
+
+		list( , , $image_type ) = $image_size;
 
 		/*
 		 * EXIF contains a bunch of data we'll probably never need formatted in ways
@@ -384,13 +390,13 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		}
 
 		foreach ( array( 'title', 'caption', 'credit', 'copyright', 'camera', 'iso' ) as $key ) {
-			if ( $meta[ $key ] && ! seems_utf8( $meta[ $key ] ) ) {
+			if ( $meta[ $key ] && ! wp_is_valid_utf8( $meta[ $key ] ) ) {
 				$meta[ $key ] = mb_convert_encoding( $meta[ $key ], 'UTF-8', 'ISO-8859-1' );
 			}
 		}
 
 		foreach ( $meta['keywords'] as $key => $keyword ) {
-			if ( ! seems_utf8( $keyword ) ) {
+			if ( ! wp_is_valid_utf8( $keyword ) ) {
 				$meta['keywords'][ $key ] = mb_convert_encoding( $keyword, 'UTF-8', 'ISO-8859-1' );
 			}
 		}
@@ -989,7 +995,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	public static function _strip_and_utf8_encode( $text ) {
 		$text = wp_kses( $text, 'strip' );
 
-		if ( $text && ! seems_utf8( $text ) ) {
+		if ( $text && ! wp_is_valid_utf8( $text ) ) {
 			$text = mb_convert_encoding( $text, 'UTF-8', 'ISO-8859-1' );
 		}
 

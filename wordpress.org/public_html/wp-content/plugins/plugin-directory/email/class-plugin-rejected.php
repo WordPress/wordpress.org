@@ -12,7 +12,7 @@ class Plugin_Rejected extends Markdown_Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( '%s has been rejected', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -20,7 +20,7 @@ class Plugin_Rejected extends Markdown_Base {
 		$placeholders = [
 			// Should be first, to allow placeholders in the rejection reasons too.
 			'###REASON###'          => $this->get_rejection_reason(),
-			'###NAME###'            => $this->plugin->post_title,
+			'###NAME###'            => $this->plugin_title(),
 			'###SLUG###'            => ( $this->args['slug'] ?? '' ) ?: $this->plugin->post_name,
 			'###SUBMISSION_DATE###' => $this->args['submission_date'],
 		];

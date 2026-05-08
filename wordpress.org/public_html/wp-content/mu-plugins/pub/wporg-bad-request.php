@@ -300,6 +300,22 @@ add_action( 'gp_init', function() {
 } );
 
 /**
+ * Detect invalid requests to the multisite user activation page.
+ * We don't use this at all on WordPress.org and it causes PHP fatals
+ * due to the mismatch between active themes and no plugins.
+ */
+add_action( 'init', function() {
+	if ( ! defined( 'WP_INSTALLING' ) || ! WP_INSTALLING ) {
+		return;
+	}
+
+	$path = parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH );
+	if ( str_ends_with( $path, '/wp-activate.php' ) ) {
+		die_bad_request( 'Invalid request to wp-activate.php' );
+	}
+} );
+
+/**
  * Die with a 400 Bad Request.
  *
  * @param string $reference A unique identifying string to make it easier to read logs.
