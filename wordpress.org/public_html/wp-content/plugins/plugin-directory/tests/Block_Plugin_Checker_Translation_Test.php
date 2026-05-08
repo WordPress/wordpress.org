@@ -18,16 +18,14 @@ use WordPressdotorg\Plugin_Directory\CLI\Block_Plugin_Checker;
 class Block_Plugin_Checker_Translation_Test extends TestCase {
 
 	/**
-	 * Build a checker with the given recorded PHP function calls, parsed blocks, and
-	 * metadata-registration cache value, run the translation check, and return any
-	 * warnings it produced for that check.
+	 * Build a checker with the given recorded PHP function calls and parsed blocks,
+	 * run the translation check, and return any warnings it produced.
 	 *
-	 * @param string[] $function_names              Function names to seed into $php_function_calls.
-	 * @param array    $blocks                      Blocks to seed into $blocks.
-	 * @param bool     $registers_block_from_metadata Pre-seeded result for the metadata-registration helper.
+	 * @param string[] $function_names Function names to seed into $php_function_calls.
+	 * @param array    $blocks         Blocks to seed into $blocks.
 	 * @return array
 	 */
-	private function run_check( array $function_names, array $blocks, bool $registers_block_from_metadata = false ): array {
+	private function run_check( array $function_names, array $blocks ): array {
 		$reflection = new ReflectionClass( Block_Plugin_Checker::class );
 		$checker    = $reflection->newInstanceWithoutConstructor();
 
@@ -47,10 +45,6 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 		$blocks_prop = $reflection->getProperty( 'blocks' );
 		$blocks_prop->setAccessible( true );
 		$blocks_prop->setValue( $checker, $blocks );
-
-		$cache_prop = $reflection->getProperty( 'registers_block_from_metadata' );
-		$cache_prop->setAccessible( true );
-		$cache_prop->setValue( $checker, $registers_block_from_metadata );
 
 		$checker->check_for_translation_function();
 
@@ -74,14 +68,13 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 	 */
 	public function test_metadata_registration_with_textdomain_passes() {
 		$warnings = $this->run_check(
-			array(),
+			array( 'register_block_type_from_metadata' ),
 			array(
 				(object) array(
 					'name'       => 'plugin/main',
 					'textdomain' => 'plugin',
 				),
-			),
-			true
+			)
 		);
 		$this->assertEmpty( $warnings );
 	}
@@ -91,40 +84,35 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 	 */
 	public function test_textdomain_on_any_block_is_sufficient() {
 		$warnings = $this->run_check(
-			array(),
+			array( 'register_block_type_from_metadata' ),
 			array(
 				(object) array( 'name' => 'plugin/a' ),
 				(object) array(
 					'name'       => 'plugin/b',
 					'textdomain' => 'plugin',
 				),
-			),
-			true
+			)
 		);
 		$this->assertEmpty( $warnings );
 	}
 
 	/**
-	 * Metadata registration without any block.json textdomain still warns - core won't
+	 * Metadata registration without any block.json textdomain still warns — core won't
 	 * auto-register translations, so the original guidance is correct.
 	 */
 	public function test_metadata_registration_without_textdomain_warns() {
 		$warnings = $this->run_check(
-			array(),
-			array( (object) array( 'name' => 'plugin/main' ) ),
-			true
+			array( 'register_block_type_from_metadata' ),
+			array( (object) array( 'name' => 'plugin/main' ) )
 		);
 		$this->assertCount( 1, $warnings );
 	}
 
 	/**
-	 * When the metadata-registration helper returns false — no register_block_type()
-	 * with a non-classic first argument and no register_block_type_from_metadata()
-	 * anywhere — a textdomain in block.json alone won't load translations, so the
-	 * warning still fires. Covers both the classic register_block_type( 'ns/name', $args )
-	 * form and the no-register-call-at-all case from the helper's perspective.
+	 * Classic-name `register_block_type( 'ns/name', $args )` plus a textdomain in
+	 * block.json is not enough — core only auto-loads translations for the metadata form.
 	 */
-	public function test_no_metadata_registration_warns_even_with_textdomain() {
+	public function test_classic_register_block_type_with_textdomain_warns() {
 		$warnings = $this->run_check(
 			array(),
 			array(
@@ -132,8 +120,7 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 					'name'       => 'plugin/main',
 					'textdomain' => 'plugin',
 				),
-			),
-			false
+			)
 		);
 		$this->assertCount( 1, $warnings );
 	}
@@ -142,7 +129,7 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 	 * No translation signals at all: warning expected.
 	 */
 	public function test_no_translation_signals_warns() {
-		$warnings = $this->run_check( array(), array(), false );
+		$warnings = $this->run_check( array(), array() );
 		$this->assertCount( 1, $warnings );
 	}
 }
