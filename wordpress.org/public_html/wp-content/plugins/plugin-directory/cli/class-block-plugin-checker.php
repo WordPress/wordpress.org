@@ -1087,27 +1087,83 @@ class Block_Plugin_Checker {
 		}
 
 		/*
-		 * register_block_type() with anything other than a 'namespace/name' string
-		 * literal as its first argument is metadata-based — the argument is a path,
-		 * __DIR__, dirname() expression, etc. The classic name form does not
-		 * trigger core's automatic wp_set_script_translations() wiring.
+		 * Inspect each register_block_type() call's first argument via the PHP
+		 * tokenizer. Anything other than a 'namespace/name' string literal —
+		 * a path string, __DIR__, dirname() expression, variable, etc. — means
+		 * the call is metadata-based. The classic name form does not trigger
+		 * core's automatic wp_set_script_translations() wiring.
 		 *
-		 * `\s*+` is possessive so the engine can't backtrack into the whitespace
-		 * and bypass the negative lookahead.
+		 * Tokenizing (rather than scanning raw source) ensures matches inside
+		 * comments or string literals don't influence the result.
 		 */
 		foreach ( array_keys( $files_with_register_block_type ) as $filename ) {
-			$contents = file_get_contents( $filename );
-			if ( false === $contents ) {
-				continue;
-			}
-
-			if ( preg_match( '#\bregister_block_type\s*\(\s*+(?![\'"][\w-]+/[\w-]+[\'"]\s*[,)])#', $contents ) ) {
+			if ( $this->file_has_metadata_register_block_type_call( $filename ) ) {
 				$this->registers_block_from_metadata = true;
 				break;
 			}
 		}
 
 		return $this->registers_block_from_metadata;
+	}
+
+	/**
+	 * Whether the given PHP file contains a `register_block_type()` call whose first
+	 * argument is something other than a `'namespace/name'` string literal.
+	 *
+	 * @param string $filename Absolute path to a PHP file.
+	 * @return bool
+	 */
+	protected function file_has_metadata_register_block_type_call( $filename ) {
+		$contents = file_get_contents( $filename );
+		if ( false === $contents ) {
+			return false;
+		}
+		try {
+			$tokens = token_get_all( $contents, TOKEN_PARSE );
+		} catch ( \Error $e ) {
+			return false;
+		}
+
+		$count = count( $tokens );
+		for ( $i = 0; $i < $count; $i++ ) {
+			$token = $tokens[ $i ];
+			if ( ! is_array( $token ) || T_STRING !== $token[0] || 'register_block_type' !== $token[1] ) {
+				continue;
+			}
+
+			// Expect `(` next, allowing whitespace.
+			$j = $i + 1;
+			while ( $j < $count && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) {
+				$j++;
+			}
+			if ( $j >= $count || '(' !== $tokens[ $j ] ) {
+				continue;
+			}
+
+			// First non-whitespace token after `(` is the first argument.
+			$j++;
+			while ( $j < $count && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) {
+				$j++;
+			}
+			if ( $j >= $count ) {
+				continue;
+			}
+
+			$first_arg = $tokens[ $j ];
+			if ( ! is_array( $first_arg ) || T_CONSTANT_ENCAPSED_STRING !== $first_arg[0] ) {
+				// Variable, __DIR__, dirname() call, expression, etc. — metadata-based.
+				return true;
+			}
+
+			// Bare string literal: classic only if it matches 'namespace/name' exactly.
+			$literal = trim( $first_arg[1], "'\"" );
+			if ( ! preg_match( '#^[\w-]+/[\w-]+$#', $literal ) ) {
+				return true;
+			}
+			// Otherwise this call is the classic name form — keep looking; another call in the same file may still be metadata-based.
+		}
+
+		return false;
 	}
 
 	/**

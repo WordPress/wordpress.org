@@ -118,29 +118,13 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 	}
 
 	/**
-	 * The classic register_block_type( 'ns/name', $args ) form does not auto-register
-	 * translations, so a stray block.json textdomain elsewhere in the plugin must not
-	 * suppress the warning.
+	 * When the metadata-registration helper returns false — no register_block_type()
+	 * with a non-classic first argument and no register_block_type_from_metadata()
+	 * anywhere — a textdomain in block.json alone won't load translations, so the
+	 * warning still fires. Covers both the classic register_block_type( 'ns/name', $args )
+	 * form and the no-register-call-at-all case from the helper's perspective.
 	 */
-	public function test_classic_register_block_type_with_stray_textdomain_warns() {
-		$warnings = $this->run_check(
-			array(),
-			array(
-				(object) array(
-					'name'       => 'plugin/main',
-					'textdomain' => 'plugin',
-				),
-			),
-			false
-		);
-		$this->assertCount( 1, $warnings );
-	}
-
-	/**
-	 * A textdomain in block.json with no register call won't actually load translations,
-	 * so the warning should still fire.
-	 */
-	public function test_textdomain_in_block_json_without_register_call_warns() {
+	public function test_no_metadata_registration_warns_even_with_textdomain() {
 		$warnings = $this->run_check(
 			array(),
 			array(
