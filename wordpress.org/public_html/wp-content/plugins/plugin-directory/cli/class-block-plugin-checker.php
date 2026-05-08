@@ -1124,6 +1124,8 @@ class Block_Plugin_Checker {
 			return false;
 		}
 
+		$skip_types = array( T_WHITESPACE, T_COMMENT, T_DOC_COMMENT );
+
 		$count = count( $tokens );
 		for ( $i = 0; $i < $count; $i++ ) {
 			$token = $tokens[ $i ];
@@ -1131,18 +1133,39 @@ class Block_Plugin_Checker {
 				continue;
 			}
 
-			// Expect `(` next, allowing whitespace.
+			/*
+			 * Filter out method/static calls (`$obj->register_block_type(...)`,
+			 * `Foo::register_block_type(...)`) and declarations
+			 * (`function register_block_type(...)`) by checking the previous
+			 * significant token.
+			 */
+			$prev = $i - 1;
+			while ( $prev >= 0 && is_array( $tokens[ $prev ] ) && in_array( $tokens[ $prev ][0], $skip_types, true ) ) {
+				$prev--;
+			}
+			if ( $prev >= 0 && is_array( $tokens[ $prev ] ) ) {
+				$prev_type = $tokens[ $prev ][0];
+				if ( T_OBJECT_OPERATOR === $prev_type
+					|| T_NULLSAFE_OBJECT_OPERATOR === $prev_type
+					|| T_DOUBLE_COLON === $prev_type
+					|| T_FUNCTION === $prev_type
+					|| T_NEW === $prev_type ) {
+					continue;
+				}
+			}
+
+			// Expect `(` next, allowing whitespace and comments.
 			$j = $i + 1;
-			while ( $j < $count && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) {
+			while ( $j < $count && is_array( $tokens[ $j ] ) && in_array( $tokens[ $j ][0], $skip_types, true ) ) {
 				$j++;
 			}
 			if ( $j >= $count || '(' !== $tokens[ $j ] ) {
 				continue;
 			}
 
-			// First non-whitespace token after `(` is the first argument.
+			// First significant token after `(` is the first argument.
 			$j++;
-			while ( $j < $count && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) {
+			while ( $j < $count && is_array( $tokens[ $j ] ) && in_array( $tokens[ $j ][0], $skip_types, true ) ) {
 				$j++;
 			}
 			if ( $j >= $count ) {
