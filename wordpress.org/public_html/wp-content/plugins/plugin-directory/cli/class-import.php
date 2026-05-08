@@ -496,7 +496,7 @@ class Import {
 			wp_add_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
 
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
-			foreach ( $dashboard_widgets as $widget_name ) {
+			foreach ( array_unique( $dashboard_widgets ) as $widget_name ) {
 				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget_name, false );
 			}
 		} else {
