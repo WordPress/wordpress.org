@@ -100,6 +100,7 @@ class Import {
 		$last_modified      = $data['last_modified'];
 		$blocks             = $data['blocks'];
 		$block_files        = $data['block_files'];
+		$dashboard_widgets  = $data['dashboard_widgets'] ?? array();
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
@@ -488,6 +489,19 @@ class Import {
 			update_post_meta( $plugin->ID, 'block_files', $block_files );
 		} else {
 			delete_post_meta( $plugin->ID, 'block_files' );
+		}
+
+		// Dashboard widgets: assign the section term and store widget names.
+		if ( $dashboard_widgets ) {
+			wp_add_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
+
+			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
+			foreach ( $dashboard_widgets as $widget_name ) {
+				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget_name, false );
+			}
+		} else {
+			wp_remove_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
+			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
 		}
 
 		// Add the release to storage.
@@ -1030,9 +1044,21 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
+		// Find dashboard widget registrations (wp_add_dashboard_widget calls).
+		$dashboard_widgets = array();
+		foreach ( Filesystem::list_files( $base_dir, true, '!\.php$!i' ) as $filename ) {
+			// Skip third-party dependencies — they are not the plugin itself.
+			if ( str_contains( $filename, '/vendor/' ) ) {
+				continue;
+			}
+			foreach ( self::find_dashboard_widgets_in_file( $filename ) as $widget ) {
+				$dashboard_widgets[] = $widget;
+			}
+		}
+
 		return apply_filters(
 			'wporg_plugins_export_and_parse_plugin',
-			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' ),
+			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets' ),
 			$plugin_slug,
 			$this,
 		);
@@ -1227,6 +1253,46 @@ class Import {
 		}
 
 		return $blocks;
+	}
+
+	/**
+	 * Look for wp_add_dashboard_widget() calls within a single PHP file.
+	 *
+	 * The second argument is the widget label, often wrapped in __(), _x(),
+	 * esc_html__(), etc. We extract the first quoted string literal from
+	 * inside the second argument.
+	 *
+	 * @param string $filename Pathname of the file.
+	 * @return string[] List of widget label strings.
+	 */
+	public static function find_dashboard_widgets_in_file( $filename ) {
+		if ( 'php' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) ) {
+			return array();
+		}
+
+		$contents = file_get_contents( $filename );
+		if ( ! $contents ) {
+			return array();
+		}
+
+		$widgets = array();
+
+		// Match wp_add_dashboard_widget( <first arg>, <second arg up to next top-level comma or close-paren> ).
+		if ( preg_match_all(
+			'#wp_add_dashboard_widget\s*\(\s*[^,]{1,200},\s*([^;]{1,500}?)(?:,|\))#ms',
+			$contents,
+			$matches,
+			PREG_SET_ORDER
+		) ) {
+			foreach ( $matches as $match ) {
+				// Pull the first quoted string out of the second argument.
+				if ( preg_match( '#[\'"]([^\'"]+)[\'"]#', $match[1], $title_match ) ) {
+					$widgets[] = $title_match[1];
+				}
+			}
+		}
+
+		return array_unique( $widgets );
 	}
 
 	/**
