@@ -96,11 +96,29 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 	}
 
 	/**
-	 * End-to-end against a real fixture plugin: a `register_block_type_from_metadata( __DIR__ )`
-	 * call plus a `block.json` declaring a `textdomain` should not trigger the warning.
+	 * End-to-end against a real fixture plugin: `register_block_type_from_metadata( __DIR__ )`
+	 * plus a `block.json` declaring a `textdomain` should not trigger the warning.
 	 */
-	public function test_fixture_plugin_with_metadata_textdomain_passes() {
-		$fixture_path = __DIR__ . '/fixtures/block-plugin-with-textdomain';
+	public function test_fixture_register_block_type_from_metadata_passes() {
+		$this->assertEmpty( $this->run_check_against_fixture( 'block-plugin-with-textdomain' ) );
+	}
+
+	/**
+	 * End-to-end against a real fixture plugin: `register_block_type( __DIR__ )` plus a
+	 * `block.json` declaring a `textdomain` should not trigger the warning.
+	 */
+	public function test_fixture_register_block_type_with_dir_passes() {
+		$this->assertEmpty( $this->run_check_against_fixture( 'block-plugin-register-dir' ) );
+	}
+
+	/**
+	 * Run the translation check against a fixture plugin directory.
+	 *
+	 * @param string $fixture_dirname Directory name under tests/fixtures/.
+	 * @return array Warnings recorded by the check.
+	 */
+	private function run_check_against_fixture( string $fixture_dirname ): array {
+		$fixture_path = __DIR__ . '/fixtures/' . $fixture_dirname;
 
 		$reflection = new ReflectionClass( Block_Plugin_Checker::class );
 		$checker    = $reflection->newInstanceWithoutConstructor();
@@ -119,6 +137,6 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 
 		$checker->check_for_translation_function();
 
-		$this->assertEmpty( $checker->get_results( 'warning', 'check_for_translation_function' ) );
+		return $checker->get_results( 'warning', 'check_for_translation_function' );
 	}
 }
