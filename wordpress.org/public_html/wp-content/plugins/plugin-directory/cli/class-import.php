@@ -498,6 +498,9 @@ class Import {
 
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
 			foreach ( $dashboard_widgets as $widget_name ) {
+				if ( '' === $widget_name ) {
+					continue;
+				}
 				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget_name, false );
 			}
 		} else {
@@ -1192,18 +1195,18 @@ class Import {
 
 		if ( 'php' === $ext ) {
 			// Parse register_block_type() calls and `new WP_Block_Type()` constructor calls.
-			// Block names must be literal strings of the form "namespace/name"; titles, when nested
-			// inside an array argument, are not extracted here (the title fallback applies later).
+			// Block names must be literal strings of the form "namespace/name"; the optional
+			// 'title' entry inside the second-arg options array is captured when present.
 			$contents = file_get_contents( $filename );
 			if ( $contents ) {
 				foreach ( array( 'register_block_type', 'new WP_Block_Type' ) as $needle ) {
-					foreach ( Tokenisation_Helpers::find_function_call_arg_strings( $contents, $needle, 0 ) as $name ) {
+					foreach ( Tokenisation_Helpers::find_function_call_first_arg_and_array_value( $contents, $needle, 1, 'title' ) as $name => $title ) {
 						if ( ! preg_match( '#^[-\w]+/[-\w]+$#', $name ) ) {
 							continue;
 						}
 						$blocks[] = (object) array(
 							'name'  => $name,
-							'title' => null,
+							'title' => $title,
 						);
 					}
 				}
