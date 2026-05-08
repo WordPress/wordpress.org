@@ -492,7 +492,7 @@ class Import {
 		}
 
 		// Dashboard widgets: assign the section term and store widget names.
-		if ( count( $dashboard_widgets ) ) {
+		if ( $dashboard_widgets ) {
 			wp_add_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
 
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
