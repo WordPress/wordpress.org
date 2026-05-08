@@ -12,6 +12,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use WordPressdotorg\Plugin_Directory\Tools\Tokenisation_Helpers;
 use WordPressdotorg\Plugin_Directory\Zip\Builder;
 
 /**
@@ -1190,30 +1191,23 @@ class Import {
 		}
 
 		if ( 'php' === $ext ) {
-			// Parse a php-style register_block_type() call.
-			// Again this assumes literal strings, and only parses the name and title.
+			// Parse register_block_type() calls and `new WP_Block_Type()` constructor calls.
+			// Block names must be literal strings of the form "namespace/name"; titles, when nested
+			// inside an array argument, are not extracted here (the title fallback applies later).
 			$contents = file_get_contents( $filename );
-
-			// Search out register_block_type() calls.
-			if ( $contents && preg_match_all( "#register_block_type\s*[(]\s*['\"]([-\w]+/[-\w]+)['\"](?!\s*[.])#ms", $contents, $matches, PREG_SET_ORDER ) ) {
-				foreach ( $matches as $match ) {
-					$blocks[] = (object) [
-						'name'  => $match[1],
-						'title' => null,
-					];
+			if ( $contents ) {
+				foreach ( array( 'register_block_type', 'new WP_Block_Type' ) as $needle ) {
+					foreach ( Tokenisation_Helpers::find_function_call_arg_strings( $contents, $needle, 0 ) as $name ) {
+						if ( ! preg_match( '#^[-\w]+/[-\w]+$#', $name ) ) {
+							continue;
+						}
+						$blocks[] = (object) array(
+							'name'  => $name,
+							'title' => null,
+						);
+					}
 				}
 			}
-
-			// Search out WP_Block_Type() instances.
-			if ( $contents && preg_match_all( "#new\s+WP_Block_Type\s*[(]\s*['\"]([-\w]+\/[-\w]+)['\"](?!\s*[.])(\s*,[^;]{0,500}['\"]title['\"]\s*=>\s*['\"]([^'\"]+)['\"](?!\s*[.]))?#ms", $contents, $matches, PREG_SET_ORDER ) ) {
-				foreach ( $matches as $match ) {
-					$blocks[] = (object) [
-						'name'  => $match[1],
-						'title' => $match[3] ?? null,
-					];
-				}
-			}
-
 		}
 
 		if ( 'block.json' === basename( $filename ) ) {
@@ -1259,8 +1253,8 @@ class Import {
 	 * Look for wp_add_dashboard_widget() calls within a single PHP file.
 	 *
 	 * The second argument is the widget label, often wrapped in __(), _x(),
-	 * esc_html__(), etc. We extract the first quoted string literal from
-	 * inside the second argument.
+	 * esc_html__(), etc. The first literal-string value reachable through any
+	 * such wrapping call is returned.
 	 *
 	 * @param string $filename Pathname of the file.
 	 * @return string[] List of widget label strings.
@@ -1275,24 +1269,7 @@ class Import {
 			return array();
 		}
 
-		$widgets = array();
-
-		// Match wp_add_dashboard_widget( <first arg>, <second arg up to next top-level comma or close-paren> ).
-		if ( preg_match_all(
-			'#wp_add_dashboard_widget\s*\(\s*[^,]{1,200},\s*([^;]{1,500}?)(?:,|\))#ms',
-			$contents,
-			$matches,
-			PREG_SET_ORDER
-		) ) {
-			foreach ( $matches as $match ) {
-				// Pull the first quoted string out of the second argument.
-				if ( preg_match( '#[\'"]([^\'"]+)[\'"]#', $match[1], $title_match ) ) {
-					$widgets[] = $title_match[1];
-				}
-			}
-		}
-
-		return array_unique( $widgets );
+		return array_unique( Tokenisation_Helpers::find_function_call_arg_strings( $contents, 'wp_add_dashboard_widget', 1 ) );
 	}
 
 	/**
