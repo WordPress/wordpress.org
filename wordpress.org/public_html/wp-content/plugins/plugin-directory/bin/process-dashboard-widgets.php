@@ -56,33 +56,35 @@ if ( ! empty( $opts['list'] ) ) {
 	$slugs = array_keys( $slugs );
 }
 
-echo count( $slugs ) . " candidate plugins to scan.\n";
+fwrite( STDOUT, count( $slugs ) . " candidate plugins to scan.\n" );
 
-$count_total = $count_tagged = $count_skipped = 0;
+$count_total   = 0;
+$count_tagged  = 0;
+$count_skipped = 0;
 foreach ( $slugs as $slug ) {
-	$plugin = Plugin_Directory::get_plugin_post( $slug );
-	if ( ! $plugin || 'publish' !== $plugin->post_status ) {
-		echo "  {$slug}: not published, skipping\n";
+	$plugin_post = Plugin_Directory::get_plugin_post( $slug );
+	if ( ! $plugin_post || 'publish' !== $plugin_post->post_status ) {
+		fwrite( STDOUT, "  {$slug}: not published, skipping\n" );
 		$count_skipped++;
 		continue;
 	}
 
-	echo "{$slug}... ";
+	fwrite( STDOUT, "{$slug}... " );
 	shell_exec( 'php ' . escapeshellarg( __DIR__ . '/import-plugin.php' ) . ' ' . escapeshellarg( $slug ) );
 
-	$widget_names = get_post_meta( $plugin->ID, 'dashboard_widget_name' );
-	$has_section  = has_term( 'dashboard-widgets', 'plugin_section', $plugin->ID );
+	$widget_names = get_post_meta( $plugin_post->ID, 'dashboard_widget_name' );
+	$has_section  = has_term( 'dashboard-widgets', 'plugin_section', $plugin_post->ID );
 
 	if ( $has_section ) {
-		echo "tagged (" . count( $widget_names ) . " widgets: " . implode( ', ', $widget_names ) . ")\n";
+		fwrite( STDOUT, 'tagged (' . count( $widget_names ) . ' widgets: ' . implode( ', ', $widget_names ) . ")\n" );
 		$count_tagged++;
 	} else {
-		echo "no widgets detected\n";
+		fwrite( STDOUT, "no widgets detected\n" );
 	}
 	$count_total++;
 }
 
-echo "\n";
-echo number_format( $count_total ) . " plugins scanned\n";
-echo number_format( $count_tagged ) . " tagged with dashboard-widgets\n";
-echo number_format( $count_skipped ) . " skipped (not published)\n";
+fwrite( STDOUT, "\n" );
+fwrite( STDOUT, number_format( $count_total ) . " plugins scanned\n" );
+fwrite( STDOUT, number_format( $count_tagged ) . " tagged with dashboard-widgets\n" );
+fwrite( STDOUT, number_format( $count_skipped ) . " skipped (not published)\n" );

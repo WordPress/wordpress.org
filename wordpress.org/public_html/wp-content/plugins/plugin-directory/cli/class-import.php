@@ -1261,7 +1261,7 @@ class Import {
 	 * @param string $filename Pathname of the file.
 	 * @return string[] List of widget label strings.
 	 */
-	static function find_dashboard_widgets_in_file( $filename ) {
+	public static function find_dashboard_widgets_in_file( $filename ) {
 		if ( 'php' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) ) {
 			return array();
 		}
