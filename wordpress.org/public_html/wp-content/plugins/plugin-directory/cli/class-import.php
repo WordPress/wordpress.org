@@ -496,8 +496,8 @@ class Import {
 			wp_add_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
 
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
-			foreach ( $dashboard_widgets as $widget ) {
-				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget->name, false );
+			foreach ( $dashboard_widgets as $widget_name ) {
+				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget_name, false );
 			}
 		} else {
 			wp_remove_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
@@ -1259,7 +1259,7 @@ class Import {
 	 * inside the second argument.
 	 *
 	 * @param string $filename Pathname of the file.
-	 * @return array List of objects { name => string }.
+	 * @return string[] List of widget label strings.
 	 */
 	static function find_dashboard_widgets_in_file( $filename ) {
 		if ( 'php' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) ) {
@@ -1274,7 +1274,6 @@ class Import {
 		$widgets = array();
 
 		// Match wp_add_dashboard_widget( <first arg>, <second arg up to next top-level comma or close-paren> ).
-		// The 500-char cap mirrors find_blocks_in_file() to avoid runaway matches.
 		if ( preg_match_all(
 			'#wp_add_dashboard_widget\s*\(\s*[^,]{1,200},\s*([^;]{1,500}?)(?:,|\))#ms',
 			$contents,
@@ -1284,9 +1283,7 @@ class Import {
 			foreach ( $matches as $match ) {
 				// Pull the first quoted string out of the second argument.
 				if ( preg_match( '#[\'"]([^\'"]+)[\'"]#', $match[1], $title_match ) ) {
-					$widgets[] = (object) array(
-						'name' => $title_match[1],
-					);
+					$widgets[] = $title_match[1];
 				}
 			}
 		}
