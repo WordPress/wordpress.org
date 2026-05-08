@@ -80,7 +80,7 @@ class Tokenisation_Helpers_Test extends TestCase {
 		$src = <<<'PHP'
 wp_add_dashboard_widget(
 	My_Widget_Class::DASHBOARD_WIDGET_ID,
-	/** Inline doc comment between args. */
+	/** This is a comment */
 	'My Widget',
 	array( $instance, 'render' )
 );
