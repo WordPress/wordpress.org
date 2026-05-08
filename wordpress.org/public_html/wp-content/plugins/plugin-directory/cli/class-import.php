@@ -496,7 +496,7 @@ class Import {
 			wp_add_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
 
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
-			foreach ( array_unique( $dashboard_widgets ) as $widget_name ) {
+			foreach ( $dashboard_widgets as $widget_name ) {
 				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget_name, false );
 			}
 		} else {
@@ -1047,6 +1047,10 @@ class Import {
 		// Find dashboard widget registrations (wp_add_dashboard_widget calls).
 		$dashboard_widgets = array();
 		foreach ( Filesystem::list_files( $base_dir, true, '!\.php$!i' ) as $filename ) {
+			// Skip third-party dependencies — they are not the plugin itself.
+			if ( str_contains( $filename, '/vendor/' ) ) {
+				continue;
+			}
 			foreach ( self::find_dashboard_widgets_in_file( $filename ) as $widget ) {
 				$dashboard_widgets[] = $widget;
 			}
@@ -1288,7 +1292,7 @@ class Import {
 			}
 		}
 
-		return $widgets;
+		return array_unique( $widgets );
 	}
 
 	/**
