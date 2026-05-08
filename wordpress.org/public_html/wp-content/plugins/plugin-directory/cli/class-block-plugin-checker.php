@@ -430,7 +430,8 @@ class Block_Plugin_Checker {
 					[ $filename, $php_calls->get_error_data() ]
 				);
 			} else {
-				$all_calls += $php_calls;
+				// Append, not union — per-file calls share numeric keys from 0 so `+=` would drop later files.
+				array_push( $all_calls, ...$php_calls );
 			}
 		}
 
@@ -1019,18 +1020,34 @@ class Block_Plugin_Checker {
 	}
 
 	/**
-	 * Check that the plugin uses `wp_set_script_translations`.
+	 * Check that the plugin loads script translations. WordPress auto-loads them when a
+	 * block is registered from its `block.json` (via `register_block_type_from_metadata()`
+	 * or `register_block_type( __DIR__ )`) and `block.json` declares a `textdomain`.
 	 */
 	function check_for_translation_function() {
 		$functions = wp_list_pluck( $this->php_function_calls, 0 );
-		if ( ! in_array( 'wp_set_script_translations', $functions ) ) {
-			$this->record_result(
-				__FUNCTION__,
-				'warning',
-				__( 'No translations are loaded for the scripts.', 'wporg-plugins' ),
-				'wp_set_script_translations'
-			);
+
+		if ( in_array( 'wp_set_script_translations', $functions, true ) ) {
+			return;
 		}
+
+		$registers_block = in_array( 'register_block_type', $functions, true )
+			|| in_array( 'register_block_type_from_metadata', $functions, true );
+
+		if ( $registers_block ) {
+			foreach ( (array) $this->blocks as $block ) {
+				if ( ! empty( $block->textdomain ) ) {
+					return;
+				}
+			}
+		}
+
+		$this->record_result(
+			__FUNCTION__,
+			'warning',
+			__( 'No translations are loaded for the scripts.', 'wporg-plugins' ),
+			'wp_set_script_translations'
+		);
 	}
 
 	/**

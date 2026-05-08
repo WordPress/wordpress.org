@@ -435,7 +435,7 @@ class Block_Validator {
 			case 'check_for_translation_function':
 				return sprintf(
 					// translators: %s is the link to the internationalization docs.
-					__( 'Block plugins should use <code>wp_set_script_translations</code> to load translations for each script file. <a href="%s">Learn more about internationalization.</a>', 'wporg-plugins' ),
+					__( 'Block plugins should load translations for each script file, either by registering blocks from <code>block.json</code> with a <code>textdomain</code> set, or by calling <code>wp_set_script_translations</code> directly. <a href="%s">Learn more about internationalization.</a>', 'wporg-plugins' ),
 					'https://developer.wordpress.org/block-editor/developers/internationalization/'
 				);
 			case 'check_total_size':
