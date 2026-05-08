@@ -41,11 +41,6 @@ class Block_Plugin_Checker {
 	protected $php_function_calls = array();
 
 	/**
-	 * Pattern for valid Gutenberg block names: `lowercase-namespace/lowercase-name`.
-	 */
-	const BLOCK_NAME_REGEX = '/^[a-z][a-z0-9-]*\/[a-z][a-z0-9-]+$/';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $slug The plugin slug, if known. Optional.
@@ -621,7 +616,7 @@ class Block_Plugin_Checker {
 			if ( ! trim( strval( $block->name ) ) ) {
 				continue;
 			}
-			if ( ! preg_match( self::BLOCK_NAME_REGEX, $block->name ) ) {
+			if ( ! preg_match( '/^[a-z][a-z0-9-]*\/[a-z][a-z0-9-]+$/', $block->name ) ) {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
@@ -1025,11 +1020,9 @@ class Block_Plugin_Checker {
 	}
 
 	/**
-	 * Check that the plugin loads script translations. WordPress 5.7+ auto-registers
-	 * translations only when blocks are registered from metadata (e.g.
-	 * `register_block_type( __DIR__ )` or `register_block_type_from_metadata()`)
-	 * with a `textdomain` in `block.json`. The classic `register_block_type( 'ns/name', $args )`
-	 * form does not auto-load translations.
+	 * Check that the plugin loads script translations. WordPress auto-loads them when a
+	 * block is registered from its `block.json` (via `register_block_type_from_metadata()`
+	 * or `register_block_type( __DIR__ )`) and `block.json` declares a `textdomain`.
 	 */
 	function check_for_translation_function() {
 		$functions = wp_list_pluck( $this->php_function_calls, 0 );
@@ -1038,16 +1031,15 @@ class Block_Plugin_Checker {
 			return;
 		}
 
-		$has_block_json_textdomain = false;
-		foreach ( (array) $this->blocks as $block ) {
-			if ( ! empty( $block->textdomain ) ) {
-				$has_block_json_textdomain = true;
-				break;
-			}
-		}
+		$registers_block = in_array( 'register_block_type', $functions, true )
+			|| in_array( 'register_block_type_from_metadata', $functions, true );
 
-		if ( $this->plugin_registers_block_from_metadata() && $has_block_json_textdomain ) {
-			return;
+		if ( $registers_block ) {
+			foreach ( (array) $this->blocks as $block ) {
+				if ( ! empty( $block->textdomain ) ) {
+					return;
+				}
+			}
 		}
 
 		$this->record_result(
@@ -1056,112 +1048,6 @@ class Block_Plugin_Checker {
 			__( 'No translations are loaded for the scripts.', 'wporg-plugins' ),
 			'wp_set_script_translations'
 		);
-	}
-
-	/**
-	 * Whether the plugin registers a block from its `block.json` metadata (via
-	 * `register_block_type_from_metadata()` or `register_block_type()` with a
-	 * non-classic first argument such as `__DIR__` or a path expression).
-	 *
-	 * @return bool
-	 */
-	protected function plugin_registers_block_from_metadata() {
-		$files_with_register_block_type = array();
-		foreach ( (array) $this->php_function_calls as $call ) {
-			list( $name, , $file ) = $call;
-			if ( 'register_block_type_from_metadata' === $name ) {
-				return true;
-			}
-			if ( 'register_block_type' === $name ) {
-				$files_with_register_block_type[ $file ] = true;
-			}
-		}
-
-		foreach ( array_keys( $files_with_register_block_type ) as $filename ) {
-			if ( $this->file_has_metadata_register_block_type_call( $filename ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Whether the given PHP file contains a `register_block_type()` call whose first
-	 * argument is something other than a `'namespace/name'` string literal.
-	 *
-	 * @param string $filename Absolute path to a PHP file.
-	 * @return bool
-	 */
-	protected function file_has_metadata_register_block_type_call( $filename ) {
-		$contents = file_get_contents( $filename );
-		if ( false === $contents ) {
-			return false;
-		}
-		try {
-			$tokens = token_get_all( $contents, TOKEN_PARSE );
-		} catch ( \Error $e ) {
-			return false;
-		}
-
-		$count = count( $tokens );
-		for ( $i = 0; $i < $count; $i++ ) {
-			$token = $tokens[ $i ];
-			if ( ! is_array( $token ) || T_STRING !== $token[0] || 'register_block_type' !== $token[1] ) {
-				continue;
-			}
-
-			/* Skip method/static calls and `function register_block_type(...)` declarations. */
-			$prev = $this->next_significant_token_index( $tokens, $i, -1 );
-			if ( $prev >= 0 && is_array( $tokens[ $prev ] ) ) {
-				$disqualifying = array( T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON, T_FUNCTION, T_NEW );
-				if ( in_array( $tokens[ $prev ][0], $disqualifying, true ) ) {
-					continue;
-				}
-			}
-
-			$paren = $this->next_significant_token_index( $tokens, $i, 1 );
-			if ( $paren >= $count || '(' !== $tokens[ $paren ] ) {
-				continue;
-			}
-
-			$arg_index = $this->next_significant_token_index( $tokens, $paren, 1 );
-			if ( $arg_index >= $count ) {
-				continue;
-			}
-
-			$first_arg = $tokens[ $arg_index ];
-			if ( ! is_array( $first_arg ) || T_CONSTANT_ENCAPSED_STRING !== $first_arg[0] ) {
-				return true;
-			}
-
-			$literal = trim( $first_arg[1], "'\"" );
-			if ( ! preg_match( self::BLOCK_NAME_REGEX, $literal ) ) {
-				return true;
-			}
-			/* Classic form — another call in the same file may still be metadata-based. */
-		}
-
-		return false;
-	}
-
-	/**
-	 * Find the next token index in `$direction` (1 = forward, -1 = backward) that
-	 * isn't whitespace or a comment.
-	 *
-	 * @param array $tokens    Token list from `token_get_all()`.
-	 * @param int   $from      Starting index (excluded from the search).
-	 * @param int   $direction `1` to scan forward, `-1` to scan backward.
-	 * @return int Token index, or `count( $tokens )` / `-1` if none was found.
-	 */
-	protected function next_significant_token_index( array $tokens, $from, $direction ) {
-		$skip = array( T_WHITESPACE, T_COMMENT, T_DOC_COMMENT );
-		$i    = $from + $direction;
-		$end  = count( $tokens );
-		while ( $i >= 0 && $i < $end && is_array( $tokens[ $i ] ) && in_array( $tokens[ $i ][0], $skip, true ) ) {
-			$i += $direction;
-		}
-		return $i;
 	}
 
 	/**

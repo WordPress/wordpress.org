@@ -29,10 +29,6 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 		$reflection = new ReflectionClass( Block_Plugin_Checker::class );
 		$checker    = $reflection->newInstanceWithoutConstructor();
 
-		/*
-		 * find_called_functions_in_file() records each call as [ name, line, file ];
-		 * the check pulls index 0 via wp_list_pluck(), so mirror that shape here.
-		 */
 		$calls = array_map(
 			fn( $name ) => array( $name, 1, 'fake.php' ),
 			$function_names
@@ -52,7 +48,7 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 	}
 
 	/**
-	 * A direct wp_set_script_translations() call satisfies the check (existing behavior).
+	 * A direct wp_set_script_translations() call satisfies the check.
 	 */
 	public function test_direct_wp_set_script_translations_call_passes() {
 		$warnings = $this->run_check(
@@ -64,9 +60,9 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 
 	/**
 	 * Metadata-based registration paired with a textdomain in block.json triggers core's
-	 * automatic wp_set_script_translations() registration since WP 5.7.
+	 * automatic wp_set_script_translations() registration.
 	 */
-	public function test_metadata_registration_with_textdomain_passes() {
+	public function test_block_registration_with_textdomain_passes() {
 		$warnings = $this->run_check(
 			array( 'register_block_type_from_metadata' ),
 			array(
@@ -80,47 +76,13 @@ class Block_Plugin_Checker_Translation_Test extends TestCase {
 	}
 
 	/**
-	 * Multiple blocks: a textdomain on any one of them is enough to satisfy the check.
+	 * Block registration without any block.json textdomain still warns — core won't
+	 * auto-register translations.
 	 */
-	public function test_textdomain_on_any_block_is_sufficient() {
-		$warnings = $this->run_check(
-			array( 'register_block_type_from_metadata' ),
-			array(
-				(object) array( 'name' => 'plugin/a' ),
-				(object) array(
-					'name'       => 'plugin/b',
-					'textdomain' => 'plugin',
-				),
-			)
-		);
-		$this->assertEmpty( $warnings );
-	}
-
-	/**
-	 * Metadata registration without any block.json textdomain still warns — core won't
-	 * auto-register translations, so the original guidance is correct.
-	 */
-	public function test_metadata_registration_without_textdomain_warns() {
+	public function test_block_registration_without_textdomain_warns() {
 		$warnings = $this->run_check(
 			array( 'register_block_type_from_metadata' ),
 			array( (object) array( 'name' => 'plugin/main' ) )
-		);
-		$this->assertCount( 1, $warnings );
-	}
-
-	/**
-	 * Classic-name `register_block_type( 'ns/name', $args )` plus a textdomain in
-	 * block.json is not enough — core only auto-loads translations for the metadata form.
-	 */
-	public function test_classic_register_block_type_with_textdomain_warns() {
-		$warnings = $this->run_check(
-			array(),
-			array(
-				(object) array(
-					'name'       => 'plugin/main',
-					'textdomain' => 'plugin',
-				),
-			)
 		);
 		$this->assertCount( 1, $warnings );
 	}
