@@ -1112,9 +1112,7 @@ class Import {
 	 * stream).
 	 *
 	 * SVG and unknown formats are left untouched — they have no fixed
-	 * pixel dimensions to record. When extraction fails for a raster
-	 * format, `dimensions_failed` is set on the record so a later run
-	 * can identify the offenders without re-fetching every file.
+	 * pixel dimensions to record.
 	 *
 	 * @param array       $record The asset record (`filename`, `revision`, …).
 	 * @param array|null  $prior  Matching record from the prior import, or null.
@@ -1124,20 +1122,16 @@ class Import {
 	 * @return array The record, with `width` and `height` added when known.
 	 */
 	public static function enrich_asset_dimensions( $record, $prior, $slug, $local = null ) {
-		if ( is_array( $prior ) && isset( $prior['revision'] ) && (string) $prior['revision'] === (string) $record['revision'] ) {
-			if ( isset( $prior['width'], $prior['height'] ) && $prior['width'] > 0 && $prior['height'] > 0 ) {
-				$record['width']  = (int) $prior['width'];
-				$record['height'] = (int) $prior['height'];
+		if (
+			is_array( $prior ) &&
+			isset( $prior['revision'], $prior['width'], $prior['height'] ) &&
+			(string) $prior['revision'] === (string) $record['revision'] &&
+			$prior['width'] > 0 && $prior['height'] > 0
+		) {
+			$record['width']  = (int) $prior['width'];
+			$record['height'] = (int) $prior['height'];
 
-				return $record;
-			}
-
-			// Same revision and we already tried — don't re-fetch only to fail again.
-			if ( ! empty( $prior['dimensions_failed'] ) ) {
-				$record['dimensions_failed'] = true;
-
-				return $record;
-			}
+			return $record;
 		}
 
 		$ext = strtolower( pathinfo( $record['filename'], PATHINFO_EXTENSION ) );
@@ -1185,8 +1179,6 @@ class Import {
 		if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {
 			$record['width']  = (int) $size[0];
 			$record['height'] = (int) $size[1];
-		} else {
-			$record['dimensions_failed'] = true;
 		}
 
 		return $record;

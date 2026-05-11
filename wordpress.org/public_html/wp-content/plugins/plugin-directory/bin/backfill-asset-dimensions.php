@@ -102,10 +102,9 @@ foreach ( $post_ids as $i => $post_id ) {
 				continue;
 			}
 
-			$ext        = strtolower( pathinfo( $record['filename'], PATHINFO_EXTENSION ) );
-			$is_raster  = in_array( $ext, array( 'png', 'jpg', 'jpeg', 'gif' ), true );
-			$has_dims   = ! empty( $record['width'] ) && ! empty( $record['height'] );
-			$tried_fail = ! empty( $record['dimensions_failed'] );
+			$ext       = strtolower( pathinfo( $record['filename'], PATHINFO_EXTENSION ) );
+			$is_raster = in_array( $ext, array( 'png', 'jpg', 'jpeg', 'gif' ), true );
+			$has_dims  = ! empty( $record['width'] ) && ! empty( $record['height'] );
 
 			if ( ! $is_raster ) {
 				++$counts['skipped'];
@@ -113,11 +112,6 @@ foreach ( $post_ids as $i => $post_id ) {
 			}
 			if ( $has_dims ) {
 				++$counts['reused'];
-				continue;
-			}
-			if ( $tried_fail ) {
-				++$counts['failed'];
-				$failed_files[] = "{$slug} {$type} {$record['filename']}";
 				continue;
 			}
 
