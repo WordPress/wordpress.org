@@ -1260,12 +1260,16 @@ class Import {
 	/**
 	 * Look for wp_add_dashboard_widget() calls within a single PHP file.
 	 *
-	 * The second argument is the widget label, often wrapped in __(), _x(),
-	 * esc_html__(), etc. The first literal-string value reachable through any
-	 * such wrapping call is returned.
+	 * The second argument is the widget label. When wrapped in a recognised
+	 * i18n function (__, _e, _x, _ex, _n, _nx, esc_html__, esc_html_e,
+	 * esc_html_x, esc_attr__, esc_attr_e, esc_attr_x, translate,
+	 * translate_with_gettext_context), the inner literal is extracted; other
+	 * wrappers (e.g. sprintf, esc_html, custom helpers) or non-literal
+	 * expressions resolve to an empty string. Each call is still reported so
+	 * the section term can be applied even when the label is not parseable.
 	 *
 	 * @param string $filename Pathname of the file.
-	 * @return string[] List of widget label strings.
+	 * @return string[] List of widget label strings (empty string for non-literal labels).
 	 */
 	public static function find_dashboard_widgets_in_file( $filename ) {
 		if ( 'php' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) ) {
