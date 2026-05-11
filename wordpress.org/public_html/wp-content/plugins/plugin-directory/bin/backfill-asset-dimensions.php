@@ -38,6 +38,17 @@ if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Plugin_Directory' ) ) {
 
 global $wpdb;
 
+// Be more patient with slow SVN responses during a bulk run than the
+// per-request import path is. Uses http_request_args (not the timeout
+// filter) so the helper's explicit `timeout => 15` is overridden.
+add_filter(
+	'http_request_args',
+	function ( $args ) {
+		$args['timeout'] = 30;
+		return $args;
+	}
+);
+
 $meta_keys = array(
 	'screenshot' => 'assets_screenshots',
 	'banner'     => 'assets_banners',
