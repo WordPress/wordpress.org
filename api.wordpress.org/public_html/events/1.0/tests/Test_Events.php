@@ -2,7 +2,6 @@
 
 namespace Dotorg\API\Events\Tests;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\{Group, DataProvider};
 
 use function Dotorg\API\Events\{
 	get_events, get_location, build_response, is_client_core, pin_one_off_events,
@@ -10,7 +9,9 @@ use function Dotorg\API\Events\{
 	get_regional_wordcamp_data
 };
 
-#[Group( 'events' )]
+/**
+ * @group events
+ */
 class Test_Events extends TestCase {
 	public static function setUpBeforeClass() : void {
 		require_once dirname( __DIR__ ) . '/index.php';
@@ -39,7 +40,11 @@ class Test_Events extends TestCase {
 		$this->assertIsNumeric( $event->location->latitude );
 	}
 
-	#[Group( 'e2e' )]
+	/**
+	 * @covers ::main
+	 *
+	 * @group e2e
+	 */
 	public function test_get_events_e2e() : void {
 		$response = send_request( '/events/1.0/?location=seattle&locale=en_US&timezone=America/Los_Angeles' );
 		$body     = json_decode( $response->body );
@@ -48,8 +53,13 @@ class Test_Events extends TestCase {
 		$this->assertSame( 'Seattle', $body->location->description );
 	}
 
-	#[Group( 'needs-db' )]
-	#[DataProvider( 'data_get_events' )]
+	/**
+	 * @covers ::get_events
+	 *
+	 * @group needs-db
+	 *
+	 * @dataProvider data_get_events
+	 */
 	public function test_get_events( array $input, array $expected ) : void {
 		$actual_result = get_events( $input );
 
@@ -92,8 +102,13 @@ class Test_Events extends TestCase {
 		return $cases;
 	}
 
-	#[Group( 'needs-db' )]
-	#[DataProvider( 'data_get_events_country_restriction' )]
+	/**
+	 * @covers ::get_events
+	 *
+	 * @group needs-db
+	 *
+	 * @dataProvider data_get_events_country_restriction
+	 */
 	public function test_get_events_country_restriction( array $input, array $expected_countries ) : void {
 		$actual_result    = get_events( $input );
 		$actual_countries = array_column( array_column( $actual_result, 'location' ), 'country' );
@@ -150,7 +165,12 @@ class Test_Events extends TestCase {
 		);
 	}
 
-	#[Group( 'unit' )]
+	/**
+	 * @covers ::maybe_add_regional_wordcamps
+	 * @covers ::get_iso_3166_2_country_codes
+	 *
+	 * @group unit
+	 */
 	public function test_maybe_add_regional_wordcamps() : void {
 		// Seed with a mock local event; the function under test only cares about
 		// what it merges into this array, not where it came from.
@@ -243,8 +263,13 @@ class Test_Events extends TestCase {
 		}
 	}
 
-	#[Group( 'unit' )]
-	#[DataProvider( 'data_get_iso_3166_2_country_codes' )]
+	/**
+	 * @covers ::get_iso_3166_2_country_codes
+	 *
+	 * @dataProvider data_get_iso_3166_2_country_codes
+	 *
+	 * @group unit
+	 */
 	public function test_get_iso_3166_2_country_codes( $continent, $sample_country ) : void {
 		$countries = get_iso_3166_2_country_codes( $continent );
 
@@ -263,7 +288,11 @@ class Test_Events extends TestCase {
 		);
 	}
 
-	#[Group( 'unit' )]
+	/**
+	 * @covers ::maybe_add_wp15_promo
+	 *
+	 * @group unit
+	 */
 	public function test_maybe_add_wp15_promo() : void {
 		$local_events_yes_wp15 = array(
 			array(
@@ -396,7 +425,11 @@ class Test_Events extends TestCase {
 		$this->assertSame( $local_events_no_wp15, $events_outside_date_range, 'outside-date-range' );
 	}
 
-	#[Group( 'unit' )]
+	/**
+	 * @covers ::remove_duplicate_events
+	 *
+	 * @group unit
+	 */
 	public function test_remove_duplicate_events() : void {
 		$duplicate_events = array(
 			// Each of these represents an event; extraneous fields have been removed for readability.
@@ -427,8 +460,13 @@ class Test_Events extends TestCase {
 		$this->assertSame( $unique_events, remove_duplicate_events( $duplicate_events ) );
 	}
 
-	#[Group( 'needs-db' )]
-	#[DataProvider( 'data_get_location' )]
+	/**
+	 * @covers ::get_location
+	 *
+	 * @group needs-db
+	 *
+	 * @dataProvider data_get_location
+	 */
 	public function test_get_location( array $input, $expected ) : void {
 		$actual_result = get_location( $input );
 
@@ -1368,8 +1406,13 @@ class Test_Events extends TestCase {
 		return $cases;
 	}
 
-	#[Group( 'needs-db' )]
-	#[DataProvider( 'data_build_response' )]
+	/**
+	 * @covers ::build_response
+	 *
+	 * @group needs-db
+	 *
+	 * @dataProvider data_build_response
+	 */
 	public function test_build_response( array $input, array $expected ) : void {
 		$actual_result = build_response( $input['location'], $input['location_args'] );
 
@@ -1447,7 +1490,11 @@ class Test_Events extends TestCase {
 		);
 	}
 
-	#[Group( 'unit' )]
+	/**
+	 * @covers ::pin_one_off_events
+	 *
+	 * @group unit
+	 */
 	public function test_pin_one_off_events() : void {
 		$seed_events = array();
 
@@ -1464,8 +1511,13 @@ class Test_Events extends TestCase {
 		$this->assertStringStartsWith( 'State of the Word', $actual_events_before_expiration[0]['title'] );
 	}
 
-	#[Group( 'unit' )]
-	#[DataProvider( 'data_is_client_core' )]
+	/**
+	 * @covers ::is_client_core
+	 *
+	 * @group unit
+	 *
+	 * @dataProvider data_is_client_core
+	 */
 	public function test_is_client_core( string $user_agent, bool $expected_result ) : void {
 		$actual_result = is_client_core( $user_agent );
 
@@ -1490,8 +1542,11 @@ class Test_Events extends TestCase {
 	 *
 	 * Intentionally does NOT flag entries whose event has passed without a successor —
 	 * a past entry with no newer edition is harmless dead data.
+	 *
+	 * @covers ::get_regional_wordcamp_data
+	 *
+	 * @group data-freshness
 	 */
-	#[Group( 'data-freshness' )]
 	public function test_regional_wordcamp_data_matches_latest_published_edition() : void {
 		foreach ( get_regional_wordcamp_data() as $region => $data ) {
 			$host = parse_url( $data['event']['url'], PHP_URL_HOST );
