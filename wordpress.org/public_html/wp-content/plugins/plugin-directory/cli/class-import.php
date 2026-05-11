@@ -1194,16 +1194,21 @@ class Import {
 		}
 
 		if ( 'php' === $ext ) {
-			// Parse register_block_type() calls and `new WP_Block_Type()` constructor calls.
+			// Parse register_block_type() and `new WP_Block_Type()` calls.
 			// Block names must be literal strings of the form "namespace/name"; the optional
 			// 'title' entry inside the second-arg options array is captured when present.
 			$contents = file_get_contents( $filename );
 			if ( $contents ) {
 				foreach ( array( 'register_block_type', 'new WP_Block_Type' ) as $needle ) {
-					foreach ( Tokenisation_Helpers::find_function_call_first_arg_and_array_value( $contents, $needle, 1, 'title' ) as $name => $title ) {
-						if ( ! preg_match( '#^[-\w]+/[-\w]+$#', $name ) ) {
+					foreach ( Tokenisation_Helpers::find_function_calls( $contents, $needle ) as $args ) {
+						$name = $args[0] ?? null;
+						if ( ! is_string( $name ) || ! preg_match( '#^[-\w]+/[-\w]+$#', $name ) ) {
 							continue;
 						}
+						$options = $args[1] ?? null;
+						$title   = is_array( $options ) && is_string( $options['title'] ?? null )
+							? $options['title']
+							: null;
 						$blocks[] = (object) array(
 							'name'  => $name,
 							'title' => $title,
@@ -1272,7 +1277,12 @@ class Import {
 			return array();
 		}
 
-		return array_unique( Tokenisation_Helpers::find_function_call_arg_strings( $contents, 'wp_add_dashboard_widget', 1 ) );
+		$widgets = array();
+		foreach ( Tokenisation_Helpers::find_function_calls( $contents, 'wp_add_dashboard_widget' ) as $args ) {
+			$label     = $args[1] ?? null;
+			$widgets[] = is_string( $label ) ? $label : '';
+		}
+		return array_unique( $widgets );
 	}
 
 	/**
