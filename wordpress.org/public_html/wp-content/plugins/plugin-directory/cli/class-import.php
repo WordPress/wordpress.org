@@ -881,7 +881,7 @@ class Import {
 				$record = self::enrich_asset_dimensions(
 					$record,
 					$prior_assets[ $type ][ $filename ] ?? null,
-					$plugin_slug
+					$this->plugin
 				);
 
 				$assets[ $type ][ $asset['filename'] ] = $record;
@@ -953,7 +953,7 @@ class Import {
 			$record = self::enrich_asset_dimensions(
 				$record,
 				$prior_assets['screenshot'][ $filename ] ?? null,
-				$plugin_slug,
+				$this->plugin,
 				$plugin_screenshot
 			);
 
@@ -1114,14 +1114,14 @@ class Import {
 	 * SVG and unknown formats are left untouched — they have no fixed
 	 * pixel dimensions to record.
 	 *
-	 * @param array       $record The asset record (`filename`, `revision`, …).
-	 * @param array|null  $prior  Matching record from the prior import, or null.
-	 * @param string      $slug   Plugin slug, used to construct the SVN URL.
-	 * @param string|null $local  Optional local path; preferred over a remote
-	 *                            fetch when the file is already on disk.
+	 * @param array              $record The asset record (`filename`, `revision`, …).
+	 * @param array|null         $prior  Matching record from the prior import, or null.
+	 * @param int|\WP_Post|null  $post   The plugin post, used to construct the SVN URL.
+	 * @param string|null        $local  Optional local path; preferred over a remote
+	 *                                   fetch when the file is already on disk.
 	 * @return array The record, with `width` and `height` added when known.
 	 */
-	public static function enrich_asset_dimensions( $record, $prior, $slug, $local = null ) {
+	public static function enrich_asset_dimensions( $record, $prior, $post, $local = null ) {
 		if (
 			is_array( $prior ) &&
 			isset( $prior['revision'], $prior['width'], $prior['height'] ) &&
@@ -1144,21 +1144,9 @@ class Import {
 		if ( $local && file_exists( $local ) ) {
 			$size = @getimagesize( $local );
 		} else {
-			// 'plugin'-located screenshots live in /trunk/; everything
-			// else (banners, icons, /assets/-located screenshots) lives
-			// in /assets/.
-			$folder = ( isset( $record['location'] ) && 'plugin' === $record['location'] ) ? 'trunk' : 'assets';
-			$url    = add_query_arg(
-				'rev',
-				$record['revision'],
-				sprintf(
-					'%s/%s/%s/%s',
-					self::PLUGIN_SVN_BASE,
-					$slug,
-					$folder,
-					rawurlencode( $record['filename'] )
-				)
-			);
+			// Fetch direct from SVN rather than the CDN, so the byte
+			// stream is always the revision we just listed.
+			$url = Template::get_asset_url( $post, $record, false /* no CDN */ );
 
 			// Cap the first read at 128 KB — covers all PNG/GIF and the
 			// overwhelming majority of JPEGs without paying for the full

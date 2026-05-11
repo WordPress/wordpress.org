@@ -86,7 +86,7 @@ foreach ( $post_ids as $i => $post_id ) {
 		continue;
 	}
 
-	$slug         = $plugin->post_name;
+	$slug         = $plugin->post_name; // Only used for the failure list.
 	$plugin_dirty = false;
 
 	foreach ( $meta_keys as $type => $meta_key ) {
@@ -117,7 +117,7 @@ foreach ( $post_ids as $i => $post_id ) {
 
 			// Pass the existing record as the prior so the helper short-circuits
 			// for cases it already knows the answer for.
-			$updated = Import::enrich_asset_dimensions( $record, $record, $slug );
+			$updated = Import::enrich_asset_dimensions( $record, $record, $plugin );
 
 			if ( ! empty( $updated['width'] ) && ! empty( $updated['height'] ) ) {
 				++$counts['extracted'];
