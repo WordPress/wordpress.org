@@ -1100,26 +1100,14 @@ class Import {
 	}
 
 	/**
-	 * Populate `width` and `height` on an asset record.
+	 * Populate `width` and `height` on an asset record, reusing the prior
+	 * import's values when the SVN revision hasn't changed.
 	 *
-	 * Reuses the cached values from the prior import when the SVN revision
-	 * hasn't changed; otherwise reads the image (from a local path if one is
-	 * supplied, or by fetching the file from SVN) and parses dimensions via
-	 * `getimagesize()`. To keep import bandwidth in check, the remote path
-	 * first tries the leading 128 KB via a Range request and only falls
-	 * back to the full body when that prefix isn't enough to decode the
-	 * header (e.g. progressive JPEGs with the SOF segment deep in the
-	 * stream).
-	 *
-	 * SVG and unknown formats are left untouched — they have no fixed
-	 * pixel dimensions to record.
-	 *
-	 * @param array              $record The asset record (`filename`, `revision`, …).
-	 * @param array|null         $prior  Matching record from the prior import, or null.
-	 * @param int|\WP_Post|null  $post   The plugin post, used to construct the SVN URL.
-	 * @param string|null        $local  Optional local path; preferred over a remote
-	 *                                   fetch when the file is already on disk.
-	 * @return array The record, with `width` and `height` added when known.
+	 * @param array              $record The asset record.
+	 * @param array|null         $prior  Matching record from the prior import.
+	 * @param int|\WP_Post|null  $post   The plugin post.
+	 * @param string|null        $local  Optional local path to read instead of fetching from SVN.
+	 * @return array
 	 */
 	public static function enrich_asset_dimensions( $record, $prior, $post, $local = null ) {
 		if (
