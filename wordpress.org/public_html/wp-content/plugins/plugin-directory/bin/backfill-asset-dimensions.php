@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile — CLI script: output not escaped, loop vars shadow WP globals.
 namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\CLI\Import;
