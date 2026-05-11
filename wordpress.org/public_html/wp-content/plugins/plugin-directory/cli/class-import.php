@@ -1134,17 +1134,11 @@ class Import {
 		}
 
 		if ( ! $size ) {
-			// Fetch direct from SVN rather than the CDN, so the byte
-			// stream is always the revision we just listed.
-			$url = Template::get_asset_url( $post, $record, false /* no CDN */ );
+			$url = Template::get_asset_url( $post, $record, false );
 
-			// Ask for just the first 128 KB via Range — enough for all
-			// PNG/GIF and the overwhelming majority of JPEGs, saving the
-			// bandwidth of downloading multi-megabyte screenshots. Fall
-			// back to a full read when the prefix isn't enough to decode
-			// the header (e.g. JPEGs with the SOF marker past 128 KB).
-			// `limit_response_size` is a memory backstop in case the
-			// server ignores Range and streams the whole body.
+			// Range the first read to 128 KB — enough for the headers of
+			// PNG/GIF and most JPEGs. Fall back to a full read only when
+			// the prefix isn't enough to decode the header.
 			foreach ( array( 131072, 0 ) as $limit ) {
 				$args = array( 'timeout' => 15 );
 				if ( $limit > 0 ) {
