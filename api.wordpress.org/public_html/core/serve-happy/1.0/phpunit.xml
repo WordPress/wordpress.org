@@ -15,7 +15,12 @@
 	<!--
 		Groups:
 		* serve-happy            Default; pure-logic tests.
-		* serve-happy-live-http  Hits api.wordpress.org. Excluded in standalone CI.
+		* serve-happy-live-http  Hits api.wordpress.org. Opt in with `group serve-happy-live-http`.
 	-->
+	<groups>
+		<exclude>
+			<group>serve-happy-live-http</group>
+		</exclude>
+	</groups>
 </phpunit>
 

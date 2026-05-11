@@ -15,12 +15,19 @@
 	</testsuites>
 	<!--
 		Groups:
-		* unit            Pure-logic tests; the standalone CI default.
+		* unit            Pure-logic tests; the default for `phpunit`.
 		* needs-db        Requires a WordPress.org sandbox (init.php / hyperdb / Geonames / ip2location).
 		* e2e             Hits the live api.wordpress.org Events endpoint.
 		* data-freshness  Resolves regional wordcamp.org hosts to flag stale entries.
 
-		The unit-tests workflow excludes the needs-db, e2e, and data-freshness groups.
-		The events-api-live workflow runs only the e2e and data-freshness groups.
+		The excluded groups can be opted back in on the command line
+		(see the events-api-live workflow which passes `group e2e,data-freshness`).
 	-->
+	<groups>
+		<exclude>
+			<group>needs-db</group>
+			<group>e2e</group>
+			<group>data-freshness</group>
+		</exclude>
+	</groups>
 </phpunit>

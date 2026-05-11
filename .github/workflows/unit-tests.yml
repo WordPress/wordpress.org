@@ -19,13 +19,13 @@ jobs:
         include:
           - name: Serve Happy API
             working-directory: api.wordpress.org/public_html/core/serve-happy/1.0
-            phpunit-args: "--exclude-group serve-happy-live-http"
+            phpunit-args: ""
           - name: Browse Happy API
             working-directory: api.wordpress.org/public_html/core/browse-happy/1.0
             phpunit-args: ""
           - name: Events API
             working-directory: api.wordpress.org/public_html/events/1.0
-            phpunit-args: "--exclude-group needs-db,e2e,data-freshness"
+            phpunit-args: ""
           - name: Slack Trac Bot
             working-directory: common/includes/tests/slack/trac
             phpunit-args: "--no-configuration bot.php"

@@ -17,6 +17,15 @@ defined( 'THROTTLE_STICKY_WORDCAMPS' ) || define( 'THROTTLE_STICKY_WORDCAMPS', f
 defined( 'THROTTLE_GEONAMES' )         || define( 'THROTTLE_GEONAMES', 0 );
 defined( 'THROTTLE_IP2LOCATION' )      || define( 'THROTTLE_IP2LOCATION', 0 );
 
+// Other constants/globals normally initialised in main(); required when the
+// needs-db tests are exercised on a sandbox that provides init.php.
+defined( 'COVID_IMPACT_EXPIRATION' ) || define( 'COVID_IMPACT_EXPIRATION', strtotime( 'January 1 2022' ) );
+$GLOBALS['cache_group'] = 'events';
+$GLOBALS['cache_life']  = 12 * HOUR_IN_SECONDS;
+if ( ! isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
+	$_SERVER['HTTP_USER_AGENT'] = '';
+}
+
 // Pull in the global API config when running on a WordPress.org sandbox; absent locally / in standalone CI.
 $api_init_file = dirname( __DIR__, 3 ) . '/init.php';
 if ( file_exists( $api_init_file ) ) {
