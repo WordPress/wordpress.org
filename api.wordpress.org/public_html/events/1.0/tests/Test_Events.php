@@ -13,10 +13,6 @@ use function Dotorg\API\Events\{
  * @group events
  */
 class Test_Events extends TestCase {
-	public static function setUpBeforeClass() : void {
-		require_once dirname( __DIR__ ) . '/index.php';
-	}
-
 	/**
 	 * Asserts that an HTTP response is valid and contains an event.
 	 */
@@ -36,7 +32,7 @@ class Test_Events extends TestCase {
 		$this->assertContains( $event->type, array( 'wordcamp', 'meetup' ) );
 		$this->assertIsString( $event->title );
 		$this->assertIsNumeric( $event->start_unix_timestamp );
-		$this->assertSame( $event->url, filter_var( $event->url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED & FILTER_FLAG_QUERY_REQUIRED ) );
+		$this->assertSame( $event->url, filter_var( $event->url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED ) );
 		$this->assertIsNumeric( $event->location->latitude );
 	}
 
@@ -1581,7 +1577,9 @@ class Test_Events extends TestCase {
 	}
 
 	/**
-	 * Resolve a URL after redirects, returning the final effective URL.
+	 * Resolve a URL after redirects, returning the final effective URL on a 200 response.
+	 * Returns null on cURL errors, non-2xx responses, or when cURL is unavailable, so the
+	 * caller can skip rather than treat a transport failure as a passing assertion.
 	 */
 	private function helper_resolve_url( string $url ) : ?string {
 		if ( ! function_exists( 'curl_init' ) ) {
@@ -1597,8 +1595,15 @@ class Test_Events extends TestCase {
 			CURLOPT_USERAGENT      => 'Mozilla/5.0 (wordpress.org events-api-tests)',
 		) );
 		curl_exec( $ch );
-		$final = curl_getinfo( $ch, CURLINFO_EFFECTIVE_URL );
+
+		$errno     = curl_errno( $ch );
+		$http_code = (int) curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		$final     = curl_getinfo( $ch, CURLINFO_EFFECTIVE_URL );
 		curl_close( $ch );
+
+		if ( $errno || $http_code < 200 || $http_code >= 300 ) {
+			return null;
+		}
 
 		return $final ?: null;
 	}

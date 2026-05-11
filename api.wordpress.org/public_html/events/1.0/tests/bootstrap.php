@@ -39,7 +39,7 @@ function send_request( $path ) {
 	$host      = $sandboxed ? $sandboxed . '.wordpress.org' : 'api.wordpress.org';
 	$url       = 'https://' . $host . $path;
 
-	$body = @file_get_contents(
+	$body = file_get_contents(
 		$url,
 		false,
 		stream_context_create( array(
@@ -54,6 +54,12 @@ function send_request( $path ) {
 			),
 		) )
 	);
+
+	if ( false === $body ) {
+		throw new \RuntimeException(
+			"Failed to fetch $url: " . ( error_get_last()['message'] ?? 'unknown error' )
+		);
+	}
 
 	$status_code = 0;
 	foreach ( $http_response_header ?? array() as $header ) {
