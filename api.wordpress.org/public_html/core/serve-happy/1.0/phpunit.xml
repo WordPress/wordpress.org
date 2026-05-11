@@ -1,22 +1,21 @@
 <phpunit
+	bootstrap="tests/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
 	convertErrorsToExceptions="true"
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
-	<groups>
-		<include>
-			<group>serve-happy</group>
-		</include>
-		<exclude>
-			<group>serve-happy-live-http</group>
-		</exclude>
-	</groups>
 	<testsuites>
-		<testsuite>
+		<testsuite name="serve-happy">
 			<directory suffix=".php">tests/</directory>
+			<exclude>tests/bootstrap.php</exclude>
 		</testsuite>
 	</testsuites>
+	<!--
+		Groups:
+		* serve-happy            Default; pure-logic tests.
+		* serve-happy-live-http  Hits api.wordpress.org. Excluded in standalone CI.
+	-->
 </phpunit>
 

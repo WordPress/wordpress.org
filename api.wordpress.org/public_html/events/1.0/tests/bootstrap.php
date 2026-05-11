@@ -1,6 +1,9 @@
 <?php
 namespace Dotorg\API\Events\Tests;
 
+// Load the project's composer autoloader (PHPUnit, yoast/phpunit-polyfills).
+require_once dirname( __DIR__, 5 ) . '/vendor/autoload.php';
+
 // Signal to index.php that we're running tests so it skips main() / bootstrap() / init.php.
 define( 'WPORG_RUNNING_TESTS', true );
 

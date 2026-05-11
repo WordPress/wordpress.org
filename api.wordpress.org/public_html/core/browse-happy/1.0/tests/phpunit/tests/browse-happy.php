@@ -1,7 +1,5 @@
 <?php
 
-include dirname( __FILE__ ) . '/../../../parse.php';
-
 /**
  *
  * @group browse-happy
@@ -18,7 +16,7 @@ class Tests_Browse_Happy extends \PHPUnit\Framework\TestCase {
 	 *     }
 	 * }
 	 */
-	function data_browse_happy() {
+	public static function data_browse_happy() {
 		return [
 
 			// Amazon Silk

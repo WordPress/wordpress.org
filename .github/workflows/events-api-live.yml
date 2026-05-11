@@ -22,12 +22,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
-          tools: phpunit:^11
+          coverage: none
+
+      - name: Install composer dependencies
+        run: composer install --no-interaction --no-progress
 
       - name: Run live e2e + data-freshness groups
         working-directory: api.wordpress.org/public_html/events/1.0
-        run: |
-          phpunit --no-configuration \
-            --bootstrap tests/bootstrap.php \
-            --group e2e --group data-freshness \
-            tests/Test_Events.php
+        run: ${{ github.workspace }}/vendor/bin/phpunit --group e2e,data-freshness
