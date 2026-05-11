@@ -227,8 +227,11 @@ function wporg_redirect_site_not_found() {
 
 		case 'slack.wordpress.org':
 		case 'chat.wordpress.org':
-		case 'community.wordpress.org':
 			$location = 'https://make.wordpress.org/chat/';
+			break;
+
+		case 'community.wordpress.org':
+			$location = 'https://events.wordpress.org/';
 			break;
 
 		case 'plugins.wordpress.org':
