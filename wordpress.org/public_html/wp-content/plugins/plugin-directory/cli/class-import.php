@@ -1134,7 +1134,7 @@ class Import {
 		}
 
 		if ( ! $size ) {
-			$url = Template::get_asset_url( $post, $record, false );
+			$url = Template::get_asset_url( $post, $record, false /* no CDN */ );
 
 			// Range the first read to 128 KB — enough for the headers of
 			// PNG/GIF and most JPEGs. Fall back to a full read only when
