@@ -12,6 +12,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use WordPressdotorg\Plugin_Directory\Tools\Tokenisation_Helpers;
 use WordPressdotorg\Plugin_Directory\Zip\Builder;
 
 /**
@@ -497,6 +498,9 @@ class Import {
 
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
 			foreach ( $dashboard_widgets as $widget_name ) {
+				if ( '' === $widget_name ) {
+					continue;
+				}
 				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget_name, false );
 			}
 		} else {
@@ -1190,30 +1194,28 @@ class Import {
 		}
 
 		if ( 'php' === $ext ) {
-			// Parse a php-style register_block_type() call.
-			// Again this assumes literal strings, and only parses the name and title.
+			// Parse register_block_type() and `new WP_Block_Type()` calls.
+			// Block names must be literal strings of the form "namespace/name"; the optional
+			// 'title' entry inside the second-arg options array is captured when present.
 			$contents = file_get_contents( $filename );
-
-			// Search out register_block_type() calls.
-			if ( $contents && preg_match_all( "#register_block_type\s*[(]\s*['\"]([-\w]+/[-\w]+)['\"](?!\s*[.])#ms", $contents, $matches, PREG_SET_ORDER ) ) {
-				foreach ( $matches as $match ) {
-					$blocks[] = (object) [
-						'name'  => $match[1],
-						'title' => null,
-					];
+			if ( $contents ) {
+				foreach ( array( 'register_block_type', 'new WP_Block_Type' ) as $needle ) {
+					foreach ( Tokenisation_Helpers::find_function_calls( $contents, $needle ) as $args ) {
+						$name = $args[0] ?? null;
+						if ( ! is_string( $name ) || ! preg_match( '#^[-\w]+/[-\w]+$#', $name ) ) {
+							continue;
+						}
+						$options = $args[1] ?? null;
+						$title   = is_array( $options ) && is_string( $options['title'] ?? null )
+							? $options['title']
+							: null;
+						$blocks[] = (object) array(
+							'name'  => $name,
+							'title' => $title,
+						);
+					}
 				}
 			}
-
-			// Search out WP_Block_Type() instances.
-			if ( $contents && preg_match_all( "#new\s+WP_Block_Type\s*[(]\s*['\"]([-\w]+\/[-\w]+)['\"](?!\s*[.])(\s*,[^;]{0,500}['\"]title['\"]\s*=>\s*['\"]([^'\"]+)['\"](?!\s*[.]))?#ms", $contents, $matches, PREG_SET_ORDER ) ) {
-				foreach ( $matches as $match ) {
-					$blocks[] = (object) [
-						'name'  => $match[1],
-						'title' => $match[3] ?? null,
-					];
-				}
-			}
-
 		}
 
 		if ( 'block.json' === basename( $filename ) ) {
@@ -1258,12 +1260,16 @@ class Import {
 	/**
 	 * Look for wp_add_dashboard_widget() calls within a single PHP file.
 	 *
-	 * The second argument is the widget label, often wrapped in __(), _x(),
-	 * esc_html__(), etc. We extract the first quoted string literal from
-	 * inside the second argument.
+	 * The second argument is the widget label. When wrapped in a recognised
+	 * i18n function (__, _e, _x, _ex, _n, _nx, esc_html__, esc_html_e,
+	 * esc_html_x, esc_attr__, esc_attr_e, esc_attr_x, translate,
+	 * translate_with_gettext_context), the inner literal is extracted; other
+	 * wrappers (e.g. sprintf, esc_html, custom helpers) or non-literal
+	 * expressions resolve to an empty string. Each call is still reported so
+	 * the section term can be applied even when the label is not parseable.
 	 *
 	 * @param string $filename Pathname of the file.
-	 * @return string[] List of widget label strings.
+	 * @return string[] List of widget label strings (empty string for non-literal labels).
 	 */
 	public static function find_dashboard_widgets_in_file( $filename ) {
 		if ( 'php' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) ) {
@@ -1276,22 +1282,10 @@ class Import {
 		}
 
 		$widgets = array();
-
-		// Match wp_add_dashboard_widget( <first arg>, <second arg up to next top-level comma or close-paren> ).
-		if ( preg_match_all(
-			'#wp_add_dashboard_widget\s*\(\s*[^,]{1,200},\s*([^;]{1,500}?)(?:,|\))#ms',
-			$contents,
-			$matches,
-			PREG_SET_ORDER
-		) ) {
-			foreach ( $matches as $match ) {
-				// Pull the first quoted string out of the second argument.
-				if ( preg_match( '#[\'"]([^\'"]+)[\'"]#', $match[1], $title_match ) ) {
-					$widgets[] = $title_match[1];
-				}
-			}
+		foreach ( Tokenisation_Helpers::find_function_calls( $contents, 'wp_add_dashboard_widget' ) as $args ) {
+			$label     = $args[1] ?? null;
+			$widgets[] = is_string( $label ) ? $label : '';
 		}
-
 		return array_unique( $widgets );
 	}
 
