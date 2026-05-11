@@ -33,6 +33,13 @@ class Tokenisation_Helpers {
 	private const SKIP_TOKENS = [ T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ];
 
 	/**
+	 * Single-entry cache so back-to-back calls against the same source (e.g.
+	 * scanning a file for two related function names) reuse the token stream.
+	 */
+	private static ?string $cached_contents = null;
+	private static array $cached_tokens = [];
+
+	/**
 	 * Find calls to `$function_name` in PHP source and return structured arg
 	 * values for each call.
 	 *
@@ -55,7 +62,14 @@ class Tokenisation_Helpers {
 	 * @return array[] One entry per matched call.
 	 */
 	public static function find_function_calls( string $contents, string $function_name ): array {
-		$tokens = token_get_all( $contents );
+		// Cheap early-out: skip tokenisation entirely when the source can't
+		// contain the call. `stripos()` covers both `name(` and `\name(` forms.
+		$bare_needle = str_starts_with( $function_name, 'new ' ) ? substr( $function_name, 4 ) : $function_name;
+		if ( false === stripos( $contents, $bare_needle ) ) {
+			return [];
+		}
+
+		$tokens = self::tokenise( $contents );
 		$calls  = [];
 		foreach ( self::walk_calls( $tokens, $function_name ) as $arg_tokens_per_call ) {
 			$calls[] = array_map(
@@ -64,6 +78,14 @@ class Tokenisation_Helpers {
 			);
 		}
 		return $calls;
+	}
+
+	private static function tokenise( string $contents ): array {
+		if ( $contents !== self::$cached_contents ) {
+			self::$cached_tokens   = token_get_all( $contents );
+			self::$cached_contents = $contents;
+		}
+		return self::$cached_tokens;
 	}
 
 	/**
