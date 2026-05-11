@@ -1160,18 +1160,29 @@ class Import {
 				)
 			);
 
-			// Try the first 128 KB first; it covers all PNG/GIF and the
+			// Cap the first read at 128 KB — covers all PNG/GIF and the
 			// overwhelming majority of JPEGs without paying for the full
-			// download of multi-megabyte screenshots.
-			$prefix = self::fetch_asset_bytes( $url, 131072 );
-			if ( '' !== $prefix ) {
-				$size = @getimagesizefromstring( $prefix );
-			}
+			// download of multi-megabyte screenshots. Fall back to a full
+			// read only when the prefix isn't enough to decode the header.
+			foreach ( array( 131072, 0 ) as $limit ) {
+				$args = array( 'timeout' => 15 );
+				if ( $limit > 0 ) {
+					$args['limit_response_size'] = $limit;
+				}
 
-			if ( ! $size ) {
-				$full = self::fetch_asset_bytes( $url );
-				if ( '' !== $full ) {
-					$size = @getimagesizefromstring( $full );
+				$response = wp_remote_get( $url, $args );
+				if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+					break;
+				}
+
+				$body = wp_remote_retrieve_body( $response );
+				if ( '' === $body ) {
+					break;
+				}
+
+				$size = @getimagesizefromstring( $body );
+				if ( $size ) {
+					break;
 				}
 			}
 		}
@@ -1182,36 +1193,6 @@ class Import {
 		}
 
 		return $record;
-	}
-
-	/**
-	 * Fetch the bytes of an asset over HTTP.
-	 *
-	 * Pass `$range` to request only a prefix via a `Range` header. The body
-	 * is returned for both 200 and 206 responses; an empty string indicates
-	 * the request failed or returned no usable bytes.
-	 *
-	 * @param string $url   The asset URL.
-	 * @param int    $range Optional. The number of leading bytes to request.
-	 * @return string The response body, or an empty string on failure.
-	 */
-	protected static function fetch_asset_bytes( $url, $range = 0 ) {
-		$args = array( 'timeout' => 15 );
-		if ( $range > 0 ) {
-			$args['headers'] = array( 'Range' => 'bytes=0-' . ( $range - 1 ) );
-		}
-
-		$response = wp_remote_get( $url, $args );
-		if ( is_wp_error( $response ) ) {
-			return '';
-		}
-
-		$code = wp_remote_retrieve_response_code( $response );
-		if ( 200 !== $code && 206 !== $code ) {
-			return '';
-		}
-
-		return (string) wp_remote_retrieve_body( $response );
 	}
 
 	/**
