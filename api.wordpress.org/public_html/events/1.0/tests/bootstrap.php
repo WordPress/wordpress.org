@@ -5,14 +5,14 @@ namespace Dotorg\API\Events\Tests;
 define( 'WPORG_RUNNING_TESTS', true );
 
 // Time constants normally defined inside main().
-defined( 'HOUR_IN_SECONDS' ) or define( 'HOUR_IN_SECONDS', 60 * 60 );
-defined( 'DAY_IN_SECONDS' )  or define( 'DAY_IN_SECONDS', HOUR_IN_SECONDS * 24 );
-defined( 'WEEK_IN_SECONDS' ) or define( 'WEEK_IN_SECONDS', 7 * DAY_IN_SECONDS );
+defined( 'HOUR_IN_SECONDS' ) || define( 'HOUR_IN_SECONDS', 60 * 60 );
+defined( 'DAY_IN_SECONDS' )  || define( 'DAY_IN_SECONDS', HOUR_IN_SECONDS * 24 );
+defined( 'WEEK_IN_SECONDS' ) || define( 'WEEK_IN_SECONDS', 7 * DAY_IN_SECONDS );
 
 // Throttle constants normally defined inside main(). Default to "off" for tests.
-defined( 'THROTTLE_STICKY_WORDCAMPS' ) or define( 'THROTTLE_STICKY_WORDCAMPS', false );
-defined( 'THROTTLE_GEONAMES' )         or define( 'THROTTLE_GEONAMES', 0 );
-defined( 'THROTTLE_IP2LOCATION' )      or define( 'THROTTLE_IP2LOCATION', 0 );
+defined( 'THROTTLE_STICKY_WORDCAMPS' ) || define( 'THROTTLE_STICKY_WORDCAMPS', false );
+defined( 'THROTTLE_GEONAMES' )         || define( 'THROTTLE_GEONAMES', 0 );
+defined( 'THROTTLE_IP2LOCATION' )      || define( 'THROTTLE_IP2LOCATION', 0 );
 
 // Pull in the global API config when running on a WordPress.org sandbox; absent locally / in standalone CI.
 $api_init_file = dirname( __DIR__, 3 ) . '/init.php';
@@ -33,6 +33,7 @@ require_once dirname( __DIR__ ) . '/index.php';
  *
  * @param string $path Request path including query string, e.g. "/events/1.0/?location=seattle".
  * @return object { body: string, status_code: int }
+ * @throws \RuntimeException When the request fails at the transport layer.
  */
 function send_request( $path ) {
 	$sandboxed = defined( 'WPORG_SANDBOXED' ) ? WPORG_SANDBOXED : false;
@@ -56,9 +57,9 @@ function send_request( $path ) {
 	);
 
 	if ( false === $body ) {
-		throw new \RuntimeException(
-			"Failed to fetch $url: " . ( error_get_last()['message'] ?? 'unknown error' )
-		);
+		$last_error = error_get_last();
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Test bootstrap; message is CLI output for PHPUnit, not HTML.
+		throw new \RuntimeException( sprintf( 'Failed to fetch %s: %s', $url, $last_error['message'] ?? 'unknown error' ) );
 	}
 
 	$status_code = 0;
