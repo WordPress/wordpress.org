@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Tools;
 
+use PhpToken;
+
 /**
  * PHP source tokenisation helpers used by the importer to detect calls to
  * specific functions and extract their literal-string arguments.
@@ -29,8 +31,6 @@ class Tokenisation_Helpers {
 		'translate',
 		'translate_with_gettext_context',
 	];
-
-	private const SKIP_TOKENS = [ T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ];
 
 	/**
 	 * Single-entry cache so back-to-back calls against the same source (e.g.
@@ -80,9 +80,12 @@ class Tokenisation_Helpers {
 		return $calls;
 	}
 
+	/**
+	 * @return PhpToken[]
+	 */
 	private static function tokenise( string $contents ): array {
 		if ( $contents !== self::$cached_contents ) {
-			self::$cached_tokens   = token_get_all( $contents );
+			self::$cached_tokens   = PhpToken::tokenize( $contents );
 			self::$cached_contents = $contents;
 		}
 		return self::$cached_tokens;
@@ -92,7 +95,8 @@ class Tokenisation_Helpers {
 	 * Generator: walk PHP tokens for calls to `$function_name`, yielding each
 	 * call's argument list split into per-arg token slices.
 	 *
-	 * @return iterable<array[]>
+	 * @param PhpToken[] $tokens
+	 * @return iterable<array<PhpToken[]>>
 	 */
 	private static function walk_calls( array $tokens, string $function_name ): iterable {
 		$is_new      = str_starts_with( $function_name, 'new ' );
@@ -101,12 +105,9 @@ class Tokenisation_Helpers {
 		$count       = count( $tokens );
 
 		for ( $i = 0; $i < $count; $i++ ) {
-			$tok = $tokens[ $i ];
-			if ( ! is_array( $tok ) ) {
-				continue;
-			}
-			$matches_simple = ( T_STRING === $tok[0] && 0 === strcasecmp( $tok[1], $needle ) );
-			$matches_global = ( T_NAME_FULLY_QUALIFIED === $tok[0] && 0 === strcasecmp( $tok[1], $global_form ) );
+			$tok            = $tokens[ $i ];
+			$matches_simple = ( T_STRING === $tok->id && 0 === strcasecmp( $tok->text, $needle ) );
+			$matches_global = ( T_NAME_FULLY_QUALIFIED === $tok->id && 0 === strcasecmp( $tok->text, $global_form ) );
 			if ( ! $matches_simple && ! $matches_global ) {
 				continue;
 			}
@@ -120,9 +121,8 @@ class Tokenisation_Helpers {
 				continue;
 			}
 
-			// Find the opening paren.
 			$j = self::next_significant_index( $tokens, $i + 1 );
-			if ( null === $j || '(' !== ( $tokens[ $j ] ?? null ) ) {
+			if ( null === $j || ! $tokens[ $j ]->is( '(' ) ) {
 				continue;
 			}
 
@@ -134,22 +134,26 @@ class Tokenisation_Helpers {
 		}
 	}
 
-	private static function previous_significant_id( array $tokens, int $from ): mixed {
+	/**
+	 * @param PhpToken[] $tokens
+	 */
+	private static function previous_significant_id( array $tokens, int $from ): ?int {
 		for ( $p = $from - 1; $p >= 0; $p-- ) {
-			$pt = $tokens[ $p ];
-			if ( is_array( $pt ) && in_array( $pt[0], self::SKIP_TOKENS, true ) ) {
+			if ( $tokens[ $p ]->isIgnorable() ) {
 				continue;
 			}
-			return is_array( $pt ) ? $pt[0] : null;
+			return $tokens[ $p ]->id;
 		}
 		return null;
 	}
 
+	/**
+	 * @param PhpToken[] $tokens
+	 */
 	private static function next_significant_index( array $tokens, int $from ): ?int {
 		$count = count( $tokens );
 		for ( $k = $from; $k < $count; $k++ ) {
-			$t = $tokens[ $k ];
-			if ( ! is_array( $t ) || ! in_array( $t[0], self::SKIP_TOKENS, true ) ) {
+			if ( ! $tokens[ $k ]->isIgnorable() ) {
 				return $k;
 			}
 		}
@@ -161,7 +165,8 @@ class Tokenisation_Helpers {
 	 * token slices (split at top-level commas). Returns null when parens are
 	 * unbalanced.
 	 *
-	 * @return array[]|null
+	 * @param PhpToken[] $tokens
+	 * @return PhpToken[][]|null
 	 */
 	private static function collect_arg_lists( array $tokens, int $open_paren_index ): ?array {
 		$args  = [];
@@ -172,19 +177,15 @@ class Tokenisation_Helpers {
 		for ( $i = $open_paren_index + 1; $i < $count; $i++ ) {
 			$tok = $tokens[ $i ];
 
-			if ( is_array( $tok ) ) {
-				if ( in_array( $tok[0], self::SKIP_TOKENS, true ) ) {
-					continue;
-				}
-				$cur[] = $tok;
+			if ( $tok->isIgnorable() ) {
 				continue;
 			}
-			if ( '(' === $tok || '[' === $tok || '{' === $tok ) {
+			if ( $tok->is( [ '(', '[', '{' ] ) ) {
 				$depth++;
 				$cur[] = $tok;
 				continue;
 			}
-			if ( ')' === $tok || ']' === $tok || '}' === $tok ) {
+			if ( $tok->is( [ ')', ']', '}' ] ) ) {
 				$depth--;
 				if ( 0 === $depth ) {
 					if ( $cur ) {
@@ -195,7 +196,7 @@ class Tokenisation_Helpers {
 				$cur[] = $tok;
 				continue;
 			}
-			if ( ',' === $tok && 1 === $depth ) {
+			if ( $tok->is( ',' ) && 1 === $depth ) {
 				$args[] = $cur;
 				$cur    = [];
 				continue;
@@ -207,6 +208,8 @@ class Tokenisation_Helpers {
 
 	/**
 	 * Resolve an arg-token list to a structured value: string | array | null.
+	 *
+	 * @param PhpToken[] $tokens
 	 */
 	private static function resolve_value( array $tokens ): string|array|null {
 		$count = count( $tokens );
@@ -216,8 +219,8 @@ class Tokenisation_Helpers {
 		$first = $tokens[0];
 
 		// Bare literal: a single T_CONSTANT_ENCAPSED_STRING token.
-		if ( 1 === $count && is_array( $first ) && T_CONSTANT_ENCAPSED_STRING === $first[0] ) {
-			return self::unescape_string_token( $first[1] );
+		if ( 1 === $count && T_CONSTANT_ENCAPSED_STRING === $first->id ) {
+			return self::unescape_string_token( $first->text );
 		}
 
 		// Inline `array(...)` / `[...]` literal.
@@ -227,10 +230,9 @@ class Tokenisation_Helpers {
 		}
 
 		// Known translation wrapper: `T_STRING '(' ... ')'`.
-		if ( is_array( $first )
-			&& T_STRING === $first[0]
-			&& '(' === ( $tokens[1] ?? null )
-			&& self::is_translation_function( $first[1] )
+		if ( T_STRING === $first->id
+			&& ( $tokens[1] ?? null )?->is( '(' )
+			&& self::is_translation_function( $first->text )
 		) {
 			return self::resolve_value( self::first_inner_arg_tokens( $tokens ) );
 		}
@@ -251,6 +253,9 @@ class Tokenisation_Helpers {
 	 * Given tokens that begin with `T_STRING '('`, return the tokens of the
 	 * call's first positional argument (between `(` and the first top-level
 	 * `,` or the matching `)`).
+	 *
+	 * @param PhpToken[] $tokens
+	 * @return PhpToken[]
 	 */
 	private static function first_inner_arg_tokens( array $tokens ): array {
 		$inner = [];
@@ -258,16 +263,12 @@ class Tokenisation_Helpers {
 		$count = count( $tokens );
 		for ( $k = 2; $k < $count; $k++ ) {
 			$t = $tokens[ $k ];
-			if ( is_array( $t ) ) {
-				$inner[] = $t;
-				continue;
-			}
-			if ( '(' === $t || '[' === $t || '{' === $t ) {
+			if ( $t->is( [ '(', '[', '{' ] ) ) {
 				$depth++;
 				$inner[] = $t;
 				continue;
 			}
-			if ( ')' === $t || ']' === $t || '}' === $t ) {
+			if ( $t->is( [ ')', ']', '}' ] ) ) {
 				$depth--;
 				if ( 0 === $depth ) {
 					break;
@@ -275,7 +276,7 @@ class Tokenisation_Helpers {
 				$inner[] = $t;
 				continue;
 			}
-			if ( ',' === $t && 1 === $depth ) {
+			if ( $t->is( ',' ) && 1 === $depth ) {
 				break;
 			}
 			$inner[] = $t;
@@ -288,6 +289,8 @@ class Tokenisation_Helpers {
 	 * array of `string-key => resolved-value`. Entries without an explicit
 	 * `=>` (implicit integer keys) or with non-literal-string keys are
 	 * skipped.
+	 *
+	 * @param PhpToken[] $inner_tokens
 	 */
 	private static function resolve_array_literal( array $inner_tokens ): array {
 		$result = [];
@@ -308,31 +311,30 @@ class Tokenisation_Helpers {
 	/**
 	 * Split a list of array-inner tokens at top-level commas.
 	 *
-	 * @return array[]
+	 * @param PhpToken[] $tokens
+	 * @return PhpToken[][]
 	 */
 	private static function split_array_entries( array $tokens ): array {
 		$entries = [];
 		$cur     = [];
 		$depth   = 0;
 		foreach ( $tokens as $t ) {
-			if ( ! is_array( $t ) ) {
-				if ( '(' === $t || '[' === $t || '{' === $t ) {
-					$depth++;
-					$cur[] = $t;
-					continue;
+			if ( $t->is( [ '(', '[', '{' ] ) ) {
+				$depth++;
+				$cur[] = $t;
+				continue;
+			}
+			if ( $t->is( [ ')', ']', '}' ] ) ) {
+				$depth--;
+				$cur[] = $t;
+				continue;
+			}
+			if ( $t->is( ',' ) && 0 === $depth ) {
+				if ( $cur ) {
+					$entries[] = $cur;
 				}
-				if ( ')' === $t || ']' === $t || '}' === $t ) {
-					$depth--;
-					$cur[] = $t;
-					continue;
-				}
-				if ( ',' === $t && 0 === $depth ) {
-					if ( $cur ) {
-						$entries[] = $cur;
-					}
-					$cur = [];
-					continue;
-				}
+				$cur = [];
+				continue;
 			}
 			$cur[] = $t;
 		}
@@ -345,7 +347,8 @@ class Tokenisation_Helpers {
 	/**
 	 * Split a single array-entry token list at the top-level `=>` operator.
 	 *
-	 * @return array{0: array|null, 1: array} [ key_tokens, value_tokens ];
+	 * @param PhpToken[] $tokens
+	 * @return array{0: PhpToken[]|null, 1: PhpToken[]} [ key_tokens, value_tokens ];
 	 *         key_tokens is null when no top-level `=>` is present.
 	 */
 	private static function split_key_value( array $tokens ): array {
@@ -353,15 +356,12 @@ class Tokenisation_Helpers {
 		$count = count( $tokens );
 		for ( $i = 0; $i < $count; $i++ ) {
 			$t = $tokens[ $i ];
-			if ( is_array( $t ) ) {
-				if ( 0 === $depth && T_DOUBLE_ARROW === $t[0] ) {
-					return [ array_slice( $tokens, 0, $i ), array_slice( $tokens, $i + 1 ) ];
-				}
-				continue;
+			if ( 0 === $depth && T_DOUBLE_ARROW === $t->id ) {
+				return [ array_slice( $tokens, 0, $i ), array_slice( $tokens, $i + 1 ) ];
 			}
-			if ( '(' === $t || '[' === $t || '{' === $t ) {
+			if ( $t->is( [ '(', '[', '{' ] ) ) {
 				$depth++;
-			} elseif ( ')' === $t || ']' === $t || '}' === $t ) {
+			} elseif ( $t->is( [ ')', ']', '}' ] ) ) {
 				$depth--;
 			}
 		}
@@ -371,6 +371,9 @@ class Tokenisation_Helpers {
 	/**
 	 * Return the inner tokens of an `array(...)` or `[...]` literal, or null
 	 * when the given tokens are not such a literal.
+	 *
+	 * @param PhpToken[] $tokens
+	 * @return PhpToken[]|null
 	 */
 	private static function array_inner_tokens( array $tokens ): ?array {
 		$count = count( $tokens );
@@ -379,10 +382,10 @@ class Tokenisation_Helpers {
 		}
 		$first = $tokens[0];
 		$last  = $tokens[ $count - 1 ];
-		if ( '[' === $first && ']' === $last ) {
+		if ( $first->is( '[' ) && $last->is( ']' ) ) {
 			return array_slice( $tokens, 1, $count - 2 );
 		}
-		if ( $count >= 3 && is_array( $first ) && T_ARRAY === $first[0] && '(' === $tokens[1] && ')' === $last ) {
+		if ( $count >= 3 && T_ARRAY === $first->id && $tokens[1]->is( '(' ) && $last->is( ')' ) ) {
 			return array_slice( $tokens, 2, $count - 3 );
 		}
 		return null;
