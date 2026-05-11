@@ -827,6 +827,20 @@ class Import {
 			'blueprint'  => 100 * KB_IN_BYTES,
 		);
 
+		// Previously-imported asset metadata, used to skip re-reading any file whose
+		// SVN revision hasn't changed. The cached `width`/`height` from the prior
+		// import is reused as-is when the revision matches.
+		$prior_assets = array(
+			'screenshot' => array(),
+			'banner'     => array(),
+			'icon'       => array(),
+		);
+		if ( $this->plugin ) {
+			$prior_assets['screenshot'] = get_post_meta( $this->plugin->ID, 'assets_screenshots', true ) ?: array();
+			$prior_assets['banner']     = get_post_meta( $this->plugin->ID, 'assets_banners',     true ) ?: array();
+			$prior_assets['icon']       = get_post_meta( $this->plugin->ID, 'assets_icons',       true ) ?: array();
+		}
+
 		$svn_blueprints_folder = null;
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
@@ -862,7 +876,15 @@ class Import {
 					$resolution = preg_replace( '/[^0-9]/u', 'x', $resolution );
 				}
 
-				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+				$record = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+
+				$record = self::enrich_asset_dimensions(
+					$record,
+					$prior_assets[ $type ][ $filename ] ?? null,
+					$plugin_slug
+				);
+
+				$assets[ $type ][ $asset['filename'] ] = $record;
 			}
 		}
 
@@ -921,12 +943,21 @@ class Import {
 				continue;
 			}
 
-			$assets['screenshot'][ $filename ] = array(
+			$record = array(
 				'filename'   => $filename,
 				'revision'   => $svn_export['revision'],
 				'resolution' => $screenshot_id,
 				'location'   => 'plugin',
 			);
+
+			$record = self::enrich_asset_dimensions(
+				$record,
+				$prior_assets['screenshot'][ $filename ] ?? null,
+				$plugin_slug,
+				$plugin_screenshot
+			);
+
+			$assets['screenshot'][ $filename ] = $record;
 		}
 
 		if ( 'trunk' === $stable_tag ) {
@@ -1066,6 +1097,129 @@ class Import {
 			$plugin_slug,
 			$this,
 		);
+	}
+
+	/**
+	 * Populate `width` and `height` on an asset record.
+	 *
+	 * Reuses the cached values from the prior import when the SVN revision
+	 * hasn't changed; otherwise reads the image (from a local path if one is
+	 * supplied, or by fetching the file from SVN) and parses dimensions via
+	 * `getimagesize()`. To keep import bandwidth in check, the remote path
+	 * first tries the leading 128 KB via a Range request and only falls
+	 * back to the full body when that prefix isn't enough to decode the
+	 * header (e.g. progressive JPEGs with the SOF segment deep in the
+	 * stream).
+	 *
+	 * SVG and unknown formats are left untouched — they have no fixed
+	 * pixel dimensions to record. When extraction fails for a raster
+	 * format, `dimensions_failed` is set on the record so a later run
+	 * can identify the offenders without re-fetching every file.
+	 *
+	 * @param array       $record The asset record (`filename`, `revision`, …).
+	 * @param array|null  $prior  Matching record from the prior import, or null.
+	 * @param string      $slug   Plugin slug, used to construct the SVN URL.
+	 * @param string|null $local  Optional local path; preferred over a remote
+	 *                            fetch when the file is already on disk.
+	 * @return array The record, with `width` and `height` added when known.
+	 */
+	public static function enrich_asset_dimensions( $record, $prior, $slug, $local = null ) {
+		if ( is_array( $prior ) && isset( $prior['revision'] ) && (string) $prior['revision'] === (string) $record['revision'] ) {
+			if ( isset( $prior['width'], $prior['height'] ) && $prior['width'] > 0 && $prior['height'] > 0 ) {
+				$record['width']  = (int) $prior['width'];
+				$record['height'] = (int) $prior['height'];
+
+				return $record;
+			}
+
+			// Same revision and we already tried — don't re-fetch only to fail again.
+			if ( ! empty( $prior['dimensions_failed'] ) ) {
+				$record['dimensions_failed'] = true;
+
+				return $record;
+			}
+		}
+
+		$ext = strtolower( pathinfo( $record['filename'], PATHINFO_EXTENSION ) );
+		if ( ! in_array( $ext, array( 'png', 'jpg', 'jpeg', 'gif' ), true ) ) {
+			return $record;
+		}
+
+		$size = false;
+
+		if ( $local && file_exists( $local ) ) {
+			$size = @getimagesize( $local );
+		} else {
+			// 'plugin'-located screenshots live in /trunk/; everything
+			// else (banners, icons, /assets/-located screenshots) lives
+			// in /assets/.
+			$folder = ( isset( $record['location'] ) && 'plugin' === $record['location'] ) ? 'trunk' : 'assets';
+			$url    = add_query_arg(
+				'rev',
+				$record['revision'],
+				sprintf(
+					'%s/%s/%s/%s',
+					self::PLUGIN_SVN_BASE,
+					$slug,
+					$folder,
+					rawurlencode( $record['filename'] )
+				)
+			);
+
+			// Try the first 128 KB first; it covers all PNG/GIF and the
+			// overwhelming majority of JPEGs without paying for the full
+			// download of multi-megabyte screenshots.
+			$prefix = self::fetch_asset_bytes( $url, 131072 );
+			if ( '' !== $prefix ) {
+				$size = @getimagesizefromstring( $prefix );
+			}
+
+			if ( ! $size ) {
+				$full = self::fetch_asset_bytes( $url );
+				if ( '' !== $full ) {
+					$size = @getimagesizefromstring( $full );
+				}
+			}
+		}
+
+		if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {
+			$record['width']  = (int) $size[0];
+			$record['height'] = (int) $size[1];
+		} else {
+			$record['dimensions_failed'] = true;
+		}
+
+		return $record;
+	}
+
+	/**
+	 * Fetch the bytes of an asset over HTTP.
+	 *
+	 * Pass `$range` to request only a prefix via a `Range` header. The body
+	 * is returned for both 200 and 206 responses; an empty string indicates
+	 * the request failed or returned no usable bytes.
+	 *
+	 * @param string $url   The asset URL.
+	 * @param int    $range Optional. The number of leading bytes to request.
+	 * @return string The response body, or an empty string on failure.
+	 */
+	protected static function fetch_asset_bytes( $url, $range = 0 ) {
+		$args = array( 'timeout' => 15 );
+		if ( $range > 0 ) {
+			$args['headers'] = array( 'Range' => 'bytes=0-' . ( $range - 1 ) );
+		}
+
+		$response = wp_remote_get( $url, $args );
+		if ( is_wp_error( $response ) ) {
+			return '';
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( 200 !== $code && 206 !== $code ) {
+			return '';
+		}
+
+		return (string) wp_remote_retrieve_body( $response );
 	}
 
 	/**
