@@ -21,6 +21,9 @@ jobs:
           - name: Browse Happy API
             working-directory: api.wordpress.org/public_html/core/browse-happy/1.0
             phpunit-args: "--no-configuration tests/phpunit/tests/"
+          - name: Events API
+            working-directory: api.wordpress.org/public_html/events/1.0
+            phpunit-args: "--no-configuration --bootstrap tests/bootstrap.php --exclude-group needs-db tests/Test_Events.php"
           - name: Slack Trac Bot
             working-directory: common/includes/tests/slack/trac
             phpunit-args: "bot.php"

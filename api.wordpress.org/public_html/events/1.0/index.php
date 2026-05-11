@@ -1720,4 +1720,6 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 	);
 }
 
-main();
+if ( ! defined( 'WPORG_RUNNING_TESTS' ) || ! WPORG_RUNNING_TESTS ) {
+	main();
+}
