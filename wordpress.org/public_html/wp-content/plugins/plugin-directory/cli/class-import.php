@@ -1138,18 +1138,23 @@ class Import {
 			// stream is always the revision we just listed.
 			$url = Template::get_asset_url( $post, $record, false /* no CDN */ );
 
-			// Cap the first read at 128 KB — covers all PNG/GIF and the
-			// overwhelming majority of JPEGs without paying for the full
-			// download of multi-megabyte screenshots. Fall back to a full
-			// read only when the prefix isn't enough to decode the header.
+			// Ask for just the first 128 KB via Range — enough for all
+			// PNG/GIF and the overwhelming majority of JPEGs, saving the
+			// bandwidth of downloading multi-megabyte screenshots. Fall
+			// back to a full read when the prefix isn't enough to decode
+			// the header (e.g. JPEGs with the SOF marker past 128 KB).
+			// `limit_response_size` is a memory backstop in case the
+			// server ignores Range and streams the whole body.
 			foreach ( array( 131072, 0 ) as $limit ) {
 				$args = array( 'timeout' => 15 );
 				if ( $limit > 0 ) {
+					$args['headers']             = array( 'Range' => 'bytes=0-' . ( $limit - 1 ) );
 					$args['limit_response_size'] = $limit;
 				}
 
 				$response = wp_remote_get( $url, $args );
-				if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+				$code     = wp_remote_retrieve_response_code( $response );
+				if ( is_wp_error( $response ) || ( 200 !== $code && 206 !== $code ) ) {
 					break;
 				}
 
