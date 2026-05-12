@@ -12,34 +12,31 @@ use WordPressdotorg\Plugin_Directory\CLI;
 class Plugin_Import {
 
 	public static function queue( $plugin_slug, $plugin_data ) {
-		$hook       = "import_plugin:{$plugin_slug}";
-		$usual_time = time() + 5;
-
 		/*
 		 * If the next scheduled run is more than 5 minutes away (e.g. queued by a bulk
 		 * batch re-index), pull it forward to the usual import time so a fresh commit
 		 * isn't delayed behind the batch. The import re-reads SVN at HEAD, so the new
 		 * commit is picked up regardless of which event's args end up firing.
 		 */
-		$next_scheduled = Manager::get_scheduled_time( $hook, 'next' );
+		$next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'next' );
 		if (
 			$next_scheduled &&
 			$next_scheduled > ( time() + 5 * MINUTE_IN_SECONDS ) &&
-			Manager::reschedule_event( $hook, $usual_time, $next_scheduled )
+			Manager::reschedule_event( "import_plugin:{$plugin_slug}", time() + 5, $next_scheduled )
 		) {
 			return;
 		}
 
 		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
-		$when_to_run    = $usual_time;
-		$last_scheduled = Manager::get_scheduled_time( $hook, 'last' );
+		$when_to_run    = time() + 5;
+		$last_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' );
 		if ( $last_scheduled ) {
 			$when_to_run = $last_scheduled + HOUR_IN_SECONDS;
 		}
 
 		wp_schedule_single_event(
 			$when_to_run,
-			$hook,
+			"import_plugin:{$plugin_slug}",
 			array(
 				array_merge( array( 'plugin' => $plugin_slug ), $plugin_data ),
 			)
