@@ -48,8 +48,8 @@ class TestReadmeParserUrls extends WP_UnitTestCase {
 	public static function donate_link_provider(): array {
 		$url = 'https://example.com/donate';
 		return array(
-			'bare URL'             => array( "Donate link: $url",        $url ),
-			'autolink'             => array( "Donate link: <$url>",      $url ),
+			'bare URL'             => array( "Donate link: $url", $url ),
+			'autolink'             => array( "Donate link: <$url>", $url ),
 			'autolink with spaces' => array( "Donate link:   <$url>   ", $url ),
 		);
 	}
@@ -65,8 +65,8 @@ class TestReadmeParserUrls extends WP_UnitTestCase {
 	public static function license_uri_provider(): array {
 		$url = 'https://www.gnu.org/licenses/gpl-2.0.html';
 		return array(
-			'bare URL'             => array( "License URI: $url",        $url ),
-			'autolink'             => array( "License URI: <$url>",      $url ),
+			'bare URL'             => array( "License URI: $url", $url ),
+			'autolink'             => array( "License URI: <$url>", $url ),
 			'autolink with spaces' => array( "License URI:   <$url>   ", $url ),
 		);
 	}
@@ -89,13 +89,13 @@ class TestReadmeParserUrls extends WP_UnitTestCase {
 	public function test_license_with_embedded_url( string $header, string $expected_license, string $expected_uri ): void {
 		$parser = new Parser( self::readme_with( $header ) );
 		$this->assertSame( $expected_license, $parser->license );
-		$this->assertSame( $expected_uri,     $parser->license_uri );
+		$this->assertSame( $expected_uri, $parser->license_uri );
 	}
 
 	public static function license_with_embedded_url_provider(): array {
 		$url = 'https://www.gnu.org/licenses/gpl-2.0.html';
 		return array(
-			'bare URL'     => array( "License: GPLv2 - $url",   'GPLv2', $url ),
+			'bare URL'     => array( "License: GPLv2 - $url", 'GPLv2', $url ),
 			'autolink URL' => array( "License: GPLv2 - <$url>", 'GPLv2', $url ),
 		);
 	}
