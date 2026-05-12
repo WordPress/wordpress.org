@@ -1124,7 +1124,7 @@ class Import {
 		$size = false;
 
 		if ( $local && file_exists( $local ) ) {
-			$size = @getimagesize( $local );
+			$size = getimagesize( $local );
 		}
 
 		if ( ! $size ) {
@@ -1151,7 +1151,7 @@ class Import {
 					break;
 				}
 
-				$size = @getimagesizefromstring( $body );
+				$size = getimagesizefromstring( $body );
 				if ( $size ) {
 					break;
 				}
