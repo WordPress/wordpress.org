@@ -1,16 +1,6 @@
 <?php
 /**
- * Tests for URL headers in WordPress.org's plugin readme parser.
- *
- * Verifies that URL-bearing headers (`Donate link:`, `License URI:`, and the
- * URL embedded in `License:`) accept both the bare form
- *     Donate link: https://example.com
- * and the markdown autolink form
- *     Donate link: <https://example.com>
- *
- * The autolink form is what `markdownlint --fix` produces against bare URLs
- * in a README.md, so accepting it lets plugin authors lint their README.md
- * without breaking the wp.org plugin page.
+ * Tests for WordPress.org's plugin readme parser.
  *
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
@@ -22,7 +12,7 @@ use WordPressdotorg\Plugin_Directory\Readme\Parser;
 /**
  * @group readme-parser
  */
-class Readme_Parser_Urls_Test extends TestCase {
+class Test_Readme_Parser extends TestCase {
 
 	/**
 	 * Build a minimal readme with `$header_line` inserted into the field
@@ -59,6 +49,10 @@ class Readme_Parser_Urls_Test extends TestCase {
 		);
 	}
 
+	/**
+	 * `Donate link:` accepts the bare form and the markdown autolink form
+	 * (which `markdownlint --fix` produces against bare URLs).
+	 */
 	#[DataProvider( 'donate_link_provider' )]
 	public function test_donate_link( string $header, string $expected ): void {
 		$parser = new Parser( self::readme_with( $header ) );
@@ -74,6 +68,9 @@ class Readme_Parser_Urls_Test extends TestCase {
 		);
 	}
 
+	/**
+	 * `License URI:` accepts the bare form and the markdown autolink form.
+	 */
 	#[DataProvider( 'license_uri_provider' )]
 	public function test_license_uri( string $header, string $expected ): void {
 		$parser = new Parser( self::readme_with( $header ) );
@@ -83,15 +80,16 @@ class Readme_Parser_Urls_Test extends TestCase {
 	public static function license_with_embedded_url_provider(): array {
 		$url = 'https://www.gnu.org/licenses/gpl-2.0.html';
 		return array(
-			'bare URL'     => array( "License: GPLv2 - $url", 'GPLv2', $url ),
-			'autolink URL' => array( "License: GPLv2 - <$url>", 'GPLv2', $url ),
+			'bare URL'      => array( "License: GPLv2 - $url", 'GPLv2', $url ),
+			'autolink URL'  => array( "License: GPLv2 - <$url>", 'GPLv2', $url ),
+			'parens around' => array( "License: GPLv2 - ($url)", 'GPLv2', $url ),
 		);
 	}
 
 	/**
-	 * `License: GPLv2 - https://...` and `License: GPLv2 - <https://...>` should
-	 * both extract the URL into `license_uri` and leave only `GPLv2` in
-	 * `license` — no leftover `<` from the autolink form.
+	 * `License: GPLv2 - http://...` and the wrapped forms `<http://...>` and
+	 * `(http://...)` should all extract the URL into `license_uri` and leave
+	 * only `GPLv2` in `license` — no leftover bracket or paren.
 	 */
 	#[DataProvider( 'license_with_embedded_url_provider' )]
 	public function test_license_with_embedded_url( string $header, string $expected_license, string $expected_uri ): void {
