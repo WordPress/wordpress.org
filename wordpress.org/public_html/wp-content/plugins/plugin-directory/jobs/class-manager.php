@@ -131,7 +131,7 @@ class Manager {
 		// Flush the Cavalcade jobs cache, we need fresh data from the database.
 		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
 
-		foreach ( _get_cron_array() ?: [] as $cron ) {
+		foreach ( _get_cron_array() as $cron ) {
 			foreach ( $cron[ $hook ] ?? [] as $cron_item ) {
 				if ( 'running' === ( $cron_item['_job']->status ?? '' ) ) {
 					return true;
