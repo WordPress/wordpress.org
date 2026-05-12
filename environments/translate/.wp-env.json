@@ -1,0 +1,49 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/glotpress.zip",
+		"GlotPress/gp-translation-helpers#main",
+		"Automattic/gp-import-export#master",
+		"../wordpress.org/public_html/wp-content/plugins/glotpress-translate-bridge",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-customizations",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-routes",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-custom-stats",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-custom-errors",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-help",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-plugin-directory",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-theme-directory",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-translation-suggestions",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-translation-fixer",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-rosetta-roles",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-js-warnings",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-bulk-pretranslations",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-contributor-moderation",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-slack-integrations",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-profiles",
+		"https://downloads.wordpress.org/plugin/logged-out-admin-bar.zip"
+	],
+	"themes": [
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg",
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg-main",
+		"WordPress/wporg-parent-2021#build"
+	],
+	"mappings": {
+		"wp-content/mu-plugins": "./mocks/mu-plugins",
+		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
+		"wp-content/env-bin": "./translate/bin"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash translate/bin/after-start.sh"
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"WPORG_TRANSLATE_BLOGID": 1,
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php",
+		"GP_URL_BASE": "/",
+		"GP_TMPL_PATH": "/var/www/html/wp-content/plugins/wporg-gp-customizations/templates/",
+		"WPORGPATH": "/var/www/html/"
+	}
+}
