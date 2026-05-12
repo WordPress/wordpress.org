@@ -851,8 +851,8 @@ class Import {
 
 				$type = strtolower( $m['type'] );
 
-				// Don't import oversize assets.
-				if ( $asset['filesize'] > $asset_limits[ $type ] ) {
+				// Don't import zero-byte or oversize assets.
+				if ( ! $asset['filesize'] || $asset['filesize'] > $asset_limits[ $type ] ) {
 					continue;
 				}
 
@@ -932,8 +932,9 @@ class Import {
 				continue;
 			}
 
-			// Don't import oversize assets.
-			if ( filesize( $plugin_screenshot ) > $asset_limits['screenshot'] ) {
+			// Don't import zero-byte or oversize assets.
+			$screenshot_size = filesize( $plugin_screenshot );
+			if ( ! $screenshot_size || $screenshot_size > $asset_limits['screenshot'] ) {
 				continue;
 			}
 
