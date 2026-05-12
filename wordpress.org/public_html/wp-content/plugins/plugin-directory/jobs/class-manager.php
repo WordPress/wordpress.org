@@ -122,6 +122,29 @@ class Manager {
 	}
 
 	/**
+	 * Determines whether any job for a given hook is currently running.
+	 *
+	 * Unlike get_scheduled_time() which only inspects waiting jobs, this
+	 * queries Cavalcade directly for jobs in the 'running' state.
+	 *
+	 * @param string $hook The hook to check.
+	 * @return bool True if a job for this hook is currently running.
+	 */
+	public static function is_event_running( $hook ) {
+		if ( ! class_exists( '\HM\Cavalcade\Plugin\Job' ) ) {
+			return false;
+		}
+
+		$running = \HM\Cavalcade\Plugin\Job::get_jobs_by_query( [
+			'hook'     => $hook,
+			'statuses' => [ 'running' ],
+			'limit'    => 1,
+		] );
+
+		return ! empty( $running );
+	}
+
+	/**
 	 * Returns the current scheduled events of a hook.
 	 *
 	 * @param string   $hook           The hook to look for.
