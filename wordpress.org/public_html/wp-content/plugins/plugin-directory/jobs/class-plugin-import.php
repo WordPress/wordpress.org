@@ -27,11 +27,13 @@ class Plugin_Import {
 			Manager::reschedule_event( "import_plugin:{$plugin_slug}", time() + 5, $next_scheduled );
 		}
 
-		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
+		// To avoid a situation where two imports run concurrently, if one is already scheduled or in flight, run it 1hr later (We'll trigger it after the current one finishes).
 		$when_to_run    = time() + 5;
 		$last_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' );
 		if ( $last_scheduled ) {
 			$when_to_run = $last_scheduled + HOUR_IN_SECONDS;
+		} elseif ( Manager::is_event_running( "import_plugin:{$plugin_slug}" ) ) {
+			$when_to_run = time() + HOUR_IN_SECONDS;
 		}
 
 		wp_schedule_single_event(
