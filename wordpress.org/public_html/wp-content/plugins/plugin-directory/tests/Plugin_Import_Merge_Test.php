@@ -51,8 +51,16 @@ class Plugin_Import_Merge_Test extends TestCase {
 	}
 
 	public function test_boolean_flags_are_ored() {
-		$existing = [ 'readme_touched' => true,  'code_touched' => false, 'assets_touched' => false ];
-		$new      = [ 'readme_touched' => false, 'code_touched' => true,  'assets_touched' => false ];
+		$existing = [
+			'readme_touched' => true,
+			'code_touched'   => false,
+			'assets_touched' => false,
+		];
+		$new = [
+			'readme_touched' => false,
+			'code_touched'   => true,
+			'assets_touched' => false,
+		];
 
 		$merged = $this->merge( $existing, $new );
 
