@@ -14,17 +14,17 @@ class Plugin_Import {
 	public static function queue( $plugin_slug, $plugin_data ) {
 		/*
 		 * If the next scheduled run is more than 5 minutes away (e.g. queued by a bulk
-		 * batch re-index), pull it forward to the usual import time so a fresh commit
-		 * isn't delayed behind the batch. The import re-reads SVN at HEAD, so the new
-		 * commit is picked up regardless of which event's args end up firing.
+		 * batch re-index) and no import is currently running, pull it forward to the
+		 * usual import time so a fresh commit isn't delayed behind the batch. The new
+		 * commit-driven event is then queued 1hr later via the logic below.
 		 */
 		$next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'next' );
 		if (
 			$next_scheduled &&
 			$next_scheduled > ( time() + 5 * MINUTE_IN_SECONDS ) &&
-			Manager::reschedule_event( "import_plugin:{$plugin_slug}", time() + 5, $next_scheduled )
+			! Manager::is_event_running( "import_plugin:{$plugin_slug}" )
 		) {
-			return;
+			Manager::reschedule_event( "import_plugin:{$plugin_slug}", time() + 5, $next_scheduled );
 		}
 
 		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
