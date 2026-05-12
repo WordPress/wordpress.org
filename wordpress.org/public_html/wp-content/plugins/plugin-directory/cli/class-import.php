@@ -1132,7 +1132,12 @@ class Import {
 
 			// Range the first read to 128 KB — enough for the headers of
 			// PNG/GIF and most JPEGs. Fall back to a full read only when
-			// the prefix isn't enough to decode the header.
+			// the prefix isn't enough to decode the header — the falsy
+			// `$size` at the bottom of the loop is the implicit retry.
+			// Transport errors / non-2xx / empty body intentionally bail
+			// out via `break`: those failure modes (network down, 4xx,
+			// 5xx, empty file) won't be helped by re-requesting the same
+			// URL without Range.
 			foreach ( array( 128 * KB_IN_BYTES, 0 ) as $limit ) {
 				$args = array( 'timeout' => 15 );
 				if ( $limit > 0 ) {
