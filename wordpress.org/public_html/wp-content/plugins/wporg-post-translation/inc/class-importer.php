@@ -39,7 +39,15 @@ class Importer {
 
 		$po = $this->build_po( $strings, $reference, $gp_project );
 
-		return GP::$original->import_for_project( $gp_project, $po );
+		$result = GP::$original->import_for_project( $gp_project, $po );
+
+		if ( $result ) {
+			// Invalidate frontend translation cache; the group is registered as global
+			// in the plugin bootstrap so this is visible across the multisite network.
+			wp_cache_set_last_changed( Frontend::CACHE_GROUP );
+		}
+
+		return $result;
 	}
 
 	/**

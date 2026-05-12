@@ -22,8 +22,8 @@ class Editor {
 				'single'        => true,
 				'type'          => 'boolean',
 				'default'       => false,
-				'auth_callback' => function () {
-					return current_user_can( 'edit_posts' );
+				'auth_callback' => function ( $allowed, $meta_key, $object_id ) {
+					return current_user_can( 'edit_post', $object_id );
 				},
 			]
 		);

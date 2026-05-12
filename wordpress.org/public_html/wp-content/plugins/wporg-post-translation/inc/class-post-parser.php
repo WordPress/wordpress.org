@@ -55,7 +55,12 @@ class Post_Parser {
 	 * @return string[] Unique translatable strings.
 	 */
 	public static function post_to_strings( $post ) {
-		$post    = get_post( $post );
+		$post = get_post( $post );
+
+		if ( ! $post ) {
+			return [];
+		}
+
 		$self    = new self();
 		$strings = $self->extract_strings( $post->post_content );
 

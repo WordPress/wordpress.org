@@ -29,6 +29,10 @@ function bootstrap() {
 	require_once __DIR__ . '/inc/class-editor.php';
 	require_once __DIR__ . '/inc/class-cli.php';
 
+	// Share the translation cache last_changed token across the multisite network,
+	// so imports running on translate.w.org invalidate frontend caches on source blogs.
+	wp_cache_add_global_groups( [ Frontend::CACHE_GROUP ] );
+
 	Admin::init();
 	Frontend::init();
 	Editor::init();

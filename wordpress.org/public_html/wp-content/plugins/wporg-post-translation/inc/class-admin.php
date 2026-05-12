@@ -27,18 +27,20 @@ class Admin {
 		$permalink      = get_permalink( $post );
 		$args           = [ $post_id, $source_blog_id, $project, $permalink ];
 
-		if ( wp_next_scheduled( 'post_translation_import', $args ) ) {
-			return;
+		// On WordPress.org multisite, schedule the import on translate.w.org.
+		// The duplicate check has to run on whichever blog owns the event.
+		$is_remote = defined( 'WPORG_TRANSLATE_BLOGID' ) && is_multisite();
+
+		if ( $is_remote ) {
+			switch_to_blog( WPORG_TRANSLATE_BLOGID );
 		}
 
-		// On WordPress.org multisite, schedule the import on translate.w.org.
-		if ( defined( 'WPORG_TRANSLATE_BLOGID' ) && is_multisite() ) {
-			switch_to_blog( WPORG_TRANSLATE_BLOGID );
+		if ( ! wp_next_scheduled( 'post_translation_import', $args ) ) {
 			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'post_translation_import', $args );
+		}
+
+		if ( $is_remote ) {
 			restore_current_blog();
-		} else {
-			// Local/dev or single-site: run on the same site.
-			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'post_translation_import', $args );
 		}
 	}
 
