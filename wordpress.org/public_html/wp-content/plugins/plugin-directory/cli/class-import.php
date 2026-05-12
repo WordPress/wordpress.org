@@ -827,6 +827,14 @@ class Import {
 			'blueprint'  => 100 * KB_IN_BYTES,
 		);
 
+		// Previously-imported asset metadata, used to skip re-reading any file whose
+		// SVN revision hasn't changed.
+		$prior_assets = array(
+			'screenshot' => get_post_meta( $this->plugin->ID, 'assets_screenshots', true ) ?: array(),
+			'banner'     => get_post_meta( $this->plugin->ID, 'assets_banners',     true ) ?: array(),
+			'icon'       => get_post_meta( $this->plugin->ID, 'assets_icons',       true ) ?: array(),
+		);
+
 		$svn_blueprints_folder = null;
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
@@ -862,7 +870,15 @@ class Import {
 					$resolution = preg_replace( '/[^0-9]/u', 'x', $resolution );
 				}
 
-				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+				$record = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+
+				$record = self::enrich_asset_dimensions(
+					$record,
+					$prior_assets[ $type ][ $filename ] ?? null,
+					$this->plugin
+				);
+
+				$assets[ $type ][ $asset['filename'] ] = $record;
 			}
 		}
 
@@ -921,12 +937,21 @@ class Import {
 				continue;
 			}
 
-			$assets['screenshot'][ $filename ] = array(
+			$record = array(
 				'filename'   => $filename,
 				'revision'   => $svn_export['revision'],
 				'resolution' => $screenshot_id,
 				'location'   => 'plugin',
 			);
+
+			$record = self::enrich_asset_dimensions(
+				$record,
+				$prior_assets['screenshot'][ $filename ] ?? null,
+				$this->plugin,
+				$plugin_screenshot
+			);
+
+			$assets['screenshot'][ $filename ] = $record;
 		}
 
 		if ( 'trunk' === $stable_tag ) {
@@ -1066,6 +1091,84 @@ class Import {
 			$plugin_slug,
 			$this,
 		);
+	}
+
+	/**
+	 * Populate `width` and `height` on an asset record, reusing the prior
+	 * import's values when the SVN revision hasn't changed.
+	 *
+	 * @param array       $record The asset record.
+	 * @param array|null  $prior  Matching record from the prior import.
+	 * @param \WP_Post    $post   The plugin post.
+	 * @param string|null $local  Optional local path to read instead of fetching from SVN.
+	 * @return array
+	 */
+	public static function enrich_asset_dimensions( $record, $prior, $post, $local = null ) {
+		if (
+			is_array( $prior ) &&
+			isset( $prior['revision'], $prior['width'], $prior['height'] ) &&
+			(string) $prior['revision'] === (string) $record['revision'] &&
+			$prior['width'] > 0 && $prior['height'] > 0
+		) {
+			$record['width']  = (int) $prior['width'];
+			$record['height'] = (int) $prior['height'];
+
+			return $record;
+		}
+
+		$size = false;
+
+		if ( $local && file_exists( $local ) ) {
+			$size = wp_getimagesize( $local );
+		}
+
+		if ( ! $size ) {
+			$url       = Template::get_asset_url( $post, $record, false /* no CDN */ );
+			$temp_file = wp_tempnam( $record['filename'] );
+
+			// Range the first read to 128 KB — enough for the headers of
+			// most images. Fall back to a full read only when the prefix
+			// isn't enough to decode the header — the falsy `$size` at
+			// the bottom of the loop is the implicit retry. Transport
+			// errors / non-2xx intentionally bail out via `break`: those
+			// failure modes won't be helped by re-requesting the same
+			// URL without Range.
+			foreach ( array( 128 * KB_IN_BYTES, 0 ) as $limit ) {
+				$args = array(
+					'timeout'  => 15,
+					'stream'   => true,
+					'filename' => $temp_file,
+				);
+				if ( $limit > 0 ) {
+					$args['headers']             = array( 'Range' => 'bytes=0-' . ( $limit - 1 ) );
+					$args['limit_response_size'] = $limit;
+				}
+
+				$response = wp_safe_remote_get( $url, $args );
+				$code     = wp_remote_retrieve_response_code( $response );
+				if ( is_wp_error( $response ) || ( 200 !== $code && 206 !== $code ) ) {
+					break;
+				}
+
+				if ( ! file_exists( $temp_file ) || 0 === filesize( $temp_file ) ) {
+					break;
+				}
+
+				$size = wp_getimagesize( $temp_file );
+				if ( $size ) {
+					break;
+				}
+			}
+
+			unlink( $temp_file );
+		}
+
+		if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {
+			$record['width']  = (int) $size[0];
+			$record['height'] = (int) $size[1];
+		}
+
+		return $record;
 	}
 
 	/**
