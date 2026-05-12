@@ -6,15 +6,7 @@
 	<testsuites>
 		<testsuite name="plugin-directory">
 			<directory suffix=".php">tests/</directory>
-			<!--
-				class-* files don't match PHPUnit's directory-scan rule (which
-				expects the filename to equal the class name), so they're added
-				via <file> and excluded from the directory walk to avoid the
-				basename-mismatch warning that would otherwise fail the run.
-			-->
-			<file>tests/class-test-readme-parser.php</file>
 			<exclude>tests/bootstrap.php</exclude>
-			<exclude>tests/class-test-readme-parser.php</exclude>
 			<exclude>tests/wporg-url-schemes.php</exclude>
 			<exclude>tests/wporg-plugin-api.php</exclude>
 			<exclude>tests/wporg-plugin-api-performance.php</exclude>
