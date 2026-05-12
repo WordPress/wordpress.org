@@ -33,7 +33,7 @@ export const ALLOWED_RESOURCES = [
 	{
 		authority: 'wp.com',
 		domainRegex: /^(.*\.)?wp\.com$/,
-		pathRegex: /^\/wordpress\.org\//,
+		pathRegex: /^\/(.*\.)?wordpress\.org\//,
 		pathLabel: '/wordpress.org/',
 	},
 ];
@@ -66,6 +66,7 @@ export const getBlockMediaResourceToCheck = ( blockName, attributes ) => {
  * - https://w.org/image.jpg
  * - https://s.w.org/images/core/6.9/image.jpg
  * - https://i0.wp.com/wordpress.org/image.jpg
+ * - https://i0.wp.com/make.wordpress.org/image.jpg
  *
  * @param {string} mediaUrl The media URL to check.
  * @param {string} siteUrl The site URL.
