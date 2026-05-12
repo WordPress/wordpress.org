@@ -1123,6 +1123,9 @@ class Import {
 		}
 
 		if ( ! $size ) {
+			// `wp_tempnam()` lives in wp-admin and isn't loaded by default in CLI/cron contexts.
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+
 			$url       = Template::get_asset_url( $post, $record, false /* no CDN */ );
 			$temp_file = wp_tempnam( $record['filename'] );
 
