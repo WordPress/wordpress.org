@@ -12,39 +12,22 @@ use WordPressdotorg\Plugin_Directory\CLI;
 class Plugin_Import {
 
 	public static function queue( $plugin_slug, $plugin_data ) {
-		$hook        = "import_plugin:{$plugin_slug}";
-		$usual_time  = time() + 5;
-		$new_args    = array_merge( array( 'plugin' => $plugin_slug ), $plugin_data );
-
-		$next_scheduled = Manager::get_scheduled_time( $hook, 'next' );
+		$hook       = "import_plugin:{$plugin_slug}";
+		$usual_time = time() + 5;
 
 		/*
 		 * If the next scheduled run is more than 5 minutes away (e.g. queued by a bulk
-		 * batch re-index) and no job for this plugin is currently running, merge the
-		 * pending event with this request and pull it forward to the usual time —
-		 * otherwise the plugin's commit-driven import would be delayed behind the batch.
+		 * batch re-index), pull it forward to the usual import time so a fresh commit
+		 * isn't delayed behind the batch. The import re-reads SVN at HEAD, so the new
+		 * commit is picked up regardless of which event's args end up firing.
 		 */
+		$next_scheduled = Manager::get_scheduled_time( $hook, 'next' );
 		if (
 			$next_scheduled &&
 			$next_scheduled > ( time() + 5 * MINUTE_IN_SECONDS ) &&
-			! Manager::is_event_running( $hook )
+			Manager::reschedule_event( $hook, $usual_time, $next_scheduled )
 		) {
-			$existing      = Manager::get_scheduled_events( $hook, $next_scheduled );
-			$existing_args = $existing[0]['args'][0] ?? array();
-			$merged_args   = self::merge_plugin_data( $existing_args, $new_args );
-
-			$updated = Manager::update_scheduled_event(
-				$hook,
-				$next_scheduled,
-				array(
-					'nextrun' => $usual_time,
-					'args'    => array( $merged_args ),
-				)
-			);
-
-			if ( $updated ) {
-				return;
-			}
+			return;
 		}
 
 		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
@@ -57,35 +40,10 @@ class Plugin_Import {
 		wp_schedule_single_event(
 			$when_to_run,
 			$hook,
-			array( $new_args )
+			array(
+				array_merge( array( 'plugin' => $plugin_slug ), $plugin_data ),
+			)
 		);
-	}
-
-	/**
-	 * Merge two plugin_data payloads into a single import-job payload.
-	 *
-	 * Used when collapsing an already-scheduled future event into a newer
-	 * request so neither set of changes is lost.
-	 *
-	 * @param array $existing The args from the currently-scheduled event.
-	 * @param array $new      The args from the new request.
-	 * @return array Merged args ready to pass to the import job.
-	 */
-	protected static function merge_plugin_data( array $existing, array $new ) {
-		$merged = array_merge( $existing, $new );
-
-		foreach ( array( 'tags_touched', 'tags_deleted', 'revisions' ) as $key ) {
-			$merged[ $key ] = array_values( array_unique( array_merge(
-				(array) ( $existing[ $key ] ?? array() ),
-				(array) ( $new[ $key ] ?? array() )
-			) ) );
-		}
-
-		foreach ( array( 'readme_touched', 'code_touched', 'assets_touched' ) as $key ) {
-			$merged[ $key ] = ! empty( $existing[ $key ] ) || ! empty( $new[ $key ] );
-		}
-
-		return $merged;
 	}
 
 	/**
