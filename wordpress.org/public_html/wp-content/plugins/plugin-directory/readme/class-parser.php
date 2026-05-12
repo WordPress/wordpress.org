@@ -339,10 +339,13 @@ class Parser {
 			$this->donate_link = $headers['donate_link'];
 		}
 		if ( ! empty( $headers['license'] ) ) {
-			// Handle the many cases of "License: GPLv2 - http://..."
+			// Handle the many cases of "License: GPLv2 - http://..." (and the
+			// markdown-autolink form "License: GPLv2 - <http://...>"). `<>` is
+			// added to the trim sets so the bracket characters don't leak into
+			// either the extracted URI or the remaining license name.
 			if ( empty( $headers['license_uri'] ) && preg_match( '!(https?://\S+)!i', $headers['license'], $url ) ) {
-				$headers['license_uri'] = trim( $url[1], " -*\t\n\r\n(" );
-				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n(" );
+				$headers['license_uri'] = trim( $url[1], " -*\t\n\r\n(<>" );
+				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n(<>" );
 			}
 
 			$this->license = $headers['license'];
@@ -618,7 +621,10 @@ class Parser {
 
 		list( $key, $value ) = explode( ':', $line, 2 );
 		$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
-		$value               = trim( $value, " \t*-\r\n" );
+		// `<>` is included so that `Donate link: <https://example.com>` (markdown
+		// autolink syntax, produced by `markdownlint --fix` against bare URLs)
+		// resolves to the same value as `Donate link: https://example.com`.
+		$value               = trim( $value, " \t*-\r\n<>" );
 
 		if ( $only_valid && ! isset( $this->valid_headers[ $key ] ) ) {
 			return false;
