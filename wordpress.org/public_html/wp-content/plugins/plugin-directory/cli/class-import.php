@@ -1103,10 +1103,10 @@ class Import {
 	 * Populate `width` and `height` on an asset record, reusing the prior
 	 * import's values when the SVN revision hasn't changed.
 	 *
-	 * @param array             $record The asset record.
-	 * @param array|null        $prior  Matching record from the prior import.
-	 * @param int|\WP_Post|null $post   The plugin post.
-	 * @param string|null       $local  Optional local path to read instead of fetching from SVN.
+	 * @param array        $record The asset record.
+	 * @param array|null   $prior  Matching record from the prior import.
+	 * @param int|\WP_Post $post   The plugin post.
+	 * @param string|null  $local  Optional local path to read instead of fetching from SVN.
 	 * @return array
 	 */
 	public static function enrich_asset_dimensions( $record, $prior, $post, $local = null ) {
