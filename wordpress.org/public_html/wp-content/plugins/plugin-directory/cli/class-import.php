@@ -828,18 +828,12 @@ class Import {
 		);
 
 		// Previously-imported asset metadata, used to skip re-reading any file whose
-		// SVN revision hasn't changed. The cached `width`/`height` from the prior
-		// import is reused as-is when the revision matches.
+		// SVN revision hasn't changed.
 		$prior_assets = array(
-			'screenshot' => array(),
-			'banner'     => array(),
-			'icon'       => array(),
+			'screenshot' => get_post_meta( $this->plugin->ID, 'assets_screenshots', true ) ?: array(),
+			'banner'     => get_post_meta( $this->plugin->ID, 'assets_banners',     true ) ?: array(),
+			'icon'       => get_post_meta( $this->plugin->ID, 'assets_icons',       true ) ?: array(),
 		);
-		if ( $this->plugin ) {
-			$prior_assets['screenshot'] = get_post_meta( $this->plugin->ID, 'assets_screenshots', true ) ?: array();
-			$prior_assets['banner']     = get_post_meta( $this->plugin->ID, 'assets_banners',     true ) ?: array();
-			$prior_assets['icon']       = get_post_meta( $this->plugin->ID, 'assets_icons',       true ) ?: array();
-		}
 
 		$svn_blueprints_folder = null;
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
