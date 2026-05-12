@@ -87,38 +87,22 @@ class Manager {
 		// Flush the Cavalcade jobs cache, we need fresh data from the database
 		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
 
-		$crons = _get_cron_array();
-		if ( empty( $crons ) ) {
-			return false;
-		}
-
 		$timestamps = array();
 
-		foreach ( $crons as $timestamp => $cron ) {
-			if ( isset( $cron[ $hook ] ) ) {
-				foreach ( $cron[ $hook ] as $key => $cron_item ) {
-					// Cavalcade should present this field, if not, bail.
-					if ( empty( $cron_item['_job'] ) ) {
-						continue;
-					}
-
-					if ( 'waiting' === $cron_item['_job']->status ) {
-						$timestamps[] = $timestamp;
-						break;
-					}
+		foreach ( _get_cron_array() as $timestamp => $cron ) {
+			foreach ( $cron[ $hook ] ?? [] as $cron_item ) {
+				if ( 'waiting' === ( $cron_item['_job']->status ?? '' ) ) {
+					$timestamps[] = $timestamp;
+					break;
 				}
 			}
 		}
 
-		if ( empty( $timestamps ) ) {
+		if ( ! $timestamps ) {
 			return false;
 		}
 
-		if ( 'last' == $when ) {
-			return max( $timestamps );
-		} else {
-			return min( $timestamps );
-		}
+		return 'last' === $when ? max( $timestamps ) : min( $timestamps );
 	}
 
 	/**
