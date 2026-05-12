@@ -10,14 +10,21 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 
 /**
+ * Exercises Parser end-to-end against fixture readmes, asserting that
+ * the URL-bearing headers come out clean for both the bare and markdown
+ * autolink forms.
+ *
  * @group readme-parser
  */
 class Test_Readme_Parser extends TestCase {
 
 	/**
-	 * Build a minimal readme with `$header_line` inserted into the field
-	 * block. The fixture omits whichever URL-bearing header is under test
-	 * so the assertion isn't fighting an unrelated default.
+	 * Build a minimal readme with the given header line inserted into the
+	 * field block. The fixture omits whichever URL-bearing header is under
+	 * test so the assertion isn't fighting an unrelated default.
+	 *
+	 * @param string $header_line A `Field: Value` line to insert.
+	 * @return string Complete readme contents.
 	 */
 	private static function readme_with( string $header_line ): string {
 		return implode(
@@ -40,6 +47,11 @@ class Test_Readme_Parser extends TestCase {
 		);
 	}
 
+	/**
+	 * Data provider for {@see test_donate_link()}.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
 	public static function donate_link_provider(): array {
 		$url = 'https://example.com/donate';
 		return array(
@@ -52,6 +64,9 @@ class Test_Readme_Parser extends TestCase {
 	/**
 	 * `Donate link:` accepts the bare form and the markdown autolink form
 	 * (which `markdownlint --fix` produces against bare URLs).
+	 *
+	 * @param string $header   Full header line under test.
+	 * @param string $expected Expected `donate_link` value after parsing.
 	 */
 	#[DataProvider( 'donate_link_provider' )]
 	public function test_donate_link( string $header, string $expected ): void {
@@ -59,6 +74,11 @@ class Test_Readme_Parser extends TestCase {
 		$this->assertSame( $expected, $parser->donate_link );
 	}
 
+	/**
+	 * Data provider for {@see test_license_uri()}.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
 	public static function license_uri_provider(): array {
 		$url = 'https://www.gnu.org/licenses/gpl-2.0.html';
 		return array(
@@ -70,6 +90,9 @@ class Test_Readme_Parser extends TestCase {
 
 	/**
 	 * `License URI:` accepts the bare form and the markdown autolink form.
+	 *
+	 * @param string $header   Full header line under test.
+	 * @param string $expected Expected `license_uri` value after parsing.
 	 */
 	#[DataProvider( 'license_uri_provider' )]
 	public function test_license_uri( string $header, string $expected ): void {
@@ -77,6 +100,11 @@ class Test_Readme_Parser extends TestCase {
 		$this->assertSame( $expected, $parser->license_uri );
 	}
 
+	/**
+	 * Data provider for {@see test_license_with_embedded_url()}.
+	 *
+	 * @return array<string, array{0: string, 1: string, 2: string}>
+	 */
 	public static function license_with_embedded_url_provider(): array {
 		$url = 'https://www.gnu.org/licenses/gpl-2.0.html';
 		return array(
@@ -90,6 +118,10 @@ class Test_Readme_Parser extends TestCase {
 	 * `License: GPLv2 - http://...` and the wrapped forms `<http://...>` and
 	 * `(http://...)` should all extract the URL into `license_uri` and leave
 	 * only `GPLv2` in `license` — no leftover bracket or paren.
+	 *
+	 * @param string $header           Full header line under test.
+	 * @param string $expected_license Expected residual `license` value.
+	 * @param string $expected_uri     Expected `license_uri` extracted from the line.
 	 */
 	#[DataProvider( 'license_with_embedded_url_provider' )]
 	public function test_license_with_embedded_url( string $header, string $expected_license, string $expected_uri ): void {
