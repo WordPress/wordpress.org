@@ -89,7 +89,7 @@ $hosting_cache_buster = '9';
                             </a>
                         </h2>
 
-                        <p>Hostinger, trusted by more than 2.5 million clients worldwide, offers fast and secure managed WordPress hosting. Enjoy seamless WordPress experience with a 1-click installer, free domain and SSL, LiteSpeed and object cache for a faster website, and built-in CDN. Focusing on user security, experience and performance, it's an ideal solution for beginners and experts alike. Get smooth, value-driven hosting, backed by 24/7 support of WordPress experts, with Hostinger.</p>
+                        <p>Hostinger is trusted by more than 5 million clients worldwide, offering managed hosting for WordPress that's fast, secure, and simple to run. Launch faster with Kodee, an AI agent living inside your WordPress that helps you build and manage your site simply by chatting. Enjoy a free domain, business email, built-in CDN, automated backups, free unlimited migrations, and 24/7 support. Create and manage your WooCommerce store with ease, grow with built-in affiliate marketing tools, and get premium performance at an affordable price.</p>
 
                         <div class="forum">
                             <a href="https://wordpress.org/search/Hostinger/?in=support_forums">Forum threads about Hostinger &raquo;</a>

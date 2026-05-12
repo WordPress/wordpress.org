@@ -187,9 +187,10 @@ function update_profile( $field, $value, $user ) {
  * @param $action string The action to perform; 'add', 'remove', 'list'.
  * @param $badge  string The badge group to assign.
  * @param $users  mixed  The user(s) to assign to. A WP_User/ID/Login/Email/Slug (or array of) of the user(s) to assign.
+ * @param $async   bool   Whether to queue the request for asynchronous processing or send it immediately. Default true (async).
  * @return bool
  */
-function badge_api( string $action, string $badge, $users = array() ) : bool {
+function badge_api( string $action, string $badge, $users = array(), $async = true ) : bool {
 	$users = is_object( $users ) ? [ $users ] : (array) $users;
 	$users = array_filter( array_map( __NAMESPACE__ . '\find_user_id', $users ) );
 
@@ -217,13 +218,21 @@ function badge_api( string $action, string $badge, $users = array() ) : bool {
 		return true;
 	}
 
-	return queue( [
+	$payload = [
 		'action'  => 'wporg_handle_association',
 		'source'  => 'generic-badge',
 		'command' => $action,
 		'users'   => $users,
 		'badge'   => $badge,
-	] );
+	];
+
+	if ( $async ) {
+		return queue( $payload );
+	} else {
+		$response = api( $payload );
+
+		return ! is_wp_error( $response ) && 200 == wp_remote_retrieve_response_code( $response );
+	}
 }
 
 /**

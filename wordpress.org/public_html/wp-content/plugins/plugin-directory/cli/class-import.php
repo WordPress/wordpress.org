@@ -12,6 +12,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use WordPressdotorg\Plugin_Directory\Tools\Tokenisation_Helpers;
 use WordPressdotorg\Plugin_Directory\Zip\Builder;
 
 /**
@@ -100,6 +101,7 @@ class Import {
 		$last_modified      = $data['last_modified'];
 		$blocks             = $data['blocks'];
 		$block_files        = $data['block_files'];
+		$dashboard_widgets  = $data['dashboard_widgets'] ?? array();
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
@@ -490,6 +492,22 @@ class Import {
 			delete_post_meta( $plugin->ID, 'block_files' );
 		}
 
+		// Dashboard widgets: assign the section term and store widget names.
+		if ( $dashboard_widgets ) {
+			wp_add_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
+
+			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
+			foreach ( $dashboard_widgets as $widget_name ) {
+				if ( '' === $widget_name ) {
+					continue;
+				}
+				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget_name, false );
+			}
+		} else {
+			wp_remove_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
+			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
+		}
+
 		// Add the release to storage.
 		if ( 'trunk' != $stable_tag ) {
 			Plugin_Directory::add_release(
@@ -809,6 +827,14 @@ class Import {
 			'blueprint'  => 100 * KB_IN_BYTES,
 		);
 
+		// Previously-imported asset metadata, used to skip re-reading any file whose
+		// SVN revision hasn't changed.
+		$prior_assets = array(
+			'screenshot' => get_post_meta( $this->plugin->ID, 'assets_screenshots', true ) ?: array(),
+			'banner'     => get_post_meta( $this->plugin->ID, 'assets_banners',     true ) ?: array(),
+			'icon'       => get_post_meta( $this->plugin->ID, 'assets_icons',       true ) ?: array(),
+		);
+
 		$svn_blueprints_folder = null;
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
@@ -844,7 +870,15 @@ class Import {
 					$resolution = preg_replace( '/[^0-9]/u', 'x', $resolution );
 				}
 
-				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+				$record = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+
+				$record = self::enrich_asset_dimensions(
+					$record,
+					$prior_assets[ $type ][ $filename ] ?? null,
+					$this->plugin
+				);
+
+				$assets[ $type ][ $asset['filename'] ] = $record;
 			}
 		}
 
@@ -903,12 +937,21 @@ class Import {
 				continue;
 			}
 
-			$assets['screenshot'][ $filename ] = array(
+			$record = array(
 				'filename'   => $filename,
 				'revision'   => $svn_export['revision'],
 				'resolution' => $screenshot_id,
 				'location'   => 'plugin',
 			);
+
+			$record = self::enrich_asset_dimensions(
+				$record,
+				$prior_assets['screenshot'][ $filename ] ?? null,
+				$this->plugin,
+				$plugin_screenshot
+			);
+
+			$assets['screenshot'][ $filename ] = $record;
 		}
 
 		if ( 'trunk' === $stable_tag ) {
@@ -1030,12 +1073,102 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
+		// Find dashboard widget registrations (wp_add_dashboard_widget calls).
+		$dashboard_widgets = array();
+		foreach ( Filesystem::list_files( $base_dir, true, '!\.php$!i' ) as $filename ) {
+			// Skip third-party dependencies — they are not the plugin itself.
+			if ( str_contains( $filename, '/vendor/' ) ) {
+				continue;
+			}
+			foreach ( self::find_dashboard_widgets_in_file( $filename ) as $widget ) {
+				$dashboard_widgets[] = $widget;
+			}
+		}
+
 		return apply_filters(
 			'wporg_plugins_export_and_parse_plugin',
-			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' ),
+			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets' ),
 			$plugin_slug,
 			$this,
 		);
+	}
+
+	/**
+	 * Populate `width` and `height` on an asset record, reusing the prior
+	 * import's values when the SVN revision hasn't changed.
+	 *
+	 * @param array       $record The asset record.
+	 * @param array|null  $prior  Matching record from the prior import.
+	 * @param \WP_Post    $post   The plugin post.
+	 * @param string|null $local  Optional local path to read instead of fetching from SVN.
+	 * @return array
+	 */
+	public static function enrich_asset_dimensions( $record, $prior, $post, $local = null ) {
+		if (
+			is_array( $prior ) &&
+			isset( $prior['revision'], $prior['width'], $prior['height'] ) &&
+			(string) $prior['revision'] === (string) $record['revision'] &&
+			$prior['width'] > 0 && $prior['height'] > 0
+		) {
+			$record['width']  = (int) $prior['width'];
+			$record['height'] = (int) $prior['height'];
+
+			return $record;
+		}
+
+		$size = false;
+
+		if ( $local && file_exists( $local ) ) {
+			$size = wp_getimagesize( $local );
+		}
+
+		if ( ! $size ) {
+			$url       = Template::get_asset_url( $post, $record, false /* no CDN */ );
+			$temp_file = wp_tempnam( $record['filename'] );
+
+			// Range the first read to 128 KB — enough for the headers of
+			// most images. Fall back to a full read only when the prefix
+			// isn't enough to decode the header — the falsy `$size` at
+			// the bottom of the loop is the implicit retry. Transport
+			// errors / non-2xx intentionally bail out via `break`: those
+			// failure modes won't be helped by re-requesting the same
+			// URL without Range.
+			foreach ( array( 128 * KB_IN_BYTES, 0 ) as $limit ) {
+				$args = array(
+					'timeout'  => 15,
+					'stream'   => true,
+					'filename' => $temp_file,
+				);
+				if ( $limit > 0 ) {
+					$args['headers']             = array( 'Range' => 'bytes=0-' . ( $limit - 1 ) );
+					$args['limit_response_size'] = $limit;
+				}
+
+				$response = wp_safe_remote_get( $url, $args );
+				$code     = wp_remote_retrieve_response_code( $response );
+				if ( is_wp_error( $response ) || ( 200 !== $code && 206 !== $code ) ) {
+					break;
+				}
+
+				if ( ! file_exists( $temp_file ) || 0 === filesize( $temp_file ) ) {
+					break;
+				}
+
+				$size = wp_getimagesize( $temp_file );
+				if ( $size ) {
+					break;
+				}
+			}
+
+			unlink( $temp_file );
+		}
+
+		if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {
+			$record['width']  = (int) $size[0];
+			$record['height'] = (int) $size[1];
+		}
+
+		return $record;
 	}
 
 	/**
@@ -1164,30 +1297,28 @@ class Import {
 		}
 
 		if ( 'php' === $ext ) {
-			// Parse a php-style register_block_type() call.
-			// Again this assumes literal strings, and only parses the name and title.
+			// Parse register_block_type() and `new WP_Block_Type()` calls.
+			// Block names must be literal strings of the form "namespace/name"; the optional
+			// 'title' entry inside the second-arg options array is captured when present.
 			$contents = file_get_contents( $filename );
-
-			// Search out register_block_type() calls.
-			if ( $contents && preg_match_all( "#register_block_type\s*[(]\s*['\"]([-\w]+/[-\w]+)['\"](?!\s*[.])#ms", $contents, $matches, PREG_SET_ORDER ) ) {
-				foreach ( $matches as $match ) {
-					$blocks[] = (object) [
-						'name'  => $match[1],
-						'title' => null,
-					];
+			if ( $contents ) {
+				foreach ( array( 'register_block_type', 'new WP_Block_Type' ) as $needle ) {
+					foreach ( Tokenisation_Helpers::find_function_calls( $contents, $needle ) as $args ) {
+						$name = $args[0] ?? null;
+						if ( ! is_string( $name ) || ! preg_match( '#^[-\w]+/[-\w]+$#', $name ) ) {
+							continue;
+						}
+						$options = $args[1] ?? null;
+						$title   = is_array( $options ) && is_string( $options['title'] ?? null )
+							? $options['title']
+							: null;
+						$blocks[] = (object) array(
+							'name'  => $name,
+							'title' => $title,
+						);
+					}
 				}
 			}
-
-			// Search out WP_Block_Type() instances.
-			if ( $contents && preg_match_all( "#new\s+WP_Block_Type\s*[(]\s*['\"]([-\w]+\/[-\w]+)['\"](?!\s*[.])(\s*,[^;]{0,500}['\"]title['\"]\s*=>\s*['\"]([^'\"]+)['\"](?!\s*[.]))?#ms", $contents, $matches, PREG_SET_ORDER ) ) {
-				foreach ( $matches as $match ) {
-					$blocks[] = (object) [
-						'name'  => $match[1],
-						'title' => $match[3] ?? null,
-					];
-				}
-			}
-
 		}
 
 		if ( 'block.json' === basename( $filename ) ) {
@@ -1227,6 +1358,38 @@ class Import {
 		}
 
 		return $blocks;
+	}
+
+	/**
+	 * Look for wp_add_dashboard_widget() calls within a single PHP file.
+	 *
+	 * The second argument is the widget label. When wrapped in a recognised
+	 * i18n function (__, _e, _x, _ex, _n, _nx, esc_html__, esc_html_e,
+	 * esc_html_x, esc_attr__, esc_attr_e, esc_attr_x, translate,
+	 * translate_with_gettext_context), the inner literal is extracted; other
+	 * wrappers (e.g. sprintf, esc_html, custom helpers) or non-literal
+	 * expressions resolve to an empty string. Each call is still reported so
+	 * the section term can be applied even when the label is not parseable.
+	 *
+	 * @param string $filename Pathname of the file.
+	 * @return string[] List of widget label strings (empty string for non-literal labels).
+	 */
+	public static function find_dashboard_widgets_in_file( $filename ) {
+		if ( 'php' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) ) {
+			return array();
+		}
+
+		$contents = file_get_contents( $filename );
+		if ( ! $contents ) {
+			return array();
+		}
+
+		$widgets = array();
+		foreach ( Tokenisation_Helpers::find_function_calls( $contents, 'wp_add_dashboard_widget' ) as $args ) {
+			$label     = $args[1] ?? null;
+			$widgets[] = is_string( $label ) ? $label : '';
+		}
+		return array_unique( $widgets );
 	}
 
 	/**

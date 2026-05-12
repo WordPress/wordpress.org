@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
  */
 class Tests_API_Responses extends TestCase {
 
-	function dataprovider_determine_request_valid() {
+	public static function dataprovider_determine_request_valid() {
 		return [
 			[
 				[ 'php_version' => '5.2.9' ],
@@ -50,7 +50,7 @@ class Tests_API_Responses extends TestCase {
 		$this->assertArrayHasKey( 'is_acceptable', $output );
 	}
 
-	function dataprovider_determine_request_invalid() {
+	public static function dataprovider_determine_request_invalid() {
 		return [
 			[
 				[],
@@ -106,7 +106,7 @@ class Tests_API_Responses extends TestCase {
 		$this->assertSame( $expected, $output );
 	}
 
-	function dataprovider_parse_request_valid() {
+	public static function dataprovider_parse_request_valid() {
 		// Test recommended PHP version is always returned.
 		$data = [
 			[

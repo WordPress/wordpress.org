@@ -215,15 +215,42 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 		return;
 	}
 
+	// Build the "People" item once, gated on the team-pledges simulator being
+	// available on the current site. /pledges/ is a virtual page registered by
+	// mu-plugins/make-network/team-pledges.php, so prepending the link without
+	// the simulator results in a 404 on non-team subsites (and would fatal in
+	// page-pledges.php when get_current_team() returns null). Hoisted above the
+	// early returns so team sites without a primary nav still surface People.
+	$people_item = null;
+	if ( function_exists( 'WordPressdotorg\\Make\\Pledges\\get_current_team' ) ) {
+		$team = \WordPressdotorg\Make\Pledges\get_current_team();
+		if ( $team ) {
+			global $wp;
+			$people_url        = home_url( '/pledges/' );
+			$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
+			$people_item       = array(
+				'label'     => esc_html__( 'People', 'wporg-5ftf' ),
+				'url'       => esc_url( $people_url ),
+				'className' => $is_pledges_active ? 'current-menu-item' : '',
+			);
+		}
+	}
+
 	$local_nav_menu_object = wporg_breathe_get_local_nav_menu_object();
 
 	if ( ! $local_nav_menu_object ) {
+		if ( $people_item ) {
+			$menus['breathe'] = array( $people_item );
+		}
 		return _maybe_add_login_item_to_menu( $menus );
 	}
 
 	$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
 
 	if ( ! $menu_items || empty( $menu_items ) ) {
+		if ( $people_item ) {
+			$menus['breathe'] = array( $people_item );
+		}
 		return _maybe_add_login_item_to_menu( $menus );
 	}
 
@@ -238,9 +265,14 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 				'className' => $is_current_page ? 'current-menu-item' : '',
 			);
 		},
-		// Limit local nav items to 6
-		array_slice( $menu_items, 0, 6 )
+		// Cap the inherited local-nav at 5 when we're prepending People (total = 6),
+		// or 6 when there's no People item to add.
+		array_slice( $menu_items, 0, $people_item ? 5 : 6 )
 	);
+
+	if ( $people_item ) {
+		array_unshift( $menu, $people_item );
+	}
 
 	$menus['breathe'] = $menu;
 
