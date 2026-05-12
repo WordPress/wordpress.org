@@ -15,9 +15,14 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 
-class TestReadmeParserUrls extends WP_UnitTestCase {
+/**
+ * @group readme-parser
+ */
+class Readme_Parser_Urls_Test extends TestCase {
 
 	/**
 	 * Build a minimal readme with `$header_line` inserted into the field
@@ -54,9 +59,7 @@ class TestReadmeParserUrls extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * @dataProvider donate_link_provider
-	 */
+	#[DataProvider( 'donate_link_provider' )]
 	public function test_donate_link( string $header, string $expected ): void {
 		$parser = new Parser( self::readme_with( $header ) );
 		$this->assertSame( $expected, $parser->donate_link );
@@ -71,25 +74,10 @@ class TestReadmeParserUrls extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * @dataProvider license_uri_provider
-	 */
+	#[DataProvider( 'license_uri_provider' )]
 	public function test_license_uri( string $header, string $expected ): void {
 		$parser = new Parser( self::readme_with( $header ) );
 		$this->assertSame( $expected, $parser->license_uri );
-	}
-
-	/**
-	 * `License: GPLv2 - https://...` and `License: GPLv2 - <https://...>` should
-	 * both extract the URL into `license_uri` and leave only `GPLv2` in
-	 * `license` — no leftover `<` from the autolink form.
-	 *
-	 * @dataProvider license_with_embedded_url_provider
-	 */
-	public function test_license_with_embedded_url( string $header, string $expected_license, string $expected_uri ): void {
-		$parser = new Parser( self::readme_with( $header ) );
-		$this->assertSame( $expected_license, $parser->license );
-		$this->assertSame( $expected_uri, $parser->license_uri );
 	}
 
 	public static function license_with_embedded_url_provider(): array {
@@ -98,5 +86,17 @@ class TestReadmeParserUrls extends WP_UnitTestCase {
 			'bare URL'     => array( "License: GPLv2 - $url", 'GPLv2', $url ),
 			'autolink URL' => array( "License: GPLv2 - <$url>", 'GPLv2', $url ),
 		);
+	}
+
+	/**
+	 * `License: GPLv2 - https://...` and `License: GPLv2 - <https://...>` should
+	 * both extract the URL into `license_uri` and leave only `GPLv2` in
+	 * `license` — no leftover `<` from the autolink form.
+	 */
+	#[DataProvider( 'license_with_embedded_url_provider' )]
+	public function test_license_with_embedded_url( string $header, string $expected_license, string $expected_uri ): void {
+		$parser = new Parser( self::readme_with( $header ) );
+		$this->assertSame( $expected_license, $parser->license );
+		$this->assertSame( $expected_uri, $parser->license_uri );
 	}
 }
