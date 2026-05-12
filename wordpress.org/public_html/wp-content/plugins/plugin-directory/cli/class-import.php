@@ -1116,51 +1116,51 @@ class Import {
 			return $record;
 		}
 
-		$ext = strtolower( pathinfo( $record['filename'], PATHINFO_EXTENSION ) );
-		if ( ! in_array( $ext, array( 'png', 'jpg', 'jpeg', 'gif' ), true ) ) {
-			return $record;
-		}
-
 		$size = false;
 
 		if ( $local && file_exists( $local ) ) {
-			$size = getimagesize( $local );
+			$size = wp_getimagesize( $local );
 		}
 
 		if ( ! $size ) {
-			$url = Template::get_asset_url( $post, $record, false /* no CDN */ );
+			$url       = Template::get_asset_url( $post, $record, false /* no CDN */ );
+			$temp_file = wp_tempnam( $record['filename'] );
 
 			// Range the first read to 128 KB — enough for the headers of
-			// PNG/GIF and most JPEGs. Fall back to a full read only when
-			// the prefix isn't enough to decode the header — the falsy
-			// `$size` at the bottom of the loop is the implicit retry.
-			// Transport errors / non-2xx / empty body intentionally bail
-			// out via `break`: those failure modes (network down, 4xx,
-			// 5xx, empty file) won't be helped by re-requesting the same
+			// most images. Fall back to a full read only when the prefix
+			// isn't enough to decode the header — the falsy `$size` at
+			// the bottom of the loop is the implicit retry. Transport
+			// errors / non-2xx intentionally bail out via `break`: those
+			// failure modes won't be helped by re-requesting the same
 			// URL without Range.
 			foreach ( array( 128 * KB_IN_BYTES, 0 ) as $limit ) {
-				$args = array( 'timeout' => 15 );
+				$args = array(
+					'timeout'  => 15,
+					'stream'   => true,
+					'filename' => $temp_file,
+				);
 				if ( $limit > 0 ) {
 					$args['headers']             = array( 'Range' => 'bytes=0-' . ( $limit - 1 ) );
 					$args['limit_response_size'] = $limit;
 				}
 
-				$response = wp_remote_get( $url, $args );
+				$response = wp_safe_remote_get( $url, $args );
 				$code     = wp_remote_retrieve_response_code( $response );
 				if ( is_wp_error( $response ) || ( 200 !== $code && 206 !== $code ) ) {
 					break;
 				}
 
-				$body = wp_remote_retrieve_body( $response );
-				if ( '' === $body ) {
+				if ( ! file_exists( $temp_file ) || 0 === filesize( $temp_file ) ) {
 					break;
 				}
 
-				$size = getimagesizefromstring( $body );
+				$size = wp_getimagesize( $temp_file );
 				if ( $size ) {
 					break;
 				}
 			}
+
+			unlink( $temp_file );
 		}
 
 		if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {

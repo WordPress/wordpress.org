@@ -86,7 +86,6 @@ $counts          = array(
 	'reused'    => 0,
 	'extracted' => 0,
 	'failed'    => 0,
-	'skipped'   => 0, // SVG / non-raster.
 );
 $failed_files    = array();
 
@@ -114,15 +113,7 @@ foreach ( $post_ids as $i => $post_id ) {
 				continue;
 			}
 
-			$ext       = strtolower( pathinfo( $record['filename'], PATHINFO_EXTENSION ) );
-			$is_raster = in_array( $ext, array( 'png', 'jpg', 'jpeg', 'gif' ), true );
-			$has_dims  = ! empty( $record['width'] ) && ! empty( $record['height'] );
-
-			if ( ! $is_raster ) {
-				++$counts['skipped'];
-				continue;
-			}
-			if ( $has_dims ) {
+			if ( ! empty( $record['width'] ) && ! empty( $record['height'] ) ) {
 				++$counts['reused'];
 				continue;
 			}
@@ -158,13 +149,12 @@ foreach ( $post_ids as $i => $post_id ) {
 
 	if ( ( $i + 1 ) % 100 === 0 ) {
 		echo sprintf(
-			"  [%d/%d] reused=%d extracted=%d failed=%d skipped=%d\n",
+			"  [%d/%d] reused=%d extracted=%d failed=%d\n",
 			$i + 1,
 			$total_plugins,
 			$counts['reused'],
 			$counts['extracted'],
-			$counts['failed'],
-			$counts['skipped']
+			$counts['failed']
 		);
 	}
 }
@@ -173,9 +163,8 @@ echo "\nDone.\n";
 echo "  Plugins scanned: {$total_plugins}\n";
 echo "  Plugins updated: {$plugins_updated}" . ( $opts['dry-run'] ? ' (would update)' : '' ) . "\n";
 echo "  Assets with cached dimensions reused: {$counts['reused']}\n";
-echo "  Assets newly extracted:                {$counts['extracted']}\n";
-echo "  Assets failed extraction:              {$counts['failed']}\n";
-echo "  Non-raster assets skipped (SVG/etc.):  {$counts['skipped']}\n";
+echo "  Assets newly extracted:               {$counts['extracted']}\n";
+echo "  Assets failed extraction:             {$counts['failed']}\n";
 
 if ( $failed_files ) {
 	echo "\nFailed assets:\n  " . implode( "\n  ", $failed_files ) . "\n";
