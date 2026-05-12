@@ -1139,7 +1139,7 @@ class Import {
 			// Range the first read to 128 KB — enough for the headers of
 			// PNG/GIF and most JPEGs. Fall back to a full read only when
 			// the prefix isn't enough to decode the header.
-			foreach ( array( 131072, 0 ) as $limit ) {
+			foreach ( array( 128 * KB_IN_BYTES, 0 ) as $limit ) {
 				$args = array( 'timeout' => 15 );
 				if ( $limit > 0 ) {
 					$args['headers']             = array( 'Range' => 'bytes=0-' . ( $limit - 1 ) );
