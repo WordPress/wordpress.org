@@ -13,6 +13,9 @@
 	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
 	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
 
+	<!-- Exclude generated wp-scripts asset files. -->
+	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
+
 	<!-- Exclude JS/CSS files. -->
 	<exclude-pattern>*.js[x]?</exclude-pattern>
 	<exclude-pattern>*.[s]?css</exclude-pattern>
