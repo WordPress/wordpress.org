@@ -7,22 +7,23 @@ use WordPressdotorg\Plugin_Directory\Tools\{ Filesystem, SVN };
 use WordPressdotorg\Plugin_Directory\Email\Generic_To_Committers as Email_To_Committers;
 
 /**
- * Handles the plugin updates PCP runs.
+ * Coordinates post-import plugin scans (PCP locally, Gandalf out-of-band).
  *
  * @package WordPressdotorg\Plugin_Directory\Jobs
  */
-class Plugin_Updates_PCP {
+class Plugin_Scan {
 
 	/**
-	 * Watch for plugin imports and queue a PCP scan if needed.
+	 * Watch for plugin imports and queue a scan job if needed.
 	 *
-	 * @param string $plugin            The plugin slug.
-	 * @param string $stable_tag        The new stable tag.
-	 * @param string $old_stable_tag    The old stable tag.
-	 * @param array  $changed_svn_tags  The SVN tags that were changed.
-	 * @param int    $svn_revision      The SVN revision number.
+	 * @param \WP_Post $plugin           The plugin post.
+	 * @param string   $stable_tag       The new stable tag.
+	 * @param string   $old_stable_tag   The old stable tag.
+	 * @param array    $changed_svn_tags The SVN tags that were changed.
+	 * @param int      $svn_revision     The SVN revision number.
+	 * @param array    $warnings         The import warnings.
 	 */
-	public static function wporg_plugins_imported( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision ) {
+	public static function wporg_plugins_imported( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision, $warnings = [] ) {
 		$to_scan = [];
 		foreach ( (array) $changed_svn_tags as $tag ) {
 			if (
@@ -45,7 +46,17 @@ class Plugin_Updates_PCP {
 
 		$to_scan = array_unique( $to_scan );
 
-		self::queue( $plugin->post_name, $to_scan );
+		self::queue(
+			$plugin->post_name,
+			$to_scan,
+			[
+				'stable_tag'       => $stable_tag,
+				'old_stable_tag'   => $old_stable_tag,
+				'changed_svn_tags' => array_values( array_map( 'strval', (array) $changed_svn_tags ) ),
+				'svn_revision'     => (int) $svn_revision,
+				'warnings'         => is_array( $warnings ) ? $warnings : [],
+			]
+		);
 	}
 
 	/**
@@ -64,18 +75,23 @@ class Plugin_Updates_PCP {
 		wp_schedule_single_event(
 			$when_to_run,
 			"scan_plugin:{$plugin_slug}",
-			array_merge( array( $plugin_slug ), $args ),
+			array_merge( [ $plugin_slug ], $args ),
 		);
 	}
 
 	/**
-	 * Cron callback to scan a plugin with PCP.
+	 * Cron callback to scan a plugin update.
 	 *
-	 * @param int   $plugin_slug The plugin ID.
-	 * @param array $to_scan     The tags to scan.
+	 * @param string     $plugin_slug    The plugin slug.
+	 * @param array      $to_scan        The tags to scan with PCP.
+	 * @param array|bool $import_context The importer release context, or false if absent.
 	 */
-	public static function cron_trigger( $plugin_slug, $to_scan ) {
+	public static function cron_trigger( $plugin_slug, $to_scan, $import_context = false ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+
+		if ( $import_context ) {
+			Plugin_Scan_Gandalf::dispatch_from_import_context( $plugin, $import_context );
+		}
 
 		$already_notified     = get_post_meta( $plugin->ID, '_scan_notified', true ) ?: [];
 		$hashes_seen_this_run = [];
