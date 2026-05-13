@@ -10,12 +10,17 @@ use WordPressdotorg\Plugin_Directory\Template;
  */
 class Plugin_Updates_Gandalf {
 
-	const HISTORY_LIMIT       = 25;
-	const PENDING_META_KEY    = '_gandalf_scan_pending';
-	const HISTORY_META_KEY    = '_gandalf_scan_history';
-	const NOTIFIED_META_KEY   = '_gandalf_scan_notified';
+	/** Pending scans keyed by scan_id, used to recognize callbacks. */
+	const PENDING_META_KEY = '_gandalf_scan_pending';
+
+	/** Verdict hashes already sent to Slack, to avoid duplicate alerts. */
+	const NOTIFIED_META_KEY = '_gandalf_scan_notified';
+
+	/** Last dispatch or callback error for quick operator debugging. */
 	const LAST_ERROR_META_KEY = '_gandalf_scan_last_error';
-	const ENDPOINT            = 'https://gandalf.wordpress.org/scan';
+
+	/** Gandalf scan endpoint. */
+	const ENDPOINT = 'https://gandalf.wordpress.org/scan';
 
 	/**
 	 * Build a Gandalf scan request from the importer state, if the current ZIP changed.
@@ -123,13 +128,9 @@ class Plugin_Updates_Gandalf {
 		}
 
 		$pending[ $request_data['scan_id'] ] = array(
-			'version'                => $request_data['version'],
-			'release_ref'            => $request_data['release_ref'],
-			'previous_version'       => $request_data['previous_version'],
-			'previous_release_ref'   => $request_data['previous_release_ref'],
-			'current_zip_url'        => esc_url_raw( $request_data['current_zip_url'] ),
-			'previous_zip_included'  => null !== $request_data['previous_zip_url'],
-			'requested_at'           => $request_data['requested_at'],
+			'version'      => $request_data['version'],
+			'release_ref'  => $request_data['release_ref'],
+			'requested_at' => $request_data['requested_at'],
 		);
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
@@ -178,11 +179,6 @@ class Plugin_Updates_Gandalf {
 		$pending = self::get_array_meta( $plugin, self::PENDING_META_KEY );
 
 		if ( empty( $pending[ $scan_id ] ) || ! is_array( $pending[ $scan_id ] ) ) {
-			$history = self::get_array_meta( $plugin, self::HISTORY_META_KEY );
-			if ( isset( $history[ $scan_id ] ) ) {
-				return true;
-			}
-
 			$error = new \WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', array( 'status' => \WP_Http::BAD_REQUEST ) );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
@@ -190,7 +186,7 @@ class Plugin_Updates_Gandalf {
 
 		$pending_record = $pending[ $scan_id ];
 		if (
-			! isset( $pending_record['version'], $pending_record['release_ref'], $pending_record['current_zip_url'], $pending_record['requested_at'] ) ||
+			! isset( $pending_record['version'], $pending_record['release_ref'], $pending_record['requested_at'] ) ||
 			! is_string( $pending_record['version'] ) ||
 			! is_string( $pending_record['release_ref'] )
 		) {
@@ -205,39 +201,23 @@ class Plugin_Updates_Gandalf {
 			return $error;
 		}
 
-		$record = array(
-			'scan_id'               => sanitize_text_field( $scan_id ),
-			'status'                => $data['status'],
-			'version'               => sanitize_text_field( $pending_record['version'] ),
-			'release_ref'           => sanitize_text_field( $pending_record['release_ref'] ),
-			'previous_version'      => empty( $pending_record['previous_version'] ) ? null : sanitize_text_field( $pending_record['previous_version'] ),
-			'previous_release_ref'  => empty( $pending_record['previous_release_ref'] ) ? null : sanitize_text_field( $pending_record['previous_release_ref'] ),
-			'current_zip_url'       => esc_url_raw( $pending_record['current_zip_url'] ),
-			'previous_zip_included' => ! empty( $pending_record['previous_zip_included'] ),
-			'requested_at'          => absint( $pending_record['requested_at'] ),
-			'completed_at'          => absint( $data['completed_at'] ),
-			'received_at'           => time(),
-			'report_url'            => esc_url_raw( $data['report_url'] ),
-		);
-
 		if ( 'completed' === $data['status'] ) {
-			$record['findings_count']  = absint( $data['findings_count'] );
-			$record['severity_counts'] = $data['severity_counts'];
-			$record['verdict_hash']    = sanitize_text_field( $data['verdict_hash'] );
-			$record['scanner_version'] = sanitize_text_field( $data['scanner_version'] );
-
-			if ( $record['findings_count'] > 0 ) {
-				self::notify_slack( $plugin, $record );
+			if ( $data['findings_count'] > 0 ) {
+				self::notify_slack(
+					$plugin,
+					array(
+						'version'         => $pending_record['version'],
+						'release_ref'     => $pending_record['release_ref'],
+						'findings_count'  => absint( $data['findings_count'] ),
+						'severity_counts' => $data['severity_counts'],
+						'verdict_hash'    => sanitize_text_field( $data['verdict_hash'] ),
+						'report_url'      => esc_url_raw( $data['report_url'] ),
+					)
+				);
 			}
 		} else {
-			$record['error'] = array(
-				'kind'    => sanitize_key( $data['error']['kind'] ),
-				'message' => sanitize_text_field( $data['error']['message'] ),
-			);
-			self::record_last_error( $plugin, $record['error']['kind'], $record['error']['message'], $scan_id );
+			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
 		}
-
-		self::store_history_record( $plugin, $record );
 
 		unset( $pending[ $scan_id ] );
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
@@ -255,26 +235,6 @@ class Plugin_Updates_Gandalf {
 	protected static function dispatch_failed( $plugin, $request_data, $message, $kind ) {
 		$scan_id = sanitize_text_field( $request_data['scan_id'] );
 
-		$record = array(
-			'scan_id'               => $scan_id,
-			'status'                => 'failed',
-			'version'               => sanitize_text_field( $request_data['version'] ),
-			'release_ref'           => sanitize_text_field( $request_data['release_ref'] ),
-			'previous_version'      => null === $request_data['previous_version'] ? null : sanitize_text_field( $request_data['previous_version'] ),
-			'previous_release_ref'  => null === $request_data['previous_release_ref'] ? null : sanitize_text_field( $request_data['previous_release_ref'] ),
-			'current_zip_url'       => esc_url_raw( $request_data['current_zip_url'] ),
-			'previous_zip_included' => null !== $request_data['previous_zip_url'],
-			'requested_at'          => absint( $request_data['requested_at'] ),
-			'completed_at'          => time(),
-			'received_at'           => time(),
-			'report_url'            => '',
-			'error'                 => array(
-				'kind'    => sanitize_key( $kind ),
-				'message' => sanitize_text_field( $message ),
-			),
-		);
-
-		self::store_history_record( $plugin, $record );
 		self::record_last_error( $plugin, $kind, $message, $scan_id );
 
 		$pending = self::get_array_meta( $plugin, self::PENDING_META_KEY );
@@ -342,17 +302,6 @@ class Plugin_Updates_Gandalf {
 		$body .= sprintf( "Report: %s\n", $record['report_url'] );
 
 		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
-	}
-
-	protected static function store_history_record( $plugin, $record ) {
-		$history                       = self::get_array_meta( $plugin, self::HISTORY_META_KEY );
-		$history[ $record['scan_id'] ] = $record;
-
-		if ( count( $history ) > self::HISTORY_LIMIT ) {
-			$history = array_slice( $history, -1 * self::HISTORY_LIMIT, null, true );
-		}
-
-		update_post_meta( $plugin->ID, self::HISTORY_META_KEY, $history );
 	}
 
 	protected static function record_last_error( $plugin, $kind, $message, $scan_id = '' ) {
