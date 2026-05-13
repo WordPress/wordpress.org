@@ -1,4 +1,10 @@
 <?php
+/**
+ * Gandalf scan callback REST route.
+ *
+ * @package WordPressdotorg_Plugin_Directory
+ */
+
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
 use WordPressdotorg\Plugin_Directory\API\Base;
@@ -12,21 +18,31 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
  */
 class Gandalf_Scan extends Base {
 
+	/**
+	 * Registers the callback route.
+	 */
 	public function __construct() {
-		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/gandalf-scan', array(
-			'methods'             => \WP_REST_Server::CREATABLE,
-			'callback'            => array( $this, 'scan_callback' ),
-			'args'                => array(
-				'plugin_slug' => array(
-					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
+		register_rest_route(
+			'plugins/v1',
+			'/plugin/(?P<plugin_slug>[^/]+)/gandalf-scan',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'scan_callback' ),
+				'args'                => array(
+					'plugin_slug' => array(
+						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
+					),
 				),
-			),
-			'permission_callback' => array( $this, 'permission_check_gandalf_scan_bearer' ),
-		) );
+				'permission_callback' => array( $this, 'permission_check_gandalf_scan_bearer' ),
+			)
+		);
 	}
 
 	/**
 	 * Permission check for Gandalf callbacks.
+	 *
+	 * @param \WP_REST_Request $request The request.
+	 * @return true|\WP_Error True when authorized, or an error.
 	 */
 	public function permission_check_gandalf_scan_bearer( $request ) {
 		return $this->permission_check_api_bearer( $request, 'WP_GANDALF_SCAN_SHARED_SECRET' );
@@ -34,6 +50,9 @@ class Gandalf_Scan extends Base {
 
 	/**
 	 * Receive a Gandalf scan callback.
+	 *
+	 * @param \WP_REST_Request $request The request.
+	 * @return array|\WP_Error Callback response, or an error.
 	 */
 	public function scan_callback( $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
@@ -76,9 +95,13 @@ class Gandalf_Scan extends Base {
 
 	/**
 	 * Validate and normalize a Gandalf callback payload.
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $data   The callback payload.
+	 * @return array|\WP_Error Validated callback data, or an error.
 	 */
 	protected function validate_callback_payload( $plugin, $data ) {
-		$invalid = static function( $message ) {
+		$invalid = static function ( $message ) {
 			return new \WP_Error(
 				'invalid_gandalf_scan_callback',
 				$message,

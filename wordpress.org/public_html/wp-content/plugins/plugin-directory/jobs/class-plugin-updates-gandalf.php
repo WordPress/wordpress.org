@@ -1,4 +1,10 @@
 <?php
+/**
+ * Advisory Gandalf scan integration for plugin updates.
+ *
+ * @package WordPressdotorg\Plugin_Directory\Jobs
+ */
+
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Template;
@@ -24,8 +30,17 @@ class Plugin_Updates_Gandalf {
 
 	/**
 	 * Build a Gandalf scan request from the importer state, if the current ZIP changed.
+	 *
+	 * @param \WP_Post $plugin           The plugin post.
+	 * @param string   $stable_tag       The new stable tag.
+	 * @param string   $old_stable_tag   The previous stable tag.
+	 * @param array    $changed_svn_tags The SVN tags that changed.
+	 * @param int      $svn_revision     The SVN revision that triggered the import.
+	 * @return array|false Gandalf scan request data, or false when no scan is needed.
 	 */
 	public static function scan_data_for_import( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision ) {
+		unset( $svn_revision );
+
 		if ( ! defined( 'WP_GANDALF_SCAN_SHARED_SECRET' ) || ! WP_GANDALF_SCAN_SHARED_SECRET ) {
 			return false;
 		}
@@ -74,6 +89,10 @@ class Plugin_Updates_Gandalf {
 
 	/**
 	 * POST a queued scan request to Gandalf.
+	 *
+	 * @param \WP_Post $plugin       The plugin post.
+	 * @param array    $request_data The Gandalf scan request data.
+	 * @return bool Whether the request was accepted.
 	 */
 	public static function dispatch( $plugin, $request_data ) {
 		if ( ! defined( 'WP_GANDALF_SCAN_SHARED_SECRET' ) || ! WP_GANDALF_SCAN_SHARED_SECRET ) {
@@ -83,7 +102,7 @@ class Plugin_Updates_Gandalf {
 		foreach ( array( 'scan_id', 'subject_type', 'slug', 'version', 'release_ref', 'current_zip_url', 'callback_url' ) as $field ) {
 			if ( ! isset( $request_data[ $field ] ) || ! is_string( $request_data[ $field ] ) || '' === trim( $request_data[ $field ] ) ) {
 				self::record_last_error( $plugin, 'invalid_request_data', "Gandalf scan request missing {$field}." );
-				echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
+				printf( "Failed to dispatch Gandalf scan for %s: invalid request data.\n", esc_html( $plugin->post_name ) );
 				return false;
 			}
 		}
@@ -91,7 +110,7 @@ class Plugin_Updates_Gandalf {
 		foreach ( array( 'previous_version', 'previous_release_ref', 'previous_zip_url' ) as $field ) {
 			if ( ! array_key_exists( $field, $request_data ) || ( null !== $request_data[ $field ] && ! is_string( $request_data[ $field ] ) ) ) {
 				self::record_last_error( $plugin, 'invalid_request_data', "Gandalf scan request {$field} is invalid." );
-				echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
+				printf( "Failed to dispatch Gandalf scan for %s: invalid request data.\n", esc_html( $plugin->post_name ) );
 				return false;
 			}
 		}
@@ -109,7 +128,7 @@ class Plugin_Updates_Gandalf {
 				$request_data['requested_at'] < 0
 		) {
 			self::record_last_error( $plugin, 'invalid_request_data', 'Gandalf scan request data is invalid.' );
-			echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
+			printf( "Failed to dispatch Gandalf scan for %s: invalid request data.\n", esc_html( $plugin->post_name ) );
 			return false;
 		}
 
@@ -121,7 +140,7 @@ class Plugin_Updates_Gandalf {
 			)
 		) {
 			self::record_last_error( $plugin, 'invalid_request_data', 'Gandalf scan previous_zip_url is invalid.' );
-			echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
+			printf( "Failed to dispatch Gandalf scan for %s: invalid request data.\n", esc_html( $plugin->post_name ) );
 			return false;
 		}
 
@@ -173,12 +192,20 @@ class Plugin_Updates_Gandalf {
 			return self::dispatch_failed( $plugin, $request_data, 'Gandalf accepted the scan with an invalid response body.', 'dispatch_ack_invalid' );
 		}
 
-		echo "Dispatched Gandalf scan {$request_data['scan_id']} for {$plugin->post_name}.\n";
+		printf(
+			"Dispatched Gandalf scan %s for %s.\n",
+			esc_html( $request_data['scan_id'] ),
+			esc_html( $plugin->post_name )
+		);
 		return true;
 	}
 
 	/**
 	 * Handle a completed or failed scan callback.
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $data   The validated Gandalf callback data.
+	 * @return true|\WP_Error True on success, or an error when the scan is unknown.
 	 */
 	public static function handle_callback( $plugin, $data ) {
 		$scan_id = $data['scan_id'];
@@ -234,11 +261,24 @@ class Plugin_Updates_Gandalf {
 
 	/**
 	 * Record a valid-secret callback that failed validation.
+	 *
+	 * @param \WP_Post  $plugin  The plugin post.
+	 * @param \WP_Error $error   The validation error.
+	 * @param string    $scan_id Optional scan ID.
 	 */
 	public static function record_invalid_callback( $plugin, $error, $scan_id = '' ) {
 		self::record_last_error( $plugin, $error->get_error_code(), $error->get_error_message(), $scan_id );
 	}
 
+	/**
+	 * Record and report a failed dispatch.
+	 *
+	 * @param \WP_Post $plugin       The plugin post.
+	 * @param array    $request_data The Gandalf scan request data.
+	 * @param string   $message      The failure message.
+	 * @param string   $kind         The failure kind.
+	 * @return false Always false.
+	 */
 	protected static function dispatch_failed( $plugin, $request_data, $message, $kind ) {
 		$scan_id = sanitize_text_field( $request_data['scan_id'] );
 
@@ -249,10 +289,20 @@ class Plugin_Updates_Gandalf {
 		unset( $pending[ $scan_id ] );
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
-		echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: {$message}\n";
+		printf(
+			"Failed to dispatch Gandalf scan for %s: %s\n",
+			esc_html( $plugin->post_name ),
+			esc_html( $message )
+		);
 		return false;
 	}
 
+	/**
+	 * Notify Slack about a Gandalf scan with findings.
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $record The completed scan summary.
+	 */
 	protected static function notify_slack( $plugin, $record ) {
 		if ( 'closed' === $plugin->post_status || empty( $record['verdict_hash'] ) ) {
 			return;
@@ -279,7 +329,7 @@ class Plugin_Updates_Gandalf {
 		}
 
 		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
-		$install_line    = sprintf( "%s+ active installs", number_format_i18n( $active_installs ) );
+		$install_line    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
 		if ( $active_installs >= 10000 ) {
 			$install_line = ":bangbang::bangbang::bangbang: {$install_line} :bangbang::bangbang::bangbang:";
 		}
@@ -313,6 +363,14 @@ class Plugin_Updates_Gandalf {
 		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
 	}
 
+	/**
+	 * Store the last Gandalf integration error on the plugin.
+	 *
+	 * @param \WP_Post $plugin  The plugin post.
+	 * @param string   $kind    The error kind.
+	 * @param string   $message The error message.
+	 * @param string   $scan_id Optional scan ID.
+	 */
 	protected static function record_last_error( $plugin, $kind, $message, $scan_id = '' ) {
 		update_post_meta(
 			$plugin->ID,
@@ -325,5 +383,4 @@ class Plugin_Updates_Gandalf {
 			)
 		);
 	}
-
 }

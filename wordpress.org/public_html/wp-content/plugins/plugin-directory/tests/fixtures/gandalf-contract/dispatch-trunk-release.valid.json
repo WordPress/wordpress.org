@@ -8,6 +8,6 @@
   "previous_version": null,
   "previous_release_ref": null,
   "previous_zip_url": null,
-  "callback_url": "https://wordpress.org/wp-json/plugins/v1/plugin/hello-dolly/gandalf-scan",
+  "callback_url": "https://wordpress.org/plugins/wp-json/plugins/v1/plugin/hello-dolly/gandalf-scan",
   "requested_at": 1714208400
 }

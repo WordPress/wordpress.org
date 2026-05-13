@@ -42,7 +42,7 @@ class Plugin_Updates_PCP {
 		}
 
 		if ( $to_scan ) {
-			// always scan the current stable release
+			// Always scan the current stable release.
 			$to_scan[] = $stable_tag;
 
 			$to_scan = array_unique( $to_scan );
