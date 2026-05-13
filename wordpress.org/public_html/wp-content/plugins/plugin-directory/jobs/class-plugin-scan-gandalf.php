@@ -43,10 +43,11 @@ class Plugin_Scan_Gandalf {
 		}
 
 		if (
-			! isset( $import_context['stable_tag'], $import_context['old_stable_tag'], $import_context['changed_svn_tags'] ) ||
+			! isset( $import_context['stable_tag'], $import_context['old_stable_tag'], $import_context['changed_svn_tags'], $import_context['warnings'] ) ||
 			! is_string( $import_context['stable_tag'] ) ||
 			! is_string( $import_context['old_stable_tag'] ) ||
-			! is_array( $import_context['changed_svn_tags'] )
+			! is_array( $import_context['changed_svn_tags'] ) ||
+			! is_array( $import_context['warnings'] )
 		) {
 			return false;
 		}
@@ -54,7 +55,13 @@ class Plugin_Scan_Gandalf {
 		$stable_tag       = $import_context['stable_tag'];
 		$old_stable_tag   = $import_context['old_stable_tag'];
 		$changed_svn_tags = array_map( 'strval', $import_context['changed_svn_tags'] );
+		$warnings         = $import_context['warnings'];
 		$release_ref      = trim( $stable_tag ) ?: 'trunk';
+
+		// The importer records this when the readme points to a missing tag and falls back to trunk.
+		if ( 'trunk' === $release_ref && isset( $warnings['stable_tag_invalid_trunk_fallback'] ) ) {
+			return false;
+		}
 
 		// Trunk-only commits should not rescan a tag-based stable ZIP that was not rebuilt.
 		if ( $stable_tag === $old_stable_tag && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
