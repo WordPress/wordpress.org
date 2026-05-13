@@ -87,7 +87,7 @@ class Gandalf_Scan extends Base {
 		};
 
 		foreach ( array( 'status', 'scan_id', 'subject_type', 'slug', 'version', 'release_ref', 'report_url' ) as $field ) {
-			if ( ! $this->is_non_empty_string( $data, $field ) ) {
+			if ( ! isset( $data[ $field ] ) || ! is_string( $data[ $field ] ) || '' === trim( $data[ $field ] ) ) {
 				return $invalid( "Gandalf scan callback missing required field: {$field}." );
 			}
 		}
@@ -108,7 +108,7 @@ class Gandalf_Scan extends Base {
 			return $invalid( 'Gandalf scan callback completed_at must be a Unix timestamp.' );
 		}
 
-		if ( ! $this->is_https_url( $data['report_url'] ) ) {
+		if ( ! wp_http_validate_url( $data['report_url'] ) || 'https' !== wp_parse_url( $data['report_url'], PHP_URL_SCHEME ) ) {
 			return $invalid( 'Gandalf scan callback report_url must be an HTTPS URL.' );
 		}
 
@@ -133,7 +133,7 @@ class Gandalf_Scan extends Base {
 			}
 
 			foreach ( array( 'verdict_hash', 'scanner_version' ) as $field ) {
-				if ( ! $this->is_non_empty_string( $data, $field ) ) {
+				if ( ! isset( $data[ $field ] ) || ! is_string( $data[ $field ] ) || '' === trim( $data[ $field ] ) ) {
 					return $invalid( "Gandalf scan completed callback missing required field: {$field}." );
 				}
 			}
@@ -183,9 +183,13 @@ class Gandalf_Scan extends Base {
 			}
 
 			if (
-				! $this->is_non_empty_string( $data['error'], 'kind' ) ||
+				! isset( $data['error']['kind'] ) ||
+				! is_string( $data['error']['kind'] ) ||
+				'' === trim( $data['error']['kind'] ) ||
 				sanitize_key( $data['error']['kind'] ) !== $data['error']['kind'] ||
-				! $this->is_non_empty_string( $data['error'], 'message' )
+				! isset( $data['error']['message'] ) ||
+				! is_string( $data['error']['message'] ) ||
+				'' === trim( $data['error']['message'] )
 			) {
 				return $invalid( 'Gandalf scan failed callback error data is invalid.' );
 			}
@@ -197,13 +201,5 @@ class Gandalf_Scan extends Base {
 		}
 
 		return $validated;
-	}
-
-	protected function is_non_empty_string( $data, $field ) {
-		return isset( $data[ $field ] ) && is_string( $data[ $field ] ) && '' !== trim( $data[ $field ] );
-	}
-
-	protected function is_https_url( $value ) {
-		return is_string( $value ) && wp_http_validate_url( $value ) && 'https' === wp_parse_url( $value, PHP_URL_SCHEME );
 	}
 }

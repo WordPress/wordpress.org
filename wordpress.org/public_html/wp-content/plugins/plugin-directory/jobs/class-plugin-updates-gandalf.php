@@ -80,10 +80,6 @@ class Plugin_Updates_Gandalf {
 			return false;
 		}
 
-		$is_https_url = static function( $url ) {
-			return is_string( $url ) && wp_http_validate_url( $url ) && 'https' === wp_parse_url( $url, PHP_URL_SCHEME );
-		};
-
 		foreach ( array( 'scan_id', 'subject_type', 'slug', 'version', 'release_ref', 'current_zip_url', 'callback_url' ) as $field ) {
 			if ( ! isset( $request_data[ $field ] ) || ! is_string( $request_data[ $field ] ) || '' === trim( $request_data[ $field ] ) ) {
 				self::record_last_error( $plugin, 'invalid_request_data', "Gandalf scan request missing {$field}." );
@@ -101,21 +97,29 @@ class Plugin_Updates_Gandalf {
 		}
 
 		if (
-			! wp_is_uuid( $request_data['scan_id'], 4 ) ||
-			'plugin' !== $request_data['subject_type'] ||
-			$plugin->post_name !== $request_data['slug'] ||
-			! $is_https_url( $request_data['current_zip_url'] ) ||
-			! $is_https_url( $request_data['callback_url'] ) ||
-			! isset( $request_data['requested_at'] ) ||
-			! is_int( $request_data['requested_at'] ) ||
-			$request_data['requested_at'] < 0
+				! wp_is_uuid( $request_data['scan_id'], 4 ) ||
+				'plugin' !== $request_data['subject_type'] ||
+				$plugin->post_name !== $request_data['slug'] ||
+				! wp_http_validate_url( $request_data['current_zip_url'] ) ||
+				'https' !== wp_parse_url( $request_data['current_zip_url'], PHP_URL_SCHEME ) ||
+				! wp_http_validate_url( $request_data['callback_url'] ) ||
+				'https' !== wp_parse_url( $request_data['callback_url'], PHP_URL_SCHEME ) ||
+				! isset( $request_data['requested_at'] ) ||
+				! is_int( $request_data['requested_at'] ) ||
+				$request_data['requested_at'] < 0
 		) {
 			self::record_last_error( $plugin, 'invalid_request_data', 'Gandalf scan request data is invalid.' );
 			echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
 			return false;
 		}
 
-		if ( null !== $request_data['previous_zip_url'] && ! $is_https_url( $request_data['previous_zip_url'] ) ) {
+		if (
+			null !== $request_data['previous_zip_url'] &&
+			(
+				! wp_http_validate_url( $request_data['previous_zip_url'] ) ||
+				'https' !== wp_parse_url( $request_data['previous_zip_url'], PHP_URL_SCHEME )
+			)
+		) {
 			self::record_last_error( $plugin, 'invalid_request_data', 'Gandalf scan previous_zip_url is invalid.' );
 			echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
 			return false;
