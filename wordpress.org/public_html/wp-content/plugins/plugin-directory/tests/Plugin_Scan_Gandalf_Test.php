@@ -6,13 +6,14 @@
  */
 
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan_Gandalf;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Gandalf dispatch eligibility from importer context.
  *
  * @group gandalf
  */
-class Plugin_Scan_Gandalf_Test extends WP_UnitTestCase {
+class Plugin_Scan_Gandalf_Test extends TestCase {
 
 	/**
 	 * Captured Gandalf dispatch requests.
@@ -20,6 +21,13 @@ class Plugin_Scan_Gandalf_Test extends WP_UnitTestCase {
 	 * @var array
 	 */
 	private $requests = array();
+
+	/**
+	 * Plugin posts created during a test.
+	 *
+	 * @var array
+	 */
+	private $plugin_ids = array();
 
 	/**
 	 * Define the Gandalf shared secret used by the integration guard.
@@ -38,7 +46,8 @@ class Plugin_Scan_Gandalf_Test extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->requests = array();
+		$this->requests   = array();
+		$this->plugin_ids = array();
 
 		add_filter( 'pre_http_request', array( $this, 'capture_gandalf_request' ), 10, 3 );
 	}
@@ -48,6 +57,10 @@ class Plugin_Scan_Gandalf_Test extends WP_UnitTestCase {
 	 */
 	protected function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'capture_gandalf_request' ), 10 );
+
+		foreach ( $this->plugin_ids as $post_id ) {
+			wp_delete_post( $post_id, true );
+		}
 
 		parent::tearDown();
 	}
@@ -259,7 +272,7 @@ class Plugin_Scan_Gandalf_Test extends WP_UnitTestCase {
 	 * @return WP_Post
 	 */
 	private function create_plugin( $slug, $meta = array() ) {
-		$post_id = self::factory()->post->create(
+		$post_id = wp_insert_post(
 			array(
 				'post_name'   => $slug,
 				'post_title'  => $slug,
@@ -267,6 +280,8 @@ class Plugin_Scan_Gandalf_Test extends WP_UnitTestCase {
 				'post_status' => 'publish',
 			)
 		);
+
+		$this->plugin_ids[] = $post_id;
 
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post_id, $key, $value );
