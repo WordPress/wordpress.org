@@ -215,6 +215,26 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertSame( array(), $this->http_requests );
 	}
 
+	public function test_does_not_dispatch_with_malformed_import_context() {
+		$plugin = $this->make_plugin(
+			'gandalf-malformed-context-test',
+			array(
+				'version' => '1.2.3',
+			)
+		);
+
+		$result = Plugin_Updates_Gandalf::dispatch_from_import_context(
+			$plugin,
+			array(
+				'stable_tag'     => '1.2.3',
+				'old_stable_tag' => '1.2.2',
+			)
+		);
+
+		$this->assertFalse( $result );
+		$this->assertSame( array(), $this->http_requests );
+	}
+
 	public function test_completed_callback_clears_pending_scan_and_records_notification_hash() {
 		$plugin  = $this->make_plugin( 'gandalf-callback-test' );
 		$scan_id = '33333333-3333-4333-8333-333333333333';

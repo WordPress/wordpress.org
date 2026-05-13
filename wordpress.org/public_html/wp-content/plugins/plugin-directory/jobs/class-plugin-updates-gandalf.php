@@ -44,18 +44,30 @@ class Plugin_Updates_Gandalf {
 			return false;
 		}
 
-		$stable_tag           = $import_context['stable_tag'] ?? '';
-		$old_stable_tag       = $import_context['old_stable_tag'] ?? '';
-		$changed_svn_tags     = $import_context['changed_svn_tags'] ?? array();
-		$release_ref          = is_string( $stable_tag ) && trim( $stable_tag ) ? $stable_tag : 'trunk';
-		$previous_release_ref = is_string( $old_stable_tag ) && trim( $old_stable_tag ) ? $old_stable_tag : null;
-		$changed_svn_tags     = array_map( 'strval', (array) $changed_svn_tags );
+		// These are wporg_plugins_imported facts carried through scan_plugin cron.
+		// If they are incomplete or malformed, skip instead of guessing a release.
+		if (
+			! isset( $import_context['stable_tag'], $import_context['old_stable_tag'], $import_context['changed_svn_tags'] ) ||
+			! is_string( $import_context['stable_tag'] ) ||
+			! is_string( $import_context['old_stable_tag'] ) ||
+			! is_array( $import_context['changed_svn_tags'] )
+		) {
+			return false;
+		}
+
+		$stable_tag           = $import_context['stable_tag'];
+		$old_stable_tag       = $import_context['old_stable_tag'];
+		$changed_svn_tags     = $import_context['changed_svn_tags'];
+		$release_ref          = trim( $stable_tag ) ? $stable_tag : 'trunk';
+		$previous_release_ref = trim( $old_stable_tag ) ? $old_stable_tag : null;
+		$changed_svn_tags     = array_map( 'strval', $changed_svn_tags );
 
 		// Trunk-only commits should not rescan a tag-based stable ZIP that was not rebuilt.
 		if ( $release_ref === $previous_release_ref && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
 			return false;
 		}
 
+		// Version is post-import state; without it, the ZIP identity is not reliable.
 		$version = get_post_meta( $plugin->ID, 'version', true );
 		if ( ! is_string( $version ) || ! trim( $version ) ) {
 			return false;
