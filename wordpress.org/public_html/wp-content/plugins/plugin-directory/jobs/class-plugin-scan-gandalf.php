@@ -242,7 +242,7 @@ class Plugin_Scan_Gandalf {
 	 * @param array    $record The completed scan summary.
 	 */
 	protected static function notify_slack( $plugin, $record ) {
-		if ( 'closed' === $plugin->post_status || empty( $record['verdict_hash'] ) ) {
+		if ( empty( $record['verdict_hash'] ) ) {
 			return;
 		}
 
@@ -271,9 +271,14 @@ class Plugin_Scan_Gandalf {
 			$install_line = ":bangbang::bangbang::bangbang: {$install_line} :bangbang::bangbang::bangbang:";
 		}
 
+		$title = $plugin->post_title;
+		if ( 'closed' === $plugin->post_status ) {
+			$title .= ' (closed)';
+		}
+
 		$body = sprintf(
 			"Gandalf scan detected findings in *%s*\n%s\nVersion: %s (%s)\nFindings: %d\n",
-			$plugin->post_title,
+			$title,
 			$install_line,
 			$record['version'],
 			$record['release_ref'],
