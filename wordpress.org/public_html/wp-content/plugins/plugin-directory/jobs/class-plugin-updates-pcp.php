@@ -23,7 +23,6 @@ class Plugin_Updates_PCP {
 	 * @param int    $svn_revision      The SVN revision number.
 	 */
 	public static function wporg_plugins_imported( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision ) {
-		$gandalf_scan = Plugin_Updates_Gandalf::scan_data_for_import( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision );
 		$to_scan = [];
 		foreach ( (array) $changed_svn_tags as $tag ) {
 			if (
@@ -36,19 +35,17 @@ class Plugin_Updates_PCP {
 			}
 		}
 
-		// If only old tags were affected, and Gandalf doesn't need the current ZIP, we don't need to scan anything.
-		if ( ! $to_scan && ! $gandalf_scan ) {
+		// If only old tags were affected, we don't need to scan anything.
+		if ( ! $to_scan ) {
 			return;
 		}
 
-		if ( $to_scan ) {
-			// Always scan the current stable release.
-			$to_scan[] = $stable_tag;
+		// always scan the current stable release
+		$to_scan[] = $stable_tag;
 
-			$to_scan = array_unique( $to_scan );
-		}
+		$to_scan = array_unique( $to_scan );
 
-		self::queue( $plugin->post_name, $to_scan, $gandalf_scan );
+		self::queue( $plugin->post_name, $to_scan );
 	}
 
 	/**
@@ -74,11 +71,10 @@ class Plugin_Updates_PCP {
 	/**
 	 * Cron callback to scan a plugin with PCP.
 	 *
-	 * @param string     $plugin_slug  The plugin slug.
-	 * @param array      $to_scan      The tags to scan.
-	 * @param array|bool $gandalf_scan Optional Gandalf scan data.
+	 * @param int   $plugin_slug The plugin ID.
+	 * @param array $to_scan     The tags to scan.
 	 */
-	public static function cron_trigger( $plugin_slug, $to_scan, $gandalf_scan = false ) {
+	public static function cron_trigger( $plugin_slug, $to_scan ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 
 		$already_notified     = get_post_meta( $plugin->ID, '_scan_notified', true ) ?: [];
@@ -128,10 +124,6 @@ class Plugin_Updates_PCP {
 		}
 
 		update_post_meta( $plugin->ID, '_scan_notified', $already_notified );
-
-		if ( $gandalf_scan ) {
-			Plugin_Updates_Gandalf::dispatch( $plugin, $gandalf_scan );
-		}
 	}
 
 	/**

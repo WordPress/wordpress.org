@@ -29,27 +29,29 @@ class Plugin_Updates_Gandalf {
 	const ENDPOINT = 'https://gandalf.wordpress.org/scan';
 
 	/**
-	 * Build a Gandalf scan request from the importer state, if the current ZIP changed.
+	 * Dispatch a Gandalf scan from the importer context carried through cron.
 	 *
-	 * @param \WP_Post $plugin           The plugin post.
-	 * @param string   $stable_tag       The new stable tag.
-	 * @param string   $old_stable_tag   The previous stable tag.
-	 * @param array    $changed_svn_tags The SVN tags that changed.
-	 * @param int      $svn_revision     The SVN revision that triggered the import.
-	 * @return array|false Gandalf scan request data, or false when no scan is needed.
+	 * @param \WP_Post $plugin         The plugin post.
+	 * @param array    $import_context The importer context.
+	 * @return bool Whether the request was accepted.
 	 */
-	public static function scan_data_for_import( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision ) {
-		unset( $svn_revision );
-
+	public static function dispatch_from_import_context( $plugin, $import_context ) {
 		if ( ! defined( 'WP_GANDALF_SCAN_SHARED_SECRET' ) || ! WP_GANDALF_SCAN_SHARED_SECRET ) {
 			return false;
 		}
 
+		if ( ! is_array( $import_context ) ) {
+			return false;
+		}
+
+		$stable_tag           = $import_context['stable_tag'] ?? '';
+		$old_stable_tag       = $import_context['old_stable_tag'] ?? '';
+		$changed_svn_tags     = $import_context['changed_svn_tags'] ?? array();
 		$release_ref          = is_string( $stable_tag ) && trim( $stable_tag ) ? $stable_tag : 'trunk';
-		$previous_release_ref = is_string( $old_stable_tag ) && trim( $old_stable_tag ) ? $old_stable_tag : 'trunk';
+		$previous_release_ref = is_string( $old_stable_tag ) && trim( $old_stable_tag ) ? $old_stable_tag : null;
 		$changed_svn_tags     = array_map( 'strval', (array) $changed_svn_tags );
 
-		// Importer-provided tags are the signal that the public ZIP was rebuilt.
+		// Trunk-only commits should not rescan a tag-based stable ZIP that was not rebuilt.
 		if ( $release_ref === $previous_release_ref && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
 			return false;
 		}
@@ -63,7 +65,7 @@ class Plugin_Updates_Gandalf {
 		$previous_version = is_string( $previous_version ) && trim( $previous_version ) ? $previous_version : null;
 		$previous_zip_url = null;
 
-		if ( $previous_release_ref !== $release_ref && 'trunk' !== $previous_release_ref ) {
+		if ( $previous_release_ref && $previous_release_ref !== $release_ref && 'trunk' !== $previous_release_ref ) {
 			$previous_zip_url = Template::download_link( $plugin, $previous_release_ref );
 
 			// If only the stable tag changed, the previous release can have the same plugin version.
@@ -72,18 +74,21 @@ class Plugin_Updates_Gandalf {
 			}
 		}
 
-		return array(
-			'scan_id'              => wp_generate_uuid4(),
-			'subject_type'         => 'plugin',
-			'slug'                 => $plugin->post_name,
-			'version'              => $version,
-			'release_ref'          => $release_ref,
-			'current_zip_url'      => Template::download_link( $plugin, 'latest' ),
-			'previous_version'     => $previous_zip_url ? $previous_version : null,
-			'previous_release_ref' => $previous_zip_url ? $previous_release_ref : null,
-			'previous_zip_url'     => $previous_zip_url,
-			'callback_url'         => rest_url( 'plugins/v1/plugin/' . $plugin->post_name . '/gandalf-scan' ),
-			'requested_at'         => time(),
+		return self::dispatch(
+			$plugin,
+			array(
+				'scan_id'              => wp_generate_uuid4(),
+				'subject_type'         => 'plugin',
+				'slug'                 => $plugin->post_name,
+				'version'              => $version,
+				'release_ref'          => $release_ref,
+				'current_zip_url'      => Template::download_link( $plugin, $release_ref ),
+				'previous_version'     => $previous_zip_url ? $previous_version : null,
+				'previous_release_ref' => $previous_zip_url ? $previous_release_ref : null,
+				'previous_zip_url'     => $previous_zip_url,
+				'callback_url'         => rest_url( 'plugins/v1/plugin/' . $plugin->post_name . '/gandalf-scan' ),
+				'requested_at'         => time(),
+			)
 		);
 	}
 
