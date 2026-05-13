@@ -63,7 +63,7 @@ class Plugin_Scan_Gandalf {
 			return false;
 		}
 
-		// Trunk-only commits should not rescan a tag-based stable ZIP that was not rebuilt.
+		// Trunk-only commits should not rescan a tag-based stable ZIP that wasn't rebuilt.
 		if ( $stable_tag === $old_stable_tag && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
 			return false;
 		}
