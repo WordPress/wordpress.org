@@ -1,0 +1,13 @@
+{
+  "scan_id": "33333333-3333-4333-8333-333333333333",
+  "subject_type": "plugin",
+  "slug": "hello-dolly",
+  "version": "1.7.3",
+  "release_ref": "1.7.3",
+  "current_zip_url": "https://downloads.wordpress.org/plugin/hello-dolly.1.7.3.zip",
+  "previous_version": "1.7.2",
+  "previous_release_ref": "1.7.2",
+  "previous_zip_url": "https://downloads.wordpress.org/plugin/hello-dolly.1.7.2.zip",
+  "callback_url": "https://wordpress.org/plugins/wp-json/plugins/v1/plugin/hello-dolly/gandalf-scan",
+  "requested_at": 1714208400
+}

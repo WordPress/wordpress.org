@@ -7,22 +7,23 @@ use WordPressdotorg\Plugin_Directory\Tools\{ Filesystem, SVN };
 use WordPressdotorg\Plugin_Directory\Email\Generic_To_Committers as Email_To_Committers;
 
 /**
- * Handles the plugin updates PCP runs.
+ * Coordinates post-import plugin scans (PCP locally, Gandalf out-of-band).
  *
  * @package WordPressdotorg\Plugin_Directory\Jobs
  */
-class Plugin_Updates_PCP {
+class Plugin_Scan {
 
 	/**
-	 * Watch for plugin imports and queue a PCP scan if needed.
+	 * Watch for plugin imports and queue a scan job if needed.
 	 *
-	 * @param string $plugin            The plugin slug.
-	 * @param string $stable_tag        The new stable tag.
-	 * @param string $old_stable_tag    The old stable tag.
-	 * @param array  $changed_svn_tags  The SVN tags that were changed.
-	 * @param int    $svn_revision      The SVN revision number.
+	 * @param \WP_Post $plugin           The plugin post.
+	 * @param string   $stable_tag       The new stable tag.
+	 * @param string   $old_stable_tag   The old stable tag.
+	 * @param array    $changed_svn_tags The SVN tags that were changed.
+	 * @param int      $svn_revision     The SVN revision number.
+	 * @param array    $warnings         The import warnings.
 	 */
-	public static function wporg_plugins_imported( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision ) {
+	public static function wporg_plugins_imported( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision, $warnings = array() ) {
 		$to_scan = [];
 		foreach ( (array) $changed_svn_tags as $tag ) {
 			if (
@@ -45,7 +46,18 @@ class Plugin_Updates_PCP {
 
 		$to_scan = array_unique( $to_scan );
 
-		self::queue( $plugin->post_name, $to_scan );
+		// Carry importer facts through cron; post meta only has the current state later.
+		self::queue(
+			$plugin->post_name,
+			$to_scan,
+			array(
+				'stable_tag'       => $stable_tag,
+				'old_stable_tag'   => $old_stable_tag,
+				'changed_svn_tags' => array_values( array_map( 'strval', (array) $changed_svn_tags ) ),
+				'svn_revision'     => (int) $svn_revision,
+				'warnings'         => is_array( $warnings ) ? $warnings : array(),
+			)
+		);
 	}
 
 	/**
@@ -69,12 +81,13 @@ class Plugin_Updates_PCP {
 	}
 
 	/**
-	 * Cron callback to scan a plugin with PCP.
+	 * Cron callback to scan a plugin update.
 	 *
-	 * @param int   $plugin_slug The plugin ID.
-	 * @param array $to_scan     The tags to scan.
+	 * @param string     $plugin_slug     The plugin slug.
+	 * @param array      $to_scan         The tags to scan with PCP.
+	 * @param array|bool $gandalf_context The import context for Gandalf, or false if absent.
 	 */
-	public static function cron_trigger( $plugin_slug, $to_scan ) {
+	public static function cron_trigger( $plugin_slug, $to_scan, $gandalf_context = false ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 
 		$already_notified     = get_post_meta( $plugin->ID, '_scan_notified', true ) ?: [];
@@ -124,6 +137,11 @@ class Plugin_Updates_PCP {
 		}
 
 		update_post_meta( $plugin->ID, '_scan_notified', $already_notified );
+
+		// Existing scan_plugin jobs may predate Gandalf and only have PCP arguments.
+		if ( $gandalf_context ) {
+			Plugin_Scan_Gandalf::dispatch_from_import_context( $plugin, $gandalf_context );
+		}
 	}
 
 	/**
