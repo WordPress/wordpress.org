@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use Exception;
 use WordPressdotorg\Plugin_Directory\CLI;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**
  * Import plugin changes into WordPress.
@@ -11,38 +12,144 @@ use WordPressdotorg\Plugin_Directory\CLI;
  */
 class Plugin_Import {
 
+	/**
+	 * Queue an import job for a plugin, merging into any pending future event for the
+	 * same plugin so a single import covers all the SVN changes seen so far.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param array  $plugin_data Data about the SVN change (tags_touched, revisions, etc).
+	 */
 	public static function queue( $plugin_slug, $plugin_data ) {
+		$hook     = "import_plugin:{$plugin_slug}";
+		$new_args = array_merge( array( 'plugin' => $plugin_slug ), $plugin_data );
+
 		/*
-		 * If the next scheduled run is more than 5 minutes away (e.g. queued by a bulk
-		 * batch re-index) and no import is currently running, pull it forward to the
-		 * usual import time so a fresh commit isn't delayed behind the batch. The new
-		 * commit-driven event is then queued 1hr later via the logic below.
+		 * If there's already a future-scheduled import for this plugin and nothing
+		 * is currently running, fold the new request into it. This handles two
+		 * cases under one rule:
+		 *
+		 *  - A bulk batch re-index queued an event far in the future; a fresh
+		 *    commit should pull that forward to the usual import time.
+		 *  - A plugin that releases from a tag commits to /trunk first and then
+		 *    `svn cp trunk tags/X.Y` a moment later (see queue_run_time()). The
+		 *    first commit gets delayed; the second merges into it so a single
+		 *    import publishes the release from the tag, not from a trunk
+		 *    fallback that the tag commit then has to overwrite.
 		 */
-		$next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'next' );
-		if (
-			$next_scheduled &&
-			$next_scheduled > ( time() + 5 * MINUTE_IN_SECONDS ) &&
-			! Manager::is_event_running( "import_plugin:{$plugin_slug}" )
-		) {
-			Manager::reschedule_event( "import_plugin:{$plugin_slug}", time() + 5, $next_scheduled );
+		$next_scheduled = Manager::get_scheduled_time( $hook, 'next' );
+		if ( $next_scheduled && ! Manager::is_event_running( $hook ) ) {
+			$existing      = Manager::get_scheduled_events( $hook, $next_scheduled );
+			$existing_args = $existing[0]['args'][0] ?? array();
+			$merged_args   = self::merge_plugin_data( $existing_args, $new_args );
+
+			$updated = Manager::update_scheduled_event(
+				$hook,
+				$next_scheduled,
+				array(
+					'nextrun' => min( $next_scheduled, self::queue_run_time( $plugin_slug, $merged_args ) ),
+					'args'    => array( $merged_args ),
+				)
+			);
+
+			if ( $updated ) {
+				return;
+			}
 		}
 
-		// To avoid a situation where two imports run concurrently, if one is already scheduled or in flight, run it 1hr later (We'll trigger it after the current one finishes).
-		$when_to_run    = time() + 5;
-		$last_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' );
+		$when_to_run = self::queue_run_time( $plugin_slug, $new_args );
+
+		// To avoid a situation where two imports run concurrently, if one is already scheduled or in flight, run it 1hr later (we'll trigger it after the current one finishes).
+		$last_scheduled = Manager::get_scheduled_time( $hook, 'last' );
 		if ( $last_scheduled ) {
 			$when_to_run = $last_scheduled + HOUR_IN_SECONDS;
-		} elseif ( Manager::is_event_running( "import_plugin:{$plugin_slug}" ) ) {
+		} elseif ( Manager::is_event_running( $hook ) ) {
 			$when_to_run = time() + HOUR_IN_SECONDS;
 		}
 
 		wp_schedule_single_event(
 			$when_to_run,
-			"import_plugin:{$plugin_slug}",
-			array(
-				array_merge( array( 'plugin' => $plugin_slug ), $plugin_data ),
-			)
+			$hook,
+			array( $new_args )
 		);
+	}
+
+	/**
+	 * Decide when an import job should run, based on the SVN changes it covers.
+	 *
+	 * Plugins that release from tags typically commit the version bump to /trunk
+	 * first and then `svn cp trunk tags/X.Y` shortly after. Running the import
+	 * immediately on the trunk commit publishes a trunk-fallback release that the
+	 * tag commit then has to overwrite as a second release. To collapse those
+	 * into one import, defer trunk-only updates by 5 minutes when the plugin is
+	 * currently releasing from a tag — that gives the follow-up tag commit time
+	 * to merge into the same job (see queue()).
+	 *
+	 * Tag-touching changes, and changes on plugins releasing from trunk, run
+	 * immediately.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param array  $args        The args for the import job (post-merge where applicable).
+	 * @return int Unix timestamp for when the event should run.
+	 */
+	protected static function queue_run_time( $plugin_slug, $args ) {
+		if ( self::is_trunk_only_update_on_tagged_plugin( $plugin_slug, $args ) ) {
+			return time() + 5 * MINUTE_IN_SECONDS;
+		}
+
+		return time() + 5;
+	}
+
+	/**
+	 * Whether an import covers only /trunk on a plugin that currently releases from a tag.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param array  $args        The args for the import job.
+	 * @return bool
+	 */
+	protected static function is_trunk_only_update_on_tagged_plugin( $plugin_slug, $args ) {
+		$tags_touched = (array) ( $args['tags_touched'] ?? array() );
+		$tags_deleted = (array) ( $args['tags_deleted'] ?? array() );
+
+		$trunk_only = $tags_touched && array( 'trunk' ) === array_values( array_unique( $tags_touched ) ) && ! $tags_deleted;
+		if ( ! $trunk_only ) {
+			return false;
+		}
+
+		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $plugin ) {
+			return false;
+		}
+
+		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true );
+
+		return $current_stable_tag && 'trunk' !== $current_stable_tag;
+	}
+
+	/**
+	 * Merge two plugin_data payloads into a single import-job payload.
+	 *
+	 * Used when folding an already-scheduled future event into a newer request so
+	 * neither set of changes is lost.
+	 *
+	 * @param array $existing The args from the currently-scheduled event.
+	 * @param array $incoming The args from the new request.
+	 * @return array Merged args ready to pass to the import job.
+	 */
+	protected static function merge_plugin_data( array $existing, array $incoming ) {
+		$merged = array_merge( $existing, $incoming );
+
+		foreach ( array( 'tags_touched', 'tags_deleted', 'revisions' ) as $key ) {
+			$existing_values = (array) ( $existing[ $key ] ?? array() );
+			$incoming_values = (array) ( $incoming[ $key ] ?? array() );
+
+			$merged[ $key ] = array_values( array_unique( array_merge( $existing_values, $incoming_values ) ) );
+		}
+
+		foreach ( array( 'readme_touched', 'code_touched', 'assets_touched' ) as $key ) {
+			$merged[ $key ] = ! empty( $existing[ $key ] ) || ! empty( $incoming[ $key ] );
+		}
+
+		return $merged;
 	}
 
 	/**
