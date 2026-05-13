@@ -8,6 +8,7 @@
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Template;
+use WP_Error;
 
 /**
  * Sends plugin updates to Gandalf for advisory security scans.
@@ -62,7 +63,7 @@ class Plugin_Scan_Gandalf {
 
 		// Version is post-import state; without it, the ZIP identity is not reliable.
 		$version = get_post_meta( $plugin->ID, 'version', true );
-		if ( ! is_string( $version ) || ! trim( $version ) ) {
+		if ( ! $version ) {
 			return false;
 		}
 
@@ -164,14 +165,14 @@ class Plugin_Scan_Gandalf {
 	 *
 	 * @param \WP_Post $plugin The plugin post.
 	 * @param array    $data   The Gandalf callback data.
-	 * @return true|\WP_Error True on success, or an error when the scan is unknown.
+	 * @return true|WP_Error True on success, or an error when the scan is unknown.
 	 */
 	public static function handle_callback( $plugin, $data ) {
 		$scan_id = $data['scan_id'];
 		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
 
 		if ( empty( $pending[ $scan_id ] ) ) {
-			$error = new \WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', [ 'status' => \WP_Http::BAD_REQUEST ] );
+			$error = new WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', [ 'status' => \WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
@@ -179,7 +180,7 @@ class Plugin_Scan_Gandalf {
 		$pending_record = $pending[ $scan_id ];
 
 		if ( $data['version'] !== $pending_record['version'] || $data['release_ref'] !== $pending_record['release_ref'] ) {
-			$error = new \WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', [ 'status' => \WP_Http::BAD_REQUEST ] );
+			$error = new WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', [ 'status' => \WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
@@ -211,9 +212,9 @@ class Plugin_Scan_Gandalf {
 	/**
 	 * Record a valid-secret callback that failed validation.
 	 *
-	 * @param \WP_Post  $plugin  The plugin post.
-	 * @param \WP_Error $error   The validation error.
-	 * @param string    $scan_id Optional scan ID.
+	 * @param \WP_Post $plugin  The plugin post.
+	 * @param WP_Error $error   The validation error.
+	 * @param string   $scan_id Optional scan ID.
 	 */
 	public static function record_invalid_callback( $plugin, $error, $scan_id = '' ) {
 		self::record_last_error( $plugin, $error->get_error_code(), $error->get_error_message(), $scan_id );

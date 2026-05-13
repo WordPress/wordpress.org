@@ -10,6 +10,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan_Gandalf;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WP_Error;
 
 /**
  * Callback endpoint for advisory Gandalf scans.
@@ -47,14 +48,14 @@ class Gandalf_Scan extends Base {
 	 * correlates scan_id and release identifiers against the pending record.
 	 *
 	 * @param \WP_REST_Request $request The request.
-	 * @return array|\WP_Error Callback response, or an error.
+	 * @return array|WP_Error Callback response, or an error.
 	 */
 	public function scan_callback( $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
 		$data = $request->get_json_params();
 		if ( ! is_array( $data ) ) {
-			$error = new \WP_Error(
+			$error = new WP_Error(
 				'invalid_gandalf_scan_callback',
 				__( 'Invalid Gandalf scan callback.', 'wporg-plugins' ),
 				[ 'status' => \WP_Http::BAD_REQUEST ]
