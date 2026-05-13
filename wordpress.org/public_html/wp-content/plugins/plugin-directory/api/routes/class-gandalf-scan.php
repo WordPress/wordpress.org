@@ -25,27 +25,17 @@ class Gandalf_Scan extends Base {
 		register_rest_route(
 			'plugins/v1',
 			'/plugin/(?P<plugin_slug>[^/]+)/gandalf-scan',
-			array(
+			[
 				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'scan_callback' ),
-				'args'                => array(
-					'plugin_slug' => array(
-						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
-					),
-				),
-				'permission_callback' => array( $this, 'permission_check_gandalf_scan_bearer' ),
-			)
+				'callback'            => [ $this, 'scan_callback' ],
+				'args'                => [
+					'plugin_slug' => [
+						'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
+					],
+				],
+				'permission_callback' => fn( $request ) => $this->permission_check_api_bearer( $request, 'WP_GANDALF_SCAN_SHARED_SECRET' ),
+			]
 		);
-	}
-
-	/**
-	 * Permission check for Gandalf callbacks.
-	 *
-	 * @param \WP_REST_Request $request The request.
-	 * @return true|\WP_Error True when authorized, or an error.
-	 */
-	public function permission_check_gandalf_scan_bearer( $request ) {
-		return $this->permission_check_api_bearer( $request, 'WP_GANDALF_SCAN_SHARED_SECRET' );
 	}
 
 	/**
@@ -65,7 +55,7 @@ class Gandalf_Scan extends Base {
 			$error = new \WP_Error(
 				'invalid_gandalf_scan_callback',
 				__( 'Invalid Gandalf scan callback.', 'wporg-plugins' ),
-				array( 'status' => \WP_Http::BAD_REQUEST )
+				[ 'status' => \WP_Http::BAD_REQUEST ]
 			);
 
 			Plugin_Scan_Gandalf::record_invalid_callback( $plugin, $error );
@@ -77,8 +67,8 @@ class Gandalf_Scan extends Base {
 			return $result;
 		}
 
-		return array(
+		return [
 			'success' => true,
-		);
+		];
 	}
 }

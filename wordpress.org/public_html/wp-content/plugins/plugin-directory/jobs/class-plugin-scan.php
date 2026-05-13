@@ -23,7 +23,7 @@ class Plugin_Scan {
 	 * @param int      $svn_revision     The SVN revision number.
 	 * @param array    $warnings         The import warnings.
 	 */
-	public static function wporg_plugins_imported( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision, $warnings = array() ) {
+	public static function wporg_plugins_imported( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision, $warnings = [] ) {
 		$to_scan = [];
 		foreach ( (array) $changed_svn_tags as $tag ) {
 			if (
@@ -50,13 +50,13 @@ class Plugin_Scan {
 		self::queue(
 			$plugin->post_name,
 			$to_scan,
-			array(
+			[
 				'stable_tag'       => $stable_tag,
 				'old_stable_tag'   => $old_stable_tag,
 				'changed_svn_tags' => array_values( array_map( 'strval', (array) $changed_svn_tags ) ),
 				'svn_revision'     => (int) $svn_revision,
-				'warnings'         => is_array( $warnings ) ? $warnings : array(),
-			)
+				'warnings'         => is_array( $warnings ) ? $warnings : [],
+			]
 		);
 	}
 
@@ -76,7 +76,7 @@ class Plugin_Scan {
 		wp_schedule_single_event(
 			$when_to_run,
 			"scan_plugin:{$plugin_slug}",
-			array_merge( array( $plugin_slug ), $args ),
+			array_merge( [ $plugin_slug ], $args ),
 		);
 	}
 

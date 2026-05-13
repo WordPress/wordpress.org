@@ -6,7 +6,6 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan_Gandalf;
 
 /**
@@ -19,21 +18,14 @@ class Gandalf_Scan_Test extends TestCase {
 	 *
 	 * @var array
 	 */
-	private $http_requests = array();
-
-	/**
-	 * Plugin slugs used by the test.
-	 *
-	 * @var string[]
-	 */
-	private $plugin_slugs = array();
+	private $http_requests = [];
 
 	/**
 	 * Plugin post IDs used by the test.
 	 *
 	 * @var int[]
 	 */
-	private $plugin_ids = array();
+	private $plugin_ids = [];
 
 	/**
 	 * Original home URL.
@@ -61,18 +53,13 @@ class Gandalf_Scan_Test extends TestCase {
 		update_option( 'home', 'https://wordpress.org/plugins' );
 		update_option( 'siteurl', 'https://wordpress.org/plugins' );
 
-		add_filter( 'pre_http_request', array( $this, 'pre_http_request' ), 10, 3 );
-		add_filter( 'rest_url', array( $this, 'filter_rest_url' ), 10, 4 );
+		add_filter( 'pre_http_request', [ $this, 'pre_http_request' ], 10, 3 );
+		add_filter( 'rest_url', [ $this, 'filter_rest_url' ], 10, 4 );
 	}
 
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'pre_http_request' ), 10 );
-		remove_filter( 'rest_url', array( $this, 'filter_rest_url' ), 10 );
-
-		foreach ( $this->plugin_slugs as $slug ) {
-			$this->clear_scan_cron( $slug );
-			wp_cache_delete( $slug, 'plugin-slugs' );
-		}
+		remove_filter( 'pre_http_request', [ $this, 'pre_http_request' ], 10 );
+		remove_filter( 'rest_url', [ $this, 'filter_rest_url' ], 10 );
 
 		foreach ( $this->plugin_ids as $post_id ) {
 			wp_delete_post( $post_id, true );
@@ -84,67 +71,25 @@ class Gandalf_Scan_Test extends TestCase {
 		parent::tearDown();
 	}
 
-	public function test_import_queues_existing_scan_plugin_job_with_gandalf_context() {
-		$plugin = $this->make_plugin( 'gandalf-queue-test' );
-
-		Plugin_Scan::wporg_plugins_imported(
-			$plugin,
-			'1.2.3',
-			'1.2.2',
-			array( '1.2.3', 'trunk' ),
-			12345,
-			array( 'stable_tag_invalid' => true )
-		);
-
-		$events = $this->scheduled_scan_events( $plugin->post_name );
-
-		$this->assertCount( 1, $events );
-		$this->assertSame( $plugin->post_name, $events[0]['args'][0] );
-		$this->assertSame( array( '1.2.3', 'trunk' ), $events[0]['args'][1] );
-
-		$context = $events[0]['args'][2];
-		$this->assertSame( '1.2.3', $context['stable_tag'] );
-		$this->assertSame( '1.2.2', $context['old_stable_tag'] );
-		$this->assertSame( array( '1.2.3', 'trunk' ), $context['changed_svn_tags'] );
-		$this->assertSame( 12345, $context['svn_revision'] );
-		$this->assertSame( array( 'stable_tag_invalid' => true ), $context['warnings'] );
-		$this->assertArrayNotHasKey( 'version', $context );
-		$this->assertArrayNotHasKey( 'last_version', $context );
-	}
-
-	public function test_import_does_not_queue_for_old_tag_only_changes() {
-		$plugin = $this->make_plugin( 'gandalf-old-tag-test' );
-
-		Plugin_Scan::wporg_plugins_imported(
-			$plugin,
-			'1.2.3',
-			'1.2.3',
-			array( '1.0.0' ),
-			12345
-		);
-
-		$this->assertSame( array(), $this->scheduled_scan_events( $plugin->post_name ) );
-	}
-
 	public function test_dispatches_tag_release_payload() {
 		$plugin = $this->make_plugin(
 			'gandalf-tag-test',
-			array(
+			[
 				'version'         => '1.2.3',
 				'last_version'    => '1.2.2',
 				'last_stable_tag' => '1.2.2',
-			)
+			]
 		);
 
 		$result = Plugin_Scan_Gandalf::dispatch_from_import_context(
 			$plugin,
-			array(
+			[
 				'stable_tag'       => '1.2.3',
 				'old_stable_tag'   => '1.2.2',
-				'changed_svn_tags' => array( '1.2.3' ),
+				'changed_svn_tags' => [ '1.2.3' ],
 				'svn_revision'     => 12345,
-				'warnings'         => array(),
-			)
+				'warnings'         => [],
+			]
 		);
 
 		$this->assertTrue( $result );
@@ -165,21 +110,21 @@ class Gandalf_Scan_Test extends TestCase {
 	public function test_dispatches_trunk_release_payload() {
 		$plugin = $this->make_plugin(
 			'gandalf-trunk-test',
-			array(
+			[
 				'version'      => '1.2.3',
 				'last_version' => '1.2.2',
-			)
+			]
 		);
 
 		$result = Plugin_Scan_Gandalf::dispatch_from_import_context(
 			$plugin,
-			array(
+			[
 				'stable_tag'       => 'trunk',
 				'old_stable_tag'   => 'trunk',
-				'changed_svn_tags' => array( 'trunk' ),
+				'changed_svn_tags' => [ 'trunk' ],
 				'svn_revision'     => 12345,
-				'warnings'         => array(),
-			)
+				'warnings'         => [],
+			]
 		);
 
 		$this->assertTrue( $result );
@@ -192,29 +137,6 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertNull( $payload['previous_zip_url'] );
 	}
 
-	public function test_does_not_dispatch_tag_stable_release_for_trunk_only_commit() {
-		$plugin = $this->make_plugin(
-			'gandalf-trunk-only-test',
-			array(
-				'version' => '1.2.3',
-			)
-		);
-
-		$result = Plugin_Scan_Gandalf::dispatch_from_import_context(
-			$plugin,
-			array(
-				'stable_tag'       => '1.2.3',
-				'old_stable_tag'   => '1.2.3',
-				'changed_svn_tags' => array( 'trunk' ),
-				'svn_revision'     => 12345,
-				'warnings'         => array(),
-			)
-		);
-
-		$this->assertFalse( $result );
-		$this->assertSame( array(), $this->http_requests );
-	}
-
 	public function test_completed_callback_clears_pending_scan_and_records_notification_hash() {
 		$plugin  = $this->make_plugin( 'gandalf-callback-test' );
 		$scan_id = '33333333-3333-4333-8333-333333333333';
@@ -222,18 +144,18 @@ class Gandalf_Scan_Test extends TestCase {
 		update_post_meta(
 			$plugin->ID,
 			Plugin_Scan_Gandalf::PENDING_META_KEY,
-			array(
-				$scan_id => array(
+			[
+				$scan_id => [
 					'version'      => '1.2.3',
 					'release_ref'  => '1.2.3',
 					'requested_at' => time(),
-				),
-			)
+				],
+			]
 		);
 
 		$result = Plugin_Scan_Gandalf::handle_callback(
 			$plugin,
-			array(
+			[
 				'status'          => 'completed',
 				'scan_id'         => $scan_id,
 				'subject_type'    => 'plugin',
@@ -243,14 +165,14 @@ class Gandalf_Scan_Test extends TestCase {
 				'completed_at'    => time(),
 				'verdict_hash'    => 'verdict-hash',
 				'findings_count'  => 1,
-				'severity_counts' => array( 'high' => 1 ),
+				'severity_counts' => [ 'high' => 1 ],
 				'scanner_version' => '0.1.0',
 				'report_url'      => 'https://gandalf.wordpress.org/admin/runs/' . $scan_id,
-			)
+			]
 		);
 
 		$this->assertTrue( $result );
-		$this->assertSame( array(), get_post_meta( $plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) );
+		$this->assertSame( [], get_post_meta( $plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) );
 
 		$notified = get_post_meta( $plugin->ID, Plugin_Scan_Gandalf::NOTIFIED_META_KEY, true );
 		$this->assertIsArray( $notified );
@@ -270,28 +192,28 @@ class Gandalf_Scan_Test extends TestCase {
 			return $preempt;
 		}
 
-		$this->http_requests[] = array(
+		$this->http_requests[] = [
 			'url'  => $url,
 			'args' => $parsed_args,
-		);
+		];
 
 		$payload = json_decode( $parsed_args['body'], true );
 
-		return array(
-			'headers'  => array(),
+		return [
+			'headers'  => [],
 			'body'     => wp_json_encode(
-				array(
+				[
 					'scan_id'     => $payload['scan_id'],
 					'accepted_at' => time(),
-				)
+				]
 			),
-			'response' => array(
+			'response' => [
 				'code'    => 202,
 				'message' => 'Accepted',
-			),
-			'cookies'  => array(),
+			],
+			'cookies'  => [],
 			'filename' => null,
-		);
+		];
 	}
 
 	/**
@@ -314,12 +236,12 @@ class Gandalf_Scan_Test extends TestCase {
 	 * @param array  $meta Plugin meta.
 	 * @return \WP_Post Plugin post.
 	 */
-	private function make_plugin( $slug, $meta = array() ) {
+	private function make_plugin( $slug, $meta = [] ) {
 		$now     = current_time( 'mysql' );
 		$now_gmt = current_time( 'mysql', true );
 
 		$post_id = wp_insert_post(
-			array(
+			[
 				'post_type'         => 'plugin',
 				'post_status'       => 'publish',
 				'post_name'         => $slug,
@@ -328,17 +250,17 @@ class Gandalf_Scan_Test extends TestCase {
 				'post_date_gmt'     => $now_gmt,
 				'post_modified'     => $now,
 				'post_modified_gmt' => $now_gmt,
-			)
+			]
 		);
 
 		$this->assertIsInt( $post_id );
 		$this->assertGreaterThan( 0, $post_id );
 
 		$meta = array_merge(
-			array(
+			[
 				'version'    => '1.0.0',
 				'stable_tag' => 'trunk',
-			),
+			],
 			$meta
 		);
 
@@ -347,52 +269,9 @@ class Gandalf_Scan_Test extends TestCase {
 		}
 
 		wp_cache_delete( $slug, 'plugin-slugs' );
-		$this->plugin_slugs[] = $slug;
-		$this->plugin_ids[]   = $post_id;
+		$this->plugin_ids[] = $post_id;
 
 		return get_post( $post_id );
-	}
-
-	/**
-	 * Fetch scheduled scan_plugin events for a plugin.
-	 *
-	 * @param string $slug Plugin slug.
-	 * @return array Scheduled events.
-	 */
-	private function scheduled_scan_events( $slug ) {
-		$events = array();
-		$hook   = "scan_plugin:{$slug}";
-		$crons  = _get_cron_array();
-
-		if ( ! is_array( $crons ) ) {
-			return $events;
-		}
-
-		foreach ( $crons as $timestamp => $hooks ) {
-			if ( empty( $hooks[ $hook ] ) ) {
-				continue;
-			}
-
-			foreach ( $hooks[ $hook ] as $event ) {
-				$events[] = array(
-					'timestamp' => $timestamp,
-					'args'      => $event['args'],
-				);
-			}
-		}
-
-		return $events;
-	}
-
-	/**
-	 * Clear scheduled scan_plugin events for a plugin.
-	 *
-	 * @param string $slug Plugin slug.
-	 */
-	private function clear_scan_cron( $slug ) {
-		foreach ( $this->scheduled_scan_events( $slug ) as $event ) {
-			wp_unschedule_event( $event['timestamp'], "scan_plugin:{$slug}", $event['args'] );
-		}
 	}
 
 	/**

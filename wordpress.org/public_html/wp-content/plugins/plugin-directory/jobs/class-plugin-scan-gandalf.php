@@ -40,12 +40,7 @@ class Plugin_Scan_Gandalf {
 			return false;
 		}
 
-		if ( ! is_array( $import_context ) ) {
-			return false;
-		}
-
 		// These are wporg_plugins_imported facts carried through scan_plugin cron.
-		// If they are incomplete or malformed, skip instead of guessing a release.
 		if (
 			! isset( $import_context['stable_tag'], $import_context['old_stable_tag'], $import_context['changed_svn_tags'] ) ||
 			! is_string( $import_context['stable_tag'] ) ||
@@ -114,33 +109,32 @@ class Plugin_Scan_Gandalf {
 			return false;
 		}
 
-		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true );
-		$pending = is_array( $pending ) ? $pending : array();
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
 		foreach ( $pending as $scan_id => $record ) {
 			if ( ! is_array( $record ) || empty( $record['requested_at'] ) || $record['requested_at'] < time() - DAY_IN_SECONDS ) {
 				unset( $pending[ $scan_id ] );
 			}
 		}
 
-		$pending[ $request_data['scan_id'] ] = array(
+		$pending[ $request_data['scan_id'] ] = [
 			'version'      => $request_data['version'],
 			'release_ref'  => $request_data['release_ref'],
 			'requested_at' => $request_data['requested_at'],
-		);
+		];
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
 		$response = wp_safe_remote_post(
 			self::ENDPOINT,
-			array(
+			[
 				'timeout'    => 15,
 				'user-agent' => 'WordPress.org Plugin Directory Gandalf Scan',
-				'headers'    => array(
+				'headers'    => [
 					'Accept'        => 'application/json',
 					'Authorization' => 'Bearer ' . WP_GANDALF_SCAN_SHARED_SECRET,
 					'Content-Type'  => 'application/json',
-				),
+				],
 				'body'       => wp_json_encode( $request_data ),
-			)
+			]
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -174,10 +168,10 @@ class Plugin_Scan_Gandalf {
 	 */
 	public static function handle_callback( $plugin, $data ) {
 		$scan_id = $data['scan_id'];
-		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: array();
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
 
 		if ( empty( $pending[ $scan_id ] ) ) {
-			$error = new \WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', array( 'status' => \WP_Http::BAD_REQUEST ) );
+			$error = new \WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', [ 'status' => \WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
@@ -185,7 +179,7 @@ class Plugin_Scan_Gandalf {
 		$pending_record = $pending[ $scan_id ];
 
 		if ( $data['version'] !== $pending_record['version'] || $data['release_ref'] !== $pending_record['release_ref'] ) {
-			$error = new \WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', array( 'status' => \WP_Http::BAD_REQUEST ) );
+			$error = new \WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', [ 'status' => \WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
@@ -194,14 +188,14 @@ class Plugin_Scan_Gandalf {
 			if ( $data['findings_count'] > 0 ) {
 				self::notify_slack(
 					$plugin,
-					array(
+					[
 						'version'         => $pending_record['version'],
 						'release_ref'     => $pending_record['release_ref'],
 						'findings_count'  => $data['findings_count'],
 						'severity_counts' => $data['severity_counts'],
 						'verdict_hash'    => $data['verdict_hash'],
 						'report_url'      => $data['report_url'],
-					)
+					]
 				);
 			}
 		} else {
@@ -239,8 +233,7 @@ class Plugin_Scan_Gandalf {
 
 		self::record_last_error( $plugin, $kind, $message, $scan_id );
 
-		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true );
-		$pending = is_array( $pending ) ? $pending : array();
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
 		unset( $pending[ $scan_id ] );
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
@@ -260,8 +253,7 @@ class Plugin_Scan_Gandalf {
 			return;
 		}
 
-		$already_notified = get_post_meta( $plugin->ID, self::NOTIFIED_META_KEY, true );
-		$already_notified = is_array( $already_notified ) ? $already_notified : array();
+		$already_notified = get_post_meta( $plugin->ID, self::NOTIFIED_META_KEY, true ) ?: [];
 		foreach ( $already_notified as $hash => $time ) {
 			if ( $time < time() - MONTH_IN_SECONDS ) {
 				unset( $already_notified[ $hash ] );
@@ -296,7 +288,7 @@ class Plugin_Scan_Gandalf {
 		);
 
 		if ( ! empty( $record['severity_counts'] ) ) {
-			$severity_summary = array();
+			$severity_summary = [];
 			foreach ( $record['severity_counts'] as $severity => $count ) {
 				if ( $count > 0 ) {
 					$severity_summary[] = "{$severity}: {$count}";
@@ -327,12 +319,12 @@ class Plugin_Scan_Gandalf {
 		update_post_meta(
 			$plugin->ID,
 			self::LAST_ERROR_META_KEY,
-			array(
+			[
 				'kind'        => sanitize_key( $kind ),
 				'message'     => sanitize_text_field( $message ),
 				'scan_id'     => sanitize_text_field( $scan_id ),
 				'recorded_at' => time(),
-			)
+			]
 		);
 	}
 }
