@@ -58,13 +58,7 @@ class Plugin_Scan_Gandalf {
 		$warnings         = $import_context['warnings'];
 		$release_ref      = trim( $stable_tag ) ?: 'trunk';
 
-		// The importer records this when the readme points to a missing tag and falls back to trunk.
-		if ( 'trunk' === $release_ref && isset( $warnings['stable_tag_invalid_trunk_fallback'] ) ) {
-			return false;
-		}
-
-		// Trunk-only commits should not rescan a tag-based stable ZIP that wasn't rebuilt.
-		if ( $stable_tag === $old_stable_tag && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
+		if ( ! self::should_scan_import_context( $stable_tag, $old_stable_tag, $changed_svn_tags, $warnings ) ) {
 			return false;
 		}
 
@@ -98,6 +92,34 @@ class Plugin_Scan_Gandalf {
 				'requested_at'         => time(),
 			]
 		);
+	}
+
+	/**
+	 * Determine whether importer context should trigger a Gandalf scan.
+	 *
+	 * @param string $stable_tag       The new stable tag.
+	 * @param string $old_stable_tag   The previous stable tag.
+	 * @param array  $changed_svn_tags The SVN tags that changed.
+	 * @param array  $warnings         The import warnings.
+	 * @return bool Whether the context should be scanned.
+	 */
+	protected static function should_scan_import_context( $stable_tag, $old_stable_tag, $changed_svn_tags, $warnings ) {
+		$release_ref = trim( $stable_tag );
+		if ( '' === $release_ref ) {
+			$release_ref = 'trunk';
+		}
+
+		// The importer records this when the readme points to a missing tag and falls back to trunk.
+		if ( 'trunk' === $release_ref && isset( $warnings['stable_tag_invalid_trunk_fallback'] ) ) {
+			return false;
+		}
+
+		// Trunk-only commits should not rescan a tag-based stable ZIP that wasn't rebuilt.
+		if ( $stable_tag === $old_stable_tag && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
