@@ -83,7 +83,7 @@ class Plugin_Scan_Gandalf {
 
 		return self::dispatch(
 			$plugin,
-			array(
+			[
 				'scan_id'              => wp_generate_uuid4(),
 				'subject_type'         => 'plugin',
 				'slug'                 => $plugin->post_name,
@@ -95,7 +95,7 @@ class Plugin_Scan_Gandalf {
 				'previous_zip_url'     => $previous_zip_url,
 				'callback_url'         => rest_url( 'plugins/v1/plugin/' . $plugin->post_name . '/gandalf-scan' ),
 				'requested_at'         => time(),
-			)
+			]
 		);
 	}
 
@@ -157,13 +157,8 @@ class Plugin_Scan_Gandalf {
 			return self::dispatch_failed( $plugin, $request_data, 'Gandalf accepted the scan with an invalid response body.', 'dispatch_ack_invalid' );
 		}
 
-		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			printf(
-				"Dispatched Gandalf scan %s for %s.\n",
-				esc_html( $request_data['scan_id'] ),
-				esc_html( $plugin->post_name )
-			);
-		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Routed to the error log via E_USER_NOTICE; raw is fine.
+		trigger_error( sprintf( 'Dispatched Gandalf scan %s for %s.', $request_data['scan_id'], $plugin->post_name ), E_USER_NOTICE );
 		return true;
 	}
 
@@ -249,13 +244,8 @@ class Plugin_Scan_Gandalf {
 		unset( $pending[ $scan_id ] );
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
-		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			printf(
-				"Failed to dispatch Gandalf scan for %s: %s\n",
-				esc_html( $plugin->post_name ),
-				esc_html( $message )
-			);
-		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Routed to the error log via E_USER_NOTICE; raw is fine.
+		trigger_error( sprintf( 'Failed to dispatch Gandalf scan for %s: %s', $plugin->post_name, $message ), E_USER_NOTICE );
 		return false;
 	}
 
