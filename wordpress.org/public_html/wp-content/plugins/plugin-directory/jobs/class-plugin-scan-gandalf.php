@@ -55,15 +55,13 @@ class Plugin_Scan_Gandalf {
 			return false;
 		}
 
-		$stable_tag           = $import_context['stable_tag'];
-		$old_stable_tag       = $import_context['old_stable_tag'];
-		$changed_svn_tags     = $import_context['changed_svn_tags'];
-		$release_ref          = trim( $stable_tag ) ? $stable_tag : 'trunk';
-		$previous_release_ref = trim( $old_stable_tag ) ? $old_stable_tag : null;
-		$changed_svn_tags     = array_map( 'strval', $changed_svn_tags );
+		$stable_tag       = $import_context['stable_tag'];
+		$old_stable_tag   = $import_context['old_stable_tag'];
+		$changed_svn_tags = array_map( 'strval', $import_context['changed_svn_tags'] );
+		$release_ref      = trim( $stable_tag ) ?: 'trunk';
 
 		// Trunk-only commits should not rescan a tag-based stable ZIP that was not rebuilt.
-		if ( $release_ref === $previous_release_ref && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
+		if ( $stable_tag === $old_stable_tag && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
 			return false;
 		}
 
@@ -73,17 +71,14 @@ class Plugin_Scan_Gandalf {
 			return false;
 		}
 
-		$previous_version = get_post_meta( $plugin->ID, 'last_version', true );
-		$previous_version = is_string( $previous_version ) && trim( $previous_version ) ? $previous_version : null;
-		$previous_zip_url = null;
+		// last_stable_tag/last_version are written together on every version change,
+		// so they always describe a real prior release suitable for Gandalf diffing.
+		$previous_release_ref = get_post_meta( $plugin->ID, 'last_stable_tag', true ) ?: null;
+		$previous_version     = get_post_meta( $plugin->ID, 'last_version', true ) ?: null;
+		$previous_zip_url     = null;
 
 		if ( $previous_release_ref && $previous_release_ref !== $release_ref && 'trunk' !== $previous_release_ref ) {
 			$previous_zip_url = Template::download_link( $plugin, $previous_release_ref );
-
-			// If only the stable tag changed, the previous release can have the same plugin version.
-			if ( ! $previous_version ) {
-				$previous_version = $version;
-			}
 		}
 
 		return self::dispatch(
@@ -107,57 +102,15 @@ class Plugin_Scan_Gandalf {
 	/**
 	 * POST a queued scan request to Gandalf.
 	 *
+	 * Request shape is not pre-validated; Gandalf is the source of truth and will
+	 * reject malformed payloads with a non-2xx response, which is logged.
+	 *
 	 * @param \WP_Post $plugin       The plugin post.
 	 * @param array    $request_data The Gandalf scan request data.
 	 * @return bool Whether the request was accepted.
 	 */
 	public static function dispatch( $plugin, $request_data ) {
 		if ( ! defined( 'WP_GANDALF_SCAN_SHARED_SECRET' ) || ! WP_GANDALF_SCAN_SHARED_SECRET ) {
-			return false;
-		}
-
-		foreach ( array( 'scan_id', 'subject_type', 'slug', 'version', 'release_ref', 'current_zip_url', 'callback_url' ) as $field ) {
-			if ( ! isset( $request_data[ $field ] ) || ! is_string( $request_data[ $field ] ) || '' === trim( $request_data[ $field ] ) ) {
-				self::record_last_error( $plugin, 'invalid_request_data', "Gandalf scan request missing {$field}." );
-				printf( "Failed to dispatch Gandalf scan for %s: invalid request data.\n", esc_html( $plugin->post_name ) );
-				return false;
-			}
-		}
-
-		foreach ( array( 'previous_version', 'previous_release_ref', 'previous_zip_url' ) as $field ) {
-			if ( ! array_key_exists( $field, $request_data ) || ( null !== $request_data[ $field ] && ! is_string( $request_data[ $field ] ) ) ) {
-				self::record_last_error( $plugin, 'invalid_request_data', "Gandalf scan request {$field} is invalid." );
-				printf( "Failed to dispatch Gandalf scan for %s: invalid request data.\n", esc_html( $plugin->post_name ) );
-				return false;
-			}
-		}
-
-		if (
-				! wp_is_uuid( $request_data['scan_id'], 4 ) ||
-				'plugin' !== $request_data['subject_type'] ||
-				$plugin->post_name !== $request_data['slug'] ||
-				! wp_http_validate_url( $request_data['current_zip_url'] ) ||
-				'https' !== wp_parse_url( $request_data['current_zip_url'], PHP_URL_SCHEME ) ||
-				! wp_http_validate_url( $request_data['callback_url'] ) ||
-				'https' !== wp_parse_url( $request_data['callback_url'], PHP_URL_SCHEME ) ||
-				! isset( $request_data['requested_at'] ) ||
-				! is_int( $request_data['requested_at'] ) ||
-				$request_data['requested_at'] < 0
-		) {
-			self::record_last_error( $plugin, 'invalid_request_data', 'Gandalf scan request data is invalid.' );
-			printf( "Failed to dispatch Gandalf scan for %s: invalid request data.\n", esc_html( $plugin->post_name ) );
-			return false;
-		}
-
-		if (
-			null !== $request_data['previous_zip_url'] &&
-			(
-				! wp_http_validate_url( $request_data['previous_zip_url'] ) ||
-				'https' !== wp_parse_url( $request_data['previous_zip_url'], PHP_URL_SCHEME )
-			)
-		) {
-			self::record_last_error( $plugin, 'invalid_request_data', 'Gandalf scan previous_zip_url is invalid.' );
-			printf( "Failed to dispatch Gandalf scan for %s: invalid request data.\n", esc_html( $plugin->post_name ) );
 			return false;
 		}
 
@@ -176,11 +129,6 @@ class Plugin_Scan_Gandalf {
 		);
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
-		$body = wp_json_encode( $request_data );
-		if ( ! $body ) {
-			return self::dispatch_failed( $plugin, $request_data, 'Failed to encode Gandalf scan request.', 'encode_failed' );
-		}
-
 		$response = wp_safe_remote_post(
 			self::ENDPOINT,
 			array(
@@ -191,7 +139,7 @@ class Plugin_Scan_Gandalf {
 					'Authorization' => 'Bearer ' . WP_GANDALF_SCAN_SHARED_SECRET,
 					'Content-Type'  => 'application/json',
 				),
-				'body'       => $body,
+				'body'       => wp_json_encode( $request_data ),
 			)
 		);
 
@@ -209,72 +157,60 @@ class Plugin_Scan_Gandalf {
 			return self::dispatch_failed( $plugin, $request_data, 'Gandalf accepted the scan with an invalid response body.', 'dispatch_ack_invalid' );
 		}
 
-		printf(
-			"Dispatched Gandalf scan %s for %s.\n",
-			esc_html( $request_data['scan_id'] ),
-			esc_html( $plugin->post_name )
-		);
+		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			printf(
+				"Dispatched Gandalf scan %s for %s.\n",
+				esc_html( $request_data['scan_id'] ),
+				esc_html( $plugin->post_name )
+			);
+		}
 		return true;
 	}
 
 	/**
 	 * Handle a completed or failed scan callback.
 	 *
-	 * Trusts the bearer-authenticated caller for payload shape; only verifies the
-	 * scan_id correlates with a pending dispatch and that release identifiers match.
+	 * Trusts Gandalf for payload shape (the bearer secret is the trust boundary).
+	 * Only correlates scan_id and release identifiers against the pending record.
 	 *
 	 * @param \WP_Post $plugin The plugin post.
 	 * @param array    $data   The Gandalf callback data.
 	 * @return true|\WP_Error True on success, or an error when the scan is unknown.
 	 */
 	public static function handle_callback( $plugin, $data ) {
-		$scan_id = is_string( $data['scan_id'] ?? null ) ? $data['scan_id'] : '';
-		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true );
-		$pending = is_array( $pending ) ? $pending : array();
+		$scan_id = $data['scan_id'];
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: array();
 
-		if ( '' === $scan_id || empty( $pending[ $scan_id ] ) || ! is_array( $pending[ $scan_id ] ) ) {
+		if ( empty( $pending[ $scan_id ] ) ) {
 			$error = new \WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', array( 'status' => \WP_Http::BAD_REQUEST ) );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
 
 		$pending_record = $pending[ $scan_id ];
-		if (
-			! isset( $pending_record['version'], $pending_record['release_ref'] ) ||
-			! is_string( $pending_record['version'] ) ||
-			! is_string( $pending_record['release_ref'] ) ||
-			( $data['version'] ?? null ) !== $pending_record['version'] ||
-			( $data['release_ref'] ?? null ) !== $pending_record['release_ref']
-		) {
+
+		if ( $data['version'] !== $pending_record['version'] || $data['release_ref'] !== $pending_record['release_ref'] ) {
 			$error = new \WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', array( 'status' => \WP_Http::BAD_REQUEST ) );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
 
-		if ( 'completed' === ( $data['status'] ?? '' ) ) {
-			$findings_count = isset( $data['findings_count'] ) && is_int( $data['findings_count'] ) ? $data['findings_count'] : 0;
-			if ( $findings_count > 0 ) {
-				$severity_counts = isset( $data['severity_counts'] ) && is_array( $data['severity_counts'] ) ? $data['severity_counts'] : array();
+		if ( 'completed' === $data['status'] ) {
+			if ( $data['findings_count'] > 0 ) {
 				self::notify_slack(
 					$plugin,
 					array(
 						'version'         => $pending_record['version'],
 						'release_ref'     => $pending_record['release_ref'],
-						'findings_count'  => absint( $findings_count ),
-						'severity_counts' => $severity_counts,
-						'verdict_hash'    => sanitize_text_field( (string) ( $data['verdict_hash'] ?? '' ) ),
-						'report_url'      => esc_url_raw( (string) ( $data['report_url'] ?? '' ) ),
+						'findings_count'  => $data['findings_count'],
+						'severity_counts' => $data['severity_counts'],
+						'verdict_hash'    => $data['verdict_hash'],
+						'report_url'      => $data['report_url'],
 					)
 				);
 			}
 		} else {
-			$error_data = is_array( $data['error'] ?? null ) ? $data['error'] : array();
-			self::record_last_error(
-				$plugin,
-				is_string( $error_data['kind'] ?? null ) ? $error_data['kind'] : 'unknown',
-				is_string( $error_data['message'] ?? null ) ? $error_data['message'] : '',
-				$scan_id
-			);
+			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
 		}
 
 		unset( $pending[ $scan_id ] );
@@ -313,11 +249,13 @@ class Plugin_Scan_Gandalf {
 		unset( $pending[ $scan_id ] );
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
-		printf(
-			"Failed to dispatch Gandalf scan for %s: %s\n",
-			esc_html( $plugin->post_name ),
-			esc_html( $message )
-		);
+		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			printf(
+				"Failed to dispatch Gandalf scan for %s: %s\n",
+				esc_html( $plugin->post_name ),
+				esc_html( $message )
+			);
+		}
 		return false;
 	}
 

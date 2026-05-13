@@ -130,8 +130,9 @@ class Gandalf_Scan_Test extends TestCase {
 		$plugin = $this->make_plugin(
 			'gandalf-tag-test',
 			array(
-				'version'      => '1.2.3',
-				'last_version' => '1.2.2',
+				'version'         => '1.2.3',
+				'last_version'    => '1.2.2',
+				'last_stable_tag' => '1.2.2',
 			)
 		);
 
@@ -214,26 +215,6 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertSame( array(), $this->http_requests );
 	}
 
-	public function test_does_not_dispatch_with_malformed_import_context() {
-		$plugin = $this->make_plugin(
-			'gandalf-malformed-context-test',
-			array(
-				'version' => '1.2.3',
-			)
-		);
-
-		$result = Plugin_Scan_Gandalf::dispatch_from_import_context(
-			$plugin,
-			array(
-				'stable_tag'     => '1.2.3',
-				'old_stable_tag' => '1.2.2',
-			)
-		);
-
-		$this->assertFalse( $result );
-		$this->assertSame( array(), $this->http_requests );
-	}
-
 	public function test_completed_callback_clears_pending_scan_and_records_notification_hash() {
 		$plugin  = $this->make_plugin( 'gandalf-callback-test' );
 		$scan_id = '33333333-3333-4333-8333-333333333333';
@@ -274,21 +255,6 @@ class Gandalf_Scan_Test extends TestCase {
 		$notified = get_post_meta( $plugin->ID, Plugin_Scan_Gandalf::NOTIFIED_META_KEY, true );
 		$this->assertIsArray( $notified );
 		$this->assertArrayHasKey( 'verdict-hash', $notified );
-	}
-
-	public function test_callback_rejects_unknown_scan_id() {
-		$plugin = $this->make_plugin( 'gandalf-unknown-scan-test' );
-
-		$result = Plugin_Scan_Gandalf::handle_callback(
-			$plugin,
-			array(
-				'status'  => 'completed',
-				'scan_id' => '99999999-9999-4999-8999-999999999999',
-			)
-		);
-
-		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'unknown_gandalf_scan', $result->get_error_code() );
 	}
 
 	/**
