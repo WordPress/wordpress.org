@@ -33,7 +33,9 @@ class Gandalf_Scan extends Base {
 						'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 					],
 				],
-				'permission_callback' => fn( $request ) => $this->permission_check_api_bearer( $request, 'WP_GANDALF_SCAN_SHARED_SECRET' ),
+				'permission_callback' => function ( $request ) {
+					return $this->permission_check_api_bearer( $request, 'WP_GANDALF_SCAN_SHARED_SECRET' );
+				},
 			]
 		);
 	}
