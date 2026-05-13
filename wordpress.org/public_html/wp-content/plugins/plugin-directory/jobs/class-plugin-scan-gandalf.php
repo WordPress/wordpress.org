@@ -112,7 +112,7 @@ class Plugin_Scan_Gandalf {
 
 		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
 		foreach ( $pending as $scan_id => $record ) {
-			if ( ! is_array( $record ) || empty( $record['requested_at'] ) || $record['requested_at'] < time() - DAY_IN_SECONDS ) {
+			if ( ! is_array( $record ) || ( $record['requested_at'] ?? 0 ) < time() - DAY_IN_SECONDS ) {
 				unset( $pending[ $scan_id ] );
 			}
 		}
