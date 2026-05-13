@@ -42,7 +42,6 @@ class Plugin_Scan_Gandalf {
 			return false;
 		}
 
-		// These are wporg_plugins_imported facts carried through scan_plugin cron.
 		if (
 			! isset( $import_context['stable_tag'], $import_context['old_stable_tag'], $import_context['changed_svn_tags'] ) ||
 			! is_string( $import_context['stable_tag'] ) ||
@@ -57,19 +56,15 @@ class Plugin_Scan_Gandalf {
 		$changed_svn_tags = array_map( 'strval', $import_context['changed_svn_tags'] );
 		$release_ref      = trim( $stable_tag ) ?: 'trunk';
 
-		// Trunk-only commits should not rescan a tag-based stable ZIP that was not rebuilt.
 		if ( $stable_tag === $old_stable_tag && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
 			return false;
 		}
 
-		// Version is post-import state; without it, the ZIP identity is not reliable.
 		$version = get_post_meta( $plugin->ID, 'version', true );
 		if ( ! $version ) {
 			return false;
 		}
 
-		// last_stable_tag/last_version are written together on every version change,
-		// so they always describe a real prior release suitable for Gandalf diffing.
 		$previous_release_ref = get_post_meta( $plugin->ID, 'last_stable_tag', true ) ?: null;
 		$previous_version     = get_post_meta( $plugin->ID, 'last_version', true ) ?: null;
 		$previous_zip_url     = null;
@@ -98,9 +93,6 @@ class Plugin_Scan_Gandalf {
 
 	/**
 	 * POST a queued scan request to Gandalf.
-	 *
-	 * Request shape is not pre-validated; Gandalf is the source of truth and will
-	 * reject malformed payloads with a non-2xx response, which is logged.
 	 *
 	 * @param \WP_Post $plugin       The plugin post.
 	 * @param array    $request_data The Gandalf scan request data.
@@ -160,8 +152,6 @@ class Plugin_Scan_Gandalf {
 
 	/**
 	 * Handle a completed or failed scan callback.
-	 *
-	 * Only correlates scan_id and release identifiers against the pending record.
 	 *
 	 * @param \WP_Post $plugin The plugin post.
 	 * @param array    $data   The Gandalf callback data.

@@ -45,9 +45,6 @@ class Gandalf_Scan extends Base {
 	/**
 	 * Receive a Gandalf scan callback.
 	 *
-	 * Trusts the bearer-authenticated sender for payload shape; the dispatcher
-	 * correlates scan_id and release identifiers against the pending record.
-	 *
 	 * @param \WP_REST_Request $request The request.
 	 * @return array|WP_Error Callback response, or an error.
 	 */

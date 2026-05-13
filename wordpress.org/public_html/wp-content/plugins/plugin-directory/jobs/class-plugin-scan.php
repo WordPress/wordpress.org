@@ -46,7 +46,6 @@ class Plugin_Scan {
 
 		$to_scan = array_unique( $to_scan );
 
-		// Carry importer facts through cron; post meta only has the current state later.
 		self::queue(
 			$plugin->post_name,
 			$to_scan,
@@ -90,7 +89,6 @@ class Plugin_Scan {
 	public static function cron_trigger( $plugin_slug, $to_scan, $import_context = false ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 
-		// Existing scan_plugin jobs may predate Gandalf and only have PCP arguments.
 		if ( $import_context ) {
 			Plugin_Scan_Gandalf::dispatch_from_import_context( $plugin, $import_context );
 		}
