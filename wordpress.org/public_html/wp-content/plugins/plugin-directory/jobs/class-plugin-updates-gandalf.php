@@ -1,0 +1,388 @@
+<?php
+namespace WordPressdotorg\Plugin_Directory\Jobs;
+
+use WordPressdotorg\Plugin_Directory\Template;
+
+/**
+ * Sends plugin updates to Gandalf for advisory security scans.
+ *
+ * @package WordPressdotorg\Plugin_Directory\Jobs
+ */
+class Plugin_Updates_Gandalf {
+
+	const HISTORY_LIMIT       = 25;
+	const PENDING_META_KEY    = '_gandalf_scan_pending';
+	const HISTORY_META_KEY    = '_gandalf_scan_history';
+	const NOTIFIED_META_KEY   = '_gandalf_scan_notified';
+	const LAST_ERROR_META_KEY = '_gandalf_scan_last_error';
+	const ENDPOINT            = 'https://gandalf.wordpress.org/scan';
+
+	/**
+	 * Build a Gandalf scan request from the importer state, if the current ZIP changed.
+	 */
+	public static function scan_data_for_import( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision ) {
+		if ( ! self::is_configured() ) {
+			return false;
+		}
+
+		$release_ref          = self::normalize_release_ref( $stable_tag );
+		$previous_release_ref = self::normalize_release_ref( $old_stable_tag );
+		$changed_svn_tags     = array_map( 'strval', (array) $changed_svn_tags );
+
+		// Importer-provided tags are the signal that the public ZIP was rebuilt.
+		if ( $release_ref === $previous_release_ref && ! in_array( $release_ref, $changed_svn_tags, true ) ) {
+			return false;
+		}
+
+		$version          = self::nullable_string( get_post_meta( $plugin->ID, 'version', true ) );
+		$previous_version = self::nullable_string( get_post_meta( $plugin->ID, 'last_version', true ) );
+		$previous_zip_url = null;
+
+		if ( ! $version ) {
+			return false;
+		}
+
+		if ( $previous_release_ref !== $release_ref && 'trunk' !== $previous_release_ref ) {
+			$previous_zip_url = Template::download_link( $plugin, $previous_release_ref );
+
+			// If only the stable tag changed, the previous release can have the same plugin version.
+			if ( ! $previous_version ) {
+				$previous_version = $version;
+			}
+		}
+
+		return array(
+			'scan_id'              => wp_generate_uuid4(),
+			'subject_type'         => 'plugin',
+			'slug'                 => $plugin->post_name,
+			'version'              => $version,
+			'release_ref'          => $release_ref,
+			'current_zip_url'      => Template::download_link( $plugin, 'latest' ),
+			'previous_version'     => $previous_zip_url ? $previous_version : null,
+			'previous_release_ref' => $previous_zip_url ? $previous_release_ref : null,
+			'previous_zip_url'     => $previous_zip_url,
+			'callback_url'         => rest_url( 'plugins/v1/plugin/' . $plugin->post_name . '/gandalf-scan' ),
+			'requested_at'         => time(),
+		);
+	}
+
+	/**
+	 * POST a queued scan request to Gandalf.
+	 */
+	public static function dispatch( $plugin, $request_data ) {
+		if ( ! self::is_configured() ) {
+			return false;
+		}
+
+		$is_https_url = static function( $url ) {
+			return is_string( $url ) && wp_http_validate_url( $url ) && 'https' === wp_parse_url( $url, PHP_URL_SCHEME );
+		};
+
+		foreach ( array( 'scan_id', 'subject_type', 'slug', 'version', 'release_ref', 'current_zip_url', 'callback_url' ) as $field ) {
+			if ( ! isset( $request_data[ $field ] ) || ! is_string( $request_data[ $field ] ) || '' === trim( $request_data[ $field ] ) ) {
+				self::record_last_error( $plugin, 'invalid_request_data', "Gandalf scan request missing {$field}." );
+				echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
+				return false;
+			}
+		}
+
+		foreach ( array( 'previous_version', 'previous_release_ref', 'previous_zip_url' ) as $field ) {
+			if ( ! array_key_exists( $field, $request_data ) || ( null !== $request_data[ $field ] && ! is_string( $request_data[ $field ] ) ) ) {
+				self::record_last_error( $plugin, 'invalid_request_data', "Gandalf scan request {$field} is invalid." );
+				echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
+				return false;
+			}
+		}
+
+		if (
+			! wp_is_uuid( $request_data['scan_id'], 4 ) ||
+			'plugin' !== $request_data['subject_type'] ||
+			$plugin->post_name !== $request_data['slug'] ||
+			! $is_https_url( $request_data['current_zip_url'] ) ||
+			! $is_https_url( $request_data['callback_url'] ) ||
+			! isset( $request_data['requested_at'] ) ||
+			! is_int( $request_data['requested_at'] ) ||
+			$request_data['requested_at'] < 0
+		) {
+			self::record_last_error( $plugin, 'invalid_request_data', 'Gandalf scan request data is invalid.' );
+			echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
+			return false;
+		}
+
+		if ( null !== $request_data['previous_zip_url'] && ! $is_https_url( $request_data['previous_zip_url'] ) ) {
+			self::record_last_error( $plugin, 'invalid_request_data', 'Gandalf scan previous_zip_url is invalid.' );
+			echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: invalid request data.\n";
+			return false;
+		}
+
+		$pending = self::get_array_meta( $plugin, self::PENDING_META_KEY );
+		foreach ( $pending as $scan_id => $record ) {
+			if ( ! is_array( $record ) || empty( $record['requested_at'] ) || $record['requested_at'] < time() - DAY_IN_SECONDS ) {
+				unset( $pending[ $scan_id ] );
+			}
+		}
+
+		$pending[ $request_data['scan_id'] ] = array(
+			'version'                => $request_data['version'],
+			'release_ref'            => $request_data['release_ref'],
+			'previous_version'       => $request_data['previous_version'],
+			'previous_release_ref'   => $request_data['previous_release_ref'],
+			'current_zip_url'        => esc_url_raw( $request_data['current_zip_url'] ),
+			'previous_zip_included'  => null !== $request_data['previous_zip_url'],
+			'requested_at'           => $request_data['requested_at'],
+		);
+		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
+
+		$body = wp_json_encode( $request_data );
+		if ( ! $body ) {
+			return self::dispatch_failed( $plugin, $request_data, 'Failed to encode Gandalf scan request.', 'encode_failed' );
+		}
+
+		$response = wp_safe_remote_post(
+			self::ENDPOINT,
+			array(
+				'timeout'    => 15,
+				'user-agent' => 'WordPress.org Plugin Directory Gandalf Scan',
+				'headers'    => array(
+					'Accept'        => 'application/json',
+					'Authorization' => 'Bearer ' . WP_GANDALF_SCAN_SHARED_SECRET,
+					'Content-Type'  => 'application/json',
+				),
+				'body'       => $body,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return self::dispatch_failed( $plugin, $request_data, $response->get_error_message(), 'dispatch_wp_error' );
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		if ( $response_code < 200 || $response_code >= 300 ) {
+			return self::dispatch_failed( $plugin, $request_data, sprintf( 'Gandalf returned HTTP %d.', $response_code ), 'dispatch_http_error' );
+		}
+
+		$response_data = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! is_array( $response_data ) || ( $response_data['scan_id'] ?? '' ) !== $request_data['scan_id'] ) {
+			return self::dispatch_failed( $plugin, $request_data, 'Gandalf accepted the scan with an invalid response body.', 'dispatch_ack_invalid' );
+		}
+
+		echo "Dispatched Gandalf scan {$request_data['scan_id']} for {$plugin->post_name}.\n";
+		return true;
+	}
+
+	/**
+	 * Handle a completed or failed scan callback.
+	 */
+	public static function handle_callback( $plugin, $data ) {
+		$scan_id = $data['scan_id'];
+		$pending = self::get_array_meta( $plugin, self::PENDING_META_KEY );
+
+		if ( empty( $pending[ $scan_id ] ) || ! is_array( $pending[ $scan_id ] ) ) {
+			$history = self::get_array_meta( $plugin, self::HISTORY_META_KEY );
+			if ( isset( $history[ $scan_id ] ) ) {
+				return true;
+			}
+
+			$error = new \WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', array( 'status' => \WP_Http::BAD_REQUEST ) );
+			self::record_invalid_callback( $plugin, $error, $scan_id );
+			return $error;
+		}
+
+		$pending_record = $pending[ $scan_id ];
+		if (
+			! isset( $pending_record['version'], $pending_record['release_ref'], $pending_record['current_zip_url'], $pending_record['requested_at'] ) ||
+			! is_string( $pending_record['version'] ) ||
+			! is_string( $pending_record['release_ref'] )
+		) {
+			$error = new \WP_Error( 'invalid_gandalf_scan', 'Stored Gandalf scan data is invalid.', array( 'status' => \WP_Http::BAD_REQUEST ) );
+			self::record_invalid_callback( $plugin, $error, $scan_id );
+			return $error;
+		}
+
+		if ( $data['version'] !== $pending_record['version'] || $data['release_ref'] !== $pending_record['release_ref'] ) {
+			$error = new \WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', array( 'status' => \WP_Http::BAD_REQUEST ) );
+			self::record_invalid_callback( $plugin, $error, $scan_id );
+			return $error;
+		}
+
+		$record = array(
+			'scan_id'               => sanitize_text_field( $scan_id ),
+			'status'                => $data['status'],
+			'version'               => sanitize_text_field( $pending_record['version'] ),
+			'release_ref'           => sanitize_text_field( $pending_record['release_ref'] ),
+			'previous_version'      => empty( $pending_record['previous_version'] ) ? null : sanitize_text_field( $pending_record['previous_version'] ),
+			'previous_release_ref'  => empty( $pending_record['previous_release_ref'] ) ? null : sanitize_text_field( $pending_record['previous_release_ref'] ),
+			'current_zip_url'       => esc_url_raw( $pending_record['current_zip_url'] ),
+			'previous_zip_included' => ! empty( $pending_record['previous_zip_included'] ),
+			'requested_at'          => absint( $pending_record['requested_at'] ),
+			'completed_at'          => absint( $data['completed_at'] ),
+			'received_at'           => time(),
+			'report_url'            => esc_url_raw( $data['report_url'] ),
+		);
+
+		if ( 'completed' === $data['status'] ) {
+			$record['findings_count']  = absint( $data['findings_count'] );
+			$record['severity_counts'] = $data['severity_counts'];
+			$record['verdict_hash']    = sanitize_text_field( $data['verdict_hash'] );
+			$record['scanner_version'] = sanitize_text_field( $data['scanner_version'] );
+
+			if ( $record['findings_count'] > 0 ) {
+				self::notify_slack( $plugin, $record );
+			}
+		} else {
+			$record['error'] = array(
+				'kind'    => sanitize_key( $data['error']['kind'] ),
+				'message' => sanitize_text_field( $data['error']['message'] ),
+			);
+			self::record_last_error( $plugin, $record['error']['kind'], $record['error']['message'], $scan_id );
+		}
+
+		self::store_history_record( $plugin, $record );
+
+		unset( $pending[ $scan_id ] );
+		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
+
+		return true;
+	}
+
+	/**
+	 * Record a valid-secret callback that failed validation.
+	 */
+	public static function record_invalid_callback( $plugin, $error, $scan_id = '' ) {
+		self::record_last_error( $plugin, $error->get_error_code(), $error->get_error_message(), $scan_id );
+	}
+
+	protected static function dispatch_failed( $plugin, $request_data, $message, $kind ) {
+		$scan_id = sanitize_text_field( $request_data['scan_id'] );
+
+		$record = array(
+			'scan_id'               => $scan_id,
+			'status'                => 'failed',
+			'version'               => sanitize_text_field( $request_data['version'] ),
+			'release_ref'           => sanitize_text_field( $request_data['release_ref'] ),
+			'previous_version'      => null === $request_data['previous_version'] ? null : sanitize_text_field( $request_data['previous_version'] ),
+			'previous_release_ref'  => null === $request_data['previous_release_ref'] ? null : sanitize_text_field( $request_data['previous_release_ref'] ),
+			'current_zip_url'       => esc_url_raw( $request_data['current_zip_url'] ),
+			'previous_zip_included' => null !== $request_data['previous_zip_url'],
+			'requested_at'          => absint( $request_data['requested_at'] ),
+			'completed_at'          => time(),
+			'received_at'           => time(),
+			'report_url'            => '',
+			'error'                 => array(
+				'kind'    => sanitize_key( $kind ),
+				'message' => sanitize_text_field( $message ),
+			),
+		);
+
+		self::store_history_record( $plugin, $record );
+		self::record_last_error( $plugin, $kind, $message, $scan_id );
+
+		$pending = self::get_array_meta( $plugin, self::PENDING_META_KEY );
+		unset( $pending[ $scan_id ] );
+		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
+
+		echo "Failed to dispatch Gandalf scan for {$plugin->post_name}: {$message}\n";
+		return false;
+	}
+
+	protected static function notify_slack( $plugin, $record ) {
+		if ( 'closed' === $plugin->post_status || empty( $record['verdict_hash'] ) ) {
+			return;
+		}
+
+		$already_notified = self::get_array_meta( $plugin, self::NOTIFIED_META_KEY );
+		foreach ( $already_notified as $hash => $time ) {
+			if ( $time < time() - MONTH_IN_SECONDS ) {
+				unset( $already_notified[ $hash ] );
+			}
+		}
+
+		if ( isset( $already_notified[ $record['verdict_hash'] ] ) ) {
+			update_post_meta( $plugin->ID, self::NOTIFIED_META_KEY, $already_notified );
+			return;
+		}
+
+		$already_notified[ $record['verdict_hash'] ] = time();
+		update_post_meta( $plugin->ID, self::NOTIFIED_META_KEY, $already_notified );
+
+		if ( ! defined( 'PLUGIN_REVIEW_ALERT_SLACK_CHANNEL' ) || ! function_exists( 'slack_dm' ) ) {
+			return;
+		}
+
+		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
+		$install_line    = sprintf( "%s+ active installs", number_format_i18n( $active_installs ) );
+		if ( $active_installs >= 10000 ) {
+			$install_line = ":bangbang::bangbang::bangbang: {$install_line} :bangbang::bangbang::bangbang:";
+		}
+
+		$body = sprintf(
+			"Gandalf scan detected findings in *%s*\n%s\nVersion: %s (%s)\nFindings: %d\n",
+			$plugin->post_title,
+			$install_line,
+			$record['version'],
+			$record['release_ref'],
+			$record['findings_count']
+		);
+
+		if ( ! empty( $record['severity_counts'] ) ) {
+			$severity_summary = array();
+			foreach ( $record['severity_counts'] as $severity => $count ) {
+				if ( $count > 0 ) {
+					$severity_summary[] = "{$severity}: {$count}";
+				}
+			}
+
+			if ( $severity_summary ) {
+				$body .= 'Severity: ' . implode( ', ', $severity_summary ) . "\n";
+			}
+		}
+
+		$body .= sprintf( "Details: https://wordpress.org/plugins/wp-admin/post.php?post=%s&action=edit\n", $plugin->ID );
+		$body .= sprintf( "Plugin: https://wordpress.org/plugins/%s/\n", $plugin->post_name );
+		$body .= sprintf( "Report: %s\n", $record['report_url'] );
+
+		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
+	}
+
+	protected static function store_history_record( $plugin, $record ) {
+		$history                       = self::get_array_meta( $plugin, self::HISTORY_META_KEY );
+		$history[ $record['scan_id'] ] = $record;
+
+		if ( count( $history ) > self::HISTORY_LIMIT ) {
+			$history = array_slice( $history, -1 * self::HISTORY_LIMIT, null, true );
+		}
+
+		update_post_meta( $plugin->ID, self::HISTORY_META_KEY, $history );
+	}
+
+	protected static function record_last_error( $plugin, $kind, $message, $scan_id = '' ) {
+		update_post_meta(
+			$plugin->ID,
+			self::LAST_ERROR_META_KEY,
+			array(
+				'kind'        => sanitize_key( $kind ),
+				'message'     => sanitize_text_field( $message ),
+				'scan_id'     => sanitize_text_field( $scan_id ),
+				'recorded_at' => time(),
+			)
+		);
+	}
+
+	protected static function get_array_meta( $plugin, $key ) {
+		$value = get_post_meta( $plugin->ID, $key, true );
+		return is_array( $value ) ? $value : array();
+	}
+
+	protected static function is_configured() {
+		return defined( 'WP_GANDALF_SCAN_SHARED_SECRET' ) && WP_GANDALF_SCAN_SHARED_SECRET;
+	}
+
+	protected static function normalize_release_ref( $release_ref ) {
+		$release_ref = self::nullable_string( $release_ref );
+		return null === $release_ref ? 'trunk' : $release_ref;
+	}
+
+	protected static function nullable_string( $value ) {
+		return is_string( $value ) && '' !== trim( $value ) ? $value : null;
+	}
+}

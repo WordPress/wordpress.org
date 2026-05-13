@@ -1,0 +1,17 @@
+{
+  "status": "completed",
+  "scan_id": "33333333-3333-4333-8333-333333333333",
+  "subject_type": "plugin",
+  "slug": "hello-dolly",
+  "version": "1.7.3",
+  "release_ref": "1.7.3",
+  "completed_at": 1714208500,
+  "verdict_hash": "abc123",
+  "findings_count": 3,
+  "severity_counts": {
+    "high": 1,
+    "medium": 2
+  },
+  "scanner_version": "0.1.0",
+  "report_url": "https://gandalf.wordpress.org/admin/runs/33333333-3333-4333-8333-333333333333"
+}
