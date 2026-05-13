@@ -26,12 +26,12 @@ class Plugin_Updates_Gandalf {
 	 * Build a Gandalf scan request from the importer state, if the current ZIP changed.
 	 */
 	public static function scan_data_for_import( $plugin, $stable_tag, $old_stable_tag, $changed_svn_tags, $svn_revision ) {
-		if ( ! self::is_configured() ) {
+		if ( ! defined( 'WP_GANDALF_SCAN_SHARED_SECRET' ) || ! WP_GANDALF_SCAN_SHARED_SECRET ) {
 			return false;
 		}
 
-		$release_ref          = self::normalize_release_ref( $stable_tag );
-		$previous_release_ref = self::normalize_release_ref( $old_stable_tag );
+		$release_ref          = is_string( $stable_tag ) && trim( $stable_tag ) ? $stable_tag : 'trunk';
+		$previous_release_ref = is_string( $old_stable_tag ) && trim( $old_stable_tag ) ? $old_stable_tag : 'trunk';
 		$changed_svn_tags     = array_map( 'strval', (array) $changed_svn_tags );
 
 		// Importer-provided tags are the signal that the public ZIP was rebuilt.
@@ -39,13 +39,14 @@ class Plugin_Updates_Gandalf {
 			return false;
 		}
 
-		$version          = self::nullable_string( get_post_meta( $plugin->ID, 'version', true ) );
-		$previous_version = self::nullable_string( get_post_meta( $plugin->ID, 'last_version', true ) );
-		$previous_zip_url = null;
-
-		if ( ! $version ) {
+		$version = get_post_meta( $plugin->ID, 'version', true );
+		if ( ! is_string( $version ) || ! trim( $version ) ) {
 			return false;
 		}
+
+		$previous_version = get_post_meta( $plugin->ID, 'last_version', true );
+		$previous_version = is_string( $previous_version ) && trim( $previous_version ) ? $previous_version : null;
+		$previous_zip_url = null;
 
 		if ( $previous_release_ref !== $release_ref && 'trunk' !== $previous_release_ref ) {
 			$previous_zip_url = Template::download_link( $plugin, $previous_release_ref );
@@ -75,7 +76,7 @@ class Plugin_Updates_Gandalf {
 	 * POST a queued scan request to Gandalf.
 	 */
 	public static function dispatch( $plugin, $request_data ) {
-		if ( ! self::is_configured() ) {
+		if ( ! defined( 'WP_GANDALF_SCAN_SHARED_SECRET' ) || ! WP_GANDALF_SCAN_SHARED_SECRET ) {
 			return false;
 		}
 
@@ -120,7 +121,8 @@ class Plugin_Updates_Gandalf {
 			return false;
 		}
 
-		$pending = self::get_array_meta( $plugin, self::PENDING_META_KEY );
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true );
+		$pending = is_array( $pending ) ? $pending : array();
 		foreach ( $pending as $scan_id => $record ) {
 			if ( ! is_array( $record ) || empty( $record['requested_at'] ) || $record['requested_at'] < time() - DAY_IN_SECONDS ) {
 				unset( $pending[ $scan_id ] );
@@ -176,7 +178,8 @@ class Plugin_Updates_Gandalf {
 	 */
 	public static function handle_callback( $plugin, $data ) {
 		$scan_id = $data['scan_id'];
-		$pending = self::get_array_meta( $plugin, self::PENDING_META_KEY );
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true );
+		$pending = is_array( $pending ) ? $pending : array();
 
 		if ( empty( $pending[ $scan_id ] ) || ! is_array( $pending[ $scan_id ] ) ) {
 			$error = new \WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', array( 'status' => \WP_Http::BAD_REQUEST ) );
@@ -237,7 +240,8 @@ class Plugin_Updates_Gandalf {
 
 		self::record_last_error( $plugin, $kind, $message, $scan_id );
 
-		$pending = self::get_array_meta( $plugin, self::PENDING_META_KEY );
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true );
+		$pending = is_array( $pending ) ? $pending : array();
 		unset( $pending[ $scan_id ] );
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
@@ -250,7 +254,8 @@ class Plugin_Updates_Gandalf {
 			return;
 		}
 
-		$already_notified = self::get_array_meta( $plugin, self::NOTIFIED_META_KEY );
+		$already_notified = get_post_meta( $plugin->ID, self::NOTIFIED_META_KEY, true );
+		$already_notified = is_array( $already_notified ) ? $already_notified : array();
 		foreach ( $already_notified as $hash => $time ) {
 			if ( $time < time() - MONTH_IN_SECONDS ) {
 				unset( $already_notified[ $hash ] );
@@ -317,21 +322,4 @@ class Plugin_Updates_Gandalf {
 		);
 	}
 
-	protected static function get_array_meta( $plugin, $key ) {
-		$value = get_post_meta( $plugin->ID, $key, true );
-		return is_array( $value ) ? $value : array();
-	}
-
-	protected static function is_configured() {
-		return defined( 'WP_GANDALF_SCAN_SHARED_SECRET' ) && WP_GANDALF_SCAN_SHARED_SECRET;
-	}
-
-	protected static function normalize_release_ref( $release_ref ) {
-		$release_ref = self::nullable_string( $release_ref );
-		return null === $release_ref ? 'trunk' : $release_ref;
-	}
-
-	protected static function nullable_string( $value ) {
-		return is_string( $value ) && '' !== trim( $value ) ? $value : null;
-	}
 }
