@@ -83,12 +83,17 @@ class Plugin_Scan {
 	/**
 	 * Cron callback to scan a plugin update.
 	 *
-	 * @param string     $plugin_slug     The plugin slug.
-	 * @param array      $to_scan         The tags to scan with PCP.
-	 * @param array|bool $gandalf_context The import context for Gandalf, or false if absent.
+	 * @param string     $plugin_slug    The plugin slug.
+	 * @param array      $to_scan        The tags to scan with PCP.
+	 * @param array|bool $import_context The importer release context, or false if absent.
 	 */
-	public static function cron_trigger( $plugin_slug, $to_scan, $gandalf_context = false ) {
+	public static function cron_trigger( $plugin_slug, $to_scan, $import_context = false ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+
+		// Existing scan_plugin jobs may predate Gandalf and only have PCP arguments.
+		if ( $import_context ) {
+			Plugin_Scan_Gandalf::dispatch_from_import_context( $plugin, $import_context );
+		}
 
 		$already_notified     = get_post_meta( $plugin->ID, '_scan_notified', true ) ?: [];
 		$hashes_seen_this_run = [];
@@ -137,11 +142,6 @@ class Plugin_Scan {
 		}
 
 		update_post_meta( $plugin->ID, '_scan_notified', $already_notified );
-
-		// Existing scan_plugin jobs may predate Gandalf and only have PCP arguments.
-		if ( $gandalf_context ) {
-			Plugin_Scan_Gandalf::dispatch_from_import_context( $plugin, $gandalf_context );
-		}
 	}
 
 	/**
