@@ -11,6 +11,7 @@ use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan_Gandalf;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WP_Error;
+use WP_Http;
 
 /**
  * Callback endpoint for advisory Gandalf scans.
@@ -58,7 +59,7 @@ class Gandalf_Scan extends Base {
 			$error = new WP_Error(
 				'invalid_gandalf_scan_callback',
 				__( 'Invalid Gandalf scan callback.', 'wporg-plugins' ),
-				[ 'status' => \WP_Http::BAD_REQUEST ]
+				[ 'status' => WP_Http::BAD_REQUEST ]
 			);
 
 			Plugin_Scan_Gandalf::record_invalid_callback( $plugin, $error );
