@@ -40,7 +40,7 @@ class SVN_Watcher {
 		// We don't want to re-process the last rev processed, so bump past it
 		$last_rev_processed++;
 
-		echo "Processing changes from $last_rev_processed to $head_rev..\n";
+		fwrite( STDERR, "svn-watch: processing changes from r$last_rev_processed to r$head_rev\n" );
 
 		$plugins_to_process = $this->get_plugin_changes_between( $last_rev_processed, $head_rev );
 
@@ -48,6 +48,19 @@ class SVN_Watcher {
 			if ( $plugin_data['assets_touched'] && ! in_array( 'trunk', $plugin_data['tags_touched'] ) ) {
 				$plugin_data['tags_touched'][] = 'trunk';
 			}
+
+			$log_line = sprintf(
+				"[%s] svn-watch: r%d-r%d tags=[%s]%s%s%s%s\n",
+				$plugin_slug,
+				min( $plugin_data['revisions'] ),
+				max( $plugin_data['revisions'] ),
+				implode( ',', $plugin_data['tags_touched'] ),
+				$plugin_data['tags_deleted'] ? ' deleted=[' . implode( ',', $plugin_data['tags_deleted'] ) . ']' : '',
+				$plugin_data['readme_touched'] ? ' readme' : '',
+				$plugin_data['code_touched']   ? ' code' : '',
+				$plugin_data['assets_touched'] ? ' assets' : ''
+			);
+			fwrite( STDERR, $log_line );
 
 			Jobs\Plugin_Import::queue( $plugin_slug, $plugin_data );
 

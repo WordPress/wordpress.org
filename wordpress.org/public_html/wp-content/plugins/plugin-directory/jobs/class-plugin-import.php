@@ -48,28 +48,41 @@ class Plugin_Import {
 			$existing_args = $existing[0]['args'][0] ?? array();
 			$merged_args   = self::merge_plugin_data( $existing_args, $new_args );
 
+			list( $natural_time, $natural_reason ) = self::queue_run_time( $plugin_slug, $merged_args );
+			$nextrun                               = min( $next_scheduled, $natural_time );
+
 			$updated = Manager::update_scheduled_event(
 				"import_plugin:{$plugin_slug}",
 				$next_scheduled,
 				array(
-					'nextrun' => min( $next_scheduled, self::queue_run_time( $plugin_slug, $merged_args ) ),
+					'nextrun' => $nextrun,
 					'args'    => array( $merged_args ),
 				)
 			);
 
 			if ( $updated ) {
+				$log_line = sprintf(
+					"[%s] queue: merged into pending event, next run %s (%s)\n",
+					$plugin_slug,
+					gmdate( 'Y-m-d H:i:s', $nextrun ),
+					$natural_reason
+				);
+				fwrite( STDERR, $log_line );
+
 				return;
 			}
 		}
 
-		$when_to_run = self::queue_run_time( $plugin_slug, $new_args );
+		list( $when_to_run, $reason ) = self::queue_run_time( $plugin_slug, $new_args );
 
 		// To avoid a situation where two imports run concurrently, if one is already scheduled or in flight, run it 1hr later (we'll trigger it after the current one finishes).
 		$last_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' );
 		if ( $last_scheduled ) {
 			$when_to_run = $last_scheduled + HOUR_IN_SECONDS;
+			$reason      = 'concurrency push: 1hr after pending event';
 		} elseif ( Manager::is_event_running( "import_plugin:{$plugin_slug}" ) ) {
 			$when_to_run = time() + HOUR_IN_SECONDS;
+			$reason      = 'concurrency push: 1hr (import in flight)';
 		}
 
 		wp_schedule_single_event(
@@ -77,6 +90,14 @@ class Plugin_Import {
 			"import_plugin:{$plugin_slug}",
 			array( $new_args )
 		);
+
+		$log_line = sprintf(
+			"[%s] queue: scheduled %s (%s)\n",
+			$plugin_slug,
+			gmdate( 'Y-m-d H:i:s', $when_to_run ),
+			$reason
+		);
+		fwrite( STDERR, $log_line );
 	}
 
 	/**
@@ -96,18 +117,18 @@ class Plugin_Import {
 	 *
 	 * @param string $plugin_slug The plugin slug.
 	 * @param array  $args        The args for the import job (post-merge where applicable).
-	 * @return int Unix timestamp for when the event should run.
+	 * @return array { 0: int timestamp, 1: string reason } — when the event should run, and why.
 	 */
 	protected static function queue_run_time( $plugin_slug, $args ) {
 		if ( ! self::is_trunk_only_update( $args ) ) {
-			return time() + 5;
+			return array( time() + 5, 'tag activity' );
 		}
 
 		if ( ! empty( $args['readme_touched'] ) && self::trunk_stable_tag_flip_to_existing_tag( $plugin_slug ) ) {
-			return time() + 5;
+			return array( time() + 5, 'release-by-readme-flip to existing tag' );
 		}
 
-		return time() + 15 * MINUTE_IN_SECONDS;
+		return array( time() + 15 * MINUTE_IN_SECONDS, '15-minute trunk grace window for follow-up tag' );
 	}
 
 	/**
