@@ -161,13 +161,10 @@ class Plugin_Import {
 			return false;
 		}
 
-		try {
-			$readme         = new Readme_Parser( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk/readme.txt" );
-			$new_stable_tag = $readme->stable_tag;
-		} catch ( \Throwable $e ) {
-			// Readme_Parser hands file_get_contents() output straight to preg_match; a 404 or network error can fatal.
-			return false;
-		}
+		// Readme_Parser is tolerant of a failed fetch (file_get_contents() → false flows through preg_match as ''),
+		// so an empty stable_tag here covers both "no Stable Tag header" and "trunk readme couldn't be fetched".
+		$readme         = new Readme_Parser( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk/readme.txt" );
+		$new_stable_tag = $readme->stable_tag;
 
 		if ( ! $new_stable_tag || 'trunk' === $new_stable_tag ) {
 			return false;
