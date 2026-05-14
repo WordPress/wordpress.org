@@ -203,9 +203,12 @@ class Parser {
 
 		// Prefer wp_safe_remote_get for HTTP fetches — it has a 5s timeout, so a hung readme host can't stall queue() or the SVN watcher. Fall back to a no-timeout file_get_contents when WP isn't loaded (early bootstrap / standalone CLI) or for non-HTTP sources (local files, data URIs).
 		if ( $is_http && function_exists( 'wp_safe_remote_get' ) ) {
-			$response = wp_safe_remote_get( $file_or_url, array(
-				'user-agent' => 'WordPress.org Plugin Readme Parser',
-			) );
+			$response = wp_safe_remote_get(
+				$file_or_url,
+				array(
+					'user-agent' => 'WordPress.org Plugin Readme Parser',
+				)
+			);
 
 			if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) >= 400 ) {
 				return false;
@@ -216,7 +219,7 @@ class Parser {
 			$context = stream_context_create( array(
 				'http' => array(
 					'user_agent' => 'WordPress.org Plugin Readme Parser',
-				)
+				),
 			) );
 
 			// Suppress warnings for the common 404 / unreachable-URL case; downstream callers see an empty parser.
