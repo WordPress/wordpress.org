@@ -127,6 +127,18 @@ class Import {
 		// Validate various headers:
 
 		/*
+		 * Warn when the plugin's Version header doesn't appear to match the tag it was released from.
+		 *
+		 * Trunk releases skip this check — there's no tag folder to compare against.
+		 */
+		if ( 'trunk' !== $stable_tag && $version && ! self::version_matches_tag( $version, $stable_tag ) ) {
+			$this->warnings['version_tag_mismatch'] = [
+				'version' => $version,
+				'tag'     => $stable_tag,
+			];
+		}
+
+		/*
 		 * Check to see if the plugin is using the `Update URI` header.
 		 *
 		 * Plugins on WordPress.org should NOT use this header, but we do accept some URI formats for it in the API,
@@ -1252,6 +1264,40 @@ class Import {
 		}
 
 		return (object) $headers;
+	}
+
+	/**
+	 * Determine whether a plugin's Version header looks like a match for the SVN tag it was released from.
+	 *
+	 * Strips a leading "Version" word or 'v' prefix from both sides, then uses a containment check
+	 * so that minor format differences (e.g. `1.4` vs `1.4.0`) are still treated as a match. Empty
+	 * inputs are treated as a match because there's nothing useful to compare.
+	 *
+	 * @param string $version The plugin's Version header value.
+	 * @param string $tag     The SVN tag folder name (e.g. `1.4.1`, `v2.0`).
+	 * @return bool True when the values appear to match, false when they look mismatched.
+	 */
+	public static function version_matches_tag( $version, $tag ) {
+		$normalize = static function ( $v ) {
+			$v = trim( (string) $v );
+			// Strip a leading "Version" word, with optional ':' or '-' separator.
+			$v = preg_replace( '/^version\b\s*[:\-]?\s*/i', '', $v );
+			// Strip a leading 'v' when followed by a digit (e.g. v1.0 → 1.0).
+			$v = preg_replace( '/^v(?=\d)/i', '', $v );
+			return trim( $v );
+		};
+
+		$normalized_version = $normalize( $version );
+		$normalized_tag     = $normalize( $tag );
+
+		if ( '' === $normalized_version || '' === $normalized_tag ) {
+			return true;
+		}
+
+		return (
+			false !== stripos( $normalized_version, $normalized_tag ) ||
+			false !== stripos( $normalized_tag, $normalized_version )
+		);
 	}
 
 	/**
