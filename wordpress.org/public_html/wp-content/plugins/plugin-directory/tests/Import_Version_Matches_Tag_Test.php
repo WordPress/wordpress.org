@@ -33,7 +33,7 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 		);
 	}
 
-	public function matches_provider() {
+	public static function matches_provider() {
 		return array(
 			'exact match'                     => array( '1.0', '1.0' ),
 			'leading v on tag'                => array( '1.0', 'v1.0' ),
@@ -51,7 +51,7 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 		);
 	}
 
-	public function mismatches_provider() {
+	public static function mismatches_provider() {
 		return array(
 			'bandsintown case'        => array( '1.4.0', '1.4.1' ),
 			'different major'         => array( '1.0', '2.0' ),
