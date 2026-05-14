@@ -127,6 +127,33 @@ class Import {
 		// Validate various headers:
 
 		/*
+		 * Warn when the plugin's Version header has anything other than digits, dots, and an
+		 * optional `-rc` / `-beta` / `-alpha` pre-release suffix (with optional digits).
+		 *
+		 * Catches headers that include an accidental duplicate `Version:` prefix, stray
+		 * letters or punctuation, or other free-form text mixed in with the version number.
+		 *
+		 * The strict format matters because WordPress core uses `version_compare()` to decide
+		 * whether to offer an update — a malformed header can silently give the wrong answer
+		 * for users running an older release.
+		 */
+		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?$/i', $version ) ) {
+			$this->warnings['version_header_unexpected_chars'] = $version;
+		}
+
+		/*
+		 * Warn when the plugin's Version header doesn't appear to match the tag it was released from.
+		 *
+		 * Trunk releases skip this check — there's no tag folder to compare against.
+		 */
+		if ( 'trunk' !== $stable_tag && $version && ! self::version_matches_tag( $version, $stable_tag ) ) {
+			$this->warnings['version_tag_mismatch'] = [
+				'version' => $version,
+				'tag'     => $stable_tag,
+			];
+		}
+
+		/*
 		 * Check to see if the plugin is using the `Update URI` header.
 		 *
 		 * Plugins on WordPress.org should NOT use this header, but we do accept some URI formats for it in the API,
@@ -1252,6 +1279,47 @@ class Import {
 		}
 
 		return (object) $headers;
+	}
+
+	/**
+	 * Determine whether a plugin's Version header looks like a match for the SVN tag it was released from.
+	 *
+	 * Both sides are reduced to the leading dotted-numeric portion (e.g. `release-1.4.0` → `1.4.0`,
+	 * `1.4.0-beta` → `1.4.0`, `1.0 & beta` → `1.0`), then compared with `version_compare()`. Any
+	 * inequality is treated as a mismatch — including the unusual case where the Version header is
+	 * ahead of the tag, which is allowable but almost always unintended. `1.0` vs `1.0.0` is treated
+	 * as equal after trailing `.0` segments are stripped.
+	 *
+	 * @param string $version The plugin's Version header value.
+	 * @param string $tag     The SVN tag folder name (e.g. `1.4.1`, `v2.0`).
+	 * @return bool True when the values appear to match, false when they look mismatched.
+	 */
+	public static function version_matches_tag( $version, $tag ) {
+		$normalize = static function ( $v ) {
+			// Capture the leading dotted-numeric portion (plus an optional `-rc` / `-beta` /
+			// `-alpha` pre-release suffix, case-insensitive, with optional `.`/no-separator digits)
+			// after any non-digit prefix such as `v`, `Version: `, `release-`, `tag-`, or `hover-`.
+			if ( ! preg_match( '/^[^0-9]*(\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?)/i', (string) $v, $m ) ) {
+				return '';
+			}
+			// Lowercase the suffix — version_compare() is not consistently case-insensitive
+			// (e.g. `1.0-Beta` < `1.0-beta`), so normalize before comparing.
+			$captured = strtolower( $m[1] );
+			// Strip trailing `.0` segments so version_compare() treats `1.0` and `1.0.0` as equal.
+			// Only applies to the dotted-numeric portion; a pre-release suffix is left alone.
+			return preg_replace( '/(\.0+)+(?=(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?$)/', '', $captured );
+		};
+
+		$normalized_version = $normalize( $version );
+		$normalized_tag     = $normalize( $tag );
+
+		if ( '' === $normalized_version || '' === $normalized_tag ) {
+			return true;
+		}
+
+		// Flag any inequality. The common case is "forgot to bump the header" (tag ahead of
+		// version), but the inverse is also worth flagging — it's allowable yet usually unintended.
+		return version_compare( $normalized_tag, $normalized_version, '==' );
 	}
 
 	/**
