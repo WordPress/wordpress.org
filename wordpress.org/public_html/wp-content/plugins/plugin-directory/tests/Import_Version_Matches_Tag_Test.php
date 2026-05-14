@@ -49,7 +49,6 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 			'hover- prefix on tag'      => array( '1.0', 'hover-1.0' ),
 			'-beta trailing on version' => array( '1.0-beta', '1.0' ),
 			'space-&-beta trailing'     => array( '1.0 & beta', '1.0' ),
-			'header ahead of tag'       => array( '2.0', '1.0' ),
 			'empty version'             => array( '', '1.0' ),
 			'empty tag'                 => array( '1.0', '' ),
 			'both empty'                => array( '', '' ),
@@ -65,6 +64,7 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 			'tag has trailing digit' => array( '1.4.0', '1.4.10' ),
 			'release- prefix on tag' => array( '1.0', 'release-2.0' ),
 			'tag-beta still ahead'   => array( '1.4.0', '1.4.1-beta' ),
+			'header ahead of tag'    => array( '2.0', '1.0' ),
 		);
 	}
 }

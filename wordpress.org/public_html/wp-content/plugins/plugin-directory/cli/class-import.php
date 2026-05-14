@@ -127,6 +127,16 @@ class Import {
 		// Validate various headers:
 
 		/*
+		 * Warn when the plugin's Version header has anything other than digits and dots.
+		 *
+		 * Catches things like `Version: Version: 1.7.0` (logistos), `v1.0`, `1.0-beta`, etc. —
+		 * cases where the header value isn't a plain dotted-numeric version.
+		 */
+		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*$/', $version ) ) {
+			$this->warnings['version_header_unexpected_chars'] = $version;
+		}
+
+		/*
 		 * Warn when the plugin's Version header doesn't appear to match the tag it was released from.
 		 *
 		 * Trunk releases skip this check — there's no tag folder to compare against.
@@ -1270,9 +1280,10 @@ class Import {
 	 * Determine whether a plugin's Version header looks like a match for the SVN tag it was released from.
 	 *
 	 * Both sides are reduced to the leading dotted-numeric portion (e.g. `release-1.4.0` → `1.4.0`,
-	 * `1.4.0-beta` → `1.4.0`, `1.0 & beta` → `1.0`), then compared with `version_compare()`. Only the
-	 * "tag is ahead of the Version header" case is treated as a mismatch — equal values (so `1.0` vs
-	 * `1.0.0` is a match) and the unusual "Version header is ahead of tag" case are both allowed.
+	 * `1.4.0-beta` → `1.4.0`, `1.0 & beta` → `1.0`), then compared with `version_compare()`. Any
+	 * inequality is treated as a mismatch — including the unusual case where the Version header is
+	 * ahead of the tag, which is allowable but almost always unintended. `1.0` vs `1.0.0` is treated
+	 * as equal after trailing `.0` segments are stripped.
 	 *
 	 * @param string $version The plugin's Version header value.
 	 * @param string $tag     The SVN tag folder name (e.g. `1.4.1`, `v2.0`).
@@ -1297,9 +1308,9 @@ class Import {
 			return true;
 		}
 
-		// Only flag when the tag is strictly ahead of the Version header
-		// (the common "forgot to bump the header" mistake).
-		return version_compare( $normalized_tag, $normalized_version, '<=' );
+		// Flag any inequality. The common case is "forgot to bump the header" (tag ahead of
+		// version), but the inverse is also worth flagging — it's allowable yet usually unintended.
+		return version_compare( $normalized_tag, $normalized_version, '==' );
 	}
 
 	/**

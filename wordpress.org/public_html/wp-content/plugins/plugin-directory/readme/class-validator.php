@@ -307,12 +307,20 @@ class Validator {
 					'<code>/tags/' . esc_html( $data ) . '/</code>',
 					'<code>/trunk/</code>'
 				);
+			case 'version_header_unexpected_chars':
+				return sprintf(
+					/* translators: 1: 'Version' plugin header, 2: the Version header value */
+					__( 'The %1$s header (%2$s) contains unexpected characters. Use only digits and dots, for example %3$s.', 'wporg-plugins' ),
+					'<code>Version</code>',
+					'<code>' . esc_html( $data ) . '</code>',
+					'<code>1.2.3</code>'
+				);
 			case 'version_tag_mismatch':
 				$version = is_array( $data ) ? ( $data['version'] ?? '' ) : '';
 				$tag     = is_array( $data ) ? ( $data['tag']     ?? '' ) : '';
 				return sprintf(
 					/* translators: 1: 'Version' plugin header, 2: the Version header value, 3: the SVN tag path */
-					__( 'The %1$s header (%2$s) is older than the SVN tag this release was imported from (%3$s). Update the %1$s header in your main plugin file so it matches the tag.', 'wporg-plugins' ),
+					__( 'The %1$s header (%2$s) does not match the SVN tag this release was imported from (%3$s). Update the %1$s header in your main plugin file so it matches the tag.', 'wporg-plugins' ),
 					'<code>Version</code>',
 					'<code>' . esc_html( $version ) . '</code>',
 					'<code>/tags/' . esc_html( $tag ) . '/</code>'
