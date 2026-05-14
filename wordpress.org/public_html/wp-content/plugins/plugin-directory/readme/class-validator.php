@@ -309,10 +309,9 @@ class Validator {
 				);
 			case 'version_header_unexpected_chars':
 				return sprintf(
-					/* translators: 1: 'Version' plugin header, 2: the Version header value */
-					__( 'The %1$s header (%2$s) contains unexpected characters. Use only digits and dots, for example %3$s.', 'wporg-plugins' ),
-					'<code>Version</code>',
-					'<code>' . esc_html( $data ) . '</code>',
+					/* translators: 1: the full 'Version: X' header line, 2: an example version */
+					__( 'The %1$s header contains unexpected characters. Use only digits and dots, for example %2$s.', 'wporg-plugins' ),
+					'<code>Version: ' . esc_html( $data ) . '</code>',
 					'<code>1.2.3</code>'
 				);
 			case 'version_tag_mismatch':

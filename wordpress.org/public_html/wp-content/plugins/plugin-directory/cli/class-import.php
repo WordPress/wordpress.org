@@ -127,12 +127,12 @@ class Import {
 		// Validate various headers:
 
 		/*
-		 * Warn when the plugin's Version header has anything other than digits and dots.
+		 * Warn when the plugin's Version header has anything other than digits, dots, and an
+		 * optional `-rcN`, `-betaN`, or `-alphaN` pre-release suffix.
 		 *
-		 * Catches things like `Version: Version: 1.7.0` (logistos), `v1.0`, `1.0-beta`, etc. —
-		 * cases where the header value isn't a plain dotted-numeric version.
+		 * Catches things like `Version: Version: 1.7.0` (logistos), `v1.0`, `1.0 & beta`, etc.
 		 */
-		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*$/', $version ) ) {
+		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)\d*)?$/', $version ) ) {
 			$this->warnings['version_header_unexpected_chars'] = $version;
 		}
 
@@ -1291,14 +1291,15 @@ class Import {
 	 */
 	public static function version_matches_tag( $version, $tag ) {
 		$normalize = static function ( $v ) {
-			// Capture the leading dotted-numeric portion after any non-digit prefix
-			// (e.g. `v`, `Version: `, `release-`, `tag-`, `hover-`) and ignoring trailing
-			// non-version junk (e.g. `1.0-beta`, `1.0 & beta`).
-			if ( ! preg_match( '/^[^0-9]*(\d+(?:\.\d+)*)/', (string) $v, $m ) ) {
+			// Capture the leading dotted-numeric portion (plus an optional `-rcN` / `-betaN` /
+			// `-alphaN` pre-release suffix) after any non-digit prefix such as `v`, `Version: `,
+			// `release-`, `tag-`, or `hover-`.
+			if ( ! preg_match( '/^[^0-9]*(\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)\d*)?)/', (string) $v, $m ) ) {
 				return '';
 			}
 			// Strip trailing `.0` segments so version_compare() treats `1.0` and `1.0.0` as equal.
-			return preg_replace( '/(\.0+)+$/', '', $m[1] );
+			// Only applies to the dotted-numeric portion; a pre-release suffix is left alone.
+			return preg_replace( '/(\.0+)+(?=(?:-(?:rc|beta|alpha)\d*)?$)/', '', $m[1] );
 		};
 
 		$normalized_version = $normalize( $version );

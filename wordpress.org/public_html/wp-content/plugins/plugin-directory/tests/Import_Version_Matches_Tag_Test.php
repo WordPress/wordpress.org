@@ -36,23 +36,25 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 	public static function matches_provider() {
 		return array(
 			// Format: [ $version, $tag ].
-			'exact match'               => array( '1.0', '1.0' ),
-			'short tag, long version'   => array( '1.0.0', '1.0' ),
-			'short version, long tag'   => array( '1.0', '1.0.0' ),
-			'leading v on tag'          => array( '1.0', 'v1.0' ),
-			'leading v on version'      => array( 'v1.0', '1.0' ),
-			'capital V prefix'          => array( 'V1.0', '1.0' ),
-			'Version word prefix'       => array( 'Version 1.0', '1.0' ),
-			'Version: prefix'           => array( 'Version: 1.0', '1.0' ),
-			'release- prefix on tag'    => array( '1.4.0', 'release-1.4.0' ),
-			'tag- prefix on tag'        => array( '2.0', 'tag-2.0' ),
-			'hover- prefix on tag'      => array( '1.0', 'hover-1.0' ),
-			'-beta trailing on version' => array( '1.0-beta', '1.0' ),
-			'space-&-beta trailing'     => array( '1.0 & beta', '1.0' ),
-			'empty version'             => array( '', '1.0' ),
-			'empty tag'                 => array( '1.0', '' ),
-			'both empty'                => array( '', '' ),
-			'no digits'                 => array( 'abc', '1.0' ),
+			'exact match'             => array( '1.0', '1.0' ),
+			'short tag, long version' => array( '1.0.0', '1.0' ),
+			'short version, long tag' => array( '1.0', '1.0.0' ),
+			'leading v on tag'        => array( '1.0', 'v1.0' ),
+			'leading v on version'    => array( 'v1.0', '1.0' ),
+			'capital V prefix'        => array( 'V1.0', '1.0' ),
+			'Version word prefix'     => array( 'Version 1.0', '1.0' ),
+			'Version: prefix'         => array( 'Version: 1.0', '1.0' ),
+			'release- prefix on tag'  => array( '1.4.0', 'release-1.4.0' ),
+			'tag- prefix on tag'      => array( '2.0', 'tag-2.0' ),
+			'hover- prefix on tag'    => array( '1.0', 'hover-1.0' ),
+			'space-&-beta trailing'   => array( '1.0 & beta', '1.0' ),
+			'matching -beta'          => array( '1.0-beta', '1.0-beta' ),
+			'matching -rc1'           => array( '1.4.0-rc1', '1.4.0-rc1' ),
+			'matching -alpha'         => array( '1.0-alpha', '1.0-alpha' ),
+			'empty version'           => array( '', '1.0' ),
+			'empty tag'               => array( '1.0', '' ),
+			'both empty'              => array( '', '' ),
+			'no digits'               => array( 'abc', '1.0' ),
 		);
 	}
 
@@ -65,6 +67,9 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 			'release- prefix on tag' => array( '1.0', 'release-2.0' ),
 			'tag-beta still ahead'   => array( '1.4.0', '1.4.1-beta' ),
 			'header ahead of tag'    => array( '2.0', '1.0' ),
+			'beta vs final'          => array( '1.0-beta', '1.0' ),
+			'final vs beta'          => array( '1.0', '1.0-beta' ),
+			'different rc numbers'   => array( '1.4.0-rc1', '1.4.0-rc2' ),
 		);
 	}
 }
