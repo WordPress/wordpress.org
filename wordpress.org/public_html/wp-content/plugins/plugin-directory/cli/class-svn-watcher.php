@@ -181,7 +181,7 @@ class SVN_Watcher {
 				}
 			}
 
-			$plugin['tags_touched'] = array_unique( $plugin['tags_touched'] );
+			$plugin['tags_touched'] = array_values( array_unique( $plugin['tags_touched'] ) );
 		}
 
 		// Sort plugins by minimum revision, it should already be in this order, but double check.
