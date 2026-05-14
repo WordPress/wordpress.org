@@ -5,6 +5,7 @@ use Exception;
 use WordPressdotorg\Plugin_Directory\CLI;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Parser as Readme_Parser;
+use WordPressdotorg\Plugin_Directory\Tools\SVN;
 
 /**
  * Import plugin changes into WordPress.
@@ -61,13 +62,14 @@ class Plugin_Import {
 			);
 
 			if ( $updated ) {
-				$log_line = sprintf(
-					"[%s] queue: merged into pending event, next run %s (%s)\n",
-					$plugin_slug,
-					gmdate( 'Y-m-d H:i:s', $nextrun ),
-					$natural_reason
-				);
-				fwrite( STDERR, $log_line );
+				if ( defined( 'STDERR' ) ) {
+					fwrite( STDERR, sprintf(
+						"[%s] queue: merged into pending event, next run %s (%s)\n",
+						$plugin_slug,
+						gmdate( 'Y-m-d H:i:s', $nextrun ),
+						$natural_reason
+					) );
+				}
 
 				return;
 			}
@@ -91,13 +93,14 @@ class Plugin_Import {
 			array( $new_args )
 		);
 
-		$log_line = sprintf(
-			"[%s] queue: scheduled %s (%s)\n",
-			$plugin_slug,
-			gmdate( 'Y-m-d H:i:s', $when_to_run ),
-			$reason
-		);
-		fwrite( STDERR, $log_line );
+		if ( defined( 'STDERR' ) ) {
+			fwrite( STDERR, sprintf(
+				"[%s] queue: scheduled %s (%s)\n",
+				$plugin_slug,
+				gmdate( 'Y-m-d H:i:s', $when_to_run ),
+				$reason
+			) );
+		}
 	}
 
 	/**
@@ -161,9 +164,22 @@ class Plugin_Import {
 			return false;
 		}
 
-		// Readme_Parser is tolerant of a failed fetch (file_get_contents() → false flows through preg_match as ''),
-		// so an empty stable_tag here covers both "no Stable Tag header" and "trunk readme couldn't be fetched".
-		$readme         = new Readme_Parser( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk/readme.txt" );
+		// Find the actual readme filename (case-sensitive in SVN), preferring readme.txt over readme.md. Mirrors Import::export_and_parse_plugin.
+		$trunk_files  = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk" ) ?: array();
+		$readme_files = preg_grep( '!^readme\.(txt|md)$!i', $trunk_files );
+		if ( ! $readme_files ) {
+			return false;
+		}
+
+		$readme_filename = reset( $readme_files );
+		foreach ( $readme_files as $f ) {
+			if ( '.txt' === strtolower( substr( $f, -4 ) ) ) {
+				$readme_filename = $f;
+				break;
+			}
+		}
+
+		$readme         = new Readme_Parser( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk/{$readme_filename}" );
 		$new_stable_tag = $readme->stable_tag;
 
 		if ( ! $new_stable_tag || 'trunk' === $new_stable_tag ) {
