@@ -42,6 +42,20 @@ wp_localize_script(
 );
 
 wp_register_style(
+	'wporg-translate-topbar',
+	plugins_url( 'css/topbar.css', __FILE__ ),
+	array( 'wporg-translate' ),
+	filemtime( __DIR__ . '/css/topbar.css' )
+);
+
+wp_register_script(
+	'wporg-translate-topbar',
+	plugins_url( 'js/topbar.js', __FILE__ ),
+	array( 'wporg-translate-editor' ), // Ensures load order: core editor.js → wporg editor.js → topbar.js.
+	filemtime( __DIR__ . '/js/topbar.js' )
+);
+
+wp_register_style(
 	'chartist',
 	plugins_url( 'css/chartist.min.css', __FILE__ ),
 	[],
@@ -56,6 +70,11 @@ wp_register_script(
 
 if ( isset( $template ) && 'translations' === $template ) {
 	gp_enqueue_script( 'wporg-translate-editor' );
+
+	if ( wporg_translate_topbar_current_user_can_validate( $args ?? array() ) ) {
+		gp_enqueue_script( 'wporg-translate-topbar' );
+		gp_enqueue_style( 'wporg-translate-topbar' );
+	}
 }
 
 // Remove Emoji fallback support
@@ -87,6 +106,16 @@ add_action( 'gp_footer', static function() use ( $template, $args ) {
 		wporg_translation_help_modal( $locale );
 	}
 } );
+
+add_action(
+	'gp_footer',
+	static function() use ( $template, $args ) {
+		if ( 'translations' === $template
+			&& wporg_translate_topbar_current_user_can_validate( $args ?? array() ) ) {
+			gp_tmpl_load( 'translation-editor-topbar', array() );
+		}
+	}
+);
 
 /**
  * Prints markup for the translation help dialog.
@@ -143,6 +172,26 @@ function wporg_translation_help_modal( $locale ) {
 		</div>
 	</div>
 	<?php
+}
+
+/**
+ * Returns true if the current user can approve translations on the translation set
+ * currently being viewed. Used to gate the editor top bar.
+ *
+ * @param array $args The args array from the GlotPress template / footer context.
+ *                    Expected to contain a `translation_set` key when on the
+ *                    `translations` template.
+ * @return bool
+ */
+function wporg_translate_topbar_current_user_can_validate( $args ) {
+	if ( empty( $args['translation_set'] ) ) {
+		return false;
+	}
+	return GP::$permission->current_user_can(
+		'approve',
+		'translation-set',
+		$args['translation_set']->id
+	);
 }
 
 /**
