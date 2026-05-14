@@ -19,7 +19,6 @@ class Plugin_Import {
 	 * @param array  $plugin_data Data about the SVN change (tags_touched, revisions, etc).
 	 */
 	public static function queue( $plugin_slug, $plugin_data ) {
-		$hook     = "import_plugin:{$plugin_slug}";
 		$new_args = array_merge( array( 'plugin' => $plugin_slug ), $plugin_data );
 
 		/*
@@ -35,14 +34,14 @@ class Plugin_Import {
 		 *    it so a single import publishes from the tag, not from a trunk
 		 *    fallback that the tag commit then has to overwrite.
 		 */
-		$next_scheduled = Manager::get_scheduled_time( $hook, 'next' );
-		if ( $next_scheduled && ! Manager::is_event_running( $hook ) ) {
-			$existing      = Manager::get_scheduled_events( $hook, $next_scheduled );
+		$next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'next' );
+		if ( $next_scheduled && ! Manager::is_event_running( "import_plugin:{$plugin_slug}" ) ) {
+			$existing      = Manager::get_scheduled_events( "import_plugin:{$plugin_slug}", $next_scheduled );
 			$existing_args = $existing[0]['args'][0] ?? array();
 			$merged_args   = self::merge_plugin_data( $existing_args, $new_args );
 
 			$updated = Manager::update_scheduled_event(
-				$hook,
+				"import_plugin:{$plugin_slug}",
 				$next_scheduled,
 				array(
 					'nextrun' => min( $next_scheduled, self::queue_run_time( $merged_args ) ),
@@ -58,16 +57,16 @@ class Plugin_Import {
 		$when_to_run = self::queue_run_time( $new_args );
 
 		// To avoid a situation where two imports run concurrently, if one is already scheduled or in flight, run it 1hr later (we'll trigger it after the current one finishes).
-		$last_scheduled = Manager::get_scheduled_time( $hook, 'last' );
+		$last_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' );
 		if ( $last_scheduled ) {
 			$when_to_run = $last_scheduled + HOUR_IN_SECONDS;
-		} elseif ( Manager::is_event_running( $hook ) ) {
+		} elseif ( Manager::is_event_running( "import_plugin:{$plugin_slug}" ) ) {
 			$when_to_run = time() + HOUR_IN_SECONDS;
 		}
 
 		wp_schedule_single_event(
 			$when_to_run,
-			$hook,
+			"import_plugin:{$plugin_slug}",
 			array( $new_args )
 		);
 	}
