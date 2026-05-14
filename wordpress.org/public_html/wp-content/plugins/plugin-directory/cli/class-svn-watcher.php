@@ -40,13 +40,30 @@ class SVN_Watcher {
 		// We don't want to re-process the last rev processed, so bump past it
 		$last_rev_processed++;
 
-		echo "Processing changes from $last_rev_processed to $head_rev..\n";
+		if ( defined( 'STDERR' ) ) {
+			fwrite( STDERR, "svn-watch: processing changes from r$last_rev_processed to r$head_rev\n" );
+		}
 
 		$plugins_to_process = $this->get_plugin_changes_between( $last_rev_processed, $head_rev );
 
 		foreach ( $plugins_to_process as $plugin_slug => $plugin_data ) {
 			if ( $plugin_data['assets_touched'] && ! in_array( 'trunk', $plugin_data['tags_touched'] ) ) {
 				$plugin_data['tags_touched'][] = 'trunk';
+			}
+
+			if ( defined( 'STDERR' ) ) {
+				$log_line = sprintf(
+					"[%s] svn-watch: r%d-r%d tags=[%s]%s%s%s%s\n",
+					$plugin_slug,
+					min( $plugin_data['revisions'] ),
+					max( $plugin_data['revisions'] ),
+					implode( ',', $plugin_data['tags_touched'] ),
+					$plugin_data['tags_deleted'] ? ' deleted=[' . implode( ',', $plugin_data['tags_deleted'] ) . ']' : '',
+					$plugin_data['readme_touched'] ? ' readme' : '',
+					$plugin_data['code_touched']   ? ' code' : '',
+					$plugin_data['assets_touched'] ? ' assets' : ''
+				);
+				fwrite( STDERR, $log_line );
 			}
 
 			Jobs\Plugin_Import::queue( $plugin_slug, $plugin_data );
@@ -155,8 +172,8 @@ class SVN_Watcher {
 		
 				}
 
-				// This will have false-positives for when a readme in a subdirectory is hit, but this is only for optimizations.
-				if ( in_array( strtolower( basename( $path ) ), array( 'readme.txt', 'readme.md' ) ) ) {
+				// Only count the readme at the root of /trunk or a tag — a readme.txt in a subdirectory is just bundled documentation.
+				if ( preg_match( '!/(trunk|tags/[^/]+)/readme\.(txt|md)$!i', $path ) ) {
 					$plugin['readme_touched'] = true;
 				}
 				if ( ! $plugin['code_touched'] && ( '/' === substr( $path, -1 ) || '.php' === substr( $path, -4 ) || '.js' === substr( $path, -3 ) ) ) {
