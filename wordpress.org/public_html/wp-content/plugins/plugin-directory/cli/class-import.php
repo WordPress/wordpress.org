@@ -1269,9 +1269,10 @@ class Import {
 	/**
 	 * Determine whether a plugin's Version header looks like a match for the SVN tag it was released from.
 	 *
-	 * Strips a leading "Version" word or 'v' prefix from both sides, then uses a containment check
-	 * so that minor format differences (e.g. `1.4` vs `1.4.0`) are still treated as a match. Empty
-	 * inputs are treated as a match because there's nothing useful to compare.
+	 * Both sides are reduced to the leading dotted-numeric portion (e.g. `release-1.4.0` → `1.4.0`,
+	 * `1.4.0-beta` → `1.4.0`, `1.0 & beta` → `1.0`), then compared with `version_compare()`. Only the
+	 * "tag is ahead of the Version header" case is treated as a mismatch — equal values (so `1.0` vs
+	 * `1.0.0` is a match) and the unusual "Version header is ahead of tag" case are both allowed.
 	 *
 	 * Note: this does NOT re-apply the legacy `.X` → `0.X` normalization that
 	 * `Readme_Parser::sanitize_stable_tag()` performs — by the time this is reached, the
@@ -1283,12 +1284,14 @@ class Import {
 	 */
 	public static function version_matches_tag( $version, $tag ) {
 		$normalize = static function ( $v ) {
-			$v = trim( (string) $v );
-			// Strip a leading "Version" word, with optional ':' or '-' separator.
-			$v = preg_replace( '/^version\b\s*[:\-]?\s*/i', '', $v );
-			// Strip a leading 'v' when followed by a digit (e.g. v1.0 → 1.0).
-			$v = preg_replace( '/^v(?=\d)/i', '', $v );
-			return trim( $v );
+			// Capture the leading dotted-numeric portion after any non-digit prefix
+			// (e.g. `v`, `Version: `, `release-`, `tag-`, `hover-`) and ignoring trailing
+			// non-version junk (e.g. `1.0-beta`, `1.0 & beta`).
+			if ( ! preg_match( '/^[^0-9]*(\d+(?:\.\d+)*)/', (string) $v, $m ) ) {
+				return '';
+			}
+			// Strip trailing `.0` segments so version_compare() treats `1.0` and `1.0.0` as equal.
+			return preg_replace( '/(\.0+)+$/', '', $m[1] );
 		};
 
 		$normalized_version = $normalize( $version );
@@ -1298,10 +1301,9 @@ class Import {
 			return true;
 		}
 
-		return (
-			false !== stripos( $normalized_version, $normalized_tag ) ||
-			false !== stripos( $normalized_tag, $normalized_version )
-		);
+		// Only flag when the tag is strictly ahead of the Version header
+		// (the common "forgot to bump the header" mistake).
+		return version_compare( $normalized_tag, $normalized_version, '<=' );
 	}
 
 	/**

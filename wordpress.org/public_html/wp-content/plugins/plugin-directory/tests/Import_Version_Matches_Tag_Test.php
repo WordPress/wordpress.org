@@ -35,28 +35,36 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 
 	public static function matches_provider() {
 		return array(
-			'exact match'                     => array( '1.0', '1.0' ),
-			'leading v on tag'                => array( '1.0', 'v1.0' ),
-			'leading v on version'            => array( 'v1.0', '1.0' ),
-			'leading v on both'               => array( 'v1.0', 'v1.0' ),
-			'Version word prefix on version'  => array( 'Version 1.0', '1.0' ),
-			'Version: prefix on version'      => array( 'Version: 1.0', '1.0' ),
-			'tag is shorter version'          => array( '1.4.0', '1.4' ),
-			'tag is longer version'           => array( '1.4', '1.4.0' ),
-			'version with build suffix'       => array( '1.0-beta', '1.0' ),
-			'empty version'                   => array( '', '1.0' ),
-			'empty tag'                       => array( '1.0', '' ),
-			'both empty'                      => array( '', '' ),
-			'capital V prefix'                => array( 'V1.0', '1.0' ),
+			// Format: [ $version, $tag ].
+			'exact match'               => array( '1.0', '1.0' ),
+			'short tag, long version'   => array( '1.0.0', '1.0' ),
+			'short version, long tag'   => array( '1.0', '1.0.0' ),
+			'leading v on tag'          => array( '1.0', 'v1.0' ),
+			'leading v on version'      => array( 'v1.0', '1.0' ),
+			'capital V prefix'          => array( 'V1.0', '1.0' ),
+			'Version word prefix'       => array( 'Version 1.0', '1.0' ),
+			'Version: prefix'           => array( 'Version: 1.0', '1.0' ),
+			'release- prefix on tag'    => array( '1.4.0', 'release-1.4.0' ),
+			'tag- prefix on tag'        => array( '2.0', 'tag-2.0' ),
+			'hover- prefix on tag'      => array( '1.0', 'hover-1.0' ),
+			'-beta trailing on version' => array( '1.0-beta', '1.0' ),
+			'space-&-beta trailing'     => array( '1.0 & beta', '1.0' ),
+			'header ahead of tag'       => array( '2.0', '1.0' ),
+			'empty version'             => array( '', '1.0' ),
+			'empty tag'                 => array( '1.0', '' ),
+			'both empty'                => array( '', '' ),
+			'no digits'                 => array( 'abc', '1.0' ),
 		);
 	}
 
 	public static function mismatches_provider() {
 		return array(
-			'bandsintown case'        => array( '1.4.0', '1.4.1' ),
-			'different major'         => array( '1.0', '2.0' ),
-			'unrelated version'       => array( '3.2.1', '1.0' ),
-			'partial overlap by char' => array( '1.4.0', '1.4.10' ), // 1.4.0 not in 1.4.10, 1.4.10 not in 1.4.0.
+			// Format: [ $version, $tag ].
+			'bandsintown case'       => array( '1.4.0', '1.4.1' ),
+			'different major'        => array( '1.0', '2.0' ),
+			'tag has trailing digit' => array( '1.4.0', '1.4.10' ),
+			'release- prefix on tag' => array( '1.0', 'release-2.0' ),
+			'tag-beta still ahead'   => array( '1.4.0', '1.4.1-beta' ),
 		);
 	}
 }
