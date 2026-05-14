@@ -3,6 +3,8 @@ namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use Exception;
 use WordPressdotorg\Plugin_Directory\CLI;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Readme\Parser as Readme_Parser;
 
 /**
  * Import plugin changes into WordPress.
@@ -44,7 +46,7 @@ class Plugin_Import {
 				"import_plugin:{$plugin_slug}",
 				$next_scheduled,
 				array(
-					'nextrun' => min( $next_scheduled, self::queue_run_time( $merged_args ) ),
+					'nextrun' => min( $next_scheduled, self::queue_run_time( $plugin_slug, $merged_args ) ),
 					'args'    => array( $merged_args ),
 				)
 			);
@@ -54,7 +56,7 @@ class Plugin_Import {
 			}
 		}
 
-		$when_to_run = self::queue_run_time( $new_args );
+		$when_to_run = self::queue_run_time( $plugin_slug, $new_args );
 
 		// To avoid a situation where two imports run concurrently, if one is already scheduled or in flight, run it 1hr later (we'll trigger it after the current one finishes).
 		$last_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' );
@@ -78,19 +80,28 @@ class Plugin_Import {
 	 * first and then `svn cp trunk tags/X.Y` a moment later. Running the import
 	 * immediately on the trunk commit publishes a trunk-fallback release that
 	 * the follow-up tag commit then re-publishes from the tag. To collapse the
-	 * two into one import, all trunk-only updates are deferred by 15 minutes —
-	 * that gives the follow-up tag commit time to merge into the same job (see
+	 * two into one import, trunk-only updates are deferred by 15 minutes — that
+	 * gives the follow-up tag commit time to merge into the same job (see
 	 * queue()). Tag-touching changes (additions or deletions) run immediately.
 	 *
-	 * @param array $args The args for the import job (post-merge where applicable).
+	 * The grace window is bypassed when the only change is a `Stable Tag` flip
+	 * in /trunk/readme.txt pointing at a tag that already exists in /tags/:
+	 * there's no follow-up tag to wait for in that case.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param array  $args        The args for the import job (post-merge where applicable).
 	 * @return int Unix timestamp for when the event should run.
 	 */
-	protected static function queue_run_time( $args ) {
-		if ( self::is_trunk_only_update( $args ) ) {
-			return time() + 15 * MINUTE_IN_SECONDS;
+	protected static function queue_run_time( $plugin_slug, $args ) {
+		if ( ! self::is_trunk_only_update( $args ) ) {
+			return time() + 5;
 		}
 
-		return time() + 5;
+		if ( ! empty( $args['readme_touched'] ) && self::trunk_stable_tag_flip_to_existing_tag( $plugin_slug ) ) {
+			return time() + 5;
+		}
+
+		return time() + 15 * MINUTE_IN_SECONDS;
 	}
 
 	/**
@@ -104,6 +115,39 @@ class Plugin_Import {
 		$tags_deleted = (array) ( $args['tags_deleted'] ?? array() );
 
 		return $tags_touched && array( 'trunk' ) === array_values( array_unique( $tags_touched ) ) && ! $tags_deleted;
+	}
+
+	/**
+	 * Whether /trunk/readme.txt's Stable Tag points to a tag that's already in
+	 * /tags/ AND differs from the directory's current stable_tag.
+	 *
+	 * Indicates a release-by-readme-flip — the author isn't going to follow up
+	 * with `svn cp trunk tags/X.Y` because the tag already exists. Used to skip
+	 * the 15-minute trunk grace window in that case.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return bool
+	 */
+	protected static function trunk_stable_tag_flip_to_existing_tag( $plugin_slug ) {
+		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $plugin ) {
+			return false;
+		}
+
+		$readme         = new Readme_Parser( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk/readme.txt" );
+		$new_stable_tag = $readme->stable_tag;
+
+		if ( ! $new_stable_tag || 'trunk' === $new_stable_tag ) {
+			return false;
+		}
+
+		if ( get_post_meta( $plugin->ID, 'stable_tag', true ) === $new_stable_tag ) {
+			return false;
+		}
+
+		$tagged_versions = (array) get_post_meta( $plugin->ID, 'tagged_versions', true );
+
+		return in_array( $new_stable_tag, $tagged_versions, true );
 	}
 
 	/**
