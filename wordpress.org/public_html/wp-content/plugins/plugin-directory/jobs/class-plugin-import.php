@@ -161,8 +161,13 @@ class Plugin_Import {
 			return false;
 		}
 
-		$readme         = new Readme_Parser( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk/readme.txt" );
-		$new_stable_tag = $readme->stable_tag;
+		try {
+			$readme         = new Readme_Parser( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk/readme.txt" );
+			$new_stable_tag = $readme->stable_tag;
+		} catch ( \Throwable $e ) {
+			// Readme_Parser hands file_get_contents() output straight to preg_match; a 404 or network error can fatal.
+			return false;
+		}
 
 		if ( ! $new_stable_tag || 'trunk' === $new_stable_tag ) {
 			return false;
