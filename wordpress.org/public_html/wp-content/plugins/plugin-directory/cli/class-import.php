@@ -1274,10 +1274,6 @@ class Import {
 	 * "tag is ahead of the Version header" case is treated as a mismatch — equal values (so `1.0` vs
 	 * `1.0.0` is a match) and the unusual "Version header is ahead of tag" case are both allowed.
 	 *
-	 * Note: this does NOT re-apply the legacy `.X` → `0.X` normalization that
-	 * `Readme_Parser::sanitize_stable_tag()` performs — by the time this is reached, the
-	 * stable tag has already been sanitized, and that form should not be supported for new releases.
-	 *
 	 * @param string $version The plugin's Version header value.
 	 * @param string $tag     The SVN tag folder name (e.g. `1.4.1`, `v2.0`).
 	 * @return bool True when the values appear to match, false when they look mismatched.
