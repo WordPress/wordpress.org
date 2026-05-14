@@ -130,7 +130,8 @@ class Import {
 		 * Warn when the plugin's Version header has anything other than digits, dots, and an
 		 * optional `-rcN`, `-betaN`, or `-alphaN` pre-release suffix.
 		 *
-		 * Catches things like `Version: Version: 1.7.0` (logistos), `v1.0`, `1.0 & beta`, etc.
+		 * Catches headers that include an accidental duplicate `Version:` prefix, stray
+		 * letters or punctuation, or other free-form text mixed in with the version number.
 		 */
 		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)\d*)?$/', $version ) ) {
 			$this->warnings['version_header_unexpected_chars'] = $version;
