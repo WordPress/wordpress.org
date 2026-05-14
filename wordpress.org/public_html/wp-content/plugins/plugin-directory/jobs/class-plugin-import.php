@@ -35,9 +35,15 @@ class Plugin_Import {
 		 *    later. The first commit's event is delayed; the second merges into
 		 *    it so a single import publishes from the tag, not from a trunk
 		 *    fallback that the tag commit then has to overwrite.
+		 *
+		 * Skip the merge for events due in the next 5 seconds: a Cavalcade
+		 * runner could claim the row between our status check and the row write,
+		 * and the resulting save would clobber the runner's `status='running'`
+		 * transition. 5s assumes the status read at the top of this function
+		 * is still fresh by the time `update_scheduled_event` writes.
 		 */
 		$next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'next' );
-		if ( $next_scheduled && ! Manager::is_event_running( "import_plugin:{$plugin_slug}" ) ) {
+		if ( $next_scheduled && $next_scheduled > time() + 5 && ! Manager::is_event_running( "import_plugin:{$plugin_slug}" ) ) {
 			$existing      = Manager::get_scheduled_events( "import_plugin:{$plugin_slug}", $next_scheduled );
 			$existing_args = $existing[0]['args'][0] ?? array();
 			$merged_args   = self::merge_plugin_data( $existing_args, $new_args );
