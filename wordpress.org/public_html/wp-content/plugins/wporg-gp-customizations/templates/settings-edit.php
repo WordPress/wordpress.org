@@ -121,23 +121,21 @@ if ( $deepl_key ) {
 		<td>
 			<select name="default_sort[openai_model]" id="default_sort[openai_model]" style="border:revert;">
 				<?php
-				$openai_models = array( 'gpt-3.5-turbo', 
-										'gpt-4', 
-										'gpt-4-turbo', 
-										'gpt-4o-mini', 
-										'gpt-4o',
-										'gpt-4.1-nano', 
-										'gpt-4.1-mini', 
-										'gpt-4.1', 
-										'gpt-5-nano', 
-										'gpt-5-mini', 
-										'gpt-5', 
-										'gpt-5.1' );
-				$openai_model = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
-				foreach ( $openai_models as $model ) {
-					echo '<option value="' . esc_attr( $model ) . '"';
-					selected( $model, $openai_model );
-					echo '>' . esc_html( $model ) . '</option>';
+				$stored_model   = gp_array_get( $gp_default_sort, 'openai_model', \WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Models::FALLBACK );
+				$selected_model = \WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Models::resolve_for_current_user( $stored_model );
+				$tier_labels    = array(
+					'Expensive' => __( 'Expensive', 'glotpress' ),
+					'Medium'    => __( 'Medium', 'glotpress' ),
+					'Cheap'     => __( 'Cheap', 'glotpress' ),
+				);
+				foreach ( \WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Models::TIERS as $tier_key => $tier_models ) {
+					echo '<optgroup label="' . esc_attr( $tier_labels[ $tier_key ] ) . '">';
+					foreach ( $tier_models as $model_id ) {
+						echo '<option value="' . esc_attr( $model_id ) . '"';
+						selected( $model_id, $selected_model );
+						echo '>' . esc_html( $model_id ) . '</option>';
+					}
+					echo '</optgroup>';
 				}
 				?>
 			</select>
