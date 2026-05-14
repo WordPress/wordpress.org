@@ -205,7 +205,12 @@ class Parser {
 			)
 		) );
 
-		$contents = file_get_contents( $file_or_url, false, $context );
+		// Suppress warnings for the common 404 / unreachable-URL case; downstream callers see an empty parser.
+		$contents = @file_get_contents( $file_or_url, false, $context );
+
+		if ( ! is_string( $contents ) ) {
+			return false;
+		}
 
 		return $this->parse_readme_contents( $contents );
 	}
@@ -215,6 +220,11 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme_contents( $contents ) {
+		// Belt-and-braces: external callers (or future code paths) shouldn't be able to fatal preg_match by passing a non-string.
+		if ( ! is_string( $contents ) ) {
+			return false;
+		}
+
 		$this->raw_contents = $contents;
 
 		if ( preg_match( '!!u', $contents ) ) {
