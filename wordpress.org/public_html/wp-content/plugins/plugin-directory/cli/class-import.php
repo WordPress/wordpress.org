@@ -128,12 +128,16 @@ class Import {
 
 		/*
 		 * Warn when the plugin's Version header has anything other than digits, dots, and an
-		 * optional `-rcN`, `-betaN`, or `-alphaN` pre-release suffix.
+		 * optional `-rc` / `-beta` / `-alpha` pre-release suffix (with optional digits).
 		 *
 		 * Catches headers that include an accidental duplicate `Version:` prefix, stray
 		 * letters or punctuation, or other free-form text mixed in with the version number.
+		 *
+		 * The strict format matters because WordPress core uses `version_compare()` to decide
+		 * whether to offer an update — a malformed header can silently give the wrong answer
+		 * for users running an older release.
 		 */
-		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)\d*)?$/', $version ) ) {
+		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?$/i', $version ) ) {
 			$this->warnings['version_header_unexpected_chars'] = $version;
 		}
 
@@ -1292,15 +1296,18 @@ class Import {
 	 */
 	public static function version_matches_tag( $version, $tag ) {
 		$normalize = static function ( $v ) {
-			// Capture the leading dotted-numeric portion (plus an optional `-rcN` / `-betaN` /
-			// `-alphaN` pre-release suffix) after any non-digit prefix such as `v`, `Version: `,
-			// `release-`, `tag-`, or `hover-`.
-			if ( ! preg_match( '/^[^0-9]*(\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)\d*)?)/', (string) $v, $m ) ) {
+			// Capture the leading dotted-numeric portion (plus an optional `-rc` / `-beta` /
+			// `-alpha` pre-release suffix, case-insensitive, with optional `.`/no-separator digits)
+			// after any non-digit prefix such as `v`, `Version: `, `release-`, `tag-`, or `hover-`.
+			if ( ! preg_match( '/^[^0-9]*(\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?)/i', (string) $v, $m ) ) {
 				return '';
 			}
+			// Lowercase the suffix — version_compare() is not consistently case-insensitive
+			// (e.g. `1.0-Beta` < `1.0-beta`), so normalize before comparing.
+			$captured = strtolower( $m[1] );
 			// Strip trailing `.0` segments so version_compare() treats `1.0` and `1.0.0` as equal.
 			// Only applies to the dotted-numeric portion; a pre-release suffix is left alone.
-			return preg_replace( '/(\.0+)+(?=(?:-(?:rc|beta|alpha)\d*)?$)/', '', $m[1] );
+			return preg_replace( '/(\.0+)+(?=(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?$)/', '', $captured );
 		};
 
 		$normalized_version = $normalize( $version );

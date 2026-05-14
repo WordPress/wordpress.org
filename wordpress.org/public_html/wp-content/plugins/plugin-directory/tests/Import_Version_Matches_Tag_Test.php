@@ -51,6 +51,9 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 			'matching -beta'          => array( '1.0-beta', '1.0-beta' ),
 			'matching -rc1'           => array( '1.4.0-rc1', '1.4.0-rc1' ),
 			'matching -alpha'         => array( '1.0-alpha', '1.0-alpha' ),
+			'case-insensitive -Beta'  => array( '1.0-Beta', '1.0-beta' ),
+			'case-insensitive -RC1'   => array( '1.0-RC1', '1.0-rc1' ),
+			'dot vs no-dot suffix'    => array( '1.0-beta.1', '1.0-beta1' ),
 			'empty version'           => array( '', '1.0' ),
 			'empty tag'               => array( '1.0', '' ),
 			'both empty'              => array( '', '' ),
@@ -70,6 +73,7 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 			'beta vs final'          => array( '1.0-beta', '1.0' ),
 			'final vs beta'          => array( '1.0', '1.0-beta' ),
 			'different rc numbers'   => array( '1.4.0-rc1', '1.4.0-rc2' ),
+			'dot-separated suffixes' => array( '1.0-beta.1', '1.0-beta.2' ),
 		);
 	}
 }
