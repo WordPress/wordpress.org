@@ -134,6 +134,7 @@ function get_parent_channels( $channel ) {
 	}
 
 	list( $root, ) = explode( '-', $channel, 2 );
+	$direct_root = $root;
 
 	// Some channels parents are not a 1:1 match.
 	switch ( $root ) {
@@ -141,6 +142,7 @@ function get_parent_channels( $channel ) {
 		case 'feature':
 		case 'performance':
 		case 'tide':
+		case 'accessibility':
 		case 'core':
 			$root = 'core';
 			break;
@@ -165,15 +167,20 @@ function get_parent_channels( $channel ) {
 	$parent_channels = [];
 
 	// For when a channel has multiple parents.
-
-	// Accessibility is a sub-team of Core, but is a parent channel itself.
-	if ( 'accessibility' === $root ) {
-		$parent_channels[] = 'core';
-	}
-
 	// Learn is a sub-team of Training, plus of #meta.
 	if ( 'meta-learn' === $channel ) {
 		$parent_channels[] = 'training';
+	}
+
+	// When the switch above remapped to a team-level parent (e.g. wpcredits -> community-team),
+	// also inherit from the intermediate channel itself if it has its own whitelist.
+	// e.g. #wpcredits-spanish inherits from both #wpcredits and #community-team.
+	if (
+		$direct_root !== $root &&
+		$direct_root !== $channel &&
+		get_whitelist_for_channel( $direct_root )
+	) {
+		$parent_channels[] = $direct_root;
 	}
 
 	// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel.
