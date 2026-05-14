@@ -46,6 +46,7 @@
 		.plugin-actions {
 			margin-top: var(--wp--style--block-gap);
 			display: flex;
+			flex-wrap: wrap;
 			align-items: center;
 			gap: 16px;
 
