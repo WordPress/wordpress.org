@@ -155,8 +155,10 @@ class SVN_Watcher {
 		
 				}
 
-				// This will have false-positives for when a readme in a subdirectory is hit, but this is only for optimizations.
-				if ( in_array( strtolower( basename( $path ) ), array( 'readme.txt', 'readme.md' ) ) ) {
+				// Only count the readme at the top level of /trunk or /tags/X.Y as the plugin's readme — a readme.txt in a subdirectory is just bundled documentation.
+				$is_top_level_in_trunk = ( 'trunk' === $path_parts[1] && isset( $path_parts[2] ) && ! isset( $path_parts[3] ) );
+				$is_top_level_in_tag   = ( 'tags' === $path_parts[1] && isset( $path_parts[3] ) && ! isset( $path_parts[4] ) );
+				if ( ( $is_top_level_in_trunk || $is_top_level_in_tag ) && in_array( strtolower( basename( $path ) ), array( 'readme.txt', 'readme.md' ) ) ) {
 					$plugin['readme_touched'] = true;
 				}
 				if ( ! $plugin['code_touched'] && ( '/' === substr( $path, -1 ) || '.php' === substr( $path, -4 ) || '.js' === substr( $path, -3 ) ) ) {
