@@ -175,10 +175,12 @@ function get_parent_channels( $channel ) {
 	// When the switch above remapped to a team-level parent (e.g. wpcredits -> community-team),
 	// also inherit from the intermediate channel itself if it has its own whitelist.
 	// e.g. #wpcredits-spanish inherits from both #wpcredits and #community-team.
+	// Note: check the raw whitelist directly — calling get_whitelist_for_channel()
+	// here would recurse back through get_parent_channels() and infinite-loop.
 	if (
 		$direct_root !== $root &&
 		$direct_root !== $channel &&
-		get_whitelist_for_channel( $direct_root )
+		! empty( get_whitelist()[ $direct_root ] )
 	) {
 		$parent_channels[] = $direct_root;
 	}
