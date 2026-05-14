@@ -367,10 +367,10 @@ class Parser {
 			$this->donate_link = $headers['donate_link'];
 		}
 		if ( ! empty( $headers['license'] ) ) {
-			// Handle the many cases of "License: GPLv2 - http://..."
+			// Handle "License: GPLv2 - http://..." and wrapped forms like "<http://...>" or "(http://...)".
 			if ( empty( $headers['license_uri'] ) && preg_match( '!(https?://\S+)!i', $headers['license'], $url ) ) {
-				$headers['license_uri'] = trim( $url[1], " -*\t\n\r\n(" );
-				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n(" );
+				$headers['license_uri'] = trim( $url[1], " -*\t\n\r\n()<>" );
+				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n()<>" );
 			}
 
 			$this->license = $headers['license'];
@@ -646,7 +646,8 @@ class Parser {
 
 		list( $key, $value ) = explode( ':', $line, 2 );
 		$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
-		$value               = trim( $value, " \t*-\r\n" );
+		// Strip `<>` so the markdown autolink form `<https://example.com>` resolves like a bare URL.
+		$value               = trim( $value, " \t*-\r\n<>" );
 
 		if ( $only_valid && ! isset( $this->valid_headers[ $key ] ) ) {
 			return false;
