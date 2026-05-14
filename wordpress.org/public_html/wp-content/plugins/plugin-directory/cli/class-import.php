@@ -1273,6 +1273,10 @@ class Import {
 	 * so that minor format differences (e.g. `1.4` vs `1.4.0`) are still treated as a match. Empty
 	 * inputs are treated as a match because there's nothing useful to compare.
 	 *
+	 * Note: this does NOT re-apply the legacy `.X` → `0.X` normalization that
+	 * `Readme_Parser::sanitize_stable_tag()` performs — by the time this is reached, the
+	 * stable tag has already been sanitized, and that form should not be supported for new releases.
+	 *
 	 * @param string $version The plugin's Version header value.
 	 * @param string $tag     The SVN tag folder name (e.g. `1.4.1`, `v2.0`).
 	 * @return bool True when the values appear to match, false when they look mismatched.
