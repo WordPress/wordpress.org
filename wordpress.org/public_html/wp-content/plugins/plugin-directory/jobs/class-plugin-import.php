@@ -164,23 +164,29 @@ class Plugin_Import {
 			return false;
 		}
 
-		// Find the actual readme filename (case-sensitive in SVN), preferring readme.txt over readme.md. Mirrors Import::export_and_parse_plugin.
-		$trunk_files  = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk" ) ?: array();
-		$readme_files = preg_grep( '!^readme\.(txt|md)$!i', $trunk_files );
-		if ( ! $readme_files ) {
-			return false;
-		}
+		$base_url = "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk";
 
-		$readme_filename = reset( $readme_files );
-		foreach ( $readme_files as $f ) {
-			if ( '.txt' === strtolower( substr( $f, -4 ) ) ) {
-				$readme_filename = $f;
-				break;
+		// Optimistic: try lowercase readme.txt first — covers virtually every plugin without a shell-out.
+		$readme         = new Readme_Parser( "{$base_url}/readme.txt" );
+		$new_stable_tag = $readme->stable_tag;
+
+		if ( ! $new_stable_tag ) {
+			// Empty result could be 404 (readme.md only, or non-lowercase casing) or no Stable Tag header.
+			// Fall back to SVN::ls and try whatever else is there.
+			$trunk_files  = SVN::ls( $base_url ) ?: array();
+			$readme_files = preg_grep( '!^readme\.(txt|md)$!i', $trunk_files );
+
+			foreach ( $readme_files as $f ) {
+				if ( 'readme.txt' === $f ) {
+					continue; // Exact match we already tried.
+				}
+				$readme         = new Readme_Parser( "{$base_url}/{$f}" );
+				$new_stable_tag = $readme->stable_tag;
+				if ( $new_stable_tag ) {
+					break;
+				}
 			}
 		}
-
-		$readme         = new Readme_Parser( "https://plugins.svn.wordpress.org/{$plugin_slug}/trunk/{$readme_filename}" );
-		$new_stable_tag = $readme->stable_tag;
 
 		if ( ! $new_stable_tag || 'trunk' === $new_stable_tag ) {
 			return false;
