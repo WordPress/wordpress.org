@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for Plugin_Import::merge_plugin_data() and queue_run_time() helpers.
+ * Tests for Plugin_Import::merge_plugin_data() and is_trunk_only_update() helpers.
  *
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
@@ -24,13 +24,13 @@ class Plugin_Import_Merge_Test extends TestCase {
 	}
 
 	/**
-	 * Invoke the protected Plugin_Import::is_trunk_only_update_on_tagged_plugin() helper.
+	 * Invoke the protected Plugin_Import::is_trunk_only_update() helper.
 	 */
-	private function is_trunk_only_on_tagged_plugin( string $plugin_slug, array $args ): bool {
-		$method = new ReflectionMethod( Plugin_Import::class, 'is_trunk_only_update_on_tagged_plugin' );
+	private function is_trunk_only( array $args ): bool {
+		$method = new ReflectionMethod( Plugin_Import::class, 'is_trunk_only_update' );
 		$method->setAccessible( true );
 
-		return $method->invoke( null, $plugin_slug, $args );
+		return $method->invoke( null, $args );
 	}
 
 	public function test_merges_revisions_and_tags_without_duplicates() {
@@ -97,40 +97,49 @@ class Plugin_Import_Merge_Test extends TestCase {
 	}
 
 	/**
+	 * A commit that touches only /trunk is the candidate for the grace window.
+	 */
+	public function test_trunk_only_commit_is_classified_as_trunk_only() {
+		$this->assertTrue( $this->is_trunk_only( [
+			'tags_touched' => [ 'trunk' ],
+			'tags_deleted' => [],
+		] ) );
+	}
+
+	/**
 	 * If a tag is touched the change should never be classified as trunk-only,
 	 * even if /trunk is also in the same commit.
 	 */
 	public function test_change_touching_a_tag_is_not_trunk_only() {
-		$this->assertFalse( $this->is_trunk_only_on_tagged_plugin( 'no-such-plugin', [
+		$this->assertFalse( $this->is_trunk_only( [
 			'tags_touched' => [ 'trunk', '1.2.3' ],
 			'tags_deleted' => [],
 		] ) );
 
-		$this->assertFalse( $this->is_trunk_only_on_tagged_plugin( 'no-such-plugin', [
+		$this->assertFalse( $this->is_trunk_only( [
 			'tags_touched' => [ '1.2.3' ],
 			'tags_deleted' => [],
 		] ) );
 	}
 
 	/**
-	 * A change that deletes a tag isn't a candidate for the 5-minute delay either:
-	 * the deletion needs to propagate to the directory immediately.
+	 * A change that deletes a tag isn't a candidate for the grace window
+	 * either: the deletion needs to propagate to the directory immediately.
 	 */
 	public function test_change_deleting_a_tag_is_not_trunk_only() {
-		$this->assertFalse( $this->is_trunk_only_on_tagged_plugin( 'no-such-plugin', [
+		$this->assertFalse( $this->is_trunk_only( [
 			'tags_touched' => [ 'trunk' ],
 			'tags_deleted' => [ '1.1.0' ],
 		] ) );
 	}
 
 	/**
-	 * Without a backing plugin post the helper falls back to "run immediately",
-	 * so the import isn't held up just because the directory hasn't seen the
-	 * plugin yet.
+	 * An empty set of touched tags (a defensive default) shouldn't be
+	 * misclassified as a delayable trunk-only update.
 	 */
-	public function test_unknown_plugin_does_not_delay() {
-		$this->assertFalse( $this->is_trunk_only_on_tagged_plugin( 'no-such-plugin', [
-			'tags_touched' => [ 'trunk' ],
+	public function test_empty_tags_touched_is_not_trunk_only() {
+		$this->assertFalse( $this->is_trunk_only( [
+			'tags_touched' => [],
 			'tags_deleted' => [],
 		] ) );
 	}

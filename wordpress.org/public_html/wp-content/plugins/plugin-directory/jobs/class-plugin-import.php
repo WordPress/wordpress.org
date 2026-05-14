@@ -3,7 +3,6 @@ namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use Exception;
 use WordPressdotorg\Plugin_Directory\CLI;
-use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**
  * Import plugin changes into WordPress.
@@ -30,10 +29,10 @@ class Plugin_Import {
 		 *
 		 *  - A bulk batch re-index queued an event far in the future; a fresh
 		 *    commit should pull that forward to the usual import time.
-		 *  - A plugin that releases from a tag commits to /trunk first and then
-		 *    `svn cp trunk tags/X.Y` a moment later (see queue_run_time()). The
-		 *    first commit gets delayed; the second merges into it so a single
-		 *    import publishes the release from the tag, not from a trunk
+		 *  - The 15-minute trunk grace window (see queue_run_time()): an author
+		 *    commits to /trunk first and then `svn cp trunk tags/X.Y` a moment
+		 *    later. The first commit's event is delayed; the second merges into
+		 *    it so a single import publishes from the tag, not from a trunk
 		 *    fallback that the tag commit then has to overwrite.
 		 */
 		$next_scheduled = Manager::get_scheduled_time( $hook, 'next' );
@@ -46,7 +45,7 @@ class Plugin_Import {
 				$hook,
 				$next_scheduled,
 				array(
-					'nextrun' => min( $next_scheduled, self::queue_run_time( $plugin_slug, $merged_args ) ),
+					'nextrun' => min( $next_scheduled, self::queue_run_time( $merged_args ) ),
 					'args'    => array( $merged_args ),
 				)
 			);
@@ -56,7 +55,7 @@ class Plugin_Import {
 			}
 		}
 
-		$when_to_run = self::queue_run_time( $plugin_slug, $new_args );
+		$when_to_run = self::queue_run_time( $new_args );
 
 		// To avoid a situation where two imports run concurrently, if one is already scheduled or in flight, run it 1hr later (we'll trigger it after the current one finishes).
 		$last_scheduled = Manager::get_scheduled_time( $hook, 'last' );
@@ -76,53 +75,36 @@ class Plugin_Import {
 	/**
 	 * Decide when an import job should run, based on the SVN changes it covers.
 	 *
-	 * Plugins that release from tags typically commit the version bump to /trunk
-	 * first and then `svn cp trunk tags/X.Y` shortly after. Running the import
-	 * immediately on the trunk commit publishes a trunk-fallback release that the
-	 * tag commit then has to overwrite as a second release. To collapse those
-	 * into one import, defer trunk-only updates by 5 minutes when the plugin is
-	 * currently releasing from a tag — that gives the follow-up tag commit time
-	 * to merge into the same job (see queue()).
+	 * Authors that release from a tag commonly commit the version bump to /trunk
+	 * first and then `svn cp trunk tags/X.Y` a moment later. Running the import
+	 * immediately on the trunk commit publishes a trunk-fallback release that
+	 * the follow-up tag commit then re-publishes from the tag. To collapse the
+	 * two into one import, all trunk-only updates are deferred by 15 minutes —
+	 * that gives the follow-up tag commit time to merge into the same job (see
+	 * queue()). Tag-touching changes (additions or deletions) run immediately.
 	 *
-	 * Tag-touching changes, and changes on plugins releasing from trunk, run
-	 * immediately.
-	 *
-	 * @param string $plugin_slug The plugin slug.
-	 * @param array  $args        The args for the import job (post-merge where applicable).
+	 * @param array $args The args for the import job (post-merge where applicable).
 	 * @return int Unix timestamp for when the event should run.
 	 */
-	protected static function queue_run_time( $plugin_slug, $args ) {
-		if ( self::is_trunk_only_update_on_tagged_plugin( $plugin_slug, $args ) ) {
-			return time() + 5 * MINUTE_IN_SECONDS;
+	protected static function queue_run_time( $args ) {
+		if ( self::is_trunk_only_update( $args ) ) {
+			return time() + 15 * MINUTE_IN_SECONDS;
 		}
 
 		return time() + 5;
 	}
 
 	/**
-	 * Whether an import covers only /trunk on a plugin that currently releases from a tag.
+	 * Whether an import only covers /trunk (no tags added or removed).
 	 *
-	 * @param string $plugin_slug The plugin slug.
-	 * @param array  $args        The args for the import job.
+	 * @param array $args The args for the import job.
 	 * @return bool
 	 */
-	protected static function is_trunk_only_update_on_tagged_plugin( $plugin_slug, $args ) {
+	protected static function is_trunk_only_update( $args ) {
 		$tags_touched = (array) ( $args['tags_touched'] ?? array() );
 		$tags_deleted = (array) ( $args['tags_deleted'] ?? array() );
 
-		$trunk_only = $tags_touched && array( 'trunk' ) === array_values( array_unique( $tags_touched ) ) && ! $tags_deleted;
-		if ( ! $trunk_only ) {
-			return false;
-		}
-
-		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
-		if ( ! $plugin ) {
-			return false;
-		}
-
-		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true );
-
-		return $current_stable_tag && 'trunk' !== $current_stable_tag;
+		return $tags_touched && array( 'trunk' ) === array_values( array_unique( $tags_touched ) ) && ! $tags_deleted;
 	}
 
 	/**
