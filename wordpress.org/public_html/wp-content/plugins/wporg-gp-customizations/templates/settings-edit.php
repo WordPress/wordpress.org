@@ -267,4 +267,27 @@ if ( $deepl_key ) {
 			?>
 		</td>
 	</tr>
+	<?php if ( wporg_translate_user_is_validator_anywhere( get_current_user_id() ) ) : ?>
+	<tr>
+		<th>
+			<h4><?php esc_html_e( 'Validator settings', 'glotpress' ); ?></h4>
+		</th>
+	</tr>
+	<tr>
+		<th>
+			<label for="default_sort[hide_validator_topbar]">
+				<?php esc_html_e( 'Hide the validation top bar in the translation editor', 'glotpress' ); ?>
+			</label>
+		</th>
+		<td>
+			<input type="hidden" name="default_sort[hide_validator_topbar]" value="off" />
+			<input
+				type="checkbox"
+				id="default_sort[hide_validator_topbar]"
+				name="default_sort[hide_validator_topbar]"
+				<?php gp_checked( 'on' === gp_array_get( $gp_default_sort, 'hide_validator_topbar', 'off' ) ); ?>
+			/>
+		</td>
+	</tr>
+	<?php endif; ?>
 </table>

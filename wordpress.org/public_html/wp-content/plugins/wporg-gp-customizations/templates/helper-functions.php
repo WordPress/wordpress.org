@@ -187,12 +187,92 @@ function wporg_translate_topbar_current_user_can_validate( $args ) {
 	if ( empty( $args['translation_set'] ) ) {
 		return false;
 	}
+
+	// Per-user opt-out: validators can hide the top bar persistently from /settings/.
+	// Stored as `hide_validator_topbar => 'on'` inside the user's `gp_default_sort`
+	// option (piggybacks on the existing settings form — see settings-edit.php).
+	$default_sort = get_user_option( 'gp_default_sort' );
+	if ( 'on' === gp_array_get( $default_sort, 'hide_validator_topbar', 'off' ) ) {
+		return false;
+	}
+
 	return GP::$permission->current_user_can(
 		'approve',
 		'translation-set',
 		$args['translation_set']->id
 	);
 }
+
+/**
+ * Returns true if the given user has the ability to approve translations on
+ * at least one translation set — i.e., is a global GlotPress admin, a GTE,
+ * a Locale Manager, or a PTE somewhere. 
+ *
+ * @param int $user_id The user ID to check. 0 or missing returns false.
+ * @return bool
+ */
+function wporg_translate_user_is_validator_anywhere( $user_id ) {
+	static $cache = array();
+
+	$user_id = (int) $user_id;
+	if ( $user_id <= 0 ) {
+		return false;
+	}
+
+	if ( array_key_exists( $user_id, $cache ) ) {
+		return $cache[ $user_id ];
+	}
+
+	$rosetta = \WordPressdotorg\GlotPress\Rosetta_Roles\Plugin::get_instance();
+	if ( $rosetta->is_global_administrator( $user_id ) ) {
+		$cache[ $user_id ] = true;
+		return true;
+	}
+
+	global $wpdb;
+
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- static-map cache is sufficient for this single-row existence check.
+	$has_editor_row = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT 1 FROM {$wpdb->wporg_translation_editors}
+			 WHERE user_id = %d LIMIT 1",
+			$user_id
+		)
+	);
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+	if ( $has_editor_row ) {
+		$cache[ $user_id ] = true;
+		return true;
+	}
+
+	// "{$wpdb->base_prefix}{$blog_id}_capabilities" (serialized arrays).
+	$pattern = $wpdb->esc_like( $wpdb->base_prefix ) . '%\_capabilities';
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- static-map cache is sufficient for this gated existence check.
+	$meta_rows = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT meta_value FROM {$wpdb->usermeta}
+			 WHERE user_id = %d
+			   AND meta_key LIKE %s",
+			$user_id,
+			$pattern
+		)
+	);
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+	foreach ( $meta_rows as $serialized ) {
+		$caps = maybe_unserialize( $serialized );
+		if ( is_array( $caps ) && (
+			! empty( $caps['general_translation_editor'] ) ||
+			! empty( $caps['locale_manager'] ) ||
+			! empty( $caps['translation_editor'] )
+		) ) {
+			$cache[ $user_id ] = true;
+			return true;
+		}
+	}
+
+	$cache[ $user_id ] = false;
+	return false;
+	}
 
 /**
  * Adds descriptions to navigation items.
