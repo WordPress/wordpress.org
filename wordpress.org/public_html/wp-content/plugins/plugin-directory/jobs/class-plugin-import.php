@@ -44,7 +44,11 @@ class Plugin_Import {
 		 * is still fresh by the time `update_scheduled_event` writes.
 		 */
 		$next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'next' );
-		if ( $next_scheduled && $next_scheduled > time() + 5 && ! Manager::is_event_running( "import_plugin:{$plugin_slug}" ) ) {
+		if (
+			$next_scheduled &&
+			$next_scheduled > time() + 5 &&
+			! Manager::is_event_running( "import_plugin:{$plugin_slug}" )
+		) {
 			$existing      = Manager::get_scheduled_events( "import_plugin:{$plugin_slug}", $next_scheduled );
 			$existing_args = $existing[0]['args'][0] ?? array();
 			$merged_args   = self::merge_plugin_data( $existing_args, $new_args );
