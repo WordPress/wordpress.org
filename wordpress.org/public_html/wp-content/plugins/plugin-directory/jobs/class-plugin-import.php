@@ -25,24 +25,24 @@ class Plugin_Import {
 		$new_args = array_merge( array( 'plugin' => $plugin_slug ), $plugin_data );
 
 		/*
-		* If there's already a future-scheduled import for this plugin and nothing
-		* is currently running, fold the new request into it. The merged event
-		* runs at the natural time computed from the merged args, so:
-		*
-		*  - A bulk batch re-index queued an event far in the future + a fresh
-		*    commit → event runs at the commit's natural time (5s or 15min).
-		*  - A trunk-only event pending + another trunk commit → event resets to
-		*    15min from this latest commit (each trunk commit refreshes the
-		*    grace window).
-		*  - A trunk-only event pending + a follow-up tag commit → event pulls
-		*    forward to 5s, since the merged args now include a tag.
-		*
-		* Skip the merge for events due in the next 5 seconds: a Cavalcade
-		* runner could claim the row between our status check and the row write,
-		* and the resulting save would clobber the runner's `status='running'`
-		* transition. 5s assumes the status read at the top of this function
-		* is still fresh by the time `update_scheduled_event` writes.
-		*/
+		 * If there's already a future-scheduled import for this plugin and nothing
+		 * is currently running, fold the new request into it. The merged event
+		 * runs at the natural time computed from the merged args, so:
+		 *
+		 *  - A bulk batch re-index queued an event far in the future + a fresh
+		 *    commit → event runs at the commit's natural time (5s or 15min).
+		 *  - A trunk-only event pending + another trunk commit → event resets to
+		 *    15min from this latest commit (each trunk commit refreshes the
+		 *    grace window).
+		 *  - A trunk-only event pending + a follow-up tag commit → event pulls
+		 *    forward to 5s, since the merged args now include a tag.
+		 *
+		 * Skip the merge for events due in the next 5 seconds: a Cavalcade
+		 * runner could claim the row between our status check and the row write,
+		 * and the resulting save would clobber the runner's `status='running'`
+		 * transition. 5s assumes the status read at the top of this function
+		 * is still fresh by the time `update_scheduled_event` writes.
+		 */
 		$next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'next' );
 		if (
 			$next_scheduled &&
