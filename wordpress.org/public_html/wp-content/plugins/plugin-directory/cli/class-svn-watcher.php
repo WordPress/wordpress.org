@@ -52,7 +52,7 @@ class SVN_Watcher {
 			}
 
 			if ( defined( 'STDERR' ) ) {
-				fwrite( STDERR, sprintf(
+				$log_line = sprintf(
 					"[%s] svn-watch: r%d-r%d tags=[%s]%s%s%s%s\n",
 					$plugin_slug,
 					min( $plugin_data['revisions'] ),
@@ -62,7 +62,8 @@ class SVN_Watcher {
 					$plugin_data['readme_touched'] ? ' readme' : '',
 					$plugin_data['code_touched']   ? ' code' : '',
 					$plugin_data['assets_touched'] ? ' assets' : ''
-				) );
+				);
+				fwrite( STDERR, $log_line );
 			}
 
 			Jobs\Plugin_Import::queue( $plugin_slug, $plugin_data );

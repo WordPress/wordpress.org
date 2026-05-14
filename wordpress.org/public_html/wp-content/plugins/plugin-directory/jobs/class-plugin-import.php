@@ -63,12 +63,13 @@ class Plugin_Import {
 
 			if ( $updated ) {
 				if ( defined( 'STDERR' ) ) {
-					fwrite( STDERR, sprintf(
+					$log_line = sprintf(
 						"[%s] queue: merged into pending event, next run %s (%s)\n",
 						$plugin_slug,
 						gmdate( 'Y-m-d H:i:s', $nextrun ),
 						$natural_reason
-					) );
+					);
+					fwrite( STDERR, $log_line );
 				}
 
 				return;
@@ -94,12 +95,13 @@ class Plugin_Import {
 		);
 
 		if ( defined( 'STDERR' ) ) {
-			fwrite( STDERR, sprintf(
+			$log_line = sprintf(
 				"[%s] queue: scheduled %s (%s)\n",
 				$plugin_slug,
 				gmdate( 'Y-m-d H:i:s', $when_to_run ),
 				$reason
-			) );
+			);
+			fwrite( STDERR, $log_line );
 		}
 	}
 
@@ -125,6 +127,11 @@ class Plugin_Import {
 	protected static function queue_run_time( $plugin_slug, $args ) {
 		if ( ! self::is_trunk_only_update( $args ) ) {
 			return array( time() + 5, 'tag activity' );
+		}
+
+		// Only the SVN watcher passes `revisions` — for manual queues (wp-admin sync button, release-confirmation API, bin/import-plugin) there's no follow-up tag commit to wait for, so skip the grace window.
+		if ( empty( $args['revisions'] ) ) {
+			return array( time() + 5, 'manual queue' );
 		}
 
 		if ( ! empty( $args['readme_touched'] ) && self::trunk_stable_tag_flip_to_existing_tag( $plugin_slug ) ) {
