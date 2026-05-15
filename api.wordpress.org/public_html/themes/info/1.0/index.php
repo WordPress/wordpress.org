@@ -8,18 +8,6 @@ require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init-ondemand.php';
 //  wp_cache_switch_to_blog( WPORG_THEME_DIRECTORY_BLOGID ); // Uses is_multisite() which is unavailable.
 $wp_object_cache->blog_prefix = WPORG_THEME_DIRECTORY_BLOGID;
 
-// Helper methods
-function wp_unslash( $value ) {
-	if ( is_string( $value ) ) {
-		return stripslashes( $value );
-	}
-	if ( is_array( $value ) ) {
-		return array_map( __FUNCTION__, $value );
-	}
-
-	return $value;
-}
-
 /**
  * Bails out with an error message.
  *
@@ -69,10 +57,10 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 
 // Set up action and request information.
 if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
-	$request = isset( $_REQUEST['request'] ) ? (object) wp_unslash( $_REQUEST['request'] ) : '';
+	$request = isset( $_REQUEST['request'] ) ? (object) $_REQUEST['request'] : '';
 	$format = 'json';
 } else {
-	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? wp_unslash( $_POST['request'] ) : '';
+	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? $_POST['request'] : '';
 	if ( $post_request ) {
 		// PHP Needs to get a non-urldecoded request, to avoid multibyte character malforming the request,
 		// but we need to check for malicious content with the decoded style (in addition)
