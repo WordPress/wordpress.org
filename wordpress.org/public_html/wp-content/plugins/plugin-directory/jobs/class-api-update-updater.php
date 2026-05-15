@@ -241,10 +241,8 @@ class API_Update_Updater {
 	 * @param int    $cooldown_until Unix timestamp when the deferred event should fire.
 	 */
 	public static function queue_release_to_update_api( $plugin_slug, $cooldown_until ) {
-		$hook = "release_to_update_api:{$plugin_slug}";
-
-		wp_clear_scheduled_hook( $hook );
-		wp_schedule_single_event( $cooldown_until, $hook );
+		wp_clear_scheduled_hook( "release_to_update_api:{$plugin_slug}" );
+		wp_schedule_single_event( $cooldown_until, "release_to_update_api:{$plugin_slug}" );
 	}
 
 	/**
