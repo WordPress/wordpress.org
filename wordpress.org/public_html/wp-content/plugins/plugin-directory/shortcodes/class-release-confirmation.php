@@ -10,6 +10,7 @@ use function WordPressdotorg\Two_Factor\{
 	Revalidation\get_js_url as get_revalidation_js_url,
 	get_onboarding_account_url as get_2fa_onboarding_url
 };
+use const WordPressdotorg\Plugin_Directory\RELEASE_COOL_DOWN_DELAY;
 
 /**
  * The [release-confirmation] shortcode handler.
@@ -85,6 +86,19 @@ class Release_Confirmation {
 
 		/* translators: %s: plugins@wordpress.org */
 		echo '<p>' . sprintf( __( 'Release confirmations can be enabled on the Advanced view of plugin pages. If you need to disable release confirmations for a plugin, please contact %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
+
+		printf(
+			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+			wp_kses(
+				sprintf(
+					/* translators: 1: cooldown duration in hours, 2: plugins@wordpress.org link */
+					__( 'New releases are served to sites %1$d hours after they\'re committed (or after the final confirmation, if release confirmations are enabled). This gives security scanners and reviewers a window to catch malicious commits before they ship. If you have an urgent security fix that needs to be released sooner, contact %2$s.', 'wporg-plugins' ),
+					(int) ( RELEASE_COOL_DOWN_DELAY / HOUR_IN_SECONDS ),
+					'<a href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>'
+				),
+				array( 'a' => array( 'href' => true ) )
+			)
+		);
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
@@ -265,6 +279,8 @@ class Release_Confirmation {
 			);
 		}
 
+		self::render_cooldown_status( $data );
+
 		echo '</div>';
 
 		$text = ob_get_clean();
@@ -278,6 +294,65 @@ class Release_Confirmation {
 		 * @return string
 		 */
 		return apply_filters( 'wporg_plugins_release_approval_text', $text, $plugin, $data );
+	}
+
+	/**
+	 * Render a single line describing the cooldown state of a release: pending serve time,
+	 * served-on time, or force-released-by-reviewer time. Skipped when the release isn't yet
+	 * confirmed/processed (the existing confirmation messaging already speaks to that state).
+	 *
+	 * @param array $data The release row from Plugin_Directory::get_releases().
+	 */
+	protected static function render_cooldown_status( $data ) {
+		if ( ! empty( $data['discarded'] ) ) {
+			return;
+		}
+
+		// Skip when the release hasn't moved past the confirmation/processing stage yet.
+		if ( $data['confirmations_required'] && ( ! $data['confirmed'] || ! $data['zips_built'] ) ) {
+			return;
+		}
+
+		$release_time = $data['confirmations']
+			? max( $data['confirmations'] )
+			: (int) $data['date'];
+
+		$cooldown_until = $release_time + RELEASE_COOL_DOWN_DELAY;
+
+		if ( ! empty( $data['force_released'] ) ) {
+			$message = sprintf(
+				/* translators: %s: relative time */
+				__( 'Force-released by a plugin reviewer %s ago.', 'wporg-plugins' ),
+				human_time_diff( (int) ( $data['force_released_at'] ?? $release_time ) )
+			);
+			printf( '<span>%s</span><br>', esc_html( $message ) );
+			return;
+		}
+
+		if ( $cooldown_until > time() ) {
+			$message = sprintf(
+				/* translators: %s: relative time until cooldown expires */
+				__( 'Will be served to sites in %s.', 'wporg-plugins' ),
+				human_time_diff( time(), $cooldown_until )
+			);
+			printf(
+				'<span title="%s">%s</span><br>',
+				esc_attr( gmdate( 'Y-m-d H:i:s', $cooldown_until ) ),
+				esc_html( $message )
+			);
+			return;
+		}
+
+		$message = sprintf(
+			/* translators: %s: relative time */
+			__( 'Serving to sites since %s ago.', 'wporg-plugins' ),
+			human_time_diff( $cooldown_until )
+		);
+		printf(
+			'<span title="%s">%s</span><br>',
+			esc_attr( gmdate( 'Y-m-d H:i:s', $cooldown_until ) ),
+			esc_html( $message )
+		);
 	}
 
 	static function get_actions( $plugin, $data ) {

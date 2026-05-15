@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
+use const WordPressdotorg\Plugin_Directory\RELEASE_COOL_DOWN_DELAY;
 
 /**
  * Handles interfacing with the api.WordPress.org/plugin/update-check/ API.
@@ -67,20 +68,77 @@ class API_Update_Updater {
 
 	/**
 	 * Updates a single plugins `update_source` data.
+	 *
+	 * @param string $plugin_slug     The plugin slug.
+	 * @param bool   $bypass_cooldown Whether to bypass the release cooldown gate. True when called
+	 *                                from the deferred release cron, the reviewer force-release
+	 *                                action, or from contexts that must publish immediately (status
+	 *                                transitions, rebuild scripts). When true, `release_time` in the
+	 *                                stored meta is anchored to the moment of the write rather than
+	 *                                the original commit time, so the phased-rollout
+	 *                                `manual-updates-24hr` window measures from public availability.
+	 * @return bool
 	 */
-	public static function update_single_plugin( $plugin_slug, $self_loop = false ) {
+	public static function update_single_plugin( $plugin_slug, $bypass_cooldown = false ) {
 		global $wpdb;
 		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
 
 		if ( ! $post || ! in_array( $post->post_status, array( 'publish', 'disabled', 'closed' ) ) ) {
 			$wpdb->delete( $wpdb->prefix . 'update_source', compact( 'plugin_slug' ) );
+			wp_clear_scheduled_hook( "release_to_update_api:{$plugin_slug}" );
 			return true;
 		}
 
 		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
-		$meta             = array(
-			'release_time'    => strtotime( $post->version_date ?: $post->post_modified ),
+		$release          = Plugin_Directory::get_release( $post, $version );
+		$release_time     = self::compute_release_time( $post, $release );
+		$existing_version = (string) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				$post->post_name
+			)
+		);
+
+		/*
+		 * Defer the write for new versions still inside the cooldown window. While
+		 * deferred, the existing `update_source` row (carrying the previous version)
+		 * continues to be served by the update API.
+		 *
+		 * Bypassed when:
+		 *  - The caller explicitly bypasses (deferred-event fire, reviewer force-release, etc.).
+		 *  - The plugin is closed/disabled — closure must take effect immediately, see
+		 *    get_cooldown_defer_time().
+		 *  - The reviewer has already force-released this version.
+		 *  - This isn't actually a new-version write (same version as already in the table).
+		 */
+		if ( ! $bypass_cooldown ) {
+			$cooldown_until = self::get_cooldown_defer_time(
+				$release_time,
+				! empty( $release['force_released'] ),
+				$post->post_status,
+				$existing_version,
+				(string) $version
+			);
+
+			if ( $cooldown_until ) {
+				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
+				return true;
+			}
+		}
+
+		// When this write is publishing a new version (existing row had a different version, or
+		// no row existed) anchor `release_time` to now — that's the moment the version is
+		// actually available to sites. Keeps phased_rollout()'s `manual-updates-24hr` window
+		// measuring from public availability, even if the commit/confirmation was long ago
+		// because the cooldown deferred the write. Rebuild/status/meta-sync paths reach this
+		// code with existing_version == version and so retain the original release_time.
+		if ( $existing_version !== (string) $version && 'publish' === $post->post_status ) {
+			$release_time = time();
+		}
+
+		$meta = array(
+			'release_time'    => $release_time,
 			'last_version'    => $post->last_version ?? '',
 			'last_stable_tag' => $post->last_stable_tag ?? '',
 		);
@@ -96,21 +154,16 @@ class API_Update_Updater {
 			}
 		}
 
-		$release = Plugin_Directory::get_release( $post, $version );
-		if (
-			$release &&
-			$release['confirmations_required'] &&
-			$release['confirmations']
-		) {
-			$meta['release_time'] = max( $release['confirmations'] );
-		}
-
 		// Add phased rollout strategy data if needed.
 		if ( $release && ! empty( $release['rollout_strategy'] ) ) {
 			$meta['rollout'] = array(
 				'strategy' => $release['rollout_strategy'],
 			);
 		}
+
+		// The deferred event (if any) has either fired or been pre-empted by a force-release
+		// or status change. Clear any leftover schedule so the cron table doesn't grow.
+		wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
 
 		$data = array(
 			'plugin_id'        => $post->ID,
@@ -169,6 +222,158 @@ class API_Update_Updater {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Determine the release timestamp for a plugin version.
+	 *
+	 * Falls back through the commit timestamp on the plugin post, and is replaced by the
+	 * latest committer-confirmation time when release confirmations are required (the
+	 * version isn't really "released" until the last confirmation lands).
+	 *
+	 * @param \WP_Post   $post    The plugin post.
+	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
+	 * @return int Unix timestamp.
+	 */
+	public static function compute_release_time( $post, $release ) {
+		$release_time = strtotime( $post->version_date ? $post->version_date : $post->post_modified );
+
+		if (
+			$release &&
+			$release['confirmations_required'] &&
+			$release['confirmations']
+		) {
+			$release_time = max( $release['confirmations'] );
+		}
+
+		return $release_time;
+	}
+
+	/**
+	 * Pure-logic helper: decide whether a new-version write should be deferred,
+	 * and return the cooldown expiry timestamp if so.
+	 *
+	 * @param int    $release_time      When the release was committed / final-confirmed.
+	 * @param bool   $force_released    Whether a reviewer has force-released this version.
+	 * @param string $post_status       The plugin's current post_status.
+	 * @param string $existing_version  The version currently sitting in update_source (or '').
+	 * @param string $new_version       The version proposed for this write.
+	 * @param int    $now               Current time, injectable for tests.
+	 * @return int|false                Cooldown expiry timestamp if deferral applies, false otherwise.
+	 */
+	public static function get_cooldown_defer_time( $release_time, $force_released, $post_status, $existing_version, $new_version, $now = null ) {
+		if ( null === $now ) {
+			$now = time();
+		}
+
+		if ( $force_released ) {
+			return false;
+		}
+
+		if ( 'publish' !== $post_status ) {
+			return false;
+		}
+
+		if ( $existing_version === $new_version ) {
+			return false;
+		}
+
+		$cooldown_until = $release_time + RELEASE_COOL_DOWN_DELAY;
+		if ( $cooldown_until <= $now ) {
+			return false;
+		}
+
+		return $cooldown_until;
+	}
+
+	/**
+	 * Schedule a deferred release-to-update-api cron event for a plugin.
+	 *
+	 * If an event is already scheduled at the desired time, this is a no-op. If a
+	 * different time is scheduled (e.g. an earlier commit's cooldown), the event is
+	 * rescheduled to the later time so a follow-up commit fully resets the window.
+	 *
+	 * @param string $plugin_slug    The plugin slug.
+	 * @param int    $cooldown_until Unix timestamp when the deferred event should fire.
+	 */
+	public static function queue_release_to_update_api( $plugin_slug, $cooldown_until ) {
+		$hook = "release_to_update_api:{$plugin_slug}";
+
+		$existing = wp_next_scheduled( $hook, array( $plugin_slug ) );
+		if ( $existing === $cooldown_until ) {
+			return;
+		}
+
+		if ( $existing ) {
+			wp_unschedule_event( $existing, $hook, array( $plugin_slug ) );
+		}
+
+		wp_schedule_single_event( $cooldown_until, $hook, array( $plugin_slug ) );
+	}
+
+	/**
+	 * Cron handler for `release_to_update_api:{slug}`. Fires when the cooldown
+	 * expires; writes the new version to `update_source` immediately.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 */
+	public static function cron_trigger_release( $plugin_slug ) {
+		self::update_single_plugin( $plugin_slug, true );
+	}
+
+	/**
+	 * Reviewer force-release: clear the cooldown for a plugin's current version and
+	 * write it to `update_source` immediately. Logs the action with the supplied reason.
+	 *
+	 * Capability checks must be performed by the caller.
+	 *
+	 * @param string   $plugin_slug The plugin slug.
+	 * @param string   $reason      Free-text reason recorded in the audit log.
+	 * @param \WP_User $user        The acting user. Defaults to the current user.
+	 * @return bool True on success.
+	 */
+	public static function force_release( $plugin_slug, $reason, $user = null ) {
+		if ( ! $user ) {
+			$user = wp_get_current_user();
+		}
+
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$version = get_post_meta( $post->ID, 'version', true );
+		$release = Plugin_Directory::get_release( $post, $version );
+
+		if ( ! $release ) {
+			return false;
+		}
+
+		Plugin_Directory::add_release(
+			$post,
+			array(
+				'tag'                   => $release['tag'],
+				'force_released'        => true,
+				'force_released_by'     => $user->ID,
+				'force_released_at'     => time(),
+				'force_released_reason' => $reason,
+			)
+		);
+
+		\WordPressdotorg\Plugin_Directory\Tools::audit_log(
+			sprintf(
+				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
+				$version,
+				RELEASE_COOL_DOWN_DELAY / HOUR_IN_SECONDS,
+				$reason
+			),
+			$post,
+			$user
+		);
+
+		wp_clear_scheduled_hook( "release_to_update_api:{$plugin_slug}" );
+
+		return self::update_single_plugin( $plugin_slug, true );
 	}
 
 	static function get_plugin_assets( $post ) {

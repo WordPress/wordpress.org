@@ -2,7 +2,10 @@
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
 use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
+use const WordPressdotorg\Plugin_Directory\RELEASE_COOL_DOWN_DELAY;
 
 /**
  * The Plugin Controls / Publish metabox.
@@ -27,6 +30,7 @@ class Controls {
 			<div id="misc-publishing-actions">
 				<?php
 				self::display_meta();
+				self::display_release_cooldown();
 				self::display_post_status();
 				?>
 			</div>
@@ -40,6 +44,136 @@ class Controls {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Display the release cooldown status and (for reviewers) a force-release control.
+	 *
+	 * The cooldown only applies to publishable, version-bumping releases; for any other
+	 * state (closed/disabled plugins, releases past the cooldown window, releases already
+	 * force-released) this section is skipped entirely.
+	 */
+	protected static function display_release_cooldown() {
+		$post = get_post();
+
+		if ( 'publish' !== $post->post_status ) {
+			return;
+		}
+
+		$version = get_post_meta( $post->ID, 'version', true );
+		if ( ! $version ) {
+			return;
+		}
+
+		$release = Plugin_Directory::get_release( $post, $version );
+		if ( ! $release ) {
+			return;
+		}
+
+		$release_time   = API_Update_Updater::compute_release_time( $post, $release );
+		$cooldown_until = $release_time + RELEASE_COOL_DOWN_DELAY;
+		$force_released = ! empty( $release['force_released'] );
+
+		// Already force-released — show audit info to reviewers, nothing to authors.
+		if ( $force_released ) {
+			if ( current_user_can( 'plugin_review', $post ) ) {
+				$user = get_userdata( (int) ( $release['force_released_by'] ?? 0 ) );
+				printf(
+					'<div class="misc-pub-section misc-pub-release-cooldown"><p>%s</p></div>',
+					sprintf(
+						/* translators: 1: version, 2: relative time, 3: user display name */
+						esc_html__( 'Version %1$s was force-released %2$s ago by %3$s, bypassing the release cooldown.', 'wporg-plugins' ),
+						esc_html( $version ),
+						esc_html( human_time_diff( (int) ( $release['force_released_at'] ?? time() ) ) ),
+						esc_html( $user ? ( $user->display_name ? $user->display_name : $user->user_login ) : __( 'unknown', 'wporg-plugins' ) )
+					)
+				);
+			}
+			return;
+		}
+
+		// Cooldown already elapsed — nothing to show.
+		if ( $cooldown_until <= time() ) {
+			return;
+		}
+
+		?>
+		<div class="misc-pub-section misc-pub-release-cooldown">
+			<p>
+			<?php
+			printf(
+				/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
+				esc_html__( 'Version %1$s is in the release cooldown — it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
+				esc_html( $version ),
+				esc_html( human_time_diff( time(), $cooldown_until ) ),
+				esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
+			);
+			?>
+			</p>
+			<?php if ( current_user_can( 'plugin_review', $post ) ) : ?>
+				<p>
+					<label for="force_release_reason"><?php esc_html_e( 'Force-release reason (required):', 'wporg-plugins' ); ?></label>
+					<textarea
+						id="force_release_reason"
+						name="force_release_reason"
+						rows="2"
+						style="width: 100%;"
+						placeholder="<?php esc_attr_e( 'e.g. urgent security fix for CVE-…', 'wporg-plugins' ); ?>"
+					></textarea>
+				</p>
+				<p>
+					<?php wp_nonce_field( 'force_release_' . $post->ID, '_force_release_nonce' ); ?>
+					<button type="submit" name="force_release_version" value="<?php echo esc_attr( $version ); ?>" class="button">
+						<?php
+						printf(
+							/* translators: %s: version */
+							esc_html__( 'Force-release %s now', 'wporg-plugins' ),
+							esc_html( $version )
+						);
+						?>
+					</button>
+				</p>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Save handler for reviewer force-release submissions from the Controls metabox.
+	 *
+	 * @param int $post_id The post being saved.
+	 */
+	public static function save_post( $post_id ) {
+		if ( empty( $_POST['force_release_version'] ) ) {
+			return;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post || 'plugin' !== $post->post_type ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'plugin_review', $post ) ) {
+			return;
+		}
+
+		check_admin_referer( 'force_release_' . $post_id, '_force_release_nonce' );
+
+		$version           = get_post_meta( $post->ID, 'version', true );
+		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );
+		if ( $submitted_version !== $version ) {
+			// Submitted version doesn't match current — a newer commit landed since the form was rendered.
+			return;
+		}
+
+		$reason = isset( $_POST['force_release_reason'] )
+			? trim( sanitize_textarea_field( wp_unslash( $_POST['force_release_reason'] ) ) )
+			: '';
+		if ( ! $reason ) {
+			return;
+		}
+
+		API_Update_Updater::force_release( $post->post_name, $reason );
 	}
 
 	/**

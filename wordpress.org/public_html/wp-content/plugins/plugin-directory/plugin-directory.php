@@ -25,6 +25,16 @@ define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
  */
 define( __NAMESPACE__ . '\PLUGIN_DIR', __DIR__ );
 
+/**
+ * Delay between a plugin release being committed (or its final author confirmation)
+ * and the new version being written to the `update_source` table — and so served to
+ * sites by the api.wordpress.org plugin update-check API. The previous version remains
+ * served until the cooldown elapses. Mitigates supply-chain attacks by giving scanners
+ * and humans a window to flag bad releases. Plugin reviewers can bypass the cooldown
+ * via the wp-admin force-release action; see Jobs\API_Update_Updater::update_single_plugin().
+ */
+define( __NAMESPACE__ . '\RELEASE_COOL_DOWN_DELAY', 48 * HOUR_IN_SECONDS );
+
 // Register an Autoloader for all files
 require __DIR__ . '/class-autoloader.php';
 Autoloader\register_class_path( __NAMESPACE__, __DIR__ );
