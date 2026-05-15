@@ -49,11 +49,15 @@ class Controls {
 	/**
 	 * Display the release cooldown status and (for reviewers) a force-release control.
 	 *
-	 * Bails when there's no current release to gate, when the cooldown has already
-	 * elapsed, or when the release was already force-released (reviewers see an audit
-	 * line in that case; authors see no UI).
+	 * Bails when the cooldown feature is disabled (constant is 0), when there's no
+	 * current release to gate, when the release was force-released (the audit-log
+	 * internal note covers that for reviewers), or when the cooldown has elapsed.
 	 */
 	protected static function display_release_cooldown() {
+		if ( RELEASE_COOL_DOWN_DELAY <= 0 ) {
+			return;
+		}
+
 		$post = get_post();
 
 		$version = get_post_meta( $post->ID, 'version', true );
@@ -62,33 +66,11 @@ class Controls {
 		}
 
 		$release = Plugin_Directory::get_release( $post, $version );
-		if ( ! $release ) {
+		if ( ! $release || ! empty( $release['force_released'] ) ) {
 			return;
 		}
 
-		$release_time   = API_Update_Updater::compute_release_time( $post, $release );
-		$cooldown_until = $release_time + RELEASE_COOL_DOWN_DELAY;
-		$force_released = ! empty( $release['force_released'] );
-
-		// Already force-released — show audit info to reviewers, nothing to authors.
-		if ( $force_released ) {
-			if ( current_user_can( 'plugin_review', $post ) ) {
-				$user = get_userdata( (int) ( $release['force_released_by'] ?? 0 ) );
-				printf(
-					'<div class="misc-pub-section misc-pub-release-cooldown"><p>%s</p></div>',
-					sprintf(
-						/* translators: 1: version, 2: relative time, 3: user display name */
-						esc_html__( 'Version %1$s was force-released %2$s ago by %3$s, bypassing the release cooldown.', 'wporg-plugins' ),
-						esc_html( $version ),
-						esc_html( human_time_diff( (int) ( $release['force_released_at'] ?? time() ) ) ),
-						esc_html( $user ? ( $user->display_name ? $user->display_name : $user->user_login ) : __( 'unknown', 'wporg-plugins' ) )
-					)
-				);
-			}
-			return;
-		}
-
-		// Cooldown already elapsed — nothing to show.
+		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + RELEASE_COOL_DOWN_DELAY;
 		if ( $cooldown_until <= time() ) {
 			return;
 		}

@@ -106,27 +106,29 @@ class API_Update_Updater {
 		 * continues to be served by the update API. Callers that need immediate writes
 		 * (status transitions, reviewer force-release, the deferred event firing, meta
 		 * sync, rebuild) pass $bypass_cooldown = true.
+		 *
+		 * Skipped entirely when RELEASE_COOL_DOWN_DELAY is 0 — that's the feature-flag
+		 * off switch, callers see the original commit/confirmation release_time.
 		 */
-		if ( ! $bypass_cooldown && empty( $release['force_released'] ) ) {
-			$cooldown_until = self::get_cooldown_defer_time(
-				$release_time,
-				$existing_version,
-				(string) $version
-			);
-
-			if ( $cooldown_until ) {
+		if (
+			RELEASE_COOL_DOWN_DELAY > 0 &&
+			! $bypass_cooldown &&
+			empty( $release['force_released'] ) &&
+			$existing_version !== (string) $version
+		) {
+			$cooldown_until = $release_time + RELEASE_COOL_DOWN_DELAY;
+			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
 				return true;
 			}
 		}
 
-		// When this write is publishing a new version (existing row had a different version, or
-		// no row existed) anchor `release_time` to now — that's the moment the version is
-		// actually available to sites. Keeps phased_rollout()'s `manual-updates-24hr` window
-		// measuring from public availability, even if the commit/confirmation was long ago
-		// because the cooldown deferred the write. Rebuild/status/meta-sync paths reach this
-		// code with existing_version == version and so retain the original release_time.
-		if ( $existing_version !== (string) $version ) {
+		// When the cooldown is enabled and this write is publishing a new version, anchor
+		// `release_time` to now — that's the moment the version is actually available to
+		// sites. Keeps phased_rollout()'s `manual-updates-24hr` window measuring from public
+		// availability, even if the commit/confirmation was long ago because the cooldown
+		// deferred the write. With the cooldown disabled, keep the original semantics.
+		if ( RELEASE_COOL_DOWN_DELAY > 0 && $existing_version !== (string) $version ) {
 			$release_time = time();
 		}
 
@@ -243,33 +245,6 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * Pure-logic helper: decide whether a new-version write should be deferred,
-	 * and return the cooldown expiry timestamp if so.
-	 *
-	 * @param int    $release_time     When the release was committed / final-confirmed.
-	 * @param string $existing_version The version currently sitting in update_source (or '').
-	 * @param string $new_version      The version proposed for this write.
-	 * @param int    $now              Current time, injectable for tests.
-	 * @return int|false               Cooldown expiry timestamp if deferral applies, false otherwise.
-	 */
-	public static function get_cooldown_defer_time( $release_time, $existing_version, $new_version, $now = null ) {
-		if ( null === $now ) {
-			$now = time();
-		}
-
-		if ( $existing_version === $new_version ) {
-			return false;
-		}
-
-		$cooldown_until = $release_time + RELEASE_COOL_DOWN_DELAY;
-		if ( $cooldown_until <= $now ) {
-			return false;
-		}
-
-		return $cooldown_until;
-	}
-
-	/**
 	 * Schedule a deferred release-to-update-api cron event for a plugin.
 	 *
 	 * If an event is already scheduled at the desired time, this is a no-op. If a
@@ -350,8 +325,7 @@ class API_Update_Updater {
 				RELEASE_COOL_DOWN_DELAY / HOUR_IN_SECONDS,
 				$reason
 			),
-			$post,
-			$user
+			$post
 		);
 
 		wp_clear_scheduled_hook( "release_to_update_api:{$plugin_slug}" );
