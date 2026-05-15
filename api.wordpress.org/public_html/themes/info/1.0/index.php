@@ -72,12 +72,21 @@ if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 	$request = isset( $_REQUEST['request'] ) ? (object) wp_unslash( $_REQUEST['request'] ) : '';
 	$format = 'json';
 } else {
-	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? urldecode( wp_unslash( $_POST['request'] ) ) : '';
-	if ( $post_request && ( preg_match( '~[;{}][OC]:\+?\d+:~', $post_request ) || 0 !== strpos( $post_request, 'O:8:"stdClass":' ) ) ) {
-		die( 'error' );
+	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? wp_unslash( $_POST['request'] ) : '';
+	if ( $post_request ) {
+		// PHP Needs to get a non-urldecoded request, to avoid multibyte character malforming the request,
+		// but we need to check for malicious content with the decoded style (in addition)
+		$decoded = urldecode( $post_request );
+		if (
+			preg_match( '~[;{}][OC]:\+?\d+:~', $post_request ) ||
+			preg_match( '~[;{}][OC]:\+?\d+:~', $decoded ) ||
+			0 !== strpos( $decoded, 'O:8:"stdClass":' )
+		) {
+			send_error( 'Invalid request', 400 );
+		}
 	}
 
-	$request = unserialize( $post_request );
+	$request = unserialize( $post_request, [ 'allowed_classes' => [ 'stdClass' ] ] );
 
 	$format = 'php';
 }
