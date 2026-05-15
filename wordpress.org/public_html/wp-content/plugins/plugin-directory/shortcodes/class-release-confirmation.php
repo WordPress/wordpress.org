@@ -87,7 +87,7 @@ class Release_Confirmation {
 		/* translators: %s: plugins@wordpress.org */
 		echo '<p>' . sprintf( __( 'Release confirmations can be enabled on the Advanced view of plugin pages. If you need to disable release confirmations for a plugin, please contact %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
 
-		if ( RELEASE_COOL_DOWN_DELAY > 0 ) {
+		if ( RELEASE_COOL_DOWN_DELAY ) {
 			printf(
 				'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 				wp_kses(
@@ -307,7 +307,7 @@ class Release_Confirmation {
 	 * @param array $data The release row from Plugin_Directory::get_releases().
 	 */
 	protected static function render_cooldown_status( $data ) {
-		if ( RELEASE_COOL_DOWN_DELAY <= 0 ) {
+		if ( ! RELEASE_COOL_DOWN_DELAY ) {
 			return;
 		}
 

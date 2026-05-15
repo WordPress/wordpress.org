@@ -54,7 +54,7 @@ class Controls {
 	 * internal note covers that for reviewers), or when the cooldown has elapsed.
 	 */
 	protected static function display_release_cooldown() {
-		if ( RELEASE_COOL_DOWN_DELAY <= 0 ) {
+		if ( ! RELEASE_COOL_DOWN_DELAY ) {
 			return;
 		}
 

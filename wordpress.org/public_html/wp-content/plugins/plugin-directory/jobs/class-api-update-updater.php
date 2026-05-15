@@ -111,7 +111,7 @@ class API_Update_Updater {
 		 * off switch, callers see the original commit/confirmation release_time.
 		 */
 		if (
-			RELEASE_COOL_DOWN_DELAY > 0 &&
+			RELEASE_COOL_DOWN_DELAY &&
 			! $bypass_cooldown &&
 			empty( $release['force_released'] ) &&
 			$existing_version !== (string) $version
@@ -128,7 +128,7 @@ class API_Update_Updater {
 		// sites. Keeps phased_rollout()'s `manual-updates-24hr` window measuring from public
 		// availability, even if the commit/confirmation was long ago because the cooldown
 		// deferred the write. With the cooldown disabled, keep the original semantics.
-		if ( RELEASE_COOL_DOWN_DELAY > 0 && $existing_version !== (string) $version ) {
+		if ( RELEASE_COOL_DOWN_DELAY && $existing_version !== (string) $version ) {
 			$release_time = time();
 		}
 
