@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Tools;
 use const WordPressdotorg\Plugin_Directory\RELEASE_COOL_DOWN_DELAY;
 
 /**
@@ -318,7 +319,7 @@ class API_Update_Updater {
 			)
 		);
 
-		\WordPressdotorg\Plugin_Directory\Tools::audit_log(
+		Tools::audit_log(
 			sprintf(
 				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
 				$version,
