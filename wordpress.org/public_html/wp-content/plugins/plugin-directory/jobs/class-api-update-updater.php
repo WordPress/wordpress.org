@@ -133,7 +133,10 @@ class API_Update_Updater {
 		// measuring from public availability, even if the commit/confirmation was long ago
 		// because the cooldown deferred the write. Rebuild/status/meta-sync paths reach this
 		// code with existing_version == version and so retain the original release_time.
-		if ( $existing_version !== (string) $version && 'publish' === $post->post_status ) {
+		if (
+			$existing_version !== (string) $version &&
+			in_array( $post->post_status, array( 'publish', 'disabled' ), true )
+		) {
 			$release_time = time();
 		}
 
@@ -253,6 +256,11 @@ class API_Update_Updater {
 	 * Pure-logic helper: decide whether a new-version write should be deferred,
 	 * and return the cooldown expiry timestamp if so.
 	 *
+	 * Applies to `publish` and `disabled` plugins — both keep `available = 1`
+	 * in `update_source` and so serve new versions through the update API.
+	 * Closed plugins write through immediately (available flips to 0; there's
+	 * nothing to gate).
+	 *
 	 * @param int    $release_time      When the release was committed / final-confirmed.
 	 * @param bool   $force_released    Whether a reviewer has force-released this version.
 	 * @param string $post_status       The plugin's current post_status.
@@ -270,7 +278,7 @@ class API_Update_Updater {
 			return false;
 		}
 
-		if ( 'publish' !== $post_status ) {
+		if ( ! in_array( $post_status, array( 'publish', 'disabled' ), true ) ) {
 			return false;
 		}
 

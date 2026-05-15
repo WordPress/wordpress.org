@@ -56,7 +56,9 @@ class Controls {
 	protected static function display_release_cooldown() {
 		$post = get_post();
 
-		if ( 'publish' !== $post->post_status ) {
+		// Closed plugins don't serve updates (available=0), so the cooldown is irrelevant.
+		// publish + disabled both serve updates and are subject to the cooldown gate.
+		if ( ! in_array( $post->post_status, array( 'publish', 'disabled' ), true ) ) {
 			return;
 		}
 
