@@ -2,7 +2,13 @@
 namespace Dotorg\API\Events\Tests;
 
 // Load the project's composer autoloader (PHPUnit, yoast/phpunit-polyfills).
-require_once dirname( __DIR__, 5 ) . '/vendor/autoload.php';
+// Depth depends on the checkout layout — it differs between the production
+// server tree and a standalone open-source checkout.
+if ( file_exists( dirname( __DIR__, 5 ) . '/vendor/autoload.php' ) ) {
+	require_once dirname( __DIR__, 5 ) . '/vendor/autoload.php';
+} else {
+	require_once dirname( __DIR__, 3 ) . '/vendor/autoload.php';
+}
 
 // Signal to index.php that we're running tests so it skips main() / bootstrap() / init.php.
 define( 'WPORG_RUNNING_TESTS', true );
