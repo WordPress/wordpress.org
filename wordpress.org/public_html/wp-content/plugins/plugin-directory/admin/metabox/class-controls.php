@@ -100,7 +100,6 @@ class Controls {
 					></textarea>
 				</p>
 				<p>
-					<?php wp_nonce_field( 'force_release_' . $post->ID, '_force_release_nonce' ); ?>
 					<button type="submit" name="force_release_version" value="<?php echo esc_attr( $version ); ?>" class="button">
 						<?php
 						printf(
@@ -134,8 +133,6 @@ class Controls {
 		if ( ! current_user_can( 'plugin_review', $post ) ) {
 			return;
 		}
-
-		check_admin_referer( 'force_release_' . $post_id, '_force_release_nonce' );
 
 		$version           = get_post_meta( $post->ID, 'version', true );
 		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );
