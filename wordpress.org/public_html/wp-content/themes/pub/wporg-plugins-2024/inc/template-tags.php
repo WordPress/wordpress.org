@@ -262,6 +262,13 @@ function the_unconfirmed_releases_notice() {
 	return Release_Confirmation::frontend_unconfirmed_releases_notice();
 }
 
+/**
+ * Render the in-cooldown release notice for committers on a plugin's public page.
+ */
+function the_release_cooldown_notice() {
+	return Release_Confirmation::frontend_cooldown_notice();
+}
+
 function the_no_self_management_notice() {
 	$post = get_post();
 
