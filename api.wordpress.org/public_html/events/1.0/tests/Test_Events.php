@@ -17,10 +17,10 @@ class Test_Events extends TestCase {
 	 * Asserts that an HTTP response is valid and contains an event.
 	 */
 	public function assertResponseHasEvent( $response ) {
-		$body  = json_decode( $response->body );
-		$event = $body->events[0];
+		$this->assertSame( 200, $response->status_code, 'Non-200 response body: ' . substr( $response->body, 0, 200 ) );
 
-		$this->assertSame( 200, $response->status_code );
+		$body = json_decode( $response->body );
+		$this->assertIsObject( $body, 'Response body was not valid JSON: ' . substr( $response->body, 0, 200 ) );
 		$this->assertNull( $body->error );
 
 		$this->assertIsObject( $body->location );
@@ -29,6 +29,8 @@ class Test_Events extends TestCase {
 			( isset( $body->location->latitude ) && is_numeric( $body->location->latitude ) )
 		);
 
+		$this->assertNotEmpty( $body->events, 'Response contained no events.' );
+		$event = $body->events[0];
 		$this->assertContains( $event->type, array( 'wordcamp', 'meetup' ) );
 		$this->assertIsString( $event->title );
 		$this->assertIsNumeric( $event->start_unix_timestamp );
@@ -471,20 +473,31 @@ class Test_Events extends TestCase {
 			$actual_result['description'] = strtolower( $actual_result['description'] );
 		}
 
-		/*
-		 * Normalize coordinates to account for minor differences in the databases.
-		 *
-		 * Rounding to three decimal places means that we're still accurate within about 110 meters, which is
-		 * good enough for our purposes.
-		 *
-		 * @link https://gis.stackexchange.com/a/8674/49125.
-		 */
-		if ( isset( $actual_result['latitude'], $actual_result['longitude'] ) ) {
-			$actual_result['latitude']  = number_format( round( $actual_result['latitude'],  3 ), 3 );
-			$actual_result['longitude'] = number_format( round( $actual_result['longitude'], 3 ), 3 );
+		$this->assertSameWithLatLonDelta( $expected, $actual_result );
+	}
+
+	/**
+	 * Assert that two location arrays match, allowing small drift in latitude/longitude.
+	 *
+	 * Compares lat/lon with a tolerance to absorb routine drift in the geo databases, and
+	 * compares the remaining fields exactly. A delta of 0.01 degrees is roughly 1km at the
+	 * equator — tight enough to catch a wrong-city match, loose enough to survive geonames
+	 * updates.
+	 *
+	 * @link https://gis.stackexchange.com/a/8674/49125.
+	 */
+	public function assertSameWithLatLonDelta( $expected, $actual, float $delta = 0.01 ) : void {
+		if ( is_array( $expected ) && is_array( $actual )
+			&& isset( $expected['latitude'], $expected['longitude'], $actual['latitude'], $actual['longitude'] )
+		) {
+			$this->assertEqualsWithDelta( (float) $expected['latitude'],  (float) $actual['latitude'],  $delta, 'latitude drifted beyond tolerance' );
+			$this->assertEqualsWithDelta( (float) $expected['longitude'], (float) $actual['longitude'], $delta, 'longitude drifted beyond tolerance' );
+
+			// Strip the coordinates so the remaining fields can be compared exactly.
+			unset( $expected['latitude'], $expected['longitude'], $actual['latitude'], $actual['longitude'] );
 		}
 
-		$this->assertSame( $expected, $actual_result );
+		$this->assertSame( $expected, $actual );
 	}
 
 	public static function data_get_location() : array {
@@ -813,12 +826,12 @@ class Test_Events extends TestCase {
 
 			'city-endonym-ideographic-asia3' => array(
 				'input' => array(
-					'location_name' => 'كراچى',
+					'location_name' => 'کراچی',
 					'locale'        => 'ur',
 					'timezone'      => 'Asia/Karachi',
 				),
 				'expected' => array(
-					'description' => 'كراچى',
+					'description' => 'کراچی',
 					'latitude'    => '24.861',
 					'longitude'   => '67.010',
 					'country'     => 'PK',
@@ -1464,7 +1477,8 @@ class Test_Events extends TestCase {
 
 			'throttled' => array(
 				'input' => array(
-					'location' => 'temp-request-throttled',
+					'location'      => 'temp-request-throttled',
+					'location_args' => array(),
 				),
 				'expected' => array(
 					'location' => array(),
@@ -1475,7 +1489,8 @@ class Test_Events extends TestCase {
 
 			'no-location' => array(
 				'input' => array(
-					'location' => array(),
+					'location'      => array(),
+					'location_args' => array(),
 				),
 				'expected' => array(
 					'location' => array(),
