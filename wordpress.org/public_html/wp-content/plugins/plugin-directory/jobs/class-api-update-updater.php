@@ -69,17 +69,10 @@ class API_Update_Updater {
 	/**
 	 * Updates a single plugins `update_source` data.
 	 *
-	 * @param string $plugin_slug     The plugin slug.
-	 * @param bool   $bypass_cooldown Whether to bypass the release cooldown gate. True when called
-	 *                                from the deferred release cron, the reviewer force-release
-	 *                                action, or from contexts that must publish immediately (status
-	 *                                transitions, rebuild scripts). When true, `release_time` in the
-	 *                                stored meta is anchored to the moment of the write rather than
-	 *                                the original commit time, so the phased-rollout
-	 *                                `manual-updates-24hr` window measures from public availability.
+	 * @param string $plugin_slug The plugin slug.
 	 * @return bool
 	 */
-	public static function update_single_plugin( $plugin_slug, $bypass_cooldown = false ) {
+	public static function update_single_plugin( $plugin_slug ) {
 		global $wpdb;
 		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
 
@@ -105,16 +98,14 @@ class API_Update_Updater {
 		/*
 		 * Defer the write for new versions still inside the cooldown window. While
 		 * deferred, the existing `update_source` row (carrying the previous version)
-		 * continues to be served by the update API. Callers that need immediate writes
-		 * (status transitions, reviewer force-release, the deferred event firing, meta
-		 * sync, rebuild) pass $bypass_cooldown = true; reviewers force-release by
-		 * setting `release_delay = 0` on the release meta.
+		 * continues to be served by the update API. Reviewers force-release by setting
+		 * `release_delay = 0` on the release meta.
+		 *
+		 * The deferred cron fires at exactly $cooldown_until, so by definition this
+		 * gate is false when called from cron_trigger_release() and no explicit bypass
+		 * is needed.
 		 */
-		if (
-			$release_delay &&
-			! $bypass_cooldown &&
-			$existing_version !== (string) $version
-		) {
+		if ( $release_delay && $existing_version !== (string) $version ) {
 			$cooldown_until = $release_time + $release_delay;
 			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
@@ -243,11 +234,8 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * Schedule a deferred release-to-update-api cron event for a plugin.
-	 *
-	 * If an event is already scheduled at the desired time, this is a no-op. If a
-	 * different time is scheduled (e.g. an earlier commit's cooldown), the event is
-	 * rescheduled to the later time so a follow-up commit fully resets the window.
+	 * Schedule a deferred release-to-update-api cron event for a plugin, replacing
+	 * any earlier event so a follow-up commit fully resets the cooldown window.
 	 *
 	 * @param string $plugin_slug    The plugin slug.
 	 * @param int    $cooldown_until Unix timestamp when the deferred event should fire.
@@ -255,26 +243,18 @@ class API_Update_Updater {
 	public static function queue_release_to_update_api( $plugin_slug, $cooldown_until ) {
 		$hook = "release_to_update_api:{$plugin_slug}";
 
-		$existing = wp_next_scheduled( $hook, array( $plugin_slug ) );
-		if ( $existing === $cooldown_until ) {
-			return;
-		}
-
-		if ( $existing ) {
-			wp_unschedule_event( $existing, $hook, array( $plugin_slug ) );
-		}
-
-		wp_schedule_single_event( $cooldown_until, $hook, array( $plugin_slug ) );
+		wp_clear_scheduled_hook( $hook );
+		wp_schedule_single_event( $cooldown_until, $hook );
 	}
 
 	/**
 	 * Cron handler for `release_to_update_api:{slug}`. Fires when the cooldown
-	 * expires; writes the new version to `update_source` immediately.
-	 *
-	 * @param string $plugin_slug The plugin slug.
+	 * expires; writes the new version to `update_source` immediately. The slug
+	 * is recovered from the dynamic hook name so no args need flow through cron.
 	 */
-	public static function cron_trigger_release( $plugin_slug ) {
-		self::update_single_plugin( $plugin_slug, true );
+	public static function cron_trigger_release() {
+		list( , $plugin_slug ) = explode( ':', current_filter(), 2 );
+		self::update_single_plugin( $plugin_slug );
 	}
 
 	/**
@@ -305,14 +285,6 @@ class API_Update_Updater {
 			return false;
 		}
 
-		Plugin_Directory::add_release(
-			$post,
-			array(
-				'tag'           => $release['tag'],
-				'release_delay' => 0,
-			)
-		);
-
 		Tools::audit_log(
 			sprintf(
 				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
@@ -323,9 +295,15 @@ class API_Update_Updater {
 			$post
 		);
 
-		wp_clear_scheduled_hook( "release_to_update_api:{$plugin_slug}" );
+		Plugin_Directory::add_release(
+			$post,
+			array(
+				'tag'           => $release['tag'],
+				'release_delay' => 0,
+			)
+		);
 
-		return self::update_single_plugin( $plugin_slug, true );
+		return self::update_single_plugin( $plugin_slug );
 	}
 
 	static function get_plugin_assets( $post ) {

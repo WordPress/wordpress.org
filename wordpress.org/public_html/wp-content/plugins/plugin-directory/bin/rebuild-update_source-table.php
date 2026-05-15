@@ -47,8 +47,7 @@ if ( ! $slugs ) {
 foreach ( $slugs as $i => $slug ) {
 	echo ++$i . '/' . count( $slugs ) . "\t" . $slug . "\n";
 
-	// Rebuild bypasses the release cooldown — the intent is to reflect current state.
-	Jobs\API_Update_Updater::update_single_plugin( $slug, true );
+	Jobs\API_Update_Updater::update_single_plugin( $slug );
 
 	clear_memory_caches();
 }
