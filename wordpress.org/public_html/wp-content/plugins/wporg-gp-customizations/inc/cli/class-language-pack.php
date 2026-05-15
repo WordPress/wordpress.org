@@ -555,6 +555,63 @@ class Language_Pack extends WP_CLI_Command {
 	}
 
 	/**
+	 * Builds a ZIP archive from a list of files, junking paths (basename only).
+	 *
+	 * Replaces an earlier `exec( 'zip -9 -j ...' )` invocation that could fail
+	 * with "Unable to fork" under memory pressure as the parent CLI grew over
+	 * a long run, and that grew an unbounded shell argv as the number of JED
+	 * JSON files per language pack increased.
+	 *
+	 * Each entry is added by its basename (the `-j` equivalent) and must resolve
+	 * to a regular file inside the per-build working directory; anything else
+	 * is rejected to avoid pulling unrelated files into the archive.
+	 *
+	 * @param string   $zip_path Destination ZIP path.
+	 * @param string[] $files    Files to add. Paths must be absolute and resolve
+	 *                           to regular files (no directories, no symlinks
+	 *                           pointing outside the working tree).
+	 * @return true|WP_Error
+	 */
+	private function build_zip_file( $zip_path, array $files ) {
+		if ( ! class_exists( 'ZipArchive' ) ) {
+			return new WP_Error( 'ziparchive_missing', 'ZipArchive PHP extension is not available.' );
+		}
+
+		$zip = new \ZipArchive();
+		$opened = $zip->open( $zip_path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE );
+		if ( true !== $opened ) {
+			return new WP_Error( 'zip_open_failed', sprintf( 'ZipArchive::open() failed with code %d.', $opened ) );
+		}
+
+		$seen = [];
+		foreach ( $files as $file ) {
+			$real = realpath( $file );
+			if ( false === $real || ! is_file( $real ) || is_link( $file ) ) {
+				$zip->close();
+				return new WP_Error( 'zip_invalid_source', sprintf( 'Refusing to add non-regular or unresolved file: %s', $file ) );
+			}
+
+			$name = basename( $real );
+			if ( '' === $name || isset( $seen[ $name ] ) ) {
+				$zip->close();
+				return new WP_Error( 'zip_invalid_name', sprintf( 'Invalid or duplicate entry name for: %s', $file ) );
+			}
+			$seen[ $name ] = true;
+
+			if ( ! $zip->addFile( $real, $name ) ) {
+				$zip->close();
+				return new WP_Error( 'zip_add_failed', sprintf( 'ZipArchive::addFile() failed for: %s', $real ) );
+			}
+		}
+
+		if ( ! $zip->close() ) {
+			return new WP_Error( 'zip_close_failed', 'ZipArchive::close() failed.' );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Inserts a language pack into database.
 	 *
 	 * @param string $type     Type of the language pack.
@@ -733,16 +790,10 @@ class Language_Pack extends WP_CLI_Command {
 			}
 
 			// Create ZIP file.
-			$result = $this->execute_command( sprintf(
-				'zip -9 -j %s %s %s %s 2>&1',
-				escapeshellarg( $zip_file ),
-				escapeshellarg( $po_file ),
-				escapeshellarg( $mo_file ),
-				implode( ' ', array_map( 'escapeshellarg', $additional_files ) )
-			) );
+			$result = $this->build_zip_file( $zip_file, array_merge( [ $po_file, $mo_file ], $additional_files ) );
 
 			if ( is_wp_error( $result ) ) {
-				WP_CLI::error_multi_line( $result->get_error_data() );
+				WP_CLI::error_multi_line( [ $result->get_error_message() ] );
 				WP_CLI::warning( "ZIP generation for {$wp_locale} failed." );
 
 				// Clean up.
