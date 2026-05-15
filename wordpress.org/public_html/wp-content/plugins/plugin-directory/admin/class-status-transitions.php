@@ -482,8 +482,10 @@ class Status_Transitions {
 	 * Flush the caches for the plugin.
 	 */
 	protected function flush_caches( $post ) {
-		// Update the API endpoints with the new data
-		API_Update_Updater::update_single_plugin( $post->post_name );
+		// Update the API endpoints with the new data. Bypass the release cooldown
+		// so status transitions (closure, disable, reopen) take effect immediately
+		// rather than getting held back inside an in-flight cooldown window.
+		API_Update_Updater::update_single_plugin( $post->post_name, true );
 		Plugins_Info_API::flush_plugin_information_cache( $post->post_name );
 	}
 }

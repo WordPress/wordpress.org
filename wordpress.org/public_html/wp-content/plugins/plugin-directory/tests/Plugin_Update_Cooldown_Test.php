@@ -22,14 +22,7 @@ class Plugin_Update_Cooldown_Test extends TestCase {
 	public function test_defers_new_version_inside_cooldown_window() {
 		$now            = 1700000000;
 		$release_time   = $now - HOUR_IN_SECONDS;
-		$cooldown_until = API_Update_Updater::get_cooldown_defer_time(
-			$release_time,
-			false,
-			'publish',
-			'1.0',
-			'1.1',
-			$now
-		);
+		$cooldown_until = API_Update_Updater::get_cooldown_defer_time( $release_time, '1.0', '1.1', $now );
 
 		$this->assertSame( $release_time + RELEASE_COOL_DOWN_DELAY, $cooldown_until );
 	}
@@ -41,16 +34,9 @@ class Plugin_Update_Cooldown_Test extends TestCase {
 		$now          = 1700000000;
 		$release_time = $now - RELEASE_COOL_DOWN_DELAY - HOUR_IN_SECONDS;
 
-		$result = API_Update_Updater::get_cooldown_defer_time(
-			$release_time,
-			false,
-			'publish',
-			'1.0',
-			'1.1',
-			$now
+		$this->assertFalse(
+			API_Update_Updater::get_cooldown_defer_time( $release_time, '1.0', '1.1', $now )
 		);
-
-		$this->assertFalse( $result );
 	}
 
 	/**
@@ -60,75 +46,9 @@ class Plugin_Update_Cooldown_Test extends TestCase {
 		$now          = 1700000000;
 		$release_time = $now - HOUR_IN_SECONDS;
 
-		$result = API_Update_Updater::get_cooldown_defer_time(
-			$release_time,
-			false,
-			'publish',
-			'1.0',
-			'1.0',
-			$now
-		);
-
-		$this->assertFalse( $result );
-	}
-
-	/**
-	 * A reviewer's force-release flag should let the new version through immediately.
-	 */
-	public function test_does_not_defer_when_force_released() {
-		$now          = 1700000000;
-		$release_time = $now - HOUR_IN_SECONDS;
-
-		$result = API_Update_Updater::get_cooldown_defer_time(
-			$release_time,
-			true,
-			'publish',
-			'1.0',
-			'1.1',
-			$now
-		);
-
-		$this->assertFalse( $result );
-	}
-
-	/**
-	 * Closure must take effect immediately and not get held back by the cooldown.
-	 * `closed` plugins set available=0 in update_source — there's nothing to gate.
-	 */
-	public function test_does_not_defer_for_closed_plugins() {
-		$now          = 1700000000;
-		$release_time = $now - HOUR_IN_SECONDS;
-
 		$this->assertFalse(
-			API_Update_Updater::get_cooldown_defer_time(
-				$release_time,
-				false,
-				'closed',
-				'1.0',
-				'1.1',
-				$now
-			)
+			API_Update_Updater::get_cooldown_defer_time( $release_time, '1.0', '1.0', $now )
 		);
-	}
-
-	/**
-	 * Disabled plugins still serve updates (available=1) so the cooldown applies the
-	 * same way as for publish.
-	 */
-	public function test_defers_new_version_for_disabled_plugins() {
-		$now          = 1700000000;
-		$release_time = $now - HOUR_IN_SECONDS;
-
-		$result = API_Update_Updater::get_cooldown_defer_time(
-			$release_time,
-			false,
-			'disabled',
-			'1.0',
-			'1.1',
-			$now
-		);
-
-		$this->assertSame( $release_time + RELEASE_COOL_DOWN_DELAY, $result );
 	}
 
 	/**
@@ -138,16 +58,9 @@ class Plugin_Update_Cooldown_Test extends TestCase {
 		$now          = 1700000000;
 		$release_time = $now - ( 7 * DAY_IN_SECONDS );
 
-		$result = API_Update_Updater::get_cooldown_defer_time(
-			$release_time,
-			false,
-			'publish',
-			'',
-			'1.0',
-			$now
+		$this->assertFalse(
+			API_Update_Updater::get_cooldown_defer_time( $release_time, '', '1.0', $now )
 		);
-
-		$this->assertFalse( $result );
 	}
 
 	/**
@@ -157,16 +70,10 @@ class Plugin_Update_Cooldown_Test extends TestCase {
 		$now          = 1700000000;
 		$release_time = $now - 60;
 
-		$result = API_Update_Updater::get_cooldown_defer_time(
-			$release_time,
-			false,
-			'publish',
-			'',
-			'1.0',
-			$now
+		$this->assertSame(
+			$release_time + RELEASE_COOL_DOWN_DELAY,
+			API_Update_Updater::get_cooldown_defer_time( $release_time, '', '1.0', $now )
 		);
-
-		$this->assertSame( $release_time + RELEASE_COOL_DOWN_DELAY, $result );
 	}
 
 	/**

@@ -103,20 +103,13 @@ class API_Update_Updater {
 		/*
 		 * Defer the write for new versions still inside the cooldown window. While
 		 * deferred, the existing `update_source` row (carrying the previous version)
-		 * continues to be served by the update API.
-		 *
-		 * Bypassed when:
-		 *  - The caller explicitly bypasses (deferred-event fire, reviewer force-release, etc.).
-		 *  - The plugin is closed/disabled — closure must take effect immediately, see
-		 *    get_cooldown_defer_time().
-		 *  - The reviewer has already force-released this version.
-		 *  - This isn't actually a new-version write (same version as already in the table).
+		 * continues to be served by the update API. Callers that need immediate writes
+		 * (status transitions, reviewer force-release, the deferred event firing, meta
+		 * sync, rebuild) pass $bypass_cooldown = true.
 		 */
-		if ( ! $bypass_cooldown ) {
+		if ( ! $bypass_cooldown && empty( $release['force_released'] ) ) {
 			$cooldown_until = self::get_cooldown_defer_time(
 				$release_time,
-				! empty( $release['force_released'] ),
-				$post->post_status,
 				$existing_version,
 				(string) $version
 			);
@@ -133,10 +126,7 @@ class API_Update_Updater {
 		// measuring from public availability, even if the commit/confirmation was long ago
 		// because the cooldown deferred the write. Rebuild/status/meta-sync paths reach this
 		// code with existing_version == version and so retain the original release_time.
-		if (
-			$existing_version !== (string) $version &&
-			in_array( $post->post_status, array( 'publish', 'disabled' ), true )
-		) {
+		if ( $existing_version !== (string) $version ) {
 			$release_time = time();
 		}
 
@@ -256,30 +246,15 @@ class API_Update_Updater {
 	 * Pure-logic helper: decide whether a new-version write should be deferred,
 	 * and return the cooldown expiry timestamp if so.
 	 *
-	 * Applies to `publish` and `disabled` plugins — both keep `available = 1`
-	 * in `update_source` and so serve new versions through the update API.
-	 * Closed plugins write through immediately (available flips to 0; there's
-	 * nothing to gate).
-	 *
-	 * @param int    $release_time      When the release was committed / final-confirmed.
-	 * @param bool   $force_released    Whether a reviewer has force-released this version.
-	 * @param string $post_status       The plugin's current post_status.
-	 * @param string $existing_version  The version currently sitting in update_source (or '').
-	 * @param string $new_version       The version proposed for this write.
-	 * @param int    $now               Current time, injectable for tests.
-	 * @return int|false                Cooldown expiry timestamp if deferral applies, false otherwise.
+	 * @param int    $release_time     When the release was committed / final-confirmed.
+	 * @param string $existing_version The version currently sitting in update_source (or '').
+	 * @param string $new_version      The version proposed for this write.
+	 * @param int    $now              Current time, injectable for tests.
+	 * @return int|false               Cooldown expiry timestamp if deferral applies, false otherwise.
 	 */
-	public static function get_cooldown_defer_time( $release_time, $force_released, $post_status, $existing_version, $new_version, $now = null ) {
+	public static function get_cooldown_defer_time( $release_time, $existing_version, $new_version, $now = null ) {
 		if ( null === $now ) {
 			$now = time();
-		}
-
-		if ( $force_released ) {
-			return false;
-		}
-
-		if ( ! in_array( $post_status, array( 'publish', 'disabled' ), true ) ) {
-			return false;
 		}
 
 		if ( $existing_version === $new_version ) {

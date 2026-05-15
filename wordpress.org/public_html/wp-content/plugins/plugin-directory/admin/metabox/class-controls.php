@@ -49,18 +49,12 @@ class Controls {
 	/**
 	 * Display the release cooldown status and (for reviewers) a force-release control.
 	 *
-	 * The cooldown only applies to publishable, version-bumping releases; for any other
-	 * state (closed/disabled plugins, releases past the cooldown window, releases already
-	 * force-released) this section is skipped entirely.
+	 * Bails when there's no current release to gate, when the cooldown has already
+	 * elapsed, or when the release was already force-released (reviewers see an audit
+	 * line in that case; authors see no UI).
 	 */
 	protected static function display_release_cooldown() {
 		$post = get_post();
-
-		// Closed plugins don't serve updates (available=0), so the cooldown is irrelevant.
-		// publish + disabled both serve updates and are subject to the cooldown gate.
-		if ( ! in_array( $post->post_status, array( 'publish', 'disabled' ), true ) ) {
-			return;
-		}
 
 		$version = get_post_meta( $post->ID, 'version', true );
 		if ( ! $version ) {
