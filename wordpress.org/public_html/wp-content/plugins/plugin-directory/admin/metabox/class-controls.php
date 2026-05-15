@@ -5,7 +5,6 @@ use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
-use const WordPressdotorg\Plugin_Directory\RELEASE_COOL_DOWN_DELAY;
 
 /**
  * The Plugin Controls / Publish metabox.
@@ -49,15 +48,11 @@ class Controls {
 	/**
 	 * Display the release cooldown status and (for reviewers) a force-release control.
 	 *
-	 * Bails when the cooldown feature is disabled (constant is 0), when there's no
-	 * current release to gate, when the release was force-released (the audit-log
-	 * internal note covers that for reviewers), or when the cooldown has elapsed.
+	 * Bails when there's no current release to gate, when the release has no cooldown
+	 * delay (feature off at release-creation, or already force-released), or when the
+	 * cooldown window has elapsed.
 	 */
 	protected static function display_release_cooldown() {
-		if ( ! RELEASE_COOL_DOWN_DELAY ) {
-			return;
-		}
-
 		$post = get_post();
 
 		$version = get_post_meta( $post->ID, 'version', true );
@@ -66,11 +61,16 @@ class Controls {
 		}
 
 		$release = Plugin_Directory::get_release( $post, $version );
-		if ( ! $release || ! empty( $release['force_released'] ) ) {
+		if ( ! $release ) {
 			return;
 		}
 
-		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + RELEASE_COOL_DOWN_DELAY;
+		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+		if ( ! $release_delay ) {
+			return;
+		}
+
+		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + $release_delay;
 		if ( $cooldown_until <= time() ) {
 			return;
 		}
@@ -133,6 +133,10 @@ class Controls {
 		if ( ! current_user_can( 'plugin_review', $post ) ) {
 			return;
 		}
+
+		// Re-verify the post.php form nonce that core already checked, to satisfy phpcs
+		// and to make the security boundary explicit.
+		check_admin_referer( 'update-post_' . $post_id );
 
 		$version           = get_post_meta( $post->ID, 'version', true );
 		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );

@@ -299,15 +299,16 @@ class Release_Confirmation {
 	}
 
 	/**
-	 * Render a single line describing the cooldown state of a release: pending serve time
-	 * or force-released-by-reviewer. Skipped when the cooldown feature is disabled, when
-	 * the release was discarded, when it hasn't moved past confirmation/processing, or
-	 * when the cooldown has already elapsed without force-release.
+	 * Render a single line describing the cooldown state of a release: pending serve time.
+	 * Skipped for releases without a cooldown delay (feature off at release creation, or
+	 * force-released), discarded releases, releases that haven't moved past
+	 * confirmation/processing, or where the cooldown window has elapsed.
 	 *
 	 * @param array $data The release row from Plugin_Directory::get_releases().
 	 */
 	protected static function render_cooldown_status( $data ) {
-		if ( ! RELEASE_COOL_DOWN_DELAY ) {
+		$release_delay = (int) ( $data['release_delay'] ?? 0 );
+		if ( ! $release_delay ) {
 			return;
 		}
 
@@ -320,18 +321,8 @@ class Release_Confirmation {
 			return;
 		}
 
-		if ( ! empty( $data['force_released'] ) ) {
-			$message = sprintf(
-				/* translators: %s: relative time */
-				__( 'Force-released by a plugin reviewer %s ago.', 'wporg-plugins' ),
-				human_time_diff( (int) ( $data['force_released_at'] ?? $data['date'] ) )
-			);
-			printf( '<span>%s</span><br>', esc_html( $message ) );
-			return;
-		}
-
 		$release_time   = $data['confirmations'] ? max( $data['confirmations'] ) : (int) $data['date'];
-		$cooldown_until = $release_time + RELEASE_COOL_DOWN_DELAY;
+		$cooldown_until = $release_time + $release_delay;
 
 		if ( $cooldown_until <= time() ) {
 			return;

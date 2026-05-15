@@ -4,7 +4,6 @@ namespace WordPressdotorg\Plugin_Directory\Jobs;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
-use const WordPressdotorg\Plugin_Directory\RELEASE_COOL_DOWN_DELAY;
 
 /**
  * Handles interfacing with the api.WordPress.org/plugin/update-check/ API.
@@ -101,35 +100,33 @@ class API_Update_Updater {
 			)
 		);
 
+		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+
 		/*
 		 * Defer the write for new versions still inside the cooldown window. While
 		 * deferred, the existing `update_source` row (carrying the previous version)
 		 * continues to be served by the update API. Callers that need immediate writes
 		 * (status transitions, reviewer force-release, the deferred event firing, meta
-		 * sync, rebuild) pass $bypass_cooldown = true.
-		 *
-		 * Skipped entirely when RELEASE_COOL_DOWN_DELAY is 0 — that's the feature-flag
-		 * off switch, callers see the original commit/confirmation release_time.
+		 * sync, rebuild) pass $bypass_cooldown = true; reviewers force-release by
+		 * setting `release_delay = 0` on the release meta.
 		 */
 		if (
-			RELEASE_COOL_DOWN_DELAY &&
+			$release_delay &&
 			! $bypass_cooldown &&
-			empty( $release['force_released'] ) &&
 			$existing_version !== (string) $version
 		) {
-			$cooldown_until = $release_time + RELEASE_COOL_DOWN_DELAY;
+			$cooldown_until = $release_time + $release_delay;
 			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
 				return true;
 			}
 		}
 
-		// When the cooldown is enabled and this write is publishing a new version, anchor
-		// `release_time` to now — that's the moment the version is actually available to
-		// sites. Keeps phased_rollout()'s `manual-updates-24hr` window measuring from public
-		// availability, even if the commit/confirmation was long ago because the cooldown
-		// deferred the write. With the cooldown disabled, keep the original semantics.
-		if ( RELEASE_COOL_DOWN_DELAY && $existing_version !== (string) $version ) {
+		// When publishing a new version under an active cooldown, anchor `release_time`
+		// to now — that's the moment the version is actually available to sites. Keeps
+		// phased_rollout()'s `manual-updates-24hr` window measuring from public availability,
+		// even if the commit/confirmation was long ago because the cooldown deferred the write.
+		if ( $release_delay && $existing_version !== (string) $version ) {
 			$release_time = time();
 		}
 
@@ -311,11 +308,8 @@ class API_Update_Updater {
 		Plugin_Directory::add_release(
 			$post,
 			array(
-				'tag'                   => $release['tag'],
-				'force_released'        => true,
-				'force_released_by'     => $user->ID,
-				'force_released_at'     => time(),
-				'force_released_reason' => $reason,
+				'tag'           => $release['tag'],
+				'release_delay' => 0,
 			)
 		);
 
@@ -323,7 +317,7 @@ class API_Update_Updater {
 			sprintf(
 				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
 				$version,
-				RELEASE_COOL_DOWN_DELAY / HOUR_IN_SECONDS,
+				(int) ( $release['release_delay'] ?? 0 ) / HOUR_IN_SECONDS,
 				$reason
 			),
 			$post
