@@ -287,5 +287,21 @@ if ( $deepl_key ) {
 			/>
 		</td>
 	</tr>
+	<tr>
+		<th>
+			<label for="default_sort[hide_inline_actions]">
+				<?php esc_html_e( 'Hide the inline action buttons in the translation editor', 'glotpress' ); ?>
+			</label>
+		</th>
+		<td>
+			<input type="hidden" name="default_sort[hide_inline_actions]" value="off" />
+			<input
+				type="checkbox"
+				id="default_sort[hide_inline_actions]"
+				name="default_sort[hide_inline_actions]"
+				<?php gp_checked( 'on' === gp_array_get( $gp_default_sort, 'hide_inline_actions', 'off' ) ); ?>
+			/>
+		</td>
+	</tr>
 	<?php endif; ?>
 </table>

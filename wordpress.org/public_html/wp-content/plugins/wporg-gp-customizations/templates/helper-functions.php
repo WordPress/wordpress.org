@@ -56,6 +56,20 @@ wp_register_script(
 );
 
 wp_register_style(
+	'wporg-translate-inline-actions',
+	plugins_url( 'css/inline-actions.css', __FILE__ ),
+	array( 'wporg-translate' ),
+	filemtime( __DIR__ . '/css/inline-actions.css' )
+);
+
+wp_register_script(
+	'wporg-translate-inline-actions',
+	plugins_url( 'js/inline-actions.js', __FILE__ ),
+	array( 'wporg-translate-editor' ), // Ensures load order: core editor.js → wporg editor.js → inline-actions.js.
+	filemtime( __DIR__ . '/js/inline-actions.js' )
+);
+
+wp_register_style(
 	'chartist',
 	plugins_url( 'css/chartist.min.css', __FILE__ ),
 	[],
@@ -74,6 +88,11 @@ if ( isset( $template ) && 'translations' === $template ) {
 	if ( wporg_translate_topbar_current_user_can_validate( $args ?? array() ) ) {
 		gp_enqueue_script( 'wporg-translate-topbar' );
 		gp_enqueue_style( 'wporg-translate-topbar' );
+	}
+
+	if ( wporg_translate_inline_actions_enabled_for_current_user( $args ?? array() ) ) {
+		gp_enqueue_script( 'wporg-translate-inline-actions' );
+		gp_enqueue_style( 'wporg-translate-inline-actions' );
 	}
 }
 
@@ -193,6 +212,35 @@ function wporg_translate_topbar_current_user_can_validate( $args ) {
 	// option (piggybacks on the existing settings form — see settings-edit.php).
 	$default_sort = get_user_option( 'gp_default_sort' );
 	if ( 'on' === gp_array_get( $default_sort, 'hide_validator_topbar', 'off' ) ) {
+		return false;
+	}
+
+	return GP::$permission->current_user_can(
+		'approve',
+		'translation-set',
+		$args['translation_set']->id
+	);
+}
+
+/**
+ * Returns true if the current user should see the inline action buttons
+ * (Approve / Reject / Fuzzy) in the translation editor's row list. The
+ * inline buttons are a validator-only feature, opt-out per-user via
+ * /settings/.
+ *
+ * @param array $args The args array from the GlotPress template / footer context.
+ *                    Expected to contain a `translation_set` key when on the
+ *                    `translations` template.
+ * @return bool
+ */
+function wporg_translate_inline_actions_enabled_for_current_user( $args ) {
+	if ( empty( $args['translation_set'] ) ) {
+		return false;
+	}
+
+	// Per-user opt-out: validators can hide the inline action buttons from /settings/.
+	$default_sort = get_user_option( 'gp_default_sort' );
+	if ( 'on' === gp_array_get( $default_sort, 'hide_inline_actions', 'off' ) ) {
 		return false;
 	}
 
