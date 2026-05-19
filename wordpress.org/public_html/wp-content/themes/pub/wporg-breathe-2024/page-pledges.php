@@ -267,13 +267,6 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 	return $args ? add_query_arg( $args, $pledges_url ) : $pledges_url;
 };
 
-// aria-current="true" on the active chip restores the semantic the <button>
-// chips used to carry implicitly; without it, screen readers announce three
-// indistinguishable links instead of "current page" on the selected filter.
-$aria_current_attr = function ( $is_active ) {
-	return $is_active ? ' aria-current="true"' : '';
-};
-
 ?>
 
 <div id="primary" class="content-area">
@@ -327,15 +320,15 @@ $aria_current_attr = function ( $is_active ) {
 						<div class="pledges-filters" role="group" aria-label="<?php esc_attr_e( 'Filter contributors', 'wporg-5ftf' ); ?>">
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Time window', 'wporg-5ftf' ); ?></span>
-								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 30 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="30" href="<?php echo esc_url( $build_pledges_url( 30, $sponsorship ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 90 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="90" href="<?php echo esc_url( $build_pledges_url( 90, $sponsorship ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 180 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="180" href="<?php echo esc_url( $build_pledges_url( 180, $sponsorship ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>"<?php echo 30 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="30" href="<?php echo esc_url( $build_pledges_url( 30, $sponsorship ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>"<?php echo 90 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="90" href="<?php echo esc_url( $build_pledges_url( 90, $sponsorship ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>"<?php echo 180 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="180" href="<?php echo esc_url( $build_pledges_url( 180, $sponsorship ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
 							</div>
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Sponsorship', 'wporg-5ftf' ); ?></span>
-								<a class="pledges-chip<?php echo 'all' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 'all' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="all" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 'independent' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 'independent' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="independent" href="<?php echo esc_url( $build_pledges_url( $window_days, 'independent' ) ); ?>"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 'sponsored' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 'sponsored' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="sponsored" href="<?php echo esc_url( $build_pledges_url( $window_days, 'sponsored' ) ); ?>"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'all' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'all' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="all" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'independent' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'independent' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="independent" href="<?php echo esc_url( $build_pledges_url( $window_days, 'independent' ) ); ?>"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'sponsored' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'sponsored' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="sponsored" href="<?php echo esc_url( $build_pledges_url( $window_days, 'sponsored' ) ); ?>"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></a>
 							</div>
 						</div>
 					</div>
@@ -381,25 +374,27 @@ $aria_current_attr = function ( $is_active ) {
 							require __DIR__ . '/content-pledge.php';
 						}
 
-						if ( $show_inactive && $inactive_contributors ) {
-							// Hide the divider when the sponsorship filter has emptied its
-							// section so JS-disabled visitors don't see an orphan label above
-							// nothing. JS apply() will toggle this back on if the filter changes.
-							$divider_hidden = 0 === $visible_inactive_count ? ' hidden' : '';
+						if ( $show_inactive && $inactive_contributors ) :
 							$inactive_label = sprintf(
 								/* translators: 1: count, 2: window in days */
 								_n( '%1$d contributor with no verified contributions in the last %2$d days', '%1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
 								$inactive_count,
 								$window_days
 							);
-							echo '<div class="pledges-inactive-divider"' . esc_attr( $divider_hidden ) . '><span>' . esc_html( $inactive_label ) . '</span></div>';
-
+							// Hide the divider when the sponsorship filter has emptied its
+							// section so JS-disabled visitors don't see an orphan label above
+							// nothing. JS apply() will toggle this back on if the filter changes.
+							?>
+							<div class="pledges-inactive-divider"<?php echo 0 === $visible_inactive_count ? ' hidden' : ''; ?>>
+								<span><?php echo esc_html( $inactive_label ); ?></span>
+							</div>
+							<?php
 							foreach ( $inactive_contributors as $contributor ) {
 								$rank++;
 								$contributor['_rank'] = $rank;
 								require __DIR__ . '/content-pledge.php';
 							}
-						}
+						endif;
 						?>
 					</div>
 
