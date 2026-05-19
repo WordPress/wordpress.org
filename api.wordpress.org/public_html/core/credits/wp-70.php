@@ -914,4 +914,3 @@ class WP_70_Credits extends WP_Credits {
 		];
 	}
 }
-
