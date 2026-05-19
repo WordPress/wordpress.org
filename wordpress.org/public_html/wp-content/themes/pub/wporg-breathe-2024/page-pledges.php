@@ -73,7 +73,7 @@ if ( ! ContributionMetrics\team_has_tracking_data( $current_team->post_name ) ) 
 							<?php
 							echo wp_kses_data( sprintf(
 								/* translators: %s: team name */
-								__( 'We don\'t yet have automated contribution tracking for the <strong>%s</strong> team. Sponsors, recruiters, and team reps can\'t see who is shipping verified work — only a list of people who opted in.', 'wporg-5ftf' ),
+								__( 'We don\'t yet have automated contribution tracking for the <strong>%s</strong> team. Sponsors, recruiters, and team reps can\'t see who is shipping tracked work — only a list of people who opted in.', 'wporg-5ftf' ),
 								esc_html( $current_team->post_title )
 							) );
 							?>
@@ -111,7 +111,7 @@ if ( ! ContributionMetrics\team_has_tracking_data( $current_team->post_name ) ) 
 
 						<li class="pledges-guide-step">
 							<h3><?php esc_html_e( 'Propose a metrics discussion', 'wporg-5ftf' ); ?></h3>
-							<p><?php esc_html_e( 'Once you have earned standing in the team, propose a discussion (in a meeting or async) to define what counts as a verified contribution. What types of work? What weights? Which signals should be tracked, and which intentionally ignored?', 'wporg-5ftf' ); ?></p>
+							<p><?php esc_html_e( 'Once you have earned standing in the team, propose a discussion (in a meeting or async) to define what counts as a tracked contribution. What types of work? What impact levels? Which signals should be tracked, and which intentionally ignored?', 'wporg-5ftf' ); ?></p>
 						</li>
 
 						<li class="pledges-guide-step">
@@ -291,7 +291,7 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 						<div class="pledges-howitworks-body">
 							<strong><?php esc_html_e( 'How this page works', 'wporg-5ftf' ); ?></strong>
 							<p>
-								<?php esc_html_e( 'Contributors are ranked by weighted recent activity, not by pledged hours. Signals come from Trac props (release credits) and GitHub activity (merged PRs, pushes, closed issues), bucketed into high, medium, and low weight. Low-weight contributions (typo fixes, whitespace) don\'t factor into the ranking. Inactive contributors decay down the list automatically.', 'wporg-5ftf' ); ?>
+								<?php esc_html_e( 'Contributors are ranked by recent contribution impact, not by pledged hours. Activity is tracked from release credits in Trac and GitHub work (merged PRs, pushes, closed issues), sorted into high, medium, and low impact. Low-impact contributions (typo fixes, whitespace) don\'t factor into the ranking. Inactive contributors gradually drop down the list.', 'wporg-5ftf' ); ?>
 							</p>
 						</div>
 						<button type="button" class="pledges-howitworks-dismiss" aria-label="<?php esc_attr_e( 'Dismiss', 'wporg-5ftf' ); ?>">&times;</button>
@@ -305,7 +305,7 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 							// scopes the rank line below, not this banner. Don't conflate the two.
 							echo wp_kses_data( sprintf(
 								/* translators: %s: team name */
-								__( 'opted-in contributors to %s.', 'wporg-5ftf' ),
+								__( 'contributors to %s.', 'wporg-5ftf' ),
 								'<strong>' . esc_html( $current_team->post_title ) . '</strong>'
 							) );
 							?>
@@ -338,7 +338,7 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 							<?php
 							echo esc_html( sprintf(
 								/* translators: %d: window in days */
-								__( 'Ranked by weighted volume, last %d days.', 'wporg-5ftf' ),
+								__( 'Ranked by impact, last %d days.', 'wporg-5ftf' ),
 								$window_days
 							) );
 							?>
@@ -377,7 +377,7 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 						if ( $show_inactive && $inactive_contributors ) :
 							$inactive_label = sprintf(
 								/* translators: 1: count, 2: window in days */
-								_n( '%1$d contributor with no verified contributions in the last %2$d days', '%1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+								_n( '%1$d contributor with no tracked contributions in the last %2$d days', '%1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
 								$inactive_count,
 								$window_days
 							);
@@ -412,7 +412,30 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 						<a class="pledges-empty-reset" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></a>
 					</div>
 
-					<?php if ( $inactive_contributors ) : ?>
+					<?php if ( $inactive_contributors && ! $show_inactive ) : ?>
+						<p class="pledges-empty-extra">
+							<a href="<?php echo esc_url( add_query_arg( 'show_inactive', '1' ) ); ?>">
+								<?php
+								echo esc_html( sprintf(
+									/* translators: 1: count, 2: window in days */
+									_n( 'Show %1$d contributor with no tracked contributions in the last %2$d days', 'Show %1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+									$inactive_count,
+									$window_days
+								) );
+								?>
+							</a>
+						</p>
+					<?php endif; ?>
+
+					<?php
+					// Standalone inactive toggle: only renders when there's a visible active
+					// section to anchor it to (or when inactive is already shown, so the user
+					// can hide it). When the visible active count is 0 the empty state above
+					// already carries the "Show inactive" suggestion via pledges-empty-extra,
+					// so showing the standalone toggle below would just duplicate the CTA.
+					$show_standalone_toggle = $inactive_contributors && ( $visible_active_count > 0 || $show_inactive );
+					?>
+					<?php if ( $show_standalone_toggle ) : ?>
 						<p class="pledges-inactive-toggle">
 							<?php if ( $show_inactive ) : ?>
 								<a href="<?php echo esc_url( remove_query_arg( 'show_inactive' ) ); ?>">
@@ -429,7 +452,7 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 									<?php
 									echo esc_html( sprintf(
 										/* translators: 1: count, 2: window in days */
-										_n( 'Show %1$d contributor with no verified contributions in the last %2$d days', 'Show %1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+										_n( 'Show %1$d contributor with no tracked contributions in the last %2$d days', 'Show %1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
 										$inactive_count,
 										$window_days
 									) );

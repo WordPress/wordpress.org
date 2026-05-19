@@ -522,6 +522,23 @@
 	text-decoration: none;
 }
 
+.pledges-empty-extra {
+	margin: 14px 0 0;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.pledges-empty-extra a {
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.pledges-empty-extra a:hover,
+.pledges-empty-extra a:focus {
+	text-decoration: underline;
+}
+
 /* ------------------------------------------------------------------ */
 /* Narrow (< 720px) layout — collapse card columns                     */
 /* ------------------------------------------------------------------ */

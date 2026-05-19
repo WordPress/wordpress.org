@@ -96,8 +96,8 @@ $is_initially_hidden = 'all' !== $active_sponsorship && $active_sponsorship !== 
 				$parts = array();
 				if ( $high > 0 ) {
 					$parts[] = sprintf(
-						/* translators: 1: <strong> tag, 2: number of high-weight contributions, 3: </strong> tag */
-						_n( '%1$s%2$d high-weight%3$s contribution', '%1$s%2$d high-weight%3$s contributions', $high, 'wporg-5ftf' ),
+						/* translators: 1: <strong> tag, 2: number of high-impact contributions, 3: </strong> tag */
+						_n( '%1$s%2$d high-impact%3$s contribution', '%1$s%2$d high-impact%3$s contributions', $high, 'wporg-5ftf' ),
 						'<strong>',
 						$high,
 						'</strong>'
@@ -105,8 +105,8 @@ $is_initially_hidden = 'all' !== $active_sponsorship && $active_sponsorship !== 
 				}
 				if ( $medium > 0 ) {
 					$parts[] = sprintf(
-						/* translators: 1: <strong> tag, 2: number of medium-weight contributions, 3: </strong> tag */
-						_n( '%1$s%2$d medium%3$s contribution', '%1$s%2$d medium%3$s contributions', $medium, 'wporg-5ftf' ),
+						/* translators: 1: <strong> tag, 2: number of medium-impact contributions, 3: </strong> tag */
+						_n( '%1$s%2$d medium-impact%3$s contribution', '%1$s%2$d medium-impact%3$s contributions', $medium, 'wporg-5ftf' ),
 						'<strong>',
 						$medium,
 						'</strong>'
@@ -145,7 +145,7 @@ $is_initially_hidden = 'all' !== $active_sponsorship && $active_sponsorship !== 
 			} else {
 				echo esc_html( sprintf(
 					/* translators: %d: window in days */
-					__( 'No verified contributions in the last %d days.', 'wporg-5ftf' ),
+					__( 'No tracked contributions in the last %d days.', 'wporg-5ftf' ),
 					$window_days
 				) );
 			}
@@ -156,7 +156,7 @@ $is_initially_hidden = 'all' !== $active_sponsorship && $active_sponsorship !== 
 	<aside class="pledges-card-meta">
 		<span class="pledges-card-weight">
 			<strong><?php echo esc_html( number_format_i18n( $weighted ) ); ?></strong>
-			<span class="pledges-card-weight-label"><?php esc_html_e( 'weighted', 'wporg-5ftf' ); ?></span>
+			<span class="pledges-card-weight-label"><?php esc_html_e( 'impact', 'wporg-5ftf' ); ?></span>
 		</span>
 	</aside>
 </article>
