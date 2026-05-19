@@ -73,7 +73,7 @@ if ( ! ContributionMetrics\team_has_tracking_data( $current_team->post_name ) ) 
 							<?php
 							echo wp_kses_data( sprintf(
 								/* translators: %s: team name */
-								__( 'We don\'t yet have automated contribution tracking for the <strong>%s</strong> team. Sponsors, recruiters, and team reps can\'t see who is shipping verified work — only a list of people who opted in.', 'wporg-5ftf' ),
+								__( 'We don\'t yet have automated contribution tracking for the <strong>%s</strong> team. Sponsors, recruiters, and team reps can\'t see who is shipping tracked work — only a list of people who opted in.', 'wporg-5ftf' ),
 								esc_html( $current_team->post_title )
 							) );
 							?>
@@ -111,7 +111,7 @@ if ( ! ContributionMetrics\team_has_tracking_data( $current_team->post_name ) ) 
 
 						<li class="pledges-guide-step">
 							<h3><?php esc_html_e( 'Propose a metrics discussion', 'wporg-5ftf' ); ?></h3>
-							<p><?php esc_html_e( 'Once you have earned standing in the team, propose a discussion (in a meeting or async) to define what counts as a verified contribution. What types of work? What weights? Which signals should be tracked, and which intentionally ignored?', 'wporg-5ftf' ); ?></p>
+							<p><?php esc_html_e( 'Once you have earned standing in the team, propose a discussion (in a meeting or async) to define what counts as a tracked contribution. What types of work? What impact levels? Which signals should be tracked, and which intentionally ignored?', 'wporg-5ftf' ); ?></p>
 						</li>
 
 						<li class="pledges-guide-step">
@@ -202,8 +202,21 @@ foreach ( $contributors as $uid => $c ) {
 // `?show_inactive=1` opt-in to render inactive ones too (still beneath the active list).
 $show_inactive = ! empty( $_GET['show_inactive'] );
 
+// Sponsorship filter is URL-driven so the view is bookmarkable and survives
+// time-window navigations (the window chips are full-page reloads). Default
+// matches the historical JS default so existing links don't shift meaning.
+$sponsorship_default = 'independent';
+$sponsorship_allowed = array( 'all', 'independent', 'sponsored' );
+// is_string() guard before sanitize_key(): a URL like ?sponsorship[]=foo makes
+// $_GET['sponsorship'] an array, which would TypeError sanitize_key() on PHP 8
+// and 500 the page.
+$sponsorship_raw = isset( $_GET['sponsorship'] ) ? wp_unslash( $_GET['sponsorship'] ) : '';
+$sponsorship     = is_string( $sponsorship_raw ) ? sanitize_key( $sponsorship_raw ) : '';
+if ( ! in_array( $sponsorship, $sponsorship_allowed, true ) ) {
+	$sponsorship = $sponsorship_default;
+}
+
 $total_count       = count( $contributors );
-$active_count      = count( $active_contributors );
 $inactive_count    = count( $inactive_contributors );
 $independent_count = 0;
 $sponsored_count   = 0;
@@ -214,6 +227,45 @@ foreach ( $contributors as $c ) {
 		$independent_count++;
 	}
 }
+
+// Visible active count under the current sponsorship filter, so the initial
+// render's "N active contributors" matches what the user actually sees and
+// doesn't twitch when the JS recomputes after hydration.
+$visible_active_count   = 0;
+$visible_inactive_count = 0;
+foreach ( $active_contributors as $c ) {
+	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
+	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
+		$visible_active_count++;
+	}
+}
+foreach ( $inactive_contributors as $c ) {
+	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
+	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
+		$visible_inactive_count++;
+	}
+}
+
+// Chip URL builder. home_url('/pledges/') already includes the team site path,
+// so no REQUEST_URI concat needed. Each filter group's links carry the *other*
+// groups' state forward so switching one dimension doesn't silently reset the
+// others (see issue #374).
+$pledges_url = home_url( '/pledges/' );
+$default_w   = ContributionMetrics\WINDOW_DAYS_DEFAULT;
+
+$build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url, $default_w, $show_inactive, $sponsorship_default ) {
+	$args = array();
+	if ( $window !== $default_w ) {
+		$args['window'] = $window;
+	}
+	if ( $sponsorship_value !== $sponsorship_default ) {
+		$args['sponsorship'] = $sponsorship_value;
+	}
+	if ( $show_inactive ) {
+		$args['show_inactive'] = 1;
+	}
+	return $args ? add_query_arg( $args, $pledges_url ) : $pledges_url;
+};
 
 ?>
 
@@ -239,7 +291,7 @@ foreach ( $contributors as $c ) {
 						<div class="pledges-howitworks-body">
 							<strong><?php esc_html_e( 'How this page works', 'wporg-5ftf' ); ?></strong>
 							<p>
-								<?php esc_html_e( 'Contributors are ranked by weighted recent activity, not by pledged hours. Signals come from Trac props (release credits) and GitHub activity (merged PRs, pushes, closed issues), bucketed into high, medium, and low weight. Low-weight contributions (typo fixes, whitespace) don\'t factor into the ranking. Inactive contributors decay down the list automatically.', 'wporg-5ftf' ); ?>
+								<?php esc_html_e( 'Contributors are ranked by recent contribution impact, not by pledged hours. Activity is tracked from release credits in Trac and GitHub work (merged PRs, pushes, closed issues), sorted into high, medium, and low impact. Low-impact contributions (typo fixes, whitespace) don\'t factor into the ranking. Inactive contributors gradually drop down the list.', 'wporg-5ftf' ); ?>
 							</p>
 						</div>
 						<button type="button" class="pledges-howitworks-dismiss" aria-label="<?php esc_attr_e( 'Dismiss', 'wporg-5ftf' ); ?>">&times;</button>
@@ -253,7 +305,7 @@ foreach ( $contributors as $c ) {
 							// scopes the rank line below, not this banner. Don't conflate the two.
 							echo wp_kses_data( sprintf(
 								/* translators: %s: team name */
-								__( 'opted-in contributors to %s.', 'wporg-5ftf' ),
+								__( 'contributors to %s.', 'wporg-5ftf' ),
 								'<strong>' . esc_html( $current_team->post_title ) . '</strong>'
 							) );
 							?>
@@ -268,25 +320,15 @@ foreach ( $contributors as $c ) {
 						<div class="pledges-filters" role="group" aria-label="<?php esc_attr_e( 'Filter contributors', 'wporg-5ftf' ); ?>">
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Time window', 'wporg-5ftf' ); ?></span>
-								<?php
-								// home_url('/pledges/') already includes the team site path, so no REQUEST_URI concat needed.
-								// Carry show_inactive forward so changing the window doesn't silently collapse the inactive list.
-								$pledges_url   = home_url( '/pledges/' );
-								$base_url      = $show_inactive ? add_query_arg( 'show_inactive', '1', $pledges_url ) : $pledges_url;
-								$default_w     = ContributionMetrics\WINDOW_DAYS_DEFAULT;
-								$url_for_30    = 30 === $default_w ? $base_url : add_query_arg( 'window', 30, $base_url );
-								$url_for_90    = 90 === $default_w ? $base_url : add_query_arg( 'window', 90, $base_url );
-								$url_for_180   = 180 === $default_w ? $base_url : add_query_arg( 'window', 180, $base_url );
-								?>
-								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_30 ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_90 ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_180 ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>"<?php echo 30 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="30" href="<?php echo esc_url( $build_pledges_url( 30, $sponsorship ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>"<?php echo 90 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="90" href="<?php echo esc_url( $build_pledges_url( 90, $sponsorship ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>"<?php echo 180 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="180" href="<?php echo esc_url( $build_pledges_url( 180, $sponsorship ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
 							</div>
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Sponsorship', 'wporg-5ftf' ); ?></span>
-								<button type="button" class="pledges-chip" data-filter="sponsorship" data-value="all"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></button>
-								<button type="button" class="pledges-chip is-on" data-filter="sponsorship" data-value="independent"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></button>
-								<button type="button" class="pledges-chip" data-filter="sponsorship" data-value="sponsored"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></button>
+								<a class="pledges-chip<?php echo 'all' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'all' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="all" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'independent' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'independent' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="independent" href="<?php echo esc_url( $build_pledges_url( $window_days, 'independent' ) ); ?>"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'sponsored' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'sponsored' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="sponsored" href="<?php echo esc_url( $build_pledges_url( $window_days, 'sponsored' ) ); ?>"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></a>
 							</div>
 						</div>
 					</div>
@@ -296,7 +338,7 @@ foreach ( $contributors as $c ) {
 							<?php
 							echo esc_html( sprintf(
 								/* translators: %d: window in days */
-								__( 'Ranked by weighted volume, last %d days.', 'wporg-5ftf' ),
+								__( 'Ranked by impact, last %d days.', 'wporg-5ftf' ),
 								$window_days
 							) );
 							?>
@@ -304,11 +346,10 @@ foreach ( $contributors as $c ) {
 						<?php
 						// The result phrase is a JS-controlled template so the singular/plural
 						// form follows the visible-card count after client-side filtering, instead
-						// of being baked at render time against $active_count and drifting (e.g.
-						// "1 active contributors").
+						// of being baked at render time and drifting (e.g. "1 active contributors").
 						?>
-						<span class="pledges-result-count">
-							<span id="pledges-result-count"><?php echo esc_html( $active_count ); ?></span>
+						<span class="pledges-result-count" aria-live="polite">
+							<span id="pledges-result-count"><?php echo esc_html( $visible_active_count ); ?></span>
 							<span
 								id="pledges-result-phrase"
 								data-singular="<?php echo esc_attr__( 'active contributor (of %d total)', 'wporg-5ftf' ); ?>"
@@ -317,7 +358,7 @@ foreach ( $contributors as $c ) {
 							><?php
 								echo esc_html( sprintf(
 									/* translators: %d: total count */
-									_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $active_count, 'wporg-5ftf' ),
+									_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $visible_active_count, 'wporg-5ftf' ),
 									$total_count
 								) );
 								?></span>
@@ -333,30 +374,79 @@ foreach ( $contributors as $c ) {
 							require __DIR__ . '/content-pledge.php';
 						}
 
-						if ( $show_inactive && $inactive_contributors ) {
+						if ( $show_inactive && $inactive_contributors ) :
+							// Label reflects the *visible* inactive count under the current
+							// sponsorship filter, otherwise "10 contributors with no tracked
+							// contributions" sits above 2 cards when the filter hides the rest.
 							$inactive_label = sprintf(
 								/* translators: 1: count, 2: window in days */
-								_n( '%1$d contributor with no verified contributions in the last %2$d days', '%1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
-								$inactive_count,
+								_n( '%1$d contributor with no tracked contributions in the last %2$d days', '%1$d contributors with no tracked contributions in the last %2$d days', $visible_inactive_count, 'wporg-5ftf' ),
+								$visible_inactive_count,
 								$window_days
 							);
-							echo '<div class="pledges-inactive-divider"><span>' . esc_html( $inactive_label ) . '</span></div>';
-
+							// Hide the divider when the sponsorship filter has emptied its
+							// section so JS-disabled visitors don't see an orphan label above
+							// nothing. JS apply() will toggle this back on if the filter changes.
+							?>
+							<div class="pledges-inactive-divider"<?php echo 0 === $visible_inactive_count ? ' hidden' : ''; ?>>
+								<span><?php echo esc_html( $inactive_label ); ?></span>
+							</div>
+							<?php
 							foreach ( $inactive_contributors as $contributor ) {
 								$rank++;
 								$contributor['_rank'] = $rank;
 								require __DIR__ . '/content-pledge.php';
 							}
-						}
+						endif;
 						?>
 					</div>
 
-					<div class="pledges-empty" id="pledges-empty" hidden>
+					<?php
+					// Pre-show the empty state when the sponsorship filter has hidden every
+					// card the server would have rendered. Otherwise a JS-disabled visitor
+					// with ?sponsorship=sponsored on an all-independent team would see a
+					// blank grid and no explanation. JS apply() will hide this again if a
+					// later filter change brings cards back.
+					$visible_inactive_for_empty = $show_inactive ? $visible_inactive_count : 0;
+					$empty_initially_visible    = 0 === ( $visible_active_count + $visible_inactive_for_empty );
+					?>
+					<div class="pledges-empty" id="pledges-empty"<?php echo $empty_initially_visible ? '' : ' hidden'; ?>>
 						<p><?php esc_html_e( 'No contributors match the selected filters.', 'wporg-5ftf' ); ?></p>
-						<button type="button" class="pledges-empty-reset"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></button>
+						<a class="pledges-empty-reset" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></a>
 					</div>
 
-					<?php if ( $inactive_contributors ) : ?>
+					<?php
+					// Empty-state companion CTA: only render when the empty state itself is
+					// showing (visible_active_count === 0 && !show_inactive). Without the
+					// visible_active_count gate this would also render alongside the
+					// standalone inactive toggle below when the grid has visible cards,
+					// producing two "Show inactive" CTAs on the same page.
+					$show_empty_extra = $inactive_contributors && ! $show_inactive && 0 === $visible_active_count;
+					?>
+					<?php if ( $show_empty_extra ) : ?>
+						<p class="pledges-empty-extra">
+							<a href="<?php echo esc_url( add_query_arg( 'show_inactive', '1' ) ); ?>">
+								<?php
+								echo esc_html( sprintf(
+									/* translators: 1: count, 2: window in days */
+									_n( 'Show %1$d contributor with no tracked contributions in the last %2$d days', 'Show %1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+									$inactive_count,
+									$window_days
+								) );
+								?>
+							</a>
+						</p>
+					<?php endif; ?>
+
+					<?php
+					// Standalone inactive toggle: only renders when there's a visible active
+					// section to anchor it to (or when inactive is already shown, so the user
+					// can hide it). When the visible active count is 0 the empty state above
+					// already carries the "Show inactive" suggestion via pledges-empty-extra,
+					// so showing the standalone toggle below would just duplicate the CTA.
+					$show_standalone_toggle = $inactive_contributors && ( $visible_active_count > 0 || $show_inactive );
+					?>
+					<?php if ( $show_standalone_toggle ) : ?>
 						<p class="pledges-inactive-toggle">
 							<?php if ( $show_inactive ) : ?>
 								<a href="<?php echo esc_url( remove_query_arg( 'show_inactive' ) ); ?>">
@@ -373,7 +463,7 @@ foreach ( $contributors as $c ) {
 									<?php
 									echo esc_html( sprintf(
 										/* translators: 1: count, 2: window in days */
-										_n( 'Show %1$d contributor with no verified contributions in the last %2$d days', 'Show %1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+										_n( 'Show %1$d contributor with no tracked contributions in the last %2$d days', 'Show %1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
 										$inactive_count,
 										$window_days
 									) );

@@ -503,6 +503,7 @@
 }
 
 .pledges-empty-reset {
+	display: inline-block;
 	margin-top: 10px;
 	background: var(--wp--preset--color--charcoal-1, #1d2327);
 	color: #fff;
@@ -512,6 +513,30 @@
 	font-size: 14px;
 	line-height: 1.4;
 	cursor: pointer;
+	text-decoration: none;
+}
+
+.pledges-empty-reset:hover,
+.pledges-empty-reset:focus {
+	color: #fff;
+	text-decoration: none;
+}
+
+.pledges-empty-extra {
+	margin: 14px 0 0;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.pledges-empty-extra a {
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.pledges-empty-extra a:hover,
+.pledges-empty-extra a:focus {
+	text-decoration: underline;
 }
 
 /* ------------------------------------------------------------------ */
