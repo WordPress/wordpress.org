@@ -375,10 +375,13 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 						}
 
 						if ( $show_inactive && $inactive_contributors ) :
+							// Label reflects the *visible* inactive count under the current
+							// sponsorship filter, otherwise "10 contributors with no tracked
+							// contributions" sits above 2 cards when the filter hides the rest.
 							$inactive_label = sprintf(
 								/* translators: 1: count, 2: window in days */
-								_n( '%1$d contributor with no tracked contributions in the last %2$d days', '%1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
-								$inactive_count,
+								_n( '%1$d contributor with no tracked contributions in the last %2$d days', '%1$d contributors with no tracked contributions in the last %2$d days', $visible_inactive_count, 'wporg-5ftf' ),
+								$visible_inactive_count,
 								$window_days
 							);
 							// Hide the divider when the sponsorship filter has emptied its
@@ -412,7 +415,15 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 						<a class="pledges-empty-reset" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></a>
 					</div>
 
-					<?php if ( $inactive_contributors && ! $show_inactive ) : ?>
+					<?php
+					// Empty-state companion CTA: only render when the empty state itself is
+					// showing (visible_active_count === 0 && !show_inactive). Without the
+					// visible_active_count gate this would also render alongside the
+					// standalone inactive toggle below when the grid has visible cards,
+					// producing two "Show inactive" CTAs on the same page.
+					$show_empty_extra = $inactive_contributors && ! $show_inactive && 0 === $visible_active_count;
+					?>
+					<?php if ( $show_empty_extra ) : ?>
 						<p class="pledges-empty-extra">
 							<a href="<?php echo esc_url( add_query_arg( 'show_inactive', '1' ) ); ?>">
 								<?php

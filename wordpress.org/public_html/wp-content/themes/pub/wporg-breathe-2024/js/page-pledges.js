@@ -155,7 +155,7 @@
 		// the sponsorship state. CSS-only chips (sponsorship) re-route through
 		// our click handler and don't need rewriting here.
 		var carryLinks = document.querySelectorAll(
-			'a.pledges-chip[data-filter="window"], .pledges-inactive-toggle a[href]'
+			'a.pledges-chip[data-filter="window"], .pledges-inactive-toggle a[href], .pledges-empty-extra a[href]'
 		);
 		carryLinks.forEach( function ( link ) {
 			try {
