@@ -7,7 +7,7 @@
  */
 function wporg_login_account_purpose_options() {
 	return [
-		''                     => __( 'Please select&hellip;', 'wporg' ),
+		''                     => __( 'Please select…', 'wporg' ),
 		'personal'             => __( 'Personal use', 'wporg' ),
 		'business'             => __( 'Business / Company account', 'wporg' ),
 		'contributing'         => __( 'Contributing to WordPress', 'wporg' ),

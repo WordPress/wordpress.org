@@ -23,24 +23,24 @@ $account_purpose_options = wporg_login_account_purpose_options();
 
 ?>
 <p class="login-website">
-	<label for="user_url"><?php esc_html_e( 'Your WordPress site', 'wporg' ); ?></label>
+	<label for="user_url"><?php _e( 'Your WordPress site', 'wporg' ); ?></label>
 	<input type="url" name="user_fields[url]" id="user_url" class="input" value="<?php echo esc_attr( $fields['url'] ?? '' ); ?>" size="20" placeholder="https://example.com" data-pattern-after-blur="(https?:\/\/)?([a-zA-Z0-9\-]+\.\S+)?" />
-	<span class="small"><?php esc_html_e( "The address of your own WordPress site, if you have one. Leave blank if you don't.", 'wporg' ); ?></span>
+	<span class="small"><?php _e( 'The address of your own WordPress site, if you have one. Leave blank if you don’t.', 'wporg' ); ?></span>
 	<span class="invalid-message"><?php _e( 'That URL appears to be invalid.', 'wporg' ); ?></span>
 </p>
 
 <p class="login-account-purpose">
-	<label for="user_account_purpose"><?php esc_html_e( 'Account purpose', 'wporg' ); ?></label>
+	<label for="user_account_purpose"><?php _e( 'Account purpose', 'wporg' ); ?></label>
 	<select name="user_fields[account_purpose]" id="user_account_purpose" class="input">
 		<?php foreach ( $account_purpose_options as $key => $label ) : ?>
 			<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $fields['account_purpose'] ?? '', $key ); ?>><?php echo esc_html( $label ); ?></option>
 		<?php endforeach; ?>
 	</select>
-	<span class="small"><?php esc_html_e( "Tell us what you'll use this account for. This helps us tailor your experience.", 'wporg' ); ?></span>
+	<span class="small"><?php _e( 'Tell us what you’ll use this account for. This helps us tailor your experience.', 'wporg' ); ?></span>
 </p>
 
 <p class="login-location">
-	<label for="user_location"><?php _e( 'Location', 'wporg' ); ?></label>
+	<label for="user_location"><?php _e( 'Where are you from?', 'wporg' ); ?></label>
 	<input type="text" name="user_fields[from]" id="user_location" class="input" value="<?php echo esc_attr( $fields['from'] ?? '' ); ?>" size="20" />
 </p>
 
