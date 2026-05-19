@@ -231,13 +231,48 @@ foreach ( $contributors as $c ) {
 // Visible active count under the current sponsorship filter, so the initial
 // render's "N active contributors" matches what the user actually sees and
 // doesn't twitch when the JS recomputes after hydration.
-$visible_active_count = 0;
+$visible_active_count   = 0;
+$visible_inactive_count = 0;
 foreach ( $active_contributors as $c ) {
 	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
 	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
 		$visible_active_count++;
 	}
 }
+foreach ( $inactive_contributors as $c ) {
+	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
+	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
+		$visible_inactive_count++;
+	}
+}
+
+// Chip URL builder. home_url('/pledges/') already includes the team site path,
+// so no REQUEST_URI concat needed. Each filter group's links carry the *other*
+// groups' state forward so switching one dimension doesn't silently reset the
+// others (see issue #374).
+$pledges_url = home_url( '/pledges/' );
+$default_w   = ContributionMetrics\WINDOW_DAYS_DEFAULT;
+
+$build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url, $default_w, $show_inactive, $sponsorship_default ) {
+	$args = array();
+	if ( $window !== $default_w ) {
+		$args['window'] = $window;
+	}
+	if ( $sponsorship_value !== $sponsorship_default ) {
+		$args['sponsorship'] = $sponsorship_value;
+	}
+	if ( $show_inactive ) {
+		$args['show_inactive'] = 1;
+	}
+	return $args ? add_query_arg( $args, $pledges_url ) : $pledges_url;
+};
+
+// aria-current="true" on the active chip restores the semantic the <button>
+// chips used to carry implicitly; without it, screen readers announce three
+// indistinguishable links instead of "current page" on the selected filter.
+$aria_current_attr = function ( $is_active ) {
+	return $is_active ? ' aria-current="true"' : '';
+};
 
 ?>
 
@@ -290,46 +325,17 @@ foreach ( $active_contributors as $c ) {
 
 					<div class="pledges-toolbar">
 						<div class="pledges-filters" role="group" aria-label="<?php esc_attr_e( 'Filter contributors', 'wporg-5ftf' ); ?>">
-							<?php
-							// home_url('/pledges/') already includes the team site path, so no REQUEST_URI concat needed.
-							// Each filter group's links carry the *other* groups' state forward so switching one
-							// dimension doesn't silently reset the others (see issue #374).
-							$pledges_url = home_url( '/pledges/' );
-							$default_w   = ContributionMetrics\WINDOW_DAYS_DEFAULT;
-
-							$build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url, $default_w, $show_inactive, $sponsorship_default ) {
-								$args = array();
-								if ( $window !== $default_w ) {
-									$args['window'] = $window;
-								}
-								if ( $sponsorship_value !== $sponsorship_default ) {
-									$args['sponsorship'] = $sponsorship_value;
-								}
-								if ( $show_inactive ) {
-									$args['show_inactive'] = 1;
-								}
-								return $args ? add_query_arg( $args, $pledges_url ) : $pledges_url;
-							};
-							?>
-							<?php
-							// aria-current="true" on the active chip restores the semantic the <button>
-							// chips used to carry implicitly; without it, screen readers announce three
-							// indistinguishable links instead of "current page" on the selected filter.
-							$aria_current = function ( $is_active ) {
-								return $is_active ? ' aria-current="true"' : '';
-							};
-							?>
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Time window', 'wporg-5ftf' ); ?></span>
-								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current( 30 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="30" href="<?php echo esc_url( $build_pledges_url( 30, $sponsorship ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current( 90 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="90" href="<?php echo esc_url( $build_pledges_url( 90, $sponsorship ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current( 180 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="180" href="<?php echo esc_url( $build_pledges_url( 180, $sponsorship ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 30 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="30" href="<?php echo esc_url( $build_pledges_url( 30, $sponsorship ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 90 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="90" href="<?php echo esc_url( $build_pledges_url( 90, $sponsorship ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 180 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="180" href="<?php echo esc_url( $build_pledges_url( 180, $sponsorship ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
 							</div>
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Sponsorship', 'wporg-5ftf' ); ?></span>
-								<a class="pledges-chip<?php echo 'all' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current( 'all' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="all" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 'independent' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current( 'independent' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="independent" href="<?php echo esc_url( $build_pledges_url( $window_days, 'independent' ) ); ?>"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 'sponsored' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current( 'sponsored' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="sponsored" href="<?php echo esc_url( $build_pledges_url( $window_days, 'sponsored' ) ); ?>"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'all' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 'all' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="all" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'independent' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 'independent' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="independent" href="<?php echo esc_url( $build_pledges_url( $window_days, 'independent' ) ); ?>"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'sponsored' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current_attr( 'sponsored' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="sponsored" href="<?php echo esc_url( $build_pledges_url( $window_days, 'sponsored' ) ); ?>"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></a>
 							</div>
 						</div>
 					</div>
@@ -376,13 +382,17 @@ foreach ( $active_contributors as $c ) {
 						}
 
 						if ( $show_inactive && $inactive_contributors ) {
+							// Hide the divider when the sponsorship filter has emptied its
+							// section so JS-disabled visitors don't see an orphan label above
+							// nothing. JS apply() will toggle this back on if the filter changes.
+							$divider_hidden = 0 === $visible_inactive_count ? ' hidden' : '';
 							$inactive_label = sprintf(
 								/* translators: 1: count, 2: window in days */
 								_n( '%1$d contributor with no verified contributions in the last %2$d days', '%1$d contributors with no verified contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
 								$inactive_count,
 								$window_days
 							);
-							echo '<div class="pledges-inactive-divider"><span>' . esc_html( $inactive_label ) . '</span></div>';
+							echo '<div class="pledges-inactive-divider"' . esc_attr( $divider_hidden ) . '><span>' . esc_html( $inactive_label ) . '</span></div>';
 
 							foreach ( $inactive_contributors as $contributor ) {
 								$rank++;
@@ -393,7 +403,16 @@ foreach ( $active_contributors as $c ) {
 						?>
 					</div>
 
-					<div class="pledges-empty" id="pledges-empty" hidden>
+					<?php
+					// Pre-show the empty state when the sponsorship filter has hidden every
+					// card the server would have rendered. Otherwise a JS-disabled visitor
+					// with ?sponsorship=sponsored on an all-independent team would see a
+					// blank grid and no explanation. JS apply() will hide this again if a
+					// later filter change brings cards back.
+					$visible_inactive_for_empty = $show_inactive ? $visible_inactive_count : 0;
+					$empty_initially_visible    = 0 === ( $visible_active_count + $visible_inactive_for_empty );
+					?>
+					<div class="pledges-empty" id="pledges-empty"<?php echo $empty_initially_visible ? '' : ' hidden'; ?>>
 						<p><?php esc_html_e( 'No contributors match the selected filters.', 'wporg-5ftf' ); ?></p>
 						<button type="button" class="pledges-empty-reset"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></button>
 					</div>
