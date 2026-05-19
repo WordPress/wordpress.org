@@ -1,6 +1,6 @@
 <?php
 
-class WP_69_Credits extends WP_Credits {
+class WP_70_Credits extends WP_Credits {
 
 	public function groups() {
 		$groups = [
