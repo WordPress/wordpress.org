@@ -202,8 +202,21 @@ foreach ( $contributors as $uid => $c ) {
 // `?show_inactive=1` opt-in to render inactive ones too (still beneath the active list).
 $show_inactive = ! empty( $_GET['show_inactive'] );
 
+// Sponsorship filter is URL-driven so the view is bookmarkable and survives
+// time-window navigations (the window chips are full-page reloads). Default
+// matches the historical JS default so existing links don't shift meaning.
+$sponsorship_default = 'independent';
+$sponsorship_allowed = array( 'all', 'independent', 'sponsored' );
+// is_string() guard before sanitize_key(): a URL like ?sponsorship[]=foo makes
+// $_GET['sponsorship'] an array, which would TypeError sanitize_key() on PHP 8
+// and 500 the page.
+$sponsorship_raw = isset( $_GET['sponsorship'] ) ? wp_unslash( $_GET['sponsorship'] ) : '';
+$sponsorship     = is_string( $sponsorship_raw ) ? sanitize_key( $sponsorship_raw ) : '';
+if ( ! in_array( $sponsorship, $sponsorship_allowed, true ) ) {
+	$sponsorship = $sponsorship_default;
+}
+
 $total_count       = count( $contributors );
-$active_count      = count( $active_contributors );
 $inactive_count    = count( $inactive_contributors );
 $independent_count = 0;
 $sponsored_count   = 0;
@@ -212,6 +225,17 @@ foreach ( $contributors as $c ) {
 		$sponsored_count++;
 	} else {
 		$independent_count++;
+	}
+}
+
+// Visible active count under the current sponsorship filter, so the initial
+// render's "N active contributors" matches what the user actually sees and
+// doesn't twitch when the JS recomputes after hydration.
+$visible_active_count = 0;
+foreach ( $active_contributors as $c ) {
+	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
+	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
+		$visible_active_count++;
 	}
 }
 
@@ -266,27 +290,46 @@ foreach ( $contributors as $c ) {
 
 					<div class="pledges-toolbar">
 						<div class="pledges-filters" role="group" aria-label="<?php esc_attr_e( 'Filter contributors', 'wporg-5ftf' ); ?>">
+							<?php
+							// home_url('/pledges/') already includes the team site path, so no REQUEST_URI concat needed.
+							// Each filter group's links carry the *other* groups' state forward so switching one
+							// dimension doesn't silently reset the others (see issue #374).
+							$pledges_url = home_url( '/pledges/' );
+							$default_w   = ContributionMetrics\WINDOW_DAYS_DEFAULT;
+
+							$build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url, $default_w, $show_inactive, $sponsorship_default ) {
+								$args = array();
+								if ( $window !== $default_w ) {
+									$args['window'] = $window;
+								}
+								if ( $sponsorship_value !== $sponsorship_default ) {
+									$args['sponsorship'] = $sponsorship_value;
+								}
+								if ( $show_inactive ) {
+									$args['show_inactive'] = 1;
+								}
+								return $args ? add_query_arg( $args, $pledges_url ) : $pledges_url;
+							};
+							?>
+							<?php
+							// aria-current="true" on the active chip restores the semantic the <button>
+							// chips used to carry implicitly; without it, screen readers announce three
+							// indistinguishable links instead of "current page" on the selected filter.
+							$aria_current = function ( $is_active ) {
+								return $is_active ? ' aria-current="true"' : '';
+							};
+							?>
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Time window', 'wporg-5ftf' ); ?></span>
-								<?php
-								// home_url('/pledges/') already includes the team site path, so no REQUEST_URI concat needed.
-								// Carry show_inactive forward so changing the window doesn't silently collapse the inactive list.
-								$pledges_url   = home_url( '/pledges/' );
-								$base_url      = $show_inactive ? add_query_arg( 'show_inactive', '1', $pledges_url ) : $pledges_url;
-								$default_w     = ContributionMetrics\WINDOW_DAYS_DEFAULT;
-								$url_for_30    = 30 === $default_w ? $base_url : add_query_arg( 'window', 30, $base_url );
-								$url_for_90    = 90 === $default_w ? $base_url : add_query_arg( 'window', 90, $base_url );
-								$url_for_180   = 180 === $default_w ? $base_url : add_query_arg( 'window', 180, $base_url );
-								?>
-								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_30 ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_90 ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
-								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>" href="<?php echo esc_url( $url_for_180 ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current( 30 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="30" href="<?php echo esc_url( $build_pledges_url( 30, $sponsorship ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current( 90 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="90" href="<?php echo esc_url( $build_pledges_url( 90, $sponsorship ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>"<?php echo $aria_current( 180 === $window_days ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="window" data-value="180" href="<?php echo esc_url( $build_pledges_url( 180, $sponsorship ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
 							</div>
 							<div class="pledges-filter-group">
 								<span class="pledges-filter-label"><?php esc_html_e( 'Sponsorship', 'wporg-5ftf' ); ?></span>
-								<button type="button" class="pledges-chip" data-filter="sponsorship" data-value="all"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></button>
-								<button type="button" class="pledges-chip is-on" data-filter="sponsorship" data-value="independent"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></button>
-								<button type="button" class="pledges-chip" data-filter="sponsorship" data-value="sponsored"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></button>
+								<a class="pledges-chip<?php echo 'all' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current( 'all' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="all" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'independent' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current( 'independent' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="independent" href="<?php echo esc_url( $build_pledges_url( $window_days, 'independent' ) ); ?>"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'sponsored' === $sponsorship ? ' is-on' : ''; ?>"<?php echo $aria_current( 'sponsored' === $sponsorship ); // phpcs:ignore WordPress.Security.EscapeOutput ?> data-filter="sponsorship" data-value="sponsored" href="<?php echo esc_url( $build_pledges_url( $window_days, 'sponsored' ) ); ?>"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></a>
 							</div>
 						</div>
 					</div>
@@ -304,11 +347,10 @@ foreach ( $contributors as $c ) {
 						<?php
 						// The result phrase is a JS-controlled template so the singular/plural
 						// form follows the visible-card count after client-side filtering, instead
-						// of being baked at render time against $active_count and drifting (e.g.
-						// "1 active contributors").
+						// of being baked at render time and drifting (e.g. "1 active contributors").
 						?>
-						<span class="pledges-result-count">
-							<span id="pledges-result-count"><?php echo esc_html( $active_count ); ?></span>
+						<span class="pledges-result-count" aria-live="polite">
+							<span id="pledges-result-count"><?php echo esc_html( $visible_active_count ); ?></span>
 							<span
 								id="pledges-result-phrase"
 								data-singular="<?php echo esc_attr__( 'active contributor (of %d total)', 'wporg-5ftf' ); ?>"
@@ -317,7 +359,7 @@ foreach ( $contributors as $c ) {
 							><?php
 								echo esc_html( sprintf(
 									/* translators: %d: total count */
-									_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $active_count, 'wporg-5ftf' ),
+									_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $visible_active_count, 'wporg-5ftf' ),
 									$total_count
 								) );
 								?></span>

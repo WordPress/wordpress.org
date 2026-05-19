@@ -2,9 +2,11 @@
  * Page Pledges — Five for the Future redesign Page 1.
  * Client-side filter over the cards already rendered server-side.
  *
- * Filters: sponsorship (all/independent/sponsored). The time window is server-side
- * (?window=30|90|180); chips are <a> links that reload the page so the aggregator
- * runs against the new window.
+ * Filters: sponsorship (all/independent/sponsored) and time window (30/90/180).
+ * Both groups are URL-driven (?sponsorship=, ?window=) so the view is
+ * bookmarkable. The time-window chips reload the page so the aggregator runs
+ * against the new window; the sponsorship chips are intercepted here for an
+ * instant in-place re-filter and the URL is kept in sync via replaceState.
  *
  * Visibility is non-destructive — all cards stay in DOM, hidden via the `hidden`
  * attribute, and visible cards are re-ranked from 01 on every state change.
@@ -29,8 +31,22 @@
 	var hiwDismiss = hiwBanner && hiwBanner.querySelector( '.pledges-howitworks-dismiss' );
 	var hiwKey = 'wporg-pledges-hiw-dismissed';
 
+	var SPONSORSHIP_DEFAULT = 'independent';
+	var SPONSORSHIP_ALLOWED = [ 'all', 'independent', 'sponsored' ];
+
+	// Seed state from the server-rendered is-on chip so PHP stays the single
+	// source of truth for the default. Allow-list the value so malformed markup
+	// (missing data-value, injected chip) can't put state into an undefined
+	// limbo that hides every card.
+	var initialChip = document.querySelector(
+		'.pledges-chip.is-on[data-filter="sponsorship"]'
+	);
+	var initialValue = initialChip ? initialChip.dataset.value : SPONSORSHIP_DEFAULT;
+	if ( SPONSORSHIP_ALLOWED.indexOf( initialValue ) === -1 ) {
+		initialValue = SPONSORSHIP_DEFAULT;
+	}
 	var state = {
-		sponsorship: 'independent',
+		sponsorship: initialValue,
 	};
 
 	/**
@@ -118,26 +134,86 @@
 	}
 
 	/**
-	 * Wire BUTTON chips for client-side filtering. <a> chips (time window)
-	 * navigate via URL and reload — handled by the browser, not JS.
+	 * Keep the URL in sync with the current sponsorship filter, and carry the
+	 * value forward into sibling navigational links (time-window chips, the
+	 * show_inactive toggle) so a subsequent full-page reload preserves it.
 	 */
-	document.querySelectorAll( 'button.pledges-chip' ).forEach( function ( chip ) {
-		chip.addEventListener( 'click', function () {
-			var filter = chip.dataset.filter;
-			var value = chip.dataset.value;
-			if ( ! filter ) {
-				return;
+	function syncUrl() {
+		try {
+			var current = new URL( window.location.href );
+			if ( state.sponsorship && state.sponsorship !== SPONSORSHIP_DEFAULT ) {
+				current.searchParams.set( 'sponsorship', state.sponsorship );
+			} else {
+				current.searchParams.delete( 'sponsorship' );
 			}
-			document
-				.querySelectorAll( 'button.pledges-chip[data-filter="' + filter + '"]' )
-				.forEach( function ( c ) {
-					c.classList.remove( 'is-on' );
-				} );
-			chip.classList.add( 'is-on' );
-			state[ filter ] = value;
-			apply();
+			window.history.replaceState( null, '', current.toString() );
+		} catch ( e ) {
+			/* ignore; URL hygiene is best-effort */
+		}
+
+		// Rewrite hrefs on full-page-reload links so the next navigation keeps
+		// the sponsorship state. CSS-only chips (sponsorship) re-route through
+		// our click handler and don't need rewriting here.
+		var carryLinks = document.querySelectorAll(
+			'a.pledges-chip[data-filter="window"], .pledges-inactive-toggle a[href]'
+		);
+		carryLinks.forEach( function ( link ) {
+			try {
+				var u = new URL( link.href, window.location.origin );
+				if ( state.sponsorship && state.sponsorship !== SPONSORSHIP_DEFAULT ) {
+					u.searchParams.set( 'sponsorship', state.sponsorship );
+				} else {
+					u.searchParams.delete( 'sponsorship' );
+				}
+				link.href = u.toString();
+			} catch ( e ) {
+				/* ignore malformed hrefs */
+			}
 		} );
-	} );
+	}
+
+	/**
+	 * Set the active sponsorship value, refresh chip state, sync the URL, and
+	 * re-apply the visibility filter.
+	 */
+	function setSponsorship( value ) {
+		if ( SPONSORSHIP_ALLOWED.indexOf( value ) === -1 ) {
+			value = SPONSORSHIP_DEFAULT;
+		}
+		state.sponsorship = value;
+		document
+			.querySelectorAll( '.pledges-chip[data-filter="sponsorship"]' )
+			.forEach( function ( c ) {
+				var isActive = c.dataset.value === value;
+				c.classList.toggle( 'is-on', isActive );
+				if ( isActive ) {
+					c.setAttribute( 'aria-current', 'true' );
+				} else {
+					c.removeAttribute( 'aria-current' );
+				}
+			} );
+		syncUrl();
+		apply();
+	}
+
+	/**
+	 * Intercept sponsorship anchor chips so the filter applies instantly
+	 * without a full page reload. The href stays correct so middle-click and
+	 * "open in new tab" still produce a shareable URL.
+	 */
+	document
+		.querySelectorAll( 'a.pledges-chip[data-filter="sponsorship"]' )
+		.forEach( function ( chip ) {
+			chip.addEventListener( 'click', function ( e ) {
+				// Let modified clicks (cmd/ctrl/shift/middle) navigate normally
+				// so users can open the filtered view in a new tab.
+				if ( e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey ) {
+					return;
+				}
+				e.preventDefault();
+				setSponsorship( chip.dataset.value );
+			} );
+		} );
 
 	/**
 	 * Empty-state reset.
@@ -145,15 +221,13 @@
 	var resetBtn = document.querySelector( '.pledges-empty-reset' );
 	if ( resetBtn ) {
 		resetBtn.addEventListener( 'click', function () {
-			document
-				.querySelectorAll( '.pledges-chip[data-filter="sponsorship"]' )
-				.forEach( function ( c ) {
-					c.classList.toggle( 'is-on', c.dataset.value === 'all' );
-				} );
-			state.sponsorship = 'all';
-			apply();
+			setSponsorship( 'all' );
 		} );
 	}
 
+	// Initial paint: sync the carry-forward hrefs once even when the user
+	// hasn't toggled anything, so links rendered with no sponsorship query arg
+	// inherit one if the page was loaded with ?sponsorship= in the URL.
+	syncUrl();
 	apply();
 } )();

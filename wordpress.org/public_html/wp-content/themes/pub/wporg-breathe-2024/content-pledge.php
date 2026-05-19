@@ -42,11 +42,13 @@ foreach ( $row_attrs as $k => $v ) {
 	$attrs_html .= sprintf( ' %s="%s"', esc_attr( $k ), esc_attr( $v ) );
 }
 
-// Default sponsorship filter is "Independent" (matches the JS state and the
-// is-on chip in page-pledges.php). Pre-hide sponsored cards so the browser
-// paints the filtered view immediately; otherwise the footer-loaded JS hides
-// them after first paint, producing a visible flash of every card.
-$is_initially_hidden = 'independent' !== $status_class;
+// Sponsorship filter is URL-driven (see ?sponsorship= handling in page-pledges.php).
+// Pre-hide non-matching cards so the browser paints the filtered view immediately;
+// otherwise the footer-loaded JS hides them after first paint, producing a visible
+// flash of every card. $sponsorship is inherited from the parent template scope via
+// `require`; default to 'independent' if this file is ever included standalone.
+$active_sponsorship  = $sponsorship ?? 'independent';
+$is_initially_hidden = 'all' !== $active_sponsorship && $active_sponsorship !== $status_class;
 
 ?>
 
