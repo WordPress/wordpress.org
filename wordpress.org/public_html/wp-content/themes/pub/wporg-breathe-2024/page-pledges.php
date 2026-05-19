@@ -409,7 +409,7 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 					?>
 					<div class="pledges-empty" id="pledges-empty"<?php echo $empty_initially_visible ? '' : ' hidden'; ?>>
 						<p><?php esc_html_e( 'No contributors match the selected filters.', 'wporg-5ftf' ); ?></p>
-						<button type="button" class="pledges-empty-reset"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></button>
+						<a class="pledges-empty-reset" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></a>
 					</div>
 
 					<?php if ( $inactive_contributors ) : ?>

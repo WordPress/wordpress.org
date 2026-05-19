@@ -503,6 +503,7 @@
 }
 
 .pledges-empty-reset {
+	display: inline-block;
 	margin-top: 10px;
 	background: var(--wp--preset--color--charcoal-1, #1d2327);
 	color: #fff;
@@ -512,6 +513,13 @@
 	font-size: 14px;
 	line-height: 1.4;
 	cursor: pointer;
+	text-decoration: none;
+}
+
+.pledges-empty-reset:hover,
+.pledges-empty-reset:focus {
+	color: #fff;
+	text-decoration: none;
 }
 
 /* ------------------------------------------------------------------ */
