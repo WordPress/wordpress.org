@@ -133,7 +133,7 @@ class WP_70_Credits extends WP_Credits {
 			'andrewryno',
 			'andrewserong',
 			'andrewssanya',
-			'ankit k gupta',
+			'ankit-k-gupta',
 			'ankitkumarshah',
 			'ankitmaru',
 			'anlino',
