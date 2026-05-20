@@ -342,10 +342,25 @@ abstract class WP_Credits {
 				}
 			}
 			if ( $fetch_emails_from_db ) {
-				$fetched = $wpdb->get_results( "SELECT user_login, ID, user_email FROM $wpdb->users WHERE user_login IN ('" . implode( "', '", array_keys( $fetch_emails_from_db ) ) . "')", OBJECT_K );
-				foreach ( $fetched as $username => $row ) {
-					$groups[ $fetch_emails_from_db[ $username ] ]['data'][ $username ][1] = $this->hash( $row->user_email );
-					wp_cache_add( $username, $row->ID, 'userlogins' );
+				// Match keys to either user_login or user_nicename, case-insensitively,
+				// so version files can use any canonical form.
+				$in = "'" . implode( "', '", array_map( array( $wpdb, '_real_escape' ), array_keys( $fetch_emails_from_db ) ) ) . "'";
+				$fetched = $wpdb->get_results( "SELECT user_login, user_nicename, ID, user_email FROM $wpdb->users WHERE user_login IN ($in) OR user_nicename IN ($in)" );
+
+				$source_lookup = array();
+				foreach ( $fetch_emails_from_db as $src => $group_slug ) {
+					$source_lookup[ strtolower( $src ) ] = $src;
+				}
+
+				foreach ( $fetched as $row ) {
+					$src = $source_lookup[ strtolower( $row->user_login ) ]
+						?? $source_lookup[ strtolower( $row->user_nicename ) ]
+						?? null;
+					if ( ! $src ) {
+						continue;
+					}
+					$groups[ $fetch_emails_from_db[ $src ] ]['data'][ $src ][1] = $this->hash( $row->user_email );
+					wp_cache_add( $src, $row->ID, 'userlogins' );
 				}
 			}
 		}
