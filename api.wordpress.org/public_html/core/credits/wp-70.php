@@ -50,7 +50,6 @@ class WP_70_Credits extends WP_Credits {
 					'gziolo'              => 'Greg Ziółkowski',
 					'jameskoster'         => 'James Koster',
 					'jsnajdr'             => 'Jarda Snajdr',
-					'adamsilverstein'     => 'Adam Silverstein',
 					'dmsnell'             => 'Dennis Snell',
 					'mikachan'            => 'Sarah Norris',
 					'mciampini'           => 'Marco Ciampini',
