@@ -305,6 +305,7 @@ function run( $data ) {
 	// Don't send to these parent channels.
 	$dont_send_to = [
 		'contributor-mentorship',
+		'wpcredits',
 	];
 
 	$text = $data['text'];
@@ -316,6 +317,12 @@ function run( $data ) {
 
 	foreach ( $parent_channels as $parent_channel ) {
 		if ( in_array( $parent_channel, $dont_send_to, true ) ) {
+			continue;
+		}
+
+		// #wpcredits and #wpcredits-* inherit from #community-team for whitelist
+		// purposes, but their announcements should stay within the wpcredits family.
+		if ( 'community-team' === $parent_channel && str_starts_with( $channel, 'wpcredits' ) ) {
 			continue;
 		}
 
