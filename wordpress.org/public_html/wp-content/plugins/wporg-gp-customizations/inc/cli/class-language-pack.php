@@ -557,11 +557,6 @@ class Language_Pack extends WP_CLI_Command {
 	/**
 	 * Builds a ZIP archive from a list of files, junking paths (basename only).
 	 *
-	 * Replaces an earlier `exec( 'zip -9 -j ...' )` invocation that could fail
-	 * with "Unable to fork" under memory pressure as the parent CLI grew over
-	 * a long run, and that grew an unbounded shell argv as the number of JED
-	 * JSON files per language pack increased.
-	 *
 	 * Each entry is added by its basename (the `-j` equivalent) and must resolve
 	 * to a regular file inside the per-build working directory; anything else
 	 * is rejected to avoid pulling unrelated files into the archive.
