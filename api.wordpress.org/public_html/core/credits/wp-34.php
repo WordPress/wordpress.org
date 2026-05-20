@@ -262,7 +262,7 @@ class WP_34_Credits extends WP_Credits {
 			array( 'Plupload', 'http://www.plupload.com/' ),
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ),
-			array( 'Thickbox', 'https://jquery.com/demo/thickbox/' ),
+			array( 'Thickbox', 'https://codylindley.com/thickbox/' ),
 			array( 'TinyMCE', 'https://www.tiny.cloud/' ),
 		);
 	}

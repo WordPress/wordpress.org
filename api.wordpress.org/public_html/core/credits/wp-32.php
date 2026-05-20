@@ -194,7 +194,7 @@ class WP_32_Credits extends WP_Credits {
 			array( 'SWFObject', 'https://github.com/swfobject/swfobject' ),
 			array( 'SWFUpload', 'https://swfupload.org/' ),
 			array( 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ),
-			array( 'Thickbox', 'https://jquery.com/demo/thickbox/' ),
+			array( 'Thickbox', 'https://codylindley.com/thickbox/' ),
 			array( 'TinyMCE', 'https://www.tiny.cloud/' ),
 		);
 	}
