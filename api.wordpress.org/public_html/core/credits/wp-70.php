@@ -718,7 +718,6 @@ class WP_70_Credits extends WP_Credits {
 			'seanwei',
 			'senadir',
 			'sergeybiryukov',
-			'sergeybiyrukov',
 			'sergiomdgomes',
 			'sh4lin',
 			'shadyvb',
