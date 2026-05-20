@@ -773,7 +773,6 @@ class WP_70_Credits extends WP_Credits {
 			'supernovia',
 			'susiyanti',
 			'swanandm',
-			'swisspidy',
 			'swissspidy',
 			'swoyamjeetcodes',
 			'szepeviktor',
