@@ -563,6 +563,12 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 
 				if ( $pending_user ) {
 					$pending_user['meta'][ $field ] = $value;
+
+					// Business / company accounts default to the spectator role on the support forums.
+					// wporg_login_create_user_from_pending() picks this up at account creation.
+					if ( 'business' === $value ) {
+						$pending_user['meta']['role'] ??= 'spectator';
+					}
 				} elseif ( $value ) {
 					update_user_meta( get_current_user_id(), $field, $value );
 				} else {
