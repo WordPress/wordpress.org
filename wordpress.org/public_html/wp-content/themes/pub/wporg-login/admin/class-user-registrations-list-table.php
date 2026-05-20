@@ -229,6 +229,15 @@ class User_Registrations_List_Table extends WP_List_Table {
 			}
 		}
 
+		// Optional purpose filter from the toolbar dropdown.
+		$purpose = $_REQUEST['purpose'] ?? '';
+		if ( $purpose && isset( wporg_login_purpose_options()[ $purpose ] ) && '' !== $purpose ) {
+			$where .= $wpdb->prepare(
+				' AND registrations.meta LIKE %s',
+				'%' . $wpdb->esc_like( '"purpose":"' . $purpose . '"' ) . '%'
+			);
+		}
+
 		// Join if the view needs the users or description table.
 		if ( strpos( $where . $join, 'users.' ) || strpos( $where, 'description.' ) || (  'banned-users' === $view ?: ( $_REQUEST['view'] ?? 'all' )  ) ) {
 			$join .= " LEFT JOIN {$wpdb->users} users ON registrations.created = 1 AND registrations.user_login = users.user_login";
@@ -344,6 +353,28 @@ class User_Registrations_List_Table extends WP_List_Table {
 		<fieldset class="alignleft actions">
 			<input name="block_reason" id="block_reason" placeholder="Ban/Block reason. Used for bulk + single." style="width: 32em;padding: 0.4em;margin: 0;" value="<?php echo esc_attr( $_REQUEST['block_reason'] ?? '' ); ?>" />
 		</fieldset>
+		<?php
+	}
+
+	protected function extra_tablenav( $which ) {
+		if ( 'top' !== $which ) {
+			return;
+		}
+
+		$current = $_REQUEST['purpose'] ?? '';
+		$options = wporg_login_purpose_options();
+		?>
+		<div class="alignleft actions">
+			<label class="screen-reader-text" for="filter-by-purpose">Filter by account purpose</label>
+			<select name="purpose" id="filter-by-purpose">
+				<option value=""><?php echo esc_html( 'All purposes' ); ?></option>
+				<?php foreach ( $options as $key => $label ) : ?>
+					<?php if ( '' === $key ) continue; ?>
+					<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $current, $key ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+			<input type="submit" name="filter_action" class="button" value="Filter" />
+		</div>
 		<?php
 	}
 
