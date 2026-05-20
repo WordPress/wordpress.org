@@ -279,7 +279,7 @@ abstract class WP_Credits {
 
 	private function _data() {
 		return array(
-			'profiles' => 'https://profiles.wordpress.org/%s',
+			'profiles' => 'https://profiles.wordpress.org/%s/',
 			'version' => $this->branch,
 		);
 	}
