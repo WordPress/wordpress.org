@@ -543,7 +543,6 @@ class WP_65_Credits extends WP_Credits {
 			'mikachan',
 			'mikejolley',
 			'mikeschinkel',
-			'mikeschroder',
 			'mikinc860',
 			'mimitips',
 			'mkismy',
