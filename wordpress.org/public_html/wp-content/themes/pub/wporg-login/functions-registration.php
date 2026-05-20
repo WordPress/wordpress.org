@@ -206,10 +206,10 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	);
 
 	// If the signup has a bypass-spam-checks token, approve it.
+	// The bypass token overrides every spam check — heuristics, reCaptcha, block-words, honeypot, etc.
 	if (
 		! $pending_user['cleared'] &&
-		wporg_reg_has_signup_token( $pending_user ) &&
-		'block' !== ( $pending_user['meta']['heuristics'] ?? '' )
+		wporg_reg_has_signup_token( $pending_user )
 	) {
 		$pending_user['cleared']        = 1;
 		$pending_user['meta']['bypass'] = 'yes';
@@ -634,10 +634,10 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	}
 
 	// If the signup has a bypass-spam-checks token, approve it.
+	// The bypass token overrides every spam check — heuristics, reCaptcha, block-words, honeypot, etc.
 	if (
 		! $pending_user['cleared'] &&
-		wporg_reg_has_signup_token( $pending_user ) &&
-		'block' !== ( $pending_user['meta']['heuristics'] ?? '' )
+		wporg_reg_has_signup_token( $pending_user )
 	) {
 		$pending_user['cleared']        = 1;
 		$pending_user['meta']['bypass'] = 'yes';

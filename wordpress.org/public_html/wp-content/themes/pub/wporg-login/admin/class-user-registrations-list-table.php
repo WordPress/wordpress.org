@@ -368,10 +368,19 @@ class User_Registrations_List_Table extends WP_List_Table {
 			<label class="screen-reader-text" for="filter-by-purpose">Filter by account purpose</label>
 			<select name="purpose" id="filter-by-purpose">
 				<option value=""><?php echo esc_html( 'All purposes' ); ?></option>
-				<?php foreach ( $options as $key => $label ) : ?>
-					<?php if ( '' === $key ) continue; ?>
-					<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $current, $key ); ?>><?php echo esc_html( $label ); ?></option>
-				<?php endforeach; ?>
+				<?php
+				foreach ( $options as $key => $label ) {
+					if ( '' === $key ) {
+						continue;
+					}
+					printf(
+						'<option value="%s" %s>%s</option>',
+						esc_attr( $key ),
+						selected( $current, $key, false ),
+						esc_html( $label )
+					);
+				}
+				?>
 			</select>
 			<input type="submit" name="filter_action" class="button" value="Filter" />
 		</div>
