@@ -236,7 +236,6 @@ class WP_70_Credits extends WP_Credits {
 			'deepakprajapati',
 			'deepakrohilla',
 			'deoladev',
-			'dersosj',
 			'desrosj',
 			'dhansondesigns',
 			'dhiraj0901',
