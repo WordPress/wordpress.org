@@ -954,7 +954,7 @@ class WP_55_Credits extends WP_Credits {
 
 	public function external_libraries() {
 		return [
-			[ 'Babel Polyfill', 'https://babeljs.io/docs/en/babel-polyfill' ],
+			[ 'Babel Polyfill', 'https://babeljs.io/docs/babel-polyfill' ],
 			[ 'Backbone.js', 'http://backbonejs.org/' ],
 			[ 'Class POP3', 'https://squirrelmail.org/' ],
 			[ 'clipboard.js', 'https://clipboardjs.com/' ],
