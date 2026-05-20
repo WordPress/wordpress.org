@@ -189,7 +189,7 @@ class WP_32_Credits extends WP_Credits {
 			array( 'PclZip', 'https://www.phpconcept.net/pclzip/' ),
 			array( 'PemFTP', 'http://www.phpclasses.org/browse/package/1743.html' ),
 			array( 'phpass', 'https://www.openwall.com/phpass/' ),
-			array( 'PHPMailer', 'https://code.google.com/archive/a/apache-extras.org/p/phpmailer' ),
+			array( 'PHPMailer', 'https://github.com/PHPMailer/PHPMailer' ),
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'SWFObject', 'https://github.com/swfobject/swfobject' ),
 			array( 'SWFUpload', 'https://swfupload.org/' ),

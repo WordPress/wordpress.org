@@ -258,7 +258,7 @@ class WP_34_Credits extends WP_Credits {
 			array( 'PclZip', 'https://www.phpconcept.net/pclzip/' ),
 			array( 'PemFTP', 'http://www.phpclasses.org/browse/package/1743.html' ),
 			array( 'phpass', 'https://www.openwall.com/phpass/' ),
-			array( 'PHPMailer', 'https://code.google.com/archive/a/apache-extras.org/p/phpmailer' ),
+			array( 'PHPMailer', 'https://github.com/PHPMailer/PHPMailer' ),
 			array( 'Plupload', 'http://www.plupload.com/' ),
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ),
