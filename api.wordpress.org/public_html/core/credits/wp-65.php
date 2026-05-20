@@ -861,7 +861,7 @@ class WP_65_Credits extends WP_Credits {
 			[ 'Iris', 'https://github.com/Automattic/Iris' ],
 			[ 'jQuery', 'https://jquery.com/' ],
 			[ 'jQuery UI', 'https://jqueryui.com/' ],
-			[ 'jQuery Hotkeys', 'https://github.com/tzuryby/jquery.hotkeys' ],
+			[ 'jQuery Hotkeys', 'https://github.com/mathusiast/jquery.hotkeys' ],
 			[ 'jQuery serializeObject', 'https://benalman.com/projects/jquery-misc-plugins/' ],
 			[ 'jQuery.query', 'https://plugins.jquery.com/query-object/' ],
 			[ 'jQuery.suggest', 'https://github.com/pvulgaris/jquery.suggest' ],
@@ -887,7 +887,7 @@ class WP_65_Credits extends WP_Credits {
 			[ 'TinyMCE', 'https://www.tiny.cloud/' ],
 			[ 'Twemoji', 'https://github.com/jdecked/twemoji' ],
 			[ 'Underscore.js', 'https://underscorejs.org/' ],
-			[ 'whatwg-fetch', 'https://github.com/github/fetch' ],
+			[ 'whatwg-fetch', 'https://github.com/JakeChampion/fetch' ],
 			[ 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ],
 		];
 	}
