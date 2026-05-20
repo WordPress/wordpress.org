@@ -328,7 +328,7 @@ class WP_36_Credits extends WP_Credits {
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ),
 			array( 'Thickbox', 'http://jquery.com/demo/thickbox/' ),
-			array( 'TinyMCE', 'http://www.tinymce.com/' ),
+			array( 'TinyMCE', 'https://www.tiny.cloud/' ),
 			array( 'Underscore.js', 'http://underscorejs.org/' ),
 		);
 	}

@@ -801,7 +801,7 @@ class WP_64_Credits extends WP_Credits {
 			[ 'SimplePie', 'https://simplepie.org/' ],
 			[ 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ],
 			[ 'Thickbox', 'https://codylindley.com/thickbox/' ],
-			[ 'TinyMCE', 'https://www.tinymce.com/' ],
+			[ 'TinyMCE', 'https://www.tiny.cloud/' ],
 			[ 'Twemoji', 'https://github.com/twitter/twemoji' ],
 			[ 'Underscore.js', 'https://underscorejs.org/' ],
 			[ 'whatwg-fetch', 'https://github.com/github/fetch' ],

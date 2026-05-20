@@ -409,7 +409,7 @@ class WP_45_Credits extends WP_Credits {
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ),
 			array( 'Thickbox', 'http://codylindley.com/thickbox/' ),
-			array( 'TinyMCE', 'http://www.tinymce.com/' ),
+			array( 'TinyMCE', 'https://www.tiny.cloud/' ),
 			array( 'Twemoji', 'https://github.com/twitter/twemoji' ),
 			array( 'Underscore.js', 'http://underscorejs.org/' ),
 			array( 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ),
