@@ -796,7 +796,7 @@ class WP_56_Credits extends WP_Credits {
 			[ 'PHPMailer', 'https://github.com/PHPMailer/PHPMailer' ],
 			[ 'Plupload', 'http://www.plupload.com/' ],
 			[ 'random_compat', 'https://github.com/paragonie/random_compat' ],
-			[ 'React', 'https://reactjs.org/' ],
+			[ 'React', 'https://react.dev/' ],
 			[ 'Redux', 'https://redux.js.org/' ],
 			[ 'Requests', 'http://requests.ryanmccue.info/' ],
 			[ 'SimplePie', 'http://simplepie.org/' ],

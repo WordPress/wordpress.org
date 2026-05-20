@@ -795,7 +795,7 @@ class WP_64_Credits extends WP_Credits {
 			[ 'Plupload', 'https://www.plupload.com/' ],
 			[ 'Preact', 'https://preactjs.com/' ],
 			[ 'random_compat', 'https://github.com/paragonie/random_compat' ],
-			[ 'React', 'https://reactjs.org/' ],
+			[ 'React', 'https://react.dev/' ],
 			[ 'Redux', 'https://redux.js.org/' ],
 			[ 'Requests', 'https://requests.ryanmccue.info/' ],
 			[ 'SimplePie', 'https://simplepie.org/' ],
