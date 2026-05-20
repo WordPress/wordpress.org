@@ -856,7 +856,7 @@ class WP_70_Credits extends WP_Credits {
 
 	public function external_libraries() {
 		return [
-			[ 'Babel Polyfill', 'https://babeljs.io/docs/en/babel-polyfill' ],
+			[ 'Babel Polyfill', 'https://babeljs.io/docs/babel-polyfill' ],
 			[ 'Backbone.js', 'https://backbonejs.org/' ],
 			[ 'Class POP3', 'https://squirrelmail.org/' ],
 			[ 'clipboard.js', 'https://clipboardjs.com/' ],
@@ -887,13 +887,13 @@ class WP_70_Credits extends WP_Credits {
 			[ 'PHPMailer', 'https://github.com/PHPMailer/PHPMailer' ],
 			[ 'Plupload', 'https://www.plupload.com/' ],
 			[ 'random_compat', 'https://github.com/paragonie/random_compat' ],
-			[ 'React', 'https://reactjs.org/' ],
+			[ 'React', 'https://react.dev/' ],
 			[ 'Redux', 'https://redux.js.org/' ],
 			[ 'Requests', 'https://requests.ryanmccue.info/' ],
 			[ 'SimplePie', 'https://simplepie.org/' ],
 			[ 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ],
 			[ 'Thickbox', 'https://codylindley.com/thickbox/' ],
-			[ 'TinyMCE', 'https://www.tinymce.com/' ],
+			[ 'TinyMCE', 'https://www.tiny.cloud/' ],
 			[ 'Twemoji', 'https://github.com/twitter/twemoji' ],
 			[ 'Underscore.js', 'https://underscorejs.org/' ],
 			[ 'whatwg-fetch', 'https://github.com/github/fetch' ],
