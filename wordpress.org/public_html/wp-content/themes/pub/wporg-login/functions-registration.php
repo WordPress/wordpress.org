@@ -5,16 +5,17 @@
  *
  * Keyed by the internal value stored in user meta; values are the translated labels.
  */
-function wporg_login_account_purpose_options() {
+function wporg_login_purpose_options() {
 	return [
-		''                     => __( 'Please select…', 'wporg' ),
-		'personal'             => __( 'Personal use', 'wporg' ),
-		'business'             => __( 'Business / Company account', 'wporg' ),
-		'contributing'         => __( 'Contributing to WordPress', 'wporg' ),
-		'learn'                => __( 'Taking Learn.WordPress.org courses', 'wporg' ),
-		'support'              => __( 'Getting help in the support forums', 'wporg' ),
-		'plugin_theme_author'  => __( 'Publishing a plugin or theme', 'wporg' ),
-		'other'                => __( 'Other', 'wporg' ),
+		''                    => __( 'Please select…', 'wporg' ),
+		'contributing'        => __( 'Contributing to WordPress', 'wporg' ),
+		'learn'               => __( 'Taking Learn.WordPress.org courses', 'wporg' ),
+		'support'             => __( 'Getting help in the support forums', 'wporg' ),
+		'plugin_theme_author' => __( 'Publishing a plugin or theme', 'wporg' ),
+		'event'               => __( 'Attending a WordPress event', 'wporg' ),
+		'personal'            => __( 'Personal use', 'wporg' ),
+		'business'            => __( 'Business / Company account', 'wporg' ),
+		'other'               => __( 'Other', 'wporg' ),
 	];
 }
 
@@ -470,7 +471,7 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 
 	$tos_meta_key = WPOrg_SSO::TOS_USER_META_KEY;
 
-	foreach ( array( 'url', 'from', 'occ', 'interests', 'account_purpose', $tos_meta_key ) as $field ) {
+	foreach ( array( 'url', 'from', 'occ', 'interests', 'purpose', $tos_meta_key ) as $field ) {
 		if ( !empty( $pending_user['meta'][ $field ] ) ) {
 			$value = $pending_user['meta'][ $field ];
 
@@ -524,9 +525,16 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	if ( ! $_POST || empty( $_POST['user_fields'] ) ) {
 		return false;
 	}
-	$fields = array( 'url', 'from', 'occ', 'interests', 'account_purpose' );
+	$fields = array( 'url', 'from', 'occ', 'interests', 'purpose' );
 
-	$account_purpose_options = wporg_login_account_purpose_options();
+	$purpose_options = wporg_login_purpose_options();
+
+	// Honeypot: this field is hidden from real users via CSS — only bots fill it in.
+	$honeypot = trim( sanitize_text_field( wp_unslash( $_POST['user_fields']['biography'] ?? '' ) ) );
+	if ( $honeypot && $pending_user ) {
+		$pending_user['cleared']                = 0;
+		$pending_user['meta']['block_reason'] ??= 'Honeypot tripped (biography)';
+	}
 
 	foreach ( $fields as $field ) {
 		if ( isset( $_POST['user_fields'][ $field ] ) ) {
@@ -546,9 +554,9 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 						'user_url' => esc_url_raw( $value ),
 					) );
 				}
-			} elseif ( 'account_purpose' == $field ) {
+			} elseif ( 'purpose' == $field ) {
 				// Only accept known keys; silently drop anything else.
-				if ( ! isset( $account_purpose_options[ $value ] ) ) {
+				if ( ! isset( $purpose_options[ $value ] ) ) {
 					$value = '';
 				}
 
@@ -654,7 +662,7 @@ function wporg_login_has_blocked_word( $user ) {
 			return $word;
 		}
 
-		foreach ( [ 'url', 'from', 'occ', 'interests', 'account_purpose' ] as $field ) {
+		foreach ( [ 'url', 'from', 'occ', 'interests', 'purpose' ] as $field ) {
 			if (
 				! empty( $user['meta'][ $field ] ) &&
 				false !== stripos( $user['meta'][ $field ], $word )

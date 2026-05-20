@@ -503,7 +503,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		echo '<hr>';
 
-		foreach ( [ 'url', 'from', 'occ', 'interests', 'account_purpose', 'source', 'bypass' ] as $field ) {
+		foreach ( [ 'url', 'from', 'occ', 'interests', 'purpose', 'source', 'bypass' ] as $field ) {
 			if ( !empty( $meta->$field ) ) {
 				printf( "%s: %s<br>", esc_html( $field ), $this->link_to_search( $meta->$field ) );
 			}
