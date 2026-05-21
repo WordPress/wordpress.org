@@ -10,7 +10,7 @@ abstract class WP_Credits {
 
 	public static $use_cache = true;
 	public static $set_cache = true;
-	const cache_group = 'core-credits-api-2';
+	const cache_group = 'core-credits-api-3';
 	const cache_life = 43200; // 12 hours
 
 	protected $version;
@@ -284,8 +284,8 @@ abstract class WP_Credits {
 		if ( isset( $this->groups ) )
 			return $this->groups;
 
-		$groups = $this->groups();
-		$fetch_emails_from_user_cache = $fetch_emails_from_db = array();
+		$groups        = $this->groups();
+		$fetch_from_db = array();
 
 		foreach ( $groups as $group_slug => $group_data ) {
 			if ( 'list' == $group_data['type'] )
@@ -301,14 +301,14 @@ abstract class WP_Credits {
 					$new_data['hash'] = $person[2];
 				} elseif ( empty( $person[1] ) ) {
 					// array( 'Andrew Nacin' )
-					$fetch_emails_from_user_cache[ $k ] = $group_slug;
+					$fetch_from_db[ $k ] = $group_slug;
 				} elseif ( $this->is_hashed( $person[1] ) ) {
 					// array( 'Andrew Nacin', 'gravatar hash' )
 					$new_data['hash'] = $person[1];
 				} else {
 					// array( 'Andrew Nacin', 'Lead Developer' )
 					$new_data['title'] = $person[1];
-					$fetch_emails_from_user_cache[ $k ] = $group_slug;
+					$fetch_from_db[ $k ] = $group_slug;
 				}
 
 				// Temporary:
@@ -322,40 +322,42 @@ abstract class WP_Credits {
 			$groups[ $group_slug ]['data'] = $group_data['data'];
 		}
 
-		if ( $fetch_emails_from_user_cache ) {
-			foreach ( $fetch_emails_from_user_cache as $username => $group ) {
-				$user_id = wp_cache_get( $username, 'userlogins' );
-				if ( $user_id ) {
-					if ( $user_object = wp_cache_get( $user_id, 'users' ) ) {
-						$groups[ $group ]['data'][ $username ][1] = $this->hash( $user_object->user_email );
-					} else {
-						$fetch_emails_from_db[ $username ] = $group;
-					}
-				} else {
-					$fetch_emails_from_db[ $username ] = $group;
+		if ( $fetch_from_db ) {
+			// Match keys to either user_login or user_nicename, case-insensitively,
+			// so version files can use any canonical form.
+			$in      = "'" . implode( "', '", array_map( array( $wpdb, '_real_escape' ), array_keys( $fetch_from_db ) ) ) . "'";
+			$fetched = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($in) OR user_nicename IN ($in)" );
+
+			$source_lookup = array();
+			foreach ( array_keys( $fetch_from_db ) as $src ) {
+				$source_lookup[ strtolower( $src ) ] = $src;
+			}
+
+			$renames_by_group = array();
+			foreach ( $fetched as $row ) {
+				$src = $source_lookup[ strtolower( $row->user_login ) ]
+					?? $source_lookup[ strtolower( $row->user_nicename ) ]
+					?? null;
+				if ( ! $src ) {
+					continue;
+				}
+				$group = $fetch_from_db[ $src ];
+				$groups[ $group ]['data'][ $src ][1] = $this->hash( $row->user_email );
+				if ( $row->user_nicename !== $src ) {
+					$renames_by_group[ $group ][ $src ] = $row->user_nicename;
 				}
 			}
-			if ( $fetch_emails_from_db ) {
-				// Match keys to either user_login or user_nicename, case-insensitively,
-				// so version files can use any canonical form.
-				$in = "'" . implode( "', '", array_map( array( $wpdb, '_real_escape' ), array_keys( $fetch_emails_from_db ) ) ) . "'";
-				$fetched = $wpdb->get_results( "SELECT user_login, user_nicename, ID, user_email FROM $wpdb->users WHERE user_login IN ($in) OR user_nicename IN ($in)" );
 
-				$source_lookup = array();
-				foreach ( $fetch_emails_from_db as $src => $group_slug ) {
-					$source_lookup[ strtolower( $src ) ] = $src;
+			// Rekey entries so the array key and `username` field reflect user_nicename
+			// (the profiles.wordpress.org slug), not user_login, when they differ.
+			foreach ( $renames_by_group as $group => $renames ) {
+				$rekeyed = array();
+				foreach ( $groups[ $group ]['data'] as $key => $entry ) {
+					$new_key  = $renames[ $key ] ?? $key;
+					$entry[2] = $new_key;
+					$rekeyed[ $new_key ] = $entry;
 				}
-
-				foreach ( $fetched as $row ) {
-					$src = $source_lookup[ strtolower( $row->user_login ) ]
-						?? $source_lookup[ strtolower( $row->user_nicename ) ]
-						?? null;
-					if ( ! $src ) {
-						continue;
-					}
-					$groups[ $fetch_emails_from_db[ $src ] ]['data'][ $src ][1] = $this->hash( $row->user_email );
-					wp_cache_add( $src, $row->ID, 'userlogins' );
-				}
+				$groups[ $group ]['data'] = $rekeyed;
 			}
 		}
 
