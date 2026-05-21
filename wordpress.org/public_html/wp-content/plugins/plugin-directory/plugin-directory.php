@@ -33,7 +33,7 @@ define( __NAMESPACE__ . '\PLUGIN_DIR', __DIR__ );
  * and humans a window to flag bad releases. Plugin reviewers can bypass the cooldown
  * via the wp-admin force-release action; see Jobs\API_Update_Updater::update_single_plugin().
  */
-define( __NAMESPACE__ . '\RELEASE_COOL_DOWN_DELAY', 48 * HOUR_IN_SECONDS );
+define( __NAMESPACE__ . '\RELEASE_COOL_DOWN_DELAY', 24 * HOUR_IN_SECONDS );
 
 // Register an Autoloader for all files
 require __DIR__ . '/class-autoloader.php';
