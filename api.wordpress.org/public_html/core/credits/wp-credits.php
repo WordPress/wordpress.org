@@ -10,7 +10,7 @@ abstract class WP_Credits {
 
 	public static $use_cache = true;
 	public static $set_cache = true;
-	const cache_group = 'core-credits-api';
+	const cache_group = 'core-credits-api-2';
 	const cache_life = 43200; // 12 hours
 
 	protected $version;
@@ -200,10 +200,7 @@ abstract class WP_Credits {
 		foreach ( $translator_data as $user ) {
 			if ( $user->user_nicename == 'nacin' )
 				continue;
-			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$translators[ $user->user_nicename ] = $this->_encode( $user->display_name );
-			else
-				$translators[ $user->user_nicename ] = $user->user_nicename;
+			$translators[ $user->user_nicename ] = $user->display_name ?: $user->user_nicename;
 		}
 
 		return $translators;
@@ -223,10 +220,7 @@ abstract class WP_Credits {
 		foreach ( $validator_data as $user ) {
 			if ( $user->user_nicename == 'nacin' ) // I stopped taking Spanish in 11th grade, don't show me as a validator when I'm testing things.
 				continue;
-			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$validators[ $user->user_nicename ] = array( $this->_encode( $user->display_name ), $this->hash( $user->user_email ), $user->user_nicename );
-			else
-				$validators[ $user->user_nicename ] = array( $user->user_nicename, $this->hash( $user->user_email ), $user->user_nicename );
+			$validators[ $user->user_nicename ] = array( $user->display_name ?: $user->user_nicename, $this->hash( $user->user_email ), $user->user_nicename );
 		}
 
 		return $validators;
@@ -385,10 +379,7 @@ abstract class WP_Credits {
 		$props = array();
 
 		foreach ( $user_data as $user ) {
-			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$props[ $user->user_nicename ] = $this->_encode( $user->display_name );
-			else
-				$props[ $user->user_nicename ] = $user->user_nicename;
+			$props[ $user->user_nicename ] = $user->display_name ?: $user->user_nicename;
 		}
 
 		natcasesort( $props );
@@ -396,11 +387,6 @@ abstract class WP_Credits {
 		$this->cache_set( 'props-' . $this->version, $props );
 
 		return $props;
-	}
-
-	private function _encode( $raw ) {
-		$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $raw, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
 
 	private function _external_libraries() {
