@@ -236,7 +236,7 @@ class WP_33_Credits extends WP_Credits {
 	//		array( 'ColorPicker', 'http://' ),
 			array( 'Horde Text Diff', 'http://pear.horde.org/' ),
 			array( 'hoverIntent', 'http://plugins.jquery.com/project/hoverIntent' ),
-			array( 'imgAreaSelect', 'https://odyniec.net/projects/imgareaselect/' ),
+			array( 'imgAreaSelect', 'https://github.com/odyniec/imgareaselect' ),
 			array( 'jQuery', 'https://jquery.com/' ),
 			array( 'jQuery UI', 'https://jqueryui.com/' ),
 			array( 'jQuery Hotkeys', 'https://github.com/mathusiast/jquery.hotkeys' ),
