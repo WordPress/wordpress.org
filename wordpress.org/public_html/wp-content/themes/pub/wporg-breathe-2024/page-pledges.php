@@ -322,9 +322,9 @@ if ( ! $current_user_id ) {
 
 					<?php if ( $standing_state ) : ?>
 						<section class="pledges-standing pledges-standing-<?php echo esc_attr( $standing_state ); ?>" aria-labelledby="pledges-standing-eyebrow">
-							<h2 id="pledges-standing-eyebrow" class="pledges-standing-eyebrow">
+							<p id="pledges-standing-eyebrow" class="pledges-standing-eyebrow">
 								<?php esc_html_e( 'Your standing', 'wporg-5ftf' ); ?>
-							</h2>
+							</p>
 
 							<?php if ( 'logged-out' === $standing_state ) : ?>
 								<?php
@@ -368,7 +368,6 @@ if ( ! $current_user_id ) {
 											?>
 										</p>
 									</div>
-									<a class="pledges-standing-action pledges-standing-action-link" href="#pledges-howitworks"><?php esc_html_e( 'How impact is scored', 'wporg-5ftf' ); ?> &rarr;</a>
 								</div>
 
 							<?php elseif ( 'ranked' === $standing_state || 'filtered-out' === $standing_state ) : ?>

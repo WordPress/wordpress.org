@@ -547,11 +547,17 @@
 /* card (IntersectionObserver, see js/page-pledges.js).               */
 /* ------------------------------------------------------------------ */
 
-.pledges-standing {
+/* margin-top: 0 wins against `.entry-content > * { margin-top: ... }` from
+   the theme; without it the standing section gets a big gap below the
+   page header. */
+.entry-content .pledges-standing {
 	margin: 0 0 24px;
 }
 
-.pledges-standing-eyebrow {
+/* Theme typography (`.entry-content p`, `.entry-content h2`) was bumping
+   the eyebrow into a giant heading — bump our specificity high enough
+   to win, and reset margins so it sits tight under the page header. */
+.entry-content .pledges-standing-eyebrow {
 	font-family: var(--wp--preset--font-family--inter, system-ui, sans-serif);
 	font-size: 11px;
 	font-weight: 700;
@@ -559,6 +565,8 @@
 	text-transform: uppercase;
 	color: var(--wp--preset--color--charcoal-3, #5d6166);
 	margin: 0 0 10px;
+	padding: 0;
+	line-height: 1.2;
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -923,13 +931,21 @@ body.is-find-me-filtered .pledges-jump-pill {
 		margin-left: auto;
 	}
 
-	/* "You are here" badge needs more breathing room when the rank
-	   becomes a corner pill (see .pledges-card-rank override above). */
+	/* On narrow viewports the rank pill takes the top-right corner and the
+	   impact footer takes the bottom-right, so there's no clean place for
+	   the "You are here" badge. The blueberry ribbon, avatar ring, rank
+	   pill, and impact number already mark the card visually — keep the
+	   text in the DOM for screen readers, drop it from the visual layout. */
 	.pledges-card.is-you .pledges-card-you-badge {
-		top: auto;
-		bottom: 10px;
-		right: 12px;
-		left: auto;
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.pledges-card.is-you .pledges-card-rank {
