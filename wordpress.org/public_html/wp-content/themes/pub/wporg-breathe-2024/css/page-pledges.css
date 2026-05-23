@@ -802,8 +802,7 @@
    [hidden] between the ranked and filtered-out twins so the Clear
    filters affordance is always reachable); only the jump pill goes
    away, since clicking it would scroll to an invisible target. */
-body.is-on-me .pledges-standing-card-ranked,
-body.is-on-me .pledges-standing-card-filtered,
+body.is-on-me .pledges-standing,
 body.is-on-me .pledges-jump-pill,
 body.is-find-me-filtered .pledges-jump-pill {
 	display: none;
