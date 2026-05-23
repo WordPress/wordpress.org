@@ -328,11 +328,23 @@ if ( ! $current_user_id ) {
 
 							<?php if ( 'logged-out' === $standing_state ) : ?>
 								<?php
-								// Anchor the redirect target to home_url() so the canonical site
-								// URL controls the host. Concatenating $_SERVER['HTTP_HOST'] would
-								// be attacker-controlled (forged Host header behind misconfigured
-								// proxies) and could turn the login redirect into an open redirect.
-								$login_redirect = home_url( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/pledges/' ) );
+								// /pledges/ is a virtual route registered by the team-pledges
+								// mu-plugin and is the only URL this template renders. Use the
+								// static path so home_url() doesn't re-prepend the subsite path:
+								// home_url('/themes/pledges/') on the themes subsite would emit
+								// /themes/themes/pledges/ because home_url() appends the path
+								// argument verbatim onto get_option('home'). Re-add the three
+								// filter args explicitly so login round-trips don't drop the
+								// active window/sponsorship/show-inactive view.
+								$login_redirect_args = array();
+								foreach ( array( 'window', 'sponsorship', 'show_inactive' ) as $login_redirect_arg ) {
+									if ( isset( $_GET[ $login_redirect_arg ] ) && is_string( $_GET[ $login_redirect_arg ] ) ) {
+										$login_redirect_args[ $login_redirect_arg ] = sanitize_text_field( wp_unslash( $_GET[ $login_redirect_arg ] ) );
+									}
+								}
+								$login_redirect = $login_redirect_args
+									? add_query_arg( $login_redirect_args, home_url( '/pledges/' ) )
+									: home_url( '/pledges/' );
 								$login_url      = wp_login_url( $login_redirect );
 								?>
 								<div class="pledges-standing-card pledges-standing-card-signin">
@@ -632,10 +644,11 @@ if ( ! $current_user_id ) {
 					// it stays in the DOM (JS un-hides on filter-toggle-to-matching)
 					// but doesn't briefly flash visible before JS runs.
 					/* translators: 1: rank number */
-					$pill_label = sprintf( __( 'Jump to your card, ranked #%d', 'wporg-5ftf' ), $standing_rank );
-					$pill_hidden = ( 'filtered-out' === $standing_state );
+					$pill_aria_template = __( 'Jump to your card, ranked #%d', 'wporg-5ftf' );
+					$pill_label         = sprintf( $pill_aria_template, $standing_rank );
+					$pill_hidden        = ( 'filtered-out' === $standing_state );
 					?>
-					<a class="pledges-jump-pill" href="#pledges-card-you" aria-label="<?php echo esc_attr( $pill_label ); ?>"<?php echo $pill_hidden ? ' hidden' : ''; ?>>
+					<a class="pledges-jump-pill" href="#pledges-card-you" aria-label="<?php echo esc_attr( $pill_label ); ?>" data-aria-template="<?php echo esc_attr( $pill_aria_template ); ?>"<?php echo $pill_hidden ? ' hidden' : ''; ?>>
 						<span class="pledges-jump-avatar" aria-hidden="true">
 							<?php echo wp_kses_post( get_avatar( $standing_user['email'], 26 ) ); ?>
 						</span>

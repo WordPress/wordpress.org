@@ -131,6 +131,48 @@
 				resultPhrase.textContent = template.replace( '%d', String( total ) );
 			}
 		}
+
+		// Propagate the user's visible-relative rank to the standing card and
+		// pill so all three "your rank" labels agree. Server initial render
+		// uses the absolute rank (the user's position in the unfiltered active
+		// list); the renumber loop above rewrites the in-list card to the
+		// visible-relative rank under the current filter — mirror that here.
+		syncFindMeRank();
+	}
+
+	function syncFindMeRank() {
+		var card = document.getElementById( 'pledges-card-you' );
+		if ( ! card || card.hidden ) {
+			return;
+		}
+		var rankEl = card.querySelector( '.pledges-card-rank' );
+		if ( ! rankEl ) {
+			return;
+		}
+		var visibleRankText = rankEl.textContent;
+		var visibleRankNum  = parseInt( visibleRankText, 10 );
+
+		var standing = document.querySelector( '.pledges-standing-card-ranked' );
+		if ( standing ) {
+			var standingRankEl = standing.querySelector( '.pledges-card-rank' );
+			if ( standingRankEl ) {
+				standingRankEl.textContent = visibleRankText;
+			}
+		}
+
+		var pill = document.querySelector( '.pledges-jump-pill' );
+		if ( pill && ! isNaN( visibleRankNum ) ) {
+			var pillRankEl = pill.querySelector( '.pledges-jump-rank' );
+			if ( pillRankEl ) {
+				pillRankEl.textContent = '#' + visibleRankNum;
+			}
+			// Server-provided localized template — JS rebuilds the aria-label
+			// so screen readers also hear the updated rank.
+			var ariaTpl = pill.dataset.ariaTemplate;
+			if ( ariaTpl ) {
+				pill.setAttribute( 'aria-label', ariaTpl.replace( '%d', String( visibleRankNum ) ) );
+			}
+		}
 	}
 
 	/**
@@ -252,6 +294,7 @@
 	 */
 	var youCard       = document.getElementById( 'pledges-card-you' );
 	var jumpPill      = document.querySelector( '.pledges-jump-pill' );
+	var standingSect  = document.querySelector( '.pledges-standing' );
 	var standingRank  = document.querySelector( '.pledges-standing-card-ranked' );
 	var standingFiltd = document.querySelector( '.pledges-standing-card-filtered' );
 
@@ -280,6 +323,14 @@
 		}
 		if ( standingFiltd ) {
 			standingFiltd.hidden = ! hiddenByFilter;
+		}
+		// CSS keys the eyebrow color + dot off the section's state modifier
+		// class. Without this toggle the eyebrow would stay blueberry over
+		// the gold filtered-out twin (or gold + missing-dot over the ranked
+		// twin) when JS swaps which twin is visible.
+		if ( standingSect ) {
+			standingSect.classList.toggle( 'pledges-standing-ranked', ! hiddenByFilter );
+			standingSect.classList.toggle( 'pledges-standing-filtered-out', hiddenByFilter );
 		}
 		// Pill mirrors the ranked-twin visibility — JS owns the [hidden] flag
 		// so the server's initial render survives a client-side filter swap.
