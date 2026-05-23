@@ -242,27 +242,50 @@
 	 * #pledges-card-you), both indicators recede via the body class
 	 * `is-on-me` so the page isn't showing the same identity three times.
 	 *
-	 * Also: if the sponsorship filter has hidden the user's card (filter
-	 * changed client-side after server render), the in-list card has no
-	 * layout, so IntersectionObserver won't fire and the pill would link to
-	 * an invisible target. Body class `is-find-me-hidden` covers that case.
+	 * The 'ranked' server state renders two standing-card twins side by side:
+	 * one ranked + one filtered-out, with the filtered-out twin hidden by
+	 * default. When the sponsorship filter changes client-side to one that
+	 * excludes the user, the in-list card's `hidden` attribute flips on, and
+	 * this code swaps which standing-card twin is visible — so the user
+	 * always has a "Clear filters" recovery affordance on the page instead
+	 * of the whole block disappearing.
 	 */
-	var youCard = document.getElementById( 'pledges-card-you' );
-	var jumpPill = document.querySelector( '.pledges-jump-pill' );
+	var youCard       = document.getElementById( 'pledges-card-you' );
+	var jumpPill      = document.querySelector( '.pledges-jump-pill' );
+	var standingRank  = document.querySelector( '.pledges-standing-card-ranked' );
+	var standingFiltd = document.querySelector( '.pledges-standing-card-filtered' );
 
-	function updateFindMeHidden() {
+	function refreshStandingVariant() {
 		if ( ! youCard ) {
 			return;
 		}
-		document.body.classList.toggle( 'is-find-me-hidden', !! youCard.hidden );
+		var hiddenByFilter = !! youCard.hidden;
+
+		// Body class is the cross-cutting state flag (used by other rules too).
+		document.body.classList.toggle( 'is-find-me-filtered', hiddenByFilter );
+
+		// Both twins live in the DOM. Toggle [hidden] on both so swaps work
+		// in either direction (ranked → filtered AND filtered → ranked when
+		// the user clears the filter through the toolbar).
+		if ( standingRank ) {
+			standingRank.hidden = hiddenByFilter;
+		}
+		if ( standingFiltd ) {
+			standingFiltd.hidden = ! hiddenByFilter;
+		}
+		// Pill mirrors the ranked-twin visibility — JS owns the [hidden] flag
+		// so the server's initial render survives a client-side filter swap.
+		if ( jumpPill ) {
+			jumpPill.hidden = hiddenByFilter;
+		}
 	}
 
-	// Re-evaluate the find-me-hidden state after every filter change. The
-	// original apply() updates card visibility; we layer on the find-me check.
+	// Re-evaluate after every filter change. The original apply() updates
+	// card visibility; we layer the standing-variant swap on top.
 	var originalApply = apply;
 	apply = function () {
 		originalApply.apply( this, arguments );
-		updateFindMeHidden();
+		refreshStandingVariant();
 	};
 
 	if ( youCard && 'IntersectionObserver' in window ) {

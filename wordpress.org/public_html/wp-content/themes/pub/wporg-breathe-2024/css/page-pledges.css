@@ -605,6 +605,16 @@
 	gap: 16px;
 }
 
+/* Both standing-card twins set display:flex unconditionally above, which
+   overrides the browser-default [hidden] { display:none } UA rule. Same
+   issue on the jump pill (display:inline-flex). Make [hidden] win again
+   so server-side and JS can both toggle visibility by flipping it. */
+.pledges-standing-card-ranked[hidden],
+.pledges-standing-card-filtered[hidden],
+.pledges-jump-pill[hidden] {
+	display: none !important;
+}
+
 .pledges-standing-avatar {
 	display: flex;
 	align-items: center;
@@ -783,14 +793,19 @@
 }
 
 /* Option-1 hide-on-overlap. `is-on-me` fires from IntersectionObserver
-   when the in-list user card is in the viewport. `is-find-me-hidden`
-   fires when the in-list card is filter-hidden (no layout for the
-   observer to react to). Both states recede the standing card and pill
-   so the page never shows the same identity twice at once. */
+   when the in-list user card is in the viewport — both standing-card
+   twins and the floating pill recede so the page never shows the same
+   identity twice at once.
+
+   `is-find-me-filtered` fires when the sponsorship filter has hidden
+   the in-list card. The standing block stays on the page (JS toggles
+   [hidden] between the ranked and filtered-out twins so the Clear
+   filters affordance is always reachable); only the jump pill goes
+   away, since clicking it would scroll to an invisible target. */
 body.is-on-me .pledges-standing-card-ranked,
+body.is-on-me .pledges-standing-card-filtered,
 body.is-on-me .pledges-jump-pill,
-body.is-find-me-hidden .pledges-standing,
-body.is-find-me-hidden .pledges-jump-pill {
+body.is-find-me-filtered .pledges-jump-pill {
 	display: none;
 }
 

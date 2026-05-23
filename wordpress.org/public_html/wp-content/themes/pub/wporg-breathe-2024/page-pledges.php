@@ -278,7 +278,6 @@ $current_user_id = get_current_user_id();
 $standing_state  = '';         // logged-out | ranked | filtered-out | not-ranked | '' (hide block)
 $standing_rank   = 0;
 $standing_user   = null;
-$standing_label  = '';         // For filtered-out: the chip label that's hiding the user.
 
 if ( ! $current_user_id ) {
 	$standing_state = 'logged-out';
@@ -292,14 +291,9 @@ if ( ! $current_user_id ) {
 		$standing_rank = array_search( $current_user_id, array_keys( $active_contributors ), true );
 		$standing_rank = false === $standing_rank ? 0 : $standing_rank + 1;
 
-		if ( 'all' === $sponsorship || $user_row_sponsorship === $sponsorship ) {
-			$standing_state = 'ranked';
-		} else {
-			$standing_state = 'filtered-out';
-			$standing_label = 'sponsored' === $sponsorship
-				? __( 'Sponsored', 'wporg-5ftf' )
-				: __( 'Independent', 'wporg-5ftf' );
-		}
+		$standing_state = ( 'all' === $sponsorship || $user_row_sponsorship === $sponsorship )
+			? 'ranked'
+			: 'filtered-out';
 	} else {
 		$standing_state = 'not-ranked';
 	}
@@ -333,7 +327,14 @@ if ( ! $current_user_id ) {
 							</h2>
 
 							<?php if ( 'logged-out' === $standing_state ) : ?>
-								<?php $login_url = wp_login_url( ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ); ?>
+								<?php
+								// Anchor the redirect target to home_url() so the canonical site
+								// URL controls the host. Concatenating $_SERVER['HTTP_HOST'] would
+								// be attacker-controlled (forged Host header behind misconfigured
+								// proxies) and could turn the login redirect into an open redirect.
+								$login_redirect = home_url( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/pledges/' ) );
+								$login_url      = wp_login_url( $login_redirect );
+								?>
 								<div class="pledges-standing-card pledges-standing-card-signin">
 									<span class="pledges-standing-avatar pledges-standing-avatar-placeholder" aria-hidden="true">
 										<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false">
@@ -347,28 +348,6 @@ if ( ! $current_user_id ) {
 										<p class="pledges-standing-sub"><?php esc_html_e( 'Your rank, recent impact, and a jump-to-card link will appear here.', 'wporg-5ftf' ); ?></p>
 									</div>
 									<a class="pledges-standing-action" href="<?php echo esc_url( $login_url ); ?>"><?php esc_html_e( 'Sign in', 'wporg-5ftf' ); ?> &rarr;</a>
-								</div>
-
-							<?php elseif ( 'filtered-out' === $standing_state ) : ?>
-								<div class="pledges-standing-card pledges-standing-card-filtered">
-									<span class="pledges-standing-avatar">
-										<?php echo wp_kses_post( get_avatar( $standing_user['email'], 56 ) ); ?>
-									</span>
-									<div class="pledges-standing-body">
-										<strong class="pledges-standing-title"><?php esc_html_e( 'You\'re hidden by current filters.', 'wporg-5ftf' ); ?></strong>
-										<p class="pledges-standing-sub">
-											<?php
-											echo wp_kses_data( sprintf(
-												/* translators: 1: contributor name, 2: sponsorship filter label */
-												__( '%1$s &mdash; %2$s contributor. The <strong>%3$s</strong> filter is excluding you.', 'wporg-5ftf' ),
-												esc_html( $standing_user['name'] ),
-												empty( $standing_user['sponsored'] ) ? esc_html__( 'independent', 'wporg-5ftf' ) : esc_html__( 'sponsored', 'wporg-5ftf' ),
-												esc_html( $standing_label )
-											) );
-											?>
-										</p>
-									</div>
-									<a class="pledges-standing-action" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?> &rarr;</a>
 								</div>
 
 							<?php elseif ( 'not-ranked' === $standing_state ) : ?>
@@ -392,15 +371,48 @@ if ( ! $current_user_id ) {
 									<a class="pledges-standing-action pledges-standing-action-link" href="#pledges-howitworks"><?php esc_html_e( 'How impact is scored', 'wporg-5ftf' ); ?> &rarr;</a>
 								</div>
 
-							<?php elseif ( 'ranked' === $standing_state ) : ?>
+							<?php elseif ( 'ranked' === $standing_state || 'filtered-out' === $standing_state ) : ?>
 								<?php
+								// Both twins always render whenever the user has impact. JS
+								// flips [hidden] between them on every client-side sponsorship
+								// change so the user always has a "Clear filters" affordance
+								// even when their card gets filtered out mid-session, and so
+								// the swap also covers the inverse path (lands filtered-out,
+								// clears the filter via the toolbar, ranked twin un-hides).
 								$contributor                 = $standing_user;
 								$contributor['_rank']        = $standing_rank;
 								$contributor['_is_you']      = true;
 								$contributor['_is_standing'] = true;
+								// The only chip that can exclude the user is the one opposite
+								// their sponsorship — so the label is deterministic regardless
+								// of which twin is initially visible.
+								$exclusion_label = empty( $standing_user['sponsored'] )
+									? __( 'Sponsored', 'wporg-5ftf' )
+									: __( 'Independent', 'wporg-5ftf' );
+								$is_filtered    = ( 'filtered-out' === $standing_state );
 								?>
-								<div class="pledges-standing-card pledges-standing-card-ranked">
+								<div class="pledges-standing-card pledges-standing-card-ranked"<?php echo $is_filtered ? ' hidden' : ''; ?>>
 									<?php require __DIR__ . '/content-pledge.php'; ?>
+								</div>
+								<div class="pledges-standing-card pledges-standing-card-filtered"<?php echo $is_filtered ? '' : ' hidden'; ?>>
+									<span class="pledges-standing-avatar">
+										<?php echo wp_kses_post( get_avatar( $standing_user['email'], 56 ) ); ?>
+									</span>
+									<div class="pledges-standing-body">
+										<strong class="pledges-standing-title"><?php esc_html_e( 'You\'re hidden by current filters.', 'wporg-5ftf' ); ?></strong>
+										<p class="pledges-standing-sub">
+											<?php
+											echo wp_kses_data( sprintf(
+												/* translators: 1: contributor name, 2: sponsorship status word (independent/sponsored), 3: name of the chip currently excluding the user */
+												__( '%1$s &mdash; %2$s contributor. The <strong>%3$s</strong> filter is excluding you.', 'wporg-5ftf' ),
+												esc_html( $standing_user['name'] ),
+												empty( $standing_user['sponsored'] ) ? esc_html__( 'independent', 'wporg-5ftf' ) : esc_html__( 'sponsored', 'wporg-5ftf' ),
+												esc_html( $exclusion_label )
+											) );
+											?>
+										</p>
+									</div>
+									<a class="pledges-standing-action" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?> &rarr;</a>
 								</div>
 							<?php endif; ?>
 						</section>
@@ -609,17 +621,22 @@ if ( ! $current_user_id ) {
 
 				<?php endif; ?>
 
-				<?php if ( 'ranked' === $standing_state ) : ?>
+				<?php if ( 'ranked' === $standing_state || 'filtered-out' === $standing_state ) : ?>
 					<?php
 					// Floating jump-to pill. Server-side render is a real anchor link
 					// pointing at #pledges-card-you, so JS-disabled and middle-clicks
 					// still navigate correctly. JS upgrades to smooth-scroll + focus
 					// and hides the pill while the in-list card is in the viewport
 					// (Option-1 hide-on-overlap, see js/page-pledges.js).
+					//
+					// In 'filtered-out' state the pill is rendered with [hidden] so
+					// it stays in the DOM (JS un-hides on filter-toggle-to-matching)
+					// but doesn't briefly flash visible before JS runs.
 					/* translators: 1: rank number */
 					$pill_label = sprintf( __( 'Jump to your card, ranked #%d', 'wporg-5ftf' ), $standing_rank );
+					$pill_hidden = ( 'filtered-out' === $standing_state );
 					?>
-					<a class="pledges-jump-pill" href="#pledges-card-you" aria-label="<?php echo esc_attr( $pill_label ); ?>">
+					<a class="pledges-jump-pill" href="#pledges-card-you" aria-label="<?php echo esc_attr( $pill_label ); ?>"<?php echo $pill_hidden ? ' hidden' : ''; ?>>
 						<span class="pledges-jump-avatar" aria-hidden="true">
 							<?php echo wp_kses_post( get_avatar( $standing_user['email'], 26 ) ); ?>
 						</span>
