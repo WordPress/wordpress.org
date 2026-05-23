@@ -267,6 +267,47 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 	return $args ? add_query_arg( $args, $pledges_url ) : $pledges_url;
 };
 
+// ------------------------------------------------------------------
+// Your standing: pre-compute the logged-in viewer's state so the
+// "Your standing" block + jump-to-card pill can render server-side.
+// Anonymous visitors usually hit a cached response — they always get
+// the same "Sign in" card. Logged-in visitors bypass page cache and
+// get a per-user render.
+// ------------------------------------------------------------------
+$current_user_id = get_current_user_id();
+$standing_state  = '';         // logged-out | ranked | filtered-out | not-ranked | '' (hide block)
+$standing_rank   = 0;
+$standing_user   = null;
+
+if ( ! $current_user_id ) {
+	$standing_state = 'logged-out';
+} elseif ( isset( $contributors[ $current_user_id ] ) ) {
+	$standing_user        = $contributors[ $current_user_id ];
+	$user_row_sponsorship = empty( $standing_user['sponsored'] ) ? 'independent' : 'sponsored';
+
+	if ( isset( $active_contributors[ $current_user_id ] ) ) {
+		// Single-pass rank lookup. array_search() against array_keys() built a
+		// full keys array first and then scanned it — two passes' worth of
+		// work for the same answer when foreach can short-circuit on match.
+		$position = 0;
+		foreach ( $active_contributors as $uid => $_unused_contributor ) {
+			$position++;
+			if ( (int) $uid === (int) $current_user_id ) {
+				$standing_rank = $position;
+				break;
+			}
+		}
+
+		$standing_state = ( 'all' === $sponsorship || $user_row_sponsorship === $sponsorship )
+			? 'ranked'
+			: 'filtered-out';
+	} else {
+		$standing_state = 'not-ranked';
+	}
+}
+// If the viewer is logged in but not on this team's opt-in roster, leave
+// $standing_state empty so the block is hidden entirely (no useful info to show).
+
 ?>
 
 <div id="primary" class="content-area">
@@ -285,6 +326,115 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 			<div class="entry-content">
 
 				<?php if ( $contributors ) : ?>
+
+					<?php if ( $standing_state ) : ?>
+						<section class="pledges-standing pledges-standing-<?php echo esc_attr( $standing_state ); ?>" aria-labelledby="pledges-standing-eyebrow">
+							<p id="pledges-standing-eyebrow" class="pledges-standing-eyebrow">
+								<?php esc_html_e( 'Your standing', 'wporg-5ftf' ); ?>
+							</p>
+
+							<?php if ( 'logged-out' === $standing_state ) : ?>
+								<?php
+								// /pledges/ is a virtual route registered by the team-pledges
+								// mu-plugin and is the only URL this template renders. Use the
+								// static path so home_url() doesn't re-prepend the subsite path:
+								// home_url('/themes/pledges/') on the themes subsite would emit
+								// /themes/themes/pledges/ because home_url() appends the path
+								// argument verbatim onto get_option('home'). Re-add the three
+								// filter args explicitly so login round-trips don't drop the
+								// active window/sponsorship/show-inactive view.
+								$login_redirect_args = array();
+								foreach ( array( 'window', 'sponsorship', 'show_inactive' ) as $login_redirect_arg ) {
+									if ( isset( $_GET[ $login_redirect_arg ] ) && is_string( $_GET[ $login_redirect_arg ] ) ) {
+										$login_redirect_args[ $login_redirect_arg ] = sanitize_text_field( wp_unslash( $_GET[ $login_redirect_arg ] ) );
+									}
+								}
+								$login_redirect = $login_redirect_args
+									? add_query_arg( $login_redirect_args, home_url( '/pledges/' ) )
+									: home_url( '/pledges/' );
+								$login_url      = wp_login_url( $login_redirect );
+								?>
+								<div class="pledges-standing-card pledges-standing-card-signin">
+									<span class="pledges-standing-avatar pledges-standing-avatar-placeholder" aria-hidden="true">
+										<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+											<path d="M5.5 8.5v-2a4.5 4.5 0 019 0v2"/>
+											<rect x="4" y="8.5" width="12" height="8" rx="1.5"/>
+											<path d="M10 12v2"/>
+										</svg>
+									</span>
+									<div class="pledges-standing-body">
+										<strong class="pledges-standing-title"><?php esc_html_e( 'Sign in to see where you stand.', 'wporg-5ftf' ); ?></strong>
+										<p class="pledges-standing-sub"><?php esc_html_e( 'Your rank, recent impact, and a jump-to-card link will appear here.', 'wporg-5ftf' ); ?></p>
+									</div>
+									<a class="pledges-standing-action" href="<?php echo esc_url( $login_url ); ?>"><?php esc_html_e( 'Sign in', 'wporg-5ftf' ); ?> &rarr;</a>
+								</div>
+
+							<?php elseif ( 'not-ranked' === $standing_state ) : ?>
+								<div class="pledges-standing-card pledges-standing-card-not-ranked">
+									<span class="pledges-standing-avatar">
+										<?php echo wp_kses_post( get_avatar( $standing_user['email'], 56 ) ); ?>
+									</span>
+									<div class="pledges-standing-body">
+										<strong class="pledges-standing-title"><?php esc_html_e( 'You are not ranked in this team.', 'wporg-5ftf' ); ?></strong>
+										<p class="pledges-standing-sub">
+											<?php
+											echo esc_html( sprintf(
+												/* translators: 1: team name, 2: window in days */
+												__( 'Land a high- or medium-impact contribution to %1$s in the last %2$d days to appear here.', 'wporg-5ftf' ),
+												$current_team->post_title,
+												$window_days
+											) );
+											?>
+										</p>
+									</div>
+								</div>
+
+							<?php elseif ( 'ranked' === $standing_state || 'filtered-out' === $standing_state ) : ?>
+								<?php
+								// Both twins always render whenever the user has impact. JS
+								// flips [hidden] between them on every client-side sponsorship
+								// change so the user always has a "Clear filters" affordance
+								// even when their card gets filtered out mid-session, and so
+								// the swap also covers the inverse path (lands filtered-out,
+								// clears the filter via the toolbar, ranked twin un-hides).
+								$contributor                 = $standing_user;
+								$contributor['_rank']        = $standing_rank;
+								$contributor['_is_you']      = true;
+								$contributor['_is_standing'] = true;
+								// The only chip that can exclude the user is the one opposite
+								// their sponsorship — so the label is deterministic regardless
+								// of which twin is initially visible.
+								$exclusion_label = empty( $standing_user['sponsored'] )
+									? __( 'Sponsored', 'wporg-5ftf' )
+									: __( 'Independent', 'wporg-5ftf' );
+								$is_filtered    = ( 'filtered-out' === $standing_state );
+								?>
+								<div class="pledges-standing-card pledges-standing-card-ranked"<?php echo $is_filtered ? ' hidden' : ''; ?>>
+									<?php require __DIR__ . '/content-pledge.php'; ?>
+								</div>
+								<div class="pledges-standing-card pledges-standing-card-filtered"<?php echo $is_filtered ? '' : ' hidden'; ?>>
+									<span class="pledges-standing-avatar">
+										<?php echo wp_kses_post( get_avatar( $standing_user['email'], 56 ) ); ?>
+									</span>
+									<div class="pledges-standing-body">
+										<strong class="pledges-standing-title"><?php esc_html_e( 'You\'re hidden by current filters.', 'wporg-5ftf' ); ?></strong>
+										<p class="pledges-standing-sub">
+											<?php
+											echo wp_kses_data( sprintf(
+												/* translators: 1: contributor name, 2: sponsorship status word (independent/sponsored), 3: name of the chip currently excluding the user */
+												__( '%1$s &mdash; %2$s contributor. The <strong>%3$s</strong> filter is excluding you.', 'wporg-5ftf' ),
+												esc_html( $standing_user['name'] ),
+												empty( $standing_user['sponsored'] ) ? esc_html__( 'independent', 'wporg-5ftf' ) : esc_html__( 'sponsored', 'wporg-5ftf' ),
+												esc_html( $exclusion_label )
+											) );
+											?>
+										</p>
+									</div>
+									<a class="pledges-standing-action" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?> &rarr;</a>
+								</div>
+							<?php endif; ?>
+						</section>
+					<?php endif; ?>
 
 					<div class="pledges-howitworks" id="pledges-howitworks" role="note">
 						<div class="pledges-howitworks-icon" aria-hidden="true">i</div>
@@ -368,9 +518,10 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 					<div class="pledges-grid" id="pledges-grid">
 						<?php
 						$rank = 0;
-						foreach ( $active_contributors as $contributor ) {
+						foreach ( $active_contributors as $uid => $contributor ) {
 							$rank++;
-							$contributor['_rank'] = $rank;
+							$contributor['_rank']   = $rank;
+							$contributor['_is_you'] = ( (int) $uid === (int) $current_user_id );
 							require __DIR__ . '/content-pledge.php';
 						}
 
@@ -392,9 +543,10 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 								<span><?php echo esc_html( $inactive_label ); ?></span>
 							</div>
 							<?php
-							foreach ( $inactive_contributors as $contributor ) {
+							foreach ( $inactive_contributors as $uid => $contributor ) {
 								$rank++;
-								$contributor['_rank'] = $rank;
+								$contributor['_rank']   = $rank;
+								$contributor['_is_you'] = ( (int) $uid === (int) $current_user_id );
 								require __DIR__ . '/content-pledge.php';
 							}
 						endif;
@@ -485,6 +637,34 @@ $build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url
 						?>
 					</p>
 
+				<?php endif; ?>
+
+				<?php if ( 'ranked' === $standing_state || 'filtered-out' === $standing_state ) : ?>
+					<?php
+					// Floating jump-to pill. Server-side render is a real anchor link
+					// pointing at #pledges-card-you, so JS-disabled and middle-clicks
+					// still navigate correctly. JS upgrades to smooth-scroll + focus
+					// and hides the pill while the in-list card is in the viewport
+					// (Option-1 hide-on-overlap, see js/page-pledges.js).
+					//
+					// In 'filtered-out' state the pill is rendered with [hidden] so
+					// it stays in the DOM (JS un-hides on filter-toggle-to-matching)
+					// but doesn't briefly flash visible before JS runs.
+					/* translators: 1: rank number */
+					$pill_aria_template = __( 'Jump to your card, ranked #%d', 'wporg-5ftf' );
+					$pill_label         = sprintf( $pill_aria_template, $standing_rank );
+					$pill_hidden        = ( 'filtered-out' === $standing_state );
+					?>
+					<a class="pledges-jump-pill" href="#pledges-card-you" aria-label="<?php echo esc_attr( $pill_label ); ?>" data-aria-template="<?php echo esc_attr( $pill_aria_template ); ?>"<?php echo $pill_hidden ? ' hidden' : ''; ?>>
+						<span class="pledges-jump-avatar" aria-hidden="true">
+							<?php echo wp_kses_post( get_avatar( $standing_user['email'], 26 ) ); ?>
+						</span>
+						<span class="pledges-jump-label"><?php esc_html_e( 'Jump to your card', 'wporg-5ftf' ); ?></span>
+						<span class="pledges-jump-rank" aria-hidden="true">#<?php echo esc_html( $standing_rank ); ?></span>
+						<span class="pledges-jump-icon" aria-hidden="true">
+							<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 2v8M3 7l3 3 3-3"/></svg>
+						</span>
+					</a>
 				<?php endif; ?>
 
 			</div>

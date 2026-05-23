@@ -131,6 +131,48 @@
 				resultPhrase.textContent = template.replace( '%d', String( total ) );
 			}
 		}
+
+		// Propagate the user's visible-relative rank to the standing card and
+		// pill so all three "your rank" labels agree. Server initial render
+		// uses the absolute rank (the user's position in the unfiltered active
+		// list); the renumber loop above rewrites the in-list card to the
+		// visible-relative rank under the current filter — mirror that here.
+		syncFindMeRank();
+	}
+
+	function syncFindMeRank() {
+		var card = document.getElementById( 'pledges-card-you' );
+		if ( ! card || card.hidden ) {
+			return;
+		}
+		var rankEl = card.querySelector( '.pledges-card-rank' );
+		if ( ! rankEl ) {
+			return;
+		}
+		var visibleRankText = rankEl.textContent;
+		var visibleRankNum  = parseInt( visibleRankText, 10 );
+
+		var standing = document.querySelector( '.pledges-standing-card-ranked' );
+		if ( standing ) {
+			var standingRankEl = standing.querySelector( '.pledges-card-rank' );
+			if ( standingRankEl ) {
+				standingRankEl.textContent = visibleRankText;
+			}
+		}
+
+		var pill = document.querySelector( '.pledges-jump-pill' );
+		if ( pill && ! isNaN( visibleRankNum ) ) {
+			var pillRankEl = pill.querySelector( '.pledges-jump-rank' );
+			if ( pillRankEl ) {
+				pillRankEl.textContent = '#' + visibleRankNum;
+			}
+			// Server-provided localized template — JS rebuilds the aria-label
+			// so screen readers also hear the updated rank.
+			var ariaTpl = pill.dataset.ariaTemplate;
+			if ( ariaTpl ) {
+				pill.setAttribute( 'aria-label', ariaTpl.replace( '%d', String( visibleRankNum ) ) );
+			}
+		}
 	}
 
 	/**
@@ -229,6 +271,138 @@
 			}
 			e.preventDefault();
 			setSponsorship( 'all' );
+		} );
+	}
+
+	/**
+	 * Find Me — Option 1 (hide-on-overlap).
+	 *
+	 * The page renders, server-side, a "Your standing" card at the top and a
+	 * floating "Jump to your card" pill at the bottom. Both indicate where
+	 * the logged-in user sits in the ranking. When the user is *actually
+	 * looking at* their in-list card (IntersectionObserver fires for
+	 * #pledges-card-you), both indicators recede via the body class
+	 * `is-on-me` so the page isn't showing the same identity three times.
+	 *
+	 * The 'ranked' server state renders two standing-card twins side by side:
+	 * one ranked + one filtered-out, with the filtered-out twin hidden by
+	 * default. When the sponsorship filter changes client-side to one that
+	 * excludes the user, the in-list card's `hidden` attribute flips on, and
+	 * this code swaps which standing-card twin is visible — so the user
+	 * always has a "Clear filters" recovery affordance on the page instead
+	 * of the whole block disappearing.
+	 */
+	var youCard       = document.getElementById( 'pledges-card-you' );
+	var jumpPill      = document.querySelector( '.pledges-jump-pill' );
+	var standingSect  = document.querySelector( '.pledges-standing' );
+	var standingRank  = document.querySelector( '.pledges-standing-card-ranked' );
+	var standingFiltd = document.querySelector( '.pledges-standing-card-filtered' );
+
+	function refreshStandingVariant() {
+		if ( ! youCard ) {
+			return;
+		}
+		var hiddenByFilter = !! youCard.hidden;
+
+		// Body class is the cross-cutting state flag (used by other rules too).
+		document.body.classList.toggle( 'is-find-me-filtered', hiddenByFilter );
+
+		// When the card flips to display:none, IntersectionObserver never
+		// fires isIntersecting=false on it (there's no layout to observe), so
+		// is-on-me can persist from before the filter change and continue
+		// hiding the standing block. Clear it explicitly here.
+		if ( hiddenByFilter ) {
+			document.body.classList.remove( 'is-on-me' );
+		}
+
+		// Both twins live in the DOM. Toggle [hidden] on both so swaps work
+		// in either direction (ranked → filtered AND filtered → ranked when
+		// the user clears the filter through the toolbar).
+		if ( standingRank ) {
+			standingRank.hidden = hiddenByFilter;
+		}
+		if ( standingFiltd ) {
+			standingFiltd.hidden = ! hiddenByFilter;
+		}
+		// CSS keys the eyebrow color + dot off the section's state modifier
+		// class. Without this toggle the eyebrow would stay blueberry over
+		// the gold filtered-out twin (or gold + missing-dot over the ranked
+		// twin) when JS swaps which twin is visible.
+		//
+		// Gated on both twins existing: in the 'not-ranked' / 'logged-out'
+		// server states the section is rendered with its own modifier
+		// (e.g. .pledges-standing-not-ranked) and neither twin is in the
+		// DOM. The user's in-list card can still trigger this code path
+		// (their inactive card has id="pledges-card-you" when
+		// show_inactive=1), so without the gate we'd stack a second state
+		// modifier onto the section and the eyebrow color would conflict.
+		if ( standingSect && standingRank && standingFiltd ) {
+			standingSect.classList.toggle( 'pledges-standing-ranked', ! hiddenByFilter );
+			standingSect.classList.toggle( 'pledges-standing-filtered-out', hiddenByFilter );
+		}
+		// Pill mirrors the ranked-twin visibility — JS owns the [hidden] flag
+		// so the server's initial render survives a client-side filter swap.
+		if ( jumpPill ) {
+			jumpPill.hidden = hiddenByFilter;
+		}
+	}
+
+	// Re-evaluate after every filter change. The original apply() updates
+	// card visibility; we layer the standing-variant swap on top.
+	var originalApply = apply;
+	apply = function () {
+		originalApply.apply( this, arguments );
+		refreshStandingVariant();
+	};
+
+	if ( youCard && 'IntersectionObserver' in window ) {
+		var io = new IntersectionObserver( function ( entries ) {
+			entries.forEach( function ( entry ) {
+				document.body.classList.toggle( 'is-on-me', entry.isIntersecting );
+			} );
+		}, {
+			// Trigger before the card is fully on-screen so the standing card
+			// fades out as the user approaches their row, not after they're
+			// already staring at the duplicate.
+			rootMargin: '-15% 0px -15% 0px',
+			threshold: 0,
+		} );
+		io.observe( youCard );
+	}
+
+	if ( jumpPill && youCard ) {
+		jumpPill.addEventListener( 'click', function ( e ) {
+			// Let modified clicks (cmd/ctrl/shift/middle) navigate normally so
+			// users can open the deep link in a new tab.
+			if ( e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey ) {
+				return;
+			}
+			e.preventDefault();
+			// Smooth-scroll the card to the middle of the viewport. block:'center'
+			// matches the design — the card lands with neighbors visible above
+			// and below for context, not flush against the top of the viewport.
+			try {
+				youCard.scrollIntoView( { behavior: 'smooth', block: 'center' } );
+			} catch ( err ) {
+				youCard.scrollIntoView();
+			}
+			// Move focus into the card so screen readers announce it. Cards
+			// aren't naturally focusable, so set tabindex on demand and clear
+			// it on blur to keep the tab order untouched for keyboard users.
+			// Guard on hasAttribute so repeated pill clicks (before the card
+			// blurs) don't accumulate orphan blur listeners — each addEvent-
+			// Listener call creates a new closure even with { once: true }.
+			if ( ! youCard.hasAttribute( 'tabindex' ) ) {
+				youCard.setAttribute( 'tabindex', '-1' );
+				try {
+					youCard.focus( { preventScroll: true } );
+				} catch ( err ) {
+					youCard.focus();
+				}
+				youCard.addEventListener( 'blur', function () {
+					youCard.removeAttribute( 'tabindex' );
+				}, { once: true } );
+			}
 		} );
 	}
 

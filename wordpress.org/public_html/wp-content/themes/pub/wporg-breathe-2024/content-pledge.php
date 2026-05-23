@@ -25,6 +25,16 @@ $medium      = (int) ( $contributor['_metrics_medium'] ?? 0 );
 $top_repos   = $contributor['_metrics_top_repos'] ?? array();
 $window_days = (int) ( $contributor['_metrics_window_days'] ?? ContributionMetrics\WINDOW_DAYS_DEFAULT );
 
+// _is_you is set by page-pledges.php on the row matching get_current_user_id().
+// JS uses #pledges-card-you to locate the in-list card for IntersectionObserver,
+// and CSS applies the "you are here" treatment (ribbon, ring, badge).
+// _is_standing is set only when this card is being rendered inside the
+// "Your standing" hero block at the top of the page — same visual treatment,
+// but it must NOT carry the unique id (that's reserved for the in-list copy
+// so the jump pill anchor resolves to one element).
+$is_you      = ! empty( $contributor['_is_you'] );
+$is_standing = ! empty( $contributor['_is_standing'] );
+
 // Data attributes used by client-side filter. `data-active` lets the JS exclude
 // inactive cards from the "active contributors" result count and toggle the
 // inactive divider when filters empty its section.
@@ -35,6 +45,7 @@ $row_attrs = array(
 	'data-name'        => strtolower( $contributor['name'] ?? '' ),
 	'data-sponsorship' => $status_class,
 	'data-active'      => $weighted > 0 ? '1' : '0',
+	'data-you'         => $is_you ? '1' : '0',
 );
 
 $attrs_html = '';
@@ -47,12 +58,25 @@ foreach ( $row_attrs as $k => $v ) {
 // otherwise the footer-loaded JS hides them after first paint, producing a visible
 // flash of every card. $sponsorship is inherited from the parent template scope via
 // `require`; default to 'independent' if this file is ever included standalone.
+//
+// Standing-card twins are never sponsorship-hidden at this layer — the outer
+// .pledges-standing-card-ranked wrapper owns visibility (PHP renders it with
+// [hidden] in filtered-out state, JS swaps on filter change). If the inner
+// article were ALSO hidden, JS un-hiding the wrapper would leave the ranked
+// standing card visually blank because apply() never touches cards outside
+// #pledges-grid.
 $active_sponsorship  = $sponsorship ?? 'independent';
-$is_initially_hidden = 'all' !== $active_sponsorship && $active_sponsorship !== $status_class;
+$is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $active_sponsorship !== $status_class;
 
 ?>
 
-<article class="pledges-card"<?php echo $is_initially_hidden ? ' hidden' : ''; ?> <?php echo $attrs_html; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+<article<?php echo $is_you && ! $is_standing ? ' id="pledges-card-you"' : ''; ?> class="pledges-card<?php echo $is_you ? ' is-you' : ''; ?>"<?php echo $is_initially_hidden ? ' hidden' : ''; ?> <?php echo $attrs_html; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+	<?php if ( $is_you ) : ?>
+		<span class="pledges-card-you-badge">
+			<span class="pledges-card-you-dot" aria-hidden="true"></span>
+			<?php esc_html_e( 'You are here', 'wporg-5ftf' ); ?>
+		</span>
+	<?php endif; ?>
 	<span class="pledges-card-rank" aria-hidden="true"><?php echo esc_html( str_pad( (string) $contributor['_rank'], 2, '0', STR_PAD_LEFT ) ); ?></span>
 
 	<div class="pledges-card-avatar">
