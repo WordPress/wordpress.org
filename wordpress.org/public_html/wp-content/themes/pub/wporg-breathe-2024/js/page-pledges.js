@@ -328,7 +328,15 @@
 		// class. Without this toggle the eyebrow would stay blueberry over
 		// the gold filtered-out twin (or gold + missing-dot over the ranked
 		// twin) when JS swaps which twin is visible.
-		if ( standingSect ) {
+		//
+		// Gated on both twins existing: in the 'not-ranked' / 'logged-out'
+		// server states the section is rendered with its own modifier
+		// (e.g. .pledges-standing-not-ranked) and neither twin is in the
+		// DOM. The user's in-list card can still trigger this code path
+		// (their inactive card has id="pledges-card-you" when
+		// show_inactive=1), so without the gate we'd stack a second state
+		// modifier onto the section and the eyebrow color would conflict.
+		if ( standingSect && standingRank && standingFiltd ) {
 			standingSect.classList.toggle( 'pledges-standing-ranked', ! hiddenByFilter );
 			standingSect.classList.toggle( 'pledges-standing-filtered-out', hiddenByFilter );
 		}

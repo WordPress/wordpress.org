@@ -693,19 +693,6 @@
 	background: #000;
 }
 
-.pledges-standing-action-link {
-	background: transparent;
-	color: var(--wp--preset--color--blueberry-1, #3858e9);
-	padding: 10px 4px;
-}
-
-.pledges-standing-action-link:hover,
-.pledges-standing-action-link:focus {
-	background: transparent;
-	color: var(--wp--preset--color--blueberry-1, #3858e9);
-	text-decoration: underline;
-}
-
 /* "You are here" treatment shared by the standing card and the in-list card */
 .pledges-card.is-you {
 	position: relative;
