@@ -286,10 +286,17 @@ if ( ! $current_user_id ) {
 	$user_row_sponsorship = empty( $standing_user['sponsored'] ) ? 'independent' : 'sponsored';
 
 	if ( isset( $active_contributors[ $current_user_id ] ) ) {
-		// The user has tracked impact in the window. array_search() against the
-		// already-sorted keys is the rank — cheaper than iterating with a counter.
-		$standing_rank = array_search( $current_user_id, array_keys( $active_contributors ), true );
-		$standing_rank = false === $standing_rank ? 0 : $standing_rank + 1;
+		// Single-pass rank lookup. array_search() against array_keys() built a
+		// full keys array first and then scanned it — two passes' worth of
+		// work for the same answer when foreach can short-circuit on match.
+		$position = 0;
+		foreach ( $active_contributors as $uid => $_unused_contributor ) {
+			$position++;
+			if ( (int) $uid === (int) $current_user_id ) {
+				$standing_rank = $position;
+				break;
+			}
+		}
 
 		$standing_state = ( 'all' === $sponsorship || $user_row_sponsorship === $sponsorship )
 			? 'ranked'

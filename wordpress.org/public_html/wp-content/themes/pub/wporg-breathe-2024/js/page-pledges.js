@@ -381,16 +381,20 @@
 			// Move focus into the card so screen readers announce it. Cards
 			// aren't naturally focusable, so set tabindex on demand and clear
 			// it on blur to keep the tab order untouched for keyboard users.
-			youCard.setAttribute( 'tabindex', '-1' );
-			try {
-				youCard.focus( { preventScroll: true } );
-			} catch ( err ) {
-				youCard.focus();
+			// Guard on hasAttribute so repeated pill clicks (before the card
+			// blurs) don't accumulate orphan blur listeners — each addEvent-
+			// Listener call creates a new closure even with { once: true }.
+			if ( ! youCard.hasAttribute( 'tabindex' ) ) {
+				youCard.setAttribute( 'tabindex', '-1' );
+				try {
+					youCard.focus( { preventScroll: true } );
+				} catch ( err ) {
+					youCard.focus();
+				}
+				youCard.addEventListener( 'blur', function () {
+					youCard.removeAttribute( 'tabindex' );
+				}, { once: true } );
 			}
-			youCard.addEventListener( 'blur', function onBlur() {
-				youCard.removeAttribute( 'tabindex' );
-				youCard.removeEventListener( 'blur', onBlur );
-			} );
 		} );
 	}
 
