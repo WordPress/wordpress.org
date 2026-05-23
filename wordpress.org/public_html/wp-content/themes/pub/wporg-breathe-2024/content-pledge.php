@@ -58,8 +58,15 @@ foreach ( $row_attrs as $k => $v ) {
 // otherwise the footer-loaded JS hides them after first paint, producing a visible
 // flash of every card. $sponsorship is inherited from the parent template scope via
 // `require`; default to 'independent' if this file is ever included standalone.
+//
+// Standing-card twins are never sponsorship-hidden at this layer — the outer
+// .pledges-standing-card-ranked wrapper owns visibility (PHP renders it with
+// [hidden] in filtered-out state, JS swaps on filter change). If the inner
+// article were ALSO hidden, JS un-hiding the wrapper would leave the ranked
+// standing card visually blank because apply() never touches cards outside
+// #pledges-grid.
 $active_sponsorship  = $sponsorship ?? 'independent';
-$is_initially_hidden = 'all' !== $active_sponsorship && $active_sponsorship !== $status_class;
+$is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $active_sponsorship !== $status_class;
 
 ?>
 

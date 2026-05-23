@@ -264,6 +264,14 @@
 		// Body class is the cross-cutting state flag (used by other rules too).
 		document.body.classList.toggle( 'is-find-me-filtered', hiddenByFilter );
 
+		// When the card flips to display:none, IntersectionObserver never
+		// fires isIntersecting=false on it (there's no layout to observe), so
+		// is-on-me can persist from before the filter change and continue
+		// hiding the standing block. Clear it explicitly here.
+		if ( hiddenByFilter ) {
+			document.body.classList.remove( 'is-on-me' );
+		}
+
 		// Both twins live in the DOM. Toggle [hidden] on both so swaps work
 		// in either direction (ranked → filtered AND filtered → ranked when
 		// the user clears the filter through the toolbar).
