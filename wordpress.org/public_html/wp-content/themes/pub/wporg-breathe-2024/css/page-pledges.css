@@ -540,6 +540,261 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Your standing (find me)                                            */
+/*                                                                    */
+/* Hoisted user card at the top + floating jump-to-card pill. Both    */
+/* hide via body.is-on-me when the user is scrolled to their in-list  */
+/* card (IntersectionObserver, see js/page-pledges.js).               */
+/* ------------------------------------------------------------------ */
+
+.pledges-standing {
+	margin: 0 0 24px;
+}
+
+.pledges-standing-eyebrow {
+	font-family: var(--wp--preset--font-family--inter, system-ui, sans-serif);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.7px;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--charcoal-3, #5d6166);
+	margin: 0 0 10px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.pledges-standing-ranked .pledges-standing-eyebrow,
+.pledges-standing-ranked .pledges-standing-eyebrow::before {
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+}
+
+.pledges-standing-ranked .pledges-standing-eyebrow::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 3px;
+	background: currentColor;
+}
+
+.pledges-standing-filtered-out .pledges-standing-eyebrow {
+	color: #7a4a00;
+}
+
+/* Sign-in / not-ranked / filtered-out — non-card variants */
+.pledges-standing-card-signin,
+.pledges-standing-card-not-ranked {
+	background: var(--wp--preset--color--light-grey-2, #f6f7f7);
+	border: 1px dashed var(--wp--preset--color--light-grey-1, #c3c4c7);
+	border-radius: 8px;
+	padding: 18px 22px;
+	font-family: var(--wp--preset--font-family--inter, system-ui, sans-serif);
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.pledges-standing-card-filtered {
+	background: #fff3da;
+	border: 1px solid #e9c890;
+	border-radius: 8px;
+	padding: 18px 22px;
+	font-family: var(--wp--preset--font-family--inter, system-ui, sans-serif);
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.pledges-standing-avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	flex-shrink: 0;
+}
+
+.pledges-standing-avatar img {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	display: block;
+}
+
+.pledges-standing-avatar-placeholder {
+	background: #fff;
+	border: 1px dashed var(--wp--preset--color--light-grey-1, #c3c4c7);
+	border-radius: 50%;
+	color: var(--wp--preset--color--charcoal-4, #787c82);
+}
+
+.pledges-standing-body {
+	flex: 1;
+	min-width: 0;
+}
+
+.pledges-standing-title {
+	display: block;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--wp--preset--color--charcoal-1, #1d2327);
+	line-height: 1.3;
+}
+
+.pledges-standing-card-filtered .pledges-standing-title {
+	color: #5e3700;
+}
+
+.pledges-standing-sub {
+	font-size: 13px;
+	color: var(--wp--preset--color--charcoal-3, #5d6166);
+	margin: 4px 0 0;
+	line-height: 1.45;
+}
+
+.pledges-standing-card-filtered .pledges-standing-sub {
+	color: #7a4a00;
+}
+
+.pledges-standing-action {
+	flex-shrink: 0;
+	background: var(--wp--preset--color--charcoal-1, #1d2327);
+	color: #fff;
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+	padding: 10px 16px;
+	border-radius: 999px;
+	white-space: nowrap;
+}
+
+.pledges-standing-action:hover,
+.pledges-standing-action:focus {
+	color: #fff;
+	text-decoration: none;
+	background: #000;
+}
+
+.pledges-standing-action-link {
+	background: transparent;
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+	padding: 10px 4px;
+}
+
+.pledges-standing-action-link:hover,
+.pledges-standing-action-link:focus {
+	background: transparent;
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+	text-decoration: underline;
+}
+
+/* "You are here" treatment shared by the standing card and the in-list card */
+.pledges-card.is-you {
+	position: relative;
+	border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	box-shadow: inset 4px 0 0 var(--wp--preset--color--blueberry-1, #3858e9);
+}
+
+.pledges-card.is-you .pledges-card-rank {
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+}
+
+.pledges-card.is-you .pledges-card-avatar img {
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--wp--preset--color--blueberry-1, #3858e9);
+}
+
+.pledges-card.is-you .pledges-card-weight strong {
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+}
+
+.pledges-card-you-badge {
+	position: absolute;
+	top: 10px;
+	right: 14px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--blueberry-1, #3858e9);
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	line-height: 1;
+}
+
+.pledges-card-you-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 3px;
+	background: currentColor;
+}
+
+/* Floating "Jump to your card" pill — bottom-right of the viewport. */
+.pledges-jump-pill {
+	position: fixed;
+	right: 24px;
+	bottom: 24px;
+	z-index: 20;
+	background: var(--wp--preset--color--charcoal-1, #1d2327);
+	color: #fff;
+	border-radius: 999px;
+	padding: 8px 14px 8px 8px;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-family: var(--wp--preset--font-family--inter, system-ui, sans-serif);
+	font-size: 13px;
+	font-weight: 600;
+	text-decoration: none;
+	box-shadow: 0 12px 32px -6px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .1);
+	transition: transform .18s, opacity .18s, box-shadow .18s;
+}
+
+.pledges-jump-pill:hover,
+.pledges-jump-pill:focus {
+	color: #fff;
+	text-decoration: none;
+	transform: translateY(-1px);
+	box-shadow: 0 14px 36px -6px rgba(0, 0, 0, .50), 0 2px 6px rgba(0, 0, 0, .12);
+}
+
+.pledges-jump-avatar img {
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	display: block;
+}
+
+.pledges-jump-rank {
+	color: rgba(255, 255, 255, 0.6);
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+}
+
+.pledges-jump-icon {
+	background: rgba(255, 255, 255, 0.12);
+	border-radius: 999px;
+	width: 24px;
+	height: 24px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 2px;
+}
+
+/* Option-1 hide-on-overlap. `is-on-me` fires from IntersectionObserver
+   when the in-list user card is in the viewport. `is-find-me-hidden`
+   fires when the in-list card is filter-hidden (no layout for the
+   observer to react to). Both states recede the standing card and pill
+   so the page never shows the same identity twice at once. */
+body.is-on-me .pledges-standing-card-ranked,
+body.is-on-me .pledges-jump-pill,
+body.is-find-me-hidden .pledges-standing,
+body.is-find-me-hidden .pledges-jump-pill {
+	display: none;
+}
+
+/* ------------------------------------------------------------------ */
 /* Narrow (< 720px) layout — collapse card columns                     */
 /* ------------------------------------------------------------------ */
 
@@ -638,6 +893,48 @@
 	.pledges-howitworks-body p {
 		font-size: 14px;
 		line-height: 1.5;
+	}
+
+	/* Standing block: stack action below body so the card doesn't
+	   overflow on narrow screens. */
+	.pledges-standing-card-signin,
+	.pledges-standing-card-not-ranked,
+	.pledges-standing-card-filtered {
+		flex-wrap: wrap;
+		padding: 14px 16px;
+		gap: 12px;
+	}
+
+	.pledges-standing-action {
+		margin-left: auto;
+	}
+
+	/* "You are here" badge needs more breathing room when the rank
+	   becomes a corner pill (see .pledges-card-rank override above). */
+	.pledges-card.is-you .pledges-card-you-badge {
+		top: auto;
+		bottom: 10px;
+		right: 12px;
+		left: auto;
+	}
+
+	.pledges-card.is-you .pledges-card-rank {
+		background: var(--wp--preset--color--blueberry-2, #e8edff);
+		color: var(--wp--preset--color--blueberry-1, #3858e9);
+	}
+
+	/* Floating pill: tuck into thumb-zone corner, drop the visible label
+	   to save horizontal real estate. The aria-label still names the
+	   action for screen readers. */
+	.pledges-jump-pill {
+		right: 12px;
+		bottom: 16px;
+		padding: 6px 10px 6px 6px;
+		gap: 6px;
+	}
+
+	.pledges-jump-label {
+		display: none;
 	}
 }
 

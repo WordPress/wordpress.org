@@ -232,6 +232,86 @@
 		} );
 	}
 
+	/**
+	 * Find Me — Option 1 (hide-on-overlap).
+	 *
+	 * The page renders, server-side, a "Your standing" card at the top and a
+	 * floating "Jump to your card" pill at the bottom. Both indicate where
+	 * the logged-in user sits in the ranking. When the user is *actually
+	 * looking at* their in-list card (IntersectionObserver fires for
+	 * #pledges-card-you), both indicators recede via the body class
+	 * `is-on-me` so the page isn't showing the same identity three times.
+	 *
+	 * Also: if the sponsorship filter has hidden the user's card (filter
+	 * changed client-side after server render), the in-list card has no
+	 * layout, so IntersectionObserver won't fire and the pill would link to
+	 * an invisible target. Body class `is-find-me-hidden` covers that case.
+	 */
+	var youCard = document.getElementById( 'pledges-card-you' );
+	var jumpPill = document.querySelector( '.pledges-jump-pill' );
+
+	function updateFindMeHidden() {
+		if ( ! youCard ) {
+			return;
+		}
+		document.body.classList.toggle( 'is-find-me-hidden', !! youCard.hidden );
+	}
+
+	// Re-evaluate the find-me-hidden state after every filter change. The
+	// original apply() updates card visibility; we layer on the find-me check.
+	var originalApply = apply;
+	apply = function () {
+		originalApply.apply( this, arguments );
+		updateFindMeHidden();
+	};
+
+	if ( youCard && 'IntersectionObserver' in window ) {
+		var io = new IntersectionObserver( function ( entries ) {
+			entries.forEach( function ( entry ) {
+				document.body.classList.toggle( 'is-on-me', entry.isIntersecting );
+			} );
+		}, {
+			// Trigger before the card is fully on-screen so the standing card
+			// fades out as the user approaches their row, not after they're
+			// already staring at the duplicate.
+			rootMargin: '-15% 0px -15% 0px',
+			threshold: 0,
+		} );
+		io.observe( youCard );
+	}
+
+	if ( jumpPill && youCard ) {
+		jumpPill.addEventListener( 'click', function ( e ) {
+			// Let modified clicks (cmd/ctrl/shift/middle) navigate normally so
+			// users can open the deep link in a new tab.
+			if ( e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey ) {
+				return;
+			}
+			e.preventDefault();
+			// Smooth-scroll the card to the middle of the viewport. block:'center'
+			// matches the design — the card lands with neighbors visible above
+			// and below for context, not flush against the top of the viewport.
+			try {
+				youCard.scrollIntoView( { behavior: 'smooth', block: 'center' } );
+			} catch ( err ) {
+				youCard.scrollIntoView();
+			}
+			// Move focus into the card so screen readers announce it. Cards
+			// aren't naturally focusable, so set tabindex on demand and clear
+			// it on blur to keep the tab order untouched for keyboard users.
+			youCard.setAttribute( 'tabindex', '-1' );
+			try {
+				youCard.focus( { preventScroll: true } );
+			} catch ( err ) {
+				youCard.focus();
+			}
+			youCard.addEventListener( 'blur', function onBlur() {
+				youCard.removeAttribute( 'tabindex' );
+				youCard.removeEventListener( 'blur', onBlur );
+			} );
+		} );
+	}
+
 	// Initial paint: sync the carry-forward hrefs once even when the user
 	// hasn't toggled anything, so links rendered with no sponsorship query arg
 	// inherit one if the page was loaded with ?sponsorship= in the URL.
