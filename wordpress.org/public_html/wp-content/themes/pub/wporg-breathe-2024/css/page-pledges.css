@@ -502,7 +502,10 @@
 	display: none;
 }
 
-.pledges-empty-reset {
+/* Specificity bumped against .entry-content's typography rules — without the
+   prefix, `.entry-content a { color: #3858e9 }` from the theme wins and the
+   white text on the dark pill ends up rendering as dark-blue-on-black. */
+.entry-content .pledges-empty-reset {
 	display: inline-block;
 	margin-top: 10px;
 	background: var(--wp--preset--color--charcoal-1, #1d2327);
@@ -516,8 +519,8 @@
 	text-decoration: none;
 }
 
-.pledges-empty-reset:hover,
-.pledges-empty-reset:focus {
+.entry-content .pledges-empty-reset:hover,
+.entry-content .pledges-empty-reset:focus {
 	color: #fff;
 	text-decoration: none;
 }
@@ -674,7 +677,10 @@
 	color: #7a4a00;
 }
 
-.pledges-standing-action {
+/* Specificity bumped against .entry-content's typography rules — without the
+   prefix, `.entry-content a { color: #3858e9 }` from the theme wins and the
+   white text on the dark pill ends up rendering as dark-blue-on-black. */
+.entry-content .pledges-standing-action {
 	flex-shrink: 0;
 	background: var(--wp--preset--color--charcoal-1, #1d2327);
 	color: #fff;
@@ -686,8 +692,8 @@
 	white-space: nowrap;
 }
 
-.pledges-standing-action:hover,
-.pledges-standing-action:focus {
+.entry-content .pledges-standing-action:hover,
+.entry-content .pledges-standing-action:focus {
 	color: #fff;
 	text-decoration: none;
 	background: #000;
@@ -904,18 +910,26 @@ body.is-find-me-filtered .pledges-jump-pill {
 		line-height: 1.5;
 	}
 
-	/* Standing block: stack action below body so the card doesn't
-	   overflow on narrow screens. */
+	/* Standing block: switch to a column layout so the title can breathe
+	   instead of getting squeezed between the avatar and the action button.
+	   flex-wrap alone wasn't enough — the body had flex:1 and the action
+	   pulled to the right, so the title compressed to ~10 chars wide
+	   ("You're hidden by current filters." wrapped to four lines on /meta/
+	   in production). Stacking the action below the body and stretching it
+	   full-width keeps both readable and lands the CTA in the thumb zone. */
 	.pledges-standing-card-signin,
 	.pledges-standing-card-not-ranked,
 	.pledges-standing-card-filtered {
-		flex-wrap: wrap;
+		flex-direction: column;
+		align-items: flex-start;
 		padding: 14px 16px;
 		gap: 12px;
 	}
 
-	.pledges-standing-action {
-		margin-left: auto;
+	.entry-content .pledges-standing-action {
+		margin-left: 0;
+		align-self: stretch;
+		text-align: center;
 	}
 
 	/* On narrow viewports the rank pill takes the top-right corner and the
