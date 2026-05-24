@@ -488,7 +488,7 @@ if ( ! $current_user_id ) {
 							<?php
 							echo esc_html( sprintf(
 								/* translators: %d: window in days */
-								__( 'Ranked by impact, last %d days.', 'wporg-5ftf' ),
+								_n( 'Ranked by impact, last %d day.', 'Ranked by impact, last %d days.', $window_days, 'wporg-5ftf' ),
 								$window_days
 							) );
 							?>
