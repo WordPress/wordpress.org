@@ -85,6 +85,14 @@ function wporg_themes_map_meta_cap( $caps, $cap, $user_id, $context ) {
 			unset( $caps[ array_search( $cap, $caps ) ] );
 			break;
 
+		case 'theme_review':
+			// Theme reviewers are the same role audience as theme moderators today, so
+			// the meta cap maps onto the existing 'suspend_themes' primitive — the name
+			// is for intent ("this is a reviewer action") rather than to gate a new group.
+			$caps[] = 'suspend_themes';
+			unset( $caps[ array_search( $cap, $caps ) ] );
+			break;
+
 		case 'theme_configure_categorization_options':
 			// Protect against a cap call without a theme context.
 			$post = $context ? get_post( $context[0] ) : false;
@@ -630,7 +638,7 @@ function wporg_themes_meta_box_cooldown_section( $post, $versions ) {
 		);
 		?>
 	</p>
-	<?php if ( current_user_can( 'suspend_theme', $post->ID ) ) : ?>
+	<?php if ( current_user_can( 'theme_review', $post->ID ) ) : ?>
 		<p>
 			<label for="wporg_themes_force_release_reason"><?php esc_html_e( 'Force-release reason (required):', 'wporg-themes' ); ?></label>
 			<textarea
@@ -688,7 +696,7 @@ function wporg_themes_save_meta_box_data( $post_id ) {
 	// action, requires a reason recorded against the audit log.
 	if (
 		! empty( $_POST['wporg_themes_force_release_version'] ) &&
-		current_user_can( 'suspend_theme', $post_id )
+		current_user_can( 'theme_review', $post_id )
 	) {
 		$reason = isset( $_POST['wporg_themes_force_release_reason'] )
 			? trim( sanitize_textarea_field( wp_unslash( $_POST['wporg_themes_force_release_reason'] ) ) )
