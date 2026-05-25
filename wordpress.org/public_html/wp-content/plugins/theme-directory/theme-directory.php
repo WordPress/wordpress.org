@@ -469,6 +469,16 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
 		$new_status = 'approved';
 	}
 
+	/*
+	 * Conversely: if a caller explicitly sets 'approved' (e.g. admin selecting it from
+	 * the metabox dropdown) while the cooldown is disabled at the constant level, treat
+	 * it as 'live'. Holding a version in 'approved' with no scheduled promotion would
+	 * strand it indefinitely and trigger a "going live in 0 hours" notification.
+	 */
+	if ( 'approved' === $new_status && ! WPORG_THEMES_RELEASE_COOL_DOWN_DELAY ) {
+		$new_status = 'live';
+	}
+
 	switch ( $new_status ) {
 		// There can only be one version with these statuses:
 		case 'new':
@@ -793,8 +803,16 @@ function wporg_themes_handle_approval_cooldown( $post_id, $version, $old_status 
 		return;
 	}
 
-	$approval_time = time();
 	$release_delay = (int) WPORG_THEMES_RELEASE_COOL_DOWN_DELAY;
+	if ( ! $release_delay ) {
+		// Defensive: wporg_themes_update_version_status() already converts an explicit
+		// 'approved' into 'live' when the cooldown is disabled, so this branch shouldn't
+		// fire in normal flow. Bail rather than schedule a same-second cron and email
+		// the author about a "0 hours until live" wait.
+		return;
+	}
+
+	$approval_time = time();
 
 	wporg_themes_set_version_meta( $post_id, '_approval_time', $version, $approval_time );
 	wporg_themes_set_version_meta( $post_id, '_release_delay', $version, $release_delay );

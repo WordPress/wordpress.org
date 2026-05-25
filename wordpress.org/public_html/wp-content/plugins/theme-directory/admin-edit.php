@@ -581,7 +581,9 @@ function wporg_themes_meta_box_callback( $post ) {
 		<p><?php echo $text; ?> -
 			<select name="wporg_themes_status[<?php echo base64_encode( $version ); // base64 because version numbers don't work so well as parts of keys ?>]">
 				<option value="new" <?php selected( $status, 'new' ); ?>><?php esc_html_e( 'New', 'wporg-themes' ); ?></option>
-				<option value="approved" <?php selected( $status, 'approved' ); ?>><?php esc_html_e( 'Approved (in cooldown)', 'wporg-themes' ); ?></option>
+				<?php if ( WPORG_THEMES_RELEASE_COOL_DOWN_DELAY || 'approved' === $status ) : ?>
+					<option value="approved" <?php selected( $status, 'approved' ); ?>><?php esc_html_e( 'Approved (in cooldown)', 'wporg-themes' ); ?></option>
+				<?php endif; ?>
 				<option value="live" <?php selected( $status, 'live' ); ?>><?php esc_html_e( 'Live', 'wporg-themes' ); ?></option>
 				<option value="old" <?php selected( $status, 'old' ); ?>><?php esc_html_e( 'Old', 'wporg-themes' ); ?></option>
 			</select>
