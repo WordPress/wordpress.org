@@ -434,7 +434,7 @@ class Locale extends GP_Route {
 
 				$locale_contributors['editors'][ $editor_source ][ $editor_id ] = (object) array(
 					'nicename'     => $user->user_nicename,
-					'display_name' => $this->_encode( $user->display_name ),
+					'display_name' => $user->display_name ?: $user->user_nicename,
 					'email'        => $user->user_email,
 				);
 
@@ -524,7 +524,7 @@ class Locale extends GP_Route {
 			$locale_contributors['contributors'][ $contributor->user_id ] = (object) array(
 				'login'         => $user->user_login,
 				'nicename'      => $user->user_nicename,
-				'display_name'  => $this->_encode( $user->display_name ),
+				'display_name'  => $user->display_name ?: $user->user_nicename,
 				'email'         => $user->user_email,
 				'last_update'   => $contributor->last_update,
 				'total_count'   => $contributor->total_count,
@@ -1018,12 +1018,5 @@ class Locale extends GP_Route {
 				AND active = 1
 			ORDER BY FIELD( slug, 'waiting', 'wp', 'wp-themes', 'wp-plugins', 'patterns', 'meta', 'apps' )
 		" );
-	}
-
-	private function _encode( $raw ) {
-		if ( 'UTF-8' !== mb_detect_encoding( $raw, 'UTF-8', true ) ) {
-			$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, Windows-1252, ISO-8859-1' );
-		}
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $raw, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
 }
