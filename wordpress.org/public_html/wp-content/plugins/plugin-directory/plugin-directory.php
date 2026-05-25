@@ -32,8 +32,12 @@ define( __NAMESPACE__ . '\PLUGIN_DIR', __DIR__ );
  * served until the cooldown elapses. Mitigates supply-chain attacks by giving scanners
  * and humans a window to flag bad releases. Plugin reviewers can bypass the cooldown
  * via the wp-admin force-release action; see Jobs\API_Update_Updater::update_single_plugin().
+ *
+ * Defers to the shared WPORG_PLUGIN_THEME_RELEASE_DELAY constant when it's defined
+ * so the plugin and theme directories can be tuned (or disabled) in lockstep from a
+ * single override point.
  */
-define( __NAMESPACE__ . '\RELEASE_COOL_DOWN_DELAY', 24 * HOUR_IN_SECONDS );
+define( __NAMESPACE__ . '\RELEASE_COOL_DOWN_DELAY', defined( 'WPORG_PLUGIN_THEME_RELEASE_DELAY' ) ? WPORG_PLUGIN_THEME_RELEASE_DELAY : 24 * HOUR_IN_SECONDS );
 
 // Register an Autoloader for all files
 require __DIR__ . '/class-autoloader.php';
