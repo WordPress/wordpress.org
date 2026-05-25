@@ -819,9 +819,8 @@ function wporg_themes_handle_approval_cooldown( $post_id, $version, $old_status 
 
 	// Replace any earlier scheduled release so a re-approval (e.g. a new version
 	// uploaded mid-cooldown) fully resets the window for the latest 'approved' version.
-	$hook = "wporg_themes_release_to_live:{$post->post_name}";
-	wp_clear_scheduled_hook( $hook );
-	wp_schedule_single_event( $approval_time + $release_delay, $hook );
+	wp_clear_scheduled_hook( 'wporg_themes_release_to_live', array( $post_id ) );
+	wp_schedule_single_event( $approval_time + $release_delay, 'wporg_themes_release_to_live', array( $post_id ) );
 
 	// Notify the theme author. The "now live" email from wporg_themes_approve_version()
 	// still fires when the cooldown elapses; this fills the gap between Trac-approved
@@ -878,37 +877,20 @@ function wporg_themes_clear_cooldown_cron_on_transition( $post_id, $version, $ne
 		return;
 	}
 
-	$post = get_post( $post_id );
-	if ( ! $post ) {
-		return;
-	}
-
-	wp_clear_scheduled_hook( "wporg_themes_release_to_live:{$post->post_name}" );
+	wp_clear_scheduled_hook( 'wporg_themes_release_to_live', array( $post_id ) );
 }
 add_action( 'wporg_themes_update_version_status', 'wporg_themes_clear_cooldown_cron_on_transition', 10, 4 );
 
 /**
- * Cron handler for `wporg_themes_release_to_live:{slug}`. Fires when a version's release
+ * Cron handler for `wporg_themes_release_to_live`. Fires when a version's release
  * cooldown elapses; promotes the currently-'approved' version to 'live' so the existing
  * wporg_themes_approve_version() handler can publish the post, update wp-themes.com,
- * push translations to GlotPress, and email the author. The slug is recovered from the
- * dynamic hook name so no args flow through cron.
+ * push translations to GlotPress, and email the author.
+ *
+ * @param int $post_id Theme post ID whose 'approved' version should be promoted.
  */
-function wporg_themes_cron_release_to_live() {
-	list( , $theme_slug ) = explode( ':', current_filter(), 2 );
-
-	$theme = get_posts( array(
-		'name'        => $theme_slug,
-		'post_type'   => 'repopackage',
-		'post_status' => 'any',
-		'numberposts' => 1,
-	) );
-	if ( ! $theme ) {
-		return;
-	}
-
-	$post    = $theme[0];
-	$status  = (array) get_post_meta( $post->ID, '_status', true );
+function wporg_themes_cron_release_to_live( $post_id ) {
+	$status  = (array) get_post_meta( $post_id, '_status', true );
 	$version = array_search( 'approved', $status );
 	if ( ! $version ) {
 		// Nothing in 'approved' — the cooldown was already resolved (force-released,
@@ -916,8 +898,9 @@ function wporg_themes_cron_release_to_live() {
 		return;
 	}
 
-	wporg_themes_update_version_status( $post->ID, $version, 'live' );
+	wporg_themes_update_version_status( $post_id, $version, 'live' );
 }
+add_action( 'wporg_themes_release_to_live', 'wporg_themes_cron_release_to_live' );
 
 /**
  * Reviewer force-release: clear the cooldown for a theme's currently-approved version and
