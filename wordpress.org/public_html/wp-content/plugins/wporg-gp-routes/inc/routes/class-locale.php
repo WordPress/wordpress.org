@@ -784,10 +784,10 @@ class Locale extends GP_Route {
 
 			if ( $can_approve_for_all ) {
 				// The current user can approve for all projects, so just grab all with any waiting strings.
-				$stats_where = ' AND ( stats.waiting > 0 OR stats.fuzzy > 0 )';
+				$stats_where = ' AND stats.has_pending = 1';
 				$tp_where    = $base_level_project_sql;
 			} elseif ( $allowed_projects || $allowed_base_level_projects ) {
-				$stats_where = ' AND ( stats.waiting > 0 OR stats.fuzzy > 0 )';
+				$stats_where = ' AND stats.has_pending = 1';
 				$tp_where    = ' AND ( (';
 
 				if ( $allowed_projects ) {
@@ -884,12 +884,12 @@ class Locale extends GP_Route {
 				break;
 
 			case 'strings-waiting-and-fuzzy':
-				$stats_where    .= ' AND ( stats.waiting > 0 OR stats.fuzzy > 0 )';
-				$filter_order_by = "tp.path LIKE 'wp/%%' AND (stats.fuzzy + stats.waiting) > 0 DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
+				$stats_where    .= ' AND stats.has_pending = 1';
+				$filter_order_by = "tp.path LIKE 'wp/%%' DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
 				break;
 
 			case 'strings-waiting-and-fuzzy-by-modified-date':
-				$stats_where    .= ' AND ( stats.waiting > 0 OR stats.fuzzy > 0 ) AND stats.date_modified > "0000-00-00 00:00:00"';
+				$stats_where    .= ' AND stats.has_pending = 1 AND stats.date_modified > "0000-00-00 00:00:00"';
 				$filter_order_by = "stats.date_modified $sort_order, tp.name ASC";
 				break;
 
