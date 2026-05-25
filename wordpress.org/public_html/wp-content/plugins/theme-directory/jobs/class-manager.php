@@ -58,6 +58,8 @@ class Manager {
 	 * attaches the matching handler so the event runs when fired.
 	 */
 	public function register_colon_based_hook_handlers() {
+		global $wpdb;
+
 		$add_callback = static function ( $hook ) {
 			if ( ! str_contains( $hook, ':' ) ) {
 				return;
@@ -104,6 +106,19 @@ class Manager {
 
 			if ( $job_id && is_numeric( $job_id ) ) {
 				$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+
+				// Retry against a master DB if HyperDB's read-replica lag returned no row.
+				if (
+					! $job &&
+					isset( $wpdb->srtm ) &&
+					is_callable( [ $wpdb, 'send_reads_to_masters' ] )
+				) {
+					$srtm = $wpdb->srtm;
+					$wpdb->send_reads_to_masters();
+					$job        = \HM\Cavalcade\Plugin\Job::get( $job_id );
+					$wpdb->srtm = $srtm;
+				}
+
 				if ( $job ) {
 					$add_callback( $job->hook );
 				}

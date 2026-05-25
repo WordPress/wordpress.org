@@ -843,7 +843,11 @@ function wporg_themes_handle_approval_cooldown( $post_id, $version, $old_status 
 		$post->post_title,
 		$release_delay / HOUR_IN_SECONDS
 	) . "\n\n";
-	$content .= __( 'WordPress.org delays new theme releases by 24 hours so moderators and security scanners can review changes before they reach users. If this update fixes a security issue that needs to ship sooner, please contact themes@wordpress.org.', 'wporg-themes' ) . "\n\n";
+	$content .= sprintf(
+		/* translators: %d: cooldown duration in hours */
+		__( 'WordPress.org delays new theme releases by %d hours so moderators and security scanners can review changes before they reach users. If this update fixes a security issue that needs to ship sooner, please contact themes@wordpress.org.', 'wporg-themes' ),
+		$release_delay / HOUR_IN_SECONDS
+	) . "\n\n";
 
 	if ( $ticket_id ) {
 		$content .= sprintf( __( 'The review ticket is at %s.', 'wporg-themes' ), "https://themes.trac.wordpress.org/ticket/{$ticket_id}" ) . "\n\n";
