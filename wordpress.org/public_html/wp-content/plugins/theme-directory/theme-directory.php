@@ -51,8 +51,12 @@ define( 'WPORG_THEMES_E2E_REPO', 'WordPress/theme-review-e2e' );
  * humans a window to flag bad releases. Reviewers can bypass the cooldown via the
  * wp-admin force-release control on the Theme Versions metabox; see
  * wporg_themes_force_release_version().
+ *
+ * Defers to the shared WPORG_PLUGIN_THEME_RELEASE_DELAY constant when it's defined
+ * so the plugin and theme directories can be tuned (or disabled) in lockstep from a
+ * single override point.
  */
-define( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY', 24 * HOUR_IN_SECONDS );
+define( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY', defined( 'WPORG_PLUGIN_THEME_RELEASE_DELAY' ) ? WPORG_PLUGIN_THEME_RELEASE_DELAY : 24 * HOUR_IN_SECONDS );
 
 /**
  * Things to change on activation.
