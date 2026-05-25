@@ -935,7 +935,8 @@ function wporg_themes_force_release_version( $post_id, $reason ) {
 	wporg_themes_set_version_meta( $post_id, '_release_delay', $version, 0 );
 
 	// Log to the internal notes via a private comment, matching the audit pattern used
-	// elsewhere in the theme directory for moderator actions.
+	// elsewhere in the theme directory for moderator actions. Sanitize the reason at
+	// the function boundary so the audit log stays plain text regardless of caller.
 	wp_insert_comment( array(
 		'comment_post_ID'  => $post_id,
 		'user_id'          => get_current_user_id(),
@@ -947,7 +948,7 @@ function wporg_themes_force_release_version( $post_id, $reason ) {
 			__( 'Force-released version %1$s, bypassing the %2$d-hour release cooldown. Reason: %3$s', 'wporg-themes' ),
 			$version,
 			$release_delay / HOUR_IN_SECONDS,
-			$reason
+			sanitize_textarea_field( $reason )
 		),
 	) );
 
