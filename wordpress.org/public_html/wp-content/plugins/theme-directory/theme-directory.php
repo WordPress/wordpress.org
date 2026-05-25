@@ -44,6 +44,17 @@ define( 'WPORG_THEMES_DEFAULT_BROWSE', 'popular' );
 define( 'WPORG_THEMES_E2E_REPO', 'WordPress/theme-review-e2e' );
 
 /**
+ * Delay between a theme version being approved (by a reviewer on Trac, or via the
+ * auto-approval path for theme updates) and it becoming the live version served to
+ * sites by the themes API. The previous live version (if any) continues to be served
+ * until the cooldown elapses. Mitigates supply-chain risks by giving scanners and
+ * humans a window to flag bad releases. Reviewers can bypass the cooldown via the
+ * wp-admin force-release control on the Theme Versions metabox; see
+ * wporg_themes_force_release_version().
+ */
+define( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY', 24 * HOUR_IN_SECONDS );
+
+/**
  * Things to change on activation.
  */
 function wporg_themes_activate() {
@@ -302,6 +313,23 @@ function wporg_themes_get_version_status( $post_id, $version ) {
 }
 
 /**
+ * Sets the specified meta value for a version of a theme.
+ *
+ * @param int    $post_id    Post ID.
+ * @param string $meta_key   Post meta key holding the version => value map.
+ * @param string $version    The theme version to set the meta value for.
+ * @param mixed  $meta_value The value to store for that version.
+ * @return int|bool Meta ID if the key didn't exist, true on update, false on failure.
+ */
+function wporg_themes_set_version_meta( $post_id, $meta_key, $version, $meta_value ) {
+	$meta = (array) get_post_meta( $post_id, $meta_key, true );
+
+	$meta[ $version ] = $meta_value;
+
+	return update_post_meta( $post_id, $meta_key, $meta );
+}
+
+/**
  * Replacement for the Author meta box on theme pages
  */
 add_action( 'add_meta_boxes', 'wporg_themes_author_metabox_override', 10, 2 );
@@ -400,13 +428,17 @@ add_action( 'wp_ajax_author-lookup', 'wporg_themes_author_lookup' );
 /**
  * Handles updating the status of theme versions.
  *
- * @param int       $post_id         Post ID.
- * @param string    $current_version The theme version to update.
- * @param string    $new_status      The status to update the current version to.
+ * @param int    $post_id         Post ID.
+ * @param string $current_version The theme version to update.
+ * @param string $new_status      The status to update the current version to.
+ * @param bool   $bypass_cooldown Whether to bypass the release cooldown for a 'live' transition.
+ *                                   Used by rollbacks, the force-release control, and manual admin
+ *                                   metabox saves where the operator is explicitly pushing a version
+ *                                   live without waiting for the cooldown window.
  * @return int|bool Meta ID if the key didn't exist, true on successful update,
  *                  false on failure.
  */
-function wporg_themes_update_version_status( $post_id, $current_version, $new_status ) {
+function wporg_themes_update_version_status( $post_id, $current_version, $new_status, $bypass_cooldown = false ) {
 	$meta = get_post_meta( $post_id, '_status', true ) ?: array();
 
 	$old_status = false;
@@ -419,10 +451,29 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
 		return;
 	}
 
+	/*
+	 * Redirect a 'live' transition into the 'approved' holding state when a cooldown is
+	 * in effect. The previous live version continues to be served by the API while the
+	 * cooldown elapses; a scheduled cron then transitions 'approved' -> 'live' (which
+	 * re-enters this function with `$old_status === 'approved'`, falling through).
+	 *
+	 * Callers that need to push a version live immediately pass `$bypass_cooldown = true`
+	 * (rollbacks, the reviewer force-release control, and direct admin metabox saves).
+	 */
+	if (
+		'live' === $new_status &&
+		WPORG_THEMES_RELEASE_COOL_DOWN_DELAY &&
+		! $bypass_cooldown &&
+		'approved' !== $old_status
+	) {
+		$new_status = 'approved';
+	}
+
 	switch ( $new_status ) {
 		// There can only be one version with these statuses:
 		case 'new':
 		case 'live':
+		case 'approved':
 			// Discard all previous versions with that status.
 			foreach ( array_keys( $meta, $new_status ) as $version ) {
 				if ( version_compare( $version, $current_version, '<' ) ) {
@@ -690,9 +741,211 @@ function wporg_themes_rollback_version( $post_id, $current_version, $old_status 
 	$ticket_ids   = get_post_meta( $post_id, '_ticket_id', true );
 	$prev_version = array_search( $ticket, $ticket_ids );
 
-	wporg_themes_update_version_status( $post_id, $prev_version, 'live' );
+	// Bypass the release cooldown: a rollback is an explicit reviewer action
+	// to restore a previously-live version, not a fresh approval.
+	wporg_themes_update_version_status( $post_id, $prev_version, 'live', true );
 }
 add_action( 'wporg_themes_update_version_new', 'wporg_themes_rollback_version', 10, 3 );
+
+/**
+ * Compute the timestamp when a version's release cooldown will elapse, allowing it
+ * to transition from 'approved' to 'live'.
+ *
+ * Returns 0 when no cooldown is active (no approval timestamp recorded, or no delay
+ * captured for this version). Reading the delay from per-version meta — set at approval
+ * time — means future changes to WPORG_THEMES_RELEASE_COOL_DOWN_DELAY don't retroactively
+ * affect in-flight cooldowns. Reviewers bypass the cooldown by setting the delay to 0.
+ *
+ * @param int    $post_id Theme post ID.
+ * @param string $version The theme version to check.
+ * @return int Unix timestamp when the cooldown elapses, or 0 if no cooldown applies.
+ */
+function wporg_themes_get_cooldown_until( $post_id, $version ) {
+	$approval_time = (int) wporg_themes_get_version_meta( $post_id, '_approval_time', $version );
+	if ( ! $approval_time ) {
+		return 0;
+	}
+
+	$release_delay = (int) wporg_themes_get_version_meta( $post_id, '_release_delay', $version );
+	if ( ! $release_delay ) {
+		return 0;
+	}
+
+	return $approval_time + $release_delay;
+}
+
+/**
+ * Handle a version transitioning into the 'approved' holding state.
+ *
+ * Records the per-version approval time and the cooldown delay active at approval
+ * (so future constant changes don't retroactively affect in-flight cooldowns),
+ * schedules the cron that will promote it to 'live' once the cooldown elapses,
+ * and emails the theme author so the gap between Trac-approved and serving-to-users
+ * is explained.
+ *
+ * @param int    $post_id    Theme post ID.
+ * @param string $version    The theme version that was just approved.
+ * @param string $old_status The status the version had before approval.
+ */
+function wporg_themes_handle_approval_cooldown( $post_id, $version, $old_status ) {
+	$post = get_post( $post_id );
+	if ( ! $post ) {
+		return;
+	}
+
+	$approval_time = time();
+	$release_delay = (int) WPORG_THEMES_RELEASE_COOL_DOWN_DELAY;
+
+	wporg_themes_set_version_meta( $post_id, '_approval_time', $version, $approval_time );
+	wporg_themes_set_version_meta( $post_id, '_release_delay', $version, $release_delay );
+
+	// Replace any earlier scheduled release so a re-approval (e.g. a new version
+	// uploaded mid-cooldown) fully resets the window for the latest 'approved' version.
+	$hook = "wporg_themes_release_to_live:{$post->post_name}";
+	wp_clear_scheduled_hook( $hook );
+	wp_schedule_single_event( $approval_time + $release_delay, $hook );
+
+	// Notify the theme author. The "now live" email from wporg_themes_approve_version()
+	// still fires when the cooldown elapses; this fills the gap between Trac-approved
+	// and serving-to-users so the author isn't left wondering why their theme isn't live yet.
+	$ticket_id = wporg_themes_get_version_meta( $post_id, '_ticket_id', $version );
+
+	$subject = sprintf(
+		/* translators: 1: theme name, 2: theme version, 3: hours until live */
+		__( '[WordPress Themes] %1$s %2$s approved — going live in %3$d hours', 'wporg-themes' ),
+		$post->post_title,
+		$version,
+		$release_delay / HOUR_IN_SECONDS
+	);
+
+	$content  = sprintf(
+		/* translators: 1: theme version, 2: theme name, 3: hours until live */
+		__( 'Version %1$s of %2$s has been approved and will be served to WordPress users in about %3$d hours.', 'wporg-themes' ),
+		$version,
+		$post->post_title,
+		$release_delay / HOUR_IN_SECONDS
+	) . "\n\n";
+	$content .= __( 'WordPress.org delays new theme releases by 24 hours so moderators and security scanners can review changes before they reach users. If this update fixes a security issue that needs to ship sooner, please contact themes@wordpress.org.', 'wporg-themes' ) . "\n\n";
+
+	if ( $ticket_id ) {
+		$content .= sprintf( __( 'The review ticket is at %s.', 'wporg-themes' ), "https://themes.trac.wordpress.org/ticket/{$ticket_id}" ) . "\n\n";
+	}
+
+	$content .= "--\n";
+	$content .= __( 'The WordPress.org Themes Team', 'wporg-themes' ) . "\n";
+	$content .= 'https://make.wordpress.org/themes';
+
+	wp_mail( get_user_by( 'id', $post->post_author )->user_email, $subject, $content, 'From: "WordPress Theme Directory" <themes@wordpress.org>' );
+}
+add_action( 'wporg_themes_update_version_approved', 'wporg_themes_handle_approval_cooldown', 10, 3 );
+
+/**
+ * Clear the scheduled release-to-live cron whenever a version transitions out of
+ * 'approved': promoted to 'live' by the cron firing (no-op — the event has already
+ * dequeued itself), force-released to 'live' by a reviewer (leftover schedule needs
+ * removing), reopened back to 'new', or marked 'old' because a newer version was
+ * uploaded mid-cooldown.
+ *
+ * @param int    $post_id    Theme post ID.
+ * @param string $version    The theme version that was just updated.
+ * @param string $new_status The new status.
+ * @param string $old_status The previous status.
+ */
+function wporg_themes_clear_cooldown_cron_on_transition( $post_id, $version, $new_status, $old_status ) {
+	if ( 'approved' !== $old_status ) {
+		return;
+	}
+
+	$post = get_post( $post_id );
+	if ( ! $post ) {
+		return;
+	}
+
+	wp_clear_scheduled_hook( "wporg_themes_release_to_live:{$post->post_name}" );
+}
+add_action( 'wporg_themes_update_version_status', 'wporg_themes_clear_cooldown_cron_on_transition', 10, 4 );
+
+/**
+ * Cron handler for `wporg_themes_release_to_live:{slug}`. Fires when a version's release
+ * cooldown elapses; promotes the currently-'approved' version to 'live' so the existing
+ * wporg_themes_approve_version() handler can publish the post, update wp-themes.com,
+ * push translations to GlotPress, and email the author. The slug is recovered from the
+ * dynamic hook name so no args flow through cron.
+ */
+function wporg_themes_cron_release_to_live() {
+	list( , $theme_slug ) = explode( ':', current_filter(), 2 );
+
+	$theme = get_posts( array(
+		'name'        => $theme_slug,
+		'post_type'   => 'repopackage',
+		'post_status' => 'any',
+		'numberposts' => 1,
+	) );
+	if ( ! $theme ) {
+		return;
+	}
+
+	$post    = $theme[0];
+	$status  = (array) get_post_meta( $post->ID, '_status', true );
+	$version = array_search( 'approved', $status );
+	if ( ! $version ) {
+		// Nothing in 'approved' — the cooldown was already resolved (force-released,
+		// rolled back, or a newer version superseded this one).
+		return;
+	}
+
+	wporg_themes_update_version_status( $post->ID, $version, 'live' );
+}
+
+/**
+ * Reviewer force-release: clear the cooldown for a theme's currently-approved version and
+ * transition it to 'live' immediately. Logs the action via the internal-notes audit trail.
+ *
+ * Capability checks must be performed by the caller.
+ *
+ * @param int    $post_id Theme post ID.
+ * @param string $reason  Free-text reason recorded in the audit log.
+ * @return bool True on success.
+ */
+function wporg_themes_force_release_version( $post_id, $reason ) {
+	$post = get_post( $post_id );
+	if ( ! $post || 'repopackage' !== $post->post_type ) {
+		return false;
+	}
+
+	$status  = (array) get_post_meta( $post_id, '_status', true );
+	$version = array_search( 'approved', $status );
+	if ( ! $version ) {
+		return false;
+	}
+
+	$release_delay = (int) wporg_themes_get_version_meta( $post_id, '_release_delay', $version );
+
+	// Zero the per-version delay so any future re-entry through the cooldown gate
+	// (e.g. if `update_version_status` is called again before the cron fires) writes through.
+	wporg_themes_set_version_meta( $post_id, '_release_delay', $version, 0 );
+
+	// Log to the internal notes via a private comment, matching the audit pattern used
+	// elsewhere in the theme directory for moderator actions.
+	wp_insert_comment( array(
+		'comment_post_ID'  => $post_id,
+		'user_id'          => get_current_user_id(),
+		'comment_author'   => wp_get_current_user()->user_login,
+		'comment_type'     => 'internal-note',
+		'comment_approved' => 0,
+		'comment_content'  => sprintf(
+			/* translators: 1: version, 2: hours of cooldown bypassed, 3: reason */
+			__( 'Force-released version %1$s, bypassing the %2$d-hour release cooldown. Reason: %3$s', 'wporg-themes' ),
+			$version,
+			$release_delay / HOUR_IN_SECONDS,
+			$reason
+		),
+	) );
+
+	wporg_themes_update_version_status( $post_id, $version, 'live', true );
+
+	return true;
+}
 
 /**
  * Updates wp-themes.com with the latest version of a theme.

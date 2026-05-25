@@ -81,7 +81,10 @@ class Trac_Sync {
 				 *
 				 * For approved and rejected themes, we bail if the current status is not
 				 * 'new' That can happen when there are additional ticket updates (like
-				 * comments) after the ticket was closed.
+				 * comments) after the ticket was closed. 'approved' (a version that the
+				 * directory has already accepted and is holding in the release cooldown)
+				 * counts the same as 'live' here — we shouldn't reprocess it on every
+				 * subsequent ticket comment.
 				 *
 				 * For reopened tickets we bail if the version is already marked as 'new'.
 				 * This should only be the case if the ticket was closed and reopened before
@@ -93,7 +96,8 @@ class Trac_Sync {
 				}
 
 				// We don't need to set an already approved live version to live again.
-				if ( 'live' === $current_status && 'live' === $new_status ) {
+				// 'approved' (in cooldown) likewise needs no re-processing.
+				if ( in_array( $current_status, [ 'live', 'approved' ], true ) && 'live' === $new_status ) {
 					continue;
 				}
 

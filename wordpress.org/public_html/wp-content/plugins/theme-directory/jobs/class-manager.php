@@ -15,6 +15,17 @@ namespace WordPressdotorg\Theme_Directory\Jobs;
 class Manager {
 
 	/**
+	 * Colon-based hook names mapped to their handlers. The slug is encoded into the
+	 * hook name so wp_clear_scheduled_hook() can target a single theme's pending
+	 * event without args lookup. See `register_colon_based_hook_handlers()`.
+	 *
+	 * @var array
+	 */
+	public static $wildcard_cron_tasks = array(
+		'wporg_themes_release_to_live' => 'wporg_themes_cron_release_to_live',
+	);
+
+	/**
 	 * Add all the actions for cron tasks and schedules.
 	 */
 	public function __construct() {
@@ -31,6 +42,73 @@ class Manager {
 		// Import from SVN tasks.
 		add_action( 'theme_directory_svn_import_watcher', [ __NAMESPACE__ . '\SVN_Import', 'watcher_trigger' ] );
 		add_action( 'theme_directory_svn_import', [ __NAMESPACE__ . '\SVN_Import', 'import_trigger' ] );
+
+		// Register the colon-based cron handlers (wporg_themes_release_to_live:{slug}, etc).
+		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			// This must run after plugins_loaded so Cavalcade has had a chance to hook in.
+			add_action( 'init', [ $this, 'register_colon_based_hook_handlers' ] );
+		}
+	}
+
+	/**
+	 * The WordPress Cron implementation can't easily check whether a job is already
+	 * enqueued by args, so we encode the theme slug into the hook name (matching the
+	 * plugin directory's pattern). Hooks like `wporg_themes_release_to_live:my-theme`
+	 * don't auto-resolve to a handler — this method scans pending cron entries and
+	 * attaches the matching handler so the event runs when fired.
+	 */
+	public function register_colon_based_hook_handlers() {
+		$add_callback = static function ( $hook ) {
+			if ( ! str_contains( $hook, ':' ) ) {
+				return;
+			}
+
+			$partial_hook = explode( ':', $hook )[0];
+			$callback     = self::$wildcard_cron_tasks[ $partial_hook ] ?? false;
+
+			if ( ! $callback ) {
+				return;
+			}
+
+			if ( ! has_action( $hook, $callback ) ) {
+				add_action( $hook, $callback, 10, PHP_INT_MAX );
+			}
+		};
+
+		// Flush the Cavalcade jobs cache so we see fresh entries from the database.
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
+
+		foreach ( _get_cron_array() as $timestamp => $handlers ) {
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $handlers as $hook => $jobs ) {
+				$add_callback( $hook );
+			}
+		}
+
+		/*
+		 * When jobs are run manually or after-the-fact, we also need to find the current
+		 * job by id, since it may not be in the pending cron array yet.
+		 */
+		if (
+			class_exists( '\HM\Cavalcade\Plugin\Job' ) &&
+			( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) )
+		) {
+			$job_id = $GLOBALS['job_id'] ?? false;
+
+			if ( ! $job_id && in_array( 'run', $GLOBALS['argv'] ?? [], true ) ) {
+				$job_id = $GLOBALS['argv'][ array_search( 'run', $GLOBALS['argv'] ) + 1 ] ?? false;
+			}
+
+			if ( $job_id && is_numeric( $job_id ) ) {
+				$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+				if ( $job ) {
+					$add_callback( $job->hook );
+				}
+			}
+		}
 	}
 
 	/**

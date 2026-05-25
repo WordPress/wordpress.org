@@ -1158,8 +1158,10 @@ class WPORG_Themes_Upload {
 		$this->trac_ticket->priority = 'new theme';
 		if ( ! empty( $this->theme_post->_status ) ) {
 
-			// Is this an update to an existing, approved theme?
-			if ( 'live' === $this->theme_post->_status[ $this->theme_post->max_version ] ) {
+			// Is this an update to an existing, approved theme? An 'approved' status
+			// (live version still in release cooldown) counts as approved for ticket
+			// priority — the previous live version is still being served.
+			if ( in_array( $this->theme_post->_status[ $this->theme_post->max_version ], [ 'live', 'approved' ], true ) ) {
 				$this->trac_ticket->priority = 'theme update';
 
 				// Apparently not, it must be a new upload for previously unapproved theme.
