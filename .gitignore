@@ -1,9 +1,6 @@
 node_modules/
 package-lock.json
 vendor/
-.phpunit.result.cache
-.svn/
-
-# PHPUnit caches
 .phpunit.cache/
 .phpunit.result.cache
+.svn/
