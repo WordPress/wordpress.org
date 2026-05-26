@@ -46,10 +46,39 @@ if ( ! function_exists( 'wp_json_encode' ) ) {
 	}
 }
 
+require_once __DIR__ . '/includes/class-test-cache.php';
+
+if ( ! function_exists( 'wp_cache_get' ) ) {
+	/**
+	 * Test polyfill for wp_cache_get(). State lives in Test_Cache.
+	 *
+	 * @param string $key   Cache key.
+	 * @param string $group Cache group.
+	 * @return mixed False on miss.
+	 */
+	function wp_cache_get( $key, $group = '' ) {
+		return Test_Cache::get( $key, $group );
+	}
+}
+
+if ( ! function_exists( 'wp_cache_set' ) ) {
+	/**
+	 * Test polyfill for wp_cache_set(). State lives in Test_Cache.
+	 *
+	 * @param string $key   Cache key.
+	 * @param mixed  $value Value.
+	 * @param string $group Cache group.
+	 * @param int    $ttl   TTL in seconds (recorded, not enforced).
+	 * @return bool
+	 */
+	function wp_cache_set( $key, $value, $group = '', $ttl = 0 ) {
+		return Test_Cache::set( $key, $value, $group, $ttl );
+	}
+}
+
 require_once __DIR__ . '/../trac-notifications-api.php';
 require_once __DIR__ . '/../trac-notifications-db.php';
 require_once __DIR__ . '/../class-trac-api.php';
 
 require_once __DIR__ . '/includes/class-fake-db.php';
-require_once __DIR__ . '/includes/class-memory-cache.php';
 require_once __DIR__ . '/includes/class-fake-client.php';

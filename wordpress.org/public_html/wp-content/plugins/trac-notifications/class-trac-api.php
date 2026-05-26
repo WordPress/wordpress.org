@@ -48,13 +48,6 @@ class Trac_API {
 	protected $client_factory;
 
 	/**
-	 * Cache backend with `get( $key )` and `set( $key, $value, $ttl )`.
-	 *
-	 * @var object
-	 */
-	protected $cache;
-
-	/**
 	 * Whether the most recent cached_call() served data from the stale layer.
 	 *
 	 * @var bool
@@ -65,18 +58,12 @@ class Trac_API {
 	 * Constructor.
 	 *
 	 * @param callable|null $client_factory Factory returning a Trac HTTP client per trac. Default: live HTTP client.
-	 * @param object|null   $cache          Cache backend exposing get/set. Default: wp_cache_* wrapper.
 	 */
-	public function __construct( $client_factory = null, $cache = null ) {
+	public function __construct( $client_factory = null ) {
 		if ( null === $client_factory ) {
 			$client_factory = array( $this, 'default_client_factory' );
 		}
-		if ( null === $cache ) {
-			require_once __DIR__ . '/class-trac-api-wpcache.php';
-			$cache = new Trac_API_WPCache();
-		}
 		$this->client_factory = $client_factory;
-		$this->cache          = $cache;
 	}
 
 	/**
@@ -169,30 +156,30 @@ class Trac_API {
 		$stale_key   = "{$trac}/{$key}:stale";
 		$breaker_key = "{$trac}:breaker";
 
-		$cached = $this->cache->get( $fresh_key );
+		$cached = wp_cache_get( $fresh_key, self::CACHE_GROUP );
 		if ( false !== $cached ) {
 			return ( self::NULL_SENTINEL === $cached ) ? null : $cached;
 		}
 
-		if ( ! $this->cache->get( $breaker_key ) ) {
+		if ( ! wp_cache_get( $breaker_key, self::CACHE_GROUP ) ) {
 			$live = $callback();
 
 			if ( is_array( $live ) ) {
-				$this->cache->set( $fresh_key, $live, self::FRESH_TTL );
-				$this->cache->set( $stale_key, $live, self::STALE_TTL );
+				wp_cache_set( $fresh_key, $live, self::CACHE_GROUP, self::FRESH_TTL );
+				wp_cache_set( $stale_key, $live, self::CACHE_GROUP, self::STALE_TTL );
 				return $live;
 			}
 
 			if ( null === $live ) {
-				$this->cache->set( $fresh_key, self::NULL_SENTINEL, self::NEGATIVE_TTL );
-				$this->cache->set( $stale_key, self::NULL_SENTINEL, self::STALE_TTL );
+				wp_cache_set( $fresh_key, self::NULL_SENTINEL, self::CACHE_GROUP, self::NEGATIVE_TTL );
+				wp_cache_set( $stale_key, self::NULL_SENTINEL, self::CACHE_GROUP, self::STALE_TTL );
 				return null;
 			}
 
-			$this->cache->set( $breaker_key, 1, self::BREAKER_TTL );
+			wp_cache_set( $breaker_key, 1, self::CACHE_GROUP, self::BREAKER_TTL );
 		}
 
-		$stale = $this->cache->get( $stale_key );
+		$stale = wp_cache_get( $stale_key, self::CACHE_GROUP );
 		if ( false !== $stale ) {
 			$this->last_stale = true;
 			return ( self::NULL_SENTINEL === $stale ) ? null : $stale;

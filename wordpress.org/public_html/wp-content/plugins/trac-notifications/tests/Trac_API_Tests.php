@@ -1,9 +1,9 @@
 <?php
 /**
- * Unit tests for the Trac_API caching wrapper. Injects an in-memory cache
- * and a scriptable client so the cache read path, circuit breaker, negative
- * caching, and ticket normalization can all be exercised without touching
- * memcached or a real Trac box.
+ * Unit tests for the Trac_API caching wrapper. A scriptable client + the
+ * wp_cache_* polyfill in tests/bootstrap.php let us exercise the cache read
+ * path, circuit breaker, negative caching, and ticket normalization without
+ * touching memcached or a real Trac box.
  *
  * @package WordPressdotorg\Trac
  */
@@ -16,13 +16,6 @@ use PHPUnit\Framework\TestCase;
  */
 #[Group( 'trac-notifications' )]
 class Trac_API_Tests extends TestCase {
-
-	/**
-	 * In-memory cache injected into Trac_API.
-	 *
-	 * @var Memory_Cache
-	 */
-	protected $cache;
 
 	/**
 	 * Map of per-trac scriptable HTTP clients keyed by trac slug.
@@ -39,10 +32,11 @@ class Trac_API_Tests extends TestCase {
 	protected $api;
 
 	/**
-	 * Build a fresh cache, per-trac clients, and an api instance per test.
+	 * Reset the cache polyfill, build per-trac clients, and an api instance.
 	 */
 	public function setUp(): void {
-		$this->cache   = new Memory_Cache();
+		Test_Cache::reset();
+
 		$this->clients = array(
 			'core' => new Fake_Client(),
 			'meta' => new Fake_Client(),
@@ -53,7 +47,7 @@ class Trac_API_Tests extends TestCase {
 			return $clients[ $trac ] ?? null;
 		};
 
-		$this->api = new Trac_API( $factory, $this->cache );
+		$this->api = new Trac_API( $factory );
 	}
 
 	/**
@@ -92,8 +86,8 @@ class Trac_API_Tests extends TestCase {
 		$this->assertIsArray( $result );
 		$this->assertCount( 1, $this->clients['core']->calls );
 
-		$keys = array_column( $this->cache->set_calls, 'key' );
-		$this->assertCount( 2, $this->cache->set_calls, 'fresh + stale written' );
+		$keys = array_column( Test_Cache::$set_calls, 'key' );
+		$this->assertCount( 2, Test_Cache::$set_calls, 'fresh + stale written' );
 		$this->assertStringContainsString( ':fresh', $keys[0] );
 		$this->assertStringContainsString( ':stale', $keys[1] );
 		$this->assertFalse( $this->api->is_last_stale() );
@@ -122,9 +116,9 @@ class Trac_API_Tests extends TestCase {
 		$this->clients['core']->next_response = $this->ticket_row();
 		$this->api->get_ticket( 'core', 42 );
 
-		foreach ( array_keys( $this->cache->store ) as $key ) {
+		foreach ( array_keys( Test_Cache::$store ) as $key ) {
 			if ( str_contains( $key, ':fresh' ) ) {
-				$this->cache->expire( $key );
+				unset( Test_Cache::$store[ $key ] );
 			}
 		}
 
@@ -138,7 +132,7 @@ class Trac_API_Tests extends TestCase {
 		$this->assertCount( 1, $this->clients['core']->calls, 'one live attempt was made' );
 
 		$breaker_set = false;
-		foreach ( $this->cache->set_calls as $set ) {
+		foreach ( Test_Cache::$set_calls as $set ) {
 			if ( str_ends_with( $set['key'], ':breaker' ) ) {
 				$breaker_set = true;
 			}
@@ -153,12 +147,12 @@ class Trac_API_Tests extends TestCase {
 		$this->clients['core']->next_response = $this->ticket_row();
 		$this->api->get_ticket( 'core', 42 );
 
-		foreach ( array_keys( $this->cache->store ) as $key ) {
+		foreach ( array_keys( Test_Cache::$store ) as $key ) {
 			if ( str_contains( $key, ':fresh' ) ) {
-				$this->cache->expire( $key );
+				unset( Test_Cache::$store[ $key ] );
 			}
 		}
-		$this->cache->store['core:breaker'] = 1;
+		Test_Cache::$store[ Test_Cache::key( 'core:breaker', Trac_API::CACHE_GROUP ) ] = 1;
 
 		$this->clients['core']->calls = array();
 
@@ -173,7 +167,7 @@ class Trac_API_Tests extends TestCase {
 	 * Breaker open and no stale data: returns false without calling the client.
 	 */
 	public function test_breaker_open_and_no_stale_returns_false() {
-		$this->cache->store['core:breaker'] = 1;
+		Test_Cache::$store[ Test_Cache::key( 'core:breaker', Trac_API::CACHE_GROUP ) ] = 1;
 
 		$result = $this->api->get_ticket( 'core', 999 );
 
@@ -215,8 +209,9 @@ class Trac_API_Tests extends TestCase {
 	 * A NULL_SENTINEL value seeded in fresh cache is read back as null.
 	 */
 	public function test_null_sentinel_in_fresh_cache_is_returned_as_null() {
-		$key                                       = 'ticket:42:' . md5( wp_json_encode( array() ) );
-		$this->cache->store[ "core/{$key}:fresh" ] = Trac_API::NULL_SENTINEL;
+		$key                                                                = 'ticket:42:' . md5( wp_json_encode( array() ) );
+		$fresh_key                                                          = "core/{$key}:fresh";
+		Test_Cache::$store[ Test_Cache::key( $fresh_key, Trac_API::CACHE_GROUP ) ] = Trac_API::NULL_SENTINEL;
 
 		$result = $this->api->get_ticket( 'core', 42 );
 
@@ -231,7 +226,7 @@ class Trac_API_Tests extends TestCase {
 		$result = $this->api->get_ticket( 'plugins', 42 );
 
 		$this->assertFalse( $result );
-		$this->assertCount( 0, $this->cache->get_calls );
+		$this->assertCount( 0, Test_Cache::$get_calls );
 		$this->assertCount( 0, $this->clients['core']->calls );
 		$this->assertCount( 0, $this->clients['meta']->calls );
 	}
@@ -249,8 +244,8 @@ class Trac_API_Tests extends TestCase {
 	 * A core.trac breaker does not block meta.trac calls.
 	 */
 	public function test_core_breaker_does_not_block_meta() {
-		$this->cache->store['core:breaker']   = 1;
-		$this->clients['meta']->next_response = $this->ticket_row();
+		Test_Cache::$store[ Test_Cache::key( 'core:breaker', Trac_API::CACHE_GROUP ) ] = 1;
+		$this->clients['meta']->next_response                                          = $this->ticket_row();
 
 		$result = $this->api->get_ticket( 'meta', 42 );
 
