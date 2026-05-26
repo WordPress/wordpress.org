@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<phpunit bootstrap="tests/bootstrap.php" colors="true" cacheDirectory=".phpunit.cache">
+  <testsuites>
+    <testsuite name="trac-notifications">
+      <directory suffix="Tests.php">tests/</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>

@@ -29,6 +29,9 @@ jobs:
           - name: Slack Trac Bot
             working-directory: common/includes/tests/slack/trac
             phpunit-args: "--no-configuration bot.php"
+          - name: Trac Notifications
+            working-directory: wordpress.org/public_html/wp-content/plugins/trac-notifications
+            phpunit-args: ""
           - name: Slack Props Library
             working-directory: common/includes/slack/props/tests
             phpunit-args: "--no-configuration --bootstrap /tmp/phpunit-bootstrap.php ."

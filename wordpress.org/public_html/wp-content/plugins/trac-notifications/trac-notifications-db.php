@@ -128,6 +128,171 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		return $this->db->get_col( $this->db->prepare( "SELECT DISTINCT author FROM ticket_change WHERE $ignore_cc ticket = %d", $ticket_id ) );
 	}
 
+	/**
+	 * Composite ticket payload — one Trac round-trip from the wp.org side.
+	 *
+	 * Combines the ticket row, participants, custom fields, the most recent
+	 * comments (chronologically ordered), changelog (non-comment field
+	 * changes), and attachments. Time columns are returned raw; Trac stores
+	 * them as microseconds since epoch and the caller converts at the output
+	 * boundary.
+	 *
+	 * @param int   $ticket_id Ticket id.
+	 * @param array $opts {
+	 *     Optional. Payload-shape flags.
+	 *
+	 *     @type int|false $comments    Most-recent-N cap. Default 25. false omits comments. 0 returns all.
+	 *     @type bool      $changelog   Include non-comment field changes. Default true.
+	 *     @type bool      $attachments Include attachments. Default true.
+	 * }
+	 * @return array|null Ticket payload, or null when the ticket does not exist.
+	 */
+	public function get_trac_ticket_full( $ticket_id, $opts = array() ) {
+		$ticket = $this->get_trac_ticket( $ticket_id );
+		if ( ! $ticket ) {
+			return null;
+		}
+
+		$opts = array_merge(
+			array(
+				'comments'    => 25,
+				'changelog'   => true,
+				'attachments' => true,
+			),
+			$opts
+		);
+
+		$ticket['custom_fields'] = $this->get_trac_ticket_custom_fields( $ticket_id );
+		$ticket['participants']  = $this->get_trac_ticket_participants( $ticket_id );
+
+		if ( false !== $opts['comments'] ) {
+			$limit                    = (int) $opts['comments'];
+			$total                    = $this->get_trac_ticket_comment_count( $ticket_id );
+			$ticket['comments_total'] = $total;
+
+			/*
+			 * Most-recent-N in chronological order: skip the leading rows so
+			 * the trailing window remains in ASC display order.
+			 */
+			$offset = ( $limit > 0 ) ? max( 0, $total - $limit ) : 0;
+			$ticket['comments'] = $this->get_trac_ticket_comments( $ticket_id, $limit, $offset );
+		}
+
+		if ( $opts['changelog'] ) {
+			$ticket['changelog'] = $this->get_trac_ticket_changelog( $ticket_id );
+		}
+
+		if ( $opts['attachments'] ) {
+			$ticket['attachments'] = $this->get_trac_ticket_attachments( $ticket_id );
+		}
+
+		return $ticket;
+	}
+
+	/**
+	 * ASC-ordered window of comments. Use $offset to page or to take the tail
+	 * of the conversation. Trac stores the comment number in `oldvalue` for
+	 * comment rows; we surface it as `id`. Empty-body rows (used internally
+	 * by Trac for property-change numbering) are excluded.
+	 *
+	 * @param int $ticket_id Ticket id.
+	 * @param int $limit     Row cap. 0 returns all rows.
+	 * @param int $offset    Row offset.
+	 * @return array
+	 */
+	public function get_trac_ticket_comments( $ticket_id, $limit = 25, $offset = 0 ) {
+		$limit = (int) $limit;
+
+		$sql = "SELECT oldvalue AS id, time, author, newvalue AS body
+			FROM ticket_change
+			WHERE ticket = %d AND field = 'comment' AND newvalue <> ''
+			ORDER BY time ASC";
+
+		if ( $limit > 0 ) {
+			$sql .= sprintf( ' LIMIT %d OFFSET %d', $limit, (int) $offset );
+		}
+
+		return $this->db->get_results( $this->db->prepare( $sql, (int) $ticket_id ), ARRAY_A );
+	}
+
+	/**
+	 * Total comment count for a ticket.
+	 *
+	 * @param int $ticket_id Ticket id.
+	 * @return int
+	 */
+	public function get_trac_ticket_comment_count( $ticket_id ) {
+		return (int) $this->db->get_var(
+			$this->db->prepare(
+				"SELECT COUNT(*) FROM ticket_change WHERE ticket = %d AND field = 'comment' AND newvalue <> ''",
+				(int) $ticket_id
+			)
+		);
+	}
+
+	/**
+	 * Non-comment ticket changelog — every field transition (status, owner,
+	 * keywords, milestone, etc.) except comment bodies and cc-only changes.
+	 * Consumers filter for the fields they care about. Ordered oldest to
+	 * newest so a forward read reconstructs ticket history.
+	 *
+	 * @param int $ticket_id Ticket id.
+	 * @return array
+	 */
+	public function get_trac_ticket_changelog( $ticket_id ) {
+		return $this->db->get_results(
+			$this->db->prepare(
+				"SELECT time, author, field, oldvalue, newvalue
+				FROM ticket_change
+				WHERE ticket = %d AND field <> 'comment' AND field <> 'cc'
+				ORDER BY time ASC",
+				(int) $ticket_id
+			),
+			ARRAY_A
+		);
+	}
+
+	/**
+	 * Attachments uploaded to a ticket.
+	 *
+	 * @param int $ticket_id Ticket id.
+	 * @return array
+	 */
+	public function get_trac_ticket_attachments( $ticket_id ) {
+		return $this->db->get_results(
+			$this->db->prepare(
+				"SELECT filename, size, time, description, author
+				FROM attachment
+				WHERE type = 'ticket' AND id = %d
+				ORDER BY time ASC",
+				(int) $ticket_id
+			),
+			ARRAY_A
+		);
+	}
+
+	/**
+	 * All custom fields for a ticket as a name => value map.
+	 *
+	 * @param int $ticket_id Ticket id.
+	 * @return array
+	 */
+	public function get_trac_ticket_custom_fields( $ticket_id ) {
+		$rows = $this->db->get_results(
+			$this->db->prepare(
+				'SELECT name, value FROM ticket_custom WHERE ticket = %d',
+				(int) $ticket_id
+			),
+			ARRAY_A
+		);
+
+		$out = array();
+		foreach ( $rows as $row ) {
+			$out[ $row['name'] ] = $row['value'];
+		}
+		return $out;
+	}
+
 	function get_trac_ticket_subscriptions( $ticket_id ) {
 		$by_status = array( 'blocked' => array(), 'starred' => array() );
 		$subscriptions = $this->db->get_results( $this->db->prepare( "SELECT username, status FROM _ticket_subs WHERE ticket = %d", $ticket_id ) );
