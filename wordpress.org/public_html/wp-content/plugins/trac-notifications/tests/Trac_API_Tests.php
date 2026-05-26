@@ -11,26 +11,35 @@
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Trac_API behaviour tests.
+ */
 #[Group( 'trac-notifications' )]
 class Trac_API_Tests extends TestCase {
 
 	/**
+	 * In-memory cache injected into Trac_API.
+	 *
 	 * @var Memory_Cache
 	 */
 	protected $cache;
 
 	/**
+	 * Map of per-trac scriptable HTTP clients keyed by trac slug.
+	 *
 	 * @var array<string, Fake_Client>
 	 */
 	protected $clients;
 
 	/**
+	 * System under test.
+	 *
 	 * @var Trac_API
 	 */
 	protected $api;
 
 	/**
-	 * @return void
+	 * Build a fresh cache, per-trac clients, and an api instance per test.
 	 */
 	public function setUp(): void {
 		$this->cache   = new Memory_Cache();
@@ -48,6 +57,8 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
+	 * Build a representative DAO-shaped ticket payload, with overrides merged on top.
+	 *
 	 * @param array $overrides Fields to override.
 	 * @return array
 	 */
@@ -71,7 +82,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * First request hits the client and writes both fresh and stale entries.
 	 */
 	public function test_cold_cache_calls_client_and_writes_both_layers() {
 		$this->clients['core']->next_response = $this->ticket_row();
@@ -89,7 +100,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * A warm fresh cache returns the previously-cached value without touching the client.
 	 */
 	public function test_warm_cache_skips_client_and_returns_same_value() {
 		$this->clients['core']->next_response = $this->ticket_row();
@@ -105,7 +116,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * A client failure trips the breaker and falls back to stale data.
 	 */
 	public function test_client_failure_trips_breaker_and_serves_stale() {
 		$this->clients['core']->next_response = $this->ticket_row();
@@ -136,7 +147,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * When the breaker is already open, the client is not contacted and stale wins.
 	 */
 	public function test_breaker_open_skips_client_and_serves_stale() {
 		$this->clients['core']->next_response = $this->ticket_row();
@@ -159,7 +170,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Breaker open and no stale data: returns false without calling the client.
 	 */
 	public function test_breaker_open_and_no_stale_returns_false() {
 		$this->cache->store['core:breaker'] = 1;
@@ -172,7 +183,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Live failure with no stale entry returns false, last_stale stays false.
 	 */
 	public function test_failure_with_no_stale_returns_false() {
 		$this->clients['core']->next_response = false;
@@ -184,7 +195,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Null response is negatively cached so subsequent calls do not re-hit Trac.
 	 */
 	public function test_null_response_is_cached_and_returned_as_null() {
 		$this->clients['core']->next_response = null;
@@ -201,7 +212,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * A NULL_SENTINEL value seeded in fresh cache is read back as null.
 	 */
 	public function test_null_sentinel_in_fresh_cache_is_returned_as_null() {
 		$key                                       = 'ticket:42:' . md5( wp_json_encode( array() ) );
@@ -214,7 +225,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Unsupported trac short-circuits to false without touching cache or client.
 	 */
 	public function test_unsupported_trac_returns_false_without_touching_client_or_cache() {
 		$result = $this->api->get_ticket( 'plugins', 42 );
@@ -226,7 +237,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Non-positive ticket ids are rejected up-front.
 	 */
 	public function test_invalid_ticket_id_returns_false() {
 		$this->assertFalse( $this->api->get_ticket( 'core', 0 ) );
@@ -235,7 +246,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * A core.trac breaker does not block meta.trac calls.
 	 */
 	public function test_core_breaker_does_not_block_meta() {
 		$this->cache->store['core:breaker']   = 1;
@@ -249,7 +260,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Microsecond timestamps on the ticket root are converted to ISO-8601.
 	 */
 	public function test_normalisation_converts_microseconds_to_iso8601() {
 		$this->clients['core']->next_response = $this->ticket_row(
@@ -266,7 +277,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Microsecond timestamps inside comments, changelog, and attachments are also converted.
 	 */
 	public function test_normalisation_converts_nested_times() {
 		$this->clients['core']->next_response = $this->ticket_row(
@@ -308,7 +319,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Non-numeric time fields are left untouched (already-formatted strings survive).
 	 */
 	public function test_normalisation_leaves_non_numeric_time_alone() {
 		$this->clients['core']->next_response = $this->ticket_row(
@@ -321,7 +332,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Ticket id is cast to int and a canonical Trac URL is injected.
 	 */
 	public function test_normalisation_casts_id_and_injects_url() {
 		$this->clients['core']->next_response = $this->ticket_row( array( 'id' => '42' ) );
@@ -333,7 +344,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * URL injection uses the trac slug provided to get_ticket.
 	 */
 	public function test_meta_trac_url_normalisation() {
 		$this->clients['meta']->next_response = $this->ticket_row( array( 'id' => '99' ) );
@@ -344,7 +355,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Different opts payloads resolve to different cache keys, so each is fetched independently.
 	 */
 	public function test_different_opts_get_separate_cache_keys() {
 		$this->clients['core']->next_response = $this->ticket_row();
@@ -357,7 +368,7 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Opt insertion order does not affect the cache key, thanks to ksort().
 	 */
 	public function test_opts_in_different_order_resolve_to_same_cache_key() {
 		$this->clients['core']->next_response = $this->ticket_row();

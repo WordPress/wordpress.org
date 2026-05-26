@@ -10,21 +10,28 @@
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Trac_Notifications_DB behaviour tests for the new ticket-read methods.
+ */
 #[Group( 'trac-notifications' )]
 class Trac_Notifications_DB_Tests extends TestCase {
 
 	/**
+	 * Scriptable DB driver injected into Trac_Notifications_DB.
+	 *
 	 * @var Fake_DB
 	 */
 	protected $fake;
 
 	/**
+	 * System under test.
+	 *
 	 * @var Trac_Notifications_DB
 	 */
 	protected $dao;
 
 	/**
-	 * @return void
+	 * Build a fresh fake and DAO per test.
 	 */
 	public function setUp(): void {
 		$this->fake = new Fake_DB();
@@ -32,7 +39,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Comments are returned in chronological order with the expected SQL shape.
 	 */
 	public function test_comments_returns_rows_in_chronological_order() {
 		$this->fake->get_results_returns[] = array(
@@ -62,7 +69,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * No rows yields an empty array, not null.
 	 */
 	public function test_comments_empty_result_returns_empty_array() {
 		$this->fake->get_results_returns[] = array();
@@ -70,7 +77,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * A zero limit omits the LIMIT clause (return all rows).
 	 */
 	public function test_comments_unlimited_when_limit_zero() {
 		$this->fake->get_results_returns[] = array();
@@ -79,7 +86,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Offset is passed through to the SQL.
 	 */
 	public function test_comments_honours_offset() {
 		$this->fake->get_results_returns[] = array();
@@ -88,7 +95,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Non-integer ticket ids are coerced to int before being prepared.
 	 */
 	public function test_comments_passes_cast_ticket_id_to_prepare() {
 		$this->fake->get_results_returns[] = array();
@@ -97,7 +104,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Comment count is coerced to an int.
 	 */
 	public function test_comment_count_returns_int() {
 		$this->fake->get_var_returns[] = '7';
@@ -105,7 +112,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Null from the DB collapses to zero (not null/false).
 	 */
 	public function test_comment_count_zero_when_null() {
 		$this->fake->get_var_returns[] = null;
@@ -113,7 +120,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Changelog returns every non-comment, non-cc field transition.
 	 */
 	public function test_changelog_returns_non_comment_changes() {
 		$this->fake->get_results_returns[] = array(
@@ -142,7 +149,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Changelog with no rows yields an empty array.
 	 */
 	public function test_changelog_empty() {
 		$this->fake->get_results_returns[] = array();
@@ -150,7 +157,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Attachments query reads the attachment table filtered by type=ticket.
 	 */
 	public function test_attachments_returns_rows() {
 		$this->fake->get_results_returns[] = array(
@@ -171,7 +178,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Custom fields are returned as a name => value map.
 	 */
 	public function test_custom_fields_returns_name_value_map() {
 		$this->fake->get_results_returns[] = array(
@@ -197,7 +204,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * No custom fields yields an empty map (not null/false).
 	 */
 	public function test_custom_fields_empty() {
 		$this->fake->get_results_returns[] = array();
@@ -205,7 +212,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Missing ticket short-circuits to null with no follow-up queries.
 	 */
 	public function test_full_returns_null_for_missing_ticket() {
 		$this->fake->get_row_returns[] = null;
@@ -215,7 +222,7 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Composite payload includes ticket fields, custom fields, participants, comments + count, changelog, attachments.
 	 */
 	public function test_full_assembles_complete_payload() {
 		$this->fake->get_row_returns[]     = array(
@@ -223,15 +230,15 @@ class Trac_Notifications_DB_Tests extends TestCase {
 			'summary' => 'Test ticket',
 			'status'  => 'new',
 		);
-		$this->fake->get_results_returns[] = array( // custom_fields
+		$this->fake->get_results_returns[] = array( // custom_fields.
 			array(
 				'name'  => 'focuses',
 				'value' => 'rest-api',
 			),
 		);
-		$this->fake->get_col_returns[]     = array( 'alice', 'bob' ); // participants
-		$this->fake->get_var_returns[]     = '1'; // comment count
-		$this->fake->get_results_returns[] = array( // comments
+		$this->fake->get_col_returns[]     = array( 'alice', 'bob' ); // participants.
+		$this->fake->get_var_returns[]     = '1'; // comment count.
+		$this->fake->get_results_returns[] = array( // comments.
 			array(
 				'id'     => '1',
 				'time'   => '100',
@@ -239,8 +246,8 @@ class Trac_Notifications_DB_Tests extends TestCase {
 				'body'   => 'a comment',
 			),
 		);
-		$this->fake->get_results_returns[] = array(); // changelog
-		$this->fake->get_results_returns[] = array(); // attachments
+		$this->fake->get_results_returns[] = array(); // changelog.
+		$this->fake->get_results_returns[] = array(); // attachments.
 
 		$result = $this->dao->get_trac_ticket_full( 42 );
 
@@ -255,14 +262,14 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Passing comments=false drops the comments and comments_total keys.
 	 */
 	public function test_full_can_skip_comments() {
 		$this->fake->get_row_returns[]     = array( 'id' => '42' );
-		$this->fake->get_results_returns[] = array(); // custom_fields
-		$this->fake->get_col_returns[]     = array(); // participants
-		$this->fake->get_results_returns[] = array(); // changelog
-		$this->fake->get_results_returns[] = array(); // attachments
+		$this->fake->get_results_returns[] = array(); // custom_fields.
+		$this->fake->get_col_returns[]     = array(); // participants.
+		$this->fake->get_results_returns[] = array(); // changelog.
+		$this->fake->get_results_returns[] = array(); // attachments.
 
 		$result = $this->dao->get_trac_ticket_full( 42, array( 'comments' => false ) );
 
@@ -272,14 +279,14 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Passing changelog=false and attachments=false drops their respective keys.
 	 */
 	public function test_full_can_skip_changelog_and_attachments() {
 		$this->fake->get_row_returns[]     = array( 'id' => '42' );
-		$this->fake->get_results_returns[] = array(); // custom_fields
-		$this->fake->get_col_returns[]     = array(); // participants
-		$this->fake->get_var_returns[]     = '0'; // comment count
-		$this->fake->get_results_returns[] = array(); // comments
+		$this->fake->get_results_returns[] = array(); // custom_fields.
+		$this->fake->get_col_returns[]     = array(); // participants.
+		$this->fake->get_var_returns[]     = '0'; // comment count.
+		$this->fake->get_results_returns[] = array(); // comments.
 
 		$result = $this->dao->get_trac_ticket_full(
 			42,
@@ -295,16 +302,17 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * The composite computes offset = total - limit so the trailing window of comments
+	 * is returned in ASC display order.
 	 */
 	public function test_full_returns_most_recent_n_comments_in_chronological_order() {
 		$this->fake->get_row_returns[]     = array( 'id' => '42' );
-		$this->fake->get_results_returns[] = array(); // custom_fields
-		$this->fake->get_col_returns[]     = array(); // participants
-		$this->fake->get_var_returns[]     = '100'; // total comments
-		$this->fake->get_results_returns[] = array(); // comments
-		$this->fake->get_results_returns[] = array(); // changelog
-		$this->fake->get_results_returns[] = array(); // attachments
+		$this->fake->get_results_returns[] = array(); // custom_fields.
+		$this->fake->get_col_returns[]     = array(); // participants.
+		$this->fake->get_var_returns[]     = '100'; // total comments.
+		$this->fake->get_results_returns[] = array(); // comments.
+		$this->fake->get_results_returns[] = array(); // changelog.
+		$this->fake->get_results_returns[] = array(); // attachments.
 
 		$this->dao->get_trac_ticket_full( 42, array( 'comments' => 5 ) );
 
@@ -320,16 +328,16 @@ class Trac_Notifications_DB_Tests extends TestCase {
 	}
 
 	/**
-	 * @return void
+	 * Passing comments=0 (unlimited) uses offset 0, so no LIMIT clause is appended.
 	 */
 	public function test_full_unlimited_comments_uses_zero_offset() {
 		$this->fake->get_row_returns[]     = array( 'id' => '42' );
-		$this->fake->get_results_returns[] = array(); // custom_fields
-		$this->fake->get_col_returns[]     = array(); // participants
-		$this->fake->get_var_returns[]     = '100'; // total comments
-		$this->fake->get_results_returns[] = array(); // comments
-		$this->fake->get_results_returns[] = array(); // changelog
-		$this->fake->get_results_returns[] = array(); // attachments
+		$this->fake->get_results_returns[] = array(); // custom_fields.
+		$this->fake->get_col_returns[]     = array(); // participants.
+		$this->fake->get_var_returns[]     = '100'; // total comments.
+		$this->fake->get_results_returns[] = array(); // comments.
+		$this->fake->get_results_returns[] = array(); // changelog.
+		$this->fake->get_results_returns[] = array(); // attachments.
 
 		$this->dao->get_trac_ticket_full( 42, array( 'comments' => 0 ) );
 

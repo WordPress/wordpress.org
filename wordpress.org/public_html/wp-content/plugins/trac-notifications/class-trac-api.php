@@ -16,8 +16,6 @@
  * @package WordPressdotorg\Trac
  */
 
-require_once __DIR__ . '/class-trac-api-wpcache.php';
-
 /**
  * Trac read API with caching and per-trac circuit breaker.
  */
@@ -74,6 +72,7 @@ class Trac_API {
 			$client_factory = array( $this, 'default_client_factory' );
 		}
 		if ( null === $cache ) {
+			require_once __DIR__ . '/class-trac-api-wpcache.php';
 			$cache = new Trac_API_WPCache();
 		}
 		$this->client_factory = $client_factory;

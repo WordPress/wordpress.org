@@ -13,16 +13,22 @@
 class Memory_Cache {
 
 	/**
+	 * Stored key/value pairs.
+	 *
 	 * @var array<string, mixed>
 	 */
 	public $store = array();
 
 	/**
+	 * Log of keys passed to get().
+	 *
 	 * @var array<int, string>
 	 */
 	public $get_calls = array();
 
 	/**
+	 * Log of writes (key + ttl).
+	 *
 	 * @var array<int, array{key: string, ttl: int}>
 	 */
 	public $set_calls = array();

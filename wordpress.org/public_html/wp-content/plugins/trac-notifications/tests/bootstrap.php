@@ -35,10 +35,13 @@ if ( ! defined( 'DAY_IN_SECONDS' ) ) {
 
 if ( ! function_exists( 'wp_json_encode' ) ) {
 	/**
+	 * Minimal polyfill for wp_json_encode() used by Trac_API::ticket_cache_key.
+	 *
 	 * @param mixed $data Data to encode.
 	 * @return string
 	 */
 	function wp_json_encode( $data ) {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- This is the wp_json_encode polyfill.
 		return json_encode( $data );
 	}
 }
@@ -47,6 +50,6 @@ require_once __DIR__ . '/../trac-notifications-api.php';
 require_once __DIR__ . '/../trac-notifications-db.php';
 require_once __DIR__ . '/../class-trac-api.php';
 
-require_once __DIR__ . '/class-fake-db.php';
-require_once __DIR__ . '/class-memory-cache.php';
-require_once __DIR__ . '/class-fake-client.php';
+require_once __DIR__ . '/includes/class-fake-db.php';
+require_once __DIR__ . '/includes/class-memory-cache.php';
+require_once __DIR__ . '/includes/class-fake-client.php';

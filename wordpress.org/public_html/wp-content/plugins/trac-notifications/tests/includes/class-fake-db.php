@@ -12,26 +12,36 @@
 class Fake_DB {
 
 	/**
+	 * Log of calls to prepare(): each entry has query + args.
+	 *
 	 * @var array<int, array{query: string, args: array}>
 	 */
 	public $prepare_calls = array();
 
 	/**
+	 * Log of queries passed to get_row().
+	 *
 	 * @var array<int, string>
 	 */
 	public $get_row_calls = array();
 
 	/**
+	 * Log of queries passed to get_results().
+	 *
 	 * @var array<int, string>
 	 */
 	public $get_results_calls = array();
 
 	/**
+	 * Log of queries passed to get_col().
+	 *
 	 * @var array<int, string>
 	 */
 	public $get_col_calls = array();
 
 	/**
+	 * Log of queries passed to get_var().
+	 *
 	 * @var array<int, string>
 	 */
 	public $get_var_calls = array();
@@ -88,7 +98,7 @@ class Fake_DB {
 	 * @param string $output Output type (ignored).
 	 * @return mixed
 	 */
-	public function get_row( $query, $output = null ) {
+	public function get_row( $query, $output = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- mirrors wpdb signature.
 		$this->get_row_calls[] = $query;
 		return array_shift( $this->get_row_returns );
 	}
@@ -100,7 +110,7 @@ class Fake_DB {
 	 * @param string $output Output type (ignored).
 	 * @return mixed
 	 */
-	public function get_results( $query, $output = null ) {
+	public function get_results( $query, $output = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- mirrors wpdb signature.
 		$this->get_results_calls[] = $query;
 		return array_shift( $this->get_results_returns );
 	}
