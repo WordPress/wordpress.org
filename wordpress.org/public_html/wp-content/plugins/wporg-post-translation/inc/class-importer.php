@@ -35,6 +35,12 @@ class Importer {
 	public function import( array $strings, string $reference ) {
 		$this->load_glotpress();
 
+		// load_glotpress() is a no-op if GlotPress isn't installed; bail rather
+		// than fatal on the GP::$project reference below.
+		if ( ! class_exists( 'GP' ) ) {
+			return false;
+		}
+
 		$gp_project = GP::$project->by_path( $this->project_path );
 
 		// Create the project on-the-fly if it doesn't exist.

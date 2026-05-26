@@ -33,10 +33,10 @@ class GlotPress_Translate_Bridge {
 	/**
 	 * Translate a single string.
 	 *
-	 * @param string    $singular     The string to translate.
-	 * @param string    $project_path The GlotPress project path.
-	 * @param string    $context      The strings context. Default: null.
-	 * @param bool|null $found        Optional. Set to true if a translation was found, false otherwise. Default: null.
+	 * @param string      $singular     The string to translate.
+	 * @param string      $project_path The GlotPress project path.
+	 * @param string|null $context      The strings context. Default: null.
+	 * @param bool|null   $found        Optional. Set to true if a translation was found, false otherwise. Default: null.
 	 *
 	 * @return string The translated string if it exists, else, the existing string.
 	 */
@@ -53,11 +53,11 @@ class GlotPress_Translate_Bridge {
 	/**
 	 * Translate a pluralised string. This does not support the `$count` parameter of `_n()`.
 	 *
-	 * @param string    $singular     The singular form of the string.
-	 * @param string    $plural       The plural form of the string.
-	 * @param string    $project_path The GlotPress project path.
-	 * @param string    $context      The strings context. Default: null.
-	 * @param bool|null $found        Optional. Set to true if a translation was found, false otherwise. Default: null.
+	 * @param string      $singular     The singular form of the string.
+	 * @param string      $plural       The plural form of the string.
+	 * @param string      $project_path The GlotPress project path.
+	 * @param string|null $context      The strings context. Default: null.
+	 * @param bool|null   $found        Optional. Set to true if a translation was found, false otherwise. Default: null.
 	 *
 	 * @return array The translated plural forms of the string.
 	 */

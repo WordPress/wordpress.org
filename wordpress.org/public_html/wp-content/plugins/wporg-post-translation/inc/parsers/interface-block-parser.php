@@ -36,7 +36,7 @@ trait Dom_Utils {
 		// Wrap in a div to handle fragments, and force UTF-8 encoding.
 		$doc->loadHTML(
 			'<html><head><meta charset="UTF-8"></head><body><div id="wrap">' . $html . '</div></body></html>',
-			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NOERROR
+			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NOERROR | LIBXML_NOWARNING
 		);
 
 		return $doc;

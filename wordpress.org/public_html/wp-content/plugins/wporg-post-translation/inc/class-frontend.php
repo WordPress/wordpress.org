@@ -134,14 +134,17 @@ class Frontend {
 			return $content;
 		}
 
+		// Build a single replacement map and apply it in one strtr() pass, so an
+		// earlier replacement can't become the match target of a later one.
+		$map = [];
 		foreach ( $strings as $string ) {
 			$translated = self::translate_string( $string, $project );
 			if ( $translated !== $string ) {
-				$content = str_replace( $string, wp_kses_post( $translated ), $content );
+				$map[ $string ] = wp_kses_post( $translated );
 			}
 		}
 
-		return $content;
+		return $map ? strtr( $content, $map ) : $content;
 	}
 
 	/**
