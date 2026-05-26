@@ -7,11 +7,10 @@
  * @package WordPressdotorg\Trac
  */
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @group trac-notifications
- */
+#[Group( 'trac-notifications' )]
 class Trac_Notifications_DB_Tests extends TestCase {
 
 	/**

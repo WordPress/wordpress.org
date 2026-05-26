@@ -5,6 +5,12 @@
  * It must work without any other dependencies, such as WordPress.
  */
 class Trac_Notifications_DB implements Trac_Notifications_API {
+	/**
+	 * Database driver: wpdb on the wp.org side, Trac_Notifications_SQLite_Driver
+	 * (or wpdb against the Trac MySQL) on the Trac boxes.
+	 *
+	 * @var object
+	 */
 	public $db;
 
 	function __construct( $db ) {

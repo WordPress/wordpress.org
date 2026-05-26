@@ -2,17 +2,16 @@
 /**
  * Unit tests for the Trac_API caching wrapper. Injects an in-memory cache
  * and a scriptable client so the cache read path, circuit breaker, negative
- * caching, and ticket normalisation can all be exercised without touching
+ * caching, and ticket normalization can all be exercised without touching
  * memcached or a real Trac box.
  *
  * @package WordPressdotorg\Trac
  */
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @group trac-notifications
- */
+#[Group( 'trac-notifications' )]
 class Trac_API_Tests extends TestCase {
 
 	/**
