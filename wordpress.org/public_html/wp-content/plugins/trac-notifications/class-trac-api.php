@@ -111,13 +111,14 @@ class Trac_API {
 			return false;
 		}
 
-		$key = $this->ticket_cache_key( $ticket_id, $opts );
+		$key            = $this->ticket_cache_key( $ticket_id, $opts );
+		$client_factory = $this->client_factory;
 
 		$result = $this->cached_call(
 			$trac,
 			$key,
-			function () use ( $trac, $ticket_id, $opts ) {
-				$client = call_user_func( $this->client_factory, $trac );
+			static function () use ( $client_factory, $trac, $ticket_id, $opts ) {
+				$client = call_user_func( $client_factory, $trac );
 				if ( ! $client ) {
 					return false;
 				}

@@ -123,7 +123,8 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 	}
 
 	function get_trac_ticket_focuses( $ticket_id ) {
-		return $this->db->get_var( $this->db->prepare( "SELECT value FROM ticket_custom WHERE ticket = %d AND name = 'focuses'", $ticket_id ) );
+		$fields = $this->get_trac_ticket_custom_fields( $ticket_id );
+		return $fields['focuses'] ?? null;
 	}
 
 	function get_trac_ticket_participants( $ticket_id ) {
@@ -297,6 +298,119 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			$out[ $row['name'] ] = $row['value'];
 		}
 		return $out;
+	}
+
+	/**
+	 * Filter-and-paginate ticket search for external callers (HTTP API, MCP).
+	 *
+	 * Filter keys are allowlisted to keep the WHERE clause safe to build from
+	 * untrusted input. Equality filters cover ticket-table columns; `focuses`
+	 * and `keywords` join the ticket_custom table; `changed_since` accepts any
+	 * strtotime-parseable string and is compared against ticket.changetime
+	 * (which Trac stores as microseconds since epoch).
+	 *
+	 * Default behaviour excludes closed tickets unless `status` is set
+	 * explicitly or `include_closed` is truthy.
+	 *
+	 * @param array $filters {
+	 *     Optional. Allowlisted filters.
+	 *
+	 *     @type string $type           Ticket type (e.g. 'defect', 'enhancement').
+	 *     @type string $status         Ticket status; supplying this disables the default closed-exclusion.
+	 *     @type string $resolution     Resolution value.
+	 *     @type string $milestone      Milestone name.
+	 *     @type string $component      Component name.
+	 *     @type string $priority       Priority value.
+	 *     @type string $severity       Severity value.
+	 *     @type string $owner          Owner username.
+	 *     @type string $reporter       Reporter username.
+	 *     @type string $focuses        Substring match against the focuses custom field.
+	 *     @type string $keywords       Substring match against the keywords custom field.
+	 *     @type string $changed_since  strtotime-parseable date; matches ticket.changetime >= value.
+	 *     @type bool   $include_closed Allow closed tickets in the result set without naming a specific status.
+	 * }
+	 * @param int   $limit   1-50, default 25.
+	 * @param int   $offset  Row offset for pagination.
+	 * @return array
+	 */
+	public function search_trac_tickets( $filters = array(), $limit = 25, $offset = 0 ) {
+		$allowed_eq = array(
+			'type',
+			'status',
+			'resolution',
+			'milestone',
+			'component',
+			'priority',
+			'severity',
+			'owner',
+			'reporter',
+		);
+
+		/*
+		 * Refuse unscoped LIKE queries on ticket_custom. A bare focuses=X or
+		 * keywords=X with no other narrowing filter forces a full table scan
+		 * plus a join across ~250k custom-field rows, which is the most
+		 * expensive query this method can produce.
+		 */
+		$has_scope = ! empty( $filters['changed_since'] );
+		foreach ( $allowed_eq as $key ) {
+			if ( ! empty( $filters[ $key ] ) ) {
+				$has_scope = true;
+				break;
+			}
+		}
+		$uses_custom_like = ! empty( $filters['focuses'] ) || ! empty( $filters['keywords'] );
+		if ( $uses_custom_like && ! $has_scope ) {
+			return array();
+		}
+
+		$where = array( '1=1' );
+		$vals  = array();
+		$join  = '';
+
+		foreach ( $allowed_eq as $key ) {
+			if ( isset( $filters[ $key ] ) && '' !== $filters[ $key ] ) {
+				$where[] = "t.$key = %s";
+				$vals[]  = $filters[ $key ];
+			}
+		}
+
+		if ( empty( $filters['status'] ) && empty( $filters['include_closed'] ) ) {
+			$where[] = "t.status <> 'closed'";
+		}
+
+		if ( ! empty( $filters['focuses'] ) ) {
+			$join   .= " LEFT JOIN ticket_custom cf ON cf.ticket = t.id AND cf.name = 'focuses' ";
+			$where[] = 'cf.value LIKE %s';
+			$vals[]  = '%' . $filters['focuses'] . '%';
+		}
+
+		if ( ! empty( $filters['keywords'] ) ) {
+			$join   .= " LEFT JOIN ticket_custom ck ON ck.ticket = t.id AND ck.name = 'keywords' ";
+			$where[] = 'ck.value LIKE %s';
+			$vals[]  = '%' . $filters['keywords'] . '%';
+		}
+
+		if ( ! empty( $filters['changed_since'] ) ) {
+			$where[] = 't.changetime >= %s';
+			$vals[]  = (int) ( strtotime( $filters['changed_since'] ) * 1000000 );
+		}
+
+		$limit  = max( 1, min( 50, (int) $limit ) );
+		$offset = max( 0, (int) $offset );
+
+		$sql = "SELECT t.id, t.summary, t.status, t.resolution, t.type, t.component,
+				t.priority, t.milestone, t.owner, t.reporter, t.changetime
+			FROM ticket t $join
+			WHERE " . implode( ' AND ', $where ) . "
+			ORDER BY t.changetime DESC
+			LIMIT $limit OFFSET $offset";
+
+		if ( ! empty( $vals ) ) {
+			$sql = $this->db->prepare( $sql, $vals );
+		}
+
+		return $this->db->get_results( $sql, ARRAY_A );
 	}
 
 	function get_trac_ticket_subscriptions( $ticket_id ) {

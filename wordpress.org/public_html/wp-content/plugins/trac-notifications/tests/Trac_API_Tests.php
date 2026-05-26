@@ -49,8 +49,8 @@ class Trac_API_Tests extends TestCase {
 		);
 
 		$clients = $this->clients;
-		$factory = function ( $trac ) use ( $clients ) {
-			return isset( $clients[ $trac ] ) ? $clients[ $trac ] : null;
+		$factory = static function ( $trac ) use ( $clients ) {
+			return $clients[ $trac ] ?? null;
 		};
 
 		$this->api = new Trac_API( $factory, $this->cache );
