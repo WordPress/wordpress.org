@@ -53,7 +53,6 @@ class Admin {
 	public static function handle_import( $post_id, $source_blog_id, $project, $permalink = '' ) {
 		require_once __DIR__ . '/class-importer.php';
 
-		$importer     = new Importer( $project );
 		$needs_switch = is_multisite() && get_current_blog_id() !== $source_blog_id;
 
 		if ( $needs_switch ) {
@@ -70,6 +69,10 @@ class Admin {
 
 		$strings = Post_Parser::post_to_strings( $post );
 
+		// Capture the source site's name while switched; the import runs back on
+		// the current (translate) blog, where get_bloginfo() would be wrong.
+		$site_name = get_bloginfo( 'name' );
+
 		// Use the permalink captured at save time if available.
 		if ( ! $permalink ) {
 			$permalink = get_permalink( $post );
@@ -83,6 +86,7 @@ class Admin {
 			return;
 		}
 
+		$importer = new Importer( $project, $site_name );
 		$importer->import( $strings, $permalink );
 	}
 }

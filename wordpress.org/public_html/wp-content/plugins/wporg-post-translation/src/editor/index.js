@@ -13,6 +13,12 @@ function PostTranslationPanel() {
 
 	const [ meta, setMeta ] = useEntityProp( 'postType', postType, 'meta' );
 
+	// getCurrentPostType() can be null on the first render(s); wait for it
+	// before rendering the panel so useEntityProp has a valid entity.
+	if ( ! postType ) {
+		return null;
+	}
+
 	const isEnabled = meta?.[ '_post_translation_enabled' ] || false;
 
 	return (

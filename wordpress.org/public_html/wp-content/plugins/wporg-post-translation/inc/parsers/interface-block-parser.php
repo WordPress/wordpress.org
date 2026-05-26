@@ -93,3 +93,48 @@ trait Swap_Tags {
 		return preg_replace( '#\{\{TAG:(/?[a-z]+[^}]*)\}\}#i', '<$1>', $html );
 	}
 }
+
+/**
+ * Trait for applying a string => translation map to a block's HTML.
+ *
+ * Uses strtr() so all replacements happen in a single pass: each source
+ * substring is matched against the original block HTML only, never against
+ * text that has already been swapped in. This avoids one translation
+ * cascading into another (e.g. translating "Read" then having a later
+ * "Read more" rule re-match the already-translated output).
+ */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
+trait Replaces_Strings {
+	/**
+	 * Replace strings throughout a block's innerHTML and innerContent.
+	 *
+	 * @param array $block        A parsed block array.
+	 * @param array $replacements Map of original => translated strings.
+	 * @return array The modified block array.
+	 */
+	protected function apply_replacements( array $block, array $replacements ): array {
+		$map = [];
+		foreach ( $replacements as $original => $translated ) {
+			if ( '' !== $original && $original !== $translated ) {
+				$map[ $original ] = $translated;
+			}
+		}
+
+		if ( ! $map ) {
+			return $block;
+		}
+
+		foreach ( $block['innerContent'] as &$content ) {
+			if ( is_string( $content ) ) {
+				$content = strtr( $content, $map );
+			}
+		}
+		unset( $content );
+
+		if ( ! empty( $block['innerHTML'] ) ) {
+			$block['innerHTML'] = strtr( $block['innerHTML'], $map );
+		}
+
+		return $block;
+	}
+}

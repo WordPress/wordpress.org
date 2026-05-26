@@ -8,6 +8,8 @@ namespace WordPressdotorg\Post_Translation\Parsers;
  * or extracts specific shortcode attributes if configured.
  */
 class Shortcode_Block implements Block_Parser {
+	use Replaces_Strings;
+
 	public function to_strings( array $block ): array {
 		$html = trim( $block['innerHTML'] ?? '' );
 
@@ -20,30 +22,6 @@ class Shortcode_Block implements Block_Parser {
 	}
 
 	public function replace_strings( array $block, array $replacements ): array {
-		foreach ( $block['innerContent'] as &$content ) {
-			if ( null === $content ) {
-				continue;
-			}
-
-			foreach ( $replacements as $original => $translated ) {
-				if ( $original === $translated || '' === $original ) {
-					continue;
-				}
-
-				$content = str_replace( $original, $translated, $content );
-			}
-		}
-
-		if ( ! empty( $block['innerHTML'] ) ) {
-			foreach ( $replacements as $original => $translated ) {
-				if ( $original === $translated || '' === $original ) {
-					continue;
-				}
-
-				$block['innerHTML'] = str_replace( $original, $translated, $block['innerHTML'] );
-			}
-		}
-
-		return $block;
+		return $this->apply_replacements( $block, $replacements );
 	}
 }

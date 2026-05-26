@@ -65,14 +65,22 @@ class Frontend {
 			return $content;
 		}
 
-		$locale = get_locale();
+		// Cache the parsed/translated content in the object cache. The compound
+		// cache key relies on last_changed tokens that only persist with an
+		// external object cache, so skip caching entirely without one (e.g. local
+		// dev) rather than churn through per-request keys. The bridge still caches
+		// individual string lookups on its own.
+		$use_cache = wp_using_ext_object_cache();
+		$cache_key = '';
 
-		// Check transient cache with compound key.
-		$cache_key = self::cache_key( $post->ID, $locale );
-		$cached    = get_transient( $cache_key );
+		if ( $use_cache ) {
+			$cache_key = self::cache_key( $post->ID, get_locale() );
+			$cached    = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
-		if ( false !== $cached ) {
-			return $cached ?: $content;
+			// Empty string means "no translations found" (distinct from false = no cache).
+			if ( false !== $cached ) {
+				return $cached ?: $content;
+			}
 		}
 
 		/**
@@ -91,8 +99,9 @@ class Frontend {
 			}
 		);
 
-		// Cache the result. Empty string means "no translations found" (distinct from false = no cache).
-		set_transient( $cache_key, $translated ?: '', 6 * HOUR_IN_SECONDS );
+		if ( $use_cache ) {
+			wp_cache_set( $cache_key, $translated ?: '', self::CACHE_GROUP, 6 * HOUR_IN_SECONDS );
+		}
 
 		return $translated ?: $content;
 	}
@@ -125,12 +134,10 @@ class Frontend {
 			return $content;
 		}
 
-		$has_translation = false;
 		foreach ( $strings as $string ) {
 			$translated = self::translate_string( $string, $project );
 			if ( $translated !== $string ) {
-				$content         = str_replace( $string, wp_kses_post( $translated ), $content );
-				$has_translation = true;
+				$content = str_replace( $string, wp_kses_post( $translated ), $content );
 			}
 		}
 

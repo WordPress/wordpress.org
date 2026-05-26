@@ -9,6 +9,7 @@ namespace WordPressdotorg\Post_Translation\Parsers;
  */
 class HTML_Parser implements Block_Parser {
 	use Swap_Tags;
+	use Replaces_Strings;
 
 	protected $tags;
 	protected $attributes;
@@ -61,33 +62,7 @@ class HTML_Parser implements Block_Parser {
 	}
 
 	public function replace_strings( array $block, array $replacements ): array {
-		foreach ( $block['innerContent'] as &$content ) {
-			if ( null === $content ) {
-				continue;
-			}
-
-			foreach ( $replacements as $original => $translated ) {
-				if ( $original === $translated || '' === $original ) {
-					continue;
-				}
-
-				// Replace within tag content.
-				$content = str_replace( $original, $translated, $content );
-			}
-		}
-
-		// Also replace in innerHTML if present.
-		if ( ! empty( $block['innerHTML'] ) ) {
-			foreach ( $replacements as $original => $translated ) {
-				if ( $original === $translated || '' === $original ) {
-					continue;
-				}
-
-				$block['innerHTML'] = str_replace( $original, $translated, $block['innerHTML'] );
-			}
-		}
-
-		return $block;
+		return $this->apply_replacements( $block, $replacements );
 	}
 
 	/**

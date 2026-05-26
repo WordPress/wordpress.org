@@ -10,6 +10,7 @@ namespace WordPressdotorg\Post_Translation\Parsers;
 class Basic_Text implements Block_Parser {
 	use Dom_Utils;
 	use Swap_Tags;
+	use Replaces_Strings;
 
 	public function to_strings( array $block ): array {
 		$html = $block['innerHTML'] ?? '';
@@ -49,30 +50,6 @@ class Basic_Text implements Block_Parser {
 	}
 
 	public function replace_strings( array $block, array $replacements ): array {
-		foreach ( $block['innerContent'] as &$content ) {
-			if ( null === $content ) {
-				continue;
-			}
-
-			foreach ( $replacements as $original => $translated ) {
-				if ( $original === $translated || '' === $original ) {
-					continue;
-				}
-
-				$content = str_replace( $original, $translated, $content );
-			}
-		}
-
-		if ( ! empty( $block['innerHTML'] ) ) {
-			foreach ( $replacements as $original => $translated ) {
-				if ( $original === $translated || '' === $original ) {
-					continue;
-				}
-
-				$block['innerHTML'] = str_replace( $original, $translated, $block['innerHTML'] );
-			}
-		}
-
-		return $block;
+		return $this->apply_replacements( $block, $replacements );
 	}
 }

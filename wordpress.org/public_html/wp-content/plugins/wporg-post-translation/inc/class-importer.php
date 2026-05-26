@@ -11,9 +11,18 @@ use Translation_Entry, PO, GP;
  */
 class Importer {
 	protected $project_path;
+	protected $project_name;
 
-	public function __construct( string $project_path ) {
+	/**
+	 * @param string      $project_path The GlotPress project path.
+	 * @param string|null $project_name Display name for the project when created
+	 *                                  on-the-fly. Defaults to the current site's
+	 *                                  name. Pass explicitly when importing for a
+	 *                                  different blog (e.g. from a cron job).
+	 */
+	public function __construct( string $project_path, ?string $project_name = null ) {
 		$this->project_path = $project_path;
+		$this->project_name = $project_name;
 	}
 
 	/**
@@ -141,7 +150,7 @@ class Importer {
 		}
 
 		$slug = trim( str_replace( PROJECT_BASE, '', $this->project_path ), '/' );
-		$name = get_bloginfo( 'name' ) ?: $slug;
+		$name = $this->project_name ?: ( get_bloginfo( 'name' ) ?: $slug );
 
 		$project = GP::$project->create_and_select( [
 			'name'              => $name,
