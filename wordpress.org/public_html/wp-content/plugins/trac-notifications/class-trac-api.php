@@ -21,8 +21,6 @@
  */
 class Trac_API {
 
-	const SUPPORTED = array( 'core', 'meta' );
-
 	const CACHE_GROUP  = 'trac_api';
 	const FRESH_TTL    = 5 * MINUTE_IN_SECONDS;
 	const STALE_TTL    = DAY_IN_SECONDS;
@@ -87,11 +85,6 @@ class Trac_API {
 	 *                          Trac is unreachable with no stale cache.
 	 */
 	public function get_ticket( $trac, $ticket_id, $opts = array() ) {
-		if ( ! in_array( $trac, self::SUPPORTED, true ) ) {
-			$this->last_stale = false;
-			return false;
-		}
-
 		$ticket_id = (int) $ticket_id;
 		if ( $ticket_id <= 0 ) {
 			$this->last_stale = false;

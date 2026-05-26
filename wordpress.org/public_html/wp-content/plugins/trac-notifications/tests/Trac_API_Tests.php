@@ -220,18 +220,6 @@ class Trac_API_Tests extends TestCase {
 	}
 
 	/**
-	 * Unsupported trac short-circuits to false without touching cache or client.
-	 */
-	public function test_unsupported_trac_returns_false_without_touching_client_or_cache() {
-		$result = $this->api->get_ticket( 'plugins', 42 );
-
-		$this->assertFalse( $result );
-		$this->assertCount( 0, Test_Cache::$get_calls );
-		$this->assertCount( 0, $this->clients['core']->calls );
-		$this->assertCount( 0, $this->clients['meta']->calls );
-	}
-
-	/**
 	 * Non-positive ticket ids are rejected up-front.
 	 */
 	public function test_invalid_ticket_id_returns_false() {
