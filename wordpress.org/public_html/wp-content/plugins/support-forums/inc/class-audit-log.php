@@ -112,7 +112,7 @@ class Audit_Log {
 		// Determine what triggered this change.
 		$where_from = ! ms_is_switched() ? home_url( '/' ) : $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 		$where_from = explode( '?', $where_from )[0];
-		$where_from = preg_replace( '!^(?:https?://)?(.+?)/?[^/]*$!i', '$1', $where_from );
+		$where_from = wp_parse_url( $where_from, PHP_URL_HOST ) ?: $where_from;
 
 		// Add a user note about this action.
 		$note_text = sprintf(
@@ -122,7 +122,7 @@ class Audit_Log {
 			$where_from ?    sprintf( ' via %s', $where_from ) : ''
 		);
 
-		// Used in wporg-login to add context.
+		// Used in wporg-login & user-helpers to add context.
 		$note_text = apply_filters( 'wporg_bbp_forum_role_changed_note_text', $note_text, $user );
 
 		// Add a user note about this action.
@@ -204,10 +204,11 @@ class Audit_Log {
 				$action_text = 'Note added';
 			}
 
-			$user_edit_url = bbp_get_user_profile_edit_url( $user_id );
-
-			// On login.wordpress.org, the link should direct to the global forums.
-			if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && WPORG_LOGIN_REGISTER_BLOGID == get_current_blog_id() ) {
+			// If we're on a Rosetta network, and bbPress is active, link to the local profile edit page.
+			if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK && function_exists( 'bbp_get_user_profile_edit_url' ) ) {
+				$user_edit_url = bbp_get_user_profile_edit_url( $user_id );
+			} else {
+				// Link to the global WordPress.org profile edit page.
 				$user_edit_url = sprintf( 'https://wordpress.org/support/users/%s/edit/', get_userdata( $user_id )->user_nicename );
 			}
 

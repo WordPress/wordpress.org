@@ -67,7 +67,7 @@ $hosting_cache_buster = '9';
 							</a>
 						</h2>
 
-						<p>Bluehost is WordPress.org's longest running recommended host and offers the ultimate WordPress platform that powers millions of websites. Their shared hosting is benchmarked as delivering best-in-class performance, and for those that demand the fastest speed, 100% uptime and expert support, Bluehost Cloud Hosting offers unmatched power. No matter the solution you choose, you'll get WordPress pre-installed, an AI site builder, free domain name, email, SSL, built-in CDN and more. From blogs, business sites, and online stores, build any kind of website on an easily scalable WordPress-optimized platform backed by legendary 24/7 support by in-house WordPress experts.</p>
+						<p>Bluehost is WordPress.org's longest running recommended host and offers the ultimate WordPress platform that powers millions of websites. Their shared hosting is benchmarked as delivering best-in-class performance, and for those that demand the fastest speed, 100% uptime and expert support, Bluehost Agency Hosting offers unmatched power. No matter the solution you choose, you'll get WordPress pre-installed, an AI site builder, free domain name, email, SSL, built-in CDN and more. From blogs, business sites, and online stores, build any kind of website on an easily scalable WordPress-optimized platform backed by legendary 24/7 support by in-house WordPress experts.</p>
 
 						<div class="forum">
 							<a href="https://wordpress.org/search/Bluehost/?in=support_forums">Forum threads about Bluehost &raquo;</a>
@@ -89,7 +89,7 @@ $hosting_cache_buster = '9';
                             </a>
                         </h2>
 
-                        <p>Hostinger, trusted by more than 2.5 million clients worldwide, offers fast and secure managed WordPress hosting. Enjoy seamless WordPress experience with a 1-click installer, free domain and SSL, LiteSpeed and object cache for a faster website, and built-in CDN. Focusing on user security, experience and performance, it's an ideal solution for beginners and experts alike. Get smooth, value-driven hosting, backed by 24/7 support of WordPress experts, with Hostinger.</p>
+                        <p>Hostinger is trusted by more than 5 million clients worldwide, offering managed hosting for WordPress that's fast, secure, and simple to run. Launch faster with Kodee, an AI agent living inside your WordPress that helps you build and manage your site simply by chatting. Enjoy a free domain, business email, built-in CDN, automated backups, free unlimited migrations, and 24/7 support. Create and manage your WooCommerce store with ease, grow with built-in affiliate marketing tools, and get premium performance at an affordable price.</p>
 
                         <div class="forum">
                             <a href="https://wordpress.org/search/Hostinger/?in=support_forums">Forum threads about Hostinger &raquo;</a>

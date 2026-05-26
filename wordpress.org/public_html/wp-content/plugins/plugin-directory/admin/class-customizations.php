@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin;
 use \WordPressdotorg\Plugin_Directory;
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Tools\SVN;
+use \WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
@@ -70,7 +71,10 @@ class Customizations {
 		add_filter( 'wp_ajax_delete-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 		add_action( 'wp_ajax_plugin-svn-sync', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'svn_sync' ) );
+		add_action( 'wp_ajax_plugin-i18n-import', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'i18n_import' ) );
 		add_action( 'wp_ajax_plugin-set-reviewer', array( __NAMESPACE__ . '\Metabox\Reviewer', 'xhr_set_reviewer' ) );
+		add_action( 'wp_ajax_plugin-elasticsearch', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_response' ) );
+		add_action( 'wp_ajax_plugin-elasticsearch-reindex', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_reindex' ) );
 
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
@@ -138,10 +142,10 @@ class Customizations {
 					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js',PLUGIN_FILE ), array( 'wp-util', 'wp-lists', 'wp-api' ), filemtime( PLUGIN_DIR . '/js/edit-form.js') );
 
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
-						'approvePluginAYS'    => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
-						'rejectPluginAYS'     => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
-						'removeCommitterAYS'  => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
-						'removeSupportRepAYS' => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+						'approvePluginConfirm' => __( 'Double-click to Approve', 'wporg-plugins' ),
+						'rejectPluginAYS'      => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
+						'removeCommitterAYS'   => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+						'removeSupportRepAYS'  => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
 					) );
 					break;
 
@@ -742,8 +746,15 @@ class Customizations {
 		add_meta_box(
 			'emailsdiv',
 			__( 'Emails', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Helpscout', 'display' ),
+			array( Helpscout::class, 'admin_metabox_display' ),
 			'plugin', 'normal', 'high'
+		);
+
+		add_meta_box(
+			'cron-logs',
+			'Cron Job Logs',
+			array( __NAMESPACE__ . '\Metabox\Cron_Logs', 'display' ),
+			'plugin', 'normal', 'low'
 		);
 
 		if ( 'new' !== $post->post_status && 'pending' != $post->post_status ) {
@@ -774,16 +785,18 @@ class Customizations {
 				array( __NAMESPACE__ . '\Metabox\Author_Notice', 'display' ),
 				'plugin', 'normal', 'high'
 			);
-		}
 
-		// For highly trusted users, add a cron-jobs metabox for debugging plugin imports.
-		if ( is_super_admin() || 'production' !== wp_get_environment_type() ) {
-			add_meta_box(
-				'cron-logs',
-				'Cron Job Logs',
-				array( __NAMESPACE__ . '\Metabox\Cron_Logs', 'display' ),
-				'plugin', 'normal', 'low'
-			);
+			if (
+				class_exists( '\Automattic\Jetpack\Search\Classic_Search' ) &&
+				in_array( wp_get_environment_type(), array( 'staging', 'production' ), true )
+			) {
+				add_meta_box(
+					'plugin-elasticsearch',
+					__( 'ElasticSearch Index', 'wporg-plugins' ),
+					array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'display' ),
+					'plugin', 'normal', 'low'
+				);
+			}
 		}
 
 		// Remove unnecessary metaboxes.

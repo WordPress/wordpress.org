@@ -11,7 +11,7 @@ namespace {
 namespace Dotorg\Slack\Trac {
 
 	// Verify it came from Slack.
-	if ( ! isset( $_GET['token'] ) || $_GET['token'] !== URL_SECRET__TRAC_BOT ) {
+	if ( ! hash_equals( URL_SECRET__TRAC_BOT, $_GET['token'] ?? '' ) ) {
 		return;
 	}
 

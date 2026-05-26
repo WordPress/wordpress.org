@@ -114,7 +114,7 @@ class wporg_trac_notifications {
 	function make_components_tree( $components ) {
 		$tree = array();
 		$subcomponents = array(
-			'Comments'          => array( 'Pings/Trackbacks' ),
+			'Comments'          => array( 'Notes', 'Pings/Trackbacks' ),
 			'Editor'            => array( 'Autosave', 'Quick/Bulk Edit', 'TinyMCE' ),
 			'Formatting'        => array( 'Charset', 'Shortcodes' ),
 			'Media'             => array( 'Embeds', 'Gallery', 'Upload' ),
@@ -311,16 +311,23 @@ class wporg_trac_notifications {
 					<span class="num-stars"><span class="count"><?php echo $star_count; ?></span> <span class="count-1">star</span> <span class="count-many">stars</span></span>
 					<div class="star-list">
 				<?php
+
 					natcasesort( $stars ); foreach ( $stars as $follower ) :
 					// foreach ( $all_receiving_notifications as $follower ) :
 						if ( $username === $follower ) {
 							continue;
 						}
+
+						$follower_obj = get_user_by( 'login', $follower );
+						if ( ! $follower_obj ) {
+							continue;
+						}
+
 						$follower = esc_attr( $follower );
 						$class = ''; // in_array( $follower, $stars, true ) ? ' class="star"' : '';
 					?>
 						<a<?php echo $class; ?> title="<?php echo $follower; ?>" href="https://profiles.wordpress.org/<?php echo $follower; ?>/">
-							<?php echo get_avatar( get_user_by( 'login', $follower )->user_email, 36, 'retro' ); ?>
+							<?php echo get_avatar( $follower_obj->user_email, 36, 'retro' ); ?>
 							<span class="username"><?php echo $follower; ?></span>
 						</a>
 					<?php endforeach; ?>

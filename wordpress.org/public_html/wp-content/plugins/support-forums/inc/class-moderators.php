@@ -78,6 +78,7 @@ class Moderators {
 		add_action( 'bbp_theme_before_reply_author_details',    array( $this, 'show_anon_mod_name' ) );
 		add_filter( 'user_has_cap',                             array( $this, 'anon_moderator_user_has_cap' ), 10, 4 );
 		add_filter( 'wporg_notifications_pre_notify_matchers',  array( $this, 'notify_mod_of_at_mention' ), 10, 2 );
+		add_filter( 'bbp_add_user_subscription',                array( $this, 'replace_moderator_subscriptions' ), 10, 2 );
 
 		// Hide reply archives for the @moderator account.
 		add_filter( 'bbp_get_user_replies_created', array( $this, 'filter_query_hide_moderator' ), 10, 2 );
@@ -1299,5 +1300,25 @@ class Moderators {
 		}
 
 		return $returnval;
+	}
+
+	/**
+	 * If the @moderator account subscribes to a topic, remove it immediately, and
+	 * subscribe the current user instead.
+	 *
+	 * @param int $user_id   The user ID whom was subscribed.
+	 * @param int $object_id The topic ID subscribed to.
+	 */
+	public function replace_moderator_subscriptions( $user_id, $topic_id ) {
+		$moderator_user = get_user_by( 'slug', 'moderator' );
+		if ( $moderator_user->ID != $user_id ) {
+			return;
+		}
+
+		bbp_remove_user_subscription( $moderator_user->ID, $topic_id );
+
+		if ( get_current_user_id() ) {
+			bbp_add_user_subscription( get_current_user_id(), $topic_id );
+		}
 	}
 }

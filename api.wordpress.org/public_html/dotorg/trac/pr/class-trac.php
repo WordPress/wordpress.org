@@ -33,6 +33,9 @@ class Trac {
 	function update( $id, $comment, $attr = [], $notify = false, $author = false, $when = false ) {
 		if ( empty( $attr['_ts'] ) ) {
 			$get = $this->get( $id );
+			if ( ! $get ) {
+				return false;
+			}
 			$attr['_ts'] = $get['_ts'];
 		}
 
@@ -49,6 +52,9 @@ class Trac {
 			// `_ts` may have been outdated, update and try again.
 			if ( isset( $get ) && $attr['_ts'] === $get['_ts'] ) {
 				$get = $this->get( $id ); // refetch the ticket.
+				if ( ! $get ) {
+					throw $e;
+				}
 				if ( $attr['_ts'] === $get['_ts'] ) {
 					// Didn't change, api already retried, throw it.
 					throw $e;

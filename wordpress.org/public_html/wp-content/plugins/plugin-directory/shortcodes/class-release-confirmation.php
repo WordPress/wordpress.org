@@ -25,6 +25,11 @@ class Release_Confirmation {
 	 * @return string
 	 */
 	static function display() {
+		// In the rest-api, just return the shortcode tag, so it can be rendered properly in the app or other consumers.
+		if ( wp_is_serving_rest_request() ) {
+			return '[' . self::SHORTCODE . ']';
+		}
+
 		$plugins = Tools::get_users_write_access_plugins( wp_get_current_user() );
 
 		if ( ! $plugins ) {
@@ -63,7 +68,10 @@ class Release_Confirmation {
 		ob_start();
 
 		// If the user is not using 2FA, show a notice.
-		if ( ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+		if (
+			class_exists( 'Two_Factor_Core' ) &&
+			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
+		) {
 			printf(
 				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
@@ -81,7 +89,8 @@ class Release_Confirmation {
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
 			printf(
-				'<h2><a href="%s">%s</a></h2>',
+				'<h2 id="releases-%s"><a href="%s">%s</a></h2>',
+				esc_attr( $plugin->post_name ),
 				get_permalink( $plugin ),
 				get_the_title( $plugin )
 			);
@@ -116,14 +125,14 @@ class Release_Confirmation {
 
 		echo '<div class="wp-block-table is-style-stripes">
 		<table class="plugin-releases-listing">
+		<colgroup>
+			<col width="25%">
+		</colgroup>
 		<thead>
 			<tr>
-				<th>Version</th>
-				<th>Date</th>
-				<th>Committer</th>
-				<th>Approval</th>
-				<th>Actions</th>
-		</thead></div>';
+				<th>' . _x( 'Release', 'Releases Table header', 'wporg-plugins' ) . '</th>
+				<th>&nbsp;</th>
+		</thead>';
 
 		if ( ! $releases ) {
 			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
@@ -136,38 +145,56 @@ class Release_Confirmation {
 			foreach ( $data['committer'] as $i => $login ) {
 				$data['committer'][ $i ] = sprintf(
 					'<a href="%s">%s</a>',
-					'https://profiles.wordpress.org/' . get_user_by( 'login', $login )->user_nicename . '/',
+					'https://profiles.wordpress.org/' . ( get_user_by( 'login', $login )->user_nicename ?? '' ) . '/',
 					esc_html( $login )
 				);
 			}
 
 			printf(
 				'<tr>
-					<td>%s</td>
-					<td title="%s">%s</td>
-					<td>%s</td>
-					<td>%s</td>
-					<td><div class="plugin-releases-listing-actions">%s</div></td>
+					<td>%s<br><small>%s</small></td>
+					<td>
+						<form method="POST">
+							<div class="plugin-releases-listing-actions">%s</div>
+							%s
+						</form>
+					</td>
 				</tr>',
 				sprintf(
-					'<a href="%s">%s</a>',
-					esc_url( sprintf(
-						'https://plugins.trac.wordpress.org/browser/%s/tags/%s/',
-						$plugin->post_name,
-						$data['tag']
-					) ),
-					esc_html( $data['version'] )
+					__( 'Version %s', 'wporg-plugins' ),
+					sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( sprintf(
+							'https://plugins.trac.wordpress.org/browser/%s/tags/%s/',
+							$plugin->post_name,
+							$data['tag']
+						) ),
+						esc_html( $data['version'] )
+					),
 				),
-				esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
-				esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
-				implode( ', ', $data['committer'] ),
-				self::get_approval_text( $plugin, $data ),
-				self::get_actions( $plugin, $data )
+				sprintf(
+					/* translators: 1: time eg. '3 hours ago', 2: the committer(s). */
+					__( 'Released %1$s by %2$s', 'wporg-plugins' ),
+					sprintf(
+						'<span title="%s">%s</span>',
+						esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
+						esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
+					),
+					implode( ', ', $data['committer'] ),
+				),
+				self::get_actions( $plugin, $data ),
+				self::get_approval_text( $plugin, $data ) .
+					self::get_rollout_strategy( $plugin, $data )
 			);
 		}
 
 		echo '</table>';
 		echo '</div>';
+		echo '<style>
+			.plugin-releases-listing-actions {
+				float: right;
+			}
+		</style>';
 	}
 
 	static function get_approval_text( $plugin, $data ) {
@@ -258,8 +285,8 @@ class Release_Confirmation {
 
 		if (
 			! is_user_logged_in() ||
-			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ||
 			! current_user_can( 'plugin_manage_releases', $plugin  ) ||
+			( class_exists( 'Two_Factor_Core' ) && ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) ||
 
 			// No need to show actions if the release can't be confirmed, or is already confirmed
 			! $data['confirmations_required'] ||
@@ -279,7 +306,7 @@ class Release_Confirmation {
 				$discard_link = get_revalidation_js_url( $discard_link );
 
 				$buttons[] = sprintf(
-					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
+					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</button>',
 					$confirm_link,
 					esc_attr(
 						sprintf(
@@ -293,7 +320,7 @@ class Release_Confirmation {
 				);
 
 				$buttons[] = sprintf(
-					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
+					'<button formaction="%s" class="wp-element-button button discard-release has-very-light-gray-background-color has-charcoal-1-color" data-2fa-required data-2fa-message="%s">%s</button>',
 					$discard_link,
 					esc_attr(
 						sprintf(
@@ -314,13 +341,62 @@ class Release_Confirmation {
 		) {
 			// Plugin reviewers can undo a discard within 48hrs.
 			$buttons[] = sprintf(
-				'<a href="%s" class="wp-element-button button undo-discard">%s</a>',
+				'<button formaction="%s" class="wp-element-button button undo-discard">%s</buttona>',
 				Template::get_release_confirmation_link( $data['tag'], $plugin, 'undo-discard' ),
 				__( 'Undo Discard', 'wporg-plugins' )
 			);
 		}
 
 		return implode( ' ', $buttons );
+	}
+
+	/**
+	 * Display the Rollout Strategy options for a given plugin release.
+	 *
+	 * @param WP_Post $plugin The plugin post object.
+	 * @param array   $data   The release data.
+	 * @return string HTML for the rollout strategy options.
+	 */
+	static function get_rollout_strategy( $plugin, $data ) {
+		if ( ! current_user_can( 'plugin_manage_releases', $plugin ) ) {
+			return '';
+		}
+
+		if ( ! $data['confirmations_required'] || ! empty( $data['discarded'] ) ) {
+			return '';
+		}
+
+		$rollout = $data['rollout_strategy'] ?? '';
+		if ( $data['confirmed'] && ! $rollout ) {
+			// If the release is confirmed, but no rollout strategy was set for the release, don't display the UI.
+			return '';
+		}
+
+		ob_start();
+		echo '<div class="release-strategy">';
+		echo '<h3>' . __( 'Rollout Strategy', 'wporg-plugins' ) . '</h3>';
+
+		echo '<select
+			id="rollout_strategy"
+			name="rollout_strategy"
+			onchange="this.nextElementSibling.innerText = this.options[this.selectedIndex].dataset.description;"'
+			. disabled( $data['confirmed'], true, false ) .
+			'>';
+		foreach ( Template::get_rollout_strategies() as $slug => $set ) {
+			printf(
+				'<option value="%s" data-description="%s" %s>%s</option>',
+				esc_attr( $slug ),
+				esc_attr( $set['description'] ),
+				selected( $rollout, $slug, false ),
+				esc_html( $set['name'] )
+			);
+		}
+		echo '</select>';
+		echo '<div class="help">' . esc_html( Template::get_rollout_strategies()[ $rollout ]['description'] ?? '' ) . '</div>';
+
+		echo '</div>';
+
+		return ob_get_clean();
 	}
 
 	static function generate_access_url( $user = null ) {

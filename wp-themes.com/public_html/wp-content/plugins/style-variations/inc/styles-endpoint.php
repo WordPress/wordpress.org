@@ -5,9 +5,10 @@ namespace WordPressdotorg\Theme_Preview\Style_Variations\API_Endpoint;
 use function WordPressdotorg\Theme_Preview\Style_Variations\get_style_variations;
 
 function endpoint_handler() {
-	$variations = get_style_variations();
-	$theme_slug = get_option( 'stylesheet' );
-	$styles     = array();
+	$variations    = get_style_variations();
+	$theme_slug    = get_option( 'stylesheet' );
+	$theme_version = urlencode( wp_get_theme()->get( 'Version' ) );
+	$styles        = array();
 
 	// The base theme URL
 	$base = "https://wp-themes.com/$theme_slug";
@@ -19,7 +20,7 @@ function endpoint_handler() {
 		$styles[] = array(
 			'title'        => __( 'Default' ),
 			'link'         => $base,
-			'preview_link' => "$base?card_view",
+			'preview_link' => "$base?card_view&tv=$theme_version",
 		);
 
 		/**
@@ -32,12 +33,12 @@ function endpoint_handler() {
 			$styles[] = array(
 				'title'        => $title,
 				'link'         => $link,
-				'preview_link' => "$link&card_view",
+				'preview_link' => "$link&card_view&tv=$theme_version",
 			);
 		}
 	}
 
-	return json_encode( array_values( $styles ) );
+	return array_values( $styles );
 }
 
 add_action(
@@ -45,6 +46,19 @@ add_action(
 	function () {
 		register_rest_route(
 			'wporg-styles/v1',
+			'/variations',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function() {
+					// v1 is a JSON string, so double-encoded.
+					return json_encode( endpoint_handler() );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			'wporg-styles/v2',
 			'/variations',
 			array(
 				'methods'             => 'GET',

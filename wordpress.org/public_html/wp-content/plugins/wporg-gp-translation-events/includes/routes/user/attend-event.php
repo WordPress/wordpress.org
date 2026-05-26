@@ -38,11 +38,10 @@ class Attend_Event_Route extends Route {
 				$this->die_with_error( esc_html__( 'You are not authorized to change the attendance mode of this attendee', 'gp-translation-events' ), 403 );
 			}
 		}
-		$user = wp_get_current_user();
-		if ( ! $user ) {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
 			$this->die_with_error( esc_html__( 'Only logged-in users can attend events', 'gp-translation-events' ), 403 );
 		}
-		$user_id = $user->ID;
 
 		$event = $this->event_repository->get_event( $event_id );
 		if ( ! $event ) {

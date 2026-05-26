@@ -3,7 +3,8 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
@@ -52,6 +53,7 @@ class Plugin_Directory {
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
 		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
 		add_filter( 'wp_get_attachment_url', array( $this, 'add_info_to_zip_url' ), 100, 2 );
+		add_action( 'post_updated', [ Helpscout::class, 'post_updated' ], 10, 3 );
 
 		add_filter( 'wp_resource_hints', array( $this, 'wp_resource_hints' ), 10, 2 );
 
@@ -109,6 +111,7 @@ class Plugin_Directory {
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
 			Customizations::instance();
 			Author_Cards::instance();
+			Elasticsearch_Status::instance();
 			Stats_Report::instance();
 			Upload_Token::instance();
 
@@ -217,6 +220,7 @@ class Plugin_Directory {
 			'rewrite'           => false,
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_section',
@@ -250,6 +254,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
@@ -277,6 +282,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
@@ -295,6 +301,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',
@@ -327,6 +334,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
@@ -402,154 +410,10 @@ class Plugin_Directory {
 			'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 
-		/**
-		 * TODO
-		 * Use register_rest_field() to add array and object meta data to the API:
-		 * ratings, upgrade_notice, contributors, screenshots, sections, assets_screenshots,
-		 * assets_icons, assets_banners,
-		 */
-
-		register_meta( 'post', 'rating', array(
-			'type'         => 'number',
-			'description'  => __( 'Overall rating of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// todo 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'active_installs', array(
-			'type'              => 'integer',
-			'description'       => __( 'Number of installations.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'downloads', array(
-			'type'              => 'integer',
-			'description'       => __( 'Number of downloads.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'tested', array(
-			'description'  => __( 'The version of WordPress the plugin was tested with.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'requires', array(
-			'description'  => __( 'The minimum version of WordPress the plugin needs to run.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'requires_php', array(
-			'description'  => __( 'The minimum version of PHP the plugin needs to run.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'stable_tag', array(
-			'description'  => __( 'Stable version of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'donate_link', array(
-			'description'       => __( 'Link to donate to the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'version', array(
-			'description'  => __( 'Current stable version.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_name', array(
-			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_plugin_uri', array(
-			'description'       => __( 'URL to the homepage of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'header_name', array(
-			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_author', array(
-			'description'  => __( 'Name of the plugin author.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_author_uri', array(
-			'description'       => __( 'URL to the homepage of the author.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'header_description', array(
-			'description'  => __( 'Description of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'assets_icons', array(
-			'type'         => 'UserDefinedarray',
-			'description'  => __( 'Icon images of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'assets_banners_color', array(
-			'description'  => __( 'Fallback color for the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'support_threads', array(
-			'type'              => 'integer',
-			'description'       => __( 'Amount of support threads for the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'support_threads_resolved', array(
-			'type'              => 'integer',
-			'description'       => __( 'Amount of resolved support threads for the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
+		API\Plugin_Fields::register();
 
 		// Add the browse/* views.
-		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated|preview)' );
+		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated|preview|dashboard-widgets)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
 
 		// Create an archive for a users favorites too.
@@ -638,7 +502,6 @@ class Plugin_Directory {
 	public function register_widgets() {
 		register_widget( __NAMESPACE__ . '\Widgets\Donate' );
 		register_widget( __NAMESPACE__ . '\Widgets\Meta' );
-		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
 		register_widget( __NAMESPACE__ . '\Widgets\Support' );
 		register_widget( __NAMESPACE__ . '\Widgets\Committers' );
 		register_widget( __NAMESPACE__ . '\Widgets\Contributors' );
@@ -807,7 +670,7 @@ class Plugin_Directory {
 		// For any invalid values passed to browse, set it to featured instead
 		if (
 			! empty ( $wp_query->query['browse'] ) &&
-			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated', 'preview' ) )
+			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated', 'preview', 'dashboard-widgets' ) )
 		) {
 			 $wp_query->query['browse']      = 'featured';
 			 $wp_query->query_vars['browse'] = 'featured';
@@ -815,6 +678,10 @@ class Plugin_Directory {
 
 		// Set up custom queries for the /browse/ URLs
 		switch ( $wp_query->get( 'browse' ) ) {
+			case 'featured':
+				$wp_query->query_vars['orderby'] ??= 'RAND(' . gmdate( 'Ymd' ) . ')';
+				break;
+
 			case 'beta':
 				$wp_query->query_vars['orderby'] ??= 'last_updated';
 
@@ -1444,12 +1311,15 @@ class Plugin_Directory {
 		// We've disabled WordPress's default 404 redirects, so we'll handle them ourselves.
 		if ( is_404() ) {
 
-			// [1] => plugins [2] => example-plugin-name [3..] => random().
-			$path = explode( '/', trailingslashit( explode( '?', $_SERVER['REQUEST_URI'] )[0] ) );
+			$path_prefix = wp_parse_url( home_url('/'), PHP_URL_PATH );
+			$path        = substr( $_SERVER['REQUEST_URI'], strlen( $path_prefix ) );
+			// [0] => example-plugin-name [1..] => random().
+			$path        = explode( '/', trailingslashit( explode( '?', $path )[0] ) );
+			$path_base   = $path[0];
 
-			if ( 'tags' === $path[2] ) {
-				if ( isset( $path[3] ) && ! empty( $path[3] ) ) {
-					wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ), 301 );
+			if ( 'tags' === $path_base ) {
+				if ( isset( $path[1] ) && ! empty( $path[1] ) ) {
+					wp_safe_redirect( home_url( '/search/' . urlencode( $path[1] ) . '/' ), 301 );
 					die();
 				} else {
 					wp_safe_redirect( home_url( '/' ), 301 );
@@ -1458,10 +1328,10 @@ class Plugin_Directory {
 			}
 
 			// The about page is now over at /developers/.
-			if ( 'about' === $path[2] ) {
-				if ( isset( $path[3] ) && 'add' == $path[3] ) {
+			if ( 'about' === $path_base ) {
+				if ( isset( $path[1] ) && 'add' == $path[1] ) {
 					wp_safe_redirect( home_url( '/developers/add/' ), 301 );
-				} elseif ( isset( $path[3] ) && 'validator' == $path[3] ) {
+				} elseif ( isset( $path[1] ) && 'validator' == $path[1] ) {
 					wp_safe_redirect( home_url( '/developers/readme-validator/' ), 301 );
 				} else {
 					wp_safe_redirect( home_url( '/developers/' ), 301 );
@@ -1470,13 +1340,13 @@ class Plugin_Directory {
 			}
 
 			// Browse 404s.
-			if ( 'browse' === $path[2] ) {
+			if ( 'browse' === $path_base ) {
 				wp_safe_redirect( home_url( '/' ), 301 );
 				die();
 			}
 
 			// The readme.txt page.
-			if ( 'readme.txt' === $path[2] ) {
+			if ( 'readme.txt' === $path_base ) {
 				status_header( 200 );
 				header( 'Content-type: text/plain' );
 				echo file_get_contents( __DIR__ . '/readme/readme.txt' );
@@ -1484,7 +1354,7 @@ class Plugin_Directory {
 			}
 
 			// Handle any plugin redirects.
-			if ( $path[2] && ( $plugin = self::get_plugin_post( $path[2] ) ) ) {
+			if ( $path_base && ( $plugin = self::get_plugin_post( $path_base ) ) ) {
 				$permalink = get_permalink( $plugin->ID );
 				if ( parse_url( $permalink, PHP_URL_PATH ) != $_SERVER['REQUEST_URI'] ) {
 					wp_safe_redirect( $permalink, 301 );
@@ -1493,8 +1363,8 @@ class Plugin_Directory {
 			}
 
 			// Otherwise, let's redirect to the search page.
-			if ( isset( $path[2] ) && ! empty( $path[2] ) ) {
-				wp_safe_redirect( home_url( '/search/' . urlencode( $path[2] ) . '/' ), 301 );
+			if ( isset( $path_base ) && ! empty( $path_base ) ) {
+				wp_safe_redirect( home_url( '/search/' . urlencode( $path_base ) . '/' ), 301 );
 				die();
 			}
 		}
@@ -2079,8 +1949,8 @@ class Plugin_Directory {
 	 * @return \WP_Post|\WP_Error
 	 */
 	public static function create_plugin_post( array $args ) {
-		$title = $args['post_title'] ?: $args['post_name'];
-		$slug  = $args['post_name'] ?: sanitize_title( $title );
+		$title = ( $args['post_title'] ?? '' ) ?: $args['post_name'];
+		$slug  = ( $args['post_name'] ?? '' ) ?: sanitize_title( $title );
 
 		// Remove null items (date-related fields) to fallback to the defaults below.
 		$args = array_filter(

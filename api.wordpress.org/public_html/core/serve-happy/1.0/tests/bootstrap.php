@@ -1,13 +1,11 @@
 <?php
 namespace WordPressdotorg\API\Serve_Happy;
 
+// Load the project's composer autoloader (PHPUnit, yoast/phpunit-polyfills).
+require_once dirname( __DIR__, 6 ) . '/vendor/autoload.php';
+
 if ( function_exists( 'xdebug_disable' ) ) {
 	xdebug_disable();
-}
-
-// PHP 6+ Compatibility.
-if ( class_exists( '\PHPUnit\Runner\Version' ) && version_compare( \PHPUnit\Runner\Version::id(), '6.0', '>=' ) ) {
-	class_alias( '\PHPUnit\Framework\TestCase', 'PHPUnit_Framework_TestCase' );
 }
 
 // Error Output handler for the API.

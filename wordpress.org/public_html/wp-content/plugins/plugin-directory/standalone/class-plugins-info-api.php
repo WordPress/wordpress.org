@@ -6,6 +6,7 @@ class Plugins_Info_API {
 	const CACHE_GROUP       = 'plugin_api_info';
 	const CACHE_EXPIRY      = 21600; // 6 hour cache, wporg_object_cache will spread this out.
 	const LONG_CACHE_EXPIRY = 86400; // 24 hour cache, wporg_object_cache will spread this out.
+	const QUERY_CACHEBUSTER = 2; // Increment to force query caches (including search) to be refreshed.
 
 	protected $format  = 'json';
 	protected $jsonp   = false;
@@ -17,7 +18,7 @@ class Plugins_Info_API {
 	);
 
 	function __construct( $format = 'json' ) {
-		if ( is_array( $format ) && 'jsonp' == $format[0] ) {
+		if ( is_array( $format ) && 'jsonp' == $format[0] && is_string( $format[1] ) ) {
 			$this->jsonp = preg_replace( '/[^a-zA-Z0-9_]/', '', $format[1] );
 			$format      = 'jsonp';
 		}
@@ -239,7 +240,7 @@ class Plugins_Info_API {
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 30 ); // Short expiry for when we've got issues
 			} else {
 				$response = $response->data;
-				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
+				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, $this->query_plugins_cache_duration( $request ) );
 			}
 		}
 
@@ -282,7 +283,23 @@ class Plugins_Info_API {
 	 * Generates a cache key for a given query_plugins request.
 	 */
 	protected function query_plugins_cache_key( $request ) {
-		return 'query_plugins:' . md5( serialize( $request->query_plugins_params_for_query() ) ) . ':' . ( $request->locale ?: 'en_US' );
+		return 'query_plugins:' . self::QUERY_CACHEBUSTER . ':' . md5( serialize( $request->query_plugins_params_for_query() ) );
+	}
+
+	/**
+	 * Returns the cache duration for a Query Plugins request.
+	 *
+	 * @param Plugins_Info_API_Request $request The request object.
+	 * @return int The cache duration in seconds.
+	 */
+	protected function query_plugins_cache_duration( $request ) {
+		// New / Updated plugins get a much shorter cache duration.
+		if ( in_array( $request->browse, array( 'new', 'updated' ) ) ) {
+			return 900; // 15 minutes.
+		}
+
+		// Defaults to 6 hours otherwise.
+		return self::CACHE_EXPIRY;
 	}
 
 	/**
@@ -303,7 +320,7 @@ class Plugins_Info_API {
 
 		$number_items_requested = 100;
 		if ( ! empty( $request->number ) ) {
-			$number_items_requested = $request->number;
+			$number_items_requested = (int) $request->number;
 		}
 
 		if ( count( $response ) > $number_items_requested ) {

@@ -209,25 +209,26 @@ class Report_Topic {
 			return;
 		}
 
-		$prepared_post = wp_kses_post( $_POST['topic-report-reply'] );
+		$prepared_post = wp_kses_post( wp_unslash( $_POST['topic-report-reply'] ) );
 
 		wp_insert_comment(
 			array(
-				'comment_content' => $prepared_post,
+				'comment_content' => wp_slash( $prepared_post ),
 				'comment_post_ID' => $report->ID,
 				'user_id'         => get_current_user_id(),
 			)
 		);
 
 		$email_text = sprintf(
-			// translators: 1: The users displayname. 2: The title of the reported topic. 3: The message response from a moderator.
+			// translators: 1: The users displayname. 2: The title of the reported topic. 3: The URL to the topic. 4: The message response from a moderator.
 			__( '%1$s,
 
 You recently reported the topic "%2$s".
+<%3$s>
 
 A moderator has reviewed the report, taken appropriate action, and provided you the following feedback:
 
-%3$s
+%4$s
 
 Regards,
 The WordPress.org Team',
@@ -235,6 +236,7 @@ The WordPress.org Team',
 			),
 			get_the_author_meta( 'display_name', $report->post_author ),
 			bbp_get_topic_title(),
+			bbp_get_topic_permalink(),
 			$prepared_post
 		);
 

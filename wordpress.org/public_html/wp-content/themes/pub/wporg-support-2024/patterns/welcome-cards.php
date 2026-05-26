@@ -1,4 +1,10 @@
 <?php
+/**
+ * Title: Welcome Cards
+ * Slug: wporg-support/welcome-cards
+ * Inserter: no
+ */
+
 if ( function_exists( 'register_block_pattern' ) ) {
 	register_block_pattern(
 		'wporg-support/welcome-cards',

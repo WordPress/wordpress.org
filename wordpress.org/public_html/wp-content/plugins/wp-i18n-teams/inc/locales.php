@@ -25,8 +25,8 @@ function bootstrap(): void {
  */
 function enqueue_assets(): void {
 	if ( is_singular() && false !== strpos( get_post()->post_content, '[wp-locales' ) ) {
-		wp_enqueue_style( 'wp-i18n-teams', plugins_url( 'css/i18n-teams.css', PLUGIN_FILE ), [], 13 );
-		wp_enqueue_script( 'wp-i18n-teams', plugins_url( 'js/i18n-teams.js', PLUGIN_FILE ), [ 'jquery', 'o2-app' ], 5 );
+		wp_enqueue_style( 'wp-i18n-teams', plugins_url( 'css/i18n-teams.css', PLUGIN_FILE ), [], filemtime( dirname( __DIR__ ) . '/css/i18n-teams.css' ) );
+		wp_enqueue_script( 'wp-i18n-teams', plugins_url( 'js/i18n-teams.js', PLUGIN_FILE ), [ 'jquery', 'o2-app' ], filemtime( dirname( __DIR__ ) . '/js/i18n-teams.js' ) );
 	}
 }
 
@@ -45,10 +45,11 @@ function render_wp_locales_shortcode(): string {
 	} else {
 		require_once GLOTPRESS_LOCALES_PATH;
 		$locale = GP_Locales::by_field( 'wp_locale', $_GET['locale'] );
-		if ( $locale ) {
+		if ( $locale && 'en_US' !== $locale->wp_locale ) {
 			$locale_data = get_extended_locale_data( $locale );
 			include PLUGIN_DIR . '/views/locale-details.php';
 		} else {
+			status_header( 404 );
 			printf(
 				'<div class="callout callout-warning"><p>%s</p><p><a href="%s">%s</a></p></div>',
 				sprintf(

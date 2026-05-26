@@ -87,16 +87,25 @@ class User_Notes {
 	/**
 	 * Saves a note to a users meta data.
 	 *
-	 * @param int    $user_id   The user ID.
-	 * @param string $note_text The note text to add.
-	 * @param int    $post_id   The support thread this text is related to. Optional.
-	 * @param int    $note_id   The note ID to edit. Optional.
+	 * @param int        $user_id   The user ID.
+	 * @param string     $note_text The note text to add.
+	 * @param int|string $post_id   The support thread, or URL, this note is related to. Optional.
+	 * @param int        $note_id   The note ID to edit. Optional.
+	 * @param int|null   $author    The user ID of the note author. Optional. Default null (current user).
+	 * @param int|null   $site_id   The site ID where the note is being added. Optional. Default null (current site).
 	 */
-	public function add_user_note( $user_id, $note_text, $post_id = 0, $note_id = 0 ) {
+	public function add_user_note( $user_id, $note_text, $post_id = 0, $note_id = 0, $author = null, $site_id = null ) {
 		// Make sure the user exists.
 		$user = get_userdata( $user_id );
 		if ( ! $user ) {
 			return false;
+		}
+
+		$author  ??= wp_get_current_user()->user_nicename;
+		$site_id ??= get_current_blog_id();
+
+		if ( is_numeric( $author ) || $author instanceof \WP_User ) {
+			$author = get_userdata( $author )->user_nicename;
 		}
 
 		// Get an array of existing notes, or create an array if there are none.
@@ -105,7 +114,7 @@ class User_Notes {
 			$user_notes = array();
 		}
 
-		$edit_note = isset( $user_notes[ $note_id ] );
+		$edit_note = $note_id && isset( $user_notes[ $note_id ] );
 
 		if ( ! $edit_note ) {
 			$note_id = count( $user_notes ) + 1;
@@ -114,10 +123,17 @@ class User_Notes {
 			$user_notes[ $note_id ] = (object) array(
 				'text'      => $note_text,
 				'date'      => current_time( 'mysql' ),
-				'post_id'   => $post_id,
-				'site_id'   => get_current_blog_id(),
-				'moderator' => wp_get_current_user()->user_nicename
+				'post_id'   => 0,
+				'site_id'   => $site_id,
+				'moderator' => $author,
 			);
+
+			// Associate the note with a post if provided.
+			if ( is_numeric( $post_id ) && $post_id ) {
+				$user_notes[ $note_id ]->post_id = $post_id;
+			} elseif ( $post_id ) {
+				$user_notes[ $note_id ]->url = esc_url_raw( $post_id );
+			}
 		} else {
 			// Only keymasters or the note author can edit a note.
 			if (
@@ -133,7 +149,14 @@ class User_Notes {
 
 			// Add site ID if missing.
 			if ( ! isset( $user_notes[ $note_id ]->site_id ) ) {
-				$user_notes[ $note_id ]->site_id = get_current_blog_id();
+				$user_notes[ $note_id ]->site_id = $site_id;
+			}
+
+			// Associate the note with a post if provided.
+			if ( is_numeric( $post_id ) && $post_id ) {
+				$user_notes[ $note_id ]->post_id = $post_id;
+			} elseif ( $post_id ) {
+				$user_notes[ $note_id ]->url = esc_url_raw( $post_id );
 			}
 		}
 
@@ -294,7 +317,13 @@ class User_Notes {
 
 		foreach ( $user_notes as $key => $note ) {
 			$post_site_id       = isset( $note->site_id ) ? (int) $note->site_id : get_current_blog_id();
-			$post_permalink     = $this->get_user_note_post_permalink( $note->post_id, $user_id, $post_site_id );
+			if ( ! empty( $note->url ) ) {
+				$post_permalink = $note->url;
+				$mod_url        = 'https://profiles.wordpress.org/' . urlencode( $note->moderator ) . '/';
+			} else {
+				$post_permalink = $this->get_user_note_post_permalink( $note->post_id, $user_id, $post_site_id );
+				$mod_url        = get_home_url( $post_site_id, "/users/{$note->moderator}/" );
+			}
 			$redirect_on_delete = $this->get_user_note_post_permalink( get_the_ID(), $user_id, get_current_blog_id() );
 
 			$note_meta = array(
@@ -302,7 +331,7 @@ class User_Notes {
 					/* translators: 1: User note author's display name, 2: Link to post, 3: Date, 4: Time. */
 					__( 'By %1$s on <a href="%2$s">%3$s at %4$s</a>', 'wporg-forums' ),
 					sprintf( '<a href="%s">%s</a>',
-						esc_url( get_home_url( $post_site_id, "/users/{$note->moderator}/" ) ),
+						esc_url( $mod_url ),
 						$note->moderator
 					),
 					esc_url( $post_permalink ),

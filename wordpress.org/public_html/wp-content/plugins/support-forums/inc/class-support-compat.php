@@ -356,27 +356,32 @@ class Support_Compat {
 	 */
 	public function load_compat_subscriptions() {
 		if ( class_exists( 'WordPressdotorg\Forums\Term_Subscription\Plugin' ) ) {
+			// Labels use callbacks to defer translation loading until bbp_init.
 			Plugin::get_instance()->plugin_subscriptions = new Term_Subscription\Plugin( array(
 				'taxonomy'  => 'topic-plugin',
 				'directory' => Plugin::get_instance()->plugins,
-				'labels'    => array(
-					'subscribed_header'      => __( 'Subscribed Plugins', 'wporg-forums' ),
-					'subscribed_user_notice' => __( 'You are not currently subscribed to any plugins.', 'wporg-forums' ),
-					'subscribed_anon_notice' => __( 'This user is not currently subscribed to any plugins.', 'wporg-forums' ),
-					/* translators: %s: Plugin Name. */
-					'receipt'                => __( 'You are receiving this email because you are subscribed to the %s plugin.', 'wporg-forums' ),
-				),
+				'labels'    => function() {
+					return array(
+						'subscribed_header'      => __( 'Subscribed Plugins', 'wporg-forums' ),
+						'subscribed_user_notice' => __( 'You are not currently subscribed to any plugins.', 'wporg-forums' ),
+						'subscribed_anon_notice' => __( 'This user is not currently subscribed to any plugins.', 'wporg-forums' ),
+						/* translators: %s: Plugin Name. */
+						'receipt'                => __( 'You are receiving this email because you are subscribed to the %s plugin.', 'wporg-forums' ),
+					);
+				},
 			) );
 			Plugin::get_instance()->theme_subscriptions = new Term_Subscription\Plugin( array(
 				'taxonomy'  => 'topic-theme',
 				'directory' => Plugin::get_instance()->themes,
-				'labels'    => array(
-					'subscribed_header'      => __( 'Subscribed Themes', 'wporg-forums' ),
-					'subscribed_user_notice' => __( 'You are not currently subscribed to any themes.', 'wporg-forums' ),
-					'subscribed_anon_notice' => __( 'This user is not currently subscribed to any themes.', 'wporg-forums' ),
-					/* translators: %s: Theme Name. */
-					'receipt'                => __( 'You are receiving this email because you are subscribed to the %s theme.', 'wporg-forums' ),
-				),
+				'labels'    => function() {
+					return array(
+						'subscribed_header'      => __( 'Subscribed Themes', 'wporg-forums' ),
+						'subscribed_user_notice' => __( 'You are not currently subscribed to any themes.', 'wporg-forums' ),
+						'subscribed_anon_notice' => __( 'This user is not currently subscribed to any themes.', 'wporg-forums' ),
+						/* translators: %s: Theme Name. */
+						'receipt'                => __( 'You are receiving this email because you are subscribed to the %s theme.', 'wporg-forums' ),
+					);
+				},
 			) );
 		}
 	}

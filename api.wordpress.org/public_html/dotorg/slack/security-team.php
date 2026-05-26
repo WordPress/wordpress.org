@@ -62,7 +62,7 @@ function api_call() {
 	header( 'Content-type: text/plain' );
 
 	// Confirm it came from the Trac server.
-	if ( $_GET['token'] !== API_TOKEN ) {
+	if ( ! hash_equals( API_TOKEN, $_GET['token'] ?? '' ) ) {
 		exit;
 	}
 

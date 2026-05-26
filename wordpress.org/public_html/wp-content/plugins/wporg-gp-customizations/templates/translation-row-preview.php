@@ -134,4 +134,56 @@ $priority_char = array(
 	<td class="actions">
 		<a href="#" class="action edit"><?php _e( 'Details', 'glotpress' ); ?></a>
 	</td>
+	<?php if ( wporg_translate_inline_actions_enabled_for_current_user( get_defined_vars() ) ) : ?>
+		<td class="inline-actions">
+			<?php
+			$current_status = $translation->translation_status;
+
+			// Mirrors the outer guards in gp-templates/translation-row-editor-meta-status.php:
+			// 1. Skip rows with no status at all (untranslated entries).
+			// 2. Skip changesrequested rows unless the changesrequested status is explicitly enabled.
+			$show_inline_buttons = $current_status
+				&& ( 'changesrequested' !== $current_status
+					|| apply_filters( 'gp_enable_changesrequested_status', false ) );
+			?>
+
+			<?php if ( $show_inline_buttons ) : ?>
+				<?php if ( 'current' !== $current_status ) : ?>
+					<button
+						type="button"
+						class="button is-small inline-action inline-action-approve"
+						data-translation-id="<?php echo esc_attr( $translation->id ); ?>"
+						data-status="current"
+						data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>"
+						title="<?php esc_attr_e( 'Approve this translation. Any existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"
+						aria-label="<?php esc_attr_e( 'Approve this translation', 'glotpress' ); ?>"
+					>+</button>
+				<?php endif; ?>
+
+				<?php if ( 'rejected' !== $current_status && 'changesrequested' !== $current_status ) : ?>
+					<button
+						type="button"
+						class="button is-small inline-action inline-action-reject"
+						data-translation-id="<?php echo esc_attr( $translation->id ); ?>"
+						data-status="rejected"
+						data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"
+						title="<?php esc_attr_e( 'Reject this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"
+						aria-label="<?php esc_attr_e( 'Reject this translation', 'glotpress' ); ?>"
+					><strong>&minus;</strong></button>
+				<?php endif; ?>
+
+				<?php if ( 'fuzzy' !== $current_status ) : ?>
+					<button
+						type="button"
+						class="button is-small inline-action inline-action-fuzzy"
+						data-translation-id="<?php echo esc_attr( $translation->id ); ?>"
+						data-status="fuzzy"
+						data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"
+						title="<?php esc_attr_e( 'Mark this translation as fuzzy for further review.', 'glotpress' ); ?>"
+						aria-label="<?php esc_attr_e( 'Mark this translation as fuzzy', 'glotpress' ); ?>"
+					><strong>~</strong></button>
+				<?php endif; ?>
+			<?php endif; ?>
+		</td>
+	<?php endif; ?>
 </tr>

@@ -1,4 +1,5 @@
 {
 	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
 	"plugins": [ "." ]
 }

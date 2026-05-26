@@ -121,12 +121,21 @@ if ( $deepl_key ) {
 		<td>
 			<select name="default_sort[openai_model]" id="default_sort[openai_model]" style="border:revert;">
 				<?php
-				$openai_models = array( 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini' );
-				$openai_model = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
-				foreach ( $openai_models as $model ) {
-					echo '<option value="' . esc_attr( $model ) . '"';
-					selected( $model, $openai_model );
-					echo '>' . esc_html( $model ) . '</option>';
+				$stored_model   = gp_array_get( $gp_default_sort, 'openai_model', \WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Models::FALLBACK );
+				$selected_model = \WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Models::resolve_for_current_user( $stored_model );
+				$tier_labels    = array(
+					'Expensive' => __( 'Expensive', 'glotpress' ),
+					'Medium'    => __( 'Medium', 'glotpress' ),
+					'Cheap'     => __( 'Cheap', 'glotpress' ),
+				);
+				foreach ( \WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Models::TIERS as $tier_key => $tier_models ) {
+					echo '<optgroup label="' . esc_attr( $tier_labels[ $tier_key ] ) . '">';
+					foreach ( $tier_models as $model_id ) {
+						echo '<option value="' . esc_attr( $model_id ) . '"';
+						selected( $model_id, $selected_model );
+						echo '>' . esc_html( $model_id ) . '</option>';
+					}
+					echo '</optgroup>';
 				}
 				?>
 			</select>
@@ -193,7 +202,7 @@ if ( $deepl_key ) {
 		<td><textarea class="openai_custom_prompt" id="default_sort[openai_custom_prompt]" name="default_sort[openai_custom_prompt]" placeholder="Enter your custom prompt for ChatGPT translation suggestions"><?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_custom_prompt', '' ) ); ?></textarea></td>
 	</tr>
 	<tr>
-		<th><label for="default_sort[openai_temperature]"><?php esc_html_e( 'Temperature', 'glotpress' ); ?></label></th>
+		<th><label for="default_sort[openai_temperature]"><?php esc_html_e( 'Temperature (if is available in the model)', 'glotpress' ); ?></label></th>
 		<td><input type="number" min="0" max="2" step=".1" class="openai_temperature" id="default_sort[openai_temperature]" name="default_sort[openai_temperature]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_temperature', 0 ) ); ?>" placeholder="Enter your OpenAI key" /></td>
 	</tr>
 	<tr>
@@ -256,4 +265,43 @@ if ( $deepl_key ) {
 			?>
 		</td>
 	</tr>
+	<?php if ( wporg_translate_user_is_validator_anywhere( get_current_user_id() ) ) : ?>
+	<tr>
+		<th>
+			<h4><?php esc_html_e( 'Validator settings', 'glotpress' ); ?></h4>
+		</th>
+	</tr>
+	<tr>
+		<th>
+			<label for="default_sort[hide_validator_topbar]">
+				<?php esc_html_e( 'Hide the validation top bar in the translation editor', 'glotpress' ); ?>
+			</label>
+		</th>
+		<td>
+			<input type="hidden" name="default_sort[hide_validator_topbar]" value="off" />
+			<input
+				type="checkbox"
+				id="default_sort[hide_validator_topbar]"
+				name="default_sort[hide_validator_topbar]"
+				<?php gp_checked( 'on' === gp_array_get( $gp_default_sort, 'hide_validator_topbar', 'off' ) ); ?>
+			/>
+		</td>
+	</tr>
+	<tr>
+		<th>
+			<label for="default_sort[hide_inline_actions]">
+				<?php esc_html_e( 'Hide the inline action buttons in the translation editor', 'glotpress' ); ?>
+			</label>
+		</th>
+		<td>
+			<input type="hidden" name="default_sort[hide_inline_actions]" value="off" />
+			<input
+				type="checkbox"
+				id="default_sort[hide_inline_actions]"
+				name="default_sort[hide_inline_actions]"
+				<?php gp_checked( 'on' === gp_array_get( $gp_default_sort, 'hide_inline_actions', 'off' ) ); ?>
+			/>
+		</td>
+	</tr>
+	<?php endif; ?>
 </table>

@@ -163,6 +163,13 @@ https://make.wordpress.org/plugins', 'wporg-plugins' );
 	}
 
 	/**
+	 * Return the plugin's title with HTML entities decoded for plain-text use (e.g., email subjects).
+	 */
+	protected function plugin_title() {
+		return html_entity_decode( $this->plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	}
+
+	/**
 	 * A simple way to convert a WP_User object to a displayable username.
 	 * This shouldn't be needed, but unfortunately often is on WordPress.org.
 	 */

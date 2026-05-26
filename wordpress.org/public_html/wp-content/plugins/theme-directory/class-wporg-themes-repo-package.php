@@ -16,11 +16,21 @@ class WPORG_Themes_Repo_Package {
 	public $wp_post;
 
 	/**
+	 * Holds the Version string for this instance of the class.
+	 *
+	 * NOTE: This may not be the latest version of the theme.
+	 *
+	 * @var string
+	 */
+	public $version = '';
+
+	/**
 	 * Construct a new Package for the given post ID or object.
 	 *
 	 * @param WP_Post|int|slug $wp_post The Post object, Post ID, or theme slug of the package.
+	 * @param string|bool $version Optional. The version string, or false for latest version.
 	 */
-	public function __construct( $wp_post = 0 ) {
+	public function __construct( $wp_post = 0, $version = false ) {
 		global $post;
 		if ( ! $wp_post ) {
 			return;
@@ -52,6 +62,13 @@ class WPORG_Themes_Repo_Package {
 				$this->wp_post = $theme[0];
 			}
 		}
+
+		$this->version = $version;
+		if ( $this->wp_post ) {
+			if ( ! $version || 'latest' === $version || 'latest-stable' === $version ) {
+				$this->version = $this->latest_version();
+			}
+		}
 	}
 
 	/**
@@ -60,16 +77,15 @@ class WPORG_Themes_Repo_Package {
 	 * @return string
 	 */
 	public function screenshot_url() {
-		$screen  = 'screenshot.png';
-		$version = $this->latest_version();
+		$screen = 'screenshot.png';
 
-		if ( ! empty( $this->wp_post->_screenshot[ $version ] ) ) {
-			$screen = $this->wp_post->_screenshot[ $version ];
+		if ( ! empty( $this->wp_post->_screenshot[ $this->version ] ) ) {
+			$screen = $this->wp_post->_screenshot[ $this->version ];
 		}
 
 		return sprintf( 'https://i0.wp.com/themes.svn.wordpress.org/%1$s/%2$s/%3$s',
 			$this->wp_post->post_name,
-			$version,
+			$this->version,
 			$screen
 		);
 	}
@@ -108,7 +124,8 @@ class WPORG_Themes_Repo_Package {
 	 * @param string $version Optional.
 	 * @return string
 	 */
-	public function download_url( $version = 'latest-stable' ) {
+	public function download_url( $version = false ) {
+		$version = $version ?: $this->version;
 		if ( 'latest-stable' === $version ) {
 			$version = $this->latest_version();
 		}
@@ -136,20 +153,19 @@ class WPORG_Themes_Repo_Package {
 	 * @return int|string
 	 */
 	public function __get( $name ) {
-		$version = $this->latest_version();
 		switch ( $name ) {
 			case 'version' :
 				return $version;
 			case 'theme-url' :
-				return $this->wp_post->_theme_url[ $version ] ?? '';
+				return $this->wp_post->_theme_url[ $this->version ] ?? '';
 			case 'author-url' :
-				return $this->wp_post->_author_url[ $version ] ?? '';
+				return $this->wp_post->_author_url[ $this->version ] ?? '';
 			case 'ticket' :
-				return $this->wp_post->_ticket_id[ $version ] ?? '';
+				return $this->wp_post->_ticket_id[ $this->version ] ?? '';
 			case 'requires':
-				return $this->wp_post->_requires[ $version ] ?? '';
+				return $this->wp_post->_requires[ $this->version ] ?? '';
 			case 'requires-php':
-				return $this->wp_post->_requires_php[ $version ] ?? '';
+				return $this->wp_post->_requires_php[ $this->version ] ?? '';
 			default:
 				return $this->wp_post->$name;
 		}

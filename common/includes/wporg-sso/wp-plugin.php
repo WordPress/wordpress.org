@@ -581,6 +581,14 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$this->sso_host_url . '/wp-login.php'
 			);
 
+			/*
+			 * If we're not on the SSO cookie host, clear the cookies locally before redirecting.
+			 * Upon redirect back, these previous cookies should be invalid as the session is destroyed.
+			 */
+			if ( $this->sso_cookie_host !== COOKIE_DOMAIN ) {
+				wp_clear_auth_cookie();
+			}
+
 			$this->_safe_redirect( $remote_logout_url );
 			exit;
 		}
@@ -685,6 +693,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 		/**
 		 * Log out a user and destroy the session.
+		 *
+		 * NOTE: This handles `action=remote-logout` requests. The remote-logout query var
+		 *       is not actually used, but is present as a legacy of previous implementations.
 		 */
 		protected function _maybe_perform_remote_logout() {
 			if ( empty( $_GET['sso_logout'] ) || ! $this->is_sso_host() ) {
@@ -698,7 +709,17 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return;
 			}
 
-			// Perform the logout. This will destroy the session, logging the user out of all sites.
+			// If the session noted in the remote-logout is different from current, destroy that session first.
+			$current_token = wp_get_session_token();
+			if (
+				$remote_token['session_token'] &&
+				wp_get_session_token() !== $remote_token['session_token']
+			) {
+				$manager = WP_Session_Tokens::get_instance( $remote_token['user']->ID );
+				$manager->destroy( $remote_token['session_token'] );
+			}
+
+			// Perform the logout. This will destroy the *current* session, logging the user out of all sites.
 			wp_logout();
 
 			// Default to the logout confirmation screen, or back to the source site if possible.
@@ -970,7 +991,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * Record the last date a user changed their password.
 		 */
 		public function record_last_password_change( $user_id, $old_data, $new_data ) {
-			if ( $old_data->user_pass !== $new_data['user_pass'] ) {
+			if (
+				$old_data->user_pass !== $new_data['user_pass'] &&
+				apply_filters( 'wporg_record_last_password_change', true, $user_id )
+			) {
 				update_user_meta( $user_id, 'last_password_change', gmdate( 'Y-m-d H:i:s' ) );
 			}
 		}
@@ -980,7 +1004,14 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function record_last_password_change_reset( $password, $user_id, $old_user_data ) {
 			$user = get_user_by( 'id', $user_id );
-			if ( $old_user_data->user_pass !== $user->user_pass ) {
+
+			// https://core.trac.wordpress.org/ticket/22114#comment:32
+			$old_user_pass = is_object( $old_user_data ) ? $old_user_data->user_pass : ( is_array( $old_user_data ) ? $old_user_data['user_pass'] : '' );
+
+			if (
+				$old_user_pass !== $user->user_pass &&
+				apply_filters( 'wporg_record_last_password_change', true, $user_id )
+			) {
 				update_user_meta( $user_id, 'last_password_change', gmdate( 'Y-m-d H:i:s' ) );
 			}
 		}

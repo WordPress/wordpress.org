@@ -314,6 +314,7 @@ class Plugin {
 			! $translation->id &&
 			! empty( $args['user_id'] ) &&
 			'waiting' === $args['status'] &&
+			! empty( GP::$current_route ) &&
 			GP::$current_route->class_name === 'GP_Route_Translation' &&
 			GP::$current_route->last_method_called === 'translations_post'
 		) {
@@ -547,7 +548,7 @@ class Plugin {
 	 */
 	public function show_admin_bar() {
 		add_action( 'gp_head', 'wp_enqueue_admin_bar_header_styles' );
-		add_action( 'gp_head', '_admin_bar_bump_cb' );
+		add_action( 'gp_head', 'wp_enqueue_admin_bar_bump_styles' );
 
 		gp_enqueue_script( 'admin-bar' );
 		gp_enqueue_style( 'admin-bar' );
@@ -630,6 +631,8 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
 		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Stats_Print' );
+		WP_CLI::add_command( 'wporg-translate update-project-stats', __NAMESPACE__ . '\CLI\Update_Project_Stats' );
+		WP_CLI::add_command( 'wporg-translate check-percentage-translated-above-100-percent', __NAMESPACE__ . '\CLI\Check_Percentage_Translated_Above_100_Percent' );
 
 	}
 

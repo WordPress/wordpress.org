@@ -64,6 +64,9 @@ class Filesystem {
 		// Unzip it into the plugin directory.
 		exec( "unzip -DD {$esc_zip_file} -d {$esc_directory}" );
 
+		// Remove symlinks.
+		exec( "find {$esc_directory} -type l -delete" );
+
 		// Fix any permissions issues with the files. Sets 755 on directories, 644 on files.
 		exec( "chmod -R 755 {$esc_directory}" );
 		exec( "find {$esc_directory} -type f -exec chmod 644 {} \;" );

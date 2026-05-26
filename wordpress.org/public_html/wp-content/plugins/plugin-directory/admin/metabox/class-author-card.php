@@ -208,7 +208,7 @@ class Author_Card {
 			}
 
 			// Include any warning flags.
-			$warning_flags = self::get_user_flags( $user->ID, $author_plugins );
+			$warning_flags = self::get_user_flags( $author->ID, $author_plugins );
 			if ( $warning_flags ) {
 				echo '<strong>' . __( 'Warning Flags:', 'wporg-plugins' ) . '</strong>';
 				echo '<ul class="plugin-flagged">';

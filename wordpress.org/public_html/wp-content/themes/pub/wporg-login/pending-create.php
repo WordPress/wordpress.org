@@ -60,7 +60,7 @@ if ( ! $can_access ) {
 
 if ( wporg_login_save_profile_fields( $pending_user, 'create' ) ) {
 	// re-fetch the user, it's probably changed.
-	$pending_user = wporg_get_pending_user( $activation_user );
+	$pending_user = wporg_get_pending_user( $activation_user ) ?: $pending_user;
 }
 
 $error_recapcha_status = false;
