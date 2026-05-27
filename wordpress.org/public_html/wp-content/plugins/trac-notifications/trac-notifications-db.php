@@ -301,7 +301,8 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			GROUP BY tc.ticket
 				HAVING participant_count >= $min_participants
 			ORDER BY participant_count DESC, change_count DESC
-			LIMIT $limit"
+			LIMIT $limit",
+			ARRAY_A
 		);
 
 		if ( ! $rows ) {

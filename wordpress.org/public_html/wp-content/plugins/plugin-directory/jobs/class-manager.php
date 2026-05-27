@@ -21,7 +21,7 @@ class Manager {
 		'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
 		'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
 		'import_zip'         => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
-		'scan_plugin'        => array( __NAMESPACE__ . '\Plugin_Updates_PCP', 'cron_trigger' ),
+		'scan_plugin'        => array( __NAMESPACE__ . '\Plugin_Scan', 'cron_trigger' ),
 		'create_svn_repo'    => array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ),
 	);
 
@@ -43,7 +43,7 @@ class Manager {
 		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
 
 		// Hook into the plugin import process to queue a job.
-		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Updates_PCP', 'wporg_plugins_imported' ), 10, 5 );
+		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Scan', 'wporg_plugins_imported' ), 10, 6 );
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
@@ -87,38 +87,43 @@ class Manager {
 		// Flush the Cavalcade jobs cache, we need fresh data from the database
 		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
 
-		$crons = _get_cron_array();
-		if ( empty( $crons ) ) {
-			return false;
-		}
-
 		$timestamps = array();
 
-		foreach ( $crons as $timestamp => $cron ) {
-			if ( isset( $cron[ $hook ] ) ) {
-				foreach ( $cron[ $hook ] as $key => $cron_item ) {
-					// Cavalcade should present this field, if not, bail.
-					if ( empty( $cron_item['_job'] ) ) {
-						continue;
-					}
-
-					if ( 'waiting' === $cron_item['_job']->status ) {
-						$timestamps[] = $timestamp;
-						break;
-					}
+		foreach ( _get_cron_array() as $timestamp => $cron ) {
+			foreach ( $cron[ $hook ] ?? [] as $cron_item ) {
+				if ( 'waiting' === ( $cron_item['_job']->status ?? '' ) ) {
+					$timestamps[] = $timestamp;
+					break;
 				}
 			}
 		}
 
-		if ( empty( $timestamps ) ) {
+		if ( ! $timestamps ) {
 			return false;
 		}
 
-		if ( 'last' == $when ) {
-			return max( $timestamps );
-		} else {
-			return min( $timestamps );
+		return 'last' === $when ? max( $timestamps ) : min( $timestamps );
+	}
+
+	/**
+	 * Determines whether any job for a given hook is currently running.
+	 *
+	 * @param string $hook The hook to check.
+	 * @return bool True if a job for this hook is currently running.
+	 */
+	public static function is_event_running( $hook ) {
+		// Flush the Cavalcade jobs cache, we need fresh data from the database.
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
+
+		foreach ( _get_cron_array() as $cron ) {
+			foreach ( $cron[ $hook ] ?? [] as $cron_item ) {
+				if ( 'running' === ( $cron_item['_job']->status ?? '' ) ) {
+					return true;
+				}
+			}
 		}
+
+		return false;
 	}
 
 	/**

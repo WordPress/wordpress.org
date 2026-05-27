@@ -223,6 +223,9 @@ function build_response( $location, $location_args ) {
 	$events = array();
 	$error  = null;
 
+	// Define defaults if not set in the request.
+	$location_args += array( 'restrict_by_country' => false );
+
 	if ( 'temp-request-throttled' === $location ) {
 		$location = array();
 		$error    = 'temp-request-throttled';
@@ -230,7 +233,7 @@ function build_response( $location, $location_args ) {
 
 	if ( $location ) {
 		$event_args = array(
-			'is_client_core' => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+			'is_client_core'      => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
@@ -810,12 +813,18 @@ function get_country_from_name( $country_name ) {
 function get_events( $args = array() ) {
 	global $wpdb, $cache_life, $cache_group;
 
-	// Sort to ensure consistent cache keys.
-	ksort( $args );
+	// Define defaults if not set in the request.
+	$args += array(
+		'is_client_core'      => false,
+		'restrict_by_country' => false,
+		'number'              => 10,
+	);
 
 	// number should be between 0 and 100, with a default of 10.
-	$args['number'] = $args['number'] ?? 10;
 	$args['number'] = max( 0, min( $args['number'], 100 ) );
+
+	// Sort to ensure consistent cache keys.
+	ksort( $args );
 
 	// Distances in kilometers
 	$event_distances = array(
@@ -1099,19 +1108,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Asia',
-				'url'        => 'https://asia.wordcamp.org/2025/',
+				'url'        => 'https://asia.wordcamp.org/2027/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2025-02-20 00:00:00',
-				'end_date'   => '2025-02-22 00:00:00',
-				'start_unix_timestamp' => strtotime( '2025-02-20 00:00:00' ) - 8 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2025-02-22 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'date'       => '2027-04-09 00:00:00',
+				'end_date'   => '2027-04-11 00:00:00',
+				'start_unix_timestamp' => strtotime( '2027-04-09 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2027-04-11 00:00:00' ) - 8 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Manila, Philippines',
-					'country'   => 'PH',
-					'latitude'  => 14.5544983,
-					'longitude' => 120.9830332,
+					'location'  => 'Penang, Malaysia',
+					'country'   => 'MY',
+					'latitude'  => 5.4163568,
+					'longitude' => 100.3327612,
 				),
 			),
 		),
@@ -1153,19 +1162,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
-				'url'        => 'https://europe.wordcamp.org/2025/',
+				'url'        => 'https://europe.wordcamp.org/2026/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'                 => '2025-06-05 00:00:00',
-				'end_date'             => '2025-06-07 00:00:00',
-				'start_unix_timestamp' => strtotime( '2025-06-05 00:00:00' ) - 2 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2025-06-07 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'date'                 => '2026-06-04 00:00:00',
+				'end_date'             => '2026-06-06 00:00:00',
+				'start_unix_timestamp' => strtotime( '2026-06-04 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2026-06-06 00:00:00' ) - 2 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Basel',
-					'country'   => 'CH',
-					'latitude'  => 47.5627438,
-					'longitude' => 7.5993872,
+					'location'  => 'Kraków',
+					'country'   => 'PL',
+					'latitude'  => 50.0646501,
+					'longitude' => 19.9449799,
 				),
 			),
 		),
@@ -1180,21 +1189,21 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://us.wordcamp.org/2025/',
+				'url'        => 'https://us.wordcamp.org/2026/',
 				'meetup'     => '',
 				'meetup_url' => '',
 				// Local time
-				'date'       => '2025-08-26 09:00:00',
-				'end_date'   => '2025-08-29 17:00:00',
+				'date'       => '2026-08-16 09:00:00',
+				'end_date'   => '2026-08-19 17:00:00',
 				// GMT which due to local being GMT-7, GMT is ahead by 7h.
-				'start_unix_timestamp' => strtotime( '2025-08-26 09:00:00' ) + 7 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2025-08-29 17:00:00' ) + 7 * HOUR_IN_SECONDS,
+				'start_unix_timestamp' => strtotime( '2026-08-16 09:00:00' ) + 7 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2026-08-19 17:00:00' ) + 7 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Portland, Oregon',
+					'location'  => 'Phoenix, Arizona',
 					'country'   => 'US',
-					'latitude'  => 45.5283308,
-					'longitude' => -122.6634712,
+					'latitude'  => 33.4483771,
+					'longitude' => -112.0740373,
 				),
 			),
 		),
@@ -1308,9 +1317,9 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			}
 		}
 
-		// Special case: Show WordCamp Asia to all of asia until it's over.
+		// Special case: Show WordCamp Europe to all of europe until it's over.
 		if (
-			'asia' === $region &&
+			'europe' === $region &&
 			! empty( $location['country'] ) &&
 			$current_time <= $data['event']['end_unix_timestamp'] &&
 			in_array( strtoupper( $location['country'] ), $data['regional_countries'], true )
@@ -1720,4 +1729,6 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 	);
 }
 
-main();
+if ( ! defined( 'WPORG_RUNNING_TESTS' ) || ! WPORG_RUNNING_TESTS ) {
+	main();
+}

@@ -1,0 +1,63 @@
+/* Inline action buttons in the translation row's preview cell.
+ *
+ * Colors mirror the meta-status buttons defined in templates/style.css
+ * (currently around lines 2378-2396):
+ *   - Approve  uses the WP-admin .is-primary blue.
+ *   - Reject   colors the inner <strong> glyph red    (#dc3232).
+ *   - Fuzzy    colors the inner <strong> glyph orange (#f56e28).
+ * If those colors change in style.css, mirror the change here too.
+ */
+
+/* Column width + alignment. table.translations uses table-layout: fixed
+ * with the other columns summing to 100%, so the new column needs an
+ * explicit width or it overflows the table boundary. 10em fits three
+ * buttons (min-width 28px each + padding + borders + margins ≈ 140px)
+ * with a little breathing room on each side. Center-aligned to match
+ * the adjacent gp-column-actions ("Details") column.
+ */
+table.translations th.gp-column-inline-actions,
+table.translations td.inline-actions {
+	width: 10em;
+	text-align: center;
+}
+
+td.inline-actions {
+	white-space: nowrap;
+	vertical-align: middle;
+	padding: 4px 8px;
+}
+
+td.inline-actions .inline-action {
+	margin-left: 2px;
+	min-width: 28px;
+	padding: 2px 8px;
+	line-height: 1;
+}
+
+/* Approve — solid blue, mirrors WP-admin .button.is-primary. */
+td.inline-actions .inline-action-approve {
+	background: #2271b1;
+	border-color: #2271b1;
+	color: #fff;
+}
+td.inline-actions .inline-action-approve:hover,
+td.inline-actions .inline-action-approve:focus {
+	background: #135e96;
+	border-color: #135e96;
+	color: #fff;
+}
+
+/* Reject — default button background, red glyph; mirrors button.reject strong. */
+td.inline-actions .inline-action-reject strong {
+	color: #dc3232;
+}
+
+/* Fuzzy — default button background, orange glyph; mirrors button.fuzzy strong. */
+td.inline-actions .inline-action-fuzzy strong {
+	color: #f56e28;
+}
+
+td.inline-actions .inline-action[disabled] {
+	opacity: 0.6;
+	cursor: not-allowed;
+}

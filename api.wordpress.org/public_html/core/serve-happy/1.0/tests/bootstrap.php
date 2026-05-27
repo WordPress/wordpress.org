@@ -1,6 +1,9 @@
 <?php
 namespace WordPressdotorg\API\Serve_Happy;
 
+// Load the project's composer autoloader (PHPUnit, yoast/phpunit-polyfills).
+require_once dirname( __DIR__, 6 ) . '/vendor/autoload.php';
+
 if ( function_exists( 'xdebug_disable' ) ) {
 	xdebug_disable();
 }

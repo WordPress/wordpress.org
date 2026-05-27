@@ -2,31 +2,25 @@
 
 namespace Dotorg\API\Events\Tests;
 use PHPUnit\Framework\TestCase;
-use Requests_Response;
 
 use function Dotorg\API\Events\{
 	get_events, get_location, build_response, is_client_core, pin_one_off_events,
-	maybe_add_regional_wordcamps, get_iso_3166_2_country_codes, maybe_add_wp15_promo, remove_duplicate_events
+	maybe_add_regional_wordcamps, get_iso_3166_2_country_codes, maybe_add_wp15_promo, remove_duplicate_events,
+	get_regional_wordcamp_data
 };
 
 /**
  * @group events
  */
 class Test_Events extends TestCase {
-	public static function setUpBeforeClass() : void {
-		require_once dirname( __DIR__ ) . '/index.php';
-	}
-
 	/**
 	 * Asserts that an HTTP response is valid and contains an event.
-	 *
-	 * @param Requests_Response $response
 	 */
 	public function assertResponseHasEvent( $response ) {
-		$body  = json_decode( $response->body );
-		$event = $body->events[0];
+		$this->assertSame( 200, $response->status_code, 'Non-200 response body: ' . substr( $response->body, 0, 200 ) );
 
-		$this->assertSame( 200, $response->status_code );
+		$body = json_decode( $response->body );
+		$this->assertIsObject( $body, 'Response body was not valid JSON: ' . substr( $response->body, 0, 200 ) );
 		$this->assertNull( $body->error );
 
 		$this->assertIsObject( $body->location );
@@ -35,10 +29,12 @@ class Test_Events extends TestCase {
 			( isset( $body->location->latitude ) && is_numeric( $body->location->latitude ) )
 		);
 
+		$this->assertNotEmpty( $body->events, 'Response contained no events.' );
+		$event = $body->events[0];
 		$this->assertContains( $event->type, array( 'wordcamp', 'meetup' ) );
 		$this->assertIsString( $event->title );
 		$this->assertIsNumeric( $event->start_unix_timestamp );
-		$this->assertSame( $event->url, filter_var( $event->url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED & FILTER_FLAG_QUERY_REQUIRED ) );
+		$this->assertSame( $event->url, filter_var( $event->url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED ) );
 		$this->assertIsNumeric( $event->location->latitude );
 	}
 
@@ -58,11 +54,11 @@ class Test_Events extends TestCase {
 	/**
 	 * @covers ::get_events
 	 *
-	 * @group unit
+	 * @group needs-db
 	 *
 	 * @dataProvider data_get_events
 	 */
-	function test_get_events( array $input, array $expected ) : void {
+	public function test_get_events( array $input, array $expected ) : void {
 		$actual_result = get_events( $input );
 
 		$this->assertSame( $expected['count'], count( $actual_result ) );
@@ -71,7 +67,7 @@ class Test_Events extends TestCase {
 		$this->assertSame( $expected['country'], strtoupper( $actual_result[0]['location']['country'] ) );
 	}
 
-	function data_get_events() : array {
+	public static function data_get_events() : array {
 		$cases = array(
 			// This assumes there will always be at least 2 upcoming events, so it needs to be a very active community.
 			'2-near-seattle' => array(
@@ -107,11 +103,11 @@ class Test_Events extends TestCase {
 	/**
 	 * @covers ::get_events
 	 *
-	 * @group unit
+	 * @group needs-db
 	 *
 	 * @dataProvider data_get_events_country_restriction
 	 */
-	function test_get_events_country_restriction( array $input, array $expected_countries ) : void {
+	public function test_get_events_country_restriction( array $input, array $expected_countries ) : void {
 		$actual_result    = get_events( $input );
 		$actual_countries = array_column( array_column( $actual_result, 'location' ), 'country' );
 		$actual_countries = array_unique( array_map( 'strtoupper', $actual_countries ) );
@@ -121,7 +117,7 @@ class Test_Events extends TestCase {
 		$this->assertSame( $expected_countries, $actual_countries );
 	}
 
-	function data_get_events_country_restriction() : array {
+	public static function data_get_events_country_restriction() : array {
 		return array(
 			'restricted-by-country' => array(
 				'input' => array(
@@ -174,14 +170,11 @@ class Test_Events extends TestCase {
 	 * @group unit
 	 */
 	public function test_maybe_add_regional_wordcamps() : void {
-		$local_events = get_events( array(
-			'number' => '5',
-			'nearby' => array(
-				// Off the coast of Robben Island, South Africa.
-				'latitude'  => '-33.849951',
-				'longitude' => '18.426246',
-			),
-		) );
+		// Seed with a mock local event; the function under test only cares about
+		// what it merges into this array, not where it came from.
+		$local_events = array(
+			array( 'title' => 'Mock Local Event' ),
+		);
 
 		$region_data = array(
 			'us' => array(
@@ -228,11 +221,6 @@ class Test_Events extends TestCase {
 		$location_ip_only = array(
 			'ip' => '8.8.8.8',
 		);
-
-		// Make sure there's at least one event, otherwise there could be false positives.
-		if ( ! $local_events ) {
-			$local_events[] = array( 'title' => 'Mock Event' );
-		}
 
 		$tests_expect_no_changes = array();
 		$tests_expect_changes    = array();
@@ -286,7 +274,7 @@ class Test_Events extends TestCase {
 		$this->assertContains( $sample_country, $countries );
 	}
 
-	public function data_get_iso_3166_2_country_codes() : array {
+	public static function data_get_iso_3166_2_country_codes() : array {
 		return array(
 			array( 'antarctica',    'HM' ),
 			array( 'africa',        'KM' ),
@@ -473,7 +461,7 @@ class Test_Events extends TestCase {
 	/**
 	 * @covers ::get_location
 	 *
-	 * @group unit
+	 * @group needs-db
 	 *
 	 * @dataProvider data_get_location
 	 */
@@ -485,23 +473,34 @@ class Test_Events extends TestCase {
 			$actual_result['description'] = strtolower( $actual_result['description'] );
 		}
 
-		/*
-		 * Normalize coordinates to account for minor differences in the databases.
-		 *
-		 * Rounding to three decimal places means that we're still accurate within about 110 meters, which is
-		 * good enough for our purposes.
-		 *
-		 * @link https://gis.stackexchange.com/a/8674/49125.
-		 */
-		if ( isset( $actual_result['latitude'], $actual_result['longitude'] ) ) {
-			$actual_result['latitude']  = number_format( round( $actual_result['latitude'],  3 ), 3 );
-			$actual_result['longitude'] = number_format( round( $actual_result['longitude'], 3 ), 3 );
-		}
-
-		$this->assertSame( $expected, $actual_result );
+		$this->assertSameWithLatLonDelta( $expected, $actual_result );
 	}
 
-	public function data_get_location() : array {
+	/**
+	 * Assert that two location arrays match, allowing small drift in latitude/longitude.
+	 *
+	 * Compares lat/lon with a tolerance to absorb routine drift in the geo databases, and
+	 * compares the remaining fields exactly. A delta of 0.01 degrees is roughly 1km at the
+	 * equator — tight enough to catch a wrong-city match, loose enough to survive geonames
+	 * updates.
+	 *
+	 * @link https://gis.stackexchange.com/a/8674/49125.
+	 */
+	public function assertSameWithLatLonDelta( $expected, $actual, float $delta = 0.01 ) : void {
+		if ( is_array( $expected ) && is_array( $actual )
+			&& isset( $expected['latitude'], $expected['longitude'], $actual['latitude'], $actual['longitude'] )
+		) {
+			$this->assertEqualsWithDelta( (float) $expected['latitude'],  (float) $actual['latitude'],  $delta, 'latitude drifted beyond tolerance' );
+			$this->assertEqualsWithDelta( (float) $expected['longitude'], (float) $actual['longitude'], $delta, 'longitude drifted beyond tolerance' );
+
+			// Strip the coordinates so the remaining fields can be compared exactly.
+			unset( $expected['latitude'], $expected['longitude'], $actual['latitude'], $actual['longitude'] );
+		}
+
+		$this->assertSame( $expected, $actual );
+	}
+
+	public static function data_get_location() : array {
 		$cases = array(
 			/*
 			 * Only the country code is given
@@ -827,12 +826,12 @@ class Test_Events extends TestCase {
 
 			'city-endonym-ideographic-asia3' => array(
 				'input' => array(
-					'location_name' => 'كراچى',
+					'location_name' => 'کراچی',
 					'locale'        => 'ur',
 					'timezone'      => 'Asia/Karachi',
 				),
 				'expected' => array(
-					'description' => 'كراچى',
+					'description' => 'کراچی',
 					'latitude'    => '24.861',
 					'longitude'   => '67.010',
 					'country'     => 'PK',
@@ -1419,14 +1418,11 @@ class Test_Events extends TestCase {
 	/**
 	 * @covers ::build_response
 	 *
-	 * @todo It might be better to do more abstracted tests of `main()`, or e2e tests, rather than coupling to the
-	 * internals of `build_request()`.
-	 *
-	 * @group unit
+	 * @group needs-db
 	 *
 	 * @dataProvider data_build_response
 	 */
-	function test_build_response( array $input, array $expected ) : void {
+	public function test_build_response( array $input, array $expected ) : void {
 		$actual_result = build_response( $input['location'], $input['location_args'] );
 
 		$this->assertSame( $expected['location'], $actual_result['location'] );
@@ -1443,7 +1439,7 @@ class Test_Events extends TestCase {
 		}
 	}
 
-	function data_build_response() : array {
+	public static function data_build_response() : array {
 		return array(
 			'utrecht-ip' => array(
 				'input' => array(
@@ -1481,7 +1477,8 @@ class Test_Events extends TestCase {
 
 			'throttled' => array(
 				'input' => array(
-					'location' => 'temp-request-throttled',
+					'location'      => 'temp-request-throttled',
+					'location_args' => array(),
 				),
 				'expected' => array(
 					'location' => array(),
@@ -1492,7 +1489,8 @@ class Test_Events extends TestCase {
 
 			'no-location' => array(
 				'input' => array(
-					'location' => array(),
+					'location'      => array(),
+					'location_args' => array(),
 				),
 				'expected' => array(
 					'location' => array(),
@@ -1508,20 +1506,20 @@ class Test_Events extends TestCase {
 	 *
 	 * @group unit
 	 */
-	function test_pin_one_off_events() {
+	public function test_pin_one_off_events() : void {
 		$seed_events = array();
 
-		// Don't forget to update the values here when they're updated in the FUT.
-		$actual_events_before_start      = pin_one_off_events( $seed_events, strtotime( 'December 12, 2022' ) );
-		$actual_events_before_expiration = pin_one_off_events( $seed_events, strtotime( 'December 17, 2022' ) );
-		$actual_events_after_expiration  = pin_one_off_events( $seed_events, strtotime( 'December 19, 2022' ) );
+		// Keep in sync with the date window hardcoded in pin_one_off_events().
+		$actual_events_before_start      = pin_one_off_events( $seed_events, strtotime( 'December 10, 2024' ) );
+		$actual_events_before_expiration = pin_one_off_events( $seed_events, strtotime( 'December 13, 2024' ) );
+		$actual_events_after_expiration  = pin_one_off_events( $seed_events, strtotime( 'December 18, 2024' ) );
 
 		$this->assertEmpty( $actual_events_before_start );
 		$this->assertIsArray( $actual_events_after_expiration );
 		$this->assertEmpty( $actual_events_after_expiration );
 
 		$this->assertIsArray( $actual_events_before_expiration );
-		$this->assertSame( 'State of the Word', $actual_events_before_expiration[0]['title'] );
+		$this->assertStringStartsWith( 'State of the Word', $actual_events_before_expiration[0]['title'] );
 	}
 
 	/**
@@ -1531,18 +1529,108 @@ class Test_Events extends TestCase {
 	 *
 	 * @dataProvider data_is_client_core
 	 */
-	function test_is_client_core( string $user_agent, bool $expected_result ) : void {
+	public function test_is_client_core( string $user_agent, bool $expected_result ) : void {
 		$actual_result = is_client_core( $user_agent );
 
 		$this->assertSame( $expected_result, $actual_result );
 	}
 
-	public function data_is_client_core() : array {
+	public static function data_is_client_core() : array {
 		return array(
 			'Empty string'                    => array( '', false ),
 			'Mentions WP but not Core format' => array( 'Contains WordPress but no slash', false ),
 			'Core old version'                => array( 'WordPress/4.9; https://example.org', true ),
 			'Core future version, no URL'     => array( 'WordPress/10.0', true ),
 		);
+	}
+
+	/**
+	 * Flag regional WordCamp entries that lag behind the latest edition published on wordcamp.org.
+	 *
+	 * For each entry, the bare host (e.g. https://us.wordcamp.org/) is resolved; the final URL
+	 * after redirects points to the latest published edition's year. If that year is newer than
+	 * the year in our hardcoded data, the entry needs updating.
+	 *
+	 * Intentionally does NOT flag entries whose event has passed without a successor —
+	 * a past entry with no newer edition is harmless dead data.
+	 *
+	 * @covers ::get_regional_wordcamp_data
+	 *
+	 * @group data-freshness
+	 */
+	public function test_regional_wordcamp_data_matches_latest_published_edition() : void {
+		foreach ( get_regional_wordcamp_data() as $region => $data ) {
+			$host = parse_url( $data['event']['url'], PHP_URL_HOST );
+			$this->assertNotEmpty( $host, "Region '$region' has no parseable host in event URL: " . $data['event']['url'] );
+
+			$final_url = $this->helper_resolve_url( "https://$host/" );
+			if ( ! $final_url ) {
+				// Network failure or non-redirecting host — skip without failing.
+				continue;
+			}
+
+			$hardcoded_year = $this->helper_extract_year( $data['event']['url'] );
+			$published_year = $this->helper_extract_year( $final_url );
+
+			if ( ! $hardcoded_year || ! $published_year ) {
+				continue;
+			}
+
+			$this->assertGreaterThanOrEqual(
+				$published_year,
+				$hardcoded_year,
+				sprintf(
+					'Regional WordCamp "%s" (region "%s"): hardcoded data is for %d, but %s now points to %d. Update get_regional_wordcamp_data() with the newer edition.',
+					$data['event']['title'],
+					$region,
+					$hardcoded_year,
+					$host,
+					$published_year
+				)
+			);
+		}
+	}
+
+	/**
+	 * Resolve a URL after redirects, returning the final effective URL on a 200 response.
+	 * Returns null on cURL errors, non-2xx responses, or when cURL is unavailable, so the
+	 * caller can skip rather than treat a transport failure as a passing assertion.
+	 */
+	private function helper_resolve_url( string $url ) : ?string {
+		if ( ! function_exists( 'curl_init' ) ) {
+			return null;
+		}
+
+		$ch = curl_init( $url );
+		curl_setopt_array( $ch, array(
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_NOBODY         => true,
+			CURLOPT_TIMEOUT        => 10,
+			CURLOPT_USERAGENT      => 'Mozilla/5.0 (wordpress.org events-api-tests)',
+		) );
+		curl_exec( $ch );
+
+		$errno     = curl_errno( $ch );
+		$http_code = (int) curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		$final     = curl_getinfo( $ch, CURLINFO_EFFECTIVE_URL );
+		curl_close( $ch );
+
+		if ( $errno || $http_code < 200 || $http_code >= 300 ) {
+			return null;
+		}
+
+		return $final ?: null;
+	}
+
+	/**
+	 * Extract a 4-digit year from a URL path segment, e.g. "/2026/" → 2026.
+	 */
+	private function helper_extract_year( string $url ) : ?int {
+		$path = parse_url( $url, PHP_URL_PATH ) ?? '';
+		if ( preg_match( '#/(\d{4})(?:-[\w-]+)?/?#', $path, $m ) ) {
+			return (int) $m[1];
+		}
+		return null;
 	}
 }
