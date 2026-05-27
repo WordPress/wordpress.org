@@ -25,6 +25,16 @@ $medium      = (int) ( $contributor['_metrics_medium'] ?? 0 );
 $top_repos   = $contributor['_metrics_top_repos'] ?? array();
 $window_days = (int) ( $contributor['_metrics_window_days'] ?? ContributionMetrics\WINDOW_DAYS_DEFAULT );
 
+// _is_you is set by page-pledges.php on the row matching get_current_user_id().
+// JS uses #pledges-card-you to locate the in-list card for IntersectionObserver,
+// and CSS applies the "you are here" treatment (ribbon, ring, badge).
+// _is_standing is set only when this card is being rendered inside the
+// "Your standing" hero block at the top of the page — same visual treatment,
+// but it must NOT carry the unique id (that's reserved for the in-list copy
+// so the jump pill anchor resolves to one element).
+$is_you      = ! empty( $contributor['_is_you'] );
+$is_standing = ! empty( $contributor['_is_standing'] );
+
 // Data attributes used by client-side filter. `data-active` lets the JS exclude
 // inactive cards from the "active contributors" result count and toggle the
 // inactive divider when filters empty its section.
@@ -35,6 +45,7 @@ $row_attrs = array(
 	'data-name'        => strtolower( $contributor['name'] ?? '' ),
 	'data-sponsorship' => $status_class,
 	'data-active'      => $weighted > 0 ? '1' : '0',
+	'data-you'         => $is_you ? '1' : '0',
 );
 
 $attrs_html = '';
@@ -42,15 +53,30 @@ foreach ( $row_attrs as $k => $v ) {
 	$attrs_html .= sprintf( ' %s="%s"', esc_attr( $k ), esc_attr( $v ) );
 }
 
-// Default sponsorship filter is "Independent" (matches the JS state and the
-// is-on chip in page-pledges.php). Pre-hide sponsored cards so the browser
-// paints the filtered view immediately; otherwise the footer-loaded JS hides
-// them after first paint, producing a visible flash of every card.
-$is_initially_hidden = 'independent' !== $status_class;
+// Sponsorship filter is URL-driven (see ?sponsorship= handling in page-pledges.php).
+// Pre-hide non-matching cards so the browser paints the filtered view immediately;
+// otherwise the footer-loaded JS hides them after first paint, producing a visible
+// flash of every card. $sponsorship is inherited from the parent template scope via
+// `require`; default to 'independent' if this file is ever included standalone.
+//
+// Standing-card twins are never sponsorship-hidden at this layer — the outer
+// .pledges-standing-card-ranked wrapper owns visibility (PHP renders it with
+// [hidden] in filtered-out state, JS swaps on filter change). If the inner
+// article were ALSO hidden, JS un-hiding the wrapper would leave the ranked
+// standing card visually blank because apply() never touches cards outside
+// #pledges-grid.
+$active_sponsorship  = $sponsorship ?? 'independent';
+$is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $active_sponsorship !== $status_class;
 
 ?>
 
-<article class="pledges-card"<?php echo $is_initially_hidden ? ' hidden' : ''; ?> <?php echo $attrs_html; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+<article<?php echo $is_you && ! $is_standing ? ' id="pledges-card-you"' : ''; ?> class="pledges-card<?php echo $is_you ? ' is-you' : ''; ?>"<?php echo $is_initially_hidden ? ' hidden' : ''; ?> <?php echo $attrs_html; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+	<?php if ( $is_you ) : ?>
+		<span class="pledges-card-you-badge">
+			<span class="pledges-card-you-dot" aria-hidden="true"></span>
+			<?php esc_html_e( 'You are here', 'wporg-5ftf' ); ?>
+		</span>
+	<?php endif; ?>
 	<span class="pledges-card-rank" aria-hidden="true"><?php echo esc_html( str_pad( (string) $contributor['_rank'], 2, '0', STR_PAD_LEFT ) ); ?></span>
 
 	<div class="pledges-card-avatar">
@@ -94,8 +120,8 @@ $is_initially_hidden = 'independent' !== $status_class;
 				$parts = array();
 				if ( $high > 0 ) {
 					$parts[] = sprintf(
-						/* translators: 1: <strong> tag, 2: number of high-weight contributions, 3: </strong> tag */
-						_n( '%1$s%2$d high-weight%3$s contribution', '%1$s%2$d high-weight%3$s contributions', $high, 'wporg-5ftf' ),
+						/* translators: 1: <strong> tag, 2: number of high-impact contributions, 3: </strong> tag */
+						_n( '%1$s%2$d high-impact%3$s contribution', '%1$s%2$d high-impact%3$s contributions', $high, 'wporg-5ftf' ),
 						'<strong>',
 						$high,
 						'</strong>'
@@ -103,8 +129,8 @@ $is_initially_hidden = 'independent' !== $status_class;
 				}
 				if ( $medium > 0 ) {
 					$parts[] = sprintf(
-						/* translators: 1: <strong> tag, 2: number of medium-weight contributions, 3: </strong> tag */
-						_n( '%1$s%2$d medium%3$s contribution', '%1$s%2$d medium%3$s contributions', $medium, 'wporg-5ftf' ),
+						/* translators: 1: <strong> tag, 2: number of medium-impact contributions, 3: </strong> tag */
+						_n( '%1$s%2$d medium-impact%3$s contribution', '%1$s%2$d medium-impact%3$s contributions', $medium, 'wporg-5ftf' ),
 						'<strong>',
 						$medium,
 						'</strong>'
@@ -143,7 +169,7 @@ $is_initially_hidden = 'independent' !== $status_class;
 			} else {
 				echo esc_html( sprintf(
 					/* translators: %d: window in days */
-					__( 'No verified contributions in the last %d days.', 'wporg-5ftf' ),
+					__( 'No tracked contributions in the last %d days.', 'wporg-5ftf' ),
 					$window_days
 				) );
 			}
@@ -154,7 +180,7 @@ $is_initially_hidden = 'independent' !== $status_class;
 	<aside class="pledges-card-meta">
 		<span class="pledges-card-weight">
 			<strong><?php echo esc_html( number_format_i18n( $weighted ) ); ?></strong>
-			<span class="pledges-card-weight-label"><?php esc_html_e( 'weighted', 'wporg-5ftf' ); ?></span>
+			<span class="pledges-card-weight-label"><?php esc_html_e( 'impact', 'wporg-5ftf' ); ?></span>
 		</span>
 	</aside>
 </article>

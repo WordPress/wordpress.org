@@ -1317,9 +1317,9 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			}
 		}
 
-		// Special case: Show WordCamp Asia to all of asia until it's over.
+		// Special case: Show WordCamp Europe to all of europe until it's over.
 		if (
-			'asia' === $region &&
+			'europe' === $region &&
 			! empty( $location['country'] ) &&
 			$current_time <= $data['event']['end_unix_timestamp'] &&
 			in_array( strtoupper( $location['country'] ), $data['regional_countries'], true )
