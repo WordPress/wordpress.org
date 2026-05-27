@@ -23,9 +23,9 @@ function wporg_login_purpose_options() {
 /**
  * Sanitize a user-supplied website URL for the profile field.
  *
- * Strips WordPress internal paths (wp-admin, wp-login.php, etc.) so the saved value points at
- * the public site root, and rejects URLs hosted on wordpress.org subdomains since those refer
- * to wp.org-managed properties rather than the user's own site.
+ * Strips the wp-admin / wp-login.php paths so the saved value points at the public site root,
+ * and rejects URLs hosted on wordpress.org subdomains since those refer to wp.org-managed
+ * properties rather than the user's own site.
  *
  * @param string $url Raw URL submitted by the user.
  * @return string Cleaned URL, or an empty string if the URL is unusable.
@@ -53,10 +53,10 @@ function wporg_login_sanitize_user_url( $url ) {
 		return '';
 	}
 
-	// Strip WordPress internal paths so we keep just the site root the user lives on.
+	// Strip the wp-admin / wp-login.php paths so we keep just the site root the user lives on.
 	$path = $parts['path'] ?? '';
 	$path = preg_replace(
-		'#/(wp-admin|wp-login\.php|wp-content|wp-includes|wp-json|wp-cron\.php|xmlrpc\.php|wp-signup\.php|wp-activate\.php)(/.*|$)#i',
+		'#/(wp-admin|wp-login\.php)(/.*|$)#i',
 		'/',
 		$path
 	);
@@ -544,7 +544,7 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 				/** This filter is documented in wp-includes/user.php */
 				$value = apply_filters( 'pre_user_url', $value );
 
-				// Strip wp-admin/etc paths and reject .wordpress.org URLs.
+				// Strip wp-admin / wp-login.php paths and reject .wordpress.org URLs.
 				$value = wporg_login_sanitize_user_url( $value );
 
 				if ( $pending_user ) {
