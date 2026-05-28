@@ -57,6 +57,10 @@ class Trac_Sync {
 		$last_request = get_option( 'wporg-themes-last-trac-sync', strtotime( '-2 days' ) );
 		update_option( 'wporg-themes-last-trac-sync', time() );
 
+		// Migrate approved theme updates whose release delay has elapsed to live on Trac,
+		// so the sync below imports them as it would any other newly-live ticket.
+		self::release_to_live( $trac );
+
 		foreach ( self::$stati as $new_status => $args ) {
 			// Get array of tickets.
 			$tickets = (array) $trac->ticket_query( add_query_arg( wp_parse_args( $args, [
@@ -135,36 +139,26 @@ class Trac_Sync {
 	}
 
 	/**
-	 * Cron handler that promotes auto-approved theme updates out of the release cooldown.
+	 * Migrates auto-approved theme updates out of the release delay, on Trac.
 	 *
-	 * Finds `theme update` tickets that have been sitting in the `approved` status for at
-	 * least WPORG_THEMES_RELEASE_COOL_DOWN_DELAY, marks the associated theme version live
-	 * (firing the usual publish / wp-themes.com / GlotPress / author-email machinery), and
-	 * closes the Trac ticket as resolution=live so it leaves the `approved` state.
+	 * Finds `theme update` tickets that have been in the `approved` status for at least
+	 * WPORG_THEMES_RELEASE_COOL_DOWN_DELAY and closes them as resolution=live. That's the
+	 * only change made here — cron_trigger()'s normal sync, which runs straight after,
+	 * imports the now-live ticket into WordPress like any other.
 	 *
 	 * Scoped to the `theme update` priority on purpose: first-time theme submissions also
 	 * pass through the `approved` status, but a trusted reviewer marks those live by hand,
 	 * so they should not be promoted on a timer.
+	 *
+	 * @param \Trac $trac An authenticated Trac client.
 	 */
-	public static function release_to_live() {
-		if ( ! defined( 'THEME_TRACBOT_PASSWORD' ) || ! THEME_TRACBOT_PASSWORD ) {
-			return;
-		}
-
-		if ( ! class_exists( 'Trac' ) ) {
-			require_once ABSPATH . WPINC . '/class-IXR.php';
-			require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';
-			require_once dirname( __DIR__ ) . '/lib/class-trac.php';
-		}
-
-		$trac   = new \Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
-		$delay  = (int) ( defined( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY' ) ? WPORG_THEMES_RELEASE_COOL_DOWN_DELAY : 0 );
-		$cutoff = time() - $delay;
+	public static function release_to_live( $trac ) {
+		$cutoff = time() - (int) WPORG_THEMES_RELEASE_COOL_DOWN_DELAY;
 
 		/*
 		 * Auto-approved theme updates currently in the `approved` status. We check each
 		 * ticket's changetime in PHP rather than filtering server-side, so a quirk in
-		 * Trac's date-range query syntax can't silently strand themes in the cooldown.
+		 * Trac's date-range query syntax can't silently strand themes in the delay.
 		 */
 		$tickets = (array) $trac->ticket_query( add_query_arg( [
 			'status'   => 'approved',
@@ -174,64 +168,20 @@ class Trac_Sync {
 
 		foreach ( $tickets as $ticket_id ) {
 			$ticket = $trac->ticket_get( $ticket_id );
-			if ( ! $ticket ) {
+
+			// Skip if the ticket was force-released or reopened since the query.
+			if ( ! $ticket || 'approved' !== ( $ticket['status'] ?? '' ) ) {
 				continue;
 			}
 
-			// The ticket may have been force-released or reopened since the query.
-			if ( 'approved' !== ( $ticket['status'] ?? '' ) ) {
-				continue;
-			}
-
-			// The cooldown must have elapsed: the ticket has to have been sitting in
-			// `approved` since at least $cutoff.
+			// Only once the release delay, measured from the ticket's changetime, has elapsed.
 			$changed = $ticket[2] instanceof \IXR_Date ? $ticket[2]->getTimestamp() : strtotime( (string) $ticket[2] );
 			if ( ! $changed || $changed > $cutoff ) {
 				continue;
 			}
 
-			$theme_id = self::get_theme_id( $ticket_id );
-			if ( ! $theme_id ) {
-				continue;
-			}
-
-			// If there was a newer-version-uploaded, we have more than one version per ticket.
-			$versions = array_keys( (array) get_post_meta( $theme_id, '_ticket_id', true ), $ticket_id, true );
-			usort( $versions, 'version_compare' );
-			$version = end( $versions );
-			if ( ! $version ) {
-				continue;
-			}
-
-			$status = wporg_themes_get_version_status( $theme_id, $version );
-
-			/*
-			 * A newer version uploaded mid-cooldown will have demoted this version to
-			 * 'old'. Close the stale ticket as a newer-version-uploaded rather than
-			 * marking it live — otherwise a rollback (which looks for resolution=live
-			 * tickets) could restore a version that never actually served.
-			 */
-			if ( 'old' === $status ) {
-				$trac->ticket_update(
-					$ticket_id,
-					'Superseded by a newer version.',
-					[ 'action' => 'new_no_review_superseded', '_ts' => $ticket['_ts'] ],
-					false
-				);
-				continue;
-			}
-
-			if ( 'approved' === $status ) {
-				// The release delay has elapsed: mark the version live.
-				wporg_themes_update_version_status( $theme_id, $version, 'live' );
-			} elseif ( 'live' !== $status ) {
-				// Unexpected divergence (e.g. reopened to 'new'); leave the ticket alone.
-				continue;
-			}
-
-			// Close the ticket as live (resolution=live): we either just promoted it or
-			// it was already live in WP. Pass the concurrency token we just read to avoid
-			// a second ticket.get.
+			// Close as live. Pass the concurrency token we just read to avoid a second
+			// ticket.get; cron_trigger()'s sync then imports it as a newly-live version.
 			$trac->ticket_update(
 				$ticket_id,
 				'Marking live.',

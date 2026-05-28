@@ -47,11 +47,11 @@ define( 'WPORG_THEMES_E2E_REPO', 'WordPress/theme-review-e2e' );
  * Delay between a theme version being approved (by a reviewer on Trac, or via the
  * auto-approval path for theme updates) and it becoming the live version served to
  * sites by the themes API. Approved versions are held in Trac's `approved` status and
- * promoted to live by the theme_directory_release_to_live cron once this delay elapses;
- * the previous live version (if any) continues to be served in the meantime. Mitigates
- * supply-chain risks by giving scanners and humans a window to flag bad releases.
- * Reviewers can bypass the cooldown with Trac's `approve and mark` / `mark this theme`
- * actions, which close the ticket as live immediately.
+ * migrated to live by the theme_directory_trac_sync cron once this delay elapses (see
+ * Trac_Sync::release_to_live()); the previous live version (if any) continues to be
+ * served in the meantime. Mitigates supply-chain risks by giving scanners and humans a
+ * window to flag bad releases. Reviewers can bypass the delay with Trac's `approve and
+ * mark` / `mark this theme` actions, which close the ticket as live immediately.
  *
  * Defers to the shared WPORG_PLUGIN_THEME_RELEASE_DELAY constant when it's defined
  * so the plugin and theme directories can be tuned (or disabled) in lockstep from a
