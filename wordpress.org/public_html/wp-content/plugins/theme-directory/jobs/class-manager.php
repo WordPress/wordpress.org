@@ -25,6 +25,9 @@ class Manager {
 		// The actual cron hooks.
 		add_action( 'theme_directory_trac_sync', [ __NAMESPACE__ . '\Trac_Sync', 'cron_trigger' ] );
 
+		// Promote themes out of the release cooldown once it has elapsed.
+		add_action( 'theme_directory_release_to_live', [ __NAMESPACE__ . '\Trac_Sync', 'release_to_live' ] );
+
 		// A cronjob to check cronjobs.
 		add_action( 'theme_directory_check_cronjobs', [ $this, 'register_cron_tasks' ] );
 
@@ -63,6 +66,10 @@ class Manager {
 	public function register_cron_tasks() {
 		if ( ! wp_next_scheduled( 'theme_directory_trac_sync' ) ) {
 			wp_schedule_event( time() + 60, 'every_15m', 'theme_directory_trac_sync' );
+		}
+
+		if ( ! wp_next_scheduled( 'theme_directory_release_to_live' ) ) {
+			wp_schedule_event( time() + 60, 'every_15m', 'theme_directory_release_to_live' );
 		}
 
 		if ( ! wp_next_scheduled( 'theme_directory_check_cronjobs' ) ) {

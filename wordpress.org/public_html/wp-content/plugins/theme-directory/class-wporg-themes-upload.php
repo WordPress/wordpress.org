@@ -1332,13 +1332,24 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			// Themes team auto-approves theme-updates, so mark the theme as live immediately.
-			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets.
+			// Themes team auto-approves theme-updates. Note that this only applies to new
+			// ticket creation, so it won't happen on themes with existing outstanding tickets.
 			if ( $this->trac_ticket->priority == 'theme update' ) {
-				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
+				if ( WPORG_THEMES_RELEASE_COOL_DOWN_DELAY ) {
+					// Land the update in the `approved` status; the release-to-live cron
+					// promotes it to live once the cooldown elapses. The previous live
+					// version continues to be served in the meantime.
+					$cooldown_hours = (int) round( WPORG_THEMES_RELEASE_COOL_DOWN_DELAY / HOUR_IN_SECONDS );
+					$this->trac->ticket_update( $ticket_id, sprintf( 'Theme Update for existing Live theme - automatically approved, will be marked live in %dhrs.', $cooldown_hours ), array( 'action' => 'new_no_review_delay' ), false );
 
-				$this->trac_ticket->resolution = 'live';
-				$this->version_status          = 'live';
+					$this->version_status = 'approved';
+				} else {
+					// Cooldown disabled: mark the theme live immediately.
+					$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
+
+					$this->trac_ticket->resolution = 'live';
+					$this->version_status          = 'live';
+				}
 			}
 
 		}
@@ -1563,10 +1574,12 @@ TICKET;
 		 * Skip sending an email when..
 		 *  - The theme is to be made live immediately.
 		 *    `wporg_themes_approve_version()` will send a "Congratulations! It's live!" shortly.
+		 *  - The theme was auto-approved into the release cooldown.
+		 *    `wporg_themes_notify_release_cooldown()` sends a "going live in N hours" email.
 		 *  - No Trac ticket was created, so there's nothing to reference about where feedback is.
 		 */
 		if (
-			'live' === $this->version_status ||
+			in_array( $this->version_status, [ 'live', 'approved' ], true ) ||
 			! $this->trac_ticket->id
 		) {
 			return;

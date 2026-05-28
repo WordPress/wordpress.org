@@ -85,16 +85,6 @@ function wporg_themes_map_meta_cap( $caps, $cap, $user_id, $context ) {
 			unset( $caps[ array_search( $cap, $caps ) ] );
 			break;
 
-		case 'theme_admin_edit':
-			// Admin-edit actions on a theme post (force-release, etc). Maps onto the
-			// same 'suspend_themes' primitive the theme-admin roles already carry;
-			// the meta cap exists so check sites can read as "this is an admin edit"
-			// rather than overloading the suspend/reinstate semantics. Theme review
-			// (the workflow on Trac) is a separate concern and may diverge later.
-			$caps[] = 'suspend_themes';
-			unset( $caps[ array_search( $cap, $caps ) ] );
-			break;
-
 		case 'theme_configure_categorization_options':
 			// Protect against a cap call without a theme context.
 			$post = $context ? get_post( $context[0] ) : false;
@@ -591,8 +581,9 @@ function wporg_themes_meta_box_callback( $post ) {
 		<p><?php echo $text; ?> -
 			<select name="wporg_themes_status[<?php echo base64_encode( $version ); // base64 because version numbers don't work so well as parts of keys ?>]">
 				<option value="new" <?php selected( $status, 'new' ); ?>><?php esc_html_e( 'New', 'wporg-themes' ); ?></option>
-				<?php if ( WPORG_THEMES_RELEASE_COOL_DOWN_DELAY || 'approved' === $status ) : ?>
-					<option value="approved" <?php selected( $status, 'approved' ); ?>><?php esc_html_e( 'Approved (in cooldown)', 'wporg-themes' ); ?></option>
+				<?php if ( 'approved' === $status ) : ?>
+					<?php // `approved` is a transient Trac-driven cooldown state; only shown so the current value displays correctly. ?>
+					<option value="approved" selected><?php esc_html_e( 'Approved (in release cooldown)', 'wporg-themes' ); ?></option>
 				<?php endif; ?>
 				<option value="live" <?php selected( $status, 'live' ); ?>><?php esc_html_e( 'Live', 'wporg-themes' ); ?></option>
 				<option value="old" <?php selected( $status, 'old' ); ?>><?php esc_html_e( 'Old', 'wporg-themes' ); ?></option>
@@ -600,69 +591,6 @@ function wporg_themes_meta_box_callback( $post ) {
 		</p>
 	<?php
 	endforeach;
-
-	wporg_themes_meta_box_cooldown_section( $post, $versions );
-}
-
-/**
- * Renders the release-cooldown section of the version meta box: the countdown for the
- * currently-'approved' version, and (for reviewers) a force-release control. Bails when
- * the cooldown feature is disabled or no version is in the cooldown window.
- *
- * @param WP_Post $post     The theme post.
- * @param array   $versions The _status meta map: version => status.
- */
-function wporg_themes_meta_box_cooldown_section( $post, $versions ) {
-	if ( ! WPORG_THEMES_RELEASE_COOL_DOWN_DELAY ) {
-		return;
-	}
-
-	$approved_version = array_search( 'approved', (array) $versions, true );
-	if ( ! $approved_version ) {
-		return;
-	}
-
-	$cooldown_until = wporg_themes_get_cooldown_until( $post->ID, $approved_version );
-	if ( ! $cooldown_until || $cooldown_until <= time() ) {
-		return;
-	}
-
-	?>
-	<hr>
-	<p>
-		<?php
-		printf(
-			/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
-			esc_html__( 'Version %1$s is in the release cooldown — it will be served to users in %2$s (at %3$s UTC).', 'wporg-themes' ),
-			esc_html( $approved_version ),
-			esc_html( human_time_diff( time(), $cooldown_until ) ),
-			esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
-		);
-		?>
-	</p>
-	<?php if ( current_user_can( 'theme_admin_edit', $post->ID ) ) : ?>
-		<p>
-			<label for="wporg_themes_force_release_reason"><?php esc_html_e( 'Force-release reason (required):', 'wporg-themes' ); ?></label>
-			<textarea
-				id="wporg_themes_force_release_reason"
-				name="wporg_themes_force_release_reason"
-				rows="2"
-				style="width: 100%;"
-				placeholder="<?php esc_attr_e( 'e.g. urgent security fix', 'wporg-themes' ); ?>"
-			></textarea>
-		</p>
-		<p>
-			<button type="submit" name="wporg_themes_force_release_version" value="<?php echo esc_attr( $approved_version ); ?>" class="button">
-				<?php
-				printf(
-					/* translators: %s: version */
-					esc_html__( 'Force-release %s now', 'wporg-themes' ),
-					esc_html( $approved_version )
-				);
-				?>
-			</button>
-		</p>
-	<?php endif;
 }
 
 /**
@@ -694,21 +622,6 @@ function wporg_themes_save_meta_box_data( $post_id ) {
 	// Only run once.
 	remove_action( 'save_post', __FUNCTION__ );
 
-	// Handle reviewer force-release: explicit "release the in-cooldown version now"
-	// action, requires a reason recorded against the audit log.
-	if (
-		! empty( $_POST['wporg_themes_force_release_version'] ) &&
-		current_user_can( 'theme_admin_edit', $post_id )
-	) {
-		$reason = isset( $_POST['wporg_themes_force_release_reason'] )
-			? trim( sanitize_textarea_field( wp_unslash( $_POST['wporg_themes_force_release_reason'] ) ) )
-			: '';
-		if ( $reason ) {
-			wporg_themes_force_release_version( $post_id, $reason );
-			return;
-		}
-	}
-
 	$new_status = array();
 	foreach ( $_POST['wporg_themes_status'] as $version => $status ) {
 		// We could check of the passed status is valid, but wporg_themes_update_version_status() handles that beautifully.
@@ -716,10 +629,9 @@ function wporg_themes_save_meta_box_data( $post_id ) {
 	}
 	uksort( $new_status, 'version_compare' );
 
-	// Update the statuses. Manual admin saves bypass the release cooldown — when an
-	// operator explicitly selects 'Live' here they want it to take effect immediately.
+	// Update the statuses.
 	foreach ( $new_status as $version => $status ) {
-		wporg_themes_update_version_status( $post_id, $version, $status, true );
+		wporg_themes_update_version_status( $post_id, $version, $status );
 	}
 }
 add_action( 'save_post', 'wporg_themes_save_meta_box_data' );
