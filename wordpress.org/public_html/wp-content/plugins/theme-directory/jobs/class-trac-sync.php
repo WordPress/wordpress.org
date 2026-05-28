@@ -203,20 +203,38 @@ class Trac_Sync {
 				continue;
 			}
 
+			$status = wporg_themes_get_version_status( $theme_id, $version );
+
 			/*
-			 * Mark the version live if it's still the approved one. A newer version
-			 * uploaded mid-cooldown will have demoted this version to 'old'; we still
-			 * close the ticket below so the cron stops revisiting it.
+			 * A newer version uploaded mid-cooldown will have demoted this version to
+			 * 'old'. Close the stale ticket as a newer-version-uploaded rather than
+			 * marking it live — otherwise a rollback (which looks for resolution=live
+			 * tickets) could restore a version that never actually served.
 			 */
-			if ( 'approved' === wporg_themes_get_version_status( $theme_id, $version ) ) {
-				wporg_themes_update_version_status( $theme_id, $version, 'live' );
+			if ( 'old' === $status ) {
+				$trac->ticket_update(
+					$ticket_id,
+					'Superseded by a newer version.',
+					[ 'action' => 'new_no_review_superseded', '_ts' => $ticket['_ts'] ],
+					false
+				);
+				continue;
 			}
 
-			// Advance the ticket out of `approved` (closed, resolution=live). Pass the
-			// concurrency token we just read to avoid a second ticket.get.
+			if ( 'approved' === $status ) {
+				// The release delay has elapsed: mark the version live.
+				wporg_themes_update_version_status( $theme_id, $version, 'live' );
+			} elseif ( 'live' !== $status ) {
+				// Unexpected divergence (e.g. reopened to 'new'); leave the ticket alone.
+				continue;
+			}
+
+			// Close the ticket as live (resolution=live): we either just promoted it or
+			// it was already live in WP. Pass the concurrency token we just read to avoid
+			// a second ticket.get.
 			$trac->ticket_update(
 				$ticket_id,
-				'Release cooldown elapsed — marking this theme version live.',
+				'Marking live.',
 				[ 'action' => 'new_no_review', '_ts' => $ticket['_ts'] ],
 				false
 			);
