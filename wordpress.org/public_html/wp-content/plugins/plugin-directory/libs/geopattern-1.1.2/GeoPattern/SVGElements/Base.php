@@ -11,12 +11,26 @@ abstract class Base
         $this->args = $args;
     }
 
+    // WordPress.org: round generated floats (opacity, coordinates, transforms) to 3 decimal
+    // places. The upstream generator emits full PHP precision, e.g. fill-opacity="0.080666666666667",
+    // which is invisible once rendered but inflates every icon. See https://meta.trac.wordpress.org/ticket/8270.
+    protected function trimPrecision($value)
+    {
+        return preg_replace_callback(
+            '/-?\d*\.\d+/',
+            function ($matches) {
+                return rtrim(rtrim(number_format((float) $matches[0], 3, '.', ''), '0'), '.');
+            },
+            (string) $value
+        );
+    }
+
     public function elementsToString()
     {
         $string = ' ';
         foreach ($this->elements as $key => $value)
         {
-            $string .= "$key=\"$value\" ";
+            $string .= "$key=\"".$this->trimPrecision($value)."\" ";
         }
         return $string;
     }
@@ -31,13 +45,13 @@ abstract class Base
                 $string .= "$key=\"";
                 foreach ($value as $k => $v)
                 {
-                    $string .= "$k:$v;";
+                    $string .= "$k:".$this->trimPrecision($v).";";
                 }
                 $string .= '" ';
             }
             else
             {
-                $string .= "$key=\"$value\" ";
+                $string .= "$key=\"".$this->trimPrecision($value)."\" ";
             }
         }
         return $string;
