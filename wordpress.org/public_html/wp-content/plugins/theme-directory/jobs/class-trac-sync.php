@@ -185,7 +185,10 @@ class Trac_Sync {
 			$trac->ticket_update(
 				$ticket_id,
 				'Marking live.',
-				[ 'action' => 'new_no_review', '_ts' => $ticket['_ts'] ],
+				[
+					'action' => 'new_no_review',
+					'_ts'    => $ticket['_ts'],
+				],
 				false
 			);
 		}
