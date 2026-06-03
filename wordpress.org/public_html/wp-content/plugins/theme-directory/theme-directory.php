@@ -60,6 +60,30 @@ define( 'WPORG_THEMES_E2E_REPO', 'WordPress/theme-review-e2e' );
 define( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY', defined( 'WPORG_PLUGIN_THEME_RELEASE_DELAY' ) ? WPORG_PLUGIN_THEME_RELEASE_DELAY : 24 * HOUR_IN_SECONDS );
 
 /**
+ * Returns the release cooldown delay, in seconds, for a theme.
+ *
+ * The WPORG_THEMES_RELEASE_COOL_DOWN_DELAY constant provides the default, which is then
+ * passed through the `wporg_themes_release_cooldown_delay` filter so the delay can be
+ * shortened, extended, or removed (return 0 to disable the cooldown) on a per-theme basis.
+ * The theme slug is passed to the filter when it is known.
+ *
+ * @param string $theme_slug The slug of the theme being acted upon, if known.
+ * @return int Delay in seconds. 0 disables the cooldown (the version goes live immediately).
+ */
+function wporg_themes_get_release_cooldown_delay( $theme_slug = '' ) {
+	/**
+	 * Filters the release cooldown delay for a theme.
+	 *
+	 * Return 0 to disable the cooldown (the approved version goes live immediately), or a
+	 * larger/smaller number of seconds to lengthen or shorten the delay for this theme.
+	 *
+	 * @param int    $delay      The default delay in seconds (WPORG_THEMES_RELEASE_COOL_DOWN_DELAY).
+	 * @param string $theme_slug The slug of the theme being acted upon, or '' when not known.
+	 */
+	return (int) apply_filters( 'wporg_themes_release_cooldown_delay', WPORG_THEMES_RELEASE_COOL_DOWN_DELAY, $theme_slug );
+}
+
+/**
  * Things to change on activation.
  */
 function wporg_themes_activate() {

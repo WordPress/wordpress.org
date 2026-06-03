@@ -142,9 +142,10 @@ class Trac_Sync {
 	 * Migrates auto-approved theme updates out of the release delay, on Trac.
 	 *
 	 * Finds `theme update` tickets that have been in the `approved` status for at least
-	 * WPORG_THEMES_RELEASE_COOL_DOWN_DELAY and closes them as resolution=live. That's the
-	 * only change made here — cron_trigger()'s normal sync, which runs straight after,
-	 * imports the now-live ticket into WordPress like any other.
+	 * the theme's release cooldown delay (wporg_themes_get_release_cooldown_delay()) and
+	 * closes them as resolution=live. That's the only change made here — cron_trigger()'s
+	 * normal sync, which runs straight after, imports the now-live ticket into WordPress
+	 * like any other.
 	 *
 	 * Scoped to the `theme update` priority on purpose: first-time theme submissions also
 	 * pass through the `approved` status, but a trusted reviewer marks those live by hand,
@@ -153,8 +154,6 @@ class Trac_Sync {
 	 * @param \Trac $trac An authenticated Trac client.
 	 */
 	public static function release_to_live( $trac ) {
-		$cutoff = time() - (int) WPORG_THEMES_RELEASE_COOL_DOWN_DELAY;
-
 		/*
 		 * Auto-approved theme updates currently in the `approved` status. We check each
 		 * ticket's changetime in PHP rather than filtering server-side, so a quirk in
@@ -173,6 +172,10 @@ class Trac_Sync {
 			if ( ! $ticket || 'approved' !== ( $ticket['status'] ?? '' ) ) {
 				continue;
 			}
+
+			// Resolve the theme slug so the release delay can be filtered per-theme.
+			$theme_slug = get_post_field( 'post_name', self::get_theme_id( $ticket_id ) );
+			$cutoff     = time() - wporg_themes_get_release_cooldown_delay( $theme_slug );
 
 			// Only once the release delay, measured from the ticket's changetime, has elapsed.
 			$changed = $ticket[2] instanceof \IXR_Date ? $ticket[2]->getTimestamp() : strtotime( (string) $ticket[2] );

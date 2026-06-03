@@ -1346,11 +1346,12 @@ TICKET;
 			// Themes team auto-approves theme-updates. Note that this only applies to new
 			// ticket creation, so it won't happen on themes with existing outstanding tickets.
 			if ( $this->trac_ticket->priority == 'theme update' ) {
-				if ( WPORG_THEMES_RELEASE_COOL_DOWN_DELAY ) {
+				$release_delay = wporg_themes_get_release_cooldown_delay( $this->theme_slug );
+				if ( $release_delay ) {
 					// Land the update in the `approved` status; the release-to-live cron
 					// promotes it to live once the cooldown elapses. The previous live
 					// version continues to be served in the meantime.
-					$delay_hours = (int) round( WPORG_THEMES_RELEASE_COOL_DOWN_DELAY / HOUR_IN_SECONDS );
+					$delay_hours = (int) round( $release_delay / HOUR_IN_SECONDS );
 					$this->trac->ticket_update( $ticket_id, sprintf( 'Theme Update for existing Live theme - automatically approved, will be marked live in %dhrs.', $delay_hours ), array( 'action' => 'new_no_review_delay' ), false );
 
 					$this->version_status = 'approved';
