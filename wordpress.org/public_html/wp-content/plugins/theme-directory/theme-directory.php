@@ -56,8 +56,14 @@ define( 'WPORG_THEMES_E2E_REPO', 'WordPress/theme-review-e2e' );
  * Defers to the shared WPORG_PLUGIN_THEME_RELEASE_DELAY constant when it's defined
  * so the plugin and theme directories can be tuned (or disabled) in lockstep from a
  * single override point.
+ *
+ * Defaults to 0 (cooldown disabled, versions go live immediately) for now; this will be
+ * raised once the surrounding workflow is ready. Can be pre-defined in global config to
+ * override the default.
  */
-define( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY', defined( 'WPORG_PLUGIN_THEME_RELEASE_DELAY' ) ? WPORG_PLUGIN_THEME_RELEASE_DELAY : 24 * HOUR_IN_SECONDS );
+if ( ! defined( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY' ) ) {
+	define( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY', defined( 'WPORG_PLUGIN_THEME_RELEASE_DELAY' ) ? WPORG_PLUGIN_THEME_RELEASE_DELAY : 0 );
+}
 
 /**
  * Returns the release cooldown delay, in seconds, for a theme.
