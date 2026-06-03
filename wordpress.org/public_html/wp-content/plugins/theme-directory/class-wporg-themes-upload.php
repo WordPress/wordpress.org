@@ -76,6 +76,13 @@ class WPORG_Themes_Upload {
 	public $theme;
 
 	/**
+	 * The theme name.
+	 *
+	 * @var string
+	 */
+	public $theme_name = '';
+
+	/**
 	 * The theme slug being uploaded.
 	 *
 	 * @var string
