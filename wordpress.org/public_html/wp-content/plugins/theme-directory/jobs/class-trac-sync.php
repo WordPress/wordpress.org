@@ -20,14 +20,20 @@ class Trac_Sync {
 	 * @var array
 	 */
 	protected static $stati = [
-		'new'  => [
+		'new'      => [
 			'status' => 'reopened',
 		],
-		'live' => [
+		'approved' => [
+			// `approved` is an open Trac status (not a resolution): a reviewer has
+			// approved the ticket, or themetracbot auto-approved an update, and it's
+			// waiting out the release cooldown before being marked live.
+			'status' => 'approved',
+		],
+		'live'     => [
 			'status'     => 'closed',
 			'resolution' => 'live',
 		],
-		'old'  => [
+		'old'      => [
 			'status'     => 'closed',
 			'resolution' => 'not-approved',
 		],
@@ -50,6 +56,10 @@ class Trac_Sync {
 		$trac         = new \Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
 		$last_request = get_option( 'wporg-themes-last-trac-sync', strtotime( '-2 days' ) );
 		update_option( 'wporg-themes-last-trac-sync', time() );
+
+		// Migrate approved theme updates whose release delay has elapsed to live on Trac,
+		// so the sync below imports them as it would any other newly-live ticket.
+		self::release_to_live( $trac );
 
 		foreach ( self::$stati as $new_status => $args ) {
 			// Get array of tickets.
@@ -76,29 +86,114 @@ class Trac_Sync {
 					continue;
 				}
 
-				/*
-				 * Bail if the the theme has the wrong status.
-				 *
-				 * For approved and rejected themes, we bail if the current status is not
-				 * 'new' That can happen when there are additional ticket updates (like
-				 * comments) after the ticket was closed.
-				 *
-				 * For reopened tickets we bail if the version is already marked as 'new'.
-				 * This should only be the case if the ticket was closed and reopened before
-				 * this script was able to sync the closed status.
-				 */
 				$current_status = wporg_themes_get_version_status( $theme_id, $version );
-				if ( ( 'new' !== $new_status && 'new' !== $current_status ) || ( 'new' === $new_status && 'new' === $current_status ) ) {
+
+				/*
+				 * Skip if the version is already in the target status. This is the common
+				 * case for additional ticket activity (e.g. comments) after a ticket has
+				 * reached a resolved state.
+				 */
+				if ( $current_status === $new_status ) {
 					continue;
 				}
 
-				// We don't need to set an already approved live version to live again.
-				if ( 'live' === $current_status && 'live' === $new_status ) {
-					continue;
+				/*
+				 * Only act on transitions that make sense in the directory's lifecycle
+				 * (new -> approved -> live, with branches to old or back to new). This
+				 * guards against ticket activity that arrives out of order or after the
+				 * version has already moved on.
+				 */
+				switch ( $new_status ) {
+					case 'new':
+						// Reopened: always sync back to 'new' from any resolved state.
+						break;
+
+					case 'approved':
+						// Newly approved (reviewer or auto-approved update): only valid
+						// coming from 'new'.
+						if ( 'new' !== $current_status ) {
+							continue 2;
+						}
+						break;
+
+					case 'live':
+						// Going live: straight from review (approve_and_live / new_no_review,
+						// current 'new') or out of the release cooldown (current 'approved',
+						// via the release-to-live cron or a reviewer force-release on Trac).
+						if ( ! in_array( $current_status, [ 'new', 'approved' ], true ) ) {
+							continue 2;
+						}
+						break;
+
+					case 'old':
+						// Rejected during review: only valid coming from 'new'.
+						if ( 'new' !== $current_status ) {
+							continue 2;
+						}
+						break;
 				}
 
 				wporg_themes_update_version_status( $theme_id, $version, $new_status );
 			}
+		}
+	}
+
+	/**
+	 * Migrates auto-approved theme updates out of the release delay, on Trac.
+	 *
+	 * Finds `theme update` tickets that have been in the `approved` status for at least
+	 * the theme's release cooldown delay (wporg_themes_get_release_cooldown_delay()) and
+	 * closes them as resolution=live. That's the only change made here — cron_trigger()'s
+	 * normal sync, which runs straight after, imports the now-live ticket into WordPress
+	 * like any other.
+	 *
+	 * Scoped to the `theme update` priority on purpose: first-time theme submissions also
+	 * pass through the `approved` status, but a trusted reviewer marks those live by hand,
+	 * so they should not be promoted on a timer.
+	 *
+	 * @param \Trac $trac An authenticated Trac client.
+	 */
+	public static function release_to_live( $trac ) {
+		/*
+		 * Auto-approved theme updates currently in the `approved` status. We check each
+		 * ticket's changetime in PHP rather than filtering server-side, so a quirk in
+		 * Trac's date-range query syntax can't silently strand themes in the delay.
+		 */
+		$tickets = (array) $trac->ticket_query( add_query_arg( [
+			'status'   => 'approved',
+			'priority' => 'theme update',
+			'order'    => 'changetime',
+		] ) );
+
+		foreach ( $tickets as $ticket_id ) {
+			$ticket = $trac->ticket_get( $ticket_id );
+
+			// Skip if the ticket was force-released or reopened since the query.
+			if ( ! $ticket || 'approved' !== ( $ticket['status'] ?? '' ) ) {
+				continue;
+			}
+
+			// Resolve the theme slug so the release delay can be filtered per-theme.
+			$theme_slug = get_post_field( 'post_name', self::get_theme_id( $ticket_id ) );
+			$cutoff     = time() - wporg_themes_get_release_cooldown_delay( $theme_slug );
+
+			// Only once the release delay, measured from the ticket's changetime, has elapsed.
+			$changed = $ticket[2] instanceof \IXR_Date ? $ticket[2]->getTimestamp() : strtotime( (string) $ticket[2] );
+			if ( ! $changed || $changed > $cutoff ) {
+				continue;
+			}
+
+			// Close as live. Pass the concurrency token we just read to avoid a second
+			// ticket.get; cron_trigger()'s sync then imports it as a newly-live version.
+			$trac->ticket_update(
+				$ticket_id,
+				'Marking live.',
+				[
+					'action' => 'new_no_review',
+					'_ts'    => $ticket['_ts'],
+				],
+				false
+			);
 		}
 	}
 
