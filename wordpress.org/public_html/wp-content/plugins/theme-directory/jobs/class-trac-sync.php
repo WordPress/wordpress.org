@@ -62,12 +62,14 @@ class Trac_Sync {
 		self::release_to_live( $trac );
 
 		foreach ( self::$stati as $new_status => $args ) {
-			// Get array of tickets.
-			$tickets = (array) $trac->ticket_query( add_query_arg( wp_parse_args( $args, [
+			// Get array of tickets. ltrim() the leading `?` that add_query_arg() emits, so
+			// Trac's ticket.query parser doesn't fold it into the first field name (see
+			// release_to_live()).
+			$tickets = (array) $trac->ticket_query( ltrim( add_query_arg( wp_parse_args( $args, [
 				'order'      => 'changetime',
 				'changetime' => date( 'c', $last_request ),
 				'desc'       => 1,
-			] ) ) );
+			] ), '' ), '?' ) );
 
 			foreach ( $tickets as $ticket_id ) {
 				// Get the theme associated with that ticket.
@@ -158,12 +160,17 @@ class Trac_Sync {
 		 * Auto-approved theme updates currently in the `approved` status. We check each
 		 * ticket's changetime in PHP rather than filtering server-side, so a quirk in
 		 * Trac's date-range query syntax can't silently strand themes in the delay.
+		 *
+		 * add_query_arg() always emits a leading `?`; strip it, because Trac's ticket.query
+		 * parser splits on `&`/`=` and would otherwise read the first field as `?status`
+		 * (an unknown field it silently ignores), returning tickets regardless of status.
 		 */
-		$tickets = (array) $trac->ticket_query( add_query_arg( [
+		$tickets = (array) $trac->ticket_query( ltrim( add_query_arg( [
 			'status'   => 'approved',
+			'owner'    => 'themetracbot',
 			'priority' => 'theme update',
 			'order'    => 'changetime',
-		] ) );
+		], '' ), '?' ) );
 
 		foreach ( $tickets as $ticket_id ) {
 			$ticket = $trac->ticket_get( $ticket_id );
