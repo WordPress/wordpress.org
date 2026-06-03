@@ -39,6 +39,33 @@ define( __NAMESPACE__ . '\PLUGIN_DIR', __DIR__ );
  */
 define( __NAMESPACE__ . '\RELEASE_COOL_DOWN_DELAY', defined( 'WPORG_PLUGIN_THEME_RELEASE_DELAY' ) ? WPORG_PLUGIN_THEME_RELEASE_DELAY : 24 * HOUR_IN_SECONDS );
 
+/**
+ * Returns the release cooldown delay, in seconds, for a plugin.
+ *
+ * The RELEASE_COOL_DOWN_DELAY constant provides the default, which is then passed through
+ * the `wporg_plugins_release_cooldown_delay` filter so the delay can be shortened,
+ * extended, or removed (return 0 to disable the cooldown) on a per-plugin basis. The
+ * plugin slug is passed to the filter when it is known.
+ *
+ * This is captured onto each release at creation time (see Plugin_Directory::add_release()),
+ * so changing the filter does not retroactively alter the cooldown of in-flight releases.
+ *
+ * @param string $plugin_slug The slug of the plugin being released, if known.
+ * @return int Delay in seconds. 0 disables the cooldown (the version is served immediately).
+ */
+function get_release_cooldown_delay( $plugin_slug = '' ) {
+	/**
+	 * Filters the release cooldown delay for a plugin.
+	 *
+	 * Return 0 to disable the cooldown (the version is served as soon as it's imported), or
+	 * a larger/smaller number of seconds to lengthen or shorten the delay for this plugin.
+	 *
+	 * @param int    $delay       The default delay in seconds (the RELEASE_COOL_DOWN_DELAY constant).
+	 * @param string $plugin_slug The slug of the plugin being released, or '' when not known.
+	 */
+	return (int) apply_filters( 'wporg_plugins_release_cooldown_delay', RELEASE_COOL_DOWN_DELAY, $plugin_slug );
+}
+
 // Register an Autoloader for all files
 require __DIR__ . '/class-autoloader.php';
 Autoloader\register_class_path( __NAMESPACE__, __DIR__ );
