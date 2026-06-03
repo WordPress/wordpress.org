@@ -1729,6 +1729,10 @@ class Plugin_Directory {
 			'confirmations_required'   => (int) $plugin->release_confirmation,
 			'committer'                => [],
 			'revision'                 => [],
+			// Captures the release cooldown active at creation time so future filter/constant
+			// changes don't retroactively affect in-flight releases. Reviewers force-release
+			// by overriding this to 0 — see API_Update_Updater::force_release().
+			'release_delay'            => get_release_cooldown_delay( $plugin->post_name ),
 		];
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?

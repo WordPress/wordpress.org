@@ -265,6 +265,8 @@ class Release_Confirmation {
 			);
 		}
 
+		self::render_cooldown_status( $data );
+
 		echo '</div>';
 
 		$text = ob_get_clean();
@@ -278,6 +280,48 @@ class Release_Confirmation {
 		 * @return string
 		 */
 		return apply_filters( 'wporg_plugins_release_approval_text', $text, $plugin, $data );
+	}
+
+	/**
+	 * Render a single line describing the cooldown state of a release: pending serve time.
+	 * Skipped for releases without a cooldown delay (feature off at release creation, or
+	 * force-released), discarded releases, releases that haven't moved past
+	 * confirmation/processing, or where the cooldown window has elapsed.
+	 *
+	 * @param array $data The release row from Plugin_Directory::get_releases().
+	 */
+	protected static function render_cooldown_status( $data ) {
+		$release_delay = (int) ( $data['release_delay'] ?? 0 );
+		if ( ! $release_delay ) {
+			return;
+		}
+
+		if ( ! empty( $data['discarded'] ) ) {
+			return;
+		}
+
+		// Skip when the release hasn't moved past the confirmation/processing stage yet.
+		if ( $data['confirmations_required'] && ( ! $data['confirmed'] || ! $data['zips_built'] ) ) {
+			return;
+		}
+
+		$release_time   = $data['confirmations'] ? max( $data['confirmations'] ) : (int) $data['date'];
+		$cooldown_until = $release_time + $release_delay;
+
+		if ( $cooldown_until <= time() ) {
+			return;
+		}
+
+		$message = sprintf(
+			/* translators: %s: relative time until cooldown expires */
+			__( 'Will be served to sites in %s.', 'wporg-plugins' ),
+			human_time_diff( time(), $cooldown_until )
+		);
+		printf(
+			'<span title="%s">%s</span><br>',
+			esc_attr( gmdate( 'Y-m-d H:i:s', $cooldown_until ) ),
+			esc_html( $message )
+		);
 	}
 
 	static function get_actions( $plugin, $data ) {
@@ -420,6 +464,63 @@ class Release_Confirmation {
 
 		// A page with this shortcode has no need to be indexed.
 		add_filter( 'wporg_noindex_request', '__return_true' );
+	}
+
+	/**
+	 * Surfaces an in-cooldown notice to committers on the plugin's public page.
+	 *
+	 * Bails when the viewer isn't a committer, when there's no current release in
+	 * an active cooldown window, or when the release was force-released
+	 * (release_delay = 0 ⇒ no cooldown).
+	 *
+	 * @param WP_Post $post The currently displayed post.
+	 */
+	public static function frontend_cooldown_notice( $post = null ) {
+		$post = get_post( $post );
+
+		if ( ! $post || ! current_user_can( 'plugin_admin_edit', $post ) ) {
+			return;
+		}
+
+		$version = get_post_meta( $post->ID, 'version', true );
+		if ( ! $version ) {
+			return;
+		}
+
+		$release = Plugin_Directory::get_release( $post, $version );
+		if ( ! $release ) {
+			return;
+		}
+
+		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+		if ( ! $release_delay ) {
+			return;
+		}
+
+		$release_time   = $release['confirmations'] ? max( $release['confirmations'] ) : (int) $release['date'];
+		$cooldown_until = $release_time + $release_delay;
+
+		if ( $cooldown_until <= time() ) {
+			return;
+		}
+
+		printf(
+			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+			wp_kses(
+				sprintf(
+					/* translators: 1: plugin version, 2: relative time until cooldown expires, 3: delay duration in hours, 4: plugins@wordpress.org link */
+					__( 'Version %1$s will be released to sites in about %2$s. WordPress.org currently delays plugin updates by %3$d hours so moderators and security scanners can review changes before they reach users. If this update fixes a security issue that needs to ship sooner, contact %4$s.', 'wporg-plugins' ),
+					'<code>' . esc_html( $version ) . '</code>',
+					esc_html( human_time_diff( time(), $cooldown_until ) ),
+					(int) ( $release_delay / HOUR_IN_SECONDS ),
+					'<a href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>'
+				),
+				array(
+					'code' => array(),
+					'a'    => array( 'href' => true ),
+				)
+			)
+		);
 	}
 
 	/**

@@ -482,7 +482,7 @@ class Status_Transitions {
 	 * Flush the caches for the plugin.
 	 */
 	protected function flush_caches( $post ) {
-		// Update the API endpoints with the new data
+		// Update the API endpoints with the new data.
 		API_Update_Updater::update_single_plugin( $post->post_name );
 		Plugins_Info_API::flush_plugin_information_cache( $post->post_name );
 	}

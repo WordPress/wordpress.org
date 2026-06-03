@@ -18,11 +18,12 @@ class Manager {
 	 * @var array
 	 */
 	public static $wildcard_cron_tasks = array(
-		'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
-		'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
-		'import_zip'         => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
-		'scan_plugin'        => array( __NAMESPACE__ . '\Plugin_Scan', 'cron_trigger' ),
-		'create_svn_repo'    => array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ),
+		'import_plugin'         => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
+		'import_plugin_i18n'    => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
+		'import_zip'            => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
+		'scan_plugin'           => array( __NAMESPACE__ . '\Plugin_Scan', 'cron_trigger' ),
+		'create_svn_repo'       => array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ),
+		'release_to_update_api' => array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger_release' ),
 	);
 
 	/**

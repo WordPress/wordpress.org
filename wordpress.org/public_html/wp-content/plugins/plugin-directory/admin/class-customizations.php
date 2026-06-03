@@ -79,6 +79,7 @@ class Customizations {
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Controls', 'save_post' ) );
 	}
 
 	/**
