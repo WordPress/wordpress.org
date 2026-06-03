@@ -67,7 +67,7 @@ class Trac_Sync {
 			// release_to_live()).
 			$tickets = (array) $trac->ticket_query( ltrim( add_query_arg( wp_parse_args( $args, [
 				'order'      => 'changetime',
-				'changetime' => date( 'c', $last_request ),
+				'changetime' => date( 'c', $last_request - MINUTE_IN_SECONDS ),
 				'desc'       => 1,
 			] ), '' ), '?' ) );
 
@@ -215,7 +215,7 @@ class Trac_Sync {
 
 		$post_ids = get_posts( [
 			'fields'         => 'ids',
-			'post_status'    => 'any',
+			'post_status'    => [ 'publish', 'pending', 'draft', 'future', 'trash', 'suspend', 'delist' ],
 			'post_type'      => 'repopackage',
 			'posts_per_page' => - 1,
 			'meta_query'     => [
