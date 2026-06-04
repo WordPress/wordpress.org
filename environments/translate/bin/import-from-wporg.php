@@ -68,6 +68,15 @@ if ( ! $parent ) {
 	exit( 1 );
 }
 
+// Detach every incremental listener on the translation/originals hooks. They
+// are all designed for one-off web requests (cache purgers, language-pack build
+// triggers, stats trackers, Slack notifications, sync queues, …) and either
+// crash or pile up wasted work during a bulk seed.
+remove_all_actions( 'gp_originals_imported' );
+remove_all_actions( 'gp_translation_created' );
+remove_all_actions( 'gp_translation_saved' );
+remove_all_actions( 'gp_translation_deleted' );
+
 $ensure_project = function ( $name, $slug, $parent_id ) {
 	$parent_obj = $parent_id ? GP::$project->get( $parent_id ) : null;
 	$path       = $parent_obj ? "{$parent_obj->path}/{$slug}" : $slug;
