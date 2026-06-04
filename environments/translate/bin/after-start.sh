@@ -154,10 +154,13 @@ $WP wp eval '
 	$proj = $wporg_gp_custom_stats->project;
 	$sets = $wpdb->get_results( "SELECT id, project_id, locale, slug FROM {$wpdb->prefix}gp_translation_sets" );
 	foreach ( $sets as $s ) {
-		$counts = array();
-		$proj->get_project_translation_counts( $s->project_id, $s->locale, $s->slug, $counts );
-		if ( empty( $counts ) ) { continue; }
-		$row = (array) reset( $counts );
+		// get_project_translation_counts() returns ["all"=>N, "current"=>N, "waiting"=>N, ...]
+		// — same shape production reads in WPorg_GP_Project_Stats::shutdown(). The earlier
+		// (array) reset($counts) pattern unpacked the FIRST value as a 1-element array, so
+		// every count ended up as 0 and Plugin::get_translation_status() then fed empty rows
+		// into index-locales.php where current_count / all_count throws DivisionByZeroError.
+		$counts = $proj->get_project_translation_counts( $s->project_id, $s->locale, $s->slug );
+		if ( 0 === (int) $counts["all"] ) { continue; }
 		$wpdb->query( $wpdb->prepare(
 			"INSERT INTO {$wpdb->prefix}gp_project_translation_status
 			 (project_id, locale, locale_slug, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, date_added, date_modified)
@@ -167,8 +170,8 @@ $WP wp eval '
 			 `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`),
 			 date_modified=NOW()",
 			$s->project_id, $s->locale, $s->slug,
-			(int)($row["all"] ?? 0), (int)($row["current"] ?? 0), (int)($row["waiting"] ?? 0),
-			(int)($row["fuzzy"] ?? 0), (int)($row["warnings"] ?? 0), (int)($row["untranslated"] ?? 0)
+			(int) $counts["all"], (int) $counts["current"], (int) $counts["waiting"],
+			(int) $counts["fuzzy"], (int) $counts["warnings"], (int) $counts["untranslated"]
 		) );
 	}
 	$proj->cache_wp_themes_wp_plugins_strings();
