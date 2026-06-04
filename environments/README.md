@@ -71,6 +71,41 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
+### Translate
+
+A local instance of translate.wordpress.org with GlotPress, the `wporg-gp-*` plugins active on production, and the `pub/wporg` theme.
+
+**Start:**
+
+```bash
+npm run translate:env start
+```
+
+First start auto-imports `hello-dolly` (plugin) and `twentytwenty` (theme) so the `WordPress Plugins` and `WordPress Themes` project containers have real fixtures.
+
+**Access:** `http://localhost:8888`
+
+**Import a plugin or theme's translations on demand:**
+
+```bash
+npm run translate:import -- plugin akismet
+npm run translate:import -- theme twentytwentyfour
+```
+
+**Re-seed** (clears the seed flag so the next `start` re-imports fixtures):
+
+```bash
+npm run translate:refresh
+```
+
+**WP CLI:**
+
+```bash
+npm run translate:env -- run cli -- wp <command>
+```
+
+**Local overrides:** create `translate/.wp-env.override.json` (git-ignored) to override config values like `WP_HOME` / `WP_SITEURL` for testing behind a custom hostname.
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.
