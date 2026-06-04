@@ -155,10 +155,10 @@ $network = $ensure_project( 'Network Admin',       'network', $admin->id );
 $cc      = $ensure_project( 'Continents & Cities', 'cc',      $dev->id );
 
 $tree = array(
-	array( $dev,     'wp/dev' ),
-	array( $admin,   'wp/dev/admin' ),
+	array( $dev, 'wp/dev' ),
+	array( $admin, 'wp/dev/admin' ),
 	array( $network, 'wp/dev/admin/network' ),
-	array( $cc,      'wp/dev/cc' ),
+	array( $cc, 'wp/dev/cc' ),
 );
 
 fwrite( STDOUT, "Importing originals + translations (this can take several minutes)...\n" );
@@ -174,34 +174,46 @@ $wporg_gp_custom_stats = $GLOBALS['wporg_gp_custom_stats'] ?? null;
 if ( ! isset( $wporg_gp_custom_stats ) ) {
 	fwrite( STDERR, "wporg-gp-custom-stats not loaded; skipping stats refresh.\n" );
 } else {
-	$project_ids = array_map( static fn( $entry ) => (int) $entry[0]->id, $tree );
+	$project_ids  = array_map( static fn( $entry ) => (int) $entry[0]->id, $tree );
 	$placeholders = implode( ',', array_fill( 0, count( $project_ids ), '%d' ) );
-	$sets = $wpdb->get_results( $wpdb->prepare(
-		"SELECT project_id, locale, slug FROM {$wpdb->gp_translation_sets} WHERE project_id IN ({$placeholders})",
-		...$project_ids
-	) );
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholders is a static "%d, %d, …" list built from a known-int count.
+	$sets = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT project_id, locale, slug FROM {$wpdb->gp_translation_sets} WHERE project_id IN ({$placeholders})",
+			...$project_ids
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	$proj = $wporg_gp_custom_stats->project;
-	foreach ( $sets as $s ) {
+	foreach ( $sets as $set_row ) {
 		// get_project_translation_counts() recurses into sub-projects, so wp/dev's
 		// row ends up holding the totals across admin/network/cc as well — same
 		// shape production produces via WPorg_GP_Project_Stats::shutdown().
-		$counts = $proj->get_project_translation_counts( $s->project_id, $s->locale, $s->slug );
+		$counts = $proj->get_project_translation_counts( $set_row->project_id, $set_row->locale, $set_row->slug );
 		if ( 0 === (int) $counts['all'] ) {
 			continue;
 		}
-		$wpdb->query( $wpdb->prepare(
-			"INSERT INTO {$wpdb->prefix}gp_project_translation_status
-			 (project_id, locale, locale_slug, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, date_added, date_modified)
-			 VALUES (%d, %s, %s, %d, %d, %d, %d, %d, %d, NOW(), NOW())
-			 ON DUPLICATE KEY UPDATE
-			 `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VALUES(`waiting`),
-			 `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`),
-			 date_modified=NOW()",
-			$s->project_id, $s->locale, $s->slug,
-			(int) $counts['all'], (int) $counts['current'], (int) $counts['waiting'],
-			(int) $counts['fuzzy'], (int) $counts['warnings'], (int) $counts['untranslated']
-		) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->prefix}gp_project_translation_status
+				 (project_id, locale, locale_slug, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, date_added, date_modified)
+				 VALUES (%d, %s, %s, %d, %d, %d, %d, %d, %d, NOW(), NOW())
+				 ON DUPLICATE KEY UPDATE
+				 `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VALUES(`waiting`),
+				 `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`),
+				 date_modified=NOW()",
+				$set_row->project_id,
+				$set_row->locale,
+				$set_row->slug,
+				(int) $counts['all'],
+				(int) $counts['current'],
+				(int) $counts['waiting'],
+				(int) $counts['fuzzy'],
+				(int) $counts['warnings'],
+				(int) $counts['untranslated']
+			)
+		);
 	}
 }
 
