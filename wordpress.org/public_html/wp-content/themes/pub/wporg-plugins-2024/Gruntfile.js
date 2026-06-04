@@ -19,7 +19,7 @@ module.exports = function ( grunt ) {
 		sass: {
 			options: {
 				implementation: require( 'sass' ),
-				// Don't add source map & source mapURL in built version.
+				// Don't add source map & source map URL in built version.
 				sourceMap: 'build' !== process.argv[ 2 ],
 				omitSourceMapUrl: 'build' === process.argv[ 2 ],
 				outputStyle: 'expanded',
