@@ -73,7 +73,7 @@ npm run jobs:env -- run cli -- wp <command>
 
 ### Browse Happy
 
-A local instance of [browsehappy.com](browsehappy.com) with the theme.
+A local instance of [browsehappy.com](https://browsehappy.com) with the theme.
 
 **Start:**
 
