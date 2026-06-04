@@ -169,6 +169,76 @@ add_action( 'wp_ajax_nopriv_o2_read', function() {
 }, 9 );
 
 /**
+ * Detect invalid query parameters being passed in BuddyPress fields on requests that BuddyPress is intercepting.
+ *
+ * The component directory search forms (e.g. bp_directory_groups_search_form())
+ * pass `$_REQUEST[ "{component}_search" ]` straight into stripslashes(), which
+ * fatals when a scanner submits it as an array (e.g. `groups_search[]=the`).
+ */
+add_action( 'bp_template_redirect', function() {
+	$expected_string_fields = [
+		'members_search',
+		'groups_search',
+		'blogs_search',
+		'activity_search',
+		'forums_search',
+	];
+
+	foreach ( $expected_string_fields as $field ) {
+		if ( isset( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+			die_bad_request( "non-scalar $field in buddypress \$_REQUEST" );
+		}
+	}
+}, -1 );
+
+/**
+ * Detect invalid input to the bp-classic (BP Default theme) directory AJAX handlers.
+ *
+ * The members/groups/blogs/forums directory filters and the activity loaders
+ * pass these POST fields straight into string functions without type checks —
+ * sanitize_title( $_POST['object'] ) and urldecode( $_POST['cookie'] ) — and
+ * fatal when a vulnerability scanner submits them as arrays, e.g.
+ * `object[]=groups` or `cookie[]=…`.
+ *
+ * @see bp_dtheme_object_template_loader(), bp_dtheme_ajax_querystring()
+ */
+add_action( 'admin_init', function() {
+	// admin-ajax.php fires admin_init before the wp_ajax_{action} dispatch, so
+	// this runs before bp_dtheme_object_template_loader() and friends.
+	if ( ! wp_doing_ajax() || empty( $_REQUEST['action'] ) ) {
+		return;
+	}
+
+	$bp_classic_ajax_actions = [
+		'blogs_filter',
+		'forums_filter',
+		'groups_filter',
+		'members_filter',
+		'activity_get_older_updates',
+		'activity_widget_filter',
+	];
+
+	if ( ! in_array( $_REQUEST['action'], $bp_classic_ajax_actions, true ) ) {
+		return;
+	}
+
+	$scalar_fields = [
+		'object',
+		'cookie',
+		'filter',
+		'scope',
+		'page',
+		'search_terms',
+	];
+
+	foreach ( $scalar_fields as $field ) {
+		if ( isset( $_POST[ $field ] ) && ! is_scalar( $_POST[ $field ] ) ) {
+			die_bad_request( "non-scalar $field in bp-classic directory AJAX" );
+		}
+	}
+} );
+
+/**
  * Detect badly formed XMLRPC requests.
  * pingback.ping is not a valid multicall target, blocking due to the excessive requests.
  */

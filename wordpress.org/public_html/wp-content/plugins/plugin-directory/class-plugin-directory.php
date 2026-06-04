@@ -413,7 +413,7 @@ class Plugin_Directory {
 		API\Plugin_Fields::register();
 
 		// Add the browse/* views.
-		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated|preview)' );
+		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated|preview|dashboard-widgets)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
 
 		// Create an archive for a users favorites too.
@@ -670,7 +670,7 @@ class Plugin_Directory {
 		// For any invalid values passed to browse, set it to featured instead
 		if (
 			! empty ( $wp_query->query['browse'] ) &&
-			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated', 'preview' ) )
+			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated', 'preview', 'dashboard-widgets' ) )
 		) {
 			 $wp_query->query['browse']      = 'featured';
 			 $wp_query->query_vars['browse'] = 'featured';
@@ -1729,6 +1729,10 @@ class Plugin_Directory {
 			'confirmations_required'   => (int) $plugin->release_confirmation,
 			'committer'                => [],
 			'revision'                 => [],
+			// Captures the release cooldown active at creation time so future filter/constant
+			// changes don't retroactively affect in-flight releases. Reviewers force-release
+			// by overriding this to 0 — see API_Update_Updater::force_release().
+			'release_delay'            => get_release_cooldown_delay( $plugin->post_name ),
 		];
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?

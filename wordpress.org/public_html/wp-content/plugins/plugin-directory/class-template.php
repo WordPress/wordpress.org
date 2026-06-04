@@ -913,20 +913,6 @@ class Template {
 	}
 
 	/**
-	 * Properly encodes a string to UTF-8.
-	 *
-	 * @static
-	 *
-	 * @param string $string
-	 * @return string
-	 */
-	public static function encode( $string ) {
-		$string = mb_convert_encoding( $string, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
-
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $string, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
-	}
-
-	/**
 	 * Generates a link to toggle a plugin favorites state.
 	 *
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.

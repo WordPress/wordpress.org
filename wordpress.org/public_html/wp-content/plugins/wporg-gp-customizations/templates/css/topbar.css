@@ -1,0 +1,142 @@
+/* Fixed bar pinned under the WordPress admin bar. */
+.translation-editor-topbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 99;                   /* below admin bar (99999) and modals (>10000), above page content */
+	background: var( --gp-color-canvas-subtle );
+	border-bottom: 1px solid #c3c4c7;
+	box-shadow: 0 1px 3px rgba( 0, 0, 0, 0.06 );
+}
+
+/* Offsets so the bar never overlaps the WP admin bar.
+   The raised z-index keeps it above sticky elements inside the page
+   (e.g. .editor-panel__right, which sets z-index: 10). */
+.admin-bar .translation-editor-topbar { top: 32px; z-index: 250; }
+@media screen and ( max-width: 782px ) {
+	.admin-bar .translation-editor-topbar { top: 46px; }
+}
+
+/* Inner layout: buttons grouped on the left, close (×) on the right.
+   No max-width — the inner spans the full viewport so buttons sit at the
+   far left edge and the × sits at the far right edge on wide screens. */
+.translation-editor-topbar__inner {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 16px;
+}
+
+.translation-editor-topbar__buttons {
+	display: flex;
+	flex-wrap: wrap;               /* narrow viewports wrap rather than overflow */
+	gap: 8px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/* Mirror the typography of the Meta-tab status buttons.
+   The original rule `.editor-panel .meta .status-actions button strong`
+   does not match clones outside `.editor-panel`, so the +/−/~ symbol
+   would otherwise sit flush against the word. */
+.translation-editor-topbar__buttons button strong {
+	margin-right: .4em;
+}
+
+/* Replicate the GlotPress button styling inside the top bar.
+   GlotPress core CSS scopes its `.button` family of rules under
+   `.gp-content`. The top bar lives outside `.gp-content`, so none of those
+   rules reach the cloned buttons and they fall back to unstyled defaults.
+   The CSS custom properties (--gp-color-btn-*) are defined on `:root`, so
+   they resolve to the same colours that style the Meta-tab buttons. */
+.translation-editor-topbar .button {
+	-webkit-appearance: none;
+	appearance: none;
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+	padding: 5px 16px;
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 500;
+	color: var( --gp-color-btn-text );
+	border: 1px solid var( --gp-color-btn-border );
+	border-radius: 2px;
+	box-shadow: none;
+	background: var( --gp-color-btn-bg );
+	min-height: 32px;
+	margin: 0;
+	cursor: pointer;
+	outline: 0;
+	white-space: nowrap;
+	vertical-align: middle;
+}
+
+.translation-editor-topbar .button:hover,
+.translation-editor-topbar .button:focus {
+	background-color: var( --gp-color-btn-hover-bg );
+	color: var( --gp-color-btn-hover-text );
+	border-color: var( --gp-color-btn-hover-border );
+	box-shadow: 0 0 0 1px var( --gp-color-btn-hover-border );
+}
+
+.translation-editor-topbar .button:active {
+	background-color: var( --gp-color-btn-active-bg );
+	border-color: var( --gp-color-btn-active-border );
+	color: var( --gp-color-btn-active-text );
+	box-shadow: 0 0 0 1px var( --gp-color-btn-active-border );
+}
+
+.translation-editor-topbar .button.is-primary {
+	background-color: var( --gp-color-btn-primary-bg );
+	border-color: var( --gp-color-btn-primary-border );
+	color: var( --gp-color-btn-primary-text );
+}
+
+.translation-editor-topbar .button.is-primary:hover,
+.translation-editor-topbar .button.is-primary:focus {
+	background-color: var( --gp-color-btn-primary-hover-bg );
+	border-color: var( --gp-color-btn-primary-hover-border );
+	color: var( --gp-color-btn-primary-hover-text );
+	box-shadow: 0 0 0 1px var( --gp-color-canvas-default ), 0 0 0 2px var( --gp-color-btn-primary-hover-border );
+}
+
+.translation-editor-topbar .button.is-primary:active {
+	background-color: var( --gp-color-btn-primary-active-bg );
+	border-color: var( --gp-color-btn-primary-active-border );
+	color: var( --gp-color-btn-primary-active-text );
+	box-shadow: 0 0 0 1px var( --gp-color-canvas-default ), 0 0 0 2px var( --gp-color-btn-primary-active-border );
+}
+
+/* Preserve the coloured symbols on Reject / Fuzzy. The base rule
+   `button.reject strong { color: #dc3232 }` is global (not parent-scoped),
+   so it already applies — but only inside `.translation-editor-topbar`
+   the `<strong>` inherits `color` from the parent button, which can
+   override it. Re-state the rules here to keep the colours consistent. */
+.translation-editor-topbar .button.reject strong {
+	color: #dc3232;
+}
+
+.translation-editor-topbar .button.fuzzy strong {
+	color: #f56e28;
+}
+
+.translation-editor-topbar__close {
+	background: transparent;
+	border: 0;
+	padding: 4px;
+	cursor: pointer;
+	color: #50575e;
+	flex: 0 0 auto;
+}
+
+.translation-editor-topbar__close:hover,
+.translation-editor-topbar__close:focus {
+	color: #1d2327;
+}
+
+/* Tighter padding on narrow screens. */
+@media screen and ( max-width: 600px ) {
+	.translation-editor-topbar__inner { padding: 6px 12px; gap: 8px; }
+}

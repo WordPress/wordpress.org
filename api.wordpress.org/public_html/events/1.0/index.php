@@ -223,6 +223,9 @@ function build_response( $location, $location_args ) {
 	$events = array();
 	$error  = null;
 
+	// Define defaults if not set in the request.
+	$location_args += array( 'restrict_by_country' => false );
+
 	if ( 'temp-request-throttled' === $location ) {
 		$location = array();
 		$error    = 'temp-request-throttled';
@@ -230,7 +233,7 @@ function build_response( $location, $location_args ) {
 
 	if ( $location ) {
 		$event_args = array(
-			'is_client_core' => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+			'is_client_core'      => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
@@ -810,12 +813,18 @@ function get_country_from_name( $country_name ) {
 function get_events( $args = array() ) {
 	global $wpdb, $cache_life, $cache_group;
 
-	// Sort to ensure consistent cache keys.
-	ksort( $args );
+	// Define defaults if not set in the request.
+	$args += array(
+		'is_client_core'      => false,
+		'restrict_by_country' => false,
+		'number'              => 10,
+	);
 
 	// number should be between 0 and 100, with a default of 10.
-	$args['number'] = $args['number'] ?? 10;
 	$args['number'] = max( 0, min( $args['number'], 100 ) );
+
+	// Sort to ensure consistent cache keys.
+	ksort( $args );
 
 	// Distances in kilometers
 	$event_distances = array(
@@ -1308,9 +1317,9 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			}
 		}
 
-		// Special case: Show WordCamp Asia to all of asia until it's over.
+		// Special case: Show WordCamp Europe to all of europe until it's over.
 		if (
-			'asia' === $region &&
+			'europe' === $region &&
 			! empty( $location['country'] ) &&
 			$current_time <= $data['event']['end_unix_timestamp'] &&
 			in_array( strtoupper( $location['country'] ), $data['regional_countries'], true )

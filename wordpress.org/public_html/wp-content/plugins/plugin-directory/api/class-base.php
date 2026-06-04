@@ -36,6 +36,7 @@ class Base {
 		new Routes\Plugin_Upload();
 		new Routes\Plugin_Blueprint();
 		new Routes\Plugin_Review();
+		new Routes\Gandalf_Scan();
 	}
 
 	/**
@@ -76,7 +77,7 @@ class Base {
 	 * @return bool|\WP_Error True if the token exists, WP_Error upon failure.
 	 */
 	function permission_check_api_bearer( $request, $constant = false ) {
-		$authorization_header = $request->get_header( 'authorization' );
+		$authorization_header = $request->get_header( 'authorization' ) ?? '';
 		$authorization_header = trim( str_ireplace( 'bearer', '', $authorization_header ) );
 
 		if (
