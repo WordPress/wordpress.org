@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Runs after wp-env start. Sets up permalinks, creates pages, job categories, and sample jobs.
-#
+# Runs after wp-env start. Sets site name, description and activates the
+# Browse Happy theme.
 
 CONFIG="--config browsehappy/.wp-env.json"
 WP="npx wp-env $CONFIG run cli --"
