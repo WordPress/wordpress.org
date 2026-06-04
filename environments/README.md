@@ -71,6 +71,18 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
+### Browse Happy
+
+A local instance of [browsehappy.com](https://browsehappy.com) with the theme.
+
+**Start:**
+
+```bash
+npm run browsehappy:env start
+```
+
+**Access:** `http://localhost:8888`
+
 ### Translate
 
 A local instance of translate.wordpress.org with GlotPress, the `wporg-gp-*` plugins active on production, and the `pub/wporg` theme.
