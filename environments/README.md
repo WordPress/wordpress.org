@@ -71,6 +71,18 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
+### Browse Happy
+
+A local instance of [browsehappy.com](browsehappy.com) with the theme.
+
+**Start:**
+
+```bash
+npm run browsehappy:env start
+```
+
+**Access:** `http://localhost:8888`
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.
