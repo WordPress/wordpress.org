@@ -11,7 +11,8 @@
 		"plugins:refresh": "npm run plugins:env -- run cli -- wp option delete wporg_env_imported && npm run plugins:env -- run cli wp eval-file wp-content/env-bin/import-plugins.php",
 		"plugins:test:env": "wp-env --config plugin-directory/.wp-env.test.json",
 		"plugins:test": "npm run plugins:test:env -- start && npm run plugins:test:env -- run tests-cli --env-cwd=wp-content/plugins/plugin-directory phpunit",
-		"jobs:env": "wp-env --config jobs/.wp-env.json"
+		"jobs:env": "wp-env --config jobs/.wp-env.json",
+		"browsehappy:env": "wp-env --config browsehappy/.wp-env.json"
 	},
 	"devDependencies": {
 		"@wordpress/env": "^11"
