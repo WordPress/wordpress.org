@@ -87,7 +87,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], filemtime( __DIR__ . '/css/style.css' ) );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/build/style.css' ), [ 'dashicons', 'open-sans' ], filemtime( __DIR__ . '/build/style.css' ) );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
@@ -141,12 +141,12 @@ function scripts() {
 
 	// React is currently only used on detail pages.
 	if ( is_single() ) {
-		$assets_path = dirname( __FILE__ ) . '/js/build/theme.asset.php';
+		$assets_path = __DIR__ . '/build/theme.asset.php';
 		if ( file_exists( $assets_path ) ) {
 			$script_info = require( $assets_path );
 			wp_enqueue_script(
 				'wporg-plugins-client',
-				get_stylesheet_directory_uri() . '/js/build/theme.js',
+				get_stylesheet_directory_uri() . '/build/theme.js',
 				$script_info['dependencies'],
 				$script_info['version'],
 				true

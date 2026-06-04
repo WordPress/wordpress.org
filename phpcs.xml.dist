@@ -14,7 +14,7 @@
 	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
 
 	<!-- Exclude generated wp-scripts asset files. -->
-	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
+	<exclude-pattern>*/build/*.asset.php</exclude-pattern>
 
 	<!-- Exclude JS/CSS files. -->
 	<exclude-pattern>*.js[x]?</exclude-pattern>
