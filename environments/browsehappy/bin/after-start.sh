@@ -11,6 +11,6 @@ $WP wp option update blogname 'Browse Happy'
 $WP wp option update blogdescription 'Online. Worry free. Upgrade your browser today!'
 
 # Activate the browsehappy theme.
-$WP wp theme activate public_html
+$WP wp theme activate "Browse Happy"
 
 echo "Browse Happy environment ready!"
