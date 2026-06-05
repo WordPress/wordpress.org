@@ -62,6 +62,10 @@ abstract class Event_Date extends DateTimeImmutable {
 		return $this->utc() < Translation_Events::now();
 	}
 
+	public function is_more_than_one_year_in_the_future(): bool {
+		return $this->utc() > Translation_Events::now()->modify( '+1 year' );
+	}
+
 	public function print_relative_time_html() {
 		echo wp_kses(
 			'<time
