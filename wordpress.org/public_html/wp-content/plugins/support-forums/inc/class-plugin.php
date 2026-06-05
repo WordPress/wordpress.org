@@ -24,6 +24,7 @@ class Plugin {
 	// Define the properties for all the Support Forum components.
 	public $users                = false;
 	public $user_notes           = false;
+	public $badges               = false;
 	public $moderators           = false;
 	public $hooks                = false;
 	public $report_topic         = false;
@@ -67,6 +68,7 @@ class Plugin {
 	private function __construct() {
 		$this->users        = new Users;
 		$this->user_notes   = new User_Notes;
+		$this->badges       = new Badges();
 		$this->moderators   = new Moderators;
 		$this->hooks        = new Hooks;
 		$this->report_topic = new Report_Topic;

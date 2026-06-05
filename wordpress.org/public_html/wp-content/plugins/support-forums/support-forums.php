@@ -24,6 +24,7 @@ if ( ! class_exists( 'bbPress' ) ) {
 include( __DIR__ . '/inc/class-plugin.php' );
 include( __DIR__ . '/inc/class-users.php' );
 include( __DIR__ . '/inc/class-user-notes.php' );
+include __DIR__ . '/inc/class-badges.php';
 include( __DIR__ . '/inc/class-moderators.php' );
 include( __DIR__ . '/inc/class-hooks.php' );
 include( __DIR__ . '/inc/class-report-topic.php' );
