@@ -31,6 +31,7 @@ class Plugin {
 	public $stats                = false;
 	public $emails               = false;
 	public $audit_log            = false;
+	public $badge_automation     = false;
 	public $dropin               = false;
 	public $support_compat       = false;
 	public $performance          = false;
@@ -65,16 +66,17 @@ class Plugin {
 	 * Instantiate a new Plugin object.
 	 */
 	private function __construct() {
-		$this->users        = new Users;
-		$this->user_notes   = new User_Notes;
-		$this->moderators   = new Moderators;
-		$this->hooks        = new Hooks;
-		$this->report_topic = new Report_Topic;
-		$this->nsfw_handler = new NSFW_Handler;
-		$this->stats        = new Stats;
-		$this->emails       = new Emails;
-		$this->audit_log    = new Audit_Log;
-		$this->rest_api     = new REST_API;
+		$this->users            = new Users;
+		$this->user_notes       = new User_Notes;
+		$this->moderators       = new Moderators;
+		$this->hooks            = new Hooks;
+		$this->report_topic     = new Report_Topic;
+		$this->nsfw_handler     = new NSFW_Handler;
+		$this->stats            = new Stats;
+		$this->emails           = new Emails;
+		$this->audit_log        = new Audit_Log;
+		$this->badge_automation = new Badge_Automation;
+		$this->rest_api         = new REST_API;
 
 		// Set a flag to indicate whether this is the global forums, or a locale forum.
 		$this->is_main_forums = (
