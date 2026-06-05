@@ -69,6 +69,9 @@ class Plugin_Directory {
 		// Search
 		Plugin_Search::instance();
 
+		// Releases.
+		Plugin_Release::instance();
+
 		// Add upload size limit to limit plugin ZIP file uploads to 10M
 		add_filter( 'upload_size_limit', function( $size ) {
 			return 10 * MB_IN_BYTES;
@@ -1602,80 +1605,19 @@ class Plugin_Directory {
 	 * Get a list of all Plugin Releases.
 	 */
 	public static function get_releases( $plugin ) {
-		$plugin   = self::get_plugin_post( $plugin );
-		$releases = get_post_meta( $plugin->ID, 'releases', true );
-
-		// Data doesn't exist yet? Lets fill it out.
-		if ( false === $releases || ! is_array( $releases ) ) {
-			$releases = self::prefill_releases_meta( $plugin );
-		}
-
-		/**
-		 * If confirmations weren't required, claim that the ZIPs were built.
-		 *
-		 * This is needed for data pre-[12816].
-		 * @see https://meta.trac.wordpress.org/changeset/12816
-		 */
-		foreach ( $releases as &$release ) {
-			if ( ! $release['confirmations_required'] && ! $release['zips_built'] ) {
-				$release['zips_built'] = true;
-			}
-		}
-
-		return $releases;
+		return Plugin_Release::instance()->get_releases( $plugin );
 	}
 
 	/**
-	 * Prefill the releases meta items for a plugin.
+	 * Prefill the releases CPT items for a plugin.
 	 *
 	 * @param \WP_Post $plugin Plugin post object.
 	 * @return array
 	 */
 	public static function prefill_releases_meta( $plugin ) {
-		if ( ! $plugin->releases ) {
-			update_post_meta( $plugin->ID, 'releases', [] );
-		}
+		Plugin_Release::instance()->maybe_backfill_releases( $plugin, true );
 
-		$tags = get_post_meta( $plugin->ID, 'tags', true );
-		if ( $tags ) {
-			foreach ( $tags as $tag_version => $tag ) {
-				self::add_release( $plugin, [
-					'date'                   => strtotime( $tag['date'] ),
-					'tag'                    => $tag['tag'],
-					'version'                => $tag_version,
-					'committer'              => [ $tag['author'] ],
-					'zips_built'             => true, // Old release, assume they were built.
-					'confirmations_required' => 0,    // Old release, assume it's released.
-				] );
-			}
-		} else {
-			// Pull from SVN directly.
-			$svn_tags = Tools\SVN::ls( "https://plugins.svn.wordpress.org/{$plugin->post_name}/tags/", true ) ?: [];
-			foreach ( $svn_tags as $entry ) {
-				// Discard files
-				if ( 'dir' !== $entry['kind'] ) {
-					continue;
-				}
-
-				$tag = $entry['filename'];
-
-				// Prefix the 0 for plugin versions like 0.1
-				if ( '.' == substr( $tag, 0, 1 ) ) {
-					$tag = "0{$tag}";
-				}
-
-				self::add_release( $plugin, [
-					'date'                   => strtotime( $entry['date'] ),
-					'tag'                    => $entry['filename'],
-					'version'                => $tag,
-					'committer'              => [ $entry['author'] ],
-					'zips_built'             => true, // Old release, assume they were built.
-					'confirmations_required' => 0,    // Old release, assume it's released.
-				] );
-			}
-		}
-
-		return get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+		return self::get_releases( $plugin );
 	}
 
 	/**
@@ -1686,21 +1628,7 @@ class Plugin_Directory {
 	 * @return array|bool
 	 */
 	public static function get_release( $plugin, $tag ) {
-		$releases = self::get_releases( $plugin );
-
-		// Look for the version released as a tag.
-		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
-		if ( $filtered ) {
-			return array_shift( $filtered );
-		}
-
-		// Look for the tag as a trunk version.
-		$filtered = wp_list_filter( $releases, [ 'tag' => "trunk@{$tag}", 'version' => $tag ] );
-		if ( $filtered ) {
-			return array_shift( $filtered );
-		}
-
-		return false;
+		return Plugin_Release::instance()->get_release( $plugin, $tag );
 	}
 
 	/**
@@ -1711,66 +1639,7 @@ class Plugin_Directory {
 	 * @return bool
 	 */
 	public static function add_release( $plugin, $data ) {
-		if ( ! isset( $data['tag'] ) ) {
-			return false;
-		}
-		$plugin = self::get_plugin_post( $plugin );
-
-		$release = self::get_release( $plugin, $data['tag'] ) ?: [
-			'date'                     => time(),
-			'tag'                      => '',
-			'version'                  => '',
-			// Assume zips built if no release confirmation.
-			'zips_built'               => ! $plugin->release_confirmation,
-			'zips_built_from_revision' => 0,
-			'confirmations'            => [],
-			// Confirmed by default if no release confiration.
-			'confirmed'                => ! $plugin->release_confirmation,
-			'confirmations_required'   => (int) $plugin->release_confirmation,
-			'committer'                => [],
-			'revision'                 => [],
-			// Captures the release cooldown active at creation time so future filter/constant
-			// changes don't retroactively affect in-flight releases. Reviewers force-release
-			// by overriding this to 0 — see API_Update_Updater::force_release().
-			'release_delay'            => get_release_cooldown_delay( $plugin->post_name ),
-		];
-
-		// Fill the $release with the newish data. This could/should use wp_parse_args()?
-		foreach ( $data as $k => $v ) {
-			if ( isset( $release[ $k ] ) && is_array( $release[ $k ] ) ) {
-				$release[ $k ] = array_unique( array_merge( $release[ $k ], $v ) );
-			} else {
-				$release[ $k ] = $v;
-			}
-		}
-
-		/*
-		 * Allow a discarded release to be reset.
-		 * See API\Routes\Plugin_Release_Confirmation::undo_discard_release()
-		 */
-		if ( isset( $data['undo-discard'] ) && ! empty( $release['discarded'] ) && empty( $data['discarded'] ) ) {
-			unset( $release['discarded'] );
-		}
-
-		$releases = self::get_releases( $plugin );
-
-		// Find any other releases using this slug (as in the case of updates) and remove it.
-		// Only one release can exist in any given tag.
-		foreach ( $releases as $i => $r ) {
-			if ( $r['tag'] === $release['tag'] ) {
-				unset( $releases[ $i ] );
-			}
-		}
-
-		// Add this release in
-		$releases[] = $release;
-
-		// Sort releases most recent first.
-		uasort( $releases, function( $a, $b ) {
-			return $b['date'] <=> $a['date'];
-		} );
-
-		return update_post_meta( $plugin->ID, 'releases', $releases );
+		return Plugin_Release::instance()->add_release( $plugin, $data );
 	}
 
 	/**
@@ -1781,20 +1650,7 @@ class Plugin_Directory {
 	 * @return bool
 	 */
 	public static function remove_release( $plugin, $tag ) {
-		$result   = false;
-		$plugin   = self::get_plugin_post( $plugin );
-		$releases = self::get_releases( $plugin );
-
-		// Remove the release in question.
-		foreach ( $releases as $i => $r ) {
-			if ( $r['tag'] === $tag && ! $r['confirmed'] ) {
-				unset( $releases[ $i ] );
-
-				$result = update_post_meta( $plugin->ID, 'releases', $releases );
-			}
-		}
-
-		return $result;
+		return Plugin_Release::instance()->remove_release( $plugin, $tag );
 	}
 
 	/**
