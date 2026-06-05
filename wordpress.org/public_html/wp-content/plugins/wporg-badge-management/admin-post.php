@@ -60,7 +60,7 @@ function manage_badges() {
 
 	$errors = 0;
 	foreach ( $badges_to_assign as $badge ) {
-		if ( ! badge_api( $badge_action, $badge, $operate_on_users ) ) {
+		if ( ! badge_api( $badge_action, $badge, $operate_on_users, $async = false ) ) {
 			$errors++;
 		}
 	}

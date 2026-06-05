@@ -44,7 +44,7 @@ class WP_Directory extends GP_Route {
 
 			$contributors_by_locale[ $translation_editor->locale ]['editors'][ $translation_editor->user_id ] = (object) array(
 				'nicename'     => $user->user_nicename,
-				'display_name' => $this->_encode( $user->display_name ),
+				'display_name' => $user->display_name ?: $user->user_nicename,
 			);
 
 			$contributors_by_locale[ $translation_editor->locale ]['count']++;
@@ -72,7 +72,7 @@ class WP_Directory extends GP_Route {
 
 			$contributors_by_locale[ $row->locale ]['contributors'][ $row->user_id ] = (object) array(
 				'nicename'     => $user->user_nicename,
-				'display_name' => $this->_encode( $user->display_name ),
+				'display_name' => $user->display_name ?: $user->user_nicename,
 			);
 
 			$contributors_by_locale[ $row->locale ]['count']++;
@@ -105,7 +105,7 @@ class WP_Directory extends GP_Route {
 
 				$contributors_by_locale[ $row->locale ]['contributors'][ $row->user_id ] = (object) array(
 					'nicename'     => $user->user_nicename,
-					'display_name' => $this->_encode( $user->display_name ),
+					'display_name' => $user->display_name ?: $user->user_nicename,
 				);
 
 				$contributors_by_locale[ $row->locale ]['count']++;
@@ -239,10 +239,5 @@ class WP_Directory extends GP_Route {
 		", date( 'Y-m-d', time() - YEAR_IN_SECONDS ), $project_id );
 
 		return $wpdb->get_results( $sql );
-	}
-
-	private function _encode( $raw ) {
-		$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $raw, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
 }

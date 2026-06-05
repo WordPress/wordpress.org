@@ -46,6 +46,9 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 				'/about/testimonials' => '/news/category/community/',
 				// Deprecated About / Swag page https://github.com/WordPress/wporg-main-2022/issues/208
 				'/about/swag'         => 'https://mercantile.wordpress.org/',
+				'/shop'               => 'https://mercantile.wordpress.org/',
+				'/store'              => 'https://mercantile.wordpress.org/',
+				'/swag'               => 'https://mercantile.wordpress.org/',
 
 				// Hashtag alias for State of the Word
 				'/sotw' => 'https://wordpress.org/state-of-the-word/',
@@ -93,6 +96,10 @@ add_action( 'template_redirect', function() {
 		// Singular => Plural for plugin/theme directories
 		'/plugin/' => '/plugins/',
 		'/theme/'  => '/themes/',
+
+		// Legacy /extend/ directory URLs (pre-2013) https://meta.trac.wordpress.org/ticket/8268
+		'/extend/plugins/' => '/plugins/',
+		'/extend/themes/'  => '/themes/',
 
 		// The plugin directory was available at /plugins-wp/ during a beta-test, and is still linked to.
 		'/plugins-wp/' => '/plugins/',
@@ -205,6 +212,7 @@ function wporg_redirect_site_not_found() {
 		case 'wp15.wordpress.org':
 		case 'wp20.wordpress.org':
 		case 'jobs.wordpress.org':
+		case 'playground.wordpress.org':
 		// Default Theme Demo sites are on WordPress.net
 		case '2017.wordpress.org':
 		case '2019.wordpress.org':
@@ -214,6 +222,11 @@ function wporg_redirect_site_not_found() {
 		case '2023.wordpress.org':
 		case '2024.wordpress.org':
 		case '2025.wordpress.org':
+		case '2026.wordpress.org':
+		case '2027.wordpress.org':
+		case '2028.wordpress.org':
+		case '2029.wordpress.org':
+		case '2030.wordpress.org':
 			$location = 'https://' . explode( '.', $host )[0] . '.wordpress.net/';
 			break;
 
@@ -223,8 +236,18 @@ function wporg_redirect_site_not_found() {
 			break;
 
 		case 'community.wordpress.org':
-			$location    = 'https://make.wordpress.org/chat/matrix/';
-			$status_code = 302;
+			$location = 'https://events.wordpress.org/';
+			break;
+
+		case 'plugins.wordpress.org':
+		case 'themes.wordpress.org':
+			$location = 'https://wordpress.org/' . explode( '.', $host )[0] . '/';
+			break;
+
+		case 'shop.wordpress.org':
+		case 'store.wordpress.org':
+		case 'swag.wordpress.org':
+			$location = 'https://mercantile.wordpress.org/';
 			break;
 
 		// Plural => Singular

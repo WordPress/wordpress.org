@@ -2,6 +2,8 @@
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
 use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
 /**
@@ -27,6 +29,7 @@ class Controls {
 			<div id="misc-publishing-actions">
 				<?php
 				self::display_meta();
+				self::display_release_cooldown();
 				self::display_post_status();
 				?>
 			</div>
@@ -40,6 +43,116 @@ class Controls {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Display the release cooldown status and (for reviewers) a force-release control.
+	 *
+	 * Bails when there's no current release to gate, when the release has no cooldown
+	 * delay (feature off at release-creation, or already force-released), or when the
+	 * cooldown window has elapsed.
+	 */
+	protected static function display_release_cooldown() {
+		$post = get_post();
+
+		$version = get_post_meta( $post->ID, 'version', true );
+		if ( ! $version ) {
+			return;
+		}
+
+		$release = Plugin_Directory::get_release( $post, $version );
+		if ( ! $release ) {
+			return;
+		}
+
+		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+		if ( ! $release_delay ) {
+			return;
+		}
+
+		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + $release_delay;
+		if ( $cooldown_until <= time() ) {
+			return;
+		}
+
+		?>
+		<div class="misc-pub-section misc-pub-release-cooldown">
+			<p>
+			<?php
+			printf(
+				/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
+				esc_html__( 'Version %1$s is in the release cooldown — it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
+				esc_html( $version ),
+				esc_html( human_time_diff( time(), $cooldown_until ) ),
+				esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
+			);
+			?>
+			</p>
+			<?php if ( current_user_can( 'plugin_review', $post ) ) : ?>
+				<p>
+					<label for="force_release_reason"><?php esc_html_e( 'Force-release reason (required):', 'wporg-plugins' ); ?></label>
+					<textarea
+						id="force_release_reason"
+						name="force_release_reason"
+						rows="2"
+						style="width: 100%;"
+						placeholder="<?php esc_attr_e( 'e.g. urgent security fix for CVE-…', 'wporg-plugins' ); ?>"
+					></textarea>
+				</p>
+				<p>
+					<button type="submit" name="force_release_version" value="<?php echo esc_attr( $version ); ?>" class="button">
+						<?php
+						printf(
+							/* translators: %s: version */
+							esc_html__( 'Force-release %s now', 'wporg-plugins' ),
+							esc_html( $version )
+						);
+						?>
+					</button>
+				</p>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Save handler for reviewer force-release submissions from the Controls metabox.
+	 *
+	 * @param int $post_id The post being saved.
+	 */
+	public static function save_post( $post_id ) {
+		if ( empty( $_POST['force_release_version'] ) ) {
+			return;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post || 'plugin' !== $post->post_type ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'plugin_review', $post ) ) {
+			return;
+		}
+
+		// Re-verify the post.php form nonce that core already checked, to satisfy phpcs
+		// and to make the security boundary explicit.
+		check_admin_referer( 'update-post_' . $post_id );
+
+		$version           = get_post_meta( $post->ID, 'version', true );
+		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );
+		if ( $submitted_version !== $version ) {
+			// Submitted version doesn't match current — a newer commit landed since the form was rendered.
+			return;
+		}
+
+		$reason = isset( $_POST['force_release_reason'] )
+			? trim( sanitize_textarea_field( wp_unslash( $_POST['force_release_reason'] ) ) )
+			: '';
+		if ( ! $reason ) {
+			return;
+		}
+
+		API_Update_Updater::force_release( $post->post_name, $reason );
 	}
 
 	/**

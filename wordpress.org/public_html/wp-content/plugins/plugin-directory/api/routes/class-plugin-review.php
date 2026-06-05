@@ -32,13 +32,16 @@ class Plugin_Review extends Base {
 	 * @return array A formatted array of all the data for the plugin.
 	 */
 	public function plugin_info_permission_check( $request ) {
+		if ( empty( $request['plugin_id'] ) || empty( $request['token'] ) ) {
+			return false;
+		}
+
 		$post          = get_post( $request['plugin_id'] );
-		$expected_hash = wp_hash( $post->ID, 'plugin-review' );
+		$expected_hash = $post ? wp_hash( $post->ID, 'plugin-review' ) : '';
 
 		return (
 			$post &&
 			$expected_hash &&
-			! empty( $request['token'] ) &&
 			hash_equals( $expected_hash, $request['token'] )
 		);
 	}
@@ -78,12 +81,12 @@ class Plugin_Review extends Base {
 	 * @return array A formatted array of all the data for the plugin.
 	 */
 	public function plugin_review_info( $request ) {
-		$post      = get_post( $request['plugin_id'] );
-		$submitter = get_user_by( 'id', $post->post_author );
-
+		$post = get_post( $request['plugin_id'] );
 		if ( ! $post ) {
 			return new WP_Error( 'plugin_not_found', 'Plugin not found', [ 'status' => 404 ] );
 		}
+
+		$submitter = get_user_by( 'id', $post->post_author );
 
 		// Review-specific fields.
 		$details = [

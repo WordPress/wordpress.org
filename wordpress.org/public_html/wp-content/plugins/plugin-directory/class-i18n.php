@@ -94,6 +94,7 @@ class I18n {
 		_x( 'New plugins', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Recently updated plugins', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Preview-Enabled plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Dashboard Widgets', 'Plugin Section Name', 'wporg-plugins' );
 
 		// Section descriptions.
 		_x( 'Plugins that have been offered for adoption by others.', 'Plugin Section Description', 'wporg-plugins' );

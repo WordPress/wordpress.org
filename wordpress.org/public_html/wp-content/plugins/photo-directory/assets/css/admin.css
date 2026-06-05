@@ -1,5 +1,12 @@
 .photos-random .pagination-links {
 	display: none;
+
+}
+.photo-contributor-more-info {
+	overflow-wrap: anywhere;
+}
+.photo-contributor-more-info strong.ipv6 {
+	font-size: 0.68rem;
 }
 .photo-contributor-rejection-stats {
 	width: 100%;
@@ -173,4 +180,3 @@ body.post-type-photo #wp-content-editor-container {
 body.post-type-photo #major-publishing-actions {
 	display: block;
 }
-

@@ -67,7 +67,7 @@ function bporg_admin_redirect() {
 		isset( $_REQUEST['action'] ) &&
 		(
 			has_action( 'wp_ajax_nopriv_' . $_REQUEST['action'] ) ||
-			in_array( $_REQUEST['action'], [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce' ] )
+			in_array( $_REQUEST['action'], [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce', 'wporg_xprofile_field_suggestions' ] )
 		)
 	) {
 		return;

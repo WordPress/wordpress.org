@@ -386,7 +386,7 @@ class Plugin {
 
 				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
 					$this->imported_source = 'playground';
-				} elseif ( ! isset( $_POST['source'] ) && 'Import' == $_POST['submit'] ) {
+				} elseif ( ! isset( $_POST['source'] ) && isset( $_POST['submit'] ) && 'Import' == $_POST['submit'] ) {
 					$this->imported_source = 'import';
 				} else {
 					return;

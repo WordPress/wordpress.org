@@ -927,6 +927,59 @@ label {
 	margin-top: var(--space-20);
 }
 
+/* Candidates strip on single job page */
+.job-detail-candidates {
+	max-width: var(--wide-width);
+	margin-inline: auto;
+	padding: 0 var(--space-20) var(--space-60);
+}
+
+.job-detail-candidates__inner {
+	background: var(--color-light-grey-2);
+	border-radius: var(--radius);
+	padding: var(--space-40);
+}
+
+.job-detail-candidates__inner h3 {
+	font-size: var(--font-size-h5);
+	margin-bottom: var(--space-20);
+}
+
+.job-detail-candidates__grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--space-20);
+}
+
+.candidate-card--compact {
+	padding: var(--space-20);
+}
+
+.candidate-card--compact .candidate-card__avatar img {
+	width: 44px;
+	height: 44px;
+}
+
+.candidate-card--compact .candidate-card__name {
+	font-size: var(--font-size-base);
+}
+
+.job-detail-candidates__cta {
+	margin-top: var(--space-20);
+	text-align: center;
+	font-size: var(--font-size-sm);
+}
+
+.job-detail-candidates__cta a {
+	color: var(--color-blueberry-1);
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.job-detail-candidates__cta a:hover {
+	text-decoration: underline;
+}
+
 @media (max-width: 900px) {
 	.job-detail {
 		grid-template-columns: 1fr;
@@ -934,6 +987,10 @@ label {
 
 	.job-sidebar {
 		position: static;
+	}
+
+	.job-detail-candidates__grid {
+		grid-template-columns: 1fr;
 	}
 }
 
@@ -1285,6 +1342,293 @@ input[type="submit"].submit-job {
 .page-faq .entry-content dd {
 	margin: 0 0 var(--space-30);
 	color: var(--color-charcoal-4);
+}
+
+.page-faq .entry-content dd ul {
+	margin: var(--space-10) 0 0;
+	padding-left: var(--space-20);
+	list-style: disc;
+}
+
+.page-faq .entry-content dd ul ul {
+	margin-top: 4px;
+	list-style: circle;
+}
+
+.page-faq .entry-content dd li {
+	margin-bottom: 6px;
+	line-height: 1.6;
+}
+
+.page-faq .entry-content dd a {
+	color: var(--color-blueberry-1);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+}
+
+.page-faq .entry-content dd a:hover {
+	color: var(--color-deep-blueberry);
+}
+
+.page-faq .entry-content > p:first-child {
+	font-size: var(--font-size-base);
+	color: var(--color-charcoal-4);
+	margin-bottom: var(--space-30);
+}
+
+.page-faq .entry-content > p:first-child a {
+	color: var(--color-blueberry-1);
+	text-decoration: underline;
+}
+
+
+/* ============================================
+   Candidates / Open to Work Section
+   ============================================ */
+
+.candidates-section {
+	background: var(--color-light-grey-2);
+	padding: var(--space-60) var(--space-20);
+}
+
+.candidates-section__inner {
+	max-width: var(--wide-width);
+	margin-inline: auto;
+}
+
+.candidates-section__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--space-20);
+	margin-bottom: var(--space-40);
+	flex-wrap: wrap;
+}
+
+.candidates-section__header h2 {
+	font-size: var(--font-size-h3);
+	margin-bottom: 8px;
+}
+
+.candidates-section__header p {
+	color: var(--color-charcoal-4);
+	font-size: var(--font-size-lg);
+	max-width: 600px;
+}
+
+.candidates-section__count {
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	color: var(--color-charcoal-4);
+	background: var(--color-white);
+	padding: 6px 16px;
+	border-radius: var(--radius-pill);
+	border: 1px solid var(--color-light-grey-1);
+	white-space: nowrap;
+}
+
+.candidates-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--space-20);
+}
+
+.candidate-card {
+	display: flex;
+	align-items: center;
+	gap: var(--space-20);
+	background: var(--color-white);
+	border: 1px solid var(--color-light-grey-1);
+	border-radius: var(--radius);
+	padding: var(--space-20) var(--space-30);
+	text-decoration: none;
+	color: inherit;
+	transition:
+		border-color var(--transition),
+		box-shadow var(--transition);
+}
+
+.candidate-card:hover {
+	border-color: var(--color-blueberry-1);
+	box-shadow: 0 2px 8px rgba(56, 88, 233, 0.08);
+	color: inherit;
+}
+
+.candidate-card__avatar {
+	flex-shrink: 0;
+}
+
+.candidate-card__avatar img {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.candidate-card__info {
+	flex: 1;
+	min-width: 0;
+}
+
+.candidate-card__badge {
+	display: inline-flex;
+	padding: 2px 10px;
+	border-radius: var(--radius-pill);
+	background: var(--color-acid-green-3);
+	color: var(--color-charcoal-2);
+	font-size: var(--font-size-xs);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin-bottom: 4px;
+}
+
+.candidate-card__name {
+	font-family: var(--font-heading);
+	font-size: var(--font-size-lg);
+	font-weight: 400;
+	line-height: 1.3;
+	color: var(--color-charcoal-1);
+	margin-bottom: 2px;
+}
+
+.candidate-card__role {
+	font-size: var(--font-size-sm);
+	color: var(--color-charcoal-3);
+}
+
+.candidate-card__company {
+	color: var(--color-charcoal-5);
+}
+
+.candidate-card__company::before {
+	content: " \2014\00a0";
+}
+
+
+.candidate-card__arrow {
+	flex-shrink: 0;
+	font-size: var(--font-size-xl);
+	color: var(--color-light-grey-1);
+	transition: color var(--transition);
+}
+
+.candidate-card:hover .candidate-card__arrow {
+	color: var(--color-blueberry-1);
+}
+
+.candidates-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-30);
+	margin-top: var(--space-30);
+}
+
+.candidates-pagination__link {
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	color: var(--color-blueberry-1);
+	text-decoration: none;
+	transition: color var(--transition);
+}
+
+.candidates-pagination__link:hover {
+	color: var(--color-deep-blueberry);
+}
+
+.candidates-pagination__link--disabled {
+	color: var(--color-charcoal-5);
+	cursor: default;
+}
+
+.candidates-pagination__info {
+	font-size: var(--font-size-sm);
+	color: var(--color-charcoal-4);
+}
+
+.candidates-section__cta {
+	margin-top: var(--space-30);
+	text-align: center;
+	font-size: var(--font-size-sm);
+	color: var(--color-charcoal-4);
+}
+
+@media (max-width: 900px) {
+	.candidates-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 600px) {
+	.candidate-card {
+		padding: var(--space-20);
+	}
+
+	.candidate-card__avatar img {
+		width: 40px;
+		height: 40px;
+	}
+
+	.candidate-card__arrow {
+		display: none;
+	}
+}
+
+
+/* ============================================
+   Sidebar: Open to Work Widget
+   ============================================ */
+
+.widget-open-to-work {
+	margin-top: var(--space-20);
+}
+
+.open-to-work-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.open-to-work-list li {
+	margin-bottom: var(--space-10);
+}
+
+.open-to-work-list a {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	text-decoration: none;
+	color: var(--color-blueberry-1);
+	font-size: var(--font-size-sm);
+	transition: color var(--transition);
+}
+
+.open-to-work-list a:hover {
+	color: var(--color-deep-blueberry);
+}
+
+.open-to-work-list img {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.widget-open-to-work__more {
+	display: block;
+	margin-top: var(--space-10);
+	padding-top: var(--space-10);
+	border-top: 1px solid var(--color-light-grey-2);
+	font-size: var(--font-size-xs);
+	font-weight: 600;
+	color: var(--color-blueberry-1);
+	text-decoration: none;
+}
+
+.widget-open-to-work__more:hover {
+	color: var(--color-deep-blueberry);
 }
 
 

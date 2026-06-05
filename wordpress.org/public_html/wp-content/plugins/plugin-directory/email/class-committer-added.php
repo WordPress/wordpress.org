@@ -22,7 +22,7 @@ class Committer_Added extends Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( 'New committer added to %s', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -52,7 +52,7 @@ If you believe this to be in error, please contact %7$s.', 'wporg-plugins' );
 			$email_text,
 			$this->user_text( $this->user ),
 			$this->user_text( $this->args['committer'] ),
-			$this->plugin->post_title,
+			$this->plugin_title(),
 			$this->user_text( $this->who ),
 			$committer_list,
 			$advanced_url,

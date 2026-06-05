@@ -76,6 +76,13 @@ class WPORG_Themes_Upload {
 	public $theme;
 
 	/**
+	 * The theme name.
+	 *
+	 * @var string
+	 */
+	public $theme_name = '';
+
+	/**
 	 * The theme slug being uploaded.
 	 *
 	 * @var string
@@ -1158,8 +1165,10 @@ class WPORG_Themes_Upload {
 		$this->trac_ticket->priority = 'new theme';
 		if ( ! empty( $this->theme_post->_status ) ) {
 
-			// Is this an update to an existing, approved theme?
-			if ( 'live' === $this->theme_post->_status[ $this->theme_post->max_version ] ) {
+			// Is this an update to an existing, approved theme? An 'approved' status
+			// (live version still in release cooldown) counts as approved for ticket
+			// priority — the previous live version is still being served.
+			if ( in_array( $this->theme_post->_status[ $this->theme_post->max_version ], [ 'live', 'approved' ], true ) ) {
 				$this->trac_ticket->priority = 'theme update';
 
 				// Apparently not, it must be a new upload for previously unapproved theme.
@@ -1296,11 +1305,16 @@ TICKET;
 		 */
 		$trac_ticket_reporter = wp_get_current_user()->user_login ?? $this->author->user_login;
 
-		// If there's a previous version and the most current version's status is `new`, we update.
-		if (
-			! empty( $this->theme_post->max_version ) &&
-			'new' == $this->theme_post->_status[ $this->theme_post->max_version ]
-		) {
+		$prev_status = $this->theme_post->_status[ $this->theme_post->max_version ?? '' ] ?? '';
+
+		/*
+		 * If the previous version is still on an open ticket — either awaiting review
+		 * (`new`) or approved and waiting out the release delay (`approved`) — update that
+		 * same ticket rather than opening a new one. Re-uploading resets the ticket's
+		 * changetime, so an approved update's release delay restarts from this upload and
+		 * the superseded version is simply demoted to `old`.
+		 */
+		if ( in_array( $prev_status, [ 'new', 'approved' ], true ) ) {
 			$ticket_id = (int) $this->theme_post->_ticket_id[ $this->theme_post->max_version ];
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
@@ -1308,6 +1322,12 @@ TICKET;
 			if ( $ticket && empty( $ticket[3]['resolution'] ) ) {
 				$result    = $this->trac->ticket_update( $ticket_id, $this->trac_ticket->description, array( 'summary' => $this->trac_ticket->summary, 'keywords' => implode( ' ', $this->trac_ticket->keywords ) ), true /* Trigger email notifications */ );
 				$ticket_id = $result ? $ticket_id : false;
+
+				// Keep an approved update in the `approved` window; the release-to-live
+				// cron promotes it once the delay (measured from this upload) elapses.
+				if ( 'approved' === $prev_status ) {
+					$this->version_status = 'approved';
+				}
 			} else {
 				$ticket_id = $this->trac->ticket_create( $this->trac_ticket->summary, $this->trac_ticket->description, array(
 					'type'      => 'theme',
@@ -1330,13 +1350,25 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			// Themes team auto-approves theme-updates, so mark the theme as live immediately.
-			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets.
+			// Themes team auto-approves theme-updates. Note that this only applies to new
+			// ticket creation, so it won't happen on themes with existing outstanding tickets.
 			if ( $this->trac_ticket->priority == 'theme update' ) {
-				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
+				$release_delay = wporg_themes_get_release_cooldown_delay( $this->theme_slug );
+				if ( $release_delay ) {
+					// Land the update in the `approved` status; the release-to-live cron
+					// promotes it to live once the cooldown elapses. The previous live
+					// version continues to be served in the meantime.
+					$delay_hours = (int) round( $release_delay / HOUR_IN_SECONDS );
+					$this->trac->ticket_update( $ticket_id, sprintf( 'Theme Update for existing Live theme - automatically approved, will be marked live in %dhrs.', $delay_hours ), array( 'action' => 'new_no_review_delay' ), false );
 
-				$this->trac_ticket->resolution = 'live';
-				$this->version_status          = 'live';
+					$this->version_status = 'approved';
+				} else {
+					// Cooldown disabled: mark the theme live immediately.
+					$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
+
+					$this->trac_ticket->resolution = 'live';
+					$this->version_status          = 'live';
+				}
 			}
 
 		}
@@ -1561,10 +1593,13 @@ TICKET;
 		 * Skip sending an email when..
 		 *  - The theme is to be made live immediately.
 		 *    `wporg_themes_approve_version()` will send a "Congratulations! It's live!" shortly.
+		 *  - The theme was auto-approved into the release cooldown. It's not awaiting
+		 *    review, so the "new version uploaded" feedback email doesn't apply; the
+		 *    "now live" email follows once the cooldown elapses.
 		 *  - No Trac ticket was created, so there's nothing to reference about where feedback is.
 		 */
 		if (
-			'live' === $this->version_status ||
+			in_array( $this->version_status, [ 'live', 'approved' ], true ) ||
 			! $this->trac_ticket->id
 		) {
 			return;
