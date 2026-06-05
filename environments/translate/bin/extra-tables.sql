@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `wp_gp_user_projects` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `wp_gp_project_translation_status` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `project_id` int(10) unsigned NOT NULL,
   `locale` varchar(10) NOT NULL,
   `locale_slug` varchar(255) NOT NULL,
@@ -37,14 +37,12 @@ CREATE TABLE IF NOT EXISTS `wp_gp_project_translation_status` (
   `fuzzy` int(10) unsigned NOT NULL DEFAULT '0',
   `warnings` int(10) unsigned NOT NULL DEFAULT '0',
   `untranslated` int(10) unsigned NOT NULL DEFAULT '0',
+  `has_pending` tinyint(1) NOT NULL DEFAULT 0,
   `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `project_locale` (`project_id`,`locale`,`locale_slug`),
-  KEY `all` (`all`),
-  KEY `current` (`current`),
-  KEY `waiting` (`waiting`),
-  KEY `fuzzy` (`fuzzy`),
-  KEY `warnings` (`warnings`),
-  KEY `untranslated` (`untranslated`)
+  KEY `locale` (`locale`,`locale_slug`,`has_pending`),
+  KEY `date_added` (`date_added`),
+  KEY `date_modified` (`date_modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
