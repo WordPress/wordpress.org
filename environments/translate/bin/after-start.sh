@@ -161,17 +161,21 @@ $WP wp eval '
 		// into index-locales.php where current_count / all_count throws DivisionByZeroError.
 		$counts = $proj->get_project_translation_counts( $s->project_id, $s->locale, $s->slug );
 		if ( 0 === (int) $counts["all"] ) { continue; }
+		// has_pending mirrors production (denormalized "waiting > 0 OR fuzzy > 0").
+		// wporg-gp-routes/class-locale "needs attention" queries scan on it.
+		$has_pending = ( $counts["waiting"] > 0 || $counts["fuzzy"] > 0 ) ? 1 : 0;
 		$wpdb->query( $wpdb->prepare(
 			"INSERT INTO {$wpdb->prefix}gp_project_translation_status
-			 (project_id, locale, locale_slug, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, date_added, date_modified)
-			 VALUES (%d, %s, %s, %d, %d, %d, %d, %d, %d, NOW(), NOW())
+			 (project_id, locale, locale_slug, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, has_pending, date_added, date_modified)
+			 VALUES (%d, %s, %s, %d, %d, %d, %d, %d, %d, %d, NOW(), NOW())
 			 ON DUPLICATE KEY UPDATE
 			 `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VALUES(`waiting`),
 			 `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`),
-			 date_modified=NOW()",
+			 has_pending=VALUES(has_pending), date_modified=NOW()",
 			$s->project_id, $s->locale, $s->slug,
 			(int) $counts["all"], (int) $counts["current"], (int) $counts["waiting"],
-			(int) $counts["fuzzy"], (int) $counts["warnings"], (int) $counts["untranslated"]
+			(int) $counts["fuzzy"], (int) $counts["warnings"], (int) $counts["untranslated"],
+			$has_pending
 		) );
 	}
 	$proj->cache_wp_themes_wp_plugins_strings();
