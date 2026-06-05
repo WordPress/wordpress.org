@@ -20,13 +20,6 @@ class Badges {
 	const CONTRIBUTOR_REPLY_THRESHOLD = 50;
 
 	/**
-	 * Badge assignments queued during the current request.
-	 *
-	 * @var array<string, bool>
-	 */
-	private $queued_assignments = array();
-
-	/**
 	 * Register badge assignment hooks.
 	 */
 	public function __construct() {
@@ -188,17 +181,13 @@ class Badges {
 	 */
 	private function award_badge( $badge, $user_id ) {
 		$user_id = absint( $user_id );
-		$key     = "{$badge}:{$user_id}";
 
 		if (
 			! $user_id ||
-			isset( $this->queued_assignments[ $key ] ) ||
 			! function_exists( 'WordPressdotorg\Profiles\assign_badge' )
 		) {
 			return false;
 		}
-
-		$this->queued_assignments[ $key ] = true;
 
 		return assign_badge( $badge, $user_id );
 	}
