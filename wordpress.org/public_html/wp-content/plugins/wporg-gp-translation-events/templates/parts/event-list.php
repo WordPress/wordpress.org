@@ -102,12 +102,14 @@ $print_time = function ( $time ): void {
 					<span class="event-list-date"><?php $print_time( $event->start() ); ?></span>
 				<?php endif; ?>
 			<?php endif; ?>
-			<?php if ( $show_end ) : ?>
+			<?php if ( $show_end && ! $event->is_open_ended() ) : ?>
 				<?php if ( $event->end()->is_in_the_past() ) : ?>
 					<span class="event-list-date"><?php $print_time( $event->end() ); ?></span>
 				<?php else : ?>
 					<span class="event-list-date"><?php $print_time( $event->end() ); ?></time></span>
 				<?php endif; ?>
+			<?php elseif ( $show_end && $event->is_open_ended() ) : ?>
+				<span class="event-list-date"><?php esc_html_e( 'Ongoing', 'gp-translation-events' ); ?></span>
 			<?php endif; ?>
 
 			<?php // Excerpt. ?>

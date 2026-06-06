@@ -34,6 +34,9 @@ register_block_type(
 			if ( ! $event ) {
 				return '';
 			}
+			if ( $event->is_open_ended() ) {
+				return '<p>' . esc_html__( 'Ongoing', 'gp-translation-events' ) . '</p>';
+			}
 			$end = $event->end()->format( 'F j, Y' );
 			return '<p>' . esc_html( $end ) . '</p>';
 		},

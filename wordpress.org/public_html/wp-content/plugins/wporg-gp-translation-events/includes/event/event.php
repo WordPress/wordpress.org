@@ -36,7 +36,7 @@ class Event {
 	private int $id = 0;
 	private int $author_id;
 	private Event_Start_Date $start;
-	private Event_End_Date $end;
+	private ?Event_End_Date $end;
 	private DateTimeZone $timezone;
 	private string $slug = '';
 	private string $status;
@@ -53,7 +53,7 @@ class Event {
 	public function __construct(
 		int $author_id,
 		Event_Start_Date $start,
-		Event_End_Date $end,
+		?Event_End_Date $end,
 		DateTimeZone $timezone,
 		string $status,
 		string $title,
@@ -85,8 +85,12 @@ class Event {
 		return $this->start;
 	}
 
-	public function end(): Event_End_Date {
+	public function end(): ?Event_End_Date {
 		return $this->end;
+	}
+
+	public function is_open_ended(): bool {
+		return null === $this->end;
 	}
 
 	public function is_published(): bool {
@@ -103,11 +107,14 @@ class Event {
 
 	public function is_active(): bool {
 		$now = Translation_Events::now();
-		return $now >= $this->start->utc() && $now < $this->end->utc();
+		if ( $now < $this->start->utc() ) {
+			return false;
+		}
+		return null === $this->end || $now < $this->end->utc();
 	}
 
 	public function is_past(): bool {
-		return $this->end->is_in_the_past();
+		return null !== $this->end && $this->end->is_in_the_past();
 	}
 
 	public function is_remote(): bool {
@@ -154,7 +161,7 @@ class Event {
 		$this->start = $start;
 	}
 
-	public function set_end( Event_End_Date $end ): void {
+	public function set_end( ?Event_End_Date $end ): void {
 		$this->end = $end;
 	}
 
@@ -196,12 +203,15 @@ class Event {
 	 * @throws InvalidStart
 	 * @throws InvalidEnd
 	 */
-	public function validate_times( Event_Start_Date $start, Event_End_Date $end ) {
-		if ( $end <= $start ) {
-			throw new InvalidEnd();
-		}
+	public function validate_times( Event_Start_Date $start, ?Event_End_Date $end ) {
 		if ( ! $start->getTimezone() || 'UTC' !== $start->getTimezone()->getName() ) {
 			throw new InvalidStart();
+		}
+		if ( null === $end ) {
+			return;
+		}
+		if ( $end <= $start ) {
+			throw new InvalidEnd();
 		}
 		if ( ! $end->getTimezone() || 'UTC' !== $end->getTimezone()->getName() ) {
 			throw new InvalidEnd();

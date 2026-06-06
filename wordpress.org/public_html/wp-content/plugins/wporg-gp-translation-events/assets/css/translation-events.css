@@ -19,6 +19,18 @@
 	margin-top: 1em;
 }
 
+.translation-event-form .event-end-fields {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.translation-event-form label.event-end-open-ended-toggle {
+	display: block;
+	width: auto;
+	margin-top: 0.5em;
+	font-weight: normal;
+}
+
 .translation-event-form #submit-event {
 	margin-left: 10%;
 	width: 30%;

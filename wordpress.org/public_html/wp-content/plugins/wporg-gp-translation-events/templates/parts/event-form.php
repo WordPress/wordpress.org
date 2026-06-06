@@ -52,7 +52,22 @@ use Wporg\TranslationEvents\Urls;
 		</div>
 		<div>
 			<label for="event-end"><?php esc_html_e( 'End Date', 'gp-translation-events' ); ?></label>
-			<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() ) ?: 'readonly' ); ?>>
+			<?php
+			$is_open_ended   = $event->is_open_ended();
+			$end_value       = $is_open_ended ? '' : $event->end()->format( 'Y-m-d H:i' );
+			$can_edit_end    = $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() );
+			$end_input_attrs = ! $can_edit_end ? 'readonly' : '';
+			if ( $is_open_ended ) {
+				$end_input_attrs .= ' disabled';
+			}
+			?>
+			<span class="event-end-fields">
+				<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $end_value ); ?>" <?php echo esc_html( $end_input_attrs ); ?>>
+				<label for="event-is-open-ended" class="event-end-open-ended-toggle">
+					<input type="checkbox" id="event-is-open-ended" name="event_is_open_ended" value="1" <?php checked( $is_open_ended ); ?> <?php disabled( ! $can_edit_end ); ?>>
+					<?php esc_html_e( 'Ongoing event (no end date)', 'gp-translation-events' ); ?>
+				</label>
+			</span>
 		</div>
 		<div>
 			<label for="event-timezone"><?php esc_html_e( 'Event Timezone', 'gp-translation-events' ); ?></label>

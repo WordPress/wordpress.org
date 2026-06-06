@@ -201,10 +201,11 @@ class Event_Form_Handler {
 		// This will be sanitized by sanitize_post which is called in wp_insert_post.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$description     = isset( $data['event_description'] ) ? force_balance_tags( wp_unslash( $data['event_description'] ) ) : '';
-		$event_start     = isset( $data['event_start'] ) ? sanitize_text_field( wp_unslash( $data['event_start'] ) ) : '';
-		$event_end       = isset( $data['event_end'] ) ? sanitize_text_field( wp_unslash( $data['event_end'] ) ) : '';
-		$event_timezone  = isset( $data['event_timezone'] ) ? sanitize_text_field( wp_unslash( $data['event_timezone'] ) ) : '';
-		$attendance_mode = isset( $data['event_attendance_mode'] ) ? sanitize_text_field( wp_unslash( $data['event_attendance_mode'] ) ) : 'onsite';
+		$event_start         = isset( $data['event_start'] ) ? sanitize_text_field( wp_unslash( $data['event_start'] ) ) : '';
+		$event_end           = isset( $data['event_end'] ) ? sanitize_text_field( wp_unslash( $data['event_end'] ) ) : '';
+		$event_is_open_ended = ! empty( $data['event_is_open_ended'] );
+		$event_timezone      = isset( $data['event_timezone'] ) ? sanitize_text_field( wp_unslash( $data['event_timezone'] ) ) : '';
+		$attendance_mode     = isset( $data['event_attendance_mode'] ) ? sanitize_text_field( wp_unslash( $data['event_attendance_mode'] ) ) : 'onsite';
 
 		$event_status = '';
 		if ( isset( $data['event_form_action'] ) && in_array( $data['event_form_action'], array( 'draft', 'publish', 'trash' ), true ) ) {
@@ -223,16 +224,21 @@ class Event_Form_Handler {
 			throw new InvalidStart();
 		}
 
-		try {
-			$end = new Event_End_Date( $event_end, $timezone );
-		} catch ( Exception $e ) {
-			throw new InvalidEnd();
+		if ( $event_is_open_ended ) {
+			$end = null;
+		} else {
+			try {
+				$end = new Event_End_Date( $event_end, $timezone );
+			} catch ( Exception $e ) {
+				throw new InvalidEnd();
+			}
+			$end = $end->setTimezone( new DateTimeZone( 'UTC' ) );
 		}
 
 		$event = new Event(
 			get_current_user_id(),
 			$start->setTimezone( new DateTimeZone( 'UTC' ) ),
-			$end->setTimezone( new DateTimeZone( 'UTC' ) ),
+			$end,
 			$timezone,
 			$event_status,
 			$title,

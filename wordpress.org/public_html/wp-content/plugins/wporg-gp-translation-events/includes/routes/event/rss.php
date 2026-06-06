@@ -82,7 +82,9 @@ class Rss_Route extends Route {
 		$item .= '          <enclosure url="' . esc_url( Urls::event_image( $event->id() ) ) . '" type="image/png" length="1200" />';
 		$item .= '          <pubDate>' . esc_html( $event->updated_at()->format( DATE_RSS ) ) . '</pubDate>';
 		$item .= '          <ev:startdate>' . esc_html( $event->start()->format( DateTimeInterface::ATOM ) ) . '</ev:startdate>';
-		$item .= '          <ev:enddate>' . esc_html( $event->end()->format( DateTimeInterface::ATOM ) ) . '</ev:enddate>';
+		if ( null !== $event->end() ) {
+			$item .= '          <ev:enddate>' . esc_html( $event->end()->format( DateTimeInterface::ATOM ) ) . '</ev:enddate>';
+		}
 		$item .= '          <guid>' . esc_url( home_url( gp_url( gp_url_join( 'events', $event->slug() ) ) ) ) . '</guid>';
 		$item .= '      </item>';
 		return $item;

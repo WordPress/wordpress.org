@@ -266,8 +266,6 @@ class Event_Capabilities {
 	 * @return bool
 	 */
 	private function has_edit_field( WP_User $user, Event $event, $cap ): bool {
-		$event_end_plus_1_hr = $event->end()->modify( '+1 hour' );
-
 		if ( self::EDIT_DESCRIPTION === $cap ) {
 			return true;
 		}
@@ -284,10 +282,11 @@ class Event_Capabilities {
 			return ( self::EDIT_TITLE === $cap || self::EDIT_END === $cap );
 		}
 
-		if ( $event->end()->is_in_the_past() && $this->now < $event_end_plus_1_hr ) {
-			return ( self::EDIT_TITLE === $cap || self::EDIT_END === $cap );
-		}
-		if ( $event->end()->is_in_the_past() && $this->now > $event_end_plus_1_hr ) {
+		if ( $event->is_past() ) {
+			$event_end_plus_1_hr = $event->end()->modify( '+1 hour' );
+			if ( $this->now < $event_end_plus_1_hr ) {
+				return ( self::EDIT_TITLE === $cap || self::EDIT_END === $cap );
+			}
 			return ( self::EDIT_DESCRIPTION === $cap );
 		}
 

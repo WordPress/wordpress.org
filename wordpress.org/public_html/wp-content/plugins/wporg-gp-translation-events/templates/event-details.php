@@ -266,17 +266,22 @@ Templates::header(
 					<?php $event->start()->print_relative_time_html(); ?>
 				</span>
 				<?php $event->start()->print_time_html(); ?>
-				<span class="event-details-date-label">
-					<?php echo esc_html( $event->end()->is_in_the_past() ? __( 'Ended', 'gp-translation-events' ) : __( 'Ends', 'gp-translation-events' ) ); ?>:
-					<?php $event->end()->print_relative_time_html(); ?>
-
-				</span>
-				<?php $event->end()->print_time_html(); ?>
+				<?php if ( $event->is_open_ended() ) : ?>
+					<span class="event-details-date-label">
+						<?php esc_html_e( 'Ongoing event (no end date)', 'gp-translation-events' ); ?>
+					</span>
+				<?php else : ?>
+					<span class="event-details-date-label">
+						<?php echo esc_html( $event->end()->is_in_the_past() ? __( 'Ended', 'gp-translation-events' ) : __( 'Ends', 'gp-translation-events' ) ); ?>:
+						<?php $event->end()->print_relative_time_html(); ?>
+					</span>
+					<?php $event->end()->print_time_html(); ?>
+				<?php endif; ?>
 			</p>
 		</div>
 		<?php if ( is_user_logged_in() ) : ?>
 		<div class="event-details-join">
-			<?php if ( $event->end()->is_in_the_past() ) : ?>
+			<?php if ( $event->is_past() ) : ?>
 				<?php if ( $user_is_attending ) : ?>
 					<button disabled="disabled" class="button is-primary attend-btn"><?php esc_html_e( 'You attended', 'gp-translation-events' ); ?></button>
 				<?php endif; ?>
@@ -306,7 +311,7 @@ Templates::header(
 		<?php else : ?>
 		<div class="event-details-join">
 			<p>
-				<?php if ( ! $event->end()->is_in_the_past() ) : ?>
+				<?php if ( ! $event->is_past() ) : ?>
 					<a href="<?php echo esc_url( wp_login_url() ); ?>" class="button is-primary attend-btn"><?php esc_html_e( 'Login to attend', 'gp-translation-events' ); ?></a>
 				<?php else : ?>
 					<button disabled="disabled" class="button is-primary attend-btn"><?php esc_html_e( 'Event is over', 'gp-translation-events' ); ?></button>

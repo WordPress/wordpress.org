@@ -227,12 +227,7 @@ class Event_Repository implements Event_Repository_Interface {
 			$page_size,
 			array(
 				'meta_query' => array(
-					array(
-						'key'     => '_event_end',
-						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
-						'compare' => '>',
-						'type'    => 'DATETIME',
-					),
+					$this->meta_query_end_after_or_unbounded( $this->now ),
 				),
 				'meta_key'   => '_event_start',
 				'orderby'    => array(
@@ -290,12 +285,7 @@ class Event_Repository implements Event_Repository_Interface {
 						'compare' => '<=',
 						'type'    => 'DATETIME',
 					),
-					array(
-						'key'     => '_event_end',
-						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
-						'compare' => '>=',
-						'type'    => 'DATETIME',
-					),
+					$this->meta_query_end_after_or_unbounded( $this->now, '>=' ),
 				),
 				'meta_key'   => '_event_start',
 				'orderby'    => array(
@@ -318,12 +308,7 @@ class Event_Repository implements Event_Repository_Interface {
 			$page_size,
 			array(
 				'meta_query' => array(
-					array(
-						'key'     => '_event_end',
-						'value'   => $this->now->format( 'Y-m-d H:i:s' ),
-						'compare' => '>',
-						'type'    => 'DATETIME',
-					),
+					$this->meta_query_end_after_or_unbounded( $this->now ),
 				),
 				'meta_key'   => '_event_start',
 				'orderby'    => array(
@@ -454,12 +439,7 @@ class Event_Repository implements Event_Repository_Interface {
 					'compare' => '<=',
 					'type'    => 'DATETIME',
 				),
-				array(
-					'key'     => '_event_end',
-					'value'   => $boundary_start->format( 'Y-m-d H:i:s' ),
-					'compare' => '>',
-					'type'    => 'DATETIME',
-				),
+				$this->meta_query_end_after_or_unbounded( $boundary_start ),
 			),
 			'meta_key'   => '_event_start',
 			'meta_type'  => 'DATETIME',
@@ -604,15 +584,40 @@ class Event_Repository implements Event_Repository_Interface {
 		$meta = get_post_meta( $event_id );
 		$utc  = new DateTimeZone( 'UTC' );
 
-		if ( ! isset( $meta['_event_start'][0], $meta['_event_end'][0], $meta['_event_timezone'][0] ) ) {
+		if ( ! isset( $meta['_event_start'][0], $meta['_event_timezone'][0] ) ) {
 			return null;
+		}
+
+		$end = null;
+		if ( isset( $meta['_event_end'][0] ) && '' !== $meta['_event_end'][0] ) {
+			$end = new Event_End_Date( $meta['_event_end'][0], $utc );
 		}
 
 		return array(
 			'start'           => new Event_Start_Date( $meta['_event_start'][0], $utc ),
-			'end'             => new Event_End_Date( $meta['_event_end'][0], $utc ),
+			'end'             => $end,
 			'timezone'        => new DateTimeZone( $meta['_event_timezone'][0] ),
 			'attendance_mode' => ! isset( $meta['_event_attendance_mode'][0] ) ? 'onsite' : $meta['_event_attendance_mode'][0],
+		);
+	}
+
+	/**
+	 * Returns a meta_query fragment that matches events whose _event_end is after
+	 * the given boundary, OR which have no _event_end meta (open-ended events).
+	 */
+	private function meta_query_end_after_or_unbounded( DateTimeImmutable $boundary, string $compare = '>' ): array {
+		return array(
+			'relation' => 'OR',
+			array(
+				'key'     => '_event_end',
+				'value'   => $boundary->format( 'Y-m-d H:i:s' ),
+				'compare' => $compare,
+				'type'    => 'DATETIME',
+			),
+			array(
+				'key'     => '_event_end',
+				'compare' => 'NOT EXISTS',
+			),
 		);
 	}
 
@@ -626,7 +631,11 @@ class Event_Repository implements Event_Repository_Interface {
 		);
 		$hosts_ids = implode( ', ', $hosts_ids );
 		update_post_meta( $event->id(), '_event_start', $event->start()->utc()->format( 'Y-m-d H:i:s' ) );
-		update_post_meta( $event->id(), '_event_end', $event->end()->utc()->format( 'Y-m-d H:i:s' ) );
+		if ( null === $event->end() ) {
+			delete_post_meta( $event->id(), '_event_end' );
+		} else {
+			update_post_meta( $event->id(), '_event_end', $event->end()->utc()->format( 'Y-m-d H:i:s' ) );
+		}
 		update_post_meta( $event->id(), '_event_timezone', $event->timezone()->getName() );
 		update_post_meta( $event->id(), '_hosts', $hosts_ids );
 		update_post_meta( $event->id(), '_event_attendance_mode', $event->attendance_mode() );

@@ -8,6 +8,7 @@
 					selectUserTimezone();
 				}
 				validateEventDates();
+				bindOpenEndedToggle();
 				convertToUserLocalTime();
 				setInterval( convertToUserLocalTime, 10000 );
 
@@ -94,7 +95,9 @@
 						$( '#event-title' ).val( wordcamp.title.rendered );
 						$( '#event-description' ).val( wordcamp.content.rendered );
 						$( '#event-start' ).val( new Date( 1000 * wordcamp['Start Date (YYYY-mm-dd)'] ).toISOString().slice( 0,11 ) + '09:00' );
-						$( '#event-end' ).val( new Date( 1000 * wordcamp['End Date (YYYY-mm-dd)'] ).toISOString().slice( 0,11 ) + '18:00' );
+						if ( ! $( '#event-is-open-ended' ).is( ':checked' ) ) {
+							$( '#event-end' ).val( new Date( 1000 * wordcamp['End Date (YYYY-mm-dd)'] ).toISOString().slice( 0,11 ) + '18:00' );
+						}
 						$( '#event-timezone' ).val( wordcamp['Event Timezone'] );
 
 					}
@@ -123,13 +126,16 @@
 				$gp.notices.error( 'Event start date and time must be set.' );
 				return;
 			}
-			if ( '' === $( '#event-end' ).val() ) {
-				$gp.notices.error( 'Event end date and time must be set.' );
-				return;
-			}
-			if ( $( '#event-end' ).val() <= $( '#event-start' ).val() ) {
-				$gp.notices.error( 'Event end date and time must be later than event start date and time.' );
-				return;
+			const isOpenEnded = $( '#event-is-open-ended' ).is( ':checked' );
+			if ( ! isOpenEnded ) {
+				if ( '' === $( '#event-end' ).val() ) {
+					$gp.notices.error( 'Event end date and time must be set.' );
+					return;
+				}
+				if ( $( '#event-end' ).val() <= $( '#event-start' ).val() ) {
+					$gp.notices.error( 'Event end date and time must be later than event start date and time.' );
+					return;
+				}
 			}
 			if ( eventStatus === 'publish' && isDraft ) {
 				const submitPrompt = 'Are you sure you want to publish this event?';
@@ -193,6 +199,37 @@
 					error: function ( error ) {
 						$gp.notices.error( response.data.message );
 					},
+				}
+			);
+		}
+
+		function bindOpenEndedToggle() {
+			const $checkbox = $( '#event-is-open-ended' );
+			const $endInput = $( '#event-end' );
+			if ( ! $checkbox.length || ! $endInput.length ) {
+				return;
+			}
+
+			$checkbox.on(
+				'change',
+				function () {
+					if ( $checkbox.is( ':checked' ) ) {
+						$endInput.prop( 'disabled', true ).val( '' );
+						return;
+					}
+					$endInput.prop( 'disabled', false );
+					if ( '' === $endInput.val() ) {
+						const startVal = $( '#event-start' ).val();
+						if ( startVal ) {
+							const start = new Date( startVal );
+							start.setHours( start.getHours() + 1 );
+							const pad = ( n ) => String( n ).padStart( 2, '0' );
+							$endInput.val(
+								start.getFullYear() + '-' + pad( start.getMonth() + 1 ) + '-' + pad( start.getDate() )
+								+ 'T' + pad( start.getHours() ) + ':' + pad( start.getMinutes() )
+							);
+						}
+					}
 				}
 			);
 		}
