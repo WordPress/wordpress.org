@@ -14,6 +14,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 
 	class WPOrg_Profiles_Association_Handler {
 
+		const USER_BADGES_CACHE_GROUP      = 'user_meta';
+		const USER_BADGES_CACHE_KEY_PREFIX = 'wporg-profiles-user-badges:';
+
 		/**
 		 * @var WPOrg_Profiles_Association_Handler|null
 		 */
@@ -266,11 +269,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				if ( 'add' == $command ) {
 					if ( ! groups_is_user_member( $user_id, $group_id ) ) {
 						groups_join_group( $group_id, $user_id );
+						$this->clear_user_badges_cache( $user_id );
 						$users_altered++;
 					}
 				} elseif ( 'remove' == $command ) {
 					if ( groups_is_user_member( $user_id, $group_id ) ) {
 						groups_leave_group( $group_id, $user_id );
+						$this->clear_user_badges_cache( $user_id );
 						$users_altered++;
 					}
 				}
@@ -288,6 +293,15 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 			}
 
 			return true;
+		}
+
+		/**
+		 * Clears cached badge data for a user after their badge group membership changes.
+		 *
+		 * @param int $user_id User ID.
+		 */
+		private function clear_user_badges_cache( $user_id ) {
+			wp_cache_delete( self::USER_BADGES_CACHE_KEY_PREFIX . (int) $user_id, self::USER_BADGES_CACHE_GROUP );
 		}
 
 	} /* /class WPOrg_Profiles_Association_Handler */

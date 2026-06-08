@@ -9,6 +9,9 @@
 namespace WordPressdotorg\Profiles;
 use WP_Error, WP_User;
 
+const USER_BADGES_CACHE_GROUP      = 'user_meta';
+const USER_BADGES_CACHE_KEY_PREFIX = 'wporg-profiles-user-badges:';
+
 /**
  * Assign a badge to a given user.
  * 
@@ -69,15 +72,22 @@ function get_users_with_badge( string $badge ) : array {
 /**
  * Get a list of badges for a given user.
  *
- * WARNING: Uncached. Excludes dynamically allocated badges.
+ * Excludes dynamically allocated badges.
  *
- * @param $users mixed The user to fetch the badged for. A WP_User/ID/Login/Email.
+ * @param mixed $user The user to fetch the badges for. A WP_User/ID/Login/Email.
  * @return array An array of badge names keyed by slug.
  */
 function get_user_badges( $user ) {
 	global $wpdb;
 
-	$user_id = find_user_id( $user );
+	$user_id = (int) find_user_id( $user );
+
+	$cache_key = USER_BADGES_CACHE_KEY_PREFIX . $user_id;
+	$badges    = wp_cache_get( $cache_key, USER_BADGES_CACHE_GROUP, false, $found );
+
+	if ( $found ) {
+		return $badges;
+	}
 
 	$badges = $wpdb->get_results( $wpdb->prepare(
 		"SELECT slug, name
@@ -88,7 +98,22 @@ function get_user_badges( $user ) {
 		$user_id
 	), ARRAY_A );
 
-	return array_column( $badges, 'name', 'slug' );
+	$badges = array_column( $badges, 'name', 'slug' );
+
+	wp_cache_set( $cache_key, $badges, USER_BADGES_CACHE_GROUP, HOUR_IN_SECONDS );
+
+	return $badges;
+}
+
+/**
+ * Clear cached badges for a given user.
+ *
+ * @param mixed $user The user to clear cached badges for. A WP_User/ID/Login/Email.
+ */
+function clear_user_badges_cache( $user ) {
+	$user_id = (int) find_user_id( $user );
+
+	wp_cache_delete( USER_BADGES_CACHE_KEY_PREFIX . $user_id, USER_BADGES_CACHE_GROUP );
 }
 
 /**
@@ -230,8 +255,13 @@ function badge_api( string $action, string $badge, $users = array(), $async = tr
 		return queue( $payload );
 	} else {
 		$response = api( $payload );
+		$success  = ! is_wp_error( $response ) && 200 == wp_remote_retrieve_response_code( $response );
 
-		return ! is_wp_error( $response ) && 200 == wp_remote_retrieve_response_code( $response );
+		if ( $success ) {
+			array_walk( $users, __NAMESPACE__ . '\clear_user_badges_cache' );
+		}
+
+		return $success;
 	}
 }
 
