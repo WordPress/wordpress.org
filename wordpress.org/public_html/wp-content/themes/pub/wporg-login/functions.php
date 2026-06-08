@@ -55,7 +55,10 @@ add_filter( 'show_admin_bar', '__return_false', 101 );
 /**
  * Disable XML-RPC endpoints.
  */
-add_filter( 'xmlrpc_methods', '__return_empty_array' );
+add_filter( 'xmlrpc_enabled', '__return_false' );
+if ( 'jetpack' !== ( $_GET['for'] ?? '' ) ) {
+	add_filter( 'xmlrpc_methods', '__return_empty_array' );
+}
 
 /**
  * Replace cores login CSS with our own.
