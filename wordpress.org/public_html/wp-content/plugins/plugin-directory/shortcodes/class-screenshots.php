@@ -60,17 +60,6 @@ class Screenshots {
 	const SYNTHETIC_ID_OFFSET = 9000000;
 
 	/**
-	 * Object-cache group for the per-plugin uniform-aspect verdict.
-	 *
-	 * Registered as global so the verdict survives across the multisite
-	 * Plugin Directory subsites (mirrors the `wporg-plugins` group set up
-	 * in {@see Plugin_Directory::init()}).
-	 *
-	 * @var string
-	 */
-	const CACHE_GROUP = 'plugin-screenshot-aspect';
-
-	/**
 	 * Renders the shortcode output.
 	 *
 	 * @return string
@@ -87,15 +76,14 @@ class Screenshots {
 		$count      = count( $screenshots );
 		$use_reveal = ( $count > self::REVEAL_THRESHOLD );
 
-		// Probe every screenshot for its real width / height once and
-		// pass the result down. `get_dimensions()` keeps a Memcached
-		// cache keyed by an md5 of the URL list so the network round-
-		// trip happens at most once per screenshot revision; on
-		// subsequent renders the call costs a single Memcached lookup.
-		// Knowing the dimensions lets every `<img>` ship with `width`
-		// and `height` attributes — the browser reserves slot height
-		// from the intrinsic aspect ratio, so the gallery has zero
-		// layout shift no matter how slowly the screenshots decode.
+		// Pluck each screenshot's intrinsic width / height from the
+		// `assets_screenshots` post meta — populated once during plugin
+		// import (see `Import::enrich_asset_dimensions()`, r14866) and
+		// already inlined on every entry of $screenshots by
+		// `Template::get_screenshots()`. Shipping the dimensions on the
+		// `<img>` tag lets the browser reserve slot height from the
+		// aspect ratio at parse time, so the gallery has zero layout
+		// shift no matter how slowly the screenshots decode.
 		$dimensions = self::get_dimensions( $screenshots );
 
 		// Always render every figure — masonry balances across columns
@@ -274,9 +262,10 @@ class Screenshots {
 		 * the CSS-columns brick layout is unaffected.
 		 *
 		 * `has-uniform-aspect` is set by self::is_uniform_aspect() —
-		 * always for N=2-4, probe-based for N>=5 (server-side detection
-		 * cached in Memcached). Default layout is the CSS-columns brick
-		 * masonry that keeps every screenshot's natural aspect ratio;
+		 * always for N=2-4, dimensions-based for N>=5 (read straight
+		 * from each screenshot's `assets_screenshots` record). Default
+		 * layout is the CSS-columns brick masonry that keeps every
+		 * screenshot's natural aspect ratio;
 		 * the uniform-aspect upgrade swaps to a row-aligned CSS grid
 		 * when figures share a shape so rows do not orphan tiles. Output
 		 * stays identical across viewports — fully cacheable by Varnish
@@ -326,7 +315,7 @@ class Screenshots {
 	 *                                  before the user clicks "Show all" (drives
 	 *                                  fetchpriority).
 	 * @param array|null $dimensions    `[ width, height ]` of the source PNG / JPEG / GIF,
-	 *                                  or null when the probe failed.
+	 *                                  or null when the post meta did not carry both values.
 	 * @return string Image block markup.
 	 */
 	protected static function build_image_block( $screenshot, $id, $above_fold = false, $dimensions = null ) {
@@ -503,13 +492,14 @@ class Screenshots {
 	 *     gives a more predictable result. Same N now renders the same
 	 *     way regardless of upload — `prantorpay` and `iconic-copy-text-blocks`
 	 *     are both 4-tile + 1 full-width anchor, no surprises.
-	 *   - N>=5: probe the screenshots. Each URL gets a partial
-	 *     `Range: bytes=0-32767` GET in parallel via the Requests
-	 *     transport — enough for PNG / JPEG / GIF dimensions to land in
-	 *     header bytes. The verdict is keyed by an MD5 of the URL list,
-	 *     so a screenshot revision bump (the `?rev=` query arg changes)
-	 *     auto-invalidates the cache; on subsequent renders only a
-	 *     Memcached lookup runs.
+	 *   - N>=5: compare aspect ratios pulled from each screenshot's
+	 *     `assets_screenshots` record. Width / height land in that meta
+	 *     during plugin import (`Import::enrich_asset_dimensions()`,
+	 *     r14866) and propagate to every $screenshot entry via
+	 *     `Template::get_screenshots()`, so the lookup is in-process
+	 *     and no network call runs at render time. A missing pair on
+	 *     any single screenshot trips the fallback to brick masonry —
+	 *     the safer layout when shapes might disagree.
 	 *
 	 * @param array $screenshots Output of {@see Template::get_screenshots()}.
 	 * @return bool True when the row-aligned grid layout should activate.
@@ -550,199 +540,31 @@ class Screenshots {
 	/**
 	 * Returns `[ url => [ width, height ] ]` for every screenshot.
 	 *
-	 * Network probes run via the WordPress HTTP API's Requests
-	 * transport and read the dimensions out of the header bytes
-	 * (Range: bytes=0-32767). The verdict is keyed by an md5 of the
-	 * URL list and cached in Memcached for a day; a screenshot revision
-	 * bump (the `?rev=` query arg changes) auto-invalidates the cache.
-	 * On a partial probe failure the method caches the partial result
-	 * for an hour so a transient network blip doesn't lock us into a
-	 * "no dimensions" state until the next revision.
+	 * Width and height come straight off each screenshot record — they
+	 * are written into the `assets_screenshots` post meta during plugin
+	 * import (`Import::enrich_asset_dimensions()`, r14866) and inlined
+	 * onto every entry returned by `Template::get_screenshots()`, so the
+	 * lookup is a plain array read with no I/O. Records that did not
+	 * carry both dimensions (e.g. the import retrieve failed and a
+	 * backfill pass has not yet run) drop out of the map; downstream
+	 * code already treats missing entries as "no dimensions" and
+	 * degrades to brick masonry without `<img>` width/height.
 	 *
 	 * @param array $screenshots Screenshots returned by Template::get_screenshots().
-	 * @return array Map of screenshot URL → `[ width, height ]`. Missing
-	 *               entries indicate the probe failed for that URL.
+	 * @return array Map of screenshot URL → `[ width, height ]`. Entries
+	 *               are absent for screenshots whose meta record is
+	 *               missing width or height.
 	 */
 	private static function get_dimensions( $screenshots ) {
-		$urls = array();
-		foreach ( $screenshots as $shot ) {
-			if ( ! empty( $shot['src'] ) ) {
-				$urls[] = (string) $shot['src'];
-			}
-		}
-
-		if ( empty( $urls ) ) {
-			return array();
-		}
-
-		wp_cache_add_global_groups( self::CACHE_GROUP );
-
-		$signature = md5( implode( '|', $urls ) );
-		$cache_key = 'dims_' . $signature;
-
-		$cached = wp_cache_get( $cache_key, self::CACHE_GROUP );
-		if ( is_array( $cached ) ) {
-			return $cached;
-		}
-
-		$dimensions = self::fetch_dimensions( $urls );
-
-		// Cache for a day on full success, for an hour on partial
-		// probe failure so retries pick up changes inside the day.
-		$ttl = ( count( $dimensions ) === count( $urls ) ) ? DAY_IN_SECONDS : HOUR_IN_SECONDS;
-		wp_cache_set( $cache_key, $dimensions, self::CACHE_GROUP, $ttl );
-
-		return $dimensions;
-	}
-
-	/**
-	 * Fetches the first 32 KB of every screenshot URL in parallel and
-	 * parses the image dimensions out of the header bytes. Returns
-	 * `[ url => [ width, height ] ]`; URLs whose probe failed are
-	 * absent from the result.
-	 *
-	 * @param array $urls Screenshot URLs.
-	 * @return array
-	 */
-	private static function fetch_dimensions( $urls ) {
 		$dimensions = array();
 
-		// `\WpOrg\Requests\Requests` is canonical in WP 6.2+; the
-		// `\Requests` global remains as a back-compat alias. Prefer
-		// the namespaced class so this code keeps working when the
-		// alias is eventually removed.
-		if ( class_exists( '\\WpOrg\\Requests\\Requests' ) ) {
-			$requests_class = '\\WpOrg\\Requests\\Requests';
-		} elseif ( class_exists( '\\Requests' ) ) {
-			$requests_class = '\\Requests';
-		} else {
-			return $dimensions;
-		}
-
-		$requests = array();
-		// Preserve URL keys so the response loop can correlate each
-		// reply back to its source URL — the result map needs URL =>
-		// [ w, h ] for downstream consumers (img attrs, layout
-		// detection).
-		foreach ( $urls as $url ) {
-			$requests[ $url ] = array(
-				'url'     => $url,
-				'type'    => 'GET',
-				'headers' => array( 'Range' => 'bytes=0-32767' ),
-			);
-		}
-
-		try {
-			$responses = $requests_class::request_multiple(
-				$requests,
-				array(
-					'timeout'         => 3,
-					'connect_timeout' => 2,
-					'useragent'       => 'WordPress.org Plugin Directory',
-					'redirects'       => 2,
-				)
-			);
-		} catch ( \Exception $e ) {
-			return $dimensions;
-		}
-
-		foreach ( $responses as $url => $response ) {
-			if ( ! is_object( $response ) || ! isset( $response->body ) ) {
+		foreach ( $screenshots as $shot ) {
+			if ( empty( $shot['src'] ) || empty( $shot['width'] ) || empty( $shot['height'] ) ) {
 				continue;
 			}
-			// Range request → 206 Partial Content; some hosts return
-			// 200 with the whole body when they ignore the header.
-			$body = (string) $response->body;
-			if ( '' === $body ) {
-				continue;
-			}
-			$dim = self::parse_image_dimensions( $body );
-			if ( $dim && $dim[0] > 0 && $dim[1] > 0 ) {
-				$dimensions[ $url ] = array( (int) $dim[0], (int) $dim[1] );
-			}
+			$dimensions[ (string) $shot['src'] ] = array( (int) $shot['width'], (int) $shot['height'] );
 		}
 
 		return $dimensions;
-	}
-
-	/**
-	 * Reads the width and height from an image's header bytes, without
-	 * touching GD or the PHP warning surface that `getimagesizefromstring`
-	 * emits on partial / malformed input. Supports PNG, JPEG, and GIF —
-	 * the formats Plugin Directory accepts as screenshots.
-	 *
-	 * @param string $bytes Raw image bytes (the first 32 KB is enough).
-	 * @return array|false `[ $width, $height ]` on success, false otherwise.
-	 */
-	private static function parse_image_dimensions( $bytes ) {
-		$length = strlen( $bytes );
-		if ( $length < 24 ) {
-			return false;
-		}
-
-		// PNG: 8-byte signature, then an IHDR chunk that encodes width
-		// and height as big-endian uint32 starting at byte 16.
-		if ( "\x89PNG\r\n\x1a\n" === substr( $bytes, 0, 8 ) ) {
-			$header = unpack( 'Nwidth/Nheight', substr( $bytes, 16, 8 ) );
-			if ( $header && $header['width'] > 0 && $header['height'] > 0 ) {
-				return array( $header['width'], $header['height'] );
-			}
-			return false;
-		}
-
-		// GIF: "GIF87a" or "GIF89a" signature, then width/height as
-		// little-endian uint16 at bytes 6 and 8.
-		$gif_sig = substr( $bytes, 0, 6 );
-		if ( 'GIF87a' === $gif_sig || 'GIF89a' === $gif_sig ) {
-			$header = unpack( 'vwidth/vheight', substr( $bytes, 6, 4 ) );
-			if ( $header && $header['width'] > 0 && $header['height'] > 0 ) {
-				return array( $header['width'], $header['height'] );
-			}
-			return false;
-		}
-
-		// JPEG: 0xFFD8 SOI marker, then a stream of segments. The first
-		// SOFn marker (0xFFC0-0xFFC3, 0xFFC5-0xFFC7, 0xFFC9-0xFFCB,
-		// 0xFFCD-0xFFCF) carries height + width as big-endian uint16
-		// at offsets 5 and 7 inside the segment.
-		if ( "\xFF\xD8" === substr( $bytes, 0, 2 ) ) {
-			$offset = 2;
-			while ( $offset + 8 < $length ) {
-				if ( "\xFF" !== $bytes[ $offset ] ) {
-					return false;
-				}
-				$marker = ord( $bytes[ $offset + 1 ] );
-				++$offset;
-				// Skip 0xFF padding bytes between segments.
-				while ( 0xFF === $marker && $offset < $length ) {
-					$marker = ord( $bytes[ $offset ] );
-					++$offset;
-				}
-				$is_sof = (
-					( $marker >= 0xC0 && $marker <= 0xC3 ) ||
-					( $marker >= 0xC5 && $marker <= 0xC7 ) ||
-					( $marker >= 0xC9 && $marker <= 0xCB ) ||
-					( $marker >= 0xCD && $marker <= 0xCF )
-				);
-				if ( $is_sof && $offset + 7 < $length ) {
-					$dim = unpack( 'nheight/nwidth', substr( $bytes, $offset + 3, 4 ) );
-					if ( $dim && $dim['width'] > 0 && $dim['height'] > 0 ) {
-						return array( $dim['width'], $dim['height'] );
-					}
-					return false;
-				}
-				if ( $offset + 1 >= $length ) {
-					return false;
-				}
-				$segment_length = unpack( 'nlen', substr( $bytes, $offset, 2 ) );
-				if ( ! $segment_length || $segment_length['len'] < 2 ) {
-					return false;
-				}
-				$offset += $segment_length['len'];
-			}
-			return false;
-		}
-
-		return false;
 	}
 }
