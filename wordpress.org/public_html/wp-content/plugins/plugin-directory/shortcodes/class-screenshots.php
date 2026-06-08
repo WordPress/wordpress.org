@@ -366,14 +366,11 @@ class Screenshots {
 
 		// Wrap the `<img>` in an `<a href="{src}" target="_blank">` so
 		// the no-JS reader still gets a path to the full-resolution
-		// screenshot (opens in a new tab). Core's lightbox interactivity
-		// script attaches its own click handler on hydration and calls
-		// `preventDefault()` before the anchor would navigate, so JS
-		// readers keep the existing lightbox flow unchanged — the link
-		// is a pure progressive-enhancement fallback.
+		// screenshot. The JS path cancels only this fallback navigation;
+		// core's image lightbox click handlers still receive the event.
 		$figure  = '<figure class="' . esc_attr( $class ) . '">';
 		$figure .= sprintf(
-			'<a href="%1$s" target="_blank" rel="noopener">',
+			'<a class="plugin-screenshots__fallback-link" href="%1$s" target="_blank" rel="noopener">',
 			$src
 		);
 		$figure .= sprintf(

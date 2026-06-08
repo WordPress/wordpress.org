@@ -89,6 +89,27 @@
 		}, 3000 );
 	}
 
+	/**
+	 * Keeps the full-size anchor as a no-JS fallback only.
+	 *
+	 * Core opens the lightbox from img/button handlers but does not cancel
+	 * navigation on a wrapping anchor, so cancel the anchor default without
+	 * stopping propagation.
+	 *
+	 * @param {Document|HTMLElement} root Document or section element to scan.
+	 */
+	function disableFallbackNavigation( root ) {
+		var links = root.querySelectorAll(
+			'#screenshots figure.wp-block-image > a.plugin-screenshots__fallback-link[href]'
+		);
+
+		links.forEach( function ( link ) {
+			link.addEventListener( 'click', function ( event ) {
+				event.preventDefault();
+			} );
+		} );
+	}
+
 	/*
 	 * `--collapse-height` is set in CSS as a constant (`32rem` ≈ three
 	 * rows of typical landscape thumbs). We don't measure the natural
@@ -289,6 +310,7 @@
 	 */
 	function init( root ) {
 		hideBrokenFigures( root );
+		disableFallbackNavigation( root );
 		var roots = root.querySelectorAll( '.plugin-screenshots__reveal' );
 		roots.forEach( bind );
 	}
