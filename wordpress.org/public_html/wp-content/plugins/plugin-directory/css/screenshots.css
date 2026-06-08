@@ -245,10 +245,11 @@
  * the clipped area so their position adapts to the column heights —
  * no dead band beneath the shortest column.
  *
- * `--collapse-height` is set inline by the JS on init (it measures the
- * natural bottom edge of the ninth figure across all three columns).
- * If JS hasn't run yet, the fallback value of 36rem covers the typical
- * "three rows of 16:10 landscape thumbs" footprint.
+ * The collapse height is a fixed `max-height: 32rem` cap on the wrap
+ * (about three rows of typical landscape thumbs). We don't measure
+ * dynamically: lazy figures past the fold report `naturalWidth: 0`
+ * until they decode, which would make the measured height equal to
+ * the unclipped natural height and defeat the collapse entirely.
  */
 .plugin-screenshots__reveal {
 	position: relative;

@@ -19,12 +19,13 @@ use WordPressdotorg\Plugin_Directory\Template;
  * shots in widely different proportions (portrait phone, landscape
  * desktop, panoramas) and a fixed-aspect grid would crop them.
  *
- * For galleries with more than `REVEAL_THRESHOLD` screenshots, the first
- * `COMPACT_VISIBLE` tiles render upfront and a single "Show all N
- * screenshots" button below the grid reveals the rest on click. The
- * button is removed after expand (one-time reveal). On mobile the
- * collapse logic is suppressed entirely — vertical scroll is natural,
- * so every screenshot renders straight away.
+ * For galleries with more than `REVEAL_THRESHOLD` screenshots, every
+ * figure still renders into the DOM upfront and CSS clips the wrap at
+ * a fixed `max-height: 32rem`. A single "Show all N screenshots"
+ * button below the grid releases the clip on click and is removed
+ * afterwards (one-time reveal). On mobile the collapse logic is
+ * suppressed entirely — vertical scroll is natural, so every
+ * screenshot renders straight away.
  *
  * Lightbox captions and the optional masonry style variation for any
  * other Gallery block ship through the Gallery Lightbox Enhancements
@@ -45,16 +46,6 @@ class Screenshots {
 	 * @var int
 	 */
 	const REVEAL_THRESHOLD = 9;
-
-	/**
-	 * Visible figure count when collapse is active.
-	 *
-	 * Eight figures across three columns settles into a 3+3+2 brick — the
-	 * partial bottom row reads as "more below" under the fade overlay.
-	 *
-	 * @var int
-	 */
-	const COMPACT_VISIBLE = 8;
 
 	/**
 	 * Pseudo attachment-id offset for screenshots.
@@ -208,34 +199,23 @@ class Screenshots {
 	}
 
 	/**
-	 * Enqueues the shortcode's own CSS and toggle script.
-	 *
-	 * Assets live next to the shortcode (under `shortcodes/assets/`) so the
-	 * Plugin Directory's screenshot UX stays self-contained and does not
-	 * leak into the active theme.
+	 * Enqueues the shortcode's own CSS and toggle script. Assets live
+	 * under the plugin's `css/` and `js/` directories alongside the
+	 * other Plugin Directory stylesheets and scripts.
 	 */
 	protected static function enqueue_assets() {
-		$css_rel = 'shortcodes/assets/screenshots.css';
-		$js_rel  = 'shortcodes/assets/screenshots.js';
-
-		$plugin_dir  = dirname( __DIR__ );
-		$plugin_main = $plugin_dir . '/plugin-directory.php';
-
-		$css_path = $plugin_dir . '/' . $css_rel;
-		$js_path  = $plugin_dir . '/' . $js_rel;
-
 		wp_enqueue_style(
 			'wporg-plugins-screenshots',
-			plugins_url( $css_rel, $plugin_main ),
+			plugins_url( 'css/screenshots.css', __DIR__ . '/../plugin-directory.php' ),
 			array(),
-			file_exists( $css_path ) ? (string) filemtime( $css_path ) : '1.0'
+			(string) filemtime( __DIR__ . '/../css/screenshots.css' )
 		);
 
 		wp_enqueue_script(
 			'wporg-plugins-screenshots',
-			plugins_url( $js_rel, $plugin_main ),
+			plugins_url( 'js/screenshots.js', __DIR__ . '/../plugin-directory.php' ),
 			array(),
-			file_exists( $js_path ) ? (string) filemtime( $js_path ) : '1.0',
+			(string) filemtime( __DIR__ . '/../js/screenshots.js' ),
 			true
 		);
 	}
@@ -250,6 +230,10 @@ class Screenshots {
 	 *
 	 * @param array $screenshots Screenshots returned by Template::get_screenshots().
 	 * @param int   $count       Total screenshot count, used to size columns.
+	 * @param array $dimensions  Optional `[ url => [ width, height ] ]` map
+	 *                           from {@see self::get_dimensions()}; consumed by
+	 *                           build_image_block() to emit intrinsic width /
+	 *                           height attrs and prevent layout shift.
 	 * @return string Block markup ready for do_blocks().
 	 */
 	protected static function build_gallery_markup( $screenshots, $count, $dimensions = array() ) {

@@ -5,13 +5,16 @@
  * balanced columns and never needs to re-balance. Collapse / expand
  * happens entirely on the wrap via `max-height`:
  *
- *   - On init, measure the natural bottom of the ninth figure across
- *     the columns and write it into `--collapse-height` so the wrap
- *     clips at exactly the right line.
- *   - On click, measure the wrap's full `scrollHeight` and write it
- *     into `--full-height`, then flip the `is-revealed` class so the
- *     CSS transition animates from collapse-height to full-height.
- *   - After the transition, drop `--full-height` so a viewport resize
+ *   - The collapsed cap is a fixed `max-height: 32rem` declared in
+ *     CSS, applied while `.is-revealed` is absent. No JS measurement
+ *     on init: lazy figures past the fold report `naturalWidth: 0`
+ *     until they decode, which would have made any measured cap equal
+ *     to the unclipped natural height.
+ *   - On click, this script measures the wrap's full `scrollHeight`,
+ *     writes it into `--full-height`, then flips the `is-revealed`
+ *     class so the CSS transition animates from the fixed cap to the
+ *     measured target.
+ *   - After the transition, the cap is dropped so a viewport resize
  *     never re-clips the now-revealed gallery.
  *
  * Click does NOT add or remove any figures — they're already in
