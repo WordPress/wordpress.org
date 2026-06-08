@@ -1,11 +1,5 @@
 <?php
 /**
- * Plugin Name: JobsWP reCaptcha
- * Version:     1.1
- * Plugin URI:  https://jobs.wordpress.net/
- * Author:      Scott Reilly
- * Description: Adds reCaptcha field to job posting form for jobs.wordpress.net.
- *
  * Site must define JOBSWP_RECAPTCHA_SITE_KEY and JOBSWP_RECAPTCHA_SECRET_KEY as
  * obtained from Google reCaptcha.
  */
@@ -44,12 +38,41 @@ class Jobs_Dot_WP_Captcha {
 	}
 
 	/**
-	 * Performs setup reCaptcha use, namely enqueuing JS.
+	 * Performs setup for reCaptcha, namely enqueuing JS.
 	 *
 	 * @access protected
 	 */
 	protected static function setup() {
 		wp_enqueue_script( 'recaptcha-api', 'https://www.google.com/recaptcha/api.js', array(), '1' );
+	}
+
+	/**
+	 * Determines if reCaptcha is configured.
+	 *
+	 * Captcha is configured if the site key and secret key are defined.
+	 *
+	 * @access protected
+	 *
+	 * @return bool True if reCaptcha is configured, false otherwise.
+	 */
+	protected static function is_configured() {
+		return self::get_site_key() && self::get_secret_key();
+	}
+
+	/**
+	 * Determines if reCaptcha is required.
+	 *
+	 * @access protected
+	 *
+	 * @return bool True if reCaptcha is required, false otherwise.
+	 */
+	protected static function is_required() {
+		/**
+		 * Filters whether reCaptcha is required for form submissions that would otherwise require it.
+		 *
+		 * @param bool True if reCaptcha is required, false otherwise. Default is true if the environment is production.
+		 */
+		return (bool) apply_filters( 'jobswp_require_captcha', wp_get_environment_type() === 'production' );
 	}
 
 	/**
@@ -92,9 +115,54 @@ class Jobs_Dot_WP_Captcha {
 	public static function recaptcha_field() {
 		// Only inject the captcha field on the verification page.
 		if ( self::do_captcha() ) {
-			self::setup();
-			echo '<div class="g-recaptcha" data-sitekey="' . self::get_site_key() . '"></div>' . "\n";
+			self::output_recaptcha_field();
 		}
+	}
+
+	/**
+	 * Outputs reCAPTCHA field unless it is not required.
+	 */
+	public static function output_recaptcha_field() {
+		if ( ! self::is_required() ) {
+			return;
+		}
+		self::setup();
+		echo '<div class="g-recaptcha" data-sitekey="' . esc_attr( self::get_site_key() ) . '"></div>' . "\n";
+	}
+
+	/**
+	 * Verifies a submitted reCAPTCHA response with Google's API.
+	 *
+	 * If reCAPTCHA is not configured (missing keys), verification will fail.
+	 *
+	 * @return string|false Error message, or false if verification succeeded or was skipped.
+	 */
+	public static function verify_recaptcha_token() {
+		if ( ! self::is_required() ) {
+			return false;
+		}
+
+		if ( empty( $_POST['g-recaptcha-response'] ) ) {
+			return __( 'The captcha needs to be provided.', 'jobswp' );
+		}
+
+		$verify = array(
+			'secret'   => self::get_secret_key(),
+			'remoteip' => isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '',
+			'response' => sanitize_text_field( wp_unslash( $_POST['g-recaptcha-response'] ) ),
+		);
+
+		$response = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
+
+		if ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) {
+			$result = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( empty( $result['success'] ) ) {
+				return __( 'The captcha was incorrect.', 'jobswp' );
+			}
+			return false;
+		}
+
+		return __( 'Unable to verify captcha at this time. Try again in a few minutes.', 'jobswp' );
 	}
 
 	/**
@@ -106,27 +174,9 @@ class Jobs_Dot_WP_Captcha {
 	public static function check_captcha( $errors ) {
 		// Only proceed if no error was already thrown.
 		if ( self::do_captcha() && ! $errors && $_POST ) {
-			if ( empty( $_POST['g-recaptcha-response'] ) ) {
-				$errors = __( 'The captcha needs to be provided.', 'jobswp' );
-			} else {
-				self::setup();
-
-				$verify = array(
-					'secret'    => self::get_secret_key(),
-					'remoteip'	=> $_SERVER['REMOTE_ADDR'],
-					'response'  => $_POST['g-recaptcha-response'],
-				);
-
-				$response = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
-
-				if ( ! is_wp_error( $response ) && 200 == wp_remote_retrieve_response_code( $response ) ) {
-					$result = json_decode( wp_remote_retrieve_body( $response ), true );
-					if ( ! $result['success'] ) {
-						$errors = __( 'The captcha was incorrect.', 'jobswp' );
-					}
-				} else {
-					$errors = __( 'Unable to verify captcha at this time. Try again in a few minutes.', 'jobswp' );
-				}
+			$captcha_error = self::verify_recaptcha_token();
+			if ( $captcha_error ) {
+				$errors = $captcha_error;
 			}
 		}
 
