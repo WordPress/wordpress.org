@@ -420,9 +420,9 @@ class Screenshots {
 	 */
 	protected static function wrap_with_show_all_button( $rendered_gallery, $count ) {
 		$label = sprintf(
-			/* translators: %d: total number of screenshots in the gallery. */
-			_n( 'Show all %d screenshot', 'Show all %d screenshots', $count, 'wporg-plugins' ),
-			$count
+			/* translators: %s: total number of screenshots in the gallery. */
+			_n( 'Show all %s screenshot', 'Show all %s screenshots', $count, 'wporg-plugins' ),
+			number_format_i18n( $count )
 		);
 
 		$button = sprintf(
