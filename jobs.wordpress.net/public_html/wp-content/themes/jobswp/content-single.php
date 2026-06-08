@@ -6,12 +6,37 @@
  */
 
 $fields = array(
-	'company'    => __( 'Company', 'jobswp' ),
-	'jobtype'    => __( 'Job Type', 'jobswp' ),
-	'location'   => __( 'Location', 'jobswp' ),
-	'budget'     => __( 'Budget', 'jobswp' ),
-	'howtoapply' => __( 'How to Apply', 'jobswp' ),
+	'company'  => __( 'Company', 'jobswp' ),
+	'jobtype'  => __( 'Job Type', 'jobswp' ),
+	'location' => __( 'Location', 'jobswp' ),
+	'budget'   => __( 'Budget', 'jobswp' ),
 );
+
+// Build apply URL for the prominent CTA.
+$howtoapply_raw    = get_post_meta( get_the_ID(), 'howtoapply', true );
+$howtoapply_method = get_post_meta( get_the_ID(), 'howtoapply_method', true );
+$apply_url  = '';
+$apply_text = __( 'Apply Now', 'jobswp' );
+
+if ( $howtoapply_raw ) {
+	if ( ! $howtoapply_method ) {
+		if ( 0 < strpos( $howtoapply_raw, '@' ) ) {
+			$howtoapply_method = 'email';
+		} elseif ( 0 === strpos( $howtoapply_raw, 'http' ) ) {
+			$howtoapply_method = 'web';
+		}
+	}
+	if ( 'email' === $howtoapply_method ) {
+		$apply_url  = 'mailto:' . sanitize_email( $howtoapply_raw );
+		$apply_text = __( 'Apply via Email', 'jobswp' );
+	} elseif ( 'web' === $howtoapply_method ) {
+		$raw_url = $howtoapply_raw;
+		if ( 0 !== strpos( $raw_url, 'http' ) ) {
+			$raw_url = 'http://' . $raw_url;
+		}
+		$apply_url = esc_url( $raw_url );
+	}
+}
 ?>
 
 <div class="breadcrumb">
@@ -58,6 +83,13 @@ $fields = array(
 
 	<aside class="job-sidebar">
 		<div class="job-sidebar__card">
+			<?php if ( $apply_url ) : ?>
+				<div class="job-sidebar__apply">
+					<a href="<?php echo esc_attr( $apply_url ); ?>" class="btn btn-primary" rel="nofollow ugc noopener" <?php echo 'web' === $howtoapply_method ? 'target="_blank"' : ''; ?>>
+						<?php echo esc_html( $apply_text ); ?>
+					</a>
+				</div>
+			<?php endif; ?>
 			<h3><?php esc_html_e( 'Job Details', 'jobswp' ); ?></h3>
 			<?php
 			foreach ( $fields as $fname => $flabel ) :
@@ -108,7 +140,6 @@ $fields = array(
 						<img src="<?php echo esc_url( 'https://wordpress.org/grav-redirect.php?user=' . urlencode( $person->user_login ) . '&s=64' ); ?>" alt="" width="64" height="64" loading="lazy">
 					</div>
 					<div class="candidate-card__info">
-						<span class="candidate-card__badge"><?php esc_html_e( 'Open to Work', 'jobswp' ); ?></span>
 						<h3 class="candidate-card__name"><?php echo esc_html( $person->display_name ); ?></h3>
 						<?php if ( $role || $company ) : ?>
 							<p class="candidate-card__role">
