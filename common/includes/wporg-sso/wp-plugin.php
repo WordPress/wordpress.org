@@ -402,6 +402,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 							( is_super_admin() || is_user_member_of_blog() )
 						) ||
 						0 === strpos( $_SERVER['REQUEST_URI'], '/wp-json' ) ||
+						0 === strpos( $_SERVER['REQUEST_URI'], '/?rest_route=' ) ||
 						0 === strpos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' )
 					) {
 						// Do nothing, allow access to wp-admin, wp-json and xmlrpc.php on login.wordpress.org
