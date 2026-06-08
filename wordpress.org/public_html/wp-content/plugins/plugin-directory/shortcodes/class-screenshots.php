@@ -180,21 +180,31 @@ class Screenshots {
 	}
 
 	/**
-	 * Emits a `<link rel=preconnect>` for the Photon CDN host so the
-	 * browser can warm up the TLS handshake while the page HTML is
-	 * still streaming. Saves ~50–150 ms on the first thumbnail paint
-	 * for cold visitors. Hooked from `class-plugin-directory.php`.
+	 * Adds preconnect / dns-prefetch hints to the Photon CDN host on
+	 * single-plugin pages so the browser can warm up the TLS handshake
+	 * while the page HTML is still streaming. Saves ~50–150 ms on the
+	 * first thumbnail paint for cold visitors. Hooked from
+	 * `class-plugin-directory.php` via the `wp_resource_hints` filter.
+	 *
+	 * @param array  $urls          Resource hint URLs already queued for $relation_type.
+	 * @param string $relation_type One of preconnect / dns-prefetch / prerender / prefetch.
+	 * @return array
 	 */
-	public static function emit_preconnect() {
+	public static function add_resource_hints( $urls, $relation_type ) {
 		if ( ! is_singular( 'plugin' ) ) {
-			return;
+			return $urls;
 		}
-		$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
-		if ( 'production' !== $env ) {
-			return;
+
+		if ( 'preconnect' === $relation_type ) {
+			$urls[] = array(
+				'href'        => 'https://i0.wp.com',
+				'crossorigin' => 'anonymous',
+			);
+		} elseif ( 'dns-prefetch' === $relation_type ) {
+			$urls[] = 'https://i0.wp.com';
 		}
-		echo "<link rel='preconnect' href='https://i0.wp.com' crossorigin>\n";
-		echo "<link rel='dns-prefetch' href='https://i0.wp.com'>\n";
+
+		return $urls;
 	}
 
 	/**
