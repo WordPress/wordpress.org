@@ -53,14 +53,6 @@ add_filter( 'body_class', 'wporg_login_body_class' );
 add_filter( 'show_admin_bar', '__return_false', 101 );
 
 /**
- * Disable XML-RPC endpoints.
- */
-add_filter( 'xmlrpc_enabled', '__return_false' );
-if ( 'jetpack' !== ( $_GET['for'] ?? '' ) ) {
-	add_filter( 'xmlrpc_methods', '__return_empty_array' );
-}
-
-/**
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
