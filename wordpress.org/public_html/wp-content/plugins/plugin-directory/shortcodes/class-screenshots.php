@@ -60,6 +60,18 @@ class Screenshots {
 	const SYNTHETIC_ID_OFFSET = 9000000;
 
 	/**
+	 * Per-request lightbox metadata, keyed by synthetic attachment id.
+	 *
+	 * Each entry holds the full-resolution `ps.w.org` URL and intrinsic
+	 * width / height for one screenshot. {@see self::fix_lightbox_metadata()}
+	 * reads this map to repair the core Image block's lightbox state — see
+	 * that method for why the repair is necessary.
+	 *
+	 * @var array<int, array{url:string,width:(int|string),height:(int|string)}>
+	 */
+	protected static $lightbox_meta = array();
+
+	/**
 	 * Renders the shortcode output.
 	 *
 	 * @return string
@@ -100,9 +112,19 @@ class Screenshots {
 		// force every layout rule to use `!important`. The filter
 		// scopes the change to galleries that carry our marker class,
 		// so other Gallery blocks on the page render unchanged.
+		//
+		// Pair the layout filter with the lightbox-metadata repair. Our
+		// screenshots are external `ps.w.org` assets with synthetic
+		// attachment ids, so core cannot resolve the full-resolution
+		// source or dimensions the lightbox needs; fix_lightbox_metadata()
+		// supplies them once core has assigned each image its render-time
+		// state key. It hooks at priority 20 so it runs after core's own
+		// lightbox filter (priority 15) and overrides the broken values.
 		add_filter( 'render_block_core/gallery', array( __CLASS__, 'strip_layout_classes' ), 20, 1 );
+		add_filter( 'render_block_core/image', array( __CLASS__, 'fix_lightbox_metadata' ), 20, 2 );
 		$markup   = self::build_gallery_markup( $screenshots, $count, $dimensions );
 		$rendered = do_blocks( $markup );
+		remove_filter( 'render_block_core/image', array( __CLASS__, 'fix_lightbox_metadata' ), 20 );
 		remove_filter( 'render_block_core/gallery', array( __CLASS__, 'strip_layout_classes' ), 20 );
 
 		if ( $use_reveal ) {
@@ -228,6 +250,10 @@ class Screenshots {
 		$inner = '';
 		$index = 0;
 
+		// Reset the lightbox metadata map for this render — build_image_block()
+		// fills it as it mints each synthetic id.
+		self::$lightbox_meta = array();
+
 		foreach ( $screenshots as $screenshot_num => $screenshot ) {
 			// Every figure loads eagerly — this is a detail page, not
 			// a list, so users land here already committed to seeing
@@ -340,6 +366,17 @@ class Screenshots {
 		$srcset = self::photon_srcset( $src );
 		$class  = 'wp-block-image size-large';
 
+		// Record the full-resolution source and intrinsic dimensions for the
+		// lightbox-state repair in fix_lightbox_metadata(). The grid thumbnail
+		// loads a Photon-shrunk srcset candidate, so core (which has no real
+		// attachment to query) would otherwise enlarge that small image; this
+		// hands the lightbox the lossless original at its true size.
+		self::$lightbox_meta[ (int) $id ] = array(
+			'url'    => $src,
+			'width'  => ( is_array( $dimensions ) && ! empty( $dimensions[0] ) ) ? (int) $dimensions[0] : 'none',
+			'height' => ( is_array( $dimensions ) && ! empty( $dimensions[1] ) ) ? (int) $dimensions[1] : 'none',
+		);
+
 		// `width` and `height` ship the screenshot's intrinsic
 		// dimensions so the browser reserves layout space from the
 		// aspect ratio at parse time. Without them every figure
@@ -397,6 +434,85 @@ class Screenshots {
 	}
 
 	/**
+	 * Repairs the core Image block lightbox state for screenshot images.
+	 *
+	 * Plugin screenshots are external `ps.w.org` assets with no real
+	 * attachment, so each block carries a *synthetic* id (see
+	 * {@see self::SYNTHETIC_ID_OFFSET}). Core's lightbox renderer
+	 * (`block_core_image_render_lightbox()`, priority 15 on this same
+	 * filter) treats that id as a genuine attachment:
+	 *
+	 *   $uploadedSrc = wp_get_attachment_url( $id );        // → false
+	 *   $meta        = wp_get_attachment_metadata( $id );   // → false
+	 *   $targetWidth = $meta['width']  ?? 'none';           // → 'none'
+	 *   $targetHeight= $meta['height'] ?? 'none';           // → 'none'
+	 *
+	 * The empty `uploadedSrc` leaves the lightbox with no full-resolution
+	 * image to enlarge, and the `'none'` dimensions make core's view
+	 * script fall back to the *thumbnail's* natural size — which on
+	 * production is a Photon-shrunk srcset candidate (≤900px, often the
+	 * 300px tile). The enlarged view therefore renders tiny. On
+	 * environments without Photon the thumbnail is the full-resolution
+	 * original, which is why the bug is invisible on local / staging.
+	 *
+	 * Core keys its lightbox metadata by a per-render `uniqid()` (exposed
+	 * on the figure's `data-wp-context`), not by the attachment id, so the
+	 * only way to correct it is to read that generated key back out of the
+	 * rendered markup and re-set the affected fields. `wp_interactivity_state()`
+	 * merges with `array_replace_recursive()` (later call wins), and this
+	 * filter runs at priority 20 — after core's priority-15 pass — so the
+	 * corrected values override the broken ones. `lightboxSrcset` is
+	 * cleared so the enlarged image loads the lossless original rather than
+	 * a capped Photon candidate.
+	 *
+	 * @param string $block_content Rendered Image block markup.
+	 * @param array  $parsed_block  Parsed block, including `attrs['id']`.
+	 * @return string The unmodified markup (only interactivity state is changed).
+	 */
+	public static function fix_lightbox_metadata( $block_content, $parsed_block ) {
+		$id = isset( $parsed_block['attrs']['id'] ) ? (int) $parsed_block['attrs']['id'] : 0;
+		if ( $id < self::SYNTHETIC_ID_OFFSET || ! isset( self::$lightbox_meta[ $id ] ) ) {
+			return $block_content;
+		}
+
+		if ( ! function_exists( 'wp_interactivity_state' ) ) {
+			return $block_content;
+		}
+
+		// Recover the render-time state key core assigned to this image.
+		$processor = new \WP_HTML_Tag_Processor( $block_content );
+		if ( ! $processor->next_tag( 'figure' ) ) {
+			return $block_content;
+		}
+		$context = $processor->get_attribute( 'data-wp-context' );
+		if ( ! is_string( $context ) ) {
+			return $block_content;
+		}
+		$decoded  = json_decode( $context, true );
+		$image_id = ( is_array( $decoded ) && isset( $decoded['imageId'] ) ) ? $decoded['imageId'] : '';
+		if ( '' === $image_id ) {
+			return $block_content;
+		}
+
+		$meta = self::$lightbox_meta[ $id ];
+		wp_interactivity_state(
+			'core/image',
+			array(
+				'metadata' => array(
+					$image_id => array(
+						'uploadedSrc'    => $meta['url'],
+						'targetWidth'    => $meta['width'],
+						'targetHeight'   => $meta['height'],
+						'lightboxSrcset' => false,
+					),
+				),
+			)
+		);
+
+		return $block_content;
+	}
+
+	/**
 	 * Wraps the rendered gallery in a reveal container with a single
 	 * "Show all N screenshots" button below it. Click reveals every
 	 * hidden figure with a per-tile staggered fade-in and removes the
@@ -449,9 +565,10 @@ class Screenshots {
 	 * Routing the URL through `i0.wp.com` (Photon) returns a re-encoded,
 	 * width-bound copy at ~10× smaller payload — see
 	 * https://developer.wordpress.com/docs/photon/ for the resize/optim
-	 * options. The lightbox `src` (the unprefixed `ps.w.org` URL) stays the
-	 * full-resolution original so users get the lossless image when they
-	 * enlarge a screenshot.
+	 * options. The grid thumbnail therefore loads a small Photon candidate;
+	 * the lightbox is pointed back at the full-resolution `ps.w.org` original
+	 * separately by {@see self::fix_lightbox_metadata()} so users still get
+	 * the lossless image when they enlarge a screenshot.
 	 *
 	 * @param string $src Original asset URL.
 	 * @return string Attribute fragment ready to interpolate into `<img>`,
