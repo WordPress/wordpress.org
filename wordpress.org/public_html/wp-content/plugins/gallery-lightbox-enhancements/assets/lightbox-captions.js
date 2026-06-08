@@ -4,13 +4,13 @@
  * against the bottom edge of the picture frame — exactly the visual
  * contract of https://github.com/WordPress/gutenberg/pull/77477.
  *
- * Why "visible": core renders two `.lightbox-image-container` siblings.
- * One holds the small thumbnail used for the zoom animation hand-off,
- * the other holds the full-resolution image. Which one is on screen
- * depends on the lifecycle stage (opening, navigating, closing). We
- * pick the container whose <img> is actually inside the viewport at
- * sync time, mount the caption there, and let CSS pin it to its
- * parent's bottom — which is the bottom of the displayed picture.
+ * Why "visible": core renders two center-overlapping
+ * `.lightbox-image-container` siblings. One holds the small thumbnail
+ * used for the zoom animation hand-off, the other the full-resolution
+ * image, which paints on top. We mount the caption into that top
+ * container — the last one on screen — so it pins to the bottom of the
+ * displayed picture and is not occluded by the enlarged image, then let
+ * CSS anchor it to the absolutely-positioned container frame.
  *
  * `data-wp-text` / `data-wp-bind` attributes added after the
  * Interactivity runtime parsed the page do not bind, so the caption is
@@ -48,14 +48,17 @@
 	 */
 	function getVisibleContainer( overlay ) {
 		var containers = overlay.querySelectorAll( '.lightbox-image-container' );
-		for ( var i = 0; i < containers.length; i++ ) {
+		// Iterate from the end: core's containers center-overlap and the
+		// last one (the full-resolution image) paints on top, so the
+		// caption must live there or it renders behind the enlarged image.
+		for ( var i = containers.length - 1; i >= 0; i-- ) {
 			var img = containers[ i ].querySelector( 'img' );
 			if ( img && isInViewport( img ) ) {
 				return containers[ i ];
 			}
 		}
-		// Fallback: first container — wrong-spot caption beats no caption at all.
-		return containers[ 0 ] || null;
+		// Fallback: last container — wrong-spot caption beats no caption at all.
+		return containers[ containers.length - 1 ] || null;
 	}
 
 	/**
