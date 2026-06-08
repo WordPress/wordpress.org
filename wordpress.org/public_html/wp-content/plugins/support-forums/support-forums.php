@@ -33,6 +33,7 @@ include( __DIR__ . '/inc/class-emails.php' );
 include( __DIR__ . '/inc/class-audit-log.php' );
 include( __DIR__ . '/inc/class-blocks.php' );
 include( __DIR__ . '/inc/class-rest-api.php' );
+include( __DIR__ . '/inc/class-badge-automation.php' );
 
 // Compat-only includes.
 include( __DIR__ . '/inc/class-dropin.php' );
