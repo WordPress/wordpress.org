@@ -7,10 +7,12 @@
 
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\API\Routes\Gandalf_Scan;
-use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Updates;
-use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Updates_Gandalf;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan_Gandalf;
 
 /**
+ * Tests Gandalf scan integration behavior.
+ *
  * @group gandalf
  */
 class Gandalf_Scan_Test extends TestCase {
@@ -50,6 +52,9 @@ class Gandalf_Scan_Test extends TestCase {
 	 */
 	private $site_url;
 
+	/**
+	 * Sets up Gandalf request interception and test URLs.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
@@ -66,6 +71,9 @@ class Gandalf_Scan_Test extends TestCase {
 		add_filter( 'rest_url', array( $this, 'filter_rest_url' ), 10, 4 );
 	}
 
+	/**
+	 * Cleans up plugin posts, cron events, and URL filters.
+	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'pre_http_request' ), 10 );
 		remove_filter( 'rest_url', array( $this, 'filter_rest_url' ), 10 );
@@ -85,10 +93,13 @@ class Gandalf_Scan_Test extends TestCase {
 		parent::tearDown();
 	}
 
+	/**
+	 * Tests that imports queue the existing scan_plugin job with Gandalf context.
+	 */
 	public function test_import_queues_existing_scan_plugin_job_with_gandalf_context() {
 		$plugin = $this->make_plugin( 'gandalf-queue-test' );
 
-		Plugin_Updates::wporg_plugins_imported(
+		Plugin_Scan::wporg_plugins_imported(
 			$plugin,
 			'1.2.3',
 			'1.2.2',
@@ -113,10 +124,13 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertArrayNotHasKey( 'last_version', $context );
 	}
 
+	/**
+	 * Tests that old-tag-only imports do not queue a scan job.
+	 */
 	public function test_import_does_not_queue_for_old_tag_only_changes() {
 		$plugin = $this->make_plugin( 'gandalf-old-tag-test' );
 
-		Plugin_Updates::wporg_plugins_imported(
+		Plugin_Scan::wporg_plugins_imported(
 			$plugin,
 			'1.2.3',
 			'1.2.3',
@@ -127,16 +141,20 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertSame( array(), $this->scheduled_scan_events( $plugin->post_name ) );
 	}
 
+	/**
+	 * Tests the dispatched Gandalf payload for a tagged release.
+	 */
 	public function test_dispatches_tag_release_payload() {
 		$plugin = $this->make_plugin(
 			'gandalf-tag-test',
 			array(
-				'version'      => '1.2.3',
-				'last_version' => '1.2.2',
+				'version'         => '1.2.3',
+				'last_stable_tag' => '1.2.2',
+				'last_version'    => '1.2.2',
 			)
 		);
 
-		$result = Plugin_Updates_Gandalf::dispatch_from_import_context(
+		$result = Plugin_Scan_Gandalf::dispatch_from_import_context(
 			$plugin,
 			array(
 				'stable_tag'       => '1.2.3',
@@ -162,6 +180,9 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertSame( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/gandalf-tag-test/gandalf-scan', $payload['callback_url'] );
 	}
 
+	/**
+	 * Tests the dispatched Gandalf payload for a trunk release.
+	 */
 	public function test_dispatches_trunk_release_payload() {
 		$plugin = $this->make_plugin(
 			'gandalf-trunk-test',
@@ -171,7 +192,7 @@ class Gandalf_Scan_Test extends TestCase {
 			)
 		);
 
-		$result = Plugin_Updates_Gandalf::dispatch_from_import_context(
+		$result = Plugin_Scan_Gandalf::dispatch_from_import_context(
 			$plugin,
 			array(
 				'stable_tag'       => 'trunk',
@@ -192,6 +213,9 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertNull( $payload['previous_zip_url'] );
 	}
 
+	/**
+	 * Tests that trunk-only commits do not rescan an unchanged tagged stable release.
+	 */
 	public function test_does_not_dispatch_tag_stable_release_for_trunk_only_commit() {
 		$plugin = $this->make_plugin(
 			'gandalf-trunk-only-test',
@@ -200,7 +224,7 @@ class Gandalf_Scan_Test extends TestCase {
 			)
 		);
 
-		$result = Plugin_Updates_Gandalf::dispatch_from_import_context(
+		$result = Plugin_Scan_Gandalf::dispatch_from_import_context(
 			$plugin,
 			array(
 				'stable_tag'       => '1.2.3',
@@ -215,6 +239,9 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertSame( array(), $this->http_requests );
 	}
 
+	/**
+	 * Tests that malformed import context does not dispatch a Gandalf scan.
+	 */
 	public function test_does_not_dispatch_with_malformed_import_context() {
 		$plugin = $this->make_plugin(
 			'gandalf-malformed-context-test',
@@ -223,7 +250,7 @@ class Gandalf_Scan_Test extends TestCase {
 			)
 		);
 
-		$result = Plugin_Updates_Gandalf::dispatch_from_import_context(
+		$result = Plugin_Scan_Gandalf::dispatch_from_import_context(
 			$plugin,
 			array(
 				'stable_tag'     => '1.2.3',
@@ -235,13 +262,16 @@ class Gandalf_Scan_Test extends TestCase {
 		$this->assertSame( array(), $this->http_requests );
 	}
 
+	/**
+	 * Tests that a completed callback clears pending state and records notification dedupe.
+	 */
 	public function test_completed_callback_clears_pending_scan_and_records_notification_hash() {
 		$plugin  = $this->make_plugin( 'gandalf-callback-test' );
 		$scan_id = '33333333-3333-4333-8333-333333333333';
 
 		update_post_meta(
 			$plugin->ID,
-			Plugin_Updates_Gandalf::PENDING_META_KEY,
+			Plugin_Scan_Gandalf::PENDING_META_KEY,
 			array(
 				$scan_id => array(
 					'version'      => '1.2.3',
@@ -251,7 +281,7 @@ class Gandalf_Scan_Test extends TestCase {
 			)
 		);
 
-		$result = Plugin_Updates_Gandalf::handle_callback(
+		$result = Plugin_Scan_Gandalf::handle_callback(
 			$plugin,
 			array(
 				'status'          => 'completed',
@@ -270,16 +300,20 @@ class Gandalf_Scan_Test extends TestCase {
 		);
 
 		$this->assertTrue( $result );
-		$this->assertSame( array(), get_post_meta( $plugin->ID, Plugin_Updates_Gandalf::PENDING_META_KEY, true ) );
+		$this->assertSame( array(), get_post_meta( $plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) );
 
-		$notified = get_post_meta( $plugin->ID, Plugin_Updates_Gandalf::NOTIFIED_META_KEY, true );
+		$notified = get_post_meta( $plugin->ID, Plugin_Scan_Gandalf::NOTIFIED_META_KEY, true );
 		$this->assertIsArray( $notified );
 		$this->assertArrayHasKey( 'verdict-hash', $notified );
 	}
 
+	/**
+	 * Tests callback payload validation against an invalid contract fixture.
+	 */
 	public function test_callback_validation_rejects_invalid_status_fixture() {
 		$plugin = $this->make_plugin( 'hello-dolly' );
-		$data   = json_decode( file_get_contents( __DIR__ . '/fixtures/gandalf-contract/callback-failed-bad-status.invalid.json' ), true );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local JSON fixture.
+		$data = json_decode( file_get_contents( __DIR__ . '/fixtures/gandalf-contract/callback-failed-bad-status.invalid.json' ), true );
 
 		$reflection = new ReflectionClass( Gandalf_Scan::class );
 		$route      = $reflection->newInstanceWithoutConstructor();
@@ -301,7 +335,7 @@ class Gandalf_Scan_Test extends TestCase {
 	 * @return false|array|\WP_Error Preemptive response.
 	 */
 	public function pre_http_request( $preempt, $parsed_args, $url ) {
-		if ( Plugin_Updates_Gandalf::ENDPOINT !== $url ) {
+		if ( Plugin_Scan_Gandalf::ENDPOINT !== $url ) {
 			return $preempt;
 		}
 

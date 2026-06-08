@@ -129,14 +129,16 @@ class Internal {
 
 
 			foreach ( $stats as $stat_name => $value ) {
-				if ( 'active_installs' == $stat_name ) {
-					$value = $this->sanitize_active_installs( $value );
+				$stat_name = sanitize_key( (string) $stat_name );
+
+				if ( 'active_installs' === $stat_name ) {
+					$value    = $this->sanitize_active_installs( $value );
 					$meta_key = '_active_installs';
-				} elseif ( 'popularity' == $stat_name ) {
-					$value = (float) $value;
-					$meta_key = '_popularity';
+				} elseif ( $stat_name ) {
+					$value    = (float) $value;
+					$meta_key = '_' . $stat_name;
 				} else {
-					continue; // Unknown key
+					continue;
 				}
 
 				update_post_meta( $theme->ID, $meta_key, wp_slash( $value ) );

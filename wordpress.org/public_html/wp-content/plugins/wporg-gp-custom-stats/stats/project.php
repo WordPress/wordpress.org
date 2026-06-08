@@ -94,12 +94,13 @@ class WPorg_GP_Project_Stats {
 		];
 
 		// Store the counts for these parent projects as the sum of their children.
-		$sql = "INSERT INTO {$wpdb->project_translation_status} ( `project_id`, `locale`, `locale_slug`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `date_added`, `date_modified`)
+		$sql = "INSERT INTO {$wpdb->project_translation_status} ( `project_id`, `locale`, `locale_slug`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `has_pending`, `date_added`, `date_modified`)
 		SELECT
 			p.parent_project_id as project_id,
 			locale, locale_slug,
 			SUM( stats.all ) as `all`, SUM( stats.current ) as `current`, SUM( stats.waiting ) as `waiting`,
 			SUM( stats.fuzzy ) as `fuzzy`, SUM( stats.warnings ) as `warnings`, SUM( stats.untranslated ) as `untranslated`,
+			( SUM( stats.waiting ) > 0 OR SUM( stats.fuzzy ) > 0 ) as `has_pending`,
 			NOW() as `date_added`, NOW() as `date_modified`
 		FROM {$wpdb->project_translation_status} stats
 			LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
@@ -111,6 +112,7 @@ class WPorg_GP_Project_Stats {
 			`all` = VALUES(`all`), `current` = VALUES(`current`),
 			`waiting` = VALUES(`waiting`), `fuzzy` = VALUES(`fuzzy`),
 			`warnings` = VALUES(`warnings`), `untranslated` = VALUES(`untranslated`),
+			`has_pending` = VALUES(`has_pending`),
 			`date_modified` = VALUES(`date_modified`);
 		";
 
@@ -163,7 +165,7 @@ class WPorg_GP_Project_Stats {
 				list( $locale, $locale_slug ) = $locale_set;
 				$counts = $this->get_project_translation_counts( $project_id, $locale, $locale_slug );
 
-				$values[] = $wpdb->prepare( '(%d, %s, %s, %d, %d, %d, %d, %d, %d, %s, %s)',
+				$values[] = $wpdb->prepare( '(%d, %s, %s, %d, %d, %d, %d, %d, %d, %d, %s, %s)',
 					$project_id,
 					$locale,
 					$locale_slug,
@@ -173,6 +175,7 @@ class WPorg_GP_Project_Stats {
 					$counts['fuzzy'],
 					$counts['warnings'],
 					$counts['untranslated'],
+					( $counts['waiting'] > 0 || $counts['fuzzy'] > 0 ) ? 1 : 0,
 					$now,
 					$now
 				);
@@ -180,14 +183,44 @@ class WPorg_GP_Project_Stats {
 
 			// If we're processing a large batch, add them as we go to avoid query lengths & memory limits
 			if ( count( $values ) > 50 ) {
-				$wpdb->query( "INSERT INTO {$wpdb->project_translation_status} (`project_id`, `locale`, `locale_slug`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `date_added`, `date_modified` ) VALUES " . implode( ', ', $values ) . " ON DUPLICATE KEY UPDATE `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VAlUES(`waiting`), `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`), `date_modified`=VALUES(`date_modified`)" );
+				$wpdb->query(
+					"INSERT INTO {$wpdb->project_translation_status}
+						( `project_id`, `locale`, `locale_slug`,
+						  `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `has_pending`,
+						  `date_added`, `date_modified` )
+					 VALUES " . implode( ', ', $values ) . "
+					 ON DUPLICATE KEY UPDATE
+						`all`           = VALUES(`all`),
+						`current`       = VALUES(`current`),
+						`waiting`       = VALUES(`waiting`),
+						`fuzzy`         = VALUES(`fuzzy`),
+						`warnings`      = VALUES(`warnings`),
+						`untranslated`  = VALUES(`untranslated`),
+						`has_pending`   = VALUES(`has_pending`),
+						`date_modified` = VALUES(`date_modified`)"
+				);
 				$values = array();
 			}
 		}
 		$this->projects_to_update = array();
 
 		if ( $values ) {
-			$wpdb->query( "INSERT INTO {$wpdb->project_translation_status} (`project_id`, `locale`, `locale_slug`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `date_added`, `date_modified` ) VALUES " . implode( ', ', $values ) . " ON DUPLICATE KEY UPDATE `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VALUES(`waiting`), `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`), `date_modified`=VALUES(`date_modified`)" );
+			$wpdb->query(
+				"INSERT INTO {$wpdb->project_translation_status}
+					( `project_id`, `locale`, `locale_slug`,
+					  `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `has_pending`,
+					  `date_added`, `date_modified` )
+				 VALUES " . implode( ', ', $values ) . "
+				 ON DUPLICATE KEY UPDATE
+					`all`           = VALUES(`all`),
+					`current`       = VALUES(`current`),
+					`waiting`       = VALUES(`waiting`),
+					`fuzzy`         = VALUES(`fuzzy`),
+					`warnings`      = VALUES(`warnings`),
+					`untranslated`  = VALUES(`untranslated`),
+					`has_pending`   = VALUES(`has_pending`),
+					`date_modified` = VALUES(`date_modified`)"
+			);
 		}
 	}
 
@@ -197,7 +230,7 @@ class WPorg_GP_Project_Stats {
 Table:
 
 CREATE TABLE `gp_project_translation_status` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `project_id` int(10) unsigned NOT NULL,
   `locale` varchar(10) NOT NULL,
   `locale_slug` varchar(255) NOT NULL,
@@ -207,14 +240,14 @@ CREATE TABLE `gp_project_translation_status` (
   `fuzzy` int(10) unsigned NOT NULL DEFAULT '0',
   `warnings` int(10) unsigned NOT NULL DEFAULT '0',
   `untranslated` int(10) unsigned NOT NULL DEFAULT '0',
+  `has_pending` tinyint(1) NOT NULL DEFAULT 0,
+  `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `project_locale` (`project_id`,`locale`,`locale_slug`),
-  KEY `all` (`all`),
-  KEY `current` (`current`),
-  KEY `waiting` (`waiting`),
-  KEY `fuzzy` (`fuzzy`),
-  KEY `warnings` (`warnings`),
-  KEY `untranslated` (`untranslated`)
+  KEY `locale` (`locale`,`locale_slug`,`has_pending`),
+  KEY `date_added` (`date_added`),
+  KEY `date_modified` (`date_modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 */

@@ -79,6 +79,7 @@ class Customizations {
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Controls', 'save_post' ) );
 	}
 
 	/**
@@ -785,14 +786,19 @@ class Customizations {
 				array( __NAMESPACE__ . '\Metabox\Author_Notice', 'display' ),
 				'plugin', 'normal', 'high'
 			);
-		}
 
-		add_meta_box(
-			'plugin-elasticsearch',
-			__( 'ElasticSearch Index', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'display' ),
-			'plugin', 'normal', 'low'
-		);
+			if (
+				class_exists( '\Automattic\Jetpack\Search\Classic_Search' ) &&
+				in_array( wp_get_environment_type(), array( 'staging', 'production' ), true )
+			) {
+				add_meta_box(
+					'plugin-elasticsearch',
+					__( 'ElasticSearch Index', 'wporg-plugins' ),
+					array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'display' ),
+					'plugin', 'normal', 'low'
+				);
+			}
+		}
 
 		// Remove unnecessary metaboxes.
 		remove_meta_box( 'commentsdiv', 'plugin', 'normal' );

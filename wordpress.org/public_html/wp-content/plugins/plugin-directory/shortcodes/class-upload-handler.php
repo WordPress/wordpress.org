@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
 use WP_Error;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
-use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Updates_PCP;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
@@ -780,7 +780,7 @@ class Upload_Handler {
 			return $default_return;
 		}
 
-		$result = Plugin_Updates_PCP::run_plugin_check( $this->plugin_slug, $this->plugin_root, '' /* should be stable tag */, 'new' );
+		$result = Plugin_Scan::run_plugin_check( $this->plugin_slug, $this->plugin_root, '' /* should be stable tag */, 'new' );
 		if ( false === $result ) {
 			return $default_return;
 		}

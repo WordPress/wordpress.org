@@ -127,6 +127,33 @@ class Import {
 		// Validate various headers:
 
 		/*
+		 * Warn when the plugin's Version header has anything other than digits, dots, and an
+		 * optional `-rc` / `-beta` / `-alpha` pre-release suffix (with optional digits).
+		 *
+		 * Catches headers that include an accidental duplicate `Version:` prefix, stray
+		 * letters or punctuation, or other free-form text mixed in with the version number.
+		 *
+		 * The strict format matters because WordPress core uses `version_compare()` to decide
+		 * whether to offer an update — a malformed header can silently give the wrong answer
+		 * for users running an older release.
+		 */
+		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?$/i', $version ) ) {
+			$this->warnings['version_header_unexpected_chars'] = $version;
+		}
+
+		/*
+		 * Warn when the plugin's Version header doesn't appear to match the tag it was released from.
+		 *
+		 * Trunk releases skip this check — there's no tag folder to compare against.
+		 */
+		if ( 'trunk' !== $stable_tag && $version && ! self::version_matches_tag( $version, $stable_tag ) ) {
+			$this->warnings['version_tag_mismatch'] = [
+				'version' => $version,
+				'tag'     => $stable_tag,
+			];
+		}
+
+		/*
 		 * Check to see if the plugin is using the `Update URI` header.
 		 *
 		 * Plugins on WordPress.org should NOT use this header, but we do accept some URI formats for it in the API,
@@ -827,6 +854,14 @@ class Import {
 			'blueprint'  => 100 * KB_IN_BYTES,
 		);
 
+		// Previously-imported asset metadata, used to skip re-reading any file whose
+		// SVN revision hasn't changed.
+		$prior_assets = array(
+			'screenshot' => get_post_meta( $this->plugin->ID, 'assets_screenshots', true ) ?: array(),
+			'banner'     => get_post_meta( $this->plugin->ID, 'assets_banners',     true ) ?: array(),
+			'icon'       => get_post_meta( $this->plugin->ID, 'assets_icons',       true ) ?: array(),
+		);
+
 		$svn_blueprints_folder = null;
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
@@ -843,8 +878,8 @@ class Import {
 
 				$type = strtolower( $m['type'] );
 
-				// Don't import oversize assets.
-				if ( $asset['filesize'] > $asset_limits[ $type ] ) {
+				// Don't import zero-byte or oversize assets.
+				if ( ! $asset['filesize'] || $asset['filesize'] > $asset_limits[ $type ] ) {
 					continue;
 				}
 
@@ -862,7 +897,15 @@ class Import {
 					$resolution = preg_replace( '/[^0-9]/u', 'x', $resolution );
 				}
 
-				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+				$record = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+
+				$record = self::enrich_asset_dimensions(
+					$record,
+					$prior_assets[ $type ][ $filename ] ?? null,
+					$this->plugin
+				);
+
+				$assets[ $type ][ $asset['filename'] ] = $record;
 			}
 		}
 
@@ -916,17 +959,27 @@ class Import {
 				continue;
 			}
 
-			// Don't import oversize assets.
-			if ( filesize( $plugin_screenshot ) > $asset_limits['screenshot'] ) {
+			// Don't import zero-byte or oversize assets.
+			$screenshot_size = filesize( $plugin_screenshot );
+			if ( ! $screenshot_size || $screenshot_size > $asset_limits['screenshot'] ) {
 				continue;
 			}
 
-			$assets['screenshot'][ $filename ] = array(
+			$record = array(
 				'filename'   => $filename,
 				'revision'   => $svn_export['revision'],
 				'resolution' => $screenshot_id,
 				'location'   => 'plugin',
 			);
+
+			$record = self::enrich_asset_dimensions(
+				$record,
+				$prior_assets['screenshot'][ $filename ] ?? null,
+				$this->plugin,
+				$plugin_screenshot
+			);
+
+			$assets['screenshot'][ $filename ] = $record;
 		}
 
 		if ( 'trunk' === $stable_tag ) {
@@ -1069,6 +1122,87 @@ class Import {
 	}
 
 	/**
+	 * Populate `width` and `height` on an asset record, reusing the prior
+	 * import's values when the SVN revision hasn't changed.
+	 *
+	 * @param array       $record The asset record.
+	 * @param array|null  $prior  Matching record from the prior import.
+	 * @param \WP_Post    $post   The plugin post.
+	 * @param string|null $local  Optional local path to read instead of fetching from SVN.
+	 * @return array
+	 */
+	public static function enrich_asset_dimensions( $record, $prior, $post, $local = null ) {
+		if (
+			is_array( $prior ) &&
+			isset( $prior['revision'], $prior['width'], $prior['height'] ) &&
+			(string) $prior['revision'] === (string) $record['revision'] &&
+			$prior['width'] > 0 && $prior['height'] > 0
+		) {
+			$record['width']  = (int) $prior['width'];
+			$record['height'] = (int) $prior['height'];
+
+			return $record;
+		}
+
+		$size = false;
+
+		if ( $local && file_exists( $local ) ) {
+			$size = wp_getimagesize( $local );
+		}
+
+		if ( ! $size ) {
+			// `wp_tempnam()` lives in wp-admin and isn't loaded by default in CLI/cron contexts.
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+
+			$url       = Template::get_asset_url( $post, $record, false /* no CDN */ );
+			$temp_file = wp_tempnam( $record['filename'] );
+
+			// Range the first read to 128 KB — enough for the headers of
+			// most images. Fall back to a full read only when the prefix
+			// isn't enough to decode the header — the falsy `$size` at
+			// the bottom of the loop is the implicit retry. Transport
+			// errors / non-2xx intentionally bail out via `break`: those
+			// failure modes won't be helped by re-requesting the same
+			// URL without Range.
+			foreach ( array( 128 * KB_IN_BYTES, 0 ) as $limit ) {
+				$args = array(
+					'timeout'  => 15,
+					'stream'   => true,
+					'filename' => $temp_file,
+				);
+				if ( $limit > 0 ) {
+					$args['headers']             = array( 'Range' => 'bytes=0-' . ( $limit - 1 ) );
+					$args['limit_response_size'] = $limit;
+				}
+
+				$response = wp_safe_remote_get( $url, $args );
+				$code     = wp_remote_retrieve_response_code( $response );
+				if ( is_wp_error( $response ) || ( 200 !== $code && 206 !== $code ) ) {
+					break;
+				}
+
+				if ( ! file_exists( $temp_file ) || 0 === filesize( $temp_file ) ) {
+					break;
+				}
+
+				$size = wp_getimagesize( $temp_file );
+				if ( $size ) {
+					break;
+				}
+			}
+
+			unlink( $temp_file );
+		}
+
+		if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {
+			$record['width']  = (int) $size[0];
+			$record['height'] = (int) $size[1];
+		}
+
+		return $record;
+	}
+
+	/**
 	 * Find the plugin readme file.
 	 *
 	 * Looks for either a readme.txt or readme.md file, prioritizing readme.txt.
@@ -1145,6 +1279,47 @@ class Import {
 		}
 
 		return (object) $headers;
+	}
+
+	/**
+	 * Determine whether a plugin's Version header looks like a match for the SVN tag it was released from.
+	 *
+	 * Both sides are reduced to the leading dotted-numeric portion (e.g. `release-1.4.0` → `1.4.0`,
+	 * `1.4.0-beta` → `1.4.0`, `1.0 & beta` → `1.0`), then compared with `version_compare()`. Any
+	 * inequality is treated as a mismatch — including the unusual case where the Version header is
+	 * ahead of the tag, which is allowable but almost always unintended. `1.0` vs `1.0.0` is treated
+	 * as equal after trailing `.0` segments are stripped.
+	 *
+	 * @param string $version The plugin's Version header value.
+	 * @param string $tag     The SVN tag folder name (e.g. `1.4.1`, `v2.0`).
+	 * @return bool True when the values appear to match, false when they look mismatched.
+	 */
+	public static function version_matches_tag( $version, $tag ) {
+		$normalize = static function ( $v ) {
+			// Capture the leading dotted-numeric portion (plus an optional `-rc` / `-beta` /
+			// `-alpha` pre-release suffix, case-insensitive, with optional `.`/no-separator digits)
+			// after any non-digit prefix such as `v`, `Version: `, `release-`, `tag-`, or `hover-`.
+			if ( ! preg_match( '/^[^0-9]*(\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?)/i', (string) $v, $m ) ) {
+				return '';
+			}
+			// Lowercase the suffix — version_compare() is not consistently case-insensitive
+			// (e.g. `1.0-Beta` < `1.0-beta`), so normalize before comparing.
+			$captured = strtolower( $m[1] );
+			// Strip trailing `.0` segments so version_compare() treats `1.0` and `1.0.0` as equal.
+			// Only applies to the dotted-numeric portion; a pre-release suffix is left alone.
+			return preg_replace( '/(\.0+)+(?=(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?$)/', '', $captured );
+		};
+
+		$normalized_version = $normalize( $version );
+		$normalized_tag     = $normalize( $tag );
+
+		if ( '' === $normalized_version || '' === $normalized_tag ) {
+			return true;
+		}
+
+		// Flag any inequality. The common case is "forgot to bump the header" (tag ahead of
+		// version), but the inverse is also worth flagging — it's allowable yet usually unintended.
+		return version_compare( $normalized_tag, $normalized_version, '==' );
 	}
 
 	/**

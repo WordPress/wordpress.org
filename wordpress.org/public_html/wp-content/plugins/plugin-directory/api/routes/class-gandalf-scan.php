@@ -8,8 +8,10 @@
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
 use WordPressdotorg\Plugin_Directory\API\Base;
-use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Updates_Gandalf;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan_Gandalf;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WP_Error;
+use WP_Http;
 
 /**
  * Callback endpoint for advisory Gandalf scans.
@@ -33,57 +35,49 @@ class Gandalf_Scan extends Base {
 						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
 					),
 				),
-				'permission_callback' => array( $this, 'permission_check_gandalf_scan_bearer' ),
+				'permission_callback' => function ( $request ) {
+					return $this->permission_check_api_bearer( $request, 'WP_GANDALF_SCAN_SHARED_SECRET' );
+				},
 			)
 		);
-	}
-
-	/**
-	 * Permission check for Gandalf callbacks.
-	 *
-	 * @param \WP_REST_Request $request The request.
-	 * @return true|\WP_Error True when authorized, or an error.
-	 */
-	public function permission_check_gandalf_scan_bearer( $request ) {
-		return $this->permission_check_api_bearer( $request, 'WP_GANDALF_SCAN_SHARED_SECRET' );
 	}
 
 	/**
 	 * Receive a Gandalf scan callback.
 	 *
 	 * @param \WP_REST_Request $request The request.
-	 * @return array|\WP_Error Callback response, or an error.
+	 * @return array|WP_Error Callback response, or an error.
 	 */
 	public function scan_callback( $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 		if ( ! $plugin ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'plugin_not_found',
 				__( 'Plugin not found.', 'wporg-plugins' ),
-				array( 'status' => \WP_Http::NOT_FOUND )
+				array( 'status' => WP_Http::NOT_FOUND )
 			);
 		}
 
 		$data = $request->get_json_params();
 		if ( ! is_array( $data ) ) {
-			$error = new \WP_Error(
+			$error = new WP_Error(
 				'invalid_gandalf_scan_callback',
 				__( 'Invalid Gandalf scan callback.', 'wporg-plugins' ),
-				array( 'status' => \WP_Http::BAD_REQUEST )
+				array( 'status' => WP_Http::BAD_REQUEST )
 			);
 
-			Plugin_Updates_Gandalf::record_invalid_callback( $plugin, $error );
+			Plugin_Scan_Gandalf::record_invalid_callback( $plugin, $error );
 			return $error;
 		}
 
 		$validated_data = $this->validate_callback_payload( $plugin, $data );
 		if ( is_wp_error( $validated_data ) ) {
 			$scan_id = isset( $data['scan_id'] ) && is_string( $data['scan_id'] ) ? $data['scan_id'] : '';
-			Plugin_Updates_Gandalf::record_invalid_callback( $plugin, $validated_data, $scan_id );
+			Plugin_Scan_Gandalf::record_invalid_callback( $plugin, $validated_data, $scan_id );
 			return $validated_data;
 		}
 
-		$result = Plugin_Updates_Gandalf::handle_callback( $plugin, $validated_data );
+		$result = Plugin_Scan_Gandalf::handle_callback( $plugin, $validated_data );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
@@ -98,14 +92,14 @@ class Gandalf_Scan extends Base {
 	 *
 	 * @param \WP_Post $plugin The plugin post.
 	 * @param array    $data   The callback payload.
-	 * @return array|\WP_Error Validated callback data, or an error.
+	 * @return array|WP_Error Validated callback data, or an error.
 	 */
 	protected function validate_callback_payload( $plugin, $data ) {
 		$invalid = static function ( $message ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'invalid_gandalf_scan_callback',
 				$message,
-				array( 'status' => \WP_Http::BAD_REQUEST )
+				array( 'status' => WP_Http::BAD_REQUEST )
 			);
 		};
 

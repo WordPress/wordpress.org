@@ -2,10 +2,16 @@
 namespace Dotorg\API\Events\Tests;
 
 // Load the project's composer autoloader (PHPUnit, yoast/phpunit-polyfills).
-require_once dirname( __DIR__, 5 ) . '/vendor/autoload.php';
+// Depth depends on the checkout layout — it differs between the production
+// server tree and a standalone open-source checkout.
+if ( file_exists( dirname( __DIR__, 5 ) . '/vendor/autoload.php' ) ) {
+	require_once dirname( __DIR__, 5 ) . '/vendor/autoload.php';
+} else {
+	require_once dirname( __DIR__, 3 ) . '/vendor/autoload.php';
+}
 
 // Signal to index.php that we're running tests so it skips main() / bootstrap() / init.php.
-define( 'WPORG_RUNNING_TESTS', true );
+defined( 'WPORG_RUNNING_TESTS' ) || define( 'WPORG_RUNNING_TESTS', true );
 
 // Time constants normally defined inside main().
 defined( 'HOUR_IN_SECONDS' ) || define( 'HOUR_IN_SECONDS', 60 * 60 );
@@ -35,6 +41,13 @@ if ( file_exists( $api_init_file ) ) {
 // Load the API entry-point so its functions are defined. main() is gated by WPORG_RUNNING_TESTS.
 require_once dirname( __DIR__ ) . '/index.php';
 
+// Load deps (hyperdb, etc.) so $wpdb is available for needs-db tests. Skipped on
+// open-source checkouts that don't have the API config — the bootstrap() call
+// itself requires init.php internally, which is gated above.
+if ( file_exists( $api_init_file ) ) {
+	\Dotorg\API\Events\bootstrap();
+}
+
 // Provide cache-function stubs (normally registered by disable_caching() inside main()).
 \Dotorg\API\Events\disable_caching();
 
@@ -48,8 +61,9 @@ require_once dirname( __DIR__ ) . '/index.php';
  * @throws \RuntimeException When the request fails at the transport layer.
  */
 function send_request( $path ) {
-	$sandboxed = defined( 'WPORG_SANDBOXED' ) ? WPORG_SANDBOXED : false;
-	$host      = $sandboxed ? $sandboxed . '.wordpress.org' : 'api.wordpress.org';
+	// On a sandbox, the request has to be made to localhost with the Host header overridden.
+	$sandboxed = defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED;
+	$host      = $sandboxed ? '127.0.0.1' : 'api.wordpress.org';
 	$url       = 'https://' . $host . $path;
 
 	$body = file_get_contents(
@@ -63,6 +77,7 @@ function send_request( $path ) {
 				'timeout'       => 15,
 			),
 			'ssl'  => array(
+				'verify_peer'      => ! $sandboxed,
 				'verify_peer_name' => ! $sandboxed,
 			),
 		) )

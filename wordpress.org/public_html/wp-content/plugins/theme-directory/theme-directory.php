@@ -44,6 +44,52 @@ define( 'WPORG_THEMES_DEFAULT_BROWSE', 'popular' );
 define( 'WPORG_THEMES_E2E_REPO', 'WordPress/theme-review-e2e' );
 
 /**
+ * Delay between a theme version being approved (by a reviewer on Trac, or via the
+ * auto-approval path for theme updates) and it becoming the live version served to
+ * sites by the themes API. Approved versions are held in Trac's `approved` status and
+ * migrated to live by the theme_directory_trac_sync cron once this delay elapses (see
+ * Trac_Sync::release_to_live()); the previous live version (if any) continues to be
+ * served in the meantime. Mitigates supply-chain risks by giving scanners and humans a
+ * window to flag bad releases. Reviewers can bypass the delay with Trac's `approve and
+ * mark` / `mark this theme` actions, which close the ticket as live immediately.
+ *
+ * Defers to the shared WPORG_PLUGIN_THEME_RELEASE_DELAY constant when it's defined
+ * so the plugin and theme directories can be tuned (or disabled) in lockstep from a
+ * single override point.
+ *
+ * Defaults to 0 (cooldown disabled, versions go live immediately) for now; this will be
+ * raised once the surrounding workflow is ready. Can be pre-defined in global config to
+ * override the default.
+ */
+if ( ! defined( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY' ) ) {
+	define( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY', defined( 'WPORG_PLUGIN_THEME_RELEASE_DELAY' ) ? WPORG_PLUGIN_THEME_RELEASE_DELAY : 0 );
+}
+
+/**
+ * Returns the release cooldown delay, in seconds, for a theme.
+ *
+ * The WPORG_THEMES_RELEASE_COOL_DOWN_DELAY constant provides the default, which is then
+ * passed through the `wporg_themes_release_cooldown_delay` filter so the delay can be
+ * shortened, extended, or removed (return 0 to disable the cooldown) on a per-theme basis.
+ * The theme slug is passed to the filter when it is known.
+ *
+ * @param string $theme_slug The slug of the theme being acted upon, if known.
+ * @return int Delay in seconds. 0 disables the cooldown (the version goes live immediately).
+ */
+function wporg_themes_get_release_cooldown_delay( $theme_slug = '' ) {
+	/**
+	 * Filters the release cooldown delay for a theme.
+	 *
+	 * Return 0 to disable the cooldown (the approved version goes live immediately), or a
+	 * larger/smaller number of seconds to lengthen or shorten the delay for this theme.
+	 *
+	 * @param int    $delay      The default delay in seconds (WPORG_THEMES_RELEASE_COOL_DOWN_DELAY).
+	 * @param string $theme_slug The slug of the theme being acted upon, or '' when not known.
+	 */
+	return (int) apply_filters( 'wporg_themes_release_cooldown_delay', WPORG_THEMES_RELEASE_COOL_DOWN_DELAY, $theme_slug );
+}
+
+/**
  * Things to change on activation.
  */
 function wporg_themes_activate() {
@@ -400,9 +446,9 @@ add_action( 'wp_ajax_author-lookup', 'wporg_themes_author_lookup' );
 /**
  * Handles updating the status of theme versions.
  *
- * @param int       $post_id         Post ID.
- * @param string    $current_version The theme version to update.
- * @param string    $new_status      The status to update the current version to.
+ * @param int    $post_id         Post ID.
+ * @param string $current_version The theme version to update.
+ * @param string $new_status      The status to update the current version to.
  * @return int|bool Meta ID if the key didn't exist, true on successful update,
  *                  false on failure.
  */
@@ -423,6 +469,7 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
 		// There can only be one version with these statuses:
 		case 'new':
 		case 'live':
+		case 'approved':
 			// Discard all previous versions with that status.
 			foreach ( array_keys( $meta, $new_status ) as $version ) {
 				if ( version_compare( $version, $current_version, '<' ) ) {
