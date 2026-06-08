@@ -364,7 +364,18 @@ class Screenshots {
 		// available without delaying the first paint.
 		$priority = $above_fold ? 'high' : 'low';
 
+		// Wrap the `<img>` in an `<a href="{src}" target="_blank">` so
+		// the no-JS reader still gets a path to the full-resolution
+		// screenshot (opens in a new tab). Core's lightbox interactivity
+		// script attaches its own click handler on hydration and calls
+		// `preventDefault()` before the anchor would navigate, so JS
+		// readers keep the existing lightbox flow unchanged — the link
+		// is a pure progressive-enhancement fallback.
 		$figure  = '<figure class="' . esc_attr( $class ) . '">';
+		$figure .= sprintf(
+			'<a href="%1$s" target="_blank" rel="noopener">',
+			$src
+		);
 		$figure .= sprintf(
 			'<img src="%1$s" alt="%2$s" class="wp-image-%3$d"%4$s%5$s loading="eager" fetchpriority="%6$s" decoding="async"/>',
 			$src,
@@ -374,6 +385,7 @@ class Screenshots {
 			$dim_attrs,
 			esc_attr( $priority )
 		);
+		$figure .= '</a>';
 
 		if ( '' !== $caption ) {
 			$figure .= sprintf(
