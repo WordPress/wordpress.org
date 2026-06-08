@@ -1476,7 +1476,7 @@ input[type="submit"].submit-job {
 	object-fit: cover;
 }
 
-.candidate-card__avatar::after {
+.candidate-card__avatar.has-badge::after {
 	content: "";
 	position: absolute;
 	top: 0;

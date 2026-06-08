@@ -132,11 +132,11 @@ if ( $howtoapply_raw ) {
 		<div class="job-detail-candidates__grid">
 			<?php foreach ( $single_candidates as $person ) : ?>
 				<?php
-				$role    = ! empty( $person->positions[0]->role ) ? $person->positions[0]->role : '';
-				$company = ! empty( $person->positions[0]->company ) ? $person->positions[0]->company : '';
+				$role    = isset( $person->current_role )    ? $person->current_role    : '';
+				$company = isset( $person->current_company ) ? $person->current_company : '';
 				?>
 				<a href="<?php echo esc_url( $person->profile_url ); ?>" class="candidate-card candidate-card--compact" target="_blank" rel="noopener noreferrer">
-					<div class="candidate-card__avatar">
+					<div class="candidate-card__avatar<?php echo ! empty( $person->show_badge ) ? ' has-badge' : ''; ?>">
 						<img src="<?php echo esc_url( 'https://wordpress.org/grav-redirect.php?user=' . urlencode( $person->user_login ) . '&s=64' ); ?>" alt="" width="64" height="64" loading="lazy">
 					</div>
 					<div class="candidate-card__info">
