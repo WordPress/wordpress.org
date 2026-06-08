@@ -468,6 +468,8 @@ class Plugin_Directory {
 
 		add_shortcode( Shortcodes\Release_Confirmation::SHORTCODE, array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'display' ) );
 		add_action( 'template_redirect', array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'template_redirect' ) );
+
+		add_action( 'wp_head', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'emit_preconnect' ), 1 );
 	}
 
 	/**

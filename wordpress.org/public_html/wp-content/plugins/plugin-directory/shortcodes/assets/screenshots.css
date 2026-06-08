@@ -1,0 +1,423 @@
+/**
+ * Screenshots section styling for the [wporg-plugins-screenshots] shortcode.
+ *
+ * Lives next to the shortcode rather than in the active theme so the
+ * Plugin Directory's screenshot UX stays self-contained.
+ *
+ * Layout: CSS multi-column ("brick" / masonry). Plugin screenshots come
+ * in widely different aspect ratios (portrait phones, landscape
+ * desktops, panoramas), and a fixed-aspect grid would crop them via
+ * `object-fit: cover`. Multi-column lets each figure keep its natural
+ * height — same approach as the Phase 2 style variation in the Gallery
+ * Lightbox Enhancements polyfill.
+ *
+ * Collapse for long galleries: every figure renders into the DOM
+ * upfront. The masonry balances across columns once on first paint.
+ * The reveal "wrap" clips the bottom via `max-height` + `overflow:
+ * hidden`, and the click animates the clip away. Figures themselves
+ * never get hidden / re-shown — that prevented the previous
+ * "screenshots reshuffle on click" effect, since the multi-column
+ * algorithm doesn't have to re-balance anything.
+ *
+ * No borders, no radius, no shadows, no hover lift — wp.org gallery
+ * patterns and Photo Directory render thumbnails as bare images.
+ *
+ * Captions are intentionally not visible in the gallery grid; they
+ * surface only inside the core lightbox overlay (Phase 1 polyfill).
+ *
+ * All selectors are scoped to `#screenshots .wp-block-gallery.is-style-screenshots`
+ * or to `.plugin-screenshots__*` so this stylesheet cannot leak into
+ * any other gallery on the page.
+ */
+
+/**
+ * Default: CSS multi-column "brick" / masonry layout. Plugin
+ * screenshots come in widely different aspect ratios (portrait
+ * phones, landscape desktops, panoramas), and a fixed-aspect grid
+ * would crop them via `object-fit: cover`. Multi-column lets each
+ * figure keep its natural height and balance across three columns.
+ *
+ * Mixed-aspect galleries stay in this brick layout. The
+ * uniform-aspect upgrade below replaces it with a row-aligned grid
+ * once server-side detection (see `Screenshots::is_uniform_aspect`)
+ * has confirmed every figure shares an aspect ratio.
+ *
+ * Server output is identical across viewports, so the page stays
+ * fully cacheable.
+ */
+#screenshots .wp-block-gallery.is-style-screenshots {
+	margin: 0;
+	display: block;
+	column-count: 3;
+	column-gap: 1rem;
+}
+
+#screenshots .wp-block-gallery.is-style-screenshots.is-count-1 {
+	column-count: 1;
+}
+
+#screenshots .wp-block-gallery.is-style-screenshots.is-count-1 figure.wp-block-image {
+	margin: 0;
+}
+
+/**
+ * Uniform-aspect upgrade — row-aligned grid. The general rule covers
+ * counts of 4 and up; tiny galleries (N=2, N=3) get their own pair
+ * of rules below because the column count differs.
+ *
+ * Layout outcomes by count (uniform-aspect only):
+ *
+ *  - N=2 → 2 in a row
+ *  - N=3 → 2 + 1 full-width
+ *  - N=4 → 3 + 1 full-width  (`has-tail-1` anchor)
+ *  - N=5 → 3 + 2
+ *  - N=6 → 3 + 3
+ *  - N=7 → 3 + 3 + 1 full-width  (`has-tail-1`)
+ *  - N=8 → 3 + 3 + 2
+ *  - N=9 → 3 + 3 + 3
+ *  - N=10 → 3+3+3+1 full-width  (`has-tail-1`)
+ *  - N=11 → 3+3+3+2
+ *  - N=12 → 3+3+3+3
+ *  - … etc. (`has-tail-1` whenever count % 3 == 1)
+ */
+#screenshots .wp-block-gallery.is-style-screenshots.has-uniform-aspect:not(.is-count-1):not(.is-count-2):not(.is-count-3) {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	column-gap: 1rem;
+	row-gap: 1rem;
+	align-items: start;
+	column-count: auto;
+}
+
+#screenshots .wp-block-gallery.is-style-screenshots.has-uniform-aspect:not(.is-count-1):not(.is-count-2):not(.is-count-3) figure.wp-block-image {
+	grid-column: span 1;
+	width: 100%;
+	/* `row-gap: 1rem` on the grid wrapper handles vertical spacing.
+	   `!important` because the default figure rule below carries
+	   `!important` (forced by Gutenberg's `is-layout-flex` margin
+	   reset) — without it our grid figures inherit a redundant
+	   bottom margin and rows drift apart. */
+	margin: 0 !important;
+	break-inside: auto;
+}
+
+/* Anchor must outrank the general figure rule's specificity (which
+   carries the three :not() clauses), so repeat them here. */
+#screenshots .wp-block-gallery.is-style-screenshots.has-uniform-aspect:not(.is-count-1):not(.is-count-2):not(.is-count-3).has-tail-1 figure.wp-block-image:last-child {
+	grid-column: 1 / -1;
+}
+
+/* N=2 uniform-aspect: row of two. */
+#screenshots .wp-block-gallery.is-style-screenshots.is-count-2.has-uniform-aspect {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	column-gap: 1rem;
+	row-gap: 1rem;
+	align-items: start;
+	column-count: auto;
+}
+
+#screenshots .wp-block-gallery.is-style-screenshots.is-count-2.has-uniform-aspect figure.wp-block-image {
+	grid-column: span 1;
+	width: 100%;
+	margin: 0 !important;
+	break-inside: auto;
+}
+
+/* N=3 uniform-aspect: 2 + 1 full-width. */
+#screenshots .wp-block-gallery.is-style-screenshots.is-count-3.has-uniform-aspect {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	column-gap: 1rem;
+	row-gap: 1rem;
+	align-items: start;
+	column-count: auto;
+}
+
+#screenshots .wp-block-gallery.is-style-screenshots.is-count-3.has-uniform-aspect figure.wp-block-image {
+	grid-column: span 1;
+	width: 100%;
+	margin: 0 !important;
+	break-inside: auto;
+}
+
+#screenshots .wp-block-gallery.is-style-screenshots.is-count-3.has-uniform-aspect figure.wp-block-image:last-child {
+	grid-column: 1 / -1;
+}
+
+@media (max-width: 599px) {
+
+	#screenshots .wp-block-gallery.is-style-screenshots,
+	#screenshots .wp-block-gallery.is-style-screenshots.is-count-3 {
+		column-count: 2;
+	}
+
+	#screenshots .wp-block-gallery.is-style-screenshots.has-uniform-aspect:not(.is-count-1):not(.is-count-2):not(.is-count-3) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	#screenshots .wp-block-gallery.is-style-screenshots.has-uniform-aspect.has-tail-1 figure.wp-block-image:last-child {
+		grid-column: 1 / -1;
+	}
+}
+
+/**
+ * Each figure spans its column with natural height. `break-inside:
+ * avoid` keeps the figure intact across columns. `aspect-ratio: auto
+ * !important` neutralises core/gallery's shared aspect-ratio inline
+ * style, which would otherwise force every tile to the same shape and
+ * undo the brick layout.
+ *
+ * Width 100% / margin 0 win against core/gallery's flex defaults which
+ * would otherwise compute width with the gallery gap.
+ */
+/* Default figure styles. Layout / margin / display all land cleanly:
+   `Screenshots::strip_layout_classes` removes the helper classes
+   (`is-layout-flex`, `wp-block-gallery-is-layout-flex`,
+   `wp-block-gallery-N`) that would otherwise dictate flex layout, so
+   plain specificity carries those declarations.
+
+   The `width` and `aspect-ratio` declarations carry `!important`
+   because core/gallery still emits a hard-coded child-width sizer
+   (`flex: 1 1 auto` plus an aspect-ratio inline rule on every
+   `wp-block-image`) that survives the helper-class strip and fights
+   any CSS-columns width with full specificity. Targeted `!important`
+   here is the cleanest fix short of re-implementing the gallery
+   block from scratch. Everything else stays specificity-only. */
+#screenshots .wp-block-gallery.has-nested-images.is-style-screenshots > figure.wp-block-image {
+	width: 100% !important;
+	flex: none;
+	/* `!important` because Gutenberg's `is-layout-flex` helper class
+	   sets `margin: 0` on direct children with the same single-class
+	   specificity as ours, and `Screenshots::strip_layout_classes`
+	   does not always remove it (the filter skips galleries served
+	   from cached block markup). Without this we lose the row gap
+	   in the CSS-columns-flow branch — every figure but the last in
+	   a column ends up flush against the next row. */
+	margin: 0 0 1rem !important;
+	break-inside: avoid;
+	display: block;
+	aspect-ratio: auto !important;
+	/* Hairline border so screenshots with mostly-white backgrounds
+	   keep an edge against the page. Low alpha so it's invisible on
+	   any image with non-white edges; you only notice it on the
+	   pure-white outliers. Mirrors the border WordPress.org uses
+	   around theme / pattern preview cards. */
+	border: 1px solid rgba(0, 0, 0, 0.06);
+	box-sizing: border-box;
+}
+
+#screenshots .wp-block-gallery.is-style-screenshots figure.wp-block-image img,
+#screenshots .wp-block-gallery.is-style-screenshots figure.wp-block-image a {
+	display: block;
+	width: 100%;
+	height: auto;
+	object-fit: initial;
+}
+
+#screenshots .wp-block-gallery.is-style-screenshots figure.wp-block-image button.lightbox-trigger {
+	cursor: zoom-in;
+}
+
+/**
+ * Default Gallery paints a `backdrop-filter: blur(3px)` strip below
+ * each figure with a figcaption (legible scrim for the caption).
+ * We hide captions in the grid, so the strip would sit over a clean
+ * image and read as accidental softening. Disable.
+ */
+#screenshots .wp-block-gallery.is-style-screenshots figure.wp-block-image::before {
+	content: none;
+}
+
+#screenshots .wp-block-image figcaption {
+	display: none;
+}
+
+/* Broken / zero-dimension screenshot — JS adds this class so the
+   empty bordered rectangle doesn't sit in the grid. */
+#screenshots .wp-block-image.is-broken-tile {
+	display: none !important;
+}
+
+/**
+ * Reveal wrap. Clips the gallery via `max-height` while collapsed; the
+ * fade overlay and the Show-all button are absolutely positioned over
+ * the clipped area so their position adapts to the column heights —
+ * no dead band beneath the shortest column.
+ *
+ * `--collapse-height` is set inline by the JS on init (it measures the
+ * natural bottom edge of the ninth figure across all three columns).
+ * If JS hasn't run yet, the fallback value of 36rem covers the typical
+ * "three rows of 16:10 landscape thumbs" footprint.
+ */
+.plugin-screenshots__reveal {
+	position: relative;
+}
+
+.plugin-screenshots__gallery-wrap {
+	overflow: hidden;
+	/* Fixed cap — about three rows of typical landscape thumbs. We
+	   don't measure dynamically because lazy figures past the fold
+	   report `naturalWidth: 0` until they decode, which made the
+	   measure equal to the unclipped natural height. The fixed cap
+	   works for every count and aspect-ratio mix; the fade veil and
+	   button always sit over real content because galleries ≤ 9
+	   never enter this collapse state at all. */
+	max-height: 32rem;
+	transition: max-height 480ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plugin-screenshots__reveal.is-revealed .plugin-screenshots__gallery-wrap {
+	max-height: var(--full-height, none);
+}
+
+/**
+ * Fade overlay: a soft white veil over the bottom of the clipped
+ * masonry. Lives on the reveal root (not inside the wrap) so the
+ * wrap's `overflow: hidden` doesn't clip it. Pinned to the wrap's
+ * bottom edge — the wrap is the reveal root's only child of any
+ * height, so `bottom: 0` of the root is the wrap's bottom edge.
+ */
+.plugin-screenshots__fade {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 12rem;
+	pointer-events: none;
+	background: linear-gradient(
+		to bottom,
+		rgba(255, 255, 255, 0) 0%,
+		rgba(255, 255, 255, 0.7) 45%,
+		rgb(255, 255, 255) 90%
+);
+	transition: opacity 220ms ease-out;
+}
+
+.plugin-screenshots__reveal.is-revealed .plugin-screenshots__fade {
+	opacity: 0;
+}
+
+/* No-overflow case: PHP rendered the button (count > 9) but the
+   natural masonry fits under the cap — hide the affordance and
+   release the wrap so it shows everything. JS toggles this. */
+.plugin-screenshots__reveal.has-no-overflow .plugin-screenshots__gallery-wrap {
+	max-height: none;
+	overflow: visible;
+}
+
+.plugin-screenshots__reveal.has-no-overflow .plugin-screenshots__fade,
+.plugin-screenshots__reveal.has-no-overflow .plugin-screenshots__show-all {
+	display: none !important;
+}
+
+/**
+ * Show-all button. Pinned to the reveal root's bottom-center, sits
+ * inside the fade veil so the call to action lands over the visible
+ * masonry — no dead band underneath the shortest column. Square,
+ * black-on-white outline; mirrors the `is-style-outline` Button
+ * block convention used on the plugin page (Download / Preview).
+ */
+.plugin-screenshots__show-all {
+	position: absolute;
+	left: 50%;
+	bottom: 1.5rem;
+	transform: translateX(-50%);
+	z-index: 1;
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.6rem 1.6rem;
+
+	background: var(--wp--preset--color--white, #fff);
+	border: 1px solid var(--wp--preset--color--charcoal-1, #1e1e1e);
+	border-radius: 0;
+	color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+
+	font-family: inherit;
+	font-size: var(--wp--preset--font-size--small, 0.875rem);
+	font-weight: 600;
+	line-height: 1.4;
+	white-space: nowrap;
+	cursor: pointer;
+
+	transition: background-color 140ms ease-out, color 140ms ease-out, opacity 200ms ease-out, visibility 0s linear;
+}
+
+.plugin-screenshots__show-all:hover,
+.plugin-screenshots__show-all:focus-visible {
+	background: var(--wp--preset--color--charcoal-1, #1e1e1e);
+	color: var(--wp--preset--color--white, #fff);
+	outline: none;
+}
+
+.plugin-screenshots__show-all:focus-visible {
+	outline: 2px solid var(--wp--preset--color--blueberry-1, #3858e9);
+	outline-offset: 2px;
+}
+
+/* Chevron via mask-image so it inherits the button's color. */
+.plugin-screenshots__show-all-chevron {
+	display: inline-block;
+	width: 0.75rem;
+	height: 0.75rem;
+	background-color: currentColor;
+	-webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41Z"/></svg>');
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	-webkit-mask-size: contain;
+	mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41Z"/></svg>');
+	mask-repeat: no-repeat;
+	mask-position: center;
+	mask-size: contain;
+}
+
+/* One-time reveal: button gracefully fades out, then JS detaches it
+   so the accessibility tree and tab order stay clean. */
+.plugin-screenshots__reveal.is-revealed .plugin-screenshots__show-all {
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: opacity 200ms ease-out, visibility 0s linear 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.plugin-screenshots__gallery-wrap,
+	.plugin-screenshots__fade,
+	.plugin-screenshots__show-all {
+		transition: none;
+	}
+}
+
+/**
+ * Mobile (≤ 599px): vertical scroll is natural — the collapse
+ * affordance just adds friction. We turn the clip off, hide the fade
+ * and the button. No JS involvement: the wrap's `max-height` is
+ * removed, the gallery falls into its natural height.
+ */
+@media (max-width: 599px) {
+
+	.plugin-screenshots__gallery-wrap {
+		max-height: none;
+		overflow: visible;
+	}
+
+	.plugin-screenshots__fade,
+	.plugin-screenshots__show-all {
+		display: none !important;
+	}
+}
+
+/* No-JS fallback: release the clip so the SSR markup shows every
+   figure, hide the button (it can't be wired) and the fade. */
+.no-js .plugin-screenshots__gallery-wrap {
+	max-height: none;
+	overflow: visible;
+}
+
+.no-js .plugin-screenshots__show-all,
+.no-js .plugin-screenshots__fade {
+	display: none;
+}
