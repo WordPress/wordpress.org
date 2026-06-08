@@ -36,7 +36,7 @@ class Lightbox_Captions {
 	 * @return string Unchanged content; we only mutate Interactivity API state.
 	 */
 	public static function add_caption_to_state( $content, $block ) {
-		if ( ! str_contains( $content, 'wp-lightbox-container' ) ) {
+		if ( false === strpos( $content, 'wp-lightbox-container' ) ) {
 			return $content;
 		}
 
