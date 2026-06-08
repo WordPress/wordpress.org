@@ -1054,6 +1054,7 @@ label {
 	max-width: var(--wide-width);
 	margin-inline: auto;
 	padding: var(--space-40) var(--space-20) var(--space-60);
+	overflow-wrap: break-word;
 }
 
 .entry-article .entry-header h1,
@@ -1218,29 +1219,37 @@ input[type="submit"].submit-job {
 	margin-bottom: 4px;
 }
 
-/* SI Contact Form overrides for feedback page */
-#FSContact1 {
-	width: 100% !important;
+/* Native feedback contact form ([jobswp-contact-form]) */
+.jobswp-contact-form {
+	width: 100%;
 	max-width: 600px;
 }
 
-#FSContact1 input[type="text"],
-#FSContact1 input[type="email"] {
-	width: 100% !important;
+.jobswp-contact-form .input,
+.jobswp-contact-form input[type="text"],
+.jobswp-contact-form input[type="email"] {
+	width: 100%;
+	box-sizing: border-box;
 }
 
-#FSContact1 textarea {
-	width: 100% !important;
-	max-width: 100% !important;
+.jobswp-contact-form textarea.input {
+	width: 100%;
+	max-width: 100%;
 	min-height: 150px;
+	box-sizing: border-box;
 }
 
-#FSContact1 #fscf_captcha_code1 {
-	width: 170px !important;
+.jobswp-contact-form__field--honeypot {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
 }
 
-#FSContact1 #fscf_submit_div1 {
-	padding-top: var(--space-20) !important;
+.jobswp-contact-form__submit {
+	padding-top: var(--space-20);
+	margin-bottom: 0;
 }
 
 
@@ -1761,6 +1770,7 @@ input[type="submit"].submit-job {
 	.job-date {
 		text-align: left;
 	}
+
 
 	.job-list-col-labels {
 		display: none;
