@@ -25,16 +25,12 @@
 }
 
 /*
- * Do NOT override `.lightbox-image-container` positioning. Core stacks
- * its two containers — the zoom-thumbnail and the full-resolution image
- * — as absolutely positioned, center-overlapping siblings, with the
- * full-resolution one painted on top. Forcing them to `position:
- * relative` drops both into normal flow and stacks the images
- * vertically, rendering the picture twice the moment both containers
- * hold a real image (e.g. plugin screenshots, whose lightbox source is
- * wired up server-side). The caption is mounted into the top container
- * and pins to its frame, using that absolute container as its
- * containing block — no positioning override required here.
+ * Do NOT set `.lightbox-image-container` to `position: relative`. Core
+ * stacks its two containers (zoom-thumbnail + full-res) as absolutely
+ * positioned, overlapping siblings; forcing them into normal flow stacks
+ * the images vertically and renders the picture twice once both hold a
+ * real image (e.g. plugin screenshots). The absolute container is already
+ * the caption's containing block — no override needed.
  */
 
 .wp-lightbox-overlay .lightbox-image-container > figcaption.wp-lightbox-caption {
