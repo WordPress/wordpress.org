@@ -118,6 +118,44 @@ npm run translate:env -- run cli -- wp <command>
 
 **Local overrides:** create `translate/.wp-env.override.json` (git-ignored) to override config values like `WP_HOME` / `WP_SITEURL` for testing behind a custom hostname.
 
+### Support Forums
+
+A local instance of the WordPress.org Support Forums with bbPress, the support theme, and supporting plugins.
+
+**Start:**
+
+```bash
+npm run support:env start
+```
+
+First start automatically sets up a multisite network, creates sub-sites for Plugins (`/plugins`) and Themes (`/themes`), and provisions the default user accounts.
+
+**Note that these plugin and theme directories are only used for forum references, not for development of the respective environments.**
+
+**Access:** `http://localhost:8888`
+
+**WP CLI:**
+
+```bash
+npm run support:env -- run cli -- wp <command>
+```
+
+**User accounts:**
+
+All accounts use the password `password`.
+
+| Username | Forum role | Notes |
+|---|---|---|
+| `admin` | Network administrator | Full network admin access |
+| `keymaster` | `bbp_keymaster` | Top-level forum admin; can manage all forum content |
+| `moderator` | `bbp_moderator` | Can moderate topics and replies |
+| `pluginauthor` | `bbp_participant` | Subscriber on the Plugins sub-site |
+| `plugincontributor` | `bbp_participant` | Subscriber on the Plugins sub-site |
+| `pluginsupport` | `bbp_participant` | Plugin support rep; subscriber on the Plugins sub-site |
+| `themeauthor` | `bbp_participant` | Subscriber on the Themes sub-site |
+| `themesupport` | `bbp_participant` | Theme support rep; subscriber on the Themes sub-site (unused) |
+| `visitor` | `bbp_participant` | Regular site visitor |
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.

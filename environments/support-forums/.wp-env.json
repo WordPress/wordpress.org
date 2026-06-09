@@ -1,0 +1,47 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/bbpress.zip",
+		"https://downloads.wordpress.org/plugin/gutenberg.17.9.0.zip",
+		"https://downloads.wordpress.org/plugin/blocks-everywhere.zip",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-user-moderation",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-user-mention-autocomplete",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-user-badges",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-topic-resolution",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-topic-archive",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-term-subscription",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-redirect",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-codexify",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-code-blocks-expand-contract",
+		"../wordpress.org/public_html/wp-content/plugins/support-forums"
+	],
+	"themes": [
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg-support-2024",
+		"WordPress/wporg-parent-2021#build"
+	],
+	"mappings": {
+		".htaccess": "./support-forums/bin/.htaccess",
+		"wp-content/wporg/style": "../wordpress.org/public_html/style",
+		"wp-content/mu-plugins": "./mocks/mu-plugins",
+		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
+		"wp-content/plugins/plugin-directory": "../wordpress.org/public_html/wp-content/plugins/plugin-directory",
+		"wp-content/plugins/theme-directory": "../wordpress.org/public_html/wp-content/plugins/theme-directory",
+		"wp-content/plugins/wporg-two-factor": "../wordpress.org/public_html/wp-content/plugins/wporg-two-factor"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash support-forums/bin/after-start.sh"
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"JETPACK_DEV_DEBUG": true,
+		"WPORGPATH": "/var/www/html/wp-content/wporg",
+		"WP_ENVIRONMENT_TYPE": "local",
+		"WPORG_SUPPORT_FORUMS_BLOGID": 1,
+		"WPORG_PLUGIN_DIRECTORY_BLOGID": 2,
+		"WPORG_THEME_DIRECTORY_BLOGID": 3,
+		"PLUGINS_TABLE_PREFIX": "wp_2_"
+	}
+}
