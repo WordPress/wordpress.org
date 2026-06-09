@@ -242,7 +242,6 @@ abstract class Importer {
 		if ( $sanitized !== $doc['slug'] ) {
 			return false;
 		}
-		
 		$post_data = array(
 			'post_type'   => $this->get_post_type(),
 			'post_status' => 'publish',
