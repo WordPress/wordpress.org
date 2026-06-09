@@ -579,12 +579,12 @@ class Screenshots {
 			return '';
 		}
 
-		// Photon (i0.wp.com) is a production-only optimisation. In local
-		// or staging environments the proxy may not be reachable, which
-		// would leave the gallery silently empty until the cold cache
-		// warmed up. Fall back to the unoptimised `ps.w.org` URL there.
+		// Photon (i0.wp.com) only runs on production and staging. In local
+		// or other environments the proxy may not be reachable, which would
+		// leave the gallery silently empty until the cold cache warmed up.
+		// Fall back to the unoptimised `ps.w.org` URL there.
 		$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
-		if ( 'production' !== $env || 'staging' !== $env ) {
+		if ( 'production' !== $env && 'staging' !== $env ) {
 			return '';
 		}
 
