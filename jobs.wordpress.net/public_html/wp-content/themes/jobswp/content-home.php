@@ -116,6 +116,7 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 				} elseif ( 'Part Time' === $jobtype ) {
 					$type_icon = '&#9201;';
 				}
+
 				?>
 				<a href="<?php echo esc_url( get_permalink( $job->ID ) ); ?>" class="job-card" data-category="<?php echo esc_attr( $cat_slug ); ?>">
 					<?php if ( $cat_name ) : ?>
@@ -191,21 +192,14 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 		<div class="candidates-grid">
 			<?php foreach ( $paged_candidates as $candidate ) : ?>
 				<?php
-				$current_role    = '';
-				$current_company = '';
-
-				if ( ! empty( $candidate->positions ) ) {
-					$latest          = $candidate->positions[0];
-					$current_role    = isset( $latest->role ) ? $latest->role : '';
-					$current_company = isset( $latest->company ) ? $latest->company : '';
-				}
+				$current_role    = isset( $candidate->current_role )    ? $candidate->current_role    : '';
+				$current_company = isset( $candidate->current_company ) ? $candidate->current_company : '';
 				?>
 				<a href="<?php echo esc_url( $candidate->profile_url ); ?>" class="candidate-card" target="_blank" rel="noopener noreferrer">
-					<div class="candidate-card__avatar">
+					<div class="candidate-card__avatar<?php echo ! empty( $candidate->show_badge ) ? ' has-badge' : ''; ?>">
 						<img src="<?php echo esc_url( 'https://wordpress.org/grav-redirect.php?user=' . urlencode( $candidate->user_login ) . '&s=80' ); ?>" alt="" width="80" height="80" loading="lazy">
 					</div>
 					<div class="candidate-card__info">
-						<span class="candidate-card__badge"><?php esc_html_e( 'Open to Work', 'jobswp' ); ?></span>
 						<h3 class="candidate-card__name"><?php echo esc_html( $candidate->display_name ); ?></h3>
 						<?php if ( $current_role || $current_company ) : ?>
 							<p class="candidate-card__role">

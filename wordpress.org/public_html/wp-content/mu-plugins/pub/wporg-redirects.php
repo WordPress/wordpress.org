@@ -97,6 +97,10 @@ add_action( 'template_redirect', function() {
 		'/plugin/' => '/plugins/',
 		'/theme/'  => '/themes/',
 
+		// Legacy /extend/ directory URLs (pre-2013) https://meta.trac.wordpress.org/ticket/8268
+		'/extend/plugins/' => '/plugins/',
+		'/extend/themes/'  => '/themes/',
+
 		// The plugin directory was available at /plugins-wp/ during a beta-test, and is still linked to.
 		'/plugins-wp/' => '/plugins/',
 
@@ -208,6 +212,7 @@ function wporg_redirect_site_not_found() {
 		case 'wp15.wordpress.org':
 		case 'wp20.wordpress.org':
 		case 'jobs.wordpress.org':
+		case 'playground.wordpress.org':
 		// Default Theme Demo sites are on WordPress.net
 		case '2017.wordpress.org':
 		case '2019.wordpress.org':

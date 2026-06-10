@@ -23,7 +23,7 @@ class WP_47_Credits extends WP_Credits {
 				'shuffle' => false,
 				'data'    => array(
 					'jorbin'         => array( 'Aaron Jorbin',      'Release Deputy' ),
-					'jbpaul17'       => array( 'Jeff Paul',         'Release Deputy' ),
+					'jeffpaul'       => array( 'Jeff Paul',         'Release Deputy' ),
 					'aaroncampbell'  => array( 'Aaron D. Campbell', 'Core Developer' ),
 					'afercia'        => array( 'Andrea Fercia',     'Core Developer' ),
 					'boonebgorges'   => array( 'Boone B. Gorges',   'Core Developer' ),
@@ -282,7 +282,7 @@ class WP_47_Credits extends WP_Credits {
 			'jayarjo',
 			'jazbek',
 			'jblz',
-			'jbpaul17',
+			'jeffpaul',
 			'jbrinley',
 			'jdgrimes',
 			'jdolan',
