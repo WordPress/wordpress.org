@@ -1054,6 +1054,7 @@ label {
 	max-width: var(--wide-width);
 	margin-inline: auto;
 	padding: var(--space-40) var(--space-20) var(--space-60);
+	overflow-wrap: break-word;
 }
 
 .entry-article .entry-header h1,
@@ -1218,29 +1219,37 @@ input[type="submit"].submit-job {
 	margin-bottom: 4px;
 }
 
-/* SI Contact Form overrides for feedback page */
-#FSContact1 {
-	width: 100% !important;
+/* Native feedback contact form ([jobswp-contact-form]) */
+.jobswp-contact-form {
+	width: 100%;
 	max-width: 600px;
 }
 
-#FSContact1 input[type="text"],
-#FSContact1 input[type="email"] {
-	width: 100% !important;
+.jobswp-contact-form .input,
+.jobswp-contact-form input[type="text"],
+.jobswp-contact-form input[type="email"] {
+	width: 100%;
+	box-sizing: border-box;
 }
 
-#FSContact1 textarea {
-	width: 100% !important;
-	max-width: 100% !important;
+.jobswp-contact-form textarea.input {
+	width: 100%;
+	max-width: 100%;
 	min-height: 150px;
+	box-sizing: border-box;
 }
 
-#FSContact1 #fscf_captcha_code1 {
-	width: 170px !important;
+.jobswp-contact-form__field--honeypot {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
 }
 
-#FSContact1 #fscf_submit_div1 {
-	padding-top: var(--space-20) !important;
+.jobswp-contact-form__submit {
+	padding-top: var(--space-20);
+	margin-bottom: 0;
 }
 
 
@@ -1457,6 +1466,7 @@ input[type="submit"].submit-job {
 
 .candidate-card__avatar {
 	flex-shrink: 0;
+	position: relative;
 }
 
 .candidate-card__avatar img {
@@ -1464,6 +1474,18 @@ input[type="submit"].submit-job {
 	height: 56px;
 	border-radius: 50%;
 	object-fit: cover;
+}
+
+.candidate-card__avatar.has-badge::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 110'><defs><clipPath id='c'><circle cx='55' cy='55' r='55'/></clipPath></defs><circle cx='55' cy='55' r='52' fill='none' stroke='%2300a32a' stroke-width='6'/><g clip-path='url(%23c)'><rect x='0' y='82' width='110' height='18' fill='%2300a32a'/><text x='55' y='94.5' text-anchor='middle' fill='white' font-family='Inter,Helvetica,Arial,sans-serif' font-size='9' font-weight='800' letter-spacing='0.5'>%23OPENTOWORK</text></g></svg>");
+	background-size: 100% 100%;
+	pointer-events: none;
 }
 
 .candidate-card__info {
@@ -1762,6 +1784,7 @@ input[type="submit"].submit-job {
 		text-align: left;
 	}
 
+
 	.job-list-col-labels {
 		display: none;
 	}
@@ -1990,4 +2013,29 @@ input[type="submit"].submit-job {
 		border-right: none;
 		padding-right: 0;
 	}
+}
+
+
+/* ============================================
+   FAQ Page — centered content column
+   ============================================ */
+
+.page-faq .entry-article {
+	max-width: var(--content-width);
+}
+
+
+/* ============================================
+   Single Job — prominent Apply CTA
+   ============================================ */
+
+.job-sidebar__apply {
+	margin-bottom: var(--space-20);
+	padding-bottom: var(--space-20);
+	border-bottom: 1px solid var(--color-light-grey-2);
+}
+
+.job-sidebar__apply .btn {
+	width: 100%;
+	margin-top: 0;
 }
