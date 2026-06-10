@@ -236,6 +236,60 @@ class Test_Post_Parser extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test attribute extraction does not match prefixed attributes like data-alt.
+	 */
+	public function test_attribute_extraction_ignores_prefixed_attributes() {
+		$content = '<!-- wp:image -->'
+			. '<figure class="wp-block-image"><img src="test.jpg" alt="Real alt" data-alt="Not this" data-title="Nor this" />'
+			. '<figcaption>Image caption</figcaption></figure>'
+			. '<!-- /wp:image -->';
+
+		$parser  = new Post_Parser();
+		$strings = $parser->extract_strings( $content );
+
+		$this->assertContains( 'Real alt', $strings );
+		$this->assertNotContains( 'Not this', $strings );
+		$this->assertNotContains( 'Nor this', $strings );
+	}
+
+	/**
+	 * Test that a translation cannot break out of an attribute value.
+	 *
+	 * Replacements are context-blind, so a translation introducing a double
+	 * quote the original did not have must be encoded before substitution.
+	 */
+	public function test_replacement_cannot_break_out_of_attributes() {
+		$content = '<!-- wp:image -->'
+			. '<figure class="wp-block-image"><img src="test.jpg" alt="A photo" />'
+			. '<figcaption>A photo</figcaption></figure>'
+			. '<!-- /wp:image -->';
+
+		$parser = new Post_Parser();
+		$result = $parser->replace_in_content(
+			$content,
+			[ 'A photo' => '" onmouseover="alert(1)' ]
+		);
+
+		$this->assertStringNotContainsString( 'onmouseover="alert(1)', $result );
+		$this->assertStringContainsString( 'alt="&quot; onmouseover=&quot;alert(1)"', $result );
+	}
+
+	/**
+	 * Test that translations preserving the original's markup are not over-encoded.
+	 */
+	public function test_replacement_keeps_markup_when_original_has_markup() {
+		$content = '<!-- wp:paragraph --><p>Visit <a href="https://wordpress.org/">our site</a> today.</p><!-- /wp:paragraph -->';
+
+		$parser = new Post_Parser();
+		$result = $parser->replace_in_content(
+			$content,
+			[ 'Visit <a href="https://wordpress.org/">our site</a> today.' => 'Visita <a href="https://es.wordpress.org/">nuestro sitio</a> hoy.' ]
+		);
+
+		$this->assertStringContainsString( '<a href="https://es.wordpress.org/">nuestro sitio</a>', $result );
+	}
+
+	/**
 	 * Test post_to_strings imports every string value of a multi-value meta key.
 	 */
 	public function test_post_to_strings_includes_all_meta_values() {

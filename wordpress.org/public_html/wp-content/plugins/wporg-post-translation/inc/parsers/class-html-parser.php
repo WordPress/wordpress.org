@@ -47,7 +47,9 @@ class HTML_Parser implements Block_Parser {
 		// Extract attribute values from any tag in the block HTML.
 		if ( $this->attributes ) {
 			foreach ( $this->attributes as $attr ) {
-				if ( preg_match_all( '/' . preg_quote( $attr, '/' ) . '=["\']([^"\']+)["\']/i', $html, $attr_matches ) ) {
+				// The lookbehind stops e.g. `alt=` matching inside `data-alt=`;
+				// a \b boundary would not, as `-a` is itself a word boundary.
+				if ( preg_match_all( '/(?<![\w-])' . preg_quote( $attr, '/' ) . '=["\']([^"\']+)["\']/i', $html, $attr_matches ) ) {
 					foreach ( $attr_matches[1] as $value ) {
 						$value = trim( $value );
 						if ( '' !== $value ) {
@@ -80,6 +82,8 @@ class HTML_Parser implements Block_Parser {
 	 * Build a regex pattern to match content within a tag.
 	 */
 	protected function tag_pattern( string $tag ): string {
+		$tag = preg_quote( $tag, '#' );
+
 		return '#<' . $tag . '(?:\s[^>]*)?>(?P<content>.*?)</' . $tag . '>#is';
 	}
 }

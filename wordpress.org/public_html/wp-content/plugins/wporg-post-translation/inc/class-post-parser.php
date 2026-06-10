@@ -35,6 +35,8 @@ class Post_Parser {
 			'core/list'      => new HTML_Parser( 'li' ),
 			'core/list-item' => new HTML_Parser( 'li' ),
 			'core/quote'     => new HTML_Parser( [ 'p', 'cite' ] ),
+			// href is deliberately translatable so locale teams can point links at
+			// localised resources; translations are gated by trusted GlotPress editors.
 			'core/button'    => new HTML_Parser( 'a', [ 'href', 'title' ] ),
 			'core/shortcode' => new Shortcode_Block(),
 			'core/spacer'    => $noop,
@@ -131,6 +133,36 @@ class Post_Parser {
 	}
 
 	/**
+	 * Sanitize a translated string for substitution into block HTML.
+	 *
+	 * Replacements are applied with strtr() and are not context-aware: a string
+	 * extracted from an attribute (alt, title, href) is replaced inside that
+	 * attribute value. wp_kses_post() alone cannot make that safe, as it does
+	 * not parse the surrounding tag - a translation containing a quote could
+	 * close the attribute and inject new ones. So a translation may not
+	 * introduce HTML structure or double quotes that the original string did
+	 * not contain; any it introduces are encoded, which renders identically in
+	 * text context and is inert inside attribute values.
+	 *
+	 * @param string $original   The original string being replaced.
+	 * @param string $translated The translated string.
+	 * @return string The sanitized translation.
+	 */
+	public static function sanitize_translation( string $original, string $translated ): string {
+		$translated = wp_kses_post( $translated );
+
+		if ( false === strpos( $original, '<' ) ) {
+			$translated = str_replace( [ '<', '>' ], [ '&lt;', '&gt;' ], $translated );
+		}
+
+		if ( false === strpos( $original, '"' ) ) {
+			$translated = str_replace( '"', '&quot;', $translated );
+		}
+
+		return $translated;
+	}
+
+	/**
 	 * Replace strings in block content using a replacement map.
 	 *
 	 * @param string $content      Block content.
@@ -141,7 +173,7 @@ class Post_Parser {
 		// Sanitize replacements.
 		$sanitized = [];
 		foreach ( $replacements as $original => $translated ) {
-			$sanitized[ $original ] = wp_kses_post( $translated );
+			$sanitized[ $original ] = self::sanitize_translation( $original, $translated );
 		}
 
 		$blocks = parse_blocks( $content );
@@ -213,7 +245,8 @@ class Post_Parser {
 			'#(\\\\u[a-fA-F0-9]{4})+#',
 			function ( $matches ) use ( $excluded ) {
 				foreach ( $excluded as $char ) {
-					if ( false !== mb_stripos( $matches[0], $char ) ) {
+					// The escape sequences are ASCII; stripos() avoids an mbstring dependency.
+					if ( false !== stripos( $matches[0], $char ) ) {
 						return $matches[0];
 					}
 				}

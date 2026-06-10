@@ -140,7 +140,7 @@ class Frontend {
 		foreach ( $strings as $string ) {
 			$translated = self::translate_string( $string, $project );
 			if ( $translated !== $string ) {
-				$map[ $string ] = wp_kses_post( $translated );
+				$map[ $string ] = Post_Parser::sanitize_translation( $string, $translated );
 			}
 		}
 
