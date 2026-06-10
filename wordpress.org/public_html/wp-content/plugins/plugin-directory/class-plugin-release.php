@@ -23,13 +23,6 @@ class Plugin_Release {
 	const BACKFILLED_META = '_releases_cpt_backfilled';
 
 	/**
-	 * Tracks lazy backfill so add_release() can avoid recursive backfills.
-	 *
-	 * @var bool
-	 */
-	private $backfilling = false;
-
-	/**
 	 * Fetch the instance of the Plugin_Release class.
 	 *
 	 * @return Plugin_Release
@@ -98,10 +91,6 @@ class Plugin_Release {
 		}
 
 		$release_posts = $this->get_release_posts( $plugin );
-		if ( ! $release_posts ) {
-			$this->maybe_backfill_releases( $plugin );
-			$release_posts = $this->get_release_posts( $plugin );
-		}
 
 		$releases = array_map(
 			function ( $release_post ) use ( $plugin ) {
@@ -134,6 +123,9 @@ class Plugin_Release {
 	/**
 	 * Backfill release CPTs from legacy release metadata, tags metadata, or SVN.
 	 *
+	 * This is intended to be driven by the one-off migration script
+	 * (bin/backfill-release-cpts.php) rather than run lazily on reads or writes.
+	 *
 	 * @param string|\WP_Post $plugin Plugin slug or post object.
 	 * @param bool            $force  Whether to run even if CPT releases exist.
 	 * @return array|false|\WP_Error Backfilled release arrays, false when skipped.
@@ -161,13 +153,8 @@ class Plugin_Release {
 			$releases = $this->get_prefill_releases( $plugin );
 		}
 
-		$this->backfilling = true;
-		try {
-			foreach ( $releases as $release ) {
-				$this->add_release( $plugin, $release );
-			}
-		} finally {
-			$this->backfilling = false;
+		foreach ( $releases as $release ) {
+			$this->add_release( $plugin, $release );
 		}
 
 		update_post_meta( $plugin->ID, self::BACKFILLED_META, time() );
@@ -271,10 +258,6 @@ class Plugin_Release {
 			return false;
 		}
 
-		if ( ! $this->backfilling && ! $this->has_releases( $plugin ) && ! get_post_meta( $plugin->ID, self::BACKFILLED_META, true ) ) {
-			$this->maybe_backfill_releases( $plugin );
-		}
-
 		$existing_post = $this->get_release_post_by_tag( $plugin, $data['tag'] );
 		$release       = $existing_post ? $this->post_to_release_data( $existing_post, $plugin ) : $this->get_default_release_data( $plugin );
 
@@ -314,10 +297,6 @@ class Plugin_Release {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin );
 		if ( ! $plugin ) {
 			return false;
-		}
-
-		if ( ! $this->has_releases( $plugin ) && ! get_post_meta( $plugin->ID, self::BACKFILLED_META, true ) ) {
-			$this->maybe_backfill_releases( $plugin );
 		}
 
 		$release_post = $this->get_release_post_by_tag( $plugin, $tag );

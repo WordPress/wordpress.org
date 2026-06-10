@@ -92,10 +92,34 @@ class Plugin_Release_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Legacy release metadata is lazily backfilled to release CPTs.
+	 * Legacy release metadata is not backfilled on read; the migration handles it.
 	 */
-	public function test_legacy_releases_meta_is_lazily_backfilled_to_cpts() {
+	public function test_legacy_releases_meta_is_not_backfilled_on_read() {
 		$plugin = $this->create_plugin( 'legacy-release-cpt-test' );
+		$legacy = array(
+			array(
+				'date'                   => 1700000000,
+				'tag'                    => '1.0.0',
+				'version'                => '1.0.0',
+				'committer'              => array( 'alice' ),
+				'revision'               => array( 100 ),
+				'zips_built'             => true,
+				'confirmations_required' => 0,
+				'release_delay'          => 0,
+			),
+		);
+		update_post_meta( $plugin->ID, 'releases', $legacy );
+
+		// Reads no longer trigger an automatic backfill.
+		$this->assertSame( array(), Plugin_Directory::get_releases( $plugin ) );
+		$this->assertCount( 0, $this->get_release_posts( $plugin ) );
+	}
+
+	/**
+	 * The migration backfills legacy release metadata to release CPTs.
+	 */
+	public function test_migration_backfills_legacy_releases_meta_to_cpts() {
+		$plugin = $this->create_plugin( 'migrate-release-cpt-test' );
 		$legacy = array(
 			array(
 				'date'                   => 1700000000,
@@ -120,6 +144,8 @@ class Plugin_Release_Test extends WP_UnitTestCase {
 		);
 		update_post_meta( $plugin->ID, 'releases', $legacy );
 
+		Plugin_Release::instance()->maybe_backfill_releases( $plugin );
+
 		$releases = Plugin_Directory::get_releases( $plugin );
 
 		$this->assertCount( 2, $releases );
@@ -128,7 +154,8 @@ class Plugin_Release_Test extends WP_UnitTestCase {
 		$this->assertSame( 2 * HOUR_IN_SECONDS, $releases[0]['release_delay'] );
 		$this->assertCount( 2, $this->get_release_posts( $plugin ) );
 
-		Plugin_Directory::get_releases( $plugin );
+		// Re-running the migration is idempotent and does not duplicate CPTs.
+		Plugin_Release::instance()->maybe_backfill_releases( $plugin );
 		$this->assertCount( 2, $this->get_release_posts( $plugin ), 'Backfill should not duplicate release CPTs.' );
 	}
 
