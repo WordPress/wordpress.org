@@ -5,6 +5,7 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Plugin_Release;
 
@@ -13,7 +14,39 @@ use WordPressdotorg\Plugin_Directory\Plugin_Release;
  *
  * @group releases
  */
-class Plugin_Release_Test extends WP_UnitTestCase {
+class Plugin_Release_Test extends TestCase {
+
+	/**
+	 * Plugin posts created by a test.
+	 *
+	 * @var WP_Post[]
+	 */
+	private $plugins = array();
+
+	/**
+	 * Clean up posts created by tests.
+	 */
+	protected function tearDown(): void {
+		foreach ( $this->plugins as $plugin ) {
+			$release_posts = get_posts(
+				array(
+					'post_type'      => Plugin_Release::POST_TYPE,
+					'post_parent'    => $plugin->ID,
+					'post_status'    => 'any',
+					'posts_per_page' => -1,
+				)
+			);
+
+			foreach ( $release_posts as $release_post ) {
+				wp_delete_post( $release_post->ID, true );
+			}
+
+			wp_delete_post( $plugin->ID, true );
+		}
+
+		$this->plugins = array();
+		parent::tearDown();
+	}
 
 	/**
 	 * Create a plugin post for release tests.
@@ -22,18 +55,26 @@ class Plugin_Release_Test extends WP_UnitTestCase {
 	 * @return WP_Post
 	 */
 	private function create_plugin( $slug = 'release-cpt-test' ) {
-		$post_id = self::factory()->post->create(
+		$now     = current_time( 'mysql' );
+		$post_id = wp_insert_post(
 			array(
-				'post_type'   => 'plugin',
-				'post_name'   => $slug,
-				'post_title'  => 'Release CPT Test',
-				'post_status' => 'publish',
+				'post_type'         => 'plugin',
+				'post_name'         => $slug,
+				'post_title'        => 'Release CPT Test',
+				'post_status'       => 'publish',
+				'post_date'         => $now,
+				'post_date_gmt'     => $now,
+				'post_modified'     => $now,
+				'post_modified_gmt' => $now,
 			)
 		);
 
 		update_post_meta( $post_id, 'releases', array() );
 
-		return get_post( $post_id );
+		$plugin          = get_post( $post_id );
+		$this->plugins[] = $plugin;
+
+		return $plugin;
 	}
 
 	/**
