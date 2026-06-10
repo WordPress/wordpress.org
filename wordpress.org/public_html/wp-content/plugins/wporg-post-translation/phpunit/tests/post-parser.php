@@ -236,6 +236,30 @@ class Test_Post_Parser extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test post_to_strings imports every string value of a multi-value meta key.
+	 */
+	public function test_post_to_strings_includes_all_meta_values() {
+		$post_id = self::factory()->post->create();
+		add_post_meta( $post_id, 'subtitle', 'First value' );
+		add_post_meta( $post_id, 'subtitle', 'Second value' );
+		add_post_meta( $post_id, 'settings', [ 'not', 'translatable' ] );
+
+		add_filter(
+			'post_translation_meta_keys',
+			function () {
+				return [ 'subtitle', 'settings' ];
+			}
+		);
+
+		$strings = Post_Parser::post_to_strings( get_post( $post_id ) );
+
+		$this->assertContains( 'First value', $strings );
+		$this->assertContains( 'Second value', $strings );
+		// Array meta values are not translatable strings.
+		$this->assertNotContains( [ 'not', 'translatable' ], $strings );
+	}
+
+	/**
 	 * Test the fallback BasicText parser handles unknown block types.
 	 */
 	public function test_fallback_parser() {

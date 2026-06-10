@@ -74,9 +74,11 @@ class Post_Parser {
 
 		$meta_keys = apply_filters( 'post_translation_meta_keys', [] );
 		foreach ( $meta_keys as $meta_key ) {
-			$value = get_post_meta( $post->ID, $meta_key, true );
-			if ( $value ) {
-				$strings[] = $value;
+			// All rows of the meta key; the frontend translates each string row.
+			foreach ( get_post_meta( $post->ID, $meta_key ) as $value ) {
+				if ( $value && is_string( $value ) ) {
+					$strings[] = $value;
+				}
 			}
 		}
 

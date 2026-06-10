@@ -164,20 +164,29 @@ class Frontend {
 
 		// Temporarily remove our filter to avoid recursion.
 		remove_filter( 'get_post_metadata', [ __CLASS__, 'translate_meta' ], 100 );
-		$value = get_post_meta( $post_id, $meta_key, $single );
+		$raw = get_post_meta( $post_id, $meta_key, $single );
 		add_filter( 'get_post_metadata', [ __CLASS__, 'translate_meta' ], 100, 4 );
 
-		if ( $single && is_string( $value ) ) {
-			$value = self::translate_string( $value, $project );
-		} elseif ( is_array( $value ) ) {
-			foreach ( $value as &$item ) {
+		if ( $single ) {
+			// Only translate string values. Returning an array from this filter
+			// for a $single request would make get_metadata() return its first
+			// element rather than the full array.
+			if ( ! is_string( $raw ) ) {
+				return $value;
+			}
+
+			return self::translate_string( $raw, $project );
+		}
+
+		if ( is_array( $raw ) ) {
+			foreach ( $raw as &$item ) {
 				if ( is_string( $item ) ) {
 					$item = self::translate_string( $item, $project );
 				}
 			}
 		}
 
-		return $value;
+		return $raw;
 	}
 
 	/**

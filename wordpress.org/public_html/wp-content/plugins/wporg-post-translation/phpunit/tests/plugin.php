@@ -109,6 +109,41 @@ class Test_Plugin extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the frontend meta translation filter preserves value shapes.
+	 *
+	 * Returning an array from the get_post_metadata filter for a $single
+	 * request would make get_metadata() return its first element, so
+	 * array-valued meta must pass through untouched.
+	 */
+	public function test_meta_translation_preserves_value_shapes() {
+		$post_id = self::factory()->post->create();
+		update_post_meta( $post_id, '_post_translation_enabled', true );
+		update_post_meta( $post_id, 'array_meta', [ 'one', 'two' ] );
+		update_post_meta( $post_id, 'string_meta', 'Hello' );
+		add_post_meta( $post_id, 'multi_meta', 'First value' );
+		add_post_meta( $post_id, 'multi_meta', 'Second value' );
+
+		add_filter(
+			'post_translation_meta_keys',
+			function () {
+				return [ 'array_meta', 'string_meta', 'multi_meta' ];
+			}
+		);
+
+		// A non-English locale activates the frontend meta translation filter.
+		add_filter(
+			'locale',
+			function () {
+				return 'es_ES';
+			}
+		);
+
+		$this->assertSame( [ 'one', 'two' ], get_post_meta( $post_id, 'array_meta', true ) );
+		$this->assertSame( 'Hello', get_post_meta( $post_id, 'string_meta', true ) );
+		$this->assertSame( [ 'First value', 'Second value' ], get_post_meta( $post_id, 'multi_meta' ) );
+	}
+
+	/**
 	 * Test that the meta key is registered for the REST API.
 	 */
 	public function test_meta_registered() {
