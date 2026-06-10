@@ -236,6 +236,13 @@ abstract class Importer {
 		if ( $doc['slug'] === 'index' ) {
 			$doc['slug'] = $this->get_post_type();
 		}
+
+		// Stop if sanitized slug doesn't match
+		$sanitized = sanitize_title_with_dashes( $doc['slug'] );
+		if ( $sanitized !== $doc['slug'] ) {
+			return false;
+		}
+
 		$post_data = array(
 			'post_type'   => $this->get_post_type(),
 			'post_status' => 'publish',
