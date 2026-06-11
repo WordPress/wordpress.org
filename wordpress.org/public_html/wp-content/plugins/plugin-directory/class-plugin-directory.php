@@ -70,7 +70,7 @@ class Plugin_Directory {
 		Plugin_Search::instance();
 
 		// Releases.
-		Plugin_Release::instance();
+		Release::instance();
 
 		// Add upload size limit to limit plugin ZIP file uploads to 10M
 		add_filter( 'upload_size_limit', function( $size ) {
@@ -1607,7 +1607,7 @@ class Plugin_Directory {
 	 * Get a list of all Plugin Releases.
 	 */
 	public static function get_releases( $plugin ) {
-		return Plugin_Release::instance()->get_releases( $plugin );
+		return Release::instance()->get_all( $plugin );
 	}
 
 	/**
@@ -1617,7 +1617,7 @@ class Plugin_Directory {
 	 * @return array
 	 */
 	public static function prefill_releases_meta( $plugin ) {
-		Plugin_Release::instance()->maybe_backfill_releases( $plugin, true );
+		Release::instance()->maybe_backfill( $plugin, true );
 
 		return self::get_releases( $plugin );
 	}
@@ -1630,7 +1630,7 @@ class Plugin_Directory {
 	 * @return array|bool
 	 */
 	public static function get_release( $plugin, $tag ) {
-		return Plugin_Release::instance()->get_release( $plugin, $tag );
+		return Release::instance()->get( $plugin, $tag );
 	}
 
 	/**
@@ -1641,7 +1641,7 @@ class Plugin_Directory {
 	 * @return bool
 	 */
 	public static function add_release( $plugin, $data ) {
-		return Plugin_Release::instance()->add_release( $plugin, $data );
+		return Release::instance()->add( $plugin, $data );
 	}
 
 	/**
@@ -1652,7 +1652,7 @@ class Plugin_Directory {
 	 * @return bool
 	 */
 	public static function remove_release( $plugin, $tag ) {
-		return Plugin_Release::instance()->remove_release( $plugin, $tag );
+		return Release::instance()->remove( $plugin, $tag );
 	}
 
 	/**

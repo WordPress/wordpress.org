@@ -7,14 +7,14 @@
 
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
-use WordPressdotorg\Plugin_Directory\Plugin_Release;
+use WordPressdotorg\Plugin_Directory\Release;
 
 /**
  * Release CPT storage tests.
  *
  * @group releases
  */
-class Plugin_Release_Test extends TestCase {
+class Release_Test extends TestCase {
 
 	/**
 	 * Plugin posts created by a test.
@@ -30,7 +30,7 @@ class Plugin_Release_Test extends TestCase {
 		foreach ( $this->plugins as $plugin ) {
 			$release_posts = get_posts(
 				array(
-					'post_type'      => Plugin_Release::POST_TYPE,
+					'post_type'      => Release::POST_TYPE,
 					'post_parent'    => $plugin->ID,
 					'post_status'    => 'any',
 					'posts_per_page' => -1,
@@ -86,7 +86,7 @@ class Plugin_Release_Test extends TestCase {
 	private function get_release_posts( $plugin ) {
 		return get_posts(
 			array(
-				'post_type'      => Plugin_Release::POST_TYPE,
+				'post_type'      => Release::POST_TYPE,
 				'post_parent'    => $plugin->ID,
 				'post_status'    => 'any',
 				'posts_per_page' => -1,
@@ -157,6 +157,44 @@ class Plugin_Release_Test extends TestCase {
 	}
 
 	/**
+	 * Writes backfill legacy release metadata to release CPTs first.
+	 */
+	public function test_writes_backfill_legacy_releases_meta_first() {
+		$plugin = $this->create_plugin( 'write-backfill-release-cpt-test' );
+		$legacy = array(
+			array(
+				'date'                   => 1700000000,
+				'tag'                    => '1.0.0',
+				'version'                => '1.0.0',
+				'committer'              => array( 'alice' ),
+				'revision'               => array( 100 ),
+				'zips_built'             => true,
+				'confirmations_required' => 0,
+				'release_delay'          => 0,
+			),
+			array(
+				'date'                   => 1710000000,
+				'tag'                    => '1.1.0',
+				'version'                => '1.1.0',
+				'committer'              => array( 'bob' ),
+				'revision'               => array( 200 ),
+				'zips_built'             => false,
+				'confirmed'              => false,
+				'confirmations_required' => 1,
+				'release_delay'          => 0,
+			),
+		);
+		update_post_meta( $plugin->ID, 'releases', $legacy );
+
+		// Removing the unconfirmed legacy release backfills all releases to CPTs first.
+		$this->assertTrue( Plugin_Directory::remove_release( $plugin, '1.1.0' ) );
+
+		$releases = Plugin_Directory::get_releases( $plugin );
+		$this->assertCount( 1, $releases );
+		$this->assertSame( '1.0.0', $releases[0]['tag'] );
+	}
+
+	/**
 	 * The migration backfills legacy release metadata to release CPTs.
 	 */
 	public function test_migration_backfills_legacy_releases_meta_to_cpts() {
@@ -185,7 +223,7 @@ class Plugin_Release_Test extends TestCase {
 		);
 		update_post_meta( $plugin->ID, 'releases', $legacy );
 
-		Plugin_Release::instance()->maybe_backfill_releases( $plugin );
+		Release::instance()->maybe_backfill( $plugin );
 
 		$releases = Plugin_Directory::get_releases( $plugin );
 
@@ -196,7 +234,7 @@ class Plugin_Release_Test extends TestCase {
 		$this->assertCount( 2, $this->get_release_posts( $plugin ) );
 
 		// Re-running the migration is idempotent and does not duplicate CPTs.
-		Plugin_Release::instance()->maybe_backfill_releases( $plugin );
+		Release::instance()->maybe_backfill( $plugin );
 		$this->assertCount( 2, $this->get_release_posts( $plugin ), 'Backfill should not duplicate release CPTs.' );
 	}
 

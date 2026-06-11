@@ -16,25 +16,25 @@ namespace WordPressdotorg\Plugin_Directory;
  *
  * @package WordPressdotorg\Plugin_Directory
  */
-class Plugin_Release {
+class Release {
 
 	const POST_TYPE       = 'plugin_release';
 	const DATA_META_KEY   = 'release_data';
 	const BACKFILLED_META = '_releases_cpt_backfilled';
 
 	/**
-	 * Fetch the instance of the Plugin_Release class.
+	 * Fetch the instance of the Release class.
 	 *
-	 * @return Plugin_Release
+	 * @return Release
 	 */
 	public static function instance() {
 		static $instance = null;
 
-		return ! is_null( $instance ) ? $instance : $instance = new Plugin_Release();
+		return ! is_null( $instance ) ? $instance : $instance = new Release();
 	}
 
 	/**
-	 * Plugin_Release constructor.
+	 * Release constructor.
 	 */
 	private function __construct() {
 		add_action( 'init', array( $this, 'register_post_type' ) );
@@ -84,17 +84,17 @@ class Plugin_Release {
 	 * @param string|\WP_Post $plugin Plugin slug or post object.
 	 * @return array
 	 */
-	public function get_releases( $plugin ) {
+	public function get_all( $plugin ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin );
 		if ( ! $plugin ) {
 			return array();
 		}
 
-		$release_posts = $this->get_release_posts( $plugin );
+		$release_posts = $this->get_posts( $plugin );
 
 		$releases = array_map(
 			function ( $release_post ) use ( $plugin ) {
-				return $this->post_to_release_data( $release_post, $plugin );
+				return $this->post_to_data( $release_post, $plugin );
 			},
 			$release_posts
 		);
@@ -115,29 +115,29 @@ class Plugin_Release {
 	 * @param string|\WP_Post $plugin Plugin slug or post object.
 	 * @return bool
 	 */
-	public function has_releases( $plugin ) {
+	public function has( $plugin ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin );
-		return $plugin && (bool) $this->get_release_posts( $plugin, 1 );
+		return $plugin && (bool) $this->get_posts( $plugin, 1 );
 	}
 
 	/**
 	 * Backfill release CPTs from legacy release metadata, tags metadata, or SVN.
 	 *
-	 * This is intended to be driven by the one-off migration script
-	 * (bin/backfill-release-cpts.php) rather than run lazily on reads or writes.
+	 * This is driven by the one-off migration script (bin/backfill-release-cpts.php)
+	 * and runs lazily before writes (add() / remove()), but not on reads.
 	 *
 	 * @param string|\WP_Post $plugin Plugin slug or post object.
 	 * @param bool            $force  Whether to run even if CPT releases exist.
 	 * @return array|false|\WP_Error Backfilled release arrays, false when skipped.
 	 */
-	public function maybe_backfill_releases( $plugin, $force = false ) {
+	public function maybe_backfill( $plugin, $force = false ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin );
 		if ( ! $plugin ) {
 			return new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
 		}
 
 		if ( ! $force ) {
-			if ( $this->has_releases( $plugin ) ) {
+			if ( $this->has( $plugin ) ) {
 				return false;
 			}
 
@@ -150,14 +150,15 @@ class Plugin_Release {
 		if ( is_array( $legacy_releases ) ) {
 			$releases = $legacy_releases;
 		} else {
-			$releases = $this->get_prefill_releases( $plugin );
+			$releases = $this->get_prefill_data( $plugin );
 		}
+
+		// Mark as migrated up-front, so a concurrent (or recursive, via add()) backfill bails early.
+		update_post_meta( $plugin->ID, self::BACKFILLED_META, time() );
 
 		foreach ( $releases as $release ) {
-			$this->add_release( $plugin, $release );
+			$this->add( $plugin, $release );
 		}
-
-		update_post_meta( $plugin->ID, self::BACKFILLED_META, time() );
 
 		return $releases;
 	}
@@ -168,7 +169,7 @@ class Plugin_Release {
 	 * @param \WP_Post $plugin Plugin post object.
 	 * @return array
 	 */
-	private function get_prefill_releases( $plugin ) {
+	private function get_prefill_data( $plugin ) {
 		$releases = array();
 		$tags     = get_post_meta( $plugin->ID, 'tags', true );
 
@@ -219,8 +220,8 @@ class Plugin_Release {
 	 * @param string          $tag    Plugin version / release tag.
 	 * @return array|bool
 	 */
-	public function get_release( $plugin, $tag ) {
-		$releases = $this->get_releases( $plugin );
+	public function get( $plugin, $tag ) {
+		$releases = $this->get_all( $plugin );
 
 		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
 		if ( $filtered ) {
@@ -248,7 +249,7 @@ class Plugin_Release {
 	 * @param array           $data   Release data.
 	 * @return bool
 	 */
-	public function add_release( $plugin, $data ) {
+	public function add( $plugin, $data ) {
 		if ( ! isset( $data['tag'] ) ) {
 			return false;
 		}
@@ -258,8 +259,10 @@ class Plugin_Release {
 			return false;
 		}
 
-		$existing_post = $this->get_release_post_by_tag( $plugin, $data['tag'] );
-		$release       = $existing_post ? $this->post_to_release_data( $existing_post, $plugin ) : $this->get_default_release_data( $plugin );
+		$this->maybe_backfill( $plugin );
+
+		$existing_post = $this->get_post_by_tag( $plugin, $data['tag'] );
+		$release       = $existing_post ? $this->post_to_data( $existing_post, $plugin ) : $this->get_default_data( $plugin );
 
 		foreach ( $data as $key => $value ) {
 			if ( isset( $release[ $key ] ) && is_array( $release[ $key ] ) ) {
@@ -274,14 +277,14 @@ class Plugin_Release {
 		}
 		unset( $release['undo-discard'] );
 
-		$release = $this->normalize_release_data( $release, $plugin );
+		$release = $this->normalize_data( $release, $plugin );
 
-		$release_id = $this->save_release_post( $plugin, $release, $existing_post );
+		$release_id = $this->save_post( $plugin, $release, $existing_post );
 		if ( ! $release_id || is_wp_error( $release_id ) ) {
 			return false;
 		}
 
-		$this->delete_duplicate_release_posts( $plugin, $release['tag'], $release_id );
+		$this->delete_duplicate_posts( $plugin, $release['tag'], $release_id );
 
 		return true;
 	}
@@ -293,18 +296,20 @@ class Plugin_Release {
 	 * @param string          $tag    Release tag.
 	 * @return bool
 	 */
-	public function remove_release( $plugin, $tag ) {
+	public function remove( $plugin, $tag ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin );
 		if ( ! $plugin ) {
 			return false;
 		}
 
-		$release_post = $this->get_release_post_by_tag( $plugin, $tag );
+		$this->maybe_backfill( $plugin );
+
+		$release_post = $this->get_post_by_tag( $plugin, $tag );
 		if ( ! $release_post ) {
 			return false;
 		}
 
-		$release = $this->post_to_release_data( $release_post, $plugin );
+		$release = $this->post_to_data( $release_post, $plugin );
 		if ( ! empty( $release['confirmed'] ) ) {
 			return false;
 		}
@@ -319,7 +324,7 @@ class Plugin_Release {
 	 * @param int      $limit  Maximum number of posts.
 	 * @return \WP_Post[]
 	 */
-	private function get_release_posts( $plugin, $limit = -1 ) {
+	private function get_posts( $plugin, $limit = -1 ) {
 		$this->ensure_post_type();
 
 		return get_posts(
@@ -342,7 +347,7 @@ class Plugin_Release {
 	 * @param string   $tag    Release tag.
 	 * @return \WP_Post|null
 	 */
-	private function get_release_post_by_tag( $plugin, $tag ) {
+	private function get_post_by_tag( $plugin, $tag ) {
 		$this->ensure_post_type();
 
 		$posts = get_posts(
@@ -370,7 +375,7 @@ class Plugin_Release {
 	 * @param \WP_Post|null $existing_post Existing release post, if any.
 	 * @return int|\WP_Error
 	 */
-	private function save_release_post( $plugin, $release, $existing_post = null ) {
+	private function save_post( $plugin, $release, $existing_post = null ) {
 		$this->ensure_post_type();
 
 		$title = $release['version'] ? $release['version'] : $release['tag'];
@@ -404,7 +409,7 @@ class Plugin_Release {
 			return $release_id;
 		}
 
-		$this->update_release_meta( $release_id, $release );
+		$this->update_meta( $release_id, $release );
 
 		return $release_id;
 	}
@@ -415,7 +420,7 @@ class Plugin_Release {
 	 * @param int   $release_id Release post ID.
 	 * @param array $release    Release data.
 	 */
-	private function update_release_meta( $release_id, $release ) {
+	private function update_meta( $release_id, $release ) {
 		update_post_meta( $release_id, self::DATA_META_KEY, $release );
 
 		$mirrored_fields = array(
@@ -457,7 +462,7 @@ class Plugin_Release {
 	 * @param string   $tag         Release tag.
 	 * @param int      $release_id  Release post that should remain.
 	 */
-	private function delete_duplicate_release_posts( $plugin, $tag, $release_id ) {
+	private function delete_duplicate_posts( $plugin, $tag, $release_id ) {
 		$posts = get_posts(
 			array(
 				'post_type'        => self::POST_TYPE,
@@ -485,7 +490,7 @@ class Plugin_Release {
 	 * @param \WP_Post $plugin       Plugin post object.
 	 * @return array
 	 */
-	private function post_to_release_data( $release_post, $plugin ) {
+	private function post_to_data( $release_post, $plugin ) {
 		$data = get_post_meta( $release_post->ID, self::DATA_META_KEY, true );
 		$data = is_array( $data ) ? $data : array();
 
@@ -534,7 +539,7 @@ class Plugin_Release {
 			$data['version'] = $version ? $version : $release_post->post_title;
 		}
 
-		return $this->normalize_release_data( $data, $plugin );
+		return $this->normalize_data( $data, $plugin );
 	}
 
 	/**
@@ -543,7 +548,7 @@ class Plugin_Release {
 	 * @param \WP_Post $plugin Plugin post object.
 	 * @return array
 	 */
-	private function get_default_release_data( $plugin ) {
+	private function get_default_data( $plugin ) {
 		return array(
 			'date'                     => time(),
 			'tag'                      => '',
@@ -566,8 +571,8 @@ class Plugin_Release {
 	 * @param \WP_Post $plugin  Plugin post object.
 	 * @return array
 	 */
-	private function normalize_release_data( $release, $plugin ) {
-		$release = wp_parse_args( $release, $this->get_default_release_data( $plugin ) );
+	private function normalize_data( $release, $plugin ) {
+		$release = wp_parse_args( $release, $this->get_default_data( $plugin ) );
 
 		$release['date']                     = (int) $release['date'];
 		$release['tag']                      = (string) $release['tag'];
