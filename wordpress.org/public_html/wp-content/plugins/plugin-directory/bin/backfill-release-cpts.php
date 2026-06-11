@@ -78,25 +78,6 @@ foreach ( $slugs as $i => $slug ) {
 
 	fwrite( STDOUT, sprintf( "%d/%d\t%s\t%s\n", $i + 1, $total, $slug, $message ) );
 
-	clear_memory_caches();
-}
-
-/**
- * Reset in-memory caches between plugins to keep memory usage flat.
- */
-function clear_memory_caches() {
-	global $wpdb, $wp_object_cache;
-
-	$wpdb->queries = [];
-
-	if ( is_object( $wp_object_cache ) ) {
-		$wp_object_cache->cache          = [];
-		$wp_object_cache->group_ops      = [];
-		$wp_object_cache->memcache_debug = [];
-		$wp_object_cache->stats          = [
-			'get'    => 0,
-			'delete' => 0,
-			'add'    => 0,
-		];
-	}
+	// Reset in-memory caches between plugins to keep memory usage flat.
+	wp_cache_flush_runtime();
 }
