@@ -257,7 +257,7 @@ class Release {
 		// Fall back to a trunk release of that version, recorded as trunk@{version}.
 		if ( ! $release_post ) {
 			$release_post = $this->get_post_by_tag( $plugin, "trunk@{$tag}" );
-			if ( $release_post && get_post_meta( $release_post->ID, 'version', true ) !== $tag ) {
+			if ( $release_post && $release_post->version !== $tag ) {
 				$release_post = null;
 			}
 		}
@@ -382,7 +382,7 @@ class Release {
 				$post &&
 				self::POST_TYPE === $post->post_type &&
 				$plugin->ID === $post->post_parent &&
-				get_post_meta( $post->ID, 'tag', true ) === $tag
+				$post->tag === $tag
 			) {
 				return $post;
 			}
