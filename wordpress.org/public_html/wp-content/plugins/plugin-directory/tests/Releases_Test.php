@@ -7,14 +7,14 @@
 
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
-use WordPressdotorg\Plugin_Directory\Release;
+use WordPressdotorg\Plugin_Directory\Releases;
 
 /**
  * Release CPT storage tests.
  *
  * @group releases
  */
-class Release_Test extends TestCase {
+class Releases_Test extends TestCase {
 
 	/**
 	 * Plugin posts created by a test.
@@ -30,7 +30,7 @@ class Release_Test extends TestCase {
 		foreach ( $this->plugins as $plugin ) {
 			$release_posts = get_posts(
 				array(
-					'post_type'      => Release::POST_TYPE,
+					'post_type'      => Releases::POST_TYPE,
 					'post_parent'    => $plugin->ID,
 					'post_status'    => 'any',
 					'posts_per_page' => -1,
@@ -86,7 +86,7 @@ class Release_Test extends TestCase {
 	private function get_release_posts( $plugin ) {
 		return get_posts(
 			array(
-				'post_type'      => Release::POST_TYPE,
+				'post_type'      => Releases::POST_TYPE,
 				'post_parent'    => $plugin->ID,
 				'post_status'    => 'any',
 				'posts_per_page' => -1,
@@ -223,7 +223,7 @@ class Release_Test extends TestCase {
 		);
 		update_post_meta( $plugin->ID, 'releases', $legacy );
 
-		Release::instance()->maybe_backfill( $plugin );
+		Releases::for_plugin( $plugin )->maybe_backfill();
 
 		$releases = Plugin_Directory::get_releases( $plugin );
 
@@ -234,7 +234,7 @@ class Release_Test extends TestCase {
 		$this->assertCount( 2, $this->get_release_posts( $plugin ) );
 
 		// Re-running the migration is idempotent and does not duplicate CPTs.
-		Release::instance()->maybe_backfill( $plugin );
+		Releases::for_plugin( $plugin )->maybe_backfill();
 		$this->assertCount( 2, $this->get_release_posts( $plugin ), 'Backfill should not duplicate release CPTs.' );
 	}
 

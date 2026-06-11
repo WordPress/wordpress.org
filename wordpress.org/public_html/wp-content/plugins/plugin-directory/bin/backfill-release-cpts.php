@@ -12,7 +12,7 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
-use WordPressdotorg\Plugin_Directory\Release;
+use WordPressdotorg\Plugin_Directory\Releases;
 
 // This script should only be called in a CLI environment.
 if ( 'cli' != php_sapi_name() ) {
@@ -62,11 +62,11 @@ if ( ! $slugs ) {
 	die();
 }
 
-$releases = Release::instance();
-$total    = count( $slugs );
+$total = count( $slugs );
 
 foreach ( $slugs as $i => $slug ) {
-	$result = $releases->maybe_backfill( $slug, $force );
+	$releases = Releases::for_plugin( $slug );
+	$result   = $releases ? $releases->maybe_backfill( $force ) : new \WP_Error( 'invalid_plugin', 'Invalid plugin' );
 
 	if ( is_wp_error( $result ) ) {
 		$message = 'error: ' . $result->get_error_message();
