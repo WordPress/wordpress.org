@@ -20,6 +20,7 @@ class Release {
 
 	const POST_TYPE       = 'plugin_release';
 	const BACKFILLED_META = '_releases_cpt_backfilled';
+	const CACHE_GROUP     = 'plugin_release';
 
 	/**
 	 * Release array fields stored as postmeta on the release post.
@@ -246,25 +247,22 @@ class Release {
 	 * @return array|bool
 	 */
 	public function get( $plugin, $tag ) {
-		$releases = $this->get_all( $plugin );
-
-		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
-		if ( $filtered ) {
-			return array_shift( $filtered );
+		$plugin = Plugin_Directory::get_plugin_post( $plugin );
+		if ( ! $plugin ) {
+			return false;
 		}
 
-		$filtered = wp_list_filter(
-			$releases,
-			array(
-				'tag'     => "trunk@{$tag}",
-				'version' => $tag,
-			)
-		);
-		if ( $filtered ) {
-			return array_shift( $filtered );
+		$release_post = $this->get_post_by_tag( $plugin, $tag );
+
+		// Fall back to a trunk release of that version, recorded as trunk@{version}.
+		if ( ! $release_post ) {
+			$release_post = $this->get_post_by_tag( $plugin, "trunk@{$tag}" );
+			if ( $release_post && get_post_meta( $release_post->ID, 'version', true ) !== $tag ) {
+				$release_post = null;
+			}
 		}
 
-		return false;
+		return $release_post ? $this->post_to_data( $release_post, $plugin ) : false;
 	}
 
 	/**
@@ -375,6 +373,23 @@ class Release {
 	private function get_post_by_tag( $plugin, $tag ) {
 		$this->ensure_post_type();
 
+		// The cached ID is validated below, so deletions and re-tags self-correct.
+		$cache_key = $plugin->post_name . ':' . $tag;
+		$post_id   = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		if ( $post_id ) {
+			$post = get_post( $post_id );
+			if (
+				$post &&
+				self::POST_TYPE === $post->post_type &&
+				$plugin->ID === $post->post_parent &&
+				get_post_meta( $post->ID, 'tag', true ) === $tag
+			) {
+				return $post;
+			}
+
+			wp_cache_delete( $cache_key, self::CACHE_GROUP );
+		}
+
 		$posts = get_posts(
 			array(
 				'post_type'        => self::POST_TYPE,
@@ -389,7 +404,13 @@ class Release {
 			)
 		);
 
-		return $posts ? $posts[0] : null;
+		if ( ! $posts ) {
+			return null;
+		}
+
+		wp_cache_set( $cache_key, $posts[0]->ID, self::CACHE_GROUP );
+
+		return $posts[0];
 	}
 
 	/**
