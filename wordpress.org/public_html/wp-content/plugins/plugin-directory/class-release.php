@@ -19,8 +19,33 @@ namespace WordPressdotorg\Plugin_Directory;
 class Release {
 
 	const POST_TYPE       = 'plugin_release';
-	const DATA_META_KEY   = 'release_data';
 	const BACKFILLED_META = '_releases_cpt_backfilled';
+
+	/**
+	 * Release array fields stored as postmeta on the release post.
+	 */
+	const META_FIELDS = array(
+		'date',
+		'tag',
+		'version',
+		'committer',
+		'zips_built',
+		'zips_built_from_revision',
+		'confirmations',
+		'confirmed',
+		'confirmations_required',
+		'revision',
+		'revision_final',
+		'revision_prior',
+		'commit_log',
+		'tested',
+		'requires_php',
+		'requires_wp',
+		'requires_plugins',
+		'discarded',
+		'rollout_strategy',
+		'release_delay',
+	);
 
 	/**
 	 * Fetch the instance of the Release class.
@@ -356,7 +381,7 @@ class Release {
 				'posts_per_page'   => 1,
 				'post_parent'      => $plugin->ID,
 				'post_status'      => 'any',
-				'meta_key'         => 'release_tag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'         => 'tag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'meta_value'   => $tag, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 				'orderby'          => 'date',
 				'order'            => 'DESC',
@@ -415,42 +440,17 @@ class Release {
 	}
 
 	/**
-	 * Update full and mirrored release postmeta.
+	 * Update the release postmeta fields.
 	 *
 	 * @param int   $release_id Release post ID.
 	 * @param array $release    Release data.
 	 */
 	private function update_meta( $release_id, $release ) {
-		update_post_meta( $release_id, self::DATA_META_KEY, $release );
-
-		$mirrored_fields = array(
-			'date'                     => 'release_date',
-			'tag'                      => 'release_tag',
-			'version'                  => 'release_version',
-			'committer'                => 'release_committer',
-			'zips_built'               => 'release_zips_built',
-			'zips_built_from_revision' => 'release_zips_built_from_revision',
-			'confirmations'            => 'release_confirmations',
-			'confirmed'                => 'release_confirmed',
-			'confirmations_required'   => 'release_confirmations_required',
-			'revision'                 => 'release_revision',
-			'revision_final'           => 'release_revision_final',
-			'revision_prior'           => 'release_revision_prior',
-			'commit_log'               => 'release_commit_log',
-			'tested'                   => 'release_tested',
-			'requires_php'             => 'release_requires_php',
-			'requires_wp'              => 'release_requires_wp',
-			'requires_plugins'         => 'release_requires_plugins',
-			'discarded'                => 'release_discarded',
-			'rollout_strategy'         => 'release_rollout_strategy',
-			'release_delay'            => 'release_delay',
-		);
-
-		foreach ( $mirrored_fields as $field => $meta_key ) {
+		foreach ( self::META_FIELDS as $field ) {
 			if ( array_key_exists( $field, $release ) ) {
-				update_post_meta( $release_id, $meta_key, $release[ $field ] );
+				update_post_meta( $release_id, $field, $release[ $field ] );
 			} else {
-				delete_post_meta( $release_id, $meta_key );
+				delete_post_meta( $release_id, $field );
 			}
 		}
 	}
@@ -469,7 +469,7 @@ class Release {
 				'posts_per_page'   => -1,
 				'post_parent'      => $plugin->ID,
 				'post_status'      => 'any',
-				'meta_key'         => 'release_tag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'         => 'tag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'meta_value'   => $tag, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 				'fields'           => 'ids',
 				'suppress_filters' => true,
@@ -491,39 +491,11 @@ class Release {
 	 * @return array
 	 */
 	private function post_to_data( $release_post, $plugin ) {
-		$data = get_post_meta( $release_post->ID, self::DATA_META_KEY, true );
-		$data = is_array( $data ) ? $data : array();
+		$data = array();
 
-		$legacy_meta_fields = array(
-			'date'                     => 'release_date',
-			'tag'                      => 'release_tag',
-			'version'                  => 'release_version',
-			'committer'                => 'release_committer',
-			'zips_built'               => 'release_zips_built',
-			'zips_built_from_revision' => 'release_zips_built_from_revision',
-			'confirmations'            => 'release_confirmations',
-			'confirmed'                => 'release_confirmed',
-			'confirmations_required'   => 'release_confirmations_required',
-			'revision'                 => 'release_revision',
-			'revision_final'           => 'release_revision_final',
-			'revision_prior'           => 'release_revision_prior',
-			'commit_log'               => 'release_commit_log',
-			'tested'                   => 'release_tested',
-			'requires_php'             => 'release_requires_php',
-			'requires_wp'              => 'release_requires_wp',
-			'requires_plugins'         => 'release_requires_plugins',
-			'discarded'                => 'release_discarded',
-			'rollout_strategy'         => 'release_rollout_strategy',
-			'release_delay'            => 'release_delay',
-		);
-
-		foreach ( $legacy_meta_fields as $field => $meta_key ) {
-			if ( array_key_exists( $field, $data ) ) {
-				continue;
-			}
-
-			if ( metadata_exists( 'post', $release_post->ID, $meta_key ) ) {
-				$data[ $field ] = get_post_meta( $release_post->ID, $meta_key, true );
+		foreach ( self::META_FIELDS as $field ) {
+			if ( metadata_exists( 'post', $release_post->ID, $field ) ) {
+				$data[ $field ] = get_post_meta( $release_post->ID, $field, true );
 			}
 		}
 
@@ -531,12 +503,10 @@ class Release {
 			$data['date'] = strtotime( $release_post->post_date_gmt ? $release_post->post_date_gmt : $release_post->post_date );
 		}
 		if ( empty( $data['tag'] ) ) {
-			$tag         = get_post_meta( $release_post->ID, 'release_tag', true );
-			$data['tag'] = $tag ? $tag : $release_post->post_title;
+			$data['tag'] = $release_post->post_title;
 		}
 		if ( empty( $data['version'] ) ) {
-			$version         = get_post_meta( $release_post->ID, 'release_version', true );
-			$data['version'] = $version ? $version : $release_post->post_title;
+			$data['version'] = $release_post->post_title;
 		}
 
 		return $this->normalize_data( $data, $plugin );

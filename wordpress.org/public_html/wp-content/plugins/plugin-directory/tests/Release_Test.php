@@ -121,7 +121,7 @@ class Release_Test extends TestCase {
 		$release_posts = $this->get_release_posts( $plugin );
 		$this->assertCount( 1, $release_posts );
 		$this->assertSame( 'plugin_release', $release_posts[0]->post_type );
-		$this->assertSame( '1.0.0', get_post_meta( $release_posts[0]->ID, 'release_tag', true ) );
+		$this->assertSame( '1.0.0', get_post_meta( $release_posts[0]->ID, 'tag', true ) );
 
 		$release = Plugin_Directory::get_release( $plugin, '1.0.0' );
 		$this->assertSame( '1.0.0', $release['tag'] );
