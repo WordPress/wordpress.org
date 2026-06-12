@@ -133,9 +133,9 @@ class Releases_Test extends TestCase {
 	}
 
 	/**
-	 * Legacy release metadata is not backfilled on read; the migration handles it.
+	 * Reads fall back to legacy release metadata prior to migration, without migrating.
 	 */
-	public function test_legacy_releases_meta_is_not_backfilled_on_read() {
+	public function test_reads_fall_back_to_legacy_releases_meta_before_migration() {
 		$plugin = $this->create_plugin( 'legacy-release-cpt-test' );
 		$legacy = array(
 			array(
@@ -151,9 +151,42 @@ class Releases_Test extends TestCase {
 		);
 		update_post_meta( $plugin->ID, 'releases', $legacy );
 
-		// Reads no longer trigger an automatic backfill.
-		$this->assertSame( array(), Plugin_Directory::get_releases( $plugin ) );
+		$releases = Plugin_Directory::get_releases( $plugin );
+		$this->assertCount( 1, $releases );
+		$this->assertSame( '1.0.0', $releases[0]['tag'] );
+		$this->assertSame( array( 'alice' ), $releases[0]['committer'] );
+
+		$release = Plugin_Directory::get_release( $plugin, '1.0.0' );
+		$this->assertSame( '1.0.0', $release['version'] );
+
+		// The metadata fallback is read-only; the migration creates the CPTs.
 		$this->assertCount( 0, $this->get_release_posts( $plugin ) );
+	}
+
+	/**
+	 * Reads migrate from tags metadata when neither CPTs nor legacy release metadata exist.
+	 */
+	public function test_reads_migrate_when_no_legacy_releases_meta() {
+		$plugin = $this->create_plugin( 'prefill-release-cpt-test' );
+		delete_post_meta( $plugin->ID, 'releases' );
+		update_post_meta(
+			$plugin->ID,
+			'tags',
+			array(
+				'1.0.0' => array(
+					'tag'    => '1.0.0',
+					'date'   => '2023-11-14 22:13:20',
+					'author' => 'alice',
+				),
+			)
+		);
+
+		$releases = Plugin_Directory::get_releases( $plugin );
+
+		$this->assertCount( 1, $releases );
+		$this->assertSame( '1.0.0', $releases[0]['tag'] );
+		$this->assertSame( array( 'alice' ), $releases[0]['committer'] );
+		$this->assertCount( 1, $this->get_release_posts( $plugin ) );
 	}
 
 	/**

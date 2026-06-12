@@ -130,6 +130,10 @@ class Releases {
 			$this->get_posts()
 		);
 
+		if ( ! $releases ) {
+			$releases = $this->get_unmigrated();
+		}
+
 		uasort(
 			$releases,
 			function ( $a, $b ) {
@@ -153,7 +157,9 @@ class Releases {
 	 * Backfill release CPTs from legacy release metadata, tags metadata, or SVN.
 	 *
 	 * This is driven by the one-off migration script (bin/backfill-release-cpts.php)
-	 * and runs lazily before writes (add() / remove()), but not on reads.
+	 * and runs lazily before writes (add() / remove()). Reads fall back to the
+	 * legacy metadata without migrating, only triggering this when neither
+	 * CPTs nor legacy metadata exist.
 	 *
 	 * @param bool $force Whether to run even if CPT releases exist.
 	 * @return array|false Backfilled release arrays, false when skipped.
@@ -184,6 +190,27 @@ class Releases {
 		}
 
 		return $releases;
+	}
+
+	/**
+	 * Get release data for a plugin that hasn't been migrated to CPTs yet.
+	 *
+	 * Reads the legacy `releases` postmeta directly; when that doesn't exist
+	 * either, migrates from tags metadata / SVN via maybe_backfill().
+	 *
+	 * @return array
+	 */
+	private function get_unmigrated() {
+		if ( get_post_meta( $this->plugin->ID, self::BACKFILLED_META, true ) ) {
+			return array();
+		}
+
+		$releases = get_post_meta( $this->plugin->ID, 'releases', true );
+		if ( ! is_array( $releases ) ) {
+			$releases = $this->maybe_backfill();
+		}
+
+		return array_map( array( $this, 'normalize_data' ), $releases ? $releases : array() );
 	}
 
 	/**
@@ -252,7 +279,21 @@ class Releases {
 			}
 		}
 
-		return $release_post ? $this->post_to_data( $release_post ) : false;
+		if ( $release_post ) {
+			return $this->post_to_data( $release_post );
+		}
+
+		// Prior to migration, search the legacy metadata.
+		foreach ( $this->get_unmigrated() as $release ) {
+			if (
+				$tag === $release['tag'] ||
+				( "trunk@{$tag}" === $release['tag'] && $tag === $release['version'] )
+			) {
+				return $release;
+			}
+		}
+
+		return false;
 	}
 
 	/**
