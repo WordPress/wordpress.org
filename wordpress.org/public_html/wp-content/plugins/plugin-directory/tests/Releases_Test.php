@@ -45,7 +45,22 @@ class Releases_Test extends TestCase {
 		}
 
 		$this->plugins = array();
+		remove_all_filters( 'wporg_plugins_release_cooldown_delay' );
 		parent::tearDown();
+	}
+
+	/**
+	 * Force a non-zero release cooldown delay for the duration of a test.
+	 *
+	 * @param int $delay Cooldown delay in seconds.
+	 */
+	private function set_release_cooldown( $delay ) {
+		add_filter(
+			'wporg_plugins_release_cooldown_delay',
+			function () use ( $delay ) {
+				return $delay;
+			}
+		);
 	}
 
 	/**
@@ -136,6 +151,8 @@ class Releases_Test extends TestCase {
 	 * Reads fall back to legacy release metadata prior to migration, without migrating.
 	 */
 	public function test_reads_fall_back_to_legacy_releases_meta_before_migration() {
+		$this->set_release_cooldown( HOUR_IN_SECONDS );
+
 		$plugin = $this->create_plugin( 'legacy-release-cpt-test' );
 		$legacy = array(
 			array(
@@ -146,7 +163,6 @@ class Releases_Test extends TestCase {
 				'revision'               => array( 100 ),
 				'zips_built'             => true,
 				'confirmations_required' => 0,
-				'release_delay'          => 0,
 			),
 		);
 		update_post_meta( $plugin->ID, 'releases', $legacy );
@@ -155,6 +171,7 @@ class Releases_Test extends TestCase {
 		$this->assertCount( 1, $releases );
 		$this->assertSame( '1.0.0', $releases[0]['tag'] );
 		$this->assertSame( array( 'alice' ), $releases[0]['committer'] );
+		$this->assertSame( 0, $releases[0]['release_delay'], 'Pre-existing releases should not gain a cooldown delay.' );
 
 		$release = Plugin_Directory::get_release( $plugin, '1.0.0' );
 		$this->assertSame( '1.0.0', $release['version'] );
@@ -167,6 +184,8 @@ class Releases_Test extends TestCase {
 	 * Reads migrate from tags metadata when neither CPTs nor legacy release metadata exist.
 	 */
 	public function test_reads_migrate_when_no_legacy_releases_meta() {
+		$this->set_release_cooldown( HOUR_IN_SECONDS );
+
 		$plugin = $this->create_plugin( 'prefill-release-cpt-test' );
 		delete_post_meta( $plugin->ID, 'releases' );
 		update_post_meta(
@@ -186,6 +205,7 @@ class Releases_Test extends TestCase {
 		$this->assertCount( 1, $releases );
 		$this->assertSame( '1.0.0', $releases[0]['tag'] );
 		$this->assertSame( array( 'alice' ), $releases[0]['committer'] );
+		$this->assertSame( 0, $releases[0]['release_delay'], 'Pre-existing releases should not gain a cooldown delay.' );
 		$this->assertCount( 1, $this->get_release_posts( $plugin ) );
 	}
 
@@ -275,6 +295,8 @@ class Releases_Test extends TestCase {
 	 * Existing release tags are updated instead of duplicated.
 	 */
 	public function test_add_release_updates_existing_tag_and_merges_array_fields() {
+		$this->set_release_cooldown( HOUR_IN_SECONDS );
+
 		$plugin = $this->create_plugin( 'merge-release-cpt-test' );
 
 		Plugin_Directory::add_release(
@@ -301,6 +323,7 @@ class Releases_Test extends TestCase {
 		$this->assertSame( array( 'alice', 'bob' ), $release['committer'] );
 		$this->assertSame( array( 100, 101 ), $release['revision'] );
 		$this->assertTrue( $release['confirmed'] );
+		$this->assertSame( HOUR_IN_SECONDS, $release['release_delay'], 'New releases capture the cooldown delay at creation.' );
 		$this->assertCount( 1, $this->get_release_posts( $plugin ) );
 	}
 

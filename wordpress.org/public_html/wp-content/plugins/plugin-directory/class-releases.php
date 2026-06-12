@@ -186,6 +186,9 @@ class Releases {
 		update_post_meta( $this->plugin->ID, self::BACKFILLED_META, time() );
 
 		foreach ( $releases as $release ) {
+			// Don't capture the new-release cooldown onto pre-existing releases.
+			$release += array( 'release_delay' => 0 );
+
 			$this->add( $release );
 		}
 
@@ -575,7 +578,13 @@ class Releases {
 	 * @return array
 	 */
 	private function normalize_data( $release ) {
-		$release = wp_parse_args( $release, $this->get_default_data() );
+		$defaults = $this->get_default_data();
+
+		// The cooldown delay is captured at release creation time (see add());
+		// existing releases without one recorded never had one.
+		$defaults['release_delay'] = 0;
+
+		$release = wp_parse_args( $release, $defaults );
 
 		$release['date']                     = (int) $release['date'];
 		$release['tag']                      = (string) $release['tag'];
