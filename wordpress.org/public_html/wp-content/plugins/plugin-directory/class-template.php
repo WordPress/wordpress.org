@@ -292,23 +292,8 @@ class Template {
 	 * @return int The sanitized version for display.
 	 */
 	public static function sanitize_active_installs( $active_installs ) {
-		if ( $active_installs > 10000000 ) {
-			// 10 million +
-			return 10000000;
-		} elseif ( $active_installs > 1000000 ) {
-			$round = 1000000;
-		} elseif ( $active_installs > 100000 ) {
-			$round = 100000;
-		} elseif ( $active_installs > 10000 ) {
-			$round = 10000;
-		} elseif ( $active_installs > 1000 ) {
-			$round = 1000;
-		} elseif ( $active_installs > 100 ) {
-			$round = 100;
-		} else {
-			// Rounded to ten, else 0
-			$round = 10;
-		}
+		$length = strlen( (string) $active_installs );
+		$round = pow( 10, max( 1, $length - 1 ) );
 
 		return floor( $active_installs / $round ) * $round;
 	}
