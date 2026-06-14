@@ -462,7 +462,7 @@ class Upload {
 				<label>
 					<input type="checkbox" name="requirements[guidelines]" required="required">
 					<?php
-					printf( wp_kses_post( __( 'I have read and make sure that this plugin complies with <strong>all</strong> of the <a href="%s">Plugins Directory Guidelines</a>.', 'wporg-plugins' ) ),	'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'	);
+					printf( wp_kses_post( __( 'I have read and make sure that this plugin complies with <strong>all</strong> of the <a href="%s">Plugins Directory Guidelines</a>.', 'wporg-plugins' ) ), 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/' );
 					?>
 				</label>
 				<br>
@@ -490,8 +490,8 @@ class Upload {
 					/* translators: 1: User profile URL. */
 					wp_kses_post(
 						__( '<strong>Demonstrating ownership</strong>: Names that begin with a company, project, organization, or trademark name may only be submitted by the verified owner. Ownership is typically verified using the <a href="%1$s" target="_blank">email address associated with your WordPress.org account</a>. If necessary, update your profile before submitting.', 'wporg-plugins' )
-						),
-						esc_url( 'https://profiles.wordpress.org/profile/edit' )
+					),
+					esc_url( 'https://profiles.wordpress.org/profile/edit' )
 				); ?>
 				</p>
 				<p><?php echo wp_kses_post( __( '<strong>If you are not the owner</strong>: Simply do not imply affiliation with a company, project, or trademark that you do not own. You can do so placing their name at the end and making the distinction clear (e.g., “WriteralAI – AI Writer <u>for Acme</u>”)', 'wporg-plugins' ) ); ?></p>
