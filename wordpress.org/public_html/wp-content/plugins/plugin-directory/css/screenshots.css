@@ -217,6 +217,12 @@
 
 #screenshots .wp-block-gallery.is-style-screenshots figure.wp-block-image button.lightbox-trigger {
 	cursor: zoom-in;
+	/* Core's frosted trigger repaints the underlying thumbnail on hover.
+	   Keep the control, but make it a plain opacity change for smoother
+	   screenshot-grid interaction. */
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	will-change: opacity;
 }
 
 /**

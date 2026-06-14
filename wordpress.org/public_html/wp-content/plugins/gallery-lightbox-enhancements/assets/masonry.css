@@ -96,6 +96,11 @@
 
 .wp-block-gallery.has-nested-images.is-style-masonry figure.wp-block-image:not(#individual-image) button.lightbox-trigger {
 	cursor: zoom-in;
+	/* Limit hover work to opacity so tall masonry tiles do not visually
+	   twitch when the trigger fades in. */
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	will-change: opacity;
 }
 
 /**
