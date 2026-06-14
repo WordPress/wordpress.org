@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Template;
+use function WordPressdotorg\MainTheme\_esc_html_e;
 use function WordPressdotorg\Two_Factor\get_onboarding_account_url;
 
 class Upload {
@@ -454,20 +455,14 @@ class Upload {
 				<label>
 					<input type="checkbox" name="requirements[faq]" required="required">
 					<?php
-					printf(
-							__( 'I have read the <a href="%s">Frequently Asked Questions</a>.', 'wporg-plugins' ),
-							'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/'
-					);
+					printf( wp_kses_post( __( 'I have read the <a href="%s">Frequently Asked Questions</a>.', 'wporg-plugins' ) ),'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' );
 					?>
 				</label>
 				<br>
 				<label>
 					<input type="checkbox" name="requirements[guidelines]" required="required">
 					<?php
-					printf(
-							__( 'I have read and make sure that this plugin complies with <strong>all</strong> of the <a href="%s">Plugins Directory Guidelines</a>.', 'wporg-plugins' ),
-							'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
-					);
+					printf( wp_kses_post( __( 'I have read and make sure that this plugin complies with <strong>all</strong> of the <a href="%s">Plugins Directory Guidelines</a>.', 'wporg-plugins' ) ),	'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'	);
 					?>
 				</label>
 				<br>
@@ -475,9 +470,9 @@ class Upload {
 					<input type="checkbox" name="requirements[plugin-check]" required="required" />
 					<?php
 					printf(
-					/* Translators: URL to plugin-check plugin */
-							__( 'I confirm that the plugin has been tested with the <a href="%s">Plugin Check</a> plugin, and all indicated issues resolved (apart from what I believe to be false-positives).', 'wporg-plugins' ),
-							home_url( '/plugin-check/' )
+						/* Translators: URL to plugin-check plugin */
+						wp_kses_post( __( 'I confirm that the plugin has been tested with the <a href="%s">Plugin Check</a> plugin, and all indicated issues resolved (apart from what I believe to be false-positives).', 'wporg-plugins' )),
+						esc_url( home_url( '/plugin-check/' ) )
 					);
 					?>
 				</label>
@@ -494,7 +489,7 @@ class Upload {
 				<p><?php printf(
 					/* translators: 1: User profile URL. */
 							wp_kses_post(
-									__( '<strong>Demonstrating ownership</strong>: Names that begin with a company, project, organization, or trademark name may only be submitted by the verified owner. Ownership is typically verified using the <a href="%1$s" target="_blank">email address associated with your WordPress.org account</a>. If necessary, update your profile before submitting.', 'wporg-plugins' )
+								__( '<strong>Demonstrating ownership</strong>: Names that begin with a company, project, organization, or trademark name may only be submitted by the verified owner. Ownership is typically verified using the <a href="%1$s" target="_blank">email address associated with your WordPress.org account</a>. If necessary, update your profile before submitting.', 'wporg-plugins' )
 							),
 							esc_url( 'https://profiles.wordpress.org/profile/edit' )
 					); ?>
@@ -510,7 +505,7 @@ class Upload {
 					<?php
 					printf(
 					/* translators: %s: Current user's email address. */
-							__( 'I have permission to upload this plugin to WordPress.org for others to use and share and I am using a WordPress.org account that accurately represents the plugin owner: %s.', 'wporg-plugins' ),
+							wp_kses_post( __( 'I have permission to upload this plugin to WordPress.org for others to use and share and I am using a WordPress.org account that accurately represents the plugin owner: %s.', 'wporg-plugins' )),
 							'<strong>' . esc_html( wp_get_current_user()->user_email ) . '</strong>'
 					);
 					?>
@@ -527,7 +522,7 @@ class Upload {
 				<p><?php echo wp_kses_post( __( 'Please bear in mind that this is an <strong>open source directory for free to use plugins</strong>. Building a business around your plugin is fine, and there are compliant ways of doing so; artificial limitations in built-in code are not one of them.', 'wporg-plugins' ) ); ?></p>
 				<label>
 					<input type="checkbox" name="requirements[trialware]" required="required">
-					<?php _e( 'I confirm that my plugin code does not include artificial limitations to the included functionality. I acknowledge that I must comply with this in future, and that my plugin and account could be suspended indefinitely if I fail to do so.', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'I confirm that my plugin code does not include artificial limitations to the included functionality. I acknowledge that I must comply with this in future, and that my plugin and account could be suspended indefinitely if I fail to do so.', 'wporg-plugins' ); ?>
 				</label>
 
 				<h3>🚫 <?php esc_html_e( 'Not accepted plugins', 'wporg-plugins' ); ?></h3>
@@ -541,12 +536,12 @@ class Upload {
 				<p><?php esc_html_e( 'Please confirm that you understand the following:', 'wporg-plugins' ); ?></p>
 				<label>
 					<input type="checkbox" name="requirements[confirmation1]" required="required">
-					<?php _e( 'I understand that submissions that do not follow the Plugin Directory Guidelines may be rejected. Repeated or serious violations may result in further restrictions', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'I understand that submissions that do not follow the Plugin Directory Guidelines may be rejected. Repeated or serious violations may result in further restrictions', 'wporg-plugins' ); ?>
 				</label>
 				<br>
 				<label>
 					<input type="checkbox" name="requirements[confirmation3]" required="required">
-					<?php _e( 'I understand that hosting in the WordPress.org Plugin Directory is provided subject to continued compliance with the Plugin Directory Guidelines.', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'I understand that hosting in the WordPress.org Plugin Directory is provided subject to continued compliance with the Plugin Directory Guidelines.', 'wporg-plugins' ); ?>
 				</label>
 				<br>
 
