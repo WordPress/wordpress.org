@@ -49,7 +49,7 @@ function get_meta_block_value( $args, $block ) {
 			return sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( 'https://wordpress.org/support/plugin/' . $plugin_post->post_name . '/reviews/#new-post' ),
-				__( 'Add my review', 'wporg-themes' )
+				__( 'Your review', 'wporg-themes' )
 			);
 	}
 }

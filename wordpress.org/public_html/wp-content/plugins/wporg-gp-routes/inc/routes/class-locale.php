@@ -434,7 +434,7 @@ class Locale extends GP_Route {
 
 				$locale_contributors['editors'][ $editor_source ][ $editor_id ] = (object) array(
 					'nicename'     => $user->user_nicename,
-					'display_name' => $this->_encode( $user->display_name ),
+					'display_name' => $user->display_name ?: $user->user_nicename,
 					'email'        => $user->user_email,
 				);
 
@@ -524,7 +524,7 @@ class Locale extends GP_Route {
 			$locale_contributors['contributors'][ $contributor->user_id ] = (object) array(
 				'login'         => $user->user_login,
 				'nicename'      => $user->user_nicename,
-				'display_name'  => $this->_encode( $user->display_name ),
+				'display_name'  => $user->display_name ?: $user->user_nicename,
 				'email'         => $user->user_email,
 				'last_update'   => $contributor->last_update,
 				'total_count'   => $contributor->total_count,
@@ -546,7 +546,7 @@ class Locale extends GP_Route {
 		unset( $contributors, $editor_ids );
 
 		uasort( $locale_contributors['contributors'], function( $a, $b ) {
-			return $a->total_count < $b->total_count;
+			return $b->total_count <=> $a->total_count;
 		} );
 
 		return $locale_contributors;
@@ -698,8 +698,6 @@ class Locale extends GP_Route {
 	/**
 	 * Retrieves active sub projects with paging.
 	 *
-	 * This method is horribly inefficient when there exists many sub-projects, as it can't use SQL.
-	 *
 	 * @param GP_Project $project           The parent project
 	 * @param array $args {
 	 *	@type int    $per_page Number of items per page. Default 20
@@ -732,16 +730,23 @@ class Locale extends GP_Route {
 			$limit_sql = $wpdb->prepare( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
 		}
 
-		$parent_project_sql = $wpdb->prepare( 'AND tp.parent_project_id = %d', $project->id );
+		/*
+		 * Conditions are split by which table they reference. When $stats_where is
+		 * non-empty, the stats lookup is wrapped in a derived table so the join is
+		 * driven from the (typically small) qualifying stats set; otherwise we LEFT
+		 * JOIN stats directly so projects with no status row still appear.
+		 */
+		$tp_where    = $wpdb->prepare( 'AND tp.parent_project_id = %d', $project->id );
+		$stats_where = '';
 
 		$search_sql = '';
 		if ( $search ) {
 			$esc_search = '%%' . $wpdb->esc_like( $search ) . '%%';
-			$search_sql = $wpdb->prepare( 'AND ( tp.name LIKE %s OR tp.slug LIKE %s )', $esc_search, $esc_search );
+			$search_sql = $wpdb->prepare( ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )', $esc_search, $esc_search );
 		}
 
 		// Special Waiting Project Tab
-		// This removes the parent_project_id restriction and replaces it with all-translation-editer-projects
+		// This removes the parent_project_id restriction and replaces it with all-translation-editor-projects
 		if ( 'waiting' == $project->slug && is_user_logged_in() && $this->roles_adapter ) {
 
 			if ( ! $filter ) {
@@ -779,10 +784,11 @@ class Locale extends GP_Route {
 
 			if ( $can_approve_for_all ) {
 				// The current user can approve for all projects, so just grab all with any waiting strings.
-				$parent_project_sql = 'AND ( stats.waiting > 0 OR stats.fuzzy > 0 )';
-				$parent_project_sql .= $base_level_project_sql;
+				$stats_where = ' AND stats.has_pending = 1';
+				$tp_where    = $base_level_project_sql;
 			} elseif ( $allowed_projects || $allowed_base_level_projects ) {
-				$parent_project_sql = 'AND ( stats.waiting > 0 OR stats.fuzzy > 0 ) AND ( (';
+				$stats_where = ' AND stats.has_pending = 1';
+				$tp_where    = ' AND ( (';
 
 				if ( $allowed_projects ) {
 					/*
@@ -790,30 +796,28 @@ class Locale extends GP_Route {
 					 * We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check.
 					 */
 					$ids = implode( ', ', array_map( 'intval', $allowed_projects ) );
-					$parent_project_sql .= "tp.id IN( $ids )";
-					$parent_project_sql .= $base_level_project_sql;
+					$tp_where .= "tp.id IN( $ids )" . $base_level_project_sql;
 				} else {
-					$parent_project_sql .= '0=1';
+					$tp_where .= '0=1';
 				}
 
-				$parent_project_sql .= ") OR (";
+				$tp_where .= ') OR (';
 
 				if ( $allowed_base_level_projects ) {
 					/*
 					 * The current user can approve all sub-projects of a base level project.
 					 */
 					$ids = implode( ', ', array_map( 'intval', $allowed_base_level_projects ) );
-					$parent_project_sql .= "tp.parent_project_id IN( $ids )";
+					$tp_where .= "tp.parent_project_id IN( $ids )";
 				} else {
-					$parent_project_sql .= '0=1';
+					$tp_where .= '0=1';
 				}
 
-				$parent_project_sql .= ") )";
+				$tp_where .= ') )';
 
 			} else {
 				// The current user can't approve for any locale projects, or is logged out.
-				$parent_project_sql = 'AND 0=1';
-
+				$tp_where = ' AND 0=1';
 			}
 
 			// Exclude projects which have an assigned editor.
@@ -825,12 +829,14 @@ class Locale extends GP_Route {
 				) );
 				if ( $project_ids_with_editor ) {
 					$project_ids_with_editor = implode( ', ', array_map( 'intval', $project_ids_with_editor ) );
-					$parent_project_sql .= " AND tp.id NOT IN( $project_ids_with_editor )";
+					$tp_where .= " AND tp.id NOT IN( $project_ids_with_editor )";
 				}
 			}
 		}
 
-		$filter_order_by = $filter_where = '';
+		$tp_where .= $search_sql;
+
+		$filter_order_by = '';
 		$sort_order = 'DESC';
 		$filter_name = $filter;
 		if ( $filter && '-asc' == substr( $filter, -4 ) ) {
@@ -864,36 +870,36 @@ class Locale extends GP_Route {
 				$user_fav_projects = array_map( 'esc_sql', $this->get_user_favorites( $project->slug ) );
 
 				if ( $user_fav_projects ) {
-					$filter_where = 'AND tp.path IN( "' . implode( '", "', $user_fav_projects ) . '" )';
+					$tp_where .= ' AND tp.path IN( "' . implode( '", "', $user_fav_projects ) . '" )';
 				} else {
-					$filter_where = 'AND 0=1';
+					$tp_where .= ' AND 0=1';
 				}
 				$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
 
 				break;
 
 			case 'strings-remaining':
-				$filter_where = 'AND stats.untranslated > 0';
+				$stats_where    .= ' AND stats.untranslated > 0';
 				$filter_order_by = "stats.untranslated $sort_order, tp.name ASC";
 				break;
 
 			case 'strings-waiting-and-fuzzy':
-				$filter_where = 'AND (stats.waiting > 0 OR stats.fuzzy > 0 )';
-				$filter_order_by = "tp.path LIKE 'wp/%%' AND (stats.fuzzy + stats.waiting) > 0 DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
+				$stats_where    .= ' AND stats.has_pending = 1';
+				$filter_order_by = "tp.path LIKE 'wp/%%' DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
 				break;
 
 			case 'strings-waiting-and-fuzzy-by-modified-date':
-				$filter_where = 'AND (stats.waiting > 0 OR stats.fuzzy > 0 ) AND stats.date_modified > "0000-00-00 00:00:00"';
+				$stats_where    .= ' AND stats.has_pending = 1 AND stats.date_modified > "0000-00-00 00:00:00"';
 				$filter_order_by = "stats.date_modified $sort_order, tp.name ASC";
 				break;
 
 			case 'percent-completed':
-				$filter_where = 'AND stats.untranslated > 0';
+				$stats_where    .= ' AND stats.untranslated > 0';
 				$filter_order_by = "( stats.current / stats.all ) $sort_order, tp.name ASC";
 				break;
 
 			case 'completed':
-				$filter_where = 'AND stats.all > 0 AND stats.current = stats.all';
+				$stats_where    .= ' AND stats.all > 0 AND stats.current = stats.all';
 				$filter_order_by = "tp.name $sort_order";
 				break;
 
@@ -902,25 +908,42 @@ class Locale extends GP_Route {
 		/*
 		 * Find all child projects with translation sets that match the current locale/slug.
 		 *
-		 * 1. We need to fetch all sub-projects of the current project (so, if we're at wp-plugins, we want akismet, debug bar, importers, etc)
-		 * 2. Next, we fetch the sub-projects of those sub-projects, that gets us things like Development, Readme, etc.
-		 * 3. Next, we fetch the translation sets of both the sub-projects(1), and any sub-sub-projects(2).
-		 * Once we have the sets in 3, we can then check to see if there exists any translation sets for the current (locale, slug) (ie. en-au/default)
-		 * If not, we can simply filter them out, so that paging only has items returned that actually exist.
+		 * When the filter requires a stats row (waiting/fuzzy/untranslated/etc.), the
+		 * stats lookup is wrapped in a derived table that pre-filters by locale +
+		 * condition. The optimizer then drives the join from that small set and
+		 * eq_refs into tp, instead of scanning every project to LEFT JOIN stats.
+		 *
+		 * Without a stats filter, fall back to the original LEFT JOIN so projects
+		 * with no status row for this locale still appear (ordered last by NULL).
 		 */
-		$_projects = $project->many( "
-			SELECT SQL_CALC_FOUND_ROWS tp.*
-			FROM {$wpdb->gp_projects} tp
-				LEFT JOIN {$wpdb->project_translation_status} stats ON stats.project_id = tp.id AND stats.locale = %s AND stats.locale_slug = %s
-			WHERE
-				tp.active = 1
-				$parent_project_sql
-				$search_sql
-				$filter_where
-			GROUP BY tp.id
-			ORDER BY $filter_order_by
-			$limit_sql
-		", $locale, $set_slug );
+		if ( $stats_where ) {
+			$sql = "
+				SELECT SQL_CALC_FOUND_ROWS tp.*
+				FROM (
+					SELECT project_id, `all`, `current`, waiting, fuzzy, untranslated, date_modified
+					FROM {$wpdb->project_translation_status} stats
+					WHERE stats.locale = %s AND stats.locale_slug = %s
+						$stats_where
+				) stats
+				INNER JOIN {$wpdb->gp_projects} tp ON tp.id = stats.project_id
+				WHERE tp.active = 1
+					$tp_where
+				ORDER BY $filter_order_by
+				$limit_sql
+			";
+		} else {
+			$sql = "
+				SELECT SQL_CALC_FOUND_ROWS tp.*
+				FROM {$wpdb->gp_projects} tp
+					LEFT JOIN {$wpdb->project_translation_status} stats ON stats.project_id = tp.id AND stats.locale = %s AND stats.locale_slug = %s
+				WHERE tp.active = 1
+					$tp_where
+				ORDER BY $filter_order_by
+				$limit_sql
+			";
+		}
+
+		$_projects = $project->many( $sql, $locale, $set_slug );
 
 		$results = (int) $project->found_rows();
 		$pages = (int) ceil( $results / $per_page );
@@ -995,12 +1018,5 @@ class Locale extends GP_Route {
 				AND active = 1
 			ORDER BY FIELD( slug, 'waiting', 'wp', 'wp-themes', 'wp-plugins', 'patterns', 'meta', 'apps' )
 		" );
-	}
-
-	private function _encode( $raw ) {
-		if ( 'UTF-8' !== mb_detect_encoding( $raw, 'UTF-8', true ) ) {
-			$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, Windows-1252, ISO-8859-1' );
-		}
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $raw, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
 }

@@ -14,6 +14,10 @@
 
 namespace WordPressdotorg\GlotPress\Customizations\AI;
 
+defined( 'ABSPATH' ) || exit;
+
+use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Models;
+
 /**
  * OpenAI API Client class.
  */
@@ -69,6 +73,10 @@ class OpenAI_Client {
 	 * Automatically retrieves OpenAI configuration from current user's settings
 	 * via get_user_option('gp_default_sort').
 	 *
+	 * Side effect: the model id is routed through OpenAI_Models::resolve_for_current_user(),
+	 * which may write a migrated value back to the current user's gp_default_sort option
+	 * when the stored value (or the $config['model'] override) is not in OpenAI_Models::KEPT.
+	 *
 	 * @param array $config Optional configuration overrides.
 	 *                      - openai_api_key: string.
 	 *                      - model: string.
@@ -82,11 +90,12 @@ class OpenAI_Client {
 		}
 
 		$this->api_key     = $config['openai_api_key'] ?? gp_array_get( $user_options, 'openai_api_key', '' );
-		$this->model       = $config['model'] ?? gp_array_get( $user_options, 'openai_model', 'gpt-3.5-turbo' );
-		$this->temperature = $config['temperature'] ?? gp_array_get( $user_options, 'openai_temperature', 0 );
+		$stored_model      = $config['model'] ?? gp_array_get( $user_options, 'openai_model', OpenAI_Models::FALLBACK );
+		$this->model       = OpenAI_Models::resolve_for_current_user( $stored_model );
+		$this->temperature = $config['temperature'] ?? (float) gp_array_get( $user_options, 'openai_temperature', 0 );
 		$this->timeout     = $config['timeout'] ?? 20;
 
-		if ( ! is_float( $this->temperature ) || $this->temperature < 0 || $this->temperature > 2 ) {
+		if ( $this->temperature < 0 || $this->temperature > 2 ) {
 			$this->temperature = 0;
 		}
 		// Temperature is not supported in some models (o1, o3, o4, gpt-5 series).
@@ -138,17 +147,15 @@ class OpenAI_Client {
 			'temperature' => $this->temperature,
 		);
 
-		// Additional parameters for gpt-5 series.
+		// Additional parameters for gpt-5 series. The gpt-5.4 / gpt-5.5 family
+		// rejects reasoning_effort 'minimal'; the supported values are
+		// 'none' / 'low' / 'medium' / 'high' / 'xhigh'. We default to 'none'
+		// (cheapest, matches the previous gpt-5.1 override).
 		if ( preg_match( '/^gpt-5/i', $this->model ) ) {
 			$body['frequency_penalty'] = 0;
 			$body['presence_penalty']  = 0;
-			$body['reasoning_effort']  = 'minimal';
+			$body['reasoning_effort']  = 'none';
 			$body['verbosity']         = 'low';
-
-			// For gpt-5.1 specifically
-			if ( preg_match( '/^gpt-5\.1(?:$|-)/i', $this->model ) ) {
-				$body['reasoning_effort'] = 'none';
-			}
 		}
 		
 		$response = $this->request( '/chat/completions', $body );

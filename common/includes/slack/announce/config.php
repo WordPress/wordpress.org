@@ -163,6 +163,7 @@ function get_whitelist() {
 		) ),
 		'core-ai' => array_merge( get_committers(), array(
 			'isotropic', // @James LePage on Slack
+			'neel33', // @Neill McShea on Slack
 		) ),
 		'core-upgrade-install' => array_merge( get_committers(), array(
 			'afragen',
@@ -258,6 +259,7 @@ function get_whitelist() {
 		) ),
 		'core-passwords' => array_merge( get_committers(), array(
 			'georgestephanis',
+			'masteradhoc',
 			'valendesigns',
 		) ),
 		'core-php' => array_merge( get_committers(), array(
@@ -361,6 +363,7 @@ function get_whitelist() {
 			'chrisvanpatten',
 			'Clorith',
 			'DrewAPicture', // @drew on Slack
+			'estelaris',
 			'hlashbrooke',
 			'Kenshino',
 			'lizkaraffa',
@@ -621,6 +624,9 @@ function get_whitelist() {
 		'website-redesign' => array(
 			'ndiego', // @Nick Diego on Slack
 		),
+		'wpcredits' => array_merge( $wordcamp_central, array(
+			'celigaroe',
+		) ),
 		'wptv' => array(
 			'casiepa', // @Pascal on Slack
 			'JerrySarcastic',

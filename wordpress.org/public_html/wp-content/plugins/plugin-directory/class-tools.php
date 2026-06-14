@@ -602,19 +602,14 @@ class Tools {
 	 * Clear caches for memory management.
 	 *
 	 * @static
-	 * @global \wpdb            $wpdb
-	 * @global \WP_Object_Cache $wp_object_cache
+	 * @global \wpdb $wpdb
 	 */
 	public static function clear_memory_heavy_variables() {
-		global $wpdb, $wp_object_cache;
+		global $wpdb;
 
 		$wpdb->queries = [];
 
-		if ( is_object( $wp_object_cache ) ) {
-			$wp_object_cache->cache          = [];
-			$wp_object_cache->group_ops      = [];
-			$wp_object_cache->memcache_debug = [];
-		}
+		wp_cache_flush_runtime();
 	}
 
 	/**

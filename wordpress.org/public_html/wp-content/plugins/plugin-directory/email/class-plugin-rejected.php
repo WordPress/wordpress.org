@@ -12,7 +12,7 @@ class Plugin_Rejected extends Markdown_Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( '%s has been rejected', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -20,7 +20,7 @@ class Plugin_Rejected extends Markdown_Base {
 		$placeholders = [
 			// Should be first, to allow placeholders in the rejection reasons too.
 			'###REASON###'          => $this->get_rejection_reason(),
-			'###NAME###'            => $this->plugin->post_title,
+			'###NAME###'            => $this->plugin_title(),
 			'###SLUG###'            => ( $this->args['slug'] ?? '' ) ?: $this->plugin->post_name,
 			'###SUBMISSION_DATE###' => $this->args['submission_date'],
 		];
@@ -94,6 +94,25 @@ Please read this email in it's entirety. We know it's hurtful to be told we're n
 If you feel that we have, please reply to this email with your plugin zip attached, explain why, and we will re-review.
 
 We ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.",
+			'wporg-plugins'
+		);
+	}
+
+	public function reason_common_plugin() {
+		return __(
+			"We have rejected your plugin submission because it addresses a functionality (e.g., scroll to top, post duplication, maintenance mode, post view counter, log viewer, admin dashboard notes, image optimisation, etc) that is already widely available in the directory.
+
+The WordPress plugin ecosystem thrives on innovation, and we encourage you to explore its vast potential by creating unique solutions that fill unmet needs.
+
+Please consider developing plugins that offer fresh value to users. We'd be excited to review your plugin in the future!
+
+<strong>What to do next</strong>
+
+Don't worry! We encourage you to iterate and submit something new-WordPress's potential is limitless!
+
+Please do not resubmit the plugin, even if you believe we are incorrect.
+
+Instead, reply to this email and explain the situation so we can properly direct you forward. If you resubmit this plugin without replying and communicating with us first, your account will be suspended.",
 			'wporg-plugins'
 		);
 	}

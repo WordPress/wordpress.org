@@ -11,6 +11,7 @@ namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory\Tools;
 
 use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Ability_Base;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout as HelpScout_Client;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
@@ -26,7 +27,7 @@ class Get_Plugin_Status extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/get-plugin-status',
+			'wporg/plugins--plugin-directory--get-plugin-status',
 			array(
 				'label'               => 'Get Plugin Status',
 				'description'         => 'Retrieves the current status and any reviewer feedback for a plugin owned by the authenticated user. Returns the plugin status (new, pending, approved, rejected, published, closed, or disabled), key dates, and review correspondence when in review. Only returns results for plugins associated with the authenticated account.',
@@ -142,12 +143,15 @@ class Get_Plugin_Status extends Ability_Base {
 	public static function execute( array $input ): array {
 		self::maybe_load_plugin_directory();
 
-		$slug = sanitize_title( $input['plugin_slug'] );
-		$post = self::get_plugin_post( $slug );
+		$post = Plugin_Directory::get_plugin_post( $input['plugin_slug'] );
+
+		if ( $post && (int) $post->post_author !== get_current_user_id() ) {
+			$post = false;
+		}
 
 		if ( ! $post ) {
 			return array(
-				'error' => sprintf( 'No plugin with slug "%s" was found for your account.', $slug ),
+				'error' => sprintf( 'No plugin with slug "%s" was found for your account.', sanitize_title( $input['plugin_slug'] ) ),
 			);
 		}
 
@@ -157,26 +161,6 @@ class Get_Plugin_Status extends Ability_Base {
 			'status'   => self::get_status_data( $post ),
 			'feedback' => self::get_feedback( $post, $full_history ),
 		);
-	}
-
-	/**
-	 * Look up a plugin post owned by the current user.
-	 *
-	 * @param string $slug The plugin slug.
-	 * @return \WP_Post|null
-	 */
-	private static function get_plugin_post( string $slug ): ?\WP_Post {
-		$posts = get_posts(
-			array(
-				'post_type'   => 'plugin',
-				'name'        => $slug,
-				'post_status' => 'any',
-				'author'      => get_current_user_id(),
-				'numberposts' => 1,
-			)
-		);
-
-		return $posts[0] ?? null;
 	}
 
 	/**

@@ -23,7 +23,7 @@ class Plugin_FAQ extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/plugin-faq',
+			'wporg/plugins--plugin-directory--plugin-faq',
 			array(
 				'label'               => 'Plugin Directory FAQ',
 				'description'         => 'Frequently asked questions about the WordPress.org plugin directory submission and review process.',

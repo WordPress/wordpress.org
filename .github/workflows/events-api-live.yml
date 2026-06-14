@@ -1,0 +1,32 @@
+name: Events API (live)
+
+# Runs the e2e and data-freshness groups against the live api.wordpress.org and
+# wordcamp.org services. Kept out of the PR matrix so transient external failures
+# do not block unrelated work.
+
+on:
+  schedule:
+    # Daily at 14:00 UTC.
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+
+jobs:
+  events-api-live:
+    name: Events API live checks
+    if: github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+
+      - name: Install composer dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Run live e2e + data-freshness groups
+        working-directory: api.wordpress.org/public_html/events/1.0
+        run: ${{ github.workspace }}/vendor/bin/phpunit --group e2e,data-freshness

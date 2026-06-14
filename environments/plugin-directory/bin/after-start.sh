@@ -49,6 +49,7 @@ declare -A SECTIONS=(
 	[new]="New"
 	[updated]="Recently Updated"
 	[favorites]="Favorites"
+	[dashboard-widgets]="Dashboard Widgets"
 )
 for SLUG in "${!SECTIONS[@]}"; do
 	NAME="${SECTIONS[$SLUG]}"

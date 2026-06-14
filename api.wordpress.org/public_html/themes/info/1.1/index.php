@@ -2,7 +2,7 @@
 
 header( 'Access-Control-Allow-Origin: *' );
 
-if ( isset( $_GET['callback'] ) ) {
+if ( isset( $_GET['callback'] ) && is_string( $_GET['callback'] ) ) {
 	$callback = preg_replace( '/[^a-z0-9_]/i', '', $_GET['callback'] );
 } else {
 	$callback = false;

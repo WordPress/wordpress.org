@@ -12,28 +12,69 @@ require_once ABSPATH . '/wp-includes/wp-diff.php';
 
 class Translation_Memory_Client {
 
-	const API_ENDPOINT = 'https://translate.wordpress.com/api/tm/';
+	const API_ENDPOINT      = 'https://translate.wordpress.com/api/tm/';
 	const API_BULK_ENDPOINT = 'https://translate.wordpress.com/api/tm/-bulk';
+	const BATCH_SIZE        = 500;
 
 	/**
-	 * Updates translation memory with new strings.
+	 * Updates translation memory.
 	 *
-	 * @param array $translations  List of translation IDs, keyed by original ID.
-	 * @return true|\WP_Error True on success, WP_Error on failure.
+	 * Without args: claims a batch from the persistent queue.
+	 * With args: processes those translation_ids directly (legacy payloads were
+	 * keyed by original_id, so array_values handles both shapes).
+	 *
+	 * @param array|null $translations  Optional translation_ids to process.
+	 * @return true|\WP_Error
 	 */
-	public static function update( array $translations ) {
+	public static function update( $translations = null ) {
+		if ( null === $translations ) {
+			$translations = Plugin::with_lock( 'queue_lock', function () {
+				$queue = Plugin::read_queue();
+				if ( ! $queue ) {
+					return array();
+				}
+				$batch = array_slice( $queue, 0, self::BATCH_SIZE, true );
+				Plugin::write_queue( array_slice( $queue, count( $batch ), null, true ) );
+				return array_keys( $batch );
+			} );
+		}
+
+		if ( ! $translations ) {
+			return true;
+		}
+
+		$translations = array_values( (array) $translations );
+
+		if ( wp_doing_cron() ) {
+			printf( "Translation Memory: processing %d translation(s).\n", count( $translations ) );
+		}
+
+		return self::send_batch( $translations );
+	}
+
+	/**
+	 * Sends a single batch of translations to the TM bulk endpoint.
+	 *
+	 * @param array $translation_ids
+	 * @return true|\WP_Error
+	 */
+	protected static function send_batch( array $translation_ids ) {
 		$requests = [];
 
-		foreach ( $translations as $original_id => $translation_id ) {
-			$translation = GP::$translation->get( $translation_id );
+		foreach ( $translation_ids as $translation_id ) {
+			$translation = GP::$translation->get( (int) $translation_id );
 
 			// Check again in case the translation was changed.
-			if ( 'current' !== $translation->status ) {
+			if ( ! $translation || 'current' !== $translation->status ) {
 				continue;
 			}
 
-			$original        = GP::$original->get( $original_id );
+			$original        = GP::$original->get( $translation->original_id );
 			$translation_set = GP::$translation_set->get( $translation->translation_set_id );
+
+			if ( ! $original || ! $translation_set ) {
+				continue;
+			}
 
 			$locale = $translation_set->locale;
 			if ( 'default' !== $translation_set->slug ) {

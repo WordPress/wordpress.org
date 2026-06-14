@@ -23,7 +23,7 @@ class Plugin_Guidelines extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/plugin-guidelines',
+			'wporg/plugins--plugin-directory--plugin-guidelines',
 			array(
 				'label'               => 'Plugin Guidelines',
 				'description'         => 'The WordPress.org plugin directory detailed guidelines that all plugins must follow.',

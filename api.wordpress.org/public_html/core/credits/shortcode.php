@@ -54,7 +54,7 @@ function wporg_wordpress_credits_shortcode( $attrs ) {
 	asort( $props, SORT_FLAG_CASE | SORT_STRING );
 	$output = array();
 	foreach ( $props as $username => $name ) {
-		$output[] = '<a href="' . sprintf( $results['data']['profiles'], $username ) . '/">' . $name . '</a>';
+		$output[] = '<a href="' . sprintf( $results['data']['profiles'], $username ) . '">' . $name . '</a>';
 	}
 
 	$container_atts = '';

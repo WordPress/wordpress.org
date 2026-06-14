@@ -69,7 +69,13 @@ class Plugin_Upload extends Base {
 			return $this->slug( $request );
 
 		} elseif ( ! empty( $_FILES['zip_file'] ) && current_user_can( 'plugin_approve' ) ) {
-			return ( new Upload_Handler() )->process_upload( $plugin->ID );
+			$result = ( new Upload_Handler() )->process_upload( $plugin->ID );
+
+			if ( ! is_wp_error( $result ) && function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
+				bump_stats_extra( 'plugin-upload-source', 'api' );
+			}
+
+			return $result;
 		}
 	}
 

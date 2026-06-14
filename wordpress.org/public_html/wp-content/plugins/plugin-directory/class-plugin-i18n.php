@@ -393,12 +393,17 @@ class Plugin_I18n {
 		if ( $original === $content ) {
 			$content = $marker;
 		} else {
-			$original = preg_quote( $original, '/' );
+			$original = preg_quote( trim( $original ), '/' );
 
-			if ( false === strpos( $content, '<' ) ) {
+			if ( ! str_contains( $content, '<' ) ) {
 				$content = preg_replace( "/\b{$original}\b/", $marker, $content );
 			} else {
-				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
+				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>)\s*{$original}\s*(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
+
+				// Nested lists: match <li>STRING<ul> or <li>STRING<ol>.
+				if ( ! str_contains( $content, $marker ) ) {
+					$content = preg_replace( "/(<li\b[^>]*>)\s*{$original}\s*(<[uo]l\b[^>]*>)/m", "\${1}{$marker}\${2}", $content );
+				}
 			}
 		}
 

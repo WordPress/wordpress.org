@@ -1,4 +1,10 @@
 <?php
+/**
+ * Title: Search Field
+ * Slug: wporg-support/search-field
+ * Inserter: no
+ */
+
 if ( function_exists( 'register_block_pattern' ) ) {
 	register_block_pattern(
 		'wporg-support/search-field',

@@ -23,7 +23,7 @@ class Readme_Standard extends Ability_Base {
 	 */
 	public static function register(): void {
 		wp_register_ability(
-			'wporg/plugins/plugin-directory/readme-standard',
+			'wporg/plugins--plugin-directory--readme-standard',
 			array(
 				'label'               => 'Readme.txt Standard',
 				'description'         => 'The WordPress.org plugin readme.txt format specification including required headers, sections, and markdown support.',

@@ -14,6 +14,24 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 
 	class WPOrg_Profiles_Association_Handler {
 
+		const USER_BADGES_CACHE_GROUP      = 'user_meta';
+		const USER_BADGES_CACHE_KEY_PREFIX = 'wporg-profiles-user-badges:';
+
+		/**
+		 * @var WPOrg_Profiles_Association_Handler|null
+		 */
+		protected static $instance = null;
+
+		/**
+		 * Returns the shared instance, constructing it on first call.
+		 *
+		 * Used by both the bootstrap at the bottom of this file and by the
+		 * CLI queue processor to avoid duplicate hook registration.
+		 */
+		public static function get_instance() {
+			return self::$instance ??= new self();
+		}
+
 		/**
 		 * Constructor.
 		 */
@@ -30,7 +48,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		 * Actions to run on the 'plugins_loaded' filter.
 		 */
 		public function plugins_loaded() {
-			add_action( 'wp_ajax_nopriv_wporg_handle_association', array( $this, 'handle_association' ) );
+			add_action( 'wp_ajax_nopriv_wporg_handle_association', array( $this, 'ajax_handle_association' ) );
 
 			// Disable activity reporting related to groups
 			add_filter( 'bp_activity_component_before_save',       array( $this, 'disable_group_activity_reporting' ) );
@@ -143,84 +161,85 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		}
 
 		/**
-		 * Primary AJAX handler.
+		 * AJAX wrapper for handle_association().
 		 *
-		 * Funnels incoming requests to appropriate sub-handler based on
-		 * $_POST['source'] value.
-		 *
-		 * By default (and for security), this does nothing. The filter
-		 * 'wporg_is_valid_association_request' must be hooked in order to provide
-		 * the appropriate validity checks on the request to permit the incoming
-		 * association notification to be handled.
-		 *
-		 * TODO: Make this a generic handler and require sub-handlers to
-		 * register themselves.
+		 * Validates the request, delegates to handle_association(), and dies with the result.
 		 */
-		public function handle_association() {
-			// Return error if not a valid association request.
+		public function ajax_handle_association() {
 			if ( true !== apply_filters( 'wporg_is_valid_association_request', false ) ) {
+				status_header( 400 );
 				die( '-1 Not a valid association request.' );
 			}
 
-			// Return error if activities are not enabled.
-			if ( ! bp_is_active( 'groups' ) ) {
-				die( '-1 Group component not activated.' );
+			$result = $this->handle_association( wp_unslash( $_POST ) );
+
+			if ( is_wp_error( $result ) ) {
+				$status = $result->get_error_data()['status'] ?? 500;
+				status_header( $status );
+				die( '-1 ' . $result->get_error_message() );
 			}
 
-			$source = $_POST['source'];
+			die( '1' );
+		}
+
+		/**
+		 * Primary handler for association requests.
+		 *
+		 * Funnels incoming requests to appropriate sub-handler based on
+		 * $data['source'] value.
+		 *
+		 * @param array $data The request data.
+		 * @return true|WP_Error
+		 */
+		public function handle_association( array $data ) {
+			if ( ! bp_is_active( 'groups' ) ) {
+				return new WP_Error( 'groups_inactive', 'Group component not activated.', [ 'status' => 500 ] );
+			}
+
+			$source = $data['source'];
 
 			switch ( $source ) {
 				case 'wordcamp':
 				case 'meetups':
 				case 'polyglots':
 					// These sources may send the field as `user_id`/`association`, so handle that format if not specified otherwise.
-					$_POST['users'] ??= (array) $_POST['user_id'];
-					$_POST['badge'] ??= $_POST['association'];
+					$data['users'] ??= (array) $data['user_id'];
+					$data['badge'] ??= $data['association'];
 
 					// Fall through, the generic-badge uses `users`/`badge` for the fields, as set above.
 				case 'generic-badge':
-					$association_id = $this->handle_badge_association();
-					break;
+					return $this->handle_badge_association( $data );
 				default:
-					$association_id = '-1 Unrecognized association source.';
-					break;
+					return new WP_Error( 'unknown_source', 'Unrecognized association source.', [ 'status' => 400 ] );
 			}
-
-			if ( false === $association_id ) {
-				$association_id = '-1 Unable to save association.';
-			}
-
-			$success = intval( $association_id ) > 0 ? '1' : $association_id;
-			die( $success );
 		}
 
 		/**
 		 * Handles incoming associations for the generic '{assign|remove}_badge()' functions. See pub/profile-helpers.php.
 		 *
-		 * Payload:  (beyond 'action' and 'source')
-		 *  users:   User ID(s)/login(s)/nicename(s).
-		 *  badge:   Slug for group/association.
-		 *  command: Either 'add' or 'remove'
+		 * @param array $data {
+		 *     @type array  $users   User ID(s)/login(s)/nicename(s).
+		 *     @type string $badge   Slug for group/association.
+		 *     @type string $command Either 'add' or 'remove'.
+		 * }
+		 * @return true|WP_Error
 		 */
-		private function handle_badge_association() {
-			$users    = wp_unslash( $_POST['users'] ?? [] );
-			$command  = $_POST['command'] ?? '';
-			$badge    = sanitize_key( $_POST['badge'] ?? '' );
+		private function handle_badge_association( array $data ) {
+			$users    = $data['users'] ?? [];
+			$command  = $data['command'] ?? '';
+			$badge    = sanitize_key( $data['badge'] ?? '' );
 			$group_id = BP_Groups_Group::group_exists( $badge );
 
 			if ( ! $badge || ! $group_id ) {
-				status_header( 400 );
-				return '-1 Association does not exist: ' . $badge;
+				return new WP_Error( 'no_association', 'Association does not exist: ' . $badge, [ 'status' => 400 ] );
 			}
 
 			if ( 'add' !== $command && 'remove' !== $command ) {
-				status_header( 400 );
-				return '-1 Unknown association command';
+				return new WP_Error( 'bad_command', 'Unknown association command', [ 'status' => 400 ] );
 			}
 
 			if ( empty( $users ) ) {
-				status_header( 400 );
-				return '-1 User(s) not specified';
+				return new WP_Error( 'no_users', 'User(s) not specified', [ 'status' => 400 ] );
 			}
 
 			// Validate all users.
@@ -235,8 +254,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				}
 
 				if ( ! $_user ) {
-					status_header( 400 );
-					return '-1 Association requested for unrecognized user: ' . sanitize_text_field( $user );
+					return new WP_Error( 'unknown_user', 'Association requested for unrecognized user: ' . sanitize_text_field( $user ), [ 'status' => 400 ] );
 				}
 
 				$users[ $i ] = $_user->ID;
@@ -251,11 +269,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				if ( 'add' == $command ) {
 					if ( ! groups_is_user_member( $user_id, $group_id ) ) {
 						groups_join_group( $group_id, $user_id );
+						$this->clear_user_badges_cache( $user_id );
 						$users_altered++;
 					}
 				} elseif ( 'remove' == $command ) {
 					if ( groups_is_user_member( $user_id, $group_id ) ) {
 						groups_leave_group( $group_id, $user_id );
+						$this->clear_user_badges_cache( $user_id );
 						$users_altered++;
 					}
 				}
@@ -272,13 +292,22 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				} );
 			}
 
-			return 1;
+			return true;
+		}
+
+		/**
+		 * Clears cached badge data for a user after their badge group membership changes.
+		 *
+		 * @param int $user_id User ID.
+		 */
+		private function clear_user_badges_cache( $user_id ) {
+			wp_cache_delete( self::USER_BADGES_CACHE_KEY_PREFIX . (int) $user_id, self::USER_BADGES_CACHE_GROUP );
 		}
 
 	} /* /class WPOrg_Profiles_Association_Handler */
 } /* if class_exists */
 
 if ( class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
-	new WPOrg_Profiles_Association_Handler();
+	WPOrg_Profiles_Association_Handler::get_instance();
 }
 
