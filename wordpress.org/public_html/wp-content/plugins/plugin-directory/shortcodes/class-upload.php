@@ -97,8 +97,19 @@ class Upload {
 				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload-' . $_POST['plugin_id'] )
 			)
 		) {
-			$for_plugin    = absint( $_POST['plugin_id'] ?? 0 );
-			$upload_result = $uploader->process_upload( $for_plugin );
+			$for_plugin = absint( $_POST['plugin_id'] ?? 0 );
+
+			// Lock to prevent duplicate submissions from double-clicks or page reloads
+			$lock_key = 'plugin_upload_lock_' . get_current_user_id() . '_' . $for_plugin;
+			if ( false === wp_cache_add( $lock_key, time(), 'wporg-plugins', 5 * MINUTE_IN_SECONDS ) ) {
+				$upload_result = new \WP_Error(
+					'upload_in_progress',
+					__( 'Your previous upload is still being processed. Please wait a moment before trying again.', 'wporg-plugins' )
+				);
+			} else {
+				$upload_result = $uploader->process_upload( $for_plugin );
+				wp_cache_delete( $lock_key, 'wporg-plugins' );
+			}
 
 			if ( is_wp_error( $upload_result ) ) {
 				$type    = 'error';
