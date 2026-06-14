@@ -14,7 +14,7 @@
  */
 
 ( function () {
-	var CAPTION_REVEAL_DELAY  = 460;
+	var CAPTION_REVEAL_DELAY  = 430;
 	var SCREENSHOT_ID_OFFSET = 9000000;
 
 	/**
@@ -56,7 +56,7 @@
 				return containers[ i ];
 			}
 		}
-		// Fallback: last container — wrong-spot caption beats no caption at all.
+		// Fallback to the last container because a misplaced caption is better than none.
 		return containers[ containers.length - 1 ] || null;
 	}
 
@@ -125,6 +125,26 @@
 	}
 
 	/**
+	 * Returns a stable key for the active managed screenshot.
+	 *
+	 * @param {HTMLElement} overlay The `.wp-lightbox-overlay` element.
+	 * @return {string}
+	 */
+	function getActiveImageKey( overlay ) {
+		var target = getVisibleContainer( overlay );
+		var img    = target ? target.querySelector( 'img' ) : null;
+
+		if ( ! isManagedImage( img ) ) {
+			return '';
+		}
+
+		return [
+			getImageBlockId( img ),
+			img.currentSrc || img.src || img.getAttribute( 'src' ) || '',
+		].join( '|' );
+	}
+
+	/**
 	 * Whether the lightbox overlay is currently active.
 	 *
 	 * @param {HTMLElement} overlay The `.wp-lightbox-overlay` element.
@@ -160,6 +180,36 @@
 	 */
 	function markOverlaySettled( overlay ) {
 		overlay.dataset.wporgCaptionSettled = '1';
+	}
+
+	/**
+	 * Returns whether the first caption reveal is still waiting for core zoom.
+	 *
+	 * @param {HTMLElement} overlay The `.wp-lightbox-overlay` element.
+	 * @return {boolean}
+	 */
+	function isCaptionRevealPending( overlay ) {
+		return overlay.dataset.wporgCaptionRevealPending === '1';
+	}
+
+	/**
+	 * Marks the caption as waiting for the first reveal.
+	 *
+	 * @param {HTMLElement} overlay The `.wp-lightbox-overlay` element.
+	 */
+	function markCaptionRevealPending( overlay ) {
+		overlay.dataset.wporgCaptionRevealPending = '1';
+		overlay.dataset.wporgCaptionRevealKey     = getActiveImageKey( overlay );
+	}
+
+	/**
+	 * Clears the first reveal waiting state.
+	 *
+	 * @param {HTMLElement} overlay The `.wp-lightbox-overlay` element.
+	 */
+	function clearCaptionRevealPending( overlay ) {
+		delete overlay.dataset.wporgCaptionRevealPending;
+		delete overlay.dataset.wporgCaptionRevealKey;
 	}
 
 	/**
@@ -200,6 +250,8 @@
 			window.clearTimeout( overlay.wporgCaptionRevealTimer );
 			overlay.wporgCaptionRevealTimer = null;
 		}
+
+		clearCaptionRevealPending( overlay );
 	}
 
 	/**
@@ -218,8 +270,11 @@
 			return;
 		}
 
+		markCaptionRevealPending( overlay );
+
 		overlay.wporgCaptionRevealTimer = window.setTimeout( function () {
 			overlay.wporgCaptionRevealTimer = null;
+			clearCaptionRevealPending( overlay );
 
 			if ( ! isOverlayActive( overlay ) || ! caption.classList.contains( 'has-caption' ) ) {
 				return;
@@ -644,8 +699,13 @@
 			return;
 		}
 
+		markCaptionRevealPending( overlay );
+
 		overlay.wporgCaptionSyncTimer = window.setTimeout( function () {
 			overlay.wporgCaptionSyncTimer = null;
+			markOverlaySettled( overlay );
+			clearOverlayMetricCache( overlay );
+			syncCaption( overlay, false );
 			scheduleCaptionReveal( overlay, ensureCaption( overlay ) );
 		}, CAPTION_REVEAL_DELAY );
 	}
@@ -680,6 +740,21 @@
 		}
 
 		if ( shouldSyncImmediately ) {
+			if ( isCaptionRevealPending( overlay ) ) {
+				var pendingKey = overlay.dataset.wporgCaptionRevealKey || '';
+				var currentKey = getActiveImageKey( overlay );
+
+				clearOverlayMetricCache( overlay );
+				syncCaption( overlay, false );
+
+				if ( currentKey !== pendingKey ) {
+					clearCaptionReveal( overlay );
+					scheduleDeferredSync( overlay );
+				}
+
+				return;
+			}
+
 			clearDeferredSync( overlay );
 			clearCaptionReveal( overlay );
 			clearOverlayMetricCache( overlay );
@@ -687,7 +762,6 @@
 			return;
 		}
 
-		markOverlaySettled( overlay );
 		clearOverlayMetricCache( overlay );
 		syncCaption( overlay, false );
 		scheduleDeferredSync( overlay );

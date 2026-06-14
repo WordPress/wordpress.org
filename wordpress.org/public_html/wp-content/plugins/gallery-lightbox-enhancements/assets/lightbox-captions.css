@@ -49,10 +49,9 @@
 	border: 0;
 	border-radius: 12px;
 	overflow-wrap: anywhere;
-	text-wrap: pretty;
 	pointer-events: none;
 	opacity: 0;
-	transition: opacity 120ms ease;
+	transition: opacity 180ms ease-out;
 }
 
 .wp-lightbox-overlay.active > figcaption.wp-lightbox-caption.has-caption.is-ready {

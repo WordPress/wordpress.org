@@ -468,7 +468,6 @@ class Plugin_Directory {
 
 		add_shortcode( Shortcodes\Release_Confirmation::SHORTCODE, array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'display' ) );
 		add_action( 'template_redirect', array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'template_redirect' ) );
-
 		add_filter( 'wp_resource_hints', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'add_resource_hints' ), 10, 2 );
 	}
 
