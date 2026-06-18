@@ -1,6 +1,5 @@
 .site-header {
-	background: #3858e9;
-	background: var(--wp--preset--color--blueberry-1, #3858e9);
+	background: $color__wp-blueberry;
 	padding: 1rem 0;
 	position: relative;
 

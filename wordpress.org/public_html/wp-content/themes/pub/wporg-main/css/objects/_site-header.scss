@@ -1,7 +1,6 @@
 .site-header {
 	.home & {
-		background: #3858e9;
-		background: var(--wp--preset--color--blueberry-1, #3858e9);
+		background: $color__wp-blueberry;
 
 		@include breakpoint( $ms-breakpoint ) {
 			padding: ms( 10 ) ms( 4 );
