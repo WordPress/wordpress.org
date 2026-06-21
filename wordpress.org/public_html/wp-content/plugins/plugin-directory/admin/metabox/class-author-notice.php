@@ -56,7 +56,7 @@ class Author_Notice {
 		if ( $notice['when'] ) {
 			$who = get_user_by( 'id', $notice['who'] );
 			printf(
-				'<span>' . __( 'Last edited by %s <a title="%s">%s ago</a>', 'wporg-plugins' ) . '</span>',
+				'<span>' . __( 'Last edited by %1$s <a title="%2$s">%3$s ago</a>', 'wporg-plugins' ) . '</span>',
 				$who->display_name ?: $who->user_login,
 				gmdate( 'Y-m-d H:i:s', $notice['when'] ),
 				human_time_diff( $notice['when'] )
