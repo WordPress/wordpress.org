@@ -63,11 +63,12 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 				);
 				?>
 			</p>
-			<p><?php _e( 'Our three most common reasons for not approving a plugin are:', 'wporg-plugins' ); ?></p>
+			<p><?php _e( 'Our four most common reasons for not approving a plugin are:', 'wporg-plugins' ); ?></p>
 			<ul>
 				<li><?php printf( __( 'The plugin contains unescaped output: <a href="%s">Learn about Escaping Data</a>', 'wporg-plugins' ), 'https://developer.wordpress.org/apis/security/escaping/' ); ?></li>
 				<li><?php printf( __( 'The plugin accepts unsanitized data: <a href="%s">Learn about Sanitizing Data</a>', 'wporg-plugins' ), 'https://developer.wordpress.org/apis/security/sanitizing/' ); ?></li>
 				<li><?php printf( __( 'The plugin processes form data without a nonce: <a href="%s">Learn about Nonces</a>', 'wporg-plugins' ), 'https://developer.wordpress.org/apis/security/nonces/' ); ?></li>
+				<li><?php printf( __( 'The plugin does not comply with the guidelines: <a href="%s">Check out the guidelines</a>', 'wporg-plugins' ), 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/' ); ?></li>
 			</ul>
 			<p><?php _e( 'If the code in your plugin falls into one of the above categories, <strong>your plugin will not be approved</strong>. The Plugins Team will refer you back to these Handbook pages, adding further delay to the review process.', 'wporg-plugins' ); ?></p>
 
@@ -76,16 +77,17 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 			<p><?php echo wp_kses_post( __( 'Once your plugin is approved, it <em>cannot</em> be renamed.', 'wporg-plugins' ) ); ?></p>
 
 			<h3><?php esc_html_e( 'I made a mistake in my plugin name. Should I update it?', 'wporg-plugins' ); ?></h3>
-			<p><?php
+            <p><?php echo wp_kses_post( __( 'It depends on what you want to change. If you want to change the plugin <strong>display name</strong> you can update that by updating your plugin files in this page. If what you want to change is the <strong>permalink / slug</strong> of your plugin, you can do that ONCE before we begin with the review (if that&#8217;s available you&#8217;ll see a link to change it on this page).', 'wporg-plugins' ) ); ?></p>
+            <p><?php
 				printf(
 					/* translators: %s: Email address */
-					__( 'It depends on what you want to change. If you want to change the plugin <strong>display name</strong> you can update that by updating your plugin files in this page. If what you want to change is the <strong>permalink / slug</strong> of your plugin, you can do that ONCE before we begin with the review (if that&#8217;s available you&#8217;ll see a link to change it on this page). If this is not possible, you will need to contact us at %s, we can change it as long as the plugin has not yet been approved.', 'wporg-plugins' ),
+					__( 'If you can no longer change the slug from this page, please contact us. If your plugin is already under review, <strong>simply reply to the review email</strong>. Otherwise, email us at %s. We can make the change as long as the plugin has not yet been approved.', 'wporg-plugins' ),
 					'<code>plugins@wordpress.org</code>'
 				);
 			?></p>
 
 			<h3><?php esc_html_e( 'Why can&#8217;t I submit a plugin with certain display names?', 'wporg-plugins' ); ?></h3>
-			<p><?php echo wp_kses_post( __( 'Certain plugin names are prohibited due to trademark abuse. Similarly, we prevent their use in plugin slugs entirely for your protection.', 'wporg-plugins' ) ); ?></p>
+			<p><?php echo wp_kses_post( __( 'Certain plugin names are prohibited due to trademark abuse and to avoid confusion with other project names or plugins. Similarly, we prevent their use in plugin slugs entirely for your protection.', 'wporg-plugins' ) ); ?></p>
 		</div>
 	</section>
 </div>
