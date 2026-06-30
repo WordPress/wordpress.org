@@ -141,13 +141,13 @@ class Upload {
 				<p>
 				<?php
 				if ( 1 === (int) $plugins->new ) {
-					esc_html_e( 'Currently there is 1 plugin awaiting review.', 'wporg-plugins' );
+					esc_html_e( 'Currently there is 1 plugin awaiting its first review.', 'wporg-plugins' );
 				} else {
 					printf(
 						/* translators: %s: Amount of plugins awaiting review. */
 						esc_html( _n(
-							'Currently there is %s plugin awaiting review.',
-							'Currently there are %s plugins awaiting review.',
+							'Currently there is %s plugin awaiting their first review.',
+							'Currently there are %s plugins awaiting their first review.',
 							$plugins->new,
 							'wporg-plugins'
 						) ),
@@ -160,7 +160,7 @@ class Upload {
 					printf(
 						/* translators: %s: Date of the oldest new plugin in the queue, with a 36 hours offset. */
 						esc_html( __(
-							'All plugins that have been submitted before %s have received an initial response by email to their submission.',
+							'All new submissions received before %s have been sent an initial response by email.',
 							'wporg-plugins'
 						) ),
 						'<strong>' . esc_html( $queue_oldest_new_plugin_date_with_offset ) . '</strong>'
