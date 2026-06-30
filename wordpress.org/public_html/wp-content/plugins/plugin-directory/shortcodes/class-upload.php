@@ -530,6 +530,7 @@ class Upload {
 				<ul>
 					<li><?php echo wp_kses_post( __( 'Plugins that allow arbitrary code insertion/execution are no longer accepted. This includes but is not limited to: PHP, JavaScript editors, File Managers, and AI tools creating code that is executed on the site.  HTML is fine as long as it is escaped correctly. <i>Reason: Security</i>.', 'wporg-plugins' ) ); ?></li>
 					<li><?php echo wp_kses_post( __( 'Plugins downloading executable code from external sources. <i>Reasons: Security and Guideline 8</i>.', 'wporg-plugins' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( 'Plugins whose functionality is already well represented in the directory, with hundreds of comparable plugins available, and that do not provide meaningful differentiation or introduce substantial innovation. <i>Reason: Guideline 18</i>.', 'wporg-plugins' ) ); ?></li>
 				</ul>
 
 				<h2><?php esc_html_e( 'Step 3: Submission acknowledgement', 'wporg-plugins' ); ?></h2>
