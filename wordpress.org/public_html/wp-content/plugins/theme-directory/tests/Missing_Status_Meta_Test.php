@@ -122,14 +122,17 @@ class Missing_Status_Meta_Test extends TestCase {
 	public function test_theme_information_versions_without_status_meta() {
 		$this->create_repopackage();
 
-		$api = new Themes_API( 'theme_information', array(
-			'slug'   => 'test-theme',
-			'fields' => array(
-				'versions'       => true,
-				'downloaded'     => false,
-				'screenshot_url' => false,
-			),
-		) );
+		$api = new Themes_API(
+			'theme_information',
+			array(
+				'slug'   => 'test-theme',
+				'fields' => array(
+					'versions'       => true,
+					'downloaded'     => false,
+					'screenshot_url' => false,
+				),
+			)
+		);
 
 		$this->assertObjectNotHasProperty( 'error', $api->response );
 		$this->assertSame( array(), $api->response->versions );
@@ -147,14 +150,17 @@ class Missing_Status_Meta_Test extends TestCase {
 			),
 		) );
 
-		$api = new Themes_API( 'theme_information', array(
-			'slug'   => 'test-theme',
-			'fields' => array(
-				'versions'       => true,
-				'downloaded'     => false,
-				'screenshot_url' => false,
-			),
-		) );
+		$api = new Themes_API(
+			'theme_information',
+			array(
+				'slug'   => 'test-theme',
+				'fields' => array(
+					'versions'       => true,
+					'downloaded'     => false,
+					'screenshot_url' => false,
+				),
+			)
+		);
 
 		$this->assertObjectNotHasProperty( 'error', $api->response );
 		$this->assertSame( array( '1.0', '1.1' ), array_keys( $api->response->versions ) );

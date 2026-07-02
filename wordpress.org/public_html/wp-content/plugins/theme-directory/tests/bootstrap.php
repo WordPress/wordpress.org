@@ -11,26 +11,25 @@ if ( 'cli' !== php_sapi_name() ) {
 	return;
 }
 
-ini_set( 'display_errors', 'on' );
-error_reporting( E_ALL );
-
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
-// Check if installed in a src checkout.
-if ( ! $_tests_dir && false !== ( $pos = stripos( __FILE__, '/src/wp-content/plugins/' ) ) ) {
-	$_tests_dir = substr( __FILE__, 0, $pos ) . '/tests/phpunit/';
-}
-// Check for wp-env test directory.
-elseif ( ! $_tests_dir && file_exists( '/wordpress-phpunit/includes/functions.php' ) ) {
-	$_tests_dir = '/wordpress-phpunit/';
-}
-// Elseif no path yet, assume a temp directory path.
-elseif ( ! $_tests_dir ) {
-	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib/tests/phpunit/';
+if ( ! $_tests_dir ) {
+	$pos = stripos( __FILE__, '/src/wp-content/plugins/' );
+
+	if ( false !== $pos ) {
+		// Installed in a src checkout.
+		$_tests_dir = substr( __FILE__, 0, $pos ) . '/tests/phpunit/';
+	} elseif ( file_exists( '/wordpress-phpunit/includes/functions.php' ) ) {
+		// wp-env test directory.
+		$_tests_dir = '/wordpress-phpunit/';
+	} else {
+		// Assume a temp directory path.
+		$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib/tests/phpunit/';
+	}
 }
 
 if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
-	echo "Could not find $_tests_dir/includes/functions.php\n";
+	fwrite( STDERR, "Could not find {$_tests_dir}/includes/functions.php\n" );
 	exit( 1 );
 }
 
