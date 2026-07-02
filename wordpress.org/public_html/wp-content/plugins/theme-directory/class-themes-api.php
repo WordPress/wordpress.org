@@ -866,7 +866,8 @@ class Themes_API {
 		if ( $this->fields['versions'] ) {
 			$phil->versions = array();
 
-			foreach ( array_keys( get_post_meta( $theme->ID, '_status', true ) ) as $version ) {
+			$status = get_post_meta( $theme->ID, '_status', true );
+			foreach ( is_array( $status ) ? array_keys( $status ) : array() as $version ) {
 				$phil->versions[ $version ] = $repo_package->download_url( $version );
 			}
 		}
