@@ -787,7 +787,7 @@ class WPORG_Themes_Upload {
 				}
 
 				if ( $is_new_upload && $this->theme_post ) {
-					wp_delete_post( $this->theme_post->ID, true );
+					$this->delete_theme_post();
 				}
 
 				return new WP_Error(
@@ -1447,6 +1447,24 @@ TICKET;
 		foreach ( $post_meta as $meta_key => $meta_value ) {
 			$this->update_versioned_meta( $meta_key, $meta_value );
 		}
+	}
+
+	/**
+	 * Deletes the theme post.
+	 *
+	 * Used to clean up a freshly created post when a new upload fails.
+	 * Temporarily detaches the fail-safe that prevents repopackages from
+	 * being deleted, which would otherwise wp_die() before the post is
+	 * removed, leaving an orphaned post without versioned meta behind.
+	 *
+	 * @return WP_Post|false|null Post data on success, false or null on failure.
+	 */
+	public function delete_theme_post() {
+		remove_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
+		$result = wp_delete_post( $this->theme_post->ID, true );
+		add_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
+
+		return $result;
 	}
 
 	/**

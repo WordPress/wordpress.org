@@ -116,6 +116,23 @@ class Missing_Status_Meta_Test extends TestCase {
 	}
 
 	/**
+	 * Cleaning up a failed new upload should delete the theme post despite
+	 * the fail-safe against repopackage deletion, and restore the fail-safe
+	 * afterwards.
+	 */
+	public function test_delete_theme_post_bypasses_deletion_fail_safe() {
+		$post   = $this->create_repopackage();
+		$upload = new WPORG_Themes_Upload();
+
+		$upload->theme_post = $post;
+		$result             = $upload->delete_theme_post();
+
+		$this->assertNotEmpty( $result );
+		$this->assertNull( get_post( $post->ID ) );
+		$this->assertSame( 10, has_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' ) );
+	}
+
+	/**
 	 * The themes API should return an empty `versions` array for a published
 	 * theme missing the `_status` meta, rather than fataling.
 	 */
