@@ -1,4 +1,4 @@
-*
+/*
  * wp-trac-jinja-compat.js
  *
  * JS half of the behaviours the old Genshi site.html did server-side with
