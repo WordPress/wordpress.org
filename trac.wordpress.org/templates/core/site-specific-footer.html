@@ -1,16 +1,4 @@
-<html xmlns="http://www.w3.org/1999/xhtml"
-     xmlns:py="http://genshi.edgewall.org/"
-     xmlns:xi="http://www.w3.org/2001/XInclude"
-     py:strip="">
-
-<head py:match="head" py:attrs="select('@*')">
-${select('*|comment()|text()')}
-<link rel="stylesheet" href="https://s.w.org/wp-content/plugins/trac-notifications/make-core.css?ver=7" />
-</head>
-
-<body py:match="body" py:attrs="select('@*')">
-${select('*|comment()|text()')}
-
+{# core.trac — end-of-<body> additions, included by the shared site_footer.html. #}
 <div id="report-popup"></div>
 <script>
 var wpTracContributorLabels = {
@@ -148,5 +136,3 @@ var wpTracAutoCompleteUsers = {
 };
 
 </script>
-</body>
-</html>
