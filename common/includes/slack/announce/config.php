@@ -105,6 +105,7 @@ function get_whitelist() {
 		),
 		'contributor-mentorship' => $wordcamp_central,
 		'core' => array_merge( get_committers(), array(
+			'adrianduffell', // @Adrian Duffell on Slack
 			'akshayar', // @akshaya on Slack
 			'amykamala', // @amy kamala on Slack
 			'angelasjin',
@@ -131,6 +132,7 @@ function get_whitelist() {
 			'juanmaguitar',
 			'justinahinon',
 			'karmatosed',
+			'krupajnanda', // @Krupa on Slack
 			'laurora', // @laura on Slack
 			'lukecarbis',
 			'mapk',
@@ -150,6 +152,7 @@ function get_whitelist() {
 			'psykro', // @Jonathan on Slack
 			'rajinsharwar', // @Rajin Sharwar on Slack
 			'sabernhardt',
+			'sajjad67', // @saj1ad on Slack
 			'SirLouen',
 			'sncoker', // @shawntellecoker on Slack
 			'stoyangeorgiev', // @Stoyan Georgiev on Slack
