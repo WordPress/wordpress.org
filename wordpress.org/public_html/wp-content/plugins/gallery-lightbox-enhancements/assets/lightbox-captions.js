@@ -14,7 +14,10 @@
  */
 
 ( function () {
-	var CAPTION_REVEAL_DELAY  = 430;
+	// Delay the first caption reveal until core's lightbox zoom sizing has settled.
+	var CAPTION_REVEAL_DELAY = 430;
+
+	// Synthetic Plugin Directory screenshot IDs start here; ordinary images stay unmanaged.
 	var SCREENSHOT_ID_OFFSET = 9000000;
 
 	/**
@@ -899,11 +902,6 @@
 		 * transitions can move which container is on screen).
 		 */
 		var classObserver = new MutationObserver( function () {
-			if ( isOverlayActive( overlay ) ) {
-				requestSettledSync( overlay );
-				return;
-			}
-
 			requestSettledSync( overlay );
 		} );
 		classObserver.observe( overlay, { attributes: true, attributeFilter: [ 'class' ] } );
