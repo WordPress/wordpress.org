@@ -1519,7 +1519,7 @@ class Plugin_Directory {
 	/**
 	 * Output a JPEG share image for a given plugin.
 	 */
-	function share_image_route() {
+	public function share_image_route() {
 		$slug = get_query_var( 'plugin_share_image' );
 
 		if ( ! $slug ) {
