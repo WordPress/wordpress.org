@@ -483,6 +483,16 @@ class Template {
 	}
 
 	/**
+	 * Retrieve the dynamic share image URL for a plugin.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object.
+	 * @return string|false
+	 */
+	public static function get_share_image_url( $post = null ) {
+		return Plugin_Share_Image::get_url( $post );
+	}
+
+	/**
 	 * Retrieve the Plugin banner details for a plugin.
 	 *
 	 * @static
