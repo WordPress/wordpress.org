@@ -662,7 +662,7 @@ abstract class Directory_Compat {
 			}
 			$url = home_url( user_trailingslashit( $url ) );
 
-		// Unpretty permalinks.
+			// Unpretty permalinks.
 		} else {
 			$url = add_query_arg( array(
 				bbp_get_view_rewrite_id() => $view,

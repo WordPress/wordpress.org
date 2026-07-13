@@ -177,7 +177,7 @@ function breadcrumb() { ?>
 		<?php endif; // is_search ?>
 
 	</h2>
-<?php
+	<?php
 }
 
 function sc_feed_author( $author ) {

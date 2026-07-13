@@ -157,7 +157,7 @@ get_header();
 				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
 				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
 			);
-		?></p>
+			?></p>
 	</div>
 	<?php } ?>
 
@@ -193,9 +193,9 @@ get_header();
 	?>
 
 	<?php
-		if ( $error_recapcha_status ) {
-			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
-		}
+	if ( $error_recapcha_status ) {
+		echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
+	}
 	?>
 
 	<p class="login-submit">

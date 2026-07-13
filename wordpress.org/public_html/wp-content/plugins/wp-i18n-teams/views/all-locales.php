@@ -22,7 +22,7 @@
 			$string = sprintf( $string, sprintf( '<strong class="i18n-label %s">%s</strong>', $status, $locale_data['status_counts'][ $status ] ) );
 			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', $status, $status, $string );
 		}
-	?>
+		?>
 	</p>
 
 	<p class="locale-filters">
@@ -50,7 +50,7 @@
 			$string = sprintf( $string, sprintf( '<strong class="i18n-label %s">%s</strong>', $status, $locale_data['status_counts'][ $status ] ) );
 			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', $status, $status, $string );
 		}
-	?>
+		?>
 	</p>
 
 	<table>
@@ -97,15 +97,15 @@
 
 					<td data-column-title="<?php esc_attr_e( 'Version', 'wporg' ); ?>" class="center no-right-border">
 						<?php
-							if ( $locale_data[ $locale->wp_locale ]['rosetta_site_url'] ) {
-								if ( $locale_data[ $locale->wp_locale ]['latest_release'] ) {
-									echo esc_html( $locale_data[ $locale->wp_locale ]['latest_release'] );
-								} else {
-									_e( 'None', 'wporg' );
-								}
+						if ( $locale_data[ $locale->wp_locale ]['rosetta_site_url'] ) {
+							if ( $locale_data[ $locale->wp_locale ]['latest_release'] ) {
+								echo esc_html( $locale_data[ $locale->wp_locale ]['latest_release'] );
 							} else {
-								_e( 'No&nbsp;site', 'wporg' );
+								_e( 'None', 'wporg' );
 							}
+						} else {
+							_e( 'No&nbsp;site', 'wporg' );
+						}
 						?>
 					</td>
 					<td class="center no-left-border nowrap">

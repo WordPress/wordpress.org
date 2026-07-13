@@ -69,8 +69,8 @@ function add_single_translation_activity( GP_Translation $new_translation, ?GP_T
 			'user_id'   => $new_translation->user_id,
 		);
 
-	// Editor is approving a suggested string.
-	// Avoid sending a notification when a `current` post is re-saved, like when dismissing warnings.
+		// Editor is approving a suggested string.
+		// Avoid sending a notification when a `current` post is re-saved, like when dismissing warnings.
 	} elseif ( 'current' === $new_translation->status && isset( $previous_translation->status ) && 'current' !== $previous_translation->status ) {
 		$activities[] = array(
 			'component' => 'glotpress',

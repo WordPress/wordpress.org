@@ -52,7 +52,7 @@ function wporg_get_trac_ticket_subscription_status( $username, $ticket ) {
 	 * 
 	 * The replacement is a HTTP API call via Trac_Notifications_API::get_trac_ticket_subscription_status_for_user( $ticket, $username )
 	 */
-/*
+	/*
 	global $wpdb;
 	add_db_table( 'trac_core', '_ticket_subs' ); // HyperDB
 	$status = $wpdb->get_var( $wpdb->prepare(
@@ -63,7 +63,7 @@ function wporg_get_trac_ticket_subscription_status( $username, $ticket ) {
 	if ( is_numeric( $status ) ) {
 		return (int) $status;
 	}
-*/
+	*/
 	return false;
 }
 

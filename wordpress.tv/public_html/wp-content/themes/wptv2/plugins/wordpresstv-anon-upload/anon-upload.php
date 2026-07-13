@@ -503,9 +503,9 @@ class WPTV_Anon_Upload {
 							<?php
 								// Find the year cat
 								$cat = get_term_by( 'name', substr( $meta['recorded'], 0, 4 ), 'category' );
-								if ( $cat ) {
-									echo '<a href="#in-category-' . $cat->term_id . '" class="button-secondary anon-approve anon-cat-link" title="Click to approve">Approve</a>';
-								}
+							if ( $cat ) {
+								echo '<a href="#in-category-' . $cat->term_id . '" class="button-secondary anon-approve anon-cat-link" title="Click to approve">Approve</a>';
+							}
 							?>
 							
 						</p>
@@ -518,11 +518,11 @@ class WPTV_Anon_Upload {
 							<?php
 								$cats = preg_replace( '/[^0-9,]+/', '', trim( $meta['categories'], ' ,' ) );
 								$cats = explode( ',', $cats );
-								foreach ( $cats as $cat ) {
-									if ( intval( $cat ) ) {
-										echo '<a href="#in-category-' . $cat . '-2" class="anon-cat-link" title="Click to approve">Unknown?</a>, ';
-									}
+							foreach ( $cats as $cat ) {
+								if ( intval( $cat ) ) {
+									echo '<a href="#in-category-' . $cat . '-2" class="anon-cat-link" title="Click to approve">Unknown?</a>, ';
 								}
+							}
 							?>
 						</p>
 					</div>
@@ -624,7 +624,7 @@ class WPTV_Anon_Upload {
 				});
 			})(jQuery);
 		</script>
-	<?php
+		<?php
 	}
 }
 

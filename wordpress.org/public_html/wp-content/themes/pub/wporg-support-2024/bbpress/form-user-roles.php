@@ -8,7 +8,7 @@
  * that causes us to need to filter capabilities and the resulting UI.
  */
 if ( bbp_is_user_keymaster( get_current_user_id() ) ) {
-?><div>
+	?><div>
 	<label for="role"><?php esc_html_e( 'Blog Role', 'wporg-forums' ); ?></label>
 
 	<?php bbp_edit_user_blog_role(); ?>

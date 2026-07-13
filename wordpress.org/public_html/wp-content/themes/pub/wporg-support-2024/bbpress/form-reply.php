@@ -43,7 +43,7 @@ if ( bbp_is_reply_edit() ) : ?>
 								esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies, however your posting capabilities still allow you to post.', 'wporg-forums' ),
 								bbp_get_forum_title( bbp_get_topic_forum_id() )
 							);
-						?></p>
+							?></p>
 					</div>
 
 				<?php endif; ?>
@@ -212,19 +212,19 @@ if ( bbp_is_reply_edit() ) : ?>
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
 			<p><?php
-				if ( wporg_support_is_single_review() ) {
-					if ( is_user_logged_in() ) {
-						esc_html_e( 'You cannot reply to this review.', 'wporg-forums' );
-					} else {
-						printf( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() );
-					}
+			if ( wporg_support_is_single_review() ) {
+				if ( is_user_logged_in() ) {
+					esc_html_e( 'You cannot reply to this review.', 'wporg-forums' );
 				} else {
-					if ( is_user_logged_in() ) {
-						esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' );
-					} else {
-						printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() );
-					}
+					printf( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() );
 				}
+			} else {
+				if ( is_user_logged_in() ) {
+					esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' );
+				} else {
+					printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() );
+				}
+			}
 			?></p>
 			<?php if ( current_user_can( bbp_get_spectator_role() ) && ! bbp_is_topic_closed() && ! bbp_is_forum_closed( bbp_get_topic_forum_id() ) ) : ?>
 				<p><?php
@@ -237,7 +237,7 @@ if ( bbp_is_reply_edit() ) : ?>
 						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
 						WordPressdotorg\Forums\MODERATION_EMAIL
 					);
-				?></p>
+					?></p>
 			<?php endif; ?>
 		</div>
 	</div>

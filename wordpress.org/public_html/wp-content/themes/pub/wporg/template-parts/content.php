@@ -13,7 +13,7 @@ namespace WordPressdotorg\Theme;
 	<header class="entry-header">
 		<?php if ( is_sticky() && is_home() && ! is_paged() ) : ?>
 			<span class="sticky-post"><?php esc_html_e( 'Featured', 'wporg' ); ?></span>
-		<?php
+			<?php
 		endif;
 
 		if ( is_single() ) : // phpcs:ignore Generic.WhiteSpace.ScopeIndent.IncorrectExact
@@ -42,7 +42,7 @@ namespace WordPressdotorg\Theme;
 				'pagelink'    => '<span class="screen-reader-text">' . __( 'Page', 'wporg' ) . ' </span>%',
 				'separator'   => '<span class="screen-reader-text">, </span>',
 			) );
-		?>
+			?>
 	</div><!-- .entry-content -->
 
 	<footer class="entry-footer">

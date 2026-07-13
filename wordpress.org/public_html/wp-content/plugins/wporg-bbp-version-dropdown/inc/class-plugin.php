@@ -62,7 +62,7 @@ class Plugin {
 		if ( bbp_is_topic_form_post_request() && isset( $_POST[ self::META_KEY ] ) ) {
 			$version = $this->sanitize_wp_version( $_POST[ self::META_KEY ] );
 
-		// No post value passed
+			// No post value passed
 		} else if ( bbp_is_single_topic() || bbp_is_topic_edit() ) {
 			$version = $this->get_topic_version( array( 'id' => bbp_get_topic_id() ) );
 			if ( false === $version ) {

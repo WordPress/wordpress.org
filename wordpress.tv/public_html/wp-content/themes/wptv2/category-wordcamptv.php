@@ -66,7 +66,7 @@ global $wptv;
 				'depth'          => 1,
 				'walker'         => new WordCampTV_Walker_Nav_Menu,
 			) );
-		?>
+			?>
 
 	</div><!-- .primary-content -->
 	<?php get_sidebar( 'wordcamptv' ); ?>

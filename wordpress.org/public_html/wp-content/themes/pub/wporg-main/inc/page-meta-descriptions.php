@@ -273,7 +273,7 @@ function sites_attributes_schema() {
 	]
 }
 </script>
-<?php
+	<?php
 }
 add_action( 'wp_head', __NAMESPACE__ . '\sites_attributes_schema' );
 

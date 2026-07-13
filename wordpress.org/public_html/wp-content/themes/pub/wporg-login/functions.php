@@ -428,7 +428,7 @@ function wporg_login_canonical_url( $canonical ) {
 	if ( false === $matching_route ) {
 		$canonical = home_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
 
-	// Else, if there's a long enough slug followed by a `/`, that's a parent page.
+		// Else, if there's a long enough slug followed by a `/`, that's a parent page.
 	} elseif ( $matching_route >= 3 && '/' === substr( WP_WPOrg_SSO::$matched_route_regex, $matching_route + 1, 1 ) ) {
 		$canonical = home_url( substr( WP_WPOrg_SSO::$matched_route_regex, 0, $matching_route ) );
 

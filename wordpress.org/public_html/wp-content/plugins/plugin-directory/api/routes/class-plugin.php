@@ -388,7 +388,7 @@ class Plugin extends Base {
 	protected function get_plugin_reviews_markup_singular( $review ) {
 		$reviewer = get_user_by( 'id', $review->post_author );
 		ob_start();
-?>
+		?>
 <div class="review">
 	<div class="review-head">
 		<div class="reviewer-info">
@@ -427,7 +427,7 @@ class Plugin extends Base {
 	</div>
 	<div class="review-body"><?php echo $review->post_content; ?></div>
 </div>
-<?php
+		<?php
 		return ob_get_clean();
 	}
 

@@ -28,9 +28,9 @@
 			<?php if ( bbp_is_subscriptions()                           ) bbp_get_template_part( 'user', 'subscriptions'     ); ?>
 
 			<?php
-				if ( function_exists( 'bbp_is_single_user_engagements' ) && bbp_is_single_user_engagements() ) {
-					bbp_get_template_part( 'user', 'engagements' );
-				}
+			if ( function_exists( 'bbp_is_single_user_engagements' ) && bbp_is_single_user_engagements() ) {
+				bbp_get_template_part( 'user', 'engagements' );
+			}
 			?>
 
 			<?php if ( bbp_is_single_user_topics()                      ) bbp_get_template_part( 'user', 'topics-created'    ); ?>

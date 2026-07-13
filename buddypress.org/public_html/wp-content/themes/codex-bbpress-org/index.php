@@ -6,8 +6,8 @@
 				printf( __( 'Published on %1$s by %2$s', 'bbporg' ),
 					get_the_time( 'F jS, Y' ),
 					get_the_author_link()
-				);
-			?></cite>
+				  );
+					?></cite>
 			<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_excerpt(); ?></div>
 <?php endwhile;  ?>
 

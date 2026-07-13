@@ -10,12 +10,12 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			wp_safe_redirect( '/news/feed/' . ( 'feed' !== get_query_var('feed') ? get_query_var('feed') : '' ), 301 );
 			exit;
 
-		// temp fix for /Blocks, rm later
+			// temp fix for /Blocks, rm later
 		} elseif ( 0 === strpos( $_SERVER['REQUEST_URI'], '/Blocks' ) ) {
 			wp_safe_redirect( '/blocks/', 301 );
 			exit;
 
-		// WordPress.org does not have a specific site search, only the global WordPress.org search
+			// WordPress.org does not have a specific site search, only the global WordPress.org search
 		} elseif ( ! empty( $_GET['s'] ) && false === strpos( $_SERVER['REQUEST_URI'], '/search/' ) ) {
 			wp_safe_redirect( '/search/' . urlencode( wp_unslash( $_GET['s'] ) ) . '/', 301 );
 			exit;
@@ -213,7 +213,7 @@ function wporg_redirect_site_not_found() {
 		case 'wp20.wordpress.org':
 		case 'jobs.wordpress.org':
 		case 'playground.wordpress.org':
-		// Default Theme Demo sites are on WordPress.net
+			// Default Theme Demo sites are on WordPress.net
 		case '2017.wordpress.org':
 		case '2019.wordpress.org':
 		case '2020.wordpress.org':

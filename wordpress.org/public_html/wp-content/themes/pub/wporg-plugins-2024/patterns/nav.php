@@ -29,9 +29,9 @@
 
 <?php
 	$lang_suggest_endpoint = rest_url( '/plugins/v2/locale-banner' );
-	if ( is_singular( 'plugin' ) ) {
-		$lang_suggest_endpoint = add_query_arg( 'plugin_slug', get_queried_object()->post_name, $lang_suggest_endpoint );
-	}
+if ( is_singular( 'plugin' ) ) {
+	$lang_suggest_endpoint = add_query_arg( 'plugin_slug', get_queried_object()->post_name, $lang_suggest_endpoint );
+}
 ?>
 <!-- wp:wporg/language-suggest {"align":"full","endpoint":"<?php echo esc_attr( $lang_suggest_endpoint ); ?>"} -->
 <div class="wp-block-wporg-language-suggest alignfull" data-endpoint="<?php echo esc_attr( $lang_suggest_endpoint ); ?>"></div>

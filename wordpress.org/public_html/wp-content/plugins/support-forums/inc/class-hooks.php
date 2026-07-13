@@ -536,7 +536,7 @@ class Hooks {
 			if ( bbpress()->displayed_user && bbpress()->displayed_user->has_cap( bbp_get_blocked_role() ) ) {
 				$robots = true;
 
-			// Users with no Topics/Replies/Reviews are not indexed.
+				// Users with no Topics/Replies/Reviews are not indexed.
 			} elseif (
 				! wporg_support_get_user_topics_count() &&
 				! bbp_get_user_reply_count_raw() &&
@@ -544,7 +544,7 @@ class Hooks {
 			) {
 				$robots = true;
 
-			// Noindex all of the single user subpages.
+				// Noindex all of the single user subpages.
 			} elseif ( ! bbp_is_single_user_profile() ) {
 				$robots = true;
 			}

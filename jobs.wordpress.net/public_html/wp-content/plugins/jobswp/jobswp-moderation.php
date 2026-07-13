@@ -84,21 +84,21 @@ class Jobs_Dot_WP_Moderation {
 				echo '<tr>';
 				echo '<td><a href="' . esc_url( get_edit_post_link( $similar_job->ID ) ) . '">' . esc_html( $similar_job->post_title ) . '</a></td>';
 				echo '<td>' . $similar_job->post_status . '</td>';
-    // Output job categories
-    echo '<td>';
-    $job_categories = get_the_terms($similar_job->ID, 'job_category');
-    if ($job_categories && !is_wp_error($job_categories)) {
-        $category_names = wp_list_pluck($job_categories, 'name');
-        echo implode(', ', $category_names);
-    }
-    echo '</td>';
+				// Output job categories
+				echo '<td>';
+				$job_categories = get_the_terms($similar_job->ID, 'job_category');
+				if ($job_categories && !is_wp_error($job_categories)) {
+					$category_names = wp_list_pluck($job_categories, 'name');
+					echo implode(', ', $category_names);
+				}
+				echo '</td>';
 				echo '<td>' . get_post_meta( $similar_job->ID, 'first_name', true ) . ' ' . get_post_meta( $similar_job->ID, 'last_name', true ) . '</td>';
 				echo '<td>' . get_post_meta( $similar_job->ID, 'email', true ) . '</td>';
-echo '<td>';
-if ( $similar_job->post_content === $post->post_content ) {
-	echo 'Same job description';
-}
-echo '</td>';
+				echo '<td>';
+				if ( $similar_job->post_content === $post->post_content ) {
+					echo 'Same job description';
+				}
+				echo '</td>';
 				echo '</tr>';
 			}
 	

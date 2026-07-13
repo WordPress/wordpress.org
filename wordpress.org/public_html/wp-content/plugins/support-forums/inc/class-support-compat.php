@@ -268,7 +268,7 @@ class Support_Compat {
 			$url = $wp_rewrite->root . "view/{$view}/" . $this->user->user_nicename;
 			$url = home_url( user_trailingslashit( $url ) );
 
-		// Unpretty permalinks.
+			// Unpretty permalinks.
 		} else {
 			$url = add_query_arg( array(
 				bbp_get_view_rewrite_id() => $view,
@@ -609,7 +609,7 @@ class Support_Compat {
 				$forum_id = absint( $segments[ $count - 2 ] );
 				$topic_id = absint( $segments[ $count - 1 ] );
 
-			// {...}/{forum_id} - but not /page/{n}/ pagination.
+				// {...}/{forum_id} - but not /page/{n}/ pagination.
 			} elseif (
 				$count >= 1 &&
 				ctype_digit( $segments[ $count - 1 ] ) &&

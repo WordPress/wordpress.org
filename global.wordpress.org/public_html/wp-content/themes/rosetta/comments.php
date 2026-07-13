@@ -33,8 +33,8 @@ if ( post_password_required() ) {
 
 	<?php
 		// If comments are closed and there are comments, let's leave a little note, shall we?
-		if ( ! comments_open() && get_comments_number() ) :
-	?>
+	if ( ! comments_open() && get_comments_number() ) :
+		?>
 		<p class="no-comments"><?php _e( 'Comments are closed.', 'rosetta' ); ?></p>
 	<?php endif; ?>
 

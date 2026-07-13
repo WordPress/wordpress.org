@@ -61,7 +61,7 @@ class Reviews {
 						<div class="review-content"><?php echo wp_strip_all_tags( get_the_content() ); ?></div>
 					</div>
 				</article>
-			<?php
+				<?php
 			}
 
 			// Reset back to the plugin post.
@@ -69,7 +69,7 @@ class Reviews {
 			if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 				restore_current_blog();
 			}
-		?>
+			?>
 		</div>
 
 		<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/' ); ?>">

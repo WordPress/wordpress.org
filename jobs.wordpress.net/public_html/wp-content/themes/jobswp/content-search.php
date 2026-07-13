@@ -10,6 +10,6 @@
 
 	get_template_part( 'content', 'list' );
 
-?>
+	?>
 
 </div>

@@ -23,11 +23,11 @@
 
 		<?php if ( in_array( bbp_get_view_id(), array( 'spam', 'pending', 'archived' ) ) ) : ?>
 
-		<?php bbp_get_template_part( 'loop',       'posts'     ); ?>
+			<?php bbp_get_template_part( 'loop',       'posts'     ); ?>
 
 		<?php else : ?>
 
-		<?php bbp_get_template_part( 'loop',       'topics'    ); ?>
+			<?php bbp_get_template_part( 'loop',       'topics'    ); ?>
 
 		<?php endif; ?>
 

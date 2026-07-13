@@ -174,12 +174,12 @@ class Markdown_Import {
 			placeholder="Enter a URL representing a markdown file to import"
 			size="50" />
 		</label> <?php
-			if ( $markdown_source ) :
-				$update_link = add_query_arg( array(
-					self::$submit_name => 'import',
-					self::$nonce_name  => wp_create_nonce( self::$input_name ),
-				), get_edit_post_link( $post->ID, 'raw' ) );
-				?>
+		if ( $markdown_source ) :
+			$update_link = add_query_arg( array(
+				self::$submit_name => 'import',
+				self::$nonce_name  => wp_create_nonce( self::$input_name ),
+			), get_edit_post_link( $post->ID, 'raw' ) );
+			?>
 				<a class="button button-small button-primary" href="<?php echo esc_url( $update_link ); ?>">Import</a>
 			<?php endif; ?>
 		<?php wp_nonce_field( self::$input_name, self::$nonce_name ); ?>

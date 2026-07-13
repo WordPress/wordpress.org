@@ -229,7 +229,7 @@ function locale_notice() {
 		if ( isset( $mapped_locales[ $current_locale ] ) ) {
 			$contribute_url .= $mapped_locales[ $current_locale ] . '/default';
 		}
-	?>
+		?>
 		<div class="wp15-locale-notice">
 			<p>
 				<?php

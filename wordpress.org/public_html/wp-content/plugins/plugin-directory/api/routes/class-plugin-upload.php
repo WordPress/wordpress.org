@@ -210,7 +210,7 @@ class Plugin_Upload extends Base {
 		$email_content = sprintf(
 			// translators: 1: plugin slug.
 			__(
-'Your request to change your plugin slug to %1$s has been received and will be reviewed by our team.
+		'Your request to change your plugin slug to %1$s has been received and will be reviewed by our team.
 
 We will contact you when your plugin has been approved or if we have any questions.
 

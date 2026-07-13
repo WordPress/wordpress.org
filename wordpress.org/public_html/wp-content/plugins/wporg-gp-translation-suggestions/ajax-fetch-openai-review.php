@@ -33,12 +33,12 @@ $gp_chatgpt_custom_prompt = false;
 
 $default_sort = get_user_option( 'gp_default_sort' );
 if ( is_array( $default_sort ) ) {
-		if ( isset( $default_sort['openai_api_key'] ) ) {
-			$openai_key = $default_sort['openai_api_key'];
-		}
-		if ( isset( $default_sort['openai_custom_prompt'] ) ) {
-			$gp_chatgpt_custom_prompt = $default_sort['openai_custom_prompt'];
-		}
+	if ( isset( $default_sort['openai_api_key'] ) ) {
+		$openai_key = $default_sort['openai_api_key'];
+	}
+	if ( isset( $default_sort['openai_custom_prompt'] ) ) {
+		$gp_chatgpt_custom_prompt = $default_sort['openai_custom_prompt'];
+	}
 }
 if ( ! $openai_key ) {
 	echo '{"success":false","data":{"error":"no-openai-key","status":404}}';

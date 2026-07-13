@@ -26,9 +26,9 @@ if ( 'cli' !== php_sapi_name() ) {
 require_once dirname( __FILE__ ) . '/wp-credits.php';
 
 if ( ! function_exists( 'like_escape' ) ) :
-function like_escape( $text ) {
-	return str_replace( array( "%", "_") , array( "\\%", "\\_" ), $text );
-}
+	function like_escape( $text ) {
+		return str_replace( array( "%", "_") , array( "\\%", "\\_" ), $text );
+	}
 endif;
 
 if ( ! empty( $_GET['version'] ) ) {

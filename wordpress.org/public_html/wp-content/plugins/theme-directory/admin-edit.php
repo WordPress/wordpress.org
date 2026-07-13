@@ -589,7 +589,7 @@ function wporg_themes_meta_box_callback( $post ) {
 				<option value="old" <?php selected( $status, 'old' ); ?>><?php esc_html_e( 'Old', 'wporg-themes' ); ?></option>
 			</select>
 		</p>
-	<?php
+		<?php
 	endforeach;
 }
 

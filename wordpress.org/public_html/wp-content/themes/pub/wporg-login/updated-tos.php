@@ -53,7 +53,7 @@ get_header();
 		__u( 'Welcome back %s, Some of our policies have been updated, please review the items below before continuing.', 'wporg' ),
 		$user->display_name ?: $user->user_login
 	);
-?></p>
+	?></p>
 
 <p>&nbsp;</p>
 

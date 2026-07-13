@@ -73,7 +73,7 @@ function bb_base_register_stylesheets() {
 add_action( 'wp_enqueue_scripts', 'bb_base_register_stylesheets' );
 
 function bb_base_topic_search_form() {
-?>
+	?>
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
@@ -83,11 +83,11 @@ function bb_base_topic_search_form() {
 		</div>
 	</form>
 
-<?php
+	<?php
 }
 
 function bb_base_reply_search_form() {
-?>
+	?>
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
@@ -97,11 +97,11 @@ function bb_base_reply_search_form() {
 		</div>
 	</form>
 
-<?php
+	<?php
 }
 
 function bb_base_plugin_search_form() {
-?>
+	?>
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
@@ -111,7 +111,7 @@ function bb_base_plugin_search_form() {
 		</div>
 	</form>
 
-<?php
+	<?php
 }
 
 function bb_base_topic_search_query( $escaped = true ) {
@@ -182,8 +182,8 @@ function bb_base_single_topic_description() {
 				esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id() ) ),
 				bbp_get_topic_forum_title()
 			)
-		);
-	?></li>
+							);
+							?></li>
 	<?php if ( !empty( $reply_count ) ) : ?>
 		<li class="reply-count"><?php echo $reply_count; ?></li>
 	<?php endif; ?>
@@ -195,8 +195,8 @@ function bb_base_single_topic_description() {
 			/* translators: %s: reply author link */
 			printf( __( 'Last voice: %s', 'bborg' ),
 				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) )
-			);
-		?></li>
+										   );
+											?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="topic-freshness-time"><?php
@@ -234,7 +234,7 @@ function bb_base_single_forum_description() {
 		$topic_text      = bbp_get_forum_topics_link( $forum_id );
 		$time_since      = bbp_get_forum_freshness_link( $forum_id );
 
-	// Forum has no last active data
+		// Forum has no last active data
 	} else {
 		$topic_text      = sprintf( _n( '%s topic', '%s topics', $topic_count, 'bborg' ), bbp_number_format( $topic_count ) );
 	}
@@ -248,8 +248,8 @@ function bb_base_single_forum_description() {
 					esc_url( bbp_get_forum_permalink( bbp_get_forum_parent_id() ) ),
 					bbp_get_forum_title( bbp_get_forum_parent_id() )
 				)
-			);
-		?></li>
+								 );
+									?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $topic_count ) ) : ?>
 		<li class="topic-count"><?php echo $topic_text; ?></li>
@@ -262,8 +262,8 @@ function bb_base_single_forum_description() {
 			/* translators: %s: post author link */
 			printf( __( 'Last voice: %s', 'bborg' ),
 				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) )
-			);
-		?></li>
+										   );
+											?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="forum-freshness-time"><?php
@@ -553,7 +553,7 @@ function bb_base_recount_current_thing() {
 		// Redirect without _GET
 		bbp_redirect( bbp_get_topic_permalink() );
 
-	// Refresh forum data
+		// Refresh forum data
 	} elseif ( bbp_is_single_forum() ) {
 
 		// Get the forum ID

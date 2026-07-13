@@ -18,7 +18,7 @@
 
 				<?php bbp_get_template_part( 'content', 'single-topic-lead' ); ?>
 
-			<?php // This actually works. ?>
+				<?php // This actually works. ?>
 			<?php else : bbpress()->reply_query = bbpress()->topic_query; ?>
 
 				<?php bbp_get_template_part( 'loop', 'single-reply' ); ?>

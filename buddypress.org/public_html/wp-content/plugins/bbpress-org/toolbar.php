@@ -266,7 +266,7 @@ function bbporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 			'href'   => 'https://bbpress.org/forums/new-topic/'
 		) );
 
-	// Not logged in
+		// Not logged in
 	} else {
 		$wp_admin_bar->add_menu( array(
 			'id'     => 'bbp-login',
@@ -413,7 +413,7 @@ function bbporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 			) );
 		}
 
-	// Anonymous
+		// Anonymous
 	} else {
 		$wp_admin_bar->add_group( array(
 			'parent' => 'my-account',

@@ -1210,7 +1210,7 @@ class Admin {
 								? $published_count
 								: sprintf( '<a href="%s">%s</a>', esc_url( get_author_posts_url( $author->ID ) ), $published_count )
 						);
-					?></li>
+						?></li>
 					<li><?php
 						$rejected_count = User::count_rejected_photos( $author->ID );
 						$link_args = [
@@ -1225,24 +1225,24 @@ class Admin {
 								? $rejected_count
 								: sprintf( '<a href="%s">%d</a>', add_query_arg( $link_args, 'edit.php' ), $rejected_count )
 						);
-					?></li>
+						?></li>
 					<li><?php
 						$flagged_count = User::count_flagged_photos( $author->ID );
 						$flagged_link = '';
-						if ( $flagged_count && current_user_can( Flagged::get_capability() )) {
-							$link_args = [
-								'post_type'   => Registrations::get_post_type(),
-								'post_status' => Flagged::get_post_status(),
-								'author'      => $author->ID,
-							];
-							$flagged_link = add_query_arg( $link_args, 'edit.php' );
-						}
+					if ( $flagged_count && current_user_can( Flagged::get_capability() )) {
+						$link_args = [
+							'post_type'   => Registrations::get_post_type(),
+							'post_status' => Flagged::get_post_status(),
+							'author'      => $author->ID,
+						];
+						$flagged_link = add_query_arg( $link_args, 'edit.php' );
+					}
 						printf(
 							/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
 							_n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
 							$flagged_link ? sprintf( '<a href="%s">%d</a>', $flagged_link, $flagged_count ) : $flagged_count
 						);
-					?></li>
+						?></li>
 					<li><?php
 						$pending_count = User::count_pending_photos( $author->ID );
 						$link_args = [
@@ -1257,7 +1257,7 @@ class Admin {
 								? $pending_count
 								: sprintf( '<a href="%s">%d</a>', add_query_arg( $link_args, 'edit.php' ), $pending_count )
 						);
-					?></li>
+						?></li>
 					<li><?php
 						/* translators: %s: Date user account was created. */
 						printf( __( 'Created: <strong>%s</strong>', 'wporg-photos' ), $account_created ); ?></li>
@@ -1266,16 +1266,16 @@ class Admin {
 			<div class="photo-contributor-more-info">
 			<?php
 				// Output photo contributor IP address.
-				if ( $contrib_ip = Photo::get_contributor_ip( $post->ID ) ) {
-					// Set a class based on the IP address type.
-					$ip_class = strpos( $contrib_ip, ':' ) === false ? 'ipv4' : 'ipv6';
-					printf(
-						/* translators: 1: Class for IP address type, 2: IP address for contributor. */
-						wp_kses_post( __( 'Contributor IP address: <strong class="%1$s">%2$s</strong>', 'wporg-photos' ) ),
-						esc_attr( $ip_class ),
-						esc_html( $contrib_ip )
-					);
-				}
+			if ( $contrib_ip = Photo::get_contributor_ip( $post->ID ) ) {
+				// Set a class based on the IP address type.
+				$ip_class = strpos( $contrib_ip, ':' ) === false ? 'ipv4' : 'ipv6';
+				printf(
+					/* translators: 1: Class for IP address type, 2: IP address for contributor. */
+					wp_kses_post( __( 'Contributor IP address: <strong class="%1$s">%2$s</strong>', 'wporg-photos' ) ),
+					esc_attr( $ip_class ),
+					esc_html( $contrib_ip )
+				);
+			}
 			?>
 			</div>
 
@@ -1288,28 +1288,28 @@ class Admin {
 					$submission_errors_count = 0;
 
 					// Omit submission errors since they don't count as rejections, but do note the count.
-					if ( ! empty( $rejection_reasons[ $submission_errors_key ] ) ) {
-						$submission_errors_count = $rejection_reasons[ $submission_errors_key ];
-						unset( $rejection_reasons[ $submission_errors_key ] );
-					}
+				if ( ! empty( $rejection_reasons[ $submission_errors_key ] ) ) {
+					$submission_errors_count = $rejection_reasons[ $submission_errors_key ];
+					unset( $rejection_reasons[ $submission_errors_key ] );
+				}
 
 					$total_rejections = array_reduce( array_values( $rejection_reasons ), function ( $total, $i ) { return $total += $i; }, 0 );
 					$all_reasons = Rejection::get_rejection_reasons();
 
-					if ( $rejection_reasons ) {
-						echo '<table>';
-						echo '<tr><th>' . __( 'Reason', 'wporg-photos' ) . '</th><th>' . __( 'Total', 'wporg-photos' ) . '</th><th>%</th></tr>';
-					}
-					foreach ( $rejection_reasons as $reason => $count ) {
-						echo '<tr>';
-						echo '<td title="' . esc_attr( $all_reasons[ $reason ]['label'] ?? '' ) . '">' . esc_html( $reason ) . '</td>';
-						echo '<td>' . number_format_i18n( $count ) . '</td>';
-						echo '<td>' . number_format_i18n( ( $count / $total_rejections ) * 100, 2 ) . '%</td>';
-						echo "</tr>\n";
-					}
-					if ( $rejection_reasons ) {
-						echo "</table>\n";
-					}
+				if ( $rejection_reasons ) {
+					echo '<table>';
+					echo '<tr><th>' . __( 'Reason', 'wporg-photos' ) . '</th><th>' . __( 'Total', 'wporg-photos' ) . '</th><th>%</th></tr>';
+				}
+				foreach ( $rejection_reasons as $reason => $count ) {
+					echo '<tr>';
+					echo '<td title="' . esc_attr( $all_reasons[ $reason ]['label'] ?? '' ) . '">' . esc_html( $reason ) . '</td>';
+					echo '<td>' . number_format_i18n( $count ) . '</td>';
+					echo '<td>' . number_format_i18n( ( $count / $total_rejections ) * 100, 2 ) . '%</td>';
+					echo "</tr>\n";
+				}
+				if ( $rejection_reasons ) {
+					echo "</table>\n";
+				}
 
 					echo '<p>';
 					$total_count = $published_count + $total_rejections;
@@ -1324,12 +1324,12 @@ class Admin {
 					);
 					echo "</p>\n";
 
-					if ( $submission_errors_count ) {
-						echo '<p>';
-						/* translators: %s: The number of submission errors. */
-						printf( __( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), $submission_errors_count );
-						echo "</p>\n";
-					}
+				if ( $submission_errors_count ) {
+					echo '<p>';
+					/* translators: %s: The number of submission errors. */
+					printf( __( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), $submission_errors_count );
+					echo "</p>\n";
+				}
 				?>
 			</div>
 			<?php endif; ?>

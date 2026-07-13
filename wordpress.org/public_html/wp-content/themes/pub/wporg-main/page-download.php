@@ -174,7 +174,7 @@ the_post();
 						<img src="<?php echo esc_url( get_theme_file_uri( $hosts[ $host ]['logo'] ) ); ?>" class="logo" alt="<?php
 							/* translators: %s: Name of hosting company */
 							printf( esc_attr__( '%s company logo', 'wporg' ), esc_html( $hosts[ $host ]['name'] ) );
-							?>"
+						?>"
 						/>
 						<p><?php echo esc_html( $hosts[ $host ]['description'] ); ?></p>
 						<a href="<?php echo esc_url( $hosts[ $host ]['url'] ); ?>">

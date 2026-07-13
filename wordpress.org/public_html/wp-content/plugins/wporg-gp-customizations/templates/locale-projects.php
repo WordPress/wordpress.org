@@ -121,10 +121,10 @@ gp_tmpl_header();
 		<select id="filter" class="is-small" name="filter">
 			<?php
 				$sorts = array();
-				if ( is_user_logged_in() && in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
-					$sorts['special'] = 'Untranslated Favorites, Remaining Strings (Most first)';
-					$sorts['favorites'] = 'My Favorites';
-				}
+			if ( is_user_logged_in() && in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
+				$sorts['special'] = 'Untranslated Favorites, Remaining Strings (Most first)';
+				$sorts['favorites'] = 'My Favorites';
+			}
 				$sorts['strings-remaining'] = 'Remaining Strings (Most first)';
 				$sorts['strings-remaining-asc'] = 'Remaining Strings (Least first)';
 				$sorts['strings-waiting-and-fuzzy'] = 'Waiting + Fuzzy (Most first)';
@@ -135,13 +135,13 @@ gp_tmpl_header();
 				$sorts['percent-completed-asc'] = 'Percent Completed (Least first)';
 
 				// Completed project filter, except on the 'waiting' project.
-				if ( $project->slug != 'waiting' ) {
-					$sorts['completed-asc'] = '100% Translations';
-				}
+			if ( $project->slug != 'waiting' ) {
+				$sorts['completed-asc'] = '100% Translations';
+			}
 
-				foreach ( $sorts as $value => $text ) {
-					printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), ( $value == $filter ? 'selected="selected"' : '' ), esc_attr( $text ) );
-				}
+			foreach ( $sorts as $value => $text ) {
+				printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), ( $value == $filter ? 'selected="selected"' : '' ), esc_attr( $text ) );
+			}
 			?>
 		</select>
 

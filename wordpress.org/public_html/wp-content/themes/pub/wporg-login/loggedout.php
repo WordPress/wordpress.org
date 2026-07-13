@@ -15,19 +15,19 @@ get_header();
 	$redirect_to = wp_sanitize_redirect( $redirect_to );
 	$redirect_to = wp_validate_redirect( $redirect_to );
 
-	if ( $redirect_to ) {
-		$hostname = parse_url( $redirect_to, PHP_URL_HOST );
+if ( $redirect_to ) {
+	$hostname = parse_url( $redirect_to, PHP_URL_HOST );
 
-		echo '<p>&nbsp;</p>';
-		echo '<p class="center">';
-		printf(
-			/* translators: 1: url, 2: Hostname, ie. wordcamp.org */
-			__( 'Return to <a href="%1$s">%2$s</a>.', 'wporg' ),
-			esc_url( $redirect_to ),
-			esc_html( $hostname )
-		);
-		echo '</p>';
-	}
+	echo '<p>&nbsp;</p>';
+	echo '<p class="center">';
+	printf(
+		/* translators: 1: url, 2: Hostname, ie. wordcamp.org */
+		__( 'Return to <a href="%1$s">%2$s</a>.', 'wporg' ),
+		esc_url( $redirect_to ),
+		esc_html( $hostname )
+	);
+	echo '</p>';
+}
 ?>
 
 <p id="nav">

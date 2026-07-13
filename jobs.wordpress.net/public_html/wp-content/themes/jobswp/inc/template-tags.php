@@ -8,35 +8,35 @@
  */
 
 if ( ! function_exists( 'jobswp_content_nav' ) ) :
-/**
- * Display navigation to next/previous pages when applicable
- */
-function jobswp_content_nav( $nav_id ) {
-	global $wp_query, $post;
+	/**
+	 * Display navigation to next/previous pages when applicable
+	 */
+	function jobswp_content_nav( $nav_id ) {
+		global $wp_query, $post;
 
-	// Don't print empty markup on single pages if there's nowhere to navigate.
-	if ( is_single() ) {
-		$previous = ( is_attachment() ) ? get_post( $post->post_parent ) : get_adjacent_post( false, '', true );
-		$next = get_adjacent_post( false, '', false );
+		// Don't print empty markup on single pages if there's nowhere to navigate.
+		if ( is_single() ) {
+			$previous = ( is_attachment() ) ? get_post( $post->post_parent ) : get_adjacent_post( false, '', true );
+			$next = get_adjacent_post( false, '', false );
 
-		if ( ! $next && ! $previous )
+			if ( ! $next && ! $previous )
 			return;
-	}
+		}
 
-	// Don't print empty markup in archives if there's only one page.
-	if ( $wp_query->max_num_pages < 2 && ( is_home() || is_archive() || is_search() ) )
+		// Don't print empty markup in archives if there's only one page.
+		if ( $wp_query->max_num_pages < 2 && ( is_home() || is_archive() || is_search() ) )
 		return;
 
-	$nav_class = ( is_single() ) ? 'post-navigation' : 'paging-navigation';
+		$nav_class = ( is_single() ) ? 'post-navigation' : 'paging-navigation';
 
-	?>
+		?>
 	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo $nav_class; ?>">
 		<h1 class="screen-reader-text"><?php _e( 'Post navigation', 'jobswp' ); ?></h1>
 
-	<?php if ( is_single() ) : // navigation links for single posts ?>
+		<?php if ( is_single() ) : // navigation links for single posts ?>
 
-		<?php previous_post_link( '<div class="nav-previous">%link</div>', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'jobswp' ) . '</span> %title' ); ?>
-		<?php next_post_link( '<div class="nav-next">%link</div>', '%title <span class="meta-nav">' . _x( '&rarr;', 'Next post link', 'jobswp' ) . '</span>' ); ?>
+			<?php previous_post_link( '<div class="nav-previous">%link</div>', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'jobswp' ) . '</span> %title' ); ?>
+			<?php next_post_link( '<div class="nav-next">%link</div>', '%title <span class="meta-nav">' . _x( '&rarr;', 'Next post link', 'jobswp' ) . '</span>' ); ?>
 
 	<?php elseif ( $wp_query->max_num_pages > 1 && ( is_home() || is_archive() || is_search() ) ) : // navigation links for home, archive, and search pages ?>
 
@@ -51,27 +51,27 @@ function jobswp_content_nav( $nav_id ) {
 	<?php endif; ?>
 
 	</nav><!-- #<?php echo esc_html( $nav_id ); ?> -->
-	<?php
-}
+		<?php
+	}
 endif; // jobswp_content_nav
 
 if ( ! function_exists( 'jobswp_comment' ) ) :
-/**
- * Template for comments and pingbacks.
- *
- * Used as a callback by wp_list_comments() for displaying the comments.
- */
-function jobswp_comment( $comment, $args, $depth ) {
-	$GLOBALS['comment'] = $comment;
+	/**
+	 * Template for comments and pingbacks.
+	 *
+	 * Used as a callback by wp_list_comments() for displaying the comments.
+	 */
+	function jobswp_comment( $comment, $args, $depth ) {
+		$GLOBALS['comment'] = $comment;
 
-	if ( 'pingback' == $comment->comment_type || 'trackback' == $comment->comment_type ) : ?>
+		if ( 'pingback' == $comment->comment_type || 'trackback' == $comment->comment_type ) : ?>
 
 	<li id="comment-<?php comment_ID(); ?>" <?php comment_class(); ?>>
 		<div class="comment-body">
-			<?php _e( 'Pingback:', 'jobswp' ); ?> <?php comment_author_link(); ?> <?php edit_comment_link( __( 'Edit', 'jobswp' ), '<span class="edit-link">', '</span>' ); ?>
+				<?php _e( 'Pingback:', 'jobswp' ); ?> <?php comment_author_link(); ?> <?php edit_comment_link( __( 'Edit', 'jobswp' ), '<span class="edit-link">', '</span>' ); ?>
 		</div>
 
-	<?php else : ?>
+		<?php else : ?>
 
 	<li id="comment-<?php comment_ID(); ?>" <?php comment_class( empty( $args['has_children'] ) ? '' : 'parent' ); ?>>
 		<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
@@ -110,27 +110,27 @@ function jobswp_comment( $comment, $args, $depth ) {
 			?>
 		</article><!-- .comment-body -->
 
-	<?php
-	endif;
-}
+			<?php
+		endif;
+	}
 endif; // ends check for jobswp_comment()
 
 if ( ! function_exists( 'jobswp_the_attached_image' ) ) :
-/**
- * Prints the attached image with a link to the next attached image.
- */
-function jobswp_the_attached_image() {
-	$post                = get_post();
-	$attachment_size     = apply_filters( 'jobswp_attachment_size', array( 1200, 1200 ) );
-	$next_attachment_url = wp_get_attachment_url();
-
 	/**
-	 * Grab the IDs of all the image attachments in a gallery so we can get the
-	 * URL of the next adjacent image in a gallery, or the first image (if
-	 * we're looking at the last image in a gallery), or, in a gallery of one,
-	 * just the link to that image file.
+	 * Prints the attached image with a link to the next attached image.
 	 */
-	$attachment_ids = get_posts( array(
+	function jobswp_the_attached_image() {
+		$post                = get_post();
+		$attachment_size     = apply_filters( 'jobswp_attachment_size', array( 1200, 1200 ) );
+		$next_attachment_url = wp_get_attachment_url();
+
+		/**
+		 * Grab the IDs of all the image attachments in a gallery so we can get the
+		 * URL of the next adjacent image in a gallery, or the first image (if
+		 * we're looking at the last image in a gallery), or, in a gallery of one,
+		 * just the link to that image file.
+		 */
+		$attachment_ids = get_posts( array(
 		'post_parent'    => $post->post_parent,
 		'fields'         => 'ids',
 		'numberposts'    => -1,
@@ -139,48 +139,48 @@ function jobswp_the_attached_image() {
 		'post_mime_type' => 'image',
 		'order'          => 'ASC',
 		'orderby'        => 'menu_order ID'
-	) );
+		) );
 
-	// If there is more than 1 attachment in a gallery...
-	if ( count( $attachment_ids ) > 1 ) {
-		foreach ( $attachment_ids as $attachment_id ) {
-			if ( $attachment_id == $post->ID ) {
-				$next_id = current( $attachment_ids );
-				break;
+		// If there is more than 1 attachment in a gallery...
+		if ( count( $attachment_ids ) > 1 ) {
+			foreach ( $attachment_ids as $attachment_id ) {
+				if ( $attachment_id == $post->ID ) {
+					$next_id = current( $attachment_ids );
+					break;
+				}
 			}
-		}
 
-		// get the URL of the next image attachment...
-		if ( $next_id )
+			// get the URL of the next image attachment...
+			if ( $next_id )
 			$next_attachment_url = get_attachment_link( $next_id );
 
-		// or get the URL of the first image attachment.
-		else
+			// or get the URL of the first image attachment.
+			else
 			$next_attachment_url = get_attachment_link( array_shift( $attachment_ids ) );
-	}
+		}
 
-	printf( '<a href="%1$s" title="%2$s" rel="attachment">%3$s</a>',
+		printf( '<a href="%1$s" title="%2$s" rel="attachment">%3$s</a>',
 		esc_url( $next_attachment_url ),
 		the_title_attribute( array( 'echo' => false ) ),
 		wp_get_attachment_image( $post->ID, $attachment_size )
-	);
-}
+		);
+	}
 endif;
 
 if ( ! function_exists( 'jobswp_posted_on' ) ) :
-/**
- * Prints HTML with meta information for the current post-date/time and author.
- */
-function jobswp_posted_on() {
-	printf( // phpcs:ignore Generic.WhiteSpace.ScopeIndent.Incorrect -- Whole file uses this indentation.
+	/**
+	 * Prints HTML with meta information for the current post-date/time and author.
+	 */
+	function jobswp_posted_on() {
+		printf( // phpcs:ignore Generic.WhiteSpace.ScopeIndent.Incorrect -- Whole file uses this indentation.
 		wp_kses_post( __( '<span class="posted-on">Posted %1$s</span>', 'jobswp' ) ),
 		sprintf( '<a href="%1$s" rel="bookmark"><time class="entry-date published" datetime="%2$s">%3$s</time></a>',
 			esc_url( get_permalink() ),
 			esc_attr( get_the_date( 'c' ) ),
 			esc_html( get_the_date() )
 		)
-	);
-}
+		);
+	}
 endif;
 
 /**

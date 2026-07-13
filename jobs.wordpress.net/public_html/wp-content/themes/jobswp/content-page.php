@@ -20,7 +20,7 @@
 				'before' => '<div class="page-links">' . __( 'Pages:', 'jobswp' ),
 				'after'  => '</div>',
 			) );
-		?>
+			?>
 
 		<?php edit_post_link( __( 'Edit', 'jobswp' ), '<footer class="entry-meta"><span class="edit-link">', '</span></footer>' ); ?>
 	</div><!-- .entry-content -->

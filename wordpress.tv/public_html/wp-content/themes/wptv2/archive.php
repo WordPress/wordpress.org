@@ -14,8 +14,8 @@ global $wp_query, $post, $wptv;
 ?>
 <div class="wptv-hero">
 	<h2 class="page-title"><?php
-		if ( is_category() ) :
-			printf( __( '&#8216;%s&#8217; Videos', 'wptv' ), single_cat_title( '', false ) );
+	if ( is_category() ) :
+		printf( __( '&#8216;%s&#8217; Videos', 'wptv' ), single_cat_title( '', false ) );
 
 		elseif ( is_tag() ) :
 			printf( __( '&#8216;%s&#8217; Videos', 'wptv' ), single_tag_title( '', false ) );
@@ -44,7 +44,7 @@ global $wp_query, $post, $wptv;
 			esc_html_e( 'Archives', 'wptv' );
 
 		endif;
-	?>
+		?>
 	</h2>
 </div>
 <div class="container">
@@ -63,17 +63,17 @@ global $wp_query, $post, $wptv;
 					<?php
 						$wptv->the_terms( 'event', '<span class="video-events">', ', ', '</span>', false );
 						$speakers = get_the_terms( $post->ID, 'speakers' );
-						if ( $speakers ) {
-							$label = _n( 'Speaker:', 'Speakers:', count( $speakers ), 'wptv' );
-							$wptv->the_terms( 'speakers', '<span class="video-speakers"><strong>' . $label . '</strong> ', ', ', '</span>', false );
-						}
+					if ( $speakers ) {
+						$label = _n( 'Speaker:', 'Speakers:', count( $speakers ), 'wptv' );
+						$wptv->the_terms( 'speakers', '<span class="video-speakers"><strong>' . $label . '</strong> ', ', ', '</span>', false );
+					}
 					?>
 					<span class="video-excerpt">
 						<?php
 							$excerpt = get_the_time( get_option( 'date_format' ) );
-							if ( has_excerpt() ) {
-								$excerpt .= ' &#8212; ' . get_the_excerpt();
-							}
+						if ( has_excerpt() ) {
+							$excerpt .= ' &#8212; ' . get_the_excerpt();
+						}
 							echo apply_filters( 'the_excerpt', $excerpt );
 						?>
 					</span>

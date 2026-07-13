@@ -123,7 +123,7 @@
 
 	<?php if ( isset( $_POST['verify'] ) ) {
 		$button_label = __( 'Verify Job', 'jobswp' );
-	?>
+		?>
 		<input type="hidden" name="verify" value="1" />
 		<div class="notice notice-info accept">
 			<p><?php _e( 'By submitting a job to this site you acknowledge the following:', 'jobswp' ); ?></p>

@@ -35,11 +35,11 @@ get_header();
 <p>&nbsp;</p>
 
 <p><?php
-	if ( $requires_2fa ) {
-		_e( 'WordPress.org now requires that your account be protected by two-factor authentication. Some capabilities may be limited until your account is protected.', 'wporg' );
-	} else {
-		_e( "WordPress.org supports two-factor authentication and you'll soon be required to configure it on your account.", 'wporg' );
-	}
+if ( $requires_2fa ) {
+	_e( 'WordPress.org now requires that your account be protected by two-factor authentication. Some capabilities may be limited until your account is protected.', 'wporg' );
+} else {
+	_e( "WordPress.org supports two-factor authentication and you'll soon be required to configure it on your account.", 'wporg' );
+}
 ?></p>
 
 <p>&nbsp;</p>

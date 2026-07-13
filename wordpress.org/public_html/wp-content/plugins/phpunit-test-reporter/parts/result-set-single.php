@@ -5,8 +5,8 @@ echo Display::get_display_css();
 
 foreach ( $revisions as $revision ) :
 
-  $rev_id = (int) ltrim( $revision->post_name, 'r' );
-?>
+	$rev_id = (int) ltrim( $revision->post_name, 'r' );
+	?>
 
 <div class="ptr-test-reporter-single-revision">
 	<a href="<?php echo esc_url( sprintf( 'https://core.trac.wordpress.org/changeset/%d', $rev_id ) ); ?>">
@@ -46,7 +46,7 @@ foreach ( $revisions as $revision ) :
 			$report_query = new WP_Query( $query_args );
 			if ( ! empty( $report_query->posts ) ) :
 
-          $prev_author = null;
+				$prev_author = null;
 
 				foreach ( $report_query->posts as $report ) :
 					$status       = 'Errored';
@@ -80,10 +80,10 @@ foreach ( $revisions as $revision ) :
 						}
 					}
 					?>
-        <?php if ( $prev_author !== $host ): ?>
+					<?php if ( $prev_author !== $host ): ?>
           <tr>
             <td colspan="3">
-              <?php echo wp_kses_post( $host ); ?>
+						<?php echo wp_kses_post( $host ); ?>
             </td>
           </tr>
 
@@ -98,7 +98,7 @@ foreach ( $revisions as $revision ) :
 					<td><?php echo esc_html( Display::get_display_mysql_version( $report->ID ) ); ?></td>
 				</tr>
 					<?php
-			    $prev_author = $host;
+					$prev_author = $host;
 				endforeach;
 			else :
 				?>

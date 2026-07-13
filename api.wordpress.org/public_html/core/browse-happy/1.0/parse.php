@@ -39,7 +39,7 @@ require dirname( __FILE__ ) . '/browsers.php';
  * }
  */
 function browsehappy_get_explicit_browser_tokens() {
-	 return array(
+	return array(
 		'Camino'          => array(),
 		'Chromium'        => array(),
 		'Edge'            => array(

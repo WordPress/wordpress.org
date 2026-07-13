@@ -49,6 +49,6 @@ Preferred-Languages: en
 # For reporting issues in a plugin hosted at wordpress.org, contact plugins@wordpress.org 
 # If your website is hacked, please contact your site administrator or hosting provider.
 # Additionally, community support forums are a good resource at https://wordpress.org/support/
-<?php
+	<?php
 	exit;
 }

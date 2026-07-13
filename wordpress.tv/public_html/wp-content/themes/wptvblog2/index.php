@@ -40,7 +40,7 @@ get_header();
 		if ( have_posts() ) :
 			while ( have_posts() ) :
 				the_post();
-		?>
+				?>
 
 			<div <?php post_class(); ?>>
 				<div class="avatar"><?php echo get_avatar( $post->post_author, 110 ); ?></div>
@@ -65,7 +65,7 @@ get_header();
 				</div><!-- .entry.excerpt -->
 			</div><!-- post_class() -->
 
-		<?php
+				<?php
 			endwhile;
 		else :
 			?>

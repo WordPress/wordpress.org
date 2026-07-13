@@ -15,7 +15,7 @@ if ( have_posts() ) :
 			?>
 		</cite>
 		<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_content( __( 'Read more &rarr;', 'bborg' ) ); ?></div>
-<?php
+		<?php
 	endwhile;
 
 	if ( get_next_posts_link() ) :

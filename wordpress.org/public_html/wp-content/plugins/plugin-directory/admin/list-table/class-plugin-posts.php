@@ -324,7 +324,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		$m = ( isset( $mode ) && 'excerpt' === $mode ) ? 'excerpt' : 'list';
-	?>
+		?>
 
 	<form method="get"><table style="display: none"><tbody id="inlineedit">
 
@@ -343,11 +343,11 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 		</div></fieldset>
 
-	<?php if ( count( $hierarchical_taxonomies ) ) : ?>
+		<?php if ( count( $hierarchical_taxonomies ) ) : ?>
 
 		<fieldset class="inline-edit-col-center inline-edit-categories"><div class="inline-edit-col">
 
-	<?php foreach ( $hierarchical_taxonomies as $taxonomy ) : ?>
+			<?php foreach ( $hierarchical_taxonomies as $taxonomy ) : ?>
 
 			<span class="title inline-edit-categories-label"><?php echo esc_html( $taxonomy->labels->name ); ?></span>
 			<input type="hidden" name="tax_input[<?php echo esc_attr( $taxonomy->name ); ?>][]" value="0" />
@@ -375,7 +375,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		</td></tr>
 
 		</tbody></table></form>
-<?php
+		<?php
 	}
 
 	/**

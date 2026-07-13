@@ -456,14 +456,14 @@ class Stats_Report {
 					esc_html( $stats['plugin_delist'] )
 				);
 				$reasons = array();
-				if ( $stats['plugin_delist_reasons'] ) {
-					echo '<ul>';
-					foreach ( $stats['plugin_delist_reasons'] as $reason => $number ) {
-						$reason = Template::get_close_reasons()[ $reason ];
-						echo "<li>&nbsp;&nbsp;{$reason}: {$number}</li>";
-					}
-					echo '</ul>';
+			if ( $stats['plugin_delist_reasons'] ) {
+				echo '<ul>';
+				foreach ( $stats['plugin_delist_reasons'] as $reason => $number ) {
+					$reason = Template::get_close_reasons()[ $reason ];
+					echo "<li>&nbsp;&nbsp;{$reason}: {$number}</li>";
 				}
+				echo '</ul>';
+			}
 			?>
 			</li>
 			<li>

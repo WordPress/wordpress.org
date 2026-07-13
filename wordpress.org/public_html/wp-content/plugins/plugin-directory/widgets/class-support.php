@@ -43,7 +43,7 @@ class Support extends \WP_Widget {
 		echo $args['before_title'] . $title . $args['after_title'];
 
 		if ( $resolutions ) :
-		?>
+			?>
 			<p class="aside"><?php _e( 'Issues resolved in last two months:', 'wporg-plugins' ); ?></p>
 			<p class="counter-container">
 				<span class="counter-back">

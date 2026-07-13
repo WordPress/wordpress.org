@@ -4,7 +4,7 @@
 <?php
 $latest_release = $rosetta->rosetta->get_latest_public_release();
 if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
-?>
+	?>
 		<div class="wrapper">
 			<div class="section">
 				<div class="col-12" role="main">
@@ -22,23 +22,23 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 				<div class="col-12" role="main">
 <?php
 	query_posts('pagename=txt-welcome');
-	while(have_posts()):
-		the_post();
-?>
+while(have_posts()):
+	the_post();
+	?>
 				<h3><?php the_title(); ?></h3>
 
-				<?php
-				if ( $header_image = get_header_image() ) {
-					$hw = image_hwstring( HEADER_IMAGE_WIDTH, HEADER_IMAGE_HEIGHT );
-					printf(
-						'<img class="shot" %ssrc="%s" alt="" />',
-						$hw,
-						esc_url( $header_image )
-					);
-				}
+			<?php
+			if ( $header_image = get_header_image() ) {
+				$hw = image_hwstring( HEADER_IMAGE_WIDTH, HEADER_IMAGE_HEIGHT );
+				printf(
+					'<img class="shot" %ssrc="%s" alt="" />',
+					$hw,
+					esc_url( $header_image )
+				);
+			}
 
-				the_content();
-				?>
+			the_content();
+			?>
 <?php endwhile; ?>
 				</div>
 			</div>
@@ -46,39 +46,39 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 	</div>
 <?php
 	$latest_release = $rosetta->rosetta->get_latest_public_release();
-	if (false !== $latest_release):
-?>
+if (false !== $latest_release):
+	?>
 		<div class="wrapper">
 			<div class="section">
 				<div class="col-9">
-<?php
+	<?php
 	query_posts('pagename=txt-download');
 	while(have_posts()):
 		the_post();
-?>
+		?>
 				<h3><?php the_title(); ?></h3>
 					<?php the_content(); ?>
 <?php endwhile; ?>
 				</div>
 				<div class="col-3" role="complementary">
-					<?php get_sidebar( 'page' ); ?>
+				<?php get_sidebar( 'page' ); ?>
 				</div>
 			</div>
 		</div>
-<?php
+	<?php
 	endif; # at least one no-beta release
 	$showcase = $rosetta->showcase->front();
-	if ( $showcase ) :
-?>
+if ( $showcase ) :
+	?>
 	<div class="wrapper">
 		<div class="section">
 			<div class="col-12">
 				<h3><?php _e( 'Showcase', 'rosetta' ); ?></h3>
 				<ul id="showcase">
-<?php
+	<?php
 	foreach ( $showcase as $item ) :
 		$url = get_permalink( $item->ID );
-?>
+		?>
 	<li>
 		<a class="shot" href="<?php echo esc_url( $url ); ?>">
 			<?php
@@ -95,16 +95,16 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		<br />
 		<a class="showcase-url" href="<?php echo esc_url( $url ); ?>" rel="nofollow"><?php _e( 'Visit the site &rarr;', 'rosetta' ); ?></a>
 	</li>
-<?php
+		<?php
 	endforeach;
-?>
+	?>
 				</ul>
 			</div>
 		</div>
 	</div>
-<?php
+	<?php
 	elseif( current_user_can('edit_posts') ):
-?>
+		?>
 		<div class="wrapper">
 			<div class="section">
 				<div class="col-12">
@@ -113,19 +113,19 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 				</div>
 			</div>
 		</div>
-<?php
+		<?php
 	endif;
-?>
+	?>
 <?php
 	query_posts('pagename=txt-install');
-	while(have_posts()):
-		the_post();
-?>
+while(have_posts()):
+	the_post();
+	?>
 	<div class="wrapper">
 		<div class="section">
 			<div class="col-12">
 				<h3><?php the_title(); ?></h3>
-				<?php the_content(); ?>
+			<?php the_content(); ?>
 			</div>
 		</div>
 	</div>
@@ -135,10 +135,10 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 			<div id="blog" class="section">
 				<div class="col-9">
 					<h3><?php _e('Blog', 'rosetta'); ?></h3>
-<?php
+	<?php
 	query_posts( 'showposts=5' );
 	while (have_posts()) : the_post();
-?>
+		?>
 							<div class="post" id="post-<?php the_ID(); ?>">
 								<h4><a href="<?php the_permalink() ?>" rel="bookmark" title="<?php printf( esc_attr__('Permanent Link to %s', 'rosetta'), get_the_title()); ?>"><?php the_title(); ?></a></h4>
 								<div class="entry">

@@ -277,8 +277,8 @@ class Performance_Optimizations {
 					unset( $r['meta_key'] );
 					unset( $r['meta_type'] );
 					$r['orderby'] = 'ID';
-				// Some views use meta key lookups and should only look at known
-				// open topics.
+					// Some views use meta key lookups and should only look at known
+					// open topics.
 				} elseif ( ! empty( $r['meta_key'] ) ) {
 					$r['orderby'] = 'ID';
 					add_filter( 'posts_where', array( $this, 'posts_in_last_six_months' ) );

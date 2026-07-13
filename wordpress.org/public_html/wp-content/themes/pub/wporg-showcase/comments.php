@@ -10,19 +10,19 @@
 <h2 class="fancy"><?php comments_number( __( 'No Pings', 'wporg-showcase' ), __( '1 Ping', 'wporg-showcase' ), __( '% Pings', 'wporg-showcase' ) ); ?></h2>
 <ol id="comments">
 
-<?php foreach ($comments as $comment) : $i++; ?>
+	<?php foreach ($comments as $comment) : $i++; ?>
 	<li id="comment-<?php comment_ID() ?>" <?php if ($i % 2) echo "class='altc'"; ?>>
-	<?php comment_text() ?>
+		<?php comment_text() ?>
 	<p><cite><?php printf(
 		/* translators: 1: comment type, 2: comment author link, 3: comment date */
 		__( '%1$s from %2$s on %3$s', 'wporg-showcase' ),
 		comment_type( __( 'Comment', 'wporg-showcase' ), __( 'Trackback', 'wporg-showcase' ), __( 'Pingback', 'wporg-showcase' ) ),
 		comment_author_link(),
 		comment_date()
-	); ?></cite> <?php edit_comment_link( __( 'Edit This', 'wporg-showcase' ), ' |' ); ?></p>
+			 ); ?></cite> <?php edit_comment_link( __( 'Edit This', 'wporg-showcase' ), ' |' ); ?></p>
 	</li>
 
-<?php endforeach; ?>
+	<?php endforeach; ?>
 
 </ol>
 

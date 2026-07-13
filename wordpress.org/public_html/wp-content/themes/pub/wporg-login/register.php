@@ -146,9 +146,9 @@ get_header();
 		</label>
 	</p>
 	<?php
-		if ( $error_recapcha_status ) {
-			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
-		}
+	if ( $error_recapcha_status ) {
+		echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
+	}
 	?>
 
 	<p class="login-submit">

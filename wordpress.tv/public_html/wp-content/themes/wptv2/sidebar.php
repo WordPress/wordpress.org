@@ -18,6 +18,6 @@
 					'after_widget'  => '</li>',
 				]
 			);
-		?>
+			?>
 	</ul>
 </div><!-- .secondary_content -->

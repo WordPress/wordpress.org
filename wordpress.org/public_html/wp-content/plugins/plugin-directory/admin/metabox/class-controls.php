@@ -232,7 +232,7 @@ class Controls {
 				<p><?php printf(
 						__( 'Rejection Reason: %s', 'wporg-plugins' ),
 						'<strong>' . $rejection_reason_label . '</strong>'
-				); ?></p>
+				   ); ?></p>
 
 			<?php elseif ( 'publish' === $post->post_status ) : ?>
 
@@ -307,8 +307,8 @@ class Controls {
 						'<span title="%s">%s ago</span>',
 						esc_attr( $post->last_updated ),
 						human_time_diff( strtotime( $post->last_updated ) )
-					);
-				?></strong></td>
+							);
+							?></strong></td>
 			</tr>
 
 			<tr>
@@ -320,12 +320,12 @@ class Controls {
 						strtotime( $post->post_date_gmt ) // Fallback to the post_date, which should be similar to approval date.
 					] ) );
 
-					printf(
-						'<span title="%s">%s ago</span>',
-						esc_attr( gmdate( 'Y-m-d H:i:s', $submitted_date ) ),
-						human_time_diff( $submitted_date )
-					);
-				?></strong></td>
+							printf(
+							'<span title="%s">%s ago</span>',
+							esc_attr( gmdate( 'Y-m-d H:i:s', $submitted_date ) ),
+							human_time_diff( $submitted_date )
+							);
+							?></strong></td>
 			</tr>
 
 			<tr>
@@ -345,8 +345,8 @@ class Controls {
 						Template::sanitize_active_installs(
 							\WordPressdotorg\Stats\plugin_active_installs( $post->post_name, $post->version )
 						)
-					);
-				?></strong></td>
+							);
+							?></strong></td>
 			</tr>
 			<?php endif; ?>
 

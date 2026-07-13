@@ -314,14 +314,14 @@ class wporg_trac_notifications {
 
 					natcasesort( $stars ); foreach ( $stars as $follower ) :
 					// foreach ( $all_receiving_notifications as $follower ) :
-						if ( $username === $follower ) {
-							continue;
-						}
+					if ( $username === $follower ) {
+						continue;
+					}
 
 						$follower_obj = get_user_by( 'login', $follower );
-						if ( ! $follower_obj ) {
-							continue;
-						}
+					if ( ! $follower_obj ) {
+						continue;
+					}
 
 						$follower = esc_attr( $follower );
 						$class = ''; // in_array( $follower, $stars, true ) ? ' class="star"' : '';
@@ -345,7 +345,7 @@ class wporg_trac_notifications {
 				<span class="preferences"><span class="grid-toggle"><a href="#" class="grid dashicons dashicons-screenoptions"></a> <a href="#" class="names dashicons dashicons-exerpt-view dashicons-excerpt-view"></a></span> <a href="<?php echo home_url( 'notifications/' ); ?>">Preferences</a></span>
 		</fieldset>
 	</div>
-	<?php
+		<?php
 		$this->ticket_notes( $ticket, $username, $meta );
 		$send = array(
 			'notifications-box' => ob_get_clean(),
@@ -388,11 +388,11 @@ class wporg_trac_notifications {
 			$output = sprintf( '<strong>This is only %s&#8217;s %s ticket!</strong><br/>Previously:',
 				$ticket['reporter'], $mapping[ count( $activity['tickets'] ) ] );
 
-				foreach ( $activity['tickets'] as $t ) {
-					if ( $t['id'] != $ticket['id'] ) {
-						$output .= ' ' . $this->ticket_link( $t );
-					}
+			foreach ( $activity['tickets'] as $t ) {
+				if ( $t['id'] != $ticket['id'] ) {
+					$output .= ' ' . $this->ticket_link( $t );
 				}
+			}
 				$output .= '.';
 		}
 

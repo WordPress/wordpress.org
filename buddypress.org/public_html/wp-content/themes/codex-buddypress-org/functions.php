@@ -76,7 +76,7 @@ function bpc_record_page_edits( $post_id, $post ) {
 			// Get diff
 			//$content = wp_text_diff( $revision->post_content, $post->post_content );
 
-		// No revisions, so use original post author
+			// No revisions, so use original post author
 		} else {
 			$post_author = (int) $post->post_author;
 		}

@@ -22,7 +22,7 @@
 					<?php
 						if ( bbp_is_topic_edit() )
 							printf( __( 'Now Editing &ldquo;%s&rdquo;', 'bbpress' ), bbp_get_topic_title() );
-						else
+					else
 							bbp_is_single_forum() ? printf( __( 'Create New Topic in &ldquo;%s&rdquo;', 'bbpress' ), bbp_get_forum_title() ) : _e( 'Create New Topic', 'bbpress' );
 					?>
 

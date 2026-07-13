@@ -27,20 +27,20 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPORG_bbPress_Topic_Archive' ) ) {
-class WPORG_bbPress_Topic_Archive {
-	public function __construct() {
-		// Add meta to topic display
-		add_action( 'bbp_head', array( $this, 'maybe_add_robots' ) );
-	}
+	class WPORG_bbPress_Topic_Archive {
+		public function __construct() {
+			// Add meta to topic display
+			add_action( 'bbp_head', array( $this, 'maybe_add_robots' ) );
+		}
 
-	public function maybe_add_robots() {
-		global $post;
+		public function maybe_add_robots() {
+			global $post;
 
-		if (
+			if (
 			is_singular()
-		&&
+			&&
 			bbp_is_topic( $post->ID )
-		&&
+			&&
 			(
 				// Thread last modified is over 3 years old
 				( time() - get_post_time( 'U', true, bbp_get_topic_last_active_id( $post->ID ) ) > 3 * YEAR_IN_SECONDS )
@@ -48,10 +48,10 @@ class WPORG_bbPress_Topic_Archive {
 				// Closed thread with no replies
 				( bbp_is_topic_closed( $post->ID ) && ! bbp_get_topic_reply_count( $post->ID, true ) )
 			)
-		) {
-			echo '<meta name="robots" content="noindex,follow" />' . "\n";
+			) {
+				echo '<meta name="robots" content="noindex,follow" />' . "\n";
+			}
 		}
-	}
-} }
+	} }
 
 new WPORG_bbPress_Topic_Archive;

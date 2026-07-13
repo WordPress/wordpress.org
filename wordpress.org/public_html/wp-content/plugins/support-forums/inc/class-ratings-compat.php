@@ -218,34 +218,34 @@ class Ratings_Compat {
 
 		// Undo the above filter, for titles of replies to reviews. See #meta4254
 		add_filter( 'bbp_get_topic_last_topic_title', array( $this, 'undo_topic_title' ), 10, 1 );
-?>
+		?>
 <div class="review-ratings">
 	<div>
 		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
 		<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); ?>
 		<div class="reviews-submit-link">
 		<?php
-			if ( is_user_logged_in() ) {
-				echo '<a href="#new-post" class="btn">';
-				if ( $this->review_exists() ) {
-					_e( 'Edit your review', 'wporg-forums' );
-				} else {
-					_e( 'Add your own review', 'wporg-forums' );
-				}
-				echo '</a>';
+		if ( is_user_logged_in() ) {
+			echo '<a href="#new-post" class="btn">';
+			if ( $this->review_exists() ) {
+				_e( 'Edit your review', 'wporg-forums' );
 			} else {
-				echo '<span class="reviews-need-login">';
-				printf(
-					/* translators: %s: login URL */
-					__( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ),
-					add_query_arg(
-						'redirect_to',
-						urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
-						'https://login.wordpress.org/'
-					)
-				);
-				echo '</span>';
+				_e( 'Add your own review', 'wporg-forums' );
 			}
+			echo '</a>';
+		} else {
+			echo '<span class="reviews-need-login">';
+			printf(
+				/* translators: %s: login URL */
+				__( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ),
+				add_query_arg(
+					'redirect_to',
+					urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
+					'https://login.wordpress.org/'
+				)
+			);
+			echo '</span>';
+		}
 		?>
 		</div>
 	</div>
@@ -256,8 +256,8 @@ class Ratings_Compat {
 				/* translators: %s: number of reviews */
 				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
 				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
-			);
-		?></div>
+										 );
+											?></div>
 		<?php echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' ); ?>
 	</div>
 </div>
@@ -489,7 +489,7 @@ class Ratings_Compat {
 					__( 'Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
 					esc_url( __( 'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews', 'wporg-forums' ) )
 				);
-			?></li>
+				?></li>
 		</ul>
 		<?php
 	}

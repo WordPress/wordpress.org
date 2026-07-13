@@ -20,7 +20,7 @@ if ( comments_open() ) :
 			<?php esc_html_e( 'We will review it as quickly as possible.', 'wporg-forums' ); ?>
 		</p>
 	<?php else :
-	comment_form(
+		comment_form(
 		array(
 			'title_reply_before'  => '<h2 id="reply-title" class="comment-reply-title">',
 			'title_reply'         => __( 'Was this article helpful? How could it be improved?', 'wporg-forums' ),
@@ -44,6 +44,6 @@ if ( comments_open() ) :
 			                         '<br>' . sprintf( __( '<strong>This is not for personalized support.</strong> Please create a <a href="%s">forum thread</a> instead to receive help from the community.', 'wporg-forums'), home_url( '/forums/#bbpress-forums' ) ),
 			'label_submit'        => __( 'Submit Feedback', 'wporg-forums' ),
 		)
-	);
+		);
 	endif;
 endif;

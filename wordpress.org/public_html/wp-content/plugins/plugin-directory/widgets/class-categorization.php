@@ -62,10 +62,10 @@ class Categorization extends \WP_Widget {
 				// and the current user can update the categorization options so that the update can be
 				// easily reflected in the widget on the same page. (CSS will prevent a link with an empty
 				// URL from being shown.)
-				if ( $url || ( get_query_var( 'plugin_advanced' ) && current_user_can( 'plugin_admin_edit', $post ) ) ) {
-					printf( '<a class="external-link" href="%1$s" rel="nofollow">%2$s</a>', esc_url( $url ), esc_html( $link_text ) );
-				}
-				?>
+			if ( $url || ( get_query_var( 'plugin_advanced' ) && current_user_can( 'plugin_admin_edit', $post ) ) ) {
+				printf( '<a class="external-link" href="%1$s" rel="nofollow">%2$s</a>', esc_url( $url ), esc_html( $link_text ) );
+			}
+			?>
 			</p>
 		</div>
 		<?php

@@ -35,7 +35,7 @@ class BPOrg_Inbox_Widget extends WP_Widget {
 
 		<?php echo $after_widget; ?>
 
-	<?php
+		<?php
 	}
 }
 add_action( 'widgets_init', function () { return register_widget("BPOrg_Inbox_Widget"); } );

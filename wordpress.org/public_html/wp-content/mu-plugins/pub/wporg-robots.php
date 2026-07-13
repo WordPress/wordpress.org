@@ -27,8 +27,8 @@ function wporg_robots_txt( $robots ) {
 		           "Disallow: /search\n" .
 		           "Disallow: /?s=\n";
 
-	// AI Crawler Directives - explicitly welcome AI crawlers for training and retrieval.
-	$robots .= "\nUser-agent: GPTBot\nAllow: /\n\n" .
+		// AI Crawler Directives - explicitly welcome AI crawlers for training and retrieval.
+		$robots .= "\nUser-agent: GPTBot\nAllow: /\n\n" .
 	          "User-agent: ClaudeBot\nAllow: /\n\n" .
 	          "User-agent: anthropic-ai\nAllow: /\n\n" .
 	          "User-agent: Google-Extended\nAllow: /\n\n" .

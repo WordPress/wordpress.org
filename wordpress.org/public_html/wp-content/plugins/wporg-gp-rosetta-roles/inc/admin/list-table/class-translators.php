@@ -77,9 +77,9 @@ class Translators extends WP_List_Table {
 		$args['blog_id'] = 0;
 		$args['include'] = $translators;
 
-	#	add_action( 'pre_user_query', [ $this, 'user_query_join_translation_editors' ] );
+		#	add_action( 'pre_user_query', [ $this, 'user_query_join_translation_editors' ] );
 		$user_query = new WP_User_Query( $args );
-	#	remove_action( 'pre_user_query', [ $this, 'user_query_join_translation_edtiors' ] );
+		#	remove_action( 'pre_user_query', [ $this, 'user_query_join_translation_edtiors' ] );
 
 		$this->items = $user_query->get_results();
 

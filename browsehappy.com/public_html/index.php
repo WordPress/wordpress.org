@@ -60,7 +60,7 @@
 			<section id="about">
 				<h2><?php _e( 'What is Browse Happy?', 'browsehappy' ); ?></h2>
 				<p><?php $what = __( 'Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.', 'browsehappy' );
-echo $what; ?></p>
+				echo $what; ?></p>
 			</section><!-- #about -->
 			<section id="share">
 				<h2><?php _e( 'Share the Happiness', 'browsehappy' ); ?></h2>

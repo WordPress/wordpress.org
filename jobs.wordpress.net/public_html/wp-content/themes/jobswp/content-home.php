@@ -169,8 +169,8 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 	$paged_candidates    = $candidates_result['candidates'];
 	$total_candidates    = $candidates_result['total'];
 	$total_pages         = $candidates_result['pages'];
-	if ( ! empty( $paged_candidates ) ) :
-?>
+if ( ! empty( $paged_candidates ) ) :
+	?>
 <!-- Open to Work Section -->
 <section class="candidates-section" id="candidates">
 	<div class="candidates-section__inner">
@@ -180,13 +180,13 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 				<p><?php esc_html_e( 'WordPress community members who are looking for their next opportunity.', 'jobswp' ); ?></p>
 			</div>
 			<span class="candidates-section__count">
-				<?php
-				printf(
-					/* translators: %s: number of candidates */
-					esc_html( _n( '%s person', '%s people', $total_candidates, 'jobswp' ) ),
-					esc_html( number_format_i18n( $total_candidates ) )
-				);
-				?>
+			<?php
+			printf(
+				/* translators: %s: number of candidates */
+				esc_html( _n( '%s person', '%s people', $total_candidates, 'jobswp' ) ),
+				esc_html( number_format_i18n( $total_candidates ) )
+			);
+			?>
 			</span>
 		</div>
 		<div class="candidates-grid">
@@ -243,17 +243,17 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 		<p class="candidates-section__cta">
 			<?php
 			echo wp_kses(
-				sprintf(
-					/* translators: %s: URL to update WordPress.org profile */
-					__( 'Want to appear here? <a href="%s">Update your WordPress.org profile</a> and toggle "Open to Work" in the Jobs section.', 'jobswp' ),
-					'https://profiles.wordpress.org/me/profile/edit/'
-				),
-				array( 'a' => array( 'href' => array() ) )
+			sprintf(
+				/* translators: %s: URL to update WordPress.org profile */
+				__( 'Want to appear here? <a href="%s">Update your WordPress.org profile</a> and toggle "Open to Work" in the Jobs section.', 'jobswp' ),
+				'https://profiles.wordpress.org/me/profile/edit/'
+			),
+			array( 'a' => array( 'href' => array() ) )
 			);
 			?>
 		</p>
 	</div>
 </section>
-<?php
+	<?php
 	endif;
 ?>

@@ -11,7 +11,7 @@ use GP, GP_Locales;
  * License:     GPLv2 or later
  */
 
- class Plugin {
+class Plugin {
 
 	public static function instance() {
 		static $instance;

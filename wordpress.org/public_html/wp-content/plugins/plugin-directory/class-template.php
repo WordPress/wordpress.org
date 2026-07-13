@@ -40,7 +40,7 @@ class Template {
 				]
 			];
 
-		// Schema for plugin pages.
+			// Schema for plugin pages.
 		} elseif ( is_singular( 'plugin' ) && 'publish' === get_post_status( get_queried_object_id() ) ) {
 			$schema = self::plugin_json_jd_schema( get_queried_object() );
 		}

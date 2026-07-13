@@ -75,9 +75,9 @@ class Photo {
 		'patterns' => [
 			'pattern', 'pinstripes', 'stripes', 'zigzag',
 		],
-//		'people' => [
-//			'family', 'person',
-//		],
+		//      'people' => [
+		//          'family', 'person',
+		//      ],
 		'technology' => [
 			'appliance', 'appliances', 'camera', 'clock', 'computer', 'headphones', 'ipad', 'iphone', 'imac', 'keyboard', 'laptop', 'microphone', 'phone', 'speakers', 'stereo', 'telephone', 'television', 'turntable', 'tv', 'watch', 'wristwatch',
 		],
@@ -314,18 +314,18 @@ class Photo {
 		$exif_image_types = apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) );
 
 		if ( is_callable( 'exif_read_data' ) && in_array( $image_type, $exif_image_types, true ) ) {
-/* === Start of retry_exif_read() specific changes here. ========================================= */
-//			// Don't silence errors when in debug mode, unless running unit tests.
-//			if ( defined( 'WP_DEBUG' ) && WP_DEBUG
-//				&& ! defined( 'WP_RUN_CORE_TESTS' )
-//			) {
-//				$exif = exif_read_data( $file );
-//			} else {
+			/* === Start of retry_exif_read() specific changes here. ========================================= */
+			//          // Don't silence errors when in debug mode, unless running unit tests.
+			//          if ( defined( 'WP_DEBUG' ) && WP_DEBUG
+			//              && ! defined( 'WP_RUN_CORE_TESTS' )
+			//          ) {
+			//              $exif = exif_read_data( $file );
+			//          } else {
 //				// phpcs:ignore WordPress.PHP.NoSilencedErrors -- Silencing notice and warning is intentional. See https://core.trac.wordpress.org/ticket/42480
-//				$exif = @exif_read_data( $file );
-//			}
-$exif = self::exif_read_data_as_data_stream( $file );
-/* === End of retry_exif_read() specific changes here. ========================================== */
+			//              $exif = @exif_read_data( $file );
+			//          }
+			$exif = self::exif_read_data_as_data_stream( $file );
+			/* === End of retry_exif_read() specific changes here. ========================================== */
 
 			if ( ! empty( $exif['ImageDescription'] ) ) {
 				mbstring_binary_safe_encoding();

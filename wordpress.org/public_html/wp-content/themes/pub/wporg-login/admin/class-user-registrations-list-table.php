@@ -252,13 +252,13 @@ class User_Registrations_List_Table extends WP_List_Table {
 			'scores'          => 'Anti-spam<br>reCaptcha Akismet',
 			'user_registered' => 'Registered',
 		];
-	 }
+	}
 
-	 public function get_sortable_columns() {
+	public function get_sortable_columns() {
 		return [
-			'user_login'      => array( 'user_login', true ),
-			'scores'          => array( 'scores', true ),
-			'user_registered' => array( 'user_registered', true ),
+		   'user_login'      => array( 'user_login', true ),
+		   'scores'          => array( 'scores', true ),
+		   'user_registered' => array( 'user_registered', true ),
 		];
 	}
 

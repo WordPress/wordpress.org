@@ -25,9 +25,9 @@ $main_column_title = trim( ucwords( $view ), 's' );
 			<tr>
 				<th><span class="with-tooltip" aria-label="Sorted by active installations"><?php echo $main_column_title; ?></span></th>
 				<?php
-					foreach ( $columns as $title ) {
-						printf( "<th>%s</th>", $title );
-					}
+				foreach ( $columns as $title ) {
+					printf( "<th>%s</th>", $title );
+				}
 
 				?>
 			</tr>

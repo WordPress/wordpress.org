@@ -36,18 +36,18 @@ if ( get_query_var( 'paged' ) < 2 && $wp_query->found_posts > 6 ) : ?>
 			<div class="secondary-videos">
 			<ul>
 				<?php
-					for ( $i = 0 ; $i < 5 ; $i++ ) :
-						if ( ! have_posts() ) {
-							break; // just in case
-						}
+				for ( $i = 0 ; $i < 5 ; $i++ ) :
+					if ( ! have_posts() ) {
+						break; // just in case
+					}
 
-						the_post();
-				?>
+					the_post();
+					?>
 
 				<li class="group">
 					<a href="<?php the_permalink(); ?>" rel="bookmark">
 						<span class="video-thumbnail">
-							<?php $wptv->the_video_image( 50, null, false ); ?>
+						<?php $wptv->the_video_image( 50, null, false ); ?>
 						</span>
 						<span class="video-title"><?php the_title(); ?></span>
 					</a>

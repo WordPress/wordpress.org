@@ -85,22 +85,22 @@ gp_tmpl_header();
 						</a>
 					</th>
 					<?php
-						if ( $translation_locale_statuses[ $locale_slug ] ) :
-							foreach ( array( 'dev', 'dev-readme', 'stable', 'stable-readme', 'waiting' ) as $subproject_slug ) :
-								if ( isset( $translation_locale_statuses[ $locale_slug ][ $subproject_slug ] ) ) :
-									$percent = $translation_locale_statuses[ $locale_slug ][ $subproject_slug ];
+					if ( $translation_locale_statuses[ $locale_slug ] ) :
+						foreach ( array( 'dev', 'dev-readme', 'stable', 'stable-readme', 'waiting' ) as $subproject_slug ) :
+							if ( isset( $translation_locale_statuses[ $locale_slug ][ $subproject_slug ] ) ) :
+								$percent = $translation_locale_statuses[ $locale_slug ][ $subproject_slug ];
 
-									if ( 'waiting' === $subproject_slug ) :
-										// Color code it on -0~500 waiting strings
-										$percent_class = 100 - min( (int) ( $percent / 50 ) * 10, 100 );
+								if ( 'waiting' === $subproject_slug ) :
+									// Color code it on -0~500 waiting strings
+									$percent_class = 100 - min( (int) ( $percent / 50 ) * 10, 100 );
 
-										// It's only 100 if it has 0 strings.
-										if ( 100 == $percent_class && $percent ) {
-											$percent_class = 90;
-										}
+									// It's only 100 if it has 0 strings.
+									if ( 100 == $percent_class && $percent ) {
+										$percent_class = 90;
+									}
 
-										$link_url  = gp_url( gp_url_join( 'locale', $locale, $set_slug, $project->path ) );
-										$link_text = number_format( $percent );
+									$link_url  = gp_url( gp_url_join( 'locale', $locale, $set_slug, $project->path ) );
+									$link_text = number_format( $percent );
 									else :
 										$percent_class = (int) ( $percent / 10 ) * 10;
 										$link_url  = gp_url_project( $project->path, gp_url_join( $subproject_slug, $locale, $set_slug ) );
@@ -120,7 +120,7 @@ gp_tmpl_header();
 							echo '<td class="none" data-sort-value="-1">&mdash;</td>';
 							echo '<td class="none" data-sort-value="-1">&mdash;</td>';
 						endif;
-					?>
+						?>
 				</tr>
 			<?php endforeach; ?>
 		</tbody>

@@ -13,7 +13,7 @@ get_header();
 global $wp_query, $post, $wptv;
 
 if ( have_posts() ) :
-?>
+	?>
 
 	<div class="wptv-hero">
 		<h2 class="page-title"><?php esc_html_e( 'Archives', 'wptv' ); ?></h2>
@@ -37,7 +37,7 @@ if ( have_posts() ) :
 
 							<?php if ( $post->post_excerpt ) : ?>
 								<div class="video-description"><?php the_excerpt(); ?></div>
-							<?php
+								<?php
 								endif;
 
 								$wptv->the_terms( 'event',    '<h5>Event</h5><p class="video-event">',       '<br /> ', '</p>' );
@@ -83,7 +83,7 @@ if ( have_posts() ) :
 		</div>
 	</div><!-- container -->
 
-<?php
+	<?php
 endif;
 
 get_footer();

@@ -49,7 +49,7 @@ the_post();
 							wp_kses_post( __( 'Learn more about WordPress core software security in this free white paper. You can also download it in <a href="%s">PDF format</a>.', 'wporg' ) ),
 							'https://github.com/WordPress/Security-White-Paper/blob/master/WordPressSecurityWhitePaper.pdf?raw=true'
 						);
-					?>
+						?>
 					</p>
 
 					<img src="//s.w.org/about/images/logos/wordpress-logo-stacked-rgb.png" class="aligncenter" />
@@ -67,7 +67,7 @@ the_post();
 							esc_html__( 'WordPress is a dynamic open-source content management system which is used to power millions of websites, web applications, and blogs. It currently powers more than %s%% of the top 10 million websites on the Internet. WordPress&#8217; usability, extensibility, and mature development community make it a popular and secure choice for websites of all sizes.', 'wporg' ),
 							esc_html( WP_MARKET_SHARE )
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'Since its inception in 2003, WordPress has undergone continual hardening so its core software can address and mitigate common security threats, including the Top 10 list identified by The Open Web Application Security Project (OWASP) as common security vulnerabilities, which are discussed in this document.', 'wporg' ); ?></p>
@@ -85,7 +85,7 @@ the_post();
 							'<sup id="ref1"><a href="#footnote1">1</a></a></sup>',
 							62
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'WordPress is licensed under the General Public License (GPLv2 or later) which provides four core freedoms, and can be considered as the WordPress &#8220;bill of rights&#8221;:', 'wporg' ); ?></p>
@@ -113,7 +113,7 @@ the_post();
 							esc_html__( 'A release cycle follows the following pattern%s:', 'wporg' ),
 							'<sup id="ref2"><a href="#footnote2">2</a></sup>'
 						);
-					?>
+						?>
 					</p>
 					<ul>
 						<li><?php esc_html_e( 'Phase 1: Planning and securing team leads. This is done in the #core chat room on Slack. The release lead discusses features for the next release of WordPress. WordPress contributors get involved with that discussion. The release lead will identify team leads for each of the features.', 'wporg' ); ?></li>
@@ -134,7 +134,7 @@ the_post();
 							esc_html__( 'A minor WordPress version is dictated by the third sequence. Version 3.5.1 is a minor release, as is 3.4.2%s. A minor release is reserved for fixing security vulnerabilities and addressing critical bugs only. Since new versions of WordPress are released so frequently &mdash; the aim is every 4-5 months for a major release, and minor releases happen as needed &mdash; there is only a need for major and minor releases.', 'wporg' ),
 							'<sup id="ref3"><a href="#footnote3">3</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<h3><?php esc_html_e( 'Version Backwards Compatibility', 'wporg' ); ?></h3>
@@ -149,7 +149,7 @@ the_post();
 							50,
 							'<sup><a href="#footnote3">3</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p>
@@ -159,7 +159,7 @@ the_post();
 							esc_html__( 'The WordPress Security Team often collaborates with other security teams to address issues in common dependencies, such as resolving the vulnerability in the PHP XML parser, used by the XML-RPC API that ships with WordPress, in WordPress 3.9.2%s. This vulnerability resolution was a result of a joint effort by both WordPress and Drupal security teams.', 'wporg' ),
 							'<sup id="ref4"><a href="#footnote4">4</a></sup>'
 						);
-					?>
+						?>
 					</p>
 					<h3><?php esc_html_e( 'WordPress Security Risks, Process, and History', 'wporg' ); ?></h3>
 					<p>
@@ -170,7 +170,7 @@ the_post();
 							'https://hackerone.com/wordpress',
 							'<sup id="ref5"><a href="#footnote5">5</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'Each security report is acknowledged upon receipt, and the team works to verify the vulnerability and determine its severity. If confirmed, the security team then plans for a patch to fix the problem which can be committed to an upcoming release of the WordPress software or it can be pushed as an immediate security release, depending on the severity of the issue.', 'wporg' ); ?></p>
@@ -182,7 +182,7 @@ the_post();
 							esc_html__( 'For an immediate security release, an advisory is published by the Security Team to the WordPress.org News site%s announcing the release and detailing the changes. Credit for the responsible disclosure of a vulnerability is given in the advisory to encourage and reinforce continued responsible reporting in the future.', 'wporg' ),
 							'<sup id="ref6"><a href="#footnote6">6</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'Administrators of the WordPress software see a notification on their site dashboard to upgrade when a new release is available, and following the manual upgrade users are redirected to the About WordPress screen which details the changes. If administrators have automatic background updates enabled, they will receive an email after an upgrade has been completed.', 'wporg' ); ?></p>
@@ -195,7 +195,7 @@ the_post();
 							esc_html__( 'Starting with version 3.7, WordPress introduced automated background updates for all minor releases%s, such as 3.7.1 and 3.7.2. The WordPress Security Team can identify, fix, and push out automated security enhancements for WordPress without the site owner needing to do anything on their end, and the security update will install automatically.', 'wporg' ),
 							'<sup id="ref7"><a href="#footnote7">7</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'When a security update is pushed for the current stable release of WordPress, the core team will also push security updates for all the releases that are capable of background updates (since WordPress 3.7), so these older but still recent versions of WordPress will receive security enhancements.', 'wporg' ); ?></p>
@@ -209,7 +209,7 @@ the_post();
 							esc_html__( 'The Open Web Application Security Project (OWASP) is an online community dedicated to web application security. The OWASP Top 10 list%s focuses on identifying the most serious application security risks for a broad array of organizations. The Top 10 items are selected and prioritized in combination with consensus estimates of exploitability, detectability, and impact estimates.', 'wporg' ),
 							'<sup id="ref8"><a href="#footnote8">8</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'The following sections discuss the APIs, resources, and policies that WordPress uses to strengthen the core software and 3rd party plugins and themes against these potential risks.', 'wporg' ); ?></p>
@@ -221,7 +221,7 @@ the_post();
 							esc_html__( 'There is a set of functions and APIs available in WordPress to assist developers in making sure unauthorized code cannot be injected, and help them validate and sanitize data. Best practices and documentation are available%s on how to use these APIs to protect, validate, or sanitize input and output data in HTML, URLs, HTTP headers, and when interacting with the database and filesystem. Administrators can also further restrict the types of file which can be uploaded via filters.', 'wporg' ),
 							'<sup id="ref9"><a href="#footnote9">9</a></sup>'
 						);
-					?>
+						?>
 					</p>
 					<h4><?php esc_html_e( 'A2 - Broken Authentication and Session Management', 'wporg' ); ?></h4>
 					<p><?php esc_html_e( 'WordPress core software manages user accounts and authentication and details such as the user ID, name, and password are managed on the server-side, as well as the authentication cookies. Passwords are protected in the database using standard salting and stretching techniques. Existing sessions are destroyed upon logout for versions of WordPress after 4.0.', 'wporg' ); ?></p>
@@ -234,7 +234,7 @@ the_post();
 							'<sup id="ref10"><a href="#footnote10">10</a></sup>',
 							'<code>wp_kses</code>'
 						);
-					?>
+						?>
 					</p>
 
 					<p>
@@ -244,7 +244,7 @@ the_post();
 							esc_html__( 'As an example, the WordPress core team noticed before the release of WordPress 2.3 that the function %s was being misused by most theme authors, who were not escaping the function&#8217;s output for use in HTML. In a very rare case of slightly breaking backward compatibility, the function&#8217;s output was changed in WordPress 2.3 to be pre-escaped.', 'wporg' ),
 							'<code>the_search_query()</code>'
 						);
-					?>
+						?>
 					</p>
 					<h4><?php esc_html_e( 'A4 - Insecure Direct Object Reference', 'wporg' ); ?></h4>
 					<p><?php esc_html_e( 'WordPress often provides direct object reference, such as unique numeric identifiers of user accounts or content available in the URL or form fields. While these identifiers disclose direct system information, WordPress&#8217; rich permissions and access control system prevent unauthorized requests.', 'wporg' ); ?></p>
@@ -256,7 +256,7 @@ the_post();
 							esc_html__( 'The majority of the WordPress security configuration operations are limited to a single authorized administrator. Default settings for WordPress are continually evaluated at the core team level, and the WordPress core team provides documentation and best practices to tighten security for server configuration for running a WordPress site%s.', 'wporg' ),
 							'<sup id="ref11"><a href="#footnote11">11</a></sup>'
 						);
-					?>
+						?>
 					</p>
 					<h4><?php esc_html_e( 'A6 - Sensitive Data Exposure', 'wporg' ); ?></h4>
 					<p>
@@ -266,7 +266,7 @@ the_post();
 							esc_html__( 'WordPress user account passwords are salted and hashed based on the Portable PHP Password Hashing Framework%s. WordPress&#8217; permission system is used to control access to private information such an registered users&#8217; PII, commenters&#8217; email addresses, privately published content, etc. In WordPress 3.7, a password strength meter was included in the core software providing additional information to users setting their passwords and hints on increasing strength. WordPress also has an optional configuration setting for requiring HTTPS.', 'wporg' ),
 							'<sup id="ref12"><a href="#footnote12">12</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<h4><?php esc_html_e( 'A7 - Missing Function Level Access Control', 'wporg' ); ?></h4>
@@ -280,7 +280,7 @@ the_post();
 							esc_html__( 'WordPress uses cryptographic tokens, called nonces%s, to validate intent of action requests from authorized users to protect against potential CSRF threats. WordPress provides an API for the generation of these tokens to create and verify unique and temporary tokens, and the token is limited to a specific user, a specific action, a specific object, and a specific time period, which can be added to forms and URLs as needed. Additionally, all nonces are invalidated upon logout.', 'wporg' ),
 							'<sup id="ref13"><a href="#footnote13">13</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<h4><?php esc_html_e( 'A9 - Using Components with Known Vulnerabilities', 'wporg' ); ?></h4>
@@ -291,7 +291,7 @@ the_post();
 							esc_html__( 'The WordPress core team closely monitors the few included libraries and frameworks WordPress integrates with for core functionality. In the past the core team has made contributions to several third-party components to make them more secure, such as the update to fix a cross-site vulnerability in TinyMCE in WordPress 3.5.2%s.', 'wporg' ),
 							'<sup id="ref14"><a href="#footnote14">14</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p>
@@ -301,7 +301,7 @@ the_post();
 							esc_html__( 'If necessary, the core team may decide to fork or replace critical external components, such as when the SWFUpload library was officially replaced by the Plupload library in 3.5.2, and a secure fork of SWFUpload was made available by the security team<%s for those plugins who continued to use SWFUpload in the short-term.', 'wporg' ),
 							'<sup id="ref15"><a href="#footnote15">15</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<h4><?php esc_html_e( 'A10 - Unvalidated Redirects and Forwards', 'wporg' ); ?></h4>
@@ -312,7 +312,7 @@ the_post();
 							wp_kses_post( __( 'WordPress&#8217; internal access control and authentication system will protect against attempts to direct users to unwanted destinations or automatic redirects. This functionality is also made available to plugin developers via an API, <code>wp_safe_redirect()</code>%s.', 'wporg' ) ),
 							'<sup id="ref16"><a href="#footnote16">16</a></sup>'
 						);
-					?>
+						?>
 					</p>
 					<h3><?php esc_html_e( 'Further Security Risks and Concerns', 'wporg' ); ?></h3>
 					<h4><?php esc_html_e( 'XXE (XML eXternal Entity) processing attacks', 'wporg' ); ?></h4>
@@ -328,7 +328,7 @@ the_post();
 							esc_html__( 'WordPress requires a theme to be enabled to render content visible on the frontend. The default theme which ships with core WordPress (currently "%s") has been vigorously reviewed and tested for security reasons by both the team of theme developers plus the core development team.', 'wporg' ),
 							esc_html( wp_get_theme( 'core/' . WP_CORE_DEFAULT_THEME )->display( 'Name' ) )
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'The default theme can serve as a starting point for custom theme development, and site developers can create a child theme which includes some customization but falls back on the default theme for most functionality and security. The default theme can be easily removed by an administrator if not needed.', 'wporg' ); ?></p>
@@ -345,7 +345,7 @@ the_post();
 							esc_html( number_format_i18n( 50000 ) ),
 							esc_html( number_format_i18n( 5000 ) )
 						);
-					?>
+						?>
 					</p>
 
 					<p>
@@ -356,7 +356,7 @@ the_post();
 							'<sup id="ref17"><a href="#footnote17">17</a></sup>',
 							'<sup id="ref18"><a href="#footnote18">18</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'Each plugin and theme has the ability to be continually developed by the plugin or theme owner, and any subsequent fixes or feature development can be uploaded to the repository and made available to users with that plugin or theme installed with a description of that change. Site administrators are notified of plugins which need to be updated via their administration dashboard.', 'wporg' ); ?></p>
@@ -372,7 +372,7 @@ the_post();
 							'<sup id="ref20"><a href="#footnote20">20</a></sup>',
 							'<sup id="ref21"><a href="#footnote21">21</a></sup>'
 						);
-					?>
+						?>
 					</p>
 					<h2><?php esc_html_e( 'The Role of the Hosting Provider in WordPress Security', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'WordPress can be installed on a multitude of platforms. Though WordPress core software provides many provisions for operating a secure web application, which were covered in this document, the configuration of the operating system and the underlying web server hosting the software is equally important to keep the WordPress applications secure.', 'wporg' ); ?></p>
@@ -384,7 +384,7 @@ the_post();
 							esc_html__( 'WordPress.com is the largest WordPress installation in the world, and is owned and managed by Automattic, Inc., which was founded by Matt Mullenweg, the WordPress project co-creator. WordPress.com runs on the core WordPress software, and has its own security processes, risks, and solutions%s. This document refers to security regarding the self-hosted, downloadable open source WordPress software available from WordPress.org and installable on any server in the world.', 'wporg' ),
 							'<sup id="ref22"><a href="#footnote22">22</a></sup>'
 						);
-					?>
+						?>
 					</p>
 					<h2><?php esc_html_e( 'Appendix', 'wporg' ); ?></h2>
 					<h3><?php esc_html_e( 'Core WordPress APIs', 'wporg' ); ?></h3>
@@ -395,7 +395,7 @@ the_post();
 							esc_html__( 'The WordPress Core Application Programming Interface (API) is comprised of several individual APIs%s, each one covering the functions involved in, and use of, a given set of functionality. Together, these form the project interface which allows plugins and themes to interact with, alter, and extend WordPress core functionality safely and securely.', 'wporg' ),
 							'<sup id="ref23"><a href="#footnote23">23</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php esc_html_e( 'While each WordPress API provides best practices and standardized ways to interact with and extend WordPress core software, the following WordPress APIs are the most pertinent to enforcing and hardening WordPress security:', 'wporg' ); ?></p>
@@ -409,7 +409,7 @@ the_post();
 							esc_html__( 'The Database API%s, added in WordPress 0.71, provides the correct method for accessing data as named values which are stored in the database layer.', 'wporg' ),
 							'<sup id="ref24"><a href="#footnote24">24</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<h3><?php esc_html_e( 'Filesystem API', 'wporg' ); ?></h3>
@@ -422,7 +422,7 @@ the_post();
 							'<sup id="ref25"><a href="#footnote25">25</a></sup>',
 							'<sup id="ref26"><a href="#footnote26">26</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<p><?php echo wp_kses_post( __( 'It does this through the <code>WP_Filesystem_Base</code> class, and several subclasses which implement different ways of connecting to the local filesystem, depending on individual host support. Any theme or plugin that needs to write files locally should do so using the WP_Filesystem family of classes.', 'wporg' ) ); ?></p>
@@ -437,7 +437,7 @@ the_post();
 							'<sup id="ref27"><a href="#footnote27">27</a></sup>',
 							'<sup id="ref28"><a href="#footnote28">28</a></sup>'
 						);
-					?>
+						?>
 					</p>
 
 					<h3><?php esc_html_e( 'Permissions and current user API', 'wporg' ); ?></h3>
@@ -449,7 +449,7 @@ the_post();
 							esc_html__( 'The permissions and current user API%s is a set of functions which will help verify the current user&#8217;s permissions and authority to perform any task or operation being requested, and can protect further against unauthorized users accessing or performing functions beyond their permitted capabilities.', 'wporg' ),
 							'<sup id="ref29"><a href="#footnote29">29</a></sup>'
 						);
-					?>
+						?>
 					</p>
 					<h3><?php esc_html_e( 'White paper content License', 'wporg' ); ?></h3>
 					<p>
@@ -460,7 +460,7 @@ the_post();
 							'https://wordpressfoundation.org/trademark-policy/',
 							'https://creativecommons.org/publicdomain/zero/1.0/'
 						);
-					?>
+						?>
 					</p>
 
 					<p>
@@ -470,7 +470,7 @@ the_post();
 							wp_kses_post( __( '<em>A special thank you to Drupal&#8217;s </em><a href="%s"><em>security white paper</em></a><em>, which provided some inspiration. </em>', 'wporg' ) ),
 							'https://www.drupal.org/files/drupal-security-whitepaper-1-3_0.pdf'
 						);
-					?>
+						?>
 					</p>
 					<h3><?php esc_html_e( 'Additional Reading', 'wporg' ); ?></h3>
 					<ul>
@@ -481,7 +481,7 @@ the_post();
 								esc_html__( 'WordPress News %s', 'wporg' ),
 								'<a href="https://wordpress.org/news/">https://wordpress.org/news/</a>'
 							);
-						?>
+							?>
 						</li>
 						<li>
 						<?php
@@ -490,7 +490,7 @@ the_post();
 								esc_html__( 'WordPress Security releases %s', 'wporg' ),
 								'<a href="https://wordpress.org/news/category/security/">https://wordpress.org/news/category/security/</a>'
 							);
-						?>
+							?>
 						</li>
 						<li>
 						<?php
@@ -499,7 +499,7 @@ the_post();
 								esc_html__( 'WordPress Developer Resources %s', 'wporg' ),
 								'<a href="https://developer.wordpress.org/">https://developer.wordpress.org/</a>'
 							);
-						?>
+							?>
 						</li>
 					</ul>
 

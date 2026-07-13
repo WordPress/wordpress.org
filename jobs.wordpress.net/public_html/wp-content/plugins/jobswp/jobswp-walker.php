@@ -19,16 +19,16 @@ class Walker_Jobs_Category extends Walker_Category {
 	 * @param int $depth Depth of category in reference to parents.
 	 * @param array $args
 	 */
-	 function start_el( &$output, $category, $depth = 0, $args = array(), $id = 0 ) {
+	function start_el( &$output, $category, $depth = 0, $args = array(), $id = 0 ) {
 		extract($args);
 
 		$cat_name = esc_attr( $category->name );
 		$cat_name = apply_filters( 'list_cats', $cat_name, $category );
 		$link = '<a href="' . esc_url( get_term_link($category) ) . '" ';
 		if ( $use_desc_for_title == 0 || empty($category->description) )
-			$link .= 'title="' . esc_attr( sprintf(__( 'View all jobs filed under %s', 'jobswp' ), $cat_name) ) . '"';
+		   $link .= 'title="' . esc_attr( sprintf(__( 'View all jobs filed under %s', 'jobswp' ), $cat_name) ) . '"';
 		else
-			$link .= 'title="' . esc_attr( strip_tags( apply_filters( 'category_description', $category->description, $category ) ) ) . '"';
+		   $link .= 'title="' . esc_attr( strip_tags( apply_filters( 'category_description', $category->description, $category ) ) ) . '"';
 		$link .= '>';
 		$link .= $cat_name . '</a>';
 
@@ -63,7 +63,7 @@ class Walker_Jobs_Category extends Walker_Category {
 		}
 
 		if ( !empty($show_count) )
-			$link .= ' (' . intval($category->count) . ')';
+		   $link .= ' (' . intval($category->count) . ')';
 
 		if ( 'list' == $args['style'] ) {
 			$output .= "\t<li";

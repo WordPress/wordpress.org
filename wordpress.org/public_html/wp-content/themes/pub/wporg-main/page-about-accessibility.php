@@ -47,7 +47,7 @@ the_post();
 							'https://developer.wordpress.org/coding-standards/wordpress-coding-standards/accessibility/',
 							'https://core.trac.wordpress.org/focus/accessibility'
 						);
-					?>
+						?>
 					</p>
 
 					<p>
@@ -58,7 +58,7 @@ the_post();
 							esc_url( home_url( '/themes/tags/accessibility-ready/' ) ),
 							'https://make.wordpress.org/themes/handbook/review/accessibility/required/'
 						);
-					?>
+						?>
 					</p>
 
 					<h2><?php esc_html_e( 'The Accessibility Team', 'wporg' ); ?></h2>
@@ -69,7 +69,7 @@ the_post();
 							wp_kses_post( __( 'The <a href="%s">WordPress Accessibility Team</a> provides accessibility expertise across the project to improve the accessibility of WordPress core and resources.', 'wporg' ) ),
 							'https://make.wordpress.org/accessibility/'
 						);
-					?>
+						?>
 					</p>
 
 					<p>
@@ -83,7 +83,7 @@ the_post();
 							'https://make.wordpress.org/accessibility/handbook/get-involved/audits-and-testing/',
 							'https://make.wordpress.org/accessibility/handbook/get-involved/'
 						);
-					?>
+						?>
 					</p>
 
 					<p>
@@ -93,7 +93,7 @@ the_post();
 							wp_kses_post( __( 'To report an Accessibility issue you’ve encountered in WordPress or on WordPress.org, please see the Accessibility Handbook page on <a href="%s">Reporting Accessibility Issues</a>.', 'wporg' ) ),
 							'https://make.wordpress.org/accessibility/handbook/reporting-issues/'
 						);
-					?>
+						?>
 					</p>
 
 					<h2>

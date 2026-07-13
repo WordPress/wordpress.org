@@ -362,7 +362,7 @@ class Review_Tools {
 									'Version'   => $post->version,
 								]
 							];
-						?>
+							?>
 						<li><a href="<?php echo esc_url( 'https://api.wordpress.org/plugins/update-check/1.0/test.php?plugins=' . urlencode( json_encode( $update_check_payload ) ) ); ?>">Update Check</a></li>
 					</ul></li>
 				</ul>

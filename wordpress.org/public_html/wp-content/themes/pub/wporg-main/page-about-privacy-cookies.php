@@ -56,7 +56,7 @@ the_post();
 							__( 'Our <a href="%s">Privacy Policy</a> explains our principles when it comes to the collection, processing, and storage of your information. The Cookie Policy specifically explains how we, our partners, and users of our services deploy cookies, as well as the options you have to control them.', 'wporg' ),
 							home_url( '/about/privacy/' )
 						) );
-					?></p>
+						?></p>
 
 					<h2><?php esc_html_e( 'What are cookies?', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'Cookies are small pieces of data, stored in text files, that are stored on your computer or other device when websites are loaded in a browser. They are widely used to &#8216;remember&#8217; you and your preferences, either for a single visit (through a &#8216;session cookie&#8217;) or for multiple repeat visits (using a &#8216;persistent cookie&#8217;). They ensure a consistent and efficient experience for visitors, and perform essential functions such as allowing users to register and remain logged in. Cookies may be set by the site that you are visiting (known as &#8216;first party cookies&#8217;), or by third parties, such as those who serve content or provide advertising or analytics services on the website (&#8216;third party cookies&#8217;).', 'wporg' ); ?></p>

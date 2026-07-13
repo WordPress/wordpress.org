@@ -11,8 +11,8 @@ if ( false !== $latest_release ) :
 						__( 'Download WordPress %s', 'rosetta' ),
 						$latest_release['version']
 					)
-				);
-			?></strong>
+					);
+					?></strong>
 		</a>
 		<span><?php printf( __( '.zip &mdash; %s MB', 'rosetta' ), $latest_release['zip_size_mb'] ); ?></span>
 	</p>
@@ -21,7 +21,7 @@ if ( false !== $latest_release ) :
 		<a href="<?php echo $latest_release['targz_url']; ?>"><?php printf(
 			__( 'Download .tar.gz &mdash; %s MB', 'rosetta' ),
 			$latest_release['tar_size_mb'] );
-		?></a>
+					?></a>
 	</p>
 	<?php
 endif;

@@ -44,7 +44,7 @@ $more = 1;
 		<?php the_category_rss() ?>
 
 		<guid isPermaLink="false"><?php the_guid(); ?></guid>
-<?php if (get_option('rss_use_excerpt')) : ?>
+		<?php if (get_option('rss_use_excerpt')) : ?>
 		<description><![CDATA[<?php the_excerpt_rss() ?>]]></description>
 <?php else : ?>
 		<description><![CDATA[<?php the_excerpt_rss() ?>]]></description>
@@ -59,8 +59,8 @@ $more = 1;
 		<showcase:screenshotURL><?php site_screenshot_src(); ?></showcase:screenshotURL>
 		<showcase:domain><?php get_site_domain(false, true, false); ?></showcase:domain>
 
-<?php rss_enclosure(); ?>
-	<?php do_action('rss2_item'); ?>
+		<?php rss_enclosure(); ?>
+		<?php do_action('rss2_item'); ?>
 	</item>
 	<?php endwhile; ?>
 </channel>

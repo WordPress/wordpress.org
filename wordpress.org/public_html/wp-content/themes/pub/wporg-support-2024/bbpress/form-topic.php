@@ -79,13 +79,13 @@
 									printf( __( '<strong><a href="%s">Read the Welcome Guide</a></strong> to maximize your odds of getting help.', 'wporg-forums' ),
 										esc_url( __( 'https://wordpress.org/support/welcome/', 'wporg-forums' ) )
 									);
-								?></li>
+									?></li>
 								<li><?php
 									/* translators: %s: URL to search */
 									printf( __( '<strong><a href="%s">Search the forums</a></strong> for similar inquiries.', 'wporg-forums' ),
 										esc_url( bbp_get_search_url() )
 									);
-								?></li>
+									?></li>
 								<li><?php _e( '<strong>Update your plugins, themes, and WordPress site</strong> to the latest versions.', 'wporg-forums' ); ?></li>
 								<li><?php _e( '<strong>Describe the steps</strong> needed to reproduce an issue.', 'wporg-forums' ); ?></li>
 								<li><?php _e( '<strong>Provide relevant information</strong>, such as your browser, operating system, or server environment.', 'wporg-forums' ); ?></li>
@@ -96,14 +96,14 @@
 										esc_url( __( 'https://wordpress.org/themes/', 'wporg-forums' ) ),
 										esc_url( __( 'https://wordpress.org/plugins/', 'wporg-forums' ) )
 									);
-								?></li>
+									?></li>
 								<?php endif; ?>
 								<li><?php
 									/* translators: %s: Handbook URL for reporting security issues */
 									printf( __( '<strong>Reporting a security issue?</strong> Please follow the guidelines on <a href="%s">reporting vulnerabilities responsibly</a>.', 'wporg-forums' ),
 										esc_url( __( 'https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/', 'wporg-forums' ) )
 									);
-								?></li>
+									?></li>
 							</ul>
 
 						<?php endif; ?>
@@ -138,11 +138,11 @@
 
 					<p>
 						<label for="bbp_topic_title"><?php
-							if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
-								printf( __( 'Review Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
-							} else {
-								printf( __( 'Topic Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
-							}
+						if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+							printf( __( 'Review Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
+						} else {
+							printf( __( 'Topic Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
+						}
 						?></label><br />
 						<input type="text" id="bbp_topic_title" value="<?php bbp_form_topic_title(); ?>" size="40" name="bbp_topic_title" maxlength="<?php bbp_title_max_length(); ?>" />
 					</p>
@@ -272,7 +272,7 @@
 						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
 						WordPressdotorg\Forums\MODERATION_EMAIL
 					);
-				?></p>
+					?></p>
 			<?php endif; ?>
 		</div>
 	</div>

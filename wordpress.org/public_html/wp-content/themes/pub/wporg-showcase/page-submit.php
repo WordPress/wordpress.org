@@ -32,7 +32,7 @@ if ( !empty( $_POST ) ) {
 		/* translators: %s: URL of the site submission form */
 		__( 'Thanks! You have successfully submitted a site for consideration to be added to the WordPress Showcase. If the site you submitted is added, you will be contacted via email within one week. We appreciate your interest in the WordPress Showcase! If you\'d like to submit another site, head back to the <a href="%s">submission form</a>.', 'wporg-showcase' ),
 		'https://wordpress.org/showcase/submit-a-wordpress-site/'
-	); ?></p>
+	   ); ?></p>
 	</div>
 <?php endif; // $_POST && ! $error ?>
 
@@ -42,16 +42,16 @@ if ( empty( $_POST ) || $error ) {
 		while ( have_posts() ) :
 			the_post();
 			breadcrumb();
-?>
+			?>
 
 <div class="storycontent">
-	<?php the_content(); ?>
+			<?php the_content(); ?>
 </div>
 
-<?php
+			<?php
 		endwhile; // have_posts
 	endif; // have_posts
-?>
+	?>
 
 	<?php if ( $error ) : ?>
 		<h3 id="return"><?php _e( 'Whoops!', 'wporg-showcase' ); ?></h3>
@@ -104,14 +104,14 @@ if ( empty( $_POST ) || $error ) {
 		$recaptcha_url = 'http://www.google.com/recaptcha/api/challenge?k=' . $recaptcha_pubkey;
 		if ( !empty( $recaptcha_error ) )
 			$recaptcha_url .= '&error=' . $recaptcha_error;
-	?>
+		?>
 	<script type="text/javascript" src="<?php echo $recaptcha_url; ?>"></script>
 	<noscript>
 	<iframe src="http://www.google.com/recaptcha/api/noscript?k=your_public_key" height="300" width="500" frameborder="0"></iframe><br>
 	<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
 	<input type="hidden" name="recaptcha_response_field" value="manual_challenge">
 	</noscript>
-	<?php
+		<?php
 	} // $use_recaptcha
 	?>
 

@@ -612,15 +612,15 @@ class WPorg_Handbook_Handbook_Test extends WP_UnitTestCase {
 		$this->assertEquals( $post_fragment, $this->handbook->o2_post_fragment( $post_fragment ) );
 	}
 
-/*
-public function test_o2_post_fragment_with_invalid_arg() {
+	/*
+	public function test_o2_post_fragment_with_invalid_arg() {
 	$post_id = $this->factory()->post->create( [ 'post_type' => 'handbook' ] );
 	$post_fragment = 'cat';
 	$this->go_to( get_permalink( $post_id ) );
 
 	$this->assertEquals( $post_fragment, $this->handbook->o2_post_fragment( $post_fragment ) );
-}
-*/
+	}
+	*/
 
 	/*
 	 * comments_open()

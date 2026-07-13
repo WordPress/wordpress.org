@@ -285,7 +285,7 @@ class Make_Core_Trac_Components {
 		if ( ! is_singular( self::POST_TYPE_NAME ) && ! is_post_type_archive( self::POST_TYPE_NAME ) ) {
 			return;
 		}
-?>
+		?>
 <style>
 #toggle-compact-components { text-align: right }
 .component-info .compact { display: none }
@@ -327,7 +327,7 @@ jQuery( function( $ ) {
 	});
 });
 </script>
-<?php
+		<?php
 	}
 
 	function the_content( $content ) {

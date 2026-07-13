@@ -77,4 +77,4 @@ the_post();
 	</main><!-- #main -->
 
 	<?php
-get_footer();
+	get_footer();

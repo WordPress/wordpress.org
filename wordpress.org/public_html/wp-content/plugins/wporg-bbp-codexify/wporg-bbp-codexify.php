@@ -27,43 +27,43 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPORG_Codexify' ) ) {
-class WPORG_Codexify {
-	const BASE_URI = 'https://codex.wordpress.org/';
+	class WPORG_Codexify {
+		const BASE_URI = 'https://codex.wordpress.org/';
 
-	public function __construct() {
-		add_filter( 'content_save_pre', array( $this, 'convert_wiki_links' ) );
-	}
-
-	function convert_wiki_links( $content ) {
-		if ( strpos( $content, '[[' ) !== false && strpos( $content, ']]' ) !== false ) {
-			$content = preg_replace_callback( '%\[\[([ #:\/\w]+)\]\]%', array( $this, 'convert_base_wiki_link' ), $content );
-			$content = preg_replace_callback( '%\[\[([ #:\/\w]+)\|([^\]]+)\]\]%', array( $this, 'convert_vbar_wiki_link' ), $content );
+		public function __construct() {
+			add_filter( 'content_save_pre', array( $this, 'convert_wiki_links' ) );
 		}
-		return $content;
-	}
 
-	/**
-	 * Replace simple Wiki markup links ( [[ path ]] ) with Codex links
-	 *
-	 * @param array $matches Matches path of Wiki-formatted links
-	 * @return string
-	 */
-	public static function convert_base_wiki_link( $matches ) {
-		$path = preg_replace( '/[\s]+/', '_', trim( $matches[1] ) );
-		return '<a href="' . esc_url( self::BASE_URI . $path ) . '">' . esc_html( $matches[1] ) . '</a>';
-	}
+		function convert_wiki_links( $content ) {
+			if ( strpos( $content, '[[' ) !== false && strpos( $content, ']]' ) !== false ) {
+				$content = preg_replace_callback( '%\[\[([ #:\/\w]+)\]\]%', array( $this, 'convert_base_wiki_link' ), $content );
+				$content = preg_replace_callback( '%\[\[([ #:\/\w]+)\|([^\]]+)\]\]%', array( $this, 'convert_vbar_wiki_link' ), $content );
+			}
+			return $content;
+		}
 
-	/**
-	 * Replace extended Wiki markup links ( [[ path | title ]] ) with Codex
-	 * links
-	 *
-	 * @param array $matches Matches path and title of Wiski-formatted links
-	 * @return string
-	 */
-	public static function convert_vbar_wiki_link( $matches ) {
-		$path = preg_replace( '/[\s]+/', '_', trim( $matches[1] ) );
-		return '<a href="' . esc_url( self::BASE_URI . $path ) . '">' . esc_html( $matches[2] ) . '</a>';
-	}
-} }
+		/**
+		 * Replace simple Wiki markup links ( [[ path ]] ) with Codex links
+		 *
+		 * @param array $matches Matches path of Wiki-formatted links
+		 * @return string
+		 */
+		public static function convert_base_wiki_link( $matches ) {
+			$path = preg_replace( '/[\s]+/', '_', trim( $matches[1] ) );
+			return '<a href="' . esc_url( self::BASE_URI . $path ) . '">' . esc_html( $matches[1] ) . '</a>';
+		}
+
+		/**
+		 * Replace extended Wiki markup links ( [[ path | title ]] ) with Codex
+		 * links
+		 *
+		 * @param array $matches Matches path and title of Wiski-formatted links
+		 * @return string
+		 */
+		public static function convert_vbar_wiki_link( $matches ) {
+			$path = preg_replace( '/[\s]+/', '_', trim( $matches[1] ) );
+			return '<a href="' . esc_url( self::BASE_URI . $path ) . '">' . esc_html( $matches[2] ) . '</a>';
+		}
+	} }
 
 new WPORG_Codexify;

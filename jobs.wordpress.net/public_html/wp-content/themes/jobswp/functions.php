@@ -12,56 +12,56 @@ if ( ! isset( $content_width ) )
 	$content_width = 640; /* pixels */
 
 if ( ! function_exists( 'jobswp_setup' ) ) :
-/**
- * Sets up theme defaults and registers support for various WordPress features.
- *
- * Note that this function is hooked into the after_setup_theme hook, which runs
- * before the init hook. The init hook is too late for some features, such as indicating
- * support post thumbnails.
- */
-function jobswp_setup() {
-
 	/**
-	 * Make theme available for translation
-	 * Translations can be filed in the /languages/ directory
-	 * If you're building a theme based on jobswp, use a find and replace
-	 * to change 'jobswp' to the name of your theme in all the template files
-	 */
-	load_theme_textdomain( 'jobswp', get_template_directory() . '/languages' );
-
-	/**
-	 * Add default posts RSS feed links to head.
-	 * Comments feed is removed below as jobs don't have comments.
-	 */
-	add_theme_support( 'automatic-feed-links' );
-
-	/**
-	 * Enable support for Post Thumbnails on posts and pages
+	 * Sets up theme defaults and registers support for various WordPress features.
 	 *
-	 * @link https://developer.wordpress.org/reference/functions/add_theme_support/#post-thumbnails
+	 * Note that this function is hooked into the after_setup_theme hook, which runs
+	 * before the init hook. The init hook is too late for some features, such as indicating
+	 * support post thumbnails.
 	 */
-	//add_theme_support( 'post-thumbnails' );
+	function jobswp_setup() {
 
-	/**
-	 * This theme uses wp_nav_menu() in one location.
-	 */
-	register_nav_menus( array(
+		/**
+		 * Make theme available for translation
+		 * Translations can be filed in the /languages/ directory
+		 * If you're building a theme based on jobswp, use a find and replace
+		 * to change 'jobswp' to the name of your theme in all the template files
+		 */
+		load_theme_textdomain( 'jobswp', get_template_directory() . '/languages' );
+
+		/**
+		 * Add default posts RSS feed links to head.
+		 * Comments feed is removed below as jobs don't have comments.
+		 */
+		add_theme_support( 'automatic-feed-links' );
+
+		/**
+		 * Enable support for Post Thumbnails on posts and pages
+		 *
+		 * @link https://developer.wordpress.org/reference/functions/add_theme_support/#post-thumbnails
+		 */
+		//add_theme_support( 'post-thumbnails' );
+
+		/**
+		 * This theme uses wp_nav_menu() in one location.
+		 */
+		register_nav_menus( array(
 		'primary' => __( 'Primary Menu', 'jobswp' ),
-	) );
+		) );
 
-	/**
-	 * Enable support for Post Formats
-	 */
-//	add_theme_support( 'post-formats', array( 'aside', 'image', 'video', 'quote', 'link' ) );
+		/**
+		 * Enable support for Post Formats
+		 */
+		//  add_theme_support( 'post-formats', array( 'aside', 'image', 'video', 'quote', 'link' ) );
 
-	/**
-	 * Setup the WordPress core custom background feature.
-	 */
-	add_theme_support( 'custom-background', apply_filters( 'jobswp_custom_background_args', array(
-		'default-color' => 'ffffff',
-		'default-image' => '',
-	) ) );
-}
+		/**
+		 * Setup the WordPress core custom background feature.
+		 */
+		add_theme_support( 'custom-background', apply_filters( 'jobswp_custom_background_args', array(
+			'default-color' => 'ffffff',
+			'default-image' => '',
+		) ) );
+	}
 endif; // jobswp_setup
 add_action( 'after_setup_theme', 'jobswp_setup' );
 

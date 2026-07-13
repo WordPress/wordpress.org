@@ -225,7 +225,7 @@ class WPorg_GP_Custom_Translation_Warnings {
 		}
 
 		return implode( "\n", $warnings );
-   }
+	}
 
 	/**
 	 * Adds a warning for changing placeholders.

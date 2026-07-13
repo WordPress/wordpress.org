@@ -70,29 +70,29 @@ class WordPress_Map_Users_Import extends WP_Import {
 				} );
 			</script>
 			<p>
-			<?php
-			if ( $matched ) :
-				/* translators: Number of matched authors. */
-				printf( esc_html( _n( 'We were able to match %s author to a WordPress.org account using email addresses.', 'We were able to match %s authors to a WordPress.org account using email addresses.', $matched ) ), esc_html( $matched ) );
+				<?php
+				if ( $matched ) :
+					/* translators: Number of matched authors. */
+					printf( esc_html( _n( 'We were able to match %s author to a WordPress.org account using email addresses.', 'We were able to match %s authors to a WordPress.org account using email addresses.', $matched ) ), esc_html( $matched ) );
 			else :
 				esc_html_e( 'We couldn&#8217;t find any users to match. You&#8217;ll have to do it live.', 'wordpress-importer' );
 			endif; // $matched.
 			?>
 			</p>
 			<strong><?php esc_html_e( 'Specify a catch-all user for any users that do not have a username specified below:', 'wordpress-importer' ); ?></strong>
-			<?php
-			wp_dropdown_users( [
+				<?php
+				wp_dropdown_users( [
 				'name'            => 'user_catchall',
 				'show_option_all' => __( '- Select -', 'wordpress-importer' ),
-			] );
-			?>
+				] );
+				?>
 
 			<div class="map-users">
 				<p><?php esc_html_e( 'Map individual users:', 'wordpress-importer' ); ?></p>
 				<?php
 				foreach ( $this->unmatched_authors as $author ) :
 					$format = $author['author_display_name'] ? '%s (%s)' : '%s';
-				?>
+					?>
 				<p>
 					<strong><?php printf( esc_html( $format ), esc_html( $author['author_login'] ), esc_html( $author['author_display_name'] ) ); ?></strong><br />
 					<?php esc_html_e( 'Map to WP.org username:', 'wordpress-importer' ); ?>

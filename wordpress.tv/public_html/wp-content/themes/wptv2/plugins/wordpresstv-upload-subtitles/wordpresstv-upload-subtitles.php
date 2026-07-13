@@ -404,7 +404,7 @@ class WordPressTV_Subtitles_Upload {
 							file</a>
 						for this video and language. If you approve the current file, the other will be automatically
 						unapproved.</p>
-				<?php
+					<?php
 				}
 
 				?>
@@ -413,7 +413,7 @@ class WordPressTV_Subtitles_Upload {
 						Approved</label></p>
 			</div>
 		</div>
-	<?php
+		<?php
 	}
 
 	/**

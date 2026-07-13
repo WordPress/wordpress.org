@@ -32,7 +32,7 @@
 				<td class="projects column-projects"><?php
 					asort( $user->projects );
 					echo implode( ', ', array_map( 'esc_html', $user->projects ) );
-					?>
+				?>
 				</td>
 			</tr>
 		<?php endforeach; ?>

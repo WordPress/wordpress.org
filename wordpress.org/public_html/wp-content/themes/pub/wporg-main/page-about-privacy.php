@@ -148,7 +148,7 @@ the_post();
 							__( 'Please see <a href="%s">our cookie policy</a> for more information about what cookies are collected on WordPress.org.', 'wporg' ),
 							home_url( '/about/privacy/cookies/' )
 						) );
-					?></p>
+						?></p>
 
 					<h2><?php esc_html_e( 'Privacy Policy Changes', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'Although most changes are likely to be minor, WordPress.org may change its Privacy Policy from time to time, and at WordPress.org&#8217;s sole discretion. WordPress.org encourages visitors to frequently check this page for any changes to its Privacy Policy. Your continued use of this site after any change in this Privacy Policy will constitute your acceptance of such change.', 'wporg' ); ?></p>

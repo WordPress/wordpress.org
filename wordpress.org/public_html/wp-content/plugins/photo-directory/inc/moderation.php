@@ -279,7 +279,7 @@ class Moderation {
 	 * @param WP_User  $user The user object.
 	 * @return array
 	 */
-	 public static function disable_own_post_editing( $caps, $cap, $args, $user ) {
+	public static function disable_own_post_editing( $caps, $cap, $args, $user ) {
 		// Bail if not a relevant capability.
 		if ( empty( $cap[0] ) || ! in_array( $cap[0], [ 'edit_photos', 'publish_photos' ] ) ) {
 			return $caps;
@@ -458,7 +458,7 @@ class Moderation {
 		$content = sprintf(
 			/* translators: 1: user's display name, 2: original filename of photo, 3: URL to photo, 4: submission date, 5: image caption, 6: note to user from moderator */
 			__(
-'Hello %1$s,
+		'Hello %1$s,
 
 Thank you for submitting a photo to the WordPress Photo Directory.
 
@@ -542,7 +542,7 @@ https://wordpress.org/photos/
 		$content = sprintf(
 			/* translators: 1: user's display name, 2: specific reason for rejection (already translated), 3: submission date, 4: original filename of photo, 5: image caption, 6: URL to guidelines */
 			__(
-'Hello %1$s,
+		'Hello %1$s,
 
 Thank you for submitting a photo to the WordPress Photo Directory.
 
@@ -615,7 +615,7 @@ https://wordpress.org/photos/
 		$content = sprintf(
 			/* translators: 1: user's display name, 2: specific reason for rejection (already translated), 3: submission date, 4: original filename of photo, 5: image caption, 6: URL to guidelines */
 			__(
-'Hello %1$s,
+		'Hello %1$s,
 
 Thank you for attempting to submit a photo to the WordPress Photo Directory.
 %2$s
@@ -674,29 +674,29 @@ https://wordpress.org/photos/
 				$rejections_percentage = $rejections_count / ( $rejections_count + $published_photos_count );
 
 				// A user with more rejections than approvals should be an alert.
-				if ( $rejections_count > $published_photos_count ) {
-					$rejections_level = 'very_likely';
-					$message = __( 'more rejections than approvals', 'wporg-photos' );
-				}
+			if ( $rejections_count > $published_photos_count ) {
+				$rejections_level = 'very_likely';
+				$message = __( 'more rejections than approvals', 'wporg-photos' );
+			}
 				// Specify as alert or warning based on count relative to alert threshold.
-				else {
-					if ( $rejections_percentage >= self::FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE ) {
-						$rejections_level = 'very_likely';
-						$message = __( 'very high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
-					}
-					elseif ( $rejections_percentage >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
-						$rejections_level = 'likely';
-						$message = __( 'high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
-					}
-					elseif ( $rejections_percentage >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
-						$rejections_level = 'possible';
-						$message = __( 'rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
-					}
+			else {
+				if ( $rejections_percentage >= self::FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE ) {
+					$rejections_level = 'very_likely';
+					$message = __( 'very high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
 				}
+				elseif ( $rejections_percentage >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
+					$rejections_level = 'likely';
+					$message = __( 'high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+				}
+				elseif ( $rejections_percentage >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
+					$rejections_level = 'possible';
+					$message = __( 'rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+				}
+			}
 
-				if ( $rejections_level && $message ) {
-					$flags[ sprintf( $message, round( $rejections_percentage * 100 , 0 ) ) ] = $rejections_level;
-				}
+			if ( $rejections_level && $message ) {
+				$flags[ sprintf( $message, round( $rejections_percentage * 100 , 0 ) ) ] = $rejections_level;
+			}
 		}
 
 		$user = get_user_by( 'id', $post->post_author );

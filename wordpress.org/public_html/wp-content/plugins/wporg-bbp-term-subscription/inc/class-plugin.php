@@ -232,11 +232,11 @@ class Plugin {
 		if ( empty( $user_id ) ) {
 			bbp_add_error( 'wporg_bbp_subscribe_logged_id', __( '<strong>Error:</strong> You must be logged in to do this!', 'wporg-forums' ) );
 
-		// Check nonce.
+			// Check nonce.
 		} elseif ( 'token' !== $auth && ! bbp_verify_nonce_request( 'toggle-term-subscription_' . $user_id . '_' . $term_id . '_' . $this->taxonomy ) ) {
 			bbp_add_error( 'wporg_bbp_subscribe_nonce', __( '<strong>Error:</strong> Are you sure you wanted to do that?', 'wporg-forums' ) );
 
-		// Check user's ability to spectate if attempting to subscribe to a term.
+			// Check user's ability to spectate if attempting to subscribe to a term.
 		} elseif ( ! user_can( $user_id, 'spectate' ) && 'wporg_bbp_subscribe_term' === $action ) {
 			bbp_add_error( 'wporg_bbp_subscribe_permissions', __( '<strong>Error:</strong> You don\'t have permission to do this!', 'wporg-forums' ) );
 		}

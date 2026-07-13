@@ -77,7 +77,7 @@
 				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $locale_manager['nice_name'] ); ?>/"><?php
 					echo get_avatar( $locale_manager['email'], 60 );
 					echo esc_html( $locale_manager['display_name'] );
-					?></a>
+				?></a>
 				<?php
 				if ( $locale_manager['slack'] ) {
 					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', $locale_manager['slack'], 'https://make.wordpress.org/chat/' );

@@ -74,7 +74,7 @@ class WordPressTV_Theme {
 		if ( is_front_page() ) {
 			$canonical = home_url('/');
 
-		// Speakers, Events, Producers, Tags, Years/WordCamp.TV,
+			// Speakers, Events, Producers, Tags, Years/WordCamp.TV,
 		} elseif ( is_tax() || is_tag() || is_category() ) {
 			$canonical = get_term_link( get_queried_object() );
 			if ( is_wp_error( $canonical ) ) {
@@ -499,7 +499,7 @@ class WordPressTV_Theme {
 			</div>
 			<div class="clear"></div>
 		</li>
-	<?php
+		<?php
 	}
 
 	/**

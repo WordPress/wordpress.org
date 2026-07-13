@@ -278,7 +278,7 @@ class Dropin {
 			if ( true === $subscribed && false === $subscheck ) {
 				bbp_remove_user_subscription( $author_id, $topic_id );
 
-			// Subscribing
+				// Subscribing
 			} elseif ( false === $subscribed && true === $subscheck ) {
 				bbp_add_user_subscription( $author_id, $topic_id );
 			}
@@ -304,8 +304,8 @@ class Dropin {
 			bbp_update_topic_reply_count_hidden ( $topic_id, 0            );
 			bbp_update_topic_voice_count        ( $topic_id               );
 
-		// Walk up ancestors and do the dirty work
-		// bbp_update_topic_walker( $topic_id, $last_active, $forum_id, 0, false );
+			// Walk up ancestors and do the dirty work
+			// bbp_update_topic_walker( $topic_id, $last_active, $forum_id, 0, false );
 		}
 	}
 
@@ -402,7 +402,7 @@ class Dropin {
 			if ( true === $subscribed && false === $subscheck ) {
 				bbp_remove_user_subscription( $author_id, $topic_id );
 
-			// Subscribing
+				// Subscribing
 			} elseif ( false === $subscribed && true === $subscheck ) {
 				bbp_add_user_subscription( $author_id, $topic_id );
 			}

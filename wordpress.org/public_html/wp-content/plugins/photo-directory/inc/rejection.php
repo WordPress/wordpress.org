@@ -780,7 +780,7 @@ class Rejection {
 	 * @param array    $args    Adds context to the capability check, typically
 	 *                          starting with an object ID.
 	 */
-	 public static function remove_delete_post_cap( $caps, $cap, $user_id, $args ) {
+	public static function remove_delete_post_cap( $caps, $cap, $user_id, $args ) {
 		// Bail if not 'delete_post' cap and post not specified.
 		if ( 'delete_post' !== $cap || empty( $args[0] ) ) {
 			return $caps;

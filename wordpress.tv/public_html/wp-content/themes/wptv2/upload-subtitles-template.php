@@ -157,7 +157,7 @@ add_action( 'wp_head', 'subtitles_upload_css' );
 // Password-protect this form.
 if ( post_password_required() ) :
 	get_header();
-?>
+	?>
 	<div class="wptv-hero">
 		<div class="single container">
 			<h2><?php esc_html_e( 'Subtitle a Video', 'wptv' ); ?></h2>
@@ -172,7 +172,7 @@ if ( post_password_required() ) :
 			</div>
 		</div>
 	</div>
-<?php
+	<?php
 	get_footer();
 	return;
 endif; // post_password_required

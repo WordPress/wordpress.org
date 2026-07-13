@@ -140,7 +140,7 @@ function time_converter_script() {
 			$( document.body ).on( 'post-load ready.o2', convertTime );
 		})( jQuery );
 	</script>
-<?php
+	<?php
 }
 
 /**

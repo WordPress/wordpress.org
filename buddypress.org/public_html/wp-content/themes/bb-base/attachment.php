@@ -51,13 +51,13 @@ if ( have_posts() ) :
 			</p>
 		</div>
 
-	<?php
-	comments_template();
+		<?php
+		comments_template();
 	endwhile;
 else:
-?>
+	?>
 	<h1><?php esc_html_e('Whoops!', 'bborg' ); ?></h1>
 	<p class="error"><?php esc_html_e('Sorry friend, there&#8217;s no attachments for you to see here.', 'bborg' ); ?></p>
-<?php
+	<?php
 endif;
 get_footer();

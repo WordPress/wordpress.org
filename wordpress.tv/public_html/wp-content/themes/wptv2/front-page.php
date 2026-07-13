@@ -46,7 +46,7 @@ get_header(); ?>
 
 					while ( $featured->have_posts() ) :
 						$featured->the_post();
-				?>
+						?>
 
 				<li class="group">
 						<span class="video-thumbnail">
@@ -59,13 +59,13 @@ get_header(); ?>
 								<?php the_title(); ?>
 							</a>
 						</span>
-					<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
+						<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
 				</li>
 
-				<?php
+						<?php
 					endwhile; // $featured->have_posts
 					unset( $featured );
-				?>
+					?>
 			</ul>
 		</div><!-- .secondary-videos -->
 
@@ -77,8 +77,8 @@ get_header(); ?>
 
 		<!-- Latest Videos -->
 		<?php
-			if ( have_posts() ) :
-		?>
+		if ( have_posts() ) :
+			?>
 		<h3><?php esc_html_e( 'Latest Videos', 'wptv' ); ?></h3>
 		<ul class="video-list four-col">
 
@@ -92,7 +92,7 @@ get_header(); ?>
 			<?php endwhile; ?>
 
 		</ul>
-		<?php
+			<?php
 			endif; // $latest->have_posts
 
 			// Popular Videos
@@ -107,11 +107,11 @@ get_header(); ?>
 			) );
 
 			if ( $popular->have_posts() ) :
-		?>
+				?>
 		<h3><?php esc_html_e( 'Popular Videos', 'wptv' ); ?></h3>
 		<ul class="video-list four-col">
 
-			<?php while ( $popular->have_posts() ) : $popular->the_post(); ?>
+				<?php while ( $popular->have_posts() ) : $popular->the_post(); ?>
 			<li>
 				<a href="<?php the_permalink(); ?>">
 					<span class="video-thumbnail"><?php $wptv->the_video_image( 50, null, false ); ?></span>
@@ -121,10 +121,10 @@ get_header(); ?>
 			<?php endwhile; ?>
 
 		</ul>
-		<?php
+				<?php
 			endif; // $popular->have_posts
 			unset( $popular );
-		?>
+			?>
 
 	</div><!-- .primary-content -->
 	<?php get_sidebar(); ?>

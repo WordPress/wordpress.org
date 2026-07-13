@@ -46,7 +46,7 @@ class WPorg_GP_Help_Page {
 			return;
 		}
 		$hide_url = gp_url( '/getting-started/hide-notice' );
-?>
+		?>
 		<div class="notice" id="help-notice">
 			<p>
 				New to Translating WordPress?
@@ -61,7 +61,7 @@ class WPorg_GP_Help_Page {
 				return false;
 			});
 		</script>
-<?php
+		<?php
 	}
 
 }

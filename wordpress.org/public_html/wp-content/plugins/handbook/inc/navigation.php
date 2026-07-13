@@ -394,7 +394,7 @@ class WPorg_Handbook_Navigation {
 			</div>
 			<!-- .nav-links -->
 		</nav><!-- .navigation -->
-	<?php
+		<?php
 	}
 
 }

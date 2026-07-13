@@ -147,13 +147,13 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 
 	<div class="entry-meta">
 		<?php
-			if ( get_query_var( 'plugin_advanced' ) && ( ! $is_closed || current_user_can( 'plugin_admin_view', $post ) ) ) {
-				get_template_part( 'template-parts/plugin-sidebar', 'advanced' );
-			} elseif ( $is_closed ) {
-				get_template_part( 'template-parts/plugin-sidebar', 'closed' );
-			} else {
-				get_template_part( 'template-parts/plugin-sidebar' );
-			}
+		if ( get_query_var( 'plugin_advanced' ) && ( ! $is_closed || current_user_can( 'plugin_admin_view', $post ) ) ) {
+			get_template_part( 'template-parts/plugin-sidebar', 'advanced' );
+		} elseif ( $is_closed ) {
+			get_template_part( 'template-parts/plugin-sidebar', 'closed' );
+		} else {
+			get_template_part( 'template-parts/plugin-sidebar' );
+		}
 		?>
 	</div><!-- .entry-meta -->
 </article><!-- #post-## -->

@@ -134,7 +134,7 @@ class Plugin_Scan {
 
 			// Only notify when there's errors.
 			if ( $plugin_check_result['totals']['errors'] > 0 ) {
-			//	self::notify_plugin_authors( $plugin, $plugin_check_result, $tag ); // TODO: Enable, disabled until email content is finalised.
+				//	self::notify_plugin_authors( $plugin, $plugin_check_result, $tag ); // TODO: Enable, disabled until email content is finalised.
 				self::notify_slack_channel( $plugin, $plugin_check_result, $tag );
 			}
 		}

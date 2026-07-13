@@ -33,8 +33,8 @@ if ( have_posts() ) :
 			<dt><?php esc_html_e( 'Trackback from', 'bbporg' ); ?></dt>
 			<dd><a href="<?php trackback_url(); ?>" rel="trackback"><?php esc_html_e( 'your own site', 'bbporg' ); ?></a></dd>
 			<?php endif;
-				if ( 'open' == $post->comment_status ) :
-					_e( '<dt>Respond if</dt><dd><a href="#respond">you&#8217;d like to leave feedback</a></dd>', 'bbporg' );
+			if ( 'open' == $post->comment_status ) :
+				_e( '<dt>Respond if</dt><dd><a href="#respond">you&#8217;d like to leave feedback</a></dd>', 'bbporg' );
 				endif;
 				edit_post_link( esc_html__( 'Edit', 'bbporg' ), "\t\t\t\t\t<dt>" . esc_html__( 'You can', 'bborg' ) . "</dt>\n\t\t\t\t\t<dd>", "</dd>\n");
 			?>
@@ -54,6 +54,6 @@ else:
 	?>
 	<h1><?php esc_html_e( 'Whoops!', 'bborg' ); ?></h1>
 	<p><?php esc_html_e( 'Sorry, no images matched your criteria.', 'bborg' ); ?></p>
-<?php
+	<?php
 endif;
 get_footer();

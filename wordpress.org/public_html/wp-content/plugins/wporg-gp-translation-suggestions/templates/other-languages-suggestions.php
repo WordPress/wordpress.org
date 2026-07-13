@@ -13,23 +13,23 @@ if ( empty( $suggestions ) ) {
 
 				echo '<span class="translation-suggestion__translation-meta">';
 					$gp_locale_slug = $suggestion['locale'];
-					if ( 'default' !== $suggestion['slug'] ) {
-						$gp_locale_slug .= '/' . $suggestion['slug'];
-					}
+		if ( 'default' !== $suggestion['slug'] ) {
+			$gp_locale_slug .= '/' . $suggestion['slug'];
+		}
 					$gp_locale = GP_Locales::by_slug( $gp_locale_slug );
 
 					echo esc_html( $gp_locale ? $gp_locale->english_name : $gp_locale_slug );
 
-					if ( $suggestion['user_id'] ) {
-						$user = get_user_by( 'id', $suggestion['user_id'] );
-						if ( $user ) {
-							printf(
-								' | By <a href="https://profiles.wordpress.org/%s">%s</a>',
- 								$user->user_nicename,
-								esc_html( $user->display_name )
-							);
-						}
-					}
+		if ( $suggestion['user_id'] ) {
+			$user = get_user_by( 'id', $suggestion['user_id'] );
+			if ( $user ) {
+				printf(
+					' | By <a href="https://profiles.wordpress.org/%s">%s</a>',
+					$user->user_nicename,
+					esc_html( $user->display_name )
+				);
+			}
+		}
 
 				echo '</span>';
 			echo '</span>';

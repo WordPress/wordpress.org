@@ -372,16 +372,16 @@ function wporg_themes_author_metabox_override( $post_type, $post ) {
  */
 function wporg_themes_post_author_meta_box( $post ) {
 	global $user_ID;
-?>
+	?>
 <label class="screen-reader-text" for="post_author_override"><?php _e('Author'); ?></label>
-<?php
+	<?php
 	$value = empty($post->ID) ? $user_ID : $post->post_author;
 
 	$user = new WP_User($value);
 
 	echo "<input type='text' id='post_author_username' value='{$user->user_login}' />";
 	echo "<input type='hidden' id='post_author_override' name='post_author_override' value='{$value}' />";
-?>
+	?>
 	<script>
 	jQuery( document ).ready( function( $ ) {
 		$( "#post_author_username" ).autocomplete( {
@@ -402,7 +402,7 @@ function wporg_themes_post_author_meta_box( $post ) {
 		});
 	});
 	</script>
-<?php
+	<?php
 }
 
 /**

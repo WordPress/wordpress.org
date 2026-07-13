@@ -76,7 +76,7 @@ class Block_Validator {
 				} else {
 					printf( '<script>%s</script>', $upload_script );
 				}
-			?>
+				?>
 			</details>
 			<?php
 
@@ -476,7 +476,7 @@ class Block_Validator {
 		$email_content = sprintf(
 			// translators: 1: plugin name, 2: plugin slug.
 			__(
-'This email is to let you know that your plugin %1$s has been added to the Block Directory here: https://wordpress.org/plugins/browse/block/.
+		'This email is to let you know that your plugin %1$s has been added to the Block Directory here: https://wordpress.org/plugins/browse/block/.
 
 We\'re still working on improving Block Directory search and automated detection of blocks, so don\'t be alarmed if your block isn\'t immediately visible there. We\'ve built a new tool to help developers identify problems and potential improvements to block plugins, which you\'ll find here: https://wordpress.org/plugins/developers/block-plugin-validator/.
 

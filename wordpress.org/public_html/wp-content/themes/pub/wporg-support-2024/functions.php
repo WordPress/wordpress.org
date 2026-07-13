@@ -1256,12 +1256,12 @@ function wporg_support_wrap_standalone_li_tags_in_ul( $content ) {
 			}
 			$i++; // Skip $next_part;
 
-		// Does this text chunk contain a <li>? If so, it's got no matching start element.
+			// Does this text chunk contain a <li>? If so, it's got no matching start element.
 		} elseif ( false !== stripos( $part, '<li>' ) ) {
 			$part = preg_replace( '#<li>#i', '<ul><li>', $part, 1 ); // Replace the first li tag
 			$content .= force_balance_tags( $part );
 
-		// This shouldn't actually be hit, but is here for completeness.
+			// This shouldn't actually be hit, but is here for completeness.
 		} else {
 			$content .= force_balance_tags( $part );
 		}
@@ -1360,7 +1360,7 @@ function wporg_support_get_welcome_url() {
 /** bb Base *******************************************************************/
 
 function bb_base_search_form() {
-?>
+	?>
 
 	<form role="search" method="get" id="searchform" action="https://wordpress.org/search/do-search.php">
 		<div>
@@ -1372,11 +1372,11 @@ function bb_base_search_form() {
 		</div>
 	</form>
 
-<?php
+	<?php
 }
 
 function bb_base_topic_search_form() {
-?>
+	?>
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
@@ -1387,11 +1387,11 @@ function bb_base_topic_search_form() {
 		</div>
 	</form>
 
-<?php
+	<?php
 }
 
 function bb_base_reply_search_form() {
-?>
+	?>
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
@@ -1402,11 +1402,11 @@ function bb_base_reply_search_form() {
 		</div>
 	</form>
 
-<?php
+	<?php
 }
 
 function bb_base_plugin_search_form() {
-?>
+	?>
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
@@ -1417,7 +1417,7 @@ function bb_base_plugin_search_form() {
 		</div>
 	</form>
 
-<?php
+	<?php
 }
 
 function bb_base_topic_search_query( $escaped = true ) {
@@ -1515,8 +1515,8 @@ function bb_base_single_topic_description() {
 			/* translators: %s: reply author link */
 			printf( __( 'Last reply from: %s', 'wporg-forums' ),
 				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) )
-			);
-		?></li>
+										   );
+											?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="topic-freshness-time"><?php
@@ -1534,11 +1534,11 @@ function bb_base_single_topic_description() {
 	<?php endif; ?>
 	<?php if ( bbp_current_user_can_access_create_reply_form() /*bbp_is_topic_open( $_topic_id )*/ ) : ?>
 		<li class="create-reply"><a href="#new-post"><?php
-			if ( wporg_support_is_single_review() ) {
-				_e( 'Reply to Review', 'wporg-forums' );
-			} else {
-				_e( 'Reply to Topic', 'wporg-forums' );
-			}
+		if ( wporg_support_is_single_review() ) {
+			_e( 'Reply to Review', 'wporg-forums' );
+		} else {
+			_e( 'Reply to Topic', 'wporg-forums' );
+		}
 		?></a></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
@@ -1564,8 +1564,8 @@ function bb_base_single_forum_description() {
 					esc_url( bbp_get_forum_permalink( bbp_get_forum_parent_id() ) ),
 					bbp_get_forum_title( bbp_get_forum_parent_id() )
 				)
-			);
-		?></li>
+								 );
+									?></li>
 	<?php endif;
 }
 

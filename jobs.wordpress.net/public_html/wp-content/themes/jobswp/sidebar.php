@@ -24,7 +24,7 @@
 		$sidebar_result     = jobswp_get_open_to_work_candidates( 1, 5 );
 		$sidebar_candidates = $sidebar_result['candidates'];
 		if ( ! empty( $sidebar_candidates ) ) :
-		?>
+			?>
 			<aside class="widget widget-open-to-work">
 				<h3 class="widget-title"><?php esc_html_e( 'Open to Work', 'jobswp' ); ?></h3>
 				<ul class="open-to-work-list">

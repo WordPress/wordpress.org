@@ -320,7 +320,7 @@ function wporg_translate_user_is_validator_anywhere( $user_id ) {
 
 	$cache[ $user_id ] = false;
 	return false;
-	}
+}
 
 /**
  * Adds descriptions to navigation items.
@@ -510,11 +510,11 @@ function wporg_references( $project, $entry ) {
 			if ( $source_url = $project->source_url( $file, $line ) ) :
 				?>
 				<li><a target="_blank" href="<?php echo $source_url; ?>"><?php echo $file.':'.$line ?></a></li>
-			<?php
+				<?php
 			elseif ( wp_http_validate_url( $reference ) ) :
 				?>
 				<li><a target="_blank" href="<?php echo esc_url( $reference ); ?>"><?php echo esc_html( $reference ); ?></a></li>
-			<?php
+				<?php
 			else :
 				echo "<li>$file:$line</li>";
 			endif;
@@ -541,7 +541,7 @@ function wporg_references_wordpress_org_github( $source_url, $project, $file, $l
 		if ( str_starts_with( $file, 'mu-plugins/' ) && ! str_starts_with( $file, 'mu-plugins/pub/' ) ) {
 			$source_url = "https://github.com/WordPress/wporg-mu-plugins/blob/trunk/{$file}#L{$line}";
 
-		// wporg-gutenberg theme is pretty unique path..
+			// wporg-gutenberg theme is pretty unique path..
 		} elseif ( str_contains( $file, '/themes/wporg-gutenberg/' ) ) {
 			$source_url = "https://github.com/WordPress/wporg-gutenberg/blob/trunk/{$file}#L{$line}";
 		} elseif ( str_contains( $file, 'wporg-main-2022' ) ) {
@@ -558,7 +558,7 @@ function wporg_references_wordpress_org_github( $source_url, $project, $file, $l
 		if ( str_starts_with( $file, 'plugins/' ) && str_contains( $source_url, 'meta.trac.wordpress.org' ) ) {
 			$source_url = str_replace( '/global.wordpress.org/', '/wordpress.org/', $source_url );
 
-		// Not all Rosetta mu-plugins are public, don't attempt to link to them.
+			// Not all Rosetta mu-plugins are public, don't attempt to link to them.
 		} elseif(
 			str_starts_with( $file, 'mu-plugins/' ) &&
 			! (

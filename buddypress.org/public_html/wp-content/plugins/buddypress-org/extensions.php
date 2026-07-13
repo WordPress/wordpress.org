@@ -114,18 +114,18 @@ function bporg_redirect() {
 		if ( empty( $uri_chunks[3] ) ) {
 			bp_core_redirect( home_url( '/support/' ) );
 
-		// Single group topic redirect
+			// Single group topic redirect
 		} elseif ( !empty( $uri_chunks[5] ) && ( $uri_chunks[5] === 'topic' ) && !empty( $uri_chunks[6] ) ) {
 			bp_core_redirect( home_url( '/support/topic/' . $uri_chunks[6] . '/' ) );
 
-		// Single group forum redirect
+			// Single group forum redirect
 		} elseif ( empty( $uri_chunks[4] ) || ( $uri_chunks[4] === 'forum' ) ) {
 
 			// Use legacy group slug
 			if ( ! in_array( $uri_chunks[3], array( 'gallery', 'how-to-and-troubleshooting' ) ) ) {
 				bp_core_redirect( home_url( '/support/forum/plugin-forums/' . $uri_chunks[3] . '/' ) );
 
-			// Root forums, maybe with new slug
+				// Root forums, maybe with new slug
 			} else {
 
 				// New BuddyPress project forums locations

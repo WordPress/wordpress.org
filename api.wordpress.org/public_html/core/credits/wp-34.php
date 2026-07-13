@@ -242,7 +242,7 @@ class WP_34_Credits extends WP_Credits {
 		return array(
 			array( 'Class POP3', 'https://squirrelmail.org/' ),
 			array( 'Color Animations', 'http://plugins.jquery.com/project/color' ),
-	//		array( 'ColorPicker', 'http://' ),
+			// array( 'ColorPicker', 'http://' ),
 			array( 'Horde Text Diff', 'http://pear.horde.org/' ),
 			array( 'hoverIntent', 'http://plugins.jquery.com/project/hoverIntent' ),
 			array( 'imgAreaSelect', 'https://github.com/odyniec/imgareaselect' ),
@@ -251,7 +251,7 @@ class WP_34_Credits extends WP_Credits {
 			array( 'jQuery Hotkeys', 'https://github.com/mathusiast/jquery.hotkeys' ),
 			array( 'jQuery serializeObject', 'https://benalman.com/projects/jquery-misc-plugins/' ),
 			array( 'jQuery.query', 'http://plugins.jquery.com/project/query-object' ),
-	//		array( 'jquery.schedule', 'http://' ),
+			// array( 'jquery.schedule', 'http://' ),
 			array( 'jQuery.suggest', 'http://plugins.jquery.com/project/suggest' ),
 			array( 'jQuery UI Touch Punch', 'https://github.com/furf/jquery-ui-touch-punch' ),
 			array( 'json2', 'https://github.com/douglascrockford/JSON-js' ),

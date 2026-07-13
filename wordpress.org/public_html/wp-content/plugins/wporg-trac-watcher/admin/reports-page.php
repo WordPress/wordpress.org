@@ -289,29 +289,29 @@ function display_reports_page( $details ) {
 
 					echo '<table class="widefat striped">';
 					echo '<thead><tr><th>Prop</th><th>Count</th><th>Versions</th></tr></thead>';
-					foreach ( $details as $p ) {
-						$link = add_query_arg(
-							[
-								'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
-								's' => $p->prop_name,
-							],
-							admin_url( 'admin.php' )
-						);
+				foreach ( $details as $p ) {
+					$link = add_query_arg(
+						[
+							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
+							's' => $p->prop_name,
+						],
+						admin_url( 'admin.php' )
+					);
 	
-						$profile = $p->prop_name;
-						if ( $p->user_id ) {
-							$u = get_user_by( 'ID', $p->user_id );
-							$profile = "<A href='https://profiles.wordpress.org/{$u->user_nicename}/'>" . ( $u->display_name ?: $u->user_login ) . "</a>";
-						}
-
-						printf(
-							'<tr><td>%s</td><td>%s</td><td title="%s">%s</td></tr>',
-							$profile,
-							$p->count,
-							esc_attr( $p->versions ),
-							$compress( $p->versions )
-						);
+					$profile = $p->prop_name;
+					if ( $p->user_id ) {
+						$u = get_user_by( 'ID', $p->user_id );
+						$profile = "<A href='https://profiles.wordpress.org/{$u->user_nicename}/'>" . ( $u->display_name ?: $u->user_login ) . "</a>";
 					}
+
+					printf(
+						'<tr><td>%s</td><td>%s</td><td title="%s">%s</td></tr>',
+						$profile,
+						$p->count,
+						esc_attr( $p->versions ),
+						$compress( $p->versions )
+					);
+				}
 					echo '</table>';
 
 					break;

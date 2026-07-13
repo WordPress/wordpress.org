@@ -105,7 +105,7 @@ class Committers extends \WP_List_Table {
 				<?php $this->display_add_new_row(); ?>
 			</tbody>
 		</table>
-	<?php
+		<?php
 	}
 
 	/**

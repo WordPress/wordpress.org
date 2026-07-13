@@ -384,11 +384,11 @@ class Moderators {
 		if ( ! $post ) {
 			bbp_add_error( 'wporg_bbp_archive_post_id', __( '<strong>Error:</strong> No post was found! Which post are you archiving?', 'wporg-forums' ) );
 
-		// Check for current user.
+			// Check for current user.
 		} elseif ( empty( $user_id ) ) {
 			bbp_add_error( 'wporg_bbp_archive_logged_in', __( '<strong>Error:</strong> You must be logged in to do this!', 'wporg-forums' ) );
 
-		// Check nonce.
+			// Check nonce.
 		} elseif ( ! bbp_verify_nonce_request( 'toggle-post-archive_' . $user_id . '_' . $post->ID ) ) {
 			bbp_add_error( 'wporg_bbp_archive_nonce', __( '<strong>Error:</strong> Are you sure you wanted to do that?', 'wporg-forums' ) );
 
@@ -811,7 +811,7 @@ class Moderators {
 		if ( ( false !== $retval['status'] ) && ! is_wp_error( $retval['status'] ) ) {
 			bbp_redirect( $retval['redirect_to'] );
 
-		// Handle errors
+			// Handle errors
 		} else {
 			bbp_add_error( 'bbp_toggle_topic', $retval['message'] );
 		}
@@ -875,7 +875,7 @@ class Moderators {
 		if ( ( false !== $retval['status'] ) && ! is_wp_error( $retval['status'] ) ) {
 			bbp_redirect( $retval['redirect_to'] );
 
-		// Handle errors
+			// Handle errors
 		} else {
 			bbp_add_error( 'bbp_toggle_reply', $retval['message'] );
 		}

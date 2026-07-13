@@ -325,7 +325,7 @@ function bporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 			) );
 		}
 
-	// Not logged in
+		// Not logged in
 	} else {
 		$wp_admin_bar->add_menu( array(
 			'id'     => 'bp-login',
@@ -367,7 +367,7 @@ function bporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 			'class'  => 'ab-sub-secondary'
 		) ) );
 
-	// Show login and sign-up links
+		// Show login and sign-up links
 	} elseif ( !empty( $wp_admin_bar ) ) {
 		add_filter ( 'show_admin_bar', '__return_true' );
 
@@ -434,7 +434,7 @@ function bporg_admin_bar_my_account_item( $wp_admin_bar ) {
 			),
 		) );
 
-	// Logged in
+		// Logged in
 	} else {
 		if ( current_user_can( 'read' ) ) {
 			$profile_url = get_edit_profile_url( $user_id );

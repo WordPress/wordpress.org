@@ -38,36 +38,36 @@ get_header();
 ?>
 
 <h2 class="center"><?php
-	if ( $used_backup_code ) {
-		_e( 'Backup Code used', 'wporg' );
-	} else {
-		_e( 'Account Backup Codes', 'wporg' );
-	}
+if ( $used_backup_code ) {
+	_e( 'Backup Code used', 'wporg' );
+} else {
+	_e( 'Account Backup Codes', 'wporg' );
+}
 ?></h2>
 
 <p>&nbsp;</p>
 
 <p><?php
-	if ( $used_backup_code ) {
-		_e( "You've logged in with a backup code.<br>These codes are intended to be used when you lose access to your authentication device.<br>Please take a moment to review your account settings and ensure your two-factor settings are up-to-date.", 'wporg' );
+if ( $used_backup_code ) {
+	_e( "You've logged in with a backup code.<br>These codes are intended to be used when you lose access to your authentication device.<br>Please take a moment to review your account settings and ensure your two-factor settings are up-to-date.", 'wporg' );
+} else {
+	if ( ! $codes_available ) {
+		_e( 'You do not have any backup codes remaining.', 'wporg' );
 	} else {
-		if ( ! $codes_available ) {
-			_e( 'You do not have any backup codes remaining.', 'wporg' );
-		} else {
-			printf(
-				_n(
-					'You have %s backup code remaining.',
-					'You have %s backup codes remaining.',
-					$codes_available,
-					'wporg'
-				),
-				'<code>' . number_format_i18n( $codes_available ) . '</code>'
-			);
-		}
-
-		// Direct to the backup codes screen.
-		$account_settings_url = add_query_arg( 'screen', 'backup-codes', $account_settings_url );
+		printf(
+			_n(
+				'You have %s backup code remaining.',
+				'You have %s backup codes remaining.',
+				$codes_available,
+				'wporg'
+			),
+			'<code>' . number_format_i18n( $codes_available ) . '</code>'
+		);
 	}
+
+	// Direct to the backup codes screen.
+	$account_settings_url = add_query_arg( 'screen', 'backup-codes', $account_settings_url );
+}
 ?></p>
 
 <p>&nbsp;</p>

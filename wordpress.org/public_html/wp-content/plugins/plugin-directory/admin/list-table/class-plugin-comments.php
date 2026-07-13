@@ -53,7 +53,7 @@ class Plugin_Comments extends \WP_Post_Comments_List_Table {
 			?>
 			</tbody>
 		</table>
-	<?php
+		<?php
 	}
 
 	/**

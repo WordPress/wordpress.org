@@ -12,7 +12,7 @@
 				$user->user_login
 			)
 		);
-	?></p>
+		?></p>
 
 	<form method="post">
 		<table class="form-table">

@@ -124,13 +124,13 @@ if ( $howtoapply_raw ) {
 // "Consider These Candidates" section on single job pages.
 	$single_result     = jobswp_get_open_to_work_candidates( 1, 4 );
 	$single_candidates = $single_result['candidates'];
-	if ( ! empty( $single_candidates ) ) :
-?>
+if ( ! empty( $single_candidates ) ) :
+	?>
 <div class="job-detail-candidates">
 	<div class="job-detail-candidates__inner">
 		<h3><?php esc_html_e( 'WordPress Professionals Open to Work', 'jobswp' ); ?></h3>
 		<div class="job-detail-candidates__grid">
-			<?php foreach ( $single_candidates as $person ) : ?>
+		<?php foreach ( $single_candidates as $person ) : ?>
 				<?php
 				$role    = isset( $person->current_role )    ? $person->current_role    : '';
 				$company = isset( $person->current_company ) ? $person->current_company : '';
@@ -159,6 +159,6 @@ if ( $howtoapply_raw ) {
 		</p>
 	</div>
 </div>
-<?php
+	<?php
 	endif;
 ?>

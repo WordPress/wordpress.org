@@ -82,7 +82,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 					__( 'It depends on what you want to change. If you want to change the plugin <strong>display name</strong> you can update that by updating your plugin files in this page. If what you want to change is the <strong>permalink / slug</strong> of your plugin, you can do that ONCE before we begin with the review (if that&#8217;s available you&#8217;ll see a link to change it on this page). If this is not possible, you will need to contact us at %s, we can change it as long as the plugin has not yet been approved.', 'wporg-plugins' ),
 					'<code>plugins@wordpress.org</code>'
 				);
-			?></p>
+				?></p>
 
 			<h3><?php esc_html_e( 'Why can&#8217;t I submit a plugin with certain display names?', 'wporg-plugins' ); ?></h3>
 			<p><?php echo wp_kses_post( __( 'Certain plugin names are prohibited due to trademark abuse. Similarly, we prevent their use in plugin slugs entirely for your protection.', 'wporg-plugins' ) ); ?></p>

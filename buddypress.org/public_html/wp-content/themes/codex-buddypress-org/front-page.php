@@ -15,16 +15,16 @@
 					$terms = get_terms( 'component' );
 					$count = count( $terms );
 
-					if ( $count > 0 ) {
-						echo '<div style="width: 24%; float: left;">';
-						echo '<h2>Components</h2>';
-						echo '<ul>';
-						foreach ( $terms as $term ) {
-							echo '<li><a href="' . esc_url( 'https://codex.buddypress.org/component/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
-						}
-						echo '</ul>';
-						echo '</div>';
+				if ( $count > 0 ) {
+					echo '<div style="width: 24%; float: left;">';
+					echo '<h2>Components</h2>';
+					echo '<ul>';
+					foreach ( $terms as $term ) {
+						echo '<li><a href="' . esc_url( 'https://codex.buddypress.org/component/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 					}
+					echo '</ul>';
+					echo '</div>';
+				}
 
 				?>
 
@@ -33,16 +33,16 @@
 					$terms = get_terms( 'version', array( 'order' => 'DESC' ) );
 					$count = count( $terms );
 
-					if ( $count > 0 ) {
-						echo '<div style="width: 24%; float: left;">';
-						echo '<h2>Versions</h2>';
-						echo '<ul>';
-						foreach ( $terms as $term ) {
-							echo '<li><a href="' . esc_url( 'https://codex.buddypress.org/version/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
-						}
-						echo '</ul>';
-						echo '</div>';
+				if ( $count > 0 ) {
+					echo '<div style="width: 24%; float: left;">';
+					echo '<h2>Versions</h2>';
+					echo '<ul>';
+					foreach ( $terms as $term ) {
+						echo '<li><a href="' . esc_url( 'https://codex.buddypress.org/version/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 					}
+					echo '</ul>';
+					echo '</div>';
+				}
 
 				?>
 
@@ -51,16 +51,16 @@
 					$terms = get_terms( 'type' );
 					$count = count( $terms );
 
-					if ( $count > 0 ) {
-						echo '<div style="width: 24%; float: left;">';
-						echo '<h2>Types</h2>';
-						echo '<ul>';
-						foreach ( $terms as $term ) {
-							echo '<li><a href="' . esc_url( 'https://codex.buddypress.org/type/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
-						}
-						echo '</ul>';
-						echo '</div>';
+				if ( $count > 0 ) {
+					echo '<div style="width: 24%; float: left;">';
+					echo '<h2>Types</h2>';
+					echo '<ul>';
+					foreach ( $terms as $term ) {
+						echo '<li><a href="' . esc_url( 'https://codex.buddypress.org/type/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 					}
+					echo '</ul>';
+					echo '</div>';
+				}
 
 				?>
 
@@ -69,16 +69,16 @@
 					$terms = get_terms( 'context' );
 					$count = count( $terms );
 
-					if ( $count > 0 ) {
-						echo '<div style="width: 24%; float: left;">';
-						echo '<h2>Contexts</h2>';
-						echo '<ul>';
-						foreach ( $terms as $term ) {
-							echo '<li><a href="' . esc_url( 'https://codex.buddypress.org/context/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ). '">' . esc_html( $term->name ) . '</a></li>';
-						}
-						echo '</ul>';
-						echo '</div>';
+				if ( $count > 0 ) {
+					echo '<div style="width: 24%; float: left;">';
+					echo '<h2>Contexts</h2>';
+					echo '<ul>';
+					foreach ( $terms as $term ) {
+						echo '<li><a href="' . esc_url( 'https://codex.buddypress.org/context/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ). '">' . esc_html( $term->name ) . '</a></li>';
 					}
+					echo '</ul>';
+					echo '</div>';
+				}
 
 				?>
 
@@ -94,13 +94,13 @@
 			$args         = array( 'order' => 'ASC', );
 			$revisions    = wp_get_post_revisions( get_queried_object_id(), $args );
 			$post_authors = array( $post->post_author => 1 );
-			foreach( (array)$revisions as $revision ) {
-				if ( isset( $post_authors[ $revision->post_author ] ) ) {
-                                        $post_authors[ $revision->post_author ]++;
-                                } else {
-                                        $post_authors[ $revision->post_author ] = 1;
-                                }
+		foreach( (array)$revisions as $revision ) {
+			if ( isset( $post_authors[ $revision->post_author ] ) ) {
+									$post_authors[ $revision->post_author ]++;
+			} else {
+				$post_authors[ $revision->post_author ] = 1;
 			}
+		}
 			asort( $post_authors, SORT_NUMERIC );
 
 			global $codex_contributors;

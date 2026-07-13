@@ -17,7 +17,7 @@ class Plugin_Approved extends Markdown_Base {
 	function markdown() {
 		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug, 4: link to plugin authors profile */
 		$email_text = __(
-'Congratulations, the plugin hosting request for %1$s has been approved.
+		'Congratulations, the plugin hosting request for %1$s has been approved.
 
 Within one (1) hour your account (%2$s) will be granted commit access to your Subversion (SVN) repository.
 

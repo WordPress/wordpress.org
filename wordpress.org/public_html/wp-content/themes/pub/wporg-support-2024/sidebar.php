@@ -10,7 +10,7 @@
 					printf( __( 'Howdy, %s', 'wporg-forums' ),
 						'<a href="' . esc_url( bbp_get_user_profile_url( bbp_get_current_user_id() ) ) . '">' . bbp_get_current_user_name() . '</a>'
 					);
-				?></li>
+					?></li>
 				<li><a href="<?php echo esc_url( wp_logout_url() ); ?>"><?php _e( 'Log Out', 'wporg-forums' ); ?></a></li>
 			</ul>
 		</div>
@@ -72,12 +72,12 @@
 
 			<?php
 				$term_subscription = '';
-				if ( function_exists( 'WordPressdotorg\Forums\Term_Subscription\get_subscription_link' ) ) {
-					$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
-				}
-				if ( $term_subscription ) {
-					echo '<div>' . $term_subscription . "</div>\n";
-				}
+			if ( function_exists( 'WordPressdotorg\Forums\Term_Subscription\get_subscription_link' ) ) {
+				$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
+			}
+			if ( $term_subscription ) {
+				echo '<div>' . $term_subscription . "</div>\n";
+			}
 			?>
 
 		<?php endif; ?>
