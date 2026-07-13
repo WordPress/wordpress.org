@@ -25,8 +25,9 @@ $is_reviews = $view_id === 'reviews';
 $is_plugin = $view_id === 'plugin';
 $is_theme = $view_id === 'theme';
 
-/* Show the WordCamp US 2026 banner on the home page through August 19, 2026. */
+/* Show the WordCamp US 2026 banner on the general (non-Rosetta) home page through August 19, 2026. */
 if ( ( $is_forums_home || is_front_page() || $is_homepage )
+	&& ( ! defined( 'IS_ROSETTA_NETWORK' ) || ! IS_ROSETTA_NETWORK )
 	&& current_datetime() < new \DateTimeImmutable( '2026-08-20 00:00:00', wp_timezone() )
 ) {
 	echo do_blocks(
