@@ -1,142 +1,140 @@
-<!--!
-Render a ticket comment.
+{# WordPress.org override of Trac's ticket comment template (ticket_change.html).
 
-Arguments:
- - change: the change data
- - hide_buttons=False: hide all buttons (Edit, Reply)
- - cnum_edit=None: the comment number being edited
- - edited_comment: the current value of the comment editor
- - cnum_hist=None: the comment number for which to show a historical content
- - can_append=False: True if the user is allowed to append to tickets
- - has_edit_comment=False: True if the user is allowed to edit all comments
- - preview=False: True if rendering a change preview
--->
-<?python
-import re
-def wporg_wiki_to_html(context, wikidom, escape_newlines=None):
-	if ( 'skip-render' in req.environ['QUERY_STRING'] and 'TRAC_ADMIN' in perm('admin') ):
-		return wikidom[ :1000 ]
+  Ported from Genshi to Jinja2 for Trac 1.6. Adds, on top of core Trac:
+    - gravatars + WordPress.org profile links for comment authors
+    - special rendering for chat bots (slackbot / ircbot) and prbot
+    - comment bodies rendered through wporg_wiki_to_html (abuse/DoS safety caps:
+      100k char limit, <=1000 links, <=500 macros, huge code blocks truncated)
 
-	# Hard limit of 100k characters rendered.
-	wikidom = wikidom[ :100000 ]
+  REQUIRES a companion Trac plugin registering these functions into the Jinja2
+  template context (Genshi allowed inline <?python?>; Jinja2 does not):
+    - wporg_sanitize_user_nicename(name)                          -> str
+    - wporg_wiki_to_html(context, wikidom, escape_newlines=None)  -> Markup
+    - wporg_prbot_strip_meta(text)                                -> str
+        (strips a leading {{{#!comment ...}}} block and lstrip()s)
 
-	# Hard limit of 1000 links per text, do not render.
-	if ( wikidom.count('://') > 1000 ):
-		return ''
+  Arguments (as passed by Trac 1.6 ticket.html / ticket_preview.html):
+   - change: the change data
+   - hide_buttons=False: hide all buttons (Edit, Reply)
+   - cnum_edit=None: the comment number being edited
+   - edited_comment: the current value of the comment editor
+   - cnum_hist=None: the comment number for which to show a historical content
+   - can_append=False: True if the user is allowed to append to tickets
+   - preview=False: True if rendering a change preview
+#}
 
-	# Hard limit of 500 dynamic elements per text, do not render.
-	if ( wikidom.count('[[') > 500 ):
-		return ''
+# import 'macros.html' as jmacros with context
 
-	# Syntax highlight HTML blocks.
-	wikidom = re.sub( r'{{{\s*#!html', '{{{#!xml \n HTML', wikidom, flags=re.IGNORECASE )
+# with
+#   set cnum = to_unicode(change.get('cnum'))
+#   set hide_buttons = hide_buttons|default(false)
+#   set cnum_edit = cnum_edit|default('')
+#   set cnum_hist = cnum_hist|default('')
+#   set can_append = can_append|default(false)
+#   set preview = preview|default(false)
+#   set comment_resource = Resource('comment', cnum, parent=ticket.resource)
+#   set can_edit_comment = ('TICKET_EDIT_COMMENT' in perm(comment_resource)) or (req.authname and req.authname != 'anonymous' and req.authname == change.author)
+#   set show_editor = can_edit_comment and cnum == cnum_edit
+#   set show_history = cnum == cnum_hist
+#   set max_version = change.comment_history|max if change.comment_history else 0
+#   set comment_version = ((cversion or 0)|int if show_history else max_version)
+#   set show_buttons = not hide_buttons and not show_editor and comment_version == max_version
 
-	# Unsupported code types get converted to plaintext.
-	wikidom = re.sub( r'{{{\s*#!(?!CommitTicketReference|xml|php|js|javascript|css|sql|sh|table|tr|th|td|diff)(\S+)\s', '{{{#!default \n \\1', wikidom, flags=re.IGNORECASE )
+#   macro commentref(prefix, cnum, cls=none)
+<a href="#comment:${cnum}" class="${cls}">${prefix}${cnum}</a>
+#   endmacro
 
-	# Long code blocks (20k+) should be truncated to 10k characters.
-	wikidom = re.sub( r'{{{(.{10000}?).{10000,}?(}}}|$)', '{{{\\1 \n\nWordPress.org: Please note that this content has been truncated for display.\n }}}', wikidom, flags=re.DOTALL )
-
-	# Convert WikiMarkup.
-	wikidom = wiki_to_html( context, wikidom, escape_newlines )
-
-	return wikidom;
-?>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:py="http://genshi.edgewall.org/"
-      xmlns:xi="http://www.w3.org/2001/XInclude"
-      xmlns:i18n="http://genshi.edgewall.org/i18n"
-      py:with="cnum = change.get('cnum'); hide_buttons = value_of('hide_buttons', False);
-               cnum_edit = value_of('cnum_edit'); cnum_hist = value_of('cnum_hist');
-               can_append = value_of('can_append', False); has_edit_comment = value_of('has_edit_comment', False);
-               preview = value_of('preview', False);
-               can_edit_comment = has_edit_comment or (authname and authname != 'anonymous'
-                                                       and authname == change.author);
-               show_editor = can_edit_comment and str(cnum) == cnum_edit;
-               show_history = str(cnum) == cnum_hist;
-               max_version = max(change.comment_history) if change.comment_history else 0;
-               comment_version = int(cversion or 0) if show_history else max_version;
-               show_buttons = not hide_buttons and not show_editor and comment_version == max_version"
-      py:strip="">
-  <py:def function="commentref(prefix, cnum, cls=None)">
-    <a href="#comment:$cnum" class="$cls">$prefix$cnum</a>
-  </py:def>
-
-<py:choose>
-<py:when test="'author' in change and ('slackbot' == change.author or 'ircbot' == change.author)"
-         py:with="wporg_user = wporg_sanitize_user_nicename(change.author)"  >
-  <h3 class="change chat-bot">
-    <span class="avatar" py:if="change">
-      <span class="username-line">
-        <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" alt="" />
-        ${wiki_to_html(context, change.comment, escape_newlines=preserve_newlines)}
-      </span>
-      <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
+## ------------------------------------------------------------------ chat bots
+## slackbot / ircbot: render the (one-line) message inline in the heading.
+#   if 'author' in change and change.author in ('slackbot', 'ircbot'):
+#     set wporg_user = wporg_sanitize_user_nicename(change.author)
+<h3 class="change chat-bot">
+  <span class="avatar">
+    <span class="username-line">
+      <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" alt="" />
+      ${wiki_to_html(context, change.comment, escape_newlines=preserve_newlines)}
     </span>
-    <div py:if="show_buttons" class="trac-ticket-buttons">
-      <form py:if="'cnum' in change and can_append" id="reply-to-comment-${cnum}"
-            method="get" action="#comment">
-        <div class="inlinebuttons">
-          <input type="hidden" name="replyto" value="${cnum}"/>
-          <input type="submit" value="${captioned_button('↳', _('Reply'))}" title="${_('Reply to comment %(cnum)s', cnum=cnum)}" />
-        </div>
-      </form>
-    </div>
-  </h3>
-</py:when>
-<py:when test="'author' in change and 'prbot' == change.author"
-        py:with="
-          wporg_user   = wporg_sanitize_user_nicename(change.author);
-          display_text = re.sub( '[{]+#!comment[^}]+[}]+', '', change.comment ).lstrip();
-          pr_byline    = display_text.partition('\n')[0];
-          pr_comment   = ''.join(display_text.partition('\n')[1:]) or False;
-          prbot_class  = 'prbot with-context' if pr_comment or change.fields else 'prbot without-context';
-        ">
-  <h3 class="change chat-bot ${prbot_class}">
-    <span class="avatar">
-      <span class="username-line">
-        <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" alt="" />
-        ${wiki_to_html(context, pr_byline, escape_newlines=preserve_newlines)}
-      </span>
-      <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
+    <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
+  </span>
+#     if show_buttons:
+  <div class="trac-ticket-buttons">
+#       if 'cnum' in change and can_append:
+    <form id="reply-to-comment-${cnum}" method="get" action="#comment">
+      <div class="inlinebuttons">
+        <input type="hidden" name="replyto" value="${cnum}"/>
+        <input type="submit" value="${captioned_button('↳', _('Reply'))}" title="${_('Reply to comment %(cnum)s', cnum=cnum)}" />
+      </div>
+    </form>
+#       endif
+  </div>
+#     endif
+</h3>
+
+## ----------------------------------------------------------------------- prbot
+## GitHub PR bot: first line is the byline (rendered in the heading); the rest,
+## if any, is shown as a context comment.
+#   elif 'author' in change and change.author == 'prbot':
+#     set wporg_user = wporg_sanitize_user_nicename(change.author)
+#     set display_text = wporg_prbot_strip_meta(change.comment)
+#     set pr_parts = display_text.partition('\n')
+#     set pr_byline = pr_parts[0]
+#     set pr_comment = pr_parts[1] ~ pr_parts[2]
+#     set prbot_class = 'prbot with-context' if pr_comment or change.fields else 'prbot without-context'
+<h3 class="change chat-bot ${prbot_class}">
+  <span class="avatar">
+    <span class="username-line">
+      <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" alt="" />
+      ${wiki_to_html(context, pr_byline, escape_newlines=preserve_newlines)}
     </span>
-    <span class="threading">
-      <span py:if="'cnum' in change" id="comment:$cnum" class="cnum">${commentref('#', cnum)}</span>
-    </span>
-    <div py:if="show_buttons" class="trac-ticket-buttons">
-      <form py:if="'cnum' in change and can_edit_comment" method="get" action="#comment:${cnum}">
-        <div class="inlinebuttons">
+    <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
+  </span>
+  <span class="threading">
+#     if 'cnum' in change:
+    <span id="comment:${cnum}" class="cnum">${commentref('#', cnum)}</span>
+#     endif
+  </span>
+#     if show_buttons:
+  <div class="trac-ticket-buttons">
+#       if 'cnum' in change and can_edit_comment:
+    <form method="get" action="#comment:${cnum}">
+      <div class="inlinebuttons">
         <input type="hidden" name="cnum_edit" value="${cnum}"/>
         <input type="submit" value="${captioned_button('✎', _('Edit'))}" title="${_('Edit comment %(cnum)s', cnum=cnum)}" />
-        </div>
-      </form>
-    </div>
-  </h3>
-  <ul py:if="change.fields" class="changes">
-    <li py:for="field_name, field in sorted(change.fields.iteritems(), key=lambda item: item[1].label.lower())"
-        class="trac-field-${field_name}">
+      </div>
+    </form>
+#       endif
+  </div>
+#     endif
+</h3>
+#     if change.fields:
+  <ul class="changes">
+#       for field_name, field in change.fields.items()|sort(attribute='1.label'):
+    <li class="trac-field-${field_name}">
       <strong class="trac-field-${field_name}">${field.label}</strong>
-      <py:choose>
-        <py:when test="'rendered' in field">${field.rendered}</py:when>
-        <py:when test="field.old and field.new"><i18n:msg params="old, new">
-          changed from <em>${field.old}</em> to <em>${field.new}</em>
-        </i18n:msg></py:when>
-        <py:when test="not field.old and field.new"><i18n:msg params="value">
-          set to <em>${field.new}</em>
-        </i18n:msg></py:when>
-        <py:otherwise><i18n:msg params="value">
-          <em>${field.old}</em> deleted
-        </i18n:msg></py:otherwise>
-      </py:choose>
+#         if 'rendered' in field:
+      ${field.rendered}
+#         elif field.old and field.new:
+      changed from <em>${field.old}</em> to <em>${field.new}</em>
+#         elif not field.old and field.new:
+      set to <em>${field.new}</em>
+#         else:
+      <em>${field.old}</em> deleted
+#         endif
     </li>
+#       endfor
   </ul>
-  <div py:if="pr_comment and not show_editor" class="comment searchable" xml:space="preserve">
+#     endif
+#     if pr_comment and not show_editor:
+  <div class="comment searchable" xml:space="preserve">
     ${wiki_to_html(context, pr_comment, escape_newlines=preserve_newlines)}
   </div>
-  <form py:if="show_editor" id="trac-comment-editor" method="post" action="${href.ticket(ticket.id) + '#comment:%d' % cnum}">
+#     endif
+#     if show_editor:
+  <form id="trac-comment-editor" method="post" action="${href.ticket(ticket.id) + '#comment:' + cnum}">
+    ${jmacros.form_token_input()}
     <div>
       <textarea name="edited_comment" class="wikitext trac-resizable" rows="10" cols="78">
-${edited_comment if edited_comment is not None else change.comment}</textarea>
+${edited_comment if edited_comment is not none else change.comment}</textarea>
       <input type="hidden" name="cnum_edit" value="${cnum}"/>
     </div>
     <div class="buttons">
@@ -144,144 +142,140 @@ ${edited_comment if edited_comment is not None else change.comment}</textarea>
       <input type="submit" name="cancel_comment" value="${_('Cancel')}" title="Cancel comment edit"/>
     </div>
   </form>
-</py:when>
-<py:otherwise>
+#     endif
 
-  <h3 class="change">
-    <span class="threading"
-          py:with="change_replies = replies.get(str(cnum), []) if 'cnum' in change else []">
-      <span py:if="'cnum' in change" id="comment:$cnum" class="cnum">${commentref('#', cnum)}</span>
-      <py:if test="'replyto' in change">
-        in reply to: ${commentref('&uarr;&nbsp;', change.replyto)}
-        <py:if test="change_replies">; </py:if>
-      </py:if>
-      <py:if test="change_replies">
-        <i18n:choose numeral="len(change_replies)">
-          <span i18n:singular="">follow-up:</span>
-          <span i18n:plural="">follow-ups:</span>
-        </i18n:choose>
-        <py:for each="reply in change_replies">
-          ${commentref('&darr;&nbsp;', reply, 'follow-up')}
-        </py:for>
-      </py:if>
-    </span>
-    <py:choose>
-      <py:when test="'author' in change" py:with="wporg_user = wporg_sanitize_user_nicename(change.author)">
-        <span class="avatar" py:if="change">
-          <span class="username-line"><a href="https://profiles.wordpress.org/${wporg_user}/" class="profile-link">
-            <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" alt="" /> @<span class="username" data-username="${change.author}" data-nicename="${wporg_user}">${authorinfo(change.author)}</span></a></span>
-          <py:if test="'date' in change">
-            <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
-          </py:if>
-        </span>
-      </py:when>
-      <py:when test="'date' in change">
-        <i18n:msg params="date, author">Changed ${pretty_dateinfo(change.date)} by ${authorinfo(change.author)}</i18n:msg>
-      </py:when>
-      <py:otherwise>
-        <i18n:msg params="author">Changed by ${authorinfo(change.author)}</i18n:msg>
-      </py:otherwise>
-    </py:choose>
-    <span py:if="preview or show_editor" class="trac-loading"/>
-    <div py:if="show_buttons" class="trac-ticket-buttons">
-      <form py:if="'cnum' in change and can_append" id="reply-to-comment-${cnum}"
-            method="get" action="#comment">
-        <div class="inlinebuttons">
-          <input type="hidden" name="replyto" value="${cnum}"/>
-          <input type="submit" value="${captioned_button('↳', _('Reply'))}" title="${_('Reply to comment %(cnum)s', cnum=cnum)}" />
-        </div>
-      </form>
-      <form py:if="'cnum' in change and can_edit_comment" method="get" action="#comment:${cnum}">
-        <div class="inlinebuttons">
-          <input type="hidden" name="cnum_edit" value="${cnum}"/>
-          <input type="submit" value="${captioned_button('✎', _('Edit'))}" title="${_('Edit comment %(cnum)s', cnum=cnum)}" />
-        </div>
-      </form>
-    </div>
-  </h3>
-  <div py:if="show_buttons" class="trac-ticket-buttons" />
-  <ul py:if="change.fields" class="changes">
-    <li py:for="field_name, field in sorted(change.fields.iteritems(), key=lambda item: item[1].label.lower())"
-        class="trac-field-${field_name}${' trac-conflict' if preview and field_name in conflicts else None}">
+## -------------------------------------------------------------- normal comment
+#   else:
+<h3 class="change">
+  <span class="threading">
+#     set change_replies = replies.get(cnum, []) if 'cnum' in change else []
+#     if 'cnum' in change:
+    <span id="comment:${cnum}" class="cnum">${commentref('#', cnum)}</span>
+#     endif
+#     if 'replyto' in change:
+    in reply to: ${commentref('&uarr;&nbsp;'|safe, change.replyto)}
+#       if change_replies:
+    ;
+#       endif
+#     endif
+#     if change_replies:
+    ${ngettext("follow-up:", "follow-ups:", change_replies|length)}
+#       for reply in change_replies:
+    ${commentref('&darr;&nbsp;'|safe, reply, 'follow-up')}
+#       endfor
+#     endif
+  </span>
+#     if 'author' in change:
+#       set wporg_user = wporg_sanitize_user_nicename(change.author)
+  <span class="avatar">
+    <span class="username-line"><a href="https://profiles.wordpress.org/${wporg_user}/" class="profile-link">
+      <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" alt="" /> @<span class="username" data-username="${change.author}" data-nicename="${wporg_user}">${authorinfo(change.author)}</span></a></span>
+#       if 'date' in change:
+    <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
+#       endif
+  </span>
+#     elif 'date' in change:
+  ${tag_("Changed %(date)s by %(author)s", date=pretty_dateinfo(change.date), author=authorinfo(change.author))}
+#     else:
+  ${tag_("Changed by %(author)s", author=authorinfo(change.author))}
+#     endif
+#     if preview or show_editor:
+  <span class="trac-loading"></span>
+#     endif
+#     if show_buttons:
+  <div class="trac-ticket-buttons">
+#       if 'cnum' in change and can_append:
+    <form id="reply-to-comment-${cnum}" method="get" action="#comment">
+      <div class="inlinebuttons">
+        <input type="hidden" name="replyto" value="${cnum}"/>
+        <input type="submit" value="${captioned_button('↳', _('Reply'))}" title="${_('Reply to comment %(cnum)s', cnum=cnum)}" />
+      </div>
+    </form>
+#       endif
+#       if 'cnum' in change and can_edit_comment:
+    <form method="get" action="#comment:${cnum}">
+      <div class="inlinebuttons">
+        <input type="hidden" name="cnum_edit" value="${cnum}"/>
+        <input type="submit" value="${captioned_button('✎', _('Edit'))}" title="${_('Edit comment %(cnum)s', cnum=cnum)}" />
+      </div>
+    </form>
+#       endif
+  </div>
+#     endif
+</h3>
+#     if change.fields:
+  <ul class="changes">
+#       for field_name, field in change.fields.items()|sort(attribute='1.label'):
+    <li class="trac-field-${field_name}${' trac-conflict' if preview and field_name in conflicts else ''}">
       <strong class="trac-field-${field_name}">${field.label}</strong>
-      <py:choose>
-        <py:when test="field_name == 'attachment'"><i18n:msg params="name">
-          <a href="${href.attachment('ticket', ticket.id, field.new)}"><em>${field.new
-            }</em></a><a href="${href('raw-attachment', 'ticket', ticket.id, field.new)}"
-                         title="Download" class="trac-rawlink">&#8203;</a>
-          added
-        </i18n:msg></py:when>
-        <py:when test="'rendered' in field">${field.rendered}</py:when>
-        <py:when test="field.old and field.new"><i18n:msg params="old, new">
-          changed from <em>${field.old}</em> to <em>${field.new}</em>
-        </i18n:msg></py:when>
-        <py:when test="not field.old and field.new"><i18n:msg params="value">
-          set to <em>${field.new}</em>
-        </i18n:msg></py:when>
-        <py:otherwise><i18n:msg params="value">
-          <em>${field.old}</em> deleted
-        </i18n:msg></py:otherwise>
-        <py:if test="preview and field.by == 'user'">
-          (<button py:with="old = ticket.get_default(field_name) if field.old is empty else field.old"
-                   type="submit" name="revert_$field_name" class="trac-revert"
-                   title="Revert this change">revert<div id="revert-$field_name">${
-            '0' if 'cc_update' in field else old}</div></button>)
-        </py:if>
-      </py:choose>
+#         if field_name == 'attachment':
+      <a href="${href.attachment('ticket', ticket.id, field.new)}"><em>${field.new}</em></a><a href="${href('raw-attachment', 'ticket', ticket.id, field.new)}" title="Download" class="trac-rawlink">&#8203;</a> added
+#         elif 'rendered' in field:
+      ${field.rendered}
+#         elif field.old and field.new:
+      changed from <em>${field.old}</em> to <em>${field.new}</em>
+#         elif not field.old and field.new:
+      set to <em>${field.new}</em>
+#         else:
+      <em>${field.old}</em> deleted
+#         endif
+#         if preview and field.by == 'user':
+#           set old = ticket.get_default(field_name) if field.old is sameas(empty) else field.old
+      (<button type="submit" name="revert_${field_name}" class="trac-revert" title="Revert this change">revert<div id="revert-${field_name}">${'0' if 'cc_update' in field else old}</div></button>)
+#         endif
     </li>
+#       endfor
   </ul>
-  <form py:if="show_editor" id="trac-comment-editor" method="post"
-        action="${href.ticket(ticket.id) + '#comment:%d' % cnum}">
+#     endif
+#     if show_editor:
+  <form id="trac-comment-editor" method="post" action="${href.ticket(ticket.id) + '#comment:' + cnum}">
+    ${jmacros.form_token_input()}
     <div>
       <textarea name="edited_comment" class="wikitext trac-resizable" rows="10" cols="78">
-${edited_comment if edited_comment is not None else change.comment}</textarea>
+${edited_comment if edited_comment is not none else change.comment}</textarea>
       <input type="hidden" name="cnum_edit" value="${cnum}"/>
     </div>
     <div class="buttons">
-      <input type="submit" name="preview_comment" value="${_('Preview')}"
-             title="${_('Preview changes to comment %(cnum)s', cnum=cnum)}"/>
-      <input type="submit" name="edit_comment" value="${_('Submit changes')}"
-             title="${_('Submit changes to comment %(cnum)s', cnum=cnum)}"/>
-      <input type="submit" name="cancel_comment" value="${_('Cancel')}"
-             title="Cancel comment edit"/>
+      <input type="submit" name="preview_comment" value="${_('Preview')}" title="${_('Preview changes to comment %(cnum)s', cnum=cnum)}"/>
+      <input type="submit" name="edit_comment" value="${_('Submit changes')}" title="${_('Submit changes to comment %(cnum)s', cnum=cnum)}"/>
+      <input type="submit" name="cancel_comment" value="${_('Cancel')}" title="Cancel comment edit"/>
     </div>
   </form>
-  <py:choose>
-    <div py:when="str(cnum) == cnum_edit"
-         py:with="text = edited_comment if edited_comment is not None else change.comment"
-         class="comment searchable ticketdraft" style="${'display: none' if not text else None}" xml:space="preserve">
-      ${wporg_wiki_to_html(context, text, escape_newlines=preserve_newlines)}
-    </div>
-    <div py:when="show_history" class="comment searchable" xml:space="preserve">
-      ${wporg_wiki_to_html(context, change.comment_history[int(cversion)].comment, escape_newlines=preserve_newlines)}
-    </div>
-    <div py:when="change.comment" class="comment searchable" xml:space="preserve">
-      ${wporg_wiki_to_html(context, change.comment, escape_newlines=preserve_newlines)}
-    </div>
-  </py:choose>
-  <div py:if="not show_editor and len(change.comment_history) > 1" py:choose=""
-       class="trac-lastedit ${'trac-shade' if comment_version != max_version else None}">
-    <i18n:msg params="version, date, author" py:when="comment_version != max_version">
-        Version ${comment_version}, edited ${pretty_dateinfo(change.comment_history[comment_version].date)}
-        by ${authorinfo(change.comment_history[comment_version].author)}
-    </i18n:msg>
-    <i18n:msg params="date, author" py:otherwise="">
-        Last edited ${pretty_dateinfo(change.comment_history[comment_version].date)}
-        by ${authorinfo(change.comment_history[comment_version].author)}
-    </i18n:msg>
-    <py:if test="comment_version > 0">
-      (<a href="${href.ticket(ticket.id, cnum_hist=cnum, cversion=comment_version - 1)
-                 }#comment:${cnum}">previous</a>)
-    </py:if>
-    <py:if test="comment_version &lt; max_version">
-      (<a href="${href.ticket(ticket.id, cnum_hist=cnum, cversion=comment_version + 1)
-                 }#comment:${cnum}">next</a>)
-    </py:if>
-    <py:if test="comment_version > 0">
-      (<a href="${href.ticket(ticket.id, action='comment-diff', cnum=cnum,
-                              version=comment_version)}">diff</a>)
-    </py:if>
+#     endif
+## Comment body (rendered through the safety-capped wporg_wiki_to_html)
+#     if cnum == cnum_edit:
+#       set text = edited_comment if edited_comment is not none else change.comment
+  <div class="comment searchable ticketdraft"${{'style': 'display: none' if not text}|htmlattr} xml:space="preserve">
+    ${wporg_wiki_to_html(context, text, escape_newlines=preserve_newlines)}
   </div>
-</py:otherwise>
-</py:choose>
-</html>
+#     elif show_history:
+  <div class="comment searchable" xml:space="preserve">
+    ${wporg_wiki_to_html(context, change.comment_history[comment_version].comment, escape_newlines=preserve_newlines)}
+  </div>
+#     elif change.comment:
+  <div class="comment searchable" xml:space="preserve">
+    ${wporg_wiki_to_html(context, change.comment, escape_newlines=preserve_newlines)}
+  </div>
+#     endif
+#     if not show_editor and len(change.comment_history) is greaterthan(1):
+  <div class="trac-lastedit${' trac-shade' if comment_version != max_version else ''}">
+#       set le_date = pretty_dateinfo(change.comment_history[comment_version].date)
+#       set le_author = authorinfo(change.comment_history[comment_version].author)
+#       if comment_version != max_version:
+    Version ${comment_version}, edited ${le_date} by ${le_author}
+#       else:
+    Last edited ${le_date} by ${le_author}
+#       endif
+#       if comment_version is greaterthan(0):
+    (<a href="${href.ticket(ticket.id, cnum_hist=cnum, cversion=comment_version - 1)}#comment:${cnum}">previous</a>)
+#       endif
+#       if comment_version is lessthan(max_version):
+    (<a href="${href.ticket(ticket.id, cnum_hist=cnum, cversion=comment_version + 1)}#comment:${cnum}">next</a>)
+#       endif
+#       if comment_version is greaterthan(0):
+    (<a href="${href.ticket(ticket.id, action='comment-diff', cnum=cnum, version=comment_version)}">diff</a>)
+#       endif
+  </div>
+#     endif
+#   endif
+# endwith
