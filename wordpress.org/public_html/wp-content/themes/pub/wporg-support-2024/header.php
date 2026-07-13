@@ -13,7 +13,9 @@ namespace WordPressdotorg\Forums;
 
 \WordPressdotorg\skip_to( '#content' );
 
-$is_home = is_front_page() || is_page_template( 'page-homepage.php' );
+$is_home = ( function_exists( 'bbp_is_forum_archive' ) && bbp_is_forum_archive() )
+	|| is_front_page()
+	|| is_page_template( 'page-homepage.php' );
 
 /* Only show the WordCamp US 2026 banner through August 19, 2026. */
 $banner_end = new \DateTimeImmutable( '2026-08-20 00:00:00', wp_timezone() );
