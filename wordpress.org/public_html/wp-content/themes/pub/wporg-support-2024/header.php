@@ -13,7 +13,12 @@ namespace WordPressdotorg\Forums;
 
 \WordPressdotorg\skip_to( '#content' );
 
-if ( is_front_page() || is_page_template( 'page-homepage.php' ) ) {
+$is_home = is_front_page() || is_page_template( 'page-homepage.php' );
+
+/* Only show the WordCamp US 2026 banner through August 19, 2026. */
+$banner_end = new \DateTimeImmutable( '2026-08-20 00:00:00', wp_timezone() );
+
+if ( $is_home && current_datetime() < $banner_end ) {
 	echo do_blocks(
 		'<!-- wp:group {"metadata":{"name":"3 min-height columns"},"align":"full","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"backgroundColor":"light-grey-2","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center"},"blockVisibility":{"controlSets":[{"id":1,"enable":true,"controls":[]}]}} -->
 		<div class="wp-block-group alignfull has-light-grey-2-background-color has-background"><!-- wp:group {"style":{"layout":{"selfStretch":"fill","flexSize":null},"dimensions":{"minHeight":"0px"},"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"background":{"backgroundImage":{"url":"https://wordpress.org/files/2026/06/wcus_map.png","id":52120,"source":"file","title":"wcus_map"},"backgroundSize":"cover","backgroundAttachment":"scroll","backgroundPosition":"74% 95%"},"color":{"background":"#47002c"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
