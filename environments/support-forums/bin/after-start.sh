@@ -3,6 +3,8 @@
 # Runs after wp-env start. Sets up permalinks, creates pages, and imports plugins.
 #
 
+set -euo pipefail
+
 SETUP_VALIDATION_FILE="/var/www/html/.wp-env-setup-complete"
 
 CONFIG="--config support-forums/.wp-env.json"
