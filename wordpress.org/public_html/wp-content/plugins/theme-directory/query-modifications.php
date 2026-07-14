@@ -188,6 +188,45 @@ function wporg_themes_pre_get_posts( $query ) {
 add_action( 'pre_get_posts', 'wporg_themes_pre_get_posts' );
 
 /**
+ * Restricts Jetpack Search (Elasticsearch) theme searches to published themes.
+ *
+ * Without this, the ES hit total counts themes in non-public statuses that are
+ * then dropped when the results are loaded for display, leaving search pages
+ * with fewer cards than the total implies.
+ *
+ * @see https://github.com/WordPress/wporg-theme-directory/issues/69
+ *
+ * @param array    $es_query_args The raw Elasticsearch query args.
+ * @param WP_Query $query         The originating WP_Query object.
+ * @return array
+ */
+function wporg_themes_restrict_search_to_published( $es_query_args, $query ) {
+	if ( ! $query instanceof WP_Query || 'repopackage' !== $query->get( 'post_type' ) ) {
+		return $es_query_args;
+	}
+
+	$status_filter = array(
+		'terms' => array(
+			'post_status' => array( 'publish' ),
+		),
+	);
+
+	// Merge into the filter tree, matching Jetpack's `and` grouping.
+	if ( empty( $es_query_args['filter'] ) ) {
+		$es_query_args['filter'] = $status_filter;
+	} elseif ( isset( $es_query_args['filter']['and'] ) ) {
+		$es_query_args['filter']['and'][] = $status_filter;
+	} else {
+		$es_query_args['filter'] = array(
+			'and' => array( $es_query_args['filter'], $status_filter ),
+		);
+	}
+
+	return $es_query_args;
+}
+add_filter( 'jetpack_search_es_query_args', 'wporg_themes_restrict_search_to_published', 10, 2 );
+
+/**
  * Filters SQL clauses, to prioritize translated themes.
  *
  * @param array $clauses
