@@ -26,6 +26,8 @@
 		"JETPACK_DEV_DEBUG": true,
 		"WP_DEFAULT_THEME": "wporg-themes-2024",
 		"WP_ENVIRONMENT_TYPE": "local",
-		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php"
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php",
+		"THEME_TRACBOT_PASSWORD": "",
+		"THEME_DROPBOX_PASSWORD": ""
 	}
 }
