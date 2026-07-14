@@ -1,0 +1,32 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"../wordpress.org/public_html/wp-content/plugins/theme-directory",
+		"https://downloads.wordpress.org/plugin/theme-check.zip",
+		"https://downloads.wordpress.org/plugin/jetpack.zip"
+	],
+	"themes": [
+		"./theme-directory/vendor/wporg-theme-directory/source/wp-content/themes/wporg-themes-2024",
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg",
+		"WordPress/wporg-parent-2021#build"
+	],
+	"mappings": {
+		"wp-content/mu-plugins": "./mocks/mu-plugins",
+		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
+		"wp-content/env-bin": "./theme-directory/bin"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash theme-directory/bin/after-start.sh"
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"JETPACK_DEV_DEBUG": true,
+		"WP_DEFAULT_THEME": "wporg-themes-2024",
+		"WP_ENVIRONMENT_TYPE": "local",
+		"WP_TESTS_TITLE": "WordPress.org Themes",
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php"
+	}
+}
