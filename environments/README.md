@@ -57,12 +57,12 @@ npm run plugins:test
 
 A local instance of the WordPress.org Theme Directory with the theme directory plugin, Theme Check, the `wporg-themes-2024` frontend theme, and supporting mu-plugins. Themes are imported from the live WordPress.org themes API.
 
-The frontend theme lives in [`WordPress/wporg-theme-directory`](https://github.com/WordPress/wporg-theme-directory) rather than in this repository, so the first start clones it into a git-ignored `theme-directory/vendor/` directory. Use `themes:start` (which provisions before starting) rather than `themes:env start`.
+The frontend theme lives in [`WordPress/wporg-theme-directory`](https://github.com/WordPress/wporg-theme-directory) rather than in this repository. `wp-env` mounts that repo at `wp-content/wporg-theme-directory` and an mu-plugin registers its theme root, so no separate checkout is needed.
 
 **Start:**
 
 ```bash
-npm run themes:start
+npm run themes:env start
 ```
 
 **Re-import themes** (on demand, without clearing existing data):

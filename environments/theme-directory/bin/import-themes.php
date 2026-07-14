@@ -52,6 +52,7 @@ function fetch_themes( $api_url, $browse, $count ) {
 				'theme_url'       => true,
 				'template'        => true,
 				'tags'            => true,
+				'extended_author' => true,
 			),
 		),
 	);
@@ -74,6 +75,34 @@ function fetch_themes( $api_url, $browse, $count ) {
 }
 
 /**
+ * Ensure a WordPress user exists for a theme author, returning its ID.
+ *
+ * @param string $nicename     User nicename/slug.
+ * @param string $display_name Optional display name.
+ * @return int User ID, or 0 when no nicename was given.
+ */
+function ensure_user( $nicename, $display_name = '' ) {
+	if ( ! $nicename ) {
+		return 0;
+	}
+
+	$user = get_user_by( 'slug', $nicename );
+	if ( ! $user ) {
+		wp_insert_user( array(
+			'user_login'    => $nicename,
+			'user_nicename' => $nicename,
+			'user_email'    => $nicename . '@example.invalid',
+			'display_name'  => $display_name ?: $nicename,
+			'user_pass'     => wp_generate_password(),
+			'role'          => 'subscriber',
+		) );
+		$user = get_user_by( 'slug', $nicename );
+	}
+
+	return $user ? $user->ID : 0;
+}
+
+/**
  * Create or update a repopackage post from a themes-API theme object.
  *
  * @param object $theme Theme object from the themes API.
@@ -87,6 +116,12 @@ function save_theme( $theme ) {
 		'numberposts' => 1,
 	) );
 	$theme_post_id = $existing ? $existing[0]->ID : 0;
+
+	// Create a real author account from the API's author data.
+	$author_id = ensure_user(
+		$theme->author->user_nicename ?? '',
+		$theme->author->display_name ?? ''
+	);
 
 	$description = '';
 	if ( isset( $theme->sections->description ) ) {
@@ -105,7 +140,7 @@ function save_theme( $theme ) {
 		'post_title'        => $theme->name,
 		'post_name'         => $theme->slug,
 		'post_content'      => $description,
-		'post_author'       => 1,
+		'post_author'       => $author_id ?: 1,
 		'post_status'       => 'publish',
 		'post_date'         => $date,
 		'post_date_gmt'     => $date,
@@ -137,10 +172,9 @@ function save_theme( $theme ) {
 		update_post_meta( $theme_post_id, $key, $meta );
 	}
 
-	// Flat meta consumed by the ratings/downloads shim
-	// (environments/mocks/mu-plugins/wporg-themes-ratings.php + wporg-themes-stats.php).
+	// Rating meta consumed by the WPORG_Ratings stub
+	// (environments/mocks/mu-plugins/wporg-themes-ratings.php).
 	update_post_meta( $theme_post_id, '_active_installs', (int) ( $theme->active_installs ?? 0 ) );
-	update_post_meta( $theme_post_id, 'downloads', (int) ( $theme->downloaded ?? 0 ) );
 	update_post_meta( $theme_post_id, 'rating', (float) ( $theme->rating ?? 0 ) / 20 );
 	update_post_meta( $theme_post_id, 'num_ratings', (int) ( $theme->num_ratings ?? 0 ) );
 	update_post_meta( $theme_post_id, 'ratings', (array) ( $theme->ratings ?? array() ) );
@@ -149,6 +183,26 @@ function save_theme( $theme ) {
 	// _popularity meta key; use active installs as a stand-in for the production
 	// popularity score so imported themes appear and sort sensibly.
 	update_post_meta( $theme_post_id, '_popularity', (float) ( $theme->active_installs ?? 0 ) );
+
+	// Business model taxonomy powers the commercial/community browse views.
+	if ( ! empty( $theme->is_commercial ) ) {
+		wp_set_object_terms( $theme_post_id, 'commercial', 'theme_business_model' );
+	} elseif ( ! empty( $theme->is_community ) ) {
+		wp_set_object_terms( $theme_post_id, 'community', 'theme_business_model' );
+	}
+
+	// Seed the download count into the bb_themes_stats table the directory reads
+	// from (SELECT SUM(downloads) ... in class-themes-api.php).
+	global $wpdb;
+	$wpdb->replace(
+		'bb_themes_stats',
+		array(
+			'slug'      => $theme->slug,
+			'date'      => gmdate( 'Y-m-d' ),
+			'downloads' => (int) ( $theme->downloaded ?? 0 ),
+		),
+		array( '%s', '%s', '%d' )
+	);
 
 	/*
 	 * Mark this version live by writing the _status meta directly. Calling

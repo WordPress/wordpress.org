@@ -8,11 +8,11 @@
 		"https://downloads.wordpress.org/plugin/jetpack.zip"
 	],
 	"themes": [
-		"./theme-directory/vendor/wporg-theme-directory/source/wp-content/themes/wporg-themes-2024",
 		"../wordpress.org/public_html/wp-content/themes/pub/wporg",
 		"WordPress/wporg-parent-2021#build"
 	],
 	"mappings": {
+		"wp-content/wporg-theme-directory": "WordPress/wporg-theme-directory#build",
 		"wp-content/mu-plugins": "./mocks/mu-plugins",
 		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",

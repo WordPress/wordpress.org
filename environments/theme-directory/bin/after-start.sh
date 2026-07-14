@@ -31,6 +31,10 @@ $WP wp rewrite structure '/%postname%/' --hard
 # The themes list is paginated 12 per page on production.
 $WP wp option update posts_per_page 12
 
+# Create stub database tables that exist outside WordPress on production
+# (theme download stats and ratings).
+$WP wp db import wp-content/env-bin/database-tables.sql
+
 # Activate the frontend theme.
 $WP wp theme activate wporg-themes-2024 > /dev/null 2>&1 || true
 
@@ -45,6 +49,10 @@ fi
 echo "Creating categories..."
 $WP wp term create category 'Featured' --slug=featured --description='Featured "curated" themes.' --user=wordpressdotorg > /dev/null 2>&1 && echo "  Created category: featured" || true
 $WP wp term create category 'Special Case Theme' --slug=special-case-theme --description='Special Case Themes are allowed to bypass theme-check.' --user=wordpressdotorg > /dev/null 2>&1 && echo "  Created category: special-case-theme" || true
+
+# Create the commercial/community business model terms used by the browse views.
+$WP wp term create theme_business_model 'Commercial' --slug=commercial --user=wordpressdotorg > /dev/null 2>&1 && echo "  Created business model: commercial" || true
+$WP wp term create theme_business_model 'Community' --slug=community --user=wordpressdotorg > /dev/null 2>&1 && echo "  Created business model: community" || true
 
 # Seed tags from the hot_tags API (a no-op locally when it returns nothing).
 $WP wp eval 'foreach ( (array) themes_api( "hot_tags" ) as $t ) { $t = (array) $t; if ( ! empty( $t["slug"] ) && ! term_exists( $t["slug"], "post_tag" ) ) { wp_insert_term( $t["name"], "post_tag", array( "slug" => $t["slug"] ) ); } }' --user=wordpressdotorg > /dev/null 2>&1 || true

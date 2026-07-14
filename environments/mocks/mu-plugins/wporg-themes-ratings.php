@@ -2,10 +2,10 @@
 /**
  * Plugin Name: WordPress.org Ratings (Theme Directory local stub)
  * Description: Local stand-in for the wordpress.org ratings system the Theme
- *              Directory depends on. Reads rating data seeded onto each
- *              repopackage post by bin/import-themes.php, so no ratings table
- *              is required. Loaded as a single-file mu-plugin overlay on top of
- *              the shared environments/mocks/mu-plugins base.
+ *              Directory depends on. The production ratings table exists locally
+ *              (created empty by the theme-directory env), but seeding real
+ *              per-user rows is impractical, so this serves the rating summary
+ *              from meta the importer stores on each repopackage post.
  *
  * @package theme-directory-env
  */
