@@ -194,8 +194,6 @@ add_action( 'pre_get_posts', 'wporg_themes_pre_get_posts' );
  * then dropped when the results are loaded for display, leaving search pages
  * with fewer cards than the total implies.
  *
- * @see https://github.com/WordPress/wporg-theme-directory/issues/69
- *
  * @param array    $es_query_args The raw Elasticsearch query args.
  * @param WP_Query $query         The originating WP_Query object.
  * @return array

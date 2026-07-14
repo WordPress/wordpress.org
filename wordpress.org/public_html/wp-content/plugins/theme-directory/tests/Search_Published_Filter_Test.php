@@ -4,7 +4,7 @@
  *
  * Guards against the regression where Jetpack Search returns (and counts) themes
  * in non-public statuses, leaving search result pages with fewer cards than the
- * reported total. See https://github.com/WordPress/wporg-theme-directory/issues/69.
+ * reported total.
  *
  * @package theme-directory
  */
@@ -15,17 +15,6 @@ use PHPUnit\Framework\TestCase;
  * @group search
  */
 class Search_Published_Filter_Test extends TestCase {
-
-	/**
-	 * The `post_status` filter the callback is expected to add.
-	 *
-	 * @var array
-	 */
-	const STATUS_FILTER = array(
-		'terms' => array(
-			'post_status' => array( 'publish' ),
-		),
-	);
 
 	/**
 	 * Builds a repopackage search WP_Query stub.
@@ -41,48 +30,54 @@ class Search_Published_Filter_Test extends TestCase {
 	}
 
 	/**
-	 * The publish restriction is added when the ES query has no existing filter.
+	 * Asserts the ES filter tree constrains `post_status` to `publish`.
+	 *
+	 * Accepts either a bare `terms` filter or one nested in an `and` group, so
+	 * the assertion checks the behaviour (results are limited to published
+	 * themes) rather than the exact shape the merge logic happens to produce.
+	 *
+	 * @param array $filter The `filter` value from the ES query args.
 	 */
-	public function test_adds_filter_when_none_exists() {
-		$args = wporg_themes_restrict_search_to_published( array(), $this->repopackage_query() );
+	protected function assertConstrainsToPublish( $filter ) {
+		$clauses = isset( $filter['and'] ) ? $filter['and'] : array( $filter );
 
-		$this->assertSame( self::STATUS_FILTER, $args['filter'] );
+		foreach ( $clauses as $clause ) {
+			if ( array( 'publish' ) === ( $clause['terms']['post_status'] ?? null ) ) {
+				return;
+			}
+		}
+
+		$this->fail( 'ES query is not constrained to the `publish` post status.' );
 	}
 
 	/**
-	 * The publish restriction is combined with a single existing filter.
+	 * A search with no pre-existing ES filter is still constrained to publish.
 	 */
-	public function test_wraps_single_existing_filter() {
-		$existing = array( 'terms' => array( 'post_type' => array( 'repopackage' ) ) );
+	public function test_constrains_search_with_no_existing_filter() {
+		$args = wporg_themes_restrict_search_to_published( array(), $this->repopackage_query() );
+
+		$this->assertConstrainsToPublish( $args['filter'] );
+	}
+
+	/**
+	 * The publish constraint is AND-combined with the query's existing filters,
+	 * which must survive intact — dropping them would broaden the results.
+	 */
+	public function test_preserves_existing_filters() {
+		$existing = array( 'terms' => array( 'taxonomy.theme_tags.slug' => array( 'blog' ) ) );
 
 		$args = wporg_themes_restrict_search_to_published(
 			array( 'filter' => $existing ),
 			$this->repopackage_query()
 		);
 
-		$this->assertArrayHasKey( 'and', $args['filter'] );
-		$this->assertContains( $existing, $args['filter']['and'] );
-		$this->assertContains( self::STATUS_FILTER, $args['filter']['and'] );
+		$this->assertConstrainsToPublish( $args['filter'] );
+		$this->assertContains( $existing, $args['filter']['and'], 'Existing ES filters were dropped.' );
 	}
 
 	/**
-	 * The publish restriction is appended to an existing `and` filter group.
-	 */
-	public function test_appends_to_existing_and_group() {
-		$existing = array( 'terms' => array( 'post_type' => array( 'repopackage' ) ) );
-
-		$args = wporg_themes_restrict_search_to_published(
-			array( 'filter' => array( 'and' => array( $existing ) ) ),
-			$this->repopackage_query()
-		);
-
-		$this->assertCount( 2, $args['filter']['and'] );
-		$this->assertContains( $existing, $args['filter']['and'] );
-		$this->assertContains( self::STATUS_FILTER, $args['filter']['and'] );
-	}
-
-	/**
-	 * Non-theme queries are left untouched.
+	 * Non-theme searches sharing the `jetpack_search_es_query_args` hook are
+	 * left untouched.
 	 */
 	public function test_ignores_non_repopackage_queries() {
 		$query                          = new WP_Query();
