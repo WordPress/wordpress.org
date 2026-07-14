@@ -707,19 +707,17 @@
 		overlay.wporgCaptionSyncTimer = window.setTimeout( function () {
 			overlay.wporgCaptionSyncTimer = null;
 			markOverlaySettled( overlay );
-			clearOverlayMetricCache( overlay );
-			syncCaption( overlay, false );
 			scheduleCaptionReveal( overlay, ensureCaption( overlay ) );
 		}, CAPTION_REVEAL_DELAY );
 	}
 
 	/**
-	 * Queues a two-phase sync so captions do not mutate the lightbox geometry
-	 * while core is still animating the current image.
+	 * Delays the caption reveal until core finishes the opening animation.
 	 *
-	 * @param {HTMLElement} overlay The `.wp-lightbox-overlay` element.
+	 * @param {HTMLElement} overlay       The `.wp-lightbox-overlay` element.
+	 * @param {boolean}     forceGeometry Whether to recalculate during a pending reveal.
 	 */
-	function requestSettledSync( overlay ) {
+	function requestSettledSync( overlay, forceGeometry ) {
 		var shouldSyncImmediately = isOverlaySettled( overlay );
 
 		if ( ! isOverlayActive( overlay ) ) {
@@ -742,22 +740,18 @@
 			return;
 		}
 
-		if ( shouldSyncImmediately ) {
-			if ( isCaptionRevealPending( overlay ) ) {
-				var pendingKey = overlay.dataset.wporgCaptionRevealKey || '';
-				var currentKey = getActiveImageKey( overlay );
+		if ( isCaptionRevealPending( overlay ) ) {
+			var pendingKey = overlay.dataset.wporgCaptionRevealKey || '';
+			var currentKey = getActiveImageKey( overlay );
 
-				clearOverlayMetricCache( overlay );
-				syncCaption( overlay, false );
-
-				if ( currentKey !== pendingKey ) {
-					clearCaptionReveal( overlay );
-					scheduleDeferredSync( overlay );
-				}
-
+			if ( currentKey === pendingKey && ! forceGeometry ) {
 				return;
 			}
 
+			clearCaptionReveal( overlay );
+		}
+
+		if ( shouldSyncImmediately ) {
 			clearDeferredSync( overlay );
 			clearCaptionReveal( overlay );
 			clearOverlayMetricCache( overlay );
@@ -766,7 +760,9 @@
 		}
 
 		clearOverlayMetricCache( overlay );
+		markOverlaySettled( overlay );
 		syncCaption( overlay, false );
+		markOverlayUnsettled( overlay );
 		scheduleDeferredSync( overlay );
 	}
 
@@ -907,12 +903,12 @@
 		classObserver.observe( overlay, { attributes: true, attributeFilter: [ 'class' ] } );
 
 		window.addEventListener( 'resize', function () {
-			requestSettledSync( overlay );
+			requestSettledSync( overlay, true );
 		} );
 
 		if ( window.visualViewport ) {
 			window.visualViewport.addEventListener( 'resize', function () {
-				requestSettledSync( overlay );
+				requestSettledSync( overlay, true );
 			} );
 		}
 	}
