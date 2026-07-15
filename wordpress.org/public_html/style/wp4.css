@@ -47,6 +47,7 @@ pre {
 
 pre a { font-weight: normal; }
 
+a:link, /* https://wordpress.slack.com/archives/C02QB2JS7/p1768980644711199 */
 a {
 	color: #21759b;
 	text-decoration: none;
@@ -1008,6 +1009,7 @@ input[type=submit]:disabled,
 .button-primary,
 .download-button,
 .button-primary:visited,
+.entry-content a.button-primary:visited, /* Twentytwelve, as used on make/chat */
 .download-button:visited {
 	background: #0085ba;
 	border-color: #0073aa #006799 #006799;
@@ -1437,6 +1439,7 @@ body.make-training #headline h2 a:before { content: '\f118'; }
 body.make-flow #headline h2 a:before { content: '\f115'; }
 body.make-tv #headline h2 a:before { content: '\f235'; }
 body.make-marketing #headline h2 a:before { content: '\f130'; }
+body.make-media-corps #headline h2 a:before { content: '\f130'; }
 body.make-cli #headline h2 a:before { content: '\f345'; }
 body.make-hosting #headline h2 a:before { content: '\f176'; }
 body.make-security #headline h2 a:before { content: '\f160'; }
@@ -1444,6 +1447,7 @@ body.make-tide #headline h2 a:before { content: '\f10d'; }
 body.make-openverse #headline h2 a:before { content: '\f179'; }
 body.make-test #headline h2 a:before { content: '\f115'; }
 body.make-photos #headline h2 a:before { content: '\f306'; }
+body.make-sustainability #headline h2 a:before { content: '\f11f'; position: relative; top: 2px; }
 
 .make-core .site-title a:before { content: '\f475'; }
 .make-design .site-title a:before { content: '\f309'; }
@@ -1461,6 +1465,7 @@ body.make-photos #headline h2 a:before { content: '\f306'; }
 .make-flow .site-title a:before { content: '\f115'; }
 .make-tv .site-title a:before { content: '\f235'; }
 .make-marketing .site-title a:before { content: '\f130'; }
+.make-media-corps .site-title a:before { content: '\f130'; }
 .make-cli .site-title a:before { content: '\f345'; }
 .make-hosting .site-title a:before { content: '\f176'; }
 .make-security .site-title a:before { content: '\f160'; }
@@ -1468,6 +1473,7 @@ body.make-photos #headline h2 a:before { content: '\f306'; }
 .make-openverse .site-title a:before { content: '\f179'; }
 .make-test .site-title a:before { content: '\f115'; }
 .make-photos .site-title a:before { content: '\f306'; }
+.make-sustainability .site-title a:before { content: '\f11f'; position: relative; top: 2px; }
 
 #headline .login {
 	font-size: 12px;

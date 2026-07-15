@@ -15,5 +15,5 @@
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:navigation {"menuSlug":"plugins","overlayBackgroundColor":"charcoal-1","overlayTextColor":"white","icon":"menu","layout":{"type":"flex","orientation":"horizontal"},"style":{"spacing":{"blockGap":"24px"}},"fontSize":"small"} /-->
+	<!-- wp:navigation {"menuSlug":"plugins","overlayBackgroundColor":"charcoal-2","overlayTextColor":"white","icon":"menu","layout":{"type":"flex","orientation":"horizontal"},"style":{"spacing":{"blockGap":"24px"}},"fontSize":"small"} /-->
 <!-- /wp:wporg/local-navigation-bar -->

@@ -23,6 +23,7 @@ require_once( __DIR__ . '/src/blocks/single-plugin/index.php' );
 require_once( __DIR__ . '/src/blocks/plugin-card/index.php' );
 
 // Block Configs
+require_once( __DIR__ . '/inc/block-bindings.php' );
 require_once( __DIR__ . '/inc/block-config.php' );
 
 /**
@@ -86,7 +87,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], filemtime( __DIR__ . '/css/style.css' ) );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/build/style.css' ), [ 'dashicons', 'open-sans' ], filemtime( __DIR__ . '/build/style.css' ) );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
@@ -138,33 +139,6 @@ function scripts() {
 		wp_enqueue_script( 'wporg-plugins-upload', get_stylesheet_directory_uri() . '/js/upload.js', array( 'wp-api', 'jquery' ), filemtime( __DIR__ . '/js/upload.js' ), true );
 	}
 
-	// React is currently only used on detail pages.
-	if ( is_single() ) {
-		$assets_path = dirname( __FILE__ ) . '/js/build/theme.asset.php';
-		if ( file_exists( $assets_path ) ) {
-			$script_info = require( $assets_path );
-			wp_enqueue_script(
-				'wporg-plugins-client',
-				get_stylesheet_directory_uri() . '/js/build/theme.js',
-				$script_info['dependencies'],
-				$script_info['version'],
-				true
-			);
-			wp_localize_script(
-				'wporg-plugins-client',
-				'localeData',
-				array(
-					'' => array(
-						'Plural-Forms' => _x( 'nplurals=2; plural=n != 1;', 'plural forms', 'wporg-plugins' ),
-						'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
-						'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ),
-					),
-					'screenshots' => __( 'Screenshots', 'wporg-plugins' ),
-				)
-			);
-		}
-	}
-
 	// No Jetpack scripts needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
 	wp_dequeue_script( 'devicepx' );
@@ -195,11 +169,11 @@ function loader_src( $src, $handle ) {
 		'wporg-plugins-popover',
 		'wporg-plugins-locale-banner',
 		'wporg-plugins-stats',
-		'wporg-plugins-client',
 		'wporg-plugins-faq',
 	];
 
-	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
+	$use_cdn = ( 'production' === wp_get_environment_type() ) || ( defined( 'USE_WPORG_CDN' ) && USE_WPORG_CDN );
+	if ( ! $use_cdn ) {
 		return $src;
 	}
 
@@ -349,7 +323,7 @@ function social_meta_data() {
 	}
 
 	$icon   = Template::get_plugin_icon();
-	$banner = Template::get_plugin_banner();
+	$banner = Template::get_plugin_banner() ?: [];
 
 	$banner['banner']    = $banner['banner'] ?? false;
 	$banner['banner_2x'] = $banner['banner_2x'] ?? false;
@@ -400,9 +374,9 @@ add_action( 'wp_head', function() {
  */
 function update_archive_title( $title ) {
 	if ( is_tax( 'plugin_business_model', 'community' ) ) {
-		return __( 'Community Plugins', 'wporg-plugins' );
+		return __( 'Community plugins', 'wporg-plugins' );
 	} else if ( is_tax( 'plugin_business_model', 'commercial' ) ) {
-		return __( 'Commercial Plugins', 'wporg-plugins' );
+		return __( 'Commercial plugins', 'wporg-plugins' );
 	}
 
 	return $title;

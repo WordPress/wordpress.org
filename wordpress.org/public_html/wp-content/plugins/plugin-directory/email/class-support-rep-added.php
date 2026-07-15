@@ -10,7 +10,7 @@ class Support_Rep_Added extends Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( 'New support rep added to %s', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -40,7 +40,7 @@ If you believe this to be in error, please contact %7$s.', 'wporg-plugins' );
 			$email_text,
 			$this->user_text( $this->user ),
 			$this->user_text( $this->args['rep'] ),
-			$this->plugin->post_title,
+			$this->plugin_title(),
 			$this->user_text( $this->who ),
 			$rep_list,
 			$advanced_url,

@@ -20,11 +20,15 @@
 
 	.block-validator__plugin-submit {
 		flex: 0;
-		margin-left: var( --wp--style--block-gap );
+		margin-left: 4px;
 	}
 
 	/* Input width plus some padding */
 	@media (max-width: 36rem) {
+		.block-validator__plugin-submit {
+			width: 100%;
+		}
+
 		.block-validator__plugin-input-container {
 			display: block;
 		}
@@ -67,5 +71,19 @@
 
 	.test-screenshot {
 		text-align: center;
+	}
+
+	.plugin-upload-form-controls {
+		display: flex;
+		gap: 4px;
+		align-items: center;
+
+		> label {
+			min-width: 200px;
+			border: 1px solid var(--wp--custom--form--border--color);
+			border-radius: var(--wp--custom--form--border--radius);
+			padding: 4px 8px;
+			cursor: pointer;
+		}
 	}
 }

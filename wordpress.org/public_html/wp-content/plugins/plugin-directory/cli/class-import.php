@@ -3,7 +3,6 @@ namespace WordPressdotorg\Plugin_Directory\CLI;
 
 use Exception;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
-use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
@@ -11,9 +10,9 @@ use WordPressdotorg\Plugin_Directory\Readme\{ Parser as Readme_Parser, Validator
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Tools\Block_e2e;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use WordPressdotorg\Plugin_Directory\Tools\Tokenisation_Helpers;
 use WordPressdotorg\Plugin_Directory\Zip\Builder;
 
 /**
@@ -28,7 +27,6 @@ class Import {
 
 	// Readme fields which get stored in plugin meta
 	public $readme_fields = array(
-		'tested',
 		'donate_link',
 		'license',
 		'license_uri',
@@ -36,6 +34,7 @@ class Import {
 		'screenshots',
 
 		// These headers are stored as post meta, but are handled separately.
+		// 'tested',
 		// 'requires',
 		// 'requires_php',
 	);
@@ -77,9 +76,10 @@ class Import {
 	 *
 	 * @param string $plugin_slug            The slug of the plugin to import.
 	 * @param array  $svn_changed_tags       A list of tags/trunk which the SVN change touched. Optional.
+	 * @param array  $svn_tags_deleted       A list of tags/trunk which were deleted in the SVN change. Optional.
 	 * @param array  $svn_revision_triggered The SVN revision which this import has been triggered by. Optional.
 	 */
-	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_revision_triggered = 0 ) {
+	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_tags_deleted = array(), $svn_revision_triggered = 0 ) {
 		// Reset properties.
 		$this->warnings = [];
 
@@ -93,6 +93,7 @@ class Import {
 		$readme             = $data['readme'];
 		$assets             = $data['assets'];
 		$headers            = $data['plugin_headers'];
+		$version            = $headers->Version ?? '';
 		$stable_tag         = $data['stable_tag'];
 		$last_committer     = $data['last_committer'];
 		$last_revision      = $data['last_revision'];
@@ -100,6 +101,7 @@ class Import {
 		$last_modified      = $data['last_modified'];
 		$blocks             = $data['blocks'];
 		$block_files        = $data['block_files'];
+		$dashboard_widgets  = $data['dashboard_widgets'] ?? array();
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
@@ -108,7 +110,48 @@ class Import {
 			$this->warnings = array_merge( $this->warnings, $readme->warnings );
 		}
 
+		/**
+		 * Fire an import action, now that we've exported most of the plugin data.
+		 *
+		 * NOTE: This is prior to any validation checks.
+		 *
+		 * @param Import  $this                   The Plugin Importer object.
+		 * @param WP_Post $plugin                 The plugin being imported.
+		 * @param array   $data                   The data from the import process.
+		 * @param array   $svn_changed_tags       The list of SVN tags/trunk affected to trigger the import.
+		 * @param array   $svn_tags_deleted       The list of SVN tags/trunk deleted in the import.
+		 * @param int     $svn_revision_triggered The SVN revision that triggered the import.
+		 */
+		do_action( 'wporg_plugins_import', $this, $plugin, $data, $svn_changed_tags, $svn_tags_deleted, $svn_revision_triggered );
+
 		// Validate various headers:
+
+		/*
+		 * Warn when the plugin's Version header has anything other than digits, dots, and an
+		 * optional `-rc` / `-beta` / `-alpha` pre-release suffix (with optional digits).
+		 *
+		 * Catches headers that include an accidental duplicate `Version:` prefix, stray
+		 * letters or punctuation, or other free-form text mixed in with the version number.
+		 *
+		 * The strict format matters because WordPress core uses `version_compare()` to decide
+		 * whether to offer an update — a malformed header can silently give the wrong answer
+		 * for users running an older release.
+		 */
+		if ( $version && ! preg_match( '/^\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?$/i', $version ) ) {
+			$this->warnings['version_header_unexpected_chars'] = $version;
+		}
+
+		/*
+		 * Warn when the plugin's Version header doesn't appear to match the tag it was released from.
+		 *
+		 * Trunk releases skip this check — there's no tag folder to compare against.
+		 */
+		if ( 'trunk' !== $stable_tag && $version && ! self::version_matches_tag( $version, $stable_tag ) ) {
+			$this->warnings['version_tag_mismatch'] = [
+				'version' => $version,
+				'tag'     => $stable_tag,
+			];
+		}
 
 		/*
 		 * Check to see if the plugin is using the `Update URI` header.
@@ -145,14 +188,29 @@ class Import {
 		}
 
 		if ( $unmet_dependencies ) {
-			$this->warnings['unmet_dependencies'] = $requires_plugins_unmet;
+			$this->warnings['unmet_dependencies'] = $unmet_dependencies;
 
-			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'unmet_dependencies', $requires_plugins_unmet ) );
+			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'unmet_dependencies', $unmet_dependencies ) );
 		}
 		unset( $_requires_plugins, $unmet_dependencies );
 
+		/*
+		 * If a tag has been deleted, we should also remove any unconfirmed releases.
+		 * NOTE: remove_release() will not remove a confirmed release, but will remove a discarded release.
+		 *
+		 * Additionally; this must occur before the below release confirmation checks,
+		 * if the trunk readme has it's stable_tag set to one of these deleted (now non-existent) tags,
+		 * then $stable_tag will be set to the fallback 'trunk', causing the RC checks to fail.
+		 */
+		foreach ( $svn_tags_deleted as $svn_deleted_tag ) {
+			if ( Plugin_Directory::remove_release( $plugin, $svn_deleted_tag ) ) {
+				echo "Plugin tag {$svn_deleted_tag} deleted; release removed.\n";
+			}
+		}
+
 		// Release confirmation
 		if ( $plugin->release_confirmation ) {
+			// If the stable tag is trunk, we shouldn't continue, as we don't support that for RC.
 			if ( 'trunk' === $stable_tag ) {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
@@ -166,26 +224,38 @@ class Import {
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 				if ( ! $release ) {
 					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
-					$version = ( $svn_changed_tag === $stable_tag ) ? $headers->Version : $svn_changed_tag;
+					$release_version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
 
 					Plugin_Directory::add_release(
 						$plugin,
 						[
 							'tag'       => $svn_changed_tag,
-							'version'   => $version,
+							'version'   => $release_version,
 							'committer' => [ $last_committer ],
 							'revision'  => [ $last_revision ]
 						]
 					);
 
+					/*
+					 * Trigger the release confirmation email.
+					 *
+					 * This goes to ALL committers, including who commited the change.
+					 * "bot" accounts are NOT emailed, nor are accounts that have web login disabled.
+					 */
+					$who_to_email = array_diff(
+						Tools::get_plugin_committers( $plugin_slug ),
+						$GLOBALS['bot_accounts'] ?? [],
+						$GLOBALS['nologin_accounts'] ?? []
+					);
+
 					$email = new Release_Confirmation_Email(
 						$plugin,
-						Tools::get_plugin_committers( $plugin_slug ),
+						$who_to_email,
 						[
 							'who'     => $last_committer,
 							'readme'  => $readme,
 							'headers' => $headers,
-							'version' => $version,
+							'version' => $release_version,
 						]
 					);
 					$email->send();
@@ -206,16 +276,26 @@ class Import {
 			 * then we need to build a new zip for that tag.
 			 *
 			 * This is required as ZIP building occurs at the end of the import process, yet with
-			 * release confirmations the 
+			 * release confirmations that will not be reached when the release isn't yet confirmed.
 			 */
 			if ( ! $release['confirmed'] && ! $touches_stable_tag ) {
 				$zips_to_build = [];
 				foreach ( $svn_changed_tags as $svn_changed_tag ) {
-					// We're not concerned with trunk or stable tags.
-					if ( 'trunk' === $svn_changed_tag || $svn_changed_tag === $stable_tag ) {
+					// Never build the stable tag zips here.
+					if ( $svn_changed_tag === $stable_tag ) {
 						continue;
 					}
 
+					// Always allow trunk to be rebuilt.
+					if ( 'trunk' === $svn_changed_tag ) {
+						$zips_to_build[] = 'trunk';
+						continue;
+					}
+
+					/*
+					 * If the tag is confirmed, but the zips haven't been built, then build them.
+					 * This can be a confirmed release, but one which isn't set as stable.
+					 */
 					$this_release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 					if ( $this_release['confirmed'] && ! $this_release['zips_built'] ) {
 						$zips_to_build[] = $this_release['tag'];
@@ -228,8 +308,8 @@ class Import {
 				}
 			}
 
-			// Check that the tag is approved.
-			if ( ! $release['confirmed'] ) {
+			// Check that the tag is approved (If the release needed to be confirmed).
+			if ( ! $release['confirmed'] && $release['confirmations_required'] ) {
 
 				if ( ! in_array( $last_committer, $release['committer'], true ) ) {
 					$release['committer'][] = $last_committer;
@@ -241,11 +321,35 @@ class Import {
 				// Update with ^
 				Plugin_Directory::add_release( $plugin, $release );
 
+				/**
+				 * Fire an action to let other code know this plugin has a pending release.
+				 *
+				 * @param WP_Post $plugin  The plugin being imported.
+				 * @param array   $release The release data.
+				 * @param array   $data    The data from the import process.
+				 */
+				do_action( 'wporg_plugins_import_release_pending', $plugin, $release, $data );
+
 				throw new Exception( "Plugin release {$stable_tag} not confirmed." );
 			}
 
 			// At this point we can assume that the release was confirmed, and should be imported.
 		}
+
+		/**
+		 * Fire an import action, now that we've exported the plugin data, and validates that it's ready for release.
+		 *
+		 * NOTE: This fires after Release Confirmation, such that the plugin is 100% ready to be released.
+		 *
+		 * @param Import  $this                   The Plugin Importer object.
+		 * @param WP_Post $plugin                 The plugin being imported.
+		 * @param array   $release                The release data. Only present if the plugin uses Release Confirmation.
+		 * @param array   $data                   The data from the import process.
+		 * @param array   $svn_changed_tags       The list of SVN tags/trunk affected to trigger the import.
+		 * @param array   $svn_tags_deleted       The list of SVN tags/trunk deleted in the import.
+		 * @param int     $svn_revision_triggered The SVN revision that triggered the import.
+		 */
+		do_action( 'wporg_plugins_import_process', $this, $plugin, $release ?? false, $data, $svn_changed_tags, $svn_tags_deleted, $svn_revision_triggered );
 
 		$content = '';
 		if ( $readme->sections ) {
@@ -276,7 +380,7 @@ class Import {
 		 * - A tag (or trunk) commit is made to the current stable. The build has changed, even if not new version.
 		 */
 		if (
-			( ! isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) ||
+			( ! $version || $version != get_post_meta( $plugin->ID, 'version', true ) ) ||
 			$plugin->post_modified == '0000-00-00 00:00:00' ||
 			( $svn_changed_tags && in_array( ( $stable_tag ?: 'trunk' ), $svn_changed_tags, true ) )
 		) {
@@ -319,21 +423,9 @@ class Import {
 			wp_remove_object_terms( $plugin->ID, 'adopt-me', 'plugin_section' );
 		}
 
-		// Update the tested-up-to value
-		$tested = $readme->tested;
-		if ( function_exists( 'wporg_get_version_equivalents' ) ) {
-			foreach ( wporg_get_version_equivalents() as $latest_compatible_version => $compatible_with ) {
-				if ( in_array( $readme->tested, $compatible_with, true ) ) {
-					$tested = $latest_compatible_version;
-					break;
-				}
-			}
-		}
-
 		// Update all readme meta
 		foreach ( $this->readme_fields as $readme_field ) {
-			$value = ( 'tested' == $readme_field ) ? $tested : $readme->$readme_field;
-			update_post_meta( $plugin->ID, $readme_field, wp_slash( $value ) );
+			update_post_meta( $plugin->ID, $readme_field, wp_slash( $readme->$readme_field ) );
 		}
 
 		// Store the plugin headers we need. Note that 'Version', 'RequiresWP', and 'RequiresPHP' are handled below.
@@ -341,15 +433,29 @@ class Import {
 			update_post_meta( $plugin->ID, $meta_field, ( isset( $headers->$plugin_header ) ? wp_slash( $headers->$plugin_header ) : '' ) );
 		}
 
-		// Update the Requires and Requires PHP fields, prefering those from the Plugin Headers.
+		// Update the Requires, Requires PHP, and Tested up to fields, prefering those from the Plugin Headers.
 		// Unfortunately the value within $headers is not always a well-formed value.
 		$requires     = $readme->requires;
 		$requires_php = $readme->requires_php;
+		$tested       = $readme->tested;
 		if ( $headers->RequiresWP && preg_match( '!^[\d.]{3,}$!', $headers->RequiresWP ) ) {
 			$requires = $headers->RequiresWP;
 		}
 		if ( $headers->RequiresPHP && preg_match( '!^[\d.]{3,}$!', $headers->RequiresPHP ) ) {
 			$requires_php = $headers->RequiresPHP;
+		}
+		if ( $headers->TestedUpTo && preg_match( '!^[\d.]{3,}$!', $headers->TestedUpTo ) ) {
+			$tested = $headers->TestedUpTo;
+		}
+
+		// Sanitize the tested version.
+		if ( function_exists( 'wporg_get_version_equivalents' ) ) {
+			foreach ( wporg_get_version_equivalents() as $latest_compatible_version => $compatible_with ) {
+				if ( in_array( $tested, $compatible_with, true ) ) {
+					$tested = $latest_compatible_version;
+					break;
+				}
+			}
 		}
 
 		// Keep a log of all plugin names used by the plugin over time.
@@ -363,6 +469,7 @@ class Import {
 		update_post_meta( $plugin->ID, 'requires_plugins',   wp_slash( $requires_plugins ) );
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
+		update_post_meta( $plugin->ID, 'tested',             wp_slash( $tested ) );
 		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
 		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
@@ -393,9 +500,10 @@ class Import {
 			if ( $changed || count ( get_post_meta( $plugin->ID, 'block_name' ) ) !== count ( $blocks ) ) {
 				delete_post_meta( $plugin->ID, 'block_name' );
 				delete_post_meta( $plugin->ID, 'block_title' );
+
 				foreach ( $blocks as $block ) {
 					add_post_meta( $plugin->ID, 'block_name', $block->name, false );
-					add_post_meta( $plugin->ID, 'block_title', ( $block->title ?: $plugin->post_title ), false );
+					add_post_meta( $plugin->ID, 'block_title', $block->title, false );
 				}
 			}
 		} else {
@@ -411,25 +519,67 @@ class Import {
 			delete_post_meta( $plugin->ID, 'block_files' );
 		}
 
+		// Dashboard widgets: assign the section term and store widget names.
+		if ( $dashboard_widgets ) {
+			wp_add_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
+
+			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
+			foreach ( $dashboard_widgets as $widget_name ) {
+				if ( '' === $widget_name ) {
+					continue;
+				}
+				add_post_meta( $plugin->ID, 'dashboard_widget_name', $widget_name, false );
+			}
+		} else {
+			wp_remove_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
+			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
+		}
+
+		// Add the release to storage.
+		if ( 'trunk' != $stable_tag ) {
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'       => $stable_tag,
+					'version'   => $version,
+					'committer' => [ $last_committer ],
+					'revision'  => [ $last_revision ]
+				]
+			);
+		} elseif ( 'trunk' === $stable_tag && version_compare( $version, $plugin->version, '>' ) ) {
+			// This is a new version, released from trunk.
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'       => "trunk@{$version}",
+					'version'   => $version,
+					'committer' => [ $last_committer ],
+					'revision'  => [ $last_revision ]
+				]
+			);
+		}
+
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
+
+		// If we've got a new version, store the last version in the plugin meta.
+		if ( $version && $version !== $plugin->version ) {
+			update_post_meta( $plugin->ID, 'last_version', wp_slash( $plugin->version ) );
+			update_post_meta( $plugin->ID, 'last_stable_tag', wp_slash( $current_stable_tag ) );
+			update_post_meta( $plugin->ID, 'last_version_date', wp_slash( $plugin->version_date ) );
+
+			// Keep the date of the last version change, this often differs from the last_updated/post_modified dates.
+			update_post_meta( $plugin->ID, 'version_date', wp_slash( current_time( 'mysql' ) ) );
+		}
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', wp_slash( $stable_tag ) );
-		update_post_meta( $plugin->ID, 'version',    wp_slash( $headers->Version ) );
+		update_post_meta( $plugin->ID, 'version',    wp_slash( $version ) );
 		// Update the list of tags last, as it controls which ZIPs are present in the 'Previous versions' section and info API.
 		update_post_meta( $plugin->ID, 'tags',       wp_slash( $tagged_versions ) );
 
 		// Ensure that the API gets the updated data
 		API_Update_Updater::update_single_plugin( $plugin->post_name );
 		Plugins_Info_API::flush_plugin_information_cache( $plugin->post_name );
-
-		// Import Tide data
-		Tide_Sync::sync_data( $plugin->post_name );
-
-		// Run the Block Directory e2e tests if applicable.
-		if ( has_term( 'block', 'plugin_section', $plugin->ID ) ) {
-			Block_e2e::run( $plugin->post_name );
-		}
 
 		/**
 		 * Action that fires after a plugin is imported.
@@ -486,9 +636,6 @@ class Import {
 					( $release['zips_built'] && $release['confirmations_required'] )
 				) {
 					unset( $versions_to_build[ $i ] );
-				} else {
-					$release['zips_built'] = true;
-					Plugin_Directory::add_release( $plugin, $release );
 				}
 			}
 
@@ -515,6 +662,22 @@ class Import {
 			);
 		} catch ( Exception $e ) {
 			return false;
+		}
+
+		// Mark the ZIPs as being built.
+		foreach ( $versions_to_build as $tag ) {
+			if ( 'trunk' === $tag ) {
+				continue;
+			}
+
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'                      => $tag,
+					'zips_built'               => true,
+					'zips_built_from_revision' => ( $zip_builder->plugins_revision ?? 0 ) ?: $svn_revision_triggered,
+				]
+			);
 		}
 
 		return true;
@@ -615,14 +778,20 @@ class Import {
 			}
 		}
 
+		// Fall back to using `trunk` as stable, if the tag doesn't exist.
 		if ( ! $svn_info || ! $svn_info['result'] ) {
-            $stable_tag = 'trunk';
-            $stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk";
-            $svn_info   = SVN::info( $stable_url );
-        }
+			if ( 'trunk' !== $stable_tag ) {
+				$this->warnings['stable_tag_invalid_trunk_fallback'] = $stable_tag;
+				$this->warnings['stable_tag_invalid']                = true;
+			}
+
+			$stable_tag = 'trunk';
+			$stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk";
+			$svn_info   = SVN::info( $stable_url );
+		}
 
 		if ( ! $svn_info['result'] ) {
-			throw new Exception( 'Could not find stable SVN URL: ' . implode( ' ', reset( $svn_info['errors'] ) ) );
+			throw new Exception( 'Could not find stable SVN URL: ' . ( $svn_info['errors'] ? implode( ' ', reset( $svn_info['errors'] ) ) : 'Unknown error' ) );
 		}
 
 		$last_modified = false;
@@ -632,6 +801,16 @@ class Import {
 
 		$last_committer = $svn_info['result']['Last Changed Author'] ?? '';
 		$last_revision  = $svn_info['result']['Last Changed Rev'] ?? 0;
+
+		/*
+		 * Before we check out the plugin, ensure that it has *files* in the folder.
+		 *
+		 * Some plugins accidentally copy their entire SVN repo into the tagged folder, which
+		 * causes a recursive checkout many multiple gigabytes in size, causing issues for WordPress.org.
+		 */
+		if ( ! wp_list_filter( SVN::ls( $stable_url, true ), [ 'kind' => 'file' ] ) ) {
+			throw new Exception( "Could not create SVN export of {$stable_url}: Path appears not to have any files." );
+		}
 
 		$svn_export = SVN::export(
 			$stable_url,
@@ -647,7 +826,7 @@ class Import {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
-			throw new Exception( 'Could not create SVN export: ' . implode( ' ', reset( $svn_export['errors'] ) ) );
+			throw new Exception( 'Could not create SVN export: ' . ( $svn_export['errors'] ? implode( ' ', reset( $svn_export['errors'] ) ) : 'Unknown error' ) );
 		}
 
 		// The readme may not actually exist, but that's okay.
@@ -675,6 +854,14 @@ class Import {
 			'blueprint'  => 100 * KB_IN_BYTES,
 		);
 
+		// Previously-imported asset metadata, used to skip re-reading any file whose
+		// SVN revision hasn't changed.
+		$prior_assets = array(
+			'screenshot' => get_post_meta( $this->plugin->ID, 'assets_screenshots', true ) ?: array(),
+			'banner'     => get_post_meta( $this->plugin->ID, 'assets_banners',     true ) ?: array(),
+			'icon'       => get_post_meta( $this->plugin->ID, 'assets_icons',       true ) ?: array(),
+		);
+
 		$svn_blueprints_folder = null;
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
@@ -691,8 +878,8 @@ class Import {
 
 				$type = strtolower( $m['type'] );
 
-				// Don't import oversize assets.
-				if ( $asset['filesize'] > $asset_limits[ $type ] ) {
+				// Don't import zero-byte or oversize assets.
+				if ( ! $asset['filesize'] || $asset['filesize'] > $asset_limits[ $type ] ) {
 					continue;
 				}
 
@@ -710,7 +897,15 @@ class Import {
 					$resolution = preg_replace( '/[^0-9]/u', 'x', $resolution );
 				}
 
-				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+				$record = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
+
+				$record = self::enrich_asset_dimensions(
+					$record,
+					$prior_assets[ $type ][ $filename ] ?? null,
+					$this->plugin
+				);
+
+				$assets[ $type ][ $asset['filename'] ] = $record;
 			}
 		}
 
@@ -764,17 +959,27 @@ class Import {
 				continue;
 			}
 
-			// Don't import oversize assets.
-			if ( filesize( $plugin_screenshot ) > $asset_limits['screenshot'] ) {
+			// Don't import zero-byte or oversize assets.
+			$screenshot_size = filesize( $plugin_screenshot );
+			if ( ! $screenshot_size || $screenshot_size > $asset_limits['screenshot'] ) {
 				continue;
 			}
 
-			$assets['screenshot'][ $filename ] = array(
+			$record = array(
 				'filename'   => $filename,
 				'revision'   => $svn_export['revision'],
 				'resolution' => $screenshot_id,
 				'location'   => 'plugin',
 			);
+
+			$record = self::enrich_asset_dimensions(
+				$record,
+				$prior_assets['screenshot'][ $filename ] ?? null,
+				$this->plugin,
+				$plugin_screenshot
+			);
+
+			$assets['screenshot'][ $filename ] = $record;
 		}
 
 		if ( 'trunk' === $stable_tag ) {
@@ -797,7 +1002,9 @@ class Import {
 				$relative_filename = str_replace( "$base_dir/", '', $filename );
 				$potential_block_directories[] = dirname( $relative_filename );
 				foreach ( $blocks_in_file as $block ) {
-					$blocks[ $block->name ] = $block;
+					if ( ! empty( $block->name ) ) {
+						$blocks[ $block->name ] = $block;
+					}
 
 					$extracted_files = $this->extract_file_paths_from_block_json( $block, dirname( $relative_filename ) );
 					if ( ! empty( $extracted_files ) ) {
@@ -830,9 +1037,23 @@ class Import {
 			}
 		}
 
-		foreach ( $blocks as $block_name => $block ) {
+		// Set the fallback name for the blocks.
+		foreach ( $blocks as $block_name => &$block ) {
 			if ( empty( $block->title ) ) {
-				$blocks[ $block_name ]->title = $readme->name;
+				$block->title = $block_name;
+				// If the block duplicates the namespace, remove it. 'plugin-slug/plugin-slug-block-name'
+				$block->title = preg_replace( '#^([^/]+)/\\1-?#i', '$1/', $block->title );
+				// If the namespace is the slug (w/ or w/o dashes..), remove it.
+				if (
+					str_starts_with( $block->title, $plugin_slug . '/' ) ||
+					str_starts_with( $block->title, str_replace( '-', '', $plugin_slug ) . '/' )
+				) {
+					$block->title = explode( '/', $block->title, 2 )[1];
+				}
+				// Treat any non-wordy characters as spaces.
+				$block->title = preg_replace( '/[^a-z]+/', ' ', $block->title );
+				// Capitalise all words.
+				$block->title = ucwords( $block->title );
 			}
 		}
 
@@ -850,14 +1071,14 @@ class Import {
 			$children = array_filter(
 				$blocks,
 				function( $block ) {
-					return isset( $block->parent ) && count( $block->parent );
+					return isset( $block->parent ) && is_array( $block->parent ) && count( $block->parent );
 				}
 			);
 
 			$parent = array_filter(
 				$blocks,
 				function( $block ) {
-					return ! isset( $block->parent ) || ! count( $block->parent );
+					return ! isset( $block->parent ) || ! is_array( $block->parent ) || ! count( $block->parent );
 				}
 			);
 
@@ -880,7 +1101,105 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
-		return compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
+		// Find dashboard widget registrations (wp_add_dashboard_widget calls).
+		$dashboard_widgets = array();
+		foreach ( Filesystem::list_files( $base_dir, true, '!\.php$!i' ) as $filename ) {
+			// Skip third-party dependencies — they are not the plugin itself.
+			if ( str_contains( $filename, '/vendor/' ) ) {
+				continue;
+			}
+			foreach ( self::find_dashboard_widgets_in_file( $filename ) as $widget ) {
+				$dashboard_widgets[] = $widget;
+			}
+		}
+
+		return apply_filters(
+			'wporg_plugins_export_and_parse_plugin',
+			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets' ),
+			$plugin_slug,
+			$this,
+		);
+	}
+
+	/**
+	 * Populate `width` and `height` on an asset record, reusing the prior
+	 * import's values when the SVN revision hasn't changed.
+	 *
+	 * @param array       $record The asset record.
+	 * @param array|null  $prior  Matching record from the prior import.
+	 * @param \WP_Post    $post   The plugin post.
+	 * @param string|null $local  Optional local path to read instead of fetching from SVN.
+	 * @return array
+	 */
+	public static function enrich_asset_dimensions( $record, $prior, $post, $local = null ) {
+		if (
+			is_array( $prior ) &&
+			isset( $prior['revision'], $prior['width'], $prior['height'] ) &&
+			(string) $prior['revision'] === (string) $record['revision'] &&
+			$prior['width'] > 0 && $prior['height'] > 0
+		) {
+			$record['width']  = (int) $prior['width'];
+			$record['height'] = (int) $prior['height'];
+
+			return $record;
+		}
+
+		$size = false;
+
+		if ( $local && file_exists( $local ) ) {
+			$size = wp_getimagesize( $local );
+		}
+
+		if ( ! $size ) {
+			// `wp_tempnam()` lives in wp-admin and isn't loaded by default in CLI/cron contexts.
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+
+			$url       = Template::get_asset_url( $post, $record, false /* no CDN */ );
+			$temp_file = wp_tempnam( $record['filename'] );
+
+			// Range the first read to 128 KB — enough for the headers of
+			// most images. Fall back to a full read only when the prefix
+			// isn't enough to decode the header — the falsy `$size` at
+			// the bottom of the loop is the implicit retry. Transport
+			// errors / non-2xx intentionally bail out via `break`: those
+			// failure modes won't be helped by re-requesting the same
+			// URL without Range.
+			foreach ( array( 128 * KB_IN_BYTES, 0 ) as $limit ) {
+				$args = array(
+					'timeout'  => 15,
+					'stream'   => true,
+					'filename' => $temp_file,
+				);
+				if ( $limit > 0 ) {
+					$args['headers']             = array( 'Range' => 'bytes=0-' . ( $limit - 1 ) );
+					$args['limit_response_size'] = $limit;
+				}
+
+				$response = wp_safe_remote_get( $url, $args );
+				$code     = wp_remote_retrieve_response_code( $response );
+				if ( is_wp_error( $response ) || ( 200 !== $code && 206 !== $code ) ) {
+					break;
+				}
+
+				if ( ! file_exists( $temp_file ) || 0 === filesize( $temp_file ) ) {
+					break;
+				}
+
+				$size = wp_getimagesize( $temp_file );
+				if ( $size ) {
+					break;
+				}
+			}
+
+			unlink( $temp_file );
+		}
+
+		if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {
+			$record['width']  = (int) $size[0];
+			$record['height'] = (int) $size[1];
+		}
+
+		return $record;
 	}
 
 	/**
@@ -963,6 +1282,47 @@ class Import {
 	}
 
 	/**
+	 * Determine whether a plugin's Version header looks like a match for the SVN tag it was released from.
+	 *
+	 * Both sides are reduced to the leading dotted-numeric portion (e.g. `release-1.4.0` → `1.4.0`,
+	 * `1.4.0-beta` → `1.4.0`, `1.0 & beta` → `1.0`), then compared with `version_compare()`. Any
+	 * inequality is treated as a mismatch — including the unusual case where the Version header is
+	 * ahead of the tag, which is allowable but almost always unintended. `1.0` vs `1.0.0` is treated
+	 * as equal after trailing `.0` segments are stripped.
+	 *
+	 * @param string $version The plugin's Version header value.
+	 * @param string $tag     The SVN tag folder name (e.g. `1.4.1`, `v2.0`).
+	 * @return bool True when the values appear to match, false when they look mismatched.
+	 */
+	public static function version_matches_tag( $version, $tag ) {
+		$normalize = static function ( $v ) {
+			// Capture the leading dotted-numeric portion (plus an optional `-rc` / `-beta` /
+			// `-alpha` pre-release suffix, case-insensitive, with optional `.`/no-separator digits)
+			// after any non-digit prefix such as `v`, `Version: `, `release-`, `tag-`, or `hover-`.
+			if ( ! preg_match( '/^[^0-9]*(\d+(?:\.\d+)*(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?)/i', (string) $v, $m ) ) {
+				return '';
+			}
+			// Lowercase the suffix — version_compare() is not consistently case-insensitive
+			// (e.g. `1.0-Beta` < `1.0-beta`), so normalize before comparing.
+			$captured = strtolower( $m[1] );
+			// Strip trailing `.0` segments so version_compare() treats `1.0` and `1.0.0` as equal.
+			// Only applies to the dotted-numeric portion; a pre-release suffix is left alone.
+			return preg_replace( '/(\.0+)+(?=(?:-(?:rc|beta|alpha)(?:\.?\d+)?)?$)/', '', $captured );
+		};
+
+		$normalized_version = $normalize( $version );
+		$normalized_tag     = $normalize( $tag );
+
+		if ( '' === $normalized_version || '' === $normalized_tag ) {
+			return true;
+		}
+
+		// Flag any inequality. The common case is "forgot to bump the header" (tag ahead of
+		// version), but the inverse is also worth flagging — it's allowable yet usually unintended.
+		return version_compare( $normalized_tag, $normalized_version, '==' );
+	}
+
+	/**
 	 * Add support for additional plugin headers prior to WordPress supporting it.
 	 *
 	 * @param array $headers The headers to look for in plugins.
@@ -972,6 +1332,10 @@ class Import {
 		// WordPress Plugin Dependencies - See https://meta.trac.wordpress.org/ticket/6921
 		if ( ! isset( $headers['RequiresPlugins'] ) ) {
 			$headers['RequiresPlugins'] = 'Requires Plugins';
+		}
+		// https://meta.trac.wordpress.org/ticket/4621
+		if ( ! isset( $headers['TestedUpTo'] ) ) {
+			$headers['TestedUpTo'] = 'Tested up to';
 		}
 
 		return $headers;
@@ -994,28 +1358,41 @@ class Import {
 			// Parse a js-style registerBlockType() call.
 			// Note that this only works with literal strings for the block name and title, and assumes that order.
 			$contents = file_get_contents( $filename );
-			if ( $contents && preg_match_all( "#registerBlockType[^{}]{0,500}[(]\s*[\"']([-\w]+/[-\w]+)[\"']\s*,\s*[{]\s*title\s*:[\s\w(]*[\"']([^\"']*)[\"']#ms", $contents, $matches, PREG_SET_ORDER ) ) {
+			if ( $contents && preg_match_all( "#registerBlockType[^{}]{0,500}[(]\s*[\"']([-\w]+/[-\w]+)[\"']\s*,\s*[{][^;]{0,500}?\s*title\s*:[\s\w(.]*[\"']([^\"']*)[\"'](?!\s*[+])#ms", $contents, $matches, PREG_SET_ORDER ) ) {
 				foreach ( $matches as $match ) {
 					$blocks[] = (object) [
-						'name' => $match[1],
+						'name'  => $match[1],
 						'title' => $match[2],
 					];
 				}
 			}
 		}
+
 		if ( 'php' === $ext ) {
-			// Parse a php-style register_block_type() call.
-			// Again this assumes literal strings, and only parses the name and title.
+			// Parse register_block_type() and `new WP_Block_Type()` calls.
+			// Block names must be literal strings of the form "namespace/name"; the optional
+			// 'title' entry inside the second-arg options array is captured when present.
 			$contents = file_get_contents( $filename );
-			if ( $contents && preg_match_all( "#register_block_type\s*[(]\s*['\"]([-\w]+/[-\w]+)['\"]#ms", $contents, $matches, PREG_SET_ORDER ) ) {
-				foreach ( $matches as $match ) {
-					$blocks[] = (object) [
-						'name' => $match[1],
-						'title' => null,
-					];
+			if ( $contents ) {
+				foreach ( array( 'register_block_type', 'new WP_Block_Type' ) as $needle ) {
+					foreach ( Tokenisation_Helpers::find_function_calls( $contents, $needle ) as $args ) {
+						$name = $args[0] ?? null;
+						if ( ! is_string( $name ) || ! preg_match( '#^[-\w]+/[-\w]+$#', $name ) ) {
+							continue;
+						}
+						$options = $args[1] ?? null;
+						$title   = is_array( $options ) && is_string( $options['title'] ?? null )
+							? $options['title']
+							: null;
+						$blocks[] = (object) array(
+							'name'  => $name,
+							'title' => $title,
+						);
+					}
 				}
 			}
 		}
+
 		if ( 'block.json' === basename( $filename ) ) {
 			// A block.json file should have everything we want.
 			$validator = new Block_JSON\Validator();
@@ -1053,6 +1430,38 @@ class Import {
 		}
 
 		return $blocks;
+	}
+
+	/**
+	 * Look for wp_add_dashboard_widget() calls within a single PHP file.
+	 *
+	 * The second argument is the widget label. When wrapped in a recognised
+	 * i18n function (__, _e, _x, _ex, _n, _nx, esc_html__, esc_html_e,
+	 * esc_html_x, esc_attr__, esc_attr_e, esc_attr_x, translate,
+	 * translate_with_gettext_context), the inner literal is extracted; other
+	 * wrappers (e.g. sprintf, esc_html, custom helpers) or non-literal
+	 * expressions resolve to an empty string. Each call is still reported so
+	 * the section term can be applied even when the label is not parseable.
+	 *
+	 * @param string $filename Pathname of the file.
+	 * @return string[] List of widget label strings (empty string for non-literal labels).
+	 */
+	public static function find_dashboard_widgets_in_file( $filename ) {
+		if ( 'php' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) ) {
+			return array();
+		}
+
+		$contents = file_get_contents( $filename );
+		if ( ! $contents ) {
+			return array();
+		}
+
+		$widgets = array();
+		foreach ( Tokenisation_Helpers::find_function_calls( $contents, 'wp_add_dashboard_widget' ) as $args ) {
+			$label     = $args[1] ?? null;
+			$widgets[] = is_string( $label ) ? $label : '';
+		}
+		return array_unique( $widgets );
 	}
 
 	/**
@@ -1148,42 +1557,60 @@ class Import {
 
 			$has_self_install_step = false;
 			if ( isset( $decoded_file[ 'steps' ] ) ) {
+				// Null & falsey items are often present in auto-generated blueprints, reindex to avoid serialising to an object.
+				$decoded_file[ 'steps' ] = array_values( array_filter( $decoded_file[ 'steps' ] ) );
+
 				foreach ( $decoded_file[ 'steps' ] as &$step ) {
-					// Normalize a "install plugin from url" to a install-by-slug.
+					// Normalize a "install (plugin|theme) from url" to a install-by-slug.
 					if (
-						'installPlugin' === $step['step'] &&
-						isset( $step['pluginZipFile']['url'] ) &&
-						preg_match( '!^https?://downloads\.wordpress\.org/plugin/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step['pluginZipFile']['url'], $m )
+						'installPlugin' === $step['step'] ||
+						'installTheme' === $step['step']
 					) {
-						$step[ 'pluginZipFile' ] = [
-							'resource' => 'wordpress.org/plugins',
-							'slug'     => $m['slug']
+						$keys = [
+							'pluginZipFile',
+							'pluginData',
+							'themeZipFile',
+							'themeData'
 						];
+						foreach ( $keys as $key ) {
+							if ( preg_match( '!^https?://downloads\.wordpress\.org/[^/]+/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step[ $key ]['url'] ?? '', $m ) ) {
+								unset( $step[ $key ] );
+
+								if ( 'installPlugin' === $step['step'] ) {
+									$step[ 'pluginData' ] = [
+										'resource' => 'wordpress.org/plugins',
+										'slug'     => $m['slug']
+									];
+								} else {
+									$step[ 'themeData' ] = [
+										'resource' => 'wordpress.org/themes',
+										'slug'     => $m['slug']
+									];
+								}
+							}
+						}
 					}
 
-					// Normalize a "install theme from url" to a install-by-slug.
-					if (
-						'installTheme' === $step['step'] &&
-						isset( $step['themeZipFile']['url'] ) &&
-						preg_match( '!^https?://downloads\.wordpress\.org/theme/(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip($|[?])!i', $step['themeZipFile']['url'], $m )
-					) {
-						$step[ 'themeZipFile' ] = [
-							'resource' => 'wordpress.org/themes',
-							'slug'     => $m['slug']
-						];
+					// Upgrade from pluginZipFile to pluginData by slug where possible.
+					if ( isset( $step['pluginZipFile']['slug'] ) ) {
+						$step['pluginData'] = array(
+							'resource' => 'wordpress.org/plugins',
+							'slug'     => $step['pluginZipFile']['slug'],
+						);
+						unset( $step['pluginZipFile'] );
 					}
 
 					// Check if this is a "install this plugin" step.
 					if (
 						'installPlugin' === $step['step'] &&
-						isset( $step['pluginZipFile']['slug'] ) &&
-						$plugin_slug === $step['pluginZipFile']['slug']
+						isset( $step['pluginData']['slug'] ) &&
+						$plugin_slug === $step['pluginData']['slug']
 					) {
 						$has_self_install_step = true;
 
-						if ( true != $step['options']['activate'] ) {
-							$step[ 'options' ][ 'activate' ] = true;
-						}
+						// Ensure the step activates the plugin.
+						$step['options'] ??= [];
+						$step['options']['activate'] = true;
 					}
 				}
 			}
@@ -1192,7 +1619,7 @@ class Import {
 			if ( ! $has_self_install_step && 'akismet' !== $plugin_slug ) {
 				$decoded_file['steps'][] = array(
 					'step' => 'installPlugin',
-					'pluginZipFile' => array(
+					'pluginData' => array(
 						'resource' => 'wordpress.org/plugins',
 						'slug'     => $plugin_slug,
 					),

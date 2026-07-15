@@ -20,13 +20,13 @@
 		if ( !empty( $post->post_parent ) ) {
 			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->post_parent );
 			$rel      = '<ul>' . $children . '</ul>';
-			echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Similar</h3>' . $rel . '</div>';
+			echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Similar</h2>' . $rel . '</div>';
 			$show_related = false;
 		} else {
 			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->ID );
 			if ( !empty( $children ) ) {
 				$rel = '<ul>' . $children . '</ul>';
-				echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Subpages</h3>' . $rel . '</div>';
+				echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Subpages</h2>' . $rel . '</div>';
 				$show_related = false;
 			}
 		}
@@ -42,7 +42,7 @@
 					$rel .= '<li><a href="' . get_permalink( $related->ID ) . '" title="' . $title . '">' . $title . '</a></li>';
 				}
 				$rel = '<ul>' . $rel . '</ul>';
-				echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Related</h3>' . $rel . '</div>';
+				echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Related</h2>' . $rel . '</div>';
 			}
 		} ?>
 

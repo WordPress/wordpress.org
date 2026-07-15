@@ -88,6 +88,10 @@ td.no-right-border {
 	white-space: nowrap;
 }
 
+.translators-info table a:hover {
+	text-decoration: underline;
+}
+
 /*
  * Details page for an individual locale
  */
@@ -99,52 +103,18 @@ td.no-right-border {
 	border-radius: 4px;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
 }
-#locale-header ul,
-#main ul#postlist .postcontent #locale-header ul {
-	overflow: auto;
-	margin-left: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
-}
+
 #locale-header ul li {
 	list-style-type: none;
 }
-#locale-header ul#locale-details {
-	margin-bottom: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
-}
-#locale-download {
-	margin-bottom: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
-}
-#locale-header ul li.download-button,
-#main ul#postlist .postcontent #locale-header ul li.download-button {
-	float: left;
-	height: unset;
-	margin: 8px 12px 0 0;	/* todo put list spacing on the button itself, so that the ul takes up no space when there are no li's inside it */
-	padding: 6px 12px;
-	text-align: center;
-	white-space: unset;
-}
-#locale-header ul li.download-button a {
-	font-size: 14px;
-	font-size: 1.4rem;
-	line-height: 1.5;
-	color: white;
-	text-decoration: none;
-}
-@media only screen and (max-width: 600px) {
-	#locale-header ul li.download-button,
-	#main ul#postlist .postcontent #locale-header ul li.download-button {
-		width: 100%;
-	}
-}
 
-#locale-details,
-#main ul#locale-details {
+#locale-details {
 	font-size: 1.2em;
+	padding-left: 0;
 }
 
-.validators,
-#main ul#postlist .postcontent ul.validators {
+.validators {
 	overflow: auto;
-	margin: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
 	padding: 0;
 }
 

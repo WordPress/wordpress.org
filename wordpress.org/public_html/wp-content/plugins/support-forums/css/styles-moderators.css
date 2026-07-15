@@ -1,9 +1,16 @@
-#bbpress-forums .status-archived.even {
-	background-color: #fee !important;
+#bbpress-forums .bbp-topics:not(.full-posts) .status-archived.even,
+#bbpress-forums .bbp-topics:not(.full-posts) .status-archived.odd {
+	background-color: var(--wp--preset--color--pomegrade-3, #ffe9de);
 }
 
-#bbpress-forums .status-archived.odd {
-	background-color: #fdd !important;
+#bbpress-forums .bbp-topics:not(.full-posts) .status-spam.even,
+#bbpress-forums .bbp-topics:not(.full-posts) .status-spam.odd {
+	background-color: var(--wp--preset--color--pomegrade-2, ##ffb7a7);
+}
+
+#bbpress-forums .bbp-topics:not(.full-posts) .status-pending.even,
+#bbpress-forums .bbp-topics:not(.full-posts) .status-pending.odd {
+	background-color: var(--wp--preset--color--lemon-3, #fffdd6);
 }
 
 /*--------------------------------------------------------------
@@ -30,4 +37,18 @@
 .wporg-bbp-add-user-note button {
 	float: right;
 	color: #555; /* Back-compat for wporg-forums theme */
+}
+
+.bbp-view .bbp-topics .by-plugin-support-rep,
+.bbp-view .bbp-topics .by-plugin-contributor,
+.bbp-view .bbp-topics .by-plugin-author {
+	border-left: 3px solid var(--wp--custom--color--plugin-author, #e26f56);
+}
+
+.bbp-view .bbp-topics .by-theme-author {
+	border-left: 3px solid var(--wp--custom--color--theme-author, #9b51e0);
+}
+
+.bbp-view .bbp-topics .by-moderator {
+	border-left: 3px solid var(--wp--custom--color--moderator, #3858e9);
 }

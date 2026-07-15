@@ -6,7 +6,7 @@ namespace Dotorg\Slack\Committers;
 
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
-if ( $_POST['token'] !== WEBHOOK_TOKEN ) {
+if ( ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ) ) {
 	return;
 }
 

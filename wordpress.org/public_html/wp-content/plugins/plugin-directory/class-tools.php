@@ -70,7 +70,7 @@ class Tools {
 				FROM ratings r
 					LEFT JOIN " . $wpdb->base_prefix . WPORG_SUPPORT_FORUMS_BLOGID . "_posts p ON r.post_id = p.ID
 				WHERE r.object_type = 'plugin' AND r.object_slug = %s AND p.post_status = 'publish'
-				ORDER BY r.review_id DESC
+				ORDER BY r.date DESC
 				LIMIT %d",
 				$post->post_name,
 				$number
@@ -239,6 +239,11 @@ class Tools {
 			$email->send();
 		}
 
+		Tools::subscribe_user_to_forum_threads( $user, $post );
+
+		// Store some user-meta against the committer, so that other code knows this is a current (or past) plugin committer.
+		update_user_meta( $user->ID, 'has_plugins', time() );
+
 		return $result;
 	}
 
@@ -405,6 +410,8 @@ class Tools {
 			);
 			$email->send();
 		}
+
+		Tools::subscribe_user_to_forum_threads( $user, $post );
 
 		return $result;
 	}
@@ -595,19 +602,14 @@ class Tools {
 	 * Clear caches for memory management.
 	 *
 	 * @static
-	 * @global \wpdb            $wpdb
-	 * @global \WP_Object_Cache $wp_object_cache
+	 * @global \wpdb $wpdb
 	 */
 	public static function clear_memory_heavy_variables() {
-		global $wpdb, $wp_object_cache;
+		global $wpdb;
 
 		$wpdb->queries = [];
 
-		if ( is_object( $wp_object_cache ) ) {
-			$wp_object_cache->cache          = [];
-			$wp_object_cache->group_ops      = [];
-			$wp_object_cache->memcache_debug = [];
-		}
+		wp_cache_flush_runtime();
 	}
 
 	/**
@@ -637,5 +639,40 @@ class Tools {
 			'user_id'              => $user->ID,
 			'comment_content'      => $note,
 		] );
+	}
+
+	/**
+	 * Subscribe a user to the forum topics for a given plugin.
+	 *
+	 * @param WP_User|int $user_id The user to subscribe.
+	 * @param WP_Post     $post    The plugin to subscribe to.
+	 * @return bool
+	 */
+	public static function subscribe_user_to_forum_threads( $user_id, $post = null ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+
+		if ( ! $user_id || ! $post || ! defined( 'PLUGIN_API_INTERNAL_BEARER_TOKEN' ) ) {
+			return false;
+		}
+
+		if ( $user_id instanceof \WP_User ) {
+			$user_id = $user_id->ID;
+		}
+
+		$request = wp_remote_post(
+			'https://wordpress.org/support/wp-json/wporg-support/v1/subscribe-user-to-term',
+			[
+				'body'    => [
+					'type'    => 'plugin',
+					'slug'    => $post->post_name,
+					'user_id' => $user_id,
+				],
+				'headers' => [
+					'Authorization' => 'Bearer ' . PLUGIN_API_INTERNAL_BEARER_TOKEN,
+				],
+			]
+		);
+
+		return 200 === wp_remote_retrieve_response_code( $request );
 	}
 }

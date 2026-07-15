@@ -112,6 +112,8 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		$this->contributors = $this->get_contributors( $slug );
 		$this->support_reps = $this->get_support_reps( $slug );
 
+		$this->initialize_term();
+
 		return true;
 	}
 

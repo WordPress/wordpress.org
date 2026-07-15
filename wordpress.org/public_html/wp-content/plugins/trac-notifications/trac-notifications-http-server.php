@@ -4,6 +4,9 @@
  * Sits on the Trac server and responds to calls from Trac_Notifications_HTTP_Client.
  */
 class Trac_Notifications_HTTP_Server {
+	public $db;
+	public $secret;
+
 	function __construct( Trac_Notifications_DB $db, $secret ) {
 		$this->db     = $db;
 		$this->secret = $secret;

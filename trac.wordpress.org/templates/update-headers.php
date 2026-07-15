@@ -4,23 +4,31 @@
 // Avoid PHP Warnings from 'unexpected' tag attributes.
 libxml_use_internal_errors( true );
 
-function domdocument_from_url( $url ) {
-	$html = file_get_contents( $url );
+function fetch_url( $url ) {
+	global $http_response_header;
 
-	/*
-	 * Escape HTML within Javascript strings.
-	 * DomDocument doesn't handle HTML tags within Javascript strings.
-	 * See https://stackoverflow.com/questions/40703313/php-domdocument-errors-while-parsing-unescaped-strings
-	 */
-	$html = preg_replace_callback(
-		'!<script([^>]+)>(.*?)</script>!ism',
-		function( $m ) {
-			$escaped = $m[2];
-			$escaped = str_replace( array( '<', '>' ), array( '\x3C',  '\x3E' ), $escaped );
-			return "<script{$m[1]}>{$escaped}</script>";
-		},
-		$html
-	);
+	$context = stream_context_create( [
+		'http' => [
+			'header' => 'User-Agent: WordPress.org Trac Template Updater',
+		]
+	] );
+
+	// Don't use the CDN here, just in case.
+	$url = str_replace( '/s.w.org/', '/wordpress.org/', $url );
+
+	$result = file_get_contents( $url, false, $context );
+
+	if ( str_contains( $http_response_header[0], '429' ) ) {
+		echo "\tHit a rate limit, pausing.. retry.. \n";
+		sleep( 5 );
+		return fetch_url( $url );
+	}
+
+	return $result;
+}
+
+function domdocument_from_url( $url ) {
+	$html = fetch_url( $url );
 
 	// Ensure it's treated as UTF8, we'll assume if there's no <body> tag it's just a HTML blob.
 	if ( ! strpos( $html, '<body' ) ) {
@@ -47,8 +55,11 @@ function domdocument_for_trac() {
 	$doc = new DOMDocument();
 	$doc->formatOutput = true;
 
+	// A plain <html> shell is used only as a container to build the fragment in;
+	// save_domdocument() strips it back off so the output is a bare Jinja2 include
+	// (Trac 1.6 no longer uses the Genshi <html py:strip> wrapper).
 	$doc->loadHTML( '<!DOCTYPE html>
-	<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" py:strip=""></html>' );
+	<html xmlns="http://www.w3.org/1999/xhtml"></html>' );
 
 	// Set the encoding to UTF-8 to allow unicode characters in the output. This avoids them being escaped.
 	$doc->encoding = 'utf-8';
@@ -69,6 +80,13 @@ function save_domdocument( $file, $dom ) {
 	// Remove the XML header
 	$html = preg_replace( "#^<\?xml.+>\n?#i",  '', $html );
 
+	// Remove the DOCTYPE and the <html> container. These files are Jinja2 fragment
+	// includes (site_head/site_header/site_footer pull them into the real document),
+	// not standalone documents.
+	$html = preg_replace( "#^\s*<!DOCTYPE[^>]*>\n?#i", '', $html );
+	$html = preg_replace( '#^\s*<html\b[^>]*>\n?#i', '', $html );
+	$html = preg_replace( '#\n?</html>\s*$#i', '', $html );
+
 	// Remove CDATA tags from <style>
 	$html = preg_replace( '#<style([^>]*)><!\[CDATA\[(.+?)\]\]></style>#ism', "<style$1>$2</style>", $html );
 
@@ -84,7 +102,7 @@ function save_domdocument( $file, $dom ) {
 			}
 
 			// For non-javascript, remove the CDATA tags.
-			if ( $type && in_array( strtolower( $type ), [ 'importmap', /* 'module' */ ] ) ) {
+			if ( $type && in_array( strtolower( $type ), [ 'importmap', 'speculationrules', 'application/json' /* 'module' */ ] ) ) {
 				return "<script{$attr}>{$code}</script>";
 			}
 
@@ -115,10 +133,13 @@ function save_domdocument( $file, $dom ) {
 	/*
 	 * Use CDN assets, to avoid CORS issues.
 	 * Until https://github.com/WordPress/wporg-mu-plugins/pull/430 is resolved.
+	 *
+	 * NOTE: Quote is included here to avoid matching in inlined CSS or JS.
 	 */
 	$html = preg_replace_callback(
-		'!(?P<url>https:[\\\/]+wordpress.org[\\\/]+wp-(includes|content)[\\\/]+[^\'"]+)!i',
+		'!(?P<quote>[\'"])(?P<url>https:[\\\/]+wordpress.org[\\\/]+wp-(includes|content)[\\\/]+[^\'"]+)\\1!i',
 		function( $m ) {
+			$quote   = $m['quote'];
 			$url     = $m['url'];
 			$escaped = false !== strpos( $url, '\/' );
 
@@ -127,7 +148,7 @@ function save_domdocument( $file, $dom ) {
 			}
 
 			$url  = str_replace( 'wordpress.org', 's.w.org', $url );
-			$hash = md5( file_get_contents( $url ) );
+			$hash = md5( fetch_url( $url ) );
 
 			if ( preg_match( '/([?&;](ver|v)=[^&]+)/i', $url, $m ) ) {
 				$url = str_replace( $m[0], $m[0] . '-' . $hash, $url );
@@ -139,7 +160,7 @@ function save_domdocument( $file, $dom ) {
 				$url = addcslashes( $url, '/' );
 			}
 
-			return $url;
+			return $quote . $url . $quote;
 		},
 		$html
 	);
@@ -177,13 +198,22 @@ foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
 		continue;
 	}
 
+	// Skip <link rel="alternate">
+	if (
+		$node instanceOf DomElement &&
+		'link' === $node->tagName &&
+		'alternate' === $node->getAttribute( 'rel' )
+	) {
+		continue;
+	}
+
 	$html_node->appendChild( $wporg_head->importNode( $node, true ) );
 }
 
 // Swap out the shortcut icon for a Trac one. #6072
 $icon_url = 'https://s.w.org/style/trac/common/trac.ico';
 foreach ( ( new DOMXPath( $wporg_head ) )->query( '//link[@rel="icon"]' ) as $icon ) {
-	$hash = md5( file_get_contents( $icon_url ) );
+	$hash = md5( fetch_url( $icon_url ) );
 	$icon->setAttribute( 'href', $icon_url . '?v=' . $hash );
 }
 

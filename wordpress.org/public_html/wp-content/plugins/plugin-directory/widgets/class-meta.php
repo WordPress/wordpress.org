@@ -52,7 +52,7 @@ class Meta extends \WP_Widget {
 				<?php
 				printf(
 					/* translators: %s: version number */
-					__( 'Version: %s', 'wporg-plugins' ),
+					__( 'Version %s', 'wporg-plugins' ),
 					'<strong>' . esc_html( get_post_meta( $post->ID, 'version', true ) ) . '</strong>'
 				);
 				?>
@@ -60,18 +60,20 @@ class Meta extends \WP_Widget {
 
 			<li>
 				<?php
-				$modified_time = get_post_modified_time();
+				$last_updated = get_post_meta( $post->ID, 'last_updated', true );
+				// Fallback to modified timestamp if meta unavailable.
+				$last_updated = $last_updated ? strtotime( $last_updated ) : get_post_modified_time( 'U', true );
 
 				// Fallback for approved plugins that are not published yet.
-				if ( $modified_time < 0 ) {
-					$modified_time = get_post_time();
+				if ( ! $last_updated || $last_updated < 0 ) {
+					$last_updated = get_post_time( 'U', true );
 				}
 
 				printf(
 					/* translators: %s: time since the last update */
-					__( 'Last updated: %s', 'wporg-plugins' ),
+					__( 'Last updated %s', 'wporg-plugins' ),
 					/* translators: %s: time since the last update */
-					'<strong>' . wp_kses( sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $modified_time ) . '</span>' ), array( 'span' => true ) ) . '</strong>'
+					'<strong>' . wp_kses( sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $last_updated ) . '</span>' ), array( 'span' => true ) ) . '</strong>'
 				);
 				?>
 			</li>
@@ -79,7 +81,7 @@ class Meta extends \WP_Widget {
 				<?php
 				printf(
 					/* translators: %s: active installations count */
-					__( 'Active installations: %s', 'wporg-plugins' ),
+					__( 'Active installations %s', 'wporg-plugins' ),
 					'<strong>' . esc_html( Template::active_installs( false ) ) . '</strong>'
 				);
 				?>
@@ -87,7 +89,7 @@ class Meta extends \WP_Widget {
 
 			<?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
 				<li>
-					<?php esc_html_e( 'WordPress Version:', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'WordPress version', 'wporg-plugins' ); ?>
 					<strong>
 						<?php
 						printf(
@@ -105,7 +107,7 @@ class Meta extends \WP_Widget {
 					<?php
 					printf(
 						/* translators: %s: version number */
-						__( 'Tested up to: %s', 'wporg-plugins' ),
+						__( 'Tested up to %s', 'wporg-plugins' ),
 						'<strong>' . esc_html( $tested_up_to ) . '</strong>'
 					);
 					?>
@@ -114,7 +116,7 @@ class Meta extends \WP_Widget {
 
 			<?php if ( $requires_php = (string) get_post_meta( $post->ID, 'requires_php', true ) ) : ?>
 				<li>
-					<?php esc_html_e( 'PHP Version:', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'PHP version', 'wporg-plugins' ); ?>
 					<strong>
 						<?php
 						printf(
@@ -135,9 +137,9 @@ class Meta extends \WP_Widget {
 				<li>
 					<?php
 					if ( 1 === $available_languages_count ) {
-						esc_html_e( 'Language:', 'wporg-plugins' );
+						esc_html_e( 'Language', 'wporg-plugins' );
 					} else {
-						esc_html_e( 'Languages:', 'wporg-plugins' );
+						esc_html_e( 'Languages', 'wporg-plugins' );
 					}
 
 					echo '<div class="languages">';
@@ -208,7 +210,7 @@ class Meta extends \WP_Widget {
 					echo '<li class="clear">';
 					printf(
 						/* translators: %s: tag list */
-						_n( 'Tag: %s', 'Tags: %s', count( $term_links ), 'wporg-plugins' ),
+						_n( 'Tag %s', 'Tags %s', count( $term_links ), 'wporg-plugins' ),
 						'<div class="tags">' . implode( $term_links ) . '</div>'
 					);
 					echo '</li>';
@@ -219,7 +221,7 @@ class Meta extends \WP_Widget {
 				<li class="hide-if-no-js">
 					<?php
 					printf(
-						'<strong><a class="plugin-admin" href="%s">%s</a></strong>',
+						'<a class="plugin-admin" href="%s">%s</a>',
 						esc_url( get_permalink() . 'advanced/' ),
 						__( 'Advanced View', 'wporg-plugins' )
 					);

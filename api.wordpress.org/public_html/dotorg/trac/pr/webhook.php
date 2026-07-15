@@ -5,14 +5,18 @@ require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 require __DIR__ . '/functions.php';
 require __DIR__ . '/class-trac.php';
 
+$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
+
 function verify_signature() {
+	global $HTTP_RAW_POST_DATA;
+
 	// Validate that the request came from GitHub.
 	if ( ! defined( 'GH_PRBOT_WEBHOOK_SECRET' ) ) {
 		return;
 	}
 
 	$sent_signature     = $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '';
-	$expected_signature = 'sha1=' . hash_hmac( 'sha1', file_get_contents( 'php://input' ), GH_PRBOT_WEBHOOK_SECRET );
+	$expected_signature = 'sha1=' . hash_hmac( 'sha1', $HTTP_RAW_POST_DATA, GH_PRBOT_WEBHOOK_SECRET );
 
 	if ( ! hash_equals( $expected_signature, $sent_signature ) ) {
 		header( 'HTTP/1.0 403 Forbidden', true, 403 );
@@ -27,7 +31,7 @@ if ( empty( $_SERVER['CONTENT_TYPE'] ) || 'application/json' !== $_SERVER['CONTE
 	die( 'Please set the Content type to application/json' );
 }
 
-$payload = json_decode( file_get_contents( 'php://input' ) );
+$payload = json_decode( $HTTP_RAW_POST_DATA );
 
 if ( ! empty( $_GET['trac'] ) ) {
 	define( 'WEBHOOK_TRAC_HINT', $_GET['trac'] );
@@ -222,13 +226,18 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			$comment_author = $user->user_login;
 		}
 
+		$comment_body = format_github_content_for_trac_comment( $payload->comment->body );
+		if ( ! $comment_body ) {
+			die( 'No comment body' );
+		}
+
 		$comment_body = sprintf(
 			$comment_template,
 			$payload->comment->id,
 			$authorship,
 			$payload->comment->html_url,
 			'PR #' . $payload->issue->number,
-			format_github_content_for_trac_comment( $payload->comment->body )
+			$comment_body
 		);
 
 		foreach ( $tickets as $t ) {

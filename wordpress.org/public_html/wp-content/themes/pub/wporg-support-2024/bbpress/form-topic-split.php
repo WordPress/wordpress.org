@@ -11,11 +11,11 @@
 
 <div id="bbpress-forums">
 
-	<?php bbp_breadcrumb(); ?>
-
 	<?php if ( is_user_logged_in() && current_user_can( 'edit_topic', bbp_get_topic_id() ) ) : ?>
 
 		<div id="split-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-split">
+
+			<h1><?php printf( __( 'Split topic "%s"', 'wporg-forums' ), bbp_get_topic_title() ); ?></h1>
 
 			<form id="split_topic" name="split_topic" method="post" action="<?php the_permalink(); ?>">
 

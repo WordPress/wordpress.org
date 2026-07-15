@@ -8,9 +8,9 @@ class Plugin {
 	 * @todo AJAXify subscription action.
 	 */
 
-	public $taxonomy  = false;
-	public $labels    = array();
-	public $directory = false;
+	public $taxonomy   = false;
+	public $labels_cb  = false;
+	public $directory  = false;
 
 	protected $term        = false;
 	protected $subscribers = array();
@@ -36,17 +36,12 @@ class Plugin {
 		$r = wp_parse_args( $args, array(
 			'taxonomy'  => 'topic-tag',
 			'directory' => false,
-			'labels'    => array(
-				'subscribed_header'      => __( 'Subscribed Topic Tags', 'wporg-forums' ),
-				'subscribed_user_notice' => __( 'You are not currently subscribed to any topic tags.', 'wporg-forums' ),
-				'subscribed_anon_notice' => __( 'This user is not currently subscribed to any topic tags.', 'wporg-forums' ),
-				'receipt'                => __( "You are receiving this email because you are subscribed to the %s tag.", 'wporg-forums'),
-			),
+			'labels'    => false,
 		) );
 
-		$this->taxonomy  = $r['taxonomy'];
-		$this->labels    = $r['labels'];
-		$this->directory = $r['directory'];
+		$this->taxonomy   = $r['taxonomy'];
+		$this->labels_cb  = $r['labels'];
+		$this->directory  = $r['directory'];
 
 		// If no taxonomy was provided, there's nothing we can do.
 		if ( ! $this->taxonomy ) {
@@ -54,6 +49,31 @@ class Plugin {
 		}
 
 		add_action( 'bbp_init', array( $this, 'bbp_init' ) );
+	}
+
+	/**
+	 * Get the default translated labels.
+	 *
+	 * @return array
+	 */
+	public function get_default_labels() {
+		return array(
+			'subscribed_header'      => __( 'Subscribed Topic Tags', 'wporg-forums' ),
+			'subscribed_user_notice' => __( 'You are not currently subscribed to any topic tags.', 'wporg-forums' ),
+			'subscribed_anon_notice' => __( 'This user is not currently subscribed to any topic tags.', 'wporg-forums' ),
+			'receipt'                => __( "You are receiving this email because you are subscribed to the %s tag.", 'wporg-forums' ),
+		);
+	}
+
+	/**
+	 * Get labels, merging any custom labels with the defaults.
+	 *
+	 * @return array
+	 */
+	public function get_labels() {
+		$labels = $this->labels_cb ? call_user_func( $this->labels_cb ) : array();
+
+		return wp_parse_args( $labels, $this->get_default_labels() );
 	}
 
 	/**
@@ -369,7 +389,7 @@ To unsubscribe from future emails, click here:
 			$topic_content,
 			$topic_url,
 			sprintf(
-				$this->labels['receipt'],
+				$this->get_labels()['receipt'],
 				$this->get_current_term()->name
 			)
 		);
@@ -509,7 +529,7 @@ To unsubscribe from future emails, click here:
 			$reply_content,
 			$reply_url,
 			sprintf(
-				$this->labels['receipt'],
+				$this->get_labels()['receipt'],
 				$this->get_current_term()->name
 			)
 		);
@@ -619,7 +639,7 @@ To unsubscribe from future emails, click here:
 		?>
 
 		<div class="bbp-user-subscriptions">
-			<h2 class="entry-title"><?php echo esc_html( $this->labels['subscribed_header'] ); ?></h2>
+			<h2 class="entry-title"><?php echo esc_html( $this->get_labels()['subscribed_header'] ); ?></h2>
 			<div class="bbp-user-section">
 			<?php
 			if ( $terms ) {
@@ -633,9 +653,9 @@ To unsubscribe from future emails, click here:
 				echo "</p>\n";
 			} else {
 				if ( bbp_get_user_id() == get_current_user_id() ) {
-					echo '<p>' . esc_html( $this->labels['subscribed_user_notice'] ) . '</p>';
+					echo '<p>' . esc_html( $this->get_labels()['subscribed_user_notice'] ) . '</p>';
 				} else {
-					echo '<p>' . esc_html( $this->labels['subscribed_anon_notice'] ) . '</p>';
+					echo '<p>' . esc_html( $this->get_labels()['subscribed_anon_notice'] ) . '</p>';
 				}
 			}
 			?>
@@ -661,6 +681,7 @@ To unsubscribe from future emails, click here:
 			'taxonomy'   => $taxonomy,
 			'meta_key'   => self::META_KEY,
 			'meta_value' => $user_id,
+			'hide_empty' => false,
 		) );
 
 		// Default to false if empty.
@@ -929,12 +950,14 @@ To unsubscribe from future emails, click here:
 			$js_confirm = 'javascript:return confirm(' . json_encode( $r['js_confirm'] ) . ');';
 		}
 
-		return sprintf(
-			"<div class='wporg-bbp-term-subscription'><a href='%s' class='%s' onclick='%s'>%s</a></div>",
+		return do_blocks( sprintf(
+			'<!-- wp:button -->
+			<div class="wp-block-button is-small"><a href="%s" class="%s wp-block-button__link wp-element-button" onclick="%s">%s</a></div>
+			<!-- /wp:button -->',
 			$url,
 			esc_attr( $r['class'] ),
 			esc_attr( $js_confirm ),
 			esc_html( $text )
-		);
+		) );
 	}
 }

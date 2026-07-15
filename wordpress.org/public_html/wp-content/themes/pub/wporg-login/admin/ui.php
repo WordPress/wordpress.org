@@ -181,6 +181,8 @@ function wporg_login_admin_settings_page() {
 				wp_die( "Are you sure you wanted to do that? You attempted to change registration_block_words to less than 80% of the previous value." );
 			}
 
+			wporg_login_admin_settings_page_log_changes( 'Registration Block Words', get_option( 'registration_block_words' ), $block_words );
+
 			update_option( 'registration_block_words', $block_words );
 		}
 
@@ -194,8 +196,26 @@ function wporg_login_admin_settings_page() {
 				wp_die( "Are you sure you wanted to do that? You attempted to change banned_email_domains to less than 80% of the previous value." );
 			}
 
+			wporg_login_admin_settings_page_log_changes( 'Banned Email Domains', get_site_option( 'banned_email_domains' ), $banned_email_domains );
+
 			// Network-wide option.
 			update_site_option( 'banned_email_domains', $banned_email_domains );
+		}
+
+		$never_spam_tokens = wp_unslash( $_POST['never_spam_tokens'] ?? '' );
+		if ( $never_spam_tokens ) {
+			$never_spam_tokens = str_replace( "\r", '', $never_spam_tokens );
+			$never_spam_tokens = explode( "\n", $never_spam_tokens );
+			$never_spam_tokens = array_values( $never_spam_tokens );
+
+			// Sanity; Don't let it change more than 10%.
+			if ( count( $never_spam_tokens ) < count( get_option( 'never_spam_tokens' ) ) * 0.9 ) {
+				wp_die( "Are you sure you wanted to do that? You attempted to change never_spam_tokens to less than 90% of the previous value." );
+			}
+
+			wporg_login_admin_settings_page_log_changes( 'Never Spam Tokens', get_option( 'never_spam_tokens' ), $never_spam_tokens );
+
+			update_option( 'never_spam_tokens', $never_spam_tokens );
 		}
 
 		$ip_block = wp_unslash( $_POST['ip_block'] ?? '' );
@@ -219,21 +239,27 @@ function wporg_login_admin_settings_page() {
 
 			if ( $ip_allow ) {
 				$time_to_allow = wp_unslash( $_POST['ip_allow_time'] ?? DAY_IN_SECONDS );
-				$ip_allow      = $expand_to_range( $ip_allow );
-				foreach ( $ip_allow as $ip ) {
+				$allow = 0;
+				foreach ( $expand_to_range( $ip_allow ) as $ip ) {
 					wp_cache_set( $ip, 'whitelist', 'registration-limit', $time_to_allow );
+					$allow++;
 				}
 
-				printf( '<div class="notice notice-success"><p>%d IPs added to the allow list.</p></div>', count( $ip_allow ) );
+				printf( '<div class="notice notice-success"><p>%d IPs added to the allow list.</p></div>', $allow );
+
+				wporg_login_admin_settings_page_log_changes( 'IP Allow', [], $ip_allow );
 			}
 			if ( $ip_block ) {
 				$time_to_block = wp_unslash( $_POST['ip_block_time'] ?? DAY_IN_SECONDS );
-				$ip_block      = $expand_to_range( $ip_block );
-				foreach ( $ip_block as $ip ) {
+				$blocked = 0;
+				foreach ( $expand_to_range( $ip_block ) as $ip ) {
 					wp_cache_set( $ip, 999, 'registration-limit', $time_to_block );
+					$blocked++;
 				}
 
-				printf( '<div class="notice notice-success"><p>%d IPs blocked from registration.</p></div>', count( $ip_block ) );
+				printf( '<div class="notice notice-success"><p>%d IPs blocked from registration.</p></div>', $blocked );
+
+				wporg_login_admin_settings_page_log_changes( 'IP Block', [], $ip_allow );
 			}
 		}
 
@@ -283,29 +309,73 @@ function wporg_login_admin_settings_page() {
 		esc_textarea( implode( "\n", get_site_option( 'banned_email_domains', [] ) ) ),
 	);
 
+	printf(
+		'<tr>
+			<th>NEVER Spam Tokens</th>
+			<td>
+				<textarea id="never-spam-tokens" name="never_spam_tokens" rows="10" cols="80" style="width:100%%">%s</textarea>
+				<p id="never-spam-token-desc"><em>' .
+				'These tokens (Email domain, Location, referer, etc) will cause a registration to bypass all spam checks. Use sparingly.<br>' .
+				'Limited Regex: <code>*</code> may be used to match one-or-more non-spacey characters, <code>^</code> and <code>$</code> are supported.<br>' .
+				'One token per line. Comments may be added after each line by separating with #, eg: <code>@wordpress.net # Always allow WordPress.net signups</code>.' .
+				'</em></p>' .
+				'<p>TEST: <input type="text" id="never-spam-token-test" placeholder="Enter test string" onchange="wporgLoginNeverSpamTokenTest(this);" onkeyup="wporgLoginNeverSpamTokenTest(this);"> (Green: Bypass; Red: No match)</p>
+			</td>
+		</tr>',
+		esc_textarea( implode( "\n", get_option( 'never_spam_tokens', [] ) ) ),
+	);
+	echo '<script>
+	function wporgLoginNeverSpamTokenTest( testField ) {
+		const testString = testField.value;
+		const tokens = document.getElementById( "never-spam-tokens" ).value.split( "\\n" );
+
+		for ( let line of tokens ) {
+			line = line.split( "#" )[0].trim();
+			if ( ! line ) {
+				continue;
+			}
+			let pattern = line.replace( /[.*+?^${}()|[\\]\\\\]/g, \'\\\\$&\' ); // Escape regex chars.
+			pattern = pattern.replace( /\\\\\\*/g, \'[a-z0-9]+\' );
+			if ( pattern.startsWith( \'\\\\^\' ) ) {
+				pattern = \'^\' + pattern.slice( 2 );
+			}
+			if ( pattern.endsWith( \'\\\\$\' ) ) {
+				pattern = pattern.slice( 0, -2 ) + \'$\' ;
+			}
+			const regex = new RegExp( pattern, \'i\' );
+			if ( regex.test( testString ) ) {
+				testField.style.backgroundColor = "#aeeaad";
+				return;
+			}
+		}
+
+		testField.style.backgroundColor = "#eda3a3";
+	}
+	</script>';
+
 	echo '<tr>
 		<th>IP Block</th>
 		<td>
-			<input class="regular-text" type="text" name="ip_block" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]|[*])$" placeholder="xxx.xxx.xxx.xxx">
+			<input class="regular-text" type="text" name="ip_block" minlength="7" maxlength="15" size="15" pattern="^([a-f0-9:*]{8,}|((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]|[*]))$" placeholder="xxx.xxx.xxx.xxx">
 			<select name="ip_block_time">
 				<option value="86400">24hrs</option>
 				<option value="604800">7 days</option>
 				<option value="2592000">30 days</option>
 			</select>
-			<p><em>Single IP, or range specified as <code>1.2.3.*</code>. IP will be blocked from registrations for the selected time period. </em></p>
+			<p><em>Single IP, or range specified as <code>1.2.3.*</code> / <code>fe80:1234:*</code>. IP will be blocked from registrations for the selected time period. </em></p>
 		</td>
 	</tr>';
 
 	echo '<tr>
 		<th>IP Allow</th>
 		<td>
-			<input class="regular-text" type="text" name="ip_allow" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]|[*])$" placeholder="xxx.xxx.xxx.xxx">
+			<input class="regular-text" type="text" name="ip_allow" minlength="7" maxlength="15" size="15" pattern="^([a-f0-9:*]{8,}|((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]|[*]))$" placeholder="xxx.xxx.xxx.xxx">
 			<select name="ip_allow_time">
 				<option value="86400">24hrs</option>
 				<option value="259200">3 days</option>
 				<option value="604800">7 days</option>
 			</select>
-			<p><em>Single IP, or range specified as <code>1.2.3.*</code>. IP will bypass per-IP limits on registrations for the selected time period. Will also bypass Jetpack Protect login limiter.</em></p>
+			<p><em>Single IP, or range specified as <code>1.2.3.*</code> / <code>fe80:1234:*</code>. IP will bypass per-IP limits on registrations for the selected time period. Will also bypass Jetpack Protect login limiter.</em></p>
 		</td>
 	</tr>';
 
@@ -315,6 +385,29 @@ function wporg_login_admin_settings_page() {
 	</p>';
 	echo '</form>';
 	echo '</div>';
+}
+
+function wporg_login_admin_settings_page_log_changes( $nicename, $before, $after ) {
+	$before = (array) $before;
+	$after  = (array) $after;
+	$added   = array_diff( $after, $before );
+	$removed = array_diff( $before, $after );
+	$changes = '';
+
+	if ( $before && $removed ) {
+		$changes .= rtrim( '> -`' . implode( "`\n> -`", $removed ), '`-' ) . "`\n";
+	}
+	if ( $after && $added ) {
+		$changes .= rtrim( '> +`' . implode( "`\n> +`", $added ), '`+' ) . "`\n";
+	}
+
+	if ( ! $changes ) {
+		return;
+	}
+
+	$changes = '*' . $nicename . " changed:*\n" . $changes;
+
+	return notify_slack( FORUMS_MODACTIONS_SLACK_CHANNEL, $changes, wp_get_current_user() );
 }
 
 add_action( 'admin_post_login_resend_email', function() { 
@@ -353,6 +446,11 @@ add_action( 'admin_post_login_mark_as_cleared', function() {
 
 	$user = wporg_get_pending_user( $email );
 	if ( $user ) {
+		// If a spectator role is specified, note that.
+		if ( ( $_REQUEST['role'] ?? '' ) === 'spectator' ) {
+			$user['meta']['role'] = 'spectator';
+		}
+
 		$user['cleared'] = 2;
 		wporg_update_pending_user( $user );
 
@@ -380,7 +478,7 @@ add_action( 'admin_post_login_block', function() {
 
 	check_admin_referer( 'block_' . $email );
 
-	wporg_login_block_registration( $user );
+	wporg_login_block_registration( $email );
 
 	if ( isset( $_GET['ajax'] ) ) {
 		die( wporg_login_admin_action_text( 'blocked' ) );

@@ -1,8 +1,0 @@
-body a,
-body .wp-block-post-content a {
-	text-decoration: none;
-
-	&:not(.button, .dashicons):hover {
-		text-decoration: underline;
-	}
-}

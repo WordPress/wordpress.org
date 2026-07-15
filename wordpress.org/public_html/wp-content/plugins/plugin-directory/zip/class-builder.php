@@ -22,11 +22,15 @@ class Builder {
 
 	protected $slug       = '';
 	protected $version    = '';
+	protected $versions   = [];
 	protected $context    = '';
 	protected $stable_tag = '';
 
 	// The SVN url of the plugin version being packaged.
 	protected $plugin_version_svn_url = '';
+
+	// The revision of the plugin that was just packaged.
+	public $plugins_revision = 0;
 
 	/**
 	 * Generate a ZIP for a provided Plugin tags.
@@ -370,6 +374,20 @@ class Builder {
 			$svn_params[] = 'ignore-externals';
 		}
 
+		/*
+		 * Before we check out the plugin, ensure that it has *files* in the folder.
+		 *
+		 * Some plugins accidentally copy their entire SVN repo into the tagged folder, which
+		 * causes a recursive checkout many multiple gigabytes in size, causing issues for WordPress.org.
+		 */
+		$remote_files = SVN::ls( $this->plugin_version_svn_url, true );
+		if (
+			$remote_files && 
+			! wp_list_filter( $remote_files, [ 'kind' => 'file' ] )
+		) {
+			throw new Exception( __METHOD__ . ": Could not create SVN export of {$this->plugin_version_svn_url}: Path appears not to have any files." );
+		}
+
 		$res = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		// Handle tags which we store as 0.blah but are in /tags/.blah
 		if ( ! $res['result'] && '0.' == substr( $this->version, 0, 2 ) ) {
@@ -378,12 +396,15 @@ class Builder {
 			$res                          = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		}
 		if ( ! $res['result'] ) {
-			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
+			throw new Exception( __METHOD__ . ': ' . ( $res['errors'][0]['error_message'] ?? 'unknown error' ), 404 );
 		}
+
+		// Store the SVN revision that's been used for the ZIP in a property for later.
+		$this->plugins_revision = $res['revision'];
 
 		// Verify that the specified plugin zip will contain files.
 		if ( ! array_diff( scandir( $this->tmp_build_dir ), array( '.', '..' ) ) ) {
-			throw new Exception( ___METHOD__ . ': No files exist in the plugin directory', 404 );
+			throw new Exception( __METHOD__ . ': No files exist in the plugin directory', 404 );
 		}
 
 		// Cleanup any symlinks that shouldn't be there
@@ -405,9 +426,12 @@ class Builder {
 	 * from the same source files at different times will have the same checksums.
 	 */
 	protected function fix_directory_dates() {
-		// Find all files, output their modified dates, sort reverse numerically, grab the timestamp from the first entry
+		/*
+		 * Find all files, output their modified dates, sort reverse numerically, grab the timestamp from the first entry
+		 * Note: `sort | head` will generate STDERR output. This is expected and not a cause of concern. Silence it to remove red herrings.
+		 */
 		$latest_file_modified_timestamp = $this->exec( sprintf(
-			"find %s -type f -printf '%%T@\n' | sort -nr | head -c 10",
+			"find %s -type f -printf '%%T@\n' | sort -nr 2>/dev/null | head -c 10",
 			escapeshellarg( $this->tmp_build_dir )
 		) );
 		if ( ! $latest_file_modified_timestamp ) {

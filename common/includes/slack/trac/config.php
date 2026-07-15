@@ -41,12 +41,29 @@ class Core extends Trac {
 		'#wp-admin/includes/.*install#'    => '#core-upgrade-install',
 		'application-passwords'            => '#core-passwords',
 		'auth-app'                         => '#core-passwords',
+		'wp-includes/interactivity-api'    => '#core-interactivity-api',
+		'wp-includes/html-api'             => '#core-html-api',
+		'.devcontainer'                    => '#core-build-test-tools',
+		'.github'                          => '#core-build-test-tools',
+		'tools'                            => '#core-build-test-tools',
+		'.prettier.js'                     => '#core-build-test-tools',
+		'.env.example'                     => '#core-build-test-tools',
+		'composer.json'                    => '#core-build-test-tools',
+		'docker-compose.yml'               => '#core-build-test-tools',
+		'Gruntfile.js'                     => '#core-build-test-tools',
+		'webpack.config.js'                => '#core-build-test-tools',
+		'wp-tests-config-sample.php'       => '#core-build-test-tools',
+		'#\.n(v|p)mrc#'                    => '#core-build-test-tools',
+		'#\.version-support-[a-z]+\.json'  => '#core-build-test-tools',
+		'#^package(-lock)?\.json$#'        => '#core-build-test-tools',
+		'#^php[a-z]+\.xml\.dist$#'         => '#core-build-test-tools',
 	);
 
 	/**
 	 * Components or focuses that cause new tickets to be piped to particular channels.
 	 */
 	protected $ticket_component_filters = array(
+		'Build/Test Tools'       => '#core-build-test-tools',
 		'Bundled Theme'          => '#core-themes',
 		'Customize'              => '#core-customize',
 		'Date/Time'              => '#core-datetime',
@@ -69,6 +86,8 @@ class Core extends Trac {
 		'Upgrade/Install'        => '#core-upgrade-install',
 		'Application Passwords'  => [ '#core-passwords' => true, '#core-restapi' => true ],
 		'Login and Registration' => '#core-passwords',
+		'HTML API'               => '#core-html-api',
+		'Interactivity API'      => '#core-interactivity-api',
 	);
 }
 
@@ -97,9 +116,9 @@ class Meta extends Trac {
 		'wordcamp.org/'                         => '#meta-wordcamp',
 		'wporg-photos/'                         => [ '#meta' => true, '#photos' => true ],
 		'photo-directory/'                      => [ '#meta' => true, '#photos' => true ],
-		'wporg-themes/'                         => [ '#meta' => true, '#themereview' => true ],
-		'theme-directory/'                      => [ '#meta' => true, '#themereview' => true ],
-		'wp-themes.com/'                        => [ '#meta' => true, '#themereview' => true ],
+		'wporg-themes/'                         => [ '#meta' => true, '#themes' => true ],
+		'theme-directory/'                      => [ '#meta' => true, '#themes' => true ],
+		'wp-themes.com/'                        => [ '#meta' => true, '#themes' => true ],
 		'wporg-plugins/'                        => [ '#meta' => true, '#pluginreview' => true ],
 		'wporg-plugins-2024/'                   => [ '#meta' => true, '#pluginreview' => true ],
 		'plugin-directory/'                     => [ '#meta' => true, '#pluginreview' => true ],
@@ -118,9 +137,9 @@ class Meta extends Trac {
 		'WordPress.tv'                  => '#wptv',
 		'WordCamp Site & Plugins'       => '#meta-wordcamp',
 		'HelpHub'                       => '#meta-helphub',
-		'Theme Review'                  => '#themereview',
+		'Theme Review'                  => '#themes',
 		'Photo Directory'               => [ '#meta' => true, '#photos' => true ],
-		'Theme Directory'               => [ '#meta' => true, '#themereview' => true ],
+		'Theme Directory'               => [ '#meta' => true, '#themes' => true ],
 		'Plugin Directory'              => [ '#meta' => true, '#pluginreview' => true ],
 		'Support Forums'                => [ '#meta' => true, '#forums' => true ],
 	);
@@ -195,6 +214,7 @@ class Plugins extends Trac {
 }
 
 class Themes extends Trac {
+	protected $firehose_channel = '#themes-review-firehose';
 }
 
 class i18n extends Trac {

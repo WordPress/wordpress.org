@@ -140,10 +140,15 @@ class VisionAPI {
 	protected static function extract_from_api( $response ) {
 		$results = [];
 
-		$colors = self::extract_colors( $response->imageProperties()->info()['dominantColors']['colors'] );
-		if ( $colors ) {
-			$results['vision_raw_colors'] = $colors[0];
-			$results['vision_colors']     = $colors[1];
+		// Extract colors.
+		$image_properties = $response->imageProperties();
+		if ( $image_properties ) {
+			$raw_colors = $image_properties->info()['dominantColors']['colors'] ?? [];
+			if ( $raw_colors ) {
+				$colors = self::extract_colors( $raw_colors );
+				$results['vision_raw_colors'] = $colors[0];
+				$results['vision_colors']     = $colors[1];
+			}
 		}
 
 		// Basic use of face detection, just to count detected faces.

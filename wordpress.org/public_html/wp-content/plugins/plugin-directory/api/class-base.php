@@ -2,8 +2,6 @@
 namespace WordPressdotorg\Plugin_Directory\API;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
-use WordPressdotorg\Plugin_Directory\Plugin_I18n;
-use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * @package WordPressdotorg_Plugin_Directory
@@ -14,7 +12,6 @@ class Base {
 	 */
 	public static function init() {
 		self::load_routes();
-		self::load_fields();
 	}
 
 	/**
@@ -35,21 +32,11 @@ class Base {
 		new Routes\Plugin_Self_Transfer();
 		new Routes\Plugin_Self_Toggle_Preview();
 		new Routes\Plugin_Release_Confirmation();
-		new Routes\Plugin_E2E_Callback();
 		new Routes\Plugin_Categorization();
 		new Routes\Plugin_Upload();
 		new Routes\Plugin_Blueprint();
-	}
-
-	/**
-	 * Loads all API field for existing WordPress object types we offer.
-	 */
-	public static function load_fields() {
-		new Fields\Plugin\Banners();
-		new Fields\Plugin\Icons();
-		new Fields\Plugin\Rating();
-		new Fields\Plugin\Ratings();
-		new Fields\Plugin\Screenshots();
+		new Routes\Plugin_Review();
+		new Routes\Gandalf_Scan();
 	}
 
 	/**
@@ -90,7 +77,7 @@ class Base {
 	 * @return bool|\WP_Error True if the token exists, WP_Error upon failure.
 	 */
 	function permission_check_api_bearer( $request, $constant = false ) {
-		$authorization_header = $request->get_header( 'authorization' );
+		$authorization_header = $request->get_header( 'authorization' ) ?? '';
 		$authorization_header = trim( str_ireplace( 'bearer', '', $authorization_header ) );
 
 		if (

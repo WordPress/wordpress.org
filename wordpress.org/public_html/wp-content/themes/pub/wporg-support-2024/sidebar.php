@@ -42,7 +42,7 @@
 
 			<div>
 				<?php bbp_topic_tag_list( 0, array(
-					'before' => '<h4>' . __( 'Tags', 'wporg-forums' ) . '</h4><ul class="topic-tags"><li class="tag">',
+					'before' => '<h2>' . __( 'Tags', 'wporg-forums' ) . '</h2><ul class="topic-tags"><li class="tag">',
 					'after'  => '</li></ul>',
 					'sep'    => '</li><li class="tag">',
 				) ); ?>
@@ -59,7 +59,7 @@
 				<div>
 					<?php bbp_topic_admin_links( array (
 						'id'     => bbp_get_topic_id(),
-						'before' => '<h4>' . __( 'Admin', 'wporg-forums' ) . '</h4><ul class="topic-admin-links"><li>',
+						'before' => '<h2>' . __( 'Admin', 'wporg-forums' ) . '</h2><ul class="topic-admin-links"><li>',
 						'after'  => '</li></ul>',
 						'sep'    => '</li><li>',
 						'links'  => array()
@@ -85,7 +85,7 @@
 		<?php if ( ! bbp_is_single_user() && ! ( wporg_support_is_compat_forum() ) ) : ?>
 
 			<div>
-				<h4><?php _e( 'Topics', 'wporg-forums' ); ?></h4>
+				<h2><?php _e( 'Topics', 'wporg-forums' ); ?></h2>
 
 				<?php echo do_blocks(
 					sprintf(
@@ -102,7 +102,7 @@
 		<?php if ( bbp_is_single_view() && ! wporg_support_is_compat_view() || is_tax( 'topic-tag' ) ) : ?>
 
 			<div>
-				<h4><?php _e( 'Feeds', 'wporg-forums' ); ?></h4>
+				<h2><?php _e( 'Feeds', 'wporg-forums' ); ?></h2>
 				<ul class="forum-feeds">
 					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/"><?php _e( 'RSS Recent Posts', 'wporg-forums' ); ?></a></li>
 					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/"><?php _e( 'RSS Recent Topics', 'wporg-forums' ); ?></a></li>

@@ -10,9 +10,6 @@ include __DIR__ . '/common.php';
 $request = get_request();
 $event   = $_SERVER['HTTP_X_HELPSCOUT_EVENT'] ?? '';
 
-// Handle the openverse webhook.
-openverse_webhook( $event, $request );
-
 // Warm the caches.
 get_email_thread( $request->id, true );
 
@@ -21,29 +18,6 @@ contributor_stats( $event, $request );
 
 // Record the email in the database.
 log_email( $event, $request );
-
-/**
- * Ping the Openverse webhook.
- */
-function openverse_webhook( $event, $request ) {
-	if (
-		'production' === wp_get_environment_type() &&
-		defined( 'HELPSCOUT_OPENVERSE_WEBHOOK' ) && HELPSCOUT_OPENVERSE_WEBHOOK &&
-		defined( 'HELPSCOUT_OPENVERSE_MAILBOXID' ) && HELPSCOUT_OPENVERSE_MAILBOXID &&
-		'convo.created' === $event &&
-		isset( $request->mailboxId ) && HELPSCOUT_OPENVERSE_MAILBOXID === $request->mailboxId
-	) {
-		$subject = $request->subject;
-		$url     = $request->_links->web->href;
-
-		wp_safe_remote_post(
-			HELPSCOUT_OPENVERSE_WEBHOOK,
-			[
-				'body' => wp_json_encode( compact( 'subject', 'url' ) )
-			]
-		);
-	}
-}
 
 /**
  * Record some Contributor stats.

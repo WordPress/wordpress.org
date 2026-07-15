@@ -24,6 +24,9 @@ abstract class Directory_Compat {
 	abstract protected function do_view_header();
 
 	var $loaded       = false;
+	var $slug         = null;
+	var $ratings      = null;
+	var $stickies     = null;
 	var $authors      = null;
 	var $contributors = null;
 	var $support_reps = null;
@@ -34,6 +37,9 @@ abstract class Directory_Compat {
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
 			// Intercept feed requests prior to bbp_request_feed_trap at 10, before Performance::bbp_request_disable_missing_view_feeds at 9
 			add_filter( 'bbp_request', array( $this, 'request' ), 5 );
+
+			// Add feed links to head.
+			add_action( 'wp_head', array( $this, 'meta_link_to_feeds' ) );
 
 			// Add plugin or theme name to view feed titles.
 			add_filter( 'wp_title_rss', array( $this, 'title_correction_for_feed' ) );
@@ -288,25 +294,7 @@ abstract class Directory_Compat {
 			$this->register_views();
 
 			// Set the term for this view so we can reuse it.
-			$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
-
-			// New compats won't have any support topics or reviews, so will
-			// not yet exist as a compat term.
-			if ( ! $this->term && $this->get_object( $this->slug() ) ) {
-				$term_name = $this->slug();
-				if ( ! sanitize_title( $term_name ) ) {
-					// This happens when the slug is all non-ascii such as %e5%8f%8b%e8%a8%80, which fails to insert.
-					$term_name = urldecode( $term_name );
-				}
-				$term = wp_insert_term( $term_name, $this->taxonomy(), array( 'slug' => $this->slug() ) );
-
-				// Term exists already? Race-condition, or get_term_by() couldn't find $slug..
-				if ( is_wp_error( $term ) && $term->get_error_data( 'term_exists' ) ) {
-					$this->term = get_term( $term->get_error_data( 'term_exists' ) );
-				} elseif ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) {
-					$this->term = get_term( $term['term_id'] );
-				}
-			}
+			$this->initialize_term();
 
 			// Add plugin- and theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar',       array( $this, 'do_view_sidebar' ) );
@@ -345,6 +333,67 @@ abstract class Directory_Compat {
 
 			$this->loaded = true;
 		}
+	}
+
+	/**
+	 * Initialises the WP_Term for the compat view.
+	 *
+	 * If the term does not exist, it will be created.
+	 */
+	public function initialize_term() {
+		if ( ! $this->slug() ) {
+			return;
+		}
+
+		$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
+
+		if ( $this->term || ! $this->get_object( $this->slug() ) ) {
+			return;
+		}
+
+		$term_name = $this->slug();
+		if ( ! sanitize_title( $term_name ) ) {
+			// This happens when the slug is all non-ascii such as %e5%8f%8b%e8%a8%80, which fails to insert.
+			$term_name = urldecode( $term_name );
+		}
+
+		$term = wp_insert_term( $term_name, $this->taxonomy(), array( 'slug' => $this->slug() ) );
+
+		// Term exists already? Race-condition, or get_term_by() couldn't find $slug..
+		if ( is_wp_error( $term ) && $term->get_error_data( 'term_exists' ) ) {
+			$this->term = get_term( $term->get_error_data( 'term_exists' ) );
+		} elseif ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) {
+			$this->term = get_term( $term['term_id'] );
+		}
+	}
+
+	/**
+	 * Outputs `link` tags in the page head for the support and reviews feeds.
+	 */
+	public function meta_link_to_feeds() {
+		if ( ! $this->slug() ) {
+			return;
+		}
+
+		echo "\n";
+
+		$title_support_feed = 'theme' === $this->compat()
+			? __( 'Theme Support Feed', 'wporg-forums' )
+			: __( 'Plugin Support Feed', 'wporg-forums' );
+		printf(
+			'<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />' . "\n",
+			esc_attr( $title_support_feed ),
+			esc_url( home_url( sprintf( '/%s/%s/feed/', $this->compat(), $this->slug() ) ) )
+		);
+
+		$title_reviews_feed = 'theme' === $this->compat()
+			? __( 'Theme Reviews Feed', 'wporg-forums' )
+			: __( 'Plugin Reviews Feed', 'wporg-forums' );
+		printf(
+			'<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />' . "\n",
+			esc_attr( $title_reviews_feed ),
+			esc_url( home_url( sprintf( '/%s/%s/reviews/feed/', $this->compat(), $this->slug() ) ) )
+		);
 	}
 
 	public function check_topic_for_compat() {
@@ -641,10 +690,10 @@ abstract class Directory_Compat {
 		// Prefix link to plugin/theme support or review forum with context.
 		if ( 'plugin' === $this->compat() ) {
 			/* translators: %s: link to plugin support or review forum */
-			$compat_breadcrumb = __( 'Plugin: %s', 'wporg-forums' );
+			$compat_breadcrumb = str_replace( ' ', '&nbsp;', __( 'Plugin: %s', 'wporg-forums' ) );
 		} else {
 			/* translators: %s: link to theme support or review forum */
-			$compat_breadcrumb = __( 'Theme: %s', 'wporg-forums' );
+			$compat_breadcrumb = str_replace( ' ', '&nbsp;', __( 'Theme: %s', 'wporg-forums' ) );
 		}
 
 		$r[1] = sprintf( $compat_breadcrumb, esc_html( $this->title() ) );
@@ -928,7 +977,7 @@ abstract class Directory_Compat {
 				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
 			}
 
-			wp_cache_set( $cache_key, $compat_object, $cache_group, DAY_IN_SECONDS );
+			wp_cache_set( $cache_key, $compat_object, $cache_group, HOUR_IN_SECONDS );
 		}
 		return $compat_object;
 	}

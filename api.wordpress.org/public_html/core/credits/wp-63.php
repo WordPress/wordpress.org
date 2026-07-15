@@ -52,6 +52,7 @@ class WP_63_Credits extends WP_Credits {
  					'Joen'                => 'Joen Asmussen',
 					'jameskoster'         => 'James Koster',
 					'saxonfletcher'       => 'Saxon Fletcher',
+					'poena'               => 'Carolina Nymark',
 				],
 			],
 			'contributing-developers' => [
@@ -59,7 +60,6 @@ class WP_63_Credits extends WP_Credits {
 				'type'    => 'titles',
 				'shuffle' => true,
 				'data'    => [
-					'poena'               => 'Carolina Nymark',
 					'get_dave'            => 'David Smith',
 					'sabernhardt'         => 'Stephen Bernhardt',
 					'afercia'             => 'Andrea Fercia',
@@ -766,7 +766,7 @@ class WP_63_Credits extends WP_Credits {
 
 	public function external_libraries() {
 		return [
-			[ 'Babel Polyfill', 'https://babeljs.io/docs/en/babel-polyfill' ],
+			[ 'Babel Polyfill', 'https://babeljs.io/docs/babel-polyfill' ],
 			[ 'Backbone.js', 'https://backbonejs.org/' ],
 			[ 'Class POP3', 'https://squirrelmail.org/' ],
 			[ 'clipboard.js', 'https://clipboardjs.com/' ],
@@ -781,7 +781,7 @@ class WP_63_Credits extends WP_Credits {
 			[ 'Iris', 'https://github.com/Automattic/Iris' ],
 			[ 'jQuery', 'https://jquery.com/' ],
 			[ 'jQuery UI', 'https://jqueryui.com/' ],
-			[ 'jQuery Hotkeys', 'https://github.com/tzuryby/jquery.hotkeys' ],
+			[ 'jQuery Hotkeys', 'https://github.com/mathusiast/jquery.hotkeys' ],
 			[ 'jQuery serializeObject', 'https://benalman.com/projects/jquery-misc-plugins/' ],
 			[ 'jQuery.query', 'https://plugins.jquery.com/query-object/' ],
 			[ 'jQuery.suggest', 'https://github.com/pvulgaris/jquery.suggest' ],
@@ -797,16 +797,16 @@ class WP_63_Credits extends WP_Credits {
 			[ 'PHPMailer', 'https://github.com/PHPMailer/PHPMailer' ],
 			[ 'Plupload', 'https://www.plupload.com/' ],
 			[ 'random_compat', 'https://github.com/paragonie/random_compat' ],
-			[ 'React', 'https://reactjs.org/' ],
+			[ 'React', 'https://react.dev/' ],
 			[ 'Redux', 'https://redux.js.org/' ],
 			[ 'Requests', 'https://requests.ryanmccue.info/' ],
 			[ 'SimplePie', 'https://simplepie.org/' ],
 			[ 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ],
 			[ 'Thickbox', 'https://codylindley.com/thickbox/' ],
-			[ 'TinyMCE', 'https://www.tinymce.com/' ],
+			[ 'TinyMCE', 'https://www.tiny.cloud/' ],
 			[ 'Twemoji', 'https://github.com/twitter/twemoji' ],
 			[ 'Underscore.js', 'https://underscorejs.org/' ],
-			[ 'whatwg-fetch', 'https://github.com/github/fetch' ],
+			[ 'whatwg-fetch', 'https://github.com/JakeChampion/fetch' ],
 			[ 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ],
 		];
 	}

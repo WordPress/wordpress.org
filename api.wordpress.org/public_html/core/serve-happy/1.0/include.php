@@ -10,7 +10,10 @@ function determine_request( $request = false ) {
 
 	$php_version = false;
 	// PHP versions on hosts vary and include extra data, we're only interested in the major core PHP version component:
-	if ( preg_match( '!^([0-9]+\.([0-9]+\.)?[0-9]+)!', $request['php_version'], $m ) ) {
+	if (
+		is_string( $request['php_version'] ) &&
+		preg_match( '!^([0-9]+\.([0-9]+\.)?[0-9]+)!', $request['php_version'], $m )
+	) {
 		$php_version = $m[1];
 	}
 

@@ -2,8 +2,6 @@
 
 <div id="bbpress-forums">
 
-	<?php bbp_breadcrumb(); ?>
-
 <?php endif; ?>
 
 <?php if ( bbp_current_user_can_access_create_topic_form() ) : ?>
@@ -14,30 +12,59 @@
 
 			<?php do_action( 'bbp_theme_before_topic_form' ); ?>
 
+			<?php if ( bbp_is_topic_edit() ) { ?>
+
+				<h1>
+					<?php printf( __( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), bbp_get_topic_title() ); ?>
+				</h1>
+
+			<?php } else { ?>
+
+				<h2>
+					<?php if ( bbp_is_single_forum() ) {
+						_e( 'Create a new topic in this forum', 'wporg-forums' );
+					} elseif ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+						_e( 'Create a new review', 'wporg-forums' );
+					} else {
+						_e( 'Create a new topic', 'wporg-forums' );
+					} ?>
+				</h2>
+
+				<?php
+				if (
+					defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY &&
+					bbp_is_single_view() && 'reviews' === bbp_get_view_id()
+				) {
+					echo do_blocks(
+						sprintf(
+							'<!-- wp:wporg/notice {"type":"warning"} -->
+							<div class="wp-block-wporg-notice is-warning-notice">
+								<div class="wp-block-wporg-notice__icon"></div>
+								<div class="wp-block-wporg-notice__content">
+									<p>%s</p>
+								</div>
+							</div>
+							<!-- /wp:wporg/notice -->',
+							sprintf(
+								__( 'New reviews are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-forums' ),
+								'https://wordpress.org/news/2024/12/holiday-break/'
+							)
+						)
+					);
+					echo '</form></div>';
+					return;
+				}
+				?>
+
+			<?php } ?>
+
 			<fieldset class="bbp-form">
-				<legend>
-
-					<?php
-						if ( bbp_is_topic_edit() ) {
-							printf( __( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), bbp_get_topic_title() );
-						} else {
-							if ( bbp_is_single_forum() ) {
-								_e( 'Create a new topic in this forum', 'wporg-forums' );
-							} elseif ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
-								_e( 'Create a new review', 'wporg-forums' );
-							} else {
-								_e( 'Create a new topic', 'wporg-forums' );
-							}
-						}
-					?>
-
-				</legend>
 
 				<?php do_action( 'bbp_theme_before_topic_form_notices' ); ?>
 
 				<?php if ( ! bbp_is_topic_edit() && ! bbp_is_forum_closed() ) : ?>
 
-					<div class="bbp-template-notice">
+					<div class="bbp-template-notice info">
 
 						<?php if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) : ?>
 
@@ -131,17 +158,13 @@
 
 					<?php do_action( 'bbp_theme_before_topic_form_tags' ); ?>
 
+					<?php if ( bbp_allow_topic_tags() ) : ?>
 					<p>
-						<label for="bbp_topic_tags"><?php
-							if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
-								_e( 'Review Tags:', 'wporg-forums' );
-							} else {
-								_e( 'Topic Tags:', 'wporg-forums' );
-							}
-						?></label><br />
+						<label for="bbp_topic_tags"><?php _e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
 						<input type="text" value="<?php bbp_form_topic_tags(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" aria-describedby="bbp_topic_tags_description" <?php disabled( bbp_is_topic_spam() ); ?> /><br />
 						<em id="bbp_topic_tags_description"><?php esc_html_e( 'Separate tags with commas', 'wporg-forums' ); ?></em>
 					</p>
+					<?php endif; ?>
 
 					<?php do_action( 'bbp_theme_after_topic_form_tags' ); ?>
 
@@ -238,6 +261,19 @@
 	<div id="no-topic-<?php bbp_topic_id(); ?>" class="bbp-no-topic">
 		<div class="bbp-template-notice">
 			<p><?php _e( 'You cannot create new topics at this time.', 'wporg-forums' ); ?></p>
+			<?php if ( current_user_can( bbp_get_spectator_role() ) ) : ?>
+				<p><?php
+					printf(
+						__( 'This may be caused by your account being marked as a brand or shared company account.', 'wporg-forums' ) . '<br>' .
+						/* translators: %s: Link to https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/ */
+						__( '<a href="%s">Please read this announcement</a> for more information.', 'wporg-forums' ) . '<br>' .
+						/* translators: %s: Email address. */
+						__( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ),
+						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
+						WordPressdotorg\Forums\MODERATION_EMAIL
+					);
+				?></p>
+			<?php endif; ?>
 		</div>
 	</div>
 

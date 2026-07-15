@@ -1,8 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
 
-use WordPressdotorg\Plugin_Directory\Template;
-
 /**
  * A Widget to display contributor information about a plugin.
  *
@@ -37,20 +35,30 @@ class Contributors extends \WP_Widget {
 		) );
 
 		if ( is_wp_error( $contributors ) ) {
-			return;
+			$contributors = [];
 		}
 
-		if ( $contributors ) {
-			$contributors = array_map( function( $user_nicename ) {
+		// The owner of the plugin is always a contributor, and shown first.
+		$plugin_owner = get_the_author_meta( 'user_nicename', $post->post_author );
+		if ( $plugin_owner && 0 !== array_search( $plugin_owner, $contributors, true ) ) {
+			$contributors = array_unique(
+				array_merge(
+					[ $plugin_owner ],
+					$contributors
+				)
+			);
+		}
+
+		// Convert the user_nicenames to user objects.
+		$contributors = array_map(
+			function( $user_nicename ) {
 				return get_user_by( 'slug', $user_nicename );
-			}, $contributors );
-			$contributors = array_filter( $contributors );
-		}
+			},
+			$contributors
+		);
 
-		// If no contributors were explicitly or properly listed, default to associated author.
-		if ( ! $contributors && ( $author = get_user_by( 'ID', $post->post_author ) ) ) {
-			$contributors = [ $author ];
-		}
+		// Remove any users that didn't exist.
+		$contributors = array_filter( $contributors );
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Contributors', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
@@ -63,7 +71,7 @@ class Contributors extends \WP_Widget {
 			<li>
 				<?php echo get_avatar( $contributor->ID, 32 ); ?>
 				<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$contributor->user_nicename}/" ); ?>">
-					<?php echo Template::encode( $contributor->display_name ?: $contributor->user_nicename ); ?>
+					<?php echo $contributor->display_name ?: $contributor->user_nicename; ?>
 				</a>
 			</li>
 			<?php endforeach; ?>

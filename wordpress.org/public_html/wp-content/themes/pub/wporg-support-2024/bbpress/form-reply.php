@@ -11,8 +11,6 @@ if ( bbp_is_reply_edit() ) : ?>
 
 <div id="bbpress-forums">
 
-	<?php bbp_breadcrumb(); ?>
-
 <?php endif; ?>
 
 <?php if ( bbp_current_user_can_access_create_reply_form() ) : ?>
@@ -31,9 +29,7 @@ if ( bbp_is_reply_edit() ) : ?>
 				<?php if ( ! bbp_is_topic_open() && ! bbp_is_reply_edit() ) : ?>
 
 					<div class="bbp-template-notice">
-						<ul>
-							<li><?php esc_html_e( 'This topic is marked as closed to new replies, however your posting capabilities still allow you to reply.', 'wporg-forums' ); ?></li>
-						</ul>
+						<p><?php esc_html_e( 'This topic is marked as closed to new replies, however your posting capabilities still allow you to reply.', 'wporg-forums' ); ?></p>
 					</div>
 
 				<?php endif; ?>
@@ -41,15 +37,13 @@ if ( bbp_is_reply_edit() ) : ?>
 				<?php if ( bbp_is_forum_closed() && ! bbp_is_reply_edit() ) : ?>
 
 					<div class="bbp-template-notice">
-						<ul>
-							<li><?php
-								printf(
-									/* translators: %s: forum title */
-									esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies, however your posting capabilities still allow you to post.', 'wporg-forums' ),
-									bbp_get_forum_title( bbp_get_topic_forum_id() )
-								);
-							?></li>
-						</ul>
+						<p><?php
+							printf(
+								/* translators: %s: forum title */
+								esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies, however your posting capabilities still allow you to post.', 'wporg-forums' ),
+								bbp_get_forum_title( bbp_get_topic_forum_id() )
+							);
+						?></p>
 					</div>
 
 				<?php endif; ?>
@@ -57,9 +51,7 @@ if ( bbp_is_reply_edit() ) : ?>
 				<?php if ( current_user_can( 'unfiltered_html' ) ) : ?>
 
 					<div class="bbp-template-notice">
-						<ul>
-							<li><?php esc_html_e( 'Your account has the ability to post unrestricted HTML content.', 'wporg-forums' ); ?></li>
-						</ul>
+						<p><?php esc_html_e( 'Your account has the ability to post unrestricted HTML content.', 'wporg-forums' ); ?></p>
 					</div>
 
 				<?php endif; ?>
@@ -90,11 +82,13 @@ if ( bbp_is_reply_edit() ) : ?>
 
 						<?php do_action( 'bbp_theme_before_reply_form_tags' ); ?>
 
+						<?php if ( bbp_allow_topic_tags() ) : ?>
 						<p>
-							<label for="bbp_topic_tags"><?php esc_html_e( 'Tags:', 'wporg-forums' ); ?></label><br />
+							<label for="bbp_topic_tags"><?php _e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
 							<input type="text" value="<?php bbp_form_topic_tags(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" aria-describedby="bbp_topic_tags_description" <?php disabled( bbp_is_topic_spam() ); ?> /><br />
 							<em id="bbp_topic_tags_description"><?php esc_html_e( 'Separate tags with commas', 'wporg-forums' ); ?></em>
 						</p>
+						<?php endif; ?>
 
 						<?php do_action( 'bbp_theme_after_reply_form_tags' ); ?>
 
@@ -201,9 +195,7 @@ if ( bbp_is_reply_edit() ) : ?>
 
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
-			<ul>
-				<li><?php printf( esc_html__( 'The topic &#8216;%s&#8217; is closed to new replies.', 'wporg-forums' ), bbp_get_topic_title() ); ?></li>
-			</ul>
+			<p><?php printf( esc_html__( 'The topic &#8216;%s&#8217; is closed to new replies.', 'wporg-forums' ), bbp_get_topic_title() ); ?></p>
 		</div>
 	</div>
 
@@ -211,9 +203,7 @@ if ( bbp_is_reply_edit() ) : ?>
 
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
-			<ul>
-				<li><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), bbp_get_forum_title( bbp_get_topic_forum_id() ) ); ?></li>
-			</ul>
+			<p><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), bbp_get_forum_title( bbp_get_topic_forum_id() ) ); ?></p>
 		</div>
 	</div>
 
@@ -221,25 +211,34 @@ if ( bbp_is_reply_edit() ) : ?>
 
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
-			<ul>
-				<?php if ( wporg_support_is_single_review() ) : ?>
-
-					<?php if ( is_user_logged_in() ) : ?>
-						<li><?php esc_html_e( 'You cannot reply to this review.', 'wporg-forums' ); ?></li>
-					<?php else : ?>
-						<li><?php printf( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() ); ?></li>
-					<?php endif; ?>
-
-				<?php else : ?>
-
-					<?php if ( is_user_logged_in() ) : ?>
-						<li><?php esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' ); ?></li>
-					<?php else : ?>
-						<li><?php printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() ); ?></li>
-					<?php endif; ?>
-
-				<?php endif; ?>
-			</ul>
+			<p><?php
+				if ( wporg_support_is_single_review() ) {
+					if ( is_user_logged_in() ) {
+						esc_html_e( 'You cannot reply to this review.', 'wporg-forums' );
+					} else {
+						printf( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() );
+					}
+				} else {
+					if ( is_user_logged_in() ) {
+						esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' );
+					} else {
+						printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() );
+					}
+				}
+			?></p>
+			<?php if ( current_user_can( bbp_get_spectator_role() ) && ! bbp_is_topic_closed() && ! bbp_is_forum_closed( bbp_get_topic_forum_id() ) ) : ?>
+				<p><?php
+					printf(
+						__( 'This may be caused by your account being marked as a brand or shared company account.', 'wporg-forums' ) . '<br>' .
+						/* translators: %s: Link to https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/ */
+						__( '<a href="%s">Please read this announcement</a> for more information.', 'wporg-forums' ) . '<br>' .
+						/* translators: %s: Email address. */
+						__( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ),
+						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
+						WordPressdotorg\Forums\MODERATION_EMAIL
+					);
+				?></p>
+			<?php endif; ?>
 		</div>
 	</div>
 

@@ -356,27 +356,32 @@ class Support_Compat {
 	 */
 	public function load_compat_subscriptions() {
 		if ( class_exists( 'WordPressdotorg\Forums\Term_Subscription\Plugin' ) ) {
+			// Labels use callbacks to defer translation loading until bbp_init.
 			Plugin::get_instance()->plugin_subscriptions = new Term_Subscription\Plugin( array(
 				'taxonomy'  => 'topic-plugin',
 				'directory' => Plugin::get_instance()->plugins,
-				'labels'    => array(
-					'subscribed_header'      => __( 'Subscribed Plugins', 'wporg-forums' ),
-					'subscribed_user_notice' => __( 'You are not currently subscribed to any plugins.', 'wporg-forums' ),
-					'subscribed_anon_notice' => __( 'This user is not currently subscribed to any plugins.', 'wporg-forums' ),
-					/* translators: %s: Plugin Name. */
-					'receipt'                => __( 'You are receiving this email because you are subscribed to the %s plugin.', 'wporg-forums' ),
-				),
+				'labels'    => function() {
+					return array(
+						'subscribed_header'      => __( 'Subscribed Plugins', 'wporg-forums' ),
+						'subscribed_user_notice' => __( 'You are not currently subscribed to any plugins.', 'wporg-forums' ),
+						'subscribed_anon_notice' => __( 'This user is not currently subscribed to any plugins.', 'wporg-forums' ),
+						/* translators: %s: Plugin Name. */
+						'receipt'                => __( 'You are receiving this email because you are subscribed to the %s plugin.', 'wporg-forums' ),
+					);
+				},
 			) );
 			Plugin::get_instance()->theme_subscriptions = new Term_Subscription\Plugin( array(
 				'taxonomy'  => 'topic-theme',
 				'directory' => Plugin::get_instance()->themes,
-				'labels'    => array(
-					'subscribed_header'      => __( 'Subscribed Themes', 'wporg-forums' ),
-					'subscribed_user_notice' => __( 'You are not currently subscribed to any themes.', 'wporg-forums' ),
-					'subscribed_anon_notice' => __( 'This user is not currently subscribed to any themes.', 'wporg-forums' ),
-					/* translators: %s: Theme Name. */
-					'receipt'                => __( 'You are receiving this email because you are subscribed to the %s theme.', 'wporg-forums' ),
-				),
+				'labels'    => function() {
+					return array(
+						'subscribed_header'      => __( 'Subscribed Themes', 'wporg-forums' ),
+						'subscribed_user_notice' => __( 'You are not currently subscribed to any themes.', 'wporg-forums' ),
+						'subscribed_anon_notice' => __( 'This user is not currently subscribed to any themes.', 'wporg-forums' ),
+						/* translators: %s: Theme Name. */
+						'receipt'                => __( 'You are receiving this email because you are subscribed to the %s theme.', 'wporg-forums' ),
+					);
+				},
 			) );
 		}
 	}
@@ -499,10 +504,10 @@ class Support_Compat {
 		// Prefix link to plugin/theme support or review forum with context.
 		if ( 'plugin' === $type ) {
 			/* translators: %s: link to plugin support or review forum */
-			$parent_breadcrumb = __( 'Plugin: %s', 'wporg-forums' );
+			$parent_breadcrumb = str_replace( ' ', '&nbsp;', __( 'Plugin: %s', 'wporg-forums' ) );
 		} else {
 			/* translators: %s: link to theme support or review forum */
-			$parent_breadcrumb = __( 'Theme: %s', 'wporg-forums' );
+			$parent_breadcrumb = str_replace( ' ', '&nbsp;', __( 'Theme: %s', 'wporg-forums' ) );
 		}
 		$link = sprintf( $parent_breadcrumb, sprintf(
 			'<a href="%s" class="bbp-breadcrumb-forum">%s</a>',
@@ -558,21 +563,23 @@ class Support_Compat {
 	 * In bbPress 1, topics could be referenced using their topic id, and many
 	 * are indexed/linked via this rather than their pretty permalink. The
 	 * custom table topic2post makes it possible to quickly dereference these
-	 * and redirect them appropriately.
+	 * and redirect them appropriately. This also handles legacy numeric
+	 * forum_id[/topic_id] paths, e.g. /support/3/5661 or /support/3.
 	 */
 	public function redirect_old_topic_id() {
-		global $wpdb;
+		global $wpdb, $wp;
 
 		if ( ! is_404() ) {
 			return;
 		}
 
 		$topic_id = false;
+		$forum_id = false;
 
 		// /support/topic/1234
 		if (
 			'topic' == get_query_var( 'post_type' ) &&
-			is_numeric( get_query_var( 'topic' ) )
+			ctype_digit( (string) get_query_var( 'topic' ) )
 		) {
 			$topic_id = absint( get_query_var( 'topic' ) );
 		}
@@ -582,30 +589,108 @@ class Support_Compat {
 			// topic.php sanitized to topic-php.
 			'topic-php' === get_query_var( 'pagename' ) &&
 			isset( $_GET['id'] ) &&
-			is_numeric( $_GET['id'] )
+			is_string( $_GET['id'] ) &&
+			ctype_digit( $_GET['id'] )
 		) {
 			$topic_id = absint( $_GET['id'] );
 		}
 
+		// /support/3/5661 or /support/3 - legacy numeric forum_id[/topic_id] paths.
 		if ( ! $topic_id ) {
-			return;
-		}
+			$segments = $wp->request ? explode( '/', trim( $wp->request, '/' ) ) : array();
+			$count    = count( $segments );
 
-		$cache_key = $topic_id;
-		$cache_group = 'topic2post';
-		$post_id = wp_cache_get( $cache_key, $cache_group );
-		if ( false === $post_id ) {
-			$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}topic2post WHERE topic_id = %d LIMIT 1", $topic_id ) );
-			if ( $post_id ) {
-				$post_id = absint( $post_id );
-				wp_cache_set( $cache_key, $post_id, $cache_group );
+			// {...}/{forum_id}/{topic_id}
+			if (
+				$count >= 2 &&
+				ctype_digit( $segments[ $count - 2 ] ) &&
+				ctype_digit( $segments[ $count - 1 ] )
+			) {
+				$forum_id = absint( $segments[ $count - 2 ] );
+				$topic_id = absint( $segments[ $count - 1 ] );
+
+			// {...}/{forum_id} - but not /page/{n}/ pagination.
+			} elseif (
+				$count >= 1 &&
+				ctype_digit( $segments[ $count - 1 ] ) &&
+				( $count < 2 || 'page' !== $segments[ $count - 2 ] )
+			) {
+				$forum_id = absint( $segments[ $count - 1 ] );
 			}
 		}
 
-		if ( ! $post_id ) {
+		// Nothing recognisable in the request - let the 404 stand.
+		if ( ! $topic_id && ! $forum_id ) {
 			return;
 		}
 
+		// Resolve legacy forum_id to its current forum post ID, if we have one.
+		$forum_post_id = 0;
+		if ( $forum_id ) {
+			$forum_post_id = wp_cache_get( $forum_id, 'forum2post' );
+
+			if ( false === $forum_post_id ) {
+				$forums = get_posts( array(
+					'post_type'      => bbp_get_forum_post_type(),
+					'post_status'    => 'any',
+					'meta_key'       => '_bbp_old_forum_id',
+					'meta_value'     => $forum_id,
+					'fields'         => 'ids',
+					'posts_per_page' => 1,
+					'no_found_rows'  => true,
+					'orderby'        => 'none',
+				) );
+
+				$forum_post_id = ! empty( $forums ) ? absint( $forums[0] ) : 0;
+
+				// Cache misses too, briefly, so repeated bad IDs don't hit the DB every time.
+				wp_cache_set( $forum_id, $forum_post_id, 'forum2post', $forum_post_id ? 0 : 300 );
+			}
+		}
+
+		// No topic in the URL - forum-only request, redirect if resolved.
+		if ( ! $topic_id ) {
+			if ( ! $forum_post_id ) {
+				return;
+			}
+			$this->legacy_redirect_to_post( $forum_post_id );
+			return;
+		}
+
+		// Resolve legacy topic_id via the topic2post lookup table.
+		$topic_post_id = wp_cache_get( $topic_id, 'topic2post' );
+
+		if ( false === $topic_post_id ) {
+			$topic_post_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}topic2post WHERE topic_id = %d LIMIT 1", $topic_id ) );
+			$topic_post_id = $topic_post_id ? absint( $topic_post_id ) : 0;
+
+			// Cache misses too, briefly, so repeated bad IDs don't hit the DB every time.
+			wp_cache_set( $topic_id, $topic_post_id, 'topic2post', $topic_post_id ? 0 : 300 );
+		}
+
+		if ( ! $topic_post_id ) {
+			return;
+		}
+
+		// If a forum_id also came from the URL, confirm it matches this
+		// topic's actual parent forum before trusting the pairing - otherwise
+		// the two numeric segments weren't really a forum/topic pair.
+		if ( $forum_post_id ) {
+			$actual_forum_id = bbp_get_topic_forum_id( $topic_post_id );
+			if ( (int) $forum_post_id !== (int) $actual_forum_id ) {
+				return;
+			}
+		}
+
+		$this->legacy_redirect_to_post( $topic_post_id );
+	}
+
+	/**
+	 * Redirect to a resolved legacy post's current permalink, if it has one.
+	 *
+	 * @param int $post_id
+	 */
+	private function legacy_redirect_to_post( $post_id ) {
 		$permalink = get_permalink( $post_id );
 		if ( $permalink ) {
 			wp_safe_redirect( $permalink, 301 );

@@ -10,9 +10,6 @@
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-	<?php if ( is_page_template( 'page-forums-sidebar.php' ) ) : ?>
-		<?php bbp_breadcrumb(); ?>
-	<?php endif; ?>
 
 	<header class="entry-header">
 		<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
@@ -21,6 +18,8 @@
 	<div class="entry-content">
 		<div class="container">
 			<?php
+			echo do_blocks( '<!-- wp:wporg/table-of-contents /-->' );
+
 			the_content();
 
 			wp_link_pages( array(

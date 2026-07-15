@@ -121,7 +121,7 @@ class Locale_Banner extends Base {
 
 		// English directory.
 		if ( 'en_US' === $current_locale || ! $current_gp_locale ) {
-			$current_path   = get_site()->path;
+			$current_path   = function_exists( 'get_site' ) && get_site() ? get_site()->path : '/';
 			$referring_path = wp_parse_url( $request->get_header( 'referer' ), PHP_URL_PATH );
 
 			if ( $referring_path && '/' === $referring_path[0] ) {

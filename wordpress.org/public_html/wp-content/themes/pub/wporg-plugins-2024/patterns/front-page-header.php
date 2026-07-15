@@ -5,6 +5,18 @@
  * Inserter: no
  */
 
+$count = wp_count_posts( 'plugin' )->publish;
+$count = floor( $count / 1000 ) * 1000;
+$description = sprintf(
+	/* Translators: Total number of plugins, rounded to thousands (ex, 12,000). */
+	_n(
+		'Extend your WordPress experience! Browse over %s free plugin.',
+		'Extend your WordPress experience! Browse over %s free plugins.',
+		$count,
+		'wporg-plugins'
+	),
+	number_format_i18n( $count )
+);
 ?>
 
 <!-- wp:pattern {"slug":"wporg-plugins-2024/front-page-nav"} /-->
@@ -16,20 +28,11 @@
 	<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--40);">
 	
 		<!-- wp:heading {"level":1,"style":{"typography":{"fontSize":"50px","fontStyle":"normal","fontWeight":"400"}},"fontFamily":"eb-garamond"} -->
-		<h1 class="wp-block-heading has-eb-garamond-font-family" style="font-size:50px;font-style:normal;font-weight:400"><?php esc_html_e( 'Plugins', 'wporg' ); ?></h1>
+		<h1 class="wp-block-heading has-eb-garamond-font-family" style="font-size:50px;font-style:normal;font-weight:400"><?php esc_html_e( 'Plugins', 'wporg-plugins' ); ?></h1>
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"style":{"typography":{"lineHeight":"2.3"}},"textColor":"white"} -->
-		<p class="has-white-color has-text-color" style="line-height:2.3">
-		<?php
-			$plugin_count = wp_count_posts( 'plugin' )->publish;
-			printf(
-				/* Translators: Total number of plugins. */
-				esc_html( _n( 'Extend your WordPress experience! Browse %s free plugin.', 'Extend your WordPress experience! Browse %s free plugins.', $plugin_count, 'wporg-plugins' ) ),
-				esc_html( number_format_i18n( $plugin_count ) )
-			);
-			?>
-		</p>
+		<p class="has-white-color has-text-color" style="line-height:2.3"><?php echo esc_html( $description ); ?></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->

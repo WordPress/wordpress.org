@@ -10,6 +10,8 @@ Description: Functionality for jobs.wordpress.net
 defined( 'ABSPATH' ) or die();
 
 require_once( dirname( __FILE__ ) . '/jobswp-captcha.php' );
+require_once( dirname( __FILE__ ) . '/jobswp-contact-form.php' );
+require_once( dirname( __FILE__ ) . '/jobswp-moderation.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-template.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-walker.php' );
 
@@ -1219,3 +1221,73 @@ EMAIL;
 }
 
 Jobs_Dot_WP::get_instance();
+
+/**
+ * Fetches a paginated list of WordPress.org profiles that are "open to work".
+ *
+ * Results are cached per page for 1 hour via transients.
+ *
+ * @param int $page     Page number (1-based). Default 1.
+ * @param int $per_page Number of results per page. Default 10.
+ * @return array {
+ *     @type array $candidates Array of candidate objects.
+ *     @type int   $total      Total number of candidates across all pages.
+ *     @type int   $pages      Total number of pages.
+ * }
+ */
+function jobswp_get_open_to_work_candidates( $page = 1, $per_page = 10 ) {
+	$page     = max( 1, min( (int) $page, 100 ) );
+	$per_page = max( 1, min( (int) $per_page, 100 ) );
+	$transient_key = 'jobswp_otw_p' . $page . '_n' . $per_page;
+	$cached = get_transient( $transient_key );
+
+	if ( false !== $cached ) {
+		return $cached;
+	}
+
+	$url = add_query_arg(
+		array(
+			'page'     => $page,
+			'per_page' => $per_page,
+		),
+		'https://profiles.wordpress.org/wp-json/wporg-profiles/v1/jobs/open-to-work'
+	);
+
+	$response = wp_remote_get( $url, array( 'timeout' => 10 ) );
+
+	$empty = array(
+		'candidates' => array(),
+		'total'      => 0,
+		'pages'      => 0,
+	);
+
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		set_transient( $transient_key, $empty, 5 * MINUTE_IN_SECONDS );
+		return $empty;
+	}
+
+	$body = wp_remote_retrieve_body( $response );
+	$data = json_decode( $body );
+
+	if ( ! is_array( $data ) ) {
+		set_transient( $transient_key, $empty, 5 * MINUTE_IN_SECONDS );
+		return $empty;
+	}
+
+	$result = array(
+		'candidates' => $data,
+		'total'      => (int) wp_remote_retrieve_header( $response, 'x-wp-total' ),
+		'pages'      => (int) wp_remote_retrieve_header( $response, 'x-wp-totalpages' ),
+	);
+
+	// If API doesn't return pagination headers, fall back to what we have.
+	if ( ! $result['total'] ) {
+		$result['total'] = count( $data );
+		$result['pages'] = 1;
+	}
+
+	set_transient( $transient_key, $result, HOUR_IN_SECONDS );
+
+	return $result;
+}
+

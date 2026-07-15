@@ -40,13 +40,30 @@ class SVN_Watcher {
 		// We don't want to re-process the last rev processed, so bump past it
 		$last_rev_processed++;
 
-		echo "Processing changes from $last_rev_processed to $head_rev..\n";
+		if ( defined( 'STDERR' ) ) {
+			fwrite( STDERR, "svn-watch: processing changes from r$last_rev_processed to r$head_rev\n" );
+		}
 
 		$plugins_to_process = $this->get_plugin_changes_between( $last_rev_processed, $head_rev );
 
 		foreach ( $plugins_to_process as $plugin_slug => $plugin_data ) {
 			if ( $plugin_data['assets_touched'] && ! in_array( 'trunk', $plugin_data['tags_touched'] ) ) {
 				$plugin_data['tags_touched'][] = 'trunk';
+			}
+
+			if ( defined( 'STDERR' ) ) {
+				$log_line = sprintf(
+					"[%s] svn-watch: r%d-r%d tags=[%s]%s%s%s%s\n",
+					$plugin_slug,
+					min( $plugin_data['revisions'] ),
+					max( $plugin_data['revisions'] ),
+					implode( ',', $plugin_data['tags_touched'] ),
+					$plugin_data['tags_deleted'] ? ' deleted=[' . implode( ',', $plugin_data['tags_deleted'] ) . ']' : '',
+					$plugin_data['readme_touched'] ? ' readme' : '',
+					$plugin_data['code_touched']   ? ' code' : '',
+					$plugin_data['assets_touched'] ? ' assets' : ''
+				);
+				fwrite( STDERR, $log_line );
 			}
 
 			Jobs\Plugin_Import::queue( $plugin_slug, $plugin_data );
@@ -66,7 +83,6 @@ class SVN_Watcher {
 	 * @return array A list of plugin changes to process.
 	 */
 	protected function get_plugin_changes_between( $rev, $head_rev = 'HEAD' ) {
-
 		$logs = SVN::log( self::SVN_URL, array( $rev, $head_rev ) );
 		if ( $logs['errors'] ) {
 			if ( wp_cache_get( 'get_plugin_changes_between_failed', 'svn-watch' ) ) {
@@ -94,9 +110,27 @@ class SVN_Watcher {
 		$plugins = array();
 
 		foreach ( $logs['log'] as $log ) {
-			// Discard automated changes, these should not trigger plugin imports
-			if ( defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) && PLUGIN_SVN_MANAGEMENT_USER == $log['author'] ) {
-				continue;
+			// Discard some commits from the plugin management user.
+			if (
+				defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) &&
+				PLUGIN_SVN_MANAGEMENT_USER == $log['author']
+			) {
+				/*
+				 * If the commit matches the "new repo created" message, we'll skip it.
+				 *
+				 * See Status_Transitions::approved_create_svn_repo()
+				 */
+				if ( preg_match( '/^Adding (.+) by (.+)\.$/i', $log['message'] ) ) {
+					continue;
+				}
+
+				/*
+				 * If the commit includes an "Author:" byline, we'll use that as the actual author.
+				 * This can be used for automated commits that are made on behalf of a user.
+				 */
+				if ( preg_match( '/^Author: (.+)\.$/im', $log['message'], $matches ) ) {
+					$log['author'] = $matches[1];
+				}
 			}
 
 			$plugin_slug = explode( '/', $log['paths'][0] )[1];
@@ -104,6 +138,7 @@ class SVN_Watcher {
 			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
 				$plugins[ $plugin_slug ] = array(
 					'tags_touched'   => array(), // trunk is a tag too!
+					'tags_deleted'   => array(),
 					'readme_touched' => false, // minor optimization, only parse readme i18n on readme-related commits
 					'code_touched'   => false,
 					'assets_touched' => false,
@@ -115,32 +150,38 @@ class SVN_Watcher {
 			// Keep track of the lowest revision number we've seen for this plugin
 			$plugin['revisions'][] = $log['revision'];
 			foreach ( $log['paths'] as $path ) {
-				$path_parts = explode( '/', trim( $path, '/' ) );
+				$path_parts  = explode( '/', trim( $path, '/' ) );
+				$is_deletion = ( isset( $log['actions'][ $path ] ) && 'D' === $log['actions'][ $path ] );
 
 				if ( ! isset( $path_parts[1] ) ) {
 					continue;
 				}
-
+		
 				if ( 'trunk' == $path_parts[1] ) {
 					$plugin['tags_touched'][] = 'trunk';
-
+		
 				} elseif ( 'tags' == $path_parts[1] && isset( $path_parts[2] ) ) {
-					$plugin['tags_touched'][] = $path_parts[2];
+					if ( $is_deletion && ! isset( $path_parts[3] ) /* not a file deletion */ ) {
+						$plugin['tags_deleted'][] = $path_parts[2];
+					} else {
+						$plugin['tags_touched'][] = $path_parts[2];
+					}
 
 				} elseif ( 'assets' == $path_parts[1] ) {
 					$plugin['assets_touched'] = true;
-
+		
 				}
 
-				// This will have false-positives for when a readme in a subdirectory is hit, but this is only for optimizations.
-				if ( in_array( strtolower( basename( $path ) ), array( 'readme.txt', 'readme.md' ) ) ) {
+				// Only count the readme at the root of /trunk or a tag — a readme.txt in a subdirectory is just bundled documentation.
+				if ( preg_match( '!/(trunk|tags/[^/]+)/readme\.(txt|md)$!i', $path ) ) {
 					$plugin['readme_touched'] = true;
 				}
 				if ( ! $plugin['code_touched'] && ( '/' === substr( $path, -1 ) || '.php' === substr( $path, -4 ) || '.js' === substr( $path, -3 ) ) ) {
 					$plugin['code_touched'] = true;
 				}
 			}
-			$plugin['tags_touched'] = array_unique( $plugin['tags_touched'] );
+
+			$plugin['tags_touched'] = array_values( array_unique( $plugin['tags_touched'] ) );
 		}
 
 		// Sort plugins by minimum revision, it should already be in this order, but double check.

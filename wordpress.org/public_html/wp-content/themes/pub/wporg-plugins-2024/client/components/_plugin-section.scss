@@ -10,6 +10,7 @@
 		column-gap: 10px;
 		justify-content: space-between;
 		margin-bottom: var( --wp--style--block-gap );
+		align-items: center;
 
 		> h2 {
 			margin-bottom: 0;
@@ -20,11 +21,5 @@
 		align-self: center;
 		flex: 0 0 auto;
 		text-decoration: underline;
-
-		margin-right: var( --wp--style--block-gap );
-
-		@media screen and ( min-width: $ms-breakpoint ) {
-			margin-right: 0;
-		}
 	}
 }

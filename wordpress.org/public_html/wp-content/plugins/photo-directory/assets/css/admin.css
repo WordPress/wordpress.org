@@ -1,7 +1,25 @@
 .photos-random .pagination-links {
 	display: none;
+
 }
+.photo-contributor-more-info {
+	overflow-wrap: anywhere;
+}
+.photo-contributor-more-info strong.ipv6 {
+	font-size: 0.68rem;
+}
+.photo-contributor-rejection-stats {
+	width: 100%;
+}
+.photo-contributor-rejection-stats table {
+	text-align: left;
+	width: 100%;
+}
+
 .fixed .column-wporg-photo { font-weight: bold; width: 180px; }
+.fixed .column-wporg-photo-favorites {
+	width: 2.4rem;
+}
 .status-flagged {
 	background-color: rgba(255,150,150,0.15);
 }
@@ -109,6 +127,7 @@ dl.photos-flagged dt {
 body.post-type-photo label[for="authordiv-hide"],
 body.post-type-photo #authordiv,
 body.post-type-photo label[for="likes_meta-hide"],
+body.post-type-photo label[for="postimagediv-hide"],
 body.post-type-photo #wp-content-editor-tools,
 body.post-type-photo #ed_toolbar,
 #photo_category-adder,
@@ -127,8 +146,37 @@ body.post-type-photo #wp-content-editor-container {
 }
 #photos_info dd {
 	margin-left: 1.5rem;
+	overflow-wrap: break-word;
 }
 
 .wp-heading-inline #photo-dir-skip-photo {
 	margin-left: 1rem;
+}
+
+.no-exif {
+	font-style: italic;
+}
+
+.photo-all-exif-container {
+	border-top: 1px solid #ccc;
+	margin-top: 6px;
+	padding-top: 6px;
+}
+.photo-all-exif {
+	overflow-wrap: anywhere;
+}
+
+#dashboard-photo-rejection-stats .col-num {
+	width: 50px;
+}
+#dashboard-photo-rejection-stats .row-sum {
+	font-weight: bold;
+}
+#dashboard-photo-rejection-stats .row-sum td {
+	border-top: 1px solid #c3c4c7;
+}
+
+/* Fix overflow issue related to https://core.trac.wordpress.org/ticket/64547 */
+body.post-type-photo #major-publishing-actions {
+	display: block;
 }

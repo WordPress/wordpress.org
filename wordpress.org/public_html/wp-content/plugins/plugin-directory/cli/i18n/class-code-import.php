@@ -2,11 +2,12 @@
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 
 use Exception;
+use WP_Error;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
-use WP_Error;
 
 /**
  * Class to handle plugin code imports GlotPress.
@@ -73,7 +74,9 @@ class Code_Import extends I18n_Import {
 
 		// Import translations on initial import.
 		if ( 'created' === $result ) {
-			$this->import_translations_to_glotpress_project( $export_directory, $this->plugin, $branch );
+			$plugin_owner_user_id = Plugin_Directory::get_plugin_post( $this->plugin )->post_author ?? 0;
+
+			$this->import_translations_to_glotpress_project( $export_directory, $this->plugin, $branch, $plugin_owner_user_id );
 		}
 	}
 

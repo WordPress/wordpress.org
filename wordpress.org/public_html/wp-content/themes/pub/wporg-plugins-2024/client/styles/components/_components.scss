@@ -1,8 +1,8 @@
-@import "captions";
-@import "galleries";
-@import "media";
+@import "links";
 @import "wporg-filter-bar";
+@import "wporg-search-bar";
 @import "../../components/buttons";
+@import "../../components/code";
 @import "../../components/dialog";
 @import "../../components/plugin-card";
 @import "../../components/plugin-cards";
@@ -16,9 +16,7 @@
 @import "../../components/plugin/sections-changelog";
 @import "../../components/plugin/sections-developers";
 @import "../../components/plugin/sections-faq";
-@import "../../components/plugin/sections-image-gallery";
 @import "../../components/plugin/sections-reviews";
-@import "../../components/plugin/sections-screenshots";
 @import "../../components/plugin/sections-stats";
 @import "../../components/plugin/sections";
 @import "../../components/plugin/style";
@@ -27,7 +25,6 @@
 @import "../../components/widget-area/widgets-committers";
 @import "../../components/widget-area/widgets-contributors";
 @import "../../components/widget-area/widgets-meta";
-@import "../../components/widget-area/widgets-ratings";
 @import "../../components/widget-area/widgets-support";
 @import "../../components/widget-area/widgets";
 @import "../../components/widget-area/style";

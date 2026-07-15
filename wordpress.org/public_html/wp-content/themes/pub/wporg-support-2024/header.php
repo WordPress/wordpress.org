@@ -18,11 +18,34 @@ echo do_blocks( '<!-- wp:wporg/global-header {"style":{"border":{"bottom":{"colo
 $is_forums_home = function_exists( 'bbp_is_forum_archive' ) && bbp_is_forum_archive();
 $is_user_profile = function_exists( 'bbp_is_single_user' ) && bbp_is_single_user();
 $is_homepage = is_page_template( 'page-homepage.php' );
+$is_single_forum = function_exists( 'bbp_is_single_forum' ) && bbp_is_single_forum();
+$is_single_topic = function_exists( 'bbp_is_single_topic' ) && bbp_is_single_topic();
+$view_id = function_exists( 'bbp_get_view_id' ) ? bbp_get_view_id() : '';
+$is_reviews = $view_id === 'reviews';
+$is_plugin = $view_id === 'plugin';
+$is_theme = $view_id === 'theme';
+
+/* Show the WordCamp US 2026 banner on the general (non-Rosetta) home page through August 19, 2026. */
+if ( ( $is_forums_home || is_front_page() || $is_homepage )
+	&& ( ! defined( 'IS_ROSETTA_NETWORK' ) || ! IS_ROSETTA_NETWORK )
+	&& current_datetime() < new \DateTimeImmutable( '2026-08-20 00:00:00', wp_timezone() )
+) {
+	echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static, trusted block markup.
+		'<!-- wp:group {"metadata":{"name":"3 min-height columns"},"align":"full","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"backgroundColor":"light-grey-2","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center"},"blockVisibility":{"controlSets":[{"id":1,"enable":true,"controls":[]}]}} -->
+		<div class="wp-block-group alignfull has-light-grey-2-background-color has-background"><!-- wp:group {"style":{"layout":{"selfStretch":"fill","flexSize":null},"dimensions":{"minHeight":"0px"},"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"background":{"backgroundImage":{"url":"https://wordpress.org/files/2026/06/wcus_map.png","id":52120,"source":"file","title":"wcus_map"},"backgroundSize":"cover","backgroundAttachment":"scroll","backgroundPosition":"74% 95%"},"color":{"background":"#47002c"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
+		<div class="wp-block-group has-background" style="background-color:#47002c;min-height:0px;padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--20);padding-left:var(--wp--preset--spacing--20)"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}}},"textColor":"white","fontSize":"normal"} -->
+		<p class="has-white-color has-text-color has-link-color has-normal-font-size">Need help with WordPress? Join the community at WordCamp US 2026. <a href="https://us.wordcamp.org/2026/" data-type="link" data-id="https://us.wordcamp.org/2026/" style="color:var(--wp--preset--color--white)">Get your tickets↗</a></p>
+		<!-- /wp:paragraph --></div>
+		<!-- /wp:group --></div>
+		<!-- /wp:group -->'
+	);
+}
 
 echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	? '<!-- wp:pattern {"slug":"wporg-support/local-nav-home"} /-->'
 	: '<!-- wp:pattern {"slug":"wporg-support/local-nav"} /-->'
 );
+
 
 ?>
 
@@ -30,8 +53,9 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-forums' ); ?></a>
 
 	<div id="content" class="site-content">
-		<?php if ( is_front_page() || $is_homepage ) : ?>
-			<?php echo do_blocks(
+		<?php if ( is_front_page() || $is_homepage ) :
+
+			echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
 					<div class="wp-block-group alignfull has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color" style="padding-right:var(--wp--preset--spacing--edge-space);padding-left:var(--wp--preset--spacing--edge-space)">
@@ -57,8 +81,8 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					<div class="wp-block-wporg-language-suggest alignfull"></div>
 					<!-- /wp:wporg/language-suggest -->
 
-					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
-					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
 
 						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
 
@@ -68,9 +92,11 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					/* Translators: subhead */
 					__( 'We&#8217;ve got a variety of resources to help you get the most out of WordPress.', 'wporg-forums' )
 				)
-			); ?>
-		<?php elseif ( $is_forums_home ) : ?>
-			<?php echo do_blocks(
+			);
+
+		elseif ( $is_forums_home ) :
+
+			echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
 					<div class="wp-block-group alignfull has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color" style="padding-right:var(--wp--preset--spacing--edge-space);padding-left:var(--wp--preset--spacing--edge-space)">
@@ -96,8 +122,8 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					<div class="wp-block-wporg-language-suggest alignfull"></div>
 					<!-- /wp:wporg/language-suggest -->
 
-					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
-					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
 
 						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
 
@@ -106,15 +132,41 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 					esc_html__( 'Forums', 'wporg-forums' ),
 					esc_html__( 'A space to ask and discuss all things WordPress.', 'wporg-forums' )
 				)
-			); ?>
-		<?php elseif ( ! $is_user_profile ) : ?>
-			<?php echo do_blocks(
-				'<!-- wp:group {"style":{"spacing":{"border":{"bottom":{"color":"var:preset|color|light-grey-1","style":"solid","width":"1px"}},"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
-				<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space);border-bottom:1px solid var(--wp--preset--color--light-grey-1)">
+			);
 
-					<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
+		else :
 
-				</div>
-				<!-- /wp:group -->'
-			); ?>
-		<?php endif; ?>
+			if ( ! $is_user_profile && ! is_404() ) {
+				echo do_blocks(
+					sprintf(
+						'<!-- wp:group {"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+						<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
+
+							<!-- wp:group -->
+							<div class="wp-block-group alignwide">
+
+								%s
+
+							</div>
+							<!-- /wp:group -->
+
+						</div>
+						<!-- /wp:group -->',
+						bbp_get_breadcrumb()
+					)
+				);
+			}
+
+			if ( ! ( $is_user_profile || $is_reviews || $is_plugin || $is_theme || $is_single_forum ) ) {
+				echo do_blocks(
+					'<!-- wp:group {"style":{"spacing":{padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
+
+						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
+
+					</div>
+					<!-- /wp:group -->'
+				);
+			}
+
+		endif;

@@ -8,6 +8,10 @@
 		margin: 2rem 0 1rem;
 		padding-bottom: 1rem;
 
+		a {
+			text-decoration: none;
+		}
+
 		&:first-child {
 			margin-top: 0;
 		}
@@ -98,6 +102,7 @@
 	.reviews-link {
 		display: inline-block;
 		font-size: var( --wp--preset--font-size--small );
+		text-decoration: none;
 
 		&:after {
 			content: "\f345";

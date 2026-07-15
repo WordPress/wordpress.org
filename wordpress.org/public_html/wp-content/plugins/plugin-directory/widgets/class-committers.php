@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
 
-use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -56,7 +55,7 @@ class Committers extends \WP_Widget {
 				<li data-user="<?php echo esc_attr( $committer->user_nicename ); ?>">
 					<?php echo get_avatar( $committer->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$committer->user_nicename}/" ); ?>">
-						<?php echo Template::encode( $committer->display_name ?: $committer->user_nicename ); ?>
+						<?php echo $committer->display_name ?: $committer->user_nicename; ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_committer', $post ) ) : ?>
@@ -72,7 +71,7 @@ class Committers extends \WP_Widget {
 			<li class="new">
 				<form id="add-committer" action="POST">
 					<input type="text" name="committer" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
-					<button type="submit" class="button button-secondary"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
+					<button type="submit" class="button button-secondary button-small"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
 				</form>
 
 				<script id="tmpl-new-committer" type="text/template">

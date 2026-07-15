@@ -6,7 +6,8 @@ use stdClass;
  * Main entry point
  */
 function main() {
-	global $cache_group, $cache_life;
+	// Note: $location and $response are included for use in wrapping APIs which utilise this.
+	global $cache_group, $cache_life, $location, $response;
 
 	validate_request();
 
@@ -222,6 +223,9 @@ function build_response( $location, $location_args ) {
 	$events = array();
 	$error  = null;
 
+	// Define defaults if not set in the request.
+	$location_args += array( 'restrict_by_country' => false );
+
 	if ( 'temp-request-throttled' === $location ) {
 		$location = array();
 		$error    = 'temp-request-throttled';
@@ -229,7 +233,7 @@ function build_response( $location, $location_args ) {
 
 	if ( $location ) {
 		$event_args = array(
-			'is_client_core' => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+			'is_client_core'      => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
@@ -296,17 +300,12 @@ function build_response( $location, $location_args ) {
  * There isn't a good way to do that, though, so plugins will still get unexpected results.
  * They can set a custom user agent to get the raw data, though.
  *
- * @param string $user_agent
+ * @param string $user_agent Optional. The user agent to check. Defaults to the current request's user agent.
  *
  * @return bool
  */
-function is_client_core( $user_agent ) {
-	// This doesn't simply return the value of `strpos()` because `0` means `true` in this context
-	if ( false === strpos( $user_agent, 'WordPress/' ) ) {
-		return false;
-	}
-
-	return true;
+function is_client_core( $user_agent = null ) {
+	return str_starts_with( $user_agent ?? $_SERVER['HTTP_USER_AGENT'], 'WordPress/' );
 }
 
 /**
@@ -814,12 +813,18 @@ function get_country_from_name( $country_name ) {
 function get_events( $args = array() ) {
 	global $wpdb, $cache_life, $cache_group;
 
-	// Sort to ensure consistent cache keys.
-	ksort( $args );
+	// Define defaults if not set in the request.
+	$args += array(
+		'is_client_core'      => false,
+		'restrict_by_country' => false,
+		'number'              => 10,
+	);
 
 	// number should be between 0 and 100, with a default of 10.
-	$args['number'] = $args['number'] ?? 10;
 	$args['number'] = max( 0, min( $args['number'], 100 ) );
+
+	// Sort to ensure consistent cache keys.
+	ksort( $args );
 
 	// Distances in kilometers
 	$event_distances = array(
@@ -1084,6 +1089,8 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
  *
  * Externalizing this makes it easier to test the `maybe_add_regional_wordcamps` function.
  *
+ * TODO: Figure out a way to automate this, as the current manual process is not sustainable.
+ *
  * @return array
  */
 function get_regional_wordcamp_data() {
@@ -1101,19 +1108,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Asia',
-				'url'        => 'https://asia.wordcamp.org/2024/',
+				'url'        => 'https://asia.wordcamp.org/2027/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2024-03-07 00:00:00',
-				'end_date'   => '2024-03-09 00:00:00',
-				'start_unix_timestamp' => strtotime( '2024-03-07 00:00:00' ) - 8 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2024-03-09 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'date'       => '2027-04-09 00:00:00',
+				'end_date'   => '2027-04-11 00:00:00',
+				'start_unix_timestamp' => strtotime( '2027-04-09 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2027-04-11 00:00:00' ) - 8 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Taipei, Taiwan',
-					'country'   => 'TW',
-					'latitude'  => 25.0333949,
-					'longitude' => 121.5661024,
+					'location'  => 'Penang, Malaysia',
+					'country'   => 'MY',
+					'latitude'  => 5.4163568,
+					'longitude' => 100.3327612,
 				),
 			),
 		),
@@ -1155,19 +1162,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
-				'url'        => 'https://europe.wordcamp.org/2022/',
+				'url'        => 'https://europe.wordcamp.org/2026/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'                 => '2022-06-02 00:00:00',
-				'end_date'             => '2022-06-04 00:00:00',
-				'start_unix_timestamp' => strtotime( '2022-06-02 00:00:00' ) - 1 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2022-06-04 00:00:00' ) - 1 * HOUR_IN_SECONDS,
+				'date'                 => '2026-06-04 00:00:00',
+				'end_date'             => '2026-06-06 00:00:00',
+				'start_unix_timestamp' => strtotime( '2026-06-04 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2026-06-06 00:00:00' ) - 2 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Porto',
-					'country'   => 'PT',
-					'latitude'  => 41.147,
-					'longitude' => -8.625,
+					'location'  => 'Kraków',
+					'country'   => 'PL',
+					'latitude'  => 50.0646501,
+					'longitude' => 19.9449799,
 				),
 			),
 		),
@@ -1182,22 +1189,25 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://us.wordcamp.org/2021/',
+				'url'        => 'https://us.wordcamp.org/2026/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2021-10-01 00:00:00',
-				'end_date'   => '2021-10-02 00:00:00',
-				'start_unix_timestamp' => strtotime( '2021-10-01 00:00:00' ) - 5 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2021-10-02 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				// Local time
+				'date'       => '2026-08-16 09:00:00',
+				'end_date'   => '2026-08-19 17:00:00',
+				// GMT which due to local being GMT-7, GMT is ahead by 7h.
+				'start_unix_timestamp' => strtotime( '2026-08-16 09:00:00' ) + 7 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2026-08-19 17:00:00' ) + 7 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Online',
+					'location'  => 'Phoenix, Arizona',
 					'country'   => 'US',
-					'latitude'  => 38.6532135,
-					'longitude' => -90.3136733,
+					'latitude'  => 33.4483771,
+					'longitude' => -112.0740373,
 				),
 			),
 		),
+
 	);
 
 	return $events;
@@ -1219,8 +1229,8 @@ function get_iso_3166_2_country_codes( $continent = '' ) {
 		'africa' => array(
 			'AO', 'BF', 'BI', 'BJ', 'BW', 'CD', 'CF', 'CG', 'CI', 'CM', 'CV', 'DJ', 'DZ', 'EG', 'EH', 'ER', 'ET',
 			'GA', 'GH', 'GM', 'GN', 'GQ', 'GW', 'KE', 'KM', 'LR', 'LS', 'LY', 'MA', 'MG', 'ML', 'MR', 'MU', 'MW',
-			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'ST', 'SZ', 'TD', 'TG', 'TN',
-			'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
+			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'SS', 'ST', 'SZ', 'TD', 'TG',
+			'TN', 'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
 		),
 
 		'asia' => array(
@@ -1305,6 +1315,16 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			if ( ! empty( $location['country'] ) && strtoupper( $data['event']['location']['country'] ) === strtoupper( $location['country'] ) ) {
 				$regional_wordcamps[] = $data['event'];
 			}
+		}
+
+		// Special case: Show WordCamp Europe to all of europe until it's over.
+		if (
+			'europe' === $region &&
+			! empty( $location['country'] ) &&
+			$current_time <= $data['event']['end_unix_timestamp'] &&
+			in_array( strtoupper( $location['country'] ), $data['regional_countries'], true )
+		) {
+			$regional_wordcamps[] = $data['event'];
 		}
 
 		// After the promo ends, the event will just be displayed to everyone in the normal search radius (2 weeks
@@ -1588,35 +1608,31 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  * Pin one-off events.
  */
 function pin_one_off_events( $events, $current_time ) {
-	$madrid_utc_offset = 1 * HOUR_IN_SECONDS; // Central European Standard Time - GMT+1
+	$tokyo_utc_offset = 9 * HOUR_IN_SECONDS; // JST: UTC+9
 
 	$sotw = array(
 		'type'                 => 'wordcamp',
-		'title'                => 'State of the Word - Watch Now', // Remove "watch now" next year, see date note below.
+		'title'                => 'State of the Word 2024 – Tokyo, Japan',
 		// `utm_source` is `private` because it would have to be set by the WP install, we don't need it, and tracking it could be a privacy concern.
-		'url'                  => 'https://wordpress.org/state-of-the-word/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2023',
+		'url'                  => 'https://wordpress.org/state-of-the-word/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2024',
 		'meetup'               => '',
 		'meetup_url'           => '',
-
-		// This year they requested the event to show up for a few days after it was over. The API does that no
-		// problem, but in Core `WP_Community_Events::trim_events()` will remove it. This is a hack to make the
-		// event show up, but it will probably confuse people about when it actual was, because the date will be
-		// wrong. Don't do this again next year, only show the event in the lead up to it. The pinned News item
-		// will still show it to people after the event.
-		'date'                 => '2023-12-14 15:00:00',
-		'end_date'             => '2023-12-14 16:30:00',
-		'start_unix_timestamp' => strtotime( '2023-12-14 15:00:00' ) - $madrid_utc_offset,
-		'end_unix_timestamp'   => strtotime( '2023-12-14 16:30:00' ) - $madrid_utc_offset,
+		// Local time for the event location.
+		'date'                 => '2024-12-16 18:00:00',
+		'end_date'             => '2024-12-16 20:00:00',
+		// Unix timestamp (UTC).
+		'start_unix_timestamp' => strtotime( '2024-12-16 18:00:00' ) - $tokyo_utc_offset,
+		'end_unix_timestamp'   => strtotime( '2024-12-16 20:00:00' ) - $tokyo_utc_offset,
 
 		'location' => array(
 			'location'  => 'Online',
-			'country'   => 'ES',
-			'latitude'  => 40.41446998218856,
-			'longitude' => -3.695042334019202,
+			'country'   => 'JP',
+			'latitude'  => 35.652832,
+			'longitude' => 139.839478,
 		),
 	);
 
-	if ( $current_time > strtotime( 'December 9, 2023' ) && $current_time < strtotime( 'December 14, 2023' ) ) {
+	if ( $current_time > strtotime( 'December 11, 2024' ) && $current_time < strtotime( 'December 17, 2024' ) ) {
 		array_unshift( $events, $sotw );
 	}
 
@@ -1713,4 +1729,6 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 	);
 }
 
-main();
+if ( ! defined( 'WPORG_RUNNING_TESTS' ) || ! WPORG_RUNNING_TESTS ) {
+	main();
+}

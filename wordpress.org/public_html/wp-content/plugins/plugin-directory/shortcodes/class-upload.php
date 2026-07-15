@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Template;
+use function WordPressdotorg\Two_Factor\get_onboarding_account_url;
 
 class Upload {
 
@@ -33,7 +34,7 @@ class Upload {
 				$plugin->review_email = Upload_Handler::find_review_email( $plugin );
 
 				if ( $plugin->review_email && 'closed' !== $plugin->review_email->status ) {
-					$plugin->status = __( "Being Reviewed &#8212; We've got your email. This plugin is currently waiting on action from our review team.", 'wporg-plugins' );
+					$plugin->status = __( "Being Reviewed &#8212; We've got your email. This plugin is currently waiting on action from our plugins team.", 'wporg-plugins' );
 				}
 			} elseif ( 'approved' === $plugin->post_status ) {
 				$plugin->status = __( 'Approved &#8212; Please check your email for instructions on uploading your plugin.', 'wporg-plugins' );
@@ -47,11 +48,26 @@ class Upload {
 	 * Renders the upload shortcode.
 	 */
 	public static function display() {
+		// In the rest-api, just return the shortcode tag, so it can be rendered properly in the app or other consumers.
+		if ( wp_is_serving_rest_request() ) {
+			return '[wporg-plugin-upload]';
+		}
+
 		if ( ! is_user_logged_in() ) {
 			return '<div class="notice notice-error notice-alt"><p>' . sprintf(
 				/* translators: Login URL */
 				__( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ),
 				esc_url( wp_login_url() )
+			) . '</p></div>';
+		}
+
+		// Check 2FA before proceeding.
+		$preconditions = Upload_Handler::accepting_uploads();
+		if ( is_wp_error( $preconditions ) && '2fa_required' === $preconditions->get_error_code() ) {
+			return '<div class="notice notice-error notice-alt"><p>' . sprintf(
+				/* translators: Setup 2FA url */
+				__( 'Before you can upload a new plugin, <a href="%s">please enable two-factor authentication</a>.', 'wporg-plugins' ),
+				esc_url( function_exists( 'WordPressdotorg\Two_Factor\get_onboarding_account_url' ) ? get_onboarding_account_url() : 'https://profiles.wordpress.org/me/profile/security' )
 			) . '</p></div>';
 		}
 
@@ -63,16 +79,17 @@ class Upload {
 		$upload_result = false;
 
 		list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
+		$can_submit_new_plugin                        = ! is_wp_error( $preconditions );
 
 		if (
 			! empty( $_POST['_wpnonce'] ) &&
 			! empty( $_FILES['zip_file'] ) &&
 			(
 				// New submission.
-				! $submitted_counts->total &&
 				empty( $_POST['plugin_id'] ) &&
-				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' ) &&
-				'upload' === $_POST['action']
+				'upload' === $_POST['action'] &&
+				$can_submit_new_plugin &&
+				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' )
 			) || (
 				// Existing submission
 				! empty( $_POST['plugin_id'] ) &&
@@ -89,20 +106,34 @@ class Upload {
 			} else {
 				$type    = 'success';
 				$message = $upload_result;
+
+				if ( function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
+					bump_stats_extra( 'plugin-upload-source', 'webform' );
+				}
 			}
 
 			// Refresh the lists.
 			list( $submitted_plugins, $submitted_counts ) = self::get_submitted_plugins();
+			$can_submit_new_plugin                        = ! is_wp_error( Upload_Handler::has_queue_capacity() );
 
 			if ( ! empty( $message ) ) {
 				echo "<div class='notice notice-{$type} notice-alt'><p>{$message}</p></div>\n";
 			}
 		}
 
-		if ( ! is_wp_error( $upload_result ) || $submitted_counts->total ) :
+		if ( ! is_wp_error( $upload_result ) || $submitted_counts->total /* has a plugin in the review queue */ ) :
 			$plugins       = wp_count_posts( 'plugin', 'readable' );
 			$oldest_plugin = get_posts( [ 'post_type' => 'plugin', 'post_status' => 'new', 'order' => 'ASC', 'orderby' => 'post_date_gmt', 'numberposts' => 1 ] );
-			$queue_length  = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
+			$queue_length_in_days = 0;
+			$queue_oldest_new_plugin_date_with_offset = '';
+			if ( ! empty( $oldest_plugin ) ) {
+				$queue_length_in_days = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
+				// It adds a 36 hours offset to avoid confusion related to timezones and for it to be at least the previous day of the latest submission.
+				$queue_oldest_new_plugin_date_with_offset = date_i18n(
+					get_option( 'date_format' ),
+					strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) - ( 36 * HOUR_IN_SECONDS )
+				);
+			}
 			?>
 
 			<div class="plugin-queue-message notice notice-info notice-alt">
@@ -123,30 +154,21 @@ class Upload {
 					);
 				}
 
-				// If the queue is currently beyond 10 days, display a warning to that effect.
-				if ( $queue_length > 10 ) {
-					echo '</p><p>';
-					esc_html_e( 'The review queue is currently longer than normal, we apologize for the delays and ask for patience.', 'wporg-plugins' );
-
+				if ( $plugins->new > 0 && ! empty( $queue_oldest_new_plugin_date_with_offset ) ) {
 					echo '</p><p>';
 					printf(
-						/* translators: %s: Number of days. Only displayed if > 10 */
-						esc_html( _n(
-							'The current wait for an initial review is at least %s day.',
-							'The current wait for an initial review is at least %s days.',
-							$queue_length,
+						/* translators: %s: Date of the oldest new plugin in the queue, with a 36 hours offset. */
+						esc_html( __(
+							'All plugins that have been submitted before %s have received an initial response by email to their submission.',
 							'wporg-plugins'
 						) ),
-						'<strong>' . number_format_i18n( $queue_length ) . '</strong>'
+						'<strong>' . esc_html( $queue_oldest_new_plugin_date_with_offset ) . '</strong>'
 					);
-				} else {
-					echo '</p><p>';
-					printf(
-						/* translators: plugins@wordpress.org */
-						__( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
-						'plugins@wordpress.org'
-					);
-					echo '</p>';
+
+					// If the queue is currently beyond 10 days, display a warning to that effect.
+					if ( $queue_length_in_days >= 10 ) {
+						echo ' ' . __( 'The review queue is currently longer than normal, we apologize for the delays and ask for patience.', 'wporg-plugins' );
+					}
 				}
 				?>
 				</p>
@@ -173,8 +195,8 @@ class Upload {
 						printf(
 							/* translators: %s: Amount of pending plugins. */
 							esc_html( _n(
-								'You have %s plugin being actively reviewed and have been sent an email regarding issues. You must complete this review before you can submit another plugin. Please reply to that email with your corrected code attached or linked in order to proceed with the review.',
-								'You have %s plugins being actively reviewed and have been sent emails regarding issues. You must complete their reviews before you can submit another plugin. Please reply to the emails with your corrected code attached or linked in order to proceed with each review.',
+								'You have %s plugin being actively reviewed and have been sent an email regarding issues. You must complete this review before you can submit another plugin. Please continue the review process by following the steps indicated in that email.',
+								'You have %s plugins being actively reviewed and have been sent emails regarding issues. You must complete their reviews before you can submit another plugin. Please continue the review process by following the steps indicated in that email.',
 								$submitted_counts->pending,
 								'wporg-plugins'
 							) ),
@@ -196,7 +218,7 @@ class Upload {
 					</p>
 
 					<p>
-						<?php _e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the plugin review team examines it.' ); ?>
+						<?php _e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the Plugins Team examines it.', 'wporg-plugins' ); ?>
 					</p>
 
 					<ul>
@@ -206,24 +228,61 @@ class Upload {
 						$can_change_slug   = ( 'new' === $plugin->post_status && ! $plugin->{'_wporg_plugin_original_slug'} );
 						$can_upload_extras = in_array( $plugin->post_status, array( 'new', 'pending' ), true );
 
-						echo '<li>';
-							echo '<strong>' . esc_html( $plugin->post_title ) . '</strong>';
-							echo '<ul>';
+						echo '<li class="plugin-submission-item">';
+							echo '<div class="plugin-submission-name">' . esc_html( $plugin->post_title ) . '</div>';
 							printf(
-								'<li>%s</li>',
+								'<div class="plugin-submission-submited-date">%s</div>',
+								sprintf(
+									__( 'Submitted on: %s', 'wporg-plugins' ),
+									esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->post_date_gmt ) ) )
+								)
+							);
+							printf(
+								'<div class="plugin-submission-status">%s</div>',
 								sprintf(
 									__( 'Review status: %s', 'wporg-plugins' ),
 									$plugin->status
 								)
 							);
-							echo '<li>';
+							if (
+								'pending' === $plugin->post_status &&
+								! empty( $plugin->review_email ) &&
+								! empty( $plugin->review_email->subject ) &&
+								! empty( $plugin->review_email->created )
+							) {
+								printf(
+									'<div class="plugin-submission-email">✉️✔️ %s</div>',
+									sprintf(
+										__( 'Our team emailed you on <strong>%s</strong> regarding your submission. The subject line is: "<strong>%s</strong>".', 'wporg-plugins' ),
+										esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->review_email->created ) ) ),
+										esc_html( $plugin->review_email->subject )
+									)
+								);
+								echo '<div class="plugin-submission-email-clarification">';
+								esc_html_e( 'Please follow the instructions in that email to continue the review process. If you don’t see it in your inbox, check your spam or junk folder. You may also want to add plugins@wordpress.org to your email whitelist to ensure you receive future updates.', 'wporg-plugins' );
+								echo '</div>';
+							}
+							if ( 'new' === $plugin->post_status ) {
+								printf(
+									'<div class="plugin-submission-email">✉️⏳ %s</div>',
+									sprintf(
+										__( 'Please be patient and wait for the review email. It will be sent to your email address, <strong>%s</strong>, with the subject line: "<strong>%s</strong>".', 'wporg-plugins' ),
+										esc_html( get_userdata( $plugin->post_author )->user_email ),
+										'[WordPress Plugin Directory] Review in Progress: ' . $plugin->post_title
+									)
+								);
+								echo '<div class="plugin-submission-email-clarification">';
+								esc_html_e( 'Be sure to check your spam folder, and consider adding plugins@wordpress.org to your email whitelist to ensure the message does not get missed.', 'wporg-plugins' );
+								echo '</div>';
+							}
+							echo '<div class="plugin-submission-assigned-slug">';
 							printf(
 								__( 'Current assigned slug: %s', 'wporg-plugins' ),
 								'<code>' . esc_html( $plugin->post_name ) . '</code>'
 							);
 							?>
 							<?php if ( $can_change_slug ) : ?>
-								<a href="#" class="hide-if-no-js" onclick="this.nextElementSibling.showModal()"><?php _e( 'change', 'wporg-plugins' ); ?></a>
+								<a href="#" class="hide-if-no-js" onclick="event.preventDefault(); this.nextElementSibling.showModal()"><?php _e( 'change', 'wporg-plugins' ); ?></a>
 								<dialog class="slug-change hide-if-no-js">
 									<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
 									<strong><?php _e( 'Request to change your plugin slug', 'wporg-plugins' ); ?></strong>
@@ -269,7 +328,7 @@ class Upload {
 											</label>
 										</p>
 										<p>
-											<input class="button button-primary" type="submit" value="<?php
+											<input class="wp-block-button__link" type="submit" value="<?php
 												/* translators: Request slug-change button */
 												esc_attr_e( 'Request', 'wporg-plugins' );
 											?>" />
@@ -278,7 +337,7 @@ class Upload {
 								</dialog>
 							<?php
 							endif; // $can_change_slug
-							echo '</li>';
+							echo '</div>';
 
 							add_filter( 'get_attached_media_args', $get_attached_media_args = function( $args ) {
 								$args['orderby'] = 'post_date';
@@ -289,8 +348,8 @@ class Upload {
 							remove_filter( 'get_attached_media_args', $get_attached_media_args );
 
 							if ( $can_upload_extras ) {
-								echo '<li>';
-								echo '<a href="#" class="show-upload-additional hide-if-no-js">' . sprintf( __( 'Upload new version of %s for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
+								echo '<div class="plugin-submission-update-code wp-block-button is-small">';
+								echo '<a href="#" class="show-upload-additional hide-if-no-js wp-block-button__link">' . sprintf( __( 'Upload updated "%s" plugin for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
 
 								?>
 								<form class="plugin-upload-form hidden" enctype="multipart/form-data" method="POST" action="">
@@ -298,38 +357,64 @@ class Upload {
 									<input type="hidden" name="action" value="upload-additional"/>
 									<input type="hidden" name="plugin_id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
 
-									<label class="button button-secondary zip-file">
+									<label>
+										<?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
+										<textarea name="comment" rows="3" cols="80"></textarea>
+									</label>
+									<br>
+
+									<label class="wp-block-button__link zip-file">
 										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
 										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
 									</label>
 
-									<input class="upload-button button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>"/>
+									<input class="upload-button wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>"/>
 								</form>
 								<?php
-								echo '</li>';
+								echo '</div>';
 							}
 
-							echo '<li>';
-							echo '<strong>' . __( 'Submitted files:', 'wporg' ) . '</strong><ol>';
+							echo '<div class="plugin-submission-submitted-files">';
+							echo '<strong>' . __( 'Submitted files:', 'wporg-plugins' ) . '</strong>';
 							foreach ( $attached_media as $attachment_post_id => $upload ) {
-								echo '<li><ul>';
-								echo '<li><code>' . esc_html( $upload->submitted_name ) . '</code></li>';
-								echo '<li>' . sprintf( __( 'Version: %s', 'wporg-plugins' ), '<code>' . esc_html( $upload->version ) . '</code>' ) . '</li>';
-								echo '<li>' . sprintf( __( 'Upload Date: %s', 'wporg-plugins' ), date_i18n( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</li>';
-								if ( array_key_first( $attached_media) === $attachment_post_id ) {
+								echo '<div class="plugin-submission-file">';
+								echo '<table class="plugin-submission-file__meta">';
+								echo '<tbody>';
+
+								echo '<tr>';
+								echo '<th scope="row">' . esc_html__( 'Upload Date:', 'wporg-plugins' ) . '</th>';
+								echo '<td>' . esc_html( wp_date( get_option( 'date_format' ), strtotime( $upload->post_date ) ) ) . '</td>';
+								echo '</tr>';
+
+								echo '<tr>';
+								echo '<th scope="row">' . esc_html__( 'File:', 'wporg-plugins' ) . '</th>';
+								echo '<td><code>' . esc_html( $upload->submitted_name ) . '</code></td>';
+								echo '</tr>';
+
+								echo '<tr>';
+								echo '<th scope="row">' . esc_html__( 'Version:', 'wporg-plugins' ) . '</th>';
+								echo '<td><code>' . esc_html( $upload->version ) . '</code></td>';
+								echo '</tr>';
+
+								echo '</tbody>';
+								echo '</table>';
+
+								if ( $upload->post_content ) {
+									echo '<div class="plugin-submission-file__notes">' . nl2br( wp_kses_post( $upload->post_content ) ) . '</div>';
+								}
+
+								if ( array_key_first( $attached_media ) === $attachment_post_id ) {
 									printf(
-										'<li><a href="%s" class="%s" target="_blank">%s</a></li>',
+										'<div class="plugin-submission-file__pcp wp-block-button is-small"><a href="%s" class="%s" target="_blank">%s</a></div>',
 										esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
-										'button button-primary',
+										'wp-block-button__link',
 										__( 'Check with Plugin Check', 'wporg-plugins' )
 									);
 								}
-								echo '</ul></li>';
+								echo '</div>';
 							}
-							echo '</ol>';
 
-							echo '</li>';
-							echo '</ul>';
+							echo '</div>';
 						echo "</li>\n";
 					}
 					?>
@@ -340,7 +425,15 @@ class Upload {
 
 		<?php endif; // ! is_wp_error( $upload_result )
 
-		if ( is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
+		if ( is_wp_error( $preconditions ) && 'submissions_paused' === $preconditions->get_error_code() ) {
+			printf(
+				'<div class="notice notice-error notice-alt"><p>%s</p></div>',
+				sprintf(
+					__( 'New plugin submissions are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-plugins' ),
+					'https://wordpress.org/news/2024/12/holiday-break/'
+				)
+			);
+		} else if ( is_wp_error( $preconditions ) && 'unsafe_email' === $preconditions->get_error_code() ) {
 			echo '<div class="notice notice-error notice-alt"><p>' .
 				sprintf(
 					/* translators: %s: Profile edit url. */
@@ -349,51 +442,14 @@ class Upload {
 					) .
 					"</p></div>\n";
 
-		} else if ( ! $submitted_counts->total && ( ! $upload_result || is_wp_error( $upload_result ) ) ) : ?>
+		} else if ( $can_submit_new_plugin && ( ! $upload_result || is_wp_error( $upload_result ) ) ) :
+
+			?>
 			<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 				<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 				<input type="hidden" name="action" value="upload"/>
-				<?php
-				if ( ! empty( $_REQUEST['upload_token'] ) ) {
-					printf(
-						'<input type="hidden" name="upload_token" value="%s"/>',
-						esc_attr( $_REQUEST['upload_token'] )
-					);
 
-					if ( ! $uploader->has_valid_upload_token() ) {
-						printf(
-							'<div class="notice notice-error notice-alt"><p>%s</p></div>',
-							esc_html__( 'The token provided is invalid for this user.', 'wporg-plugins')
-						);
-					}
-				}
-				?>
-				<?php
-				/*
-				<fieldset>
-					<legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
-					<ul class="category-checklist">
-						<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
-					</ul>
-				</fieldset> */
-				?>
-
-				<label class="button button-secondary zip-file">
-					<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
-					<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
-				</label>
-
-				<p>
-					<small>
-						<?php
-						printf(
-							/* translators: Maximum allowed file size. */
-							esc_html__( 'Maximum allowed file size: %s', 'wporg-plugins' ),
-							esc_html( size_format( wp_max_upload_size() ) )
-						);
-						?>
-					</small>
-				</p>
+				<h3><?php esc_html_e( 'Please, read and check the following before uploading your plugin', 'wporg-plugins' ); ?></h3>
 
 				<p>
 					<label>
@@ -432,15 +488,90 @@ class Upload {
 							printf(
 								/* Translators: URL to plugin-check plugin */
 								__( 'I confirm that the plugin has been tested with the <a href="%s">Plugin Check</a> plugin, and all indicated issues resolved (apart from what I believe to be false-positives).', 'wporg-plugins' ),
-								home_url( '/plugins/plugin-check/' )
+								home_url( '/plugin-check/' )
 							);
 						?>
 					</label>
 				</p>
 
-				<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
+				<h3><?php esc_html_e( 'Plugin Naming', 'wporg-plugins' ); ?></h3>
+				<p><?php echo wp_kses_post( __( '<strong>Generic names</strong> that <strong>resemble existing plugins in the directory</strong> (e.g., “AI Writer”, “Image Optimization”) won’t be accepted, even if the slug is available.', 'wporg-plugins' ) ); ?></p>
+				<p><?php echo wp_kses_post( __( 'Instead, please <strong>start your plugin name with a unique or coined term</strong>, such as your brand, alias, or organization name (e.g., “Acme AI Writer”, “WriteralAI - AI Writter”, “Acme Image Optimization”, “Imageralia - Image Optimization”).', 'wporg-plugins' ) ); ?></p>
+
+				<h3><?php esc_html_e( 'Plugin Ownership', 'wporg-plugins' ); ?></h3>
+				<p><?php printf(
+					/* translators: 1: User profile URL. */
+					wp_kses_post(
+						__( 'Names that <strong>begin</strong> with a project, organization, or trademark are <strong>only accepted if submitted by the verified owner</strong>. Ownership can be <strong>confirmed through the email domain in your <a href="%1$s" target="_blank">user profile</a></strong> - update it before submitting.', 'wporg-plugins' )
+					),
+					esc_url( 'https://profiles.wordpress.org/profile/edit' )
+				); ?>
+				<br>
+				<?php echo wp_kses_post( __( '<i>For example, use an official Acme email domain (e.g., “john@acme.example”) for a plugin named “Acme AI Writer”.</i>', 'wporg-plugins' ) ); ?>
+				</p>
+				<p><?php echo wp_kses_post( __( '<strong>If you don’t own the entity, don’t imply affiliation</strong>. Place their name <strong>at the end</strong> and <strong>make the distinction clear</strong>.', 'wporg-plugins' ) ); ?>
+				<br>
+				<?php echo wp_kses_post( __( '<i>For example, if you don’t own “Acme” use a structure like: “{your-distinguible-plugin-name} for Acme” (e.g., “WriteralAI – AI Writer for Acme”).</i>', 'wporg-plugins' ) ); ?>
+				</p>
+
+				<h3><?php esc_html_e( 'Are you ready? Upload the .zip file for your plugin', 'wporg-plugins' ); ?></h3>
+
+				<?php
+				if ( ! empty( $_REQUEST['upload_token'] ) ) {
+					printf(
+						'<input type="hidden" name="upload_token" value="%s"/>',
+						esc_attr( $_REQUEST['upload_token'] )
+					);
+
+					if ( ! $uploader->has_valid_upload_token() ) {
+						printf(
+							'<div class="notice notice-error notice-alt"><p>%s</p></div>',
+							esc_html__( 'The token provided is invalid for this user.', 'wporg-plugins' )
+						);
+					}
+				}
+				?>
+				<?php
+				/*
+				<fieldset>
+					<legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
+					<ul class="category-checklist">
+						<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
+					</ul>
+				</fieldset> */
+				?>
+
+				<label class="wp-block-button__link zip-file">
+					<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
+					<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
+				</label>
+
+				<div>
+					<small>
+						<?php
+						printf(
+							/* translators: Maximum allowed file size. */
+							esc_html__( 'Maximum allowed file size: %s', 'wporg-plugins' ),
+							esc_html( size_format( wp_max_upload_size() ) )
+						);
+						?>
+					</small>
+				</div>
+
+				<p>
+					<label>
+						<?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
+						<textarea name="comment" rows="3" cols="80"><?php
+							if ( ! empty( $_REQUEST['comment'] ) ) {
+								echo esc_textarea( $_REQUEST['comment'] );
+							}
+							?></textarea>
+					</label>
+				</p>
+
+				<input id="upload_button" class="wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 			</form>
-		<?php endif; // ! $submitted_counts->total
+		<?php endif; // $can_submit_new_plugin
 
 		return ob_get_clean();
 	}

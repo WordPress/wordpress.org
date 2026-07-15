@@ -28,6 +28,9 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 	 *
 	 * [--set=<set>]
 	 * : Translation set slug: Default: "default"
+	 *
+	 * [--user_id=<user_id>]
+	 * : User ID to attribute the import to. Default: Anonymous
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$file = basename( $args[2] );
@@ -47,12 +50,13 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 			WP_CLI::error( "Locale not found! [$file]" );
 		}
 
-		$format = gp_array_get( GP::$formats, isset( $assoc_args['format'] ) ?  $assoc_args['format'] : 'po', null );
+		$format_slug = $assoc_args['format'] ?? 'po';
+		$format = gp_array_get( GP::$formats, $format_slug, null );
 		if ( ! $format ) {
 			WP_CLI::error( "No such format! [$file]" );
 		}
 
-		$set_slug = isset( $assoc_args['set'] ) ? $assoc_args['set'] : 'default';
+		$set_slug = $assoc_args['set'] ?? 'default';
 		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $set_slug, $locale->slug );
 		if ( ! $translation_set ) {
 			WP_CLI::error( "Translation set not found! [$file]" );
@@ -64,14 +68,28 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 			WP_CLI::error( "Couldn't load translations from file! [$file]" );
 		}
 
+		if ( ! empty( $assoc_args['user_id'] ) ) {
+			$user_id       = (int) $assoc_args['user_id'];
+			$previous_user = get_current_user_id(); 
+			if ( ! get_user_by( 'id', $user_id ) ) {
+				WP_CLI::error( "User not found! [$file]" );
+			}
+
+			wp_set_current_user( $user_id );
+		}
+
 		add_filter( 'gp_translation_set_import_over_existing', '__return_false' );
 		add_filter( 'gp_translation_set_import_status', array( $this, '__string_status_waiting' ) );
 
 		// Do the import.
 		$imported = $translation_set->import( $translations );
 
-		remove_filter( 'gp_translation_set_import_status', '__string_status_waiting' );
+		remove_filter( 'gp_translation_set_import_status', array( $this, '__string_status_waiting' ) );
 		remove_filter( 'gp_translation_set_import_over_existing', '__return_false' );
+
+		if ( ! empty( $assoc_args['user_id'] ) && isset( $previous_user ) ) {
+			wp_set_current_user( $previous_user );
+		}
 
 		WP_CLI::success( "Imported $imported strings for {$locale->english_name} [$file]" );
 	}

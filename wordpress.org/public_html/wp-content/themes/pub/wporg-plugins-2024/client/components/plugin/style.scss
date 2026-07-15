@@ -17,9 +17,42 @@
 		border-bottom: 0;
 		padding-top: var( --wp--preset--spacing--40 ); /* This is overridden if we have a banner below. */
 
+		.entry-heading-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+
+			// This is to fix the buttons missing small padding on mobile
+			// Ideally we remove this when we update this single page.
+			@media screen and (max-width: 599px) {
+				--wp--custom--button--spacing--padding--top: 12px;
+				--wp--custom--button--spacing--padding--bottom: 12px;
+				--wp--custom--button--spacing--padding--left: 16px;
+				--wp--custom--button--spacing--padding--right: 16px;
+			}
+
+			@media screen and (min-width: 700px) {
+				flex-direction: row;
+			}
+
+			> *:first-child {
+				flex: 1;
+
+				display: flex;
+				align-items: center;
+			}
+		}
+
 		.plugin-actions {
-			float: right;
-			margin-inline-start: 1rem;
+			margin-top: var(--wp--style--block-gap);
+			display: flex;
+			align-items: center;
+			gap: 16px;
+
+			@media screen and (min-width: 700px) {
+				margin-top: 0;
+				margin-inline-start: 1rem;
+			}
 
 			> div,
 			> .button {
@@ -32,23 +65,29 @@
 					display: none;
 				}
 			}
+			  
 		}
 
 		.plugin-title {
 			clear: none;
 			font-size: var( --wp--preset--font-size--heading-3 );
 			font-weight: 400;
-			line-height: 1.1;
+			line-height: var( --wp--custom--heading--level-3--typography--line-height );
 			margin: 0;
 
 			a {
 				color: inherit;
+				text-decoration: none;
+
+				&:hover {
+					text-decoration: underline;
+				}
 			}
 		}
 
 		.byline {
 			display: block;
-			color: #78848f;
+			color: var(--wp--preset--color--charcoal-4);
 			margin-top: 4px;
 		}
 	}
@@ -80,6 +119,7 @@
 				background: white;
 				text-decoration: none;
 				color: var(--wp--preset--color--charcoal-1);
+				font-size: var(--wp--preset--font-size--normal);
 
 				&.active, &:hover {
 					background: var(--wp--preset--color--light-grey-2) !important;
@@ -241,28 +281,21 @@
 		flex: 0 0 auto;
 		font-size: 0.9rem;
 		align-self: flex-end;
-		height: 2rem;
 
-		a::before {
-			content: '\f125';
+		a {
 			display: inline-block;
-			font-family: dashicons;
-			margin-right: 0.4em;
-			vertical-align: top;
-			font-size: 1.2em;
-			max-height: 1em;
-		}
-
-		@media screen and (max-width: 737px) {
-			padding-right: 20px;
+			padding: 0.64rem 0 0.64rem 1.25rem;
+			font-size: var(--wp--preset--font-size--normal);
 		}
 
 		@media screen and (max-width:38em) {
 			border-bottom: 0;
 			display: block;
-			margin-left: 20px;
-			margin-top: 1.5rem;
 			width: 100%;
+
+			a {
+				padding-right: 1.25rem;
+			}
 		}
 	}
 
@@ -306,5 +339,29 @@
 			float: right;
 			width: 30%;
 		}
+	}
+
+	.plugin-danger-zone h4 {
+		margin-top: var( --wp--preset--spacing--60 );
+	}
+}
+
+
+.plugin-releases-listing {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.plugin-releases-listing tbody td:nth-child(4) div {
+	font-size: 14px;
+}
+
+.plugin-releases-listing-actions {
+	display: flex;
+	gap: 8px;
+	flex-direction: column;
+
+	@media screen and ( min-width: 34em ) {
+		flex-direction: row;
 	}
 }

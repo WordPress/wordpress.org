@@ -32,6 +32,7 @@ class Capabilities {
 			'plugin_remove_support_rep',
 			'plugin_self_transfer',
 			'plugin_self_close',
+			'plugin_toggle_public_preview',
 			'plugin_manage_releases',
 		);
 		if ( ! in_array( $cap, $handled_caps ) ) {
@@ -55,6 +56,13 @@ class Capabilities {
 		// Start over, we'll specify all caps below.
 		$required_caps = array();
 
+		// Plugin Committers need to have 2FA to be able to perform any of these actions.
+		if ( function_exists( 'WordPressdotorg\Two_Factor\user_requires_2fa' ) && class_exists( 'Two_Factor_Core' ) ) {
+			if ( \WordPressdotorg\Two_Factor\user_requires_2fa( $user ) && ! \Two_Factor_Core::is_user_using_two_factor( $user->ID ) ) {
+				$required_caps[] = 'do_not_allow';
+			}
+		}
+
 		// Certain actions require the plugin to be published.
 		if (
 			'publish' !== $post->post_status &&
@@ -63,6 +71,7 @@ class Capabilities {
 				array(
 					'plugin_self_transfer',
 					'plugin_self_close',
+					'plugin_toggle_public_preview'
 				)
 			)
 		) {
@@ -81,17 +90,18 @@ class Capabilities {
 		}
 
 		// If a plugin is in the Beta or Featured views, they're not able to self-manage certain things. Require reviewer.
+		$is_beta     = is_object_in_term( $post->ID, 'plugin_section', 'beta' );
+		$is_featured = is_object_in_term( $post->ID, 'plugin_section', 'featured' );
+
 		if (
+			( $is_beta || $is_featured ) &&
 			in_array(
 				$cap,
 				array(
 					'plugin_self_close',
 					'plugin_self_transfer',
-					'plugin_add_committer',
-					'plugin_remove_committer',
 				)
-			) &&
-			is_object_in_term( $post->ID, 'plugin_section', array( 'beta', 'featured' ) )
+			)
 		) {
 			$required_caps[] = 'plugin_review';
 		}
@@ -99,6 +109,15 @@ class Capabilities {
 		// Only the Owner of a plugin is able to transfer plugins.
 		if ( 'plugin_self_transfer' === $cap && $user_id != $post->post_author ) {
 			$required_caps[] = 'do_not_allow';
+		}
+
+		// For featured/beta plugins, only the owner can manage committers.
+		if (
+			( $is_featured || $is_beta ) &&
+			$user_id != $post->post_author &&
+			in_array( $cap, array( 'plugin_add_committer', 'plugin_remove_committer' ) )
+		) {
+			$required_caps[] = 'plugin_review';
 		}
 
 		// Committers

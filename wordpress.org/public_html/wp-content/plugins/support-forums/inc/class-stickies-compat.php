@@ -6,11 +6,14 @@ class Stickies_Compat {
 
 	const META = '_bbp_sticky_topics';
 
-	var $compat   = null;
-	var $slug     = null;
-	var $taxonomy = null;
-	var $object   = null;
-	var $term     = null;
+	var $compat       = null;
+	var $slug         = null;
+	var $taxonomy     = null;
+	var $object       = null;
+	var $term         = null;
+	var $authors      = array();
+	var $contributors = array();
+	var $support_reps = array();
 
 	public function __construct( $args ) {
 		$args = wp_parse_args( $args, array(

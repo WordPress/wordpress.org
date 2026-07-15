@@ -31,6 +31,7 @@ class Plugin {
 	public $stats                = false;
 	public $emails               = false;
 	public $audit_log            = false;
+	public $badge_automation     = false;
 	public $dropin               = false;
 	public $support_compat       = false;
 	public $performance          = false;
@@ -39,6 +40,7 @@ class Plugin {
 	public $plugin_subscriptions = false; // Defined via Support_Compat
 	public $theme_subscriptions  = false; // Defined via Support_Compat
 	public $blocks               = false;
+	public $rest_api             = false;
 
 	/**
 	 * Define whether this is the global forums, or a locale forum.
@@ -64,15 +66,17 @@ class Plugin {
 	 * Instantiate a new Plugin object.
 	 */
 	private function __construct() {
-		$this->users        = new Users;
-		$this->user_notes   = new User_Notes;
-		$this->moderators   = new Moderators;
-		$this->hooks        = new Hooks;
-		$this->report_topic = new Report_Topic;
-		$this->nsfw_handler = new NSFW_Handler;
-		$this->stats        = new Stats;
-		$this->emails       = new Emails;
-		$this->audit_log    = new Audit_Log;
+		$this->users            = new Users();
+		$this->user_notes       = new User_Notes();
+		$this->moderators       = new Moderators();
+		$this->hooks            = new Hooks();
+		$this->report_topic     = new Report_Topic();
+		$this->nsfw_handler     = new NSFW_Handler();
+		$this->stats            = new Stats();
+		$this->emails           = new Emails();
+		$this->audit_log        = new Audit_Log();
+		$this->badge_automation = new Badge_Automation();
+		$this->rest_api         = new REST_API();
 
 		// Set a flag to indicate whether this is the global forums, or a locale forum.
 		$this->is_main_forums = (
@@ -82,21 +86,21 @@ class Plugin {
 
 		// These modifications are specific to https://wordpress.org/support/
 		if ( $this->is_main_forums ) {
-			$this->dropin          = new Dropin;
-			$this->support_compat  = new Support_Compat;
+			$this->dropin          = new Dropin();
+			$this->support_compat  = new Support_Compat();
 
 			// Only load Performance_Optimizations if necessary.
-			$this->performance     = new Performance_Optimizations;
+			$this->performance     = new Performance_Optimizations();
 
 			// Ratings_Compat is loaded by Theme_Directory_Compat or
 			// Plugin_Directory_Compat depending on the request.
-			$this->themes          = new Theme_Directory_Compat;
-			$this->plugins         = new Plugin_Directory_Compat;
+			$this->themes          = new Theme_Directory_Compat();
+			$this->plugins         = new Plugin_Directory_Compat();
 		}
 
 		// Only load the Block Support if the Blocks Everywhere plugin is available.
 		if ( class_exists( 'Automattic\Blocks_Everywhere\Blocks_Everywhere' ) ) {
-			$this->blocks          = new Blocks;
+			$this->blocks          = new Blocks();
 		}
 
 		add_action( 'bbp_add_rewrite_rules', array( $this, 'maybe_flush_rewrite_rules' ) );

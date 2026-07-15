@@ -9,9 +9,9 @@
 
 ?>
 
-<?php bbp_breadcrumb(); ?>
-
 <div id="bbpress-forums">
+
+	<h1><?php bbp_view_title(); ?></h1>
 
 	<?php do_action( 'wporg_compat_before_single_view' ); ?>
 

@@ -11,11 +11,11 @@
 
 <div id="bbpress-forums">
 
-	<?php bbp_breadcrumb(); ?>
-
 	<?php if ( is_user_logged_in() && current_user_can( 'edit_topic', bbp_get_topic_id() ) ) : ?>
 
 		<div id="merge-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-merge">
+
+			<h1><?php printf( __( 'Merge topic "%s"', 'wporg-forums' ), bbp_get_topic_title() ); ?></h1>
 
 			<form id="merge_topic" name="merge_topic" method="post" action="<?php the_permalink(); ?>">
 

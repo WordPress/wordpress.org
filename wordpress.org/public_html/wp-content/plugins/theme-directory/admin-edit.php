@@ -581,6 +581,10 @@ function wporg_themes_meta_box_callback( $post ) {
 		<p><?php echo $text; ?> -
 			<select name="wporg_themes_status[<?php echo base64_encode( $version ); // base64 because version numbers don't work so well as parts of keys ?>]">
 				<option value="new" <?php selected( $status, 'new' ); ?>><?php esc_html_e( 'New', 'wporg-themes' ); ?></option>
+				<?php if ( 'approved' === $status ) : ?>
+					<?php // `approved` is a transient Trac-driven pre-release state; only shown so the current value displays correctly. ?>
+					<option value="approved" selected><?php esc_html_e( 'Approved (pending release)', 'wporg-themes' ); ?></option>
+				<?php endif; ?>
 				<option value="live" <?php selected( $status, 'live' ); ?>><?php esc_html_e( 'Live', 'wporg-themes' ); ?></option>
 				<option value="old" <?php selected( $status, 'old' ); ?>><?php esc_html_e( 'Old', 'wporg-themes' ); ?></option>
 			</select>
@@ -607,6 +611,11 @@ function wporg_themes_save_meta_box_data( $post_id ) {
 	}
 	// TODO should this be a post type specific capability?
 	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// This is specific to the repopackage post type.
+	if ( 'repopackage' !== get_post_type( $post_id ) ) {
 		return;
 	}
 

@@ -76,6 +76,13 @@ class WPORG_Themes_Upload {
 	public $theme;
 
 	/**
+	 * The theme name.
+	 *
+	 * @var string
+	 */
+	public $theme_name = '';
+
+	/**
 	 * The theme slug being uploaded.
 	 *
 	 * @var string
@@ -281,6 +288,15 @@ class WPORG_Themes_Upload {
 		// The version should be set live as it's from SVN.
 		$this->version_status = 'live';
 
+		if ( 'themedropbox' !== $author && function_exists( 'bump_stats_extra' ) ) {
+			bump_stats_extra( 'themes', 'upload_by_svn' );
+		}
+
+		// Run in the context of the author.
+		if ( $this->author ) {
+			set_current_user( $this->author->id );
+		}
+
 		return $this->import( array( // return true | WP_Error
 			// Since this version is already in SVN, we shouldn't try to import it again.
 			'commit_to_svn' => false,
@@ -446,6 +462,18 @@ class WPORG_Themes_Upload {
 		// Populate the theme post.
 		if ( ! $this->theme_post ) {
 			$this->theme_post = $this->get_theme_post();
+		}
+		$is_new_upload = empty( $this->theme_post );
+		$is_update     = ! $is_new_upload;
+
+		if ( $is_new_upload && defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY ) {
+			return new WP_Error(
+				'submissions_disabled',
+				sprintf(
+					__( 'New theme submissions are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-themes' ),
+					'https://wordpress.org/news/2024/12/holiday-break/'
+				)
+			);
 		}
 
 		// Populate author.
@@ -681,7 +709,15 @@ class WPORG_Themes_Upload {
 
 		// Pass it through Theme Check and see how great this theme really is.
 		if ( $args['run_themecheck'] ) {
+			// Disable error reporting for when this is run via CLI.
+			$error_reporting = error_reporting(0);
+			ob_start();
 			$result = $this->check_theme();
+			$theme_check_output = ob_get_clean();
+			error_reporting( $error_reporting );
+
+			// Output the Theme Check results. This is the only HTML that this function outputs.
+			echo $theme_check_output;
 
 			if ( ! $result && $args['block_on_themecheck'] ) {
 				// Log it to slack.
@@ -694,7 +730,8 @@ class WPORG_Themes_Upload {
 						__( 'Your theme has failed the theme check. Please correct the problems with it and upload it again. You can also use the <a href="%1$s">Theme Check Plugin</a> to test your theme before uploading. If you have any questions about this please post them to %2$s.', 'wporg-themes' ),
 						'//wordpress.org/plugins/theme-check/',
 						'<a href="https://make.wordpress.org/themes">https://make.wordpress.org/themes</a>'
-					)
+					),
+					$theme_check_output
 				);
 			}
 		}
@@ -704,7 +741,17 @@ class WPORG_Themes_Upload {
 
 		// Create a new version in SVN.
 		if ( $args['commit_to_svn'] ) {
+
 			$result = $this->add_to_svn();
+
+			// Use a specific check for when the version already exists in SVN.
+			if ( is_wp_error( $result ) && $result->get_error_code() === 'version_exists_in_svn' ) {
+				return new WP_Error(
+					'version_exists_in_svn',
+					__( "The theme version already exists in SVN. Please check the version you're uploading doesn't already exist.", 'wporg-themes' )
+				);
+			}
+
 			if ( ! $result || is_wp_error( $result ) ) {
 				return new WP_Error(
 					'failed_svn_commit',
@@ -722,6 +769,9 @@ class WPORG_Themes_Upload {
 			}
 		}
 
+		// Create or update the theme post before Trac so the post ID is available for the preview link.
+		$this->create_or_update_theme_post();
+
 		// Create a Trac ticket for this theme version.
 		if ( $args['create_trac_ticket'] ) {
 			// Get all Trac ticket information set up.
@@ -730,10 +780,14 @@ class WPORG_Themes_Upload {
 			// Talk to Trac and let them know about our new version. Or new theme.
 			$ticket_id = $this->create_or_update_trac_ticket();
 
-			if ( ! $ticket_id  ) {
+			if ( ! $ticket_id ) {
 				if ( $args['commit_to_svn'] ) {
 					// Since it's been added to SVN at this point, remove it from SVN to prevent future issues.
 					$this->remove_from_svn( 'Trac ticket creation failed.' );
+				}
+
+				if ( $is_new_upload && $this->theme_post ) {
+					$this->delete_theme_post();
 				}
 
 				return new WP_Error(
@@ -745,10 +799,20 @@ class WPORG_Themes_Upload {
 					)
 				);
 			}
+
+			// Write the ticket ID to post meta now that the Trac ticket exists.
+			$this->update_versioned_meta( '_ticket_id', $ticket_id );
+			add_post_meta( $this->theme_post->ID, sanitize_key( '_trac_ticket_' . $this->theme->get( 'Version' ) ), $ticket_id );
 		}
 
-		// Add a or update the Theme Directory entry for this theme.
-		$this->create_or_update_theme_post();
+		/*
+		 * Discard versions that are awaiting review, and maybe set this upload as live.
+		 * This runs after Trac ticket creation since auto-approved updates change version_status to 'live'.
+		 */
+		wporg_themes_update_version_status( $this->theme_post->ID, $this->theme->get( 'Version' ), $this->version_status );
+
+		// Refresh the post to include all meta written above.
+		$this->theme_post = $this->get_theme_post();
 
 		// Send theme author an email for peace of mind.
 		$this->send_email_notification();
@@ -760,6 +824,11 @@ class WPORG_Themes_Upload {
 
 		// Initiate a GitHub actions run for the theme.
 		$this->trigger_e2e_run();
+
+		// Record stats.
+		if ( function_exists( 'bump_stats_extra' ) ) {
+			bump_stats_extra( 'themes', $is_new_upload ? 'new' : 'update' );
+		}
 
 		// Success!
 		return true;
@@ -923,6 +992,10 @@ class WPORG_Themes_Upload {
 	 * @return WP_Post|null
 	 */
 	public function get_theme_post() {
+		if ( empty( $this->theme_slug ) ) {
+			return null;
+		}
+
 		$themes = get_posts( array(
 			'name'             => $this->theme_slug,
 			'posts_per_page'   => 1,
@@ -1045,7 +1118,7 @@ class WPORG_Themes_Upload {
 
 		// Display the errors.
 		$verdict = $result ? array( 'tc-pass', __( 'Pass', 'wporg-themes' ) ) : array( 'tc-fail', __( 'Fail', 'wporg-themes' ) );
-		echo '<h4>' . sprintf( __( 'Results of Automated Theme Scanning: %s', 'wporg-themes' ), vsprintf( '<span class="%1$s">%2$s</span>', $verdict ) ) . '</h4>';
+		echo '<h2>' . sprintf( __( 'Results of Automated Theme Scanning: %s', 'wporg-themes' ), vsprintf( '<span class="%1$s">%2$s</span>', $verdict ) ) . '</h2>';
 		echo '<ul class="tc-result">' . display_themechecks() . '</ul>';
 		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
 
@@ -1092,8 +1165,10 @@ class WPORG_Themes_Upload {
 		$this->trac_ticket->priority = 'new theme';
 		if ( ! empty( $this->theme_post->_status ) ) {
 
-			// Is this an update to an existing, approved theme?
-			if ( 'live' === $this->theme_post->_status[ $this->theme_post->max_version ] ) {
+			// Is this an update to an existing, approved theme? An 'approved' status
+			// (live version still in release cooldown) counts as approved for ticket
+			// priority — the previous live version is still being served.
+			if ( in_array( $this->theme_post->_status[ $this->theme_post->max_version ], [ 'live', 'approved' ], true ) ) {
 				$this->trac_ticket->priority = 'theme update';
 
 				// Apparently not, it must be a new upload for previously unapproved theme.
@@ -1113,91 +1188,11 @@ class WPORG_Themes_Upload {
 		// ZIP location
 		$theme_zip_link = "https://downloads.wordpress.org/theme/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1";
 
-		// Build the Live Preview Blueprint & URL.
-		 $blueprint_parent_step = '';
-		 if (
-			$this->theme->parent() &&
-			in_array( 'buddypress', $this->theme->get( 'Tags' ) )
-		) {
-			$blueprint_parent_step = <<<BLUEPRINT_PARENT_BP
-			{
-				"step": "installPlugin",
-				"pluginZipFile": {
-					"resource": "wordpress.org/plugins",
-					"slug": "buddypress"
-				},
-				"options": {
-					"activate": true
-				}
-			},
-			BLUEPRINT_PARENT_BP;
-		} elseif ( $this->theme->parent() ) {
-			$blueprint_parent_step = <<<BLUEPRINT_PARENT_THEME
-			{
-				"step": "installTheme",
-				"themeZipFile": {
-					"resource": "wordpress.org/themes",
-					"slug": "{$this->theme->get_template()}"
-				}
-			},
-			BLUEPRINT_PARENT_THEME;
-		}
-
-		// NOTE: The username + password included below are only used for the local in-browser environment, and are not a secret.
-		$blueprint = <<<BLUEPRINT
-		{
-			"preferredVersions": {
-				"php": "7.4",
-				"wp": "latest"
-			},
-			"steps": [
-				{
-					"step": "login",
-					"username": "admin",
-					"password": "password"
-				},
-				{
-					"step": "defineWpConfigConsts",
-					"consts": {
-						"WP_DEBUG": true
-					}
-				},
-				{
-					"step": "importFile",
-					"file": {
-						"resource": "url",
-						"url": "https://raw.githubusercontent.com/WordPress/theme-test-data/master/themeunittestdata.wordpress.xml",
-						"caption": "Downloading theme testing content"
-					},
-					"progress": {
-						"caption": "Installing theme testing content"
-					}
-				},
-				{
-					"step": "installPlugin",
-					"pluginZipFile": {
-						"resource": "wordpress.org/plugins",
-						"slug": "theme-check"
-					},
-					"options": {
-						"activate": true
-					}
-				},
-				{$blueprint_parent_step}
-				{
-					"step": "installTheme",
-					"themeZipFile": {
-						"resource": "url",
-						"url": "{$theme_zip_link}",
-						"caption": "Downloading the theme"
-					}
-				}
-			]
-		}
-		BLUEPRINT;
-
-		// NOTE: The json_encode( json_decode() ) is to remove the whitespaces used above for readability.
-		$live_preview_link = 'https://playground.wordpress.net/#' . json_encode( json_decode( $blueprint ) );
+		$live_preview_link = add_query_arg(
+			'blueprint-url',
+			urlencode( rest_url( 'themes/v1/review-blueprint/' . $this->theme_post->ID . '-' . $this->theme_slug . '/' . $this->theme->display( 'Version' ) ) ),
+			'https://playground.wordpress.net/'
+		);
 
 		// Hacky way to prevent a problem with xml-rpc.
 		$this->trac_ticket->description = <<<TICKET
@@ -1310,18 +1305,29 @@ TICKET;
 		 */
 		$trac_ticket_reporter = wp_get_current_user()->user_login ?? $this->author->user_login;
 
-		// If there's a previous version and the most current version's status is `new`, we update.
-		if (
-			! empty( $this->theme_post->max_version ) &&
-			'new' == $this->theme_post->_status[ $this->theme_post->max_version ]
-		) {
-			$ticket_id = (int) $this->theme_post->_ticket_id[ $this->theme_post->max_version ];
+		$prev_status = $this->theme_post->_status[ $this->theme_post->max_version ?? '' ] ?? '';
+
+		/*
+		 * If the previous version is still on an open ticket — either awaiting review
+		 * (`new`) or approved and waiting out the release delay (`approved`) — update that
+		 * same ticket rather than opening a new one. Re-uploading resets the ticket's
+		 * changetime, so an approved update's release delay restarts from this upload and
+		 * the superseded version is simply demoted to `old`.
+		 */
+		if ( in_array( $prev_status, [ 'new', 'approved' ], true ) ) {
+			$ticket_id = (int) ( $this->theme_post->_ticket_id[ $this->theme_post->max_version ] ?? 0 );
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
 			// Make sure the ticket has not yet been resolved.
 			if ( $ticket && empty( $ticket[3]['resolution'] ) ) {
 				$result    = $this->trac->ticket_update( $ticket_id, $this->trac_ticket->description, array( 'summary' => $this->trac_ticket->summary, 'keywords' => implode( ' ', $this->trac_ticket->keywords ) ), true /* Trigger email notifications */ );
 				$ticket_id = $result ? $ticket_id : false;
+
+				// Keep an approved update in the `approved` window; the release-to-live
+				// cron promotes it once the delay (measured from this upload) elapses.
+				if ( 'approved' === $prev_status ) {
+					$this->version_status = 'approved';
+				}
 			} else {
 				$ticket_id = $this->trac->ticket_create( $this->trac_ticket->summary, $this->trac_ticket->description, array(
 					'type'      => 'theme',
@@ -1344,13 +1350,25 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			// Themes team auto-approves theme-updates, so mark the theme as live immediately.
-			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets.
+			// Themes team auto-approves theme-updates. Note that this only applies to new
+			// ticket creation, so it won't happen on themes with existing outstanding tickets.
 			if ( $this->trac_ticket->priority == 'theme update' ) {
-				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
+				$release_delay = wporg_themes_get_release_cooldown_delay( $this->theme_slug );
+				if ( $release_delay ) {
+					// Land the update in the `approved` status; the release-to-live cron
+					// promotes it to live once the cooldown elapses. The previous live
+					// version continues to be served in the meantime.
+					$delay_hours = (int) round( $release_delay / HOUR_IN_SECONDS );
+					$this->trac->ticket_update( $ticket_id, sprintf( 'Theme Update for existing Live theme - automatically approved, will be marked live in %dhrs.', $delay_hours ), array( 'action' => 'new_no_review_delay' ), false );
 
-				$this->trac_ticket->resolution = 'live';
-				$this->version_status          = 'live';
+					$this->version_status = 'approved';
+				} else {
+					// Cooldown disabled: mark the theme live immediately.
+					$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
+
+					$this->trac_ticket->resolution = 'live';
+					$this->version_status          = 'live';
+				}
 			}
 
 		}
@@ -1361,19 +1379,28 @@ TICKET;
 	}
 
 	/**
+	 * Update a versioned post meta value for the current theme version.
+	 *
+	 * @param string $meta_key   The meta key to update.
+	 * @param mixed  $meta_value The meta value to set for the current version.
+	 */
+	protected function update_versioned_meta( $meta_key, $meta_value ) {
+		$post_id   = $this->theme_post->ID;
+		$meta_data = array_filter( (array) get_post_meta( $post_id, $meta_key, true ) );
+
+		$meta_data[ $this->theme->get( 'Version' ) ] = $meta_value;
+
+		update_post_meta( $post_id, $meta_key, $meta_data );
+	}
+
+	/**
 	 * Creates or updates a theme post.
 	 */
 	public function create_or_update_theme_post() {
 		$upload_date = current_time( 'mysql' );
 
-		// If we already have a post, get its ID.
-		if ( ! empty( $this->theme_post ) ) {
-			$post_id = $this->theme_post->ID;
-			// see wporg_themes_approve_version() for where the post is updated.
-
-		// Otherwise create it for this new theme.
-		} else {
-
+		// Create a new theme post if one doesn't exist yet.
+		if ( empty( $this->theme_post ) ) {
 			// Filter the tags to those that exist on the site already.
 			$tags = array_intersect(
 				$this->theme->get( 'Tags' ),
@@ -1397,6 +1424,8 @@ TICKET;
 				'post_type'      => 'repopackage',
 				'tags_input'     => $tags,
 			) );
+
+			$this->theme_post = get_post( $post_id );
 		}
 
 		// Finally, add post meta.
@@ -1407,7 +1436,6 @@ TICKET;
 			'_requires'     => $this->sanitize_version_like_field( $this->theme->get( 'RequiresWP' ), 'requires' ),
 			'_requires_php' => $this->sanitize_version_like_field( $this->theme->get( 'RequiresPHP' ) ),
 			'_upload_date'  => $upload_date,
-			'_ticket_id'    => $this->trac_ticket->id,
 			'_screenshot'   => $this->theme->screenshot,
 		);
 
@@ -1417,23 +1445,26 @@ TICKET;
 		}
 
 		foreach ( $post_meta as $meta_key => $meta_value ) {
-			$meta_data = array_filter( (array) get_post_meta( $post_id, $meta_key, true ) );
-			$meta_data[ $this->theme->get( 'Version' ) ] = $meta_value;
-			update_post_meta( $post_id, $meta_key, $meta_data );
+			$this->update_versioned_meta( $meta_key, $meta_value );
 		}
+	}
 
-		// Add an additional row with the trac ticket ID, to make it possible to find the post by this ID later.
-		if ( $post_meta['_ticket_id'] ) {
-			add_post_meta( $post_id, sanitize_key( '_trac_ticket_' . $this->theme->get( 'Version' ) ), $post_meta['_ticket_id'] );
-		}
+	/**
+	 * Deletes the theme post.
+	 *
+	 * Used to clean up a freshly created post when a new upload fails.
+	 * Temporarily detaches the fail-safe that prevents repopackages from
+	 * being deleted, which would otherwise wp_die() before the post is
+	 * removed, leaving an orphaned post without versioned meta behind.
+	 *
+	 * @return WP_Post|false|null Post data on success, false or null on failure.
+	 */
+	public function delete_theme_post() {
+		remove_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
+		$result = wp_delete_post( $this->theme_post->ID, true );
+		add_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
 
-		// Discard versions that are awaiting review, and maybe set this upload as live.
-		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), $this->version_status );
-
-		// refresh the post to avoid stale data.
-		if ( $post_id ) {
-			$this->theme_post = $this->get_theme_post();
-		}
+		return $result;
 	}
 
 	/**
@@ -1451,10 +1482,21 @@ TICKET;
 			return $this->add_to_svn_via_svn_import();
 		}
 
-		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
-
 		// Keeps a copy of the output of the commands for debugging.
 		$output = array();
+
+		// Check to see if the theme already exists in SVN.
+		$this->exec_with_notify( self::SVN . " ls https://themes.svn.wordpress.org/{$this->theme_slug}/", $output, $return_var );
+		if ( $return_var < 1 ) {
+			// SVN ls output is one line per version, with a `/` appended to versions.
+			$svn_versions = array_map( function( $line ) {
+				return trim( $line, "/\r\n\t " );
+			}, $output );
+
+			if ( in_array( $this->theme->display( 'Version' ), $svn_versions, true ) ) {
+				return new WP_Error( 'version_exists_in_svn', 'version_exists_in_svn' ); // Intentionally not translated or human-readable-text.
+			}
+		}
 
 		// Theme exists, attempt to do a copy from old version to new.
 		$this->exec_with_notify( self::SVN . " co https://themes.svn.wordpress.org/{$this->theme_slug}/ {$this->tmp_svn_dir} --depth=empty", $output, $return_var );
@@ -1463,7 +1505,8 @@ TICKET;
 		}
 
 		// Try to copy the previous version over.
-		$prev_version = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
+		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
+		$prev_version    = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
 		$this->exec_with_notify( self::SVN . " cp $prev_version $new_version_dir", $output, $return_var );
 		if ( $return_var > 0 ) {
 			return $this->add_to_svn_via_svn_import();
@@ -1568,10 +1611,13 @@ TICKET;
 		 * Skip sending an email when..
 		 *  - The theme is to be made live immediately.
 		 *    `wporg_themes_approve_version()` will send a "Congratulations! It's live!" shortly.
+		 *  - The theme was auto-approved into the release cooldown. It's not awaiting
+		 *    review, so the "new version uploaded" feedback email doesn't apply; the
+		 *    "now live" email follows once the cooldown elapses.
 		 *  - No Trac ticket was created, so there's nothing to reference about where feedback is.
 		 */
 		if (
-			'live' === $this->version_status ||
+			in_array( $this->version_status, [ 'live', 'approved' ], true ) ||
 			! $this->trac_ticket->id
 		) {
 			return;
@@ -1632,7 +1678,7 @@ You can help speed up the process by making sure that your theme follows all of 
 <https://make.wordpress.org/themes/handbook/get-involved/become-a-reviewer/>
 
 ** Questions? **
-If you have questions you can ask the reviewer in the ticket or chat with us on Slack in the #themereview channel.
+If you have questions you can ask the reviewer in the ticket or chat with us on Slack in the #themes channel.
 <https://chat.wordpress.org/>
 
 Subscribe to the Themes Team blog to stay up to date with the latest requirements and the ongoing work to improve the review process:
@@ -1724,7 +1770,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 	 * @return WP_Theme
 	 */
 	public function populate_post_with_meta( $theme ) {
-		foreach ( get_post_custom_keys( $theme->ID ) as $meta_key ) {
+		foreach ( (array) get_post_custom_keys( $theme->ID ) as $meta_key ) {
 			$theme->$meta_key = get_post_meta( $theme->ID, $meta_key, true );
 
 			if ( is_array( $theme->$meta_key ) ) {
@@ -1733,7 +1779,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 		}
 
 		// Save the highest recorded version number.
-		$uploaded_versions  = array_keys( $theme->_status );
+		$uploaded_versions  = is_array( $theme->_status ) ? array_keys( $theme->_status ) : array();
 		$theme->max_version = end( $uploaded_versions );
 
 		return $theme;
@@ -1775,7 +1821,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 	}
 
 	/**
-	 * Log a Theme Upload to the slack `#themereview-firehose` channel.
+	 * Log a Theme Upload to the slack `#themes-review-firehose` channel.
 	 * 
 	 * @param string $status Whether the upload was 'allowed' or 'blocked'.
 	 */
@@ -1972,6 +2018,6 @@ The WordPress Themes Team', 'wporg-themes' ),
 			$send->set_icon( ':x:' );
 		}
 
-		$send->send( '#themereview-firehose' );
+		$send->send( '#themes-review-firehose' );
 	}
 }

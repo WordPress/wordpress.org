@@ -41,7 +41,7 @@ if ( have_posts() ) :
 		</dl>
 		<hr class="hidden" />
 
-		<h3><?php esc_html_e( 'View Older or Newer Images', 'bbporg' ); ?></h3>
+		<h2><?php esc_html_e( 'View Older or Newer Images', 'bbporg' ); ?></h2>
 		<div class="navigation">
 			<div class="alignleft"><?php previous_image_link() ?></div>
 			<div class="alignright"><?php next_image_link() ?></div>

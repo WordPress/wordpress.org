@@ -21,7 +21,7 @@ abstract class Base {
 	abstract public function body();
 
 	// Internal use only.
-	protected $users = false;
+	protected $users = [];
 
 	/**
 	 * @param $plugin  The plugin this email relates to.
@@ -160,6 +160,13 @@ abstract class Base {
 		return __( '--
 The WordPress Plugin Directory Team
 https://make.wordpress.org/plugins', 'wporg-plugins' );
+	}
+
+	/**
+	 * Return the plugin's title with HTML entities decoded for plain-text use (e.g., email subjects).
+	 */
+	protected function plugin_title() {
+		return html_entity_decode( $this->plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	}
 
 	/**

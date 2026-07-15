@@ -5,7 +5,6 @@ use WordPressdotorg\Plugin_Directory\Tools;
 
 class Plugin_Rejected extends Markdown_Base {
 	protected $required_args = [
-		'slug',
 		'submission_date'
 	];
 
@@ -13,7 +12,7 @@ class Plugin_Rejected extends Markdown_Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( '%s has been rejected', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -21,8 +20,8 @@ class Plugin_Rejected extends Markdown_Base {
 		$placeholders = [
 			// Should be first, to allow placeholders in the rejection reasons too.
 			'###REASON###'          => $this->get_rejection_reason(),
-			'###NAME###'            => $this->plugin->post_title,
-			'###SLUG###'            => $this->plugin->post_name,
+			'###NAME###'            => $this->plugin_title(),
+			'###SLUG###'            => ( $this->args['slug'] ?? '' ) ?: $this->plugin->post_name,
 			'###SUBMISSION_DATE###' => $this->args['submission_date'],
 		];
 
@@ -57,23 +56,27 @@ class Plugin_Rejected extends Markdown_Base {
 
 	public function reason_3_month() {
 		return __(
-			"Your plugin has been rejected because it has been roughly 90 days without significant progress being made on the review we sent, from the email address on record.
+			"Your plugin has been rejected because it has been roughly 90 days without significant progress being made on the review we sent to the email address on record at the beginning of the review.
 
 https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#why-was-my-plugin-rejected-after-three-months
 
 <strong>What to do next</strong>
 
-If you no longer wish to have your plugin reviewed, you can simply delete this message. No harm, no foul.
+If you no longer wish to have your plugin reviewed you can simply delete this message. No harm, no foul.
 
-If you do want to finish your review, please reply to this email and let us know. If you don't remember where you were with the review, please email us the latest version of your code and we'll review that.
+If you want to finish your review, please do the following:
+
+- <strong>First</strong>, find the last email we sent you with our latest review, read that email thoroughly and <strong>fix the issues mentioned</strong>.
+- Once your plugin is corrected, you are ready to <a href='https://wordpress.org/plugins/developers/add/'>resubmit it</a> and <strong>reply to this email</strong> so we know you want to continue.
+- You will then have to <strong>wait</strong> your turn for the team to review your plugin again.
+
+We understand that sometimes emails get lost or mistakenly filed as spam, and it's entirely possible that you never received or seen our previous emails. If you can't find it, let us know and we'll send it to you again.
 
 <strong>Why this happens</strong>
 
-In order to keep the plugin queue manageable, we reject plugins that are not complete after 3 months (90 days). Even with this policy, we have on average 500 plugins waiting on developers to complete their review at any point in time.
+In order to keep the plugin queue manageable, we reject plugins that are not making progress after 3 months (90 days). Even with this policy, we have more than 500 plugins waiting for developers to complete their review at any given time.
 
-All plugins are reviewed within 7 working days of submission, but we understand that emails are sometimes lost or accidentally filed as spam, and it's totally possible you never got our previous emails. Another common cause for this is that you replied from a different email address than you submitted it, causing the email chain to be broken.
-
-Thankfully, a rejection does not mean we can't go forward. If you want to continue, please just reply and let us know.",
+Thankfully, a rejection does not mean we can't go forward. If you want to continue, please just update your plugin, submit it and reply to let us know.",
 			'wporg-plugins'
 		);
 	}
@@ -91,6 +94,25 @@ Please read this email in it's entirety. We know it's hurtful to be told we're n
 If you feel that we have, please reply to this email with your plugin zip attached, explain why, and we will re-review.
 
 We ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.",
+			'wporg-plugins'
+		);
+	}
+
+	public function reason_common_plugin() {
+		return __(
+			"We have rejected your plugin submission because it addresses a functionality (e.g., scroll to top, post duplication, maintenance mode, post view counter, log viewer, admin dashboard notes, image optimisation, etc) that is already widely available in the directory.
+
+The WordPress plugin ecosystem thrives on innovation, and we encourage you to explore its vast potential by creating unique solutions that fill unmet needs.
+
+Please consider developing plugins that offer fresh value to users. We'd be excited to review your plugin in the future!
+
+<strong>What to do next</strong>
+
+Don't worry! We encourage you to iterate and submit something new-WordPress's potential is limitless!
+
+Please do not resubmit the plugin, even if you believe we are incorrect.
+
+Instead, reply to this email and explain the situation so we can properly direct you forward. If you resubmit this plugin without replying and communicating with us first, your account will be suspended.",
 			'wporg-plugins'
 		);
 	}

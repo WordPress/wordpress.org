@@ -1,4 +1,10 @@
 <?php
+/**
+ * Title: Welcome Cards
+ * Slug: wporg-support/welcome-cards
+ * Inserter: no
+ */
+
 if ( function_exists( 'register_block_pattern' ) ) {
 	register_block_pattern(
 		'wporg-support/welcome-cards',
@@ -19,7 +25,11 @@ if ( function_exists( 'register_block_pattern' ) ) {
 					<!-- /wp:paragraph -->
 
 					<!-- wp:paragraph -->
-					<p>' . __( '<a href="https://wordpress.org/support/welcome/">Get started</a>', 'wporg-forums' ) . '</p>
+					<p>' . sprintf(
+						/* Translators: forums welcome page URL */
+						__( '<a href="%s">Get started</a>', 'wporg-forums' ),
+						esc_url( wporg_support_get_welcome_url() )
+					) . '</p>
 					<!-- /wp:paragraph -->
 
 				</div>

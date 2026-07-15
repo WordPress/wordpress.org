@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
 
-use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -55,11 +54,12 @@ class Support_Reps extends \WP_Widget {
 
 		<ul id="support-rep-list" class="support-rep-list">
 
-			<?php foreach ( $support_reps as $support_rep ) : ?>
+			<?php foreach ( $support_reps as $support_rep ) :
+				if ( ! $support_rep ) continue; ?>
 				<li data-user="<?php echo esc_attr( $support_rep->user_nicename ); ?>">
 					<?php echo get_avatar( $support_rep->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$support_rep->user_nicename}/" ); ?>">
-						<?php echo Template::encode( $support_rep->display_name ?: $support_rep->user_nicename ); ?>
+						<?php echo $support_rep->display_name ?: $support_rep->user_nicename; ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_support_rep', $post ) ) : ?>
@@ -75,7 +75,7 @@ class Support_Reps extends \WP_Widget {
 			<li class="new">
 				<form id="add-support-rep" action="POST">
 					<input type="text" name="support_rep" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
-					<button type="submit" class="button button-secondary"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
+					<button type="submit" class="button button-secondary button-small"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
 				</form>
 
 				<script id="tmpl-new-support-rep" type="text/template">

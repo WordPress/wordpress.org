@@ -13,6 +13,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation;
 
 /**
  * Returns a list of authors.
@@ -98,14 +99,15 @@ function the_plugin_favorite_button( $post = null ) {
 function the_author_byline( $post = null ) {
 	$post = get_post( $post );
 
-	// Anonymize the author byline when all committers have been removed.
-	if ( ! Tools::get_plugin_committers( $post->post_name ) ) {
+	// Anonymize the author byline if closed permanently (includes no committers).
+	if ( Template::get_close_data( $post )['permanent'] ?? false ) {
 		return;
 	}
 
-	$url    = get_post_meta( $post->ID, 'header_author_uri', true );
-	$author = strip_tags( get_post_meta( $post->ID, 'header_author', true ) ) ?: get_the_author();
-	$author = $url ? '<a class="url fn n" rel="nofollow" href="' . esc_url( $url ) . '">' . $author . '</a>' : $author;
+	$url    = get_author_posts_url( $post->post_author ); 
+	$author = strip_tags( get_the_author_meta( 'display_name', $post->post_author ) ) ?: get_the_author();
+
+	$author = $url ? '<a class="url fn n" href="' . esc_url( $url ) . '">' . $author . '</a>' : $author;
 
 	/* translators: post author. */
 	printf( esc_html_x( 'By %s', 'post author', 'wporg-plugins' ), '<span class="author vcard">' . wp_kses_post( $author ) . '</span>' );
@@ -208,35 +210,34 @@ function get_plugin_status_notice( $post = null ) {
 
 		case 'disabled':
 		case 'closed':
-			$closed_date  = get_post_meta( get_the_ID(), 'plugin_closed_date', true );
-			$close_reason = Template::get_close_reason( $post );
+			$close_data = Template::get_close_data( $post );
 
-			if ( $closed_date ) {
+			if ( $close_data['date'] ) {
 				if ( 'disabled' === $post_status && current_user_can( 'plugin_approve' ) ) {
-					/* translators: %s: plugin closing date */
-					$message = sprintf( __( 'This plugin has been disabled as of %s -- this means it is closed, but actively serving updates.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
+					$message = sprintf(
+						/* translators: %s: plugin closing date */
+						__( 'This plugin has been disabled as of %s -- this means it is closed, but actively serving updates.', 'wporg-plugins' ),
+						mysql2date( get_option( 'date_format' ), $close_data['date'] )
+					);
 				} else {
-					/* translators: %s: plugin closing date */
-					$message = sprintf( __( 'This plugin has been closed as of %s and is not available for download.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
+					$message = sprintf(
+						/* translators: %s: plugin closing date */
+						__( 'This plugin has been closed as of %s and is not available for download.', 'wporg-plugins' ),
+						mysql2date( get_option( 'date_format' ), $close_data['date'] )
+					);
 				}
 
-				// Determine permanence of closure.
-				$committers = Tools::get_plugin_committers( $post->post_name );
-				$permanent  = ( __( 'Author Request', 'wporg-plugins' ) === $close_reason || ! $committers );
-
-				$days_passed = (int) ( ( current_time( 'timestamp' ) - mysql2date( 'U', $closed_date ) ) / DAY_IN_SECONDS );
-
 				// If we're closed, it may be permanent.
-				if ( $permanent ) {
+				if ( $close_data['permanent'] ) {
 					$message .= ' ' . __( 'This closure is permanent.', 'wporg-plugins' );
-				} elseif ( $days_passed < 60 ) {
+				} elseif ( ! $close_data['public'] ) {
 					$message .= ' ' . __( 'This closure is temporary, pending a full review.', 'wporg-plugins' );
 				}
 
-				// Display close reason if more than 60 days have passed.
-				if ( $days_passed >= 60 ) {
+				// Display close reason if it's now publicly known.
+				if ( $close_data['public'] && $close_data['reason'] ) {
 					/* translators: %s: plugin close/disable reason */
-					$message .= ' ' . sprintf( __( 'Reason: %s.', 'wporg-plugins' ), $close_reason );
+					$message .= ' ' . sprintf( __( 'Reason: %s.', 'wporg-plugins' ), $close_data['label'] );
 				}
 			} else {
 				$message = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
@@ -258,49 +259,58 @@ function get_plugin_status_notice( $post = null ) {
 }
 
 function the_unconfirmed_releases_notice() {
-	$plugin = get_post();
+	return Release_Confirmation::frontend_unconfirmed_releases_notice();
+}
 
-	if ( ! $plugin->release_confirmation || ! current_user_can( 'plugin_admin_edit', $plugin ) ) {
-		return;
-	}
-
-	$releases = Plugin_Directory::get_releases( $plugin ) ?: [];
-	$warning  = false;
-
-	foreach ( $releases as $release ) {
-		if ( ! $release['confirmed'] && $release['confirmations_required'] && empty( $release['discarded'] ) ) {
-			$warning = true;
-			break;
-		}
-	}
-
-	if ( ! $warning ) {
-		return;
-	}
-
-	printf(
-		'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-		sprintf(
-			__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
-			home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
-		)
-	);
+/**
+ * Render the in-cooldown release notice for committers on a plugin's public page.
+ */
+function the_release_cooldown_notice() {
+	return Release_Confirmation::frontend_cooldown_notice();
 }
 
 function the_no_self_management_notice() {
 	$post = get_post();
 
-	// Check if they can access plugin management, but can't add committers.
-	// This means the plugin has limited self-management functionalities, for security.
+	$is_beta     = is_object_in_term( $post->ID, 'plugin_section', 'beta' );
+	$is_featured = is_object_in_term( $post->ID, 'plugin_section', 'featured' );
+
+	// Check if the plugin is in a section with limited self-management, and the user can manage it.
 	if (
-		current_user_can( 'plugin_admin_edit', $post ) &&
-		! current_user_can( 'plugin_add_committer', $post )
+		! ( $is_beta || $is_featured ) ||
+		! (
+			current_user_can( 'plugin_admin_edit', $post ) ||
+			current_user_can( 'plugin_review' )
+		)
 	) {
-		printf(
-			'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
-			__( 'Management of this plugin has been limited for security reasons. Please contact the plugins team for assistance to add/remove committers, or to perform other actions that are unavailable.', 'wporg-plugins' )
+		return;
+	}
+
+	$section = $is_beta ? __( 'Beta', 'wporg-plugins' ) : __( 'Featured', 'wporg-plugins' );
+	$is_owner = get_current_user_id() == $post->post_author;
+
+	if ( $is_owner ) {
+		$message = sprintf(
+			/* translators: 1: section name (Beta/Featured), 2: plugins team email address */
+			__( 'This plugin is listed in the %1$s section. Some management features have been limited for security reasons. Please contact the <a href="mailto:%2$s">plugins team (%2$s)</a> for assistance with closing or transferring this plugin.', 'wporg-plugins' ),
+			$section,
+			'plugins@wordpress.org'
+		);
+	} else {
+		$owner = get_user_by( 'ID', $post->post_author );
+		$message = sprintf(
+			/* translators: 1: section name (Beta/Featured), 2: plugin owner display name, 3: plugins team email address */
+			__( 'This plugin is listed in the %1$s section. Some management features have been limited for security reasons. Only the plugin owner (%2$s) can manage committers. Please contact the <a href="mailto:%3$s">plugins team (%3$s)</a> for assistance with closing or transferring this plugin.', 'wporg-plugins' ),
+			$section,
+			esc_html( $owner->display_name ),
+			'plugins@wordpress.org'
 		);
 	}
+
+	printf(
+		'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
+		$message
+	);
 }
 
 /**
@@ -380,7 +390,7 @@ function the_previous_version_download( $post = null ) {
 	echo '</select> ';
 
 	printf(
-		'<a href="%s" id="download-previous-link" class="button button-secondary">%s</a>',
+		'<span class="wp-block-button is-small"><a href="%s" id="download-previous-link" class="wp-block-button__link">%s</a></span>',
 		esc_url( Template::download_link( $post, reset( $tags ) ) ),
 		esc_html__( 'Download', 'wporg-plugins' )
 	);
@@ -427,8 +437,8 @@ function the_plugin_community_zone() {
 	);
 	echo '<span class="help">' . esc_attr__( 'Optional. The URL where development happens, such as at github.com.', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
-	echo '<p>';
-	echo '<button class="button button-secondary" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
+	echo '<p class="wp-block-button is-small">';
+	echo '<button class="wp-block-button__link" type="submit">' . esc_html__( 'Save', 'wporg-plugins' ) . '</button>';
 	echo '<span class="success-msg">' . __( 'Saved!', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
 	echo '</form>';
@@ -473,8 +483,8 @@ function the_plugin_commercial_zone() {
 	);
 	echo '<span class="help">' . esc_attr__( 'Optional. The URL for plugin support, other than its support forum on wordpress.org.', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
-	echo '<p>';
-	echo '<button class="button button-secondary" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
+	echo '<p class="wp-block-button is-small">';
+	echo '<button class="wp-block-button__link" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
 	echo '<span class="success-msg">' . __( 'Saved!', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
 	echo '</form>';
@@ -491,6 +501,8 @@ function the_plugin_danger_zone() {
 	}
 
 	echo '<hr>';
+
+	echo '<div class="plugin-danger-zone">';
 
 	echo '<h2>' . esc_html__( 'The Danger Zone', 'wporg-plugins' ) . '</h2>';
 
@@ -514,6 +526,8 @@ function the_plugin_danger_zone() {
 		// Output the toggle preview button.
 		the_plugin_self_toggle_preview_button();
 	}
+
+	echo '</div>';
 
 }
 
@@ -543,12 +557,62 @@ function the_plugin_self_close_button() {
 	}
 	echo '</p></div>';
 
-	if ( $close_link ) {
-		echo '<form method="POST" action="' . esc_url( $close_link ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
-		// Translators: %s is the plugin name, as defined by the plugin itself.
-		echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
-		echo '</form>';
+	if ( ! $close_link ) {
+		return;
 	}
+
+	// Translators: %s is the plugin name, as defined by the plugin itself.
+	$close_button_text = sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() );
+	?>
+	<div class="wp-block-button is-small"><button class="show-dialog wp-block-button__link" onclick="this.parentNode.nextElementSibling.showModal()"><?php echo $close_button_text; ?></button></div>
+	<dialog>
+		<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
+		<strong><?php _e( 'Close your plugin?', 'wporg-plugins' ); ?></strong>
+		<div class="notice notice-warning notice-alt"><p>
+			<?php _e( '<strong>Warning:</strong> Closing a plugin is intended to be a <em>permanent</em> action. There is no way to reopen a plugin without contacting the plugins team.', 'wporg-plugins' ); ?>
+		</p></div>
+
+		<form method="POST" action="<?php echo esc_url( $close_link ); ?>">
+			<p>
+				<label>
+					<input type="checkbox" name="confirm" required />
+					<?php printf(
+						/* translators: %s: The plugin name. */
+						__( 'Yes, I wish to close %s.', 'wporg-plugins' ),
+						'<code>' . get_the_title() . '</code>'
+					); ?>
+				</label>
+			</p>
+			<p>
+				<label>
+					<input type="checkbox" name="confirm" required />
+					<?php _e( 'Yes, I understand that this is permanent.', 'wporg-plugins' ); ?>
+				</label>
+			</p>
+			<p>
+				<label>
+					<input type="checkbox" name="confirm" required />
+					<?php _e( 'I am not working on a newer version to submit to the plugin directory.', 'wporg-plugins' ); ?>
+				</label>
+			</p>
+			<p>
+				<label>
+					<?php printf(
+						/* translators: %s: The plugin slug. */
+						__( 'Please enter the plugin slug %s below.', 'wporg-plugins' ),
+						'<code>' . esc_html( $post->post_name ) . '</code>'
+					); ?><br>
+					<input type="text" name="confirm" pattern="<?php echo esc_attr( $post->post_name ); ?>" required class="has-large-font-size" />
+				</label>
+			</p>
+			<p>
+				<?php printf( __( 'If you have any questions, please contact <a href="mailto:%1$s">%1$s</a> before proceeding with a link to your plugin and your questions.', 'wporg-plugins' ), 'plugins@wordpress.org' ); ?>
+			<p class="wp-block-button is-small">
+				<input class="wp-block-button__link" type="submit" value="<?php echo esc_attr( $close_button_text ); ?>" />
+			</p>
+		</form>
+	</dialog>
+	<?php
 }
 
 /**
@@ -558,7 +622,7 @@ function the_plugin_self_toggle_preview_button() {
 	$post            = get_post();
 	$toggle_link     = Template::get_self_toggle_preview_link( $post );
 
-	if ( ! current_user_can( 'plugin_self_close', $post ) ) {
+	if ( ! current_user_can( 'plugin_toggle_public_preview', $post ) ) {
 		return;
 	}
 
@@ -589,7 +653,7 @@ function the_plugin_self_toggle_preview_button() {
 
 		echo '<form method="POST" action="' . esc_url( $toggle_link ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
 		// Translators: %s is the plugin name, as defined by the plugin itself.
-		echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'Please toggle the Live Preview link for %s', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
+		echo '<p class="wp-block-button is-small"><input class="wp-block-button__link" type="submit" value="' . esc_attr( sprintf( __( 'Please toggle the Live Preview link for %s', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
 		echo '</form>';
 	}
 }
@@ -621,16 +685,27 @@ function the_plugin_self_transfer_form() {
 
 	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> Transferring a plugin is intended to be <em>permanent</em>. There is no way to get plugin ownership back without contacting the plugin team.', 'wporg-plugins' ) . '</p></div>';
 
-	$users = [];
+	$disabled_users = [];
+	$users          = [];
 	foreach ( Tools::get_plugin_committers( $post->post_name ) as $user_login ) {
 		$user = get_user_by( 'login', $user_login );
 		if ( $user->ID != get_current_user_id() ) {
 			$users[] = $user;
+
+			// Mark users as disabled if they don't have 2FA enabled, as plugins can't be transferred to users without 2FA.
+			if ( class_exists( 'Two_Factor_Core' ) && ! \Two_Factor_Core::is_user_using_two_factor( $user->ID ) ) {
+				$disabled_users[ $user->ID ] = true;
+			}
 		}
 	}
 	if ( ! $users ) {
 		echo '<div class="plugin-notice notice notice-error notice-alt"><p>' . __( 'To transfer a plugin, you must first add the new owner as a committer.', 'wporg-plugins' ) . '</p></div>';
 		return;
+	}
+
+	// Users must have 2FA enabled to be able to transfer a plugin.
+	if ( $disabled_users ) {
+		echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . __( 'Only users with Two-Factor authentication enabled can be selected.', 'wporg-plugins' ) . '</p></div>';
 	}
 
 	echo '<form method="POST" action="' . esc_url( Template::get_self_transfer_link() ) . '" onsubmit="return ( 0 != document.getElementById(\'transfer-new-owner\').value ) && confirm( jQuery(this).prev(\'.notice\').text() );">';
@@ -639,14 +714,16 @@ function the_plugin_self_transfer_form() {
 	echo '<option value="0">---</option>';
 	foreach ( $users as $user ) {
 		printf(
-			'<option value="%d">%s</option>' . "\n",
+			'<option value="%d" %s>%s</option>' . "\n",
 			esc_attr( $user->ID ),
+			disabled( isset( $disabled_users[ $user->ID ] ), true, false ),
 			esc_html( $user->display_name . ' (' . $user->user_login . ')' )
 		);
 	}
 	echo '</select></p>';
+
 	// Translators: %s is the plugin name, as defined by the plugin itself.
-	echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'Please transfer %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
+	echo '<p class="wp-block-button is-small"><input class="wp-block-button__link" type="submit" value="' . esc_attr( sprintf( __( 'Please transfer %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
 	echo '</form>';
 
 }
@@ -679,7 +756,7 @@ function the_plugin_release_confirmation_form() {
 		echo '</p></div>';
 
 		echo '<form method="POST" action="' . esc_url( Template::get_enable_release_confirmation_link() ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
-		echo '<p><input class="button" type="submit" value="' . esc_attr__( 'I understand, please enable release confirmations.', 'wporg-plugins' ) . '" /></p>';
+		echo '<p class="wp-block-button is-small"><input class="wp-block-button__link" type="submit" value="' . esc_attr__( 'I understand, please enable release confirmations.', 'wporg-plugins' ) . '" /></p>';
 		echo '</form>';
 
 	} else {
@@ -704,7 +781,7 @@ function the_author_notice( $post = null ) {
 		printf(
 			'<div class="notice notice-alt notice-%s">%s</div>',
 			esc_attr( $notice['type'] ),
-			'<p><strong>' . __( 'A note from the Plugin Review team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			'<p><strong>' . __( 'A note from the Plugins Team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
 			wp_kses_post( $notice['html'] ) // Should have wrapping <p> tags.
 		);
 	}

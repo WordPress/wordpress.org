@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 use WordPressdotorg\Plugin_Directory\Tools;
+use const \WP_CLI;
 
 /**
  * Manager to wrap up all the logic for Cron tasks.
@@ -8,6 +9,22 @@ use WordPressdotorg\Plugin_Directory\Tools;
  * @package WordPressdotorg\Plugin_Directory\Jobs
  */
 class Manager {
+
+	/**
+	 * The cron tasks that are triggered by a colon-based hook.
+	 *
+	 * @see Manager::register_colon_based_hook_handlers()
+	 * @static
+	 * @var array
+	 */
+	public static $wildcard_cron_tasks = array(
+		'import_plugin'         => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
+		'import_plugin_i18n'    => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
+		'import_zip'            => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
+		'scan_plugin'           => array( __NAMESPACE__ . '\Plugin_Scan', 'cron_trigger' ),
+		'create_svn_repo'       => array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ),
+		'release_to_update_api' => array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger_release' ),
+	);
 
 	/**
 	 * Add all the actions for cron tasks and schedules.
@@ -26,11 +43,14 @@ class Manager {
 		add_action( 'plugin_directory_zip_cleanup', array( __NAMESPACE__ . '\Zip_Cleanup', 'cron_trigger' ) );
 		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
 
+		// Hook into the plugin import process to queue a job.
+		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Scan', 'wporg_plugins_imported' ), 10, 6 );
+
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
 
 		// Register the wildcard cron hook tasks.
-		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			// This must be run after plugins_loaded, as that's when Cavalcade hooks in.
 			add_action( 'init', array( $this, 'register_colon_based_hook_handlers' ) );
 		}
@@ -68,38 +88,43 @@ class Manager {
 		// Flush the Cavalcade jobs cache, we need fresh data from the database
 		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
 
-		$crons = _get_cron_array();
-		if ( empty( $crons ) ) {
-			return false;
-		}
-
 		$timestamps = array();
 
-		foreach ( $crons as $timestamp => $cron ) {
-			if ( isset( $cron[ $hook ] ) ) {
-				foreach ( $cron[ $hook ] as $key => $cron_item ) {
-					// Cavalcade should present this field, if not, bail.
-					if ( empty( $cron_item['_job'] ) ) {
-						continue;
-					}
-
-					if ( 'waiting' === $cron_item['_job']->status ) {
-						$timestamps[] = $timestamp;
-						break;
-					}
+		foreach ( _get_cron_array() as $timestamp => $cron ) {
+			foreach ( $cron[ $hook ] ?? [] as $cron_item ) {
+				if ( 'waiting' === ( $cron_item['_job']->status ?? '' ) ) {
+					$timestamps[] = $timestamp;
+					break;
 				}
 			}
 		}
 
-		if ( empty( $timestamps ) ) {
+		if ( ! $timestamps ) {
 			return false;
 		}
 
-		if ( 'last' == $when ) {
-			return max( $timestamps );
-		} else {
-			return min( $timestamps );
+		return 'last' === $when ? max( $timestamps ) : min( $timestamps );
+	}
+
+	/**
+	 * Determines whether any job for a given hook is currently running.
+	 *
+	 * @param string $hook The hook to check.
+	 * @return bool True if a job for this hook is currently running.
+	 */
+	public static function is_event_running( $hook ) {
+		// Flush the Cavalcade jobs cache, we need fresh data from the database.
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
+
+		foreach ( _get_cron_array() as $cron ) {
+			foreach ( $cron[ $hook ] ?? [] as $cron_item ) {
+				if ( 'running' === ( $cron_item['_job']->status ?? '' ) ) {
+					return true;
+				}
+			}
 		}
+
+		return false;
 	}
 
 	/**
@@ -286,31 +311,79 @@ class Manager {
 	 * These cron tasks are in the form of 'import_plugin:$slug', this maps them to their expected handlers.
 	 */
 	public function register_colon_based_hook_handlers() {
-		$cron_array = get_option( 'cron' );
+		global $wpdb;
 
-		$wildcard_cron_tasks = array(
-			'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
-			'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
-			'tide_sync'          => array( __NAMESPACE__ . '\Tide_Sync', 'cron_trigger' ),
-		);
+		// Add the wildcard cron task above to the specified colon-based hook.
+		$add_callback = static function( $hook ) {
+			if ( ! str_contains( $hook, ':' ) ) {
+				return;
+			}
 
-		if ( is_array( $cron_array ) ) {
-			foreach ( $cron_array as $timestamp => $handlers ) {
-				if ( ! is_numeric( $timestamp ) ) {
-					continue;
+			$partial_hook = explode( ':', $hook )[0];
+			$callback     = self::$wildcard_cron_tasks[ $partial_hook ] ?? false;
+
+			if ( ! $callback ) {
+				return;
+			}
+
+			if ( ! has_action( $hook, $callback ) ) {
+				add_action( $hook, $callback, 10, PHP_INT_MAX );
+			}
+		};
+
+		// Flush the Cavalcade jobs cache, we need fresh data from the database
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
+
+		foreach ( _get_cron_array() as $timestamp => $handlers ) {
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $handlers as $hook => $jobs ) {
+				$add_callback( $hook );
+			}
+		}
+
+		/*
+		 * When jobs are run manually or after-the-fact, we need to find the current job first.
+		 *
+		 * The `CAVALCADE_JOB_ID` constant exists inside Cavalcade, which WordPress.org uses for cron,
+		 * but the constant is only set just before the cron task fires, and is not available at the
+		 * time that this code executes.
+		 *
+		 * We can get the job hook via the job id, either through `$job_id` global that our loader sets,
+		 * or through the WP CLI arguments.
+		 */
+		if (
+			class_exists( '\HM\Cavalcade\Plugin\Job' ) &&
+			( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) )
+		) {
+			// The WordPress.org cavalcade loader sets the $job_id variable, check there first.
+			$job_id = $GLOBALS['job_id'] ?? false;
+
+			// Try to get it from the CLI args. `wp cavalcade run 12345`
+			if ( ! $job_id && in_array( 'run', $GLOBALS['argv'] ) ) {
+				$job_id = $GLOBALS['argv'][ array_search( 'run', $GLOBALS['argv'] ) + 1 ] ?? false;
+			}
+
+			if ( $job_id && is_numeric( $job_id ) ) {
+				$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+
+				// This shouldn't occur, but if it does and we're using HyperDB, retry against a master DB server.
+				if (
+					! $job &&
+					isset( $wpdb->srtm ) &&
+					is_callable( [ $wpdb, 'send_reads_to_masters' ] )
+				) {
+					$srtm = $wpdb->srtm;
+					$wpdb->send_reads_to_masters();
+					$job = \HM\Cavalcade\Plugin\Job::get( $job_id );
+					$wpdb->srtm = $srtm;
 				}
 
-				foreach ( $handlers as $hook => $jobs ) {
-					$pos = strpos( $hook, ':' );
-					if ( ! $pos ) {
-						continue;
-					}
-
-					$partial_hook = substr( $hook, 0, $pos );
-
-					if ( isset( $wildcard_cron_tasks[ $partial_hook ] ) ) {
-						add_action( $hook, $wildcard_cron_tasks[ $partial_hook ], 10, PHP_INT_MAX );
-					}
+				// If we're running a job, add the callback for the job if it hasn't already been done.
+				if ( $job ) {
+					$add_callback( $job->hook );
 				}
 			}
 		}
@@ -326,5 +399,66 @@ class Manager {
 		Tools::clear_memory_heavy_variables();
 	}
 
+	/**
+	 * Fetch all the cron jobs for a plugin.
+	 *
+	 * @static
+	 *
+	 * @param \WP_Post $plugin    The plugin post object.
+	 * @param array    $args      Additional arguments to filter the jobs. See \HM\Cavalcade\Plugin\Job::get_jobs_by_query() for more details.
+	 * @param bool     $with_logs Whether to fetch logs for the jobs.
+	 * @return array
+	 */
+	public static function get_plugin_cron_jobs( \WP_Post $plugin, $args = [], $with_logs = false ) {
+		global $wpdb;
+
+		if ( ! class_exists( '\HM\Cavalcade\Plugin\Job' ) ) {
+			return [];
+		}
+
+		$args['statuses'] ??= [ 'waiting', 'running', 'completed', 'failed', 'cancelled' ];
+		$args['limit']    ??= 20;
+		$args['args']     ??= null; // All jobs, regardless of args.
+
+		$jobs = [];
+		foreach ( self::$wildcard_cron_tasks as $job_prefix => $callback ) {
+			$args['hook'] = $job_prefix . ':' . $plugin->post_name;
+			$jobs = array_merge(
+				$jobs,
+				\HM\Cavalcade\Plugin\Job::get_jobs_by_query( $args )
+			);
+		}
+
+		// Convert to stdClass to avoid dynamic property deprecation on Job objects.
+		$jobs = array_map( static fn( $job ) => (object) (array) $job, $jobs );
+
+		// Fetch logs for the tasks.
+		if ( $with_logs ) {
+			$log_table = str_replace( 'jobs', 'logs', \HM\Cavalcade\Plugin\Job::get_table() );
+			foreach ( $jobs as $job ) {
+				$job->logs = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT status, timestamp, content FROM %i WHERE job = %d ORDER BY id DESC LIMIT 20",
+						$log_table,
+						$job->id
+					)
+				);
+				// Decode the JSON content.
+				array_walk( $job->logs, static function( &$log ) {
+					$log->content = json_decode( $log->content, true ) ?: $log->content;
+				} );
+			}
+		}
+
+		// Sort jobs based on last run.
+		usort( $jobs, static function( $a, $b ) {
+			$a_last = max( $a->start, ! empty( $a->logs ) ? max( array_map( 'strtotime', wp_list_pluck( $a->logs, 'timestamp' ) ) ) : 0 );
+			$b_last = max( $b->start, ! empty( $b->logs ) ? max( array_map( 'strtotime', wp_list_pluck( $b->logs, 'timestamp' ) ) ) : 0 );
+
+			return $a_last <=> $b_last;
+		} );
+
+		return $jobs;
+	}
 }
 

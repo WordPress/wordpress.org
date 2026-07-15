@@ -6,38 +6,128 @@
  */
 
 /**
+ * Include locale specific styles.
+ */
+require_once get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/inc/rosetta-styles.php';
+require_once( __DIR__ . '/inc/block-config.php' );
+
+/**
  * Use the ‘Lead Topic’ uses the single topic part
  * allowing styling the lead topic separately from the main reply loop.
  */
 add_filter( 'bbp_show_lead_topic', '__return_true' );
 
 /**
+ * Remove the helphub table of contents from the handbook pages.
+ */
+add_filter( 'wporg_handbook_toc_should_add_toc', '__return_false' );
+
+/**
+ * Get the local navigation menu object if it exists.
+ */
+function wporg_support_get_local_nav_menu_object() {
+	$local_nav_menu_locations = get_nav_menu_locations();
+	$local_nav_menu_object = isset( $local_nav_menu_locations['local-navigation'] )
+		? wp_get_nav_menu_object( $local_nav_menu_locations['local-navigation'] )
+		: false;
+
+	return $local_nav_menu_object;
+}
+
+/**
+ * Register a local nav menu for non-English forums, if it doesn't already exist.
+ */
+function wporg_support_register_local_nav_menu() {
+	if ( substr( get_locale(), 0, 2 ) === 'en' || wporg_support_get_local_nav_menu_object() ) {
+		return;
+	}
+
+	register_nav_menu( 'local-navigation', __( 'Local Navigation', 'wporg-forums' ) );
+}
+add_action( 'after_setup_theme', 'wporg_support_register_local_nav_menu' );
+
+/**
  * Provide a list of local navigation menus.
  */
-function add_site_navigation_menus( $menus ) {
-	return array(
-		'forums' => array(
-			array(
-				'label' => __( 'Guidelines', 'wporg-forums' ),
-				'url' => '/guidelines/',
-			),
+function wporg_support_add_site_navigation_menus( $menus ) {
+	if ( is_admin() ) {
+		return;
+	}
+
+	if ( substr( get_locale(), 0, 2 ) === 'en' ) {
+		$menu = array(
 			array(
 				'label' => __( 'Welcome to Support', 'wporg-forums' ),
 				'url' => '/welcome/',
 			),
 			array(
-				'label' => __( 'Get Involved', 'wporg-forums' ),
+				'label' => __( 'Guidelines', 'wporg-forums' ),
+				'url' => '/guidelines/',
+			),
+			array(
+				'label' => __( 'Get involved', 'wporg-forums' ),
 				'url' => 'https://make.wordpress.org/support/handbook/contributing-to-the-wordpress-forums/',
-			)
-		),
-	);
+			),
+		);
+	} else {
+		$local_nav_menu_object = wporg_support_get_local_nav_menu_object();
+		$menu = array(
+			array(
+				'label' => __( 'Get involved', 'wporg-forums' ),
+				'url' => 'https://make.wordpress.org/support/handbook/contributing-to-the-wordpress-forums/',
+			),
+		);
+
+		if ( ! is_user_logged_in() ) {
+			global $wp;
+			$redirect_url = home_url( $wp->request );
+			$menu[] = array(
+				'label' => __( 'Log in', 'wporg-forums' ),
+				'url' => wp_login_url( $redirect_url ),
+				'className' => 'has-separator',
+			);
+		}
+
+		if ( ! $local_nav_menu_object ) {
+			return array( 'forums' => $menu );
+		}
+
+		$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
+
+		if ( ! $menu_items || empty( $menu_items ) ) {
+			return array( 'forums' => $menu );
+		}
+
+		$menu = array_map(
+			function( $menu_item ) {
+				return array(
+					'label' => esc_html( $menu_item->title ),
+					'url' => esc_url( $menu_item->url )
+				);
+			},
+			// Limit local nav items to 3
+			array_slice( $menu_items, 0, 3 )
+		);
+	}
+
+	if ( ! is_user_logged_in() ) {
+		global $wp;
+		$redirect_url = home_url( $wp->request );
+		$menu[] = array(
+			'label' => __( 'Log in', 'wporg-forums' ),
+			'url' => wp_login_url( $redirect_url ),
+			'className' => 'has-separator',
+		);
+	}
+
+	return array( 'forums' => $menu );
 }
-add_filter( 'wporg_block_navigation_menus', '\add_site_navigation_menus' );
+add_filter( 'wporg_block_navigation_menus', 'wporg_support_add_site_navigation_menus' );
 
 /**
  * Register patterns from the patterns directory.
  */
-function register_patterns() {
+function wporg_support_register_patterns() {
 	$pattern_directory = new DirectoryIterator( get_template_directory() . '/patterns/' );
 	foreach ( $pattern_directory as $file ) {
 		if ( $file->isFile() ) {
@@ -45,7 +135,7 @@ function register_patterns() {
 		}
 	}
 }
-add_action( 'init', 'register_patterns' );
+add_action( 'init', 'wporg_support_register_patterns' );
 
 /**
  * Add theme support for some features.
@@ -73,8 +163,18 @@ add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
 function wporg_support_scripts() {
 	wp_dequeue_style( 'wp4-styles' );
 
-	wp_enqueue_style( 'wporg-parent-2021-style', get_theme_root_uri() . '/wporg-parent-2021/build/style.css', [ 'wporg-global-fonts' ] );
-	wp_enqueue_style( 'wporg-parent-2021-block-styles', get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css', [ 'wporg-global-fonts' ] );
+	wp_enqueue_style(
+		'wporg-parent-2021-style',
+		get_theme_root_uri() . '/wporg-parent-2021/build/style.css',
+		[ 'wporg-global-fonts' ],
+		filemtime( get_theme_root() . '/wporg-parent-2021/build/style.css' )
+	);
+	wp_enqueue_style(
+		'wporg-parent-2021-block-styles',
+		get_theme_root_uri() . '/wporg-parent-2021/build/block-styles.css',
+		[ 'wporg-global-fonts' ],
+		filemtime( get_theme_root() . '/wporg-parent-2021/build/block-styles.css' )
+	);
 
 	wp_enqueue_style( 'support-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
 	wp_style_add_data( 'support-style', 'rtl', 'replace' );
@@ -112,9 +212,9 @@ add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
  *
  * @return WP_Theme_JSON_Data The updated theme.json settings.
  */
-function merge_parent_support_theme_json( $theme_json ) {
+function wporg_support_merge_parent_support_theme_json( $theme_json ) {
 	$support_theme_json_data = $theme_json->get_data();
-	$parent_theme_json_data = json_decode( file_get_contents( get_theme_root_uri() . '/wporg-parent-2021/theme.json' ), true );
+	$parent_theme_json_data = json_decode( file_get_contents( get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/theme.json' ), true );
 
 	if ( ! $parent_theme_json_data ) {
 		return $theme_json;
@@ -144,7 +244,7 @@ function merge_parent_support_theme_json( $theme_json ) {
 	return $theme_json->update_with( $new_data );
 
 }
-add_filter( 'wp_theme_json_data_theme', 'merge_parent_support_theme_json' );
+add_filter( 'wp_theme_json_data_theme', 'wporg_support_merge_parent_support_theme_json' );
 
 /**
  * Merge two arrays recursively, overwriting keys in the first array with keys from the second array.
@@ -299,7 +399,7 @@ add_filter( 'comment_post_redirect', 'wporg_support_comment_post_redirect', 10, 
  */
 function wporg_support_breadcrumb() {
 	// Separator
-	$args['sep']             = is_rtl() ? __( '&laquo;', 'wporg-forums' ) : __( '&raquo;', 'wporg-forums' );
+	$args['sep']             = is_rtl() ? __( '\\', 'wporg-forums' ) : __( '/', 'wporg-forums' );
 	$args['pad_sep']         = 1;
 	$args['sep_before']      = '<span class="bbp-breadcrumb-sep">' ;
 	$args['sep_after']       = '</span>';
@@ -442,7 +542,7 @@ function wporg_support_get_forums_list() {
 			</div>
 			<!-- /wp:group -->',
 			esc_attr( $columns_to_fill ),
-			__( 'Theme &amp; Plugins', 'wporg-forums' ),
+			__( 'Themes &amp; Plugins', 'wporg-forums' ),
 			sprintf(
 				/* translators: 1: Theme Directory URL, 2: Plugin Directory URL */
 				__( 'Looking for help with a WordPress <a href="%1$s">theme</a> or <a href="%2$s">plugin</a>? Head to the theme or plugin\'s page and find the "View support forum" link to visit its specific forum.', 'wporg-forums' ),
@@ -493,7 +593,7 @@ function wporg_support_get_sidebar_topics() {
 			continue;
 		}
 
-		$output .= sprintf( '<a class="bbp-view-title wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s"><h5 class="wp-block-heading has-inter-font-family has-small-font-size" style="font-weight:700;margin-bottom:0">%s</h5></a>',
+		$output .= sprintf( '<a class="bbp-view-title wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow" href="%s"><h3 class="wp-block-heading has-inter-font-family has-small-font-size" style="font-weight:700;margin-bottom:0">%s</h3></a>',
 			esc_url( bbp_get_view_url( $view ) ),
 			bbp_get_view_title( $view )
 		);
@@ -627,7 +727,7 @@ function wporg_support_get_slack_username( $user_id = 0 ) {
 
 	$data = wp_cache_get( "user_id:$user_id", 'slack_data' );
 	if ( false === $data ) {
-		$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
+		$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d ORDER BY deactivated ASC LIMIT 1", $user_id ) );
 
 		// Cache nonexistence as an empty string.
 		wp_cache_add( "user_id:$user_id", (string) $data, 'slack_data', 1800 );
@@ -1117,6 +1217,8 @@ add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url
  * @return string Filtered content.
  */
 function wporg_support_wrap_standalone_li_tags_in_ul( $content ) {
+	remove_filter( current_filter(), 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
+
 	// No lists? No worries.
 	if ( false === stripos( $content, '<li>' ) ) {
 		return $content;
@@ -1167,8 +1269,23 @@ function wporg_support_wrap_standalone_li_tags_in_ul( $content ) {
 
 	return $content;
 }
-add_filter( 'bbp_get_topic_content', 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
-add_filter( 'bbp_get_reply_content', 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
+
+/**
+ * Maybe wrap standalone <li> tags in <ul> tags.
+ * This only wraps non-block-posts.
+ * 
+ * @see https://meta.trac.wordpress.org/ticket/7618
+ */
+function wporg_support_maybe_wrap_standalone_li_tags_in_ul( $content ) {
+	// If it's not a block post, we'll need to filter it after all transforms.
+	if ( ! has_blocks( $content ) ) {
+		add_filter( current_filter(), 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
+	}
+
+	return $content;
+}
+add_filter( 'bbp_get_topic_content', 'wporg_support_maybe_wrap_standalone_li_tags_in_ul', 1 );
+add_filter( 'bbp_get_reply_content', 'wporg_support_maybe_wrap_standalone_li_tags_in_ul', 1 );
 
 /**
  * Set 'is_single' query var to true on single replies.
@@ -1227,6 +1344,17 @@ function wporg_is_single_user_profile( bool $is_single_user_profile ) : bool {
 	return $is_single_user_profile;
 }
 add_filter( 'bbp_is_single_user_profile', 'wporg_is_single_user_profile' );
+
+/**
+ * Get the URL for the forums welcome page.
+ * This is translated so the URL can be customized per locale.
+ *
+ * @return string
+ */
+function wporg_support_get_welcome_url() {
+	/* Translators: URL for the welcome page. Check whether your site has a custom slug, eg. https://es.wordpress.org/support/bienvenida/ */
+	return __( 'https://wordpress.org/support/welcome/', 'wporg-forums' );
+}
 
 
 /** bb Base *******************************************************************/
@@ -1357,17 +1485,25 @@ function bb_base_single_topic_description() {
 		$wp_version = WordPressdotorg\Forums\Version_Dropdown\get_topic_version( $topic_id );
 	}
 
-	?>
+	$forum_hidden = false;
+	if ( class_exists( 'WordPressdotorg\Forums\Support_Compat' ) ) {
+		$forum_hidden = in_array( bbp_get_topic_forum_id(), WordPressdotorg\Forums\Support_Compat::HIDDEN_FORUMS, true );
+	}
 
-	<li class="topic-forum"><?php
-		/* translators: %s: forum title */
-		printf( __( 'In: %s', 'wporg-forums' ),
+	if ( ! $forum_hidden ) {
+		echo '<li class="topic-forum">';
+		printf(
+			/* translators: %s: forum title */
+			__( 'In: %s', 'wporg-forums' ),
 			sprintf( '<a href="%s">%s</a>',
 				esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id() ) ),
 				bbp_get_topic_forum_title()
 			)
 		);
-	?></li>
+		echo '</li>';
+	}
+
+	?>
 	<?php if ( !empty( $reply_count ) ) : ?>
 		<li class="reply-count"><?php echo $reply_count; ?></li>
 	<?php endif; ?>

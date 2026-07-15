@@ -7,7 +7,7 @@
  * Author URI:      https://make.wordpress.org/hosting/
  * Text Domain:     ptr
  * Domain Path:     /languages
- * Version:         0.1.3
+ * Version:         0.2.0
  * License:         GPL v3
  *
  * @package         PTR
@@ -29,7 +29,6 @@ add_action( 'body_class', array( 'PTR\Display', 'filter_body_class' ) );
 add_action( 'post_class', array( 'PTR\Display', 'filter_post_class' ) );
 add_action( 'the_content', array( 'PTR\Display', 'filter_the_content' ) );
 add_action( 'rest_api_init', array( 'PTR\RestAPI', 'register_routes' ) );
-
 add_action( 'load-edit.php', 'ptr_load_edit_php' );
 
 /**
@@ -92,4 +91,36 @@ function ptr_get_template_part( $template, $vars = array() ) {
 	// @codingStandardsIgnoreEnd
 	include $full_path;
 	return ob_get_clean();
+}
+
+/**
+ * Counts the number of failing or passing test reports for a revision.
+ *
+ * @param int    $revision_parent_id The current revision's post ID.
+ * @param string $status             The status term slug to count.
+ *
+ * @return int The number of reports for the given revision.
+ */
+function ptr_count_test_results( $revision_parent_id, $status = 'passed' ) {
+	$report_query = new WP_Query(
+		array(
+			'post_type'      => 'result',
+			'post_parent'    => $revision_parent_id,
+			'fields'         => 'ids',
+			'posts_per_page' => 1,
+			'tax_query'      => array(
+				array(
+					'taxonomy'   => 'report-result',
+					'terms'      => $status,
+					'field'      => 'slug',
+				),
+			)
+		)
+	);
+
+	if ( ! $report_query->have_posts() ) {
+		return 0;
+	}
+
+	return $report_query->found_posts;
 }

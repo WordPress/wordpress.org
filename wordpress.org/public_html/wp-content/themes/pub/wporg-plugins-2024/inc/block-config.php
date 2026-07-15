@@ -5,14 +5,20 @@
 
 namespace WordPressdotorg\Theme\Plugins_2024\Block_Config;
 
+use WordPressdotorg\Plugin_Directory\Tools;
+
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\wporg_query_filter_options_sort' );
 add_filter( 'wporg_query_filter_options_business_model', __NAMESPACE__ . '\wporg_query_filter_options_business_model' );
+add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wporg_query_filter_options_plugin_category' );
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
+add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
+add_filter( 'wporg_ratings_data', __NAMESPACE__ . '\set_rating_data', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\filter_site_title_block' );
 add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\filter_navigation_block', 10, 2 );
+add_filter( 'render_block_wporg/language-suggest', __NAMESPACE__ . '\filter_language_suggest' );
 
 /**
  * Provide a list of local navigation menus.
@@ -20,17 +26,22 @@ add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\filter_navigation_
 function add_site_navigation_menus( $menus ) {
 	global $wp;
 
-	$url = 'https://' . $_SERVER['HTTP_HOST'] . parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+	// This accounts for test and local environments.
+	$scheme = wp_parse_url( home_url(), PHP_URL_SCHEME ) ?: 'https';
+	$host   = $_SERVER['HTTP_HOST'] ?? wp_parse_url( home_url(), PHP_URL_HOST ) ?: 'localhost';
+	$path   = parse_url( ( $_SERVER['REQUEST_URI'] ?? '/' ) ?: '/', PHP_URL_PATH );
+	$url    = $scheme . '://' . $host . $path;
 
 	$items = array(
 		'plugins' => array(
 			array(
-				'label' => __( 'My Favorites', 'wporg-plugins' ),
-				'url' => '/browse/favorites/',
-			),
-			array(
 				'label' => __( 'Submit a plugin', 'wporg-plugins' ),
 				'url' => '/developers/',
+			),
+			array(
+				'label' => __( 'My favorites', 'wporg-plugins' ),
+				'url' => '/browse/favorites/',
+				'className' => 'has-separator',
 			),
 		),
 		'section-bar' => array(
@@ -67,6 +78,15 @@ function add_site_navigation_menus( $menus ) {
 			),*/
 		)
 	);
+
+	if ( ! is_user_logged_in() ) {
+		global $wp;
+		$redirect_url = home_url( $wp->request );
+		$items['plugins'][] = array(
+			'label' => __( 'Log in', 'wporg-plugins' ),
+			'url' => wp_login_url( $redirect_url ),
+		);
+	}
 
 	/*
 	// Not usually in the menu, but we need to show these somehow.
@@ -128,8 +148,9 @@ function wporg_query_filter_options_sort() {
 
 function wporg_query_filter_options_business_model() {
 	$options = array(
+		''           => __( 'All', 'wporg-plugins' ),
 		'commercial' => __( 'Commercial', 'wporg-plugins' ),
-		'community' => __( 'Community', 'wporg-plugins' ),
+		'community'  => __( 'Community', 'wporg-plugins' ),
 	);
 	$label = __( 'Type', 'wporg-plugins' );
 	if ( get_query_var( 'plugin_business_model' ) && isset( $options[ get_query_var( 'plugin_business_model' ) ] ) ) {
@@ -143,6 +164,30 @@ function wporg_query_filter_options_business_model() {
 		'action'   => '',
 		'options'  => $options ,
 		'selected' => [ get_query_var( 'plugin_business_model' ) ],
+	);
+}
+
+function wporg_query_filter_options_plugin_category() {
+	$options = [];
+
+	foreach ( get_terms( 'plugin_category', [ 'hide_empty' => true ] ) as $term ) {
+		$options[ $term->slug ] = $term->name;
+	}
+	
+	$count = count( (array) get_query_var( 'plugin_category' ) );
+	$label = sprintf(
+		/* translators: The dropdown label for filtering, %s is the selected term count. */
+		_n( 'Categories <span>%s</span>', 'Categories <span>%s</span>', number_format_i18n( $count ), 'wporg-plugins' ),
+		$count
+	);
+	
+	return array(
+		'label'    => $label,
+		'title'    => __( 'Category', 'wporg-plugins' ),
+		'key'      => 'plugin_category',
+		'action'   => '',
+		'options'  => $options,
+		'selected' => (array) get_query_var( 'plugin_category' ),
 	);
 }
 
@@ -185,15 +230,104 @@ function wporg_query_filter_in_form( $key ) {
 		echo '<input type="hidden" name="block_search" value="1" />';
 	}
 
+	// Temporary for feature flag
+	if ( isset( $_GET['show_filters'] )  ) {
+		echo '<input type="hidden" name="show_filters" value="1" />';
+	}
+
 }
 
 function wporg_query_total_label( $label, $count ) {
 
 	if ( ! is_search() ) {
-		return;
+		return '';
+	}
+
+	$plugin_business_model = get_query_var( 'plugin_business_model' );
+	if ( $plugin_business_model ) {
+		$term_name = '';
+
+		if ( 'community' === $plugin_business_model ) {
+			$term_name = __( 'community', 'wporg-plugins' );
+		} elseif ( 'commercial' === $plugin_business_model ) {
+			$term_name = __( 'commercial', 'wporg-plugins' );
+		}
+
+		return sprintf(
+			/* Translators: %1$: Number of plugins, %2$s: Plugin category  */
+			_n( '%1$s %2$s plugin', '%1$s %2$s plugins', $count, 'wporg-plugins' ),
+			number_format_i18n( $count ),
+			$term_name
+		);
 	}
 
 	return _n( '%s plugin', '%s plugins', $count, 'wporg-plugins' );
+}
+
+/**
+ * Configure the favorite button.
+ *
+ * @param array $settings Array of settings for this filter.
+ * @param int   $post_id  The current post ID.
+ *
+ * @return array|bool Settings array.
+ */
+function get_favorite_settings( $settings, $post_id ) {
+	return array(
+		'is_favorite' => Tools::favorited_plugin( $post_id ),
+		'add_callback' => function( $_post_id ) {
+			$result = (bool) Tools::favorite_plugin( $_post_id, get_current_user_id(), true );
+			// `favorite_plugin` can return false for a number of reasons (not logged in, no plugin found, )
+			if ( ! $result ) {
+				return new \WP_Error( 'favorite-error', 'Plugin could not be favorited.' );
+			}
+			return $result;
+		},
+		'delete_callback' => function( $_post_id ) {
+			$result = (bool) Tools::favorite_plugin( $_post_id, get_current_user_id(), false );
+			// `favorite_plugin` can return false for a number of reasons (not logged in, no plugin found, )
+			if ( ! $result ) {
+				return new \WP_Error( 'unfavorite-error', 'Plugin could not be unfavorited.' );
+			}
+			return $result;
+		},
+	);
+}
+
+/**
+ * Update ratings blocks with real rating data.
+ *
+ * @param array $data    Rating data.
+ * @param int   $post_id Current post.
+ *
+ * @return array
+ */
+function set_rating_data( $data, $post_id ) {
+	$post = get_post( $post_id );
+
+	if ( class_exists( '\WPORG_Ratings' ) ) {
+		$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
+		$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
+	} else {
+		$rating  = get_post_meta( $post->ID, 'rating', true ) ?: 0;
+		$ratings = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+	}
+
+	/**
+	 * Why do we multiply the average rating by 20?
+	 * The themes API does it this way, and the rating plugin was built to fit that. 
+	 * Instead of redoing everything, multiplying here keeps things simple and works well.
+	 *
+	 * @see theme-directory/class-themes-api.php for more info.
+	 */
+	$adjusted_rating = $rating * 20;
+
+	return array(
+		'rating' => $adjusted_rating,
+		'ratingsCount' => array_sum( $ratings ),
+		'ratings' => $ratings,
+		'supportUrl' => esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' )
+	);
 }
 
 /**
@@ -284,4 +418,24 @@ function filter_navigation_block( $block_content, $block ) {
 	}
 
 	return $block_content;
+}
+
+
+/**
+ * Increase the visibilit of the language suggest bar to recruit translators on plugin page.
+ * 
+ * @see https://github.com/WordPress/wordpress.org/issues/301
+ * 
+ * @param string $block_content
+ * @return string
+ */
+function filter_language_suggest( $block_content ) {
+	if ( ! is_single() ) {
+		return $block_content;
+	}
+
+	$html = new \WP_HTML_Tag_Processor( $block_content );
+	$html->next_tag();
+	$html->add_class( 'is-style-prominent' );
+	return $html->get_updated_html();
 }

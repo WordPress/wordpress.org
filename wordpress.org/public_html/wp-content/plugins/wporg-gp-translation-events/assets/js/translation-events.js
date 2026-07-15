@@ -9,6 +9,7 @@
 				}
 				validateEventDates();
 				convertToUserLocalTime();
+				setInterval( convertToUserLocalTime, 10000 );
 
 				$( '.submit-event' ).on(
 					'click',
@@ -20,13 +21,85 @@
 					}
 				);
 
-				$( '.delete-event' ).on(
+				$( '.trash-event' ).on(
 					'click',
 					function ( e ) {
 						e.preventDefault();
-						handleDelete()
+						handleTrash()
 					}
 				);
+
+				$( '.text-snippet' ).on(
+					'click',
+					function ( e ) {
+						e.preventDefault();
+						var textArea        = $( this ).closest( 'div' ).find( 'textarea' );
+						var textAreaContent = textArea.val();
+						textArea.val( textAreaContent + $( this ).data( 'snippet' ) );
+					}
+				);
+
+				$( '.event-attendees h2, .event-contributors h2' ).on(
+					'click',
+					function ( e ) {
+							e.preventDefault();
+							$( this ).closest( 'body' ).toggleClass( 'icons' );
+							$( '.convert-to-host, .remove-as-host' ).toggle();
+					}
+				);
+
+				$( '#quick-add' ).on(
+					'toggle',
+					function () {
+						if ( $( this ).data( 'loaded' ) ) {
+							return;
+						}
+						$( this ).addClass( 'loading' );
+						const options = {
+							weekday: 'short',
+							day: 'numeric',
+							month: 'short',
+							year: 'numeric'
+						};
+
+						fetch( 'https://central.wordcamp.org/wp-json/wp/v2/wordcamps?per_page=30&status=wcpt-scheduled' ).then(
+							response => response.json()
+						).then(
+							function ( data ) {
+								data.sort( ( a, b ) => a['Start Date (YYYY-mm-dd)'] - b['Start Date (YYYY-mm-dd)'] );
+								const ul = $( '<ul>' );
+								for ( const wordcamp of data ) {
+									const li = $( '<li>' ).data( 'wordcamp', wordcamp );
+									li.append( $( '<a>' ).attr( 'href', wordcamp.link ).text( wordcamp.title.rendered ) );
+									li.append( $( '<span>' ).text( ' ' + new Date( 1000 * wordcamp['Start Date (YYYY-mm-dd)'] ).toLocaleDateString( navigator.language, options ) + ' - ' + new Date( 1000 * wordcamp['End Date (YYYY-mm-dd)'] ).toLocaleDateString( navigator.language, options ) ) );
+									ul.append( li );
+								}
+								$( '#quick-add' ).data( 'loaded', true ).removeClass( 'loading' ).append( ul );
+							}
+						);
+					}
+				);
+				$( document ).on(
+					'click',
+					'#quick-add a',
+					function ( e ) {
+						e.preventDefault();
+						e.stopPropagation();
+
+						const wordcamp = $( e.target ).closest( 'li' ).data( 'wordcamp' );
+						if ( ! wordcamp ) {
+							return;
+						}
+
+						$( '#event-title' ).val( wordcamp.title.rendered );
+						$( '#event-description' ).val( wordcamp.content.rendered );
+						$( '#event-start' ).val( new Date( 1000 * wordcamp['Start Date (YYYY-mm-dd)'] ).toISOString().slice( 0,11 ) + '09:00' );
+						$( '#event-end' ).val( new Date( 1000 * wordcamp['End Date (YYYY-mm-dd)'] ).toISOString().slice( 0,11 ) + '18:00' );
+						$( '#event-timezone' ).val( wordcamp['Event Timezone'] );
+
+					}
+				);
+
 			}
 		);
 
@@ -37,6 +110,15 @@
 		 * @param isDraft	  Whether the current event status is a draft or not
 		 */
 		function handleSubmit( eventStatus, isDraft ) {
+			const $form = $( '.translation-event-form' );
+			if ( ! $form[0].reportValidity() ) {
+				return;
+			}
+
+			if ( '' === $( '#event-title' ).val() ) {
+				$gp.notices.error( 'Event title must be set.' );
+				return;
+			}
 			if ( '' === $( '#event-start' ).val() ) {
 				$gp.notices.error( 'Event start date and time must be set.' );
 				return;
@@ -56,7 +138,6 @@
 				}
 			}
 			$( '#event-form-action' ).val( eventStatus );
-			const $form        = $( '.translation-event-form' );
 			const $is_creation = $( '#form-name' ).val() === 'create_event';
 
 			$.ajax(
@@ -80,7 +161,7 @@
 							}
 							$( '#event-url' ).removeClass( 'hide-event-url' ).find( 'a' ).attr( 'href', response.data.eventUrl ).text( response.data.eventUrl );
 							if ( $is_creation ) {
-								$( '#delete-button' ).toggle();
+								$( '#trash-button' ).toggle();
 							}
 							$gp.notices.success( response.data.message );
 						}
@@ -94,20 +175,20 @@
 			);
 		}
 
-		function handleDelete() {
+		function handleTrash() {
 			if ( ! confirm( 'Are you sure you want to delete this event?' ) ) {
 				return;
 			}
 			const $form = $( '.translation-event-form' );
-			$( '#form-name' ).val( 'delete_event' );
-			$( '#event-form-action' ).val( 'delete' );
+			$( '#form-name' ).val( 'trash_event' );
+			$( '#event-form-action' ).val( 'trash' );
 			$.ajax(
 				{
 					type: 'POST',
 					url: $translation_event.url,
 					data:$form.serialize(),
 					success: function ( response ) {
-						window.location = response.data.eventDeleteUrl;
+						window.location = response.data.eventTrashUrl;
 					},
 					error: function ( error ) {
 						$gp.notices.error( response.data.message );
@@ -148,12 +229,19 @@
 			}
 			timeElements.forEach(
 				function ( timeEl ) {
-					const eventDateObj         = new Date( timeEl.getAttribute( 'datetime' ) );
+					const datetime = timeEl.getAttribute( 'datetime' );
+					if ( ! datetime ) {
+						return;
+					}
+					const eventDateObj = new Date( datetime );
+					timeEl.title       = eventDateObj.toUTCString();
+					const timeContent  = timeEl.querySelector( 'span' ) ? timeEl.querySelector( 'span' ) : timeEl;
+
 					const userTimezoneOffset   = new Date().getTimezoneOffset();
 					const userTimezoneOffsetMs = userTimezoneOffset * 60 * 1000;
 					const userLocalDateTime    = new Date( eventDateObj.getTime() - userTimezoneOffsetMs );
 
-					const options      = {
+					const options = {
 						weekday: 'short',
 						year: 'numeric',
 						month: 'short',
@@ -162,9 +250,81 @@
 						minute: 'numeric',
 						timeZoneName: 'short'
 					};
-					timeEl.textContent = userLocalDateTime.toLocaleTimeString( navigator.language, options );
+					if ( timeEl.classList.contains( 'absolute' ) ) {
+						if ( timeEl.dataset.format ) {
+							if ( timeEl.dataset.format.includes( 'l' ) ) {
+								options.weekday = 'long';
+							} else if ( ! timeEl.dataset.format.includes( 'D' ) ) {
+								delete options.weekday;
+							}
+							if ( timeEl.dataset.format.includes( 'F' ) ) {
+								options.month = 'long';
+							} else if ( timeEl.dataset.format.includes( 'm' ) || timeEl.dataset.format.includes( 'n' ) ) {
+								options.month = 'numeric';
+							}
+						}
+						timeContent.textContent = userLocalDateTime.toLocaleTimeString( navigator.language, options );
+					}
+
+					if ( timeEl.classList.contains( 'relative' ) ) {
+						// Display the relative time.
+						const now    = new Date();
+						let diff     = userLocalDateTime - now;
+						let in_text  = 'in ';
+						let ago_text = '';
+						if ( diff < 0 ) {
+							if ( timeEl.classList.contains( 'future' ) ) {
+								// If an event transitions from future to past, reload the page to move it from active to past events and vice versa.
+								location.reload();
+							}
+							in_text  = '';
+							ago_text = ' ago';
+						}
+
+						const seconds    = Math.floor( Math.abs( diff ) / 1000 );
+						const minutes    = Math.floor( seconds / 60 );
+						const hours      = Math.floor( minutes / 60 );
+						let days         = Math.floor( hours / 24 );
+						const weeks      = Math.floor( days / 7 );
+						const months     = Math.floor( days / 30 );
+						const years      = Math.floor( days / 365.25 );
+						let relativeTime = '';
+						if ( years > 1 ) {
+							relativeTime = years + ' year' + ( years > 1 ? 's' : '' );
+						} else if ( months > 1 ) {
+							relativeTime = months + ' month' + ( months > 1 ? 's' : '' );
+						} else if ( weeks > 2 ) {
+							relativeTime = weeks + ' week' + ( weeks > 1 ? 's' : '' );
+						} else if ( weeks === 1 ) {
+							if ( diff < 0 ) {
+								relativeTime = 'last week';
+								ago_text     = '';
+							} else {
+								relativeTime = 'next week';
+								in_text      = '';
+							}
+						} else if ( days > 0 ) {
+							if ( hours > 12 ) {
+								days += 1;
+							}
+							relativeTime = days + ' day' + ( days > 1 ? 's' : '' );
+						} else if ( hours > 0 ) {
+							relativeTime = hours + ' hour' + ( hours > 1 ? 's' : '' );
+						} else if ( minutes > 0 ) {
+							relativeTime = minutes + ' minute' + ( minutes > 1 ? 's' : '' );
+						} else {
+							relativeTime = 'less than a minute';
+						}
+						if ( timeEl.classList.contains( 'absolute' ) ) {
+							timeContent.textContent += ' (' + in_text + relativeTime + ago_text + ')';
+						} else {
+							timeContent.textContent = in_text + relativeTime + ago_text;
+						}
+					}
+
 				}
 			);
 		}
-	}( jQuery, $gp )
+	}( jQuery,
+	$gp )
 );

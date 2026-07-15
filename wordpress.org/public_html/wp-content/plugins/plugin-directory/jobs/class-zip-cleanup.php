@@ -28,6 +28,7 @@ class ZIP_Cleanup {
 	public static function cron_trigger() {
 
 		$attachments = get_posts( [
+			'fields'         => 'id=>parent',
 			'post_type'      => 'attachment',
 			'post_mime_type' => 'application/zip',
 			'posts_per_page' => -1,
@@ -37,14 +38,18 @@ class ZIP_Cleanup {
 					'column' => 'post_modified_gmt',
 					'before' => self::KEEP_DAYS . ' days ago',
 				]
-			]
+			],
+
+			// Don't prime caches, helps with some memory when we're not really using any of it.
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
 		] );
 
-		foreach ( $attachments as $attachment ) {
-			$plugin = get_post( $attachment->post_parent );
+		foreach ( $attachments as $attachment_id => $plugin_id ) {
+			$plugin = get_post( $plugin_id );
 
 			// If not a plugin upload, or something drastically is wrong..
-			if ( ! $attachment->post_parent || ! $plugin || 'plugin' !== $plugin->post_type ) {
+			if ( ! $plugin_id || ! $plugin || 'plugin' !== $plugin->post_type ) {
 				continue;
 			}
 
@@ -62,7 +67,7 @@ class ZIP_Cleanup {
 			 */
 			$plugin_last_touched_date = 0;
 			foreach ( [ 'plugin_closed_date', '_approved', '_publish', '_rejected' ] as $meta_field ) {
-				$meta_value = get_post_meta( $plugin->ID, $meta_field, true );
+				$meta_value = get_post_meta( $plugin_id, $meta_field, true );
 				if ( ! $meta_value ) {
 					continue;
 				}
@@ -84,20 +89,19 @@ class ZIP_Cleanup {
 			}
 
 			// Cleanup ZIP-related metadata.
-			delete_post_meta( $plugin->ID, '_submitted_zip_size' );
-			delete_post_meta( $plugin->ID, '_submitted_zip_loc' );
+			delete_post_meta( $plugin_id, '_submitted_zip_size' );
+			delete_post_meta( $plugin_id, '_submitted_zip_loc' );
 
 			// Delete the file hash from the post.
-			$file_hash = sha1_file( get_attached_file( $attachment ) );
-			if ( $file_hash ) {
-				delete_post_meta( $plugin->ID, 'uploaded_zip_hash', $file_hash );
+			$file_on_disk = get_attached_file( $attachment_id );
+			if ( $file_on_disk && file_exists( $file_on_disk ) ) {
+				$file_hash = sha1_file( $file_on_disk );
+				if ( $file_hash ) {
+					delete_post_meta( $plugin->ID, 'uploaded_zip_hash', $file_hash );
+				}
 			}
 
-			// Include some log output for debugging.
-			$filename = basename( wp_get_attachment_url( $attachment->ID ) );
-			echo "Removing {$filename} from {$plugin->post_name} after {$days_to_keep} days\n";
-
-			wp_delete_attachment( $attachment->ID, true );
+			wp_delete_attachment( $attachment_id, true );
 		}
 	}
 

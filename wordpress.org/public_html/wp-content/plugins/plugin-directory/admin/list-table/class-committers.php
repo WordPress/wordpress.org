@@ -161,7 +161,7 @@ class Committers extends \WP_List_Table {
 
 		// Check if the committer for this row is removable.
 		$post_id = get_post()->ID;
-		if ( current_user_can( 'plugin_remove_committer', $post_id ) && $user_object->ID != get_current_user_id() ) {
+		if ( current_user_can( 'plugin_remove_committer', $post_id ) ) {
 			$actions['delete'] = "<a class='submitremove' data-wp-lists='delete:the-committer-list:committer-{$user_object->ID}:faafaa:post_id={$post_id}' href='" . wp_nonce_url( 'users.php?action=remove&amp;committer=' . $user_object->ID, "remove-committer-{$user_object->ID}" ) . "'>" . __( 'Remove', 'wporg-plugins' ) . '</a>';
 		}
 

@@ -3,6 +3,8 @@ namespace WordPressdotorg\Plugin_Directory\Admin;
 
 use \WordPressdotorg\Plugin_Directory;
 use \WordPressdotorg\Plugin_Directory\Tools;
+use \WordPressdotorg\Plugin_Directory\Tools\SVN;
+use \WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
@@ -34,6 +36,7 @@ class Customizations {
 
 		add_filter( 'query_vars', array( $this, 'query_vars' ) );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		add_filter( 'posts_search', array( $this, 'posts_search' ), 10, 2 );
 
 		add_action( 'load-edit.php', array( $this, 'bulk_action_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -68,11 +71,15 @@ class Customizations {
 		add_filter( 'wp_ajax_delete-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 		add_action( 'wp_ajax_plugin-svn-sync', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'svn_sync' ) );
+		add_action( 'wp_ajax_plugin-i18n-import', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'i18n_import' ) );
 		add_action( 'wp_ajax_plugin-set-reviewer', array( __NAMESPACE__ . '\Metabox\Reviewer', 'xhr_set_reviewer' ) );
+		add_action( 'wp_ajax_plugin-elasticsearch', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_response' ) );
+		add_action( 'wp_ajax_plugin-elasticsearch-reindex', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_reindex' ) );
 
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Controls', 'save_post' ) );
 	}
 
 	/**
@@ -136,10 +143,10 @@ class Customizations {
 					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js',PLUGIN_FILE ), array( 'wp-util', 'wp-lists', 'wp-api' ), filemtime( PLUGIN_DIR . '/js/edit-form.js') );
 
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
-						'approvePluginAYS'    => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
-						'rejectPluginAYS'     => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
-						'removeCommitterAYS'  => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
-						'removeSupportRepAYS' => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+						'approvePluginConfirm' => __( 'Double-click to Approve', 'wporg-plugins' ),
+						'rejectPluginAYS'      => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
+						'removeCommitterAYS'   => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+						'removeSupportRepAYS'  => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
 					) );
 					break;
 
@@ -262,6 +269,34 @@ class Customizations {
 
 			$query->set( 'meta_query', $meta_query );
 		}
+	}
+
+	/**
+	 * Filter searches to search by slug in wp-admin.
+	 *
+	 * WP_Query::parse_search() doesn't allow specifying the post_name field as a searchable field.
+	 *
+	 * @param string    $where    The WHERE clause of the search query.
+	 * @param \WP_Query $wp_query The WP_Query object.
+	 * @return string The WHERE clause of the query.
+	 */
+	public function posts_search( $where, $wp_query ) {
+		global $wpdb;
+
+		if ( ! $where || ! $wp_query->is_main_query() || ! $wp_query->is_search() ) {
+			return $where;
+		}
+
+		// WP_Query::parse_search() is protected, so we'll just do a poor job of it here.
+		$custom_or = $wpdb->prepare(
+			"( {$wpdb->posts}.post_name LIKE %s )",
+			'%' . $wpdb->esc_like( $wp_query->get( 's' ) ) . '%'
+		);
+
+		// Merge the custom column search into the existing search SQL.
+		$where = preg_replace( '#^(\s*AND\s*)(.+)$#i', ' AND ( $2 OR ' . $custom_or . ' )', $where );
+
+		return $where;
 	}
 
 	/**
@@ -532,29 +567,79 @@ class Customizations {
 	 * @return array The data to insert into the database.
 	 */
 	function check_existing_plugin_slug_on_post_update( $data, $postarr ) {
+		global $wpdb;
+
 		if ( 'plugin' !== $data['post_type'] || ! isset( $postarr['ID'] ) ) {
 			return $data;
 		}
 
-		$existing_plugin = Plugin_Directory\Plugin_Directory::get_plugin_post( $data['post_name'] );
+		// If we can't locate the existing plugin, we can't check for a conflict.
+		$plugin = get_post( $postarr['ID'] );
+		if ( ! $plugin ) {
+			return $data;
+		}
+
+		$old_slug        = $plugin->post_name;
+		$new_slug        = $data['post_name'];
+		$existing_plugin = Plugin_Directory\Plugin_Directory::get_plugin_post( $new_slug );
 
 		// Is there already a plugin with the same slug?
-		if ( $existing_plugin && $existing_plugin->ID != $postarr['ID'] ) {
+		if ( $existing_plugin && $existing_plugin->ID != $plugin->ID ) {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
 				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
-				$data['post_name']
+				$new_slug
 			) );
 		}
 
+		// If the plugin is approved, we'll need to perform a folder rename, and re-grant SVN access.
+		if ( 'approved' === $plugin->post_status && $old_slug !== $new_slug ) {
+			// SVN Rename $old_slug to $new_slug
+			$result = SVN::rename(
+				"http://plugins.svn.wordpress.org/{$old_slug}/",
+				"http://plugins.svn.wordpress.org/{$new_slug}/",
+				array(
+					'message' => sprintf( 'Renaming %1$s to %2$s.', $old_slug, $new_slug ),
+				)
+			);
+			if ( $result['errors'] ) {
+				$error = 'Error renaming SVN repository: ' . var_export( $result['errors'], true );
+				Tools::audit_log( $error, $plugin->ID );
+				wp_die( $error ); // Abort before the post is altered.
+			} else {
+				Tools::audit_log(
+					sprintf(
+						'Renamed SVN repository in %s.',
+						'https://plugins.svn.wordpress.org/changeset/' . $result['revision']
+					),
+					$plugin->ID
+				);
+
+				/*
+				 * Migrate Committers to new path.
+				 * As no committers have changed as part of this operation, just update the database.
+				 */
+				$wpdb->update(
+					PLUGINS_TABLE_PREFIX . 'svn_access',
+					[ 'path' => '/' . $new_slug ],
+					[ 'path' => '/' . $old_slug ]
+				);
+			}
+		}
+
 		// Record the slug change.
-		$plugin = get_post( $postarr['ID'] );
-		if ( $plugin && $plugin->post_name !== $data['post_name'] ) {
-			Tools::audit_log( sprintf(
-				"Slug changed from '%s' to '%s'.",
-				$plugin->post_name,
-				$data['post_name']
-			), $plugin->ID );
+		if ( $old_slug !== $new_slug ) {
+			// Only log if the slugs don't appear to be rejection-related.
+			if (
+				! preg_match( '!^rejected-.+-rejected$!', $old_slug ) &&
+				! preg_match( '!^rejected-.+-rejected$!', $new_slug )
+			) {
+				Tools::audit_log( sprintf(
+					"Slug changed from '%s' to '%s'.",
+					$old_slug,
+					$new_slug
+				), $plugin->ID );
+			}
 		}
 
 		return $data;
@@ -662,8 +747,15 @@ class Customizations {
 		add_meta_box(
 			'emailsdiv',
 			__( 'Emails', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Helpscout', 'display' ),
+			array( Helpscout::class, 'admin_metabox_display' ),
 			'plugin', 'normal', 'high'
+		);
+
+		add_meta_box(
+			'cron-logs',
+			'Cron Job Logs',
+			array( __NAMESPACE__ . '\Metabox\Cron_Logs', 'display' ),
+			'plugin', 'normal', 'low'
 		);
 
 		if ( 'new' !== $post->post_status && 'pending' != $post->post_status ) {
@@ -694,14 +786,26 @@ class Customizations {
 				array( __NAMESPACE__ . '\Metabox\Author_Notice', 'display' ),
 				'plugin', 'normal', 'high'
 			);
+
+			if (
+				class_exists( '\Automattic\Jetpack\Search\Classic_Search' ) &&
+				in_array( wp_get_environment_type(), array( 'staging', 'production' ), true )
+			) {
+				add_meta_box(
+					'plugin-elasticsearch',
+					__( 'ElasticSearch Index', 'wporg-plugins' ),
+					array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'display' ),
+					'plugin', 'normal', 'low'
+				);
+			}
 		}
 
 		// Remove unnecessary metaboxes.
 		remove_meta_box( 'commentsdiv', 'plugin', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'plugin', 'normal' );
 
-		// Remove slug metabox unless the slug is editable for the current user.
-		if ( ! in_array( $post->post_status, array( 'new', 'pending' ) ) || ! current_user_can( 'plugin_approve', $post ) ) {
+		// Remove slug metabox unless the slug is editable by the current user.
+		if ( ! in_array( $post->post_status, array( 'new', 'pending', 'approved' ) ) || ! current_user_can( 'plugin_approve', $post ) ) {
 			remove_meta_box( 'slugdiv', 'plugin', 'normal' );
 		}
 	}

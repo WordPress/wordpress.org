@@ -10,7 +10,7 @@ abstract class WP_Credits {
 
 	public static $use_cache = true;
 	public static $set_cache = true;
-	const cache_group = 'core-credits-api';
+	const cache_group = 'core-credits-api-3';
 	const cache_life = 43200; // 12 hours
 
 	protected $version;
@@ -60,6 +60,11 @@ abstract class WP_Credits {
 		'6.3' => '2023-03-10 00:00:00',
 		'6.4' => '2023-07-19 00:00:00',
 		'6.5' => '2023-10-17 00:00:00',
+		'6.6' => '2024-03-05 00:00:00',
+		'6.7' => '2024-06-26 00:00:00',
+		'6.8' => '2024-10-23 00:00:00',
+		'6.9' => '2025-03-25 00:00:00',
+		'7.0' => '2025-11-12 00:00:00',
 	);
 
 	final public static function factory( $version, $gp_locale ) {
@@ -195,10 +200,7 @@ abstract class WP_Credits {
 		foreach ( $translator_data as $user ) {
 			if ( $user->user_nicename == 'nacin' )
 				continue;
-			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$translators[ $user->user_nicename ] = $this->_encode( $user->display_name );
-			else
-				$translators[ $user->user_nicename ] = $user->user_nicename;
+			$translators[ $user->user_nicename ] = $user->display_name ?: $user->user_nicename;
 		}
 
 		return $translators;
@@ -218,10 +220,7 @@ abstract class WP_Credits {
 		foreach ( $validator_data as $user ) {
 			if ( $user->user_nicename == 'nacin' ) // I stopped taking Spanish in 11th grade, don't show me as a validator when I'm testing things.
 				continue;
-			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$validators[ $user->user_nicename ] = array( $this->_encode( $user->display_name ), md5( $user->user_email ), $user->user_nicename );
-			else
-				$validators[ $user->user_nicename ] = array( $user->user_nicename, md5( $user->user_email ), $user->user_nicename );
+			$validators[ $user->user_nicename ] = array( $user->display_name ?: $user->user_nicename, $this->hash( $user->user_email ), $user->user_nicename );
 		}
 
 		return $validators;
@@ -274,7 +273,7 @@ abstract class WP_Credits {
 
 	private function _data() {
 		return array(
-			'profiles' => 'https://profiles.wordpress.org/%s',
+			'profiles' => 'https://profiles.wordpress.org/%s/',
 			'version' => $this->branch,
 		);
 	}
@@ -285,8 +284,8 @@ abstract class WP_Credits {
 		if ( isset( $this->groups ) )
 			return $this->groups;
 
-		$groups = $this->groups();
-		$fetch_emails_from_user_cache = $fetch_emails_from_db = array();
+		$groups        = $this->groups();
+		$fetch_from_db = array();
 
 		foreach ( $groups as $group_slug => $group_data ) {
 			if ( 'list' == $group_data['type'] )
@@ -297,24 +296,24 @@ abstract class WP_Credits {
 				$this->names_in_groups[] = strtolower( $k );
 
 				if ( ! empty( $person[2] ) ) {
-					// array( 'Andrew Nacin', 'Lead Developer', 'md5 hash' )
+					// array( 'Andrew Nacin', 'Lead Developer', 'gravatar hash' )
 					$new_data['title'] = $person[1];
 					$new_data['hash'] = $person[2];
 				} elseif ( empty( $person[1] ) ) {
 					// array( 'Andrew Nacin' )
-					$fetch_emails_from_user_cache[ $k ] = $group_slug;
-				} elseif ( strlen( $person[1] ) === 32 && preg_match('/^[a-f0-9]{32}$/', $person[1] ) ) {
-					// array( 'Andrew Nacin', 'md5 hash' )
+					$fetch_from_db[ $k ] = $group_slug;
+				} elseif ( $this->is_hashed( $person[1] ) ) {
+					// array( 'Andrew Nacin', 'gravatar hash' )
 					$new_data['hash'] = $person[1];
 				} else {
 					// array( 'Andrew Nacin', 'Lead Developer' )
 					$new_data['title'] = $person[1];
-					$fetch_emails_from_user_cache[ $k ] = $group_slug;
+					$fetch_from_db[ $k ] = $group_slug;
 				}
 
 				// Temporary:
-				if ( strlen( $new_data['hash'] ) != 32 || strpos( $new_data['hash'], '@' ) ) {
-					$new_data['hash'] = md5( $new_data['hash'] );
+				if ( ! $this->is_hashed( $new_data['hash'] ) ) {
+					$new_data['hash'] = $this->hash( $new_data['hash'] );
 				}
 
 				$group_data['data'][ $k ] = array_values( $new_data );
@@ -323,25 +322,42 @@ abstract class WP_Credits {
 			$groups[ $group_slug ]['data'] = $group_data['data'];
 		}
 
-		if ( $fetch_emails_from_user_cache ) {
-			foreach ( $fetch_emails_from_user_cache as $username => $group ) {
-				$user_id = wp_cache_get( $username, 'userlogins' );
-				if ( $user_id ) {
-					if ( $user_object = wp_cache_get( $user_id, 'users' ) ) {
-						$groups[ $group ]['data'][ $username ][1] = md5( strtolower( $user_object->user_email ) );
-					} else {
-						$fetch_emails_from_db[ $username ] = $group;
-					}
-				} else {
-					$fetch_emails_from_db[ $username ] = $group;
+		if ( $fetch_from_db ) {
+			// Match keys to either user_login or user_nicename, case-insensitively,
+			// so version files can use any canonical form.
+			$in      = "'" . implode( "', '", array_map( array( $wpdb, '_real_escape' ), array_keys( $fetch_from_db ) ) ) . "'";
+			$fetched = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($in) OR user_nicename IN ($in)" );
+
+			$source_lookup = array();
+			foreach ( array_keys( $fetch_from_db ) as $src ) {
+				$source_lookup[ strtolower( $src ) ] = $src;
+			}
+
+			$renames_by_group = array();
+			foreach ( $fetched as $row ) {
+				$src = $source_lookup[ strtolower( $row->user_login ) ]
+					?? $source_lookup[ strtolower( $row->user_nicename ) ]
+					?? null;
+				if ( ! $src ) {
+					continue;
+				}
+				$group = $fetch_from_db[ $src ];
+				$groups[ $group ]['data'][ $src ][1] = $this->hash( $row->user_email );
+				if ( $row->user_nicename !== $src ) {
+					$renames_by_group[ $group ][ $src ] = $row->user_nicename;
 				}
 			}
-			if ( $fetch_emails_from_db ) {
-				$fetched = $wpdb->get_results( "SELECT user_login, ID, user_email FROM $wpdb->users WHERE user_login IN ('" . implode( "', '", array_keys( $fetch_emails_from_db ) ) . "')", OBJECT_K );
-				foreach ( $fetched as $username => $row ) {
-					$groups[ $fetch_emails_from_db[ $username ] ]['data'][ $username ][1] = md5( strtolower( $row->user_email ) );
-					wp_cache_add( $username, $row->ID, 'userlogins' );
+
+			// Rekey entries so the array key and `username` field reflect user_nicename
+			// (the profiles.wordpress.org slug), not user_login, when they differ.
+			foreach ( $renames_by_group as $group => $renames ) {
+				$rekeyed = array();
+				foreach ( $groups[ $group ]['data'] as $key => $entry ) {
+					$new_key  = $renames[ $key ] ?? $key;
+					$entry[2] = $new_key;
+					$rekeyed[ $new_key ] = $entry;
 				}
+				$groups[ $group ]['data'] = $rekeyed;
 			}
 		}
 
@@ -365,10 +381,7 @@ abstract class WP_Credits {
 		$props = array();
 
 		foreach ( $user_data as $user ) {
-			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$props[ $user->user_nicename ] = $this->_encode( $user->display_name );
-			else
-				$props[ $user->user_nicename ] = $user->user_nicename;
+			$props[ $user->user_nicename ] = $user->display_name ?: $user->user_nicename;
 		}
 
 		natcasesort( $props );
@@ -376,11 +389,6 @@ abstract class WP_Credits {
 		$this->cache_set( 'props-' . $this->version, $props );
 
 		return $props;
-	}
-
-	private function _encode( $raw ) {
-		$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $raw, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
 
 	private function _external_libraries() {
@@ -441,6 +449,28 @@ abstract class WP_Credits {
 		} else {
 			echo serialize( $results );
 		}
+	}
+
+	private function is_hashed( $maybe_hash ) {
+		if (
+			! is_string( $maybe_hash ) ||
+			strpos( $maybe_hash, '@' ) !== false
+		) {
+			return false;
+		}
+
+		switch ( strlen( $maybe_hash ) ) {
+			case 32:
+				return preg_match( '/^[a-f0-9]{32}$/', $maybe_hash );
+			case 64:
+				return preg_match( '/^[a-f0-9]{64}$/', $maybe_hash );
+		}
+
+		return false;
+	}
+
+	private function hash( $email ) {
+		return hash( 'sha256', strtolower( $email ) );
 	}
 
 }

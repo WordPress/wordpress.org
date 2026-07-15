@@ -61,7 +61,7 @@ class Uploads {
 	public static function init() {
 		/* Image restrictions. */
 
-		add_filter( 'big_image_size_threshold',         [ __CLASS__, 'big_image_size_threshold' ] );
+		add_filter( 'big_image_size_threshold',         [ __CLASS__, 'big_image_size_threshold' ], 99999 );
 
 		/* Frontend Uploader customizations. */
 
@@ -80,6 +80,8 @@ class Uploads {
 
 		// Enqueue scripts.
 		add_action( 'wp_enqueue_scripts',               [ __CLASS__, 'wp_enqueue_scripts' ] );
+		// Adds user's recent submissions above upload form.
+		add_filter( 'wporg_photos_pre_upload_form',     [ __CLASS__, 'output_user_recent_submissions' ] );
 		// Disable upload form and show message if user not allowed to upload.
 		add_filter( 'the_content',                      [ __CLASS__, 'insert_upload_disallowed_notice' ], 1 );
 		// Insert upload form into submit page.
@@ -132,7 +134,7 @@ class Uploads {
 			'photo_license'            => sprintf(
 				/* translators: %s: Link to CC0 license */
 				__( 'I am making this photo available under the <a href="%s">CC0 license</a>. People will be able to use this image for any purpose, including resale, marketing, branding, etc without cost or attribution.', 'wporg-photos' ),
-				'https://creativecommons.org/share-your-work/public-domain/cc0/'
+				'https://creativecommons.org/publicdomain/zero/1.0/'
 			),
 			'photo_photograph'         => __( 'Photo is an actual photograph and not a screenshot or digital art.', 'wporg-photos' ),
 			'photo_high_quality'       => __( 'Photo is high quality (well composed and lit, not blurry, etc).', 'wporg-photos' ),
@@ -343,19 +345,35 @@ class Uploads {
 	 * @return string
 	 */
 	public static function disable_frontend_uploader_shortcode_unless_logged_in( $output, $tag ) {
-		if ( ! is_user_logged_in() ) {
-			$fu_shortcodes = [
-				'fu-upload-form',
-				'fu-upload-response',
-			];
+		$fu_shortcodes = [
+			'fu-upload-form',
+			'fu-upload-response',
+		];
+		$is_fu_shortcode = in_array( $tag, $fu_shortcodes, true );
 
-			if ( in_array( $tag, $fu_shortcodes ) ) {
-				$output = '<p>'
-					. sprintf(
-						__( 'Please <a href="%s">log in or create an account</a> so you can upload a photo.', 'wporg-photos' ),
-						esc_url( wp_login_url( get_permalink() ) ) )
-					. '</p>';
-			}
+		if ( ! is_user_logged_in() && $is_fu_shortcode ) {
+			$output = '<p>'
+				. sprintf(
+					__( 'Please <a href="%s">log in or create an account</a> so you can upload a photo.', 'wporg-photos' ),
+					esc_url( wp_login_url( get_permalink() ) ) )
+				. '</p>';
+		} elseif ( defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY && $is_fu_shortcode ) {
+			$output = do_blocks(
+				sprintf(
+					'<!-- wp:wporg/notice {"type":"warning"} -->
+					<div class="wp-block-wporg-notice is-warning-notice">
+						<div class="wp-block-wporg-notice__icon"></div>
+						<div class="wp-block-wporg-notice__content">
+							<p>%s</p>
+						</div>
+					</div>
+					<!-- /wp:wporg/notice -->',
+					sprintf(
+						__( 'New photo submissions are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-photos' ),
+						'https://wordpress.org/news/2024/12/holiday-break/'
+					)
+				)
+			);
 		}
 
 		return $output;
@@ -770,16 +788,20 @@ class Uploads {
 		$post = get_post( $post_id );
 
 		if ( is_object( $post ) ) {
-			$post->post_name  = $name;
-			$post->post_title = $name;
-			wp_update_post( $post );
+			wp_update_post( [
+				'ID'         => $post->ID,
+				'post_name'  => $name,
+				'post_title' => $name,
+			] );
 
 			// Change the same fields in the attachment to obfuscate the original
 			// filename.
 			$photo_name = wp_unique_post_slug( $name . '-photo', $photo->ID, $photo->post_status, $photo->post_type, $post->ID );
-			$photo->post_name = $photo_name;
-			$photo->post_title = $photo_name;
-			wp_update_post( $photo );
+			wp_update_post( [
+				'ID'         => $photo->ID,
+				'post_name'  => $photo_name,
+				'post_title' => $photo_name,
+			] );
 		}
 	}
 
@@ -798,7 +820,9 @@ class Uploads {
 
 		$file = array_shift( $_FILES );
 
-		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), $file['name'][0] );
+		$orig_filename = sanitize_file_name( $file['name'][0] );
+
+		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), $orig_filename );
 		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filesize' ), $file['size'][0] );
 
 		// Store hash of file.
@@ -884,14 +908,6 @@ class Uploads {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) ) {
 			$content .= apply_filters( 'wporg_photos_pre_upload_form', $content );
 
-			if ( User::count_published_photos( get_current_user_id() ) ) {
-				$content .= sprintf(
-					/* translators: %s: URL to current user's photo archive. */
-					'<p>' . __( 'View <a href="%s">your archive of photos</a> to see what you&#8217;ve already had published.', 'wporg-photos' ) . '</p>',
-					get_author_posts_url( get_current_user_id() )
-				);
-			}
-
 			$content .= '<fieldset id="wporg-photo-upload">';
 
 			$content .= sprintf(
@@ -920,12 +936,18 @@ class Uploads {
 				)
 				. "</div>\n"
 				. sprintf(
-					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d" help="%s"]' . "\n",
+					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d"]' . "\n",
 					$description_shortcode,
 					esc_attr( __( 'Alternative Text (required)', 'wporg-photos' ) ),
-					self::MAX_LENGTH_DESCRIPTION,
-					esc_attr( sprintf( __( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Maximum of %d characters. No HTML.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
+					self::MAX_LENGTH_DESCRIPTION
 				)
+				. '<p class="ugc-help">'
+				. sprintf(
+					__( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Maximum of %d characters. No HTML. <a href="%s">Learn more about alternative text.</a>', 'wporg-photos' ),
+					self::MAX_LENGTH_DESCRIPTION,
+					'https://make.wordpress.org/photos/2024/02/02/alt-text-for-wordpress-photos/'
+				)
+				. '</p>' . "\n"
 				. '<div class="upload-checkbox-wrapper">' . "\n";
 
 				// Checklist of guideline requirements.
@@ -941,7 +963,7 @@ class Uploads {
 				$content .= "</div>\n"; // End upload-checkbox-wrapper.
 
 				$content .= sprintf(
-					'[input type="submit" class="button-primary" value="%s"]' . "\n",
+					'[input type="submit" class="button-primary wp-block-button__link wp-element-button" value="%s"]' . "\n",
 					esc_attr( __( 'Submit', 'wporg-photos' ) )
 				)
 				. '[recaptcha]' . "\n";
@@ -1004,6 +1026,40 @@ class Uploads {
 
 		return $transforms;
 	}
+
+	/**
+	 * Adds current user's 6 most recent photo submissions above upload form.
+	 *
+	 * @param string $content Existing content before the upload form.
+	 * @return string
+	 */
+	public static function output_user_recent_submissions( $content ) {
+		// Bail if user does not have any published photos.
+		if ( ! User::count_published_photos( get_current_user_id() ) ) {
+			return $content;
+		}
+
+		$recent_photos = User::get_recent_photos( get_current_user_id(), 6, false );
+		if ( $recent_photos ) {
+			$content .= '<h2 class="latest-photos">' . esc_html__( 'Your latest published photos', 'wporg-photos' ) . '</h2>' . "\n";
+			$content .= '<div class="photos-grid">' . "\n";
+
+			foreach ( $recent_photos as $photo ) {
+				$content .= Template_Tags\get_photo_as_grid_item( $photo, 'medium', 'post' );
+			}
+
+			$content .= "</div>\n";
+		}
+
+		$content .= sprintf(
+			/* translators: %s: URL to current user's photo archive. */
+			'<p>' . __( 'View <a href="%s">your archive of photos</a> to see everything you&#8217;ve already had published.', 'wporg-photos' ) . '</p>',
+			esc_url( get_author_posts_url( get_current_user_id() ) )
+		);
+
+		return $content;
+	}
+
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Uploads', 'init' ] );

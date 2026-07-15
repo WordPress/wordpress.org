@@ -39,44 +39,43 @@ class User_Registrations_List_Table extends WP_List_Table {
 			]
 		];
 
-		$default      = 'all';
-		$current_view = $_REQUEST['view'] ?? $default;
+		$current_view = $this->get_current_view();
 
 		if ( ! empty( $_GET['s'] ) ) {
-			$default = 'search';
 			$views[0] = [
 				'search', 'All search results'
 			];
 
 			array_unshift( $views, [ 'all', 'All' ] );
-
-			if ( 'all' === $current_view ) {
-				$current_view = 'search';
-			}
 		}
 
 		return array_map(
 			function( $item ) use ( $current_view ) {
 				global $wpdb;
 
-				$count = $wpdb->get_var(
-					"SELECT count(*) FROM {$wpdb->base_prefix}user_pending_registrations registrations " .
-					$this->get_join_where_sql( $item[0] )
-				);
+				$view      = $item[0];
+				$is_search = ( ! empty( $_GET['s'] ) && 'all' != $view );
 
-				$url = admin_url( 'admin.php?page=user-registrations' );
-				if ( !empty( $_GET['s'] ) && 'all' != $item[0] ) {
-					$url = add_query_arg( 's', urlencode( $_GET['s'] ), $url );
+				// If we're searching, and the search didn't have any results, all the "sub views" are 0.
+				if ( $is_search && ! $this->get_view_total_count( 'search' ) ) {
+					$count = 0;
+				} else {
+					$count = $this->get_view_total_count( $view );
 				}
 
-				if ( 'all' !== $item[0] ) {
-					$url = add_query_arg( 'view', $item[0], $url );
+				$url = admin_url( 'admin.php?page=user-registrations' );
+				if ( $is_search ) {
+					$url = add_query_arg( 's', urlencode( wp_unslash( $_GET['s'] ) ), $url );
+				}
+
+				if ( 'all' !== $view ) {
+					$url = add_query_arg( 'view', $view, $url );
 				}
 
 				return sprintf(
 					'<a href="%s" class="%s">%s <span class="count">(%s)</span></a>',
 					$url,
-					$current_view === $item[0] ? 'current' : '',
+					$current_view === $view ? 'current' : '',
 					$item[1],
 					number_format_i18n( $count ),
 				);
@@ -84,6 +83,61 @@ class User_Registrations_List_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Get the current view to display.
+	 *
+	 * @return string
+	 */
+	protected function get_current_view() {
+		$view = $_REQUEST['view'] ?? false;
+		if ( ! $view ) {
+			$view = 'all';
+			if ( ! empty( $_GET['s'] ) ) {
+				$view = 'search';
+			}
+		}
+
+		if ( 'all' === $view && ! empty( $_GET['s'] ) ) {
+			$view = 'search';
+		}
+
+		return $view;
+	}
+
+	/**
+	 * Get the total count for a given view.
+	 *
+	 * @param string $view The view to get the count for.
+	 * @return int
+	 */
+	protected function get_view_total_count( $view ) {
+		global $wpdb;
+		static $counts = [];
+
+		// Search view has no results if no search term...
+		if ( 'search' === $view && empty( $_GET['s'] ) ) {
+			return 0;
+		}
+
+		$current_view = $this->get_current_view();
+		if ( $view === $current_view ) {
+			return $this->get_pagination_arg( 'total_items' );
+		}
+
+		$counts[ $view ] ??= $wpdb->get_var(
+			"SELECT count(*) FROM {$wpdb->base_prefix}user_pending_registrations registrations " .
+			$this->get_join_where_sql( $view )
+		);
+
+		return $counts[ $view ];
+	}
+
+	/**
+	 * Get the SQL WHERE clause for a given view.
+	 *
+	 * @param string $view The view to get the WHERE clause for.
+	 * @return string
+	 */
 	protected function get_view_sql_where( $view ) {
 		switch ( $view ) {
 			case 'pending':
@@ -108,6 +162,12 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 	}
 
+	/**
+	 * Get the SQL JOIN and WHERE clause for a given view.
+	 *
+	 * @param string $view The view to get the JOIN and WHERE clause for.
+	 * @return string
+	 */
 	protected function get_join_where_sql( $view = null ) {
 		global $wpdb;
 
@@ -120,24 +180,39 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 			$search_term = wp_unslash( $_GET['s'] );
 			$search_like = '%' . $wpdb->esc_like( $search_term ) . '%';
-
+			
 			// Limit searches to where they're likely, for performance.
 			if ( str_contains( $search_term, '@' ) ) {
-				// Looks like an email, so just search the emails.
-				$where .= $wpdb->prepare(
-					"AND registrations.user_email LIKE %s",
-					$search_like
-				);
+				$san_search_term = wporg_sanitize_email_for_search( $search_term );
+				$san_search_like = '%' . $wpdb->esc_like( $san_search_term ) . '%';
+
+				// If it looks like a full email, exact match.
+				if ( preg_match( '/^.{3,}@.+[.].+$/', $search_term ) ) {
+					// Looks like an email, so just search the emails.
+					$where .= $wpdb->prepare(
+						"AND ( registrations.user_email = %s OR registrations.user_email_san = %s )",
+						$search_term,
+						$san_search_term
+					);
+				} else {
+					// Otherwise, a wildcard on the email.
+					$where .= $wpdb->prepare(
+						"AND ( registrations.user_email LIKE %s OR registrations.user_email_san LIKE %s )",
+						$search_like,
+						$san_search_like
+					);
+				}
 			} elseif (
 				// If it looks like an IP
 				preg_match( '/^\d{1,3}\.[0-9.]*$/', $search_term ) ||
+				preg_match( '/^[0-9a-f]+:[0-9a-f:]*$/', $search_term ) ||
 				// Or it looks like a country code, 
-				preg_match( '/^[A-Z]{2}/', $search_term )
+				preg_match( '/^[A-Z]{2}$/', $search_term )
 			) {
-				// then only look in metadata.
+				// then only look in metadata, case sensitive.
 				$where .= $wpdb->prepare(
-					"AND registrations.meta LIKE %s",
-					$search_like
+					"AND registrations.meta LIKE BINARY %s",
+					'%"' . $wpdb->esc_like( $search_term ) . '%' // Anchor it with a " at the start of the field.
 				);
 			} else {
 				// Otherwise, search everything.
@@ -145,10 +220,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 					"AND (
 						registrations.user_login LIKE %s OR
 						registrations.user_email LIKE %s OR
+						registrations.user_email_san LIKE %s OR
 						registrations.meta LIKE %s OR
 						description.meta_value LIKE %s
 					)",
-					$search_like, $search_like, $search_like, $search_like
+					$search_like, $search_like, $search_like, $search_like, $search_like
 				);
 			}
 		}
@@ -423,11 +499,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$ips[] = $ip . ' ' . $meta->{$field . '_ip_country'};
 		}
 
-		echo implode( ', ', array_map( array( $this, 'link_to_Search' ), array_unique( $ips ) ) );
+		echo implode( ', ', array_map( array( $this, 'link_to_search' ), array_unique( $ips ) ) );
 
 		echo '<hr>';
 
-		foreach ( [ 'url', 'from', 'occ', 'interests' ] as $field ) {
+		foreach ( [ 'url', 'from', 'occ', 'interests', 'source', 'bypass' ] as $field ) {
 			if ( !empty( $meta->$field ) ) {
 				printf( "%s: %s<br>", esc_html( $field ), $this->link_to_search( $meta->$field ) );
 			}
@@ -446,7 +522,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 	function column_scores( $item ) {
 
-		echo ( $item->cleared ? 'Passed' : 'Failed' ) . '<br>';
+		echo ( $item->cleared ? 'Passed' : 'Failed' );
+		if ( $item->cleared && 'spectator' === ( $item->meta->role ?? '' ) ) {
+			echo ' (mark as: spectator)';
+		}
+		echo '<br>';
 
 		foreach ( $item->scores as $type => $val ) {
 			printf(
@@ -474,6 +554,25 @@ class User_Registrations_List_Table extends WP_List_Table {
 			);
 		}
 
+		$block_reason = (array) ( $item->meta->block_reason ?? [] );
+		if ( $block_reason ) {
+			$first_key = array_keys( $block_reason )[0];
+			$title     = ( is_numeric( $first_key ) ? '' : "{$first_key}: " ) . ( $block_reason[ $first_key ] ?? '' );
+			unset( $block_reason[ $first_key ] );
+
+			if ( wp_is_numeric_array( $block_reason ) && 1 == count( $block_reason ) ) {
+				$details = array_shift( $block_reason );
+			} else {
+				$details = print_r( $block_reason, true );
+			}
+
+			printf(
+				'<abbr title="%s">%s</abbr> ',
+				esc_attr( $details ),
+				esc_html( $title )
+			);
+		}
+
 		$row_actions = [];
 
 		if ( ! $item->created && $item->user_activation_key ) {
@@ -495,6 +594,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			);
 			$url = wp_nonce_url( $url, 'clear_' . $item->user_email );
 			$row_actions['approve-reg'] = '<a href="' . esc_url( $url ) . '">Approve</a>';
+			$row_actions['approve-spectator'] = '<a href="' . esc_url( add_query_arg( 'role', 'spectator', $url ) ) . '">Approve as Spectator</a>';
 		}
 
 		if ( $row_actions ) {
@@ -503,14 +603,14 @@ class User_Registrations_List_Table extends WP_List_Table {
 	}
 
 	function link_to_search( $s ) {
-		$parts = preg_split( '/([^\w\.-])/ui', $s, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$parts = preg_split( '#([^\w\.:/-])#ui', $s, -1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( ! $parts ) {
 			$parts = array( $s );
 		}
 
 		return implode( '', array_map( function( $s ) {
 			if ( strlen( $s ) >= 3 || preg_match( '/^[A-Z]{2}$/', $s ) /* country */ ) {
-				return '<a href="' . add_query_arg( 's', urlencode( $s ), admin_url( 'admin.php?page=user-registrations' ) ) . '">' . esc_html( $s ) . '</a>';
+				return '<a href="' . esc_url( add_query_arg( 's', urlencode( $s ), admin_url( 'admin.php?page=user-registrations' ) ) ) . '">' . esc_html( $s ) . '</a>';
 			}
 			return esc_html( $s );
 		}, $parts ) );

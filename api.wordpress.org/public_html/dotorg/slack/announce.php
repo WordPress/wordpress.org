@@ -22,14 +22,14 @@ function get_avatar( $username, $slack_id, $team_id ) {
 		$wp_user_id
 	) );
 
-	$hash = md5( strtolower( trim( $email ) ) );
+	$hash = hash( 'sha256', strtolower( trim( $email ) ) );
 	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G&%s', $hash, time() );
 }
 
 $i = 0;
 // WEBHOOK_TOKEN_1, WEBHOOK_TOKEN_2, etc.
 while ( defined( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . ++$i ) ) {
-	if ( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . $i ) === $_POST['token'] ) {
+	if ( hash_equals( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . $i ), $_POST['token'] ) ) {
 		run( $_POST );
 	}
 }

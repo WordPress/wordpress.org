@@ -1,4 +1,3 @@
-@charset "UTF-8";
 /**
  * Theme Name: WordPress.org Support 2024
  * Theme URI: http://wordpress.org/
@@ -17,8 +16,9 @@
  * and share what you've learned with others.
  */
 /* Sass is good */
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /*--------------------------------------------------------------
@@ -907,22 +907,23 @@ div.bbp-template-notice.updated {
 /*--------------------------------------------------------------
 # Typography
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 h1,
 h2,
 h3,
 h4,
-.bbp-view .review-ratings .col-5 > div:first-child,
+.bbp-view .review-ratings > div:last-child > div:first-child,
 h5,
 h6 {
-	clear: both;
 	margin: 0 0 var(--wp--style--block-gap);
 }
 
@@ -932,13 +933,18 @@ h2.comment-reply-title {
 	line-height: 1.5em;
 }
 
+* + h2 {
+	margin-top: var(--wp--preset--spacing--40);
+}
+
 h3.comment-reply-title {
 	font-size: 1.25rem;
 	font-weight: 700;
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 p {
@@ -976,7 +982,7 @@ address {
 }
 
 pre {
-	background: var(--wp--preset--color--light-grey-1);
+	background: var(--wp--preset--color--light-grey-2);
 	box-sizing: content-box;
 	font-family: "Courier 10 Pitch", Courier, monospace;
 	font-size: 0.8rem;
@@ -1031,15 +1037,64 @@ big {
 }
 
 /* Move the Block Editor toolbar below the Header & Also Viewing z-index bar */
+.iso-editor {
+	border-color: var(--wp--custom--form--border--color);
+	border-radius: var(--wp--custom--form--border--radius);
+}
 .iso-editor.has-fixed-toolbar .interface-interface-skeleton__header {
 	z-index: var(--wp--custom--z-index--iso-editor);
 }
+.iso-editor pre {
+	background-color: #f0f0f0;
+}
 
+.wp-block-quote {
+	font-size: var(--wp--preset--font-size--normal);
+	line-height: var(--wp--custom--body--short-text--typography--line-height);
+	padding-left: var(--wp--preset--spacing--20);
+	font-family: var(--wp--preset--font-family--inter);
+}
+
+:where(.wp-block-search__button-inside .wp-block-search__inside-wrapper) {
+	border: none;
+}
+
+.wp-block-wporg-table-of-contents {
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: 2px;
+	margin-bottom: var(--wp--preset--spacing--50);
+}
+@media screen and (min-width: 1300px) {
+	.wp-block-wporg-table-of-contents {
+		float: right;
+		width: 250px;
+		margin-left: var(--wp--style--block-gap);
+		margin-bottom: var(--wp--style--block-gap);
+		padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--20) 0;
+	}
+}
+.wp-block-wporg-table-of-contents li ul {
+	margin-left: 0;
+}
+
+/* https://github.com/WordPress/gutenberg/pull/65891 Remove with GB 20.9+ */
+/*rtl:begin:ignore*/
+.wp-block-code {
+	direction: ltr;
+	text-align: initial;
+}
+.wp-block-code code {
+	direction: ltr;
+	text-align: initial;
+}
+
+/*rtl:end:ignore*/
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 html {
@@ -1086,10 +1141,6 @@ blockquote p {
 p.has-background {
 	display: inline-block;
 	padding: var(--wp--preset--spacing--20);
-}
-
-a:visited {
-	color: var(--wp--preset--color--purple-1);
 }
 
 ul, ol {
@@ -1162,8 +1213,9 @@ table {
 	text-align: center;
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 .notice {
@@ -1236,15 +1288,12 @@ table {
 	padding-bottom: 8px;
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /* User badges */
-.type-reported_topics {
-	border-right: 2px solid var(--wp--custom--color--thread-reporter);
-}
-
 .author-badge {
 	position: absolute;
 	top: var(--wp--preset--spacing--20);
@@ -1277,7 +1326,6 @@ table {
 
 .author-badge-reporter {
 	background-color: var(--wp--custom--color--thread-reporter);
-	color: var(--wp--preset--color--charcoal-1);
 	right: -2px;
 	left: initial;
 	border-radius: 2px 0 0 2px;
@@ -1306,8 +1354,9 @@ table {
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /* --------------------------------------------------------------------------
@@ -1352,30 +1401,27 @@ table {
 /* ----------------------------------------------------------------------------
   1.0 - Button Layouts
 ---------------------------------------------------------------------------- */
-.button, #bbpress-forums .wporg-bbp-term-subscription > a,
+.button,
+.button-primary,
 #bbpress-forums .reviews-submit-link > .btn,
 #bbpress-forums .subscription-toggle,
 #bbpress-forums .favorite-toggle,
-.button-primary,
 #bbpress-forums fieldset.bbp-form .button.submit,
-#bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn,
-#bbpress-forums fieldset.bbp-form .submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
 .button-secondary {
 	border: 1px solid;
-	border-radius: 3px;
+	border-radius: 2px;
 	box-sizing: border-box;
 	cursor: pointer;
 	display: inline-block;
-	font-size: 0.8rem;
-	height: 1.5625rem;
-	line-height: 1;
+	height: auto;
+	line-height: var(--wp--custom--button--typography--line-height);
 	margin: 0;
 	padding: 0 0.8rem;
 	text-decoration: none;
 	white-space: nowrap;
 	-webkit-appearance: none;
+	appearance: none;
+	box-shadow: none;
 }
 
 /* Remove the dotted border on :focus and the extra padding in Firefox */
@@ -1387,105 +1433,37 @@ input[type=submit]::-moz-focus-inner {
 	padding: 0;
 }
 
-.button.button-large, #bbpress-forums .wporg-bbp-term-subscription > a.button-large,
-#bbpress-forums .reviews-submit-link > .button-large.btn,
-#bbpress-forums .button-large.subscription-toggle,
-#bbpress-forums .button-large.favorite-toggle,
-.button-group.button-large .button,
-.button-group.button-large #bbpress-forums .wporg-bbp-term-subscription > a,
-#bbpress-forums .button-group.button-large .wporg-bbp-term-subscription > a,
-.button-group.button-large #bbpress-forums .reviews-submit-link > .btn,
-#bbpress-forums .button-group.button-large .reviews-submit-link > .btn,
-.button-group.button-large #bbpress-forums .subscription-toggle,
-#bbpress-forums .button-group.button-large .subscription-toggle,
-.button-group.button-large #bbpress-forums .favorite-toggle,
-#bbpress-forums .button-group.button-large .favorite-toggle {
+.button.button-large,
+.button-group.button-large .button {
 	height: 1.953125rem;
 	line-height: 1;
 	padding: 0 1rem;
 }
 
-.button.button-small, #bbpress-forums .wporg-bbp-term-subscription > a.button-small,
-#bbpress-forums .reviews-submit-link > .button-small.btn,
-#bbpress-forums .button-small.subscription-toggle,
-#bbpress-forums .button-small.favorite-toggle,
-.button-group.button-small .button,
-.button-group.button-small #bbpress-forums .wporg-bbp-term-subscription > a,
-#bbpress-forums .button-group.button-small .wporg-bbp-term-subscription > a,
-.button-group.button-small #bbpress-forums .reviews-submit-link > .btn,
-#bbpress-forums .button-group.button-small .reviews-submit-link > .btn,
-.button-group.button-small #bbpress-forums .subscription-toggle,
-#bbpress-forums .button-group.button-small .subscription-toggle,
-.button-group.button-small #bbpress-forums .favorite-toggle,
-#bbpress-forums .button-group.button-small .favorite-toggle {
+.button.button-small,
+.button-group.button-small .button {
 	font-size: 0.64rem;
 	height: 1.25rem;
 	line-height: 1;
 	padding: 0 0.5rem;
 }
 
-a.button, #bbpress-forums .wporg-bbp-term-subscription > a,
-#bbpress-forums .reviews-submit-link > a.btn,
-#bbpress-forums a.subscription-toggle,
-#bbpress-forums a.favorite-toggle,
-a.button-primary,
-#bbpress-forums fieldset.bbp-form a.button.submit,
-#bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > a.submit.btn,
-#bbpress-forums fieldset.bbp-form a.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form a.submit.favorite-toggle,
-a.button-secondary {
-	line-height: 1.5625rem;
-}
-
-a.button.button-large, #bbpress-forums .wporg-bbp-term-subscription > a.button-large,
-#bbpress-forums .reviews-submit-link > a.button-large.btn,
-#bbpress-forums a.button-large.subscription-toggle,
-#bbpress-forums a.button-large.favorite-toggle,
-.button-group.button-large a.button,
-.button-group.button-large #bbpress-forums .wporg-bbp-term-subscription > a,
-#bbpress-forums .button-group.button-large .wporg-bbp-term-subscription > a,
-.button-group.button-large #bbpress-forums .reviews-submit-link > a.btn,
-#bbpress-forums .button-group.button-large .reviews-submit-link > a.btn,
-.button-group.button-large #bbpress-forums a.subscription-toggle,
-#bbpress-forums .button-group.button-large a.subscription-toggle,
-.button-group.button-large #bbpress-forums a.favorite-toggle,
-#bbpress-forums .button-group.button-large a.favorite-toggle {
+a.button.button-large,
+.button-group.button-large a.button {
 	line-height: 1.953125rem;
 }
 
-a.button.button-small, #bbpress-forums .wporg-bbp-term-subscription > a.button-small,
-#bbpress-forums .reviews-submit-link > a.button-small.btn,
-#bbpress-forums a.button-small.subscription-toggle,
-#bbpress-forums a.button-small.favorite-toggle,
-.button-group.button-small a.button,
-.button-group.button-small #bbpress-forums .wporg-bbp-term-subscription > a,
-#bbpress-forums .button-group.button-small .wporg-bbp-term-subscription > a,
-.button-group.button-small #bbpress-forums .reviews-submit-link > a.btn,
-#bbpress-forums .button-group.button-small .reviews-submit-link > a.btn,
-.button-group.button-small #bbpress-forums a.subscription-toggle,
-#bbpress-forums .button-group.button-small a.subscription-toggle,
-.button-group.button-small #bbpress-forums a.favorite-toggle,
-#bbpress-forums .button-group.button-small a.favorite-toggle {
+a.button.button-small,
+.button-group.button-small a.button {
 	line-height: 1.25rem;
 }
 
-.button:active, #bbpress-forums .wporg-bbp-term-subscription > a:active,
-#bbpress-forums .reviews-submit-link > .btn:active,
-#bbpress-forums .subscription-toggle:active,
-#bbpress-forums .favorite-toggle:active,
-.button:focus,
-#bbpress-forums .wporg-bbp-term-subscription > a:focus,
-#bbpress-forums .reviews-submit-link > .btn:focus,
-#bbpress-forums .subscription-toggle:focus,
-#bbpress-forums .favorite-toggle:focus {
+.button:active,
+.button:focus {
 	outline: none;
 }
 
-.button.hidden, #bbpress-forums .wporg-bbp-term-subscription > a.hidden,
-#bbpress-forums .reviews-submit-link > .hidden.btn,
-#bbpress-forums .hidden.subscription-toggle,
-#bbpress-forums .hidden.favorite-toggle {
+.button.hidden {
 	display: none;
 }
 
@@ -1504,117 +1482,56 @@ input[type=reset]:focus {
 /* ----------------------------------------------------------------------------
   2.0 - Default Button Style
 ---------------------------------------------------------------------------- */
-.button, #bbpress-forums .wporg-bbp-term-subscription > a,
-#bbpress-forums .reviews-submit-link > .btn,
-#bbpress-forums .subscription-toggle,
-#bbpress-forums .favorite-toggle,
-.button:visited,
-#bbpress-forums .wporg-bbp-term-subscription > a:visited,
-#bbpress-forums .reviews-submit-link > .btn:visited,
-#bbpress-forums .subscription-toggle:visited,
-#bbpress-forums .favorite-toggle:visited,
+.button,
 .button-secondary {
 	background: #f7f7f7;
 	border-color: #ccc;
-	box-shadow: 0 1px 0 #ccc;
+	box-shadow: none;
 	color: #555;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
-p .button, p #bbpress-forums .wporg-bbp-term-subscription > a, #bbpress-forums p .wporg-bbp-term-subscription > a,
-p #bbpress-forums .reviews-submit-link > .btn,
-#bbpress-forums p .reviews-submit-link > .btn,
-p #bbpress-forums .subscription-toggle,
-#bbpress-forums p .subscription-toggle,
-p #bbpress-forums .favorite-toggle,
-#bbpress-forums p .favorite-toggle {
+p .button {
 	vertical-align: baseline;
 }
 
-.button.hover, #bbpress-forums .wporg-bbp-term-subscription > a.hover,
-#bbpress-forums .reviews-submit-link > .hover.btn,
-#bbpress-forums .hover.subscription-toggle,
-#bbpress-forums .hover.favorite-toggle,
+.button.hover,
 .button:hover,
-#bbpress-forums .wporg-bbp-term-subscription > a:hover,
-#bbpress-forums .reviews-submit-link > .btn:hover,
-#bbpress-forums .subscription-toggle:hover,
-#bbpress-forums .favorite-toggle:hover,
 .button-secondary:hover,
 .button.focus,
-#bbpress-forums .wporg-bbp-term-subscription > a.focus,
-#bbpress-forums .reviews-submit-link > .focus.btn,
-#bbpress-forums .focus.subscription-toggle,
-#bbpress-forums .focus.favorite-toggle,
 .button:focus,
-#bbpress-forums .wporg-bbp-term-subscription > a:focus,
-#bbpress-forums .reviews-submit-link > .btn:focus,
-#bbpress-forums .subscription-toggle:focus,
-#bbpress-forums .favorite-toggle:focus,
 .button-secondary:focus {
 	background: #fafafa;
 	border-color: #999;
 	color: #23282d;
 }
 
-.button.focus, #bbpress-forums .wporg-bbp-term-subscription > a.focus,
-#bbpress-forums .reviews-submit-link > .focus.btn,
-#bbpress-forums .focus.subscription-toggle,
-#bbpress-forums .focus.favorite-toggle,
+.button.focus,
 .button:focus,
-#bbpress-forums .wporg-bbp-term-subscription > a:focus,
-#bbpress-forums .reviews-submit-link > .btn:focus,
-#bbpress-forums .subscription-toggle:focus,
-#bbpress-forums .favorite-toggle:focus,
 .button-secondary:focus,
 .button-link:focus {
 	border-color: #5b9dd9;
-	box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
+	box-shadow: none;
 }
 
-.button.active, #bbpress-forums .wporg-bbp-term-subscription > a.active,
-#bbpress-forums .reviews-submit-link > .active.btn,
-#bbpress-forums .active.subscription-toggle,
-#bbpress-forums .active.favorite-toggle,
+.button.active,
 .button.active:hover,
-#bbpress-forums .wporg-bbp-term-subscription > a.active:hover,
-#bbpress-forums .reviews-submit-link > .active.btn:hover,
-#bbpress-forums .active.subscription-toggle:hover,
-#bbpress-forums .active.favorite-toggle:hover,
 .button:active,
-#bbpress-forums .wporg-bbp-term-subscription > a:active,
-#bbpress-forums .reviews-submit-link > .btn:active,
-#bbpress-forums .subscription-toggle:active,
-#bbpress-forums .favorite-toggle:active,
 .button-secondary:active {
 	background: var(--wp--preset--color--light-grey-1);
 	border-color: #999;
-	box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
+	box-shadow: none;
 	transform: translateY(1px);
 }
 
-.button.active:focus, #bbpress-forums .wporg-bbp-term-subscription > a.active:focus,
-#bbpress-forums .reviews-submit-link > .active.btn:focus,
-#bbpress-forums .active.subscription-toggle:focus,
-#bbpress-forums .active.favorite-toggle:focus {
+.button.active:focus {
 	border-color: #5b9dd9;
-	box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5), 0 0 3px rgba(0, 115, 170, 0.8);
+	box-shadow: none;
 }
 
-.button[disabled], #bbpress-forums .wporg-bbp-term-subscription > a[disabled],
-#bbpress-forums .reviews-submit-link > [disabled].btn,
-#bbpress-forums [disabled].subscription-toggle,
-#bbpress-forums [disabled].favorite-toggle,
+.button[disabled],
 .button:disabled,
-#bbpress-forums .wporg-bbp-term-subscription > a:disabled,
-#bbpress-forums .reviews-submit-link > .btn:disabled,
-#bbpress-forums .subscription-toggle:disabled,
-#bbpress-forums .favorite-toggle:disabled,
 .button.disabled,
-#bbpress-forums .wporg-bbp-term-subscription > a.disabled,
-#bbpress-forums .reviews-submit-link > .disabled.btn,
-#bbpress-forums .disabled.subscription-toggle,
-#bbpress-forums .disabled.favorite-toggle,
 .button-secondary[disabled],
 .button-secondary:disabled,
 .button-secondary.disabled,
@@ -1648,52 +1565,53 @@ for a cross of good semantics with the visual */
 /* ----------------------------------------------------------------------------
   3.0 - Primary Button Style
 ---------------------------------------------------------------------------- */
-.button-primary, #bbpress-forums fieldset.bbp-form .button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn,
-#bbpress-forums fieldset.bbp-form .submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
+.button-primary, #bbpress-forums .reviews-submit-link > .btn,
+#bbpress-forums .subscription-toggle,
+#bbpress-forums .favorite-toggle, #bbpress-forums fieldset.bbp-form .button.submit,
 .download-button,
 .is-primary,
 input[type=submit],
 button[type=submit] {
-	background: var(--wp--custom--button--color--background);
-	border: var(--wp--custom--button--border--width) var(--wp--custom--button--border--style) var(--wp--custom--button--border--color);
+	--wp--custom--button--spacing--padding--top: var(--wp--custom--button--small--spacing--padding--top);
+	--wp--custom--button--spacing--padding--bottom: var(--wp--custom--button--small--spacing--padding--bottom);
+	--wp--custom--button--spacing--padding--left: var(--wp--custom--button--small--spacing--padding--left);
+	--wp--custom--button--spacing--padding--right: var(--wp--custom--button--small--spacing--padding--right);
+	--wp--custom--button--typography--font-size: var(--wp--custom--button--small--typography--font-size);
+	border-width: 0;
+	padding-top: calc(var(--wp--custom--button--spacing--padding--top) + var(--wp--custom--button--border--width));
+	padding-bottom: calc(var(--wp--custom--button--spacing--padding--bottom) + var(--wp--custom--button--border--width));
+	padding-left: calc(var(--wp--custom--button--spacing--padding--left) + var(--wp--custom--button--border--width));
+	padding-right: calc(var(--wp--custom--button--spacing--padding--right) + var(--wp--custom--button--border--width));
 	border-radius: var(--wp--custom--button--border--radius);
 	box-shadow: none;
+	opacity: 1;
 	color: var(--wp--custom--button--color--text);
+	background-color: var(--wp--custom--button--color--background);
+	font-weight: var(--wp--custom--button--typography--font-weight);
+	font-family: inherit;
+	font-size: var(--wp--custom--button--typography--font-size);
+	line-height: var(--wp--custom--button--typography--line-height);
 	text-decoration: none;
-	text-shadow: none;
-	font-size: var(--wp--custom--button--small--typography--font-size);
-	line-height: 1.3;
-	padding-right: var(--wp--custom--button--small--spacing--padding--right);
-	padding-left: var(--wp--custom--button--small--spacing--padding--left);
 }
-.button-primary:visited, #bbpress-forums fieldset.bbp-form .button.submit:visited, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit:visited,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:visited,
-#bbpress-forums fieldset.bbp-form .submit.subscription-toggle:visited,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:visited,
+.button-primary:visited, #bbpress-forums .reviews-submit-link > .btn:visited,
+#bbpress-forums .subscription-toggle:visited,
+#bbpress-forums .favorite-toggle:visited, #bbpress-forums fieldset.bbp-form .button.submit:visited,
 .download-button:visited,
 .is-primary:visited,
 input[type=submit]:visited,
 button[type=submit]:visited {
-	background: var(--wp--custom--button--color--background);
-	border-color: var(--wp--custom--button--border--color);
 	box-shadow: none;
 	color: var(--wp--custom--button--color--text);
 }
-.button-primary.hover, #bbpress-forums fieldset.bbp-form .hover.button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.hover.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .hover.submit.btn,
-#bbpress-forums fieldset.bbp-form .hover.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .hover.submit.favorite-toggle, .button-primary:hover, #bbpress-forums fieldset.bbp-form .button.submit:hover, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit:hover,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:hover,
-#bbpress-forums fieldset.bbp-form .submit.subscription-toggle:hover,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:hover, .button-primary.focus, #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.focus.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .focus.submit.btn,
-#bbpress-forums fieldset.bbp-form .focus.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle, .button-primary:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit:focus,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:focus,
-#bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus,
+.button-primary.hover, #bbpress-forums .reviews-submit-link > .hover.btn,
+#bbpress-forums .hover.subscription-toggle,
+#bbpress-forums .hover.favorite-toggle, #bbpress-forums fieldset.bbp-form .hover.button.submit, .button-primary:hover, #bbpress-forums .reviews-submit-link > .btn:hover,
+#bbpress-forums .subscription-toggle:hover,
+#bbpress-forums .favorite-toggle:hover, #bbpress-forums fieldset.bbp-form .button.submit:hover, .button-primary.focus, #bbpress-forums .reviews-submit-link > .focus.btn,
+#bbpress-forums .focus.subscription-toggle,
+#bbpress-forums .focus.favorite-toggle, #bbpress-forums fieldset.bbp-form .focus.button.submit, .button-primary:focus, #bbpress-forums .reviews-submit-link > .btn:focus,
+#bbpress-forums .subscription-toggle:focus,
+#bbpress-forums .favorite-toggle:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus,
 .download-button.hover,
 .download-button:hover,
 .download-button.focus,
@@ -1711,17 +1629,14 @@ button[type=submit]:hover,
 button[type=submit].focus,
 button[type=submit]:focus {
 	background: var(--wp--custom--button--hover--color--background);
-	border-color: var(--wp--custom--button--hover--color--background);
 	box-shadow: none;
 	color: var(--wp--custom--button--hover--color--text);
 }
-.button-primary.focus, #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.focus.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .focus.submit.btn,
-#bbpress-forums fieldset.bbp-form .focus.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle, .button-primary:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit:focus,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:focus,
-#bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus,
+.button-primary.focus, #bbpress-forums .reviews-submit-link > .focus.btn,
+#bbpress-forums .focus.subscription-toggle,
+#bbpress-forums .focus.favorite-toggle, #bbpress-forums fieldset.bbp-form .focus.button.submit, .button-primary:focus, #bbpress-forums .reviews-submit-link > .btn:focus,
+#bbpress-forums .subscription-toggle:focus,
+#bbpress-forums .favorite-toggle:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus,
 .download-button.focus,
 .download-button:focus,
 .is-primary.focus,
@@ -1730,16 +1645,20 @@ input[type=submit].focus,
 input[type=submit]:focus,
 button[type=submit].focus,
 button[type=submit]:focus {
-	box-shadow: none;
-	border-color: var(--wp--custom--button--focus--border--color);
+	background-color: var(--wp--custom--button--color--background);
+	box-shadow: inset 0 0 0 3px var(--wp--preset--color--white) !important;
+	outline: 1.5px solid var(--wp--custom--button--focus--border--color);
+	outline-offset: -1.5px;
 }
-.button-primary.active, #bbpress-forums fieldset.bbp-form .active.button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.active.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .active.submit.btn,
-#bbpress-forums fieldset.bbp-form .active.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle, .button-primary.active:hover, .button-primary.active:focus, .button-primary:active, #bbpress-forums fieldset.bbp-form .button.submit:active, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit:active,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:active,
-#bbpress-forums fieldset.bbp-form .submit.subscription-toggle:active,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:active,
+.button-primary.active, #bbpress-forums .reviews-submit-link > .active.btn,
+#bbpress-forums .active.subscription-toggle,
+#bbpress-forums .active.favorite-toggle, #bbpress-forums fieldset.bbp-form .active.button.submit, .button-primary.active:hover, #bbpress-forums .reviews-submit-link > .active.btn:hover,
+#bbpress-forums .active.subscription-toggle:hover,
+#bbpress-forums .active.favorite-toggle:hover, .button-primary.active:focus, #bbpress-forums .reviews-submit-link > .active.btn:focus,
+#bbpress-forums .active.subscription-toggle:focus,
+#bbpress-forums .active.favorite-toggle:focus, .button-primary:active, #bbpress-forums .reviews-submit-link > .btn:active,
+#bbpress-forums .subscription-toggle:active,
+#bbpress-forums .favorite-toggle:active, #bbpress-forums fieldset.bbp-form .button.submit:active,
 .download-button.active,
 .download-button.active:hover,
 .download-button.active:focus,
@@ -1756,22 +1675,21 @@ button[type=submit].active,
 button[type=submit].active:hover,
 button[type=submit].active:focus,
 button[type=submit]:active {
-	background: var(--wp--custom--button--active--color--background);
-	border-color: var(--wp--custom--button--active--border--color);
+	padding-top: var(--wp--custom--button--spacing--padding--top);
+	padding-bottom: var(--wp--custom--button--spacing--padding--bottom);
+	padding-left: var(--wp--custom--button--spacing--padding--left);
+	padding-right: var(--wp--custom--button--spacing--padding--right);
+	border: var(--wp--custom--button--border--width) solid currentColor;
 	color: var(--wp--custom--button--active--color--text);
-	box-shadow: none;
-	vertical-align: top;
+	background-color: var(--wp--custom--button--active--color--background);
 }
-.button-primary[disabled], #bbpress-forums fieldset.bbp-form [disabled].button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a[disabled].submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > [disabled].submit.btn,
-#bbpress-forums fieldset.bbp-form [disabled].submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form [disabled].submit.favorite-toggle, .button-primary:disabled, #bbpress-forums fieldset.bbp-form .button.submit:disabled, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.submit:disabled,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .submit.btn:disabled,
-#bbpress-forums fieldset.bbp-form .submit.subscription-toggle:disabled,
-#bbpress-forums fieldset.bbp-form .submit.favorite-toggle:disabled, .button-primary.disabled, #bbpress-forums fieldset.bbp-form .disabled.button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.disabled.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .disabled.submit.btn,
-#bbpress-forums fieldset.bbp-form .disabled.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .disabled.submit.favorite-toggle,
+.button-primary[disabled], #bbpress-forums .reviews-submit-link > [disabled].btn,
+#bbpress-forums [disabled].subscription-toggle,
+#bbpress-forums [disabled].favorite-toggle, #bbpress-forums fieldset.bbp-form [disabled].button.submit, .button-primary:disabled, #bbpress-forums .reviews-submit-link > .btn:disabled,
+#bbpress-forums .subscription-toggle:disabled,
+#bbpress-forums .favorite-toggle:disabled, #bbpress-forums fieldset.bbp-form .button.submit:disabled, .button-primary.disabled, #bbpress-forums .reviews-submit-link > .disabled.btn,
+#bbpress-forums .disabled.subscription-toggle,
+#bbpress-forums .disabled.favorite-toggle, #bbpress-forums fieldset.bbp-form .disabled.button.submit,
 .download-button[disabled],
 .download-button:disabled,
 .download-button.disabled,
@@ -1785,130 +1703,41 @@ button[type=submit][disabled],
 button[type=submit]:disabled,
 button[type=submit].disabled {
 	background: var(--wp--custom--button--disabled--background-color) !important;
-	border-color: var(--wp--custom--button--disabled--border-color) !important;
 	box-shadow: none !important;
 	color: var(--wp--custom--button--disabled--color) !important;
 	cursor: default;
 }
-.button-primary.button.button-hero, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero,
-#bbpress-forums .reviews-submit-link > .button-primary.button-hero.btn,
-#bbpress-forums .button-primary.button-hero.subscription-toggle,
-#bbpress-forums .button-primary.button-hero.favorite-toggle, #bbpress-forums fieldset.bbp-form .button.button-hero.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.button-hero.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .button-hero.submit.btn,
-#bbpress-forums fieldset.bbp-form .button-hero.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle,
+.button-primary.button.button-hero, #bbpress-forums .reviews-submit-link > .button.button-hero.btn,
+#bbpress-forums .button.button-hero.subscription-toggle,
+#bbpress-forums .button.button-hero.favorite-toggle, #bbpress-forums fieldset.bbp-form .button.button-hero.submit,
 .download-button.button.button-hero,
-#bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero,
-#bbpress-forums .reviews-submit-link > .download-button.button-hero.btn,
-#bbpress-forums .download-button.button-hero.subscription-toggle,
-#bbpress-forums .download-button.button-hero.favorite-toggle,
 .is-primary.button.button-hero,
-#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero,
-#bbpress-forums .reviews-submit-link > .is-primary.button-hero.btn,
-#bbpress-forums .is-primary.button-hero.subscription-toggle,
-#bbpress-forums .is-primary.button-hero.favorite-toggle,
 input[type=submit].button.button-hero,
-#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.btn,
-#bbpress-forums input[type=submit].button-hero.subscription-toggle,
-#bbpress-forums input[type=submit].button-hero.favorite-toggle,
-button[type=submit].button.button-hero,
-#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.btn,
-#bbpress-forums button[type=submit].button-hero.subscription-toggle,
-#bbpress-forums button[type=submit].button-hero.favorite-toggle {
-	box-shadow: 0 2px 0 #006799;
+button[type=submit].button.button-hero {
+	box-shadow: none;
 }
-.button-primary.button.button-hero.active, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero.active,
-#bbpress-forums .reviews-submit-link > .button-primary.button-hero.active.btn,
-#bbpress-forums .button-primary.button-hero.active.subscription-toggle,
-#bbpress-forums .button-primary.button-hero.active.favorite-toggle, #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.button-hero.active.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .button-hero.active.submit.btn,
-#bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle, .button-primary.button.button-hero.active:hover, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero.active:hover,
-#bbpress-forums .reviews-submit-link > .button-primary.button-hero.active.btn:hover,
-#bbpress-forums .button-primary.button-hero.active.subscription-toggle:hover,
-#bbpress-forums .button-primary.button-hero.active.favorite-toggle:hover, .button-primary.button.button-hero.active:focus, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero.active:focus,
-#bbpress-forums .reviews-submit-link > .button-primary.button-hero.active.btn:focus,
-#bbpress-forums .button-primary.button-hero.active.subscription-toggle:focus,
-#bbpress-forums .button-primary.button-hero.active.favorite-toggle:focus, .button-primary.button.button-hero:active, #bbpress-forums .wporg-bbp-term-subscription > a.button-primary.button-hero:active,
-#bbpress-forums .reviews-submit-link > .button-primary.button-hero.btn:active,
-#bbpress-forums .button-primary.button-hero.subscription-toggle:active,
-#bbpress-forums .button-primary.button-hero.favorite-toggle:active, #bbpress-forums fieldset.bbp-form .button.button-hero.submit:active, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription > a.button-hero.submit:active,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link > .button-hero.submit.btn:active,
-#bbpress-forums fieldset.bbp-form .button-hero.submit.subscription-toggle:active,
-#bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle:active,
+.button-primary.button.button-hero.active, #bbpress-forums .reviews-submit-link > .button.button-hero.active.btn,
+#bbpress-forums .button.button-hero.active.subscription-toggle,
+#bbpress-forums .button.button-hero.active.favorite-toggle, #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit, .button-primary.button.button-hero.active:hover, .button-primary.button.button-hero.active:focus, .button-primary.button.button-hero:active, #bbpress-forums .reviews-submit-link > .button.button-hero.btn:active,
+#bbpress-forums .button.button-hero.subscription-toggle:active,
+#bbpress-forums .button.button-hero.favorite-toggle:active, #bbpress-forums fieldset.bbp-form .button.button-hero.submit:active,
 .download-button.button.button-hero.active,
-#bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero.active,
-#bbpress-forums .reviews-submit-link > .download-button.button-hero.active.btn,
-#bbpress-forums .download-button.button-hero.active.subscription-toggle,
-#bbpress-forums .download-button.button-hero.active.favorite-toggle,
 .download-button.button.button-hero.active:hover,
-#bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero.active:hover,
-#bbpress-forums .reviews-submit-link > .download-button.button-hero.active.btn:hover,
-#bbpress-forums .download-button.button-hero.active.subscription-toggle:hover,
-#bbpress-forums .download-button.button-hero.active.favorite-toggle:hover,
 .download-button.button.button-hero.active:focus,
-#bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero.active:focus,
-#bbpress-forums .reviews-submit-link > .download-button.button-hero.active.btn:focus,
-#bbpress-forums .download-button.button-hero.active.subscription-toggle:focus,
-#bbpress-forums .download-button.button-hero.active.favorite-toggle:focus,
 .download-button.button.button-hero:active,
-#bbpress-forums .wporg-bbp-term-subscription > a.download-button.button-hero:active,
-#bbpress-forums .reviews-submit-link > .download-button.button-hero.btn:active,
-#bbpress-forums .download-button.button-hero.subscription-toggle:active,
-#bbpress-forums .download-button.button-hero.favorite-toggle:active,
 .is-primary.button.button-hero.active,
-#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero.active,
-#bbpress-forums .reviews-submit-link > .is-primary.button-hero.active.btn,
-#bbpress-forums .is-primary.button-hero.active.subscription-toggle,
-#bbpress-forums .is-primary.button-hero.active.favorite-toggle,
 .is-primary.button.button-hero.active:hover,
-#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero.active:hover,
-#bbpress-forums .reviews-submit-link > .is-primary.button-hero.active.btn:hover,
-#bbpress-forums .is-primary.button-hero.active.subscription-toggle:hover,
-#bbpress-forums .is-primary.button-hero.active.favorite-toggle:hover,
 .is-primary.button.button-hero.active:focus,
-#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero.active:focus,
-#bbpress-forums .reviews-submit-link > .is-primary.button-hero.active.btn:focus,
-#bbpress-forums .is-primary.button-hero.active.subscription-toggle:focus,
-#bbpress-forums .is-primary.button-hero.active.favorite-toggle:focus,
 .is-primary.button.button-hero:active,
-#bbpress-forums .wporg-bbp-term-subscription > a.is-primary.button-hero:active,
-#bbpress-forums .reviews-submit-link > .is-primary.button-hero.btn:active,
-#bbpress-forums .is-primary.button-hero.subscription-toggle:active,
-#bbpress-forums .is-primary.button-hero.favorite-toggle:active,
 input[type=submit].button.button-hero.active,
-#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.active.btn,
-#bbpress-forums input[type=submit].button-hero.active.subscription-toggle,
-#bbpress-forums input[type=submit].button-hero.active.favorite-toggle,
 input[type=submit].button.button-hero.active:hover,
-#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.active.btn:hover,
-#bbpress-forums input[type=submit].button-hero.active.subscription-toggle:hover,
-#bbpress-forums input[type=submit].button-hero.active.favorite-toggle:hover,
 input[type=submit].button.button-hero.active:focus,
-#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.active.btn:focus,
-#bbpress-forums input[type=submit].button-hero.active.subscription-toggle:focus,
-#bbpress-forums input[type=submit].button-hero.active.favorite-toggle:focus,
 input[type=submit].button.button-hero:active,
-#bbpress-forums .reviews-submit-link > input[type=submit].button-hero.btn:active,
-#bbpress-forums input[type=submit].button-hero.subscription-toggle:active,
-#bbpress-forums input[type=submit].button-hero.favorite-toggle:active,
 button[type=submit].button.button-hero.active,
-#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.active.btn,
-#bbpress-forums button[type=submit].button-hero.active.subscription-toggle,
-#bbpress-forums button[type=submit].button-hero.active.favorite-toggle,
 button[type=submit].button.button-hero.active:hover,
-#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.active.btn:hover,
-#bbpress-forums button[type=submit].button-hero.active.subscription-toggle:hover,
-#bbpress-forums button[type=submit].button-hero.active.favorite-toggle:hover,
 button[type=submit].button.button-hero.active:focus,
-#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.active.btn:focus,
-#bbpress-forums button[type=submit].button-hero.active.subscription-toggle:focus,
-#bbpress-forums button[type=submit].button-hero.active.favorite-toggle:focus,
-button[type=submit].button.button-hero:active,
-#bbpress-forums .reviews-submit-link > button[type=submit].button-hero.btn:active,
-#bbpress-forums button[type=submit].button-hero.subscription-toggle:active,
-#bbpress-forums button[type=submit].button-hero.favorite-toggle:active {
-	box-shadow: inset 0 3px 0 #006799;
+button[type=submit].button.button-hero:active {
+	box-shadow: none;
 }
 
 .button-primary-disabled {
@@ -1930,239 +1759,80 @@ button[type=submit].button.button-hero:active,
 	white-space: nowrap;
 }
 
-.button-group > .button, #bbpress-forums .wporg-bbp-term-subscription.button-group > a,
-#bbpress-forums .reviews-submit-link.button-group > .btn,
-#bbpress-forums .button-group > .subscription-toggle,
-#bbpress-forums .button-group > .favorite-toggle {
+.button-group > .button {
 	border-radius: 0;
 	display: inline-block;
 	margin-right: -1px;
 	z-index: 10;
 }
 
-.button-group > .button-primary, #bbpress-forums fieldset.bbp-form .button-group > .button.submit, #bbpress-forums fieldset.bbp-form .wporg-bbp-term-subscription.button-group > a.submit,
-#bbpress-forums fieldset.bbp-form .reviews-submit-link.button-group > .submit.btn,
-#bbpress-forums fieldset.bbp-form .button-group > .submit.subscription-toggle,
-#bbpress-forums fieldset.bbp-form .button-group > .submit.favorite-toggle {
+.button-group > .button-primary, #bbpress-forums .reviews-submit-link.button-group > .btn,
+#bbpress-forums .button-group > .subscription-toggle,
+#bbpress-forums .button-group > .favorite-toggle, #bbpress-forums fieldset.bbp-form .button-group > .button.submit {
 	z-index: 100;
 }
 
-.button-group > .button:hover, #bbpress-forums .wporg-bbp-term-subscription.button-group > a:hover,
-#bbpress-forums .reviews-submit-link.button-group > .btn:hover,
-#bbpress-forums .button-group > .subscription-toggle:hover,
-#bbpress-forums .button-group > .favorite-toggle:hover {
+.button-group > .button:hover {
 	z-index: 20;
 }
 
-.button-group > .button:first-child, #bbpress-forums .wporg-bbp-term-subscription.button-group > a:first-child,
-#bbpress-forums .reviews-submit-link.button-group > .btn:first-child,
-#bbpress-forums .button-group > .subscription-toggle:first-child,
-#bbpress-forums .button-group > .favorite-toggle:first-child {
+.button-group > .button:first-child {
 	border-radius: 3px 0 0 3px;
 }
 
-.button-group > .button:last-child, #bbpress-forums .wporg-bbp-term-subscription.button-group > a:last-child,
-#bbpress-forums .reviews-submit-link.button-group > .btn:last-child,
-#bbpress-forums .button-group > .subscription-toggle:last-child,
-#bbpress-forums .button-group > .favorite-toggle:last-child {
+.button-group > .button:last-child {
 	border-radius: 0 3px 3px 0;
 }
 
-.button-group > .button:focus, #bbpress-forums .wporg-bbp-term-subscription.button-group > a:focus,
-#bbpress-forums .reviews-submit-link.button-group > .btn:focus,
-#bbpress-forums .button-group > .subscription-toggle:focus,
-#bbpress-forums .button-group > .favorite-toggle:focus {
+.button-group > .button:focus {
 	position: relative;
 	z-index: 1;
 }
 
-/* ----------------------------------------------------------------------------
-  5.0 - Responsive Button Styles
----------------------------------------------------------------------------- */
-@media screen and (max-width: 48em) {
-	.button, #bbpress-forums .wporg-bbp-term-subscription > a,
-	#bbpress-forums .reviews-submit-link > .btn,
-	#bbpress-forums .subscription-toggle,
-	#bbpress-forums .favorite-toggle,
-	.button.button-large,
-	#bbpress-forums .wporg-bbp-term-subscription > a.button-large,
-	#bbpress-forums .reviews-submit-link > .button-large.btn,
-	#bbpress-forums .button-large.subscription-toggle,
-	#bbpress-forums .button-large.favorite-toggle,
-	.button.button-small,
-	#bbpress-forums .wporg-bbp-term-subscription > a.button-small,
-	#bbpress-forums .reviews-submit-link > .button-small.btn,
-	#bbpress-forums .button-small.subscription-toggle,
-	#bbpress-forums .button-small.favorite-toggle {
-		font-size: 14px;
-		height: auto;
-		line-height: normal;
-		margin-bottom: 4px;
-		padding: 6px 14px;
-		vertical-align: middle;
-	}
-}
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /* Include margin and padding in the width calculation of input and textarea. */
 input,
-textarea {
+textarea,
+select {
 	box-sizing: border-box;
+	line-height: var(--wp--custom--form--line-height);
 }
 
-input[type=text],
-input[type=password],
-input[type=checkbox],
-input[type=color],
-input[type=date],
-input[type=datetime],
-input[type=datetime-local],
-input[type=email],
-input[type=month],
-input[type=number],
-input[type=password],
 input[type=radio],
-input[type=tel],
-input[type=text],
-input[type=time],
-input[type=url],
-input[type=week],
-select,
-textarea {
-	background-color: #fff;
-	border: 1px solid var(--wp--preset--color--light-grey-1);
+input[type=checkbox] {
+	border: 1px solid var(--wp--custom--form--border--color);
 	box-shadow: var(--wp--custom--form--color--box-shadow);
-	color: var(--wp--custom--form--color--text);
-	transition: 0.05s border-color ease-in-out;
-	-webkit-appearance: none;
-}
-input[type=text]:focus,
-input[type=password]:focus,
-input[type=checkbox]:focus,
-input[type=color]:focus,
-input[type=date]:focus,
-input[type=datetime]:focus,
-input[type=datetime-local]:focus,
-input[type=email]:focus,
-input[type=month]:focus,
-input[type=number]:focus,
-input[type=password]:focus,
-input[type=radio]:focus,
-input[type=tel]:focus,
-input[type=text]:focus,
-input[type=time]:focus,
-input[type=url]:focus,
-input[type=week]:focus,
-select:focus,
-textarea:focus {
-	color: var(--wp--custom--form--color--text);
-}
-
-input[type=text]:focus,
-input[type=password]:focus,
-input[type=color]:focus,
-input[type=date]:focus,
-input[type=datetime]:focus,
-input[type=datetime-local]:focus,
-input[type=email]:focus,
-input[type=month]:focus,
-input[type=number]:focus,
-input[type=password]:focus,
-input[type=search]:focus,
-input[type=tel]:focus,
-input[type=text]:focus,
-input[type=time]:focus,
-input[type=url]:focus,
-input[type=week]:focus,
-input[type=checkbox]:focus,
-input[type=radio]:focus,
-select:focus,
-textarea:focus {
-	border-color: #5b9dd9;
-	box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
-}
-
-/* rtl:ignore */
-input[type=email],
-input[type=url] {
-	direction: ltr;
-}
-
-input[type=text],
-input[type=email],
-input[type=password],
-input[type=number] {
-	padding: 6px 10px;
-}
-
-/* Vertically align the number selector with the input. */
-input[type=number] {
-	height: 40px;
-	line-height: inherit;
-}
-
-input[type=checkbox],
-input[type=radio] {
-	background: #fff;
-	border: 1px solid #b4b9be;
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+	border-radius: var(--wp--custom--form--border--radius);
 	clear: none;
-	color: #555;
 	cursor: pointer;
 	display: inline-block;
-	height: 25px;
+	width: 20px;
+	height: 20px;
 	line-height: 0;
-	margin: -4px 4px 0 0;
-	min-width: 16px;
 	padding: 0 !important;
 	text-align: center;
-	transition: 0.05s border-color ease-in-out;
 	vertical-align: middle;
-	width: 25px;
+	margin: 0;
 }
-
-input[type=checkbox] {
-	padding: 10px;
+input[type=radio]:focus,
+input[type=checkbox]:focus {
+	box-shadow: none;
+	color: var(--wp--custom--form--color--text);
+}
+input[type=radio]:focus-visible,
+input[type=checkbox]:focus-visible {
+	outline: -webkit-focus-ring-color auto 1px;
 }
 
 input[type=radio] {
 	border-radius: 50%;
-	line-height: 10px;
-	margin-right: 4px;
 }
-
-input[type=checkbox]:checked::before,
-input[type=radio]:checked::before {
-	display: inline-block;
-	float: left;
-	font: 400 21px/1 dashicons;
-	vertical-align: middle;
-	width: 16px;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-	speak: none;
-}
-
-input[type=checkbox]:checked::before {
-	color: var(--wp--preset--color--blueberry-1);
-	content: "\f147";
-	font: 400 30px/1 dashicons;
-	margin: -3px -5px;
-}
-
-input[type=radio]:checked::before {
-	background-color: var(--wp--preset--color--blueberry-1);
-	border-radius: 50px;
-	content: "•";
-	font-size: 24px;
-	height: 9px;
-	line-height: 16px;
-	margin: 7px;
-	text-indent: -9999px;
-	vertical-align: middle;
-	width: 9px;
+input[type=radio] + label {
+	margin-left: 0.5em;
 }
 
 @-moz-document url-prefix() {
@@ -2172,40 +1842,18 @@ input[type=radio]:checked::before {
 		margin-bottom: -1px;
 	}
 }
+select {
+	background: var(--wp--custom--form--color--background);
+	border: var(--wp--custom--form--border--width) var(--wp--custom--form--border--style) var(--wp--custom--form--border--color);
+	border-radius: var(--wp--custom--form--border--radius);
+	box-shadow: var(--wp--custom--form--color--box-shadow);
+	font-family: inherit;
+	min-height: 40px;
+}
+
 /* Search */
 input[type=search]::-webkit-search-decoration {
 	display: none;
-}
-
-.ie8 input[type=password] {
-	font-family: sans-serif;
-}
-
-textarea,
-input,
-select,
-button {
-	font-family: inherit;
-	font-size: inherit;
-	font-weight: inherit;
-}
-
-textarea,
-input,
-select {
-	border-radius: 0;
-	font-size: 16px;
-	padding: 3px 5px; /* Reset mobile webkit's default element styling */
-}
-
-textarea {
-	line-height: 1.4;
-	overflow: auto;
-	padding: 2px 6px;
-	resize: vertical;
-}
-.comment-form-comment textarea {
-	width: 100%;
 }
 
 input[type=file] {
@@ -2233,10 +1881,10 @@ select:disabled,
 select.disabled,
 textarea:disabled,
 textarea.disabled {
-	background: rgba(255, 255, 255, 0.5);
-	border-color: rgba(222, 222, 222, 0.75);
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-	color: rgba(51, 51, 51, 0.5);
+	background: var(--wp--custom--form--color--background);
+	border-color: var(--wp--custom--form--disabled--border-color);
+	box-shadow: none;
+	color: var(--wp--custom--form--disabled--color);
 }
 
 input[type=file]:disabled,
@@ -2263,50 +1911,15 @@ fieldset label {
 	vertical-align: middle;
 }
 
-/* =Media Queries
--------------------------------------------------------------- */
-@media screen and (min-width: 48em) {
-	/* Input Elements */
-	input[type=text],
-	input[type=email],
-	input[type=password],
-	input[type=number] {
-		padding: 0;
-	}
-	input[type=number] {
-		height: 28px;
-	}
-	input[type=checkbox] {
-		padding: 0;
-	}
-	input[type=checkbox]:checked::before {
-		font: 400 21px/1 dashicons;
-		margin: -3px 0 0 -4px;
-	}
-	input[type=radio],
-	input[type=checkbox] {
-		height: 16px;
-		width: 16px;
-	}
-	input[type=radio]:checked::before {
-		width: 6px;
-		height: 6px;
-		margin: 4px;
-	}
-	textarea,
-	input,
-	select {
-		font-size: 14px;
-	}
-}
 /*--------------------------------------------------------------
 # Navigation
 --------------------------------------------------------------*/
 /*--------------------------------------------------------------
 ## Menus
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 .site-main .comment-navigation,
@@ -2389,9 +2002,8 @@ fieldset label {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear::before, .bbp-view .review-ratings::before, .bbpress main#main::before,
+.clear::before, .bbpress main#main::before,
 .clear::after,
-.bbp-view .review-ratings::after,
 .bbpress main#main::after,
 .entry-content::before,
 .entry-content::after,
@@ -2408,7 +2020,7 @@ fieldset label {
 	table-layout: fixed;
 }
 
-.clear::after, .bbp-view .review-ratings::after, .bbpress main#main::after,
+.clear::after, .bbpress main#main::after,
 .entry-content::after,
 .comment-content::after,
 .site-header::after,
@@ -2434,11 +2046,17 @@ fieldset label {
 	cursor: pointer;
 }
 
+.gutenberg-support #bbpress-forums fieldset.bbp-form .blocks-everywhere {
+	max-width: 100%;
+	min-width: 100%;
+}
+
 /*--------------------------------------------------------------
 # Site
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /*--------------------------------------------------------------
@@ -2644,7 +2262,7 @@ body:not(.trac):not(.home-page):not(.home) #main {
 }
 
 body:not(.trac):not(.home-page) #main {
-	padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
 }
 
 @media screen and (max-width: 460px) {
@@ -2685,6 +2303,7 @@ body.single .sidebar {
 }
 .sidebar > div ul:not(.topic-tags) > li {
 	font-size: var(--wp--preset--font-size--normal);
+	line-height: var(--wp--custom--body--short-text--typography--line-height);
 	border-top: 1px solid var(--wp--custom--color--border);
 	padding: var(--wp--preset--spacing--10) 0;
 }
@@ -2703,7 +2322,7 @@ body.single .sidebar {
 .sidebar a:hover {
 	text-decoration: underline;
 }
-.sidebar h4, .sidebar .bbp-view .review-ratings .col-5 > div:first-child, .bbp-view .review-ratings .sidebar .col-5 > div:first-child {
+.sidebar h2 {
 	font-weight: 400;
 	font-size: var(--wp--preset--font-size--normal);
 	margin-bottom: var(--wp--preset--spacing--10);
@@ -2711,44 +2330,31 @@ body.single .sidebar {
 
 /*--------------------------------------------------------------
 # .search-form
+# Matches wp-block-search styles
 --------------------------------------------------------------*/
 .search-form {
+	display: inline-block;
 	font-size: 0;
-	margin-bottom: 2rem;
 	max-width: 100%;
 	position: relative;
+	width: 232px;
 }
 .search-form .search-field {
 	border: none;
-	border-radius: 0;
-	box-shadow: none;
+	border-radius: var(--wp--custom--form--border--radius) 0 0 var(--wp--custom--form--border--radius);
 	display: block;
-	font-size: 1rem;
-	margin: 0 auto;
 	max-width: 100%;
-	padding: 0.5rem;
-	width: 22.7373675443rem;
+	width: 100%;
+	background-color: var(--wp--custom--form--search--color--background);
+	font-size: var(--wp--custom--form--typography--font-size);
+	line-height: var(--wp--custom--button--typography--line-height);
+	color: var(--wp--custom--form--search--color--text);
+	box-shadow: var(--wp--custom--form--color--box-shadow);
+	font-family: inherit;
+	padding-inline: var(--wp--custom--form--padding--inline);
+	padding-block: var(--wp--custom--form--padding--block);
 }
 .search-form .button-search {
-	border-left: none;
-	border-radius: 0 2px 2px 0;
-	font-size: 1rem;
-	position: relative;
-	right: auto;
-	top: auto;
-}
-.search-form .button-search:active {
-	background: #006799;
-	border-right: 1px solid #006799;
-	box-shadow: none;
-}
-.search-form .button-search .dashicons {
-	font-size: 1rem;
-}
-.site-header .search-form {
-	display: inline-block;
-}
-.site-header.home .search-form .button-search, .site-main .search-form .button-search {
 	background: transparent;
 	border: none;
 	border-radius: 0;
@@ -2756,65 +2362,21 @@ body.single .sidebar {
 	color: #32373c;
 	display: block;
 	height: 100%;
-	padding: 0.5rem 1rem;
+	padding-inline: var(--wp--custom--form--padding--block);
+	padding-block: var(--wp--custom--form--padding--block);
 	position: absolute;
 	right: 0;
 	text-shadow: none;
 	top: 0;
 	margin: 0;
 }
-.site-header.home .search-form .button-search:focus, .site-main .search-form .button-search:focus {
-	box-shadow: 0 0 2px 1px #33b3db;
+.search-form .button-search:focus-visible {
+	outline: -webkit-focus-ring-color auto 1px;
 }
-.site-header.home .search-form .button-search:active, .site-main .search-form .button-search:active {
+.search-form .button-search:active {
 	background: transparent;
 	border: none;
 	transform: none;
-}
-.site-header.home .search-form .button-search i, .site-main .search-form .button-search i {
-	vertical-align: sub;
-}
-.site-header:not(.home) .search-form {
-	margin: 0;
-}
-.site-header:not(.home) .search-form .search-field {
-	border: 0;
-	border-radius: 2px;
-	display: inline-block;
-	font-size: 1rem;
-	padding: 5px 10px;
-	position: relative;
-	width: 100%;
-}
-@media screen and (min-width: 48em) {
-	.site-header:not(.home) .search-form .search-field {
-		border-radius: 2px 0 0 2px;
-		font-size: 0.64rem;
-		width: 7rem;
-	}
-	.site-header:not(.home) .search-form .search-field + .button-search {
-		display: inline-block;
-		margin-bottom: 0;
-	}
-}
-@media screen and (min-width: 60em) {
-	.site-header:not(.home) .search-form .search-field {
-		width: 10rem;
-	}
-}
-.site-main .search-form .search-field {
-	border: 1px solid var(--wp--preset--color--light-grey-1);
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
-	padding: 0.5rem;
-	width: 100%;
-}
-
-.search .site-main {
-	margin-top: 2rem;
-	padding-top: 0;
-}
-.search.search-results .page-header {
-	margin: 2rem 0;
 }
 
 /*--------------------------------------------------------------
@@ -2833,11 +2395,9 @@ body.single .sidebar {
 # .helphub-page
 # .page
 --------------------------------------------------------------*/
-@media screen and (min-width: 48em) {
-	.helphub-page .entry-header .entry-title,
-	.page .entry-header .entry-title {
-		padding: 0 2rem;
-	}
+.helphub-page #main-content,
+.page #main-content {
+	margin-top: 0;
 }
 .helphub-page .entry-content section,
 .page .entry-content section {
@@ -2857,10 +2417,6 @@ body.single .sidebar {
 .page .entry-content section:first-of-type {
 	padding-top: 0;
 }
-.helphub-page .entry-content section + section,
-.page .entry-content section + section {
-	border-top: 2px solid var(--wp--preset--color--light-grey-1);
-}
 .helphub-page .entry-content h2.toc-heading,
 .page .entry-content h2.toc-heading {
 	font-size: var(--wp--preset--font-size--heading-4);
@@ -2879,26 +2435,6 @@ body.single .sidebar {
 .page .entry-content h3.toc-heading:target {
 	border-left-color: var(--wp--preset--color--blueberry-1);
 	scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
-}
-.helphub-page .entry-content .table-of-contents,
-.page .entry-content .table-of-contents {
-	margin: 0 0 var(--wp--preset--spacing--20) var(--wp--preset--spacing--20);
-}
-.helphub-page .entry-content .table-of-contents .items,
-.page .entry-content .table-of-contents .items {
-	font-size: var(--wp--preset--font-size--small);
-}
-.helphub-page .entry-content .table-of-contents .items li ul,
-.page .entry-content .table-of-contents .items li ul {
-	margin-left: 0;
-}
-.helphub-page .entry-content .table-of-contents .items li a:hover,
-.page .entry-content .table-of-contents .items li a:hover {
-	color: var(--wp--custom--link--color--text);
-}
-.helphub-page .entry-content p.toc-jump,
-.page .entry-content p.toc-jump {
-	margin-bottom: unset;
 }
 .helphub-page .entry-footer,
 .page .entry-footer {
@@ -2945,6 +2481,13 @@ body.single .sidebar {
 /*--------------------------------------------------------------
 # 404 Error page
 --------------------------------------------------------------*/
+body.error404 {
+	background-color: var(--wp--preset--color--white);
+}
+body.error404 a {
+	color: var(--wp--preset--color--blueberry-1);
+}
+
 .error-404 .page-title, .error-404 .page-content {
 	text-align: center;
 }
@@ -2972,6 +2515,17 @@ body.category #main .archive-pagination {
 	font-size: var(--wp--preset--font-size--normal);
 	line-height: inherit;
 	overflow: inherit;
+}
+#bbpress-forums h1 {
+	font-size: var(--wp--preset--font-size--heading-1);
+	line-height: var(--wp--custom--heading--level-1--typography--line-height);
+	padding-bottom: unset;
+}
+#bbpress-forums hr {
+	border-color: var(--wp--custom--color--border);
+	border-style: solid;
+	border-width: 1px 0 0;
+	margin-bottom: var(--wp--style--block-gap);
 }
 
 .bbpress main#main .entry-content,
@@ -3015,52 +2569,51 @@ body.category #main .archive-pagination {
 	}
 }
 
-.bbpress.bbp-view-reviews #bbpress-forums .bbp-create-topic-wrapper .search-form {
-	width: 100%;
-}
-.bbpress #bbpress-forums div.bbp-template-notice {
-	padding: var(--wp--preset--spacing--20);
-	border: none;
-	border-radius: 2px;
-	background-color: var(--wp--preset--color--blueberry-4);
-}
-.bbpress #bbpress-forums div.bbp-template-notice p,
-.bbpress #bbpress-forums div.bbp-template-notice li {
-	font-size: 13px;
-	line-height: 160%;
-}
-.bbpress #bbpress-forums div.bbp-template-notice a {
-	color: var(--wp--preset--color--blueberry-1);
-	text-decoration: underline;
-}
-.bbpress #bbpress-forums div.bbp-template-notice a:hover {
-	color: var(--wp--preset--color--blueberry-1);
+.bbpress.bbp-view-all-replies #bbpress-forums .status-pending .even,
+.bbpress.bbp-view-all-replies #bbpress-forums .status-pending .odd {
+	background: none;
 }
 .bbpress #bbpress-forums .bbp-topic-content > div.bbp-template-notice,
 .bbpress #bbpress-forums .bbp-reply-content > div.bbp-template-notice {
 	margin-bottom: 30px;
 }
+.bbpress #bbpress-forums .status-pending.even, .bbpress #bbpress-forums .status-pending.odd {
+	background: none;
+}
+.bbpress #bbpress-forums .status-pending a {
+	background: none;
+}
 .bbpress #bbpress-forums .status-pending div.bbp-template-notice {
-	background: #fff359;
+	background: var(--wp--preset--color--lemon-3);
 }
 .bbpress #bbpress-forums .status-archived div.bbp-template-notice,
 .bbpress #bbpress-forums .status-spam div.bbp-template-notice {
-	background: #f49797;
+	background: var(--wp--preset--color--pomegrade-3);
 }
-.bbpress #bbpress-forums .bbp-topic-content p:last-child,
-.bbpress #bbpress-forums .bbp-reply-content p:last-child {
-	margin-bottom: var(--wp--preset--spacing--20);
+.bbpress #bbpress-forums .bbp-forum-content ul.sticky,
+.bbpress #bbpress-forums .bbp-topics ul.sticky,
+.bbpress #bbpress-forums .bbp-topics ul.super-sticky,
+.bbpress #bbpress-forums .bbp-topics-front ul.super-sticky {
+	background-color: var(--wp--preset--color--lemon-3) !important;
 }
 .bbpress #bbpress-forums .bbp-body .bbp-topic-freshness,
 .bbpress #bbpress-forums .bbp-body .bbp-topic-voice-count,
 .bbpress #bbpress-forums .bbp-body .bbp-topic-reply-count {
 	font-size: var(--wp--preset--font-size--small);
 }
+.bbpress #bbpress-forums .bbp-body ul.forum,
+.bbpress #bbpress-forums .bbp-body ul.topic {
+	border-top-color: var(--wp--custom--color--border);
+}
 .bbpress #bbpress-forums .bbp-body ul.topic a {
 	text-decoration: none;
 }
 .bbpress #bbpress-forums .bbp-body ul.topic a:hover {
 	text-decoration: underline;
+}
+.bbpress #bbpress-forums .bbp-body .bbp-topic-content ul,
+.bbpress #bbpress-forums .bbp-body .bbp-reply-content ul {
+	margin-bottom: var(--wp--style--block-gap);
 }
 .bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
 .bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
@@ -3109,7 +2662,7 @@ body.category #main .archive-pagination {
 	border: 0;
 }
 .bbpress #bbpress-forums ul.bbp-lead-topic li.bbp-body div.topic {
-	background: transparent;
+	background: var(--wp--preset--color--light-grey-3);
 }
 .bbpress #bbpress-forums .bbp-search-results div.topic .topic-indicator {
 	display: none;
@@ -3189,19 +2742,40 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums div.topic,
 .bbpress #bbpress-forums div.reply,
 .bbpress #bbpress-forums div.reported_topics {
-	padding: var(--wp--preset--spacing--20);
+	padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--20) 40px;
 }
 .bbpress #bbpress-forums div.topic.author-has-badge, .bbpress #bbpress-forums div.topic.topic-author, .bbpress #bbpress-forums div.topic.by-moderator,
 .bbpress #bbpress-forums div.reply.author-has-badge,
 .bbpress #bbpress-forums div.reply.topic-author,
-.bbpress #bbpress-forums div.reply.by-moderator {
+.bbpress #bbpress-forums div.reply.by-moderator,
+.bbpress #bbpress-forums div.reported_topics.author-has-badge,
+.bbpress #bbpress-forums div.reported_topics.topic-author,
+.bbpress #bbpress-forums div.reported_topics.by-moderator {
 	padding-top: 60px;
+}
+.bbpress #bbpress-forums div.reported_topics {
+	padding-top: 60px;
+	background-color: unset;
+	border: 2px solid var(--wp--custom--color--thread-reporter);
 }
 .bbpress #bbpress-forums div.bbp-reply-content,
 .bbpress #bbpress-forums div.bbp-topic-content {
 	padding: 0;
 	clear: left;
 	margin: var(--wp--preset--spacing--20) 0 0;
+}
+.bbpress #bbpress-forums div.bbp-reply-content code,
+.bbpress #bbpress-forums div.bbp-reply-content pre,
+.bbpress #bbpress-forums div.bbp-topic-content code,
+.bbpress #bbpress-forums div.bbp-topic-content pre {
+	background-color: var(--wp--preset--color--light-grey-2);
+}
+.bbpress #bbpress-forums div.bbp-reply-content pre,
+.bbpress #bbpress-forums div.bbp-topic-content pre {
+	padding: var(--wp--preset--spacing--20);
+	border: 1px solid var(--wp--custom--color--border);
+	max-width: 100%;
+	border-radius: 2px;
 }
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-reply-content,
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-topic-content {
@@ -3218,7 +2792,9 @@ body.category #main .archive-pagination {
 	font-weight: 700;
 }
 .bbpress #bbpress-forums ul.bbp-topic-revision-log {
-	color: var(--wp--preset--color--charcoal-3);
+	color: var(--wp--preset--color--charcoal-1);
+	font-size: var(--wp--preset--font-size--extra-small);
+	border-top: 1px solid var(--wp--custom--color--border);
 }
 .bbpress #bbpress-forums div.bbp-reply-content .bbp-reply-revision-log-item a,
 .bbpress #bbpress-forums div.bbp-topic-content .bbp-topic-revision-log-item a {
@@ -3230,26 +2806,20 @@ body.category #main .archive-pagination {
 	position: absolute;
 	bottom: 0;
 	right: 0;
-	background: var(--wp--preset--color--light-grey-3);
-	padding: 3px 10px;
-}
-@media screen and (max-width: 480px) {
-	.bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links,
-	.bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links {
-		padding: 3px 7px;
-	}
-}
-@media screen and (max-width: 767px) {
-	.bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links,
-	.bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links {
-		display: block;
-	}
+	background: none;
+	padding: var(--wp--preset--spacing--10) calc(var(--wp--preset--spacing--20) - 5px);
+	font-size: 0;
 }
 .bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links a,
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a {
 	color: var(--wp--custom--link--color--text);
 	text-transform: inherit;
-	font-size: 0.7rem;
+	font-size: var(--wp--preset--font-size--extra-small);
+	padding: 3px 5px;
+}
+.bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links a:not(:last-child),
+.bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a:not(:last-child) {
+	border-right: 1px solid var(--wp--custom--color--border);
 }
 .bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links a:hover,
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a:hover {
@@ -3309,61 +2879,21 @@ body.category #main .archive-pagination {
 	display: inline-block;
 	color: #f00;
 }
-.bbpress #bbpress-forums .create-topic {
-	font-size: 0.8rem;
-}
 @media (min-width: 600px) {
 	.bbpress #bbpress-forums .create-topic {
 		float: left;
 	}
 }
-.bbpress #bbpress-forums .create-topic::before {
-	color: #000;
-	content: "\f132";
-	font: 400 16px/1 dashicons;
-	margin: 0 4px 0 -4px;
-	vertical-align: middle;
-}
 .bbpress #bbpress-forums .bbp-create-topic-wrapper {
 	display: flex;
-	flex-direction: column;
-	gap: 16px;
-	padding: 15px 0;
-	text-align: center;
-}
-@media (min-width: 767px) {
-	.bbpress #bbpress-forums .bbp-create-topic-wrapper {
-		flex-direction: row;
-		justify-content: space-between;
-	}
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: var(--wp--style--block-gap);
 }
 .bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic {
-	float: none;
-	height: auto;
-	padding: 9px 12px;
-}
-.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic::before {
-	color: #fff;
-}
-.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic.button-secondary::before {
-	color: #000;
-}
-.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
-	margin: 0 8px 0 6px;
-	font-size: 0.8rem;
-}
-.bbpress #bbpress-forums .bbp-create-topic-wrapper .search-form {
-	display: none;
-}
-@media (max-width: 767px) {
-	.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic,
-	.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
-		display: block;
-		width: 100%;
-	}
-	.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
-		margin: 3px 0;
-	}
+	line-height: var(--wp--custom--button--typography--line-height);
+	padding-inline: var(--wp--custom--form--padding--inline);
+	padding-block: var(--wp--custom--form--padding--block);
 }
 .bbpress #bbpress-forums .bbp-pagination {
 	font-size: 0.8rem;
@@ -3418,6 +2948,9 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .bbp-pagination .page-numbers:last-child {
 	border-radius: 0 3px 3px 0;
 }
+.bbpress #bbpress-forums h1 + .bbp-pagination {
+	display: none !important;
+}
 .bbpress #bbpress-forums .bbp-topic-pagination a {
 	border: 1px solid #ddd;
 }
@@ -3448,33 +2981,34 @@ body.category #main .archive-pagination {
 .bbpress #wp-link-wrap #wp-link #search-panel label span.search-label {
 	width: 90px;
 }
-.bbpress li.bbp-forum-freshness,
-.bbpress li.bbp-topic-freshness {
-	text-align: left;
-}
-.bbpress .forum-titles .bbp-topic-voice-count,
-.bbpress .forum-titles .bbp-topic-reply-count {
-	overflow: hidden;
-}
-.bbpress .forum-titles .bbp-topic-voice-count::before,
-.bbpress .forum-titles .bbp-topic-reply-count::before {
-	font: 400 16px/1 dashicons;
-	margin-right: 100px;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-}
-@media (min-width: 321px) {
-	.bbpress .forum-titles .bbp-topic-voice-count::before,
-	.bbpress .forum-titles .bbp-topic-reply-count::before {
-		font: 400 21px/1 dashicons;
-		margin-left: 20px;
+@media screen and (min-width: 321px) {
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-title,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-title {
+		width: 60%;
 	}
-}
-.bbpress .forum-titles .bbp-topic-voice-count::before {
-	content: "\f307";
-}
-.bbpress .forum-titles .bbp-topic-reply-count::before {
-	content: "\f125";
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-reply-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-reply-count {
+		text-align: left;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-voice-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-voice-count {
+		width: 12%;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-reply-count,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-reply-count {
+		width: 8%;
+	}
+	.bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
+	.bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-freshness {
+		text-align: right;
+		width: 20%;
+	}
 }
 .bbpress #bbpress-forums .bbp-forum-info .bbp-forum-content,
 .bbpress #bbpress-forums p.bbp-topic-meta {
@@ -3494,10 +3028,6 @@ body.category #main .archive-pagination {
 /*--------------------------------------------------------------
 # Buttons
 --------------------------------------------------------------*/
-#bbpress-forums fieldset.bbp-form button {
-	padding: 0 0.8rem;
-	font-size: 0.8rem;
-}
 #bbpress-forums .bbp-reply-form {
 	clear: both;
 }
@@ -3506,21 +3036,12 @@ body.category #main .archive-pagination {
 	float: none;
 	margin-top: 0;
 }
-#bbpress-forums fieldset.bbp-form select,
-#bbpress-forums fieldset.bbp-form input[type=text] {
-	min-height: 32px;
-	height: 32px;
-}
+#bbpress-forums #bbp-your-profile fieldset.submit button,
 #bbpress-forums .bbp-submit-wrapper {
-	margin-top: -35px;
-}
-@media (max-width: 767px) {
-	#bbpress-forums .bbp-submit-wrapper {
-		margin-top: 0;
-	}
+	float: none;
 }
 #bbpress-forums .wporg-bbp-term-subscription {
-	margin-bottom: 1rem;
+	margin-bottom: var(--wp--style--block-gap);
 }
 
 .viewmore {
@@ -3545,55 +3066,110 @@ body.category #main .archive-pagination {
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/
-#bbpress-forums fieldset.bbp-form {
-	margin: 0;
-	border: 0;
-}
-#bbpress-forums fieldset.bbp-form legend {
-	font-weight: 400;
-	font-size: 1.25rem;
-}
-#bbpress-forums fieldset.bbp-form label,
-#bbpress-forums fieldset.bbp-form p em {
-	font-size: 0.8rem;
-}
-#bbpress-forums fieldset.bbp-form em#site_url_description {
-	display: inline-block;
-	margin-bottom: 12px;
-}
-#bbpress-forums fieldset.bbp-form input[type=checkbox],
-#bbpress-forums fieldset.bbp-form input#site_url,
-#bbpress-forums fieldset.bbp-form input#bbp_topic_tags {
-	margin-bottom: 0;
-}
-#bbpress-forums fieldset.bbp-form div.rate {
-	margin-bottom: 8px;
-}
 #bbpress-forums fieldset.log-edit {
 	margin: 12px 0 8px 0;
 }
 #bbpress-forums fieldset.log-edit legend {
 	padding: 0;
-	font-size: 0.8rem;
+}
+#bbpress-forums #bbp-your-profile fieldset {
+	padding: 0;
+	margin: 0 0 var(--wp--style--block-gap);
+	border: none;
+}
+#bbpress-forums fieldset.bbp-form select,
+#bbpress-forums fieldset.bbp-form input[type=text],
+#bbpress-forums #bbp-your-profile fieldset input,
+#bbpress-forums #bbp-your-profile fieldset textarea,
+#bbpress-forums #bbp-your-profile fieldset select {
+	height: unset;
+	border-color: var(--wp--custom--form--border--color);
+	padding: var(--wp--custom--form--padding--block) var(--wp--custom--form--padding--inline);
+	background-color: var(--wp--custom--form--color--background);
+	border-radius: var(--wp--custom--form--border--radius);
+	min-height: 40px;
+}
+#bbpress-forums fieldset.bbp-form select:focus,
+#bbpress-forums fieldset.bbp-form input[type=text]:focus,
+#bbpress-forums #bbp-your-profile fieldset input:focus,
+#bbpress-forums #bbp-your-profile fieldset textarea:focus,
+#bbpress-forums #bbp-your-profile fieldset select:focus {
+	box-shadow: none;
+}
+#bbpress-forums fieldset.bbp-form select:focus-visible,
+#bbpress-forums fieldset.bbp-form input[type=text]:focus-visible,
+#bbpress-forums #bbp-your-profile fieldset input:focus-visible,
+#bbpress-forums #bbp-your-profile fieldset textarea:focus-visible,
+#bbpress-forums #bbp-your-profile fieldset select:focus-visible {
+	box-shadow: none;
+	outline: -webkit-focus-ring-color auto 1px;
+}
+#bbpress-forums fieldset.bbp-form select:disabled,
+#bbpress-forums fieldset.bbp-form input[type=text]:disabled,
+#bbpress-forums #bbp-your-profile fieldset input:disabled,
+#bbpress-forums #bbp-your-profile fieldset textarea:disabled,
+#bbpress-forums #bbp-your-profile fieldset select:disabled {
+	border-color: var(--wp--custom--form--disabled--border-color);
+}
+#bbpress-forums fieldset.bbp-form input[type=checkbox],
+#bbpress-forums fieldset.bbp-form input[type=radio] {
+	margin: 0;
+}
+#bbpress-forums fieldset.bbp-form input[type=checkbox] + label,
+#bbpress-forums fieldset.bbp-form input[type=radio] + label {
+	margin-left: 0.5em;
+}
+#bbpress-forums fieldset.bbp-form input[type=checkbox]:focus,
+#bbpress-forums fieldset.bbp-form input[type=radio]:focus {
+	box-shadow: none;
+}
+#bbpress-forums fieldset.bbp-form input[type=checkbox]:focus-visible,
+#bbpress-forums fieldset.bbp-form input[type=radio]:focus-visible {
+	box-shadow: none;
+	outline: -webkit-focus-ring-color auto 1px;
+}
+#bbpress-forums fieldset.bbp-form label input[type=checkbox],
+#bbpress-forums fieldset.bbp-form label input[type=radio] {
+	margin-right: 0.5em;
+}
+#bbpress-forums #bbp-user-body div.bbp-search-form form > div {
+	margin-bottom: var(--wp--style--block-gap);
+	display: flex;
+}
+#bbpress-forums #bbp-user-body div.bbp-search-form form > div input[type=text] {
+	flex: 1;
+	margin-right: calc(var(--wp--preset--spacing--10) / 2);
+}
+@media only screen and (max-width: 480px) {
+	#bbpress-forums #bbp-user-body div.bbp-search-form button,
+	#bbpress-forums #bbp-user-body div.bbp-search-form input {
+		font-size: var(--wp--preset--font-size--small);
+		padding: var(--wp--custom--form--padding--block) var(--wp--custom--form--padding--inline);
+	}
 }
 @media (max-width: 767px) {
+	#bbpress-forums #bbp-user-body div.bbp-search-form {
+		float: none;
+	}
+	#bbpress-forums #bbp-user-body h2.entry-title {
+		clear: right;
+	}
 	#bbpress-forums input[type=text] {
 		width: 100%;
 	}
 }
 
-.single-forum .bbp-topic-form,
+body.single-forum #bbpress-forums .bbp-topic-form,
 .bbp-view .bbp-topic-form {
-	margin-top: 1rem;
-	padding-top: 1rem;
-	border-top: 1px solid var(--wp--custom--color--border);
+	margin-top: var(--wp--preset--spacing--30);
 	clear: both;
+	border-top: none;
 }
-.single-forum .bbp-topic-form ul,
+body.single-forum #bbpress-forums .bbp-topic-form ul,
 .bbp-view .bbp-topic-form ul {
 	padding: 0 16px !important;
 }
-.single-forum .bbp-topic-form ul li,
+body.single-forum #bbpress-forums .bbp-topic-form ul li,
 .bbp-view .bbp-topic-form ul li {
 	list-style: initial !important;
 }
@@ -3601,6 +3177,12 @@ body.category #main .archive-pagination {
 .topic-edit #bbpress-forums .bbp-topic-form legend,
 .reply-edit #bbpress-forums .bbp-reply-form legend {
 	display: block;
+}
+
+body.reply-edit #bbpress-forums fieldset.bbp-form,
+body.topic-edit #bbpress-forums fieldset.bbp-form {
+	border: none;
+	margin: 0 0 var(--wp--style--block-gap);
 }
 
 .reply-edit #bbpress-forums .form-reply-to {
@@ -3611,18 +3193,25 @@ body.category #main .archive-pagination {
 	width: 100%;
 }
 
-.topic-resolved label {
-	vertical-align: none;
+.topic-resolved form {
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: calc(var(--wp--preset--spacing--10) / 2);
 }
 .topic-resolved select {
-	width: 120px;
-	line-height: 1;
+	width: 130px;
 }
 
 .topic-resolved-indicator {
 	background-color: var(--wp--preset--color--vivid-green-cyan);
 	top: var(--wp--preset--spacing--20);
 	border-radius: 2px;
+	color: var(--wp--preset--color--charcoal-1);
+}
+.topic-resolved-indicator::before {
+	color: var(--wp--preset--color--charcoal-1);
 }
 @media screen and (max-width: 480px) {
 	.topic-resolved-indicator {
@@ -3644,9 +3233,38 @@ select {
 --------------------------------------------------------------*/
 div.bbp-template-notice,
 div.indicator-hint {
-	padding: 1.25em;
-	border-radius: 2px;
 	margin: 0 0 var(--wp--style--block-gap);
+	border: none;
+	font-size: var(--wp--preset--font-size--small);
+	padding: 1.25em;
+	color: var(--wp--preset--color--charcoal-1);
+	background-color: var(--wp--preset--color--acid-green-3);
+	border-radius: 2px;
+}
+div.bbp-template-notice.info,
+div.indicator-hint.info {
+	border: none;
+	background-color: var(--wp--preset--color--blueberry-4);
+}
+div.bbp-template-notice.error,
+div.indicator-hint.error {
+	border: none;
+	background-color: var(--wp--preset--color--pomegrade-3);
+}
+div.bbp-template-notice.warning, div.bbp-template-notice.important,
+div.indicator-hint.warning,
+div.indicator-hint.important {
+	border: none;
+	background-color: var(--wp--preset--color--lemon-3);
+}
+div.bbp-template-notice a,
+div.indicator-hint a {
+	color: var(--wp--preset--color--blueberry-1);
+	text-decoration: underline;
+}
+div.bbp-template-notice a:hover,
+div.indicator-hint a:hover {
+	color: var(--wp--preset--color--blueberry-1);
 }
 div.bbp-template-notice ul:last-child,
 div.indicator-hint ul:last-child {
@@ -3656,7 +3274,7 @@ div.bbp-template-notice p,
 div.bbp-template-notice li,
 div.indicator-hint p,
 div.indicator-hint li {
-	font-size: var(--wp--preset--font-size--extra-small);
+	font-size: var(--wp--preset--font-size--small);
 	padding: 0;
 }
 
@@ -3801,7 +3419,7 @@ body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.reply.
 	scroll-margin-top: var(--wp--custom--local-navigation-bar--spacing--height);
 	margin-bottom: var(--wp--preset--spacing--30);
 }
-body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.even:not(.topic):not(.reply),
+body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.even:not(.topic):not(.reply):not(.reported_topics),
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.even,
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.odd:not(.reply),
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.odd {
@@ -3810,9 +3428,6 @@ body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums ul.odd {
 }
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .wporg-ratings {
 	margin: var(--wp--preset--spacing--20) 0;
-}
-body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .wporg-ratings [class*=dashicons-star-] {
-	color: var(--wp--preset--color--charcoal-2);
 }
 body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums .topic {
 	position: relative;
@@ -3848,18 +3463,40 @@ body.single-topic:not(body.topic-edit) .entry-content header {
 	border: unset;
 	padding: unset;
 }
-body.single-topic:not(body.topic-edit) div.bbp-breadcrumb {
-	float: none;
-}
 
 div.bbp-breadcrumb {
-	font-size: 0.8rem;
-	margin-bottom: 15px;
-	color: var(--wp--preset--color--charcoal-3);
-	line-height: 27px;
+	font-size: var(--wp--preset--font-size--small);
+	margin: 0;
+	float: none;
+	padding: 15px 0;
 }
 div.bbp-breadcrumb p {
+	display: flex;
+	position: relative;
+	max-width: 100%;
 	margin: 0 !important;
+	overflow-x: auto;
+	-webkit-mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+	mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+	color: var(--wp--preset--color--charcoal-1);
+	text-overflow: clip;
+	white-space: nowrap;
+}
+div.bbp-breadcrumb p::after {
+	content: "";
+	display: inline-block;
+	width: 60px;
+}
+div.bbp-breadcrumb a {
+	color: var(--wp--preset--color--charcoal-4);
+	text-decoration: none;
+}
+div.bbp-breadcrumb a:hover {
+	text-decoration: underline;
+}
+div.bbp-breadcrumb .bbp-breadcrumb-sep {
+	margin: 0 10px;
+	color: var(--wp--preset--color--light-grey-1);
 }
 
 .sidebar .topic-info li.topic-report {
@@ -3869,7 +3506,6 @@ div.bbp-breadcrumb p {
 .sidebar .topic-info li.topic-report input[type=text],
 .sidebar .topic-info li.topic-report textarea {
 	width: 100%;
-	padding: 0.2rem 0.5rem 0.1rem;
 	margin: 4px 0 8px;
 }
 .sidebar .topic-info li.topic-report .topic-report-notice {
@@ -3906,9 +3542,6 @@ div.bbp-breadcrumb p {
 /*--------------------------------------------------------------
 # User Profile
 --------------------------------------------------------------*/
-.bbp-single-user input[type=text] {
-	padding: 3px 5px;
-}
 @media (max-width: 767px) {
 	.bbp-single-user input[type=text]#ts {
 		margin-bottom: 6px;
@@ -3917,6 +3550,14 @@ div.bbp-breadcrumb p {
 
 .bbpress #bbpress-forums #bbp-user-wrapper {
 	font-size: var(--wp--preset--font-size--small);
+}
+.bbpress #bbpress-forums #bbp-user-wrapper h2.entry-title {
+	font-size: var(--wp--preset--font-size--heading-4);
+	padding-bottom: unset;
+	margin: 0 0 var(--wp--style--block-gap);
+}
+.bbpress #bbpress-forums #bbp-user-wrapper .bbp-user-section {
+	margin-top: var(--wp--style--block-gap);
 }
 
 #bbpress-forums #bbp-single-user-details #bbp-user-avatar a {
@@ -3937,58 +3578,50 @@ div.bbp-breadcrumb p {
 /*--------------------------------------------------------------
 # Plugin / Theme specific support pages
 --------------------------------------------------------------*/
-.bbp-topics .wporg-ratings [class*=dashicons-star-] {
-	color: var(--wp--preset--color--charcoal-2);
-}
-
 .bbp-view .review-ratings {
-	margin-bottom: 1rem;
-	padding-bottom: 10px;
+	margin-bottom: var(--wp--preset--spacing--20);
+	padding-bottom: var(--wp--preset--spacing--20);
 	border-bottom: 1px solid var(--wp--custom--color--border);
 	display: flex;
-	flex-direction: row-reverse;
 }
-.bbp-view .review-ratings .col-3 {
+.bbp-view .review-ratings > div:first-child {
 	font-size: 0.8rem;
-	margin: 0;
-	width: 35%;
-	float: none;
-	border-top: 1px solid var(--wp--custom--color--border);
+	width: 60%;
+	min-width: 54%;
+	flex-shrink: 0;
 }
-.bbp-view .review-ratings .col-3 .reviews-total-count {
+.bbp-view .review-ratings > div:last-child {
+	margin: 0 0 10px 0;
+	padding-right: 10px;
+	min-width: 40%;
+	font-size: 0.8rem;
+}
+.bbp-view .review-ratings > div:last-child .reviews-total-count {
 	font-weight: 700;
 	padding-bottom: 5px;
 	padding-top: 5px;
 }
-.bbp-view .review-ratings .col-3 .counter-bar {
-	background-color: var(--wp--preset--color--charcoal-2) !important;
-}
-.bbp-view .review-ratings .col-5 {
-	margin: 0 5% 10px 0;
-	width: 60%;
-	font-size: 0.8rem;
-	float: none;
-}
-.bbp-view .review-ratings .col-5 > div:first-child {
+.bbp-view .review-ratings > div:last-child > div:first-child {
 	margin-top: 0;
 }
-.bbp-view .review-ratings .col-5 .wporg-ratings {
+.bbp-view .review-ratings > div:last-child .wporg-ratings {
 	display: inline-block;
 	margin-right: 1rem;
 }
-.bbp-view .review-ratings .col-5 .wporg-ratings [class*=dashicons-star-] {
-	color: var(--wp--preset--color--charcoal-2);
-}
-.bbp-view .review-ratings .col-5 .reviews-submit-link {
+.bbp-view .review-ratings > div:last-child .reviews-submit-link {
 	margin-top: 1rem;
 }
 @media (max-width: 499px) {
 	.bbp-view .review-ratings {
-		flex-direction: column-reverse;
+		flex-direction: column;
 	}
-	.bbp-view .review-ratings .col-3, .bbp-view .review-ratings .col-5 {
+	.bbp-view .review-ratings > div:first-child {
 		width: 100%;
+		margin-bottom: 20px;
 	}
+}
+.bbp-view .reviews-submit-link {
+	margin-top: 10px;
 }
 
 /*--------------------------------------------------------------

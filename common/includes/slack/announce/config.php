@@ -22,22 +22,18 @@ namespace Dotorg\Slack\Announce;
 function get_whitelist() {
 	$wordcamp_central = array(
 		'_DorsVenabili', // @rocio on Slack
-		'andreamiddleton',
 		'angelasjin',
-		'camikaos',
 		'chanthaboune',
-		'coreymckrill',
 		'courtneypk',
-		'evarlese',
 		'harishanker',
 		'harmonyromo', // @Harmony Romo on Slack
-		'hlashbrooke',
-		'iandunn',
 		'Nao',
+		'peiraisotta',
 		'ryelle',
 	);
 
 	return array(
+		// Note: For #x-y-release-leads / #x-y-feature, #core announce is inherited automatically.
 		'6-4-release-leads' => array(
 			'akshayar', // @akshaya on Slack
 			'cbringmann', // @Chloé Bringmann on Slack
@@ -52,22 +48,18 @@ function get_whitelist() {
 			'arush',
 			'audrasjb',
 			'azhiyadev', // @Hauwa Abashiya on Slack
+			'elblakeo31', // @Blake (Equalify)
 			'joedolson',
 			'joesimpsonjr',
+			'krupajnanda',
+			'nhrrob',
 			'nrqsnchz',
+			'muddassirnasim',
+			'rcreators', // @Rishi Mehta on Slack
 			'rianrietveld',
 			'ryokuhi',
 			'sarahricker',
-		),
-		'accessibility-docs' => array(
-			'sarahricker',
-		),
-		'accessibility-events' => array(
-			'audrasjb',
-			'joedolson',
-			'nrqsnchz',
-			'ryokuhi',
-			'sarahricker',
+			'thisisyeasin',
 		),
 		'bbpress' => array(
 			'johnjamesjacoby', // @jjj on Slack
@@ -82,13 +74,28 @@ function get_whitelist() {
 			'danielbachhuber',
 			'schlessera',
 		),
-		'community-events' => array_merge( $wordcamp_central, array(
-			'francina',
-		) ),
+		'campusconnect' => array(
+			// Inherits from #community-team.
+			// Additional Campus Connect mentors:
+			'evarlese',     // @erica on Slack
+			'webtechpooja', // @Pooja Derashri on Slack
+			'anandau14',    // @Anand on Slack
+			'devmuhib',     // @Muhibul Haque on Slack
+			'mosescursor',  // @Moses Cursor on Slack
+		),
+		'community-events' => array(
+			// Inherits from #community-team.
+		),
 		'community-team' => array_merge( $wordcamp_central, array(
 			'francina',
 			'myselfkhayer',
+			'nukaga',
+			'st810amaze',
+			'leogopal',
 		) ),
+		'content-creators' => array(
+			'annezazu',
+		),
 		'contributor-day' => array(
 			'camikaos',
 			'cronkled', // @alx on Slack
@@ -98,50 +105,68 @@ function get_whitelist() {
 		),
 		'contributor-mentorship' => $wordcamp_central,
 		'core' => array_merge( get_committers(), array(
+			'adrianduffell', // @Adrian Duffell on Slack
 			'akshayar', // @akshaya on Slack
 			'amykamala', // @amy kamala on Slack
 			'angelasjin',
 			'annezazu',
 			'antpb',
 			'audrasjb',
+			'Benjamin_Zekavica', //@Benjamin Zekavica on Slack
 			'Boniu91', // @Piotrek Boniu on Slack
 			'cbringmann', // @Chloé Bringmann on Slack
 			'chaion07',
 			'chanthaboune',
+			'colorful-tones',
 			'costdev',
 			'danieltj',
 			'desrosj',
+			'estelaris',
+			'fabiankaegy',
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
 			'ironprogrammer',
 			'James Roberts', // @jamesroberts on Slack
 			'JeffPaul',
 			'JoshuaWold',
+			'juanmaguitar',
 			'justinahinon',
 			'karmatosed',
+			'krupajnanda', // @Krupa on Slack
 			'laurora', // @laura on Slack
 			'lukecarbis',
 			'mapk',
 			'markparnell',
 			'marybaum',
 			'meaganhanes',
+			'meher',
 			'metalandcoffee',
 			'mikachan',
 			'monikarao',
 			'mukesh27',
 			'nicolefurlan',
+			'nhrrob',
 			'oglekler',
 			'pbiron',
 			'priethor',
 			'psykro', // @Jonathan on Slack
 			'rajinsharwar', // @Rajin Sharwar on Slack
 			'sabernhardt',
+			'sajjad67', // @saj1ad on Slack
+			'SirLouen',
 			'sncoker', // @shawntellecoker on Slack
+			'stoyangeorgiev', // @Stoyan Georgiev on Slack
 			'thelmachido', // @thelmachido-zw on Slack
 			'thewebprincess',
 			'webcommsat', // @abhanonstopnewsuk on Slack
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
+			'wildworks', // @Aki Hamano on Slack
+			'zunaid321', // @Zunaid Amin on Slack
+		) ),
+		'core-ai' => array_merge( get_committers(), array(
+			'isotropic', // @James LePage on Slack
+			'neel33', // @Neill McShea on Slack
 		) ),
 		'core-upgrade-install' => array_merge( get_committers(), array(
 			'afragen',
@@ -237,6 +262,7 @@ function get_whitelist() {
 		) ),
 		'core-passwords' => array_merge( get_committers(), array(
 			'georgestephanis',
+			'masteradhoc',
 			'valendesigns',
 		) ),
 		'core-php' => array_merge( get_committers(), array(
@@ -285,10 +311,21 @@ function get_whitelist() {
 			'Boniu91', // @Piotrek Boniu on Slack
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
+			'huzaifaalmesbah', // @Huzaifa Al Mesbah on Slack
 			'ironprogrammer',
+			'juanmaguitar', // @JuanMa on Slack
 			'justinahinon',
+			'krupajnanda',
+			'mobarak',
 			'monikarao',
+			'mosescursor', // @Moses Cursor on Slack
+			'nikunj8866',
+			'oglekler',
+			'ozgursar',
+			'psykro', // @Jonathan on Slack
+			'r1k0',
 			'ryan', // @boren on Slack
+			'SirLouen',
 			'webtechpooja', // @Pooja Derashri on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
@@ -329,6 +366,7 @@ function get_whitelist() {
 			'chrisvanpatten',
 			'Clorith',
 			'DrewAPicture', // @drew on Slack
+			'estelaris',
 			'hlashbrooke',
 			'Kenshino',
 			'lizkaraffa',
@@ -360,20 +398,28 @@ function get_whitelist() {
 			'mariaojob', // @Mary Job on Slack
 			'sterndata',
 		),
+		'gatherpress' => array(
+			'mauteri',
+			'patricia70', // @patriciabt on Slack
+		),
 		'glotpress' => array(
 			'Amieiro',
 			'ocean90',
 		),
 		'hosting' => array(
 			'andrew.taylor', // @ataylorme on Slack
+			'chaion07',
 			'Crixu',
+			'grafruessel',
 			'kirasong',
 			'jadonn',
 			'JavierCasares',
+			'jazzs3quence',
 			'jessibelle',
 			'amykamala', // @amy kamala on Slack
 			'brechtryckaert',
 			'brettface',
+			'zunaid321', // @Zunaid Amin on Slack
 		),
 		'marketing' => array(
 			'bernard0omnisend', // Bernard Meyer on Slack
@@ -385,6 +431,9 @@ function get_whitelist() {
 			'robinwpdeveloper',
 			'santanainniss',
 			'SeReedMedia',
+		),
+		'media-corps' => array(
+			'eidolonnight',
 		),
 		'meta' => array(
 			'coreymckrill',
@@ -436,15 +485,25 @@ function get_whitelist() {
 		),
 		'core-performance' => array(
 			// #core (inc committers) already included via get_parent_channel().
+			'b1ink0',
 			'clarkeemily', // @Emily Clarke on Slack
 			'joegrainger', // @Joe Grainger on Slack
 			'mukesh27',
 			'mxbclang', // @Bethany Chobanian Lang (they/them) on Slack
+			'shyamgadde',
 		),
 		'photos' => array(
 			'topher1kenobe',
 			'katiejrichards',
 			'marcusskyverge',
+		),
+		'playground' => array(
+			'akirk',
+			'bph',
+			'berislav.grgicak',
+			'bpayton',
+			'fellyph',
+			'zieladam',
 		),
 		'polyglots' => array(
 			'Amieiro',
@@ -452,10 +511,10 @@ function get_whitelist() {
 			'chaion07',
 			'CoachBirgit',
 			'deconf',
-			'evarlese',
 			'felipeelia',
+			'jainnidhi', // @nidhijain on Slack
 			'kharisblank', // @kharisulistiyo on Slack
-			'Nao',
+			'luisrull',
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
@@ -466,18 +525,31 @@ function get_whitelist() {
 		),
 		'polyglots-events' => array(
 			'casiepa', // @Pascal on Slack
+			'chaion07',
 			'CoachBirgit',
 			'deconf',
-			'evarlese',
 			'felipeelia',
-			'Nao',
+			'jainnidhi', // @nidhijain on Slack
+			'kharisblank', // @kharisulistiyo on Slack
+			'luisrull',
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
+			'spiraltee', // @Tosin on Slack
 			'tobifjellner',
 			'tokyobiyori',
 		),
-		'themereview' => array(
+		'polyglots-multilingual-community' => array(
+			'courane01', // @Courtney on Slack
+			'estelaris',
+		),
+		'sustainability' => array(
+			'littlebigthing', // @Csaba on Slack
+			'nahuai', // @Nahuai Badiola on Slack
+			'noradriana', // @Nora Ferreirós on Slack
+			'yellowlime', // @Thijs Buijs on Slack
+		),
+		'themes' => array(
 			'acalfieri',
 			'acosmin',
 			'aristath',
@@ -506,7 +578,6 @@ function get_whitelist() {
 			'annezazu',
 			'arasae', // @Sarah (She/Her) on Slack
 			'azhiyadev', // @Hauwa Abashiya on Slack
-			'bsanevans',
 			'chanthaboune',
 			'chetan200891',
 			'chrisbadgett',
@@ -514,12 +585,14 @@ function get_whitelist() {
 			'colorful tones', // @colorful-tones on Slack
 			'courane01', // @Courtney on Slack
 			'courtneypk',
+			'devmuhib', // @Muhibul Haque on Slack
 			'digitalchild',
 			'eboxnet',
 			'fikekomala',
 			'hardeepasrani',
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
+			'kaitohm',
 			'lada7042',
 			'meaganhanes',
 			'mrfoxtalbot',
@@ -529,6 +602,8 @@ function get_whitelist() {
 			'piyopiyofox',
 			'psykro', // @Jonathan on Slack
 			'richtabor',
+			'rjekic',
+			'sumitsingh',
 			'trynet',
 			'webtechpooja', // @Pooja Derashri on Slack
 			'west7',
@@ -540,7 +615,7 @@ function get_whitelist() {
 			'SamSuresh',
 		),
 		'wceu' => array(
-			'vertizio', // @Pascal on Slack
+			'casiepa', // @Pascal on Slack
 		),
 		'wcus' => array(
 			'cronkled', // @alx on Slack
@@ -552,10 +627,14 @@ function get_whitelist() {
 		'website-redesign' => array(
 			'ndiego', // @Nick Diego on Slack
 		),
+		'wpcredits' => array_merge( $wordcamp_central, array(
+			'celigaroe',
+		) ),
 		'wptv' => array(
 			'casiepa', // @Pascal on Slack
 			'JerrySarcastic',
 			'mgelves', // @maugelves on Slack
+			'nilovelez',
 			'nishasingh',
 			'rahuldsarker',
 			'RoseAppleMedia',

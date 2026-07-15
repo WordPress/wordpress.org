@@ -2,7 +2,13 @@
 
 namespace Wporg\TranslationEvents\Routes\Event;
 
+use DateTimeImmutable;
+use DateTimeZone;
+use Wporg\TranslationEvents\Event\Event;
+use Wporg\TranslationEvents\Event\Event_End_Date;
+use Wporg\TranslationEvents\Event\Event_Start_Date;
 use Wporg\TranslationEvents\Routes\Route;
+use Wporg\TranslationEvents\Translation_Events;
 
 /**
  * Displays the event create page.
@@ -14,19 +20,28 @@ class Create_Route extends Route {
 			wp_safe_redirect( wp_login_url( home_url( $wp->request ) ) );
 			exit;
 		}
-		$event_form_title         = 'Create Event';
-		$event_form_name          = 'create_event';
-		$css_show_url             = 'hide-event-url';
-		$event_id                 = null;
-		$event_title              = '';
-		$event_description        = '';
-		$event_timezone           = '';
-		$event_start              = '';
-		$event_end                = '';
-		$event_url                = '';
-		$create_delete_button     = true;
-		$visibility_delete_button = 'none';
 
-		$this->tmpl( 'events-form', get_defined_vars() );
+		if ( ! current_user_can( 'create_translation_event' ) ) {
+			$this->die_with_error( 'You do not have permission to create events.', 403 );
+		}
+
+		$now = Translation_Events::now();
+
+		$event = new Event(
+			get_current_user_id(),
+			new Event_Start_Date( $now->format( 'Y-m-d H:i:s' ) ),
+			new Event_End_Date( $now->modify( '+1 hour' )->format( 'Y-m-d H:i:s' ) ),
+			new DateTimeZone( 'UTC' ),
+			'draft',
+			'',
+			'',
+		);
+
+		$this->tmpl(
+			'event-create',
+			array(
+				'event' => $event,
+			),
+		);
 	}
 }

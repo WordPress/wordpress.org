@@ -5,10 +5,13 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions;
 use GP;
 use GP_Locales;
 use WordPressdotorg\GlotPress\TranslationSuggestions\Routes\Translation_Memory;
+use WordPressdotorg\GlotPress\Bulk_Pretranslations\Deepl;
 
 class Plugin {
 
 	const TM_UPDATE_EVENT = 'wporg_translate_tm_update';
+	const TM_QUEUE_OPTION = 'wporg_translate_tm_queue';
+	const TM_UPDATE_DELAY = 60;
 
 	/**
 	 * @var Plugin The singleton instance.
@@ -16,7 +19,11 @@ class Plugin {
 	private static $instance;
 
 	/**
-	 * @var array
+	 * Translation IDs queued during the current request.
+	 *
+	 * Keyed by translation_id for dedup; values are ignored.
+	 *
+	 * @var array<int, true>
 	 */
 	private $queue = array();
 
@@ -70,11 +77,14 @@ class Plugin {
 			return;
 		}
 
-		$this->queue[ $translation->original_id ] = $translation->id;
+		// Key by translation_id so distinct translations of the same original
+		// (e.g. different locales, plural forms) are all queued.
+		$this->queue[ (int) $translation->id ] = true;
 	}
 
 	/**
-	 * Schedules a single event to update translation memory for new translations.
+	 * Merges the request's queued translations into the persistent queue and
+	 * ensures a single cron event is scheduled to process it.
 	 */
 	public function schedule_tm_update() {
 		remove_action( 'gp_translation_created', array( $this, 'translation_updated' ), 3 );
@@ -84,7 +94,73 @@ class Plugin {
 			return;
 		}
 
-		wp_schedule_single_event( time() + 60, self::TM_UPDATE_EVENT, array( 'translations' => $this->queue ) );
+		$new_ids = $this->queue;
+		$this->queue = array();
+
+		$merged = self::with_lock( 'queue_lock', function () use ( $new_ids ) {
+			self::write_queue( $new_ids + self::read_queue() );
+			return true;
+		} );
+
+		// If the lock couldn't be acquired, fall back to a per-request cron
+		// so the translations aren't dropped.
+		if ( ! $merged ) {
+			wp_schedule_single_event(
+				time() + self::TM_UPDATE_DELAY,
+				self::TM_UPDATE_EVENT,
+				array( 'translations' => array_keys( $new_ids ) )
+			);
+			return;
+		}
+
+		if ( ! wp_next_scheduled( self::TM_UPDATE_EVENT ) ) {
+			wp_schedule_single_event( time() + self::TM_UPDATE_DELAY, self::TM_UPDATE_EVENT );
+		}
+	}
+
+	/**
+	 * Reads the persistent TM update queue.
+	 *
+	 * @return array<int, true> Set of translation_ids (value always true).
+	 */
+	public static function read_queue() {
+		$queue = get_option( self::TM_QUEUE_OPTION, array() );
+		return is_array( $queue ) ? $queue : array();
+	}
+
+	/**
+	 * Writes (or deletes, when empty) the persistent TM update queue.
+	 *
+	 * @param array<int, true> $queue Set of translation_ids.
+	 */
+	public static function write_queue( array $queue ) {
+		if ( ! $queue ) {
+			delete_option( self::TM_QUEUE_OPTION );
+			return;
+		}
+		update_option( self::TM_QUEUE_OPTION, $queue, false );
+	}
+
+	/**
+	 * Runs $callback while holding a memcached-backed lock.
+	 *
+	 * wp_cache_add maps to memcached ADD — atomic. Single attempt; returns
+	 * false without running the callback if the lock is held.
+	 *
+	 * @param string   $name     Lock name.
+	 * @param callable $callback
+	 * @return mixed The callback's return value, or false if the lock was not acquired.
+	 */
+	public static function with_lock( $name, callable $callback ) {
+		if ( ! wp_cache_add( $name, 1, 'locks', 30 ) ) {
+			return false;
+		}
+
+		try {
+			return $callback();
+		} finally {
+			wp_cache_delete( $name, 'locks' );
+		}
 	}
 
 	/**
@@ -130,7 +206,9 @@ class Plugin {
 		$gp_default_sort         = get_user_option( 'gp_default_sort' );
 		$get_openai_translations = ! empty( trim( gp_array_get( $gp_default_sort, 'openai_api_key' ) ) );
 		$get_deepl_translations  = ! empty( trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ) );
-
+		$deepl 				     = new DeepL();
+		$deepl_locale 		     = $deepl->get_deepl_locale( $args['locale_slug'] );
+		
 		wp_localize_script(
 			'gp-translation-suggestions',
 			'gpTranslationSuggestions',
@@ -139,12 +217,12 @@ class Plugin {
 				'get_external_translations' => array(
 					'get_openai_translations' => $get_openai_translations,
 					'get_deepl_translations'  => $get_deepl_translations,
+					'get_deepl_locale'        => $deepl_locale,
 				),
 			)
 		);
 
 		gp_enqueue_script( 'gp-translation-suggestions' );
-
 		wp_add_inline_script(
 			'gp-translation-suggestions',
 			sprintf(
