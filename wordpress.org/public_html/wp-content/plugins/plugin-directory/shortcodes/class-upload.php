@@ -500,7 +500,7 @@ class Upload {
 				<p><?php echo wp_kses_post( __( '<strong>If you are not the owner</strong>: Simply do not imply affiliation with a company, project, or trademark that you do not own. You can do so placing their name at the end and making the distinction clear (e.g., “WriteralAI – AI Writer <em>for Acme</em>”)', 'wporg-plugins' ) ); ?></p>
 				<label>
 					<input type="checkbox" name="requirements[naming]" required="required">
-					<?php esc_html_e( 'I have chosen a plugin name that is not confusingly similar to existing plugins, projects, organizations, or trademarks. I searched on internet for similar names and found nothing similar.', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'I have chosen a plugin name that is not confusingly similar to existing plugins, projects, organizations, or trademarks. I searched on the internet for similar names and found nothing similar.', 'wporg-plugins' ); ?>
 				</label>
 				<br>
 				<label>
