@@ -137,16 +137,6 @@ function scripts() {
 	// The plugin submission page: /developers/add/
 	if ( is_page( 'add' ) ) {
 		wp_enqueue_script( 'wporg-plugins-upload', get_stylesheet_directory_uri() . '/js/upload.js', array( 'wp-api', 'jquery' ), filemtime( __DIR__ . '/js/upload.js' ), true );
-
-		wp_localize_script(
-			'wporg-plugins-upload',
-			'pluginUpload',
-			array(
-				'l10n' => array(
-					'uploading' => __( 'Uploading…', 'wporg-plugins' ),
-				),
-			)
-		);
 	}
 
 	// No Jetpack scripts needed.

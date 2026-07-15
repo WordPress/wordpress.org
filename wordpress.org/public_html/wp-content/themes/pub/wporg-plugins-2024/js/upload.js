@@ -51,16 +51,13 @@
 
 	// Prevent duplicate submissions by disabling the submit button
 	$( 'form.plugin-upload-form' ).on( 'submit', function() {
-		var $button = $(this).find( 'input[type="submit"]' );
+		var $button = $(this).find( 'input[type="submit"]' ),
+			uploadingLabel = $button.data( 'uploadingLabel' );
 
 		$button.prop( 'disabled', true );
 
-		if ( ! $button.data( 'defaultValue' ) ) {
-			$button.data( 'defaultValue', $button.val() );
-		}
-
-		if ( 'undefined' !== typeof pluginUpload && pluginUpload.l10n && pluginUpload.l10n.uploading ) {
-			$button.val( pluginUpload.l10n.uploading );
+		if ( uploadingLabel ) {
+			$button.val( uploadingLabel );
 		}
 	} );
 
