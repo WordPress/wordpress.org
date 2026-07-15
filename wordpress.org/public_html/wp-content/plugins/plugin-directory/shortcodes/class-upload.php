@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Template;
-use function WordPressdotorg\MainTheme\_esc_html_e;
 use function WordPressdotorg\Two_Factor\get_onboarding_account_url;
 
 class Upload {
@@ -480,12 +479,11 @@ class Upload {
 				<h2><?php esc_html_e( 'Step 2: Common reasons plugins are rejected', 'wporg-plugins' ); ?></h2>
 				<h3>🏷️
 					<?php
-					esc_html_e( 'Naming and ownership', 'wporg-plugins' );
-					echo ' - <i>'.esc_html( 'Guideline 17', 'wporg-plugins' ).'</i>';
+					echo wp_kses_post( __( 'Naming and ownership – <em>Guideline 17</em>', 'wporg-plugins' ) );
 					?>
 				</h3>
 				<p><?php echo wp_kses_post( __( 'Plugin names must be <strong>distinctive</strong> and should not be <strong>confusingly similar</strong> to existing plugins, projects, products, organizations, or trademarks that are not owned by you.', 'wporg-plugins' ) ); ?></p>
-				<p><?php echo wp_kses_post( __( '<strong>Choosing a distinctive name</strong>: Generic names such as "AI Writer" or "Image Optimization" and/or names similar to existing plugins are unlikely to be accepted, even if the plugin slug is available. Make your plugin stand out by using a unique identifier such as your name, brand, organization, or project name (e.g., “<u>Acme</u> AI Writer”, “<u>WriteralAI</u> – AI Writter”)', 'wporg-plugins' ) ); ?></p>
+				<p><?php echo wp_kses_post( __( '<strong>Choosing a distinctive name</strong>: Generic names such as "AI Writer" or "Image Optimization" and/or names similar to existing plugins are unlikely to be accepted, even if the plugin slug is available. Make your plugin stand out by using a unique identifier such as your name, brand, organization, or project name (e.g., “<em>Acme</em> AI Writer”, “<em>WriteralAI</em> – AI Writter”)', 'wporg-plugins' ) ); ?></p>
 				<p><?php printf(
 					/* translators: 1: User profile URL. */
 					wp_kses_post(
@@ -494,7 +492,7 @@ class Upload {
 					esc_url( 'https://profiles.wordpress.org/profile/edit' )
 				); ?>
 				</p>
-				<p><?php echo wp_kses_post( __( '<strong>If you are not the owner</strong>: Simply do not imply affiliation with a company, project, or trademark that you do not own. You can do so placing their name at the end and making the distinction clear (e.g., “WriteralAI – AI Writer <u>for Acme</u>”)', 'wporg-plugins' ) ); ?></p>
+				<p><?php echo wp_kses_post( __( '<strong>If you are not the owner</strong>: Simply do not imply affiliation with a company, project, or trademark that you do not own. You can do so placing their name at the end and making the distinction clear (e.g., “WriteralAI – AI Writer <em>for Acme</em>”)', 'wporg-plugins' ) ); ?></p>
 				<label>
 					<input type="checkbox" name="requirements[naming]" required="required">
 					<?php esc_html_e( 'I have chosen a plugin name that is not confusingly similar to existing plugins, projects, organizations, or trademarks. I searched on internet for similar names and found nothing similar.', 'wporg-plugins' ); ?>
@@ -513,12 +511,11 @@ class Upload {
 
 				<h3>🔓
 					<?php
-					esc_html_e( 'Trialware', 'wporg-plugins' );
-					echo ' - <i>'.esc_html( 'Guidelines 5 and 6', 'wporg-plugins' ).'</i>';
+                    echo wp_kses_post( __( 'Trialware – <em>Guidelines 5 and 6</em>', 'wporg-plugins' ) );
 					?>
 				</h3>
 				<p><?php echo wp_kses_post( __( 'Plugins hosted in the WordPress.org Plugin Directory <strong>may not artificially restrict functionality that is included in the plugin itself</strong>.', 'wporg-plugins' ) ); ?></p>
-				<p><?php echo wp_kses_post( __( 'This includes but is not limited to: paywalls, license/feature gating, time-limited trials, usage cutoffs, or any other mechanism that restricts, disables, or conditions access to <u>features implemented in the plugin code and/or that the plugin itself can do</u>.', 'wporg-plugins' ) ); ?></p>
+				<p><?php echo wp_kses_post( __( 'This includes but is not limited to: paywalls, license/feature gating, time-limited trials, usage cutoffs, or any other mechanism that restricts, disables, or conditions access to <strong>features implemented in the plugin code and/or that the plugin itself can do</strong>.', 'wporg-plugins' ) ); ?></p>
 				<p><?php echo wp_kses_post( __( 'Please bear in mind that this is an <strong>open source directory for free to use plugins</strong>. Building a business around your plugin is fine, and there are compliant ways of doing so; artificial limitations in built-in code are not one of them.', 'wporg-plugins' ) ); ?></p>
 				<label>
 					<input type="checkbox" name="requirements[trialware]" required="required">
@@ -526,11 +523,11 @@ class Upload {
 				</label>
 
 				<h3>🚫 <?php esc_html_e( 'Not accepted plugins', 'wporg-plugins' ); ?></h3>
-				<p><?php esc_html_e( 'There are some kind of plugins that aren\'t accepted in the directory, please do not submit them.', 'wporg-plugins' ); ?></p>
+				<p><?php esc_html_e( 'There are some kind of plugins that aren’t accepted in the directory, please do not submit them.', 'wporg-plugins' ); ?></p>
 				<ul>
-					<li><?php echo wp_kses_post( __( 'Plugins that allow arbitrary code insertion/execution are no longer accepted. This includes but is not limited to: PHP, JavaScript editors, File Managers, and AI tools creating code that is executed on the site.  HTML is fine as long as it is escaped correctly. <i>Reason: Security</i>.', 'wporg-plugins' ) ); ?></li>
-					<li><?php echo wp_kses_post( __( 'Plugins downloading executable code from external sources. <i>Reasons: Security and Guideline 8</i>.', 'wporg-plugins' ) ); ?></li>
-					<li><?php echo wp_kses_post( __( 'Plugins whose functionality is already well represented in the directory, with hundreds of comparable plugins available, and that do not provide meaningful differentiation or introduce substantial innovation. <i>Reason: Guideline 18</i>.', 'wporg-plugins' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( 'Plugins that allow arbitrary code insertion/execution are no longer accepted. This includes but is not limited to: PHP, JavaScript editors, File Managers, and AI tools creating code that is executed on the site.  HTML is fine as long as it is escaped correctly. <em>Reason: Security</em>.', 'wporg-plugins' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( 'Plugins downloading executable code from external sources. <em>Reasons: Security and Guideline 8</em>.', 'wporg-plugins' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( 'Plugins whose functionality is already well represented in the directory, with hundreds of comparable plugins available, and that do not provide meaningful differentiation or introduce substantial innovation. <em>Reason: Guideline 18</em>.', 'wporg-plugins' ) ); ?></li>
 				</ul>
 
 				<h2><?php esc_html_e( 'Step 3: Submission acknowledgement', 'wporg-plugins' ); ?></h2>
