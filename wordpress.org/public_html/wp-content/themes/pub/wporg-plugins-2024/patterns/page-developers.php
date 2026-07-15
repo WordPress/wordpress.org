@@ -30,7 +30,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 		<li>
 			<?php
 			/* translators: URL to licence list. */
-			printf( wp_kses_post( __( 'Your plugin must be compatible with the <a href="%s">GNU General Public License v2</a>, or any later version. The plugin should either include its source code or provide a clear link to it. We strongly recommend using the same license as WordPress — &#8220;GPLv2 or later.&#8221;', 'wporg-plugins' ) ), esc_url( 'https://www.gnu.org/licenses/license-list.html#GPLCompatibleLicenses' ) );
+			printf( wp_kses_post( __( 'Your plugin must be compatible with the <a href="%s">GNU General Public License v2</a>, or any later version. The plugin should either include its human-readable source code or provide a clear, accessible link to it. We strongly recommend using the same license as WordPress — &#8220;GPLv2 or later.&#8221;', 'wporg-plugins' ) ), esc_url( 'https://www.gnu.org/licenses/license-list.html#GPLCompatibleLicenses' ) );
 			?>
 		</li>
 		<li>
