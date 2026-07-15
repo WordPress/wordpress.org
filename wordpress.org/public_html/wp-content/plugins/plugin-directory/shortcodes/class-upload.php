@@ -480,10 +480,10 @@ class Upload {
 				<h3>🏷️
 					<?php
 					printf(
-							wp_kses_post(
-									__( 'Naming and ownership – <em>Guideline <a href="%s" target="_blank">17</a></em>', 'wporg-plugins' )
-							),
-							'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#17-plugins-must-respect-trademarks-copyrights-and-project-names'
+						wp_kses_post(
+							__( 'Naming and ownership – <em>Guideline <a href="%s" target="_blank">17</a></em>', 'wporg-plugins' )
+						),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#17-plugins-must-respect-trademarks-copyrights-and-project-names'
 					);
 					?>
 				</h3>
@@ -517,11 +517,11 @@ class Upload {
 				<h3>🔓
 					<?php
 					printf(
-							wp_kses_post(
-									__( 'Trialware – <em>Guidelines <a href="%s" target="_blank">5</a> and <a href="%s" target="_blank">6</a></em>', 'wporg-plugins' )
-							),
-							'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#5-trialware-is-not-permitted',
-							'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#6-software-as-a-service-is-permitted'
+						wp_kses_post(
+							__( 'Trialware – <em>Guidelines <a href="%1$s" target="_blank">5</a> and <a href="%2$s" target="_blank">6</a></em>', 'wporg-plugins' )
+						),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#5-trialware-is-not-permitted',
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#6-software-as-a-service-is-permitted'
 					);
 					?>
 				</h3>
@@ -537,15 +537,17 @@ class Upload {
 				<p><?php esc_html_e( 'There are some kind of plugins that aren’t accepted in the directory, please do not submit them.', 'wporg-plugins' ); ?></p>
 				<ul>
 					<li><?php echo wp_kses_post( __( 'Plugins that allow arbitrary code insertion/execution are no longer accepted. This includes but is not limited to: PHP, JavaScript editors, File Managers, and AI tools creating code that is executed on the site.  HTML is fine as long as it is escaped correctly. <em>Reason: Security</em>.', 'wporg-plugins' ) ); ?></li>
-					<li><?php printf(
-								wp_kses_post( __( 'Plugins downloading executable code from external sources. <em>Reasons: Security and <a href="%s" target="_blank">Guideline 8</a></em>.', 'wporg-plugins' ) ),
-								'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#8-plugins-may-not-send-executable-code-via-third-party-systems'
-						); ?>
+					<li>
+					<?php printf(
+						wp_kses_post( __( 'Plugins downloading executable code from external sources. <em>Reasons: Security and <a href="%s" target="_blank">Guideline 8</a></em>.', 'wporg-plugins' ) ),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#8-plugins-may-not-send-executable-code-via-third-party-systems'
+					); ?>
 					</li>
-					<li><?php printf(
-								wp_kses_post( __( 'Plugins whose functionality is already well represented in the directory, with hundreds of comparable plugins available, and that do not provide meaningful differentiation or introduce substantial innovation. <em>Reason: <a href="%s" target="_blank">Guideline 18</a></em>.', 'wporg-plugins' ) ),
-								'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#18-we-reserve-the-right-to-maintain-the-plugin-directory-to-the-best-of-our-ability'
-						); ?>
+					<li>
+					<?php printf(
+						wp_kses_post( __( 'Plugins whose functionality is already well represented in the directory, with hundreds of comparable plugins available, and that do not provide meaningful differentiation or introduce substantial innovation. <em>Reason: <a href="%s" target="_blank">Guideline 18</a></em>.', 'wporg-plugins' ) ),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#18-we-reserve-the-right-to-maintain-the-plugin-directory-to-the-best-of-our-ability'
+					); ?>
 					</li>
 				</ul>
 
@@ -555,8 +557,8 @@ class Upload {
 					<input type="checkbox" name="requirements[confirmation1]" required="required">
 					<?php
 					printf(
-							wp_kses_post( __( 'I understand that submissions that do not follow the <a href="%s" target="_blank">Plugins Directory Guidelines</a> may be rejected. Repeated or serious violations may result in further restrictions.', 'wporg-plugins' ) ),
-							'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
+						wp_kses_post( __( 'I understand that submissions that do not follow the <a href="%s" target="_blank">Plugins Directory Guidelines</a> may be rejected. Repeated or serious violations may result in further restrictions.', 'wporg-plugins' ) ),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
 					);
 					?>
 				</label>
@@ -565,8 +567,8 @@ class Upload {
 					<input type="checkbox" name="requirements[confirmation3]" required="required">
 					<?php
 					printf(
-							wp_kses_post( __( 'I understand that hosting in the WordPress.org Plugin Directory is provided subject to continued compliance with the <a href="%s" target="_blank">Plugins Directory Guidelines</a>.', 'wporg-plugins' ) ),
-							'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
+						wp_kses_post( __( 'I understand that hosting in the WordPress.org Plugin Directory is provided subject to continued compliance with the <a href="%s" target="_blank">Plugins Directory Guidelines</a>.', 'wporg-plugins' ) ),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
 					);
 					?>
 				</label>
