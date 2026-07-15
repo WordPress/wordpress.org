@@ -379,7 +379,7 @@ class Upload {
 										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
 									</label>
 
-									<input class="upload-button wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ) ?>" data-uploading-label="<?php esc_attr_e( 'Uploading…', 'wporg-plugins' ); ?>"/>
+									<input class="upload-button wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>" data-uploading-label="<?php esc_attr_e( 'Uploading…', 'wporg-plugins' ); ?>"/>
 								</form>
 								<?php
 								echo '</div>';
