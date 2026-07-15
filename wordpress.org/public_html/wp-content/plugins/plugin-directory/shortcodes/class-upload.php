@@ -511,7 +511,7 @@ class Upload {
 
 				<h3>🔓
 					<?php
-                    echo wp_kses_post( __( 'Trialware – <em>Guidelines 5 and 6</em>', 'wporg-plugins' ) );
+					echo wp_kses_post( __( 'Trialware – <em>Guidelines 5 and 6</em>', 'wporg-plugins' ) );
 					?>
 				</h3>
 				<p><?php echo wp_kses_post( __( 'Plugins hosted in the WordPress.org Plugin Directory <strong>may not artificially restrict functionality that is included in the plugin itself</strong>.', 'wporg-plugins' ) ); ?></p>
