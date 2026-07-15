@@ -63,7 +63,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 				);
 				?>
 			</p>
-			<p><?php esc_html_e( 'Our four most common reasons for not approving a plugin are:', 'wporg-plugins' ); ?></p>
+			<p><?php esc_html_e( 'The most common reasons for not approving a plugin are:', 'wporg-plugins' ); ?></p>
 			<ul>
 				<li><?php printf( wp_kses_post( __( 'The plugin contains unescaped output: <a href="%s">Learn about Escaping Data</a>', 'wporg-plugins' ) ), esc_url( 'https://developer.wordpress.org/apis/security/escaping/' ) ); ?></li>
 				<li><?php printf( wp_kses_post( __( 'The plugin accepts unsanitized data: <a href="%s">Learn about Sanitizing Data</a>', 'wporg-plugins' ) ), esc_url( 'https://developer.wordpress.org/apis/security/sanitizing/' ) ); ?></li>
