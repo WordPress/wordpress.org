@@ -25,6 +25,22 @@ $is_reviews = $view_id === 'reviews';
 $is_plugin = $view_id === 'plugin';
 $is_theme = $view_id === 'theme';
 
+/* Show the WordCamp US 2026 banner on the general (non-Rosetta) home page through August 19, 2026. */
+if ( ( $is_forums_home || is_front_page() || $is_homepage )
+	&& ( ! defined( 'IS_ROSETTA_NETWORK' ) || ! IS_ROSETTA_NETWORK )
+	&& current_datetime() < new \DateTimeImmutable( '2026-08-20 00:00:00', wp_timezone() )
+) {
+	echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static, trusted block markup.
+		'<!-- wp:group {"metadata":{"name":"3 min-height columns"},"align":"full","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"backgroundColor":"light-grey-2","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center"},"blockVisibility":{"controlSets":[{"id":1,"enable":true,"controls":[]}]}} -->
+		<div class="wp-block-group alignfull has-light-grey-2-background-color has-background"><!-- wp:group {"style":{"layout":{"selfStretch":"fill","flexSize":null},"dimensions":{"minHeight":"0px"},"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"background":{"backgroundImage":{"url":"https://wordpress.org/files/2026/06/wcus_map.png","id":52120,"source":"file","title":"wcus_map"},"backgroundSize":"cover","backgroundAttachment":"scroll","backgroundPosition":"74% 95%"},"color":{"background":"#47002c"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
+		<div class="wp-block-group has-background" style="background-color:#47002c;min-height:0px;padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--20);padding-left:var(--wp--preset--spacing--20)"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}}},"textColor":"white","fontSize":"normal"} -->
+		<p class="has-white-color has-text-color has-link-color has-normal-font-size">Need help with WordPress? Join the community at WordCamp US 2026. <a href="https://us.wordcamp.org/2026/" data-type="link" data-id="https://us.wordcamp.org/2026/" style="color:var(--wp--preset--color--white)">Get your tickets↗</a></p>
+		<!-- /wp:paragraph --></div>
+		<!-- /wp:group --></div>
+		<!-- /wp:group -->'
+	);
+}
+
 echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	? '<!-- wp:pattern {"slug":"wporg-support/local-nav-home"} /-->'
 	: '<!-- wp:pattern {"slug":"wporg-support/local-nav"} /-->'

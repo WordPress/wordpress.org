@@ -1229,8 +1229,8 @@ function get_iso_3166_2_country_codes( $continent = '' ) {
 		'africa' => array(
 			'AO', 'BF', 'BI', 'BJ', 'BW', 'CD', 'CF', 'CG', 'CI', 'CM', 'CV', 'DJ', 'DZ', 'EG', 'EH', 'ER', 'ET',
 			'GA', 'GH', 'GM', 'GN', 'GQ', 'GW', 'KE', 'KM', 'LR', 'LS', 'LY', 'MA', 'MG', 'ML', 'MR', 'MU', 'MW',
-			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'ST', 'SZ', 'TD', 'TG', 'TN',
-			'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
+			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'SS', 'ST', 'SZ', 'TD', 'TG',
+			'TN', 'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
 		),
 
 		'asia' => array(

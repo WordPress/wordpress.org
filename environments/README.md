@@ -53,6 +53,42 @@ npx wp-env run cli wp <command>
 npm run plugins:test
 ```
 
+### Theme Directory
+
+A local instance of the WordPress.org Theme Directory with the theme directory plugin, Theme Check, the `wporg-themes-2024` frontend theme, and supporting mu-plugins. Themes are imported from the live WordPress.org themes API.
+
+**Start:**
+
+```bash
+npm run themes:env start
+```
+
+**Re-import themes** (on demand, without clearing existing data):
+
+```bash
+npm run themes:import
+```
+
+**Re-seed themes** (clears import flag, then re-imports):
+
+```bash
+npm run themes:refresh
+```
+
+**Access:** `http://localhost:8888`
+
+**WP CLI:**
+
+```bash
+npm run themes:env -- run cli -- wp <command>
+```
+
+**Run tests:**
+
+```bash
+npm run themes:test
+```
+
 ### Jobs
 
 A local instance of jobs.wordpress.net with the JobsWP plugin, theme, sample job categories, and sample job posts.

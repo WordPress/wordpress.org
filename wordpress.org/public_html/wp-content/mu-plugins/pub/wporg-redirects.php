@@ -310,19 +310,6 @@ add_action( 'template_redirect', function() {
 	exit;
 } );
 
-/**
- * Redirect developer.wp.org/playground/ to github documentation.
- */
-add_action( 'template_redirect', function() {
-	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
-	if ( 'developer.wordpress.org' !== $_SERVER['HTTP_HOST'] || ! str_starts_with( $path, '/playground' ) ) {
-		return;
-	}
-
-	wp_redirect( 'https://wordpress.github.io/wordpress-playground/', 301 );
-	exit;
-} );
-
 // Add wp.org redirect from developer.wp.org see: https://github.com/WordPress/wporg-developer/issues/452
 add_action( 'parse_request', function() {
 	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );

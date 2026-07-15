@@ -79,6 +79,11 @@ jobs:
             wp-env-args: "--config plugin-directory/.wp-env.test.json"
             container: tests-cli
             plugin-name: plugin-directory
+          - name: Theme Directory
+            working-directory: environments
+            wp-env-args: "--config theme-directory/.wp-env.test.json"
+            container: tests-cli
+            plugin-name: theme-directory
     steps:
       - uses: actions/checkout@v4
 
