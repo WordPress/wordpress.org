@@ -140,13 +140,13 @@ class Upload {
 				<p>
 				<?php
 				if ( 1 === (int) $plugins->new ) {
-					esc_html_e( 'Currently there is 1 plugin awaiting review.', 'wporg-plugins' );
+					esc_html_e( 'Currently there is 1 plugin awaiting its first review.', 'wporg-plugins' );
 				} else {
 					printf(
 						/* translators: %s: Amount of plugins awaiting review. */
 						esc_html( _n(
-							'Currently there is %s plugin awaiting review.',
-							'Currently there are %s plugins awaiting review.',
+							'Currently there is %s plugin awaiting their first review.',
+							'Currently there are %s plugins awaiting their first review.',
 							$plugins->new,
 							'wporg-plugins'
 						) ),
@@ -159,7 +159,7 @@ class Upload {
 					printf(
 						/* translators: %s: Date of the oldest new plugin in the queue, with a 36 hours offset. */
 						esc_html( __(
-							'All plugins that have been submitted before %s have received an initial response by email to their submission.',
+							'All new submissions received before %s have been sent an initial response by email.',
 							'wporg-plugins'
 						) ),
 						'<strong>' . esc_html( $queue_oldest_new_plugin_date_with_offset ) . '</strong>'
@@ -449,70 +449,130 @@ class Upload {
 				<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 				<input type="hidden" name="action" value="upload"/>
 
-				<h3><?php esc_html_e( 'Please, read and check the following before uploading your plugin', 'wporg-plugins' ); ?></h3>
+				<h2><?php esc_html_e( 'Step 1: Before you submit', 'wporg-plugins' ); ?></h2>
+				<p><?php esc_html_e( 'Please, read and confirm the following.', 'wporg-plugins' ); ?></p>
+				<label>
+					<input type="checkbox" name="requirements[faq]" required="required">
+					<?php
+					printf( wp_kses_post( __( 'I have read the <a href="%s">Frequently Asked Questions</a>.', 'wporg-plugins' ) ), 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' );
+					?>
+				</label>
+				<br>
+				<label>
+					<input type="checkbox" name="requirements[guidelines]" required="required">
+					<?php
+					printf( wp_kses_post( __( 'I have read and make sure that this plugin complies with <strong>all</strong> of the <a href="%s">Plugins Directory Guidelines</a>.', 'wporg-plugins' ) ), 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/' );
+					?>
+				</label>
+				<br>
+				<label>
+					<input type="checkbox" name="requirements[plugin-check]" required="required" />
+					<?php
+					printf(
+						/* Translators: URL to plugin-check plugin */
+						wp_kses_post( __( 'I confirm that the plugin has been tested with the <a href="%s">Plugin Check</a> plugin, and all indicated issues resolved (apart from what I believe to be false-positives).', 'wporg-plugins' )),
+						esc_url( home_url( '/plugin-check/' ) )
+					);
+					?>
+				</label>
 
-				<p>
-					<label>
-						<input type="checkbox" name="requirements[faq]" required="required">
-						<?php
-							printf(
-								__( 'I have read the <a href="%s">Frequently Asked Questions</a>.', 'wporg-plugins' ),
-								'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/'
-							);
-						?>
-					</label>
-					<br>
-					<label>
-						<input type="checkbox" name="requirements[guidelines]" required="required">
-						<?php
-							printf(
-								__( 'This plugin complies with all of the <a href="%s">Plugin Developer Guidelines</a>.', 'wporg-plugins' ),
-								'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
-							);
-						?>
-					</label>
-					<br>
-					<label>
-						<input type="checkbox" name="requirements[author]" required="required">
-						<?php _e( 'I have permission to upload this plugin to WordPress.org for others to use and share.', 'wporg-plugins' ); ?>
-					</label>
-					<br>
-					<label>
-						<input type="checkbox" name="requirements[license]" required="required">
-						<?php _e( 'This plugin, all included libraries, and any other included assets are licenced as GPL or are under a GPL compatible license.', 'wporg-plugins' ); ?>
-					</label>
-					<br>
-					<label>
-						<input type="checkbox" name="requirements[plugin-check]" required="required" />
-						<?php
-							printf(
-								/* Translators: URL to plugin-check plugin */
-								__( 'I confirm that the plugin has been tested with the <a href="%s">Plugin Check</a> plugin, and all indicated issues resolved (apart from what I believe to be false-positives).', 'wporg-plugins' ),
-								home_url( '/plugin-check/' )
-							);
-						?>
-					</label>
-				</p>
-
-				<h3><?php esc_html_e( 'Plugin Naming', 'wporg-plugins' ); ?></h3>
-				<p><?php echo wp_kses_post( __( '<strong>Generic names</strong> that <strong>resemble existing plugins in the directory</strong> (e.g., “AI Writer”, “Image Optimization”) won’t be accepted, even if the slug is available.', 'wporg-plugins' ) ); ?></p>
-				<p><?php echo wp_kses_post( __( 'Instead, please <strong>start your plugin name with a unique or coined term</strong>, such as your brand, alias, or organization name (e.g., “Acme AI Writer”, “WriteralAI - AI Writter”, “Acme Image Optimization”, “Imageralia - Image Optimization”).', 'wporg-plugins' ) ); ?></p>
-
-				<h3><?php esc_html_e( 'Plugin Ownership', 'wporg-plugins' ); ?></h3>
+				<h2><?php esc_html_e( 'Step 2: Common reasons plugins are rejected', 'wporg-plugins' ); ?></h2>
+				<h3>🏷️
+					<?php
+					printf(
+						wp_kses_post(
+							__( 'Naming and ownership – <em>Guideline <a href="%s" target="_blank">17</a></em>', 'wporg-plugins' )
+						),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#17-plugins-must-respect-trademarks-copyrights-and-project-names'
+					);
+					?>
+				</h3>
+				<p><?php echo wp_kses_post( __( 'Plugin names must be <strong>distinctive</strong> and should not be <strong>confusingly similar</strong> to existing plugins, projects, products, organizations, or trademarks that are not owned by you.', 'wporg-plugins' ) ); ?></p>
+				<p><?php echo wp_kses_post( __( '<strong>Choosing a distinctive name</strong>: Generic names such as "AI Writer" or "Image Optimization" and/or names similar to existing plugins are unlikely to be accepted, even if the plugin slug is available. Make your plugin stand out by using a unique identifier such as your name, brand, organization, or project name (e.g., “<em>Acme</em> AI Writer”, “<em>WriteralAI</em> – AI Writter”)', 'wporg-plugins' ) ); ?></p>
 				<p><?php printf(
 					/* translators: 1: User profile URL. */
 					wp_kses_post(
-						__( 'Names that <strong>begin</strong> with a project, organization, or trademark are <strong>only accepted if submitted by the verified owner</strong>. Ownership can be <strong>confirmed through the email domain in your <a href="%1$s" target="_blank">user profile</a></strong> - update it before submitting.', 'wporg-plugins' )
+						__( '<strong>Demonstrating ownership</strong>: Names that begin with a company, project, organization, or trademark name may only be submitted by the verified owner. Ownership is typically verified using the <a href="%1$s" target="_blank">email address associated with your WordPress.org account</a>. If necessary, update your profile before submitting.', 'wporg-plugins' )
 					),
 					esc_url( 'https://profiles.wordpress.org/profile/edit' )
 				); ?>
-				<br>
-				<?php echo wp_kses_post( __( '<i>For example, use an official Acme email domain (e.g., “john@acme.example”) for a plugin named “Acme AI Writer”.</i>', 'wporg-plugins' ) ); ?>
 				</p>
-				<p><?php echo wp_kses_post( __( '<strong>If you don’t own the entity, don’t imply affiliation</strong>. Place their name <strong>at the end</strong> and <strong>make the distinction clear</strong>.', 'wporg-plugins' ) ); ?>
+				<p><?php echo wp_kses_post( __( '<strong>If you are not the owner</strong>: Simply do not imply affiliation with a company, project, or trademark that you do not own. You can do so placing their name at the end and making the distinction clear (e.g., “WriteralAI – AI Writer <em>for Acme</em>”)', 'wporg-plugins' ) ); ?></p>
+				<label>
+					<input type="checkbox" name="requirements[naming]" required="required">
+					<?php esc_html_e( 'I have chosen a plugin name that is not confusingly similar to existing plugins, projects, organizations, or trademarks. I searched on the internet for similar names and found nothing similar.', 'wporg-plugins' ); ?>
+				</label>
 				<br>
-				<?php echo wp_kses_post( __( '<i>For example, if you don’t own “Acme” use a structure like: “{your-distinguible-plugin-name} for Acme” (e.g., “WriteralAI – AI Writer for Acme”).</i>', 'wporg-plugins' ) ); ?>
-				</p>
+				<label>
+					<input type="checkbox" name="requirements[author]" required="required">
+					<?php
+					printf(
+						/* translators: %s: Current user's email address. */
+						wp_kses_post( __( 'I have permission to upload this plugin to WordPress.org for others to use and share and I am using a WordPress.org account that accurately represents the plugin owner: %s.', 'wporg-plugins' )),
+						'<strong>' . esc_html( wp_get_current_user()->user_email ) . '</strong>'
+					);
+					?>
+				</label>
+
+				<h3>🔓
+					<?php
+					printf(
+						wp_kses_post(
+							__( 'Trialware – <em>Guidelines <a href="%1$s" target="_blank">5</a> and <a href="%2$s" target="_blank">6</a></em>', 'wporg-plugins' )
+						),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#5-trialware-is-not-permitted',
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#6-software-as-a-service-is-permitted'
+					);
+					?>
+				</h3>
+				<p><?php echo wp_kses_post( __( 'Plugins hosted in the WordPress.org Plugin Directory <strong>may not artificially restrict functionality that is included in the plugin itself</strong>.', 'wporg-plugins' ) ); ?></p>
+				<p><?php echo wp_kses_post( __( 'This includes but is not limited to: paywalls, license/feature gating, time-limited trials, usage cutoffs, or any other mechanism that restricts, disables, or conditions access to <strong>features implemented in the plugin code and/or that the plugin itself can do</strong>.', 'wporg-plugins' ) ); ?></p>
+				<p><?php echo wp_kses_post( __( 'Please bear in mind that this is an <strong>open source directory for free to use plugins</strong>. Building a business around your plugin is fine, and there are compliant ways of doing so; artificial limitations in built-in code are not one of them.', 'wporg-plugins' ) ); ?></p>
+				<label>
+					<input type="checkbox" name="requirements[trialware]" required="required">
+					<?php esc_html_e( 'I confirm that my plugin code does not include artificial limitations to the included functionality. I acknowledge that I must comply with this in future, and that my plugin and account could be suspended indefinitely if I fail to do so.', 'wporg-plugins' ); ?>
+				</label>
+
+				<h3>🚫 <?php esc_html_e( 'Not accepted plugins', 'wporg-plugins' ); ?></h3>
+				<p><?php esc_html_e( 'There are some kind of plugins that aren’t accepted in the directory, please do not submit them.', 'wporg-plugins' ); ?></p>
+				<ul>
+					<li><?php echo wp_kses_post( __( 'Plugins that allow arbitrary code insertion/execution are no longer accepted. This includes but is not limited to: PHP, JavaScript editors, File Managers, and AI tools creating code that is executed on the site.  HTML is fine as long as it is escaped correctly. <em>Reason: Security</em>.', 'wporg-plugins' ) ); ?></li>
+					<li>
+					<?php printf(
+						wp_kses_post( __( 'Plugins downloading executable code from external sources. <em>Reasons: Security and <a href="%s" target="_blank">Guideline 8</a></em>.', 'wporg-plugins' ) ),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#8-plugins-may-not-send-executable-code-via-third-party-systems'
+					); ?>
+					</li>
+					<li>
+					<?php printf(
+						wp_kses_post( __( 'Plugins whose functionality is already well represented in the directory, with hundreds of comparable plugins available, and that do not provide meaningful differentiation or introduce substantial innovation. <em>Reason: <a href="%s" target="_blank">Guideline 18</a></em>.', 'wporg-plugins' ) ),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#18-we-reserve-the-right-to-maintain-the-plugin-directory-to-the-best-of-our-ability'
+					); ?>
+					</li>
+				</ul>
+
+				<h2><?php esc_html_e( 'Step 3: Submission acknowledgement', 'wporg-plugins' ); ?></h2>
+				<p><?php esc_html_e( 'Please confirm that you understand the following:', 'wporg-plugins' ); ?></p>
+				<label>
+					<input type="checkbox" name="requirements[confirmation1]" required="required">
+					<?php
+					printf(
+						wp_kses_post( __( 'I understand that submissions that do not follow the <a href="%s" target="_blank">Plugins Directory Guidelines</a> may be rejected. Repeated or serious violations may result in further restrictions.', 'wporg-plugins' ) ),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
+					);
+					?>
+				</label>
+				<br>
+				<label>
+					<input type="checkbox" name="requirements[confirmation3]" required="required">
+					<?php
+					printf(
+						wp_kses_post( __( 'I understand that hosting in the WordPress.org Plugin Directory is provided subject to continued compliance with the <a href="%s" target="_blank">Plugins Directory Guidelines</a>.', 'wporg-plugins' ) ),
+						'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
+					);
+					?>
+				</label>
+				<br>
 
 				<h3><?php esc_html_e( 'Are you ready? Upload the .zip file for your plugin', 'wporg-plugins' ); ?></h3>
 
