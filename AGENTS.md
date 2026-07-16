@@ -59,7 +59,7 @@ Because this Git repository is a read-only mirror of the canonical WordPress Met
 
 ### 2. Contributor "Props" System
 *   The repository utilizes a automated workflow called `Props Bot` (defined in [.github/workflows/props-bot.yml](.github/workflows/props-bot.yml)).
-*   The bot automatically scans the commits, comments, and reviewers of the PR to compile a standard SVN-formatted "Props" attribution line (e.g., `Props georgestephanis, corecommitter.`).
+*   The bot automatically scans the commits, comments, and reviewers of the PR to compile a standard SVN-formatted "Props" attribution line (e.g., `Props username, corecommitter.`).
 *   Ensure that any co-authors or helpers are correctly credited so they are recognized when the commit is written to SVN.
 
 ---
