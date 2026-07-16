@@ -18,6 +18,7 @@
 	var CAPTION_REVEAL_DELAY = 430;
 
 	// Synthetic Plugin Directory screenshot IDs start here; ordinary images stay unmanaged.
+	// Keep in sync with SYNTHETIC_ID_OFFSET in plugin-directory/shortcodes/class-screenshots.php.
 	var SCREENSHOT_ID_OFFSET = 9000000;
 
 	/**
@@ -548,6 +549,9 @@
 
 			scale = newContainerHeight / currentContainerHeight;
 
+			// These are core Image block lightbox internals set by setOverlayStyles().
+			// Core rewrites them whenever the lightbox opens, navigates, or resizes.
+			// See https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/image/view.js#L585-L597.
 			overlay.style.setProperty(
 				'--wp--lightbox-container-width',
 				( currentContainerWidth * scale ) + 'px'
