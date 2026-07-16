@@ -794,7 +794,7 @@ class WPORG_Themes_Upload {
 					'failed_trac_ticket_creation',
 					sprintf(
 						/* translators: %s: mailto link */
-						__( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ),
+						__( 'There was an error creating a Trac ticket for your theme. This is usually temporary, so please wait a few minutes and try uploading again. If the error persists, report it to %s.', 'wporg-themes' ),
 						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
 					)
 				);
@@ -1350,9 +1350,13 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			// Themes team auto-approves theme-updates. Note that this only applies to new
-			// ticket creation, so it won't happen on themes with existing outstanding tickets.
-			if ( $this->trac_ticket->priority == 'theme update' ) {
+			/*
+			 * Themes team auto-approves theme-updates. Note that this only applies to new
+			 * ticket creation, so it won't happen on themes with existing outstanding tickets.
+			 *
+			 * Skipped when ticket creation failed, as there's no ticket to act upon.
+			 */
+			if ( $ticket_id && 'theme update' === $this->trac_ticket->priority ) {
 				$release_delay = wporg_themes_get_release_cooldown_delay( $this->theme_slug );
 				if ( $release_delay ) {
 					// Land the update in the `approved` status; the release-to-live cron
