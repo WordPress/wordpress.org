@@ -12,7 +12,7 @@
 namespace WordPressOrg\Bin\PHPCS_Changed;
 
 function run_phpcs( $file, $bin_dir ) {
-	exec( "$bin_dir/phpcs $file -snq", $output, $exec_exit_status );
+	exec( "$bin_dir/phpcs $file --standard=./phpcs-clean.xml.dist -snq", $output, $exec_exit_status );
 	echo implode( "\n", $output );
 	return $exec_exit_status;
 }
@@ -27,10 +27,10 @@ function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
 	exec( "$git diff $base_branch $file > $name.diff" );
 
 	exec( "$git show $base_branch:$file > $name.test.php" );
-	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs.xml.dist --report=json -snq > $name.orig.phpcs" );
+	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs-clean.xml.dist --report=json -snq > $name.orig.phpcs" );
 
 	exec( "cat $file > $name.test.php" );
-	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs.xml.dist --report=json -snq > $name.phpcs" );
+	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs-clean.xml.dist --report=json -snq > $name.phpcs" );
 
 	$cmd = "$bin_dir/phpcs-changed --diff $name.diff --phpcs-orig $name.orig.phpcs --phpcs-new $name.phpcs";
 	exec( $cmd, $output, $exec_exit_status );

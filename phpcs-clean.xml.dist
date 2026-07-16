@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<ruleset name="WordPress.org Coding Standards (Clean)">
+	<description>Full WordPress Coding Standards, applied to changed lines and new files only (via .github/bin/phpcs-branch.php). No sniff exclusions — new code is held to the stock standard.</description>
+
+	<!-- Show sniff codes in all reports -->
+	<arg value="ps" />
+	<arg name="colors" />
+
+	<!-- Exclude 3rd-party files -->
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/plugins/plugin-directory/libs/*</exclude-pattern>
+	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
+	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
+
+	<!-- Exclude generated wp-scripts asset files. -->
+	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
+
+	<!-- Exclude JS/CSS files. -->
+	<exclude-pattern>*.js[x]?</exclude-pattern>
+	<exclude-pattern>*.[s]?css</exclude-pattern>
+
+	<!-- Scan all (php) files in the current folder and subfolders -->
+	<file>.</file>
+	<arg name="extensions" value="php" />
+
+	<!-- WordPress.org runs recent versions of WordPress. -->
+	<config name="minimum_wp_version" value="6.9"/>
+
+	<!-- Check for PHP cross-version compatibility. -->
+	<config name="testVersion" value="8.4-"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress"/>
+</ruleset>

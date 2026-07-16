@@ -5,6 +5,7 @@ on:
     paths:
     - '**.php'
     - phpcs.xml.dist
+    - phpcs-clean.xml.dist
     - composer.json
     - .github/workflows/phpcs.yml
     - .github/bin/phpcs-branch.php
