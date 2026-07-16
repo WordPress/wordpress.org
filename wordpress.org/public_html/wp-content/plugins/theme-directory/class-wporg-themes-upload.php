@@ -794,7 +794,7 @@ class WPORG_Themes_Upload {
 					'failed_trac_ticket_creation',
 					sprintf(
 						/* translators: %s: mailto link */
-						__( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ),
+						__( 'There was an error creating a Trac ticket for your theme. This is usually temporary, so please wait a moment and try uploading again. If the error persists, report it to %s.', 'wporg-themes' ),
 						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
 					)
 				);
