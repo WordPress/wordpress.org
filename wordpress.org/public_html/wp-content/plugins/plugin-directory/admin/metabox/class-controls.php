@@ -138,13 +138,6 @@ class Controls {
 		// and to make the security boundary explicit.
 		check_admin_referer( 'update-post_' . $post_id );
 
-		$version           = get_post_meta( $post->ID, 'version', true );
-		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );
-		if ( $submitted_version !== $version ) {
-			// Submitted version doesn't match current — a newer commit landed since the form was rendered.
-			return;
-		}
-
 		$reason = isset( $_POST['force_release_reason'] )
 			? trim( sanitize_textarea_field( wp_unslash( $_POST['force_release_reason'] ) ) )
 			: '';
@@ -152,7 +145,12 @@ class Controls {
 			return;
 		}
 
-		API_Update_Updater::force_release( $post->post_name, $reason );
+		// serve_release_now() refuses a version that's no longer current.
+		API_Update_Updater::serve_release_now(
+			$post->post_name,
+			sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) ),
+			$reason
+		);
 	}
 
 	/**

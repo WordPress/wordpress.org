@@ -1732,8 +1732,8 @@ class Plugin_Directory {
 			'committer'                => [],
 			'revision'                 => [],
 			// Captures the release cooldown active at creation time so future filter/constant
-			// changes don't retroactively affect in-flight releases. Reviewers force-release
-			// by overriding this to 0 — see API_Update_Updater::force_release().
+			// changes don't retroactively affect in-flight releases. Overridden to 0 to serve
+			// a release without the wait — see API_Update_Updater::serve_release_now().
 			'release_delay'            => get_release_cooldown_delay( $plugin->post_name ),
 		];
 
