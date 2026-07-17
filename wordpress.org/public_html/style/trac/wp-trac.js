@@ -1193,9 +1193,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 					// If the owner field exists, then we're on /newticket. Remove it.
 					$('#field-owner').parents('tr').hide();
 
-					html = '<div><label id="keyword-label" for="keyword-add" style="width:' + labelWidth + 'px">Workflow Keywords:</label>';
-					html += '<select id="keyword-add"><option value=""> - Add - </option></select>';
-					html += '<button type="button" id="edit-keywords" aria-label="Manual keyword" aria-expanded="false">Manual</button></div>';
+					html = '<div>'
+						html += '<label id="keyword-label" for="keyword-add" style="width:' + labelWidth + 'px">Workflow Keywords:</label>';
+						html += '<select id="keyword-add"><option value=""> - Add - </option></select>';
+						html += '<button type="button" id="edit-keywords" aria-label="Manual keyword" aria-expanded="false">Manual</button>';
+						html += ' <a href="https://make.wordpress.org/core/handbook/contribute/trac/keywords/" title="Keywords documentation">ℹ</a>';
+					html += '</div>';
 					html += '<div id="keyword-bin"></div>';
 					container.prepend( html );
 					elements.bin = $('#keyword-bin');
