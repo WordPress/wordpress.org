@@ -618,6 +618,19 @@ class Upload {
 					</small>
 				</div>
 
+				<div id="plugin-check-preview" class="plugin-check-preview" hidden>
+					<p>
+						<button type="button" id="plugin-check-preview-button" class="wp-block-button__link">
+							<?php esc_html_e( 'Test with Plugin Check in Playground', 'wporg-plugins' ); ?>
+						</button>
+						<br>
+						<small>
+							<?php esc_html_e( 'Runs the selected zip through the Plugin Check plugin, inside a WordPress Playground running in your browser. Your zip is not uploaded to WordPress.org for this.', 'wporg-plugins' ); ?>
+						</small>
+					</p>
+					<div class="plugin-check-preview-frame" hidden></div>
+				</div>
+
 				<p>
 					<label>
 						<?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
