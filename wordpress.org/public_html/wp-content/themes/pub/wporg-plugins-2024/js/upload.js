@@ -157,7 +157,7 @@
 					// Preselection is best-effort; the dropdown still lets the user pick manually.
 				}
 
-				$previewButton.text( buttonText );
+				$previewButton.prop( 'disabled', false ).text( buttonText );
 			} catch ( error ) {
 				$frameContainer.prop( 'hidden', true ).empty();
 				$previewButton.prop( 'disabled', false ).text( buttonText );
