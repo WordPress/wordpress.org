@@ -86,12 +86,7 @@ class API_Update_Updater {
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
 		$release          = Plugin_Directory::get_release( $post, $version );
 		$release_time     = self::compute_release_time( $post, $release );
-		$existing_version = (string) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
-				$post->post_name
-			)
-		);
+		$existing_version = self::get_served_version( $post->post_name );
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 
@@ -108,8 +103,8 @@ class API_Update_Updater {
 			}
 		}
 
-		// Anchor to now: phased_rollout()'s 24h window measures from public availability.
-		if ( $release_delay && $existing_version !== (string) $version ) {
+		// Anchor to now: phased_rollout()'s 24h window measures from public availability, not the commit.
+		if ( $existing_version !== (string) $version ) {
 			$release_time = time();
 		}
 
@@ -200,6 +195,23 @@ class API_Update_Updater {
 	}
 
 	/**
+	 * The version currently served from `update_source`.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return string The served version, or '' when the plugin isn't in `update_source`.
+	 */
+	public static function get_served_version( $plugin_slug ) {
+		global $wpdb;
+
+		return (string) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				$plugin_slug
+			)
+		);
+	}
+
+	/**
 	 * Determine the release timestamp for a plugin version.
 	 *
 	 * Falls back through the commit timestamp on the plugin post, and is replaced by the
@@ -282,9 +294,14 @@ class API_Update_Updater {
 			return false;
 		}
 
-		// Nothing to skip: no delay was captured at release creation, or it's already served.
+		// Nothing to skip: no delay was captured at release creation.
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 		if ( ! $release_delay ) {
+			return false;
+		}
+
+		// Already served: the delay elapsed on its own; leave `update_source` and its `release_time` untouched.
+		if ( self::get_served_version( $post->post_name ) === (string) $version ) {
 			return false;
 		}
 

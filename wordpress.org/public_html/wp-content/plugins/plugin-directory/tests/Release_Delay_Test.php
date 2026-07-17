@@ -200,6 +200,28 @@ class Release_Delay_Test extends TestCase {
 	}
 
 	/**
+	 * The `release_time` stored against the served row. phased_rollout()'s manual-updates-24hr
+	 * window measures from this, so serving early must not move it back to the commit time.
+	 *
+	 * @return int|null Unix timestamp, or null when the row or field is absent.
+	 */
+	protected function get_served_release_time() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- `update_source` lives outside WordPress, and a cached read would defeat the assertion.
+		$meta = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT `meta` FROM `{$wpdb->prefix}update_source` WHERE `plugin_slug` = %s",
+				self::SLUG
+			)
+		);
+
+		$meta = $meta ? maybe_unserialize( $meta ) : array();
+
+		return isset( $meta['release_time'] ) ? (int) $meta['release_time'] : null;
+	}
+
+	/**
 	 * The previous version keeps being served while the new one waits.
 	 */
 	public function test_holds_back_a_version_that_is_still_inside_its_delay() {
@@ -314,6 +336,43 @@ class Release_Delay_Test extends TestCase {
 	public function test_serving_now_refuses_an_empty_version_or_reason() {
 		$this->assertFalse( API_Update_Updater::serve_release_now( self::SLUG, '', 'Gandalf scan reported no findings.' ) );
 		$this->assertFalse( API_Update_Updater::serve_release_now( self::SLUG, self::NEW_VERSION, '' ) );
+		$this->assertSame( self::DELAY, $this->get_stored_delay( self::NEW_VERSION ) );
+	}
+
+	/**
+	 * The manual-updates-24hr window must run from when the version goes public, so serving
+	 * early stamps `release_time` at now, not at the commit that may long predate it.
+	 */
+	public function test_serving_now_dates_the_release_from_publication_not_commit() {
+		$this->set_committed_at( time() - ( 10 * HOUR_IN_SECONDS ) );
+
+		$before = time();
+		API_Update_Updater::serve_release_now( self::SLUG, self::NEW_VERSION, 'Gandalf scan reported no findings.' );
+
+		$this->assertGreaterThanOrEqual( $before, $this->get_served_release_time() );
+	}
+
+	/**
+	 * A callback arriving after the delay already elapsed has nothing to skip: the served
+	 * version and its manual-updates window are left exactly as they are.
+	 */
+	public function test_serving_now_leaves_an_already_served_version_untouched() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- `update_source` lives outside WordPress; there is no API for it.
+		$wpdb->update(
+			$wpdb->prefix . 'update_source',
+			array(
+				'version' => self::NEW_VERSION,
+				'meta'    => maybe_serialize( array( 'release_time' => 1000 ) ),
+			),
+			array( 'plugin_slug' => self::SLUG )
+		);
+
+		$result = API_Update_Updater::serve_release_now( self::SLUG, self::NEW_VERSION, 'Gandalf scan reported no findings.' );
+
+		$this->assertFalse( $result );
+		$this->assertSame( 1000, $this->get_served_release_time() );
 		$this->assertSame( self::DELAY, $this->get_stored_delay( self::NEW_VERSION ) );
 	}
 }
