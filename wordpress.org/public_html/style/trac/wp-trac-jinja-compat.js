@@ -162,7 +162,7 @@ jQuery( function ( $ ) {
 		}
 
 		// A preview page is showing when Trac has rendered the change/preview area.
-		var isPreview = $( '#ticketchange, #changelog, #preview' ).length > 0; // TODO(verify)
+		var isPreview = $( '#ticketbox.ticketdraft' ).length > 0;
 
 		// Force non-gardeners to preview before posting.
 		if ( ! window.wpBugGardener && ! isPreview ) {
