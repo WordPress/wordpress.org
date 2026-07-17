@@ -9,7 +9,7 @@ This document provides specialized architectural context, guidelines, and conven
 This is a Git repository containing a mirror of the WordPress.org Meta environment.
 
 - **Primary Working Directory:** The repository root directory. All subprojects (such as `api.wordpress.org`, `wordpress.org`, etc.) are located directly at the root.
-- **PHP Compatibility:** The codebase aims to be compatible with PHP 8.4 and runs on modern WordPress installations (minimum version 6.9).
+- **PHP Compatibility:** The codebase aims to be compatible with PHP 8.4 and runs on WordPress `trunk` (the in-development version).
 - **GitHub Tooling:** Configuration and CI workflow files are located in [.github/](.github) (see detailed guides in [.github/README.md](.github/README.md)).
 
 ---
@@ -22,10 +22,10 @@ Many API endpoints (e.g., in `api.wordpress.org`) require access to core WordPre
 require_once dirname( ... ) . '/wp-init-ondemand.php';
 ```
 > [!IMPORTANT]
-> The file `wp-init-ondemand.php` is deployed dynamically in production environments and is **not tracked** in the repository. Agents should not attempt to locate it or modify its call.
+> The file `wp-init-ondemand.php` lives in the **private dotorg repository**, so it is **not present in this repository**. Agents should not attempt to locate it or modify its call.
 
 ### 2. Multi-site and Object Cache Prefixing
-To load or cache data from a specific multisite blog (like the plugin directory or theme directory), code often overrides the global cache prefix:
+To load or cache data from a specific multisite blog (like the plugin directory or theme directory), code points the object cache at that blog by overriding its per-blog key prefix:
 ```php
 $wp_object_cache->blog_prefix = WPORG_THEME_DIRECTORY_BLOGID;
 ```
@@ -50,15 +50,14 @@ Before making commits, you should execute:
 
 ## Contribution & Pull Request Workflow
 
-Because this Git repository is a read-only mirror of the canonical WordPress Meta Subversion (SVN) repository, developers and agents must adhere to the following workflow for all modifications:
+Because this Git repository is a read-only mirror of the `meta.svn.wordpress.org` Subversion (SVN) repository, developers and agents should follow this workflow for all modifications:
 
-### 1. Meta Trac Ticket Requirement
-*   **Mandatory Ticket:** Every pull request submitted on GitHub **must be tied to a pre-existing ticket** on the [WordPress.org Meta Trac](https://meta.trac.wordpress.org/).
-*   **PR Association:** Always link to the Trac ticket URL in the PR description (e.g., `https://meta.trac.wordpress.org/ticket/XXXXX`) or write `Meta Trac #XXXXX` in the description or commit logs.
-*   **Commit Rights:** Code changes are not merged on GitHub directly. Instead, a core committer will review the PR, commit the patch to the canonical SVN repository, and close the Trac ticket. SVN commits are automatically mirrored to GitHub, closing the PR in the process.
+### 1. Meta Trac Ticket
+*   **Link the ticket you're fixing:** If a PR addresses an existing [WordPress.org Meta Trac](https://meta.trac.wordpress.org/) ticket, always reference it in the PR description — link its URL (e.g., `https://meta.trac.wordpress.org/ticket/XXXXX`) or write `Meta Trac #XXXXX`.
+*   **Commit Rights:** Code changes are not merged on GitHub directly. Instead, a Meta committer will review the PR, commit the patch to the Meta repository, and close the Trac ticket. SVN commits are automatically mirrored to GitHub, closing the PR in the process.
 
 ### 2. Contributor "Props" System
-*   The repository utilizes a automated workflow called `Props Bot` (defined in [.github/workflows/props-bot.yml](.github/workflows/props-bot.yml)).
+*   The repository utilizes an automated workflow called `Props Bot` (defined in [.github/workflows/props-bot.yml](.github/workflows/props-bot.yml)).
 *   The bot automatically scans the commits, comments, and reviewers of the PR to compile a standard SVN-formatted "Props" attribution line (e.g., `Props username, corecommitter.`).
 *   Ensure that any co-authors or helpers are correctly credited so they are recognized when the commit is written to SVN.
 

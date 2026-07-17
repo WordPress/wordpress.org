@@ -2,9 +2,6 @@
 
 Welcome to the **WordPress Meta Git Repository**. This repository is an official mirror of the canonical Subversion (SVN) repository for WordPress.org meta services. It contains the source code, themes, plugins, configuration, and tools powering the various backend systems, network-wide multisites, APIs, and community tools of the **WordPress.org** ecosystem.
 
-For guidance on how AI coding assistants and developers should interact with this codebase, refer to the companion document:
-👉 [AGENTS.md](AGENTS.md)
-
 ---
 
 ## Workspace Map
@@ -52,8 +49,7 @@ For more detailed information, see the [Environments Guide](environments/README.
 
 ## Contribution & PR Workflow
 
-Because this repository is a read-only mirror of the official Subversion (SVN) codebase:
+Because this repository is a read-only mirror of the `meta.svn.wordpress.org` Subversion (SVN) codebase:
 
-1. **Trac Ticket Required:** Any Pull Request submitted on the GitHub mirror **must** be tied to a pre-existing ticket on the [WordPress.org Meta Trac](https://meta.trac.wordpress.org/).
-2. **Referencing Tickets:** Mention the ticket number in your PR description (e.g., `https://meta.trac.wordpress.org/ticket/XXXXX` or `Meta Trac #XXXXX`).
-3. **Commit Process:** Staged Git PR changes will not be merged directly on GitHub; a Core Committer will review and commit the patch to the canonical SVN repository, which will automatically sync and resolve the PR on GitHub.
+1. **Link the ticket you're fixing:** If your PR addresses an existing [WordPress.org Meta Trac](https://meta.trac.wordpress.org/) ticket, always reference it in the PR description (e.g., `https://meta.trac.wordpress.org/ticket/XXXXX` or `Meta Trac #XXXXX`).
+2. **Commit Process:** Staged Git PR changes will not be merged directly on GitHub; a Meta committer will review and commit the patch to the Meta repository, which will automatically sync and resolve the PR on GitHub.
