@@ -98,7 +98,8 @@
 					iframe        = document.createElement( 'iframe' );
 
 				iframe.className = 'plugin-check-preview-iframe';
-				iframe.style.cssText = 'width: 100%; height: 80vh; border: 1px solid #c3c4c7; border-radius: 2px;';
+				iframe.title = wp.i18n ? wp.i18n.__( 'Plugin Check preview (WordPress Playground)', 'wporg-plugins' ) : 'Plugin Check preview (WordPress Playground)';
+				iframe.style.cssText = 'width: 100%; height: 80vh; border: 1px solid #c3c4c7; border-radius: 2px';
 
 				$frameContainer.prop( 'hidden', false ).empty().append( iframe );
 				iframe.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
