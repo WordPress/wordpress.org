@@ -161,9 +161,13 @@ h3.change a {
 	position: relative;
 }
 #metanav {
-	position: absolute;
-	top: -24px;
-	right: 6px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    background: #eff6f9;
+    border: 2px solid #21759b;
+    margin: 5px 0;
 }
 #headline.no-menu ~ #banner #metanav {
 	top: -40px;
@@ -173,9 +177,11 @@ h3.change a {
 }
 #metanav.nav ul {
 	font-size: 12px;
+	margin: 0;
+    padding: 0 5px;
 }
 #metanav.nav li {
-	color: #fff;
+	color: rgba(0, 0, 0, 0.8);
 	border-right: 0;
 }
 .build #metanav.nav li,
@@ -188,7 +194,7 @@ h3.change a {
 #metanav.nav a,
 #metanav.nav a:visited,
 #metanav form.trac-logout button {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(0, 0, 0, 0.8);
 	background: inherit;
 	border: inherit;
 }
@@ -204,7 +210,7 @@ h3.change a {
 #metanav.nav a:active,
 #metanav form.trac-logout button:hover,
 #metanav form.trac-logout button:active {
-	color: #fff;
+	color: #000;
 	text-decoration: underline;
 	background-color: inherit;
 }
@@ -255,6 +261,14 @@ form#search input {
 /* When blame displays a changeset inline, override the inline style set by blame.js */
 #main ~ .message[style] {
 	width: auto !important;
+}
+
+/* Trac specific styles */
+.trac #banner {
+	margin-bottom: 40px;
+}
+.trac form#search {
+	margin-top: 40px;
 }
 
 /* =admin.css */
@@ -2231,6 +2245,24 @@ a.mention.me {
 	.listing.tickets tbody .trac-columns th a {
 		font-size: 1.2em;
 	}
+
+	/* Trac specific styles */
+	.trac #banner {
+		margin-bottom: -45px;
+	}
+	.trac form#search {
+		margin-top: 0;
+	}
+	.trac #metanav {
+		background: none;
+		border: none;
+	}
+	.trac #metanav.nav li {
+		color: #fff;
+	}
+	#metanav.nav a, #metanav.nav a:hover, #metanav.nav a:visited, #metanav form.trac-logout button {
+		color: rgba(255, 255, 255, 0.8);
+	}
 }
 
 @media (max-width: 640px) {
@@ -2284,7 +2316,7 @@ a.mention.me {
 	#filters td {
 		display: block;
 	}
-	#filters .trac-clause td:not(.actions td), 
+	#filters .trac-clause td:not(.actions td),
 	#filters .trac-clause th {
 		text-align:left;
 	}
