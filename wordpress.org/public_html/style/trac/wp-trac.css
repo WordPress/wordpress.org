@@ -249,9 +249,7 @@ form#search input {
 	margin-left: auto;
 	margin-right: auto;
 }
-#content.report #prefs div {
-	float: right;
-}
+
 /* When blame displays a changeset inline, override the inline style set by blame.js */
 #main ~ .message[style] {
 	width: auto !important;
@@ -1974,6 +1972,7 @@ table.listing th.desc a:after {
 	padding-right: 4px;
 	background: none;
 	border: none;
+	text-align: right;
 }
 #content.report #prefs div {
 	display: inline;
