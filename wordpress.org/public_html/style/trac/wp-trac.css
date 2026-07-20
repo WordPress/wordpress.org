@@ -398,9 +398,7 @@ table.progress td.closed {
 #ticket {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
-}
-#content.ticket .ticketdraft {
-	border: 1px solid #ccc;
+	padding: 0;
 }
 #ticket > h2 {
 	font-size: 16px;
@@ -763,12 +761,11 @@ fieldset {
 	box-shadow: none;
 }
 div.trac-content {
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	border: none;
+	margin: 0;
 }
 .foldable :link, .foldable :visited {
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	border: none;
 }
 .foldable a:hover {
 	text-decoration: none; /* for bb's */
@@ -1097,6 +1094,9 @@ body.plugins #main .newticket-not-here .support {
 }
 #propertyform[action*="/newticket"] #properties table.trac-properties > tbody > tr > td#focuses {
 	padding-left: 58px;
+}
+#propertyform[action*="/newticket"] ~ #commits {
+	display: none;
 }
 #propertyform > .buttons {
 	clear: right;

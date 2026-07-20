@@ -1547,7 +1547,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				$.ajax({
 					url: endpoint + '?trac-notifications=' + ticket,
 					xhrFields: { withCredentials: true }
-				}).success( function( data ) {
+				}).done( function( data ) {
 					if ( data.success ) {
 						render( data.data['notifications-box'] );
 						if ( data.data.maintainers ) {
@@ -1683,7 +1683,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 						'trac-ticket-subs' : true,
 						'tickets' : tickets
 					}
-				}).success( function( data ) {
+				}).done( function( data ) {
 					if ( ! data.success ) {
 						return;
 					}
@@ -1790,7 +1790,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 						+ '&ticket=' + ticket
 						+ ( authenticated ? '&authenticated=1' : '' )
 						+ ( ( authenticated && 'URL' in window ) ? '&_lastmod=' + ( new URL( jQuery('a.timeline').last().prop('href') ) ).searchParams.get( 'from' ) : '' )
-				).success( function( data ) {
+				).done( function( data ) {
 					// Update the number
 					container.find( 'h3 .trac-count' ).removeClass( 'hidden' ).find( 'span' ).text( data.length );
 
@@ -1860,7 +1860,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 							+ '?trac=' + trac
 							+ '&author=' + user
 							+ ( authenticated ? '&authenticated=1' : '' )
-					).success( function( ticketList ) {
+					).done( function( ticketList ) {
 						document.location = document.location.toString() +
 							( document.location.search ? '&' : '?' ) +
 							'GITHUBTICKETS=' + ticketList.join(',');
@@ -2165,13 +2165,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 		}() ),
 
-		patchTracFor122Changes: function() {
-			// TODO: This needs to be removed, the Trac assets on s.w.org are probably outdated and need updating.
-			console.log( "wp-trac: Applying compat patches for Trac 1.2.2" );
-			// From Trac 1.2.2 threaded_comments.js:
-			window.applyCommentsOrder = window.applyCommentsOrder || function() {}
-
-			// Add Params to s.w.org scripts and stylesheets when loaded dynamically.
+		addDynamicAssetCacheBuster: function() {
+			// Add cache-busting params to s.w.org scripts and stylesheets when loaded dynamically.
 			var cache_buster = jQuery('script[src^="https://s.w.org"][src*="v="]').attr('src');
 			if ( cache_buster ) {
 				cache_buster = cache_buster.match(/v=([0-9]+)$/)[1];
@@ -2190,13 +2185,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 			$.loadStyleSheet = function( href ) {
 				return oldLoadStylesheet( maybe_add_cache_buster( href ) );
 			}
-
-			// From Trac 1.2.2 trac.js:
-			$.loadScript                = $.loadScript                || function() {}
-			$.fn.exclusiveOnClick       = $.fn.exclusiveOnClick       || function() {}
-			$.fn.addSelectAllCheckboxes = $.fn.addSelectAllCheckboxes || function() {}
-			$.fn.disableOnSubmit        = $.fn.disableOnSubmit        || function() {}
-			$.fn.disableSubmit          = $.fn.disableSubmit          || function() {}
 		},
 
 		disableTracAutoFocus: function() {
@@ -2210,7 +2198,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 	// Perform this as soon as this file loads.
 	wpTrac.disableTracAutoFocus();
-	wpTrac.patchTracFor122Changes();
+	wpTrac.addDynamicAssetCacheBuster();
 
 })(jQuery);
 
