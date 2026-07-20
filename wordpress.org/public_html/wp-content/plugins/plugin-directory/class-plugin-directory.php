@@ -1754,6 +1754,15 @@ class Plugin_Directory {
 			unset( $release['discarded'] );
 		}
 
+		/*
+		 * Clear a high-risk Gandalf block so the release can be served.
+		 * See Jobs\API_Update_Updater::force_release().
+		 */
+		if ( ! empty( $data['unblock'] ) ) {
+			unset( $release['release_block'] );
+		}
+		unset( $release['unblock'] );
+
 		$releases = self::get_releases( $plugin );
 
 		// Find any other releases using this slug (as in the case of updates) and remove it.

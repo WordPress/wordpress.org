@@ -86,14 +86,15 @@ class API_Update_Updater {
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
 		$release          = Plugin_Directory::get_release( $post, $version );
 		$release_time     = self::compute_release_time( $post, $release );
-		$existing_version = (string) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
-				$post->post_name
-			)
-		);
+		$existing_version = self::get_served_version( $post->post_name );
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+
+		if ( self::is_release_blocked( $release ) && $existing_version !== (string) $version ) {
+			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
+
+			return true;
+		}
 
 		/*
 		 * Defer the write for new versions still inside the cooldown window. While
@@ -198,7 +199,7 @@ class API_Update_Updater {
 		// Sync the latest version to Stats.
 		if ( function_exists( '\WordPressdotorg\Stats\sync_latest_version' ) ) {
 			\WordPressdotorg\Stats\sync_latest_version(
-				'plugin', 
+				'plugin',
 				array(
 					$plugin_slug => $version
 				)
@@ -206,6 +207,33 @@ class API_Update_Updater {
 		}
 
 		return true;
+	}
+
+	/**
+	 * The version currently served from `update_source`.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return string The served version, or '' when the plugin isn't in `update_source`.
+	 */
+	public static function get_served_version( $plugin_slug ) {
+		global $wpdb;
+
+		return (string) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				$plugin_slug
+			)
+		);
+	}
+
+	/**
+	 * Whether a release is blocked by a high-risk Gandalf scan.
+	 *
+	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
+	 * @return bool True when the release is being held out of `update_source`.
+	 */
+	public static function is_release_blocked( $release ) {
+		return is_array( $release ) && ! empty( $release['release_block'] );
 	}
 
 	/**
@@ -283,21 +311,36 @@ class API_Update_Updater {
 			return false;
 		}
 
-		Tools::audit_log(
-			sprintf(
-				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
-				$version,
-				(int) ( $release['release_delay'] ?? 0 ) / HOUR_IN_SECONDS,
-				$reason
-			),
-			$post
-		);
+		// A force-release also overrides a high-risk Gandalf block; note that in the audit trail.
+		if ( self::is_release_blocked( $release ) ) {
+			Tools::audit_log(
+				sprintf(
+					'Force-released version %1$s, overriding the security-scan block (risk score %2$s). Reason: %3$s',
+					$version,
+					$release['release_block']['risk_score'] ?? '?',
+					$reason
+				),
+				$post
+			);
+		} else {
+			Tools::audit_log(
+				sprintf(
+					'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
+					$version,
+					(int) ( $release['release_delay'] ?? 0 ) / HOUR_IN_SECONDS,
+					$reason
+				),
+				$post
+			);
+		}
 
 		Plugin_Directory::add_release(
 			$post,
 			array(
 				'tag'           => $release['tag'],
 				'release_delay' => 0,
+				// Clear any Gandalf block so update_single_plugin() serves the version.
+				'unblock'       => true,
 			)
 		);
 

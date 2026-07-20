@@ -52,3 +52,8 @@ tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Load shared abstract test-case bases; they're excluded from the suite but subclasses need them.
+foreach ( glob( __DIR__ . '/*_Test_Case.php' ) as $test_case_base ) {
+	require_once $test_case_base;
+}

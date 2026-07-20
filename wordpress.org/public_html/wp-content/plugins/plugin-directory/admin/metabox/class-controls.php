@@ -46,11 +46,11 @@ class Controls {
 	}
 
 	/**
-	 * Display the release cooldown status and (for reviewers) a force-release control.
+	 * Display the release hold status and (for reviewers) a force-release control.
 	 *
-	 * Bails when there's no current release to gate, when the release has no cooldown
-	 * delay (feature off at release-creation, or already force-released), or when the
-	 * cooldown window has elapsed.
+	 * Shows one of two messages: a countdown while a release is cooling down, or a block
+	 * notice when a Gandalf scan is holding it (which outlasts the cooldown window). Bails
+	 * when there's no current release, or when it's neither held nor still cooling down.
 	 */
 	protected static function display_release_cooldown() {
 		$post = get_post();
@@ -65,13 +65,13 @@ class Controls {
 			return;
 		}
 
-		$release_delay = (int) ( $release['release_delay'] ?? 0 );
-		if ( ! $release_delay ) {
-			return;
-		}
-
+		$blocked        = API_Update_Updater::is_release_blocked( $release );
+		$release_delay  = (int) ( $release['release_delay'] ?? 0 );
 		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + $release_delay;
-		if ( $cooldown_until <= time() ) {
+		$in_cooldown    = $release_delay && $cooldown_until > time();
+
+		// Nothing to surface unless the release is held or still cooling down.
+		if ( ! $blocked && ! $in_cooldown ) {
 			return;
 		}
 
@@ -79,13 +79,22 @@ class Controls {
 		<div class="misc-pub-section misc-pub-release-cooldown">
 			<p>
 			<?php
-			printf(
-				/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
-				esc_html__( 'Version %1$s is in the release cooldown — it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
-				esc_html( $version ),
-				esc_html( human_time_diff( time(), $cooldown_until ) ),
-				esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
-			);
+			if ( $blocked ) {
+				printf(
+					/* translators: 1: version, 2: security scan risk score */
+					esc_html__( 'Version %1$s is blocked by a security scan (risk score %2$s) and is being held from sites. Force-releasing overrides the block.', 'wporg-plugins' ),
+					esc_html( $version ),
+					esc_html( $release['release_block']['risk_score'] ?? '?' )
+				);
+			} else {
+				printf(
+					/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
+					esc_html__( 'Version %1$s is in the release cooldown — it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
+					esc_html( $version ),
+					esc_html( human_time_diff( time(), $cooldown_until ) ),
+					esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
+				);
+			}
 			?>
 			</p>
 			<?php if ( current_user_can( 'plugin_review', $post ) ) : ?>
