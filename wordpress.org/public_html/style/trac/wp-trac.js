@@ -249,7 +249,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 		linkGutenbergIssues: function( selector ) {
 			var gutenRegEx = /\bGB[-]?(\d+)([^<]*<\/a>)?/gi,
-				gutenInAttrRegEx = new RegExp( '="[^"]*?' + gutenRegEx.source + '[\\s\\S]*?"' );
+				gutenInAttrRegEx = new RegExp( '="[^"]*?' + gutenRegEx.source + '[\\s\\S]*?"', 'g' );
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function() {
 				var $comment = $( this ).html();
@@ -276,7 +276,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 					// Restore matches in HTML attributes.
 					if ( placeholders.length ) {
-						$comment = $comment.replace( '__PLACEHOLDER__', function() {
+						$comment = $comment.replace( /__PLACEHOLDER__/g, function() {
 							return placeholders.shift();
 						} );
 					}
@@ -367,15 +367,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-empty"></div>');
 
 			// Link username in header.
-			(function($) {
-				var el = $('#metanav').find('.first'),
-					username;
-				username = el.text();
-				if ( 0 === username.indexOf( 'logged in as' ) ) {
-					username = username.replace( 'logged in as ', '' );
-					el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username + '/' }).text( username ) ).prepend( 'logged in as ');
-				}
-			})(jQuery);
+			wpTrac.linkHeaderUsername();
 
 			// Ticket-only tweaks.
 			if ( content.hasClass( 'ticket' ) ) {
@@ -387,34 +379,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 				// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
 				// but only if it was already open.
-				(function(){
-					var action, hadClass,
-						form = $('#propertyform'),
-						modify = $('#modify').parent();
-
-					if ( ! form.length ) {
-						return;
-					}
-					action = form.attr('action');
-					$(document).ajaxSend( function( event, XMLHttpRequest, ajaxOptions ) {
-						if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
-							return;
-						}
-						hadClass = modify.hasClass('collapsed');
-						// Prevent re-rendering of image previews and other changes from causing "jumps" while writing a comment.
-						$(document.head).append( '<style id="changelog-height"> #changelog { height: ' + $('#changelog').height() + 'px !important; } </style>' );
-					});
-					$(document).ajaxComplete( function( event, XMLHttpRequest, ajaxOptions ) {
-						if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
-							return;
-						}
-						if ( ! hadClass ) {
-							modify.removeClass('collapsed');
-						}
-						content.triggerHandler( 'wpTracPostPreview' );
-						window.setTimeout( function() { $('#changelog-height').remove(); }, 200 );
-					});
-				})();
+				wpTrac.keepModifyTicketOpen();
 
 				// Open WikiFormatting links in a new window.
 				$( '#content.ticket' ).on( 'click', 'a[href$="wiki/WikiFormatting"]', function() {
@@ -466,64 +431,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 			}
 
 			// Add custom buttons to the formatting toolbar.
-			// http://trac.edgewall.org/browser/tags/trac-1.0.9/trac/htdocs/js/wikitoolbar.js
-			(function($) {
-				function extendWikiFormattingToolbar() {
-					var $textarea = $( this ), textarea = $textarea[0], $wikitoolbar;
-					if ( 'undefined' === typeof document.selection && 'undefined' === typeof textarea.setSelectionRange ) {
-						return;
-					}
-
-					$wikitoolbar = $textarea.parents( 'div.trac-resizable' ).siblings( 'div.wikitoolbar' );
-
-					// after = ID of an existing button.
-					function addButton( id, title, after, fn ) {
-						var $button = $( '<a />', { 'href': '#', 'id': id, 'title': title, 'tabIndex': 400 } );
-						$button.on( 'click', function() {
-							if ( false === $textarea.prop( 'disabled' ) && false === $textarea.prop( 'readonly' ) ) {
-								try { fn(); } catch (e) { }
-							}
-							return false;
-						});
-						$wikitoolbar.find( after ).after( $button );
-					}
-
-					function encloseSelection( prefix, suffix ) {
-						var start, end, sel, scrollPos, subst;
-						textarea.focus();
-						if ( 'undefined' !== typeof document.selection ) {
-							sel = document.selection.createRange().text;
-						} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-							start = textarea.selectionStart;
-							end = textarea.selectionEnd;
-							scrollPos = textarea.scrollTop;
-							sel = textarea.value.substring( start, end );
-						}
-						if ( sel.match( / $/ ) ) { // exclude ending space char, if any
-							sel = sel.substring( 0, sel.length - 1 );
-							suffix = suffix + ' ';
-						}
-						subst = prefix + sel + suffix;
-						if ( 'undefined' !== typeof document.selection) {
-							document.selection.createRange().text = subst;
-							textarea.caretPos -= suffix.length;
-						} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-							textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
-							if ( sel ) {
-								textarea.setSelectionRange( start + subst.length, start + subst.length );
-							} else {
-								textarea.setSelectionRange( start + prefix.length, start + prefix.length );
-							}
-							textarea.scrollTop = scrollPos;
-						}
-					}
-
-					addButton( 'code-php', 'PHP Code block: {{{#!php example }}}', '#code', function() {
-						encloseSelection( "{{{#!php\n<?php\n", "\n}}}\n" ); // jshint ignore:line
-					});
-				}
-				$( 'textarea.wikitext' ).each( extendWikiFormattingToolbar );
-			})(jQuery);
+			wpTrac.wikiToolbar();
 
 			// Force 'Attachments' and 'Modify Ticket' to be shown.
 			$('#attachments').removeClass('collapsed');
@@ -553,7 +461,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				.find('input[type=text], select').enable().focus( function() {
 					$(this).siblings('input[type=radio]').click();
 				}).end()
-				.find('input[name=action]').unbind('click').end()
+				.find('input[name=action]').off('click').end()
 				.find('div').has('select').find('input[type=radio]').change( function() {
 					$(this).siblings('select').enable();
 				});
@@ -710,6 +618,108 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 			$( '#batchmod_value_comment' ).prop( 'required', true );
 		},
 
+		// Link the current user's name in the header to their profile.
+		linkHeaderUsername: function() {
+			var el = $('#metanav').find('.first'),
+				username = el.text();
+
+			if ( 0 === username.indexOf( 'logged in as' ) ) {
+				username = username.replace( 'logged in as ', '' );
+				el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username + '/' }).text( username ) ).prepend( 'logged in as ');
+			}
+		},
+
+		// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
+		// but only if it was already open.
+		keepModifyTicketOpen: function() {
+			var action, hadClass,
+				content = $( '#content' ),
+				form    = $('#propertyform'),
+				modify  = $('#modify').parent();
+
+			if ( ! form.length ) {
+				return;
+			}
+			action = form.attr('action');
+			$(document).ajaxSend( function( event, XMLHttpRequest, ajaxOptions ) {
+				if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+					return;
+				}
+				hadClass = modify.hasClass('collapsed');
+				// Prevent re-rendering of image previews and other changes from causing "jumps" while writing a comment.
+				$(document.head).append( '<style id="changelog-height"> #changelog { height: ' + $('#changelog').height() + 'px !important; } </style>' );
+			});
+			$(document).ajaxComplete( function( event, XMLHttpRequest, ajaxOptions ) {
+				if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+					return;
+				}
+				if ( ! hadClass ) {
+					modify.removeClass('collapsed');
+				}
+				content.triggerHandler( 'wpTracPostPreview' );
+				window.setTimeout( function() { $('#changelog-height').remove(); }, 200 );
+			});
+		},
+
+		// Add custom buttons to the formatting toolbar.
+		// http://trac.edgewall.org/browser/tags/trac-1.0.9/trac/htdocs/js/wikitoolbar.js
+		wikiToolbar: function() {
+			// after = ID of an existing button.
+			function addButton( $wikitoolbar, $textarea, id, title, after, fn ) {
+				var $button = $( '<a />', { 'href': '#', 'id': id, 'title': title, 'tabIndex': 400 } );
+				$button.on( 'click', function() {
+					if ( false === $textarea.prop( 'disabled' ) && false === $textarea.prop( 'readonly' ) ) {
+						try { fn(); } catch (e) { }
+					}
+					return false;
+				});
+				$wikitoolbar.find( after ).after( $button );
+			}
+
+			function encloseSelection( textarea, prefix, suffix ) {
+				var start, end, sel, scrollPos, subst;
+				textarea.focus();
+				if ( 'undefined' !== typeof document.selection ) {
+					sel = document.selection.createRange().text;
+				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
+					start = textarea.selectionStart;
+					end = textarea.selectionEnd;
+					scrollPos = textarea.scrollTop;
+					sel = textarea.value.substring( start, end );
+				}
+				if ( sel.match( / $/ ) ) { // exclude ending space char, if any
+					sel = sel.substring( 0, sel.length - 1 );
+					suffix = suffix + ' ';
+				}
+				subst = prefix + sel + suffix;
+				if ( 'undefined' !== typeof document.selection) {
+					document.selection.createRange().text = subst;
+					textarea.caretPos -= suffix.length;
+				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
+					textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
+					if ( sel ) {
+						textarea.setSelectionRange( start + subst.length, start + subst.length );
+					} else {
+						textarea.setSelectionRange( start + prefix.length, start + prefix.length );
+					}
+					textarea.scrollTop = scrollPos;
+				}
+			}
+
+			$( 'textarea.wikitext' ).each( function() {
+				var $textarea = $( this ), textarea = $textarea[0], $wikitoolbar;
+				if ( 'undefined' === typeof document.selection && 'undefined' === typeof textarea.setSelectionRange ) {
+					return;
+				}
+
+				$wikitoolbar = $textarea.parents( 'div.trac-resizable' ).siblings( 'div.wikitoolbar' );
+
+				addButton( $wikitoolbar, $textarea, 'code-php', 'PHP Code block: {{{#!php example }}}', '#code', function() {
+					encloseSelection( textarea, "{{{#!php\n<?php\n", "\n}}}\n" ); // jshint ignore:line
+				});
+			});
+		},
+
 		// If we're not dealing with a trusted bug gardener:
 		nonGardeners: function() {
 			var version,
@@ -753,7 +763,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				$headline = $( '#headline' ),
 				failed = false;
 
-			$( '#report-popup' ).on( 'change', '.tickets-by-topic', function() {
+			popup.on( 'change', '.tickets-by-topic', function() {
 				var topic = $(this).val();
 				if ( ! topic ) {
 					return;
@@ -791,7 +801,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 					event.preventDefault();
 				}
 			});
-			$( '#report-popup' ).on( 'click', '.close', function() {
+			popup.on( 'click', '.close', function() {
 				$body.removeClass( 'ticket-reports-open' );
 				return false;
 			});
@@ -838,7 +848,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 						}
 
 						url_params[summary_field]     = $('#field-summary').val();
-						url_params[description_field] = $('#field-description').val()
+						url_params[description_field] = $('#field-description').val();
 
 						url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( url_params );
 						if ( url.length > 1500 ) {
@@ -974,7 +984,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				initTicketParticipants: function() {
 					var users  = [], exclude = [];
 
-					if ( 'undefined' !== settings.exclude ) {
+					if ( 'undefined' !== typeof settings.exclude ) {
 						exclude = settings.exclude;
 					}
 
@@ -1040,7 +1050,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				initNonTicketParticipants: function() {
 					var users  = [], exclude = [];
 
-					if ( 'undefined' !== settings.exclude ) {
+					if ( 'undefined' !== typeof settings.exclude ) {
 						exclude = settings.exclude;
 					}
 
@@ -1053,7 +1063,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 					}
 
 					// Exclude current user.
-					if ( 'undefined' !== wpTrac.currentUser ) {
+					if ( wpTrac.currentUser ) {
 						users = $.grep( users, function( user ) {
 							return user !== wpTrac.currentUser;
 						});
@@ -1091,7 +1101,32 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 		workflow: (function() {
 			var keywords = {},
 				originalKeywords = {},
-				elements = {};
+				elements = {},
+				// Keywords that cannot coexist. Adding one removes its counterpart.
+				exclusiveKeywords = {
+					'has-patch'            : 'needs-patch',
+					'needs-patch'          : 'has-patch',
+					'has-test-info'        : 'needs-test-info',
+					'needs-test-info'      : 'has-test-info',
+					'has-unit-tests'       : 'needs-unit-tests',
+					'needs-unit-tests'     : 'has-unit-tests',
+					'has-dev-note'         : 'needs-dev-note',
+					'needs-dev-note'       : 'has-dev-note',
+					'dev-reviewed'         : 'dev-feedback',
+					'has-privacy-review'   : 'needs-privacy-review',
+					'needs-privacy-review' : 'has-privacy-review',
+					'has-copy-review'      : 'needs-copy-review',
+					'needs-copy-review'    : 'has-copy-review',
+					'has-screenshots'      : 'needs-screenshots',
+					'needs-screenshots'    : 'has-screenshots'
+				};
+
+			// Build a keyword bin <span> with its remove button.
+			function keywordSpan( keyword ) {
+				return $( '<span />' ).text( keyword ).attr( 'data-keyword', keyword ).prepend(
+					$( '<button type="button" class="keyword-button-remove dashicons dashicons-dismiss" />' ).attr( 'aria-label', 'Remove ' + keyword + ' keyword' )
+				);
+			}
 
 			return {
 				init: function() {
@@ -1133,7 +1168,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 					});
 
 					// Keyword adds.
-					$('#keyword-add').bind('change keypress', function(e) {
+					$('#keyword-add').on('change keypress', function(e) {
 						if ( e.type === 'keypress' ) {
 							if ( e.which === 13 ) {
 								e.stopPropagation();
@@ -1217,7 +1252,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[0] !== '' ) {
 						$.each( keywords, function( k, v ) {
-							var html = $( '<span />' ).text( v ).attr( 'data-keyword', v ).prepend( $( '<button type="button" aria-label="Remove keyword" class="keyword-button-remove dashicons dashicons-dismiss" />' ).attr( 'aria-label', 'Remove ' + v + ' keyword' ) );
+							var html = keywordSpan( v );
 							if ( v in coreKeywordList ) {
 								html.attr('title', coreKeywordList[v]);
 							}
@@ -1265,54 +1300,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 						title = coreKeywordList[keyword];
 					}
 
-					if ( 'has-patch' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'needs-patch' );
-					} else if ( 'needs-patch' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'has-patch' );
-					}
-
-					if ( 'has-test-info' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'needs-test-info' );
-					} else if ( 'needs-test-info' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'has-test-info' );
-					}
-
-					if ( 'has-unit-tests' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'needs-unit-tests' );
-					} else if ( 'needs-unit-tests' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'has-unit-tests' );
-					}
-
-					if ( 'has-dev-note' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'needs-dev-note' );
-					} else if ( 'needs-dev-note' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'has-dev-note' );
-					}
-
-					if ( 'dev-reviewed' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'dev-feedback' );
-					}
-
-					if ( 'has-privacy-review' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'needs-privacy-review' );
-					} else if ( 'needs-privacy-review' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'has-privacy-review' );
-					}
-
-					if ( 'has-copy-review' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'needs-copy-review' );
-					} else if ( 'needs-copy-review' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'has-copy-review' );
-					}
-
-					if ( 'has-screenshots' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'needs-screenshots' );
-					} else if ( 'needs-screenshots' === keyword ) {
-						wpTrac.workflow.removeKeyword( 'has-screenshots' );
+					// Remove the mutually-exclusive counterpart, if any.
+					if ( Object.prototype.hasOwnProperty.call( exclusiveKeywords, keyword ) ) {
+						wpTrac.workflow.removeKeyword( exclusiveKeywords[ keyword ] );
 					}
 
 					// Add it to the bin, and refresh the hidden input.
-					html = $( '<span />' ).text( keyword ).attr( 'data-keyword', keyword ).prepend( $( '<button type="button" aria-label="Remove keyword" class="keyword-button-remove dashicons dashicons-dismiss" />' ).attr( 'aria-label', 'Remove ' + keyword +' keyword' ) );
+					html = keywordSpan( keyword );
 					if ( title ) {
 						html.attr('title', title);
 					}
@@ -1381,7 +1375,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				if ( $( '#field-owner' ).length === 0 ) {
 					$('label[for="field-focuses"]').parent().remove();
 				}
-				if ( field.parent().attr( 'colspan' ) === 3 ) {
+				if ( field.parent().attr( 'colspan' ) === '3' ) {
 					field.parent().attr( 'id', 'focuses' );
 				} else {
 					field.parent().attr({ colspan: 2, id: 'focuses' });
@@ -1410,7 +1404,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 						'data-focus' : focus,
 						title: description,
 						class: classes
-					} ).html( '<button type="button" class="core-focuses-button" aria-pressed="' + ariaPressed + '">' + ( focus === 'administration' ? 'admin' : focus ) + '</a>' ) );
+					} ).html( '<button type="button" class="core-focuses-button" aria-pressed="' + ariaPressed + '">' + ( focus === 'administration' ? 'admin' : focus ) + '</button>' ) );
 				});
 				ul.appendTo( container );
 				ul.wrap( '<fieldset id="fieldset-focuses" />' );
@@ -1892,9 +1886,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 							data.reviews.CHANGES_REQUESTED ||
 							(
 								data.check_runs &&
-								'failed' == Object.values( data.check_runs ).reduce( function( result, element ) {
-									return 'failed' == element ? element : result;
-								}, 'no-reviews' )
+								Object.values( data.check_runs ).includes( 'failed' )
 							)
 						) {
 							// Let the unit tests / reviews section take care of it.
@@ -2035,7 +2027,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 				// Only if we have a 'General' option.
 				const components = jQuery( '#field-component option' ).get().map( opt => opt.value ),
-					hasDefaultCat = generalCategories.filter( value => components.includes( value ) );
+					hasDefaultCat = generalCategories.some( value => components.includes( value ) );
 
 				if ( ! hasDefaultCat ) {
 					return;
