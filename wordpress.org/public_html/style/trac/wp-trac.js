@@ -249,7 +249,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 		linkGutenbergIssues: function( selector ) {
 			var gutenRegEx = /\bGB[-]?(\d+)([^<]*<\/a>)?/gi,
-				gutenInAttrRegEx = new RegExp( '="[^"]*?' + gutenRegEx.source + '[\\s\\S]*?"' );
+				gutenInAttrRegEx = new RegExp( '="[^"]*?' + gutenRegEx.source + '[\\s\\S]*?"', 'g' );
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function() {
 				var $comment = $( this ).html();
@@ -276,7 +276,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 					// Restore matches in HTML attributes.
 					if ( placeholders.length ) {
-						$comment = $comment.replace( '__PLACEHOLDER__', function() {
+						$comment = $comment.replace( /__PLACEHOLDER__/g, function() {
 							return placeholders.shift();
 						} );
 					}
@@ -974,7 +974,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				initTicketParticipants: function() {
 					var users  = [], exclude = [];
 
-					if ( 'undefined' !== settings.exclude ) {
+					if ( 'undefined' !== typeof settings.exclude ) {
 						exclude = settings.exclude;
 					}
 
@@ -1040,7 +1040,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				initNonTicketParticipants: function() {
 					var users  = [], exclude = [];
 
-					if ( 'undefined' !== settings.exclude ) {
+					if ( 'undefined' !== typeof settings.exclude ) {
 						exclude = settings.exclude;
 					}
 
@@ -1053,7 +1053,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 					}
 
 					// Exclude current user.
-					if ( 'undefined' !== wpTrac.currentUser ) {
+					if ( wpTrac.currentUser ) {
 						users = $.grep( users, function( user ) {
 							return user !== wpTrac.currentUser;
 						});
@@ -1381,7 +1381,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				if ( $( '#field-owner' ).length === 0 ) {
 					$('label[for="field-focuses"]').parent().remove();
 				}
-				if ( field.parent().attr( 'colspan' ) === 3 ) {
+				if ( field.parent().attr( 'colspan' ) === '3' ) {
 					field.parent().attr( 'id', 'focuses' );
 				} else {
 					field.parent().attr({ colspan: 2, id: 'focuses' });
@@ -1410,7 +1410,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 						'data-focus' : focus,
 						title: description,
 						class: classes
-					} ).html( '<button type="button" class="core-focuses-button" aria-pressed="' + ariaPressed + '">' + ( focus === 'administration' ? 'admin' : focus ) + '</a>' ) );
+					} ).html( '<button type="button" class="core-focuses-button" aria-pressed="' + ariaPressed + '">' + ( focus === 'administration' ? 'admin' : focus ) + '</button>' ) );
 				});
 				ul.appendTo( container );
 				ul.wrap( '<fieldset id="fieldset-focuses" />' );
@@ -2035,7 +2035,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 				// Only if we have a 'General' option.
 				const components = jQuery( '#field-component option' ).get().map( opt => opt.value ),
-					hasDefaultCat = generalCategories.filter( value => components.includes( value ) );
+					hasDefaultCat = generalCategories.some( value => components.includes( value ) );
 
 				if ( ! hasDefaultCat ) {
 					return;
