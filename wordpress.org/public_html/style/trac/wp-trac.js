@@ -1301,7 +1301,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 					}
 
 					// Remove the mutually-exclusive counterpart, if any.
-					if ( exclusiveKeywords[ keyword ] ) {
+					if ( Object.prototype.hasOwnProperty.call( exclusiveKeywords, keyword ) ) {
 						wpTrac.workflow.removeKeyword( exclusiveKeywords[ keyword ] );
 					}
 
