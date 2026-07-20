@@ -367,15 +367,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-empty"></div>');
 
 			// Link username in header.
-			(function($) {
-				var el = $('#metanav').find('.first'),
-					username;
-				username = el.text();
-				if ( 0 === username.indexOf( 'logged in as' ) ) {
-					username = username.replace( 'logged in as ', '' );
-					el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username + '/' }).text( username ) ).prepend( 'logged in as ');
-				}
-			})(jQuery);
+			wpTrac.linkHeaderUsername();
 
 			// Ticket-only tweaks.
 			if ( content.hasClass( 'ticket' ) ) {
@@ -387,34 +379,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 				// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
 				// but only if it was already open.
-				(function(){
-					var action, hadClass,
-						form = $('#propertyform'),
-						modify = $('#modify').parent();
-
-					if ( ! form.length ) {
-						return;
-					}
-					action = form.attr('action');
-					$(document).ajaxSend( function( event, XMLHttpRequest, ajaxOptions ) {
-						if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
-							return;
-						}
-						hadClass = modify.hasClass('collapsed');
-						// Prevent re-rendering of image previews and other changes from causing "jumps" while writing a comment.
-						$(document.head).append( '<style id="changelog-height"> #changelog { height: ' + $('#changelog').height() + 'px !important; } </style>' );
-					});
-					$(document).ajaxComplete( function( event, XMLHttpRequest, ajaxOptions ) {
-						if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
-							return;
-						}
-						if ( ! hadClass ) {
-							modify.removeClass('collapsed');
-						}
-						content.triggerHandler( 'wpTracPostPreview' );
-						window.setTimeout( function() { $('#changelog-height').remove(); }, 200 );
-					});
-				})();
+				wpTrac.keepModifyTicketOpen();
 
 				// Open WikiFormatting links in a new window.
 				$( '#content.ticket' ).on( 'click', 'a[href$="wiki/WikiFormatting"]', function() {
@@ -466,64 +431,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 			}
 
 			// Add custom buttons to the formatting toolbar.
-			// http://trac.edgewall.org/browser/tags/trac-1.0.9/trac/htdocs/js/wikitoolbar.js
-			(function($) {
-				function extendWikiFormattingToolbar() {
-					var $textarea = $( this ), textarea = $textarea[0], $wikitoolbar;
-					if ( 'undefined' === typeof document.selection && 'undefined' === typeof textarea.setSelectionRange ) {
-						return;
-					}
-
-					$wikitoolbar = $textarea.parents( 'div.trac-resizable' ).siblings( 'div.wikitoolbar' );
-
-					// after = ID of an existing button.
-					function addButton( id, title, after, fn ) {
-						var $button = $( '<a />', { 'href': '#', 'id': id, 'title': title, 'tabIndex': 400 } );
-						$button.on( 'click', function() {
-							if ( false === $textarea.prop( 'disabled' ) && false === $textarea.prop( 'readonly' ) ) {
-								try { fn(); } catch (e) { }
-							}
-							return false;
-						});
-						$wikitoolbar.find( after ).after( $button );
-					}
-
-					function encloseSelection( prefix, suffix ) {
-						var start, end, sel, scrollPos, subst;
-						textarea.focus();
-						if ( 'undefined' !== typeof document.selection ) {
-							sel = document.selection.createRange().text;
-						} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-							start = textarea.selectionStart;
-							end = textarea.selectionEnd;
-							scrollPos = textarea.scrollTop;
-							sel = textarea.value.substring( start, end );
-						}
-						if ( sel.match( / $/ ) ) { // exclude ending space char, if any
-							sel = sel.substring( 0, sel.length - 1 );
-							suffix = suffix + ' ';
-						}
-						subst = prefix + sel + suffix;
-						if ( 'undefined' !== typeof document.selection) {
-							document.selection.createRange().text = subst;
-							textarea.caretPos -= suffix.length;
-						} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-							textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
-							if ( sel ) {
-								textarea.setSelectionRange( start + subst.length, start + subst.length );
-							} else {
-								textarea.setSelectionRange( start + prefix.length, start + prefix.length );
-							}
-							textarea.scrollTop = scrollPos;
-						}
-					}
-
-					addButton( 'code-php', 'PHP Code block: {{{#!php example }}}', '#code', function() {
-						encloseSelection( "{{{#!php\n<?php\n", "\n}}}\n" ); // jshint ignore:line
-					});
-				}
-				$( 'textarea.wikitext' ).each( extendWikiFormattingToolbar );
-			})(jQuery);
+			wpTrac.wikiToolbar();
 
 			// Force 'Attachments' and 'Modify Ticket' to be shown.
 			$('#attachments').removeClass('collapsed');
@@ -708,6 +616,108 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 
 			// Batch Modify should require a comment.
 			$( '#batchmod_value_comment' ).prop( 'required', true );
+		},
+
+		// Link the current user's name in the header to their profile.
+		linkHeaderUsername: function() {
+			var el = $('#metanav').find('.first'),
+				username = el.text();
+
+			if ( 0 === username.indexOf( 'logged in as' ) ) {
+				username = username.replace( 'logged in as ', '' );
+				el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username + '/' }).text( username ) ).prepend( 'logged in as ');
+			}
+		},
+
+		// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
+		// but only if it was already open.
+		keepModifyTicketOpen: function() {
+			var action, hadClass,
+				content = $( '#content' ),
+				form    = $('#propertyform'),
+				modify  = $('#modify').parent();
+
+			if ( ! form.length ) {
+				return;
+			}
+			action = form.attr('action');
+			$(document).ajaxSend( function( event, XMLHttpRequest, ajaxOptions ) {
+				if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+					return;
+				}
+				hadClass = modify.hasClass('collapsed');
+				// Prevent re-rendering of image previews and other changes from causing "jumps" while writing a comment.
+				$(document.head).append( '<style id="changelog-height"> #changelog { height: ' + $('#changelog').height() + 'px !important; } </style>' );
+			});
+			$(document).ajaxComplete( function( event, XMLHttpRequest, ajaxOptions ) {
+				if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+					return;
+				}
+				if ( ! hadClass ) {
+					modify.removeClass('collapsed');
+				}
+				content.triggerHandler( 'wpTracPostPreview' );
+				window.setTimeout( function() { $('#changelog-height').remove(); }, 200 );
+			});
+		},
+
+		// Add custom buttons to the formatting toolbar.
+		// http://trac.edgewall.org/browser/tags/trac-1.0.9/trac/htdocs/js/wikitoolbar.js
+		wikiToolbar: function() {
+			// after = ID of an existing button.
+			function addButton( $wikitoolbar, $textarea, id, title, after, fn ) {
+				var $button = $( '<a />', { 'href': '#', 'id': id, 'title': title, 'tabIndex': 400 } );
+				$button.on( 'click', function() {
+					if ( false === $textarea.prop( 'disabled' ) && false === $textarea.prop( 'readonly' ) ) {
+						try { fn(); } catch (e) { }
+					}
+					return false;
+				});
+				$wikitoolbar.find( after ).after( $button );
+			}
+
+			function encloseSelection( textarea, prefix, suffix ) {
+				var start, end, sel, scrollPos, subst;
+				textarea.focus();
+				if ( 'undefined' !== typeof document.selection ) {
+					sel = document.selection.createRange().text;
+				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
+					start = textarea.selectionStart;
+					end = textarea.selectionEnd;
+					scrollPos = textarea.scrollTop;
+					sel = textarea.value.substring( start, end );
+				}
+				if ( sel.match( / $/ ) ) { // exclude ending space char, if any
+					sel = sel.substring( 0, sel.length - 1 );
+					suffix = suffix + ' ';
+				}
+				subst = prefix + sel + suffix;
+				if ( 'undefined' !== typeof document.selection) {
+					document.selection.createRange().text = subst;
+					textarea.caretPos -= suffix.length;
+				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
+					textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
+					if ( sel ) {
+						textarea.setSelectionRange( start + subst.length, start + subst.length );
+					} else {
+						textarea.setSelectionRange( start + prefix.length, start + prefix.length );
+					}
+					textarea.scrollTop = scrollPos;
+				}
+			}
+
+			$( 'textarea.wikitext' ).each( function() {
+				var $textarea = $( this ), textarea = $textarea[0], $wikitoolbar;
+				if ( 'undefined' === typeof document.selection && 'undefined' === typeof textarea.setSelectionRange ) {
+					return;
+				}
+
+				$wikitoolbar = $textarea.parents( 'div.trac-resizable' ).siblings( 'div.wikitoolbar' );
+
+				addButton( $wikitoolbar, $textarea, 'code-php', 'PHP Code block: {{{#!php example }}}', '#code', function() {
+					encloseSelection( textarea, "{{{#!php\n<?php\n", "\n}}}\n" ); // jshint ignore:line
+				});
+			});
 		},
 
 		// If we're not dealing with a trusted bug gardener:
