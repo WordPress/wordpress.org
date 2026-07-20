@@ -1098,9 +1098,8 @@ body.plugins #main .newticket-not-here .support {
 #propertyform[action*="/newticket"] #properties table.trac-properties > tbody > tr > td#focuses {
 	padding-left: 58px;
 }
-#propertyform > p,
 #propertyform > .buttons {
-	margin-left: 10px;
+	clear: right;
 }
 .set-trunk, .set-trunk:hover {
 	border: none;
@@ -2284,7 +2283,7 @@ a.mention.me {
 	#filters td {
 		display: block;
 	}
-	#filters .trac-clause td:not(.actions td), 
+	#filters .trac-clause td:not(.actions td),
 	#filters .trac-clause th {
 		text-align:left;
 	}
@@ -2406,6 +2405,9 @@ a.mention.me {
 	}
 	#ticket table.properties img.avatar {
 		float: left;
+	}
+	#propertyform > .buttons {
+		padding-top: 12px;
 	}
 	#attachments > div.attachments > p {
 		float: none;
