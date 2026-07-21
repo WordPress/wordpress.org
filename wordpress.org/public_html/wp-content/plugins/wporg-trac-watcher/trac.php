@@ -17,10 +17,7 @@ add_action( 'import_trac_feeds', function() {
 function import_trac_feed( $svn ) {
 	global $wpdb;
 
-	// Themes Trac timeline generation is slow due to huge theme-review ticket descriptions; more than ~30 items exceeds the 60s server-side timeout, truncating the feed.
-	$max = ( 'themes' === $svn['slug'] ) ? 25 : 50;
-
-	$feed_url = $svn['trac'] . '/timeline?ticket=on&changeset=on&milestone=on&wiki=on&max=' . $max . '&daysback=5&format=rss';
+	$feed_url = $svn['trac'] . '/timeline?ticket=on&changeset=on&milestone=on&wiki=on&max=50&daysback=5&format=rss';
 
 	$feed = wp_remote_retrieve_body( wp_remote_get( $feed_url, array( 'timeout' => 60 ) ) );
 	if ( ! $feed ) {
