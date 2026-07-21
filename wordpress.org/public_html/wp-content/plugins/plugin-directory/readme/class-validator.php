@@ -359,7 +359,7 @@ class Validator {
 				return sprintf(
 					/* translators: %s: list of tags not supported */
 					__( 'One or more tags were ignored. The following tags are not permitted: %s', 'wporg-plugins' ),
-					'<code>' . implode( '</code>, <code>', $data ) . '</code>'
+					'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $data ) ) . '</code>'
 				);
 			case 'low_usage_tags':
 				return sprintf(
