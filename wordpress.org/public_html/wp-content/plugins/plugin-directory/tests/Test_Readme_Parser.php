@@ -129,4 +129,33 @@ class Test_Readme_Parser extends TestCase {
 		$this->assertSame( $expected_license, $parser->license );
 		$this->assertSame( $expected_uri, $parser->license_uri );
 	}
+
+	/**
+	 * Data provider for {@see test_license_is_sanitized()}.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public static function license_markup_provider(): array {
+		return array(
+			'image payload'          => array( 'License: GPLv2 <img src=x onerror=alert(document.domain)>' ),
+			'script payload'         => array( 'License: GPLv2 <script>alert(1)</script>' ),
+			'payload containing url' => array( 'License: GPLv2 <img src=https://example.com/x onerror=alert(1)>' ),
+			'unclosed tag'           => array( 'License: GPLv2 <img src=x onerror=alert(1)' ),
+		);
+	}
+
+	/**
+	 * A `License:` value that contains a GPL-compatible token passes validation, so it
+	 * gets reported back to reviewers verbatim. It must not carry markup with it.
+	 *
+	 * @param string $header Full header line under test.
+	 */
+	#[DataProvider( 'license_markup_provider' )]
+	public function test_license_is_sanitized( string $header ): void {
+		$parser = new Parser( self::readme_with( $header ) );
+
+		$this->assertStringStartsWith( 'GPLv2', $parser->license );
+		$this->assertStringNotContainsString( '<', $parser->license );
+		$this->assertStringNotContainsString( 'onerror', $parser->license );
+	}
 }

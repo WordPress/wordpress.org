@@ -336,19 +336,20 @@ class Block_Validator {
 				$output .= "<p class='small'>{$labels['description']}</p>\n";
 			}
 			$output .= "<div class='notice notice-{$type} notice-alt'>\n";
-			foreach ( (array) $results_by_type[ $type ] as $item ) {
+			foreach ( (array) ( $results_by_type[ $type ] ?? array() ) as $item ) {
 				// Only get details if this is a warning or error.
 				$details = ( 'info' === $type ) ? false : self::get_detailed_help( $item->check_name, $item );
+				$message = self::sanitize_message( $item->message );
 				if ( $details ) {
 					$details = '<p>' . implode( '</p><p>', (array) $details ) . '</p>';
-					$output .= "<details class='{$item->check_name}'><summary>{$item->message}</summary>{$details}</details>";
+					$output .= "<details class='{$item->check_name}'><summary>{$message}</summary>{$details}</details>";
 				} else {
-					$output .= "<p>{$item->message}</p>";
+					$output .= "<p>{$message}</p>";
 				}
 			}
 			// Collapse block.json warnings into one details at the end of warnings list.
 			if ( 'error' === $type && ! empty( $block_json_issues ) ) {
-				$messages = wp_list_pluck( $block_json_issues, 'message' );
+				$messages = array_map( array( __CLASS__, 'sanitize_message' ), wp_list_pluck( $block_json_issues, 'message' ) );
 				$details = '<p>' . implode( '</p><p>', (array) $messages ) . '</p>';
 				$output .= sprintf(
 					'<details class="check_block_json_is_valid"><summary>%1$s</summary>%2$s</details>',
@@ -366,6 +367,32 @@ class Block_Validator {
 		}
 
 		echo $output;
+	}
+
+	/**
+	 * Restrict a checker result message to the markup the checks actually use.
+	 *
+	 * Messages recorded by Block_Plugin_Checker intentionally contain a little
+	 * markup, but they also interpolate plugin-controlled values such as readme
+	 * headers, block names and file paths. Those values are escaped where they
+	 * are interpolated; this is the backstop for anything that is missed.
+	 *
+	 * @param string $message A message recorded by Block_Plugin_Checker.
+	 *
+	 * @return string The message, safe to output as HTML.
+	 */
+	protected static function sanitize_message( $message ) {
+		return wp_kses(
+			$message,
+			array(
+				'a'      => array( 'href' => true ),
+				'br'     => array(),
+				'code'   => array(),
+				'em'     => array(),
+				'strong' => array(),
+			),
+			array( 'http', 'https' )
+		);
 	}
 
 	/**
