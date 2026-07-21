@@ -46,10 +46,11 @@ class Controls {
 	}
 
 	/**
-	 * Display the release hold status and (for reviewers) a force-release control.
+	 * Display the release hold status and (for reviewers) force-release and block controls.
 	 *
 	 * Shows one of two messages: a countdown while a release is cooling down, or a block
-	 * notice when a Gandalf scan is holding it (which outlasts the cooldown window). Bails
+	 * notice when the release is being held (which outlasts the cooldown window). Reviewers
+	 * can force-release either way, and can block a version that's still cooling down. Bails
 	 * when there's no current release, or when it's neither held nor still cooling down.
 	 */
 	protected static function display_release_cooldown() {
@@ -80,12 +81,21 @@ class Controls {
 			<p>
 			<?php
 			if ( $blocked ) {
-				printf(
-					/* translators: 1: version, 2: security scan risk score */
-					esc_html__( 'Version %1$s is blocked by a security scan (risk score %2$s) and is being held from sites. Force-releasing overrides the block.', 'wporg-plugins' ),
-					esc_html( $version ),
-					esc_html( $release['release_block']['risk_score'] ?? '?' )
-				);
+				$block = $release['release_block'];
+				if ( isset( $block['risk_score'] ) ) {
+					printf(
+						/* translators: 1: version, 2: security scan risk score */
+						esc_html__( 'Version %1$s is blocked by a security scan (risk score %2$s) and is being held from sites. Force-releasing overrides the block.', 'wporg-plugins' ),
+						esc_html( $version ),
+						esc_html( $block['risk_score'] )
+					);
+				} else {
+					printf(
+						/* translators: %s: version */
+						esc_html__( 'Version %s is blocked and is being held from sites. Force-releasing overrides the block.', 'wporg-plugins' ),
+						esc_html( $version )
+					);
+				}
 			} else {
 				printf(
 					/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
@@ -99,10 +109,10 @@ class Controls {
 			</p>
 			<?php if ( current_user_can( 'plugin_review', $post ) ) : ?>
 				<p>
-					<label for="force_release_reason"><?php esc_html_e( 'Force-release reason (required):', 'wporg-plugins' ); ?></label>
+					<label for="release_action_reason"><?php esc_html_e( 'Reason (required):', 'wporg-plugins' ); ?></label>
 					<textarea
-						id="force_release_reason"
-						name="force_release_reason"
+						id="release_action_reason"
+						name="release_action_reason"
 						rows="2"
 						style="width: 100%;"
 						placeholder="<?php esc_attr_e( 'e.g. urgent security fix for CVE-…', 'wporg-plugins' ); ?>"
@@ -118,6 +128,17 @@ class Controls {
 						);
 						?>
 					</button>
+					<?php if ( $in_cooldown && ! $blocked ) : ?>
+						<button type="submit" name="block_release_version" value="<?php echo esc_attr( $version ); ?>" class="button">
+							<?php
+							printf(
+								/* translators: %s: version */
+								esc_html__( 'Block %s from sites', 'wporg-plugins' ),
+								esc_html( $version )
+							);
+							?>
+						</button>
+					<?php endif; ?>
 				</p>
 			<?php endif; ?>
 		</div>
@@ -125,12 +146,14 @@ class Controls {
 	}
 
 	/**
-	 * Save handler for reviewer force-release submissions from the Controls metabox.
+	 * Save handler for reviewer force-release and block submissions from the Controls metabox.
 	 *
 	 * @param int $post_id The post being saved.
 	 */
 	public static function save_post( $post_id ) {
-		if ( empty( $_POST['force_release_version'] ) ) {
+		$is_force_release = ! empty( $_POST['force_release_version'] );
+		$is_block         = ! empty( $_POST['block_release_version'] );
+		if ( ! $is_force_release && ! $is_block ) {
 			return;
 		}
 
@@ -148,20 +171,30 @@ class Controls {
 		check_admin_referer( 'update-post_' . $post_id );
 
 		$version           = get_post_meta( $post->ID, 'version', true );
-		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );
+		$submitted_version = sanitize_text_field( wp_unslash( $is_force_release ? $_POST['force_release_version'] : $_POST['block_release_version'] ) );
 		if ( $submitted_version !== $version ) {
 			// Submitted version doesn't match current — a newer commit landed since the form was rendered.
 			return;
 		}
 
-		$reason = isset( $_POST['force_release_reason'] )
-			? trim( sanitize_textarea_field( wp_unslash( $_POST['force_release_reason'] ) ) )
+		$reason = isset( $_POST['release_action_reason'] )
+			? trim( sanitize_textarea_field( wp_unslash( $_POST['release_action_reason'] ) ) )
 			: '';
 		if ( ! $reason ) {
 			return;
 		}
 
-		API_Update_Updater::force_release( $post->post_name, $reason );
+		if ( $is_force_release ) {
+			API_Update_Updater::force_release( $post->post_name, $reason );
+		} else {
+			API_Update_Updater::block_release(
+				$post->post_name,
+				array(
+					'reason'     => $reason,
+					'blocked_by' => wp_get_current_user()->user_login,
+				)
+			);
+		}
 	}
 
 	/**

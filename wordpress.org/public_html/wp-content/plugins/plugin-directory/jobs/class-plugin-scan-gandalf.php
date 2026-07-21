@@ -9,7 +9,6 @@ namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
-use WordPressdotorg\Plugin_Directory\Tools;
 use WP_Error;
 use WP_Http;
 
@@ -191,7 +190,13 @@ class Plugin_Scan_Gandalf {
 			$risk_score = ( isset( $data['risk_score'] ) && is_numeric( $data['risk_score'] ) ) ? (float) $data['risk_score'] : null;
 
 			if ( null !== $risk_score && $risk_score >= self::RISK_SCORE_BLOCK_THRESHOLD ) {
-				$held = self::block_release( $plugin, $pending_record, $scan_id, $risk_score );
+				/*
+				 * Auto-blocking is disabled. Enable by restoring:
+				 *
+				 * $held = self::block_release( $plugin, $pending_record, $scan_id, $risk_score );
+				 */
+				$held = false;
+
 				self::notify_slack_blocked(
 					$plugin,
 					[
@@ -226,7 +231,7 @@ class Plugin_Scan_Gandalf {
 	}
 
 	/**
-	 * Record a block on the scanned release and re-run the update to hold the version back.
+	 * Hold the scanned release, once the verdict is known to still apply to it.
 	 *
 	 * @param \WP_Post $plugin         The plugin post.
 	 * @param array    $pending_record The pending scan record (version, release_ref).
@@ -252,36 +257,13 @@ class Plugin_Scan_Gandalf {
 			return false;
 		}
 
-		// Already live: the cooldown elapsed before this verdict arrived.
-		if ( API_Update_Updater::get_served_version( $plugin->post_name ) === $version ) {
-			return false;
-		}
-
-		Plugin_Directory::add_release(
-			$plugin,
+		return API_Update_Updater::block_release(
+			$plugin->post_name,
 			[
-				'tag'           => $release['tag'],
-				'release_block' => [
-					'scan_id'    => $scan_id,
-					'risk_score' => $risk_score,
-					'blocked_at' => time(),
-				],
+				'scan_id'    => $scan_id,
+				'risk_score' => $risk_score,
 			]
 		);
-
-		// Re-run so a version scheduled to serve at cooldown-end is held now instead.
-		API_Update_Updater::update_single_plugin( $plugin->post_name );
-
-		Tools::audit_log(
-			sprintf(
-				'A security scan blocked version %1$s from being served (risk score %2$s).',
-				$version,
-				$risk_score
-			),
-			$plugin
-		);
-
-		return true;
 	}
 
 	/**
@@ -371,19 +353,19 @@ class Plugin_Scan_Gandalf {
 	}
 
 	/**
-	 * Alert Slack about a high-risk verdict. Always sends: a block needs a human either way.
+	 * Alert Slack about a high-risk verdict. Always sends: a high score needs a human either way.
 	 *
 	 * @param \WP_Post $plugin The plugin post.
 	 * @param array    $record 'version', 'release_ref', 'risk_score', 'report_url', and 'held'
-	 *                         (whether the release was held, or was already live).
+	 *                         (whether the release was held).
 	 */
 	protected static function notify_slack_blocked( $plugin, $record ) {
 		if ( ! empty( $record['held'] ) ) {
 			$headline = 'A security scan *blocked* a release of *%s*';
 			$status   = 'Held out of the update API until a reviewer force-releases it.';
 		} else {
-			$headline = 'A security scan flagged an *already-served* release of *%s*';
-			$status   = 'The release delay had already elapsed, so this version is live. Manual action (close or roll back) may be required.';
+			$headline = 'A security scan flagged a release of *%s*';
+			$status   = 'Not held automatically. Review the version and block it from the plugin page if warranted.';
 		}
 
 		self::send_slack_alert(
@@ -392,7 +374,7 @@ class Plugin_Scan_Gandalf {
 			$record['version'],
 			$record['release_ref'],
 			[
-				sprintf( 'Risk score: %s (blocks at %s)', $record['risk_score'], self::RISK_SCORE_BLOCK_THRESHOLD ),
+				sprintf( 'Risk score: %s (flags at %s)', $record['risk_score'], self::RISK_SCORE_BLOCK_THRESHOLD ),
 				$status,
 			],
 			$record['report_url']

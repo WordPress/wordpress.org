@@ -40,6 +40,8 @@ class Gandalf_Risk_Score_Block_Callback_Test extends Gandalf_Callback_Test_Case 
 	 * version it scanned is held back — the previous one keeps being served — and recorded.
 	 */
 	public function test_a_blocking_score_over_the_api_holds_the_version() {
+		$this->markTestSkipped( 'Auto-blocking on a risk score is disabled; see Plugin_Scan_Gandalf::handle_callback().' );
+
 		$response = $this->post_callback( $this->callback_body( array( 'risk_score' => Plugin_Scan_Gandalf::RISK_SCORE_BLOCK_THRESHOLD ) ) );
 
 		$this->assertSame( 200, $response->get_status() );
@@ -53,6 +55,8 @@ class Gandalf_Risk_Score_Block_Callback_Test extends Gandalf_Callback_Test_Case 
 	 * would normally serve the new version still leaves the old one in place.
 	 */
 	public function test_a_held_version_is_not_served_when_its_delay_later_elapses() {
+		$this->markTestSkipped( 'Auto-blocking on a risk score is disabled; see Plugin_Scan_Gandalf::handle_callback().' );
+
 		$this->post_callback( $this->callback_body( array( 'risk_score' => 9 ) ) );
 
 		// Age the commit past the delay; without the block this run would serve NEW_VERSION.
@@ -108,6 +112,8 @@ class Gandalf_Risk_Score_Block_Callback_Test extends Gandalf_Callback_Test_Case 
 	 * the block cleared.
 	 */
 	public function test_force_release_after_an_api_block_serves_the_version() {
+		$this->markTestSkipped( 'Auto-blocking on a risk score is disabled; see Plugin_Scan_Gandalf::handle_callback().' );
+
 		$this->post_callback( $this->callback_body( array( 'risk_score' => 9 ) ) );
 
 		$result = API_Update_Updater::force_release( static::SLUG, 'Reviewed the scan; false positive.' );

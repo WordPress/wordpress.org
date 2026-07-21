@@ -227,7 +227,9 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * Whether a release is blocked by a high-risk Gandalf scan.
+	 * Whether a release is being held out of `update_source` by a block.
+	 *
+	 * A block is set either by a high-risk security scan or by a reviewer.
 	 *
 	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
 	 * @return bool True when the release is being held out of `update_source`.
@@ -311,17 +313,24 @@ class API_Update_Updater {
 			return false;
 		}
 
-		// A force-release also overrides a high-risk Gandalf block; note that in the audit trail.
+		// A force-release also overrides a block; note that in the audit trail.
 		if ( self::is_release_blocked( $release ) ) {
-			Tools::audit_log(
-				sprintf(
+			$block = $release['release_block'];
+			if ( isset( $block['risk_score'] ) ) {
+				$message = sprintf(
 					'Force-released version %1$s, overriding the security-scan block (risk score %2$s). Reason: %3$s',
 					$version,
-					$release['release_block']['risk_score'] ?? '?',
+					$block['risk_score'],
 					$reason
-				),
-				$post
-			);
+				);
+			} else {
+				$message = sprintf(
+					'Force-released version %1$s, overriding the release block. Reason: %2$s',
+					$version,
+					$reason
+				);
+			}
+			Tools::audit_log( $message, $post );
 		} else {
 			Tools::audit_log(
 				sprintf(
@@ -345,6 +354,70 @@ class API_Update_Updater {
 		);
 
 		return self::update_single_plugin( $plugin_slug );
+	}
+
+	/**
+	 * Hold a plugin's current version out of `update_source` until it's force-released.
+	 *
+	 * The counterpart to force_release(), shared by the reviewer control and the security
+	 * scan. Callers apply their own preconditions first; this only refuses when there's
+	 * nothing left to hold.
+	 *
+	 * Capability checks must be performed by the caller.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param array  $block       The block to record: 'reason' and 'blocked_by' for a reviewer
+	 *                            block, or 'scan_id' and 'risk_score' for a security scan.
+	 * @return bool True when the version was held, false when there was nothing to hold.
+	 */
+	public static function block_release( $plugin_slug, $block ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$version = get_post_meta( $post->ID, 'version', true );
+		$release = Plugin_Directory::get_release( $post, $version );
+
+		if ( ! $release ) {
+			return false;
+		}
+
+		// Already live: the version is being served, so there's nothing left to hold back.
+		if ( self::get_served_version( $plugin_slug ) === (string) $version ) {
+			return false;
+		}
+
+		$block['blocked_at'] = time();
+
+		Plugin_Directory::add_release(
+			$post,
+			array(
+				'tag'           => $release['tag'],
+				'release_block' => $block,
+			)
+		);
+
+		if ( isset( $block['risk_score'] ) ) {
+			$message = sprintf(
+				'A security scan blocked version %1$s from being served (risk score %2$s).',
+				$version,
+				$block['risk_score']
+			);
+		} else {
+			$message = sprintf(
+				'Blocked version %1$s from being served to sites. Reason: %2$s',
+				$version,
+				$block['reason']
+			);
+		}
+
+		Tools::audit_log( $message, $post );
+
+		// Re-run so a version scheduled to serve at cooldown-end is held now instead.
+		self::update_single_plugin( $plugin_slug );
+
+		return true;
 	}
 
 	static function get_plugin_assets( $post ) {

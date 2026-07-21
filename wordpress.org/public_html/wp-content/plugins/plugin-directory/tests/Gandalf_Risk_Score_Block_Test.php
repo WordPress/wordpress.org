@@ -241,6 +241,8 @@ class Gandalf_Risk_Score_Block_Test extends TestCase {
 	 * the block is recorded, and any deferred serve is cancelled.
 	 */
 	public function test_a_blocking_score_holds_the_version() {
+		$this->markTestSkipped( 'Auto-blocking on a risk score is disabled; see Plugin_Scan_Gandalf::handle_callback().' );
+
 		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->callback_data( array( 'risk_score' => 8 ) ) );
 
 		$this->assertSame( self::SERVED_VERSION, $this->get_served_version() );
@@ -253,6 +255,8 @@ class Gandalf_Risk_Score_Block_Test extends TestCase {
 	 * A score above the threshold blocks just the same.
 	 */
 	public function test_a_score_above_the_threshold_holds_the_version() {
+		$this->markTestSkipped( 'Auto-blocking on a risk score is disabled; see Plugin_Scan_Gandalf::handle_callback().' );
+
 		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->callback_data( array( 'risk_score' => 9.5 ) ) );
 
 		$this->assertSame( self::SERVED_VERSION, $this->get_served_version() );
@@ -290,6 +294,8 @@ class Gandalf_Risk_Score_Block_Test extends TestCase {
 	 * A reviewer force-release overrides the block: the held version is served and the block cleared.
 	 */
 	public function test_force_release_clears_the_block_and_serves() {
+		$this->markTestSkipped( 'Auto-blocking on a risk score is disabled; see Plugin_Scan_Gandalf::handle_callback().' );
+
 		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->callback_data( array( 'risk_score' => 8 ) ) );
 
 		$result = API_Update_Updater::force_release( self::SLUG, 'Reviewed the scan; false positive.' );
@@ -303,6 +309,8 @@ class Gandalf_Risk_Score_Block_Test extends TestCase {
 	 * The override is recorded, naming the block it bypassed.
 	 */
 	public function test_force_release_records_the_override_in_the_audit_log() {
+		$this->markTestSkipped( 'Auto-blocking on a risk score is disabled; see Plugin_Scan_Gandalf::handle_callback().' );
+
 		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->callback_data( array( 'risk_score' => 8 ) ) );
 
 		API_Update_Updater::force_release( self::SLUG, 'Reviewed the scan; false positive.' );
@@ -372,6 +380,8 @@ class Gandalf_Risk_Score_Block_Test extends TestCase {
 	 * A held version stays held across the reconciliation cron that would otherwise serve it.
 	 */
 	public function test_a_held_version_is_not_served_by_a_later_update_run() {
+		$this->markTestSkipped( 'Auto-blocking on a risk score is disabled; see Plugin_Scan_Gandalf::handle_callback().' );
+
 		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->callback_data( array( 'risk_score' => 8 ) ) );
 
 		// The delay has since elapsed; without the block this would serve 2.0.
