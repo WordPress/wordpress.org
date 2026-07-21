@@ -787,14 +787,14 @@ class WPORG_Themes_Upload {
 				}
 
 				if ( $is_new_upload && $this->theme_post ) {
-					wp_delete_post( $this->theme_post->ID, true );
+					$this->delete_theme_post();
 				}
 
 				return new WP_Error(
 					'failed_trac_ticket_creation',
 					sprintf(
 						/* translators: %s: mailto link */
-						__( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ),
+						__( 'There was an error creating a Trac ticket for your theme. This is usually temporary, so please wait a few minutes and try uploading again. If the error persists, report it to %s.', 'wporg-themes' ),
 						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
 					)
 				);
@@ -1315,7 +1315,7 @@ TICKET;
 		 * the superseded version is simply demoted to `old`.
 		 */
 		if ( in_array( $prev_status, [ 'new', 'approved' ], true ) ) {
-			$ticket_id = (int) $this->theme_post->_ticket_id[ $this->theme_post->max_version ];
+			$ticket_id = (int) ( $this->theme_post->_ticket_id[ $this->theme_post->max_version ] ?? 0 );
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
 			// Make sure the ticket has not yet been resolved.
@@ -1350,9 +1350,13 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			// Themes team auto-approves theme-updates. Note that this only applies to new
-			// ticket creation, so it won't happen on themes with existing outstanding tickets.
-			if ( $this->trac_ticket->priority == 'theme update' ) {
+			/*
+			 * Themes team auto-approves theme-updates. Note that this only applies to new
+			 * ticket creation, so it won't happen on themes with existing outstanding tickets.
+			 *
+			 * Skipped when ticket creation failed, as there's no ticket to act upon.
+			 */
+			if ( $ticket_id && 'theme update' === $this->trac_ticket->priority ) {
 				$release_delay = wporg_themes_get_release_cooldown_delay( $this->theme_slug );
 				if ( $release_delay ) {
 					// Land the update in the `approved` status; the release-to-live cron
@@ -1447,6 +1451,24 @@ TICKET;
 		foreach ( $post_meta as $meta_key => $meta_value ) {
 			$this->update_versioned_meta( $meta_key, $meta_value );
 		}
+	}
+
+	/**
+	 * Deletes the theme post.
+	 *
+	 * Used to clean up a freshly created post when a new upload fails.
+	 * Temporarily detaches the fail-safe that prevents repopackages from
+	 * being deleted, which would otherwise wp_die() before the post is
+	 * removed, leaving an orphaned post without versioned meta behind.
+	 *
+	 * @return WP_Post|false|null Post data on success, false or null on failure.
+	 */
+	public function delete_theme_post() {
+		remove_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
+		$result = wp_delete_post( $this->theme_post->ID, true );
+		add_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
+
+		return $result;
 	}
 
 	/**
@@ -1752,7 +1774,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 	 * @return WP_Theme
 	 */
 	public function populate_post_with_meta( $theme ) {
-		foreach ( get_post_custom_keys( $theme->ID ) as $meta_key ) {
+		foreach ( (array) get_post_custom_keys( $theme->ID ) as $meta_key ) {
 			$theme->$meta_key = get_post_meta( $theme->ID, $meta_key, true );
 
 			if ( is_array( $theme->$meta_key ) ) {
@@ -1761,7 +1783,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 		}
 
 		// Save the highest recorded version number.
-		$uploaded_versions  = array_keys( $theme->_status );
+		$uploaded_versions  = is_array( $theme->_status ) ? array_keys( $theme->_status ) : array();
 		$theme->max_version = end( $uploaded_versions );
 
 		return $theme;

@@ -79,7 +79,9 @@ while ( $query->have_posts() ) {
 	$results = $checker->run_check_plugin_repo( $url );
 
 	foreach ( $results as $item ) {
-		echo "$item->type\t$item->check_name\t$item->message\n";
+		// Messages are built for HTML; undo that so the terminal doesn't show "&amp;".
+		$message = html_entity_decode( wp_strip_all_tags( $item->message ), ENT_QUOTES, 'UTF-8' );
+		echo "$item->type\t$item->check_name\t$message\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Terminal output; escaping would undo the decode above.
 		if ( $item->data ) {
 			print_r( $item->data );
 			echo "\n";

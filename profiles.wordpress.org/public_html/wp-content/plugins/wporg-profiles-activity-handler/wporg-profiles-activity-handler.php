@@ -845,11 +845,25 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$content = false;
 				$primary_link = sanitize_url( $data['blog_url'] ); // To group digest entries by site.
 
-				$singular = sprintf(
-					'Updated a handbook page on <a href="%s">%s</a>.',
-					sanitize_url( $data['blog_url'] ),
-					sanitize_text_field( $data['blog'] )
-				);
+				if ( ! empty( $data['url'] ) && ! empty( $data['title'] ) ) {
+					// Link the page itself while the digest holds a single update (#8228).
+					$singular = sprintf(
+						'Updated the handbook page <i><a href="%s">%s</a></i> on <a href="%s">%s</a>.',
+						esc_url( $data['url'] ),
+						sanitize_text_field( $data['title'] ),
+						sanitize_url( $data['blog_url'] ),
+						sanitize_text_field( $data['blog'] )
+					);
+					// `digest_bump()` runs this through sprintf(); escape literal
+					// percent signs from encoded URLs or titles.
+					$singular = str_replace( '%', '%%', $singular );
+				} else {
+					$singular = sprintf(
+						'Updated a handbook page on <a href="%s">%s</a>.',
+						sanitize_url( $data['blog_url'] ),
+						sanitize_text_field( $data['blog'] )
+					);
+				}
 
 				$plural = sprintf(
 					'Made %s updates to handbook pages on <a href="%s">%s</a>.',

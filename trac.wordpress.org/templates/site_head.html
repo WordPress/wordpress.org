@@ -1,0 +1,48 @@
+{# WordPress.org Trac customizations — content injected into <head>.
+
+  Jinja2 replacement for the `head` matches in the old Genshi site.html.
+  Trac auto-includes this file (see TracInterfaceCustomization). Only additive
+  markup belongs here; DOM rewrites now live in wp-trac.js / wp-trac.css.
+#}
+# set scripts_version = '239'
+# set project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
+
+## WP.org global <head> markup (kept in sync by update-headers.php)
+# include 'wporg-head.html'
+
+<meta name="viewport" content="width=device-width"/>
+<link rel="stylesheet" href="https://s.w.org/wp-includes/css/dashicons.min.css?20150710" type="text/css"/>
+<link rel="stylesheet" type="text/css" href="https://s.w.org/style/trac/wp-trac.css?${scripts_version}"/>
+<link rel="stylesheet" type="text/css" href="https://s.w.org/style/trac/wp-trac-jinja-compat.css?${scripts_version}"/>
+# if req.is_authenticated:
+<link rel="stylesheet" href="https://s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all"/>
+# endif
+
+## Prevent Trac from focusing #field-summary on load, as this can scroll past the instructions
+# if req.path_info == '/newticket':
+<script>
+jQuery( document ).ready( function( $ ) {
+	$("#field-summary").one( 'focus', function( event ) { return false; });
+});
+</script>
+# endif
+
+## <link rel="canonical"> for ticket and changeset pages, e.g. /ticket/123
+# if req.path_info.startswith(('/ticket/', '/changeset/')):
+#   set path_parts = req.path_info.split('/')
+<link rel="canonical" href="https://${req.environ['HTTP_HOST']}/${path_parts[1]}/${path_parts[2]}"/>
+# endif
+
+## <meta name="robots">
+# if req.path_info.startswith('/attachment/'):
+<meta name="robots" content="noindex, follow"/>
+# elif req.path_info.startswith('/browser/') and 'rev' in req.args:
+## e.g. /browser/trunk/?rev=37670
+<meta name="robots" content="noindex, follow"/>
+# elif req.path_info.startswith('/changeset/') and req.path_info.strip('/').split('/')[2:]:
+## e.g. /changeset/123/trunk (a changeset restricted to a path)
+<meta name="robots" content="noindex, follow"/>
+# endif
+
+## Per-environment <head> additions (optional; e.g. core/site-specific-head.html)
+# include 'site-specific-head.html' ignore missing

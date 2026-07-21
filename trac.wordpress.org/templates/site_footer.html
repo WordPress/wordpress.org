@@ -1,0 +1,80 @@
+{# WordPress.org Trac customizations — content injected at the end of <body>.
+
+  Jinja2 replacement for the tail of the old Genshi site.html <body> match.
+  Trac auto-includes this file (see TracInterfaceCustomization).
+#}
+# set scripts_version = '239'
+# set project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
+# set wporg_endpoint = 'https://make.wordpress.org/' + project_slug + '/'
+# set notifications_enabled = project_slug in ['core', 'meta']
+# set is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm
+
+## WP.org global footer markup (kept in sync by update-headers.php)
+# include 'wporg-footer.html'
+
+# if is_bug_gardener:
+<script>
+var wpBugGardener = true;
+</script>
+# endif
+
+# if req.authname:
+<script>
+var wpTracCurrentUser = "${req.authname}";
+</script>
+# endif
+
+## JavaScript
+<script src="https://s.w.org/style/js/navigation.min.js?20190128"></script>
+<script src="https://s.w.org/style/trac/jquery.caret.min.js?ver=2015-02-01"></script>
+<script src="https://s.w.org/style/trac/jquery.atwho.min.js?ver=1.0.1"></script>
+<script src="https://s.w.org/style/trac/wp-trac.js?${scripts_version}"></script>
+<script src="https://s.w.org/style/trac/wp-trac-jinja-compat.js?${scripts_version}"></script>
+
+## Check for security buzzwords on new tickets
+# if req.path_info == '/newticket':
+<script src="https://s.w.org/style/trac/trac-security.js?${scripts_version}"></script>
+# endif
+
+## Trac auth check
+# if req.is_authenticated:
+<!--TRAC_WP_USER_IS_LOGGED_IN-->
+<div id="wp-auth-check-wrap" class="hidden fallback">
+	<div id="wp-auth-check-bg"></div>
+	<div id="wp-auth-check">
+		<div class="wp-auth-check-close" tabindex="0" title="Close"></div>
+		<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="https://login.wordpress.org/" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
+		</div>
+	</div>
+</div>
+<script>
+function wp_trac_auth_check() {
+	$.ajax( '${href('/')}' ).success( function( data ) {
+		var addClass = -1 !== data.indexOf( '<!--TRAC_WP_USER_IS_LOGGED_IN-->' );
+		$( '#wp-auth-check-wrap' ).toggleClass( 'hidden', addClass );
+	});
+}
+jQuery(document).ready(function( $ ) {
+	$('.wp-auth-check-close').click( function() {
+		$( '#wp-auth-check-wrap' ).addClass( 'hidden' );
+	});
+	window.setInterval( wp_trac_auth_check, 5 * 60 * 1000 );
+});
+</script>
+# endif
+
+## Trac notifications
+# if notifications_enabled:
+<script>
+(function() {
+	var settings = { endpoint: '${wporg_endpoint}', authenticated: ${req.is_authenticated|int} };
+	# if ticket is defined and ticket and ticket.exists:
+	settings.ticket = ${ticket.id};
+	# endif
+	wpTrac.notifications.init(settings);
+})();
+</script>
+# endif
+
+## Per-environment <body> additions (optional; e.g. core/site-specific-footer.html)
+# include 'site-specific-footer.html' ignore missing

@@ -117,7 +117,7 @@ class Helphub_Contributors_Admin {
 	 */
 	public function save_post( $post_id, $post ) {
 		// Verify nonce.
-		if ( ! isset( $_POST['helphub_contributors_nonce'] ) || ! wp_verify_nonce( $_POST['helphub_contributors_nonce'], 'helphub-contributors-save' ) ) {
+		if ( ! isset( $_POST['helphub_contributors_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['helphub_contributors_nonce'] ) ), 'helphub-contributors-save' ) ) {
 			return;
 		}
 
@@ -133,7 +133,21 @@ class Helphub_Contributors_Admin {
 			return;
 		}
 
-		$contributors = $_POST['helphub_contributors'];
+		$contributors = array();
+
+		// Contributors are looked up by user_nicename, so reduce each value to a nicename-safe slug.
+		foreach ( (array) wp_unslash( $_POST['helphub_contributors'] ) as $contributor ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each value is sanitized with sanitize_title() below; the sniff cannot follow it into the loop.
+			// Guard against nested arrays, which would fatal in sanitize_title().
+			if ( ! is_string( $contributor ) ) {
+				continue;
+			}
+
+			$contributor = sanitize_title( $contributor );
+
+			if ( '' !== $contributor && ! in_array( $contributor, $contributors, true ) ) {
+				$contributors[] = $contributor;
+			}
+		}
 
 		update_post_meta( $post_id, 'helphub_contributors', $contributors );
 	}
@@ -169,15 +183,17 @@ class Helphub_Contributors_Admin {
 
 		if ( is_array( $contributors ) ) :
 			foreach ( $contributors as $contributor ) {
-				$contributor_link = '<a href="https://profiles.wordpress.org/' . esc_html( $contributor ) . '/">@' . esc_html( $contributor ) . '</a>';
+				printf(
+					'<a href="%1$s">@%2$s</a>',
+					esc_url( 'https://profiles.wordpress.org/' . $contributor . '/' ),
+					esc_html( $contributor )
+				);
 
-				if ( end( $contributors ) == $contributor ) {
-					$contributor_link .= esc_html__( '.', 'wporg-forums' );
+				if ( end( $contributors ) === $contributor ) {
+					esc_html_e( '.', 'wporg-forums' );
 				} else {
-					$contributor_link .= esc_html__( ', ', 'wporg-forums' );
+					esc_html_e( ', ', 'wporg-forums' );
 				}
-
-				echo $contributor_link;
 			}
 		endif;
 	}

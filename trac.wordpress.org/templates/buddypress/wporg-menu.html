@@ -1,21 +1,8 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	  xmlns:py="http://genshi.edgewall.org/"
-	  py:strip="">
+{# buddypress.trac headline/menu (overrides the shared default wporg-menu.html).
 
-	<!--! Pull #metanav out of div#banner and put it into buddypress.org's #subnav -->
-	<py:match path="div[@id='banner']" buffer="true" once="true">
-		<div id="subnav">
-			<div id="subnav-inner">
-				<ul id="nav-user" class="menu">
-					${select("div[@id='metanav']/ul/li")}
-				</ul>
-			</div>
-		</div>
-		<!--! Leave form#search in #banner -->
-		<div id="banner">
-			${select("form[@id='search']")}
-		</div>
-	</py:match>
-
-</html>
+  The old Genshi version used a py:match on div#banner to move Trac's #metanav
+  into a buddypress.org-style #subnav and leave form#search in #banner. Jinja2 has
+  no py:match / stream filter, so that DOM reorganization must be done client-side
+  in wp-trac.js / CSS for buddypress.trac. This file intentionally emits nothing:
+  buddypress uses its own header bar (wporg-header.html), not the P2 headline.
+#}

@@ -1,6 +1,6 @@
 // Allow resizing <textarea> elements through a drag bar
 
-jQuery(document).ready(function($) {
+jQuery(function($) {
   $('textarea.trac-resizable').each(function() {
     var textarea = $(this);
     var offset = null;
@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 
     function endDrag(e) {
       textarea.focus();
-      $(document).unbind('mousemove', dragging).unbind('mouseup', endDrag);
+      $(document).off('mousemove', dragging).off('mouseup', endDrag);
     }
 
     var grip = $('<div class="trac-grip"/>').mousedown(beginDrag)[0];

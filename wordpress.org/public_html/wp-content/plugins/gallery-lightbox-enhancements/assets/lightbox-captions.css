@@ -12,22 +12,26 @@
  */
 
 /**
- * The core zoom-mode `.scrim` is white at 0.9 opacity by default, but
- * core CSS doesn't pin it (no `top`/`left` declared). With the two
- * `.lightbox-image-container` siblings each `position: relative; top:
- * 450px`, the absolute scrim falls through to its normal-flow position
- * and lands somewhere around `y: 1444px` — visually below the viewport
- * fold. Pin it to the overlay's top-left so the dimmer actually covers
- * the page as intended.
+ * Defensive pin for the core zoom-mode `.scrim` (white, 0.9 opacity).
+ * Core leaves it `position: absolute` with no `top`/`left`, relying on
+ * its two `.lightbox-image-container` siblings being out of normal flow
+ * so the scrim's static position resolves to the overlay's top-left.
+ * We keep those containers on core's own positioning (see note below),
+ * so this is belt-and-braces — harmless if core already covers the page.
  */
 .wp-lightbox-overlay .scrim {
 	top: 0 !important;
 	left: 0 !important;
 }
 
-.wp-lightbox-overlay .lightbox-image-container {
-	position: relative;
-}
+/*
+ * Do NOT set `.lightbox-image-container` to `position: relative`. Core
+ * stacks its two containers (zoom-thumbnail + full-res) as absolutely
+ * positioned, overlapping siblings; forcing them into normal flow stacks
+ * the images vertically and renders the picture twice once both hold a
+ * real image (e.g. plugin screenshots). The absolute container is already
+ * the caption's containing block — no override needed.
+ */
 
 .wp-lightbox-overlay .lightbox-image-container > figcaption.wp-lightbox-caption {
 	position: absolute;
@@ -38,7 +42,7 @@
 	margin: 0;
 	padding: 3.5em 1.25em 1em;
 	color: #fff;
-	text-align: center;
+	text-align: start;
 	font-size: 0.95rem;
 	font-weight: 500;
 	line-height: 1.45;
