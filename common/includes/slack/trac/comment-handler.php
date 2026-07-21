@@ -21,6 +21,21 @@ class Comment_Handler {
 		$this->lines = $email_message;
 	}
 
+	/**
+	 * Back-compat accessor for protected properties.
+	 *
+	 * slack-trac-hook.php reads properties like $handler->comment and
+	 * $handler->$property directly from outside this class, which is
+	 * otherwise fatal now that these properties are explicitly declared
+	 * protected.
+	 */
+	function __get( $name ) {
+		if ( property_exists( $this, $name ) ) {
+			return $this->$name;
+		}
+		return null;
+	}
+
 	function run() {
 		$this->process_message();
 
