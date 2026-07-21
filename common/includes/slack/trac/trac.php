@@ -15,6 +15,11 @@ class Trac implements User {
 	protected $commit_username;
 	protected $ticket_username;
 
+	// Set dynamically per-Trac in __construct(); declared explicitly to
+	// avoid the PHP 8.2+ deprecation notice for implicit dynamic properties.
+	protected $trac;
+	protected $name;
+
 	// 'title', 'fields', 'description'
 	protected $primary_channel_ticket_format = 'description';
 
