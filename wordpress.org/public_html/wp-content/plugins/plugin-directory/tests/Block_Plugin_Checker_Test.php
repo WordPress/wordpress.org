@@ -3,11 +3,10 @@
  * Tests for the Block Plugin Checker's individual checks and the way its messages
  * are rendered.
  *
- * These exercise the checks that can run purely off injected state — no repo
- * export, database, or filesystem scan. The filesystem/DB checks
- * (check_readme_exists, check_for_block_script_files, check_for_duplicate_block_name,
- * check_for_unique_namespace, the size checks) and check_for_translation_function
- * are covered elsewhere or need fixtures.
+ * These exercise the checks that can run purely off injected state. Checks that
+ * need a repo export, a database or a filesystem scan are out of scope here and
+ * are, with the exception of check_for_translation_function (see
+ * Block_Plugin_Checker_Translation_Test), not yet covered anywhere.
  *
  * Escaping is checked inline on the checks that emit plugin-controlled data
  * (license, block name, block.json path), since that is where the values flow in.
@@ -17,6 +16,7 @@
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\CLI\Block_Plugin_Checker;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Block_Validator;
@@ -24,15 +24,18 @@ use WordPressdotorg\Plugin_Directory\Shortcodes\Block_Validator;
 /**
  * Unit tests for the individual Block Plugin Checker checks and message rendering.
  *
- * @group block-validator
+ * The group is declared as an attribute, not `@group`: PHPUnit 11 ignores a class
+ * doc-block entirely once the class carries any attribute, so `@group` here would
+ * silently drop the class out of `--group block-validator` runs.
  */
+#[Group( 'block-validator' )]
 #[CoversClass( Block_Plugin_Checker::class )]
 #[CoversClass( Block_Validator::class )]
 class Block_Plugin_Checker_Test extends TestCase {
 
 	/**
 	 * Build a checker and inject the given protected properties, bypassing the
-	 * constructor (which adds filters and expects a slug).
+	 * constructor (which registers an extra_plugin_headers filter).
 	 *
 	 * @param array $props Property name => value to set on the checker.
 	 * @return Block_Plugin_Checker
@@ -70,7 +73,7 @@ class Block_Plugin_Checker_Test extends TestCase {
 	 */
 
 	/**
-	 * Nothing in the readme or the plugin headers earns a warning.
+	 * A license missing from both the readme and the plugin headers is a warning.
 	 */
 	public function test_missing_license_warns() {
 		$checker = $this->checker( array( 'readme' => (object) array( 'license' => '' ) ) );
@@ -80,8 +83,9 @@ class Block_Plugin_Checker_Test extends TestCase {
 	}
 
 	/**
-	 * A readme License that passes validation is reported back verbatim — so any
-	 * markup riding along in it must be escaped.
+	 * The readme license is interpolated into the result message, so check_license()
+	 * must escape it. Parser::sanitize_text() strips markup out of the license first;
+	 * this covers the case where the checker is handed a readme that has not.
 	 */
 	public function test_readme_license_is_reported_and_escaped() {
 		$checker = $this->checker( array( 'readme' => (object) array( 'license' => 'GPLv2 <img src=x onerror=alert(document.domain)>' ) ) );
@@ -108,6 +112,21 @@ class Block_Plugin_Checker_Test extends TestCase {
 		$messages = $this->messages( $checker, 'info', 'check_license' );
 		$this->assertCount( 1, $messages );
 		$this->assertStringNotContainsString( '<img', $messages[0] );
+		$this->assertStringContainsString( '&lt;img', $messages[0] );
+	}
+
+	/**
+	 * Escaping is idempotent in WordPress, so running esc_html() over a license that
+	 * Parser already sanitized must not turn "&amp;" into "&amp;amp;" on the page.
+	 */
+	public function test_benign_license_is_not_double_escaped() {
+		$checker = $this->checker( array( 'readme' => (object) array( 'license' => 'GPLv2 (see LICENSE &amp; COPYING)' ) ) );
+		$checker->check_license();
+
+		$messages = $this->messages( $checker, 'info', 'check_license' );
+		$this->assertCount( 1, $messages );
+		$this->assertStringContainsString( 'LICENSE &amp; COPYING', $messages[0] );
+		$this->assertStringNotContainsString( '&amp;amp;', $messages[0] );
 	}
 
 	/*
@@ -374,12 +393,33 @@ class Block_Plugin_Checker_Test extends TestCase {
 		$messages = $this->messages( $checker, 'warning', 'check_block_json_is_valid' );
 		$this->assertCount( 1, $messages );
 
-		/* The quote survives only as an entity, never as attribute syntax. */
+		// The quote survives only as an entity, never as attribute syntax.
 		$this->assertStringNotContainsString( '" onmouseover', $messages[0] );
 		$this->assertStringContainsString( '&quot; onmouseover', $messages[0] );
+	}
 
-		/* The only quotes left are the two delimiting the href. */
-		$this->assertSame( 2, substr_count( $messages[0], '"' ) );
+	/**
+	 * Block_JSON\Validator formats field names as <code>, so that has to survive the
+	 * wp_kses() pass — while anything it does not emit does not.
+	 */
+	public function test_block_json_error_keeps_code_markup_only() {
+		$checker = $this->checker(
+			array(
+				'path_to_plugin'        => '/tmp/plugin',
+				'block_json_validation' => array(
+					'/tmp/plugin/block.json' => new WP_Error(
+						'error',
+						'One of <code>script</code>, <code>editorScript</code> is required.<img src=x onerror=alert(1)>'
+					),
+				),
+			)
+		);
+		$checker->check_block_json_is_valid();
+
+		$messages = $this->messages( $checker, 'warning', 'check_block_json_is_valid' );
+		$this->assertCount( 1, $messages );
+		$this->assertStringContainsString( '<code>editorScript</code>', $messages[0] );
+		$this->assertStringNotContainsString( '<img', $messages[0] );
 	}
 
 	/**
@@ -429,6 +469,61 @@ class Block_Plugin_Checker_Test extends TestCase {
 		$checker->check_php_function_calls();
 
 		$this->assertCount( 1, $checker->get_results( $expected, 'check_php_function_calls' ) );
+	}
+
+	/*
+	 * Tests for run_check_plugin_repo.
+	 */
+
+	/**
+	 * Data provider for {@see test_rejected_repo_url_is_escaped()}.
+	 *
+	 * The URL is whatever was typed into the form on the validator page, echoed back
+	 * in the rejection message, so it is the rawest input the checker handles. Each
+	 * case here trips a different early return, before any network access.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public static function rejected_repo_url_provider(): array {
+		$payload = '"><img src=x onerror=alert(document.domain)>';
+
+		return array(
+			'unparseable'     => array( 'http://' . $payload ),
+			'wrong host'      => array( 'https://evil.example/' . $payload ),
+			'github, no repo' => array( 'https://github.com/' . $payload ),
+		);
+	}
+
+	/**
+	 * A rejected repository URL is reported back with its markup escaped. Which of
+	 * the early returns fires depends on how far wp_parse_url() gets with the
+	 * payload; every one of them interpolates the URL, so all are covered.
+	 *
+	 * @param string $url URL submitted to the validator.
+	 */
+	#[DataProvider( 'rejected_repo_url_provider' )]
+	public function test_rejected_repo_url_is_escaped( string $url ) {
+		$checker  = $this->checker();
+		$messages = array_map(
+			static fn( $result ) => $result->message,
+			$checker->run_check_plugin_repo( $url )
+		);
+
+		$this->assertCount( 1, $messages );
+		$this->assertStringNotContainsString( '<img', $messages[0] );
+		$this->assertStringContainsString( '&lt;img', $messages[0] );
+	}
+
+	/*
+	 * Tests for get_browser_url.
+	 */
+
+	/**
+	 * A ZIP upload never sets a repo URL, so there is nothing to link to. Returning
+	 * '' rather than null keeps esc_url() off the PHP 8.1 deprecation path.
+	 */
+	public function test_browser_url_is_empty_without_a_repo() {
+		$this->assertSame( '', $this->checker()->get_browser_url( '/tmp/plugin/block.json' ) );
 	}
 
 	/*

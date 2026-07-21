@@ -10,9 +10,9 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 
 /**
- * Exercises Parser end-to-end against fixture readmes, asserting that
- * the URL-bearing headers come out clean for both the bare and markdown
- * autolink forms.
+ * Exercises Parser end-to-end against readmes built inline, asserting that the
+ * URL-bearing headers come out clean for both the bare and markdown autolink
+ * forms, and that the License header is stripped of markup.
  *
  * @group readme-parser
  */
@@ -145,8 +145,8 @@ class Test_Readme_Parser extends TestCase {
 	}
 
 	/**
-	 * A `License:` value that contains a GPL-compatible token passes validation, so it
-	 * gets reported back to reviewers verbatim. It must not carry markup with it.
+	 * The `License:` value is echoed into reviewer-facing output, so Parser must
+	 * strip markup out of it before it is stored.
 	 *
 	 * @param string $header Full header line under test.
 	 */

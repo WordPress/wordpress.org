@@ -336,6 +336,7 @@ class Block_Validator {
 				$output .= "<p class='small'>{$labels['description']}</p>\n";
 			}
 			$output .= "<div class='notice notice-{$type} notice-alt'>\n";
+			// Absent only via the fall-through above: block.json issues, no other errors.
 			foreach ( (array) ( $results_by_type[ $type ] ?? array() ) as $item ) {
 				// Only get details if this is a warning or error.
 				$details = ( 'info' === $type ) ? false : self::get_detailed_help( $item->check_name, $item );
@@ -347,7 +348,7 @@ class Block_Validator {
 					$output .= "<p>{$message}</p>";
 				}
 			}
-			// Collapse block.json warnings into one details at the end of warnings list.
+			// Collapse block.json issues into one details at the end of the errors list.
 			if ( 'error' === $type && ! empty( $block_json_issues ) ) {
 				$messages = array_map( array( __CLASS__, 'sanitize_message' ), wp_list_pluck( $block_json_issues, 'message' ) );
 				$details = '<p>' . implode( '</p><p>', (array) $messages ) . '</p>';
@@ -378,7 +379,6 @@ class Block_Validator {
 	 * are interpolated; this is the backstop for anything that is missed.
 	 *
 	 * @param string $message A message recorded by Block_Plugin_Checker.
-	 *
 	 * @return string The message, safe to output as HTML.
 	 */
 	protected static function sanitize_message( $message ) {

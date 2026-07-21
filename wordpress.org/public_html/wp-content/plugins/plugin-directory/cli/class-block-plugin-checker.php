@@ -86,6 +86,9 @@ class Block_Plugin_Checker {
 	 * Return a trac/github browser link to a file in the plugin.
 	 *
 	 * @param string $file The file pathname.
+	 *
+	 * @return string A browser URL for the file, or an empty string if the plugin
+	 *                has no repository that can be linked to.
 	 */
 	public function get_browser_url( $file ) {
 		if ( !empty( $this->repo_url ) ) {
@@ -97,7 +100,7 @@ class Block_Plugin_Checker {
 			}
 		}
 
-		// No repo to link to (e.g. a ZIP upload) — return an empty string rather than null.
+		// No linkable repo — a ZIP upload, or a repo URL in an unrecognised form.
 		return '';
 	}
 
@@ -163,6 +166,7 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
+				// translators: %s is the URL that was submitted.
 				sprintf( __( 'Invalid url: %s', 'wporg-plugins' ), esc_html( $url ) ),
 				$url
 			);
@@ -173,6 +177,7 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
+				// translators: %s is the URL that was submitted.
 				sprintf( __( 'URL must be GitHub or plugins.svn.wordpress.org: %s', 'wporg-plugins' ), esc_html( $url ) ),
 				$url
 			);
@@ -185,6 +190,7 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
+					// translators: %s is the URL that was submitted.
 					sprintf( __( 'URL must be a plugin repository: %s', 'wporg-plugins' ), esc_html( $url ) ),
 					$url
 				);
@@ -215,6 +221,7 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
+					// translators: %s is the URL that was submitted.
 					sprintf( __( 'URL must be a plugin repository: %s', 'wporg-plugins' ), esc_html( $url ) ),
 					$url
 				);
@@ -251,7 +258,8 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
-				sprintf( __( 'Error fetching repository %s: %s', 'wporg-plugins' ), esc_html( $svn_url ), esc_html( $export['errors'][0]['error_code'] ?? 'unknown error' ) ),
+				// translators: %1$s is the repository URL, %2$s is the error code.
+				sprintf( __( 'Error fetching repository %1$s: %2$s', 'wporg-plugins' ), esc_html( $svn_url ), esc_html( $export['errors'][0]['error_code'] ?? 'unknown error' ) ),
 				$export['errors'] ?? array()
 			);
 			return false;
@@ -422,11 +430,12 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
-					sprintf( 
-						__( 'PHP error %s in %s', 'wporg-plugins' ),
-						esc_html( $php_calls->get_error_message() ), 
+					sprintf(
+						// translators: %1$s is the PHP error message, %2$s is a link to the file.
+						__( 'PHP error %1$s in %2$s', 'wporg-plugins' ),
+						esc_html( $php_calls->get_error_message() ),
 						sprintf( '<a href="%s">%s</a>', 
-							esc_url( $this->get_browser_url( $filename ) . '#L' . $php_calls->get_error_data() ), 
+							esc_url( $this->get_browser_url( $filename ) . '#L' . $php_calls->get_error_data() ),
 							esc_html( $this->relative_filename( $filename ) )
 						)
 					),
@@ -735,7 +744,7 @@ class Block_Plugin_Checker {
 									'error',
 									// translators: %1$s is the namespace, %2$s is a link to the plugin.
 									sprintf( __( 'Please use a unique block namespace. Namespace %1$s is already used by %2$s.' ), 
-										'<code>' . esc_html( $this->get_namespace( $block ) ) . '</code>', 
+										'<code>' . esc_html( $this->get_namespace( $block ) ) . '</code>',
 										'<a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $post->post_title ) . '</a>'
 									)
 								);
@@ -748,7 +757,7 @@ class Block_Plugin_Checker {
 								'warning',
 								// translators: %1$s is the namespace, %2$s is a link to the plugin.
 								sprintf( __( 'Please use a unique block namespace. Namespace %1$s is already used by %2$s.' ), 
-									'<code>' . esc_html( $this->get_namespace( $block ) ) . '</code>', 
+									'<code>' . esc_html( $this->get_namespace( $block ) ) . '</code>',
 									'<a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $post->post_title ) . '</a>'
 								)
 							);
