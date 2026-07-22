@@ -54,11 +54,9 @@ function wporg_login_rest_username_exists( $request ) {
 			'available' => false,
 			'error' => sprintf(
 				__( 'That username is already in use.', 'wporg' ) . '<br>' .
-				/* translators: %s Email address */
-				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . 
-				/* translators: %s Email address */
-				'<br>' . __( 'Please contact %s for more details.', 'wporg' ),
-				'<code>' . esc_html( $pending['user_email'] ) . '</code>',
+				__( 'Your account is pending approval. You will receive an email to set your password when approved.', 'wporg' ) . '<br>' .
+				/* translators: %s Support email address */
+				__( 'Please contact %s for more details.', 'wporg' ),
 				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
 			),
 			'avatar' => get_avatar( $pending['user_email'], 64 ),
@@ -122,11 +120,9 @@ function wporg_login_rest_email_in_use( $request ) {
 			'available' => false,
 			'error' => sprintf(
 				__( 'That email address already has an account.', 'wporg' ) . '<br>' .
-				/* translators: %s Email address */
-				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . 
-				/* translators: %s Email address */
-				'<br>' . __( 'Please contact %s for more details.', 'wporg' ),
-				'<code>' . esc_html( $pending['user_email'] ) . '</code>',
+				__( 'Your account is pending approval. You will receive an email to set your password when approved.', 'wporg' ) . '<br>' .
+				/* translators: %s Support email address */
+				__( 'Please contact %s for more details.', 'wporg' ),
 				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
 			),
 			'avatar' => get_avatar( $email, 64 ),
