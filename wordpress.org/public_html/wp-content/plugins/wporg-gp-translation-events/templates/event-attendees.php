@@ -58,6 +58,7 @@ Templates::header(
 					</td>
 					<td>
 					<form class="add-remove-user-as-host" method="post" action="<?php echo esc_url( Urls::event_toggle_host( $event->id(), $attendee->user_id() ) ); ?>">
+						<?php wp_nonce_field( "toggle_translation_event_host_{$event->id()}_{$attendee->user_id()}" ); ?>
 						<?php if ( $attendee->is_host() ) : ?>
 							<input type="submit" class="button is-primary remove-as-host" value="<?php echo esc_attr__( 'Remove as host', 'gp-translation-events' ); ?>"/>
 							<?php else : ?>
