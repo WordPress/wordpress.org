@@ -52,3 +52,20 @@ tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+/*
+ * Resolve test classes from this directory by name, so the shared `*_Test_Case` bases load
+ * on demand rather than needing to be required in dependency order. PHPUnit loads the test
+ * files themselves; this only ever fires for a base a test file extends.
+ *
+ * Registered last, so it's consulted only for classes nothing else resolved.
+ */
+spl_autoload_register(
+	function ( $class ) {
+		$file = __DIR__ . '/' . $class . '.php';
+
+		if ( file_exists( $file ) ) {
+			require_once $file;
+		}
+	}
+);
