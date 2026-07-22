@@ -299,7 +299,7 @@ class API_Update_Updater {
 	/**
 	 * Whether a release is being held out of `update_source` by a block.
 	 *
-	 * A block is set by a reviewer, and cleared by a force-release.
+	 * A block is set either by a high-risk security scan or by a reviewer.
 	 *
 	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
 	 * @return bool True when the release is being held out of `update_source`.
@@ -385,14 +385,22 @@ class API_Update_Updater {
 
 		// A force-release also overrides a block; note that in the audit trail.
 		if ( self::is_release_blocked( $release ) ) {
-			Tools::audit_log(
-				sprintf(
+			$block = $release['release_block'];
+			if ( isset( $block['risk_score'] ) ) {
+				$message = sprintf(
+					'Force-released version %1$s, overriding the security-scan block (risk score %2$s). Reason: %3$s',
+					$version,
+					$block['risk_score'],
+					$reason
+				);
+			} else {
+				$message = sprintf(
 					'Force-released version %1$s, overriding the release block. Reason: %2$s',
 					$version,
 					$reason
-				),
-				$post
-			);
+				);
+			}
+			Tools::audit_log( $message, $post );
 		} else {
 			Tools::audit_log(
 				sprintf(
@@ -421,13 +429,15 @@ class API_Update_Updater {
 	/**
 	 * Hold a plugin's current version out of `update_source` until it's force-released.
 	 *
-	 * The counterpart to force_release(). Callers apply their own preconditions first; this
-	 * only refuses when there's nothing left to hold.
+	 * The counterpart to force_release(), shared by the reviewer control and the security
+	 * scan. Callers apply their own preconditions first; this only refuses when there's
+	 * nothing left to hold.
 	 *
 	 * Capability checks must be performed by the caller.
 	 *
 	 * @param string $plugin_slug The plugin slug.
-	 * @param array  $block       The block to record: 'reason' and 'blocked_by'.
+	 * @param array  $block       The block to record: 'reason' and 'blocked_by' for a reviewer
+	 *                            block, or 'scan_id' and 'risk_score' for a security scan.
 	 * @return bool True when the version was held, false when there was nothing to hold.
 	 */
 	public static function block_release( $plugin_slug, $block ) {
@@ -458,14 +468,21 @@ class API_Update_Updater {
 			)
 		);
 
-		Tools::audit_log(
-			sprintf(
+		if ( isset( $block['risk_score'] ) ) {
+			$message = sprintf(
+				'A security scan blocked version %1$s from being served (risk score %2$s).',
+				$version,
+				$block['risk_score']
+			);
+		} else {
+			$message = sprintf(
 				'Blocked version %1$s from being served to sites. Reason: %2$s',
 				$version,
 				$block['reason']
-			),
-			$post
-		);
+			);
+		}
+
+		Tools::audit_log( $message, $post );
 
 		// Re-run so a version scheduled to serve at cooldown-end is held now instead.
 		self::update_single_plugin( $plugin_slug );

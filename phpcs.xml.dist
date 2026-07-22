@@ -145,6 +145,8 @@
 		<properties>
 			<property name="custom_test_classes" type="array">
 				<element value="Release_Block_Test_Case"/>
+				<element value="Gandalf_Scan_Test_Case"/>
+				<element value="Gandalf_Callback_Test_Case"/>
 			</property>
 		</properties>
 	</rule>

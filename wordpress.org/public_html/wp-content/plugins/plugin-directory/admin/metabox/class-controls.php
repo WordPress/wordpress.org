@@ -81,11 +81,21 @@ class Controls {
 			<p>
 			<?php
 			if ( $blocked ) {
-				printf(
-					/* translators: %s: version */
-					esc_html__( 'Version %s is blocked and is being held from sites. Force-releasing overrides the block.', 'wporg-plugins' ),
-					esc_html( $version )
-				);
+				$block = $release['release_block'];
+				if ( isset( $block['risk_score'] ) ) {
+					printf(
+						/* translators: 1: version, 2: security scan risk score */
+						esc_html__( 'Version %1$s is blocked by a security scan (risk score %2$s) and is being held from sites. Force-releasing overrides the block.', 'wporg-plugins' ),
+						esc_html( $version ),
+						esc_html( $block['risk_score'] )
+					);
+				} else {
+					printf(
+						/* translators: %s: version */
+						esc_html__( 'Version %s is blocked and is being held from sites. Force-releasing overrides the block.', 'wporg-plugins' ),
+						esc_html( $version )
+					);
+				}
 			} else {
 				printf(
 					/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
