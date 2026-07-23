@@ -4,9 +4,6 @@ namespace Wporg\TranslationEvents\Theme_2024;
 use GP_Locales;
 use Wporg\TranslationEvents\Project\Project_Repository;
 
-
-
-
 register_block_type(
 	'wporg-translate-events-2024/event-projects',
 	array(

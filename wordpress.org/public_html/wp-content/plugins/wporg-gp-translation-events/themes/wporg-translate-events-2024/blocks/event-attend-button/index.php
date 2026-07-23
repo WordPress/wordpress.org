@@ -26,7 +26,7 @@ register_block_type(
 		<div class="event-details-join">
 				<?php if ( $event->end()->is_in_the_past() ) : ?>
 					<?php if ( $user_is_attending ) : ?>
-						<p class="has-charcoal-4-color has-text-color has-small-font-size" style="margin-top:var(--wp--preset--spacing--10);margin-bottom:var(--wp--preset--spacing--20)"><?php esc_html_e( 'You attended this event.', 'wporg-translate-events-2024' ); ?></p>
+					<p class="has-charcoal-4-color has-text-color has-small-font-size" style="margin-top:var(--wp--preset--spacing--10);margin-bottom:var(--wp--preset--spacing--20)"><?php esc_html_e( 'You attended this event.', 'wporg-translate-events-2024' ); ?></p>
 				<?php endif; ?>
 			<?php elseif ( $user_is_contributor ) : ?>
 				<?php // Contributors can't un-attend so don't show anything. ?>
@@ -41,7 +41,7 @@ register_block_type(
 							<?php if ( ! $event->is_hybrid() ) : ?>
 								<p class="onsite-btn-note">
 									<?php echo wp_kses_post( __( '<strong>Note:</strong> This is an onsite-only event. Please only click attend if you are at the event. The host might otherwise remove you.', 'gp-translation-events' ) ); ?>
-								</p>	
+								</p>
 							<?php endif; ?>
 						<?php endif; ?>
 						<?php if ( $event->is_remote() || $event->is_hybrid() ) : ?>

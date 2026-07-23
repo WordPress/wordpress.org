@@ -3,8 +3,6 @@
 use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Urls;
 
-
-
 register_block_type(
 	'wporg-translate-events-2024/event-stats',
 	array(

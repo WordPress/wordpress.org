@@ -5,7 +5,6 @@ use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Translation_Events;
 
-
 register_block_type(
 	'wporg-translate-events-2024/event-contribution-summary',
 	array(

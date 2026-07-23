@@ -1,7 +1,7 @@
 <?php namespace Wporg\TranslationEvents\Theme_2024;
+
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Urls;
-
 
 register_block_type(
 	'wporg-translate-events-2024/event-title',
@@ -26,10 +26,10 @@ register_block_type(
 			}
 			?>
 			<h3 class="wporg-marker-list-item__title">
-					<a href="<?php echo esc_url( $url ); ?>">
-						<?php echo esc_html( $event->title() ); ?>
-					</a>
-				</h3>
+				<a href="<?php echo esc_url( $url ); ?>">
+					<?php echo esc_html( $event->title() ); ?>
+				</a>
+			</h3>
 			<?php
 			return ob_get_clean();
 		},

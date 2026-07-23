@@ -8,7 +8,7 @@ $user_is_attending   = $attributes['user_is_attending'];
 $user_is_contributor = $attributes['user_is_contributor'];
 
 ?>
-<!-- wp:wporg-translate-events-2024/event-attend-button 
+<!-- wp:wporg-translate-events-2024/event-attend-button
 <?php
 echo wp_json_encode(
 	array(
@@ -46,7 +46,7 @@ if ( $event->is_past() ) :
 
 <!-- wp:wporg-translate-events-2024/event-description <?php echo wp_json_encode( array( 'id' => $event->id() ) ); ?> /-->
 <!-- wp:wporg-translate-events-2024/contributor-list <?php echo wp_json_encode( array( 'id' => $event->id() ) ); ?> /-->
-<!-- wp:wporg-translate-events-2024/attendee-list 
+<!-- wp:wporg-translate-events-2024/attendee-list
 <?php
 echo wp_json_encode(
 	array(
