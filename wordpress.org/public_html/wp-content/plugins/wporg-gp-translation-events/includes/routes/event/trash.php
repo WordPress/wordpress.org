@@ -2,7 +2,7 @@
 
 namespace Wporg\TranslationEvents\Routes\Event;
 
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Urls;
@@ -13,7 +13,7 @@ use Wporg\TranslationEvents\Urls;
  * If the event is currently trashed, it will be un-trashed.
  */
 class Trash_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 
 	public function __construct() {
 		parent::__construct();

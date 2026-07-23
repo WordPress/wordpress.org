@@ -2,9 +2,11 @@
 
 namespace Wporg\TranslationEvents\Routes\Event;
 
+use DateTimeImmutable;
 use DateTimeInterface;
+use WP_Post;
 use Wporg\TranslationEvents\Event\Event;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Urls;
@@ -13,7 +15,7 @@ use Wporg\TranslationEvents\Urls;
  * Displays the RSS page.
  */
 class Rss_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 
 	/**
 	 * Rss_Route constructor.
@@ -29,11 +31,21 @@ class Rss_Route extends Route {
 	 * @return void
 	 */
 	public function handle(): void {
-		$current_events_query = $this->event_repository->get_current_and_upcoming_events( 1, 20 );
-		$rss_feed             = $this->get_rss_20_header( $current_events_query->events );
+		$args                = array(
+			'posts_per_page'      => 20,
+			'post_type'           => Translation_Events::CPT,
+			'post_status'         => 'publish',
+			'post_parent__not_in' => array( 0 ),
+		);
+		$last_20_events_post = get_posts( $args );
 
-		foreach ( $current_events_query->events as $event ) {
-			$rss_feed .= $this->get_item( $event );
+		$this->send_headers( $this->document_pub_and_build_date( $last_20_events_post, 'Y-m-d H:i:s' ) );
+		$rss_feed = $this->get_rss_20_header( $last_20_events_post );
+		foreach ( $last_20_events_post as $event_post ) {
+			$event = $this->event_repository->get_event( $event_post->ID );
+			if ( $event ) {
+				$rss_feed .= $this->get_item( $event );
+			}
 		}
 		$rss_feed .= $this->get_rss_20_footer();
 
@@ -44,7 +56,81 @@ class Rss_Route extends Route {
 	}
 
 	/**
+	 * Sends headers, Based on send_headers() in the WP Class.
+	 *
+	 * @param string $post_modified_gmt   The post modified GMT date.
+	 */
+	private function send_headers( string $post_modified_gmt ) {
+		$headers       = array();
+		$status        = null;
+		$exit_required = false;
+		$date_format   = 'D, d M Y H:i:s';
+
+		$wp_last_modified = mysql2date( $date_format, $post_modified_gmt, false ) . ' GMT';
+		$wp_etag          = '"' . md5( $wp_last_modified ) . '"';
+
+		$headers['Last-Modified'] = $wp_last_modified;
+		$headers['ETag']          = $wp_etag;
+
+		// Support for conditional GET.
+		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
+			$client_etag = wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			// Remove the "W/" if the client has sent it (weak validation).
+			if ( 0 === strpos( $client_etag, 'W/' ) ) {
+				$client_etag = substr( $client_etag, 2 );
+			}
+		} else {
+			$client_etag = '';
+		}
+
+		if ( isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
+			$client_last_modified = trim( wp_unslash( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		} else {
+			$client_last_modified = '';
+		}
+
+		// If string is empty, return 0. If not, attempt to parse into a timestamp.
+		$client_modified_timestamp = $client_last_modified ? strtotime( $client_last_modified ) : 0;
+
+		// Make a timestamp for our most recent modification.
+		$wp_modified_timestamp = strtotime( $wp_last_modified );
+
+		if ( ( $client_last_modified && $client_etag )
+			? ( ( $client_modified_timestamp >= $wp_modified_timestamp ) && ( $client_etag === $wp_etag ) )
+			: ( ( $client_modified_timestamp >= $wp_modified_timestamp ) || ( $client_etag === $wp_etag ) )
+		) {
+			$status        = 304;
+			$exit_required = true;
+		}
+
+		if ( ! empty( $status ) ) {
+			status_header( $status );
+		}
+
+		// If Last-Modified is set to false, it should not be sent (no-cache situation).
+		if ( isset( $headers['Last-Modified'] ) && false === $headers['Last-Modified'] ) {
+			unset( $headers['Last-Modified'] );
+
+			if ( ! headers_sent() ) {
+				header_remove( 'Last-Modified' );
+			}
+		}
+
+		if ( ! headers_sent() ) {
+			foreach ( (array) $headers as $name => $field_value ) {
+				header( "{$name}: {$field_value}" );
+			}
+		}
+
+		if ( $exit_required ) {
+			exit;
+		}
+	}
+
+	/**
 	 * Get the RSS 2.0 header.
+	 *
+	 * @param WP_Post[] $events Array of last events, as WP_Post objects.
 	 *
 	 * @return string
 	 */
@@ -74,7 +160,14 @@ class Rss_Route extends Route {
 		return $footer;
 	}
 
-	private function get_item( Event $event ) {
+	/**
+	 * Get a RSS 2.0 item from an event.
+	 *
+	 * @param Event $event The event.
+	 *
+	 * @return string The item.
+	 */
+	private function get_item( Event $event ): string {
 		$item  = '      <item>';
 		$item .= '          <title>' . esc_html( $event->title() ) . '</title>';
 		$item .= '          <link>' . esc_url( home_url( gp_url( gp_url_join( 'events', $event->slug() ) ) ) ) . '</link>';
@@ -91,22 +184,30 @@ class Rss_Route extends Route {
 	/**
 	 * Get the most recent event's pub date.
 	 *
-	 * @param Event[] $events Array of events to use for the pub date.
+	 * If there are no events at all, returns the date of the Unix epoch.
+	 *
+	 * @param WP_Post[] $events_post Array of last events, as WP_Post objects.
+	 * @param string    $format      Date format.
 	 *
 	 * @return string|null
 	 */
-	private function document_pub_and_build_date( array $events ): ?string {
-		if ( empty( $events ) ) {
-			return null;
+	private function document_pub_and_build_date( array $events_post, string $format = DATE_RSS ): ?string {
+		// Default to the Unix epoch.
+		$pub_date = new DateTimeImmutable( '@0' );
+		if ( empty( $events_post ) ) {
+			return $pub_date->format( DATE_RSS );
 		}
-
-		$pub_date = $events[0]->updated_at();
-		foreach ( $events as $event ) {
-			if ( $event->updated_at() > $pub_date ) {
+		$first_event = $this->event_repository->get_event( $events_post[0]->ID );
+		if ( $first_event ) {
+			$pub_date = $first_event->updated_at();
+		}
+		foreach ( $events_post as $event_post ) {
+			$event = $this->event_repository->get_event( $event_post->ID );
+			if ( $event && ( $event->updated_at() > $pub_date ) ) {
 				$pub_date = $event->updated_at();
 			}
 		}
 
-		return $pub_date->format( DATE_RSS );
+		return $pub_date->format( $format );
 	}
 }

@@ -20,7 +20,9 @@
 		"browsehappy:env": "wp-env --config browsehappy/.wp-env.json",
 		"translate:env": "wp-env --config translate/.wp-env.json",
 		"translate:import": "npm run translate:env -- run cli -- wp eval-file wp-content/env-bin/import-from-wporg.php",
-		"translate:refresh": "npm run translate:env -- run cli -- wp option delete wporg_translate_env_seeded"
+		"translate:refresh": "npm run translate:env -- run cli -- wp option delete wporg_translate_env_seeded",
+		"translate:test:env": "wp-env --config translate/.wp-env.test.json",
+		"translate:test": "npm run translate:test:env -- start && npm run translate:test:env -- run tests-cli --env-cwd=wp-content/plugins/wporg-gp-translation-events phpunit"
 	},
 	"devDependencies": {
 		"@wordpress/env": "^11"

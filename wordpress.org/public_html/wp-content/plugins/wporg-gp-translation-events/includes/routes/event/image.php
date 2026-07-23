@@ -3,7 +3,7 @@
 namespace Wporg\TranslationEvents\Routes\Event;
 
 use Wporg\TranslationEvents\Routes\Route;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Translation_Events;
 
 /**
@@ -12,9 +12,9 @@ use Wporg\TranslationEvents\Translation_Events;
 class Image_Route extends Route {
 
 	/**
-	 * @var Event_Repository_Interface
+	 * @var Event_Repository
 	 */
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 
 	/**
 	 * Image_Route constructor.
@@ -73,7 +73,6 @@ class Image_Route extends Route {
 
 		header( 'Content-type: image/png' );
 		imagepng( $image );
-		imagedestroy( $image );
 	}
 
 	/**

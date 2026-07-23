@@ -11,9 +11,9 @@ use WP_Query;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Translation_Events;
 
-class Event_Repository implements Event_Repository_Interface {
-	private const POST_TYPE = Translation_Events::CPT;
-
+class Event_Repository {
+	private const POST_TYPE      = Translation_Events::CPT;
+	private const CACHE_DURATION = DAY_IN_SECONDS;
 	protected DateTimeImmutable $now;
 	private Attendee_Repository $attendee_repository;
 
@@ -88,6 +88,7 @@ class Event_Repository implements Event_Repository_Interface {
 		}
 
 		$this->update_event_meta( $event );
+		$this->invalidate_cache( $event->id() );
 		return $event->id();
 	}
 
@@ -96,6 +97,7 @@ class Event_Repository implements Event_Repository_Interface {
 		if ( ! $result ) {
 			return false;
 		}
+		$this->invalidate_cache( $event->id() );
 		return $event;
 	}
 
@@ -121,10 +123,15 @@ class Event_Repository implements Event_Repository_Interface {
 			array( '%d' ),
 		);
 		// phpcs:enable
+		$this->invalidate_cache( $event->id() );
 		return $event;
 	}
 
 	public function get_event( int $id ): ?Event {
+		if ( wp_cache_get( 'translation_event_' . $id ) ) {
+			return wp_cache_get( 'translation_event_' . $id );
+		}
+
 		$post = $this->get_event_post( $id );
 		if ( ! $post ) {
 			return null;
@@ -148,7 +155,7 @@ class Event_Repository implements Event_Repository_Interface {
 			);
 			$event->set_id( $post->ID );
 			$event->set_slug( $post->post_name );
-
+			wp_cache_set( 'translation_event_' . $post->ID, $event, '', self::CACHE_DURATION );
 			return $event;
 		} catch ( Exception $e ) {
 			// This should not be possible as it means data in the database is invalid.
@@ -551,6 +558,10 @@ class Event_Repository implements Event_Repository_Interface {
 		$events = array();
 		foreach ( $posts as $post ) {
 			$meta = $this->get_event_meta( $post->ID );
+			if ( empty( $meta['start'] ) || empty( $meta['end'] ) || empty( $meta['timezone'] ) ) {
+				// If the event is missing any of the required meta fields, we skip it.
+				continue;
+			}
 
 			$title = $post->post_title;
 			if ( empty( $title ) ) {
@@ -578,8 +589,11 @@ class Event_Repository implements Event_Repository_Interface {
 			$events[] = $event;
 
 		}
-
-		return new Events_Query_Result( $events, $page, $query->max_num_pages );
+		$num_of_pages = $query->max_num_pages;
+		if ( -1 === $page_size ) {
+			$num_of_pages = empty( $events ) ? 0 : 1;
+		}
+		return new Events_Query_Result( $events, $page, $num_of_pages );
 	}
 
 	private function get_event_post( int $event_id ): ?WP_Post {
@@ -630,6 +644,10 @@ class Event_Repository implements Event_Repository_Interface {
 		update_post_meta( $event->id(), '_event_timezone', $event->timezone()->getName() );
 		update_post_meta( $event->id(), '_hosts', $hosts_ids );
 		update_post_meta( $event->id(), '_event_attendance_mode', $event->attendance_mode() );
+	}
+
+	private function invalidate_cache( $event_id ) {
+		wp_cache_delete( 'translation_event_' . $event_id );
 	}
 }
 

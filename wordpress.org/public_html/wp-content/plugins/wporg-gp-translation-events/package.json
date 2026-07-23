@@ -1,0 +1,16 @@
+{
+  "name": "wporg-translate-events",
+  "version": "1.0.0",
+  "description": "Plugin that powers translate.wordpress.org/events",
+  "main": "build/index.js",
+  "scripts": {
+    "start": "wp-scripts start",
+    "build": "wp-scripts build",
+    "format": "wp-scripts format",
+    "lint:css": "wp-scripts lint-style",
+    "lint:js": "wp-scripts lint-js"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^28.3.0"
+  }
+}

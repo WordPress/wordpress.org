@@ -12,10 +12,10 @@ use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Urls;
 
 class Event_Form_Handler {
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 	private Notifications_Schedule $notifications_schedule;
 
-	public function __construct( DateTimeImmutable $now, Event_Repository_Interface $event_repository ) {
+	public function __construct( DateTimeImmutable $now, Event_Repository $event_repository ) {
 		$this->event_repository       = $event_repository;
 		$this->notifications_schedule = new Notifications_Schedule( $now, $this->event_repository );
 	}
@@ -88,9 +88,6 @@ class Event_Form_Handler {
 			// Create or update event.
 
 			try {
-				if ( 'edit_event' === $action && $event ) {
-					$form_data['event_timezone'] = $event->timezone()->getName();
-				}
 				$new_event = $this->parse_form_data( $form_data );
 			} catch ( InvalidTimeZone $e ) {
 				wp_send_json_error( esc_html__( 'Invalid time zone.', 'gp-translation-events' ), 422 );
@@ -218,13 +215,17 @@ class Event_Form_Handler {
 		}
 
 		try {
-			$start = new Event_Start_Date( $event_start, $timezone );
+			$start_utc = new DateTime( $event_start, $timezone );
+			$start_utc = $start_utc->setTimezone( new DateTimeZone( 'UTC' ) );
+			$start     = new Event_Start_Date( $start_utc->format( 'Y-m-d H:i:s' ), $timezone );
 		} catch ( Exception $e ) {
 			throw new InvalidStart();
 		}
 
 		try {
-			$end = new Event_End_Date( $event_end, $timezone );
+			$end_utc = new DateTime( $event_end, $timezone );
+			$end_utc = $end_utc->setTimezone( new DateTimeZone( 'UTC' ) );
+			$end     = new Event_End_Date( $end_utc->format( 'Y-m-d H:i:s' ), $timezone );
 		} catch ( Exception $e ) {
 			throw new InvalidEnd();
 		}
