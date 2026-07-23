@@ -1,9 +1,17 @@
 <?php
+/**
+ * Value object for the translation statistics of an event.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 namespace Wporg\TranslationEvents\Stats;
 
 use Exception;
 
+/**
+ * Translation statistics for an event, one row per locale plus totals.
+ */
 class Event_Stats {
 	/**
 	 * Associative array of rows, with the locale as key.
@@ -12,10 +20,18 @@ class Event_Stats {
 	 */
 	private array $rows = array();
 
+	/**
+	 * Totals across all locales.
+	 *
+	 * @var Stats_Row
+	 */
 	private Stats_Row $totals;
 
 	/**
-	 * Add a stats row.
+	 * Add a stats row for a locale.
+	 *
+	 * @param string    $locale The locale of the row.
+	 * @param Stats_Row $row    The row to add.
 	 *
 	 * @throws Exception When incorrect locale is passed.
 	 */
@@ -26,6 +42,11 @@ class Event_Stats {
 		$this->rows[ $locale ] = $row;
 	}
 
+	/**
+	 * Set the totals across all locales.
+	 *
+	 * @param Stats_Row $totals The totals row.
+	 */
 	public function set_totals( Stats_Row $totals ) {
 		$this->totals = $totals;
 	}
@@ -56,6 +77,11 @@ class Event_Stats {
 		return $this->rows;
 	}
 
+	/**
+	 * Get the totals across all locales.
+	 *
+	 * @return Stats_Row The totals row.
+	 */
 	public function totals(): Stats_Row {
 		return $this->totals;
 	}

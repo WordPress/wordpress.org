@@ -1,15 +1,43 @@
 <?php
+/**
+ * Tests for the Stats_Listener class.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 use Wporg\Tests\Base_Test as TestCase;
 use Wporg\TranslationEvents\Tests\Event_Factory;
 use Wporg\TranslationEvents\Tests\Stats_Factory;
 use Wporg\TranslationEvents\Tests\Translation_Factory;
 
+/**
+ * Tests for the Stats_Listener class.
+ */
 class Stats_Listener_Test extends TestCase {
+	/**
+	 * Factory used to create translations for the tests.
+	 *
+	 * @var Translation_Factory
+	 */
 	private Translation_Factory $translation_factory;
+
+	/**
+	 * Factory used to create events for the tests.
+	 *
+	 * @var Event_Factory
+	 */
 	private Event_Factory $event_factory;
+
+	/**
+	 * Factory used to inspect stored stats.
+	 *
+	 * @var Stats_Factory
+	 */
 	private Stats_Factory $stats_factory;
 
+	/**
+	 * Sets up the test case before each test runs.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->translation_factory = new Translation_Factory( $this->factory );
@@ -19,6 +47,9 @@ class Stats_Listener_Test extends TestCase {
 		$this->set_normal_user_as_current();
 	}
 
+	/**
+	 * Translations are not recorded as stats for draft events.
+	 */
 	public function test_does_not_store_action_for_draft_events() {
 		$user_id = get_current_user_id();
 		$this->event_factory->create_draft( $this->now );
@@ -31,6 +62,9 @@ class Stats_Listener_Test extends TestCase {
 		$this->assertEquals( 0, $stats_count );
 	}
 
+	/**
+	 * Translations are not recorded as stats for inactive events.
+	 */
 	public function test_does_not_store_action_for_inactive_events() {
 		$user_id = get_current_user_id();
 
@@ -44,6 +78,9 @@ class Stats_Listener_Test extends TestCase {
 		$this->assertEquals( 0, $stats_count );
 	}
 
+	/**
+	 * Translations are not recorded as stats when the user is not attending any active event.
+	 */
 	public function test_does_not_store_action_if_user_not_attending() {
 		$user_id = get_current_user_id();
 
@@ -65,6 +102,9 @@ class Stats_Listener_Test extends TestCase {
 		$this->assertEquals( 0, $stats_count );
 	}
 
+	/**
+	 * Creating a translation records a create action for each active event the user attends.
+	 */
 	public function test_stores_action_create() {
 		$user_id = get_current_user_id();
 
@@ -92,13 +132,20 @@ class Stats_Listener_Test extends TestCase {
 		$this->assertEquals( 'aa', $event2_stats['locale'] );
 	}
 
+	/**
+	 * Approving a translation records an approve action for each active event the user attends.
+	 */
 	public function test_stores_action_approve() {
 		$user_id = get_current_user_id();
 
 		$event1_id = $this->event_factory->create_active( $this->now, array( $user_id ) );
 		$event2_id = $this->event_factory->create_active( $this->now, array( $user_id ) );
 
-		/** @var GP_Translation $translation */
+		/**
+		 * The translation created for the attending user.
+		 *
+		 * @var GP_Translation $translation
+		 */
 		$translation = $this->translation_factory->create( $user_id );
 		// Stats_Listener will have been called.
 		// Clean up stats because we won't care about the "created" action.
@@ -125,13 +172,20 @@ class Stats_Listener_Test extends TestCase {
 		$this->assertEquals( 'aa', $event2_stats['locale'] );
 	}
 
+	/**
+	 * Rejecting a translation records a reject action for each active event the user attends.
+	 */
 	public function test_stores_action_reject() {
 		$user_id = get_current_user_id();
 
 		$event1_id = $this->event_factory->create_active( $this->now, array( $user_id ) );
 		$event2_id = $this->event_factory->create_active( $this->now, array( $user_id ) );
 
-		/** @var GP_Translation $translation */
+		/**
+		 * The translation created for the attending user.
+		 *
+		 * @var GP_Translation $translation
+		 */
 		$translation = $this->translation_factory->create( $user_id );
 		// Stats_Listener will have been called.
 		// Clean up stats because we won't care about the "created" action.
@@ -158,13 +212,20 @@ class Stats_Listener_Test extends TestCase {
 		$this->assertEquals( 'aa', $event2_stats['locale'] );
 	}
 
+	/**
+	 * Requesting changes on a translation records a request_changes action for each active event the user attends.
+	 */
 	public function test_stores_action_request_changes() {
 		$user_id = get_current_user_id();
 
 		$event1_id = $this->event_factory->create_active( $this->now, array( $user_id ) );
 		$event2_id = $this->event_factory->create_active( $this->now, array( $user_id ) );
 
-		/** @var GP_Translation $translation */
+		/**
+		 * The translation created for the attending user.
+		 *
+		 * @var GP_Translation $translation
+		 */
 		$translation = $this->translation_factory->create( $user_id );
 		// Stats_Listener will have been called.
 		// Clean up stats because we won't care about the "created" action.

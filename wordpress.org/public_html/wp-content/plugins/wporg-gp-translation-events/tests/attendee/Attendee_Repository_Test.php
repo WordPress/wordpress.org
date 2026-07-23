@@ -1,4 +1,9 @@
 <?php
+/**
+ * Tests for the Attendee_Repository class.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 use Wporg\Tests\Base_Test as TestCase;
 use Wporg\TranslationEvents\Attendee\Attendee;
@@ -7,13 +12,42 @@ use Wporg\TranslationEvents\Tests\Stats_Factory;
 use Wporg\TranslationEvents\Tests\Event_Factory;
 use Wporg\TranslationEvents\Tests\Translation_Factory;
 
+/**
+ * Tests for the Attendee_Repository class.
+ */
 class Attendee_Repository_Test extends TestCase {
+	/**
+	 * The attendee repository under test.
+	 *
+	 * @var Attendee_Repository
+	 */
 	private Attendee_Repository $repository;
+
+	/**
+	 * Factory used to create stats rows for the tests.
+	 *
+	 * @var Stats_Factory
+	 */
 	private Stats_Factory $stats_factory;
+
+	/**
+	 * Factory used to create events for the tests.
+	 *
+	 * @var Event_Factory
+	 */
 	private Event_Factory $event_factory;
+
+	/**
+	 * Factory used to create translations for the tests.
+	 *
+	 * @var Translation_Factory
+	 */
 	private Translation_Factory $translation_factory;
 
 
+	/**
+	 * Sets up the test case before each test runs.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->repository          = new Attendee_Repository();
@@ -22,16 +56,25 @@ class Attendee_Repository_Test extends TestCase {
 		$this->translation_factory = new Translation_Factory( $this->factory );
 	}
 
+	/**
+	 * Inserting an attendee with a zero event ID throws an invalid event id error.
+	 */
 	public function test_add_attendee_invalid_event_id() {
 		$this->expectExceptionMessage( 'invalid event id' );
 		$this->repository->insert_attendee( new Attendee( 0, 1 ) );
 	}
 
+	/**
+	 * Inserting an attendee with a zero user ID throws an invalid user id error.
+	 */
 	public function test_add_attendee_invalid_user_id() {
 		$this->expectExceptionMessage( 'invalid user id' );
 		$this->repository->insert_attendee( new Attendee( 1, 0 ) );
 	}
 
+	/**
+	 * Inserted attendees are persisted with their host and new-contributor flags.
+	 */
 	public function test_insert_attendee() {
 		$event1_id = 1;
 		$event2_id = 2;
@@ -54,6 +97,9 @@ class Attendee_Repository_Test extends TestCase {
 		$this->assertEquals( 1, $rows[1]->is_new_contributor );
 	}
 
+	/**
+	 * Removing an attendee deletes only that event's row for the user.
+	 */
 	public function test_remove_attendee() {
 		$event1_id = 1;
 		$event2_id = 2;
@@ -69,6 +115,9 @@ class Attendee_Repository_Test extends TestCase {
 		$this->assertEquals( $event2_id, $rows[0]->event_id );
 	}
 
+	/**
+	 * The attendee for an event and user is returned with correct host and contributor flags, or null when absent.
+	 */
 	public function test_get_attendee_for_event_for_user() {
 		$event1_id = 1;
 		$event2_id = 2;
@@ -104,6 +153,9 @@ class Attendee_Repository_Test extends TestCase {
 		$this->assertNull( $this->repository->get_attendee_for_event_for_user( $event2_id, $user2_id ) );
 	}
 
+	/**
+	 * A user's attendees across multiple events are returned keyed by event ID with correct flags.
+	 */
 	public function test_get_attendees_for_user_for_events() {
 		$event1_id = 1;
 		$event2_id = 2;
@@ -161,6 +213,9 @@ class Attendee_Repository_Test extends TestCase {
 		$this->assertEmpty( $this->repository->get_attendees_for_user_for_events( $user2_id, array( $event3_id ) ) );
 	}
 
+	/**
+	 * Only host attendees are returned for an event, keyed by user ID.
+	 */
 	public function test_get_hosts() {
 		$event1_id = 1;
 		$event2_id = 2;
@@ -192,6 +247,9 @@ class Attendee_Repository_Test extends TestCase {
 		$this->assertEquals( $host21, $hosts[ $user1_id ] );
 	}
 
+	/**
+	 * All attendees for an event are returned keyed by user ID with correct host and contributor flags.
+	 */
 	public function test_get_attendees() {
 		$event1_id = 1;
 		$event2_id = 2;
@@ -239,6 +297,9 @@ class Attendee_Repository_Test extends TestCase {
 		$this->assertTrue( $attendees[ $user2_id ]->is_contributor() );
 	}
 
+	/**
+	 * Only attendees without any contributions are returned as not contributing.
+	 */
 	public function test_get_attendees_not_contributing() {
 		$event1_id = 1;
 		$user1_id  = 42;
@@ -266,6 +327,9 @@ class Attendee_Repository_Test extends TestCase {
 		$this->assertFalse( $attendees[ $user3_id ]->is_host() );
 	}
 
+	/**
+	 * Rechecking clears the new-contributor flag for attendees who have since passed the contribution threshold.
+	 */
 	public function test_recheck_new_contributor_status() {
 		$user1_id = 42;
 		$user2_id = 43;
@@ -298,6 +362,11 @@ class Attendee_Repository_Test extends TestCase {
 		$this->assertFalse( $attendees[ $user2_id ]->is_new_contributor() );
 	}
 
+	/**
+	 * Returns all rows from the event attendees table ordered by event and user ID.
+	 *
+	 * @return array The attendee table rows.
+	 */
 	private function all_table_rows(): array {
 		global $wpdb, $gp_table_prefix;
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

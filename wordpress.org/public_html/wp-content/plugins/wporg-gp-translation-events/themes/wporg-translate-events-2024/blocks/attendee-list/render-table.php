@@ -1,4 +1,10 @@
 <?php
+/**
+ * Table view for the attendee-list block, with host and attendance-mode controls.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 use Wporg\TranslationEvents\Urls;
 
 ?>

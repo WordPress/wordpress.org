@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-projects block, which renders the translation projects associated with an event.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use GP_Locales;

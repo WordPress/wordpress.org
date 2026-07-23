@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-start block, which renders an event's start date and time.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

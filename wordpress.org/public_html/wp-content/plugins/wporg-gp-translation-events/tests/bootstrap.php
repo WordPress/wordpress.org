@@ -1,4 +1,9 @@
 <?php
+/**
+ * PHPUnit bootstrap file that loads WordPress, GlotPress, and the plugin under test.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 use Wporg\TranslationEvents\Upgrade;
 
@@ -7,6 +12,13 @@ if ( ! $_tests_dir ) {
 	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 }
 
+/**
+ * Build an absolute path to a file inside the GlotPress plugin directory.
+ *
+ * @param string $path Path relative to the GlotPress plugin root.
+ *
+ * @return string Absolute path to the file inside GlotPress.
+ */
 function _glotpress_path( string $path ): string {
 	$plugins_dir = dirname( __DIR__, 2 );
 
@@ -62,7 +74,7 @@ require_once _glotpress_path( '/tests/phpunit/lib/testcase-route.php' );
 require_once _glotpress_path( '/tests/phpunit/lib/testcase-request.php' );
 
 // Require our own test code.
-require_once __DIR__ . '/base-test.php';
-require_once __DIR__ . '/lib/event-factory.php';
-require_once __DIR__ . '/lib/stats-factory.php';
-require_once __DIR__ . '/lib/translation-factory.php';
+require_once __DIR__ . '/class-base-test.php';
+require_once __DIR__ . '/lib/class-event-factory.php';
+require_once __DIR__ . '/lib/class-stats-factory.php';
+require_once __DIR__ . '/lib/class-translation-factory.php';

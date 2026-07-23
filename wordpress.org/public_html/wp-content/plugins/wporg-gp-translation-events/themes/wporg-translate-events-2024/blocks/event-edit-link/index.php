@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-edit-link block, which renders a link to edit the current event.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

@@ -1,4 +1,10 @@
 <?php
+/**
+ * Template for the events homepage, listing current, upcoming, and past events.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 $event_ids             = $attributes['event_ids'] ?? array();

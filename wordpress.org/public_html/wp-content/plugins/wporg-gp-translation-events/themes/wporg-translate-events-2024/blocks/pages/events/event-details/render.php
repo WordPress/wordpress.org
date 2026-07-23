@@ -1,4 +1,10 @@
 <?php
+/**
+ * Template for the event details page, rendering the attend button and event information.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Attendee\Attendee;

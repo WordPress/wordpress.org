@@ -1,4 +1,10 @@
 <?php
+/**
+ * Template for the my-events page, listing the events the current user has created or attends.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 $event_ids = $attributes['event_ids'] ?? array();

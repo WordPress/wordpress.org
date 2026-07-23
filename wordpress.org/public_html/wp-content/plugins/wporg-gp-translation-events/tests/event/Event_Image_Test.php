@@ -1,4 +1,9 @@
 <?php
+/**
+ * Tests for the event image route and social metadata.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 use Wporg\Tests\Base_Test as TestCase;
 use Wporg\TranslationEvents\Routes\Event\Image_Route;
@@ -6,6 +11,9 @@ use Wporg\TranslationEvents\Templates;
 use Wporg\TranslationEvents\Tests\Event_Factory;
 use Wporg\TranslationEvents\Urls;
 
+/**
+ * Tests for the event image route and social metadata.
+ */
 class Event_Image_Test extends TestCase {
 	/**
 	 * Test that when the header template is fired, it generates the social metadata.

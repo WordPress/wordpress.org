@@ -1,4 +1,11 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024;
+<?php
+/**
+ * Registers the event-stats block, which renders a table of an event's translation statistics.
+ *
+ * @package wporg-translate-events-2024
+ */
+
+namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Urls;

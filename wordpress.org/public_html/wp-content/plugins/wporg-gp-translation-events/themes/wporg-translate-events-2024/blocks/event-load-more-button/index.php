@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-load-more-button block, which renders a button that loads more events for a given filter.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

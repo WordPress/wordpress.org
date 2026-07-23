@@ -1,4 +1,9 @@
 <?php
+/**
+ * List view for the attendee-list block.
+ *
+ * @package wporg-translate-events-2024
+ */
 
 if ( empty( $attendees_not_contributing ) || ! current_user_can( 'edit_translation_event', $event_id ) ) {
 	return;

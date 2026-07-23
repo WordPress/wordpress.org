@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-flag block, which renders a flag showing whether the current user is hosting, attending, hosted, or attended the event.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

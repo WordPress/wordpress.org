@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-attend-button block, which renders the attend, join, or login control for an event.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

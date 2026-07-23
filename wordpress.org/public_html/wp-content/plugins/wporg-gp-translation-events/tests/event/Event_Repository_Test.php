@@ -1,4 +1,9 @@
 <?php
+/**
+ * Tests for the Event_Repository class.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 use Wporg\Tests\Base_Test as TestCase;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
@@ -9,12 +14,41 @@ use Wporg\TranslationEvents\Event\Event_Start_Date;
 use Wporg\TranslationEvents\Tests\Event_Factory;
 use Wporg\TranslationEvents\Tests\Stats_Factory;
 
+/**
+ * Tests for the Event_Repository class.
+ */
 class Event_Repository_Test extends TestCase {
+	/**
+	 * Factory used to create events for the tests.
+	 *
+	 * @var Event_Factory
+	 */
 	private Event_Factory $event_factory;
+
+	/**
+	 * Factory used to create stats rows for the tests.
+	 *
+	 * @var Stats_Factory
+	 */
 	private Stats_Factory $stats_factory;
+
+	/**
+	 * Repository used to inspect an event's attendees.
+	 *
+	 * @var Attendee_Repository
+	 */
 	private Attendee_Repository $attendee_repository;
+
+	/**
+	 * The event repository under test.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $repository;
 
+	/**
+	 * Sets up the test case before each test runs.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->event_factory       = new Event_Factory();
@@ -25,6 +59,9 @@ class Event_Repository_Test extends TestCase {
 		$this->set_normal_user_as_current();
 	}
 
+	/**
+	 * Getting an event returns null when the post is of a different post type.
+	 */
 	public function test_get_event_returns_null_when_post_does_not_not_have_correct_type() {
 		$id = wp_insert_post(
 			array(
@@ -34,15 +71,24 @@ class Event_Repository_Test extends TestCase {
 		$this->assertNull( $this->repository->get_event( $id ) );
 	}
 
+	/**
+	 * Getting an event returns null when no post with that ID exists.
+	 */
 	public function test_get_event_returns_null_when_event_does_not_exist() {
 		$this->assertNull( $this->repository->get_event( 42 ) );
 	}
 
+	/**
+	 * Getting an event returns null for a regular post that is not an event.
+	 */
 	public function test_get_event_returns_null_when_post_is_not_event() {
 		$post_id = $this->factory()->post->create();
 		$this->assertNull( $this->repository->get_event( $post_id ) );
 	}
 
+	/**
+	 * A stored event is loaded back with its dates, timezone, slug, status, title, and description.
+	 */
 	public function test_get_event() {
 		$start    = $this->now->modify( '-1 hours' );
 		$end      = $this->now->modify( '+1 hours' );
@@ -60,6 +106,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertStringStartsWith( 'Event content', $event->description() );
 	}
 
+	/**
+	 * Inserting an event assigns it an ID and persists all of its fields and permalink.
+	 */
 	public function test_create_event() {
 		$start       = ( new Event_Start_Date( 'now' ) )->modify( '-1 hours' );
 		$end         = ( new Event_End_Date( 'now' ) )->modify( '+1 hours' );
@@ -93,6 +142,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( '/events/' . $start->format( 'Y' ) . '/foo-title', wp_make_link_relative( get_the_permalink( $event->id() ) ) );
 	}
 
+	/**
+	 * Updating an event persists the changed dates, timezone, status, title, and description.
+	 */
 	public function test_update_event() {
 		$event_id = $this->event_factory->create_active( $this->now );
 		$event    = $this->repository->get_event( $event_id );
@@ -117,6 +169,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $updated_description, $updated_event->description() );
 	}
 
+	/**
+	 * Trashing an event sets its status to trash.
+	 */
 	public function test_trash_event() {
 		$event_id = $this->event_factory->create_active( $this->now );
 
@@ -127,6 +182,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( 'trash', $event->status() );
 	}
 
+	/**
+	 * Deleting an event removes it along with its attendees and stats, leaving other events untouched.
+	 */
 	public function test_delete_event() {
 		$user_id = get_current_user_id();
 
@@ -153,6 +211,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertNotEmpty( $this->stats_factory->get_by_event_id( $another_event_id ) );
 	}
 
+	/**
+	 * Getting current events returns only active events, ordered and paginated.
+	 */
 	public function test_get_active_events() {
 		$event1_id = $this->event_factory->create_active( $this->now->modify( '-1 minute' ) );
 		$event2_id = $this->event_factory->create_active( $this->now );
@@ -178,6 +239,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event2_id, $events[0]->id() );
 	}
 
+	/**
+	 * Getting upcoming events returns only future events in start order.
+	 */
 	public function test_get_upcoming_events() {
 		$event1_id = $this->event_factory->create_inactive_future( $this->now );
 		$event2_id = $this->event_factory->create_inactive_future( $this->now->modify( '+1 minute' ) );
@@ -190,6 +254,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event2_id, $events[1]->id() );
 	}
 
+	/**
+	 * Getting past events returns only ended events, most recent first.
+	 */
 	public function test_get_past_events() {
 		$event1_id = $this->event_factory->create_inactive_past( $this->now->modify( '-1 minute' ) );
 		$event2_id = $this->event_factory->create_inactive_past( $this->now );
@@ -202,6 +269,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event1_id, $events[1]->id() );
 	}
 
+	/**
+	 * Getting trashed events returns only events that have been trashed.
+	 */
 	public function test_get_trashed_events() {
 		$event1_id = $this->event_factory->create_active( $this->now );
 		$event2_id = $this->event_factory->create_inactive_past( $this->now );
@@ -220,6 +290,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event2_id, $events[0]->id() );
 	}
 
+	/**
+	 * Getting a user's events returns every event they attend, ordered and paginated.
+	 */
 	public function test_get_events_for_user() {
 		$user_id   = get_current_user_id();
 		$event1_id = $this->event_factory->create_inactive_past( $this->now );
@@ -245,6 +318,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event2_id, $events[0]->id() );
 	}
 
+	/**
+	 * Getting a user's current events returns only the active events they attend, paginated.
+	 */
 	public function test_get_current_events_for_user() {
 		$user_id   = get_current_user_id();
 		$event1_id = $this->event_factory->create_active( $this->now, array( $user_id ) );
@@ -272,6 +348,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event2_id, $events[0]->id() );
 	}
 
+	/**
+	 * Getting a user's current and upcoming events excludes their past events, ordered and paginated.
+	 */
 	public function test_get_current_and_upcoming_events_for_user() {
 		$user_id   = get_current_user_id();
 		$event1_id = $this->event_factory->create_active( $this->now->modify( '-1 minute' ), array( $user_id ) );
@@ -299,6 +378,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event2_id, $events[0]->id() );
 	}
 
+	/**
+	 * Getting a user's past events returns only the ended events they attend, most recent first and paginated.
+	 */
 	public function test_get_past_events_for_user() {
 		$user_id   = get_current_user_id();
 		$event1_id = $this->event_factory->create_inactive_past( $this->now, array( $user_id ) );
@@ -325,6 +407,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event2_id, $events[0]->id() );
 	}
 
+	/**
+	 * Getting events created by a user returns only that author's events, newest first.
+	 */
 	public function test_get_events_created_by_user() {
 		$user_id   = get_current_user_id();
 		$event1_id = $this->event_factory->create_inactive_past( $this->now );
@@ -346,6 +431,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEquals( $event1_id, $events[3]->id() );
 	}
 
+	/**
+	 * Getting current events returns an empty array when no active events exist.
+	 */
 	public function test_get_current_events_when_no_current_events_exist() {
 		$result = $this->repository->get_current_events();
 		$this->assertIsArray( $result->events );
@@ -360,6 +448,9 @@ class Event_Repository_Test extends TestCase {
 		$this->assertEmpty( $result->events );
 	}
 
+	/**
+	 * Getting current events returns only active events with correct page counts across pages.
+	 */
 	public function test_get_current_events() {
 		$event1_id = $this->event_factory->create_active( $this->now );
 		$event2_id = $this->event_factory->create_active( $this->now );

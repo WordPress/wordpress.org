@@ -1,4 +1,9 @@
 <?php
+/**
+ * Tests for the Attendee_Adder class.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 use PHPUnit\Framework\MockObject\MockObject;
 use Wporg\Tests\Base_Test as TestCase;
@@ -10,18 +15,55 @@ use Wporg\TranslationEvents\Tests\Event_Factory;
 use Wporg\TranslationEvents\Tests\Stats_Factory;
 use Wporg\TranslationEvents\Tests\Translation_Factory;
 
+/**
+ * Tests for the Attendee_Adder class.
+ */
 class Attendee_Adder_Test extends TestCase {
 	/**
+	 * Mocked attendee repository the adder writes to.
+	 *
 	 * @var MockObject|Attendee_Repository
 	 */
 	private $attendee_repository;
 
+	/**
+	 * The attendee adder under test.
+	 *
+	 * @var Attendee_Adder
+	 */
 	private Attendee_Adder $adder;
+
+	/**
+	 * Repository used to load events created by the factory.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
+
+	/**
+	 * Factory used to create events for the tests.
+	 *
+	 * @var Event_Factory
+	 */
 	private Event_Factory $event_factory;
+
+	/**
+	 * Factory used to create translations for the tests.
+	 *
+	 * @var Translation_Factory
+	 */
 	private Translation_Factory $translation_factory;
+
+	/**
+	 * Factory used to inspect stored stats.
+	 *
+	 * @var Stats_Factory
+	 */
 	private Stats_Factory $stats_factory;
 
+	/**
+	 * Sets up the test case before each test runs.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->attendee_repository = $this->createMock( Attendee_Repository::class );
@@ -34,6 +76,9 @@ class Attendee_Adder_Test extends TestCase {
 		$this->set_normal_user_as_current();
 	}
 
+	/**
+	 * Adding an attendee to an event inserts it through the repository.
+	 */
 	public function test_add() {
 		$user_id  = get_current_user_id();
 		$event_id = $this->event_factory->create_active( $this->now );
@@ -48,6 +93,9 @@ class Attendee_Adder_Test extends TestCase {
 		$this->adder->add_to_event( $event, $attendee );
 	}
 
+	/**
+	 * Attendees with fewer than eleven prior translations are marked as new contributors.
+	 */
 	public function test_sets_is_new_contributor() {
 		$user1_id = 52;
 		$user2_id = 53;
@@ -89,6 +137,9 @@ class Attendee_Adder_Test extends TestCase {
 		$this->assertTrue( $attendee23->is_new_contributor() );
 	}
 
+	/**
+	 * Adding an attendee to an active event imports only their in-window, non-rejected translations as stats.
+	 */
 	public function test_import_stats_if_active_event() {
 		$user_id = get_current_user_id();
 
@@ -103,8 +154,10 @@ class Attendee_Adder_Test extends TestCase {
 		$translation1 = $this->translation_factory->create( $user_id );
 		$translation2 = $this->translation_factory->create( $user_id );
 
-		/** @var GP_Translation $translation_rejected  */
-		/** @var GP_Translation $translation_old  */
+		/*
+		 * Create translations that are later rejected or marked old,
+		 * and must therefore not be imported.
+		 */
 		$translation_rejected = $this->translation_factory->create( $user_id );
 		$translation_old      = $this->translation_factory->create( $user_id );
 
@@ -136,6 +189,9 @@ class Attendee_Adder_Test extends TestCase {
 		$this->assertEquals( $translation2->date_added, $stats1['happened_at'] );
 	}
 
+	/**
+	 * Joining an event imports the existing translation and later translations are counted immediately.
+	 */
 	public function test_stats_for_inactive_then_active_event() {
 		$user_id = get_current_user_id();
 
@@ -160,6 +216,9 @@ class Attendee_Adder_Test extends TestCase {
 		$this->assertEquals( 2, $this->stats_factory->get_count() );
 	}
 
+	/**
+	 * Adding an attendee to an inactive event imports no stats.
+	 */
 	public function test_does_not_import_stats_if_inactive_event() {
 		$user_id  = get_current_user_id();
 		$event_id = $this->event_factory->create_inactive_future( $this->now );

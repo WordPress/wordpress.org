@@ -1,4 +1,13 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024; ?>
+<?php
+/**
+ * Markup for the site header block, including the global header, local navigation bar, and breadcrumbs.
+ *
+ * @package wporg-translate-events-2024
+ */
+
+namespace Wporg\TranslationEvents\Theme_2024;
+
+?>
 
 <!-- wp:wporg/global-header {"style":{"border":{"bottom":{"color":"var:preset|color|white-opacity-15","style":"solid","width":"1px"}}}} /-->
 

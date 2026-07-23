@@ -1,4 +1,9 @@
 <?php
+/**
+ * Factory for creating translation events in tests.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 namespace Wporg\TranslationEvents\Tests;
 
@@ -10,7 +15,15 @@ use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Translation_Events;
 
+/**
+ * Creates translation event posts with sensible defaults for tests.
+ */
 class Event_Factory extends WP_UnitTest_Factory_For_Post {
+	/**
+	 * Sets up the default generation definitions for event posts.
+	 *
+	 * @param WP_UnitTest_Factory|null $factory The parent factory, if any.
+	 */
 	public function __construct( $factory = null ) {
 		parent::__construct( $factory );
 		$this->default_generation_definitions = array(
@@ -22,6 +35,13 @@ class Event_Factory extends WP_UnitTest_Factory_For_Post {
 		);
 	}
 
+	/**
+	 * Creates an active event and switches it to draft status.
+	 *
+	 * @param DateTimeImmutable $now The reference time used to place the event.
+	 *
+	 * @return int The created event's post ID.
+	 */
 	public function create_draft( DateTimeImmutable $now ): int {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 
@@ -39,6 +59,14 @@ class Event_Factory extends WP_UnitTest_Factory_For_Post {
 		return $event_id;
 	}
 
+	/**
+	 * Creates an event that is currently active, starting at the given time.
+	 *
+	 * @param DateTimeImmutable $now          The event's start time.
+	 * @param int[]             $attendee_ids IDs of users to attend the event.
+	 *
+	 * @return int The created event's post ID.
+	 */
 	public function create_active( DateTimeImmutable $now, array $attendee_ids = array() ): int {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 
@@ -50,6 +78,14 @@ class Event_Factory extends WP_UnitTest_Factory_For_Post {
 		);
 	}
 
+	/**
+	 * Creates an event that has already ended in the past.
+	 *
+	 * @param DateTimeImmutable $now          The reference time used to place the event.
+	 * @param int[]             $attendee_ids IDs of users to attend the event.
+	 *
+	 * @return int The created event's post ID.
+	 */
 	public function create_inactive_past( DateTimeImmutable $now, array $attendee_ids = array() ): int {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 
@@ -61,6 +97,14 @@ class Event_Factory extends WP_UnitTest_Factory_For_Post {
 		);
 	}
 
+	/**
+	 * Creates an event that starts in the future.
+	 *
+	 * @param DateTimeImmutable $now          The reference time used to place the event.
+	 * @param int[]             $attendee_ids IDs of users to attend the event.
+	 *
+	 * @return int The created event's post ID.
+	 */
 	public function create_inactive_future( DateTimeImmutable $now, array $attendee_ids = array() ): int {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 
@@ -72,6 +116,16 @@ class Event_Factory extends WP_UnitTest_Factory_For_Post {
 		);
 	}
 
+	/**
+	 * Creates an event with the given start, end, timezone, and attendees.
+	 *
+	 * @param DateTimeImmutable $start        The event's start time.
+	 * @param DateTimeImmutable $end          The event's end time.
+	 * @param DateTimeZone      $timezone     The event's timezone.
+	 * @param int[]             $attendee_ids IDs of users to attend the event.
+	 *
+	 * @return int The created event's post ID.
+	 */
 	public function create_event( DateTimeImmutable $start, DateTimeImmutable $end, DateTimeZone $timezone, array $attendee_ids ): int {
 		$attendee_repository = new Attendee_Repository();
 		$event_id            = $this->create();
