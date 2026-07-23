@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -285,7 +286,7 @@ class Release_Confirmation {
 	/**
 	 * Render a single line describing the cooldown state of a release: pending serve time.
 	 * Skipped for releases without a cooldown delay (feature off at release creation, or
-	 * force-released), discarded releases, releases that haven't moved past
+	 * force-released), discarded releases, blocked releases, releases that haven't moved past
 	 * confirmation/processing, or where the cooldown window has elapsed.
 	 *
 	 * @param array $data The release row from Plugin_Directory::get_releases().
@@ -297,6 +298,15 @@ class Release_Confirmation {
 		}
 
 		if ( ! empty( $data['discarded'] ) ) {
+			return;
+		}
+
+		/*
+		 * A block leaves the delay and the release date untouched, so the countdown below
+		 * would keep promising a serve time that no longer applies. Say nothing rather than
+		 * name a time the release won't be served at.
+		 */
+		if ( API_Update_Updater::is_release_blocked( $data ) ) {
 			return;
 		}
 
@@ -470,8 +480,8 @@ class Release_Confirmation {
 	 * Surfaces an in-cooldown notice to committers on the plugin's public page.
 	 *
 	 * Bails when the viewer isn't a committer, when there's no current release in
-	 * an active cooldown window, or when the release was force-released
-	 * (release_delay = 0 ⇒ no cooldown).
+	 * an active cooldown window, when the release is blocked, or when the release was
+	 * force-released (release_delay = 0 ⇒ no cooldown).
 	 *
 	 * @param WP_Post $post The currently displayed post.
 	 */
@@ -489,6 +499,15 @@ class Release_Confirmation {
 
 		$release = Plugin_Directory::get_release( $post, $version );
 		if ( ! $release ) {
+			return;
+		}
+
+		/*
+		 * A block leaves the delay and the release date untouched, so the notice below would
+		 * keep naming a serve time that no longer applies. Say nothing rather than promise a
+		 * release that's being held.
+		 */
+		if ( API_Update_Updater::is_release_blocked( $release ) ) {
 			return;
 		}
 

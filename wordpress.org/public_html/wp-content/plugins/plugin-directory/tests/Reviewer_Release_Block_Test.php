@@ -38,11 +38,17 @@ class Reviewer_Release_Block_Test extends Release_Block_Test_Case {
 	protected function setUp(): void {
 		parent::setUp();
 
+		/*
+		 * Suffixed so an interrupted run that skips tearDown() doesn't leave a login behind
+		 * that fails the insert — and with it every test in the class — on the next run.
+		 */
+		$login = 'reviewer-block-user-' . uniqid();
+
 		$reviewer_id = wp_insert_user(
 			array(
-				'user_login' => 'reviewer-block-user',
+				'user_login' => $login,
 				'user_pass'  => 'password',
-				'user_email' => 'reviewer-block-user@example.org',
+				'user_email' => $login . '@example.org',
 			)
 		);
 		$this->assertNotInstanceOf( WP_Error::class, $reviewer_id );
@@ -61,6 +67,9 @@ class Reviewer_Release_Block_Test extends Release_Block_Test_Case {
 			$_POST['release_action_reason'],
 			$_REQUEST['_wpnonce']
 		);
+
+		delete_transient( 'settings_errors' );
+		remove_filter( 'redirect_post_location', array( Controls::class, 'flag_settings_updated' ) );
 
 		wp_set_current_user( 0 );
 		wp_delete_user( $this->reviewer->ID );
@@ -102,6 +111,17 @@ class Reviewer_Release_Block_Test extends Release_Block_Test_Case {
 	 * block is recorded with the reason and reviewer, and any deferred serve is cancelled.
 	 */
 	public function test_a_block_holds_the_in_cooldown_version() {
+		/*
+		 * Run the updater first so the cooldown actually schedules the deferred serve. Without
+		 * it there's no event to cancel, and the assertion below passes whether or not the
+		 * block clears one.
+		 */
+		API_Update_Updater::update_single_plugin( self::SLUG );
+		$this->assertNotFalse(
+			wp_next_scheduled( 'release_to_update_api:' . self::SLUG ),
+			'precondition: the cooldown scheduled a deferred serve'
+		);
+
 		$result = API_Update_Updater::block_release( self::SLUG, $this->reviewer_block() );
 
 		$this->assertTrue( $result );
@@ -148,7 +168,8 @@ class Reviewer_Release_Block_Test extends Release_Block_Test_Case {
 	}
 
 	/**
-	 * The force-release over a reviewer block is recorded, without a risk score to name.
+	 * The force-release over a reviewer block is recorded as an override of the block, rather
+	 * than as the plain cooldown bypass.
 	 */
 	public function test_force_release_over_a_reviewer_block_records_the_override() {
 		API_Update_Updater::block_release( self::SLUG, $this->reviewer_block() );
@@ -358,5 +379,220 @@ class Reviewer_Release_Block_Test extends Release_Block_Test_Case {
 
 		$this->assertNull( $this->get_release_block() );
 		$this->assertSame( self::NEW_VERSION, $this->get_served_version() );
+	}
+
+	/**
+	 * A second block is refused rather than merged into the first, so the recorded reason and
+	 * reviewer stay those of the hold that's actually in effect.
+	 */
+	public function test_a_second_block_is_refused() {
+		API_Update_Updater::block_release( self::SLUG, $this->reviewer_block() );
+
+		$result = API_Update_Updater::block_release(
+			self::SLUG,
+			array(
+				'reason'     => 'A different reviewer, a different reason.',
+				'blocked_by' => 'someone-else',
+			)
+		);
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'Suspicious obfuscated code.', $this->get_release_block()['reason'] );
+		$this->assertSame( $this->reviewer->user_login, $this->get_release_block()['blocked_by'] );
+	}
+
+	/**
+	 * Syncing availability rewrites only the closure fields: the rollout data describing the
+	 * version still being served has to survive a close and a re-open untouched, or the
+	 * phased rollout silently turns into a full one.
+	 */
+	public function test_holding_a_version_preserves_the_served_rollout_meta() {
+		$this->unserve();
+		$this->serve(
+			self::SERVED_VERSION,
+			array(
+				'release_time' => 1700000000,
+				'rollout'      => array( 'strategy' => 'manual-updates-24hr' ),
+			)
+		);
+
+		API_Update_Updater::block_release( self::SLUG, $this->reviewer_block() );
+
+		foreach ( array( 'closed', 'publish' ) as $status ) {
+			wp_update_post(
+				array(
+					'ID'          => $this->plugin->ID,
+					'post_status' => $status,
+				)
+			);
+			clean_post_cache( $this->plugin->ID );
+
+			API_Update_Updater::update_single_plugin( self::SLUG );
+		}
+
+		$meta = $this->get_served_meta();
+
+		$this->assertSame( 1700000000, $meta['release_time'] );
+		$this->assertSame( array( 'strategy' => 'manual-updates-24hr' ), $meta['rollout'] );
+		$this->assertArrayNotHasKey( 'closed_at', $meta, 're-opening drops the closure fields' );
+		$this->assertSame( self::SERVED_VERSION, $this->get_served_version() );
+	}
+
+	/**
+	 * Closing a plugin while a version is held records the closure in the served row's meta.
+	 */
+	public function test_closing_a_plugin_records_the_closure_while_a_version_is_held() {
+		API_Update_Updater::block_release( self::SLUG, $this->reviewer_block() );
+
+		wp_update_post(
+			array(
+				'ID'          => $this->plugin->ID,
+				'post_status' => 'closed',
+			)
+		);
+		clean_post_cache( $this->plugin->ID );
+
+		API_Update_Updater::update_single_plugin( self::SLUG );
+
+		$this->assertArrayHasKey( 'closed_at', $this->get_served_meta() );
+	}
+
+	/**
+	 * With no `update_source` row there's nothing being served to correct, so holding a
+	 * version is still recorded and nothing is written.
+	 */
+	public function test_a_block_without_a_served_row_still_holds() {
+		$this->unserve();
+
+		$result = API_Update_Updater::block_release( self::SLUG, $this->reviewer_block() );
+
+		$this->assertTrue( $result );
+		$this->assertNull( $this->get_served_row() );
+	}
+
+	/**
+	 * Render the release section of the Controls metabox for the plugin under test.
+	 *
+	 * The method is protected and reads the post from the global, so both have to be worked
+	 * around to exercise it. Asserting on which controls appear rather than on the markup
+	 * keeps this from breaking on copy changes.
+	 *
+	 * @return string The rendered markup.
+	 */
+	protected function render_controls() {
+		wp_set_current_user( $this->reviewer->ID );
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride -- display_release_cooldown() reads the post from the global; there's no way to inject it.
+		$GLOBALS['post'] = $this->plugin;
+
+		$display = new ReflectionMethod( Controls::class, 'display_release_cooldown' );
+		$display->setAccessible( true );
+
+		ob_start();
+		$display->invoke( null );
+		$output = ob_get_clean();
+
+		unset( $GLOBALS['post'] );
+
+		return $output;
+	}
+
+	/**
+	 * A held version stays force-releasable after its cooldown window has passed — otherwise
+	 * the block would have no way to be lifted from the edit screen.
+	 */
+	public function test_the_metabox_offers_force_release_on_a_held_version_past_its_cooldown() {
+		API_Update_Updater::block_release( self::SLUG, $this->reviewer_block() );
+		$this->elapse_cooldown();
+
+		$output = $this->render_controls();
+
+		$this->assertStringContainsString( 'name="force_release_version"', $output );
+		$this->assertStringNotContainsString( 'name="block_release_version"', $output );
+	}
+
+	/**
+	 * The Block button survives the gap between the cooldown expiring and the deferred serve
+	 * actually running — the version isn't served yet, so it can still be held.
+	 */
+	public function test_the_metabox_offers_block_after_the_cooldown_but_before_the_serve() {
+		$this->elapse_cooldown();
+
+		$output = $this->render_controls();
+
+		$this->assertStringContainsString( 'name="block_release_version"', $output );
+	}
+
+	/**
+	 * Once the version is being served and isn't held, there's nothing left to act on.
+	 */
+	public function test_the_metabox_shows_nothing_once_the_version_is_served() {
+		$this->elapse_cooldown();
+		API_Update_Updater::update_single_plugin( self::SLUG );
+
+		$this->assertSame( self::NEW_VERSION, $this->get_served_version(), 'precondition: version is live' );
+		$this->assertSame( '', trim( $this->render_controls() ) );
+	}
+
+	/**
+	 * A refused block tells the reviewer why, rather than leaving them to infer it from the
+	 * release section having disappeared.
+	 */
+	public function test_the_metabox_reports_a_block_that_was_refused() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- `update_source` lives outside WordPress; there is no API for it.
+		$wpdb->update(
+			$wpdb->prefix . 'update_source',
+			array( 'version' => self::NEW_VERSION ),
+			array( 'plugin_slug' => self::SLUG )
+		);
+
+		$this->submit_controls(
+			array(
+				'block_release_version' => self::NEW_VERSION,
+				'release_action_reason' => 'Suspicious obfuscated code.',
+			)
+		);
+
+		$notice = get_transient( 'settings_errors' );
+
+		$this->assertNotEmpty( $notice );
+		$this->assertSame( 'error', $notice[0]['type'] );
+		$this->assertStringContainsString( 'already being served', $notice[0]['message'] );
+	}
+
+	/**
+	 * A block with no reason says so, instead of silently doing nothing.
+	 */
+	public function test_the_metabox_reports_a_missing_reason() {
+		$this->submit_controls(
+			array(
+				'block_release_version' => self::NEW_VERSION,
+				'release_action_reason' => '   ',
+			)
+		);
+
+		$notice = get_transient( 'settings_errors' );
+
+		$this->assertNotEmpty( $notice );
+		$this->assertStringContainsString( 'a reason is required', $notice[0]['message'] );
+	}
+
+	/**
+	 * A successful block is confirmed, so the reviewer knows the hold took effect.
+	 */
+	public function test_the_metabox_confirms_a_successful_block() {
+		$this->submit_controls(
+			array(
+				'block_release_version' => self::NEW_VERSION,
+				'release_action_reason' => 'Suspicious obfuscated code.',
+			)
+		);
+
+		$notice = get_transient( 'settings_errors' );
+
+		$this->assertNotEmpty( $notice );
+		$this->assertSame( 'updated', $notice[0]['type'] );
 	}
 }
