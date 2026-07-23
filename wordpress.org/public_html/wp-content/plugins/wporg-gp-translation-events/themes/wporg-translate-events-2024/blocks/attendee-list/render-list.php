@@ -6,7 +6,6 @@ if ( empty( $attendees_not_contributing ) || ! current_user_can( 'edit_translati
 
 ?>
 <!-- wp:heading {"style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"medium","fontFamily":"inter"} -->
-<?php // translators: %d is the number of contributors. ?>
 <h4 class="wp-block-heading has-inter-font-family has-medium-font-size" style="font-style:normal;font-weight:700">
 	<?php
 		// translators: %d is the number of contributors.
