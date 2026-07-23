@@ -248,6 +248,34 @@ function wporg_themes_search_default_language_fields( $languages ) {
 add_filter( 'jetpack_search_query_languages', 'wporg_themes_search_default_language_fields' );
 
 /**
+ * Keeps Jetpack Search from handling searches within the Commercial/Community views.
+ *
+ * The `theme_business_model` taxonomy is not part of the site's Elasticsearch
+ * index, so the term filter Jetpack builds from the tax query excludes every
+ * document and these searches return no results. Letting them fall back to the
+ * SQL search path, which handles the tax query correctly, works around that
+ * until the taxonomy is indexed.
+ *
+ * @param bool     $should_handle Whether Jetpack Search should handle the query.
+ * @param WP_Query $query         The WP_Query object.
+ * @return bool
+ */
+function wporg_themes_search_skip_business_model_queries( $should_handle, $query ) {
+	if ( ! $should_handle || ! $query->is_search() ) {
+		return $should_handle;
+	}
+
+	foreach ( (array) $query->get( 'tax_query' ) as $tax_query ) {
+		if ( isset( $tax_query['taxonomy'] ) && 'theme_business_model' === $tax_query['taxonomy'] ) {
+			return false;
+		}
+	}
+
+	return $should_handle;
+}
+add_filter( 'jetpack_search_should_handle_query', 'wporg_themes_search_skip_business_model_queries', 10, 2 );
+
+/**
  * Filters SQL clauses, to prioritize translated themes.
  *
  * @param array $clauses
