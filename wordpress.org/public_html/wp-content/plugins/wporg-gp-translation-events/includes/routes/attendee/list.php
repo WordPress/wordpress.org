@@ -5,7 +5,7 @@ namespace Wporg\TranslationEvents\Routes\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 
 
 /**
@@ -13,7 +13,7 @@ use Wporg\TranslationEvents\Event\Event_Repository_Interface;
  */
 class List_Route extends Route {
 	private Attendee_Repository $attendee_repository;
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 
 
 
@@ -50,12 +50,14 @@ class List_Route extends Route {
 			$attendees = $this->attendee_repository->get_attendees( $event->id() );
 		}
 
+		$this->use_theme();
 		$this->tmpl(
 			'event-attendees',
 			array(
 				'event'            => $event,
 				'attendees'        => $attendees,
 				'is_active_filter' => $is_active_filter,
+				'event_id'         => $event->id(),
 			),
 		);
 	}

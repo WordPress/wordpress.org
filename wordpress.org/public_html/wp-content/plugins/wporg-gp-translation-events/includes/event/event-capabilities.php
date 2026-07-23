@@ -46,13 +46,13 @@ class Event_Capabilities {
 	);
 
 	private DateTimeImmutable $now;
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 	private Stats_Calculator $stats_calculator;
 
 	public function __construct(
 		DateTimeImmutable $now,
-		Event_Repository_Interface $event_repository,
+		Event_Repository $event_repository,
 		Attendee_Repository $attendee_repository,
 		Stats_Calculator $stats_calculator
 	) {

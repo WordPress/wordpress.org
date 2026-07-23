@@ -4,7 +4,7 @@ namespace Wporg\TranslationEvents\Routes\User;
 
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Urls;
@@ -15,7 +15,7 @@ use Wporg\TranslationEvents\Urls;
  * If the user is currently marked as host, they will be marked as not host.
  */
 class Host_Event_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 
 	/**

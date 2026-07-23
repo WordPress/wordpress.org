@@ -2,7 +2,7 @@
 
 namespace Wporg\TranslationEvents\Routes\Event;
 
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
 
@@ -10,7 +10,7 @@ use Wporg\TranslationEvents\Translation_Events;
  * Displays the event edit page.
  */
 class Edit_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 
 	public function __construct() {
 		parent::__construct();
@@ -35,10 +35,12 @@ class Edit_Route extends Route {
 
 		include ABSPATH . 'wp-admin/includes/post.php';
 
+		$this->use_theme();
 		$this->tmpl(
 			'event-edit',
 			array(
-				'event' => $event,
+				'event'    => $event,
+				'event_id' => $event->id(),
 			),
 		);
 	}

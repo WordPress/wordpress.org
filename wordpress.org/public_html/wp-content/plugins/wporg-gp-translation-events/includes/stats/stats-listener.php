@@ -7,7 +7,7 @@ use DateTimeZone;
 use Exception;
 use GP_Translation;
 use GP_Translation_Set;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 
 class Stats_Listener {
 	const ACTION_CREATE          = 'create';
@@ -15,9 +15,9 @@ class Stats_Listener {
 	const ACTION_REJECT          = 'reject';
 	const ACTION_REQUEST_CHANGES = 'request_changes';
 
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 
-	public function __construct( Event_Repository_Interface $event_repository ) {
+	public function __construct( Event_Repository $event_repository ) {
 		$this->event_repository = $event_repository;
 	}
 

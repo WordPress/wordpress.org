@@ -5,7 +5,7 @@ namespace Wporg\TranslationEvents\Routes\User;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Adder;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Urls;
@@ -19,7 +19,7 @@ use Wporg\TranslationEvents\Urls;
  * created since the event started are imported.
  */
 class Attend_Event_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 	private Attendee_Adder $attendee_adder;
 

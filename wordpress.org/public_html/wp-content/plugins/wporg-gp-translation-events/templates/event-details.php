@@ -2,6 +2,7 @@
 /**
  * Template for event page.
  */
+
 namespace Wporg\TranslationEvents\Templates;
 
 use GP_Locales;

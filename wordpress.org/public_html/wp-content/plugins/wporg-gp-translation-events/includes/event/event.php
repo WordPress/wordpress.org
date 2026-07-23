@@ -4,33 +4,7 @@ namespace Wporg\TranslationEvents\Event;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Exception;
-use Throwable;
 use Wporg\TranslationEvents\Translation_Events;
-
-class InvalidTimeZone extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
-		parent::__construct( 'Event time zone is invalid', 0, $previous );
-	}
-}
-
-class InvalidStart extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
-		parent::__construct( 'Event start is invalid', 0, $previous );
-	}
-}
-
-class InvalidEnd extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
-		parent::__construct( 'Event end is invalid', 0, $previous );
-	}
-}
-
-class InvalidStatus extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
-		parent::__construct( 'Event status is invalid', 0, $previous );
-	}
-}
 
 class Event {
 	private int $id = 0;

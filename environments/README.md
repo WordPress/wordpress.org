@@ -152,6 +152,12 @@ npm run translate:refresh
 npm run translate:env -- run cli -- wp <command>
 ```
 
+**Run tests** (the Translation Events plugin's PHPUnit suite, in a dedicated test environment):
+
+```bash
+npm run translate:test
+```
+
 **Local overrides:** create `translate/.wp-env.override.json` (git-ignored) to override config values like `WP_HOME` / `WP_SITEURL` for testing behind a custom hostname.
 
 ### Handbook (in-plugin)

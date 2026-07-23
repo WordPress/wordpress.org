@@ -8,14 +8,14 @@ use GP_Original;
 use Translation_Entry;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Templates;
 
 /**
  * Displays the event translations page.
  */
 class Translations_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 
 	public function __construct() {
 		parent::__construct();

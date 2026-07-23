@@ -48,11 +48,11 @@ use Wporg\TranslationEvents\Urls;
 		?>
 		<div>
 			<label for="event-start"><?php esc_html_e( 'Start Date', 'gp-translation-events' ); ?></label>
-			<input type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event->start()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_start', $event->id() ) ?: 'readonly' ); ?> >
+			<input type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event->start()->setTimezone( $event->timezone() )->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_start', $event->id() ) ?: 'readonly' ); ?> >
 		</div>
 		<div>
 			<label for="event-end"><?php esc_html_e( 'End Date', 'gp-translation-events' ); ?></label>
-			<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() ) ?: 'readonly' ); ?>>
+			<input type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->setTimezone( $event->timezone() )->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() ) ?: 'readonly' ); ?>>
 		</div>
 		<div>
 			<label for="event-timezone"><?php esc_html_e( 'Event Timezone', 'gp-translation-events' ); ?></label>

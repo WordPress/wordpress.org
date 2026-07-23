@@ -2,6 +2,7 @@
 /**
  * Attendees list page.
  */
+
 namespace Wporg\TranslationEvents\Templates;
 
 use Wporg\TranslationEvents\Event\Event;
