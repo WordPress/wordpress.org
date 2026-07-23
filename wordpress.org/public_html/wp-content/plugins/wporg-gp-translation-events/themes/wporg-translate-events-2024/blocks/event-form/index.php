@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-form block, which renders the form for creating or editing an event.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use DateTimeZone;
@@ -69,7 +75,7 @@ register_block_type(
 	<input type="hidden" id="event-id" name="event_id" value="<?php echo esc_attr( $event->id() ); ?>">
 	<input type="hidden" id="event-form-action" name="event_form_action">
 	<!-- wp:form-input -->
-	<div class="wp-block-form-input"><label class="wp-block-form-input__label" for="event-title"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Event Title', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="text" id="event-title" name="event_title" value="<?php echo esc_html( $event->title() ); ?>" <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_title', $event->id() ) ?: 'readonly' ); ?> required size="42"/></label></div>
+	<div class="wp-block-form-input"><label class="wp-block-form-input__label" for="event-title"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Event Title', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="text" id="event-title" name="event_title" value="<?php echo esc_html( $event->title() ); ?>" <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_title', $event->id() ) ? '' : 'readonly' ); ?> required size="42"/></label></div>
 	<!-- /wp:form-input -->
 			<?php $event_url_class = $is_create_form ? 'hide-event-url' : ''; ?>
 			<?php $event_url = $is_create_form ? '' : Urls::event_details_absolute( $event->id() ); ?>
@@ -77,7 +83,7 @@ register_block_type(
 	<div class="wp-block-form-input <?php echo esc_attr( $event_url_class ); ?>"><label class="wp-block-form-input__label" for="event-permalink"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Event URL', 'wporg-translate-events-2024' ); ?></span><a id="event-permalink" class="event-permalink wp-block-form-input__input" href="<?php echo esc_url( $event_url ); ?>" target="_blank"><?php echo esc_url( $event_url ); ?></a></label></div>
 	<!-- /wp:form-input -->
 	<!-- wp:form-input {"type":"textarea"} -->
-<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Event Description', 'wporg-translate-events-2024' ); ?></span><textarea class="wp-block-form-input__input" id="event-description" name="event_description" rows="4" cols="40" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_description', $event->id() ) ?: 'readonly' ); ?>><?php echo esc_html( $event->description() ); ?></textarea>
+<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Event Description', 'wporg-translate-events-2024' ); ?></span><textarea class="wp-block-form-input__input" id="event-description" name="event_description" rows="4" cols="40" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_description', $event->id() ) ? '' : 'readonly' ); ?>><?php echo esc_html( $event->description() ); ?></textarea>
 			<?php
 			echo wp_kses(
 				Event_Text_Snippet::get_snippet_links(),
@@ -95,15 +101,15 @@ register_block_type(
 </label></div>
 <!-- /wp:form-input -->
 		<!-- wp:form-input -->
-		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Start Date', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event->start()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_start', $event->id() ) ?: 'readonly' ); ?>/></label></div>
+		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Start Date', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event->start()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_start', $event->id() ) ? '' : 'readonly' ); ?>/></label></div>
 		<!-- /wp:form-input -->
 		<!-- wp:form-input -->
-		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'End Date', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() ) ?: 'readonly' ); ?>/></label></div>
+		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'End Date', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() ) ? '' : 'readonly' ); ?>/></label></div>
 		<!-- /wp:form-input -->
 
 		<!-- wp:form-input -->
 		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Event Timezone', 'wporg-translate-events-2024' ); ?></span>
-		<select class="wp-block-form-input__input" id="event-timezone" name="event_timezone" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_timezone', $event->id() ) ?: 'disabled' ); ?> >
+		<select class="wp-block-form-input__input" id="event-timezone" name="event_timezone" required <?php echo esc_html( $is_create_form || current_user_can( 'edit_translation_event_timezone', $event->id() ) ? '' : 'disabled' ); ?> >
 				<?php
 				echo wp_kses(
 					wp_timezone_choice( $is_create_form ? null : $event->timezone()->getName(), get_user_locale() ),

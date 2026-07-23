@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the front-cover pattern, a "Get involved" cover with cards to host an event or manage your own events.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Urls;

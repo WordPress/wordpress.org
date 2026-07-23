@@ -1,4 +1,11 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024;
+<?php
+/**
+ * Registers the attendee-list block, which renders the attendees of an event as a list or table.
+ *
+ * @package wporg-translate-events-2024
+ */
+
+namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Attendee\Attendee;

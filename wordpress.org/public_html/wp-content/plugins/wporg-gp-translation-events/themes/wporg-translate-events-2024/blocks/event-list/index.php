@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-list block, which renders a paginated list of events.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

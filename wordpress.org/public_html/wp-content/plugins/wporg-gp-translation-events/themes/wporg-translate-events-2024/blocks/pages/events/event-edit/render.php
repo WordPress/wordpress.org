@@ -1,4 +1,10 @@
 <?php
+/**
+ * Template for the edit-event page, rendering the event form in edit mode.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 $data = array(

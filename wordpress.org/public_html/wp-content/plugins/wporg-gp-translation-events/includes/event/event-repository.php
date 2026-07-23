@@ -499,9 +499,9 @@ class Event_Repository {
 	}
 
 	/**
-	 * @throws InvalidStart
-	 * @throws InvalidEnd
-	 * @throws InvalidStatus
+	 * @throws Invalid_Start
+	 * @throws Invalid_End
+	 * @throws Invalid_Status
 	 * @throws Exception
 	 */
 	private function execute_events_query(

@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-nav-links block, which renders the edit and trash navigation links for an event page.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Urls;

@@ -1,15 +1,43 @@
 <?php
+/**
+ * Tests for the Stats_Calculator class.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 use Wporg\Tests\Base_Test as TestCase;
 use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Tests\Event_Factory;
 use Wporg\TranslationEvents\Tests\Stats_Factory;
 
+/**
+ * Tests for the Stats_Calculator class.
+ */
 class Stats_Calculator_Test extends TestCase {
+	/**
+	 * Factory used to create events for the tests.
+	 *
+	 * @var Event_Factory
+	 */
 	private Event_Factory $event_factory;
+
+	/**
+	 * Factory used to create stats rows for the tests.
+	 *
+	 * @var Stats_Factory
+	 */
 	private Stats_Factory $stats_factory;
+
+	/**
+	 * The stats calculator under test.
+	 *
+	 * @var Stats_Calculator
+	 */
 	private Stats_Calculator $calculator;
 
+	/**
+	 * Sets up the test case before each test runs.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->event_factory = new Event_Factory();
@@ -19,12 +47,18 @@ class Stats_Calculator_Test extends TestCase {
 		$this->set_normal_user_as_current();
 	}
 
+	/**
+	 * An event with no recorded actions reports as having no stats.
+	 */
 	public function test_tells_that_event_has_no_stats() {
 		$user_id  = get_current_user_id();
 		$event_id = $this->event_factory->create_active( $this->now, array( $user_id ) );
 		$this->assertFalse( $this->calculator->event_has_stats( $event_id ) );
 	}
 
+	/**
+	 * An event with at least one recorded action reports as having stats.
+	 */
 	public function test_tells_that_event_has_stats() {
 		$user_id = get_current_user_id();
 
@@ -36,6 +70,9 @@ class Stats_Calculator_Test extends TestCase {
 		$this->assertTrue( $this->calculator->event_has_stats( $event_id ) );
 	}
 
+	/**
+	 * Stats for an event are aggregated per locale and totaled, counting only that event's actions.
+	 */
 	public function test_calculates_stats_for_event() {
 		$user1_id = 42;
 		$user2_id = 43;
@@ -92,6 +129,14 @@ class Stats_Calculator_Test extends TestCase {
 		$this->assertEquals( 3, $stats->totals()->users );
 	}
 
+	/**
+	 * Creates an original and a translation in the given translation set.
+	 *
+	 * @param object $translation_set The translation set to create the original and translation in.
+	 * @param string $status          The status to give the created translation.
+	 *
+	 * @return object The created original.
+	 */
 	private function create_original_and_translation( $translation_set, $status = 'current' ) {
 		$original = $this->factory->original->create( array( 'project_id' => $translation_set->project_id ) );
 		$this->factory->translation->create(

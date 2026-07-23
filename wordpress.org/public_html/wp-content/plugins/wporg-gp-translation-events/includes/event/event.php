@@ -20,9 +20,9 @@ class Event {
 	private string $attendance_mode;
 
 	/**
-	 * @throws InvalidStart
-	 * @throws InvalidEnd
-	 * @throws InvalidStatus
+	 * @throws Invalid_Start
+	 * @throws Invalid_End
+	 * @throws Invalid_Status
 	 */
 	public function __construct(
 		int $author_id,
@@ -141,11 +141,11 @@ class Event {
 	}
 
 	/**
-	 * @throws InvalidStatus
+	 * @throws Invalid_Status
 	 */
 	public function set_status( string $status ): void {
 		if ( ! in_array( $status, array( 'draft', 'publish', 'trash' ), true ) ) {
-			throw new InvalidStatus();
+			throw new Invalid_Status();
 		}
 		$this->status = $status;
 	}
@@ -167,18 +167,18 @@ class Event {
 	}
 
 	/**
-	 * @throws InvalidStart
-	 * @throws InvalidEnd
+	 * @throws Invalid_Start
+	 * @throws Invalid_End
 	 */
 	public function validate_times( Event_Start_Date $start, Event_End_Date $end ) {
 		if ( $end <= $start ) {
-			throw new InvalidEnd();
+			throw new Invalid_End();
 		}
 		if ( ! $start->getTimezone() || 'UTC' !== $start->getTimezone()->getName() ) {
-			throw new InvalidStart();
+			throw new Invalid_Start();
 		}
 		if ( ! $end->getTimezone() || 'UTC' !== $end->getTimezone()->getName() ) {
-			throw new InvalidEnd();
+			throw new Invalid_End();
 		}
 	}
 }

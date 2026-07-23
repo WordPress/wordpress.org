@@ -1,9 +1,19 @@
 <?php
+/**
+ * Bootstraps the Translate Events 2024 theme, registering its blocks and patterns and wiring up navigation menus, breadcrumbs, and social meta tags.
+ *
+ * @package wporg-translate-events-2024
+ */
 
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Urls;
 
+/**
+ * Registers all block types provided by the theme.
+ *
+ * @return void
+ */
 function register_blocks(): void {
 	include_once __DIR__ . '/blocks/header/index.php';
 	include_once __DIR__ . '/blocks/event-excerpt/index.php';
@@ -37,6 +47,11 @@ function register_blocks(): void {
 	include_once __DIR__ . '/blocks/event-load-more-button/index.php';
 }
 
+/**
+ * Registers all block patterns provided by the theme.
+ *
+ * @return void
+ */
 function register_patterns(): void {
 	include_once __DIR__ . '/patterns/front-cover.php';
 }
@@ -171,7 +186,16 @@ function add_social_tags( string $html_title, string $url, string $html_descript
 
 // The $attributes argument cannot be removed despite not being used in the function, because otherwise it won't be
 // in scope for the rendered template.
-// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+/**
+ * Renders a themed page by wrapping the given template in the header and footer blocks.
+ *
+ * @param string $template_path Path to the template file to render.
+ * @param string $title         The page title.
+ * @param array  $attributes    Attributes passed through to the rendered template.
+ *
+ * @return void
+ */
 function render_page( string $template_path, string $title, array $attributes ): void {
 	// The page content must be rendered before the header block, so that styles and scripts of the referenced blocks
 	// are registered.
@@ -216,3 +240,4 @@ function render_page( string $template_path, string $title, array $attributes ):
 		BLOCKS
 	);
 }
+// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed

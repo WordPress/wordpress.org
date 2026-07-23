@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the event-trash-link block, which renders a control to move the current event to trash or restore it.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

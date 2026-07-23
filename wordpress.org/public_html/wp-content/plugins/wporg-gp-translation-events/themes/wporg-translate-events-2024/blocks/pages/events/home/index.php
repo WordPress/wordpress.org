@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the page-events-home block, which renders the events homepage.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 register_block_type(

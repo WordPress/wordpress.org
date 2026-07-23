@@ -1,10 +1,24 @@
 <?php
+/**
+ * The start date of an event.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 namespace Wporg\TranslationEvents\Event;
 
 use Wporg\TranslationEvents\Translation_Events;
 
+/**
+ * The date and time at which an event starts.
+ */
 class Event_Start_Date extends Event_Date {
+	/**
+	 * Prefix a formatted date with a translated "starts" phrase.
+	 *
+	 * @param string $date A formatted date.
+	 * @return string The prefixed date.
+	 */
 	public function get_prefixed_date( $date ): string {
 		if ( $this->is_in_the_past() ) {
 			// translators: %s: A date.
@@ -14,6 +28,11 @@ class Event_Start_Date extends Event_Date {
 		return sprintf( __( 'starts %s', 'gp-translation-events' ), '<span>' . $date . '</span>' );
 	}
 
+	/**
+	 * Generate variable text depending on when the event starts.
+	 *
+	 * @return string The date text.
+	 */
 	public function get_variable_text(): string {
 		$interval       = $this->diff( Translation_Events::now() );
 		$hours_left     = ( $interval->d * 24 ) + $interval->h;

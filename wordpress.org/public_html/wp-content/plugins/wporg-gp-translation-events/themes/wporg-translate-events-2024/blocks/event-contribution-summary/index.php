@@ -1,4 +1,11 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024;
+<?php
+/**
+ * Registers the event-contribution-summary block, which renders a sentence summarizing an event's contribution statistics.
+ *
+ * @package wporg-translate-events-2024
+ */
+
+namespace Wporg\TranslationEvents\Theme_2024;
 
 use WP_User;
 use Wporg\TranslationEvents\Stats\Stats_Calculator;

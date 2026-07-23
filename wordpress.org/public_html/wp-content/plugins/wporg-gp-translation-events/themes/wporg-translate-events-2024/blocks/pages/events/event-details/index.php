@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the page-events-event-details block, which renders an event's details page.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

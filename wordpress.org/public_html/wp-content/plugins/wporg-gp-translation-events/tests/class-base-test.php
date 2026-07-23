@@ -1,4 +1,9 @@
 <?php
+/**
+ * Base test case shared by the plugin's PHPUnit tests.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 namespace Wporg\Tests;
 
@@ -6,9 +11,20 @@ use DateTimeImmutable;
 use GP_UnitTestCase;
 use Wporg\TranslationEvents\Translation_Events;
 
+/**
+ * Base test case providing common setup for the plugin's tests.
+ */
 abstract class Base_Test extends GP_UnitTestCase {
+	/**
+	 * The current time, captured once at the start of each test.
+	 *
+	 * @var DateTimeImmutable
+	 */
 	protected DateTimeImmutable $now;
 
+	/**
+	 * Sets up the test case before each test runs.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->now = Translation_Events::now();

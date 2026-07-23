@@ -1,18 +1,29 @@
 <?php
+/**
+ * Tests for the Event class.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 use Wporg\Tests\Base_Test as TestCase;
 use Wporg\TranslationEvents\Event\Event;
-use Wporg\TranslationEvents\Event\InvalidStart;
-use Wporg\TranslationEvents\Event\InvalidEnd;
-use Wporg\TranslationEvents\Event\InvalidStatus;
+use Wporg\TranslationEvents\Event\Invalid_Start;
+use Wporg\TranslationEvents\Event\Invalid_End;
+use Wporg\TranslationEvents\Event\Invalid_Status;
 use Wporg\TranslationEvents\Event\Event_End_Date;
 use Wporg\TranslationEvents\Event\Event_Start_Date;
 
+/**
+ * Tests for the Event class.
+ */
 class Event_Test extends TestCase {
+	/**
+	 * Constructing an event whose end precedes its start throws Invalid_End.
+	 */
 	public function test_validates_start_and_end() {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 
-		$this->expectException( InvalidEnd::class );
+		$this->expectException( Invalid_End::class );
 		new Event(
 			0,
 			new Event_Start_Date( 'now' ),
@@ -24,10 +35,13 @@ class Event_Test extends TestCase {
 		);
 	}
 
+	/**
+	 * Constructing an event with start and end dates that already carry a timezone throws Invalid_Start.
+	 */
 	public function test_validates_start_and_end_timezone() {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 
-		$this->expectException( InvalidStart::class );
+		$this->expectException( Invalid_Start::class );
 		new Event(
 			0,
 			new Event_Start_Date( 'now', $timezone ),
@@ -39,10 +53,13 @@ class Event_Test extends TestCase {
 		);
 	}
 
+	/**
+	 * Constructing an event with an empty status throws Invalid_Status.
+	 */
 	public function test_validates_status() {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 
-		$this->expectException( InvalidStatus::class );
+		$this->expectException( Invalid_Status::class );
 		new Event(
 			0,
 			new Event_Start_Date( 'now' ),
@@ -54,6 +71,9 @@ class Event_Test extends TestCase {
 		);
 	}
 
+	/**
+	 * Only an event whose window spans the current time reports as active.
+	 */
 	public function test_is_active() {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 		$start    = new Event_Start_Date( 'now' );
@@ -94,6 +114,9 @@ class Event_Test extends TestCase {
 		$this->assertFalse( $future_event->is_active() );
 	}
 
+	/**
+	 * Only an event whose end is before the current time reports as past.
+	 */
 	public function test_is_past() {
 		$timezone = new DateTimeZone( 'Europe/Lisbon' );
 		$start    = new Event_Start_Date( 'now' );

@@ -1,4 +1,10 @@
 <?php
+/**
+ * Template for the event attendees page, rendering the attendee list for an event.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Translation_Events;

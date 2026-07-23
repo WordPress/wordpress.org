@@ -1,4 +1,10 @@
 <?php
+/**
+ * Registers the remote-attendance-icon block, which renders an icon indicating remote attendance.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
 
 register_block_type(

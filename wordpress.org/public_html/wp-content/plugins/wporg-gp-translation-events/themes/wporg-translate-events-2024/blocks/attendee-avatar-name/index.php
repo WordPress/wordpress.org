@@ -1,4 +1,11 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024;
+<?php
+/**
+ * Registers the attendee-avatar-name block, which renders an attendee's avatar alongside their display name.
+ *
+ * @package wporg-translate-events-2024
+ */
+
+namespace Wporg\TranslationEvents\Theme_2024;
 
 register_block_type(
 	'wporg-translate-events-2024/attendee-avatar-name',
