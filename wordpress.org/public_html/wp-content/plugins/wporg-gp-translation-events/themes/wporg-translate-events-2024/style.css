@@ -34,7 +34,7 @@ body {
 		list-style: none;
 		font-size: var(--wp--preset--font-size--small);
 	}
-	
+
 .wporg-marker-list__container .wporg-marker-list-item .wporg-marker-list-item__title {
 	float: left;
 }
@@ -49,14 +49,14 @@ body {
 		}
 
 .wporg-marker-list__container span.my-event-flag {
-    width: 43px;
-    height: 28px;
-    padding: 4px 8px;
-    gap: 10px;
-    border-radius: 2px 0 0 0;
-    background: #EFF2FF;
-    margin-left: 4px; 
-    font-size: .8em; 
+	width: 43px;
+	height: 28px;
+	padding: 4px 8px;
+	gap: 10px;
+	border-radius: 2px 0 0 0;
+	background: #EFF2FF;
+	margin-left: 4px;
+	font-size: .8em;
 }
 
 a.blue-bolded-link {
@@ -68,7 +68,7 @@ a.blue-bolded-link {
 
 .attendee-avatar img {
 	border-radius: 50%;
-    vertical-align: middle;
+	vertical-align: middle;
 }
 
 .first-time-contributor-tada::after {
@@ -94,16 +94,16 @@ a.remove-attendee:hover{
 }
 textarea.wp-block-form-input__input {
 	border: 1px solid #949494;
-    font-family: inherit;
-    font-size: var(--wp--custom--form--typography--font-size);
+	font-family: inherit;
+	font-size: var(--wp--custom--form--typography--font-size);
 }
 
 select.wp-block-form-input__input {
 	border: 1px solid;
-    line-height: 2;
-    min-height: 3em;
+	line-height: 2;
+	min-height: 3em;
 	padding-inline: var(--wp--custom--form--padding--inline);
-    padding-block: var(--wp--custom--form--padding--block);
+	padding-block: var(--wp--custom--form--padding--block);
 	line-height: var(--wp--custom--form--typography--line-height);
 }
 
@@ -179,9 +179,9 @@ span.user-remote-icon.dashicons-video-alt2 {
 }
 
 .wp-block-group.is-layout-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
 }
 
 .video-icon-on-gravatar {
