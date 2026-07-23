@@ -594,8 +594,40 @@ class Upload_Handler {
 			$post_args['meta_input']['_used_upload_token'] = $has_upload_token;
 		}
 
+		/*
+		 * Claim the slug for the moment it takes to re-check and create the post, so
+		 * that two submissions of the same new plugin can't both slip past the earlier
+		 * duplicate checks and each create a queue entry.
+		 */
+		$submit_lock = '';
+		if ( ! $updating_existing ) {
+			$submit_lock = 'plugin_submit_lock_' . $this->plugin_slug;
+
+			if ( false === wp_cache_add( $submit_lock, time(), 'wporg-plugins', MINUTE_IN_SECONDS ) ) {
+				return new WP_Error( 'submission_in_progress', __( 'A submission for this plugin is currently being processed. Please wait a moment and try again.', 'wporg-plugins' ) );
+			}
+
+			// Re-check for a clashing plugin now that the slug is claimed.
+			if (
+				Plugin_Directory::get_plugin_post( $this->plugin_slug ) ||
+				get_posts( array(
+					'post_type'   => 'plugin',
+					'title'       => $this->plugin['Name'],
+					'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
+				) )
+			) {
+				wp_cache_delete( $submit_lock, 'wporg-plugins' );
+
+				return new WP_Error( 'submission_in_progress', __( 'A submission for this plugin is currently being processed. Please wait a moment and try again.', 'wporg-plugins' ) );
+			}
+		}
+
 		// Add/Update the Plugin Directory entry for this plugin.
 		$plugin_post = Plugin_Directory::create_plugin_post( $post_args );
+
+		if ( $submit_lock ) {
+			wp_cache_delete( $submit_lock, 'wporg-plugins' );
+		}
 
 		if ( is_wp_error( $plugin_post ) ) {
 			return $plugin_post;
