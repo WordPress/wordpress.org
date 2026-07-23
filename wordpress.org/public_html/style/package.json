@@ -1,25 +1,27 @@
 {
-  "name": "wporg-style",
-  "version": "1.0.0",
-  "description": "General styles for WordPress.org",
-  "author": "wordpressdotorg",
-  "license": "GPL-2.0+",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "svn",
-    "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/style/"
-  },
-  "devDependencies": {
-    "autoprefixer": "^9.4.6",
-    "cssnano": "^4.1.8",
-    "es6-promise": "~4.2.5",
-    "grunt": "^1.0.3",
-    "grunt-contrib-jshint": "^2.0.0",
-    "grunt-contrib-uglify": "^4.0.0",
-    "grunt-contrib-watch": "^1.1.0",
-    "grunt-postcss": "^0.9.0",
-    "grunt-rtlcss": "^2.0.1"
-  }
+	"name": "wporg-style",
+	"version": "1.0.0",
+	"description": "General styles for WordPress.org",
+	"author": "wordpressdotorg",
+	"license": "GPL-2.0+",
+	"repository": {
+		"type": "svn",
+		"url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/style/"
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	],
+	"scripts": {
+		"build": "npm run build:css && npm run build:js",
+		"build:css": "node bin/build-rtl.js",
+		"build:js": "wp-scripts build",
+		"format": "wp-scripts format .",
+		"lint:js": "wp-scripts lint-js . --ignore-pattern '**/*.min.js' --ignore-pattern 'trac/common/'"
+	},
+	"devDependencies": {
+		"@wordpress/browserslist-config": "^6.51.0",
+		"@wordpress/prettier-config": "^4.51.0",
+		"@wordpress/scripts": "^33.0.0",
+		"rtlcss": "^4.3.0"
+	}
 }

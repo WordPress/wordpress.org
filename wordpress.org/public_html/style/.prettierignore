@@ -1,0 +1,4 @@
+**/*.min.js
+*.css
+package-lock.json
+trac/common/
