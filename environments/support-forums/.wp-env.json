@@ -28,8 +28,7 @@
 		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/plugins/plugin-directory": "../wordpress.org/public_html/wp-content/plugins/plugin-directory",
-		"wp-content/plugins/theme-directory": "../wordpress.org/public_html/wp-content/plugins/theme-directory",
-		"wp-content/plugins/wporg-two-factor": "../wordpress.org/public_html/wp-content/plugins/wporg-two-factor"
+		"wp-content/plugins/theme-directory": "../wordpress.org/public_html/wp-content/plugins/theme-directory"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash support-forums/bin/after-start.sh"

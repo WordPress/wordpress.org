@@ -21,3 +21,14 @@ if ( ! function_exists( __NAMESPACE__ . '\get_onboarding_account_url' ) ) {
 		return home_url( '/' );
 	}
 }
+
+if ( ! function_exists( __NAMESPACE__ . '\get_edit_account_url' ) ) {
+	/**
+	 * URL for editing account details via the new two-factor interface. Points at the local home.
+	 *
+	 * @return string
+	 */
+	function get_edit_account_url( $username = null ) {
+		return home_url( '/' );
+	}
+}
