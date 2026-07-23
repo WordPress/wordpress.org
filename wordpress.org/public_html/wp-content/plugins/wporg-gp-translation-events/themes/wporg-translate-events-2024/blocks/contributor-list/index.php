@@ -3,8 +3,6 @@
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Attendee\Attendee;
 
-
-
 register_block_type(
 	'wporg-translate-events-2024/contributor-list',
 	array(
@@ -13,8 +11,8 @@ register_block_type(
 			if ( ! isset( $attributes['id'] ) ) {
 				return '';
 			}
-			$event_id = $attributes['id'];
-			$attendees             = Translation_Events::get_attendee_repository()->get_attendees( $event_id );
+			$event_id     = $attributes['id'];
+			$attendees    = Translation_Events::get_attendee_repository()->get_attendees( $event_id );
 			$contributors = array_filter(
 				$attendees,
 				function ( Attendee $attendee ) {
@@ -35,7 +33,7 @@ register_block_type(
 				?>
 			</h4>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:group {"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":null}} -->
 			<div class="wp-block-group">
 				<?php
@@ -43,7 +41,7 @@ register_block_type(
 					?>
 					<!-- wp:group -->
 					<div class="wp-block-group">
-						<!-- wp:wporg-translate-events-2024/attendee-avatar-name 
+						<!-- wp:wporg-translate-events-2024/attendee-avatar-name
 						<?php
 						echo wp_json_encode(
 							array(
@@ -56,16 +54,15 @@ register_block_type(
 						<?php if ( $contributor->is_remote() ) : ?>
 							<!-- wp:wporg-translate-events-2024/remote-attendance-icon <?php echo wp_json_encode( array( 'css_class' => 'video-icon-on-gravatar' ) ); ?> /-->
 						<?php endif; ?>
-						</div>
+					</div>
 					<!-- /wp:group -->
-					
-						<?php
+					<?php
 				endforeach;
 				?>
 			</div>
 			<!-- /wp:group -->
-				<?php
-				return ob_get_clean();
+			<?php
+			return ob_get_clean();
 		},
 	)
 );

@@ -10,7 +10,7 @@ if ( ! $event ) {
 }
 
 ?>
-<!-- wp:wporg-translate-events-2024/attendee-list 
+<!-- wp:wporg-translate-events-2024/attendee-list
 <?php
 echo wp_json_encode(
 	array(

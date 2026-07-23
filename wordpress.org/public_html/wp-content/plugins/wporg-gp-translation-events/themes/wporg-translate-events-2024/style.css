@@ -39,7 +39,7 @@ body {
 	float: left;
 }
 
- .wporg-marker-list__container .wporg-marker-list-item:first-child {
+.wporg-marker-list__container .wporg-marker-list-item:first-child {
 			border-radius: 2px 2px 0 0;
 		}
 
@@ -207,7 +207,7 @@ span.user-remote-icon.dashicons-video-alt2 {
 .event-nav-link:hover {
 	text-decoration: underline;
 }
- @media (min-width: 960px) {
+@media (min-width: 960px) {
 
 .wporg-marker-list__container .wporg-marker-list-item {
 	display: grid;
