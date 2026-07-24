@@ -132,11 +132,11 @@ JS;
 		}
 CSS;
 
-	wp_register_script( 'wporg-themes-upload', false, array(), false, true );
+	wp_register_script( 'wporg-themes-upload', false, array(), '1.0', true );
 	wp_enqueue_script( 'wporg-themes-upload' );
 	wp_add_inline_script( 'wporg-themes-upload', $upload_script );
 
-	wp_register_style( 'wporg-themes-upload', false );
+	wp_register_style( 'wporg-themes-upload', false, array(), '1.0' );
 	wp_enqueue_style( 'wporg-themes-upload' );
 	wp_add_inline_style( 'wporg-themes-upload', $upload_style );
 
