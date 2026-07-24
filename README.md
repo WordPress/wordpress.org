@@ -10,9 +10,9 @@ Here is a comprehensive directory map of the active services at the root of this
 
 | Subproject / Service | Description | Documentation |
 | :--- | :--- | :--- |
-| 🔌 **[api.wordpress.org](api.wordpress.org)** | Host for the WordPress core API endpoints (updates, version suggestions, community events, translations, Composer v2 package repository). | 📄 [API Documentation](api.wordpress.org/README.md) |
-| 🌐 **[wordpress.org](wordpress.org)** | Codebase powering primary WordPress.org hubs. Includes custom themes, plugins, and mu-plugins (Plugin Directory, Theme Directory, Support Forums, Rosetta, HelpHub, Photo Directory, learn.wordpress.org). | 📄 [WordPress.org Documentation](wordpress.org/README.md) |
-| 📦 **[common](common)** | Shared library, modules, and utilities across sites (SSO client, Slack hooks, profiles, and testing structure). | 📄 [Common Shared Docs](common/README.md) |
+| 🔌 **[api.wordpress.org](api.wordpress.org)** | Host for the WordPress core API endpoints (updates, version suggestions, community events, translations, Composer v2 package repository). | — |
+| 🌐 **[wordpress.org](wordpress.org)** | Codebase powering primary WordPress.org hubs. Includes custom themes, plugins, and mu-plugins (Plugin Directory, Theme Directory, Support Forums, Rosetta, HelpHub, Photo Directory, learn.wordpress.org). | — |
+| 📦 **[common](common)** | Shared library, modules, and utilities across sites (SSO client, Slack hooks, profiles, and testing structure). | — |
 | 💻 **[environments](environments)** | Local development environment configurations powered by Docker and `wp-env`. | 📄 [Environments Guide](environments/README.md) |
 | ⚙️ **[.github](.github)** | Custom CI workflows (Static analysis branch checks, Docker wp-env unit tests, Live API monitors, and Props bots) and helper scripts. | 📄 [GitHub Actions Docs](.github/README.md) |
 | 🗣️ **[browsehappy.com](browsehappy.com)** | Theme and settings for browsehappy.com, checking latest web browser versions to promote up-to-date web usage. | 📄 [Browse Happy Readme](browsehappy.com/public_html/README.md) |
