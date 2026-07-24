@@ -125,6 +125,21 @@ function wporg_themes_render_upload_shortcode() {
 		} )();
 JS;
 
+	$upload_style = <<<'CSS'
+		#upload_button:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+CSS;
+
+	wp_register_script( 'wporg-themes-upload', false, array(), false, true );
+	wp_enqueue_script( 'wporg-themes-upload' );
+	wp_add_inline_script( 'wporg-themes-upload', $upload_script );
+
+	wp_register_style( 'wporg-themes-upload', false );
+	wp_enqueue_style( 'wporg-themes-upload' );
+	wp_add_inline_style( 'wporg-themes-upload', $upload_style );
+
 	return $notice . '<h2>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h2>
 		<form
 			enctype="multipart/form-data"
@@ -149,14 +164,7 @@ JS;
 			</p>
 
 			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '" data-uploading-label="' . esc_attr__( 'Uploading&hellip;', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
-		</form>
-		<style>
-			#upload_button:disabled {
-				opacity: 0.6;
-				cursor: not-allowed;
-			}
-		</style>
-		<script>' . $upload_script . '</script>';
+		</form>';
 }
 
 /**
