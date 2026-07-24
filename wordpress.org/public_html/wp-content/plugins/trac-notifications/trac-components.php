@@ -314,8 +314,10 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 .history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: middle; line-height: 15px; }
 .history.growing:before { content: "\f142"; color: red }
 .history.shrinking:before { content: "\f140"; color: green }
-td.right { text-align: right; }
-body.post-type-archive-component table td { vertical-align: middle; }
+td.right, th.right { text-align: right; }
+body.post-type-archive-component table th,
+body.post-type-archive-component table td { vertical-align: middle; padding: 4px 8px; border-bottom: 1px solid #eee; }
+body.post-type-archive-component table tr:last-child td { border-bottom: none; }
 td.maintainers { padding-top: 4px; padding-bottom: 4px; height: 26px; }
 td.maintainers img.avatar { margin-right: 5px; }
 .component-info .create-new-ticket { float: right; margin-top: 25px; }
@@ -709,7 +711,7 @@ jQuery( function( $ ) {
 		static $once = true;
 		if ( $once ) {
 			$once = false;
-			echo '<thead><tr><td>Component</td><td>Tickets</td><td>7 Days</td><td>0&nbsp;Replies</td><td>Maintainers</td></tr></thead>';
+			echo '<thead><tr><th>Component</th><th class="right">Tickets</th><th class="right">7 Days</th><th class="right">0&nbsp;Replies</th><th>Maintainers</th></tr></thead>';
 		}
 
 		$arrow = '';
