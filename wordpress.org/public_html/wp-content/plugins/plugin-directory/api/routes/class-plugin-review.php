@@ -22,6 +22,15 @@ class Plugin_Review extends Base {
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'plugin_review_info' ),
 			'permission_callback' => array( $this, 'plugin_info_permission_check' ),
+			'args'                => array(
+				'plugin_id' => array(
+					'type' => 'integer',
+				),
+				'token'     => array(
+					'type'    => 'string',
+					'pattern' => '^[a-f0-9]{32}$',
+				),
+			),
 		) );
 	}
 

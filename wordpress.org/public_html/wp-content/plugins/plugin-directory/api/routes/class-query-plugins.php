@@ -30,6 +30,60 @@ class Query_Plugins extends Base {
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'query' ),
 			'permission_callback' => '__return_true',
+
+			/*
+			 * api.wordpress.org proxies client input into this route verbatim,
+			 * so all parameters coerce rather than reject: custom sanitize
+			 * callbacks intentionally replace strict schema validation.
+			 */
+			'args'                => array(
+				'paged'             => array(
+					'type'              => 'integer',
+					'sanitize_callback' => 'absint',
+				),
+				'posts_per_page'    => array(
+					'type'              => 'integer',
+					'sanitize_callback' => 'absint',
+				),
+				'browse'            => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'favorites_user'    => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'plugin_category'   => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				's'                 => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'author_name'       => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'installed_plugins' => array(
+					'type'              => array( 'string', 'array' ),
+					'items'             => array( 'type' => 'string' ),
+					'sanitize_callback' => 'wp_parse_list',
+				),
+				'plugin_tags'       => array(
+					'type'              => array( 'string', 'array' ),
+					'items'             => array( 'type' => 'string' ),
+					'sanitize_callback' => 'wp_parse_list',
+				),
+				'locale'            => array(
+					'type'              => 'string',
+					'sanitize_callback' => array( $this, 'sanitize_locale_callback' ),
+				),
+				'block'             => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+			),
 		) );
 	}
 

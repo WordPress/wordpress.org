@@ -23,6 +23,13 @@ class Internal_Stats extends Base {
 			'methods'             => \WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'bulk_update_stats' ),
 			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
+			'args'                => array(
+				// Entries are unconstrained so one malformed plugin cannot reject the batch.
+				'plugins' => array(
+					'type'     => 'object',
+					'required' => true,
+				),
+			),
 		) );
 	}
 
@@ -46,6 +53,10 @@ class Internal_Stats extends Base {
 		$data = $request['plugins'];
 
 		foreach ( $data as $plugin_slug => $stats ) {
+			if ( ! is_array( $stats ) ) {
+				continue;
+			}
+
 			$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 			if ( ! $plugin ) {
 				continue;

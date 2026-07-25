@@ -21,6 +21,10 @@ class Plugin_Self_Toggle_Preview extends Base {
 				'plugin_slug' => [
 					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 				],
+				// Whether to dismiss the missing blueprint notice instead of toggling the preview.
+				'dismiss'     => [
+					'type' => 'boolean',
+				],
 			],
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );

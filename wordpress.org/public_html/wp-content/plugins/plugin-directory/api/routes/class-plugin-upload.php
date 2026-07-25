@@ -26,6 +26,9 @@ class Plugin_Upload extends Base {
 			'callback'            => array( $this, 'upload' ),
 			'permission_callback' => array( $this, 'permission_check' ),
 			'args' => [
+				'ID'        => [
+					'type' => 'integer',
+				],
 				'post_name' => [
 					'type'     => 'string',
 					'required' => false,
@@ -38,6 +41,9 @@ class Plugin_Upload extends Base {
 			'callback'            => array( $this, 'slug' ),
 			'permission_callback' => array( $this, 'permission_check' ),
 			'args' => [
+				'ID'        => [
+					'type' => 'integer',
+				],
 				'post_name' => [
 					'type'     => 'string',
 					'required' => true,

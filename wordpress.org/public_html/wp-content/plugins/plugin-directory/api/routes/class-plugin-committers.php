@@ -19,6 +19,12 @@ class Plugin_Committers extends Base {
 
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/committers/?', array(
+			'args' => array(
+				'plugin_slug' => array(
+					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
+					'required'          => true,
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'list_committers' ),
@@ -28,12 +34,6 @@ class Plugin_Committers extends Base {
 						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 					);
 				},
-				'args'                => array(
-					'plugin_slug' => array(
-						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
-						'required'          => true,
-					),
-				),
 			),
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -45,9 +45,10 @@ class Plugin_Committers extends Base {
 					);
 				},
 				'args'                => array(
-					'plugin_slug' => array(
-						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
-						'required'          => true,
+					// The user_login, user_nicename, or user_email of the user to add.
+					'committer' => array(
+						'type'     => 'string',
+						'required' => true,
 					),
 				),
 			),

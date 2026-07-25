@@ -28,6 +28,10 @@ class Plugin extends Base {
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
 				),
+				'locale'      => array(
+					'type'              => 'string',
+					'sanitize_callback' => array( $this, 'sanitize_locale_callback' ),
+				),
 			),
 		) );
 	}
@@ -373,7 +377,7 @@ class Plugin extends Base {
 	 */
 	protected function get_plugin_reviews_markup( $plugin_slug ) {
 		$output = '';
-		foreach ( Tools::get_plugin_reviews( $plugin_slug, 10 ) as $review ) {
+		foreach ( Tools::get_plugin_reviews( $plugin_slug, 10 ) ?: array() as $review ) {
 			$output .= $this->get_plugin_reviews_markup_singular( $review );
 		}
 		return $output;

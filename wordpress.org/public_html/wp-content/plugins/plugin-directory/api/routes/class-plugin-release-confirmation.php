@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WP_REST_Response;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
+use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation_Enabled as Release_Confirmation_Enabled_Email;
@@ -28,6 +29,10 @@ class Plugin_Release_Confirmation extends Base {
 				'plugin_slug' => [
 					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 				],
+				'confirmations_required' => [
+					'type'    => 'integer',
+					'minimum' => 0,
+				],
 			],
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
@@ -45,7 +50,11 @@ class Plugin_Release_Confirmation extends Base {
 				],
 				'plugin_tag' => [
 					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
-				]
+				],
+				'rollout_strategy' => [
+					'type' => 'string',
+					'enum' => array_keys( Template::get_rollout_strategies() ),
+				],
 			],
 			'permission_callback' => [ $this, 'permission_can_access_plugin' ],
 		] );

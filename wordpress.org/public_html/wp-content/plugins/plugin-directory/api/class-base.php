@@ -50,6 +50,22 @@ class Base {
 	}
 
 	/**
+	 * A sanitization callback for REST API locale parameters.
+	 *
+	 * Restricts the value to the characters present in WordPress locale slugs.
+	 *
+	 * @param string $value The requested locale.
+	 * @return string The sanitized locale.
+	 */
+	public function sanitize_locale_callback( $value ) {
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+
+		return preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $value );
+	}
+
+	/**
 	 * A Permission Check callback which validates the request against the internal api-call token.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.

@@ -23,6 +23,19 @@ class Plugin_Blueprint extends Base {
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
 				),
+				'zip_hash'    => array(
+					'type' => 'string',
+				),
+				'url_hash'    => array(
+					'type' => 'string',
+				),
+				'type'        => array(
+					'type' => 'string',
+				),
+				'lang'        => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
 			)
 		) );
 	}

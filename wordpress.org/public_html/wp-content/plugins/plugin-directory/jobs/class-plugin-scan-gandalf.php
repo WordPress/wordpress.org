@@ -160,7 +160,7 @@ class Plugin_Scan_Gandalf {
 	 * @return true|WP_Error True on success, or an error when the scan is unknown.
 	 */
 	public static function handle_callback( $plugin, $data ) {
-		$scan_id = $data['scan_id'];
+		$scan_id = $data['scan_id'] ?? '';
 		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
 
 		if ( empty( $pending[ $scan_id ] ) ) {
@@ -171,28 +171,28 @@ class Plugin_Scan_Gandalf {
 
 		$pending_record = $pending[ $scan_id ];
 
-		if ( $data['version'] !== $pending_record['version'] || $data['release_ref'] !== $pending_record['release_ref'] ) {
+		if ( ( $data['version'] ?? null ) !== $pending_record['version'] || ( $data['release_ref'] ?? null ) !== $pending_record['release_ref'] ) {
 			$error = new WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', [ 'status' => WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
 
-		if ( 'completed' === $data['status'] ) {
-			if ( $data['findings_count'] > 0 ) {
+		if ( 'completed' === ( $data['status'] ?? '' ) ) {
+			if ( ( $data['findings_count'] ?? 0 ) > 0 ) {
 				self::notify_slack(
 					$plugin,
 					[
 						'version'         => $pending_record['version'],
 						'release_ref'     => $pending_record['release_ref'],
 						'findings_count'  => $data['findings_count'],
-						'severity_counts' => $data['severity_counts'],
-						'verdict_hash'    => $data['verdict_hash'],
-						'report_url'      => $data['report_url'],
+						'severity_counts' => $data['severity_counts'] ?? [],
+						'verdict_hash'    => $data['verdict_hash'] ?? '',
+						'report_url'      => $data['report_url'] ?? '',
 					]
 				);
 			}
 		} else {
-			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
+			self::record_last_error( $plugin, $data['error']['kind'] ?? 'unknown', $data['error']['message'] ?? '', $scan_id );
 		}
 
 		unset( $pending[ $scan_id ] );

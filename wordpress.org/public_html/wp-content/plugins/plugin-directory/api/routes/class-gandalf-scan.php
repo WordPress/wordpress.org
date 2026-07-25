@@ -30,9 +30,47 @@ class Gandalf_Scan extends Base {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'scan_callback' ],
+
+				/*
+				 * Fields are typed but not required, and tolerate nulls, so
+				 * that malformed callbacks reach the callback and are recorded
+				 * on the plugin instead of being rejected at the REST layer.
+				 */
 				'args'                => [
-					'plugin_slug' => [
+					'plugin_slug'     => [
 						'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
+					],
+					'scan_id'         => [
+						'type' => 'string',
+					],
+					'version'         => [
+						'type' => 'string',
+					],
+					'release_ref'     => [
+						'type' => 'string',
+					],
+					'status'          => [
+						'type' => 'string',
+					],
+					'findings_count'  => [
+						'type' => [ 'integer', 'null' ],
+					],
+					'severity_counts' => [
+						'type' => [ 'object', 'null' ],
+					],
+					'verdict_hash'    => [
+						'type' => [ 'string', 'null' ],
+					],
+					'report_url'      => [
+						'type'   => [ 'string', 'null' ],
+						'format' => 'uri',
+					],
+					'error'           => [
+						'type'       => [ 'object', 'null' ],
+						'properties' => [
+							'kind'    => [ 'type' => 'string' ],
+							'message' => [ 'type' => 'string' ],
+						],
 					],
 				],
 				'permission_callback' => function ( $request ) {
