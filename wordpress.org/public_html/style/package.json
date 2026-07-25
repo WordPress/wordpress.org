@@ -16,6 +16,7 @@
 		"build:css": "node bin/build-rtl.js",
 		"build:js": "wp-scripts build",
 		"format": "wp-scripts format .",
+		"lint:css": "wp-scripts lint-style",
 		"lint:js": "wp-scripts lint-js . --ignore-pattern '**/*.min.js' --ignore-pattern 'trac/common/'"
 	},
 	"devDependencies": {
