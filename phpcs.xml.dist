@@ -79,6 +79,11 @@
 		<exclude phpcbf-only="true" name="PEAR.Functions.FunctionCallSignature" />
 	</rule>
 
+	<!-- PHPUnit derives test class names from file names, and class names cannot contain hyphens. -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+
 	<rule ref="WordPress-Docs">
 		<!-- Descriptive names make explicit comments unnecessary in many cases. -->
 		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
