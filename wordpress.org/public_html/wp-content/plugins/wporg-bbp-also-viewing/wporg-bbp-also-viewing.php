@@ -439,6 +439,14 @@ function clear_viewing( $page = null, $user_id = false ) {
  */
 function rest_api_init() {
 	register_rest_route( 'wporg/v1', '/currentlyViewing/(?P<page>.+)', [
+		'args' => [
+			'page' => [
+				'type'              => 'string',
+				'required'          => true,
+				'validate_callback' => 'rest_validate_request_arg',
+				'sanitize_callback' => __NAMESPACE__ . '\sanitize_page_url_for_db',
+			],
+		],
 		[
 			'methods'  => 'GET',
 			'callback' => function( $request ) {
@@ -459,6 +467,11 @@ function rest_api_init() {
 			'permission_callback' => function() {
 				return is_user_logged_in() && enabled();
 			},
+			'args'                => [
+				'isTyping' => [
+					'type' => 'boolean',
+				],
+			],
 		],
 		[
 			'methods'  => 'DELETE',
