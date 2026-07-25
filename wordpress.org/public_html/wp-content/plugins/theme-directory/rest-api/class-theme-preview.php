@@ -14,7 +14,7 @@ class Theme_Preview {
 			'args'                => array(
 				'slug' => array(
 					'type'              => 'string',
-					'required'          => 'true',
+					'required'          => true,
 					'sanitize_callback' => 'sanitize_key',
 				),
 			),
@@ -47,10 +47,15 @@ class Theme_Preview {
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'set_blueprint' ),
 			'args'                => array(
-				'slug' => array(
+				'slug'      => array(
 					'type'              => 'string',
-					'required'          => 'true',
+					'required'          => true,
 					'sanitize_callback' => 'sanitize_key',
+				),
+				// A JSON-encoded Playground blueprint, decoded and validated in the callback.
+				'blueprint' => array(
+					'type'     => 'string',
+					'required' => true,
 				),
 			),
 			'permission_callback' => function( $request ) {

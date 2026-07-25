@@ -11,6 +11,13 @@ class Internal {
 			'methods'             => \WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'bulk_update_stats' ),
 			'permission_callback' => array( $this, 'permission_check_bearer' ),
+			'args'                => array(
+				// Entries are unconstrained so one malformed theme cannot reject the batch.
+				'themes' => array(
+					'type'     => 'object',
+					'required' => true,
+				),
+			),
 		) );
 
 		register_rest_route( 'themes/v1', 'svn-auth', array(
@@ -115,6 +122,10 @@ class Internal {
 		$data = $request['themes'];
 
 		foreach ( $data as $theme_slug => $stats ) {
+			if ( ! is_array( $stats ) ) {
+				continue;
+			}
+
 			$theme = get_posts( array(
 				'name'             => $theme_slug,
 				'posts_per_page'   => 1,

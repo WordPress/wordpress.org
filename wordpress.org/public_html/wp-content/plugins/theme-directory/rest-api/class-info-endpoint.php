@@ -9,6 +9,25 @@ class Info_Endpoint {
 		$args = array(
 			'callback'            => array( $this, 'info' ),
 			'permission_callback' => '__return_true',
+			'args'                => array(
+				'slug'       => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'slugs'      => array(
+					'type'  => array( 'string', 'array' ),
+					'items' => array( 'type' => 'string' ),
+				),
+				'fields'     => array(
+					'type' => array( 'string', 'array', 'object' ),
+				),
+				'locale'     => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => __NAMESPACE__ . '\sanitize_locale',
+				),
+			),
 		);
 
 		register_rest_route( 'themes/1.0', 'info(/(?P<slug>[^/]+))?', $args );
@@ -32,7 +51,7 @@ class Info_Endpoint {
 
 		if ( ! empty( $api->bad_input ) ) {
 			$response->set_status( 400 );
-		} elseif ( ! empty( $api->error ) && 'Theme not found' === $api->error ) {
+		} elseif ( 'Theme not found' === ( $api->response->error ?? '' ) ) {
 			$response->set_status( 404 );
 		}
 

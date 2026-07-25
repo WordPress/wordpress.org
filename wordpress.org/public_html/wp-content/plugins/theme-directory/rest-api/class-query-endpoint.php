@@ -9,6 +9,51 @@ class Query_Endpoint {
 		$args = array(
 			'callback'            => array( $this, 'query' ),
 			'permission_callback' => '__return_true',
+			'args'                => array(
+				'page'       => array(
+					'type' => 'integer',
+				),
+				'per_page'   => array(
+					'type' => 'integer',
+				),
+				'browse'     => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'user'       => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'tag'        => array(
+					'type'  => array( 'string', 'array' ),
+					'items' => array( 'type' => 'string' ),
+				),
+				'search'     => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'theme'      => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'author'     => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'fields'     => array(
+					'type' => array( 'string', 'array', 'object' ),
+				),
+				'locale'     => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => __NAMESPACE__ . '\sanitize_locale',
+				),
+			),
 		);
 
 		register_rest_route( 'themes/1.0', 'query', $args );

@@ -7,6 +7,16 @@ class Tags_Endpoint {
 		$args = array(
 			'callback'            => array( $this, 'tags' ),
 			'permission_callback' => '__return_true',
+			'args'                => array(
+				'number' => array(
+					'type' => 'integer',
+				),
+				'locale' => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => __NAMESPACE__ . '\sanitize_locale',
+				),
+			),
 		);
 
 		register_rest_route( 'themes/1.0', 'tags', $args );

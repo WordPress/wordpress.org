@@ -58,3 +58,6 @@ tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Shared base class for the REST API endpoint tests.
+require_once __DIR__ . '/Endpoint_TestCase.php';

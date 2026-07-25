@@ -9,6 +9,18 @@ class Features_Endpoint {
 		$args = array(
 			'callback'            => array( $this, 'features' ),
 			'permission_callback' => '__return_true',
+			'args'                => array(
+				'wp_version' => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'locale'     => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => __NAMESPACE__ . '\\sanitize_locale',
+				),
+			),
 		);
 
 		register_rest_route( 'themes/1.0', 'features', $args );

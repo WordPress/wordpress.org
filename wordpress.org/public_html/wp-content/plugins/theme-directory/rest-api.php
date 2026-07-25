@@ -2,6 +2,18 @@
 namespace WordPressdotorg\Theme_Directory\Rest_API;
 
 /**
+ * Sanitizes a requested locale parameter.
+ *
+ * Restricts the value to the characters present in WordPress locale slugs.
+ *
+ * @param string $locale The requested locale.
+ * @return string The sanitized locale.
+ */
+function sanitize_locale( $locale ) {
+	return preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $locale );
+}
+
+/**
  * The WordPress REST API only allows jsonp support via the _jsonp parameter,
  * and it must be set prior to the REST API Server being initialized, prior to any
  * rest api specific filters are run.

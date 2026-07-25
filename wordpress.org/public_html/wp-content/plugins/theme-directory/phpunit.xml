@@ -7,6 +7,7 @@
 		<testsuite name="theme-directory">
 			<directory suffix=".php">tests/</directory>
 			<exclude>tests/bootstrap.php</exclude>
+			<exclude>tests/Endpoint_TestCase.php</exclude>
 		</testsuite>
 	</testsuites>
 </phpunit>

@@ -7,6 +7,14 @@ class Commercial_Shops_Endpoint {
 		$args = array(
 			'callback'            => array( $this, 'shops' ),
 			'permission_callback' => '__return_true',
+			'args'                => array(
+				// Only its presence is checked, to bypass the response cache.
+				'cache_buster' => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+			),
 		);
 
 		register_rest_route( 'themes/1.0', 'commercial-shops', $args );

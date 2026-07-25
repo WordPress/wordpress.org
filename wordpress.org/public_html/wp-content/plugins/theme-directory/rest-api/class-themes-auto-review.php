@@ -37,6 +37,16 @@ class Auto_Review_Controller extends WP_REST_Controller {
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
 				'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				'args'                => array(
+					'theme_slug' => array(
+						'type'              => 'string',
+						'validate_callback' => 'rest_validate_request_arg',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'ticket_id'  => array(
+						'type' => 'integer',
+					),
+				),
 			)
 		);
 	}

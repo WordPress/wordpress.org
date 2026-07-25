@@ -46,6 +46,13 @@ class Theme_Review_Stats extends WP_REST_Controller {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_by_theme_type' ),
 				'permission_callback' => '__return_true',
+				'args'                => array(
+					'startDate' => array(
+						'type'              => 'string',
+						'validate_callback' => 'rest_validate_request_arg',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 			)
 		);
 
@@ -56,6 +63,13 @@ class Theme_Review_Stats extends WP_REST_Controller {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_by_segment' ),
 				'permission_callback' => '__return_true',
+				'args'                => array(
+					'startDate' => array(
+						'type'              => 'string',
+						'validate_callback' => 'rest_validate_request_arg',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 			)
 		);
 
@@ -66,6 +80,13 @@ class Theme_Review_Stats extends WP_REST_Controller {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_by_author_type' ),
 				'permission_callback' => '__return_true',
+				'args'                => array(
+					'startDate' => array(
+						'type'              => 'string',
+						'validate_callback' => 'rest_validate_request_arg',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 			)
 		);
 
@@ -76,6 +97,13 @@ class Theme_Review_Stats extends WP_REST_Controller {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_review_days' ),
 				'permission_callback' => '__return_true',
+				'args'                => array(
+					'startDate' => array(
+						'type'              => 'string',
+						'validate_callback' => 'rest_validate_request_arg',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 			)
 		);
 	}
