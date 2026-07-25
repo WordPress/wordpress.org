@@ -31,7 +31,12 @@ exact bytes that will ship using your browser's developer tools:
     Overrides_, enable overrides for a local folder, then edit (or paste your
     modified copy over) `https://s.w.org/style/trac/wp-trac.js` — reloads on
     any `*.trac.wordpress.org` page now use your local version. Firefox offers
-    the same via _Local Overrides_ in the Network panel.
+    the same via _Local Overrides_ in the Network panel. Note that Chrome
+    stores override files with the query string in the file name
+    (`wp-trac.js?239`) and only matches that exact name — create the override
+    via _Network → right-click → Override content_ (or name hand-placed files
+    accordingly), and remember overrides only apply to tabs whose DevTools
+    window is open.
 -   **Console:** for quick one-offs, paste the modified file's contents into
     the DevTools console on a Trac page. Most of the code runs inside
     `jQuery( function() {} )` ready callbacks, which execute immediately when
