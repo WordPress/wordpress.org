@@ -5,28 +5,59 @@ function wporg_login_rest_routes() {
 		'methods'             => WP_REST_Server::READABLE,
 		'callback'            => 'wporg_login_rest_username_exists',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'login' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+		),
 	) );
 	register_rest_route( 'wporg/v1', '/username-available/?', array(
 		'methods'             => WP_REST_Server::READABLE,
 		'callback'            => 'wporg_login_rest_username_exists',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'login' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+		),
 	) );
 
 	register_rest_route( 'wporg/v1', '/email-in-use/(?P<email>.*)', array(
 		'methods'             => WP_REST_Server::READABLE,
 		'callback'            => 'wporg_login_rest_email_in_use',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'email' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+		),
 	) );
 	register_rest_route( 'wporg/v1', '/email-in-use/?', array(
 		'methods'             => WP_REST_Server::READABLE,
 		'callback'            => 'wporg_login_rest_email_in_use',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'email' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+		),
 	) );
 
 	register_rest_route( 'wporg/v1', '/resend-confirmation-email/?', array(
 		'methods'             => WP_REST_Server::EDITABLE,
 		'callback'            => 'wporg_login_rest_resend_confirmation_email',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'account' => array(
+				'type'              => 'string',
+				'required'          => true,
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+		),
 	) );
 }
 add_action( 'rest_api_init', 'wporg_login_rest_routes' );
