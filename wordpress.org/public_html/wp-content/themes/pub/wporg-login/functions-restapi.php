@@ -7,8 +7,7 @@ function wporg_login_rest_routes() {
 		'permission_callback' => '__return_true',
 		'args'                => array(
 			'login' => array(
-				'type'              => 'string',
-				'sanitize_callback' => 'sanitize_text_field',
+				'type' => 'string',
 			),
 		),
 	) );
@@ -18,8 +17,7 @@ function wporg_login_rest_routes() {
 		'permission_callback' => '__return_true',
 		'args'                => array(
 			'login' => array(
-				'type'              => 'string',
-				'sanitize_callback' => 'sanitize_text_field',
+				'type' => 'string',
 			),
 		),
 	) );
@@ -30,8 +28,7 @@ function wporg_login_rest_routes() {
 		'permission_callback' => '__return_true',
 		'args'                => array(
 			'email' => array(
-				'type'              => 'string',
-				'sanitize_callback' => 'sanitize_text_field',
+				'type' => 'string',
 			),
 		),
 	) );
@@ -41,8 +38,7 @@ function wporg_login_rest_routes() {
 		'permission_callback' => '__return_true',
 		'args'                => array(
 			'email' => array(
-				'type'              => 'string',
-				'sanitize_callback' => 'sanitize_text_field',
+				'type' => 'string',
 			),
 		),
 	) );
@@ -53,9 +49,8 @@ function wporg_login_rest_routes() {
 		'permission_callback' => '__return_true',
 		'args'                => array(
 			'account' => array(
-				'type'              => 'string',
-				'required'          => true,
-				'sanitize_callback' => 'sanitize_text_field',
+				'type'     => 'string',
+				'required' => true,
 			),
 		),
 	) );
