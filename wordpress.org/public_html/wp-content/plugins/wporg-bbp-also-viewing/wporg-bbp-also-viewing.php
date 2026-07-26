@@ -262,8 +262,14 @@ function get_currently_viewing( $page ) {
 			continue;
 		}
 
+		// Ignore records of deleted users.
+		$user = get_user_by( 'id', $u->user_id );
+		if ( ! $user ) {
+			continue;
+		}
+
 		$return[] = [
-			'who'      => get_user_by( 'id', $u->user_id )->display_name,
+			'who'      => $user->display_name,
 			'isTyping' => (bool) $u->typing,
 			'user_id'  => (int) $u->user_id,
 		];
@@ -307,6 +313,11 @@ function get_others_currently_viewing( $page ) {
 	// Plugin support reps can see other reps and committers -for their own plugins-.
 	$current_user_objects = get_user_object_slugs( get_current_user_id() );
 	foreach ( $users as &$u ) {
+		// Skip users that have already been anonymized.
+		if ( ! $u['user_id'] ) {
+			continue;
+		}
+
 		$user_objects = get_user_object_slugs( $u['user_id'] );
 		if ( ! array_intersect( $current_user_objects, $user_objects ) ) {
 			$u['who']     = '';

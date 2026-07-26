@@ -1136,19 +1136,22 @@ abstract class Directory_Compat {
 
 		// Plugins
 		if ( 'plugin' == $this->compat() ) {
-			$slugs = $wpdb->get_col( $wpdb->prepare(
-				"SELECT DISTINCT p.post_name
-					FROM %i AS t
-						LEFT JOIN %i AS tt ON tt.term_id = t.term_id
-						LEFT JOIN %i AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
-						LEFT JOIN %i AS p ON tr.object_id = p.ID
-					WHERE tt.taxonomy IN( 'plugin_contributors', 'plugin_support_reps', 'plugin_committers' ) AND t.name = %s",
+			$user = get_user_by( 'id', $user_id );
+			if ( $user ) {
+				$slugs = $wpdb->get_col( $wpdb->prepare(
+					"SELECT DISTINCT p.post_name
+						FROM %i AS t
+							LEFT JOIN %i AS tt ON tt.term_id = t.term_id
+							LEFT JOIN %i AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+							LEFT JOIN %i AS p ON tr.object_id = p.ID
+						WHERE tt.taxonomy IN( 'plugin_contributors', 'plugin_support_reps', 'plugin_committers' ) AND t.name = %s",
 					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_terms',
 					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_taxonomy',
 					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_relationships',
 					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_posts',
-					get_user_by( 'id', $user_id )->user_nicename
-			) );
+					$user->user_nicename
+				) );
+			}
 		}
 
 		wp_cache_set( $cache_key, $slugs, $cache_group, HOUR_IN_SECONDS );
