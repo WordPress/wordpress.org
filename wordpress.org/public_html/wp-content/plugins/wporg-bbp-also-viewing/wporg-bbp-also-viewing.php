@@ -44,6 +44,9 @@ function init() {
 	} );
 	add_action( 'also_viewing_cleanup', __NAMESPACE__ . '\cron_cleanup' );
 
+	// Remove a deleted user's records right away.
+	add_action( 'deleted_user', __NAMESPACE__ . '\deleted_user' );
+
 	// If the user can't enable it, we can skip registering the panels and such.
 	if ( ! allowed_for_user() ) {
 		return;
@@ -301,25 +304,14 @@ function get_others_currently_viewing( $page ) {
 		return array_values( $users );
 	}
 
-	// Anonymize mods for other users.
-	foreach ( $users as &$u ) {
-		if ( user_can( $u['user_id'], 'moderate' ) ) {
-			$u['who']     = '';
-			$u['user_id'] = 0;
-		}
-	}
-
-	// Anonymize users unless they've got similar caps.
+	// Anonymize mods, and users unless they've got similar caps.
 	// Plugin support reps can see other reps and committers -for their own plugins-.
 	$current_user_objects = get_user_object_slugs( get_current_user_id() );
 	foreach ( $users as &$u ) {
-		// Skip users that have already been anonymized.
-		if ( ! $u['user_id'] ) {
-			continue;
-		}
-
-		$user_objects = get_user_object_slugs( $u['user_id'] );
-		if ( ! array_intersect( $current_user_objects, $user_objects ) ) {
+		if (
+			user_can( $u['user_id'], 'moderate' ) ||
+			! array_intersect( $current_user_objects, get_user_object_slugs( $u['user_id'] ) )
+		) {
 			$u['who']     = '';
 			$u['user_id'] = 0;
 		}
@@ -443,6 +435,15 @@ function clear_viewing( $page = null, $user_id = false ) {
 	foreach ( $pages as $p ) {
 		wp_cache_delete( $p, CACHE_GROUP );
 	}
+}
+
+/**
+ * Remove a deleted user's viewing records right away.
+ *
+ * @param int $user_id The deleted user's ID.
+ */
+function deleted_user( $user_id ) {
+	clear_viewing( null, $user_id );
 }
 
 /**
