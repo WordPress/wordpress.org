@@ -44,9 +44,6 @@ function init() {
 	} );
 	add_action( 'also_viewing_cleanup', __NAMESPACE__ . '\cron_cleanup' );
 
-	// Remove a deleted user's records right away.
-	add_action( 'deleted_user', __NAMESPACE__ . '\deleted_user' );
-
 	// If the user can't enable it, we can skip registering the panels and such.
 	if ( ! allowed_for_user() ) {
 		return;
@@ -265,14 +262,8 @@ function get_currently_viewing( $page ) {
 			continue;
 		}
 
-		// Ignore records of deleted users.
-		$user = get_user_by( 'id', $u->user_id );
-		if ( ! $user ) {
-			continue;
-		}
-
 		$return[] = [
-			'who'      => $user->display_name,
+			'who'      => get_user_by( 'id', $u->user_id )->display_name,
 			'isTyping' => (bool) $u->typing,
 			'user_id'  => (int) $u->user_id,
 		];
@@ -435,15 +426,6 @@ function clear_viewing( $page = null, $user_id = false ) {
 	foreach ( $pages as $p ) {
 		wp_cache_delete( $p, CACHE_GROUP );
 	}
-}
-
-/**
- * Remove a deleted user's viewing records right away.
- *
- * @param int $user_id The deleted user's ID.
- */
-function deleted_user( $user_id ) {
-	clear_viewing( null, $user_id );
 }
 
 /**

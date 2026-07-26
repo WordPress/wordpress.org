@@ -1123,7 +1123,7 @@ abstract class Directory_Compat {
 		}
 		$slugs = [];
 
-		// Deleted users have no objects; cache the empty result.
+		// Nonexistent users have no objects; cache the empty result.
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
 			wp_cache_set( $cache_key, $slugs, $cache_group, HOUR_IN_SECONDS );
