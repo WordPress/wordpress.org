@@ -1123,6 +1123,13 @@ abstract class Directory_Compat {
 		}
 		$slugs = [];
 
+		// Nonexistent users have no objects; cache the empty result.
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			wp_cache_set( $cache_key, $slugs, $cache_group, HOUR_IN_SECONDS );
+			return $slugs;
+		}
+
 		// Themes.
 		if ( 'theme' == $this->compat() ) {
 			$slugs = $wpdb->get_col( $wpdb->prepare(
@@ -1143,11 +1150,11 @@ abstract class Directory_Compat {
 						LEFT JOIN %i AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
 						LEFT JOIN %i AS p ON tr.object_id = p.ID
 					WHERE tt.taxonomy IN( 'plugin_contributors', 'plugin_support_reps', 'plugin_committers' ) AND t.name = %s",
-					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_terms',
-					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_taxonomy',
-					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_relationships',
-					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_posts',
-					get_user_by( 'id', $user_id )->user_nicename
+				$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_terms',
+				$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_taxonomy',
+				$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_relationships',
+				$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_posts',
+				$user->user_nicename
 			) );
 		}
 
