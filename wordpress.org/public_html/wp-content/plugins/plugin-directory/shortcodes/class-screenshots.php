@@ -54,6 +54,8 @@ class Screenshots {
 	 * attachment ID. The core Image block's lightbox needs a stable numeric
 	 * key in `state.metadata.{id}`, so we mint one from this offset plus the
 	 * screenshot index.
+	 * Keep in sync with `SCREENSHOT_ID_OFFSET` in
+	 * `gallery-lightbox-enhancements/assets/lightbox-captions.js`.
 	 *
 	 * @var int
 	 */
