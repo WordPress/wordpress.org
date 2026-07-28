@@ -18,8 +18,8 @@ if ( ! empty( $sso::$matched_route_params['confirm_user'] ) ) {
 	die();
 }
 
-$activation_user = $_COOKIE['wporg_confirm_user'] ?? false;
-$activation_key  = $_COOKIE['wporg_confirm_key']  ?? false;
+$activation_user = is_string( $_COOKIE['wporg_confirm_user'] ?? null ) ? $_COOKIE['wporg_confirm_user'] : '';
+$activation_key  = is_string( $_COOKIE['wporg_confirm_key']  ?? null ) ? $_COOKIE['wporg_confirm_key']  : '';
 
 $pending_user = wporg_get_pending_user( $activation_user );
 if ( ! $pending_user ) {
