@@ -6,9 +6,10 @@
 	<arg value="ps" />
 	<arg name="colors" />
 
-	<!-- Exclude 3rd-party files -->
+	<!-- Exclude 3rd-party and generated files -->
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/build/*</exclude-pattern>
 	<exclude-pattern>*/plugins/plugin-directory/libs/*</exclude-pattern>
 	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
 	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>

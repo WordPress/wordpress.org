@@ -1,0 +1,104 @@
+<?php
+namespace WordPressdotorg\Post_Translation\Parsers;
+
+/**
+ * Parses translatable strings from specific HTML tags within block content.
+ *
+ * Extracts text content from specified HTML tags, and optionally extracts
+ * specific attribute values (like alt, title, href).
+ */
+class HTML_Parser implements Block_Parser {
+	use Swap_Tags;
+	use Replaces_Strings;
+
+	protected $tags;
+	protected $attributes;
+
+	/**
+	 * @param string|string[] $tags       HTML tag name(s) to extract text from.
+	 * @param string[]        $attributes HTML attribute names to extract values from.
+	 */
+	public function __construct( $tags, array $attributes = [] ) {
+		$this->tags       = (array) $tags;
+		$this->attributes = $attributes;
+	}
+
+	public function to_strings( array $block ): array {
+		$strings = [];
+		$html    = $this->get_block_html( $block );
+
+		if ( ! $html ) {
+			return $strings;
+		}
+
+		foreach ( $this->tags as $tag ) {
+			$pattern = $this->tag_pattern( $tag );
+
+			if ( preg_match_all( $pattern, $html, $matches ) ) {
+				foreach ( $matches['content'] as $content ) {
+					$content = trim( $content );
+					if ( '' !== $content ) {
+						$strings[] = $content;
+					}
+				}
+			}
+		}
+
+		// Extract attribute values from any tag in the block HTML.
+		if ( $this->attributes ) {
+			foreach ( $this->attributes as $attr ) {
+				// The lookbehind stops e.g. `alt=` matching inside `data-alt=`;
+				// a \b boundary would not, as `-a` is itself a word boundary.
+				if ( preg_match_all( '/(?<![\w-])' . preg_quote( $attr, '/' ) . '=["\']([^"\']+)["\']/i', $html, $attr_matches ) ) {
+					foreach ( $attr_matches[1] as $value ) {
+						$value = trim( $value );
+						if ( '' !== $value ) {
+							$strings[] = $value;
+						}
+					}
+				}
+			}
+		}
+
+		return array_unique( $strings );
+	}
+
+	public function replace_strings( array $block, array $replacements ): array {
+		return $this->apply_replacements( $block, $replacements );
+	}
+
+	/**
+	 * Get the combined HTML content of a block.
+	 */
+	protected function get_block_html( array $block ): string {
+		if ( ! empty( $block['innerHTML'] ) ) {
+			return $block['innerHTML'];
+		}
+
+		return implode( '', array_filter( $block['innerContent'], 'is_string' ) );
+	}
+
+	/**
+	 * Build a regex pattern to match content within a tag.
+	 */
+	protected function tag_pattern( string $tag ): string {
+		$tag = preg_quote( $tag, '#' );
+
+		return '#<' . $tag . '(?:\s[^>]*)?>(?P<content>.*?)</' . $tag . '>#is';
+	}
+}
+
+/**
+ * HTML parser that supports regex patterns for tag names.
+ *
+ * For example, '/h[1-6]/' matches any heading tag.
+ */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
+class HTML_Regex_Parser extends HTML_Parser {
+	protected function tag_pattern( string $tag ): string {
+		// Strip delimiters from the regex pattern.
+		$tag_pattern = trim( $tag, '/' );
+
+		return '#<(?P<tag>' . $tag_pattern . ')(?:\s[^>]*)?>(?P<content>.*?)</(?P=tag)>#is';
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"name": "wporg-post-translation",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"build": "wp-scripts build --webpack-src-dir=src/editor --output-path=build/editor",
+		"start": "wp-scripts start --webpack-src-dir=src/editor --output-path=build/editor"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.0.0"
+	}
+}

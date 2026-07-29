@@ -33,16 +33,19 @@ class GlotPress_Translate_Bridge {
 	/**
 	 * Translate a single string.
 	 *
-	 * @param $singular     The string to translate.
-	 * @param $project_path The GlotPress project path.
-	 * @param $context      The strings context. Default: null.
+	 * @param string      $singular     The string to translate.
+	 * @param string      $project_path The GlotPress project path.
+	 * @param string|null $context      The strings context. Default: null.
+	 * @param bool|null   $found        Optional. Set to true if a translation was found, false otherwise. Default: null.
 	 *
 	 * @return string The translated string if it exists, else, the existing string.
 	 */
-	static function translate( $singular, $project_path, $context = null ) {
+	public static function translate( $singular, $project_path, $context = null, &$found = null ) {
 		$t = self::instance();
 
 		$translation = $t->find_translation( compact( 'singular', 'context' ), $project_path );
+
+		$found = (bool) $translation;
 
 		return $translation ? $translation[0] : $singular;
 	}
@@ -50,17 +53,20 @@ class GlotPress_Translate_Bridge {
 	/**
 	 * Translate a pluralised string. This does not support the `$count` parameter of `_n()`.
 	 *
-	 * @param $singular     The singular form of the string.
-	 * @param $plural       The plural form of the string.
-	 * @param $project_path The GlotPress project path.
-	 * @param $context      The strings context. Default: null
+	 * @param string      $singular     The singular form of the string.
+	 * @param string      $plural       The plural form of the string.
+	 * @param string      $project_path The GlotPress project path.
+	 * @param string|null $context      The strings context. Default: null.
+	 * @param bool|null   $found        Optional. Set to true if a translation was found, false otherwise. Default: null.
 	 *
 	 * @return array The translated plural forms of the string.
 	 */
-	static function translate_plural( $singular, $plural, $project_path, $context = null ) {
+	public static function translate_plural( $singular, $plural, $project_path, $context = null, &$found = null ) {
 		$t = self::instance();
 
 		$translation = $t->find_translation( compact( 'singular', 'plural', 'context' ), $project_path );
+
+		$found = (bool) $translation;
 
 		return $translation ?: array( $singular, $plural );
 	}

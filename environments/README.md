@@ -119,6 +119,24 @@ npm run browsehappy:env start
 
 **Access:** `http://localhost:8888`
 
+### Post Translation
+
+A local instance for the Post Translation plugin with the GlotPress Translate Bridge dependency.
+
+**Start:**
+
+```bash
+npm run post-translation:env start
+```
+
+**Run tests:**
+
+```bash
+npm run post-translation:env -- run cli --env-cwd=wp-content/plugins/wporg-post-translation phpunit
+```
+
+**Access:** `http://localhost:8888`
+
 ### Translate
 
 A local instance of translate.wordpress.org with GlotPress, the `wporg-gp-*` plugins active on production, and the `pub/wporg` theme.

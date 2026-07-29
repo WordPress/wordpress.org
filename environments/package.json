@@ -18,6 +18,7 @@
 		"themes:test": "npm run themes:test:env -- start && npm run themes:test:env -- run tests-cli --env-cwd=wp-content/plugins/theme-directory phpunit",
 		"jobs:env": "wp-env --config jobs/.wp-env.json",
 		"browsehappy:env": "wp-env --config browsehappy/.wp-env.json",
+		"post-translation:env": "wp-env --config post-translation/.wp-env.json",
 		"translate:env": "wp-env --config translate/.wp-env.json",
 		"translate:import": "npm run translate:env -- run cli -- wp eval-file wp-content/env-bin/import-from-wporg.php",
 		"translate:refresh": "npm run translate:env -- run cli -- wp option delete wporg_translate_env_seeded"
