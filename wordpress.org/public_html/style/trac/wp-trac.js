@@ -1866,7 +1866,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 			// Logic to determine what the PRs status is
 			function prStatus( data ) {
 				var stack = [],
-					emojiState = '';
+					emojiState = '',
+					providerText, checkStatus;
 
 				// Closed? Skip everything else.
 				if ( data.closed_at ) {
@@ -1912,18 +1913,21 @@ var wpTrac, coreKeywordList, gardenerKeywordList, hideFromNewTickets, reservedTe
 				// Unit Tests?
 				if ( data.check_runs ) {
 					for ( var provider in data.check_runs ) {
+						providerText = $( '<span>' ).text( provider ).html();
+						checkStatus  = $( '<span>' ).text( data.check_runs[ provider ] ).html();
+
 						switch ( data.check_runs[ provider ] ) {
 							case 'in_progress':
-								stack.push( provider + ' running' );
+								stack.push( providerText + ' running' );
 								break;
 							case 'failed':
 								emojiState = '❌';
-								stack.push( provider );
+								stack.push( providerText );
 								break;
 							case 'success':
 								continue;
 							default:
-								stack.push( provider + ' ' + data.check_runs[ provider ] );
+								stack.push( providerText + ' ' + checkStatus );
 								break;
 						}
 					}
