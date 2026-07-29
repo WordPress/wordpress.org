@@ -70,10 +70,10 @@ jobs:
       matrix:
         include:
           - name: Handbook Plugin
-            working-directory: wordpress.org/public_html/wp-content/plugins/handbook
+            working-directory: environments
+            wp-env-args: "--config handbook/.wp-env.test.json"
             container: tests-cli
             plugin-name: handbook
-            phpunit-args: "--no-configuration --bootstrap phpunit/bootstrap.php phpunit/tests/"
           - name: Plugin Directory
             working-directory: environments
             wp-env-args: "--config plugin-directory/.wp-env.test.json"

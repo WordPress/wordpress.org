@@ -1,0 +1,10 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"plugins": [
+		"../wordpress.org/public_html/wp-content/plugins/handbook"
+	],
+	"lifecycleScripts": {
+		"afterStart": "bash handbook/bin/after-start-test.sh"
+	}
+}
