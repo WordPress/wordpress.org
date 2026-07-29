@@ -34,7 +34,7 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 	 *
 	 * @var array
 	 */
-	protected static $hooks_saved = [];
+	protected static $hooks_saved = array();
 
 	/**
 	 * Fixture factory, for tests that reach for `$this->factory` rather than
@@ -52,7 +52,7 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 	 *
 	 * @var array
 	 */
-	protected $registered_sidebars = [];
+	protected $registered_sidebars = array();
 
 	/**
 	 * Returns the fixture factory, creating it on first use.
@@ -89,11 +89,11 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 			$this->backup_hooks();
 		}
 
-		$_GET     = [];
-		$_POST    = [];
-		$_REQUEST = [];
+		$_GET     = array();
+		$_POST    = array();
+		$_REQUEST = array();
 
-		$this->registered_sidebars = $GLOBALS['wp_registered_sidebars'] ?? [];
+		$this->registered_sidebars = $GLOBALS['wp_registered_sidebars'] ?? array();
 
 		self::flush_cache();
 
@@ -108,15 +108,15 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 
 		$wpdb->query( 'ROLLBACK' );
 
-		remove_filter( 'query', [ $this, 'create_temporary_tables' ] );
-		remove_filter( 'query', [ $this, 'drop_temporary_tables' ] );
+		remove_filter( 'query', array( $this, 'create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, 'drop_temporary_tables' ) );
 
 		// Reset the query globals the way wp-settings.php first sets them up.
 		$wp_the_query = new WP_Query();
 		$wp_query     = $wp_the_query;
 		$wp           = new WP();
 
-		$post_globals = [ 'post', 'id', 'authordata', 'currentday', 'currentmonth', 'page', 'pages', 'multipage', 'more', 'numpages' ];
+		$post_globals = array( 'post', 'id', 'authordata', 'currentday', 'currentmonth', 'page', 'pages', 'multipage', 'more', 'numpages' );
 		foreach ( $post_globals as $global ) {
 			$GLOBALS[ $global ] = null;
 		}
@@ -126,7 +126,7 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 		 * so a test that calls set_current_screen() does not decide what screen
 		 * the next test starts on.
 		 */
-		foreach ( [ 'current_screen', 'taxnow', 'typenow' ] as $global ) {
+		foreach ( array( 'current_screen', 'taxnow', 'typenow' ) as $global ) {
 			$GLOBALS[ $global ] = null;
 		}
 
@@ -151,8 +151,8 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 		$wpdb->query( 'SET autocommit = 0;' );
 		$wpdb->query( 'START TRANSACTION;' );
 
-		add_filter( 'query', [ $this, 'create_temporary_tables' ] );
-		add_filter( 'query', [ $this, 'drop_temporary_tables' ] );
+		add_filter( 'query', array( $this, 'create_temporary_tables' ) );
+		add_filter( 'query', array( $this, 'drop_temporary_tables' ) );
 	}
 
 	/**
@@ -187,14 +187,14 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 	 * Snapshots the hook globals.
 	 */
 	protected function backup_hooks() {
-		self::$hooks_saved['wp_filter'] = [];
+		self::$hooks_saved['wp_filter'] = array();
 
 		foreach ( $GLOBALS['wp_filter'] as $hook_name => $hook_object ) {
 			self::$hooks_saved['wp_filter'][ $hook_name ] = clone $hook_object;
 		}
 
-		foreach ( [ 'wp_actions', 'wp_filters', 'wp_current_filter' ] as $key ) {
-			self::$hooks_saved[ $key ] = $GLOBALS[ $key ] ?? [];
+		foreach ( array( 'wp_actions', 'wp_filters', 'wp_current_filter' ) as $key ) {
+			self::$hooks_saved[ $key ] = $GLOBALS[ $key ] ?? array();
 		}
 	}
 
@@ -209,13 +209,13 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 			return;
 		}
 
-		$GLOBALS['wp_filter'] = [];
+		$GLOBALS['wp_filter'] = array();
 
 		foreach ( self::$hooks_saved['wp_filter'] as $hook_name => $hook_object ) {
 			$GLOBALS['wp_filter'][ $hook_name ] = clone $hook_object;
 		}
 
-		foreach ( [ 'wp_actions', 'wp_filters', 'wp_current_filter' ] as $key ) {
+		foreach ( array( 'wp_actions', 'wp_filters', 'wp_current_filter' ) as $key ) {
 			if ( isset( self::$hooks_saved[ $key ] ) ) {
 				$GLOBALS[ $key ] = self::$hooks_saved[ $key ];
 			}
@@ -237,7 +237,7 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 		wp_cache_flush();
 
 		wp_cache_add_global_groups(
-			[
+			array(
 				'blog-details',
 				'blog-id-cache',
 				'blog-lookup',
@@ -258,10 +258,10 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 				'useremail',
 				'userlogins',
 				'userslugs',
-			]
+			)
 		);
 
-		wp_cache_add_non_persistent_groups( [ 'counts', 'plugins', 'theme_json' ] );
+		wp_cache_add_non_persistent_groups( array( 'counts', 'plugins', 'theme_json' ) );
 	}
 
 	/**
@@ -274,17 +274,17 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 		 * WP and WP_Query pull parameters from globals and superglobals, so
 		 * everything they read has to be cleared before the request is rerun.
 		 */
-		$_GET  = [];
-		$_POST = [];
+		$_GET  = array();
+		$_POST = array();
 
-		$globals = [ 'query_string', 'id', 'postdata', 'authordata', 'day', 'currentmonth', 'page', 'pages', 'multipage', 'more', 'numpages', 'pagenow', 'current_screen' ];
+		$globals = array( 'query_string', 'id', 'postdata', 'authordata', 'day', 'currentmonth', 'page', 'pages', 'multipage', 'more', 'numpages', 'pagenow', 'current_screen' );
 		foreach ( $globals as $global ) {
 			if ( isset( $GLOBALS[ $global ] ) ) {
 				unset( $GLOBALS[ $global ] );
 			}
 		}
 
-		$parts = parse_url( $url );
+		$parts = wp_parse_url( $url );
 		if ( isset( $parts['scheme'] ) ) {
 			$req = $parts['path'] ?? '';
 			if ( isset( $parts['query'] ) ) {
@@ -328,7 +328,7 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 	public function assertQueryTrue( ...$prop ) {
 		global $wp_query;
 
-		$all = [
+		$all = array(
 			'is_404',
 			'is_admin',
 			'is_archive',
@@ -360,7 +360,7 @@ abstract class WPorg_Handbook_TestCase extends TestCase {
 			'is_time',
 			'is_trackback',
 			'is_year',
-		];
+		);
 
 		foreach ( $prop as $true_thing ) {
 			$this->assertContains( $true_thing, $all, "Unknown conditional: {$true_thing}." );
