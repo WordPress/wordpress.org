@@ -186,15 +186,18 @@ class WPorg_Handbook_Navigation {
 			}
 		}
 
-		// Cache key format is pages:{post ID}:{sort column}:{source_post}(:{excluded})?.
-		$cache_key = 'pages:' . $post->ID . ':' . $sort_column . ':' . ( $source_post ? '1' : '0' );
+		// The list of pages varies by this, so the cache key must account for it.
+		$can_read_private = current_user_can( get_post_type_object( get_post_type( $post ) )->cap->read_private_posts );
+
+		// Cache key format is pages:{post ID}:{sort column}:{source_post}:{can read private}(:{excluded})?.
+		$cache_key = 'pages:' . $post->ID . ':' . $sort_column . ':' . ( $source_post ? '1' : '0' ) . ':' . ( $can_read_private ? '1' : '0' );
 		if ( $exclude ) {
 			$cache_key .= ':' . str_replace( ' ', '', $exclude );
 		}
 		$cache_group = 'wporg_handbook:' . get_current_blog_id();
 
 		$post_status = array( 'publish' );
-		if ( current_user_can( get_post_type_object( get_post_type( $post ) )->cap->read_private_posts ) ) {
+		if ( $can_read_private ) {
 			$post_status[] = 'private';
 		}
 
