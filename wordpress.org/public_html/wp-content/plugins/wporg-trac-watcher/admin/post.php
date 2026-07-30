@@ -46,7 +46,7 @@ add_action( 'admin_post_svn_save', function() {
 			die( -1 );
 		}
 
-		$prop_name = wp_unslash( $_REQUEST['prop_name'] );
+		$prop_name = sanitize_text_field( wp_unslash( $_REQUEST['prop_name'] ) );
 		if ( ! $user && $prop_name != $the_prop->prop_name ) {
 			$user = Props\find_user_id( $prop_name );
 		}
@@ -92,9 +92,9 @@ add_action( 'admin_post_svn_save', function() {
 		// Adding one?
 
 		// Use the 'prop name' field first, otherwise fall back to the user_id field if the former is blank
-		$prop_name = wp_unslash( $_REQUEST['prop_name'] ?? '' );
+		$prop_name = sanitize_text_field( wp_unslash( $_REQUEST['prop_name'] ?? '' ) );
 		if ( ! $prop_name ) {
-			$prop_name = wp_unslash( $_REQUEST['user_id'] ?? '' );
+			$prop_name = sanitize_text_field( wp_unslash( $_REQUEST['user_id'] ?? '' ) );
 		};
 
 		if ( ! $prop_name ) {

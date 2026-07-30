@@ -20,15 +20,15 @@ function display_reports_page( $details ) {
 	<div class="wrap">
 		<h2>Reports: <?php echo esc_html( $details['name'] ); ?></h2>
 		<ol>
-			<li><a href="<?php echo $url; ?>&what=contributors">All props matching filter</a></li>
-			<li><a href="<?php echo $url; ?>&what=committers">All Committers matching filter</a></li>
-			<li><a href="<?php echo $url; ?>&what=cloud">Cloud of Props matching filter</a></li>
-			<li><a href="<?php echo $url; ?>&what=typos">Props typos matching filter</a></li>
-			<li><a href="<?php echo $url; ?>&what=unknown-props">Unknown Props/typos matching filter</a></li>
-			<li><a href="<?php echo $url; ?>&what=raw-contributors-and-committers">All Props+Committers matching filter grouped together</a></li>
-			
+			<li><a href="<?php echo esc_url( $url . '&what=contributors' ); ?>">All props matching filter</a></li>
+			<li><a href="<?php echo esc_url( $url . '&what=committers' ); ?>">All Committers matching filter</a></li>
+			<li><a href="<?php echo esc_url( $url . '&what=cloud' ); ?>">Cloud of Props matching filter</a></li>
+			<li><a href="<?php echo esc_url( $url . '&what=typos' ); ?>">Props typos matching filter</a></li>
+			<li><a href="<?php echo esc_url( $url . '&what=unknown-props' ); ?>">Unknown Props/typos matching filter</a></li>
+			<li><a href="<?php echo esc_url( $url . '&what=raw-contributors-and-committers' ); ?>">All Props+Committers matching filter grouped together</a></li>
+
 			<?php if ( $is_core ) { ?>
-			<li><a href="<?php echo $url; ?>&what=versions-contributed">Versions which users have contributed to. Ignores filter.</a></li>
+			<li><a href="<?php echo esc_url( $url . '&what=versions-contributed' ); ?>">Versions which users have contributed to. Ignores filter.</a></li>
 			<?php } ?>
 		</ol>
 
@@ -136,11 +136,11 @@ function display_reports_page( $details ) {
 					);
 
 					printf(
-						'<tr><td><a href="%s">%s</a></td><td><a href="%s">%s</a></td></tr>',
-						'https://profiles.wordpress.org/' . $c->user_nicename . '/',
-						get_avatar( $c->ID, 32 ) . ' ' . ( $c->display_name ?: $c->user_nicename ),
-						$link,
-						$c->count,
+						'<tr><td><a href="%1$s">%2$s</a></td><td><a href="%3$s">%4$s</a></td></tr>',
+						esc_url( 'https://profiles.wordpress.org/' . $c->user_nicename . '/' ),
+						get_avatar( $c->ID, 32 ) . ' ' . esc_html( $c->display_name ?: $c->user_nicename ),
+						esc_url( $link ),
+						esc_html( $c->count ),
 					);
 				}
 				echo '</table>';
@@ -172,21 +172,21 @@ function display_reports_page( $details ) {
 					);
 					if ( ! $c->ID ) {
 						printf(
-							'<tr><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',
-							$c->prop_name,
-							$c->count,
-							$link,
-							'[' . str_replace( ',', '] [', $c->revisions ) . ']'
+							'<tr><td>%1$s</td><td>%2$s</td><td><a href="%3$s">%4$s</a></td></tr>',
+							esc_html( $c->prop_name ),
+							esc_html( $c->count ),
+							esc_url( $link ),
+							esc_html( '[' . str_replace( ',', '] [', $c->revisions ) . ']' )
 						);
 						continue;
 					}
 					printf(
-						'<tr><td><a href="%s">%s</a></td><td>%s</td><td><a href="%s">%s</a></td></tr>',
-						'https://profiles.wordpress.org/' . $c->user_nicename . '/',
-						get_avatar( $c->ID, 32 ) . ' ' . ($c->display_name ?: $c->user_nicename),
-						$c->count,
-						$link,
-						'[' . str_replace( ',', '] [', $c->revisions ) . ']'
+						'<tr><td><a href="%1$s">%2$s</a></td><td>%3$s</td><td><a href="%4$s">%5$s</a></td></tr>',
+						esc_url( 'https://profiles.wordpress.org/' . $c->user_nicename . '/' ),
+						get_avatar( $c->ID, 32 ) . ' ' . esc_html( $c->display_name ?: $c->user_nicename ),
+						esc_html( $c->count ),
+						esc_url( $link ),
+						esc_html( '[' . str_replace( ',', '] [', $c->revisions ) . ']' )
 					);
 				}
 				echo '</table>';
@@ -298,18 +298,22 @@ function display_reports_page( $details ) {
 							admin_url( 'admin.php' )
 						);
 	
-						$profile = $p->prop_name;
+						$profile = esc_html( $p->prop_name );
 						if ( $p->user_id ) {
-							$u = get_user_by( 'ID', $p->user_id );
-							$profile = "<A href='https://profiles.wordpress.org/{$u->user_nicename}/'>" . ( $u->display_name ?: $u->user_login ) . "</a>";
+							$u       = get_user_by( 'ID', $p->user_id );
+							$profile = sprintf(
+								'<a href="%s">%s</a>',
+								esc_url( 'https://profiles.wordpress.org/' . $u->user_nicename . '/' ),
+								esc_html( $u->display_name ?: $u->user_login )
+							);
 						}
 
 						printf(
-							'<tr><td>%s</td><td>%s</td><td title="%s">%s</td></tr>',
-							$profile,
-							$p->count,
+							'<tr><td>%1$s</td><td>%2$s</td><td title="%3$s">%4$s</td></tr>',
+							$profile, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped when built above.
+							esc_html( $p->count ),
 							esc_attr( $p->versions ),
-							$compress( $p->versions )
+							esc_html( $compress( $p->versions ) )
 						);
 					}
 					echo '</table>';
@@ -342,13 +346,13 @@ function display_reports_page( $details ) {
 						admin_url( 'admin.php' )
 					);
 					printf(
-						'<tr><td><a href="%s">%s</a></td><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',
-						'https://profiles.wordpress.org/' . $c->user_nicename . '/',
-						$c->display_name ?: $c->user_nicename,
-						$c->typos,
-						$c->count,
-						$link,
-						'[' . str_replace( ',', '] [', $c->revisions ) . ']'
+						'<tr><td><a href="%1$s">%2$s</a></td><td>%3$s</td><td>%4$s</td><td><a href="%5$s">%6$s</a></td></tr>',
+						esc_url( 'https://profiles.wordpress.org/' . $c->user_nicename . '/' ),
+						esc_html( $c->display_name ?: $c->user_nicename ),
+						esc_html( $c->typos ),
+						esc_html( $c->count ),
+						esc_url( $link ),
+						esc_html( '[' . str_replace( ',', '] [', $c->revisions ) . ']' )
 					);
 				}
 				echo '</table>';
@@ -377,11 +381,11 @@ function display_reports_page( $details ) {
 						admin_url( 'admin.php' )
 					);
 					printf(
-						'<tr><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',
+						'<tr><td>%1$s</td><td>%2$s</td><td><a href="%3$s">%4$s</a></td></tr>',
 						esc_html( $c->prop_name ),
-						$c->count,
-						$link,
-						'[' . str_replace( ',', '] [', $c->revisions ) . ']'
+						esc_html( $c->count ),
+						esc_url( $link ),
+						esc_html( '[' . str_replace( ',', '] [', $c->revisions ) . ']' )
 					);
 				}
 				echo '</table>';
@@ -413,21 +417,21 @@ function display_reports_page( $details ) {
 
 
 				echo "<p>Props (Contributors + Committers bunched together) designed to be copy-pasted elsewhere.<br>
-				Set gravatar size via adding <a href='$url&size=96'>&size=96</a> to this URL.<br>
+				Set gravatar size via adding <a href='" . esc_url( $url . '&size=96' ) . "'>&size=96</a> to this URL.<br>
 				Note: A committer prop'ing themselves only counts for 1 here.</p>";
 
 				echo '<table class="widefat striped">';
 				echo '<thead><tr><th>ID</th><th>Name</th><th>DisplayName</th><th>Count</th><th>Profile URL</th><th>Gravatar</th><th>GravURL</th></tr></thead>';
 				foreach ( $details as $c ) {
 					printf(
-						'<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-						$c->ID,
-						$c->prop_name,
-						$c->display_name,
-						$c->count,
-						make_clickable( $c->user_nicename ? 'https://profile.wordpress.org/' . $c->user_nicename . '/' : '' ),
-						$c->ID ? get_avatar( $c->ID, min( 96, $_GET['size'] ?? 32 ) ) : '',
-						make_clickable( $c->ID ? get_avatar_url( $c->ID, [ 'size' => $_GET['size'] ?? 64 ] ) : '' )
+						'<tr><td>%1$s</td><td>%2$s</td><td>%3$s</td><td>%4$s</td><td>%5$s</td><td>%6$s</td><td>%7$s</td></tr>',
+						esc_html( $c->ID ),
+						esc_html( $c->prop_name ),
+						esc_html( $c->display_name ),
+						esc_html( $c->count ),
+						make_clickable( $c->user_nicename ? esc_url( 'https://profile.wordpress.org/' . $c->user_nicename . '/' ) : '' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- URL escaped, make_clickable() returns markup.
+						$c->ID ? get_avatar( $c->ID, min( 96, absint( $_GET['size'] ?? 32 ) ) ) : '',
+						make_clickable( $c->ID ? get_avatar_url( $c->ID, [ 'size' => absint( $_GET['size'] ?? 64 ) ] ) : '' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generated URL, and the anchor text is meant to be copy-pasted as-is.
 					);
 				}
 				echo '</table>';
