@@ -178,10 +178,16 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	}
 
 	/**
-	 * Saving a disallowed source stores nothing.
+	 * Saving a disallowed source clears the stored one.
+	 *
+	 * The stored value is seeded first so that the assertion distinguishes a
+	 * rejected source from `action_save_post()` never reaching the check, which
+	 * would leave the meta unset and read back as an empty string either way.
 	 */
 	public function test_save_post_does_not_store_a_disallowed_source(): void {
 		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
+
+		update_post_meta( $post_id, 'wporg_cli_markdown_source', 'https://github.com/wp-cli/handbook/blob/main/README.md' );
 
 		$_POST['wporg-cli-markdown-source']       = 'http://127.0.0.1/secrets';
 		$_POST['wporg-cli-markdown-source-nonce'] = wp_create_nonce( 'wporg-cli-markdown-source' );
@@ -204,6 +210,87 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 		Markdown_Import::action_save_post( $post_id );
 
 		$this->assertSame( $source, get_post_meta( $post_id, 'wporg_cli_markdown_source', true ) );
+	}
+
+	/**
+	 * The slashes WordPress adds to `$_POST` do not survive into the stored source.
+	 */
+	public function test_save_post_stores_a_slashed_source_without_the_slashes(): void {
+		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
+		$source  = "https://github.com/wp-cli/handbook/blob/main/what's-new.md";
+
+		$_POST['wporg-cli-markdown-source']       = wp_slash( $source );
+		$_POST['wporg-cli-markdown-source-nonce'] = wp_create_nonce( 'wporg-cli-markdown-source' );
+
+		Markdown_Import::action_save_post( $post_id );
+
+		$this->assertSame( $source, get_post_meta( $post_id, 'wporg_cli_markdown_source', true ) );
+	}
+
+	/**
+	 * Runs the private manifest importer against a single document.
+	 *
+	 * @param array $doc Manifest document.
+	 * @return WP_Post|false The created post, or false if it was skipped.
+	 */
+	private function create_post_from_manifest_doc( array $doc ) {
+		$method = new ReflectionMethod( Markdown_Import::class, 'create_post_from_manifest_doc' );
+
+		return $method->invoke( null, $doc );
+	}
+
+	/**
+	 * A manifest document with an allowed source is imported.
+	 */
+	public function test_manifest_doc_with_an_allowed_source_is_created(): void {
+		$source = 'https://raw.githubusercontent.com/wp-cli/handbook/main/README.md';
+
+		$post = $this->create_post_from_manifest_doc(
+			array(
+				'title'           => 'Readme',
+				'slug'            => 'readme',
+				'markdown_source' => $source,
+			)
+		);
+
+		$this->assertInstanceOf( WP_Post::class, $post );
+		$this->posts[] = $post->ID;
+
+		$this->assertSame( $source, get_post_meta( $post->ID, 'wporg_cli_markdown_source', true ) );
+	}
+
+	/**
+	 * A manifest document pointing somewhere else creates no post at all.
+	 *
+	 * Checking at fetch time alone would still leave a page behind that every
+	 * scheduled import fails on.
+	 */
+	public function test_manifest_doc_with_a_disallowed_source_is_skipped(): void {
+		$post = $this->create_post_from_manifest_doc(
+			array(
+				'title'           => 'Internal',
+				'slug'            => 'internal',
+				'markdown_source' => 'http://169.254.169.254/latest/meta-data/',
+			)
+		);
+
+		$this->assertFalse( $post );
+		$this->assertNull( get_page_by_path( 'internal', OBJECT, 'handbook' ) );
+	}
+
+	/**
+	 * A manifest document without a source at all creates no post.
+	 */
+	public function test_manifest_doc_without_a_source_is_skipped(): void {
+		$post = $this->create_post_from_manifest_doc(
+			array(
+				'title' => 'Sourceless',
+				'slug'  => 'sourceless',
+			)
+		);
+
+		$this->assertFalse( $post );
+		$this->assertNull( get_page_by_path( 'sourceless', OBJECT, 'handbook' ) );
 	}
 
 	/**

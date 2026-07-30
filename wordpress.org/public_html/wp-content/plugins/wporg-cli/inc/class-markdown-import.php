@@ -96,6 +96,15 @@ class Markdown_Import {
 	 * Create a new handbook page from the manifest document
 	 */
 	private static function create_post_from_manifest_doc( $doc, $post_parent = null ) {
+		// Checked before the insert, so a bad entry doesn't leave behind a page that only ever fails to import.
+		$markdown_source = self::validate_markdown_source( $doc['markdown_source'] ?? '' );
+		if ( ! $markdown_source ) {
+			if ( class_exists( 'WP_CLI' ) ) {
+				\WP_CLI::warning( sprintf( 'Skipped %s: markdown source is not an allowed URL.', $doc['slug'] ?? 'manifest doc' ) );
+			}
+			return false;
+		}
+
 		$post_data = array(
 			'post_type'   => 'handbook',
 			'post_status' => 'publish',
@@ -110,7 +119,7 @@ class Markdown_Import {
 		if ( class_exists( 'WP_CLI' ) ) {
 			\WP_CLI::log( "Created post {$post_id} for {$doc['title']}." );
 		}
-		update_post_meta( $post_id, self::$meta_key, esc_url_raw( $doc['markdown_source'] ) );
+		update_post_meta( $post_id, self::$meta_key, $markdown_source );
 		return get_post( $post_id );
 	}
 
@@ -199,6 +208,7 @@ class Markdown_Import {
 	public static function action_save_post( $post_id ) {
 
 		if ( ! isset( $_POST[ self::$input_name ] )
+			|| ! is_string( $_POST[ self::$input_name ] )
 			|| ! isset( $_POST[ self::$nonce_name ] )
 			|| ! in_array( get_post_type( $post_id ), self::$supported_post_types, true ) ) {
 			return;
