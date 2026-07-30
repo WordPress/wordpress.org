@@ -115,7 +115,8 @@ class Handbook {
 		if ( is_wp_error( $markdown_source ) ) {
 			return '';
 		}
-		if ( 'github.com' !== parse_url( $markdown_source, PHP_URL_HOST )
+		// The host is compared case insensitively, since that is how the importer accepts it.
+		if ( 'github.com' !== strtolower( (string) wp_parse_url( $markdown_source, PHP_URL_HOST ) )
 			|| false !== stripos( $markdown_source, '/edit/main/' ) ) {
 			return $markdown_source;
 		}
