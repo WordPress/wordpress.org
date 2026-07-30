@@ -439,8 +439,8 @@ function display_reports_page( $details ) {
 						esc_html( $c->display_name ),
 						esc_html( $c->count ),
 						wp_kses_post( make_clickable( $c->user_nicename ? 'https://profile.wordpress.org/' . $c->user_nicename . '/' : '' ) ),
-						$c->ID ? get_avatar( $c->ID, min( 96, absint( $_GET['size'] ?? 32 ) ) ) : '',
-						wp_kses_post( make_clickable( $c->ID ? get_avatar_url( $c->ID, [ 'size' => absint( $_GET['size'] ?? 64 ) ] ) : '' ) )
+						$c->ID ? get_avatar( $c->ID, min( 96, absint( $_GET['size'] ?? 0 ) ?: 32 ) ) : '',
+						wp_kses_post( make_clickable( $c->ID ? get_avatar_url( $c->ID, [ 'size' => absint( $_GET['size'] ?? 0 ) ?: 64 ] ) : '' ) )
 					);
 				}
 				echo '</table>';
