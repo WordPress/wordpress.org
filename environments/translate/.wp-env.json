@@ -22,6 +22,7 @@
 		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-contributor-moderation",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-slack-integrations",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-profiles",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-translation-events",
 		"https://downloads.wordpress.org/plugin/logged-out-admin-bar.zip"
 	],
 	"themes": [

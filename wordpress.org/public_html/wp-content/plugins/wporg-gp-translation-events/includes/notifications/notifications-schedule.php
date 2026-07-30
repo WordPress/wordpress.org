@@ -3,19 +3,19 @@
 namespace Wporg\TranslationEvents\Notifications;
 
 use DateTimeImmutable;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 
 class Notifications_Schedule {
 	private DateTimeImmutable $now;
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 
 	/**
 	 * Notifications_Schedule constructor.
 	 *
-	 * @param DateTimeImmutable          $now              The value of "now".
-	 * @param Event_Repository_Interface $event_repository Event repository.
+	 * @param DateTimeImmutable $now              The value of "now".
+	 * @param Event_Repository  $event_repository Event repository.
 	 */
-	public function __construct( DateTimeImmutable $now, Event_Repository_Interface $event_repository ) {
+	public function __construct( DateTimeImmutable $now, Event_Repository $event_repository ) {
 		$this->now              = $now;
 		$this->event_repository = $event_repository;
 	}

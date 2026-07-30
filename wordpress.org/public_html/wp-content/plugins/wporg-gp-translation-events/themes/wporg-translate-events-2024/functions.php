@@ -1,9 +1,19 @@
 <?php
+/**
+ * Bootstraps the Translate Events 2024 theme, registering its blocks and patterns and wiring up navigation menus, breadcrumbs, and social meta tags.
+ *
+ * @package wporg-translate-events-2024
+ */
 
 namespace Wporg\TranslationEvents\Theme_2024;
 
 use Wporg\TranslationEvents\Urls;
 
+/**
+ * Registers all block types provided by the theme.
+ *
+ * @return void
+ */
 function register_blocks(): void {
 	include_once __DIR__ . '/blocks/header/index.php';
 	include_once __DIR__ . '/blocks/event-excerpt/index.php';
@@ -13,8 +23,37 @@ function register_blocks(): void {
 	include_once __DIR__ . '/blocks/event-list/index.php';
 	include_once __DIR__ . '/blocks/footer/index.php';
 	include_once __DIR__ . '/blocks/pages/events/my-events/index.php';
+	include_once __DIR__ . '/blocks/pages/events/home/index.php';
 	include_once __DIR__ . '/blocks/event-attendance-mode/index.php';
 	include_once __DIR__ . '/blocks/event-flag/index.php';
+	include_once __DIR__ . '/blocks/pages/events/event-details/index.php';
+	include_once __DIR__ . '/blocks/attendee-list/index.php';
+	include_once __DIR__ . '/blocks/attendee-avatar-name/index.php';
+	include_once __DIR__ . '/blocks/contributor-list/index.php';
+	include_once __DIR__ . '/blocks/event-stats/index.php';
+	include_once __DIR__ . '/blocks/event-projects/index.php';
+	include_once __DIR__ . '/blocks/event-contribution-summary/index.php';
+	include_once __DIR__ . '/blocks/event-description/index.php';
+	include_once __DIR__ . '/blocks/event-attend-button/index.php';
+	include_once __DIR__ . '/blocks/event-host-list/index.php';
+	include_once __DIR__ . '/blocks/pages/events/event-attendees/index.php';
+	include_once __DIR__ . '/blocks/pages/events/event-create/index.php';
+	include_once __DIR__ . '/blocks/event-form/index.php';
+	include_once __DIR__ . '/blocks/pages/events/event-edit/index.php';
+	include_once __DIR__ . '/blocks/remote-attendance-icon/index.php';
+	include_once __DIR__ . '/blocks/event-edit-link/index.php';
+	include_once __DIR__ . '/blocks/event-trash-link/index.php';
+	include_once __DIR__ . '/blocks/event-nav-links/index.php';
+	include_once __DIR__ . '/blocks/event-load-more-button/index.php';
+}
+
+/**
+ * Registers all block patterns provided by the theme.
+ *
+ * @return void
+ */
+function register_patterns(): void {
+	include_once __DIR__ . '/patterns/front-cover.php';
 }
 
 add_action(
@@ -28,6 +67,7 @@ add_action(
 	'wporg_translate_events_theme_init',
 	function (): void {
 		register_blocks();
+		register_patterns();
 		add_action(
 			'wp_head',
 			function (): void {
@@ -146,7 +186,16 @@ function add_social_tags( string $html_title, string $url, string $html_descript
 
 // The $attributes argument cannot be removed despite not being used in the function, because otherwise it won't be
 // in scope for the rendered template.
-// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+/**
+ * Renders a themed page by wrapping the given template in the header and footer blocks.
+ *
+ * @param string $template_path Path to the template file to render.
+ * @param string $title         The page title.
+ * @param array  $attributes    Attributes passed through to the rendered template.
+ *
+ * @return void
+ */
 function render_page( string $template_path, string $title, array $attributes ): void {
 	// The page content must be rendered before the header block, so that styles and scripts of the referenced blocks
 	// are registered.
@@ -175,8 +224,14 @@ function render_page( string $template_path, string $title, array $attributes ):
 		<!-- /wp:group -->
 		BLOCKS
 	);
-
-	$header_json = wp_json_encode( array( 'title' => $title ) );
+	// get block name from template path.
+	$page_block_name = basename( dirname( $template_path ) ) === 'events' ? pathinfo( $template_path, PATHINFO_FILENAME ) : basename( dirname( $template_path ) );
+	$header_json     = wp_json_encode(
+		array(
+			'title'           => $title,
+			'page_block_name' => $page_block_name,
+		)
+	);
 	echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		<<<BLOCKS
 		<!-- wp:wporg-translate-events-2024/header $header_json /-->
@@ -185,3 +240,4 @@ function render_page( string $template_path, string $title, array $attributes ):
 		BLOCKS
 	);
 }
+// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed

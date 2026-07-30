@@ -71,6 +71,10 @@ class Attendee {
 		$this->is_new_contributor = true;
 	}
 
+	public function mark_as_active_contributor(): void {
+		$this->is_new_contributor = false;
+	}
+
 	public function mark_as_remote_attendee(): void {
 		$this->is_remote = true;
 	}

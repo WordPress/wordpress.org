@@ -9,33 +9,42 @@ use Exception;
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Event\Event;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use WP_User;
 use Wporg\TranslationEvents\Event\Event_Start_Date;
 
 class Notifications_Send {
 
 	private Attendee_Repository $attendee_repository;
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 	private DateTimeImmutable $now;
 
 	/**
 	 * Notifications_Send constructor.
 	 *
-	 * @param DateTimeImmutable          $now                 The value of "now".
-	 * @param Event_Repository_Interface $event_repository    Event repository.
-	 * @param Attendee_Repository        $attendee_repository Attendee repository.
+	 * @param DateTimeImmutable   $now                 The value of "now".
+	 * @param Event_Repository    $event_repository    Event repository.
+	 * @param Attendee_Repository $attendee_repository Attendee repository.
 	 */
 	public function __construct(
 		DateTimeImmutable $now,
-		Event_Repository_Interface $event_repository,
+		Event_Repository $event_repository,
 		Attendee_Repository $attendee_repository
 	) {
 		$this->now                 = $now;
 		$this->event_repository    = $event_repository;
 		$this->attendee_repository = $attendee_repository;
 		add_action( 'wporg_gp_translation_events_email_notifications_1h', array( $this, 'send_notifications' ), 10, 1 );
+		add_action( 'wporg_gp_translation_events_email_notifications_1h', array( $this, 'recalculate_new_contributor' ), 10, 1 );
 		add_action( 'wporg_gp_translation_events_email_notifications_24h', array( $this, 'send_notifications' ), 10, 1 );
+	}
+
+	public function recalculate_new_contributor( int $post_id ) {
+		$event = $this->event_repository->get_event( $post_id );
+		if ( null === $event ) {
+			return;
+		}
+		$this->attendee_repository->recheck_new_contributor_status( $event->id() );
 	}
 
 	/**

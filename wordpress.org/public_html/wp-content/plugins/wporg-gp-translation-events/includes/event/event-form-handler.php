@@ -12,10 +12,10 @@ use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Urls;
 
 class Event_Form_Handler {
-	private Event_Repository_Interface $event_repository;
+	private Event_Repository $event_repository;
 	private Notifications_Schedule $notifications_schedule;
 
-	public function __construct( DateTimeImmutable $now, Event_Repository_Interface $event_repository ) {
+	public function __construct( DateTimeImmutable $now, Event_Repository $event_repository ) {
 		$this->event_repository       = $event_repository;
 		$this->notifications_schedule = new Notifications_Schedule( $now, $this->event_repository );
 	}
@@ -88,20 +88,17 @@ class Event_Form_Handler {
 			// Create or update event.
 
 			try {
-				if ( 'edit_event' === $action && $event ) {
-					$form_data['event_timezone'] = $event->timezone()->getName();
-				}
 				$new_event = $this->parse_form_data( $form_data );
-			} catch ( InvalidTimeZone $e ) {
+			} catch ( Invalid_Time_Zone $e ) {
 				wp_send_json_error( esc_html__( 'Invalid time zone.', 'gp-translation-events' ), 422 );
 				return;
-			} catch ( InvalidStart $e ) {
+			} catch ( Invalid_Start $e ) {
 				wp_send_json_error( esc_html__( 'Invalid start date.', 'gp-translation-events' ), 422 );
 				return;
-			} catch ( InvalidEnd $e ) {
+			} catch ( Invalid_End $e ) {
 				wp_send_json_error( esc_html__( 'Invalid end date.', 'gp-translation-events' ), 422 );
 				return;
-			} catch ( InvalidStatus $e ) {
+			} catch ( Invalid_Status $e ) {
 				wp_send_json_error( esc_html__( 'Invalid status.', 'gp-translation-events' ), 422 );
 				return;
 			}
@@ -188,10 +185,10 @@ class Event_Form_Handler {
 	// PHPCS erroneously thinks there should be only two throw tags.
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 	/**
-	 * @throws InvalidStart
-	 * @throws InvalidEnd
-	 * @throws InvalidTimeZone
-	 * @throws InvalidStatus
+	 * @throws Invalid_Start
+	 * @throws Invalid_End
+	 * @throws Invalid_Time_Zone
+	 * @throws Invalid_Status
 	 */
 	// phpcs:enable
 	private function parse_form_data( array $data ): Event {
@@ -214,19 +211,23 @@ class Event_Form_Handler {
 		try {
 			$timezone = new DateTimeZone( $event_timezone );
 		} catch ( Exception $e ) {
-			throw new InvalidTimeZone();
+			throw new Invalid_Time_Zone();
 		}
 
 		try {
-			$start = new Event_Start_Date( $event_start, $timezone );
+			$start_utc = new DateTime( $event_start, $timezone );
+			$start_utc = $start_utc->setTimezone( new DateTimeZone( 'UTC' ) );
+			$start     = new Event_Start_Date( $start_utc->format( 'Y-m-d H:i:s' ), $timezone );
 		} catch ( Exception $e ) {
-			throw new InvalidStart();
+			throw new Invalid_Start();
 		}
 
 		try {
-			$end = new Event_End_Date( $event_end, $timezone );
+			$end_utc = new DateTime( $event_end, $timezone );
+			$end_utc = $end_utc->setTimezone( new DateTimeZone( 'UTC' ) );
+			$end     = new Event_End_Date( $end_utc->format( 'Y-m-d H:i:s' ), $timezone );
 		} catch ( Exception $e ) {
-			throw new InvalidEnd();
+			throw new Invalid_End();
 		}
 
 		$event = new Event(

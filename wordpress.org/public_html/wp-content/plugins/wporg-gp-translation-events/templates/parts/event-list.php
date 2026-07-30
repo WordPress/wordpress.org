@@ -19,7 +19,7 @@ $show_start                      = $show_start ?? false;
 $show_end                        = $show_end ?? false;
 $show_excerpt                    = $show_excerpt ?? true;
 $show_permanent_delete           = $show_permanent_delete ?? false;
-$extra_classes                   = isset( $extra_classes ) ? implode( $extra_classes, ' ' ) : '';
+$extra_classes                   = isset( $extra_classes ) ? implode( ' ', $extra_classes ) : '';
 $current_user_attendee_per_event = $current_user_attendee_per_event ?? array();
 
 /**

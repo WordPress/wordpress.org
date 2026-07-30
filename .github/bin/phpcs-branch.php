@@ -21,16 +21,19 @@ function run_phpcs( $file, $bin_dir ) {
  * Note: This differs from the typical usage of phpcs-changed, which suggests piping in the file contents.
  * Here, we create temporary files instead, because piping in the contents causes phpcs-changed to misbehave
  * when the file contains special characters (like escape sequences such as '\\').
+ *
+ * The temporary file is fed to phpcs on stdin with --stdin-path, so that sniffs which act on the file's
+ * path (like WordPress.Files.FileName and ruleset exclude-patterns) see the real path, not the temp file.
  */
 function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
 	$name = basename( $file );
 	exec( "$git diff $base_branch $file > $name.diff" );
 
 	exec( "$git show $base_branch:$file > $name.test.php" );
-	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs.xml.dist --report=json -snq > $name.orig.phpcs" );
+	exec( "$bin_dir/phpcs --stdin-path=$file --standard=./phpcs.xml.dist --report=json -snq < $name.test.php > $name.orig.phpcs" );
 
 	exec( "cat $file > $name.test.php" );
-	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs.xml.dist --report=json -snq > $name.phpcs" );
+	exec( "$bin_dir/phpcs --stdin-path=$file --standard=./phpcs.xml.dist --report=json -snq < $name.test.php > $name.phpcs" );
 
 	$cmd = "$bin_dir/phpcs-changed --diff $name.diff --phpcs-orig $name.orig.phpcs --phpcs-new $name.phpcs";
 	exec( $cmd, $output, $exec_exit_status );

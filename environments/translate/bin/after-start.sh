@@ -44,6 +44,10 @@ $WP wp eval '
 	gp_upgrade_db();
 '
 
+# Translation Events also only creates its tables when is_admin() is true.
+echo "Ensuring Translation Events schema is up to date..."
+$WP wp eval 'Wporg\TranslationEvents\Upgrade::upgrade_if_needed();'
+
 # wporg-gp-custom-stats reads from extra tables (user_translations_count, etc.)
 # that production maintains manually — the plugin does not create them.
 echo "Creating wporg-gp-custom-stats tables..."

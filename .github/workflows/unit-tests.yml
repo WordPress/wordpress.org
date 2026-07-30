@@ -84,6 +84,11 @@ jobs:
             wp-env-args: "--config theme-directory/.wp-env.test.json"
             container: tests-cli
             plugin-name: theme-directory
+          - name: Translation Events
+            working-directory: environments
+            wp-env-args: "--config translate/.wp-env.test.json"
+            container: tests-cli
+            plugin-name: wporg-gp-translation-events
     steps:
       - uses: actions/checkout@v4
 

@@ -65,7 +65,7 @@ class Attendee_Adder {
 		// phpcs:enable
 	}
 
-	private function check_is_new_contributor( Event $event, int $user_id ): bool {
+	public function check_is_new_contributor( Event $event, int $user_id ): bool {
 		global $wpdb, $gp_table_prefix;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
