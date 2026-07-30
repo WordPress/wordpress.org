@@ -6,9 +6,13 @@
 		"../wordpress.org/public_html/wp-content/plugins/o2-private-posts",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-make-sites-cpt",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-meeting-posttype",
-		"../wordpress.org/public_html/wp-content/plugins/trac-notifications"
+		"../wordpress.org/public_html/wp-content/plugins/trac-notifications",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-trac-watcher"
 	],
 	"lifecycleScripts": {
 		"afterStart": "bash make/bin/after-start-test.sh"
+	},
+	"config": {
+		"WP_CORE_LATEST_RELEASE": "7.0"
 	}
 }
