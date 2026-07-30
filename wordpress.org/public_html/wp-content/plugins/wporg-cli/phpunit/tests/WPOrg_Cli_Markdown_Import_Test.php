@@ -33,13 +33,6 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	private array $users = array();
 
 	/**
-	 * Transients set by a test, deleted afterwards.
-	 *
-	 * @var string[]
-	 */
-	private array $transients = array();
-
-	/**
 	 * Removes the fixtures and global state a test set up.
 	 */
 	public function tearDown(): void {
@@ -55,11 +48,6 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 			wp_delete_user( $user_id );
 		}
 		$this->users = array();
-
-		foreach ( $this->transients as $transient ) {
-			delete_transient( $transient );
-		}
-		$this->transients = array();
 
 		parent::tearDown();
 	}
@@ -284,24 +272,6 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 		Markdown_Import::action_save_post( $post_id );
 
 		$this->assertSame( $stored, get_post_meta( $post_id, 'wporg_cli_markdown_source', true ) );
-	}
-
-	/**
-	 * A rejected source is reported back to the editor rather than dropped.
-	 */
-	public function test_save_post_reports_a_disallowed_source(): void {
-		$user_id = $this->create_user( 'editor' );
-		$post_id = $this->create_handbook_post( $user_id );
-
-		$_POST['wporg-cli-markdown-source']       = 'http://127.0.0.1/secrets';
-		$_POST['wporg-cli-markdown-source-nonce'] = wp_create_nonce( 'wporg-cli-markdown-source' );
-
-		Markdown_Import::action_save_post( $post_id );
-
-		$transient          = 'wporg-cli-markdown-source-rejected-' . $user_id . '-' . $post_id;
-		$this->transients[] = $transient;
-
-		$this->assertSame( 'http://127.0.0.1/secrets', get_transient( $transient ) );
 	}
 
 	/**

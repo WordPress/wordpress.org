@@ -18,7 +18,6 @@ use WP_Error, WP_Query;
 //add_action( 'load-post.php', array( 'WPOrg_Learn\Markdown_Import', 'action_load_post_php' ) );
 //add_action( 'edit_form_after_title', array( 'WPOrg_Learn\Markdown_Import', 'action_edit_form_after_title' ) );
 //add_action( 'save_post', array( 'WPOrg_Learn\Markdown_Import', 'action_save_post' ) );
-//add_action( 'admin_notices', array( 'WPOrg_Learn\Markdown_Import', 'action_admin_notices' ) );
 //add_filter( 'cron_schedules', array( 'WPOrg_Learn\Markdown_Import', 'filter_cron_schedules' ) );
 
 // This filter is still necessary because the lesson plans that were originally imported from GitHub still require
@@ -49,13 +48,6 @@ class Markdown_Import {
 	 * @var string[]
 	 */
 	private static $allowed_hosts = array( 'github.com', 'raw.githubusercontent.com', 'wptrainingteam.github.io' );
-
-	/**
-	 * Transient prefix for the source a save was rejected for.
-	 *
-	 * @var string
-	 */
-	private static $rejected_transient = 'wporg-learn-markdown-source-rejected-';
 
 	/**
 	 * Register our cron task if it doesn't already exist
@@ -272,37 +264,10 @@ class Markdown_Import {
 		$markdown_source = self::validate_markdown_source( $submitted );
 		if ( ! $markdown_source ) {
 			// The stored source is left alone, since the prefilled field posts it back on every save.
-			set_transient( self::$rejected_transient . get_current_user_id() . '-' . $post_id, $submitted, MINUTE_IN_SECONDS );
 			return;
 		}
 
 		update_post_meta( $post_id, self::$meta_key, $markdown_source );
-	}
-
-	/**
-	 * Report a Markdown source that was rejected on save.
-	 */
-	public static function action_admin_notices() {
-		$post = get_post();
-		if ( ! $post || $post->post_type !== self::$supported_post_type ) {
-			return;
-		}
-
-		$transient = self::$rejected_transient . get_current_user_id() . '-' . $post->ID;
-		$rejected  = get_transient( $transient );
-		if ( false === $rejected ) {
-			return;
-		}
-		delete_transient( $transient );
-
-		wp_admin_notice(
-			sprintf(
-				'The Markdown source was not changed to <code>%s</code>. Imports are limited to: %s.',
-				esc_html( $rejected ),
-				esc_html( implode( ', ', self::$allowed_hosts ) )
-			),
-			array( 'type' => 'error' )
-		);
 	}
 
 	/**

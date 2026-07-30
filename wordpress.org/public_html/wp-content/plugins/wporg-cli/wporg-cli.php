@@ -23,7 +23,6 @@ add_action( 'wporg_cli_markdown_import', array( 'WPOrg_Cli\Markdown_Import', 'ac
 add_action( 'load-post.php', array( 'WPOrg_Cli\Markdown_Import', 'action_load_post_php' ) );
 add_action( 'edit_form_after_title', array( 'WPOrg_Cli\Markdown_Import', 'action_edit_form_after_title' ) );
 add_action( 'save_post', array( 'WPOrg_Cli\Markdown_Import', 'action_save_post' ) );
-add_action( 'admin_notices', array( 'WPOrg_Cli\Markdown_Import', 'action_admin_notices' ) );
 add_filter( 'cron_schedules', array( 'WPOrg_Cli\Markdown_Import', 'filter_cron_schedules' ) );
 add_filter( 'the_title', array( 'WPOrg_Cli\Handbook', 'filter_the_title_edit_link' ), 10, 2 );
 add_filter( 'get_edit_post_link', array( 'WPOrg_Cli\Handbook', 'redirect_edit_link_to_github' ), 10, 3 );

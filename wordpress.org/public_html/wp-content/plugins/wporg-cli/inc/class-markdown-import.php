@@ -23,13 +23,6 @@ class Markdown_Import {
 	private static $allowed_hosts = array( 'github.com', 'raw.githubusercontent.com' );
 
 	/**
-	 * Transient prefix for the source a save was rejected for.
-	 *
-	 * @var string
-	 */
-	private static $rejected_transient = 'wporg-cli-markdown-source-rejected-';
-
-	/**
 	 * Register our cron task if it doesn't already exist
 	 */
 	public static function action_init() {
@@ -252,37 +245,10 @@ class Markdown_Import {
 		$markdown_source = self::validate_markdown_source( $submitted );
 		if ( ! $markdown_source ) {
 			// The stored source is left alone, since the prefilled field posts it back on every save.
-			set_transient( self::$rejected_transient . get_current_user_id() . '-' . $post_id, $submitted, MINUTE_IN_SECONDS );
 			return;
 		}
 
 		update_post_meta( $post_id, self::$meta_key, $markdown_source );
-	}
-
-	/**
-	 * Report a Markdown source that was rejected on save.
-	 */
-	public static function action_admin_notices() {
-		$post = get_post();
-		if ( ! $post || ! in_array( $post->post_type, self::$supported_post_types, true ) ) {
-			return;
-		}
-
-		$transient = self::$rejected_transient . get_current_user_id() . '-' . $post->ID;
-		$rejected  = get_transient( $transient );
-		if ( false === $rejected ) {
-			return;
-		}
-		delete_transient( $transient );
-
-		wp_admin_notice(
-			sprintf(
-				'The Markdown source was not changed to <code>%s</code>. Imports are limited to: %s.',
-				esc_html( $rejected ),
-				esc_html( implode( ', ', self::$allowed_hosts ) )
-			),
-			array( 'type' => 'error' )
-		);
 	}
 
 	/**
