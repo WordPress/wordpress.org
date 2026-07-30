@@ -89,6 +89,11 @@ jobs:
             wp-env-args: "--config make/.wp-env.test.json"
             container: tests-cli
             plugin-name: wporg-o2-posting-access
+          - name: Make - Trac Watcher
+            working-directory: environments
+            wp-env-args: "--config make/.wp-env.test.json"
+            container: tests-cli
+            plugin-name: wporg-trac-watcher
     steps:
       - uses: actions/checkout@v4
 
