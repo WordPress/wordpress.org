@@ -1,0 +1,11 @@
+<phpunit
+	bootstrap="phpunit/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	>
+	<testsuites>
+		<testsuite name="wporg-o2-posting-access">
+			<directory suffix=".php">./phpunit/tests/</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

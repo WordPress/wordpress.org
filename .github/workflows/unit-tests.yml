@@ -84,6 +84,11 @@ jobs:
             wp-env-args: "--config theme-directory/.wp-env.test.json"
             container: tests-cli
             plugin-name: theme-directory
+          - name: Make - o2 Posting Access
+            working-directory: environments
+            wp-env-args: "--config make/.wp-env.test.json"
+            container: tests-cli
+            plugin-name: wporg-o2-posting-access
     steps:
       - uses: actions/checkout@v4
 

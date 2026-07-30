@@ -1,0 +1,14 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"plugins": [
+		"../wordpress.org/public_html/wp-content/plugins/wporg-o2-posting-access",
+		"../wordpress.org/public_html/wp-content/plugins/o2-private-posts",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-make-sites-cpt",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-meeting-posttype",
+		"../wordpress.org/public_html/wp-content/plugins/trac-notifications"
+	],
+	"lifecycleScripts": {
+		"afterStart": "bash make/bin/after-start-test.sh"
+	}
+}
