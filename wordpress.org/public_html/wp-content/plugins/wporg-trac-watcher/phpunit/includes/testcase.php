@@ -104,6 +104,7 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 
 		$this->restore_hooks();
 
+		set_current_screen( 'front' );
 		wp_set_current_user( 0 );
 
 		$_REQUEST = array();
