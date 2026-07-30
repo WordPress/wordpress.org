@@ -16,6 +16,13 @@ class Markdown_Import {
 	private static $posts_per_page = -1;
 
 	/**
+	 * Hosts a Markdown source may be fetched from.
+	 *
+	 * @var string[]
+	 */
+	private static $allowed_hosts = array( 'github.com', 'raw.githubusercontent.com' );
+
+	/**
 	 * Register our cron task if it doesn't already exist
 	 */
 	public static function action_init() {
@@ -197,13 +204,14 @@ class Markdown_Import {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_POST[ self::$nonce_name ], self::$input_name ) ) {
+		if ( ! wp_verify_nonce( $_POST[ self::$nonce_name ], self::$input_name )
+			|| ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
 
 		$markdown_source = '';
 		if ( ! empty( $_POST[ self::$input_name ] ) ) {
-			$markdown_source = esc_url_raw( $_POST[ self::$input_name ] );
+			$markdown_source = self::validate_markdown_source( wp_unslash( $_POST[ self::$input_name ] ) );
 		}
 		update_post_meta( $post_id, self::$meta_key, $markdown_source );
 	}
@@ -228,6 +236,15 @@ class Markdown_Import {
 			return $markdown_source;
 		}
 
+		/*
+		 * Sources are also checked on save, but stored values predate that check
+		 * and the scheduled import reuses whatever is already in post meta.
+		 */
+		$markdown_source = self::validate_markdown_source( $markdown_source );
+		if ( ! $markdown_source ) {
+			return new WP_Error( 'invalid-markdown-source', 'Markdown source is not an allowed URL.' );
+		}
+
 		if ( ! class_exists( 'WPCom_GHF_Markdown_Parser' ) && defined( 'JETPACK__PLUGIN_DIR' ) ) {
 			include JETPACK__PLUGIN_DIR . '/_inc/lib/markdown.php';
 		}
@@ -238,7 +255,7 @@ class Markdown_Import {
 		// Transform GitHub repo HTML pages into their raw equivalents
 		$markdown_source = preg_replace( '#https?://github\.com/([^/]+/[^/]+)/blob/(.+)#', 'https://raw.githubusercontent.com/$1/$2', $markdown_source );
 		$markdown_source = add_query_arg( 'v', time(), $markdown_source );
-		$response = wp_remote_get( $markdown_source );
+		$response = wp_safe_remote_get( $markdown_source );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
@@ -267,6 +284,26 @@ class Markdown_Import {
 		}
 		wp_update_post( $post_data );
 		return true;
+	}
+
+	/**
+	 * Check a Markdown source URL against the list of allowed hosts.
+	 *
+	 * @param string $markdown_source URL to check.
+	 * @return string The URL, or an empty string if it isn't allowed.
+	 */
+	public static function validate_markdown_source( $markdown_source ) {
+		$markdown_source = esc_url_raw( $markdown_source, array( 'http', 'https' ) );
+		if ( ! $markdown_source ) {
+			return '';
+		}
+
+		$host = wp_parse_url( $markdown_source, PHP_URL_HOST );
+		if ( ! $host || ! in_array( strtolower( $host ), self::$allowed_hosts, true ) ) {
+			return '';
+		}
+
+		return $markdown_source;
 	}
 
 	/**

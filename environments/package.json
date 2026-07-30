@@ -18,6 +18,8 @@
 		"themes:test": "npm run themes:test:env -- start && npm run themes:test:env -- run tests-cli --env-cwd=wp-content/plugins/theme-directory phpunit",
 		"handbook:test:env": "wp-env --config handbook/.wp-env.test.json",
 		"handbook:test": "npm run handbook:test:env -- start && npm run handbook:test:env -- run tests-cli --env-cwd=wp-content/plugins/handbook phpunit",
+		"cli:test:env": "wp-env --config cli/.wp-env.test.json",
+		"cli:test": "npm run cli:test:env -- start && npm run cli:test:env -- run tests-cli --env-cwd=wp-content/plugins/wporg-cli phpunit",
 		"make:test:env": "wp-env --config make/.wp-env.test.json",
 		"make:test": "npm run make:test:env -- start && npm run make:test:env -- run tests-cli --env-cwd=wp-content/plugins/wporg-o2-posting-access phpunit",
 		"jobs:env": "wp-env --config jobs/.wp-env.json",
