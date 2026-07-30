@@ -16,6 +16,8 @@
 		"themes:refresh": "npm run themes:env -- run cli -- wp option delete wporg_themes_env_imported && npm run themes:env -- run cli -- wp eval-file wp-content/env-bin/import-themes.php --user=wordpressdotorg",
 		"themes:test:env": "wp-env --config theme-directory/.wp-env.test.json",
 		"themes:test": "npm run themes:test:env -- start && npm run themes:test:env -- run tests-cli --env-cwd=wp-content/plugins/theme-directory phpunit",
+		"handbook:test:env": "wp-env --config handbook/.wp-env.test.json",
+		"handbook:test": "npm run handbook:test:env -- start && npm run handbook:test:env -- run tests-cli --env-cwd=wp-content/plugins/handbook phpunit",
 		"jobs:env": "wp-env --config jobs/.wp-env.json",
 		"browsehappy:env": "wp-env --config browsehappy/.wp-env.json",
 		"translate:env": "wp-env --config translate/.wp-env.json",

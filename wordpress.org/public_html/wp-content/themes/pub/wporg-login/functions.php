@@ -39,6 +39,8 @@ function wporg_login_body_class( $classes ) {
 		$classes[] = 'route-' . WP_WPOrg_SSO::$matched_route;
 	}
 
+	$classes[] = 'admin-color-modern';
+
 	// Remove the 404 class..
 	if ( false !== ( $pos = array_search( 'error404', $classes ) ) ) {
 		unset( $classes[ $pos ] );

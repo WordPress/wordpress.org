@@ -10,9 +10,9 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 
 /**
- * Exercises Parser end-to-end against fixture readmes, asserting that
- * the URL-bearing headers come out clean for both the bare and markdown
- * autolink forms.
+ * Exercises Parser end-to-end against readmes built inline, asserting that the
+ * URL-bearing headers come out clean for both the bare and markdown autolink
+ * forms, and that the License header is stripped of markup.
  *
  * @group readme-parser
  */
@@ -128,5 +128,34 @@ class Test_Readme_Parser extends TestCase {
 		$parser = new Parser( self::readme_with( $header ) );
 		$this->assertSame( $expected_license, $parser->license );
 		$this->assertSame( $expected_uri, $parser->license_uri );
+	}
+
+	/**
+	 * Data provider for {@see test_license_is_sanitized()}.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public static function license_markup_provider(): array {
+		return array(
+			'image payload'          => array( 'License: GPLv2 <img src=x onerror=alert(document.domain)>' ),
+			'script payload'         => array( 'License: GPLv2 <script>alert(1)</script>' ),
+			'payload containing url' => array( 'License: GPLv2 <img src=https://example.com/x onerror=alert(1)>' ),
+			'unclosed tag'           => array( 'License: GPLv2 <img src=x onerror=alert(1)' ),
+		);
+	}
+
+	/**
+	 * The `License:` value is echoed into reviewer-facing output, so Parser must
+	 * strip markup out of it before it is stored.
+	 *
+	 * @param string $header Full header line under test.
+	 */
+	#[DataProvider( 'license_markup_provider' )]
+	public function test_license_is_sanitized( string $header ): void {
+		$parser = new Parser( self::readme_with( $header ) );
+
+		$this->assertStringStartsWith( 'GPLv2', $parser->license );
+		$this->assertStringNotContainsString( '<', $parser->license );
+		$this->assertStringNotContainsString( 'onerror', $parser->license );
 	}
 }

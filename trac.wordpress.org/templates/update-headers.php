@@ -77,6 +77,13 @@ function save_domdocument( $file, $dom ) {
 
 	$html = $dom->saveXML();
 
+	// saveXML() self-closes empty raw-text/RCDATA tags, which is invalid in text/html and swallows following markup.
+	$html = preg_replace(
+		'#<(script|style|textarea|title|iframe|noscript)\b([^>]*?)\s*/>#i',
+		'<$1$2></$1>',
+		$html
+	);
+
 	// Remove the XML header
 	$html = preg_replace( "#^<\?xml.+>\n?#i",  '', $html );
 

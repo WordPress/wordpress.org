@@ -398,9 +398,7 @@ table.progress td.closed {
 #ticket {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
-}
-#content.ticket .ticketdraft {
-	border: 1px solid #ccc;
+	padding: 0;
 }
 #ticket > h2 {
 	font-size: 16px;
@@ -763,12 +761,11 @@ fieldset {
 	box-shadow: none;
 }
 div.trac-content {
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	border: none;
+	margin: 0;
 }
 .foldable :link, .foldable :visited {
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	border: none;
 }
 .foldable a:hover {
 	text-decoration: none; /* for bb's */
@@ -1098,9 +1095,11 @@ body.plugins #main .newticket-not-here .support {
 #propertyform[action*="/newticket"] #properties table.trac-properties > tbody > tr > td#focuses {
 	padding-left: 58px;
 }
-#propertyform > p,
+#propertyform[action*="/newticket"] ~ #commits {
+	display: none;
+}
 #propertyform > .buttons {
-	margin-left: 10px;
+	clear: right;
 }
 .set-trunk, .set-trunk:hover {
 	border: none;
@@ -2284,7 +2283,7 @@ a.mention.me {
 	#filters td {
 		display: block;
 	}
-	#filters .trac-clause td:not(.actions td), 
+	#filters .trac-clause td:not(.actions td),
 	#filters .trac-clause th {
 		text-align:left;
 	}
@@ -2406,6 +2405,9 @@ a.mention.me {
 	}
 	#ticket table.properties img.avatar {
 		float: left;
+	}
+	#propertyform > .buttons {
+		padding-top: 12px;
 	}
 	#attachments > div.attachments > p {
 		float: none;
