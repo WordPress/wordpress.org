@@ -194,134 +194,140 @@ function display_reports_page( $details ) {
 
 				break;
 			case 'versions-contributed':
-					$details = $wpdb->get_results(
-						"SELECT prop_name, user_id, COUNT( distinct version ) as count,
-							group_concat( distinct version ORDER BY version ASC  SEPARATOR ', ' ) as versions,
-							ifnull(user_id,prop_name) as _groupby
-						FROM (
-							SELECT distinct LEFT(version, 3) as version, prop_name, p.user_id
-							FROM {$details['props_table']} p
-								JOIN {$details['rev_table']} r ON p.revision = r.id
-							GROUP BY prop_name, version
-							UNION
-							SELECT distinct LEFT(version, 3) as version, r.author as prop_name, u.ID as user_id
-							FROM {$details['rev_table']} r
-								JOIN {$wpdb->users} u ON r.author = u.user_login
-							GROUP BY r.author, version
-						) a
-						WHERE version != ''
-						group by _groupby HAVING COUNT(*) > 1
-						ORDER BY `count` DESC"
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names come from get_svns(), and an identifier cannot be a placeholder.
+				$details = $wpdb->get_results(
+					"SELECT prop_name, user_id, COUNT( distinct version ) as count,
+						group_concat( distinct version ORDER BY version ASC  SEPARATOR ', ' ) as versions,
+						ifnull(user_id,prop_name) as _groupby
+					FROM (
+						SELECT distinct LEFT(version, 3) as version, prop_name, p.user_id
+						FROM {$details['props_table']} p
+							JOIN {$details['rev_table']} r ON p.revision = r.id
+						GROUP BY prop_name, version
+						UNION
+						SELECT distinct LEFT(version, 3) as version, r.author as prop_name, u.ID as user_id
+						FROM {$details['rev_table']} r
+							JOIN {$wpdb->users} u ON r.author = u.user_login
+						GROUP BY r.author, version
+					) a
+					WHERE version != ''
+					group by _groupby HAVING COUNT(*) > 1
+					ORDER BY `count` DESC"
+				);
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+				// Compress the versions list down to a smaller range.
+				$compress = function ( $versions ) {
+					$in = $versions;
+					$out = [];
+					if ( ! is_array( $versions ) ) {
+						$versions = preg_split( '![,\s]+!', $versions );
+					}
+
+					// Don't try to compress only a few versions.
+					if ( count( $versions ) <= 2 ) {
+						return $in;
+					}
+
+					// [ X.Y => 0, X.Y+1 => 1, ... ]
+					$versions = array_flip( $versions );
+
+					$not_a_version = [
+						'0.9', '1.1', '1.2', '1.4', '1.7', '1.8', '1.9',
+					];
+
+					// 2.4 + 2.5 are special. 2.4 was skipped, and many users only have a 2.4 or a 2.5 prop. Give them both versions if they have either.
+					if ( isset( $versions['2.5'] ) || isset( $versions['2.4'] ) ) {
+						$versions['2.5'] = 1;
+						$versions['2.4'] = 1;
+					}
+
+					$i = 0; // This counter is just here to protect against infinite loops should something go wrong.
+					while ( $versions && $i++ < 40 ) {
+						$min   = sprintf( '%.1f', min( array_keys( $versions ) ) );
+						$max   = sprintf( '%.1f', max( array_keys( $versions ) ) );
+						if ( $min === $max ) {
+							$out[] = $min;
+							break;
+						} elseif ( $max - $min < 0.2 ) {
+							$out[] = "{$min}-{$max}";
+							break;
+						}
+
+						foreach ( range( $min, $max + 0.1, 0.1 ) as $v ) {
+							$v = sprintf( '%.1f', $v );
+
+							if ( in_array( $v, $not_a_version ) ) {
+								unset( $versions[ $v ] );
+								continue;
+							}
+
+							if ( ! isset( $versions[ $v ] ) ) {
+								$last = sprintf( '%.1f', $v - 0.1 );
+
+								if ( $last == $min ) {
+									$out[] = $last;
+									unset( $versions[ $v ] );
+									break;
+								} elseif ( $last - $min < 0.15 ) {
+									// No point doing 1-2, just do 1, 2
+									$out[] = $min;
+									$out[] = $last;
+								} else {
+									$out[] = "{$min}-{$last}";
+								}
+								break;
+							} elseif ( $v == $max ) {
+								$out[] = "{$min}-{$max}"; // (5)";
+								unset( $versions[ $v ] );
+								break;
+							}
+
+							// No break above: we are between a start and an end version.
+							unset( $versions[ $v ] );
+						}
+					}
+
+					return implode( ', ', $out );
+				};
+
+				echo '<table class="widefat striped">';
+				echo '<thead><tr><th>Prop</th><th>Count</th><th>Versions</th></tr></thead>';
+				foreach ( $details as $p ) {
+					$link = add_query_arg(
+						[
+							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
+							's' => $p->prop_name,
+						],
+						admin_url( 'admin.php' )
 					);
 
-					// Compress the versions list down to a smaller range.
-					$compress = function( $versions ) {
-						$in = $versions;
-						$out = [];
-						if ( ! is_array( $versions ) ) {
-							$versions = preg_split( '![,\s]+!', $versions );
-						}
+					$u = $p->user_id ? get_user_by( 'ID', $p->user_id ) : false;
 
-						// Don't try to compress only a few versions.
-						if ( count( $versions ) <= 2 ) {
-							return $in;
-						}
-
-						// [ X.Y => 0, X.Y+1 => 1, ... ]
-						$versions = array_flip( $versions );
-
-						$not_a_version = [
-							'0.9', '1.1', '1.2', '1.4', '1.7', '1.8', '1.9',
-						];
-
-						// 2.4 + 2.5 are special. 2.4 was skipped, and many users only have a 2.4 or a 2.5 prop. Give them both versions if they have either.
-						if ( isset( $versions['2.5'] ) || isset( $versions['2.4'] ) ) {
-							$versions['2.5'] = $version['2.4'] = 1;
-						}
-
-						$i = 0; // This counter is just here to protect against infinite loops should something go wrong.
-						while ( $versions && $i++ < 40 ) {
-							$min   = sprintf( '%.1f', min( array_keys( $versions ) ) );
-							$max   = sprintf( '%.1f', max( array_keys( $versions ) ) );
-							if ( $min === $max ) {
-								$out[] = $min;
-								break;
-							} elseif ( $max - $min < 0.2 ) {
-								$out[] = "{$min}-{$max}";
-								break;
-							}
-
-							foreach ( range( $min, $max+0.1, 0.1 ) as $v ) {
-								$v = sprintf( '%.1f', $v );
-
-								if ( in_array( $v, $not_a_version ) ) {
-									unset( $versions[ $v ] );
-									continue;
-								}
-
-								if ( ! isset( $versions[ $v ] ) ) {
-									$last = sprintf( '%.1f', $v - 0.1 );
-
-									if ( $last == $min ) {
-										$out[] = $last;
-										unset( $versions[ $v ] );
-										break;
-									} elseif ( $last - $min < 0.15 ) {
-										// No point doing 1-2, just do 1, 2
-										$out[] = $min;
-										$out[] = $last;
-									} else {
-										$out[] = "{$min}-{$last}";
-									}
-									break;
-								} elseif ( $v == $max ) {
-									$out[] = "{$min}-{$max}"; // (5)";
-									unset( $versions[ $v ] );
-									break;
-								} else {
-									// no break. We're between a start, and end version.
-								}
-								unset( $versions[ $v ] );
-							}
-						}
-
-						return implode( ', ', $out );
-					};
-
-					echo '<table class="widefat striped">';
-					echo '<thead><tr><th>Prop</th><th>Count</th><th>Versions</th></tr></thead>';
-					foreach ( $details as $p ) {
-						$link = add_query_arg(
-							[
-								'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
-								's' => $p->prop_name,
-							],
-							admin_url( 'admin.php' )
-						);
-	
-						$profile = esc_html( $p->prop_name );
-						$u       = $p->user_id ? get_user_by( 'ID', $p->user_id ) : false;
-
-						// The account a prop points at may since have been deleted; fall back to the stored name.
-						if ( $u ) {
-							$profile = sprintf(
-								'<a href="%s">%s</a>',
-								esc_url( 'https://profiles.wordpress.org/' . $u->user_nicename . '/' ),
-								esc_html( $u->display_name ?: $u->user_login )
-							);
-						}
-
+					// The account a prop points at may since have been deleted; fall back to the stored name.
+					if ( ! $u ) {
 						printf(
 							'<tr><td>%1$s</td><td>%2$s</td><td title="%3$s">%4$s</td></tr>',
-							$profile, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped when built above.
+							esc_html( $p->prop_name ),
 							esc_html( $p->count ),
 							esc_attr( $p->versions ),
 							esc_html( $compress( $p->versions ) )
 						);
+						continue;
 					}
-					echo '</table>';
 
-					break;
+					printf(
+						'<tr><td><a href="%1$s">%2$s</a></td><td>%3$s</td><td title="%4$s">%5$s</td></tr>',
+						esc_url( 'https://profiles.wordpress.org/' . $u->user_nicename . '/' ),
+						esc_html( $u->display_name ?: $u->user_login ),
+						esc_html( $p->count ),
+						esc_attr( $p->versions ),
+						esc_html( $compress( $p->versions ) )
+					);
+				}
+				echo '</table>';
+
+				break;
 			case 'typos':
 				$details = $wpdb->get_results(
 					"SELECT u.user_login, u.user_nicename, u.display_name,
@@ -432,9 +438,9 @@ function display_reports_page( $details ) {
 						esc_html( $c->prop_name ),
 						esc_html( $c->display_name ),
 						esc_html( $c->count ),
-						make_clickable( $c->user_nicename ? esc_url( 'https://profile.wordpress.org/' . $c->user_nicename . '/' ) : '' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- URL escaped, make_clickable() returns markup.
+						wp_kses_post( make_clickable( $c->user_nicename ? 'https://profile.wordpress.org/' . $c->user_nicename . '/' : '' ) ),
 						$c->ID ? get_avatar( $c->ID, min( 96, absint( $_GET['size'] ?? 32 ) ) ) : '',
-						make_clickable( $c->ID ? get_avatar_url( $c->ID, [ 'size' => absint( $_GET['size'] ?? 64 ) ] ) : '' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generated URL, and the anchor text is meant to be copy-pasted as-is.
+						wp_kses_post( make_clickable( $c->ID ? get_avatar_url( $c->ID, [ 'size' => absint( $_GET['size'] ?? 64 ) ] ) : '' ) )
 					);
 				}
 				echo '</table>';
