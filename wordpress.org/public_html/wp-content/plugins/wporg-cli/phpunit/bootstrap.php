@@ -63,6 +63,8 @@ function _register_handbook_post_type(): void {
 }
 tests_add_filter( 'init', '_register_handbook_post_type' );
 
+require_once __DIR__ . '/stubs/class-wpcom-ghf-markdown-parser.php';
+
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
 

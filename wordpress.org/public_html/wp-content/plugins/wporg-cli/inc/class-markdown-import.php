@@ -23,6 +23,13 @@ class Markdown_Import {
 	private static $allowed_hosts = array( 'github.com', 'raw.githubusercontent.com' );
 
 	/**
+	 * Transient prefix for the source a save was rejected for.
+	 *
+	 * @var string
+	 */
+	private static $rejected_transient = 'wporg-cli-markdown-source-rejected-';
+
+	/**
 	 * Register our cron task if it doesn't already exist
 	 */
 	public static function action_init() {
@@ -219,11 +226,46 @@ class Markdown_Import {
 			return;
 		}
 
-		$markdown_source = '';
-		if ( ! empty( $_POST[ self::$input_name ] ) ) {
-			$markdown_source = self::validate_markdown_source( wp_unslash( $_POST[ self::$input_name ] ) );
+		$submitted = wp_unslash( $_POST[ self::$input_name ] );
+		if ( '' === $submitted ) {
+			update_post_meta( $post_id, self::$meta_key, '' );
+			return;
 		}
+
+		$markdown_source = self::validate_markdown_source( $submitted );
+		if ( ! $markdown_source ) {
+			// The stored source is left alone, since the prefilled field posts it back on every save.
+			set_transient( self::$rejected_transient . get_current_user_id() . '-' . $post_id, $submitted, MINUTE_IN_SECONDS );
+			return;
+		}
+
 		update_post_meta( $post_id, self::$meta_key, $markdown_source );
+	}
+
+	/**
+	 * Report a Markdown source that was rejected on save.
+	 */
+	public static function action_admin_notices() {
+		$post = get_post();
+		if ( ! $post || ! in_array( $post->post_type, self::$supported_post_types, true ) ) {
+			return;
+		}
+
+		$transient = self::$rejected_transient . get_current_user_id() . '-' . $post->ID;
+		$rejected  = get_transient( $transient );
+		if ( false === $rejected ) {
+			return;
+		}
+		delete_transient( $transient );
+
+		wp_admin_notice(
+			sprintf(
+				'The Markdown source was not changed to <code>%s</code>. Imports are limited to: %s.',
+				esc_html( $rejected ),
+				esc_html( implode( ', ', self::$allowed_hosts ) )
+			),
+			array( 'type' => 'error' )
+		);
 	}
 
 	/**
@@ -262,8 +304,8 @@ class Markdown_Import {
 			return new WP_Error( 'missing-jetpack-markdown', 'Jetpack Markdown is missing on system.' );
 		}
 
-		// Transform GitHub repo HTML pages into their raw equivalents
-		$markdown_source = preg_replace( '#https?://github\.com/([^/]+/[^/]+)/blob/(.+)#', 'https://raw.githubusercontent.com/$1/$2', $markdown_source );
+		// Transform GitHub repo HTML pages into their raw equivalents, matching the host as case insensitively as it was validated.
+		$markdown_source = preg_replace( '#https?://github\.com/([^/]+/[^/]+)/blob/(.+)#i', 'https://raw.githubusercontent.com/$1/$2', $markdown_source );
 		$markdown_source = add_query_arg( 'v', time(), $markdown_source );
 		$response = wp_safe_remote_get( $markdown_source );
 		if ( is_wp_error( $response ) ) {
@@ -308,8 +350,16 @@ class Markdown_Import {
 			return '';
 		}
 
-		$host = wp_parse_url( $markdown_source, PHP_URL_HOST );
-		if ( ! $host || ! in_array( strtolower( $host ), self::$allowed_hosts, true ) ) {
+		$parts = wp_parse_url( $markdown_source );
+		if ( ! $parts ) {
+			return '';
+		}
+
+		// A protocol relative URL parses to an allowed host, but the HTTP API refuses to request it.
+		$scheme = strtolower( $parts['scheme'] ?? '' );
+		$host   = strtolower( $parts['host'] ?? '' );
+		if ( ! in_array( $scheme, array( 'http', 'https' ), true )
+			|| ! in_array( $host, self::$allowed_hosts, true ) ) {
 			return '';
 		}
 

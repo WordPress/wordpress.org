@@ -33,6 +33,13 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	private array $users = array();
 
 	/**
+	 * Transients set by a test, deleted afterwards.
+	 *
+	 * @var string[]
+	 */
+	private array $transients = array();
+
+	/**
 	 * Removes the fixtures and global state a test set up.
 	 */
 	public function tearDown(): void {
@@ -48,6 +55,11 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 			wp_delete_user( $user_id );
 		}
 		$this->users = array();
+
+		foreach ( $this->transients as $transient ) {
+			delete_transient( $transient );
+		}
+		$this->transients = array();
 
 		parent::tearDown();
 	}
@@ -127,6 +139,7 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 			'unrelated host'     => array( 'https://example.org/README.md' ),
 			'file scheme'        => array( 'file:///etc/passwd' ),
 			'ftp scheme'         => array( 'ftp://github.com/wp-cli/handbook' ),
+			'protocol relative'  => array( '//github.com/wp-cli/handbook/blob/main/README.md' ),
 			'empty string'       => array( '' ),
 		);
 	}
@@ -152,6 +165,29 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	}
 
 	/**
+	 * Runs the importer against a post without letting a request leave the process.
+	 *
+	 * @param int $post_id Post to import.
+	 * @return array The importer's return value, and the requested URL or false if
+	 *               no request was attempted.
+	 */
+	private function import_post( int $post_id ): array {
+		$requested = false;
+		$spy       = function ( $preempt, $args, $url ) use ( &$requested ) {
+			$requested = $url;
+			return new WP_Error( 'stubbed-request', 'The request was stubbed out.' );
+		};
+		add_filter( 'pre_http_request', $spy, 10, 3 );
+
+		$method = new ReflectionMethod( Markdown_Import::class, 'update_post_from_markdown_source' );
+		$result = $method->invoke( null, $post_id );
+
+		remove_filter( 'pre_http_request', $spy, 10 );
+
+		return array( $result, $requested );
+	}
+
+	/**
 	 * A source stored before the check was added is not fetched.
 	 */
 	public function test_import_rejects_disallowed_source_without_making_a_request(): void {
@@ -159,18 +195,7 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 
 		update_post_meta( $post_id, 'wporg_cli_markdown_source', 'http://169.254.169.254/latest/meta-data/' );
 
-		$requested = false;
-		$spy       = function ( $preempt, $args, $url ) use ( &$requested ) {
-			$requested = $url;
-			return new WP_Error( 'unexpected-request', 'No request should have been made.' );
-		};
-		add_filter( 'pre_http_request', $spy, 10, 3 );
-
-		$method = new ReflectionMethod( Markdown_Import::class, 'update_post_from_markdown_source' );
-		$method->setAccessible( true );
-		$result = $method->invoke( null, $post_id );
-
-		remove_filter( 'pre_http_request', $spy, 10 );
+		list( $result, $requested ) = $this->import_post( $post_id );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'invalid-markdown-source', $result->get_error_code() );
@@ -178,18 +203,86 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	}
 
 	/**
-	 * Saving a disallowed source clears the stored one.
+	 * Blob URLs the importer accepts, whatever case the host was entered in.
 	 *
-	 * The stored value is seeded first so that the assertion distinguishes a
-	 * rejected source from `action_save_post()` never reaching the check, which
-	 * would leave the meta unset and read back as an empty string either way.
+	 * @return array[]
 	 */
-	public function test_save_post_does_not_store_a_disallowed_source(): void {
+	public static function get_blob_sources(): array {
+		return array(
+			'lower case host' => array( 'https://github.com/wp-cli/handbook/blob/main/README.md' ),
+			'mixed case host' => array( 'https://GitHub.com/wp-cli/handbook/blob/main/README.md' ),
+			'upper case host' => array( 'https://GITHUB.COM/wp-cli/handbook/blob/main/README.md' ),
+		);
+	}
+
+	/**
+	 * A blob URL is rewritten to the raw host before it is fetched.
+	 *
+	 * Hosts are compared case insensitively, so a blob URL that is accepted but not
+	 * rewritten would have GitHub's HTML page parsed as Markdown into the post.
+	 *
+	 * @param string $url Stored source.
+	 */
+	#[DataProvider( 'get_blob_sources' )]
+	public function test_import_fetches_blob_sources_from_the_raw_host( string $url ): void {
+		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
+
+		update_post_meta( $post_id, 'wporg_cli_markdown_source', $url );
+
+		list( , $requested ) = $this->import_post( $post_id );
+
+		$this->assertIsString( $requested, 'No request was attempted for an allowed source.' );
+		$this->assertStringStartsWith( 'https://raw.githubusercontent.com/wp-cli/handbook/main/README.md', $requested );
+	}
+
+	/**
+	 * Saving a disallowed source leaves the stored one in place.
+	 *
+	 * The field is prefilled with the stored source, so any save of a post whose
+	 * source predates the check posts it back. Clearing the meta would silently
+	 * take the front end edit link and the scheduled import with it.
+	 */
+	public function test_save_post_keeps_the_stored_source_when_a_disallowed_one_is_submitted(): void {
+		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
+		$stored  = 'https://github.com/wp-cli/handbook/blob/main/README.md';
+
+		update_post_meta( $post_id, 'wporg_cli_markdown_source', $stored );
+
+		$_POST['wporg-cli-markdown-source']       = 'http://127.0.0.1/secrets';
+		$_POST['wporg-cli-markdown-source-nonce'] = wp_create_nonce( 'wporg-cli-markdown-source' );
+
+		Markdown_Import::action_save_post( $post_id );
+
+		$this->assertSame( $stored, get_post_meta( $post_id, 'wporg_cli_markdown_source', true ) );
+	}
+
+	/**
+	 * A rejected source is reported back to the editor rather than dropped.
+	 */
+	public function test_save_post_reports_a_disallowed_source(): void {
+		$user_id = $this->create_user( 'editor' );
+		$post_id = $this->create_handbook_post( $user_id );
+
+		$_POST['wporg-cli-markdown-source']       = 'http://127.0.0.1/secrets';
+		$_POST['wporg-cli-markdown-source-nonce'] = wp_create_nonce( 'wporg-cli-markdown-source' );
+
+		Markdown_Import::action_save_post( $post_id );
+
+		$transient          = 'wporg-cli-markdown-source-rejected-' . $user_id . '-' . $post_id;
+		$this->transients[] = $transient;
+
+		$this->assertSame( 'http://127.0.0.1/secrets', get_transient( $transient ) );
+	}
+
+	/**
+	 * Submitting an empty source clears the stored one.
+	 */
+	public function test_save_post_clears_the_source_when_the_field_is_emptied(): void {
 		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
 
 		update_post_meta( $post_id, 'wporg_cli_markdown_source', 'https://github.com/wp-cli/handbook/blob/main/README.md' );
 
-		$_POST['wporg-cli-markdown-source']       = 'http://127.0.0.1/secrets';
+		$_POST['wporg-cli-markdown-source']       = '';
 		$_POST['wporg-cli-markdown-source-nonce'] = wp_create_nonce( 'wporg-cli-markdown-source' );
 
 		Markdown_Import::action_save_post( $post_id );
@@ -235,8 +328,14 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	 */
 	private function create_post_from_manifest_doc( array $doc ) {
 		$method = new ReflectionMethod( Markdown_Import::class, 'create_post_from_manifest_doc' );
+		$post   = $method->invoke( null, $doc );
 
-		return $method->invoke( null, $doc );
+		// Registered here rather than at the call site, so a failing assertion still leaves the post cleaned up.
+		if ( $post instanceof WP_Post ) {
+			$this->posts[] = $post->ID;
+		}
+
+		return $post;
 	}
 
 	/**
@@ -254,8 +353,6 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 		);
 
 		$this->assertInstanceOf( WP_Post::class, $post );
-		$this->posts[] = $post->ID;
-
 		$this->assertSame( $source, get_post_meta( $post->ID, 'wporg_cli_markdown_source', true ) );
 	}
 
