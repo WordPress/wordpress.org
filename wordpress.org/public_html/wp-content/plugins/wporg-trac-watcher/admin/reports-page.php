@@ -78,7 +78,7 @@ function display_reports_page( $details ) {
 
 		// Revisions.
 		if ( ! empty( $revisions ) ) {
-			if (  preg_match( '!(?P<start>\d+)[:-](?P<end>(HEAD|\d+))!', $args['revisions'], $m ) ) {
+			if (  preg_match( '!(?P<start>\d+)[:-](?P<end>(HEAD|\d+))!', $revisions, $m ) ) {
 				if ( 'HEAD' === $m['end'] ) {
 					$where .= $wpdb->prepare( ' AND r.id > %d', $m['start'] );
 				} else {
