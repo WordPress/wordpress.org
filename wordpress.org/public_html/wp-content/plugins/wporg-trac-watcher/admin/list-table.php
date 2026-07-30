@@ -348,7 +348,8 @@ class Commits_List_Table extends WP_List_Table {
 				return "<div>{$message}</div>";
 
 			case 'props':
-				$can_edit = current_user_can( 'publish_posts' );
+				// Must match what the handlers in admin/post.php require, see the note there.
+				$can_edit = current_user_can( 'edit_others_posts' );
 				$output   = '<div class="propslist">';
 
 				foreach ( $item->props as $prop => $user_id ) {

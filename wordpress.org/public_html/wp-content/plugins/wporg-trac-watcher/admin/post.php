@@ -4,7 +4,8 @@ namespace WordPressdotorg\Trac\Watcher;
 add_action( 'admin_post_svn_save', function() {
 	global $wpdb;
 
-	if ( ! current_user_can( 'publish_posts' ) ) {
+	// Not publish_posts or edit_posts: o2 Posting Access grants both to any logged-in non-member.
+	if ( ! current_user_can( 'edit_others_posts' ) ) {
 		die( '-1' );
 	}
 	check_admin_referer( 'edit_svn_prop' );
@@ -139,7 +140,8 @@ add_action( 'admin_post_svn_save', function() {
 add_action( 'admin_post_svn_reparse', function() {
 	global $wpdb;
 
-	if ( ! current_user_can( 'publish_posts' ) ) {
+	// Reparsing rewrites the same records; see the note on the save handler above.
+	if ( ! current_user_can( 'edit_others_posts' ) ) {
 		die( '-1' );
 	}
 	check_admin_referer( 'reparse_svn' );
