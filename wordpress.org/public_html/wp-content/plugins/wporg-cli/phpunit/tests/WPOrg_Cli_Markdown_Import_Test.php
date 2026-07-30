@@ -107,6 +107,36 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	}
 
 	/**
+	 * Stores a Markdown source without the check a normal write goes through.
+	 *
+	 * Models a value stored before the allow-list existed, which is what the
+	 * check at fetch time is there to catch.
+	 *
+	 * @param int    $post_id         Post to store the source on.
+	 * @param string $markdown_source Source to store.
+	 */
+	private function store_legacy_source( int $post_id, string $markdown_source ): void {
+		$filter   = 'sanitize_post_meta_wporg_cli_markdown_source_for_handbook';
+		$callback = array( Markdown_Import::class, 'validate_markdown_source' );
+
+		/*
+		 * Whatever was registered is put back, rather than assumed: adding the
+		 * check here unconditionally would install it for the rest of the process
+		 * and hide its absence from every test that runs after this one.
+		 */
+		$priority = has_filter( $filter, $callback );
+		if ( false !== $priority ) {
+			remove_filter( $filter, $callback, $priority );
+		}
+
+		update_post_meta( $post_id, 'wporg_cli_markdown_source', $markdown_source );
+
+		if ( false !== $priority ) {
+			add_filter( $filter, $callback, $priority, 4 );
+		}
+	}
+
+	/**
 	 * URLs the importer is expected to accept.
 	 *
 	 * @return array[]
@@ -193,7 +223,7 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	public function test_import_rejects_disallowed_source_without_making_a_request(): void {
 		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
 
-		update_post_meta( $post_id, 'wporg_cli_markdown_source', 'http://169.254.169.254/latest/meta-data/' );
+		$this->store_legacy_source( $post_id, 'http://169.254.169.254/latest/meta-data/' );
 
 		list( $result, $requested ) = $this->import_post( $post_id );
 
@@ -388,6 +418,66 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 
 		$this->assertFalse( $post );
 		$this->assertNull( get_page_by_path( 'sourceless', OBJECT, 'handbook' ) );
+	}
+
+	/**
+	 * A write that never touches the input field is checked all the same.
+	 *
+	 * The key is editable through the custom fields metabox, which saves through
+	 * WordPress rather than through `action_save_post()`, so the allow-list has to
+	 * be applied to the meta itself.
+	 *
+	 * @param string $url URL to store.
+	 */
+	#[DataProvider( 'get_disallowed_sources' )]
+	public function test_meta_write_outside_the_input_field_is_checked( string $url ): void {
+		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
+
+		update_post_meta( $post_id, 'wporg_cli_markdown_source', $url );
+
+		$this->assertSame( '', get_post_meta( $post_id, 'wporg_cli_markdown_source', true ) );
+	}
+
+	/**
+	 * An allowed source written the same way is stored unchanged.
+	 *
+	 * @param string $url URL to store.
+	 */
+	#[DataProvider( 'get_allowed_sources' )]
+	public function test_meta_write_outside_the_input_field_keeps_an_allowed_source( string $url ): void {
+		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
+
+		update_post_meta( $post_id, 'wporg_cli_markdown_source', $url );
+
+		$this->assertSame( $url, get_post_meta( $post_id, 'wporg_cli_markdown_source', true ) );
+	}
+
+	/**
+	 * The custom fields metabox is checked like any other write.
+	 *
+	 * That box edits an existing row by its meta ID through a different function
+	 * than `update_post_meta()`, which is the route that reaches it from the block
+	 * editor.
+	 */
+	public function test_meta_written_through_the_custom_fields_metabox_is_checked(): void {
+		global $wpdb;
+
+		require_once ABSPATH . 'wp-admin/includes/post.php';
+
+		$post_id = $this->create_handbook_post( $this->create_user( 'editor' ) );
+		$this->store_legacy_source( $post_id, 'https://github.com/wp-cli/handbook/blob/main/README.md' );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- The meta ID the metabox posts back is not exposed by the meta API.
+		$meta_id = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT meta_id FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = 'wporg_cli_markdown_source'",
+				$post_id
+			)
+		);
+
+		update_meta( $meta_id, 'wporg_cli_markdown_source', 'http://127.0.0.1/secrets' );
+
+		$this->assertSame( '', get_post_meta( $post_id, 'wporg_cli_markdown_source', true ) );
 	}
 
 	/**

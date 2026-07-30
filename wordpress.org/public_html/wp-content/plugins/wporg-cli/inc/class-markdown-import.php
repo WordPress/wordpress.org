@@ -41,6 +41,23 @@ class Markdown_Import {
 		}
 	}
 
+	/**
+	 * Register the Markdown source meta, so that every write is checked.
+	 */
+	public static function action_register_meta() {
+		foreach ( self::$supported_post_types as $post_type ) {
+			register_post_meta(
+				$post_type,
+				self::$meta_key,
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'sanitize_callback' => array( __CLASS__, 'validate_markdown_source' ),
+				)
+			);
+		}
+	}
+
 	public static function action_wporg_cli_manifest_import() {
 		$response = wp_remote_get( self::$handbook_manifest );
 		if ( is_wp_error( $response ) ) {
