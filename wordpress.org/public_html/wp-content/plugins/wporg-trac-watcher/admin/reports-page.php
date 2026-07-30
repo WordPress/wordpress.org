@@ -105,8 +105,9 @@ function display_reports_page( $details ) {
 				$counts = [];
 				foreach ( $details as $r ) {
 					$counts[] = (object)[
-						'id' => $r->id,
+						'id' => $r->ID,
 						'name' => $r->display_name ?: $r->user_nicename,
+						'slug' => $r->user_nicename,
 						'link' => 'https://profiles.wordpress.org/' . $r->user_nicename . '/',
 						'count' => $r->count
 					];
@@ -321,7 +322,7 @@ function display_reports_page( $details ) {
 					break;
 			case 'typos':
 				$details = $wpdb->get_results(
-					"SELECT u.user_login, u.user_nicename,
+					"SELECT u.user_login, u.user_nicename, u.display_name,
 						COUNT( * ) as count,
 						group_concat( distinct p.prop_name SEPARATOR ', ' ) as typos,
 						group_concat( p.revision ORDER BY p.revision ASC ) as revisions
