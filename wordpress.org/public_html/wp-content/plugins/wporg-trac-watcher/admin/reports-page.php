@@ -10,8 +10,8 @@ function display_reports_page( $details ) {
 	$branch    = $_REQUEST['branch'] ?? '';
 	$is_core   = ( 'core' === $details['slug'] );
 
-	// Default to the latest version for core.
-	if ( $is_core && is_null( $version ) ) {
+	// Default to the latest version for core. The constant is optional, as it is everywhere else in the plugin.
+	if ( $is_core && is_null( $version ) && defined( 'WP_CORE_LATEST_RELEASE' ) ) {
 		$version = sprintf( '%.1f', floatval( WP_CORE_LATEST_RELEASE ) + 0.1 );
 	}
 
@@ -300,8 +300,10 @@ function display_reports_page( $details ) {
 						);
 	
 						$profile = esc_html( $p->prop_name );
-						if ( $p->user_id ) {
-							$u       = get_user_by( 'ID', $p->user_id );
+						$u       = $p->user_id ? get_user_by( 'ID', $p->user_id ) : false;
+
+						// The account a prop points at may since have been deleted; fall back to the stored name.
+						if ( $u ) {
 							$profile = sprintf(
 								'<a href="%s">%s</a>',
 								esc_url( 'https://profiles.wordpress.org/' . $u->user_nicename . '/' ),

@@ -296,20 +296,29 @@ class Commits_List_Table extends WP_List_Table {
 					}
 				}
 
+				// A committer who has no wp.org account is shown by their SVN username alone.
 				$user = get_user_by( 'login', $item->author );
-				$output .= sprintf(
-					'<br><a href="%1$s">%2$s %3$s<br>%4$s</a>',
-					esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
-					get_avatar( $user, 32 ),
-					esc_html( $user->display_name ),
-					esc_html( $user->user_login )
-				);
+				if ( $user ) {
+					$output .= sprintf(
+						'<br><a href="%1$s">%2$s %3$s<br>%4$s</a>',
+						esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+						get_avatar( $user, 32 ),
+						esc_html( $user->display_name ),
+						esc_html( $user->user_login )
+					);
+				} else {
+					$output .= sprintf( '<br>%s', esc_html( $item->author ) );
+				}
 
 
 				return $output;
 
 			case 'author':
 				$user = get_user_by( 'login', $item->author );
+				if ( ! $user ) {
+					return esc_html( $item->author );
+				}
+
 				return sprintf(
 					'<a href="%1$s">%2$s %3$s</a>',
 					esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
