@@ -5,6 +5,8 @@
  * @package wporg-trac-watcher
  */
 
+declare( strict_types=1 );
+
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir && file_exists( '/wordpress-phpunit/includes/functions.php' ) ) {
@@ -50,20 +52,6 @@ require_once dirname( __DIR__ ) . '/admin/ui.php';
  * call the same function register_activation_hook() would.
  */
 WordPressdotorg\Trac\Watcher\create_tables();
-
-/*
- * find_user_id() falls back to a GitHub username lookup against a table owned
- * by another part of dotorg. It isn't under test, but it has to exist or every
- * lookup emits a database error.
- */
-global $wpdb;
-$wpdb->query(
-	'CREATE TABLE IF NOT EXISTS `wporg_github_users` (
-		`user_id` bigint(20) NOT NULL,
-		`github_user` varchar(255) NOT NULL DEFAULT "",
-		PRIMARY KEY (`user_id`)
-	) ENGINE=InnoDB DEFAULT CHARSET=latin1;'
-);
 
 // Include the base test case.
 require __DIR__ . '/includes/testcase.php';

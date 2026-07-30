@@ -11,6 +11,8 @@
  * @package wporg-trac-watcher
  */
 
+declare( strict_types=1 );
+
 use PHPUnit\Framework\TestCase;
 use function WordPressdotorg\Trac\Watcher\SVN\get_svns;
 
@@ -29,35 +31,35 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	 *
 	 * @var WP_UnitTest_Factory|null
 	 */
-	protected static $factory_instance = null;
+	protected static ?WP_UnitTest_Factory $factory_instance = null;
 
 	/**
 	 * Hook globals captured before the first test, restored after each test.
 	 *
 	 * @var array
 	 */
-	protected static $hooks_saved = array();
+	protected static array $hooks_saved = array();
 
 	/**
 	 * Fixture factory.
 	 *
 	 * @var WP_UnitTest_Factory
 	 */
-	protected $factory;
+	protected WP_UnitTest_Factory $factory;
 
 	/**
 	 * Details for the core SVN, which every test uses.
 	 *
 	 * @var array
 	 */
-	protected $svn;
+	protected array $svn;
 
 	/**
 	 * Returns the fixture factory, creating it on first use.
 	 *
 	 * @return WP_UnitTest_Factory
 	 */
-	protected static function factory() {
+	protected static function factory(): WP_UnitTest_Factory {
 		if ( ! self::$factory_instance ) {
 			self::$factory_instance = new WP_UnitTest_Factory();
 		}
@@ -114,7 +116,7 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	/**
 	 * Wraps the test in a transaction so database writes never persist.
 	 */
-	protected function start_transaction() {
+	protected function start_transaction(): void {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Transaction control has no caching or API equivalent.
@@ -126,7 +128,7 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	/**
 	 * Snapshots the hook globals.
 	 */
-	protected function backup_hooks() {
+	protected function backup_hooks(): void {
 		self::$hooks_saved['wp_filter'] = array();
 
 		foreach ( $GLOBALS['wp_filter'] as $hook_name => $hook_object ) {
@@ -141,7 +143,7 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	/**
 	 * Restores the hook globals from the snapshot.
 	 */
-	protected function restore_hooks() {
+	protected function restore_hooks(): void {
 		if ( ! isset( self::$hooks_saved['wp_filter'] ) ) {
 			return;
 		}
@@ -165,9 +167,10 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	 * @param string $message The commit message.
 	 * @return void
 	 */
-	protected function seed_revision( $message ) {
+	protected function seed_revision( string $message ): void {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Seeding the plugin's own table, which has no API or caching layer.
 		$wpdb->insert(
 			$this->svn['rev_table'],
 			array(
@@ -188,10 +191,11 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	 * @param array $props Map of prop name to user ID, or null when unresolved.
 	 * @return void
 	 */
-	protected function seed_props( array $props ) {
+	protected function seed_props( array $props ): void {
 		global $wpdb;
 
 		foreach ( $props as $prop_name => $user_id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Seeding the plugin's own table, which has no API or caching layer.
 			$wpdb->insert(
 				$this->svn['props_table'],
 				array(
@@ -210,7 +214,7 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	 * @param array  $props   Map of prop name to user ID, or null when unresolved.
 	 * @return object
 	 */
-	protected function make_item( $message, array $props ) {
+	protected function make_item( string $message, array $props ): object {
 		return (object) array(
 			'id'      => self::REVISION,
 			'author'  => 'admin',
@@ -230,7 +234,7 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	 * @param string $column The column name.
 	 * @return string
 	 */
-	protected function render_column( $item, $column ) {
+	protected function render_column( object $item, string $column ): string {
 		$table = new WordPressdotorg\Trac\Watcher\Commits_List_Table( $this->svn );
 
 		return $table->column_default( $item, $column );
@@ -245,7 +249,7 @@ abstract class WPorg_Trac_Watcher_TestCase extends TestCase {
 	 * @param string $html The rendered output.
 	 * @return void
 	 */
-	protected function assertMarkupIsInert( $html ) {
+	protected function assertMarkupIsInert( string $html ): void {
 		$this->assertStringNotContainsString( '<img', $html, 'The stored value rendered as a live tag.' );
 		$this->assertStringContainsString( '&lt;img', $html, 'The stored value is missing, so the escaping assertion above would pass vacuously.' );
 	}

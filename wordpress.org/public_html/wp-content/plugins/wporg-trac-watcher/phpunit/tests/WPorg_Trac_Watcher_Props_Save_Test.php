@@ -10,6 +10,8 @@
  * @package wporg-trac-watcher
  */
 
+declare( strict_types=1 );
+
 defined( 'ABSPATH' ) || die();
 
 /**
@@ -34,7 +36,7 @@ class WPorg_Trac_Watcher_Props_Save_Test extends WPorg_Trac_Watcher_TestCase {
 	 * @param array $request Request arguments, merged over the required ones.
 	 * @return void
 	 */
-	protected function save( array $request ) {
+	protected function save( array $request ): void {
 		$_REQUEST = array_merge(
 			array(
 				'svn'      => 'core',
@@ -56,7 +58,7 @@ class WPorg_Trac_Watcher_Props_Save_Test extends WPorg_Trac_Watcher_TestCase {
 	 *
 	 * @return string[]
 	 */
-	protected function stored_prop_names() {
+	protected function stored_prop_names(): array {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name comes from get_svns(), and the plugin's tables have no caching layer.
@@ -66,7 +68,7 @@ class WPorg_Trac_Watcher_Props_Save_Test extends WPorg_Trac_Watcher_TestCase {
 	/**
 	 * Markup submitted as a new prop name is stripped before it is stored.
 	 */
-	public function test_adding_a_prop_strips_markup_from_the_name() {
+	public function test_adding_a_prop_strips_markup_from_the_name(): void {
 		$this->save(
 			array(
 				'what'      => 'add',
@@ -81,7 +83,7 @@ class WPorg_Trac_Watcher_Props_Save_Test extends WPorg_Trac_Watcher_TestCase {
 	 * The name also falls back to the user_id field when the first is left blank,
 	 * which is a second way the same value reaches the table.
 	 */
-	public function test_adding_a_prop_strips_markup_from_the_fallback_field() {
+	public function test_adding_a_prop_strips_markup_from_the_fallback_field(): void {
 		$this->save(
 			array(
 				'what'      => 'add',
@@ -96,7 +98,7 @@ class WPorg_Trac_Watcher_Props_Save_Test extends WPorg_Trac_Watcher_TestCase {
 	/**
 	 * Editing an existing prop goes through a separate assignment.
 	 */
-	public function test_editing_a_prop_strips_markup_from_the_name() {
+	public function test_editing_a_prop_strips_markup_from_the_name(): void {
 		$this->seed_props( array( 'bobby' => null ) );
 
 		$this->save(
@@ -114,7 +116,7 @@ class WPorg_Trac_Watcher_Props_Save_Test extends WPorg_Trac_Watcher_TestCase {
 	 * Sanitising on the way in does not make the output escaping redundant: rows
 	 * predating it are still in the table, so the renderer has to hold on its own.
 	 */
-	public function test_a_row_that_predates_sanitisation_still_renders_inert() {
+	public function test_a_row_that_predates_sanitisation_still_renders_inert(): void {
 		$this->seed_props( array( '<img src=x onerror=alert(1)>' => null ) );
 
 		$table = new WordPressdotorg\Trac\Watcher\Commits_List_Table( $this->svn );
