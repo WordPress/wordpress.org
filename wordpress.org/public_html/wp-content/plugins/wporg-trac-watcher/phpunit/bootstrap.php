@@ -46,6 +46,7 @@ require $_tests_dir . '/includes/bootstrap.php';
  */
 require_once ABSPATH . 'wp-admin/includes/admin.php';
 require_once dirname( __DIR__ ) . '/admin/ui.php';
+require_once dirname( __DIR__ ) . '/admin/reports-page.php';
 
 /*
  * The plugin's own tables. Activation hooks don't run in the test suite, so
