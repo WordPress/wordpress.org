@@ -197,6 +197,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Validates the request, delegates to handle_activity(), and dies with the result.
 		 */
 		public function ajax_handle_activity() {
+			// Failure messages echo request data, so keep the response non-scriptable.
+			header( 'Content-Type: text/plain; charset=utf-8' );
+
 			try {
 				do_action( 'wporg_profiles_before_handle_activity' );
 
