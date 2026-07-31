@@ -69,31 +69,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # One entry per environment. A script covering several plugins runs
+          # them all against the environment it starts once.
           - name: Handbook Plugin
-            working-directory: environments
-            wp-env-args: "--config handbook/.wp-env.test.json"
-            container: tests-cli
-            plugin-name: handbook
+            script: handbook:test
           - name: Plugin Directory
-            working-directory: environments
-            wp-env-args: "--config plugin-directory/.wp-env.test.json"
-            container: tests-cli
-            plugin-name: plugin-directory
+            script: plugins:test
           - name: Theme Directory
-            working-directory: environments
-            wp-env-args: "--config theme-directory/.wp-env.test.json"
-            container: tests-cli
-            plugin-name: theme-directory
-          - name: Make - o2 Posting Access
-            working-directory: environments
-            wp-env-args: "--config make/.wp-env.test.json"
-            container: tests-cli
-            plugin-name: wporg-o2-posting-access
-          - name: Make - Trac Watcher
-            working-directory: environments
-            wp-env-args: "--config make/.wp-env.test.json"
-            container: tests-cli
-            plugin-name: wporg-trac-watcher
+            script: themes:test
+          - name: Make
+            script: make:test
+    defaults:
+      run:
+        working-directory: environments
     steps:
       - uses: actions/checkout@v4
 
@@ -102,17 +90,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install wp-env
-        run: npm -g install @wordpress/env
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Start wp-env
-        working-directory: ${{ matrix.working-directory }}
-        run: wp-env ${{ matrix.wp-env-args || '' }} start
-
-      - name: Install PHPUnit Polyfills
-        working-directory: ${{ matrix.working-directory }}
-        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} composer require --dev yoast/phpunit-polyfills:^4.0 --working-dir=/wordpress-phpunit
-
+      # The scripts start their environment, whose `afterStart` installs PHPUnit
+      # and the polyfills, and then run each suite it holds.
       - name: Run PHPUnit
-        working-directory: ${{ matrix.working-directory }}
-        run: wp-env ${{ matrix.wp-env-args || '' }} run ${{ matrix.container }} --env-cwd=wp-content/plugins/${{ matrix.plugin-name }} phpunit ${{ matrix.phpunit-args || '' }}
+        run: npm run ${{ matrix.script }}
