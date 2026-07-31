@@ -2,9 +2,15 @@
 	"core": "WordPress/WordPress#master",
 	"phpVersion": "8.4",
 	"plugins": [
-		"../wordpress.org/public_html/wp-content/plugins/wporg-cli"
+		"../wordpress.org/public_html/wp-content/plugins/wporg-cli",
+		"../wordpress.org/public_html/wp-content/plugins/handbook",
+		"https://downloads.wordpress.org/plugin/jetpack.zip"
 	],
 	"lifecycleScripts": {
 		"afterStart": "bash cli/bin/after-start-test.sh"
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"JETPACK_DEV_DEBUG": true
 	}
 }
