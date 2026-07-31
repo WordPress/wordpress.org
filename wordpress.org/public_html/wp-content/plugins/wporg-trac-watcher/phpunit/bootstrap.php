@@ -5,7 +5,7 @@
  * @package wporg-trac-watcher
  */
 
-declare( strict_types=1 );
+declare( strict_types = 1 );
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 

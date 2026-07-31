@@ -11,7 +11,7 @@
  * @package wporg-trac-watcher
  */
 
-declare( strict_types=1 );
+declare( strict_types = 1 );
 
 use PHPUnit\Framework\TestCase;
 use function WordPressdotorg\Trac\Watcher\SVN\get_svns;
