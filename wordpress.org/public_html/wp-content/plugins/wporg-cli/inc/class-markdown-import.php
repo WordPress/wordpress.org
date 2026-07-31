@@ -23,6 +23,13 @@ class Markdown_Import {
 	private static $allowed_hosts = array( 'github.com', 'raw.githubusercontent.com' );
 
 	/**
+	 * Repository owners a Markdown source may be fetched from.
+	 *
+	 * @var string[]
+	 */
+	private static $allowed_owners = array( 'wp-cli' );
+
+	/**
 	 * Register our cron task if it doesn't already exist
 	 */
 	public static function action_init() {
@@ -322,7 +329,7 @@ class Markdown_Import {
 	}
 
 	/**
-	 * Check a Markdown source URL against the list of allowed hosts.
+	 * Check a Markdown source URL against the lists of allowed hosts and owners.
 	 *
 	 * @param string $markdown_source URL to check.
 	 * @return string The URL, or an empty string if it isn't allowed.
@@ -343,6 +350,12 @@ class Markdown_Import {
 		$host   = strtolower( $parts['host'] ?? '' );
 		if ( ! in_array( $scheme, array( 'http', 'https' ), true )
 			|| ! in_array( $host, self::$allowed_hosts, true ) ) {
+			return '';
+		}
+
+		$segments = explode( '/', trim( $parts['path'] ?? '', '/' ) );
+		$owner    = strtolower( $segments[0] ?? '' );
+		if ( ! in_array( $owner, self::$allowed_owners, true ) ) {
 			return '';
 		}
 

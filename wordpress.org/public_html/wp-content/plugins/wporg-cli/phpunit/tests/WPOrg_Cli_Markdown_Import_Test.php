@@ -131,11 +131,12 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 	 */
 	public static function get_allowed_sources(): array {
 		return array(
-			'raw host'        => array( 'https://raw.githubusercontent.com/wp-cli/handbook/main/README.md' ),
-			'blob URL'        => array( 'https://github.com/wp-cli/handbook/blob/main/README.md' ),
-			'plain http'      => array( 'http://github.com/wp-cli/handbook/blob/main/README.md' ),
-			'mixed case host' => array( 'https://GitHub.com/wp-cli/handbook/blob/main/README.md' ),
-			'query string'    => array( 'https://github.com/wp-cli/handbook/blob/main/README.md?v=123' ),
+			'raw host'         => array( 'https://raw.githubusercontent.com/wp-cli/handbook/main/README.md' ),
+			'blob URL'         => array( 'https://github.com/wp-cli/handbook/blob/main/README.md' ),
+			'plain http'       => array( 'http://github.com/wp-cli/handbook/blob/main/README.md' ),
+			'mixed case host'  => array( 'https://GitHub.com/wp-cli/handbook/blob/main/README.md' ),
+			'mixed case owner' => array( 'https://github.com/WP-CLI/handbook/blob/main/README.md' ),
+			'query string'     => array( 'https://github.com/wp-cli/handbook/blob/main/README.md?v=123' ),
 		);
 	}
 
@@ -158,6 +159,11 @@ class WPOrg_Cli_Markdown_Import_Test extends TestCase {
 			'file scheme'        => array( 'file:///etc/passwd' ),
 			'ftp scheme'         => array( 'ftp://github.com/wp-cli/handbook' ),
 			'protocol relative'  => array( '//github.com/wp-cli/handbook/blob/main/README.md' ),
+			'other owner'        => array( 'https://github.com/notwpcli/handbook/blob/main/README.md' ),
+			'other owner raw'    => array( 'https://raw.githubusercontent.com/notwpcli/handbook/main/README.md' ),
+			'owner lookalike'    => array( 'https://github.com/wp-cli-docs/handbook/blob/main/README.md' ),
+			'owner as gist'      => array( 'https://github.com/gist/wp-cli/handbook/blob/main/README.md' ),
+			'no owner'           => array( 'https://github.com/' ),
 			'empty string'       => array( '' ),
 		);
 	}
