@@ -52,7 +52,7 @@ class Markdown_Import {
 	}
 
 	public static function action_wporg_cli_manifest_import() {
-		$response = wp_remote_get( self::$handbook_manifest );
+		$response = wp_safe_remote_get( self::$handbook_manifest );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {

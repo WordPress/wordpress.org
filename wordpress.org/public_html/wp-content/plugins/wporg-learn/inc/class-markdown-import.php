@@ -65,7 +65,7 @@ class Markdown_Import {
 	 * Actions taken on `wporg_learn_manifest_import` event.
 	 */
 	public static function action_wporg_learn_manifest_import() {
-		$response = wp_remote_get( self::$lesson_plan_manifest );
+		$response = wp_safe_remote_get( self::$lesson_plan_manifest );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
