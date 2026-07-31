@@ -94,6 +94,11 @@ jobs:
             wp-env-args: "--config make/.wp-env.test.json"
             container: tests-cli
             plugin-name: wporg-trac-watcher
+          - name: Make - WP-CLI
+            working-directory: environments
+            wp-env-args: "--config make/.wp-env.test.json"
+            container: tests-cli
+            plugin-name: wporg-cli
     steps:
       - uses: actions/checkout@v4
 
