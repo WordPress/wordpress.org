@@ -256,9 +256,10 @@ class WPORG_Themes_Upload {
 
 		// Check out from SVN.
 		$this->create_tmp_dirs( $slug . '.' . $version );
-		$esc_svn = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
+		$esc_svn       = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
+		$esc_theme_dir = escapeshellarg( $this->theme_dir );
 		$this->exec_with_notify(
-			self::SVN . ' export ' . $esc_svn . ' ' . escapeshellarg( $this->theme_dir ) . ' --force', // force as we've created the directory already.
+			self::SVN . " export {$esc_svn} {$esc_theme_dir} --force", // force as we've created the directory already.
 			$output,
 			$return_var
 		);
@@ -270,7 +271,7 @@ class WPORG_Themes_Upload {
 		}
 
 		// Remove any unexpected entries, we only need basic files and directories, anything else will cause problems when installed onto a site.
-		$this->exec_with_notify( 'find ' . escapeshellarg( $this->theme_dir ) . ' -not -type f -not -type d -delete' );
+		$this->exec_with_notify( "find {$esc_theme_dir} -not -type f -not -type d -delete" );
 
 		// Fetch data from SVN if not known.
 		if ( ! $changeset ) {
