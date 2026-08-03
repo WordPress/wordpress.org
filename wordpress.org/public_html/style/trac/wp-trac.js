@@ -2708,10 +2708,17 @@ let wpTrac,
 		} )(),
 
 		addDynamicAssetCacheBuster() {
-			// Add cache-busting params to s.w.org scripts and stylesheets when loaded dynamically.
-			let cacheBuster = $( 'script[src*="/style/trac/wp-trac.js"]' ).attr( 'src' );
+			/*
+			 * Mirrors the `?v=` a server-side rewrite adds to un-queried s.w.org
+			 * assets, so dynamic loads request the same URL as the static tags. Inert
+			 * until that rewrite returns; it was lost in the Jinja2 port. Do not key
+			 * it off scripts_version instead: the URLs would then differ, and
+			 * $.loadStyleSheet de-dupes on the exact string, so it would append a
+			 * second trac.css after wp-trac.css and Trac's rules would win.
+			 */
+			let cacheBuster = $( 'script[src^="https://s.w.org"][src*="v="]' ).attr( 'src' );
 			if ( cacheBuster ) {
-				cacheBuster = ( cacheBuster.match( /\?([0-9]+)$/ ) || [] )[ 1 ];
+				cacheBuster = ( cacheBuster.match( /v=([0-9]+)$/ ) || [] )[ 1 ];
 			}
 			const maybeAddCacheBuster = function ( href ) {
 				if ( cacheBuster && href.match( /https:\/\/s.w.org/i ) && href.match( /[.](css|js)$/ ) ) {
