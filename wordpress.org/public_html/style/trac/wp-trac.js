@@ -1115,7 +1115,8 @@ let wpTrac,
 
 			function encloseSelection( textarea, prefix, suffix ) {
 				let start, end, sel, scrollPos;
-				textarea.trigger( 'focus' );
+				// A DOM element, not a jQuery object: see the caller.
+				textarea.focus();
 				if ( 'undefined' !== typeof document.selection ) {
 					sel = document.selection.createRange().text;
 				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {

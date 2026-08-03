@@ -106,7 +106,7 @@ window.wp = window.wp || {};
 			$( '.buttons' ).before(
 				`<p id="security-question">
 				<label><input type="checkbox" name="sec_question" />&nbsp;I am <strong>not</strong> reporting a security issue</label>
-				&mdash; report <a href="http://make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">security issues</a>
+				&mdash; report <a href="https://make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">security issues</a>
 				to the <a href="https://hackerone.com/wordpress">WordPress HackerOne program</a></p>`
 			);
 		}

@@ -2396,7 +2396,7 @@ body.core #ctxtnav a[href="/report"] {
 
 .atwho-view .cur strong {
 	color: #fff !important;
-	font: 700;
+	font-weight: 700;
 }
 
 .atwho-view ul {
