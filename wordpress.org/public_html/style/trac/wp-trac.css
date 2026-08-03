@@ -427,8 +427,10 @@ div.attachment #preview .diff .entry h2 a {
 	background: none; /* get rid of the little strip of gradient */
 }
 
-/* Sessions are tied to WP.org logins; hide the anonymous "Advanced" session tab. */
-#content.prefs #tabs #tab_advanced {
+/* Sessions are tied to WP.org logins; hide the anonymous "Advanced" session tab,
+   and the "Keyboard Shortcuts" tab along with it. */
+#content.prefs #tabs #tab_advanced,
+#content.prefs #tabs #tab_keybindings {
 	display: none;
 }
 
@@ -829,6 +831,12 @@ pre.wiki, pre.literal-block {
 
 #attachments dd {
 	margin-left: 10px
+}
+
+/* Attachment form: the "Replace existing attachment of the same name" options are
+   for gardeners only. wp-trac.js sets the body class this keys off. */
+body:not(.wp-bug-gardener) #attachment .options {
+	display: none;
 }
 
 table.listing tr {

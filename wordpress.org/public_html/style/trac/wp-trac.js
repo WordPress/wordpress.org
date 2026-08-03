@@ -270,6 +270,9 @@ let wpTrac,
 		currentUser: 'undefined' !== typeof wpTracCurrentUser ? wpTracCurrentUser : '',
 
 		init() {
+			// Gardener status as a body class, for rules that cannot see the flag.
+			$body.toggleClass( 'wp-bug-gardener', wpTrac.gardener );
+
 			// Markup rewrites first, so everything below sees the rewritten DOM (e.g. data-nicename on gravatar links).
 			wpTrac.updateAuthLinks();
 			wpTrac.addContributorAvatars();
