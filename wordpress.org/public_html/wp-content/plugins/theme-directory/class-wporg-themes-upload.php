@@ -258,7 +258,7 @@ class WPORG_Themes_Upload {
 		$this->create_tmp_dirs( $slug . '.' . $version );
 		$esc_svn = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
 		$this->exec_with_notify(
-			self::SVN . " export {$esc_svn} {$this->theme_dir} --force", // force as we've created the directory already.
+			self::SVN . ' export ' . $esc_svn . ' ' . escapeshellarg( $this->theme_dir ) . ' --force', // force as we've created the directory already.
 			$output,
 			$return_var
 		);
