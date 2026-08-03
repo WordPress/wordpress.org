@@ -270,7 +270,7 @@ class WPORG_Themes_Upload {
 		}
 
 		// Remove any unexpected entries, we only need basic files and directories, anything else will cause problems when installed onto a site.
-		$this->exec_with_notify( "find {$this->theme_dir} -not -type f -not -type d -delete" );
+		$this->exec_with_notify( 'find ' . escapeshellarg( $this->theme_dir ) . ' -not -type f -not -type d -delete' );
 
 		// Fetch data from SVN if not known.
 		if ( ! $changeset ) {
