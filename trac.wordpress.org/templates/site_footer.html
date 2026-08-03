@@ -29,7 +29,6 @@ var wpTracCurrentUser = "${req.authname}";
 <script src="https://s.w.org/style/trac/jquery.caret.min.js?ver=2015-02-01"></script>
 <script src="https://s.w.org/style/trac/jquery.atwho.min.js?ver=1.0.1"></script>
 <script src="https://s.w.org/style/trac/wp-trac.js?${scripts_version}"></script>
-<script src="https://s.w.org/style/trac/wp-trac-jinja-compat.js?${scripts_version}"></script>
 
 ## Check for security buzzwords on new tickets
 # if req.path_info == '/newticket':
@@ -49,7 +48,7 @@ var wpTracCurrentUser = "${req.authname}";
 </div>
 <script>
 function wp_trac_auth_check() {
-	$.ajax( '${href('/')}' ).success( function( data ) {
+	$.ajax( '${href('/')}' ).done( function( data ) {
 		var addClass = -1 !== data.indexOf( '<!--TRAC_WP_USER_IS_LOGGED_IN-->' );
 		$( '#wp-auth-check-wrap' ).toggleClass( 'hidden', addClass );
 	});
