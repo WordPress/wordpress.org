@@ -1162,7 +1162,8 @@ let wpTrac,
 					$textarea,
 					'code-php',
 					'PHP Code block: {{{#!php example }}}',
-					'#code',
+					// Trac 1.6 gives toolbar buttons a class, not an id.
+					'.trac-wikitoolbar-code',
 					function () {
 						encloseSelection( textarea, '{{{#!php\n<?php\n', '\n}}}\n' ); // jshint ignore:line
 					}

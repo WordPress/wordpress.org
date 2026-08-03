@@ -2142,15 +2142,15 @@ span.AtD_proofread_button:hover::before,
 	color: #444;
 }
 
-.wikitoolbar a#strong::before {
+.wikitoolbar a.trac-wikitoolbar-strong::before {
 	content: "\f200"; /* dashicons-editor-bold */
 }
 
-.wikitoolbar a#em::before {
+.wikitoolbar a.trac-wikitoolbar-em::before {
 	content: "\f201"; /* dashicons-editor-italic */
 }
 
-.wikitoolbar a#heading::before {
+.wikitoolbar a.trac-wikitoolbar-heading::before {
 	content: "\f215"; /* dashicons-editor-textcolor */
 	font-weight: 700;
 	font-size: 26px;
@@ -2158,29 +2158,29 @@ span.AtD_proofread_button:hover::before,
 	margin-top: -1px
 }
 
-.wikitoolbar a#link::before {
+.wikitoolbar a.trac-wikitoolbar-link::before {
 	content: "\f103"; /* dashicons-admin-links */
 }
 
-.wikitoolbar a#code::before {
+.wikitoolbar a.trac-wikitoolbar-code::before {
 	content: "\f475"; /* dashicons-editor-code */
 }
 
-.wikitoolbar a#hr::before {
+.wikitoolbar a.trac-wikitoolbar-hr::before {
 	content: "\f460"; /* dashicons-minus */
 	font-size: 22px;
 	margin-left: -1px;
 }
 
-.wikitoolbar a#br::before {
+.wikitoolbar a.trac-wikitoolbar-br::before {
 	content: "\f474"; /* dashicons-editor-break */
 }
 
-.wikitoolbar a#np::before {
+.wikitoolbar a.trac-wikitoolbar-np::before {
 	content: "\f476"; /* dashicons-editor-paragraph */
 }
 
-.wikitoolbar a#img::before {
+.wikitoolbar a.trac-wikitoolbar-img::before {
 	content: "\f128"; /* dashicons-format-image */
 }
 
