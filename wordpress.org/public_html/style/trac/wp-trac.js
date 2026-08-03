@@ -254,14 +254,18 @@ let wpTrac,
 	/**
 	 * Rewrites regex matches found in an element's text nodes.
 	 *
-	 * Attribute values are never visited, and matches already inside a link
-	 * are skipped, so no placeholder round-trip is needed to protect content
-	 * the regex must not touch.
+	 * Rebuilt as Text/Element nodes rather than an HTML string, so nothing
+	 * decoded out of the text (e.g. `&lt;` read back as `<`) is ever
+	 * reparsed as markup. Uses Node.append() instead of jQuery's
+	 * .append()/.html(), which parse string arguments as HTML. Attribute
+	 * values are never visited, and matches already inside a link are
+	 * skipped.
 	 *
 	 * @param {Element}  root     Element whose text nodes are walked.
 	 * @param {RegExp}   regex    Global regex tested against each text node's value.
-	 * @param {Function} replacer String.prototype.replace()-style callback returning
-	 *                            an HTML fragment built only from the regex's own capture groups.
+	 * @param {Function} replacer Receives the same arguments as a String.prototype.replace()
+	 *                            callback (match, ...groups, offset, string) and returns a
+	 *                            string, a DOM Node, or an array of either to insert as-is.
 	 */
 	function linkTextNodes( root, regex, replacer ) {
 		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT ),
@@ -275,15 +279,27 @@ let wpTrac,
 		}
 
 		textNodes.forEach( function ( textNode ) {
-			regex.lastIndex = 0;
-			if ( ! regex.test( textNode.nodeValue ) ) {
+			const value = textNode.nodeValue,
+				matches = [ ...value.matchAll( regex ) ];
+
+			if ( ! matches.length ) {
 				return;
 			}
 
-			const fragment = document
-				.createRange()
-				.createContextualFragment( textNode.nodeValue.replace( regex, replacer ) );
-			textNode.parentNode.replaceChild( fragment, textNode );
+			const fragment = document.createDocumentFragment();
+			let lastIndex = 0;
+
+			matches.forEach( function ( match ) {
+				fragment.append( value.slice( lastIndex, match.index ) );
+
+				const replacement = replacer.apply( null, [ ...match, match.index, value ] );
+				fragment.append( ...( Array.isArray( replacement ) ? replacement : [ replacement ] ) );
+
+				lastIndex = match.index + match[ 0 ].length;
+			} );
+			fragment.append( value.slice( lastIndex ) );
+
+			textNode.replaceWith( fragment );
 		} );
 	}
 
@@ -379,7 +395,14 @@ let wpTrac,
 					}
 
 					const meClass = username === wpTrac.currentUser ? ' me' : '';
-					return `${ pre }<a class="mention${ meClass }" href="https://profiles.wordpress.org/${ username }/">@${ username }</a>`;
+					return [
+						pre,
+						$( '<a />', {
+							class: `mention${ meClass }`,
+							href: `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`,
+							text: `@${ username }`,
+						} )[ 0 ],
+					];
 				} );
 			} );
 		},
@@ -389,7 +412,12 @@ let wpTrac,
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
 				linkTextNodes( this, gutenbergIssueRegEx, function ( match, issueNumber ) {
-					return `<a class="gutenberg-issue github ext-link" href="https://github.com/WordPress/Gutenberg/issues/${ issueNumber }"><span class="icon">&#8203;</span>${ match }</a>`;
+					return $( '<a />', {
+						class: 'gutenberg-issue github ext-link',
+						href: `https://github.com/WordPress/Gutenberg/issues/${ issueNumber }`,
+					} )
+						.append( $( '<span class="icon">&#8203;</span>' ) )
+						.append( document.createTextNode( match ) )[ 0 ];
 				} );
 			} );
 		},
