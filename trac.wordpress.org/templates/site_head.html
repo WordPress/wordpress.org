@@ -1,10 +1,8 @@
 {# WordPress.org Trac customizations — content injected into <head>.
 
-  Jinja2 replacement for the `head` matches in the old Genshi site.html.
-  Trac auto-includes this file (see TracInterfaceCustomization). Only additive
-  markup belongs here; DOM rewrites now live in wp-trac.js / wp-trac.css.
+  Trac auto-includes this file (see TracInterfaceCustomization).
 #}
-# set scripts_version = '242'
+# set scripts_version = env.config.get('wporg', 'scripts_version')
 # set project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 
 ## WP.org global <head> markup (kept in sync by update-headers.php)
