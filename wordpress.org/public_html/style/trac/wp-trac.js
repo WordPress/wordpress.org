@@ -251,6 +251,58 @@ let wpTrac,
 		return $( '<span />' ).text( value ).html();
 	}
 
+	/**
+	 * Rewrites regex matches found in an element's text nodes.
+	 *
+	 * Rebuilt as Text/Element nodes rather than an HTML string, so nothing
+	 * decoded out of the text (e.g. `&lt;` read back as `<`) is ever
+	 * reparsed as markup. Uses Node.append() instead of jQuery's
+	 * .append()/.html(), which parse string arguments as HTML. Attribute
+	 * values are never visited, and matches already inside a link are
+	 * skipped.
+	 *
+	 * @param {Element}  root     Element whose text nodes are walked.
+	 * @param {RegExp}   regex    Global regex tested against each text node's value.
+	 * @param {Function} replacer Receives the same arguments as a String.prototype.replace()
+	 *                            callback (match, ...groups, offset, string) and returns a
+	 *                            string, a DOM Node, or an array of either to insert as-is.
+	 */
+	function linkTextNodes( root, regex, replacer ) {
+		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT ),
+			textNodes = [];
+		let node;
+
+		while ( ( node = walker.nextNode() ) ) {
+			if ( ! $( node.parentNode ).closest( 'a' ).length ) {
+				textNodes.push( node );
+			}
+		}
+
+		textNodes.forEach( function ( textNode ) {
+			const value = textNode.nodeValue,
+				matches = [ ...value.matchAll( regex ) ];
+
+			if ( ! matches.length ) {
+				return;
+			}
+
+			const fragment = document.createDocumentFragment();
+			let lastIndex = 0;
+
+			matches.forEach( function ( match ) {
+				fragment.append( value.slice( lastIndex, match.index ) );
+
+				const replacement = replacer.apply( null, [ ...match, match.index, value ] );
+				fragment.append( ...( Array.isArray( replacement ) ? replacement : [ replacement ] ) );
+
+				lastIndex = match.index + match[ 0 ].length;
+			} );
+			fragment.append( value.slice( lastIndex ) );
+
+			textNode.replaceWith( fragment );
+		} );
+	}
+
 	// Project slug: from the body class site_header.html sets (make-<slug>), else the host.
 	const projectSlug =
 		( document.body.className.match( /\bmake-([a-z0-9-]+)/ ) || [] )[ 1 ] ||
@@ -334,88 +386,39 @@ let wpTrac,
 		linkMentions( selector ) {
 			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
 			const mentionsRegEx =
-					/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_\-.]{1,20})(?:\b(?!@|＠)|$)/g,
-				mentionsInAttrRegEx = new RegExp( '="[^"]*?' + mentionsRegEx.source + '[\\s\\S]*?"', 'g' );
+				/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_\-.]{1,20})(?:\b(?!@|＠)|$)/g;
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
-				let $comment = $( this ).html();
-
-				if ( mentionsRegEx.test( $comment ) ) {
-					const placeholders = [];
-
-					if ( mentionsInAttrRegEx.test( $comment ) ) {
-						// Preserve mentions in HTML attributes.
-						$comment = $comment.replace( mentionsInAttrRegEx, function ( match ) {
-							placeholders.push( match );
-							return `__WPTRAC_PLACEHOLDER_${ placeholders.length - 1 }__`;
-						} );
+				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
+					if ( -1 !== $.inArray( username, reservedTerms ) ) {
+						return match;
 					}
 
-					$comment = $comment.replace( mentionsRegEx, function ( match, pre, username ) {
-						if ( -1 !== $.inArray( username, reservedTerms ) ) {
-							return match;
-						}
-
-						const meClass = username === wpTrac.currentUser ? ' me' : '';
-						return `${ pre }<a class="mention${ meClass }" href="https://profiles.wordpress.org/${ username }/">@${ username }</a>`;
-					} );
-
-					// Restore mentions in HTML attributes.
-					if ( placeholders.length ) {
-						// Indexed, so a literal token in the comment cannot shift the queue.
-						$comment = $comment.replace(
-							/__WPTRAC_PLACEHOLDER_(\d+)__/g,
-							function ( token, index ) {
-								return undefined === placeholders[ index ] ? token : placeholders[ index ];
-							}
-						);
-					}
-
-					$( this ).html( $comment );
-				}
+					const meClass = username === wpTrac.currentUser ? ' me' : '';
+					return [
+						pre,
+						$( '<a />', {
+							class: `mention${ meClass }`,
+							href: `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`,
+							text: `@${ username }`,
+						} )[ 0 ],
+					];
+				} );
 			} );
 		},
 
 		linkGutenbergIssues( selector ) {
-			const gutenRegEx = /\bGB[-]?(\d+)([^<]*<\/a>)?/gi,
-				gutenInAttrRegEx = new RegExp( '="[^"]*?' + gutenRegEx.source + '[\\s\\S]*?"', 'g' );
+			const gutenbergIssueRegEx = /\bGB[-]?(\d+)\b/gi;
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
-				let $comment = $( this ).html();
-
-				if ( gutenRegEx.test( $comment ) ) {
-					const placeholders = [];
-
-					if ( gutenInAttrRegEx.test( $comment ) ) {
-						// Preserve matches in HTML attributes.
-						$comment = $comment.replace( gutenInAttrRegEx, function ( match ) {
-							placeholders.push( match );
-							return `__WPTRAC_PLACEHOLDER_${ placeholders.length - 1 }__`;
-						} );
-					}
-
-					$comment = $comment.replace( gutenRegEx, function ( match, issueNumber, closingAPresent ) {
-						if ( closingAPresent ) {
-							// Already linked
-							return match;
-						}
-
-						return `<a class="gutenberg-issue github ext-link" href="https://github.com/WordPress/Gutenberg/issues/${ issueNumber }"><span class="icon">&#8203;</span>${ match }</a>`;
-					} );
-
-					// Restore matches in HTML attributes.
-					if ( placeholders.length ) {
-						// Indexed, so a literal token in the comment cannot shift the queue.
-						$comment = $comment.replace(
-							/__WPTRAC_PLACEHOLDER_(\d+)__/g,
-							function ( token, index ) {
-								return undefined === placeholders[ index ] ? token : placeholders[ index ];
-							}
-						);
-					}
-
-					$( this ).html( $comment );
-				}
+				linkTextNodes( this, gutenbergIssueRegEx, function ( match, issueNumber ) {
+					return $( '<a />', {
+						class: 'gutenberg-issue github ext-link',
+						href: `https://github.com/WordPress/Gutenberg/issues/${ issueNumber }`,
+					} )
+						.append( $( '<span class="icon">&#8203;</span>' ) )
+						.append( document.createTextNode( match ) )[ 0 ];
+				} );
 			} );
 		},
 
