@@ -325,26 +325,22 @@ form#search input {
 }
 
 #tabs {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
 #tabs li li.active {
-	-webkit-border-radius: 0;
 	border-radius: 0;
 	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
 .plugin {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
 .plugin .foldable > :link, .plugin .foldable > :visited {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -376,7 +372,6 @@ table.code td {
 }
 
 div.code {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -483,13 +478,20 @@ table.progress td.closed {
 }
 
 #ticket {
-	background: #f9f9f9;
-	border: 1px solid #ccc;
 	padding: 0;
 }
 
-#ticket > h2 {
+#ticketbox {
+	background: #f9f9f9;
+	border: 1px solid #ccc;
+}
+
+#ticketbox > h2 {
 	font-size: 16px;
+}
+
+#ticketbox > h1 {
+	color: inherit;
 }
 
 #ticket .date {
@@ -524,7 +526,7 @@ table.progress td.closed {
 	color: #666;
 }
 
-#ticket div.description h3 {
+#ticket div.description h2 {
 	border-bottom: 1px solid #ddd;
 	color: #666;
 }
@@ -584,18 +586,15 @@ table.progress td.closed {
 	padding: .2em 0; /* breathing room */
 }
 
-#ticket {
-	-webkit-border-radius: 3px;
+#ticketbox {
 	border-radius: 3px;
 }
 
 .ticketdraft {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
 ul.children > li.child {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -715,7 +714,6 @@ blockquote.citation {
 	font: 400 10px "Open Sans",sans-serif;
 	background: none;
 	border: 0;
-	-webkit-border-radius: 0;
 	border-radius: 0;
 	line-height: 1;
 	margin-top: 8px;
@@ -726,7 +724,6 @@ blockquote.citation {
 
 #mainnav .first, #mainnav .first :link,
 #mainnav .last, #mainnav .last :link {
-	-webkit-border-radius: 0;
 	border-radius: 0;
 }
 
@@ -867,7 +864,6 @@ span:target {
 }
 
 input[type="button"], input[type="submit"], input[type="reset"] {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	text-shadow: none;
 	-webkit-box-shadow: none;
@@ -895,7 +891,6 @@ input[type="reset"]:focus:active {
 }
 
 input[type="text"], input.textwidget, textarea {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	font-size: 13px;
 }
@@ -905,14 +900,12 @@ input[name="description"] {
 }
 
 fieldset {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
 .inlinebuttons input {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -952,7 +945,6 @@ div.trac-content {
 }
 
 #prefs {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -967,7 +959,6 @@ pre.wiki, pre.literal-block {
 }
 
 tt {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -983,7 +974,6 @@ table.listing {
 
 span.system-message,
 div.system-message {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	-webkit-box-shadow: none;
 	box-shadow: none;
@@ -1004,7 +994,6 @@ div.system-message {
 }
 
 div.system-message .trac-close-msg {
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -1060,7 +1049,6 @@ div.trac-content {
 span.avatar img,
 table.properties img.avatar {
 	float: left;
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -1186,7 +1174,6 @@ div.change > .trac-ticket-buttons {
 }
 
 div.trac-ticket-buttons input[type="submit"] {
-	-webkit-border-radius: 0;
 	border-radius: 0;
 	background: none;
 	padding: 0 5px;
