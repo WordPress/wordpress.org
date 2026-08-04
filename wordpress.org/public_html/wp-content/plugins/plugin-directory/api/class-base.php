@@ -19,6 +19,7 @@ class Base {
 	 */
 	public static function load_routes() {
 		new Routes\Internal_Stats();
+		new Routes\New_Queue_Stats();
 		new Routes\Plugin();
 		new Routes\Locale_Banner();
 		new Routes\Plugin_Favorites();
