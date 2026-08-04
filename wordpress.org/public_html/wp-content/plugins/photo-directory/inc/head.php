@@ -104,8 +104,11 @@ class Head {
 		// Print the schema.
 		if ( $schema ) {
 			echo PHP_EOL, '<script type="application/ld+json">', PHP_EOL;
-			// Output URLs without escaping the slashes, and print it human readable.
-			echo wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+			// Output URLs without escaping the slashes, and print it human readable. JSON_HEX_* keeps a stored '</script>' from closing the element.
+			echo wp_json_encode(
+				$schema,
+				JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+			);
 			echo PHP_EOL, '</script>', PHP_EOL;
 		}
 	}
