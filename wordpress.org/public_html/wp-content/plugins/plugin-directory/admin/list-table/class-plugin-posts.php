@@ -692,6 +692,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 			printf(
 				'%s<br><span>%s</span>',
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_edit_link() runs the URL through esc_url(), and the link text is escaped here.
 				$this->get_edit_link( $args, esc_html( $reviewer->display_name ?: $reviewer->user_login ) ),
 				esc_html( sprintf(
 					/* translators: %s The time/date different, '1 hour' */
