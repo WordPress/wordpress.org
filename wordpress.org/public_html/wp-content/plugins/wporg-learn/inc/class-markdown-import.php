@@ -40,16 +40,6 @@ class Markdown_Import {
 	private static $posts_per_page       = 100;
 
 	/**
-	 * Hosts a Markdown source may be fetched from.
-	 *
-	 * The lesson plans were imported from the training team's GitHub
-	 * repositories, which is also where the manifest is published.
-	 *
-	 * @var string[]
-	 */
-	private static $allowed_hosts = array( 'github.com', 'raw.githubusercontent.com', 'wptrainingteam.github.io' );
-
-	/**
 	 * Register our cron task if it doesn't already exist
 	 */
 	public static function action_init() {
@@ -65,7 +55,7 @@ class Markdown_Import {
 	 * Actions taken on `wporg_learn_manifest_import` event.
 	 */
 	public static function action_wporg_learn_manifest_import() {
-		$response = wp_safe_remote_get( self::$lesson_plan_manifest );
+		$response = wp_remote_get( self::$lesson_plan_manifest );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
@@ -127,15 +117,6 @@ class Markdown_Import {
 	 * Create a new lesson plan page from the manifest document
 	 */
 	private static function create_post_from_manifest_doc( $doc, $post_parent = null ) {
-		// Checked before the insert, so a bad entry doesn't leave behind a page that only ever fails to import.
-		$markdown_source = self::validate_markdown_source( $doc['markdown_source'] ?? '' );
-		if ( ! $markdown_source ) {
-			if ( class_exists( 'WP_CLI' ) ) {
-				\WP_CLI::warning( sprintf( 'Skipped %s: markdown source is not an allowed URL.', $doc['slug'] ?? 'manifest doc' ) );
-			}
-			return false;
-		}
-
 		$post_data = array(
 			'post_type'   => self::$supported_post_type,
 			'post_status' => 'publish',
@@ -150,7 +131,7 @@ class Markdown_Import {
 		if ( class_exists( 'WP_CLI' ) ) {
 			\WP_CLI::log( "Created post {$post_id} for {$doc['title']}." );
 		}
-		update_post_meta( $post_id, self::$meta_key, $markdown_source );
+		update_post_meta( $post_id, self::$meta_key, esc_url_raw( $doc['markdown_source'] ) );
 		return get_post( $post_id );
 	}
 
@@ -244,29 +225,19 @@ class Markdown_Import {
 	public static function action_save_post( $post_id ) {
 
 		if ( ! isset( $_POST[ self::$input_name ] )
-			|| ! is_string( $_POST[ self::$input_name ] )
 			|| ! isset( $_POST[ self::$nonce_name ] )
 			|| get_post_type( $post_id ) !== self::$supported_post_type ) {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_POST[ self::$nonce_name ], self::$input_name )
-			|| ! current_user_can( 'edit_post', $post_id ) ) {
+		if ( ! wp_verify_nonce( $_POST[ self::$nonce_name ], self::$input_name ) ) {
 			return;
 		}
 
-		$submitted = wp_unslash( $_POST[ self::$input_name ] );
-		if ( '' === $submitted ) {
-			update_post_meta( $post_id, self::$meta_key, '' );
-			return;
+		$markdown_source = '';
+		if ( ! empty( $_POST[ self::$input_name ] ) ) {
+			$markdown_source = esc_url_raw( $_POST[ self::$input_name ] );
 		}
-
-		$markdown_source = self::validate_markdown_source( $submitted );
-		if ( ! $markdown_source ) {
-			// The stored source is left alone, since the prefilled field posts it back on every save.
-			return;
-		}
-
 		update_post_meta( $post_id, self::$meta_key, $markdown_source );
 	}
 
@@ -289,24 +260,14 @@ class Markdown_Import {
 		if ( is_wp_error( $markdown_source ) ) {
 			return $markdown_source;
 		}
-
-		/*
-		 * Sources are also checked on save, but stored values predate that check
-		 * and the scheduled import reuses whatever is already in post meta.
-		 */
-		$markdown_source = self::validate_markdown_source( $markdown_source );
-		if ( ! $markdown_source ) {
-			return new WP_Error( 'invalid-markdown-source', 'Markdown source is not an allowed URL.' );
-		}
-
 		if ( ! function_exists( 'jetpack_require_lib' ) ) {
 			return new WP_Error( 'missing-jetpack-require-lib', 'jetpack_require_lib() is missing on system.' );
 		}
 
-		// Transform GitHub repo HTML pages into their raw equivalents, matching the host as case insensitively as it was validated.
-		//$markdown_source = preg_replace( '#https?://github\.com/([^/]+/[^/]+)/blob/(.+)#i', 'https://raw.githubusercontent.com/$1/$2', $markdown_source );
+		// Transform GitHub repo HTML pages into their raw equivalents
+		//$markdown_source = preg_replace( '#https?://github\.com/([^/]+/[^/]+)/blob/(.+)#', 'https://raw.githubusercontent.com/$1/$2', $markdown_source );
 		$markdown_source = add_query_arg( 'v', time(), $markdown_source );
-		$response        = wp_safe_remote_get( $markdown_source );
+		$response        = wp_remote_get( $markdown_source );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
@@ -338,34 +299,6 @@ class Markdown_Import {
 		}
 		wp_update_post( $post_data );
 		return true;
-	}
-
-	/**
-	 * Check a Markdown source URL against the list of allowed hosts.
-	 *
-	 * @param string $markdown_source URL to check.
-	 * @return string The URL, or an empty string if it isn't allowed.
-	 */
-	public static function validate_markdown_source( $markdown_source ) {
-		$markdown_source = esc_url_raw( $markdown_source, array( 'http', 'https' ) );
-		if ( ! $markdown_source ) {
-			return '';
-		}
-
-		$parts = wp_parse_url( $markdown_source );
-		if ( ! $parts ) {
-			return '';
-		}
-
-		// A protocol relative URL parses to an allowed host, but the HTTP API refuses to request it.
-		$scheme = strtolower( $parts['scheme'] ?? '' );
-		$host   = strtolower( $parts['host'] ?? '' );
-		if ( ! in_array( $scheme, array( 'http', 'https' ), true )
-			|| ! in_array( $host, self::$allowed_hosts, true ) ) {
-			return '';
-		}
-
-		return $markdown_source;
 	}
 
 	/**
@@ -421,11 +354,9 @@ class Markdown_Import {
 		if ( is_wp_error( $markdown_source ) ) {
 			return $content;
 		}
-		$markdown_source = esc_url( str_replace( '/README.md', '', $markdown_source ) );
-		if ( ! $markdown_source ) {
-			return $content;
-		}
+		$markdown_source = str_replace( '/README.md', '', $markdown_source );
+		$content         = str_replace( '<img src="/images/', '<img src="' . $markdown_source . '/images/', $content );
 
-		return str_replace( '<img src="/images/', '<img src="' . $markdown_source . '/images/', $content );
+		return $content;
 	}
 }
