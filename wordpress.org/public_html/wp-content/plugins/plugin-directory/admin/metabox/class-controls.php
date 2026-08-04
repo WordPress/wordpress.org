@@ -353,7 +353,7 @@ class Controls {
 			<?php if ( $post->tested ) : ?>
 			<tr>
 				<td><?php _e( 'Tested With:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php printf( 'WordPress %s', $post->tested ); ?></strong></td>
+				<td><strong><?php printf( 'WordPress %s', esc_html( $post->tested ) ); ?></strong></td>
 			</tr>
 			<?php endif; ?>
 		</table><!-- .misc-pub-section -->

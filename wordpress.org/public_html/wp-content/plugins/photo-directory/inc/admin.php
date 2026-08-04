@@ -653,8 +653,8 @@ class Admin {
 
 		echo '<dl class="photos-flagged">';
 		foreach ( $flags as $flag => $class ) {
-			echo '<dt>' . ucfirst( $flag ) . ':</dt>';
-			echo '<dd>' . ucwords( str_replace( '_', ' ', $class ) ) . '</dd>';
+			echo '<dt>' . esc_html( ucfirst( $flag ) ) . ':</dt>';
+			echo '<dd>' . esc_html( ucwords( str_replace( '_', ' ', $class ) ) ) . '</dd>';
 		}
 		echo "</dl>\n";
 
