@@ -174,7 +174,7 @@ class Builder {
 		$this->cleanup();
 
 		if ( ! $res['result'] && $res['errors'] ) {
-			throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . $res['errors'][0]['error_message'] );
+			throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . esc_html( $res['errors'][0]['error_message'] ) );
 		}
 
 		/*
