@@ -173,12 +173,16 @@ class Builder {
 
 		$this->cleanup();
 
-		if ( ! $res['result'] && $res['errors'] ) {
-			throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . esc_html( $res['errors'][0]['error_message'] ) );
+		if ( ! $res['result'] ) {
+			if ( $res['errors'] ) {
+				throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . esc_html( $res['errors'][0]['error_message'] ) );
+			} elseif ( '' !== trim( $res['output'] ?? '' ) ) {
+				throw new Exception( __METHOD__ . ': Commit failed: ' . esc_html( trim( $res['output'] ) ) );
+			}
 		}
 
 		/*
-		 * A failed commit without any SVN errors means there were no modified files,
+		 * A failed commit with no errors and no output means there were no modified files,
 		 * ie. the ZIPs on disk were already up to date. That's a successful build.
 		 */
 
