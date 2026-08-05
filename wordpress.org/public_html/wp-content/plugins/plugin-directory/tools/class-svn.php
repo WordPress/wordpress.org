@@ -252,11 +252,10 @@ class SVN {
 	 *     @type bool        $result   The result of the operation.
 	 *     @type int         $revision The revision imported.
 	 *     @type false|array $errors   Whether any errors or warnings were encountered.
-	 *     @type string      $output   The raw output of the commit command.
 	 * }
 	 */
 	public static function commit( $checkout, $message, $options = array() ) {
-		$options[]    = 'non-interactive';
+		$options[] = 'non-interactive';
 		$options['m'] = $message;
 		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
@@ -268,7 +267,6 @@ class SVN {
 				'result'   => false,
 				'revision' => false,
 				'errors'   => [ 'No SVN credentials configured.' ],
-				'output'   => '',
 			];
 		}
 
@@ -287,7 +285,7 @@ class SVN {
 			$errors   = self::parse_svn_errors( $output );
 		}
 
-		return compact( 'result', 'revision', 'errors', 'output' );
+		return compact( 'result', 'revision', 'errors' );
 	}
 
 	/**
