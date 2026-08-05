@@ -93,6 +93,7 @@ class Builder {
 		}
 
 		// Build the requested ZIPs
+		$built_versions = [];
 		foreach ( $versions as $version ) {
 			// Incase .1 was passed, treat it as 0.1
 			if ( '.' == substr( $version, 0, 1 ) ) {
@@ -149,6 +150,14 @@ class Builder {
 			if ( $this->signature_file ) {
 				SVN::add( $this->signature_file );
 			}
+
+			$built_versions[] = $version;
+		}
+
+		// If no versions could be built, an empty commit would incorrectly report success.
+		if ( ! $built_versions ) {
+			$this->cleanup();
+			throw new Exception( __METHOD__ . ': Failed to build any of the requested ZIPs.' );
 		}
 
 		$res = SVN::commit(
@@ -164,13 +173,14 @@ class Builder {
 
 		$this->cleanup();
 
-		if ( ! $res['result'] ) {
-			if ( $res['errors'] ) {
-				throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . $res['errors'][0]['error_message'] );
-			} else {
-				throw new Exception( __METHOD__ . ': Commit failed without error, maybe there were no modified files?' );
-			}
+		if ( ! $res['result'] && $res['errors'] ) {
+			throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . $res['errors'][0]['error_message'] );
 		}
+
+		/*
+		 * A failed commit without any SVN errors means there were no modified files,
+		 * ie. the ZIPs on disk were already up to date. That's a successful build.
+		 */
 
 		return true;
 	}

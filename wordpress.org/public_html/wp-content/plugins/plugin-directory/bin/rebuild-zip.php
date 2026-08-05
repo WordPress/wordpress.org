@@ -114,6 +114,22 @@ try {
 			"{$plugin_slug}: Rebuild triggered by " . php_uname( 'n' ),
 			$stable_tag
 		);
+
+		// Mark the ZIPs as being built, trunk has no release record.
+		foreach ( $versions_to_build as $built_tag ) {
+			if ( 'trunk' === $built_tag ) {
+				continue;
+			}
+
+			Plugin_Directory::add_release(
+				$plugin_post,
+				array(
+					'tag'                      => $built_tag,
+					'zips_built'               => true,
+					'zips_built_from_revision' => $zip_builder->plugins_revision,
+				)
+			);
+		}
 	}
 
 	echo 'OK. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
