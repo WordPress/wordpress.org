@@ -128,6 +128,9 @@ class Builder {
 
 			} catch ( Exception $e ) {
 				// In event of error, skip this file this time.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Routed to the error log via E_USER_WARNING; raw is fine.
+				trigger_error( sprintf( 'ZIP build failed for %s %s: %s', $this->slug, $version, $e->getMessage() ), E_USER_WARNING );
+
 				$this->cleanup_plugin_tmp();
 
 				// Perform an SVN up to revert any changes made.
