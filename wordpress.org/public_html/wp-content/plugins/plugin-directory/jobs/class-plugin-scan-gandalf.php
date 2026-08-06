@@ -7,6 +7,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WP_Error;
 use WP_Http;
@@ -29,6 +30,9 @@ class Plugin_Scan_Gandalf {
 
 	/** Gandalf scan endpoint. */
 	const ENDPOINT = 'https://gandalf.wordpress.org/scan';
+
+	/** Risk score at or above which a completed scan blocks the release from being served. */
+	const RISK_SCORE_BLOCK_THRESHOLD = 8;
 
 	/**
 	 * Dispatch a Gandalf scan from the importer context carried through cron.
@@ -178,8 +182,33 @@ class Plugin_Scan_Gandalf {
 		}
 
 		if ( 'completed' === $data['status'] ) {
-			if ( $data['findings_count'] > 0 ) {
-				self::notify_slack(
+			/*
+			 * Precedence: a high enough risk score blocks the release outright; otherwise findings
+			 * raise the usual advisory alert. `risk_score` is read defensively because the callback
+			 * route doesn't validate it, and because Gandalf doesn't send it yet.
+			 */
+			$risk_score = ( isset( $data['risk_score'] ) && is_numeric( $data['risk_score'] ) ) ? (float) $data['risk_score'] : null;
+
+			if ( null !== $risk_score && $risk_score >= self::RISK_SCORE_BLOCK_THRESHOLD ) {
+				/*
+				 * Auto-blocking is disabled. Enable by restoring:
+				 *
+				 * $held = self::block_release( $plugin, $pending_record, $scan_id, $risk_score );
+				 */
+				$held = false;
+
+				self::notify_slack_blocked(
+					$plugin,
+					[
+						'version'     => $pending_record['version'],
+						'release_ref' => $pending_record['release_ref'],
+						'risk_score'  => $risk_score,
+						'held'        => $held,
+						'report_url'  => $data['report_url'] ?? '',
+					]
+				);
+			} elseif ( $data['findings_count'] > 0 ) {
+				self::notify_slack_findings(
 					$plugin,
 					[
 						'version'         => $pending_record['version'],
@@ -199,6 +228,42 @@ class Plugin_Scan_Gandalf {
 		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
 
 		return true;
+	}
+
+	/**
+	 * Hold the scanned release, once the verdict is known to still apply to it.
+	 *
+	 * @param \WP_Post $plugin         The plugin post.
+	 * @param array    $pending_record The pending scan record (version, release_ref).
+	 * @param string   $scan_id        The Gandalf scan ID.
+	 * @param float    $risk_score     The reported risk score.
+	 * @return bool True when the release was held, false when there was nothing to hold.
+	 */
+	protected static function block_release( $plugin, $pending_record, $scan_id, $risk_score ) {
+		$version = (string) $pending_record['version'];
+
+		// A newer release landed since this scan was dispatched; the scanned version is moot.
+		if ( (string) get_post_meta( $plugin->ID, 'version', true ) !== $version ) {
+			return false;
+		}
+
+		$release = Plugin_Directory::get_release( $plugin, $version );
+		if ( ! $release ) {
+			return false;
+		}
+
+		// No cooldown was captured at release creation, so the version was served at import.
+		if ( empty( $release['release_delay'] ) ) {
+			return false;
+		}
+
+		return API_Update_Updater::block_release(
+			$plugin->post_name,
+			[
+				'scan_id'    => $scan_id,
+				'risk_score' => $risk_score,
+			]
+		);
 	}
 
 	/**
@@ -236,12 +301,16 @@ class Plugin_Scan_Gandalf {
 	}
 
 	/**
-	 * Notify Slack about a Gandalf scan with findings.
+	 * Alert Slack about a scan that reported findings.
+	 *
+	 * Dedupes on the verdict hash so an unchanged result isn't reported twice, and is skipped
+	 * when no hash is present, since there's nothing to dedupe on.
 	 *
 	 * @param \WP_Post $plugin The plugin post.
-	 * @param array    $record The completed scan summary.
+	 * @param array    $record 'version', 'release_ref', 'findings_count', 'severity_counts',
+	 *                         'verdict_hash', 'report_url'.
 	 */
-	protected static function notify_slack( $plugin, $record ) {
+	protected static function notify_slack_findings( $plugin, $record ) {
 		if ( empty( $record['verdict_hash'] ) ) {
 			return;
 		}
@@ -261,14 +330,71 @@ class Plugin_Scan_Gandalf {
 		$already_notified[ $record['verdict_hash'] ] = time();
 		update_post_meta( $plugin->ID, self::NOTIFIED_META_KEY, $already_notified );
 
-		if ( ! defined( 'PLUGIN_REVIEW_ALERT_SLACK_CHANNEL' ) || ! function_exists( 'slack_dm' ) ) {
-			return;
+		$detail = [ sprintf( 'Findings: %d', $record['findings_count'] ) ];
+
+		$severity_summary = [];
+		foreach ( (array) ( $record['severity_counts'] ?? [] ) as $severity => $count ) {
+			if ( $count > 0 ) {
+				$severity_summary[] = "{$severity}: {$count}";
+			}
+		}
+		if ( $severity_summary ) {
+			$detail[] = 'Severity: ' . implode( ', ', $severity_summary );
 		}
 
-		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
-		$install_line    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
-		if ( $active_installs >= 10000 ) {
-			$install_line = ":bangbang::bangbang::bangbang: {$install_line} :bangbang::bangbang::bangbang:";
+		self::send_slack_alert(
+			$plugin,
+			'A security scan detected findings in *%s*',
+			$record['version'],
+			$record['release_ref'],
+			$detail,
+			$record['report_url']
+		);
+	}
+
+	/**
+	 * Alert Slack about a high-risk verdict. Always sends: a high score needs a human either way.
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $record 'version', 'release_ref', 'risk_score', 'report_url', and 'held'
+	 *                         (whether the release was held).
+	 */
+	protected static function notify_slack_blocked( $plugin, $record ) {
+		if ( ! empty( $record['held'] ) ) {
+			$headline = 'A security scan *blocked* a release of *%s*';
+			$status   = 'Held out of the update API until a reviewer force-releases it.';
+		} else {
+			$headline = 'A security scan flagged a release of *%s*';
+			$status   = 'Not held automatically. Review the version and block it from the plugin page if warranted.';
+		}
+
+		self::send_slack_alert(
+			$plugin,
+			$headline,
+			$record['version'],
+			$record['release_ref'],
+			[
+				sprintf( 'Risk score: %s (flags at %s)', $record['risk_score'], self::RISK_SCORE_BLOCK_THRESHOLD ),
+				$status,
+			],
+			$record['report_url']
+		);
+	}
+
+	/**
+	 * Send a plugin-review Slack alert: the shared envelope for the scan notifications — the
+	 * plugin title, active-install count, version line, and links.
+	 *
+	 * @param \WP_Post $plugin      The plugin post.
+	 * @param string   $headline    A sprintf format with a single %s for the plugin title.
+	 * @param string   $version     The scanned version.
+	 * @param string   $release_ref The scanned release ref.
+	 * @param string[] $detail      Lines describing the result, placed after the version line.
+	 * @param string   $report_url  Link to the scan report, or '' when there isn't one.
+	 */
+	private static function send_slack_alert( $plugin, $headline, $version, $release_ref, $detail, $report_url ) {
+		if ( ! defined( 'PLUGIN_REVIEW_ALERT_SLACK_CHANNEL' ) || ! function_exists( 'slack_dm' ) ) {
+			return;
 		}
 
 		$title = $plugin->post_title;
@@ -276,31 +402,21 @@ class Plugin_Scan_Gandalf {
 			$title .= ' (closed)';
 		}
 
-		$body = sprintf(
-			"Gandalf scan detected findings in *%s*\n%s\nVersion: %s (%s)\nFindings: %d\n",
-			$title,
-			$install_line,
-			$record['version'],
-			$record['release_ref'],
-			$record['findings_count']
-		);
-
-		if ( ! empty( $record['severity_counts'] ) ) {
-			$severity_summary = [];
-			foreach ( $record['severity_counts'] as $severity => $count ) {
-				if ( $count > 0 ) {
-					$severity_summary[] = "{$severity}: {$count}";
-				}
-			}
-
-			if ( $severity_summary ) {
-				$body .= 'Severity: ' . implode( ', ', $severity_summary ) . "\n";
-			}
+		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
+		$install_line    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
+		if ( $active_installs >= 10000 ) {
+			$install_line = ":warning: {$install_line}";
 		}
 
+		$body  = sprintf( $headline, $title ) . "\n";
+		$body .= $install_line . "\n";
+		$body .= sprintf( "Version: %s (%s)\n", $version, $release_ref );
+		$body .= implode( "\n", $detail ) . "\n";
 		$body .= sprintf( "Details: https://wordpress.org/plugins/wp-admin/post.php?post=%s&action=edit\n", $plugin->ID );
 		$body .= sprintf( "Plugin: https://wordpress.org/plugins/%s/\n", $plugin->post_name );
-		$body .= sprintf( "Report: %s\n", $record['report_url'] );
+		if ( ! empty( $report_url ) ) {
+			$body .= sprintf( "Report: %s\n", $report_url );
+		}
 
 		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
 	}
