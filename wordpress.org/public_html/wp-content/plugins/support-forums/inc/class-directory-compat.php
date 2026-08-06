@@ -460,15 +460,15 @@ abstract class Directory_Compat {
 			return $retval;
 		}
 		if (
-			( ! empty( $this->authors ) && in_array( $user->user_nicename, $this->authors ) )
+			( ! empty( $this->authors ) && in_array( $user->user_nicename, $this->authors, true ) )
 		||
-			( ! empty( $this->contributors ) && in_array( $user->user_nicename, $this->contributors ) )
+			( ! empty( $this->contributors ) && in_array( $user->user_nicename, $this->contributors, true ) )
 		||
-			( ! empty( $this->support_reps ) && in_array( $user->user_nicename, $this->support_reps ) )
+			( ! empty( $this->support_reps ) && in_array( $user->user_nicename, $this->support_reps, true ) )
 		||
 			// Back-compat for support reps added before https://meta.trac.wordpress.org/changeset/5867,
 			// can be removed once they are re-added via the Plugin Directory UI.
-			( is_a( $user, 'WP_User' ) && $user->supportrep == $this->slug() )
+			( is_a( $user, 'WP_User' ) && '' !== (string) $this->slug() && (string) $user->supportrep === (string) $this->slug() )
 		) {
 			$retval = true;
 		}

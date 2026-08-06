@@ -399,7 +399,7 @@ class Plugin {
 
 		$authors = $compat ? $compat->get_authors( $slug ) : array();
 
-		return $authors && in_array( $user_nicename, $authors );
+		return $authors && in_array( $user_nicename, $authors, true );
 	}
 
 	/**
@@ -426,7 +426,7 @@ class Plugin {
 
 		$contributors = $compat ? $compat->get_contributors( $slug ) : array();
 
-		return $contributors && in_array( $user_nicename, $contributors );
+		return $contributors && in_array( $user_nicename, $contributors, true );
 	}
 
 	/**
@@ -452,7 +452,7 @@ class Plugin {
 
 		$support_reps = $compat ? $compat->get_support_reps( $slug ) : array();
 
-		return $support_reps && in_array( $user_nicename, $support_reps );
+		return $support_reps && in_array( $user_nicename, $support_reps, true );
 	}
 
 	/**
