@@ -86,20 +86,27 @@ class API_Update_Updater {
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
 		$release          = Plugin_Directory::get_release( $post, $version );
 		$release_time     = self::compute_release_time( $post, $release );
-		$existing_version = (string) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
-				$post->post_name
-			)
-		);
+		$existing_version = self::get_served_version( $post->post_name );
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+
+		/*
+		 * Hold a blocked version out of the row: the previously-served version keeps being
+		 * served, and any deferred serve is cancelled rather than merely postponed. Only the
+		 * availability and closure fields are refreshed, since every other column would
+		 * describe the version being held.
+		 */
+		if ( self::is_release_blocked( $release ) && $existing_version !== (string) $version ) {
+			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
+
+			return self::sync_availability( $post );
+		}
 
 		/*
 		 * Defer the write for new versions still inside the cooldown window. While
 		 * deferred, the existing `update_source` row (carrying the previous version)
 		 * continues to be served by the update API. Reviewers force-release by setting
-		 * `release_delay = 0` on the release meta.
+		 * `release_delay = 0` and `unblock` on the release meta — see force_release().
 		 *
 		 * The deferred cron fires at exactly $cooldown_until, so by definition this
 		 * gate is false when called from cron_trigger_release() and no explicit bypass
@@ -109,7 +116,8 @@ class API_Update_Updater {
 			$cooldown_until = $release_time + $release_delay;
 			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
-				return true;
+
+				return self::sync_availability( $post );
 			}
 		}
 
@@ -127,16 +135,7 @@ class API_Update_Updater {
 			'last_stable_tag' => $post->last_stable_tag ?? '',
 		);
 
-		if ( in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
-			$closed_data = Template::get_close_data( $post );
-			if ( $closed_data ) {
-				// Close date is sometimes unknown, only include the Day of closure.
-				$meta['closed_at'] = $closed_data['date'] ? gmdate( 'Y-m-d', strtotime( $closed_data['date'] ) ) : false;
-				if ( $closed_data['public'] ) {
-					$meta['closed_reason'] = $closed_data['reason'] ?: 'unknown';
-				}
-			}
-		}
+		$meta = array_merge( $meta, self::get_closed_meta( $post ) );
 
 		// Add phased rollout strategy data if needed.
 		if ( $release && ! empty( $release['rollout_strategy'] ) ) {
@@ -177,6 +176,30 @@ class API_Update_Updater {
 			}
 		}
 
+		self::flush_update_caches( $plugin_slug );
+
+		// Sync the latest version to Stats.
+		if ( function_exists( '\WordPressdotorg\Stats\sync_latest_version' ) ) {
+			\WordPressdotorg\Stats\sync_latest_version(
+				'plugin',
+				array(
+					$plugin_slug => $version,
+				)
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Purge the caches the update and info APIs answer `update_source` queries from.
+	 *
+	 * Every write to the row has to be followed by this, or the change doesn't reach sites
+	 * until the cached entries expire.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 */
+	protected static function flush_update_caches( $plugin_slug ) {
 		// ~34char prefix, Memcache limit of 255char per key.
 		$plugin_details_cache_key = 'plugin_details:' . ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug );
 		wp_cache_delete( $plugin_details_cache_key, 'update-check-3' );
@@ -194,18 +217,150 @@ class API_Update_Updater {
 				wp_cache_delete( $cache_key, 'plugin_api_info' );
 			}
 		}
+	}
 
-		// Sync the latest version to Stats.
-		if ( function_exists( '\WordPressdotorg\Stats\sync_latest_version' ) ) {
-			\WordPressdotorg\Stats\sync_latest_version(
-				'plugin', 
-				array(
-					$plugin_slug => $version
-				)
-			);
+	/**
+	 * The closure fields recorded in `update_source`'s `meta` column.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return array Empty for a plugin that is neither closed nor disabled.
+	 */
+	protected static function get_closed_meta( $post ) {
+		if ( ! in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
+			return array();
 		}
 
+		$closed_data = Template::get_close_data( $post );
+		if ( ! $closed_data ) {
+			return array();
+		}
+
+		// Close date is sometimes unknown, only include the Day of closure.
+		$meta = array(
+			'closed_at' => $closed_data['date'] ? gmdate( 'Y-m-d', strtotime( $closed_data['date'] ) ) : false,
+		);
+
+		if ( $closed_data['public'] ) {
+			$meta['closed_reason'] = $closed_data['reason'] ?: 'unknown';
+		}
+
+		return $meta;
+	}
+
+	/**
+	 * Apply the plugin's availability and closure state to the `update_source` row without
+	 * disturbing the version it serves.
+	 *
+	 * Whenever a new version is held back — by the release cooldown or by a block —
+	 * update_single_plugin() returns early, because the row has to keep serving the previous
+	 * version and the version-specific columns are all derived from post meta describing the
+	 * held one. A status change still has to reach sites immediately though: closing a plugin
+	 * whose next version is on hold must stop the current version being offered. So the
+	 * availability and closure fields are written on their own, and the rest of the row is
+	 * left as it is.
+	 *
+	 * `version` and `last_updated` are deliberately left behind with it, so the plugin keeps
+	 * matching cron_trigger()'s out-of-date query for as long as the version is held. The
+	 * repeated write is idempotent; converging would mean recording the held version as served.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return bool False when the row couldn't be read or written, true otherwise —
+	 *              including when there's no row, which is nothing to correct rather than
+	 *              a failure.
+	 */
+	protected static function sync_availability( $post ) {
+		global $wpdb;
+
+		/*
+		 * Fetched as a row, not a single value: `meta` is nullable, so a null there would be
+		 * indistinguishable from the plugin having no row at all.
+		 */
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT `meta` FROM `{$wpdb->prefix}update_source` WHERE `plugin_slug` = %s",
+				$post->post_name
+			),
+			ARRAY_A
+		);
+
+		if ( ! $row ) {
+			// A failed lookup reads the same as no row, so tell them apart before giving up.
+			if ( $wpdb->last_error ) {
+				return false;
+			}
+
+			// Nothing is being served, so there's no availability to correct.
+			return true;
+		}
+
+		$meta = array();
+		if ( $row['meta'] ) {
+			$meta = maybe_unserialize( $row['meta'] );
+
+			/*
+			 * Bail rather than overwrite. Rebuilding from an unreadable value would discard
+			 * `release_time` and `rollout`, which govern the phased rollout of the version
+			 * currently being served — worse than leaving availability stale.
+			 */
+			if ( ! is_array( $meta ) ) {
+				return false;
+			}
+		}
+
+		// Clear the closure fields before re-deriving them, so re-opening a plugin drops them.
+		unset( $meta['closed_at'], $meta['closed_reason'] );
+		$meta = array_merge( $meta, self::get_closed_meta( $post ) );
+
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'update_source',
+			array(
+				'available' => (int) in_array( $post->post_status, array( 'publish', 'disabled' ) ),
+				'meta'      => $meta ? serialize( $meta ) : '',
+			),
+			array( 'plugin_slug' => $post->post_name )
+		);
+
+		if ( false === $updated ) {
+			return false;
+		}
+
+		/*
+		 * The update API answers from cache, so the row write on its own wouldn't reach sites
+		 * — which is the entire reason availability is synced here.
+		 */
+		self::flush_update_caches( $post->post_name );
+
 		return true;
+	}
+
+	/**
+	 * The version currently served from `update_source`.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return string The served version, or '' when the plugin isn't in `update_source`.
+	 */
+	public static function get_served_version( $plugin_slug ) {
+		global $wpdb;
+
+		return (string) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				$plugin_slug
+			)
+		);
+	}
+
+	/**
+	 * Whether a release is being held out of `update_source` by a block.
+	 *
+	 * Blocks are recorded on the release meta as `release_block`, and cleared by
+	 * Plugin_Directory::add_release() with `unblock => true`.
+	 *
+	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
+	 * @return bool True when the release is being held out of `update_source`.
+	 */
+	public static function is_release_blocked( $release ) {
+		return is_array( $release ) && ! empty( $release['release_block'] );
 	}
 
 	/**
@@ -283,25 +438,134 @@ class API_Update_Updater {
 			return false;
 		}
 
-		Tools::audit_log(
-			sprintf(
-				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
-				$version,
-				(int) ( $release['release_delay'] ?? 0 ) / HOUR_IN_SECONDS,
-				$reason
-			),
-			$post
-		);
+		// A force-release also overrides a block; note that in the audit trail.
+		if ( self::is_release_blocked( $release ) ) {
+			Tools::audit_log(
+				sprintf(
+					'Force-released version %1$s, overriding the release block. Reason: %2$s',
+					$version,
+					$reason
+				),
+				$post
+			);
+		} else {
+			Tools::audit_log(
+				sprintf(
+					'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
+					$version,
+					(int) ( $release['release_delay'] ?? 0 ) / HOUR_IN_SECONDS,
+					$reason
+				),
+				$post
+			);
+		}
 
 		Plugin_Directory::add_release(
 			$post,
 			array(
 				'tag'           => $release['tag'],
 				'release_delay' => 0,
+				// Clear any release block so update_single_plugin() serves the version.
+				'unblock'       => true,
 			)
 		);
 
 		return self::update_single_plugin( $plugin_slug );
+	}
+
+	/**
+	 * Hold a plugin's current version out of `update_source` until it's force-released.
+	 *
+	 * The counterpart to force_release(). Callers apply their own preconditions first — this
+	 * checks neither the cooldown state nor who's asking, and will hold any release that
+	 * isn't already served. It refuses when there's nothing left to hold: no plugin, no
+	 * release row, the version already being served, or a hold already recorded against it.
+	 *
+	 * Capability checks must be performed by the caller.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param array  $block       The block to record: 'reason' and 'blocked_by'. 'blocked_at'
+	 *                            is added here.
+	 * @return bool True when the version is held as a result, false when it isn't — including
+	 *              when the hold couldn't be recorded, or the version was served while it was
+	 *              being recorded and the hold was rolled back.
+	 */
+	public static function block_release( $plugin_slug, $block ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$version = get_post_meta( $post->ID, 'version', true );
+		$release = Plugin_Directory::get_release( $post, $version );
+
+		if ( ! $release ) {
+			return false;
+		}
+
+		// Already live: the version is being served, so there's nothing left to hold back.
+		if ( self::get_served_version( $plugin_slug ) === (string) $version ) {
+			return false;
+		}
+
+		/*
+		 * Already held. Recording a second block would merge it into the first rather than
+		 * replace it, leaving a hybrid of the two reasons — and an unblock here would then
+		 * discard the original hold rather than this one.
+		 */
+		if ( self::is_release_blocked( $release ) ) {
+			return false;
+		}
+
+		$block['blocked_at'] = time();
+
+		Plugin_Directory::add_release(
+			$post,
+			array(
+				'tag'           => $release['tag'],
+				'release_block' => $block,
+			)
+		);
+
+		/*
+		 * Confirm the hold from stored state rather than from add_release()'s return value,
+		 * which is update_post_meta()'s and is also false for an unchanged write.
+		 */
+		if ( ! self::is_release_blocked( Plugin_Directory::get_release( $post, $version ) ) ) {
+			return false;
+		}
+
+		// Re-run so a version scheduled to serve at cooldown-end is held now instead.
+		self::update_single_plugin( $plugin_slug );
+
+		/*
+		 * The deferred serve can fire between the check above and this point, and a block
+		 * can't un-ship a live version. Undo it rather than leave a block recorded against
+		 * one, which would have the metabox reporting a hold that isn't in effect.
+		 */
+		if ( self::get_served_version( $plugin_slug ) === (string) $version ) {
+			Plugin_Directory::add_release(
+				$post,
+				array(
+					'tag'     => $release['tag'],
+					'unblock' => true,
+				)
+			);
+
+			return false;
+		}
+
+		// Logged once the hold is known to be in effect, so the trail records what happened.
+		Tools::audit_log(
+			sprintf(
+				'Blocked version %1$s from being served to sites. Reason: %2$s',
+				$version,
+				$block['reason'] ?? ''
+			),
+			$post
+		);
+
+		return true;
 	}
 
 	static function get_plugin_assets( $post ) {

@@ -138,4 +138,14 @@
 		<exclude name="WordPress.Security.NonceVerification.Missing" />
 		<exclude name="WordPress.Security.NonceVerification.Recommended" />
 	</rule>
+
+	<!-- Recognise project test-case bases so the FileName sniff exempts their subclasses (whose
+	     names must match their class, not be hyphenated, so PHPUnit can discover them). -->
+	<rule ref="WordPress.Files.FileName">
+		<properties>
+			<property name="custom_test_classes" type="array">
+				<element value="Release_Block_Test_Case"/>
+			</property>
+		</properties>
+	</rule>
 </ruleset>
