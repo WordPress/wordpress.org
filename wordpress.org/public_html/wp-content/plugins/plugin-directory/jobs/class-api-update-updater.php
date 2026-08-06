@@ -86,24 +86,14 @@ class API_Update_Updater {
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
 		$release          = Plugin_Directory::get_release( $post, $version );
 		$release_time     = self::compute_release_time( $post, $release );
-		$existing_version = (string) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
-				$post->post_name
-			)
-		);
+		$existing_version = self::get_served_version( $post->post_name );
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 
 		/*
-		 * Defer the write for new versions still inside the cooldown window. While
-		 * deferred, the existing `update_source` row (carrying the previous version)
-		 * continues to be served by the update API. Reviewers force-release by setting
-		 * `release_delay = 0` on the release meta.
-		 *
-		 * The deferred cron fires at exactly $cooldown_until, so by definition this
-		 * gate is false when called from cron_trigger_release() and no explicit bypass
-		 * is needed.
+		 * Defer new versions still inside the cooldown; the existing `update_source` row keeps
+		 * serving the previous version meanwhile. The deferred cron fires at exactly
+		 * $cooldown_until, so this gate is always false when called from cron_trigger_release().
 		 */
 		if ( $release_delay && $existing_version !== (string) $version ) {
 			$cooldown_until = $release_time + $release_delay;
@@ -113,11 +103,8 @@ class API_Update_Updater {
 			}
 		}
 
-		// When publishing a new version under an active cooldown, anchor `release_time`
-		// to now — that's the moment the version is actually available to sites. Keeps
-		// phased_rollout()'s `manual-updates-24hr` window measuring from public availability,
-		// even if the commit/confirmation was long ago because the cooldown deferred the write.
-		if ( $release_delay && $existing_version !== (string) $version ) {
+		// Anchor to now: phased_rollout()'s 24h window measures from public availability, not the commit.
+		if ( $existing_version !== (string) $version ) {
 			$release_time = time();
 		}
 
@@ -145,8 +132,7 @@ class API_Update_Updater {
 			);
 		}
 
-		// The deferred event (if any) has either fired or been pre-empted by a force-release
-		// or status change. Clear any leftover schedule so the cron table doesn't grow.
+		// Clear any leftover deferred schedule so the cron table doesn't grow.
 		wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
 
 		$data = array(
@@ -209,6 +195,23 @@ class API_Update_Updater {
 	}
 
 	/**
+	 * The version currently served from `update_source`.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return string The served version, or '' when the plugin isn't in `update_source`.
+	 */
+	public static function get_served_version( $plugin_slug ) {
+		global $wpdb;
+
+		return (string) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				$plugin_slug
+			)
+		);
+	}
+
+	/**
 	 * Determine the release timestamp for a plugin version.
 	 *
 	 * Falls back through the commit timestamp on the plugin post, and is replaced by the
@@ -256,19 +259,23 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * Reviewer force-release: clear the cooldown for a plugin's current version and
-	 * write it to `update_source` immediately. Logs the action with the supplied reason.
+	 * Write a version to `update_source` now, without waiting out its release delay. Used by
+	 * reviewers force-releasing from wp-admin and by a clean Gandalf scan; what separates the
+	 * two is $reason, not the behaviour.
 	 *
-	 * Capability checks must be performed by the caller.
+	 * $version must still be the plugin's current version — callers evaluated it earlier, and
+	 * serving a stale one would skip the wait on a release nobody looked at. Authentication
+	 * and capability checks are the caller's.
 	 *
 	 * @param string   $plugin_slug The plugin slug.
+	 * @param string   $version     The version that was evaluated.
 	 * @param string   $reason      Free-text reason recorded in the audit log.
 	 * @param \WP_User $user        The acting user. Defaults to the current user.
-	 * @return bool True on success.
+	 * @return bool True when the version was served.
 	 */
-	public static function force_release( $plugin_slug, $reason, $user = null ) {
-		if ( ! $user ) {
-			$user = wp_get_current_user();
+	public static function serve_release_now( $plugin_slug, $version, $reason, $user = false ) {
+		if ( ! $version || ! $reason ) {
+			return false;
 		}
 
 		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
@@ -276,21 +283,37 @@ class API_Update_Updater {
 			return false;
 		}
 
-		$version = get_post_meta( $post->ID, 'version', true );
-		$release = Plugin_Directory::get_release( $post, $version );
+		// A newer release landed since the caller evaluated this version.
+		$current_version = (string) get_post_meta( $post->ID, 'version', true );
+		if ( $current_version !== (string) $version ) {
+			return false;
+		}
 
+		$release = Plugin_Directory::get_release( $post, $version );
 		if ( ! $release ) {
+			return false;
+		}
+
+		// Nothing to skip: no delay was captured at release creation.
+		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+		if ( ! $release_delay ) {
+			return false;
+		}
+
+		// Already served: the delay elapsed on its own; leave `update_source` and its `release_time` untouched.
+		if ( self::get_served_version( $post->post_name ) === (string) $version ) {
 			return false;
 		}
 
 		Tools::audit_log(
 			sprintf(
-				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
+				'Served version %1$s immediately, skipping the %2$d-hour release delay. Reason: %3$s',
 				$version,
-				(int) ( $release['release_delay'] ?? 0 ) / HOUR_IN_SECONDS,
+				(int) round( $release_delay / HOUR_IN_SECONDS ),
 				$reason
 			),
-			$post
+			$post,
+			$user
 		);
 
 		Plugin_Directory::add_release(

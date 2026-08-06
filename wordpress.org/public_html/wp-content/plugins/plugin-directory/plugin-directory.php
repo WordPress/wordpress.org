@@ -30,8 +30,13 @@ define( __NAMESPACE__ . '\PLUGIN_DIR', __DIR__ );
  * and the new version being written to the `update_source` table — and so served to
  * sites by the api.wordpress.org plugin update-check API. The previous version remains
  * served until the cooldown elapses. Mitigates supply-chain attacks by giving scanners
- * and humans a window to flag bad releases. Plugin reviewers can bypass the cooldown
- * via the wp-admin force-release action; see Jobs\API_Update_Updater::update_single_plugin().
+ * and humans a window to flag bad releases. See Jobs\API_Update_Updater::update_single_plugin()
+ * for the gate itself.
+ *
+ * Two things end the wait early, both via Jobs\API_Update_Updater::serve_release_now():
+ * a reviewer force-releasing from wp-admin, and a Gandalf scan completing with no findings.
+ * The latter means the window is only spent on releases a scanner flagged or never
+ * reported on.
  *
  * Defers to the shared WPORG_PLUGIN_THEME_RELEASE_DELAY constant when it's defined
  * so the plugin and theme directories can be tuned (or disabled) in lockstep from a

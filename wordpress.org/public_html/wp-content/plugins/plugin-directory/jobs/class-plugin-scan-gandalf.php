@@ -1,6 +1,6 @@
 <?php
 /**
- * Advisory Gandalf scan integration for plugin updates.
+ * Gandalf scan integration for plugin updates.
  *
  * @package WordPressdotorg\Plugin_Directory\Jobs
  */
@@ -12,7 +12,11 @@ use WP_Error;
 use WP_Http;
 
 /**
- * Sends plugin updates to Gandalf for advisory security scans.
+ * Sends plugin updates to Gandalf for security scans and acts on the verdict.
+ *
+ * Findings raise a Slack alert for a reviewer. A scan that completes with no findings
+ * lets the version be served immediately, without waiting out its release delay. A scan
+ * that never reports back leaves the delay to elapse on its own.
  *
  * @package WordPressdotorg\Plugin_Directory\Jobs
  */
@@ -155,9 +159,13 @@ class Plugin_Scan_Gandalf {
 	/**
 	 * Handle a completed or failed scan callback.
 	 *
+	 * Expects a payload already checked against the route's args schema, and so reads the
+	 * verdict fields without guarding them.
+	 *
 	 * @param \WP_Post $plugin The plugin post.
 	 * @param array    $data   The Gandalf callback data.
-	 * @return true|WP_Error True on success, or an error when the scan is unknown.
+	 * @return true|WP_Error True on success, or an error when the callback can't be matched
+	 *                       to a pending scan.
 	 */
 	public static function handle_callback( $plugin, $data ) {
 		$scan_id = $data['scan_id'];
@@ -178,7 +186,19 @@ class Plugin_Scan_Gandalf {
 		}
 
 		if ( 'completed' === $data['status'] ) {
-			if ( $data['findings_count'] > 0 ) {
+			if ( 0 === $data['findings_count'] ) {
+				// serve_release_now() re-checks the version, so a release imported mid-scan keeps its delay.
+				API_Update_Updater::serve_release_now(
+					$plugin->post_name,
+					$pending_record['version'],
+					sprintf(
+						'Gandalf scan %s reported no findings for %s.',
+						$scan_id,
+						$pending_record['release_ref']
+					)
+				);
+			} else {
+				// Anything but a clean scan goes to a human, including a nonsensical negative count.
 				self::notify_slack(
 					$plugin,
 					[
