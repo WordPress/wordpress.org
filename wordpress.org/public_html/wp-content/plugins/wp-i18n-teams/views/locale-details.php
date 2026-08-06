@@ -80,7 +80,7 @@
 					?></a>
 				<?php
 				if ( $locale_manager['slack'] ) {
-					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', $locale_manager['slack'], 'https://make.wordpress.org/chat/' );
+					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', esc_html( $locale_manager['slack'] ), 'https://make.wordpress.org/chat/' );
 				}
 				?>
 			</li>
@@ -101,7 +101,7 @@
 				?></a>
 				<?php
 				if ( $validator['slack'] ) {
-					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', $validator['slack'], 'https://make.wordpress.org/chat/' );
+					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', esc_html( $validator['slack'] ), 'https://make.wordpress.org/chat/' );
 				}
 				?>
 			</li>
@@ -122,7 +122,7 @@
 				?></a>
 				<?php
 				if ( $validator['slack'] ) {
-					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', $validator['slack'], 'https://make.wordpress.org/chat/' );
+					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', esc_html( $validator['slack'] ), 'https://make.wordpress.org/chat/' );
 				}
 				?>
 			</li>
