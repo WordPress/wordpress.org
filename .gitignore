@@ -2,4 +2,5 @@ node_modules/
 package-lock.json
 vendor/
 .phpunit.result.cache
+.phpcs.cache
 .svn/

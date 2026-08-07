@@ -11,8 +11,12 @@
 // phpcs:ignoreFile
 namespace WordPressOrg\Bin\PHPCS_Changed;
 
-function run_phpcs( $file, $bin_dir ) {
-	exec( "$bin_dir/phpcs $file -snq", $output, $exec_exit_status );
+/*
+ * New files are scanned in a single invocation, so that the parallel processing
+ * configured in phpcs.xml.dist can scan them concurrently.
+ */
+function run_phpcs( $files, $bin_dir ) {
+	exec( "$bin_dir/phpcs " . implode( ' ', $files ) . ' -snq', $output, $exec_exit_status );
 	echo implode( "\n", $output );
 	return $exec_exit_status;
 }
@@ -53,6 +57,7 @@ function main() {
 
 		$affected_files = shell_exec( "$git diff $base_branch --name-status --diff-filter=AM 2>&1 | grep .php$" );
 		$affected_files = explode( "\n", trim( $affected_files ) );
+		$new_files      = array();
 
 		foreach ( $affected_files as $record ) {
 			if ( ! $record ) {
@@ -60,20 +65,21 @@ function main() {
 			}
 
 			list( $change, $file ) = explode( "\t", trim( $record ) );
-			$cmd_status = 0;
 
 			switch ( $change ) {
 				case 'M':
-					$cmd_status = run_phpcs_changed( $file, $git, $base_branch, $bin_dir );
+					// If any cmd exits with 1, we want to exit with 1.
+					$status |= run_phpcs_changed( $file, $git, $base_branch, $bin_dir );
 					break;
 
 				case 'A':
-					$cmd_status = run_phpcs( $file, $bin_dir );
+					$new_files[] = $file;
 					break;
 			}
+		}
 
-			// If any cmd exits with 1, we want to exit with 1.
-			$status |= $cmd_status;
+		if ( $new_files ) {
+			$status |= run_phpcs( $new_files, $bin_dir );
 		}
 
 	} catch ( \Exception $exception ) {

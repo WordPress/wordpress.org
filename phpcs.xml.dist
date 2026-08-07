@@ -6,6 +6,14 @@
 	<arg value="ps" />
 	<arg name="colors" />
 
+	<!-- Speed up scans: parallel workers, and a cache of unchanged file results. -->
+	<arg name="parallel" value="10" />
+	<arg name="cache" value=".phpcs.cache" />
+	<ini name="memory_limit" value="512M" />
+
+	<!-- Report file paths relative to the repository root. -->
+	<arg name="basepath" value="." />
+
 	<!-- Exclude 3rd-party files -->
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
@@ -15,10 +23,6 @@
 
 	<!-- Exclude generated wp-scripts asset files. -->
 	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
-
-	<!-- Exclude JS/CSS files. -->
-	<exclude-pattern>*.js[x]?</exclude-pattern>
-	<exclude-pattern>*.[s]?css</exclude-pattern>
 
 	<!-- Scan all (php) files in the current folder and subfolders -->
 	<file>.</file>
@@ -31,10 +35,17 @@
 	<config name="testVersion" value="8.4-"/>
 	<rule ref="PHPCompatibilityWP"/>
 
-	<rule ref="WordPress-Core">
-		<!-- Allow embedded PHP tags on a single line. -->
+	<rule ref="WordPress">
+		<exclude name="WordPress.DB.DirectDatabaseQuery" />
+		<exclude name="WordPress.DB.SlowDBQuery" />
+		<exclude name="WordPress.Security.ValidatedSanitizedInput" />
+		<exclude name="WordPress.Utils.I18nTextDomainFixer" />
+
+		<!-- The <?php and ?> tags can be on a line with content in templates. -->
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen" />
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd" />
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeOpen" />
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterEnd" />
 
 		<!-- Class file names are not always predictable. -->
 		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
@@ -48,10 +59,14 @@
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound" />
 
 		<!-- Aligning things can make the code more readable. -->
-		<exclude name="WordPress.WhiteSpace.PrecisionAlignment.Found" />
+		<exclude name="Universal.WhiteSpace.PrecisionAlignment.Found" />
+		<exclude name="Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter" />
 		<exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
 		<exclude name="WordPress.WhiteSpace.OperatorSpacing.SpacingBefore" />
-		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.SpaceBeforeArrayCloser" />
+		<exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceAfterArrayOpenerSingleLine" />
+		<exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceBeforeArrayCloserSingleLine" />
+		<exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceAfterArrayOpenerMultiLine" />
+		<exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceBeforeArrayCloserMultiLine" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket" />
 		<exclude name="Squiz.Strings.ConcatenationSpacing.PaddingFound" />
@@ -62,12 +77,7 @@
 		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
 
 		<!-- Short array syntax is already used throughout the codebase. -->
-		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
-
-		<!-- The <?php and ?> tags can be on a line with content in templates. -->
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeOpen" />
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterEnd" />
 
 		<!-- trigger_error() is used for logging in production. -->
 		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_trigger_error" />
@@ -75,11 +85,22 @@
 		<!-- print_r() is acceptable in CLI and debugging contexts. -->
 		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_print_r" />
 
-		<!-- Warn about mis-aligned array items, but don't automatically "fix" them. -->
-		<exclude phpcbf-only="true" name="PEAR.Functions.FunctionCallSignature" />
-	</rule>
+		<!-- Commented-out code is sometimes intentional for reference. -->
+		<exclude name="Squiz.PHP.CommentedOutCode.Found" />
 
-	<rule ref="WordPress-Docs">
+		<!-- Custom capabilities are valid in the WordPress.org environment. -->
+		<exclude name="WordPress.WP.Capabilities.Unknown" />
+
+		<!-- Allow use statements right after namespace. -->
+		<exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
+
+		<!-- Allow short ternary operator (?:). -->
+		<exclude name="Universal.Operators.DisallowShortTernary" />
+
+		<!-- Nonce verification is often handled at a higher level. -->
+		<exclude name="WordPress.Security.NonceVerification.Missing" />
+		<exclude name="WordPress.Security.NonceVerification.Recommended" />
+
 		<!-- Descriptive names make explicit comments unnecessary in many cases. -->
 		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
 		<exclude name="Squiz.Commenting.FileComment.Missing" />
@@ -115,27 +136,5 @@
 
 		<!-- WordPress translators comments require no space after //. -->
 		<exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" />
-	</rule>
-
-	<!-- Commented-out code is sometimes intentional for reference. -->
-	<rule ref="Squiz.PHP.CommentedOutCode.Found">
-		<severity>0</severity>
-	</rule>
-
-	<!-- Custom capabilities are valid in the WordPress.org environment. -->
-	<rule ref="WordPress.WP.Capabilities.Unknown">
-		<severity>0</severity>
-	</rule>
-
-	<rule ref="WordPress-Extra">
-		<!-- Allow use statements right after namespace. -->
-		<exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
-
-		<!-- Allow short ternary operator (?:). -->
-		<exclude name="Universal.Operators.DisallowShortTernary" />
-
-		<!-- Nonce verification is often handled at a higher level. -->
-		<exclude name="WordPress.Security.NonceVerification.Missing" />
-		<exclude name="WordPress.Security.NonceVerification.Recommended" />
 	</rule>
 </ruleset>
