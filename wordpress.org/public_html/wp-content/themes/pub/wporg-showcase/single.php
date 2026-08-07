@@ -31,10 +31,18 @@
 											$image_src = substr($value, 0, $space);
 											$image_desc = substr($value, $space+1);
 
+											$thumb_src = add_query_arg(
+												array(
+													'w' => 155,
+													'h' => 155,
+												),
+												$image_src
+											);
+
 											$output .= "<dl class='gallery-item'>";
 											$output .= "
 												<dt class='gallery-icon'>
-													<a href='$image_src' title='$image_desc'><img src='$image_src?w=155&h=155' /></a>
+													<a href='" . esc_url( $image_src ) . "' title='" . esc_attr( $image_desc ) . "'><img src='" . esc_url( $thumb_src ) . "' /></a>
 												</dt>";
 											$output .= "</dl>";
 											if ( $key > 0 && $key+1 % 2 == 0 )
