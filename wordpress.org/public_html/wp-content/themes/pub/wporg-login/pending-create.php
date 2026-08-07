@@ -28,7 +28,7 @@ if ( ! $pending_user ) {
 }
 
 // Already logged in.. Warn about duplicate accounts, etc.
-if ( is_user_logged_in() && $activation_user != wp_get_current_user()->user_login ) {
+if ( is_user_logged_in() && $activation_user !== wp_get_current_user()->user_login ) {
 	wp_safe_redirect( home_url( '/linkexpired/register-logged-in' ) );
 	exit;
 }

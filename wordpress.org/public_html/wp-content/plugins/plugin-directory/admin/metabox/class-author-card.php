@@ -78,7 +78,7 @@ class Author_Card {
 		// Don't show author cards for these users.
 		// These are Profiles shortcuts and never the users that actually happen to have these names.
 		$ignored_users = [ 'me', 'profile' ];
-		if ( in_array( $author->user_nicename, $ignored_users ) ) {
+		if ( in_array( $author->user_nicename, $ignored_users, true ) ) {
 			return;
 		}
 
