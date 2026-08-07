@@ -515,6 +515,7 @@ function get_whitelist() {
 			'jainnidhi', // @nidhijain on Slack
 			'kharisblank', // @kharisulistiyo on Slack
 			'luisrull',
+			'mayukojpn', // @mayo on Slack
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack

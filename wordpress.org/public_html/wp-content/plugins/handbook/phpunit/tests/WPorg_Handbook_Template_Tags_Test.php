@@ -2,10 +2,10 @@
 
 defined( 'ABSPATH' ) or die();
 
-class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
+class WPorg_Handbook_Template_Tags_Test extends WPorg_Handbook_TestCase {
 
 	public function setUp(): void {
-		parent::setup();
+		parent::setUp();
 
 		WPorg_Handbook_Init::init();
 	}
@@ -193,7 +193,7 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 		$post_id = $this->factory()->post->create( [ 'post_type' => 'handbook' ] );
 		$this->go_to( get_permalink( $post_id ) );
 
-		$this->assertEquals( 'http://example.org/?post_type=handbook', wporg_get_current_handbook_home_url() );
+		$this->assertEquals( home_url( '/?post_type=handbook' ), wporg_get_current_handbook_home_url() );
 
 	}
 
@@ -212,10 +212,10 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 		$post_id2 = $this->factory()->post->create( [ 'post_type' => 'theme-handbook', 'post_name' => 'example' ] );
 
 		$this->go_to( get_permalink( $post_id1 ) );
-		$this->assertEquals( 'http://example.org/?post_type=plugin-handbook', wporg_get_current_handbook_home_url() );
+		$this->assertEquals( home_url( '/?post_type=plugin-handbook' ), wporg_get_current_handbook_home_url() );
 
 		$this->go_to( get_permalink( $post_id2 ) );
-		$this->assertEquals( 'http://example.org/?post_type=theme-handbook', wporg_get_current_handbook_home_url() );
+		$this->assertEquals( home_url( '/?post_type=theme-handbook' ), wporg_get_current_handbook_home_url() );
 	}
 
 	public function test_wporg_get_current_handbook_home_url_with_landing_page() {

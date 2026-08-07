@@ -685,15 +685,20 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$reviewer_time = (int) ( $post->assigned_reviewer_time ?? 0 );
 
 		if ( $reviewer ) {
+			$args = [
+				'post_type' => $post->post_type,
+				'reviewer'  => $reviewer_id,
+			];
+
 			printf(
-				"<a href='%s'>%s</a><br><span>%s</span>",
-				add_query_arg( [ 'reviewer' => $reviewer_id ] ),
-				$reviewer->display_name ?: $reviewer->user_login,
-				sprintf(
+				'%s<br><span>%s</span>',
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_edit_link() runs the URL through esc_url(), and the link text is escaped here.
+				$this->get_edit_link( $args, esc_html( $reviewer->display_name ?: $reviewer->user_login ) ),
+				esc_html( sprintf(
 					/* translators: %s The time/date different, '1 hour' */
 					__( '%s ago', 'wporg-plugins' ),
 					human_time_diff( $reviewer_time )
-				)
+				) )
 			);
 		} else {
 			echo '-';

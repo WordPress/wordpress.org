@@ -2,7 +2,19 @@
 
 defined( 'ABSPATH' ) or die();
 
-class WPorg_Handbook_Admin_Notices_Test extends WP_UnitTestCase {
+class WPorg_Handbook_Admin_Notices_Test extends WPorg_Handbook_TestCase {
+
+	public function setUp(): void {
+		parent::setUp();
+
+		WPorg_Handbook_Init::init();
+	}
+
+	public function tearDown(): void {
+		parent::tearDown();
+
+		WPorg_Handbook_Init::reset( true );
+	}
 
 	//
 	//

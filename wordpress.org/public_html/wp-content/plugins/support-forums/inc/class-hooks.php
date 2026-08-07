@@ -55,7 +55,16 @@ class Hooks {
 		remove_filter( 'bbp_get_topic_author_link', 'bbp_rel_nofollow' );
 		remove_filter( 'bbp_get_reply_author_link', 'bbp_rel_nofollow' );
 
-		// add ugc to links in topics and replies. These already have nofollow, this adds ugc as well
+		/*
+		 * Remove the nofollow filter from topic and reply content. It parses attributes with
+		 * shortcode_parse_atts(), which runs stripcslashes() over every value, and then re-emits
+		 * them without escaping. add_rel_ugc() below adds nofollow via wp_rel_callback(), which
+		 * escapes, so dropping this loses no behaviour.
+		 */
+		remove_filter( 'bbp_get_reply_content', 'bbp_rel_nofollow', 60 );
+		remove_filter( 'bbp_get_topic_content', 'bbp_rel_nofollow', 60 );
+
+		// add nofollow and ugc to links in topics and replies
 		add_filter( 'bbp_get_reply_content', array( $this, 'add_rel_ugc' ), 80 );
 		add_filter( 'bbp_get_topic_content', array( $this, 'add_rel_ugc' ), 80 );
 
