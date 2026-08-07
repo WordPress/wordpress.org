@@ -16,7 +16,7 @@ namespace WordPressOrg\Bin\PHPCS_Changed;
  * configured in phpcs.xml.dist can scan them concurrently.
  */
 function run_phpcs( $files, $bin_dir ) {
-	exec( "$bin_dir/phpcs " . implode( ' ', $files ) . ' -snq', $output, $exec_exit_status );
+	exec( "$bin_dir/phpcs " . implode( ' ', array_map( 'escapeshellarg', $files ) ) . ' -snq', $output, $exec_exit_status );
 	echo implode( "\n", $output );
 	return $exec_exit_status;
 }
