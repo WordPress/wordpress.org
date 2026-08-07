@@ -27,21 +27,28 @@ function run_phpcs( $files, $bin_dir ) {
  * when the file contains special characters (like escape sequences such as '\\').
  */
 function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
-	$name = basename( $file );
-	exec( "$git diff $base_branch $file > $name.diff" );
+	$name       = basename( $file );
+	$file_arg   = escapeshellarg( $file );
+	$branch_arg = escapeshellarg( $base_branch );
+	$diff       = escapeshellarg( "$name.diff" );
+	$test_file  = escapeshellarg( "$name.test.php" );
+	$orig_json  = escapeshellarg( "$name.orig.phpcs" );
+	$new_json   = escapeshellarg( "$name.phpcs" );
 
-	exec( "$git show $base_branch:$file > $name.test.php" );
-	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs.xml.dist --report=json -snq > $name.orig.phpcs" );
+	exec( "$git diff $branch_arg $file_arg > $diff" );
 
-	exec( "cat $file > $name.test.php" );
-	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs.xml.dist --report=json -snq > $name.phpcs" );
+	exec( "$git show " . escapeshellarg( "$base_branch:$file" ) . " > $test_file" );
+	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -snq > $orig_json" );
 
-	$cmd = "$bin_dir/phpcs-changed --diff $name.diff --phpcs-orig $name.orig.phpcs --phpcs-new $name.phpcs";
+	exec( "cat $file_arg > $test_file" );
+	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -snq > $new_json" );
+
+	$cmd = "$bin_dir/phpcs-changed --diff $diff --phpcs-orig $orig_json --phpcs-new $new_json";
 	exec( $cmd, $output, $exec_exit_status );
 	echo implode( "\n", $output );
 	echo "\n";
 
-	exec( "rm $name.diff $name.test.php $name.orig.phpcs $name.phpcs" );
+	exec( "rm $diff $test_file $orig_json $new_json" );
 	return $exec_exit_status;
 }
 
