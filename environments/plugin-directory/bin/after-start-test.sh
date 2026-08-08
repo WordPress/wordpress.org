@@ -8,7 +8,7 @@
 set -euo pipefail
 
 CONFIG="--config plugin-directory/.wp-env.test.json"
-RUN="npx wp-env $CONFIG run tests-cli"
+RUN="npx wp-env $CONFIG run cli"
 
 echo "Installing PHPUnit 11 and polyfills..."
 $RUN composer global require -W phpunit/phpunit:^11.0 2>&1

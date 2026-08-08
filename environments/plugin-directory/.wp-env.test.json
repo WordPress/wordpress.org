@@ -1,6 +1,7 @@
 {
 	"core": "WordPress/WordPress#master",
 	"phpVersion": "8.4",
+	"testsEnvironment": false,
 	"plugins": [
 		"../wordpress.org/public_html/wp-content/plugins/plugin-directory"
 	],
