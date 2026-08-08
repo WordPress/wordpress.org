@@ -49,7 +49,7 @@ function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
 	exec( "cat $file_arg > $test_file" );
 	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -snq > $new_json" );
 
-	$cmd = "$bin_dir/phpcs-changed --diff $diff --phpcs-orig $orig_json --phpcs-new $new_json";
+	$cmd = "$bin_dir/phpcs-changed -s --diff $diff --phpcs-orig $orig_json --phpcs-new $new_json";
 	exec( $cmd, $output, $exec_exit_status );
 	echo implode( "\n", $output );
 	echo "\n";
