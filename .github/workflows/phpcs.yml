@@ -13,8 +13,8 @@ on:
     paths:
     - '**.php'
 
-# Trunk pushes get a unique group per commit — a shared group would silently
-# cancel queued runs, leaving mirrored SVN commits unlinted.
+# Trunk pushes get a unique group per commit — queued runs would otherwise be
+# cancelled, leaving mirrored commits unlinted.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true

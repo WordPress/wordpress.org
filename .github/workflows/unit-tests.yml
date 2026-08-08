@@ -5,9 +5,8 @@ on:
   push:
     branches: [ trunk ]
 
-# Cancel superseded runs of the same PR. Trunk pushes get a unique group per
-# commit — a shared group would silently cancel queued runs, leaving mirrored
-# SVN commits untested since each push is only diffed against its own range.
+# Cancel superseded PR runs. Trunk pushes get a unique group per commit —
+# queued runs would otherwise be cancelled, leaving mirrored commits untested.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true
@@ -17,10 +16,8 @@ permissions:
   pull-requests: read
 
 jobs:
-  # Map changed files to affected test suites, so a run only executes the
-  # suites it can actually break. Suites are defined in
-  # .github/unit-tests-suites.yml — path filters and job matrices are both
-  # generated from it.
+  # Run only the suites the changed files can break, as defined in
+  # .github/unit-tests-suites.yml.
   changes:
     name: Detect affected suites
     if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
@@ -32,8 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Turn the suite definitions into path filters (suite paths plus the
-      # shared paths for the suite's type) and per-type matrix entries.
+      # Emit path filters (suite paths plus type-shared ones) and matrices.
       - name: Load suite definitions
         id: suites
         run: |
@@ -125,9 +121,26 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version-file: environments/.nvmrc
+          cache: npm
+          cache-dependency-path: environments/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      # Cache sources for up to a day. No restore-keys: wp-env never updates
+      # existing sources, so an older cache would pin CI to stale WordPress.
+      - name: Get cache day
+        id: cache-day
+        run: echo "date=$( date -u +%F )" >> "$GITHUB_OUTPUT"
+
+      # wp-env homes in ~/wp-env (not ~/.wp-env) on snap hosts like GH runners.
+      - name: Cache wp-env sources
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.wp-env
+            ~/wp-env
+          key: wp-env-${{ matrix.filter }}-${{ steps.cache-day.outputs.date }}-${{ hashFiles('environments/**/.wp-env*.json') }}
 
       # The scripts start their environment, whose `afterStart` installs PHPUnit
       # and the polyfills, and then run each suite it holds.
