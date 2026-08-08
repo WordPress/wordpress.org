@@ -13,8 +13,10 @@ on:
     paths:
     - '**.php'
 
+# Trunk pushes get a unique group per commit — a shared group would silently
+# cancel queued runs, leaving mirrored SVN commits unlinted.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true
 
 jobs:
@@ -23,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
 

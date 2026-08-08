@@ -5,6 +5,8 @@
 # stub tables that live outside WordPress on production.
 #
 
+set -euo pipefail
+
 CONFIG="--config make/.wp-env.test.json"
 RUN="npx wp-env $CONFIG run tests-cli"
 

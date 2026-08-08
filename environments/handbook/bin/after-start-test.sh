@@ -4,6 +4,8 @@
 # Installs PHPUnit 11 and Yoast polyfills in the test container.
 #
 
+set -euo pipefail
+
 CONFIG="--config handbook/.wp-env.test.json"
 RUN="npx wp-env $CONFIG run tests-cli"
 
