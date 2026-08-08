@@ -71,6 +71,7 @@ function main() {
 		$affected_files = shell_exec( "$git diff $base_branch --name-status --diff-filter=AM 2>&1 | grep .php$" );
 		$affected_files = explode( "\n", trim( $affected_files ) );
 		$new_files      = array();
+		$modified_count = 0;
 
 		foreach ( $affected_files as $record ) {
 			if ( ! $record ) {
@@ -81,6 +82,8 @@ function main() {
 
 			switch ( $change ) {
 				case 'M':
+					$modified_count++;
+					echo "Checking changed lines in $file:\n";
 					// If any cmd exits with 1, we want to exit with 1.
 					$status |= run_phpcs_changed( $file, $git, $base_branch, $bin_dir );
 					break;
@@ -92,10 +95,13 @@ function main() {
 		}
 
 		if ( $new_files ) {
+			echo 'Checking ' . count( $new_files ) . " new file(s):\n\t" . implode( "\n\t", $new_files ) . "\n";
 			$status |= run_phpcs( $new_files, $bin_dir );
 		}
 
 		exec( 'rm -rf .phpcs-branch' );
+
+		printf( "\nDone. Checked %d modified and %d new file(s).\n", $modified_count, count( $new_files ) );
 
 	} catch ( \Exception $exception ) {
 		echo "\nAborting because of error: {$exception->getMessage()} \n";
