@@ -31,9 +31,15 @@ function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
 	$file_arg   = escapeshellarg( $file );
 	$branch_arg = escapeshellarg( $base_branch );
 	$diff       = escapeshellarg( "$name.diff" );
-	$test_file  = escapeshellarg( "$name.test.php" );
 	$orig_json  = escapeshellarg( "$name.orig.phpcs" );
 	$new_json   = escapeshellarg( "$name.phpcs" );
+
+	/*
+	 * Scan the copies at a path mirroring the original file, so that the file name and
+	 * the path-based exclude patterns in phpcs.xml.dist apply as they would for the real file.
+	 */
+	$test_file = escapeshellarg( ".phpcs-branch/$file" );
+	exec( 'mkdir -p ' . escapeshellarg( dirname( ".phpcs-branch/$file" ) ) );
 
 	exec( "$git diff $branch_arg $file_arg > $diff" );
 
@@ -88,6 +94,8 @@ function main() {
 		if ( $new_files ) {
 			$status |= run_phpcs( $new_files, $bin_dir );
 		}
+
+		exec( 'rm -rf .phpcs-branch' );
 
 	} catch ( \Exception $exception ) {
 		echo "\nAborting because of error: {$exception->getMessage()} \n";
