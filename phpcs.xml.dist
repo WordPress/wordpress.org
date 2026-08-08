@@ -48,4 +48,9 @@
 		<!-- Custom capabilities are valid in the WordPress.org environment; an allowlist is proposed in PR #583. -->
 		<exclude name="WordPress.WP.Capabilities.Unknown" />
 	</rule>
+
+	<!-- PHPUnit requires test files to be named after the test class they contain. -->
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
 </ruleset>
