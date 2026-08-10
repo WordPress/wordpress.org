@@ -173,15 +173,3 @@ jobs:
       # and the polyfills, and then run each suite it holds.
       - name: Run PHPUnit
         run: npm run ${{ matrix.script }}
-
-  # Stable status check for branch protection — always runs, unlike the conditional matrix-named suite jobs.
-  results:
-    name: Test results
-    needs: [ changes, php-standalone, php-wordpress ]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Fail if a suite failed
-        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-        run: exit 1
