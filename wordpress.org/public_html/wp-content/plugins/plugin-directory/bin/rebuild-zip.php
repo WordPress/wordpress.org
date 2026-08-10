@@ -108,7 +108,7 @@ try {
 
 	// (re)Build & Commit 5 Zips at a time to avoid limitations.
 	foreach ( array_chunk( $versions, 5 ) as $versions_to_build ) {
-		$zip_builder->build(
+		$built_versions = $zip_builder->build(
 			$plugin_slug,
 			$versions_to_build,
 			"{$plugin_slug}: Rebuild triggered by " . php_uname( 'n' ),
@@ -116,7 +116,7 @@ try {
 		);
 
 		// Mark the ZIPs as being built, trunk has no release record.
-		foreach ( $versions_to_build as $built_tag ) {
+		foreach ( (array) $built_versions as $built_tag ) {
 			if ( 'trunk' === $built_tag ) {
 				continue;
 			}

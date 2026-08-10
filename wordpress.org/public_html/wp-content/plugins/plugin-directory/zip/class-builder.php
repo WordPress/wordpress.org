@@ -38,6 +38,7 @@ class Builder {
 	 * @param string $slug     The plugin slug.
 	 * @param array  $versions The versions of the plugin to build ZIPs for.
 	 * @param string $context  The context of this Builder instance (commit #, etc)
+	 * @return array|false The versions that were successfully built, false in unconfigured environments.
 	 */
 	public function build( $slug, $versions, $context = '', $stable_tag = '' ) {
 		// Bail when in an unconfigured environment.
@@ -174,7 +175,8 @@ class Builder {
 		$this->cleanup();
 
 		if ( ! $res['result'] && $res['errors'] ) {
-			throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . esc_html( $res['errors'][0]['error_message'] ) );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
+			throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . $res['errors'][0]['error_message'] );
 		}
 
 		/*
@@ -182,7 +184,7 @@ class Builder {
 		 * ie. the ZIPs on disk were already up to date. That's a successful build.
 		 */
 
-		return true;
+		return $built_versions;
 	}
 
 	/**
