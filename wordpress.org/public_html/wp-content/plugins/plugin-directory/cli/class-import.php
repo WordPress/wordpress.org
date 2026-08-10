@@ -661,10 +661,16 @@ class Import {
 				$stable_tag
 			);
 		} catch ( Exception $e ) {
-			$this->warnings['zip_build_failed'] = $e->getMessage();
+			$failed_versions = array_unique( $versions_to_build );
+			$error           = preg_replace( '/[\r\n\t]+/', ' ', $e->getMessage() );
+
+			$this->warnings['zip_build_failed'] = [
+				'versions' => $failed_versions,
+				'message'  => $error,
+			];
 
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Routed to the error log via E_USER_WARNING; raw is fine.
-			trigger_error( sprintf( '%s: ZIP build failed for %s: %s', $plugin_slug, implode( ', ', array_unique( $versions_to_build ) ), $e->getMessage() ), E_USER_WARNING );
+			trigger_error( sprintf( '%s: ZIP build failed for %s: %s', $plugin_slug, implode( ', ', $failed_versions ), $error ), E_USER_WARNING );
 
 			return false;
 		}
