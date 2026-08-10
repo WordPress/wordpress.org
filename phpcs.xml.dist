@@ -6,6 +6,14 @@
 	<arg value="ps" />
 	<arg name="colors" />
 
+	<!-- Speed up scans: parallel workers, and a cache of unchanged file results. -->
+	<arg name="parallel" value="10" />
+	<arg name="cache" value=".phpcs.cache" />
+	<ini name="memory_limit" value="512M" />
+
+	<!-- Report file paths relative to the repository root. -->
+	<arg name="basepath" value="." />
+
 	<!-- Exclude 3rd-party files -->
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
@@ -15,10 +23,6 @@
 
 	<!-- Exclude generated wp-scripts asset files. -->
 	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
-
-	<!-- Exclude JS/CSS files. -->
-	<exclude-pattern>*.js[x]?</exclude-pattern>
-	<exclude-pattern>*.[s]?css</exclude-pattern>
 
 	<!-- Scan all (php) files in the current folder and subfolders -->
 	<file>.</file>
@@ -31,111 +35,22 @@
 	<config name="testVersion" value="8.4-"/>
 	<rule ref="PHPCompatibilityWP"/>
 
-	<rule ref="WordPress-Core">
-		<!-- Allow embedded PHP tags on a single line. -->
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen" />
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd" />
+	<rule ref="WordPress">
+		<exclude name="WordPress.DB.DirectDatabaseQuery" />
+		<exclude name="WordPress.DB.SlowDBQuery" />
 
-		<!-- Class file names are not always predictable. -->
-		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
-
-		<!-- Translators comments are a judgement call. -->
-		<exclude name="WordPress.WP.I18n.MissingTranslatorsComment" />
-
-		<!-- Not practical for a large and varied codebase. -->
-		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound" />
-		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound" />
-		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound" />
-
-		<!-- Aligning things can make the code more readable. -->
-		<exclude name="WordPress.WhiteSpace.PrecisionAlignment.Found" />
-		<exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
-		<exclude name="WordPress.WhiteSpace.OperatorSpacing.SpacingBefore" />
-		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.SpaceBeforeArrayCloser" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket" />
-		<exclude name="Squiz.Strings.ConcatenationSpacing.PaddingFound" />
-
-		<!-- There are cases where having multiple items on a single line is appropriate. -->
-		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
+		<!-- Config-driven rewrite utility; must never run as part of a lint standard. -->
+		<exclude name="WordPress.Utils.I18nTextDomainFixer" />
 
 		<!-- Short array syntax is already used throughout the codebase. -->
-		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
-		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax" />
 
-		<!-- The <?php and ?> tags can be on a line with content in templates. -->
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeOpen" />
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterEnd" />
-
-		<!-- trigger_error() is used for logging in production. -->
-		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_trigger_error" />
-
-		<!-- print_r() is acceptable in CLI and debugging contexts. -->
-		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_print_r" />
-
-		<!-- Warn about mis-aligned array items, but don't automatically "fix" them. -->
-		<exclude phpcbf-only="true" name="PEAR.Functions.FunctionCallSignature" />
+		<!-- Custom capabilities are valid in the WordPress.org environment; an allowlist is proposed in PR #583. -->
+		<exclude name="WordPress.WP.Capabilities.Unknown" />
 	</rule>
 
-	<rule ref="WordPress-Docs">
-		<!-- Descriptive names make explicit comments unnecessary in many cases. -->
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
-		<exclude name="Squiz.Commenting.FileComment.Missing" />
-		<exclude name="Squiz.Commenting.ClassComment.Missing" />
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
-		<exclude name="Squiz.Commenting.FunctionComment.Missing" />
-		<exclude name="Generic.Commenting.DocComment.MissingShort" />
-		<exclude name="Squiz.Commenting.VariableComment.Missing" />
-		<exclude name="Squiz.Commenting.VariableComment.MissingVar" />
-
-		<!-- Requiring full stops on inline/param comments is pedantic. -->
-		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
-		<exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop" />
-
-		<!-- Package tags add clutter without value. -->
-		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
-
-		<!-- We only use basic exceptions. -->
-		<exclude name="Squiz.Commenting.FunctionComment.EmptyThrows" />
-
-		<!-- Whitespace makes things more readable. -->
-		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen" />
-
-		<!-- Valid in some cases like closing tags from another file. -->
-		<exclude name="Squiz.Commenting.InlineComment.SpacingAfter" />
-
-		<!-- Not wrong for WordPress plugin file headers. -->
-		<exclude name="Squiz.Commenting.FileComment.WrongStyle" />
-
-		<!-- Class comments are often omitted, causing PHPCS to confuse plugin headers for class comments. -->
-		<exclude name="Squiz.Commenting.ClassComment.WrongStyle" />
-		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
-
-		<!-- WordPress translators comments require no space after //. -->
-		<exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" />
-	</rule>
-
-	<!-- Commented-out code is sometimes intentional for reference. -->
-	<rule ref="Squiz.PHP.CommentedOutCode.Found">
-		<severity>0</severity>
-	</rule>
-
-	<!-- Custom capabilities are valid in the WordPress.org environment. -->
-	<rule ref="WordPress.WP.Capabilities.Unknown">
-		<severity>0</severity>
-	</rule>
-
-	<rule ref="WordPress-Extra">
-		<!-- Allow use statements right after namespace. -->
-		<exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
-
-		<!-- Allow short ternary operator (?:). -->
-		<exclude name="Universal.Operators.DisallowShortTernary" />
-
-		<!-- Nonce verification is often handled at a higher level. -->
-		<exclude name="WordPress.Security.NonceVerification.Missing" />
-		<exclude name="WordPress.Security.NonceVerification.Recommended" />
+	<!-- PHPUnit requires test files to be named after the test class they contain. -->
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>*/tests/*</exclude-pattern>
 	</rule>
 </ruleset>

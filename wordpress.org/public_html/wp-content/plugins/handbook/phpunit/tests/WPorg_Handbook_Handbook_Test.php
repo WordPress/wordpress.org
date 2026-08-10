@@ -2,6 +2,8 @@
 
 defined( 'ABSPATH' ) or die();
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 // Mock P2_Resolved_Posts class for later.
 class P2_Resolved_Posts {
 	public static function instance() {
@@ -13,12 +15,12 @@ class P2_Resolved_Posts {
 	}
 }
 
-class WPorg_Handbook_Handbook_Test extends WP_UnitTestCase {
+class WPorg_Handbook_Handbook_Test extends WPorg_Handbook_TestCase {
 
 	protected $handbook;
 
 	public function setUp(): void {
-		parent::setup();
+		parent::setUp();
 		WPorg_Handbook_Init::init();
 
 		$handbooks = WPorg_Handbook_Init::get_handbook_objects();
@@ -89,9 +91,7 @@ class WPorg_Handbook_Handbook_Test extends WP_UnitTestCase {
 		$this->assertEquals( count( dataprovider_get_default_config() ), count( WPorg_Handbook::get_default_handbook_config() ) );
 	}
 
-	/**
-	 * @dataProvider get_default_config
-	 */
+	#[DataProvider( 'get_default_config' )]
 	public function test_get_default_handbook_config( $key, $default ) {
 		$config = WPorg_Handbook::get_default_handbook_config();
 
@@ -443,7 +443,7 @@ class WPorg_Handbook_Handbook_Test extends WP_UnitTestCase {
 		$post = $this->factory()->post->create_and_get( [ 'post_type' => 'handbook', 'post_name' => 'handbook' ] );
 		$expected = 'something';
 
-		$this->assertEquals( 'http://example.org/?post_type=handbook', $this->handbook->post_type_link( 'something', $post ) );
+		$this->assertEquals( home_url( '/?post_type=handbook' ), $this->handbook->post_type_link( 'something', $post ) );
 	}
 
 	/*
@@ -652,8 +652,8 @@ public function test_o2_post_fragment_with_invalid_arg() {
 		$this->go_to( get_permalink( $post_id ) );
 
 		$menu_items = [
-			(object)[ 'object_id' => 0, 'url' => 'http://example.org/', 'classes' => [], 'current' => false ],
-			(object)[ 'object_id' => 0, 'url' => 'http://example.org/?p=4', 'classes' => [], 'current' => false ],
+			(object)[ 'object_id' => 0, 'url' => home_url( '/' ), 'classes' => [], 'current' => false ],
+			(object)[ 'object_id' => 0, 'url' => home_url( '/?p=4' ), 'classes' => [], 'current' => false ],
 		];
 
 		$this->assertEquals( $menu_items, $this->handbook->highlight_menu_handbook_link( $menu_items ) );
@@ -664,13 +664,13 @@ public function test_o2_post_fragment_with_invalid_arg() {
 		$this->go_to( get_permalink( $post_id ) );
 
 		$menu_items = [
-			(object)[ 'object_id' => 0, 'url' => 'http://example.org/', 'classes' => [], 'current' => false ],
-			(object)[ 'object_id' => 0, 'url' => 'http://example.org/?post_type=handbook', 'classes' => [], 'current' => false ],
+			(object)[ 'object_id' => 0, 'url' => home_url( '/' ), 'classes' => [], 'current' => false ],
+			(object)[ 'object_id' => 0, 'url' => home_url( '/?post_type=handbook' ), 'classes' => [], 'current' => false ],
 		];
 
 		$expected = [
-			(object)[ 'object_id' => 0, 'url' => 'http://example.org/', 'classes' => [], 'current' => false ],
-			(object)[ 'object_id' => 0, 'url' => 'http://example.org/?post_type=handbook', 'classes' => ['current-menu-item'], 'current' => false ],
+			(object)[ 'object_id' => 0, 'url' => home_url( '/' ), 'classes' => [], 'current' => false ],
+			(object)[ 'object_id' => 0, 'url' => home_url( '/?post_type=handbook' ), 'classes' => ['current-menu-item'], 'current' => false ],
 		];
 
 		$this->assertEquals( $expected, $this->handbook->highlight_menu_handbook_link( $menu_items ) );

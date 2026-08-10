@@ -48,8 +48,11 @@ class Template {
 		// Print the schema.
 		if ( $schema ) {
 			echo PHP_EOL, '<script type="application/ld+json">', PHP_EOL;
-			// Output URLs without escaping the slashes, and print it human readable.
-			echo wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+			// Output URLs without escaping the slashes, and print it human readable. JSON_HEX_* keeps a stored '</script>' from closing the element.
+			echo wp_json_encode(
+				$schema,
+				JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+			);
 			echo PHP_EOL, '</script>', PHP_EOL;
 		}
 	}
@@ -448,9 +451,13 @@ class Template {
 			case 'html':
 
 				if ( $icon_2x && $icon_2x !== $icon ) {
-					return "<img class='plugin-icon' srcset='{$icon}, {$icon_2x} 2x' src='{$icon_2x}' alt=''>";
+					return sprintf(
+						'<img class="plugin-icon" srcset="%1$s, %2$s 2x" src="%2$s" alt="">',
+						esc_url( $icon ),
+						esc_url( $icon_2x )
+					);
 				} else {
-					return "<img class='plugin-icon' src='{$icon}' alt=''>";
+					return sprintf( '<img class="plugin-icon" src="%s" alt="">', esc_url( $icon ) );
 				}
 				break;
 

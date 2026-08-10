@@ -121,6 +121,17 @@ class Themes_API {
 			}
 		}
 
+		// Malformed locales fall back to the site default.
+		if (
+			isset( $this->request->locale ) &&
+			(
+				! is_string( $this->request->locale ) ||
+				sanitize_locale_name( $this->request->locale ) !== $this->request->locale
+			)
+		) {
+			unset( $this->request->locale );
+		}
+
 		// Favorites requests require a user to fetch favorites for.
 		if ( isset( $this->request->browse ) && 'favorites' === $this->request->browse && ! isset( $this->request->user ) ) {
 			$this->request->user = '';

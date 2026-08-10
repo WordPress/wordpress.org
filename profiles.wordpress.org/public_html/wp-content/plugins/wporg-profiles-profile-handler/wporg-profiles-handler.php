@@ -38,6 +38,9 @@ class Profile_Update_Handler {
 	 * Validates the request, delegates to handle(), and dies with the result.
 	 */
 	public function ajax_handle() {
+		// Failure messages echo request data, so keep the response non-scriptable.
+		header( 'Content-Type: text/plain; charset=utf-8' );
+
 		try {
 			do_action( 'wporg_profiles_before_handle_update_profile' );
 
@@ -86,7 +89,12 @@ class Profile_Update_Handler {
 		$fields = $data['fields'] ?? [];
 		foreach ( $fields as $field => $value ) {
 			if ( ! xprofile_get_field_id_from_name( $field ) ) {
-				return new WP_Error( 'invalid_field', "'{$field}' xProfile field could not be found.", [ 'status' => 400 ] );
+				// $field is a request array key, which wp_unslash() does not touch.
+				return new WP_Error(
+					'invalid_field',
+					sprintf( '"%s" xProfile field could not be found.', sanitize_text_field( $field ) ),
+					[ 'status' => 400 ]
+				);
 			}
 		}
 

@@ -10,7 +10,7 @@
  *  - /milestone/
  * 
  * Can be enabled on a site by adding:
- *  - wp_oembed_add_provider( '#https://(meta|core)\.trac\.wordpress.org/.*#', 'https://api.wordpress.org/dotorg/trac/oembed/?api_key=...' );
+ *  - wp_oembed_add_provider( '#https://(meta|core)\.trac\.wordpress\.org/.*#', 'https://api.wordpress.org/dotorg/trac/oembed/?api_key=...', true );
  * 
  * oEmbed Discovery is not enabled, as although adding the tag to trac is possible, it requires inline Javascript.
  * 
@@ -24,24 +24,44 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = $_REQUEST['url'] ?? '';
+$url = $_GET['url'] ?? '';
 $url = is_string( $url ) ? wp_unslash( $url ) : '';
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );
 
+// meta|core are the only tracs embedable.
+$allowed_hosts = [
+	'core.trac.wordpress.org',
+	'meta.trac.wordpress.org',
+];
+
 if (
 	! $url ||
 	'GET' !== $_SERVER['REQUEST_METHOD'] ||
-	// meta|core are the only tracs embedable.
-	// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
-	! (
-		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>ticket|changeset)/\d+$!i', $url, $m ) ||
-		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>query)[?].+$!i', $url, $m ) ||
-		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone)/[a-z0-9.]+[ ]?[a-z0-9.]*$!i', $url, $m ) ||
-		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>ticketgraph)([?]component=[^&]+)?$!i', $url, $m )
-	)
+	! in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ), $allowed_hosts, true )
 ) {
+	header( 'HTTP/1.1 404 Not Found', true, 404 );
+	die();
+}
+
+// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
+$trac_baseurl = '^(?P<baseurl>https://(?P<trac>meta|core)\.trac\.wordpress\.org/)';
+$allowed_urls = [
+	'!' . $trac_baseurl . '(?P<type>ticket|changeset)/\d+$!iD',
+	'!' . $trac_baseurl . '(?P<type>query)[?].+$!iD',
+	'!' . $trac_baseurl . '(?P<type>milestone)/[a-z0-9.]+[ ]?[a-z0-9.]*$!iD',
+	'!' . $trac_baseurl . '(?P<type>ticketgraph)([?]component=[^&]+)?$!iD',
+];
+
+$m = [];
+foreach ( $allowed_urls as $allowed_url ) {
+	if ( preg_match( $allowed_url, $url, $m ) ) {
+		break;
+	}
+}
+
+if ( ! $m ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
 	die();
 }
@@ -116,6 +136,10 @@ if ( ! isset( $_GET['embed'] ) ) {
 	echo wp_json_encode( $embed );
 	die();
 }
+
+// The remainder of this request outputs the HTML document displayed within the iframe.
+header( 'Content-Type: text/html; charset=UTF-8' );
+header( 'X-Content-Type-Options: nosniff' );
 
 $cache_key = sha1( $url );
 if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {

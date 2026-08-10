@@ -56,7 +56,7 @@ function site_screenshot_src( $width = '', $echo = true ) {
 	$screenshot = str_replace( 'http://', 'https://', $screenshot );
 
 	if ( $echo ) {
-		echo $screenshot;
+		echo esc_url( $screenshot );
 	} else {
 		return $screenshot;
 	}
@@ -77,9 +77,15 @@ function site_screenshot_tag( $width = '', $classes='screenshot' ) {
 	// mshot images have a 4/3 ratio
 	$height = (int)( $width * (3/4) );
 
-	$img = "<img src='{$screenshot}' srcset='$srcset 2x' width='{$width}' height='{$height}' alt='". the_title_attribute(array('echo'=>false)) . "' class='{$classes}' />";
-
-	echo $img;
+	printf(
+		'<img src="%s" srcset="%s 2x" width="%s" height="%s" alt="%s" class="%s" />',
+		esc_url( $screenshot ),
+		esc_url( $srcset ),
+		esc_attr( $width ),
+		esc_attr( $height ),
+		the_title_attribute( array( 'echo' => false ) ),
+		esc_attr( $classes )
+	);
 }
 
 function wp_flavors() {

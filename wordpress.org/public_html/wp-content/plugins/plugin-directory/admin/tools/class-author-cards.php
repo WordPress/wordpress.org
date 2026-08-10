@@ -119,12 +119,12 @@ class Author_Cards {
 
 				// Output author card
 				if ( $user ) {
-					if ( ! in_array( $user->user_nicename, $processed_usernames ) ) {
+					if ( ! in_array( $user->user_nicename, $processed_usernames, true ) ) {
 						$processed_usernames[] = $user->user_nicename;
 						Author_Card::display( $user->ID );
 					}
 				} else {
-					if ( ! in_array( $username, $processed_usernames ) ) {
+					if ( ! in_array( $username, $processed_usernames, true ) ) {
 						$processed_usernames[] = $username;
 						echo '<div class="profile"><p class="profile-personal">';
 						echo '<img class="avatar" src="https://gravatar.com/avatar/?d=mystery"><span class="profile-details"><strong>';
