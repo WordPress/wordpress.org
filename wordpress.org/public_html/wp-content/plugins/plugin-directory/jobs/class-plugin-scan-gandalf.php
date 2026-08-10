@@ -268,9 +268,9 @@ class Plugin_Scan_Gandalf {
 		}
 
 		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
-		$install_line    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
+		$install_text    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
 		if ( $active_installs >= 10000 ) {
-			$install_line = ":bangbang::bangbang::bangbang: {$install_line} :bangbang::bangbang::bangbang:";
+			$install_text = "*{$install_text}*";
 		}
 
 		// Escaping &, <, and > neutralizes Slack control sequences like <!channel> in untrusted strings.
@@ -279,57 +279,103 @@ class Plugin_Scan_Gandalf {
 			$title .= ' (closed)';
 		}
 
+		$findings_count = (int) $record['findings_count'];
+		$top_findings   = self::top_findings( $record['findings'], 5 );
+
 		$body = sprintf(
-			"Security scan detected findings in *%s*\n%s\nVersion: %s (%s)\nFindings: %d\n",
+			'Security scan found *%s* in *<https://wordpress.org/plugins/%s/|%s>* %s',
+			1 === $findings_count ? '1 finding' : "{$findings_count} findings",
+			$plugin->post_name,
 			$title,
-			$install_line,
-			htmlspecialchars( $record['version'], ENT_NOQUOTES ),
-			htmlspecialchars( $record['release_ref'], ENT_NOQUOTES ),
-			$record['findings_count']
+			htmlspecialchars( $record['version'], ENT_NOQUOTES )
 		);
 
-		if ( ! empty( $record['severity_counts'] ) ) {
-			$severity_summary = [];
-			foreach ( $record['severity_counts'] as $severity => $count ) {
-				if ( $count > 0 ) {
-					$severity_summary[] = htmlspecialchars( "{$severity}: {$count}", ENT_NOQUOTES );
-				}
-			}
-
-			if ( $severity_summary ) {
-				$body .= 'Severity: ' . implode( ', ', $severity_summary ) . "\n";
-			}
+		if ( $record['release_ref'] !== $record['version'] ) {
+			$body .= sprintf( ' (`%s`)', htmlspecialchars( $record['release_ref'], ENT_NOQUOTES ) );
 		}
 
-		if ( isset( $record['max_risk_score'] ) ) {
-			$body .= sprintf( "Max risk score: %s\n", htmlspecialchars( $record['max_risk_score'], ENT_NOQUOTES ) );
-		}
+		$body .= "\n" . $install_text . "\n";
 
-		if ( ! empty( $record['findings'] ) ) {
-			$body .= "Top findings:\n";
-			foreach ( self::top_findings( $record['findings'], 5 ) as $finding ) {
-				$investigation = '';
-				if ( 'completed' === ( $finding['investigation']['status'] ?? '' ) && in_array( $finding['investigation']['result'] ?? '', [ 'reproduced', 'conditional' ], true ) ) {
-					$investigation = sprintf( ' (investigation: %s)', htmlspecialchars( $finding['investigation']['result'], ENT_NOQUOTES ) );
-				}
-
+		if ( $top_findings ) {
+			$body .= "\n";
+			foreach ( $top_findings as $finding ) {
 				$body .= sprintf(
-					"• [%s/%s] %s — %s%s%s\n",
-					htmlspecialchars( $finding['risk_score'] ?? 0, ENT_NOQUOTES ),
-					htmlspecialchars( $finding['severity'] ?? '', ENT_NOQUOTES ),
-					htmlspecialchars( self::excerpt( $finding['title'] ?? '', 150 ), ENT_NOQUOTES ),
-					htmlspecialchars( $finding['file_path'] ?? '', ENT_NOQUOTES ),
-					empty( $finding['line'] ) ? '' : ':' . (int) $finding['line'],
-					$investigation
+					"*%s*: %s\n",
+					trim( htmlspecialchars( $finding['risk_score'] ?? 0, ENT_NOQUOTES ) . ' ' . self::severity_label( $finding['severity'] ?? '' ) ),
+					htmlspecialchars( self::excerpt( $finding['title'] ?? '', 150 ), ENT_NOQUOTES )
 				);
+
+				$details = [];
+				if ( ! empty( $finding['file_path'] ) ) {
+					$details[] = self::file_link( $plugin, $record['release_ref'], $finding['file_path'], (int) ( $finding['line'] ?? 0 ) );
+				}
+
+				if ( 'completed' === ( $finding['investigation']['status'] ?? '' ) && in_array( $finding['investigation']['result'] ?? '', [ 'reproduced', 'conditional' ], true ) ) {
+					$details[] = sprintf( 'investigation *%s*', htmlspecialchars( $finding['investigation']['result'], ENT_NOQUOTES ) );
+				}
+
+				if ( $details ) {
+					$body .= '↳ ' . implode( ' · ', $details ) . "\n";
+				}
+			}
+
+			if ( $findings_count > count( $top_findings ) ) {
+				$body .= sprintf( "…and %d more in the full report.\n", $findings_count - count( $top_findings ) );
 			}
 		}
 
-		$body .= sprintf( "Details: https://wordpress.org/plugins/wp-admin/post.php?post=%s&action=edit\n", $plugin->ID );
-		$body .= sprintf( "Plugin: https://wordpress.org/plugins/%s/\n", $plugin->post_name );
-		$body .= sprintf( "Report: %s\n", htmlspecialchars( $record['report_url'], ENT_NOQUOTES ) );
+		$body .= "\n" . sprintf(
+			'<https://wordpress.org/plugins/wp-admin/post.php?post=%d&action=edit|wp-admin> · <%s|Gandalf report>',
+			$plugin->ID,
+			htmlspecialchars( $record['report_url'], ENT_NOQUOTES )
+		);
 
 		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
+	}
+
+	/**
+	 * Return the display label for a finding severity, shouting the severe tiers.
+	 *
+	 * @param string $severity The finding severity.
+	 * @return string The escaped display label.
+	 */
+	protected static function severity_label( $severity ) {
+		$severity = trim( (string) $severity );
+
+		if ( in_array( strtolower( $severity ), [ 'critical', 'high', 'error' ], true ) ) {
+			$severity = strtoupper( $severity );
+		}
+
+		return htmlspecialchars( $severity, ENT_NOQUOTES );
+	}
+
+	/**
+	 * Return a Slack link to the finding's file in the plugins Trac browser.
+	 *
+	 * @param \WP_Post $plugin      The plugin post.
+	 * @param string   $release_ref The scanned release ref.
+	 * @param string   $file_path   The file path, relative to the plugin root.
+	 * @param int      $line        The line number, or 0 for none.
+	 * @return string The Slack-formatted link.
+	 */
+	protected static function file_link( $plugin, $release_ref, $file_path, $line ) {
+		$file_path = ltrim( (string) $file_path, '/' );
+
+		// URL-encoding the untrusted path segments also keeps | and > from breaking the link syntax.
+		$url = sprintf(
+			'https://plugins.trac.wordpress.org/browser/%s/%s/%s',
+			$plugin->post_name,
+			'trunk' === $release_ref ? 'trunk' : 'tags/' . rawurlencode( $release_ref ),
+			implode( '/', array_map( 'rawurlencode', explode( '/', $file_path ) ) )
+		);
+
+		$label = $file_path;
+		if ( $line ) {
+			$url   .= '#L' . $line;
+			$label .= ':' . $line;
+		}
+
+		return sprintf( '<%s|%s>', $url, htmlspecialchars( $label, ENT_NOQUOTES ) );
 	}
 
 	/**
