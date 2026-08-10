@@ -301,21 +301,12 @@ class Plugin_Scan_Gandalf {
 			foreach ( $top_findings as $finding ) {
 				$body .= sprintf(
 					"*%s*: %s\n",
-					trim( htmlspecialchars( $finding['risk_score'] ?? 0, ENT_NOQUOTES ) . ' ' . self::severity_label( $finding['severity'] ?? '' ) ),
+					htmlspecialchars( trim( ( $finding['risk_score'] ?? 0 ) . ' ' . trim( (string) ( $finding['severity'] ?? '' ) ) ), ENT_NOQUOTES ),
 					htmlspecialchars( self::excerpt( $finding['title'] ?? '', 150 ), ENT_NOQUOTES )
 				);
 
-				$details = [];
 				if ( ! empty( $finding['file_path'] ) ) {
-					$details[] = self::file_link( $plugin, $record['release_ref'], $finding['file_path'], (int) ( $finding['line'] ?? 0 ) );
-				}
-
-				if ( 'completed' === ( $finding['investigation']['status'] ?? '' ) && in_array( $finding['investigation']['result'] ?? '', [ 'reproduced', 'conditional' ], true ) ) {
-					$details[] = sprintf( 'investigation *%s*', htmlspecialchars( $finding['investigation']['result'], ENT_NOQUOTES ) );
-				}
-
-				if ( $details ) {
-					$body .= '↳ ' . implode( ' · ', $details ) . "\n";
+					$body .= '↳ ' . self::file_link( $plugin, $record['release_ref'], $finding['file_path'], (int) ( $finding['line'] ?? 0 ) ) . "\n";
 				}
 			}
 
@@ -324,29 +315,14 @@ class Plugin_Scan_Gandalf {
 			}
 		}
 
+		// A | would end the URL portion of the Slack link early; htmlspecialchars() covers < and >.
 		$body .= "\n" . sprintf(
 			'<https://wordpress.org/plugins/wp-admin/post.php?post=%d&action=edit|wp-admin> · <%s|Gandalf report>',
 			$plugin->ID,
-			htmlspecialchars( $record['report_url'], ENT_NOQUOTES )
+			htmlspecialchars( str_replace( '|', '%7C', $record['report_url'] ), ENT_NOQUOTES )
 		);
 
 		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
-	}
-
-	/**
-	 * Return the display label for a finding severity, shouting the severe tiers.
-	 *
-	 * @param string $severity The finding severity.
-	 * @return string The escaped display label.
-	 */
-	protected static function severity_label( $severity ) {
-		$severity = trim( (string) $severity );
-
-		if ( in_array( strtolower( $severity ), [ 'critical', 'high', 'error' ], true ) ) {
-			$severity = strtoupper( $severity );
-		}
-
-		return htmlspecialchars( $severity, ENT_NOQUOTES );
 	}
 
 	/**
