@@ -4,6 +4,12 @@ on:
   pull_request:
   push:
     branches: [ trunk ]
+  # Daily full run: path filtering means regular runs never re-validate the
+  # suites against their unpinned external inputs (WordPress trunk, PHPUnit,
+  # the polyfills, jetpack.zip), so upstream breakage would land silently.
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 # Cancel superseded PR runs. Trunk pushes get a unique group per commit —
 # queued runs would otherwise be cancelled, leaving mirrored commits untested.
@@ -34,14 +40,33 @@ jobs:
         id: suites
         run: |
           suites=$( yq -o=json '.' .github/unit-tests-suites.yml )
+
+          # Reject suites the matrix builders below would silently drop.
+          invalid=$( jq -r '.suites | to_entries | map( select( ( .value.type | IN( "standalone", "wordpress" ) | not ) or ( .value.paths // [] ) == [] ) | .key ) | join( ", " )' <<< "$suites" )
+          if [ -n "$invalid" ]; then
+            echo "::error file=.github/unit-tests-suites.yml::Suites with an unknown type or no paths: $invalid"
+            exit 1
+          fi
+
+          # Add each wordpress suite's plugins to its paths, straight from the
+          # environment config, so the two can never drift apart.
+          for suite in $( jq -r '.suites | to_entries[] | select( .value.type == "wordpress" ) | .key' <<< "$suites" ); do
+            plugins=$( jq -c '[ .plugins[] | select( startswith( "../" ) ) | sub( "^\\.\\./"; "" ) + "/**" ]' "environments/$suite/.wp-env.test.json" )
+            suites=$( jq -c --arg suite "$suite" --argjson plugins "$plugins" '.suites[ $suite ].paths += $plugins' <<< "$suites" )
+          done
+
+          filters=$( jq -c '.["shared-paths"] as $shared | .suites | with_entries( .value |= ( $shared[ .type ] + .paths ) )' <<< "$suites" )
+          standalone=$( jq -c '.suites | to_entries | map( select( .value.type == "standalone" ) | { filter: .key } + ( .value | del( .type, .paths ) ) )' <<< "$suites" )
+          wordpress=$( jq -c '.suites | to_entries | map( select( .value.type == "wordpress" ) | { filter: .key } + ( .value | del( .type, .paths ) ) )' <<< "$suites" )
           {
-            echo "filters=$( jq -c '.["shared-paths"] as $shared | .suites | with_entries( .value |= ( $shared[ .type ] + .paths ) )' <<< "$suites" )"
-            echo "standalone=$( jq -c '.suites | to_entries | map( select( .value.type == "standalone" ) | { filter: .key } + ( .value | del( .type, .paths ) ) )' <<< "$suites" )"
-            echo "wordpress=$( jq -c '.suites | to_entries | map( select( .value.type == "wordpress" ) | { filter: .key } + ( .value | del( .type, .paths ) ) )' <<< "$suites" )"
+            echo "filters=$filters"
+            echo "standalone=$standalone"
+            echo "wordpress=$wordpress"
           } >> "$GITHUB_OUTPUT"
 
       - name: Detect changed paths
         id: filter
+        if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
         uses: dorny/paths-filter@v4
         with:
           filters: ${{ steps.suites.outputs.filters }}
@@ -53,9 +78,17 @@ jobs:
           STANDALONE: ${{ steps.suites.outputs.standalone }}
           WORDPRESS: ${{ steps.suites.outputs.wordpress }}
         run: |
+          if [ -z "$CHANGES" ]; then
+            # Scheduled and manual runs re-test everything.
+            standalone="$STANDALONE"
+            wordpress="$WORDPRESS"
+          else
+            standalone=$( jq -c --argjson changed "$CHANGES" 'map( select( .filter as $f | $changed | index( $f ) ) )' <<< "$STANDALONE" )
+            wordpress=$( jq -c --argjson changed "$CHANGES" 'map( select( .filter as $f | $changed | index( $f ) ) )' <<< "$WORDPRESS" )
+          fi
           {
-            echo "standalone=$( jq -c --argjson changed "$CHANGES" 'map( select( .filter as $f | $changed | index( $f ) ) )' <<< "$STANDALONE" )"
-            echo "wordpress=$( jq -c --argjson changed "$CHANGES" 'map( select( .filter as $f | $changed | index( $f ) ) )' <<< "$WORDPRESS" )"
+            echo "standalone=$standalone"
+            echo "wordpress=$wordpress"
           } >> "$GITHUB_OUTPUT"
 
   # Standalone PHP tests — no WordPress or database dependency.
@@ -127,8 +160,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Cache sources for up to a day. No restore-keys: wp-env never updates
-      # existing sources, so an older cache would pin CI to stale WordPress.
+      # Cache sources for up to a day. No restore-keys: a restored cache
+      # brings its wp-env config-hash marker (wp-env-cache.json) with it, and
+      # when that matches, wp-env start skips source downloads and WordPress
+      # configuration entirely — an older cache would pin CI to stale
+      # WordPress instead of being refreshed.
       - name: Get cache day
         id: cache-day
         run: echo "date=$( date -u +%F )" >> "$GITHUB_OUTPUT"
@@ -140,9 +176,23 @@ jobs:
           path: |
             ~/.wp-env
             ~/wp-env
-          key: wp-env-${{ matrix.filter }}-${{ steps.cache-day.outputs.date }}-${{ hashFiles('environments/**/.wp-env*.json') }}
+          key: wp-env-${{ matrix.filter }}-${{ steps.cache-day.outputs.date }}-${{ hashFiles(format('environments/{0}/.wp-env.test.json', matrix.filter), 'environments/package-lock.json') }}
 
       # The scripts start their environment, whose `afterStart` installs PHPUnit
       # and the polyfills, and then run each suite it holds.
       - name: Run PHPUnit
         run: npm run ${{ matrix.script }}
+
+  # Stable status check for branch protection: the suite jobs are conditional
+  # with matrix-derived names, so this is the one check that always runs and
+  # reflects the overall result.
+  results:
+    name: Test results
+    needs: [ changes, php-standalone, php-wordpress ]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail if a suite failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

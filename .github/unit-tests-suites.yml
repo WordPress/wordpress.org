@@ -10,9 +10,10 @@
 #   type:    standalone (plain PHPUnit) or wordpress (wp-env/Docker).
 #   name:    display name in the job list.
 #   paths:   globs of the files the suite tests or loads — include every
-#            plugin its environment activates and every cross-directory
-#            dependency its bootstrap pulls in. The shared paths for the
-#            suite's type are added automatically.
+#            cross-directory dependency its bootstrap pulls in. The shared
+#            paths for the suite's type are added automatically, and so are
+#            the plugins a wordpress suite's environment activates (read from
+#            environments/<suite>/.wp-env.test.json by the workflow).
 #   All other keys are passed through to the job matrix as-is.
 
 # Changes that affect every suite of a type.
@@ -76,7 +77,6 @@ suites:
     name: Handbook Plugin
     script: handbook:test
     paths:
-      - 'wordpress.org/public_html/wp-content/plugins/handbook/**'
       - 'environments/handbook/**'
 
   plugin-directory:
@@ -84,7 +84,6 @@ suites:
     name: Plugin Directory
     script: plugins:test
     paths:
-      - 'wordpress.org/public_html/wp-content/plugins/plugin-directory/**'
       - 'environments/plugin-directory/**'
 
   theme-directory:
@@ -92,7 +91,6 @@ suites:
     name: Theme Directory
     script: themes:test
     paths:
-      - 'wordpress.org/public_html/wp-content/plugins/theme-directory/**'
       - 'environments/theme-directory/**'
 
   make:
@@ -100,12 +98,4 @@ suites:
     name: Make
     script: make:test
     paths:
-      - 'wordpress.org/public_html/wp-content/plugins/wporg-o2-posting-access/**'
-      - 'wordpress.org/public_html/wp-content/plugins/o2-private-posts/**'
-      - 'wordpress.org/public_html/wp-content/plugins/wporg-make-sites-cpt/**'
-      - 'wordpress.org/public_html/wp-content/plugins/wporg-meeting-posttype/**'
-      - 'wordpress.org/public_html/wp-content/plugins/trac-notifications/**'
-      - 'wordpress.org/public_html/wp-content/plugins/wporg-trac-watcher/**'
-      - 'wordpress.org/public_html/wp-content/plugins/wporg-cli/**'
-      - 'wordpress.org/public_html/wp-content/plugins/handbook/**'
       - 'environments/make/**'

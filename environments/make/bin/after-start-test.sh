@@ -17,5 +17,4 @@ $RUN composer require --dev yoast/phpunit-polyfills:^4.0 --working-dir=/wordpres
 # The file only uses CREATE TABLE IF NOT EXISTS, so re-importing it on every
 # start is safe.
 echo "Creating stub database tables..."
-npx wp-env $CONFIG run cli -- wp db import wp-content/env-bin/database-tables.sql 2>&1
 $RUN -- wp db import wp-content/env-bin/database-tables.sql 2>&1
