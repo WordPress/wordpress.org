@@ -13,8 +13,7 @@ on:
     paths:
     - '**.php'
 
-# Trunk pushes get a unique group per commit — queued runs would otherwise be
-# cancelled, leaving mirrored commits unlinted.
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true

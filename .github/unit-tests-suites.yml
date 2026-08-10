@@ -1,20 +1,4 @@
-# Unit test suite definitions.
-#
-# Single source of truth for the `changes` job in
-# .github/workflows/unit-tests.yml: each suite declares its job matrix
-# configuration and the paths that can break it. The workflow generates the
-# path filters and the job matrices from this file, and only runs the suites
-# whose paths match a changed file.
-#
-# To add a suite, add one entry under `suites`:
-#   type:    standalone (plain PHPUnit) or wordpress (wp-env/Docker).
-#   name:    display name in the job list.
-#   paths:   globs of the files the suite tests or loads — include every
-#            cross-directory dependency its bootstrap pulls in. The shared
-#            paths for the suite's type are added automatically, and so are
-#            the plugins a wordpress suite's environment activates (read from
-#            environments/<suite>/.wp-env.test.json by the workflow).
-#   All other keys are passed through to the job matrix as-is.
+# Unit test suite definitions: unit-tests.yml only runs a suite when a changed file matches its `paths` (shared type paths and a wordpress suite's environment plugins are added automatically); all other keys pass through to the job matrix.
 
 # Changes that affect every suite of a type.
 shared-paths:

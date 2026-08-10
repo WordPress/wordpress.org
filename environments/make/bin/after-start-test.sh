@@ -14,7 +14,6 @@ echo "Installing PHPUnit 11 and polyfills..."
 $RUN composer global require -W phpunit/phpunit:^11.0 2>&1
 $RUN composer require --dev yoast/phpunit-polyfills:^4.0 --working-dir=/wordpress-phpunit 2>&1
 
-# The file only uses CREATE TABLE IF NOT EXISTS, so re-importing it on every
-# start is safe.
+# Safe to re-import on every start: the file only uses CREATE TABLE IF NOT EXISTS.
 echo "Creating stub database tables..."
 $RUN -- wp db import wp-content/env-bin/database-tables.sql 2>&1

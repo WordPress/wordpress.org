@@ -9,8 +9,7 @@ on:
     - cron: '0 3 * * *'
   workflow_dispatch:
 
-# Cancel superseded PR runs. Trunk pushes get a unique group per commit —
-# queued runs would otherwise be cancelled, leaving mirrored commits untested.
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true
@@ -20,8 +19,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  # Run only the suites the changed files can break, as defined in
-  # .github/unit-tests-suites.yml.
+  # Run only the suites the changed files can break, per .github/unit-tests-suites.yml.
   changes:
     name: Detect affected suites
     if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
@@ -46,8 +44,7 @@ jobs:
             exit 1
           fi
 
-          # Add each wordpress suite's plugins to its paths, straight from the
-          # environment config, so the two can never drift apart.
+          # Add each wordpress suite's environment plugins to its paths so the two can't drift.
           for suite in $( jq -r '.suites | to_entries[] | select( .value.type == "wordpress" ) | .key' <<< "$suites" ); do
             plugins=$( jq -c '[ .plugins[] | select( startswith( "../" ) ) | sub( "^\\.\\./"; "" ) + "/**" ]' "environments/$suite/.wp-env.test.json" )
             suites=$( jq -c --arg suite "$suite" --argjson plugins "$plugins" '.suites[ $suite ].paths += $plugins' <<< "$suites" )
@@ -158,11 +155,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Cache sources for up to a day. No restore-keys: a restored cache
-      # brings its wp-env config-hash marker (wp-env-cache.json) with it, and
-      # when that matches, wp-env start skips source downloads and WordPress
-      # configuration entirely — an older cache would pin CI to stale
-      # WordPress instead of being refreshed.
+      # Cache sources for up to a day. No restore-keys: restored caches skip wp-env's source downloads and would pin CI to stale WordPress.
       - name: Get cache day
         id: cache-day
         run: echo "date=$( date -u +%F )" >> "$GITHUB_OUTPUT"
@@ -181,9 +174,7 @@ jobs:
       - name: Run PHPUnit
         run: npm run ${{ matrix.script }}
 
-  # Stable status check for branch protection: the suite jobs are conditional
-  # with matrix-derived names, so this is the one check that always runs and
-  # reflects the overall result.
+  # Stable status check for branch protection — always runs, unlike the conditional matrix-named suite jobs.
   results:
     name: Test results
     needs: [ changes, php-standalone, php-wordpress ]
