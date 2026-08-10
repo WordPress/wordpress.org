@@ -68,15 +68,20 @@ function emit_annotations( $report, $file_override = null ) {
  * configured in phpcs.xml.dist can scan them concurrently.
  */
 function run_phpcs( $files, $bin_dir ) {
-	$json_report = '.phpcs-branch.json';
-	$json_arg    = escapeshellarg( $json_report );
+	$args = implode( ' ', array_map( 'escapeshellarg', $files ) ) . ' -snq';
 
-	exec( "$bin_dir/phpcs " . implode( ' ', array_map( 'escapeshellarg', $files ) ) . " -snq --report-full --report-json=$json_arg", $output, $exec_exit_status );
+	// Only produce the JSON report when there are annotations to feed.
+	if ( getenv( 'GITHUB_ACTIONS' ) ) {
+		$json_report = '.phpcs-branch.json';
+		$args       .= ' --report-full --report-json=' . escapeshellarg( $json_report );
+	}
+
+	exec( "$bin_dir/phpcs $args", $output, $exec_exit_status );
 	echo implode( "\n", $output );
 
-	if ( file_exists( $json_report ) ) {
+	if ( ! empty( $json_report ) && file_exists( $json_report ) ) {
 		emit_annotations( (array) json_decode( file_get_contents( $json_report ), true ) );
-		exec( "rm -f $json_arg" );
+		unlink( $json_report );
 	}
 
 	return $exec_exit_status;
@@ -116,8 +121,10 @@ function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
 	echo "\n";
 
 	// The report is keyed by the temporary path, so annotate the real file instead.
-	exec( "$cmd --report json", $json_output );
-	emit_annotations( (array) json_decode( implode( '', $json_output ), true ), $file );
+	if ( getenv( 'GITHUB_ACTIONS' ) ) {
+		exec( "$cmd --report json", $json_output );
+		emit_annotations( (array) json_decode( implode( '', $json_output ), true ), $file );
+	}
 
 	exec( "rm $diff $test_file $orig_json $new_json" );
 	return $exec_exit_status;
