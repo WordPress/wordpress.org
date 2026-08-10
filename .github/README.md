@@ -8,6 +8,7 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 
 - **[workflows/](workflows/)**: Automated GitHub Actions yaml files.
 - **[bin/](bin/)**: Supporting scripts used by workflows or developers.
+- **[unit-tests-suites.yml](unit-tests-suites.yml)**: Unit test suite definitions — the single source of truth for which suites exist and which paths trigger them.
 
 ---
 
@@ -32,10 +33,13 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 - **Actions:** Sets up PHP 8.4, installs composer tools, and executes the `phpcs-branch.php` helper script to report PHPCS syntax/standard compliance on PR diffs.
 
 ### 2. [Unit Tests](workflows/unit-tests.yml) (`unit-tests.yml`)
-- **Trigger:** Runs on pull requests and pushes to `trunk`.
+- **Trigger:** Runs on pull requests and pushes to `trunk` (only the suites affected by the changed files), plus a daily scheduled run and manual dispatch (all suites).
+- **Suite definitions:** [unit-tests-suites.yml](unit-tests-suites.yml) declares every suite, its job matrix configuration, and the paths that can break it. To add a suite, edit that file — the workflow generates its path filters and job matrices from it.
 - **Jobs:**
+  - **`changes`**: Loads the suite definitions, detects which paths changed, and builds the matrices for the suites that need to run.
   - **`php-standalone`**: Runs PHPUnit on modules that do not depend on WordPress or a database (Serve Happy, Browse Happy, Events API, Slack Trac Bot, and Slack Props Library).
-  - **`php-wordpress`**: Sets up Node.js, installs Docker-based `@wordpress/env` (`wp-env`), spins up the local container environment, injects PHPUnit polyfills, and runs unit tests for the Handbook, Plugin Directory, and Theme Directory plugins.
+  - **`php-wordpress`**: Sets up Node.js, installs Docker-based `@wordpress/env` (`wp-env`), spins up the local container environment, injects PHPUnit polyfills, and runs unit tests for the Handbook, Plugin Directory, Theme Directory, and Make plugins.
+  - **`results`**: Always-run aggregate job that fails if any suite failed — the stable status check to require in branch protection.
 
 ### 3. [Events API (live) Checks](workflows/events-api-live.yml) (`events-api-live.yml`)
 - **Trigger:** Runs daily at 14:00 UTC and on manual workflow dispatch.

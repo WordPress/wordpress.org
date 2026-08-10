@@ -4,37 +4,103 @@ on:
   pull_request:
   push:
     branches: [ trunk ]
+  # Daily full run to catch breakage in unpinned external inputs.
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
+  # Run only the suites the changed files can break, per .github/unit-tests-suites.yml.
+  changes:
+    name: Detect affected suites
+    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      standalone: ${{ steps.matrices.outputs.standalone }}
+      wordpress: ${{ steps.matrices.outputs.wordpress }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Emit path filters (suite paths plus type-shared ones) and matrices.
+      - name: Load suite definitions
+        id: suites
+        run: |
+          suites=$( yq -o=json '.' .github/unit-tests-suites.yml )
+
+          # Reject suites the matrix builders below would silently drop.
+          invalid=$( jq -r '.suites | to_entries | map( select( ( .value.type | IN( "standalone", "wordpress" ) | not ) or ( .value.paths // [] ) == [] ) | .key ) | join( ", " )' <<< "$suites" )
+          if [ -n "$invalid" ]; then
+            echo "::error file=.github/unit-tests-suites.yml::Suites with an unknown type or no paths: $invalid"
+            exit 1
+          fi
+
+          # Add each wordpress suite's environment plugins to its paths so the two can't drift.
+          for suite in $( jq -r '.suites | to_entries[] | select( .value.type == "wordpress" ) | .key' <<< "$suites" ); do
+            plugins=$( jq -c '[ .plugins[] | select( startswith( "../" ) ) | sub( "^\\.\\./"; "" ) + "/**" ]' "environments/$suite/.wp-env.test.json" )
+            suites=$( jq -c --arg suite "$suite" --argjson plugins "$plugins" '.suites[ $suite ].paths += $plugins' <<< "$suites" )
+          done
+
+          filters=$( jq -c '.["shared-paths"] as $shared | .suites | with_entries( .value |= ( $shared[ .type ] + .paths ) )' <<< "$suites" )
+          standalone=$( jq -c '.suites | to_entries | map( select( .value.type == "standalone" ) | { filter: .key } + ( .value | del( .type, .paths ) ) )' <<< "$suites" )
+          wordpress=$( jq -c '.suites | to_entries | map( select( .value.type == "wordpress" ) | { filter: .key } + ( .value | del( .type, .paths ) ) )' <<< "$suites" )
+          {
+            echo "filters=$filters"
+            echo "standalone=$standalone"
+            echo "wordpress=$wordpress"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Detect changed paths
+        id: filter
+        if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
+        uses: dorny/paths-filter@v4
+        with:
+          filters: ${{ steps.suites.outputs.filters }}
+
+      - name: Build suite matrices
+        id: matrices
+        env:
+          CHANGES: ${{ steps.filter.outputs.changes }}
+          STANDALONE: ${{ steps.suites.outputs.standalone }}
+          WORDPRESS: ${{ steps.suites.outputs.wordpress }}
+        run: |
+          if [ -z "$CHANGES" ]; then
+            # Scheduled and manual runs re-test everything.
+            standalone="$STANDALONE"
+            wordpress="$WORDPRESS"
+          else
+            standalone=$( jq -c --argjson changed "$CHANGES" 'map( select( .filter as $f | $changed | index( $f ) ) )' <<< "$STANDALONE" )
+            wordpress=$( jq -c --argjson changed "$CHANGES" 'map( select( .filter as $f | $changed | index( $f ) ) )' <<< "$WORDPRESS" )
+          fi
+          {
+            echo "standalone=$standalone"
+            echo "wordpress=$wordpress"
+          } >> "$GITHUB_OUTPUT"
+
   # Standalone PHP tests — no WordPress or database dependency.
   # Uses the project's composer-installed PHPUnit 9 + yoast/phpunit-polyfills,
   # matching the version that WordPress Core ships its test bootstrap for.
   php-standalone:
     name: "PHP: ${{ matrix.name }}"
-    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    needs: changes
+    if: needs.changes.outputs.standalone != '[]'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: Serve Happy API
-            working-directory: api.wordpress.org/public_html/core/serve-happy/1.0
-            phpunit-args: ""
-          - name: Browse Happy API
-            working-directory: api.wordpress.org/public_html/core/browse-happy/1.0
-            phpunit-args: ""
-          - name: Events API
-            working-directory: api.wordpress.org/public_html/events/1.0
-            phpunit-args: ""
-          - name: Slack Trac Bot
-            working-directory: common/includes/tests/slack/trac
-            phpunit-args: "--no-configuration bot.php"
-          - name: Slack Props Library
-            working-directory: common/includes/slack/props/tests
-            phpunit-args: "--no-configuration --bootstrap /tmp/phpunit-bootstrap.php ."
-            bootstrap: wpdb-stub
+        include: ${{ fromJSON(needs.changes.outputs.standalone) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -43,7 +109,7 @@ jobs:
           coverage: none
 
       - name: Install composer dependencies
-        run: composer install --no-interaction --no-progress
+        uses: ramsey/composer-install@v4
 
       - name: Create wpdb stub bootstrap
         if: matrix.bootstrap == 'wpdb-stub'
@@ -63,37 +129,59 @@ jobs:
   # WordPress-dependent PHP tests — require wp-env (Docker).
   php-wordpress:
     name: "WP: ${{ matrix.name }}"
-    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    needs: changes
+    if: needs.changes.outputs.wordpress != '[]'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # One entry per environment. A script covering several plugins runs
-          # them all against the environment it starts once.
-          - name: Handbook Plugin
-            script: handbook:test
-          - name: Plugin Directory
-            script: plugins:test
-          - name: Theme Directory
-            script: themes:test
-          - name: Make
-            script: make:test
+        # One entry per environment. A script covering several plugins runs
+        # them all against the environment it starts once.
+        include: ${{ fromJSON(needs.changes.outputs.wordpress) }}
     defaults:
       run:
         working-directory: environments
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version-file: environments/.nvmrc
+          cache: npm
+          cache-dependency-path: environments/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      # Cache sources for up to a day. No restore-keys: restored caches skip wp-env's source downloads and would pin CI to stale WordPress.
+      - name: Get cache day
+        id: cache-day
+        run: echo "date=$( date -u +%F )" >> "$GITHUB_OUTPUT"
+
+      # wp-env homes in ~/wp-env (not ~/.wp-env) on snap hosts like GH runners.
+      - name: Cache wp-env sources
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.wp-env
+            ~/wp-env
+          key: wp-env-${{ matrix.filter }}-${{ steps.cache-day.outputs.date }}-${{ hashFiles(format('environments/{0}/.wp-env.test.json', matrix.filter), 'environments/package-lock.json') }}
 
       # The scripts start their environment, whose `afterStart` installs PHPUnit
       # and the polyfills, and then run each suite it holds.
       - name: Run PHPUnit
         run: npm run ${{ matrix.script }}
+
+  # Stable status check for branch protection — always runs, unlike the conditional matrix-named suite jobs.
+  results:
+    name: Test results
+    needs: [ changes, php-standalone, php-wordpress ]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail if a suite failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
