@@ -100,6 +100,10 @@ class Builder {
 			}
 			$this->version = $version;
 
+			// Reset the per-version output files, so error handling only acts on files from this iteration.
+			$this->checksum_file  = '';
+			$this->signature_file = '';
+
 			if ( 'trunk' == $version ) {
 				$this->zip_file = "{$this->tmp_dir}/{$this->slug}/{$this->slug}.zip";
 			} else {
