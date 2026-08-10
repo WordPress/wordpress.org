@@ -641,6 +641,9 @@ function get_whitelist() {
 			'RoseAppleMedia',
 			'sbddesign',
 		),
+		'wp-ahmedabad' => array(
+			'chetan200891', // @Chetan Prajapati  on Slack
+		),
 	);
 }
 
