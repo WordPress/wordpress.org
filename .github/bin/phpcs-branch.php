@@ -11,8 +11,12 @@
 // phpcs:ignoreFile
 namespace WordPressOrg\Bin\PHPCS_Changed;
 
-function run_phpcs( $file, $bin_dir ) {
-	exec( "$bin_dir/phpcs $file -snq", $output, $exec_exit_status );
+/*
+ * New files are scanned in a single invocation, so that the parallel processing
+ * configured in phpcs.xml.dist can scan them concurrently.
+ */
+function run_phpcs( $files, $bin_dir ) {
+	exec( "$bin_dir/phpcs " . implode( ' ', array_map( 'escapeshellarg', $files ) ) . ' -snq', $output, $exec_exit_status );
 	echo implode( "\n", $output );
 	return $exec_exit_status;
 }
@@ -23,21 +27,34 @@ function run_phpcs( $file, $bin_dir ) {
  * when the file contains special characters (like escape sequences such as '\\').
  */
 function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
-	$name = basename( $file );
-	exec( "$git diff $base_branch $file > $name.diff" );
+	$name       = basename( $file );
+	$file_arg   = escapeshellarg( $file );
+	$branch_arg = escapeshellarg( $base_branch );
+	$diff       = escapeshellarg( "$name.diff" );
+	$orig_json  = escapeshellarg( "$name.orig.phpcs" );
+	$new_json   = escapeshellarg( "$name.phpcs" );
 
-	exec( "$git show $base_branch:$file > $name.test.php" );
-	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs.xml.dist --report=json -snq > $name.orig.phpcs" );
+	/*
+	 * Scan the copies at a path mirroring the original file, so that the file name and
+	 * the path-based exclude patterns in phpcs.xml.dist apply as they would for the real file.
+	 */
+	$test_file = escapeshellarg( ".phpcs-branch/$file" );
+	exec( 'mkdir -p ' . escapeshellarg( dirname( ".phpcs-branch/$file" ) ) );
 
-	exec( "cat $file > $name.test.php" );
-	exec( "$bin_dir/phpcs $name.test.php --standard=./phpcs.xml.dist --report=json -snq > $name.phpcs" );
+	exec( "$git diff $branch_arg $file_arg > $diff" );
 
-	$cmd = "$bin_dir/phpcs-changed --diff $name.diff --phpcs-orig $name.orig.phpcs --phpcs-new $name.phpcs";
+	exec( "$git show " . escapeshellarg( "$base_branch:$file" ) . " > $test_file" );
+	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -snq > $orig_json" );
+
+	exec( "cat $file_arg > $test_file" );
+	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -snq > $new_json" );
+
+	$cmd = "$bin_dir/phpcs-changed -s --diff $diff --phpcs-orig $orig_json --phpcs-new $new_json";
 	exec( $cmd, $output, $exec_exit_status );
 	echo implode( "\n", $output );
 	echo "\n";
 
-	exec( "rm $name.diff $name.test.php $name.orig.phpcs $name.phpcs" );
+	exec( "rm $diff $test_file $orig_json $new_json" );
 	return $exec_exit_status;
 }
 
@@ -53,6 +70,8 @@ function main() {
 
 		$affected_files = shell_exec( "$git diff $base_branch --name-status --diff-filter=AM 2>&1 | grep .php$" );
 		$affected_files = explode( "\n", trim( $affected_files ) );
+		$new_files      = array();
+		$modified_count = 0;
 
 		foreach ( $affected_files as $record ) {
 			if ( ! $record ) {
@@ -60,21 +79,29 @@ function main() {
 			}
 
 			list( $change, $file ) = explode( "\t", trim( $record ) );
-			$cmd_status = 0;
 
 			switch ( $change ) {
 				case 'M':
-					$cmd_status = run_phpcs_changed( $file, $git, $base_branch, $bin_dir );
+					$modified_count++;
+					echo "Checking changed lines in $file:\n";
+					// If any cmd exits with 1, we want to exit with 1.
+					$status |= run_phpcs_changed( $file, $git, $base_branch, $bin_dir );
 					break;
 
 				case 'A':
-					$cmd_status = run_phpcs( $file, $bin_dir );
+					$new_files[] = $file;
 					break;
 			}
-
-			// If any cmd exits with 1, we want to exit with 1.
-			$status |= $cmd_status;
 		}
+
+		if ( $new_files ) {
+			echo 'Checking ' . count( $new_files ) . " new file(s):\n\t" . implode( "\n\t", $new_files ) . "\n";
+			$status |= run_phpcs( $new_files, $bin_dir );
+		}
+
+		exec( 'rm -rf .phpcs-branch' );
+
+		printf( "\nDone. Checked %d modified and %d new file(s).\n", $modified_count, count( $new_files ) );
 
 	} catch ( \Exception $exception ) {
 		echo "\nAborting because of error: {$exception->getMessage()} \n";

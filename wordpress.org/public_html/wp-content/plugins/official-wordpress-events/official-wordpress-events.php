@@ -919,7 +919,7 @@ class Official_WordPress_Events {
 	 */
 	protected function log( $message, $write_to_disk = false ) {
 		$limit = 500;
-		$api_keys = array( MEETUP_API_KEY, OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
+		$api_keys = array( OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
 
 		if ( 'cli' === php_sapi_name() ) {
 			echo "\n" . $message;

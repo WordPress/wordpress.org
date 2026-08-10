@@ -1,4 +1,4 @@
-<?php // phpcs:disable WordPress.Files.FileName -- PHPUnit discovers tests by class name.
+<?php
 /**
  * Tests for handbook previous/next page navigation.
  *
