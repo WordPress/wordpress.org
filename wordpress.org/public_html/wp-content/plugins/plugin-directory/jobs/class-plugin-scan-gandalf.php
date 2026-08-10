@@ -188,6 +188,8 @@ class Plugin_Scan_Gandalf {
 						'severity_counts' => $data['severity_counts'],
 						'verdict_hash'    => $data['verdict_hash'],
 						'report_url'      => $data['report_url'],
+						'findings'        => is_array( $data['findings'] ?? null ) ? array_filter( $data['findings'], 'is_array' ) : [],
+						'max_risk_score'  => $data['max_risk_score'] ?? null,
 					]
 				);
 			}
@@ -271,17 +273,18 @@ class Plugin_Scan_Gandalf {
 			$install_line = ":bangbang::bangbang::bangbang: {$install_line} :bangbang::bangbang::bangbang:";
 		}
 
-		$title = $plugin->post_title;
+		// Escaping &, <, and > neutralizes Slack control sequences like <!channel> in untrusted strings.
+		$title = htmlspecialchars( $plugin->post_title, ENT_NOQUOTES );
 		if ( 'closed' === $plugin->post_status ) {
 			$title .= ' (closed)';
 		}
 
 		$body = sprintf(
-			"Gandalf scan detected findings in *%s*\n%s\nVersion: %s (%s)\nFindings: %d\n",
+			"Security scan detected findings in *%s*\n%s\nVersion: %s (%s)\nFindings: %d\n",
 			$title,
 			$install_line,
-			$record['version'],
-			$record['release_ref'],
+			htmlspecialchars( $record['version'], ENT_NOQUOTES ),
+			htmlspecialchars( $record['release_ref'], ENT_NOQUOTES ),
 			$record['findings_count']
 		);
 
@@ -289,7 +292,7 @@ class Plugin_Scan_Gandalf {
 			$severity_summary = [];
 			foreach ( $record['severity_counts'] as $severity => $count ) {
 				if ( $count > 0 ) {
-					$severity_summary[] = "{$severity}: {$count}";
+					$severity_summary[] = htmlspecialchars( "{$severity}: {$count}", ENT_NOQUOTES );
 				}
 			}
 
@@ -298,11 +301,66 @@ class Plugin_Scan_Gandalf {
 			}
 		}
 
+		if ( isset( $record['max_risk_score'] ) ) {
+			$body .= sprintf( "Max risk score: %s\n", htmlspecialchars( $record['max_risk_score'], ENT_NOQUOTES ) );
+		}
+
+		if ( ! empty( $record['findings'] ) ) {
+			$body .= "Top findings:\n";
+			foreach ( self::top_findings( $record['findings'], 5 ) as $finding ) {
+				$investigation = '';
+				if ( 'completed' === ( $finding['investigation']['status'] ?? '' ) && in_array( $finding['investigation']['result'] ?? '', [ 'reproduced', 'conditional' ], true ) ) {
+					$investigation = sprintf( ' (investigation: %s)', htmlspecialchars( $finding['investigation']['result'], ENT_NOQUOTES ) );
+				}
+
+				$body .= sprintf(
+					"• [%s/%s] %s — %s%s%s\n",
+					htmlspecialchars( $finding['risk_score'] ?? 0, ENT_NOQUOTES ),
+					htmlspecialchars( $finding['severity'] ?? '', ENT_NOQUOTES ),
+					htmlspecialchars( self::excerpt( $finding['title'] ?? '', 150 ), ENT_NOQUOTES ),
+					htmlspecialchars( $finding['file_path'] ?? '', ENT_NOQUOTES ),
+					empty( $finding['line'] ) ? '' : ':' . (int) $finding['line'],
+					$investigation
+				);
+			}
+		}
+
 		$body .= sprintf( "Details: https://wordpress.org/plugins/wp-admin/post.php?post=%s&action=edit\n", $plugin->ID );
 		$body .= sprintf( "Plugin: https://wordpress.org/plugins/%s/\n", $plugin->post_name );
-		$body .= sprintf( "Report: %s\n", $record['report_url'] );
+		$body .= sprintf( "Report: %s\n", htmlspecialchars( $record['report_url'], ENT_NOQUOTES ) );
 
 		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
+	}
+
+	/**
+	 * Return the highest-risk findings first, bounded for display.
+	 *
+	 * The callback orders findings by ID, not by severity.
+	 *
+	 * @param array $findings The scan findings.
+	 * @param int   $limit    Maximum number of findings to return.
+	 * @return array The highest-risk findings.
+	 */
+	protected static function top_findings( $findings, $limit ) {
+		usort(
+			$findings,
+			static function ( $a, $b ) {
+				return ( $b['risk_score'] ?? 0 ) <=> ( $a['risk_score'] ?? 0 );
+			}
+		);
+
+		return array_slice( $findings, 0, $limit );
+	}
+
+	/**
+	 * Collapse untrusted text onto a single bounded line.
+	 *
+	 * @param string $text   The text to excerpt.
+	 * @param int    $length Maximum length in characters.
+	 * @return string The excerpted text.
+	 */
+	protected static function excerpt( $text, $length ) {
+		return mb_strimwidth( preg_replace( '/\s+/u', ' ', trim( (string) $text ) ), 0, $length, '…' );
 	}
 
 	/**
