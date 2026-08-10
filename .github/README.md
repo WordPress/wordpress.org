@@ -19,6 +19,7 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 - **Mechanism:**
   - Runs standard `phpcs` on newly added files (`diff-filter=A`).
   - Runs `phpcs-changed` on modified files (`diff-filter=M`), creating temporary files/diffs to calculate only the errors introduced on the changed lines.
+  - In GitHub Actions, also emits each violation as an inline annotation on the PR diff.
 - **Usage:**
   ```bash
   BASE_REF=trunk php .github/bin/phpcs-branch.php
