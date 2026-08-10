@@ -4,9 +4,7 @@ on:
   pull_request:
   push:
     branches: [ trunk ]
-  # Daily full run: path filtering means regular runs never re-validate the
-  # suites against their unpinned external inputs (WordPress trunk, PHPUnit,
-  # the polyfills, jetpack.zip), so upstream breakage would land silently.
+  # Daily full run to catch breakage in unpinned external inputs.
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:
