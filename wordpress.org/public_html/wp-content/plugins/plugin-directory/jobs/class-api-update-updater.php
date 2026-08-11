@@ -97,12 +97,15 @@ class API_Update_Updater {
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 
+		// `update_source.version` is varchar(128); mirror cron_trigger()'s `left( pm.meta_value, 128 )` truncation allowance.
+		$is_new_version = substr( (string) $version, 0, 128 ) !== $existing_version;
+
 		/*
 		 * Hold a blocked version out of the row: the previously served version keeps
 		 * being served, and the deferred serve is cancelled rather than postponed.
 		 * Status changes still reach the row right away.
 		 */
-		if ( self::is_release_blocked( $release ) && $existing_version !== (string) $version ) {
+		if ( self::is_release_blocked( $release ) && $is_new_version ) {
 			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
 
 			if ( $existing_row ) {
@@ -128,7 +131,7 @@ class API_Update_Updater {
 		 * expires, cron_trigger() keeps re-selecting the plugin and this write
 		 * repeats as a no-op.
 		 */
-		if ( $release_delay && $existing_version !== (string) $version ) {
+		if ( $release_delay && $is_new_version ) {
 			$cooldown_until = $release_time + $release_delay;
 			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
@@ -145,7 +148,7 @@ class API_Update_Updater {
 		// to now — that's the moment the version is actually available to sites. Keeps
 		// phased_rollout()'s `manual-updates-24hr` window measuring from public availability,
 		// even if the commit/confirmation was long ago because the cooldown deferred the write.
-		if ( $release_delay && $existing_version !== (string) $version ) {
+		if ( $release_delay && $is_new_version ) {
 			$release_time = time();
 		}
 
@@ -265,8 +268,8 @@ class API_Update_Updater {
 			return false;
 		}
 
-		// Already live: a block can't un-ship a served version.
-		if ( self::get_served_version( $plugin_slug ) === (string) $version ) {
+		// Already live: a block can't un-ship a served version (compared with the column's varchar(128) truncation).
+		if ( self::get_served_version( $plugin_slug ) === substr( (string) $version, 0, 128 ) ) {
 			return false;
 		}
 
