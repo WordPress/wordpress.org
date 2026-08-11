@@ -247,6 +247,10 @@ class API_Update_Updater {
 	/**
 	 * Hold a plugin's current version out of `update_source` until it's force-released.
 	 *
+	 * The block is scoped to this one release: a later version escapes the hold,
+	 * so an author can ship a fix without reviewer intervention, while the held
+	 * version itself stays blocked until a reviewer force-releases it.
+	 *
 	 * The counterpart to force_release(). It refuses when the version cannot be
 	 * held: no plugin, no release, or the version already being served. Blocking
 	 * an already-held release is a no-op success that preserves the existing
