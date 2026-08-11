@@ -108,12 +108,28 @@ try {
 
 	// (re)Build & Commit 5 Zips at a time to avoid limitations.
 	foreach ( array_chunk( $versions, 5 ) as $versions_to_build ) {
-		$zip_builder->build(
+		$built_versions = $zip_builder->build(
 			$plugin_slug,
 			$versions_to_build,
 			"{$plugin_slug}: Rebuild triggered by " . php_uname( 'n' ),
 			$stable_tag
 		);
+
+		// Mark the ZIPs as being built, trunk has no release record.
+		foreach ( (array) $built_versions as $built_tag ) {
+			if ( 'trunk' === $built_tag ) {
+				continue;
+			}
+
+			Plugin_Directory::add_release(
+				$plugin_post,
+				array(
+					'tag'                      => $built_tag,
+					'zips_built'               => true,
+					'zips_built_from_revision' => $zip_builder->plugins_revision,
+				)
+			);
+		}
 	}
 
 	echo 'OK. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
