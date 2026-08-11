@@ -379,9 +379,12 @@ class Update_Source_Hold_Test extends TestCase {
 
 	/**
 	 * A release without a record cannot be blocked.
+	 *
+	 * An empty (rather than deleted) `releases` meta keeps get_releases() from
+	 * prefilling via a live SVN lookup.
 	 */
 	public function test_unknown_release_is_not_blockable(): void {
-		delete_post_meta( $this->plugin->ID, 'releases' );
+		update_post_meta( $this->plugin->ID, 'releases', array() );
 
 		$this->assertFalse( $this->block() );
 	}
