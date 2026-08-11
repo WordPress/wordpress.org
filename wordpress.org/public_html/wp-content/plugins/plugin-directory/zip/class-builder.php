@@ -38,7 +38,7 @@ class Builder {
 	 * @param string $slug     The plugin slug.
 	 * @param array  $versions The versions of the plugin to build ZIPs for.
 	 * @param string $context  The context of this Builder instance (commit #, etc)
-	 * @return array|false The versions that were successfully built, false in unconfigured environments.
+	 * @return array|false Map of successfully-built version => SVN revision it was built from, false in unconfigured environments.
 	 */
 	public function build( $slug, $versions, $context = '', $stable_tag = '' ) {
 		// Bail when in an unconfigured environment.
@@ -161,7 +161,8 @@ class Builder {
 				SVN::add( $this->signature_file );
 			}
 
-			$built_versions[] = $version;
+			// Record each built version with the revision it was exported from.
+			$built_versions[ $version ] = $this->plugins_revision;
 		}
 
 		// If no versions could be built, an empty commit would incorrectly report success.

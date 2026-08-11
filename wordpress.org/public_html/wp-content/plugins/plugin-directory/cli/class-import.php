@@ -651,8 +651,8 @@ class Import {
 		// Rebuild/Build $build_zips
 		try {
 			// This will rebuild the ZIP.
-			$zip_builder = new Builder();
-			$zip_builder->build(
+			$zip_builder    = new Builder();
+			$built_versions = $zip_builder->build(
 				$plugin_slug,
 				array_unique( $versions_to_build ),
 				$svn_revision_triggered ?
@@ -675,20 +675,22 @@ class Import {
 			return false;
 		}
 
-		// Mark the ZIPs as being built.
-		foreach ( $versions_to_build as $tag ) {
-			if ( 'trunk' === $tag ) {
-				continue;
-			}
+		// Mark only the ZIPs that actually built, each with its export revision.
+		if ( is_array( $built_versions ) ) {
+			foreach ( $built_versions as $tag => $revision ) {
+				if ( 'trunk' === $tag ) {
+					continue;
+				}
 
-			Plugin_Directory::add_release(
-				$plugin,
-				[
-					'tag'                      => $tag,
-					'zips_built'               => true,
-					'zips_built_from_revision' => ( $zip_builder->plugins_revision ?? 0 ) ?: $svn_revision_triggered,
-				]
-			);
+				Plugin_Directory::add_release(
+					$plugin,
+					[
+						'tag'                      => $tag,
+						'zips_built'               => true,
+						'zips_built_from_revision' => $revision ? $revision : $svn_revision_triggered,
+					]
+				);
+			}
 		}
 
 		return true;

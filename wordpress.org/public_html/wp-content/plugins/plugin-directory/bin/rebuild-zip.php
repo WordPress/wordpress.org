@@ -115,20 +115,22 @@ try {
 			$stable_tag
 		);
 
-		// Mark the ZIPs as being built, trunk has no release record.
-		foreach ( (array) $built_versions as $built_tag ) {
-			if ( 'trunk' === $built_tag ) {
-				continue;
-			}
+		// Mark the built ZIPs; trunk has no release record. build() returns false when unconfigured.
+		if ( is_array( $built_versions ) ) {
+			foreach ( $built_versions as $built_tag => $built_revision ) {
+				if ( 'trunk' === $built_tag ) {
+					continue;
+				}
 
-			Plugin_Directory::add_release(
-				$plugin_post,
-				array(
-					'tag'                      => $built_tag,
-					'zips_built'               => true,
-					'zips_built_from_revision' => $zip_builder->plugins_revision,
-				)
-			);
+				Plugin_Directory::add_release(
+					$plugin_post,
+					array(
+						'tag'                      => $built_tag,
+						'zips_built'               => true,
+						'zips_built_from_revision' => $built_revision,
+					)
+				);
+			}
 		}
 	}
 
