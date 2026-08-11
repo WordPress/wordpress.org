@@ -263,6 +263,10 @@ class Update_Source_Hold_Test extends TestCase {
 	public function test_block_holds_unserved_version(): void {
 		$this->insert_served_row();
 
+		// Schedule the deferred serve that the block is expected to cancel.
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+		$this->assertNotFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+
 		$this->assertTrue( $this->block() );
 		$this->assertTrue( API_Update_Updater::is_release_blocked( $this->get_release() ) );
 
@@ -275,12 +279,21 @@ class Update_Source_Hold_Test extends TestCase {
 	}
 
 	/**
-	 * The block, not the cooldown clock, holds the version: a direct write
-	 * attempt changes nothing.
+	 * The block, not the cooldown clock, holds the version: with the cooldown
+	 * cleared, a direct write attempt still changes nothing.
 	 */
 	public function test_block_outlasts_cooldown(): void {
 		$this->insert_served_row();
 		$this->assertTrue( $this->block() );
+
+		// Clear the cooldown so only the block can be holding the version.
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'           => self::STAGED_VERSION,
+				'release_delay' => 0,
+			)
+		);
 
 		API_Update_Updater::update_single_plugin( $this->plugin->post_name );
 
