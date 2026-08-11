@@ -676,7 +676,7 @@ class Import {
 		}
 
 		// Mark only the ZIPs that actually built, each with its export revision.
-		Plugin_Directory::mark_zips_built( $plugin, $built_versions, $svn_revision_triggered );
+		Plugin_Directory::mark_zips_built( $plugin, $built_versions );
 
 		return true;
 	}
