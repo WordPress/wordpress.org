@@ -167,6 +167,7 @@ class Plugin {
 			GP::$router->prepend( "/projects/wp-themes/$project", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_projects' ) );
 			GP::$router->prepend( "/projects/wp-themes/$project/contributors", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_contributors' ) );
 			GP::$router->prepend( "/projects/wp-themes/$project/language-packs", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_language_packs' ) );
+			GP::$router->prepend( "/projects/meta/$project", array( __NAMESPACE__ . '\Routes\Meta', 'get_meta_projects' ) );
 
 			// Add Robots.txt support
 			GP::$router->prepend( '/robots\.txt', 'do_robots' );
