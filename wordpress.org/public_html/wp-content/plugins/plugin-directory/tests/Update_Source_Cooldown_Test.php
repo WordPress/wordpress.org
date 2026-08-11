@@ -125,7 +125,7 @@ class Update_Source_Cooldown_Test extends TestCase {
 	 *
 	 * @return object|null The row, or null when none exists.
 	 */
-	private function get_row() {
+	private function get_row(): ?object {
 		global $wpdb;
 
 		return $wpdb->get_row(

@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
@@ -86,12 +87,13 @@ class API_Update_Updater {
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
 		$release          = Plugin_Directory::get_release( $post, $version );
 		$release_time     = self::compute_release_time( $post, $release );
-		$existing_version = (string) $wpdb->get_var(
+		$existing_row     = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				"SELECT version, meta FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
 				$post->post_name
 			)
 		);
+		$existing_version = (string) ( $existing_row->version ?? '' );
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 
@@ -108,14 +110,18 @@ class API_Update_Updater {
 		 * Only the version bump waits for the cooldown: a status change made
 		 * mid-cooldown (a closure, a reopen) is applied to the existing row
 		 * immediately, which keeps serving the previous release's data.
+		 *
+		 * cron_trigger() keeps re-selecting the plugin while the row's version
+		 * differs from the post's; each re-pass through here is an idempotent
+		 * no-op (the UPDATE matches the stored values) until the cooldown expires.
 		 */
 		if ( $release_delay && $existing_version !== (string) $version ) {
 			$cooldown_until = $release_time + $release_delay;
 			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
 
-				if ( $existing_version ) {
-					self::update_row_availability( $post );
+				if ( $existing_row ) {
+					self::update_row_availability( $post, $existing_row->meta );
 				}
 
 				return true;
@@ -152,7 +158,7 @@ class API_Update_Updater {
 		$data = array(
 			'plugin_id'        => $post->ID,
 			'plugin_slug'      => $post->post_name,
-			'available'        => (int) in_array( $post->post_status, array( 'publish', 'disabled' ) ),
+			'available'        => (int) self::is_available( $post ),
 			'version'          => $version,
 			'stable_tag'       => get_post_meta( $post->ID, 'stable_tag', true ),
 			'plugin_name'      => strip_tags( get_post_meta( $post->ID, 'header_name', true ) ),
@@ -199,18 +205,12 @@ class API_Update_Updater {
 	 * The row keeps serving the previous release's data; only its availability,
 	 * closure meta, and freshness marker follow the plugin's current status.
 	 *
-	 * @param \WP_Post $post The plugin post.
+	 * @param \WP_Post    $post     The plugin post.
+	 * @param string|null $row_meta The row's current `meta` column value.
 	 * @return bool Whether the row changed.
 	 */
-	protected static function update_row_availability( $post ) {
+	protected static function update_row_availability( $post, $row_meta ) {
 		global $wpdb;
-
-		$row_meta = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT meta FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
-				$post->post_name
-			)
-		);
 
 		$meta = maybe_unserialize( $row_meta );
 		$meta = is_array( $meta ) ? $meta : array();
@@ -220,7 +220,7 @@ class API_Update_Updater {
 		$updated = $wpdb->update(
 			$wpdb->prefix . 'update_source',
 			array(
-				'available'    => (int) in_array( $post->post_status, array( 'publish', 'disabled' ), true ),
+				'available'    => (int) self::is_available( $post ),
 				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Matches the update_source meta format.
 				'meta'         => $meta ? serialize( $meta ) : '',
 				'last_updated' => $post->post_modified,
@@ -233,6 +233,16 @@ class API_Update_Updater {
 		}
 
 		return (bool) $updated;
+	}
+
+	/**
+	 * Whether a plugin's `update_source` row should be marked available.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return bool
+	 */
+	protected static function is_available( $post ) {
+		return in_array( $post->post_status, array( 'publish', 'disabled' ), true );
 	}
 
 	/**
@@ -268,19 +278,8 @@ class API_Update_Updater {
 		$plugin_details_cache_key = 'plugin_details:' . ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug );
 		wp_cache_delete( $plugin_details_cache_key, 'update-check-3' );
 
-		// Clear plugin info caches also
-		if ( defined( 'GLOTPRESS_LOCALES_PATH' ) && GLOTPRESS_LOCALES_PATH ) {
-			require_once GLOTPRESS_LOCALES_PATH;
-
-			$locales = array_filter( array_values( wp_list_pluck( \GP_Locales::locales(), 'wp_locale' ) ) );
-
-			foreach ( $locales as $locale ) {
-				$cache_key = 'plugin_information:'
-					. ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug )
-					. ":{$locale}";
-				wp_cache_delete( $cache_key, 'plugin_api_info' );
-			}
-		}
+		// Clear plugin info caches also.
+		Plugins_Info_API::flush_plugin_information_cache( $plugin_slug );
 	}
 
 	/**
