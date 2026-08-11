@@ -115,23 +115,8 @@ try {
 			$stable_tag
 		);
 
-		// Mark the built ZIPs; trunk has no release record. build() returns false when unconfigured.
-		if ( is_array( $built_versions ) ) {
-			foreach ( $built_versions as $built_tag => $built_revision ) {
-				if ( 'trunk' === $built_tag ) {
-					continue;
-				}
-
-				Plugin_Directory::add_release(
-					$plugin_post,
-					array(
-						'tag'                      => $built_tag,
-						'zips_built'               => true,
-						'zips_built_from_revision' => $built_revision,
-					)
-				);
-			}
-		}
+		// Mark only the ZIPs that actually built, each with its export revision.
+		Plugin_Directory::mark_zips_built( $plugin_post, $built_versions );
 	}
 
 	echo 'OK. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
