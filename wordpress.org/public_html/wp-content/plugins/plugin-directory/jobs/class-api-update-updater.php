@@ -456,11 +456,7 @@ class API_Update_Updater {
 			return false;
 		}
 
-		/*
-		 * Log only what the force-release actually lifts: a block leaves its trace
-		 * here (the unblock below deletes the block record itself), and the cooldown
-		 * is only a bypass while it is still running.
-		 */
+		// Log only what is actually lifted: a deleted block's only trace, and the cooldown only while it still runs.
 		$lifted = array();
 
 		if ( self::is_release_blocked( $release ) ) {
