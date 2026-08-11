@@ -253,7 +253,7 @@ class API_Update_Updater {
 	 * @param array  $block       The block to record; 'blocked_at' is added here.
 	 * @return bool Whether the version is held as a result.
 	 */
-	public static function block_release( $plugin_slug, $block ) {
+	public static function block_release( $plugin_slug, array $block ) {
 		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
 		if ( ! $post ) {
 			return false;
