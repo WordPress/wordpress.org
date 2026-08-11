@@ -19,6 +19,7 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 - **Mechanism:**
   - Runs standard `phpcs` on newly added files (`diff-filter=A`).
   - Runs `phpcs-changed` on modified files (`diff-filter=M`), creating temporary files/diffs to calculate only the errors introduced on the changed lines.
+  - In GitHub Actions, also emits each violation as an inline annotation on the PR diff.
 - **Usage:**
   ```bash
   BASE_REF=trunk php .github/bin/phpcs-branch.php
@@ -39,7 +40,6 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
   - **`changes`**: Loads the suite definitions, detects which paths changed, and builds the matrices for the suites that need to run.
   - **`php-standalone`**: Runs PHPUnit on modules that do not depend on WordPress or a database (Serve Happy, Browse Happy, Events API, Slack Trac Bot, and Slack Props Library).
   - **`php-wordpress`**: Sets up Node.js, installs Docker-based `@wordpress/env` (`wp-env`), spins up the local container environment, injects PHPUnit polyfills, and runs unit tests for the Handbook, Plugin Directory, Theme Directory, and Make plugins.
-  - **`results`**: Always-run aggregate job that fails if any suite failed — the stable status check to require in branch protection.
 
 ### 3. [Events API (live) Checks](workflows/events-api-live.yml) (`events-api-live.yml`)
 - **Trigger:** Runs daily at 14:00 UTC and on manual workflow dispatch.
