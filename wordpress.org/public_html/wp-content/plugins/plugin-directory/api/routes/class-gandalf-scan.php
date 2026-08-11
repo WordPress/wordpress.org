@@ -23,12 +23,11 @@ class Gandalf_Scan extends Base {
 	/**
 	 * Registers the callback route.
 	 *
-	 * The args carry the callback body schema per the integration contract;
-	 * cross-field invariants are validated in validate_callback_data(). The
-	 * schema is strict only about what the directory acts on: the REST server
-	 * rejects violations before the callback runs, so anything stricter —
-	 * length caps, unknown-field rejection, display-only enums — would void
-	 * whole deliveries when the scanner evolves.
+	 * The args carry the callback body schema per the integration contract.
+	 * The schema is strict only about what the directory acts on: the REST
+	 * server rejects violations before the callback runs, so anything
+	 * stricter — length caps, unknown-field rejection, display-only enums —
+	 * would void whole deliveries when the scanner evolves.
 	 */
 	public function __construct() {
 		register_rest_route(
@@ -183,37 +182,6 @@ class Gandalf_Scan extends Base {
 	}
 
 	/**
-	 * Validate the cross-field invariants of a security scan callback.
-	 *
-	 * Field-level validation — types and the status enum — is handled by the
-	 * route args; this checks only the per-status required fields, which a
-	 * per-field schema cannot express. Unknown fields are deliberately not
-	 * rejected, so the scanner can add fields without breaking deliveries.
-	 *
-	 * @param array $data The security scan callback data.
-	 * @return WP_Error|null An error for invalid callbacks, null otherwise.
-	 */
-	public static function validate_callback_data( $data ) {
-		if ( 'completed' === ( $data['status'] ?? '' ) ) {
-			$required_fields = [ 'verdict_hash', 'findings_count', 'findings', 'max_risk_score', 'severity_counts', 'report_url' ];
-		} else {
-			$required_fields = [ 'error' ];
-		}
-
-		foreach ( $required_fields as $field ) {
-			if ( ! isset( $data[ $field ] ) ) {
-				return new WP_Error(
-					'invalid_gandalf_scan_callback',
-					sprintf( 'Invalid security scan callback: missing %s.', $field ),
-					[ 'status' => WP_Http::BAD_REQUEST ]
-				);
-			}
-		}
-
-		return null;
-	}
-
-	/**
 	 * Receive a security scan callback.
 	 *
 	 * @param \WP_REST_Request $request The request.
@@ -242,14 +210,9 @@ class Gandalf_Scan extends Base {
 			return $error;
 		}
 
-		$error = self::validate_callback_data( $data );
-
 		// The payload must assert the same plugin the callback was routed to.
-		if ( ! $error && ( $data['slug'] ?? '' ) !== $plugin->post_name ) {
+		if ( ( $data['slug'] ?? '' ) !== $plugin->post_name ) {
 			$error = new WP_Error( 'invalid_gandalf_scan', 'Security scan callback slug does not match the plugin.', [ 'status' => WP_Http::BAD_REQUEST ] );
-		}
-
-		if ( is_wp_error( $error ) ) {
 			Plugin_Scan_Gandalf::record_invalid_callback( $plugin, $error, sanitize_text_field( (string) ( $data['scan_id'] ?? '' ) ) );
 			return $error;
 		}
