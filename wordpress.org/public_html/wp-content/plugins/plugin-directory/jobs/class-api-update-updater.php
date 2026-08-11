@@ -98,6 +98,21 @@ class API_Update_Updater {
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 
 		/*
+		 * Hold a blocked version out of the row: the previously served version keeps
+		 * being served, and the deferred serve is cancelled rather than postponed.
+		 * Status changes still reach the row right away.
+		 */
+		if ( self::is_release_blocked( $release ) && $existing_version !== (string) $version ) {
+			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
+
+			if ( $existing_row ) {
+				self::update_row_availability( $post, $existing_row->meta );
+			}
+
+			return true;
+		}
+
+		/*
 		 * Defer the write for new versions still inside the cooldown window. While
 		 * deferred, the existing `update_source` row (carrying the previous version)
 		 * continues to be served by the update API. Reviewers force-release by setting
@@ -192,6 +207,86 @@ class API_Update_Updater {
 				)
 			);
 		}
+
+		return true;
+	}
+
+	/**
+	 * The version currently served from `update_source`.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return string The served version, or '' when the plugin isn't in `update_source`.
+	 */
+	public static function get_served_version( $plugin_slug ) {
+		global $wpdb;
+
+		return (string) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				$plugin_slug
+			)
+		);
+	}
+
+	/**
+	 * Whether a release is being held out of `update_source` by a block.
+	 *
+	 * Blocks are recorded on the release meta as `release_block`, and cleared by
+	 * Plugin_Directory::add_release() with `unblock => true`.
+	 *
+	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
+	 * @return bool True when the release is being held out of `update_source`.
+	 */
+	public static function is_release_blocked( $release ) {
+		return is_array( $release ) && ! empty( $release['release_block'] );
+	}
+
+	/**
+	 * Hold a plugin's current version out of `update_source` until it's force-released.
+	 *
+	 * The counterpart to force_release(). It refuses when there is nothing to
+	 * hold: no plugin, no release, the version already being served, or a hold
+	 * already recorded against it. Capability checks and audit logging are the
+	 * caller's.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param array  $block       The block to record; 'blocked_at' is added here.
+	 * @return bool Whether the version is held as a result.
+	 */
+	public static function block_release( $plugin_slug, $block ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$version = get_post_meta( $post->ID, 'version', true );
+		$release = Plugin_Directory::get_release( $post, $version );
+		if ( ! $release ) {
+			return false;
+		}
+
+		// Already live: a block can't un-ship a served version.
+		if ( self::get_served_version( $plugin_slug ) === (string) $version ) {
+			return false;
+		}
+
+		// Already held; recording a second block would merge it into the first.
+		if ( self::is_release_blocked( $release ) ) {
+			return false;
+		}
+
+		$block['blocked_at'] = time();
+
+		Plugin_Directory::add_release(
+			$post,
+			array(
+				'tag'           => $release['tag'],
+				'release_block' => $block,
+			)
+		);
+
+		// Cancel a serve scheduled for cooldown-end; the row keeps the previous version.
+		self::update_single_plugin( $plugin_slug );
 
 		return true;
 	}
@@ -373,6 +468,8 @@ class API_Update_Updater {
 			array(
 				'tag'           => $release['tag'],
 				'release_delay' => 0,
+				// Clear any release block so update_single_plugin() serves the version.
+				'unblock'       => true,
 			)
 		);
 
