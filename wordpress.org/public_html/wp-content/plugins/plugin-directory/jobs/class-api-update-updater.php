@@ -200,8 +200,12 @@ class API_Update_Updater {
 	 * Sync the status-dependent `update_source` fields for a plugin whose
 	 * version bump is deferred by a release cooldown.
 	 *
-	 * The row keeps serving the previous release's data; only its availability,
-	 * closure meta, and freshness marker follow the plugin's current status.
+	 * The row keeps serving the previous release's data; only its availability
+	 * and closure meta follow the plugin's current status. `version` and
+	 * `last_updated` are deliberately left untouched: the stale freshness
+	 * marker keeps the plugin matching cron_trigger()'s out-of-date query, so
+	 * the backup recovery path survives even when the version clauses are
+	 * blinded by their 128-character truncation allowance.
 	 *
 	 * @param \WP_Post    $post     The plugin post.
 	 * @param string|null $row_meta The row's current `meta` column value.
@@ -218,10 +222,9 @@ class API_Update_Updater {
 		$updated = $wpdb->update(
 			$wpdb->prefix . 'update_source',
 			array(
-				'available'    => (int) self::is_available( $post ),
+				'available' => (int) self::is_available( $post ),
 				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Matches the update_source meta format.
-				'meta'         => $meta ? serialize( $meta ) : '',
-				'last_updated' => $post->post_modified,
+				'meta'      => $meta ? serialize( $meta ) : '',
 			),
 			array( 'plugin_slug' => $post->post_name )
 		);
