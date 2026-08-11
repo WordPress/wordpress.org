@@ -280,13 +280,16 @@ class API_Update_Updater {
 
 		$block['blocked_at'] = time();
 
-		Plugin_Directory::add_release(
+		$recorded = Plugin_Directory::add_release(
 			$post,
 			array(
 				'tag'           => $release['tag'],
 				'release_block' => $block,
 			)
 		);
+		if ( ! $recorded ) {
+			return false;
+		}
 
 		// Cancel a serve scheduled for cooldown-end; the row keeps the previous version.
 		self::update_single_plugin( $plugin_slug );
