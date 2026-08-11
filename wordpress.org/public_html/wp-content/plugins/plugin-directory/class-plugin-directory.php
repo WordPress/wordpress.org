@@ -1816,9 +1816,6 @@ class Plugin_Directory {
 	 * @return bool
 	 */
 	public static function remove_release( $plugin, $tag ) {
-		// PHP coerces numeric-string array keys to integers; release tags are strings.
-		$tag = (string) $tag;
-
 		$result   = false;
 		$plugin   = self::get_plugin_post( $plugin );
 		$releases = self::get_releases( $plugin );
