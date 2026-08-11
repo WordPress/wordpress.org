@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
@@ -86,12 +87,13 @@ class API_Update_Updater {
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
 		$release          = Plugin_Directory::get_release( $post, $version );
 		$release_time     = self::compute_release_time( $post, $release );
-		$existing_version = (string) $wpdb->get_var(
+		$existing_row     = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				"SELECT version, meta FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
 				$post->post_name
 			)
 		);
+		$existing_version = (string) ( $existing_row->version ?? '' );
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 
@@ -104,11 +106,22 @@ class API_Update_Updater {
 		 * The deferred cron fires at exactly $cooldown_until, so by definition this
 		 * gate is false when called from cron_trigger_release() and no explicit bypass
 		 * is needed.
+		 *
+		 * Only the version bump waits for the cooldown: a status change made
+		 * mid-cooldown (a closure, a reopen) reaches the existing row right away,
+		 * while it keeps serving the previous release's data. Until the cooldown
+		 * expires, cron_trigger() keeps re-selecting the plugin and this write
+		 * repeats as a no-op.
 		 */
 		if ( $release_delay && $existing_version !== (string) $version ) {
 			$cooldown_until = $release_time + $release_delay;
 			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
+
+				if ( $existing_row ) {
+					self::update_row_availability( $post, $existing_row->meta );
+				}
+
 				return true;
 			}
 		}
@@ -127,16 +140,7 @@ class API_Update_Updater {
 			'last_stable_tag' => $post->last_stable_tag ?? '',
 		);
 
-		if ( in_array( $post->post_status, array( 'disabled', 'closed' ) ) ) {
-			$closed_data = Template::get_close_data( $post );
-			if ( $closed_data ) {
-				// Close date is sometimes unknown, only include the Day of closure.
-				$meta['closed_at'] = $closed_data['date'] ? gmdate( 'Y-m-d', strtotime( $closed_data['date'] ) ) : false;
-				if ( $closed_data['public'] ) {
-					$meta['closed_reason'] = $closed_data['reason'] ?: 'unknown';
-				}
-			}
-		}
+		$meta = array_merge( $meta, self::get_close_meta( $post ) );
 
 		// Add phased rollout strategy data if needed.
 		if ( $release && ! empty( $release['rollout_strategy'] ) ) {
@@ -152,7 +156,7 @@ class API_Update_Updater {
 		$data = array(
 			'plugin_id'        => $post->ID,
 			'plugin_slug'      => $post->post_name,
-			'available'        => (int) in_array( $post->post_status, array( 'publish', 'disabled' ) ),
+			'available'        => (int) self::is_available( $post ),
 			'version'          => $version,
 			'stable_tag'       => get_post_meta( $post->ID, 'stable_tag', true ),
 			'plugin_name'      => strip_tags( get_post_meta( $post->ID, 'header_name', true ) ),
@@ -177,35 +181,106 @@ class API_Update_Updater {
 			}
 		}
 
-		// ~34char prefix, Memcache limit of 255char per key.
-		$plugin_details_cache_key = 'plugin_details:' . ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug );
-		wp_cache_delete( $plugin_details_cache_key, 'update-check-3' );
-
-		// Clear plugin info caches also
-		if ( defined( 'GLOTPRESS_LOCALES_PATH' ) && GLOTPRESS_LOCALES_PATH ) {
-			require_once GLOTPRESS_LOCALES_PATH;
-
-			$locales = array_filter( array_values( wp_list_pluck( \GP_Locales::locales(), 'wp_locale' ) ) );
-
-			foreach ( $locales as $locale ) {
-				$cache_key = 'plugin_information:'
-					. ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug )
-					. ":{$locale}";
-				wp_cache_delete( $cache_key, 'plugin_api_info' );
-			}
-		}
+		self::clear_plugin_caches( $plugin_slug );
 
 		// Sync the latest version to Stats.
 		if ( function_exists( '\WordPressdotorg\Stats\sync_latest_version' ) ) {
 			\WordPressdotorg\Stats\sync_latest_version(
-				'plugin', 
+				'plugin',
 				array(
-					$plugin_slug => $version
+					$plugin_slug => $version,
 				)
 			);
 		}
 
 		return true;
+	}
+
+	/**
+	 * Sync the status-dependent `update_source` fields for a plugin whose
+	 * version bump is deferred by a release cooldown.
+	 *
+	 * The row keeps serving the previous release's data; only its availability
+	 * and closure meta follow the plugin's current status. `version` and
+	 * `last_updated` are deliberately left untouched: the stale freshness
+	 * marker keeps the plugin matching cron_trigger()'s out-of-date query, so
+	 * the backup recovery path survives even when the version clauses are
+	 * blinded by their 128-character truncation allowance.
+	 *
+	 * @param \WP_Post    $post     The plugin post.
+	 * @param string|null $row_meta The row's current `meta` column value.
+	 * @return bool Whether the row changed.
+	 */
+	protected static function update_row_availability( $post, $row_meta ) {
+		global $wpdb;
+
+		$meta = maybe_unserialize( $row_meta );
+		$meta = is_array( $meta ) ? $meta : array();
+		unset( $meta['closed_at'], $meta['closed_reason'] );
+		$meta = array_merge( $meta, self::get_close_meta( $post ) );
+
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'update_source',
+			array(
+				'available' => (int) self::is_available( $post ),
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Matches the update_source meta format.
+				'meta'      => $meta ? serialize( $meta ) : '',
+			),
+			array( 'plugin_slug' => $post->post_name )
+		);
+
+		if ( $updated ) {
+			self::clear_plugin_caches( $post->post_name );
+		}
+
+		return (bool) $updated;
+	}
+
+	/**
+	 * Whether a plugin's `update_source` row should be marked available.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return bool
+	 */
+	protected static function is_available( $post ) {
+		return in_array( $post->post_status, array( 'publish', 'disabled' ), true );
+	}
+
+	/**
+	 * Return the closure fields for a plugin's `update_source` meta.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return array Empty for plugins that are not disabled or closed.
+	 */
+	protected static function get_close_meta( $post ) {
+		$meta = array();
+
+		if ( in_array( $post->post_status, array( 'disabled', 'closed' ), true ) ) {
+			$closed_data = Template::get_close_data( $post );
+			if ( $closed_data ) {
+				// Close date is sometimes unknown, only include the Day of closure.
+				$meta['closed_at'] = $closed_data['date'] ? gmdate( 'Y-m-d', strtotime( $closed_data['date'] ) ) : false;
+				if ( $closed_data['public'] ) {
+					$meta['closed_reason'] = $closed_data['reason'] ? $closed_data['reason'] : 'unknown';
+				}
+			}
+		}
+
+		return $meta;
+	}
+
+	/**
+	 * Clear the update-check and plugin information caches for a plugin.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 */
+	protected static function clear_plugin_caches( $plugin_slug ) {
+		// ~34char prefix, Memcache limit of 255char per key.
+		$plugin_details_cache_key = 'plugin_details:' . ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug );
+		wp_cache_delete( $plugin_details_cache_key, 'update-check-3' );
+
+		// Clear plugin info caches also.
+		Plugins_Info_API::flush_plugin_information_cache( $plugin_slug );
 	}
 
 	/**
