@@ -456,11 +456,30 @@ class API_Update_Updater {
 			return false;
 		}
 
+		/*
+		 * Log only what the force-release actually lifts: a block leaves its trace
+		 * here (the unblock below deletes the block record itself), and the cooldown
+		 * is only a bypass while it is still running.
+		 */
+		$lifted = array();
+
+		if ( self::is_release_blocked( $release ) ) {
+			$lifted[] = sprintf(
+				'lifting the release block held since %s',
+				gmdate( 'Y-m-d', (int) ( $release['release_block']['blocked_at'] ?? 0 ) )
+			);
+		}
+
+		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+		if ( $release_delay && self::compute_release_time( $post, $release ) + $release_delay > time() ) {
+			$lifted[] = sprintf( 'bypassing the %d-hour release cooldown', $release_delay / HOUR_IN_SECONDS );
+		}
+
 		Tools::audit_log(
 			sprintf(
-				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
+				'Force-released version %s%s. Reason: %s',
 				$version,
-				(int) ( $release['release_delay'] ?? 0 ) / HOUR_IN_SECONDS,
+				$lifted ? ', ' . implode( ' and ', $lifted ) : '',
 				$reason
 			),
 			$post

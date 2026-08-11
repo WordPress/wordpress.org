@@ -383,15 +383,38 @@ class Update_Source_Hold_Test extends TestCase {
 	}
 
 	/**
-	 * A force-release clears the block and serves the version.
+	 * A force-release clears the block, serves the version, and logs that a
+	 * block was lifted — the only trace left once the block record is deleted.
+	 * With the cooldown already cleared, the log claims no cooldown bypass.
 	 */
 	public function test_force_release_clears_block(): void {
 		$this->insert_served_row();
 		$this->assertTrue( $this->block() );
 
+		// Clear the cooldown so the block is the only thing being lifted.
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'           => self::STAGED_VERSION,
+				'release_delay' => 0,
+			)
+		);
+
 		$this->assertTrue( API_Update_Updater::force_release( $this->plugin->post_name, 'Reviewed; false positive.' ) );
 
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
 		$this->assertSame( self::STAGED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+
+		$audit_log = implode( ' ', wp_list_pluck(
+			get_comments(
+				array(
+					'post_id' => $this->plugin->ID,
+					'type'    => 'internal-note',
+				)
+			),
+			'comment_content'
+		) );
+		$this->assertStringContainsString( 'lifting the release block', $audit_log );
+		$this->assertStringNotContainsString( 'release cooldown', $audit_log );
 	}
 }
