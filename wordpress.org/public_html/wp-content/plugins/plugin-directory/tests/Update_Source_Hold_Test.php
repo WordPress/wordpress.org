@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for update_source writes during a release cooldown.
+ * Tests for update_source writes while a version is held by a cooldown or block.
  *
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
@@ -13,18 +13,19 @@ use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**
- * Tests that a release cooldown defers only the version bump, while status
- * changes reach the `update_source` row immediately.
+ * Tests that a hold — a release cooldown or a release block — defers only the
+ * version bump, while status changes reach the `update_source` row immediately.
+ * A cooldown expires on its own; a block lasts until the release is force-released.
  *
  * @group jobs
  */
 #[Group( 'jobs' )]
-class Update_Source_Cooldown_Test extends TestCase {
+class Update_Source_Hold_Test extends TestCase {
 
 	/** The version served by the update_source row fixture. */
 	private const SERVED_VERSION = '1.0.0';
 
-	/** The newer version still inside its release cooldown. */
+	/** The newer version held by the cooldown or block. */
 	private const STAGED_VERSION = '1.4.4';
 
 	/**
@@ -49,10 +50,13 @@ class Update_Source_Cooldown_Test extends TestCase {
 
 		wp_cache_flush();
 
+		// Tools::audit_log() reads it unguarded.
+		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+
 		$plugin = Plugin_Directory::create_plugin_post(
 			array(
-				'post_name'   => 'cooldown-test-' . ( ++self::$plugin_count ),
-				'post_title'  => 'Cooldown Sync Test Plugin',
+				'post_name'   => 'update-source-test-' . ( ++self::$plugin_count ),
+				'post_title'  => 'Update Source Test Plugin',
 				'post_status' => 'publish',
 			)
 		);
@@ -93,9 +97,11 @@ class Update_Source_Cooldown_Test extends TestCase {
 	}
 
 	/**
-	 * Insert an update_source row serving the previous version.
+	 * Insert an update_source row serving a version.
+	 *
+	 * @param string $version The version the row serves.
 	 */
-	private function insert_served_row(): void {
+	private function insert_served_row( string $version = self::SERVED_VERSION ): void {
 		global $wpdb;
 
 		$wpdb->insert(
@@ -104,8 +110,8 @@ class Update_Source_Cooldown_Test extends TestCase {
 				'plugin_id'        => $this->plugin->ID,
 				'plugin_slug'      => $this->plugin->post_name,
 				'available'        => 1,
-				'version'          => self::SERVED_VERSION,
-				'stable_tag'       => self::SERVED_VERSION,
+				'version'          => $version,
+				'stable_tag'       => $version,
 				'plugin_name'      => $this->plugin->post_title,
 				'requires_plugins' => '',
 				'last_updated'     => $this->plugin->post_modified,
@@ -149,6 +155,27 @@ class Update_Source_Cooldown_Test extends TestCase {
 			delete_post_meta( $this->plugin->ID, '_close_reason' );
 			delete_post_meta( $this->plugin->ID, 'plugin_closed_date' );
 		}
+	}
+
+	/**
+	 * Block the staged release of the plugin fixture.
+	 *
+	 * @return bool Whether the release was blocked.
+	 */
+	private function block(): bool {
+		return API_Update_Updater::block_release(
+			$this->plugin->post_name,
+			array( 'reason' => 'High-risk release.' )
+		);
+	}
+
+	/**
+	 * Fetch the release record for the staged version.
+	 *
+	 * @return array|false The release, or false when none exists.
+	 */
+	private function get_release(): array|false {
+		return Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::STAGED_VERSION );
 	}
 
 	/**
@@ -227,5 +254,113 @@ class Update_Source_Cooldown_Test extends TestCase {
 		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
 
 		$this->assertNull( $this->get_row() );
+	}
+
+	/**
+	 * Blocking an unserved release records the hold and keeps the row on the
+	 * served version, with the deferred serve cancelled.
+	 */
+	public function test_block_holds_unserved_version(): void {
+		$this->insert_served_row();
+
+		$this->assertTrue( $this->block() );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( $this->get_release() ) );
+
+		$block = $this->get_release()['release_block'];
+		$this->assertSame( 'High-risk release.', $block['reason'] );
+		$this->assertNotEmpty( $block['blocked_at'] );
+
+		$this->assertSame( self::SERVED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+		$this->assertFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * The block, not the cooldown clock, holds the version: a direct write
+	 * attempt changes nothing.
+	 */
+	public function test_block_outlasts_cooldown(): void {
+		$this->insert_served_row();
+		$this->assertTrue( $this->block() );
+
+		API_Update_Updater::update_single_plugin( $this->plugin->post_name );
+
+		$this->assertSame( self::SERVED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+	}
+
+	/**
+	 * A first-ever release can be blocked before any row exists; none is
+	 * created while the hold is in effect.
+	 */
+	public function test_block_holds_first_release(): void {
+		$this->assertTrue( $this->block() );
+
+		API_Update_Updater::update_single_plugin( $this->plugin->post_name );
+
+		$this->assertSame( '', API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+	}
+
+	/**
+	 * A version that is already being served cannot be blocked.
+	 */
+	public function test_served_version_is_not_blockable(): void {
+		$this->insert_served_row( self::STAGED_VERSION );
+
+		$this->assertFalse( $this->block() );
+		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
+	}
+
+	/**
+	 * A release without a record cannot be blocked.
+	 */
+	public function test_unknown_release_is_not_blockable(): void {
+		delete_post_meta( $this->plugin->ID, 'releases' );
+
+		$this->assertFalse( $this->block() );
+	}
+
+	/**
+	 * A second block on an already-held release is refused, preserving the first.
+	 */
+	public function test_existing_block_is_not_replaced(): void {
+		$this->insert_served_row();
+		$this->assertTrue( $this->block() );
+
+		$second = API_Update_Updater::block_release(
+			$this->plugin->post_name,
+			array( 'reason' => 'Another reason.' )
+		);
+
+		$this->assertFalse( $second );
+		$this->assertSame( 'High-risk release.', $this->get_release()['release_block']['reason'] );
+	}
+
+	/**
+	 * A status change while a release is held still reaches the row.
+	 */
+	public function test_status_change_reaches_row_while_blocked(): void {
+		$this->insert_served_row();
+		$this->assertTrue( $this->block() );
+
+		$this->set_status( 'closed' );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$row = $this->get_row();
+		$this->assertSame( '0', $row->available );
+		$this->assertStringContainsString( 'closed_at', (string) $row->meta );
+		$this->assertSame( self::SERVED_VERSION, $row->version );
+	}
+
+	/**
+	 * A force-release clears the block and serves the version.
+	 */
+	public function test_force_release_clears_block(): void {
+		$this->insert_served_row();
+		$this->assertTrue( $this->block() );
+
+		$this->assertTrue( API_Update_Updater::force_release( $this->plugin->post_name, 'Reviewed; false positive.' ) );
+
+		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
+		$this->assertSame( self::STAGED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
 	}
 }
