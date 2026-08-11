@@ -436,8 +436,9 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * Reviewer force-release: clear the cooldown for a plugin's current version and
-	 * write it to `update_source` immediately. Logs the action with the supplied reason.
+	 * Reviewer force-release: lift any release block — this is the only way to
+	 * clear one — and the cooldown for a plugin's current version, then write it
+	 * to `update_source` immediately. Logs the action with the supplied reason.
 	 *
 	 * Capability checks must be performed by the caller.
 	 *
