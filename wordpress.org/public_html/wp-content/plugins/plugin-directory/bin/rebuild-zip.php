@@ -104,7 +104,10 @@ try {
 	if ( ! $plugin_post ) {
 		throw new Exception( 'Could not locate plugin post' );
 	}
-	$stable_tag = get_post_meta( $plugin_post->ID, 'stable_tag', true ) ?: 'trunk';
+	$stable_tag = get_post_meta( $plugin_post->ID, 'stable_tag', true );
+	if ( ! $stable_tag ) {
+		$stable_tag = 'trunk';
+	}
 
 	// (re)Build & Commit 5 Zips at a time to avoid limitations.
 	foreach ( array_chunk( $versions, 5 ) as $versions_to_build ) {
