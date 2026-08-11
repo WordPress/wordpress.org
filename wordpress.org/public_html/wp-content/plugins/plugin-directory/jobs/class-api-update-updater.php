@@ -464,10 +464,7 @@ class API_Update_Updater {
 		$lifted = array();
 
 		if ( self::is_release_blocked( $release ) ) {
-			$lifted[] = sprintf(
-				'lifting the release block held since %s',
-				gmdate( 'Y-m-d', (int) ( $release['release_block']['blocked_at'] ?? 0 ) )
-			);
+			$lifted[] = 'lifting the release block';
 		}
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
