@@ -97,6 +97,24 @@ class API_Update_Updater {
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 
+		// `update_source.version` is varchar(128); mirror cron_trigger()'s `left( pm.meta_value, 128 )` truncation allowance.
+		$is_new_version = substr( (string) $version, 0, 128 ) !== $existing_version;
+
+		/*
+		 * Hold a blocked version out of the row: the previously served version keeps
+		 * being served, and the deferred serve is cancelled rather than postponed.
+		 * Status changes still reach the row right away.
+		 */
+		if ( self::is_release_blocked( $release ) && $is_new_version ) {
+			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
+
+			if ( $existing_row ) {
+				self::update_row_availability( $post, $existing_row->meta );
+			}
+
+			return true;
+		}
+
 		/*
 		 * Defer the write for new versions still inside the cooldown window. While
 		 * deferred, the existing `update_source` row (carrying the previous version)
@@ -113,7 +131,7 @@ class API_Update_Updater {
 		 * expires, cron_trigger() keeps re-selecting the plugin and this write
 		 * repeats as a no-op.
 		 */
-		if ( $release_delay && $existing_version !== (string) $version ) {
+		if ( $release_delay && $is_new_version ) {
 			$cooldown_until = $release_time + $release_delay;
 			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
@@ -130,7 +148,7 @@ class API_Update_Updater {
 		// to now — that's the moment the version is actually available to sites. Keeps
 		// phased_rollout()'s `manual-updates-24hr` window measuring from public availability,
 		// even if the commit/confirmation was long ago because the cooldown deferred the write.
-		if ( $release_delay && $existing_version !== (string) $version ) {
+		if ( $release_delay && $is_new_version ) {
 			$release_time = time();
 		}
 
@@ -192,6 +210,93 @@ class API_Update_Updater {
 				)
 			);
 		}
+
+		return true;
+	}
+
+	/**
+	 * The version currently served from `update_source`.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return string The served version, or '' when the plugin isn't in `update_source`.
+	 */
+	public static function get_served_version( $plugin_slug ) {
+		global $wpdb;
+
+		return (string) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				$plugin_slug
+			)
+		);
+	}
+
+	/**
+	 * Whether a release is being held out of `update_source` by a block.
+	 *
+	 * Blocks are recorded on the release meta as `release_block`, and cleared by
+	 * Plugin_Directory::add_release() with `unblock => true`.
+	 *
+	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
+	 * @return bool True when the release is being held out of `update_source`.
+	 */
+	public static function is_release_blocked( $release ) {
+		return is_array( $release ) && ! empty( $release['release_block'] );
+	}
+
+	/**
+	 * Hold a plugin's current version out of `update_source` until it's force-released.
+	 *
+	 * The block is scoped to this one release: a later version escapes the hold,
+	 * so an author can ship a fix without reviewer intervention, while the held
+	 * version itself stays blocked until a reviewer force-releases it.
+	 *
+	 * The counterpart to force_release(). It refuses when the version cannot be
+	 * held: no plugin, no release, or the version already being served. Blocking
+	 * an already-held release is a no-op success that preserves the existing
+	 * block. Capability checks and audit logging are the caller's.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param array  $block       The block to record; 'blocked_at' is added here.
+	 * @return bool Whether the version is held as a result.
+	 */
+	public static function block_release( $plugin_slug, array $block ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$version = get_post_meta( $post->ID, 'version', true );
+		$release = Plugin_Directory::get_release( $post, $version );
+		if ( ! $release ) {
+			return false;
+		}
+
+		// Already live: a block can't un-ship a served version (compared with the column's varchar(128) truncation).
+		if ( self::get_served_version( $plugin_slug ) === substr( (string) $version, 0, 128 ) ) {
+			return false;
+		}
+
+		// Already held; recording a second block would merge it into the first.
+		if ( self::is_release_blocked( $release ) ) {
+			return true;
+		}
+
+		$block['blocked_at'] = time();
+
+		$recorded = Plugin_Directory::add_release(
+			$post,
+			array(
+				'tag'           => $release['tag'],
+				'release_block' => $block,
+			)
+		);
+		if ( ! $recorded ) {
+			return false;
+		}
+
+		// Cancel a serve scheduled for cooldown-end; the row keeps the previous version.
+		self::update_single_plugin( $plugin_slug );
 
 		return true;
 	}
@@ -331,8 +436,9 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * Reviewer force-release: clear the cooldown for a plugin's current version and
-	 * write it to `update_source` immediately. Logs the action with the supplied reason.
+	 * Reviewer force-release: lift any release block — this is the only way to
+	 * clear one — and the cooldown for a plugin's current version, then write it
+	 * to `update_source` immediately. Logs the action with the supplied reason.
 	 *
 	 * Capability checks must be performed by the caller.
 	 *
@@ -358,11 +464,23 @@ class API_Update_Updater {
 			return false;
 		}
 
+		// Log only what is actually lifted: a deleted block's only trace, and the cooldown only while it still runs.
+		$lifted = array();
+
+		if ( self::is_release_blocked( $release ) ) {
+			$lifted[] = 'lifting the release block';
+		}
+
+		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+		if ( $release_delay && self::compute_release_time( $post, $release ) + $release_delay > time() ) {
+			$lifted[] = sprintf( 'bypassing the %d-hour release cooldown', $release_delay / HOUR_IN_SECONDS );
+		}
+
 		Tools::audit_log(
 			sprintf(
-				'Force-released version %s, bypassing the %d-hour release cooldown. Reason: %s',
+				'Force-released version %s%s. Reason: %s',
 				$version,
-				(int) ( $release['release_delay'] ?? 0 ) / HOUR_IN_SECONDS,
+				$lifted ? ', ' . implode( ' and ', $lifted ) : '',
 				$reason
 			),
 			$post
@@ -373,6 +491,7 @@ class API_Update_Updater {
 			array(
 				'tag'           => $release['tag'],
 				'release_delay' => 0,
+				'unblock'       => true,
 			)
 		);
 
