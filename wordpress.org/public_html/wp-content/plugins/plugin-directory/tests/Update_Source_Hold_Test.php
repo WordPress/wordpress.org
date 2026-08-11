@@ -357,6 +357,27 @@ class Update_Source_Hold_Test extends TestCase {
 	}
 
 	/**
+	 * A version longer than the row's varchar(128) `version` column is stored
+	 * truncated; the truncated match must not read as a new version, which would
+	 * defer the already-served release to a cooldown over and over.
+	 */
+	public function test_served_truncated_version_is_not_deferred(): void {
+		$long_version = str_repeat( '1.0.', 50 ) . '0';
+
+		$release            = $this->get_release();
+		$release['tag']     = $long_version;
+		$release['version'] = $long_version;
+
+		update_post_meta( $this->plugin->ID, 'version', $long_version );
+		update_post_meta( $this->plugin->ID, 'releases', array( $release ) );
+		$this->insert_served_row( substr( $long_version, 0, 128 ) );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$this->assertFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
 	 * A release without a record cannot be blocked.
 	 */
 	public function test_unknown_release_is_not_blockable(): void {
