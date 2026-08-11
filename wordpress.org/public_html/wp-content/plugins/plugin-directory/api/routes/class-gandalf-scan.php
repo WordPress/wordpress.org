@@ -24,16 +24,11 @@ class Gandalf_Scan extends Base {
 	 * Registers the callback route.
 	 *
 	 * The args carry the callback body schema per the integration contract;
-	 * cross-field invariants are validated in validate_callback_data().
-	 *
-	 * The contract is strict only about what the directory acts on — the
-	 * status branching, the plugin identity, and field types. It is
-	 * deliberately lenient about the descriptive payload: no length caps, no
-	 * unknown-field rejection, no enums on display-only fields, and no upper
-	 * bound on scores. The REST server rejects arg violations before the
-	 * callback runs, so anything stricter would void whole deliveries when
-	 * the scanner evolves — an over-long model-generated string, a new
-	 * severity, or an added field must not cost a verdict.
+	 * cross-field invariants are validated in validate_callback_data(). The
+	 * schema is strict only about what the directory acts on: the REST server
+	 * rejects violations before the callback runs, so anything stricter —
+	 * length caps, unknown-field rejection, display-only enums — would void
+	 * whole deliveries when the scanner evolves.
 	 */
 	public function __construct() {
 		register_rest_route(
@@ -98,7 +93,8 @@ class Gandalf_Scan extends Base {
 						'type'  => 'array',
 						'items' => [
 							'type'       => 'object',
-							'required'   => [ 'id', 'ref', 'title', 'severity', 'file_path', 'risk_score', 'investigation' ],
+							// Only the score is acted on; descriptive fields are read defensively.
+							'required'   => [ 'risk_score' ],
 							'properties' => [
 								'id'            => [
 									'type'      => 'string',
@@ -134,7 +130,6 @@ class Gandalf_Scan extends Base {
 								],
 								'investigation' => [
 									'type'       => 'object',
-									'required'   => [ 'status', 'result', 'summary' ],
 									'properties' => [
 										'status'  => [
 											'type'      => 'string',
