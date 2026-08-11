@@ -323,6 +323,15 @@ class Update_Source_Hold_Test extends TestCase {
 	public function test_block_holds_first_release(): void {
 		$this->assertTrue( $this->block() );
 
+		// Clear the cooldown so only the block can be holding the version.
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'           => self::STAGED_VERSION,
+				'release_delay' => 0,
+			)
+		);
+
 		API_Update_Updater::update_single_plugin( $this->plugin->post_name );
 
 		$this->assertSame( '', API_Update_Updater::get_served_version( $this->plugin->post_name ) );
