@@ -483,7 +483,6 @@ class API_Update_Updater {
 			array(
 				'tag'           => $release['tag'],
 				'release_delay' => 0,
-				// Clear any release block so update_single_plugin() serves the version.
 				'unblock'       => true,
 			)
 		);
