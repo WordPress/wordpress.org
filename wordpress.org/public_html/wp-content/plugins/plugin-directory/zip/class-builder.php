@@ -39,9 +39,10 @@ class Builder {
 	/**
 	 * Generate a ZIP for a provided Plugin tags.
 	 *
-	 * @param string $slug     The plugin slug.
-	 * @param array  $versions The versions of the plugin to build ZIPs for.
-	 * @param string $context  The context of this Builder instance (commit #, etc)
+	 * @param string $slug       The plugin slug.
+	 * @param array  $versions   The versions of the plugin to build ZIPs for.
+	 * @param string $context    Optional. The context of this Builder instance (commit #, etc). Default empty string.
+	 * @param string $stable_tag Optional. The stable tag of the plugin, used to determine whether checksums are generated. Default empty string.
 	 * @return array|false Map of successfully-built version (as requested) => SVN revision it was built from, false in unconfigured environments.
 	 */
 	public function build( $slug, $versions, $context = '', $stable_tag = '' ) {
