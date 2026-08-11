@@ -366,7 +366,8 @@ class Update_Source_Hold_Test extends TestCase {
 	}
 
 	/**
-	 * A second block on an already-held release is refused, preserving the first.
+	 * A second block on an already-held release is a no-op success — the version
+	 * is held, which is what the caller asked for — preserving the first block.
 	 */
 	public function test_existing_block_is_not_replaced(): void {
 		$this->insert_served_row();
@@ -377,7 +378,7 @@ class Update_Source_Hold_Test extends TestCase {
 			array( 'reason' => 'Another reason.' )
 		);
 
-		$this->assertFalse( $second );
+		$this->assertTrue( $second );
 		$this->assertSame( 'High-risk release.', $this->get_release()['release_block']['reason'] );
 	}
 

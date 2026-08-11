@@ -247,10 +247,10 @@ class API_Update_Updater {
 	/**
 	 * Hold a plugin's current version out of `update_source` until it's force-released.
 	 *
-	 * The counterpart to force_release(). It refuses when there is nothing to
-	 * hold: no plugin, no release, the version already being served, or a hold
-	 * already recorded against it. Capability checks and audit logging are the
-	 * caller's.
+	 * The counterpart to force_release(). It refuses when the version cannot be
+	 * held: no plugin, no release, or the version already being served. Blocking
+	 * an already-held release is a no-op success that preserves the existing
+	 * block. Capability checks and audit logging are the caller's.
 	 *
 	 * @param string $plugin_slug The plugin slug.
 	 * @param array  $block       The block to record; 'blocked_at' is added here.
@@ -275,7 +275,7 @@ class API_Update_Updater {
 
 		// Already held; recording a second block would merge it into the first.
 		if ( self::is_release_blocked( $release ) ) {
-			return false;
+			return true;
 		}
 
 		$block['blocked_at'] = time();
