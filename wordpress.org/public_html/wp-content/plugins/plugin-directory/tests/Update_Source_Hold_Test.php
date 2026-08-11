@@ -179,6 +179,22 @@ class Update_Source_Hold_Test extends TestCase {
 	}
 
 	/**
+	 * Fetch the plugin's audit log entries as a single string.
+	 *
+	 * @return string The concatenated internal-note comments.
+	 */
+	private function get_audit_log(): string {
+		$notes = get_comments(
+			array(
+				'post_id' => $this->plugin->ID,
+				'type'    => 'internal-note',
+			)
+		);
+
+		return implode( ' ', wp_list_pluck( $notes, 'comment_content' ) );
+	}
+
+	/**
 	 * A new version inside its cooldown stays deferred; the row keeps serving
 	 * the previous version.
 	 */
@@ -405,15 +421,7 @@ class Update_Source_Hold_Test extends TestCase {
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
 		$this->assertSame( self::STAGED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
 
-		$audit_log = implode( ' ', wp_list_pluck(
-			get_comments(
-				array(
-					'post_id' => $this->plugin->ID,
-					'type'    => 'internal-note',
-				)
-			),
-			'comment_content'
-		) );
+		$audit_log = $this->get_audit_log();
 		$this->assertStringContainsString( 'lifting the release block', $audit_log );
 		$this->assertStringNotContainsString( 'release cooldown', $audit_log );
 	}
