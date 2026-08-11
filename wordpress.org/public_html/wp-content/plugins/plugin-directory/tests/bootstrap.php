@@ -46,11 +46,6 @@ require_once $_tests_dir . '/includes/functions.php';
  * Manually load the plugin being tested.
  */
 function manually_load_plugin() {
-	// Points at tables which live outside WordPress on production; see Tools::get_plugin_committers().
-	if ( ! defined( 'PLUGINS_TABLE_PREFIX' ) ) {
-		define( 'PLUGINS_TABLE_PREFIX', $GLOBALS['wpdb']->prefix );
-	}
-
 	require_once dirname( __DIR__ ) . '/plugin-directory.php';
 }
 tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );

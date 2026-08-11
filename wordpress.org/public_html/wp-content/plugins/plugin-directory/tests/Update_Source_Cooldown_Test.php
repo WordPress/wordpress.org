@@ -16,13 +16,6 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
  * Tests that a release cooldown defers only the version bump, while status
  * changes reach the `update_source` row immediately.
  *
- * Extends the plain PHPUnit TestCase: WP_UnitTestCase is not compatible with
- * the PHPUnit 11 runner used by this suite. Isolation comes from giving every
- * test its own plugin post instead of per-test transactions.
- *
- * The group is declared as an attribute as well as `@group`: PHPUnit 11 ignores
- * a class-level `@group` docblock, while older runners ignore the attribute.
- *
  * @group jobs
  */
 #[Group( 'jobs' )]

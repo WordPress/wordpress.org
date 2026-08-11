@@ -108,12 +108,10 @@ class API_Update_Updater {
 		 * is needed.
 		 *
 		 * Only the version bump waits for the cooldown: a status change made
-		 * mid-cooldown (a closure, a reopen) is applied to the existing row
-		 * immediately, which keeps serving the previous release's data.
-		 *
-		 * cron_trigger() keeps re-selecting the plugin while the row's version
-		 * differs from the post's; each re-pass through here is an idempotent
-		 * no-op (the UPDATE matches the stored values) until the cooldown expires.
+		 * mid-cooldown (a closure, a reopen) reaches the existing row right away,
+		 * while it keeps serving the previous release's data. Until the cooldown
+		 * expires, cron_trigger() keeps re-selecting the plugin and this write
+		 * repeats as a no-op.
 		 */
 		if ( $release_delay && $existing_version !== (string) $version ) {
 			$cooldown_until = $release_time + $release_delay;
