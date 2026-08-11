@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan_Gandalf;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
@@ -208,7 +209,47 @@ class Gandalf_Scan_Endpoint_Test extends TestCase {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( array( 'success' => true ), $response->get_data() );
 
+		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
+		$this->assertSame( 'advisory', $snapshot['action'] );
+		$this->assertSame( 5.5, $snapshot['max_risk_score'] );
+		$this->assertCount( 3, $snapshot['findings'] );
+
 		$this->assertEmpty( get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) );
+	}
+
+	/**
+	 * A high-risk callback blocks the release end to end.
+	 */
+	public function test_high_risk_callback_blocks_release(): void {
+		update_post_meta(
+			$this->plugin->ID,
+			'releases',
+			array(
+				array(
+					'date'                     => time(),
+					'tag'                      => self::VERSION,
+					'version'                  => self::VERSION,
+					'zips_built'               => true,
+					'zips_built_from_revision' => 0,
+					'confirmations'            => array(),
+					'confirmed'                => true,
+					'confirmations_required'   => 0,
+					'committer'                => array(),
+					'revision'                 => array(),
+					'release_delay'            => DAY_IN_SECONDS,
+				),
+			)
+		);
+
+		$response = $this->dispatch( $this->payload( array( 'max_risk_score' => 9.8 ) ) );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$release = Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::VERSION );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( $release ) );
+
+		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
+		$this->assertSame( 'blocked', $snapshot['action'] );
 	}
 
 	/**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Advisory Gandalf scan integration for plugin updates.
+ * Gandalf scan integration for plugin updates.
  *
  * @package WordPressdotorg\Plugin_Directory\Jobs
  */
@@ -9,11 +9,16 @@ namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Tools;
 use WP_Error;
 use WP_Http;
 
 /**
- * Sends plugin updates to Gandalf for advisory security scans.
+ * Sends plugin updates to Gandalf for security scans and acts on the results.
+ *
+ * Completed scans whose maximum risk score reaches the block threshold hold
+ * the scanned release out of the update API — the previously served version
+ * keeps being served.
  *
  * @package WordPressdotorg\Plugin_Directory\Jobs
  */
@@ -30,6 +35,12 @@ class Plugin_Scan_Gandalf {
 
 	/** Consumed callbacks keyed by scan_id, to acknowledge retries without repeating effects. */
 	const CONSUMED_META_KEY = '_gandalf_scan_consumed';
+
+	/** Bounded evidence snapshot of the last completed scan. */
+	const LAST_RESULT_META_KEY = '_gandalf_scan_last_result';
+
+	/** Completed scans with a max risk score at or above this have their release blocked. */
+	const BLOCK_RISK_SCORE = 8.0;
 
 	/** Gandalf scan endpoint. */
 	const ENDPOINT = 'https://gandalf.wordpress.org/scan';
@@ -239,20 +250,58 @@ class Plugin_Scan_Gandalf {
 		}
 
 		if ( 'completed' === $data['status'] ) {
-			if ( $data['findings_count'] > 0 ) {
-				self::notify_slack(
-					$plugin,
-					[
-						'version'         => $pending_record['version'],
-						'release_ref'     => $pending_record['release_ref'],
-						'findings_count'  => $data['findings_count'],
-						'severity_counts' => $data['severity_counts'],
-						'verdict_hash'    => $data['verdict_hash'],
-						'report_url'      => $data['report_url'],
-						'findings'        => is_array( $data['findings'] ?? null ) ? array_filter( $data['findings'], 'is_array' ) : [],
-						'max_risk_score'  => $data['max_risk_score'] ?? null,
-					]
-				);
+			$record = [
+				'scan_id'         => $scan_id,
+				'version'         => $pending_record['version'],
+				'release_ref'     => $pending_record['release_ref'],
+				'completed_at'    => $data['completed_at'] ?? time(),
+				'verdict_hash'    => $data['verdict_hash'],
+				'findings_count'  => $data['findings_count'],
+				'severity_counts' => $data['severity_counts'],
+				'max_risk_score'  => (float) $data['max_risk_score'],
+				'report_url'      => $data['report_url'],
+				'action'          => 'advisory',
+
+				/*
+				 * Only the ten highest-risk findings ever surface (Slack shows five,
+				 * the review note ten), and snippets and explanations are only in
+				 * the scan report; storing more would bloat a post meta row that is
+				 * loaded on every plugin page view.
+				 */
+				'findings'        => array_map(
+					static function ( $finding ) {
+						unset( $finding['code_snippet'], $finding['explanation'] );
+						return $finding;
+					},
+					self::top_findings( $data['findings'], 10 )
+				),
+			];
+
+			/**
+			 * Filters the risk score at which a completed security scan blocks the release.
+			 *
+			 * @param float    $threshold The block threshold, from 0 to 10.
+			 * @param \WP_Post $plugin    The plugin post.
+			 */
+			$threshold = (float) apply_filters( 'wporg_plugins_security_scan_block_risk_score', self::BLOCK_RISK_SCORE, $plugin );
+
+			if ( $record['max_risk_score'] >= $threshold && self::block_release( $plugin, $record ) ) {
+				$record['action'] = 'blocked';
+
+				self::record_review_note( $plugin, $record );
+			}
+
+			// A retry of a partially processed delivery must not downgrade the recorded action.
+			$previous_result = get_post_meta( $plugin->ID, self::LAST_RESULT_META_KEY, true );
+			if ( is_array( $previous_result ) && ( $previous_result['scan_id'] ?? '' ) === $scan_id && 'advisory' === $record['action'] ) {
+				$record['action'] = $previous_result['action'] ?? 'advisory';
+			}
+
+			// Persist the bounded evidence snapshot and the action taken on it.
+			update_post_meta( $plugin->ID, self::LAST_RESULT_META_KEY, $record );
+
+			if ( $record['findings_count'] > 0 || 'advisory' !== $record['action'] ) {
+				self::notify_slack( $plugin, $record );
 			}
 		} else {
 			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
@@ -305,6 +354,82 @@ class Plugin_Scan_Gandalf {
 	}
 
 	/**
+	 * Block the scanned release, once the verdict is known to still apply to it.
+	 *
+	 * A verdict for a version that is no longer the plugin's current release,
+	 * or that is already being served, can't un-ship anything — blocking is
+	 * refused and the result stays advisory.
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $record The completed scan record.
+	 * @return bool Whether the release was blocked.
+	 */
+	protected static function block_release( $plugin, $record ) {
+		// A newer release landed since this scan was dispatched; the scanned version is moot.
+		if ( (string) get_post_meta( $plugin->ID, 'version', true ) !== (string) $record['version'] ) {
+			return false;
+		}
+
+		return API_Update_Updater::block_release(
+			$plugin->post_name,
+			[
+				'scan_id'    => $record['scan_id'],
+				'risk_score' => $record['max_risk_score'],
+			]
+		);
+	}
+
+	/**
+	 * Leave an internal note with the scan findings for the plugin review team.
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $record The completed scan record.
+	 */
+	protected static function record_review_note( $plugin, $record ) {
+		$note = sprintf(
+			'Automatically blocked version %s (%s) from being served: security scan %s reported a maximum risk score of %s. Force-release to serve it.',
+			esc_html( $record['version'] ),
+			esc_html( $record['release_ref'] ),
+			esc_html( $record['scan_id'] ),
+			esc_html( $record['max_risk_score'] )
+		);
+
+		$note .= '<br><br>Findings:';
+		foreach ( self::top_findings( $record['findings'], 10 ) as $finding ) {
+			$note .= sprintf(
+				'<br>&#8226; <strong>%s</strong> &mdash; %s',
+				esc_html( number_format( (float) $finding['risk_score'], 1 ) ),
+				esc_html( self::excerpt( $finding['title'] ?? '', 200 ) )
+			);
+
+			if ( ! empty( $finding['file_path'] ) ) {
+				$note .= sprintf(
+					'<br>&nbsp;&nbsp;%s%s',
+					esc_html( $finding['file_path'] ),
+					empty( $finding['line'] ) ? '' : ':' . (int) $finding['line']
+				);
+			}
+
+			// The contract only requires a finding's risk_score; read the rest defensively.
+			$investigation = $finding['investigation'] ?? [];
+			if ( 'completed' === ( $investigation['status'] ?? '' ) && in_array( $investigation['result'] ?? '', [ 'reproduced', 'conditional' ], true ) ) {
+				$note .= sprintf(
+					'<br>&nbsp;&nbsp;Investigation (%s): %s',
+					esc_html( $investigation['result'] ),
+					esc_html( self::excerpt( $investigation['summary'] ?? '', 200 ) )
+				);
+			}
+		}
+
+		$note .= '<br><br>Report: ' . esc_url( $record['report_url'] );
+
+		$wordpressdotorg = get_user_by( 'slug', 'wordpressdotorg' );
+
+		// wp_insert_comment() unslashes; slash so backslashes in finding strings survive.
+		Tools::audit_log( wp_slash( $note ), $plugin, $wordpressdotorg ? $wordpressdotorg : false );
+	}
+
+	/**
 	 * Record a valid-secret callback that failed validation.
 	 *
 	 * @param \WP_Post $plugin  The plugin post.
@@ -342,7 +467,7 @@ class Plugin_Scan_Gandalf {
 	 * Notify Slack about a Gandalf scan with findings.
 	 *
 	 * @param \WP_Post $plugin The plugin post.
-	 * @param array    $record The completed scan summary.
+	 * @param array    $record The completed scan record.
 	 */
 	protected static function notify_slack( $plugin, $record ) {
 		if ( empty( $record['verdict_hash'] ) ) {
@@ -356,7 +481,8 @@ class Plugin_Scan_Gandalf {
 			}
 		}
 
-		if ( isset( $already_notified[ $record['verdict_hash'] ] ) ) {
+		// Release blocks always alert; only advisory results deduplicate.
+		if ( 'advisory' === $record['action'] && isset( $already_notified[ $record['verdict_hash'] ] ) ) {
 			update_post_meta( $plugin->ID, self::NOTIFIED_META_KEY, $already_notified );
 			return;
 		}
@@ -393,11 +519,16 @@ class Plugin_Scan_Gandalf {
 			$meta_links .= ' · ' . htmlspecialchars( $record['release_ref'], ENT_NOQUOTES );
 		}
 
+		$summary_text = sprintf( '%s · %s', 1 === $findings_count ? '*1 finding*' : "*{$findings_count} findings*", $install_text );
+		if ( isset( $record['max_risk_score'] ) ) {
+			$summary_text .= sprintf( ' · max risk %s', number_format( (float) $record['max_risk_score'], 1 ) );
+		}
+
 		$summary = [
 			'type' => 'section',
 			'text' => [
 				'type' => 'mrkdwn',
-				'text' => sprintf( '%s · %s', 1 === $findings_count ? '*1 finding*' : "*{$findings_count} findings*", $install_text ),
+				'text' => $summary_text,
 			],
 		];
 
@@ -422,14 +553,25 @@ class Plugin_Scan_Gandalf {
 					'text' => self::excerpt( trim( $title . ' ' . $record['version'] ), 150 ),
 				],
 			],
-			$summary,
-			[
-				'type'     => 'context',
-				'elements' => [
-					[
-						'type' => 'mrkdwn',
-						'text' => $meta_links,
-					],
+		];
+
+		if ( 'blocked' === $record['action'] ) {
+			$blocks[] = [
+				'type' => 'section',
+				'text' => [
+					'type' => 'mrkdwn',
+					'text' => ':rotating_light: *Automatically blocked from release.*',
+				],
+			];
+		}
+
+		$blocks[] = $summary;
+		$blocks[] = [
+			'type'     => 'context',
+			'elements' => [
+				[
+					'type' => 'mrkdwn',
+					'text' => $meta_links,
 				],
 			],
 		];
@@ -470,12 +612,20 @@ class Plugin_Scan_Gandalf {
 			$attachments[] = $attachment;
 		}
 
-		$fallback = sprintf(
-			'Security scan found %s in %s %s',
-			1 === $findings_count ? '1 finding' : "{$findings_count} findings",
-			htmlspecialchars( $title, ENT_NOQUOTES ),
-			htmlspecialchars( $record['version'], ENT_NOQUOTES )
-		);
+		if ( 'blocked' === $record['action'] ) {
+			$fallback = sprintf(
+				'Security scan automatically blocked %s %s from release',
+				htmlspecialchars( $title, ENT_NOQUOTES ),
+				htmlspecialchars( $record['version'], ENT_NOQUOTES )
+			);
+		} else {
+			$fallback = sprintf(
+				'Security scan found %s in %s %s',
+				1 === $findings_count ? '1 finding' : "{$findings_count} findings",
+				htmlspecialchars( $title, ENT_NOQUOTES ),
+				htmlspecialchars( $record['version'], ENT_NOQUOTES )
+			);
+		}
 		if ( isset( $record['max_risk_score'] ) ) {
 			$fallback .= sprintf( ' (max risk %s)', number_format( (float) $record['max_risk_score'], 1 ) );
 		}
@@ -546,8 +696,6 @@ class Plugin_Scan_Gandalf {
 	/**
 	 * Return the highest-risk findings first, bounded for display.
 	 *
-	 * The callback orders findings by ID, not by severity.
-	 *
 	 * @param array $findings The scan findings.
 	 * @param int   $limit    Maximum number of findings to return.
 	 * @return array The highest-risk findings.
@@ -556,7 +704,7 @@ class Plugin_Scan_Gandalf {
 		usort(
 			$findings,
 			static function ( $a, $b ) {
-				return ( $b['risk_score'] ?? 0 ) <=> ( $a['risk_score'] ?? 0 );
+				return $b['risk_score'] <=> $a['risk_score'];
 			}
 		);
 
