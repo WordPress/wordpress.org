@@ -102,6 +102,10 @@ class Builder {
 			}
 			$this->version = $version;
 
+			// Reset the per-version output files, so error handling only acts on files from this iteration.
+			$this->checksum_file  = '';
+			$this->signature_file = '';
+
 			if ( 'trunk' == $version ) {
 				$this->zip_file = "{$this->tmp_dir}/{$this->slug}/{$this->slug}.zip";
 			} else {
@@ -130,6 +134,11 @@ class Builder {
 
 			} catch ( Exception $e ) {
 				// In event of error, skip this file this time.
+				$error = preg_replace( '/[\r\n\t]+/', ' ', $e->getMessage() );
+
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Routed to the error log via E_USER_WARNING; raw is fine.
+				trigger_error( sprintf( 'ZIP build failed for %s %s: %s', $this->slug, $version, $error ), E_USER_WARNING );
+
 				$this->cleanup_plugin_tmp();
 
 				// Perform an SVN up to revert any changes made.
