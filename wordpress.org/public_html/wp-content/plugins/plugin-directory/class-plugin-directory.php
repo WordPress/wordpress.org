@@ -1716,6 +1716,10 @@ class Plugin_Directory {
 		if ( ! isset( $data['tag'] ) ) {
 			return false;
 		}
+
+		// PHP coerces numeric-string array keys to integers; release tags are strings.
+		$data['tag'] = (string) $data['tag'];
+
 		$plugin = self::get_plugin_post( $plugin );
 
 		$release = self::get_release( $plugin, $data['tag'] ) ?: [
@@ -1773,6 +1777,35 @@ class Plugin_Directory {
 		} );
 
 		return update_post_meta( $plugin->ID, 'releases', $releases );
+	}
+
+	/**
+	 * Mark built ZIPs as such on their release records.
+	 *
+	 * @param string|\WP_Post $plugin         Plugin slug or post object.
+	 * @param array|false     $built_versions Map of built version => SVN revision, as returned by Zip\Builder::build().
+	 * @return void
+	 */
+	public static function mark_zips_built( $plugin, $built_versions ) {
+		if ( ! is_array( $built_versions ) ) {
+			return;
+		}
+
+		foreach ( $built_versions as $tag => $revision ) {
+			// Trunk has no release record.
+			if ( 'trunk' === $tag ) {
+				continue;
+			}
+
+			self::add_release(
+				$plugin,
+				[
+					'tag'                      => $tag,
+					'zips_built'               => true,
+					'zips_built_from_revision' => $revision,
+				]
+			);
+		}
 	}
 
 	/**

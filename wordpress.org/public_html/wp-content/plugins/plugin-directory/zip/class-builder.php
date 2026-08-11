@@ -29,16 +29,21 @@ class Builder {
 	// The SVN url of the plugin version being packaged.
 	protected $plugin_version_svn_url = '';
 
-	// The revision of the plugin that was just packaged.
-	public $plugins_revision = 0;
+	/**
+	 * The revision of the plugin that was just packaged.
+	 *
+	 * @var int
+	 */
+	protected $plugins_revision = 0;
 
 	/**
 	 * Generate a ZIP for a provided Plugin tags.
 	 *
-	 * @param string $slug     The plugin slug.
-	 * @param array  $versions The versions of the plugin to build ZIPs for.
-	 * @param string $context  The context of this Builder instance (commit #, etc)
-	 * @return array|false The versions that were successfully built, false in unconfigured environments.
+	 * @param string $slug       The plugin slug.
+	 * @param array  $versions   The versions of the plugin to build ZIPs for.
+	 * @param string $context    Optional. The context of this Builder instance (commit #, etc). Default empty string.
+	 * @param string $stable_tag Optional. The stable tag of the plugin, used to determine whether checksums are generated. Default empty string.
+	 * @return array|false Map of successfully-built version (as requested) => SVN revision it was built from, false in unconfigured environments.
 	 */
 	public function build( $slug, $versions, $context = '', $stable_tag = '' ) {
 		// Bail when in an unconfigured environment.
@@ -95,8 +100,9 @@ class Builder {
 
 		// Build the requested ZIPs
 		$built_versions = [];
-		foreach ( $versions as $version ) {
+		foreach ( $versions as $requested_version ) {
 			// Incase .1 was passed, treat it as 0.1
+			$version = $requested_version;
 			if ( '.' == substr( $version, 0, 1 ) ) {
 				$version = "0{$version}";
 			}
@@ -161,7 +167,8 @@ class Builder {
 				SVN::add( $this->signature_file );
 			}
 
-			$built_versions[] = $version;
+			// Key by the requested version, as release records store the raw tag name.
+			$built_versions[ $requested_version ] = $this->plugins_revision;
 		}
 
 		// If no versions could be built, an empty commit would incorrectly report success.

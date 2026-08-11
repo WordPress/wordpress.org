@@ -104,7 +104,10 @@ try {
 	if ( ! $plugin_post ) {
 		throw new Exception( 'Could not locate plugin post' );
 	}
-	$stable_tag = get_post_meta( $plugin_post->ID, 'stable_tag', true ) ?? 'trunk';
+	$stable_tag = get_post_meta( $plugin_post->ID, 'stable_tag', true );
+	if ( ! $stable_tag ) {
+		$stable_tag = 'trunk';
+	}
 
 	// (re)Build & Commit 5 Zips at a time to avoid limitations.
 	foreach ( array_chunk( $versions, 5 ) as $versions_to_build ) {
@@ -115,21 +118,8 @@ try {
 			$stable_tag
 		);
 
-		// Mark the ZIPs as being built, trunk has no release record.
-		foreach ( (array) $built_versions as $built_tag ) {
-			if ( 'trunk' === $built_tag ) {
-				continue;
-			}
-
-			Plugin_Directory::add_release(
-				$plugin_post,
-				array(
-					'tag'                      => $built_tag,
-					'zips_built'               => true,
-					'zips_built_from_revision' => $zip_builder->plugins_revision,
-				)
-			);
-		}
+		// Mark only the ZIPs that actually built, each with its export revision.
+		Plugin_Directory::mark_zips_built( $plugin_post, $built_versions );
 	}
 
 	echo 'OK. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
