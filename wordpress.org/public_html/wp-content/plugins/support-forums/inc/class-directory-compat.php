@@ -772,7 +772,7 @@ abstract class Directory_Compat {
 	}
 
 	/**
-	 * Reject review submissions aimed at objects the directory does not serve publicly.
+	 * Reject review submissions the create-topic form would not offer.
 	 *
 	 * The create-topic-form filter only decides whether the review form is displayed; bbPress's
 	 * topic handlers never consult it, so the same rule is enforced here on the write path.
@@ -789,16 +789,20 @@ abstract class Directory_Compat {
 			return;
 		}
 
-		// Prefer the resolved compat slug; otherwise fall back to this compat's query var.
+		// The resolved slug, or this compat's query var.
 		$slug = $this->slug() ? $this->slug() : get_query_var( $this->query_var() );
 		if ( ! $slug ) {
 			return;
 		}
 
-		if ( ! self::get_object_by_slug_and_type( $slug, $this->compat() ) ) {
+		// Mirror the create-topic form: a published plugin, or a publicly-served theme.
+		$object     = self::get_object_by_slug_and_type( $slug, $this->compat() );
+		$reviewable = $object && ( 'plugin' !== $this->compat() || 'publish' === $object->post_status );
+
+		if ( ! $reviewable ) {
 			bbp_add_error(
-				'wporg_compat_unpublished_review',
-				__( '<strong>Error</strong>: Reviews are only available for published plugins and themes.', 'wporg-forums' )
+				'wporg_compat_unavailable_review',
+				__( '<strong>Error:</strong> This item is not available for reviews.', 'wporg-forums' )
 			);
 		}
 	}
