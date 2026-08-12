@@ -665,15 +665,6 @@ function wporg_support_pre_get_document_title( $title ) {
 add_filter( 'pre_get_document_title', 'wporg_support_pre_get_document_title' );
 
 /**
- * The Footer for our theme.
- *
- * @package WPBBP
- */
-function wporg_get_global_footer() {
-	require WPORGPATH . 'footer.php';
-}
-
-/**
  * Append an optimized site name.
  *
  * @param array $title Parts of the page title.
