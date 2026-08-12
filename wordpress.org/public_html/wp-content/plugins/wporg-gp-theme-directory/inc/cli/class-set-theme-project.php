@@ -103,7 +103,7 @@ class Set_Theme_Project extends WP_CLI_Command {
 	}
 
 	/**
-	 * A cutdown version of core's get_file_data() to return specific headers from a Theme, plus it's screenshot.
+	 * Returns specific headers from a theme's style.css, plus its screenshot.
 	 */
 	private function get_theme_data( $theme_slug, $theme_dir ) {
 		$style_css = "{$theme_dir}style.css";
