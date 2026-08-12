@@ -1,4 +1,10 @@
 <?php
+/**
+ * Generates dynamic social share images for plugin pages.
+ *
+ * @package WordPressdotorg\Plugin_Directory
+ */
+
 namespace WordPressdotorg\Plugin_Directory;
 
 /**
@@ -173,6 +179,10 @@ class Plugin_Share_Image {
 	 * @return int
 	 */
 	protected static function count_locales( $plugin ) {
+		if ( ! defined( 'GLOTPRESS_LOCALES_PATH' ) ) {
+			return 0;
+		}
+
 		$translations = Plugin_I18n::instance()->get_translations( $plugin->post_name );
 
 		if ( empty( $translations ) ) {
@@ -208,10 +218,12 @@ class Plugin_Share_Image {
 	 */
 	protected static function get_rating_value( $plugin ) {
 		if ( class_exists( '\WPORG_Ratings' ) ) {
-			return (float) ( \WPORG_Ratings::get_avg_rating( 'plugin', $plugin->post_name ) ?: 0 );
+			$rating = \WPORG_Ratings::get_avg_rating( 'plugin', $plugin->post_name );
+			return $rating ? (float) $rating : 0.0;
 		}
 
-		return (float) ( get_post_meta( $plugin->ID, 'rating', true ) ?: 0 );
+		$rating = get_post_meta( $plugin->ID, 'rating', true );
+		return $rating ? (float) $rating : 0.0;
 	}
 
 	/**

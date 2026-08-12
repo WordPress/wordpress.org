@@ -4,6 +4,9 @@
 	"plugins": [
 		"../wordpress.org/public_html/wp-content/plugins/plugin-directory"
 	],
+	"mappings": {
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build"
+	},
 	"lifecycleScripts": {
 		"afterStart": "bash plugin-directory/bin/after-start-test.sh"
 	}

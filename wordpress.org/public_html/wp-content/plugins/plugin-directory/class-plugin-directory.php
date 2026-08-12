@@ -431,7 +431,7 @@ class Plugin_Directory {
 		// Add a rule for generated plugin icons. geopattern-icon/demo.svg | geopattern-icon/demo_abc123.svg
 		add_rewrite_rule( '^geopattern-icon/([^/_]+)(_([a-f0-9]{6}))?\.svg$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
 
-		// Add a rule for generated plugin share images. share-image/demo.jpg
+		// Add a rule for generated plugin share images. share-image/demo.jpg.
 		add_rewrite_rule( '^share-image/([^/]+)\.jpg$', 'index.php?plugin_share_image=$matches[1]', 'top' );
 
 		// Handle plugin admin requests
