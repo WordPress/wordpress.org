@@ -431,8 +431,8 @@ class Plugin_Directory {
 		// Add a rule for generated plugin icons. geopattern-icon/demo.svg | geopattern-icon/demo_abc123.svg
 		add_rewrite_rule( '^geopattern-icon/([^/_]+)(_([a-f0-9]{6}))?\.svg$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
 
-		// Add a rule for generated plugin share images. share-image/demo.jpg.
-		add_rewrite_rule( '^share-image/([^/]+)\.jpg$', 'index.php?plugin_share_image=$matches[1]', 'top' );
+		// Share images. share-image/demo.jpg | share-image/demo_a1b2c3d4.jpg (token is a cache buster).
+		add_rewrite_rule( '^share-image/([^/_]+)(_([a-f0-9]{8}))?\.jpg$', 'index.php?plugin_share_image=$matches[1]', 'top' );
 
 		// Handle plugin admin requests
 		add_rewrite_rule( '^([^/]+)/advanced/?$', 'index.php?name=$matches[1]&plugin_advanced=1', 'top' );
@@ -1526,21 +1526,13 @@ class Plugin_Directory {
 			return;
 		}
 
-		$plugin = get_posts(
-			array(
-				'post_type'      => 'plugin',
-				'name'           => $slug,
-				'post_status'    => 'publish',
-				'posts_per_page' => 1,
-			)
-		);
-
-		if ( empty( $plugin ) ) {
+		$plugin = self::get_plugin_post( $slug );
+		if ( ! $plugin || 'publish' !== $plugin->post_status ) {
 			status_header( 404 );
 			die();
 		}
 
-		if ( ! Plugin_Share_Image::output( $plugin[0] ) ) {
+		if ( ! Plugin_Share_Image::output( $plugin ) ) {
 			status_header( 500 );
 			die();
 		}

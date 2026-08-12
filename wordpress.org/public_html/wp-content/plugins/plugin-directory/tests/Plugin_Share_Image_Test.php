@@ -7,35 +7,25 @@
 
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Plugin_Share_Image;
+use WordPressdotorg\Plugin_Directory\Template;
 
 /**
- * Share image data and render tests.
+ * Share image URL, data, and render tests.
  *
  * @group share-image
  */
 class Plugin_Share_Image_Test extends TestCase {
 
 	/**
-	 * Format an install count via the protected helper.
-	 *
-	 * @param int $active_installs Active install count.
-	 * @return string
-	 */
-	protected function format_installs( $active_installs ) {
-		$reflection = new \ReflectionMethod( Plugin_Share_Image::class, 'format_install_count' );
-
-		return $reflection->invoke( null, $active_installs );
-	}
-
-	/**
-	 * Create a published plugin fixture without icon meta.
+	 * Create a published plugin fixture.
 	 *
 	 * @param array $args Optional post args / meta overrides.
 	 * @return \WP_Post
 	 */
 	protected function create_plugin( $args = array() ) {
 		$active_installs = $args['active_installs'] ?? 0;
-		unset( $args['active_installs'] );
+		$assets_icons    = $args['assets_icons'] ?? null;
+		unset( $args['active_installs'], $args['assets_icons'] );
 
 		$now     = gmdate( 'Y-m-d H:i:s' );
 		$post_id = wp_insert_post(
@@ -60,12 +50,17 @@ class Plugin_Share_Image_Test extends TestCase {
 		$this->assertIsInt( $post_id );
 
 		update_post_meta( $post_id, 'active_installs', $active_installs );
+		update_post_meta( $post_id, 'last_updated', $now );
+
+		if ( null !== $assets_icons ) {
+			update_post_meta( $post_id, 'assets_icons', $assets_icons );
+		}
 
 		return get_post( $post_id );
 	}
 
 	/**
-	 * Build a WP_Post that is not persisted, for negative get_data/render cases.
+	 * Build a WP_Post that is not persisted, for negative get_data/get_url/render cases.
 	 *
 	 * @param string $post_type   Post type.
 	 * @param string $post_status Post status.
@@ -85,60 +80,120 @@ class Plugin_Share_Image_Test extends TestCase {
 	}
 
 	/**
-	 * Non-plugin posts must not produce share-image data.
+	 * Require Inter so render tests fail loudly instead of skipping.
 	 */
-	public function test_get_data_returns_null_for_non_plugin_post() {
-		$this->assertNull( Plugin_Share_Image::get_data( $this->fake_post( 'post', 'publish' ) ) );
-	}
-
-	/**
-	 * Unpublished plugins must not produce share-image data.
-	 */
-	public function test_get_data_returns_null_for_unpublished_plugin() {
-		$this->assertNull( Plugin_Share_Image::get_data( $this->fake_post( 'plugin', 'draft' ) ) );
-	}
-
-	/**
-	 * Install counts use the directory's display formatting.
-	 */
-	public function test_get_data_formats_install_counts() {
-		$this->assertSame( '<10', $this->format_installs( 0 ) );
-		$this->assertSame( '500+', $this->format_installs( 500 ) );
-		$this->assertSame( '50,000+', $this->format_installs( 50000 ) );
-		$this->assertSame( '150K+', $this->format_installs( 150000 ) );
-		$this->assertSame( '2M+', $this->format_installs( 2500000 ) );
-	}
-
-	/**
-	 * Rendering a non-plugin post must fail.
-	 */
-	public function test_render_returns_false_for_non_plugin_post() {
-		$this->assertFalse( Plugin_Share_Image::render( $this->fake_post( 'post', 'publish' ) ) );
-	}
-
-	/**
-	 * Rendering an unpublished plugin must fail.
-	 */
-	public function test_render_returns_false_for_unpublished_plugin() {
-		$this->assertFalse( Plugin_Share_Image::render( $this->fake_post( 'plugin', 'draft' ) ) );
-	}
-
-	/**
-	 * A published plugin renders a 1200x630 JPEG.
-	 */
-	public function test_render_returns_jpeg_for_published_plugin() {
+	protected function require_inter_font() {
 		$this->assertFileExists(
 			WP_CONTENT_DIR . '/mu-plugins/wporg-mu-plugins/fonts/Inter.ttf',
 			'Inter.ttf is required to render share images; map wporg-mu-plugins fonts into this environment.'
 		);
+	}
 
+	public function test_get_data_returns_null_for_non_plugin_post() {
+		$this->assertNull( Plugin_Share_Image::get_data( $this->fake_post( 'post', 'publish' ) ) );
+	}
+
+	public function test_get_data_returns_null_for_unpublished_plugin() {
+		$this->assertNull( Plugin_Share_Image::get_data( $this->fake_post( 'plugin', 'draft' ) ) );
+	}
+
+	public function test_get_url_returns_false_for_closed_plugin() {
+		$this->assertFalse( Plugin_Share_Image::get_url( $this->fake_post( 'plugin', 'closed' ) ) );
+		$this->assertFalse( Plugin_Share_Image::get_url( $this->fake_post( 'plugin', 'disabled' ) ) );
+	}
+
+	public function test_get_url_returns_false_for_non_plugin_post() {
+		$this->assertFalse( Plugin_Share_Image::get_url( $this->fake_post( 'post', 'publish' ) ) );
+	}
+
+	public function test_get_url_includes_cache_token_for_published_plugin() {
+		$this->require_inter_font();
+
+		$plugin = $this->create_plugin( array( 'active_installs' => 150000 ) );
+		$url    = Plugin_Share_Image::get_url( $plugin );
+
+		$this->assertNotFalse( $url );
+		$this->assertMatchesRegularExpression(
+			'#/share-image/' . preg_quote( $plugin->post_name, '#' ) . '_[a-f0-9]{8}\.jpg$#',
+			$url
+		);
+	}
+
+	public function test_get_url_changes_when_install_count_changes() {
+		$this->require_inter_font();
+
+		$plugin = $this->create_plugin( array( 'active_installs' => 1000 ) );
+		$first  = Plugin_Share_Image::get_url( $plugin );
+
+		update_post_meta( $plugin->ID, 'active_installs', 2000000 );
+		$second = Plugin_Share_Image::get_url( $plugin );
+
+		$this->assertNotFalse( $first );
+		$this->assertNotFalse( $second );
+		$this->assertNotSame( $first, $second );
+	}
+
+	public function test_get_data_falls_back_to_1x_icon_when_2x_is_false() {
 		$plugin = $this->create_plugin(
 			array(
-				'active_installs' => 150000,
+				'assets_icons' => array(
+					array(
+						'filename'   => 'icon-128x128.png',
+						'revision'   => 1,
+						'resolution' => '128x128',
+						'locale'     => '',
+					),
+				),
 			)
 		);
 
-		$bytes = Plugin_Share_Image::render( $plugin );
+		$icons = Template::get_plugin_icon( $plugin );
+		$this->assertFalse( $icons['icon_2x'] );
+		$this->assertNotEmpty( $icons['icon'] );
+
+		$data = Plugin_Share_Image::get_data( $plugin );
+		$this->assertSame( $icons['icon'], $data['icon_url'] );
+	}
+
+	public function test_get_data_uses_directory_install_formatting() {
+		$plugin = $this->create_plugin( array( 'active_installs' => 150000 ) );
+		$data   = Plugin_Share_Image::get_data( $plugin );
+		$last   = end( $data['stats'] );
+
+		$this->assertSame( Template::format_active_installs_for_display( 150000 ), $last['value'] );
+		$this->assertSame( 'Installs', $last['label'] );
+	}
+
+	public function test_contributors_helper_drops_nicenames_that_do_not_resolve() {
+		$plugin = $this->create_plugin();
+		wp_set_object_terms( $plugin->ID, array( 'not-a-real-wporg-user-xyz' ), 'plugin_contributors' );
+
+		$contributors = Template::get_plugin_contributors( $plugin );
+
+		foreach ( $contributors as $user ) {
+			$this->assertInstanceOf( \WP_User::class, $user );
+			$this->assertNotSame( 'not-a-real-wporg-user-xyz', $user->user_nicename );
+		}
+	}
+
+	public function test_count_plugin_locales_returns_zero_without_translations() {
+		$plugin = $this->create_plugin();
+		$this->assertSame( 0, Template::count_plugin_locales( $plugin ) );
+	}
+
+	public function test_render_returns_false_for_non_plugin_post() {
+		$this->assertFalse( Plugin_Share_Image::render( $this->fake_post( 'post', 'publish' ) ) );
+	}
+
+	public function test_render_returns_false_for_unpublished_plugin() {
+		$this->assertFalse( Plugin_Share_Image::render( $this->fake_post( 'plugin', 'draft' ) ) );
+	}
+
+	public function test_render_returns_jpeg_for_published_plugin() {
+		$this->require_inter_font();
+
+		$plugin = $this->create_plugin( array( 'active_installs' => 150000 ) );
+		$bytes  = Plugin_Share_Image::render( $plugin );
 
 		$this->assertNotFalse( $bytes );
 		$this->assertNotEmpty( $bytes );
@@ -150,14 +205,24 @@ class Plugin_Share_Image_Test extends TestCase {
 		$this->assertSame( IMAGETYPE_JPEG, $info[2] );
 	}
 
-	/**
-	 * Overlong multibyte titles must truncate without fatalling in GD.
-	 */
-	public function test_render_handles_multibyte_title_that_requires_truncation() {
-		$this->assertFileExists(
-			WP_CONTENT_DIR . '/mu-plugins/wporg-mu-plugins/fonts/Inter.ttf',
-			'Inter.ttf is required to render share images; map wporg-mu-plugins fonts into this environment.'
+	public function test_render_handles_empty_excerpt() {
+		$this->require_inter_font();
+
+		$plugin = $this->create_plugin(
+			array(
+				'post_excerpt' => '',
+				'post_content' => '',
+			)
 		);
+
+		$bytes = Plugin_Share_Image::render( $plugin );
+
+		$this->assertNotFalse( $bytes );
+		$this->assertSame( IMAGETYPE_JPEG, getimagesizefromstring( $bytes )[2] );
+	}
+
+	public function test_render_handles_multibyte_title_that_requires_truncation() {
+		$this->require_inter_font();
 
 		$plugin = $this->create_plugin(
 			array(

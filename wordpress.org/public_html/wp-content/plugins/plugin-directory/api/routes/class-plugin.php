@@ -116,27 +116,7 @@ class Plugin extends Base {
 		$result['author_profile'] = $profile_url;
 		$result['contributors']   = array();
 
-		$contributors = get_terms( array(
-			'taxonomy'   => 'plugin_contributors',
-			'object_ids' => array( $post->ID ),
-			'orderby'    => 'term_order',
-			'fields'     => 'names',
-		) );
-
-		if ( is_wp_error( $contributors ) ) {
-			$contributors = array();
-		}
-
-		if ( ! $contributors ) {
-			$contributors = [ $author->user_nicename ];
-		}
-
-		foreach ( $contributors as $contributor ) {
-			$user = get_user_by( 'slug', $contributor );
-			if ( ! $user ) {
-				continue;
-			}
-
+		foreach ( Template::get_plugin_contributors( $post ) as $user ) {
 			$result['contributors'][ $user->user_nicename ] = array(
 				'profile'      => $this->get_user_profile_link( $user ),
 				'avatar'       => get_avatar_url( $user, array(
