@@ -387,7 +387,7 @@ class Official_WordPress_Events {
 							if ( empty( $value ) ) {
 								continue 3;
 							} else {
-								$event['url'] = $value;
+								$event['url'] = esc_url_raw( $value );
 							}
 							break;
 
