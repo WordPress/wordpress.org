@@ -286,7 +286,7 @@ class Plugin_Scan_Gandalf {
 				self::notify_slack( $plugin, $record );
 			}
 
-			self::notify_committers( $plugin, $record );
+			self::notify_committers( $plugin, $record, $data['findings'] );
 		} else {
 			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
 		}
@@ -632,10 +632,11 @@ class Plugin_Scan_Gandalf {
 	/**
 	 * Email the plugin committers about a completed scan's findings.
 	 *
-	 * @param \WP_Post $plugin The plugin post.
-	 * @param array    $record The completed scan record.
+	 * @param \WP_Post $plugin   The plugin post.
+	 * @param array    $record   The completed scan record.
+	 * @param array    $findings The reported findings, with code snippets and explanations intact.
 	 */
-	protected static function notify_committers( $plugin, $record ) {
+	protected static function notify_committers( $plugin, $record, $findings ) {
 		if ( empty( $record['verdict_hash'] ) ) {
 			return;
 		}
@@ -676,6 +677,9 @@ class Plugin_Scan_Gandalf {
 
 		$already_emailed[ $record['verdict_hash'] ] = time();
 		update_post_meta( $plugin->ID, self::EMAILED_META_KEY, $already_emailed );
+
+		// The stored record's findings are stripped for the meta row; the email gets them intact.
+		$record['findings'] = self::top_findings( $findings, 10 );
 
 		$email = new Security_Scan_Findings(
 			$plugin,

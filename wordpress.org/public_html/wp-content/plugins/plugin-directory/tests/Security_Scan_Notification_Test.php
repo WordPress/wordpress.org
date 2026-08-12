@@ -343,10 +343,17 @@ class Security_Scan_Notification_Test extends TestCase {
 		$this->assertStringContainsString( 'block it from being offered as an update', $email['message'] );
 		$this->assertStringContainsString( '9.8', $email['message'] );
 		$this->assertStringContainsString( 'Remote response controls a PHP callable', $email['message'] );
+		// The relative path links to the file in the Trac browser.
 		$this->assertStringContainsString(
 			sprintf( 'https://plugins.trac.wordpress.org/browser/%s/tags/%s/includes/class-admin.php#L688', $this->plugin->post_name, self::VERSION ),
 			$email['message']
 		);
+		$this->assertStringContainsString( '>includes/class-admin.php:688</a>', $email['message'] );
+
+		// The code snippet renders escaped in a code block; the explanation as prose.
+		$this->assertStringContainsString( '$clean = $this-&gt;write;', $email['message'] );
+		$this->assertStringContainsString( '<code>', $email['message'] );
+		$this->assertStringContainsString( 'The response body reaches a callable.', $email['message'] );
 	}
 
 	/**
@@ -363,7 +370,13 @@ class Security_Scan_Notification_Test extends TestCase {
 				'findings_count' => 2,
 				'findings'       => array(
 					$this->finding( 9.8 ),
-					$this->finding( 9.7, array( 'title' => '[Appeal this decision](https://evil.example/appeal)' ) ),
+					$this->finding(
+						9.7,
+						array(
+							'title'        => '[Appeal this decision](https://evil.example/appeal)',
+							'code_snippet' => '<script>alert(2)</script>',
+						)
+					),
 				),
 			)
 		);
@@ -373,13 +386,17 @@ class Security_Scan_Notification_Test extends TestCase {
 		$this->assertCount( 1, $this->emails );
 		$message = $this->emails[0]['message'];
 
+		// Markup in a title renders as inert, escaped text.
 		$this->assertStringNotContainsString( '<script>', $message );
-		$this->assertStringNotContainsString( 'alert(1)', $message );
+		$this->assertStringContainsString( '&lt;script&gt;alert(1)&lt;/script&gt;', $message );
 
 		// The Markdown link must not survive as a masquerading anchor.
 		$this->assertStringContainsString( 'Appeal this decision', $message );
 		$this->assertStringNotContainsString( '[Appeal', $message );
 		$this->assertStringNotContainsString( '>Appeal this decision</a>', $message );
+
+		// A hostile snippet renders escaped inside its code block.
+		$this->assertStringContainsString( '&lt;script&gt;alert(2)&lt;/script&gt;', $message );
 	}
 
 	/**

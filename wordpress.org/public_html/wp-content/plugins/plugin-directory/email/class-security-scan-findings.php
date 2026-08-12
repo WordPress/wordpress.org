@@ -67,7 +67,7 @@ class Security_Scan_Findings extends Markdown_Base {
 		);
 
 		if ( 'blocked' === $record['action'] ) {
-			$action = __( 'A security review of this version found issues severe enough to block it from being offered as an update, protecting sites from receiving it. Sites running a previous version keep receiving that version. Please address the findings and release a new version; the block applies only to this version.', 'wporg-plugins' );
+			$action = __( 'A security review of this version found issues severe enough to block it from being offered as an update, protecting sites from receiving it. Sites running a previous version keep receiving that version. Please address the findings and release a new version.', 'wporg-plugins' );
 		} else {
 			$action = __( 'Please review the findings and address them in an upcoming release.', 'wporg-plugins' );
 		}
@@ -78,13 +78,25 @@ class Security_Scan_Findings extends Markdown_Base {
 	}
 
 	/**
-	 * Format the findings as a list, highest risk first.
+	 * The plain-text content for the email template.
+	 *
+	 * Decodes the entities prose() encodes into the Markdown source.
+	 *
+	 * @return string The plain-text content.
+	 */
+	public function body(): string {
+		return html_entity_decode( $this->markdown(), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	}
+
+	/**
+	 * Format the findings, highest risk first.
 	 *
 	 * Finding strings are untrusted scanner output; only the risk score is
-	 * contractually guaranteed. Lines end in two spaces to hard-break in Markdown.
+	 * contractually guaranteed. The title line ends in two spaces to
+	 * hard-break in Markdown.
 	 *
 	 * @param array $record The completed scan record.
-	 * @return string The findings list, or an empty string without findings.
+	 * @return string The findings, or an empty string without findings.
 	 */
 	private function findings_text( array $record ): string {
 		$items = [];
@@ -93,7 +105,7 @@ class Security_Scan_Findings extends Markdown_Base {
 			$title = $this->excerpt( (string) ( $finding['title'] ?? '' ), 300 );
 
 			$item = sprintf(
-				'* **%1$s** — %2$s',
+				'**%1$s** — %2$s',
 				number_format_i18n( (float) ( $finding['risk_score'] ?? 0 ), 1 ),
 				$title ?: __( '(no summary provided)', 'wporg-plugins' )
 			);
@@ -102,8 +114,22 @@ class Security_Scan_Findings extends Markdown_Base {
 				$file_path = $this->excerpt( (string) $finding['file_path'], 200 );
 				$line      = (int) ( $finding['line'] ?? 0 );
 
-				$item .= "  \n  " . $file_path . ( $line ? ':' . $line : '' );
-				$item .= "  \n  " . $this->file_url( (string) $record['release_ref'], (string) $finding['file_path'], $line );
+				// The excerpted label can't contain a `]`, the URL is percent-encoded; the link syntax stays intact.
+				$item .= sprintf(
+					"  \n[%1\$s](%2\$s)",
+					$file_path . ( $line ? ':' . $line : '' ),
+					$this->file_url( (string) $record['release_ref'], (string) $finding['file_path'], $line )
+				);
+			}
+
+			$snippet = $this->snippet_text( (string) ( $finding['code_snippet'] ?? '' ) );
+			if ( '' !== $snippet ) {
+				$item .= "\n\n" . $snippet;
+			}
+
+			$explanation = $this->prose( (string) ( $finding['explanation'] ?? '' ), 2000 );
+			if ( '' !== $explanation ) {
+				$item .= "\n\n" . $explanation;
 			}
 
 			$items[] = $item;
@@ -113,7 +139,7 @@ class Security_Scan_Findings extends Markdown_Base {
 			return '';
 		}
 
-		return __( 'Findings:', 'wporg-plugins' ) . "\n\n" . implode( "\n", $items );
+		return '### ' . __( 'Findings', 'wporg-plugins' ) . "\n\n" . implode( "\n\n---\n\n", $items );
 	}
 
 	/**
@@ -140,6 +166,49 @@ class Security_Scan_Findings extends Markdown_Base {
 	}
 
 	/**
+	 * Format an untrusted code snippet as an indented Markdown code block.
+	 *
+	 * Unlike a fence, an indented code block cannot be broken out of, and
+	 * Markdown escapes its content in the HTML variant.
+	 *
+	 * @param string $snippet The code snippet.
+	 * @return string The code block, or an empty string for an empty snippet.
+	 */
+	private function snippet_text( string $snippet ): string {
+		$snippet = str_replace( "\r\n", "\n", trim( $snippet, "\n\r" ) );
+		$snippet = mb_strimwidth( implode( "\n", array_slice( explode( "\n", $snippet ), 0, 10 ) ), 0, 1000, '…' );
+
+		if ( '' === trim( $snippet ) ) {
+			return '';
+		}
+
+		return '    ' . str_replace( "\n", "\n    ", $snippet );
+	}
+
+	/**
+	 * Bound untrusted prose, preserving paragraphs, without live markup.
+	 *
+	 * Angle brackets are encoded rather than stripped, so text like `<slug>`
+	 * or `<?php` survives as text; body() decodes the plain-text variant.
+	 * Backticks become apostrophes: a line-leading backtick pair would turn
+	 * into a code block (Markdown::code_trick()). Line indents go for the
+	 * same reason, and brackets can't form Markdown links or images.
+	 *
+	 * @param string $text   The text to bound.
+	 * @param int    $length Maximum length in characters.
+	 * @return string The bounded text.
+	 */
+	private function prose( string $text, int $length ): string {
+		$text = str_replace( "\r\n", "\n", trim( $text ) );
+		$text = preg_replace( '/^[ \t]+/m', '', $text );
+		$text = preg_replace( "/\n{3,}/", "\n\n", $text );
+		$text = mb_strimwidth( $text, 0, $length, '…' );
+		$text = str_replace( [ '[', ']', '`' ], [ '(', ')', "'" ], $text );
+
+		return htmlspecialchars( $text, ENT_NOQUOTES, 'UTF-8' );
+	}
+
+	/**
 	 * Collapse untrusted text onto a single bounded line, without markup.
 	 *
 	 * @param string $text   The text to excerpt.
@@ -147,11 +216,6 @@ class Security_Scan_Findings extends Markdown_Base {
 	 * @return string The excerpted text.
 	 */
 	private function excerpt( string $text, int $length ): string {
-		$text = wp_strip_all_tags( $text );
-
-		// Neutralize Markdown link and image syntax; the HTML variant renders Markdown.
-		$text = str_replace( [ '[', ']' ], [ '(', ')' ], $text );
-
-		return mb_strimwidth( preg_replace( '/\s+/u', ' ', trim( $text ) ), 0, $length, '…' );
+		return preg_replace( '/\s+/u', ' ', $this->prose( $text, $length ) );
 	}
 }
