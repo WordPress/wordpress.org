@@ -89,23 +89,38 @@ class Plugin_Share_Image_Test extends TestCase {
 		);
 	}
 
+	/**
+	 * Non-plugin posts must not produce share-image data.
+	 */
 	public function test_get_data_returns_null_for_non_plugin_post() {
 		$this->assertNull( Plugin_Share_Image::get_data( $this->fake_post( 'post', 'publish' ) ) );
 	}
 
+	/**
+	 * Unpublished plugins must not produce share-image data.
+	 */
 	public function test_get_data_returns_null_for_unpublished_plugin() {
 		$this->assertNull( Plugin_Share_Image::get_data( $this->fake_post( 'plugin', 'draft' ) ) );
 	}
 
+	/**
+	 * Closed and disabled plugins must not emit a share-image URL.
+	 */
 	public function test_get_url_returns_false_for_closed_plugin() {
 		$this->assertFalse( Plugin_Share_Image::get_url( $this->fake_post( 'plugin', 'closed' ) ) );
 		$this->assertFalse( Plugin_Share_Image::get_url( $this->fake_post( 'plugin', 'disabled' ) ) );
 	}
 
+	/**
+	 * Non-plugin posts must not emit a share-image URL.
+	 */
 	public function test_get_url_returns_false_for_non_plugin_post() {
 		$this->assertFalse( Plugin_Share_Image::get_url( $this->fake_post( 'post', 'publish' ) ) );
 	}
 
+	/**
+	 * Published plugins get a versioned share-image URL.
+	 */
 	public function test_get_url_includes_cache_token_for_published_plugin() {
 		$this->require_inter_font();
 
@@ -119,6 +134,9 @@ class Plugin_Share_Image_Test extends TestCase {
 		);
 	}
 
+	/**
+	 * Changing installs must bust the share-image URL token.
+	 */
 	public function test_get_url_changes_when_install_count_changes() {
 		$this->require_inter_font();
 
@@ -133,6 +151,9 @@ class Plugin_Share_Image_Test extends TestCase {
 		$this->assertNotSame( $first, $second );
 	}
 
+	/**
+	 * A 1x raster icon is used when icon_2x is false.
+	 */
 	public function test_get_data_falls_back_to_1x_icon_when_2x_is_false() {
 		$plugin = $this->create_plugin(
 			array(
@@ -155,6 +176,9 @@ class Plugin_Share_Image_Test extends TestCase {
 		$this->assertSame( $icons['icon'], $data['icon_url'] );
 	}
 
+	/**
+	 * Install counts use the directory display formatting.
+	 */
 	public function test_get_data_uses_directory_install_formatting() {
 		$plugin = $this->create_plugin( array( 'active_installs' => 150000 ) );
 		$data   = Plugin_Share_Image::get_data( $plugin );
@@ -164,6 +188,9 @@ class Plugin_Share_Image_Test extends TestCase {
 		$this->assertSame( 'Installs', $last['label'] );
 	}
 
+	/**
+	 * Contributor nicenames that do not resolve to a user are dropped.
+	 */
 	public function test_contributors_helper_drops_nicenames_that_do_not_resolve() {
 		$plugin = $this->create_plugin();
 		wp_set_object_terms( $plugin->ID, array( 'not-a-real-wporg-user-xyz' ), 'plugin_contributors' );
@@ -176,19 +203,31 @@ class Plugin_Share_Image_Test extends TestCase {
 		}
 	}
 
+	/**
+	 * Plugins with no translations report zero locales.
+	 */
 	public function test_count_plugin_locales_returns_zero_without_translations() {
 		$plugin = $this->create_plugin();
 		$this->assertSame( 0, Template::count_plugin_locales( $plugin ) );
 	}
 
+	/**
+	 * Rendering a non-plugin post must fail.
+	 */
 	public function test_render_returns_false_for_non_plugin_post() {
 		$this->assertFalse( Plugin_Share_Image::render( $this->fake_post( 'post', 'publish' ) ) );
 	}
 
+	/**
+	 * Rendering an unpublished plugin must fail.
+	 */
 	public function test_render_returns_false_for_unpublished_plugin() {
 		$this->assertFalse( Plugin_Share_Image::render( $this->fake_post( 'plugin', 'draft' ) ) );
 	}
 
+	/**
+	 * A published plugin renders a 1200x630 JPEG.
+	 */
 	public function test_render_returns_jpeg_for_published_plugin() {
 		$this->require_inter_font();
 
@@ -205,6 +244,9 @@ class Plugin_Share_Image_Test extends TestCase {
 		$this->assertSame( IMAGETYPE_JPEG, $info[2] );
 	}
 
+	/**
+	 * An empty excerpt must still render a JPEG.
+	 */
 	public function test_render_handles_empty_excerpt() {
 		$this->require_inter_font();
 
@@ -221,6 +263,9 @@ class Plugin_Share_Image_Test extends TestCase {
 		$this->assertSame( IMAGETYPE_JPEG, getimagesizefromstring( $bytes )[2] );
 	}
 
+	/**
+	 * Overlong multibyte titles must truncate without fatalling in GD.
+	 */
 	public function test_render_handles_multibyte_title_that_requires_truncation() {
 		$this->require_inter_font();
 
