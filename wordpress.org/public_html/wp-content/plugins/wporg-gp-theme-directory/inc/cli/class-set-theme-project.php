@@ -108,25 +108,15 @@ class Set_Theme_Project extends WP_CLI_Command {
 	private function get_theme_data( $theme_slug, $theme_dir ) {
 		$style_css = "{$theme_dir}style.css";
 
-		$theme_data = array(
-			'name'        => 'Theme Name',
-			'version'     => 'Version',
-			'description' => 'Description',
+		$theme_data = get_file_data(
+			$style_css,
+			array(
+				'name'        => 'Theme Name',
+				'version'     => 'Version',
+				'description' => 'Description',
+			)
 		);
-
-		//  Pull only the first 8kiB of the file in.
-		$file_data = file_get_contents( $style_css, false, null, 0, 8192 );
-
-		// Make sure we catch CR-only line endings.
-		$file_data = str_replace( "\r", "\n", $file_data );
-
-		foreach ( $theme_data as $field => $regex ) {
-			if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
-				$theme_data[ $field ] = strip_tags( _cleanup_header_comment( $match[1] ) );
-			} else {
-				$theme_data[ $field ] = '';
-			}
-		}
+		$theme_data = array_map( 'strip_tags', $theme_data );
 
 		// Screenshot
 		$theme_data['screenshot'] = '';
