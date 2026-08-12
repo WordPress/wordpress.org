@@ -232,13 +232,6 @@ class Plugin_Scan {
 			return;
 		}
 
-		$totals = sprintf(
-			"Found %d errors in %s %s.\n\n",
-			$results[ 'totals' ][ 'errors' ],
-			$plugin->post_name,
-			$tag
-		);
-
 		$summary = [];
 		foreach ( $results[ 'files' ] as $filename => $file ) {
 			foreach ( $file as $message ) {
@@ -256,48 +249,122 @@ class Plugin_Scan {
 			return;
 		}
 
-		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
-
-		$body = sprintf( "Detected errors in *%s*\n", $plugin->post_title );
-		if ( $active_installs >= 10000 ) {
-			$body .= sprintf( ":bangbang::bangbang::bangbang: %s+ active installs :bangbang::bangbang::bangbang:\n", number_format_i18n( $active_installs ) );
-		} else {
-			$body .= sprintf( "%s+ active installs\n", number_format_i18n( $active_installs ) );
-		}
-
-		$body .= $totals . "\n";
-		$body .= sprintf( "Details: https://wordpress.org/plugins/wp-admin/post.php?post=%s&action=edit\n", $plugin->ID );
-		$body .= sprintf( "Source: https://plugins.trac.wordpress.org/browser/%s/%s/\n",
-			$plugin->post_name,
-			( 'trunk' === $tag ? 'trunk' : 'tags/' . $tag )
-		);
-		$body .= sprintf( "Plugin: https://wordpress.org/plugins/%s/\n", $plugin->post_name );
-
-		$body .= "\n\n```\n";
-		$body .= sprintf( "%-80s %8s %8s\n", 'Type', 'Errors', 'Files' );
-		$body .= sprintf( "%-80s %8s %8s\n", '----', '------', '-----' );
+		$codes = [];
 		foreach ( $summary as $error_code => $file_errors ) {
-			$file_count  = count( $file_errors );
-			$error_count = count( $file_errors, COUNT_RECURSIVE ) - $file_count;
+			$file_count = count( $file_errors );
 
-			$body .= sprintf(
-				"%-80s %8d %8d\n",
-				$error_code,
-				$error_count,
-				$file_count
-			);
+			$codes[] = [
+				'code'   => $error_code,
+				'errors' => count( $file_errors, COUNT_RECURSIVE ) - $file_count,
+				'files'  => $file_count,
+			];
 		}
-		$body .= '```';
+
+		usort(
+			$codes,
+			static function ( $a, $b ) {
+				return $b['errors'] <=> $a['errors'];
+			}
+		);
+
+		$total_errors = array_sum( array_column( $codes, 'errors' ) );
+
+		// Keep the table scannable and well below the 3,000-character section block limit.
+		$more = count( $codes ) - 10;
+		if ( $more > 0 ) {
+			$codes = array_slice( $codes, 0, 10 );
+		}
+
+		foreach ( $codes as $i => $code ) {
+			// Keep untrusted codes from escaping the code block or exceeding Slack's block size limit.
+			$clean = preg_replace( '/\s+/u', ' ', trim( str_replace( '`', '', (string) $code['code'] ) ) );
+
+			$codes[ $i ]['code'] = htmlspecialchars( mb_strimwidth( $clean, 0, 80, '…' ), ENT_NOQUOTES );
+		}
+
+		$width = max( array_map( 'strlen', array_merge( [ 'Type' ], array_column( $codes, 'code' ) ) ) );
+
+		$table  = sprintf( "%-{$width}s %8s %8s\n", 'Type', 'Errors', 'Files' );
+		$table .= sprintf( "%-{$width}s %8s %8s\n", '----', '------', '-----' );
+		foreach ( $codes as $code ) {
+			$table .= sprintf( "%-{$width}s %8d %8d\n", $code['code'], $code['errors'], $code['files'] );
+		}
+		if ( $more > 0 ) {
+			$table .= sprintf( "…and %d more error types.\n", $more );
+		}
+
+		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
+		$install_text    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
+		if ( $active_installs >= 10000 ) {
+			$install_text = "*{$install_text}*";
+		}
+
+		// Post titles are stored entity-encoded; the header block is plain text, so only decode.
+		$title = html_entity_decode( $plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+		$blocks = [
+			[
+				'type' => 'header',
+				'text' => [
+					'type' => 'plain_text',
+					'text' => mb_strimwidth( preg_replace( '/\s+/u', ' ', trim( $title . ' ' . $tag ) ), 0, 150, '…' ),
+				],
+			],
+			[
+				'type' => 'section',
+				'text' => [
+					'type' => 'mrkdwn',
+					'text' => sprintf( '%s · %s', 1 === $total_errors ? '*1 error*' : "*{$total_errors} errors*", $install_text ),
+				],
+			],
+			[
+				'type'     => 'context',
+				'elements' => [
+					[
+						'type' => 'mrkdwn',
+						'text' => sprintf(
+							'<https://wordpress.org/plugins/wp-admin/post.php?post=%d&action=edit|wp-admin> · <https://plugins.trac.wordpress.org/browser/%s/%s/|Source> · <https://wordpress.org/plugins/%s/|Plugin page>',
+							$plugin->ID,
+							$plugin->post_name,
+							'trunk' === $tag ? 'trunk' : 'tags/' . rawurlencode( $tag ),
+							$plugin->post_name
+						),
+					],
+				],
+			],
+			[
+				'type' => 'divider',
+			],
+			[
+				'type' => 'section',
+				'text' => [
+					'type' => 'mrkdwn',
+					'text' => "```\n{$table}```",
+				],
+			],
+		];
+
+		$fallback = sprintf(
+			'Plugin Check found %s in %s %s',
+			1 === $total_errors ? '1 error' : "{$total_errors} errors",
+			htmlspecialchars( $title, ENT_NOQUOTES ),
+			htmlspecialchars( $tag, ENT_NOQUOTES )
+		);
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
 			echo "\n==== Plugin Check Results for {$plugin->post_name} {$tag} SLACK LOG ====\n";
-			echo $body;
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
+			echo $fallback . "\n" . $table;
 		}
 
 		if ( defined( 'PLUGIN_REVIEW_ALERT_SLACK_CHANNEL' ) && function_exists( 'slack_dm' ) ) {
 			slack_dm(
-				$body,
+				[
+					'text'     => $fallback,
+					'username' => 'Plugin Check',
+					'blocks'   => $blocks,
+				],
 				PLUGIN_REVIEW_ALERT_SLACK_CHANNEL,
 				true
 			);

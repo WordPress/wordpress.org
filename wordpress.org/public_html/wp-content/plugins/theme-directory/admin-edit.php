@@ -622,10 +622,22 @@ function wporg_themes_save_meta_box_data( $post_id ) {
 	// Only run once.
 	remove_action( 'save_post', __FUNCTION__ );
 
+	$existing_versions = get_post_meta( $post_id, '_status', true ) ?: array();
+	$valid_statuses    = array( 'new', 'approved', 'live', 'old' );
+
+	$submitted = isset( $_POST['wporg_themes_status'] )
+		? array_map( 'sanitize_key', (array) wp_unslash( $_POST['wporg_themes_status'] ) )
+		: array();
+
 	$new_status = array();
-	foreach ( $_POST['wporg_themes_status'] as $version => $status ) {
-		// We could check of the passed status is valid, but wporg_themes_update_version_status() handles that beautifully.
-		$new_status[ base64_decode( $version ) ] = $status;
+	foreach ( $submitted as $version => $status ) {
+		$version = base64_decode( (string) $version );
+
+		if ( ! isset( $existing_versions[ $version ] ) || ! in_array( $status, $valid_statuses, true ) ) {
+			continue;
+		}
+
+		$new_status[ $version ] = $status;
 	}
 	uksort( $new_status, 'version_compare' );
 

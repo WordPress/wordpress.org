@@ -1,0 +1,101 @@
+# Unit test suite definitions.
+#
+# Single source of truth for the `changes` job in
+# .github/workflows/unit-tests.yml: each suite declares its job matrix
+# configuration and the paths that can break it. The workflow generates the
+# path filters and the job matrices from this file, and only runs the suites
+# whose paths match a changed file.
+#
+# To add a suite, add one entry under `suites`:
+#   type:    standalone (plain PHPUnit) or wordpress (wp-env/Docker).
+#   name:    display name in the job list.
+#   paths:   globs of the files the suite tests or loads — include every
+#            cross-directory dependency its bootstrap pulls in. The shared
+#            paths for the suite's type are added automatically, and so are
+#            the plugins a wordpress suite's environment activates (read from
+#            environments/<suite>/.wp-env.test.json by the workflow).
+#   All other keys are passed through to the job matrix as-is.
+
+# Changes that affect every suite of a type.
+shared-paths:
+  # PHPUnit and the polyfills are installed from the root composer manifest.
+  standalone:
+    - '.github/workflows/unit-tests.yml'
+    - '.github/unit-tests-suites.yml'
+    - 'composer.json'
+    - 'composer.lock'
+  wordpress:
+    - '.github/workflows/unit-tests.yml'
+    - '.github/unit-tests-suites.yml'
+    - 'environments/package.json'
+    - 'environments/package-lock.json'
+    - 'environments/.nvmrc'
+
+suites:
+  serve-happy:
+    type: standalone
+    name: Serve Happy API
+    working-directory: api.wordpress.org/public_html/core/serve-happy/1.0
+    paths:
+      - 'api.wordpress.org/public_html/core/serve-happy/**'
+      - 'wordpress.org/public_html/wp-content/mu-plugins/pub/servehappy-config.php'
+
+  browse-happy:
+    type: standalone
+    name: Browse Happy API
+    working-directory: api.wordpress.org/public_html/core/browse-happy/1.0
+    paths:
+      - 'api.wordpress.org/public_html/core/browse-happy/**'
+
+  events:
+    type: standalone
+    name: Events API
+    working-directory: api.wordpress.org/public_html/events/1.0
+    paths:
+      - 'api.wordpress.org/public_html/events/1.0/**'
+
+  slack-trac:
+    type: standalone
+    name: Slack Trac Bot
+    working-directory: common/includes/tests/slack/trac
+    phpunit-args: --no-configuration bot.php
+    paths:
+      - 'common/includes/slack/**'
+      - 'common/includes/tests/slack/**'
+
+  slack-props:
+    type: standalone
+    name: Slack Props Library
+    working-directory: common/includes/slack/props/tests
+    phpunit-args: --no-configuration --bootstrap /tmp/phpunit-bootstrap.php .
+    bootstrap: wpdb-stub
+    paths:
+      - 'common/includes/slack/props/**'
+
+  handbook:
+    type: wordpress
+    name: Handbook Plugin
+    script: handbook:test
+    paths:
+      - 'environments/handbook/**'
+
+  plugin-directory:
+    type: wordpress
+    name: Plugin Directory
+    script: plugins:test
+    paths:
+      - 'environments/plugin-directory/**'
+
+  theme-directory:
+    type: wordpress
+    name: Theme Directory
+    script: themes:test
+    paths:
+      - 'environments/theme-directory/**'
+
+  make:
+    type: wordpress
+    name: Make
+    script: make:test
+    paths:
+      - 'environments/make/**'

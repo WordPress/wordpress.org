@@ -42,6 +42,13 @@ class Uploads {
 	const SUBMIT_PAGE_SLUG = 'submit';
 
 	/**
+	 * The Frontend Uploader form layout used for photo uploads.
+	 *
+	 * @var string
+	 */
+	const FORM_LAYOUT = 'post_media';
+
+	/**
 	 * Memoized value of file hash.
 	 *
 	 * @var string
@@ -91,7 +98,7 @@ class Uploads {
 
 		/* After submission, but before an upload initiates. */
 
-		add_filter( 'fu_should_process_content_upload', [ __CLASS__, 'can_proceed_with_upload' ] );
+		add_filter( 'fu_should_process_content_upload', [ __CLASS__, 'can_proceed_with_upload' ], 10, 2 );
 
 		/* After submission, but before post is created. */
 
@@ -537,10 +544,19 @@ class Uploads {
 	 * file being checked (as much as can be done without the file actually being
 	 * uploaded yet), etc. Checks `user_can_upload()` as the first step.
 	 *
-	 * @param bool $can Can the user upload the photo?
+	 * @param bool   $can    Can the user upload the photo?
+	 * @param string $layout Optional. Form layout used for the submission. Default ''.
 	 * @return bool True if user can upload the photo, else false.
 	 */
-	public static function can_proceed_with_upload( $can ) {
+	public static function can_proceed_with_upload( $can, $layout = '' ) {
+		$reason = '';
+
+		// Only allow the form layout that the submit form is built with.
+		if ( $can && self::FORM_LAYOUT !== $layout ) {
+			$can    = false;
+			$reason = 'invalid-form-layout';
+		}
+
 		// Check if user is able to upload.
 		if ( $can ) {
 			$can = self::user_can_upload();
@@ -586,6 +602,11 @@ class Uploads {
 	 *                      specific validation issue.
 	 */
 	protected static function validate_upload_form() {
+		// Frontend Uploader uploads the first file field, not the 'files' field checked below.
+		if ( count( $_FILES ) > 1 ) {
+			return 'too-many-files';
+		}
+
 		if ( ! empty( $_FILES['files']['error'][0] ) ) {
 			switch ( $_FILES['files']['error'][0] ) {
 				case UPLOAD_ERR_INI_SIZE:
@@ -911,7 +932,8 @@ class Uploads {
 			$content .= '<fieldset id="wporg-photo-upload">';
 
 			$content .= sprintf(
-				'[fu-upload-form form_layout="post_media" post_type="%s" title="%s" suppress_default_fields="true"]' . "\n",
+				'[fu-upload-form form_layout="%s" post_type="%s" title="%s" suppress_default_fields="true"]' . "\n",
+				esc_attr( self::FORM_LAYOUT ),
 				esc_attr( $post_type ),
 				esc_attr( __( 'Upload your photo', 'wporg-photos' ) )
 			);

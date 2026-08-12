@@ -188,6 +188,8 @@ class Plugin_Scan_Gandalf {
 						'severity_counts' => $data['severity_counts'],
 						'verdict_hash'    => $data['verdict_hash'],
 						'report_url'      => $data['report_url'],
+						'findings'        => is_array( $data['findings'] ?? null ) ? array_filter( $data['findings'], 'is_array' ) : [],
+						'max_risk_score'  => $data['max_risk_score'] ?? null,
 					]
 				);
 			}
@@ -266,43 +268,209 @@ class Plugin_Scan_Gandalf {
 		}
 
 		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
-		$install_line    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
+		$install_text    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
 		if ( $active_installs >= 10000 ) {
-			$install_line = ":bangbang::bangbang::bangbang: {$install_line} :bangbang::bangbang::bangbang:";
+			$install_text = "*{$install_text}*";
 		}
 
-		$title = $plugin->post_title;
+		// Post titles are stored entity-encoded; the header block is plain text, so only decode.
+		$title = html_entity_decode( $plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		if ( 'closed' === $plugin->post_status ) {
 			$title .= ' (closed)';
 		}
 
-		$body = sprintf(
-			"Gandalf scan detected findings in *%s*\n%s\nVersion: %s (%s)\nFindings: %d\n",
-			$title,
-			$install_line,
-			$record['version'],
-			$record['release_ref'],
-			$record['findings_count']
+		$findings_count = (int) $record['findings_count'];
+		$top_findings   = self::top_findings( $record['findings'], 5 );
+
+		$meta_links = sprintf(
+			'<https://wordpress.org/plugins/wp-admin/post.php?post=%d&action=edit|wp-admin> · <https://wordpress.org/plugins/%s/|Plugin page>',
+			$plugin->ID,
+			$plugin->post_name
 		);
-
-		if ( ! empty( $record['severity_counts'] ) ) {
-			$severity_summary = [];
-			foreach ( $record['severity_counts'] as $severity => $count ) {
-				if ( $count > 0 ) {
-					$severity_summary[] = "{$severity}: {$count}";
-				}
-			}
-
-			if ( $severity_summary ) {
-				$body .= 'Severity: ' . implode( ', ', $severity_summary ) . "\n";
-			}
+		if ( $record['release_ref'] !== $record['version'] ) {
+			// Escaping &, <, and > neutralizes Slack control sequences like <!channel> in untrusted strings.
+			$meta_links .= ' · ' . htmlspecialchars( $record['release_ref'], ENT_NOQUOTES );
 		}
 
-		$body .= sprintf( "Details: https://wordpress.org/plugins/wp-admin/post.php?post=%s&action=edit\n", $plugin->ID );
-		$body .= sprintf( "Plugin: https://wordpress.org/plugins/%s/\n", $plugin->post_name );
-		$body .= sprintf( "Report: %s\n", $record['report_url'] );
+		$summary = [
+			'type' => 'section',
+			'text' => [
+				'type' => 'mrkdwn',
+				'text' => sprintf( '%s · %s', 1 === $findings_count ? '*1 finding*' : "*{$findings_count} findings*", $install_text ),
+			],
+		];
 
-		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
+		$report_url = esc_url_raw( $record['report_url'] ?? '' );
+		if ( $report_url ) {
+			$summary['accessory'] = [
+				'type'  => 'button',
+				'text'  => [
+					'type' => 'plain_text',
+					'text' => 'View report',
+				],
+				'url'   => $report_url,
+				'style' => 'primary',
+			];
+		}
+
+		$blocks = [
+			[
+				'type' => 'header',
+				'text' => [
+					'type' => 'plain_text',
+					'text' => self::excerpt( trim( $title . ' ' . $record['version'] ), 150 ),
+				],
+			],
+			$summary,
+			[
+				'type'     => 'context',
+				'elements' => [
+					[
+						'type' => 'mrkdwn',
+						'text' => $meta_links,
+					],
+				],
+			],
+		];
+
+		$attachments = [];
+		foreach ( $top_findings as $finding ) {
+			$risk_score = (float) ( $finding['risk_score'] ?? 0 );
+
+			$attachment = [
+				'color'  => self::risk_color( $risk_score ),
+				'blocks' => [
+					[
+						'type' => 'section',
+						'text' => [
+							'type' => 'mrkdwn',
+							'text' => sprintf(
+								'*%s* — %s',
+								number_format( $risk_score, 1 ),
+								htmlspecialchars( self::excerpt( $finding['title'] ?? '', 150 ), ENT_NOQUOTES )
+							),
+						],
+					],
+				],
+			];
+
+			if ( ! empty( $finding['file_path'] ) ) {
+				$attachment['blocks'][] = [
+					'type'     => 'context',
+					'elements' => [
+						[
+							'type' => 'mrkdwn',
+							'text' => 'File: ' . self::file_link( $plugin, $record['release_ref'], $finding['file_path'], (int) ( $finding['line'] ?? 0 ) ),
+						],
+					],
+				];
+			}
+
+			$attachments[] = $attachment;
+		}
+
+		$fallback = sprintf(
+			'Security scan found %s in %s %s',
+			1 === $findings_count ? '1 finding' : "{$findings_count} findings",
+			htmlspecialchars( $title, ENT_NOQUOTES ),
+			htmlspecialchars( $record['version'], ENT_NOQUOTES )
+		);
+		if ( isset( $record['max_risk_score'] ) ) {
+			$fallback .= sprintf( ' (max risk %s)', number_format( (float) $record['max_risk_score'], 1 ) );
+		}
+
+		slack_dm(
+			[
+				'text'        => $fallback,
+				'username'    => 'Gandalf',
+				'blocks'      => $blocks,
+				'attachments' => $attachments,
+			],
+			PLUGIN_REVIEW_ALERT_SLACK_CHANNEL,
+			true
+		);
+	}
+
+	/**
+	 * Return the attachment bar color for a risk score.
+	 *
+	 * @param float $risk_score The finding's risk score, 0-10.
+	 * @return string A hex color.
+	 */
+	protected static function risk_color( $risk_score ) {
+		if ( $risk_score >= 9 ) {
+			return '#D0342C';
+		}
+
+		if ( $risk_score >= 6 ) {
+			return '#E8912D';
+		}
+
+		if ( $risk_score >= 4 ) {
+			return '#ECB22E';
+		}
+
+		return '#808080';
+	}
+
+	/**
+	 * Return a Slack link to the finding's file in the plugins Trac browser.
+	 *
+	 * @param \WP_Post $plugin      The plugin post.
+	 * @param string   $release_ref The scanned release ref.
+	 * @param string   $file_path   The file path, relative to the plugin root.
+	 * @param int      $line        The line number, or 0 for none.
+	 * @return string The Slack-formatted link.
+	 */
+	protected static function file_link( $plugin, $release_ref, $file_path, $line ) {
+		$file_path = ltrim( (string) $file_path, '/' );
+
+		// URL-encoding the untrusted path segments also keeps | and > from breaking the link syntax.
+		$url = sprintf(
+			'https://plugins.trac.wordpress.org/browser/%s/%s/%s',
+			$plugin->post_name,
+			'trunk' === $release_ref ? 'trunk' : 'tags/' . rawurlencode( $release_ref ),
+			implode( '/', array_map( 'rawurlencode', explode( '/', $file_path ) ) )
+		);
+
+		$label = $file_path;
+		if ( $line ) {
+			$url   .= '#L' . $line;
+			$label .= ':' . $line;
+		}
+
+		return sprintf( '<%s|%s>', $url, htmlspecialchars( $label, ENT_NOQUOTES ) );
+	}
+
+	/**
+	 * Return the highest-risk findings first, bounded for display.
+	 *
+	 * The callback orders findings by ID, not by severity.
+	 *
+	 * @param array $findings The scan findings.
+	 * @param int   $limit    Maximum number of findings to return.
+	 * @return array The highest-risk findings.
+	 */
+	protected static function top_findings( $findings, $limit ) {
+		usort(
+			$findings,
+			static function ( $a, $b ) {
+				return ( $b['risk_score'] ?? 0 ) <=> ( $a['risk_score'] ?? 0 );
+			}
+		);
+
+		return array_slice( $findings, 0, $limit );
+	}
+
+	/**
+	 * Collapse untrusted text onto a single bounded line.
+	 *
+	 * @param string $text   The text to excerpt.
+	 * @param int    $length Maximum length in characters.
+	 * @return string The excerpted text.
+	 */
+	protected static function excerpt( $text, $length ) {
+		return mb_strimwidth( preg_replace( '/\s+/u', ' ', trim( (string) $text ) ), 0, $length, '…' );
 	}
 
 	/**

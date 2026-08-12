@@ -140,7 +140,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 	while (have_posts()) : the_post();
 ?>
 							<div class="post" id="post-<?php the_ID(); ?>">
-								<h4><a href="<?php the_permalink() ?>" rel="bookmark" title="<?php printf( esc_attr__('Permanent Link to %s', 'rosetta'), get_the_title()); ?>"><?php the_title(); ?></a></h4>
+								<h4><a href="<?php the_permalink(); ?>" rel="bookmark" title="<?php echo esc_attr( sprintf( __( 'Permanent Link to %s', 'rosetta' ), get_the_title() ) ); ?>"><?php the_title(); ?></a></h4>
 								<div class="entry">
 									<?php the_excerpt(); ?>
 								</div>

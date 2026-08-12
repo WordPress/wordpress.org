@@ -1,13 +1,18 @@
 {
 	"core": "WordPress/WordPress#master",
 	"phpVersion": "8.4",
+	"testsEnvironment": false,
 	"plugins": [
 		"../wordpress.org/public_html/wp-content/plugins/plugin-directory"
 	],
 	"mappings": {
-		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build"
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
+		"wp-content/env-bin": "./plugin-directory/bin"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash plugin-directory/bin/after-start-test.sh"
+	},
+	"config": {
+		"PLUGINS_TABLE_PREFIX": "wp_"
 	}
 }

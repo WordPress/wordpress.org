@@ -162,7 +162,7 @@ class SVN_Import {
 						"----\nWordPress Theme Directory",
 					),
 					esc_html( $uploader->author->display_name ?: $uploader->author->user_login ),
-					$uploader->theme->display('Name') . ' ' . $uploader->theme->display('Version'),
+					$uploader->get_theme_header( 'Name' ) . ' ' . $uploader->get_theme_header( 'Version' ),
 					'<div style="margin-left: 30px">' . $error_message . '</div>',
 					'https://make.wordpress.org/themes/handbook/review/required/'
 				),

@@ -101,8 +101,11 @@ function import_revisions( $svn ) {
 		(int) MAX_REVISIONS
 	);
 
+	// shell_exec() returns null when the command can't be run at all, which simplexml_load_string() won't accept.
+	$log = shell_exec( $command );
+
 	$xml_internal_errors = libxml_use_internal_errors( true );
-	$xml                 = simplexml_load_string( shell_exec( $command ) );
+	$xml                 = $log ? simplexml_load_string( $log ) : false;
 	libxml_use_internal_errors( $xml_internal_errors );
 
 	if ( ! $xml ) {

@@ -1,0 +1,12 @@
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	>
+	<testsuites>
+		<testsuite name="theme-directory">
+			<directory suffix=".php">tests/</directory>
+			<exclude>tests/bootstrap.php</exclude>
+		</testsuite>
+	</testsuites>
+</phpunit>

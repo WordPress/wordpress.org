@@ -74,7 +74,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 				/* translators: 1: user's WordPress.org profile link, 2: user's Slack username, 3: make.wordpress.org/chat URL */
 				printf( __( '%1$s on WordPress.org, %2$s on <a href="%3$s">Slack</a>', 'wporg-forums' ),
 					wporg_support_get_wporg_profile_link(),
-					'@' . $slack_username,
+					'@' . esc_html( $slack_username ),
 					'https://make.wordpress.org/chat/'
 				);
 			} elseif( $slack_username ) {

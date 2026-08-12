@@ -515,6 +515,7 @@ function get_whitelist() {
 			'jainnidhi', // @nidhijain on Slack
 			'kharisblank', // @kharisulistiyo on Slack
 			'luisrull',
+			'mayukojpn', // @mayo on Slack
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
@@ -639,6 +640,9 @@ function get_whitelist() {
 			'rahuldsarker',
 			'RoseAppleMedia',
 			'sbddesign',
+		),
+		'wp-ahmedabad' => array(
+			'chetan200891', // @Chetan Prajapati  on Slack
 		),
 	);
 }

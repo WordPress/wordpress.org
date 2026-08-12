@@ -2,10 +2,12 @@
 
 defined( 'ABSPATH' ) or die();
 
-class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
+use PHPUnit\Framework\Attributes\DataProvider;
+
+class WPorg_Handbook_Init_Test extends WPorg_Handbook_TestCase {
 
 	public function setUp(): void {
-		parent::setup();
+		parent::setUp();
 
 		WPorg_Handbook_Init::init();
 	}
@@ -174,9 +176,7 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 	 * get_handbooks_config()
 	 */
 
-	/**
-	 * @dataProvider get_default_config
-	 */
+	#[DataProvider( 'get_default_config' )]
 	public function test_get_handbooks_config_default( $key, $default ) {
 		$configs = WPorg_Handbook_Init::get_handbooks_config();
 		$this->assertArrayHasKey( 'handbook', $configs );
@@ -200,9 +200,7 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 		$this->assertEmpty( WPorg_Handbook_Init::get_handbooks_config( 'nonexistent-handbook' ) );
 	}
 
-	/**
-	 * @dataProvider get_default_config
-	 */
+	#[DataProvider( 'get_default_config' )]
 	public function test_get_handbooks_config_specific_handbook_default( $key, $default ) {
 		$config = WPorg_Handbook_Init::get_handbooks_config( 'handbook' );
 
@@ -218,9 +216,7 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 		}
 	}
 
-	/**
-	 * @dataProvider get_default_config
-	 */
+	#[DataProvider( 'get_default_config' )]
 	public function test_get_handbooks_config_specific_custom_handbook( $key, $default ) {
 		reinit_handbooks( [ 'plugins' => [] ] );
 

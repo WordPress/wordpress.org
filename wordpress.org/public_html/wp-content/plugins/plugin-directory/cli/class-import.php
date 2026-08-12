@@ -651,8 +651,8 @@ class Import {
 		// Rebuild/Build $build_zips
 		try {
 			// This will rebuild the ZIP.
-			$zip_builder = new Builder();
-			$zip_builder->build(
+			$zip_builder    = new Builder();
+			$built_versions = $zip_builder->build(
 				$plugin_slug,
 				array_unique( $versions_to_build ),
 				$svn_revision_triggered ?
@@ -661,24 +661,22 @@ class Import {
 				$stable_tag
 			);
 		} catch ( Exception $e ) {
+			$failed_versions = array_unique( $versions_to_build );
+			$error           = preg_replace( '/[\r\n\t]+/', ' ', $e->getMessage() );
+
+			$this->warnings['zip_build_failed'] = [
+				'versions' => $failed_versions,
+				'message'  => $error,
+			];
+
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Routed to the error log via E_USER_WARNING; raw is fine.
+			trigger_error( sprintf( '%s: ZIP build failed for %s: %s', $plugin_slug, implode( ', ', $failed_versions ), $error ), E_USER_WARNING );
+
 			return false;
 		}
 
-		// Mark the ZIPs as being built.
-		foreach ( $versions_to_build as $tag ) {
-			if ( 'trunk' === $tag ) {
-				continue;
-			}
-
-			Plugin_Directory::add_release(
-				$plugin,
-				[
-					'tag'                      => $tag,
-					'zips_built'               => true,
-					'zips_built_from_revision' => ( $zip_builder->plugins_revision ?? 0 ) ?: $svn_revision_triggered,
-				]
-			);
-		}
+		// Mark only the ZIPs that actually built, each with its export revision.
+		Plugin_Directory::mark_zips_built( $plugin, $built_versions );
 
 		return true;
 	}

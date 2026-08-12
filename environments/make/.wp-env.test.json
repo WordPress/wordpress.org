@@ -1,0 +1,26 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"../wordpress.org/public_html/wp-content/plugins/wporg-o2-posting-access",
+		"../wordpress.org/public_html/wp-content/plugins/o2-private-posts",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-make-sites-cpt",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-meeting-posttype",
+		"../wordpress.org/public_html/wp-content/plugins/trac-notifications",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-trac-watcher",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-cli",
+		"../wordpress.org/public_html/wp-content/plugins/handbook",
+		"https://downloads.wordpress.org/plugin/jetpack.zip"
+	],
+	"mappings": {
+		"wp-content/env-bin": "./make/bin"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash make/bin/after-start-test.sh"
+	},
+	"config": {
+		"WP_CORE_LATEST_RELEASE": "7.0",
+		"JETPACK_DEV_DEBUG": true
+	}
+}
