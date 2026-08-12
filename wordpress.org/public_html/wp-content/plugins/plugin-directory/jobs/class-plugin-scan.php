@@ -276,8 +276,10 @@ class Plugin_Scan {
 		}
 
 		foreach ( $codes as $i => $code ) {
-			// Escaping &, <, and > neutralizes Slack control sequences in scanner-supplied codes.
-			$codes[ $i ]['code'] = htmlspecialchars( $code['code'], ENT_NOQUOTES );
+			// Keep untrusted codes from escaping the code block or exceeding Slack's block size limit.
+			$clean = preg_replace( '/\s+/u', ' ', trim( str_replace( '`', '', (string) $code['code'] ) ) );
+
+			$codes[ $i ]['code'] = htmlspecialchars( mb_strimwidth( $clean, 0, 80, '…' ), ENT_NOQUOTES );
 		}
 
 		$width = max( array_map( 'strlen', array_merge( [ 'Type' ], array_column( $codes, 'code' ) ) ) );
