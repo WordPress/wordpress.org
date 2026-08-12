@@ -60,6 +60,9 @@ abstract class Directory_Compat {
 			// Always check to see if a topic title needs a compat prefix.
 			add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 9, 2 );
 
+			// Enforce the published-status rule on the write path; priority 0 beats bbPress's handlers (1 and 10).
+			add_action( 'bbp_post_request', array( $this, 'block_unpublished_object_review' ), 0 );
+
 			// Always check to see if a new topic is being posted; this must run
 			// before subscriptions go out for `bbp_new_topic` at priority 10.
 			add_action( 'bbp_new_topic', array( $this, 'new_topic' ), 9, 4 );
@@ -769,6 +772,42 @@ abstract class Directory_Compat {
 	}
 
 	/**
+	 * Reject review submissions the create-topic form would not offer.
+	 *
+	 * The create-topic-form filter only decides whether the review form is displayed; bbPress's
+	 * topic handlers never consult it, so the same rule is enforced here on the write path.
+	 *
+	 * @param string $action The bbPress POST action being handled.
+	 */
+	public function block_unpublished_object_review( $action = '' ) {
+		if ( 'bbp-new-topic' !== $action && 'bbp-edit-topic' !== $action ) {
+			return;
+		}
+
+		// Only guard submissions to the reviews forum.
+		if ( (int) Plugin::REVIEWS_FORUM_ID !== (int) bbp_get_form_topic_forum() ) {
+			return;
+		}
+
+		// The resolved slug, or this compat's query var.
+		$slug = $this->slug() ? $this->slug() : get_query_var( $this->query_var() );
+		if ( ! $slug ) {
+			return;
+		}
+
+		// Mirror the create-topic form: a published plugin, or a publicly-served theme.
+		$object     = self::get_object_by_slug_and_type( $slug, $this->compat() );
+		$reviewable = $object && ( 'plugin' !== $this->compat() || 'publish' === $object->post_status );
+
+		if ( ! $reviewable ) {
+			bbp_add_error(
+				'wporg_compat_unavailable_review',
+				__( '<strong>Error:</strong> This item is not available for reviews.', 'wporg-forums' )
+			);
+		}
+	}
+
+	/**
 	 * Filter the template fetch to avoid displaying a new topic form in the reviews forum.
 	 *
 	 * @param array $templates The templates to load
@@ -969,12 +1008,11 @@ abstract class Directory_Compat {
 		$cache_group = $type . '-objects';
 		$compat_object = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $compat_object ) {
-
-			// Get the object information from the correct table.
+			// Only resolve publicly-served records; the other statuses are the private review pipeline.
 			if ( $type == 'theme' ) {
-				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug ) );
+				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' AND post_status IN ( 'publish', 'delist' ) LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug ) );
 			} elseif ( $type == 'plugin' ) {
-				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
+				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' AND post_status IN ( 'publish', 'closed', 'disabled' ) LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
 			}
 
 			wp_cache_set( $cache_key, $compat_object, $cache_group, HOUR_IN_SECONDS );

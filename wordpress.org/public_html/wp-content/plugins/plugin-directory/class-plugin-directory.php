@@ -204,7 +204,7 @@ class Plugin_Directory {
 			'menu_icon'    => 'dashicons-admin-plugins',
 			'capabilities' => array(
 				'edit_post'          => 'plugin_edit',
-				'read_post'          => 'read',
+				'read_post'          => 'plugin_admin_view',
 				'edit_posts'         => 'plugin_dashboard_access',
 				'edit_others_posts'  => 'plugin_edit_others',
 				'publish_posts'      => 'plugin_approve',
