@@ -337,10 +337,10 @@ class Security_Scan_Notification_Test extends TestCase {
 		$email = $this->emails[0];
 
 		$this->assertSame( $this->committer->user_email, $email['to'] );
-		$this->assertStringContainsString( 'has been blocked pending a security review', $email['subject'] );
+		$this->assertStringContainsString( 'has been blocked due to security findings', $email['subject'] );
 		$this->assertStringContainsString( self::VERSION, $email['subject'] );
 
-		$this->assertStringContainsString( 'blocked from being offered as an update', $email['message'] );
+		$this->assertStringContainsString( 'block it from being offered as an update', $email['message'] );
 		$this->assertStringContainsString( '9.8', $email['message'] );
 		$this->assertStringContainsString( 'Remote response controls a PHP callable', $email['message'] );
 		$this->assertStringContainsString(
@@ -475,7 +475,7 @@ class Security_Scan_Notification_Test extends TestCase {
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( get_post( $this->plugin->ID ), $retry ) );
 
 		$this->assertCount( 2, $this->emails );
-		$this->assertStringContainsString( 'has been blocked pending a security review', $this->emails[1]['subject'] );
+		$this->assertStringContainsString( 'has been blocked due to security findings', $this->emails[1]['subject'] );
 	}
 
 	/**

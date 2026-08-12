@@ -35,7 +35,7 @@ class Security_Scan_Findings extends Markdown_Base {
 
 		if ( 'blocked' === $record['action'] ) {
 			/* translators: 1: Plugin name. 2: Plugin version. */
-			$subject = __( '%1$s %2$s has been blocked pending a security review', 'wporg-plugins' );
+			$subject = __( '%1$s %2$s has been blocked due to security findings', 'wporg-plugins' );
 		} else {
 			/* translators: 1: Plugin name. 2: Plugin version. */
 			$subject = __( 'Security scan findings in %1$s %2$s', 'wporg-plugins' );
@@ -67,7 +67,7 @@ class Security_Scan_Findings extends Markdown_Base {
 		);
 
 		if ( 'blocked' === $record['action'] ) {
-			$action = __( 'To protect sites, this version has been blocked from being offered as an update while the WordPress Plugin Review Team takes a closer look. Sites running a previous version keep receiving that version in the meantime. The team will release this version if it finds no cause for concern; you can also address the findings in a new version, which is not affected by this block.', 'wporg-plugins' );
+			$action = __( 'A security review of this version found issues severe enough to block it from being offered as an update, protecting sites from receiving it. Sites running a previous version keep receiving that version. Please address the findings and release a new version; the block applies only to this version.', 'wporg-plugins' );
 		} else {
 			$action = __( 'No action has been taken against this version. Please review the findings and address them in an upcoming release.', 'wporg-plugins' );
 		}
