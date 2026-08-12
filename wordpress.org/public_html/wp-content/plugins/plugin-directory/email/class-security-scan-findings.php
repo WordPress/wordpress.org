@@ -72,9 +72,16 @@ class Security_Scan_Findings extends Markdown_Base {
 			$action = __( 'Please review the findings and address them in an upcoming release.', 'wporg-plugins' );
 		}
 
-		$outro = __( 'If you have questions or believe these findings to be in error, please reply to this email or contact plugins@wordpress.org.', 'wporg-plugins' );
+		$parts = [ $greeting, $intro, $action ];
 
-		return implode( "\n\n", array_filter( [ $greeting, $intro, $action, $this->findings_text( $record ), $outro ] ) );
+		$findings = $this->findings_text( $record );
+		if ( '' !== $findings ) {
+			array_push( $parts, $findings, '---' );
+		}
+
+		$parts[] = __( 'If you have questions or believe these findings to be in error, please reply to this email or contact plugins@wordpress.org.', 'wporg-plugins' );
+
+		return implode( "\n\n", $parts );
 	}
 
 	/**
