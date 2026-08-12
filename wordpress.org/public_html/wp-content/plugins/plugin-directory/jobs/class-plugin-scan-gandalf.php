@@ -7,6 +7,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
+use WordPressdotorg\Plugin_Directory\Email\Security_Scan_Findings;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -36,8 +37,14 @@ class Plugin_Scan_Gandalf {
 	/** Consumed callbacks keyed by scan_id, to acknowledge retries without repeating effects. */
 	const CONSUMED_META_KEY = '_gandalf_scan_consumed';
 
+	/** Verdict hashes already emailed to the plugin committers, to avoid duplicate emails. */
+	const EMAILED_META_KEY = '_gandalf_scan_emailed';
+
 	/** Completed scans with a max risk score at or above this have their release blocked. */
 	const BLOCK_RISK_SCORE = PHP_FLOAT_MAX;
+
+	/** Completed scans with a max risk score at or above this have their committers emailed. */
+	const NOTIFY_RISK_SCORE = self::BLOCK_RISK_SCORE;
 
 	/** Gandalf scan endpoint. */
 	const ENDPOINT = 'https://gandalf.wordpress.org/scan';
@@ -278,6 +285,8 @@ class Plugin_Scan_Gandalf {
 			if ( $record['findings_count'] > 0 || 'advisory' !== $record['action'] ) {
 				self::notify_slack( $plugin, $record );
 			}
+
+			self::notify_committers( $plugin, $record );
 		} else {
 			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
 		}
@@ -618,6 +627,65 @@ class Plugin_Scan_Gandalf {
 			PLUGIN_REVIEW_ALERT_SLACK_CHANNEL,
 			true
 		);
+	}
+
+	/**
+	 * Email the plugin committers about a completed scan's findings.
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $record The completed scan record.
+	 */
+	protected static function notify_committers( $plugin, $record ) {
+		if ( empty( $record['verdict_hash'] ) ) {
+			return;
+		}
+
+		/**
+		 * Filters the risk score at which a completed security scan emails the plugin committers.
+		 *
+		 * @param float    $threshold The notification threshold, from 0 to 10. Above 10 disables the emails.
+		 * @param \WP_Post $plugin    The plugin post.
+		 */
+		$threshold = (float) apply_filters( 'wporg_plugins_security_scan_notify_risk_score', self::NOTIFY_RISK_SCORE, $plugin );
+
+		if ( $record['max_risk_score'] < $threshold ) {
+			return;
+		}
+
+		$already_emailed = get_post_meta( $plugin->ID, self::EMAILED_META_KEY, true ) ?: [];
+		foreach ( $already_emailed as $hash => $time ) {
+			if ( $time < time() - MONTH_IN_SECONDS ) {
+				unset( $already_emailed[ $hash ] );
+			}
+		}
+
+		// Release blocks always email; only advisory results deduplicate.
+		if ( 'advisory' === $record['action'] && isset( $already_emailed[ $record['verdict_hash'] ] ) ) {
+			update_post_meta( $plugin->ID, self::EMAILED_META_KEY, $already_emailed );
+			return;
+		}
+
+		$committers = array_diff(
+			Tools::get_plugin_committers( $plugin ),
+			$GLOBALS['bot_accounts'] ?? [],
+			$GLOBALS['nologin_accounts'] ?? []
+		);
+		if ( ! $committers ) {
+			return;
+		}
+
+		$already_emailed[ $record['verdict_hash'] ] = time();
+		update_post_meta( $plugin->ID, self::EMAILED_META_KEY, $already_emailed );
+
+		$email = new Security_Scan_Findings(
+			$plugin,
+			$committers,
+			[
+				'record' => $record,
+				'who'    => 'WordPress.org',
+			]
+		);
+		$email->send();
 	}
 
 	/**
