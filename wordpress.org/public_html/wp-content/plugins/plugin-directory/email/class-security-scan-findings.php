@@ -69,7 +69,7 @@ class Security_Scan_Findings extends Markdown_Base {
 		if ( 'blocked' === $record['action'] ) {
 			$action = __( 'A security review of this version found issues severe enough to block it from being offered as an update, protecting sites from receiving it. Sites running a previous version keep receiving that version. Please address the findings and release a new version; the block applies only to this version.', 'wporg-plugins' );
 		} else {
-			$action = __( 'No action has been taken against this version. Please review the findings and address them in an upcoming release.', 'wporg-plugins' );
+			$action = __( 'Please review the findings and address them in an upcoming release.', 'wporg-plugins' );
 		}
 
 		$outro = __( 'If you have questions or believe these findings to be in error, please reply to this email or contact plugins@wordpress.org.', 'wporg-plugins' );

@@ -392,7 +392,7 @@ class Security_Scan_Notification_Test extends TestCase {
 
 		$this->assertCount( 1, $this->emails );
 		$this->assertStringContainsString( 'Security scan findings in', $this->emails[0]['subject'] );
-		$this->assertStringContainsString( 'No action has been taken against this version', $this->emails[0]['message'] );
+		$this->assertStringContainsString( 'Please review the findings and address them in an upcoming release.', $this->emails[0]['message'] );
 		$this->assertStringNotContainsString( 'blocked', $this->emails[0]['message'] );
 	}
 
