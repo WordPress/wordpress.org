@@ -19,11 +19,11 @@
 		"style": "../wordpress.org/public_html/style"
 	},
 	"lifecycleScripts": {
-		"afterStart": "node plugin-directory/bin/after-start.js"
+		"afterStart": "bash plugin-directory/bin/after-start.sh"
 	},
 	"config": {
 		"WP_DEBUG": true,
-		"JETPACK_DEV_DEBUG": false,
+		"JETPACK_DEV_DEBUG": true,
 		"WP_TESTS_TITLE": "WordPress.org Plugins",
 		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php",
 		"PLUGINS_TABLE_PREFIX": "wp_"
