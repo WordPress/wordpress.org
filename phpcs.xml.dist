@@ -44,6 +44,7 @@
 
 		<!-- Short array syntax is already used throughout the codebase. -->
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax" />
+		<exclude name="Universal.Operators.DisallowShortTernary" />
 	</rule>
 
 	<!-- Custom capabilities used across the WordPress.org environment. -->
