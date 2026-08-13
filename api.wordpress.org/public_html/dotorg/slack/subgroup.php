@@ -1,17 +1,20 @@
 <?php
-
-namespace Dotorg\Slack\Subgroup;
-
-require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
-
-/*
+/**
+ * Slack /subgroup app: slash command and interactivity endpoint.
+ *
  * This is a standalone Slack app endpoint: only the object cache is loaded, not WordPress, so
  * request data is never slashed. Slack authenticates every request with an HMAC signature over the
  * raw request body, verified in `verify_slack_signature()` before anything is dispatched; nonces
  * don't exist in server-to-server webhooks.
  *
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Slack
  */
+
+namespace Dotorg\Slack\Subgroup;
+
+require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
 const CACHE_GROUP                 = 'api-slack-subgroup';
 const CACHE_TTL_ACTIVE_CHANNELS   = 120;     // Users can create channels outside this app.

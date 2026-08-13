@@ -1,4 +1,14 @@
 <?php
+/**
+ * Slack outgoing-webhook Trac bot: expands ticket and changeset references.
+ *
+ * Slack authenticates itself with the shared `URL_SECRET__TRAC_BOT` secret passed in the
+ * outgoing webhook URL, verified below; nonces don't exist in server-to-server webhooks.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Slack
+ */
 
 namespace {
 	require dirname( dirname( __DIR__ ) ) . '/wp-init.php';
@@ -9,12 +19,6 @@ namespace {
 }
 
 namespace Dotorg\Slack\Trac {
-	/*
-	 * Slack authenticates itself with the shared `URL_SECRET__TRAC_BOT` secret passed in the
-	 * outgoing webhook URL, verified below; nonces don't exist in server-to-server webhooks.
-	 *
-	 * phpcs:disable WordPress.Security.NonceVerification
-	 */
 
 	// Verify it came from Slack.
 	if ( ! is_string( $_GET['token'] ?? null ) || ! hash_equals( URL_SECRET__TRAC_BOT, wp_unslash( $_GET['token'] ) ) ) {

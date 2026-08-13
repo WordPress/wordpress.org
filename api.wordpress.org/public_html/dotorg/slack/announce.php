@@ -1,17 +1,21 @@
 <?php
-namespace Dotorg\Slack\Announce;
-
-require dirname( __DIR__, 2 ) . '/includes/hyperdb/bb-10-hyper-db.php';
-require dirname( __DIR__, 2 ) . '/includes/slack-config.php';
-require dirname( __DIR__, 2 ) . '/includes/slack/announce/lib.php';
-
-/*
+/**
+ * Slack slash-command handler for making announcements in channels.
+ *
  * This is a standalone Slack slash-command handler: WordPress is not loaded, so request
  * data is never slashed. Slack authenticates itself with one of the shared
  * `WEBHOOK_TOKEN_*` secrets below; nonces don't exist in server-to-server webhooks.
  *
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Slack
  */
+
+namespace Dotorg\Slack\Announce;
+
+require dirname( __DIR__, 2 ) . '/includes/hyperdb/bb-10-hyper-db.php';
+require dirname( __DIR__, 2 ) . '/includes/slack-config.php';
+require dirname( __DIR__, 2 ) . '/includes/slack/announce/lib.php';
 
 function get_avatar( $username, $slack_id, $team_id ) {
 	global $wpdb;
