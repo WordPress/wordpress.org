@@ -48,7 +48,7 @@ function get_signed_payload_or_die() {
 		FILTER_VALIDATE_REGEXP,
 		[
 			'options' => [
-				'regexp'  => '/^sha256=[0-9a-f]{64}$/i',
+				'regexp'  => '/^sha256=[0-9a-f]{64}\z/i',
 				'default' => '',
 			],
 		]
@@ -172,7 +172,8 @@ switch ( $event ) {
 	case 'issues':
 		if ( ! in_array( $payload->action, [ 'opened', 'edited', 'closed', 'deleted' ] ) ) {
 			header( 'HTTP/1.0 422 Unprocessable Entity', true, 422 );
-			die( esc_html( "NO; $event:{$payload->action} not required." ) );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body; the endpoint sends Content-Type: text/plain.
+			die( "NO; $event:{$payload->action} not required." );
 		}
 
 		// Update the Title & Description if it's edited. Just to keep everything in sync.
@@ -224,7 +225,8 @@ switch ( $event ) {
 
 		if ( ! in_array( $payload->action, [ 'opened', 'reopened', 'edited', 'closed' ] ) ) {
 			header( 'HTTP/1.0 422 Unprocessable Entity', true, 422 );
-			die( esc_html( "NO; $event:{$payload->action} not required." ) );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body; the endpoint sends Content-Type: text/plain.
+			die( "NO; $event:{$payload->action} not required." );
 		}
 
 		// Update the Title & Description if it's edited. Just to keep everything in sync.

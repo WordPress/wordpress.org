@@ -24,7 +24,8 @@ function verify_signature() {
 
 	// Validate that the request came from GitHub.
 	if ( ! defined( 'GH_PRBOT_WEBHOOK_SECRET' ) ) {
-		return;
+		header( 'HTTP/1.0 500 Internal Server Error', true, 500 );
+		die( 'Webhook secret not configured.' );
 	}
 
 	$sent_signature     = (string) filter_var(
@@ -32,7 +33,7 @@ function verify_signature() {
 		FILTER_VALIDATE_REGEXP,
 		[
 			'options' => [
-				'regexp'  => '/^sha1=[0-9a-f]{40}$/i',
+				'regexp'  => '/^sha1=[0-9a-f]{40}\z/i',
 				'default' => '',
 			],
 		]

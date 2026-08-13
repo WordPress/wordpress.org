@@ -17,7 +17,7 @@ define( 'MENTIONED',  2 );
 require dirname( dirname( __DIR__ ) ) . '/wp-init.php';
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
-if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== \Dotorg\Slack\Trac\URL_SECRET__MENTIONS ) {
+if ( ! is_string( $_POST['secret'] ?? null ) || ! hash_equals( \Dotorg\Slack\Trac\URL_SECRET__MENTIONS, wp_unslash( $_POST['secret'] ) ) ) {
 	exit;
 }
 
