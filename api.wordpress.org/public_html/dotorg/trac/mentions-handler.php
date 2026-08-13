@@ -2,14 +2,12 @@
 /**
  * Trac comment mentions handler: creates notifications for mentioned users.
  *
- * @package WordPressdotorg\API\Trac
- */
-
-/*
  * This endpoint is called by Trac, not by a browser: requests are authenticated by the
  * shared URL_SECRET__MENTIONS secret posted alongside the payload, not by a user session.
  *
  * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
  */
 
 define( 'BLOCKED',    0 );
