@@ -50,7 +50,7 @@ function get_security_team( $user_field = 'user_login' ) {
 
 	$slack_user_ids = $group['group']['members'];
 	$slack_user_ids = array_filter( $slack_user_ids, function( $user_id ) {
-		return (bool) preg_match( '/^U[A-Z0-9]+$/', $user_id );
+		return (bool) preg_match( '/^U[A-Z0-9]+\z/', $user_id );
 	});
 	$slack_user_ids_for_sql = "'" . implode( "', '", $slack_user_ids ) . "'";
 	$user_ids = $wpdb->get_col( "SELECT user_id FROM slack_users WHERE slack_id IN ($slack_user_ids_for_sql)" );
