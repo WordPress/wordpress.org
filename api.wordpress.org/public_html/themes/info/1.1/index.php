@@ -1,9 +1,26 @@
 <?php
+/**
+ * Themes API 1.1 endpoint: JSON wrapper around the 1.0 API.
+ *
+ * @package WordPressdotorg\API\Themes
+ */
+
+/*
+ * This is a stateless public API endpoint, so there is no session or nonce infrastructure.
+ * The request is also read before the 1.0 endpoint loads WordPress, which means request
+ * data has not been slashed at that point.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ */
 
 header( 'Access-Control-Allow-Origin: *' );
 
 if ( isset( $_GET['callback'] ) && is_string( $_GET['callback'] ) ) {
-	$callback = preg_replace( '/[^a-z0-9_]/i', '', $_GET['callback'] );
+	$callback = preg_replace(
+		'/[^a-z0-9_]/i',
+		'',
+		filter_var( $_GET['callback'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW )
+	);
 } else {
 	$callback = false;
 }

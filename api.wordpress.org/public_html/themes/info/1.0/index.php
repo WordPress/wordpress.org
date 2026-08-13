@@ -2,6 +2,14 @@
 namespace WordPressdotorg\API\Themes\Info;
 use function WordPressdotorg\API\load_wordpress;
 
+/*
+ * This is a stateless public API endpoint, so there is no session or nonce infrastructure.
+ * The request is also parsed before `load_wordpress()` runs below, which means request data
+ * has not been slashed at that point.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ */
+
 // This exposes the `load_wordpress()` function mentioned below.
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init-ondemand.php';
 
@@ -17,16 +25,33 @@ $wp_object_cache->blog_prefix = WPORG_THEME_DIRECTORY_BLOGID;
 function send_error( $error, $code = 404 ) {
 	global $format;
 
-	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' ' . $code, true, $code );
+	$protocol = filter_var(
+		$_SERVER['SERVER_PROTOCOL'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		array(
+			'options' => array(
+				'regexp'  => '#^HTTP/[0-9.]+$#',
+				'default' => 'HTTP/1.0',
+			),
+		)
+	);
+
+	header( $protocol . ' ' . $code, true, $code );
 
 	$response = (object) [
 		'error' => $error	
 	];
 
+	/*
+	 * Only used for a substring comparison, never output or stored.
+	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	 */
+	$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
 	// Browsers get a nicer action not implemented error.
 	if (
-		'GET' === $_SERVER['REQUEST_METHOD'] &&
-		false === strpos( $_SERVER['HTTP_USER_AGENT'] ?? '', 'WordPress/' ) &&
+		isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] &&
+		false === strpos( $user_agent, 'WordPress/' ) &&
 		false !== strpos( $error, 'Action not implemented.' )
 	) {
 		header( 'Content-Type: text/html; charset=utf-8' );
@@ -46,7 +71,7 @@ function send_error( $error, $code = 404 ) {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body in the requested format; escaping would corrupt it.
 		echo serialize( $response );
 	} else {
-		// JSON format
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON payload; no wp_json_encode() here.
 		echo json_encode( $response );
 	}
 
@@ -59,9 +84,19 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 
 // Set up action and request information.
 if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
+	/*
+	 * Individual fields are type-checked and sanitized by Themes_API; all
+	 * database access runs through prepared WP_Query calls.
+	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	 */
 	$request = isset( $_REQUEST['request'] ) ? (object) $_REQUEST['request'] : '';
 	$format = 'json';
 } else {
+	/*
+	 * A serialized payload, screened for object injection below and unserialized
+	 * with `allowed_classes` limited to stdClass.
+	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	 */
 	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? $_POST['request'] : '';
 	if ( $post_request ) {
 		// PHP Needs to get a non-urldecoded request, to avoid multibyte character malforming the request,
@@ -81,7 +116,17 @@ if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 	$format = 'php';
 }
 
-$action = $_REQUEST['action'] ?? '';
+// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- pre-existing; drives this endpoint's switch.
+$action = filter_var(
+	$_REQUEST['action'] ?? '',
+	FILTER_VALIDATE_REGEXP,
+	array(
+		'options' => array(
+			'regexp'  => '/^[a-z_]{1,32}$/',
+			'default' => '',
+		),
+	)
+);
 
 // Validate the request.
 switch ( $action ) {
