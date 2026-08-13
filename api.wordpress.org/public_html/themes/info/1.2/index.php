@@ -2,15 +2,13 @@
 /**
  * Themes API 1.2 endpoint: GET-only wrapper with flat request support.
  *
- * @package WordPressdotorg\API\Themes
- */
-
-/*
  * This is a stateless public API endpoint, so there is no session or nonce infrastructure.
  * The request is also read before the 1.0 endpoint loads WordPress, which means request
  * data has not been slashed at that point.
  *
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Themes
  */
 
 // Version 1.2+ only accepts GET requests
