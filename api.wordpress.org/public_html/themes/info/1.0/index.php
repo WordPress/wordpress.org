@@ -1,14 +1,18 @@
 <?php
-namespace WordPressdotorg\API\Themes\Info;
-use function WordPressdotorg\API\load_wordpress;
-
-/*
+/**
+ * Themes API 1.0 endpoint: theme information and queries for WordPress clients.
+ *
  * This is a stateless public API endpoint, so there is no session or nonce infrastructure.
  * The request is also parsed before `load_wordpress()` runs below, which means request data
  * has not been slashed at that point.
  *
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Themes
  */
+
+namespace WordPressdotorg\API\Themes\Info;
+use function WordPressdotorg\API\load_wordpress;
 
 // This exposes the `load_wordpress()` function mentioned below.
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init-ondemand.php';
