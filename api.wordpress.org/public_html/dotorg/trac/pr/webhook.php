@@ -55,7 +55,7 @@ if ( $trac_hint ) {
 	define( 'WEBHOOK_TRAC_HINT', $trac_hint );
 }
 
-switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '' ) {
+switch ( sanitize_key( wp_unslash( $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '' ) ) ) {
 	// Pull Request
 	case 'pull_request':
 
