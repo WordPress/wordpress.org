@@ -80,11 +80,19 @@ switch ( $requested_action ) {
 			FILTER_VALIDATE_REGEXP,
 			array(
 				'options' => array(
-					'regexp'  => '/^[a-z0-9-]+$/',
+					'regexp'  => '/^[a-z0-9_-]+$/',
 					'default' => '',
 				),
 			)
 		);
+
+		if ( ! $theme_slug ) {
+			api_send_json(
+				array(
+					'error' => 'bad_request',
+				)
+			);
+		}
 
 		if ( 'add-favorite' == $requested_action ) {
 			$result = wporg_themes_add_favorite( $theme_slug );

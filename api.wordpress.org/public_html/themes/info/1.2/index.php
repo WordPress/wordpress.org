@@ -12,7 +12,7 @@
  */
 
 // Version 1.2+ only accepts GET requests
-if ( isset( $_SERVER['REQUEST_METHOD'] ) && ! in_array( $_SERVER['REQUEST_METHOD'], array( 'GET', 'HEAD' ), true ) ) {
+if ( isset( $_SERVER['REQUEST_METHOD'] ) && ! in_array( $_SERVER['REQUEST_METHOD'], array( 'GET', 'HEAD', 'OPTIONS' ), true ) ) {
 	$protocol = filter_var(
 		$_SERVER['SERVER_PROTOCOL'] ?? '',
 		FILTER_VALIDATE_REGEXP,
@@ -25,7 +25,7 @@ if ( isset( $_SERVER['REQUEST_METHOD'] ) && ! in_array( $_SERVER['REQUEST_METHOD
 	);
 
 	header( $protocol . ' 405 Method not allowed' );
-	header( 'Allow: GET' );
+	header( 'Allow: GET, HEAD, OPTIONS' );
 	header( 'Content-Type: text/plain' );
 
 	die( 'This API only serves GET requests.' );
