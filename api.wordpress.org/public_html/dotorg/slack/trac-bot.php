@@ -129,8 +129,7 @@ namespace Dotorg\Slack\Trac {
 
 		$trac_xmlrpc = new \Trac( 'slackbot', SLACKBOT_WPORG_PASSWORD, "https://$trac.trac.wordpress.org/login/xmlrpc" );
 
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- local to this webhook script.
-		$comment = sprintf( $comment_template, $channel_name, $user_name, str_replace( '.', '', $msg_timestamp ) );
+		$trac_comment = sprintf( $comment_template, $channel_name, $user_name, str_replace( '.', '', $msg_timestamp ) );
 		foreach ( $results['ticket'] as $ticket ) {
 			$ticket_id = is_array( $ticket ) ? $ticket['id'] : $ticket;
 
@@ -154,7 +153,7 @@ namespace Dotorg\Slack\Trac {
 
 			$parser->set_redundancy( 'trac', $trac, 'ticket', $ticket_id );
 
-			$trac_xmlrpc->ticket_update( $ticket_id, $comment );
+			$trac_xmlrpc->ticket_update( $ticket_id, $trac_comment );
 		}
 	}
 }

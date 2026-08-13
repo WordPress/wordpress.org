@@ -151,11 +151,11 @@ function handle_slash_command() {
 		],
 	];
 
-	$channel_id = filter_var( $_POST['channel_id'] ?? '', FILTER_VALIDATE_REGEXP, $id_options );
-	$user_id    = filter_var( $_POST['user_id'] ?? '', FILTER_VALIDATE_REGEXP, $id_options );
+	$channel_id = (string) filter_var( $_POST['channel_id'] ?? '', FILTER_VALIDATE_REGEXP, $id_options );
+	$user_id    = (string) filter_var( $_POST['user_id'] ?? '', FILTER_VALIDATE_REGEXP, $id_options );
 
 	// A trigger ID, eg. `13345224609.738474920.8088930838d88f008e0`.
-	$trigger_id = filter_var(
+	$trigger_id = (string) filter_var(
 		$_POST['trigger_id'] ?? '',
 		FILTER_VALIDATE_REGEXP,
 		[

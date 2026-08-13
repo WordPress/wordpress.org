@@ -22,7 +22,7 @@ if ( ! is_string( $_POST['token'] ?? null ) || ! hash_equals( WEBHOOK_TOKEN, $_P
 }
 
 // The Slack user name of whoever triggered the webhook, echoed back in the JSON response below.
-$user_name = filter_var( $_POST['user_name'] ?? '', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW );
+$user_name = (string) filter_var( $_POST['user_name'] ?? '', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW );
 
 echo json_encode( array(
 	'username'   => 'wordpressdotorg',
