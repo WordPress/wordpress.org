@@ -1,13 +1,17 @@
 <?php
-namespace WordPressdotorg\API\Trac\GithubPRs;
-
-/*
+/**
+ * GitHub webhook receiver for pull request events.
+ *
  * This endpoint is a GitHub webhook receiver: requests are authenticated by the
  * `X-Hub-Signature` HMAC computed with GH_PRBOT_WEBHOOK_SECRET, not by a user session,
  * so there is no nonce to verify.
  *
  * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
  */
+
+namespace WordPressdotorg\API\Trac\GithubPRs;
 
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 require __DIR__ . '/functions.php';

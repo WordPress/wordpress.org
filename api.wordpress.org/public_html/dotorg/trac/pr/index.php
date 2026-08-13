@@ -1,12 +1,16 @@
 <?php
-namespace WordPressdotorg\API\Trac\GithubPRs;
-
-/*
+/**
+ * Trac endpoint for GitHub pull request data attached to tickets.
+ *
  * This is a public, unauthenticated, read-only JSON endpoint consumed by Trac: requests are
  * anonymous GET requests, so there is no session or nonce to verify.
  *
  * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
  */
+
+namespace WordPressdotorg\API\Trac\GithubPRs;
 
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 require __DIR__ . '/functions.php';
