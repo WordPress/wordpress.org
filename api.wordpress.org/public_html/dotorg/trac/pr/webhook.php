@@ -1,6 +1,14 @@
 <?php
 namespace WordPressdotorg\API\Trac\GithubPRs;
 
+/*
+ * This endpoint is a GitHub webhook receiver: requests are authenticated by the
+ * `X-Hub-Signature` HMAC computed with GH_PRBOT_WEBHOOK_SECRET, not by a user session,
+ * so there is no nonce to verify.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ */
+
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 require __DIR__ . '/functions.php';
 require __DIR__ . '/class-trac.php';
@@ -15,7 +23,16 @@ function verify_signature() {
 		return;
 	}
 
-	$sent_signature     = $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '';
+	$sent_signature     = (string) filter_var(
+		wp_unslash( $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '' ),
+		FILTER_VALIDATE_REGEXP,
+		[
+			'options' => [
+				'regexp'  => '/^sha1=[0-9a-f]{40}$/i',
+				'default' => '',
+			],
+		]
+	);
 	$expected_signature = 'sha1=' . hash_hmac( 'sha1', $HTTP_RAW_POST_DATA, GH_PRBOT_WEBHOOK_SECRET );
 
 	if ( ! hash_equals( $expected_signature, $sent_signature ) ) {
@@ -33,11 +50,12 @@ if ( empty( $_SERVER['CONTENT_TYPE'] ) || 'application/json' !== $_SERVER['CONTE
 
 $payload = json_decode( $HTTP_RAW_POST_DATA );
 
-if ( ! empty( $_GET['trac'] ) ) {
-	define( 'WEBHOOK_TRAC_HINT', $_GET['trac'] );
+$trac_hint = sanitize_key( wp_unslash( $_GET['trac'] ?? '' ) );
+if ( $trac_hint ) {
+	define( 'WEBHOOK_TRAC_HINT', $trac_hint );
 }
 
-switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
+switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '' ) {
 	// Pull Request
 	case 'pull_request':
 

@@ -27,8 +27,20 @@ function get_request() {
 	// HelpScout sends json data in the POST, so grab it from the input directly.
 	$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
 
-	// Check the signature matches.
-	if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ) ) {
+	// Check the signature matches. It's a base64 encoded HMAC, allowing for the URL-safe alphabet.
+	$signature = (string) filter_var(
+		wp_unslash( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ),
+		FILTER_VALIDATE_REGEXP,
+		[
+			'options' => [
+				'regexp'  => '!^[A-Za-z0-9+/=_-]+$!',
+				'default' => '',
+			],
+		]
+	);
+
+	// phpcs:ignore PHPCompatibility.Variables.RemovedPredefinedGlobalVariables -- Local variable named after the old global, assigned from php://input above.
+	if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $signature ) ) {
 		exit;
 	}
 
