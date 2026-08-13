@@ -27,6 +27,9 @@ class Plugin_Scan_Gandalf {
 	/** Last dispatch or callback error for quick operator debugging. */
 	const LAST_ERROR_META_KEY = '_gandalf_scan_last_error';
 
+	/** Consumed callbacks keyed by scan_id, to acknowledge retries without repeating effects. */
+	const CONSUMED_META_KEY = '_gandalf_scan_consumed';
+
 	/** Gandalf scan endpoint. */
 	const ENDPOINT = 'https://gandalf.wordpress.org/scan';
 
@@ -156,15 +159,65 @@ class Plugin_Scan_Gandalf {
 	 * Handle a completed or failed scan callback.
 	 *
 	 * @param \WP_Post $plugin The plugin post.
-	 * @param array    $data   The Gandalf callback data.
-	 * @return true|WP_Error True on success, or an error when the scan is unknown.
+	 * @param array    $data   The security scan callback data, validated by the route.
+	 * @return true|WP_Error True on success, or an error when the callback is invalid.
 	 */
 	public static function handle_callback( $plugin, $data ) {
-		$scan_id = $data['scan_id'];
-		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
+		/*
+		 * Serialize processing per plugin, not per scan: callbacks read-modify-write
+		 * shared per-plugin meta, and a scanner retry racing a slow first delivery
+		 * waits for the consumed record.
+		 */
+		if ( ! wp_cache_add( 'gandalf-scan-callback-' . $plugin->ID, 1, 'plugin-scans', 5 * MINUTE_IN_SECONDS ) ) {
+			return new WP_Error( 'security_scan_locked', 'A security scan callback for this plugin is already being processed.', [ 'status' => WP_Http::CONFLICT ] );
+		}
+
+		try {
+			return self::consume_callback( $plugin, $data );
+		} finally {
+			wp_cache_delete( 'gandalf-scan-callback-' . $plugin->ID, 'plugin-scans' );
+		}
+	}
+
+	/**
+	 * Consume a validated callback exactly once.
+	 *
+	 * Runs under the per-plugin lock taken by handle_callback().
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $data   The validated security scan callback data.
+	 * @return true|WP_Error True on success, or an error when the callback is invalid.
+	 */
+	protected static function consume_callback( $plugin, $data ) {
+		$scan_id  = $data['scan_id'];
+		$digest   = self::callback_digest( $data );
+		$consumed = get_post_meta( $plugin->ID, self::CONSUMED_META_KEY, true );
+		$consumed = is_array( $consumed ) ? $consumed : [];
+		foreach ( $consumed as $consumed_scan_id => $consumed_record ) {
+			if ( ! is_array( $consumed_record ) || ( $consumed_record['time'] ?? 0 ) < time() - WEEK_IN_SECONDS ) {
+				unset( $consumed[ $consumed_scan_id ] );
+			}
+		}
+
+		if ( isset( $consumed[ $scan_id ] ) ) {
+			// Identical retry of a consumed callback: acknowledge without repeating effects.
+			if ( hash_equals( $consumed[ $scan_id ]['digest'], $digest ) ) {
+				return true;
+			}
+
+			// Only a completed verdict may supersede a consumed failure report for the same scan.
+			if ( 'completed' !== $data['status'] || 'failed' !== ( $consumed[ $scan_id ]['status'] ?? '' ) ) {
+				$error = new WP_Error( 'security_scan_conflict', 'A different security scan callback was already consumed for this scan.', [ 'status' => WP_Http::CONFLICT ] );
+				self::record_invalid_callback( $plugin, $error, $scan_id );
+				return $error;
+			}
+		}
+
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true );
+		$pending = is_array( $pending ) ? $pending : [];
 
 		if ( empty( $pending[ $scan_id ] ) ) {
-			$error = new WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', [ 'status' => WP_Http::BAD_REQUEST ] );
+			$error = new WP_Error( 'unknown_gandalf_scan', 'Unknown security scan.', [ 'status' => WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
@@ -172,7 +225,7 @@ class Plugin_Scan_Gandalf {
 		$pending_record = $pending[ $scan_id ];
 
 		if ( $data['version'] !== $pending_record['version'] || $data['release_ref'] !== $pending_record['release_ref'] ) {
-			$error = new WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', [ 'status' => WP_Http::BAD_REQUEST ] );
+			$error = new WP_Error( 'invalid_gandalf_scan', 'Security scan callback does not match the pending scan.', [ 'status' => WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
@@ -197,10 +250,57 @@ class Plugin_Scan_Gandalf {
 			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
 		}
 
-		unset( $pending[ $scan_id ] );
-		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
+		/*
+		 * Deliberately recorded after the effects, failing closed: a crash
+		 * mid-processing makes the retry re-apply the (idempotent) effects
+		 * rather than acknowledge effects that never happened.
+		 */
+		$consumed[ $scan_id ] = [
+			'digest' => $digest,
+			'status' => $data['status'],
+			'time'   => time(),
+		];
+		update_post_meta( $plugin->ID, self::CONSUMED_META_KEY, $consumed );
+
+		/*
+		 * A failed report keeps the pending entry: the scanner may still deliver
+		 * a completed verdict for this scan, which supersedes the failure.
+		 */
+		if ( 'completed' === $data['status'] ) {
+			unset( $pending[ $scan_id ] );
+			update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
+		}
 
 		return true;
+	}
+
+	/**
+	 * Return a canonical digest of a callback body.
+	 *
+	 * Keys are sorted recursively so a scanner retry that re-marshals the same
+	 * data with a different key order still matches its consumed record.
+	 *
+	 * @param array $data The validated security scan callback data.
+	 * @return string A sha256 hex digest.
+	 */
+	protected static function callback_digest( $data ) {
+		self::ksort_deep( $data );
+		return hash( 'sha256', wp_json_encode( $data ) );
+	}
+
+	/**
+	 * Recursively sort an array by key. Sequential lists are unaffected.
+	 *
+	 * @param array $data The array to sort, by reference.
+	 */
+	protected static function ksort_deep( &$data ) {
+		ksort( $data );
+		foreach ( $data as &$value ) {
+			if ( is_array( $value ) ) {
+				self::ksort_deep( $value );
+			}
+		}
+		unset( $value );
 	}
 
 	/**
