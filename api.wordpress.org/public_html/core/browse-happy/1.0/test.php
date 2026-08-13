@@ -2,14 +2,12 @@
 /**
  * Browse Happy user agent parser test page.
  *
- * @package BrowseHappy
- */
-
-/*
  * This is a standalone diagnostic page: WordPress is not loaded, so request data is
  * never slashed and the `esc_*()` escaping helpers are unavailable.
  *
  * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package BrowseHappy
  */
 
 include dirname( __FILE__ ) . '/parse.php';
