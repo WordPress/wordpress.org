@@ -1,4 +1,16 @@
 <?php
+/**
+ * WordPress.org Translations API endpoint for WordPress core.
+ *
+ * @package WordPressdotorg\API\Translations
+ */
+
+/*
+ * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
+ * so request data is never slashed, and there is no session or nonce infrastructure.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ */
 
 $base_dir = dirname( dirname( dirname( __DIR__ ) ) );
 require( $base_dir . '/translations/lib.php' );
@@ -9,9 +21,9 @@ wp_cache_init();
 
 $version = WP_CORE_LATEST_RELEASE;
 if ( isset( $_REQUEST['version'] ) ) {
-	$version = $_REQUEST['version'];
+	$version = filter_var( $_REQUEST['version'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW );
 	if ( empty( $version ) || ! is_string( $version ) || ! is_numeric( $version[0] ) ) {
-		header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request' );
+		http_response_code( 400 );
 		die( '?version= must be a valid WordPress version' );
 	}
 
@@ -23,7 +35,7 @@ $translations = find_all_translations_for_core( $version );
 header( 'Access-Control-Allow-Origin: *' );
 header( 'Access-Control-Expose-Headers: X-Translations-Count' );
 header( 'X-Translations-Count:' . count( $translations ) );
-if ( 'HEAD' === $_SERVER['REQUEST_METHOD'] ) {
+if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'HEAD' === $_SERVER['REQUEST_METHOD'] ) {
 	exit;
 }
 
@@ -32,4 +44,3 @@ call_headers( 'application/json' );
 echo json_encode( array( 'translations' => $translations ) );
 
 exit;
-
