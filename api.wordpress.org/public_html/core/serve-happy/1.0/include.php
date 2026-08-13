@@ -1,12 +1,16 @@
 <?php
-namespace WordPressdotorg\API\Serve_Happy;
-
-/*
+/**
+ * Serve Happy API request parsing and response functions.
+ *
  * This is a standalone, unauthenticated, stateless API endpoint: there is no session or
  * nonce infrastructure to verify against.
  *
  * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Serve_Happy
  */
+
+namespace WordPressdotorg\API\Serve_Happy;
 
 function determine_request( $request = false ) {
 	$request = $request ?: $_GET; // For unit testing.
