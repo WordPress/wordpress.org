@@ -144,26 +144,23 @@ function parse_request() {
 
 	if ( isset( $_GET['country'] ) ) {
 		// An ISO 3166-1 alpha-2 or alpha-3 country code.
-		$location_args['country']             = filter_var(
+		$country = filter_var(
 			$_GET['country'],
 			FILTER_VALIDATE_REGEXP,
-			array(
-				'options' => array(
-					'regexp'  => '/^[a-z]{2,3}$/i',
-					'default' => '',
-				),
-			)
+			array( 'options' => array( 'regexp' => '/^[a-z]{2,3}$/i' ) )
 		);
+
+		if ( false === $country ) {
+			send_bad_request( 'country must be an ISO 3166-1 alpha-2 or alpha-3 country code.' );
+		}
+
+		$location_args['country']             = $country;
 		$location_args['restrict_by_country'] = true;
 	}
 
 	// If a precise location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
 	if ( isset( $_POST['location_data'] ) ) {
-		/*
-		 * Values are scalar-checked in validate_request(); all downstream database
-		 * access is prepared, and output is JSON-encoded.
-		 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		 */
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Scalar-checked in validate_request(); DB access is prepared, output is JSON-encoded.
 		$location_args = $_POST['location_data'];
 	}
 
@@ -214,7 +211,7 @@ function parse_request() {
 			FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
 		);
 
-		$location_args['ip'] = $public_ip ? $public_ip : filter_var( $_SERVER['REMOTE_ADDR'] ?? '', FILTER_VALIDATE_IP );
+		$location_args['ip'] = $public_ip ? $public_ip : (string) filter_var( $_SERVER['REMOTE_ADDR'] ?? '', FILTER_VALIDATE_IP );
 	}
 
 	return $location_args;
@@ -309,10 +306,7 @@ function build_response( $location, $location_args ) {
 		$error    = 'temp-request-throttled';
 	}
 
-	/*
-	 * Only used for prefix/substring comparisons, never output or stored.
-	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only used for prefix/substring comparisons, never output or stored.
 	$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
 	if ( $location ) {
@@ -390,10 +384,7 @@ function build_response( $location, $location_args ) {
  */
 function is_client_core( $user_agent = null ) {
 	if ( null === $user_agent ) {
-		/*
-		 * Only used for a prefix comparison, never output or stored.
-		 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		 */
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only used for a prefix comparison, never output or stored.
 		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 	}
 
