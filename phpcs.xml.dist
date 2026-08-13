@@ -36,6 +36,9 @@
 	<rule ref="PHPCompatibilityWP"/>
 
 	<rule ref="WordPress">
+		<!-- Vendored library; carries local patches, so PHPCompatibilityWP stays active on it. -->
+		<exclude-pattern>*/dotorg/trac/pr/adhocore-php-jwt/*</exclude-pattern>
+
 		<exclude name="WordPress.DB.DirectDatabaseQuery" />
 		<exclude name="WordPress.DB.SlowDBQuery" />
 
