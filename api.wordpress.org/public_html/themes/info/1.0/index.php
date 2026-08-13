@@ -34,7 +34,7 @@ function send_error( $error, $code = 404 ) {
 		FILTER_VALIDATE_REGEXP,
 		array(
 			'options' => array(
-				'regexp'  => '#^HTTP/[0-9.]+$#',
+				'regexp'  => '#^HTTP/[0-9.]+\z#',
 				'default' => 'HTTP/1.0',
 			),
 		)
@@ -115,7 +115,7 @@ $action = filter_var(
 	FILTER_VALIDATE_REGEXP,
 	array(
 		'options' => array(
-			'regexp'  => '/^[a-z_]{1,32}$/',
+			'regexp'  => '/^[a-z_]{1,32}\z/',
 			'default' => '',
 		),
 	)
@@ -134,7 +134,7 @@ switch ( $action ) {
 			}
 
 			foreach ( $slugs as $slug ) {
-				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+$/', $slug ) ) {
+				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+\z/', $slug ) ) {
 					send_error( 'Invalid slugs provided' );
 				}
 
@@ -147,7 +147,7 @@ switch ( $action ) {
 			if ( ! $slug ) {
 				send_error( 'Slug not provided' );
 			}
-			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+$/', $slug ) ) {
+			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+\z/', $slug ) ) {
 				send_error( 'Invalid slug provided' );
 			}
 

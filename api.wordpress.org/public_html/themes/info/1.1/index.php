@@ -20,7 +20,7 @@ if ( isset( $_GET['callback'] ) && is_string( $_GET['callback'] ) ) {
 		FILTER_VALIDATE_REGEXP,
 		array(
 			'options' => array(
-				'regexp'  => '/^[a-z_][a-z0-9_]*$/i',
+				'regexp'  => '/^[a-z_][a-z0-9_]*\z/i',
 				'default' => false,
 			),
 		)
