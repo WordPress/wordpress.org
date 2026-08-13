@@ -221,11 +221,21 @@ class API_Update_Updater {
 	 * @return string The served version, or '' when the plugin isn't in `update_source`.
 	 */
 	public static function get_served_version( $plugin_slug ) {
+		return (string) ( self::get_served_release( $plugin_slug )->version ?? '' );
+	}
+
+	/**
+	 * The release currently served from `update_source`.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return object|null Row with `version` and `stable_tag`, or null when the plugin isn't in `update_source`.
+	 */
+	public static function get_served_release( $plugin_slug ) {
 		global $wpdb;
 
-		return (string) $wpdb->get_var(
+		return $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				"SELECT version, stable_tag FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
 				$plugin_slug
 			)
 		);
