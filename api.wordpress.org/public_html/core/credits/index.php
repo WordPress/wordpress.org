@@ -1,4 +1,16 @@
 <?php
+/**
+ * WordPress.org Credits API endpoint.
+ *
+ * @package WordPressdotorg\API\Credits
+ */
+
+/*
+ * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
+ * so request data is never slashed, and there is no session or nonce infrastructure.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ */
 
 $api_root = dirname( dirname( __DIR__ ) );
 
@@ -32,17 +44,42 @@ function like_escape( $text ) {
 endif;
 
 if ( ! empty( $_GET['version'] ) ) {
-	$version = preg_replace( '/^([.0-9]+).*/', '$1', $_GET['version'] );
+	$version = preg_replace(
+		'/^([.0-9]+).*/',
+		'$1',
+		filter_var(
+			$_GET['version'],
+			FILTER_VALIDATE_REGEXP,
+			array(
+				'options' => array(
+					'regexp'  => '/^[0-9][.0-9]*/',
+					'default' => '',
+				),
+			)
+		)
+	);
 } elseif ( 'cli' == php_sapi_name() && isset( $argv[1] ) ) {
 	$version = preg_replace( '/^([.0-9]+).*/', '$1', $argv[1] );
 } else {
 	$version = WP_CORE_LATEST_RELEASE;
 }
 
+// A WP locale, e.g. `de_DE_formal` or `es_419`.
+$requested_locale = isset( $_GET['locale'] ) ? filter_var(
+	$_GET['locale'],
+	FILTER_VALIDATE_REGEXP,
+	array(
+		'options' => array(
+			'regexp'  => '/^[A-Za-z0-9_-]+$/',
+			'default' => '',
+		),
+	)
+) : '';
+
 if (
 	! is_string( $version ) ||
 	version_compare( $version, '3.2', '<' ) ||
-	( isset( $_GET['locale'] ) && ! is_string( $_GET['locale'] ) )
+	( isset( $_GET['locale'] ) && ! is_string( $requested_locale ) )
 ) {
 	header( 'HTTP/1.0 400 Bad Request', true, 400 );
 	die( 'Bad request.' );
@@ -50,10 +87,13 @@ if (
 
 $locale = false;
 // Convert a locale from a WP locale to a GP locale.
-if ( ( isset( $_GET['locale'] ) && 'en_US' != $_GET['locale'] ) || ( 'cli' == php_sapi_name() && isset( $argv[2] ) ) ) {
+if (
+	( isset( $_GET['locale'] ) && 'en_US' != $requested_locale ) ||
+	( 'cli' == php_sapi_name() && isset( $argv[2] ) )
+) {
 	require GLOTPRESS_LOCALES_PATH;
 
-	$gp_locale = GP_Locales::by_field( 'wp_locale', isset( $argv[2] ) ? $argv[2] : $_GET['locale'] );
+	$gp_locale = GP_Locales::by_field( 'wp_locale', isset( $argv[2] ) ? $argv[2] : $requested_locale );
 	if ( $gp_locale ) {
 		$locale = $gp_locale;
 	}
