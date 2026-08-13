@@ -191,8 +191,7 @@ class Plugin_Scan_Gandalf {
 	protected static function consume_callback( $plugin, $data ) {
 		$scan_id  = $data['scan_id'];
 		$digest   = self::callback_digest( $data );
-		$consumed = get_post_meta( $plugin->ID, self::CONSUMED_META_KEY, true );
-		$consumed = is_array( $consumed ) ? $consumed : [];
+		$consumed = get_post_meta( $plugin->ID, self::CONSUMED_META_KEY, true ) ?: [];
 		foreach ( $consumed as $consumed_scan_id => $consumed_record ) {
 			if ( ! is_array( $consumed_record ) || ( $consumed_record['time'] ?? 0 ) < time() - WEEK_IN_SECONDS ) {
 				unset( $consumed[ $consumed_scan_id ] );
@@ -213,8 +212,7 @@ class Plugin_Scan_Gandalf {
 			}
 		}
 
-		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true );
-		$pending = is_array( $pending ) ? $pending : [];
+		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
 
 		if ( empty( $pending[ $scan_id ] ) ) {
 			$error = new WP_Error( 'unknown_gandalf_scan', 'Unknown security scan.', [ 'status' => WP_Http::BAD_REQUEST ] );

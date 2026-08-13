@@ -75,8 +75,7 @@ class Security_Scan_Consumption_Test extends TestCase {
 	 * @param string $scan_id The scan ID to register.
 	 */
 	private function add_pending_scan( string $scan_id ): void {
-		$pending = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true );
-		$pending = is_array( $pending ) ? $pending : array();
+		$pending = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) ?: array();
 
 		$pending[ $scan_id ] = array(
 			'version'      => self::VERSION,
