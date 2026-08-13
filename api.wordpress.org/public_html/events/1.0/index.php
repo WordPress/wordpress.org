@@ -2,6 +2,13 @@
 namespace Dotorg\API\Events;
 use stdClass;
 
+/*
+ * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
+ * so request data is never slashed, and there is no session or nonce infrastructure.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ */
+
 /**
  * Main entry point
  */
@@ -127,32 +134,72 @@ function parse_request() {
 	$location_args = array( 'restrict_by_country' => false );
 
 	// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
-	if ( isset( $_GET['latitude'], $_GET['longitude'] ) ) {
-		$location_args['latitude']  = $_GET['latitude'];
-		$location_args['longitude'] = $_GET['longitude'];
+	if (
+		isset( $_GET['latitude'], $_GET['longitude'] ) &&
+		is_numeric( $_GET['latitude'] ) && is_numeric( $_GET['longitude'] )
+	) {
+		$location_args['latitude']  = floatval( $_GET['latitude'] );
+		$location_args['longitude'] = floatval( $_GET['longitude'] );
 	}
 
 	if ( isset( $_GET['country'] ) ) {
-		$location_args['country']             = $_GET['country'];
+		// An ISO 3166-1 alpha-2 or alpha-3 country code.
+		$location_args['country']             = filter_var(
+			$_GET['country'],
+			FILTER_VALIDATE_REGEXP,
+			array(
+				'options' => array(
+					'regexp'  => '/^[a-z]{2,3}$/i',
+					'default' => '',
+				),
+			)
+		);
 		$location_args['restrict_by_country'] = true;
 	}
 
 	// If a precise location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
 	if ( isset( $_POST['location_data'] ) ) {
+		/*
+		 * Values are scalar-checked in validate_request(); all downstream database
+		 * access is prepared, and output is JSON-encoded.
+		 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		 */
 		$location_args = $_POST['location_data'];
 	}
 
 	// Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
 	if ( isset( $_REQUEST['location'] ) ) {
-		$location_args['location_name'] = trim( $_REQUEST['location'] );
+		$location_args['location_name'] = trim(
+			filter_var( $_REQUEST['location'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW )
+		);
 	}
 
 	if ( isset( $_REQUEST['timezone'] ) ) {
-		$location_args['timezone'] = $_REQUEST['timezone'];
+		// An IANA timezone identifier, e.g. `America/New_York` or `Etc/GMT+5`.
+		$location_args['timezone'] = filter_var(
+			$_REQUEST['timezone'],
+			FILTER_VALIDATE_REGEXP,
+			array(
+				'options' => array(
+					'regexp'  => '#^[A-Za-z0-9/_+-]{1,50}$#',
+					'default' => '',
+				),
+			)
+		);
 	}
 
 	if ( isset( $_REQUEST['locale'] ) ) {
-		$location_args['locale'] = $_REQUEST['locale'];
+		// A locale identifier, e.g. `en_US` or `pt_PT_ao90`.
+		$location_args['locale'] = filter_var(
+			$_REQUEST['locale'],
+			FILTER_VALIDATE_REGEXP,
+			array(
+				'options' => array(
+					'regexp'  => '/^[A-Za-z0-9_-]{2,20}$/',
+					'default' => '',
+				),
+			)
+		);
 	}
 
 	if ( isset( $_REQUEST['ip'] ) ) {
@@ -167,7 +214,7 @@ function parse_request() {
 			FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
 		);
 
-		$location_args['ip'] = $public_ip ? $public_ip : $_SERVER['REMOTE_ADDR'];
+		$location_args['ip'] = $public_ip ? $public_ip : filter_var( $_SERVER['REMOTE_ADDR'] ?? '', FILTER_VALIDATE_IP );
 	}
 
 	return $location_args;
@@ -193,9 +240,14 @@ function validate_request() {
 	];
 
 	foreach ( $must_be_strings as $field ) {
-		if ( isset( $_GET[ $field ] ) && ! is_scalar( $_GET[ $field ] ) ) {
+		// Check `$_REQUEST` because `parse_request()` accepts some of these fields from either method.
+		if ( isset( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
 			send_bad_request( $field . ' must be of type string.' );
 		}
+	}
+
+	if ( isset( $_POST['location_data'] ) && ! is_array( $_POST['location_data'] ) ) {
+		send_bad_request( 'location_data must be an array.' );
 	}
 
 	if ( ! empty( $_POST['location_data'] ) ) {
@@ -257,14 +309,20 @@ function build_response( $location, $location_args ) {
 		$error    = 'temp-request-throttled';
 	}
 
+	/*
+	 * Only used for prefix/substring comparisons, never output or stored.
+	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	 */
+	$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
 	if ( $location ) {
 		$event_args = array(
-			'is_client_core'      => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+			'is_client_core'      => is_client_core( $user_agent ),
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
 		if ( isset( $_REQUEST['number'] ) ) {
-			$event_args['number'] = $_REQUEST['number'];
+			$event_args['number'] = intval( $_REQUEST['number'] );
 		}
 
 		if ( ! empty( $location['latitude'] ) ) {
@@ -285,18 +343,18 @@ function build_response( $location, $location_args ) {
 
 		$events = get_events( $event_args );
 
-		//$events = maybe_add_wp15_promo( $events, $_SERVER['HTTP_USER_AGENT'], time() );
+		// $events = maybe_add_wp15_promo( $events, $user_agent, time() );
 
 		$events = maybe_add_regional_wordcamps(
 			$events,
 			get_regional_wordcamp_data(),
-			$_SERVER['HTTP_USER_AGENT'],
+			$user_agent,
 			time(),
 			$location
 		);
 
-		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time(), $location['country'] ?? '' );
-		$events = pin_next_workshop_discussion_group( $events, $_SERVER['HTTP_USER_AGENT'] );
+		$events = pin_next_online_wordcamp( $events, $user_agent, time(), $location['country'] ?? '' );
+		$events = pin_next_workshop_discussion_group( $events, $user_agent );
 		$events = pin_one_off_events( $events, time() );
 		$events = remove_duplicate_events( $events );
 
@@ -331,7 +389,15 @@ function build_response( $location, $location_args ) {
  * @return bool
  */
 function is_client_core( $user_agent = null ) {
-	return str_starts_with( $user_agent ?? $_SERVER['HTTP_USER_AGENT'], 'WordPress/' );
+	if ( null === $user_agent ) {
+		/*
+		 * Only used for a prefix comparison, never output or stored.
+		 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		 */
+		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+	}
+
+	return str_starts_with( $user_agent, 'WordPress/' );
 }
 
 /**
