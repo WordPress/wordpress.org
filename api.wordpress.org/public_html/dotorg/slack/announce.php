@@ -1,9 +1,9 @@
 <?php
 namespace Dotorg\Slack\Announce;
 
-require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
-require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
-require dirname( dirname( __DIR__ ) ) . '/includes/slack/announce/lib.php';
+require dirname( __DIR__, 2 ) . '/includes/hyperdb/bb-10-hyper-db.php';
+require dirname( __DIR__, 2 ) . '/includes/slack-config.php';
+require dirname( __DIR__, 2 ) . '/includes/slack/announce/lib.php';
 
 /*
  * This is a standalone Slack slash-command handler: WordPress is not loaded, so request

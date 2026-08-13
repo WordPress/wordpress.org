@@ -2,10 +2,10 @@
 namespace Dotorg\Slack\Security_Team;
 
 if ( ! isset( $GLOBALS['wpdb'] ) ) {
-	require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
+	require dirname( __DIR__, 2 ) . '/includes/hyperdb/bb-10-hyper-db.php';
 }
 
-require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
+require dirname( __DIR__, 2 ) . '/includes/slack-config.php';
 
 /*
  * Standalone when requested directly: it loads HyperDB but not WordPress, so nothing is
