@@ -1,19 +1,16 @@
 <?php
+namespace Dotorg\Slack\Announce;
 
-namespace {
-	require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
-	require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
-}
-
-namespace Dotorg\Slack\Announce {
-
+require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
+require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 require dirname( dirname( __DIR__ ) ) . '/includes/slack/announce/lib.php';
 
-/* phpcs:disable Generic.WhiteSpace.ScopeIndent -- file-scope code here is historically unindented.
- * phpcs:disable WordPress.Security.NonceVerification
- * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
- * Standalone Slack slash-command handler: WordPress is not loaded, so request data is
- * never slashed; Slack authenticates with the shared WEBHOOK_TOKEN_* secrets below.
+/*
+ * This is a standalone Slack slash-command handler: WordPress is not loaded, so request
+ * data is never slashed. Slack authenticates itself with one of the shared
+ * `WEBHOOK_TOKEN_*` secrets below; nonces don't exist in server-to-server webhooks.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
  */
 
 function get_avatar( $username, $slack_id, $team_id ) {
@@ -33,13 +30,15 @@ function get_avatar( $username, $slack_id, $team_id ) {
 	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G&%s', $hash, time() );
 }
 
+// An array (`token[]`) would make hash_equals() throw; bail on anything but a string.
+if ( ! is_string( $_POST['token'] ?? null ) ) {
+	return;
+}
+
 $i = 0;
 // WEBHOOK_TOKEN_1, WEBHOOK_TOKEN_2, etc.
 while ( defined( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . ++$i ) ) {
-	if ( hash_equals( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . $i ), $_POST['token'] ?? '' ) ) {
+	if ( hash_equals( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . $i ), $_POST['token'] ) ) {
 		run( $_POST );
 	}
 }
-
-}
-

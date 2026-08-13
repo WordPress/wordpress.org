@@ -14,7 +14,8 @@ require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
  */
 
-if ( ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ?? '' ) ) {
+// An array (`token[]`) would make hash_equals() throw; treat it as an invalid token.
+if ( ! is_string( $_POST['token'] ?? null ) || ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ) ) {
 	return;
 }
 

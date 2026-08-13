@@ -57,7 +57,7 @@ function api_request( $url ) {
 }
 
 // Check the request is valid.
-if ( empty( $_GET['secret'] ) || ! hash_equals( COMMUNITY_CALENDLY_SECRET, wp_unslash( $_GET['secret'] ) ) ) {
+if ( empty( $_GET['secret'] ) || ! is_string( $_GET['secret'] ) || ! hash_equals( COMMUNITY_CALENDLY_SECRET, wp_unslash( $_GET['secret'] ) ) ) {
 	header( 'HTTP/1.1 403 Forbidden' );
 	die( 'Invalid secret provided.' );
 }

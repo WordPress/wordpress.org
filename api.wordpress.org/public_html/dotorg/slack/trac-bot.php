@@ -16,8 +16,8 @@ namespace Dotorg\Slack\Trac {
 	 * phpcs:disable WordPress.Security.NonceVerification
 	 */
 
-	// Verify it came from Slack.
-	if ( ! hash_equals( URL_SECRET__TRAC_BOT, wp_unslash( $_GET['token'] ?? '' ) ) ) {
+	// Verify it came from Slack. An array (`token[]`) would make hash_equals() throw.
+	if ( ! is_string( $_GET['token'] ?? null ) || ! hash_equals( URL_SECRET__TRAC_BOT, wp_unslash( $_GET['token'] ) ) ) {
 		return;
 	}
 

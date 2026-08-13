@@ -1,21 +1,18 @@
 <?php
+namespace Dotorg\Slack\Security_Team;
 
-namespace {
-	if ( ! isset( $GLOBALS['wpdb'] ) ) {
-		require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
-	}
+if ( ! isset( $GLOBALS['wpdb'] ) ) {
+	require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
 }
-
-namespace Dotorg\Slack\Security_Team {
 
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
-/* phpcs:disable Generic.WhiteSpace.ScopeIndent -- file-scope code here is historically unindented.
- * phpcs:disable WordPress.Security.NonceVerification
- * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+/*
  * Standalone when requested directly: it loads HyperDB but not WordPress, so nothing is
  * slashed. (Also included as a library by trac/mentions-handler.php, which skips the
  * request handling below.) The Trac server authenticates with the shared API_TOKEN secret.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
  */
 
 function slack_api( $method, $content = array() ) {
@@ -69,8 +66,8 @@ function get_security_team( $user_field = 'user_login' ) {
 function api_call() {
 	header( 'Content-type: text/plain' );
 
-	// Confirm it came from the Trac server.
-	if ( ! hash_equals( API_TOKEN, $_GET['token'] ?? '' ) ) {
+	// Confirm it came from the Trac server. An array (`token[]`) would make hash_equals() throw.
+	if ( ! is_string( $_GET['token'] ?? null ) || ! hash_equals( API_TOKEN, $_GET['token'] ) ) {
 		exit;
 	}
 
@@ -92,6 +89,4 @@ function api_call() {
 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- substring comparison only.
 if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( $_SERVER['REQUEST_URI'], '/security-team.php?token=' ) ) {
 	api_call();
-}
-
 }
