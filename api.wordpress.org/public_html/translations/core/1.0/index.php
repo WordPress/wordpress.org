@@ -19,7 +19,16 @@ wp_cache_init();
 
 $version = WP_CORE_LATEST_RELEASE;
 if ( isset( $_REQUEST['version'] ) ) {
-	$version = filter_var( $_REQUEST['version'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW );
+	// This becomes a memcached cache key, which rejects spaces and control characters.
+	$version = filter_var(
+		$_REQUEST['version'],
+		FILTER_VALIDATE_REGEXP,
+		array(
+			'options' => array(
+				'regexp' => '/^[0-9][a-z0-9._-]{0,99}$/i',
+			),
+		)
+	);
 	if ( empty( $version ) || ! is_string( $version ) || ! is_numeric( $version[0] ) ) {
 		http_response_code( 400 );
 		die( '?version= must be a valid WordPress version' );
