@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -487,7 +488,7 @@ class Release_Confirmation {
 			return;
 		}
 
-		$release = Plugin_Directory::get_release( $post, $version );
+		$release = API_Update_Updater::get_current_release( $post );
 		if ( ! $release ) {
 			return;
 		}

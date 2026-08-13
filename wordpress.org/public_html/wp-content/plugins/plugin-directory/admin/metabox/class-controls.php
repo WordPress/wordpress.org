@@ -60,7 +60,7 @@ class Controls {
 			return;
 		}
 
-		$release = Plugin_Directory::get_release( $post, $version );
+		$release = API_Update_Updater::get_current_release( $post );
 		if ( ! $release ) {
 			return;
 		}

@@ -85,7 +85,7 @@ class API_Update_Updater {
 
 		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
-		$release          = Plugin_Directory::get_release( $post, $version );
+		$release          = self::get_current_release( $post );
 		$release_time     = self::compute_release_time( $post, $release );
 		$existing_row     = $wpdb->get_row(
 			$wpdb->prepare(
@@ -232,6 +232,22 @@ class API_Update_Updater {
 	}
 
 	/**
+	 * The release being served or held for a plugin's current version.
+	 *
+	 * Resolved from the stable tag first — the served package is built from it,
+	 * and a Version header that doesn't match its tag must not orphan the
+	 * release's block or cooldown — falling back to the version for trunk
+	 * releases, which are keyed `trunk@{version}`.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return array|false The release row from Plugin_Directory::get_release(), or false when none exists.
+	 */
+	public static function get_current_release( $post ) {
+		return Plugin_Directory::get_release( $post, get_post_meta( $post->ID, 'stable_tag', true ) )
+			?: Plugin_Directory::get_release( $post, get_post_meta( $post->ID, 'version', true ) );
+	}
+
+	/**
 	 * Whether a release is being held out of `update_source` by a block.
 	 *
 	 * Blocks are recorded on the release meta as `release_block`, and cleared by
@@ -267,7 +283,7 @@ class API_Update_Updater {
 		}
 
 		$version = get_post_meta( $post->ID, 'version', true );
-		$release = Plugin_Directory::get_release( $post, $version );
+		$release = self::get_current_release( $post );
 		if ( ! $release ) {
 			return false;
 		}
@@ -458,7 +474,7 @@ class API_Update_Updater {
 		}
 
 		$version = get_post_meta( $post->ID, 'version', true );
-		$release = Plugin_Directory::get_release( $post, $version );
+		$release = self::get_current_release( $post );
 
 		if ( ! $release ) {
 			return false;
