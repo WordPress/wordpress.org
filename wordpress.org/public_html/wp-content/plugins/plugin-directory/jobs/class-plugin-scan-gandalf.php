@@ -74,6 +74,13 @@ class Plugin_Scan_Gandalf {
 		$previous_version     = get_post_meta( $plugin->ID, 'last_version', true ) ?: null;
 		$previous_zip_url     = null;
 
+		// A blocked or cooling-down release never reaches `update_source`, so diffing against the served release keeps a re-tagged payload from becoming its own baseline.
+		$served = API_Update_Updater::get_served_release( $plugin->post_name );
+		if ( $served && substr( $version, 0, 128 ) !== $served->version ) {
+			$previous_release_ref = $served->stable_tag;
+			$previous_version     = $served->version;
+		}
+
 		if ( $previous_release_ref && $previous_release_ref !== $release_ref && 'trunk' !== $previous_release_ref ) {
 			$previous_zip_url = Template::download_link( $plugin, $previous_release_ref );
 		}
