@@ -89,23 +89,31 @@ class API_Update_Updater {
 		$release_time     = self::compute_release_time( $post, $release );
 		$existing_row     = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT version, meta FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				"SELECT version, stable_tag, meta FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
 				$post->post_name
 			)
 		);
 		$existing_version = (string) ( $existing_row->version ?? '' );
+		$existing_ref     = (string) ( $existing_row->stable_tag ?? '' );
+		$stable_tag       = (string) get_post_meta( $post->ID, 'stable_tag', true );
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 
-		// `update_source.version` is varchar(128); mirror cron_trigger()'s `left( pm.meta_value, 128 )` truncation allowance.
-		$is_new_version = substr( (string) $version, 0, 128 ) !== $existing_version;
+		/*
+		 * A new release is a change to the served version OR the served ref: a new tag
+		 * carrying the same version still ships different content, so it must pass through
+		 * the cooldown and block gates rather than skip them on the unchanged version alone.
+		 * Both columns are varchar(128); mirror cron_trigger()'s `left( …, 128 )` allowance.
+		 */
+		$is_new_release = substr( (string) $version, 0, 128 ) !== $existing_version
+			|| substr( $stable_tag, 0, 128 ) !== $existing_ref;
 
 		/*
 		 * Hold a blocked version out of the row: the previously served version keeps
 		 * being served, and the deferred serve is cancelled rather than postponed.
 		 * Status changes still reach the row right away.
 		 */
-		if ( self::is_release_blocked( $release ) && $is_new_version ) {
+		if ( self::is_release_blocked( $release ) && $is_new_release ) {
 			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
 
 			if ( $existing_row ) {
@@ -125,13 +133,13 @@ class API_Update_Updater {
 		 * gate is false when called from cron_trigger_release() and no explicit bypass
 		 * is needed.
 		 *
-		 * Only the version bump waits for the cooldown: a status change made
+		 * Only the new release waits for the cooldown: a status change made
 		 * mid-cooldown (a closure, a reopen) reaches the existing row right away,
 		 * while it keeps serving the previous release's data. Until the cooldown
 		 * expires, cron_trigger() keeps re-selecting the plugin and this write
 		 * repeats as a no-op.
 		 */
-		if ( $release_delay && $is_new_version ) {
+		if ( $release_delay && $is_new_release ) {
 			$cooldown_until = $release_time + $release_delay;
 			if ( $cooldown_until > time() ) {
 				self::queue_release_to_update_api( $post->post_name, $cooldown_until );
@@ -148,7 +156,7 @@ class API_Update_Updater {
 		// to now — that's the moment the version is actually available to sites. Keeps
 		// phased_rollout()'s `manual-updates-24hr` window measuring from public availability,
 		// even if the commit/confirmation was long ago because the cooldown deferred the write.
-		if ( $release_delay && $is_new_version ) {
+		if ( $release_delay && $is_new_release ) {
 			$release_time = time();
 		}
 
@@ -176,7 +184,7 @@ class API_Update_Updater {
 			'plugin_slug'      => $post->post_name,
 			'available'        => (int) self::is_available( $post ),
 			'version'          => $version,
-			'stable_tag'       => get_post_meta( $post->ID, 'stable_tag', true ),
+			'stable_tag'       => $stable_tag,
 			'plugin_name'      => strip_tags( get_post_meta( $post->ID, 'header_name', true ) ),
 			'plugin_name_san'  => sanitize_title_with_dashes( strip_tags( get_post_meta( $post->ID, 'header_name', true ) ) ),
 			'plugin_author'    => strip_tags( get_post_meta( $post->ID, 'header_author', true ) ),
