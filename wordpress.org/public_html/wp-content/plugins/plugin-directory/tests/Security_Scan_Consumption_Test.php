@@ -179,10 +179,7 @@ class Security_Scan_Consumption_Test extends TestCase {
 		$consumed = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::CONSUMED_META_KEY, true );
 		$this->assertArrayHasKey( self::SCAN_ID, $consumed );
 
-		/*
-		 * The Slack dedup record is written even without a configured channel;
-		 * clearing it exposes whether the retry re-runs the notification effects.
-		 */
+		// Clearing the Slack dedup record exposes whether the retry re-runs notification effects.
 		delete_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::NOTIFIED_META_KEY );
 
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( get_post( $this->plugin->ID ), $callback ) );

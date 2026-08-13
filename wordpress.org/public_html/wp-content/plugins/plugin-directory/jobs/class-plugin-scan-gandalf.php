@@ -163,11 +163,7 @@ class Plugin_Scan_Gandalf {
 	 * @return true|WP_Error True on success, or an error when the callback is invalid.
 	 */
 	public static function handle_callback( $plugin, $data ) {
-		/*
-		 * Serialize processing per plugin, not per scan: callbacks read-modify-write
-		 * shared per-plugin meta, and a scanner retry racing a slow first delivery
-		 * waits for the consumed record.
-		 */
+		// Serialize per plugin: callbacks read-modify-write shared per-plugin meta.
 		if ( ! wp_cache_add( 'gandalf-scan-callback-' . $plugin->ID, 1, 'plugin-scans', 5 * MINUTE_IN_SECONDS ) ) {
 			return new WP_Error( 'security_scan_locked', 'A security scan callback for this plugin is already being processed.', [ 'status' => WP_Http::CONFLICT ] );
 		}
@@ -248,11 +244,7 @@ class Plugin_Scan_Gandalf {
 			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
 		}
 
-		/*
-		 * Deliberately recorded after the effects, failing closed: a crash
-		 * mid-processing makes the retry re-apply the (idempotent) effects
-		 * rather than acknowledge effects that never happened.
-		 */
+		// Recorded after the effects, so a crashed delivery is retried, not acknowledged.
 		$consumed[ $scan_id ] = [
 			'digest' => $digest,
 			'status' => $data['status'],
@@ -260,10 +252,7 @@ class Plugin_Scan_Gandalf {
 		];
 		update_post_meta( $plugin->ID, self::CONSUMED_META_KEY, $consumed );
 
-		/*
-		 * A failed report keeps the pending entry: the scanner may still deliver
-		 * a completed verdict for this scan, which supersedes the failure.
-		 */
+		// A failed report keeps the pending entry for a completed verdict that may still arrive.
 		if ( 'completed' === $data['status'] ) {
 			unset( $pending[ $scan_id ] );
 			update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
