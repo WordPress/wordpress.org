@@ -25,7 +25,7 @@ if ( isset( $_REQUEST['version'] ) ) {
 		FILTER_VALIDATE_REGEXP,
 		array(
 			'options' => array(
-				'regexp' => '/^[0-9][a-z0-9._-]{0,99}$/i',
+				'regexp' => '/^[0-9][a-z0-9._-]{0,99}\z/i',
 			),
 		)
 	);
