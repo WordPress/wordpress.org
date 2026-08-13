@@ -17,10 +17,25 @@ require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
 require( $base_dir . '/includes/object-cache.php' );
 wp_cache_init();
 
-$slug    = isset( $_REQUEST['slug'] ) ? filter_var( $_REQUEST['slug'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW ) : '';
-$version = isset( $_REQUEST['version'] )
-	? filter_var( $_REQUEST['version'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW )
-	: null;
+// These become memcached cache keys, which reject spaces and control characters.
+$slug    = isset( $_REQUEST['slug'] ) ? filter_var(
+	$_REQUEST['slug'],
+	FILTER_VALIDATE_REGEXP,
+	array(
+		'options' => array(
+			'regexp' => '/^[a-z0-9._-]{1,100}$/i',
+		),
+	)
+) : '';
+$version = isset( $_REQUEST['version'] ) ? filter_var(
+	$_REQUEST['version'],
+	FILTER_VALIDATE_REGEXP,
+	array(
+		'options' => array(
+			'regexp' => '/^[a-z0-9._-]{1,100}$/i',
+		),
+	)
+) : null;
 
 if ( isset( $_REQUEST['slug'] ) && ! is_string( $slug ) ) {
 	http_response_code( 400 );
