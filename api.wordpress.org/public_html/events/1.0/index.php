@@ -1,13 +1,17 @@
 <?php
-namespace Dotorg\API\Events;
-use stdClass;
-
-/*
+/**
+ * WordPress.org Events API endpoint: upcoming events near a given location.
+ *
  * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
  * so request data is never slashed, and there is no session or nonce infrastructure.
  *
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Events
  */
+
+namespace Dotorg\API\Events;
+use stdClass;
 
 /**
  * Main entry point
@@ -856,7 +860,6 @@ function guess_location_from_country( $location_name ) {
 
 	return $country;
 }
-
 
 /**
  * Get the country that corresponds to the given country name
