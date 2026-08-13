@@ -28,7 +28,7 @@ function api_send_json( $data ) {
 	$callback = isset( $_GET['callback'] ) ? sanitize_text_field( wp_unslash( $_GET['callback'] ) ) : '';
 
 	// A callback that is not a valid JavaScript identifier falls back to plain JSON.
-	if ( ! preg_match( '/^[a-z_][a-z0-9_]*$/i', $callback ) ) {
+	if ( ! preg_match( '/^[a-z_][a-z0-9_]*\z/i', $callback ) ) {
 		$callback = false;
 	}
 
@@ -58,7 +58,7 @@ $requested_action = filter_var(
 	FILTER_VALIDATE_REGEXP,
 	array(
 		'options' => array(
-			'regexp'  => '/^[a-z0-9_-]+$/',
+			'regexp'  => '/^[a-z0-9_-]+\z/',
 			'default' => '',
 		),
 	)
@@ -80,7 +80,7 @@ switch ( $requested_action ) {
 			FILTER_VALIDATE_REGEXP,
 			array(
 				'options' => array(
-					'regexp'  => '/^[a-z0-9_-]+$/',
+					'regexp'  => '/^[a-z0-9_-]+\z/',
 					'default' => '',
 				),
 			)

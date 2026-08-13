@@ -18,7 +18,7 @@ if ( isset( $_SERVER['REQUEST_METHOD'] ) && ! in_array( $_SERVER['REQUEST_METHOD
 		FILTER_VALIDATE_REGEXP,
 		array(
 			'options' => array(
-				'regexp'  => '#^HTTP/[0-9.]+$#',
+				'regexp'  => '#^HTTP/[0-9.]+\z#',
 				'default' => 'HTTP/1.0',
 			),
 		)
@@ -43,7 +43,7 @@ if ( ! isset( $_GET['request'] ) ) {
 		FILTER_VALIDATE_REGEXP,
 		array(
 			'options' => array(
-				'regexp'  => '/^[a-z_]{1,32}$/',
+				'regexp'  => '/^[a-z_]{1,32}\z/',
 				'default' => '',
 			),
 		)
