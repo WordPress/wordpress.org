@@ -61,9 +61,9 @@ class Gandalf_Scan_Baseline_Test extends TestCase {
 	/**
 	 * The pre_http_request callback capturing the dispatch.
 	 *
-	 * @var callable
+	 * @var \Closure
 	 */
-	private $http_mock;
+	private \Closure $http_mock;
 
 	/**
 	 * Create a published plugin importing NEW_VERSION after a blocked BLOCKED_VERSION.
@@ -98,12 +98,11 @@ class Gandalf_Scan_Baseline_Test extends TestCase {
 		$wpdb->delete( $wpdb->prefix . 'update_source', array( 'plugin_slug' => $this->plugin->post_name ) );
 
 		update_post_meta( $this->plugin->ID, 'version', self::NEW_VERSION );
-		update_post_meta( $this->plugin->ID, 'stable_tag', self::NEW_VERSION );
 		update_post_meta( $this->plugin->ID, 'last_version', self::BLOCKED_VERSION );
 		update_post_meta( $this->plugin->ID, 'last_stable_tag', self::BLOCKED_VERSION );
 
 		$this->request_body = null;
-		$this->http_mock    = function ( $preempt, array $parsed_args, string $url ) {
+		$this->http_mock    = function ( mixed $preempt, array $parsed_args, string $url ): array {
 			$this->assertSame( Plugin_Scan_Gandalf::ENDPOINT, $url );
 			$this->request_body = json_decode( $parsed_args['body'], true );
 
@@ -220,6 +219,28 @@ class Gandalf_Scan_Baseline_Test extends TestCase {
 
 		$this->assertSame( self::BLOCKED_VERSION, $request['previous_version'] );
 		$this->assertSame( self::BLOCKED_VERSION, $request['previous_release_ref'] );
+	}
+
+	/**
+	 * A baseline candidate that is itself a blocked release is dropped: with
+	 * no served row, the last imported release would be the baseline, but its
+	 * content is exactly what the scan has to surface.
+	 */
+	public function test_no_baseline_when_last_release_is_blocked(): void {
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'           => self::BLOCKED_VERSION,
+				'version'       => self::BLOCKED_VERSION,
+				'release_block' => array( 'blocked_at' => time() ),
+			)
+		);
+
+		$request = $this->dispatch_scan();
+
+		$this->assertNull( $request['previous_version'] );
+		$this->assertNull( $request['previous_release_ref'] );
+		$this->assertNull( $request['previous_zip_url'] );
 	}
 
 	/**
