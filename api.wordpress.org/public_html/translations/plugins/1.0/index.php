@@ -2,14 +2,12 @@
 /**
  * WordPress.org Translations API endpoint for plugins.
  *
- * @package WordPressdotorg\API\Translations
- */
-
-/*
  * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
  * so request data is never slashed, and there is no session or nonce infrastructure.
  *
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Translations
  */
 
 $base_dir = dirname( dirname( dirname( __DIR__ ) ) );
