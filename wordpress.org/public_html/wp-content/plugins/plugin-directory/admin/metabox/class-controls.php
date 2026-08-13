@@ -55,17 +55,12 @@ class Controls {
 	protected static function display_release_cooldown() {
 		$post = get_post();
 
-		$version = get_post_meta( $post->ID, 'version', true );
-		if ( ! $version ) {
-			return;
-		}
-
+		// Resolved from the stable tag, so the hold shows even when the Version header is empty or disagrees.
 		$release = API_Update_Updater::get_current_release( $post );
 		if ( ! $release ) {
 			return;
 		}
 
-		// The held release is resolved from the stable tag, so name it — not the Version header, which may disagree.
 		$release_version = $release['version'];
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
@@ -103,7 +98,7 @@ class Controls {
 					></textarea>
 				</p>
 				<p>
-					<button type="submit" name="force_release_version" value="<?php echo esc_attr( $version ); ?>" class="button">
+					<button type="submit" name="force_release_tag" value="<?php echo esc_attr( $release['tag'] ); ?>" class="button">
 						<?php
 						printf(
 							/* translators: %s: version */
@@ -124,7 +119,7 @@ class Controls {
 	 * @param int $post_id The post being saved.
 	 */
 	public static function save_post( $post_id ) {
-		if ( empty( $_POST['force_release_version'] ) ) {
+		if ( empty( $_POST['force_release_tag'] ) ) {
 			return;
 		}
 
@@ -141,10 +136,11 @@ class Controls {
 		// and to make the security boundary explicit.
 		check_admin_referer( 'update-post_' . $post_id );
 
-		$version           = get_post_meta( $post->ID, 'version', true );
-		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );
-		if ( $submitted_version !== $version ) {
-			// Submitted version doesn't match current — a newer commit landed since the form was rendered.
+		// Staleness guard on the release identity, not the header version: a newer commit
+		// that moved the stable tag since the form rendered lands a different release here.
+		$release       = API_Update_Updater::get_current_release( $post );
+		$submitted_tag = sanitize_text_field( wp_unslash( $_POST['force_release_tag'] ) );
+		if ( ! $release || $submitted_tag !== (string) $release['tag'] ) {
 			return;
 		}
 

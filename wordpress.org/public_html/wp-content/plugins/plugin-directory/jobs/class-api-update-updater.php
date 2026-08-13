@@ -101,11 +101,16 @@ class API_Update_Updater {
 		$is_new_version = substr( (string) $version, 0, 128 ) !== $existing_version;
 
 		/*
-		 * Hold a blocked version out of the row: the previously served version keeps
+		 * Hold a blocked release out of the row: the previously served version keeps
 		 * being served, and the deferred serve is cancelled rather than postponed.
 		 * Status changes still reach the row right away.
+		 *
+		 * Gated on the block alone, not $is_new_version: a header renamed to match
+		 * the served version would make that proxy false, writing the blocked
+		 * release's stable tag live. block_release() already refuses to block a
+		 * served release, so a held release is never the one already in the row.
 		 */
-		if ( self::is_release_blocked( $release ) && $is_new_version ) {
+		if ( self::is_release_blocked( $release ) ) {
 			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
 
 			if ( $existing_row ) {
@@ -238,20 +243,31 @@ class API_Update_Updater {
 	 * package is built from — so a Version header that disagrees with its tag
 	 * cannot redirect the release's block or cooldown onto a different release.
 	 * Trunk-stable plugins have no tag-named release row (theirs are keyed
-	 * `trunk@{version}`), so they resolve by version; their identity is the
-	 * header itself, so a header rename there is out of this method's reach.
+	 * `trunk@{version}`), so they resolve by that key; their identity is the
+	 * header version, so a header rename there is out of this method's reach.
+	 *
+	 * Matched strictly by tag, unlike Plugin_Directory::get_release(): its
+	 * wp_list_filter() match is loose (`'1.4' == '1.40'`) and prefers a bare
+	 * tag over a `trunk@{version}` row, either of which could resolve a hold
+	 * off the wrong release.
 	 *
 	 * @param \WP_Post $post The plugin post.
-	 * @return array|false The release row from Plugin_Directory::get_release(), or false when none exists.
+	 * @return array|false The matching release row, or false when none exists.
 	 */
 	public static function get_current_release( $post ) {
 		$stable_tag = get_post_meta( $post->ID, 'stable_tag', true );
 
-		if ( ! $stable_tag || 'trunk' === $stable_tag ) {
-			return Plugin_Directory::get_release( $post, get_post_meta( $post->ID, 'version', true ) );
+		$target = ( ! $stable_tag || 'trunk' === $stable_tag )
+			? 'trunk@' . get_post_meta( $post->ID, 'version', true )
+			: $stable_tag;
+
+		foreach ( (array) Plugin_Directory::get_releases( $post ) as $release ) {
+			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $target ) {
+				return $release;
+			}
 		}
 
-		return Plugin_Directory::get_release( $post, $stable_tag );
+		return false;
 	}
 
 	/**
@@ -295,7 +311,8 @@ class API_Update_Updater {
 		}
 
 		// Already live: a block can't un-ship the resolved release once it's the served version (compared with the column's varchar(128) truncation).
-		if ( self::get_served_version( $plugin_slug ) === substr( (string) ( $release['version'] ?? '' ), 0, 128 ) ) {
+		$served_version = self::get_served_version( $plugin_slug );
+		if ( '' !== $served_version && substr( (string) ( $release['version'] ?? '' ), 0, 128 ) === $served_version ) {
 			return false;
 		}
 

@@ -483,11 +483,7 @@ class Release_Confirmation {
 			return;
 		}
 
-		$version = get_post_meta( $post->ID, 'version', true );
-		if ( ! $version ) {
-			return;
-		}
-
+		// Resolved from the stable tag, so the notice shows even when the Version header is empty or disagrees.
 		$release = API_Update_Updater::get_current_release( $post );
 		if ( ! $release ) {
 			return;

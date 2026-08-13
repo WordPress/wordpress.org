@@ -259,6 +259,64 @@ class Current_Release_Resolution_Test extends TestCase {
 	}
 
 	/**
+	 * A header renamed down to the already-served version cannot write the
+	 * blocked tag into update_source: the block gate no longer keys on the
+	 * header-derived is_new_version proxy.
+	 */
+	public function test_block_held_when_header_matches_served_version(): void {
+		global $wpdb;
+
+		update_post_meta( $this->plugin->ID, 'version', self::SERVED_VERSION );
+		$this->add_release( self::HELD_TAG, self::SERVED_VERSION, array( 'release_block' => array( 'blocked_at' => time() ) ) );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT version, stable_tag FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s", $this->plugin->post_name ) );
+		$this->assertSame( self::SERVED_VERSION, $row->version );
+		$this->assertSame( self::SERVED_VERSION, $row->stable_tag );
+	}
+
+	/**
+	 * The already-served guard doesn't read an empty served version and an empty
+	 * resolved version as a match, which would wrongly refuse the block.
+	 */
+	public function test_block_not_refused_for_empty_versions(): void {
+		global $wpdb;
+
+		$wpdb->delete( $wpdb->prefix . 'update_source', array( 'plugin_slug' => $this->plugin->post_name ) );
+		$this->add_release( self::HELD_TAG, '' );
+
+		$this->assertTrue( API_Update_Updater::block_release( $this->plugin->post_name, array( 'risk_score' => 9.8 ) ) );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::HELD_TAG ) ) );
+	}
+
+	/**
+	 * A tag that is numerically equal but textually different to the stable tag
+	 * does not resolve: the match is strict, not wp_list_filter's loose ==.
+	 */
+	public function test_numeric_collision_tag_not_matched(): void {
+		update_post_meta( $this->plugin->ID, 'stable_tag', '1.4' );
+		$this->add_release( '1.40', '1.40', array( 'release_block' => array( 'blocked_at' => time() ) ) );
+
+		$this->assertFalse( API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) ) );
+	}
+
+	/**
+	 * A dormant SVN tag named like the trunk version does not shadow the
+	 * `trunk@{version}` release the trunk plugin actually serves.
+	 */
+	public function test_trunk_version_not_shadowed_by_like_named_tag(): void {
+		update_post_meta( $this->plugin->ID, 'stable_tag', 'trunk' );
+		update_post_meta( $this->plugin->ID, 'version', '1.2.3' );
+		$this->add_release( '1.2.3', '1.2.3', array( 'release_block' => array( 'blocked_at' => time() ) ) );
+		$this->add_release( 'trunk@1.2.3', '1.2.3' );
+
+		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
+		$this->assertSame( 'trunk@1.2.3', $release['tag'] );
+		$this->assertFalse( API_Update_Updater::is_release_blocked( $release ) );
+	}
+
+	/**
 	 * The force-release audit note names the release actually unblocked — the
 	 * stable-tag-resolved one — not the plugin's Version header.
 	 */
