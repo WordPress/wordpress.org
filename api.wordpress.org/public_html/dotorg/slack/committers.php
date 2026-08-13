@@ -28,7 +28,6 @@ if ( ! isset( $_POST['token'] ) || ! is_string( $_POST['token'] ) || '' === $_PO
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
  */
 
-// An array (`token[]`) would make hash_equals() throw; treat it as an invalid token.
 if ( ! is_string( $_POST['token'] ?? null ) || ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ) ) {
 	return;
 }
