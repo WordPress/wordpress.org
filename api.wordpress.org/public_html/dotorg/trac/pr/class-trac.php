@@ -148,7 +148,7 @@ class Trac {
 			$json = $this->trac_json_deobjectify( $json );
 
 		} elseif ( $json && isset( $json->error ) ) {
-			throw new \Exception( 'JSON Error: ' . $json->error->code . ' ' . $json->error->message );
+			throw new \Exception( 'JSON Error: ' . esc_html( $json->error->code ) . ' ' . esc_html( $json->error->message ) );
 		} elseif ( ! $json ) {
 			throw new \Exception( 'Trac API Error: Trac Unavailable.' );
 		}

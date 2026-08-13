@@ -43,7 +43,16 @@ if (
 function get_signed_payload_or_die() {
 	$payload            = file_get_contents( 'php://input' );
 	// Validate that the request came from GitHub.
-	$sent_signature     = $_SERVER['HTTP_X_HUB_SIGNATURE_256'];
+	$sent_signature     = (string) filter_var(
+		wp_unslash( $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '' ),
+		FILTER_VALIDATE_REGEXP,
+		[
+			'options' => [
+				'regexp'  => '/^sha256=[0-9a-f]{64}$/i',
+				'default' => '',
+			],
+		]
+	);
 	$expected_signature = 'sha256=' . hash_hmac( 'sha256', $payload, constant( 'GH_ACTIVITY_WEBHOOK_SECRET' ) );
 
 	if ( ! hash_equals( $expected_signature, $sent_signature ) ) {
@@ -71,7 +80,7 @@ function github_user_to_user_id( $user ) {
 	return $user_id ? intval( $user_id ) : false;
 }
 
-$event   = $_SERVER['HTTP_X_GITHUB_EVENT'];
+$event   = sanitize_key( wp_unslash( $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '' ) );
 $payload = get_signed_payload_or_die();
 
 // Ignore anything on private repos.
@@ -163,7 +172,7 @@ switch ( $event ) {
 	case 'issues':
 		if ( ! in_array( $payload->action, [ 'opened', 'edited', 'closed', 'deleted' ] ) ) {
 			header( 'HTTP/1.0 422 Unprocessable Entity', true, 422 );
-			die( "NO; $event:{$payload->action} not required." );
+			die( esc_html( "NO; $event:{$payload->action} not required." ) );
 		}
 
 		// Update the Title & Description if it's edited. Just to keep everything in sync.
@@ -215,7 +224,7 @@ switch ( $event ) {
 
 		if ( ! in_array( $payload->action, [ 'opened', 'reopened', 'edited', 'closed' ] ) ) {
 			header( 'HTTP/1.0 422 Unprocessable Entity', true, 422 );
-			die( "NO; $event:{$payload->action} not required." );
+			die( esc_html( "NO; $event:{$payload->action} not required." ) );
 		}
 
 		// Update the Title & Description if it's edited. Just to keep everything in sync.
