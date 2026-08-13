@@ -146,7 +146,7 @@ function parse_request() {
 		$location_args['longitude'] = floatval( $_GET['longitude'] );
 	}
 
-	if ( isset( $_GET['country'] ) ) {
+	if ( isset( $_GET['country'] ) && '' !== $_GET['country'] ) {
 		// An ISO 3166-1 alpha-2 or alpha-3 country code.
 		$country = filter_var(
 			$_GET['country'],
@@ -319,7 +319,7 @@ function build_response( $location, $location_args ) {
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
-		if ( isset( $_REQUEST['number'] ) ) {
+		if ( isset( $_REQUEST['number'] ) && is_numeric( $_REQUEST['number'] ) ) {
 			$event_args['number'] = intval( $_REQUEST['number'] );
 		}
 
