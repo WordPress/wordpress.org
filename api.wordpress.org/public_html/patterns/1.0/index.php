@@ -1,12 +1,15 @@
 <?php
-
-namespace WordPressdotorg\API\Patterns;
-
-/*
+/**
+ * WordPress.org Block Pattern Directory API endpoint.
+ *
  * The request is read here, before `main()` loads WordPress, so it has not been slashed.
  *
  * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Patterns
  */
+
+namespace WordPressdotorg\API\Patterns;
 
 /*
  * Supply Block Pattern Directory data to the block editor.
@@ -46,7 +49,6 @@ function flush_handler( $buffer ) {
 
 	return false; // Original buffer will be output with no changes.
 }
-
 
 /**
  * Proxy w.org/patterns API endpoints for reliability.

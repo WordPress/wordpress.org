@@ -1,12 +1,16 @@
 <?php
-namespace WordPressdotorg\API\Serve_Happy;
-
-/*
+/**
+ * WordPress.org Serve Happy API endpoint: PHP version recommendations.
+ *
  * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
  * so request data is never slashed, and there is no session or nonce infrastructure.
  *
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Serve_Happy
  */
+
+namespace WordPressdotorg\API\Serve_Happy;
 
 define( 'API_VERSION', '1.0' );
 
