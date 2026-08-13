@@ -1,4 +1,15 @@
 <?php
+/**
+ * Calendly webhook handler for community deputy meetings.
+ *
+ * Calendly authenticates itself with the shared `COMMUNITY_CALENDLY_SECRET` passed in the webhook
+ * URL, verified below; nonces don't exist in server-to-server webhooks.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Slack
+ */
+
 namespace WordPressdotorg\API\Slack\Community_Deputy_Webhook;
 use Dotorg\Slack\Send;
 use DateTime, DateTimeZone;
@@ -8,13 +19,6 @@ use DateTime, DateTimeZone;
  */
 require dirname( __DIR__, 2 ) . '/wp-init.php';
 require dirname( __DIR__, 2 ) . '/includes/slack-config.php';
-
-/*
- * Calendly authenticates itself with the shared `COMMUNITY_CALENDLY_SECRET` passed in the webhook
- * URL, verified below; nonces don't exist in server-to-server webhooks.
- *
- * phpcs:disable WordPress.Security.NonceVerification
- */
 
 /**
  * Quick API wrapper for the Calendly API.

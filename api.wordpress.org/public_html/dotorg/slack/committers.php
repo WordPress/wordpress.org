@@ -20,14 +20,6 @@ if ( ! isset( $_POST['token'] ) || ! is_string( $_POST['token'] ) || '' === $_PO
 	return;
 }
 
-/*
- * This is a standalone Slack outgoing-webhook handler: WordPress is not loaded, so request data
- * is never slashed. Slack authenticates itself with the shared `WEBHOOK_TOKEN` below; nonces
- * don't exist in server-to-server webhooks.
- *
- * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
- */
-
 if ( ! is_string( $_POST['token'] ?? null ) || ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ) ) {
 	return;
 }

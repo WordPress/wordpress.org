@@ -20,14 +20,6 @@ if ( ! isset( $GLOBALS['wpdb'] ) ) {
 
 require dirname( __DIR__, 2 ) . '/includes/slack-config.php';
 
-/*
- * Standalone when requested directly: it loads HyperDB but not WordPress, so nothing is
- * slashed. (Also included as a library by trac/mentions-handler.php, which skips the
- * request handling below.) The Trac server authenticates with the shared API_TOKEN secret.
- *
- * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
- */
-
 function slack_api( $method, $content = array() ) {
 	$content['token'] = SLACK_TOKEN;
 	$content = http_build_query( $content );
