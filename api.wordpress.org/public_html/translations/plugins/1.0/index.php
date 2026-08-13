@@ -23,7 +23,7 @@ $slug    = isset( $_REQUEST['slug'] ) ? filter_var(
 	FILTER_VALIDATE_REGEXP,
 	array(
 		'options' => array(
-			'regexp' => '/^[a-z0-9._-]{1,100}$/i',
+			'regexp' => '/^[a-z0-9._-]{1,100}\z/i',
 		),
 	)
 ) : '';
@@ -32,7 +32,7 @@ $version = isset( $_REQUEST['version'] ) ? filter_var(
 	FILTER_VALIDATE_REGEXP,
 	array(
 		'options' => array(
-			'regexp' => '/^[a-z0-9._-]{1,100}$/i',
+			'regexp' => '/^[a-z0-9._-]{1,100}\z/i',
 		),
 	)
 ) : null;
