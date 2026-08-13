@@ -21,6 +21,11 @@ if ( isset( $_GET['callback'] ) && is_string( $_GET['callback'] ) ) {
 		'',
 		filter_var( $_GET['callback'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW )
 	);
+
+	// A callback that is not a valid JavaScript identifier falls back to plain JSON.
+	if ( $callback && ! preg_match( '/^[a-z_]/i', $callback ) ) {
+		$callback = false;
+	}
 } else {
 	$callback = false;
 }

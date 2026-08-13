@@ -24,14 +24,13 @@ function api_send_json( $data ) {
 		header( 'Access-Control-Allow-Credentials: true' ); // Allow cookies to be used.
 	}
 
-	/*
-	 * The JSONP callback name doesn't change any state; the actions below
-	 * verify a nonce.
-	 * phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	 */
-	$callback = isset( $_GET['callback'] )
-		? preg_replace( '/[^a-z0-9_]/i', '', sanitize_text_field( wp_unslash( $_GET['callback'] ) ) )
-		: false;
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The callback name doesn't change any state; the actions below verify a nonce.
+	$callback = isset( $_GET['callback'] ) ? preg_replace( '/[^a-z0-9_]/i', '', sanitize_text_field( wp_unslash( $_GET['callback'] ) ) ) : false;
+
+	// A callback that is not a valid JavaScript identifier falls back to plain JSON.
+	if ( $callback && ! preg_match( '/^[a-z_]/i', $callback ) ) {
+		$callback = false;
+	}
 
 	$json = wp_json_encode( $data );
 
@@ -53,7 +52,17 @@ if ( ! is_user_logged_in() ) {
 	) );
 }
 
-$requested_action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
+// Reject rather than transform: a malformed action must not become a valid one.
+$requested_action = filter_var(
+	wp_unslash( $_REQUEST['action'] ?? '' ),
+	FILTER_VALIDATE_REGEXP,
+	array(
+		'options' => array(
+			'regexp'  => '/^[a-z0-9_-]+$/',
+			'default' => '',
+		),
+	)
+);
 
 switch ( $requested_action ) {
 	case 'add-favorite':
@@ -66,7 +75,16 @@ switch ( $requested_action ) {
 			) );
 		}
 
-		$theme_slug = sanitize_key( wp_unslash( $_REQUEST['theme'] ) );
+		$theme_slug = filter_var(
+			wp_unslash( $_REQUEST['theme'] ),
+			FILTER_VALIDATE_REGEXP,
+			array(
+				'options' => array(
+					'regexp'  => '/^[a-z0-9-]+$/',
+					'default' => '',
+				),
+			)
+		);
 
 		if ( 'add-favorite' == $requested_action ) {
 			$result = wporg_themes_add_favorite( $theme_slug );

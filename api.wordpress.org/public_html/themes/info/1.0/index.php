@@ -42,10 +42,7 @@ function send_error( $error, $code = 404 ) {
 		'error' => $error	
 	];
 
-	/*
-	 * Only used for a substring comparison, never output or stored.
-	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only used for a substring comparison, never output or stored.
 	$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
 	// Browsers get a nicer action not implemented error.
@@ -55,11 +52,7 @@ function send_error( $error, $code = 404 ) {
 		false !== strpos( $error, 'Action not implemented.' )
 	) {
 		header( 'Content-Type: text/html; charset=utf-8' );
-		/*
-		 * Every caller passes a hard-coded message, one of which intentionally
-		 * contains a link; WordPress and esc_html() are not loaded here.
-		 * phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		 */
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Every caller passes a hard-coded message, one of which intentionally contains a link; esc_html() is not loaded here.
 		die( "<p>{$error}</p>" );
 	}
 
@@ -88,19 +81,11 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 
 // Set up action and request information.
 if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
-	/*
-	 * Individual fields are type-checked and sanitized by Themes_API; all
-	 * database access runs through prepared WP_Query calls.
-	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Fields are type-checked and sanitized by Themes_API; DB access uses prepared WP_Query calls.
 	$request = isset( $_REQUEST['request'] ) ? (object) $_REQUEST['request'] : '';
 	$format = 'json';
 } else {
-	/*
-	 * A serialized payload, screened for object injection below and unserialized
-	 * with `allowed_classes` limited to stdClass.
-	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Screened for object injection below; unserialized with `allowed_classes` limited to stdClass.
 	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? $_POST['request'] : '';
 	if ( $post_request ) {
 		// PHP Needs to get a non-urldecoded request, to avoid multibyte character malforming the request,
