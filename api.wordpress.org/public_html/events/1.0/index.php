@@ -151,7 +151,7 @@ function parse_request() {
 		$country = filter_var(
 			$_GET['country'],
 			FILTER_VALIDATE_REGEXP,
-			array( 'options' => array( 'regexp' => '/^[a-z]{2,3}$/i' ) )
+			array( 'options' => array( 'regexp' => '/^[a-z]{2,3}\z/i' ) )
 		);
 
 		if ( false === $country ) {
@@ -182,7 +182,7 @@ function parse_request() {
 			FILTER_VALIDATE_REGEXP,
 			array(
 				'options' => array(
-					'regexp'  => '#^[A-Za-z0-9/_+-]{1,50}$#',
+					'regexp'  => '#^[A-Za-z0-9/_+-]{1,50}\z#',
 					'default' => '',
 				),
 			)
@@ -196,7 +196,7 @@ function parse_request() {
 			FILTER_VALIDATE_REGEXP,
 			array(
 				'options' => array(
-					'regexp'  => '/^[A-Za-z0-9_-]{2,20}$/',
+					'regexp'  => '/^[A-Za-z0-9_-]{2,20}\z/',
 					'default' => '',
 				),
 			)
@@ -783,7 +783,7 @@ function get_country_code_from_locale( $locale ) {
 		return null;
 	}
 
-	preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $locale, $match );
+	preg_match( '/^[a-z]+[-_]([a-z]+)\z/i', $locale, $match );
 
 	$country_code = $match[1] ?? null;
 
