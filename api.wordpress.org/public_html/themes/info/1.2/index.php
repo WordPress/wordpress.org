@@ -14,7 +14,7 @@
  */
 
 // Version 1.2+ only accepts GET requests
-if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'POST' ) {
+if ( isset( $_SERVER['REQUEST_METHOD'] ) && ! in_array( $_SERVER['REQUEST_METHOD'], array( 'GET', 'HEAD' ), true ) ) {
 	$protocol = filter_var(
 		$_SERVER['SERVER_PROTOCOL'] ?? '',
 		FILTER_VALIDATE_REGEXP,
