@@ -9,6 +9,13 @@ namespace Dotorg\Slack\Announce {
 
 require dirname( dirname( __DIR__ ) ) . '/includes/slack/announce/lib.php';
 
+/* phpcs:disable Generic.WhiteSpace.ScopeIndent -- file-scope code here is historically unindented.
+ * phpcs:disable WordPress.Security.NonceVerification
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ * Standalone Slack slash-command handler: WordPress is not loaded, so request data is
+ * never slashed; Slack authenticates with the shared WEBHOOK_TOKEN_* secrets below.
+ */
+
 function get_avatar( $username, $slack_id, $team_id ) {
 	global $wpdb;
 
@@ -29,7 +36,7 @@ function get_avatar( $username, $slack_id, $team_id ) {
 $i = 0;
 // WEBHOOK_TOKEN_1, WEBHOOK_TOKEN_2, etc.
 while ( defined( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . ++$i ) ) {
-	if ( hash_equals( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . $i ), $_POST['token'] ) ) {
+	if ( hash_equals( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . $i ), $_POST['token'] ?? '' ) ) {
 		run( $_POST );
 	}
 }

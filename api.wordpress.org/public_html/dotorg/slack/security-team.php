@@ -10,6 +10,14 @@ namespace Dotorg\Slack\Security_Team {
 
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
+/* phpcs:disable Generic.WhiteSpace.ScopeIndent -- file-scope code here is historically unindented.
+ * phpcs:disable WordPress.Security.NonceVerification
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ * Standalone when requested directly: it loads HyperDB but not WordPress, so nothing is
+ * slashed. (Also included as a library by trac/mentions-handler.php, which skips the
+ * request handling below.) The Trac server authenticates with the shared API_TOKEN secret.
+ */
+
 function slack_api( $method, $content = array() ) {
 	$content['token'] = SLACK_TOKEN;
 	$content = http_build_query( $content );
@@ -76,10 +84,12 @@ function api_call() {
 		exit;
 	}
 
-	echo implode( "\n", $team ) . "\n"; // Trailing newline critical.
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- plain-text list; trailing newline critical.
+	echo implode( "\n", $team ) . "\n";
 	exit;
 }
 
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- substring comparison only.
 if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( $_SERVER['REQUEST_URI'], '/security-team.php?token=' ) ) {
 	api_call();
 }
