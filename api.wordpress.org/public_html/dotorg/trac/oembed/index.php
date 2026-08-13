@@ -16,14 +16,12 @@
  * 
  * Please do not abuse this API, otherwise an API KEY will become required.
  *
- * @package WordPressdotorg\API\Trac
- */
-
-/*
  * This is a public, unauthenticated, stateless oEmbed endpoint: requests are anonymous
  * GET requests from arbitrary sites, so there is no session or nonce to verify.
  *
  * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
  */
 
 include dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
