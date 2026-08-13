@@ -1,4 +1,16 @@
 <?php
+/**
+ * WordPress.org Importers API endpoint.
+ *
+ * @package WordPressdotorg\API\Importers
+ */
+
+/*
+ * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
+ * so request data is never slashed, and there is no session or nonce infrastructure.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ */
 
 // Allow playground access.
 header( 'Access-Control-Allow-Origin: *' );
@@ -6,7 +18,8 @@ header( 'Content-Type: ' . ( defined( 'JSON_RESPONSE' ) ? 'application/json' : '
 
 $version = '';
 if ( isset( $_REQUEST['version'] ) ) { // Introduced in WordPress 4.6.
-	$version = str_replace( '-src', '', $_REQUEST['version'] );
+	$requested_version = filter_var( $_REQUEST['version'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW );
+	$version           = is_string( $requested_version ) ? str_replace( '-src', '', $requested_version ) : '';
 }
 
 if ( version_compare( $version, '5.4-beta', '>=' ) ) {
@@ -21,6 +34,7 @@ if ( version_compare( $version, '5.4-beta', '>=' ) ) {
 }
 
 $response = array( 'importers' => $popular_importers, 'translated' => false );
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON or serialized payload, not HTML.
 echo defined( 'JSON_RESPONSE' ) ? json_encode( $response ) : serialize( $response );
 
 function __( $string ) { return $string; }

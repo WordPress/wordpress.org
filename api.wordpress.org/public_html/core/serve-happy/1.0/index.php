@@ -1,6 +1,13 @@
 <?php
 namespace WordPressdotorg\API\Serve_Happy;
 
+/*
+ * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
+ * so request data is never slashed, and there is no session or nonce infrastructure.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ */
+
 define( 'API_VERSION', '1.0' );
 
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/init.php';
@@ -17,7 +24,17 @@ output_response(
 
 // Output functions
 function bail( $error_code, $error_text, $http_code = 400, $http_code_text = false ) {
-	$server_protocol = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
+	// Only a well-formed protocol version is echoed back into the status header.
+	$server_protocol = filter_var(
+		$_SERVER['SERVER_PROTOCOL'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		array(
+			'options' => array(
+				'regexp'  => '#^HTTP/[0-9]+(\.[0-9]+)?$#',
+				'default' => 'HTTP/1.1',
+			),
+		)
+	);
 	$http_code_texts = [
 		400 => 'Bad Request',
 	];
@@ -39,15 +56,28 @@ function output_response( $data ) {
 
 	header( 'Access-Control-Allow-Origin: *' );
 
-	if ( !empty( $_GET['callback'] ) ) {
+	// A JSONP callback is a JavaScript identifier, optionally namespaced; anything else is discarded.
+	$callback = filter_var(
+		$_GET['callback'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		array(
+			'options' => array(
+				'regexp'  => '/^[a-zA-Z0-9_.]+$/',
+				'default' => '',
+			),
+			'flags'   => FILTER_REQUIRE_SCALAR,
+		)
+	);
+
+	if ( $callback ) {
 		call_headers( 'application/javascript' );
 
-		echo '/**/' .
-			preg_replace('/[^a-zA-Z0-9_.]/', '', $_GET['callback'] ) .
-			'(' . $json_data . ')';
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- validated callback, JSON-encoded payload.
+		echo '/**/' . $callback . '(' . $json_data . ')';
 	} else {
 		call_headers( 'application/json' );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON-encoded payload served as application/json.
 		echo $json_data;
 	}
 }
