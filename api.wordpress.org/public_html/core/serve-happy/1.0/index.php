@@ -26,15 +26,22 @@ output_response(
 	)
 );
 
-// Output functions
-function bail( $error_code, $error_text, $http_code = 400, $http_code_text = false ) {
+/**
+ * Sends an error response and halts.
+ *
+ * @param string      $error_code     Machine-readable error code.
+ * @param string      $error_text     Human-readable error description.
+ * @param int         $http_code      Optional. HTTP status code. Default 400.
+ * @param string|null $http_code_text Optional. HTTP status reason phrase. Default derived from the status code.
+ */
+function bail( $error_code, $error_text, $http_code = 400, $http_code_text = null ) {
 	// Only a well-formed protocol version is echoed back into the status header.
 	$server_protocol = filter_var(
 		$_SERVER['SERVER_PROTOCOL'] ?? '',
 		FILTER_VALIDATE_REGEXP,
 		array(
 			'options' => array(
-				'regexp'  => '#^HTTP/[0-9]+(\.[0-9]+)?$#',
+				'regexp'  => '#^HTTP/[0-9]+(\.[0-9]+)?\z#',
 				'default' => 'HTTP/1.1',
 			),
 		)
@@ -66,7 +73,7 @@ function output_response( $data ) {
 		FILTER_VALIDATE_REGEXP,
 		array(
 			'options' => array(
-				'regexp'  => '/^[a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*$/',
+				'regexp'  => '/^[a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*\z/',
 				'default' => '',
 			),
 			'flags'   => FILTER_REQUIRE_SCALAR,

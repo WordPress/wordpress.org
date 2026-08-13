@@ -15,7 +15,7 @@ require dirname( __FILE__ ) . '/parse.php';
 // A JSONP callback is a plain JavaScript identifier; anything else is discarded.
 $jsonp_filter_args = array(
 	'options' => array(
-		'regexp'  => '/^[a-zA-Z_][a-zA-Z0-9_]*$/',
+		'regexp'  => '/^[a-zA-Z_][a-zA-Z0-9_]*\z/',
 		'default' => '',
 	),
 	'flags'   => FILTER_REQUIRE_SCALAR,
