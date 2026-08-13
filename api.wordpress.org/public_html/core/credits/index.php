@@ -43,7 +43,7 @@ endif;
 
 if ( ! empty( $_GET['version'] ) ) {
 	$version = preg_replace(
-		'/^([.0-9]+).*/',
+		'/^([.0-9]+).*/s',
 		'$1',
 		filter_var(
 			$_GET['version'],
@@ -68,7 +68,7 @@ $requested_locale = isset( $_GET['locale'] ) ? filter_var(
 	FILTER_VALIDATE_REGEXP,
 	array(
 		'options' => array(
-			'regexp'  => '/^[A-Za-z0-9_-]+$/',
+			'regexp'  => '/^[A-Za-z0-9_-]+\z/',
 			'default' => '',
 		),
 	)
