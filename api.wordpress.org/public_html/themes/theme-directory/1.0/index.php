@@ -16,25 +16,32 @@ $_SERVER['REQUEST_URI'] = '/themes/';
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
 function api_send_json( $data ) {
+	$origin = isset( $_SERVER['HTTP_ORIGIN'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ORIGIN'] ) ) : '';
+
 	// Allow cross-domain calls from *.wordpress.org
-	if ( isset( $_SERVER['HTTP_ORIGIN'] ) && preg_match( '!^https?://([^.]+\.)?wordpress\.org/?$!i', $_SERVER['HTTP_ORIGIN'] ) ) {
-		header( 'Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] );
+	if ( $origin && preg_match( '!^https?://([^.]+\.)?wordpress\.org/?$!i', $origin ) ) {
+		header( 'Access-Control-Allow-Origin: ' . $origin );
 		header( 'Access-Control-Allow-Credentials: true' ); // Allow cookies to be used.
 	}
 
-	if ( isset( $_GET['callback'] ) ) {
-		$callback = preg_replace( '/[^a-z0-9_]/i', '', $_GET['callback'] );
-	} else {
-		$callback = false;
-	}
+	/*
+	 * The JSONP callback name doesn't change any state; the actions below
+	 * verify a nonce.
+	 * phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	 */
+	$callback = isset( $_GET['callback'] )
+		? preg_replace( '/[^a-z0-9_]/i', '', sanitize_text_field( wp_unslash( $_GET['callback'] ) ) )
+		: false;
 
 	$json = wp_json_encode( $data );
 
 	if ( $callback ) {
 		header( 'Content-Type:application/javascript; charset=' . get_option( 'blog_charset' ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- validated callback, JSON payload.
 		echo "$callback( $json );";
 	} else {
 		header( 'Content-Type: application/json; charset=' . get_option( 'blog_charset' ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON payload served as application/json.
 		echo $json;
 	}
 	die();
@@ -46,18 +53,22 @@ if ( ! is_user_logged_in() ) {
 	) );
 }
 
-switch ( $_REQUEST['action'] ) {
+$requested_action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
+
+switch ( $requested_action ) {
 	case 'add-favorite':
 	case 'remove-favorite':
-		if ( ! isset( $_REQUEST['theme'] ) || ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'modify-theme-favorite' ) ) {
+		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
+
+		if ( ! isset( $_REQUEST['theme'] ) || ! wp_verify_nonce( $nonce, 'modify-theme-favorite' ) ) {
 			api_send_json( array(
 				'error' => 'bad_request'
 			) );
 		}
 
-		$theme_slug = wp_unslash( $_REQUEST['theme'] );
+		$theme_slug = sanitize_key( wp_unslash( $_REQUEST['theme'] ) );
 
-		if ( 'add-favorite' == $_REQUEST['action'] ) {
+		if ( 'add-favorite' == $requested_action ) {
 			$result = wporg_themes_add_favorite( $theme_slug );
 		} else {
 			$result = wporg_themes_remove_favorite( $theme_slug );
