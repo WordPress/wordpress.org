@@ -62,7 +62,7 @@ function output_response( $data ) {
 		FILTER_VALIDATE_REGEXP,
 		array(
 			'options' => array(
-				'regexp'  => '/^[a-zA-Z0-9_.]+$/',
+				'regexp'  => '/^[a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*$/',
 				'default' => '',
 			),
 			'flags'   => FILTER_REQUIRE_SCALAR,

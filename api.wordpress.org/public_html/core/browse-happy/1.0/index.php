@@ -17,7 +17,7 @@ require dirname( __FILE__ ) . '/parse.php';
 // A JSONP callback is a plain JavaScript identifier; anything else is discarded.
 $jsonp_filter_args = array(
 	'options' => array(
-		'regexp'  => '/^[a-zA-Z0-9_]+$/',
+		'regexp'  => '/^[a-zA-Z_][a-zA-Z0-9_]*$/',
 		'default' => '',
 	),
 	'flags'   => FILTER_REQUIRE_SCALAR,
@@ -40,10 +40,7 @@ $user_agent = filter_var( $_REQUEST['useragent'], FILTER_UNSAFE_RAW, FILTER_FLAG
 $data = browsehappy_parse_user_agent( $user_agent );
 
 // Collect a sample: One out of every 25.
-/*
- * Only used for a prefix comparison, never output or stored.
- * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
- */
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only used for a prefix comparison, never output or stored.
 if ( 0 === strpos( $_SERVER['HTTP_USER_AGENT'] ?? '', 'WordPress/' ) && 1 === rand( 1, 25 ) ) {
 	require( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/includes/hyperdb/bb-10-hyper-db.php' );
 	bh_record_data( $user_agent, $data );
