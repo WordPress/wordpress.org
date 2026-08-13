@@ -66,7 +66,7 @@ function get_security_team( $user_field = 'user_login' ) {
 function api_call() {
 	header( 'Content-type: text/plain' );
 
-	// Confirm it came from the Trac server. An array (`token[]`) would make hash_equals() throw.
+	// Confirm it came from the Trac server.
 	if ( ! is_string( $_GET['token'] ?? null ) || ! hash_equals( API_TOKEN, $_GET['token'] ) ) {
 		exit;
 	}

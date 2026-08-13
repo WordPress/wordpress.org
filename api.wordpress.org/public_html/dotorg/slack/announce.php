@@ -30,7 +30,6 @@ function get_avatar( $username, $slack_id, $team_id ) {
 	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G&%s', $hash, time() );
 }
 
-// An array (`token[]`) would make hash_equals() throw; bail on anything but a string.
 if ( ! is_string( $_POST['token'] ?? null ) ) {
 	return;
 }
