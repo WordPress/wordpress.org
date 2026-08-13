@@ -4,32 +4,28 @@
  *
  * Standalone endpoint: WordPress is not loaded, so request data is never slashed, and
  * Trac authenticates itself with the shared `API_TOKEN` secret; nonces do not exist in
- * server-to-server requests. The file body sits inside a curly-brace namespace without
- * the matching indent, so the scope sniff reads every line as one level short.
+ * server-to-server requests.
  *
- * phpcs:disable Generic.WhiteSpace.ScopeIndent
  * phpcs:disable WordPress.Security.NonceVerification
  * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
  *
  * @package WordPressdotorg\API\Slack
  */
 
-namespace {
-	if ( ! isset( $GLOBALS['wpdb'] ) ) {
-		require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
-	}
-}
+namespace Dotorg\Slack\Security_Team;
 
-namespace Dotorg\Slack\Security_Team {
+if ( ! isset( $GLOBALS['wpdb'] ) ) {
+	require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
+}
 
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
-/* phpcs:disable Generic.WhiteSpace.ScopeIndent -- file-scope code here is historically unindented.
- * phpcs:disable WordPress.Security.NonceVerification
- * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+/*
  * Standalone when requested directly: it loads HyperDB but not WordPress, so nothing is
  * slashed. (Also included as a library by trac/mentions-handler.php, which skips the
  * request handling below.) The Trac server authenticates with the shared API_TOKEN secret.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
  */
 
 function slack_api( $method, $content = array() ) {
@@ -111,6 +107,4 @@ function api_call() {
 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- substring comparison only.
 if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( $_SERVER['REQUEST_URI'], '/security-team.php?token=' ) ) {
 	api_call();
-}
-
 }

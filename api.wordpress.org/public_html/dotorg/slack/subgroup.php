@@ -132,11 +132,7 @@ if ( ! verify_slack_signature( $raw_body ) ) {
 
 // Dispatch: slash command vs. interactivity callback.
 if ( isset( $_POST['payload'] ) ) {
-	/*
-	 * A JSON document covered by the verified signature above; sanitizing it would
-	 * corrupt it. Individual fields are validated where they're read.
-	 * phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON document covered by the verified signature above; fields are validated where read.
 	$payload = json_decode( $_POST['payload'], true );
 	handle_interaction( $payload );
 	exit;
