@@ -25,10 +25,10 @@ function api_send_json( $data ) {
 	}
 
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The callback name doesn't change any state; the actions below verify a nonce.
-	$callback = isset( $_GET['callback'] ) ? preg_replace( '/[^a-z0-9_]/i', '', sanitize_text_field( wp_unslash( $_GET['callback'] ) ) ) : false;
+	$callback = isset( $_GET['callback'] ) ? sanitize_text_field( wp_unslash( $_GET['callback'] ) ) : '';
 
 	// A callback that is not a valid JavaScript identifier falls back to plain JSON.
-	if ( $callback && ! preg_match( '/^[a-z_]/i', $callback ) ) {
+	if ( ! preg_match( '/^[a-z_][a-z0-9_]*$/i', $callback ) ) {
 		$callback = false;
 	}
 

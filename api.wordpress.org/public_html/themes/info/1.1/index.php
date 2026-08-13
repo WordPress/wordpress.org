@@ -14,16 +14,17 @@
 header( 'Access-Control-Allow-Origin: *' );
 
 if ( isset( $_GET['callback'] ) && is_string( $_GET['callback'] ) ) {
-	$callback = preg_replace(
-		'/[^a-z0-9_]/i',
-		'',
-		filter_var( $_GET['callback'], FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW )
-	);
-
 	// A callback that is not a valid JavaScript identifier falls back to plain JSON.
-	if ( $callback && ! preg_match( '/^[a-z_]/i', $callback ) ) {
-		$callback = false;
-	}
+	$callback = filter_var(
+		$_GET['callback'],
+		FILTER_VALIDATE_REGEXP,
+		array(
+			'options' => array(
+				'regexp'  => '/^[a-z_][a-z0-9_]*$/i',
+				'default' => false,
+			),
+		)
+	);
 } else {
 	$callback = false;
 }
