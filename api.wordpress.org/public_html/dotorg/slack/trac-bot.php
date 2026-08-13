@@ -9,6 +9,12 @@ namespace {
 }
 
 namespace Dotorg\Slack\Trac {
+	/*
+	 * Slack authenticates itself with the shared `URL_SECRET__TRAC_BOT` secret passed in the
+	 * outgoing webhook URL, verified below; nonces don't exist in server-to-server webhooks.
+	 *
+	 * phpcs:disable WordPress.Security.NonceVerification
+	 */
 
 	// Slack sends the token as a query arg; anything else is not a webhook request.
 	if ( ! isset( $_GET['token'] ) || ! is_string( $_GET['token'] ) || '' === $_GET['token'] ) {
@@ -20,8 +26,16 @@ namespace Dotorg\Slack\Trac {
 		return;
 	}
 
+	/*
+	 * The Slack channel name, user name, and message timestamp are interpolated into the Trac
+	 * comment and the message permalink below.
+	 */
+	$channel_name  = sanitize_text_field( wp_unslash( $_POST['channel_name'] ?? '' ) );
+	$user_name     = sanitize_text_field( wp_unslash( $_POST['user_name'] ?? '' ) );
+	$msg_timestamp = sanitize_text_field( wp_unslash( $_POST['timestamp'] ?? '' ) );
+
 	// Prevent recursion.
-	if ( $_POST['user_name'] === 'slackbot' ) {
+	if ( 'slackbot' === $user_name ) {
 		return;
 	}
 
@@ -112,7 +126,7 @@ namespace Dotorg\Slack\Trac {
 
 		$slack->send( $parser->get_channel(), $parser->get_thread() );
 
-		if ( $_POST['channel_name'] === 'test' ) {
+		if ( 'test' === $channel_name ) {
 			// Don't post to Trac if we're coming from #test.
 			continue;
 		}
@@ -124,7 +138,8 @@ namespace Dotorg\Slack\Trac {
 
 		$trac_xmlrpc = new \Trac( 'slackbot', SLACKBOT_WPORG_PASSWORD, "https://$trac.trac.wordpress.org/login/xmlrpc" );
 
-		$comment = sprintf( $comment_template, $_POST['channel_name'], $_POST['user_name'], str_replace( '.', '', $_POST['timestamp'] ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- local to this webhook script.
+		$comment = sprintf( $comment_template, $channel_name, $user_name, str_replace( '.', '', $msg_timestamp ) );
 		foreach ( $results['ticket'] as $ticket ) {
 			$ticket_id = is_array( $ticket ) ? $ticket['id'] : $ticket;
 
