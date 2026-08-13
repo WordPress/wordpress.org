@@ -232,4 +232,50 @@ class Current_Release_Resolution_Test extends TestCase {
 		$this->assertSame( self::SERVED_VERSION, $this->served_version() );
 		$this->assertNotFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
 	}
+
+	/**
+	 * A tagged plugin resolves strictly by its stable tag: a release row that
+	 * exists only for the header version is not a fallback.
+	 */
+	public function test_tagged_plugin_ignores_version_release_row(): void {
+		$this->add_release( self::RENAMED_VERSION, self::RENAMED_VERSION, array( 'release_block' => array( 'blocked_at' => time() ) ) );
+
+		$this->assertFalse( API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) ) );
+	}
+
+	/**
+	 * The block's already-served guard compares the resolved release's version,
+	 * not the header: a header renamed to equal the served version cannot make
+	 * a different, unserved release look already-live and refuse the block.
+	 */
+	public function test_block_release_guard_uses_resolved_release_version(): void {
+		update_post_meta( $this->plugin->ID, 'version', self::SERVED_VERSION );
+		$this->add_release( self::HELD_TAG, '2.0' );
+
+		$this->assertTrue( API_Update_Updater::block_release( $this->plugin->post_name, array( 'risk_score' => 9.8 ) ) );
+
+		$release = Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::HELD_TAG );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( $release ) );
+	}
+
+	/**
+	 * The force-release audit note names the release actually unblocked — the
+	 * stable-tag-resolved one — not the plugin's Version header.
+	 */
+	public function test_force_release_audit_log_names_resolved_release(): void {
+		update_post_meta( $this->plugin->ID, 'version', '9.9.9' );
+		$this->add_release( self::HELD_TAG, '7.7.7', array( 'release_block' => array( 'blocked_at' => time() ) ) );
+
+		$this->assertTrue( API_Update_Updater::force_release( $this->plugin->post_name, 'Reviewed.' ) );
+
+		$notes = get_comments(
+			array(
+				'post_id' => $this->plugin->ID,
+				'type'    => 'internal-note',
+			)
+		);
+		$this->assertNotEmpty( $notes );
+		$this->assertStringContainsString( 'version 7.7.7', $notes[0]->comment_content );
+		$this->assertStringNotContainsString( '9.9.9', $notes[0]->comment_content );
+	}
 }

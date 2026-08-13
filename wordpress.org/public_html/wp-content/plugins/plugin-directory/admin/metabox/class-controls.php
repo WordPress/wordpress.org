@@ -65,6 +65,9 @@ class Controls {
 			return;
 		}
 
+		// The held release is resolved from the stable tag, so name it — not the Version header, which may disagree.
+		$release_version = $release['version'];
+
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 		if ( ! $release_delay ) {
 			return;
@@ -82,7 +85,7 @@ class Controls {
 			printf(
 				/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
 				esc_html__( 'Version %1$s is in the release cooldown — it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
-				esc_html( $version ),
+				esc_html( $release_version ),
 				esc_html( human_time_diff( time(), $cooldown_until ) ),
 				esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
 			);
@@ -105,7 +108,7 @@ class Controls {
 						printf(
 							/* translators: %s: version */
 							esc_html__( 'Force-release %s now', 'wporg-plugins' ),
-							esc_html( $version )
+							esc_html( $release_version )
 						);
 						?>
 					</button>

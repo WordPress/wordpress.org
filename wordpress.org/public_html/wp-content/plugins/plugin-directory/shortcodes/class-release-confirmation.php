@@ -498,8 +498,8 @@ class Release_Confirmation {
 			return;
 		}
 
-		$release_time   = $release['confirmations'] ? max( $release['confirmations'] ) : (int) $release['date'];
-		$cooldown_until = $release_time + $release_delay;
+		// Match the enforced window: compute_release_time() is what update_single_plugin() gates on.
+		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + $release_delay;
 
 		if ( $cooldown_until <= time() ) {
 			return;
@@ -511,7 +511,7 @@ class Release_Confirmation {
 				sprintf(
 					/* translators: 1: plugin version, 2: relative time until cooldown expires, 3: delay duration in hours, 4: plugins@wordpress.org link */
 					__( 'Version %1$s will be released to sites in about %2$s. WordPress.org currently delays plugin updates by %3$d hours so moderators and security scanners can review changes before they reach users. If this update fixes a security issue that needs to ship sooner, contact %4$s.', 'wporg-plugins' ),
-					'<code>' . esc_html( $version ) . '</code>',
+					'<code>' . esc_html( $release['version'] ) . '</code>',
 					esc_html( human_time_diff( time(), $cooldown_until ) ),
 					(int) ( $release_delay / HOUR_IN_SECONDS ),
 					'<a href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>'

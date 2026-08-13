@@ -234,17 +234,24 @@ class API_Update_Updater {
 	/**
 	 * The release being served or held for a plugin's current version.
 	 *
-	 * Resolved from the stable tag first — the served package is built from it,
-	 * and a Version header that doesn't match its tag must not orphan the
-	 * release's block or cooldown — falling back to the version for trunk
-	 * releases, which are keyed `trunk@{version}`.
+	 * Tagged plugins resolve strictly by the stable tag — the source the served
+	 * package is built from — so a Version header that disagrees with its tag
+	 * cannot redirect the release's block or cooldown onto a different release.
+	 * Trunk-stable plugins have no tag-named release row (theirs are keyed
+	 * `trunk@{version}`), so they resolve by version; their identity is the
+	 * header itself, so a header rename there is out of this method's reach.
 	 *
 	 * @param \WP_Post $post The plugin post.
 	 * @return array|false The release row from Plugin_Directory::get_release(), or false when none exists.
 	 */
 	public static function get_current_release( $post ) {
-		return Plugin_Directory::get_release( $post, get_post_meta( $post->ID, 'stable_tag', true ) )
-			?: Plugin_Directory::get_release( $post, get_post_meta( $post->ID, 'version', true ) );
+		$stable_tag = get_post_meta( $post->ID, 'stable_tag', true );
+
+		if ( ! $stable_tag || 'trunk' === $stable_tag ) {
+			return Plugin_Directory::get_release( $post, get_post_meta( $post->ID, 'version', true ) );
+		}
+
+		return Plugin_Directory::get_release( $post, $stable_tag );
 	}
 
 	/**
@@ -282,14 +289,13 @@ class API_Update_Updater {
 			return false;
 		}
 
-		$version = get_post_meta( $post->ID, 'version', true );
 		$release = self::get_current_release( $post );
 		if ( ! $release ) {
 			return false;
 		}
 
-		// Already live: a block can't un-ship a served version (compared with the column's varchar(128) truncation).
-		if ( self::get_served_version( $plugin_slug ) === substr( (string) $version, 0, 128 ) ) {
+		// Already live: a block can't un-ship the resolved release once it's the served version (compared with the column's varchar(128) truncation).
+		if ( self::get_served_version( $plugin_slug ) === substr( (string) ( $release['version'] ?? '' ), 0, 128 ) ) {
 			return false;
 		}
 
@@ -473,12 +479,13 @@ class API_Update_Updater {
 			return false;
 		}
 
-		$version = get_post_meta( $post->ID, 'version', true );
 		$release = self::get_current_release( $post );
 
 		if ( ! $release ) {
 			return false;
 		}
+
+		$version = $release['version'];
 
 		// Log only what is actually lifted: a deleted block's only trace, and the cooldown only while it still runs.
 		$lifted = array();
