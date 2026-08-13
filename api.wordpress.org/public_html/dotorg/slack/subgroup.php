@@ -101,7 +101,7 @@ function verify_slack_signature( $body ) {
 		FILTER_VALIDATE_REGEXP,
 		[
 			'options' => [
-				'regexp'  => '/^\d+$/',
+				'regexp'  => '/^\d+\z/',
 				'default' => '',
 			],
 		]
@@ -111,7 +111,7 @@ function verify_slack_signature( $body ) {
 		FILTER_VALIDATE_REGEXP,
 		[
 			'options' => [
-				'regexp'  => '/^v0=[0-9a-f]{64}$/',
+				'regexp'  => '/^v0=[0-9a-f]{64}\z/',
 				'default' => '',
 			],
 		]
@@ -146,7 +146,7 @@ function handle_slash_command() {
 	// Slack channel and user IDs are uppercase alphanumeric, eg. `C0123ABCD` and `U0123ABCD`.
 	$id_options = [
 		'options' => [
-			'regexp'  => '/^[A-Z0-9]+$/',
+			'regexp'  => '/^[A-Z0-9]+\z/',
 			'default' => '',
 		],
 	];
@@ -160,7 +160,7 @@ function handle_slash_command() {
 		FILTER_VALIDATE_REGEXP,
 		[
 			'options' => [
-				'regexp'  => '/^[A-Za-z0-9.]+$/',
+				'regexp'  => '/^[A-Za-z0-9.]+\z/',
 				'default' => '',
 			],
 		]
@@ -743,7 +743,7 @@ function finalize_create( $new_id, $name, $creator, $parent_id, $parent_name, $u
 	// conversations.invite fails the entire batch on one malformed ID. Filter
 	// defensively so a stray character in a config value can't sink everyone.
 	$valid_invitees = array_values( array_filter( $invitees, function ( $id ) {
-		return preg_match( '/^[UWB][A-Z0-9]+$/', $id );
+		return preg_match( '/^[UWB][A-Z0-9]+\z/', $id );
 	} ) );
 	$invitees = $valid_invitees;
 
