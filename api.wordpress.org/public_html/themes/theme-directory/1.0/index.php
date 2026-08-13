@@ -87,11 +87,7 @@ switch ( $requested_action ) {
 		);
 
 		if ( ! $theme_slug ) {
-			api_send_json(
-				array(
-					'error' => 'bad_request',
-				)
-			);
+			api_send_json( array( 'error' => 'bad_request' ) );
 		}
 
 		if ( 'add-favorite' == $requested_action ) {
