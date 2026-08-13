@@ -82,7 +82,7 @@ class Plugin_Scan_Gandalf {
 			$previous_version     = $served->version ?: null;
 		}
 
-		// A blocked release must not be the baseline either way — its content is exactly what the scan has to surface.
+		// A blocked release must not be the baseline either way — dropping it makes the scanner run a full scan.
 		if ( $previous_release_ref && API_Update_Updater::is_release_blocked( Plugin_Directory::get_release( $plugin, $previous_release_ref ) ) ) {
 			$previous_release_ref = null;
 			$previous_version     = null;

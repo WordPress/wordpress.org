@@ -223,8 +223,8 @@ class Gandalf_Scan_Baseline_Test extends TestCase {
 
 	/**
 	 * A baseline candidate that is itself a blocked release is dropped: with
-	 * no served row, the last imported release would be the baseline, but its
-	 * content is exactly what the scan has to surface.
+	 * no served row, the last imported release would be the baseline, but the
+	 * scan must run without one — a full scan — to surface its content.
 	 */
 	public function test_no_baseline_when_last_release_is_blocked(): void {
 		Plugin_Directory::add_release(
