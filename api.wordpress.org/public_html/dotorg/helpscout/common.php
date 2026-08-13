@@ -22,10 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Retrieve the incoming payload, and verify it's from HelpScout.
  */
 function get_request() {
-	global $HTTP_RAW_POST_DATA;
-
 	// HelpScout sends json data in the POST, so grab it from the input directly.
-	$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
+	$raw_post_data = file_get_contents( 'php://input' );
 
 	// Check the signature matches. It's a base64 encoded HMAC, allowing for the URL-safe alphabet.
 	$signature = (string) filter_var(
@@ -33,19 +31,18 @@ function get_request() {
 		FILTER_VALIDATE_REGEXP,
 		[
 			'options' => [
-				'regexp'  => '!^[A-Za-z0-9+/=_-]+$!',
+				'regexp'  => '!^[A-Za-z0-9+/=_-]+\z!',
 				'default' => '',
 			],
 		]
 	);
 
-	// phpcs:ignore PHPCompatibility.Variables.RemovedPredefinedGlobalVariables -- Local variable named after the old global, assigned from php://input above.
-	if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $signature ) ) {
+	if ( ! is_from_helpscout( $raw_post_data, $signature ) ) {
 		exit;
 	}
 
 	// get the info from HS.
-	return json_decode( $HTTP_RAW_POST_DATA );
+	return json_decode( $raw_post_data );
 }
 
 // function to verify signature from HelpScout
