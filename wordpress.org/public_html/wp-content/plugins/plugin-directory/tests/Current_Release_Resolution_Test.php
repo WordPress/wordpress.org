@@ -370,6 +370,37 @@ class Current_Release_Resolution_Test extends TestCase {
 	}
 
 	/**
+	 * Without a version_date, the release clock anchors on the release row's own
+	 * date: post_modified would slide on unrelated post edits and re-arm cooldown
+	 * displays for an already-served release.
+	 */
+	public function test_release_time_anchors_on_release_date_without_version_date(): void {
+		$release = array(
+			'date'                   => time() - WEEK_IN_SECONDS,
+			'confirmations_required' => 0,
+			'confirmations'          => array(),
+		);
+
+		$this->assertSame( $release['date'], API_Update_Updater::compute_release_time( get_post( $this->plugin->ID ), $release ) );
+	}
+
+	/**
+	 * A version_date on the plugin outranks the release row's date as the clock anchor.
+	 */
+	public function test_release_time_prefers_version_date(): void {
+		$version_time = time() - DAY_IN_SECONDS;
+		update_post_meta( $this->plugin->ID, 'version_date', gmdate( 'Y-m-d H:i:s', $version_time ) );
+
+		$release = array(
+			'date'                   => time() - WEEK_IN_SECONDS,
+			'confirmations_required' => 0,
+			'confirmations'          => array(),
+		);
+
+		$this->assertSame( $version_time, API_Update_Updater::compute_release_time( get_post( $this->plugin->ID ), $release ) );
+	}
+
+	/**
 	 * The force-release audit note names the release actually unblocked — the
 	 * stable-tag-resolved one — not the plugin's Version header.
 	 */

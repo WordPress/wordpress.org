@@ -441,16 +441,24 @@ class API_Update_Updater {
 	/**
 	 * Determine the release timestamp for a plugin version.
 	 *
-	 * Falls back through the commit timestamp on the plugin post, and is replaced by the
-	 * latest committer-confirmation time when release confirmations are required (the
-	 * version isn't really "released" until the last confirmation lands).
+	 * Anchored on the version's commit time (`version_date`), falling back to the
+	 * release row's own date — unlike post_modified, neither slides on unrelated
+	 * post edits — and replaced by the latest committer-confirmation time when
+	 * release confirmations are required (the version isn't really "released"
+	 * until the last confirmation lands).
 	 *
 	 * @param \WP_Post   $post    The plugin post.
 	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
 	 * @return int Unix timestamp.
 	 */
 	public static function compute_release_time( $post, $release ) {
-		$release_time = strtotime( $post->version_date ? $post->version_date : $post->post_modified );
+		if ( $post->version_date ) {
+			$release_time = strtotime( $post->version_date );
+		} elseif ( ! empty( $release['date'] ) ) {
+			$release_time = (int) $release['date'];
+		} else {
+			$release_time = strtotime( $post->post_modified );
+		}
 
 		if (
 			$release &&
