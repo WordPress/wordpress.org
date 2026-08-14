@@ -7,6 +7,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WP_Error;
 use WP_Http;
@@ -73,6 +74,19 @@ class Plugin_Scan_Gandalf {
 		$previous_release_ref = get_post_meta( $plugin->ID, 'last_stable_tag', true ) ?: null;
 		$previous_version     = get_post_meta( $plugin->ID, 'last_version', true ) ?: null;
 		$previous_zip_url     = null;
+
+		// A blocked or cooling-down release never reaches `update_source`, so diffing against the served release keeps a re-tagged payload from becoming its own baseline.
+		$served = API_Update_Updater::get_served_release( $plugin->post_name );
+		if ( $served && substr( $version, 0, 128 ) !== $served->version ) {
+			$previous_release_ref = $served->stable_tag ?: null;
+			$previous_version     = $served->version ?: null;
+		}
+
+		// A blocked release must not be the baseline either way — dropping it makes the scanner run a full scan.
+		if ( $previous_release_ref && API_Update_Updater::is_release_blocked( Plugin_Directory::get_release( $plugin, $previous_release_ref ) ) ) {
+			$previous_release_ref = null;
+			$previous_version     = null;
+		}
 
 		if ( $previous_release_ref && $previous_release_ref !== $release_ref && 'trunk' !== $previous_release_ref ) {
 			$previous_zip_url = Template::download_link( $plugin, $previous_release_ref );

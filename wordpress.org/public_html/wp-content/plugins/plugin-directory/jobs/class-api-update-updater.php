@@ -217,12 +217,12 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * The `update_source` row identifying what is currently served.
+	 * The release currently served from `update_source`.
 	 *
 	 * @param string $plugin_slug The plugin slug.
-	 * @return object|null The row's version and stable_tag, or null when the plugin isn't in `update_source`.
+	 * @return object|null Row with `version` and `stable_tag`, or null when the plugin isn't in `update_source`.
 	 */
-	public static function get_served_row( $plugin_slug ) {
+	public static function get_served_release( $plugin_slug ) {
 		global $wpdb;
 
 		return $wpdb->get_row(
@@ -326,7 +326,7 @@ class API_Update_Updater {
 		}
 
 		// Already live: a block can't un-ship a served release — compared by identity (the ref for tagged rows, the version for ref-less trunk-stable rows), with the columns' varchar(128) truncation.
-		$served = self::get_served_row( $plugin_slug );
+		$served = self::get_served_release( $plugin_slug );
 		if ( $served ) {
 			if ( $served->stable_tag && 'trunk' !== $served->stable_tag ) {
 				$is_served = substr( (string) $release['tag'], 0, 128 ) === (string) $served->stable_tag;
