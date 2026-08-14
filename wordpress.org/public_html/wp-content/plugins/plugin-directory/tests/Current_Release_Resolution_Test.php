@@ -472,6 +472,119 @@ class Current_Release_Resolution_Test extends TestCase {
 	}
 
 	/**
+	 * Empty version and stable_tag metas resolve no release and must not make
+	 * the row write error or defer.
+	 */
+	public function test_empty_metas_resolve_false_and_still_update(): void {
+		update_post_meta( $this->plugin->ID, 'version', '' );
+		update_post_meta( $this->plugin->ID, 'stable_tag', '' );
+		$this->add_release( '1.0', '1.0', array( 'date' => time() - WEEK_IN_SECONDS ) );
+
+		$this->assertFalse( API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) ) );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+		$this->assertFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * A legacy plugin without releases meta gets it prefilled from the tags
+	 * meta, resolves by stable tag, and its old release doesn't defer the row.
+	 */
+	public function test_prefilled_legacy_releases_resolve_by_stable_tag(): void {
+		update_post_meta( $this->plugin->ID, 'version', '1.0' );
+		update_post_meta( $this->plugin->ID, 'stable_tag', '1.0' );
+		delete_post_meta( $this->plugin->ID, 'releases' );
+		update_post_meta(
+			$this->plugin->ID,
+			'tags',
+			array(
+				'1.0' => array(
+					'tag'    => '1.0',
+					'date'   => '2020-01-01',
+					'author' => 'testuser',
+				),
+			)
+		);
+
+		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
+		$this->assertSame( '1.0', $release['tag'] );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+		$this->assertSame( '1.0', $this->served_version() );
+		$this->assertFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * An old release whose cooldown window has long elapsed doesn't defer the
+	 * row write: resolving more releases than before must not re-hold legacy
+	 * version bumps.
+	 */
+	public function test_elapsed_cooldown_on_old_release_does_not_defer(): void {
+		$this->add_release( self::HELD_TAG, self::RENAMED_VERSION, array( 'date' => time() - WEEK_IN_SECONDS ) );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$this->assertSame( self::RENAMED_VERSION, $this->served_version() );
+		$this->assertFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * Legacy rows can carry integer-typed tags (written before the string
+	 * cast); resolution and the strict add_release() merge handle them.
+	 */
+	public function test_legacy_integer_tag_resolves_and_merges_strictly(): void {
+		update_post_meta( $this->plugin->ID, 'version', '2.0' );
+		update_post_meta( $this->plugin->ID, 'stable_tag', '2' );
+		update_post_meta(
+			$this->plugin->ID,
+			'releases',
+			array(
+				array(
+					'date'                     => time() - WEEK_IN_SECONDS,
+					'tag'                      => 2,
+					'version'                  => '2.0',
+					'zips_built'               => true,
+					'zips_built_from_revision' => 0,
+					'confirmations'            => array(),
+					'confirmed'                => true,
+					'confirmations_required'   => 0,
+					'committer'                => array(),
+					'revision'                 => array(),
+					'release_delay'            => 0,
+				),
+			)
+		);
+
+		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
+		$this->assertSame( '2.0', $release['version'] );
+
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'           => '2',
+				'release_block' => array( 'blocked_at' => time() ),
+			)
+		);
+
+		$releases = Plugin_Directory::get_releases( $this->plugin );
+		$this->assertCount( 1, $releases );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( reset( $releases ) ) );
+	}
+
+	/**
+	 * A tag that isn't the version string (e.g. `v2.0`) resolves by the stable
+	 * tag; the old version-keyed lookup couldn't find these at all.
+	 */
+	public function test_non_version_tag_name_resolves(): void {
+		update_post_meta( $this->plugin->ID, 'version', '2.0' );
+		update_post_meta( $this->plugin->ID, 'stable_tag', 'v2.0' );
+		$this->add_release( 'v2.0', '2.0' );
+
+		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
+		$this->assertSame( 'v2.0', $release['tag'] );
+	}
+
+	/**
 	 * The force-release audit note names the release actually unblocked — the
 	 * stable-tag-resolved one — not the plugin's Version header.
 	 */
