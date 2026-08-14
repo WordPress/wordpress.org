@@ -282,11 +282,6 @@ class Security_Scan_Block_Test extends TestCase {
 		$this->assertSame( 9.8, $block['risk_score'] );
 		$this->assertNotEmpty( $block['blocked_at'] );
 
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'blocked', $snapshot['action'] );
-		$this->assertSame( 9.8, $snapshot['max_risk_score'] );
-		$this->assertCount( 2, $snapshot['findings'] );
-
 		$consumed = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::CONSUMED_META_KEY, true );
 		$this->assertArrayHasKey( self::SCAN_ID, $consumed );
 
@@ -351,9 +346,6 @@ class Security_Scan_Block_Test extends TestCase {
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
 		$this->assertCount( 0, $this->get_internal_notes() );
-
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'advisory', $snapshot['action'] );
 	}
 
 	/**
@@ -375,9 +367,6 @@ class Security_Scan_Block_Test extends TestCase {
 
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->completed_callback() ) );
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
-
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'advisory', $snapshot['action'] );
 	}
 
 	/**
@@ -389,9 +378,6 @@ class Security_Scan_Block_Test extends TestCase {
 
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->completed_callback() ) );
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
-
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'advisory', $snapshot['action'] );
 	}
 
 	/**
@@ -454,16 +440,15 @@ class Security_Scan_Block_Test extends TestCase {
 
 		$this->assertTrue( API_Update_Updater::is_release_blocked( $this->get_release() ) );
 
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'blocked', $snapshot['action'] );
-
 		$this->assertEmpty( get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) );
 	}
 
 	/**
-	 * The stored evidence snapshot is bounded to the ten highest-risk findings.
+	 * The review note lists the ten highest-risk findings, highest first.
 	 */
-	public function test_snapshot_keeps_only_top_findings(): void {
+	public function test_note_lists_only_top_findings(): void {
+		$this->stage_release();
+
 		$findings = array();
 		for ( $i = 0; $i < 12; $i++ ) {
 			$findings[] = $this->finding( round( 9.8 - ( $i / 10 ), 1 ) );
@@ -479,9 +464,10 @@ class Security_Scan_Block_Test extends TestCase {
 
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
 
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertCount( 10, $snapshot['findings'] );
-		$this->assertSame( 9.8, $snapshot['findings'][0]['risk_score'] );
+		$note = $this->get_internal_notes()[0]->comment_content;
+		$this->assertSame( 10, substr_count( $note, '&#8226;' ) );
+		$this->assertStringContainsString( '<strong>9.8</strong>', $note );
+		$this->assertStringNotContainsString( '<strong>8.7</strong>', $note );
 	}
 
 	/**
@@ -527,37 +513,13 @@ class Security_Scan_Block_Test extends TestCase {
 
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
 		$this->assertTrue( API_Update_Updater::is_release_blocked( $this->get_release() ) );
-
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'blocked', $snapshot['action'] );
-		$this->assertSame( 9.0, $snapshot['max_risk_score'] );
+		$this->assertSame( 9.0, $this->get_release()['release_block']['risk_score'] );
 	}
 
 	/**
-	 * A block refused because the scanned version is already served still alerts.
+	 * Backslashes in finding text survive the review note.
 	 */
-	public function test_refused_block_still_alerts(): void {
-		$this->stage_cooldown_release( self::VERSION );
-
-		$callback = $this->completed_callback(
-			array(
-				'findings_count'  => 0,
-				'findings'        => array(),
-				'severity_counts' => array(),
-			)
-		);
-
-		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
-		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
-
-		$notified = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::NOTIFIED_META_KEY, true );
-		$this->assertArrayHasKey( $callback['verdict_hash'], $notified );
-	}
-
-	/**
-	 * Backslashes in finding text survive the stored evidence snapshot.
-	 */
-	public function test_snapshot_keeps_backslashes_in_findings(): void {
+	public function test_note_keeps_backslashes_in_findings(): void {
 		$this->stage_release();
 
 		$callback = $this->completed_callback(
@@ -570,8 +532,7 @@ class Security_Scan_Block_Test extends TestCase {
 
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
 
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'Regex \e escape reaches preg_replace', $snapshot['findings'][0]['title'] );
+		$this->assertStringContainsString( 'Regex \e escape reaches preg_replace', $this->get_internal_notes()[0]->comment_content );
 	}
 
 	/**

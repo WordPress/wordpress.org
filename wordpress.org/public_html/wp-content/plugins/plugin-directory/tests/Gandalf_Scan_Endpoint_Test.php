@@ -209,11 +209,6 @@ class Gandalf_Scan_Endpoint_Test extends TestCase {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( array( 'success' => true ), $response->get_data() );
 
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'advisory', $snapshot['action'] );
-		$this->assertSame( 5.5, $snapshot['max_risk_score'] );
-		$this->assertCount( 3, $snapshot['findings'] );
-
 		$this->assertEmpty( get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) );
 	}
 
@@ -247,9 +242,6 @@ class Gandalf_Scan_Endpoint_Test extends TestCase {
 
 		$release = Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::VERSION );
 		$this->assertTrue( API_Update_Updater::is_release_blocked( $release ) );
-
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( 'blocked', $snapshot['action'] );
 	}
 
 	/**
@@ -419,9 +411,7 @@ class Gandalf_Scan_Endpoint_Test extends TestCase {
 		);
 
 		$this->assertSame( 200, $response->get_status() );
-
-		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
-		$this->assertSame( array(), $snapshot['findings'] );
+		$this->assertEmpty( get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) );
 	}
 
 	/**

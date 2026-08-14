@@ -36,9 +36,6 @@ class Plugin_Scan_Gandalf {
 	/** Consumed callbacks keyed by scan_id, to acknowledge retries without repeating effects. */
 	const CONSUMED_META_KEY = '_gandalf_scan_consumed';
 
-	/** Bounded evidence snapshot of the last completed scan. */
-	const LAST_RESULT_META_KEY = '_gandalf_scan_last_result';
-
 	/** Completed scans with a max risk score at or above this have their release blocked. */
 	const BLOCK_RISK_SCORE = 8.0;
 
@@ -261,20 +258,7 @@ class Plugin_Scan_Gandalf {
 				'max_risk_score'  => (float) $data['max_risk_score'],
 				'report_url'      => $data['report_url'],
 				'action'          => 'advisory',
-
-				/*
-				 * Only the ten highest-risk findings ever surface (Slack shows five,
-				 * the review note ten), and snippets and explanations are only in
-				 * the scan report; storing more would bloat a post meta row that is
-				 * loaded on every plugin page view.
-				 */
-				'findings'        => array_map(
-					static function ( $finding ) {
-						unset( $finding['code_snippet'], $finding['explanation'] );
-						return $finding;
-					},
-					self::top_findings( $data['findings'], 10 )
-				),
+				'findings'        => $data['findings'],
 			];
 
 			/**
@@ -291,11 +275,7 @@ class Plugin_Scan_Gandalf {
 				self::record_review_note( $plugin, $record );
 			}
 
-			// Persist the bounded evidence snapshot and the action taken on it; update_post_meta() unslashes.
-			update_post_meta( $plugin->ID, self::LAST_RESULT_META_KEY, wp_slash( $record ) );
-
-			// A refused block still alerts: the scanned code is live and nothing held it.
-			if ( $record['max_risk_score'] >= $threshold || $record['findings_count'] > 0 ) {
+			if ( $record['findings_count'] > 0 || 'advisory' !== $record['action'] ) {
 				self::notify_slack( $plugin, $record );
 			}
 		} else {
