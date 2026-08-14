@@ -187,7 +187,7 @@ class Release_Confirmation {
 					implode( ', ', $data['committer'] ),
 				),
 				self::get_actions( $plugin, $data ),
-				self::get_approval_text( $plugin, $data, $current_release ) .
+				self::get_approval_text( $plugin, $data, $current_release ) . // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped when built.
 					self::get_rollout_strategy( $plugin, $data )
 			);
 		}
@@ -201,7 +201,15 @@ class Release_Confirmation {
 		</style>';
 	}
 
-	static function get_approval_text( $plugin, $data, $current_release = null ) {
+	/**
+	 * The confirmation/cooldown status text for a release row.
+	 *
+	 * @param \WP_Post   $plugin          The plugin post object.
+	 * @param array      $data            The release row from Plugin_Directory::get_releases().
+	 * @param array|null $current_release Optional. The already-resolved current release, to save re-resolving per row.
+	 * @return string The release approval text, filtered via `wporg_plugins_release_approval_text`.
+	 */
+	public static function get_approval_text( $plugin, $data, $current_release = null ) {
 		ob_start();
 
 		if ( ! $data['confirmations_required'] ) {
