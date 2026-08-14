@@ -457,6 +457,21 @@ class Current_Release_Resolution_Test extends TestCase {
 	}
 
 	/**
+	 * The listing's cooldown line follows the same resolution as the rest of the
+	 * UI: with the stable tag flipped to trunk at an unchanged version, the
+	 * fallback-resolved release is the current one and keeps its line.
+	 */
+	public function test_cooldown_line_follows_fallback_resolution(): void {
+		update_post_meta( $this->plugin->ID, 'version', self::RENAMED_VERSION );
+		update_post_meta( $this->plugin->ID, 'stable_tag', 'trunk' );
+		$this->add_release( self::RENAMED_VERSION, self::RENAMED_VERSION );
+
+		$releases = array_column( Plugin_Directory::get_releases( $this->plugin ), null, 'tag' );
+
+		$this->assertStringContainsString( 'Will be served', Release_Confirmation::get_approval_text( get_post( $this->plugin->ID ), $releases[ self::RENAMED_VERSION ] ) );
+	}
+
+	/**
 	 * The force-release audit note names the release actually unblocked — the
 	 * stable-tag-resolved one — not the plugin's Version header.
 	 */

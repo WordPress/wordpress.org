@@ -124,6 +124,9 @@ class Release_Confirmation {
 	static function single_plugin( $plugin ) {
 		$releases = Plugin_Directory::get_releases( $plugin );
 
+		// Resolved once for the whole listing; each row's cooldown line compares against it.
+		$current_release = API_Update_Updater::get_current_release( $plugin );
+
 		echo '<div class="wp-block-table is-style-stripes">
 		<table class="plugin-releases-listing">
 		<colgroup>
@@ -184,7 +187,7 @@ class Release_Confirmation {
 					implode( ', ', $data['committer'] ),
 				),
 				self::get_actions( $plugin, $data ),
-				self::get_approval_text( $plugin, $data ) .
+				self::get_approval_text( $plugin, $data, $current_release ) .
 					self::get_rollout_strategy( $plugin, $data )
 			);
 		}
@@ -198,7 +201,7 @@ class Release_Confirmation {
 		</style>';
 	}
 
-	static function get_approval_text( $plugin, $data ) {
+	static function get_approval_text( $plugin, $data, $current_release = null ) {
 		ob_start();
 
 		if ( ! $data['confirmations_required'] ) {
@@ -266,7 +269,7 @@ class Release_Confirmation {
 			);
 		}
 
-		self::render_cooldown_status( $plugin, $data );
+		self::render_cooldown_status( $plugin, $data, $current_release );
 
 		echo '</div>';
 
@@ -290,10 +293,11 @@ class Release_Confirmation {
 	 * confirmation/processing, rows other than the current release (superseded rows are
 	 * never served), or where the cooldown window has elapsed.
 	 *
-	 * @param \WP_Post $plugin The plugin post object.
-	 * @param array    $data   The release row from Plugin_Directory::get_releases().
+	 * @param \WP_Post   $plugin          The plugin post object.
+	 * @param array      $data            The release row from Plugin_Directory::get_releases().
+	 * @param array|null $current_release The already-resolved current release, or null to resolve here.
 	 */
-	protected static function render_cooldown_status( $plugin, $data ) {
+	protected static function render_cooldown_status( $plugin, $data, $current_release = null ) {
 		$release_delay = (int) ( $data['release_delay'] ?? 0 );
 		if ( ! $release_delay ) {
 			return;
@@ -309,7 +313,8 @@ class Release_Confirmation {
 		}
 
 		// Only the current release can be pending; superseded rows are never served.
-		if ( (string) ( $data['tag'] ?? '' ) !== (string) API_Update_Updater::get_current_release_tag( $plugin ) ) {
+		$current_release = $current_release ?? API_Update_Updater::get_current_release( $plugin );
+		if ( ! $current_release || (string) ( $data['tag'] ?? '' ) !== (string) $current_release['tag'] ) {
 			return;
 		}
 
