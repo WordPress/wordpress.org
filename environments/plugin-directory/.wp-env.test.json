@@ -12,6 +12,7 @@
 		"afterStart": "bash plugin-directory/bin/after-start-test.sh"
 	},
 	"config": {
-		"PLUGINS_TABLE_PREFIX": "wp_"
+		"PLUGINS_TABLE_PREFIX": "wp_",
+		"WP_GANDALF_SCAN_SHARED_SECRET": "local-dev-secret"
 	}
 }

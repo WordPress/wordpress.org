@@ -331,8 +331,8 @@ class Plugin_Scan_Gandalf {
 	/**
 	 * Block the scanned release, once the verdict is known to still apply to it.
 	 *
-	 * A verdict for a version that is no longer the plugin's current release,
-	 * or that is already being served, can't un-ship anything — blocking is
+	 * A verdict for a release that is no longer the plugin's current one, or
+	 * that is already being served, can't un-ship anything — blocking is
 	 * refused and the result stays advisory.
 	 *
 	 * @param \WP_Post $plugin The plugin post.
@@ -340,8 +340,11 @@ class Plugin_Scan_Gandalf {
 	 * @return bool Whether the release was blocked.
 	 */
 	protected static function block_release( $plugin, $record ) {
-		// A newer release landed since this scan was dispatched; the scanned version is moot.
-		if ( (string) get_post_meta( $plugin->ID, 'version', true ) !== (string) $record['version'] ) {
+		// Whether the verdict still applies turns on the scanned tag, never the version header an author can rename inside it.
+		$current     = API_Update_Updater::get_current_release( $plugin );
+		$scanned_tag = 'trunk' === $record['release_ref'] ? 'trunk@' . $record['version'] : $record['release_ref'];
+
+		if ( ! $current || (string) ( $current['tag'] ?? '' ) !== (string) $scanned_tag ) {
 			return false;
 		}
 

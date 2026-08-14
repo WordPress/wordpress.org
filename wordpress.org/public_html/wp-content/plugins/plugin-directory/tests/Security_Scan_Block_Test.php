@@ -370,14 +370,39 @@ class Security_Scan_Block_Test extends TestCase {
 	}
 
 	/**
-	 * A verdict for a version superseded by a newer release is moot.
+	 * A verdict for a release superseded by a newer one is moot.
 	 */
-	public function test_superseded_version_is_not_blocked(): void {
+	public function test_superseded_release_is_not_blocked(): void {
 		$this->stage_release();
+
+		$releases   = get_post_meta( $this->plugin->ID, 'releases', true );
+		$releases[] = array_merge(
+			$releases[0],
+			array(
+				'tag'     => '1.5.0',
+				'version' => '1.5.0',
+			)
+		);
+		update_post_meta( $this->plugin->ID, 'releases', $releases );
+		update_post_meta( $this->plugin->ID, 'stable_tag', '1.5.0' );
 		update_post_meta( $this->plugin->ID, 'version', '1.5.0' );
 
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->completed_callback() ) );
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
+	}
+
+	/**
+	 * Renaming the version header inside the scanned tag does not dodge the block.
+	 *
+	 * The header is author-controlled and the hold follows the stable tag, so a
+	 * rename must not read as a release the verdict no longer applies to.
+	 */
+	public function test_renamed_version_header_still_blocks(): void {
+		$this->stage_release();
+		update_post_meta( $this->plugin->ID, 'version', '1.5.0' );
+
+		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->completed_callback() ) );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( $this->get_release() ) );
 	}
 
 	/**
@@ -514,6 +539,29 @@ class Security_Scan_Block_Test extends TestCase {
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
 		$this->assertTrue( API_Update_Updater::is_release_blocked( $this->get_release() ) );
 		$this->assertSame( 9.0, $this->get_release()['release_block']['risk_score'] );
+	}
+
+	/**
+	 * A verdict is refused when the stable tag now resolves to another release.
+	 *
+	 * The hold lands on whatever the stable tag points at, so a moved tag can
+	 * carry the scanned version while naming a release the scan never saw.
+	 */
+	public function test_moved_stable_tag_is_not_blocked(): void {
+		$this->stage_release();
+
+		$releases   = get_post_meta( $this->plugin->ID, 'releases', true );
+		$hotfix     = $releases[0];
+		$hotfix     = array_merge( $hotfix, array( 'tag' => self::VERSION . '-hotfix' ) );
+		$releases[] = $hotfix;
+		update_post_meta( $this->plugin->ID, 'releases', $releases );
+		update_post_meta( $this->plugin->ID, 'stable_tag', self::VERSION . '-hotfix' );
+
+		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->completed_callback() ) );
+
+		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
+		$this->assertFalse( API_Update_Updater::is_release_blocked( Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::VERSION . '-hotfix' ) ) );
+		$this->assertCount( 0, $this->get_internal_notes() );
 	}
 
 	/**
