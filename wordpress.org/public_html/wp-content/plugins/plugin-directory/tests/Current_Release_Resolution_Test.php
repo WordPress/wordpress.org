@@ -132,7 +132,7 @@ class Current_Release_Resolution_Test extends TestCase {
 	 * @return string The served version.
 	 */
 	private function served_version(): string {
-		return API_Update_Updater::get_served_version( $this->plugin->post_name );
+		return (string) ( API_Update_Updater::get_served_row( $this->plugin->post_name )->version ?? '' );
 	}
 
 	/**

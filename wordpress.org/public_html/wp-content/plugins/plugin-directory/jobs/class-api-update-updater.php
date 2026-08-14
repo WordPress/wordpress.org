@@ -234,16 +234,6 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * The version currently served from `update_source`.
-	 *
-	 * @param string $plugin_slug The plugin slug.
-	 * @return string The served version, or '' when the plugin isn't in `update_source`.
-	 */
-	public static function get_served_version( $plugin_slug ) {
-		return (string) ( self::get_served_row( $plugin_slug )->version ?? '' );
-	}
-
-	/**
 	 * The release being served or held for a plugin's current version.
 	 *
 	 * Resolved strictly by the stable tag — the source of the served package —

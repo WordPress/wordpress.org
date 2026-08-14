@@ -290,7 +290,7 @@ class Update_Source_Hold_Test extends TestCase {
 		$this->assertSame( 'High-risk release.', $block['reason'] );
 		$this->assertNotEmpty( $block['blocked_at'] );
 
-		$this->assertSame( self::SERVED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+		$this->assertSame( self::SERVED_VERSION, (string) ( $this->get_row()->version ?? '' ) );
 		$this->assertFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
 	}
 
@@ -313,7 +313,7 @@ class Update_Source_Hold_Test extends TestCase {
 
 		API_Update_Updater::update_single_plugin( $this->plugin->post_name );
 
-		$this->assertSame( self::SERVED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+		$this->assertSame( self::SERVED_VERSION, (string) ( $this->get_row()->version ?? '' ) );
 	}
 
 	/**
@@ -334,7 +334,7 @@ class Update_Source_Hold_Test extends TestCase {
 
 		API_Update_Updater::update_single_plugin( $this->plugin->post_name );
 
-		$this->assertSame( '', API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+		$this->assertSame( '', (string) ( $this->get_row()->version ?? '' ) );
 	}
 
 	/**
@@ -453,7 +453,7 @@ class Update_Source_Hold_Test extends TestCase {
 		$this->assertTrue( API_Update_Updater::force_release( $this->plugin->post_name, 'Reviewed; false positive.' ) );
 
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
-		$this->assertSame( self::STAGED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+		$this->assertSame( self::STAGED_VERSION, (string) ( $this->get_row()->version ?? '' ) );
 
 		$audit_log = $this->get_audit_log();
 		$this->assertStringContainsString( 'lifting the release block', $audit_log );
@@ -471,7 +471,7 @@ class Update_Source_Hold_Test extends TestCase {
 		$this->assertTrue( API_Update_Updater::force_release( $this->plugin->post_name, 'Reviewed; false positive.' ) );
 
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
-		$this->assertSame( self::STAGED_VERSION, API_Update_Updater::get_served_version( $this->plugin->post_name ) );
+		$this->assertSame( self::STAGED_VERSION, (string) ( $this->get_row()->version ?? '' ) );
 
 		$this->assertStringContainsString(
 			'lifting the release block and bypassing the 24-hour release cooldown',
