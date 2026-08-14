@@ -287,7 +287,8 @@ class Release_Confirmation {
 	 * Render a single line describing the cooldown state of a release: pending serve time.
 	 * Skipped for releases without a cooldown delay (feature off at release creation, or
 	 * force-released), discarded releases, releases that haven't moved past
-	 * confirmation/processing, or where the cooldown window has elapsed.
+	 * confirmation/processing, rows other than the current release (superseded rows are
+	 * never served), or where the cooldown window has elapsed.
 	 *
 	 * @param \WP_Post $plugin The plugin post object.
 	 * @param array    $data   The release row from Plugin_Directory::get_releases().
@@ -304,6 +305,12 @@ class Release_Confirmation {
 
 		// Skip when the release hasn't moved past the confirmation/processing stage yet.
 		if ( $data['confirmations_required'] && ( ! $data['confirmed'] || ! $data['zips_built'] ) ) {
+			return;
+		}
+
+		// Only the current release can be pending; superseded rows are never served.
+		$current = API_Update_Updater::get_current_release( $plugin );
+		if ( ! $current || (string) $current['tag'] !== (string) ( $data['tag'] ?? '' ) ) {
 			return;
 		}
 

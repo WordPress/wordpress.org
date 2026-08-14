@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation;
 
 /**
  * Tests that a Version header that doesn't match its tag cannot orphan the
@@ -398,6 +399,23 @@ class Current_Release_Resolution_Test extends TestCase {
 		);
 
 		$this->assertSame( $version_time, API_Update_Updater::compute_release_time( get_post( $this->plugin->ID ), $release ) );
+	}
+
+	/**
+	 * The releases listing shows the cooldown line only for the current release:
+	 * a superseded row is never served, so the plugin-wide version_date anchor
+	 * must not re-display a pending serve time on old rows after a new commit.
+	 */
+	public function test_cooldown_line_only_for_current_release(): void {
+		update_post_meta( $this->plugin->ID, 'version_date', gmdate( 'Y-m-d H:i:s' ) );
+		$this->add_release( self::HELD_TAG, self::RENAMED_VERSION );
+		$this->add_release( '1.0', '1.0', array( 'date' => time() - WEEK_IN_SECONDS ) );
+
+		$releases = array_column( Plugin_Directory::get_releases( $this->plugin ), null, 'tag' );
+		$plugin   = get_post( $this->plugin->ID );
+
+		$this->assertStringContainsString( 'Will be served', Release_Confirmation::get_approval_text( $plugin, $releases[ self::HELD_TAG ] ) );
+		$this->assertStringNotContainsString( 'Will be served', Release_Confirmation::get_approval_text( $plugin, $releases['1.0'] ) );
 	}
 
 	/**
