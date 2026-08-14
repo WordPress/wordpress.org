@@ -235,13 +235,51 @@ class Current_Release_Resolution_Test extends TestCase {
 	}
 
 	/**
-	 * A tagged plugin resolves strictly by its stable tag: a release row that
-	 * exists only for the header version is not a fallback.
+	 * A release row for the header version is a fallback only: it resolves when
+	 * the stable tag has no row (the gates would otherwise fail open), and never
+	 * overrides the stable tag's own release.
 	 */
-	public function test_tagged_plugin_ignores_version_release_row(): void {
+	public function test_version_release_row_is_fallback_only(): void {
 		$this->add_release( self::RENAMED_VERSION, self::RENAMED_VERSION, array( 'release_block' => array( 'blocked_at' => time() ) ) );
 
-		$this->assertFalse( API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) ) );
+		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
+		$this->assertSame( self::RENAMED_VERSION, $release['tag'] );
+
+		$this->add_release( self::HELD_TAG, self::RENAMED_VERSION );
+
+		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
+		$this->assertSame( self::HELD_TAG, $release['tag'] );
+	}
+
+	/**
+	 * Flipping the stable tag to trunk at an unchanged version creates no
+	 * trunk@{version} release row; the hold on the version-named release must
+	 * keep the gates closed rather than orphan into a fail-open miss.
+	 */
+	public function test_trunk_flip_at_same_version_keeps_hold(): void {
+		update_post_meta( $this->plugin->ID, 'version', self::RENAMED_VERSION );
+		update_post_meta( $this->plugin->ID, 'stable_tag', 'trunk' );
+		$this->add_release( self::RENAMED_VERSION, self::RENAMED_VERSION, array( 'release_block' => array( 'blocked_at' => time() ) ) );
+
+		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
+		$this->assertSame( self::RENAMED_VERSION, $release['tag'] );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( $release ) );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+		$this->assertSame( self::SERVED_VERSION, $this->served_version() );
+	}
+
+	/**
+	 * The fallback also survives the combination of both evasions: a renamed
+	 * header inside the held tag, then a stable-tag flip to trunk.
+	 */
+	public function test_trunk_flip_with_renamed_header_keeps_hold(): void {
+		update_post_meta( $this->plugin->ID, 'stable_tag', 'trunk' );
+		$this->add_release( self::HELD_TAG, self::RENAMED_VERSION, array( 'release_block' => array( 'blocked_at' => time() ) ) );
+
+		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
+		$this->assertSame( self::HELD_TAG, $release['tag'] );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( $release ) );
 	}
 
 	/**

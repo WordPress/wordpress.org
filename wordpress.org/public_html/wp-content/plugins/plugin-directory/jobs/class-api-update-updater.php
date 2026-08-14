@@ -243,19 +243,41 @@ class API_Update_Updater {
 	 * Strict matching, unlike Plugin_Directory::get_release()'s loose lookup
 	 * (`'1.4' == '1.40'`), which could land on the wrong release.
 	 *
+	 * When the ref has no release row (a stable tag flipped to trunk at an
+	 * unchanged version creates none), the version-named — then version-
+	 * carrying — release is a fallback: a miss would fail the block and
+	 * cooldown gates open, and the fallback never overrides a ref-resolved
+	 * hold.
+	 *
 	 * @param \WP_Post $post The plugin post.
 	 * @return array|false The matching release row, or false when none exists.
 	 */
 	public static function get_current_release( $post ) {
-		$target = self::get_current_release_tag( $post );
+		$target   = self::get_current_release_tag( $post );
+		$releases = (array) Plugin_Directory::get_releases( $post );
 
-		foreach ( (array) Plugin_Directory::get_releases( $post ) as $release ) {
+		foreach ( $releases as $release ) {
 			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $target ) {
 				return $release;
 			}
 		}
 
-		return false;
+		$version = (string) get_post_meta( $post->ID, 'version', true );
+		if ( '' === $version ) {
+			return false;
+		}
+
+		$carrying = false;
+		foreach ( $releases as $release ) {
+			if ( (string) ( $release['tag'] ?? '' ) === $version ) {
+				return $release;
+			}
+			if ( ! $carrying && (string) ( $release['version'] ?? '' ) === $version ) {
+				$carrying = $release;
+			}
+		}
+
+		return $carrying;
 	}
 
 	/**
