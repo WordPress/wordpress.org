@@ -534,6 +534,67 @@ class Security_Scan_Block_Test extends TestCase {
 	}
 
 	/**
+	 * A block refused because the scanned version is already served still alerts.
+	 */
+	public function test_refused_block_still_alerts(): void {
+		$this->stage_cooldown_release( self::VERSION );
+
+		$callback = $this->completed_callback(
+			array(
+				'findings_count'  => 0,
+				'findings'        => array(),
+				'severity_counts' => array(),
+			)
+		);
+
+		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
+		$this->assertFalse( API_Update_Updater::is_release_blocked( $this->get_release() ) );
+
+		$notified = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::NOTIFIED_META_KEY, true );
+		$this->assertArrayHasKey( $callback['verdict_hash'], $notified );
+	}
+
+	/**
+	 * Backslashes in finding text survive the stored evidence snapshot.
+	 */
+	public function test_snapshot_keeps_backslashes_in_findings(): void {
+		$this->stage_release();
+
+		$callback = $this->completed_callback(
+			array(
+				'findings_count'  => 1,
+				'findings'        => array( $this->finding( 9.8, array( 'title' => 'Regex \e escape reaches preg_replace' ) ) ),
+				'severity_counts' => array( 'error' => 1 ),
+			)
+		);
+
+		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
+
+		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
+		$this->assertSame( 'Regex \e escape reaches preg_replace', $snapshot['findings'][0]['title'] );
+	}
+
+	/**
+	 * The review note reports the risk score with the same precision as the alert.
+	 */
+	public function test_note_formats_risk_score_to_one_decimal(): void {
+		$this->stage_release();
+
+		$callback = $this->completed_callback(
+			array(
+				'findings_count'  => 1,
+				'findings'        => array( $this->finding( 8.0 ) ),
+				'max_risk_score'  => 8.0,
+				'severity_counts' => array( 'error' => 1 ),
+			)
+		);
+
+		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
+
+		$this->assertStringContainsString( 'maximum risk score of 8.0', $this->get_internal_notes()[0]->comment_content );
+	}
+
+	/**
 	 * A callback for a different version than the pending scan is rejected.
 	 */
 	public function test_mismatched_version_is_rejected(): void {

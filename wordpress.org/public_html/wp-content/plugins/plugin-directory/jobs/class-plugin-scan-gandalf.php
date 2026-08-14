@@ -291,16 +291,11 @@ class Plugin_Scan_Gandalf {
 				self::record_review_note( $plugin, $record );
 			}
 
-			// A retry of a partially processed delivery must not downgrade the recorded action.
-			$previous_result = get_post_meta( $plugin->ID, self::LAST_RESULT_META_KEY, true );
-			if ( is_array( $previous_result ) && ( $previous_result['scan_id'] ?? '' ) === $scan_id && 'advisory' === $record['action'] ) {
-				$record['action'] = $previous_result['action'] ?? 'advisory';
-			}
+			// Persist the bounded evidence snapshot and the action taken on it; update_post_meta() unslashes.
+			update_post_meta( $plugin->ID, self::LAST_RESULT_META_KEY, wp_slash( $record ) );
 
-			// Persist the bounded evidence snapshot and the action taken on it.
-			update_post_meta( $plugin->ID, self::LAST_RESULT_META_KEY, $record );
-
-			if ( $record['findings_count'] > 0 || 'advisory' !== $record['action'] ) {
+			// A refused block still alerts: the scanned code is live and nothing held it.
+			if ( $record['max_risk_score'] >= $threshold || $record['findings_count'] > 0 ) {
 				self::notify_slack( $plugin, $record );
 			}
 		} else {
@@ -391,7 +386,7 @@ class Plugin_Scan_Gandalf {
 			esc_html( $record['version'] ),
 			esc_html( $record['release_ref'] ),
 			esc_html( $record['scan_id'] ),
-			esc_html( $record['max_risk_score'] )
+			esc_html( number_format( (float) $record['max_risk_score'], 1 ) )
 		);
 
 		$note .= '<br><br>Findings:';

@@ -364,6 +364,67 @@ class Gandalf_Scan_Endpoint_Test extends TestCase {
 	}
 
 	/**
+	 * A completed callback that reports no verdict is rejected by the route schema.
+	 *
+	 * The verdict fields cannot be marked required — a failed report omits them
+	 * legitimately — so the status validator enforces that half of the contract.
+	 */
+	public function test_completed_callback_without_verdict_is_rejected(): void {
+		foreach ( array( 'verdict_hash', 'findings_count', 'severity_counts', 'max_risk_score', 'findings', 'report_url' ) as $field ) {
+			$payload = $this->payload();
+			unset( $payload[ $field ] );
+
+			$response = $this->dispatch( $payload );
+
+			$this->assertSame( 400, $response->get_status(), "Missing {$field} was accepted." );
+			$this->assertStringContainsString( $field, $response->get_data()['data']['params']['status'] );
+			$this->assertPendingScanUntouched();
+		}
+	}
+
+	/**
+	 * A failed callback that reports no error is rejected by the route schema.
+	 */
+	public function test_failed_callback_without_error_is_rejected(): void {
+		$response = $this->dispatch(
+			array(
+				'status'       => 'failed',
+				'scan_id'      => self::SCAN_ID,
+				'subject_type' => 'plugin',
+				'slug'         => $this->plugin->post_name,
+				'version'      => self::VERSION,
+				'release_ref'  => self::VERSION,
+				'completed_at' => time(),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertStringContainsString( 'error', $response->get_data()['data']['params']['status'] );
+		$this->assertPendingScanUntouched();
+	}
+
+	/**
+	 * A completed callback reporting a verdict with no findings is accepted.
+	 */
+	public function test_completed_callback_without_findings_is_accepted(): void {
+		$response = $this->dispatch(
+			$this->payload(
+				array(
+					'findings_count'  => 0,
+					'findings'        => array(),
+					'severity_counts' => array(),
+					'max_risk_score'  => 0,
+				)
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$snapshot = get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::LAST_RESULT_META_KEY, true );
+		$this->assertSame( array(), $snapshot['findings'] );
+	}
+
+	/**
 	 * A callback routed to an unknown plugin is rejected.
 	 */
 	public function test_unknown_plugin_is_rejected(): void {
