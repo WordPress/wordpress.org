@@ -85,7 +85,7 @@ class API_Update_Updater {
 
 		$version          = get_post_meta( $post->ID, 'version', true );
 		$requires_plugins = get_post_meta( $post->ID, 'requires_plugins', true );
-		$release          = Plugin_Directory::get_release( $post, $version );
+		$release          = self::get_current_release( $post );
 		$release_time     = self::compute_release_time( $post, $release );
 		$existing_row     = $wpdb->get_row(
 			$wpdb->prepare(
@@ -101,11 +101,13 @@ class API_Update_Updater {
 		$is_new_version = substr( (string) $version, 0, 128 ) !== $existing_version;
 
 		/*
-		 * Hold a blocked version out of the row: the previously served version keeps
-		 * being served, and the deferred serve is cancelled rather than postponed.
-		 * Status changes still reach the row right away.
+		 * Hold a blocked release out of the row: the previous version keeps being
+		 * served, the deferred serve is cancelled, and status changes still reach
+		 * the row. Gated on the block alone — a header renamed to the served
+		 * version turns the $is_new_version proxy false, and block_release()
+		 * refuses served releases, so a held release is never already in the row.
 		 */
-		if ( self::is_release_blocked( $release ) && $is_new_version ) {
+		if ( self::is_release_blocked( $release ) ) {
 			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
 
 			if ( $existing_row ) {
@@ -215,16 +217,6 @@ class API_Update_Updater {
 	}
 
 	/**
-	 * The version currently served from `update_source`.
-	 *
-	 * @param string $plugin_slug The plugin slug.
-	 * @return string The served version, or '' when the plugin isn't in `update_source`.
-	 */
-	public static function get_served_version( $plugin_slug ) {
-		return (string) ( self::get_served_release( $plugin_slug )->version ?? '' );
-	}
-
-	/**
 	 * The release currently served from `update_source`.
 	 *
 	 * @param string $plugin_slug The plugin slug.
@@ -239,6 +231,58 @@ class API_Update_Updater {
 				$plugin_slug
 			)
 		);
+	}
+
+	/**
+	 * The release being served or held for a plugin's current version.
+	 *
+	 * Resolved strictly by the stable tag — the source of the served package —
+	 * so a Version header that disagrees with its tag cannot redirect a hold
+	 * onto a different release. Trunk-stable plugins resolve by their
+	 * `trunk@{version}` key instead; their identity is the header version.
+	 * Strict matching, unlike Plugin_Directory::get_release()'s loose lookup
+	 * (`'1.4' == '1.40'`), which could land on the wrong release.
+	 *
+	 * When the ref has no release row (a stable tag flipped to trunk at an
+	 * unchanged version creates none), the version-named — then version-
+	 * carrying — release is a fallback: a miss would fail the block and
+	 * cooldown gates open, and the fallback never overrides a ref-resolved
+	 * hold.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return array|false The matching release row, or false when none exists.
+	 */
+	public static function get_current_release( $post ) {
+		$stable_tag = get_post_meta( $post->ID, 'stable_tag', true );
+
+		$target = ( ! $stable_tag || 'trunk' === $stable_tag )
+			? 'trunk@' . get_post_meta( $post->ID, 'version', true )
+			: $stable_tag;
+
+		$releases = (array) Plugin_Directory::get_releases( $post );
+
+		foreach ( $releases as $release ) {
+			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $target ) {
+				return $release;
+			}
+		}
+
+		$version = (string) get_post_meta( $post->ID, 'version', true );
+		if ( '' === $version ) {
+			return false;
+		}
+
+		$carrying = false;
+		foreach ( $releases as $release ) {
+			if ( (string) ( $release['tag'] ?? '' ) === $version ) {
+				return $release;
+			}
+			if ( ! $carrying && (string) ( $release['version'] ?? '' ) === $version ) {
+				$carrying = $release;
+			}
+		}
+
+		return $carrying;
 	}
 
 	/**
@@ -262,7 +306,7 @@ class API_Update_Updater {
 	 * version itself stays blocked until a reviewer force-releases it.
 	 *
 	 * The counterpart to force_release(). It refuses when the version cannot be
-	 * held: no plugin, no release, or the version already being served. Blocking
+	 * held: no plugin, no release, or the release already being served. Blocking
 	 * an already-held release is a no-op success that preserves the existing
 	 * block. Capability checks and audit logging are the caller's.
 	 *
@@ -276,15 +320,24 @@ class API_Update_Updater {
 			return false;
 		}
 
-		$version = get_post_meta( $post->ID, 'version', true );
-		$release = Plugin_Directory::get_release( $post, $version );
+		$release = self::get_current_release( $post );
 		if ( ! $release ) {
 			return false;
 		}
 
-		// Already live: a block can't un-ship a served version (compared with the column's varchar(128) truncation).
-		if ( self::get_served_version( $plugin_slug ) === substr( (string) $version, 0, 128 ) ) {
-			return false;
+		// Already live: a block can't un-ship a served release — compared by identity (the ref for tagged rows, the version for ref-less trunk-stable rows), with the columns' varchar(128) truncation.
+		$served = self::get_served_release( $plugin_slug );
+		if ( $served ) {
+			if ( $served->stable_tag && 'trunk' !== $served->stable_tag ) {
+				$is_served = substr( (string) $release['tag'], 0, 128 ) === (string) $served->stable_tag;
+			} else {
+				$is_served = '' !== (string) $served->version
+					&& substr( (string) ( $release['version'] ?? '' ), 0, 128 ) === (string) $served->version;
+			}
+
+			if ( $is_served ) {
+				return false;
+			}
 		}
 
 		// Already held; recording a second block would merge it into the first.
@@ -401,16 +454,24 @@ class API_Update_Updater {
 	/**
 	 * Determine the release timestamp for a plugin version.
 	 *
-	 * Falls back through the commit timestamp on the plugin post, and is replaced by the
-	 * latest committer-confirmation time when release confirmations are required (the
-	 * version isn't really "released" until the last confirmation lands).
+	 * Anchored on the version's commit time (`version_date`), falling back to the
+	 * release row's own date — unlike post_modified, neither slides on unrelated
+	 * post edits — and replaced by the latest committer-confirmation time when
+	 * release confirmations are required (the version isn't really "released"
+	 * until the last confirmation lands).
 	 *
 	 * @param \WP_Post   $post    The plugin post.
 	 * @param array|bool $release The release row from Plugin_Directory::get_release(), or false.
 	 * @return int Unix timestamp.
 	 */
 	public static function compute_release_time( $post, $release ) {
-		$release_time = strtotime( $post->version_date ? $post->version_date : $post->post_modified );
+		if ( $post->version_date ) {
+			$release_time = strtotime( $post->version_date );
+		} elseif ( ! empty( $release['date'] ) ) {
+			$release_time = (int) $release['date'];
+		} else {
+			$release_time = strtotime( $post->post_modified );
+		}
 
 		if (
 			$release &&
@@ -467,12 +528,13 @@ class API_Update_Updater {
 			return false;
 		}
 
-		$version = get_post_meta( $post->ID, 'version', true );
-		$release = Plugin_Directory::get_release( $post, $version );
+		$release = self::get_current_release( $post );
 
 		if ( ! $release ) {
 			return false;
 		}
+
+		$version = $release['version'];
 
 		// Log only what is actually lifted: a deleted block's only trace, and the cooldown only while it still runs.
 		$lifted = array();
