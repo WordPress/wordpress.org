@@ -266,7 +266,7 @@ class Release_Confirmation {
 			);
 		}
 
-		self::render_cooldown_status( $data );
+		self::render_cooldown_status( $plugin, $data );
 
 		echo '</div>';
 
@@ -289,9 +289,10 @@ class Release_Confirmation {
 	 * force-released), discarded releases, releases that haven't moved past
 	 * confirmation/processing, or where the cooldown window has elapsed.
 	 *
-	 * @param array $data The release row from Plugin_Directory::get_releases().
+	 * @param \WP_Post $plugin The plugin post object.
+	 * @param array    $data   The release row from Plugin_Directory::get_releases().
 	 */
-	protected static function render_cooldown_status( $data ) {
+	protected static function render_cooldown_status( $plugin, $data ) {
 		$release_delay = (int) ( $data['release_delay'] ?? 0 );
 		if ( ! $release_delay ) {
 			return;
@@ -306,8 +307,8 @@ class Release_Confirmation {
 			return;
 		}
 
-		$release_time   = $data['confirmations'] ? max( $data['confirmations'] ) : (int) $data['date'];
-		$cooldown_until = $release_time + $release_delay;
+		// Match the enforced window: compute_release_time() is what update_single_plugin() gates on.
+		$cooldown_until = API_Update_Updater::compute_release_time( $plugin, $data ) + $release_delay;
 
 		if ( $cooldown_until <= time() ) {
 			return;
