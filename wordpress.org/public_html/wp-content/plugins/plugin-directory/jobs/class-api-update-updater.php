@@ -101,14 +101,11 @@ class API_Update_Updater {
 		$is_new_version = substr( (string) $version, 0, 128 ) !== $existing_version;
 
 		/*
-		 * Hold a blocked release out of the row: the previously served version keeps
-		 * being served, and the deferred serve is cancelled rather than postponed.
-		 * Status changes still reach the row right away.
-		 *
-		 * Gated on the block alone, not $is_new_version: a header renamed to match
-		 * the served version would make that proxy false, writing the blocked
-		 * release's stable tag live. block_release() already refuses to block a
-		 * served release, so a held release is never the one already in the row.
+		 * Hold a blocked release out of the row: the previous version keeps being
+		 * served, the deferred serve is cancelled, and status changes still reach
+		 * the row. Gated on the block alone — a header renamed to the served
+		 * version turns the $is_new_version proxy false, and block_release()
+		 * refuses served releases, so a held release is never already in the row.
 		 */
 		if ( self::is_release_blocked( $release ) ) {
 			wp_clear_scheduled_hook( "release_to_update_api:{$post->post_name}" );
@@ -249,17 +246,12 @@ class API_Update_Updater {
 	/**
 	 * The release being served or held for a plugin's current version.
 	 *
-	 * Tagged plugins resolve strictly by the stable tag — the source the served
-	 * package is built from — so a Version header that disagrees with its tag
-	 * cannot redirect the release's block or cooldown onto a different release.
-	 * Trunk-stable plugins have no tag-named release row (theirs are keyed
-	 * `trunk@{version}`), so they resolve by that key; their identity is the
-	 * header version, so a header rename there is out of this method's reach.
-	 *
-	 * Matched strictly by tag, unlike Plugin_Directory::get_release(): its
-	 * wp_list_filter() match is loose (`'1.4' == '1.40'`) and prefers a bare
-	 * tag over a `trunk@{version}` row, either of which could resolve a hold
-	 * off the wrong release.
+	 * Resolved strictly by the stable tag — the source of the served package —
+	 * so a Version header that disagrees with its tag cannot redirect a hold
+	 * onto a different release. Trunk-stable plugins resolve by their
+	 * `trunk@{version}` key instead; their identity is the header version.
+	 * Strict matching, unlike Plugin_Directory::get_release()'s loose lookup
+	 * (`'1.4' == '1.40'`), which could land on the wrong release.
 	 *
 	 * @param \WP_Post $post The plugin post.
 	 * @return array|false The matching release row, or false when none exists.

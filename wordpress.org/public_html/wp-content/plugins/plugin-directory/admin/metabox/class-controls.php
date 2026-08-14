@@ -136,8 +136,7 @@ class Controls {
 		// and to make the security boundary explicit.
 		check_admin_referer( 'update-post_' . $post_id );
 
-		// Staleness guard on the release identity, not the header version: a newer commit
-		// that moved the stable tag since the form rendered lands a different release here.
+		// Staleness guard on the release identity: a commit that moved the stable tag since the form rendered lands a different release here.
 		$release       = API_Update_Updater::get_current_release( $post );
 		$submitted_tag = sanitize_text_field( wp_unslash( $_POST['force_release_tag'] ) );
 		if ( ! $release || $submitted_tag !== (string) $release['tag'] ) {
