@@ -247,11 +247,7 @@ class API_Update_Updater {
 	 * @return array|false The matching release row, or false when none exists.
 	 */
 	public static function get_current_release( $post ) {
-		$stable_tag = get_post_meta( $post->ID, 'stable_tag', true );
-
-		$target = ( ! $stable_tag || 'trunk' === $stable_tag )
-			? 'trunk@' . get_post_meta( $post->ID, 'version', true )
-			: $stable_tag;
+		$target = self::get_current_release_tag( $post );
 
 		foreach ( (array) Plugin_Directory::get_releases( $post ) as $release ) {
 			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $target ) {
@@ -260,6 +256,20 @@ class API_Update_Updater {
 		}
 
 		return false;
+	}
+
+	/**
+	 * The release tag a plugin's current version is served or held under.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 * @return string The stable tag, or `trunk@{version}` for trunk-stable plugins.
+	 */
+	public static function get_current_release_tag( $post ) {
+		$stable_tag = get_post_meta( $post->ID, 'stable_tag', true );
+
+		return ( ! $stable_tag || 'trunk' === $stable_tag )
+			? 'trunk@' . get_post_meta( $post->ID, 'version', true )
+			: $stable_tag;
 	}
 
 	/**

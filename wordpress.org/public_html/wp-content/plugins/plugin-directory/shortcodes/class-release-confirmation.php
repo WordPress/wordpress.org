@@ -309,8 +309,7 @@ class Release_Confirmation {
 		}
 
 		// Only the current release can be pending; superseded rows are never served.
-		$current = API_Update_Updater::get_current_release( $plugin );
-		if ( ! $current || (string) $current['tag'] !== (string) ( $data['tag'] ?? '' ) ) {
+		if ( (string) ( $data['tag'] ?? '' ) !== (string) API_Update_Updater::get_current_release_tag( $plugin ) ) {
 			return;
 		}
 
