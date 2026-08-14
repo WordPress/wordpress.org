@@ -1722,7 +1722,16 @@ class Plugin_Directory {
 
 		$plugin = self::get_plugin_post( $plugin );
 
-		$release = self::get_release( $plugin, $data['tag'] ) ?: [
+		// Strict match only: get_release()'s loose lookup ('1.4' == '1.40') could merge onto the wrong release.
+		$release = false;
+		foreach ( self::get_releases( $plugin ) as $r ) {
+			if ( isset( $r['tag'] ) && (string) $r['tag'] === $data['tag'] ) {
+				$release = $r;
+				break;
+			}
+		}
+
+		$release = $release ?: [
 			'date'                     => time(),
 			'tag'                      => '',
 			'version'                  => '',
@@ -1772,7 +1781,7 @@ class Plugin_Directory {
 		// Find any other releases using this slug (as in the case of updates) and remove it.
 		// Only one release can exist in any given tag.
 		foreach ( $releases as $i => $r ) {
-			if ( $r['tag'] === $release['tag'] ) {
+			if ( (string) $r['tag'] === $release['tag'] ) {
 				unset( $releases[ $i ] );
 			}
 		}

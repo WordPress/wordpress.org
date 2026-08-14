@@ -220,20 +220,30 @@ class API_Update_Updater {
 	}
 
 	/**
+	 * The `update_source` row identifying what is currently served.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return object|null The row's version and stable_tag, or null when the plugin isn't in `update_source`.
+	 */
+	public static function get_served_row( $plugin_slug ) {
+		global $wpdb;
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT version, stable_tag FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
+				$plugin_slug
+			)
+		);
+	}
+
+	/**
 	 * The version currently served from `update_source`.
 	 *
 	 * @param string $plugin_slug The plugin slug.
 	 * @return string The served version, or '' when the plugin isn't in `update_source`.
 	 */
 	public static function get_served_version( $plugin_slug ) {
-		global $wpdb;
-
-		return (string) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT version FROM {$wpdb->prefix}update_source WHERE plugin_slug = %s",
-				$plugin_slug
-			)
-		);
+		return (string) ( self::get_served_row( $plugin_slug )->version ?? '' );
 	}
 
 	/**
@@ -291,7 +301,7 @@ class API_Update_Updater {
 	 * version itself stays blocked until a reviewer force-releases it.
 	 *
 	 * The counterpart to force_release(). It refuses when the version cannot be
-	 * held: no plugin, no release, or the version already being served. Blocking
+	 * held: no plugin, no release, or the release already being served. Blocking
 	 * an already-held release is a no-op success that preserves the existing
 	 * block. Capability checks and audit logging are the caller's.
 	 *
@@ -310,10 +320,19 @@ class API_Update_Updater {
 			return false;
 		}
 
-		// Already live: a block can't un-ship the resolved release once it's the served version (compared with the column's varchar(128) truncation).
-		$served_version = self::get_served_version( $plugin_slug );
-		if ( '' !== $served_version && substr( (string) ( $release['version'] ?? '' ), 0, 128 ) === $served_version ) {
-			return false;
+		// Already live: a block can't un-ship a served release — compared by identity (the ref for tagged rows, the version for ref-less trunk-stable rows), with the columns' varchar(128) truncation.
+		$served = self::get_served_row( $plugin_slug );
+		if ( $served ) {
+			if ( $served->stable_tag && 'trunk' !== $served->stable_tag ) {
+				$is_served = substr( (string) $release['tag'], 0, 128 ) === (string) $served->stable_tag;
+			} else {
+				$is_served = '' !== (string) $served->version
+					&& substr( (string) ( $release['version'] ?? '' ), 0, 128 ) === (string) $served->version;
+			}
+
+			if ( $is_served ) {
+				return false;
+			}
 		}
 
 		// Already held; recording a second block would merge it into the first.

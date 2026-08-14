@@ -244,7 +244,7 @@ class Current_Release_Resolution_Test extends TestCase {
 	}
 
 	/**
-	 * The block's already-served guard compares the resolved release's version,
+	 * The block's already-served guard keys on the resolved release's identity,
 	 * not the header: a header renamed to equal the served version cannot make
 	 * a different, unserved release look already-live and refuse the block.
 	 */
@@ -314,6 +314,59 @@ class Current_Release_Resolution_Test extends TestCase {
 		$release = API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) );
 		$this->assertSame( 'trunk@1.2.3', $release['tag'] );
 		$this->assertFalse( API_Update_Updater::is_release_blocked( $release ) );
+	}
+
+	/**
+	 * A re-commit into the already-served tag cannot be blocked, even when it
+	 * bumps the header: the guard compares the ref the row serves, not the
+	 * version label, so it can't claim to hold a package that already shipped.
+	 */
+	public function test_block_refused_for_recommit_into_served_tag(): void {
+		update_post_meta( $this->plugin->ID, 'stable_tag', self::SERVED_VERSION );
+		update_post_meta( $this->plugin->ID, 'version', '1.0.1' );
+		$this->add_release( self::SERVED_VERSION, '1.0.1' );
+
+		$this->assertFalse( API_Update_Updater::block_release( $this->plugin->post_name, array( 'risk_score' => 9.8 ) ) );
+		$this->assertFalse( API_Update_Updater::is_release_blocked( Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::SERVED_VERSION ) ) );
+	}
+
+	/**
+	 * Trunk-stable rows carry no per-release ref, so the already-served guard
+	 * falls back to their identity — the version — and still refuses the block.
+	 */
+	public function test_block_refused_for_served_trunk_release(): void {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->prefix . 'update_source',
+			array( 'stable_tag' => 'trunk' ),
+			array( 'plugin_slug' => $this->plugin->post_name )
+		);
+		update_post_meta( $this->plugin->ID, 'stable_tag', 'trunk' );
+		update_post_meta( $this->plugin->ID, 'version', self::SERVED_VERSION );
+		$this->add_release( 'trunk@' . self::SERVED_VERSION, self::SERVED_VERSION );
+
+		$this->assertFalse( API_Update_Updater::block_release( $this->plugin->post_name, array( 'risk_score' => 9.8 ) ) );
+		$this->assertFalse( API_Update_Updater::is_release_blocked( Plugin_Directory::get_release( get_post( $this->plugin->ID ), 'trunk@' . self::SERVED_VERSION ) ) );
+	}
+
+	/**
+	 * The block's write lands on the exact tag: add_release() must not merge it
+	 * onto a numerically-equal different release ('1.4' == '1.40') and delete
+	 * the genuine row in the process.
+	 */
+	public function test_block_write_lands_on_exact_tag_not_numeric_equal(): void {
+		update_post_meta( $this->plugin->ID, 'stable_tag', '1.4' );
+		$this->add_release( '1.40', '1.40', array( 'date' => time() ) );
+		$this->add_release( '1.4', '1.4', array( 'date' => time() - DAY_IN_SECONDS ) );
+
+		$this->assertTrue( API_Update_Updater::block_release( $this->plugin->post_name, array( 'risk_score' => 9.8 ) ) );
+
+		$releases = array_column( Plugin_Directory::get_releases( $this->plugin ), null, 'tag' );
+		$this->assertSame( '1.4', $releases['1.4']['version'] );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( $releases['1.4'] ) );
+		$this->assertSame( '1.40', $releases['1.40']['version'] );
+		$this->assertFalse( API_Update_Updater::is_release_blocked( $releases['1.40'] ) );
 	}
 
 	/**
