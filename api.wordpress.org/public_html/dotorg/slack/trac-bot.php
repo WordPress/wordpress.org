@@ -75,6 +75,14 @@ namespace Dotorg\Slack\Trac {
 					$parser->set_redundancy( 'slack', $trac, $type, $id );
 					$slack->add_attachment( $attachment );
 				} else {
+					/*
+					 * A number matching no ticket is more likely a misparse than a reference.
+					 * Setting redundancy would let the repost-a-link path above surface the dead URL.
+					 */
+					if ( $obj->is_not_found() ) {
+						continue;
+					}
+
 					// We don't have an attachment when the Trac is private or if we experienced an error.
 					// Don't set redundancy times on errors.
 					if ( ! $trac_obj->is_public() ) {
@@ -118,10 +126,15 @@ namespace Dotorg\Slack\Trac {
 			// If the ticket is closed and hasn't been modified in over 2 years, don't post a reference to it.
 			if ( ! empty( $parsed_objects[ 'ticket' ][ $ticket_id ] ) ) {
 				$ticket_object = $parsed_objects[ 'ticket' ][ $ticket_id ];
-				$ticket_object->fetch();
 
+				if ( $ticket_object->is_not_found() ) {
+					continue;
+				}
+
+				// Trac labels the column 'modified' and names it 'changetime'.
+				$modified          = $ticket_object->modified ?: $ticket_object->changetime;
 				$is_closed         = ( 'closed' === $ticket_object->status );
-				$last_modified     = strtotime( $ticket_object->modified );
+				$last_modified     = $modified ? strtotime( $modified ) : false;
 				$has_recent_change = ( ! $last_modified || $last_modified > ( time() - 2 * YEAR_IN_SECONDS ) );
 
 				if ( $is_closed && ! $has_recent_change ) {
