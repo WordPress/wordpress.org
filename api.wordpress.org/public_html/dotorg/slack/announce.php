@@ -1,13 +1,21 @@
 <?php
+/**
+ * Slack slash-command handler for making announcements in channels.
+ *
+ * This is a standalone Slack slash-command handler: WordPress is not loaded, so request
+ * data is never slashed. Slack authenticates itself with one of the shared
+ * `WEBHOOK_TOKEN_*` secrets below; nonces don't exist in server-to-server webhooks.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Slack
+ */
 
-namespace {
-	require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
-	require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
-}
+namespace Dotorg\Slack\Announce;
 
-namespace Dotorg\Slack\Announce {
-
-require dirname( dirname( __DIR__ ) ) . '/includes/slack/announce/lib.php';
+require dirname( __DIR__, 2 ) . '/includes/hyperdb/bb-10-hyper-db.php';
+require dirname( __DIR__, 2 ) . '/includes/slack-config.php';
+require dirname( __DIR__, 2 ) . '/includes/slack/announce/lib.php';
 
 function get_avatar( $username, $slack_id, $team_id ) {
 	global $wpdb;
@@ -26,6 +34,10 @@ function get_avatar( $username, $slack_id, $team_id ) {
 	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G&%s', $hash, time() );
 }
 
+if ( ! is_string( $_POST['token'] ?? null ) ) {
+	return;
+}
+
 $i = 0;
 // WEBHOOK_TOKEN_1, WEBHOOK_TOKEN_2, etc.
 while ( defined( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . ++$i ) ) {
@@ -33,6 +45,3 @@ while ( defined( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . ++$i ) ) {
 		run( $_POST );
 	}
 }
-
-}
-

@@ -1,4 +1,14 @@
 <?php
+/**
+ * Slack outgoing-webhook Trac bot: expands ticket and changeset references.
+ *
+ * Slack authenticates itself with the shared `URL_SECRET__TRAC_BOT` secret passed in the
+ * outgoing webhook URL, verified below; nonces don't exist in server-to-server webhooks.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Slack
+ */
 
 namespace {
 	require dirname( dirname( __DIR__ ) ) . '/wp-init.php';
@@ -11,12 +21,20 @@ namespace {
 namespace Dotorg\Slack\Trac {
 
 	// Verify it came from Slack.
-	if ( ! hash_equals( URL_SECRET__TRAC_BOT, $_GET['token'] ?? '' ) ) {
+	if ( ! is_string( $_GET['token'] ?? null ) || ! hash_equals( URL_SECRET__TRAC_BOT, wp_unslash( $_GET['token'] ) ) ) {
 		return;
 	}
 
+	/*
+	 * The Slack channel name, user name, and message timestamp are interpolated into the Trac
+	 * comment and the message permalink below.
+	 */
+	$channel_name  = sanitize_text_field( wp_unslash( $_POST['channel_name'] ?? '' ) );
+	$user_name     = sanitize_text_field( wp_unslash( $_POST['user_name'] ?? '' ) );
+	$msg_timestamp = sanitize_text_field( wp_unslash( $_POST['timestamp'] ?? '' ) );
+
 	// Prevent recursion.
-	if ( $_POST['user_name'] === 'slackbot' ) {
+	if ( 'slackbot' === $user_name ) {
 		return;
 	}
 
@@ -99,7 +117,7 @@ namespace Dotorg\Slack\Trac {
 
 		$slack->send( $parser->get_channel(), $parser->get_thread() );
 
-		if ( $_POST['channel_name'] === 'test' ) {
+		if ( 'test' === $channel_name ) {
 			// Don't post to Trac if we're coming from #test.
 			continue;
 		}
@@ -111,7 +129,7 @@ namespace Dotorg\Slack\Trac {
 
 		$trac_xmlrpc = new \Trac( 'slackbot', SLACKBOT_WPORG_PASSWORD, "https://$trac.trac.wordpress.org/login/xmlrpc" );
 
-		$comment = sprintf( $comment_template, $_POST['channel_name'], $_POST['user_name'], str_replace( '.', '', $_POST['timestamp'] ) );
+		$trac_comment = sprintf( $comment_template, $channel_name, $user_name, str_replace( '.', '', $msg_timestamp ) );
 		foreach ( $results['ticket'] as $ticket ) {
 			$ticket_id = is_array( $ticket ) ? $ticket['id'] : $ticket;
 
@@ -135,7 +153,7 @@ namespace Dotorg\Slack\Trac {
 
 			$parser->set_redundancy( 'trac', $trac, 'ticket', $ticket_id );
 
-			$trac_xmlrpc->ticket_update( $ticket_id, $comment );
+			$trac_xmlrpc->ticket_update( $ticket_id, $trac_comment );
 		}
 	}
 }

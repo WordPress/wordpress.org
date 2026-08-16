@@ -1,4 +1,16 @@
 <?php
+/**
+ * Slack /subgroup app: slash command and interactivity endpoint.
+ *
+ * This is a standalone Slack app endpoint: only the object cache is loaded, not WordPress, so
+ * request data is never slashed. Slack authenticates every request with an HMAC signature over the
+ * raw request body, verified in `verify_slack_signature()` before anything is dispatched; nonces
+ * don't exist in server-to-server webhooks.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Slack
+ */
 
 namespace Dotorg\Slack\Subgroup;
 
@@ -83,8 +95,27 @@ function ack_and_finish() {
 }
 
 function verify_slack_signature( $body ) {
-	$timestamp = $_SERVER['HTTP_X_SLACK_REQUEST_TIMESTAMP'] ?? '';
-	$signature = $_SERVER['HTTP_X_SLACK_SIGNATURE'] ?? '';
+	// A Unix timestamp, and a `v0=` prefixed HMAC-SHA256 hex digest. Anything else can't be from Slack.
+	$timestamp = filter_var(
+		$_SERVER['HTTP_X_SLACK_REQUEST_TIMESTAMP'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		[
+			'options' => [
+				'regexp'  => '/^\d+\z/',
+				'default' => '',
+			],
+		]
+	);
+	$signature = filter_var(
+		$_SERVER['HTTP_X_SLACK_SIGNATURE'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		[
+			'options' => [
+				'regexp'  => '/^v0=[0-9a-f]{64}\z/',
+				'default' => '',
+			],
+		]
+	);
 	if ( ! $timestamp || ! $signature ) {
 		return false;
 	}
@@ -104,6 +135,7 @@ if ( ! verify_slack_signature( $raw_body ) ) {
 
 // Dispatch: slash command vs. interactivity callback.
 if ( isset( $_POST['payload'] ) ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON document covered by the verified signature above; fields are validated where read.
 	$payload = json_decode( $_POST['payload'], true );
 	handle_interaction( $payload );
 	exit;
@@ -111,9 +143,28 @@ if ( isset( $_POST['payload'] ) ) {
 handle_slash_command();
 
 function handle_slash_command() {
-	$channel_id = $_POST['channel_id'] ?? '';
-	$user_id    = $_POST['user_id'] ?? '';
-	$trigger_id = $_POST['trigger_id'] ?? '';
+	// Slack channel and user IDs are uppercase alphanumeric, eg. `C0123ABCD` and `U0123ABCD`.
+	$id_options = [
+		'options' => [
+			'regexp'  => '/^[A-Z0-9]+\z/',
+			'default' => '',
+		],
+	];
+
+	$channel_id = (string) filter_var( $_POST['channel_id'] ?? '', FILTER_VALIDATE_REGEXP, $id_options );
+	$user_id    = (string) filter_var( $_POST['user_id'] ?? '', FILTER_VALIDATE_REGEXP, $id_options );
+
+	// A trigger ID, eg. `13345224609.738474920.8088930838d88f008e0`.
+	$trigger_id = (string) filter_var(
+		$_POST['trigger_id'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		[
+			'options' => [
+				'regexp'  => '/^[A-Za-z0-9.]+\z/',
+				'default' => '',
+			],
+		]
+	);
 
 	// trigger_id is only valid for 3s, and listing every subgroup's membership will take
 	// longer than that. Open a loading view now, then views.update after we have the data.
@@ -692,7 +743,7 @@ function finalize_create( $new_id, $name, $creator, $parent_id, $parent_name, $u
 	// conversations.invite fails the entire batch on one malformed ID. Filter
 	// defensively so a stray character in a config value can't sink everyone.
 	$valid_invitees = array_values( array_filter( $invitees, function ( $id ) {
-		return preg_match( '/^[UWB][A-Z0-9]+$/', $id );
+		return preg_match( '/^[UWB][A-Z0-9]+\z/', $id );
 	} ) );
 	$invitees = $valid_invitees;
 

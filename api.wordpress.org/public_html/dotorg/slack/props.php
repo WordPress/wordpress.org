@@ -40,6 +40,7 @@ namespace Dotorg\Slack\Props {
 
 			header( 'X-Slack-No-Retry', 1 ); // Don't retry this event again.
 			trigger_error(
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text PHP error log entry, not HTTP output.
 				sprintf( 'Received retry for %s because: %s', $message_id, $headers['X-Slack-Retry-Reason'] ),
 				E_USER_NOTICE
 			);
@@ -51,6 +52,7 @@ namespace Dotorg\Slack\Props {
 		}
 
 	} catch ( Exception $exception ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text PHP error log entry, not HTTP output.
 		trigger_error( $exception->getMessage(), E_USER_WARNING );
 
 	} finally {
@@ -59,6 +61,7 @@ namespace Dotorg\Slack\Props {
 		 * request, so this should still be 200 even if something goes wrong on our end.
 		 */
 		http_response_code( 200 );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- plain-text response body for Slack.
 		die( $result );
 	}
 }
