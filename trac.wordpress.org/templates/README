@@ -70,11 +70,35 @@ the shared site_head.html/site_footer.html `# include ... ignore missing`:
  *  core/site-specific-head.html      — make-core.css
  *  core/site-specific-footer.html    — #report-popup + contributor-label JS
  *  meta/site-specific-footer.html    — autocomplete-users JS
+ *  bbpress/site-specific-footer.html, buddypress/site-specific-footer.html
+                                      — legacy navigation.min.js (mobile menu)
  *  core/wporg-menu.html, meta/wporg-menu.html — per-Trac headline/menu
 
 bbpress/ and buddypress/ ship their own wporg-head/header/footer.html (bbPress.org
 / BuddyPress.org branding) and a no-op wporg-menu.html. Their old Genshi banner
 reorganization (py:match on div#banner) is now client-side in wp-trac.js / CSS.
+
+They are also the only environments still on the pre-block WordPress.org header
+markup (#wporg-header / #mobile-menu-button / #wporg-header-menu), so they are the
+only ones that still load s.w.org/style/js/navigation.min.js. On core.trac and
+meta.trac the global header is the block-based one, and its menu is driven by the
+Gutenberg Navigation block's Interactivity API view module
+(@wordpress/block-library/navigation/view), already included via wporg-footer.html.
+
+DON'T "modernize" those two by copying bbPress.org's/BuddyPress.org's current
+header markup (#header > #header-inner > #nav > #bb-menu-icon + #bb-nav). Its menu
+is CSS-only and needs no JS, which looks like a clean way to retire
+navigation.min.js, but the IDs collide with Trac's own:
+
+ *  Trac renders its own `<div id="header">` inside #banner (wp-trac.css hides it
+    with `#banner #header { display: none }`), so you end up with a duplicate ID.
+ *  trac.css styles `#header :link` (0-1-1-0), which outranks bb-base's `#nav li a`
+    (0-1-0-2). Every menu link loses its padding and turns #555, so the desktop nav
+    renders as one run-together string.
+
+#wporg-header / #wporg-header-menu exist precisely to stay out of the way of
+Trac's generic #header and #nav. Keep them, and keep the script that drives them.
+Verified against live bbpress.trac in Aug 2026.
 
 
 update-headers.php

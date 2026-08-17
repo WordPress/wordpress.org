@@ -1,0 +1,8 @@
+{# bbpress.trac — end-of-<body> additions, included by the shared site_footer.html.
+
+  bbPress.org still ships the pre-block WordPress.org header markup (#wporg-header,
+  #mobile-menu-button, #wporg-header-menu), so it still needs the legacy navigation
+  script to toggle the mobile menu. core.trac and meta.trac use the block-based
+  global header, whose menu is driven by the Gutenberg Navigation block instead.
+#}
+<script src="https://s.w.org/style/js/navigation.min.js?20190128"></script>
