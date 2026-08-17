@@ -6,6 +6,11 @@ namespace Dotorg\Slack\Committers;
 
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
+// Slack sends the token as POST data; anything else is not a webhook request.
+if ( ! isset( $_POST['token'] ) || ! is_string( $_POST['token'] ) || '' === $_POST['token'] ) {
+	return;
+}
+
 if ( ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ) ) {
 	return;
 }

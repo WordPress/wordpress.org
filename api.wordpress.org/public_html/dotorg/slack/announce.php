@@ -26,11 +26,17 @@ function get_avatar( $username, $slack_id, $team_id ) {
 	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G&%s', $hash, time() );
 }
 
+// Slack sends the token as POST data; anything else is not a webhook request.
+if ( ! isset( $_POST['token'] ) || ! is_string( $_POST['token'] ) || '' === $_POST['token'] ) {
+	return;
+}
+
 $i = 0;
 // WEBHOOK_TOKEN_1, WEBHOOK_TOKEN_2, etc.
 while ( defined( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . ++$i ) ) {
 	if ( hash_equals( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . $i ), $_POST['token'] ) ) {
 		run( $_POST );
+		break;
 	}
 }
 
