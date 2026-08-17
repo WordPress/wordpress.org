@@ -40,8 +40,8 @@ gp_tmpl_header();
 						'<span class="dashicons dashicons-admin-users"></span><br />%s',
 						isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0
 					);
-					echo gp_link_get( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale, $contributors );
 					?>
+					<a href="<?php echo esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale ); ?>"><?php echo $contributors; ?></a>
 				</div>
 				<div class="percent">
 					<div class="percent-complete" style="width:<?php echo $percent_complete; ?>%;"></div>
