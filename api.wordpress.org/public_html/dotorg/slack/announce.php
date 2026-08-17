@@ -26,7 +26,7 @@ require dirname( __DIR__, 2 ) . '/includes/slack/announce/lib.php';
  * @param string $username The Slack user name. Unused, part of the hook signature.
  * @param string $slack_id The Slack user ID to look up.
  * @param string $team_id  The Slack team ID. Unused, part of the hook signature.
- * @return string The Gravatar URL for the linked account.
+ * @return string The Gravatar URL, or an empty string when the Slack account is not linked.
  */
 function get_avatar( $username, $slack_id, $team_id ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- Signature is fixed by the call in lib.php.
 	global $wpdb;
@@ -38,6 +38,10 @@ function get_avatar( $username, $slack_id, $team_id ) { // phpcs:ignore Generic.
 		)
 	);
 
+	if ( ! $wp_user_id ) {
+		return '';
+	}
+
 	$email = $wpdb->get_var(
 		$wpdb->prepare(
 			"SELECT user_email FROM $wpdb->users WHERE ID = %d",
@@ -45,8 +49,12 @@ function get_avatar( $username, $slack_id, $team_id ) { // phpcs:ignore Generic.
 		)
 	);
 
+	if ( ! $email ) {
+		return '';
+	}
+
 	$hash = hash( 'sha256', strtolower( trim( $email ) ) );
-	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G&%s', $hash, time() );
+	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96&d=mm&r=G&%s', $hash, time() );
 }
 
 // Slack sends the token as POST data; anything else is not a webhook request.
