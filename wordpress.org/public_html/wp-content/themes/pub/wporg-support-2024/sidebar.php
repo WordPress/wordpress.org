@@ -27,7 +27,7 @@
 					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/"><?php _e( 'RSS Recent Posts', 'wporg-forums' ); ?></a></li>
 					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/?type=topic"><?php _e( 'RSS Recent Topics', 'wporg-forums' ); ?></a></li>
 					<?php if ( is_user_logged_in() && $forum_subscription_link = bbp_get_forum_subscription_link() ) : ?>
-						<li class="forum-subscribe"><?php echo $forum_subscription_link; ?></li>
+						<li class="forum-subscribe"><?php echo wp_kses_post( $forum_subscription_link ); ?></li>
 					<?php endif; ?>
 				</ul>
 			</div>

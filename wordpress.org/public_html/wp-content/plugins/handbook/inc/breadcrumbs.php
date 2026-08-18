@@ -87,7 +87,7 @@ class WPorg_Handbook_Breadcrumbs {
 		}
 
 		echo '<div class="handbook-breadcrumbs">';
-		echo implode( ' / ', $links );
+		echo wp_kses_post( implode( ' / ', $links ) );
 		echo "</div>\n";
 	}
 

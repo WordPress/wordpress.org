@@ -221,7 +221,7 @@ function tags_with_count( $format = 'list', $before = '', $sep = '', $after = ''
 		return;
 	}
 
-	echo $before . join( $sep, $tag_links ) . $after;
+	echo wp_kses_post( $before . join( $sep, $tag_links ) . $after );
 }
 
 function extras_feed( $is_comments_feed = false ) {

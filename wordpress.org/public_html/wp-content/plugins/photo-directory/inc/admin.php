@@ -1125,7 +1125,8 @@ class Admin {
 		$moderator_link = Photo::get_moderator_link( $post );
 		if ( $moderator_link ) {
 			echo '<div class="misc-pub-section curtime misc-pub-curtime">';
-			printf( __( 'Moderated by: %s', 'wporg-photos' ), $moderator_link );
+			/* translators: %s: Link to the moderator's profile. */
+			echo wp_kses_post( sprintf( __( 'Moderated by: %s', 'wporg-photos' ), $moderator_link ) );
 			echo '</div>';
 		}
 	}
@@ -1365,7 +1366,7 @@ class Admin {
 
 		// Output moderator.
 		if ( $mod_link = Photo::get_moderator_link( $post_id ) ) {
-			printf( $format, 'moderator', __( 'Moderator', 'wporg-photos' ), $mod_link );
+			echo wp_kses_post( sprintf( $format, 'moderator', __( 'Moderator', 'wporg-photos' ), $mod_link ) );
 		}
 	}
 
