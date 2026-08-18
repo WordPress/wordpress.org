@@ -105,7 +105,7 @@ if ( empty( $_POST ) || $error ) {
 		if ( !empty( $recaptcha_error ) )
 			$recaptcha_url .= '&error=' . $recaptcha_error;
 	?>
-	<script type="text/javascript" src="<?php echo $recaptcha_url; ?>"></script>
+	<script type="text/javascript" src="<?php echo esc_url( $recaptcha_url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript ?>"></script>
 	<noscript>
 	<iframe src="http://www.google.com/recaptcha/api/noscript?k=your_public_key" height="300" width="500" frameborder="0"></iframe><br>
 	<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>

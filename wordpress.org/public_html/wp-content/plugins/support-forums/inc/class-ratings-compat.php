@@ -170,7 +170,7 @@ class Ratings_Compat {
 
 			printf(
 				'<div class="bbp-template-notice info"><p>%s</p></div>',
-				sprintf( $notice, $object_link, $edit_url )
+				wp_kses_post( sprintf( $notice, $object_link, esc_url( $edit_url ) ) )
 			);
 		}
 	}
