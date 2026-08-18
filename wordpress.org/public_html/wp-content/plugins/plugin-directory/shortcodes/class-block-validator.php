@@ -290,7 +290,7 @@ class Block_Validator {
 				echo '<h3>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</h3>';
 
 				echo '<ul>';
-				echo '<li><a href="' . esc_url( get_edit_post_link( $plugin->ID ) ) . '">' . esc_html__( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
+				echo '<li><a href="' . esc_url( (string) get_edit_post_link( $plugin->ID ) ) . '">' . esc_html__( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
 				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li>';
 				echo '</ul>';
 

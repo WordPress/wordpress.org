@@ -476,7 +476,7 @@ class Admin {
 				$prefixed_format,
 				sprintf(
 					'<div><a class="photos-photo-link row-title" href="%s" aria-label="%s">%s</a></div>',
-					esc_url( get_edit_post_link( $post_id ) ),
+					esc_url( (string) get_edit_post_link( $post_id ) ),
 					/* translators: %s: Post title. */
 					esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
 					$image
