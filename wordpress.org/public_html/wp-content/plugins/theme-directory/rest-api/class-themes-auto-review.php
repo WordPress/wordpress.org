@@ -81,12 +81,21 @@ class Auto_Review_Controller extends WP_REST_Controller {
 	/**
 	 * Returns whether the ticket number is for the correct theme.
 	 * 
-	 * @param string $keywords A string that should include the theme slug.
+	 * Tickets carry a `theme-{slug}` keyword, added by
+	 * WPORG_Themes_Upload::prepare_trac_ticket(). Matching that whole keyword
+	 * rather than searching for the bare slug keeps a slug that is a substring
+	 * of another theme's slug from matching that theme's ticket.
+	 *
+	 * @param string $keywords   The ticket's keywords, space separated.
 	 * @param string $theme_slug The theme slug.
 	 * @return bool
 	 */
 	public function ticket_is_for_theme( $keywords, $theme_slug ) {
-		return ! empty( $keywords ) && strpos( $keywords , $theme_slug );
+		if ( empty( $keywords ) || empty( $theme_slug ) ) {
+			return false;
+		}
+
+		return in_array( 'theme-' . $theme_slug, preg_split( '/\s+/', trim( $keywords ) ), true );
 	}
 
 	/**
@@ -157,6 +166,14 @@ class Auto_Review_Controller extends WP_REST_Controller {
 				'rest_invalid_ticket',
 				__( 'Unable to locate ticket.', 'wporg-themes' ),
 				array( 'status' => \WP_Http::NOT_FOUND )
+			);
+		}
+
+		if ( ! $this->ticket_is_for_theme( $ticket['keywords'] ?? '', $theme_slug ) ) {
+			return new \WP_Error(
+				'rest_ticket_theme_mismatch',
+				__( 'That ticket is not for this theme.', 'wporg-themes' ),
+				array( 'status' => \WP_Http::BAD_REQUEST )
 			);
 		}
 
