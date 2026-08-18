@@ -355,14 +355,6 @@ html[dir="rtl"] #browserlist li {
 	background: url(imgs/alphabg.png) repeat;
 }
 
-.ie6 #browserlist h2 {
-	background: #E7DECD; /* 24-bit PNG not supported in IE6, replacing with flat color */
-}
-
-.ie6 #browserlist li a:hover h2 {
-	background: #EEE8DC; /* Lighter color on hover to simulate transparency */
-}
-
 #browserlist p {
 	padding: 0 5px;
 	text-shadow: 0 1px 0 rgba(255,255,255,.8);
@@ -370,10 +362,6 @@ html[dir="rtl"] #browserlist li {
 
 #browserlist p.info {
 	min-height: 150px;
-}
-
-.ie6 #browserlist p.info {
-	height: 120px; /* Fix for min-height bug */
 }
 
 #browserlist p.version {
@@ -396,10 +384,6 @@ html[dir="rtl"] #browserlist li {
 	background: url(imgs/alphabg.png) repeat;
 }
 
-.ie6 #browserlist p.website {
-	background: #E7DECD; /* 24-bit PNG not supported in IE6, replacing with flat color */
-}
-
 #browserlist li a:link, #browserlist li a:visited {
 	color: #324B4B;
 	padding: 10px;
@@ -420,10 +404,6 @@ html[dir="rtl"] #browserlist li {
 
 .no-rgba #browserlist li a:hover {
 	background: url(imgs/alphabg.png) repeat;
-}
-
-.ie6 #browserlist li a:hover {
-	background: #E7DECD; /* 24-bit PNG not supported in IE6, replacing with flat color */
 }
 
 #browserlist li a:hover .website {
@@ -515,10 +495,6 @@ footer h2 {
 	margin-left: 15px;
 }
 
-.ie6 #about {
-	display: inline; /* Fix for double margin float bug */
-}
-
 #share {
 	width: 30%;
 	float: right;
@@ -535,10 +511,6 @@ html[dir="rtl"] #share {
 	float: left;
 }
 
-.ie6 #share {
-	display: inline; /* Fix for double margin float bug */
-}
-
 #share nav li {
 	width: 32px;
 	height: 32px;
@@ -550,10 +522,6 @@ html[dir="rtl"] #share nav li {
 	float: right;
 	margin-right: 0;
 	margin-left: 9px;
-}
-
-.ie6 #share nav li {
-	display: inline; /* Fix for double margin float bug */
 }
 
 #share nav li a {
