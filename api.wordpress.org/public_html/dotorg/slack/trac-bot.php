@@ -10,8 +10,13 @@ namespace {
 
 namespace Dotorg\Slack\Trac {
 
+	// Slack sends the token as a query arg; anything else is not a webhook request.
+	if ( ! isset( $_GET['token'] ) || ! is_string( $_GET['token'] ) || '' === $_GET['token'] ) {
+		return;
+	}
+
 	// Verify it came from Slack.
-	if ( ! isset( $_GET['token'] ) || ! is_string( $_GET['token'] ) || ! hash_equals( URL_SECRET__TRAC_BOT, wp_unslash( $_GET['token'] ) ) ) {
+	if ( ! hash_equals( URL_SECRET__TRAC_BOT, wp_unslash( $_GET['token'] ) ) ) {
 		return;
 	}
 

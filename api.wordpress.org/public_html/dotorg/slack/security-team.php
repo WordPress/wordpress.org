@@ -61,8 +61,14 @@ function get_security_team( $user_field = 'user_login' ) {
 function api_call() {
 	header( 'Content-type: text/plain' );
 
+	// Trac sends the token as a query arg; anything else is not a valid request.
+	if ( ! isset( $_GET['token'] ) || ! is_string( $_GET['token'] ) || '' === $_GET['token'] ) {
+		exit;
+	}
+
 	// Confirm it came from the Trac server.
-	if ( ! hash_equals( API_TOKEN, $_GET['token'] ?? '' ) ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- No WP loaded, so the request is never slashed.
+	if ( ! hash_equals( API_TOKEN, $_GET['token'] ) ) {
 		exit;
 	}
 
