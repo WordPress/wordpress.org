@@ -265,7 +265,7 @@ function get_target_url() {
 		$target_url .= '/' . $locale;
 	}
 
-	$path = $_SERVER['REQUEST_URI'];
+	$path = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 	if ( $path ) {
 		$count = 1; // Only replace the leading Openverse subpath.
 		$target_url .= str_replace( OPENVERSE_SUBPATH, '', $path, $count );

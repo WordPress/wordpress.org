@@ -27,7 +27,7 @@ if ( $is_redirect_enabled ) {
 	wp_redirect( $target_url, 301 );
 	exit;
 } else {
-	echo "<!-- " . $target_url . " -->";
+	echo '<!-- ' . esc_url( $target_url ) . ' -->';
 }
 
 get_header();
