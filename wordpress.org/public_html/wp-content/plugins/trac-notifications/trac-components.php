@@ -507,7 +507,7 @@ jQuery( function( $ ) {
 				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
 			}
 			echo '</ul>';
-			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
+			echo 'View all posts tagged <a href="' . esc_url( get_term_link( $post->post_name, 'post_tag' ) ) . '">' . esc_html( $post->post_name ) . "</a>.\n\n";
 			wp_reset_postdata();
 		}
 
@@ -525,7 +525,7 @@ jQuery( function( $ ) {
 				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
 			}
 			echo '</ul>';
-			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
+			echo 'View all posts tagged <a href="' . esc_url( get_term_link( $post->post_name, 'post_tag' ) ) . '">' . esc_html( $post->post_name ) . "</a>.\n\n";
 			wp_reset_postdata();
 		}
 		restore_current_blog();

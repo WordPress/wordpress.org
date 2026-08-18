@@ -30,7 +30,7 @@ if ( have_posts() ) :
 					get_the_time( 'l, F jS, Y' ),
 					get_the_time(),
 					get_the_category_list(', '),
-					get_post_comments_feed_link()
+					esc_url( get_post_comments_feed_link() )
 				);
 
 				if ( 'open' == $post->comment_status && 'open' == $post->ping_status ) :

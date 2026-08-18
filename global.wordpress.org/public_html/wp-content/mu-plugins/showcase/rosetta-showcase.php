@@ -205,7 +205,7 @@ class Rosetta_Showcase {
 				$title = _draft_or_post_title();
 				printf(
 					'<a class="row-title" href="%s" aria-label="%s">%s</a>',
-					get_edit_post_link( $post_id ),
+					esc_url( get_edit_post_link( $post_id ) ),
 					/* translators: %s: post title */
 					esc_attr( sprintf( __( '&#8220;%s&#8221; (Edit)', 'rosetta' ), $title ) ),
 					$title
