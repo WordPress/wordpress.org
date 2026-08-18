@@ -34,7 +34,7 @@ the_post();
 
 			<header class="entry-header">
 				<hgroup class="header-group">
-					<img width="300" src="<?php echo get_theme_file_uri('images/enterprise/education.png'); ?>">
+					<img width="300" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/education.png' ) ); ?>">
 					<h1 class="entry-title">WordPress in Education</h1>
 					<p class="entry-description">As a result of its flexibility, ease of use (for authors and administrators), open source license, focus on backward compatibility, and large community of developers, designers, and consultants, WordPress is the content management system of choice for K12 and Higher Education across the globe.</p>
 					<div style="clear:both"></div>
@@ -53,35 +53,35 @@ the_post();
 					<h3>Public Universities</h3>
 				</div>
 				<div class="entry-content row enterprise-logos">
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/boisestate.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/sprott.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/cuny.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/coloradostate.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/curtinuniversity.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/fiu.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/georgiastate.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/iaia.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/newcollegeofflorida.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/nichollsstate.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofalabama.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/ualr.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/ubc.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/berkleylaw.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/cambridge.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/ucf.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofflorida.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofhawaii.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofmaine.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofmarywashington.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofmelbourne.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofmichigan.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/centerforeuropeanstudies.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/usc.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofwashington.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/uofwisconsinmilwaukee.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/vcuarts.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/wallawalla.png'); ?>"></section>
-					<section class="col-2"><img src="<?php echo get_theme_file_uri('images/enterprise/washingtonstate.png'); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/boisestate.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/sprott.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/cuny.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/coloradostate.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/curtinuniversity.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/fiu.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/georgiastate.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iaia.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/newcollegeofflorida.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/nichollsstate.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofalabama.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/ualr.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/ubc.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/berkleylaw.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/cambridge.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/ucf.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofflorida.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofhawaii.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofmaine.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofmarywashington.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofmelbourne.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofmichigan.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/centerforeuropeanstudies.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/usc.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofwashington.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uofwisconsinmilwaukee.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/vcuarts.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wallawalla.png' ) ); ?>"></section>
+					<section class="col-2"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/washingtonstate.png' ) ); ?>"></section>
 				</div>
 			</div>
 
@@ -95,39 +95,39 @@ the_post();
 			<div class="entry-content row examples">
 				<section class="col-6">
 					<h4>Private Liberal Arts Colleges</h4>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/bates.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/dawson.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/dominicancollege.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/dominicanuniversity.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/lafayette.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/wheaton.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/bates.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/dawson.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/dominicancollege.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/dominicanuniversity.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/lafayette.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wheaton.png' ) ); ?>">
 				</section>
 				<section class="col-6">
 					<h4>Private Research Universities</h4>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/bostonu.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/bayloru.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/casewestern.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/mitsloan.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/northeastern.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/stanford.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/bostonu.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/bayloru.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/casewestern.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/mitsloan.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/northeastern.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/stanford.png' ) ); ?>">
 				</section>
 			</div>
 
 			<div class="entry-content row examples">
 				<section class="col-4">
 					<h4>Ivy League</h4>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/harvard.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/princeton.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/harvard.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/princeton.png' ) ); ?>">
 				</section>
 				<section class="col-4">
 					<h4>Professional &<br> Medical Schools</h4>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/desmoines.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/westernstates.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/desmoines.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/westernstates.png' ) ); ?>">
 				</section>
 				<section class="col-4">
 					<h4>K-12 Education</h4>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/newark.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/lcti.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/newark.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/lcti.png' ) ); ?>">
 				</section>
 			</div>
 
@@ -147,89 +147,89 @@ the_post();
 				</section>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconpaywall.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconpaywall.png' ) ); ?>">
 						<h4>Accessibility</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/washingtonstate.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/wpaccessibilityhandbook.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/wpaccessibility.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/siteimprove.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/washingtonstate.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wpaccessibilityhandbook.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wpaccessibility.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/siteimprove.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconvideo.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconvideo.png' ) ); ?>">
 						<h4>Single-Sign On/<br>Federated Identity</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/shibbolethlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/saml.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/shibbolethlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/saml.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconasset.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconasset.png' ) ); ?>">
 						<h4>Search</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/elasticsearchlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/google.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/elasticsearchlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/google.png' ) ); ?>"></div>
 						</div>
 					</section>
 				</div>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconanalytics.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconanalytics.png' ) ); ?>">
 						<h4>Calendar/Events</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/localist.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/theeventscalendar.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/calendarwiz.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/localist.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/theeventscalendar.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/calendarwiz.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconautomation.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconautomation.png' ) ); ?>">
 						<h4>News/Syndication</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/distributorlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/washingtonstate.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/distributorlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/washingtonstate.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconseo.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconseo.png' ) ); ?>">
 						<h4>WordPress Powered Learning Management Systems</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/learndash.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/lifterlms.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/learnpress.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/wpcourseware.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/senseilms.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/learndash.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/lifterlms.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/learnpress.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wpcourseware.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/senseilms.png' ) ); ?>"></div>
 						</div>
 					</section>
 				</div>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconchannels.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconchannels.png' ) ); ?>">
 						<h4>Learning Management Systems</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/blackboard.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/edmodo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/moodle.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/openedx.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/sakai.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/blackboard.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/edmodo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/moodle.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/openedx.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/sakai.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconsocial.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconsocial.png' ) ); ?>">
 						<h4>Student Information Systems</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/ellucian.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/blackbaud.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/empower.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/ellucian.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/blackbaud.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/empower.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration cta blue">
@@ -246,10 +246,10 @@ the_post();
 						<h2 class="header">For More Information</h2>
 						<h3>Groups</h3>
 						<hr class="bluesmall">
-						<img src="<?php echo get_theme_file_uri('images/enterprise/wpcampus.png'); ?>">
+						<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wpcampus.png' ) ); ?>">
 						<p>Active community of WordPress practitioners working in higher education:  "Our goal is to provide a wealth of knowledge for anyone who's interested in using WordPress and allow people to share and learn about WordPress in the world of higher education." Hosts an annual conference.</p>
 
-						<img src="<?php echo get_theme_file_uri('images/enterprise/wpedu.png'); ?>">
+						<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wpedu.png' ) ); ?>">
 						<p>"Low-Traffic list discussing WordPress in education"</p>
 					</div>
 					<div class="videos">

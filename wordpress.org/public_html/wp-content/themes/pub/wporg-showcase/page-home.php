@@ -109,7 +109,7 @@ get_header();
 
 				<?php endwhile; // have_posts ?>
 			</ul>
-			<a href="<?php echo home_url( '/archives/' ); ?>" class="wpsc-view-all"><?php _e( 'View All Showcase Sites &rarr;', 'wporg-showcase' ); ?></a>
+			<a href="<?php echo esc_url( home_url( '/archives/' ) ); ?>" class="wpsc-view-all"><?php esc_html_e( 'View All Showcase Sites &rarr;', 'wporg-showcase' ); ?></a>
 
 			<?php endif; // have_posts ?>
 

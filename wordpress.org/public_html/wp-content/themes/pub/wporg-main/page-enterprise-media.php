@@ -34,7 +34,7 @@ the_post();
 
 			<header class="entry-header">
 				<hgroup class="header-group">
-					<img width="300" src="<?php echo get_theme_file_uri('images/enterprise/mediapublishing.png'); ?>">
+					<img width="300" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/mediapublishing.png' ) ); ?>">
 					<h1 class="entry-title">Media and Publishing</h1>
 
 					<p class="entry-description">Global Media Delivers on WordPress</p>
@@ -57,61 +57,61 @@ the_post();
 
 			<div class="entry-content row media-logos">
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/nytlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/nytlogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/peoplelogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/peoplelogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/uslogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uslogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/wsjlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wsjlogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/mnglogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/mnglogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/timelogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/timelogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/entertainmentlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/entertainmentlogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/denverpostlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/denverpostlogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/sjmnewslogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/sjmnewslogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/fortunelogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/fortunelogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/varietylogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/varietylogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/portlandpresslogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/portlandpresslogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/seattletimeslogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/seattletimeslogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/wwdlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wwdlogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/rollingstonelogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/rollingstonelogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/thesunlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/thesunlogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/usatodaylogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/usatodaylogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/motortrendlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/motortrendlogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/readersdigestlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/readersdigestlogo.png' ) ); ?>">
 				</section>
 				<section class="col-3">
 				</section>
@@ -127,34 +127,34 @@ the_post();
 
 			<div class="entry-content row media-logos">
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/digidaylogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/digidaylogo.png' ) ); ?>">
 				</section>
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/fivethirtyeightlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/fivethirtyeightlogo.png' ) ); ?>">
 				</section>
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/onedigitallogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/onedigitallogo.png' ) ); ?>">
 				</section>
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/venturebeatlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/venturebeatlogo.png' ) ); ?>">
 				</section>
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/politicologo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/politicologo.png' ) ); ?>">
 				</section
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/uproxxlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uproxxlogo.png' ) ); ?>">
 				</section>
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/thewraplogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/thewraplogo.png' ) ); ?>">
 				</section>
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/wirecutterlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wirecutterlogo.png' ) ); ?>">
 				</section>
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/foxsportslogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/foxsportslogo.png' ) ); ?>">
 				</section>
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/digitaltrendslogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/digitaltrendslogo.png' ) ); ?>">
 				</section>
 			</div>
 
@@ -162,23 +162,23 @@ the_post();
 				<section class="col-4">
 					<h4>Broadcasters</h4>
 					<p>WordPress integrates with streaming video-on-demand applications (SVOD) via providers like Anvato, over-the-top (OTT) media services, and integrated audio and video players that support virtually any platform or device.</p>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/wamulogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/nexstarlogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/beasleylogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wamulogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/nexstarlogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/beasleylogo.png' ) ); ?>">
 				</section>
 				<section class="col-4">
 					<h4>Book Publishers</h4>
 					<p>A flexible information architecture, supported by fully customizable post types and taxonomies, helps book publishers manage complex data models for their titles and integrate with services like Onix and Bowker.</p>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/macmillanlogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/hachettelogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/harpercollinslogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/macmillanlogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/hachettelogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/harpercollinslogo.png' ) ); ?>">
 				</section>
 				<section class="col-4">
 					<h4>Nonprofit</h4>
 					<p>Nonprofit organizations have complex publishing needs that rival any publisher in news media. WordPress helps them efficiently manage their sites with a small staff and powerful integrations with search platforms let them expose their wealth of evergreen content to the community.</p>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/brookingslogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/clevelandcliniclogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/aarplogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/brookingslogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/clevelandcliniclogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/aarplogo.png' ) ); ?>">
 				</section>
 			</div>
 
@@ -189,118 +189,118 @@ the_post();
 				</section>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconpaywall.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconpaywall.png' ) ); ?>">
 						<h4>Paywall & Monetization</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/pianologo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/laterpaylogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/pianologo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/laterpaylogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconvideo.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconvideo.png' ) ); ?>">
 						<h4>Video</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/brightcovelogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/ooyalalogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/anvatologo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/brightcovelogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/ooyalalogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/anvatologo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconasset.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconasset.png' ) ); ?>">
 						<h4>Digital Asset Management</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/gettyimageslogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/webdamlogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/gettyimageslogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/webdamlogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 				</div>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconanalytics.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconanalytics.png' ) ); ?>">
 						<h4>Analytics</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/parselylogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/chartbeatlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/googleanalyticslogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/adobeanalyticslogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/parselylogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/chartbeatlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/googleanalyticslogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/adobeanalyticslogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconautomation.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconautomation.png' ) ); ?>">
 						<h4>Marketing Automation & Personalization</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/sailthrulogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/parselylogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/sailthrulogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/parselylogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconseo.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconseo.png' ) ); ?>">
 						<h4>SEO & Audience</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/yoastlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/optimizelylogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/msmsitemaplogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/yoastlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/optimizelylogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/msmsitemaplogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 				</div>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconchannels.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconchannels.png' ) ); ?>">
 						<h4>Platform Channels</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/amplogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/facebook2logo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/ioslogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/flipboardlogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/amplogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/facebook2logo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/ioslogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/flipboardlogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconsocial.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconsocial.png' ) ); ?>">
 						<h4>Social</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/disquslogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/forumslogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/socialcommunitylogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/disquslogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/forumslogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/socialcommunitylogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconworkflow.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconworkflow.png' ) ); ?>">
 						<h4>Editorial Workflow</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/editflowlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/coschedulelogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/kapostlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/distributorlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/googledocslogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/editflowlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/coschedulelogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/kapostlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/distributorlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/googledocslogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 				</div>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconadvertising.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconadvertising.png' ) ); ?>">
 						<h4>Advertising</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/adstxtlogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/adstxtlogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconsearch.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconsearch.png' ) ); ?>">
 						<h4>Search & Indexing</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/elasticsearchlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/solrlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/marklogiclogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/elasticsearchlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/solrlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/marklogiclogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration blue">
@@ -316,19 +316,19 @@ the_post();
 				<div class="entry-content row">
 					<section class="col-3">
 						<h3>Paywall and Monetization Whitepaper</h3>
-						<div><img src="<?php echo get_theme_file_uri('images/enterprise/more1.png'); ?>"></div>
+						<div><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/more1.png' ) ); ?>"></div>
 					</section>
 					<section class="col-3">
 						<h3>Editorial Newsroom Workflow Guide</h3>
-						<div><img src="<?php echo get_theme_file_uri('images/enterprise/more2.png'); ?>"></div>
+						<div><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/more2.png' ) ); ?>"></div>
 					</section>
 					<section class="col-3">
 						<h3>Decoupled WordPress Pros and Cons</h3>
-						<div><img src="<?php echo get_theme_file_uri('images/enterprise/more3.png'); ?>"></div>
+						<div><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/more3.png' ) ); ?>"></div>
 					</section>
 					<section class="col-3">
 						<h3>Security / Open Source</h3>
-						<div><img src="<?php echo get_theme_file_uri('images/enterprise/more4.png'); ?>"></div>
+						<div><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/more4.png' ) ); ?>"></div>
 					</section>
 				</div>
 			</div>

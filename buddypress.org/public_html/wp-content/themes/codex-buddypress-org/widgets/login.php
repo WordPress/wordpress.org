@@ -23,7 +23,7 @@ class BPOrg_Login_Widget extends WP_Widget {
 				</a>
 
 				<h4><?php echo bp_core_get_userlink( bp_loggedin_user_id() ) ?></h4>
-				<a class="button logout" href="<?php echo wp_logout_url( bp_get_root_domain() ) ?>"><?php _e( 'Log Out', 'buddypress' ) ?></a>
+				<a class="button logout" href="<?php echo esc_url( wp_logout_url( bp_get_root_domain() ) ); ?>"><?php esc_html_e( 'Log Out', 'buddypress' ); ?></a>
 
 				<?php do_action( 'bp_sidebar_me' ) ?>
 			</div>
@@ -45,11 +45,14 @@ class BPOrg_Login_Widget extends WP_Widget {
 			<p id="login-text">
 				<?php _e( 'To start connecting please log in first.', 'buddypress' ) ?>
 				<?php if ( bp_get_signup_allowed() ) : ?>
-					<?php printf( __( ' You can also <a href="%s" title="Create an account">create an account</a>.', 'buddypress' ), site_url( BP_REGISTER_SLUG . '/' ) ) ?>
+					<?php
+					/* translators: %s: URL of the account registration page. */
+					printf( wp_kses_post( __( ' You can also <a href="%s" title="Create an account">create an account</a>.', 'buddypress' ) ), esc_url( site_url( BP_REGISTER_SLUG . '/' ) ) );
+					?>
 				<?php endif; ?>
 			</p>
 
-			<form name="login-form" id="sidebar-login-form" class="standard-form" action="<?php echo site_url( 'wp-login.php', 'login_post' ) ?>" method="post">
+			<form name="login-form" id="sidebar-login-form" class="standard-form" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post">
 				<label><?php _e( 'Username', 'buddypress' ) ?><br />
 				<input type="text" name="log" id="sidebar-user-login" class="input" value="<?php echo attribute_escape(stripslashes($user_login)); ?>" /></label>
 
