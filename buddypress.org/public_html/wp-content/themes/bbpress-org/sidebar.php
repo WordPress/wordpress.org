@@ -108,7 +108,7 @@ endif;
 		<div>
 			<h2><?php _e( 'Legacy', 'bbporg' ); ?></h2>
 			<ul>
-				<li><a href="<?php echo get_permalink( 116247 ); ?>"><?php _e( 'Plugins for bbPress 1.1', 'bbporg' ); ?></a></li>
+				<li><a href="<?php echo esc_url( get_permalink( 116247 ) ); ?>"><?php esc_html_e( 'Plugins for bbPress 1.1', 'bbporg' ); ?></a></li>
 			</ul>
 		</div>
 

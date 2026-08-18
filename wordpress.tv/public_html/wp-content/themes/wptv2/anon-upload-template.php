@@ -285,7 +285,7 @@ if ( isset( $_GET['post_category'] ) ) {
 					<p>Please review the guidelines listed on the right, then submit your video below:</p>
 				<?php } ?>
 
-				<form method="post" action="<?php echo admin_url('admin-post.php'); ?>" data-xhr-action="<?php echo admin_url('admin-post.php?xhr=1'); ?>" id="video-upload-form" enctype="multipart/form-data">
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-xhr-action="<?php echo esc_url( admin_url( 'admin-post.php?xhr=1' ) ); ?>" id="video-upload-form" enctype="multipart/form-data">
 					<?php wp_nonce_field('wptv-upload-video', 'wptvvideon'); ?>
 					<input type="hidden" name="action" value="wptv_video_upload" />
 

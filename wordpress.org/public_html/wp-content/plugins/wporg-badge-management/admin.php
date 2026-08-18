@@ -156,7 +156,7 @@ function render_manage_tab() {
 
 	// Render a form with a textarea for the user, a selection for the action, and a checkbox of each team that this site can manage.
 	?>
-	<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="wporg_profile_manage_badges">
 		<?php wp_nonce_field( 'wporg_profile_badges' ); ?>
 		<table class="form-table">
@@ -208,7 +208,7 @@ function render_settings() {
 
 	?>
 	<h1>Settings</h1>
-	<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="badge_settings">
 		<?php wp_nonce_field( 'badge_settings' ); ?>
 		<table class="form-table">

@@ -21,7 +21,12 @@ get_header(); ?>
 			</header><!-- .page-header -->
 
 			<div class="page-content">
-				<p><?php printf( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg-forums' ), home_url( '/forums/' ) ); ?></p>
+				<p>
+					<?php
+					/* translators: %s: URL of the forums home page. */
+					printf( wp_kses_post( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg-forums' ) ), esc_url( home_url( '/forums/' ) ) );
+					?>
+				</p>
 			</div>
 		</section>
 

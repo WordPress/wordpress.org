@@ -382,7 +382,7 @@ jQuery( function( $ ) {
 			echo "<h3>Recent posts on the make/{$this->trac} blog</h3>\n<ul>";
 			while ( $recent_posts->have_posts() ) {
 				$recent_posts->the_post();
-				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
+				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
 			}
 			echo '</ul>';
 			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
@@ -400,7 +400,7 @@ jQuery( function( $ ) {
 			echo "<h3>Recent posts on the make/test blog</h3>\n<ul>";
 			while ( $flow_posts->have_posts() ) {
 				$flow_posts->the_post();
-				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
+				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
 			}
 			echo '</ul>';
 			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
@@ -722,9 +722,9 @@ jQuery( function( $ ) {
 
 		echo '<tr>';
 		if ( $post->post_parent ) {
-			echo '<td>&mdash; <a href="' . get_permalink() . '">' . $post->post_title . '</a></td>';
+			echo '<td>&mdash; <a href="' . esc_url( get_permalink() ) . '">' . esc_html( $post->post_title ) . '</a></td>';
 		} else {
-			echo '<td><a href="' . get_permalink() . '"><strong>' . $post->post_title . '</strong></a></td>';
+			echo '<td><a href="' . esc_url( get_permalink() ) . '"><strong>' . esc_html( $post->post_title ) . '</strong></a></td>';
 		}
 
 		$open_tickets = 0;

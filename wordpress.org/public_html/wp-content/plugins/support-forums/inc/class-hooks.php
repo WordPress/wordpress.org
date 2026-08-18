@@ -1034,7 +1034,8 @@ class Hooks {
 				} else {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <em>%2$s</em></p>',
 						__( 'The page I need help with:', 'wporg-forums' ),
-						sprintf( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ), wp_login_url() )
+						/* translators: %s: URL of the log in page. */
+						sprintf( wp_kses_post( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ) ), esc_url( wp_login_url() ) )
 					);
 				}
 			}

@@ -98,16 +98,16 @@ function wp_flavors() {
 
 	foreach ( $flavors as $flavor ) {
 		if ( in_category( $flavor ) ) {
-			echo '<li class="flavor-used"><img src="' . get_template_directory_uri() . '/images/flavor.png" /> ' . $flavor . '</li>';
+			echo '<li class="flavor-used"><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor.png" /> ' . esc_html( $flavor ) . '</li>';
 		} else {
-			echo '<li><img src="' . get_template_directory_uri() . '/images/flavor2.png" /> ' . $flavor . '</li>';
+			echo '<li><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor2.png" /> ' . esc_html( $flavor ) . '</li>';
 		}
 	}
 
 	if ( in_category( 'BuddyPress' ) ) {
-		echo '<li class="flavor-used"><img src="' . get_template_directory_uri() . '/images/flavor-bp.png" /> ' . __( 'BuddyPress', 'wporg-showcase' ). '</li>';
+		echo '<li class="flavor-used"><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor-bp.png" /> ' . esc_html__( 'BuddyPress', 'wporg-showcase' ) . '</li>';
 	} else {
-		echo '<li><img src="' . get_template_directory_uri() . '/images/flavor-bp2.png" /> ' . __( 'BuddyPress', 'wporg-showcase' ). '</li>';
+		echo '<li><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor-bp2.png" /> ' . esc_html__( 'BuddyPress', 'wporg-showcase' ) . '</li>';
 	}
 
 	echo '</ul>';
@@ -160,7 +160,7 @@ function popular_tags ($number = 10) {
 
 function breadcrumb() { ?>
 
-	<h2><a href="<?php echo home_url( '/' ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php _e( 'Showcase', 'wporg-showcase' ); ?></a>
+	<h2><a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php esc_html_e( 'Showcase', 'wporg-showcase' ); ?></a>
 
 		<?php if ( is_search() ) : ?>
 			<?php

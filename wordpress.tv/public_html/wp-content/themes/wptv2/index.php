@@ -76,7 +76,7 @@ if ( have_posts() ) :
 				<p><?php echo get_search_form(); ?></p>
 				<p><?php printf ( __( 'Or, <a href="%s">visit the homepage</a> to start a fresh journey.', 'wptv' ), '/' ); ?></p>
 				<p>
-					<img src="<?php echo get_stylesheet_directory_uri(); ?>/i/michael-pick-stashes-a-guinness.gif" alt="" /><br />
+					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/i/michael-pick-stashes-a-guinness.gif' ); ?>" alt="" /><br />
 					Photo animation credit: <a href="https://markjaquith.com/">Mark Jaquith</a>.
 				</p>
 			</div>

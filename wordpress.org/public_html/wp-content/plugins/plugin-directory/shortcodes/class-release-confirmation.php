@@ -77,7 +77,7 @@ class Release_Confirmation {
 				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
 					__( 'Your account has elevated privileges and requires extra security before you can manage plugin releases. Please <a href="%s">enable two-factor authentication now</a>.', 'wporg-plugins' ),
-					get_2fa_onboarding_url()
+					esc_url( get_2fa_onboarding_url() )
 				)
 			);
 		}
@@ -92,7 +92,7 @@ class Release_Confirmation {
 			printf(
 				'<h2 id="releases-%s"><a href="%s">%s</a></h2>',
 				esc_attr( $plugin->post_name ),
-				get_permalink( $plugin ),
+				esc_url( get_permalink( $plugin ) ),
 				get_the_title( $plugin )
 			);
 
@@ -571,7 +571,7 @@ class Release_Confirmation {
 			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 			sprintf(
 				__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
-				home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
+				esc_url( home_url( '/developers/releases/' ) ) // TODO: Hardcoded URL.
 			)
 		);
 	}
