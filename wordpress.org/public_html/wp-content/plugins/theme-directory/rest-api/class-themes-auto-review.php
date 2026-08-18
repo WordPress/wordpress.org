@@ -86,7 +86,10 @@ class Auto_Review_Controller extends WP_REST_Controller {
 	 * rather than searching for the bare slug keeps a slug that is a substring
 	 * of another theme's slug from matching that theme's ticket.
 	 *
-	 * @param string $keywords   The ticket's keywords, space separated.
+	 * Keywords are written as a space separated list, but the Trac field is free
+	 * text and reviewers do separate them with commas, so both are accepted.
+	 *
+	 * @param string $keywords   The ticket's keywords.
 	 * @param string $theme_slug The theme slug.
 	 * @return bool
 	 */
@@ -95,7 +98,9 @@ class Auto_Review_Controller extends WP_REST_Controller {
 			return false;
 		}
 
-		return in_array( 'theme-' . $theme_slug, preg_split( '/\s+/', trim( $keywords ) ), true );
+		$keywords = preg_split( '/[\s,]+/', strtolower( $keywords ), -1, PREG_SPLIT_NO_EMPTY );
+
+		return in_array( 'theme-' . strtolower( $theme_slug ), $keywords, true );
 	}
 
 	/**
@@ -172,7 +177,12 @@ class Auto_Review_Controller extends WP_REST_Controller {
 		if ( ! $this->ticket_is_for_theme( $ticket['keywords'] ?? '', $theme_slug ) ) {
 			return new \WP_Error(
 				'rest_ticket_theme_mismatch',
-				__( 'That ticket is not for this theme.', 'wporg-themes' ),
+				sprintf(
+					/* translators: 1: Trac ticket ID, 2: theme slug. */
+					__( 'Ticket %1$d carries no keyword for the theme %2$s.', 'wporg-themes' ),
+					(int) $ticket_id,
+					$theme_slug
+				),
 				array( 'status' => \WP_Http::BAD_REQUEST )
 			);
 		}
