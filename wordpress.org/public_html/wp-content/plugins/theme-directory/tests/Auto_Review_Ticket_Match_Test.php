@@ -15,6 +15,8 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Theme_Directory\Rest_API\Auto_Review_Controller;
 
 /**
+ * Covers the ticket-to-theme match used before an auto-review comment is posted.
+ *
  * @group themes-api
  */
 class Auto_Review_Ticket_Match_Test extends TestCase {
@@ -54,23 +56,25 @@ class Auto_Review_Ticket_Match_Test extends TestCase {
 	 */
 	public static function data_keywords() {
 		return array(
-			'keyword first in the list'   => array( 'theme-mente-clara', 'mente-clara', true ),
-			'keyword later in the list'   => array( 'child-theme theme-foo', 'foo', true ),
-			'comma separated'             => array( 'theme-foo, needs-screenshot', 'foo', true ),
-			'comma without a space'       => array( 'needs-screenshot,theme-foo', 'foo', true ),
-			'surrounding whitespace'      => array( '  theme-foo   child-theme  ', 'foo', true ),
-			'mixed case keyword'          => array( 'Theme-Twenty-Four', 'twenty-four', true ),
-			'mixed case slug'             => array( 'theme-twenty-four', 'Twenty-Four', true ),
-			'slug is a prefix of another' => array( 'theme-twentytwentyfour', 'twenty', false ),
-			'slug longer than the keyword' => array( 'theme-twenty', 'twentytwentyfour', false ),
-			'a different theme'           => array( 'theme-bar', 'foo', false ),
+			'keyword first in the list'     => array( 'theme-mente-clara', 'mente-clara', true ),
+			'keyword later in the list'     => array( 'child-theme theme-foo', 'foo', true ),
+			'comma separated'               => array( 'theme-foo, needs-screenshot', 'foo', true ),
+			'comma without a space'         => array( 'needs-screenshot,theme-foo', 'foo', true ),
+			'surrounding whitespace'        => array( '  theme-foo   child-theme  ', 'foo', true ),
+			'mixed case keyword'            => array( 'Theme-Twenty-Four', 'twenty-four', true ),
+			'mixed case slug'               => array( 'theme-twenty-four', 'Twenty-Four', true ),
+			'slug is a prefix of another'   => array( 'theme-twentytwentyfour', 'twenty', false ),
+			'slug longer than the keyword'  => array( 'theme-twenty', 'twentytwentyfour', false ),
+			'a different theme'             => array( 'theme-bar', 'foo', false ),
 			'parent keyword is not a match' => array( 'child-theme parent-foo', 'foo', false ),
-			'no keywords'                 => array( '', 'foo', false ),
-			'no slug'                     => array( 'theme-foo', '', false ),
+			'no keywords'                   => array( '', 'foo', false ),
+			'no slug'                       => array( 'theme-foo', '', false ),
 		);
 	}
 
 	/**
+	 * A ticket is the theme's only when it carries that theme's whole keyword.
+	 *
 	 * @dataProvider data_keywords
 	 *
 	 * @param string $keywords   The ticket's keywords.
