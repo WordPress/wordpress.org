@@ -54,7 +54,7 @@ $more = 1;
 		<content:encoded><![CDATA[<?php the_excerpt_rss() ?>]]></content:encoded>
 	<?php endif; ?>
 <?php endif; ?>
-		<wfw:commentRss><?php echo get_post_comments_feed_link(); ?></wfw:commentRss>
+		<wfw:commentRss><?php echo esc_url( get_post_comments_feed_link() ); ?></wfw:commentRss>
 
 		<showcase:screenshotURL><?php site_screenshot_src(); ?></showcase:screenshotURL>
 		<showcase:domain><?php get_site_domain(false, true, false); ?></showcase:domain>
