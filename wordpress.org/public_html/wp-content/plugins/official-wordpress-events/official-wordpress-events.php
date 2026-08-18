@@ -887,7 +887,7 @@ class Official_WordPress_Events {
 			trigger_error( sprintf(
 				'%s error for %s: %s',
 				__METHOD__,
-				parse_url( site_url(), PHP_URL_HOST ),
+				esc_html( parse_url( site_url(), PHP_URL_HOST ) ),
 				sanitize_text_field( $error )
 			), E_USER_WARNING );
 

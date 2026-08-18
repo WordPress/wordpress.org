@@ -140,6 +140,8 @@
 			<property name="customAutoEscapedFunctions" type="array">
 				<!-- Returns esc_url( $url ); see themes/pub/wporg-login/functions.php. -->
 				<element value="wporg_login_wordpress_url"/>
+				<!-- Core assembles and escapes this markup itself. -->
+				<element value="get_sample_permalink_html"/>
 			</property>
 		</properties>
 	</rule>
