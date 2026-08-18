@@ -1,11 +1,17 @@
-<?php defined( 'ABSPATH' ) or die(); ?>
+<?php
+/**
+ * The main template file.
+ *
+ * phpcs:disable WordPress.WP.EnqueuedResources
+ *
+ * @package browsehappy
+ */
+
+defined( 'ABSPATH' ) || die();
+?>
 <!DOCTYPE html>
 
-<!--[if lt IE 7 ]> <html <?php language_attributes(); ?> class="no-js ie6"> <![endif]-->
-<!--[if IE 7 ]>    <html <?php language_attributes(); ?> class="no-js ie7"> <![endif]-->
-<!--[if IE 8 ]>    <html <?php language_attributes(); ?> class="no-js ie8"> <![endif]-->
-<!--[if IE 9 ]>    <html <?php language_attributes(); ?> class="no-js ie9"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--> <html <?php language_attributes(); ?> class="no-js"> <!--<![endif]-->
+<html <?php language_attributes(); ?> class="no-js">
 
 <head>
 	<meta charset="utf-8">
@@ -14,15 +20,10 @@
 	<meta name="author" content="WordPress" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?15" />
-	<script src="<?php echo get_template_directory_uri(); ?>/js/modernizr-1.6.min.js"></script>
+	<link rel="stylesheet" href="<?php echo esc_url( get_template_directory_uri() . '/style.css?15' ); ?>" />
+	<script src="<?php echo esc_url( get_template_directory_uri() . '/js/modernizr-1.6.min.js' ); ?>"></script>
 	<script src="https://use.typekit.com/lsw6yis.js"></script>
 	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-
-	<!--[if lt IE 7]>
-		<script src="<?php echo get_template_directory_uri(); ?>/js/pngfix.min.js"></script>
-		<script>DD_belatedPNG.fix('#i18n-alert, header, #browserlist li .icon, footer, #share nav li a, #byline a');</script>
-	<![endif]-->
 
 <?php wp_head(); ?>
 </head>
