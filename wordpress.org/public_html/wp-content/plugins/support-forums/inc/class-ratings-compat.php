@@ -152,7 +152,9 @@ class Ratings_Compat {
 				return;
 			}
 
-			$notice = $object_link = $edit_url = '';
+			$notice      = '';
+			$object_link = '';
+			$edit_url    = '';
 			switch( $this->compat ) {
 				case 'plugin' :
 					/* translators: 1: link to the plugin, 2: review edit URL */
