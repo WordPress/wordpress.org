@@ -204,7 +204,7 @@ class Meta extends \WP_Widget {
 						if ( is_wp_error( $link ) ) {
 							return '';
 						}
-						return '<a href="' . esc_url( $link ) . '" rel="tag">' . $term->name . '</a>';
+						return '<a href="' . esc_url( $link ) . '" rel="tag">' . esc_html( $term->name ) . '</a>';
 					}, $terms ) );
 
 					echo '<li class="clear">';
