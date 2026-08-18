@@ -174,8 +174,13 @@ class SVN_Watcher {
 				}
 
 				if ( 'trunk' == $path_parts[1] ) {
-					$plugin['tags_touched'][] = 'trunk';
-
+					/*
+					 * A deleted /trunk has nothing left to export. It isn't recorded in tags_deleted
+					 * either, as that removes the matching release, and trunk has no release of its own.
+					 */
+					if ( ! $is_deletion || isset( $path_parts[2] ) /* a file within trunk */ ) {
+						$plugin['tags_touched'][] = 'trunk';
+					}
 				} elseif ( 'tags' == $path_parts[1] && isset( $path_parts[2] ) ) {
 					if ( $is_deletion && ! isset( $path_parts[3] ) /* not a file deletion */ ) {
 						$plugin['tags_deleted'][] = $path_parts[2];

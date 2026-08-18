@@ -186,6 +186,69 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 	}
 
 	/**
+	 * Deleting /trunk leaves nothing to export, so it mustn't be queued as a touched version.
+	 *
+	 * This is a real release pattern: the tag is added and trunk deleted in one commit, then
+	 * trunk is re-created from that tag a few seconds later. An import queued from the first
+	 * commit runs while trunk is missing, and the ZIP build fails against a URL that's gone.
+	 */
+	public function test_trunk_deletion_is_not_queued_as_a_touched_version() {
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry(
+					3653586,
+					array(
+						'/wp-better-permalinks/tags/4.3.1'            => 'A',
+						'/wp-better-permalinks/tags/4.3.1/readme.txt' => 'A',
+						'/wp-better-permalinks/trunk'                 => 'D',
+					)
+				),
+			)
+		);
+
+		$this->assertSame( array( '4.3.1' ), $plugins['wp-better-permalinks']['tags_touched'] );
+		$this->assertNotContains( 'trunk', $plugins['wp-better-permalinks']['tags_touched'] );
+
+		// trunk has no release of its own, so there's nothing for the importer to remove either.
+		$this->assertSame( array(), $plugins['wp-better-permalinks']['tags_deleted'] );
+	}
+
+	/**
+	 * Deleting a file inside /trunk is a change to trunk, not the removal of it.
+	 */
+	public function test_file_deletion_within_trunk_still_touches_trunk() {
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry( 600, array( '/plugin-a/trunk/deprecated.php' => 'D' ) ),
+			)
+		);
+
+		$this->assertSame( array( 'trunk' ), $plugins['plugin-a']['tags_touched'] );
+	}
+
+	/**
+	 * Once trunk is back, it's a change like any other — including when both commits land in
+	 * the same batch of revisions, where the deletion and the re-creation are seen together.
+	 */
+	public function test_recreated_trunk_is_queued_again() {
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry(
+					3653586,
+					array(
+						'/plugin-a/tags/1.0' => 'A',
+						'/plugin-a/trunk'    => 'D',
+					)
+				),
+				$this->log_entry( 3653587, array( '/plugin-a/trunk' => 'A' ) ),
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( array( '1.0', 'trunk' ), $plugins['plugin-a']['tags_touched'] );
+		$this->assertSame( array( 3653586, 3653587 ), $plugins['plugin-a']['revisions'] );
+	}
+
+	/**
 	 * Paths that don't name anything below the plugin root carry no importable change.
 	 */
 	public function test_bare_plugin_root_paths_are_ignored() {
