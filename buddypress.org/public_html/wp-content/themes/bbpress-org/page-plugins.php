@@ -37,7 +37,7 @@
 								'mid_size'  => 1
 							) );
 
-							echo $pag_links;
+							echo wp_kses_post( $pag_links );
 						?>
 
 					</div>
@@ -85,7 +85,7 @@
 
 					<div class="bbp-pagination-links">
 
-						<?php echo $pag_links; ?>
+						<?php echo wp_kses_post( $pag_links ); ?>
 
 					</div>
 				</div>

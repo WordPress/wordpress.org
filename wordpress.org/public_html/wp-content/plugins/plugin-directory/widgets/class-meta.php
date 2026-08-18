@@ -211,7 +211,7 @@ class Meta extends \WP_Widget {
 					printf(
 						/* translators: %s: tag list */
 						_n( 'Tag %s', 'Tags %s', count( $term_links ), 'wporg-plugins' ),
-						'<div class="tags">' . implode( $term_links ) . '</div>'
+						'<div class="tags">' . wp_kses_post( implode( $term_links ) ) . '</div>'
 					);
 					echo '</li>';
 				}

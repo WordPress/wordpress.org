@@ -207,7 +207,7 @@ function wporg_themes_post_submitbox_misc_actions() {
 	}
 
 	if ( ! empty( $links ) ) {
-		echo '<div class="misc-pub-section">' . implode( ' | ', $links ) . '</div>';
+		echo '<div class="misc-pub-section">' . wp_kses_post( implode( ' | ', $links ) ) . '</div>';
 	}
 }
 add_action( 'post_submitbox_misc_actions', 'wporg_themes_post_submitbox_misc_actions' );

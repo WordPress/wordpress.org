@@ -13,7 +13,7 @@ if ( have_posts() ) :
 		<div class="post" id="post-<?php the_ID(); ?>">
 			<h1><a href="<?php the_permalink() ?>" rel="bookmark" title="<?php printf( esc_attr__( 'Permanent Link to %s', 'bborg' ), the_title_attribute( [ 'echo' => false ] ) ); ?>"><?php the_title(); ?></a></h1>
 			<label class="date"><?php the_time( 'F jS, Y' ); ?></label>
-			<p class="<?php echo esc_attr( $classname ); ?>"><?php echo $attachment_link; ?><br /><?php echo basename($post->guid); ?></p>
+			<p class="<?php echo esc_attr( $classname ); ?>"><?php echo wp_kses_post( $attachment_link ); ?><br /><?php echo esc_html( basename( $post->guid ) ); ?></p>
 			<?php
 				the_content( __( 'Check it out!', 'bborg' ) );
 				wp_link_pages( array(
