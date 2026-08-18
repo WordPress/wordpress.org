@@ -1,4 +1,18 @@
 <?php
+/**
+ * Reports the security team's user logins to the Trac server.
+ *
+ * Standalone endpoint: WordPress is not loaded, so request data is never slashed, and
+ * Trac authenticates itself with the shared `API_TOKEN` secret; nonces do not exist in
+ * server-to-server requests. The file body sits inside a curly-brace namespace without
+ * the matching indent, so the scope sniff reads every line as one level short.
+ *
+ * phpcs:disable Generic.WhiteSpace.ScopeIndent
+ * phpcs:disable WordPress.Security.NonceVerification
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Slack
+ */
 
 namespace {
 	if ( ! isset( $GLOBALS['wpdb'] ) ) {
@@ -67,7 +81,6 @@ function api_call() {
 	}
 
 	// Confirm it came from the Trac server.
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- No WP loaded, so the request is never slashed.
 	if ( ! hash_equals( API_TOKEN, $_GET['token'] ) ) {
 		exit;
 	}
