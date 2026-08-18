@@ -9,12 +9,17 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\CLI\SVN_Watcher;
 
 /**
+ * Tests that SVN log entries are attributed to the right plugin.
+ *
  * @group cli
  */
 class SVN_Watcher_Log_Summary_Test extends TestCase {
 
 	/**
 	 * Invoke the protected SVN_Watcher::summarize_plugin_changes() helper.
+	 *
+	 * @param array $logs A list of log entries, as returned by SVN::log()'s 'log' key.
+	 * @return array The per-plugin change data.
 	 */
 	private function summarize( array $logs ): array {
 		$method = new ReflectionMethod( SVN_Watcher::class, 'summarize_plugin_changes' );
@@ -59,15 +64,22 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 	 * plugin happened to sort first in the commit.
 	 */
 	public function test_commit_spanning_multiple_plugins_is_split_per_plugin() {
-		$plugins = $this->summarize( array(
-			$this->log_entry( 3644696, array(
-				'/autoclose/tags/3.1.2/readme.txt',
-				'/autoclose/trunk/readme.txt',
-				'/better-search/tags/4.4.0/readme.txt',
-				'/better-search/trunk/readme.txt',
-				'/top-10/tags/4.4.2/readme.txt',
-			), 'Ajay', 'Update Tested up to: 7.1' ),
-		) );
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry(
+					3644696,
+					array(
+						'/autoclose/tags/3.1.2/readme.txt',
+						'/autoclose/trunk/readme.txt',
+						'/better-search/tags/4.4.0/readme.txt',
+						'/better-search/trunk/readme.txt',
+						'/top-10/tags/4.4.2/readme.txt',
+					),
+					'Ajay',
+					'Update Tested up to: 7.1'
+				),
+			)
+		);
 
 		$this->assertEqualsCanonicalizing(
 			array( 'autoclose', 'better-search', 'top-10' ),
@@ -89,13 +101,18 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 	 * what a different plugin in the same commit happened to change.
 	 */
 	public function test_flags_are_not_shared_between_plugins_in_one_commit() {
-		$plugins = $this->summarize( array(
-			$this->log_entry( 100, array(
-				'/plugin-a/trunk/readme.txt',
-				'/plugin-b/trunk/plugin-b.php',
-				'/plugin-c/assets/banner-772x250.png',
-			) ),
-		) );
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry(
+					100,
+					array(
+						'/plugin-a/trunk/readme.txt',
+						'/plugin-b/trunk/plugin-b.php',
+						'/plugin-c/assets/banner-772x250.png',
+					)
+				),
+			)
+		);
 
 		$this->assertTrue( $plugins['plugin-a']['readme_touched'] );
 		$this->assertFalse( $plugins['plugin-a']['code_touched'] );
@@ -114,13 +131,18 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 	 * Each plugin should record the revision once, however many of its paths the commit touched.
 	 */
 	public function test_revisions_are_recorded_once_per_commit() {
-		$plugins = $this->summarize( array(
-			$this->log_entry( 200, array(
-				'/plugin-a/trunk/plugin-a.php',
-				'/plugin-a/trunk/readme.txt',
-				'/plugin-a/tags/1.0/plugin-a.php',
-			) ),
-		) );
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry(
+					200,
+					array(
+						'/plugin-a/trunk/plugin-a.php',
+						'/plugin-a/trunk/readme.txt',
+						'/plugin-a/tags/1.0/plugin-a.php',
+					)
+				),
+			)
+		);
 
 		$this->assertSame( array( 200 ), $plugins['plugin-a']['revisions'] );
 		$this->assertEqualsCanonicalizing( array( 'trunk', '1.0' ), $plugins['plugin-a']['tags_touched'] );
@@ -130,11 +152,13 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 	 * Revisions accumulate across commits, and plugins come back ordered by their earliest revision.
 	 */
 	public function test_multiple_commits_accumulate_and_sort_by_earliest_revision() {
-		$plugins = $this->summarize( array(
-			$this->log_entry( 300, array( '/plugin-b/trunk/readme.txt' ) ),
-			$this->log_entry( 301, array( '/plugin-a/trunk/readme.txt' ) ),
-			$this->log_entry( 302, array( '/plugin-b/tags/2.0/readme.txt' ) ),
-		) );
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry( 300, array( '/plugin-b/trunk/readme.txt' ) ),
+				$this->log_entry( 301, array( '/plugin-a/trunk/readme.txt' ) ),
+				$this->log_entry( 302, array( '/plugin-b/tags/2.0/readme.txt' ) ),
+			)
+		);
 
 		$this->assertSame( array( 'plugin-b', 'plugin-a' ), array_keys( $plugins ) );
 		$this->assertSame( array( 300, 302 ), $plugins['plugin-b']['revisions'] );
@@ -145,12 +169,17 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 	 * Deleting a tag directory is a deletion; deleting a file inside a tag is just a change to it.
 	 */
 	public function test_tag_deletion_is_distinguished_from_a_file_deletion_within_a_tag() {
-		$plugins = $this->summarize( array(
-			$this->log_entry( 400, array(
-				'/plugin-a/tags/1.0'          => 'D',
-				'/plugin-a/tags/2.0/stale.php' => 'D',
-			) ),
-		) );
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry(
+					400,
+					array(
+						'/plugin-a/tags/1.0'           => 'D',
+						'/plugin-a/tags/2.0/stale.php' => 'D',
+					)
+				),
+			)
+		);
 
 		$this->assertSame( array( '1.0' ), $plugins['plugin-a']['tags_deleted'] );
 		$this->assertSame( array( '2.0' ), $plugins['plugin-a']['tags_touched'] );
@@ -160,12 +189,17 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 	 * Paths that don't name anything below the plugin root carry no importable change.
 	 */
 	public function test_bare_plugin_root_paths_are_ignored() {
-		$plugins = $this->summarize( array(
-			$this->log_entry( 500, array(
-				'/plugin-a'                 => 'A',
-				'/plugin-b/trunk/readme.txt' => 'M',
-			) ),
-		) );
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry(
+					500,
+					array(
+						'/plugin-a'                  => 'A',
+						'/plugin-b/trunk/readme.txt' => 'M',
+					)
+				),
+			)
+		);
 
 		$this->assertSame( array( 'plugin-b' ), array_keys( $plugins ) );
 	}

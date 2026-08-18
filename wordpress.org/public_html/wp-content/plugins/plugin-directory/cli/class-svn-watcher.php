@@ -160,7 +160,7 @@ class SVN_Watcher {
 					$plugins[ $plugin_slug ] = array(
 						'tags_touched'   => array(), // trunk is a tag too!
 						'tags_deleted'   => array(),
-						'readme_touched' => false, // minor optimization, only parse readme i18n on readme-related commits
+						'readme_touched' => false, // minor optimization, only parse readme i18n on readme-related commits.
 						'code_touched'   => false,
 						'assets_touched' => false,
 						'revisions'      => array(),
