@@ -1240,7 +1240,7 @@ class Admin {
 						printf(
 							/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
 							_n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
-							$flagged_link ? sprintf( '<a href="%s">%d</a>', $flagged_link, $flagged_count ) : $flagged_count
+							$flagged_link ? sprintf( '<a href="%s">%d</a>', esc_url( $flagged_link ), (int) $flagged_count ) : (int) $flagged_count
 						);
 					?></li>
 					<li><?php
