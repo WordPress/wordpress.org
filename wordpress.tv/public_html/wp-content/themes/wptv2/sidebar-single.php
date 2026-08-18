@@ -71,7 +71,7 @@ global $wptv, $originalcontent;
 								echo 'MP4: ' . wp_kses_post( join( ', ', $mp4_links ) ) . '<br/>';
 							}
 							if ( ! empty( $ogg_link ) ) {
-								echo "OGG: $ogg_link";
+								echo 'OGG: ' . wp_kses_post( $ogg_link );
 							}
 ?>
 			</div>

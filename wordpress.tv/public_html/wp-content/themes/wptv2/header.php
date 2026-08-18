@@ -40,7 +40,7 @@ global $wptv;
 
 			<h1><a rel="home" href="<?php echo esc_url( $wptv->home_url( '/' ) ); ?>"><img src="<?php echo esc_url( get_template_directory_uri() . '/i/wptv-2x.png' ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" height="40" width="210" /></a></h1>
 
-			<form id="searchform" name="searchform" method="get" action="<?php echo $wptv->home_url( '/' ); ?>">
+			<form id="searchform" name="searchform" method="get" action="<?php echo esc_url( $wptv->home_url( '/' ) ); ?>">
 				<label for="searchbox" class="screen-reader-text"><?php esc_attr_e( 'Search WordPress.tv', 'wptv' ); ?></label>
 				<input type="search" placeholder="<?php esc_attr_e( 'Search WordPress.tv', 'wptv' ); ?>" id="searchbox" name="s" value="<?php the_search_query(); ?>"  />
 				<input type="submit" value="<?php esc_attr_e( 'Search', 'wptv' ); ?>" />
