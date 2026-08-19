@@ -106,10 +106,22 @@ class SVN_Watcher {
 			return array();
 		}
 
-		// Summarize the plugin changes down into something more useful
+		return $this->summarize_plugin_changes( $logs['log'] );
+	}
+
+	/**
+	 * Summarizes a set of SVN log entries into per-plugin change data.
+	 *
+	 * A single commit may span multiple plugins, so the plugin each change belongs to is
+	 * determined from the individual path rather than from the commit as a whole.
+	 *
+	 * @param array $logs A list of log entries, as returned by SVN::log()'s 'log' key.
+	 * @return array A list of plugin changes to process, keyed by plugin slug.
+	 */
+	protected function summarize_plugin_changes( $logs ) {
 		$plugins = array();
 
-		foreach ( $logs['log'] as $log ) {
+		foreach ( $logs as $log ) {
 			// Discard some commits from the plugin management user.
 			if (
 				defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) &&
@@ -133,22 +145,6 @@ class SVN_Watcher {
 				}
 			}
 
-			$plugin_slug = explode( '/', $log['paths'][0] )[1];
-
-			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
-				$plugins[ $plugin_slug ] = array(
-					'tags_touched'   => array(), // trunk is a tag too!
-					'tags_deleted'   => array(),
-					'readme_touched' => false, // minor optimization, only parse readme i18n on readme-related commits
-					'code_touched'   => false,
-					'assets_touched' => false,
-					'revisions'      => array(),
-				);
-			}
-			$plugin =& $plugins[ $plugin_slug ];
-
-			// Keep track of the lowest revision number we've seen for this plugin
-			$plugin['revisions'][] = $log['revision'];
 			foreach ( $log['paths'] as $path ) {
 				$path_parts  = explode( '/', trim( $path, '/' ) );
 				$is_deletion = ( isset( $log['actions'][ $path ] ) && 'D' === $log['actions'][ $path ] );
@@ -156,10 +152,30 @@ class SVN_Watcher {
 				if ( ! isset( $path_parts[1] ) ) {
 					continue;
 				}
-		
+
+				// A commit can span multiple plugins, so each path names the plugin it affects.
+				$plugin_slug = $path_parts[0];
+
+				if ( ! isset( $plugins[ $plugin_slug ] ) ) {
+					$plugins[ $plugin_slug ] = array(
+						'tags_touched'   => array(), // trunk is a tag too!
+						'tags_deleted'   => array(),
+						'readme_touched' => false, // minor optimization, only parse readme i18n on readme-related commits.
+						'code_touched'   => false,
+						'assets_touched' => false,
+						'revisions'      => array(),
+					);
+				}
+				$plugin =& $plugins[ $plugin_slug ];
+
+				// Keep track of the revisions we've seen for this plugin.
+				if ( ! in_array( $log['revision'], $plugin['revisions'], true ) ) {
+					$plugin['revisions'][] = $log['revision'];
+				}
+
 				if ( 'trunk' == $path_parts[1] ) {
 					$plugin['tags_touched'][] = 'trunk';
-		
+
 				} elseif ( 'tags' == $path_parts[1] && isset( $path_parts[2] ) ) {
 					if ( $is_deletion && ! isset( $path_parts[3] ) /* not a file deletion */ ) {
 						$plugin['tags_deleted'][] = $path_parts[2];
@@ -169,7 +185,7 @@ class SVN_Watcher {
 
 				} elseif ( 'assets' == $path_parts[1] ) {
 					$plugin['assets_touched'] = true;
-		
+
 				}
 
 				// Only count the readme at the root of /trunk or a tag — a readme.txt in a subdirectory is just bundled documentation.
@@ -179,9 +195,15 @@ class SVN_Watcher {
 				if ( ! $plugin['code_touched'] && ( '/' === substr( $path, -1 ) || '.php' === substr( $path, -4 ) || '.js' === substr( $path, -3 ) ) ) {
 					$plugin['code_touched'] = true;
 				}
-			}
 
-			$plugin['tags_touched'] = array_values( array_unique( $plugin['tags_touched'] ) );
+				// Break the reference, so the next iteration doesn't write through it.
+				unset( $plugin );
+			}
+		}
+
+		foreach ( $plugins as $plugin_slug => $plugin ) {
+			$plugins[ $plugin_slug ]['tags_touched'] = array_values( array_unique( $plugin['tags_touched'] ) );
+			$plugins[ $plugin_slug ]['tags_deleted'] = array_values( array_unique( $plugin['tags_deleted'] ) );
 		}
 
 		// Sort plugins by minimum revision, it should already be in this order, but double check.
