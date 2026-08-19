@@ -103,7 +103,13 @@ class WordPressTV_Subtitles_Upload {
 	 * When the POST request is fired with the subtitles form and action.
 	 */
 	function post() {
-		if ( empty( $_POST['wptv-upload-subtitles-nonce'] ) || ! wp_verify_nonce( $_POST['wptv-upload-subtitles-nonce'], 'wptv-upload-subtitles' ) ) {
+		if (
+			empty( $_POST['wptv-upload-subtitles-nonce'] ) ||
+			(
+				empty( $_POST['wptv_wporg_username'] ) &&
+				! wp_verify_nonce( $_POST['wptv-upload-subtitles-nonce'], 'wptv-upload-subtitles' )
+			)
+		) {
 			wp_die( 'Invalid form data. Please go back and try again.' );
 		}
 
