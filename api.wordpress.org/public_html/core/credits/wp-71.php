@@ -931,6 +931,7 @@ class WP_71_Credits extends WP_Credits {
 			[ 'json2', 'https://github.com/douglascrockford/JSON-js' ],
 			[ 'Lodash', 'https://lodash.com/' ],
 			[ 'Masonry', 'https://masonry.desandro.com/' ],
+			[ 'Mediabunny', 'https://github.com/Vanilagy/mediabunny' ],
 			[ 'MediaElement.js', 'https://www.mediaelementjs.com/' ],
 			[ 'Moment', 'https://momentjs.com/' ],
 			[ 'PclZip', 'https://www.phpconcept.net/' ],
@@ -948,6 +949,7 @@ class WP_71_Credits extends WP_Credits {
 			[ 'TinyMCE', 'https://www.tiny.cloud/' ],
 			[ 'Twemoji', 'https://github.com/twitter/twemoji' ],
 			[ 'Underscore.js', 'https://underscorejs.org/' ],
+			[ 'wasm-vips', 'https://github.com/kleisauke/wasm-vips' ],
 			[ 'whatwg-fetch', 'https://github.com/JakeChampion/fetch' ],
 			[ 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ],
 		];
