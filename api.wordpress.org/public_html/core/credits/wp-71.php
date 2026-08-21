@@ -950,6 +950,7 @@ class WP_71_Credits extends WP_Credits {
 			[ 'Twemoji', 'https://github.com/twitter/twemoji' ],
 			[ 'Underscore.js', 'https://underscorejs.org/' ],
 			[ 'wasm-vips', 'https://github.com/kleisauke/wasm-vips' ],
+			[ 'Waveform Player', 'https://waveformplayer.com' ],
 			[ 'whatwg-fetch', 'https://github.com/JakeChampion/fetch' ],
 			[ 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ],
 		];
