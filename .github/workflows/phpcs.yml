@@ -13,8 +13,9 @@ on:
     paths:
     - '**.php'
 
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true
 
 jobs:
@@ -23,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
 
@@ -35,6 +36,12 @@ jobs:
         tools: composer:v2
       env:
         COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v6
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
 
     - name: Install Composer dependencies
       run: composer install --no-interaction --prefer-dist

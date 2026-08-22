@@ -32,6 +32,7 @@ class Plugin {
 
 			add_filter( 'gettext_with_context', [ $this, 'replace_post_button_label' ], 10, 4 );
 			add_filter( 'o2_create_post', [ $this, 'save_new_post_as_pending' ] );
+			add_filter( 'wp_insert_post_data', array( $this, 'enforce_pending_status' ) );
 			add_filter( 'the_title', [ $this, 'prepend_pending_notice' ], 10, 2 );
 			add_filter( 'comments_open', [ $this, 'close_comments_for_pending_posts' ], 10, 2 );
 		}
@@ -157,6 +158,39 @@ class Plugin {
 	}
 
 	/**
+	 * Applies the 'pending' status to submissions from users who can't publish.
+	 *
+	 * The capabilities granted in add_post_capabilities() are primitive capabilities
+	 * that every write path honors, so the review step can't live on o2's front end
+	 * 'o2_create_post' filter alone -- it has to apply wherever a post is created.
+	 * Only posts a logged-in user is authoring for themselves are affected, so
+	 * editorial and programmatic inserts are left alone.
+	 *
+	 * @param array $data An array of slashed, sanitized, and processed post data.
+	 * @return array Filtered post data.
+	 */
+	public function enforce_pending_status( $data ) {
+		$author = (int) ( $data['post_author'] ?? 0 );
+
+		if ( ! $author || get_current_user_id() !== $author ) {
+			return $data;
+		}
+
+		$exempt_statuses = array( 'draft', 'pending', 'auto-draft', 'trash', 'inherit' );
+		if ( in_array( $data['post_status'], $exempt_statuses, true ) ) {
+			return $data;
+		}
+
+		if ( $this->user_can_publish( $author ) ) {
+			return $data;
+		}
+
+		$data['post_status'] = 'pending';
+
+		return $data;
+	}
+
+	/**
 	 * Replaces the button label "Post" with "Submit for review" if current user
 	 * can't publish a post with post status 'publish'.
 	 *
@@ -239,7 +273,7 @@ class Plugin {
 	 * @return array Array of all the user's capabilities.
 	 */
 	public function add_post_capabilities( $allcaps, $caps, $args, $user ) {
-		if ( ! is_user_logged_in() || in_array( 'publish_posts', $allcaps, true ) || is_user_member_of_blog( $user->ID ) ) {
+		if ( empty( $user->ID ) || ! empty( $allcaps['publish_posts'] ) || is_user_member_of_blog( $user->ID ) ) {
 			return $allcaps;
 		}
 

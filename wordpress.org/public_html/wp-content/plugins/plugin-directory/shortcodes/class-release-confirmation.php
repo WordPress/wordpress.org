@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -123,6 +124,9 @@ class Release_Confirmation {
 	static function single_plugin( $plugin ) {
 		$releases = Plugin_Directory::get_releases( $plugin );
 
+		// Resolved once for the whole listing; each row's cooldown line compares against it.
+		$current_release = API_Update_Updater::get_current_release( $plugin );
+
 		echo '<div class="wp-block-table is-style-stripes">
 		<table class="plugin-releases-listing">
 		<colgroup>
@@ -183,7 +187,7 @@ class Release_Confirmation {
 					implode( ', ', $data['committer'] ),
 				),
 				self::get_actions( $plugin, $data ),
-				self::get_approval_text( $plugin, $data ) .
+				self::get_approval_text( $plugin, $data, $current_release ) . // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped when built.
 					self::get_rollout_strategy( $plugin, $data )
 			);
 		}
@@ -197,7 +201,15 @@ class Release_Confirmation {
 		</style>';
 	}
 
-	static function get_approval_text( $plugin, $data ) {
+	/**
+	 * The confirmation/cooldown status text for a release row.
+	 *
+	 * @param \WP_Post   $plugin          The plugin post object.
+	 * @param array      $data            The release row from Plugin_Directory::get_releases().
+	 * @param array|null $current_release Optional. The already-resolved current release, to save re-resolving per row.
+	 * @return string The release approval text, filtered via `wporg_plugins_release_approval_text`.
+	 */
+	public static function get_approval_text( $plugin, $data, $current_release = null ) {
 		ob_start();
 
 		if ( ! $data['confirmations_required'] ) {
@@ -265,7 +277,7 @@ class Release_Confirmation {
 			);
 		}
 
-		self::render_cooldown_status( $data );
+		self::render_cooldown_status( $plugin, $data, $current_release );
 
 		echo '</div>';
 
@@ -286,11 +298,14 @@ class Release_Confirmation {
 	 * Render a single line describing the cooldown state of a release: pending serve time.
 	 * Skipped for releases without a cooldown delay (feature off at release creation, or
 	 * force-released), discarded releases, releases that haven't moved past
-	 * confirmation/processing, or where the cooldown window has elapsed.
+	 * confirmation/processing, rows other than the current release (superseded rows are
+	 * never served), or where the cooldown window has elapsed.
 	 *
-	 * @param array $data The release row from Plugin_Directory::get_releases().
+	 * @param \WP_Post   $plugin          The plugin post object.
+	 * @param array      $data            The release row from Plugin_Directory::get_releases().
+	 * @param array|null $current_release The already-resolved current release, or null to resolve here.
 	 */
-	protected static function render_cooldown_status( $data ) {
+	protected static function render_cooldown_status( $plugin, $data, $current_release = null ) {
 		$release_delay = (int) ( $data['release_delay'] ?? 0 );
 		if ( ! $release_delay ) {
 			return;
@@ -305,8 +320,14 @@ class Release_Confirmation {
 			return;
 		}
 
-		$release_time   = $data['confirmations'] ? max( $data['confirmations'] ) : (int) $data['date'];
-		$cooldown_until = $release_time + $release_delay;
+		// Only the current release can be pending; superseded rows are never served.
+		$current_release = $current_release ?? API_Update_Updater::get_current_release( $plugin );
+		if ( ! $current_release || (string) ( $data['tag'] ?? '' ) !== (string) $current_release['tag'] ) {
+			return;
+		}
+
+		// Match the enforced window: compute_release_time() is what update_single_plugin() gates on.
+		$cooldown_until = API_Update_Updater::compute_release_time( $plugin, $data ) + $release_delay;
 
 		if ( $cooldown_until <= time() ) {
 			return;
@@ -482,12 +503,8 @@ class Release_Confirmation {
 			return;
 		}
 
-		$version = get_post_meta( $post->ID, 'version', true );
-		if ( ! $version ) {
-			return;
-		}
-
-		$release = Plugin_Directory::get_release( $post, $version );
+		// Resolved from the stable tag, so the notice shows even when the Version header is empty or disagrees.
+		$release = API_Update_Updater::get_current_release( $post );
 		if ( ! $release ) {
 			return;
 		}
@@ -497,8 +514,8 @@ class Release_Confirmation {
 			return;
 		}
 
-		$release_time   = $release['confirmations'] ? max( $release['confirmations'] ) : (int) $release['date'];
-		$cooldown_until = $release_time + $release_delay;
+		// Match the enforced window: compute_release_time() is what update_single_plugin() gates on.
+		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + $release_delay;
 
 		if ( $cooldown_until <= time() ) {
 			return;
@@ -510,7 +527,7 @@ class Release_Confirmation {
 				sprintf(
 					/* translators: 1: plugin version, 2: relative time until cooldown expires, 3: delay duration in hours, 4: plugins@wordpress.org link */
 					__( 'Version %1$s will be released to sites in about %2$s. WordPress.org currently delays plugin updates by %3$d hours so moderators and security scanners can review changes before they reach users. If this update fixes a security issue that needs to ship sooner, contact %4$s.', 'wporg-plugins' ),
-					'<code>' . esc_html( $version ) . '</code>',
+					'<code>' . esc_html( $release['version'] ) . '</code>',
 					esc_html( human_time_diff( time(), $cooldown_until ) ),
 					(int) ( $release_delay / HOUR_IN_SECONDS ),
 					'<a href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>'

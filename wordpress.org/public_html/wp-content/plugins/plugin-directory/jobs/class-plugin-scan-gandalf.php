@@ -7,6 +7,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WP_Error;
 use WP_Http;
@@ -26,6 +27,9 @@ class Plugin_Scan_Gandalf {
 
 	/** Last dispatch or callback error for quick operator debugging. */
 	const LAST_ERROR_META_KEY = '_gandalf_scan_last_error';
+
+	/** Consumed callbacks keyed by scan_id, to acknowledge retries without repeating effects. */
+	const CONSUMED_META_KEY = '_gandalf_scan_consumed';
 
 	/** Gandalf scan endpoint. */
 	const ENDPOINT = 'https://gandalf.wordpress.org/scan';
@@ -70,6 +74,19 @@ class Plugin_Scan_Gandalf {
 		$previous_release_ref = get_post_meta( $plugin->ID, 'last_stable_tag', true ) ?: null;
 		$previous_version     = get_post_meta( $plugin->ID, 'last_version', true ) ?: null;
 		$previous_zip_url     = null;
+
+		// A blocked or cooling-down release never reaches `update_source`, so diffing against the served release keeps a re-tagged payload from becoming its own baseline.
+		$served = API_Update_Updater::get_served_release( $plugin->post_name );
+		if ( $served && substr( $version, 0, 128 ) !== $served->version ) {
+			$previous_release_ref = $served->stable_tag ?: null;
+			$previous_version     = $served->version ?: null;
+		}
+
+		// A blocked release must not be the baseline either way — dropping it makes the scanner run a full scan.
+		if ( $previous_release_ref && API_Update_Updater::is_release_blocked( Plugin_Directory::get_release( $plugin, $previous_release_ref ) ) ) {
+			$previous_release_ref = null;
+			$previous_version     = null;
+		}
 
 		if ( $previous_release_ref && $previous_release_ref !== $release_ref && 'trunk' !== $previous_release_ref ) {
 			$previous_zip_url = Template::download_link( $plugin, $previous_release_ref );
@@ -156,15 +173,59 @@ class Plugin_Scan_Gandalf {
 	 * Handle a completed or failed scan callback.
 	 *
 	 * @param \WP_Post $plugin The plugin post.
-	 * @param array    $data   The Gandalf callback data.
-	 * @return true|WP_Error True on success, or an error when the scan is unknown.
+	 * @param array    $data   The security scan callback data, validated by the route.
+	 * @return true|WP_Error True on success, or an error when the callback is invalid.
 	 */
 	public static function handle_callback( $plugin, $data ) {
-		$scan_id = $data['scan_id'];
+		// Serialize per plugin: callbacks read-modify-write shared per-plugin meta.
+		if ( ! wp_cache_add( 'gandalf-scan-callback-' . $plugin->ID, 1, 'plugin-scans', 5 * MINUTE_IN_SECONDS ) ) {
+			return new WP_Error( 'security_scan_locked', 'A security scan callback for this plugin is already being processed.', [ 'status' => WP_Http::CONFLICT ] );
+		}
+
+		try {
+			return self::consume_callback( $plugin, $data );
+		} finally {
+			wp_cache_delete( 'gandalf-scan-callback-' . $plugin->ID, 'plugin-scans' );
+		}
+	}
+
+	/**
+	 * Consume a validated callback exactly once.
+	 *
+	 * Runs under the per-plugin lock taken by handle_callback().
+	 *
+	 * @param \WP_Post $plugin The plugin post.
+	 * @param array    $data   The validated security scan callback data.
+	 * @return true|WP_Error True on success, or an error when the callback is invalid.
+	 */
+	protected static function consume_callback( $plugin, $data ) {
+		$scan_id  = $data['scan_id'];
+		$digest   = self::callback_digest( $data );
+		$consumed = get_post_meta( $plugin->ID, self::CONSUMED_META_KEY, true ) ?: [];
+		foreach ( $consumed as $consumed_scan_id => $consumed_record ) {
+			if ( ! is_array( $consumed_record ) || ( $consumed_record['time'] ?? 0 ) < time() - WEEK_IN_SECONDS ) {
+				unset( $consumed[ $consumed_scan_id ] );
+			}
+		}
+
+		if ( isset( $consumed[ $scan_id ] ) ) {
+			// Identical retry of a consumed callback: acknowledge without repeating effects.
+			if ( hash_equals( $consumed[ $scan_id ]['digest'], $digest ) ) {
+				return true;
+			}
+
+			// Only a completed verdict may supersede a consumed failure report for the same scan.
+			if ( 'completed' !== $data['status'] || 'failed' !== ( $consumed[ $scan_id ]['status'] ?? '' ) ) {
+				$error = new WP_Error( 'security_scan_conflict', 'A different security scan callback was already consumed for this scan.', [ 'status' => WP_Http::CONFLICT ] );
+				self::record_invalid_callback( $plugin, $error, $scan_id );
+				return $error;
+			}
+		}
+
 		$pending = get_post_meta( $plugin->ID, self::PENDING_META_KEY, true ) ?: [];
 
 		if ( empty( $pending[ $scan_id ] ) ) {
-			$error = new WP_Error( 'unknown_gandalf_scan', 'Unknown Gandalf scan_id.', [ 'status' => WP_Http::BAD_REQUEST ] );
+			$error = new WP_Error( 'unknown_gandalf_scan', 'Unknown security scan.', [ 'status' => WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
@@ -172,7 +233,7 @@ class Plugin_Scan_Gandalf {
 		$pending_record = $pending[ $scan_id ];
 
 		if ( $data['version'] !== $pending_record['version'] || $data['release_ref'] !== $pending_record['release_ref'] ) {
-			$error = new WP_Error( 'invalid_gandalf_scan', 'Gandalf callback does not match the pending scan.', [ 'status' => WP_Http::BAD_REQUEST ] );
+			$error = new WP_Error( 'invalid_gandalf_scan', 'Security scan callback does not match the pending scan.', [ 'status' => WP_Http::BAD_REQUEST ] );
 			self::record_invalid_callback( $plugin, $error, $scan_id );
 			return $error;
 		}
@@ -188,6 +249,8 @@ class Plugin_Scan_Gandalf {
 						'severity_counts' => $data['severity_counts'],
 						'verdict_hash'    => $data['verdict_hash'],
 						'report_url'      => $data['report_url'],
+						'findings'        => is_array( $data['findings'] ?? null ) ? array_filter( $data['findings'], 'is_array' ) : [],
+						'max_risk_score'  => $data['max_risk_score'] ?? null,
 					]
 				);
 			}
@@ -195,10 +258,50 @@ class Plugin_Scan_Gandalf {
 			self::record_last_error( $plugin, $data['error']['kind'], $data['error']['message'], $scan_id );
 		}
 
-		unset( $pending[ $scan_id ] );
-		update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
+		// Recorded after the effects, so a crashed delivery is retried, not acknowledged.
+		$consumed[ $scan_id ] = [
+			'digest' => $digest,
+			'status' => $data['status'],
+			'time'   => time(),
+		];
+		update_post_meta( $plugin->ID, self::CONSUMED_META_KEY, $consumed );
+
+		// A failed report keeps the pending entry for a completed verdict that may still arrive.
+		if ( 'completed' === $data['status'] ) {
+			unset( $pending[ $scan_id ] );
+			update_post_meta( $plugin->ID, self::PENDING_META_KEY, $pending );
+		}
 
 		return true;
+	}
+
+	/**
+	 * Return a canonical digest of a callback body.
+	 *
+	 * Keys are sorted recursively so a scanner retry that re-marshals the same
+	 * data with a different key order still matches its consumed record.
+	 *
+	 * @param array $data The validated security scan callback data.
+	 * @return string A sha256 hex digest.
+	 */
+	protected static function callback_digest( $data ) {
+		self::ksort_deep( $data );
+		return hash( 'sha256', wp_json_encode( $data ) );
+	}
+
+	/**
+	 * Recursively sort an array by key. Sequential lists are unaffected.
+	 *
+	 * @param array $data The array to sort, by reference.
+	 */
+	protected static function ksort_deep( &$data ) {
+		ksort( $data );
+		foreach ( $data as &$value ) {
+			if ( is_array( $value ) ) {
+				self::ksort_deep( $value );
+			}
+		}
+		unset( $value );
 	}
 
 	/**
@@ -266,43 +369,209 @@ class Plugin_Scan_Gandalf {
 		}
 
 		$active_installs = (int) get_post_meta( $plugin->ID, 'active_installs', true );
-		$install_line    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
+		$install_text    = sprintf( '%s+ active installs', number_format_i18n( $active_installs ) );
 		if ( $active_installs >= 10000 ) {
-			$install_line = ":bangbang::bangbang::bangbang: {$install_line} :bangbang::bangbang::bangbang:";
+			$install_text = "*{$install_text}*";
 		}
 
-		$title = $plugin->post_title;
+		// Post titles are stored entity-encoded; the header block is plain text, so only decode.
+		$title = html_entity_decode( $plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		if ( 'closed' === $plugin->post_status ) {
 			$title .= ' (closed)';
 		}
 
-		$body = sprintf(
-			"Gandalf scan detected findings in *%s*\n%s\nVersion: %s (%s)\nFindings: %d\n",
-			$title,
-			$install_line,
-			$record['version'],
-			$record['release_ref'],
-			$record['findings_count']
+		$findings_count = (int) $record['findings_count'];
+		$top_findings   = self::top_findings( $record['findings'], 5 );
+
+		$meta_links = sprintf(
+			'<https://wordpress.org/plugins/wp-admin/post.php?post=%d&action=edit|wp-admin> · <https://wordpress.org/plugins/%s/|Plugin page>',
+			$plugin->ID,
+			$plugin->post_name
 		);
-
-		if ( ! empty( $record['severity_counts'] ) ) {
-			$severity_summary = [];
-			foreach ( $record['severity_counts'] as $severity => $count ) {
-				if ( $count > 0 ) {
-					$severity_summary[] = "{$severity}: {$count}";
-				}
-			}
-
-			if ( $severity_summary ) {
-				$body .= 'Severity: ' . implode( ', ', $severity_summary ) . "\n";
-			}
+		if ( $record['release_ref'] !== $record['version'] ) {
+			// Escaping &, <, and > neutralizes Slack control sequences like <!channel> in untrusted strings.
+			$meta_links .= ' · ' . htmlspecialchars( $record['release_ref'], ENT_NOQUOTES );
 		}
 
-		$body .= sprintf( "Details: https://wordpress.org/plugins/wp-admin/post.php?post=%s&action=edit\n", $plugin->ID );
-		$body .= sprintf( "Plugin: https://wordpress.org/plugins/%s/\n", $plugin->post_name );
-		$body .= sprintf( "Report: %s\n", $record['report_url'] );
+		$summary = [
+			'type' => 'section',
+			'text' => [
+				'type' => 'mrkdwn',
+				'text' => sprintf( '%s · %s', 1 === $findings_count ? '*1 finding*' : "*{$findings_count} findings*", $install_text ),
+			],
+		];
 
-		slack_dm( $body, PLUGIN_REVIEW_ALERT_SLACK_CHANNEL, true );
+		$report_url = esc_url_raw( $record['report_url'] ?? '' );
+		if ( $report_url ) {
+			$summary['accessory'] = [
+				'type'  => 'button',
+				'text'  => [
+					'type' => 'plain_text',
+					'text' => 'View report',
+				],
+				'url'   => $report_url,
+				'style' => 'primary',
+			];
+		}
+
+		$blocks = [
+			[
+				'type' => 'header',
+				'text' => [
+					'type' => 'plain_text',
+					'text' => self::excerpt( trim( $title . ' ' . $record['version'] ), 150 ),
+				],
+			],
+			$summary,
+			[
+				'type'     => 'context',
+				'elements' => [
+					[
+						'type' => 'mrkdwn',
+						'text' => $meta_links,
+					],
+				],
+			],
+		];
+
+		$attachments = [];
+		foreach ( $top_findings as $finding ) {
+			$risk_score = (float) ( $finding['risk_score'] ?? 0 );
+
+			$attachment = [
+				'color'  => self::risk_color( $risk_score ),
+				'blocks' => [
+					[
+						'type' => 'section',
+						'text' => [
+							'type' => 'mrkdwn',
+							'text' => sprintf(
+								'*%s* — %s',
+								number_format( $risk_score, 1 ),
+								htmlspecialchars( self::excerpt( $finding['title'] ?? '', 150 ), ENT_NOQUOTES )
+							),
+						],
+					],
+				],
+			];
+
+			if ( ! empty( $finding['file_path'] ) ) {
+				$attachment['blocks'][] = [
+					'type'     => 'context',
+					'elements' => [
+						[
+							'type' => 'mrkdwn',
+							'text' => 'File: ' . self::file_link( $plugin, $record['release_ref'], $finding['file_path'], (int) ( $finding['line'] ?? 0 ) ),
+						],
+					],
+				];
+			}
+
+			$attachments[] = $attachment;
+		}
+
+		$fallback = sprintf(
+			'Security scan found %s in %s %s',
+			1 === $findings_count ? '1 finding' : "{$findings_count} findings",
+			htmlspecialchars( $title, ENT_NOQUOTES ),
+			htmlspecialchars( $record['version'], ENT_NOQUOTES )
+		);
+		if ( isset( $record['max_risk_score'] ) ) {
+			$fallback .= sprintf( ' (max risk %s)', number_format( (float) $record['max_risk_score'], 1 ) );
+		}
+
+		slack_dm(
+			[
+				'text'        => $fallback,
+				'username'    => 'Gandalf',
+				'blocks'      => $blocks,
+				'attachments' => $attachments,
+			],
+			PLUGIN_REVIEW_ALERT_SLACK_CHANNEL,
+			true
+		);
+	}
+
+	/**
+	 * Return the attachment bar color for a risk score.
+	 *
+	 * @param float $risk_score The finding's risk score, 0-10.
+	 * @return string A hex color.
+	 */
+	protected static function risk_color( $risk_score ) {
+		if ( $risk_score >= 9 ) {
+			return '#D0342C';
+		}
+
+		if ( $risk_score >= 6 ) {
+			return '#E8912D';
+		}
+
+		if ( $risk_score >= 4 ) {
+			return '#ECB22E';
+		}
+
+		return '#808080';
+	}
+
+	/**
+	 * Return a Slack link to the finding's file in the plugins Trac browser.
+	 *
+	 * @param \WP_Post $plugin      The plugin post.
+	 * @param string   $release_ref The scanned release ref.
+	 * @param string   $file_path   The file path, relative to the plugin root.
+	 * @param int      $line        The line number, or 0 for none.
+	 * @return string The Slack-formatted link.
+	 */
+	protected static function file_link( $plugin, $release_ref, $file_path, $line ) {
+		$file_path = ltrim( (string) $file_path, '/' );
+
+		// URL-encoding the untrusted path segments also keeps | and > from breaking the link syntax.
+		$url = sprintf(
+			'https://plugins.trac.wordpress.org/browser/%s/%s/%s',
+			$plugin->post_name,
+			'trunk' === $release_ref ? 'trunk' : 'tags/' . rawurlencode( $release_ref ),
+			implode( '/', array_map( 'rawurlencode', explode( '/', $file_path ) ) )
+		);
+
+		$label = $file_path;
+		if ( $line ) {
+			$url   .= '#L' . $line;
+			$label .= ':' . $line;
+		}
+
+		return sprintf( '<%s|%s>', $url, htmlspecialchars( $label, ENT_NOQUOTES ) );
+	}
+
+	/**
+	 * Return the highest-risk findings first, bounded for display.
+	 *
+	 * The callback orders findings by ID, not by severity.
+	 *
+	 * @param array $findings The scan findings.
+	 * @param int   $limit    Maximum number of findings to return.
+	 * @return array The highest-risk findings.
+	 */
+	protected static function top_findings( $findings, $limit ) {
+		usort(
+			$findings,
+			static function ( $a, $b ) {
+				return ( $b['risk_score'] ?? 0 ) <=> ( $a['risk_score'] ?? 0 );
+			}
+		);
+
+		return array_slice( $findings, 0, $limit );
+	}
+
+	/**
+	 * Collapse untrusted text onto a single bounded line.
+	 *
+	 * @param string $text   The text to excerpt.
+	 * @param int    $length Maximum length in characters.
+	 * @return string The excerpted text.
+	 */
+	protected static function excerpt( $text, $length ) {
+		return mb_strimwidth( preg_replace( '/\s+/u', ' ', trim( (string) $text ) ), 0, $length, '…' );
 	}
 
 	/**

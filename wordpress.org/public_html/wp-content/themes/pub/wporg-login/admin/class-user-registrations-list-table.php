@@ -291,19 +291,26 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$sort_order = 'DESC';
 		}
 
-		$per_page     = $_GET['per_page'] ?? $this->get_items_per_page( 'users_per_page', 100 );
+		// Bounds match core's users_per_page screen option, see set_screen_options().
+		$per_page = isset( $_GET['per_page'] )
+			? min( 999, max( 1, absint( $_GET['per_page'] ) ) )
+			: $this->get_items_per_page( 'users_per_page', 100 );
+
 		$current_page = $this->get_pagenum();
 
 		$join_where = $this->get_join_where_sql();
 
-		$per_page_offset = ($current_page-1) * $per_page;
+		$per_page_offset = ( $current_page - 1 ) * $per_page;
+
+		// Prepared separately; $join_where already contains prepared LIKE patterns.
+		$limit = $wpdb->prepare( 'LIMIT %d, %d', $per_page_offset, $per_page );
 
 		$this->items = $wpdb->get_results(
 			"SELECT SQL_CALC_FOUND_ROWS registrations.*
 			FROM {$wpdb->base_prefix}user_pending_registrations registrations
 			$join_where
 			ORDER BY {$sort_column} {$sort_order}
-			LIMIT {$per_page_offset}, {$per_page}"
+			$limit"
 		);
 
 		$total_items = $wpdb->get_var( 'SELECT FOUND_ROWS()' );

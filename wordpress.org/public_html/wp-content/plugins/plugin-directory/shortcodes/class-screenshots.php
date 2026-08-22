@@ -54,6 +54,8 @@ class Screenshots {
 	 * attachment ID. The core Image block's lightbox needs a stable numeric
 	 * key in `state.metadata.{id}`, so we mint one from this offset plus the
 	 * screenshot index.
+	 * Keep in sync with `SCREENSHOT_ID_OFFSET` in
+	 * `gallery-lightbox-enhancements/assets/lightbox-captions.js`.
 	 *
 	 * @var int
 	 */
@@ -363,7 +365,7 @@ class Screenshots {
 			)
 		);
 
-		$srcset = self::photon_srcset( $src );
+		$srcset = self::photon_srcset( $screenshot );
 		$class  = 'wp-block-image size-large';
 
 		// Record the full-resolution source and intrinsic dimensions for the
@@ -555,40 +557,24 @@ class Screenshots {
 	}
 
 	/**
-	 * Builds a Photon-powered `srcset` (and matching `sizes`) attribute string
-	 * for a `ps.w.org` screenshot URL. Returns an empty string when the source
-	 * URL is not on `ps.w.org`, so the original `src` is used unchanged.
+	 * Builds a revision-aware Photon `srcset` for a screenshot.
 	 *
-	 * Plugin authors upload screenshots at full resolution but we render them
-	 * inside a 3-column grid, so the browser otherwise downloads the full
-	 * asset (often 300–800 KB) only to scale it down to a ~250 px tile.
-	 * Routing the URL through `i0.wp.com` (Photon) returns a re-encoded,
-	 * width-bound copy at ~10× smaller payload — see
-	 * https://developer.wordpress.com/docs/photon/ for the resize/optim
-	 * options. The grid thumbnail therefore loads a small Photon candidate;
-	 * the lightbox is pointed back at the full-resolution `ps.w.org` original
-	 * separately by {@see self::fix_lightbox_metadata()} so users still get
-	 * the lossless image when they enlarge a screenshot.
-	 *
-	 * @param string $src Original asset URL.
+	 * @param array $screenshot Screenshot metadata.
 	 * @return string Attribute fragment ready to interpolate into `<img>`,
 	 *                including the leading space, or empty string.
 	 */
-	protected static function photon_srcset( $src ) {
-		if ( ! preg_match( '#^https?://ps\.w\.org/#', $src ) ) {
-			return '';
-		}
-
-		// Photon (i0.wp.com) only runs on production and staging. In local
-		// or other environments the proxy may not be reachable, which would
-		// leave the gallery silently empty until the cold cache warmed up.
-		// Fall back to the unoptimised `ps.w.org` URL there.
+	protected static function photon_srcset( $screenshot ) {
 		$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
 		if ( 'production' !== $env && 'staging' !== $env ) {
 			return '';
 		}
 
-		$photon_base = preg_replace( '#^https?://#', 'https://i0.wp.com/', $src );
+		$source_url   = Template::get_asset_url( null, $screenshot, false );
+		$source_query = wp_parse_url( $source_url, PHP_URL_QUERY );
+		$photon_base  = str_replace( 'https://', 'https://i0.wp.com/', remove_query_arg( 'rev', $source_url ) );
+
+		// Photon only forwards the source query string when it is passed through `q`.
+		$photon_base = add_query_arg( 'q', $source_query, $photon_base );
 		$widths      = array( 300, 600, 900 );
 		$srcset      = array();
 

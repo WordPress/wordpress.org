@@ -55,15 +55,13 @@ class Controls {
 	protected static function display_release_cooldown() {
 		$post = get_post();
 
-		$version = get_post_meta( $post->ID, 'version', true );
-		if ( ! $version ) {
-			return;
-		}
-
-		$release = Plugin_Directory::get_release( $post, $version );
+		// Resolved from the stable tag, so the hold shows even when the Version header is empty or disagrees.
+		$release = API_Update_Updater::get_current_release( $post );
 		if ( ! $release ) {
 			return;
 		}
+
+		$release_version = $release['version'];
 
 		$release_delay = (int) ( $release['release_delay'] ?? 0 );
 		if ( ! $release_delay ) {
@@ -82,7 +80,7 @@ class Controls {
 			printf(
 				/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
 				esc_html__( 'Version %1$s is in the release cooldown — it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
-				esc_html( $version ),
+				esc_html( $release_version ),
 				esc_html( human_time_diff( time(), $cooldown_until ) ),
 				esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
 			);
@@ -100,12 +98,12 @@ class Controls {
 					></textarea>
 				</p>
 				<p>
-					<button type="submit" name="force_release_version" value="<?php echo esc_attr( $version ); ?>" class="button">
+					<button type="submit" name="force_release_tag" value="<?php echo esc_attr( $release['tag'] ); ?>" class="button">
 						<?php
 						printf(
 							/* translators: %s: version */
 							esc_html__( 'Force-release %s now', 'wporg-plugins' ),
-							esc_html( $version )
+							esc_html( $release_version )
 						);
 						?>
 					</button>
@@ -121,7 +119,7 @@ class Controls {
 	 * @param int $post_id The post being saved.
 	 */
 	public static function save_post( $post_id ) {
-		if ( empty( $_POST['force_release_version'] ) ) {
+		if ( empty( $_POST['force_release_tag'] ) ) {
 			return;
 		}
 
@@ -138,10 +136,10 @@ class Controls {
 		// and to make the security boundary explicit.
 		check_admin_referer( 'update-post_' . $post_id );
 
-		$version           = get_post_meta( $post->ID, 'version', true );
-		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );
-		if ( $submitted_version !== $version ) {
-			// Submitted version doesn't match current — a newer commit landed since the form was rendered.
+		// Staleness guard on the release identity: a commit that moved the stable tag since the form rendered lands a different release here.
+		$release       = API_Update_Updater::get_current_release( $post );
+		$submitted_tag = sanitize_text_field( wp_unslash( $_POST['force_release_tag'] ) );
+		if ( ! $release || $submitted_tag !== (string) $release['tag'] ) {
 			return;
 		}
 
@@ -353,7 +351,7 @@ class Controls {
 			<?php if ( $post->tested ) : ?>
 			<tr>
 				<td><?php _e( 'Tested With:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php printf( 'WordPress %s', $post->tested ); ?></strong></td>
+				<td><strong><?php printf( 'WordPress %s', esc_html( $post->tested ) ); ?></strong></td>
 			</tr>
 			<?php endif; ?>
 		</table><!-- .misc-pub-section -->

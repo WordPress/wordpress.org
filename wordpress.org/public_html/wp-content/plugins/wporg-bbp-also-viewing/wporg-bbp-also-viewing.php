@@ -295,20 +295,14 @@ function get_others_currently_viewing( $page ) {
 		return array_values( $users );
 	}
 
-	// Anonymize mods for other users.
-	foreach ( $users as &$u ) {
-		if ( user_can( $u['user_id'], 'moderate' ) ) {
-			$u['who']     = '';
-			$u['user_id'] = 0;
-		}
-	}
-
-	// Anonymize users unless they've got similar caps.
+	// Anonymize mods, and users unless they've got similar caps.
 	// Plugin support reps can see other reps and committers -for their own plugins-.
 	$current_user_objects = get_user_object_slugs( get_current_user_id() );
 	foreach ( $users as &$u ) {
-		$user_objects = get_user_object_slugs( $u['user_id'] );
-		if ( ! array_intersect( $current_user_objects, $user_objects ) ) {
+		if (
+			user_can( $u['user_id'], 'moderate' ) ||
+			! array_intersect( $current_user_objects, get_user_object_slugs( $u['user_id'] ) )
+		) {
 			$u['who']     = '';
 			$u['user_id'] = 0;
 		}

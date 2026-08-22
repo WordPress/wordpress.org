@@ -36,26 +36,36 @@ class Remove_Attendee_Route extends Route {
 		global $wp;
 		if ( ! is_user_logged_in() ) {
 			wp_safe_redirect( wp_login_url( home_url( $wp->request ) ) );
-			exit;
+			$this->exit_();
+			return; // exit_() doesn't exit under GP_Route::$fake_request.
+		}
+
+		$nonce_action = "remove_translation_event_attendee_{$event_id}_{$user_id}";
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), $nonce_action ) ) {
+			$this->die_with_error( esc_html__( 'Your link has expired or is invalid. Please go back and try again.', 'gp-translation-events' ), 403 );
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
 		$event = $this->event_repository->get_event( $event_id );
 		if ( ! $event ) {
 			$this->die_with_404();
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 		if ( ! current_user_can( 'edit_translation_event_attendees', $event->id() ) ) {
 			$this->die_with_error( esc_html__( 'You do not have permission to edit this event.', 'gp-translation-events' ), 403 );
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
 		$attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event->id(), $user_id );
 		if ( $attendee instanceof Attendee ) {
 			if ( ! current_user_can( 'edit_translation_event_attendees', $event->id() ) ) {
 				$this->die_with_error( esc_html__( 'You do not have permission to remove this attendee.', 'gp-translation-events' ), 403 );
+				return; // die_with_*() doesn't die under GP_Route::$fake_request.
 			}
 			$this->attendee_repository->remove_attendee( $event->id(), $user_id );
 		}
 
 		wp_safe_redirect( Urls::event_attendees( $event->id() ) );
-		exit;
+		$this->exit_();
 	}
 }

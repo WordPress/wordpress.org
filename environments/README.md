@@ -5,7 +5,7 @@ Local development environments for WordPress.org projects, powered by [`wp-env`]
 ## Prerequisites
 
 - [Docker](https://www.docker.com/products/docker-desktop/) installed and running
-- [Node.js](https://nodejs.org/) >= 20
+- [Node.js](https://nodejs.org/) — the version in [.nvmrc](.nvmrc) (`nvm use`)
 
 ## Setup
 
@@ -165,10 +165,10 @@ cd wordpress.org/public_html/wp-content/plugins/handbook
 npx wp-env start
 ```
 
-**Run tests:**
+**Run tests:** use the test environment in this directory instead — it starts a dedicated instance and runs the suite in one step:
 
 ```bash
-npx wp-env run phpunit phpunit -c /var/www/html/wp-content/plugins/handbook/phpunit.xml
+npm run handbook:test
 ```
 
 ## Common Commands

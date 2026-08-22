@@ -229,14 +229,19 @@ function wporg_login_send_confirmation_email( $user ) {
 /**
  * Fetches a pending user record from the database by username or Email.
  *
- * @param string|int $who The username, email address, or user ID.
+ * @param string|int|array $who The username, email address, user ID, or an
+ *                              existing pending user record.
+ * @return array|false The pending user record, or false if not found.
  */
 function wporg_get_pending_user( $who ) {
 	global $wpdb;
 
 	// Is it a pending user object already?
-	if ( is_array( $who ) && isset( $who['pending_id'] ) ) {
-		return $who;
+	if ( is_array( $who ) ) {
+		if ( empty( $who['pending_id'] ) ) {
+			return false;
+		}
+		$who = (int) $who['pending_id'];
 	}
 
 	if ( is_numeric( $who ) && (int) $who == $who ) {

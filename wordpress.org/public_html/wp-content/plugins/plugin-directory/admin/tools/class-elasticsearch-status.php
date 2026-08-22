@@ -27,14 +27,14 @@ class Elasticsearch_Status {
 			'plugin-tools',
 			'ES Index Status',
 			'ES Index Status',
-			'plugin_admin',
+			'plugin_approve',
 			'es-index-status',
 			array( $this, 'render' )
 		);
 	}
 
 	public function render() {
-		if ( ! current_user_can( 'plugin_admin' ) ) {
+		if ( ! current_user_can( 'plugin_approve' ) ) {
 			return;
 		}
 
@@ -249,7 +249,7 @@ class Elasticsearch_Status {
 	public function ajax_check_batch() {
 		check_ajax_referer( 'es-index-check-batch' );
 
-		if ( ! current_user_can( 'plugin_admin' ) ) {
+		if ( ! current_user_can( 'plugin_approve' ) ) {
 			wp_send_json_error( 'Permission denied.' );
 		}
 
@@ -294,7 +294,7 @@ class Elasticsearch_Status {
 	public function ajax_reindex() {
 		check_ajax_referer( 'es-index-check-batch' );
 
-		if ( ! current_user_can( 'plugin_admin' ) ) {
+		if ( ! current_user_can( 'plugin_approve' ) ) {
 			wp_send_json_error( 'Permission denied.' );
 		}
 

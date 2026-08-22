@@ -166,6 +166,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		 * Validates the request, delegates to handle_association(), and dies with the result.
 		 */
 		public function ajax_handle_association() {
+			// Failure messages echo request data, so keep the response non-scriptable.
+			header( 'Content-Type: text/plain; charset=utf-8' );
+
 			if ( true !== apply_filters( 'wporg_is_valid_association_request', false ) ) {
 				status_header( 400 );
 				die( '-1 Not a valid association request.' );

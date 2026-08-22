@@ -204,7 +204,7 @@ class Plugin_Directory {
 			'menu_icon'    => 'dashicons-admin-plugins',
 			'capabilities' => array(
 				'edit_post'          => 'plugin_edit',
-				'read_post'          => 'read',
+				'read_post'          => 'plugin_admin_view',
 				'edit_posts'         => 'plugin_dashboard_access',
 				'edit_others_posts'  => 'plugin_edit_others',
 				'publish_posts'      => 'plugin_approve',
@@ -1716,9 +1716,24 @@ class Plugin_Directory {
 		if ( ! isset( $data['tag'] ) ) {
 			return false;
 		}
+
+		// PHP coerces numeric-string array keys to integers; release tags are strings.
+		$data['tag'] = (string) $data['tag'];
+
 		$plugin = self::get_plugin_post( $plugin );
 
-		$release = self::get_release( $plugin, $data['tag'] ) ?: [
+		$releases = self::get_releases( $plugin );
+
+		// Strict match only: get_release()'s loose lookup ('1.4' == '1.40') could merge onto the wrong release. Only one release can exist in any given tag.
+		$release = false;
+		foreach ( $releases as $i => $r ) {
+			if ( isset( $r['tag'] ) && (string) $r['tag'] === $data['tag'] ) {
+				$release = $release ?: $r;
+				unset( $releases[ $i ] );
+			}
+		}
+
+		$release = $release ?: [
 			'date'                     => time(),
 			'tag'                      => '',
 			'version'                  => '',
@@ -1754,15 +1769,14 @@ class Plugin_Directory {
 			unset( $release['discarded'] );
 		}
 
-		$releases = self::get_releases( $plugin );
-
-		// Find any other releases using this slug (as in the case of updates) and remove it.
-		// Only one release can exist in any given tag.
-		foreach ( $releases as $i => $r ) {
-			if ( $r['tag'] === $release['tag'] ) {
-				unset( $releases[ $i ] );
-			}
+		/*
+		 * Clear a release block so the release can be served.
+		 * See Jobs\API_Update_Updater::force_release().
+		 */
+		if ( ! empty( $data['unblock'] ) ) {
+			unset( $release['release_block'] );
 		}
+		unset( $release['unblock'] );
 
 		// Add this release in
 		$releases[] = $release;
@@ -1773,6 +1787,35 @@ class Plugin_Directory {
 		} );
 
 		return update_post_meta( $plugin->ID, 'releases', $releases );
+	}
+
+	/**
+	 * Mark built ZIPs as such on their release records.
+	 *
+	 * @param string|\WP_Post $plugin         Plugin slug or post object.
+	 * @param array|false     $built_versions Map of built version => SVN revision, as returned by Zip\Builder::build().
+	 * @return void
+	 */
+	public static function mark_zips_built( $plugin, $built_versions ) {
+		if ( ! is_array( $built_versions ) ) {
+			return;
+		}
+
+		foreach ( $built_versions as $tag => $revision ) {
+			// Trunk has no release record.
+			if ( 'trunk' === $tag ) {
+				continue;
+			}
+
+			self::add_release(
+				$plugin,
+				[
+					'tag'                      => $tag,
+					'zips_built'               => true,
+					'zips_built_from_revision' => $revision,
+				]
+			);
+		}
 	}
 
 	/**

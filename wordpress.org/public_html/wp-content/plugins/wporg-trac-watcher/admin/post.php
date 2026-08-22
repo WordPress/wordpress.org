@@ -4,7 +4,8 @@ namespace WordPressdotorg\Trac\Watcher;
 add_action( 'admin_post_svn_save', function() {
 	global $wpdb;
 
-	if ( ! current_user_can( 'publish_posts' ) ) {
+	// Not publish_posts or edit_posts: o2 Posting Access grants both to any logged-in non-member.
+	if ( ! current_user_can( 'edit_others_posts' ) ) {
 		die( '-1' );
 	}
 	check_admin_referer( 'edit_svn_prop' );
@@ -46,7 +47,7 @@ add_action( 'admin_post_svn_save', function() {
 			die( -1 );
 		}
 
-		$prop_name = wp_unslash( $_REQUEST['prop_name'] );
+		$prop_name = sanitize_text_field( wp_unslash( $_REQUEST['prop_name'] ) );
 		if ( ! $user && $prop_name != $the_prop->prop_name ) {
 			$user = Props\find_user_id( $prop_name );
 		}
@@ -92,9 +93,9 @@ add_action( 'admin_post_svn_save', function() {
 		// Adding one?
 
 		// Use the 'prop name' field first, otherwise fall back to the user_id field if the former is blank
-		$prop_name = wp_unslash( $_REQUEST['prop_name'] ?? '' );
+		$prop_name = sanitize_text_field( wp_unslash( $_REQUEST['prop_name'] ?? '' ) );
 		if ( ! $prop_name ) {
-			$prop_name = wp_unslash( $_REQUEST['user_id'] ?? '' );
+			$prop_name = sanitize_text_field( wp_unslash( $_REQUEST['user_id'] ?? '' ) );
 		};
 
 		if ( ! $prop_name ) {
@@ -139,7 +140,8 @@ add_action( 'admin_post_svn_save', function() {
 add_action( 'admin_post_svn_reparse', function() {
 	global $wpdb;
 
-	if ( ! current_user_can( 'publish_posts' ) ) {
+	// Reparsing rewrites the same records; see the note on the save handler above.
+	if ( ! current_user_can( 'edit_others_posts' ) ) {
 		die( '-1' );
 	}
 	check_admin_referer( 'reparse_svn' );
