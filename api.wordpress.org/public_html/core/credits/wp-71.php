@@ -379,6 +379,7 @@ class WP_71_Credits extends WP_Credits {
 			'iflairwebtechnologies',
 			'im3dabasia1',
 			'inc2734',
+			'indirabiswas27',
 			'ingeniumed',
 			'iqbal1hossain',
 			'ironprogrammer',
@@ -462,6 +463,7 @@ class WP_71_Credits extends WP_Credits {
 			'kadamwhite',
 			'kannanravi',
 			'kapilpaul',
+			'karinchristen',
 			'karmatosed',
 			'karthickmurugan',
 			'karthikeya01',
@@ -950,6 +952,7 @@ class WP_71_Credits extends WP_Credits {
 			[ 'Twemoji', 'https://github.com/twitter/twemoji' ],
 			[ 'Underscore.js', 'https://underscorejs.org/' ],
 			[ 'wasm-vips', 'https://github.com/kleisauke/wasm-vips' ],
+			[ 'Waveform Player', 'https://waveformplayer.com' ],
 			[ 'whatwg-fetch', 'https://github.com/JakeChampion/fetch' ],
 			[ 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ],
 		];
