@@ -255,13 +255,16 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	public function get_events_for_user( int $user_id, int $page = -1, int $page_size = -1 ): Events_Query_Result {
+		// Only users who manage events may see unpublished ones, so that an attendee row cannot surface a draft.
+		$post_status = user_can( $user_id, 'manage_translation_events' ) ? array( 'publish', 'draft' ) : array( 'publish' );
+
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		return $this->execute_events_query(
 			$page,
 			$page_size,
 			array(
-				'post_status' => array( 'publish', 'draft' ),
+				'post_status' => $post_status,
 				'meta_key'    => '_event_start',
 				'orderby'     => array(
 					'meta_value' => 'DESC',
