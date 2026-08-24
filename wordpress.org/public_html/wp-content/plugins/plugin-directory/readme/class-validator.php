@@ -314,6 +314,13 @@ class Validator {
 					'<code>Version: ' . esc_html( $data ) . '</code>',
 					'<code>1.2.3</code>'
 				);
+			case 'invalid_version_header':
+				return sprintf(
+					/* translators: 1: the full 'Version: X' header line, 2: '..' */
+					__( 'The %1$s header is used as a folder name for the release files, so it cannot start with a slash, contain a %2$s segment, or include control characters. This release was not imported.', 'wporg-plugins' ),
+					'<code>Version: ' . esc_html( $data ) . '</code>',
+					'<code>..</code>'
+				);
 			case 'version_tag_mismatch':
 				$version = is_array( $data ) ? ( $data['version'] ?? '' ) : '';
 				$tag     = is_array( $data ) ? ( $data['tag']     ?? '' ) : '';

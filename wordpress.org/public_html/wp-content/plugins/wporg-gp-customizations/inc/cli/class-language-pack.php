@@ -128,6 +128,10 @@ class Language_Pack extends WP_CLI_Command {
 			WP_CLI::error( 'No version available.' );
 		}
 
+		if ( ! $this->version_is_path_safe( $version ) ) {
+			WP_CLI::error( 'Invalid version.' );
+		}
+
 		$svn_command  = $this->get_svn_command();
 		$svn_checkout = self::get_temp_directory( $slug );
 
@@ -200,6 +204,10 @@ class Language_Pack extends WP_CLI_Command {
 
 		if ( ! $version ) {
 			WP_CLI::error( 'No version available.' );
+		}
+
+		if ( ! $this->version_is_path_safe( $version ) ) {
+			WP_CLI::error( 'Invalid version.' );
 		}
 
 		$svn_command  = $this->get_svn_command();
@@ -328,6 +336,29 @@ class Language_Pack extends WP_CLI_Command {
 		$plugin = json_decode( $plugin );
 
 		return $plugin->version ?? false;
+	}
+
+	/**
+	 * Determines whether a version can be used as a path component.
+	 *
+	 * The version is interpolated into filesystem paths by build_language_packs(), so a value that could
+	 * step outside the directory it names has to be rejected before it gets there.
+	 *
+	 * @param mixed $version Version of a theme/plugin, from the API or the --version argument.
+	 * @return bool True if the version is safe to use in a path, false otherwise.
+	 */
+	private function version_is_path_safe( $version ) {
+		if ( ! is_string( $version ) || '' === $version ) {
+			return false;
+		}
+
+		if ( preg_match( '#[[:cntrl:]]#', $version ) ) {
+			return false;
+		}
+
+		$segments = preg_split( '#[/\\\\]#', $version );
+
+		return '' !== $segments[0] && ! in_array( '..', $segments, true );
 	}
 
 	/**
