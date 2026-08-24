@@ -82,9 +82,10 @@ class Composer_Repository {
 
 		if ( 'not_found' === $response || null === $response ) {
 			/*
-			 * A 404 leaves the name unresolved, so Composer falls through to the next repository —
-			 * Packagist by default, where these vendors are unclaimed. Naming the package marks it
-			 * found, so Composer stops looking and reports it as unresolvable.
+			 * A 404 leaves the name unresolved, so Composer keeps looking through every repository
+			 * configured after this one, ending at Packagist, where these vendors are unclaimed.
+			 * Naming the package marks it found, which stops that search for all of them and reports
+			 * the name as unresolvable.
 			 */
 			$package_name = 'wp-' . $type . '/' . $slug;
 
@@ -176,12 +177,17 @@ class Composer_Repository {
 		if ( ! empty( $plugin_data['versions'] ) && is_array( $plugin_data['versions'] ) ) {
 			foreach ( $plugin_data['versions'] as $version => $download_url ) {
 				$normalized = Version_Normalizer::normalize( (string) $version );
-				if ( false === $normalized || isset( $seen[ $normalized ] ) ) {
+				if ( false === $normalized ) {
 					continue;
 				}
 
-				$seen[ $normalized ] = true;
-				$versions[]          = Package_Builder::build_plugin( $slug, $normalized, $plugin_data, $download_url );
+				$key = Version_Normalizer::dedupe_key( $normalized );
+				if ( isset( $seen[ $key ] ) ) {
+					continue;
+				}
+
+				$seen[ $key ] = true;
+				$versions[]   = Package_Builder::build_plugin( $slug, $normalized, $plugin_data, $download_url );
 			}
 		}
 
@@ -269,12 +275,17 @@ class Composer_Repository {
 		if ( ! empty( $theme_data->versions ) && is_array( $theme_data->versions ) ) {
 			foreach ( $theme_data->versions as $version => $download_url ) {
 				$normalized = Version_Normalizer::normalize( (string) $version );
-				if ( false === $normalized || isset( $seen[ $normalized ] ) ) {
+				if ( false === $normalized ) {
 					continue;
 				}
 
-				$seen[ $normalized ] = true;
-				$versions[]          = Package_Builder::build_theme( $slug, $normalized, $theme_data, $download_url );
+				$key = Version_Normalizer::dedupe_key( $normalized );
+				if ( isset( $seen[ $key ] ) ) {
+					continue;
+				}
+
+				$seen[ $key ] = true;
+				$versions[]   = Package_Builder::build_theme( $slug, $normalized, $theme_data, $download_url );
 			}
 		}
 

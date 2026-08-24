@@ -239,8 +239,9 @@ class Test_Packages_Endpoint extends TestCase {
 		$data = json_decode( $response->body );
 		$this->assertIsObject( $data );
 		$this->assertObjectHasProperty( 'packages', $data );
+		$this->assertObjectHasProperty( 'wp-plugin/woocommerce-gateway-stripe', $data->packages );
 
-		$versions = $data->packages->{'wp-plugin/woocommerce-gateway-stripe'} ?? array();
+		$versions = $data->packages->{'wp-plugin/woocommerce-gateway-stripe'};
 
 		$dependencies = array();
 		foreach ( $versions as $entry ) {

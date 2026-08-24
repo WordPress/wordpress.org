@@ -73,6 +73,31 @@ class Version_Normalizer {
 	}
 
 	/**
+	 * Build a key that matches whenever Composer would treat two normalized versions as one.
+	 *
+	 * Composer compares versions in four numeric segments, so it reads "1.54" and "1.54.0" as the
+	 * same version even though they normalize to different strings here.
+	 *
+	 * @param string $version A version returned by normalize().
+	 * @return string The comparison key.
+	 */
+	public static function dedupe_key( string $version ): string {
+		if ( str_starts_with( $version, 'dev-' ) ) {
+			return $version;
+		}
+
+		$numeric = $version;
+		$suffix  = '';
+
+		if ( str_contains( $version, '-' ) ) {
+			list( $numeric, $suffix ) = explode( '-', $version, 2 );
+			$suffix                   = '-' . $suffix;
+		}
+
+		return implode( '.', array_pad( explode( '.', $numeric ), 4, '0' ) ) . $suffix;
+	}
+
+	/**
 	 * Map various pre-release suffix names to canonical Composer names.
 	 *
 	 * @param string $suffix The raw suffix.
