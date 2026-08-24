@@ -1304,7 +1304,7 @@ class Import {
 
 		$segments = preg_split( '#[/\\\\]#', $version );
 
-		return '' !== $segments[0] && ! in_array( '..', $segments, true );
+		return '' !== $segments[0] && ! array_intersect( array( '.', '..' ), $segments );
 	}
 
 	/**

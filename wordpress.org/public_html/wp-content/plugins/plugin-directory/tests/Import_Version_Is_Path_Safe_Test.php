@@ -83,6 +83,9 @@ class Import_Version_Is_Path_Safe_Test extends TestCase {
 			// Format: [ $version ].
 			'parent traversal'   => array( '../../../../var/www/html' ),
 			'bare parent'        => array( '..' ),
+			'bare current'       => array( '.' ),
+			'current mid-path'   => array( '1.0/.' ),
+			'current at end'     => array( '1.0\\.' ),
 			'parent mid-path'    => array( '1.0/../../etc' ),
 			'backslash parent'   => array( '1.0\\..\\..' ),
 			'absolute path'      => array( '/etc/passwd' ),

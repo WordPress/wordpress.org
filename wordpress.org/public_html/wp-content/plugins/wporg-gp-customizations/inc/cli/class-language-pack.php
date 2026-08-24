@@ -358,7 +358,7 @@ class Language_Pack extends WP_CLI_Command {
 
 		$segments = preg_split( '#[/\\\\]#', $version );
 
-		return '' !== $segments[0] && ! in_array( '..', $segments, true );
+		return '' !== $segments[0] && ! array_intersect( [ '.', '..' ], $segments );
 	}
 
 	/**
