@@ -141,6 +141,14 @@ class Import {
 			$this->warnings['version_header_unexpected_chars'] = $version;
 		}
 
+		// Stored as post meta, served by the API, and used as a path component downstream.
+		if ( $version && ! self::version_is_path_safe( $version ) ) {
+			$this->warnings['invalid_version_header'] = $version;
+
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
+			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'invalid_version_header', $version ) );
+		}
+
 		/*
 		 * Warn when the plugin's Version header doesn't appear to match the tag it was released from.
 		 *
@@ -1277,6 +1285,26 @@ class Import {
 		}
 
 		return (object) $headers;
+	}
+
+	/**
+	 * Determine whether a plugin's Version header can be used as a path component.
+	 *
+	 * @param mixed $version The plugin's Version header value.
+	 * @return bool True when the value is safe to use in a path, false otherwise.
+	 */
+	public static function version_is_path_safe( $version ) {
+		if ( ! is_string( $version ) || '' === $version ) {
+			return false;
+		}
+
+		if ( preg_match( '#[[:cntrl:]]#', $version ) ) {
+			return false;
+		}
+
+		$segments = preg_split( '#[/\\\\]#', $version );
+
+		return '' !== $segments[0] && ! array_intersect( array( '.', '..' ), $segments );
 	}
 
 	/**
