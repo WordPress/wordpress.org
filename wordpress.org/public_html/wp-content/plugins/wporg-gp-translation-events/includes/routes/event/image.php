@@ -73,6 +73,11 @@ class Image_Route extends Route {
 
 		imagettftext( $image, $text_size, $text_angle, $text_x1, $text_y1, $text_color, $font, $text1 );
 
+		if ( $event && 'publish' !== $event->status() ) {
+			// For an unpublished event the image depends on who is asking, so it must not be shared between viewers.
+			header( 'Cache-Control: private, no-store' );
+		}
+
 		header( 'Content-type: image/png' );
 		imagepng( $image );
 		imagedestroy( $image );
