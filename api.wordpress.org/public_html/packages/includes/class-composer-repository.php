@@ -81,11 +81,15 @@ class Composer_Repository {
 		}
 
 		if ( 'not_found' === $response || null === $response ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 404 Not Found', true, 404 );
+			/*
+			 * A 404 leaves the name unresolved, so Composer falls through to the next repository —
+			 * Packagist by default, where these vendors are unclaimed. Naming the package marks it
+			 * found, so Composer stops looking and reports it as unresolvable.
+			 */
+			$package_name = 'wp-' . $type . '/' . $slug;
 
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			echo json_encode( array( 'packages' => (object) array() ), JSON_UNESCAPED_SLASHES );
+			echo json_encode( array( 'packages' => array( $package_name => array() ) ), JSON_UNESCAPED_SLASHES );
 			exit;
 		}
 
@@ -166,16 +170,18 @@ class Composer_Repository {
 	private static function build_plugin_response( string $slug, array $plugin_data ): ?array {
 		$package_name = 'wp-plugin/' . $slug;
 		$versions     = array();
+		$seen         = array();
 
 		// Build entries for each tagged version.
 		if ( ! empty( $plugin_data['versions'] ) && is_array( $plugin_data['versions'] ) ) {
 			foreach ( $plugin_data['versions'] as $version => $download_url ) {
 				$normalized = Version_Normalizer::normalize( (string) $version );
-				if ( false === $normalized ) {
+				if ( false === $normalized || isset( $seen[ $normalized ] ) ) {
 					continue;
 				}
 
-				$versions[] = Package_Builder::build_plugin( $slug, $normalized, $plugin_data, $download_url );
+				$seen[ $normalized ] = true;
+				$versions[]          = Package_Builder::build_plugin( $slug, $normalized, $plugin_data, $download_url );
 			}
 		}
 
@@ -258,15 +264,17 @@ class Composer_Repository {
 	private static function build_theme_response( string $slug, object $theme_data ): ?array {
 		$package_name = 'wp-theme/' . $slug;
 		$versions     = array();
+		$seen         = array();
 
 		if ( ! empty( $theme_data->versions ) && is_array( $theme_data->versions ) ) {
 			foreach ( $theme_data->versions as $version => $download_url ) {
 				$normalized = Version_Normalizer::normalize( (string) $version );
-				if ( false === $normalized ) {
+				if ( false === $normalized || isset( $seen[ $normalized ] ) ) {
 					continue;
 				}
 
-				$versions[] = Package_Builder::build_theme( $slug, $normalized, $theme_data, $download_url );
+				$seen[ $normalized ] = true;
+				$versions[]          = Package_Builder::build_theme( $slug, $normalized, $theme_data, $download_url );
 			}
 		}
 

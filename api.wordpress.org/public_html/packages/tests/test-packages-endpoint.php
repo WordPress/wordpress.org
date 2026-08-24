@@ -207,34 +207,88 @@ class Test_Packages_Endpoint extends TestCase {
 	}
 
 	/**
-	 * Test that an unknown plugin returns 404 with empty packages.
+	 * Test that an unknown plugin claims the name with no versions.
+	 *
+	 * Composer only stops consulting lower-priority repositories once a repository names the
+	 * package, so a name we can't serve must still be answered with an empty version list.
 	 */
-	public function test_unknown_plugin_returns_404(): void {
+	public function test_unknown_plugin_claims_name(): void {
 		$response = send_request( '/packages/p2/wp-plugin/this-plugin-definitely-does-not-exist-xyz.json' );
 
-		$this->assertSame( 404, $response->status_code );
+		$this->assertSame( 200, $response->status_code );
 
 		$data = json_decode( $response->body );
 		$this->assertIsObject( $data );
 		$this->assertObjectHasProperty( 'packages', $data );
+		$this->assertObjectHasProperty( 'wp-plugin/this-plugin-definitely-does-not-exist-xyz', $data->packages );
+		$this->assertSame( array(), $data->packages->{'wp-plugin/this-plugin-definitely-does-not-exist-xyz'} );
 	}
 
 	/**
-	 * Test that an unknown theme returns 404 with empty packages.
+	 * Test that every plugin dependency this repository emits is also answered by it.
+	 *
+	 * A `require` we publish but don't answer for is a name Composer will go looking for in the next
+	 * repository, so it has to resolve here whether the dependency is published, closed, or gone.
 	 */
-	public function test_unknown_theme_returns_404(): void {
+	public function test_plugin_dependencies_are_claimed(): void {
+		$response = send_request( '/packages/p2/wp-plugin/woocommerce-gateway-stripe.json' );
+
+		// Assert the fixture resolved, so a broken endpoint fails here instead of skipping below.
+		$this->assertSame( 200, $response->status_code );
+
+		$data = json_decode( $response->body );
+		$this->assertIsObject( $data );
+		$this->assertObjectHasProperty( 'packages', $data );
+
+		$versions = $data->packages->{'wp-plugin/woocommerce-gateway-stripe'} ?? array();
+
+		$dependencies = array();
+		foreach ( $versions as $entry ) {
+			foreach ( array_keys( (array) ( $entry->require ?? array() ) ) as $name ) {
+				if ( str_starts_with( $name, 'wp-plugin/' ) ) {
+					$dependencies[ $name ] = true;
+				}
+			}
+		}
+
+		if ( ! $dependencies ) {
+			$this->markTestSkipped( 'woocommerce-gateway-stripe no longer declares a plugin dependency.' );
+		}
+
+		foreach ( array_keys( $dependencies ) as $name ) {
+			$dependency = send_request( '/packages/p2/' . $name . '.json' );
+
+			$this->assertSame( 200, $dependency->status_code, "{$name} is not served by this repository." );
+			$this->assertObjectHasProperty( $name, json_decode( $dependency->body )->packages, "{$name} is not claimed by this repository." );
+		}
+	}
+
+	/**
+	 * Test that an unknown theme claims the name with no versions.
+	 */
+	public function test_unknown_theme_claims_name(): void {
 		$response = send_request( '/packages/p2/wp-theme/this-theme-definitely-does-not-exist-xyz.json' );
 
-		$this->assertSame( 404, $response->status_code );
+		$this->assertSame( 200, $response->status_code );
+
+		$data = json_decode( $response->body );
+		$this->assertIsObject( $data );
+		$this->assertObjectHasProperty( 'wp-theme/this-theme-definitely-does-not-exist-xyz', $data->packages );
+		$this->assertSame( array(), $data->packages->{'wp-theme/this-theme-definitely-does-not-exist-xyz'} );
 	}
 
 	/**
-	 * Test that an invalid core slug returns 404.
+	 * Test that an invalid core slug claims the name with no versions.
 	 */
-	public function test_invalid_core_slug_returns_404(): void {
+	public function test_invalid_core_slug_claims_name(): void {
 		$response = send_request( '/packages/p2/wp-core/not-wordpress.json' );
 
-		$this->assertSame( 404, $response->status_code );
+		$this->assertSame( 200, $response->status_code );
+
+		$data = json_decode( $response->body );
+		$this->assertIsObject( $data );
+		$this->assertObjectHasProperty( 'wp-core/not-wordpress', $data->packages );
+		$this->assertSame( array(), $data->packages->{'wp-core/not-wordpress'} );
 	}
 
 	/**

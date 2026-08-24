@@ -49,9 +49,10 @@ class Version_Normalizer {
 
 		// Build the numeric part.
 		$major = $matches[1];
-		$minor = $matches[2] ?? '0';
-		$patch = ! empty( $matches[3] ) ? $matches[3] : null;
-		$extra = ! empty( $matches[4] ) ? $matches[4] : null;
+		// Test for an unmatched group rather than a falsy one, or a "0" segment would be dropped.
+		$minor = ( isset( $matches[2] ) && '' !== $matches[2] ) ? $matches[2] : '0';
+		$patch = ( isset( $matches[3] ) && '' !== $matches[3] ) ? $matches[3] : null;
+		$extra = ( isset( $matches[4] ) && '' !== $matches[4] ) ? $matches[4] : null;
 
 		$normalized = $major . '.' . $minor;
 		if ( null !== $patch ) {
