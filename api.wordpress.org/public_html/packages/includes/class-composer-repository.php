@@ -82,10 +82,8 @@ class Composer_Repository {
 
 		if ( 'not_found' === $response || null === $response ) {
 			/*
-			 * A 404 leaves the name unresolved, so Composer keeps looking through every repository
-			 * configured after this one, ending at Packagist, where these vendors are unclaimed.
-			 * Naming the package marks it found, which stops that search for all of them and reports
-			 * the name as unresolvable.
+			 * A 404 leaves the name unresolved, so Composer keeps searching every repository after
+			 * this one, ending at Packagist where these vendors are unclaimed. Naming it stops that.
 			 */
 			$package_name = 'wp-' . $type . '/' . $slug;
 
