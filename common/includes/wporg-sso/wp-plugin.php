@@ -578,7 +578,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					'action'         => 'remote-logout',
 					'redirect_to'    => urlencode( $logout_redirect ),
 					// The logout token is consumed on the SSO host (see _maybe_perform_remote_logout()), so bind it there.
-					'sso_logout'     => urlencode( $this->_generate_remote_token( $user, $this->sso_host ) )
+					'sso_logout'     => urlencode( $this->_generate_remote_token( $user, $this->sso_host ) ),
 				),
 				$this->sso_host_url . '/wp-login.php'
 			);
@@ -787,10 +787,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 		/**
 		 * Generate a hash for remote-login for non-wordpress.org domains
-		 *
-		 * @param string $target_host The host the token is issued for. Binding the hash
-		 *                            to the host keeps a token issued for one host from
-		 *                            being accepted on another.
 		 */
 		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false, $session_token = '', $target_host = '' ) {
 			// Scope the token to the destination's registrable domain (wordcamp.org,
@@ -855,14 +851,16 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				if ( ! get_transient( $dedup_key ) ) {
 					set_transient( $dedup_key, 1, 10 * MINUTE_IN_SECONDS );
 					// Path only (no query), and strip request-supplied input to a safe charset.
-					$path = (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ); // phpcs:ignore
-					trigger_error( sprintf(
+					$path    = (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					$message = sprintf(
 						'[wporg-sso] remote token did not validate for host=%s registrable=%s path=%s sample_user=%d',
 						preg_replace( '/[^a-z0-9.:_-]/i', '', (string) $this->host ),
 						preg_replace( '/[^a-z0-9.:_-]/i', '', (string) $registrable ),
 						preg_replace( '#[^a-z0-9._/-]#i', '', $path ),
 						(int) $user_id
-					), E_USER_WARNING );
+					);
+
+					trigger_error( $message, E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
 			}
 
