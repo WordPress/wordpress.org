@@ -71,7 +71,7 @@ $type = $m['type'];
 // Reject Trac output-format selectors (e.g. ?format=csv), which return non-HTML bytes rather than an embeddable page.
 $query_args = [];
 wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query_args );
-if ( ! empty( $query_args['format'] ) ) {
+if ( array_key_exists( 'format', $query_args ) && '' !== $query_args['format'] ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
 	die();
 }
