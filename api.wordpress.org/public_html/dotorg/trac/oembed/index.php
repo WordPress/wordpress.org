@@ -68,6 +68,14 @@ if ( ! $m ) {
 
 $type = $m['type'];
 
+// Reject Trac output-format selectors (e.g. ?format=csv), which return non-HTML bytes rather than an embeddable page.
+$query_args = [];
+wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query_args );
+if ( in_array( 'format', array_map( 'strtolower', array_keys( $query_args ) ), true ) ) {
+	header( 'HTTP/1.1 404 Not Found', true, 404 );
+	die();
+}
+
 // if not iframe embed, respond with oembed payload.
 if ( ! isset( $_GET['embed'] ) ) {
 	header( 'Content-Type: application/json; charset=UTF-8' );
@@ -146,19 +154,22 @@ if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {
 	die( $data );
 }
 
-$html = wp_remote_retrieve_body(
-	wp_safe_remote_get(
-		$url,
-		[
-			'user_agent'          => 'WordPress.org Trac oEmbed; https://api.wordpress.org/dotorg/trac/oembed',
-			'timeout'             => 15,
-			'limit_response_size' => 500 * KB_IN_BYTES,
-		]
-	)
+$response = wp_safe_remote_get(
+	$url,
+	[
+		'user_agent'          => 'WordPress.org Trac oEmbed; https://api.wordpress.org/dotorg/trac/oembed',
+		'timeout'             => 15,
+		'limit_response_size' => 500 * KB_IN_BYTES,
+	]
 );
+
+$html         = wp_remote_retrieve_body( $response );
+$content_type = strtolower( (string) wp_remote_retrieve_header( $response, 'content-type' ) );
 
 if (
 	! $html ||
+	// Security guard: only reparse responses Trac serves as HTML. A non-HTML format (e.g. ?format=csv) returns unescaped ticket content that would become executable markup on this origin (XSS) once parsed as HTML below.
+	! str_contains( $content_type, 'text/html' ) ||
 	(
 		! str_starts_with( $html, '<' ) &&
 		str_contains( $html, 'TracError: ' )
