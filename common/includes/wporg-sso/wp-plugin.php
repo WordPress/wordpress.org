@@ -789,10 +789,12 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * Generate a hash for remote-login for non-wordpress.org domains
 		 */
 		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false, $session_token = '', $target_host = '' ) {
-			// Scope the token to the destination's registrable domain (wordcamp.org,
-			// bbpress.org, ...) rather than the exact host, so it stays valid across
-			// same-family canonical redirects (e.g. 2023.us.wordcamp.org -> us.wordcamp.org)
-			// but not on an unrelated family (wordcamp.org != wordpress.org).
+			/*
+			 * Scope the token to the destination's registrable domain (wordcamp.org,
+			 * bbpress.org, ...) rather than the exact host, so it stays valid across
+			 * same-family canonical redirects (e.g. 2023.us.wordcamp.org -> us.wordcamp.org)
+			 * but not on an unrelated family (wordcamp.org != wordpress.org).
+			 */
 			$target_host = $this->_get_targetted_host( $this->_normalize_token_host( $target_host ) );
 
 			// re-use the same frag that Auth cookies use to invalidate sessions.
@@ -842,9 +844,17 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			 * (10 min) so it can't be flooded, and behind a filter so it's easy to turn
 			 * off. Under normal traffic this logs nothing. Remove after rollout.
 			 */
-			if ( ! $valid && $expiration_valid && $user && ! $valid_hash
-				&& apply_filters( 'wporg_sso_log_binding_rejects', true )
-			) {
+			/**
+			 * Filters whether to log remote tokens that fail the host scope check.
+			 *
+			 * Temporary rollout aid; see the block above in
+			 * WP_WPOrg_SSO::_validate_remote_token() where the hook fires.
+			 *
+			 * @param bool $log_rejects Whether to log. Default true.
+			 */
+			$log_rejects = apply_filters( 'wporg_sso_log_binding_rejects', true );
+
+			if ( ! $valid && $expiration_valid && $user && ! $valid_hash && $log_rejects ) {
 				$registrable = $this->_get_targetted_host( $this->_normalize_token_host( $this->host ) );
 				$dedup_key   = 'wporg_sso_bindlog_' . md5( $registrable );
 
