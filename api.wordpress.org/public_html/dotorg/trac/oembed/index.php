@@ -71,7 +71,7 @@ $type = $m['type'];
 // Reject Trac output-format selectors (e.g. ?format=csv), which return non-HTML bytes rather than an embeddable page.
 $query_args = [];
 wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query_args );
-if ( isset( $query_args['format'] ) ) {
+if ( ! empty( $query_args['format'] ) ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
 	die();
 }
@@ -173,6 +173,7 @@ foreach ( (array) wp_remote_retrieve_header( $response, 'content-type' ) as $con
 
 if (
 	! $html ||
+	200 !== wp_remote_retrieve_response_code( $response ) ||
 	// Security guard: only reparse responses Trac serves as HTML. A non-HTML format (e.g. ?format=csv) returns unescaped ticket content that would become executable markup on this origin (XSS) once parsed as HTML below.
 	[ 'text/html' ] !== array_unique( $content_types ) ||
 	(
