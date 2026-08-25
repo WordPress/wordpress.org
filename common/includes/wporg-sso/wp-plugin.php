@@ -851,8 +851,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				if ( ! get_transient( $dedup_key ) ) {
 					set_transient( $dedup_key, 1, 10 * MINUTE_IN_SECONDS );
 					// Path only (no query), and strip request-supplied input to a safe charset.
-					$path    = (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					$message = sprintf(
+					$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+					$path        = (string) wp_parse_url( $request_uri, PHP_URL_PATH );
+					$message     = sprintf(
 						'[wporg-sso] remote token did not validate for host=%s registrable=%s path=%s sample_user=%d',
 						preg_replace( '/[^a-z0-9.:_-]/i', '', (string) $this->host ),
 						preg_replace( '/[^a-z0-9.:_-]/i', '', (string) $registrable ),
