@@ -163,7 +163,7 @@ $response = wp_safe_remote_get(
 	]
 );
 
-$html         = wp_remote_retrieve_body( $response );
+$html = wp_remote_retrieve_body( $response );
 // A duplicated header comes back as an array; every value must declare HTML.
 $content_types = [];
 foreach ( (array) wp_remote_retrieve_header( $response, 'content-type' ) as $content_type ) {
