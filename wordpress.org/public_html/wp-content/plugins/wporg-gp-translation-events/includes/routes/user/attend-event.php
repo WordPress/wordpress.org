@@ -37,8 +37,8 @@ class Attend_Event_Route extends Route {
 			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
-		$nonce_name = '_attendee_nonce';
-		if ( ! isset( $_POST[ $nonce_name ] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $nonce_name ] ) ), $nonce_name ) ) {
+		$nonce_action = 'attend_translation_event_' . $event_id;
+		if ( ! isset( $_POST['_attendee_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_attendee_nonce'] ) ), $nonce_action ) ) {
 			$this->die_with_error( esc_html__( 'Your link has expired or is invalid. Please reload the page and try again.', 'gp-translation-events' ), 403 );
 			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
@@ -46,6 +46,11 @@ class Attend_Event_Route extends Route {
 		$event = $this->event_repository->get_event( $event_id );
 		if ( ! $event ) {
 			$this->die_with_404();
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
+		}
+
+		if ( ! current_user_can( 'view_translation_event', $event->id() ) ) {
+			$this->die_with_error( esc_html__( 'You are not authorized to attend this event.', 'gp-translation-events' ), 403 );
 			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
