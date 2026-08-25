@@ -71,7 +71,7 @@ $type = $m['type'];
 // Reject Trac output-format selectors (e.g. ?format=csv), which return non-HTML bytes rather than an embeddable page.
 $query_args = [];
 wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query_args );
-if ( in_array( 'format', array_map( 'strtolower', array_keys( $query_args ) ), true ) ) {
+if ( isset( $query_args['format'] ) ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
 	die();
 }
@@ -164,7 +164,9 @@ $response = wp_safe_remote_get(
 );
 
 $html         = wp_remote_retrieve_body( $response );
-$content_type = strtolower( (string) wp_remote_retrieve_header( $response, 'content-type' ) );
+$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+// A duplicated header comes back as an array; the last value is the effective one.
+$content_type = strtolower( (string) ( is_array( $content_type ) ? end( $content_type ) : $content_type ) );
 
 if (
 	! $html ||
