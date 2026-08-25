@@ -164,14 +164,17 @@ $response = wp_safe_remote_get(
 );
 
 $html         = wp_remote_retrieve_body( $response );
-$content_type = wp_remote_retrieve_header( $response, 'content-type' );
-// A duplicated header comes back as an array; the last value is the effective one.
-$content_type = strtolower( (string) ( is_array( $content_type ) ? end( $content_type ) : $content_type ) );
+// A duplicated header comes back as an array; every value must declare HTML.
+$content_types = [];
+foreach ( (array) wp_remote_retrieve_header( $response, 'content-type' ) as $content_type ) {
+	// Reduce to the bare media type, e.g. `text/html; charset=utf-8` => `text/html`.
+	$content_types[] = strtolower( trim( explode( ';', (string) $content_type )[0] ) );
+}
 
 if (
 	! $html ||
 	// Security guard: only reparse responses Trac serves as HTML. A non-HTML format (e.g. ?format=csv) returns unescaped ticket content that would become executable markup on this origin (XSS) once parsed as HTML below.
-	! str_contains( $content_type, 'text/html' ) ||
+	[ 'text/html' ] !== array_unique( $content_types ) ||
 	(
 		! str_starts_with( $html, '<' ) &&
 		str_contains( $html, 'TracError: ' )
