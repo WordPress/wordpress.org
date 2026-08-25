@@ -174,7 +174,7 @@ foreach ( (array) wp_remote_retrieve_header( $response, 'content-type' ) as $con
 if (
 	! $html ||
 	200 !== wp_remote_retrieve_response_code( $response ) ||
-	// Security guard: only reparse responses Trac serves as HTML. A non-HTML format (e.g. ?format=csv) returns unescaped ticket content that would become executable markup on this origin (XSS) once parsed as HTML below.
+	// Only reparse what Trac serves as HTML — anything else could become executable markup on this origin.
 	[ 'text/html' ] !== array_unique( $content_types ) ||
 	(
 		! str_starts_with( $html, '<' ) &&
