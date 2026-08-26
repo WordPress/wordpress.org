@@ -191,70 +191,133 @@ class Release_Confirmation_Immutable_Tag_Test extends TestCase {
 	}
 
 	/**
-	 * A tag last changed at (or before) a revision the release has already recorded is
-	 * unmodified — re-triggered imports of the same commit must stay a no-op.
+	 * A tag last changed at (or before) the release's recorded source revision is unmodified —
+	 * re-triggered imports of the same commit must stay a no-op.
 	 */
-	public function test_tag_at_a_recorded_revision_is_not_modified(): void {
-		$release = array(
-			'revision'                 => array( 100 ),
-			'zips_built_from_revision' => 0,
-		);
+	public function test_tag_at_source_revision_is_not_modified(): void {
+		$release = array( 'source_revision' => 100 );
 
 		$this->assertFalse( Import::tag_modified_after_release( $release, 100 ) );
 		$this->assertFalse( Import::tag_modified_after_release( $release, 90 ) );
 	}
 
 	/**
-	 * A tag last changed after every revision the release has recorded was modified
-	 * behind the release's back and must trigger a reset — regardless of whether the
-	 * release is confirmed or its zips are built, so the confirm-to-build window and
-	 * partially-confirmed releases are covered too.
+	 * A tag last changed after the recorded source revision was modified behind the release's
+	 * back and must trigger a reset — the check ignores confirmed/zips-built state, so the
+	 * confirm-to-build window and partially-confirmed releases are covered too.
 	 */
-	public function test_tag_changed_after_all_recorded_revisions_is_modified(): void {
-		$release = array(
-			'revision'                 => array( 100 ),
-			'zips_built_from_revision' => 0,
-		);
+	public function test_tag_changed_after_source_revision_is_modified(): void {
+		$release = array( 'source_revision' => 100 );
 
 		$this->assertTrue( Import::tag_modified_after_release( $release, 101 ) );
 	}
 
 	/**
-	 * The zip build's export revision extends the anchor: the build exported the repo at
-	 * that revision, so any tag change at or before it was part of the built code.
+	 * A discarded release is not exempt: its code can still be re-committed, so a change past
+	 * the source revision is detected. The reset (and discard itself) clears its confirmations.
 	 */
-	public function test_zip_build_revision_extends_the_anchor(): void {
+	public function test_discarded_release_is_not_exempt(): void {
 		$release = array(
-			'revision'                 => array( 100 ),
-			'zips_built_from_revision' => 150,
+			'source_revision' => 100,
+			'discarded'       => array( 'user' => 'someone' ),
 		);
+
+		$this->assertTrue( Import::tag_modified_after_release( $release, 200 ) );
+	}
+
+	/**
+	 * A legacy record predating source_revision falls back to the served ZIP's export revision: a
+	 * tag change after it is unshipped and re-opens the release, while a change already in the built
+	 * code does not.
+	 */
+	public function test_legacy_release_falls_back_to_zip_build_revision(): void {
+		$release = array( 'zips_built_from_revision' => 150 );
 
 		$this->assertFalse( Import::tag_modified_after_release( $release, 150 ) );
 		$this->assertTrue( Import::tag_modified_after_release( $release, 151 ) );
 	}
 
 	/**
-	 * Legacy release records that predate the revision fields must not raise undefined
-	 * array key warnings, and anchor at zero so any change re-opens them.
+	 * A legacy record with no revision information at all (e.g. a prefilled grandfathered tag) fails
+	 * safe: any real revision counts as modified rather than trusting the grandfathered approval.
 	 */
-	public function test_legacy_release_without_revision_fields(): void {
+	public function test_legacy_release_without_any_revision_fails_safe(): void {
 		$this->assertTrue( Import::tag_modified_after_release( array( 'tag' => '1.0' ), 100 ) );
 		$this->assertFalse( Import::tag_modified_after_release( array( 'tag' => '1.0' ), 0 ) );
 	}
 
 	/**
-	 * Missing and discarded releases carry no approval to protect, so they never count
-	 * as modified.
+	 * A missing release carries no approval to protect and never counts as modified.
 	 */
-	public function test_missing_and_discarded_releases_are_ignored(): void {
+	public function test_missing_release_is_not_modified(): void {
 		$this->assertFalse( Import::tag_modified_after_release( false, 100 ) );
+	}
 
-		$discarded = array(
-			'revision'                 => array( 100 ),
-			'zips_built_from_revision' => 0,
-			'discarded'                => true,
+	/**
+	 * Recording a discard clears the release's confirmations outright, so undo_discard_release()
+	 * can't restore approvals collected against code that has since changed.
+	 */
+	public function test_discard_clears_confirmations(): void {
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'                    => '1.4.0',
+				'version'                => '1.4.0',
+				'confirmations_required' => 2,
+				'confirmations'          => array(
+					'alice' => 111,
+					'bob'   => 222,
+				),
+			)
 		);
 
-		$this->assertFalse( Import::tag_modified_after_release( $discarded, 200 ) );
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'       => '1.4.0',
+				'confirmed' => false,
+				'discarded' => array(
+					'user' => 'reviewer',
+					'time' => 333,
+				),
+			)
+		);
+
+		$this->assertSame( array(), $this->release( '1.4.0' )['confirmations'] );
+	}
+
+	/**
+	 * Re-opening a release re-arms the current cooldown (dropping a force-release bypass) and
+	 * refreshes its date so it resurfaces in the confirmation queue instead of staying buried.
+	 */
+	public function test_reset_rearms_cooldown_and_refreshes_date(): void {
+		$before = time();
+
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'           => '1.4.0',
+				'version'       => '1.4.0',
+				'confirmed'     => true,
+				'date'          => $before - WEEK_IN_SECONDS,
+				'release_delay' => 0,
+			)
+		);
+
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'                => '1.4.0',
+				'reset_confirmation' => true,
+			)
+		);
+
+		$release = $this->release( '1.4.0' );
+
+		$this->assertSame(
+			\WordPressdotorg\Plugin_Directory\get_release_cooldown_delay( $this->plugin->post_name ),
+			$release['release_delay']
+		);
+		$this->assertGreaterThanOrEqual( $before, $release['date'] );
 	}
 }

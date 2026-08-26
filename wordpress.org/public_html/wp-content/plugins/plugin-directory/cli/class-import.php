@@ -70,25 +70,26 @@ class Import {
 	public $plugin;
 
 	/**
-	 * Determine whether a release's tag has been modified since the release was recorded.
+	 * Whether a tag's code changed since its release's confirmation state was established.
 	 *
-	 * A tag last changed after every revision the release has recorded was modified behind its back.
+	 * Compares the tag's current "Last Changed Rev" against the recorded source_revision. Records
+	 * predating that field fall back to the served ZIP's export revision, and fail safe (modified)
+	 * when even that is unknown; import_from_svn() backfills source_revision so the fallback runs once.
 	 *
 	 * @param array|false $release      Stored release record, per Plugin_Directory::get_release().
 	 * @param int         $tag_revision The tag path's current "Last Changed Rev".
-	 * @return bool Whether the tag changed after the release's last recorded revision.
+	 * @return bool Whether the tag changed after the recorded source revision.
 	 */
 	public static function tag_modified_after_release( $release, $tag_revision ) {
-		// No release to protect, or a discarded release that isn't served.
-		if ( ! $release || ! empty( $release['discarded'] ) ) {
+		if ( ! $release ) {
 			return false;
 		}
 
-		// Legacy records may predate the revision fields.
-		$known_revisions   = array_map( 'intval', (array) ( $release['revision'] ?? [] ) );
-		$known_revisions[] = (int) ( $release['zips_built_from_revision'] ?? 0 );
+		if ( isset( $release['source_revision'] ) ) {
+			return (int) $tag_revision > (int) $release['source_revision'];
+		}
 
-		return $tag_revision > max( $known_revisions );
+		return (int) $tag_revision > (int) ( $release['zips_built_from_revision'] ?? 0 );
 	}
 
 	/**
@@ -245,6 +246,17 @@ class Import {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
 
+			// Per-tag last-changed rev/author, from the listing export_and_parse_plugin() already fetched.
+			$tag_last_changed = [];
+			foreach ( $tagged_versions as $tag_meta ) {
+				if ( isset( $tag_meta['tag'] ) ) {
+					$tag_last_changed[ $tag_meta['tag'] ] = [
+						'revision' => (int) ( $tag_meta['revision'] ?? 0 ),
+						'author'   => (string) ( $tag_meta['author'] ?? '' ),
+					];
+				}
+			}
+
 			// Check to see if the commit has touched tags that don't have known confirmed releases.
 			foreach ( $svn_changed_tags as $svn_changed_tag ) {
 				if ( 'trunk' === $svn_changed_tag ) {
@@ -253,22 +265,20 @@ class Import {
 
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 
-				// The tag's own last change; $last_revision/$last_committer describe the stable tag's path, which may be a different tag.
-				if ( $svn_changed_tag === $stable_tag ) {
+				// $last_revision/$last_committer describe the stable path; other tags need their own.
+				if ( isset( $tag_last_changed[ $svn_changed_tag ] ) ) {
+					$tag_revision  = $tag_last_changed[ $svn_changed_tag ]['revision'];
+					$tag_committer = $tag_last_changed[ $svn_changed_tag ]['author'] ?: $last_committer;
+				} elseif ( $svn_changed_tag === $stable_tag ) {
 					$tag_revision  = (int) $last_revision;
 					$tag_committer = $last_committer;
 				} else {
-					$tag_info      = SVN::info( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$svn_changed_tag}" );
-					$tag_revision  = (int) ( $tag_info['result']['Last Changed Rev'] ?? 0 );
-					$tag_committer = $tag_info['result']['Last Changed Author'] ?? $last_committer;
+					// Unknown revision (tag deleted mid-import, or listing failure): don't guess and risk a false reset.
+					$this->warnings['tag_revision_unresolved'][] = $svn_changed_tag;
+					continue;
 				}
 
-				/*
-				 * A served tag re-committed with new code must re-confirm, not inherit its old
-				 * approval — including the zero-confirmation state grandfathered tags carry, and
-				 * any confirmations already collected against the old code. An identical re-import
-				 * stays a no-op, as the tag's last change is then a revision the release has seen.
-				 */
+				// Re-committed code must re-confirm, not inherit the tag's old approval; an unchanged re-import is a no-op.
 				$modified_after_release = self::tag_modified_after_release( $release, $tag_revision );
 
 				if ( ! $release || $modified_after_release ) {
@@ -284,10 +294,12 @@ class Import {
 					}
 
 					$release_data = [
-						'tag'       => $svn_changed_tag,
-						'version'   => $release_version,
-						'committer' => [ $tag_committer ],
-						'revision'  => [ $tag_revision ],
+						'tag'             => $svn_changed_tag,
+						'version'         => $release_version,
+						'committer'       => [ $tag_committer ],
+						'revision'        => [ $tag_revision ],
+						// Baseline for later modification checks.
+						'source_revision' => $tag_revision,
 					];
 
 					// Discard the prior approval when re-opening a modified release.
@@ -326,6 +338,15 @@ class Import {
 					} else {
 						echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
 					}
+				} elseif ( ! isset( $release['source_revision'] ) ) {
+					// Legacy record, unchanged: record its baseline so later checks are tag-specific.
+					Plugin_Directory::add_release(
+						$plugin,
+						[
+							'tag'             => $svn_changed_tag,
+							'source_revision' => $tag_revision,
+						]
+					);
 				}
 			}
 
@@ -788,9 +809,10 @@ class Import {
 			}
 
 			$tagged_versions[ $tag ] = [
-				'tag'    => $entry['filename'],
-				'author' => $entry['author'],
-				'date'   => $entry['date'],
+				'tag'      => $entry['filename'],
+				'author'   => $entry['author'],
+				'date'     => $entry['date'],
+				'revision' => (int) ( $entry['revision'] ?? 0 ),
 			];
 		}
 

@@ -1768,8 +1768,17 @@ class Plugin_Directory {
 		// Re-open a served release for fresh approval, clearing the old confirmation set the merge above can't. See Import::import_from_svn().
 		if ( ! empty( $data['reset_confirmation'] ) ) {
 			$release = array_merge( $release, $confirmation_defaults );
+
+			// Re-opened code is new: re-arm the cooldown (dropping any force-release bypass) and resurface by date.
+			$release['release_delay'] = get_release_cooldown_delay( $plugin->post_name );
+			$release['date']          = time();
 		}
 		unset( $release['reset_confirmation'] );
+
+		// A discard voids approvals; clear them so undo_discard_release() can't restore stale confirmations.
+		if ( ! empty( $data['discarded'] ) ) {
+			$release['confirmations'] = [];
+		}
 
 		/*
 		 * Allow a discarded release to be reset.
