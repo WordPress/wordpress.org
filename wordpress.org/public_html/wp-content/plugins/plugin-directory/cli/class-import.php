@@ -72,10 +72,9 @@ class Import {
 	/**
 	 * Whether a tag's code changed since its release's confirmation state was established.
 	 *
-	 * Compares the tag's current "Last Changed Rev" against the recorded source_revision. A record
-	 * predating that field falls back to the served ZIP's export revision if it was built (failing
-	 * safe when that's unknown), or is left for the backfill if it isn't served yet; import_from_svn()
-	 * records source_revision so the fallback runs at most once per tag.
+	 * Each release remembers the revision it was approved at; a newer commit to the tag means it
+	 * changed. Older releases from before we tracked that lean on the best revision we have, and when
+	 * unsure are treated as changed rather than trusted — just once, until they record their own.
 	 *
 	 * @param array|false $release      Stored release record, per Plugin_Directory::get_release().
 	 * @param int         $tag_revision The tag path's current "Last Changed Rev".
