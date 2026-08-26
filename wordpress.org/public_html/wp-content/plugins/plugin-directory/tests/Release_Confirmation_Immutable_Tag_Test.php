@@ -226,24 +226,29 @@ class Release_Confirmation_Immutable_Tag_Test extends TestCase {
 	}
 
 	/**
-	 * A legacy record predating source_revision falls back to the served ZIP's export revision: a
-	 * tag change after it is unshipped and re-opens the release, while a change already in the built
+	 * A built legacy record predating source_revision falls back to the served ZIP's export revision:
+	 * a tag change after it is unshipped and re-opens the release, while a change already in the built
 	 * code does not.
 	 */
 	public function test_legacy_release_falls_back_to_zip_build_revision(): void {
-		$release = array( 'zips_built_from_revision' => 150 );
+		$release = array(
+			'zips_built'               => true,
+			'zips_built_from_revision' => 150,
+		);
 
 		$this->assertFalse( Import::tag_modified_after_release( $release, 150 ) );
 		$this->assertTrue( Import::tag_modified_after_release( $release, 151 ) );
 	}
 
 	/**
-	 * A legacy record with no revision information at all (e.g. a prefilled grandfathered tag) fails
-	 * safe: any real revision counts as modified rather than trusting the grandfathered approval.
+	 * A built legacy record with no export revision (e.g. a prefilled grandfathered tag) fails safe:
+	 * any real revision counts as modified rather than trusting the grandfathered approval.
 	 */
-	public function test_legacy_release_without_any_revision_fails_safe(): void {
-		$this->assertTrue( Import::tag_modified_after_release( array( 'tag' => '1.0' ), 100 ) );
-		$this->assertFalse( Import::tag_modified_after_release( array( 'tag' => '1.0' ), 0 ) );
+	public function test_built_legacy_release_without_revision_fails_safe(): void {
+		$release = array( 'zips_built' => true );
+
+		$this->assertTrue( Import::tag_modified_after_release( $release, 100 ) );
+		$this->assertFalse( Import::tag_modified_after_release( $release, 0 ) );
 	}
 
 	/**
@@ -251,6 +256,28 @@ class Release_Confirmation_Immutable_Tag_Test extends TestCase {
 	 */
 	public function test_missing_release_is_not_modified(): void {
 		$this->assertFalse( Import::tag_modified_after_release( false, 100 ) );
+	}
+
+	/**
+	 * An unbuilt legacy release (no source_revision, never served) is never modified: the import
+	 * that confirm_release() queues must not wipe the confirmation it just collected.
+	 */
+	public function test_unbuilt_legacy_release_is_not_modified(): void {
+		$release = array( 'zips_built' => false );
+
+		$this->assertFalse( Import::tag_modified_after_release( $release, 999 ) );
+	}
+
+	/**
+	 * Exact-tag lookup: a numerically-equal distinct tag ('1.40' vs '1.4') must not shadow the other,
+	 * which would mislead the importer's modified check and the stable-tag gate.
+	 */
+	public function test_get_release_matches_exact_tag_not_numeric_equal(): void {
+		$this->add_grandfathered_release( '1.4', '1.4' );
+		$this->add_grandfathered_release( '1.40', '1.40' );
+
+		$this->assertSame( '1.4', Plugin_Directory::get_release( $this->plugin, '1.4' )['tag'] );
+		$this->assertSame( '1.40', Plugin_Directory::get_release( $this->plugin, '1.40' )['tag'] );
 	}
 
 	/**

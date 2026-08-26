@@ -1690,10 +1690,11 @@ class Plugin_Directory {
 	public static function get_release( $plugin, $tag ) {
 		$releases = self::get_releases( $plugin );
 
-		// Look for the version released as a tag.
-		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
-		if ( $filtered ) {
-			return array_shift( $filtered );
+		// Exact tag match first; wp_list_filter()'s loose == would confuse '1.4' with '1.40'.
+		foreach ( $releases as $release ) {
+			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $tag ) {
+				return $release;
+			}
 		}
 
 		// Look for the tag as a trunk version.
@@ -1733,7 +1734,7 @@ class Plugin_Directory {
 			}
 		}
 
-		// The unconfirmed state of a release, shared by fresh releases and confirmation resets so the two can't drift apart.
+		// Unconfirmed-state defaults, shared by fresh releases and resets so the two can't drift apart.
 		$confirmation_defaults = [
 			// Assume zips built if no release confirmation.
 			'zips_built'               => ! $plugin->release_confirmation,

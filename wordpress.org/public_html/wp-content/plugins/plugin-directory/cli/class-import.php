@@ -72,9 +72,10 @@ class Import {
 	/**
 	 * Whether a tag's code changed since its release's confirmation state was established.
 	 *
-	 * Compares the tag's current "Last Changed Rev" against the recorded source_revision. Records
-	 * predating that field fall back to the served ZIP's export revision, and fail safe (modified)
-	 * when even that is unknown; import_from_svn() backfills source_revision so the fallback runs once.
+	 * Compares the tag's current "Last Changed Rev" against the recorded source_revision. A record
+	 * predating that field falls back to the served ZIP's export revision if it was built (failing
+	 * safe when that's unknown), or is left for the backfill if it isn't served yet; import_from_svn()
+	 * records source_revision so the fallback runs at most once per tag.
 	 *
 	 * @param array|false $release      Stored release record, per Plugin_Directory::get_release().
 	 * @param int         $tag_revision The tag path's current "Last Changed Rev".
@@ -87,6 +88,11 @@ class Import {
 
 		if ( isset( $release['source_revision'] ) ) {
 			return (int) $tag_revision > (int) $release['source_revision'];
+		}
+
+		// An unbuilt legacy release isn't served, so nothing to protect: leave it for the backfill, don't wipe its confirmations.
+		if ( empty( $release['zips_built'] ) ) {
+			return false;
 		}
 
 		return (int) $tag_revision > (int) ( $release['zips_built_from_revision'] ?? 0 );
@@ -265,7 +271,7 @@ class Import {
 
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 
-				// get_release() matches loosely ('1.4' == '1.40', or a trunk@ fallback); only act on an exact-tag record.
+				// get_release()'s trunk@ fallback can match a different release; only act on an exact-tag record.
 				if ( $release && (string) ( $release['tag'] ?? '' ) !== (string) $svn_changed_tag ) {
 					$release = false;
 				}
@@ -288,8 +294,8 @@ class Import {
 
 				if ( ! $release || $modified_after_release ) {
 					if ( $svn_changed_tag === $stable_tag ) {
-						// Stable release, described by the parsed plugin headers.
-						$release_version = $version;
+						// Stable release, described by the parsed plugin headers; don't clobber a stored version with an empty header.
+						$release_version = $version ?: ( ( $release['version'] ?? '' ) ?: $svn_changed_tag );
 					} elseif ( $release ) {
 						// Keep the stored version; there's no header data for non-stable tags.
 						$release_version = $release['version'] ?: $svn_changed_tag;
@@ -339,8 +345,10 @@ class Import {
 					$email->send();
 
 					if ( $modified_after_release ) {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI progress output.
 						echo "Plugin release {$svn_changed_tag} modified after release; confirmation reset.\n";
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI progress output.
 						echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
 					}
 				} elseif ( ! isset( $release['source_revision'] ) ) {
@@ -388,7 +396,7 @@ class Import {
 					 * This can be a confirmed release, but one which isn't set as stable.
 					 */
 					$this_release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
-					if ( $this_release['confirmed'] && ! $this_release['zips_built'] ) {
+					if ( $this_release && $this_release['confirmed'] && ! $this_release['zips_built'] ) {
 						$zips_to_build[] = $this_release['tag'];
 					}
 				}
