@@ -1761,6 +1761,16 @@ class Plugin_Directory {
 			}
 		}
 
+		// Re-open a served release for fresh approval, clearing the old confirmation set the merge above can't. See Import::import_from_svn().
+		if ( ! empty( $data['reset_confirmation'] ) ) {
+			$release['confirmed']                = false;
+			$release['confirmations']            = [];
+			$release['confirmations_required']   = (int) $plugin->release_confirmation;
+			$release['zips_built']               = false;
+			$release['zips_built_from_revision'] = 0;
+		}
+		unset( $release['reset_confirmation'] );
+
 		/*
 		 * Allow a discarded release to be reset.
 		 * See API\Routes\Plugin_Release_Confirmation::undo_discard_release()

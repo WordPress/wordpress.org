@@ -230,17 +230,30 @@ class Import {
 				}
 
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
-				if ( ! $release ) {
+
+				/*
+				 * A served tag re-committed with new code must re-confirm, not inherit its old approval
+				 * (including the zero-confirmation state grandfathered tags carry). The revision compare
+				 * keeps an identical re-import a no-op.
+				 */
+				$modified_after_release = $release
+					&& $release['confirmed']
+					&& $release['zips_built']
+					&& (int) $last_revision !== (int) $release['zips_built_from_revision'];
+
+				if ( ! $release || $modified_after_release ) {
 					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
 					$release_version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
 
 					Plugin_Directory::add_release(
 						$plugin,
 						[
-							'tag'       => $svn_changed_tag,
-							'version'   => $release_version,
-							'committer' => [ $last_committer ],
-							'revision'  => [ $last_revision ]
+							'tag'                => $svn_changed_tag,
+							'version'            => $release_version,
+							'committer'          => [ $last_committer ],
+							'revision'           => [ $last_revision ],
+							// Discard the prior approval when re-opening a modified release.
+							'reset_confirmation' => $modified_after_release,
 						]
 					);
 
@@ -268,7 +281,11 @@ class Import {
 					);
 					$email->send();
 
-					echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
+					if ( $modified_after_release ) {
+						echo "Plugin release {$svn_changed_tag} modified after release; confirmation reset.\n";
+					} else {
+						echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
+					}
 				}
 			}
 
