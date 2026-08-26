@@ -1690,7 +1690,7 @@ class Plugin_Directory {
 	public static function get_release( $plugin, $tag ) {
 		$releases = self::get_releases( $plugin );
 
-		// Exact tag match first; wp_list_filter()'s loose == would confuse '1.4' with '1.40'.
+		// Match the exact tag; '1.4' and '1.40' are distinct releases, not a numeric match.
 		foreach ( $releases as $release ) {
 			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $tag ) {
 				return $release;
