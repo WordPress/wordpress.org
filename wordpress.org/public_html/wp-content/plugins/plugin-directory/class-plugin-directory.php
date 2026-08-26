@@ -1772,6 +1772,9 @@ class Plugin_Directory {
 			// Re-opened code is new: re-arm the cooldown (dropping any force-release bypass) and resurface by date.
 			$release['release_delay'] = get_release_cooldown_delay( $plugin->post_name );
 			$release['date']          = time();
+
+			// A prior discard is stale once the code changes: fully re-open so it can be confirmed.
+			unset( $release['discarded'] );
 		}
 		unset( $release['reset_confirmation'] );
 

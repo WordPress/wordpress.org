@@ -287,6 +287,34 @@ class Release_Confirmation_Immutable_Tag_Test extends TestCase {
 	}
 
 	/**
+	 * Re-opening a modified release clears a prior discard, so it isn't left in a state the reset
+	 * email invites committers to confirm but confirm_release() and discard_release() both refuse.
+	 */
+	public function test_reset_clears_discarded(): void {
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'       => '1.4.0',
+				'version'   => '1.4.0',
+				'discarded' => array(
+					'user' => 'reviewer',
+					'time' => 333,
+				),
+			)
+		);
+
+		Plugin_Directory::add_release(
+			$this->plugin,
+			array(
+				'tag'                => '1.4.0',
+				'reset_confirmation' => true,
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'discarded', $this->release( '1.4.0' ) );
+	}
+
+	/**
 	 * Re-opening a release re-arms the current cooldown (dropping a force-release bypass) and
 	 * refreshes its date so it resurfaces in the confirmation queue instead of staying buried.
 	 */

@@ -265,6 +265,11 @@ class Import {
 
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 
+				// get_release() matches loosely ('1.4' == '1.40', or a trunk@ fallback); only act on an exact-tag record.
+				if ( $release && (string) ( $release['tag'] ?? '' ) !== (string) $svn_changed_tag ) {
+					$release = false;
+				}
+
 				// $last_revision/$last_committer describe the stable path; other tags need their own.
 				if ( isset( $tag_last_changed[ $svn_changed_tag ] ) ) {
 					$tag_revision  = $tag_last_changed[ $svn_changed_tag ]['revision'];
