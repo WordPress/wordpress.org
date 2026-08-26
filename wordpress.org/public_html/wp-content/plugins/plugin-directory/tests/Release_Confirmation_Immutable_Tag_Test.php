@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
+use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**
@@ -20,7 +21,8 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
  * zero-confirmation state.
  *
  * These tests cover the `reset_confirmation` seam Import::import_from_svn() uses to
- * re-open a modified released tag, and confirm a plain merge never resets on its own.
+ * re-open a modified released tag, the Import::tag_modified_after_release() check that
+ * decides when to use it, and confirm a plain merge never resets on its own.
  *
  * Extends the plain PHPUnit TestCase for the same reasons as
  * Current_Release_Resolution_Test: WP_UnitTestCase is incompatible with the
@@ -186,5 +188,73 @@ class Release_Confirmation_Immutable_Tag_Test extends TestCase {
 
 		$this->assertTrue( $release['confirmed'] );
 		$this->assertSame( 0, $release['confirmations_required'] );
+	}
+
+	/**
+	 * A tag last changed at (or before) a revision the release has already recorded is
+	 * unmodified — re-triggered imports of the same commit must stay a no-op.
+	 */
+	public function test_tag_at_a_recorded_revision_is_not_modified(): void {
+		$release = array(
+			'revision'                 => array( 100 ),
+			'zips_built_from_revision' => 0,
+		);
+
+		$this->assertFalse( Import::tag_modified_after_release( $release, 100 ) );
+		$this->assertFalse( Import::tag_modified_after_release( $release, 90 ) );
+	}
+
+	/**
+	 * A tag last changed after every revision the release has recorded was modified
+	 * behind the release's back and must trigger a reset — regardless of whether the
+	 * release is confirmed or its zips are built, so the confirm-to-build window and
+	 * partially-confirmed releases are covered too.
+	 */
+	public function test_tag_changed_after_all_recorded_revisions_is_modified(): void {
+		$release = array(
+			'revision'                 => array( 100 ),
+			'zips_built_from_revision' => 0,
+		);
+
+		$this->assertTrue( Import::tag_modified_after_release( $release, 101 ) );
+	}
+
+	/**
+	 * The zip build's export revision extends the anchor: the build exported the repo at
+	 * that revision, so any tag change at or before it was part of the built code.
+	 */
+	public function test_zip_build_revision_extends_the_anchor(): void {
+		$release = array(
+			'revision'                 => array( 100 ),
+			'zips_built_from_revision' => 150,
+		);
+
+		$this->assertFalse( Import::tag_modified_after_release( $release, 150 ) );
+		$this->assertTrue( Import::tag_modified_after_release( $release, 151 ) );
+	}
+
+	/**
+	 * Legacy release records that predate the revision fields must not raise undefined
+	 * array key warnings, and anchor at zero so any change re-opens them.
+	 */
+	public function test_legacy_release_without_revision_fields(): void {
+		$this->assertTrue( Import::tag_modified_after_release( array( 'tag' => '1.0' ), 100 ) );
+		$this->assertFalse( Import::tag_modified_after_release( array( 'tag' => '1.0' ), 0 ) );
+	}
+
+	/**
+	 * Missing and discarded releases carry no approval to protect, so they never count
+	 * as modified.
+	 */
+	public function test_missing_and_discarded_releases_are_ignored(): void {
+		$this->assertFalse( Import::tag_modified_after_release( false, 100 ) );
+
+		$discarded = array(
+			'revision'                 => array( 100 ),
+			'zips_built_from_revision' => 0,
+			'discarded'                => true,
+		);
+
+		$this->assertFalse( Import::tag_modified_after_release( $discarded, 200 ) );
 	}
 }

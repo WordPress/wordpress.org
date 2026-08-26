@@ -70,6 +70,28 @@ class Import {
 	public $plugin;
 
 	/**
+	 * Determine whether a release's tag has been modified since the release was recorded.
+	 *
+	 * A tag last changed after every revision the release has recorded was modified behind its back.
+	 *
+	 * @param array|false $release      Stored release record, per Plugin_Directory::get_release().
+	 * @param int         $tag_revision The tag path's current "Last Changed Rev".
+	 * @return bool Whether the tag changed after the release's last recorded revision.
+	 */
+	public static function tag_modified_after_release( $release, $tag_revision ) {
+		// No release to protect, or a discarded release that isn't served.
+		if ( ! $release || ! empty( $release['discarded'] ) ) {
+			return false;
+		}
+
+		// Legacy records may predate the revision fields.
+		$known_revisions   = array_map( 'intval', (array) ( $release['revision'] ?? [] ) );
+		$known_revisions[] = (int) ( $release['zips_built_from_revision'] ?? 0 );
+
+		return $tag_revision > max( $known_revisions );
+	}
+
+	/**
 	 * Process an import for a Plugin into the Plugin Directory.
 	 *
 	 * @throws \Exception
@@ -231,31 +253,49 @@ class Import {
 
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
 
+				// The tag's own last change; $last_revision/$last_committer describe the stable tag's path, which may be a different tag.
+				if ( $svn_changed_tag === $stable_tag ) {
+					$tag_revision  = (int) $last_revision;
+					$tag_committer = $last_committer;
+				} else {
+					$tag_info      = SVN::info( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$svn_changed_tag}" );
+					$tag_revision  = (int) ( $tag_info['result']['Last Changed Rev'] ?? 0 );
+					$tag_committer = $tag_info['result']['Last Changed Author'] ?? $last_committer;
+				}
+
 				/*
-				 * A served tag re-committed with new code must re-confirm, not inherit its old approval
-				 * (including the zero-confirmation state grandfathered tags carry). The revision compare
-				 * keeps an identical re-import a no-op.
+				 * A served tag re-committed with new code must re-confirm, not inherit its old
+				 * approval — including the zero-confirmation state grandfathered tags carry, and
+				 * any confirmations already collected against the old code. An identical re-import
+				 * stays a no-op, as the tag's last change is then a revision the release has seen.
 				 */
-				$modified_after_release = $release
-					&& $release['confirmed']
-					&& $release['zips_built']
-					&& (int) $last_revision !== (int) $release['zips_built_from_revision'];
+				$modified_after_release = self::tag_modified_after_release( $release, $tag_revision );
 
 				if ( ! $release || $modified_after_release ) {
-					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
-					$release_version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
+					if ( $svn_changed_tag === $stable_tag ) {
+						// Stable release, described by the parsed plugin headers.
+						$release_version = $version;
+					} elseif ( $release ) {
+						// Keep the stored version; there's no header data for non-stable tags.
+						$release_version = $release['version'] ?: $svn_changed_tag;
+					} else {
+						// New non-stable release; fallback to the tag name.
+						$release_version = $svn_changed_tag;
+					}
 
-					Plugin_Directory::add_release(
-						$plugin,
-						[
-							'tag'                => $svn_changed_tag,
-							'version'            => $release_version,
-							'committer'          => [ $last_committer ],
-							'revision'           => [ $last_revision ],
-							// Discard the prior approval when re-opening a modified release.
-							'reset_confirmation' => $modified_after_release,
-						]
-					);
+					$release_data = [
+						'tag'       => $svn_changed_tag,
+						'version'   => $release_version,
+						'committer' => [ $tag_committer ],
+						'revision'  => [ $tag_revision ],
+					];
+
+					// Discard the prior approval when re-opening a modified release.
+					if ( $modified_after_release ) {
+						$release_data['reset_confirmation'] = true;
+					}
+
+					Plugin_Directory::add_release( $plugin, $release_data );
 
 					/*
 					 * Trigger the release confirmation email.
@@ -273,7 +313,7 @@ class Import {
 						$plugin,
 						$who_to_email,
 						[
-							'who'     => $last_committer,
+							'who'     => $tag_committer,
 							'readme'  => $readme,
 							'headers' => $headers,
 							'version' => $release_version,

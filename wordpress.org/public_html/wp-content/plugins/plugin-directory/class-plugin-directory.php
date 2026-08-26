@@ -1733,23 +1733,27 @@ class Plugin_Directory {
 			}
 		}
 
-		$release = $release ?: [
-			'date'                     => time(),
-			'tag'                      => '',
-			'version'                  => '',
+		// The unconfirmed state of a release, shared by fresh releases and confirmation resets so the two can't drift apart.
+		$confirmation_defaults = [
 			// Assume zips built if no release confirmation.
 			'zips_built'               => ! $plugin->release_confirmation,
 			'zips_built_from_revision' => 0,
 			'confirmations'            => [],
-			// Confirmed by default if no release confiration.
+			// Confirmed by default if no release confirmation.
 			'confirmed'                => ! $plugin->release_confirmation,
 			'confirmations_required'   => (int) $plugin->release_confirmation,
-			'committer'                => [],
-			'revision'                 => [],
+		];
+
+		$release = $release ?: $confirmation_defaults + [
+			'date'          => time(),
+			'tag'           => '',
+			'version'       => '',
+			'committer'     => [],
+			'revision'      => [],
 			// Captures the release cooldown active at creation time so future filter/constant
 			// changes don't retroactively affect in-flight releases. Reviewers force-release
 			// by overriding this to 0 — see API_Update_Updater::force_release().
-			'release_delay'            => get_release_cooldown_delay( $plugin->post_name ),
+			'release_delay' => get_release_cooldown_delay( $plugin->post_name ),
 		];
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?
@@ -1763,11 +1767,7 @@ class Plugin_Directory {
 
 		// Re-open a served release for fresh approval, clearing the old confirmation set the merge above can't. See Import::import_from_svn().
 		if ( ! empty( $data['reset_confirmation'] ) ) {
-			$release['confirmed']                = false;
-			$release['confirmations']            = [];
-			$release['confirmations_required']   = (int) $plugin->release_confirmation;
-			$release['zips_built']               = false;
-			$release['zips_built_from_revision'] = 0;
+			$release = array_merge( $release, $confirmation_defaults );
 		}
 		unset( $release['reset_confirmation'] );
 
