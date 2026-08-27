@@ -426,6 +426,31 @@ class Security_Scan_Notification_Test extends TestCase {
 	}
 
 	/**
+	 * A lone carriage return in a snippet cannot break a line out of the code block.
+	 *
+	 * The Markdown processor maps a bare \r to a newline; if the snippet is not
+	 * normalized first, the split-out line loses its indent and renders as live
+	 * HTML instead of escaped code.
+	 */
+	public function test_snippet_carriage_return_stays_in_code_block(): void {
+		$callback = $this->completed_callback(
+			array(
+				'findings_count' => 1,
+				'findings'       => array(
+					$this->finding( 9.8, array( 'code_snippet' => "safe_line\r<script>alert(4)</script>" ) ),
+				),
+			)
+		);
+
+		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback );
+
+		$message = $this->emails[0]['message'];
+
+		$this->assertStringContainsString( '&lt;script&gt;alert(4)&lt;/script&gt;', $message );
+		$this->assertStringNotContainsString( '<script>alert(4)', $message );
+	}
+
+	/**
 	 * A high-risk verdict that could not block still emails, as advisory.
 	 */
 	public function test_advisory_high_risk_scan_emails_committers(): void {

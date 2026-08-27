@@ -182,7 +182,8 @@ class Security_Scan_Findings extends Markdown_Base {
 	 * @return string The code block, or an empty string for an empty snippet.
 	 */
 	private function snippet_text( string $snippet ): string {
-		$snippet = str_replace( "\r\n", "\n", trim( $snippet, "\n\r" ) );
+		// Normalize every newline the Markdown processor recognizes (it maps \r\n and lone \r to \n): an unindented line it splits out later escapes the code block.
+		$snippet = str_replace( [ "\r\n", "\r" ], "\n", trim( $snippet, "\n\r" ) );
 		$lines   = array_slice( explode( "\n", $snippet ), 0, 10 );
 		$snippet = mb_strimwidth( implode( "\n", $this->outdent( $lines ) ), 0, 1000, '…' );
 
