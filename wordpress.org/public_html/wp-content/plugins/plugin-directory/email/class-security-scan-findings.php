@@ -59,15 +59,15 @@ class Security_Scan_Findings extends Markdown_Base {
 		);
 
 		$intro = sprintf(
-			/* translators: 1: Plugin name. 2: Plugin version. 3: Maximum risk score, from 0 to 10. */
-			__( 'An automated security scan of %1$s %2$s reported findings with a maximum risk score of %3$s out of 10.', 'wporg-plugins' ),
+			/* translators: 1: Plugin name. 2: Plugin version. 3: URL to the automated security review documentation. */
+			__( 'An automated security review of %1$s %2$s reported the following findings. Learn more about these reviews in the [plugin developer handbook](%3$s).', 'wporg-plugins' ),
 			$this->plugin_title(),
 			$record['version'],
-			number_format_i18n( (float) $record['max_risk_score'], 1 )
+			'https://developer.wordpress.org/plugins/wordpress-org/automated-security-review/'
 		);
 
 		if ( 'blocked' === $record['action'] ) {
-			$action = __( 'A security review of this version found issues severe enough to block it from being offered as an update, protecting sites from receiving it. Sites running a previous version keep receiving that version. Please address the findings and release a new version.', 'wporg-plugins' );
+			$action = __( 'The issues found were severe enough to block this version from being offered as an update. Sites running a previous version keep receiving that version. Please address the findings and release a new version.', 'wporg-plugins' );
 		} else {
 			$action = __( 'Please review the findings and address them in an upcoming release.', 'wporg-plugins' );
 		}
@@ -79,7 +79,7 @@ class Security_Scan_Findings extends Markdown_Base {
 			array_push( $parts, $findings, '---' );
 		}
 
-		$parts[] = __( 'If you have questions or believe these findings to be in error, please reply to this email or contact plugins@wordpress.org.', 'wporg-plugins' );
+		$parts[] = __( 'If you have questions or believe a finding does not apply, please reply to this email with the details.', 'wporg-plugins' );
 
 		return implode( "\n\n", $parts );
 	}
