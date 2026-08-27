@@ -68,6 +68,11 @@ class WPorg_Handbook_Breadcrumbs_Test extends WPorg_Handbook_TestCase {
 	public function tearDown(): void {
 		parent::tearDown();
 
+		// Reset the widget flag this class forces on, so it doesn't leak into later tests.
+		$using_widget = new ReflectionProperty( 'WPorg_Handbook_Breadcrumbs', 'using_pages_widget' );
+		$using_widget->setAccessible( true );
+		$using_widget->setValue( null, false );
+
 		WPorg_Handbook_Init::reset( true );
 	}
 

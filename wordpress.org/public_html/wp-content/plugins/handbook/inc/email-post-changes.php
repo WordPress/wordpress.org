@@ -37,7 +37,7 @@ class WPorg_Handbook_Email_Post_Changes {
 			exit;
 		}
 
-		if ( ! is_user_logged_in() || ! wporg_is_handbook_post_type( $post->post_type ) ) {
+		if ( ! is_user_logged_in() || ! wporg_is_handbook_post_type( $post->post_type ) || ! current_user_can( 'read_post', $post_id ) ) {
 			wp_redirect( get_permalink( $post_id ) );
 			exit;
 		}
