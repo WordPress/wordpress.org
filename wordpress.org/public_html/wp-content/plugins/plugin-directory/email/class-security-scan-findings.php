@@ -61,8 +61,8 @@ class Security_Scan_Findings extends Markdown_Base {
 		$intro = sprintf(
 			/* translators: 1: Plugin name. 2: Plugin version. 3: URL to the automated security review documentation. */
 			__( 'An automated security review of %1$s %2$s reported the following findings. Learn more about these reviews in the [plugin developer handbook](%3$s).', 'wporg-plugins' ),
-			$this->plugin_title(),
-			$record['version'],
+			$this->excerpt( $this->plugin_title(), 200 ),
+			$this->excerpt( (string) $record['version'], 32 ),
 			'https://developer.wordpress.org/plugins/wordpress-org/automated-security-review/'
 		);
 

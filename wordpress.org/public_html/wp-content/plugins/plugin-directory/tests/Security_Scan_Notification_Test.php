@@ -400,6 +400,45 @@ class Security_Scan_Notification_Test extends TestCase {
 	}
 
 	/**
+	 * An author-controlled version header does not reach the email as markup.
+	 *
+	 * The version is interpolated into the Markdown intro, so HTML and link
+	 * syntax in it must be neutralized like any other untrusted string.
+	 */
+	public function test_email_neutralizes_hostile_version(): void {
+		$version = '9.9 <script>alert(7)</script>';
+
+		update_post_meta( $this->plugin->ID, 'version', $version );
+		update_post_meta( $this->plugin->ID, 'stable_tag', $version );
+		update_post_meta(
+			$this->plugin->ID,
+			Plugin_Scan_Gandalf::PENDING_META_KEY,
+			array(
+				self::SCAN_ID => array(
+					'version'      => $version,
+					'release_ref'  => $version,
+					'requested_at' => time(),
+				),
+			)
+		);
+
+		$callback = $this->completed_callback(
+			array(
+				'version'     => $version,
+				'release_ref' => $version,
+			)
+		);
+
+		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback );
+
+		$this->assertCount( 1, $this->emails );
+		$message = $this->emails[0]['message'];
+
+		$this->assertStringNotContainsString( '<script>alert(7)', $message );
+		$this->assertStringContainsString( '&lt;script&gt;', $message );
+	}
+
+	/**
 	 * Indented snippets render outdented, keeping their relative indentation.
 	 */
 	public function test_snippet_outdents_common_indentation(): void {
