@@ -33,23 +33,24 @@ class WPorg_Handbook_Email_Post_Changes {
 	public static function update_watchlist() {
 		$post_id = absint( $_GET['post_id'] );
 		if ( ! $post_id || ! $post = get_post( $post_id ) ) {
-			wp_redirect( home_url( '/' ) );
+			wp_safe_redirect( home_url( '/' ) );
 			exit;
 		}
 
-		if ( ! is_user_logged_in() || ! wporg_is_handbook_post_type( $post->post_type ) || ! current_user_can( 'read_post', $post_id ) ) {
-			wp_redirect( get_permalink( $post_id ) );
+		if ( ! is_user_logged_in() || ! wporg_is_handbook_post_type( $post->post_type ) ) {
+			wp_safe_redirect( get_permalink( $post_id ) );
 			exit;
 		}
 
 		$watch = ! empty( $_GET['watch'] );
 		$verify = wp_verify_nonce( $_GET['_wpnonce'], ( $watch ? 'watch-' : 'unwatch-' ) . $post_id );
 
-		if ( $verify ) {
+		// Subscribing needs read access; unsubscribing only removes the caller, so it must always be allowed.
+		if ( $verify && ( ! $watch || current_user_can( 'read_post', $post_id ) ) ) {
 			$user_id = get_current_user_id();
 			$users = $_users = get_post_meta( $post_id, '_wporg_watchlist', true ) ?: array();
 			if ( $watch ) {
-				if ( ! in_array( $user_id, $users, true ) ) {
+				if ( ! in_array( $user_id, array_map( 'intval', $users ), true ) ) {
 					$users[] = $user_id;
 				}
 			} else {
@@ -58,7 +59,7 @@ class WPorg_Handbook_Email_Post_Changes {
 			}
 			update_post_meta( $post_id, '_wporg_watchlist', $users, $_users );
 		}
-		wp_redirect( get_permalink( $post_id ) );
+		wp_safe_redirect( get_permalink( $post_id ) );
 		exit;
 	}
 }

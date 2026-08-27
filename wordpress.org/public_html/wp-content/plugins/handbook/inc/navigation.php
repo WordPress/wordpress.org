@@ -288,14 +288,11 @@ class WPorg_Handbook_Navigation {
 					);
 				}
 
-				// If no next yet, recursively check for a next ancestor the visitor can read.
+				// If no next yet, recursively check for a next ancestor; that query already filters to readable pages.
 				if ( $get_next && ! $next && $parent_id ) {
-					$parent = get_post( $parent_id );
-					if ( $parent && ( 'publish' === $parent->post_status || current_user_can( 'read_post', $parent->ID ) ) ) {
-						$parent_next = self::get_adjacent_posts_via_handbook_pages_widget( $parent_id, 'next', $post->ID );
-						if ( is_array( $parent_next ) ) {
-							$next = $parent_next[1];
-						}
+					$parent_next = self::get_adjacent_posts_via_handbook_pages_widget( $parent_id, 'next', $post->ID );
+					if ( is_array( $parent_next ) ) {
+						$next = $parent_next[1];
 					}
 				}
 
