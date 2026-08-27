@@ -65,12 +65,6 @@ class Package_Builder {
 
 		$entry['authors'] = self::build_authors( $plugin_data );
 
-		$entry['source'] = array(
-			'type'      => 'svn',
-			'url'       => 'https://plugins.svn.wordpress.org/' . $slug . '/',
-			'reference' => 'dev-trunk' === $version ? 'trunk' : 'tags/' . $version,
-		);
-
 		$entry['support'] = array(
 			'issues'    => 'https://wordpress.org/support/plugin/' . $slug,
 			'source'    => 'https://plugins.svn.wordpress.org/' . $slug,
@@ -120,19 +114,13 @@ class Package_Builder {
 			$entry['require']['php'] = '>=' . $theme_data->requires_php;
 		}
 
-		if ( ! empty( $theme_data->sections['description'] ) ) {
-			$entry['description'] = wp_strip_all_tags( $theme_data->sections['description'] );
+		if ( ! empty( $theme_data->description ) ) {
+			$entry['description'] = wp_strip_all_tags( $theme_data->description );
 		} elseif ( ! empty( $theme_data->name ) ) {
 			$entry['description'] = $theme_data->name;
 		}
 
 		$entry['homepage'] = 'https://wordpress.org/themes/' . $slug . '/';
-
-		$entry['source'] = array(
-			'type'      => 'svn',
-			'url'       => 'https://themes.svn.wordpress.org/' . $slug . '/',
-			'reference' => $version,
-		);
 
 		$entry['support'] = array(
 			'issues' => 'https://wordpress.org/support/theme/' . $slug,

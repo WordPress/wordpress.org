@@ -76,9 +76,6 @@ class Test_Version_Normalizer extends TestCase {
 	/**
 	 * Test that the dedupe key matches for versions Composer compares as equal.
 	 *
-	 * Composer pads versions to four numeric segments, so tags that differ only by a trailing zero
-	 * are one version to it and only one of them can be served.
-	 *
 	 * @dataProvider data_equivalent_versions
 	 *
 	 * @param string $a One normalized version.
@@ -104,6 +101,9 @@ class Test_Version_Normalizer extends TestCase {
 			'leading v'             => array( '1.0', 'v1.0' ),
 			'zero with suffix'      => array( '3.1-rc1', '3.1.0-rc1' ),
 			'short and long suffix' => array( '1.0-a1', '1.0-alpha1' ),
+			'leading zero patch'    => array( '1.7.5', '1.7.05' ),
+			'leading zero major'    => array( '1', '01' ),
+			'leading zero suffix'   => array( '1.0-rc1', '1.0-rc01' ),
 		);
 	}
 
