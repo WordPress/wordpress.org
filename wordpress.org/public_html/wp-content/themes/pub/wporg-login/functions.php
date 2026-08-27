@@ -484,7 +484,7 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 			$message .=  __( 'Log in to your WordPress.org account. If you don\'t have one, you can <a href="/register">create an account</a>.', 'wporg' );
 		} else {
 			$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong>';
-			$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
+			$message .= __( 'Log in to your WordPress.org account to participate in WordCamps and meetups around the world.', 'wporg' );
 		}
 	} elseif ( str_contains( $from, 'learn.wordpress.org' ) ) {
 		$message .= '<strong>' . __( 'Access all of Learn WordPress', 'wporg' ) . '</strong>';

@@ -284,7 +284,7 @@ Templates::header(
 				<?php // Contributors can't un-attend so don't show anything. ?>
 			<?php else : ?>
 				<form class="event-details-attend" method="post" action="<?php echo esc_url( Urls::event_toggle_attendee( $event->id() ) ); ?>">
-					<?php wp_nonce_field( '_attendee_nonce', '_attendee_nonce' ); ?>
+					<?php wp_nonce_field( 'attend_translation_event_' . $event->id(), '_attendee_nonce' ); ?>
 					<?php if ( $user_is_attending ) : ?>
 						<input type="submit" class="button is-secondary attending-btn" value="<?php esc_attr_e( "You're attending", 'gp-translation-events' ); ?>" />
 					<?php else : ?>

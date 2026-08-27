@@ -1690,10 +1690,11 @@ class Plugin_Directory {
 	public static function get_release( $plugin, $tag ) {
 		$releases = self::get_releases( $plugin );
 
-		// Look for the version released as a tag.
-		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
-		if ( $filtered ) {
-			return array_shift( $filtered );
+		// Match the exact tag; '1.4' and '1.40' are distinct releases, not a numeric match.
+		foreach ( $releases as $release ) {
+			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $tag ) {
+				return $release;
+			}
 		}
 
 		// Look for the tag as a trunk version.
@@ -1733,23 +1734,27 @@ class Plugin_Directory {
 			}
 		}
 
-		$release = $release ?: [
-			'date'                     => time(),
-			'tag'                      => '',
-			'version'                  => '',
+		// Unconfirmed-state defaults, shared by fresh releases and resets so the two can't drift apart.
+		$confirmation_defaults = [
 			// Assume zips built if no release confirmation.
 			'zips_built'               => ! $plugin->release_confirmation,
 			'zips_built_from_revision' => 0,
 			'confirmations'            => [],
-			// Confirmed by default if no release confiration.
+			// Confirmed by default if no release confirmation.
 			'confirmed'                => ! $plugin->release_confirmation,
 			'confirmations_required'   => (int) $plugin->release_confirmation,
-			'committer'                => [],
-			'revision'                 => [],
+		];
+
+		$release = $release ?: $confirmation_defaults + [
+			'date'          => time(),
+			'tag'           => '',
+			'version'       => '',
+			'committer'     => [],
+			'revision'      => [],
 			// Captures the release cooldown active at creation time so future filter/constant
 			// changes don't retroactively affect in-flight releases. Reviewers force-release
 			// by overriding this to 0 — see API_Update_Updater::force_release().
-			'release_delay'            => get_release_cooldown_delay( $plugin->post_name ),
+			'release_delay' => get_release_cooldown_delay( $plugin->post_name ),
 		];
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?
@@ -1759,6 +1764,24 @@ class Plugin_Directory {
 			} else {
 				$release[ $k ] = $v;
 			}
+		}
+
+		// Re-open a served release for fresh approval, clearing the old confirmation set the merge above can't. See Import::import_from_svn().
+		if ( ! empty( $data['reset_confirmation'] ) ) {
+			$release = array_merge( $release, $confirmation_defaults );
+
+			// Re-opened code is new: re-arm the cooldown (dropping any force-release bypass) and resurface by date.
+			$release['release_delay'] = get_release_cooldown_delay( $plugin->post_name );
+			$release['date']          = time();
+
+			// A prior discard is stale once the code changes: fully re-open so it can be confirmed.
+			unset( $release['discarded'] );
+		}
+		unset( $release['reset_confirmation'] );
+
+		// A discard voids approvals; clear them so undo_discard_release() can't restore stale confirmations.
+		if ( ! empty( $data['discarded'] ) ) {
+			$release['confirmations'] = [];
 		}
 
 		/*
