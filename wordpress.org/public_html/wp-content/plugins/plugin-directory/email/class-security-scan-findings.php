@@ -263,7 +263,7 @@ class Security_Scan_Findings extends Markdown_Base {
 		$text = preg_replace( "/\n{3,}/", "\n\n", $text );
 		$text = mb_strimwidth( $text, 0, $length, '…' );
 		$text = str_replace( [ '[', ']', '`' ], [ '(', ')', "'" ], $text );
-		$text = htmlspecialchars( $text, ENT_NOQUOTES, 'UTF-8' );
+		$text = htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8' );
 
 		return preg_replace_callback(
 			'/^([#=*_-])/m',
