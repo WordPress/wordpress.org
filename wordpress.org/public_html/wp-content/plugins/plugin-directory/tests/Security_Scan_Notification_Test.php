@@ -87,6 +87,13 @@ class Security_Scan_Notification_Test extends TestCase {
 	private $threshold_pin;
 
 	/**
+	 * The REMOTE_ADDR the test overwrote, restored on teardown.
+	 *
+	 * @var string|null
+	 */
+	private ?string $remote_addr = null;
+
+	/**
 	 * Create a published plugin with a pending security scan and one committer.
 	 */
 	protected function setUp(): void {
@@ -102,6 +109,7 @@ class Security_Scan_Notification_Test extends TestCase {
 		add_filter( 'wporg_plugins_security_scan_notify_risk_score', $this->threshold_pin );
 
 		// Tools::audit_log() reads it unguarded.
+		$this->remote_addr      = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Captured verbatim to restore in tearDown, not used as input.
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
 		$plugin = Plugin_Directory::create_plugin_post(
@@ -176,7 +184,13 @@ class Security_Scan_Notification_Test extends TestCase {
 			$this->threshold_filter = null;
 		}
 
-		unset( $GLOBALS['bot_accounts'], $GLOBALS['phpmailer'] );
+		unset( $GLOBALS['bot_accounts'], $GLOBALS['nologin_accounts'], $GLOBALS['phpmailer'] );
+
+		if ( null === $this->remote_addr ) {
+			unset( $_SERVER['REMOTE_ADDR'] );
+		} else {
+			$_SERVER['REMOTE_ADDR'] = $this->remote_addr;
+		}
 
 		parent::tearDown();
 	}
@@ -435,7 +449,7 @@ class Security_Scan_Notification_Test extends TestCase {
 		$message = $this->emails[0]['message'];
 
 		$this->assertStringNotContainsString( '<script>alert(7)', $message );
-		$this->assertStringContainsString( '&lt;script&gt;', $message );
+		$this->assertStringContainsString( '9.9 &lt;script&gt;alert(7)', $message );
 	}
 
 	/**
@@ -520,6 +534,80 @@ class Security_Scan_Notification_Test extends TestCase {
 		// A carriage-return-smuggled marker is neutralized too.
 		$this->assertStringContainsString( '&#35;## smuggled', $message );
 		$this->assertStringNotContainsString( 'smuggled</h3>', $message );
+	}
+
+	/**
+	 * An explanation cannot forge lists, tables, definition lists, or fences.
+	 */
+	public function test_explanation_cannot_forge_structured_blocks(): void {
+		$callback = $this->completed_callback(
+			array(
+				'findings_count' => 1,
+				'findings'       => array(
+					$this->finding(
+						9.8,
+						array(
+							'code_snippet' => '',
+							'explanation'  => "+ bullet\n\n1. numbered\n\n| a | b |\n| - | - |\n| 1 | 2 |\n\nterm\n:   def\n\n~~~\nfenced\n~~~",
+						)
+					),
+				),
+			)
+		);
+
+		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback );
+
+		$message = $this->emails[0]['message'];
+
+		// None of the block openers produce a real structured element.
+		$this->assertStringNotContainsString( '<ul', $message );
+		$this->assertStringNotContainsString( '<ol', $message );
+		$this->assertStringNotContainsString( '<table', $message );
+		$this->assertStringNotContainsString( '<dl', $message );
+		$this->assertStringNotContainsString( '<pre>', $message );
+
+		// The text still reaches the reader.
+		$this->assertStringContainsString( 'bullet', $message );
+		$this->assertStringContainsString( 'fenced', $message );
+	}
+
+	/**
+	 * The plain-text body decodes entities without reconstructing live markup.
+	 *
+	 * The pre_wp_mail harness captures only the HTML variant, so the plain-text
+	 * body() is exercised directly here.
+	 */
+	public function test_plain_text_body_is_inert(): void {
+		$record = array(
+			'scan_id'         => self::SCAN_ID,
+			'version'         => self::VERSION,
+			'release_ref'     => self::VERSION,
+			'completed_at'    => time(),
+			'verdict_hash'    => 'f71c3d944050095a4e2e20f9ee8a7c9a',
+			'findings_count'  => 1,
+			'severity_counts' => array( 'error' => 1 ),
+			'max_risk_score'  => 9.8,
+			'report_url'      => 'https://scanner.example/runs/' . self::SCAN_ID,
+			'action'          => 'advisory',
+			'findings'        => array( $this->finding( 9.8, array( 'explanation' => '# heading text' ) ) ),
+		);
+
+		$email = new \WordPressdotorg\Plugin_Directory\Email\Security_Scan_Findings(
+			$this->plugin,
+			array( $this->committer ),
+			array( 'record' => $record )
+		);
+
+		$body = $email->body();
+
+		// The HTML entities are decoded back to plain characters for the text/plain part.
+		$this->assertStringContainsString( '<script>alert(1)</script>', $body );
+		$this->assertStringContainsString( '# heading text', $body );
+
+		// The HTML variant keeps them escaped and neutralized.
+		$html = $email->html();
+		$this->assertStringContainsString( '&lt;script&gt;alert(1)&lt;/script&gt;', $html );
+		$this->assertStringContainsString( '&#35; heading text', $html );
 	}
 
 	/**
@@ -638,6 +726,25 @@ class Security_Scan_Notification_Test extends TestCase {
 	}
 
 	/**
+	 * No-login committers are not emailed.
+	 */
+	public function test_nologin_committers_are_not_emailed(): void {
+		$this->stage_release();
+
+		// A real account, so only the no-login filter keeps it from being emailed.
+		$nologin_login = 'gandalf-nologin-' . self::$plugin_count;
+		$this->assertIsInt( wp_create_user( $nologin_login, wp_generate_password(), $nologin_login . '@example.com' ) );
+
+		$this->prime_committers( array( $this->committer->user_login, $nologin_login ) );
+		$GLOBALS['nologin_accounts'] = array( $nologin_login );
+
+		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $this->completed_callback() ) );
+
+		$this->assertCount( 1, $this->emails );
+		$this->assertSame( $this->committer->user_email, $this->emails[0]['to'] );
+	}
+
+	/**
 	 * A finding carrying only the required risk_score still renders.
 	 */
 	public function test_minimal_finding_renders(): void {
@@ -653,6 +760,10 @@ class Security_Scan_Notification_Test extends TestCase {
 		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
 
 		$this->assertCount( 1, $this->emails );
-		$this->assertStringContainsString( '9.9', $this->emails[0]['message'] );
+		$message = $this->emails[0]['message'];
+
+		// The absent title falls back, and the finding renders without a crash.
+		$this->assertStringContainsString( '9.9', $message );
+		$this->assertStringContainsString( '(no summary provided)', $message );
 	}
 }
