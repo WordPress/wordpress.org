@@ -67,7 +67,11 @@ class WPorg_Handbook_Breadcrumbs {
 		do {
 			$parent_id = wp_get_post_parent_id( $page );
 			if ( $parent_id ) {
-				$pages[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $parent_id ) ), get_the_title( $parent_id ) );
+				$parent = get_post( $parent_id );
+				// Skip unreadable ancestors so unpublished titles/IDs aren't disclosed, but keep climbing.
+				if ( $parent && ( 'publish' === $parent->post_status || current_user_can( 'read_post', $parent->ID ) ) ) {
+					$pages[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $parent ) ), get_the_title( $parent ) );
+				}
 				$page = $parent_id;
 			}
 		} while ( $parent_id );
