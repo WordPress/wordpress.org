@@ -248,10 +248,11 @@ class Security_Scan_Findings extends Markdown_Base {
 	 * Backticks become apostrophes: a line-leading backtick pair would turn
 	 * into a code block (Markdown::code_trick()). Line indents go for the
 	 * same reason, and brackets can't form Markdown links or images. A
-	 * line-leading heading or rule marker is emitted as a numeric entity, so
-	 * it displays as typed but can't forge a heading or horizontal rule; a
-	 * lone carriage return is folded first, since the Markdown processor
-	 * treats it as a newline and would otherwise expose a marker mid-text.
+	 * line-leading block marker — heading, rule, list, table, definition
+	 * list, or fence — is emitted as a numeric entity, so it displays as
+	 * typed but can't forge a block element; a lone carriage return is folded
+	 * first, since the Markdown processor treats it as a newline and would
+	 * otherwise expose a marker mid-text.
 	 *
 	 * @param string $text   The text to bound.
 	 * @param int    $length Maximum length in characters.
@@ -265,10 +266,20 @@ class Security_Scan_Findings extends Markdown_Base {
 		$text = str_replace( [ '[', ']', '`' ], [ '(', ')', "'" ], $text );
 		$text = htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8' );
 
-		return preg_replace_callback(
-			'/^([#=*_-])/m',
+		// A line-leading heading, rule, list, table, definition-list, or fence marker.
+		$text = preg_replace_callback(
+			'/^([#=*_+~|:-])/m',
 			static function ( array $matches ): string {
 				return '&#' . ord( $matches[1] ) . ';';
+			},
+			$text
+		);
+
+		// An ordered-list marker, whose opener is the digits' trailing punctuation followed by a space; a version like 9.9 is left alone.
+		return preg_replace_callback(
+			'/^(\d+)([.)])(?=\s)/m',
+			static function ( array $matches ): string {
+				return $matches[1] . '&#' . ord( $matches[2] ) . ';';
 			},
 			$text
 		);
