@@ -939,7 +939,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 
 			switch ( $key ) {
 				case 'aperture':
-					$value = '&#402;/' . $value;
+					$value = 'ƒ/' . $value;
 					break;
 				case 'created_timestamp':
 					$label = 'Created';
