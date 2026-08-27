@@ -537,14 +537,15 @@ class API_Update_Updater {
 		$version = $release['version'];
 
 		// Log only what is actually lifted: a deleted block's only trace, and the cooldown only while it still runs.
-		$lifted = array();
+		$was_blocked   = self::is_release_blocked( $release );
+		$release_delay = (int) ( $release['release_delay'] ?? 0 );
+		$in_cooldown   = $release_delay && self::compute_release_time( $post, $release ) + $release_delay > time();
 
-		if ( self::is_release_blocked( $release ) ) {
+		$lifted = array();
+		if ( $was_blocked ) {
 			$lifted[] = 'lifting the release block';
 		}
-
-		$release_delay = (int) ( $release['release_delay'] ?? 0 );
-		if ( $release_delay && self::compute_release_time( $post, $release ) + $release_delay > time() ) {
+		if ( $in_cooldown ) {
 			$lifted[] = sprintf( 'bypassing the %d-hour release cooldown', $release_delay / HOUR_IN_SECONDS );
 		}
 
@@ -566,6 +567,18 @@ class API_Update_Updater {
 				'unblock'       => true,
 			)
 		);
+
+		// Track what the force-release skipped: a readable reason total, and a per-plugin breakdown (groups display values, not a sum).
+		if ( function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
+			if ( $was_blocked ) {
+				bump_stats_extra( 'plugin-force-release', 'block' );
+				bump_stats_extra( 'plugin-force-release-block', $post->post_name );
+			}
+			if ( $in_cooldown ) {
+				bump_stats_extra( 'plugin-force-release', 'cooldown' );
+				bump_stats_extra( 'plugin-force-release-cooldown', $post->post_name );
+			}
+		}
 
 		return self::update_single_plugin( $plugin_slug );
 	}
