@@ -249,12 +249,15 @@ class WPorg_Handbook_Navigation {
 					);
 				}
 
-				// If no previous yet, then it's the parent, if there is one.
+				// If no previous yet, it's the parent — but only if the visitor can read it.
 				if ( $get_prev && ! $prev && $parent_id ) {
-					$prev = (object) array(
-						'url'   => get_the_permalink( $parent_id ),
-						'title' => get_the_title( $parent_id ),
-					);
+					$parent = get_post( $parent_id );
+					if ( $parent && ( 'publish' === $parent->post_status || current_user_can( 'read_post', $parent->ID ) ) ) {
+						$prev = (object) array(
+							'url'   => get_the_permalink( $parent_id ),
+							'title' => get_the_title( $parent_id ),
+						);
+					}
 				}
 
 				// The next post may be this post's first child.
@@ -285,7 +288,7 @@ class WPorg_Handbook_Navigation {
 					);
 				}
 
-				// If no next yet, recursively check for a next ancestor.
+				// If no next yet, recursively check for a next ancestor; that query already filters to readable pages.
 				if ( $get_next && ! $next && $parent_id ) {
 					$parent_next = self::get_adjacent_posts_via_handbook_pages_widget( $parent_id, 'next', $post->ID );
 					if ( is_array( $parent_next ) ) {
