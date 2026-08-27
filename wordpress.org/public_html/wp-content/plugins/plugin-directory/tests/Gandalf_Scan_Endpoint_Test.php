@@ -236,7 +236,15 @@ class Gandalf_Scan_Endpoint_Test extends TestCase {
 			)
 		);
 
+		// Pin the block threshold the test was written against; the shipped default disables blocking.
+		$threshold_filter = static function (): float {
+			return 8.0;
+		};
+		add_filter( 'wporg_plugins_security_scan_block_risk_score', $threshold_filter );
+
 		$response = $this->dispatch( $this->payload( array( 'max_risk_score' => 9.8 ) ) );
+
+		remove_filter( 'wporg_plugins_security_scan_block_risk_score', $threshold_filter );
 
 		$this->assertSame( 200, $response->get_status() );
 

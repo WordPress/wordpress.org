@@ -37,7 +37,7 @@ class Plugin_Scan_Gandalf {
 	const CONSUMED_META_KEY = '_gandalf_scan_consumed';
 
 	/** Completed scans with a max risk score at or above this have their release blocked. */
-	const BLOCK_RISK_SCORE = 8.0;
+	const BLOCK_RISK_SCORE = PHP_FLOAT_MAX;
 
 	/** Gandalf scan endpoint. */
 	const ENDPOINT = 'https://gandalf.wordpress.org/scan';

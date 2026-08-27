@@ -49,12 +49,25 @@ class Security_Scan_Block_Test extends TestCase {
 	private \WP_Post $plugin;
 
 	/**
+	 * The block threshold filter pinning the suite to 8.0, removed on teardown.
+	 *
+	 * @var callable
+	 */
+	private $threshold_filter;
+
+	/**
 	 * Create a published plugin with a pending security scan.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
 		wp_cache_flush();
+
+		// Pin the block threshold the suite was written against; the shipped default disables blocking.
+		$this->threshold_filter = static function (): float {
+			return 8.0;
+		};
+		add_filter( 'wporg_plugins_security_scan_block_risk_score', $this->threshold_filter );
 
 		// Tools::audit_log() reads it unguarded.
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
@@ -82,6 +95,15 @@ class Security_Scan_Block_Test extends TestCase {
 		update_post_meta( $this->plugin->ID, 'version', self::VERSION );
 		update_post_meta( $this->plugin->ID, 'stable_tag', self::VERSION );
 		$this->add_pending_scan( self::SCAN_ID );
+	}
+
+	/**
+	 * Remove the threshold filter the tests installed.
+	 */
+	protected function tearDown(): void {
+		remove_filter( 'wporg_plugins_security_scan_block_risk_score', $this->threshold_filter );
+
+		parent::tearDown();
 	}
 
 	/**
