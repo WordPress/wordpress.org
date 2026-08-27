@@ -451,6 +451,39 @@ class Security_Scan_Notification_Test extends TestCase {
 	}
 
 	/**
+	 * Line-leading markers in an explanation cannot forge headings or rules.
+	 *
+	 * A carriage return is a line break to the Markdown processor, so it can
+	 * smuggle a marker to the start of a line as well.
+	 */
+	public function test_explanation_cannot_forge_markdown_blocks(): void {
+		$callback = $this->completed_callback(
+			array(
+				'findings_count' => 1,
+				'findings'       => array(
+					$this->finding(
+						9.8,
+						array( 'explanation' => "# Forged heading\n\n---\n\ntext\r### smuggled" )
+					),
+				),
+			)
+		);
+
+		Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback );
+
+		$message = $this->emails[0]['message'];
+
+		// The forged markers render as text, not as heading or rule elements.
+		$this->assertStringContainsString( '&#35; Forged heading', $message );
+		$this->assertStringContainsString( '&#45;--', $message );
+		$this->assertStringNotContainsString( '<h1', $message );
+
+		// A carriage-return-smuggled marker is neutralized too.
+		$this->assertStringContainsString( '&#35;## smuggled', $message );
+		$this->assertStringNotContainsString( 'smuggled</h3>', $message );
+	}
+
+	/**
 	 * A high-risk verdict that could not block still emails, as advisory.
 	 */
 	public function test_advisory_high_risk_scan_emails_committers(): void {

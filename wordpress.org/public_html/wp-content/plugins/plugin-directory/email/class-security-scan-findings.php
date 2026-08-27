@@ -247,20 +247,31 @@ class Security_Scan_Findings extends Markdown_Base {
 	 * or `<?php` survives as text; body() decodes the plain-text variant.
 	 * Backticks become apostrophes: a line-leading backtick pair would turn
 	 * into a code block (Markdown::code_trick()). Line indents go for the
-	 * same reason, and brackets can't form Markdown links or images.
+	 * same reason, and brackets can't form Markdown links or images. A
+	 * line-leading heading or rule marker is emitted as a numeric entity, so
+	 * it displays as typed but can't forge a heading or horizontal rule; a
+	 * lone carriage return is folded first, since the Markdown processor
+	 * treats it as a newline and would otherwise expose a marker mid-text.
 	 *
 	 * @param string $text   The text to bound.
 	 * @param int    $length Maximum length in characters.
 	 * @return string The bounded text.
 	 */
 	private function prose( string $text, int $length ): string {
-		$text = str_replace( "\r\n", "\n", trim( $text ) );
+		$text = str_replace( [ "\r\n", "\r" ], "\n", trim( $text ) );
 		$text = preg_replace( '/^[ \t]+/m', '', $text );
 		$text = preg_replace( "/\n{3,}/", "\n\n", $text );
 		$text = mb_strimwidth( $text, 0, $length, '…' );
 		$text = str_replace( [ '[', ']', '`' ], [ '(', ')', "'" ], $text );
+		$text = htmlspecialchars( $text, ENT_NOQUOTES, 'UTF-8' );
 
-		return htmlspecialchars( $text, ENT_NOQUOTES, 'UTF-8' );
+		return preg_replace_callback(
+			'/^([#=*_-])/m',
+			static function ( array $matches ): string {
+				return '&#' . ord( $matches[1] ) . ';';
+			},
+			$text
+		);
 	}
 
 	/**
