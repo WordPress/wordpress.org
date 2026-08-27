@@ -340,7 +340,7 @@ class Security_Scan_Notification_Test extends TestCase {
 		$this->assertStringContainsString( 'has been blocked due to security findings', $email['subject'] );
 		$this->assertStringContainsString( self::VERSION, $email['subject'] );
 
-		$this->assertStringContainsString( 'block it from being offered as an update', $email['message'] );
+		$this->assertStringContainsString( 'block this version from being offered as an update', $email['message'] );
 		$this->assertStringContainsString( '9.8', $email['message'] );
 		$this->assertStringContainsString( 'Remote response controls a PHP callable', $email['message'] );
 		// The relative path links to the file in the Trac browser.
@@ -397,6 +397,32 @@ class Security_Scan_Notification_Test extends TestCase {
 
 		// A hostile snippet renders escaped inside its code block.
 		$this->assertStringContainsString( '&lt;script&gt;alert(2)&lt;/script&gt;', $message );
+	}
+
+	/**
+	 * Indented snippets render outdented, keeping their relative indentation.
+	 */
+	public function test_snippet_outdents_common_indentation(): void {
+		$callback = $this->completed_callback(
+			array(
+				'findings_count' => 2,
+				'findings'       => array(
+					$this->finding( 9.8, array( 'code_snippet' => "        if ( \$x ) {\n\n            do_thing();\n        }" ) ),
+					$this->finding( 9.7, array( 'code_snippet' => "function f() {\n    return 1;\n}" ) ),
+				),
+			)
+		);
+
+		$this->assertTrue( Plugin_Scan_Gandalf::handle_callback( $this->plugin, $callback ) );
+
+		$this->assertCount( 1, $this->emails );
+		$message = $this->emails[0]['message'];
+
+		// The shared indent is gone, the nested line keeps its relative step, the blank line survives.
+		$this->assertStringContainsString( "if ( \$x ) {\n\n    do_thing();\n}", $message );
+
+		// A snippet already at the margin is untouched.
+		$this->assertStringContainsString( "function f() {\n    return 1;\n}", $message );
 	}
 
 	/**

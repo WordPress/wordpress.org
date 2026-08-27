@@ -183,13 +183,60 @@ class Security_Scan_Findings extends Markdown_Base {
 	 */
 	private function snippet_text( string $snippet ): string {
 		$snippet = str_replace( "\r\n", "\n", trim( $snippet, "\n\r" ) );
-		$snippet = mb_strimwidth( implode( "\n", array_slice( explode( "\n", $snippet ), 0, 10 ) ), 0, 1000, '…' );
+		$lines   = array_slice( explode( "\n", $snippet ), 0, 10 );
+		$snippet = mb_strimwidth( implode( "\n", $this->outdent( $lines ) ), 0, 1000, '…' );
 
 		if ( '' === trim( $snippet ) ) {
 			return '';
 		}
 
 		return '    ' . str_replace( "\n", "\n    ", $snippet );
+	}
+
+	/**
+	 * Strip the whitespace prefix shared by all non-blank lines, keeping
+	 * the block's relative indentation.
+	 *
+	 * @param array $lines The lines to outdent.
+	 * @return array The outdented lines.
+	 */
+	private function outdent( array $lines ): array {
+		$prefix = null;
+
+		foreach ( $lines as $line ) {
+			if ( '' === trim( $line ) ) {
+				continue;
+			}
+
+			$indent = substr( $line, 0, strspn( $line, " \t" ) );
+
+			if ( null === $prefix ) {
+				$prefix = $indent;
+				continue;
+			}
+
+			$length     = 0;
+			$max_length = min( strlen( $prefix ), strlen( $indent ) );
+			while ( $length < $max_length && $prefix[ $length ] === $indent[ $length ] ) {
+				++$length;
+			}
+			$prefix = substr( $prefix, 0, $length );
+
+			if ( '' === $prefix ) {
+				break;
+			}
+		}
+
+		if ( ! $prefix ) {
+			return $lines;
+		}
+
+		return array_map(
+			static function ( string $line ) use ( $prefix ): string {
+				return str_starts_with( $line, $prefix ) ? substr( $line, strlen( $prefix ) ) : $line;
+			},
+			$lines
+		);
 	}
 
 	/**
