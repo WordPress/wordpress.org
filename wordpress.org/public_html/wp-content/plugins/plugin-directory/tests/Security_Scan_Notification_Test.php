@@ -94,6 +94,13 @@ class Security_Scan_Notification_Test extends TestCase {
 	private ?string $remote_addr = null;
 
 	/**
+	 * The account-exclusion globals the tests set, restored on teardown.
+	 *
+	 * @var array
+	 */
+	private array $account_globals = array();
+
+	/**
 	 * Create a published plugin with a pending security scan and one committer.
 	 */
 	protected function setUp(): void {
@@ -111,6 +118,11 @@ class Security_Scan_Notification_Test extends TestCase {
 		// Tools::audit_log() reads it unguarded.
 		$this->remote_addr      = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Captured verbatim to restore in tearDown, not used as input.
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+
+		// Capture the exclusion globals the tests overwrite, to restore them without clobbering a pre-existing value.
+		foreach ( array( 'bot_accounts', 'nologin_accounts' ) as $global ) {
+			$this->account_globals[ $global ] = array_key_exists( $global, $GLOBALS ) ? $GLOBALS[ $global ] : null;
+		}
 
 		$plugin = Plugin_Directory::create_plugin_post(
 			array(
@@ -184,7 +196,15 @@ class Security_Scan_Notification_Test extends TestCase {
 			$this->threshold_filter = null;
 		}
 
-		unset( $GLOBALS['bot_accounts'], $GLOBALS['nologin_accounts'], $GLOBALS['phpmailer'] );
+		unset( $GLOBALS['phpmailer'] );
+
+		foreach ( $this->account_globals as $global => $value ) {
+			if ( null === $value ) {
+				unset( $GLOBALS[ $global ] );
+			} else {
+				$GLOBALS[ $global ] = $value;
+			}
+		}
 
 		if ( null === $this->remote_addr ) {
 			unset( $_SERVER['REMOTE_ADDR'] );
