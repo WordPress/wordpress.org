@@ -75,8 +75,9 @@ class Version_Normalizer {
 	/**
 	 * Build a key that matches whenever Composer would treat two normalized versions as one.
 	 *
-	 * Composer compares versions in four numeric segments, so it reads "1.54" and "1.54.0" as the
-	 * same version even though they normalize to different strings here.
+	 * Composer treats leading- and trailing-zero variants as one version ("1.54"/"1.54.0",
+	 * "1.7.5"/"1.7.05"), so leading zeros are stripped from each numeric segment and the
+	 * pre-release number to give those variants a shared key.
 	 *
 	 * @param string $version A version returned by normalize().
 	 * @return string The comparison key.
@@ -91,10 +92,19 @@ class Version_Normalizer {
 
 		if ( str_contains( $version, '-' ) ) {
 			list( $numeric, $suffix ) = explode( '-', $version, 2 );
-			$suffix                   = '-' . $suffix;
 		}
 
-		return implode( '.', array_pad( explode( '.', $numeric ), 4, '0' ) ) . $suffix;
+		// Strip leading zeros as strings; intval() would overflow an oversized segment and collide.
+		$strip    = static fn ( string $segment ): string => ltrim( $segment, '0' ) ?: '0';
+		$segments = array_map( $strip, explode( '.', $numeric ) );
+		$key      = implode( '.', array_pad( $segments, 4, '0' ) );
+
+		if ( '' !== $suffix ) {
+			$suffix = preg_replace_callback( '/\d+/', fn ( $digits ) => $strip( $digits[0] ), $suffix );
+			$key   .= '-' . $suffix;
+		}
+
+		return $key;
 	}
 
 	/**
