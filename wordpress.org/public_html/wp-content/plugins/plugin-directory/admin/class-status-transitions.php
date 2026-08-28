@@ -27,6 +27,13 @@ class Status_Transitions {
 	}
 
 	/**
+	 * Hooks the status transition actions.
+	 */
+	public static function init() {
+		add_action( 'transition_post_status', array( __CLASS__, 'instance' ) );
+	}
+
+	/**
 	 * Constructor.
 	 */
 	private function __construct() {

@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Stats_Report, Upload_Token };
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
@@ -84,6 +85,9 @@ class Plugin_Directory {
 		// Load the API routes.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'init' ) );
 
+		// Hooks plugin status transitions when done from the Rest API.
+		add_action( 'rest_api_init', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'init' ) );
+
 		// Allow post_modified not to be modified when we don't specifically bump it, and slugs for pending plugins.
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 
@@ -116,7 +120,8 @@ class Plugin_Directory {
 			Upload_Token::instance();
 
 			add_action( 'wp_insert_post_data', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'can_change_post_status' ), 10, 2 );
-			add_action( 'transition_post_status', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'instance' ) );
+
+			Status_Transitions::init();
 		}
 
 		register_activation_hook( PLUGIN_FILE, array( $this, 'activate' ) );
