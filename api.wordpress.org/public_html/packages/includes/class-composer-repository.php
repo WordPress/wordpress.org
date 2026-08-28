@@ -81,11 +81,14 @@ class Composer_Repository {
 		}
 
 		if ( 'not_found' === $response || null === $response ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 404 Not Found', true, 404 );
+			/*
+			 * A 404 leaves the name unresolved, so Composer keeps searching every repository after
+			 * this one, ending at Packagist where these vendors are unclaimed. Naming it stops that.
+			 */
+			$package_name = 'wp-' . $type . '/' . $slug;
 
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			echo json_encode( array( 'packages' => (object) array() ), JSON_UNESCAPED_SLASHES );
+			echo json_encode( array( 'packages' => array( $package_name => array() ) ), JSON_UNESCAPED_SLASHES );
 			exit;
 		}
 
@@ -166,6 +169,7 @@ class Composer_Repository {
 	private static function build_plugin_response( string $slug, array $plugin_data ): ?array {
 		$package_name = 'wp-plugin/' . $slug;
 		$versions     = array();
+		$seen         = array();
 
 		// Build entries for each tagged version.
 		if ( ! empty( $plugin_data['versions'] ) && is_array( $plugin_data['versions'] ) ) {
@@ -175,7 +179,13 @@ class Composer_Repository {
 					continue;
 				}
 
-				$versions[] = Package_Builder::build_plugin( $slug, $normalized, $plugin_data, $download_url );
+				$key = Version_Normalizer::dedupe_key( $normalized );
+				if ( isset( $seen[ $key ] ) ) {
+					continue;
+				}
+
+				$seen[ $key ] = true;
+				$versions[]   = Package_Builder::build_plugin( $slug, $normalized, $plugin_data, $download_url );
 			}
 		}
 
@@ -258,6 +268,7 @@ class Composer_Repository {
 	private static function build_theme_response( string $slug, object $theme_data ): ?array {
 		$package_name = 'wp-theme/' . $slug;
 		$versions     = array();
+		$seen         = array();
 
 		if ( ! empty( $theme_data->versions ) && is_array( $theme_data->versions ) ) {
 			foreach ( $theme_data->versions as $version => $download_url ) {
@@ -266,7 +277,13 @@ class Composer_Repository {
 					continue;
 				}
 
-				$versions[] = Package_Builder::build_theme( $slug, $normalized, $theme_data, $download_url );
+				$key = Version_Normalizer::dedupe_key( $normalized );
+				if ( isset( $seen[ $key ] ) ) {
+					continue;
+				}
+
+				$seen[ $key ] = true;
+				$versions[]   = Package_Builder::build_theme( $slug, $normalized, $theme_data, $download_url );
 			}
 		}
 

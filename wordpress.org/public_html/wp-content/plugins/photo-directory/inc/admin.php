@@ -653,8 +653,8 @@ class Admin {
 
 		echo '<dl class="photos-flagged">';
 		foreach ( $flags as $flag => $class ) {
-			echo '<dt>' . ucfirst( $flag ) . ':</dt>';
-			echo '<dd>' . ucwords( str_replace( '_', ' ', $class ) ) . '</dd>';
+			echo '<dt>' . esc_html( ucfirst( $flag ) ) . ':</dt>';
+			echo '<dd>' . esc_html( ucwords( str_replace( '_', ' ', $class ) ) ) . '</dd>';
 		}
 		echo "</dl>\n";
 
@@ -683,8 +683,8 @@ class Admin {
 
 		echo '<dl>';
 		foreach ( $exif as $key => $data ) {
-			echo "<dt>{$data['label']}</dt>\n";
-			echo "<dd>{$data['value']}</dd>\n";
+			echo '<dt>' . esc_html( $data['label'] ) . "</dt>\n";
+			echo '<dd>' . esc_html( $data['value'] ) . "</dd>\n";
 		}
 		echo "</dl>\n";
 
@@ -1197,9 +1197,9 @@ class Admin {
 			<div class="photo-contributor-info">
 				<strong>
 					<?php if ( $author->user_url ) { ?><a class="photo-contributor-url" rel="noopener noreferrer" href="<?php echo esc_url( $author->user_url ); ?>"><?php } ?>
-					<?php echo $author->display_name; ?>
+					<?php echo esc_html( $author->display_name ); ?>
 					<?php if ( $author->user_url ) { ?></a><?php } ?>
-					<div class="photo-contributor-profile"><a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $author->user_nicename . '/' ); ?>">@<?php echo $author->user_nicename; ?></a></div>
+					<div class="photo-contributor-profile"><a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $author->user_nicename . '/' ); ?>">@<?php echo esc_html( $author->user_nicename ); ?></a></div>
 				</strong>
 				<ul>
 					<li><?php

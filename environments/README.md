@@ -5,7 +5,7 @@ Local development environments for WordPress.org projects, powered by [`wp-env`]
 ## Prerequisites
 
 - [Docker](https://www.docker.com/products/docker-desktop/) installed and running
-- [Node.js](https://nodejs.org/) >= 20
+- [Node.js](https://nodejs.org/) — the version in [.nvmrc](.nvmrc) (`nvm use`)
 
 ## Setup
 
@@ -51,6 +51,42 @@ npx wp-env run cli wp <command>
 
 ```bash
 npm run plugins:test
+```
+
+### Theme Directory
+
+A local instance of the WordPress.org Theme Directory with the theme directory plugin, Theme Check, the `wporg-themes-2024` frontend theme, and supporting mu-plugins. Themes are imported from the live WordPress.org themes API.
+
+**Start:**
+
+```bash
+npm run themes:env start
+```
+
+**Re-import themes** (on demand, without clearing existing data):
+
+```bash
+npm run themes:import
+```
+
+**Re-seed themes** (clears import flag, then re-imports):
+
+```bash
+npm run themes:refresh
+```
+
+**Access:** `http://localhost:8888`
+
+**WP CLI:**
+
+```bash
+npm run themes:env -- run cli -- wp <command>
+```
+
+**Run tests:**
+
+```bash
+npm run themes:test
 ```
 
 ### Jobs
@@ -129,10 +165,10 @@ cd wordpress.org/public_html/wp-content/plugins/handbook
 npx wp-env start
 ```
 
-**Run tests:**
+**Run tests:** use the test environment in this directory instead — it starts a dedicated instance and runs the suite in one step:
 
 ```bash
-npx wp-env run phpunit phpunit -c /var/www/html/wp-content/plugins/handbook/phpunit.xml
+npm run handbook:test
 ```
 
 ## Common Commands

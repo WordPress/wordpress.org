@@ -49,9 +49,10 @@ class Version_Normalizer {
 
 		// Build the numeric part.
 		$major = $matches[1];
-		$minor = $matches[2] ?? '0';
-		$patch = ! empty( $matches[3] ) ? $matches[3] : null;
-		$extra = ! empty( $matches[4] ) ? $matches[4] : null;
+		// Test for an unmatched group rather than a falsy one, or a "0" segment would be dropped.
+		$minor = ( isset( $matches[2] ) && '' !== $matches[2] ) ? $matches[2] : '0';
+		$patch = ( isset( $matches[3] ) && '' !== $matches[3] ) ? $matches[3] : null;
+		$extra = ( isset( $matches[4] ) && '' !== $matches[4] ) ? $matches[4] : null;
 
 		$normalized = $major . '.' . $minor;
 		if ( null !== $patch ) {
@@ -69,6 +70,31 @@ class Version_Normalizer {
 		}
 
 		return $normalized;
+	}
+
+	/**
+	 * Build a key that matches whenever Composer would treat two normalized versions as one.
+	 *
+	 * Composer compares versions in four numeric segments, so it reads "1.54" and "1.54.0" as the
+	 * same version even though they normalize to different strings here.
+	 *
+	 * @param string $version A version returned by normalize().
+	 * @return string The comparison key.
+	 */
+	public static function dedupe_key( string $version ): string {
+		if ( str_starts_with( $version, 'dev-' ) ) {
+			return $version;
+		}
+
+		$numeric = $version;
+		$suffix  = '';
+
+		if ( str_contains( $version, '-' ) ) {
+			list( $numeric, $suffix ) = explode( '-', $version, 2 );
+			$suffix                   = '-' . $suffix;
+		}
+
+		return implode( '.', array_pad( explode( '.', $numeric ), 4, '0' ) ) . $suffix;
 	}
 
 	/**

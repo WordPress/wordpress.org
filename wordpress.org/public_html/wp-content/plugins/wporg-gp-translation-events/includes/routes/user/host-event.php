@@ -38,15 +38,24 @@ class Host_Event_Route extends Route {
 		$current_user = wp_get_current_user();
 		if ( ! $current_user->exists() ) {
 			$this->die_with_error( esc_html__( "Only logged-in users can manage the event's hosts.", 'gp-translation-events' ), 403 );
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
+		}
+
+		$nonce_action = "toggle_translation_event_host_{$event_id}_{$user_id}";
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), $nonce_action ) ) {
+			$this->die_with_error( esc_html__( 'Your link has expired or is invalid. Please reload the page and try again.', 'gp-translation-events' ), 403 );
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
 		if ( ! current_user_can( 'edit_translation_event', $event_id ) ) {
 			$this->die_with_error( esc_html__( "You do not have permissions to manage the event's hosts.", 'gp-translation-events' ), 403 );
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
 		$event = $this->event_repository->get_event( $event_id );
 		if ( ! $event ) {
 			$this->die_with_404();
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
 		$affected_attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event_id, $user_id );
@@ -63,6 +72,6 @@ class Host_Event_Route extends Route {
 		}
 
 		wp_safe_redirect( Urls::event_attendees( $event->id() ) );
-		exit;
+		$this->exit_();
 	}
 }

@@ -384,10 +384,11 @@ class Official_WordPress_Events {
 							break;
 
 						case 'URL':
-							if ( empty( $value ) ) {
+							$url = esc_url_raw( $value );
+							if ( empty( $url ) ) {
 								continue 3;
 							} else {
-								$event['url'] = $value;
+								$event['url'] = $url;
 							}
 							break;
 
@@ -695,7 +696,7 @@ class Official_WordPress_Events {
 				'source_id'       => $meetup['id'],
 				'status'          => 'upcoming' === $meetup['status'] ? 'scheduled' : 'cancelled',
 				'title'           => $meetup['name'],
-				'url'             => $meetup['link'],
+				'url'             => esc_url_raw( $meetup['link'] ),
 				'meetup_name'     => $meetup['group']['name'],
 				'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup['group']['urlname'] ),
 				'description'     => $meetup['description'] ?? '',
@@ -919,7 +920,7 @@ class Official_WordPress_Events {
 	 */
 	protected function log( $message, $write_to_disk = false ) {
 		$limit = 500;
-		$api_keys = array( MEETUP_API_KEY, OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
+		$api_keys = array( OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
 
 		if ( 'cli' === php_sapi_name() ) {
 			echo "\n" . $message;

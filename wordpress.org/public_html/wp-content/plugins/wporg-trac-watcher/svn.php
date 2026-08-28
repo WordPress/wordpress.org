@@ -96,13 +96,16 @@ function import_revisions( $svn ) {
 
 	$command = sprintf(
 		'svn log %s -r %d:HEAD --limit %d --xml -v 2>/dev/null',
-		esc_url( $svn_url ),
+		escapeshellarg( $svn_url ),
 		(int) $last_revision,
 		(int) MAX_REVISIONS
 	);
 
+	// shell_exec() returns null when the command can't be run at all, which simplexml_load_string() won't accept.
+	$log = shell_exec( $command );
+
 	$xml_internal_errors = libxml_use_internal_errors( true );
-	$xml                 = simplexml_load_string( shell_exec( $command ) );
+	$xml                 = $log ? simplexml_load_string( $log ) : false;
 	libxml_use_internal_errors( $xml_internal_errors );
 
 	if ( ! $xml ) {
@@ -230,7 +233,7 @@ function get_wp_version( $svn_url, $branch, $revision = 'HEAD' ) {
 		$url = "{$svn_url}/{$branch}/{$f}";
 		$output = shell_exec( sprintf(
 			'svn cat %s@%d 2>/dev/null',
-			esc_url( $url ),
+			escapeshellarg( $url ),
 			(int) $revision
 		) );
 

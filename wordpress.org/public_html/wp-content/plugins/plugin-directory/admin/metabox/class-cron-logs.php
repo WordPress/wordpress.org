@@ -101,7 +101,7 @@ class Cron_Logs {
 				esc_html( $job->status ),
 				$task_desc,
 				$logs,
-				esc_html( json_encode( $job->args[0], JSON_PRETTY_PRINT ) )
+				esc_html( json_encode( $job->args[0] ?? $job->args, JSON_PRETTY_PRINT ) )
 			);
 		}
 

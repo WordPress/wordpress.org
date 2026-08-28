@@ -1,0 +1,21 @@
+{# WordPress.org Trac customizations — content injected at the start of <body>.
+
+  Jinja2 replacement for the `body` match in the old Genshi site.html. Trac
+  auto-includes this file (see TracInterfaceCustomization).
+#}
+# set project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
+
+## Apply the <body> id/classes the theme's CSS expects. The old Genshi site.html
+## set these via a py:match on <body>; Jinja2 can only add content, so do it here
+## (first thing in <body>, so document.body already exists) to avoid a flash.
+<script>
+document.body.id = 'wordpress-org';
+document.body.classList.add( 'trac', 'wporg-make', '${project_slug}', 'make-${project_slug}' );
+</script>
+
+## WP.org global header markup (kept in sync by update-headers.php)
+# include 'wporg-header.html'
+
+## Per-Trac headline/menu. An environment's own templates dir may ship a
+## wporg-menu.html that overrides the shared default below.
+# include 'wporg-menu.html'

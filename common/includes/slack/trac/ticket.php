@@ -4,6 +4,12 @@ namespace Dotorg\Slack\Trac;
 
 class Ticket extends Resource {
 	protected $data;
+	/**
+	 * Whether the Trac query matched no ticket.
+	 *
+	 * @var bool
+	 */
+	protected $not_found = false;
 
 	function get_text() {
 		$this->fetch();
@@ -12,7 +18,7 @@ class Ticket extends Resource {
 			return $this->get_url();
 		}
 
-		return sprintf( "<%s|#%s: %s>", $this->get_url(), $this->id, htmlspecialchars( $this->summary, ENT_NOQUOTES ) );
+		return sprintf( '<%s|#%s: %s>', $this->get_url(), $this->id, htmlspecialchars( $this->summary, ENT_NOQUOTES | ENT_SUBSTITUTE ) );
 	}
 
 	function get_short_attachment() {
@@ -40,11 +46,16 @@ class Ticket extends Resource {
 
 		unset( $attachment['text'] ); // Moved to title and title_link.
 
-		$attachment['title']      = sprintf( '#%s: %s', $this->id, htmlspecialchars( $this->summary, ENT_NOQUOTES ) );
+		$attachment['title']      = sprintf( '#%s: %s', $this->id, htmlspecialchars( $this->summary, ENT_NOQUOTES | ENT_SUBSTITUTE ) );
 		$attachment['title_link'] = $this->get_url();
 
 		$attachment['fields'] = self::get_ticket_fields( $this->data );
-		$attachment['ts']     = strtotime( $this->data->created );
+
+		// Trac labels the column 'created' and names it 'time'.
+		$ts = strtotime( $this->created ?: $this->time );
+		if ( $ts ) {
+			$attachment['ts'] = $ts;
+		}
 
 		$attachment['footer']      = sprintf( '<%s|%s>', $this->trac->get_url(), $this->trac->get_name() );
 		$attachment['footer_icon'] = sprintf( '%s/chrome/common/trac.ico', $this->trac->get_url() );
@@ -62,6 +73,10 @@ class Ticket extends Resource {
 			return;
 		}
 
+		/*
+		 * Don't reorder the columns: slack-trac-hook.php array_shift()s the parsed row
+		 * to drop the id, so whichever comes first is the one discarded.
+		 */
 		$url = sprintf(
 			'%s/query?id=%s&col=id&col=summary&col=owner&col=type&col=cc&col=status&col=priority&col=milestone&col=component&col=version&col=severity&col=resolution&col=time&col=changetime&col=focuses&col=reporter&col=keywords&col=description&format=csv',
 			$this->trac->get_url(),
@@ -83,13 +98,53 @@ class Ticket extends Resource {
 		// The first line are headers. All additional lines are part of
 		// of a single CSV row (there can be \n in content).
 		$contents = explode( "\n", $contents, 2 );
-		$ticket_info = array_combine(
-			str_getcsv( strtolower( $contents[0] ), ',', '"', '"' ),
-			str_getcsv( $contents[1], ',', '"', '"' )
-		);
+
+		// Trac sends a UTF-8 BOM and CRLF line endings, neither belongs in the keys.
+		$header_line = str_replace( "\xEF\xBB\xBF", '', $contents[0] );
+		$header_line = strtolower( rtrim( $header_line, "\r\n" ) );
+
+		$headers = str_getcsv( $header_line, ',', '"', '"' );
+
+		// A single field is an error page or a bot check, not a row of column names.
+		if ( count( $headers ) < 2 ) {
+			$this->data = false;
+			return;
+		}
+
+		/*
+		 * A header-only response matched no row we can see: no such ticket, or one hidden
+		 * from anonymous requests. Only say so for a response that really is the CSV, or a
+		 * bot check that happens to parse would pass for a missing ticket. Stock columns
+		 * only, as custom fields like focuses are defined per Trac.
+		 */
+		if ( ! isset( $contents[1] ) || '' === trim( $contents[1] ) ) {
+			$this->not_found = in_array( 'summary', $headers, true ) && in_array( 'status', $headers, true );
+			$this->data      = false;
+			return;
+		}
+
+		$values = str_getcsv( rtrim( $contents[1], "\r\n" ), ',', '"', '"' );
+
+		if ( count( $headers ) !== count( $values ) ) {
+			$this->data = false;
+			return;
+		}
+
+		$ticket_info = array_combine( $headers, $values );
 
 		$this->data = (object) $ticket_info;
 		return $this->data;
+	}
+
+	/**
+	 * Whether the Trac query came back empty. Fetches the ticket.
+	 *
+	 * @return bool
+	 */
+	public function is_not_found() {
+		$this->fetch();
+
+		return $this->not_found;
 	}
 
 	static function get_ticket_fields( $ticket ) {
@@ -151,7 +206,7 @@ class Ticket extends Resource {
 			);
 		}
 
-		if ( $ticket->keywords ) {
+		if ( ! empty( $ticket->keywords ) ) {
 			$ticket_fields[] = array(
 				'title' => 'Keywords',
 				'value' => $ticket->keywords,

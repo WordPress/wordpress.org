@@ -121,6 +121,17 @@ class Themes_API {
 			}
 		}
 
+		// Malformed locales fall back to the site default.
+		if (
+			isset( $this->request->locale ) &&
+			(
+				! is_string( $this->request->locale ) ||
+				sanitize_locale_name( $this->request->locale ) !== $this->request->locale
+			)
+		) {
+			unset( $this->request->locale );
+		}
+
 		// Favorites requests require a user to fetch favorites for.
 		if ( isset( $this->request->browse ) && 'favorites' === $this->request->browse && ! isset( $this->request->user ) ) {
 			$this->request->user = '';
@@ -866,7 +877,9 @@ class Themes_API {
 		if ( $this->fields['versions'] ) {
 			$phil->versions = array();
 
-			foreach ( array_keys( get_post_meta( $theme->ID, '_status', true ) ) as $version ) {
+			$status   = get_post_meta( $theme->ID, '_status', true );
+			$versions = is_array( $status ) ? array_keys( $status ) : array();
+			foreach ( $versions as $version ) {
 				$phil->versions[ $version ] = $repo_package->download_url( $version );
 			}
 		}

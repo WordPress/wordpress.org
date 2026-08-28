@@ -204,7 +204,7 @@ class Plugin_Directory {
 			'menu_icon'    => 'dashicons-admin-plugins',
 			'capabilities' => array(
 				'edit_post'          => 'plugin_edit',
-				'read_post'          => 'read',
+				'read_post'          => 'plugin_admin_view',
 				'edit_posts'         => 'plugin_dashboard_access',
 				'edit_others_posts'  => 'plugin_edit_others',
 				'publish_posts'      => 'plugin_approve',
@@ -1690,10 +1690,11 @@ class Plugin_Directory {
 	public static function get_release( $plugin, $tag ) {
 		$releases = self::get_releases( $plugin );
 
-		// Look for the version released as a tag.
-		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
-		if ( $filtered ) {
-			return array_shift( $filtered );
+		// Match the exact tag; '1.4' and '1.40' are distinct releases, not a numeric match.
+		foreach ( $releases as $release ) {
+			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $tag ) {
+				return $release;
+			}
 		}
 
 		// Look for the tag as a trunk version.
@@ -1716,25 +1717,44 @@ class Plugin_Directory {
 		if ( ! isset( $data['tag'] ) ) {
 			return false;
 		}
+
+		// PHP coerces numeric-string array keys to integers; release tags are strings.
+		$data['tag'] = (string) $data['tag'];
+
 		$plugin = self::get_plugin_post( $plugin );
 
-		$release = self::get_release( $plugin, $data['tag'] ) ?: [
-			'date'                     => time(),
-			'tag'                      => '',
-			'version'                  => '',
+		$releases = self::get_releases( $plugin );
+
+		// Strict match only: get_release()'s loose lookup ('1.4' == '1.40') could merge onto the wrong release. Only one release can exist in any given tag.
+		$release = false;
+		foreach ( $releases as $i => $r ) {
+			if ( isset( $r['tag'] ) && (string) $r['tag'] === $data['tag'] ) {
+				$release = $release ?: $r;
+				unset( $releases[ $i ] );
+			}
+		}
+
+		// Unconfirmed-state defaults, shared by fresh releases and resets so the two can't drift apart.
+		$confirmation_defaults = [
 			// Assume zips built if no release confirmation.
 			'zips_built'               => ! $plugin->release_confirmation,
 			'zips_built_from_revision' => 0,
 			'confirmations'            => [],
-			// Confirmed by default if no release confiration.
+			// Confirmed by default if no release confirmation.
 			'confirmed'                => ! $plugin->release_confirmation,
 			'confirmations_required'   => (int) $plugin->release_confirmation,
-			'committer'                => [],
-			'revision'                 => [],
+		];
+
+		$release = $release ?: $confirmation_defaults + [
+			'date'          => time(),
+			'tag'           => '',
+			'version'       => '',
+			'committer'     => [],
+			'revision'      => [],
 			// Captures the release cooldown active at creation time so future filter/constant
 			// changes don't retroactively affect in-flight releases. Reviewers force-release
 			// by overriding this to 0 — see API_Update_Updater::force_release().
-			'release_delay'            => get_release_cooldown_delay( $plugin->post_name ),
+			'release_delay' => get_release_cooldown_delay( $plugin->post_name ),
 		];
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?
@@ -1746,6 +1766,24 @@ class Plugin_Directory {
 			}
 		}
 
+		// Re-open a served release for fresh approval, clearing the old confirmation set the merge above can't. See Import::import_from_svn().
+		if ( ! empty( $data['reset_confirmation'] ) ) {
+			$release = array_merge( $release, $confirmation_defaults );
+
+			// Re-opened code is new: re-arm the cooldown (dropping any force-release bypass) and resurface by date.
+			$release['release_delay'] = get_release_cooldown_delay( $plugin->post_name );
+			$release['date']          = time();
+
+			// A prior discard is stale once the code changes: fully re-open so it can be confirmed.
+			unset( $release['discarded'] );
+		}
+		unset( $release['reset_confirmation'] );
+
+		// A discard voids approvals; clear them so undo_discard_release() can't restore stale confirmations.
+		if ( ! empty( $data['discarded'] ) ) {
+			$release['confirmations'] = [];
+		}
+
 		/*
 		 * Allow a discarded release to be reset.
 		 * See API\Routes\Plugin_Release_Confirmation::undo_discard_release()
@@ -1754,15 +1792,14 @@ class Plugin_Directory {
 			unset( $release['discarded'] );
 		}
 
-		$releases = self::get_releases( $plugin );
-
-		// Find any other releases using this slug (as in the case of updates) and remove it.
-		// Only one release can exist in any given tag.
-		foreach ( $releases as $i => $r ) {
-			if ( $r['tag'] === $release['tag'] ) {
-				unset( $releases[ $i ] );
-			}
+		/*
+		 * Clear a release block so the release can be served.
+		 * See Jobs\API_Update_Updater::force_release().
+		 */
+		if ( ! empty( $data['unblock'] ) ) {
+			unset( $release['release_block'] );
 		}
+		unset( $release['unblock'] );
 
 		// Add this release in
 		$releases[] = $release;
@@ -1773,6 +1810,35 @@ class Plugin_Directory {
 		} );
 
 		return update_post_meta( $plugin->ID, 'releases', $releases );
+	}
+
+	/**
+	 * Mark built ZIPs as such on their release records.
+	 *
+	 * @param string|\WP_Post $plugin         Plugin slug or post object.
+	 * @param array|false     $built_versions Map of built version => SVN revision, as returned by Zip\Builder::build().
+	 * @return void
+	 */
+	public static function mark_zips_built( $plugin, $built_versions ) {
+		if ( ! is_array( $built_versions ) ) {
+			return;
+		}
+
+		foreach ( $built_versions as $tag => $revision ) {
+			// Trunk has no release record.
+			if ( 'trunk' === $tag ) {
+				continue;
+			}
+
+			self::add_release(
+				$plugin,
+				[
+					'tag'                      => $tag,
+					'zips_built'               => true,
+					'zips_built_from_revision' => $revision,
+				]
+			);
+		}
 	}
 
 	/**

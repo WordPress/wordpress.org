@@ -261,6 +261,9 @@ add_action( 'sensei_reports_overview_before_top_filters', __NAMESPACE__ . '\wpor
  * Redirect requests for the "My Courses" page to the login page and back, if logged out.
  */
 function restrict_my_courses_page_access() {
+	if ( ! function_exists( 'Sensei' ) ) {
+		return;
+	}
 	if ( ! is_user_logged_in() && is_page( Sensei()->settings->get_my_courses_page_id() ) ) {
 		$redirect_to = wp_unslash( $_GET['redirect_to'] ?? '' ) ?: sensei_get_current_page_url();
 
@@ -294,7 +297,7 @@ function sensei_login_form_before() {
 	// Start an output buffer, we'll remove the form content in the post-login-form filter.
 	ob_start();
 
-	add_action( 'sensei_login_form_after', function() {
+	add_action( 'sensei_login_form_after', function () {
 		$html = ob_get_clean();
 
 		/*
@@ -326,12 +329,12 @@ function sensei_register_form_start() {
 	// Start an output buffer, we'll replace the form content in the post-login-form filter.
 	ob_start();
 
-	add_action( 'sensei_register_form_end', function() {
+	add_action( 'sensei_register_form_end', function () {
 		// We don't need any of the output buffer contents, since we're just in the <form> tag.
 		ob_end_clean();
 
 		// Output a registration button.
-		echo sprintf(
+		printf(
 			'<div class="wp-block-button"><a href="%s" class="wp-block-button__link wp-element-button button button-secondary">%s</a></div>',
 			esc_url( wp_registration_url() ),
 			esc_html__( 'Register', 'wporg-learn' ),
@@ -393,7 +396,7 @@ function disable_certificate_reservations() {
 
 	remove_action( 'sensei_course_status_updated', array( $instance, 'handle_course_completed' ), 9, 3 );
 
-	add_action( 'sensei_course_status_updated', static function( $status, $user_id, $course_id ) use ( $instance ) {
+	add_action( 'sensei_course_status_updated', static function ( $status, $user_id, $course_id ) use ( $instance ) {
 		/*
 		 * WPORG: Only generate certificates for templated certificates.
 		 *

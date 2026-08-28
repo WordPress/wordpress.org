@@ -509,14 +509,14 @@ function wporg_references( $project, $entry ) {
 			list( $file, $line ) = array_pad( explode( ':', $reference ), 2, 0 );
 			if ( $source_url = $project->source_url( $file, $line ) ) :
 				?>
-				<li><a target="_blank" href="<?php echo $source_url; ?>"><?php echo $file.':'.$line ?></a></li>
+				<li><a target="_blank" href="<?php echo esc_url( $source_url ); ?>"><?php echo esc_html( $file . ':' . $line ); ?></a></li>
 			<?php
 			elseif ( wp_http_validate_url( $reference ) ) :
 				?>
 				<li><a target="_blank" href="<?php echo esc_url( $reference ); ?>"><?php echo esc_html( $reference ); ?></a></li>
 			<?php
 			else :
-				echo "<li>$file:$line</li>";
+				echo '<li>' . esc_html( "$file:$line" ) . '</li>';
 			endif;
 		endforeach;
 		?>

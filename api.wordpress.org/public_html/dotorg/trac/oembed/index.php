@@ -10,7 +10,7 @@
  *  - /milestone/
  * 
  * Can be enabled on a site by adding:
- *  - wp_oembed_add_provider( '#https://(meta|core)\.trac\.wordpress.org/.*#', 'https://api.wordpress.org/dotorg/trac/oembed/?api_key=...' );
+ *  - wp_oembed_add_provider( '#https://(meta|core)\.trac\.wordpress\.org/.*#', 'https://api.wordpress.org/dotorg/trac/oembed/?api_key=...', true );
  * 
  * oEmbed Discovery is not enabled, as although adding the tag to trac is possible, it requires inline Javascript.
  * 
@@ -24,29 +24,57 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = $_REQUEST['url'] ?? '';
+$url = $_GET['url'] ?? '';
 $url = is_string( $url ) ? wp_unslash( $url ) : '';
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );
 
+// meta|core are the only tracs embedable.
+$allowed_hosts = [
+	'core.trac.wordpress.org',
+	'meta.trac.wordpress.org',
+];
+
 if (
 	! $url ||
 	'GET' !== $_SERVER['REQUEST_METHOD'] ||
-	// meta|core are the only tracs embedable.
-	// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
-	! (
-		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>ticket|changeset)/\d+$!i', $url, $m ) ||
-		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>query)[?].+$!i', $url, $m ) ||
-		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone)/[a-z0-9.]+[ ]?[a-z0-9.]*$!i', $url, $m ) ||
-		preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>ticketgraph)([?]component=[^&]+)?$!i', $url, $m )
-	)
+	! in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ), $allowed_hosts, true )
 ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
 	die();
 }
 
+// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
+$trac_baseurl = '^(?P<baseurl>https://(?P<trac>meta|core)\.trac\.wordpress\.org/)';
+$allowed_urls = [
+	'!' . $trac_baseurl . '(?P<type>ticket|changeset)/\d+$!iD',
+	'!' . $trac_baseurl . '(?P<type>query)[?].+$!iD',
+	'!' . $trac_baseurl . '(?P<type>milestone)/[a-z0-9.]+[ ]?[a-z0-9.]*$!iD',
+	'!' . $trac_baseurl . '(?P<type>ticketgraph)([?]component=[^&]+)?$!iD',
+];
+
+$m = [];
+foreach ( $allowed_urls as $allowed_url ) {
+	if ( preg_match( $allowed_url, $url, $m ) ) {
+		break;
+	}
+}
+
+if ( ! $m ) {
+	header( 'HTTP/1.1 404 Not Found', true, 404 );
+	die();
+}
+
 $type = $m['type'];
+
+// Reject Trac output-format selectors (e.g. ?format=csv), which return non-HTML bytes rather than an embeddable page.
+$query_args = [];
+wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query_args );
+if ( array_key_exists( 'format', $query_args ) && '' !== $query_args['format'] ) {
+	header( 'HTTP/1.1 404 Not Found', true, 404 );
+	die();
+}
 
 // if not iframe embed, respond with oembed payload.
 if ( ! isset( $_GET['embed'] ) ) {
@@ -117,24 +145,37 @@ if ( ! isset( $_GET['embed'] ) ) {
 	die();
 }
 
+// The remainder of this request outputs the HTML document displayed within the iframe.
+header( 'Content-Type: text/html; charset=UTF-8' );
+header( 'X-Content-Type-Options: nosniff' );
+
 $cache_key = sha1( $url );
 if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {
 	die( $data );
 }
 
-$html = wp_remote_retrieve_body(
-	wp_safe_remote_get(
-		$url,
-		[
-			'user_agent'          => 'WordPress.org Trac oEmbed; https://api.wordpress.org/dotorg/trac/oembed',
-			'timeout'             => 15,
-			'limit_response_size' => 500 * KB_IN_BYTES,
-		]
-	)
+$response = wp_safe_remote_get(
+	$url,
+	[
+		'user_agent'          => 'WordPress.org Trac oEmbed; https://api.wordpress.org/dotorg/trac/oembed',
+		'timeout'             => 15,
+		'limit_response_size' => 500 * KB_IN_BYTES,
+	]
 );
+
+$html = wp_remote_retrieve_body( $response );
+// A duplicated header comes back as an array; every value must declare HTML.
+$content_types = [];
+foreach ( (array) wp_remote_retrieve_header( $response, 'content-type' ) as $content_type ) {
+	// Reduce to the bare media type, e.g. `text/html; charset=utf-8` => `text/html`.
+	$content_types[] = strtolower( trim( explode( ';', (string) $content_type )[0] ) );
+}
 
 if (
 	! $html ||
+	200 !== wp_remote_retrieve_response_code( $response ) ||
+	// Only reparse what Trac serves as HTML — anything else could become executable markup on this origin.
+	[ 'text/html' ] !== array_unique( $content_types ) ||
 	(
 		! str_starts_with( $html, '<' ) &&
 		str_contains( $html, 'TracError: ' )

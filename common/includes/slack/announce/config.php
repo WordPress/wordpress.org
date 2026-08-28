@@ -105,6 +105,7 @@ function get_whitelist() {
 		),
 		'contributor-mentorship' => $wordcamp_central,
 		'core' => array_merge( get_committers(), array(
+			'adrianduffell', // @Adrian Duffell on Slack
 			'akshayar', // @akshaya on Slack
 			'amykamala', // @amy kamala on Slack
 			'angelasjin',
@@ -131,6 +132,7 @@ function get_whitelist() {
 			'juanmaguitar',
 			'justinahinon',
 			'karmatosed',
+			'krupajnanda', // @Krupa on Slack
 			'laurora', // @laura on Slack
 			'lukecarbis',
 			'mapk',
@@ -150,6 +152,7 @@ function get_whitelist() {
 			'psykro', // @Jonathan on Slack
 			'rajinsharwar', // @Rajin Sharwar on Slack
 			'sabernhardt',
+			'sajjad67', // @saj1ad on Slack
 			'SirLouen',
 			'sncoker', // @shawntellecoker on Slack
 			'stoyangeorgiev', // @Stoyan Georgiev on Slack
@@ -512,6 +515,7 @@ function get_whitelist() {
 			'jainnidhi', // @nidhijain on Slack
 			'kharisblank', // @kharisulistiyo on Slack
 			'luisrull',
+			'mayukojpn', // @mayo on Slack
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
@@ -636,6 +640,9 @@ function get_whitelist() {
 			'rahuldsarker',
 			'RoseAppleMedia',
 			'sbddesign',
+		),
+		'wp-ahmedabad' => array(
+			'chetan200891', // @Chetan Prajapati  on Slack
 		),
 	);
 }

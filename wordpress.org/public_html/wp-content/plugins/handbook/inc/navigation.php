@@ -186,15 +186,18 @@ class WPorg_Handbook_Navigation {
 			}
 		}
 
-		// Cache key format is pages:{post ID}:{sort column}:{source_post}(:{excluded})?.
-		$cache_key = 'pages:' . $post->ID . ':' . $sort_column . ':' . ( $source_post ? '1' : '0' );
+		// The list of pages varies by this, so the cache key must account for it.
+		$can_read_private = current_user_can( get_post_type_object( get_post_type( $post ) )->cap->read_private_posts );
+
+		// Cache key format is pages:{post ID}:{sort column}:{source_post}:{can read private}(:{excluded})?.
+		$cache_key = 'pages:' . $post->ID . ':' . $sort_column . ':' . ( $source_post ? '1' : '0' ) . ':' . ( $can_read_private ? '1' : '0' );
 		if ( $exclude ) {
 			$cache_key .= ':' . str_replace( ' ', '', $exclude );
 		}
 		$cache_group = 'wporg_handbook:' . get_current_blog_id();
 
 		$post_status = array( 'publish' );
-		if ( current_user_can( get_post_type_object( get_post_type( $post ) )->cap->read_private_posts ) ) {
+		if ( $can_read_private ) {
 			$post_status[] = 'private';
 		}
 
@@ -246,12 +249,15 @@ class WPorg_Handbook_Navigation {
 					);
 				}
 
-				// If no previous yet, then it's the parent, if there is one.
+				// If no previous yet, it's the parent — but only if the visitor can read it.
 				if ( $get_prev && ! $prev && $parent_id ) {
-					$prev = (object) array(
-						'url'   => get_the_permalink( $parent_id ),
-						'title' => get_the_title( $parent_id ),
-					);
+					$parent = get_post( $parent_id );
+					if ( $parent && ( 'publish' === $parent->post_status || current_user_can( 'read_post', $parent->ID ) ) ) {
+						$prev = (object) array(
+							'url'   => get_the_permalink( $parent_id ),
+							'title' => get_the_title( $parent_id ),
+						);
+					}
 				}
 
 				// The next post may be this post's first child.
@@ -282,7 +288,7 @@ class WPorg_Handbook_Navigation {
 					);
 				}
 
-				// If no next yet, recursively check for a next ancestor.
+				// If no next yet, recursively check for a next ancestor; that query already filters to readable pages.
 				if ( $get_next && ! $next && $parent_id ) {
 					$parent_next = self::get_adjacent_posts_via_handbook_pages_widget( $parent_id, 'next', $post->ID );
 					if ( is_array( $parent_next ) ) {

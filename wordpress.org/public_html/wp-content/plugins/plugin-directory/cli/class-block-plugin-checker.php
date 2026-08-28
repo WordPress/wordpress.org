@@ -86,6 +86,9 @@ class Block_Plugin_Checker {
 	 * Return a trac/github browser link to a file in the plugin.
 	 *
 	 * @param string $file The file pathname.
+	 *
+	 * @return string A browser URL for the file, or an empty string if the plugin
+	 *                has no repository that can be linked to.
 	 */
 	public function get_browser_url( $file ) {
 		if ( !empty( $this->repo_url ) ) {
@@ -96,6 +99,9 @@ class Block_Plugin_Checker {
 				return str_replace( 'https://plugins.svn.wordpress.org', 'https://plugins.trac.wordpress.org/browser', $this->repo_url ) . '/' . $file;
 			}
 		}
+
+		// No linkable repo — a ZIP upload, or a repo URL in an unrecognised form.
+		return '';
 	}
 
 	/**
@@ -160,7 +166,8 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
-				sprintf( __( 'Invalid url: %s', 'wporg-plugins' ), $url ),
+				// translators: %s is the URL that was submitted.
+				sprintf( __( 'Invalid url: %s', 'wporg-plugins' ), esc_html( $url ) ),
 				$url
 			);
 			return $this->results;
@@ -170,7 +177,8 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
-				sprintf( __( 'URL must be GitHub or plugins.svn.wordpress.org: %s', 'wporg-plugins' ), $url ),
+				// translators: %s is the URL that was submitted.
+				sprintf( __( 'URL must be GitHub or plugins.svn.wordpress.org: %s', 'wporg-plugins' ), esc_html( $url ) ),
 				$url
 			);
 			return $this->results;
@@ -182,7 +190,8 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
-					sprintf( __( 'URL must be a plugin repository: %s', 'wporg-plugins' ), $url ),
+					// translators: %s is the URL that was submitted.
+					sprintf( __( 'URL must be a plugin repository: %s', 'wporg-plugins' ), esc_html( $url ) ),
 					$url
 				);
 				return $this->results;
@@ -212,7 +221,8 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
-					sprintf( __( 'URL must be a plugin repository: %s', 'wporg-plugins' ), $url ),
+					// translators: %s is the URL that was submitted.
+					sprintf( __( 'URL must be a plugin repository: %s', 'wporg-plugins' ), esc_html( $url ) ),
 					$url
 				);
 				return $this->results;
@@ -248,7 +258,8 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
-				sprintf( __( 'Error fetching repository %s: %s', 'wporg-plugins' ), $svn_url, $export['errors'][0]['error_code'] ?? 'unknown error' ),
+				// translators: %1$s is the repository URL, %2$s is the error code.
+				sprintf( __( 'Error fetching repository %1$s: %2$s', 'wporg-plugins' ), esc_html( $svn_url ), esc_html( $export['errors'][0]['error_code'] ?? 'unknown error' ) ),
 				$export['errors'] ?? array()
 			);
 			return false;
@@ -419,12 +430,13 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
-					sprintf( 
-						__( 'PHP error %s in %s', 'wporg-plugins' ),
-						$php_calls->get_error_message(), 
+					sprintf(
+						// translators: %1$s is the PHP error message, %2$s is a link to the file.
+						__( 'PHP error %1$s in %2$s', 'wporg-plugins' ),
+						esc_html( $php_calls->get_error_message() ),
 						sprintf( '<a href="%s">%s</a>', 
-							$this->get_browser_url( $filename ) . '#L' . $php_calls->get_error_data(), 
-							$this->relative_filename( $filename ) 
+							esc_url( $this->get_browser_url( $filename ) . '#L' . $php_calls->get_error_data() ),
+							esc_html( $this->relative_filename( $filename ) )
 						)
 					),
 					[ $filename, $php_calls->get_error_data() ]
@@ -514,7 +526,7 @@ class Block_Plugin_Checker {
 				__FUNCTION__,
 				'info',
 				// translators: %s is the license.
-				sprintf( __( 'Found a license in readme.txt: %s.', 'wporg-plugins' ), $this->readme->license ),
+				sprintf( __( 'Found a license in readme.txt: %s.', 'wporg-plugins' ), esc_html( $this->readme->license ) ),
 				$this->readme->license
 			);
 		} elseif ( ! empty( $this->headers->License ) ) {
@@ -522,7 +534,7 @@ class Block_Plugin_Checker {
 				__FUNCTION__,
 				'info',
 				// translators: %s is the license.
-				sprintf( __( 'Found a license in plugin headers: %s.', 'wporg-plugins' ), $this->headers->License ),
+				sprintf( __( 'Found a license in plugin headers: %s.', 'wporg-plugins' ), esc_html( $this->headers->License ) ),
 				$this->headers->License
 			);
 		}
@@ -598,8 +610,8 @@ class Block_Plugin_Checker {
 						sprintf(
 							// translators: %1$s is the block slug, %2$s is the found plugin title.
 							__( 'Block name %1$s already exists in the plugin "%2$s."', 'wporg-plugins' ),
-							'<code>' . $block->name . '</code>',
-							$query->posts[0]->post_title
+							'<code>' . esc_html( $block->name ) . '</code>',
+							esc_html( $query->posts[0]->post_title )
 						),
 						[ 'block_name' => $block->name, 'slug' => $post->post_name ]
 					);
@@ -621,7 +633,7 @@ class Block_Plugin_Checker {
 					__FUNCTION__,
 					'error',
 					// translators: %s is the block name.
-					sprintf( __( 'Block name %s is invalid. Please use lowercase alphanumeric characters.', 'wporg-plugins' ), '<code>' . $block->name . '</code>' )
+					sprintf( __( 'Block name %s is invalid. Please use lowercase alphanumeric characters.', 'wporg-plugins' ), '<code>' . esc_html( $block->name ) . '</code>' )
 				);
 			} else {
 				$disallowed_ns = array( 'cgb/', 'create-block/', 'example/', 'block/', 'core/', 'gutenberg-examples/' );
@@ -633,8 +645,8 @@ class Block_Plugin_Checker {
 							sprintf(
 								// translators: %1$s is the block name, %2$s is the namespace.
 								__( 'Block %1$s uses namespace %2$s. Please use a unique namespace.', 'wporg-plugins' ),
-								'<code>' . $block->name . '</code>',
-								'<code>' . $ns . '</code>'
+								'<code>' . esc_html( $block->name ) . '</code>',
+								'<code>' . esc_html( $ns ) . '</code>'
 							)
 						);
 						break;
@@ -665,7 +677,7 @@ class Block_Plugin_Checker {
 					// translators: %1$d is the number of namespaces, %2$s is the list of namespaces.
 					__( 'Found blocks with %1$d different namespaces: %2$s.', 'wporg-plugins' ),
 					count( $namespaces ),
-					'<code>' . implode( ', ', $namespaces ) . '</code>'
+					'<code>' . esc_html( implode( ', ', $namespaces ) ) . '</code>'
 				),
 				$namespaces
 			);
@@ -732,7 +744,7 @@ class Block_Plugin_Checker {
 									'error',
 									// translators: %1$s is the namespace, %2$s is a link to the plugin.
 									sprintf( __( 'Please use a unique block namespace. Namespace %1$s is already used by %2$s.' ), 
-										'<code>' . $this->get_namespace( $block ) . '</code>', 
+										'<code>' . esc_html( $this->get_namespace( $block ) ) . '</code>',
 										'<a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $post->post_title ) . '</a>'
 									)
 								);
@@ -745,7 +757,7 @@ class Block_Plugin_Checker {
 								'warning',
 								// translators: %1$s is the namespace, %2$s is a link to the plugin.
 								sprintf( __( 'Please use a unique block namespace. Namespace %1$s is already used by %2$s.' ), 
-									'<code>' . $this->get_namespace( $block ) . '</code>', 
+									'<code>' . esc_html( $this->get_namespace( $block ) ) . '</code>',
 									'<a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $post->post_title ) . '</a>'
 								)
 							);
@@ -793,7 +805,7 @@ class Block_Plugin_Checker {
 					__FUNCTION__,
 					'info',
 					// translators: %s is the block name.
-					sprintf( __( 'Found a block.json file for block %s.', 'wporg-plugins' ), '<code>' . $block_name . '</code>' ),
+					sprintf( __( 'Found a block.json file for block %s.', 'wporg-plugins' ), '<code>' . esc_html( $block_name ) . '</code>' ),
 					$this->block_json_files[ $block_name ]
 				);
 			}
@@ -834,7 +846,7 @@ class Block_Plugin_Checker {
 				sprintf(
 					/* translators: %s is a list of block names. */
 					__( 'More than one top-level block was found: %s', 'wporg-plugins' ),
-					implode( ', ', $list )
+					esc_html( implode( ', ', $list ) )
 				)
 			);
 		}
@@ -852,7 +864,7 @@ class Block_Plugin_Checker {
 						__FUNCTION__,
 						'info',
 						// translators: %s is the block name.
-						sprintf( __( 'Found file %s.', 'wporg-plugins' ), '<code>' . $script . '</code>' ),
+						sprintf( __( 'Found file %s.', 'wporg-plugins' ), '<code>' . esc_html( $script ) . '</code>' ),
 						compact( 'kind', 'script' )
 					);
 				} else {
@@ -868,7 +880,7 @@ class Block_Plugin_Checker {
 					$this->record_result(
 						__FUNCTION__,
 						'error',
-						sprintf( $message, '<code>' . $script . '</code>' ),
+						sprintf( $message, '<code>' . esc_html( $script ) . '</code>' ),
 						compact( 'kind', 'script' )
 					);
 				}
@@ -912,8 +924,8 @@ class Block_Plugin_Checker {
 						sprintf(
 							// translators: %1$s is the file name, %2$s is the json error message.
 							__( 'Error attempting to parse json in %1$s: %2$s', 'wporg-plugins' ),
-							'<code><a href="' . $this->get_browser_url( $block_json_file ) . '">' . $this->relative_filename( $block_json_file ) . '</a></code>',
-							$message
+							'<code><a href="' . esc_url( $this->get_browser_url( $block_json_file ) ) . '">' . esc_html( $this->relative_filename( $block_json_file ) ) . '</a></code>',
+							esc_html( $message )
 						),
 						$this->relative_filename( $block_json_file )
 					);
@@ -932,7 +944,7 @@ class Block_Plugin_Checker {
 					__FUNCTION__,
 					'info',
 					// translators: %s is the file name.
-					sprintf( __( 'JSON file %s is valid.', 'wporg-plugins' ), '<code>' . $this->relative_filename( $block_json_file ) . '</code>' ),
+					sprintf( __( 'JSON file %s is valid.', 'wporg-plugins' ), '<code>' . esc_html( $this->relative_filename( $block_json_file ) ) . '</code>' ),
 					$this->relative_filename( $block_json_file )
 				);
 				continue;
@@ -947,7 +959,7 @@ class Block_Plugin_Checker {
 						$this->record_result(
 							__FUNCTION__,
 							( 'error' === $code ? 'warning' : $code ), // TODO: be smarter about mapping these
-							'<code><a href="' . $this->get_browser_url( $block_json_file ) . '">' . $this->relative_filename( $block_json_file ) . '</a></code>: ' . $message,
+							'<code><a href="' . esc_url( $this->get_browser_url( $block_json_file ) ) . '">' . esc_html( $this->relative_filename( $block_json_file ) ) . '</a></code>: ' . wp_kses( $message, array( 'code' => array() ) ),
 							array(
 								$this->relative_filename( $block_json_file ),
 								$result->get_error_data( $code ),
@@ -1073,7 +1085,7 @@ class Block_Plugin_Checker {
 					sprintf(
 						// translators: %s is the function name.
 						__( 'Found PHP call %s. This may cause problems.', 'wporg-plugins' ),
-						'<a href="' . $this->get_browser_url( $call[2] ) . '#L' . $call[1] . '"><code>' . $call[0] . '()</code></a>'
+						'<a href="' . esc_url( $this->get_browser_url( $call[2] ) . '#L' . $call[1] ) . '"><code>' . esc_html( $call[0] ) . '()</code></a>'
 					),
 					$call
 				);
@@ -1084,7 +1096,7 @@ class Block_Plugin_Checker {
 					sprintf(
 						// translators: %s is the function name.
 						__( 'Found PHP call %s. This is likely to prevent your plugin from working as expected.', 'wporg-plugins' ),
-						'<a href="' . $this->get_browser_url( $call[2] ) . '#L' . $call[1] . '"><code>' . $call[0] . '()</code></a>'
+						'<a href="' . esc_url( $this->get_browser_url( $call[2] ) . '#L' . $call[1] ) . '"><code>' . esc_html( $call[0] ) . '()</code></a>'
 					),
 					$call
 				);

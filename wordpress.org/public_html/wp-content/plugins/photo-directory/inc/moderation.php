@@ -291,7 +291,7 @@ class Moderation {
 		}
 
 		// Bail if user isn't a moderator.
-		if ( ! user_can( $user->ID, 'photos_moderator' ) ) {
+		if ( ! user_can( $user->ID, 'edit_photos' ) ) {
 			return $caps;
 		}
 
@@ -376,6 +376,8 @@ class Moderation {
 	/**
 	 * Formats flags into a list for display.
 	 *
+	 * Flag names can originate from post meta, so no caller may pass markup through them.
+	 *
 	 * @param array $flags  Associative array of flags names (as keys) and
 	 *                      severity (as values). Severity can be one of
 	 *                      ['possible', 'likely', 'very_likely'].
@@ -391,9 +393,13 @@ class Moderation {
 			$formatted .= sprintf(
 				'<li class="dashicons-before dashicons-flag %s" title="%s">%s</li>' . "\n",
 				esc_attr( $class ),
-				/* translators: 1: Moderation category, 2: Likelihood of the image being of the given moderation category */
-				sprintf( __( 'This image is flagged as potentially containing %1$s content: %2$s', 'wporg-photos' ), $flag, ucwords( str_replace( '_', ' ', $class ) ) ),
-				ucwords( $flag )
+				esc_attr( sprintf(
+					/* translators: 1: Moderation category, 2: Likelihood of the image being of the given moderation category */
+					__( 'This image is flagged as potentially containing %1$s content: %2$s', 'wporg-photos' ),
+					$flag,
+					ucwords( str_replace( '_', ' ', $class ) )
+				) ),
+				esc_html( ucwords( $flag ) )
 			);
 		}
 		$formatted .= "</ul>\n";
@@ -682,15 +688,15 @@ https://wordpress.org/photos/
 				else {
 					if ( $rejections_percentage >= self::FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'very_likely';
-						$message = __( 'very high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'very high rejection rate (%d%%)', 'wporg-photos' );
 					}
 					elseif ( $rejections_percentage >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'likely';
-						$message = __( 'high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'high rejection rate (%d%%)', 'wporg-photos' );
 					}
 					elseif ( $rejections_percentage >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'possible';
-						$message = __( 'rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'rejection rate (%d%%)', 'wporg-photos' );
 					}
 				}
 

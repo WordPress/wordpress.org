@@ -135,7 +135,8 @@ class Translation_Sync {
 	public function queue_translation_for_sync( $translation ) {
 		global $wpdb;
 
-		$allowed_statuses = array( 'current', 'rejected', 'changesrequested', 'fuzzy' );
+		// Only statuses GlotPress gates on `approve`; one a user can set without it must not cross projects.
+		$allowed_statuses = array( 'current', 'rejected', 'changesrequested' );
 		
 		// Do not propagate waiting translations and other translations with warnings.
 		if ( ! in_array( $translation->status, $allowed_statuses ) || ! empty( $translation->warnings ) ) {
@@ -221,6 +222,12 @@ class Translation_Sync {
 	 * @return bool False on failure, true on success.
 	 */
 	private function copy_translation_into_set( $translation, $new_translation_set, $new_original ) {
+		// Only propagate what the acting user could do in the destination; cron and CLI aren't acting for anyone.
+		$is_system_run = ( defined( 'WP_CLI' ) && WP_CLI ) || wp_doing_cron();
+		if ( ! $is_system_run && ! GP::$permission->current_user_can( 'approve', 'translation-set', $new_translation_set->id ) ) {
+			return true;
+		}
+
 		$locale = GP_Locales::by_slug( $new_translation_set->locale );
 		$new_translation = [];
 

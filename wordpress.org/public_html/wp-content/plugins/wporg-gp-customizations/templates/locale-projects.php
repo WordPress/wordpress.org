@@ -56,8 +56,8 @@ gp_tmpl_header();
 				'<span class="dashicons dashicons-admin-users"></span><br />%s',
 				isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0
 			);
-			echo gp_link_get( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale, $contributors );
 			?>
+			<a href="<?php echo esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale );?>"><?php echo $contributors; ?></a>
 		</div>
 	</div>
 </div>
@@ -211,7 +211,7 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 		<div class="project <?php echo $classes; ?>">
 			<div class="project-top">
 				<div class="project-icon">
-					<?php echo gp_link_get( $project_url, $project_icon ) ?>
+					<a href="<?php echo esc_url( $project_url ); ?>"><?php echo $project_icon; ?></a>
 				</div>
 
 				<div class="project-name">

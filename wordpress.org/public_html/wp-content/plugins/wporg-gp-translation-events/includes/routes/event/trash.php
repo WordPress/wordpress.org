@@ -24,16 +24,25 @@ class Trash_Route extends Route {
 		if ( ! is_user_logged_in() ) {
 			global $wp;
 			wp_safe_redirect( wp_login_url( home_url( $wp->request ) ) );
-			exit;
+			$this->exit_();
+			return; // exit_() doesn't exit under GP_Route::$fake_request.
+		}
+
+		$nonce_action = 'trash_translation_event_' . $event_id;
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), $nonce_action ) ) {
+			$this->die_with_error( esc_html__( 'Your link has expired or is invalid. Please go back and try again.', 'gp-translation-events' ), 403 );
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
 		$event = $this->event_repository->get_event( $event_id );
 		if ( ! $event ) {
 			$this->die_with_404();
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
 		if ( ! current_user_can( 'trash_translation_event', $event->id() ) ) {
 			$this->die_with_error( esc_html__( 'You do not have permission to delete or restore this event.', 'gp-translation-events' ), 403 );
+			return; // die_with_*() doesn't die under GP_Route::$fake_request.
 		}
 
 		if ( ! $event->is_trashed() ) {
@@ -47,6 +56,6 @@ class Trash_Route extends Route {
 			wp_safe_redirect( Urls::event_edit( $event->id() ) );
 		}
 
-		exit;
+		$this->exit_();
 	}
 }

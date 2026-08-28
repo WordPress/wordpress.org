@@ -49,4 +49,16 @@
 		$(this).hide().parents('ul').find('.plugin-upload-form.hidden').removeClass( 'hidden' );
 	} );
 
+	// Prevent duplicate submissions by disabling the submit button
+	$( 'form.plugin-upload-form' ).on( 'submit', function() {
+		var $button = $(this).find( 'input[type="submit"]' ),
+			uploadingLabel = $button.data( 'uploadingLabel' );
+
+		$button.prop( 'disabled', true );
+
+		if ( uploadingLabel ) {
+			$button.val( uploadingLabel );
+		}
+	} );
+
 })( jQuery );

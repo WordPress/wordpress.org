@@ -577,7 +577,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				array(
 					'action'         => 'remote-logout',
 					'redirect_to'    => urlencode( $logout_redirect ),
-					'sso_logout'     => urlencode( $this->_generate_remote_token( $user ) )
+					// The logout token is consumed on the SSO host (see _maybe_perform_remote_logout()), so bind it there.
+					'sso_logout'     => urlencode( $this->_generate_remote_token( $user, $this->sso_host ) ),
 				),
 				$this->sso_host_url . '/wp-login.php'
 			);
@@ -685,7 +686,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$redirect_host = parse_url( $redirect, PHP_URL_HOST );
 
 			if ( $user && $this->_is_valid_targeted_domain( $redirect_host ) && ! preg_match( '!wordpress.org$!i', $redirect_host ) ) {
-				$sso_token = $this->_generate_remote_token( $user );
+				$sso_token = $this->_generate_remote_token( $user, $redirect_host );
 				$redirect  = add_query_arg( 'sso_token', urlencode( $sso_token ), $redirect );
 			}
 
@@ -740,12 +741,33 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
+		 * Normalize a host for use in a remote token.
+		 *
+		 * Comparisons are case-insensitive and ignore the port, matching how the
+		 * rest of the SSO code treats hostnames.
+		 *
+		 * @param string $host A hostname, possibly with a port.
+		 * @return string The normalized hostname.
+		 */
+		protected function _normalize_token_host( $host ) {
+			$host = strtolower( (string) $host );
+
+			if ( false !== strpos( $host, ':' ) ) {
+				$host = strstr( $host, ':', true );
+			}
+
+			return $host;
+		}
+
+		/**
 		 * Generates a remote token for login/logout.
 		 *
-		 * @param WP_User $user The User for the token.
+		 * @param WP_User $user        The User for the token.
+		 * @param string  $target_host The host the token is issued for. The token is
+		 *                             only accepted back on this same host.
 		 * @return string The SSO token.
 		 */
-		protected function _generate_remote_token( $user ) {
+		protected function _generate_remote_token( $user, $target_host = '' ) {
 			// Use a super-short timeout for the token. It's only going to be used once.
 			$valid_until = time() + self::REMOTE_TOKEN_TIMEOUT;
 
@@ -757,7 +779,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$remember_me       = ! empty( $_POST['rememberme'] ) || ( $auth_cookie_parts && $auth_cookie_parts['expiration'] >= ( time() + ( 2 * DAY_IN_SECONDS ) ) );
 			$session_token     = wp_get_session_token();
 
-			$hash        = $this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token );
+			$hash        = $this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token, $target_host );
 			$sso_token   = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me . '|' . $session_token;
 
 			return $sso_token;
@@ -766,11 +788,19 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		/**
 		 * Generate a hash for remote-login for non-wordpress.org domains
 		 */
-		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false, $session_token = '' ) {
+		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false, $session_token = '', $target_host = '' ) {
+			/*
+			 * Scope the token to the destination's registrable domain (wordcamp.org,
+			 * bbpress.org, ...) rather than the exact host, so it stays valid across
+			 * same-family canonical redirects (e.g. 2023.us.wordcamp.org -> us.wordcamp.org)
+			 * but not on an unrelated family (wordcamp.org != wordpress.org).
+			 */
+			$target_host = $this->_get_targetted_host( $this->_normalize_token_host( $target_host ) );
+
 			// re-use the same frag that Auth cookies use to invalidate sessions.
 			$pass_frag = substr( $user->user_pass, 8, 4 );
-			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until . '|' . $session_token, 'wporg_sso' );
-			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me . '|' . $session_token, $key );
+			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until . '|' . $session_token . '|' . $target_host, 'wporg_sso' );
+			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me . '|' . $session_token . '|' . $target_host, $key );
 
 			return $hash;
 		}
@@ -798,13 +828,52 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$user       = get_user_by( 'id', $user_id );
 			if ( $user ) {
 				$valid_hash = hash_equals(
-					$this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token ),
+					// Validate against the current host's family (see _generate_remote_token_hash()).
+					$this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token, $this->host ),
 					$sso_hash
 				);
 			}
 
 			// Validate that the remote login token is valid.
 			$valid = ( $expiration_valid && $valid_hash );
+
+			/*
+			 * Temporary rollout check: log tokens that are well-formed and unexpired
+			 * but don't validate for the current host's family, so we can confirm the
+			 * scoping above isn't affecting legitimate sign-ins. Deduped per host
+			 * (10 min) so it can't be flooded, and behind a filter so it's easy to turn
+			 * off. Under normal traffic this logs nothing. Remove after rollout.
+			 */
+			/**
+			 * Filters whether to log remote tokens that fail the host scope check.
+			 *
+			 * Temporary rollout aid; see the block above in
+			 * WP_WPOrg_SSO::_validate_remote_token() where the hook fires.
+			 *
+			 * @param bool $log_rejects Whether to log. Default true.
+			 */
+			$log_rejects = apply_filters( 'wporg_sso_log_binding_rejects', true );
+
+			if ( ! $valid && $expiration_valid && $user && ! $valid_hash && $log_rejects ) {
+				$registrable = $this->_get_targetted_host( $this->_normalize_token_host( $this->host ) );
+				$dedup_key   = 'wporg_sso_bindlog_' . md5( $registrable );
+
+				if ( ! get_transient( $dedup_key ) ) {
+					set_transient( $dedup_key, 1, 10 * MINUTE_IN_SECONDS );
+					// Path only (no query), and strip request-supplied input to a safe charset.
+					$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+					$path        = (string) wp_parse_url( $request_uri, PHP_URL_PATH );
+					$message     = sprintf(
+						'[wporg-sso] remote token did not validate for host=%s registrable=%s path=%s sample_user=%d',
+						preg_replace( '/[^a-z0-9.:_-]/i', '', (string) $this->host ),
+						preg_replace( '/[^a-z0-9.:_-]/i', '', (string) $registrable ),
+						preg_replace( '#[^a-z0-9._/-]#i', '', $path ),
+						(int) $user_id
+					);
+
+					trigger_error( $message, E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
+			}
 
 			return compact(
 				'valid',

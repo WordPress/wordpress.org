@@ -1,4 +1,4 @@
-<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+<?php
 /**
  * Unit tests for the Version_Normalizer class.
  *
@@ -63,6 +63,70 @@ class Test_Version_Normalizer extends TestCase {
 			'two segment with beta'     => array( '6.9-beta3', '6.9-beta3' ),
 			'three segment with RC'     => array( '6.9.1-RC1', '6.9.1-rc1' ),
 			'version with v and suffix' => array( 'v2.0-beta1', '2.0-beta1' ),
+			'zero patch kept'           => array( '1.2.0', '1.2.0' ),
+			'zero patch and minor kept' => array( '1.0.0', '1.0.0' ),
+			'zero third segment kept'   => array( '8.7.0.1', '8.7.0.1' ),
+			'zero fourth segment kept'  => array( '2.1.3.0', '2.1.3.0' ),
+			'all zeros kept'            => array( '0.0.0', '0.0.0' ),
+			'zero minor kept'           => array( '4.0', '4.0' ),
+			'zero patch with suffix'    => array( '3.1.0-rc1', '3.1.0-rc1' ),
+		);
+	}
+
+	/**
+	 * Test that the dedupe key matches for versions Composer compares as equal.
+	 *
+	 * Composer pads versions to four numeric segments, so tags that differ only by a trailing zero
+	 * are one version to it and only one of them can be served.
+	 *
+	 * @dataProvider data_equivalent_versions
+	 *
+	 * @param string $a One normalized version.
+	 * @param string $b A version Composer treats as equal to $a.
+	 */
+	public function test_dedupe_key_matches_equivalent_versions( string $a, string $b ): void {
+		$this->assertSame(
+			Version_Normalizer::dedupe_key( Version_Normalizer::normalize( $a ) ),
+			Version_Normalizer::dedupe_key( Version_Normalizer::normalize( $b ) )
+		);
+	}
+
+	/**
+	 * Data provider for versions Composer compares as equal.
+	 *
+	 * @return array Test cases.
+	 */
+	public function data_equivalent_versions(): array {
+		return array(
+			'trailing zero'         => array( '1.54', '1.54.0' ),
+			'two trailing zeros'    => array( '1.6', '1.6.0.0' ),
+			'four segment zero'     => array( '9.1.4', '9.1.4.0' ),
+			'leading v'             => array( '1.0', 'v1.0' ),
+			'zero with suffix'      => array( '3.1-rc1', '3.1.0-rc1' ),
+			'short and long suffix' => array( '1.0-a1', '1.0-alpha1' ),
+		);
+	}
+
+	/**
+	 * Test that the dedupe key differs for versions Composer compares as distinct.
+	 */
+	public function test_dedupe_key_separates_hotfix_versions(): void {
+		$this->assertNotSame(
+			Version_Normalizer::dedupe_key( Version_Normalizer::normalize( '8.7.1' ) ),
+			Version_Normalizer::dedupe_key( Version_Normalizer::normalize( '8.7.0.1' ) )
+		);
+	}
+
+	/**
+	 * Test that hotfix releases don't collapse onto the release they patch.
+	 *
+	 * WordPress hotfixes use an x.y.0.z tag, which has to stay distinct from x.y.z — otherwise both
+	 * are served under one Composer version and a pinned requirement resolves to the wrong zip.
+	 */
+	public function test_normalize_keeps_hotfix_versions_distinct(): void {
+		$this->assertNotSame(
+			Version_Normalizer::normalize( '8.7.1' ),
+			Version_Normalizer::normalize( '8.7.0.1' )
 		);
 	}
 

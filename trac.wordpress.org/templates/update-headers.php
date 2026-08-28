@@ -55,8 +55,11 @@ function domdocument_for_trac() {
 	$doc = new DOMDocument();
 	$doc->formatOutput = true;
 
+	// A plain <html> shell is used only as a container to build the fragment in;
+	// save_domdocument() strips it back off so the output is a bare Jinja2 include
+	// (Trac 1.6 no longer uses the Genshi <html py:strip> wrapper).
 	$doc->loadHTML( '<!DOCTYPE html>
-	<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" py:strip=""></html>' );
+	<html xmlns="http://www.w3.org/1999/xhtml"></html>' );
 
 	// Set the encoding to UTF-8 to allow unicode characters in the output. This avoids them being escaped.
 	$doc->encoding = 'utf-8';
@@ -74,8 +77,22 @@ function save_domdocument( $file, $dom ) {
 
 	$html = $dom->saveXML();
 
+	// saveXML() self-closes empty raw-text/RCDATA tags, which is invalid in text/html and swallows following markup.
+	$html = preg_replace(
+		'#<(script|style|textarea|title|iframe|noscript)\b([^>]*?)\s*/>#i',
+		'<$1$2></$1>',
+		$html
+	);
+
 	// Remove the XML header
 	$html = preg_replace( "#^<\?xml.+>\n?#i",  '', $html );
+
+	// Remove the DOCTYPE and the <html> container. These files are Jinja2 fragment
+	// includes (site_head/site_header/site_footer pull them into the real document),
+	// not standalone documents.
+	$html = preg_replace( "#^\s*<!DOCTYPE[^>]*>\n?#i", '', $html );
+	$html = preg_replace( '#^\s*<html\b[^>]*>\n?#i', '', $html );
+	$html = preg_replace( '#\n?</html>\s*$#i', '', $html );
 
 	// Remove CDATA tags from <style>
 	$html = preg_replace( '#<style([^>]*)><!\[CDATA\[(.+?)\]\]></style>#ism', "<style$1>$2</style>", $html );
