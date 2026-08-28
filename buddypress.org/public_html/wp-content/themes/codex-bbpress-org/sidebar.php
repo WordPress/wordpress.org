@@ -39,7 +39,7 @@
 			if ( $relateds ) {
 				foreach ( $relateds as $related ) {
 					$title = apply_filters( 'the_title', $related->post_title );
-					$rel .= '<li><a href="' . get_permalink( $related->ID ) . '" title="' . $title . '">' . $title . '</a></li>';
+					$rel  .= '<li><a href="' . esc_url( get_permalink( $related->ID ) ) . '" title="' . esc_attr( wp_strip_all_tags( $title ) ) . '">' . $title . '</a></li>';
 				}
 				$rel = '<ul>' . $rel . '</ul>';
 				echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Related</h2>' . $rel . '</div>';
