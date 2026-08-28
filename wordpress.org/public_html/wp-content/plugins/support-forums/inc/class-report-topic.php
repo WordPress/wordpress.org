@@ -593,7 +593,7 @@ The WordPress.org Team',
 			$this->add_modlook_history(
 				(int) $_POST['wporg-support-report-topic'],
 				wp_slash( sanitize_textarea_field( wp_unslash( $_POST['topic-report-reason-details'] ) ) ),
-				(int) $_POST['topic-report-reason']
+				$validate_term->term_id
 			);
 
 			wp_safe_redirect( get_the_permalink( $_POST['wporg-support-report-topic'] ) );
