@@ -103,7 +103,7 @@ class Uploads {
 		/* After submission, but before post is created. */
 
 		add_filter( 'fu_before_create_post', [ __CLASS__, 'sanitize_submitted_description' ], 5 );
-		add_filter( 'fu_before_create_post',            [ __CLASS__, 'make_post_pending_instead_of_private' ] );
+		add_filter( 'fu_before_create_post', [ __CLASS__, 'make_post_pending_instead_of_private' ] );
 
 		/* After submission, after an upload completes. */
 
