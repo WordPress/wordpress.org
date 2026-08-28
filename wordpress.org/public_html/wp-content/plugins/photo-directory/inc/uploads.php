@@ -486,10 +486,6 @@ class Uploads {
 	 * @return array
 	 */
 	public static function sanitize_submitted_description( $post_array ) {
-		if ( Registrations::get_post_type() !== ( $post_array['post_type'] ?? '' ) ) {
-			return $post_array;
-		}
-
 		if ( isset( $post_array['post_content'] ) ) {
 			$post_array['post_content'] = wp_slash( sanitize_textarea_field( wp_unslash( $post_array['post_content'] ) ) );
 		}
