@@ -78,9 +78,6 @@ class Plugin_Self_Close extends Base {
 			$plugin
 		);
 
-		// Archive translation project.
-		Status_Transitions::set_translation_status( $plugin, 'inactive' );
-
 		// Email all Plugin Committers.
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been closed', 'wporg-plugins' ), $plugin->post_title );
 		$message = sprintf(
