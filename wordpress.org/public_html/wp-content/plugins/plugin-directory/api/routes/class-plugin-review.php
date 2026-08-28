@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
@@ -17,27 +18,43 @@ class Plugin_Review extends Base {
 	/**
 	 * Plugin constructor.
 	 */
-	function __construct() {
+	public function __construct() {
 		// An API Endpoint to expose more detailed plugin data for a pending plugin.
-		register_rest_route( 'plugins/v1', '/plugin-review/(?P<plugin_id>\d+)-(?P<token>[a-f0-9]{32})/?', array(
-			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'plugin_review_info' ),
-			'permission_callback' => array( $this, 'plugin_info_permission_check' ),
-		) );
+		register_rest_route(
+			'plugins/v1',
+			'/plugin-review/(?P<plugin_id>\d+)-(?P<token>[a-f0-9]{32})/?',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'plugin_review_info' ),
+				'permission_callback' => array( $this, 'plugin_info_permission_check' ),
+			)
+		);
 
-		// An API Endpoint to change the status of a plugin from new to pending and assign the current user as reviewer.
-		register_rest_route( 'plugins/v1', '/plugin-review/(?P<plugin_id>\d+)/assign', array(
-			'methods'             => WP_REST_Server::EDITABLE,
-			'callback'            => array( $this, 'assign_reviewer' ),
-			'permission_callback' => array( $this, 'assign_reviewer_permissions_check' ),
-		) );
+		// An API Endpoint to change the status of a plugin from new to pending and assign a reviewer to it.
+		register_rest_route(
+			'plugins/v1',
+			'/plugin-review/(?P<plugin_id>\d+)-(?P<token>[a-f0-9]{32})/assign',
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'assign_reviewer' ),
+				'permission_callback' => array( $this, 'assign_reviewer_permission_check' ),
+				'args'                => array(
+					'user_id' => array(
+						'description' => 'The WordPress.org user performing the action, who will be assigned as the reviewer.',
+						'type'        => 'integer',
+						'minimum'     => 1,
+						'required'    => true,
+					),
+				),
+			)
+		);
 	}
 
 	/**
 	 * Permission check that validates the hash for a pending plugin.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
-	 * @return array A formatted array of all the data for the plugin.
+	 * @return bool Whether the token matches the plugin.
 	 */
 	public function plugin_info_permission_check( $request ) {
 		if ( empty( $request['plugin_id'] ) || empty( $request['token'] ) ) {
@@ -57,8 +74,8 @@ class Plugin_Review extends Base {
 	/**
 	 * Append a link to the plugin review info endpoint to a URL.
 	 *
-	 * @param string   $url  The URL.
-	 * @param \WP_Post $post The WP post.
+	 * @param string  $url  The URL.
+	 * @param WP_Post $post The WP post.
 	 * @return string
 	 */
 	public static function append_plugin_review_info_url( $url, $post ) {
@@ -73,20 +90,25 @@ class Plugin_Review extends Base {
 	}
 	/**
 	 * Fetch the URL to the plugin review info endpoint.
+	 *
+	 * @param WP_Post $post The plugin post object.
+	 * @return string The generated plugin review information URL.
 	 */
 	public static function get_plugin_review_info_url( $post ) {
-		return rest_url( sprintf(
-			'plugins/v1/plugin-review/%d-%s/',
-			$post->ID,
-			wp_hash( $post->ID, 'plugin-review' )
-		) );
+		return rest_url(
+			sprintf(
+				'plugins/v1/plugin-review/%d-%s/',
+				$post->ID,
+				wp_hash( $post->ID, 'plugin-review' )
+			)
+		);
 	}
 
 	/**
 	 * Endpoint to retrieve a full plugin representation for a pending plugin.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
-	 * @return array A formatted array of all the data for the plugin.
+	 * @return array|WP_Error A formatted array of all the data for the plugin.
 	 */
 	public function plugin_review_info( $request ) {
 		$post = get_post( $request['plugin_id'] );
@@ -98,27 +120,39 @@ class Plugin_Review extends Base {
 
 		// Review-specific fields.
 		$details = [
-			'ID'            => $post->ID,
-			'post_status'   => $post->post_status,
-			'edit_url'      => add_query_arg( [ 'action' => 'edit', 'post' => $post->ID ], admin_url( 'post.php' ) ),
-			'helpscout'     => null, // Most recent email details.
-			'submitter'     => [
+			'ID'          => $post->ID,
+			'post_status' => $post->post_status,
+			'edit_url'    => add_query_arg(
+				[
+					'action' => 'edit',
+					'post'   => $post->ID,
+				],
+				admin_url( 'post.php' )
+			),
+			'helpscout'   => null, // Most recent email details.
+			'submitter'   => [
 				'user_login' => $submitter->user_login,
 				'user_email' => $submitter->user_email,
 			],
-			'zips'          => [],
+			'zips'        => [],
 		];
 
 		// Append the public api fields.
-		$details = $details + (new Plugin)->plugin_info_data( $request, $post );
+		$details = $details + ( new Plugin() )->plugin_info_data( $request, $post );
 
 		// When the plugin is pre-publish, we'll overwrite some fields.
-		if ( in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
+		if ( in_array( $post->post_status, [ 'new', 'pending', 'approved' ], true ) ) {
 			$details['download_link'] = null;
 			$details['preview_link']  = null;
-			$details['helpscout']     = Helpscout::get_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+			$details['helpscout']     = Helpscout::get_emails(
+				$post,
+				[
+					'subject' => 'Review in Progress:',
+					'limit'   => 1,
+				]
+			);
 		} else {
-			$details['helpscout']     = Helpscout::get_emails( $post, [ 'limit' => 1 ] );
+			$details['helpscout'] = Helpscout::get_emails( $post, [ 'limit' => 1 ] );
 		}
 
 		$attachments = get_attached_media( 'application/zip', $post );
@@ -151,23 +185,33 @@ class Plugin_Review extends Base {
 	/**
 	 * Permission check for assigning a reviewer.
 	 *
+	 * The request is not authenticated as a WordPress.org user. It's authorised by the
+	 * per-plugin internal token in the URL, which limits the request to a single plugin, plus a
+	 * shared secret which is only known to the clients allowed to make changes.
+	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
-	 * @return bool
+	 * @return bool|WP_Error True if the request is authorised, WP_Error upon failure.
 	 */
-	public function assign_reviewer_permissions_check( $request ) {
-		$plugin_id = absint( $request['plugin_id'] );
-		return $plugin_id && current_user_can( 'edit_post', $plugin_id ) &&
-		       ( current_user_can( 'plugin_approve' ) || current_user_can( 'plugin_review' ) );
+	public function assign_reviewer_permission_check( $request ) {
+		$secret_check = $this->permission_check_api_bearer( $request, 'PLUGIN_REVIEW_ENDPOINT_SECRET' );
+		if ( is_wp_error( $secret_check ) ) {
+			return $secret_check;
+		}
+
+		return $this->plugin_info_permission_check( $request );
 	}
 
 	/**
-	 * Endpoint to change the status of a plugin from new to pending and assign the current user as reviewer.
+	 * Endpoint to change the status of a plugin from new to pending and assign a reviewer to it.
+	 *
+	 * The reviewer is passed as `user_id`, as the request isn't made by a logged in user.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return bool|WP_Error
 	 */
 	public function assign_reviewer( $request ) {
-		$post = get_post( $request['plugin_id'] );
+		$post     = get_post( $request['plugin_id'] );
+		$reviewer = get_user_by( 'id', $request['user_id'] );
 
 		if ( ! $post || 'plugin' !== $post->post_type ) {
 			return new WP_Error( 'plugin_not_found', 'Plugin not found', [ 'status' => 404 ] );
@@ -175,6 +219,23 @@ class Plugin_Review extends Base {
 
 		if ( 'new' !== $post->post_status ) {
 			return new WP_Error( 'invalid_status', 'Plugin is not in "new" status', [ 'status' => 400 ] );
+		}
+
+		if ( ! $reviewer || ! user_can( $reviewer, 'plugin_review' ) ) {
+			return new WP_Error( 'invalid_reviewer', 'The given user cannot review plugins', [ 'status' => 400 ] );
+		}
+
+		/*
+		 * Act as the reviewer for the remainder of the request, so that the reviewer
+		 * assignment and the audit log entries are attributed to them.
+		 */
+		wp_set_current_user( $reviewer->ID );
+
+		// Assign the reviewer first, so that a failure here leaves the plugin untouched.
+		$assigned_reviewer = (int) get_post_meta( $post->ID, 'assigned_reviewer', true );
+
+		if ( $assigned_reviewer !== $reviewer->ID && ! Reviewer::set_reviewer( $post->ID, $reviewer->ID ) ) {
+			return new WP_Error( 'reviewer_not_assigned', 'Failed to assign reviewer', [ 'status' => 500 ] );
 		}
 
 		// Change status to pending.
@@ -193,13 +254,6 @@ class Plugin_Review extends Base {
 
 		if ( 0 === $update_result ) {
 			return new WP_Error( 'plugin_status_not_updated', 'Failed to update plugin status', [ 'status' => 500 ] );
-		}
-
-		// Assign current user as reviewer.
-		$result = Reviewer::set_reviewer( $post->ID, get_current_user_id() );
-
-		if ( ! $result ) {
-			return new WP_Error( 'reviewer_not_assigned', 'Failed to assign reviewer', [ 'status' => 500 ] );
 		}
 
 		return true;
