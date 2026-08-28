@@ -102,7 +102,8 @@ class Uploads {
 
 		/* After submission, but before post is created. */
 
-		add_filter( 'fu_before_create_post',            [ __CLASS__, 'make_post_pending_instead_of_private' ] );
+		add_filter( 'fu_before_create_post', [ __CLASS__, 'sanitize_submitted_description' ], 5 );
+		add_filter( 'fu_before_create_post', [ __CLASS__, 'make_post_pending_instead_of_private' ] );
 
 		/* After submission, after an upload completes. */
 
@@ -476,6 +477,25 @@ class Uploads {
 		$notices['fu-spam']['text'] = $rejection;
 
 		return $notices;
+	}
+
+	/**
+	 * Sanitizes the submitted "Alternative Text" as the plain text it is.
+	 *
+	 * @param array $post_array Array of post settings.
+	 * @return array
+	 */
+	public static function sanitize_submitted_description( $post_array ) {
+		// The photo form is the only Frontend Uploader form here; scope to it should another ever be added.
+		if ( Registrations::get_post_type() !== ( $post_array['post_type'] ?? '' ) ) {
+			return $post_array;
+		}
+
+		if ( isset( $post_array['post_content'] ) ) {
+			$post_array['post_content'] = wp_slash( sanitize_textarea_field( wp_unslash( $post_array['post_content'] ) ) );
+		}
+
+		return $post_array;
 	}
 
 	/**
