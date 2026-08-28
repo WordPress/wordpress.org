@@ -345,12 +345,18 @@ class Plugin_Review extends Base {
 
 		// Assign the reviewer first, so that a failure here leaves the plugin untouched.
 		$assigned_reviewer = (int) get_post_meta( $post->ID, 'assigned_reviewer', true );
+		$reviewer_changed  = $assigned_reviewer !== $reviewer->ID;
 
-		if ( $assigned_reviewer !== $reviewer->ID && ! Reviewer::set_reviewer( $post->ID, $reviewer->ID ) ) {
+		if ( $reviewer_changed && ! Reviewer::set_reviewer( $post->ID, $reviewer->ID ) ) {
 			return new WP_Error( 'reviewer_not_assigned', 'Failed to assign reviewer', [ 'status' => 500 ] );
 		}
 
-		return $this->set_plugin_status( $post, 'pending' );
+		$result = $this->set_plugin_status( $post, 'pending' );
+		if ( is_wp_error( $result ) && $reviewer_changed ) {
+			Reviewer::set_reviewer( $post->ID, $assigned_reviewer );
+		}
+
+		return $result;
 	}
 
 	/**
