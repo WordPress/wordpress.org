@@ -8,6 +8,7 @@ use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Reviewer;
 use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
+use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
 use WP_Error;
 use WP_REST_Server;
 
@@ -384,6 +385,9 @@ class Plugin_Review extends Base {
 	 * Limited to plugins which haven't been approved yet. Approved plugins have a SVN
 	 * repository, and renaming that is only handled by the Edit Plugin screen.
 	 *
+	 * The new slug goes through the same availability checks as an author requesting a slug
+	 * change, minus the trademark check, as reviewers rename plugins to resolve trademarks.
+	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return bool|WP_Error
 	 */
@@ -419,6 +423,33 @@ class Plugin_Review extends Base {
 
 		if ( Plugin_Directory::get_plugin_post( $new_slug ) ) {
 			return new WP_Error( 'slug_in_use', 'That slug is already in use', [ 'status' => 400 ] );
+		}
+
+		// Short slugs are too generic to hand out.
+		if ( strlen( $new_slug ) < 5 ) {
+			return new WP_Error( 'too_short', 'That slug is too short', [ 'status' => 400 ] );
+		}
+
+		// Some slugs would clash with the directory itself, or with well known plugins.
+		$upload_handler              = new Upload_Handler();
+		$upload_handler->plugin_slug = $new_slug;
+
+		if ( $upload_handler->has_reserved_slug() ) {
+			return new WP_Error( 'reserved_slug', 'That slug is reserved', [ 'status' => 400 ] );
+		}
+
+		/*
+		 * A slug with a significant install base outside of the directory can't be handed out
+		 * either, as updates from here would overwrite those installs. It's a heuristic on the
+		 * plugin name, so it's the last check to run.
+		 */
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) ) {
+			$name     = ucwords( str_replace( '-', ' ', $new_slug ) );
+			$installs = wporg_stats_get_plugin_name_install_count( $name );
+
+			if ( $installs && $installs->count >= 100 ) {
+				return new WP_Error( 'slug_in_use_in_the_wild', 'That slug is already in use by a plugin hosted elsewhere', [ 'status' => 400 ] );
+			}
 		}
 
 		$result = wp_update_post(
