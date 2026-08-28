@@ -85,9 +85,6 @@ class Plugin_Directory {
 		// Load the API routes.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'init' ) );
 
-		// Hooks plugin status transitions when done from the Rest API.
-		add_action( 'rest_api_init', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'init' ) );
-
 		// Allow post_modified not to be modified when we don't specifically bump it, and slugs for pending plugins.
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 

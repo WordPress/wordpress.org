@@ -296,6 +296,12 @@ class Plugin_Review extends Base {
 	 * @return bool|WP_Error True if the status was changed, WP_Error upon failure.
 	 */
 	protected function set_plugin_status( $post, $status ) {
+		/*
+		 * The transition actions are only hooked in the admin, so opt this request in to get
+		 * the same side-effects a status change from the Edit Plugin screen has.
+		 */
+		Status_Transitions::init();
+
 		$result = wp_update_post(
 			[
 				'ID'          => $post->ID,
