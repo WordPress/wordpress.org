@@ -1483,7 +1483,8 @@ TICKET;
 				'post_author'    => $this->author->ID,
 				'post_title'     => $this->theme->get( 'Name' ),
 				'post_name'      => $this->theme_slug,
-				'post_content'   => $this->theme->get( 'Description' ),
+				// The description is a one-line header, not body content to run through the shortcode chain.
+				'post_content'   => strip_shortcodes( $this->theme->get( 'Description' ) ),
 				'post_parent'    => $this->theme->post_parent,
 				'post_date'      => $upload_date,
 				'post_date_gmt'  => $upload_date,
