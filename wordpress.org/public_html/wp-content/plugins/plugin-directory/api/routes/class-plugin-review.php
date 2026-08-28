@@ -2,9 +2,12 @@
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
 use WordPressdotorg\Plugin_Directory\API\Base;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Reviewer;
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WP_Error;
 use WP_REST_Server;
 
@@ -19,10 +22,12 @@ class Plugin_Review extends Base {
 	 * Plugin constructor.
 	 */
 	public function __construct() {
+		$plugin_route = '/plugin-review/(?P<plugin_id>\d+)-(?P<token>[a-f0-9]{32})';
+
 		// An API Endpoint to expose more detailed plugin data for a pending plugin.
 		register_rest_route(
 			'plugins/v1',
-			'/plugin-review/(?P<plugin_id>\d+)-(?P<token>[a-f0-9]{32})/?',
+			$plugin_route . '/?',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'plugin_review_info' ),
@@ -30,19 +35,56 @@ class Plugin_Review extends Base {
 			)
 		);
 
+		/*
+		 * The endpoints below change a plugin. They're not authenticated as a WordPress.org
+		 * user, so each of them is told which user is performing the action.
+		 */
+		$user_id_arg = array(
+			'user_id' => array(
+				'description' => 'The WordPress.org user performing the action.',
+				'type'        => 'integer',
+				'minimum'     => 1,
+				'required'    => true,
+			),
+		);
+
 		// An API Endpoint to change the status of a plugin from new to pending and assign a reviewer to it.
 		register_rest_route(
 			'plugins/v1',
-			'/plugin-review/(?P<plugin_id>\d+)-(?P<token>[a-f0-9]{32})/assign',
+			$plugin_route . '/assign',
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'assign_reviewer' ),
-				'permission_callback' => array( $this, 'assign_reviewer_permission_check' ),
-				'args'                => array(
-					'user_id' => array(
-						'description' => 'The WordPress.org user performing the action, who will be assigned as the reviewer.',
-						'type'        => 'integer',
-						'minimum'     => 1,
+				'permission_callback' => array( $this, 'plugin_change_permission_check' ),
+				'args'                => $user_id_arg,
+			)
+		);
+
+		// An API Endpoint to change the status of a plugin to approved.
+		register_rest_route(
+			'plugins/v1',
+			$plugin_route . '/approve',
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'approve_plugin' ),
+				'permission_callback' => array( $this, 'plugin_change_permission_check' ),
+				'args'                => $user_id_arg,
+			)
+		);
+
+		// An API Endpoint to change the slug of a plugin which hasn't been approved yet.
+		register_rest_route(
+			'plugins/v1',
+			$plugin_route . '/slug',
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'change_slug' ),
+				'permission_callback' => array( $this, 'plugin_change_permission_check' ),
+				'args'                => $user_id_arg + array(
+					'slug' => array(
+						'description' => 'The new slug for the plugin.',
+						'type'        => 'string',
+						'minLength'   => 1,
 						'required'    => true,
 					),
 				),
@@ -183,16 +225,16 @@ class Plugin_Review extends Base {
 	}
 
 	/**
-	 * Permission check for assigning a reviewer.
+	 * Permission check for the endpoints which change a plugin.
 	 *
-	 * The request is not authenticated as a WordPress.org user. It's authorised by the
-	 * per-plugin internal token in the URL, which limits the request to a single plugin, plus a
+	 * The requests are not authenticated as a WordPress.org user. They're authorised by the
+	 * per-plugin internal token in the URL, which limits a request to a single plugin, plus a
 	 * shared secret which is only known to the clients allowed to make changes.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return bool|WP_Error True if the request is authorised, WP_Error upon failure.
 	 */
-	public function assign_reviewer_permission_check( $request ) {
+	public function plugin_change_permission_check( $request ) {
 		$secret_check = $this->permission_check_api_bearer( $request, 'PLUGIN_REVIEW_ENDPOINT_SECRET' );
 		if ( is_wp_error( $secret_check ) ) {
 			return $secret_check;
@@ -202,34 +244,97 @@ class Plugin_Review extends Base {
 	}
 
 	/**
-	 * Endpoint to change the status of a plugin from new to pending and assign a reviewer to it.
+	 * Fetch the plugin a request is for.
 	 *
-	 * The reviewer is passed as `user_id`, as the request isn't made by a logged in user.
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return \WP_Post|WP_Error The plugin, WP_Error if it doesn't exist.
+	 */
+	protected function get_plugin( $request ) {
+		$post = get_post( $request['plugin_id'] );
+
+		if ( ! $post || 'plugin' !== $post->post_type ) {
+			return new WP_Error( 'plugin_not_found', 'Plugin not found', [ 'status' => 404 ] );
+		}
+
+		return $post;
+	}
+
+	/**
+	 * Fetch the user performing a change, and act as them for the rest of the request.
+	 *
+	 * The request isn't made by a logged in user, so the user is taken from `user_id`. Setting
+	 * them as the current user attributes the change and the audit log entries to them.
+	 *
+	 * @param \WP_REST_Request $request    The Rest API Request.
+	 * @param string           $capability The capability the user needs to make the change.
+	 * @return \WP_User|WP_Error The user, WP_Error if they cannot make the change.
+	 */
+	protected function get_acting_user( $request, $capability ) {
+		$user = get_user_by( 'id', $request['user_id'] );
+
+		if ( ! $user ) {
+			return new WP_Error( 'user_not_found', 'User not found', [ 'status' => 404 ] );
+		}
+
+		if ( ! user_can( $user, $capability ) ) {
+			return new WP_Error( 'user_cannot_do_that', 'The given user cannot perform this action', [ 'status' => 403 ] );
+		}
+
+		wp_set_current_user( $user->ID );
+
+		return $user;
+	}
+
+	/**
+	 * Change the status of a plugin.
+	 *
+	 * The side-effects of the change are handled by `Status_Transitions`.
+	 *
+	 * @param \WP_Post $post   The plugin.
+	 * @param string   $status The new post status.
+	 * @return bool|WP_Error True if the status was changed, WP_Error upon failure.
+	 */
+	protected function set_plugin_status( $post, $status ) {
+		$result = wp_update_post(
+			[
+				'ID'          => $post->ID,
+				'post_status' => $status,
+			],
+			true
+		);
+
+		if ( is_wp_error( $result ) ) {
+			$result->add_data( [ 'status' => 500 ] );
+			return $result;
+		}
+
+		if ( 0 === $result ) {
+			return new WP_Error( 'plugin_status_not_updated', 'Failed to update plugin status', [ 'status' => 500 ] );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Endpoint to change the status of a plugin from new to pending and assign a reviewer to it.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return bool|WP_Error
 	 */
 	public function assign_reviewer( $request ) {
-		$post     = get_post( $request['plugin_id'] );
-		$reviewer = get_user_by( 'id', $request['user_id'] );
-
-		if ( ! $post || 'plugin' !== $post->post_type ) {
-			return new WP_Error( 'plugin_not_found', 'Plugin not found', [ 'status' => 404 ] );
+		$post = $this->get_plugin( $request );
+		if ( is_wp_error( $post ) ) {
+			return $post;
 		}
 
 		if ( 'new' !== $post->post_status ) {
 			return new WP_Error( 'invalid_status', 'Plugin is not in "new" status', [ 'status' => 400 ] );
 		}
 
-		if ( ! $reviewer || ! user_can( $reviewer, 'plugin_review' ) ) {
-			return new WP_Error( 'invalid_reviewer', 'The given user cannot review plugins', [ 'status' => 400 ] );
+		$reviewer = $this->get_acting_user( $request, 'plugin_review' );
+		if ( is_wp_error( $reviewer ) ) {
+			return $reviewer;
 		}
-
-		/*
-		 * Act as the reviewer for the remainder of the request, so that the reviewer
-		 * assignment and the audit log entries are attributed to them.
-		 */
-		wp_set_current_user( $reviewer->ID );
 
 		// Assign the reviewer first, so that a failure here leaves the plugin untouched.
 		$assigned_reviewer = (int) get_post_meta( $post->ID, 'assigned_reviewer', true );
@@ -238,23 +343,103 @@ class Plugin_Review extends Base {
 			return new WP_Error( 'reviewer_not_assigned', 'Failed to assign reviewer', [ 'status' => 500 ] );
 		}
 
-		// Change status to pending.
-		$update_result = wp_update_post(
+		return $this->set_plugin_status( $post, 'pending' );
+	}
+
+	/**
+	 * Endpoint to change the status of a plugin to approved.
+	 *
+	 * Approving a plugin creates its SVN repository, grants the author commit access and
+	 * emails them, all of which is handled by `Status_Transitions`.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool|WP_Error
+	 */
+	public function approve_plugin( $request ) {
+		$post = $this->get_plugin( $request );
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}
+
+		$allowed_transitions = Status_Transitions::get_allowed_transitions( $post->post_status, $post );
+		if ( ! in_array( 'approved', $allowed_transitions, true ) ) {
+			return new WP_Error(
+				'invalid_status',
+				sprintf( 'A plugin with the "%s" status cannot be approved', $post->post_status ),
+				[ 'status' => 400 ]
+			);
+		}
+
+		$user = $this->get_acting_user( $request, 'plugin_approve' );
+		if ( is_wp_error( $user ) ) {
+			return $user;
+		}
+
+		return $this->set_plugin_status( $post, 'approved' );
+	}
+
+	/**
+	 * Endpoint to change the slug of a plugin.
+	 *
+	 * Limited to plugins which haven't been approved yet. Approved plugins have a SVN
+	 * repository, and renaming that is only handled by the Edit Plugin screen.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool|WP_Error
+	 */
+	public function change_slug( $request ) {
+		$post = $this->get_plugin( $request );
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}
+
+		if ( ! in_array( $post->post_status, [ 'new', 'pending' ], true ) ) {
+			return new WP_Error( 'invalid_status', 'Plugin is not awaiting review', [ 'status' => 400 ] );
+		}
+
+		/*
+		 * `plugin_approve` is the plugin post type's `publish_posts` capability, which
+		 * `wp_insert_post()` requires to set the slug of a pending post.
+		 */
+		$user = $this->get_acting_user( $request, 'plugin_approve' );
+		if ( is_wp_error( $user ) ) {
+			return $user;
+		}
+
+		$old_slug = $post->post_name;
+		$new_slug = trim( $request['slug'] );
+
+		if ( sanitize_title_with_dashes( $new_slug ) !== $new_slug ) {
+			return new WP_Error( 'invalid_slug', 'Slugs may only contain the lowercase characters a-z, 0-9, and -', [ 'status' => 400 ] );
+		}
+
+		if ( $new_slug === $old_slug ) {
+			return new WP_Error( 'slug_unchanged', 'That is already the slug of this plugin', [ 'status' => 400 ] );
+		}
+
+		if ( Plugin_Directory::get_plugin_post( $new_slug ) ) {
+			return new WP_Error( 'slug_in_use', 'That slug is already in use', [ 'status' => 400 ] );
+		}
+
+		$result = wp_update_post(
 			[
-				'ID'          => $post->ID,
-				'post_status' => 'pending',
+				'ID'        => $post->ID,
+				'post_name' => $new_slug,
 			],
 			true
 		);
 
-		if ( is_wp_error( $update_result ) ) {
-			$update_result->add_data( [ 'status' => 500 ] );
-			return $update_result;
+		if ( is_wp_error( $result ) ) {
+			$result->add_data( [ 'status' => 500 ] );
+			return $result;
 		}
 
-		if ( 0 === $update_result ) {
-			return new WP_Error( 'plugin_status_not_updated', 'Failed to update plugin status', [ 'status' => 500 ] );
+		// `wp_insert_post()` alters the slug in a few cases, so check the plugin actually got it.
+		if ( get_post_field( 'post_name', $post->ID ) !== $new_slug ) {
+			return new WP_Error( 'slug_not_updated', 'Failed to update the plugin slug', [ 'status' => 500 ] );
 		}
+
+		Tools::audit_log( sprintf( "Slug changed from '%s' to '%s'.", $old_slug, $new_slug ), $post->ID );
 
 		return true;
 	}
