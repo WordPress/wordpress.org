@@ -412,7 +412,56 @@ class WPORG_Themes_Upload {
 	 * @return bool True when the version is canonical.
 	 */
 	public static function is_canonical_version( $version ) {
-		return (bool) preg_match( '/^\d+(\.\d+)*$/', (string) $version );
+		return (bool) preg_match( '/^\d+(\.\d+)*$/D', (string) $version );
+	}
+
+	/**
+	 * Collects the errors for a theme's Version header and its SVN directory identity.
+	 *
+	 * @param string       $version          The style.css Version header value.
+	 * @param string|false $expected_version SVN directory version the header must match; false to skip the check.
+	 * @return WP_Error The errors found; empty when the version is acceptable.
+	 */
+	public static function version_identity_errors( $version, $expected_version = false ) {
+		$errors = new WP_Error();
+
+		if ( ! $version ) {
+			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
+
+			$error .= sprintf(
+				/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
+				__( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
+				'<code>Version:</code>',
+				'<code>style.css</code>',
+				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
+			);
+
+			$errors->add( 'no_version', $error );
+
+		} elseif ( ! self::is_canonical_version( $version ) ) {
+			$errors->add(
+				'invalid_version',
+				sprintf(
+					/* translators: %s: style.css */
+					__( 'Version strings must be a plain numeric version like 1.2 or 1.2.3. Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
+					'<code>style.css</code>'
+				)
+			);
+
+		} elseif ( false !== $expected_version && (string) $expected_version !== $version ) {
+			// The exported directory name must equal the version its tree declares, or review and downloads diverge.
+			$errors->add(
+				'version_mismatch',
+				sprintf(
+					/* translators: 1: SVN directory version, 2: style.css version */
+					__( 'The SVN directory version (%1$s) does not match the version declared in style.css (%2$s).', 'wporg-themes' ),
+					'<code>' . esc_html( (string) $expected_version ) . '</code>',
+					'<code>' . esc_html( $version ) . '</code>'
+				)
+			);
+		}
+
+		return $errors;
 	}
 
 	/**
@@ -629,42 +678,9 @@ class WPORG_Themes_Upload {
 			$style_errors->add( 'no_tags', $error );
 		}
 
-		if ( ! $this->theme->get( 'Version' ) ) {
-			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
-
-			$error .= sprintf(
-				/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
-				__( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
-				'<code>Version:</code>',
-				'<code>style.css</code>',
-				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
-			);
-
-			$style_errors->add( 'no_version', $error );
-
-		} else if ( ! self::is_canonical_version( $this->theme->get( 'Version' ) ) ) {
-			$style_errors->add(
-				'invalid_version',
-				sprintf(
-					/* translators: %s: style.css */
-					__( 'Version strings must be a plain numeric version like 1.2 or 1.2.3. Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
-					'<code>style.css</code>'
-				)
-			);
-		}
-
-		// The exported directory name must equal the version its tree declares, or review and downloads diverge.
-		if ( ! empty( $args['expected_version'] ) && (string) $args['expected_version'] !== (string) $this->theme->get( 'Version' ) ) {
-			$style_errors->add(
-				'version_mismatch',
-				sprintf(
-					/* translators: 1: SVN directory version, 2: style.css version */
-					__( 'The SVN directory version (%1$s) does not match the version declared in style.css (%2$s).', 'wporg-themes' ),
-					'<code>' . esc_html( (string) $args['expected_version'] ) . '</code>',
-					'<code>' . esc_html( (string) $this->theme->get( 'Version' ) ) . '</code>'
-				)
-			);
-		}
+		$style_errors->merge_from(
+			self::version_identity_errors( (string) $this->theme->get( 'Version' ), $args['expected_version'] )
+		);
 
 		// Version is greater than current version happens after authorship checks.
 

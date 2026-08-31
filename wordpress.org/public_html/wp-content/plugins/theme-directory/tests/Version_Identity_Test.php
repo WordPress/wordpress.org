@@ -10,7 +10,8 @@ declare( strict_types = 1 );
 use PHPUnit\Framework\TestCase;
 
 /**
- * Covers WPORG_Themes_Upload::is_canonical_version() and the download URL identity.
+ * Covers WPORG_Themes_Upload::is_canonical_version(), version_identity_errors(),
+ * and the download URL identity.
  *
  * @group upload
  */
@@ -94,7 +95,53 @@ class Version_Identity_Test extends TestCase {
 			'non numeric'  => array( '1.4a' ),
 			'whitespace'   => array( '1.4 ' ),
 			'letters'      => array( 'v1.4' ),
+			'newline'      => array( "1.4\n" ),
 		);
+	}
+
+	/**
+	 * A canonical header matching the SVN directory version is error free.
+	 */
+	public function test_matching_canonical_version_yields_no_errors(): void {
+		$errors = WPORG_Themes_Upload::version_identity_errors( '1.4', '1.4' );
+
+		$this->assertFalse( $errors->has_errors() );
+	}
+
+	/**
+	 * A canonical header that differs from the SVN directory version is a mismatch.
+	 */
+	public function test_version_mismatch_detected(): void {
+		$errors = WPORG_Themes_Upload::version_identity_errors( '1.2', '1.4' );
+
+		$this->assertSame( array( 'version_mismatch' ), $errors->get_error_codes() );
+	}
+
+	/**
+	 * The directory identity check must also run for the falsy canonical version '0'.
+	 */
+	public function test_version_mismatch_detected_for_version_zero_directory(): void {
+		$errors = WPORG_Themes_Upload::version_identity_errors( '1.2', '0' );
+
+		$this->assertSame( array( 'version_mismatch' ), $errors->get_error_codes() );
+	}
+
+	/**
+	 * A missing header is one defect: no self-contradictory mismatch error on top.
+	 */
+	public function test_missing_header_reports_only_no_version(): void {
+		$errors = WPORG_Themes_Upload::version_identity_errors( '', '1.4' );
+
+		$this->assertSame( array( 'no_version' ), $errors->get_error_codes() );
+	}
+
+	/**
+	 * A noncanonical header is one defect: a mismatch error would just restate it.
+	 */
+	public function test_noncanonical_header_reports_only_invalid_version(): void {
+		$errors = WPORG_Themes_Upload::version_identity_errors( '1.4.', '1.4' );
+
+		$this->assertSame( array( 'invalid_version' ), $errors->get_error_codes() );
 	}
 
 	/**
@@ -122,6 +169,32 @@ class Version_Identity_Test extends TestCase {
 		$this->assertStringEndsWith(
 			'/identity-probe.1.4..zip',
 			$package->download_url( '1.4.' )
+		);
+	}
+
+	/**
+	 * A package whose version resolves to an empty string must fall back to the
+	 * unversioned latest-package URL, not a doubled-period filename.
+	 */
+	public function test_download_url_omits_empty_version(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => 'repopackage',
+				'post_status' => 'publish',
+				'post_title'  => 'Identity Probe Unversioned',
+				'post_name'   => 'identity-probe-unversioned',
+				'post_author' => 1,
+			)
+		);
+
+		$this->post_ids[] = $post_id;
+
+		// No `_status` meta, so latest_version() and the version property are ''.
+		$package = new WPORG_Themes_Repo_Package( get_post( $post_id ) );
+
+		$this->assertStringEndsWith(
+			'/identity-probe-unversioned.zip',
+			$package->download_url()
 		);
 	}
 }
