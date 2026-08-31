@@ -1,10 +1,11 @@
 <?php
 /**
- * Tests that the SVN watcher routes a changeset to the version it touched.
+ * Tests that the SVN watcher finds every version a changeset touched.
  *
  * A file-only commit rewrites bytes inside an existing version without adding or
- * removing a directory node. Such a commit must still be scheduled for re-import
- * and re-scan, so the path selection considers file paths, not only directories.
+ * removing a directory node, and one commit may touch several versions. Each must
+ * be scheduled for re-import and re-scan, so the path selection considers file
+ * paths, not only directories, and returns every version it finds.
  *
  * @package theme-directory
  */
@@ -15,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Theme_Directory\Jobs\SVN_Import;
 
 /**
- * Covers SVN_Import::changed_slug_version().
+ * Covers SVN_Import::changed_slug_versions().
  *
  * @group svn-import
  */
@@ -46,16 +47,16 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 	}
 
 	/**
-	 * A directory node for a version routes to that version, as it always has.
+	 * A directory node for a version selects that version.
 	 */
 	public function test_directory_commit_selects_version(): void {
 		$entry = $this->log_entry( array( array( 'dir', '/my-theme/1.4' ) ) );
 
-		$this->assertSame( array( 'my-theme', '1.4' ), SVN_Import::changed_slug_version( $entry ) );
+		$this->assertSame( array( array( 'my-theme', '1.4' ) ), SVN_Import::changed_slug_versions( $entry ) );
 	}
 
 	/**
-	 * A file-only commit inside a version routes to that version.
+	 * A file-only commit inside a version selects that version.
 	 *
 	 * This is the case the watcher previously skipped, letting post-review bytes
 	 * ship without a re-scan.
@@ -63,7 +64,7 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 	public function test_file_only_commit_selects_version(): void {
 		$entry = $this->log_entry( array( array( 'file', '/my-theme/1.4/functions.php' ) ) );
 
-		$this->assertSame( array( 'my-theme', '1.4' ), SVN_Import::changed_slug_version( $entry ) );
+		$this->assertSame( array( array( 'my-theme', '1.4' ) ), SVN_Import::changed_slug_versions( $entry ) );
 	}
 
 	/**
@@ -72,7 +73,17 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 	public function test_theme_root_file_selects_nothing(): void {
 		$entry = $this->log_entry( array( array( 'file', '/my-theme/readme.txt' ) ) );
 
-		$this->assertSame( array( '', '' ), SVN_Import::changed_slug_version( $entry ) );
+		$this->assertSame( array(), SVN_Import::changed_slug_versions( $entry ) );
+	}
+
+	/**
+	 * A node with no `kind` attribute makes no version from a bare `/slug/x` path,
+	 * matching the watcher's former directory-only guard.
+	 */
+	public function test_kindless_theme_root_node_selects_nothing(): void {
+		$entry = $this->log_entry( array( array( '', '/my-theme/assets' ) ) );
+
+		$this->assertSame( array(), SVN_Import::changed_slug_versions( $entry ) );
 	}
 
 	/**
@@ -81,16 +92,13 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 	public function test_no_version_path_selects_nothing(): void {
 		$entry = $this->log_entry( array( array( 'dir', '/my-theme' ) ) );
 
-		$this->assertSame( array( '', '' ), SVN_Import::changed_slug_version( $entry ) );
+		$this->assertSame( array(), SVN_Import::changed_slug_versions( $entry ) );
 	}
 
 	/**
-	 * A changed version directory wins over a file edited in an older version.
-	 *
-	 * SVN lists paths alphabetically, so the older version's file comes first; the import
-	 * must still route to the newly added version, not re-import the old one.
+	 * A commit that adds a version and edits an older version's files selects both.
 	 */
-	public function test_directory_wins_over_older_version_file(): void {
+	public function test_mixed_commit_selects_every_version(): void {
 		$entry = $this->log_entry(
 			array(
 				array( 'file', '/my-theme/1.4/functions.php' ),
@@ -98,13 +106,16 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 			)
 		);
 
-		$this->assertSame( array( 'my-theme', '2.0' ), SVN_Import::changed_slug_version( $entry ) );
+		$this->assertSame(
+			array( array( 'my-theme', '1.4' ), array( 'my-theme', '2.0' ) ),
+			SVN_Import::changed_slug_versions( $entry )
+		);
 	}
 
 	/**
-	 * With no version directory in the commit, the first changed file's version wins.
+	 * A file-only commit editing several versions selects each of them.
 	 */
-	public function test_first_file_version_wins_without_directory(): void {
+	public function test_file_only_commit_selects_every_version(): void {
 		$entry = $this->log_entry(
 			array(
 				array( 'file', '/my-theme/1.4/functions.php' ),
@@ -112,6 +123,23 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 			)
 		);
 
-		$this->assertSame( array( 'my-theme', '1.4' ), SVN_Import::changed_slug_version( $entry ) );
+		$this->assertSame(
+			array( array( 'my-theme', '1.4' ), array( 'my-theme', '1.5' ) ),
+			SVN_Import::changed_slug_versions( $entry )
+		);
+	}
+
+	/**
+	 * Several changed paths within one version collapse to a single entry.
+	 */
+	public function test_paths_in_one_version_are_deduplicated(): void {
+		$entry = $this->log_entry(
+			array(
+				array( 'dir', '/my-theme/2.0' ),
+				array( 'file', '/my-theme/2.0/style.css' ),
+			)
+		);
+
+		$this->assertSame( array( array( 'my-theme', '2.0' ) ), SVN_Import::changed_slug_versions( $entry ) );
 	}
 }

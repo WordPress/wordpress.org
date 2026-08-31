@@ -20,31 +20,31 @@ class SVN_Import {
 	use Exec_With_Logging;
 
 	/**
-	 * Determines the theme slug and version a changeset touched.
+	 * Determines the theme slug/version pairs a changeset touched.
+	 *
+	 * Every changed version is returned, so a commit that edits files across several
+	 * versions re-imports and re-scans all of them, not only the first.
 	 *
 	 * @param SimpleXMLElement $element A single `<logentry>` from `svn log -v --xml`.
-	 * @return array{0: string, 1: string} The slug and version, or empty strings when none matched.
+	 * @return array<int, array{0: string, 1: string}> Distinct slug/version pairs, in commit order.
 	 */
-	public static function changed_slug_version( $element ) {
-		$file_match = array( '', '' );
+	public static function changed_slug_versions( $element ) {
+		$versions = array();
 
 		foreach ( $element->xpath( 'paths/path' ) as $path ) {
 			if ( ! preg_match( '!^/(?P<slug>[^/]+)/(?P<version>[^/]+)(?P<subpath>/.+)?$!', (string) $path, $m ) ) {
 				continue;
 			}
 
-			// A directory node names the version; prefer it, as the watcher did before it looked at files.
-			if ( 'file' !== (string) $path['kind'] ) {
-				return array( $m['slug'], $m['version'] );
+			// A version is named by a directory node, or by a file inside a version directory; a bare /slug/file names none.
+			if ( 'dir' !== (string) $path['kind'] && empty( $m['subpath'] ) ) {
+				continue;
 			}
 
-			// A file counts only inside a version directory, and only as a fallback if no version directory changed.
-			if ( ! empty( $m['subpath'] ) && '' === $file_match[0] ) {
-				$file_match = array( $m['slug'], $m['version'] );
-			}
+			$versions[ "{$m['slug']}/{$m['version']}" ] = array( $m['slug'], $m['version'] );
 		}
 
-		return $file_match;
+		return array_values( $versions );
 	}
 
 	/**
@@ -81,33 +81,28 @@ class SVN_Import {
 			return false;
 		}
 
-		$theme_changes = array_filter( array_map( function( $element ) { 
+		$theme_changes = array();
 
-			// Get slug/version.
-			list( $slug, $version ) = self::changed_slug_version( $element );
-			if ( ! $slug || ! $version ) {
-				return false;
-			}
-
+		foreach ( $xml->xpath( '/log/logentry' ) as $element ) {
 			$changeset = (int) $element->xpath( '@revision' )[0];
 			$author    = trim( (string) $element->xpath( 'author' )[0] );
 			$msg       = trim( (string) $element->xpath( 'msg' )[0] );
 
-			$info = compact( 'slug', 'version', 'changeset', 'author', 'msg' );
+			foreach ( self::changed_slug_versions( $element ) as list( $slug, $version ) ) {
+				$info = compact( 'slug', 'version', 'changeset', 'author', 'msg' );
 
-			// Allow for including/skipping revisions based on external conditionals.
-			$should_import = 'themedropbox' !== $author;
-			$should_import = apply_filters( 'themes_svn_should_import', $should_import, $info );
+				// Allow for including/skipping revisions based on external conditionals.
+				$should_import = 'themedropbox' !== $author;
+				$should_import = apply_filters( 'themes_svn_should_import', $should_import, $info );
 
-			// DEBUG visible in cron log.
-			echo "[{$changeset}] $slug: $version by $author " . ( $should_import ? 'Importing from SVN.' : 'Skipping.' ) . "\n";
+				// DEBUG visible in cron log.
+				echo "[{$changeset}] $slug: $version by $author " . ( $should_import ? 'Importing from SVN.' : 'Skipping.' ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text cron log output, not a web response.
 
-			if ( ! $should_import ) {
-				return false;
+				if ( $should_import ) {
+					$theme_changes[] = $info;
+				}
 			}
-
-			return $info;
-		}, $xml->xpath('/log/logentry') ) );
+		}
 
 		$theme_changes = array_unique( $theme_changes, SORT_REGULAR );
 
