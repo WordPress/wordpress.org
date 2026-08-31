@@ -20,6 +20,33 @@ class SVN_Import {
 	use Exec_With_Logging;
 
 	/**
+	 * Determines the theme slug and version a changeset touched.
+	 *
+	 * Considers every changed path, not only directory nodes, so a file-only commit that
+	 * rewrites bytes inside an existing version is still routed to that version for
+	 * re-import and re-scan. Returns the first version path found in commit order.
+	 *
+	 * @param SimpleXMLElement $element A single `<logentry>` from `svn log -v --xml`.
+	 * @return array{0: string, 1: string} The slug and version, or empty strings when none matched.
+	 */
+	public static function changed_slug_version( $element ) {
+		foreach ( $element->xpath( 'paths/path' ) as $path ) {
+			if ( ! preg_match( '!^/(?P<slug>[^/]+)/(?P<version>[^/]+)(?P<subpath>/.+)?$!', (string) $path, $m ) ) {
+				continue;
+			}
+
+			// A bare /slug/file names no version, so a changed file must sit inside the version directory to count.
+			if ( 'file' === (string) $path['kind'] && empty( $m['subpath'] ) ) {
+				continue;
+			}
+
+			return array( $m['slug'], $m['version'] );
+		}
+
+		return array( '', '' );
+	}
+
+	/**
 	 * Check for new SVN revisions on the target repo, and queue an import job for each matching.
 	 */
 	public static function watcher_trigger() {
@@ -56,15 +83,7 @@ class SVN_Import {
 		$theme_changes = array_filter( array_map( function( $element ) { 
 
 			// Get slug/version.
-			$slug = '';
-			$version = '';
-			foreach ( $element->xpath( 'paths/path[@kind="dir"]') as $path ) {
-				if ( preg_match( '!^/(?P<slug>[^/]+)/(?P<version>[^/]+)(/.+)?$!', (string) $path, $m ) ) {
-					$slug    = $m['slug'];
-					$version = $m['version'];
-					break;
-				}
-			}
+			list( $slug, $version ) = self::changed_slug_version( $element );
 			if ( ! $slug || ! $version ) {
 				return false;
 			}
@@ -87,7 +106,7 @@ class SVN_Import {
 			}
 
 			return $info;
-		}, $xml->xpath('/log/logentry') ) );
+		}, $xml->xpath( '/log/logentry' ) ) );
 
 		$theme_changes = array_unique( $theme_changes, SORT_REGULAR );
 
