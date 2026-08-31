@@ -65,8 +65,7 @@ class WPORG_Themes_Repo_Package {
 
 		$this->version = $version;
 		if ( $this->wp_post ) {
-			// String comparison: the canonical version '0' is falsy but not "latest".
-			if ( '' === (string) $version || 'latest' === $version || 'latest-stable' === $version ) {
+			if ( ! $version || 'latest' === $version || 'latest-stable' === $version ) {
 				$this->version = $this->latest_version();
 			}
 		}
@@ -126,8 +125,7 @@ class WPORG_Themes_Repo_Package {
 	 * @return string
 	 */
 	public function download_url( $version = false ) {
-		// String comparison: the canonical version '0' must address its own package.
-		$version = '' === (string) $version ? $this->version : $version;
+		$version = $version ?: $this->version;
 		if ( 'latest-stable' === $version ) {
 			$version = $this->latest_version();
 		}

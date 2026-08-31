@@ -22,19 +22,17 @@ class Version_Identity_Test extends TestCase {
 	 *
 	 * With post ID 0 there is no meta, so latest_version() resolves to ''.
 	 *
-	 * @param string       $post_name The theme slug for the package.
-	 * @param string|false $version   Optional. The version to construct with, or false for latest.
+	 * @param string $post_name The theme slug for the package.
 	 * @return WPORG_Themes_Repo_Package The package under test.
 	 */
-	private function create_package( string $post_name, $version = false ): WPORG_Themes_Repo_Package {
+	private function create_package( string $post_name ): WPORG_Themes_Repo_Package {
 		return new WPORG_Themes_Repo_Package(
 			new WP_Post(
 				(object) array(
 					'ID'        => 0,
 					'post_name' => $post_name,
 				)
-			),
-			$version
+			)
 		);
 	}
 
@@ -57,7 +55,7 @@ class Version_Identity_Test extends TestCase {
 	public static function data_canonical_versions(): array {
 		return array(
 			'integer'      => array( '1' ),
-			'zero'         => array( '0' ),
+			'below one'    => array( '0.9' ),
 			'major minor'  => array( '1.4' ),
 			'three parts'  => array( '1.2.3' ),
 			'four parts'   => array( '1.2.3.4' ),
@@ -83,15 +81,17 @@ class Version_Identity_Test extends TestCase {
 	 */
 	public static function data_noncanonical_versions(): array {
 		return array(
-			'empty'        => array( '' ),
-			'trailing dot' => array( '1.4.' ),
-			'repeated dot' => array( '1..4' ),
-			'leading dot'  => array( '.1.4' ),
-			'lone dot'     => array( '.' ),
-			'non numeric'  => array( '1.4a' ),
-			'whitespace'   => array( '1.4 ' ),
-			'letters'      => array( 'v1.4' ),
-			'newline'      => array( "1.4\n" ),
+			'empty'          => array( '' ),
+			'bare zero'      => array( '0' ),
+			'multipart zero' => array( '0.0.0' ),
+			'trailing dot'   => array( '1.4.' ),
+			'repeated dot'   => array( '1..4' ),
+			'leading dot'    => array( '.1.4' ),
+			'lone dot'       => array( '.' ),
+			'non numeric'    => array( '1.4a' ),
+			'whitespace'     => array( '1.4 ' ),
+			'letters'        => array( 'v1.4' ),
+			'newline'        => array( "1.4\n" ),
 		);
 	}
 
@@ -105,12 +105,12 @@ class Version_Identity_Test extends TestCase {
 	}
 
 	/**
-	 * The falsy canonical header '0' is a real version, not a missing one.
+	 * The falsy header '0' is rejected as an invalid version, not as a missing one.
 	 */
-	public function test_version_zero_header_is_not_reported_as_missing(): void {
+	public function test_version_zero_header_is_reported_as_invalid(): void {
 		$errors = WPORG_Themes_Upload::version_identity_errors( '0', '0' );
 
-		$this->assertFalse( $errors->has_errors() );
+		$this->assertSame( array( 'invalid_version' ), $errors->get_error_codes() );
 	}
 
 	/**
@@ -123,7 +123,7 @@ class Version_Identity_Test extends TestCase {
 	}
 
 	/**
-	 * The directory identity check must also run for the falsy canonical version '0'.
+	 * A falsy '0' directory version must still be compared, not treated as no directory.
 	 */
 	public function test_version_mismatch_detected_for_version_zero_directory(): void {
 		$errors = WPORG_Themes_Upload::version_identity_errors( '1.2', '0' );
@@ -176,16 +176,5 @@ class Version_Identity_Test extends TestCase {
 			'/identity-probe-unversioned.zip',
 			$package->download_url()
 		);
-	}
-
-	/**
-	 * The falsy canonical version '0' must address its own package, not the latest one.
-	 */
-	public function test_download_url_keeps_version_zero(): void {
-		$package = $this->create_package( 'identity-probe-zero', '0' );
-
-		$this->assertSame( '0', $package->version );
-		$this->assertStringEndsWith( '/identity-probe-zero.0.zip', $package->download_url() );
-		$this->assertStringEndsWith( '/identity-probe-zero.0.zip', $package->download_url( '0' ) );
 	}
 }

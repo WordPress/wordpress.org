@@ -407,12 +407,15 @@ class WPORG_Themes_Upload {
 	 * Canonical means decimal segments joined by single periods and nothing else: the one
 	 * shape that maps identically across the style.css header, SVN directory, meta key, API
 	 * value, and package filename, so review and downloads can't resolve different trees.
+	 * Version zero ('0', '0.0', ...) is rejected: version_compare() makes it the lowest
+	 * possible version, and the bare form's falsiness invites `! $version` bugs downstream.
 	 *
 	 * @param string $version The version string to test.
 	 * @return bool True when the version is canonical.
 	 */
 	public static function is_canonical_version( $version ) {
-		return (bool) preg_match( '/^\d+(\.\d+)*$/D', (string) $version );
+		return (bool) preg_match( '/^\d+(\.\d+)*$/D', (string) $version )
+			&& (bool) preg_match( '/[1-9]/', (string) $version );
 	}
 
 	/**
@@ -425,7 +428,7 @@ class WPORG_Themes_Upload {
 	public static function version_identity_errors( $version, $expected_version = false ) {
 		$errors = new WP_Error();
 
-		// Strict comparison: '0' is a canonical version, not a missing header.
+		// Strict comparison: a '0' header is reported as invalid below, not as missing.
 		if ( '' === $version ) {
 			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
 
