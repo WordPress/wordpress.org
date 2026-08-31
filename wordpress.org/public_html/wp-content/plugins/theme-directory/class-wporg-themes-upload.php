@@ -315,7 +315,8 @@ class WPORG_Themes_Upload {
 		$esc_svn       = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
 		$esc_theme_dir = escapeshellarg( $this->theme_dir );
 		$this->exec_with_notify(
-			self::SVN . " export {$esc_svn} {$esc_theme_dir} --force", // force as we've created the directory already.
+			// --ignore-externals: never let a committer's svn:externals pull a remote tree into the export.
+			self::SVN . " export {$esc_svn} {$esc_theme_dir} --force --ignore-externals", // force as we've created the directory already.
 			$output,
 			$return_var
 		);
