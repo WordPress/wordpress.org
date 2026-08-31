@@ -16,6 +16,18 @@ add_action( 'wp_head', function () {
 	}
 }, 1 );
 
+/**
+ * Returns the `domain` post meta of the current showcase entry.
+ *
+ * The return value is unescaped, so that callers can compose it into a URL
+ * before escaping for their own context. Every caller that prints it must
+ * escape it: `esc_url()` in an `href`, `esc_html()` in element content.
+ *
+ * @param bool $rep_slash       Percent-encode slashes, for the screenshot service.
+ * @param bool $echo            Print the value (escaped as element content) as well as returning it.
+ * @param bool $rem_trail_slash Drop a trailing slash.
+ * @return string The unescaped domain.
+ */
 function get_site_domain( $rep_slash = true, $echo = true, $rem_trail_slash = false ) {
 	global $post;
 
@@ -31,8 +43,11 @@ function get_site_domain( $rep_slash = true, $echo = true, $rem_trail_slash = fa
 	if ( $rep_slash )
 		$domain = str_replace('/', '%2F', $domain );
 
-	if ( $echo ) echo $domain;
-	else return $domain;
+	if ( $echo ) {
+		echo esc_html( $domain );
+	}
+
+	return $domain;
 }
 
 function site_screenshot_src( $width = '', $echo = true ) {
@@ -114,8 +129,16 @@ function wp_flavors() {
 }
 
 function blockquote_style( $content ) {
-	if ( is_single() )
-		$content = str_replace( '</blockquote>', '<cite>' . __( 'Source:', 'wporg-showcase' ). ' <a href="http://' . get_site_domain( false, false ) . '">' . get_site_domain( false, false, true ) . '</a></cite><div class="clear"></div></blockquote>', $content );
+	if ( is_single() ) {
+		$cite = sprintf(
+			'<cite>%1$s <a href="%2$s">%3$s</a></cite><div class="clear"></div></blockquote>',
+			esc_html__( 'Source:', 'wporg-showcase' ),
+			esc_url( 'http://' . get_site_domain( false, false ) ),
+			esc_html( get_site_domain( false, false, true ) )
+		);
+
+		$content = str_replace( '</blockquote>', $cite, $content );
+	}
 
 	return $content;
 }
