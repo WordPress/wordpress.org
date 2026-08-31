@@ -37,9 +37,12 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 			);
 		}
 
-		return simplexml_load_string(
+		$element = simplexml_load_string(
 			'<logentry revision="123"><author>author</author><msg>m</msg><paths>' . $path_xml . '</paths></logentry>'
 		);
+		$this->assertNotFalse( $element, 'The fixture XML failed to parse.' );
+
+		return $element;
 	}
 
 	/**
@@ -82,16 +85,33 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 	}
 
 	/**
-	 * The first version path in commit order wins, whatever its node kind.
+	 * A changed version directory wins over a file edited in an older version.
+	 *
+	 * SVN lists paths alphabetically, so the older version's file comes first; the import
+	 * must still route to the newly added version, not re-import the old one.
 	 */
-	public function test_first_version_path_wins(): void {
+	public function test_directory_wins_over_older_version_file(): void {
 		$entry = $this->log_entry(
 			array(
-				array( 'file', '/my-theme/2.0/style.css' ),
-				array( 'dir', '/other-theme/1.0' ),
+				array( 'file', '/my-theme/1.4/functions.php' ),
+				array( 'dir', '/my-theme/2.0' ),
 			)
 		);
 
 		$this->assertSame( array( 'my-theme', '2.0' ), SVN_Import::changed_slug_version( $entry ) );
+	}
+
+	/**
+	 * With no version directory in the commit, the first changed file's version wins.
+	 */
+	public function test_first_file_version_wins_without_directory(): void {
+		$entry = $this->log_entry(
+			array(
+				array( 'file', '/my-theme/1.4/functions.php' ),
+				array( 'file', '/my-theme/1.5/style.css' ),
+			)
+		);
+
+		$this->assertSame( array( 'my-theme', '1.4' ), SVN_Import::changed_slug_version( $entry ) );
 	}
 }

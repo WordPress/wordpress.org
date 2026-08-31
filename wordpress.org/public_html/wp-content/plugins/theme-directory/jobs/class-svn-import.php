@@ -22,28 +22,29 @@ class SVN_Import {
 	/**
 	 * Determines the theme slug and version a changeset touched.
 	 *
-	 * Considers every changed path, not only directory nodes, so a file-only commit that
-	 * rewrites bytes inside an existing version is still routed to that version for
-	 * re-import and re-scan. Returns the first version path found in commit order.
-	 *
 	 * @param SimpleXMLElement $element A single `<logentry>` from `svn log -v --xml`.
 	 * @return array{0: string, 1: string} The slug and version, or empty strings when none matched.
 	 */
 	public static function changed_slug_version( $element ) {
+		$file_match = array( '', '' );
+
 		foreach ( $element->xpath( 'paths/path' ) as $path ) {
 			if ( ! preg_match( '!^/(?P<slug>[^/]+)/(?P<version>[^/]+)(?P<subpath>/.+)?$!', (string) $path, $m ) ) {
 				continue;
 			}
 
-			// A bare /slug/file names no version, so a changed file must sit inside the version directory to count.
-			if ( 'file' === (string) $path['kind'] && empty( $m['subpath'] ) ) {
-				continue;
+			// A directory node names the version; prefer it, as the watcher did before it looked at files.
+			if ( 'file' !== (string) $path['kind'] ) {
+				return array( $m['slug'], $m['version'] );
 			}
 
-			return array( $m['slug'], $m['version'] );
+			// A file counts only inside a version directory, and only as a fallback if no version directory changed.
+			if ( ! empty( $m['subpath'] ) && '' === $file_match[0] ) {
+				$file_match = array( $m['slug'], $m['version'] );
+			}
 		}
 
-		return array( '', '' );
+		return $file_match;
 	}
 
 	/**
@@ -106,7 +107,7 @@ class SVN_Import {
 			}
 
 			return $info;
-		}, $xml->xpath( '/log/logentry' ) ) );
+		}, $xml->xpath('/log/logentry') ) );
 
 		$theme_changes = array_unique( $theme_changes, SORT_REGULAR );
 
