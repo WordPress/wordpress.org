@@ -425,7 +425,8 @@ class WPORG_Themes_Upload {
 	public static function version_identity_errors( $version, $expected_version = false ) {
 		$errors = new WP_Error();
 
-		if ( ! $version ) {
+		// Strict comparison: '0' is a canonical version, not a missing header.
+		if ( '' === $version ) {
 			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
 
 			$error .= sprintf(

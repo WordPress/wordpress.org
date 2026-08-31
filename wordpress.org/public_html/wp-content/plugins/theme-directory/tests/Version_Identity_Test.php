@@ -18,29 +18,24 @@ use PHPUnit\Framework\TestCase;
 class Version_Identity_Test extends TestCase {
 
 	/**
-	 * IDs of posts created during a test, deleted again on teardown.
+	 * Builds an in-memory repopackage package, no database rows needed.
 	 *
-	 * @var int[]
+	 * With post ID 0 there is no meta, so latest_version() resolves to ''.
+	 *
+	 * @param string       $post_name The theme slug for the package.
+	 * @param string|false $version   Optional. The version to construct with, or false for latest.
+	 * @return WPORG_Themes_Repo_Package The package under test.
 	 */
-	protected array $post_ids = array();
-
-	/**
-	 * Removes the fixture posts created during a test.
-	 */
-	protected function tearDown(): void {
-		/*
-		 * The plugin prevents repopackages from being deleted; detach that
-		 * specific guard while cleaning up the fixture posts.
-		 */
-		remove_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
-		foreach ( $this->post_ids as $post_id ) {
-			wp_delete_post( $post_id, true );
-		}
-		add_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
-
-		$this->post_ids = array();
-
-		parent::tearDown();
+	private function create_package( string $post_name, $version = false ): WPORG_Themes_Repo_Package {
+		return new WPORG_Themes_Repo_Package(
+			new WP_Post(
+				(object) array(
+					'ID'        => 0,
+					'post_name' => $post_name,
+				)
+			),
+			$version
+		);
 	}
 
 	/**
@@ -62,6 +57,7 @@ class Version_Identity_Test extends TestCase {
 	public static function data_canonical_versions(): array {
 		return array(
 			'integer'      => array( '1' ),
+			'zero'         => array( '0' ),
 			'major minor'  => array( '1.4' ),
 			'three parts'  => array( '1.2.3' ),
 			'four parts'   => array( '1.2.3.4' ),
@@ -109,6 +105,15 @@ class Version_Identity_Test extends TestCase {
 	}
 
 	/**
+	 * The falsy canonical header '0' is a real version, not a missing one.
+	 */
+	public function test_version_zero_header_is_not_reported_as_missing(): void {
+		$errors = WPORG_Themes_Upload::version_identity_errors( '0', '0' );
+
+		$this->assertFalse( $errors->has_errors() );
+	}
+
+	/**
 	 * A canonical header that differs from the SVN directory version is a mismatch.
 	 */
 	public function test_version_mismatch_detected(): void {
@@ -148,19 +153,7 @@ class Version_Identity_Test extends TestCase {
 	 * The download URL must address the exact version, never a period-collapsed alias.
 	 */
 	public function test_download_url_does_not_collapse_periods(): void {
-		$post_id = wp_insert_post(
-			array(
-				'post_type'   => 'repopackage',
-				'post_status' => 'publish',
-				'post_title'  => 'Identity Probe',
-				'post_name'   => 'identity-probe',
-				'post_author' => 1,
-			)
-		);
-
-		$this->post_ids[] = $post_id;
-
-		$package = new WPORG_Themes_Repo_Package( get_post( $post_id ) );
+		$package = $this->create_package( 'identity-probe' );
 
 		$this->assertStringEndsWith(
 			'/identity-probe.1.2.3.zip',
@@ -177,24 +170,22 @@ class Version_Identity_Test extends TestCase {
 	 * unversioned latest-package URL, not a doubled-period filename.
 	 */
 	public function test_download_url_omits_empty_version(): void {
-		$post_id = wp_insert_post(
-			array(
-				'post_type'   => 'repopackage',
-				'post_status' => 'publish',
-				'post_title'  => 'Identity Probe Unversioned',
-				'post_name'   => 'identity-probe-unversioned',
-				'post_author' => 1,
-			)
-		);
-
-		$this->post_ids[] = $post_id;
-
-		// No `_status` meta, so latest_version() and the version property are ''.
-		$package = new WPORG_Themes_Repo_Package( get_post( $post_id ) );
+		$package = $this->create_package( 'identity-probe-unversioned' );
 
 		$this->assertStringEndsWith(
 			'/identity-probe-unversioned.zip',
 			$package->download_url()
 		);
+	}
+
+	/**
+	 * The falsy canonical version '0' must address its own package, not the latest one.
+	 */
+	public function test_download_url_keeps_version_zero(): void {
+		$package = $this->create_package( 'identity-probe-zero', '0' );
+
+		$this->assertSame( '0', $package->version );
+		$this->assertStringEndsWith( '/identity-probe-zero.0.zip', $package->download_url() );
+		$this->assertStringEndsWith( '/identity-probe-zero.0.zip', $package->download_url( '0' ) );
 	}
 }
