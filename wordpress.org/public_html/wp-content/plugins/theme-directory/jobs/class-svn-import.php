@@ -32,7 +32,8 @@ class SVN_Import {
 		$versions = array();
 
 		foreach ( $element->xpath( 'paths/path' ) as $path ) {
-			if ( ! preg_match( '!^/(?P<slug>[^/]+)/(?P<version>[^/]+)(?P<subpath>/.+)?$!', (string) $path, $m ) ) {
+			// The version segment must start with a digit, so a non-version dir like /slug/assets is skipped.
+			if ( ! preg_match( '!^/(?P<slug>[^/]+)/(?P<version>\d[^/]*)(?P<subpath>/.+)?$!', (string) $path, $m ) ) {
 				continue;
 			}
 

@@ -96,6 +96,24 @@ class Svn_Import_Changed_Version_Test extends TestCase {
 	}
 
 	/**
+	 * A non-version directory (a name not starting with a digit) is not a version.
+	 */
+	public function test_non_version_directory_selects_nothing(): void {
+		$entry = $this->log_entry( array( array( 'dir', '/my-theme/assets' ) ) );
+
+		$this->assertSame( array(), SVN_Import::changed_slug_versions( $entry ) );
+	}
+
+	/**
+	 * A file nested under a non-version directory is not a version either.
+	 */
+	public function test_file_under_non_version_directory_selects_nothing(): void {
+		$entry = $this->log_entry( array( array( 'file', '/my-theme/assets/app.js' ) ) );
+
+		$this->assertSame( array(), SVN_Import::changed_slug_versions( $entry ) );
+	}
+
+	/**
 	 * A commit that adds a version and edits an older version's files selects both.
 	 */
 	public function test_mixed_commit_selects_every_version(): void {
