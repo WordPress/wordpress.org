@@ -134,7 +134,6 @@ class WPORG_Themes_Repo_Package {
 		$file = $this->wp_post->post_name . '.' . $version . '.zip';
 
 		$file = preg_replace( '/[^a-z0-9_.-]/i', '', $file );
-		$file = preg_replace( '/[.]+/', '.', $file );
 
 		return set_url_scheme( $url . $file );
 	}
