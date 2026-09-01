@@ -52,6 +52,22 @@ class Comment_Handler {
 		if ( $firehose ) {
 			$this->send->send( $firehose );
 		}
+
+		// Send notifications for Workflow Keyword additions
+		$this->send_keyword_notifications();
+	}
+
+	function send_keyword_notifications() {
+		if ( empty( $this->keywords_added ) ) {
+			return;
+		}
+
+		foreach ( $this->keywords_added as $keyword ) {
+			$channels = $this->trac->get_keyword_channels( $keyword );
+			foreach ( $channels as $channel ) {
+				$this->send->send( $channel );
+			}
+		}
 	}
 
 	function process_message() {
@@ -195,6 +211,7 @@ class Comment_Handler {
 		array_shift( $lines );
 
 		$changes = $comment = array();
+		$this->keywords_added = array();
 
 		// Check if the summary of a ticket was changed.
 		if ( preg_match( '/ \(was: (.*)\)$/', $subject, $matches ) ) {
@@ -207,7 +224,14 @@ class Comment_Handler {
 
 				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
 					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
-				} else { // * status:  assigned => closed
+				} else { 
+					// Track keywords added for Workflow Keyword notifications.
+					if ( preg_match( '~^ \* keywords:  (.*) => (.*)$~', $line, $kw_matches ) ) {
+						$old_keywords = array_filter( array_map( 'trim', explode( ' ', $kw_matches[1] ) ) );
+						$new_keywords = array_filter( array_map( 'trim', explode( ' ', $kw_matches[2] ) ) );
+						$this->keywords_added = array_diff( $new_keywords, $old_keywords );
+					}
+					// Applies Slack formatting for other changes.
 					$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', $line );
 				}
 			}
