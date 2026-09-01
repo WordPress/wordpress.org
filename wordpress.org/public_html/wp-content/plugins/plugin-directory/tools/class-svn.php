@@ -241,6 +241,37 @@ class SVN {
 	}
 
 	/**
+	 * Mark removed files as deleted, and add any new files.
+	 *
+	 * @static
+	 * @param string $path The folder to add/remove files from.
+	 * @return array {
+	 *    @type bool        $result   The result of the operation.
+	 *    @type false|array $errors   Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function add_remove( $path ) {
+		$options = [
+			'no-ignore',
+			'non-interactive',
+		];
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$output = '';
+		$esc_path = escapeshellarg( $path );
+
+		// Leading ! => Remove file
+		$output  .= self::shell_exec( "svn status {$esc_options} {$esc_path} | grep ^! | cut -c9- | xargs svn rm {}" );
+		// Leading ? => Add file
+		$output  .= self::shell_exec( "svn status {$esc_options} {$esc_path} | grep ^? | cut -c9- | xargs svn add {}" );
+
+		$errors   = self::parse_svn_errors( $output );
+		$result   = ! $errors;
+
+		return compact( 'result', 'errors' );
+	}
+
+	/**
 	 * Commit changes in a SVN checkout.
 	 *
 	 * @static
