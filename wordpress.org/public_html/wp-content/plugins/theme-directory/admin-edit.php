@@ -77,16 +77,17 @@ function wporg_themes_map_meta_cap( $caps, $cap, $user_id, $context ) {
 
 		case 'suspend_theme':
 		case 'reinstate_theme':
-			// Refuse unless the call carries an actual theme.
-			$post = $context ? get_post( $context[0] ) : false;
-			if ( ! $post || 'repopackage' !== $post->post_type ) {
+			// Refuse unless the call carries an actual, registered theme.
+			$post      = empty( $context[0] ) ? false : get_post( $context[0] );
+			$post_type = $post ? get_post_type_object( $post->post_type ) : null;
+			if ( ! $post_type || 'repopackage' !== $post->post_type ) {
 				return [ 'do_not_allow' ];
 			}
 
 			// Moderating a theme acts on a record somebody else owns.
 			return [
 				'suspend_theme' === $cap ? 'suspend_themes' : 'reinstate_themes',
-				get_post_type_object( $post->post_type )->cap->edit_others_posts,
+				$post_type->cap->edit_others_posts,
 			];
 
 		case 'theme_configure_categorization_options':

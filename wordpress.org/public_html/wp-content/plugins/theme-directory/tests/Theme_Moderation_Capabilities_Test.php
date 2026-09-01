@@ -44,11 +44,12 @@ class Theme_Moderation_Capabilities_Test extends TestCase {
 	}
 
 	/**
-	 * Removes the fixtures and the capabilities the test granted.
+	 * Removes the fixture posts and users.
+	 *
+	 * The moderation primitives are left in place: granting them to Editors and
+	 * Administrators is this site's normal state, not something the test dirtied.
 	 */
 	protected function tearDown(): void {
-		wporg_themes_remove_caps();
-
 		/*
 		 * The plugin prevents repopackages from being deleted; detach that
 		 * specific guard while cleaning up the fixture posts.
