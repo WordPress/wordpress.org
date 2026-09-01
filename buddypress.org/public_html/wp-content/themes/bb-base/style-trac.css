@@ -333,6 +333,40 @@ body.trac #banner form#search input[type=text] {
 	min-width: 250px;
 }
 
+body.trac #banner {
+	flex-wrap: wrap;
+}
+
+body.trac #banner form#search {
+	flex: 0 0 100%;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+body.trac #banner #metanav {
+	position: static;
+	float: none;
+	top: auto;
+	right: auto;
+	left: auto;
+	flex: 0 0 100%;
+	width: 100%;
+	margin: 0;
+	padding: .5em 0 0;
+	display: flex;
+	justify-content: center;
+}
+
+body.trac #banner #metanav ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
 /* Main Navigation */
 body.trac #mainnav {
 	border-bottom: 1px solid var(--bbbase-grey-border-color-low-contrast) !important;
@@ -656,6 +690,45 @@ body.trac .inlinebuttons input[type=submit] {
 	line-height: 13px;
 	margin: 0;
 	font-weight: 400;
+}
+
+body.trac #content.report #prefs,
+body.trac #content.query #prefs {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+body.trac #content.report #prefs > div,
+body.trac #content.query #prefs > div {
+	margin: 0;
+}
+
+body.trac #content.report #prefs label,
+body.trac #content.query #prefs label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+body.trac #content.report #prefs label input[type="text"],
+body.trac #content.query #prefs label input[type="text"] {
+	margin: 0;
+	width: 6em;
+	max-width: 100%;
+}
+
+body.trac #content.report #prefs .buttons,
+body.trac #content.query #prefs .buttons {
+	margin: 0;
+	text-align: left;
+}
+
+body.trac #content.report #prefs .buttons input[type="submit"],
+body.trac #content.query #prefs .buttons input[type="submit"] {
+	margin: 0;
 }
 
 /* Roadmap */
