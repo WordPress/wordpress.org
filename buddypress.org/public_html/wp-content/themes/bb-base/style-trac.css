@@ -658,6 +658,45 @@ body.trac .inlinebuttons input[type=submit] {
 	font-weight: 400;
 }
 
+body.trac #content.report #prefs,
+body.trac #content.query #prefs {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+body.trac #content.report #prefs > div,
+body.trac #content.query #prefs > div {
+	margin: 0;
+}
+
+body.trac #content.report #prefs label,
+body.trac #content.query #prefs label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+body.trac #content.report #prefs label input[type="text"],
+body.trac #content.query #prefs label input[type="text"] {
+	margin: 0;
+	width: 6em;
+	max-width: 100%;
+}
+
+body.trac #content.report #prefs .buttons,
+body.trac #content.query #prefs .buttons {
+	margin: 0;
+	text-align: left;
+}
+
+body.trac #content.report #prefs .buttons input[type="submit"],
+body.trac #content.query #prefs .buttons input[type="submit"] {
+	margin: 0;
+}
+
 /* Roadmap */
 body.trac div.milestone {
 	margin: 0;
