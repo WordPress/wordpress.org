@@ -330,7 +330,7 @@ class Support_Compat {
 	public function is_enabled_on_forum( $retval, $forum_id = 0 ) {
 		// An explicit forum id wins over whatever the request happens to be rendering.
 		if ( ! empty( $forum_id ) ) {
-			return ( Plugin::REVIEWS_FORUM_ID != $forum_id );
+			return ( Plugin::REVIEWS_FORUM_ID !== (int) $forum_id );
 		}
 
 		// Check the current forum.
