@@ -45,12 +45,14 @@ class Filesystem_Symlink_Test extends TestCase {
 
 		$this->outside = sys_get_temp_dir() . '/' . uniqid( 'fs-outside-', true );
 		mkdir( $this->outside );
-		file_put_contents( $this->outside . '/secret.txt', 'secret' );
+
+		// A missing target would leave a dangling symlink, which `isFile()` rejects even without the guard under test.
+		$this->assertNotFalse( file_put_contents( $this->outside . '/secret.txt', 'secret' ) );
 
 		$this->dir = sys_get_temp_dir() . '/' . uniqid( 'fs-tree-', true );
 		mkdir( $this->dir );
 		mkdir( $this->dir . '/real-dir' );
-		file_put_contents( $this->dir . '/real.txt', 'real' );
+		$this->assertNotFalse( file_put_contents( $this->dir . '/real.txt', 'real' ) );
 
 		// Without these the fixture holds only real entries and every assertion below passes vacuously.
 		$this->assertTrue( symlink( $this->outside . '/secret.txt', $this->dir . '/readme.txt' ) );
