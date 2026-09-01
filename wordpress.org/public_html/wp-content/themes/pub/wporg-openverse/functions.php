@@ -255,6 +255,11 @@ if ( !defined( 'OPENVERSE_STANDALONE_URL' ) ) {
  * Examples:
  * - https://ru.wordpress.org/openverse → {ov_redirect_url}/ru/
  * - https://wordpress.org/openverse/search/?q=dog → {ov_redirect_url}/search/?q=dog
+ *
+ * The returned URL always carries at least a trailing path separator, so a bare
+ * `/openverse` resolves to `{ov_redirect_url}/` rather than to the origin alone.
+ *
+ * @return string
  */
 function get_target_url() {
 	$target_url = get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL );
@@ -265,14 +270,49 @@ function get_target_url() {
 		$target_url .= '/' . $locale;
 	}
 
-	$path = $_SERVER['REQUEST_URI'];
-	if ( $path ) {
-		$count = 1; // Only replace the leading Openverse subpath.
-		$target_url .= str_replace( OPENVERSE_SUBPATH, '', $path, $count );
+	// Sanitising is required by WordPress.Security.ValidatedSanitizedInput.
+	// Not `sanitize_text_field()`, which strips percent-encoded octets and
+	// would turn `?q=cat%20dog` into `?q=catdog`.
+	$path = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+
+	// Only the leading subpath is removed. `str_replace()` cannot express that:
+	// it replaced every occurrence, including one in a later segment such as
+	// `/image/openverse-logo/` or one in the query string.
+	if ( str_starts_with( $path, OPENVERSE_SUBPATH ) ) {
+		$path = substr( $path, strlen( OPENVERSE_SUBPATH ) );
 	}
+
+	// The origin has no trailing slash, so the path must supply the separator.
+	// Prepending it is also what keeps the remainder in the path rather than
+	// the authority; `ltrim()` only collapses a doubled slash.
+	$target_url .= '/' . ltrim( $path, '/' );
 
 	return $target_url;
 }
+
+/**
+ * Allow the redirect to reach the standalone Openverse site.
+ *
+ * The host comes from the configured origin, not from the generated target
+ * URL, so that a malformed target cannot authorise its own destination.
+ *
+ * @param string[] $hosts Allowed host names.
+ * @return string[] Allowed host names, plus the standalone Openverse host when
+ *                  the redirect is enabled.
+ */
+function allow_standalone_redirect_host( $hosts ) {
+	if ( ! get_theme_mod( 'ov_is_redirect_enabled' ) ) {
+		return $hosts;
+	}
+
+	$host = wp_parse_url( get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL ), PHP_URL_HOST );
+	if ( $host ) {
+		$hosts[] = $host;
+	}
+
+	return $hosts;
+}
+add_filter( 'allowed_redirect_hosts', __NAMESPACE__ . '\allow_standalone_redirect_host' );
 
 /**
 * Provide configuration for the theme to redirect to the given standalone
