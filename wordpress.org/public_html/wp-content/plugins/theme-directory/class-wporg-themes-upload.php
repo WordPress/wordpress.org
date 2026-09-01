@@ -315,7 +315,8 @@ class WPORG_Themes_Upload {
 		$esc_svn       = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
 		$esc_theme_dir = escapeshellarg( $this->theme_dir );
 		$this->exec_with_notify(
-			self::SVN . " export {$esc_svn} {$esc_theme_dir} --force", // force as we've created the directory already.
+			// --ignore-externals: never let a committer's svn:externals pull a remote tree into the export.
+			self::SVN . " export {$esc_svn} {$esc_theme_dir} --force --ignore-externals", // force as we've created the directory already.
 			$output,
 			$return_var
 		);
@@ -359,7 +360,8 @@ class WPORG_Themes_Upload {
 
 		return $this->import( array( // return true | WP_Error
 			// Since this version is already in SVN, we shouldn't try to import it again.
-			'commit_to_svn' => false,
+			'commit_to_svn'    => false,
+			'expected_version' => $version,
 		) );
 	}
 
@@ -401,6 +403,73 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
+	 * Determines whether a version string is a canonical, unambiguous theme version.
+	 *
+	 * Canonical means decimal segments joined by single periods and nothing else: the one
+	 * shape that maps identically across the style.css header, SVN directory, meta key, API
+	 * value, and package filename, so review and downloads can't resolve different trees.
+	 * Version zero ('0', '0.0', ...) is rejected: version_compare() makes it the lowest
+	 * possible version, and the bare form's falsiness invites `! $version` bugs downstream.
+	 *
+	 * @param string $version The version string to test.
+	 * @return bool True when the version is canonical.
+	 */
+	public static function is_canonical_version( $version ) {
+		return (bool) preg_match( '/^\d+(\.\d+)*$/D', (string) $version )
+			&& (bool) preg_match( '/[1-9]/', (string) $version );
+	}
+
+	/**
+	 * Collects the errors for a theme's Version header and its SVN directory identity.
+	 *
+	 * @param string       $version          The style.css Version header value.
+	 * @param string|false $expected_version SVN directory version the header must match; false to skip the check.
+	 * @return WP_Error The errors found; empty when the version is acceptable.
+	 */
+	public static function version_identity_errors( $version, $expected_version = false ) {
+		$errors = new WP_Error();
+
+		// Strict comparison: a '0' header is reported as invalid below, not as missing.
+		if ( '' === $version ) {
+			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
+
+			$error .= sprintf(
+				/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
+				__( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
+				'<code>Version:</code>',
+				'<code>style.css</code>',
+				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
+			);
+
+			$errors->add( 'no_version', $error );
+
+		} elseif ( ! self::is_canonical_version( $version ) ) {
+			$errors->add(
+				'invalid_version',
+				sprintf(
+					/* translators: %s: style.css */
+					__( 'Version strings must be a plain numeric version like 1.2 or 1.2.3. Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
+					'<code>style.css</code>'
+				)
+			);
+
+		} elseif ( false !== $expected_version && (string) $expected_version !== $version ) {
+			// The exported directory name must equal the version its tree declares, or review and downloads diverge.
+			$errors->add(
+				'version_mismatch',
+				sprintf(
+					/* translators: 1: SVN directory version, 2: style.css version */
+					__( 'The SVN directory version (%1$s) does not match the version declared in style.css (%2$s).', 'wporg-themes' ),
+					'<code>' . esc_html( (string) $expected_version ) . '</code>',
+					'<code>' . esc_html( $version ) . '</code>'
+				)
+			);
+		}
+
+		return $errors;
+	}
+
+	/**
 	 * Processes a theme import.
 	 *
 	 * @return WP_Error|true Error object on failure, true on success.
@@ -417,6 +486,8 @@ class WPORG_Themes_Upload {
 				'block_on_themecheck' => true,
 				// Whether to create a Trac ticket for this import.
 				'create_trac_ticket'  => true,
+				// SVN directory version the tree's header must match; false to skip the check.
+				'expected_version'    => false,
 			)
 		);
 
@@ -612,29 +683,9 @@ class WPORG_Themes_Upload {
 			$style_errors->add( 'no_tags', $error );
 		}
 
-		if ( ! $this->theme->get( 'Version' ) ) {
-			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
-
-			$error .= sprintf(
-				/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
-				__( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
-				'<code>Version:</code>',
-				'<code>style.css</code>',
-				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
-			);
-
-			$style_errors->add( 'no_version', $error );
-
-		} else if ( preg_match( '|[^\d\.]|', $this->theme->get( 'Version' ) ) ) {
-			$style_errors->add(
-				'invalid_version',
-				sprintf(
-					/* translators: %s: style.css */
-					__( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
-					'<code>style.css</code>'
-				)
-			);
-		}
+		$style_errors->merge_from(
+			self::version_identity_errors( (string) $this->theme->get( 'Version' ), $args['expected_version'] )
+		);
 
 		// Version is greater than current version happens after authorship checks.
 
