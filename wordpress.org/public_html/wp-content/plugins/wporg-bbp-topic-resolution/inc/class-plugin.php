@@ -264,10 +264,6 @@ class Plugin {
 	 * @param string $action The requested action to compare this function to
 	 */
 	public function topic_resolution_handler( $action = '' ) {
-		if ( ! $this->is_enabled_on_forum() ) {
-			return false;
-		}
-
 		// Bail if the action isn't meant for this function.
 		if ( $action != 'wporg_bbp_topic_resolution' ) {
 			return;
@@ -283,6 +279,11 @@ class Plugin {
 		$topic      = bbp_get_topic( $topic_id );
 		$user_id    = get_current_user_id();
 		$resolution = $_POST[ self::META_KEY ];
+
+		// Resolution must be enabled on the topic's forum, not on the one being viewed.
+		if ( $topic && ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic->ID ) ) ) {
+			return false;
+		}
 
 		// Check for empty topic id.
 		if ( empty( $topic_id ) || ! $topic ) {
