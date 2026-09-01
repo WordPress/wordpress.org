@@ -956,6 +956,11 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					break;
 				case 'iso':
 					$label = 'ISO';
+					// Cast to discard the arbitrary string EXIF can supply for this tag.
+					$value = (int) $value;
+					if ( 0 >= $value ) {
+						continue 2;
+					}
 					break;
 				case 'shutter_speed':
 					$label = 'Shutter Speed';
@@ -1124,7 +1129,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			$link = sprintf(
 				'<span id="photo-moderator"><a href="%s">%s</a></span>',
 				esc_url( 'https://profiles.wordpress.org/' . $moderator->user_nicename . '/' ),
-				sanitize_text_field( $moderator->display_name )
+				esc_html( $moderator->display_name )
 			);
 		}
 
