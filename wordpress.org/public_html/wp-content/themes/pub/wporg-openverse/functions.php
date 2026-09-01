@@ -275,10 +275,15 @@ function get_target_url() {
 	// would turn `?q=cat%20dog` into `?q=catdog`.
 	$path = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
-	// Only the leading subpath is removed. `str_replace()` cannot express that:
-	// it replaced every occurrence, including one in a later segment such as
-	// `/image/openverse-logo/` or one in the query string.
-	if ( str_starts_with( $path, OPENVERSE_SUBPATH ) ) {
+	// Only a leading, whole-segment subpath is removed. `str_replace()` could
+	// express neither constraint: it replaced every occurrence, including one
+	// in a later segment such as `/image/openverse-logo/`, one in the query
+	// string, and the `/openverse` inside a longer segment like
+	// `/openverse-search`.
+	if ( OPENVERSE_SUBPATH === $path
+		|| str_starts_with( $path, OPENVERSE_SUBPATH . '/' )
+		|| str_starts_with( $path, OPENVERSE_SUBPATH . '?' )
+	) {
 		$path = substr( $path, strlen( OPENVERSE_SUBPATH ) );
 	}
 
