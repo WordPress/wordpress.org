@@ -2076,12 +2076,11 @@ h5 {
 .wptv-hero .secondary-videos li {
 	font-size: 13px;
 	margin: 0 auto 23px;
-	max-width: 130px;
 }
 
 .wptv-hero .secondary-videos .video-thumbnail img {
-	width: 130px;
-	height: 75px;
+	width: 100%;
+	height: auto;
 }
 
 .wptv-hero .secondary-videos a:hover img {
@@ -2511,6 +2510,11 @@ h3#comments {
 	.wptv-hero .secondary-videos .video-thumbnail {
 		left: 0;
 		position: absolute;
+	}
+
+	.wptv-hero .secondary-videos .video-thumbnail img {
+		width: 130px;
+		height: 75px;
 	}
 }
 
