@@ -59,34 +59,20 @@ class Filesystem_Symlink_Test extends TestCase {
 		$this->assertTrue( symlink( $this->outside, $this->dir . '/linked-dir' ) );
 	}
 
+	// phpcs:enable WordPress.WP.AlternativeFunctions
+
 	/**
-	 * Removes both trees, links first so the targets survive to be deleted themselves.
+	 * Removes both fixture roots.
 	 *
 	 * @return void
 	 */
 	protected function tearDown(): void {
-		foreach ( array( '/readme.txt', '/linked-dir' ) as $link ) {
-			if ( is_link( $this->dir . $link ) ) {
-				unlink( $this->dir . $link );
-			}
-		}
-
-		foreach ( array( $this->dir . '/real.txt', $this->outside . '/secret.txt' ) as $file ) {
-			if ( is_file( $file ) ) {
-				unlink( $file );
-			}
-		}
-
-		foreach ( array( $this->dir . '/real-dir', $this->dir, $this->outside ) as $dir ) {
-			if ( is_dir( $dir ) ) {
-				rmdir( $dir );
-			}
-		}
+		// `Filesystem::rmdir()` no-ops on the empty string an aborted `setUp()` leaves behind.
+		Filesystem::rmdir( $this->dir );
+		Filesystem::rmdir( $this->outside );
 
 		parent::tearDown();
 	}
-
-	// phpcs:enable WordPress.WP.AlternativeFunctions
 
 	/**
 	 * A symlink to a regular file must not be listed as a file.
