@@ -132,6 +132,9 @@ class SVN {
 			$revision = (int) $m['revision'];
 			$result   = true;
 			$errors   = false;
+
+			// `svn export` materialises `svn:special` entries as real symlinks, which consumers would follow out of the export.
+			self::shell_exec( "find $esc_destination ! -type d ! -type f -delete" );
 		} else {
 			$result   = false;
 			$revision = false;
