@@ -1,5 +1,75 @@
 <?php
 
+/**
+ * Returns the available "Account purpose" dropdown options.
+ *
+ * Keyed by the internal value stored in user meta; values are the translated labels.
+ */
+function wporg_login_purpose_options() {
+	return [
+		''                    => __( 'Please select…', 'wporg' ),
+		'contributing'        => __( 'Contributing to WordPress', 'wporg' ),
+		'learn'               => __( 'Taking Learn.WordPress.org courses', 'wporg' ),
+		'support'             => __( 'Getting help in the support forums', 'wporg' ),
+		'plugin_theme_author' => __( 'Publishing a plugin or theme as an individual', 'wporg' ),
+		'event'               => __( 'Attending a WordPress event', 'wporg' ),
+		'create_site'         => __( 'Create a WordPress site', 'wporg' ),
+		'personal'            => __( 'Personal use', 'wporg' ),
+		'business'            => __( 'Business / Company account', 'wporg' ),
+		'other'               => __( 'Other', 'wporg' ),
+	];
+}
+
+/**
+ * Sanitize a user-supplied website URL for the profile field.
+ *
+ * Strips the wp-admin / wp-login.php paths so the saved value points at the public site root,
+ * and rejects URLs hosted on wordpress.org subdomains since those refer to wp.org-managed
+ * properties rather than the user's own site.
+ *
+ * @param string $url Raw URL submitted by the user.
+ * @return string Cleaned URL, or an empty string if the URL is unusable.
+ */
+function wporg_login_sanitize_user_url( $url ) {
+	$url = trim( (string) $url );
+	if ( ! $url ) {
+		return '';
+	}
+
+	// Add a scheme if missing, otherwise wp_parse_url treats the input as a path.
+	if ( ! preg_match( '#^[a-z][a-z0-9+.\-]*://#i', $url ) ) {
+		$url = 'http://' . ltrim( $url, '/' );
+	}
+
+	$parts = wp_parse_url( $url );
+	if ( ! $parts || empty( $parts['host'] ) ) {
+		return '';
+	}
+
+	$host = strtolower( $parts['host'] );
+
+	// Reject wordpress.org and any subdomain of it — those aren't the user's own site.
+	if ( 'wordpress.org' === $host || str_ends_with( $host, '.wordpress.org' ) ) {
+		return '';
+	}
+
+	// Strip the wp-admin / wp-login.php paths so we keep just the site root the user lives on.
+	$path = $parts['path'] ?? '';
+	$path = preg_replace(
+		'#/(wp-admin|wp-login\.php)(/.*|$)#i',
+		'/',
+		$path
+	);
+
+	$rebuilt = $parts['scheme'] . '://' . $host;
+	if ( ! empty( $parts['port'] ) ) {
+		$rebuilt .= ':' . $parts['port'];
+	}
+	$rebuilt .= $path ?: '/';
+
+	return $rebuilt;
+}
+
 function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low_scores = true ) {
 
 	// Allow local installs to bypass
@@ -136,10 +206,10 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	);
 
 	// If the signup has a bypass-spam-checks token, approve it.
+	// The bypass token overrides every spam check — heuristics, reCaptcha, block-words, honeypot, etc.
 	if (
 		! $pending_user['cleared'] &&
-		wporg_reg_has_signup_token( $pending_user ) &&
-		'block' !== ( $pending_user['meta']['heuristics'] ?? '' )
+		wporg_reg_has_signup_token( $pending_user )
 	) {
 		$pending_user['cleared']        = 1;
 		$pending_user['meta']['bypass'] = 'yes';
@@ -407,7 +477,7 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 
 	$tos_meta_key = WPOrg_SSO::TOS_USER_META_KEY;
 
-	foreach ( array( 'url', 'from', 'occ', 'interests', $tos_meta_key ) as $field ) {
+	foreach ( array( 'url', 'from', 'occ', 'interests', 'purpose', $tos_meta_key ) as $field ) {
 		if ( !empty( $pending_user['meta'][ $field ] ) ) {
 			$value = $pending_user['meta'][ $field ];
 
@@ -420,8 +490,9 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 			];
 
 			if ( 'url' == $field ) {
-				// If the URL contains WordPress.org, just skip it.
-				if ( str_contains( strtolower( $value ), 'wordpress.org' ) ) {
+				// Re-run the sanitizer in case a legacy pending record predates the form-time cleanup.
+				$value = wporg_login_sanitize_user_url( $value );
+				if ( ! $value ) {
 					continue;
 				}
 
@@ -460,7 +531,16 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	if ( ! $_POST || empty( $_POST['user_fields'] ) ) {
 		return false;
 	}
-	$fields = array( 'url', 'from', 'occ', 'interests' );
+	$fields = array( 'url', 'from', 'occ', 'interests', 'purpose' );
+
+	$purpose_options = wporg_login_purpose_options();
+
+	// Honeypot: this field is hidden from real users via CSS — only bots fill it in.
+	$honeypot = trim( sanitize_text_field( wp_unslash( $_POST['user_fields']['biography'] ?? '' ) ) );
+	if ( $honeypot && $pending_user ) {
+		$pending_user['cleared']                = 0;
+		$pending_user['meta']['block_reason'] ??= 'Honeypot tripped (biography)';
+	}
 
 	foreach ( $fields as $field ) {
 		if ( isset( $_POST['user_fields'][ $field ] ) ) {
@@ -469,6 +549,9 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 				/** This filter is documented in wp-includes/user.php */
 				$value = apply_filters( 'pre_user_url', $value );
 
+				// Strip wp-admin / wp-login.php paths and reject .wordpress.org URLs.
+				$value = wporg_login_sanitize_user_url( $value );
+
 				if ( $pending_user ) {
 					$pending_user['meta'][ $field ] = esc_url_raw( $value );
 				} else {
@@ -476,6 +559,25 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 						'ID' => get_current_user_id(),
 						'user_url' => esc_url_raw( $value ),
 					) );
+				}
+			} elseif ( 'purpose' == $field ) {
+				// Only accept known keys; silently drop anything else.
+				if ( ! isset( $purpose_options[ $value ] ) ) {
+					$value = '';
+				}
+
+				if ( $pending_user ) {
+					$pending_user['meta'][ $field ] = $value;
+
+					// Business / company accounts default to the spectator role on the support forums.
+					// wporg_login_create_user_from_pending() picks this up at account creation.
+					if ( 'business' === $value ) {
+						$pending_user['meta']['role'] ??= 'spectator';
+					}
+				} elseif ( $value ) {
+					update_user_meta( get_current_user_id(), $field, $value );
+				} else {
+					delete_user_meta( get_current_user_id(), $field );
 				}
 			} else {
 				if ( $pending_user ) {
@@ -537,10 +639,10 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	}
 
 	// If the signup has a bypass-spam-checks token, approve it.
+	// The bypass token overrides every spam check — heuristics, reCaptcha, block-words, honeypot, etc.
 	if (
 		! $pending_user['cleared'] &&
-		wporg_reg_has_signup_token( $pending_user ) &&
-		'block' !== ( $pending_user['meta']['heuristics'] ?? '' )
+		wporg_reg_has_signup_token( $pending_user )
 	) {
 		$pending_user['cleared']        = 1;
 		$pending_user['meta']['bypass'] = 'yes';
@@ -572,7 +674,7 @@ function wporg_login_has_blocked_word( $user ) {
 			return $word;
 		}
 
-		foreach ( [ 'url', 'from', 'occ', 'interests' ] as $field ) {
+		foreach ( [ 'url', 'from', 'occ', 'interests', 'purpose' ] as $field ) {
 			if (
 				! empty( $user['meta'][ $field ] ) &&
 				false !== stripos( $user['meta'][ $field ], $word )
