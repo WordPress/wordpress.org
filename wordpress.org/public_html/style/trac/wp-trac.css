@@ -894,6 +894,7 @@ input[type="reset"]:focus:active {
 input[type="text"], input.textwidget, textarea {
 	border-radius: 3px;
 	font-size: 13px;
+	padding: 0 6px;
 }
 
 input[name="description"] {
