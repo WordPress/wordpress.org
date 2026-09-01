@@ -49,6 +49,27 @@ class Cron_Logs_Metabox_Test extends TestCase {
 	private \WP_Post $plugin;
 
 	/**
+	 * The global post to put back, and whether there was one at all.
+	 *
+	 * @var mixed
+	 */
+	private $previous_post;
+
+	/**
+	 * Whether a global post was set before this test ran.
+	 *
+	 * @var bool
+	 */
+	private bool $had_previous_post = false;
+
+	/**
+	 * The wpdb error-suppression setting to put back.
+	 *
+	 * @var bool
+	 */
+	private bool $previous_suppress_errors = false;
+
+	/**
 	 * Create the plugin whose edit screen is being rendered.
 	 */
 	protected function setUp(): void {
@@ -67,24 +88,31 @@ class Cron_Logs_Metabox_Test extends TestCase {
 		$this->assertInstanceOf( \WP_Post::class, $plugin );
 		$this->plugin = $plugin;
 
-		$GLOBALS['post'] = $plugin;
+		$this->had_previous_post = isset( $GLOBALS['post'] );
+		$this->previous_post     = $GLOBALS['post'] ?? null;
+		$GLOBALS['post']         = $plugin;
 
 		/*
 		 * The metabox always asks for logs, and the Cavalcade log table doesn't exist
 		 * in the test install. The failed lookup is the same no-logs case as a job that
 		 * hasn't run yet; suppress the error so it doesn't reach the output buffer.
 		 */
-		$GLOBALS['wpdb']->suppress_errors( true );
+		$this->previous_suppress_errors = (bool) $GLOBALS['wpdb']->suppress_errors( true );
 	}
 
 	/**
-	 * Reset the globals the metabox and its job source read.
+	 * Restore the globals the metabox and its job source read.
 	 */
 	protected function tearDown(): void {
 		\HM\Cavalcade\Plugin\Job::$jobs = array();
 
-		$GLOBALS['wpdb']->suppress_errors( false );
-		unset( $GLOBALS['post'] );
+		$GLOBALS['wpdb']->suppress_errors( $this->previous_suppress_errors );
+
+		if ( $this->had_previous_post ) {
+			$GLOBALS['post'] = $this->previous_post;
+		} else {
+			unset( $GLOBALS['post'] );
+		}
 
 		parent::tearDown();
 	}
@@ -154,8 +182,10 @@ class Cron_Logs_Metabox_Test extends TestCase {
 			array( 'tags_touched' => array( '1.0<img src=x onerror=alert(1)>' ) )
 		);
 
-		$this->assertStringContainsString( 'Job Args:', $html );
-		$this->assertStringNotContainsString( '<img', $html );
+		// Scope to the log row: the task description above it carries the same value.
+		$this->assertSame( 1, preg_match( '#<pre>(.*)</pre>#s', $html, $log_row ) );
+		$this->assertStringContainsString( 'Job Args:', $log_row[1] );
+		$this->assertStringNotContainsString( '<img', $log_row[1] );
 	}
 
 	/**
