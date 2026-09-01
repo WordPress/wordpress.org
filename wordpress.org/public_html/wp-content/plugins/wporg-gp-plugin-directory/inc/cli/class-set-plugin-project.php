@@ -295,9 +295,13 @@ class Set_Plugin_Project extends WP_CLI_Command {
 			)
 		);
 
-		$details = $json && '{' == $json[0] ? json_decode( $json ) : null;
+		if ( ! json_validate( $json ) ) {
+			return null;
+		}
 
-		if ( isset( $details->error ) ) {
+		$details = json_decode( $json );
+
+		if ( ! is_object( $details ) || isset( $details->error ) ) {
 			return null;
 		}
 
