@@ -52,8 +52,9 @@ class Filesystem_Symlink_Test extends TestCase {
 		mkdir( $this->dir . '/real-dir' );
 		file_put_contents( $this->dir . '/real.txt', 'real' );
 
-		symlink( $this->outside . '/secret.txt', $this->dir . '/readme.txt' );
-		symlink( $this->outside, $this->dir . '/linked-dir' );
+		// Without these the fixture holds only real entries and every assertion below passes vacuously.
+		$this->assertTrue( symlink( $this->outside . '/secret.txt', $this->dir . '/readme.txt' ) );
+		$this->assertTrue( symlink( $this->outside, $this->dir . '/linked-dir' ) );
 	}
 
 	/**
