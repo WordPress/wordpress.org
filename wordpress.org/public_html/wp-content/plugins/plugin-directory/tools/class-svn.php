@@ -140,7 +140,12 @@ class SVN {
 			if ( trim( $scrub ) ) {
 				$result   = false;
 				$revision = false;
-				$errors   = array( array( 'error_message' => 'Could not remove non-regular files from the export: ' . trim( $scrub ) ) );
+				$errors   = array(
+					array(
+						'error_code'    => 'export_cleanup_failed',
+						'error_message' => 'Could not remove non-regular files from the export: ' . trim( $scrub ),
+					),
+				);
 			}
 		} else {
 			$result   = false;
