@@ -1237,11 +1237,6 @@ class WPORG_Themes_Upload {
 		echo '<ul class="tc-result">' . display_themechecks() . '</ul>';
 		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
 
-		// Override ALL of the upload checks for child themes.
-		if ( $this->theme->parent() ) {
-			$result = true;
-		}
-
 		return $result;
 	}
 
