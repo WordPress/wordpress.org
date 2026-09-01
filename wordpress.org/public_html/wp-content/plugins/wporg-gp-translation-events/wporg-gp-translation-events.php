@@ -211,8 +211,8 @@ class Translation_Events {
 		?>
 		<label for="event_start">Start Date (UTC): </label>
 		<input type="datetime-local" id="event_start" name="event_start" value="<?php echo esc_attr( $event->start() ); ?>" required><br>
-		<label for="event_end">End Date (UTC): </label>
-		<input type="datetime-local" id="event_end" name="event_end" value="<?php echo esc_attr( $event->end() ); ?>" required><br>
+		<label for="event_end">End Date (UTC, leave empty for ongoing event): </label>
+		<input type="datetime-local" id="event_end" name="event_end" value="<?php echo esc_attr( null === $event->end() ? '' : (string) $event->end() ); ?>"><br>
 		<label for="event-timezone">Timezone: </label>
 		<select id="event-timezone" name="event_timezone" required>
 			<?php
@@ -275,9 +275,15 @@ class Translation_Events {
 		}
 		$fields = array( 'event_start', 'event_end', 'event_timezone' );
 		foreach ( $fields as $field ) {
-			if ( isset( $_POST[ $field ] ) ) {
-				update_post_meta( $post_id, '_' . $field, sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) );
+			if ( ! isset( $_POST[ $field ] ) ) {
+				continue;
 			}
+			$value = sanitize_text_field( wp_unslash( $_POST[ $field ] ) );
+			if ( 'event_end' === $field && '' === $value ) {
+				delete_post_meta( $post_id, '_' . $field );
+				continue;
+			}
+			update_post_meta( $post_id, '_' . $field, $value );
 		}
 	}
 

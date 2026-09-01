@@ -5,6 +5,7 @@ namespace Wporg\TranslationEvents\Attendee;
 use Exception;
 use Wporg\TranslationEvents\Event\Event;
 use Wporg\TranslationEvents\Stats\Stats_Listener;
+use Wporg\TranslationEvents\Translation_Events;
 
 class Attendee_Adder {
 	private Attendee_Repository $attendee_repository;
@@ -37,6 +38,20 @@ class Attendee_Adder {
 
 	private function import_stats( Event $event, Attendee $attendee ): void {
 		global $wpdb, $gp_table_prefix;
+
+		$now   = Translation_Events::now();
+		$end   = $event->end() ? $event->end()->utc() : $now;
+		$start = $event->start()->utc();
+
+		// Open-ended events can span arbitrary durations. Cap the lookback to avoid
+		// a full table scan over `translations` when a new attendee joins.
+		if ( null === $event->end() ) {
+			$one_year_ago = $now->modify( '-1 year' );
+			if ( $start < $one_year_ago ) {
+				$start = $one_year_ago;
+			}
+		}
+
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -57,8 +72,8 @@ class Attendee_Adder {
 					'event_id'          => $event->id(),
 					'action'            => Stats_Listener::ACTION_CREATE,
 					'user_id'           => $attendee->user_id(),
-					'date_added_after'  => $event->start()->utc()->format( 'Y-m-d H:i:s' ),
-					'date_added_before' => $event->end()->utc()->format( 'Y-m-d H:i:s' ),
+					'date_added_after'  => $start->format( 'Y-m-d H:i:s' ),
+					'date_added_before' => $end->format( 'Y-m-d H:i:s' ),
 				),
 			),
 		);

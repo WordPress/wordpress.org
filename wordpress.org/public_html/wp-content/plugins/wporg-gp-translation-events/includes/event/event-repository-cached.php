@@ -61,7 +61,10 @@ class Event_Repository_Cached extends Event_Repository {
 			array_filter(
 				$events,
 				function ( $event ) {
-					return $event->start() <= $this->now && $this->now <= $event->end();
+					if ( $event->start() > $this->now ) {
+						return false;
+					}
+					return null === $event->end() || $this->now <= $event->end();
 				}
 			)
 		);
