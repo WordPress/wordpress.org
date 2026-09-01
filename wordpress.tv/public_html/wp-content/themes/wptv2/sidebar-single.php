@@ -9,18 +9,15 @@ global $wptv, $originalcontent;
 ?>
 
 <div class="secondary-content video-info">
-	<h5>Published</h5>
+	<h3 class="screen-reader-text">Video Details</h3>
+	<h4>Published</h4>
 			<p class="video-date"><?php echo get_the_date(); ?></p>
 
-			<?php if ( get_the_excerpt() ) : ?>
-				<div class="video-description"><?php the_excerpt(); ?></div>
 			<?php
-				endif;
-
-				$wptv->the_terms( 'event', '<h5>Event</h5><p class="video-event">', '<br /> ', '</p>' );
-				$wptv->the_terms( 'speakers', '<h5>Speakers</h5><p class="video-speakers">', '<br /> ', '</p>' );
-				$wptv->the_terms( 'post_tag', '<h5>Tags</h5><p class="video-tags">', '<br /> ', '</p>' );
-				$wptv->the_terms( 'language', '<h5>Language</h5><p class="video-lang">', '<br /> ', '</p>' );
+				$wptv->the_terms( 'event', '<h4>Event</h4><p class="video-event">', '<br /> ', '</p>' );
+				$wptv->the_terms( 'speakers', '<h4>Speakers</h4><p class="video-speakers">', '<br /> ', '</p>' );
+				$wptv->the_terms( 'post_tag', '<h4>Tags</h4><p class="video-tags">', '<br /> ', '</p>' );
+				$wptv->the_terms( 'language', '<h4>Language</h4><p class="video-lang">', '<br /> ', '</p>' );
 
 				if ( function_exists( 'find_all_videopress_shortcodes' ) ) {
 					$videos = array_keys( find_all_videopress_shortcodes( $originalcontent ) );
@@ -64,7 +61,7 @@ global $wptv, $originalcontent;
 
 						if ( ! empty( $mp4_links ) || ! empty( $ogg_link ) ) {
 ?>
-			<h5>Download</h5>
+			<h4>Download</h4>
 			<div class="video-downloads">
 <?php
 							if ( ! empty( $mp4_links ) ) {
@@ -78,7 +75,7 @@ global $wptv, $originalcontent;
 <?php
 						}
 
-						echo '<h5>Subtitles</h5>';
+						echo '<h4>Subtitles</h4>';
 						$ttml_links = array();
 						$languages = VideoPress_Subtitles::get_languages();
 						$subtitles = (array) get_post_meta( $video->post_id, '_videopress_subtitles', true );
@@ -115,7 +112,7 @@ global $wptv, $originalcontent;
 			?>
 
 			<?php if ( $producer_name || $producer_username ) : ?>
-				<h5>Producer</h5>
+				<h4>Producer</h4>
 
 				<div class="video-producer">
 					<?php if ( $producer_username ) : ?>
