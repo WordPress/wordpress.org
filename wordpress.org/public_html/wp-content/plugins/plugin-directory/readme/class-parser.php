@@ -688,6 +688,8 @@ class Parser {
 			),
 			'dd'         => array(),
 			'li'         => array(),
+			'ins'        => array(),
+			'del'        => array(),
 			'h3'         => array(),
 			'h4'         => array(),
 		);
