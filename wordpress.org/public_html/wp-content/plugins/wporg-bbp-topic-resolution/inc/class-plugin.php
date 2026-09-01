@@ -509,11 +509,9 @@ class Plugin {
 	 * @return bool True if allowed, false if not
 	 */
 	public function user_can_resolve( $user_id, $topic_id ) {
-		$post     = false;
-		$topic_id = bbp_get_topic_id();
-		if ( $topic_id ) {
-			$post = get_post( $topic_id );
-		}
+		// Authorize against the requested topic, only falling back to the displayed one.
+		$topic_id = bbp_get_topic_id( $topic_id );
+		$post     = $topic_id ? bbp_get_topic( $topic_id ) : false;
 
 		if ( $user_id && $post && ( user_can( $user_id, 'moderate', $topic_id ) || $user_id == $post->post_author ) ) {
 			$retval = true;
