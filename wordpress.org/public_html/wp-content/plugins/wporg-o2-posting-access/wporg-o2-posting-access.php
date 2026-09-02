@@ -21,8 +21,12 @@ class Plugin {
 		}
 
 		add_filter( 'user_has_cap', [ $this, 'add_post_capabilities' ], 10, 4 );
-		add_filter( 'rest_post_query', [ $this, 'restrict_non_public_queries' ] );
-		add_filter( 'rest_attachment_query', [ $this, 'restrict_non_public_queries' ] );
+		add_action( 'registered_post_type', [ $this, 'restrict_rest_queries' ] );
+
+		foreach ( get_post_types() as $post_type ) {
+			$this->restrict_rest_queries( $post_type );
+		}
+
 		add_action( 'admin_bar_menu', [ $this, 'remove_non_accessible_menu_items' ], 100 );
 
 		if ( apply_filters( 'wporg_o2_enable_pending_for_unknown_users', true ) ) {
@@ -284,6 +288,16 @@ class Plugin {
 		$allcaps['edit_published_posts'] = true;
 
 		return $allcaps;
+	}
+
+	/**
+	 * Restricts REST collection queries for a post type.
+	 *
+	 * @param string $post_type Post type key.
+	 * @return void
+	 */
+	public function restrict_rest_queries( $post_type ) {
+		add_filter( "rest_{$post_type}_query", [ $this, 'restrict_non_public_queries' ] );
 	}
 
 	/**

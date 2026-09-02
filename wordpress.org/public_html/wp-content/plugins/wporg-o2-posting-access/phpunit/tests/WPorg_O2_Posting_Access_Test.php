@@ -113,11 +113,12 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	/**
 	 * Runs a posts collection request and returns its total.
 	 *
-	 * @param array $params Query parameters to set on the request.
+	 * @param array  $params Query parameters to set on the request.
+	 * @param string $route  Optional. Collection route to request.
 	 * @return array The response status, total, and row count.
 	 */
-	protected function query_posts( $params ) {
-		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
+	protected function query_posts( $params, $route = '/wp/v2/posts' ) {
+		$request = new WP_REST_Request( 'GET', $route );
 
 		foreach ( $params as $key => $value ) {
 			$request->set_param( $key, $value );
@@ -242,6 +243,63 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 
 		$this->assertSame( 3, $result['total'] );
 		$this->assertSame( 3, $result['rows'] );
+	}
+
+	/**
+	 * Core's 'wp_block' maps both 'read' and 'edit_posts' onto 'edit_posts', so
+	 * the grant reaches the patterns route as well and unpublished pattern
+	 * content is searchable there unless every post type is covered.
+	 */
+	public function test_non_member_cannot_count_others_unpublished_patterns() {
+		$author = $this->factory()->user->create( array( 'role' => 'author' ) );
+
+		$this->factory()->post->create_many(
+			2,
+			array(
+				'post_type'   => 'wp_block',
+				'post_status' => 'draft',
+				'post_author' => $author,
+				'post_title'  => 'Unannounced pattern',
+			)
+		);
+
+		$result = $this->query_posts(
+			array(
+				'context' => 'edit',
+				'status'  => array( 'draft' ),
+				'search'  => 'Unannounced',
+			),
+			'/wp/v2/blocks'
+		);
+
+		$this->assertLessThan( 400, $result['status'], 'Core still permits the request; the restriction is on what it counts.' );
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['rows'] );
+	}
+
+	/**
+	 * Post types are registered on 'init', long after this plugin loads, so the
+	 * filter has to attach as they arrive rather than from a fixed list.
+	 *
+	 * The filter is asserted directly rather than over a request, because REST
+	 * routes are registered on 'rest_api_init' and a post type registered mid-test
+	 * has none.
+	 */
+	public function test_post_type_registered_after_load_is_restricted() {
+		register_post_type(
+			'wporg_test_rest_cpt',
+			array(
+				'public'          => true,
+				'show_in_rest'    => true,
+				'capability_type' => 'post',
+			)
+		);
+
+		$args = apply_filters( 'rest_wporg_test_rest_cpt_query', array( 'post_status' => array( 'draft' ) ) );
+
+		unregister_post_type( 'wporg_test_rest_cpt' );
+
+		$this->assertSame( $this->non_member, $args['author'] );
 	}
 
 	/**
