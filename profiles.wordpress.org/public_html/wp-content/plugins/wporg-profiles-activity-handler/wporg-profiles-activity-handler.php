@@ -959,8 +959,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			);
 
 			$action_received = sprintf(
-				'<a href="%1$s">Received props</a> from <a href="https://profiles.wordpress.org/%2$s/">@%2$s</a> in <a href="https://make.wordpress.org/chat/">Slack</a>',
+				'<a href="%1$s">Received props</a> from <a href="%2$s">@%3$s</a> in <a href="https://make.wordpress.org/chat/">Slack</a>',
 				esc_url_raw( $url ),
+				esc_url( 'https://profiles.wordpress.org/' . rawurlencode( $giver_username ) . '/' ),
 				esc_html( $giver_username ),
 			);
 
