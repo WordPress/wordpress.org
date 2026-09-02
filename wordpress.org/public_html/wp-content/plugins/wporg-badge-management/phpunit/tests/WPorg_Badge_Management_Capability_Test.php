@@ -8,7 +8,8 @@
 defined( 'ABSPATH' ) || die();
 
 use const WordPressdotorg\Make\Badge_Management\MANAGE_BADGES_CAP;
-use function WordPressdotorg\Make\Badge_Management\current_user_can_edit_settings;
+use function WordPressdotorg\Make\Badge_Management\current_user_can_change_required_cap;
+use function WordPressdotorg\Make\Badge_Management\get_required_cap;
 
 /**
  * Covers who the required capability setting lets manage badges on a site.
@@ -105,9 +106,23 @@ class WPorg_Badge_Management_Capability_Test extends WPorg_Badge_Management_Test
 	}
 
 	/**
-	 * Settings are for administrators who can manage badges themselves.
+	 * A stored value outside the offered choices falls back to the default.
 	 */
-	public function test_settings_require_an_administrator_who_can_manage_badges() {
+	public function test_unknown_setting_falls_back_to_manage_options() {
+		update_option( 'wporg_profile_badge_required_cap', 'edit_posts' );
+
+		$administrator = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		$editor        = $this->factory()->user->create( array( 'role' => 'editor' ) );
+
+		$this->assertSame( 'manage_options', get_required_cap() );
+		$this->assertTrue( user_can( $administrator, MANAGE_BADGES_CAP ) );
+		$this->assertFalse( user_can( $editor, MANAGE_BADGES_CAP ) );
+	}
+
+	/**
+	 * Only administrators who can manage badges themselves can change the required capability.
+	 */
+	public function test_required_cap_is_changed_by_administrators_who_can_manage_badges() {
 		$administrator = $this->factory()->user->create( array( 'role' => 'administrator' ) );
 		$author        = $this->factory()->user->create( array( 'role' => 'author' ) );
 		$super_admin   = $this->create_non_member();
@@ -116,18 +131,18 @@ class WPorg_Badge_Management_Capability_Test extends WPorg_Badge_Management_Test
 		update_option( 'wporg_profile_badge_required_cap', 'publish_posts' );
 
 		wp_set_current_user( $author );
-		$this->assertFalse( current_user_can_edit_settings(), 'An author can manage badges but is not an administrator.' );
+		$this->assertFalse( current_user_can_change_required_cap(), 'An author can manage badges but is not an administrator.' );
 
 		wp_set_current_user( $administrator );
-		$this->assertTrue( current_user_can_edit_settings() );
+		$this->assertTrue( current_user_can_change_required_cap() );
 
 		update_option( 'wporg_profile_badge_required_cap', 'manage_network' );
 
 		wp_set_current_user( $administrator );
-		$this->assertFalse( current_user_can_edit_settings(), 'A setting that excludes administrators is not theirs to change.' );
+		$this->assertFalse( current_user_can_change_required_cap(), 'A setting that excludes administrators is not theirs to change.' );
 
 		wp_set_current_user( $super_admin );
-		$this->assertTrue( current_user_can_edit_settings() );
+		$this->assertTrue( current_user_can_change_required_cap() );
 	}
 
 	/**

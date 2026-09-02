@@ -78,19 +78,31 @@ function manage_badges() {
 }
 
 function save_settings() {
-	if ( ! current_user_can_edit_settings() ) {
+	if ( ! current_user_can( MANAGE_BADGES_CAP ) ) {
 		wp_die( 'Unauthorized user' );
 	}
 
 	check_admin_referer( 'badge_settings' );
 
+	// Required cap. The select is disabled for users who can't change it, so the field is only posted when it applies.
+	// Limited to the offered choices, and to capabilities the current user holds.
+	$required_cap = isset( $_POST['required_role'] ) ? sanitize_text_field( wp_unslash( $_POST['required_role'] ) ) : null;
+	if (
+		null !== $required_cap &&
+		(
+			! current_user_can_change_required_cap() ||
+			! array_key_exists( $required_cap, get_required_cap_choices() ) ||
+			! current_user_can( $required_cap )
+		)
+	) {
+		wp_die( 'Unauthorized user' );
+	}
+
 	// Note to team.
 	$note_to_team = isset( $_POST['note_to_team'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note_to_team'] ) ) : '';
 	update_option( 'wporg_profile_badge_note_to_team', $note_to_team );
 
-	// Required cap. Limited to capabilities the current user holds, matching the choices offered in the form.
-	$required_cap = isset( $_POST['required_role'] ) ? sanitize_text_field( wp_unslash( $_POST['required_role'] ) ) : 'manage_options';
-	if ( array_key_exists( $required_cap, get_required_cap_choices() ) && current_user_can( $required_cap ) ) {
+	if ( null !== $required_cap ) {
 		update_option( 'wporg_profile_badge_required_cap', $required_cap );
 	}
 

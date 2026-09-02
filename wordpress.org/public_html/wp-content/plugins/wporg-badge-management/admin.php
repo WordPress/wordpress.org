@@ -20,9 +20,7 @@ function render() {
 		$tabs[ 'list_users:' . $slug ] = get_badges()[ $slug ] ?? $slug;
 	}
 
-	if ( current_user_can_edit_settings() ) {
-		$tabs['settings'] = 'Settings';
-	}
+	$tabs['settings'] = 'Settings';
 
 	// Create a set of tabs for managing badges and listing users with badges.
 	$active_tab = ( $_GET['tab'] ?? '' ) ?: array_key_first( $tabs );
@@ -201,9 +199,6 @@ function render_manage_tab() {
  * Renders the settings tab.
  */
 function render_settings() {
-	if ( ! current_user_can_edit_settings() ) {
-		return;
-	}
 
 	// Add a note to the team.
 	$note_to_team = get_option( 'wporg_profile_badge_note_to_team', '' );
@@ -230,7 +225,7 @@ function render_settings() {
 			<tr>
 				<th scope="row"><label for="required_role">Required Cap to Manage Badges</label></th>
 				<td>
-					<select name="required_role" id="required_role">
+					<select name="required_role" id="required_role" <?php disabled( ! current_user_can_change_required_cap() ); ?>>
 						<?php foreach ( get_required_cap_choices() as $cap => $desc ) : ?>
 							<option
 								value="<?php echo esc_attr( $cap ); ?>"
@@ -242,6 +237,9 @@ function render_settings() {
 						<?php endforeach; ?>
 					</select>
 					<p class="description">Select the minimum user role required to manage badges on this site. Only users with a role on this site qualify; super admins can always manage badges.</p>
+					<?php if ( ! current_user_can_change_required_cap() ) : ?>
+						<p class="description"><em>Only administrators can change this setting.</em></p>
+					<?php endif; ?>
 				</td>
 			</tr>
 			<tr>

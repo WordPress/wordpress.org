@@ -23,7 +23,9 @@ const MANAGE_BADGES_CAP = 'wporg_manage_profile_badges';
  * @return string
  */
 function get_required_cap(): string {
-	return get_option( 'wporg_profile_badge_required_cap', 'manage_options' );
+	$cap = get_option( 'wporg_profile_badge_required_cap', 'manage_options' );
+
+	return array_key_exists( $cap, get_required_cap_choices() ) ? $cap : 'manage_options';
 }
 
 /**
@@ -66,14 +68,14 @@ function map_badge_manager_cap( $caps, $cap, $user_id ) {
 add_filter( 'map_meta_cap', __NAMESPACE__ . '\map_badge_manager_cap', 10, 3 );
 
 /**
- * Whether the current user can change the settings for this site.
+ * Whether the current user can change which capability manages badges on this site.
  *
- * Settings are for administrators who can manage badges themselves, so a
- * setting that excludes site administrators can't be changed by one.
+ * Administrators who can manage badges themselves, so a setting that
+ * excludes site administrators can't be changed by one.
  *
  * @return bool
  */
-function current_user_can_edit_settings(): bool {
+function current_user_can_change_required_cap(): bool {
 	return current_user_can( MANAGE_BADGES_CAP ) && current_user_can( 'manage_options' );
 }
 
