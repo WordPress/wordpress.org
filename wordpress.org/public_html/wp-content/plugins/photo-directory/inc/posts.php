@@ -37,6 +37,7 @@ class Posts {
 
 		// Photo content is plain text (the alternative text), never post markup.
 		add_filter( 'the_content', [ __CLASS__, 'render_content_as_plain_text' ], PHP_INT_MIN );
+		add_filter( 'the_content', [ __CLASS__, 'restore_embed_filters' ], PHP_INT_MAX );
 
 		// Offset subsequent paginations of front page by number of posts on front page.
 		add_action( 'pre_get_posts',      [ __CLASS__, 'offset_front_page_paginations' ], 11 );
@@ -260,13 +261,26 @@ class Posts {
 	}
 
 	/**
+	 * `WP_Embed` callbacks unhooked while a photo's content is being filtered.
+	 *
+	 * @var string[]
+	 */
+	private static $removed_embed_filters = [];
+
+	/**
 	 * Renders a photo's content as the plain text it is.
 	 *
 	 * A photo's content is the alternative text submitted with it. The submit
 	 * form and its sanitization treat that as plain text, so the content must
 	 * not be interpreted as post markup on output either. It is escaped here,
-	 * ahead of every other 'the_content' callback, so that blocks, shortcodes,
-	 * and embeds only ever see text.
+	 * ahead of every other 'the_content' callback, so that blocks and
+	 * shortcodes only ever see text. The `WP_Embed` callbacks are unhooked for
+	 * the rest of this run, since a bare URL would otherwise be embedded
+	 * whether it sits on its own line or inside a paragraph, and hooked back
+	 * up by `restore_embed_filters()`.
+	 *
+	 * Keys on the global post, like core's own content callbacks, so it applies
+	 * to whatever 'the_content' is run for while a photo is the current post.
 	 *
 	 * @param string $content Post content.
 	 * @return string
@@ -276,23 +290,60 @@ class Posts {
 			return $content;
 		}
 
+		$removed = self::remove_embed_filters();
+		if ( $removed ) {
+			self::$removed_embed_filters = $removed;
+		}
+
 		return self::plain_text_to_html( $content );
 	}
 
 	/**
-	 * Converts plain text into paragraphs that later content filters leave as text.
+	 * Hooks the `WP_Embed` callbacks back up once a photo's content has been filtered.
+	 *
+	 * @param string $content Filtered post content.
+	 * @return string
+	 */
+	public static function restore_embed_filters( $content ) {
+		foreach ( self::$removed_embed_filters as $method ) {
+			add_filter( 'the_content', [ $GLOBALS['wp_embed'], $method ], 8 );
+		}
+		self::$removed_embed_filters = [];
+
+		return $content;
+	}
+
+	/**
+	 * Unhooks the `WP_Embed` 'the_content' callbacks.
+	 *
+	 * @return string[] Names of the callbacks that were hooked and are now removed.
+	 */
+	private static function remove_embed_filters() {
+		$removed  = [];
+		$wp_embed = $GLOBALS['wp_embed'] ?? null;
+
+		if ( $wp_embed instanceof \WP_Embed ) {
+			foreach ( [ 'run_shortcode', 'autoembed' ] as $method ) {
+				if ( remove_filter( 'the_content', [ $wp_embed, $method ], 8 ) ) {
+					$removed[] = $method;
+				}
+			}
+		}
+
+		return $removed;
+	}
+
+	/**
+	 * Escapes plain text so that later content filters leave it as text.
 	 *
 	 * @param string $text Plain text.
 	 * @return string
 	 */
-	public static function plain_text_to_html( $text ) {
+	private static function plain_text_to_html( $text ) {
 		$html = esc_html( $text );
 
 		// Shortcode syntax is part of the text; keep `do_shortcode()` from seeing its delimiter.
-		$html = str_replace( '[', '&#91;', $html );
-
-		// Wrap paragraphs now, so a URL on a line of its own is not auto-embedded.
-		return wpautop( $html );
+		return str_replace( '[', '&#91;', $html );
 	}
 
 	/**
