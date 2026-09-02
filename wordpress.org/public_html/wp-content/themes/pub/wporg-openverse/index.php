@@ -19,16 +19,21 @@ namespace WordPressdotorg\Openverse\Theme;
 	standalone site and exit immediately. If not, print what would have been the
 	redirect URL to the HTML as a comment.
 
-	The target is validated before redirecting. Left to itself
+	The target is checked before redirecting. Left to itself
 	`wp_safe_redirect()` sends an unusable target to `admin_url()` instead, and
 	a 301 into wp-admin would sit in visitors' caches long after the setting
 	that caused it was corrected. Rendering the page is the safer failure.
+
+	The host has to be checked separately because `wp_validate_redirect()`
+	repairs rather than rejects: given a target with no host it prepends the
+	current directory and returns that, skipping the allowed-host check
+	entirely. This target is always absolute, so no host means no redirect.
  */
 
 $is_redirect_enabled = get_theme_mod( 'ov_is_redirect_enabled' );
 $target_url = get_target_url();
 
-if ( $is_redirect_enabled && wp_validate_redirect( $target_url, false ) ) {
+if ( $is_redirect_enabled && wp_parse_url( $target_url, PHP_URL_HOST ) && wp_validate_redirect( $target_url, '' ) ) {
 	wp_safe_redirect( $target_url, 301 );
 	exit;
 } else {
