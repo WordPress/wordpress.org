@@ -62,7 +62,7 @@ class Target_Url_Test extends TestCase {
 	protected function tearDown(): void {
 		remove_filter( 'theme_mod_ov_is_redirect_enabled', '__return_true' );
 		remove_filter( 'theme_mod_ov_redirect_url', array( $this, 'origin' ) );
-		remove_filter( 'locale', array( $this, 'russian' ) );
+		remove_filter( 'locale', array( $this, 'polish' ) );
 
 		if ( null === $this->request_uri ) {
 			unset( $_SERVER['REQUEST_URI'] );
@@ -81,10 +81,10 @@ class Target_Url_Test extends TestCase {
 	}
 
 	/**
-	 * Filter callback switching the site to Russian.
+	 * Filter callback switching the site to Polish.
 	 */
-	public function russian(): string {
-		return 'ru_RU';
+	public function polish(): string {
+		return 'pl_PL';
 	}
 
 	/**
@@ -167,10 +167,10 @@ class Target_Url_Test extends TestCase {
 	 * A locale slug is inserted between the origin and the path.
 	 */
 	public function test_inserts_the_locale_before_the_path(): void {
-		add_filter( 'locale', array( $this, 'russian' ) );
+		add_filter( 'locale', array( $this, 'polish' ) );
 		$_SERVER['REQUEST_URI'] = '/openverse/search/?q=dog';
 
-		$this->assertSame( self::ORIGIN . '/ru/search/?q=dog', get_target_url() );
+		$this->assertSame( self::ORIGIN . '/pl/search/?q=dog', get_target_url() );
 	}
 
 	/**

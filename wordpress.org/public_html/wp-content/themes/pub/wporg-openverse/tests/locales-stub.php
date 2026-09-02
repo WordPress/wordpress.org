@@ -18,7 +18,7 @@ if ( ! function_exists( __NAMESPACE__ . '\get_locales' ) ) {
 	 */
 	function get_locales(): array {
 		return array(
-			'ru_RU' => (object) array( 'slug' => 'ru' ),
+			'pl_PL' => (object) array( 'slug' => 'pl' ),
 		);
 	}
 }
