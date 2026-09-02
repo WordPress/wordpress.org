@@ -133,6 +133,24 @@ class Review_Corpus_Test extends TestCase {
 	}
 
 	/**
+	 * A root-level file with a numeric name is not mistaken for one the review missed.
+	 *
+	 * `WP_Theme::scandir()` merges its subdirectory results with `array_merge_recursive()`,
+	 * which renumbers a key like `404` away, so the comparison cannot use the keys.
+	 */
+	public function test_numeric_file_name_is_reviewable(): void {
+		$upload = $this->create_upload(
+			array(
+				'style.css'     => '/* Theme Name: A Theme */',
+				'404'           => 'no extension',
+				'inc/setup.php' => '<?php',
+			)
+		);
+
+		$this->assertSame( array(), $upload->unreviewable_files() );
+	}
+
+	/**
 	 * A hidden file inside an excluded directory is reported; its visible siblings are not.
 	 */
 	public function test_hidden_file_inside_excluded_directory_is_reported(): void {

@@ -276,10 +276,23 @@ class WPORG_Themes_Upload {
 	public function unreviewable_files() {
 		// Lifted only to measure, so the diff isolates the dot-prefixed entries no filter can reach.
 		add_filter( 'theme_scandir_exclusions', '__return_empty_array' );
-		$reviewed = array_keys( (array) $this->theme->get_files( null, -1, false ) );
+
+		/*
+		 * Matched on the absolute paths rather than the relative keys: scandir() merges its
+		 * subdirectory results with array_merge_recursive(), which renumbers a key like `404`.
+		 * See https://core.trac.wordpress.org/ticket/53599.
+		 */
+		$reviewed = array_flip( array_values( (array) $this->theme->get_files( null, -1, false ) ) );
 		remove_filter( 'theme_scandir_exclusions', '__return_empty_array' );
 
-		$unreviewed = array_values( array_diff( $this->package_files(), $reviewed ) );
+		$prefix     = trailingslashit( $this->theme_dir );
+		$unreviewed = array();
+
+		foreach ( $this->get_all_files( $this->theme_dir ) as $file ) {
+			if ( ! isset( $reviewed[ $file ] ) ) {
+				$unreviewed[] = substr( $file, strlen( $prefix ) );
+			}
+		}
 
 		sort( $unreviewed );
 
