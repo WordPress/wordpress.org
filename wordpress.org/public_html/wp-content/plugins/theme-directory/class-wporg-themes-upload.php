@@ -303,7 +303,7 @@ class WPORG_Themes_Upload {
 		$by_lowercase = array();
 
 		foreach ( $files as $file ) {
-			$by_lowercase[ strtolower( $file ) ][] = $file;
+			$by_lowercase[ mb_strtolower( $file, 'UTF-8' ) ][] = $file;
 
 			foreach ( explode( '/', $file ) as $segment ) {
 				// Win32 reads the device name from the segment up to its first period.

@@ -232,6 +232,19 @@ class Review_Corpus_Test extends TestCase {
 	}
 
 	/**
+	 * Case folding covers non-ASCII names, which a case-insensitive filesystem also folds.
+	 */
+	public function test_non_ascii_case_only_duplicates_are_rejected(): void {
+		$upper = "assets/\u{00C4}.php";
+		$lower = "assets/\u{00E4}.php";
+
+		$this->assertSame(
+			array( $upper, $lower ),
+			WPORG_Themes_Upload::non_portable_files( array( 'style.css', $upper, $lower ) )
+		);
+	}
+
+	/**
 	 * A path caught by two rules is reported once.
 	 */
 	public function test_paths_are_reported_once(): void {
