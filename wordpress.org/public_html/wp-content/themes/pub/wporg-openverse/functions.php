@@ -296,6 +296,31 @@ function get_target_url() {
 }
 
 /**
+ * Whether a redirect target is usable.
+ *
+ * `wp_validate_redirect()` repairs rather than rejects. Given a target with no
+ * host it prepends the current directory, and given a scheme-relative one it
+ * assumes `http`, so both come back truthy. The scheme and host are checked
+ * first because this target is always absolute.
+ *
+ * @param string $target_url URL the theme intends to redirect to.
+ * @return bool
+ */
+function is_valid_target_url( $target_url ) {
+	$parts = wp_parse_url( $target_url );
+
+	if ( empty( $parts['host'] ) || empty( $parts['scheme'] ) ) {
+		return false;
+	}
+
+	if ( ! in_array( $parts['scheme'], array( 'http', 'https' ), true ) ) {
+		return false;
+	}
+
+	return (bool) wp_validate_redirect( $target_url, '' );
+}
+
+/**
  * Allow the redirect to reach the standalone Openverse site.
  *
  * The host comes from the configured origin, not from the generated target
