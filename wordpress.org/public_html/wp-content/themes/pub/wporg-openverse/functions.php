@@ -262,7 +262,7 @@ if ( !defined( 'OPENVERSE_STANDALONE_URL' ) ) {
  * @return string
  */
 function get_target_url() {
-	$target_url = untrailingslashit( get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL ) );
+	$target_url = get_standalone_origin();
 
 	$curr_locale = get_locale();
 	$locale = get_locale_slug( $curr_locale );
@@ -296,6 +296,18 @@ function get_target_url() {
 }
 
 /**
+ * The origin the standalone Openverse site is served from.
+ *
+ * The Customizer's `sanitize_callback` drops a trailing slash and
+ * `wp theme mod set` does not, so it is dropped here too.
+ *
+ * @return string
+ */
+function get_standalone_origin() {
+	return untrailingslashit( get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL ) );
+}
+
+/**
  * Whether the redirect to the standalone site is switched on.
  *
  * `wp theme mod set` stores the string it is handed, so the setting can hold
@@ -311,15 +323,11 @@ function is_redirect_enabled() {
 /**
  * Whether a redirect target is usable.
  *
- * `wp_validate_redirect()` repairs rather than rejects. Given a target with no
- * host it prepends the current directory, and given a scheme-relative one it
- * assumes `http`, so both come back truthy. The scheme and host are checked
- * first because this target is always absolute.
- *
- * The `http`/`https` comparison is deliberately case-sensitive, and states a
- * contract rather than carrying the weight: `wp_validate_redirect()` compares
- * the same way, so an upper-case scheme is refused either way. Lower-casing it
- * here would not make one usable.
+ * The path is appended straight after the origin, so a target's authority is
+ * always the one an administrator configured. Comparing the two makes that an
+ * enforced property rather than an assumption, and it is why this does not need
+ * `wp_safe_redirect()`: no request can reach a host the origin did not supply,
+ * and the allow-list that would require widens redirects for the whole site.
  *
  * @param string $target_url URL the theme intends to redirect to.
  * @return bool
@@ -335,33 +343,8 @@ function is_valid_target_url( $target_url ) {
 		return false;
 	}
 
-	return (bool) wp_validate_redirect( $target_url, '' );
+	return $parts['host'] === wp_parse_url( get_standalone_origin(), PHP_URL_HOST );
 }
-
-/**
- * Allow the redirect to reach the standalone Openverse site.
- *
- * The host is read from the configured origin rather than the generated target
- * URL. The two always share an authority today, so it makes no difference now;
- * it keeps the filter right if the target is ever assembled differently.
- *
- * @param string[] $hosts Allowed host names.
- * @return string[] Allowed host names, plus the standalone Openverse host when
- *                  the redirect is enabled.
- */
-function allow_standalone_redirect_host( $hosts ) {
-	if ( ! is_redirect_enabled() ) {
-		return $hosts;
-	}
-
-	$host = wp_parse_url( get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL ), PHP_URL_HOST );
-	if ( $host ) {
-		$hosts[] = $host;
-	}
-
-	return $hosts;
-}
-add_filter( 'allowed_redirect_hosts', __NAMESPACE__ . '\allow_standalone_redirect_host' );
 
 /**
 * Provide configuration for the theme to redirect to the given standalone

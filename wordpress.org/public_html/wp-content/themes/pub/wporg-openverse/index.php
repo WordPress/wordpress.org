@@ -19,16 +19,15 @@ namespace WordPressdotorg\Openverse\Theme;
 	standalone site and exit immediately. If not, print what would have been the
 	redirect URL to the HTML as a comment.
 
-	The target is checked before redirecting. Left to itself
-	`wp_safe_redirect()` sends an unusable target to `admin_url()` instead, and
-	a 301 into wp-admin would sit in visitors' caches long after the setting
-	that caused it was corrected. Rendering the page is the safer failure.
+	The target is checked before redirecting. A misconfigured `ov_redirect_url`
+	would otherwise send a permanent redirect that sits in visitors' caches long
+	after the setting was corrected. Rendering the page is the safer failure.
  */
 
 $target_url = get_target_url();
 
 if ( is_redirect_enabled() && is_valid_target_url( $target_url ) ) {
-	wp_safe_redirect( $target_url, 301 );
+	wp_redirect( $target_url, 301 );
 	exit;
 } else {
 	echo '<!-- ' . esc_html( $target_url ) . ' -->';

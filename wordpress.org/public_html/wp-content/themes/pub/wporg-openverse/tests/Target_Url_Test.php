@@ -189,15 +189,15 @@ class Target_Url_Test extends TestCase {
 			'javascript'       => array( 'javascript:alert(1)', false ),
 			'path only'        => array( '/search/', false ),
 			'empty'            => array( '', false ),
-			'unlisted host'    => array( 'https://example.com/search/', false ),
+			'another host'     => array( 'https://example.com/search/', false ),
 		);
 	}
 
 	/**
 	 * Only an absolute http or https URL on an allowed host is redirected to.
 	 *
-	 * `wp_validate_redirect()` repairs rather than rejects, so a target with no
-	 * host or no scheme comes back truthy and cannot be relied on alone.
+	 * The authority comes from the configured origin, never from the request,
+	 * so the guard checks the target's host against that origin directly.
 	 *
 	 * @param string $target   The URL the theme would redirect to.
 	 * @param bool   $expected Whether it should be redirected to.
@@ -208,12 +208,11 @@ class Target_Url_Test extends TestCase {
 	}
 
 	/**
-	 * Every request the theme forwards survives the redirect it is handed to.
+	 * Every request the theme forwards is accepted and sent as it was built.
 	 *
-	 * `wp_safe_redirect()` sends a target it cannot validate to `admin_url()`
-	 * rather than refusing, so a guard that is looser than core leaves a 301
-	 * into wp-admin in visitors' caches. Asserting the guard on its own cannot
-	 * catch that: this walks the whole path, from request to sent header.
+	 * Asserting the guard on its own only restates it. This walks the whole
+	 * path, from request through the guard to the header `wp_redirect()` would
+	 * send, so a target the guard accepts but core would mangle shows up here.
 	 *
 	 * @param string $request_uri The incoming request.
 	 */
@@ -225,8 +224,8 @@ class Target_Url_Test extends TestCase {
 		$this->assertTrue( is_valid_target_url( $target ), "Refused to redirect to {$target}" );
 		$this->assertSame(
 			$target,
-			wp_validate_redirect( $target, 'FELL-BACK' ),
-			"wp_safe_redirect() would not have sent {$target}"
+			wp_sanitize_redirect( $target ),
+			"wp_redirect() would not have sent {$target} unchanged"
 		);
 	}
 
