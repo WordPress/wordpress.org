@@ -38,10 +38,14 @@ function render() {
 	echo '</h2>';
 
 	// Let the user know who else can manage badges on this site.
-	printf(
-		'<div class="notice notice-success"><p>Users with a role on this site and the <code>%s</code> capability can manage badges.</p></div>',
-		esc_html( get_required_cap() )
-	);
+	if ( 'manage_network' === get_required_cap() ) {
+		echo '<div class="notice notice-success"><p>Only super admins can manage badges on this site.</p></div>';
+	} else {
+		printf(
+			'<div class="notice notice-success"><p>Super admins, and users with a role on this site and the <code>%s</code> capability, can manage badges.</p></div>',
+			esc_html( get_required_cap() )
+		);
+	}
 
 	switch ( explode( ':', $active_tab )[0] ) {
 		case 'list_users':
@@ -236,7 +240,7 @@ function render_settings() {
 							</option>
 						<?php endforeach; ?>
 					</select>
-					<p class="description">Select the minimum user role required to manage badges on this site. Only users with a role on this site qualify; super admins can always manage badges.</p>
+					<p class="description">Select the minimum user role required to manage badges on this site. Only users with a role on this site qualify; super admins can always manage badges, and only a super admin can limit it to super admins.</p>
 					<?php if ( ! current_user_can_change_required_cap() ) : ?>
 						<p class="description"><em>Only administrators can change this setting.</em></p>
 					<?php endif; ?>

@@ -25,7 +25,7 @@ const MANAGE_BADGES_CAP = 'wporg_manage_profile_badges';
 function get_required_cap(): string {
 	$cap = get_option( 'wporg_profile_badge_required_cap', 'manage_options' );
 
-	return array_key_exists( $cap, get_required_cap_choices() ) ? $cap : 'manage_options';
+	return is_string( $cap ) && array_key_exists( $cap, get_required_cap_choices() ) ? $cap : 'manage_options';
 }
 
 /**
@@ -70,8 +70,8 @@ add_filter( 'map_meta_cap', __NAMESPACE__ . '\map_badge_manager_cap', 10, 3 );
 /**
  * Whether the current user can change which capability manages badges on this site.
  *
- * Administrators who can manage badges themselves, so a setting that
- * excludes site administrators can't be changed by one.
+ * Requires `manage_options` on top of being able to manage badges, so a
+ * setting that excludes site administrators can't be changed by one.
  *
  * @return bool
  */

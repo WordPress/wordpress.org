@@ -95,7 +95,14 @@ function save_settings() {
 			! current_user_can( $required_cap )
 		)
 	) {
-		wp_die( 'Unauthorized user' );
+		wp_die(
+			'You are not allowed to set that capability. Nothing was saved.',
+			'Unauthorized',
+			[
+				'response'  => 403,
+				'back_link' => true,
+			]
+		);
 	}
 
 	// Note to team.

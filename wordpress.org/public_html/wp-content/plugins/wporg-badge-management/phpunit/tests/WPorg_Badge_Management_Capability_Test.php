@@ -117,6 +117,10 @@ class WPorg_Badge_Management_Capability_Test extends WPorg_Badge_Management_Test
 		$this->assertSame( 'manage_options', get_required_cap() );
 		$this->assertTrue( user_can( $administrator, MANAGE_BADGES_CAP ) );
 		$this->assertFalse( user_can( $editor, MANAGE_BADGES_CAP ) );
+
+		update_option( 'wporg_profile_badge_required_cap', array( 'publish_posts' ) );
+
+		$this->assertSame( 'manage_options', get_required_cap() );
 	}
 
 	/**
