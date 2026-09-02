@@ -37,7 +37,7 @@ function show_colors( $post = 0, $echo = true ) {
 			'<span class="photo-color photo-color-%s"><a href="%s">%s</a></span>',
 			esc_attr( $color->slug ),
 			esc_url( get_term_link( $color->slug, Registrations::get_taxonomy( 'colors' ) ) ),
-			$color->name
+			esc_html( $color->name )
 		);
 	}
 	$output .= implode( ', ', $colors_output );
@@ -82,7 +82,7 @@ function show_categories( $post = 0, $echo = true ) {
 			'<a class="photo-category photo-category-%s" href="%s">%s</a>',
 			esc_attr( $cat->slug ),
 			esc_url( get_term_link( $cat->slug, Registrations::get_taxonomy( 'categories' ) ) ),
-			$cat->name
+			esc_html( $cat->name )
 		);
 	}
 	$output .= implode( ', ', $cats_output );
@@ -127,7 +127,7 @@ function show_tags( $post = 0, $echo = true ) {
 			'<li class="photo-tag photo-tag-%s"><a href="%s">%s</a></li>',
 			esc_attr( $tag->slug ),
 			esc_url( get_term_link( $tag->slug, Registrations::get_taxonomy( 'tags' ) ) ),
-			$tag->name
+			esc_html( $tag->name )
 		);
 	}
 
@@ -206,8 +206,8 @@ function show_exif( $post = 0, $echo = true ) {
 		$exif_output[] = sprintf(
 			'<li><span class="photo-exif photo-exif-%s">%s: <strong>%s</strong></span></li>',
 			esc_attr( $key ),
-			$item['label'],
-			$item['value']
+			esc_html( $item['label'] ),
+			esc_html( $item['value'] )
 		);
 	}
 	$output .= implode( "\n", $exif_output );
