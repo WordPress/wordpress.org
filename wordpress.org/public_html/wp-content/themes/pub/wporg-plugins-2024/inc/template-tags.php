@@ -513,6 +513,9 @@ function the_plugin_danger_zone() {
 	// Output the Release Confirmation form.
 	the_plugin_release_confirmation_form();
 
+	// Output the rollout settings.
+	the_rollout_settings();
+
 	if ( 'publish' != $post->post_status ) {
 		// A reminder of the closed status.
 		the_active_plugin_notice();
@@ -806,4 +809,46 @@ function the_author_notice( $post = null ) {
 			wp_kses_post( $import_warnings )
 		);
 	}
+}
+
+/**
+ * Displays the "phased rollout" settings for a plugin.
+ */
+function the_rollout_settings() {
+	$post = get_post();
+	if ( ! current_user_can( 'plugin_manage_releases', $post ) ) {
+		return;
+	}
+	$rollout = $post->phased_rollout ?: '';
+
+	echo '<h4>' . __( 'Rollout Strategy', 'wporg-plugins' ) . '</h4>';
+
+	echo '<p>' .
+		__( 'Phased rollout of a plugin initially delivers updates to a small selection of sites, increasing over time.', 'wporg-plugins' ) .
+		' ' .
+		__( 'This allows for the plugin author to limit the impact of a change in a plugin which may negatively impact user experience, to receive that feedback, and resolve the issue before the plugin update is delivered to all websites.', 'wporg-plugins' ) .
+		'</p>';
+
+	echo '<form method="POST" action="' . esc_url( Template::get_phased_rollout_link() ) . '">';
+	echo '<select
+			id="rollout_strategy"
+			name="rollout_strategy"
+			onchange="this.nextElementSibling.innerText = this.options[this.selectedIndex].dataset.description;"
+			>';
+	foreach ( Template::get_rollout_strategies() as $slug => $set ) {
+		printf(
+			'<option value="%s" data-description="%s" %s>%s</option>',
+			esc_attr( $slug ),
+			esc_attr( $set['description'] ),
+			selected( $rollout, $slug, false ),
+			esc_html( $set['name'] )
+		);
+	}
+	echo '</select>';
+	echo '<div class="help">' . esc_html( Template::get_rollout_strategies()[ $rollout ]['description'] ?? '' ) . '</div>';
+
+	echo '<p class="wp-block-button is-small">';
+	echo '<input class="wp-block-button__link" type="submit" value="' . esc_attr__( 'Save', 'wporg-plugins' ) . '" />';
+	echo '</p>';
+	echo '</form>';
 }

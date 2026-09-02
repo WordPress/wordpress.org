@@ -167,6 +167,10 @@ class API_Update_Updater {
 			$meta['rollout'] = array(
 				'strategy' => $release['rollout_strategy'],
 			);
+		} elseif ( $post->rollout_strategy ) {
+			$meta['rollout'] = array(
+				'strategy' => $post->rollout_strategy,
+			);
 		}
 
 		// The deferred event (if any) has either fired or been pre-empted by a force-release
