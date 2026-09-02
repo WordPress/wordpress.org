@@ -253,6 +253,100 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
+	 * Lists every file the package will contain.
+	 *
+	 * @return array Package-relative paths.
+	 */
+	public function package_files() {
+		$prefix = trailingslashit( $this->theme_dir );
+
+		return array_map(
+			static function ( $file ) use ( $prefix ) {
+				return substr( $file, strlen( $prefix ) );
+			},
+			$this->get_all_files( $this->theme_dir )
+		);
+	}
+
+	/**
+	 * Lists the packaged files that the automated review never reads.
+	 *
+	 * @return array Package-relative paths of the unreviewed files, sorted.
+	 */
+	public function unreviewable_files() {
+		// Lifted only to measure, so the diff isolates the dot-prefixed entries no filter can reach.
+		add_filter( 'theme_scandir_exclusions', '__return_empty_array' );
+		$reviewed = array_keys( (array) $this->theme->get_files( null, -1, false ) );
+		remove_filter( 'theme_scandir_exclusions', '__return_empty_array' );
+
+		$unreviewed = array_values( array_diff( $this->package_files(), $reviewed ) );
+
+		sort( $unreviewed );
+
+		return $unreviewed;
+	}
+
+	/**
+	 * Lists the packaged files whose names do not identify one file on every supported platform.
+	 *
+	 * @param array $files Package-relative paths to test.
+	 * @return array The paths that are not portable, sorted.
+	 */
+	public static function non_portable_files( array $files ) {
+		$devices = array( 'CON', 'PRN', 'AUX', 'NUL', 'CONIN$', 'CONOUT$' );
+		for ( $i = 1; $i <= 9; $i++ ) {
+			$devices[] = 'COM' . $i;
+			$devices[] = 'LPT' . $i;
+		}
+
+		$not_portable = array();
+
+		foreach ( $files as $file ) {
+			foreach ( explode( '/', $file ) as $segment ) {
+				// Win32 reads the device name from the segment up to its first period.
+				list( $device ) = explode( '.', $segment );
+
+				if (
+					preg_match( '/[:\\\\\x00-\x1f]/', $segment ) ||
+					preg_match( '/[. ]$/', $segment ) ||
+					in_array( strtoupper( $device ), $devices, true )
+				) {
+					$not_portable[] = $file;
+					break;
+				}
+			}
+		}
+
+		sort( $not_portable );
+
+		return $not_portable;
+	}
+
+	/**
+	 * Renders a list of package paths for an error message.
+	 *
+	 * A rejected tree such as a committed `.git` directory holds thousands of paths, so
+	 * only the first few are named.
+	 *
+	 * @param array $files Package-relative paths.
+	 * @return string The escaped, comma-separated list.
+	 */
+	protected function format_file_list( array $files ) {
+		$listed = array_slice( $files, 0, 10 );
+		$list   = '<code>' . implode( '</code>, <code>', array_map( 'esc_html', $listed ) ) . '</code>';
+
+		if ( count( $files ) > count( $listed ) ) {
+			$list .= sprintf(
+				/* translators: %d: number of further files not named in the message */
+				__( ', and %d more', 'wporg-themes' ),
+				count( $files ) - count( $listed )
+			);
+		}
+
+		return $list;
+	}
+
+	/**
 	 * Validate that a theme upload succeeded and was a valid file.
 	 */
 	public function validate_upload( $file ) {
@@ -806,6 +900,47 @@ class WPORG_Themes_Upload {
 					$this->get_theme_header( 'Name' ),
 					'<code>' . $this->theme_post->max_version . '</code>',
 					'<code>style.css</code>'
+				)
+			);
+		}
+
+		/*
+		 * Review has to cover the bytes that ship. Anything the scanner cannot read, and
+		 * any name that does not resolve to one file on every supported platform, would
+		 * let the reviewed tree and the installed tree hold different code.
+		 */
+		$unreviewable = $this->unreviewable_files();
+		if ( $unreviewable ) {
+			$style_errors->add(
+				'unreviewable_files',
+				sprintf(
+					/* translators: 1: number of files, 2: comma-separated list of file paths */
+					_n(
+						'The theme contains %1$d file that the automated review cannot read: %2$s. Remove it and upload the theme again.',
+						'The theme contains %1$d files that the automated review cannot read: %2$s. Remove them and upload the theme again.',
+						count( $unreviewable ),
+						'wporg-themes'
+					),
+					count( $unreviewable ),
+					$this->format_file_list( $unreviewable )
+				)
+			);
+		}
+
+		$not_portable = self::non_portable_files( $this->package_files() );
+		if ( $not_portable ) {
+			$style_errors->add(
+				'non_portable_filename',
+				sprintf(
+					/* translators: 1: number of files, 2: comma-separated list of file paths */
+					_n(
+						'The theme contains %1$d file whose name is not portable to every platform WordPress supports: %2$s. Rename it and upload the theme again.',
+						'The theme contains %1$d files whose names are not portable to every platform WordPress supports: %2$s. Rename them and upload the theme again.',
+						count( $not_portable ),
+						'wporg-themes'
+					),
+					count( $not_portable ),
+					$this->format_file_list( $not_portable )
 				)
 			);
 		}
