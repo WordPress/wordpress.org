@@ -300,14 +300,17 @@ class WPORG_Themes_Upload {
 		}
 
 		$not_portable = array();
+		$by_lowercase = array();
 
 		foreach ( $files as $file ) {
+			$by_lowercase[ strtolower( $file ) ][] = $file;
+
 			foreach ( explode( '/', $file ) as $segment ) {
 				// Win32 reads the device name from the segment up to its first period.
 				list( $device ) = explode( '.', $segment );
 
 				if (
-					preg_match( '/[:\\\\\x00-\x1f]/', $segment ) ||
+					preg_match( '/[<>:"|?*\\\\\x00-\x1f]/', $segment ) ||
 					preg_match( '/[. ]$/', $segment ) ||
 					in_array( strtoupper( $device ), $devices, true )
 				) {
@@ -316,6 +319,15 @@ class WPORG_Themes_Upload {
 				}
 			}
 		}
+
+		// A case-insensitive filesystem resolves every member of these groups to one file.
+		foreach ( $by_lowercase as $group ) {
+			if ( count( $group ) > 1 ) {
+				$not_portable = array_merge( $not_portable, $group );
+			}
+		}
+
+		$not_portable = array_unique( $not_portable );
 
 		sort( $not_portable );
 
@@ -904,11 +916,6 @@ class WPORG_Themes_Upload {
 			);
 		}
 
-		/*
-		 * Review has to cover the bytes that ship. Anything the scanner cannot read, and
-		 * any name that does not resolve to one file on every supported platform, would
-		 * let the reviewed tree and the installed tree hold different code.
-		 */
 		$unreviewable = $this->unreviewable_files();
 		if ( $unreviewable ) {
 			$style_errors->add(

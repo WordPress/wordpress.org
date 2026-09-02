@@ -172,6 +172,7 @@ class Review_Corpus_Test extends TestCase {
 			'leading dot'         => array( 'languages/.gitkeep' ),
 			'device name in word' => array( 'inc/console.php' ),
 			'device as extension' => array( 'assets/icon.con' ),
+			'mixed case'          => array( 'assets/Foo.php' ),
 		);
 	}
 
@@ -204,6 +205,41 @@ class Review_Corpus_Test extends TestCase {
 			'reserved device alone' => array( 'CON' ),
 			'serial port'           => array( 'assets/com1.txt' ),
 			'control character'     => array( "assets/icon\t.svg" ),
+			'less than'             => array( 'assets/a<b.txt' ),
+			'greater than'          => array( 'assets/a>b.txt' ),
+			'double quote'          => array( 'assets/a"b.txt' ),
+			'pipe'                  => array( 'assets/a|b.php' ),
+			'question mark'         => array( 'assets/icon?.svg' ),
+			'asterisk'              => array( 'assets/x*.css' ),
+		);
+	}
+
+	/**
+	 * Paths differing only by case name one file on a case-insensitive filesystem, so every member is reported.
+	 */
+	public function test_case_only_duplicates_are_rejected(): void {
+		$files = array(
+			'style.css',
+			'assets/Foo.php',
+			'assets/foo.php',
+			'inc/setup.php',
+		);
+
+		$this->assertSame(
+			array( 'assets/Foo.php', 'assets/foo.php' ),
+			WPORG_Themes_Upload::non_portable_files( $files )
+		);
+	}
+
+	/**
+	 * A path caught by two rules is reported once.
+	 */
+	public function test_paths_are_reported_once(): void {
+		$files = array( 'assets/A?.php', 'assets/a?.php' );
+
+		$this->assertSame(
+			array( 'assets/A?.php', 'assets/a?.php' ),
+			WPORG_Themes_Upload::non_portable_files( $files )
 		);
 	}
 
