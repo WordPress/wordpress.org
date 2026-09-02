@@ -35,6 +35,9 @@ class Posts {
 		// Sync photo post content to photo media on update.
 		add_action( 'post_updated',       [ __CLASS__, 'sync_photo_post_to_photo_media_on_update' ], 5, 3 );
 
+		// Photo content is plain text (the alternative text), never post markup.
+		add_filter( 'the_content', [ __CLASS__, 'render_content_as_plain_text' ], PHP_INT_MIN );
+
 		// Offset subsequent paginations of front page by number of posts on front page.
 		add_action( 'pre_get_posts',      [ __CLASS__, 'offset_front_page_paginations' ], 11 );
 		// Fix pages count for front page paginations.
@@ -254,6 +257,42 @@ class Posts {
 		}
 
 		return wp_get_attachment_url( $post_id );
+	}
+
+	/**
+	 * Renders a photo's content as the plain text it is.
+	 *
+	 * A photo's content is the alternative text submitted with it. The submit
+	 * form and its sanitization treat that as plain text, so the content must
+	 * not be interpreted as post markup on output either. It is escaped here,
+	 * ahead of every other 'the_content' callback, so that blocks, shortcodes,
+	 * and embeds only ever see text.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public static function render_content_as_plain_text( $content ) {
+		if ( Registrations::get_post_type() !== get_post_type() ) {
+			return $content;
+		}
+
+		return self::plain_text_to_html( $content );
+	}
+
+	/**
+	 * Converts plain text into paragraphs that later content filters leave as text.
+	 *
+	 * @param string $text Plain text.
+	 * @return string
+	 */
+	public static function plain_text_to_html( $text ) {
+		$html = esc_html( $text );
+
+		// Shortcode syntax is part of the text; keep `do_shortcode()` from seeing its delimiter.
+		$html = str_replace( '[', '&#91;', $html );
+
+		// Wrap paragraphs now, so a URL on a line of its own is not auto-embedded.
+		return wpautop( $html );
 	}
 
 	/**
