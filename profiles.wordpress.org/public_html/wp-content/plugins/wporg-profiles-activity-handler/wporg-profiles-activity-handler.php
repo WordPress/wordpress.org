@@ -536,7 +536,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					esc_html( $data['title'] )
 				),
 				'content'           => '',
-				'primary_link'      => $data['url'],
+				'primary_link'      => sanitize_url( $data['url'] ),
 				'component'         => 'plugins',
 				'type'              => 'plugin_create',
 				'item_id'           => intval( $data['plugin_id'] ),
@@ -568,7 +568,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					esc_html( $data['title'] )
 				),
 				'content'           => '',
-				'primary_link'      => $data['url'],
+				'primary_link'      => sanitize_url( $data['url'] ),
 				'component'         => 'themes',
 				'type'              => 'theme_create',
 				'item_id'           => intval( $data['theme_id'] ),
@@ -748,7 +748,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'user_id'           => $user->ID,
 				'action'            => $action,
 				'content'           => '',
-				'primary_link'      => $data['url'] ?? '',
+				'primary_link'      => sanitize_url( $data['url'] ?? '' ),
 				'component'         => 'wordcamp',
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
@@ -961,7 +961,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$action_received = sprintf(
 				'<a href="%1$s">Received props</a> from <a href="https://profiles.wordpress.org/%2$s/">@%2$s</a> in <a href="https://make.wordpress.org/chat/">Slack</a>',
 				esc_url_raw( $url ),
-				$giver_username,
+				esc_html( $giver_username ),
 			);
 
 			$user_case_args[] = array(
