@@ -343,7 +343,7 @@ function is_valid_target_url( $target_url ) {
 		return false;
 	}
 
-	return $parts['host'] === wp_parse_url( get_standalone_origin(), PHP_URL_HOST );
+	return wp_parse_url( get_standalone_origin(), PHP_URL_HOST ) === $parts['host'];
 }
 
 /**
