@@ -12,6 +12,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 use function WordPressdotorg\Openverse\Theme\get_target_url;
+use function WordPressdotorg\Openverse\Theme\is_redirect_enabled;
 use function WordPressdotorg\Openverse\Theme\is_valid_target_url;
 
 /**
@@ -153,10 +154,12 @@ class Target_Url_Test extends TestCase {
 	public function test_keeps_the_configured_host( string $request_uri ): void {
 		$_SERVER['REQUEST_URI'] = $request_uri;
 
-		$this->assertSame(
-			'openverse.org',
-			wp_parse_url( get_target_url(), PHP_URL_HOST ),
-			'Forwarded to a different host: ' . get_target_url()
+		$target = get_target_url();
+
+		$this->assertStringStartsWith(
+			self::ORIGIN . '/',
+			$target,
+			'Forwarded somewhere other than a path under the origin: ' . $target
 		);
 	}
 
@@ -202,5 +205,124 @@ class Target_Url_Test extends TestCase {
 	#[DataProvider( 'targets' )]
 	public function test_redirects_only_to_an_absolute_http_url( string $target, bool $expected ): void {
 		$this->assertSame( $expected, is_valid_target_url( $target ) );
+	}
+
+	/**
+	 * Every request the theme forwards survives the redirect it is handed to.
+	 *
+	 * `wp_safe_redirect()` sends a target it cannot validate to `admin_url()`
+	 * rather than refusing, so a guard that is looser than core leaves a 301
+	 * into wp-admin in visitors' caches. Asserting the guard on its own cannot
+	 * catch that: this walks the whole path, from request to sent header.
+	 *
+	 * @param string $request_uri The incoming request.
+	 */
+	#[DataProvider( 'every_request' )]
+	public function test_a_forwarded_request_is_sent_unchanged( string $request_uri ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		$target                 = get_target_url();
+
+		$this->assertTrue( is_valid_target_url( $target ), "Refused to redirect to {$target}" );
+		$this->assertSame(
+			$target,
+			wp_validate_redirect( $target, 'FELL-BACK' ),
+			"wp_safe_redirect() would not have sent {$target}"
+		);
+	}
+
+	/**
+	 * Every request used anywhere in this file.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function every_request(): array {
+		$requests = array();
+
+		foreach ( self::requests() as $name => $case ) {
+			$requests[ $name ] = array( $case[0] );
+		}
+
+		return array_merge( $requests, self::awkward_requests() );
+	}
+
+	/**
+	 * Values the switch can hold, and whether each one means "on".
+	 *
+	 * @return array<string, array{mixed, bool}>
+	 */
+	public static function switch_values(): array {
+		return array(
+			'boolean true'   => array( true, true ),
+			'boolean false'  => array( false, false ),
+			'one'            => array( '1', true ),
+			'zero'           => array( '0', false ),
+			'empty string'   => array( '', false ),
+			'the word true'  => array( 'true', true ),
+			'the word false' => array( 'false', false ),
+			'upper case'     => array( 'FALSE', false ),
+		);
+	}
+
+	/**
+	 * The switch reads the string forms `wp theme mod set` stores.
+	 *
+	 * The command stores its argument verbatim, so the setting can hold
+	 * `'false'`, and a plain truthiness test would turn the redirect on for it.
+	 *
+	 * @param mixed $stored   What the theme mod holds.
+	 * @param bool  $expected Whether the redirect should run.
+	 */
+	#[DataProvider( 'switch_values' )]
+	public function test_reads_the_switch_as_it_was_written( $stored, bool $expected ): void {
+		remove_filter( 'theme_mod_ov_is_redirect_enabled', '__return_true' );
+		add_filter( 'theme_mod_ov_is_redirect_enabled', static fn() => $stored );
+
+		$this->assertSame( $expected, is_redirect_enabled() );
+
+		remove_all_filters( 'theme_mod_ov_is_redirect_enabled' );
+		add_filter( 'theme_mod_ov_is_redirect_enabled', '__return_true' );
+	}
+
+	/**
+	 * Origins the setting can hold, and the URL each one forwards a search to.
+	 *
+	 * @return array<string, array{string, ?string}>
+	 */
+	public static function origins(): array {
+		return array(
+			'plain'              => array( 'https://openverse.org', 'https://openverse.org/search/' ),
+			'trailing slash'     => array( 'https://openverse.org/', 'https://openverse.org/search/' ),
+			'http'               => array( 'http://openverse.org', 'http://openverse.org/search/' ),
+			'explicit port'      => array( 'https://openverse.org:8443', 'https://openverse.org:8443/search/' ),
+			'upper case scheme'  => array( 'HTTPS://openverse.org', null ),
+			'no scheme'          => array( 'openverse.org', null ),
+			'scheme relative'    => array( '//openverse.org', null ),
+			'other scheme'       => array( 'ftp://openverse.org', null ),
+		);
+	}
+
+	/**
+	 * A configured origin either forwards to itself or is refused outright.
+	 *
+	 * The trailing-slash row matters because the Customizer strips one and
+	 * `wp theme mod set` does not.
+	 *
+	 * @param string      $origin   The configured origin.
+	 * @param string|null $expected The URL a search forwards to, or null when
+	 *                              the theme should render the page instead.
+	 */
+	#[DataProvider( 'origins' )]
+	public function test_forwards_only_to_a_usable_origin( string $origin, ?string $expected ): void {
+		remove_filter( 'theme_mod_ov_redirect_url', array( $this, 'origin' ) );
+		add_filter( 'theme_mod_ov_redirect_url', static fn() => $origin );
+		$_SERVER['REQUEST_URI'] = '/openverse/search/';
+
+		$target = get_target_url();
+		$sent   = is_valid_target_url( $target ) ? $target : null;
+
+		$this->assertSame( $expected, $sent );
+
+		remove_all_filters( 'theme_mod_ov_redirect_url' );
+		add_filter( 'theme_mod_ov_redirect_url', array( $this, 'origin' ) );
 	}
 }

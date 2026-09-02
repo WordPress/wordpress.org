@@ -25,10 +25,9 @@ namespace WordPressdotorg\Openverse\Theme;
 	that caused it was corrected. Rendering the page is the safer failure.
  */
 
-$is_redirect_enabled = get_theme_mod( 'ov_is_redirect_enabled' );
 $target_url = get_target_url();
 
-if ( $is_redirect_enabled && is_valid_target_url( $target_url ) ) {
+if ( is_redirect_enabled() && is_valid_target_url( $target_url ) ) {
 	wp_safe_redirect( $target_url, 301 );
 	exit;
 } else {

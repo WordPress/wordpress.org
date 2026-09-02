@@ -262,7 +262,7 @@ if ( !defined( 'OPENVERSE_STANDALONE_URL' ) ) {
  * @return string
  */
 function get_target_url() {
-	$target_url = get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL );
+	$target_url = untrailingslashit( get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL ) );
 
 	$curr_locale = get_locale();
 	$locale = get_locale_slug( $curr_locale );
@@ -296,12 +296,30 @@ function get_target_url() {
 }
 
 /**
+ * Whether the redirect to the standalone site is switched on.
+ *
+ * `wp theme mod set` stores the string it is handed, so the setting can hold
+ * `'false'`, which PHP reads as true. `wp_validate_boolean()` reads it the way
+ * whoever typed it meant it.
+ *
+ * @return bool
+ */
+function is_redirect_enabled() {
+	return wp_validate_boolean( get_theme_mod( 'ov_is_redirect_enabled', false ) );
+}
+
+/**
  * Whether a redirect target is usable.
  *
  * `wp_validate_redirect()` repairs rather than rejects. Given a target with no
  * host it prepends the current directory, and given a scheme-relative one it
  * assumes `http`, so both come back truthy. The scheme and host are checked
  * first because this target is always absolute.
+ *
+ * The `http`/`https` comparison is deliberately case-sensitive, and states a
+ * contract rather than carrying the weight: `wp_validate_redirect()` compares
+ * the same way, so an upper-case scheme is refused either way. Lower-casing it
+ * here would not make one usable.
  *
  * @param string $target_url URL the theme intends to redirect to.
  * @return bool
@@ -323,15 +341,16 @@ function is_valid_target_url( $target_url ) {
 /**
  * Allow the redirect to reach the standalone Openverse site.
  *
- * The host comes from the configured origin, not from the generated target
- * URL, so that a malformed target cannot authorise its own destination.
+ * The host is read from the configured origin rather than the generated target
+ * URL. The two always share an authority today, so it makes no difference now;
+ * it keeps the filter right if the target is ever assembled differently.
  *
  * @param string[] $hosts Allowed host names.
  * @return string[] Allowed host names, plus the standalone Openverse host when
  *                  the redirect is enabled.
  */
 function allow_standalone_redirect_host( $hosts ) {
-	if ( ! get_theme_mod( 'ov_is_redirect_enabled' ) ) {
+	if ( ! is_redirect_enabled() ) {
 		return $hosts;
 	}
 
