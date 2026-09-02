@@ -21,6 +21,8 @@ class Plugin {
 		}
 
 		add_filter( 'user_has_cap', [ $this, 'add_post_capabilities' ], 10, 4 );
+		add_filter( 'rest_post_query', [ $this, 'restrict_non_public_queries' ] );
+		add_filter( 'rest_attachment_query', [ $this, 'restrict_non_public_queries' ] );
 		add_action( 'admin_bar_menu', [ $this, 'remove_non_accessible_menu_items' ], 100 );
 
 		if ( apply_filters( 'wporg_o2_enable_pending_for_unknown_users', true ) ) {
@@ -282,6 +284,35 @@ class Plugin {
 		$allcaps['edit_published_posts'] = true;
 
 		return $allcaps;
+	}
+
+	/**
+	 * Restricts REST queries for non-public post statuses to the user's own posts.
+	 *
+	 * A query mixing public and non-public statuses is scoped whole, because one
+	 * set of WP_Query arguments cannot express "public by anyone, non-public by me".
+	 *
+	 * @param array $args An array of arguments for WP_Query.
+	 * @return array Filtered WP_Query arguments.
+	 */
+	public function restrict_non_public_queries( $args ) {
+		$user_id = get_current_user_id();
+
+		if ( ! $user_id || is_user_member_of_blog( $user_id ) || is_super_admin( $user_id ) ) {
+			return $args;
+		}
+
+		// 'inherit' is the attachments route's default status, so it is readable without the grant.
+		$public_statuses = array_merge( get_post_stati( [ 'public' => true ] ), [ 'inherit' ] );
+		if ( ! array_diff( (array) ( $args['post_status'] ?? [] ), $public_statuses ) ) {
+			return $args;
+		}
+
+		$args['author']         = $user_id;
+		$args['author__in']     = [];
+		$args['author__not_in'] = [];
+
+		return $args;
 	}
 }
 
