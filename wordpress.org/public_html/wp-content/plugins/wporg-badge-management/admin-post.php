@@ -10,8 +10,7 @@ add_action( 'admin_post_wporg_profile_manage_badges', __NAMESPACE__ . '\manage_b
 add_action( 'admin_post_badge_settings', __NAMESPACE__ . '\save_settings' );
 
 function manage_badges() {
-	$required_cap = get_option( 'wporg_profile_badge_required_cap', 'manage_options' );
-	if ( ! current_user_can( $required_cap ) ) {
+	if ( ! current_user_can( MANAGE_BADGES_CAP ) ) {
 		wp_die( 'Unauthorized user' );
 	}
 
@@ -79,8 +78,7 @@ function manage_badges() {
 }
 
 function save_settings() {
-	$required_cap = get_option( 'wporg_profile_badge_required_cap', 'manage_options' );
-	if ( ! current_user_can( $required_cap ) ) {
+	if ( ! current_user_can_edit_settings() ) {
 		wp_die( 'Unauthorized user' );
 	}
 
@@ -90,10 +88,9 @@ function save_settings() {
 	$note_to_team = isset( $_POST['note_to_team'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note_to_team'] ) ) : '';
 	update_option( 'wporg_profile_badge_note_to_team', $note_to_team );
 
-	// Required cap.
+	// Required cap. Limited to capabilities the current user holds, matching the choices offered in the form.
 	$required_cap = isset( $_POST['required_role'] ) ? sanitize_text_field( wp_unslash( $_POST['required_role'] ) ) : 'manage_options';
-	$valid_caps   = [ 'publish_posts', 'manage_options', 'manage_network' ];
-	if ( in_array( $required_cap, $valid_caps, true ) ) {
+	if ( array_key_exists( $required_cap, get_required_cap_choices() ) && current_user_can( $required_cap ) ) {
 		update_option( 'wporg_profile_badge_required_cap', $required_cap );
 	}
 

@@ -20,7 +20,9 @@ function render() {
 		$tabs[ 'list_users:' . $slug ] = get_badges()[ $slug ] ?? $slug;
 	}
 
-	$tabs['settings'] = 'Settings';
+	if ( current_user_can_edit_settings() ) {
+		$tabs['settings'] = 'Settings';
+	}
 
 	// Create a set of tabs for managing badges and listing users with badges.
 	$active_tab = ( $_GET['tab'] ?? '' ) ?: array_key_first( $tabs );
@@ -37,10 +39,10 @@ function render() {
 	}
 	echo '</h2>';
 
-	// Let the user know that this is accessible by ajyone with the ... capability.
+	// Let the user know who else can manage badges on this site.
 	printf(
-		'<div class="notice notice-success"><p>Anyone with the <code>%s</code> capability on this site can manage badges.</p></div>',
-		get_option( 'wporg_profile_badge_required_cap', 'manage_options' )
+		'<div class="notice notice-success"><p>Users with a role on this site and the <code>%s</code> capability can manage badges.</p></div>',
+		esc_html( get_required_cap() )
 	);
 
 	switch ( explode( ':', $active_tab )[0] ) {
@@ -195,13 +197,19 @@ function render_manage_tab() {
 	<?php
 }
 
-function render_settings() {	
+/**
+ * Renders the settings tab.
+ */
+function render_settings() {
+	if ( ! current_user_can_edit_settings() ) {
+		return;
+	}
 
 	// Add a note to the team.
 	$note_to_team = get_option( 'wporg_profile_badge_note_to_team', '' );
 
 	// The minimum capability required to manage badges on this site.
-	$current_cap = get_option( 'wporg_profile_badge_required_cap', 'manage_options' );
+	$current_cap = get_required_cap();
 
 	// Allow super-admins to set the badges users on this site can assign.
 	$allowed_badges = get_option( 'wporg_profile_badges', [] );
@@ -222,16 +230,8 @@ function render_settings() {
 			<tr>
 				<th scope="row"><label for="required_role">Required Cap to Manage Badges</label></th>
 				<td>
-					<?php
-					$role_caps = [
-						'publish_posts'  => 'Can publish posts (Author+)',
-						'manage_options' => 'Can manage options (Admin+)',
-						'manage_network' => 'Can manage network (Super Admin)',
-					];
-
-					?>
 					<select name="required_role" id="required_role">
-						<?php foreach ( $role_caps as $cap => $desc ) : ?>
+						<?php foreach ( get_required_cap_choices() as $cap => $desc ) : ?>
 							<option
 								value="<?php echo esc_attr( $cap ); ?>"
 								<?php selected( $current_cap, $cap ); ?>
@@ -241,7 +241,7 @@ function render_settings() {
 							</option>
 						<?php endforeach; ?>
 					</select>
-					<p class="description">Select the minimum user role required to manage badges on this site.</p>
+					<p class="description">Select the minimum user role required to manage badges on this site. Only users with a role on this site qualify; super admins can always manage badges.</p>
 				</td>
 			</tr>
 			<tr>

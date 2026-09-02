@@ -4,6 +4,7 @@
 	"testsEnvironment": false,
 	"plugins": [
 		"../wordpress.org/public_html/wp-content/plugins/wporg-o2-posting-access",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-badge-management",
 		"../wordpress.org/public_html/wp-content/plugins/o2-private-posts",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-make-sites-cpt",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-meeting-posttype",
