@@ -3,6 +3,7 @@
 namespace WordPressdotorg\Theme_Preview\Style_Variations\Page_Intercept;
 
 use function WordPressdotorg\Theme_Preview\Style_Variations\get_style_variations;
+use function WordPressdotorg\Theme_Preview\Style_Variations\get_variation_query_value;
 
 /**
  * Return the requested style variation title from the $_GET request.
@@ -32,6 +33,9 @@ function get_variation_from_query() {
 		return $cache[ $stylesheet ];
 	}
 
+	// Written before the lookup on purpose: the lookup below reads the theme's styles and can
+	// call home_url(), which runs persist_query_string() and lands back here. The early miss
+	// turns that into a no-op instead of a recursion.
 	$cache[ $stylesheet ] = false;
 
 	$variation_title = get_style_variation_from_url();
@@ -115,7 +119,7 @@ function persist_query_string( $link ) {
 		return $link;
 	}
 
-	return add_query_arg( 'style_variation', rawurlencode( strtolower( $variation['title'] ) ), $link );
+	return add_query_arg( 'style_variation', get_variation_query_value( $variation ), $link );
 }
 
 add_filter( 'page_link', __NAMESPACE__ . '\persist_query_string' );
