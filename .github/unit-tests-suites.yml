@@ -99,6 +99,8 @@ suites:
     script: make:test
     paths:
       - 'environments/make/**'
+      # Mounted for its suite but not activated, so not read from the environment's plugin list.
+      - 'wordpress.org/public_html/wp-content/plugins/wporg-badge-management/**'
 
   openverse:
     type: wordpress
