@@ -293,7 +293,7 @@ class Target_Url_Test extends TestCase {
 			'trailing slash'     => array( 'https://openverse.org/', 'https://openverse.org/search/' ),
 			'http'               => array( 'http://openverse.org', 'http://openverse.org/search/' ),
 			'explicit port'      => array( 'https://openverse.org:8443', 'https://openverse.org:8443/search/' ),
-			'upper case scheme'  => array( 'HTTPS://openverse.org', null ),
+			'upper case scheme'  => array( 'HTTPS://openverse.org', 'HTTPS://openverse.org/search/' ),
 			'no scheme'          => array( 'openverse.org', null ),
 			'scheme relative'    => array( '//openverse.org', null ),
 			'other scheme'       => array( 'ftp://openverse.org', null ),

@@ -339,7 +339,7 @@ function is_valid_target_url( $target_url ) {
 		return false;
 	}
 
-	if ( ! in_array( $parts['scheme'], array( 'http', 'https' ), true ) ) {
+	if ( ! in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) ) {
 		return false;
 	}
 
