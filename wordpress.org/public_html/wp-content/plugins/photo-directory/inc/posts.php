@@ -270,6 +270,9 @@ class Posts {
 	 *
 	 * Keys on the global post, like core's own content callbacks, so it applies
 	 * to whatever 'the_content' is run for while a photo is the current post.
+	 * The reverse also holds: a photo's content filtered while another post is
+	 * global, such as an excerpt built outside the loop, is not escaped here.
+	 * Nothing on the site does that.
 	 *
 	 * @param string $content Post content.
 	 * @return string
