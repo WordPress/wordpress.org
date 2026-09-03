@@ -11,12 +11,17 @@
 ## WP.org global footer markup (kept in sync by update-headers.php)
 # include 'wporg-footer.html'
 
-## Globals read by wp-trac.js. Always declared, so a wiki-html element with a matching id can't clobber them.
+# if is_bug_gardener:
 <script>
-var wpBugGardener = ${is_bug_gardener|lower};
-var wpTracCurrentUser = "${req.authname}";
-var wpTracContributorLabels, wpTracAutoCompleteUsers;
+var wpBugGardener = true;
 </script>
+# endif
+
+# if req.authname:
+<script>
+var wpTracCurrentUser = "${req.authname}";
+</script>
+# endif
 
 ## JavaScript
 <script src="https://s.w.org/style/js/navigation.min.js?20190128"></script>
