@@ -9,16 +9,7 @@ include __DIR__ . '/list-table.php';
 include __DIR__ . '/post.php';
 
 add_action( 'admin_menu', function() {
-	$svns = SVN\get_svns();
-
-	// Limit the display to just this make sites revisions if possible.
-	if ( 
-		is_multisite() &&
-		( $path = trim( parse_url( home_url('/'), PHP_URL_PATH ), '/' ) ) &&
-		isset( $svns[ $path ] )
-	) {
-		$svns = [ $path => $svns[ $path ] ];
-	}
+	$svns = get_svns_for_current_site();
 
 	foreach ( $svns as $slug => $details ) {
 		// No point showing this UI if we're not importing Props.
@@ -30,7 +21,7 @@ add_action( 'admin_menu', function() {
 		$hook = add_menu_page(
 			$name,
 			$name,
-			'edit_posts',
+			'edit_others_posts',
 			'props-edit-' . $slug,
 			function() use ( $details ) {
 				display_list_table( $details );
@@ -53,6 +44,26 @@ add_action( 'admin_menu', function() {
 	}
 
 } );
+
+/**
+ * Returns the SVNs the current site works with.
+ *
+ * Each Make site handles its own project, so make.wordpress.org/core only lists
+ * and edits the core props. Sites without a matching project, like the network
+ * root, get all of them.
+ *
+ * @return array
+ */
+function get_svns_for_current_site() {
+	$svns = SVN\get_svns();
+	$path = is_multisite() ? trim( (string) parse_url( home_url( '/' ), PHP_URL_PATH ), '/' ) : '';
+
+	if ( $path && isset( $svns[ $path ] ) ) {
+		return [ $path => $svns[ $path ] ];
+	}
+
+	return $svns;
+}
 
 function load_page() {
 	add_screen_option(

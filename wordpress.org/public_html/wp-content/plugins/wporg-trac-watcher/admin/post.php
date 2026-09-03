@@ -10,7 +10,7 @@ add_action( 'admin_post_svn_save', function() {
 	}
 	check_admin_referer( 'edit_svn_prop' );
 
-	$svns = SVN\get_svns();
+	$svns = get_svns_for_current_site();
 	$svn = $svns[ $_REQUEST['svn'] ] ?? false;
 	$rev = $_REQUEST['revision'] ?? false;
 
@@ -146,7 +146,7 @@ add_action( 'admin_post_svn_reparse', function() {
 	}
 	check_admin_referer( 'reparse_svn' );
 
-	$svns = SVN\get_svns();
+	$svns = get_svns_for_current_site();
 	$svn = $svns[ $_REQUEST['svn'] ] ?? false;
 	$rev = $_REQUEST['revision'] ?? false;
 
