@@ -5,7 +5,7 @@ namespace WordPressdotorg\Theme_Preview\Style_Variations\Page_Intercept;
 use function WordPressdotorg\Theme_Preview\Style_Variations\get_style_variations;
 
 /**
- * Return the name of the pattern from the $_GET request.
+ * Return the requested style variation title from the $_GET request.
  *
  * @return string
  */
@@ -14,74 +14,62 @@ function get_style_variation_from_url() {
 		return '';
 	}
 
-	return sanitize_text_field( urldecode( wp_unslash( $_GET['style_variation'] ) ) );
+	return sanitize_text_field( wp_unslash( $_GET['style_variation'] ) );
 }
 
 /**
- * Retrieves the variation based on presense of query string.
+ * Retrieves the variation registered by the theme that matches the query string.
  *
- * @return false|array
+ * The result is cached per theme, as the link filters below call this once per link on the page.
+ *
+ * @return false|array The variation, or false when the query string is absent or matches nothing.
  */
 function get_variation_from_query() {
+	static $cache = array();
+
+	$stylesheet = get_stylesheet();
+	if ( array_key_exists( $stylesheet, $cache ) ) {
+		return $cache[ $stylesheet ];
+	}
+
+	$cache[ $stylesheet ] = false;
+
 	$variation_title = get_style_variation_from_url();
 	if ( empty( $variation_title ) ) {
 		return false;
 	}
 
-	/**
-	 * Retrieve all variations and match to make sure we have one with the same title.
-	 */
 	$variations = get_style_variations();
 	if ( empty( $variations ) ) {
 		return false;
 	}
 
-	return current(
+	$cache[ $stylesheet ] = current(
 		array_filter(
 			$variations,
-			function( $variation ) use ( $variation_title ) {
-				return strtolower( $variation['title'] ) == strtolower( $variation_title );
+			function ( $variation ) use ( $variation_title ) {
+				return strtolower( $variation['title'] ) === strtolower( $variation_title );
 			}
 		)
 	);
+
+	return $cache[ $stylesheet ];
 }
 
 /**
  * Update the theme's variation if valid query string is present.
  *
- * @param WP_Theme_JSON_Data_Gutenberg $theme_json
+ * @param WP_Theme_JSON_Data_Gutenberg $theme_json The theme JSON data.
  * @return WP_Theme_JSON_Data_Gutenberg
  */
 function filter_theme_json_user( $theme_json ) {
-	$variation_title = get_style_variation_from_url();
-	if ( empty( $variation_title ) ) {
-		return $theme_json;
-	}
-
-	/**
-	 * Retrieve all variations and match to make sure we have one with the same title.
-	 */
-	$variations = \WP_Theme_JSON_Resolver::get_style_variations();
-	if ( empty( $variations ) ) {
-		return $theme_json;
-	}
-
-	$variation_details = current(
-		array_filter(
-			$variations,
-			function( $variation ) use ( $variation_title ) {
-				return strtolower( $variation['title'] ) == strtolower( $variation_title );
-			}
-		)
-	);
-
 	$variation_details = get_variation_from_query();
 
 	if ( ! $variation_details ) {
 		return $theme_json;
 	}
 
-	// Override styles with variation
+	// Override styles with variation.
 	$new_data = array(
 		'version' => 2,
 	);
@@ -107,7 +95,6 @@ function filter_theme_json_user( $theme_json ) {
  * Hopefully this code can be remove when we have a better component to use.
  *
  * Ref: https://github.com/WordPress/gutenberg/issues/44886
-
  */
 add_filter( 'theme_json_user', __NAMESPACE__ . '\filter_theme_json_user' );
 add_filter( 'wp_theme_json_data_user', __NAMESPACE__ . '\filter_theme_json_user' );
@@ -115,20 +102,23 @@ add_filter( 'wp_theme_json_data_user', __NAMESPACE__ . '\filter_theme_json_user'
 /**
  * Appends a query string to maintain the style variation state.
  *
- * @param string $link
+ * Only a variation the theme actually registers is carried across, using the same
+ * lower-cased, URL-encoded form the styles endpoint generates.
+ *
+ * @param string $link The link being filtered.
  * @return string URL
  */
 function persist_query_string( $link ) {
-	$variation_title = get_style_variation_from_url();
+	$variation = get_variation_from_query();
 
-	if ( $variation_title ) {
-		return add_query_arg( 'style_variation', $variation_title, $link );
+	if ( ! $variation || empty( $variation['title'] ) ) {
+		return $link;
 	}
 
-	return $link;
+	return add_query_arg( 'style_variation', rawurlencode( strtolower( $variation['title'] ) ), $link );
 }
 
-add_filter( 'page_link', __NAMESPACE__ . '\persist_query_string', 10, 2 );
-add_filter( 'post_link', __NAMESPACE__ . '\persist_query_string', 10, 2 );
-add_filter( 'term_link', __NAMESPACE__ . '\persist_query_string', 10, 2 );
-add_filter( 'home_url', __NAMESPACE__ . '\persist_query_string', 10, 2 );
+add_filter( 'page_link', __NAMESPACE__ . '\persist_query_string' );
+add_filter( 'post_link', __NAMESPACE__ . '\persist_query_string' );
+add_filter( 'term_link', __NAMESPACE__ . '\persist_query_string' );
+add_filter( 'home_url', __NAMESPACE__ . '\persist_query_string' );
