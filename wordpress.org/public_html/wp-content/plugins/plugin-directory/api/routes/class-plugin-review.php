@@ -400,8 +400,16 @@ class Plugin_Review extends Base {
 	 * The new slug goes through the same availability checks as an author requesting a slug
 	 * change, minus the trademark check, as reviewers rename plugins to resolve trademarks.
 	 *
+	 * The slug the plugin ends up with isn't always the one requested, so the response
+	 * carries both and the caller can tell the reviewer which slug they got.
+	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
-	 * @return bool|WP_Error
+	 * @return array|WP_Error {
+	 *     The renamed plugin, WP_Error upon failure.
+	 *
+	 *     @type string $slug           The slug the plugin now has.
+	 *     @type string $requested_slug The slug which was requested.
+	 * }
 	 */
 	public function change_slug( $request ) {
 		$post = $this->get_plugin( $request );
@@ -477,13 +485,28 @@ class Plugin_Review extends Base {
 			return $result;
 		}
 
-		// `wp_insert_post()` alters the slug in a few cases, so check the plugin actually got it.
-		if ( get_post_field( 'post_name', $post->ID ) !== $new_slug ) {
+		/*
+		 * `wp_insert_post()` alters the slug in a few cases, most commonly by suffixing it to
+		 * keep it unique when the slug was taken between the check above and this update, so
+		 * the slug the plugin ended up with is read back rather than assumed.
+		 */
+		$saved_slug = get_post_field( 'post_name', $post->ID );
+
+		if ( ! $saved_slug || $saved_slug === $old_slug ) {
 			return new WP_Error( 'slug_not_updated', 'Failed to update the plugin slug', [ 'status' => 500 ] );
 		}
 
-		Tools::audit_log( sprintf( "Slug changed from '%s' to '%s'.", $old_slug, $new_slug ), $post->ID );
+		$audit_entry = sprintf( "Slug changed from '%s' to '%s'.", $old_slug, $saved_slug );
 
-		return true;
+		if ( $saved_slug !== $new_slug ) {
+			$audit_entry .= sprintf( " The requested slug, '%s', was not available.", $new_slug );
+		}
+
+		Tools::audit_log( $audit_entry, $post->ID );
+
+		return [
+			'slug'           => $saved_slug,
+			'requested_slug' => $new_slug,
+		];
 	}
 }

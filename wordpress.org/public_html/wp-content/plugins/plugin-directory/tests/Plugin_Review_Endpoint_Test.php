@@ -576,7 +576,13 @@ class Plugin_Review_Endpoint_Test extends TestCase {
 		);
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertTrue( $response->get_data() );
+		$this->assertSame(
+			array(
+				'slug'           => 'a-brand-new-slug',
+				'requested_slug' => 'a-brand-new-slug',
+			),
+			$response->get_data()
+		);
 
 		$this->assertSame( 'a-brand-new-slug', get_post( $plugin->ID )->post_name );
 		$this->assertSame( 'pending', get_post( $plugin->ID )->post_status );
@@ -585,6 +591,56 @@ class Plugin_Review_Endpoint_Test extends TestCase {
 		$this->assertCount( 1, $notes );
 		$this->assertSame( $this->admin_id, (int) $notes[0]->user_id );
 		$this->assertStringContainsString( "Slug changed from '{$plugin->post_name}' to 'a-brand-new-slug'.", $notes[0]->comment_content );
+	}
+
+	/**
+	 * A rename which lands on a different slug than the one requested is a success
+	 * reporting the slug the plugin got, not a failure.
+	 *
+	 * `wp_insert_post()` suffixes a slug which was taken between the availability check
+	 * and the update. That race can't be staged in a single threaded test, so the slug is
+	 * marked as unavailable on the filter core offers for it, and core suffixes it.
+	 */
+	public function test_slug_change_reports_the_slug_the_plugin_got(): void {
+		// The uniqueness check is skipped for pending posts, so the plugin is a new one.
+		$plugin = $this->create_plugin( 'new' );
+
+		$slug_is_taken = static function ( bool $is_bad, string $slug ): bool {
+			return 'a-contested-slug' === $slug ? true : $is_bad;
+		};
+
+		add_filter( 'wp_unique_post_slug_is_bad_flat_slug', $slug_is_taken, 10, 2 );
+
+		try {
+			$response = $this->dispatch(
+				'slug',
+				array(
+					'user_id' => $this->admin_id,
+					'slug'    => 'a-contested-slug',
+				),
+				null,
+				null,
+				$plugin->ID
+			);
+		} finally {
+			remove_filter( 'wp_unique_post_slug_is_bad_flat_slug', $slug_is_taken, 10 );
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			array(
+				'slug'           => 'a-contested-slug-2',
+				'requested_slug' => 'a-contested-slug',
+			),
+			$response->get_data()
+		);
+
+		$this->assertSame( 'a-contested-slug-2', get_post( $plugin->ID )->post_name );
+
+		$notes = $this->audit_log( $plugin->ID );
+		$this->assertCount( 1, $notes );
+		$this->assertStringContainsString( "Slug changed from '{$plugin->post_name}' to 'a-contested-slug-2'.", $notes[0]->comment_content );
+		$this->assertStringContainsString( "The requested slug, 'a-contested-slug', was not available.", $notes[0]->comment_content );
 	}
 
 	/**
