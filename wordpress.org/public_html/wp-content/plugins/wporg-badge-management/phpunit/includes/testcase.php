@@ -8,6 +8,9 @@
  * test before a single assertion runs. This mirrors the approach the handbook
  * plugin's suite takes.
  *
+ * Copy of `wporg-o2-posting-access/phpunit/includes/testcase.php`, which is
+ * the source of truth. Fix things there first, then bring them over.
+ *
  * @package wporg-badge-management
  */
 
