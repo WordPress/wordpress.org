@@ -1,4 +1,4 @@
-/* globals wpBugGardener, wpTracAutoCompleteUsers, wpTracContributorLabels, wpTracCurrentUser */
+/* globals wpTracCurrentUser */
 let wpTrac,
 	coreKeywordList,
 	gardenerKeywordList,
@@ -318,7 +318,7 @@ let wpTrac,
 		}[ projectSlug ] || 'https://wordpress.org/support/';
 
 	wpTrac = {
-		gardener: true === wpBugGardener,
+		gardener: true === window.wpBugGardener,
 		currentUser: wpTracCurrentUser,
 
 		init() {
@@ -338,8 +338,8 @@ let wpTrac,
 				wpTrac.nonGardeners();
 			}
 
-			if ( wpTracContributorLabels ) {
-				wpTrac.showContributorLabels( wpTracContributorLabels );
+			if ( window.wpTracContributorLabels ) {
+				wpTrac.showContributorLabels( window.wpTracContributorLabels );
 			}
 
 			wpTrac.autocomplete.init();
@@ -1395,8 +1395,8 @@ let wpTrac,
 						return;
 					}
 
-					if ( wpTracAutoCompleteUsers ) {
-						settings = wpTracAutoCompleteUsers;
+					if ( window.wpTracAutoCompleteUsers ) {
+						settings = window.wpTracAutoCompleteUsers;
 					}
 
 					this.initTicketParticipants();
