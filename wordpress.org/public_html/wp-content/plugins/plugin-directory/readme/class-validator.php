@@ -507,8 +507,9 @@ class Validator {
 			case 'trademarked_slug':
 			case 'trademarked':
 				$trademarks = (array) $data['trademark'];
-				$context    = $data['context'];
-				$messages   = [];
+				// Callers differ on whether they pre-escape the context, so normalise it first.
+				$context  = esc_html( wp_specialchars_decode( $data['context'], ENT_QUOTES ) );
+				$messages = [];
 	
 				$cannot_start_with = array_filter( $trademarks, function( $slug ) {
 					return str_ends_with( $slug, '-' );
