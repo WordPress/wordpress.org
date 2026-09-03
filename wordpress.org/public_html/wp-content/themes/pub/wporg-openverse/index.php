@@ -18,16 +18,19 @@ namespace WordPressdotorg\Openverse\Theme;
 	If the theme mod `ov_is_redirect_enabled` is set to `true`, redirect to the
 	standalone site and exit immediately. If not, print what would have been the
 	redirect URL to the HTML as a comment.
+
+	The target is checked before redirecting. A misconfigured `ov_redirect_url`
+	would otherwise send a permanent redirect that sits in visitors' caches long
+	after the setting was corrected. Rendering the page is the safer failure.
  */
 
-$is_redirect_enabled = get_theme_mod( 'ov_is_redirect_enabled' );
 $target_url = get_target_url();
 
-if ( $is_redirect_enabled ) {
+if ( is_redirect_enabled() && is_valid_target_url( $target_url ) ) {
 	wp_redirect( $target_url, 301 );
 	exit;
 } else {
-	echo "<!-- " . $target_url . " -->";
+	echo '<!-- ' . esc_html( $target_url ) . ' -->';
 }
 
 get_header();

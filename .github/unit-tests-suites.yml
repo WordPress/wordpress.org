@@ -99,3 +99,11 @@ suites:
     script: make:test
     paths:
       - 'environments/make/**'
+
+  openverse:
+    type: wordpress
+    name: Openverse Theme
+    script: openverse:test
+    paths:
+      - 'environments/openverse/**'
+      - 'wordpress.org/public_html/wp-content/themes/pub/wporg-openverse/**'
