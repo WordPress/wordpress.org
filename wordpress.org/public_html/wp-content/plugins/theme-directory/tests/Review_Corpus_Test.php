@@ -5,7 +5,7 @@
  * Review runs over `WP_Theme::get_files()`, while the package is built from the whole
  * extracted tree. The scanner's dot-prefixed exclusion is not filterable, so a hidden
  * file ships without any check reading it; the import fails on that difference.
- * Filenames that Win32 resolves to a different target are rejected for the same reason.
+ * Non-portable file names are rejected too.
  *
  * @package theme-directory
  */
@@ -195,7 +195,7 @@ class Review_Corpus_Test extends TestCase {
 	}
 
 	/**
-	 * Names that Win32 resolves to a different target are rejected.
+	 * Non-portable names are rejected.
 	 *
 	 * @dataProvider data_non_portable_names
 	 *
@@ -206,7 +206,7 @@ class Review_Corpus_Test extends TestCase {
 	}
 
 	/**
-	 * Names that alias to a file other than the one review read.
+	 * Names that are not portable.
 	 *
 	 * @return array<string, array{0: string}>
 	 */
@@ -229,6 +229,9 @@ class Review_Corpus_Test extends TestCase {
 			'pipe'                  => array( 'assets/a|b.php' ),
 			'question mark'         => array( 'assets/icon?.svg' ),
 			'asterisk'              => array( 'assets/x*.css' ),
+			'non-ascii'             => array( "assets/caf\u{00E9}.php" ),
+			'non-ascii digit'       => array( "assets/COM\u{00B9}.txt" ),
+			'delete character'      => array( "assets/icon\x7f.svg" ),
 		);
 	}
 
@@ -250,19 +253,6 @@ class Review_Corpus_Test extends TestCase {
 	}
 
 	/**
-	 * Case folding covers non-ASCII names, which a case-insensitive filesystem also folds.
-	 */
-	public function test_non_ascii_case_only_duplicates_are_rejected(): void {
-		$upper = "assets/\u{00C4}.php";
-		$lower = "assets/\u{00E4}.php";
-
-		$this->assertSame(
-			array( $upper, $lower ),
-			WPORG_Themes_Upload::non_portable_files( array( 'style.css', $upper, $lower ) )
-		);
-	}
-
-	/**
 	 * A path caught by two rules is reported once.
 	 */
 	public function test_paths_are_reported_once(): void {
@@ -272,6 +262,22 @@ class Review_Corpus_Test extends TestCase {
 			array( 'assets/A?.php', 'assets/a?.php' ),
 			WPORG_Themes_Upload::non_portable_files( $files )
 		);
+	}
+
+	/**
+	 * Every rejected name is rendered so the author can see it, whatever bytes it holds.
+	 */
+	public function test_rejected_names_are_rendered_visibly(): void {
+		$render   = new ReflectionMethod( WPORG_Themes_Upload::class, 'format_file_list' );
+		$rendered = $render->invoke(
+			new WPORG_Themes_Upload(),
+			array( "assets/caf\xE9.php", "assets/icon\x7f.svg", 'inc\\setup.php' )
+		);
+
+		$this->assertStringContainsString( 'caf\351.php', $rendered );
+		$this->assertStringContainsString( 'icon\177.svg', $rendered );
+		$this->assertStringContainsString( 'inc\setup.php', $rendered );
+		$this->assertStringNotContainsString( '<code></code>', $rendered );
 	}
 
 	/**
