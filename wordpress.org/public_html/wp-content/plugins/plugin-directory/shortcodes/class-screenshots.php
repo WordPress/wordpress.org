@@ -183,10 +183,9 @@ class Screenshots {
 	}
 
 	/**
-	 * Adds preconnect / dns-prefetch hints to the Photon CDN host on
+	 * Adds preconnect / dns-prefetch hints to the screenshot host on
 	 * single-plugin pages so the browser can warm up the TLS handshake
-	 * while the page HTML is still streaming. Saves ~50–150 ms on the
-	 * first thumbnail paint for cold visitors. Hooked from
+	 * while the page HTML is still streaming. Hooked from
 	 * `class-plugin-directory.php` via the `wp_resource_hints` filter.
 	 *
 	 * @param array  $urls          Resource hint URLs already queued for $relation_type.
@@ -200,11 +199,11 @@ class Screenshots {
 
 		if ( 'preconnect' === $relation_type ) {
 			$urls[] = array(
-				'href'        => 'https://i0.wp.com',
+				'href'        => 'https://ps.w.org',
 				'crossorigin' => 'anonymous',
 			);
 		} elseif ( 'dns-prefetch' === $relation_type ) {
-			$urls[] = 'https://i0.wp.com';
+			$urls[] = 'https://ps.w.org';
 		}
 
 		return $urls;
@@ -369,10 +368,9 @@ class Screenshots {
 		$class  = 'wp-block-image size-large';
 
 		// Record the full-resolution source and intrinsic dimensions for the
-		// lightbox-state repair in fix_lightbox_metadata(). The grid thumbnail
-		// loads a Photon-shrunk srcset candidate, so core (which has no real
-		// attachment to query) would otherwise enlarge that small image; this
-		// hands the lightbox the lossless original at its true size.
+		// lightbox-state repair in fix_lightbox_metadata(). Core has no real
+		// attachment to query for these external assets, so this hands the
+		// lightbox the lossless original at its true size.
 		self::$lightbox_meta[ (int) $id ] = array(
 			'url'    => $src,
 			'width'  => ( is_array( $dimensions ) && ! empty( $dimensions[0] ) ) ? (int) $dimensions[0] : 'none',
@@ -450,12 +448,8 @@ class Screenshots {
 	 *   $targetHeight= $meta['height'] ?? 'none';           // → 'none'
 	 *
 	 * The empty `uploadedSrc` leaves the lightbox with no full-resolution
-	 * image to enlarge, and the `'none'` dimensions make core's view
-	 * script fall back to the *thumbnail's* natural size — which on
-	 * production is a Photon-shrunk srcset candidate (≤900px, often the
-	 * 300px tile). The enlarged view therefore renders tiny. On
-	 * environments without Photon the thumbnail is the full-resolution
-	 * original, which is why the bug is invisible on local / staging.
+	 * image to enlarge, and the `'none'` dimensions leave core's view script
+	 * without the source image's intrinsic size.
 	 *
 	 * Core keys its lightbox metadata by a per-render `uniqid()` (exposed
 	 * on the figure's `data-wp-context`), not by the attachment id, so the
@@ -463,9 +457,8 @@ class Screenshots {
 	 * rendered markup and re-set the affected fields. `wp_interactivity_state()`
 	 * merges with `array_replace_recursive()` (later call wins), and this
 	 * filter runs at priority 20 — after core's priority-15 pass — so the
-	 * corrected values override the broken ones. `lightboxSrcset` is
-	 * cleared so the enlarged image loads the lossless original rather than
-	 * a capped Photon candidate.
+	 * corrected values override the broken ones. `lightboxSrcset` is cleared
+	 * so the enlarged image loads the lossless original.
 	 *
 	 * @param string $block_content Rendered Image block markup.
 	 * @param array  $parsed_block  Parsed block, including `attrs['id']`.
@@ -557,35 +550,22 @@ class Screenshots {
 	}
 
 	/**
-	 * Builds a revision-aware Photon `srcset` for a screenshot.
+	 * Temporarily disables the Photon `srcset` for screenshots.
+	 *
+	 * Photon drops the revision query string when transform arguments are
+	 * present, which can leave resized screenshots pinned to stale source data.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/8331
+	 * @see https://code.trac.wordpress.org/ticket/79#comment:1
 	 *
 	 * @param array $screenshot Screenshot metadata.
-	 * @return string Attribute fragment ready to interpolate into `<img>`,
-	 *                including the leading space, or empty string.
+	 * @return string Empty string while Photon resizing is disabled.
 	 */
 	protected static function photon_srcset( $screenshot ) {
-		$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
-		if ( 'production' !== $env && 'staging' !== $env ) {
-			return '';
-		}
 
-		$source_url   = Template::get_asset_url( null, $screenshot, false );
-		$source_query = wp_parse_url( $source_url, PHP_URL_QUERY );
-		$photon_base  = str_replace( 'https://', 'https://i0.wp.com/', remove_query_arg( 'rev', $source_url ) );
+		unset( $screenshot );
 
-		// Photon only forwards the source query string when it is passed through `q`.
-		$photon_base = add_query_arg( 'q', $source_query, $photon_base );
-		$widths      = array( 300, 600, 900 );
-		$srcset      = array();
-
-		foreach ( $widths as $width ) {
-			$srcset[] = add_query_arg( 'w', $width, $photon_base ) . ' ' . $width . 'w';
-		}
-
-		return sprintf(
-			' srcset="%1$s" sizes="(max-width: 599px) 50vw, 33vw"',
-			esc_attr( implode( ', ', $srcset ) )
-		);
+		return '';
 	}
 
 	/**
