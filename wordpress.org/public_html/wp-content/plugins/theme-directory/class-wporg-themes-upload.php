@@ -954,8 +954,8 @@ class WPORG_Themes_Upload {
 				sprintf(
 					/* translators: 1: number of files, 2: comma-separated list of file paths */
 					_n(
-						'The theme contains %1$d file whose name is not portable to every platform WordPress supports: %2$s. File names may contain only printable ASCII characters that Windows allows, may not end in a period or space, may not be a reserved Windows name, and may not differ from another name only by case. Rename it and upload the theme again.',
-						'The theme contains %1$d files whose names are not portable to every platform WordPress supports: %2$s. File names may contain only printable ASCII characters that Windows allows, may not end in a period or space, may not be a reserved Windows name, and may not differ from another name only by case. Rename them and upload the theme again.',
+						'The theme contains %1$d file whose name is not portable to every platform WordPress supports: %2$s. Each part of a path may contain only printable ASCII characters, excluding those Windows reserves, may not end in a period or space, may not be a reserved Windows name, and may not differ from another path only by case. Rename it and upload the theme again.',
+						'The theme contains %1$d files whose names are not portable to every platform WordPress supports: %2$s. Each part of a path may contain only printable ASCII characters, excluding those Windows reserves, may not end in a period or space, may not be a reserved Windows name, and may not differ from another path only by case. Rename them and upload the theme again.',
 						count( $not_portable ),
 						'wporg-themes'
 					),
