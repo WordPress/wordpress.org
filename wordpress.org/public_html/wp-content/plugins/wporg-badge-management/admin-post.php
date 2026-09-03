@@ -84,13 +84,17 @@ function save_settings() {
 
 	check_admin_referer( 'badge_settings' );
 
-	// Required cap. The select is disabled for users who can't change it, so the field is only posted when it applies.
-	// Limited to the offered choices, and to capabilities the current user holds.
+	// Required cap. The select is disabled for users who can't change it, but a stale form may still post
+	// the field, so it's ignored from them rather than refused. For those who can, it's limited to the
+	// offered choices and to capabilities they hold.
 	$required_cap = isset( $_POST['required_role'] ) ? sanitize_text_field( wp_unslash( $_POST['required_role'] ) ) : null;
+	if ( ! current_user_can_change_required_cap() ) {
+		$required_cap = null;
+	}
+
 	if (
 		null !== $required_cap &&
 		(
-			! current_user_can_change_required_cap() ||
 			! array_key_exists( $required_cap, get_required_cap_choices() ) ||
 			! current_user_can( $required_cap )
 		)
