@@ -253,6 +253,125 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
+	 * Lists every file the package will contain.
+	 *
+	 * @return array Package-relative paths.
+	 */
+	public function package_files() {
+		$prefix = trailingslashit( $this->theme_dir );
+
+		return array_map(
+			static function ( $file ) use ( $prefix ) {
+				return substr( $file, strlen( $prefix ) );
+			},
+			$this->get_all_files( $this->theme_dir )
+		);
+	}
+
+	/**
+	 * Lists the packaged files that the automated review never reads.
+	 *
+	 * @return array Package-relative paths of the unreviewed files, sorted.
+	 */
+	public function unreviewable_files() {
+		// Lifted only to measure, so the diff isolates the dot-prefixed entries no filter can reach.
+		add_filter( 'theme_scandir_exclusions', '__return_empty_array' );
+		$reviewed = array_flip( array_values( (array) $this->theme->get_files( null, -1, false ) ) );
+		remove_filter( 'theme_scandir_exclusions', '__return_empty_array' );
+
+		$prefix     = trailingslashit( $this->theme_dir );
+		$unreviewed = array();
+
+		foreach ( $this->get_all_files( $this->theme_dir ) as $file ) {
+			if ( ! isset( $reviewed[ $file ] ) ) {
+				$unreviewed[] = substr( $file, strlen( $prefix ) );
+			}
+		}
+
+		sort( $unreviewed );
+
+		return $unreviewed;
+	}
+
+	/**
+	 * Lists the packaged files whose names are not portable.
+	 *
+	 * @param array $files Package-relative paths to test.
+	 * @return array The paths that are not portable, sorted.
+	 */
+	public static function non_portable_files( array $files ) {
+		$devices = array( 'CON', 'PRN', 'AUX', 'NUL', 'CONIN$', 'CONOUT$' );
+		for ( $i = 1; $i <= 9; $i++ ) {
+			$devices[] = 'COM' . $i;
+			$devices[] = 'LPT' . $i;
+		}
+
+		$not_portable = array();
+		$by_lowercase = array();
+
+		foreach ( $files as $file ) {
+			$by_lowercase[ strtolower( $file ) ][] = $file;
+
+			foreach ( explode( '/', $file ) as $segment ) {
+				// Win32 reads the device name from the segment up to its first period.
+				list( $device ) = explode( '.', $segment );
+
+				if (
+					preg_match( '/[<>:"|?*\\\\\x00-\x1f\x7f-\xff]/', $segment ) ||
+					preg_match( '/[. ]$/', $segment ) ||
+					in_array( strtoupper( $device ), $devices, true )
+				) {
+					$not_portable[] = $file;
+					break;
+				}
+			}
+		}
+
+		// A case-insensitive filesystem resolves every member of these groups to one file.
+		foreach ( $by_lowercase as $group ) {
+			if ( count( $group ) > 1 ) {
+				$not_portable = array_merge( $not_portable, $group );
+			}
+		}
+
+		$not_portable = array_unique( $not_portable );
+
+		sort( $not_portable );
+
+		return $not_portable;
+	}
+
+	/**
+	 * Renders a list of package paths for an error message.
+	 *
+	 * A rejected tree such as a committed `.git` directory holds thousands of paths, so
+	 * only the first few are named.
+	 *
+	 * @param array $files Package-relative paths.
+	 * @return string The escaped, comma-separated list.
+	 */
+	protected function format_file_list( array $files ) {
+		$listed = array_map(
+			static function ( $file ) {
+				// Escape non-printable bytes so every rejected name is visible.
+				return esc_html( addcslashes( $file, "\0..\37\177..\377" ) );
+			},
+			array_slice( $files, 0, 10 )
+		);
+		$list   = '<code>' . implode( '</code>, <code>', $listed ) . '</code>';
+
+		if ( count( $files ) > count( $listed ) ) {
+			$list .= sprintf(
+				/* translators: %d: number of further files not named in the message */
+				__( ', and %d more', 'wporg-themes' ),
+				count( $files ) - count( $listed )
+			);
+		}
+
+		return $list;
+	}
+
+	/**
 	 * Validate that a theme upload succeeded and was a valid file.
 	 */
 	public function validate_upload( $file ) {
@@ -315,7 +434,8 @@ class WPORG_Themes_Upload {
 		$esc_svn       = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
 		$esc_theme_dir = escapeshellarg( $this->theme_dir );
 		$this->exec_with_notify(
-			self::SVN . " export {$esc_svn} {$esc_theme_dir} --force", // force as we've created the directory already.
+			// --ignore-externals: never let a committer's svn:externals pull a remote tree into the export.
+			self::SVN . " export {$esc_svn} {$esc_theme_dir} --force --ignore-externals", // force as we've created the directory already.
 			$output,
 			$return_var
 		);
@@ -359,7 +479,8 @@ class WPORG_Themes_Upload {
 
 		return $this->import( array( // return true | WP_Error
 			// Since this version is already in SVN, we shouldn't try to import it again.
-			'commit_to_svn' => false,
+			'commit_to_svn'    => false,
+			'expected_version' => $version,
 		) );
 	}
 
@@ -401,6 +522,73 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
+	 * Determines whether a version string is a canonical, unambiguous theme version.
+	 *
+	 * Canonical means decimal segments joined by single periods and nothing else: the one
+	 * shape that maps identically across the style.css header, SVN directory, meta key, API
+	 * value, and package filename, so review and downloads can't resolve different trees.
+	 * Version zero ('0', '0.0', ...) is rejected: version_compare() makes it the lowest
+	 * possible version, and the bare form's falsiness invites `! $version` bugs downstream.
+	 *
+	 * @param string $version The version string to test.
+	 * @return bool True when the version is canonical.
+	 */
+	public static function is_canonical_version( $version ) {
+		return (bool) preg_match( '/^\d+(\.\d+)*$/D', (string) $version )
+			&& (bool) preg_match( '/[1-9]/', (string) $version );
+	}
+
+	/**
+	 * Collects the errors for a theme's Version header and its SVN directory identity.
+	 *
+	 * @param string       $version          The style.css Version header value.
+	 * @param string|false $expected_version SVN directory version the header must match; false to skip the check.
+	 * @return WP_Error The errors found; empty when the version is acceptable.
+	 */
+	public static function version_identity_errors( $version, $expected_version = false ) {
+		$errors = new WP_Error();
+
+		// Strict comparison: a '0' header is reported as invalid below, not as missing.
+		if ( '' === $version ) {
+			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
+
+			$error .= sprintf(
+				/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
+				__( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
+				'<code>Version:</code>',
+				'<code>style.css</code>',
+				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
+			);
+
+			$errors->add( 'no_version', $error );
+
+		} elseif ( ! self::is_canonical_version( $version ) ) {
+			$errors->add(
+				'invalid_version',
+				sprintf(
+					/* translators: %s: style.css */
+					__( 'Version strings must be a plain numeric version like 1.2 or 1.2.3. Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
+					'<code>style.css</code>'
+				)
+			);
+
+		} elseif ( false !== $expected_version && (string) $expected_version !== $version ) {
+			// The exported directory name must equal the version its tree declares, or review and downloads diverge.
+			$errors->add(
+				'version_mismatch',
+				sprintf(
+					/* translators: 1: SVN directory version, 2: style.css version */
+					__( 'The SVN directory version (%1$s) does not match the version declared in style.css (%2$s).', 'wporg-themes' ),
+					'<code>' . esc_html( (string) $expected_version ) . '</code>',
+					'<code>' . esc_html( $version ) . '</code>'
+				)
+			);
+		}
+
+		return $errors;
+	}
+
+	/**
 	 * Processes a theme import.
 	 *
 	 * @return WP_Error|true Error object on failure, true on success.
@@ -417,6 +605,8 @@ class WPORG_Themes_Upload {
 				'block_on_themecheck' => true,
 				// Whether to create a Trac ticket for this import.
 				'create_trac_ticket'  => true,
+				// SVN directory version the tree's header must match; false to skip the check.
+				'expected_version'    => false,
 			)
 		);
 
@@ -598,6 +788,18 @@ class WPORG_Themes_Upload {
 			$style_errors->add( 'no_description', $error );
 		}
 
+		if ( preg_match( '/' . get_shortcode_regex() . '/', $theme_description ) ) {
+			$style_errors->add(
+				'shortcode_in_description',
+				sprintf(
+					/* translators: 1: comment header line, 2: style.css */
+					__( 'The %1$s line in %2$s cannot contain shortcodes. Remove them and upload the theme again.', 'wporg-themes' ),
+					'<code>Description:</code>',
+					'<code>style.css</code>'
+				)
+			);
+		}
+
 		if ( ! $this->theme->get( 'Tags' ) ) {
 			$error = __( 'The theme has no tags.', 'wporg-themes' ) . ' ';
 
@@ -612,29 +814,9 @@ class WPORG_Themes_Upload {
 			$style_errors->add( 'no_tags', $error );
 		}
 
-		if ( ! $this->theme->get( 'Version' ) ) {
-			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
-
-			$error .= sprintf(
-				/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
-				__( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
-				'<code>Version:</code>',
-				'<code>style.css</code>',
-				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
-			);
-
-			$style_errors->add( 'no_version', $error );
-
-		} else if ( preg_match( '|[^\d\.]|', $this->theme->get( 'Version' ) ) ) {
-			$style_errors->add(
-				'invalid_version',
-				sprintf(
-					/* translators: %s: style.css */
-					__( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
-					'<code>style.css</code>'
-				)
-			);
-		}
+		$style_errors->merge_from(
+			self::version_identity_errors( (string) $this->theme->get( 'Version' ), $args['expected_version'] )
+		);
 
 		// Version is greater than current version happens after authorship checks.
 
@@ -755,6 +937,42 @@ class WPORG_Themes_Upload {
 					$this->get_theme_header( 'Name' ),
 					'<code>' . $this->theme_post->max_version . '</code>',
 					'<code>style.css</code>'
+				)
+			);
+		}
+
+		$unreviewable = $this->unreviewable_files();
+		if ( $unreviewable ) {
+			$style_errors->add(
+				'unreviewable_files',
+				sprintf(
+					/* translators: 1: number of files, 2: comma-separated list of file paths */
+					_n(
+						'The theme contains %1$d file that the automated review cannot read: %2$s. Remove it and upload the theme again.',
+						'The theme contains %1$d files that the automated review cannot read: %2$s. Remove them and upload the theme again.',
+						count( $unreviewable ),
+						'wporg-themes'
+					),
+					count( $unreviewable ),
+					$this->format_file_list( $unreviewable )
+				)
+			);
+		}
+
+		$not_portable = self::non_portable_files( $this->package_files() );
+		if ( $not_portable ) {
+			$style_errors->add(
+				'non_portable_filename',
+				sprintf(
+					/* translators: 1: number of files, 2: comma-separated list of file paths */
+					_n(
+						'The theme contains %1$d file whose name is not portable to every platform WordPress supports: %2$s. Rename it and upload the theme again.',
+						'The theme contains %1$d files whose names are not portable to every platform WordPress supports: %2$s. Rename them and upload the theme again.',
+						count( $not_portable ),
+						'wporg-themes'
+					),
+					count( $not_portable ),
+					$this->format_file_list( $not_portable )
 				)
 			);
 		}
@@ -1185,11 +1403,6 @@ class WPORG_Themes_Upload {
 		echo '<h2>' . sprintf( __( 'Results of Automated Theme Scanning: %s', 'wporg-themes' ), vsprintf( '<span class="%1$s">%2$s</span>', $verdict ) ) . '</h2>';
 		echo '<ul class="tc-result">' . display_themechecks() . '</ul>';
 		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
-
-		// Override ALL of the upload checks for child themes.
-		if ( $this->theme->parent() ) {
-			$result = true;
-		}
 
 		return $result;
 	}

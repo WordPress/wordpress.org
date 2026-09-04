@@ -102,7 +102,8 @@ class Uploads {
 
 		/* After submission, but before post is created. */
 
-		add_filter( 'fu_before_create_post',            [ __CLASS__, 'make_post_pending_instead_of_private' ] );
+		add_filter( 'fu_before_create_post', [ __CLASS__, 'sanitize_submitted_description' ], 5 );
+		add_filter( 'fu_before_create_post', [ __CLASS__, 'make_post_pending_instead_of_private' ] );
 
 		/* After submission, after an upload completes. */
 
@@ -428,6 +429,9 @@ class Uploads {
 				case 'file-not-jpg':
 					$rejection = __( 'Your submission must be an image in the JPEG format.', 'wporg-photos' );
 					break;
+				case 'shortcode-in-text':
+					$rejection = __( 'The title, description, and caption cannot contain shortcodes. Please remove them and submit again.', 'wporg-photos' );
+					break;
 				case 'file-too-large':
 					$rejection = sprintf(
 						__( 'The file size for your submission is too large. Please submit a photo smaller than %d MB in size.', 'wporg-photos' ),
@@ -476,6 +480,31 @@ class Uploads {
 		$notices['fu-spam']['text'] = $rejection;
 
 		return $notices;
+	}
+
+	/**
+	 * Sanitizes the submitted free-text fields as the plain text they are.
+	 *
+	 * @param array $post_array Array of post settings.
+	 * @return array
+	 */
+	public static function sanitize_submitted_description( $post_array ) {
+		// The description is the photo's alternative text, so it keeps its line breaks; the other two are single lines.
+		$fields = [
+			'post_title'   => 'sanitize_text_field',
+			'post_content' => 'sanitize_textarea_field',
+			'post_excerpt' => 'sanitize_text_field',
+		];
+
+		foreach ( $fields as $field => $sanitize ) {
+			if ( ! isset( $post_array[ $field ] ) ) {
+				continue;
+			}
+
+			$post_array[ $field ] = wp_slash( $sanitize( wp_unslash( $post_array[ $field ] ) ) );
+		}
+
+		return $post_array;
 	}
 
 	/**
@@ -672,6 +701,20 @@ class Uploads {
 
 		if ( ! isset( $_POST['photo_license'] ) || ! $_POST['photo_license'] ) {
 			return 'checkbox_unchecked_license';
+		}
+
+		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read raw: sanitizing before the check would hide what it looks for.
+			$submitted = isset( $_POST[ $field ] ) ? wp_unslash( $_POST[ $field ] ) : '';
+
+			// A field can arrive as an array, which Frontend Uploader drops before it builds the post.
+			if ( ! is_string( $submitted ) || '' === $submitted ) {
+				continue;
+			}
+
+			if ( preg_match( '/' . get_shortcode_regex() . '/', $submitted ) ) {
+				return 'shortcode-in-text';
+			}
 		}
 
 		return false;

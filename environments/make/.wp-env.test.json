@@ -14,7 +14,8 @@
 		"https://downloads.wordpress.org/plugin/jetpack.zip"
 	],
 	"mappings": {
-		"wp-content/env-bin": "./make/bin"
+		"wp-content/env-bin": "./make/bin",
+		"wp-content/plugins/wporg-badge-management": "../wordpress.org/public_html/wp-content/plugins/wporg-badge-management"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash make/bin/after-start-test.sh"

@@ -9,7 +9,7 @@
 function wporg_themes_add_caps() {
 
 	// Give Editors and higher the ability to suspend and reinstate a theme.
-	foreach ( array( 'administrator', 'author', 'editor' ) as $role ) {
+	foreach ( array( 'administrator', 'editor' ) as $role ) {
 		$wp_roles = get_role( $role );
 
 		$wp_roles->add_cap( 'suspend_themes' );
@@ -22,7 +22,7 @@ add_action( 'wporg_themes_activation', 'wporg_themes_add_caps' );
  * Removes custom capabilities on plugin deactivation.
  */
 function wporg_themes_remove_caps() {
-	foreach ( array( 'administrator', 'author', 'editor' ) as $role ) {
+	foreach ( array( 'administrator', 'editor' ) as $role ) {
 		$wp_roles = get_role( $role );
 
 		$wp_roles->remove_cap( 'suspend_themes' );
@@ -76,14 +76,18 @@ function wporg_themes_map_meta_cap( $caps, $cap, $user_id, $context ) {
 			break;
 
 		case 'suspend_theme':
-			$caps[] = 'suspend_themes';
-			unset( $caps[ array_search( $cap, $caps ) ] );
-			break;
-
 		case 'reinstate_theme':
-			$caps[] = 'reinstate_themes';
-			unset( $caps[ array_search( $cap, $caps ) ] );
-			break;
+			// Refuse unless the call carries an actual theme.
+			$post = empty( $context[0] ) ? false : get_post( $context[0] );
+			if ( ! $post || 'repopackage' !== $post->post_type ) {
+				return [ 'do_not_allow' ];
+			}
+
+			// Moderating a theme acts on a record somebody else owns.
+			return [
+				'suspend_theme' === $cap ? 'suspend_themes' : 'reinstate_themes',
+				get_post_type_object( $post->post_type )->cap->edit_others_posts,
+			];
 
 		case 'theme_configure_categorization_options':
 			// Protect against a cap call without a theme context.

@@ -50,11 +50,11 @@ gp_tmpl_header();
 		foreach ( $language_packs->translations as $language_pack ) {
 			printf(
 				'<li><strong>%s <span class="locale-code">(%s)</span>:</strong> Last updated %s for version %s (<a href="%s">zip</a>)</li>',
-				$language_pack->english_name,
-				$language_pack->language,
-				$language_pack->updated,
-				$language_pack->version,
-				$language_pack->package
+				esc_html( $language_pack->english_name ),
+				esc_html( $language_pack->language ),
+				esc_html( $language_pack->updated ),
+				esc_html( $language_pack->version ),
+				esc_url( $language_pack->package )
 			);
 		}
 		echo '</ul>';

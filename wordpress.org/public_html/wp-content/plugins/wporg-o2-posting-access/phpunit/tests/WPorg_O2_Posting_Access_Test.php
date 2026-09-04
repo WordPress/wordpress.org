@@ -84,6 +84,238 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	}
 
 	/*
+	 * REST reads: 'edit_posts' is granted for writing, but core also reads it as
+	 * the gate for querying non-public statuses. Rows stay hidden either way --
+	 * what leaks without the restriction is 'X-WP-Total', which is taken from the
+	 * query before the per-item permission filter runs.
+	 */
+
+	/**
+	 * Seeds three drafts belonging to somebody else.
+	 *
+	 * @return int The other author's user ID.
+	 */
+	protected function seed_others_drafts() {
+		$author = $this->factory()->user->create( array( 'role' => 'author' ) );
+
+		$this->factory()->post->create_many(
+			3,
+			array(
+				'post_status' => 'draft',
+				'post_author' => $author,
+				'post_title'  => 'Unannounced release',
+			)
+		);
+
+		return $author;
+	}
+
+	/**
+	 * Runs a posts collection request and returns its total.
+	 *
+	 * @param array  $params Query parameters to set on the request.
+	 * @param string $route  Optional. Collection route to request.
+	 * @return array The response status, total, and row count.
+	 */
+	protected function query_posts( $params, $route = '/wp/v2/posts' ) {
+		$request = new WP_REST_Request( 'GET', $route );
+
+		foreach ( $params as $key => $value ) {
+			$request->set_param( $key, $value );
+		}
+
+		$response = rest_do_request( $request );
+		$headers  = $response->get_headers();
+
+		return array(
+			'status' => $response->get_status(),
+			'total'  => isset( $headers['X-WP-Total'] ) ? (int) $headers['X-WP-Total'] : null,
+			'rows'   => count( (array) $response->get_data() ),
+		);
+	}
+
+	/**
+	 * The count of other people's drafts must not be reported to a non-member.
+	 */
+	public function test_non_member_cannot_count_others_unpublished_posts() {
+		$this->seed_others_drafts();
+
+		$result = $this->query_posts(
+			array(
+				'context' => 'edit',
+				'status'  => array( 'draft', 'pending', 'private' ),
+			)
+		);
+
+		$this->assertLessThan( 400, $result['status'], 'Core still permits the request; the restriction is on what it counts.' );
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['rows'] );
+	}
+
+	/**
+	 * 'search' matches title and body, so an unrestricted count answers "does a
+	 * hidden draft contain this string" one character at a time.
+	 */
+	public function test_non_member_cannot_search_others_unpublished_posts() {
+		$this->seed_others_drafts();
+
+		$result = $this->query_posts(
+			array(
+				'context' => 'edit',
+				'status'  => array( 'draft' ),
+				'search'  => 'Unannounced',
+			)
+		);
+
+		$this->assertSame( 0, $result['total'] );
+	}
+
+	/**
+	 * The 'author' parameter must not survive the restriction, or the count
+	 * attributes hidden posts to the person who wrote them.
+	 */
+	public function test_non_member_cannot_attribute_others_unpublished_posts() {
+		$author = $this->seed_others_drafts();
+
+		$result = $this->query_posts(
+			array(
+				'context' => 'edit',
+				'status'  => array( 'draft' ),
+				'author'  => array( $author ),
+			)
+		);
+
+		$this->assertSame( 0, $result['total'] );
+	}
+
+	/**
+	 * The restriction scopes to the caller rather than refusing outright, so a
+	 * non-member can still see the submission they are waiting on.
+	 */
+	public function test_non_member_still_sees_their_own_pending_post() {
+		$this->seed_others_drafts();
+		wp_insert_post(
+			array(
+				'post_title'  => 'My submission',
+				'post_status' => 'pending',
+				'post_author' => $this->non_member,
+			)
+		);
+
+		$result = $this->query_posts(
+			array(
+				'context' => 'edit',
+				'status'  => array( 'pending' ),
+			)
+		);
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['rows'] );
+	}
+
+	/**
+	 * Published posts are public, so the ordinary collection is left alone.
+	 */
+	public function test_non_member_published_queries_are_untouched() {
+		wp_set_current_user( 0 );
+		$this->factory()->post->create_many( 2, array( 'post_status' => 'publish' ) );
+		wp_set_current_user( $this->non_member );
+
+		$result = $this->query_posts( array() );
+
+		$this->assertSame( 2, $result['total'] );
+		$this->assertSame( 2, $result['rows'] );
+	}
+
+	/**
+	 * Members are outside the grant, so nothing about their queries changes.
+	 */
+	public function test_member_queries_are_untouched() {
+		$this->seed_others_drafts();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'editor' ) ) );
+
+		$result = $this->query_posts(
+			array(
+				'context' => 'edit',
+				'status'  => array( 'draft' ),
+			)
+		);
+
+		$this->assertSame( 3, $result['total'] );
+		$this->assertSame( 3, $result['rows'] );
+	}
+
+	/**
+	 * Core's 'wp_block' maps both 'read' and 'edit_posts' onto 'edit_posts', so
+	 * the grant reaches the patterns route as well and unpublished pattern
+	 * content is searchable there unless every post type is covered.
+	 */
+	public function test_non_member_cannot_count_others_unpublished_patterns() {
+		$author = $this->factory()->user->create( array( 'role' => 'author' ) );
+
+		$this->factory()->post->create_many(
+			2,
+			array(
+				'post_type'   => 'wp_block',
+				'post_status' => 'draft',
+				'post_author' => $author,
+				'post_title'  => 'Unannounced pattern',
+			)
+		);
+
+		$result = $this->query_posts(
+			array(
+				'context' => 'edit',
+				'status'  => array( 'draft' ),
+				'search'  => 'Unannounced',
+			),
+			'/wp/v2/blocks'
+		);
+
+		$this->assertLessThan( 400, $result['status'], 'Core still permits the request; the restriction is on what it counts.' );
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['rows'] );
+	}
+
+	/**
+	 * Post types are registered on 'init', long after this plugin loads, so the
+	 * filter has to attach as they arrive rather than from a fixed list.
+	 *
+	 * The filter is asserted directly rather than over a request, because REST
+	 * routes are registered on 'rest_api_init' and a post type registered mid-test
+	 * has none.
+	 */
+	public function test_post_type_registered_after_load_is_restricted() {
+		register_post_type(
+			'wporg_test_rest_cpt',
+			array(
+				'public'          => true,
+				'show_in_rest'    => true,
+				'capability_type' => 'post',
+			)
+		);
+
+		$args = apply_filters( 'rest_wporg_test_rest_cpt_query', array( 'post_status' => array( 'draft' ) ) );
+
+		unregister_post_type( 'wporg_test_rest_cpt' );
+
+		$this->assertSame( $this->non_member, $args['author'] );
+	}
+
+	/**
+	 * 'inherit' is the default status of the attachments route and defers to the
+	 * parent post, so restricting it would break media listings for no gain.
+	 */
+	public function test_inherit_status_is_not_restricted() {
+		$args = array(
+			'post_status' => array( 'inherit' ),
+			'author__in'  => array( 12 ),
+		);
+
+		$this->assertSame( $args, $this->plugin->restrict_non_public_queries( $args ) );
+	}
+
+	/*
 	 * Publishing policy: user_can_publish() decides who skips review.
 	 */
 

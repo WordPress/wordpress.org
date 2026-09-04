@@ -166,8 +166,8 @@ class Admin {
 			esc_attr( $notice_type ),
 			sprintf(
 				$notice,
-				'https://profiles.wordpress.org/' . $user->user_nicename . '/',
-				sanitize_text_field( $user->display_name )
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				esc_html( $user->display_name )
 			)
 		);
 	}

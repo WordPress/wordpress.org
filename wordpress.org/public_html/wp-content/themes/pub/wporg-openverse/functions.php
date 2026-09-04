@@ -255,9 +255,14 @@ if ( !defined( 'OPENVERSE_STANDALONE_URL' ) ) {
  * Examples:
  * - https://ru.wordpress.org/openverse → {ov_redirect_url}/ru/
  * - https://wordpress.org/openverse/search/?q=dog → {ov_redirect_url}/search/?q=dog
+ *
+ * The returned URL always carries at least a trailing path separator, so a bare
+ * `/openverse` resolves to `{ov_redirect_url}/` rather than to the origin alone.
+ *
+ * @return string
  */
 function get_target_url() {
-	$target_url = get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL );
+	$target_url = get_standalone_origin();
 
 	$curr_locale = get_locale();
 	$locale = get_locale_slug( $curr_locale );
@@ -265,13 +270,80 @@ function get_target_url() {
 		$target_url .= '/' . $locale;
 	}
 
+	// Sanitising is required by WordPress.Security.ValidatedSanitizedInput.
+	// Not `sanitize_text_field()`, which strips percent-encoded octets and
+	// would turn `?q=cat%20dog` into `?q=catdog`.
 	$path = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-	if ( $path ) {
-		$count = 1; // Only replace the leading Openverse subpath.
-		$target_url .= str_replace( OPENVERSE_SUBPATH, '', $path, $count );
+
+	// Only a leading, whole-segment subpath is removed. `str_replace()` could
+	// express neither constraint: it replaced every occurrence, including one
+	// in a later segment such as `/image/openverse-logo/`, one in the query
+	// string, and the `/openverse` inside a longer segment like
+	// `/openverse-search`.
+	if ( OPENVERSE_SUBPATH === $path
+		|| str_starts_with( $path, OPENVERSE_SUBPATH . '/' )
+		|| str_starts_with( $path, OPENVERSE_SUBPATH . '?' )
+	) {
+		$path = substr( $path, strlen( OPENVERSE_SUBPATH ) );
 	}
 
+	// The origin has no trailing slash, so the path must supply the separator.
+	// Prepending it is also what keeps the remainder in the path rather than
+	// the authority; `ltrim()` only collapses a doubled slash.
+	$target_url .= '/' . ltrim( $path, '/' );
+
 	return $target_url;
+}
+
+/**
+ * The origin the standalone Openverse site is served from.
+ *
+ * The Customizer's `sanitize_callback` drops a trailing slash and
+ * `wp theme mod set` does not, so it is dropped here too.
+ *
+ * @return string
+ */
+function get_standalone_origin() {
+	return untrailingslashit( get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL ) );
+}
+
+/**
+ * Whether the redirect to the standalone site is switched on.
+ *
+ * `wp theme mod set` stores the string it is handed, so the setting can hold
+ * `'false'`, which PHP reads as true. `wp_validate_boolean()` reads it the way
+ * whoever typed it meant it.
+ *
+ * @return bool
+ */
+function is_redirect_enabled() {
+	return wp_validate_boolean( get_theme_mod( 'ov_is_redirect_enabled', false ) );
+}
+
+/**
+ * Whether a redirect target is usable.
+ *
+ * The path is appended straight after the origin, so a target's authority is
+ * always the one an administrator configured. Comparing the two makes that an
+ * enforced property rather than an assumption, and it is why this does not need
+ * `wp_safe_redirect()`: no request can reach a host the origin did not supply,
+ * and the allow-list that would require widens redirects for the whole site.
+ *
+ * @param string $target_url URL the theme intends to redirect to.
+ * @return bool
+ */
+function is_valid_target_url( $target_url ) {
+	$parts = wp_parse_url( $target_url );
+
+	if ( empty( $parts['host'] ) || empty( $parts['scheme'] ) ) {
+		return false;
+	}
+
+	if ( ! in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) ) {
+		return false;
+	}
+
+	return wp_parse_url( get_standalone_origin(), PHP_URL_HOST ) === $parts['host'];
 }
 
 /**
