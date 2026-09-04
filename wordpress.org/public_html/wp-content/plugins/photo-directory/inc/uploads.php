@@ -707,7 +707,12 @@ class Uploads {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read raw: sanitizing before the check would hide what it looks for.
 			$submitted = isset( $_POST[ $field ] ) ? wp_unslash( $_POST[ $field ] ) : '';
 
-			if ( $submitted && preg_match( '/' . get_shortcode_regex() . '/', $submitted ) ) {
+			// A field can arrive as an array; `sanitize_text_field()` stores those as an empty string.
+			if ( ! is_string( $submitted ) || '' === $submitted ) {
+				continue;
+			}
+
+			if ( preg_match( '/' . get_shortcode_regex() . '/', $submitted ) ) {
 				return 'shortcode-in-text';
 			}
 		}
