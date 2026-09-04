@@ -480,19 +480,20 @@ class Uploads {
 	}
 
 	/**
-	 * Sanitizes the submitted "Alternative Text" as the plain text it is.
+	 * Sanitizes the submitted free-text fields as the plain text they are.
 	 *
 	 * @param array $post_array Array of post settings.
 	 * @return array
 	 */
 	public static function sanitize_submitted_description( $post_array ) {
-		// The photo form is the only Frontend Uploader form here; scope to it should another ever be added.
-		if ( Registrations::get_post_type() !== ( $post_array['post_type'] ?? '' ) ) {
-			return $post_array;
-		}
+		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
+			if ( ! isset( $post_array[ $field ] ) ) {
+				continue;
+			}
 
-		if ( isset( $post_array['post_content'] ) ) {
-			$post_array['post_content'] = wp_slash( sanitize_textarea_field( wp_unslash( $post_array['post_content'] ) ) );
+			$value = sanitize_textarea_field( wp_unslash( $post_array[ $field ] ) );
+
+			$post_array[ $field ] = wp_slash( strip_shortcodes( $value ) );
 		}
 
 		return $post_array;
