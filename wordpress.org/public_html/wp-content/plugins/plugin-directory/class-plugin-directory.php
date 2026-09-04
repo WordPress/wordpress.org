@@ -42,9 +42,12 @@ class Plugin_Directory {
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_filter( 'jetpack_sitemap_post_types', array( $this, 'jetpack_sitemap_post_types' ) );
 		add_filter( 'jetpack_sitemap_skip_post', array( $this, 'jetpack_sitemap_skip_post' ), 10, 2 );
+		add_filter( 'jetpack_enable_open_graph', array( $this, 'disable_jetpack_open_graph_for_plugins' ), 99 );
+		add_filter( 'jetpack_disable_twitter_cards', array( $this, 'disable_jetpack_twitter_cards_for_plugins' ), 99 );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
+		add_action( 'template_redirect', array( $this, 'share_image_route' ), 0 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ), 1 );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'get_the_archive_title_prefix', array( $this, 'filter_get_the_archive_title_prefix' ) );
@@ -427,6 +430,9 @@ class Plugin_Directory {
 
 		// Add a rule for generated plugin icons. geopattern-icon/demo.svg | geopattern-icon/demo_abc123.svg
 		add_rewrite_rule( '^geopattern-icon/([^/_]+)(_([a-f0-9]{6}))?\.svg$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
+
+		// Share images. share-image/demo.jpg | share-image/demo_a1b2c3d4.jpg (token is a cache buster).
+		add_rewrite_rule( '^share-image/([^/_]+)(_([a-f0-9]{8}))?\.jpg$', 'index.php?plugin_share_image=$matches[1]', 'top' );
 
 		// Handle plugin admin requests
 		add_rewrite_rule( '^([^/]+)/advanced/?$', 'index.php?name=$matches[1]&plugin_advanced=1', 'top' );
@@ -1207,6 +1213,7 @@ class Plugin_Directory {
 		$vars[] = 'redirect_plugin_tab';
 		$vars[] = 'plugin_advanced';
 		$vars[] = 'geopattern_icon';
+		$vars[] = 'plugin_share_image';
 		$vars[] = 'block_search';
 
 		// Remove support for any query vars the Plugin Directory doesn't support/need on the front-end.
@@ -1510,6 +1517,30 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Output a JPEG share image for a given plugin.
+	 */
+	public function share_image_route() {
+		$slug = get_query_var( 'plugin_share_image' );
+
+		if ( ! $slug ) {
+			return;
+		}
+
+		$plugin = self::get_plugin_post( $slug );
+		if ( ! $plugin || 'publish' !== $plugin->post_status ) {
+			status_header( 404 );
+			die();
+		}
+
+		if ( ! Plugin_Share_Image::output( $plugin ) ) {
+			status_header( 500 );
+			die();
+		}
+
+		die();
+	}
+
+	/**
 	 * The array of post types to be included in the sitemap.
 	 *
 	 * @param array $post_types List of included post types.
@@ -1541,6 +1572,44 @@ class Plugin_Directory {
 		}
 
 		return $skip;
+	}
+
+	/**
+	 * Disable Jetpack Open Graph on plugin pages.
+	 *
+	 * The theme outputs custom Open Graph tags, including the dynamic share image.
+	 *
+	 * @param bool $enabled Whether Jetpack Open Graph is enabled.
+	 * @return bool
+	 */
+	public function disable_jetpack_open_graph_for_plugins( $enabled ) {
+		if ( ! did_action( 'wp' ) ) {
+			return $enabled;
+		}
+
+		if ( is_singular( 'plugin' ) ) {
+			return false;
+		}
+
+		return $enabled;
+	}
+
+	/**
+	 * Disable Jetpack Twitter Cards on plugin pages.
+	 *
+	 * @param bool $disabled Whether Jetpack Twitter Cards are disabled.
+	 * @return bool
+	 */
+	public function disable_jetpack_twitter_cards_for_plugins( $disabled ) {
+		if ( ! did_action( 'wp' ) ) {
+			return $disabled;
+		}
+
+		if ( is_singular( 'plugin' ) ) {
+			return true;
+		}
+
+		return $disabled;
 	}
 
 	/**

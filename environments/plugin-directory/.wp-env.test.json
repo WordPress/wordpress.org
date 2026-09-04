@@ -6,6 +6,7 @@
 		"../wordpress.org/public_html/wp-content/plugins/plugin-directory"
 	],
 	"mappings": {
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/env-bin": "./plugin-directory/bin"
 	},
 	"lifecycleScripts": {
