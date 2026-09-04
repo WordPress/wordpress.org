@@ -703,8 +703,15 @@ class Uploads {
 			return 'checkbox_unchecked_license';
 		}
 
-		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read raw: sanitizing before the check would hide what it looks for.
+		// The same fields and sanitizers `sanitize_submitted_description()` stores them with.
+		$fields = [
+			'post_title'   => 'sanitize_text_field',
+			'post_content' => 'sanitize_textarea_field',
+			'post_excerpt' => 'sanitize_text_field',
+		];
+
+		foreach ( $fields as $field => $sanitize ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized on the next line, by whichever callback stores the field.
 			$submitted = isset( $_POST[ $field ] ) ? wp_unslash( $_POST[ $field ] ) : '';
 
 			// A field can arrive as an array, which Frontend Uploader drops before it builds the post.
@@ -712,7 +719,8 @@ class Uploads {
 				continue;
 			}
 
-			if ( preg_match( '/' . get_shortcode_regex() . '/', $submitted ) ) {
+			// Anything but a clean no-match is refused: preg_match() returns false when PCRE gives up.
+			if ( 0 !== preg_match( '/' . get_shortcode_regex() . '/', $sanitize( $submitted ) ) ) {
 				return 'shortcode-in-text';
 			}
 		}
