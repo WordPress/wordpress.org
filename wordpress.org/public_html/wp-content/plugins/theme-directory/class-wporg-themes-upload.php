@@ -1682,9 +1682,10 @@ TICKET;
 
 			$post_id = wp_insert_post( array(
 				'post_author'    => $this->author->ID,
-				'post_title'     => $this->theme->get( 'Name' ),
+				// The name and the description are one-line headers, not body content to run
+				// through the shortcode chain.
+				'post_title'     => strip_shortcodes( $this->theme->get( 'Name' ) ),
 				'post_name'      => $this->theme_slug,
-				// The description is a one-line header, not body content to run through the shortcode chain.
 				'post_content'   => strip_shortcodes( $this->theme->get( 'Description' ) ),
 				'post_parent'    => $this->theme->post_parent,
 				'post_date'      => $upload_date,
@@ -1700,9 +1701,10 @@ TICKET;
 
 		// Finally, add post meta.
 		$post_meta = array(
-			'_theme_url'    => $this->theme->get( 'ThemeURI' ),
-			'_author'       => $this->theme->get( 'Author' ),
-			'_author_url'   => $this->theme->get( 'AuthorURI' ),
+			// One-line headers, as above.
+			'_theme_url'    => strip_shortcodes( $this->theme->get( 'ThemeURI' ) ),
+			'_author'       => strip_shortcodes( $this->theme->get( 'Author' ) ),
+			'_author_url'   => strip_shortcodes( $this->theme->get( 'AuthorURI' ) ),
 			'_requires'     => $this->sanitize_version_like_field( $this->theme->get( 'RequiresWP' ), 'requires' ),
 			'_requires_php' => $this->sanitize_version_like_field( $this->theme->get( 'RequiresPHP' ) ),
 			'_upload_date'  => $upload_date,
