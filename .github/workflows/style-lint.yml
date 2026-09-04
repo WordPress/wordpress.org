@@ -1,0 +1,58 @@
+name: Static Analysis (Style JS/CSS)
+
+on:
+  pull_request:
+    paths:
+    - 'wordpress.org/public_html/style/**.js'
+    - 'wordpress.org/public_html/style/**.css'
+    - 'wordpress.org/public_html/style/package.json'
+    - 'wordpress.org/public_html/style/package-lock.json'
+    - 'wordpress.org/public_html/style/.prettierignore'
+    - .github/workflows/style-lint.yml
+  push:
+    branches: [trunk]
+    paths:
+    - 'wordpress.org/public_html/style/**.js'
+    - 'wordpress.org/public_html/style/**.css'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Style Coding Standards
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: wordpress.org/public_html/style
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version-file: environments/.nvmrc
+        cache: npm
+        cache-dependency-path: wordpress.org/public_html/style/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Lint JavaScript
+      run: npm run lint:js
+
+    - name: Lint CSS
+      run: npm run lint:css
+
+    - name: Check formatting
+      run: npx prettier --check .
+
+    # Generated files (wp4-rtl.css, js/navigation.min.js) are committed, so a
+    # source edit without a rebuild ships stale output. Rebuild and fail on drift.
+    - name: Check generated files are up to date
+      run: |
+        npm run build
+        git diff --exit-code -- .
