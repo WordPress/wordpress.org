@@ -33,10 +33,10 @@ get_header();
 								<div class="wpsc-hero-slide-content-right-wrapper">
 							<h3><a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h3>
 
-							<?php $wpsc_url = esc_url( get_post_meta( $post->ID, 'domain', true ) ); ?>
-							<?php if ( $wpsc_url ) : // make sure the URL is valid (esc_url will return an empty string if not) ?>
-							<a href="<?php echo $wpsc_url; ?>" class="wpsc-linkout">
-								<?php echo str_replace( parse_url( $wpsc_url, PHP_URL_SCHEME ) . '://', '', untrailingslashit( $wpsc_url ) ); ?>
+							<?php $wpsc_url = esc_url_raw( get_post_meta( $post->ID, 'domain', true ) ); ?>
+							<?php if ( $wpsc_url ) : // Make sure the URL is valid; esc_url_raw() returns an empty string if not. ?>
+							<a href="<?php echo esc_url( $wpsc_url ); ?>" class="wpsc-linkout">
+								<?php echo esc_html( str_replace( parse_url( $wpsc_url, PHP_URL_SCHEME ) . '://', '', untrailingslashit( $wpsc_url ) ) ); ?>
 								<span class="linkout-symbol"><?php _ex( '&#10162;', 'linkout symbol', 'wporg-showcase' ); ?></span>
 							</a>
 							<?php endif; // $wpsc_url ?>
@@ -109,7 +109,7 @@ get_header();
 
 				<?php endwhile; // have_posts ?>
 			</ul>
-			<a href="<?php echo home_url( '/archives/' ); ?>" class="wpsc-view-all"><?php _e( 'View All Showcase Sites &rarr;', 'wporg-showcase' ); ?></a>
+			<a href="<?php echo esc_url( home_url( '/archives/' ) ); ?>" class="wpsc-view-all"><?php esc_html_e( 'View All Showcase Sites &rarr;', 'wporg-showcase' ); ?></a>
 
 			<?php endif; // have_posts ?>
 

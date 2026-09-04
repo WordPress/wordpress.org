@@ -49,7 +49,7 @@
 			$link .= 'title="'. esc_attr( sprintf( __( 'View all jobs filed under %s', 'jobswp' ), $category->name ) ) . '"';
 			$link .= '>';
 			$link .= 'Show all '.apply_filters( 'list_terms', $category->name, $category ) . ' jobs &raquo;</a>';		
-			echo $link;
+			echo wp_kses_post( $link );
 			echo '</p>';
 		} else {
 			jobswp_content_nav( 'all-job-categories' );

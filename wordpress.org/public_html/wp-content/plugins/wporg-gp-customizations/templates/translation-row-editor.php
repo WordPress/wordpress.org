@@ -86,7 +86,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 							</button>
 							<ul class="button-menu__dropdown">
 								<?php foreach ( $more_links as $link ) : ?>
-									<li><?php echo $link; ?></li>
+									<li><?php echo wp_kses_post( $link ); ?></li>
 								<?php endforeach; ?>
 							</ul>
 						</div>

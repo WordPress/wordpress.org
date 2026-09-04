@@ -109,7 +109,7 @@ defined( 'ABSPATH' ) || exit;
 		<div>
 			<label for="email"><?php esc_html_e( 'Email', 'wporg-forums' ); ?></label>
 			<?php bbp_displayed_user_field( 'user_email', 'edit' ); ?>
-			(<a href="<?php echo get_edit_account_url( bbp_get_displayed_user_id() ); ?>">edit</a>)
+			(<a href="<?php echo esc_url( get_edit_account_url( bbp_get_displayed_user_id() ) ); ?>">edit</a>)
 		</div>
 
 		<div>
@@ -120,7 +120,7 @@ defined( 'ABSPATH' ) || exit;
 			<p id="security">
 				<?php printf(
 					__( 'Your password and two-factor authentication settings can be changed in <a href="%s">the Account section</a>.', 'wporg' ),
-					get_edit_account_url( bbp_get_displayed_user_id() )
+					esc_url( get_edit_account_url( bbp_get_displayed_user_id() ) )
 				); ?>
 			</p>
 		</div>

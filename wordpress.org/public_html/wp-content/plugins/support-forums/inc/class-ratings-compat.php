@@ -152,7 +152,9 @@ class Ratings_Compat {
 				return;
 			}
 
-			$notice = $object_link = $edit_link = '';
+			$notice      = '';
+			$object_link = '';
+			$edit_url    = '';
 			switch( $this->compat ) {
 				case 'plugin' :
 					/* translators: 1: link to the plugin, 2: review edit URL */
@@ -170,7 +172,7 @@ class Ratings_Compat {
 
 			printf(
 				'<div class="bbp-template-notice info"><p>%s</p></div>',
-				sprintf( $notice, $object_link, $edit_url )
+				wp_kses_post( sprintf( $notice, $object_link, esc_url( $edit_url ) ) )
 			);
 		}
 	}

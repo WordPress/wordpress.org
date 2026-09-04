@@ -351,7 +351,7 @@ class Review_Tools {
 					<li>API Endpoints:
 						<ul class="ul-disc">
 						<li><a href="<?php echo esc_url( 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&slug=' . $post->post_name ); ?>">Info</a></li>
-						<li><a href="<?php echo rest_url('/plugins/v1/plugin/' . $post->post_name ); ?>" title="Source-data for info endpoint">wp-json Info</a></li>
+						<li><a href="<?php echo esc_url( rest_url( '/plugins/v1/plugin/' . $post->post_name ) ); ?>" title="Source-data for info endpoint">wp-json Info</a></li>
 						<?php
 							$update_check_payload = [
 								// This is a placeholder filename, it'll work for our purposes.

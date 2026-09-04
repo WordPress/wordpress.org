@@ -34,7 +34,7 @@ the_post();
 
 			<header class="entry-header">
 				<hgroup class="header-group">
-					<img width="300" src="<?php echo get_theme_file_uri('images/enterprise/ecommerce.png'); ?>">
+					<img width="300" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/ecommerce.png' ) ); ?>">
 					<h1 class="entry-title">eCommerce</h1>
 					<p class="entry-description">Enterprise Ecommerce,<br>Now on WordPress</p>
 					<p class="entry-description small">WordPress is ready to support your organization with ecommerce in the enterprise. More online stores use WordPress for ecommerce than any other platform. For the enterprise, WordPress has the integrations, technical approaches, and service ecosystem you need. It&apos;s also an open platform with no lock-in. The data in WordPress is yours with easy porting in and out. WordPress itself has no restrictive contracts or licensing and offers a lower total cost of ownership compared to other enterprise platforms.</p>
@@ -103,23 +103,23 @@ the_post();
 				<section class="col-4">
 					<h4>WooCommerce</h4>
 					<p>Hundreds of extensions help to support your existing vendors and foundational systems. It&apos;s straightforward to build powerful, custom experiences without the need to create components from scratch.</p>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/swelllogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/allblackslogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/wwflogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/swelllogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/allblackslogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wwflogo.png' ) ); ?>">
 				</section>
 				<section class="col-4">
 					<h4>BigCommerce</h4>
 					<p>A SaaS backend integrated through the BigCommerce plugin brings enterprise-specific functionality and scale along with streamlined integrations. </p>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/firewirelogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/carluccioslogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/kodaklogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/firewirelogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/carluccioslogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/kodaklogo.png' ) ); ?>">
 				</section>
 				<section class="col-4">
 					<h4>Other eCommerce Platforms</h4>
 					<p>Build seamless integrations with other popular ecommerce solutions like Shopify and Magento for a unified user experience..</p>
-					<img src="<?php echo get_theme_file_uri('images/enterprise/methodlogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/tyrlogo.png'); ?>">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/riflepaperlogo.png'); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/methodlogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/tyrlogo.png' ) ); ?>">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/riflepaperlogo.png' ) ); ?>">
 				</section>
 			</div>
 
@@ -130,95 +130,95 @@ the_post();
 				</section>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconpaywall.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconpaywall.png' ) ); ?>">
 						<h4>ERP</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/netsuitelogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/zohologo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/salesforcelogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/netsuitelogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/zohologo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/salesforcelogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconvideo.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconvideo.png' ) ); ?>">
 						<h4>PIM Systems</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/solidpepperlogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/solidpepperlogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconasset.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconasset.png' ) ); ?>">
 						<h4>Email Marketing</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/mailchimplogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/jiltlogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/mailchimplogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/jiltlogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 				</div>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconanalytics.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconanalytics.png' ) ); ?>">
 						<h4>Personalization and multichanneling</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/sailthrulogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/stripelogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/squarelogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/amazonpaylogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/authnetlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/paypalpfprologo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/sailthrulogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/stripelogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/squarelogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/amazonpaylogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/authnetlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/paypalpfprologo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconautomation.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconautomation.png' ) ); ?>">
 						<h4>Shipping apps</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/shipstationlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/upslogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/fedexlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/uspslogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/shipstationlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/upslogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/fedexlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/uspslogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconseo.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconseo.png' ) ); ?>">
 						<h4>Analytics</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/googleecomlogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/metoriklogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/kissmetricslogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/googleecomlogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/metoriklogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/kissmetricslogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 				</div>
 				<div class="entry-content row integrations-list">
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconchannels.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconchannels.png' ) ); ?>">
 						<h4>Accounting Systems (Bookkeeping)</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/quickbookslogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/xerologo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/freshbookslogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/quickbookslogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/xerologo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/freshbookslogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconsocial.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconsocial.png' ) ); ?>">
 						<h4>POS Integrations</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/squarelogo.png'); ?>"></div>
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/lightspeedlogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/squarelogo.png' ) ); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/lightspeedlogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 					<section class="col-4 integration">
-						<img class="icon" src="<?php echo get_theme_file_uri('images/enterprise/iconworkflow.png'); ?>">
+						<img class="icon" src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/iconworkflow.png' ) ); ?>">
 						<h4>Multilingual Store</h4>
 						<hr>
 						<div class="logos">
-							<div class="logo"><img src="<?php echo get_theme_file_uri('images/enterprise/wpmllogo.png'); ?>"></div>
+							<div class="logo"><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/wpmllogo.png' ) ); ?>"></div>
 						</div>
 					</section>
 				</div>
@@ -231,19 +231,19 @@ the_post();
 				<div class="entry-content row">
 					<section class="col-3">
 						<h3>Security</h3>
-						<div><img src="<?php echo get_theme_file_uri('images/enterprise/more4.png'); ?>"></div>
+						<div><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/more4.png' ) ); ?>"></div>
 					</section>
 					<section class="col-3">
 						<h3>GDPR</h3>
-						<div><img src="<?php echo get_theme_file_uri('images/enterprise/more5.png'); ?>"></div>
+						<div><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/more5.png' ) ); ?>"></div>
 					</section>
 					<section class="col-3">
 						<h3>Multichannel Marketing</h3>
-						<div><img src="<?php echo get_theme_file_uri('images/enterprise/more6.png'); ?>"></div>
+						<div><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/more6.png' ) ); ?>"></div>
 					</section>
 					<section class="col-3">
 						<h3>Working with the REST API</h3>
-						<div><img src="<?php echo get_theme_file_uri('images/enterprise/more7.png'); ?>"></div>
+						<div><img src="<?php echo esc_url( get_theme_file_uri( 'images/enterprise/more7.png' ) ); ?>"></div>
 					</section>
 				</div>
 			</div>

@@ -109,7 +109,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 			<div class="section">
 				<div class="col-12">
 					<h3><?php _e('Showcase', 'rosetta'); ?></h3>
-					<span id="showcase-front-slate">You can <a href="<?php echo admin_url('edit.php?post_type=showcase'); ?>">add notable sites</a> in your language and screenshot and description of random three of them will show here.</span>
+					<span id="showcase-front-slate">You can <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=showcase' ) ); ?>">add notable sites</a> in your language and screenshot and description of random three of them will show here.</span>
 				</div>
 			</div>
 		</div>

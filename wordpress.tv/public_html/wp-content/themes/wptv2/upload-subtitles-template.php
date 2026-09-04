@@ -246,7 +246,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 
 		<p>Subtitling: <a href="<?php echo esc_url( get_permalink( $parent->ID ) ); ?>"><?php echo apply_filters( 'the_title', $parent->post_title ); ?></a></p>
 
-		<form method="post" action="<?php echo admin_url( 'admin-post.php' ); ?>" id="video-upload-form" enctype="multipart/form-data">
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="video-upload-form" enctype="multipart/form-data">
 
 			<?php wp_nonce_field( 'wptv-upload-subtitles', 'wptv-upload-subtitles-nonce' ); ?>
 			<input type="hidden" name="action" value="wptv_video_upload_subtitles" />

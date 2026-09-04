@@ -22,7 +22,7 @@ get_header();
 printf(
 	/* translators: %s: logout URL */
 	__( 'Do you really want to <a href="%s">log out</a>?', 'wporg' ),
-	wp_logout_url( $redirect_to )
+	esc_url( wp_logout_url( $redirect_to ) )
 );
 ?>
 

@@ -439,6 +439,7 @@ class Customizations {
 	 */
 	public function show_permalink( $post ) {
 		if ( 'plugin' === $post->post_type && 'publish' === $post->post_status ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core assembles and escapes this markup itself.
 			echo get_sample_permalink_html( $post );
 		}
 	}

@@ -338,7 +338,7 @@ get_header( 'wporg' );
 						foreach ( array_rand( $user_links, 3 ) as $slug ) :
 							printf(
 								'<li><a href="%1$s"><img src="https://s.w.org/images/notableusers/%2$s-2x.png?version=2" alt="%2$s" width="130" height="57" /></a></li>',
-								$user_links[ $slug ],
+								esc_url( $user_links[ $slug ] ),
 								$slug
 							);
 						endforeach;

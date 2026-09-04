@@ -133,6 +133,17 @@
 		</properties>
 	</rule>
 
+	<!-- Project functions that already escape what they return. -->
+	<!-- Please note: Only add a function here after confirming it escapes its own return value! -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<property name="customAutoEscapedFunctions" type="array">
+				<!-- Returns esc_url( $url ); see themes/pub/wporg-login/functions.php. -->
+				<element value="wporg_login_wordpress_url"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- PHPUnit requires test files to be named after the test class they contain. -->
 	<rule ref="WordPress.Files.FileName">
 		<exclude-pattern>*/tests/*</exclude-pattern>

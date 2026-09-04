@@ -741,7 +741,7 @@ class WordPressTV_Theme {
 			$count   = $display_count ? ' <span class="tag-count">' . absint( $term->count ) . '</span>' : '';
 			$links[] = '<a href="' . esc_url( get_term_link( $term, $taxonomy ) ) . '">' . esc_html( $term->name ) . $count . '</a>';
 		}
-		echo $before . join( $sep, $links ) . $after;
+		echo wp_kses_post( $before . join( $sep, $links ) . $after );
 	}
 
 	/**
