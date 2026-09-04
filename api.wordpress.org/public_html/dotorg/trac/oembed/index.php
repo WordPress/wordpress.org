@@ -149,6 +149,9 @@ if ( ! isset( $_GET['embed'] ) ) {
 header( 'Content-Type: text/html; charset=UTF-8' );
 header( 'X-Content-Type-Options: nosniff' );
 
+// The iframe's sandbox covers that element, not this response, which is reachable directly.
+header( 'Content-Security-Policy: sandbox allow-scripts allow-top-navigation-by-user-activation' );
+
 $cache_key = sha1( $url );
 if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {
 	die( $data );
@@ -323,7 +326,10 @@ $js = <<<JS
 	window.addEventListener( 'DOMContentLoaded', send );
 })();
 JS;
-$doc->getElementsByTagName( 'head' )[0]->appendChild( $doc->createElement( 'script', $js ) );
+
+$reporter = $doc->createElement( 'script' );
+$reporter->appendChild( $doc->createTextNode( $js ) );
+$doc->getElementsByTagName( 'head' )[0]->appendChild( $reporter );
 
 $css = <<<CSS
 html {
