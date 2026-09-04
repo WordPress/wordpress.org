@@ -1,4 +1,15 @@
 <?php
+/**
+ * WordPress.org Serve Happy API endpoint: PHP version recommendations.
+ *
+ * This is a standalone, unauthenticated, stateless API endpoint: WordPress is not loaded,
+ * so request data is never slashed, and there is no session or nonce infrastructure.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Serve_Happy
+ */
+
 namespace WordPressdotorg\API\Serve_Happy;
 
 define( 'API_VERSION', '1.0' );
@@ -15,9 +26,26 @@ output_response(
 	)
 );
 
-// Output functions
-function bail( $error_code, $error_text, $http_code = 400, $http_code_text = false ) {
-	$server_protocol = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
+/**
+ * Sends an error response and halts.
+ *
+ * @param string      $error_code     Machine-readable error code.
+ * @param string      $error_text     Human-readable error description.
+ * @param int         $http_code      Optional. HTTP status code. Default 400.
+ * @param string|null $http_code_text Optional. HTTP status reason phrase. Default derived from the status code.
+ */
+function bail( $error_code, $error_text, $http_code = 400, $http_code_text = null ) {
+	// Only a well-formed protocol version is echoed back into the status header.
+	$server_protocol = filter_var(
+		$_SERVER['SERVER_PROTOCOL'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		array(
+			'options' => array(
+				'regexp'  => '#^HTTP/[0-9]+(\.[0-9]+)?\z#',
+				'default' => 'HTTP/1.1',
+			),
+		)
+	);
 	$http_code_texts = [
 		400 => 'Bad Request',
 	];
@@ -39,15 +67,28 @@ function output_response( $data ) {
 
 	header( 'Access-Control-Allow-Origin: *' );
 
-	if ( !empty( $_GET['callback'] ) ) {
+	// A JSONP callback is a JavaScript identifier, optionally namespaced; anything else is discarded.
+	$callback = filter_var(
+		$_GET['callback'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		array(
+			'options' => array(
+				'regexp'  => '/^[a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*\z/',
+				'default' => '',
+			),
+			'flags'   => FILTER_REQUIRE_SCALAR,
+		)
+	);
+
+	if ( $callback ) {
 		call_headers( 'application/javascript' );
 
-		echo '/**/' .
-			preg_replace('/[^a-zA-Z0-9_.]/', '', $_GET['callback'] ) .
-			'(' . $json_data . ')';
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- validated callback, JSON-encoded payload.
+		echo '/**/' . $callback . '(' . $json_data . ')';
 	} else {
 		call_headers( 'application/json' );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON-encoded payload served as application/json.
 		echo $json_data;
 	}
 }

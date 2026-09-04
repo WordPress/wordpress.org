@@ -1,4 +1,13 @@
 <?php
+/**
+ * WordPress.org Block Pattern Directory API endpoint.
+ *
+ * The request is read here, before `main()` loads WordPress, so it has not been slashed.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Patterns
+ */
 
 namespace WordPressdotorg\API\Patterns;
 
@@ -8,7 +17,7 @@ namespace WordPressdotorg\API\Patterns;
  * This is cached by nginx, so we don't have to worry about the performance costs of loading WP, and don't need to
  * do any any object caching.
  */
-main( $_SERVER['QUERY_STRING'] );
+main( filter_var( $_SERVER['QUERY_STRING'] ?? '', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW ) );
 
 /**
  * Last minute rewrite of headers, to correct URLs set by the internal API endpoint.
@@ -40,7 +49,6 @@ function flush_handler( $buffer ) {
 
 	return false; // Original buffer will be output with no changes.
 }
-
 
 /**
  * Proxy w.org/patterns API endpoints for reliability.
