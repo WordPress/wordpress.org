@@ -486,12 +486,19 @@ class Uploads {
 	 * @return array
 	 */
 	public static function sanitize_submitted_description( $post_array ) {
-		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
+		// The description is the photo's alternative text, so it keeps its line breaks; the other two are single lines.
+		$fields = [
+			'post_title'   => 'sanitize_text_field',
+			'post_content' => 'sanitize_textarea_field',
+			'post_excerpt' => 'sanitize_text_field',
+		];
+
+		foreach ( $fields as $field => $sanitize ) {
 			if ( ! isset( $post_array[ $field ] ) ) {
 				continue;
 			}
 
-			$value = sanitize_textarea_field( wp_unslash( $post_array[ $field ] ) );
+			$value = $sanitize( wp_unslash( $post_array[ $field ] ) );
 
 			$post_array[ $field ] = wp_slash( strip_shortcodes( $value ) );
 		}
