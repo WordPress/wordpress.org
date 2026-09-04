@@ -30,7 +30,8 @@
 		"openverse:test": "npm run openverse:test:env -- start && npm run openverse:test:env -- run cli --env-cwd=wp-content/themes/wporg-openverse phpunit",
 		"translate:env": "wp-env --config translate/.wp-env.json",
 		"translate:import": "npm run translate:env -- run cli -- wp eval-file wp-content/env-bin/import-from-wporg.php",
-		"translate:refresh": "npm run translate:env -- run cli -- wp option delete wporg_translate_env_seeded"
+		"translate:refresh": "npm run translate:env -- run cli -- wp option delete wporg_translate_env_seeded",
+		"support:env": "wp-env --config support-forums/.wp-env.json"
 	},
 	"devDependencies": {
 		"@wordpress/env": "^11"
