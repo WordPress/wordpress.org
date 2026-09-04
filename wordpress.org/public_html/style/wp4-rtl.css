@@ -47,7 +47,7 @@ pre {
 
 pre a { font-weight: normal; }
 
-a {
+a:where(:not(.wp-element-button)) {
 	color: #21759b;
 	text-decoration: none;
 	font-weight: normal;
@@ -57,7 +57,7 @@ strong a {
 	font-weight: bold;
 }
 
-a:visited {
+a:visited:where(:not(.wp-element-button)) {
 	color: #4ca6cf;
 }
 
@@ -71,7 +71,27 @@ h3 a { font-weight: bold; }
 
 p a:hover { border-bottom: 1px solid #d54e21; }
 
-a:hover { color: #d54e21; }
+a:hover:where(:not(.wp-element-button)) { color: #d54e21; }
+
+/*
+ * Buttons are not body links. The link colours above are more specific than the
+ * button colours the block theme emits, which is `:root :where( .wp-block-button
+ * .wp-block-button__link )`, so without the `:not( .wp-element-button )` guards
+ * they repaint button labels. These rules restore the hover, focus and active
+ * states from the same button custom properties the wporg parent theme uses, for
+ * pages that load wp4.css and not the parent theme's button stylesheet.
+ * See https://meta.trac.wordpress.org/ticket/8418
+ */
+.wp-block-button__link:hover,
+.wp-block-button__link:focus {
+	color: var( --wp--custom--button--hover--color--text, #fff );
+	background-color: var( --wp--custom--button--hover--color--background, #213fd4 );
+}
+
+.wp-block-button__link:active {
+	color: var( --wp--custom--button--active--color--text, #fff );
+	background-color: var( --wp--custom--button--active--color--background, #1e1e1e );
+}
 
 h2,
 h1.heading {
