@@ -429,6 +429,9 @@ class Uploads {
 				case 'file-not-jpg':
 					$rejection = __( 'Your submission must be an image in the JPEG format.', 'wporg-photos' );
 					break;
+				case 'shortcode-in-text':
+					$rejection = __( 'The title, description, and caption cannot contain shortcodes. Please remove them and submit again.', 'wporg-photos' );
+					break;
 				case 'file-too-large':
 					$rejection = sprintf(
 						__( 'The file size for your submission is too large. Please submit a photo smaller than %d MB in size.', 'wporg-photos' ),
@@ -498,9 +501,7 @@ class Uploads {
 				continue;
 			}
 
-			$value = $sanitize( wp_unslash( $post_array[ $field ] ) );
-
-			$post_array[ $field ] = wp_slash( strip_shortcodes( $value ) );
+			$post_array[ $field ] = wp_slash( $sanitize( wp_unslash( $post_array[ $field ] ) ) );
 		}
 
 		return $post_array;
@@ -700,6 +701,15 @@ class Uploads {
 
 		if ( ! isset( $_POST['photo_license'] ) || ! $_POST['photo_license'] ) {
 			return 'checkbox_unchecked_license';
+		}
+
+		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read raw: sanitizing before the check would hide what it looks for.
+			$submitted = isset( $_POST[ $field ] ) ? wp_unslash( $_POST[ $field ] ) : '';
+
+			if ( $submitted && preg_match( '/' . get_shortcode_regex() . '/', $submitted ) ) {
+				return 'shortcode-in-text';
+			}
 		}
 
 		return false;
