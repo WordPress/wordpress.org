@@ -18,7 +18,7 @@ class wporg_trac_notifications {
 
 	function __construct() {
 		$make_site = explode( '/', home_url( '' ) );
-		$trac = $make_site[3];
+		$trac      = $make_site[3] ?? '';
 		if ( $make_site[2] !== 'make.wordpress.org' || ! in_array( $trac, $this->tracs_supported ) ) {
 			return;
 		}
