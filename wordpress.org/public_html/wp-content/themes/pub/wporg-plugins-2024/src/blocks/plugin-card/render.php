@@ -20,7 +20,7 @@ do_blocks( '<!-- wp:wporg/link-wrapper /-->' ); // Import the styles
 		<?php echo wp_kses_post( Template::get_star_rating( $post, false ) ); ?>
 
 		<div class="entry-excerpt">
-			<?php the_excerpt(); ?>
+			<p><?php echo esc_html( wp_strip_all_tags( wptexturize( get_the_excerpt() ) ) ); ?></p>
 		</div><!-- .entry-excerpt -->
 	</div>
 
