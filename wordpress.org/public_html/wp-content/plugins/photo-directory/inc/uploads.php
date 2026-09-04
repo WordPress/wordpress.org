@@ -707,7 +707,7 @@ class Uploads {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read raw: sanitizing before the check would hide what it looks for.
 			$submitted = isset( $_POST[ $field ] ) ? wp_unslash( $_POST[ $field ] ) : '';
 
-			// A field can arrive as an array; `sanitize_text_field()` stores those as an empty string.
+			// A field can arrive as an array, which Frontend Uploader drops before it builds the post.
 			if ( ! is_string( $submitted ) || '' === $submitted ) {
 				continue;
 			}
