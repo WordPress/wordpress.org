@@ -274,15 +274,42 @@ class Plugin_Search {
 			],
 		];
 
-		// A direct slug match
+		// Boost on a title match.
 		$should_match[] = [
 			'multi_match' => [
 				'query'  => $search_phrase,
-				'fields' => $this->localise_es_fields( [ 'title', 'slug_text' ] ),
+				'fields' => $this->localise_es_fields( [ 'title' ] ),
 				'type'   => 'most_fields',
 				'boost'  => 5,
 			],
 		];
+
+		// A direct slug match.
+		//
+		// The slug boost is meant to reward searches that are looking for a
+		// specific plugin by its slug (e.g. `wordpress-seo`, `wp-google-maps`),
+		// not searches for a topic that happens to appear as one word of a slug.
+		//
+		// Previously `slug_text` was included in the title `most_fields` match
+		// above. Because `slug_text` is word-tokenized (`wp-google-maps` becomes
+		// `wp`, `google`, `maps`), a generic single-word query like `map` matched
+		// a fragment of every `*-map(s)` slug and collected the full slug boost.
+		// That let plugins squat on common terms by stuffing them into the slug.
+		//
+		// Instead we match the query against the whole-slug `slug` keyword field,
+		// normalised the same way the slug itself was generated. `sanitize_title()`
+		// turns `WP Google Maps` into `wp-google-maps`, so an actual slug search
+		// still scores a decisive, constant boost, while a single common word
+		// only matches a plugin whose entire slug is that word.
+		$slug_candidate = sanitize_title( $search_phrase );
+		if ( $slug_candidate ) {
+			$should_match[] = [
+				'constant_score' => [
+					'filter' => [ 'term' => [ 'slug' => $slug_candidate ] ],
+					'boost'  => 8,
+				],
+			];
+		}
 
 		$should_match[] = [
 			'multi_match' => [
