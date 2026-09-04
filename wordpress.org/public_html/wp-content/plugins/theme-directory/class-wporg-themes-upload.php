@@ -788,6 +788,18 @@ class WPORG_Themes_Upload {
 			$style_errors->add( 'no_description', $error );
 		}
 
+		if ( preg_match( '/' . get_shortcode_regex() . '/', $theme_description ) ) {
+			$style_errors->add(
+				'shortcode_in_description',
+				sprintf(
+					/* translators: 1: comment header line, 2: style.css */
+					__( 'The %1$s line in %2$s cannot contain shortcodes. Remove them and upload the theme again.', 'wporg-themes' ),
+					'<code>Description:</code>',
+					'<code>style.css</code>'
+				)
+			);
+		}
+
 		if ( ! $this->theme->get( 'Tags' ) ) {
 			$error = __( 'The theme has no tags.', 'wporg-themes' ) . ' ';
 
@@ -1684,8 +1696,7 @@ TICKET;
 				'post_author'    => $this->author->ID,
 				'post_title'     => $this->theme->get( 'Name' ),
 				'post_name'      => $this->theme_slug,
-				// The description is a one-line header, not body content to run through the shortcode chain.
-				'post_content'   => strip_shortcodes( $this->theme->get( 'Description' ) ),
+				'post_content'   => $this->theme->get( 'Description' ),
 				'post_parent'    => $this->theme->post_parent,
 				'post_date'      => $upload_date,
 				'post_date_gmt'  => $upload_date,
