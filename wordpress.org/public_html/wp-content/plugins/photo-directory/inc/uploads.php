@@ -719,7 +719,8 @@ class Uploads {
 				continue;
 			}
 
-			if ( 1 === preg_match( '/' . get_shortcode_regex() . '/', $sanitize( $submitted ) ) ) {
+			// Anything but a clean no-match is refused: preg_match() returns false when PCRE gives up.
+			if ( 0 !== preg_match( '/' . get_shortcode_regex() . '/', $sanitize( $submitted ) ) ) {
 				return 'shortcode-in-text';
 			}
 		}
