@@ -149,7 +149,12 @@ if ( ! isset( $_GET['embed'] ) ) {
 header( 'Content-Type: text/html; charset=UTF-8' );
 header( 'X-Content-Type-Options: nosniff' );
 
-// The iframe's sandbox covers that element, not this response, which is reachable directly.
+/*
+ * The iframe's sandbox covers that element, not this response, which is reachable directly.
+ * Re-serving third-party markup is the point of this endpoint, so the sandbox is the boundary
+ * rather than the markup: the document cannot act as this origin, and it shows nothing the Trac
+ * URL it mirrors does not already show to the same audience.
+ */
 header( 'Content-Security-Policy: sandbox allow-scripts allow-top-navigation-by-user-activation' );
 
 $cache_key = sha1( $url );
