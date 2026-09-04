@@ -15,7 +15,15 @@
  * oEmbed Discovery is not enabled, as although adding the tag to trac is possible, it requires inline Javascript.
  * 
  * Please do not abuse this API, otherwise an API KEY will become required.
+ *
+ * This is a public, unauthenticated, stateless oEmbed endpoint: requests are anonymous
+ * GET requests from arbitrary sites, so there is no session or nonce to verify.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
  */
+
 include dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
 // Avoid warnings from DomDocument.
@@ -24,8 +32,8 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = $_GET['url'] ?? '';
-$url = is_string( $url ) ? wp_unslash( $url ) : '';
+// Control characters only; percent-encoding or stripping `%` would corrupt the URLs matched below.
+$url = (string) filter_var( wp_unslash( $_GET['url'] ?? '' ), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW );
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );
@@ -38,6 +46,7 @@ $allowed_hosts = [
 
 if (
 	! $url ||
+	! isset( $_SERVER['REQUEST_METHOD'] ) ||
 	'GET' !== $_SERVER['REQUEST_METHOD'] ||
 	! in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ), $allowed_hosts, true )
 ) {
@@ -108,7 +117,7 @@ if ( ! isset( $_GET['embed'] ) ) {
 	);
 
 	if ( ! empty( $_GET['api_key'] ) ) {
-		$embed_url = add_query_arg( 'api_key', wp_unslash( $_GET['api_key'] ), $embed_url );
+		$embed_url = add_query_arg( 'api_key', sanitize_text_field( wp_unslash( $_GET['api_key'] ) ), $embed_url );
 	}
 
 	$embed_url .= '#el=' . $id;
@@ -151,6 +160,7 @@ header( 'X-Content-Type-Options: nosniff' );
 
 $cache_key = sha1( $url );
 if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Cached copy of the HTML document generated below; this endpoint serves text/html.
 	die( $data );
 }
 
@@ -183,6 +193,7 @@ if (
 ) {
 	$output = '<h1>Temporarily Unavailable</h1>';
 	wp_cache_set( $cache_key, $output, 'trac-oembed', MINUTE_IN_SECONDS );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static HTML markup defined above; this endpoint serves text/html.
 	die( $output );
 }
 
@@ -341,4 +352,5 @@ $data = $doc->saveHTML();
 
 wp_cache_set( $cache_key, $data, 'trac-oembed', HOUR_IN_SECONDS );
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Complete HTML document built by DOMDocument above; this endpoint serves text/html and escaping it would destroy the markup.
 echo $data;
