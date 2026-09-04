@@ -32,6 +32,8 @@ class Make_Core_Trac_Components {
 		add_action( 'manage_component_posts_custom_column', array( $this, 'manage_posts_custom_column' ), 10, 2 );
 		add_filter( 'wp_nav_menu_objects', array( $this, 'highlight_menu_component_link' ) );
 		add_filter( 'map_meta_cap', [ $this, 'map_meta_cap' ], 10, 4 );
+		add_action( 'load-post.php', [ $this, 'load_post_screen' ] );
+		add_filter( 'wp_insert_post_data', [ $this, 'keep_component_author' ], 10, 2 );
 	}
 
 	function trac_url() {
@@ -81,6 +83,7 @@ class Make_Core_Trac_Components {
 			'show_ui' => true,
 			'labels' => $labels,
 			'capabilities' => array(
+				'create_posts'           => 'edit_others_posts',
 				'delete_published_posts' => 'manage_options',
 			),
 			'menu_icon' => 'dashicons-admin-generic',
@@ -166,6 +169,10 @@ class Make_Core_Trac_Components {
 			return;
 		}
 		$value = get_post_meta( $post->ID, '_active_maintainers', true );
+		if ( ! $this->can_edit_maintainers() ) {
+			echo '<p>Active maintainers: ' . ( $value ? esc_html( $value ) : 'none' ) . '</p>';
+			return;
+		}
 		echo '<p><label for="active-maintainers">Active maintainers (WP.org usernames, comma-separated)</label> <input type="text" class="large-text" id="active-maintainers" name="active-maintainers" value="' . esc_attr( $value ) . '" />';
 	}
 
@@ -182,7 +189,7 @@ class Make_Core_Trac_Components {
 			update_post_meta( $post->ID, '_page_is_subcomponent', isset( $_POST['page-is-subcomponent'] ) );
 		}
 
-		if ( isset( $_POST['active-maintainers'] ) ) {
+		if ( isset( $_POST['active-maintainers'] ) && $this->can_edit_maintainers() ) {
 			update_post_meta( $post->ID, '_active_maintainers', sanitize_text_field( wp_unslash( $_POST['active-maintainers'] ) ) );
 		}
 	}
@@ -252,6 +259,11 @@ class Make_Core_Trac_Components {
 	/**
 	 * Allows component maintainers to edit their components if they are at least a Contributor.
 	 *
+	 * Only the per-post capabilities are mapped, and only against the post that
+	 * was passed in. The plural `edit_others_posts` has no post to map against
+	 * and is left alone; see load_post_screen() for how the edit form gets by
+	 * without it.
+	 *
 	 * @param array  $required_caps The user's actual capabilities.
 	 * @param string $cap           Capability name.
 	 * @param int    $user_id       The user ID.
@@ -259,22 +271,127 @@ class Make_Core_Trac_Components {
 	 * @return array Primitive caps.
 	 */
 	public function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
-		if ( $user_id && in_array( $cap, [ 'edit_post', 'publish_post', 'edit_others_posts' ], true ) ) {
-			if ( empty( $context[0] ) ) {
-				$context[0] = isset( $_POST['post_ID'] ) ? absint( $_POST['post_ID'] ) : 0;
-			}
+		if ( ! in_array( $cap, [ 'edit_post', 'publish_post' ], true ) ) {
+			return $required_caps;
+		}
 
-			if ( 'component' === get_post_type( $context[0] ) ) {
-				$user_name   = get_user_by( 'id', $user_id )->user_login;
-				$maintainers = array_map( 'trim', explode( ',', get_post_meta( $context[0], '_active_maintainers', true ) ) );
+		$post = isset( $context[0] ) ? get_post( $context[0] ) : null;
+		if ( ! $post || self::POST_TYPE_NAME !== $post->post_type ) {
+			return $required_caps;
+		}
 
-				if ( in_array( $user_name, $maintainers, true ) ) {
-					$required_caps = ['edit_posts'];
-				}
+		if ( ! $this->is_maintainer( $user_id, $post->ID ) ) {
+			return $required_caps;
+		}
+
+		return [ 'edit_posts' ];
+	}
+
+	/**
+	 * Lets a maintainer save a component page they did not author.
+	 *
+	 * The edit form submits the page's existing author in a hidden field, and
+	 * because it differs from the current user, core then requires the plural
+	 * `edit_others_posts` before it saves. For a verified save or preview of a
+	 * component the current user maintains, that field is dropped instead: core
+	 * fills in the current user, asks for nothing more, and
+	 * keep_component_author() puts the stored author back on the way in.
+	 */
+	public function load_post_screen() {
+		if ( ! in_array( $_POST['action'] ?? '', [ 'editpost', 'preview' ], true ) ) {
+			return;
+		}
+
+		$post_id = isset( $_POST['post_ID'] ) ? absint( $_POST['post_ID'] ) : 0;
+		$post    = $post_id ? get_post( $post_id ) : null;
+		if ( ! $post || self::POST_TYPE_NAME !== $post->post_type ) {
+			return;
+		}
+
+		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'update-post_' . $post_id ) ) {
+			return;
+		}
+
+		if ( ! $this->is_maintainer( get_current_user_id(), $post_id ) ) {
+			return;
+		}
+
+		// Changing the author is not part of maintaining the page.
+		$author = isset( $_POST['post_author'] ) ? (int) $_POST['post_author'] : 0;
+		if ( ! empty( $_POST['post_author_override'] ) || $author !== (int) $post->post_author ) {
+			return;
+		}
+
+		unset( $_POST['post_author'] );
+	}
+
+	/**
+	 * Keeps a component page's author when someone editing by delegation saves it.
+	 *
+	 * Core only asks for `edit_others_posts` when a different author is submitted.
+	 * A save that leaves the field out, such as Quick Edit or a maintainer's save
+	 * from the edit form (see load_post_screen()), gets the current user as
+	 * author instead, and a maintainer would take the page over without meaning
+	 * to.
+	 *
+	 * @param array $data    Slashed, sanitized post data.
+	 * @param array $postarr Slashed, sanitized, and processed post data, as passed to wp_insert_post().
+	 * @return array Post data.
+	 */
+	public function keep_component_author( $data, $postarr ) {
+		if ( self::POST_TYPE_NAME !== ( $data['post_type'] ?? '' ) || empty( $postarr['ID'] ) || ! is_user_logged_in() ) {
+			return $data;
+		}
+
+		$existing = get_post( $postarr['ID'] );
+		if ( ! $existing || (int) $data['post_author'] === (int) $existing->post_author ) {
+			return $data;
+		}
+
+		if ( current_user_can( 'edit_others_posts' ) ) {
+			return $data;
+		}
+
+		$data['post_author'] = $existing->post_author;
+
+		return $data;
+	}
+
+	/**
+	 * Whether a user is listed as an active maintainer of a component page.
+	 *
+	 * Logins are compared case-insensitively, as get_user_by() resolves them.
+	 *
+	 * @param int $user_id The user ID.
+	 * @param int $post_id The component page ID.
+	 * @return bool
+	 */
+	public function is_maintainer( $user_id, $post_id ) {
+		$user = $user_id ? get_user_by( 'id', $user_id ) : false;
+		if ( ! $user ) {
+			return false;
+		}
+
+		foreach ( $this->get_component_maintainers_by_post( $post_id ) as $maintainer ) {
+			if ( 0 === strcasecmp( $maintainer, $user->user_login ) ) {
+				return true;
 			}
 		}
 
-		return $required_caps;
+		return false;
+	}
+
+	/**
+	 * Whether the current user may change who maintains a component.
+	 *
+	 * Maintainers edit their page; who maintains it is decided by someone who can
+	 * already edit every component page.
+	 *
+	 * @return bool
+	 */
+	public function can_edit_maintainers() {
+		return current_user_can( 'edit_others_posts' );
 	}
 
 	function wp_enqueue_scripts() {
