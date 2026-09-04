@@ -311,6 +311,10 @@ foreach ( $elements_to_remove as $el ) {
 // Add a script to the header.
 $js = <<<JS
 (function() {
+	if ( window.parent === window ) {
+		return;
+	}
+
 	var id = ( document.location.hash.match(/el=([0-9a-f]+)(&|$)/) || [ '', '' ] )[1];
 
 	function send() {
