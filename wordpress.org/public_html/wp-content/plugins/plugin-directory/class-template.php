@@ -722,7 +722,7 @@ class Template {
 		$args = is_numeric( $args ) ? array( 'rating' => $args ) : $args;
 		$args = wp_parse_args( $args, array(
 			'rating'   => 0,
-			'template' => '<span class="%1$s"></span>',
+			'template' => '<span class="%1$s" aria-hidden="true"></span>',
 		) );
 
 		$rating         = round( $args['rating'] / 0.5 ) * 0.5;
