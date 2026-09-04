@@ -140,8 +140,8 @@ class Theme_Header_Storage_Test extends TestCase {
 		$upload->theme      = new WP_Theme( $this->stylesheet, $this->theme_root );
 		$upload->theme_slug = 'fixture-theme-' . uniqid();
 		$upload->author     = get_user_by( 'id', 1 );
-		$upload->theme_post = null;
 
+		// `$theme_post` is left unset, which is what the class treats as a first submission.
 		$upload->create_or_update_theme_post();
 
 		$this->assertInstanceOf( WP_Post::class, $upload->theme_post );
