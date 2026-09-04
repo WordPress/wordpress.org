@@ -294,7 +294,7 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
-	 * Lists the packaged files whose names do not identify one file on every supported platform.
+	 * Lists the packaged files whose names are not portable.
 	 *
 	 * @param array $files Package-relative paths to test.
 	 * @return array The paths that are not portable, sorted.
@@ -310,14 +310,14 @@ class WPORG_Themes_Upload {
 		$by_lowercase = array();
 
 		foreach ( $files as $file ) {
-			$by_lowercase[ mb_strtolower( $file, 'UTF-8' ) ][] = $file;
+			$by_lowercase[ strtolower( $file ) ][] = $file;
 
 			foreach ( explode( '/', $file ) as $segment ) {
 				// Win32 reads the device name from the segment up to its first period.
 				list( $device ) = explode( '.', $segment );
 
 				if (
-					preg_match( '/[<>:"|?*\\\\\x00-\x1f]/', $segment ) ||
+					preg_match( '/[<>:"|?*\\\\\x00-\x1f\x7f-\xff]/', $segment ) ||
 					preg_match( '/[. ]$/', $segment ) ||
 					in_array( strtoupper( $device ), $devices, true )
 				) {
@@ -351,8 +351,14 @@ class WPORG_Themes_Upload {
 	 * @return string The escaped, comma-separated list.
 	 */
 	protected function format_file_list( array $files ) {
-		$listed = array_slice( $files, 0, 10 );
-		$list   = '<code>' . implode( '</code>, <code>', array_map( 'esc_html', $listed ) ) . '</code>';
+		$listed = array_map(
+			static function ( $file ) {
+				// Escape non-printable bytes so every rejected name is visible.
+				return esc_html( addcslashes( $file, "\0..\37\177..\377" ) );
+			},
+			array_slice( $files, 0, 10 )
+		);
+		$list   = '<code>' . implode( '</code>, <code>', $listed ) . '</code>';
 
 		if ( count( $files ) > count( $listed ) ) {
 			$list .= sprintf(
