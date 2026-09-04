@@ -1,4 +1,16 @@
 <?php
+/**
+ * Themes API 1.0 endpoint: theme information and queries for WordPress clients.
+ *
+ * This is a stateless public API endpoint, so there is no session or nonce infrastructure.
+ * The request is also parsed before `load_wordpress()` runs below, which means request data
+ * has not been slashed at that point.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+ *
+ * @package WordPressdotorg\API\Themes
+ */
+
 namespace WordPressdotorg\API\Themes\Info;
 use function WordPressdotorg\API\load_wordpress;
 
@@ -17,19 +29,34 @@ $wp_object_cache->blog_prefix = WPORG_THEME_DIRECTORY_BLOGID;
 function send_error( $error, $code = 404 ) {
 	global $format;
 
-	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' ' . $code, true, $code );
+	$protocol = filter_var(
+		$_SERVER['SERVER_PROTOCOL'] ?? '',
+		FILTER_VALIDATE_REGEXP,
+		array(
+			'options' => array(
+				'regexp'  => '#^HTTP/[0-9.]+\z#',
+				'default' => 'HTTP/1.0',
+			),
+		)
+	);
+
+	header( $protocol . ' ' . $code, true, $code );
 
 	$response = (object) [
 		'error' => $error	
 	];
 
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only used for a substring comparison, never output or stored.
+	$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
 	// Browsers get a nicer action not implemented error.
 	if (
-		'GET' === $_SERVER['REQUEST_METHOD'] &&
-		false === strpos( $_SERVER['HTTP_USER_AGENT'] ?? '', 'WordPress/' ) &&
+		isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] &&
+		false === strpos( $user_agent, 'WordPress/' ) &&
 		false !== strpos( $error, 'Action not implemented.' )
 	) {
 		header( 'Content-Type: text/html; charset=utf-8' );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Every caller passes a hard-coded message, one of which intentionally contains a link; esc_html() is not loaded here.
 		die( "<p>{$error}</p>" );
 	}
 
@@ -42,9 +69,10 @@ function send_error( $error, $code = 404 ) {
 	}
 
 	if ( 'php' === $format ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- serialized payload, not HTML.
 		echo serialize( $response );
 	} else {
-		// JSON format
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON payload; no wp_json_encode() here.
 		echo json_encode( $response );
 	}
 
@@ -57,9 +85,11 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 
 // Set up action and request information.
 if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Fields are type-checked and sanitized by Themes_API; DB access uses prepared WP_Query calls.
 	$request = isset( $_REQUEST['request'] ) ? (object) $_REQUEST['request'] : '';
 	$format = 'json';
 } else {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Screened for object injection below; unserialized with `allowed_classes` limited to stdClass.
 	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? $_POST['request'] : '';
 	if ( $post_request ) {
 		// PHP Needs to get a non-urldecoded request, to avoid multibyte character malforming the request,
@@ -79,7 +109,17 @@ if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 	$format = 'php';
 }
 
-$action = $_REQUEST['action'] ?? '';
+// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- pre-existing; drives this endpoint's switch.
+$action = filter_var(
+	$_REQUEST['action'] ?? '',
+	FILTER_VALIDATE_REGEXP,
+	array(
+		'options' => array(
+			'regexp'  => '/^[a-z_]{1,32}\z/',
+			'default' => '',
+		),
+	)
+);
 
 // Validate the request.
 switch ( $action ) {
@@ -94,7 +134,7 @@ switch ( $action ) {
 			}
 
 			foreach ( $slugs as $slug ) {
-				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+$/', $slug ) ) {
+				if ( ! $slug || ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+\z/', $slug ) ) {
 					send_error( 'Invalid slugs provided' );
 				}
 
@@ -107,7 +147,7 @@ switch ( $action ) {
 			if ( ! $slug ) {
 				send_error( 'Slug not provided' );
 			}
-			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+$/', $slug ) ) {
+			if ( ! is_string( $slug ) || ! preg_match( '/^[a-z0-9-_]+\z/', $slug ) ) {
 				send_error( 'Invalid slug provided' );
 			}
 
@@ -140,6 +180,7 @@ $api = wporg_themes_query_api( $action, $request, 'api_object' );
 
 $api->set_status_header();
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON or serialized payload, not HTML.
 echo $api->get_result( $format );
 
 // Cache when a theme doesn't exist. See the validation handler above.
