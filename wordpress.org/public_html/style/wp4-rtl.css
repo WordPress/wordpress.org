@@ -232,6 +232,23 @@ a img.aligncenter {
 	height: auto;
 }
 
+/*
+ * Syndicated entries can arrive with pixel widths baked into the markup by the
+ * source site, for example the 560px email column that newsletter plugins put on
+ * separators. `.wrapper img` above is constrained for the same reason; these are
+ * the other elements that turn up with a hardcoded width and push the page
+ * sideways on narrow screens.
+ * See https://meta.trac.wordpress.org/ticket/8419
+ */
+.wrapper .entry hr,
+.wrapper .entry table,
+.wrapper .entry iframe,
+.wrapper .entry video,
+.wrapper .entry embed,
+.wrapper .entry object {
+	max-width: 100%;
+}
+
 #wporg-header {
 	position: relative;
 	height: 140px;
