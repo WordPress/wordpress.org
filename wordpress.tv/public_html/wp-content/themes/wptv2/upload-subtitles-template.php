@@ -195,6 +195,8 @@ if ( ! $parent || ! in_array( $parent->post_status, array( 'publish', 'private' 
 	wp_die( 'You can not subtitle this video, sorry.' );
 }
 
+nocache_headers();
+
 get_header();
 
 $message = '';
