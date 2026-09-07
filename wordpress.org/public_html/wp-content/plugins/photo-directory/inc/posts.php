@@ -35,6 +35,9 @@ class Posts {
 		// Sync photo post content to photo media on update.
 		add_action( 'post_updated',       [ __CLASS__, 'sync_photo_post_to_photo_media_on_update' ], 5, 3 );
 
+		// Photo content is plain text (the alternative text), never post markup.
+		add_filter( 'the_content', [ __CLASS__, 'render_content_as_plain_text' ], PHP_INT_MIN );
+
 		// Offset subsequent paginations of front page by number of posts on front page.
 		add_action( 'pre_get_posts',      [ __CLASS__, 'offset_front_page_paginations' ], 11 );
 		// Fix pages count for front page paginations.
@@ -254,6 +257,35 @@ class Posts {
 		}
 
 		return wp_get_attachment_url( $post_id );
+	}
+
+	/**
+	 * Renders a photo's content as the plain text it is.
+	 *
+	 * A photo's content is the alternative text submitted with it. The submit
+	 * form and its sanitization treat that as plain text, so the content must
+	 * not be interpreted as post markup on output either. It is escaped here,
+	 * ahead of every other 'the_content' callback, so that they only ever see
+	 * text.
+	 *
+	 * Keys on the global post, like core's own content callbacks, so it applies
+	 * to whatever 'the_content' is run for while a photo is the current post.
+	 * The reverse also holds: a photo's content filtered while another post is
+	 * global, such as an excerpt built outside the loop, is not escaped here.
+	 * Nothing on the site does that.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public static function render_content_as_plain_text( $content ) {
+		if ( Registrations::get_post_type() !== get_post_type() ) {
+			return $content;
+		}
+
+		$content = esc_html( $content );
+
+		// Shortcode and URL syntax stay visible text: hide the characters shortcodes and embeds key on.
+		return str_replace( [ '[', '://' ], [ '&#91;', '&#58;//' ], $content );
 	}
 
 	/**
