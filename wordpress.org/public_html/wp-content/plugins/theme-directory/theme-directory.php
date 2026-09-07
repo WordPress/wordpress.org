@@ -593,6 +593,7 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		);
 
 		// SVN commits skip the upload's shortcode check, so make the delimiters inert here.
+		$theme_post_name           = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_post_name );
 		$theme_data['Description'] = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_data['Description'] );
 
 		wp_update_post( array(
