@@ -129,7 +129,7 @@ if ( ! headers_sent() ) {
 		</p>
 
 		<div class="wp-embed-excerpt">
-			<?php the_excerpt(); ?>
+			<p><?php echo esc_html( get_plugin_excerpt_text() ); ?></p>
 		</div>
 
 		<?php
