@@ -822,7 +822,7 @@ function the_author_notice( $post = null ) {
  */
 function get_plugin_excerpt_text() {
 	$excerpt = wptexturize( get_the_excerpt() );
-	$excerpt = preg_replace( '#<br\s*/?>#i', ' ', $excerpt );
+	$excerpt = preg_replace( '#<br\b[^>]*>#i', ' ', $excerpt );
 
-	return trim( wp_strip_all_tags( $excerpt, true ) );
+	return wp_strip_all_tags( $excerpt, true );
 }
