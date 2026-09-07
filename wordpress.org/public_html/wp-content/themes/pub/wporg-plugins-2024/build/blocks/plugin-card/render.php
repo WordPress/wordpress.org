@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Theme\Plugins_2024\PluginCard;
 
 use WordPressdotorg\Plugin_Directory\Template;
+use function WordPressdotorg\Plugin_Directory\Theme\get_plugin_excerpt_text;
 
 $post = get_post();
 // Simulates wporg/link-wrapper block until this is migrated to a block, or it supports href=permalink.
@@ -20,7 +21,7 @@ do_blocks( '<!-- wp:wporg/link-wrapper /-->' ); // Import the styles
 		<?php echo wp_kses_post( Template::get_star_rating( $post, false ) ); ?>
 
 		<div class="entry-excerpt">
-			<p><?php echo esc_html( wp_strip_all_tags( wptexturize( get_the_excerpt() ) ) ); ?></p>
+			<p><?php echo esc_html( get_plugin_excerpt_text() ); ?></p>
 		</div><!-- .entry-excerpt -->
 	</div>
 

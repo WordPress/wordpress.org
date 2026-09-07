@@ -807,3 +807,22 @@ function the_author_notice( $post = null ) {
 		);
 	}
 }
+
+/**
+ * Returns the current plugin's excerpt as plain text, for the card and the embed.
+ *
+ * Excerpts are plain text by construction (the readme parser strips them), but
+ * excerpts imported from a plugin file header can still carry markup. Line
+ * breaks become spaces so the words on either side stay apart, then the tags
+ * go. Texturize runs first so that text inside <code> keeps its literal
+ * quotes, matching what the_excerpt() printed. The result is unescaped text:
+ * callers wrap it in esc_html().
+ *
+ * @return string The excerpt as plain text.
+ */
+function get_plugin_excerpt_text() {
+	$excerpt = wptexturize( get_the_excerpt() );
+	$excerpt = preg_replace( '#<br\s*/?>#i', ' ', $excerpt );
+
+	return trim( wp_strip_all_tags( $excerpt, true ) );
+}

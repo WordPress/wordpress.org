@@ -129,7 +129,7 @@ if ( ! headers_sent() ) {
 		</p>
 
 		<div class="wp-embed-excerpt">
-			<p><?php echo esc_html( wp_strip_all_tags( wptexturize( get_the_excerpt() ) ) ); ?></p>
+			<p><?php echo esc_html( get_plugin_excerpt_text() ); ?></p>
 		</div>
 
 		<?php
