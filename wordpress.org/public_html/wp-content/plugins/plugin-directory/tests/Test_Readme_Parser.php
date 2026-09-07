@@ -158,4 +158,44 @@ class Test_Readme_Parser extends TestCase {
 		$this->assertStringNotContainsString( '<', $parser->license );
 		$this->assertStringNotContainsString( 'onerror', $parser->license );
 	}
+
+	/**
+	 * Data provider for {@see test_filter_text_keeps_section_markup_only()}.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public static function filter_text_provider(): array {
+		return array(
+			'section tags and attributes kept'   => array(
+				'See <a href="https://example.com/" title="t" rel="nofollow">docs</a>, <strong>bold</strong> and <code>x</code>.',
+				'See <a href="https://example.com/" title="t" rel="nofollow">docs</a>, <strong>bold</strong> and <code>x</code>.',
+			),
+			'attributes outside the list dropped' => array(
+				'<a id="x" class="c" style="color:red" data-foo="bar" data-wp-bind--href="context.u" href="#top">Top</a>',
+				'<a href="#top">Top</a>',
+			),
+			'elements outside the list dropped'  => array(
+				'START <div data-foo="bar"><img src="x"><span>inner</span></div> END',
+				'START inner END',
+			),
+			'unbalanced tags balanced'           => array(
+				'<strong>open',
+				'<strong>open</strong>',
+			),
+		);
+	}
+
+	/**
+	 * `filter_text()` is the one place that decides what markup a readme section may
+	 * carry. It is public so a value that stands in for a section can use it, so its
+	 * output is pinned here: the section allow-list survives, other markup is dropped.
+	 *
+	 * @param string $input    Text as found in a readme or a plugin file header.
+	 * @param string $expected Text as the directory stores it.
+	 */
+	#[DataProvider( 'filter_text_provider' )]
+	public function test_filter_text_keeps_section_markup_only( string $input, string $expected ): void {
+		$parser = new Parser( '' );
+		$this->assertSame( $expected, $parser->filter_text( $input ) );
+	}
 }

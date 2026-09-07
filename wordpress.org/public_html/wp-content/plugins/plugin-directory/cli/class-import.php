@@ -455,7 +455,10 @@ class Import {
 				$content .= "\n\n<!--section={$section}-->\n{$section_content}";
 			}
 		} elseif ( ! empty( $headers->Description ) ) {
-			$content = "<!--section=description-->\n{$headers->Description}";
+			// No readme: the plugin file header stands in for the description section,
+			// so it gets the same treatment the readme parser gives a section.
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Header keys as core's get_plugin_data() names them.
+			$content = "<!--section=description-->\n" . $readme->filter_text( $headers->Description );
 		}
 
 		// Use the Readme name, as long as it's not the plugin slug.
