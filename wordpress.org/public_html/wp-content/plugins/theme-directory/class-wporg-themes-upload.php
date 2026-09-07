@@ -788,13 +788,34 @@ class WPORG_Themes_Upload {
 			$style_errors->add( 'no_description', $error );
 		}
 
-		if ( preg_match( '/' . get_shortcode_regex() . '/', $theme_description ) ) {
+		/*
+		 * The one-line headers that can carry the syntax, as
+		 * `error code => [ style.css line, value that gets stored ]`. The description
+		 * reaches `post_content`, the name reaches `post_title`, and the author is stored
+		 * as the `_author` post meta that the themes API reads back. Each is read the way
+		 * `create_or_update_theme_post()` reads it, so the check sees the value that would
+		 * be stored rather than the one in the file.
+		 *
+		 * `Theme URI` and `Author URI` need no entry: `WP_Theme::get()` returns them
+		 * through `esc_url_raw()`, which percent-encodes the delimiters.
+		 */
+		$stored_headers = array(
+			'shortcode_in_description' => array( 'Description', $theme_description ),
+			'shortcode_in_name'        => array( 'Theme Name', (string) $this->theme->get( 'Name' ) ),
+			'shortcode_in_author'      => array( 'Author', (string) $this->theme->get( 'Author' ) ),
+		);
+
+		foreach ( $stored_headers as $code => list( $header, $value ) ) {
+			if ( ! preg_match( '/' . get_shortcode_regex() . '/', $value ) ) {
+				continue;
+			}
+
 			$style_errors->add(
-				'shortcode_in_description',
+				$code,
 				sprintf(
 					/* translators: 1: comment header line, 2: style.css */
 					__( 'The %1$s line in %2$s cannot contain shortcodes. Remove them and upload the theme again.', 'wporg-themes' ),
-					'<code>Description:</code>',
+					'<code>' . $header . ':</code>',
 					'<code>style.css</code>'
 				)
 			);
@@ -1694,9 +1715,7 @@ TICKET;
 
 			$post_id = wp_insert_post( array(
 				'post_author'    => $this->author->ID,
-				// The name and the description are one-line headers, not body content to run
-				// through the shortcode chain.
-				'post_title'     => strip_shortcodes( $this->theme->get( 'Name' ) ),
+				'post_title'     => $this->theme->get( 'Name' ),
 				'post_name'      => $this->theme_slug,
 				'post_content'   => $this->theme->get( 'Description' ),
 				'post_parent'    => $this->theme->post_parent,
@@ -1713,10 +1732,9 @@ TICKET;
 
 		// Finally, add post meta.
 		$post_meta = array(
-			// One-line headers, as above.
-			'_theme_url'    => strip_shortcodes( $this->theme->get( 'ThemeURI' ) ),
-			'_author'       => strip_shortcodes( $this->theme->get( 'Author' ) ),
-			'_author_url'   => strip_shortcodes( $this->theme->get( 'AuthorURI' ) ),
+			'_theme_url'    => $this->theme->get( 'ThemeURI' ),
+			'_author'       => $this->theme->get( 'Author' ),
+			'_author_url'   => $this->theme->get( 'AuthorURI' ),
 			'_requires'     => $this->sanitize_version_like_field( $this->theme->get( 'RequiresWP' ), 'requires' ),
 			'_requires_php' => $this->sanitize_version_like_field( $this->theme->get( 'RequiresPHP' ) ),
 			'_upload_date'  => $upload_date,
