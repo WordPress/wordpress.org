@@ -45,7 +45,54 @@ function p2_kses_init() {
  */
 function p2_kses_init_filters() {
 	remove_filter( 'pre_comment_content', 'wp_filter_kses' );
-	add_filter( 'pre_comment_content', 'wp_filter_post_kses' );
+	add_filter( 'pre_comment_content', __NAMESPACE__ . '\\filter_comment_content' );
+}
+
+/**
+ * Applies the post HTML filters to comment content, then drops o2's own classes.
+ *
+ * Mirrors wp_filter_post_kses(), which is what this used to hook directly.
+ *
+ * @param string $data Slashed comment content.
+ * @return string Slashed comment content.
+ */
+function filter_comment_content( $data ) {
+	return addslashes( strip_o2_control_classes( wp_kses( stripslashes( $data ), 'post' ) ) );
+}
+
+/**
+ * Removes o2's control classes from comment HTML.
+ *
+ * These classes are how o2 binds its post actions, and the lookup that picks an
+ * editor to read, across the whole post article rather than to the controls it
+ * rendered itself. Comments live in that article and their HTML comes from the
+ * commenter, so it must not be able to present itself as one of those controls.
+ *
+ * @param string $html Unslashed comment HTML.
+ * @return string
+ */
+function strip_o2_control_classes( $html ) {
+	if ( false === stripos( $html, 'o2-' ) ) {
+		return $html;
+	}
+
+	$tags = new \WP_HTML_Tag_Processor( $html );
+
+	while ( $tags->next_tag() ) {
+		$remove = array();
+
+		foreach ( $tags->class_list() as $class ) {
+			if ( str_starts_with( strtolower( $class ), 'o2-' ) ) {
+				$remove[] = $class;
+			}
+		}
+
+		foreach ( $remove as $class ) {
+			$tags->remove_class( $class );
+		}
+	}
+
+	return $tags->get_updated_html();
 }
 
 /**
