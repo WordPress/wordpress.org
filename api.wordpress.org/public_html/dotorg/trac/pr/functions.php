@@ -380,14 +380,14 @@ function trac_comment_processors() {
 /**
  * Escapes the row separators of a line, leaving its inline code alone.
  *
- * Trac writes a row separator's parameters onto the `tr` element, but renders the
- * contents of an inline `{{{…}}}` literally, so only the text between them needs it.
+ * Trac writes a row separator's parameters onto the `tr` element, but renders inline
+ * code literally, so only the text outside a `{{{…}}}` or a backtick span needs it.
  *
  * @param string $line One line of composed wiki text.
  * @return string|false The line with its row separators escaped.
  */
 function trac_comment_escape_row_separators( $line ) {
-	$parts = preg_split( '#(\{\{\{.*?\}\}\})#', $line, -1, PREG_SPLIT_DELIM_CAPTURE );
+	$parts = preg_split( '#(\{\{\{.*?\}\}\}|`[^`\n]*`)#', $line, -1, PREG_SPLIT_DELIM_CAPTURE );
 	if ( false === $parts ) {
 		return false;
 	}
@@ -499,15 +499,16 @@ function trac_comment_code_block( $fence ) {
  * @return string|false The span as Trac wiki markup, or false if it cannot be built.
  */
 function trac_comment_wiki_text( $text ) {
-	// A one-line fence is Trac's inline code: its contents are not escaped with the prose.
-	$parts = preg_split( '#```(.*?)```#s', $text, -1, PREG_SPLIT_DELIM_CAPTURE );
+	// Trac renders inline code literally, so its contents are not escaped with the prose.
+	$parts = preg_split( '#(```.*?```|`[^`\n]*`)#s', $text, -1, PREG_SPLIT_DELIM_CAPTURE );
 	if ( false === $parts ) {
 		return false;
 	}
 
 	foreach ( $parts as $i => $part ) {
 		if ( $i % 2 ) {
-			$parts[ $i ] = '{{{' . $part . '}}}';
+			// A one-line fence becomes Trac's own inline code; a single backtick already is.
+			$parts[ $i ] = str_starts_with( $part, '```' ) ? '{{{' . substr( $part, 3, -3 ) . '}}}' : $part;
 			continue;
 		}
 

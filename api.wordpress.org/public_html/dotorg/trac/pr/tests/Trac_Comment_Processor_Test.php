@@ -412,6 +412,32 @@ class Trac_Comment_Processor_Test extends TestCase {
 	}
 
 	/**
+	 * A single backtick is Trac's inline code too, and its contents are literal.
+	 *
+	 * @dataProvider data_backtick_spans
+	 *
+	 * @param string $body A pull request body with markup inside a backtick span.
+	 * @return void
+	 */
+	public function test_a_backtick_span_is_left_alone( string $body ) {
+		$this->assertSame( trim( $body ), format_github_content_for_trac_comment( $body ) );
+	}
+
+	/**
+	 * Backtick spans whose contents would otherwise be escaped.
+	 *
+	 * @return array
+	 */
+	public static function data_backtick_spans() {
+		return array(
+			'macro'         => array( "Use `[[Image(x)]]` here.\n" ),
+			'anchor'        => array( "Use `[=#x]` here.\n" ),
+			'block opener'  => array( "Use `{{{` here.\n" ),
+			'row separator' => array( "Use `|-id=x` here.\n" ),
+		);
+	}
+
+	/**
 	 * A quoted fence must sit inside the citation, delimiters and all.
 	 *
 	 * Trac re-formats a citation's lines as their own document, so a block whose
