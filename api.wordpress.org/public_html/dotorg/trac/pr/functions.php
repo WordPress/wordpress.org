@@ -511,11 +511,7 @@ function trac_comment_wiki_text( $text ) {
 			continue;
 		}
 
-		/*
-		 * `[[` opens a macro and `[=` an anchor, both of which take element attributes;
-		 * `{{{` opens a processor block. Markdown's own single `[` is left for the link
-		 * and image conversions below.
-		 */
+		// Only the openers Trac reads as markup; a lone `[` is left for the conversions below.
 		$parts[ $i ] = preg_replace( '~\[(?=[\[=])|\{(?=\{\{)~', '!$0', $part );
 		if ( null === $parts[ $i ] ) {
 			return false;
@@ -558,10 +554,7 @@ function trac_comment_wiki_text( $text ) {
 		$text
 	);
 
-	/*
-	 * PHP coerces a null subject to '' for the next call, so a pass that PCRE gave up
-	 * on has to be caught before the one after it hides the failure.
-	 */
+	// A null subject is coerced to '' by the next call, so every pass is checked.
 	if ( ! is_string( $text ) ) {
 		return false;
 	}
@@ -649,11 +642,6 @@ function format_github_content_for_trac_comment( $desc ) {
 		return false;
 	}
 
-	/*
-	 * Fenced code and the text around it need opposite treatment: a block renders
-	 * literally once opened, while everything else is wiki markup to escape. `!` is
-	 * text rather than an escape inside a block, so the two cannot share a pass.
-	 */
 	$parts = preg_split( '#(^[ >]*```(?:(?!```)[^\n])*\n.*?```[ \t]*$)#sm', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
 	if ( false === $parts ) {
 		return false;
@@ -672,11 +660,6 @@ function format_github_content_for_trac_comment( $desc ) {
 
 	$desc = trim( $desc );
 
-	/*
-	 * What Trac skips before a `{{{` or a `#!`: its own whitespace class, which is
-	 * Python's and so wider than PCRE's, plus the `>` of a citation, whose contents
-	 * it re-formats as wiki text in their own right.
-	 */
 	$skipped = trac_comment_skipped();
 
 	// After all this, if it names a processor we didn't pick, we're not interested in syncing it.
