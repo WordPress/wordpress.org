@@ -382,6 +382,36 @@ class Trac_Comment_Processor_Test extends TestCase {
 	}
 
 	/**
+	 * A line opening with inline code does not open a block.
+	 *
+	 * The opening line of a block must not reach past its own closing backticks, or
+	 * two one-line fences and everything between them are read as one block.
+	 *
+	 * @return void
+	 */
+	public function test_two_inline_fences_stay_separate() {
+		$desc = format_github_content_for_trac_comment(
+			"```wp_head()```\nsee [docs](https://e.org/d)\n```wp_footer()```\n"
+		);
+
+		$this->assertSame(
+			"{{{wp_head()}}}\nsee [https://e.org/d docs]\n{{{wp_footer()}}}",
+			$desc
+		);
+	}
+
+	/**
+	 * Inline code renders literally, so the row-separator escape stays out of it.
+	 *
+	 * @return void
+	 */
+	public function test_a_row_separator_inside_inline_code_is_untouched() {
+		$desc = format_github_content_for_trac_comment( "Use ```|-id=x``` in a row.\n" );
+
+		$this->assertSame( 'Use {{{|-id=x}}} in a row.', $desc );
+	}
+
+	/**
 	 * A quoted fence must sit inside the citation, delimiters and all.
 	 *
 	 * Trac re-formats a citation's lines as their own document, so a block whose

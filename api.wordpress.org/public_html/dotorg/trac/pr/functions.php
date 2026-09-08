@@ -378,6 +378,35 @@ function trac_comment_processors() {
 }
 
 /**
+ * Escapes the row separators of a line, leaving its inline code alone.
+ *
+ * Trac writes a row separator's parameters onto the `tr` element, but renders the
+ * contents of an inline `{{{…}}}` literally, so only the text between them needs it.
+ *
+ * @param string $line One line of composed wiki text.
+ * @return string|false The line with its row separators escaped.
+ */
+function trac_comment_escape_row_separators( $line ) {
+	$parts = preg_split( '#(\{\{\{.*?\}\}\})#', $line, -1, PREG_SPLIT_DELIM_CAPTURE );
+	if ( false === $parts ) {
+		return false;
+	}
+
+	foreach ( $parts as $i => $part ) {
+		if ( $i % 2 ) {
+			continue;
+		}
+
+		$parts[ $i ] = preg_replace( '~\|(?=-)~', '!|', $part );
+		if ( null === $parts[ $i ] ) {
+			return false;
+		}
+	}
+
+	return implode( '', $parts );
+}
+
+/**
  * What Trac skips within a line before a delimiter, plus the `>` of a citation.
  *
  * Python's whitespace class, which is wider than PCRE's, so a pattern using this
@@ -542,8 +571,7 @@ function trac_comment_wiki_text( $text ) {
 		'#^.+$#m',
 		function ( $m ) {
 			if ( ! preg_match( '#^[|].+[|]$#', $m[0] ) ) {
-				// Trac writes a row separator's parameters onto the `tr` element.
-				return preg_replace( '~\|(?=-)~', '!|', $m[0] );
+				return trac_comment_escape_row_separators( $m[0] );
 			}
 
 			// Headers such as `| --- |---|`.
@@ -626,7 +654,7 @@ function format_github_content_for_trac_comment( $desc ) {
 	 * literally once opened, while everything else is wiki markup to escape. `!` is
 	 * text rather than an escape inside a block, so the two cannot share a pass.
 	 */
-	$parts = preg_split( '#(^[ >]*```[^\n]*\n.*?```[ \t]*$)#sm', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+	$parts = preg_split( '#(^[ >]*```(?:(?!```)[^\n])*\n.*?```[ \t]*$)#sm', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
 	if ( false === $parts ) {
 		return false;
 	}
