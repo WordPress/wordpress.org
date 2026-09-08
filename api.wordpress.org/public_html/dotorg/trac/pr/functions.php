@@ -350,7 +350,7 @@ function get_trac_instance( $trac ) {
  *  - format_github_content_for_trac_comment();
  *
  * @param string $desc.
- * @return string Converted PR Description
+ * @return string|false Converted PR Description, or false if it may not be synced.
  */
 function format_pr_desc_for_trac_comment( $desc ) {
 	$desc = trim( $desc );
@@ -365,6 +365,232 @@ function format_pr_desc_for_trac_comment( $desc ) {
 }
 
 /**
+ * The Trac wiki processors a synced comment may name.
+ *
+ * The rest render badly, or take element attributes as `#!div` and `#!span` do.
+ *
+ * @link https://trac.edgewall.org/wiki/1.1/WikiProcessors#AvailableProcessors
+ *
+ * @return array Supported processor names.
+ */
+function trac_comment_processors() {
+	return [ 'default', 'xml', 'php', 'js', 'javascript', 'css', 'sql', 'sh', 'diff' ];
+}
+
+/**
+ * What Trac skips within a line before a delimiter, plus the `>` of a citation.
+ *
+ * Python's whitespace class, which is wider than PCRE's, so a pattern using this
+ * needs the `u` modifier. `\n` is left out: it must not carry across a line.
+ *
+ * @return string A character class, for use inside a `/u` pattern.
+ */
+function trac_comment_skipped() {
+	return '[ \t\x1c-\x1f\p{Z}>]';
+}
+
+/**
+ * Turns one fenced code block into a Trac code block.
+ *
+ * The contents are rendered literally, so only the block's own delimiters and its
+ * processor line have to be taken away from the pull request.
+ *
+ * @param string $fence One ```-fenced span, delimiters included.
+ * @return string|false The span as Trac wiki markup, or false if it cannot be built.
+ */
+function trac_comment_code_block( $fence ) {
+	/*
+	 * Trac ends a block only on a line of exactly `}}}` and nests one only on a line
+	 * opening with `{{{`, so those two shapes are broken up and braces anywhere else
+	 * are left as the code wrote them.
+	 */
+	$inert = function ( $code ) {
+		$skipped = trac_comment_skipped();
+
+		return preg_replace(
+			array( "~^({$skipped}*)\}\}\}{$skipped}*$~mu", "~^({$skipped}*)\{\{\{(?![^\n]*\}\}\})~mu" ),
+			array( '$1} }}', '$1{ {{' ),
+			$code
+		);
+	};
+
+	// Anchored to the whole span: a match on part of it would drop the rest.
+	if ( preg_match( '#\A(?P<indent>[ >]*)```[ ]*(?P<format>[a-z]+)$(?P<code>.+?)```[ \t]*\z#sm', $fence, $m ) ) {
+		$format = trim( $m['format'] );
+
+		// The HTML code block in trac renders actual HTML, set it as an XML code block for syntax highlighting.
+		if ( 'html' === $format ) {
+			$format = 'xml';
+		}
+
+		if ( ! in_array( $format, trac_comment_processors(), true ) ) {
+			$format = 'default';
+		}
+
+		$code = trim( $m['code'] );
+		// replace a blank indented line at the end of the code block with.. nothing.
+		if ( $m['indent'] ) {
+			$code = preg_replace( "#\n[ >]+$#", '', $code );
+		}
+
+		$code = $inert( (string) $code );
+		if ( ! is_string( $code ) ) {
+			return false;
+		}
+
+		return $m['indent'] . "{{{\n" .
+			$m['indent'] . '#!' . $format . "\n" .
+			$code . "\n" .
+			$m['indent'] . "}}}\n";
+	}
+
+	if ( ! preg_match( '#\A(?P<indent>[ >]*)```(?P<code>.*?)```[ \t]*\z#s', $fence, $m ) ) {
+		return false;
+	}
+
+	// A one-line fence is Trac's inline code, not a block.
+	if ( ! str_contains( $m['code'], "\n" ) ) {
+		$code = $inert( $m['code'] );
+
+		return is_string( $code ) ? $m['indent'] . '{{{' . $code . '}}}' : false;
+	}
+
+	$code = $inert( preg_replace( "#\n[ >]+$#", '', trim( $m['code'], "\n" ) ) );
+	if ( ! is_string( $code ) ) {
+		return false;
+	}
+
+	// Naming the processor stops the fence's first line from choosing one.
+	return $m['indent'] . "{{{\n" .
+		$m['indent'] . "#!default\n" .
+		$code . "\n" .
+		$m['indent'] . '}}}';
+}
+
+/**
+ * Converts one span of pull request text to Trac wiki markup.
+ *
+ * The body's own wiki syntax is escaped before any is added, so only the markup
+ * this composer writes reaches Trac as markup.
+ *
+ * @param string $text A span of the pull request lying outside any code fence.
+ * @return string|false The span as Trac wiki markup, or false if it cannot be built.
+ */
+function trac_comment_wiki_text( $text ) {
+	/*
+	 * `[[` opens a macro and `[=` an anchor, both of which take element attributes;
+	 * `{{{` opens a processor block. Markdown's own single `[` is left for the link
+	 * and image conversions below.
+	 */
+	$text = preg_replace( '~\[(?=[\[=])|\{(?=\{\{)~', '!$0', $text );
+
+	if ( null === $text ) {
+		return false;
+	}
+
+	// Convert Images (Must happen prior to Links, as the only difference is a preceeding `!`).
+	$text = preg_replace_callback(
+		'#!\[(?!\[)(.+?)\]\((.+?)\)#',
+		function ( $m ) {
+			return '[[Image(' . trac_comment_link_target( $m[2] ) . ')]]';
+		},
+		$text
+	);
+	if ( ! is_string( $text ) ) {
+		return false;
+	}
+
+	// Convert Images embedded as `<img>`.
+	$text = preg_replace_callback(
+		'#<img[^>]+src=(["\'])(.+?)\\1[^>]*>#',
+		function ( $m ) {
+			return '[[Image(' . trac_comment_link_target( $m[2] ) . ')]]';
+		},
+		$text
+	);
+
+	if ( ! is_string( $text ) ) {
+		return false;
+	}
+
+	// Convert Links.
+	$text = preg_replace_callback(
+		'#\[(.+?)\]\((.+?)\)#',
+		function ( $m ) {
+			return '[' . trac_comment_link_target( $m[2] ) . ' ' . $m[1] . ']';
+		},
+		$text
+	);
+
+	/*
+	 * PHP coerces a null subject to '' for the next call, so a pass that PCRE gave up
+	 * on has to be caught before the one after it hides the failure.
+	 */
+	if ( ! is_string( $text ) ) {
+		return false;
+	}
+
+	// Convert Tables, and escape the row separators of every line that is not one.
+	$text = preg_replace_callback(
+		'#^.+$#m',
+		function ( $m ) {
+			if ( ! preg_match( '#^[|].+[|]$#', $m[0] ) ) {
+				// Trac writes a row separator's parameters onto the `tr` element.
+				return preg_replace( '~\|(?=-)~', '!|', $m[0] );
+			}
+
+			// Headers such as `| --- |---|`.
+			if ( preg_match( '#^[- |]+$#', $m[0] ) ) {
+				return '~~~TABLEHEADER~~~';
+			}
+
+			// Replace singular |'s but not double ||'s.
+			return preg_replace( '#(?<![|])[|](?![|])#', '||', $m[0] );
+		},
+		$text
+	);
+	// Markup the headers now. Trac table headers are in the format of `||= Header =||`.
+	$text = preg_replace_callback(
+		"#^([|].+[|])\n(~~~TABLEHEADER~~~)#m",
+		function ( $m ) {
+			$headers = $m[1];
+			$headers = preg_replace( '#[|]{2}([^|=])#', '||=$1', $headers );
+			$headers = preg_replace( '#([^|=])[|]{2}#', '$1=||', $headers );
+
+			return $headers;
+		},
+		$text
+	);
+
+	// A conversion above that PCRE gave up on would otherwise empty the span.
+	if ( ! is_string( $text ) ) {
+		return false;
+	}
+
+	// It shouldn't exist at this point, but if it does, replace it back with it's original content.
+	return str_replace( '~~~TABLEHEADER~~~', '|| ||', $text );
+}
+
+/**
+ * Encodes a URL for use as the target of a Trac macro or link.
+ *
+ * Macro arguments are comma-separated and Trac writes one it does not recognise onto
+ * the element as an attribute, while `|` would meet the row-separator escape below.
+ *
+ * @param string $url Link or image target taken from the pull request.
+ * @return string The target with the markup's own punctuation percent-encoded.
+ */
+function trac_comment_link_target( $url ) {
+	return preg_replace_callback(
+		'/[,()\[\]"\'|]/',
+		function ( $m ) {
+			return rawurlencode( $m[0] );
+		},
+		trim( $url )
+	);
+}
+
+/**
  * Formats github content for usage on Trac.
  *
  * This:
@@ -375,95 +601,53 @@ function format_pr_desc_for_trac_comment( $desc ) {
  *  - Converts tables
  *
  * @param string $desc.
- * @return string Converted PR Description
+ * @return string|false Converted PR Description, or false if it may not be synced.
  */
 function format_github_content_for_trac_comment( $desc ) {
-	// Standardise on \n.
-	$desc = str_replace( "\r\n", "\n", $desc );
+	// Standardise on \n, including the boundaries Trac breaks lines on but PCRE does not.
+	$line_breaks = array( "\r\n", "\r", "\x0b", "\x0c", "\x1c", "\x1d", "\x1e", "\xc2\x85", "\xe2\x80\xa8", "\xe2\x80\xa9" );
+	$desc        = str_replace( $line_breaks, "\n", $desc );
 
 	// Remove HTML comments
 	$desc = preg_replace( '#<!--.+?-->#s', '', $desc );
+	if ( null === $desc ) {
+		return false;
+	}
 
-	// Convert Code blocks.
-	$desc = preg_replace_callback(
-		'#^(?P<indent>[ >]*)```[ ]*(?P<format>[a-z]+$)(?P<code>.+?)```$#sm',
-		function( $m ) {
-			$format = trim( $m['format'] );
+	/*
+	 * Fenced code and the text around it need opposite treatment: a block renders
+	 * literally once opened, while everything else is wiki markup to escape. `!` is
+	 * text rather than an escape inside a block, so the two cannot share a pass.
+	 */
+	$parts = preg_split( '#(^[ >]*```.*?```[ \t]*$|```.*?```)#sm', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+	if ( false === $parts ) {
+		return false;
+	}
 
-			// The HTML code block in trac renders actual HTML, set it as an XML code block for syntax highlighting.
-			if ( 'html' === $format ) {
-				$format = 'xml';
-			}
+	foreach ( $parts as $i => $part ) {
+		$part = ( $i % 2 ) ? trac_comment_code_block( $part ) : trac_comment_wiki_text( $part );
+		if ( false === $part ) {
+			return false;
+		}
 
-			/*
-			 * Some other code processor types can end up rendering badly on Trac, limit to expected safe types.
-			 *
-			 * See https://trac.edgewall.org/wiki/1.1/WikiProcessors#AvailableProcessors
-			 */
-			$supported_formats = [ 'xml', 'php', 'js', 'javascript', 'css', 'sql', 'sh', 'diff' ];
-			if ( ! in_array( $format, $supported_formats ) ) {
-				$format = 'default';
-			}
+		$parts[ $i ] = $part;
+	}
 
-			$code = trim( $m['code'] );
-			// replace a blank indented line at the end of the code block with.. nothing.
-			if ( $m['indent'] ) {
-				$code = preg_replace( "#\n[ >]+$#", '', $code );
-			}
-
-			return
-				$m['indent'] . "{{{\n" .
-				$m['indent'] . "#!" . $format . "\n" .
-				$code . "\n" .
-				$m['indent'] . "}}}\n";
-		},
-		$desc
-	);
-
-	$desc = preg_replace( '#```(.+?)```#s', '{{{$1}}}', $desc );
-
-	// Convert Images (Must happen prior to Links, as the only difference is a preceeding !)
-	$desc = preg_replace( '#!\[(.+?)\]\((.+?)\)#', '[[Image($2)]]', $desc );
-	// Convert Images embedded as `<img>`.
-	$desc = preg_replace( '#<img[^>]+src=(["\'])(.+?)\\1[^>]*>#', '[[Image($2)]]', $desc );
-
-	// Convert Links.
-	$desc = preg_replace( '#\[(.+?)\]\((.+?)\)#', '[$2 $1]', $desc );
-
-	// Convert Tables.
-	$desc = preg_replace_callback(
-		'#^[|].+[|]$#m', 
-		function( $m ) {
-			// Headers such as `| --- |---|`
-			if ( preg_match( '#^[- |]+$#', $m[0] ) ) {
-				return '~~~TABLEHEADER~~~';
-			}
-
-			// Replace singular |'s but not double ||'s
-			return preg_replace( '#(?<![|])[|](?![|])#', '||', $m[0] );
-		},
-		$desc
-	);
-	// Markup the headers now. Trac table headers are in the format of ||= Header =||
-	$desc = preg_replace_callback(
-		"#^([|].+[|])\n(~~~TABLEHEADER~~~)#m",
-		function( $m ) {
-			$headers = $m[1];
-			$headers = preg_replace( '#[|]{2}([^|=])#', '||=$1', $headers );
-			$headers = preg_replace( '#([^|=])[|]{2}#', '$1=||', $headers );
-
-			return $headers;
-		},
-		$desc
-	);
-
-	// It shouldn't exist at this point, but if it does, replace it back with it's original content.
-	$desc = str_replace( '~~~TABLEHEADER~~~', '|| ||', $desc );
+	$desc = implode( '', $parts );
 
 	$desc = trim( $desc );
 
-	// After all this, if it's a HTML comment, we're not interested in syncing it.
-	if ( preg_match( '/[{`]+\s*#!html/i', $desc ) ) {
+	/*
+	 * What Trac skips before a `{{{` or a `#!`: its own whitespace class, which is
+	 * Python's and so wider than PCRE's, plus the `>` of a citation, whose contents
+	 * it re-formats as wiki text in their own right.
+	 */
+	$skipped = trac_comment_skipped();
+
+	// After all this, if it names a processor we didn't pick, we're not interested in syncing it.
+	$block = "~^{$skipped}*\{\{\{(?![^\n]*\}\}\}){$skipped}*\n?{$skipped}*#!([\w+-][\w+/-]*)~mu";
+	$count = preg_match_all( $block, $desc, $processors );
+	if ( false === $count || array_diff( array_map( 'strtolower', $processors[1] ), trac_comment_processors() ) ) {
 		return false;
 	}
 
