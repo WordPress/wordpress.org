@@ -83,6 +83,7 @@
 			<select name="category" id="category" class="<?php echo jobswp_required_field_classes( 'category' ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<?php foreach ( Jobs_Dot_WP::get_job_categories() as $cat ) : ?>
+					<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- jobswp_field_value() returns selected() markup. ?>
 					<option value="<?php echo esc_attr( $cat->slug ); ?>" <?php echo jobswp_field_value( 'category', esc_attr( $cat->slug ) ); ?>><?php echo esc_html( $cat->name ); ?></option>
 				<?php endforeach; ?>
 			</select>

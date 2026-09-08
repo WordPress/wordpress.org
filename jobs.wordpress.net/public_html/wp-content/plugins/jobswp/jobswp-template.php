@@ -16,10 +16,7 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 
 	switch ( $meta_key ) :
 		case 'location':
-			if ( empty( $val ) )
-				$val = 'N/A';
-			else
-				$val = esc_html( $val );
+			$val = empty( $val ) ? 'N/A' : esc_html( $val );
 			break;
 		case 'jobtype':
 			if ( 'ppt' == $val )
@@ -89,6 +86,7 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 			esc_url( get_term_feed_link( $category->term_id, $category->taxonomy ) ),
 			esc_attr( $category->name ),
 			esc_url( get_term_link( $category, 'job_category' ) ),
+			/* translators: %s: Job category name. */
 			esc_attr( sprintf( __( 'View all jobs listed under %s', 'jobswp' ), $category->name ) ),
 			esc_html( apply_filters( 'list_cats', $category->name, $category ) )
 		);
