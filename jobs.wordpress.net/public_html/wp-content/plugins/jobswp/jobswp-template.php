@@ -18,6 +18,8 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 		case 'location':
 			if ( empty( $val ) )
 				$val = 'N/A';
+			else
+				$val = esc_html( $val );
 			break;
 		case 'jobtype':
 			if ( 'ppt' == $val )
@@ -62,6 +64,8 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 				$val = esc_html( $val );
 			}
 			break;
+		default:
+			$val = esc_html( $val );
 	endswitch;
 
 	return apply_filters( 'jobswp_metadata', $val, $post_id, $meta_key );
@@ -80,16 +84,14 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 	$output = '<div class="row row-head">';
 	$link = $before;
 	if ( $category ) {
-			$link .= '<a href="' . get_term_feed_link( $category->term_id, $category->taxonomy ) . '"';
-			$title = ' title="' . $category->name . '"';
-			$alt = ' alt="' . $category->name . '"';
-			$link .= $title;
-			$link .= '>';
-			$link .= '</a> ';
-			$link .= '<a href="' . get_term_link( $category, 'job_category' ) . '" ';
-			$link .= 'title="' . sprintf( __( 'View all jobs listed under %s', 'jobswp' ), esc_attr( $category->name ) ) . '"';
-			$link .= '>';
-			$link .= apply_filters( 'list_cats', $category->name, $category ).'</a>';
+		$link .= sprintf(
+			'<a href="%1$s" title="%2$s"></a> <a href="%3$s" title="%4$s">%5$s</a>',
+			esc_url( get_term_feed_link( $category->term_id, $category->taxonomy ) ),
+			esc_attr( $category->name ),
+			esc_url( get_term_link( $category, 'job_category' ) ),
+			esc_attr( sprintf( __( 'View all jobs listed under %s', 'jobswp' ), $category->name ) ),
+			esc_html( apply_filters( 'list_cats', $category->name, $category ) )
+		);
 	}
 
 	$orig_jobscnt = $jobscnt;
@@ -105,7 +107,7 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 	$output .= $link;
 	$output .= '<div class="jobs-count">';
 
-	$output .= '<a href="' . $feed_link . '">RSS</a> <span>' . $jobscnt . '</span></div>
+	$output .= '<a href="' . esc_url( $feed_link ) . '">RSS</a> <span>' . $jobscnt . '</span></div>
 		</div>
 		<div class="row job-list-col-labels">
 			<div class="job-date">Date Posted</div>
