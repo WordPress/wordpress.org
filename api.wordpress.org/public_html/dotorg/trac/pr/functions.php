@@ -460,9 +460,12 @@ function trac_comment_code_block( $fence ) {
 		// replace a blank indented line at the end of the code block with.. nothing.
 		if ( $m['indent'] ) {
 			$code = preg_replace( "#\n[ >]+$#", '', $code );
+			if ( null === $code ) {
+				return false;
+			}
 		}
 
-		$code = $inert( (string) $code );
+		$code = $inert( $code );
 		if ( ! is_string( $code ) ) {
 			return false;
 		}
@@ -477,7 +480,12 @@ function trac_comment_code_block( $fence ) {
 		return false;
 	}
 
-	$code = $inert( preg_replace( "#\n[ >]+$#", '', trim( $m['code'], "\n" ) ) );
+	$code = preg_replace( "#\n[ >]+$#", '', trim( $m['code'], "\n" ) );
+	if ( null === $code ) {
+		return false;
+	}
+
+	$code = $inert( $code );
 	if ( ! is_string( $code ) ) {
 		return false;
 	}
@@ -561,11 +569,20 @@ function trac_comment_wiki_text( $text ) {
 	}
 
 	// Convert Tables, and escape the row separators of every line that is not one.
-	$text = preg_replace_callback(
+	$escaped = true;
+	$text    = preg_replace_callback(
 		'#^.+$#m',
-		function ( $m ) {
+		function ( $m ) use ( &$escaped ) {
 			if ( ! preg_match( '#^[|].+[|]$#', $m[0] ) ) {
-				return trac_comment_escape_row_separators( $m[0] );
+				$line = trac_comment_escape_row_separators( $m[0] );
+				// A false here would be coerced to '', dropping the line from the comment.
+				if ( false === $line ) {
+					$escaped = false;
+
+					return $m[0];
+				}
+
+				return $line;
 			}
 
 			// Headers such as `| --- |---|`.
@@ -592,7 +609,7 @@ function trac_comment_wiki_text( $text ) {
 	);
 
 	// A conversion above that PCRE gave up on would otherwise empty the span.
-	if ( ! is_string( $text ) ) {
+	if ( ! $escaped || ! is_string( $text ) ) {
 		return false;
 	}
 

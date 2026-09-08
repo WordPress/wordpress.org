@@ -203,6 +203,10 @@ class Trac_Comment_Processor_Test extends TestCase {
 		$open = format_github_content_for_trac_comment( "Fixes #1.\n\n{$skipped}{{{\n#!html\nBODY\n}}}\n" );
 		$name = format_github_content_for_trac_comment( "Fixes #1.\n\n{{{\n{$skipped}#!html\nBODY\n}}}\n" );
 
+		// Asserted, or `live_processors()` would also pass on a comment that never synced.
+		$this->assertIsString( $open );
+		$this->assertIsString( $name );
+
 		$this->assertSame( array(), $this->live_processors( $open ), 'Skipped text before the block opener.' );
 		$this->assertSame( array(), $this->live_processors( $name ), 'Skipped text before the processor name.' );
 	}
