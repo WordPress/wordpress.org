@@ -344,6 +344,44 @@ class Trac_Comment_Processor_Test extends TestCase {
 	}
 
 	/**
+	 * Markup around a one-line fence must still convert.
+	 *
+	 * A block is converted on its own because its contents are not wiki markup, but a
+	 * one-line fence is part of the line it sits on, and a table or link it appears in
+	 * has to be read whole.
+	 *
+	 * @dataProvider data_markup_around_inline_code
+	 *
+	 * @param string $body   A pull request body with inline code inside other markup.
+	 * @param string $expect The converted markup the comment should carry.
+	 * @return void
+	 */
+	public function test_markup_around_inline_code_still_converts( string $body, string $expect ) {
+		$desc = format_github_content_for_trac_comment( $body );
+
+		$this->assertIsString( $desc );
+		$this->assertStringContainsString( $expect, $desc );
+	}
+
+	/**
+	 * Constructs that span a one-line fence.
+	 *
+	 * @return array
+	 */
+	public static function data_markup_around_inline_code() {
+		return array(
+			'table row' => array(
+				"| ```wp_head()``` | OK |\n| --- | --- |\n| a | b |\n",
+				'||= {{{wp_head()}}} =||= OK =||',
+			),
+			'link label' => array(
+				"See [the ```wp_head()``` hook](https://example.org/d) here.\n",
+				'[https://example.org/d the {{{wp_head()}}} hook]',
+			),
+		);
+	}
+
+	/**
 	 * A quoted fence must sit inside the citation, delimiters and all.
 	 *
 	 * Trac re-formats a citation's lines as their own document, so a block whose

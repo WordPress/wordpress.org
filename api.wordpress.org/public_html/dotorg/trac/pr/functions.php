@@ -448,13 +448,6 @@ function trac_comment_code_block( $fence ) {
 		return false;
 	}
 
-	// A one-line fence is Trac's inline code, not a block.
-	if ( ! str_contains( $m['code'], "\n" ) ) {
-		$code = $inert( $m['code'] );
-
-		return is_string( $code ) ? $m['indent'] . '{{{' . $code . '}}}' : false;
-	}
-
 	$code = $inert( preg_replace( "#\n[ >]+$#", '', trim( $m['code'], "\n" ) ) );
 	if ( ! is_string( $code ) ) {
 		return false;
@@ -477,16 +470,30 @@ function trac_comment_code_block( $fence ) {
  * @return string|false The span as Trac wiki markup, or false if it cannot be built.
  */
 function trac_comment_wiki_text( $text ) {
-	/*
-	 * `[[` opens a macro and `[=` an anchor, both of which take element attributes;
-	 * `{{{` opens a processor block. Markdown's own single `[` is left for the link
-	 * and image conversions below.
-	 */
-	$text = preg_replace( '~\[(?=[\[=])|\{(?=\{\{)~', '!$0', $text );
-
-	if ( null === $text ) {
+	// A one-line fence is Trac's inline code: its contents are not escaped with the prose.
+	$parts = preg_split( '#```(.*?)```#s', $text, -1, PREG_SPLIT_DELIM_CAPTURE );
+	if ( false === $parts ) {
 		return false;
 	}
+
+	foreach ( $parts as $i => $part ) {
+		if ( $i % 2 ) {
+			$parts[ $i ] = '{{{' . $part . '}}}';
+			continue;
+		}
+
+		/*
+		 * `[[` opens a macro and `[=` an anchor, both of which take element attributes;
+		 * `{{{` opens a processor block. Markdown's own single `[` is left for the link
+		 * and image conversions below.
+		 */
+		$parts[ $i ] = preg_replace( '~\[(?=[\[=])|\{(?=\{\{)~', '!$0', $part );
+		if ( null === $parts[ $i ] ) {
+			return false;
+		}
+	}
+
+	$text = implode( '', $parts );
 
 	// Convert Images (Must happen prior to Links, as the only difference is a preceeding `!`).
 	$text = preg_replace_callback(
@@ -600,7 +607,7 @@ function trac_comment_link_target( $url ) {
  *  - Converts links
  *  - Converts tables
  *
- * @param string $desc.
+ * @param string $desc GitHub content to convert to Trac wiki markup.
  * @return string|false Converted PR Description, or false if it may not be synced.
  */
 function format_github_content_for_trac_comment( $desc ) {
@@ -608,7 +615,7 @@ function format_github_content_for_trac_comment( $desc ) {
 	$line_breaks = array( "\r\n", "\r", "\x0b", "\x0c", "\x1c", "\x1d", "\x1e", "\xc2\x85", "\xe2\x80\xa8", "\xe2\x80\xa9" );
 	$desc        = str_replace( $line_breaks, "\n", $desc );
 
-	// Remove HTML comments
+	// Remove HTML comments.
 	$desc = preg_replace( '#<!--.+?-->#s', '', $desc );
 	if ( null === $desc ) {
 		return false;
@@ -619,7 +626,7 @@ function format_github_content_for_trac_comment( $desc ) {
 	 * literally once opened, while everything else is wiki markup to escape. `!` is
 	 * text rather than an escape inside a block, so the two cannot share a pass.
 	 */
-	$parts = preg_split( '#(^[ >]*```.*?```[ \t]*$|```.*?```)#sm', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+	$parts = preg_split( '#(^[ >]*```[^\n]*\n.*?```[ \t]*$)#sm', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
 	if ( false === $parts ) {
 		return false;
 	}
