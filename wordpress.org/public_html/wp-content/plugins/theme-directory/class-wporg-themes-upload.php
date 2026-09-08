@@ -672,10 +672,7 @@ class WPORG_Themes_Upload {
 		$this->theme_name = $this->theme->get( 'Name' );
 
 		if ( ! $this->theme_slug ) {
-			// Determine the theme slug (ascii only for compatibility) based on the name of the theme in the stylesheet
-			$this->theme_slug = remove_accents( $this->theme_name );
-			$this->theme_slug = preg_replace( '/%[a-f0-9]{2}/i', '', $this->theme_slug );
-			$this->theme_slug = sanitize_title_with_dashes( $this->theme_slug );
+			$this->theme_slug = wporg_themes_slug_from_name( $this->theme_name );
 		}
 
 		// Account for "twenty" themes, these themes have slugs that do not match the normal conventions.
@@ -685,7 +682,7 @@ class WPORG_Themes_Upload {
 			$this->theme_slug
 		);
 
-		if ( ! $this->theme_name || ! $this->theme_slug ) {
+		if ( ! $this->theme_name ) {
 			$error = __( 'The theme has no name.', 'wporg-themes' ) . ' ';
 
 			$error .= sprintf(
@@ -697,6 +694,16 @@ class WPORG_Themes_Upload {
 			);
 
 			$style_errors->add( 'no_name', $error );
+		} elseif ( ! $this->theme_slug ) {
+			$style_errors->add(
+				'unsupported_name',
+				sprintf(
+					/* translators: 1: theme name, 2: style.css */
+					__( 'The theme name %1$s cannot be used, as theme names need at least one latin letter (A-Z) or number. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
+					'<code>' . $this->get_theme_header( 'Name' ) . '</code>',
+					'<code>style.css</code>'
+				)
+			);
 		}
 
 		// Do not allow themes with WordPress and Theme in the theme name.
@@ -1073,7 +1080,19 @@ class WPORG_Themes_Upload {
 		}
 
 		// Create or update the theme post before Trac so the post ID is available for the preview link.
-		$this->create_or_update_theme_post();
+		$result = $this->create_or_update_theme_post();
+		if ( is_wp_error( $result ) ) {
+			if ( $args['commit_to_svn'] ) {
+				// Since it's been added to SVN at this point, remove it from SVN to prevent future issues.
+				$this->remove_from_svn( 'Theme post creation failed: ' . $result->get_error_code() );
+			}
+
+			if ( $is_new_upload && $this->theme_post ) {
+				$this->delete_theme_post();
+			}
+
+			return $result;
+		}
 
 		// Create a Trac ticket for this theme version.
 		if ( $args['create_trac_ticket'] ) {
@@ -1697,6 +1716,8 @@ TICKET;
 
 	/**
 	 * Creates or updates a theme post.
+	 *
+	 * @return true|WP_Error True on success, or the error when a new theme post could not be created.
 	 */
 	public function create_or_update_theme_post() {
 		$upload_date = current_time( 'mysql' );
@@ -1727,7 +1748,31 @@ TICKET;
 				'tags_input'     => $tags,
 			) );
 
+			if ( ! $post_id ) {
+				return new WP_Error(
+					'failed_post_creation',
+					sprintf(
+						/* translators: %s: mailto link */
+						__( 'There was an error saving your theme. Please try again, if this error persists report the error to %s.', 'wporg-themes' ),
+						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+					)
+				);
+			}
+
 			$this->theme_post = get_post( $post_id );
+
+			// wp_insert_post() sanitizes post_name again; refuse the upload if that changed the slug.
+			if ( $this->theme_post->post_name !== $this->theme_slug ) {
+				return new WP_Error(
+					'slug_mismatch',
+					sprintf(
+						/* translators: 1: theme slug, 2: style.css */
+						__( 'The theme name could not be stored as %1$s. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
+						'<code>' . esc_html( $this->theme_slug ) . '</code>',
+						'<code>style.css</code>'
+					)
+				);
+			}
 		}
 
 		// Finally, add post meta.
@@ -1749,6 +1794,8 @@ TICKET;
 		foreach ( $post_meta as $meta_key => $meta_value ) {
 			$this->update_versioned_meta( $meta_key, $meta_value );
 		}
+
+		return true;
 	}
 
 	/**

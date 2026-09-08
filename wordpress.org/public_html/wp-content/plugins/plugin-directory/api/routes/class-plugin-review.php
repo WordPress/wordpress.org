@@ -433,7 +433,7 @@ class Plugin_Review extends Base {
 		$old_slug = $post->post_name;
 		$new_slug = trim( $request['slug'] );
 
-		if ( sanitize_title_with_dashes( $new_slug ) !== $new_slug ) {
+		if ( ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $new_slug ) ) {
 			return new WP_Error( 'invalid_slug', 'Slugs may only contain the lowercase characters a-z, 0-9, and -', [ 'status' => 400 ] );
 		}
 

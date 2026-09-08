@@ -231,22 +231,6 @@ class Theme_Header_Storage_Test extends TestCase {
 	}
 
 	/**
-	 * The slug `wporg_themes_approve_version()` derives from a name.
-	 *
-	 * A renamed theme only keeps the new name if it still sanitizes to the stored
-	 * `post_name`, so a test that wants that branch has to store this.
-	 *
-	 * @param string $name Value of the `Theme Name:` header.
-	 * @return string
-	 */
-	protected function slug_for( string $name ): string {
-		$slugified = remove_accents( $name );
-		$slugified = preg_replace( '/%[a-f0-9]{2}/i', '', $slugified );
-
-		return sanitize_title_with_dashes( $slugified );
-	}
-
-	/**
 	 * Creates a published repopackage to stand in for a listed theme.
 	 *
 	 * @param string $title Stored `post_title`.
@@ -398,7 +382,7 @@ class Theme_Header_Storage_Test extends TestCase {
 	 */
 	public function test_live_version_stores_an_inert_name(): void {
 		$name    = 'Fixture ' . self::DIRECT . ' Theme';
-		$post_id = $this->create_theme_post( 'Fixture Theme', $this->slug_for( $name ) );
+		$post_id = $this->create_theme_post( 'Fixture Theme', wporg_themes_slug_from_name( $name ) );
 
 		$this->serve_style_css( $name );
 		wporg_themes_approve_version( $post_id, '1.0', 'old' );
