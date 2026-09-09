@@ -36,16 +36,22 @@ class Event_Notices_Test extends Base_Test {
 	private array $notices = array();
 
 	/**
+	 * The `gp_set_cookie` filter callback that captures notice cookies.
+	 *
 	 * @var callable
 	 */
 	private $cookie_capture;
 
 	/**
+	 * The `wp_redirect` filter callback that stops redirect headers under PHPUnit.
+	 *
 	 * @var callable
 	 */
 	private $redirect_guard;
 
 	/**
+	 * Registers the cookie capture and redirect guard before each test.
+	 *
 	 * @return void
 	 */
 	public function setUp(): void {
@@ -74,6 +80,8 @@ class Event_Notices_Test extends Base_Test {
 	}
 
 	/**
+	 * Removes the filters registered in setUp().
+	 *
 	 * @return void
 	 */
 	public function tearDown(): void {
@@ -86,6 +94,8 @@ class Event_Notices_Test extends Base_Test {
 	}
 
 	/**
+	 * Trashing an event through the trash route sets a success notice.
+	 *
 	 * @return void
 	 */
 	public function test_trashing_an_event_sets_a_notice() {
@@ -97,6 +107,8 @@ class Event_Notices_Test extends Base_Test {
 	}
 
 	/**
+	 * Restoring a trashed event through the trash route sets a success notice.
+	 *
 	 * @return void
 	 */
 	public function test_restoring_an_event_sets_a_notice() {
@@ -113,6 +125,8 @@ class Event_Notices_Test extends Base_Test {
 	}
 
 	/**
+	 * Permanently deleting a trashed event sets a success notice.
+	 *
 	 * @return void
 	 */
 	public function test_permanently_deleting_an_event_sets_a_notice() {
