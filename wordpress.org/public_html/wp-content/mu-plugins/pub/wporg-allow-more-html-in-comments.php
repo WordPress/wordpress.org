@@ -51,13 +51,31 @@ function p2_kses_init_filters() {
 /**
  * Applies the post HTML filters to comment content, then drops o2's own classes.
  *
- * Mirrors wp_filter_post_kses(), which is what this used to hook directly.
+ * Mirrors wp_filter_post_kses(), which is what this used to hook directly, apart
+ * from the narrower tag list.
  *
  * @param string $data Slashed comment content.
  * @return string Slashed comment content.
  */
 function filter_comment_content( $data ) {
-	return addslashes( strip_o2_control_classes( wp_kses( stripslashes( $data ), 'post' ) ) );
+	return addslashes( strip_o2_control_classes( wp_kses( stripslashes( $data ), comment_allowed_html() ) ) );
+}
+
+/**
+ * Builds the list of HTML allowed in a comment.
+ *
+ * The post list, minus the form controls. A comment is prose, so a field the
+ * reader can type into or a button they can press is out of place in one, and
+ * o2 reads meaning into both. Same reasoning as the <title> removal below.
+ *
+ * @return array[] Allowed HTML tags and attributes.
+ */
+function comment_allowed_html() {
+	$tags = wp_kses_allowed_html( 'post' );
+
+	unset( $tags['textarea'], $tags['button'] );
+
+	return $tags;
 }
 
 /**
@@ -72,10 +90,6 @@ function filter_comment_content( $data ) {
  * @return string
  */
 function strip_o2_control_classes( $html ) {
-	if ( false === stripos( $html, 'o2-' ) ) {
-		return $html;
-	}
-
 	$tags = new \WP_HTML_Tag_Processor( $html );
 
 	while ( $tags->next_tag() ) {
