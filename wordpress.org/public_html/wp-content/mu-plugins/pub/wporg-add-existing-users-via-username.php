@@ -44,7 +44,7 @@ function add_existing_user_to_site() {
 	check_admin_referer( 'add-user', '_wpnonce_add-user' );
 
 	$user_details = null;
-	$user_email   = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
+	$user_email   = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['email'] ) ) : '';
 	if ( false !== strpos( $user_email, '@' ) ) {
 		$user_details = get_user_by( 'email', $user_email );
 	} else {
@@ -61,7 +61,7 @@ function add_existing_user_to_site() {
 	}
 
 	// The role travels with the invite and is applied when the invite is opened.
-	$requested_role = isset( $_REQUEST['role'] ) && is_string( $_REQUEST['role'] ) ? wp_unslash( $_REQUEST['role'] ) : '';
+	$requested_role = isset( $_REQUEST['role'] ) && is_string( $_REQUEST['role'] ) ? sanitize_key( wp_unslash( $_REQUEST['role'] ) ) : '';
 	wp_ensure_editable_role( $requested_role );
 
 	// Adding an existing user to this blog.
