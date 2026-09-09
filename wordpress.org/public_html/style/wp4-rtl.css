@@ -515,7 +515,7 @@ a img.aligncenter {
 
 	#head-search input.text {
 		width: 216px;
-  }
+	}
 }
 
 @media screen and (max-width:768px) {
@@ -1265,7 +1265,7 @@ body #ed_toolbar #ed_pre {
 h3 {
 	font-size: 14px;
 	color: #23282d;
-	font-weight:700;
+	font-weight: 700;
 	margin: -1px 0 1px 0;
 }
 
@@ -1451,7 +1451,7 @@ body.make-marketing #headline h2 a::before { content: '\f130'; }
 
 body.make-media-corps #headline h2 a::before { content: '\f130'; }
 
-body.make-cli #headline h2 a::before { content: '\f345'; }
+body.make-cli #headline h2 a::before { content: '\f341'; }
 
 body.make-hosting #headline h2 a::before { content: '\f176'; }
 
@@ -1501,7 +1501,7 @@ body.make-sustainability #headline h2 a::before { content: '\f11f'; position: re
 
 .make-media-corps .site-title a::before { content: '\f130'; }
 
-.make-cli .site-title a::before { content: '\f345'; }
+.make-cli .site-title a::before { content: '\f341'; }
 
 .make-hosting .site-title a::before { content: '\f176'; }
 

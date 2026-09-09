@@ -2,8 +2,7 @@
  * Generates wp4-rtl.css from wp4.css.
  *
  * Run via `npm run build:css` (after autoprefixing) or directly with
- * `node bin/build-rtl.js`. Ported from the former grunt-rtlcss task; the
- * options and plugins below are unchanged.
+ * `node bin/build-rtl.js`. Ported from the former grunt-rtlcss task.
  */
 
 const fs = require( 'fs' );
@@ -35,6 +34,21 @@ const options = {
 };
 
 /**
+ * Dashicons arrow code points, keyed by the glyph to replace.
+ *
+ * arrow-left <-> arrow-right, arrow-left-alt <-> arrow-right-alt,
+ * arrow-left-alt2 <-> arrow-right-alt2.
+ */
+const mirroredArrows = {
+	f141: 'f139',
+	f139: 'f141',
+	f340: 'f344',
+	f344: 'f340',
+	f341: 'f345',
+	f345: 'f341',
+};
+
+/**
  * RTLCSS plugins.
  *
  * Swaps the Dashicons left/right arrow glyphs, which RTLCSS cannot infer from
@@ -60,24 +74,10 @@ const plugins = [
 				 * @return {Object} The declaration with the arrow glyph flipped.
 				 */
 				action( prop, value ) {
-					if ( value === '"\\f141"' ) {
-						// dashicons-arrow-left.
-						value = '"\\f139"';
-					} else if ( value === '"\\f340"' ) {
-						// dashicons-arrow-left-alt.
-						value = '"\\f344"';
-					} else if ( value === '"\\f341"' ) {
-						// dashicons-arrow-left-alt2.
-						value = '"\\f345"';
-					} else if ( value === '"\\f139"' ) {
-						// dashicons-arrow-right.
-						value = '"\\f141"';
-					} else if ( value === '"\\f344"' ) {
-						// dashicons-arrow-right-alt.
-						value = '"\\f340"';
-					} else if ( value === '"\\f345"' ) {
-						// dashicons-arrow-right-alt2.
-						value = '"\\f341"';
+					// Match either quote style; the Grunt-era check only matched double quotes and never fired.
+					const match = value.match( /^(['"])\\(f[0-9a-f]{3})\1$/i );
+					if ( match && mirroredArrows[ match[ 2 ].toLowerCase() ] ) {
+						value = match[ 1 ] + '\\' + mirroredArrows[ match[ 2 ].toLowerCase() ] + match[ 1 ];
 					}
 					return { prop, value };
 				},

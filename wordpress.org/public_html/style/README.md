@@ -21,7 +21,7 @@ from a Dotorg sandbox; see [Deployment](#deployment).
 Tooling is based on [`@wordpress/scripts`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-scripts/).
 Requires Node.js and npm.
 
-```
+```sh
 npm install
 ```
 

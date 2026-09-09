@@ -515,7 +515,7 @@ a img.aligncenter {
 
 	#head-search input.text {
 		width: 216px;
-  }
+	}
 }
 
 @media screen and (max-width:768px) {
@@ -1265,7 +1265,7 @@ body #ed_toolbar #ed_pre {
 h3 {
 	font-size: 14px;
 	color: #23282d;
-	font-weight:700;
+	font-weight: 700;
 	margin: -1px 0 1px 0;
 }
 
