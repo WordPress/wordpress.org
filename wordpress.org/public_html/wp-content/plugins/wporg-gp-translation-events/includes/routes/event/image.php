@@ -60,7 +60,7 @@ class Image_Route extends Route {
 
 		$text_box1   = imagettfbbox( $text_size, $text_angle, $font, $text1 );
 		$text_width1 = $text_box1[4] - $text_box1[0];
-		$text_x1     = ( 1200 - $text_width1 ) / 2;
+		$text_x1     = (int) ( ( 1200 - $text_width1 ) / 2 );
 		$text_y1     = 350;
 		if ( '' !== $text2 ) {
 			$text_y1 -= 50;
@@ -69,7 +69,7 @@ class Image_Route extends Route {
 		if ( '' !== $text2 ) {
 			$text_box2   = imagettfbbox( $text_size, $text_angle, $font, $text2 );
 			$text_width2 = $text_box2[4] - $text_box2[0];
-			$text_x2     = ( 1200 - $text_width2 ) / 2;
+			$text_x2     = (int) ( ( 1200 - $text_width2 ) / 2 );
 			$text_y2     = $text_y1 + 110;
 			imagettftext( $image, $text_size, $text_angle, $text_x2, $text_y2, $text_color, $font, $text2 );
 		}
