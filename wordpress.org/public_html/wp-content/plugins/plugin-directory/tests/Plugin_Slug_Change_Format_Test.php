@@ -180,6 +180,20 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 	}
 
 	/**
+	 * A slug longer than `post_name` can hold is refused rather than stored truncated.
+	 *
+	 * @return void
+	 */
+	public function test_route_refuses_a_slug_longer_than_post_name_can_hold(): void {
+		$plugin = $this->create_new_plugin();
+		$result = $this->change_slug( $plugin, str_repeat( 'a', 201 ) );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'too_long', $result->get_error_code() );
+		$this->assertSame( self::ORIGINAL_SLUG, get_post( $plugin->ID )->post_name );
+	}
+
+	/**
 	 * A slug within the character set is stored exactly as requested, and logged as stored.
 	 *
 	 * @return void
@@ -190,7 +204,7 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 
 		$this->assertTrue( $result );
 		$this->assertSame( 'fixture-renamed', get_post( $plugin->ID )->post_name );
-		$this->assertSame( array( 'Changed slug from fixture-sample to fixture-renamed' ), $this->audit_log( $plugin->ID ) );
+		$this->assertSame( array( 'Changed slug from fixture-sample to fixture-renamed.' ), $this->audit_log( $plugin->ID ) );
 	}
 
 	/**
@@ -219,7 +233,7 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 		$this->assertTrue( $result );
 		$this->assertSame( 'fixture-contested-2', get_post( $plugin->ID )->post_name );
 		$this->assertSame(
-			array( "Changed slug from fixture-sample to fixture-contested-2 The requested slug, 'fixture-contested', was not available." ),
+			array( "Changed slug from fixture-sample to fixture-contested-2. The requested slug, 'fixture-contested', was not available." ),
 			$this->audit_log( $plugin->ID )
 		);
 	}

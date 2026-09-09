@@ -676,6 +676,7 @@ class Plugin_Review_Endpoint_Test extends TestCase {
 			'underscore'      => array( 'under_score-slug', 'invalid_slug' ),
 			'percent-encoded' => array( 'perc%20ent-slug', 'invalid_slug' ),
 			'leading hyphen'  => array( '-leading-slug', 'invalid_slug' ),
+			'too long'        => array( str_repeat( 'a', 201 ), 'too_long' ),
 			'too short'       => array( 'abcd', 'too_short' ),
 			'reserved name'   => array( 'wordpress', 'reserved_slug' ),
 			'reserved plugin' => array( 'yoast-seo', 'reserved_slug' ),

@@ -120,8 +120,13 @@ class Plugin_Upload extends Base {
 		}
 
 		// Check the slug is in a valid format.
-		if ( ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug ) ) {
+		if ( ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*\z/', $slug ) ) {
 			return new WP_Error( 'invalid_slug', __( 'Invalid slug. Slugs may only contain the lowercase characters a-z, 0-9, and -.', 'wporg-plugins' ) );
+		}
+
+		// Longer than post_name can store; it would be truncated on save.
+		if ( strlen( $slug ) > 200 ) {
+			return new WP_Error( 'too_long', __( 'Error: The plugin slug is too long.', 'wporg-plugins' ) );
 		}
 
 		// Check the plugin can have it's slug changed.
@@ -188,7 +193,7 @@ class Plugin_Upload extends Base {
 		// Refresh, and log the slug the plugin got: core suffixes one that was taken between the check above and the update.
 		$plugin = get_post( $plugin->ID );
 
-		$audit_entry = sprintf( 'Changed slug from %s to %s', $old_slug, $plugin->post_name );
+		$audit_entry = sprintf( 'Changed slug from %s to %s.', $old_slug, $plugin->post_name );
 		if ( $plugin->post_name !== $slug ) {
 			$audit_entry .= sprintf( " The requested slug, '%s', was not available.", $slug );
 		}

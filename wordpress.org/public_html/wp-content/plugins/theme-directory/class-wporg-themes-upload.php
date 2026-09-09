@@ -699,7 +699,7 @@ class WPORG_Themes_Upload {
 				'unsupported_name',
 				sprintf(
 					/* translators: 1: theme name, 2: style.css */
-					__( 'The theme name %1$s cannot be used, as theme names need at least one latin letter (A-Z) or number. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
+					__( 'The theme name %1$s cannot be used, as theme names need at least one character that maps to a Latin letter (a-z) or a digit. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
 					'<code>' . $this->get_theme_header( 'Name' ) . '</code>',
 					'<code>style.css</code>'
 				)

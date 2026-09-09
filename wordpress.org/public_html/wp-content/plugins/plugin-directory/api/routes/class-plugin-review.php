@@ -433,8 +433,13 @@ class Plugin_Review extends Base {
 		$old_slug = $post->post_name;
 		$new_slug = trim( $request['slug'] );
 
-		if ( ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $new_slug ) ) {
+		if ( ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*\z/', $new_slug ) ) {
 			return new WP_Error( 'invalid_slug', 'Slugs may only contain the lowercase characters a-z, 0-9, and -', [ 'status' => 400 ] );
+		}
+
+		// Longer than post_name can store; it would be truncated on save.
+		if ( strlen( $new_slug ) > 200 ) {
+			return new WP_Error( 'too_long', 'That slug is too long', [ 'status' => 400 ] );
 		}
 
 		if ( $new_slug === $old_slug ) {
