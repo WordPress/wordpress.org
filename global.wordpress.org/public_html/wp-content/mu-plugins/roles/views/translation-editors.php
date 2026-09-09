@@ -1,10 +1,10 @@
 <div class="wrap">
 	<h2>
 		<?php
-		_e( 'Translation Editors', 'rosetta' );
+		esc_html_e( 'Translation Editors', 'rosetta' );
 
 		if ( ! empty( $_REQUEST['s'] ) ) {
-			echo '<span class="subtitle">' . sprintf( __( 'Search results for &#8220;%s&#8221;', 'rosetta' ), esc_html( wp_unslash( $_REQUEST['s'] ) ) ) . '</span>';
+			echo '<span class="subtitle">' . sprintf( esc_html__( 'Search results for &#8220;%s&#8221;', 'rosetta' ), esc_html( wp_unslash( $_REQUEST['s'] ) ) ) . '</span>';
 		}
 		?>
 	</h2>
@@ -23,25 +23,25 @@
 	</form>
 
 	<?php if ( current_user_can( Rosetta_Roles::MANAGE_TRANSLATION_EDITORS_CAP ) ) : ?>
-		<h3><?php _e( 'Add Translation Editor', 'rosetta' ); ?></h3>
-		<p><?php _e( 'Enter the email address or username of an existing user on wordpress.org.', 'rosetta' ); ?></p>
+		<h3><?php esc_html_e( 'Add Translation Editor', 'rosetta' ); ?></h3>
+		<p><?php esc_html_e( 'Enter the email address or username of an existing user on wordpress.org.', 'rosetta' ); ?></p>
 		<form action="" method="post">
 			<table class="form-table">
 				<tr>
-					<th scope="row"><label for="user"><?php _e( 'E-mail or Username', 'rosetta' ); ?></label></th>
+					<th scope="row"><label for="user"><?php esc_html_e( 'E-mail or Username', 'rosetta' ); ?></label></th>
 					<td><input type="text" class="regular-text" name="user" id="user"></td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="user"><?php _e( 'Add editor access for:', 'rosetta' ); ?></label></th>
+					<th scope="row"><label for="user"><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></label></th>
 					<td>
 						<fieldset>
-							<legend class="screen-reader-text"><?php _e( 'Add editor access for:', 'rosetta' ); ?></legend>
+							<legend class="screen-reader-text"><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></legend>
 							<label for="custom-projects">
-								<input type="radio" name="projects" value="custom" id="custom-projects" checked> <?php _e( 'Custom &ndash; After the user is added you will be redirected to set the projects.', 'rosetta' ); ?>
+								<input type="radio" name="projects" value="custom" id="custom-projects" checked> <?php esc_html_e( 'Custom &ndash; After the user is added you will be redirected to set the projects.', 'rosetta' ); ?>
 							</label>
 							<br>
 							<label for="all-projects" >
-								<input type="radio" name="projects" value="all" id="all-projects"> <?php _e( 'All projects &ndash; If selected, translation editor will have validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
+								<input type="radio" name="projects" value="all" id="all-projects"> <?php esc_html_e( 'All projects &ndash; If selected, translation editor will have validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
 							</label>
 						</fieldset>
 					</td>

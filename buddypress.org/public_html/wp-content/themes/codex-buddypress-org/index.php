@@ -3,7 +3,8 @@
 			<h2 id="post-<?php the_ID(); ?>"><a href="<?php the_permalink() ?>" rel="bookmark"><?php the_title(); ?></a></h2>
 			<cite><?php
 				/* translators: 1: post date, 2: post author */
-				printf( __( 'Published on %1$s by %2$s', 'bporg' ),
+				printf(
+					esc_html__( 'Published on %1$s by %2$s', 'bporg' ),
 					get_the_time( 'F jS, Y' ),
 					get_the_author_link()
 				);
@@ -12,7 +13,7 @@
 <?php endwhile;  ?>
 
 <?php else : ?>
-			<p><em><?php _e( 'Sorry, no posts matched your criteria.' ); ?></em></p>
+			<p><em><?php esc_html_e( 'Sorry, no posts matched your criteria.' ); ?></em></p>
 <?php endif; ?>
 			<?php posts_nav_link(' &#8212; ', __('Newer &rarr;'), __('&larr; Older') ); ?>
 			<hr class="hidden" />

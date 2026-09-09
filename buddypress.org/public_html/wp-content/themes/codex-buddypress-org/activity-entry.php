@@ -28,8 +28,8 @@
 		<?php if ( 'activity_comment' == bp_get_activity_type() ) : ?>
 
 			<div class="activity-inreplyto">
-				<strong><?php _e( 'In reply to', 'buddypress' ) ?></strong> - <?php bp_activity_parent_content() ?> &middot;
-				<a href="<?php bp_activity_thread_permalink() ?>" class="view" title="<?php esc_attr_e( 'Permalink', 'buddypress' ) ?>"><?php _e( 'View', 'buddypress' ) ?></a>
+				<strong><?php esc_html_e( 'In reply to', 'buddypress' ); ?></strong> - <?php bp_activity_parent_content(); ?> &middot;
+				<a href="<?php bp_activity_thread_permalink(); ?>" class="view" title="<?php esc_attr_e( 'Permalink', 'buddypress' ); ?>"><?php esc_html_e( 'View', 'buddypress' ); ?></a>
 			</div>
 
 		<?php endif; ?>
@@ -39,24 +39,24 @@
 			<?php if ( is_user_logged_in() ) : ?>
 				<?php if ( !bp_get_activity_is_favorite() ) : ?>
 
-					<a href="<?php bp_activity_favorite_link() ?>" class="button fav" title="<?php esc_attr_e( 'Mark as Favorite', 'buddypress' ) ?>"><?php _e( 'Favorite', 'buddypress' ) ?></a>
+					<a href="<?php bp_activity_favorite_link(); ?>" class="button fav" title="<?php esc_attr_e( 'Mark as Favorite', 'buddypress' ); ?>"><?php esc_html_e( 'Favorite', 'buddypress' ); ?></a>
 
 				<?php else : ?>
 
-					<a href="<?php bp_activity_unfavorite_link() ?>" class="button unfav" title="<?php esc_attr_e( 'Remove Favorite', 'buddypress' ) ?>"><?php _e( 'Remove Favorite', 'buddypress' ) ?></a>
+					<a href="<?php bp_activity_unfavorite_link(); ?>" class="button unfav" title="<?php esc_attr_e( 'Remove Favorite', 'buddypress' ); ?>"><?php esc_html_e( 'Remove Favorite', 'buddypress' ); ?></a>
 
 				<?php endif; ?>
 			<?php endif;?>
 
 			<?php if ( bp_get_activity_type() == 'new_forum_topic' || bp_get_activity_type() == 'new_forum_reply' ) : ?>
 
-				<a href="<?php bp_activity_thread_permalink() ?>" class="button view-thread"><?php _e( 'View Topic' ); ?></a>
+				<a href="<?php bp_activity_thread_permalink(); ?>" class="button view-thread"><?php esc_html_e( 'View Topic' ); ?></a>
 
 			<?php else : ?>
 
 				<?php if ( is_user_logged_in() && bp_activity_can_comment() ) : ?>
 
-					<a href="<?php bp_activity_comment_link() ?>" class="button acomment-reply" id="acomment-comment-<?php bp_activity_id() ?>"><?php _e( 'Comment', 'buddypress' ) ?> (<span><?php bp_activity_comment_count() ?></span>)</a>
+					<a href="<?php bp_activity_comment_link(); ?>" class="button acomment-reply" id="acomment-comment-<?php bp_activity_id(); ?>"><?php esc_html_e( 'Comment', 'buddypress' ); ?> (<span><?php bp_activity_comment_count(); ?></span>)</a>
 
 				<?php endif; ?>
 
@@ -87,7 +87,7 @@
 					<div class="ac-textarea">
 						<textarea id="ac-input-<?php bp_activity_id() ?>" class="ac-input" name="ac_input_<?php bp_activity_id() ?>"></textarea>
 					</div>
-					<input type="submit" name="ac_form_submit" value="<?php esc_attr_e( 'Post', 'buddypress' ) ?> &rarr;" /> &nbsp; <?php _e( 'or press esc to cancel.', 'buddypress' ) ?>
+					<input type="submit" name="ac_form_submit" value="<?php esc_attr_e( 'Post', 'buddypress' ) ?> &rarr;" /> &nbsp; <?php esc_html_e( 'or press esc to cancel.', 'buddypress' ) ?>
 					<input type="hidden" name="comment_form_id" value="<?php bp_activity_id() ?>" />
 				</div>
 				<?php wp_nonce_field( 'new_activity_comment', '_wpnonce_new_activity_comment' ) ?>

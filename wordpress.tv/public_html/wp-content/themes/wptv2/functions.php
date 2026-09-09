@@ -477,7 +477,7 @@ class WordPressTV_Theme {
 			<?php if ( $comment->comment_type != 'pingback' ) : ?>
 
 				<small class="commentmetadata">
-					<a href="#comment-<?php comment_ID() ?>" title=""><?php printf( __( '%1$s at %2$s', 'wptv' ), get_comment_date(), get_comment_time() ); ?></a>
+					<a href="#comment-<?php comment_ID(); ?>" title=""><?php printf( esc_html__( '%1$s at %2$s', 'wptv' ), get_comment_date(), get_comment_time() ); ?></a>
 					<?php
 						edit_comment_link( __( 'edit', 'wptv' ), '&nbsp;&nbsp;', '' );
 						echo comment_reply_link( array(
@@ -492,7 +492,7 @@ class WordPressTV_Theme {
 
 			<div class="commenttext">
 				<?php if ( $comment->comment_approved == '0' ) : ?>
-					<em><?php _e( 'Your comment is awaiting moderation.', 'wptv' ); ?></em>
+					<em><?php esc_html_e( 'Your comment is awaiting moderation.', 'wptv' ); ?></em>
 				<?php endif; // comment_approved == 0 ?>
 
 				<?php comment_text(); ?>

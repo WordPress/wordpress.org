@@ -47,25 +47,25 @@ if ( ! empty( $_POST['submit'] ) ) {
 
 	if ( $error ) {
 		?>
-		<h3 id="return"><?php _e( 'Error', 'rosetta' ); ?></h3>
-		<p class="error"><?php _e( 'There seems to have been a problem with the information you entered. Please fix the field indicated and resubmit.', 'rosetta' ); ?></p>
+		<h3 id="return"><?php esc_html_e( 'Error', 'rosetta' ); ?></h3>
+		<p class="error"><?php esc_html_e( 'There seems to have been a problem with the information you entered. Please fix the field indicated and resubmit.', 'rosetta' ); ?></p>
 		<form id="contactme" method="post" action="/contact/#return">
 			<table id="form">
 
 				<?php if ( $your_name ) { ?>
 					<tr class="error">
 						<td class="label">
-							<label for="your_name"><?php _e( 'Your Name:', 'rosetta' ); ?> </label>
+							<label for="your_name"><?php esc_html_e( 'Your Name:', 'rosetta' ); ?> </label>
 						</td>
 						<td>
 							<span><input name="your_name" type="text" id="your_name" value="<?php echo esc_attr( $_POST['your_name'] ); ?>" /></span>
-							<?php _e( 'Let us know your name.', 'rosetta' ); ?>
+							<?php esc_html_e( 'Let us know your name.', 'rosetta' ); ?>
 						</td>
 					</tr>
 				<?php } else { ?>
 					<tr>
 						<td class="label">
-							<label for="your_name"><?php _e( 'Your Name:', 'rosetta' ); ?></label>
+							<label for="your_name"><?php esc_html_e( 'Your Name:', 'rosetta' ); ?></label>
 						</td>
 						<td>
 							<span><input name="your_name" type="text" id="your_name" value="<?php echo esc_attr( $_POST['your_name'] ); ?>" /></span>
@@ -76,17 +76,17 @@ if ( ! empty( $_POST['submit'] ) ) {
 				<?php if ( $your_email ) { ?>
 					<tr class="error">
 						<td class="label">
-							<label for="your_email"><?php _e( 'Your Email:', 'rosetta' ); ?></label>
+							<label for="your_email"><?php esc_html_e( 'Your Email:', 'rosetta' ); ?></label>
 						</td>
 						<td>
 							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( $_POST['your_email'] ); ?>" /></span>
-							<?php _e( 'Your email address did not appear to be valid. Please check it.', 'rosetta' ); ?>
+							<?php esc_html_e( 'Your email address did not appear to be valid. Please check it.', 'rosetta' ); ?>
 						</td>
 					</tr>
 				<?php } else { ?>
 					<tr>
 						<td class="label">
-							<label for="your_email"><?php _e( 'Your Email:', 'rosetta' ); ?></label>
+							<label for="your_email"><?php esc_html_e( 'Your Email:', 'rosetta' ); ?></label>
 						</td>
 						<td>
 							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( $_POST['your_email'] ); ?>" /></span>
@@ -96,7 +96,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 
 				<tr>
 					<td class="label">
-						<label for="blog_url"><?php _e( 'URI of your blog:', 'rosetta' ); ?></label>
+						<label for="blog_url"><?php esc_html_e( 'URI of your blog:', 'rosetta' ); ?></label>
 					</td>
 					<td>
 						<span><input name="blog_url" type="text" id="blog_url" value="<?php echo esc_attr( $_POST['blog_url'] ); ?>" /></span>
@@ -106,17 +106,17 @@ if ( ! empty( $_POST['submit'] ) ) {
 				<?php if ( $subject ) { ?>
 					<tr class="error">
 						<td class="label">
-							<label for="subject"><?php _e( 'What&rsquo;s this about?', 'rosetta' ); ?></label>
+							<label for="subject"><?php esc_html_e( 'What&rsquo;s this about?', 'rosetta' ); ?></label>
 						</td>
 						<td>
 							<span><input name="subject" type="text" id="subject" value="<?php echo esc_attr( $_POST['subject'] ); ?>" /></span>
-							<?php _e( 'Write something!', 'rosetta' ); ?>
+							<?php esc_html_e( 'Write something!', 'rosetta' ); ?>
 						</td>
 					</tr>
 				<?php } else { ?>
 					<tr>
 						<td class="label">
-							<label for="subject"><?php _e('What&rsquo;s this about?', 'rosetta'); ?></label>
+							<label for="subject"><?php esc_html_e( 'What&rsquo;s this about?', 'rosetta' ); ?></label>
 						</td>
 						<td>
 							<span><input name="subject" type="text" id="subject" value="<?php echo esc_attr( $_POST['subject'] ); ?>" /></span>
@@ -127,17 +127,17 @@ if ( ! empty( $_POST['submit'] ) ) {
 				<?php if ( $blog_description ) { ?>
 					<tr class="error">
 						<td class="label">
-							<label for="message"><?php _e('Your Message:', 'rosetta'); ?></label>
+							<label for="message"><?php esc_html_e( 'Your Message:', 'rosetta' ); ?></label>
 						</td>
 						<td>
 							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( $_POST['message'] ); ?></textarea></span>
-							<?php _e( 'Say something!', 'rosetta' ); ?>
+							<?php esc_html_e( 'Say something!', 'rosetta' ); ?>
 						</td>
 					</tr>
 				<?php } else { ?>
 					<tr>
 						<td class="label">
-							<label for="message"><?php _e( 'Your Message:', 'rosetta' ); ?></label>
+							<label for="message"><?php esc_html_e( 'Your Message:', 'rosetta' ); ?></label>
 						</td>
 						<td>
 							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( $_POST['message'] ); ?></textarea></span>
@@ -203,8 +203,8 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 		remove_action( 'phpmailer_init', 'rosetta_set_sender' );
 		?>
 		<div id="return">
-			<h3><?php _e( 'Submitted!', 'rosetta' ); ?></h3>
-			<p><strong><?php _e( 'Thank you!', 'rosetta' ); ?></strong></p>
+			<h3><?php esc_html_e( 'Submitted!', 'rosetta' ); ?></h3>
+			<p><strong><?php esc_html_e( 'Thank you!', 'rosetta' ); ?></strong></p>
 		</div>
 		<?php
 	}
@@ -212,9 +212,9 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 } else { // Empty $_POST['submit']
 
 	if ( false !== strpos( get_the_content(), 'The contents of this page are filled automatically' ) ) : ?>
-		<p><?php _e( 'You can contact translators and this site administrators via this form:', 'rosetta'); ?></p>
+		<p><?php esc_html_e( 'You can contact translators and this site administrators via this form:', 'rosetta'); ?></p>
 		<?php /* translators: feel free to add links to places, where one can get support in your language. */ ?>
-		<p><?php _e( '<strong>Please, do not post support requests here!</strong> They will probably be ignored.', 'rosetta' ); ?></p>
+		<p><?php echo wp_kses_post( __( '<strong>Please, do not post support requests here!</strong> They will probably be ignored.', 'rosetta' ) ); ?></p>
 	<?php else: ?>
 		<?php the_content(); ?>
 	<?php endif; ?>
@@ -223,7 +223,7 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 		<table id="form">
 			<tr>
 				<td class="label">
-					<label for="your_name"><?php _e( 'Your Name:', 'rosetta' ); ?></label> <?php _e( '(required)', 'rosetta' ); ?>
+					<label for="your_name"><?php esc_html_e( 'Your Name:', 'rosetta' ); ?></label> <?php esc_html_e( '(required)', 'rosetta' ); ?>
 				</td>
 				<td>
 					<span><input name="your_name" type="text" id="your_name" /></span>
@@ -231,7 +231,7 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 			</tr>
 			<tr>
 				<td class="label">
-					<label for="your_email"><?php _e( 'Your Email:', 'rosetta' ); ?></label> <?php _e( '(required)', 'rosetta' ); ?>
+					<label for="your_email"><?php esc_html_e( 'Your Email:', 'rosetta' ); ?></label> <?php esc_html_e( '(required)', 'rosetta' ); ?>
 				</td>
 				<td>
 					<span><input name="your_email" type="text" id="your_email" /></span>
@@ -239,7 +239,7 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 			</tr>
 			<tr>
 				<td class="label">
-					<label for="blog_url"><?php _e( 'URI of your blog:', 'rosetta' ); ?></label>
+					<label for="blog_url"><?php esc_html_e( 'URI of your blog:', 'rosetta' ); ?></label>
 				</td>
 				<td>
 					<span><input name="blog_url" type="text" id="blog_url" /></span>
@@ -247,7 +247,7 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 			</tr>
 			<tr>
 				<td class="label">
-					<label for="subject"><?php _e( 'What&rsquo;s this about?', 'rosetta' ); ?></label> <?php _e( '(required)', 'rosetta' ); ?>
+					<label for="subject"><?php esc_html_e( 'What&rsquo;s this about?', 'rosetta' ); ?></label> <?php esc_html_e( '(required)', 'rosetta' ); ?>
 				</td>
 				<td>
 					<span><input name="subject" type="text" id="subject" /></span>
@@ -255,7 +255,7 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 			</tr>
 			<tr>
 				<td class="label">
-					<label for="message"><?php _e( 'Tell us something:', 'rosetta' ); ?></label> <?php _e( '(required)', 'rosetta' ); ?>
+					<label for="message"><?php esc_html_e( 'Tell us something:', 'rosetta' ); ?></label> <?php esc_html_e( '(required)', 'rosetta' ); ?>
 				</td>
 				<td>
 					<span class="message"><textarea name="message" id="message"></textarea></span>

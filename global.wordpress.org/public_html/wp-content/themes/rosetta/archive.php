@@ -8,31 +8,37 @@
 				<?php
 				$blog_url = home_url( '/#blog' );
 				if ( 'page' === get_option( 'show_on_front' ) ) {
-					$blog_url = get_permalink( get_option('page_for_posts' ) );
+					$blog_url = get_permalink( get_option( 'page_for_posts' ) );
 				}
 				?>
-				<p><a href="<?php echo esc_url( $blog_url ); ?>"><?php _e( '&laquo; Back to blog', 'rosetta' ); ?></a></p>
+				<p><a href="<?php echo esc_url( $blog_url ); ?>"><?php esc_html_e( '&laquo; Back to blog', 'rosetta' ); ?></a></p>
 
 				<table class="widefat" >
 					<?php
 					$i = 0;
 					if ( have_posts() ) :
-						while ( have_posts() ) : the_post();
+						while ( have_posts() ) :
+							the_post();
 							$i++;
 							?>
-							<tr <?php if ( $i % 2 ) echo ' class="alt" '; ?>>
+							<tr 
+							<?php
+							if ( $i % 2 ) {
+								echo ' class="alt" ';}
+							?>
+							>
 								<th>
-									<?php the_date( '','<span class="date">', '</span>' ); ?>
+									<?php the_date( '', '<span class="date">', '</span>' ); ?>
 								</th>
 								<td>
-									<a href="<?php the_permalink() ?>"><?php the_title(); ?></a>
+									<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
 								</td>
 							</tr>
 							<?php
 						endwhile;
 					else :
 						?>
-						<p><?php _e( 'Sorry, no posts matched your criteria.', 'rosetta' ); ?></p>
+						<p><?php esc_html_e( 'Sorry, no posts matched your criteria.', 'rosetta' ); ?></p>
 						<?php
 					endif;
 					?>
@@ -45,4 +51,5 @@
 		</div>
 	</div>
 
-<?php get_footer();
+<?php
+get_footer();

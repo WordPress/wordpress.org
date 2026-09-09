@@ -3,13 +3,16 @@ gp_title( sprintf( __( 'Mass-create Translation Sets &lt; %s &lt; GlotPress', 'g
 gp_breadcrumb_project( $project );
 gp_tmpl_header();
 ?>
-<h2><?php _e( 'Mass-create Translation Sets', 'glotpress' ); ?></h2>
-<p><?php _e( 'Here you can mass-create translation sets in this project.
+<h2><?php esc_html_e( 'Mass-create Translation Sets', 'glotpress' ); ?></h2>
+<p>
+<?php
+esc_html_e(
+	'Here you can mass-create translation sets in this project.
 The list of translation sets will be mirrored with the sets of a project you choose.
 Usually this is one of the parent projects.', 'glotpress' ); ?></p>
 <form action="<?php echo esc_url( gp_url_current() ); ?>" method="post">
 	<dl>
-		<dt><label for="project_id"><?php _e( 'Project to take translation sets from:', 'glotpress' );  ?></label></dt>
+		<dt><label for="project_id"><?php esc_html_e( 'Project to take translation sets from:', 'glotpress' ); ?></label></dt>
 		<dd><input type="text" name="project_id" value="" id="project_id">
 	</dl>
 	<div id="preview"></div>

@@ -133,8 +133,8 @@ class Author_Card {
 				?>
 
 				<span class="profile-links">
-					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>/"><?php _e( 'profile', 'wporg-plugins' ); ?></a> |
-					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>/"><?php _e( 'support', 'wporg-plugins' ); ?></a>
+					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>/"><?php esc_html_e( 'profile', 'wporg-plugins' ); ?></a> |
+					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>/"><?php esc_html_e( 'support', 'wporg-plugins' ); ?></a>
 				</span>
 
 				<div class="profile-email">
@@ -154,7 +154,7 @@ class Author_Card {
 					<?php
 					/* translators: 1: time ago, 2: registration date */
 					printf(
-						__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
+						esc_html__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
 						human_time_diff( strtotime( $author->user_registered ) ),
 						date( 'Y-M-d', strtotime( $author->user_registered ) )
 					);
@@ -165,7 +165,7 @@ class Author_Card {
 
 		<?php if ( ! empty( $author->user_url ) ) : ?>
 			<p class="profile-url">
-				<?php _e( 'Author URL:', 'wporg-plugins' ); ?>
+				<?php esc_html_e( 'Author URL:', 'wporg-plugins' ); ?>
 				<a href="<?php echo esc_url( $author->user_url ); ?>"><?php echo esc_html( $author->user_url ); ?></a>
 			</p>
 		<?php endif; ?>
@@ -201,7 +201,7 @@ class Author_Card {
 						);
 					}
 					/* translators: %s: comma-separated list of negative user status labels */
-					echo '<p>' . sprintf( __( 'This user is: %s', 'wporg-plugins' ), implode( ', ', $labels ) ) . '</p>';
+					echo '<p>' . sprintf( esc_html__( 'This user is: %s', 'wporg-plugins' ), implode( ', ', $labels ) ) . '</p>';
 				}
 
 				$user_notes = get_user_meta( $user->ID, '_wporg_bbp_user_notes', true );
@@ -210,7 +210,7 @@ class Author_Card {
 			// Include any warning flags.
 			$warning_flags = self::get_user_flags( $author->ID, $author_plugins );
 			if ( $warning_flags ) {
-				echo '<strong>' . __( 'Warning Flags:', 'wporg-plugins' ) . '</strong>';
+				echo '<strong>' . esc_html__( 'Warning Flags:', 'wporg-plugins' ) . '</strong>';
 				echo '<ul class="plugin-flagged">';
 				foreach ( $warning_flags as $flag => $reasons ) {
 					echo '<li class="plugin-flagged-' . esc_attr( $flag ) . '"><strong>' . esc_html( strtoupper( $flag ) ) . ' (' . esc_html( count( $reasons ) ) . '):</strong> ' . esc_html( implode( '; ', $reasons ) ) . '</li>';
@@ -237,14 +237,14 @@ class Author_Card {
 
 				/* translators: %s: comma-separated list of plugin author's IP addresses */
 				printf(
-					'<p>' . __( 'IPs : %s', 'wporg-plugins' ) . '</p>',
+					'<p>' . esc_html__( 'IPs : %s', 'wporg-plugins' ) . '</p>',
 					implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) )
 				);
 			}
 
 			// Include any user notes.
 			if ( ! empty( $user_notes ) ) {
-				_e( 'User notes:', 'wporg-plugins' );
+				esc_html_e( 'User notes:', 'wporg-plugins' );
 				echo '<ul>';
 				foreach ( $user_notes as $note ) {
 					$note_meta = sprintf(
@@ -267,9 +267,9 @@ class Author_Card {
 		<div class="profile-plugins">
 			<?php
 			if ( empty( $author_commit ) && empty( $author_plugins ) ) {
-				_e( 'Not a developer on any plugin.', 'wporg-plugins' );
+				esc_html_e( 'Not a developer on any plugin.', 'wporg-plugins' );
 			} else {
-				echo '<strong>' . sprintf( _n( '%d plugin:', '%d plugins:', count( $all_plugins ), 'wporg-plugins' ), count( $all_plugins ) ) . '</strong>';
+				echo '<strong>' . sprintf( esc_html( _n( '%d plugin:', '%d plugins:', count( $all_plugins ), 'wporg-plugins' ) ), count( $all_plugins ) ) . '</strong>';
 
 				echo '<ul>';
 				self::display_plugin_links( $all_plugins, $author_plugins, $author_commit );
@@ -512,7 +512,7 @@ class Author_Card {
 					'<a href="%s" title="%s">%s</a>',
 					esc_url( get_edit_post_link( $plugin->ID, '' ) ),
 					esc_attr__( 'Edit this plugin', 'wporg-plugins' ),
-					__( 'Edit', 'wporg-plugins' )
+					esc_html__( 'Edit', 'wporg-plugins' )
 				),
 				sprintf(
 					'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',

@@ -106,7 +106,7 @@ class Admin {
 			'<div id="message" class="notice notice-warning"><p>%s</p></div>' . "\n",
 			/* translators: %s: URL to settings page for enabling/disabling photo uploads. */
 			sprintf(
-				__( '<strong>Photo uploads are currently disabled for all users!</strong> Uncheck <a href="%s">the setting</a> to re-enable uploading.', 'wporg-photos' ),
+				wp_kses_post( __( '<strong>Photo uploads are currently disabled for all users!</strong> Uncheck <a href="%s">the setting</a> to re-enable uploading.', 'wporg-photos' ) ),
 				esc_url( admin_url( 'options-media.php' ) . '#' . Settings::KILLSWITCH_OPTION_NAME )
 			)
 		);
@@ -187,7 +187,7 @@ class Admin {
 			if ( $missing_taxonomies ) {
 				echo '<div class="notice notice-error is-dismissible notice-missing-taxonomies"><p>';
 				printf(
-					__( '<strong>Error:</strong> Photo was not published because the following taxonomies are missing terms: %s', 'wporg-photos' ),
+					wp_kses_post( __( '<strong>Error:</strong> Photo was not published because the following taxonomies are missing terms: %s', 'wporg-photos' ) ),
 					'<strong>' . implode( '</strong>, <strong>', $missing_taxonomies ) . '</strong>'
 				);
 
@@ -871,7 +871,7 @@ class Admin {
 		}
 
 		if ( ! $shown_photos ) {
-			echo '<p>' . __( 'This contributor does not have any other submitted photos.', 'wporg-photos' ) . "</p>\n";
+			echo '<p>' . esc_html__( 'This contributor does not have any other submitted photos.', 'wporg-photos' ) . "</p>\n";
 		}
 
 		echo '</div>' . "\n";
@@ -885,7 +885,7 @@ class Admin {
 			printf(
 				'<a href="%s">%s</a>',
 				esc_url( $link ),
-				__( "View all photos from this contributor &rarr;", 'wporg-photos' )
+				esc_html__( 'View all photos from this contributor &rarr;', 'wporg-photos' )
 			);
 			echo '</div>' . "\n";
 		}
@@ -1206,7 +1206,7 @@ class Admin {
 					<li><?php
 						/* translators: %s: Linked number of photos submitted by user. */
 						printf(
-							__( 'Published photos: <strong>%s</strong>', 'wporg-photos' ),
+							wp_kses_post( __( 'Published photos: <strong>%s</strong>', 'wporg-photos' ) ),
 							( 0 === $published_count )
 								? $published_count
 								: sprintf( '<a href="%s">%s</a>', esc_url( get_author_posts_url( $author->ID ) ), $published_count )
@@ -1221,7 +1221,7 @@ class Admin {
 						];
 						/* translators: %s: Linked number of photos submitted by user that have been rejected. */
 						printf(
-							__( 'Rejected photos: <strong>%s</strong>', 'wporg-photos' ),
+							wp_kses_post( __( 'Rejected photos: <strong>%s</strong>', 'wporg-photos' ) ),
 							( 0 === $rejected_count )
 								? $rejected_count
 								: sprintf( '<a href="%s">%d</a>', add_query_arg( $link_args, 'edit.php' ), $rejected_count )
@@ -1240,7 +1240,7 @@ class Admin {
 						}
 						printf(
 							/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
-							_n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
+							wp_kses_post( _n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ) ),
 							$flagged_link ? sprintf( '<a href="%s">%d</a>', esc_url( $flagged_link ), (int) $flagged_count ) : (int) $flagged_count
 						);
 					?></li>
@@ -1253,7 +1253,7 @@ class Admin {
 						];
 						/* translators: %s: Linked number of photos submitted by user that have been rejected. */
 						printf(
-							__( 'Pending photos: <strong>%s</strong>', 'wporg-photos' ),
+							wp_kses_post( __( 'Pending photos: <strong>%s</strong>', 'wporg-photos' ) ),
 							( 0 === $pending_count )
 								? $pending_count
 								: sprintf( '<a href="%s">%d</a>', add_query_arg( $link_args, 'edit.php' ), $pending_count )
@@ -1261,7 +1261,9 @@ class Admin {
 					?></li>
 					<li><?php
 						/* translators: %s: Date user account was created. */
-						printf( __( 'Created: <strong>%s</strong>', 'wporg-photos' ), $account_created ); ?></li>
+						printf( wp_kses_post( __( 'Created: <strong>%s</strong>', 'wporg-photos' ) ), $account_created );
+					?>
+						</li>
 				</ul>
 			</div>
 			<div class="photo-contributor-more-info">
@@ -1299,7 +1301,7 @@ class Admin {
 
 					if ( $rejection_reasons ) {
 						echo '<table>';
-						echo '<tr><th>' . __( 'Reason', 'wporg-photos' ) . '</th><th>' . __( 'Total', 'wporg-photos' ) . '</th><th>%</th></tr>';
+						echo '<tr><th>' . esc_html__( 'Reason', 'wporg-photos' ) . '</th><th>' . esc_html__( 'Total', 'wporg-photos' ) . '</th><th>%</th></tr>';
 					}
 					foreach ( $rejection_reasons as $reason => $count ) {
 						echo '<tr>';
@@ -1320,7 +1322,7 @@ class Admin {
 
 					printf(
 						/* translators: %s: Rejection rate as a percentage. */
-						__( 'Total rejection rate: %s', 'wporg-photos'),
+						esc_html__( 'Total rejection rate: %s', 'wporg-photos'),
 						'<strong>' . $rejection_rate .'%</strong>'
 					);
 					echo "</p>\n";
@@ -1328,7 +1330,7 @@ class Admin {
 					if ( $submission_errors_count ) {
 						echo '<p>';
 						/* translators: %s: The number of submission errors. */
-						printf( __( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), $submission_errors_count );
+						printf( esc_html__( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), $submission_errors_count );
 						echo "</p>\n";
 					}
 				?>
@@ -1356,12 +1358,12 @@ class Admin {
 
 		// Output file hash.
 		if ( $file_hash = get_post_meta( $post_id, Registrations::get_meta_key( 'file_hash' ), true ) ) {
-			printf( $format, 'file-hash', __( 'File hash', 'wporg-photos' ), $file_hash );
+			printf( $format, 'file-hash', esc_html__( 'File hash', 'wporg-photos' ), $file_hash );
 		}
 
 		// Output original filename.
 		if ( $orig_filename = get_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), true ) ) {
-			printf( $format, 'original-filename', __( 'Original file name', 'wporg-photos' ), esc_html( $orig_filename ) );
+			printf( $format, 'original-filename', esc_html__( 'Original file name', 'wporg-photos' ), esc_html( $orig_filename ) );
 		}
 
 		// Output moderator.
@@ -1446,7 +1448,7 @@ class Admin {
 		&&
 			! current_user_can( get_post_type_object( 'post' )->cap->create_posts )
 		) {
-			wp_die( __( 'Sorry, you are not allowed to access the media library.', 'wporg-photos' ) );
+			wp_die( esc_html__( 'Sorry, you are not allowed to access the media library.', 'wporg-photos' ) );
 		}
 	}
 
@@ -1682,7 +1684,7 @@ class Admin {
 			'<a href="%s" id="photo-dir-skip-photo" class="page-title-action" title="%s">%s</a>',
 			esc_url( add_query_arg( 'skipphoto', '1' ) ),
 			esc_attr__( 'Skip this photo and load another.', 'wporg-photos' ),
-			__( 'Skip Photo', 'wporg-photos')
+			esc_html__( 'Skip Photo', 'wporg-photos' )
 		);
 	}
 

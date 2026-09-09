@@ -166,7 +166,7 @@ if ( post_password_required() ) :
 
 	<div class="container">
 		<div class="video-upload">
-			<p><?php printf( __( 'Hey there! If you&#8217;re interested in subtitling or captioning videos for WordPress.tv, please fill out the <a href="%s">contact form</a>, and we&#8217;ll be in touch.', 'wptv' ), 'https://wordpress.tv/contact/' ); ?></p>
+			<p><?php printf( wp_kses_post( __( 'Hey there! If you&#8217;re interested in subtitling or captioning videos for WordPress.tv, please fill out the <a href="%s">contact form</a>, and we&#8217;ll be in touch.', 'wptv' ) ), 'https://wordpress.tv/contact/' ); ?></p>
 			<div class="pass-form">
 				<?php echo get_the_password_form(); ?>
 			</div>
@@ -254,7 +254,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 
 			<table>
 				<tr>
-					<th><label for="wptv_wporg_username"><?php _e( 'WordPress.org Username' ); ?><span class="required"> * </span></label></th>
+					<th><label for="wptv_wporg_username"><?php esc_html_e( 'WordPress.org Username' ); ?><span class="required"> * </span></label></th>
 					<td>
 						<input type="text" id="wptv_wporg_username" name="wptv_wporg_username" /><br />
 						To contribute subtitles, you must be a registered user at the <a href="https://wordpress.org">WordPress.org</a> website. Note that this is the username you use to log in at WordPress.org, not the username you use to log in on your own WordPress-powered site.<br />
@@ -271,7 +271,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 				</tr>
 
 				<tr>
-					<th><label for="wptv_language"><?php _e( 'Language' ); ?><span class="required"> * </span></label></th>
+					<th><label for="wptv_language"><?php esc_html_e( 'Language' ); ?><span class="required"> * </span></label></th>
 					<td>
 						<select name="wptv_language">
 							<?php $tracks = VideoPress_Subtitles::get_tracks( $video->guid ); ?>
@@ -283,7 +283,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 				</tr>
 
 				<tr>
-					<th><label for="wptv_subtitles_file"><?php _e( 'Subtitles File' ); ?><span class="required"> * </span></label></th>
+					<th><label for="wptv_subtitles_file"><?php esc_html_e( 'Subtitles File' ); ?><span class="required"> * </span></label></th>
 					<td><input type="file" name="wptv_subtitles_file" id="wptv_subtitles_file" /></td>
 				</tr>
 

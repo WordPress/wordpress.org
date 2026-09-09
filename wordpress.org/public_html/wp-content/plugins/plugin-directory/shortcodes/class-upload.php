@@ -178,7 +178,7 @@ class Upload {
 
 					// If the queue is currently beyond 10 days, display a warning to that effect.
 					if ( $queue_length_in_days >= 10 ) {
-						echo ' ' . __( 'The review queue is currently longer than normal, we apologize for the delays and ask for patience.', 'wporg-plugins' );
+						echo ' ' . esc_html__( 'The review queue is currently longer than normal, we apologize for the delays and ask for patience.', 'wporg-plugins' );
 					}
 				}
 				?>
@@ -229,7 +229,7 @@ class Upload {
 					</p>
 
 					<p>
-						<?php _e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the Plugins Team examines it.', 'wporg-plugins' ); ?>
+						<?php esc_html_e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the Plugins Team examines it.', 'wporg-plugins' ); ?>
 					</p>
 
 					<ul>
@@ -244,14 +244,14 @@ class Upload {
 							printf(
 								'<div class="plugin-submission-submited-date">%s</div>',
 								sprintf(
-									__( 'Submitted on: %s', 'wporg-plugins' ),
+									esc_html__( 'Submitted on: %s', 'wporg-plugins' ),
 									esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->post_date_gmt ) ) )
 								)
 							);
 							printf(
 								'<div class="plugin-submission-status">%s</div>',
 								sprintf(
-									__( 'Review status: %s', 'wporg-plugins' ),
+									esc_html__( 'Review status: %s', 'wporg-plugins' ),
 									$plugin->status
 								)
 							);
@@ -264,7 +264,7 @@ class Upload {
 								printf(
 									'<div class="plugin-submission-email">✉️✔️ %s</div>',
 									sprintf(
-										__( 'Our team emailed you on <strong>%s</strong> regarding your submission. The subject line is: "<strong>%s</strong>".', 'wporg-plugins' ),
+										wp_kses_post( __( 'Our team emailed you on <strong>%s</strong> regarding your submission. The subject line is: "<strong>%s</strong>".', 'wporg-plugins' ) ),
 										esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->review_email->created ) ) ),
 										esc_html( $plugin->review_email->subject )
 									)
@@ -277,7 +277,7 @@ class Upload {
 								printf(
 									'<div class="plugin-submission-email">✉️⏳ %s</div>',
 									sprintf(
-										__( 'Please be patient and wait for the review email. It will be sent to your email address, <strong>%s</strong>, with the subject line: "<strong>%s</strong>".', 'wporg-plugins' ),
+										wp_kses_post( __( 'Please be patient and wait for the review email. It will be sent to your email address, <strong>%s</strong>, with the subject line: "<strong>%s</strong>".', 'wporg-plugins' ) ),
 										esc_html( get_userdata( $plugin->post_author )->user_email ),
 										'[WordPress Plugin Directory] Review in Progress: ' . $plugin->post_title
 									)
@@ -288,40 +288,40 @@ class Upload {
 							}
 							echo '<div class="plugin-submission-assigned-slug">';
 							printf(
-								__( 'Current assigned slug: %s', 'wporg-plugins' ),
+								esc_html__( 'Current assigned slug: %s', 'wporg-plugins' ),
 								'<code>' . esc_html( $plugin->post_name ) . '</code>'
 							);
 							?>
 							<?php if ( $can_change_slug ) : ?>
-								<a href="#" class="hide-if-no-js" onclick="event.preventDefault(); this.nextElementSibling.showModal()"><?php _e( 'change', 'wporg-plugins' ); ?></a>
+								<a href="#" class="hide-if-no-js" onclick="event.preventDefault(); this.nextElementSibling.showModal()"><?php esc_html_e( 'change', 'wporg-plugins' ); ?></a>
 								<dialog class="slug-change hide-if-no-js">
 									<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
-									<strong><?php _e( 'Request to change your plugin slug', 'wporg-plugins' ); ?></strong>
+									<strong><?php esc_html_e( 'Request to change your plugin slug', 'wporg-plugins' ); ?></strong>
 									<form>
 										<input type="hidden" name="action" value="request-slug-change" />
 										<input type="hidden" name="id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
 
 										<div class="notice notice-info notice-alt">
-											<p><?php _e( 'Your chosen slug cannot be guaranteed, and is subject to change based on the results of your review.', 'wporg-plugins' ); ?></p>
+											<p><?php esc_html_e( 'Your chosen slug cannot be guaranteed, and is subject to change based on the results of your review.', 'wporg-plugins' ); ?></p>
 											<p><?php
 												printf(
 													/* Translators: URL */
-													__( "Your slug is used to generate your plugins URL. Currently it's %s", 'wporg-plugins' ),
+													esc_html__( "Your slug is used to generate your plugins URL. Currently it's %s", 'wporg-plugins' ),
 													'<code>' . esc_url( home_url( $plugin->post_name ) . '/' ) . '</code>'
 												);
 											?></p>
-											<p><?php _e( 'Your slug (aka permalink) cannot be changed once your review is completed. Please choose carefully.', 'wporg-plugins' ); ?></p>
+											<p><?php esc_html_e( 'Your slug (aka permalink) cannot be changed once your review is completed. Please choose carefully.', 'wporg-plugins' ); ?></p>
 										</div>
 										<div class="notice notice-error notice-alt hidden"><p></p></div>
 										<p>
 											<label>
-												<strong><?php _e( 'Plugin Name', 'wporg-plugins' ); ?></strong><br>
+												<strong><?php esc_html_e( 'Plugin Name', 'wporg-plugins' ); ?></strong><br>
 												<?php echo esc_html( $plugin->post_title ); ?>
 											</label>
 										</p>
 										<p>
 											<label>
-												<strong><?php _e( 'Desired Slug', 'wporg-plugins' ); ?></strong><br>
+												<strong><?php esc_html_e( 'Desired Slug', 'wporg-plugins' ); ?></strong><br>
 												<input type="text" name="post_name" required maxlength="200" pattern="[a-z0-9-]*" value="<?php echo esc_attr( $plugin->post_name ); ?>" />
 											</label>
 										</p>
@@ -332,7 +332,7 @@ class Upload {
 												<?php
 													printf(
 														/* Translators: URL to plugin guidelines */
-														__( 'I confirm that my slug choice <a href="%s">meets the guidelines for plugin slugs</a>.', 'wporg-plugins' ),
+														wp_kses_post( __( 'I confirm that my slug choice <a href="%s">meets the guidelines for plugin slugs</a>.', 'wporg-plugins' ) ),
 														'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#17-plugins-must-respect-trademarks-copyrights-and-project-names'
 													);
 												?>
@@ -360,7 +360,7 @@ class Upload {
 
 							if ( $can_upload_extras ) {
 								echo '<div class="plugin-submission-update-code wp-block-button is-small">';
-								echo '<a href="#" class="show-upload-additional hide-if-no-js wp-block-button__link">' . sprintf( __( 'Upload updated "%s" plugin for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
+								echo '<a href="#" class="show-upload-additional hide-if-no-js wp-block-button__link">' . sprintf( esc_html__( 'Upload updated "%s" plugin for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
 
 								?>
 								<form class="plugin-upload-form hidden" enctype="multipart/form-data" method="POST" action="">
@@ -369,14 +369,14 @@ class Upload {
 									<input type="hidden" name="plugin_id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
 
 									<label>
-										<?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
+								<?php esc_html_e( 'Additional Information', 'wporg-plugins' ); ?><br>
 										<textarea name="comment" rows="3" cols="80"></textarea>
 									</label>
 									<br>
 
 									<label class="wp-block-button__link zip-file">
 										<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
-										<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
+										<span><?php esc_html_e( 'Select File', 'wporg-plugins' ); ?></span>
 									</label>
 
 									<input class="upload-button wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>" data-uploading-label="<?php esc_attr_e( 'Uploading…', 'wporg-plugins' ); ?>"/>
@@ -386,7 +386,7 @@ class Upload {
 							}
 
 							echo '<div class="plugin-submission-submitted-files">';
-							echo '<strong>' . __( 'Submitted files:', 'wporg-plugins' ) . '</strong>';
+							echo '<strong>' . esc_html__( 'Submitted files:', 'wporg-plugins' ) . '</strong>';
 							foreach ( $attached_media as $attachment_post_id => $upload ) {
 								echo '<div class="plugin-submission-file">';
 								echo '<table class="plugin-submission-file__meta">';
@@ -419,7 +419,7 @@ class Upload {
 										'<div class="plugin-submission-file__pcp wp-block-button is-small"><a href="%s" class="%s" target="_blank">%s</a></div>',
 										esc_url( Template::preview_link_zip( $plugin->post_name, $upload->ID, 'pcp' ) ),
 										'wp-block-button__link',
-										__( 'Check with Plugin Check', 'wporg-plugins' )
+										esc_html__( 'Check with Plugin Check', 'wporg-plugins' )
 									);
 								}
 								echo '</div>';
@@ -440,7 +440,7 @@ class Upload {
 			printf(
 				'<div class="notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
-					__( 'New plugin submissions are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-plugins' ),
+					wp_kses_post( __( 'New plugin submissions are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-plugins' ) ),
 					'https://wordpress.org/news/2024/12/holiday-break/'
 				)
 			);
@@ -448,7 +448,7 @@ class Upload {
 			echo '<div class="notice notice-error notice-alt"><p>' .
 				sprintf(
 					/* translators: %s: Profile edit url. */
-					__( 'Your email host has email deliverability problems. Please <a href="%s">Update your email address</a> first.', 'wporg-plugins'),
+					wp_kses_post( __( 'Your email host has email deliverability problems. Please <a href="%s">Update your email address</a> first.', 'wporg-plugins' ) ),
 					esc_url( 'https://wordpress.org/support/users/' . wp_get_current_user()->user_nicename . '/edit' )
 					) .
 					"</p></div>\n";
@@ -614,7 +614,7 @@ class Upload {
 
 				<label class="wp-block-button__link zip-file">
 					<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip" required data-maxbytes="<?php echo esc_attr( wp_max_upload_size() ); ?>" />
-					<span><?php _e( 'Select File', 'wporg-plugins' ); ?></span>
+					<span><?php esc_html_e( 'Select File', 'wporg-plugins' ); ?></span>
 				</label>
 
 				<div>
@@ -631,7 +631,7 @@ class Upload {
 
 				<p>
 					<label>
-						<?php _e( 'Additional Information', 'wporg-plugins' ); ?><br>
+						<?php esc_html_e( 'Additional Information', 'wporg-plugins' ); ?><br>
 						<textarea name="comment" rows="3" cols="80"><?php
 							if ( ! empty( $_REQUEST['comment'] ) ) {
 								echo esc_textarea( $_REQUEST['comment'] );

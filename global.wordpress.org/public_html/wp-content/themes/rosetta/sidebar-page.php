@@ -14,12 +14,12 @@ if ( false !== $latest_release ) :
 				);
 			?></strong>
 		</a>
-		<span><?php printf( __( '.zip &mdash; %s MB', 'rosetta' ), $latest_release['zip_size_mb'] ); ?></span>
+		<span><?php printf( esc_html__( '.zip &mdash; %s MB', 'rosetta' ), $latest_release['zip_size_mb'] ); ?></span>
 	</p>
 
 	<p class="download-tar">
 		<a href="<?php echo $latest_release['targz_url']; ?>"><?php printf(
-			__( 'Download .tar.gz &mdash; %s MB', 'rosetta' ),
+			esc_html__( 'Download .tar.gz &mdash; %s MB', 'rosetta' ),
 			$latest_release['tar_size_mb'] );
 		?></a>
 	</p>
@@ -27,9 +27,9 @@ if ( false !== $latest_release ) :
 endif;
 ?>
 
-<h3><?php _e( 'Resources', 'rosetta' ); ?></h3>
+<h3><?php esc_html_e( 'Resources', 'rosetta' ); ?></h3>
 
-<p><?php _e( 'For help with installing or using WordPress, consult our documentation in your language.', 'rosetta' ); ?></p>
+<p><?php esc_html_e( 'For help with installing or using WordPress, consult our documentation in your language.', 'rosetta' ); ?></p>
 
 <?php
 if ( has_nav_menu( 'rosetta_resources' ) ) {

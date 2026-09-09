@@ -13,7 +13,7 @@ add_action( 'wp_head', function() {
 get_header();
 ?>
 <div id="pagebody" class="home">
-	<h2 class="screen-reader-text"><?php _e( 'Featured Sites', 'wporg-showcase' ); ?></h2>
+	<h2 class="screen-reader-text"><?php esc_html_e( 'Featured Sites', 'wporg-showcase' ); ?></h2>
 	<?php query_posts( array( 'cat' => 4, 'posts_per_page' => 9, 'post_status' => 'publish' ) ); ?>
 	<?php if ( have_posts() ) : ?>
 
@@ -37,7 +37,7 @@ get_header();
 							<?php if ( $wpsc_url ) : // Make sure the URL is valid; esc_url_raw() returns an empty string if not. ?>
 							<a href="<?php echo esc_url( $wpsc_url ); ?>" class="wpsc-linkout">
 								<?php echo esc_html( str_replace( parse_url( $wpsc_url, PHP_URL_SCHEME ) . '://', '', untrailingslashit( $wpsc_url ) ) ); ?>
-								<span class="linkout-symbol"><?php _ex( '&#10162;', 'linkout symbol', 'wporg-showcase' ); ?></span>
+								<span class="linkout-symbol"><?php echo esc_html_x( '&#10162;', 'linkout symbol', 'wporg-showcase' ); ?></span>
 							</a>
 							<?php endif; // $wpsc_url ?>
 
@@ -46,7 +46,7 @@ get_header();
 								the_excerpt();
 							?>
 							<a class="wpsc-hero-learnmore" href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>">
-								<?php _e( 'Learn More &rarr;', 'wporg-showcase' ); ?>
+								<?php esc_html_e( 'Learn More &rarr;', 'wporg-showcase' ); ?>
 							</a>
 								</div>
 							</div>
@@ -69,7 +69,7 @@ get_header();
 		<div class="maincontentwrapper">
 			<?php query_posts( array( 'cat' => 4, 'posts_per_page' => 3, 'tag' => 'business', 'orderby' => 'rand' ) ); ?>
 			<?php if ( have_posts() ) : ?>
-			<h2><?php _e( 'Featured Business Sites', 'wporg-showcase' ); ?></h2>
+			<h2><?php esc_html_e( 'Featured Business Sites', 'wporg-showcase' ); ?></h2>
 			<ul class="wpsc-recent">
 
 				<?php while ( have_posts() ) : the_post(); ?>
@@ -92,7 +92,7 @@ get_header();
 			<?php query_posts( array( 'posts_per_page' => 9 ) ); ?>
 			<?php if ( have_posts() ) : ?>
 
-			<h2><?php _e( 'Recently Added Sites', 'wporg-showcase' ); ?></h2>
+			<h2><?php esc_html_e( 'Recently Added Sites', 'wporg-showcase' ); ?></h2>
 			<ul class="wpsc-recent">
 
 				<?php while ( have_posts() ) : the_post(); ?>

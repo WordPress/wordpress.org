@@ -200,7 +200,7 @@ function bbp_user_edit_after() {
 		</p>',
 		checked( enabled( $user_id ), true, false ),
 		sprintf(
-			__( 'Enable the <a href="%s">Also Viewing</a> feature.', 'wporg-forums' ),
+			wp_kses_post( __( 'Enable the <a href="%s">Also Viewing</a> feature.', 'wporg-forums' ) ),
 			'https://make.wordpress.org/support/handbook/appendix/helpful-tools/#avoiding-overlapping-replies'
 		)
 	);

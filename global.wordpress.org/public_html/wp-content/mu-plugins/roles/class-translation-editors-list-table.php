@@ -106,7 +106,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * Output 'no users' message.
 	 */
 	public function no_items() {
-		_e( 'No translation editors were found.', 'rosetta' );
+		esc_html_e( 'No translation editors were found.', 'rosetta' );
 	}
 
 	/**
@@ -269,7 +269,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	public function column_cb( $user ) {
 		if ( $this->user_can_promote ) {
 			?>
-			<label class="screen-reader-text" for="cb-select-<?php echo $user->ID; ?>"><?php _e( 'Select translation editor', 'rosetta' ); ?></label>
+			<label class="screen-reader-text" for="cb-select-<?php echo $user->ID; ?>"><?php esc_html_e( 'Select translation editor', 'rosetta' ); ?></label>
 			<input id="cb-select-<?php echo $user->ID; ?>" type="checkbox" name="translation-editors[]" value="<?php echo $user->ID; ?>">
 			<?php
 		}
@@ -326,12 +326,12 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		$project_access_list = $this->rosetta_roles->get_users_projects( $user->ID );
 
 		if ( empty( $project_access_list ) ) {
-			_e( 'No projects', 'rosetta' );
+			esc_html_e( 'No projects', 'rosetta' );
 			return;
 		}
 
 		if ( in_array( 'all', $project_access_list, true ) ) {
-			_e( 'All projects', 'rosetta' );
+			esc_html_e( 'All projects', 'rosetta' );
 			return;
 		}
 

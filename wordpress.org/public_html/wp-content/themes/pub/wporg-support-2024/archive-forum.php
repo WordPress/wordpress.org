@@ -16,7 +16,7 @@ get_header(); ?>
 			<section>
 				<p><?php printf(
 					/* Translators: forums welcome page URL */
-					__( 'Our community-based support forums are a great place to learn, share, and help each other. <a href="%s">Find out how to get started</a>.', 'wporg-forums' ),
+					wp_kses_post( __( 'Our community-based support forums are a great place to learn, share, and help each other. <a href="%s">Find out how to get started</a>.', 'wporg-forums' ) ),
 					esc_url( wporg_support_get_welcome_url() )
 				) ?></p>
 			</section>

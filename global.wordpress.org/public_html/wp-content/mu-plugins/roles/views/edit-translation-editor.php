@@ -1,5 +1,5 @@
 <div class="wrap">
-	<h2><?php _e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
+	<h2><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
 
 	<?php echo $feedback_message; ?>
 
@@ -7,7 +7,7 @@
 		$user = get_user_by( 'id', $user_id );
 		printf(
 			/* translators: %s: WP.org profile link */
-			__( 'You are currently editing the user %s.', 'rosetta' ),
+			esc_html__( 'You are currently editing the user %s.', 'rosetta' ),
 			sprintf( '<a href="%1$s">%2$s</a>',
 				'https://profiles.wordpress.org/' . $user->user_nicename . '/',
 				$user->user_login
@@ -20,27 +20,27 @@
 			<tbody>
 				<tr>
 					<th scope="row">
-						<?php _e( 'Add editor access for:', 'rosetta' ); ?><br>
+						<?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?><br>
 					</th>
 					<td>
 						<fieldset id="projects">
-							<legend class="screen-reader-text"><span><?php _e( 'Add editor access for:', 'rosetta' ); ?></span></legend>
+							<legend class="screen-reader-text"><span><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></span></legend>
 
 							<ul id="projects-list" class="projects-list">
 								<li id="project-all" class="active">
 									<label>
-										<input type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php _e( 'All projects', 'rosetta' ); ?>
+										<input type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php esc_html_e( 'All projects', 'rosetta' ); ?>
 									</label>
 									<div class="sub-projects-wrapper">
-										<?php _e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
+										<?php esc_html_e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
 									</div>
 								</li>
 								<li id="project-loading" class="loading">
-									<?php _e( 'Loading&hellip;', 'rosetta' ); ?>
+									<?php esc_html_e( 'Loading&hellip;', 'rosetta' ); ?>
 								</li>
 							</ul>
 						</fieldset>
-						<p class="description"><?php _e( 'Each project includes sub projects and newly-added sub projects.', 'rosetta' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Each project includes sub projects and newly-added sub projects.', 'rosetta' ); ?></p>
 					</td>
 				</tr>
 			</tbody>

@@ -72,14 +72,14 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 
 			if ( $slack_username && $slack_username != $user_nicename ) {
 				/* translators: 1: user's WordPress.org profile link, 2: user's Slack username, 3: make.wordpress.org/chat URL */
-				printf( __( '%1$s on WordPress.org, %2$s on <a href="%3$s">Slack</a>', 'wporg-forums' ),
+				printf( wp_kses_post( __( '%1$s on WordPress.org, %2$s on <a href="%3$s">Slack</a>', 'wporg-forums' ) ),
 					wporg_support_get_wporg_profile_link(),
 					'@' . esc_html( $slack_username ),
 					'https://make.wordpress.org/chat/'
 				);
 			} elseif( $slack_username ) {
 				/* translators: 1: WordPress.org and Slack username, 2: URL for information about Slack */
-				printf( __( '%1$s on WordPress.org and <a href="%2$s">Slack</a>', 'wporg-forums' ),
+				printf( wp_kses_post( __( '%1$s on WordPress.org and <a href="%2$s">Slack</a>', 'wporg-forums' ) ),
 					wporg_support_get_wporg_profile_link(),
 					'https://make.wordpress.org/chat/'
 				);

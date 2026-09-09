@@ -61,7 +61,7 @@ class Readme_Validator {
 				</p>
 			</form>
 
-			<p><?php _e( '... or paste your <code>readme.txt</code> here:', 'wporg-plugins' ); ?></p>
+			<p><?php echo wp_kses_post( __( '... or paste your <code>readme.txt</code> here:', 'wporg-plugins' ) ); ?></p>
 				<textarea rows="20" cols="100" name="readme_visible" placeholder="=== Plugin Name ==="><?php echo esc_textarea( $readme_contents ); ?></textarea>
 				<form id="readme-data" method="post" action="">
 					<input type="hidden" name="readme" value="" />

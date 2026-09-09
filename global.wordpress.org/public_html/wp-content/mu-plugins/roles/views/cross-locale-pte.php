@@ -1,11 +1,11 @@
 <div class="wrap">
 	<h2>
-		<?php _e( 'Cross-Locale PTEs', 'rosetta' ); ?>
+		<?php esc_html_e( 'Cross-Locale PTEs', 'rosetta' ); ?>
 	</h2>
 
 	<?php echo $feedback_message; ?>
 
-	<p><?php _e( 'This is the list of our current Cross-Locale PTEs.', 'rosetta' ); ?></p>
+	<p><?php esc_html_e( 'This is the list of our current Cross-Locale PTEs.', 'rosetta' ); ?></p>
 	<table class="wp-list-table widefat fixed striped translation-editors">
 		<thead>
 		<tr>
@@ -40,12 +40,12 @@
 	</table>
 
 	<?php if ( current_user_can( Rosetta_Roles::MANAGE_TRANSLATION_EDITORS_CAP ) ) : ?>
-		<h3><?php _e( 'Add Cross-Locale PTE', 'rosetta' ); ?></h3>
-		<p><?php _e( 'Enter the email address or username of an existing user on wordpress.org.', 'rosetta' ); ?></p>
+		<h3><?php esc_html_e( 'Add Cross-Locale PTE', 'rosetta' ); ?></h3>
+		<p><?php esc_html_e( 'Enter the email address or username of an existing user on wordpress.org.', 'rosetta' ); ?></p>
 		<form action="" method="post">
 			<table class="form-table">
 				<tr>
-					<th scope="row"><label for="user"><?php _e( 'E-mail or Username', 'rosetta' ); ?></label></th>
+					<th scope="row"><label for="user"><?php esc_html_e( 'E-mail or Username', 'rosetta' ); ?></label></th>
 					<td><input type="text" class="regular-text" name="user" id="user"></td>
 				</tr>
 			</table>

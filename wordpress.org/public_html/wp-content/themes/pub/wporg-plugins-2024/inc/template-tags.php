@@ -439,7 +439,7 @@ function the_plugin_community_zone() {
 	echo '</p>';
 	echo '<p class="wp-block-button is-small">';
 	echo '<button class="wp-block-button__link" type="submit">' . esc_html__( 'Save', 'wporg-plugins' ) . '</button>';
-	echo '<span class="success-msg">' . __( 'Saved!', 'wporg-plugins' ) . '</span>';
+	echo '<span class="success-msg">' . esc_html__( 'Saved!', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
 	echo '</form>';
 }
@@ -485,7 +485,7 @@ function the_plugin_commercial_zone() {
 	echo '</p>';
 	echo '<p class="wp-block-button is-small">';
 	echo '<button class="wp-block-button__link" type="submit">' . esc_attr__( 'Save', 'wporg-plugins' ) . '</button>';
-	echo '<span class="success-msg">' . __( 'Saved!', 'wporg-plugins' ) . '</span>';
+	echo '<span class="success-msg">' . esc_html__( 'Saved!', 'wporg-plugins' ) . '</span>';
 	echo '</p>';
 	echo '</form>';
 }
@@ -550,10 +550,10 @@ function the_plugin_self_close_button() {
 	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
 	if ( $active_installs >= 20000 ) {
 		// Translators: %s is the plugin team email address.
-		printf( __( '<strong>Notice:</strong> Due to the high volume of users for this plugin it cannot be closed without speaking directly to the plugins team. Please contact <a href="mailto:%1$s">%1$s</a> with a link to the plugin and explanation as to why it should be closed.', 'wporg-plugins' ), 'plugins@wordpress.org' );
+		printf( wp_kses_post( __( '<strong>Notice:</strong> Due to the high volume of users for this plugin it cannot be closed without speaking directly to the plugins team. Please contact <a href="mailto:%1$s">%1$s</a> with a link to the plugin and explanation as to why it should be closed.', 'wporg-plugins' ) ), 'plugins@wordpress.org' );
 	} else {
 		$close_link = Template::get_self_close_link( $post );
-		_e( '<strong>Warning:</strong> Closing a plugin is intended to be a <em>permanent</em> action. There is no way to reopen a plugin without contacting the plugins team.', 'wporg-plugins' );
+		echo wp_kses_post( __( '<strong>Warning:</strong> Closing a plugin is intended to be a <em>permanent</em> action. There is no way to reopen a plugin without contacting the plugins team.', 'wporg-plugins' ) );
 	}
 	echo '</p></div>';
 
@@ -567,9 +567,9 @@ function the_plugin_self_close_button() {
 	<div class="wp-block-button is-small"><button class="show-dialog wp-block-button__link" onclick="this.parentNode.nextElementSibling.showModal()"><?php echo $close_button_text; ?></button></div>
 	<dialog>
 		<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
-		<strong><?php _e( 'Close your plugin?', 'wporg-plugins' ); ?></strong>
+		<strong><?php esc_html_e( 'Close your plugin?', 'wporg-plugins' ); ?></strong>
 		<div class="notice notice-warning notice-alt"><p>
-			<?php _e( '<strong>Warning:</strong> Closing a plugin is intended to be a <em>permanent</em> action. There is no way to reopen a plugin without contacting the plugins team.', 'wporg-plugins' ); ?>
+			<?php echo wp_kses_post( __( '<strong>Warning:</strong> Closing a plugin is intended to be a <em>permanent</em> action. There is no way to reopen a plugin without contacting the plugins team.', 'wporg-plugins' ) ); ?>
 		</p></div>
 
 		<form method="POST" action="<?php echo esc_url( $close_link ); ?>">
@@ -578,7 +578,7 @@ function the_plugin_self_close_button() {
 					<input type="checkbox" name="confirm" required />
 					<?php printf(
 						/* translators: %s: The plugin name. */
-						__( 'Yes, I wish to close %s.', 'wporg-plugins' ),
+						esc_html__( 'Yes, I wish to close %s.', 'wporg-plugins' ),
 						'<code>' . get_the_title() . '</code>'
 					); ?>
 				</label>
@@ -586,27 +586,27 @@ function the_plugin_self_close_button() {
 			<p>
 				<label>
 					<input type="checkbox" name="confirm" required />
-					<?php _e( 'Yes, I understand that this is permanent.', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'Yes, I understand that this is permanent.', 'wporg-plugins' ); ?>
 				</label>
 			</p>
 			<p>
 				<label>
 					<input type="checkbox" name="confirm" required />
-					<?php _e( 'I am not working on a newer version to submit to the plugin directory.', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'I am not working on a newer version to submit to the plugin directory.', 'wporg-plugins' ); ?>
 				</label>
 			</p>
 			<p>
 				<label>
 					<?php printf(
 						/* translators: %s: The plugin slug. */
-						__( 'Please enter the plugin slug %s below.', 'wporg-plugins' ),
+						esc_html__( 'Please enter the plugin slug %s below.', 'wporg-plugins' ),
 						'<code>' . esc_html( $post->post_name ) . '</code>'
 					); ?><br>
 					<input type="text" name="confirm" pattern="<?php echo esc_attr( $post->post_name ); ?>" required class="has-large-font-size" />
 				</label>
 			</p>
 			<p>
-				<?php printf( __( 'If you have any questions, please contact <a href="mailto:%1$s">%1$s</a> before proceeding with a link to your plugin and your questions.', 'wporg-plugins' ), 'plugins@wordpress.org' ); ?>
+				<?php printf( wp_kses_post( __( 'If you have any questions, please contact <a href="mailto:%1$s">%1$s</a> before proceeding with a link to your plugin and your questions.', 'wporg-plugins' ) ), 'plugins@wordpress.org' ); ?>
 			<p class="wp-block-button is-small">
 				<input class="wp-block-button__link" type="submit" value="<?php echo esc_attr( $close_button_text ); ?>" />
 			</p>
@@ -638,15 +638,15 @@ function the_plugin_self_toggle_preview_button() {
 
 	if ( !isset( $blueprints[ 'blueprint.json' ] ) ) {
 		echo '<div class="plugin-notice notice notice-error notice-alt"><p>';
-		_e( '<strong>Note:</strong> Missing or invalid blueprint.json file.', 'wporg-plugins' );
+		echo wp_kses_post( __( '<strong>Note:</strong> Missing or invalid blueprint.json file.', 'wporg-plugins' ) );
 		echo '</p></div>';
 	} elseif ( $toggle_link ) {
 
 		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
 		if ( 'enabled' === $preview_status ) {
-			_e( 'This will disable the Preview button for public users.', 'wporg-plugins' );
+			esc_html_e( 'This will disable the Preview button for public users.', 'wporg-plugins' );
 		} else {
-			_e( 'This will enable the Preview button for public users.', 'wporg-plugins' );
+			esc_html_e( 'This will enable the Preview button for public users.', 'wporg-plugins' );
 		}
 
 		echo '</p></div>';
@@ -683,7 +683,7 @@ function the_plugin_self_transfer_form() {
 
 	echo '<p>' . esc_html__( 'You are the current owner of this plugin. You may transfer those rights to another person at any time, provided they have commit access to this plugin.', 'wporg-plugins' ) . '</p>';
 
-	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> Transferring a plugin is intended to be <em>permanent</em>. There is no way to get plugin ownership back without contacting the plugin team.', 'wporg-plugins' ) . '</p></div>';
+	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>' . wp_kses_post( __( '<strong>Warning:</strong> Transferring a plugin is intended to be <em>permanent</em>. There is no way to get plugin ownership back without contacting the plugin team.', 'wporg-plugins' ) ) . '</p></div>';
 
 	$disabled_users = [];
 	$users          = [];
@@ -699,13 +699,13 @@ function the_plugin_self_transfer_form() {
 		}
 	}
 	if ( ! $users ) {
-		echo '<div class="plugin-notice notice notice-error notice-alt"><p>' . __( 'To transfer a plugin, you must first add the new owner as a committer.', 'wporg-plugins' ) . '</p></div>';
+		echo '<div class="plugin-notice notice notice-error notice-alt"><p>' . esc_html__( 'To transfer a plugin, you must first add the new owner as a committer.', 'wporg-plugins' ) . '</p></div>';
 		return;
 	}
 
 	// Users must have 2FA enabled to be able to transfer a plugin.
 	if ( $disabled_users ) {
-		echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . __( 'Only users with Two-Factor authentication enabled can be selected.', 'wporg-plugins' ) . '</p></div>';
+		echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . esc_html__( 'Only users with Two-Factor authentication enabled can be selected.', 'wporg-plugins' ) . '</p></div>';
 	}
 
 	echo '<form method="POST" action="' . esc_url( Template::get_self_transfer_link() ) . '" onsubmit="return ( 0 != document.getElementById(\'transfer-new-owner\').value ) && confirm( jQuery(this).prev(\'.notice\').text() );">';
@@ -739,20 +739,20 @@ function the_plugin_release_confirmation_form() {
 
 	echo '<h4>' . esc_html__( 'Release Confirmation', 'wporg-plugins' ) . '</h4>';
 	if ( $confirmations_required ) {
-		echo '<p>' . __( 'Release confirmations for this plugin are <strong>enabled</strong>.', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . wp_kses_post( __( 'Release confirmations for this plugin are <strong>enabled</strong>.', 'wporg-plugins' ) ) . '</p>';
 	} else {
-		echo '<p>' . __( 'Release confirmations for this plugin are <strong>disabled</strong>', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . wp_kses_post( __( 'Release confirmations for this plugin are <strong>disabled</strong>', 'wporg-plugins' ) ) . '</p>';
 	}
 	echo '<p>' . esc_html__( 'All future releases will require email confirmation before being made available. This increases security and ensures that plugin releases are only made when intended.', 'wporg-plugins' ) . '</p>';
 
 	if ( ! $confirmations_required && 'trunk' === $post->stable_tag ) {
 		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
-			_e( "Release confirmations currently require tagged releases, as you're releasing from trunk they cannot be enabled.", 'wporg-plugins' );
+			esc_html_e( "Release confirmations currently require tagged releases, as you're releasing from trunk they cannot be enabled.", 'wporg-plugins' );
 		echo '</p></div>';
 
 	} else if ( ! $confirmations_required ) {
 		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
-			_e( '<strong>Warning:</strong> Enabling release confirmations is intended to be a <em>permanent</em> action. There is no way to disable this without contacting the plugins team.', 'wporg-plugins' );
+			echo wp_kses_post( __( '<strong>Warning:</strong> Enabling release confirmations is intended to be a <em>permanent</em> action. There is no way to disable this without contacting the plugins team.', 'wporg-plugins' ) );
 		echo '</p></div>';
 
 		echo '<form method="POST" action="' . esc_url( Template::get_enable_release_confirmation_link() ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
@@ -761,7 +761,7 @@ function the_plugin_release_confirmation_form() {
 
 	} else {
 		/* translators: 1: plugins@wordpress.org */
-		echo '<p>' . sprintf( __( 'To disable release confirmations, please contact the plugins team by emailing %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
+		echo '<p>' . sprintf( esc_html__( 'To disable release confirmations, please contact the plugins team by emailing %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
 	}
 }
 
@@ -781,7 +781,7 @@ function the_author_notice( $post = null ) {
 		printf(
 			'<div class="notice notice-alt notice-%s">%s</div>',
 			esc_attr( $notice['type'] ),
-			'<p><strong>' . __( 'A note from the Plugins Team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			'<p><strong>' . esc_html__( 'A note from the Plugins Team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
 			wp_kses_post( $notice['html'] ) // Should have wrapping <p> tags.
 		);
 	}
@@ -802,7 +802,7 @@ function the_author_notice( $post = null ) {
 		$import_warnings  = '<ul><li>' . implode( '</li><li>', $import_warnings ) . '</li></ul>';
 		printf(
 			'<div class="notice notice-error notice-alt">%s</div>',
-			'<p><strong>' . __( 'During the last import of your plugin the following warnings were encountered. This message is visible only to the plugin authors &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			'<p><strong>' . esc_html__( 'During the last import of your plugin the following warnings were encountered. This message is visible only to the plugin authors &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
 			wp_kses_post( $import_warnings )
 		);
 	}

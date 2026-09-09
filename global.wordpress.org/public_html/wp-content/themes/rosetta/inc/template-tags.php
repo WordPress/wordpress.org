@@ -4,7 +4,7 @@
  */
 function rosetta_entry_meta() {
 	if ( is_sticky() && is_home() && ! is_paged() ) {
-		printf( '<span class="sticky-post">%s</span> ', __( 'Featured', 'rosetta' ) );
+		printf( '<span class="sticky-post">%s</span> ', esc_html__( 'Featured', 'rosetta' ) );
 	}
 
 	$time_string = sprintf(
@@ -21,7 +21,7 @@ function rosetta_entry_meta() {
 
 	printf(
 		/* translators: 1: post date 2: post author */
-		__( 'Posted on %1$s by %2$s.', 'rosetta' ),
+		esc_html__( 'Posted on %1$s by %2$s.', 'rosetta' ),
 		$time_string,
 		$author_string
 	);
@@ -36,7 +36,7 @@ function rosetta_entry_meta() {
 		echo ' ';
 		printf(
 			/* translators: %s: list of categories */
-			__( 'Filed under %s.', 'rosetta' ),
+			esc_html__( 'Filed under %s.', 'rosetta' ),
 			$categories_string
 		);
 	}

@@ -32,7 +32,7 @@
 
 <header id="masthead" class="site-header<?php if ( is_front_page() ) { echo ' home'; } ?>" role="banner">
 	<?php if ( get_query_var( 'is_handbook' ) ) : ?>
-	<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu', 'bporg-developer' ); ?></strong></a>
+	<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu', 'bporg-developer' ); ?></strong></a>
 	<?php endif; ?>
 	<div class="site-branding">
 		<h1 class="site-title">
@@ -68,7 +68,7 @@
 			<?php get_search_form(); ?>
 			<div id="inner-search-icon-container">
 				<div id="inner-search-icon">
-					<div class="dashicons dashicons-search"><span class="screen-reader-text"><?php _e( 'Search', 'bporg-developer' ); ?></span></div>
+					<div class="dashicons dashicons-search"><span class="screen-reader-text"><?php esc_html_e( 'Search', 'bporg-developer' ); ?></span></div>
 				</div>
 			</div>
 		</div>

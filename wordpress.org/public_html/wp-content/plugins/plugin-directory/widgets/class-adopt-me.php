@@ -36,9 +36,9 @@ class Adopt_Me extends \WP_Widget {
 
 			<div>
 				<p>
-					<?php _e( 'This plugin is seeking new, active, developers. Are you interested in assuming that responsibility?', 'wporg-plugins' ); ?></p>
+					<?php esc_html_e( 'This plugin is seeking new, active, developers. Are you interested in assuming that responsibility?', 'wporg-plugins' ); ?></p>
 				<p>
-					<a class="button" href="https://developer.wordpress.org/plugins/wordpress-org/take-over-an-existing-plugin/"><?php _e( 'Read more', 'wporg-plugins' ); ?></a>
+					<a class="button" href="https://developer.wordpress.org/plugins/wordpress-org/take-over-an-existing-plugin/"><?php esc_html_e( 'Read more', 'wporg-plugins' ); ?></a>
 				</p>
 			</div>
 			<?php

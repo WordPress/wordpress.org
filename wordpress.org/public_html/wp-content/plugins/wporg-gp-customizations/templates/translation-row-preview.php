@@ -132,7 +132,7 @@ $priority_char = array(
 		endif; ?>
 	</td>
 	<td class="actions">
-		<a href="#" class="action edit"><?php _e( 'Details', 'glotpress' ); ?></a>
+		<a href="#" class="action edit"><?php esc_html_e( 'Details', 'glotpress' ); ?></a>
 	</td>
 	<?php if ( wporg_translate_inline_actions_enabled_for_current_user( get_defined_vars() ) ) : ?>
 		<td class="inline-actions">

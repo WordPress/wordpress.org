@@ -97,7 +97,7 @@ class Translators extends WP_List_Table {
 	 * Output 'no users' message.
 	 */
 	public function no_items() {
-		_e( 'No translators were found.', 'wporg-translate' );
+		esc_html_e( 'No translators were found.', 'wporg-translate' );
 	}
 
 	/**
@@ -158,7 +158,7 @@ class Translators extends WP_List_Table {
 	public function column_cb( $user ) {
 		if ( $this->user_can_promote ) {
 			?>
-			<label class="screen-reader-text" for="cb-select-<?php echo $user->ID; ?>"><?php _e( 'Select translator', 'wporg-translate' ); ?></label>
+			<label class="screen-reader-text" for="cb-select-<?php echo $user->ID; ?>"><?php esc_html_e( 'Select translator', 'wporg-translate' ); ?></label>
 			<input id="cb-select-<?php echo $user->ID; ?>" type="checkbox" name="translators[]" value="<?php echo $user->ID; ?>">
 			<?php
 		}

@@ -2,7 +2,7 @@
 
 
 <section class="forums-homepage-list">
-	<h2 class="has-heading-5-font-size"><?php _e( 'Forums', 'wporg-forums' ); ?></h2>
+	<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Forums', 'wporg-forums' ); ?></h2>
 
 	<?php echo do_blocks(
 		sprintf(
@@ -17,7 +17,7 @@
 </section>
 
 <section class="forums-homepage-topics">
-	<h2 class="has-heading-5-font-size"><?php _e( 'Topics', 'wporg-forums' ); ?></h2>
+	<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Topics', 'wporg-forums' ); ?></h2>
 
 	<?php echo do_blocks(
 		sprintf(

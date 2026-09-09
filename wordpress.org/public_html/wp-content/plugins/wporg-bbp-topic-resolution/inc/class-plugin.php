@@ -117,7 +117,7 @@ class Plugin {
 			return;
 		}
 
-		echo '<span class="topic-resolved-indicator">' . __( 'Resolved', 'wporg-forums' ) . '</span>';
+		echo '<span class="topic-resolved-indicator">' . esc_html__( 'Resolved', 'wporg-forums' ) . '</span>';
 	}
 
 	/**

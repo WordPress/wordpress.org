@@ -420,7 +420,7 @@ class Plugin extends Base {
 				$review_author_markup .= '</a>';
 
 				printf(
-					__( 'By %1$s on %2$s', 'wporg-plugins' ),
+					esc_html__( 'By %1$s on %2$s', 'wporg-plugins' ),
 					$review_author_markup,
 					'<span class="review-date">' . date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ) . '</span>'
 				);

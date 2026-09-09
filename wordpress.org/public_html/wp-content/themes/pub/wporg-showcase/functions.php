@@ -106,7 +106,7 @@ function site_screenshot_tag( $width = '', $classes='screenshot' ) {
 function wp_flavors() {
 	global $post;
 
-	echo '<h2 class="heading">' . __( 'Flavor', 'wporg-showcase' ). '</h2>';
+	echo '<h2 class="heading">' . esc_html__( 'Flavor', 'wporg-showcase' ) . '</h2>';
 	echo '<ul id="flavors">';
 
 	$flavors = array( 'WordPress.org', 'WordPress.com', 'WordPress.com VIP', 'WordPress MS' );
@@ -188,20 +188,20 @@ function breadcrumb() { ?>
 		<?php if ( is_search() ) : ?>
 			<?php
 				/* translators: %s: search query */
-				printf( __( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() );
+				printf( esc_html__( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() );
 			?>
 		<?php elseif ( strstr( $_SERVER['REQUEST_URI'], '/showcase/archives' ) ) : ?>
-			<?php _e( '&raquo; Archives', 'wporg-showcase' ); ?>
+			<?php esc_html_e( '&raquo; Archives', 'wporg-showcase' ); ?>
 		<?php else : ?>
 			<?php if ( is_category() ) : ?>
-				<?php _e( '&raquo; Flavor', 'wporg-showcase' ); ?>
+				<?php esc_html_e( '&raquo; Flavor', 'wporg-showcase' ); ?>
 			<?php elseif ( is_tag() ) : ?>
-				<?php _e( '&raquo; Tag', 'wporg-showcase' ); ?>
+				<?php esc_html_e( '&raquo; Tag', 'wporg-showcase' ); ?>
 			<?php endif; // is_category ?>
 
 			<?php
 				/* translators: %s: document title */
-				printf( __( '&raquo; %s', 'wporg-showcase' ), wp_get_document_title() );
+				printf( esc_html__( '&raquo; %s', 'wporg-showcase' ), wp_get_document_title() );
 			?>
 		<?php endif; // is_search ?>
 

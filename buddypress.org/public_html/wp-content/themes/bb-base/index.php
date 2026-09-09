@@ -8,7 +8,8 @@ if ( have_posts() ) :
 		<cite>
 			<?php
 			/* translators: 1: post date, 2: post author */
-			printf( __( 'Published on %1$s by %2$s', 'bborg' ),
+			printf(
+				esc_html__( 'Published on %1$s by %2$s', 'bborg' ),
 				get_the_time( 'F jS, Y' ),
 				get_the_author_link()
 			);
@@ -31,7 +32,7 @@ if ( have_posts() ) :
 	endif;
 else :
 	?>
-	<p><em><?php _e( 'Sorry, no posts matched your criteria.', 'bborg' ); ?></em></p>
+	<p><em><?php esc_html_e( 'Sorry, no posts matched your criteria.', 'bborg' ); ?></em></p>
 	<?php
 endif;
 ?>

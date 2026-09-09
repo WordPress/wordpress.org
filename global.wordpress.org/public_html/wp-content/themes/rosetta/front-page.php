@@ -73,7 +73,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 	<div class="wrapper">
 		<div class="section">
 			<div class="col-12">
-				<h3><?php _e( 'Showcase', 'rosetta' ); ?></h3>
+				<h3><?php esc_html_e( 'Showcase', 'rosetta' ); ?></h3>
 				<ul id="showcase">
 <?php
 	foreach ( $showcase as $item ) :
@@ -93,7 +93,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		</a>
 		<?php echo esc_html( $item->post_title ); ?>
 		<br />
-		<a class="showcase-url" href="<?php echo esc_url( $url ); ?>" rel="nofollow"><?php _e( 'Visit the site &rarr;', 'rosetta' ); ?></a>
+		<a class="showcase-url" href="<?php echo esc_url( $url ); ?>" rel="nofollow"><?php esc_html_e( 'Visit the site &rarr;', 'rosetta' ); ?></a>
 	</li>
 <?php
 	endforeach;
@@ -108,7 +108,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		<div class="wrapper">
 			<div class="section">
 				<div class="col-12">
-					<h3><?php _e('Showcase', 'rosetta'); ?></h3>
+					<h3><?php esc_html_e( 'Showcase', 'rosetta' ); ?></h3>
 					<span id="showcase-front-slate">You can <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=showcase' ) ); ?>">add notable sites</a> in your language and screenshot and description of random three of them will show here.</span>
 				</div>
 			</div>
@@ -134,7 +134,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		<div class="wrapper">
 			<div id="blog" class="section">
 				<div class="col-9">
-					<h3><?php _e('Blog', 'rosetta'); ?></h3>
+					<h3><?php esc_html_e('Blog', 'rosetta'); ?></h3>
 <?php
 	query_posts( 'showposts=5' );
 	while (have_posts()) : the_post();

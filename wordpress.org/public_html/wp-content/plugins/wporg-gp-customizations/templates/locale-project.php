@@ -57,11 +57,11 @@ gp_tmpl_header();
 				</li>
 				<?php if ( $locale_glossary ) : ?>
 					<li class="locale-glossary">
-						<a href="<?php echo esc_url( gp_url_join( gp_url( '/locale' ), $locale_slug, $set_slug, 'glossary' ) ); ?>" class="glossary-link"><?php _e( 'Locale Glossary', 'glotpress' ); ?></a>
+						<a href="<?php echo esc_url( gp_url_join( gp_url( '/locale' ), $locale_slug, $set_slug, 'glossary' ) ); ?>" class="glossary-link"><?php esc_html_e( 'Locale Glossary', 'glotpress' ); ?></a>
 					</li>
 				<?php elseif ( $can_create_locale_glossary ) : ?>
 					<li class="locale-glossary">
-						<a href="<?php echo esc_url( gp_url_join( gp_url( '/locale' ), $locale_slug, $set_slug, 'glossary' ) ); ?>" class="glossary-link"><?php _e( 'Create Locale Glossary', 'glotpress' ); ?></a>
+						<a href="<?php echo esc_url( gp_url_join( gp_url( '/locale' ), $locale_slug, $set_slug, 'glossary' ) ); ?>" class="glossary-link"><?php esc_html_e( 'Create Locale Glossary', 'glotpress' ); ?></a>
 					</li>
 				<?php endif; ?>
 			</ul>
@@ -147,12 +147,12 @@ if ( 'wp-plugins' === $project->path ) {
 	<table class="gp-table locale-sub-projects">
 		<thead>
 			<tr>
-				<th class="header"><?php _e( 'Set / Sub Project' ); ?></th>
-				<th><?php _e( 'Translated' ); ?></th>
-				<th><?php _e( 'Fuzzy' ); ?></th>
-				<th><?php _e( 'Untranslated' ); ?></th>
-				<th><?php _e( 'Waiting' ); ?></th>
-				<th><?php _e( 'Changes requested' ); ?></th>
+				<th class="header"><?php esc_html_e( 'Set / Sub Project' ); ?></th>
+				<th><?php esc_html_e( 'Translated' ); ?></th>
+				<th><?php esc_html_e( 'Fuzzy' ); ?></th>
+				<th><?php esc_html_e( 'Untranslated' ); ?></th>
+				<th><?php esc_html_e( 'Waiting' ); ?></th>
+				<th><?php esc_html_e( 'Changes requested' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>

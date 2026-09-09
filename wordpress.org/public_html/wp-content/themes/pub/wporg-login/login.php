@@ -26,11 +26,11 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] 
 <form name="loginform" id="loginform" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post">
 	<p class="intro"><?php echo wporg_login_wporg_is_starpress(); ?></p>
 	<p class="login-username">
-		<label for="user_login"><?php _e( 'Username or Email Address', 'wporg' ); ?></label>
+		<label for="user_login"><?php esc_html_e( 'Username or Email Address', 'wporg' ); ?></label>
 		<input type="text" name="log" id="user_login" class="input" value="<?php echo esc_attr( $username ); ?>" size="20" />
 	</p>
 	<p class="login-password">
-		<label for="user_pass"><?php _e( 'Password', 'wporg' ); ?></label>
+		<label for="user_pass"><?php esc_html_e( 'Password', 'wporg' ); ?></label>
 		<span class="wp-pwd" style="display:block;">
 			<input type="password" name="pwd" id="user_pass" class="input password-input" value="" size="20" />
 			<button type="button" id="wp-hide-pw" class="button button-secondary wp-hide-pw hide-if-no-js" aria-label="<?php esc_attr_e( 'Show password', 'wporg' ); ?>">
@@ -39,7 +39,7 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] 
 		</span>
 	</p>
 	<?php do_action( 'login_form' ); ?>
-	<p class="login-remember"><label><input name="rememberme" type="checkbox" id="rememberme" value="forever" /> <?php _e( 'Remember me', 'wporg' ); ?></label></p>
+	<p class="login-remember"><label><input name="rememberme" type="checkbox" id="rememberme" value="forever" /> <?php esc_html_e( 'Remember me', 'wporg' ); ?></label></p>
 	<p class="login-submit">
 		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Log In', 'wporg' ); ?>" />
 		<input type="hidden" name="redirect_to" value="<?php echo esc_url( $redirect ); ?>" />
@@ -47,8 +47,8 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] 
 </form>
 
 <p id="nav">
-	<a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" title="<?php _e( 'Lost your password?', 'wporg' ); ?>"><?php _e( 'Lost your password?', 'wporg' ); ?></a> &nbsp; • &nbsp;
-	<a href="<?php echo esc_url( wp_registration_url() ); ?>" title="<?php _e( 'Create an account', 'wporg' ); ?>"><?php _e( 'Create an account', 'wporg' ); ?></a>
+	<a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" title="<?php esc_attr_e( 'Lost your password?', 'wporg' ); ?>"><?php esc_html_e( 'Lost your password?', 'wporg' ); ?></a> &nbsp; • &nbsp;
+	<a href="<?php echo esc_url( wp_registration_url() ); ?>" title="<?php esc_attr_e( 'Create an account', 'wporg' ); ?>"><?php esc_html_e( 'Create an account', 'wporg' ); ?></a>
 </p>
 
 <script type="text/javascript">

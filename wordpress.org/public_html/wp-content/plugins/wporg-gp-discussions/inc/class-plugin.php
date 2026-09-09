@@ -130,7 +130,7 @@ class Plugin {
 							</fieldset>
 
 							<label class="feedback">
-								<?php _e( 'Comment:', 'glotpress' ); ?>
+								<?php esc_html_e( 'Comment:', 'glotpress' ); ?>
 								<textarea placeholder="Let the contributor know what they did wrong…" name="comment" rows="4"></textarea>
 							</label>
 
@@ -158,7 +158,7 @@ class Plugin {
 					<div class="wporg-translate-modal__content">
 						<form action="POST">
 							<label class="feedback">
-								<?php _e( 'Comment:', 'glotpress' ); ?>
+								<?php esc_html_e( 'Comment:', 'glotpress' ); ?>
 								<textarea required placeholder="Type your question or feedback to this string…" name="comment" rows="4"></textarea>
 							</label>
 

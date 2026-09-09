@@ -1,3 +1,3 @@
 <div class="bbp-template-notice">
-	<p><?php _e( 'Please enter some search terms above', 'wporg-forums' ); ?></p>
+	<p><?php esc_html_e( 'Please enter some search terms above', 'wporg-forums' ); ?></p>
 </div>

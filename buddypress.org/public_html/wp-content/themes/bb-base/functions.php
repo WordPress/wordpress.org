@@ -77,8 +77,8 @@ function bb_base_topic_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h2><?php _e( 'Forum Search', 'bborg'); ?></h2>
-			<label class="screen-reader-text hidden" for="ts"><?php _e( 'Search for:', 'bborg' ); ?></label>
+			<h2><?php esc_html_e( 'Forum Search', 'bborg' ); ?></h2>
+			<label class="screen-reader-text hidden" for="ts"><?php esc_html_e( 'Search for:', 'bborg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_topic_search_query(); ?>" name="ts" id="ts" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
@@ -91,8 +91,8 @@ function bb_base_reply_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h2><?php _e( 'Reply Search', 'bborg'); ?></h2>
-			<label class="screen-reader-text hidden" for="rs"><?php _e( 'Search for:', 'bborg' ); ?></label>
+			<h2><?php esc_html_e( 'Reply Search', 'bborg' ); ?></h2>
+			<label class="screen-reader-text hidden" for="rs"><?php esc_html_e( 'Search for:', 'bborg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_reply_search_query(); ?>" name="rs" id="rs" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
@@ -105,8 +105,8 @@ function bb_base_plugin_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h2><?php _e( 'Plugin Search', 'bborg'); ?></h2>
-			<label class="screen-reader-text hidden" for="ps"><?php _e( 'Search for:', 'bborg' ); ?></label>
+			<h2><?php esc_html_e( 'Plugin Search', 'bborg' ); ?></h2>
+			<label class="screen-reader-text hidden" for="ps"><?php esc_html_e( 'Search for:', 'bborg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_plugin_search_query(); ?>" name="ps" id="ts" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
@@ -177,7 +177,7 @@ function bb_base_single_topic_description() {
 
 	<li class="topic-forum"><?php
 		/* translators: %s: forum title */
-		printf( __( 'In: %s', 'bborg' ),
+		printf( esc_html__( 'In: %s', 'bborg' ),
 			sprintf( '<a href="%s">%s</a>',
 				esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id() ) ),
 				bbp_get_topic_forum_title()
@@ -193,7 +193,7 @@ function bb_base_single_topic_description() {
 	<?php if ( !empty( $last_reply  ) ) : ?>
 		<li class="topic-freshness-author"><?php
 			/* translators: %s: reply author link */
-			printf( __( 'Last voice: %s', 'bborg' ),
+			printf( esc_html__( 'Last voice: %s', 'bborg' ),
 				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) )
 			);
 		?></li>
@@ -201,7 +201,7 @@ function bb_base_single_topic_description() {
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="topic-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( __( 'About %s', 'bborg' ), $time_since );
+			printf( esc_html__( 'About %s', 'bborg' ), $time_since );
 		?></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
@@ -243,7 +243,7 @@ function bb_base_single_forum_description() {
 	<?php if ( bbp_get_forum_parent_id() ) : ?>
 		<li class="topic-parent"><?php
 			/* translators: %s: forum title */
-			printf( __( 'In: %s', 'bborg' ),
+			printf( esc_html__( 'In: %s', 'bborg' ),
 				sprintf( '<a href="%s">%s</a>',
 					esc_url( bbp_get_forum_permalink( bbp_get_forum_parent_id() ) ),
 					bbp_get_forum_title( bbp_get_forum_parent_id() )
@@ -260,7 +260,7 @@ function bb_base_single_forum_description() {
 	<?php if ( !empty( $last_active  ) ) : ?>
 		<li class="forum-freshness-author"><?php
 			/* translators: %s: post author link */
-			printf( __( 'Last voice: %s', 'bborg' ),
+			printf( esc_html__( 'Last voice: %s', 'bborg' ),
 				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) )
 			);
 		?></li>
@@ -268,7 +268,7 @@ function bb_base_single_forum_description() {
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="forum-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( __( 'About %s', 'bborg' ), $time_since );
+			printf( esc_html__( 'About %s', 'bborg' ), $time_since );
 		?></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>

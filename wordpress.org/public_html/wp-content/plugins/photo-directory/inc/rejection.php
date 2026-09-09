@@ -873,9 +873,9 @@ class Rejection {
 		}
 
 		echo '<div class="misc-pub-section curtime misc-pub-curtime">';
-		printf( __( 'Rejected by: %s', 'wporg-photos' ), '<b>' . $rejection_user . '</b>' );
+		printf( esc_html__( 'Rejected by: %s', 'wporg-photos' ), '<b>' . $rejection_user . '</b>' );
 		echo '<br>';
-		printf( __( 'Rejected on: %s', 'wporg-photos' ), '<b>' . $rejection_date . '</b>' );
+		printf( esc_html__( 'Rejected on: %s', 'wporg-photos' ), '<b>' . $rejection_date . '</b>' );
 		echo '</div>';
 	}
 
@@ -1008,7 +1008,7 @@ JS;
 			echo "</label></div>\n";
 		}
 
-		echo '<label for="rejected_reason">' . __( 'Reject due to:', 'wporg-photos' ) . '<br>';
+		echo '<label for="rejected_reason">' . esc_html__( 'Reject due to:', 'wporg-photos' ) . '<br>';
 		printf(
 			'<select id="rejected_reason" name="rejected_reason"%s>',
 			disabled( true, $is_disabled, false )
@@ -1029,23 +1029,23 @@ JS;
 		$note_to_user_label_class = ( $is_disabled ? '' : ' pending_moderator_note_to_user' );
 
 		// Markup for optional note to send to user in rejection email.
-		echo '<label for="moderator_note_to_user" class="moderator_note_to_user' . esc_attr( $note_to_user_label_class ) . '">' . __( '(Optional) Note to user on rejection:', 'wporg-photos' );
-		echo '<p class="description"><em>' . __( 'Included in rejection email.', 'wporg-photos' ) . '</em></p>';
+		echo '<label for="moderator_note_to_user" class="moderator_note_to_user' . esc_attr( $note_to_user_label_class ) . '">' . esc_html__( '(Optional) Note to user on rejection:', 'wporg-photos' );
+		echo '<p class="description"><em>' . esc_html__( 'Included in rejection email.', 'wporg-photos' ) . '</em></p>';
 		echo '<textarea id="moderator_note_to_user" name="moderator_note_to_user" rows="4"' . disabled( true, $is_disabled, false ) . '>';
 		echo esc_textarea( self::get_moderator_note_to_user( $post, 'reject' ) );
 		echo '</textarea>';
 		echo '</label>';
 
 		// Markup for optional note sent to user in approval email.
-		echo '<label for="moderator_note_to_user_on_publish" class="moderator_note_to_user_on_publish' . esc_attr( $note_to_user_label_class ) . '">' . __( '(Optional) Note to user on approval:', 'wporg-photos' );
-		echo '<p class="description"><em>' . __( 'Included in approval email.', 'wporg-photos' ) . '</em></p>';
+		echo '<label for="moderator_note_to_user_on_publish" class="moderator_note_to_user_on_publish' . esc_attr( $note_to_user_label_class ) . '">' . esc_html__( '(Optional) Note to user on approval:', 'wporg-photos' );
+		echo '<p class="description"><em>' . esc_html__( 'Included in approval email.', 'wporg-photos' ) . '</em></p>';
 		echo '<textarea id="moderator_note_to_user_on_publish" name="moderator_note_to_user_on_publish" rows="4"' . disabled( true, $is_disabled, false ) . '>';
 		echo esc_textarea( self::get_moderator_note_to_user( $post, 'publish' ) );
 		echo '</textarea>';
 		echo '</label>';
 
 		// Markup for optional private note for moderator-eyes only.
-		echo '<label for="moderator_private_note">' . __( '(Optional) Private moderators-only note:', 'wporg-photos' );
+		echo '<label for="moderator_private_note">' . esc_html__( '(Optional) Private moderators-only note:', 'wporg-photos' );
 		echo '<textarea id="moderator_private_note" name="moderator_private_note" rows="4">';
 		echo esc_textarea( self::get_moderator_private_note( $post ) );
 		echo '</textarea>';
@@ -1368,7 +1368,7 @@ JS;
 
 		echo '<table id="dashboard-photo-rejection-stats" class="wp-list-table widefat fixed striped table-view-list">';
 		echo '<thead><tr>';
-		echo '<th>' . __( 'Rejection reason', 'wporg-photos' ) . '</th>';
+		echo '<th>' . esc_html__( 'Rejection reason', 'wporg-photos' ) . '</th>';
 		echo '<th class="col-num col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
 		echo '<th class="col-num col-percent-rejected" title="' . esc_attr( 'Percentage of overall rejections', 'wporg-photos' ) . '">%</th>';
 		echo '</tr></thead>';
@@ -1389,7 +1389,7 @@ JS;
 			echo "</tr>\n";
 		}
 
-		echo '<tr class="row-sum"><td>' . __( 'Total', 'wporg-photos' ) . '</td><td>' . number_format_i18n( $total_rejections ) . '</td><td>100%</td></tr>';
+		echo '<tr class="row-sum"><td>' . esc_html__( 'Total', 'wporg-photos' ) . '</td><td>' . number_format_i18n( $total_rejections ) . '</td><td>100%</td></tr>';
 		echo '</tbody></table>';
 		echo '</div>';
 	}

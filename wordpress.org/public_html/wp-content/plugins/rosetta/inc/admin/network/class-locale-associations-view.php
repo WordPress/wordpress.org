@@ -37,8 +37,8 @@ class Locale_Associations_View implements Admin_Page_View {
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( $this->get_title() ); ?></h1>
-			<p><?php _e( 'Manage the locale association for localized sites. Without an association the site&#8217;s front end is not available.', 'rosetta' ); ?></p>
-			<p><a href="#add-new-associations"><?php _e( 'Add New Association', 'rosetta' ); ?></a> | <a  href="#existing-associations"><?php _e( 'Existing Associations', 'rosetta' ); ?></a> | <a href="#sites-without-locale-association"><?php _e( 'Sites Without Locale Association', 'rosetta' ); ?></a></p>
+			<p><?php esc_html_e( 'Manage the locale association for localized sites. Without an association the site&#8217;s front end is not available.', 'rosetta' ); ?></p>
+			<p><a href="#add-new-associations"><?php esc_html_e( 'Add New Association', 'rosetta' ); ?></a> | <a  href="#existing-associations"><?php esc_html_e( 'Existing Associations', 'rosetta' ); ?></a> | <a href="#sites-without-locale-association"><?php esc_html_e( 'Sites Without Locale Association', 'rosetta' ); ?></a></p>
 			<hr/>
 			<?php
 			$this->render_message();
@@ -70,37 +70,37 @@ class Locale_Associations_View implements Admin_Page_View {
 			case 'delete-association|delete_failure' :
 				printf(
 					'<div class="notice notice-error"><p>%s</p></div>',
-					__( 'An error occurred. Please try again.', 'rosetta' )
+					esc_html__( 'An error occurred. Please try again.', 'rosetta' )
 				);
 				break;
 			case 'add-association|missing_data' :
 				printf(
 					'<div class="notice notice-error"><p>%s</p></div>',
-					__( 'Please provide a locale and a subdomain.', 'rosetta' )
+					esc_html__( 'Please provide a locale and a subdomain.', 'rosetta' )
 				);
 				break;
 			case 'add-association|locale_does_not_exist' :
 				printf(
 					'<div class="notice notice-error"><p>%s</p></div>',
-					__( 'The locale does not exist yet.', 'rosetta' )
+					esc_html__( 'The locale does not exist yet.', 'rosetta' )
 				);
 				break;
 			case 'add-association|success' :
 				printf(
 					'<div class="notice notice-success"><p>%s</p></div>',
-					__( 'The new association has been added.', 'rosetta' )
+					esc_html__( 'The new association has been added.', 'rosetta' )
 				);
 				break;
 			case 'delete-association|missing_data' :
 				printf(
 					'<div class="notice notice-error"><p>%s</p></div>',
-					__( 'The ID of the association is missing. Please try again.', 'rosetta' )
+					esc_html__( 'The ID of the association is missing. Please try again.', 'rosetta' )
 				);
 				break;
 			case 'delete-association|success' :
 				printf(
 					'<div class="notice notice-success"><p>%s</p></div>',
-					__( 'The association has been deleted.', 'rosetta' )
+					esc_html__( 'The association has been deleted.', 'rosetta' )
 				);
 				break;
 		}
@@ -111,15 +111,15 @@ class Locale_Associations_View implements Admin_Page_View {
 	 */
 	private function render_form() {
 		?>
-		<h2 id="add-new-associations"><?php _e( 'Add New Association', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
+		<h2 id="add-new-associations"><?php esc_html_e( 'Add New Association', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
 		<form action="" method="post">
 			<?php wp_nonce_field( 'add-association' ); ?>
 			<input type="hidden" name="action" value="add-association" />
 
 			<p>
-				<label for="locale"><?php _e( 'Locale:', 'rosetta' ); ?></label>
+				<label for="locale"><?php esc_html_e( 'Locale:', 'rosetta' ); ?></label>
 				<select id="locale" name="locale" required>
-					<option value=""><?php _e( '&mdash; Select &mdash;', 'rosetta' ); ?></option>
+					<option value=""><?php esc_html_e( '&mdash; Select &mdash;', 'rosetta' ); ?></option>
 					<?php
 					foreach ( $this->page->get_available_wp_locales() as $locale ) {
 						printf(
@@ -131,7 +131,7 @@ class Locale_Associations_View implements Admin_Page_View {
 					?>
 				</select>
 
-				<label for="subdomain"><?php _e( 'Subdomain:', 'rosetta' ); ?></label>
+				<label for="subdomain"><?php esc_html_e( 'Subdomain:', 'rosetta' ); ?></label>
 				<input type="text" id="subdomain" name="subdomain" class="code" required />
 			</p>
 
@@ -147,14 +147,14 @@ class Locale_Associations_View implements Admin_Page_View {
 	 */
 	private function render_table() {
 		?>
-		<h2 id="existing-associations"><?php _e( 'Existing Associations', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
+		<h2 id="existing-associations"><?php esc_html_e( 'Existing Associations', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
 		<table class="widefat striped">
 			<thead>
 				<tr>
-					<th><?php _e( 'Locale', 'rosetta' ); ?></th>
-					<th><?php _e( 'Subdomain', 'rosetta' ); ?></th>
-					<th><?php _e( 'Sites', 'rosetta' ); ?></th>
-					<th><?php _e( 'Latest Release', 'rosetta' ); ?></th>
+					<th><?php esc_html_e( 'Locale', 'rosetta' ); ?></th>
+					<th><?php esc_html_e( 'Subdomain', 'rosetta' ); ?></th>
+					<th><?php esc_html_e( 'Sites', 'rosetta' ); ?></th>
+					<th><?php esc_html_e( 'Latest Release', 'rosetta' ); ?></th>
 					<th>&mdash;</th>
 				</tr>
 			</thead>
@@ -207,7 +207,7 @@ class Locale_Associations_View implements Admin_Page_View {
 	 */
 	public function render_sites_without_locale() {
 		?>
-		<h2 id="sites-without-locale-association"><?php _e( 'Sites Without Locale Association', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
+		<h2 id="sites-without-locale-association"><?php esc_html_e( 'Sites Without Locale Association', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
 		<?php
 		$domains_with_locale = wp_list_pluck( $this->page->get_associations(), 'subdomain' );
 		array_walk( $domains_with_locale, function( &$domain ) {

@@ -58,7 +58,7 @@ get_header();
 <p>&nbsp;</p>
 
 <p>
-	<a href="https://<?php echo $localised_domain; ?>/about/privacy/"><?php _e( 'Privacy Policy', 'wporg' ); ?></a>
+	<a href="https://<?php echo $localised_domain; ?>/about/privacy/"><?php esc_html_e( 'Privacy Policy', 'wporg' ); ?></a>
 </p>
 <?php /* ?>
 <p>
@@ -84,8 +84,8 @@ get_header();
 </p>
 
 <p id="nav">
-	<a href="/"><?php _e( '&larr; Back to login', 'wporg' ); ?></a> &nbsp; • &nbsp;
-	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
+	<a href="/"><?php esc_html_e( '&larr; Back to login', 'wporg' ); ?></a> &nbsp; • &nbsp;
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

@@ -37,7 +37,7 @@ get_header(); ?>
 
 			printf(
 				/* translators: %s: Date of last update. */
-				'<p class="handbook-last-updated">' . __( 'Last updated: %s', 'wporg' ) . '</p>',
+				'<p class="handbook-last-updated">' . esc_html__( 'Last updated: %s', 'wporg' ) . '</p>',
 				sprintf(
 					'<time datetime="%s">%s</time>',
 					esc_attr( get_the_modified_date( DATE_W3C ) ),

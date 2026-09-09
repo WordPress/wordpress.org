@@ -223,23 +223,23 @@ class Ratings_Compat {
 ?>
 <div class="review-ratings">
 	<div>
-		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
+		<div style="font-weight:bold;"><?php esc_html_e( 'Average Rating', 'wporg-forums' ); ?></div>
 		<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); ?>
 		<div class="reviews-submit-link">
 		<?php
 			if ( is_user_logged_in() ) {
 				echo '<a href="#new-post" class="btn">';
 				if ( $this->review_exists() ) {
-					_e( 'Edit your review', 'wporg-forums' );
+					esc_html_e( 'Edit your review', 'wporg-forums' );
 				} else {
-					_e( 'Add your own review', 'wporg-forums' );
+					esc_html_e( 'Add your own review', 'wporg-forums' );
 				}
 				echo '</a>';
 			} else {
 				echo '<span class="reviews-need-login">';
 				printf(
 					/* translators: %s: login URL */
-					__( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ),
+					wp_kses_post( __( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ) ),
 					add_query_arg(
 						'redirect_to',
 						urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
@@ -256,7 +256,7 @@ class Ratings_Compat {
 		<div class="reviews-total-count"><?php
 			printf(
 				/* translators: %s: number of reviews */
-				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
+				esc_html( _n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ) ),
 				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
 			);
 		?></div>
@@ -271,17 +271,17 @@ class Ratings_Compat {
 			echo '<p class="reviews-filtered-msg" style="margin-top:12px;font-size:0.8rem;">';
 			printf(
 				/* translators: %d: number of stars */
-				_n(
+				wp_kses_post( _n(
 					'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
 					'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
 					$filter,
 					'wporg-forums'
-				) . ' ',
+				) ) . ' ',
 				$filter
 			);
 			printf(
 				/* translators: %s: plugin/theme reviews URL */
-				__( '<a href="%s">See all reviews</a>.', 'wporg-forums' ),
+				wp_kses_post( __( '<a href="%s">See all reviews</a>.', 'wporg-forums' ) ),
 				esc_url( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) )
 			);
 			echo "</p>\n";
@@ -430,7 +430,7 @@ class Ratings_Compat {
 			echo '<div class="bbp-template-notice"><p>';
 			printf(
 				/* translators: %s: login URL */
-				__( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ),
+				wp_kses_post( __( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ) ),
 				add_query_arg(
 					'redirect_to',
 					urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
@@ -455,12 +455,12 @@ class Ratings_Compat {
 
 	public function do_template_notice() {
 		if ( $this->object->post_author == get_current_user_id() ) { ?>
-			<p><?php _e( 'A review should be the review of an experience a user has with your project, not for self-promotion.', 'wporg-forums' ); ?></p>
+			<p><?php esc_html_e( 'A review should be the review of an experience a user has with your project, not for self-promotion.', 'wporg-forums' ); ?></p>
 
 			<?php if ( 'plugin' === $this->compat ) : ?>
-				<p><?php _e( 'Since you work on this plugin, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ); ?></p>
+				<p><?php echo wp_kses_post( __( 'Since you work on this plugin, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ) ); ?></p>
 			<?php elseif ( 'theme' === $this->compat ) : ?>
-				<p><?php _e( 'Since you work on this theme, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ); ?></p>
+				<p><?php echo wp_kses_post( __( 'Since you work on this theme, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ) ); ?></p>
 			<?php endif;
 
 			return;
@@ -480,7 +480,7 @@ class Ratings_Compat {
 				break;
 		}
 		?>
-		<p><?php _e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
+		<p><?php esc_html_e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
 		<ul>
 			<li><?php printf( $report, esc_url( sprintf( home_url( '/%s/%s/' ), $this->compat, $this->slug ) ) ); ?></li>
 			<li><?php echo esc_html( $rate ); ?></li>
@@ -488,7 +488,7 @@ class Ratings_Compat {
 			<li><?php
 				printf(
 					/* translators: %s: Forum user guide URL */
-					__( 'Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
+					wp_kses_post( __( 'Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ) ),
 					esc_url( __( 'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews', 'wporg-forums' ) )
 				);
 			?></li>
@@ -517,7 +517,7 @@ class Ratings_Compat {
 
 		printf(
 			'<label for="rating">%s</label>',
-			__( 'Your Rating:', 'wporg-forums' )
+			esc_html__( 'Your Rating:', 'wporg-forums' )
 		);
 
 		\WPORG_Ratings::get_dashicons_form( $this->compat, $this->slug, true );

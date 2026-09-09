@@ -233,30 +233,30 @@ class Controls {
 
 			<?php if ( 'closed' === $post->post_status ) : ?>
 
-				<p><?php printf( __( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
+				<p><?php printf( esc_html__( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
 
 			<?php elseif ( 'disabled' === $post->post_status ) : ?>
 
-				<p><?php printf( __( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
+				<p><?php printf( esc_html__( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
 
 			<?php elseif ( 'rejected' === $post->post_status ) : ?>
 
 				<p><?php printf(
-						__( 'Rejection Reason: %s', 'wporg-plugins' ),
+						esc_html__( 'Rejection Reason: %s', 'wporg-plugins' ),
 						'<strong>' . $rejection_reason_label . '</strong>'
 				); ?></p>
 
 			<?php elseif ( 'publish' === $post->post_status ) : ?>
 
 				<?php if ( $active_installs >= '20000' ) : ?>
-					<p><strong><?php _e( 'Notice:', 'wporg-plugins' ); ?></strong> <?php _e( 'Due to the large volume of active users, the developers should be warned and their plugin remain open save under extreme circumstances.', 'wporg-plugins' ); ?>.</p>
+					<p><strong><?php esc_html_e( 'Notice:', 'wporg-plugins' ); ?></strong> <?php esc_html_e( 'Due to the large volume of active users, the developers should be warned and their plugin remain open save under extreme circumstances.', 'wporg-plugins' ); ?>.</p>
 				<?php endif; ?>
 
 			<?php endif; ?>
 
 			<?php if ( array_intersect( $statuses, [ 'closed', 'disabled' ] ) ) { ?>
 				<p>
-					<label for="close_reason"><?php _e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
+					<label for="close_reason"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
 					<select name="close_reason" id="close_reason">
 						<?php foreach ( $close_reasons as $key => $label ) : ?>
 							<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $close_reason ); ?>><?php echo esc_html( $label ); ?></option>
@@ -276,7 +276,7 @@ class Controls {
 
 				if ( $status === 'rejected' ) { ?>
 					<p>
-						<label for="rejection_reason"><?php _e( 'Rejection Reason:', 'wporg-plugins' ); ?></label>
+						<label for="rejection_reason"><?php esc_html_e( 'Rejection Reason:', 'wporg-plugins' ); ?></label>
 						<select name="rejection_reason" id="rejection_reason">
 							<?php foreach ( $rejection_reasons as $key => $label ) : ?>
 								<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $rejection_reason ); ?>><?php echo esc_html( $label ); ?></option>
@@ -303,17 +303,17 @@ class Controls {
 		?>
 		<table class="misc-pub-section misc-pub-meta">
 			<tr>
-				<td><?php _e( 'Status:', 'wporg-plugins' ); ?></td>
+				<td><?php esc_html_e( 'Status:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></strong></td>
 			</tr>
 
 			<tr>
-				<td><?php _e( 'Version:', 'wporg-plugins' ); ?></td>
+				<td><?php esc_html_e( 'Version:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php echo esc_html( $post->version ); ?></strong></td>
 			</tr>
 
 			<tr>
-				<td><?php _e( 'Updated:', 'wporg-plugins' ); ?></td>
+				<td><?php esc_html_e( 'Updated:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php
 					printf(
 						'<span title="%s">%s ago</span>',
@@ -324,7 +324,7 @@ class Controls {
 			</tr>
 
 			<tr>
-				<td><?php _e( 'Submitted:', 'wporg-plugins' ); ?></td>
+				<td><?php esc_html_e( 'Submitted:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php
 					$submitted_date = min( array_filter( [
 						$post->_submitted_date,           // Submitted date stored since 2017-04-11
@@ -341,7 +341,7 @@ class Controls {
 			</tr>
 
 			<tr>
-				<td><?php _e( 'Installs:', 'wporg-plugins' ); ?></td>
+				<td><?php esc_html_e( 'Installs:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php echo Template::active_installs( false, $post ); ?></strong></td>
 			</tr>
 
@@ -364,7 +364,7 @@ class Controls {
 
 			<?php if ( $post->tested ) : ?>
 			<tr>
-				<td><?php _e( 'Tested With:', 'wporg-plugins' ); ?></td>
+				<td><?php esc_html_e( 'Tested With:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php printf( 'WordPress %s', esc_html( $post->tested ) ); ?></strong></td>
 			</tr>
 			<?php endif; ?>

@@ -76,16 +76,16 @@ class Release_Confirmation {
 			printf(
 				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
-					__( 'Your account has elevated privileges and requires extra security before you can manage plugin releases. Please <a href="%s">enable two-factor authentication now</a>.', 'wporg-plugins' ),
+					wp_kses_post( __( 'Your account has elevated privileges and requires extra security before you can manage plugin releases. Please <a href="%s">enable two-factor authentication now</a>.', 'wporg-plugins' ) ),
 					esc_url( get_2fa_onboarding_url() )
 				)
 			);
 		}
 
-		echo '<p>' . __( 'This page is for authorized committers to view and manage releases of their plugins. Plugins with confirmations enabled require an extra action on this page to approve each new release.', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . esc_html__( 'This page is for authorized committers to view and manage releases of their plugins. Plugins with confirmations enabled require an extra action on this page to approve each new release.', 'wporg-plugins' ) . '</p>';
 
 		/* translators: %s: plugins@wordpress.org */
-		echo '<p>' . sprintf( __( 'Release confirmations can be enabled on the Advanced view of plugin pages. If you need to disable release confirmations for a plugin, please contact %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
+		echo '<p>' . sprintf( esc_html__( 'Release confirmations can be enabled on the Advanced view of plugin pages. If you need to disable release confirmations for a plugin, please contact %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
@@ -105,7 +105,7 @@ class Release_Confirmation {
 
 		if ( $not_enabled ) {
 			printf(
-				'<p><em>' . __( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em></p>',
+				'<p><em>' . esc_html__( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em></p>',
 				wp_sprintf_l( '%l', array_filter( array_map( function( $plugin ) {
 					if ( 'publish' == get_post_status( $plugin ) ) {
 						return sprintf(
@@ -134,12 +134,12 @@ class Release_Confirmation {
 		</colgroup>
 		<thead>
 			<tr>
-				<th>' . _x( 'Release', 'Releases Table header', 'wporg-plugins' ) . '</th>
+				<th>' . esc_html_x( 'Release', 'Releases Table header', 'wporg-plugins' ) . '</th>
 				<th>&nbsp;</th>
 		</thead>';
 
 		if ( ! $releases ) {
-			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
+			echo '<tr class="no-items"><td colspan="5"><em>' . esc_html__( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
 		}
 
 		foreach ( $releases as $data ) {
@@ -165,7 +165,7 @@ class Release_Confirmation {
 					</td>
 				</tr>',
 				sprintf(
-					__( 'Version %s', 'wporg-plugins' ),
+					esc_html__( 'Version %s', 'wporg-plugins' ),
 					sprintf(
 						'<a href="%s">%s</a>',
 						esc_url( sprintf(
@@ -178,7 +178,7 @@ class Release_Confirmation {
 				),
 				sprintf(
 					/* translators: 1: time eg. '3 hours ago', 2: the committer(s). */
-					__( 'Released %1$s by %2$s', 'wporg-plugins' ),
+					esc_html__( 'Released %1$s by %2$s', 'wporg-plugins' ),
 					sprintf(
 						'<span title="%s">%s</span>',
 						esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
@@ -213,18 +213,18 @@ class Release_Confirmation {
 		ob_start();
 
 		if ( ! $data['confirmations_required'] ) {
-			_e( 'Release did not require confirmation.', 'wporg-plugins' );
+			esc_html_e( 'Release did not require confirmation.', 'wporg-plugins' );
 		} else if ( ! empty( $data['discarded'] ) ) {
-			_e( 'Release discarded.', 'wporg-plugins' );
+			esc_html_e( 'Release discarded.', 'wporg-plugins' );
 		} elseif ( $data['confirmed'] && ! $data['zips_built'] ) {
-			_e( 'Release confirmed, waiting for processing.', 'wporg-plugins' );
+			esc_html_e( 'Release confirmed, waiting for processing.', 'wporg-plugins' );
 		} else if ( $data['confirmed'] ) {
-			_e( 'Release confirmed.', 'wporg-plugins' );
+			esc_html_e( 'Release confirmed.', 'wporg-plugins' );
 		} else if ( 1 == $data['confirmations_required'] ) {
-			_e( 'Waiting for confirmation.', 'wporg-plugins' );
+			esc_html_e( 'Waiting for confirmation.', 'wporg-plugins' );
 		} else {
 			printf(
-				__( '%s of %s required confirmations.', 'wporg-plugins' ),
+				esc_html__( '%s of %s required confirmations.', 'wporg-plugins' ),
 				number_format_i18n( count( $data['confirmations'] ) ),
 				number_format_i18n( $plugin->release_confirmation )
 			);
@@ -262,7 +262,7 @@ class Release_Confirmation {
 				'<span title="%s">%s</span><br>',
 				esc_attr( gmdate( 'Y-m-d H:i:s', $data['discarded']['time'] ) ),
 				sprintf(
-					__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
+					esc_html__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
 					$user->display_name ?: $user->user_login,
 					human_time_diff( $data['discarded']['time'] )
 				)
@@ -273,7 +273,7 @@ class Release_Confirmation {
 		if ( $data['confirmed'] && ! $data['zips_built'] ) {
 			printf(
 				'<span>%s</span><br>',
-				__( 'The ZIP files for this release have not yet been built by WordPress.org.', 'wporg-plugins' )
+				esc_html__( 'The ZIP files for this release have not yet been built by WordPress.org.', 'wporg-plugins' )
 			);
 		}
 
@@ -439,7 +439,7 @@ class Release_Confirmation {
 
 		ob_start();
 		echo '<div class="release-strategy">';
-		echo '<h3>' . __( 'Rollout Strategy', 'wporg-plugins' ) . '</h3>';
+		echo '<h3>' . esc_html__( 'Rollout Strategy', 'wporg-plugins' ) . '</h3>';
 
 		echo '<select
 			id="rollout_strategy"
@@ -591,7 +591,7 @@ class Release_Confirmation {
 		printf(
 			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 			sprintf(
-				__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
+				wp_kses_post( __( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ) ),
 				esc_url( home_url( '/developers/releases/' ) ) // TODO: Hardcoded URL.
 			)
 		);

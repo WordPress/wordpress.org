@@ -258,71 +258,71 @@ class Meeting_Post_Type {
 
 		<p>
 		<label for="team">
-			<?php _e( 'Team: ', 'wporg' ); ?>
+			<?php esc_html_e( 'Team: ', 'wporg' ); ?>
 			<input type="text" id="team" name="team" class="regular-text wide" value="<?php echo esc_attr( $team ); ?>">
 		</label>
 		</p>
 		<p>
 		<label for="start_date">
-			<?php _e( 'Start Date', 'wporg' ); ?>
+			<?php esc_html_e( 'Start Date', 'wporg' ); ?>
 			<input type="text" name="start_date" id="start_date" class="date" value="<?php echo esc_attr( $start ); ?>">
 		</label>
 		<label for="end_date">
-			<?php _e( 'End Date', 'wporg' ); ?>
+			<?php esc_html_e( 'End Date', 'wporg' ); ?>
 			<input type="text" name="end_date" id="end_date" class="date" value="<?php echo esc_attr( $end ); ?>">
 		</label>
 		</p>
 		<p>
 		<label for="time">
-			<?php _e( 'Time (UTC)', 'wporg' ); ?>
+			<?php esc_html_e( 'Time (UTC)', 'wporg' ); ?>
 			<input type="text" name="time" id="time" class="time" value="<?php echo esc_attr( $time ); ?>">
 		</label>
 		</p>
 		<p class="recurring">
-		<?php _e( 'Recurring: ', 'wporg' ); ?><br />
+			<?php esc_html_e( 'Recurring: ', 'wporg' ); ?><br />
 		<label for="weekly">
 			<input type="radio" name="recurring" value="weekly" id="weekly" class="regular-radio" <?php checked( $recurring, 'weekly' ); ?>>
-			<?php _e( 'Weekly', 'wporg' ); ?>
+			<?php esc_html_e( 'Weekly', 'wporg' ); ?>
 		</label><br />
 
 		<label for="biweekly">
 			<input type="radio" name="recurring" value="biweekly" id="biweekly" class="regular-radio" <?php checked( $recurring, 'biweekly' ); ?>>
-			<?php _e( 'Biweekly', 'wporg' ); ?>
+			<?php esc_html_e( 'Biweekly', 'wporg' ); ?>
 		</label><br />
 
 		<label for="occurrence">
 			<input type="radio" name="recurring" value="occurrence" id="occurrence" class="regular-radio" <?php checked( $recurring, 'occurrence' ); ?>>
-			<?php _e( 'Occurrence in a month:', 'wporg' ); ?>
+			<?php esc_html_e( 'Occurrence in a month:', 'wporg' ); ?>
 		</label>
 		<label for="week-1">
 			<input type="checkbox" name="occurrence[]" value="1" id="week-1" <?php checked( in_array( 1, $occurrence ) ); ?>>
-			<?php _e( '1st', 'wporg' ); ?>
+			<?php esc_html_e( '1st', 'wporg' ); ?>
 		</label>
 		<label for="week-2">
 			<input type="checkbox" name="occurrence[]" value="2" id="week-2" <?php checked( in_array( 2, $occurrence ) ); ?>>
-			<?php _e( '2nd', 'wporg' ); ?>
+			<?php esc_html_e( '2nd', 'wporg' ); ?>
 		</label>
 		<label for="week-3">
 			<input type="checkbox" name="occurrence[]" value="3" id="week-3" <?php checked( in_array( 3, $occurrence ) ); ?>>
-			<?php _e( '3rd', 'wporg' ); ?>
+			<?php esc_html_e( '3rd', 'wporg' ); ?>
 		</label>
 		<label for="week-4">
 			<input type="checkbox" name="occurrence[]" value="4" id="week-4" <?php checked( in_array( 4, $occurrence ) ); ?>>
-			<?php _e( '4th', 'wporg' ); ?>
+			<?php esc_html_e( '4th', 'wporg' ); ?>
 		</label><br />
 
 		<label for="monthly">
 			<input type="radio" name="recurring" value="monthly" id="monthly" class="regular-radio" <?php checked( $recurring, 'monthly' ); ?>>
-			<?php _e( 'Monthly', 'wporg' ); ?>
+			<?php esc_html_e( 'Monthly', 'wporg' ); ?>
 		</label>
 		</p>
 		<p>
-		<label for="link"><?php _e( 'Link: ', 'wporg' ); ?>
+		<label for="link"><?php esc_html_e( 'Link: ', 'wporg' ); ?>
 			<input type="text" name="link" id="link" class="regular-text wide" value="<?php echo esc_url( $link ); ?>">
 		</label>
 		</p>
 		<p>
-		<label for="location"><?php _e( 'Location: ', 'wporg' ); ?>
+		<label for="location"><?php esc_html_e( 'Location: ', 'wporg' ); ?>
 			<input type="text" name="location" id="location" class="regular-text wide" value="<?php echo esc_attr( $location ); ?>">
 		</label>
 		</p>

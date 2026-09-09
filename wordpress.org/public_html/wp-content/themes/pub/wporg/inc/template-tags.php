@@ -30,7 +30,7 @@ if ( ! function_exists( __NAMESPACE__ . '\entry_meta' ) ) :
 			// phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
 			printf(
 				/* translators: 1: post date 2: post author */
-				'<span class="posted-on">' . __( 'Posted on %1$s by %2$s.', 'wporg' ) . '</span>',
+				'<span class="posted-on">' . esc_html__( 'Posted on %1$s by %2$s.', 'wporg' ) . '</span>',
 				$time_string,
 				$author_string
 			);

@@ -72,7 +72,7 @@ class Settings {
 			esc_attr( self::KILLSWITCH_OPTION_NAME ),
 			esc_attr( self::KILLSWITCH_OPTION_NAME ),
 			checked( true, self::is_killswitch_enabled(), false ),
-			__( 'Prevents all users from being able to upload any photos', 'wporg-photos' )
+			esc_html__( 'Prevents all users from being able to upload any photos', 'wporg-photos' )
 		);
 	}
 

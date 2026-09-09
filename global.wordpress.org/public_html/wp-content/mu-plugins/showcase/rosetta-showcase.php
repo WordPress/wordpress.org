@@ -125,9 +125,9 @@ class Rosetta_Showcase {
 	public function showcase_meta_box( $post ) {
 		$url = get_post_meta( $post->ID, '_rosetta_showcase_url', true );
 		?>
-		<p><label for="rosetta_showcase_url"><?php _e( 'URL', 'rosetta' ); ?></label>
+		<p><label for="rosetta_showcase_url"><?php esc_html_e( 'URL', 'rosetta' ); ?></label>
 			<input style="margin-left: 0; width: 98%" name="rosetta_showcase_url" id="rosetta_showcase_url" type="text" value="<?php echo esc_url( $url ); ?>" /></p>
-		<label for="excerpt"><?php _e( 'Description', 'rosetta' ); ?></label>
+		<label for="excerpt"><?php esc_html_e( 'Description', 'rosetta' ); ?></label>
 		<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt"><?php echo $post->post_excerpt; // textarea_escaped ?></textarea>
 		<?php
 	}

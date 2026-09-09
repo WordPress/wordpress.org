@@ -32,19 +32,19 @@ get_header(); ?>
 		</section>
 
 		<section class="forums-homepage-topics">
-			<h2 class="has-heading-5-font-size"><?php _e( 'Topics', 'wporg-forums' ); ?></h2>
+			<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Topics', 'wporg-forums' ); ?></h2>
 
 			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/forums-views"} /-->' ); ?>
 		</section>
 
 		<section class="clear helpful-links">
 			<div>
-				<h2 class="has-heading-5-font-size"><?php _e( 'Helpful Links', 'wporg-forums' ); ?></h2>
+				<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Helpful Links', 'wporg-forums' ); ?></h2>
 				<ul class="meta-list">
-					<li><?php _e( '<a href="https://wordpress.org/support/article/new_to_wordpress_-_where_to_start/">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://wordpress.org/support/article/faq-installation/">Frequently Asked Questions about Installing WordPress</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://wordpress.org/support/article/first-steps-with-wordpress-classic/">First Steps with WordPress</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://wordpress.org/support/article/writing-posts/">Writing Posts</a>', 'wporg-forums' ); ?></li>
+					<li><?php echo wp_kses_post( __( '<a href="https://wordpress.org/support/article/new_to_wordpress_-_where_to_start/">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( '<a href="https://wordpress.org/support/article/faq-installation/">Frequently Asked Questions about Installing WordPress</a>', 'wporg-forums' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( '<a href="https://wordpress.org/support/article/first-steps-with-wordpress-classic/">First Steps with WordPress</a>', 'wporg-forums' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( '<a href="https://wordpress.org/support/article/writing-posts/">Writing Posts</a>', 'wporg-forums' ) ); ?></li>
 				</ul>
 			</div>
 		</section>

@@ -132,7 +132,10 @@ class Status_Transitions {
 		}
 
 		// ...DIE!!!!!
-		wp_die( __( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ), '', array(
+		wp_die(
+			esc_html__( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ),
+			'',
+			array(
 			'back_link' => true,
 		) );
 	}
