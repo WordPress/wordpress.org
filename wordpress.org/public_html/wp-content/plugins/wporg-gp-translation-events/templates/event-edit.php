@@ -26,12 +26,12 @@ Templates::header(
 <div class="event-page-wrapper">
 	<?php $is_create_form = false; ?>
 	<?php Templates::part( 'event-form', compact( 'is_create_form', 'event' ) ); ?>
-</div>
 
-<div class="event-edit-right">
-	<?php if ( current_user_can( 'edit_translation_event_attendees', $event->id() ) ) : ?>
-		<a class="manage-attendees-btn button is-primary" href="<?php echo esc_url( Urls::event_attendees( $event->id() ) ); ?>"><?php esc_html_e( 'Manage Attendees', 'gp-translation-events' ); ?></a>
-	<?php endif; ?>
+	<div class="event-edit-right">
+		<?php if ( current_user_can( 'edit_translation_event_attendees', $event->id() ) ) : ?>
+			<a class="manage-attendees-btn button is-primary" href="<?php echo esc_url( Urls::event_attendees( $event->id() ) ); ?>"><?php esc_html_e( 'Manage Attendees', 'gp-translation-events' ); ?></a>
+		<?php endif; ?>
+	</div>
 </div>
 
 <?php Templates::footer(); ?>
