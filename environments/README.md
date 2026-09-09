@@ -160,6 +160,8 @@ npm run translate:test
 
 **Local overrides:** create `translate/.wp-env.override.json` (git-ignored) to override config values like `WP_HOME` / `WP_SITEURL` for testing behind a custom hostname.
 
+**Translation Events 2024 design:** the events routes render the legacy templates unless the new block theme is enabled. To preview it, add `"config": { "TRANSLATION_EVENTS_NEW_DESIGN": true }` to `translate/.wp-env.override.json` and restart.
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.
