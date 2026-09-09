@@ -18,7 +18,7 @@ if ( ! $event ) {
 ?>
 <!-- wp:wporg-translate-events-2024/attendee-list
 <?php
-echo wp_json_encode(
+echo serialize_block_attributes(
 	array(
 		'id'        => $event->id(),
 		'view_type' => 'table',

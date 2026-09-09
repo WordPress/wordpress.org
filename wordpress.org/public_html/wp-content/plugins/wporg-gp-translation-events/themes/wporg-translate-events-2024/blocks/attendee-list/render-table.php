@@ -25,7 +25,7 @@ use Wporg\TranslationEvents\Urls;
 					<td>
 						<!-- wp:wporg-translate-events-2024/attendee-avatar-name
 						<?php
-						echo wp_json_encode(
+						echo serialize_block_attributes(
 							array(
 								'user_id'            => $attendee->user_id(),
 								'is_new_contributor' => $attendee->is_new_contributor(),

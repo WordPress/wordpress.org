@@ -37,12 +37,12 @@ $past_events_data = array(
 <!-- wp:heading {"style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"medium","fontFamily":"inter"} -->
 <h2 class="wp-block-heading has-inter-font-family has-medium-font-size" style="font-style:normal;font-weight:700;padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--20);"><?php esc_html_e( 'Your next events', 'wporg-translate-events-2024' ); ?></h2>
 <!-- /wp:heading -->
-<!-- wp:wporg-translate-events-2024/event-list <?php echo wp_json_encode( $current_events_data ); ?>  /-->
+<!-- wp:wporg-translate-events-2024/event-list <?php echo serialize_block_attributes( $current_events_data ); ?>  /-->
 <!-- wp:heading {"style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"medium","fontFamily":"inter","spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}}} -->
 <h2 class="wp-block-heading has-inter-font-family has-medium-font-size" style="font-style:normal;font-weight:700;padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--20);"><?php esc_html_e( 'Upcoming events', 'wporg-translate-events-2024' ); ?></h2>
 <!-- /wp:heading -->
-<!-- wp:wporg-translate-events-2024/event-list <?php echo wp_json_encode( $upcoming_events_data ); ?>  /-->
+<!-- wp:wporg-translate-events-2024/event-list <?php echo serialize_block_attributes( $upcoming_events_data ); ?>  /-->
 <!-- wp:heading {"style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"medium","fontFamily":"inter"} -->
 <h2 class="wp-block-heading has-inter-font-family has-medium-font-size" style="font-style:normal;font-weight:700;padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--20);"><?php esc_html_e( 'Past events', 'wporg-translate-events-2024' ); ?></h2>
 <!-- /wp:heading -->
-<!-- wp:wporg-translate-events-2024/event-list <?php echo wp_json_encode( $past_events_data ); ?>  /-->
+<!-- wp:wporg-translate-events-2024/event-list <?php echo serialize_block_attributes( $past_events_data ); ?>  /-->

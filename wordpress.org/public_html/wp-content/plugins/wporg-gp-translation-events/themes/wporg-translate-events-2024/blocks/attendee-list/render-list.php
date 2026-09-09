@@ -28,7 +28,7 @@ if ( empty( $attendees_not_contributing ) || ! current_user_can( 'edit_translati
 		<div class="wp-block-group">
 			<!-- wp:wporg-translate-events-2024/attendee-avatar-name
 			<?php
-			echo wp_json_encode(
+			echo serialize_block_attributes(
 				array(
 					'user_id'            => $attendee->user_id(),
 					'is_new_contributor' => $attendee->is_new_contributor(),
@@ -37,7 +37,7 @@ if ( empty( $attendees_not_contributing ) || ! current_user_can( 'edit_translati
 			?>
 			/-->
 			<?php if ( $attendee->is_remote() ) : ?>
-				<!-- wp:wporg-translate-events-2024/remote-attendance-icon <?php echo wp_json_encode( array( 'css_class' => 'video-icon-on-gravatar' ) ); ?> /-->
+				<!-- wp:wporg-translate-events-2024/remote-attendance-icon <?php echo serialize_block_attributes( array( 'css_class' => 'video-icon-on-gravatar' ) ); ?> /-->
 			<?php endif; ?>
 		</div>
 		<!-- /wp:group -->
