@@ -101,10 +101,10 @@ register_block_type(
 </label></div>
 <!-- /wp:form-input -->
 		<!-- wp:form-input -->
-		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Start Date', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event->start()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo ( $is_create_form || current_user_can( 'edit_translation_event_start', $event->id() ) ) ? '' : 'readonly'; ?>/></label></div>
+		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'Start Date', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="datetime-local" id="event-start" name="event_start" value="<?php echo esc_attr( $event->start()->setTimezone( $event->timezone() )->format( 'Y-m-d H:i' ) ); ?>" required <?php echo ( $is_create_form || current_user_can( 'edit_translation_event_start', $event->id() ) ) ? '' : 'readonly'; ?>/></label></div>
 		<!-- /wp:form-input -->
 		<!-- wp:form-input -->
-		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'End Date', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->format( 'Y-m-d H:i' ) ); ?>" required <?php echo ( $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() ) ) ? '' : 'readonly'; ?>/></label></div>
+		<div class="wp-block-form-input"><label class="wp-block-form-input__label"><span class="wp-block-form-input__label-content"><?php esc_html_e( 'End Date', 'wporg-translate-events-2024' ); ?></span><input class="wp-block-form-input__input" type="datetime-local" id="event-end" name="event_end" value="<?php echo esc_attr( $event->end()->setTimezone( $event->timezone() )->format( 'Y-m-d H:i' ) ); ?>" required <?php echo ( $is_create_form || current_user_can( 'edit_translation_event_end', $event->id() ) ) ? '' : 'readonly'; ?>/></label></div>
 		<!-- /wp:form-input -->
 
 		<!-- wp:form-input -->
