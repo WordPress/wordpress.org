@@ -5,6 +5,8 @@
  * @package wporg-gp-translation-events
  */
 
+declare( strict_types = 1 );
+
 namespace Wporg\TranslationEvents\Event;
 
 use Exception;

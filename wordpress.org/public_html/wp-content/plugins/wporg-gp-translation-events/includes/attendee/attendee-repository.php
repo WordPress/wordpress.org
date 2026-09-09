@@ -6,8 +6,6 @@ use Exception;
 use Wporg\TranslationEvents\Attendee\Attendee_Adder;
 use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Translation_Events;
-use DateTimeImmutable;
-use DateTimeZone;
 
 class Attendee_Repository {
 

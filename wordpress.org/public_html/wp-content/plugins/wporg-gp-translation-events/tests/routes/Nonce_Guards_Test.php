@@ -100,7 +100,7 @@ class Nonce_Guards_Test extends TestCase {
 	 * @return void
 	 */
 	#[DataProvider( 'guarded_routes' )]
-	public function test_rejects_missing_nonce( string $route_class, string $field, string $method, bool $needs_user ) {
+	public function test_rejects_missing_nonce( string $route_class, string $field, string $method, bool $needs_user ): void {
 		$this->assert_route_rejects( $route_class, $field, $method, $needs_user, null );
 	}
 
@@ -114,7 +114,7 @@ class Nonce_Guards_Test extends TestCase {
 	 * @return void
 	 */
 	#[DataProvider( 'guarded_routes' )]
-	public function test_rejects_forged_nonce( string $route_class, string $field, string $method, bool $needs_user ) {
+	public function test_rejects_forged_nonce( string $route_class, string $field, string $method, bool $needs_user ): void {
 		$this->assert_route_rejects( $route_class, $field, $method, $needs_user, 'not-a-real-nonce' );
 	}
 
@@ -128,7 +128,7 @@ class Nonce_Guards_Test extends TestCase {
 	 * @param string|null $nonce       Nonce to send, or null to send none at all.
 	 * @return void
 	 */
-	private function assert_route_rejects( string $route_class, string $field, string $method, bool $needs_user, ?string $nonce ) {
+	private function assert_route_rejects( string $route_class, string $field, string $method, bool $needs_user, ?string $nonce ): void {
 		$user_id = $this->factory->user->create();
 		wp_set_current_user( $user_id );
 

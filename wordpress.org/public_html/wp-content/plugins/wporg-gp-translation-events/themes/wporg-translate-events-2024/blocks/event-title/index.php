@@ -19,11 +19,12 @@ register_block_type(
 				return '';
 			}
 			$event_id = get_the_ID();
-			ob_start();
 			$event = Translation_Events::get_event_repository()->get_event( $event_id );
 			if ( ! $event ) {
 				return '';
 			}
+
+			ob_start();
 			$url = Urls::event_details( $event->id() );
 			?>
 			<?php
