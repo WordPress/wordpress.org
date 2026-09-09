@@ -16,6 +16,10 @@ on:
     - 'wordpress.org/public_html/style/.stylelintignore'
     - 'wordpress.org/public_html/style/**.js'
     - 'wordpress.org/public_html/style/**.css'
+    - 'wordpress.org/public_html/style/package.json'
+    - 'wordpress.org/public_html/style/package-lock.json'
+    - 'wordpress.org/public_html/style/.prettierignore'
+    - .github/workflows/style-lint.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

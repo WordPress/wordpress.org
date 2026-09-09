@@ -1,7 +1,7 @@
 /**
  * Generates wp4-rtl.css from wp4.css.
  *
- * Run via `npm run build:css` (after autoprefixing) or directly with
+ * Run via `npm run build:css` or directly with
  * `node bin/build-rtl.js`. Ported from the former grunt-rtlcss task.
  */
 
