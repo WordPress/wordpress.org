@@ -15,7 +15,7 @@ get_header();
 
 <?php
 if ( 'register' == $reason && $user ) {
-	echo '<p class="center">' . esc_html__( "The link you've followed has expired.", 'wporg' ) . '</p>';
+	echo '<p class="center">' . esc_html__( 'The link you&#8217;ve followed has expired.', 'wporg' ) . '</p>';
 
 	echo '<p class="center"><a href="' . esc_url( home_url( '/register/' . urlencode( $user ) ) ) . '">' .
 		sprintf(
@@ -25,7 +25,7 @@ if ( 'register' == $reason && $user ) {
 		) .
 		'</a></p>';
 } elseif ( 'lostpassword' == $reason && $user ) {
-	echo '<p class="center">' . esc_html__( "The link you've followed has expired.", 'wporg' ) . '</p>';
+	echo '<p class="center">' . esc_html__( 'The link you&#8217;ve followed has expired.', 'wporg' ) . '</p>';
 	echo '<p class="center"><a href="' . esc_url( home_url( '/lostpassword/'  . urlencode( $user ) ) ) . '">' .
 			esc_html__( 'Reset your password.', 'wporg' ) .
 			'</a></p>';
@@ -54,7 +54,7 @@ if ( 'register' == $reason && $user ) {
 	) . '</p>';
 
 } else {
-	echo '<p class="center">' . esc_html__( "The link you've followed has expired.", 'wporg' ) . '</p>';
+	echo '<p class="center">' . esc_html__( 'The link you&#8217;ve followed has expired.', 'wporg' ) . '</p>';
 }
 ?>
 

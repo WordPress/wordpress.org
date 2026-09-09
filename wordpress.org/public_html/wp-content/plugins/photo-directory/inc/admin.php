@@ -1335,7 +1335,7 @@ class Admin {
 					if ( $submission_errors_count ) {
 						echo '<p>';
 						/* translators: %s: The number of submission errors. */
-						printf( esc_html__( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), (int) $submission_errors_count );
+						printf( esc_html__( 'Submission errors (which aren&#8217;t counted as submissions): %s', 'wporg-photos' ), (int) $submission_errors_count );
 						echo "</p>\n";
 					}
 				?>

@@ -748,7 +748,7 @@ function the_plugin_release_confirmation_form() {
 
 	if ( ! $confirmations_required && 'trunk' === $post->stable_tag ) {
 		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
-			esc_html_e( "Release confirmations currently require tagged releases, as you're releasing from trunk they cannot be enabled.", 'wporg-plugins' );
+			esc_html_e( 'Release confirmations currently require tagged releases, as you&#8217;re releasing from trunk they cannot be enabled.', 'wporg-plugins' );
 		echo '</p></div>';
 
 	} else if ( ! $confirmations_required ) {

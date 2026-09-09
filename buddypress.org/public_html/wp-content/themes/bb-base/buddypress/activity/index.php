@@ -52,7 +52,7 @@
 				<?php if ( bp_get_total_favorite_count_for_user( bp_loggedin_user_id() ) ) : ?>
 
 					<?php /* translators: %s: Favorite count. */ ?>
-					<li id="activity-favorites"><a href="<?php echo esc_url( bp_loggedin_user_domain() . bp_get_activity_slug() . '/favorites/' ); ?>" title="<?php esc_attr_e( "The activity I've marked as a favorite.", 'buddypress' ); ?>"><?php printf( wp_kses_post( __( 'My Favorites <span>%s</span>', 'buddypress' ) ), (int) bp_get_total_favorite_count_for_user( bp_loggedin_user_id() ) ); ?></a></li>
+					<li id="activity-favorites"><a href="<?php echo esc_url( bp_loggedin_user_domain() . bp_get_activity_slug() . '/favorites/' ); ?>" title="<?php esc_attr_e( 'The activity I&#8217;ve marked as a favorite.', 'buddypress' ); ?>"><?php printf( wp_kses_post( __( 'My Favorites <span>%s</span>', 'buddypress' ) ), (int) bp_get_total_favorite_count_for_user( bp_loggedin_user_id() ) ); ?></a></li>
 
 				<?php endif; ?>
 

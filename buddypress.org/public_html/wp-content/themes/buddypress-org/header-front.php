@@ -50,7 +50,7 @@
 			<h2><?php esc_html_e( 'Friendships', 'bporg' ); ?></h2>
 			<p>
 				<a href="//buddypress.org/about/friends/"><img src="<?php echo esc_url( get_theme_file_uri( 'images/feature_friends.gif' ) ); ?>" alt="" width="156" height="116"></a>
-				<span><?php echo wp_kses_post( __( "Friendship connections. <br>It's always about <br>who you know!", 'bporg' ) ); ?></span>
+				<span><?php echo wp_kses_post( __( 'Friendship connections. <br>It&#8217;s always about <br>who you know!', 'bporg' ) ); ?></span>
 			</p>
 		</div>
 		<div class="feature">

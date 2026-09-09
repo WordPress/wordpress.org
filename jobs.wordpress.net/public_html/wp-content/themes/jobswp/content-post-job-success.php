@@ -44,5 +44,5 @@
 		?>
 	</p>
 
-	<p><?php esc_html_e( "Below you'll find a preview of your job posting.", 'jobswp' ); ?></p>
+	<p><?php esc_html_e( 'Below you&#8217;ll find a preview of your job posting.', 'jobswp' ); ?></p>
 </div>

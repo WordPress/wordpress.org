@@ -311,7 +311,7 @@ class Upload {
 											<p><?php
 												printf(
 													/* Translators: URL */
-													esc_html__( "Your slug is used to generate your plugins URL. Currently it's %s", 'wporg-plugins' ),
+													esc_html__( 'Your slug is used to generate your plugins URL. Currently it&#8217;s %s', 'wporg-plugins' ),
 													'<code>' . esc_url( home_url( $plugin->post_name ) . '/' ) . '</code>'
 												);
 											?></p>

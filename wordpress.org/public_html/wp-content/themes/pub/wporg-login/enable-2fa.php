@@ -38,7 +38,7 @@ get_header();
 	if ( $requires_2fa ) {
 		esc_html_e( 'WordPress.org now requires that your account be protected by two-factor authentication. Some capabilities may be limited until your account is protected.', 'wporg' );
 	} else {
-		esc_html_e( "WordPress.org supports two-factor authentication and you'll soon be required to configure it on your account.", 'wporg' );
+		esc_html_e( 'WordPress.org supports two-factor authentication and you&#8217;ll soon be required to configure it on your account.', 'wporg' );
 	}
 ?></p>
 
@@ -49,11 +49,11 @@ get_header();
 
 <p>&nbsp;</p>
 
-<p><a href="<?php echo esc_url( add_query_arg( 'redirect_to', urlencode( $redirect_to ), get_onboarding_account_url() ) ); ?>"><button class="button-primary"><?php esc_html_e( "OK, I'll setup Two-Factor now.", 'wporg' ); ?></button></a></p>
+<p><a href="<?php echo esc_url( add_query_arg( 'redirect_to', urlencode( $redirect_to ), get_onboarding_account_url() ) ); ?>"><button class="button-primary"><?php esc_html_e( 'OK, I&#8217;ll setup Two-Factor now.', 'wporg' ); ?></button></a></p>
 
 <?php if ( ! $requires_2fa ) { ?>
 <p id="nav">
-	<a href="<?php echo esc_url( $redirect_to ); ?>" style="font-style: italic;"><?php esc_html_e( "I'll do it later", 'wporg' ); ?></a>
+	<a href="<?php echo esc_url( $redirect_to ); ?>" style="font-style: italic;"><?php esc_html_e( 'I&#8217;ll do it later', 'wporg' ); ?></a>
 </p>
 <?php } ?>
 

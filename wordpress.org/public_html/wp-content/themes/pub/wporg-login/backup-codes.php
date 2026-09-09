@@ -49,7 +49,7 @@ get_header();
 
 <p><?php
 	if ( $used_backup_code ) {
-		echo wp_kses_post( __( "You've logged in with a backup code.<br>These codes are intended to be used when you lose access to your authentication device.<br>Please take a moment to review your account settings and ensure your two-factor settings are up-to-date.", 'wporg' ) );
+		echo wp_kses_post( __( 'You&#8217;ve logged in with a backup code.<br>These codes are intended to be used when you lose access to your authentication device.<br>Please take a moment to review your account settings and ensure your two-factor settings are up-to-date.', 'wporg' ) );
 	} else {
 		if ( ! $codes_available ) {
 			esc_html_e( 'You do not have any backup codes remaining.', 'wporg' );
@@ -85,7 +85,7 @@ get_header();
 
 <?php if ( $can_ignore ) { ?>
 	<p id="nav">
-		<a href="<?php echo esc_url( $redirect_to ); ?>" style="font-style: italic;"><?php esc_html_e( "I'll do this later", 'wporg' ); ?></a>
+		<a href="<?php echo esc_url( $redirect_to ); ?>" style="font-style: italic;"><?php esc_html_e( 'I&#8217;ll do this later', 'wporg' ); ?></a>
 	</p>
 <?php } ?>
 

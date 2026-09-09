@@ -30,7 +30,7 @@ if ( !empty( $_POST ) ) {
 	<h3><?php esc_html_e( 'Submitted!', 'wporg-showcase' ); ?></h3>
 	<p><?php printf(
 		/* translators: %s: URL of the site submission form */
-		wp_kses_post( __( 'Thanks! You have successfully submitted a site for consideration to be added to the WordPress Showcase. If the site you submitted is added, you will be contacted via email within one week. We appreciate your interest in the WordPress Showcase! If you\'d like to submit another site, head back to the <a href="%s">submission form</a>.', 'wporg-showcase' ) ),
+		wp_kses_post( __( 'Thanks! You have successfully submitted a site for consideration to be added to the WordPress Showcase. If the site you submitted is added, you will be contacted via email within one week. We appreciate your interest in the WordPress Showcase! If you&#8217;d like to submit another site, head back to the <a href="%s">submission form</a>.', 'wporg-showcase' ) ),
 		'https://wordpress.org/showcase/submit-a-wordpress-site/'
 	); ?></p>
 	</div>
@@ -60,11 +60,11 @@ if ( empty( $_POST ) || $error ) {
 			<p><?php esc_html_e( 'Please submit a WordPress blog URL. Blogspot/Blogger blogs are not accepted.', 'wporg-showcase' ); ?></p>
 
 		<?php elseif ( $site_detected == "NO" ) : ?>
-			<p><?php esc_html_e( 'We didn\'t detect WordPress at the given URL. Please submit the URL of a site running WordPress.', 'wporg-showcase' ); ?></p>
+			<p><?php esc_html_e( 'We didn&#8217;t detect WordPress at the given URL. Please submit the URL of a site running WordPress.', 'wporg-showcase' ); ?></p>
 
 		<?php elseif ( $site_detected == "YES" && version_compare($site_version, $latest_release, '<' ) ) : ?>
-			<p><?php esc_html_e( 'We were unable to detect the latest version of WordPress at the given URL. We\'d prefer submissions to the showcase to be running up-to-date versions of WordPress.', 'wporg-showcase' ); ?></p>
-			<p><?php esc_html_e( 'If you\'re sure the site is running the latest version of WordPress, then please check the URL to make sure it\'s accurate, and that the URL you submit points directly to the location where WordPress is running.', 'wporg-showcase' ); ?></p>
+			<p><?php esc_html_e( 'We were unable to detect the latest version of WordPress at the given URL. We&#8217;d prefer submissions to the showcase to be running up-to-date versions of WordPress.', 'wporg-showcase' ); ?></p>
+			<p><?php esc_html_e( 'If you&#8217;re sure the site is running the latest version of WordPress, then please check the URL to make sure it&#8217;s accurate, and that the URL you submit points directly to the location where WordPress is running.', 'wporg-showcase' ); ?></p>
 
 		<?php else : ?>
 			<p><?php esc_html_e( 'There seems to have been a problem with the information you entered. Please make sure all fields have data and resubmit.', 'wporg-showcase' ); ?></p>
@@ -85,7 +85,7 @@ if ( empty( $_POST ) || $error ) {
 	<p><label for="url"><?php esc_html_e( 'Site URL', 'wporg-showcase' ); ?></label><br />
 	<input type="url" name="url" id="url" value="<?php echo esc_url( $url ); ?>" size="28" tabindex="4" class="text" required></p>
 
-	<p><label for="owner"><?php esc_html_e( "Do you own this site? (It's okay if you don't - we just want to know for contact purposes.)", 'wporg-showcase' ); ?></label><br />
+	<p><label for="owner"><?php esc_html_e( 'Do you own this site? (It&#8217;s okay if you don&#8217;t - we just want to know for contact purposes.)', 'wporg-showcase' ); ?></label><br />
 	<select name="owner" id="owner" tabindex="5">
 		<option value="yes" <?php selected( $owner, 'yes' ); ?> ><?php esc_html_e( 'Yes', 'wporg-showcase' ); ?></option>
 		<option value="no" <?php selected( $owner, 'no' ); ?> ><?php esc_html_e( 'No', 'wporg-showcase' ); ?></option>
