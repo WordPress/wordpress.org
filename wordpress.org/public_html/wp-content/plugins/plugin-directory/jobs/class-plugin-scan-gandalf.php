@@ -41,7 +41,7 @@ class Plugin_Scan_Gandalf {
 	const EMAILED_META_KEY = '_gandalf_scan_emailed';
 
 	/** Completed scans with a max risk score at or above this have their release blocked. */
-	const BLOCK_RISK_SCORE = PHP_FLOAT_MAX;
+	const BLOCK_RISK_SCORE = 8.0;
 
 	/** Completed scans with a max risk score at or above this have their committers emailed. */
 	const NOTIFY_RISK_SCORE = self::BLOCK_RISK_SCORE;
