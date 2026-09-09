@@ -133,6 +133,15 @@
 		</properties>
 	</rule>
 
+	<!-- serialize_block_attributes() escapes attribute JSON for use inside a block comment delimiter. -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<property name="customEscapingFunctions" type="array">
+				<element value="serialize_block_attributes"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- PHPUnit requires test files to be named after the test class they contain. -->
 	<rule ref="WordPress.Files.FileName">
 		<exclude-pattern>*/tests/*</exclude-pattern>

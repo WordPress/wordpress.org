@@ -424,13 +424,31 @@ class Screenshots {
 		if ( '' !== $caption ) {
 			$figure .= sprintf(
 				'<figcaption class="wp-element-caption">%s</figcaption>',
-				wp_kses_post( $caption )
+				self::escape_block_delimiters( wp_kses_post( $caption ) )
 			);
 		}
 
 		$figure .= '</figure>';
 
 		return "<!-- wp:image {$attrs} -->\n{$figure}\n<!-- /wp:image -->\n";
+	}
+
+	/**
+	 * Encodes block-comment delimiters in a caption.
+	 *
+	 * The caption is concatenated into the Image block markup that display()
+	 * hands to do_blocks(), so it has to stay a text leaf of that block rather
+	 * than something the block parser can read as grammar of its own.
+	 *
+	 * @param string $caption Caption HTML.
+	 * @return string Caption HTML with no block-comment delimiters left in it.
+	 */
+	protected static function escape_block_delimiters( $caption ) {
+		return str_replace(
+			array( '<!--', '-->' ),
+			array( '&lt;!--', '--&gt;' ),
+			$caption
+		);
 	}
 
 	/**

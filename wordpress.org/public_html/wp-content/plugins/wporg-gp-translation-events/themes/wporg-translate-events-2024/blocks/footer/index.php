@@ -1,4 +1,11 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024;
+<?php
+/**
+ * Registers the footer block, which renders the site footer from render.php.
+ *
+ * @package wporg-translate-events-2024
+ */
+
+namespace Wporg\TranslationEvents\Theme_2024;
 
 register_block_type(
 	'wporg-translate-events-2024/footer',

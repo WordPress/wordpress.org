@@ -1,4 +1,12 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024;
+<?php
+/**
+ * Registers the event-excerpt block, which renders an event's excerpt.
+ *
+ * @package wporg-translate-events-2024
+ */
+
+namespace Wporg\TranslationEvents\Theme_2024;
+
 use Wporg\TranslationEvents\Translation_Events;
 
 register_block_type(

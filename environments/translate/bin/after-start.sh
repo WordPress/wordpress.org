@@ -44,6 +44,10 @@ $WP wp eval '
 	gp_upgrade_db();
 '
 
+# Translation Events also only creates its tables when is_admin() is true.
+echo "Ensuring Translation Events schema is up to date..."
+$WP wp eval 'Wporg\TranslationEvents\Upgrade::upgrade_if_needed();'
+
 # wporg-gp-custom-stats reads from extra tables (user_translations_count, etc.)
 # that production maintains manually — the plugin does not create them.
 echo "Creating wporg-gp-custom-stats tables..."
@@ -137,6 +141,9 @@ if [ -z "$($WP wp option get wporg_translate_env_seeded 2>/dev/null)" ]; then
 
 	echo "Seeding twentytwenty (theme)..."
 	$WP wp eval-file wp-content/env-bin/import-from-wporg.php theme twentytwenty
+
+	echo "Seeding demo Translation Events..."
+	$WP wp eval-file wp-content/env-bin/seed-events.php
 
 	$WP wp option update wporg_translate_env_seeded "$(date +%s)"
 else

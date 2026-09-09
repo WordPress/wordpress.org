@@ -1448,6 +1448,33 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
+	 * Disables Trac wiki markup in a value read from the uploaded theme.
+	 *
+	 * Trac skips a construct preceded by `!`, so its openers are prefixed. Line-start
+	 * constructs have no such escape, so the line breaks reaching them are removed.
+	 *
+	 * @param string $value Value read from the uploaded theme.
+	 * @return string The value with wiki markup disabled.
+	 */
+	protected static function escape_trac_wiki( $value ) {
+		// Before the byte work below, and before a `/u` pattern has to read the value.
+		$value = self::strip_non_utf8( (string) $value );
+
+		// Trac splits on Python's line boundaries, which include NEL, LS and PS.
+		$line_breaks = array( "\r", "\n", "\v", "\f", "\x1c", "\x1d", "\x1e", "\xc2\x85", "\xe2\x80\xa8", "\xe2\x80\xa9" );
+		$value       = str_replace( $line_breaks, ' ', $value );
+
+		// An escape that could not be applied returns nothing rather than the raw value.
+		$value = preg_replace( '/\[|\{|\|(?=[|-])/', '!$0', $value );
+		if ( null === $value ) {
+			return '';
+		}
+
+		// A leading `=` opens a heading, and its anchor becomes the element's `id`.
+		return 0 === preg_match( '/^[\s\x1c-\x1f\p{Z}]*=/u', $value ) ? $value : '!' . $value;
+	}
+
+	/**
 	 * Sets up all Trac ticket information that we need later.
 	 */
 	public function prepare_trac_ticket() {
@@ -1460,9 +1487,13 @@ class WPORG_Themes_Upload {
 			if ( in_array( 'buddypress', $this->theme->get( 'Tags' ) ) ) {
 				$this->trac_ticket->keywords[] = 'buddypress';
 			} else {
+				// The parent lookup sanitizes before matching, so this header is still raw.
+				$parent = $this->theme->get_template();
+
+				// A keyword is space-separated, so it takes the slug and the link the escape.
 				$this->trac_ticket->keywords[]  = 'child-theme';
-				$this->trac_ticket->keywords[]  = 'parent-' . $this->theme->get_template();
-				$this->trac_ticket->parent_link = "Parent Theme: https://wordpress.org/themes/{$this->theme->get_template()}";
+				$this->trac_ticket->keywords[]  = 'parent-' . sanitize_title( $parent );
+				$this->trac_ticket->parent_link = 'Parent Theme: https://wordpress.org/themes/' . self::escape_trac_wiki( $parent );
 			}
 		}
 
@@ -1500,7 +1531,13 @@ class WPORG_Themes_Upload {
 		}
 
 		// Description
-		$theme_description = $this->strip_non_utf8( (string) $this->get_theme_header( 'Description' ) );
+		$theme_description = self::escape_trac_wiki( $this->get_theme_header( 'Description' ) );
+		$theme_name        = self::escape_trac_wiki( $this->get_theme_header( 'Name' ) );
+		$theme_uri         = self::escape_trac_wiki( $this->get_theme_header( 'ThemeURI' ) );
+		$author_uri        = self::escape_trac_wiki( $this->get_theme_header( 'AuthorURI' ) );
+
+		// A URL path segment, and encoded as one so it cannot add `[[Image()]]` arguments.
+		$theme_screenshot = rawurlencode( (string) $this->theme->screenshot );
 
 		// ZIP location
 		$theme_zip_link = "https://downloads.wordpress.org/theme/{$this->theme_slug}.{$this->get_theme_header( 'Version' )}.zip?nostats=1";
@@ -1513,12 +1550,12 @@ class WPORG_Themes_Upload {
 
 		// Hacky way to prevent a problem with xml-rpc.
 		$this->trac_ticket->description = <<<TICKET
-{$this->get_theme_header( 'Name' )} - {$this->get_theme_header( 'Version' )}
+{$theme_name} - {$this->get_theme_header( 'Version' )}
 
 {$theme_description}
 
-Theme URL - {$this->get_theme_header( 'ThemeURI' )}
-Author URL - {$this->get_theme_header( 'AuthorURI' )}
+Theme URL - {$theme_uri}
+Author URL - {$author_uri}
 
 Trac Browser - https://themes.trac.wordpress.org/browser/{$this->theme_slug}/{$this->get_theme_header( 'Version' )}
 WordPress.org - https://wordpress.org/themes/{$this->theme_slug}/
@@ -1532,7 +1569,7 @@ Live preview – [[{$live_preview_link}|https://playground.wordpress.net/#…]]
 History:
 [[TicketQuery(format=table, keywords=~theme-{$this->theme_slug}, col=id|summary|status|resolution|owner)]]
 
-[[Image(https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->get_theme_header( 'Version' )}/{$this->theme->screenshot}, width=640)]]
+[[Image(https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->get_theme_header( 'Version' )}/{$theme_screenshot}, width=640)]]
 TICKET;
 
 		$theme_check_results = $this->generate_themecheck_results_for_trac();
@@ -1540,6 +1577,52 @@ TICKET;
 			$this->trac_ticket->description .= "\nTheme Check Results:\n" . $theme_check_results;
 		}
 
+	}
+
+	/**
+	 * Turns one Theme Check message into the Trac markup the ticket carries.
+	 *
+	 * Text around the `<pre>` blocks is wiki markup and is escaped; a block renders
+	 * literally. Tags go first, so removing one cannot splice a delimiter together.
+	 *
+	 * @param string $error One Theme Check error message, as HTML.
+	 * @return string The message as Trac wiki markup.
+	 */
+	protected static function format_themecheck_error_for_trac( $error ) {
+		// With DELIM_CAPTURE the odd offsets hold the quoted code, and the tags around it are dropped.
+		$parts = preg_split( '!<pre[^>]*>(.*?)</pre>!s', self::strip_non_utf8( (string) $error ), -1, PREG_SPLIT_DELIM_CAPTURE );
+
+		// A PCRE failure, not an absent block; say so rather than show the reviewer a clean scan.
+		if ( false === $parts ) {
+			return 'A Theme Check message could not be formatted for Trac.';
+		}
+
+		foreach ( $parts as $i => $part ) {
+			$part = str_replace( array( '<strong>', '</strong>' ), array( "'''", "'''" ), $part );
+			$part = preg_replace( '!<span class=[^>]+>([^<]+)</span>!', '$1', $part );
+			$part = str_replace( '<br>', ' ', $part );
+
+			if ( $i % 2 ) {
+				// `!` does not escape inside a block, so any run of the code's own braces is broken up.
+				$part = preg_replace( '/([{}])(?=\1\1)/', '$1 ', $part );
+
+				// `#!default` takes the processor line, which the code would otherwise supply.
+				$parts[ $i ] = "\r\n{{{\r\n#!default\r\n" . $part . "\r\n}}}\r\n";
+				continue;
+			}
+
+			$part = self::escape_trac_wiki( $part );
+
+			// Converted after the escape, so the checker's own links stay links.
+			$parts[ $i ] = preg_replace( '/<a\s?href\s?=\s?[\'|"]([^"|\']*)[\'|"]>([^<]*)<\/a>/i', '[$1 $2]', $part );
+
+			// A pass above that PCRE gave up on would drop this half of the message.
+			if ( ! is_string( $parts[ $i ] ) ) {
+				return 'A Theme Check message could not be formatted for Trac.';
+			}
+		}
+
+		return implode( '', $parts );
 	}
 
 	/*
@@ -1563,23 +1646,14 @@ TICKET;
 
 		if ( $tc_errors ) {
 			foreach ( $tc_errors as $e ) {
-				$trac_left = array( '<strong>', '</strong>' );
-				$trac_right= array( "'''", "'''" );
-				$html_link = '/<a\s?href\s?=\s?[\'|"]([^"|\']*)[\'|"]>([^<]*)<\/a>/i';
-				$html_new = '[$1 $2]';
-				$e = preg_replace( $html_link, $html_new, $e );
-				$e = str_replace( $trac_left, $trac_right, $e );
-				$e = preg_replace( '/<pre.*?>/', "\r\n{{{\r\n", $e );
-				$e = str_replace( '</pre>', "\r\n}}}\r\n", $e );
-				$e = preg_replace( '!<span class=[^>]+>([^<]+)</span>!', '$1', $e );
-				$e = str_replace( '<br>', ' ', $e );
+				$e = self::format_themecheck_error_for_trac( $e );
 
 				// Decode some entities.
 				$e = preg_replace_callback( '!(&[lg]t;)!', function( $f ) {
 					return html_entity_decode( $f[0] );
 				}, $e );
 
-				if ( 'INFO' !== substr( $e, 0, 4 ) ) {
+				if ( '' !== $e && 'INFO' !== substr( $e, 0, 4 ) ) {
 					$tc_results[] = '* ' . $e;
 				}
 			}
@@ -2152,7 +2226,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 	 * @param string $string The string to be converted.
 	 * @return string The converted string.
 	 */
-	protected function strip_non_utf8( $string ) {
+	protected static function strip_non_utf8( $string ) {
 		ini_set( 'mbstring.substitute_character', 'none' );
 
 		return mb_convert_encoding( $string, 'UTF-8', 'UTF-8' );

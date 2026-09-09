@@ -397,7 +397,8 @@ class Jobs_Dot_WP {
 		}
 
 		echo '<div class="error"><p>';
-		printf( __( 'ERROR: The username configured for posting jobs &mdash; %s &mdash; does not exist.', 'jobswp' ), $this->get_jobposter( false ) );
+		/* translators: %s: Configured job poster username. */
+		printf( esc_html__( 'ERROR: The username configured for posting jobs &mdash; %s &mdash; does not exist.', 'jobswp' ), esc_html( $this->get_jobposter( false ) ) );
 		echo '</p></div>';
 	}
 
@@ -433,7 +434,7 @@ class Jobs_Dot_WP {
 		$close_link = add_query_arg( 'action', $action, admin_url( sprintf( $post_type_object->_edit_link, $post->ID ) ) );
 		$close_link = wp_nonce_url( $close_link, "$action-post_{$post->ID}" );
 
-		$link = '<a href="' . $close_link . '"';
+		$link = '<a href="' . esc_url( $close_link ) . '"';
 		if ( $class )
 			$link .= ' class="' . esc_attr( $class ) . '"';
 		$link .= ' title="' . esc_attr__( 'Close this job', 'jobswp' ) . '">';
@@ -503,7 +504,8 @@ class Jobs_Dot_WP {
 
 		if ( $user_id = wp_check_post_lock( $post_id ) ) {
 			$user = get_userdata( $user_id );
-			wp_die( sprintf( __( 'You cannot close this job. %s is currently editing.', 'jobswp' ), $user->display_name ) );
+			/* translators: %s: Display name of the user editing the job. */
+			wp_die( sprintf( esc_html__( 'You cannot close this job. %s is currently editing.', 'jobswp' ), esc_html( $user->display_name ) ) );
 		}
 
 		if ( ! $this->close_job( $post ) )
