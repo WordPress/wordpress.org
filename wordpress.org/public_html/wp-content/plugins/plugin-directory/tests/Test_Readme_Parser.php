@@ -182,6 +182,10 @@ class Test_Readme_Parser extends TestCase {
 				'<strong>open',
 				'<strong>open</strong>',
 			),
+			'comments dropped'                   => array(
+				'Before <!-- hidden --> after',
+				'Before  after',
+			),
 		);
 	}
 
