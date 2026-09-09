@@ -159,8 +159,7 @@ class Translation_Events {
 			'translation-events-js',
 			'$translation_event',
 			array(
-				'url'          => admin_url( 'admin-ajax.php' ),
-				'_event_nonce' => wp_create_nonce( self::CPT ),
+				'url' => admin_url( 'admin-ajax.php' ),
 			)
 		);
 	}
@@ -248,7 +247,7 @@ class Translation_Events {
 				if ( ! $user ) {
 						return '<i>Unknown user id: ' . esc_html( $host->user_id() ) . '</i>';
 				}
-				return '<a href="' . esc_attr( get_author_posts_url( $host->user_id() ) ) . '">' . esc_html( $user->display_name ) . '</a>';
+				return '<a href="' . esc_url( get_author_posts_url( $host->user_id() ) ) . '">' . esc_html( $user->display_name ) . '</a>';
 			},
 			$hosts
 		);

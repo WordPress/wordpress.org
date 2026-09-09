@@ -53,7 +53,7 @@ Templates::header(
 					function ( $host ) {
 						$url  = get_author_posts_url( $host->user_id() );
 						$name = get_the_author_meta( 'display_name', $host->user_id() );
-						return '<a href="' . esc_attr( $url ) . '">' . esc_html( $name ) . '</a>';
+						return '<a href="' . esc_url( $url ) . '">' . esc_html( $name ) . '</a>';
 					},
 					$hosts
 				);
@@ -98,7 +98,7 @@ Templates::header(
 				</h2>
 				<ul>
 					<?php foreach ( $contributors as $contributor ) : ?>
-						<li class="event-contributor" title="<?php echo esc_html( implode( ', ', $contributor->contributed_locales() ) ); ?>">
+						<li class="event-contributor" title="<?php echo esc_attr( implode( ', ', $contributor->contributed_locales() ) ); ?>">
 							<a href="<?php echo esc_url( get_author_posts_url( $contributor->user_id() ) ); ?>" class="avatar"><?php echo get_avatar( $contributor->user_id(), 48 ); ?></a>
 							<a href="<?php echo esc_url( get_author_posts_url( $contributor->user_id() ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $contributor->user_id() ) ); ?></a>
 							<?php if ( $contributor->is_new_contributor() ) : ?>
@@ -123,7 +123,7 @@ Templates::header(
 							<a href="<?php echo esc_url( get_author_posts_url( $_attendee->user_id() ) ); ?>" class="avatar"><?php echo get_avatar( $_attendee->user_id(), 48 ); ?></a>
 							<a href="<?php echo esc_url( get_author_posts_url( $_attendee->user_id() ) ); ?>" class="name"><?php echo esc_html( get_the_author_meta( 'display_name', $_attendee->user_id() ) ); ?></a>
 							<?php if ( $_attendee->is_new_contributor() ) : ?>
-								<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
+								<span class="first-time-contributor-tada" title="<?php esc_attr_e( 'New Translation Contributor', 'gp-translation-events' ); ?>"></span>
 							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
@@ -146,7 +146,7 @@ Templates::header(
 					<?php /** @var $row Stats_Row */ ?>
 					<?php foreach ( $event_stats->rows() as $_locale => $row ) : ?>
 					<tr>
-						<td title="<?php echo esc_html( $_locale ); ?> "><a href="<?php echo esc_url( gp_url_join( gp_url( '/languages' ), $row->language->slug ) ); ?>"><?php echo esc_html( $row->language->english_name ); ?></a></td>
+						<td title="<?php echo esc_attr( $_locale ); ?> "><a href="<?php echo esc_url( gp_url_join( gp_url( '/languages' ), $row->language->slug ) ); ?>"><?php echo esc_html( $row->language->english_name ); ?></a></td>
 						<td><a href="<?php echo esc_url( Urls::event_translations( $event->id(), $row->language->slug ) ); ?>"><?php echo esc_html( $row->created ); ?></a></td>
 						<td><?php echo esc_html( $row->reviewed ); ?></td>
 						<td><?php echo esc_html( $row->users ); ?></td>
@@ -165,7 +165,7 @@ Templates::header(
 				<h2><?php esc_html_e( 'Projects', 'gp-translation-events' ); ?></h2>
 				<ul>
 					<?php foreach ( $projects as $project_name => $row ) : ?>
-					<li class="event-project" title="<?php echo esc_html( str_replace( ',', ', ', $row->locales ) ); ?>">
+					<li class="event-project" title="<?php echo esc_attr( str_replace( ',', ', ', $row->locales ) ); ?>">
 						<?php
 						$row_locales = array();
 						foreach ( explode( ',', $row->locales ) as $_locale ) {
@@ -240,7 +240,7 @@ Templates::header(
 								function ( $contributor ) {
 									$append_tada = '';
 									if ( $contributor->is_new_contributor() ) {
-											$append_tada = ' <span class="new-contributor" title="' . esc_html__( 'New Translation Contributor', 'gp-translation-events' ) . '">🎉</span>';
+											$append_tada = ' <span class="new-contributor" title="' . esc_attr__( 'New Translation Contributor', 'gp-translation-events' ) . '">🎉</span>';
 									}
 									return '@' . ( new WP_User( $contributor->user_id() ) )->user_login . $append_tada;
 								},

@@ -48,15 +48,17 @@ use Wporg\TranslationEvents\Urls;
 						<form class="add-remove-user-as-host" method="post" action="<?php echo esc_url( Urls::event_toggle_host( $event->id(), $attendee->user_id() ) ); ?>">
 							<?php wp_nonce_field( "toggle_translation_event_host_{$event->id()}_{$attendee->user_id()}" ); ?>
 							<div class="wp-block-buttons wporg-theme-actions is-layout-flex wp-block-buttons-is-layout-flex">
-								<?php if ( $attendee->is_host() ) : ?>
+								<?php $can_toggle_host = current_user_can( 'manage_translation_events' ) || $attendee->user_id() === get_current_user_id() || ! ( $attendee->is_host() || $attendee->user_id() === $event->author_id() ); ?>
+								<?php if ( $can_toggle_host && $attendee->is_host() ) : ?>
 									<input type="submit" class="wp-block-button__link remove-as-host" value="<?php echo esc_attr__( 'Remove as host', 'wporg-translate-events-2024' ); ?>"/>
-								<?php else : ?>
+								<?php elseif ( $can_toggle_host ) : ?>
 									<input type="submit" class="wp-block-button__link convert-to-host" value="<?php echo esc_attr__( 'Make co-host', 'wporg-translate-events-2024' ); ?>"/>
 								<?php endif; ?>
 								<?php if ( $event->is_hybrid() ) : ?>
 									<div class="wp-block-button is-style-outline"><a href="<?php echo esc_url( Urls::event_toggle_attendance_mode( $event->id(), $attendee->user_id() ) ); ?>" class="wp-block-button__link wp-element-button set-attendance-mode" id="wporg-theme-button-preview"><?php $attendee->is_remote() ? esc_html_e( 'Set as on-site', 'wporg-translate-events-2024' ) : esc_html_e( 'Set as remote', 'wporg-translate-events-2024' ); ?></a></div>
 								<?php endif; ?>
-								<?php if ( ! $attendee->is_host() ) : ?>
+								<?php $is_protected = $attendee->is_host() || $attendee->is_contributor() || $attendee->user_id() === $event->author_id(); ?>
+								<?php if ( ! $is_protected || current_user_can( 'manage_translation_events' ) ) : ?>
 									<div class="wp-block-button is-style-outline"><a href="<?php echo esc_url( Urls::event_remove_attendee( $event->id(), $attendee->user_id() ) ); ?>" class="wp-block-button__link wp-element-button remove-attendee" id="wporg-theme-button-preview"><?php esc_html_e( 'Remove', 'wporg-translate-events-2024' ); ?></a></div>
 								<?php endif; ?>
 							</div>

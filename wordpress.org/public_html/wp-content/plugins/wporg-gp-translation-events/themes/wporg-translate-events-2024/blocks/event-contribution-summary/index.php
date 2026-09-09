@@ -69,7 +69,7 @@ register_block_type(
 							count( $event_stats->rows() ),
 							array_map(
 								function ( $row ) {
-									return $row->language->english_name;
+									return esc_html( $row->language->english_name );
 								},
 								$event_stats->rows()
 							),
@@ -95,9 +95,9 @@ register_block_type(
 								function ( $contributor ) {
 									$append_tada = '';
 									if ( $contributor->is_new_contributor() ) {
-											$append_tada = ' <span class="new-contributor" title="' . esc_html__( 'New Translation Contributor', 'wporg-translate-events-2024' ) . '">🎉</span>';
+											$append_tada = ' <span class="new-contributor" title="' . esc_attr__( 'New Translation Contributor', 'wporg-translate-events-2024' ) . '">🎉</span>';
 									}
-									return '@' . ( new WP_User( $contributor->user_id() ) )->user_login . $append_tada;
+									return '@' . esc_html( ( new WP_User( $contributor->user_id() ) )->user_login ) . $append_tada;
 								},
 								$contributors
 							)

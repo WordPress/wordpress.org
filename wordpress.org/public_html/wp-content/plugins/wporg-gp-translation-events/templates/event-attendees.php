@@ -60,15 +60,17 @@ Templates::header(
 					<td>
 					<form class="add-remove-user-as-host" method="post" action="<?php echo esc_url( Urls::event_toggle_host( $event->id(), $attendee->user_id() ) ); ?>">
 						<?php wp_nonce_field( "toggle_translation_event_host_{$event->id()}_{$attendee->user_id()}" ); ?>
-						<?php if ( $attendee->is_host() ) : ?>
+						<?php $can_toggle_host = current_user_can( 'manage_translation_events' ) || $attendee->user_id() === get_current_user_id() || ! ( $attendee->is_host() || $attendee->user_id() === $event->author_id() ); ?>
+						<?php if ( $can_toggle_host && $attendee->is_host() ) : ?>
 							<input type="submit" class="button is-primary remove-as-host" value="<?php echo esc_attr__( 'Remove as host', 'gp-translation-events' ); ?>"/>
-							<?php else : ?>
+							<?php elseif ( $can_toggle_host ) : ?>
 									<input type="submit" class="button is-secondary convert-to-host" value="<?php echo esc_attr__( 'Make co-host', 'gp-translation-events' ); ?>"/>
 							<?php endif; ?>
 							<?php if ( $event->is_hybrid() ) : ?>
 								<a href="<?php echo esc_url( Urls::event_toggle_attendance_mode( $event->id(), $attendee->user_id() ) ); ?>" class="button set-attendance-mode"><?php $attendee->is_remote() ? esc_html_e( 'Set as on-site', 'gp-translation-events' ) : esc_html_e( 'Set as remote', 'gp-translation-events' ); ?></a>
 							<?php endif; ?>
-							<?php if ( ! $attendee->is_host() ) : ?>
+							<?php $is_protected = $attendee->is_host() || $attendee->is_contributor() || $attendee->user_id() === $event->author_id(); ?>
+							<?php if ( ! $is_protected || current_user_can( 'manage_translation_events' ) ) : ?>
 								<a href="<?php echo esc_url( Urls::event_remove_attendee( $event->id(), $attendee->user_id() ) ); ?>" class="button remove-attendee"><?php esc_html_e( 'Remove', 'gp-translation-events' ); ?></a>
 							<?php endif; ?>
 						</form>

@@ -29,7 +29,7 @@ register_block_type(
 				foreach ( $event_ids as $event_id ) {
 					?>
 					<li class="wporg-marker-list-item">
-						<!-- wp:wporg-translate-events-2024/event-template <?php echo wp_json_encode( array( 'id' => $event_id ) ); ?> -->
+						<!-- wp:wporg-translate-events-2024/event-template <?php echo serialize_block_attributes( array( 'id' => intval( $event_id ) ) ); ?> -->
 						<div>
 							<!-- wp:wporg-translate-events-2024/event-title /-->
 							<?php
@@ -53,7 +53,7 @@ register_block_type(
 			</div>
 			<!-- wp:wporg-translate-events-2024/event-load-more-button
 				<?php
-				echo wp_json_encode(
+				echo serialize_block_attributes(
 					array(
 						'filter'    => $event_filter,
 						'next_page' => $next_page,
@@ -77,7 +77,7 @@ function get_no_result_view() {
 	$content .= '<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--10);padding-bottom:var(--wp--preset--spacing--10)">';
 	$content .= sprintf(
 		'<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center">%s</p><!-- /wp:paragraph -->',
-		esc_attr__( 'No events found in this category.', 'wporg-translate-events-2024' )
+		esc_html__( 'No events found in this category.', 'wporg-translate-events-2024' )
 	);
 	$content .= '</div><!-- /wp:group -->';
 

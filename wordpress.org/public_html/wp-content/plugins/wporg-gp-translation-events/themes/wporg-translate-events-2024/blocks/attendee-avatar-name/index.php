@@ -24,7 +24,7 @@ register_block_type(
 				<a href="<?php echo esc_url( get_author_posts_url( $user_id ) ); ?>" class="attendee-avatar"><?php echo get_avatar( $user_id, 48 ); ?></a>
 				<a href="<?php echo esc_url( get_author_posts_url( $user_id ) ); ?>" class="attendee-name"><?php echo esc_html( get_the_author_meta( 'display_name', $user_id ) ); ?></a>
 				<?php if ( $is_new_contributor ) : ?>
-					<span class="first-time-contributor-tada" title="<?php esc_html_e( 'New Translation Contributor', 'wporg-translate-events-2024' ); ?>"></span>
+					<span class="first-time-contributor-tada" title="<?php esc_attr_e( 'New Translation Contributor', 'wporg-translate-events-2024' ); ?>"></span>
 				<?php endif; ?>
 			</div>
 			<!-- /wp:group -->

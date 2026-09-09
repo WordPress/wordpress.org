@@ -99,7 +99,7 @@ class List_Route extends Route {
 		$page_count   = $tmpl_args[ $filter_key ]->page_count;
 		$next_page    = ( ( $current_page + 1 ) <= $page_count ) ? $current_page + 1 : 0;
 
-		$list_block_markup = '<!-- wp:wporg-translate-events-2024/event-list ' . wp_json_encode(
+		$list_block_markup = '<!-- wp:wporg-translate-events-2024/event-list ' . serialize_block_attributes(
 			array(
 				'event_ids' => $event_ids,
 				'next_page' => $next_page,

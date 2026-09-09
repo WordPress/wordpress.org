@@ -126,7 +126,7 @@ class Notifications_Send {
 	private function get_email_message( WP_User $user, Event $event ): string {
 		$start_date = $event->start();
 		// translators: %s: User display name.
-		$message  = sprintf( esc_html__( 'Hi %s,', 'gp-translation-events' ), $user->display_name );
+		$message  = sprintf( esc_html__( 'Hi %s,', 'gp-translation-events' ), esc_html( $user->display_name ) );
 		$message .= '<br><br>';
 		$message .= esc_html(
 			sprintf(

@@ -40,6 +40,7 @@ class Translations_Route extends Route {
 
 		if ( ! current_user_can( 'view_translation_event', $event->id() ) ) {
 			$this->die_with_error( esc_html__( 'You are not authorized to view this page.', 'gp-translation-events' ), 403 );
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
 		global $wpdb, $gp_table_prefix;

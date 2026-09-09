@@ -31,7 +31,7 @@ register_block_type(
 			<!-- /wp:heading -->
 			<ul>
 				<?php foreach ( $projects as $project_name => $row ) : ?>
-				<li class="event-project" title="<?php echo esc_html( str_replace( ',', ', ', $row->locales ) ); ?>">
+				<li class="event-project" title="<?php echo esc_attr( str_replace( ',', ', ', $row->locales ) ); ?>">
 					<?php
 					$row_locales = array();
 					foreach ( explode( ',', $row->locales ) as $_locale ) {

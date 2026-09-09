@@ -26,6 +26,7 @@ require_once __DIR__ . '/includes/event/class-invalid-time-zone.php';
 require_once __DIR__ . '/includes/event/class-invalid-start.php';
 require_once __DIR__ . '/includes/event/class-invalid-end.php';
 require_once __DIR__ . '/includes/event/class-invalid-status.php';
+require_once __DIR__ . '/includes/event/class-invalid-attendance-mode.php';
 require_once __DIR__ . '/includes/event/event-date.php';
 require_once __DIR__ . '/includes/event/class-event-start-date.php';
 require_once __DIR__ . '/includes/event/class-event-end-date.php';

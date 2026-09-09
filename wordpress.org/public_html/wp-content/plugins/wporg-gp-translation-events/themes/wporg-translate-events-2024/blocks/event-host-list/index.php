@@ -38,7 +38,7 @@ register_block_type(
 				function ( $host ) {
 					$url  = get_author_posts_url( $host->user_id() );
 					$name = get_the_author_meta( 'display_name', $host->user_id() );
-					return '<a href="' . esc_attr( $url ) . '">' . esc_html( $name ) . '</a>';
+					return '<a href="' . esc_url( $url ) . '">' . esc_html( $name ) . '</a>';
 				},
 				$hosts
 			);

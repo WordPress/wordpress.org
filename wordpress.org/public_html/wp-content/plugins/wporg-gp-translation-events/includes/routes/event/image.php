@@ -36,12 +36,15 @@ class Image_Route extends Route {
 			$this->die_with_error( esc_html__( 'The image cannot be generated because GD extension is not installed.', 'gp-translation-events' ) );
 		}
 
-		// Fall back to the generic image rather than leak the title of an event the viewer cannot see.
-		$event    = $this->event_repository->get_event( $event_id );
-		$can_view = $event && current_user_can( 'view_translation_event', $event->id() );
-		$text     = $can_view ? $event->title() : esc_html__( 'Translation events', 'gp-translation-events' );
-		$text     = '' === $text ? esc_html__( 'Translation events', 'gp-translation-events' ) : $text;
-		$text     = substr( $text, 0, 44 ); // Limit the text to 44 characters.
+		$event = $this->event_repository->get_event( $event_id );
+		if ( $event && ! current_user_can( 'view_translation_event', $event->id() ) ) {
+			$this->die_with_error( esc_html__( 'You are not authorized to view this page.', 'gp-translation-events' ), 403 );
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
+		}
+
+		$text = $event ? $event->title() : esc_html__( 'Translation events', 'gp-translation-events' );
+		$text = '' === $text ? esc_html__( 'Translation events', 'gp-translation-events' ) : $text;
+		$text = substr( $text, 0, 44 ); // Limit the text to 44 characters.
 
 		$lines = $this->split_text( $text, 22 ); // Limit each line to 22 characters.
 		$text1 = $lines[0];

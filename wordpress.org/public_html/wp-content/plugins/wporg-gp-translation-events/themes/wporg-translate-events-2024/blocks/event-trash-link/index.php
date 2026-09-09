@@ -33,7 +33,7 @@ register_block_type(
 					<a href="<?php echo esc_url( Urls::event_trash( $event->id() ) ); ?>"
 						class="button is-small"
 						title="<?php echo esc_attr__( 'Restore', 'gp-translation-events' ); ?>">
-						<?php echo esc_attr__( 'Restore', 'gp-translation-events' ); ?>
+						<?php echo esc_html__( 'Restore', 'gp-translation-events' ); ?>
 					</a>
 				<?php else : ?>
 					<a href="<?php echo esc_url( Urls::event_trash( $event->id() ) ); ?>"

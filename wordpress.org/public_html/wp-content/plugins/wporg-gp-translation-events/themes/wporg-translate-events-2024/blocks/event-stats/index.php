@@ -42,7 +42,7 @@ register_block_type(
 						<tbody>
 						<?php foreach ( $event_stats->rows() as $_locale => $row ) : ?>
 							<tr>
-								<td title="<?php echo esc_html( $_locale ); ?> "><a href="<?php echo esc_url( gp_url_join( gp_url( '/languages' ), $row->language->slug ) ); ?>"><?php echo esc_html( $row->language->english_name ); ?></a></td>
+								<td title="<?php echo esc_attr( $_locale ); ?> "><a href="<?php echo esc_url( gp_url_join( gp_url( '/languages' ), $row->language->slug ) ); ?>"><?php echo esc_html( $row->language->english_name ); ?></a></td>
 								<td><a href="<?php echo esc_url( Urls::event_translations( $event_id, $row->language->slug ) ); ?>"><?php echo esc_html( $row->created ); ?></a></td>
 								<td><?php echo esc_html( $row->reviewed ); ?></td>
 								<td><?php echo esc_html( $row->users ); ?></td>

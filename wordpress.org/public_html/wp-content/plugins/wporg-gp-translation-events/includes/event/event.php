@@ -7,6 +7,8 @@ use DateTimeZone;
 use Wporg\TranslationEvents\Translation_Events;
 
 class Event {
+	public const ATTENDANCE_MODES = array( 'onsite', 'remote', 'hybrid' );
+
 	private int $id = 0;
 	private int $author_id;
 	private Event_Start_Date $start;
@@ -23,6 +25,7 @@ class Event {
 	 * @throws Invalid_Start  When the start date is not in UTC.
 	 * @throws Invalid_End    When the end date is not in UTC, or is not after the start date.
 	 * @throws Invalid_Status When the status is not draft, publish, or trash.
+	 * @throws Invalid_Attendance_Mode When the attendance mode is not onsite, remote, or hybrid.
 	 */
 	public function __construct(
 		int $author_id,
@@ -162,7 +165,17 @@ class Event {
 		$this->updated_at = $updated_at ?? Translation_Events::now();
 	}
 
+	/**
+	 * Set how attendees take part in the event.
+	 *
+	 * @param string $attendance_mode One of onsite, remote, or hybrid.
+	 *
+	 * @throws Invalid_Attendance_Mode When the attendance mode is not onsite, remote, or hybrid.
+	 */
 	public function set_attendance_mode( string $attendance_mode ): void {
+		if ( ! in_array( $attendance_mode, self::ATTENDANCE_MODES, true ) ) {
+			throw new Invalid_Attendance_Mode();
+		}
 		$this->attendance_mode = $attendance_mode;
 	}
 

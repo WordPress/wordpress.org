@@ -60,6 +60,19 @@ class Event_Repository_Test extends TestCase {
 	}
 
 	/**
+	 * An attendance mode stored before the model validated it falls back to onsite.
+	 */
+	public function test_get_event_falls_back_to_onsite_for_unknown_attendance_mode() {
+		$event_id = $this->event_factory->create_active( $this->now );
+		update_post_meta( $event_id, '_event_attendance_mode', 'teleport' );
+
+		$event = $this->repository->get_event( $event_id );
+
+		$this->assertInstanceOf( Event::class, $event );
+		$this->assertSame( 'onsite', $event->attendance_mode() );
+	}
+
+	/**
 	 * Getting an event returns null when the post is of a different post type.
 	 */
 	public function test_get_event_returns_null_when_post_does_not_not_have_correct_type() {
