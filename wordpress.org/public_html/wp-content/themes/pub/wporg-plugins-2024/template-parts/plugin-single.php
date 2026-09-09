@@ -50,6 +50,13 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			</div>
 			<div class="plugin-actions">
 				<?php
+				/**
+				 * Retrieve the plugin donate link.
+				 *
+				 * @var string $donate_link The donation URL from post meta.
+				 */
+				$donate_link = get_post_meta( get_the_ID(), 'donate_link', true );
+
 				$buttons = '<!-- wp:wporg/favorite-button /-->';
 
 				if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) {
@@ -76,6 +83,15 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 						<!-- /wp:button -->',
 						esc_attr( add_query_arg( array( 'preview' => 1 ), get_the_permalink() ) ),
 						esc_html__( 'Test Preview', 'wporg-plugins' )
+					);
+				}
+				if ( $donate_link ) {
+					$buttons .= sprintf(
+						'<!-- wp:button {"className":"is-small is-style-outline plugin-donate download-button"} -->
+						<div class="wp-block-button is-small is-style-outline plugin-donate download-button"><a class="wp-block-button__link wp-element-button" href="%1$s">%2$s</a></div>
+						<!-- /wp:button -->',
+						esc_url( $donate_link ),
+						esc_html__( 'Donate', 'wporg-plugins' )
 					);
 				}
 				echo do_blocks( $buttons ); // phpcs:ignore -- Output escaped while building string.
