@@ -129,7 +129,7 @@ class Author_Card {
 						esc_attr__( 'Click to search Help Scout for mentions of this author', 'wporg-plugins' )
 					),
 				);
-				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_links );
+				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', array_map( 'wp_kses_post', $author_links ) );
 				?>
 
 				<span class="profile-links">
@@ -147,7 +147,7 @@ class Author_Card {
 							esc_attr__( 'Click to search Help Scout for emails sent to/from this email address', 'wporg-plugins' )
 						),
 					);
-					vprintf( '<span class="profile-sp-link">[ %s ]</span>', $author_email_links );
+					vprintf( '<span class="profile-sp-link">[ %s ]</span>', array_map( 'wp_kses_post', $author_email_links ) );
 					?>
 				</div>
 				<div class="profile-join">

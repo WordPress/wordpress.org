@@ -74,7 +74,7 @@ function render() {
 	?>
 	<div class="wrap" id="wp_learn_admin">
 	<h1>Invite GitHub Member</h1>
-	<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="github_invite">
 		<?php wp_nonce_field( 'github_invite' ); ?>
 		<table class="form-table">
@@ -136,7 +136,7 @@ function render() {
 		?>
 		<hr>
 		<h1>Settings</h1>
-		<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="github_invite_settings">
 			<?php wp_nonce_field( 'github_invite_settings' ); ?>
 			<table class="form-table">

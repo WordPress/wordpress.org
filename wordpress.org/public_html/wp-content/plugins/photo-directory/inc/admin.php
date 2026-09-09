@@ -476,7 +476,7 @@ class Admin {
 				$prefixed_format,
 				sprintf(
 					'<div><a class="photos-photo-link row-title" href="%s" aria-label="%s">%s</a></div>',
-					get_edit_post_link( $post_id ),
+					esc_url( (string) get_edit_post_link( $post_id ) ),
 					/* translators: %s: Post title. */
 					esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
 					$image
@@ -1125,7 +1125,8 @@ class Admin {
 		$moderator_link = Photo::get_moderator_link( $post );
 		if ( $moderator_link ) {
 			echo '<div class="misc-pub-section curtime misc-pub-curtime">';
-			printf( __( 'Moderated by: %s', 'wporg-photos' ), $moderator_link );
+			/* translators: %s: Link to the moderator's profile. */
+			echo wp_kses_post( sprintf( __( 'Moderated by: %s', 'wporg-photos' ), $moderator_link ) );
 			echo '</div>';
 		}
 	}
@@ -1240,7 +1241,7 @@ class Admin {
 						printf(
 							/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
 							_n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
-							$flagged_link ? sprintf( '<a href="%s">%d</a>', $flagged_link, $flagged_count ) : $flagged_count
+							$flagged_link ? sprintf( '<a href="%s">%d</a>', esc_url( $flagged_link ), (int) $flagged_count ) : (int) $flagged_count
 						);
 					?></li>
 					<li><?php
@@ -1365,7 +1366,7 @@ class Admin {
 
 		// Output moderator.
 		if ( $mod_link = Photo::get_moderator_link( $post_id ) ) {
-			printf( $format, 'moderator', __( 'Moderator', 'wporg-photos' ), $mod_link );
+			echo wp_kses_post( sprintf( $format, 'moderator', __( 'Moderator', 'wporg-photos' ), $mod_link ) );
 		}
 	}
 

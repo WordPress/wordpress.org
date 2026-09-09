@@ -216,13 +216,15 @@ if ( bbp_is_reply_edit() ) : ?>
 					if ( is_user_logged_in() ) {
 						esc_html_e( 'You cannot reply to this review.', 'wporg-forums' );
 					} else {
-						printf( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() );
+						/* translators: %s: URL of the log in page. */
+						printf( wp_kses_post( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ) ), esc_url( wp_login_url() ) );
 					}
 				} else {
 					if ( is_user_logged_in() ) {
 						esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' );
 					} else {
-						printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() );
+						/* translators: %s: URL of the log in page. */
+						printf( wp_kses_post( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ) ), esc_url( wp_login_url() ) );
 					}
 				}
 			?></p>

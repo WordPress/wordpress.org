@@ -607,7 +607,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					sprintf(
 						"<h1>Logged in!</h1><p>You are currently logged in as <code>%s</code>.</p><p><a href='%s'>Would you like to logout?</a>",
 						wp_get_current_user()->user_login,
-						wp_logout_url()
+						esc_url( wp_logout_url() )
 					)
 				);
 				exit;

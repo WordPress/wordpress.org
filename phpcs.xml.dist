@@ -133,11 +133,17 @@
 		</properties>
 	</rule>
 
-	<!-- serialize_block_attributes() escapes attribute JSON for use inside a block comment delimiter. -->
+	<!-- Project functions that escape their own output. -->
 	<rule ref="WordPress.Security.EscapeOutput">
 		<properties>
+			<!-- serialize_block_attributes() escapes attribute JSON for use inside a block comment delimiter. -->
 			<property name="customEscapingFunctions" type="array">
 				<element value="serialize_block_attributes"/>
+			</property>
+			<!-- Please note: Only add a function here after confirming it escapes its own return value! -->
+			<property name="customAutoEscapedFunctions" type="array">
+				<!-- Returns esc_url( $url ); see themes/pub/wporg-login/functions.php. -->
+				<element value="wporg_login_wordpress_url"/>
 			</property>
 		</properties>
 	</rule>

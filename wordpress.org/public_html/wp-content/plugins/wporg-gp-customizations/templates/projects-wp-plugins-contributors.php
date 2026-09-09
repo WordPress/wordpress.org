@@ -23,7 +23,7 @@ gp_tmpl_header();
 			</div>
 
 			<ul class="project-meta">
-				<li class="project-name"><?php echo $project->name; ?> <?php echo $edit_link; ?></li>
+				<li class="project-name"><?php echo esc_html( $project->name ); ?> <?php echo wp_kses_post( $edit_link ); ?></li>
 			</ul>
 		</div>
 
