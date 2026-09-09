@@ -129,7 +129,7 @@ A local instance of translate.wordpress.org with GlotPress, the `wporg-gp-*` plu
 npm run translate:env start
 ```
 
-First start auto-imports `hello-dolly` (plugin) and `twentytwenty` (theme) so the `WordPress Plugins` and `WordPress Themes` project containers have real fixtures.
+First start auto-imports `hello-dolly` (plugin) and `twentytwenty` (theme) so the `WordPress Plugins` and `WordPress Themes` project containers have real fixtures. It also seeds a few demo Translation Events (active, upcoming, past, and draft) with hosts and attendees.
 
 **Access:** `http://localhost:8888`
 
@@ -138,6 +138,12 @@ First start auto-imports `hello-dolly` (plugin) and `twentytwenty` (theme) so th
 ```bash
 npm run translate:import -- plugin akismet
 npm run translate:import -- theme twentytwentyfour
+```
+
+**Seed demo events on demand** (idempotent):
+
+```bash
+npm run translate:seed-events
 ```
 
 **Re-seed** (clears the seed flag so the next `start` re-imports fixtures):

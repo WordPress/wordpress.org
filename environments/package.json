@@ -32,6 +32,7 @@
 		"translate:env": "wp-env --config translate/.wp-env.json",
 		"translate:import": "npm run translate:env -- run cli -- wp eval-file wp-content/env-bin/import-from-wporg.php",
 		"translate:refresh": "npm run translate:env -- run cli -- wp option delete wporg_translate_env_seeded",
+		"translate:seed-events": "npm run translate:env -- run cli -- wp eval-file wp-content/env-bin/seed-events.php",
 		"translate:test:env": "wp-env --config translate/.wp-env.test.json",
 		"translate:test": "npm run translate:test:env -- start && npm run translate:test:env -- run tests-cli --env-cwd=wp-content/plugins/wporg-gp-translation-events phpunit"
 	},

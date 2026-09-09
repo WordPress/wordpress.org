@@ -142,6 +142,9 @@ if [ -z "$($WP wp option get wporg_translate_env_seeded 2>/dev/null)" ]; then
 	echo "Seeding twentytwenty (theme)..."
 	$WP wp eval-file wp-content/env-bin/import-from-wporg.php theme twentytwenty
 
+	echo "Seeding demo Translation Events..."
+	$WP wp eval-file wp-content/env-bin/seed-events.php
+
 	$WP wp option update wporg_translate_env_seeded "$(date +%s)"
 else
 	echo "Seed fixtures already imported, skipping."
