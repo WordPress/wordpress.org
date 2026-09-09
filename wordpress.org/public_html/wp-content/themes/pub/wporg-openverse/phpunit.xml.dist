@@ -1,0 +1,13 @@
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	>
+	<testsuites>
+		<testsuite name="wporg-openverse">
+			<directory suffix=".php">tests/</directory>
+			<exclude>tests/bootstrap.php</exclude>
+			<exclude>tests/locales-stub.php</exclude>
+		</testsuite>
+	</testsuites>
+</phpunit>

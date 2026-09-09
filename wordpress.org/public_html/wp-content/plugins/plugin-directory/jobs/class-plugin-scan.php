@@ -383,7 +383,7 @@ class Plugin_Scan {
 		$svn_url    = Import::PLUGIN_SVN_BASE . '/' . $plugin_slug . ( 'trunk' === $tag ? '/trunk' : '/tags/' . $tag );
 
 		// Create a checkout of the ZIP SVN
-		$res = SVN::export( $svn_url, $local_path, [ '--force' /* Overwrite the folder contents */ ] );
+		$res = SVN::export( $svn_url, $local_path, [ '--force' /* Overwrite the folder contents */, '--ignore-externals' /* Don't pull committer-controlled remote trees into the scan */ ] );
 
 		if ( ! $res['result'] ) {
 			return false;

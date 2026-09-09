@@ -46,7 +46,7 @@ class Cron_Logs {
 				] as $field => $name
 			) {
 				if ( ! empty( $job->args[0][ $field ] ) ) {
-					$task_desc .= '<span>' . $name . ': ' . ( is_array( $job->args[0][ $field ] ) ? implode( ', ', $job->args[0][ $field ] ) : $job->args[0][ $field ] ) . '</span>';
+					$task_desc .= '<span>' . $name . ': ' . esc_html( is_array( $job->args[0][ $field ] ) ? implode( ', ', $job->args[0][ $field ] ) : $job->args[0][ $field ] ) . '</span>';
 				}
 			}
 

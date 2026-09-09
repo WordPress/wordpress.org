@@ -40,7 +40,7 @@
 				if ( $relateds ) {
 					foreach ( $relateds as $related ) {
 						$title = apply_filters('the_title', $related->post_title);
-						$rel .= '<li><a href="' . get_permalink($related->ID) . '" title="' . $title . '">' . $title . '</a></li>';
+						$rel  .= '<li><a href="' . esc_url( get_permalink( $related->ID ) ) . '" title="' . esc_attr( wp_strip_all_tags( $title ) ) . '">' . $title . '</a></li>';
 					}
 					$rel = '<ul>' . $rel . '</ul>';
 					echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Related</h2>' . $rel . '</div>';
@@ -65,8 +65,8 @@
 				<li><?php edit_post_link( __( 'Edit This Page', 'bborg' ) ); ?></li>
 			<?php endif; ?>
 			<?php if ( ! is_user_logged_in() ) : ?>
-				<li><a href="<?php echo wp_login_url(); ?>">Log In</a></li>
-				<li><a href="<?php echo wp_registration_url(); ?>">Register</a></li>
+				<li><a href="<?php echo esc_url( wp_login_url() ); ?>">Log In</a></li>
+				<li><a href="<?php echo esc_url( wp_registration_url() ); ?>">Register</a></li>
 			<?php endif; ?>
 		</ul>
 	</div>

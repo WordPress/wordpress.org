@@ -69,12 +69,14 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 	
 		// Step 2. Is that Trac Ticket still what we expect?
 		$matched_existing_ref = false;
-		foreach ( $existing_refs as $ref ) {
-			if (
-				$ref->trac === $pr_data->trac_ticket[0] &&
-				$ref->ticket === $pr_data->trac_ticket[1]
-			) {
-				$matched_existing_ref = true;
+		if ( $pr_data->trac_ticket ) {
+			foreach ( $existing_refs as $ref ) {
+				if (
+					$ref->trac === $pr_data->trac_ticket[0] &&
+					$ref->ticket === $pr_data->trac_ticket[1]
+				) {
+					$matched_existing_ref = true;
+				}
 			}
 		}
 

@@ -34,7 +34,10 @@ class Readme_Validator {
 		if ( $readme_url && preg_match( '!^https?://([^./]+\.)?wordpress.org/plugins/(?P<slug>[^/]+)!i', $readme_url, $m ) ) {
 			$plugin = Plugin_Directory::get_plugin_post( $m['slug'] );
 
-			if ( $plugin ) {
+			if ( $plugin && (
+				in_array( $plugin->post_status, array( 'publish', 'closed', 'disabled' ), true ) ||
+				current_user_can( 'plugin_admin_view', $plugin )
+			) ) {
 				$readme_url         = 'https://plugins.svn.wordpress.org/' . $plugin->post_name . '/' . ( ( $plugin->stable_tag && 'trunk' != $plugin->stable_tag ) ? 'tags/' . $plugin->stable_tag : 'trunk' ) . '/readme.txt';
 				$_REQUEST['readme'] = $readme_url;
 			}

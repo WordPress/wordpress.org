@@ -68,6 +68,14 @@ if ( ! $m ) {
 
 $type = $m['type'];
 
+// Reject Trac output-format selectors (e.g. ?format=csv), which return non-HTML bytes rather than an embeddable page.
+$query_args = [];
+wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query_args );
+if ( array_key_exists( 'format', $query_args ) && '' !== $query_args['format'] ) {
+	header( 'HTTP/1.1 404 Not Found', true, 404 );
+	die();
+}
+
 // if not iframe embed, respond with oembed payload.
 if ( ! isset( $_GET['embed'] ) ) {
 	header( 'Content-Type: application/json; charset=UTF-8' );
@@ -141,24 +149,41 @@ if ( ! isset( $_GET['embed'] ) ) {
 header( 'Content-Type: text/html; charset=UTF-8' );
 header( 'X-Content-Type-Options: nosniff' );
 
+/*
+ * The iframe's sandbox covers that element, not this response, which is reachable directly.
+ * Re-serving third-party markup is the point of this endpoint, so the sandbox is the boundary
+ * rather than the markup: the document cannot act as this origin, and it shows nothing the Trac
+ * URL it mirrors does not already show to the same audience.
+ */
+header( 'Content-Security-Policy: sandbox allow-scripts allow-top-navigation-by-user-activation' );
+
 $cache_key = sha1( $url );
 if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {
 	die( $data );
 }
 
-$html = wp_remote_retrieve_body(
-	wp_safe_remote_get(
-		$url,
-		[
-			'user_agent'          => 'WordPress.org Trac oEmbed; https://api.wordpress.org/dotorg/trac/oembed',
-			'timeout'             => 15,
-			'limit_response_size' => 500 * KB_IN_BYTES,
-		]
-	)
+$response = wp_safe_remote_get(
+	$url,
+	[
+		'user_agent'          => 'WordPress.org Trac oEmbed; https://api.wordpress.org/dotorg/trac/oembed',
+		'timeout'             => 15,
+		'limit_response_size' => 500 * KB_IN_BYTES,
+	]
 );
+
+$html = wp_remote_retrieve_body( $response );
+// A duplicated header comes back as an array; every value must declare HTML.
+$content_types = [];
+foreach ( (array) wp_remote_retrieve_header( $response, 'content-type' ) as $content_type ) {
+	// Reduce to the bare media type, e.g. `text/html; charset=utf-8` => `text/html`.
+	$content_types[] = strtolower( trim( explode( ';', (string) $content_type )[0] ) );
+}
 
 if (
 	! $html ||
+	200 !== wp_remote_retrieve_response_code( $response ) ||
+	// Only reparse what Trac serves as HTML — anything else could become executable markup on this origin.
+	[ 'text/html' ] !== array_unique( $content_types ) ||
 	(
 		! str_starts_with( $html, '<' ) &&
 		str_contains( $html, 'TracError: ' )
@@ -291,6 +316,10 @@ foreach ( $elements_to_remove as $el ) {
 // Add a script to the header.
 $js = <<<JS
 (function() {
+	if ( window.parent === window ) {
+		return;
+	}
+
 	var id = ( document.location.hash.match(/el=([0-9a-f]+)(&|$)/) || [ '', '' ] )[1];
 
 	function send() {
@@ -306,7 +335,10 @@ $js = <<<JS
 	window.addEventListener( 'DOMContentLoaded', send );
 })();
 JS;
-$doc->getElementsByTagName( 'head' )[0]->appendChild( $doc->createElement( 'script', $js ) );
+
+$reporter = $doc->createElement( 'script' );
+$reporter->appendChild( $doc->createTextNode( $js ) );
+$doc->getElementsByTagName( 'head' )[0]->appendChild( $reporter );
 
 $css = <<<CSS
 html {

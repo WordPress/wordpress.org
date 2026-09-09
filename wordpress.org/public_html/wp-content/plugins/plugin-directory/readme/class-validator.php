@@ -19,6 +19,24 @@ class Validator {
 	public $last_content = '';
 
 	/**
+	 * Hosts a readme may be fetched from.
+	 *
+	 * @var string[]
+	 */
+	private static $allowed_hosts = array(
+		'plugins.svn.wordpress.org',
+		'themes.svn.wordpress.org',
+		'raw.githubusercontent.com',
+	);
+
+	/**
+	 * Maximum size of a readme fetched by URL, in bytes.
+	 *
+	 * @var int
+	 */
+	const MAX_FETCH_BYTES = 512 * KB_IN_BYTES;
+
+	/**
 	 * Fetch the instance of the Validator class.
 	 *
 	 * @static
@@ -36,7 +54,17 @@ class Validator {
 	 * @return array Array of the readme validation results.
 	 */
 	public function validate_url( $url ) {
-		$url = esc_url_raw( $url );
+		$url = esc_url_raw( $url, array( 'http', 'https' ) );
+
+		$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		if ( ! in_array( $host, self::$allowed_hosts, true ) ) {
+			$error = sprintf(
+				/* translators: %s: Comma-separated list of hostnames. */
+				__( 'URL must be a readme hosted on one of %s. To validate a readme from anywhere else, paste its contents below.', 'wporg-plugins' ),
+				'<code>' . implode( '</code>, <code>', self::$allowed_hosts ) . '</code>'
+			);
+			return array( 'errors' => array( 'disallowed_url_host' => $error ) );
+		}
 
 		$path = wp_parse_url( $url, PHP_URL_PATH ) ?? '';
 		if (
@@ -48,17 +76,32 @@ class Validator {
 				__( 'URL must end in %s or %s!', 'wporg-plugins' ),
 				'<code>readme.txt</code>', '<code>readme.md</code>'
 			);
-			return array(
-				'errors' => array( $error ),
-			);
+			return array( 'errors' => array( 'invalid_url_extension' => $error ) );
 		}
 
-		$readme = wp_safe_remote_get( $url );
-		if ( ! $readme_text = wp_remote_retrieve_body( $readme ) ) {
+		// Every allowed host redirects plain HTTP to HTTPS, and redirects are not followed.
+		$url = set_url_scheme( $url, 'https' );
+
+		$args = array(
+			'redirection'         => 0,
+			'limit_response_size' => self::MAX_FETCH_BYTES,
+		);
+
+		$readme      = wp_safe_remote_get( $url, $args );
+		$readme_text = wp_remote_retrieve_body( $readme );
+
+		if ( 200 !== wp_remote_retrieve_response_code( $readme ) || ! $readme_text ) {
 			$error = __( 'Invalid readme.txt URL.', 'wporg-plugins' );
-			return array(
-				'errors' => array( $error ),
+			return array( 'errors' => array( 'invalid_url' => $error ) );
+		}
+
+		if ( strlen( $readme_text ) >= self::MAX_FETCH_BYTES ) {
+			$error = sprintf(
+				/* translators: %s: Maximum readme size, e.g. "512 KB". */
+				__( 'The readme at that URL is larger than %s, so it was not validated. Paste its contents below instead.', 'wporg-plugins' ),
+				size_format( self::MAX_FETCH_BYTES )
 			);
+			return array( 'errors' => array( 'readme_too_large' => $error ) );
 		}
 
 		return $this->validate_content( $readme_text );
@@ -464,8 +507,9 @@ class Validator {
 			case 'trademarked_slug':
 			case 'trademarked':
 				$trademarks = (array) $data['trademark'];
-				$context    = $data['context'];
-				$messages   = [];
+				// Callers differ on whether they pre-escape the context, so normalise it first.
+				$context  = esc_html( wp_specialchars_decode( $data['context'], ENT_QUOTES ) );
+				$messages = [];
 	
 				$cannot_start_with = array_filter( $trademarks, function( $slug ) {
 					return str_ends_with( $slug, '-' );

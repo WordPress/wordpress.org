@@ -17,7 +17,7 @@ $wp_query = new WP_Query( array( 'no_found_rows' => true, 'post_type' => 'post',
 								<p><?php _e( 'Sorry, we could not not find that site in the Showcase. We do have many others available though. Here&#8217;s one chosen at random!', 'wporg-showcase' ); ?></p>
 								<?php //breadcrumb(); ?>
 								<h2><?php the_title(); ?></h2>
-								<a href=' http://<?php get_site_domain( false ); ?>'>
+								<a href="<?php echo esc_url( 'http://' . get_site_domain( false, false ) ); ?>">
 									<?php site_screenshot_tag( 518, 'screenshot site-screenshot'); ?>
 								</a>
 								<?php the_content(); ?>

@@ -95,15 +95,15 @@
 
 		<div class="feature">
 			<h2><?php _e('WordPress', 'bbporg'); ?></h2>
-			<p><a href="https://wordpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/wordpress.gif"/></a><?php esc_html_e( 'The world&#8217;s most powerful web publishing software.', 'bborg' ); ?></p>
+			<p><a href="https://wordpress.org"><img width="78" height="58" alt="" src="<?php echo esc_url( get_template_directory_uri() . '/images/wordpress.gif' ); ?>"/></a><?php esc_html_e( 'The world&#8217;s most powerful web publishing software.', 'bborg' ); ?></p>
 		</div>
 		<div class="feature">
 			<h2><?php _e('bbPress', 'bbporg'); ?></h2>
-			<p><a href="https://bbpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/bbpress.gif"/></a><?php esc_html_e( 'Simple and elegant forum software from the creators of WordPress.', 'bborg' ); ?></p>
+			<p><a href="https://bbpress.org"><img width="78" height="58" alt="" src="<?php echo esc_url( get_template_directory_uri() . '/images/bbpress.gif' ); ?>"/></a><?php esc_html_e( 'Simple and elegant forum software from the creators of WordPress.', 'bborg' ); ?></p>
 		</div>
 		<div style="margin-right: 0pt;" class="feature">
 			<h2><?php _e('BuddyPress', 'bbporg'); ?></h2>
-			<p><a href="https://buddypress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/buddypress.gif"/></a><?php esc_html_e( 'Create a fully featured niche social-network with a few easy clicks.', 'bborg' ); ?></p>
+			<p><a href="https://buddypress.org"><img width="78" height="58" alt="" src="<?php echo esc_url( get_template_directory_uri() . '/images/buddypress.gif' ); ?>"/></a><?php esc_html_e( 'Create a fully featured niche social-network with a few easy clicks.', 'bborg' ); ?></p>
 		</div>
 
 	<?php elseif ( ( ! is_page( 'login' ) && ! is_page( 'register' ) && ! is_page( 'lost-password' ) ) || is_home() || is_singular( 'post' ) || is_archive() ) : ?>

@@ -49,7 +49,7 @@ $main_column_title = trim( ucwords( $view ), 's' );
 					esc_attr( sprintf( __( "%s+ Active Installations" ), number_format_i18n( $details->installs ) ) ),
 					esc_attr( $main_column_title ),
 					$details->installs,
-					$project_overview_link,
+					esc_url( $project_overview_link ),
 					$details->project->name
 				);
 
@@ -74,7 +74,7 @@ $main_column_title = trim( ucwords( $view ), 's' );
 						$percent_class,
 						$title,
 						$sort_value,
-						$link,
+						esc_url( $link ),
 						$cell_text
 					);
 				}

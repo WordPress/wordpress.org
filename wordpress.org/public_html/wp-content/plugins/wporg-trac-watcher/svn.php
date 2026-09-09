@@ -96,7 +96,7 @@ function import_revisions( $svn ) {
 
 	$command = sprintf(
 		'svn log %s -r %d:HEAD --limit %d --xml -v 2>/dev/null',
-		esc_url( $svn_url ),
+		escapeshellarg( $svn_url ),
 		(int) $last_revision,
 		(int) MAX_REVISIONS
 	);
@@ -233,7 +233,7 @@ function get_wp_version( $svn_url, $branch, $revision = 'HEAD' ) {
 		$url = "{$svn_url}/{$branch}/{$f}";
 		$output = shell_exec( sprintf(
 			'svn cat %s@%d 2>/dev/null',
-			esc_url( $url ),
+			escapeshellarg( $url ),
 			(int) $revision
 		) );
 

@@ -8,14 +8,19 @@ use GP_Original;
 use Translation_Entry;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Templates;
 
 /**
  * Displays the event translations page.
  */
 class Translations_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
+	private Event_Repository $event_repository;
 
 	public function __construct() {
 		parent::__construct();
@@ -35,6 +40,7 @@ class Translations_Route extends Route {
 
 		if ( ! current_user_can( 'view_translation_event', $event->id() ) ) {
 			$this->die_with_error( esc_html__( 'You are not authorized to view this page.', 'gp-translation-events' ), 403 );
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
 		global $wpdb, $gp_table_prefix;

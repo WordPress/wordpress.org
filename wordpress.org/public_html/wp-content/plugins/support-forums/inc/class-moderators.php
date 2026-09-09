@@ -22,6 +22,9 @@ class Moderators {
 		add_filter( 'bbp_map_primary_meta_caps',        array( $this, 'map_meta_caps' ), 10, 4 );
 		add_action( 'bbp_post_request',                 array( $this, 'edit_user_handler' ), 0 );
 
+		// Strip credential and site-role fields moderators must not set. bbPress is at 1.
+		add_action( 'bbp_post_request', array( $this, 'restrict_profile_edit_fields' ), 0 );
+
 		// Allow moderators to manage user roles.
 		add_filter( 'bbp_get_caps_for_role',            array( $this, 'bbp_get_caps_for_role' ), 10, 2 );
 
@@ -261,6 +264,34 @@ class Moderators {
 		// If it's an allowed role, add it back so it can be processed by bbp_profile_update_role().
 		if ( in_array( $new_forum_role, $allowed_roles, true ) ) {
 			$_POST['bbp-forums-role'] = $new_forum_role;
+		}
+	}
+
+	/**
+	 * Strip the role and password fields before bbPress calls edit_user().
+	 *
+	 * Runs at priority 0, ahead of bbp_edit_user_handler() (priority 1); the
+	 * bbp_profile_update() hook is too late for the site role, as core commits
+	 * set_role() before firing profile_update.
+	 *
+	 * @param string $action The requested action.
+	 */
+	public function restrict_profile_edit_fields( $action = '' ) {
+		if ( 'bbp-update-user' !== $action || is_admin() ) {
+			return;
+		}
+
+		// Keymasters legitimately manage users and roles.
+		if ( bbp_is_user_keymaster( get_current_user_id() ) ) {
+			return;
+		}
+
+		// Site roles are never assigned through the front-end profile handler.
+		unset( $_POST['role'] );
+
+		// Only the account owner may change their own password.
+		if ( bbp_get_displayed_user_id() !== get_current_user_id() ) {
+			unset( $_POST['pass1'], $_POST['pass2'] );
 		}
 	}
 

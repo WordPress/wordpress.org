@@ -590,7 +590,11 @@ The WordPress.org Team',
 			remove_action( 'set_object_terms', array( $this, 'detect_manual_modlook' ), 10 );
 			wp_add_object_terms( $_POST['wporg-support-report-topic'], 'modlook', 'topic-tag' );
 
-			$this->add_modlook_history( $_POST['wporg-support-report-topic'], $_POST['topic-report-reason-details'], (int) $_POST['topic-report-reason'] );
+			$this->add_modlook_history(
+				(int) $_POST['wporg-support-report-topic'],
+				wp_slash( sanitize_textarea_field( wp_unslash( $_POST['topic-report-reason-details'] ) ) ),
+				$validate_term->term_id
+			);
 
 			wp_safe_redirect( get_the_permalink( $_POST['wporg-support-report-topic'] ) );
 

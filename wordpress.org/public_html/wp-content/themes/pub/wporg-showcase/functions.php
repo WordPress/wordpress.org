@@ -16,6 +16,18 @@ add_action( 'wp_head', function () {
 	}
 }, 1 );
 
+/**
+ * Returns the `domain` post meta of the current showcase entry.
+ *
+ * The return value is unescaped, so that callers can compose it into a URL
+ * before escaping for their own context. Every caller that prints it must
+ * escape it: `esc_url()` in an `href`, `esc_html()` in element content.
+ *
+ * @param bool $rep_slash       Percent-encode slashes, for the screenshot service.
+ * @param bool $echo            Print the value (escaped as element content) as well as returning it.
+ * @param bool $rem_trail_slash Drop a trailing slash.
+ * @return string The unescaped domain.
+ */
 function get_site_domain( $rep_slash = true, $echo = true, $rem_trail_slash = false ) {
 	global $post;
 
@@ -31,8 +43,11 @@ function get_site_domain( $rep_slash = true, $echo = true, $rem_trail_slash = fa
 	if ( $rep_slash )
 		$domain = str_replace('/', '%2F', $domain );
 
-	if ( $echo ) echo $domain;
-	else return $domain;
+	if ( $echo ) {
+		echo esc_html( $domain );
+	}
+
+	return $domain;
 }
 
 function site_screenshot_src( $width = '', $echo = true ) {
@@ -98,24 +113,32 @@ function wp_flavors() {
 
 	foreach ( $flavors as $flavor ) {
 		if ( in_category( $flavor ) ) {
-			echo '<li class="flavor-used"><img src="' . get_template_directory_uri() . '/images/flavor.png" /> ' . $flavor . '</li>';
+			echo '<li class="flavor-used"><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor.png" /> ' . esc_html( $flavor ) . '</li>';
 		} else {
-			echo '<li><img src="' . get_template_directory_uri() . '/images/flavor2.png" /> ' . $flavor . '</li>';
+			echo '<li><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor2.png" /> ' . esc_html( $flavor ) . '</li>';
 		}
 	}
 
 	if ( in_category( 'BuddyPress' ) ) {
-		echo '<li class="flavor-used"><img src="' . get_template_directory_uri() . '/images/flavor-bp.png" /> ' . __( 'BuddyPress', 'wporg-showcase' ). '</li>';
+		echo '<li class="flavor-used"><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor-bp.png" /> ' . esc_html__( 'BuddyPress', 'wporg-showcase' ) . '</li>';
 	} else {
-		echo '<li><img src="' . get_template_directory_uri() . '/images/flavor-bp2.png" /> ' . __( 'BuddyPress', 'wporg-showcase' ). '</li>';
+		echo '<li><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor-bp2.png" /> ' . esc_html__( 'BuddyPress', 'wporg-showcase' ) . '</li>';
 	}
 
 	echo '</ul>';
 }
 
 function blockquote_style( $content ) {
-	if ( is_single() )
-		$content = str_replace( '</blockquote>', '<cite>' . __( 'Source:', 'wporg-showcase' ). ' <a href="http://' . get_site_domain( false, false ) . '">' . get_site_domain( false, false, true ) . '</a></cite><div class="clear"></div></blockquote>', $content );
+	if ( is_single() ) {
+		$cite = sprintf(
+			'<cite>%1$s <a href="%2$s">%3$s</a></cite><div class="clear"></div></blockquote>',
+			esc_html__( 'Source:', 'wporg-showcase' ),
+			esc_url( 'http://' . get_site_domain( false, false ) ),
+			esc_html( get_site_domain( false, false, true ) )
+		);
+
+		$content = str_replace( '</blockquote>', $cite, $content );
+	}
 
 	return $content;
 }
@@ -160,7 +183,7 @@ function popular_tags ($number = 10) {
 
 function breadcrumb() { ?>
 
-	<h2><a href="<?php echo home_url( '/' ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php _e( 'Showcase', 'wporg-showcase' ); ?></a>
+	<h2><a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php esc_html_e( 'Showcase', 'wporg-showcase' ); ?></a>
 
 		<?php if ( is_search() ) : ?>
 			<?php
@@ -221,7 +244,7 @@ function tags_with_count( $format = 'list', $before = '', $sep = '', $after = ''
 		return;
 	}
 
-	echo $before . join( $sep, $tag_links ) . $after;
+	echo wp_kses_post( $before . join( $sep, $tag_links ) . $after );
 }
 
 function extras_feed( $is_comments_feed = false ) {

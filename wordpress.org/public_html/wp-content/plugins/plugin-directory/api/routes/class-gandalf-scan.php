@@ -44,9 +44,10 @@ class Gandalf_Scan extends Base {
 						'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 					],
 					'status'          => [
-						'type'     => 'string',
-						'enum'     => [ 'completed', 'failed' ],
-						'required' => true,
+						'type'              => 'string',
+						'enum'              => [ 'completed', 'failed' ],
+						'required'          => true,
+						'validate_callback' => [ $this, 'validate_status_callback' ],
 					],
 					'scan_id'         => [
 						'type'      => 'string',
@@ -179,6 +180,43 @@ class Gandalf_Scan extends Base {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Validate that a callback body carries the fields its status implies.
+	 *
+	 * The contract has two halves — a completed scan reports a verdict, a
+	 * failed one reports an error — and `required` cannot express either,
+	 * being unconditional. Enforcing it here keeps the whole body schema in
+	 * the route, so the callback runs only on a payload it can read directly.
+	 *
+	 * @param mixed            $value   The status value.
+	 * @param \WP_REST_Request $request The request.
+	 * @param string           $param   The parameter name.
+	 * @return true|WP_Error True when the body matches its status.
+	 */
+	public function validate_status_callback( $value, $request, $param ) {
+		$valid = rest_validate_request_arg( $value, $request, $param );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+
+		$required = 'completed' === $value
+			? [ 'verdict_hash', 'findings_count', 'severity_counts', 'max_risk_score', 'findings', 'report_url' ]
+			: [ 'error' ];
+
+		foreach ( $required as $field ) {
+			if ( null === $request->get_param( $field ) ) {
+				return new WP_Error(
+					'rest_missing_callback_param',
+					/* translators: 1: Field name, 2: Callback status. */
+					sprintf( __( '%1$s is required for a %2$s security scan callback.', 'wporg-plugins' ), $field, $value ),
+					[ 'status' => WP_Http::BAD_REQUEST ]
+				);
+			}
+		}
+
+		return true;
 	}
 
 	/**

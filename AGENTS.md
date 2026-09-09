@@ -36,6 +36,14 @@ The repository implements a shared SSO mechanism under [common/includes/wporg-ss
 
 ---
 
+## Security Trust Model
+
+Roles on WordPress.org multisite blogs are assigned individually rather than granted on sign-up. Much of the estate leans on this: capability checks are often coarse, because on most sites there is no untrusted principal below the people who run them.
+
+This is not uniform — some sites register their own roles and appoint community members into them at scale — so confirm the trust model of the site you are working on before relying on it. The [HackerOne program policy](https://hackerone.com/wordpress) is the authority on which gaps count as in-scope vulnerabilities.
+
+---
+
 ## Coding Standards & Linting
 
 We enforce the **WordPress Coding Standards (WPCS)** with local adjustments configured in [phpcs.xml.dist](phpcs.xml.dist).

@@ -27,10 +27,10 @@ get_header(); ?>
 				<div class="topic-guide section">
 					<h4><?php _e( 'Or browse through topics:', 'bporg-developer' ); ?></h4>
 					<ul class="unordered-list horizontal-list no-bullets">
-						<li><a href="<?php echo get_post_type_archive_link( 'wp-parser-function' ) ?>"><?php _e( 'Functions', 'bporg-developer' ); ?></a></li>
-						<li><a href="<?php echo get_post_type_archive_link( 'wp-parser-hook' ) ?>"><?php _e( 'Hooks', 'bporg-developer' ); ?></a></li>
-						<li><a href="<?php echo get_post_type_archive_link( 'wp-parser-class' ) ?>"><?php _e( 'Classes', 'bporg-developer' ); ?></a></li>
-						<li><a href="<?php echo get_post_type_archive_link( 'wp-parser-method' ) ?>"><?php _e( 'Methods', 'bporg-developer' ); ?></a></li>
+						<li><a href="<?php echo esc_url( get_post_type_archive_link( 'wp-parser-function' ) ); ?>"><?php esc_html_e( 'Functions', 'bporg-developer' ); ?></a></li>
+						<li><a href="<?php echo esc_url( get_post_type_archive_link( 'wp-parser-hook' ) ); ?>"><?php esc_html_e( 'Hooks', 'bporg-developer' ); ?></a></li>
+						<li><a href="<?php echo esc_url( get_post_type_archive_link( 'wp-parser-class' ) ); ?>"><?php esc_html_e( 'Classes', 'bporg-developer' ); ?></a></li>
+						<li><a href="<?php echo esc_url( get_post_type_archive_link( 'wp-parser-method' ) ); ?>"><?php esc_html_e( 'Methods', 'bporg-developer' ); ?></a></li>
 					</ul>
 				</div><!-- /topic-guide -->
 

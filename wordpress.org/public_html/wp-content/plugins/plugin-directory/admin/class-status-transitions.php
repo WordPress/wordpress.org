@@ -27,6 +27,21 @@ class Status_Transitions {
 	}
 
 	/**
+	 * Hooks the status transition actions for the current request.
+	 *
+	 * The admin hooks `instance()` itself, which defers the work until a status
+	 * actually changes. Callers here are about to make a change they know about, so
+	 * the actions are attached directly — the constructor only runs the first time
+	 * the class is instantiated, which may already have happened.
+	 */
+	public static function init() {
+		$instance = self::instance();
+
+		add_action( 'transition_post_status', array( $instance, 'transition_post_status' ), 11, 3 );
+		add_action( 'post_updated', array( $instance, 'record_owner_change' ), 11, 3 );
+	}
+
+	/**
 	 * Constructor.
 	 */
 	private function __construct() {

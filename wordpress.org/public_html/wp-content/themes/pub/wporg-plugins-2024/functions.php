@@ -407,6 +407,23 @@ function update_archive_description( $description ) {
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
 
 /**
+ * Point the Language Suggest block at the directory's own suggestion API.
+ *
+ * @param string $endpoint Default endpoint URL.
+ * @return string Endpoint URL for the current request.
+ */
+function language_suggest_endpoint( $endpoint ) {
+	$endpoint = rest_url( '/plugins/v2/locale-banner' );
+
+	if ( is_singular( 'plugin' ) ) {
+		$endpoint = add_query_arg( 'plugin_slug', get_queried_object()->post_name, $endpoint );
+	}
+
+	return $endpoint;
+}
+add_filter( 'wporg_language_suggest_endpoint', __NAMESPACE__ . '\language_suggest_endpoint' );
+
+/**
  * Custom template tags for this theme.
  */
 require get_stylesheet_directory() . '/inc/template-tags.php';

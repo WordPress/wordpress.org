@@ -674,6 +674,7 @@ class Themes_API {
 
 		$theme_shops = new WP_Query( array(
 			'post_type'      => 'theme_shop',
+			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 			// NOTE: This rand() disables WP_Query caching.
 			'orderby'        => 'rand(' . gmdate('YmdH') . ')',

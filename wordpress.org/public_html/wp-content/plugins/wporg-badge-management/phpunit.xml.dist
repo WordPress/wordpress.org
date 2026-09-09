@@ -1,0 +1,11 @@
+<phpunit
+	bootstrap="phpunit/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	>
+	<testsuites>
+		<testsuite name="wporg-badge-management">
+			<directory suffix=".php">./phpunit/tests/</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

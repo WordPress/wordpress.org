@@ -759,8 +759,8 @@ https://wordpress.org/photos/
 		foreach ( $pending as $post ) {
 			$content .= sprintf(
 				"<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-				get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( "(unknown)", 'wporg-photos' ),
-				get_the_date( 'Y-m-d', $post ),
+				esc_html( get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( '(unknown)', 'wporg-photos' ) ),
+				esc_html( get_the_date( 'Y-m-d', $post ) ),
 				esc_html( get_the_content( null, false, $post ) ?: __( '(none provided)', 'wporg-photos' ) ),
 			);
 		}

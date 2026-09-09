@@ -132,6 +132,7 @@ class Composer_Repository {
 				'slug'   => $slug,
 				'fields' => array(
 					'versions'          => true,
+					'stable_tag'        => true,
 					'download_link'     => true,
 					'last_updated'      => true,
 					'short_description' => true,
@@ -167,47 +168,19 @@ class Composer_Repository {
 	 * @return array|null The packages response, or null if no valid versions.
 	 */
 	private static function build_plugin_response( string $slug, array $plugin_data ): ?array {
-		$package_name = 'wp-plugin/' . $slug;
-		$versions     = array();
-		$seen         = array();
+		$tagged       = ( ! empty( $plugin_data['versions'] ) && is_array( $plugin_data['versions'] ) ) ? $plugin_data['versions'] : array();
+		$fallback_url = $plugin_data['download_link'] ?? sprintf( 'https://downloads.wordpress.org/plugin/%s.zip', $slug );
 
-		// Build entries for each tagged version.
-		if ( ! empty( $plugin_data['versions'] ) && is_array( $plugin_data['versions'] ) ) {
-			foreach ( $plugin_data['versions'] as $version => $download_url ) {
-				$normalized = Version_Normalizer::normalize( (string) $version );
-				if ( false === $normalized ) {
-					continue;
-				}
-
-				$key = Version_Normalizer::dedupe_key( $normalized );
-				if ( isset( $seen[ $key ] ) ) {
-					continue;
-				}
-
-				$seen[ $key ] = true;
-				$versions[]   = Package_Builder::build_plugin( $slug, $normalized, $plugin_data, $download_url );
-			}
-		}
-
-		// If no tagged versions, use the current version and its download link.
-		if ( empty( $versions ) && ! empty( $plugin_data['version'] ) ) {
-			$normalized = Version_Normalizer::normalize( $plugin_data['version'] );
-			if ( false !== $normalized ) {
-				$fallback_url = $plugin_data['download_link'] ?? sprintf( 'https://downloads.wordpress.org/plugin/%s.zip', $slug );
-				$versions[]   = Package_Builder::build_plugin( $slug, $normalized, $plugin_data, $fallback_url );
-			}
+		$versions = array();
+		foreach ( self::select_plugin_versions( $tagged, (string) ( $plugin_data['stable_tag'] ?? 'trunk' ), (string) ( $plugin_data['version'] ?? '' ), $fallback_url ) as $entry ) {
+			$versions[] = Package_Builder::build_plugin( $slug, $entry['version'], $plugin_data, $entry['url'] );
 		}
 
 		if ( empty( $versions ) ) {
 			return null;
 		}
 
-		usort(
-			$versions,
-			function ( $a, $b ) {
-				return version_compare( $b['version'], $a['version'] );
-			}
-		);
+		$package_name = 'wp-plugin/' . $slug;
 
 		$response = array( 'packages' => array( $package_name => $versions ) );
 
@@ -236,12 +209,12 @@ class Composer_Repository {
 		$request = (object) array(
 			'slug'   => $slug,
 			'fields' => array(
-				'versions'        => true,
+				'downloadlink'    => true,
 				'description'     => true,
 				'requires_php'    => true,
 				'last_updated'    => true,
 				'extended_author' => true,
-				'downloadlink'    => false,
+				'versions'        => false,
 				'sections'        => false,
 				'rating'          => false,
 				'tags'            => false,
@@ -266,54 +239,141 @@ class Composer_Repository {
 	 * @return array|null The packages response, or null if no valid versions.
 	 */
 	private static function build_theme_response( string $slug, object $theme_data ): ?array {
-		$package_name = 'wp-theme/' . $slug;
-		$versions     = array();
-		$seen         = array();
-
-		if ( ! empty( $theme_data->versions ) && is_array( $theme_data->versions ) ) {
-			foreach ( $theme_data->versions as $version => $download_url ) {
-				$normalized = Version_Normalizer::normalize( (string) $version );
-				if ( false === $normalized ) {
-					continue;
-				}
-
-				$key = Version_Normalizer::dedupe_key( $normalized );
-				if ( isset( $seen[ $key ] ) ) {
-					continue;
-				}
-
-				$seen[ $key ] = true;
-				$versions[]   = Package_Builder::build_theme( $slug, $normalized, $theme_data, $download_url );
-			}
-		}
-
-		// If no tagged versions, use the current version.
-		if ( empty( $versions ) && ! empty( $theme_data->version ) ) {
-			$normalized = Version_Normalizer::normalize( $theme_data->version );
-			if ( false !== $normalized ) {
-				$fallback_url = sprintf( 'https://downloads.wordpress.org/theme/%s.%s.zip', $slug, $theme_data->version );
-				$versions[]   = Package_Builder::build_theme( $slug, $normalized, $theme_data, $fallback_url );
-			}
-		}
-
-		if ( empty( $versions ) ) {
+		// Serve the directory's current version only; lacking a live version it may be the newest, unreviewed upload (known residual).
+		$live_version = $theme_data->version ?? '';
+		if ( '' === $live_version ) {
 			return null;
 		}
 
-		usort(
-			$versions,
-			function ( $a, $b ) {
-				return version_compare( $b['version'], $a['version'] );
-			}
-		);
+		$normalized = Version_Normalizer::normalize( (string) $live_version );
+		if ( false === $normalized ) {
+			return null;
+		}
 
-		$response = array( 'packages' => array( $package_name => $versions ) );
+		$download_url = (string) ( $theme_data->download_link ?? '' );
+		if ( '' === $download_url ) {
+			return null;
+		}
+
+		$response = array(
+			'packages' => array(
+				'wp-theme/' . $slug => array( Package_Builder::build_theme( $slug, $normalized, $theme_data, $download_url ) ),
+			),
+		);
 
 		if ( ! empty( $theme_data->last_updated_time ) ) {
 			$response['last_modified'] = strtotime( $theme_data->last_updated_time );
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Select the plugin versions eligible for the Composer response, newest first.
+	 *
+	 * Serves the release history up to the stable release, dropping any tag above it. The ceiling is
+	 * the stable tag, or the current version when the plugin is trunk-stable; a degenerate current
+	 * version ('0.0' or 'trunk') is rejected and nothing is served. Equivalent tags collapse (the
+	 * stable tag wins its key), and the served release is always offered. Comparisons use canonical keys.
+	 *
+	 * @param array  $tagged       Map of raw SVN tag => download URL.
+	 * @param string $stable_tag   The plugin's stable tag ('trunk' or a version).
+	 * @param string $version      The plugin's current version, from its readme header.
+	 * @param string $fallback_url Download URL to use for the current version.
+	 * @return array List of [ 'version' => normalized, 'url' => download URL ], newest first.
+	 */
+	public static function select_plugin_versions( array $tagged, string $stable_tag, string $version, string $fallback_url ): array {
+		$normalized_stable  = Version_Normalizer::normalize( $stable_tag );
+		$normalized_current = '' !== $version ? Version_Normalizer::normalize( $version ) : false;
+
+		// The served release: the stable tag, or (trunk-stable) the current version; a degenerate '0.0'/'trunk' serves nothing.
+		$usable = static fn ( string|false $normalized ): bool => false !== $normalized && 'dev-trunk' !== $normalized && '0.0.0.0' !== Version_Normalizer::dedupe_key( $normalized );
+
+		if ( $usable( $normalized_stable ) ) {
+			$served = $normalized_stable;
+		} elseif ( $usable( $normalized_current ) ) {
+			$served = $normalized_current;
+		} else {
+			return array();
+		}
+		$ceiling = Version_Normalizer::dedupe_key( $served );
+
+		$seen = array();
+		foreach ( $tagged as $tag => $url ) {
+			$tag        = (string) $tag;
+			$normalized = Version_Normalizer::normalize( $tag );
+			if ( false === $normalized ) {
+				continue;
+			}
+
+			// Keep trunk (the dev branch); drop tags canonically newer than the ceiling.
+			$key = Version_Normalizer::dedupe_key( $normalized );
+			if ( 'dev-trunk' !== $normalized && version_compare( $key, $ceiling, '>' ) ) {
+				continue;
+			}
+
+			// Dedupe equivalent tags: the stable tag wins its key, else the canonical spelling.
+			$is_stable = ( $tag === $stable_tag );
+			if ( isset( $seen[ $key ] ) && ( $seen[ $key ]['stable'] || ( ! $is_stable && ! self::is_preferred_spelling( $normalized, $tag, $seen[ $key ]['normalized'], $seen[ $key ]['tag'] ) ) ) ) {
+				continue;
+			}
+
+			$seen[ $key ] = array(
+				'normalized' => $normalized,
+				'tag'        => $tag,
+				'stable'     => $is_stable,
+				'url'        => (string) $url,
+			);
+		}
+
+		// Always offer the served release itself, unless a tag already produced it above.
+		if ( ! isset( $seen[ $ceiling ] ) ) {
+			$seen[ $ceiling ] = array(
+				'normalized' => $served,
+				'tag'        => '',
+				'stable'     => false,
+				'url'        => $fallback_url,
+			);
+		}
+
+		$entries = array();
+		foreach ( $seen as $entry ) {
+			$entries[] = array(
+				'version' => $entry['normalized'],
+				'url'     => $entry['url'],
+			);
+		}
+
+		usort(
+			$entries,
+			static function ( $a, $b ) {
+				return version_compare( $b['version'], $a['version'] );
+			}
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * Decide whether one spelling of a version should be kept over another Composer treats as equal.
+	 *
+	 * The point is a single deterministic winner, never dependent on the order tags arrive in. It
+	 * orders by normalized length (usually, but not always, the fewer-zeros spelling), then the
+	 * normalized bytes, then the raw tag, so even tags that normalize identically ("1.0"/"v1.0")
+	 * resolve to one.
+	 *
+	 * @param string $candidate     Normalized version being considered.
+	 * @param string $candidate_tag Its raw tag.
+	 * @param string $current       Normalized version already kept for this dedupe key.
+	 * @param string $current_tag   Its raw tag.
+	 * @return bool True if $candidate should replace the kept version.
+	 */
+	private static function is_preferred_spelling( string $candidate, string $candidate_tag, string $current, string $current_tag ): bool {
+		$order = ( strlen( $candidate ) <=> strlen( $current ) )
+			?: strcmp( $candidate, $current )
+			?: strcmp( $candidate_tag, $current_tag );
+
+		return $order < 0;
 	}
 
 	/**

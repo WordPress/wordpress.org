@@ -33,7 +33,7 @@ get_header(); ?>
 		<div class="secondary-videos">
 			<h3>
 				<?php esc_html_e( 'WordCampTV', 'wptv' ); ?>
-				<a href="<?php echo home_url( '/category/wordcamptv/' ); ?>" class="view-more"><?php _e( 'More &rarr;', 'wptv' ); ?></a>
+				<a href="<?php echo esc_url( home_url( '/category/wordcamptv/' ) ); ?>" class="view-more"><?php esc_html_e( 'More &rarr;', 'wptv' ); ?></a>
 			</h3>
 			<ul>
 				<?php

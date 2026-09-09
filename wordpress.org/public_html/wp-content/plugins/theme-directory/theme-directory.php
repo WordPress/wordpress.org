@@ -572,9 +572,7 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		// Allow theme titles to change in case or accent: `ThemeName` => `Themename` + `ThemeName` => `ThemèName`
 		if ( $theme_post_name !== $theme_data['Name'] ) {
 			// Theme name has been updated. Make sure it still sanitizes to the same post.
-			$name_slugified = remove_accents( $theme_data['Name'] );
-			$name_slugified = preg_replace( '/%[a-f0-9]{2}/i', '', $name_slugified );
-			$name_slugified = sanitize_title_with_dashes( $name_slugified );
+			$name_slugified = wporg_themes_slug_from_name( $theme_data['Name'] );
 
 			if ( $name_slugified === $post->post_name ) {
 				// The new name still ends up at the same post_name slug value, let them have it.
@@ -591,6 +589,10 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 				'fields' => 'slugs'
 			) )
 		);
+
+		// SVN commits skip the upload's shortcode check, so make the delimiters inert here.
+		$theme_post_name           = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_post_name );
+		$theme_data['Description'] = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_data['Description'] );
 
 		wp_update_post( array(
 			'ID'           => $post_id,
@@ -791,6 +793,24 @@ function wporg_themes_remove_wpthemescom( $theme_slug ) {
 			),
 		) );
 	}
+}
+
+/**
+ * Derives the directory slug for a theme name.
+ *
+ * Kept to ASCII, so the value survives the second sanitize that `wp_insert_post()`
+ * runs on `post_name`. The upload maps the default theme names (`twenty-*`) after this.
+ *
+ * @param string $name The theme name, as read from the `Theme Name:` header.
+ * @return string The slug; empty when nothing of the name can be kept.
+ */
+function wporg_themes_slug_from_name( $name ) {
+	// Convert accented characters, drop what cannot be converted, and drop '%' so nothing reads as an encoded octet.
+	$slug = preg_replace( '/[%\x80-\xff]/', '', remove_accents( (string) $name ) );
+	$slug = sanitize_title_with_dashes( $slug );
+
+	// Underscores alone survive the sanitizer; a slug needs a letter or a digit.
+	return preg_match( '/[a-z0-9]/', $slug ) ? $slug : '';
 }
 
 /**

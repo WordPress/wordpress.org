@@ -1,7 +1,15 @@
+<?php
+/**
+ * Sidebar shown alongside a single showcase entry.
+ *
+ * @package wporg-showcase
+ */
+
+?>
 		<div class="col-3 rightsidebar">
 			<div class="rightsidebarwrapper">
 			<div class="currentSiteRating">
-				<p class="button"><a href="http://<?php get_site_domain( false ); ?>"><?php _e( 'Visit Site', 'wporg-showcase' ); ?></a></p>
+				<p class="button"><a href="<?php echo esc_url( 'http://' . get_site_domain( false, false ) ); ?>"><?php esc_html_e( 'Visit Site', 'wporg-showcase' ); ?></a></p>
 
 				<?php wp_flavors(); ?>
 				<br />

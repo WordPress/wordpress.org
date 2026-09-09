@@ -3,48 +3,25 @@
 Here we are implementing Translation Events, as discussed in our Polyglots Make P2 Post: [Translation Events Prototype](https://make.wordpress.org/polyglots/2024/02/28/translation-events-prototype/).
 
 ## Development environment
-First follow [instructions to install `wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/#prerequisites).
 
-Then install dependencies:
+This plugin is part of the translate.wordpress.org development environment in `environments/translate` at the root of this repository, which runs it alongside GlotPress and the other translate.wordpress.org plugins. From the `environments` directory:
 
 ```shell
-composer install
+npm run translate:env start
 ```
 
-Then you can run a local WordPress instance with the plugin installed:
+See `environments/README.md` for details.
+
+## Tests
+
+The test suite runs in a dedicated wp-env test environment. From the `environments` directory:
 
 ```shell
-composer dev:start
+npm run translate:test
 ```
 
-Once the environment is running, you must create the database tables needed by this plugin:
+If you want to run only one test, start the test environment once and then run PHPUnit directly with a filter:
 
 ```shell
-composer dev:db:schema
-```
-
-WordPress is now running at http://localhost:8888, user: `admin`, password: `password`.
-
-### Local environment
-
-If you are not using `wp-env`, you need to add the tables to the database of your local environment. To do this, you can run this command from the plugin folder:
-
-```shell
-wp db query < schema.sql
-```
-
-### Tests
-
-You can run tests in `wp-env` with the following command:
-
-> Note that `wp-env` must be running.
-
-```shell
-composer dev:test
-```
-
-If you want to run only one test, you can use the following command:
-
-```shell
-composer dev:test -- --filter methods_name
+npm run translate:test:env -- run tests-cli --env-cwd=wp-content/plugins/wporg-gp-translation-events phpunit -- --filter method_name
 ```

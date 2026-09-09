@@ -372,9 +372,12 @@ class Plugin extends Base {
 	 * @return string HTML blob of data.
 	 */
 	protected function get_plugin_reviews_markup( $plugin_slug ) {
-		$output = '';
-		foreach ( Tools::get_plugin_reviews( $plugin_slug, 10 ) as $review ) {
-			$output .= $this->get_plugin_reviews_markup_singular( $review );
+		$output         = '';
+		$plugin_reviews = Tools::get_plugin_reviews( $plugin_slug, 10 );
+		if ( ! empty( $plugin_reviews ) ) {
+			foreach ( $plugin_reviews as $review ) {
+				$output .= $this->get_plugin_reviews_markup_singular( $review );
+			}
 		}
 		return $output;
 	}

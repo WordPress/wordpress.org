@@ -12,6 +12,6 @@ wp_enqueue_style( 'showcase', get_stylesheet_uri(), array( 'dashicons' ), 21 );
 <div id="headline">
 	<div class="wrapper">
 		<a id="wpsc-mobile-menu-button" class="" href="#" onclick="toggle_wpsc_mobile_menu();"></a>
-		<h1><a href="<?php echo home_url('/'); ?>"><?php _e( 'WordPress Website Showcase', 'wporg-showcase' ); ?></a></h1>
+		<h1><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'WordPress Website Showcase', 'wporg-showcase' ); ?></a></h1>
 	</div>
 </div>

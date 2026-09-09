@@ -24,7 +24,16 @@
 
 			<?php do_action( 'bbp_theme_before_topic_started_in' ); ?>
 
-			<span class="bbp-topic-started-in"><?php printf( __( 'in: <a href="%1$s">%2$s</a>', 'wporg-forums' ), bbp_get_forum_permalink( bbp_get_topic_forum_id( $topic_id ) ), bbp_get_forum_title( bbp_get_topic_forum_id( $topic_id ) ) ); ?></span>
+			<span class="bbp-topic-started-in">
+				<?php
+				printf(
+					/* translators: 1: URL of the forum, 2: Name of the forum. */
+					wp_kses_post( __( 'in: <a href="%1$s">%2$s</a>', 'wporg-forums' ) ),
+					esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id( $topic_id ) ) ),
+					esc_html( bbp_get_forum_title( bbp_get_topic_forum_id( $topic_id ) ) )
+				);
+				?>
+			</span>
 
 			<?php do_action( 'bbp_theme_after_topic_started_in' ); ?>
 
