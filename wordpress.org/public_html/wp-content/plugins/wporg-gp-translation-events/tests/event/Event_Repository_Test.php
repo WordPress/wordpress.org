@@ -60,6 +60,35 @@ class Event_Repository_Test extends TestCase {
 	}
 
 	/**
+	 * Edits made outside the repository, like in wp-admin, must not be masked by the event cache.
+	 */
+	public function test_get_event_reflects_post_updated_outside_repository() {
+		$event_id = $this->event_factory->create_active( $this->now );
+		$this->assertNotSame( 'Renamed', $this->repository->get_event( $event_id )->title() );
+
+		wp_update_post(
+			array(
+				'ID'         => $event_id,
+				'post_title' => 'Renamed',
+			)
+		);
+
+		$this->assertSame( 'Renamed', $this->repository->get_event( $event_id )->title() );
+	}
+
+	/**
+	 * Trashing in wp-admin must not leave a cached event that still reads as published.
+	 */
+	public function test_get_event_reflects_post_trashed_outside_repository() {
+		$event_id = $this->event_factory->create_active( $this->now );
+		$this->assertTrue( $this->repository->get_event( $event_id )->is_published() );
+
+		wp_trash_post( $event_id );
+
+		$this->assertTrue( $this->repository->get_event( $event_id )->is_trashed() );
+	}
+
+	/**
 	 * An attendance mode stored before the model validated it falls back to onsite.
 	 */
 	public function test_get_event_falls_back_to_onsite_for_unknown_attendance_mode() {

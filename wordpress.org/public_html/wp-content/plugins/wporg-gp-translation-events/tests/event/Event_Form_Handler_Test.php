@@ -144,6 +144,26 @@ class Event_Form_Handler_Test extends TestCase {
 	}
 
 	/**
+	 * The timezone select is disabled for users who may not change it, and disabled fields are
+	 * not submitted, so an edit without a timezone must keep the stored one rather than fail.
+	 *
+	 * @return void
+	 */
+	public function test_edit_form_keeps_timezone_when_field_is_not_submitted(): void {
+		$this->set_normal_user_as_current();
+		$event_id = $this->event_factory->create_active( $this->now );
+		$this->create_stats_for_event( $event_id );
+		$this->assertFalse( current_user_can( 'edit_translation_event_timezone', $event_id ) );
+
+		$form_data = $this->form_data( 'edit_event', 'publish', $event_id );
+		unset( $form_data['event_timezone'] );
+		$response = $this->submit( $form_data );
+
+		$this->assertTrue( $response['success'] );
+		$this->assertSame( 'Europe/Lisbon', $this->event_repository->get_event( $event_id )->timezone()->getName() );
+	}
+
+	/**
 	 * A trashed event must be restored through the trash route, which checks the trash capability.
 	 *
 	 * @return void

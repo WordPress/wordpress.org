@@ -658,7 +658,7 @@ class Event_Repository {
 	 *
 	 * @param int $event_id Event ID.
 	 */
-	private function invalidate_cache( $event_id ) {
+	public function invalidate_cache( int $event_id ): void {
 		wp_cache_delete( 'translation_event_' . $event_id );
 	}
 }

@@ -99,6 +99,10 @@ class Event_Form_Handler {
 		} else {
 			// Create or update event.
 
+			if ( 'edit_event' === $action && ! empty( $event ) && empty( $form_data['event_timezone'] ) ) {
+				$form_data['event_timezone'] = $event->timezone()->getName();
+			}
+
 			try {
 				$new_event = $this->parse_form_data( $form_data );
 			} catch ( Invalid_Time_Zone $e ) {

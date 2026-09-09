@@ -96,6 +96,7 @@ class Translation_Events {
 		add_action( 'init', array( $this, 'remove_incorrect_rss_feed' ) );
 		add_action( 'add_meta_boxes', array( $this, 'event_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_event_meta_boxes' ) );
+		add_action( 'clean_post_cache', array( $this, 'invalidate_event_cache' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'event_status_transition' ), 10, 3 );
 		add_filter( 'gp_nav_menu_items', array( $this, 'gp_event_nav_menu_items' ), 10, 2 );
 		add_filter( 'wp_insert_post_data', array( $this, 'generate_event_slug' ), 10, 2 );
@@ -281,6 +282,20 @@ class Translation_Events {
 			if ( isset( $_POST[ $field ] ) ) {
 				update_post_meta( $post_id, '_' . $field, sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) );
 			}
+		}
+		self::get_event_repository()->invalidate_cache( $post_id );
+	}
+
+	/**
+	 * Drop the cached event whenever WordPress drops the post's cache, so that edits made
+	 * outside the repository, like in wp-admin, are not served stale.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
+	 */
+	public function invalidate_event_cache( int $post_id, WP_Post $post ): void {
+		if ( self::CPT === $post->post_type ) {
+			self::get_event_repository()->invalidate_cache( $post_id );
 		}
 	}
 
