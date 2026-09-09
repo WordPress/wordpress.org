@@ -268,7 +268,7 @@ class Release_Confirmation {
 				sprintf(
 					/* translators: 1: User name, 2: Time since the release was discarded. */
 					esc_html__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
-					$user->display_name ?: $user->user_login,
+					esc_html( $user->display_name ?: $user->user_login ),
 					human_time_diff( $data['discarded']['time'] )
 				)
 			);

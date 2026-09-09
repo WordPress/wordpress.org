@@ -16,7 +16,7 @@
 
 				<h1>
 					<?php /* translators: %s: Topic title. */ ?>
-					<?php printf( esc_html__( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), esc_html( bbp_get_topic_title() ) ); ?>
+					<?php printf( esc_html__( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), wp_kses_post( bbp_get_topic_title() ) ); ?>
 				</h1>
 
 			<?php } else { ?>

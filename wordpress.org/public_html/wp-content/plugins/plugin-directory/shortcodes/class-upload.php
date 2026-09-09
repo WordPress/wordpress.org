@@ -283,7 +283,7 @@ class Upload {
 										/* translators: 1: Email address, 2: Email subject. */
 										wp_kses_post( __( 'Please be patient and wait for the review email. It will be sent to your email address, <strong>%1$s</strong>, with the subject line: "<strong>%2$s</strong>".', 'wporg-plugins' ) ),
 										esc_html( get_userdata( $plugin->post_author )->user_email ),
-										'[WordPress Plugin Directory] Review in Progress: ' . $plugin->post_title
+										'[WordPress Plugin Directory] Review in Progress: ' . esc_html( $plugin->post_title )
 									)
 								);
 								echo '<div class="plugin-submission-email-clarification">';

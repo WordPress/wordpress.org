@@ -104,7 +104,7 @@
 									esc_html_e( 'None', 'wporg' );
 								}
 							} else {
-								esc_html_e( 'None', 'wporg' );
+								esc_html_e( 'No&nbsp;site', 'wporg' );
 							}
 						?>
 					</td>
