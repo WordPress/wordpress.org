@@ -107,6 +107,9 @@
 				<element value="edit_topic"/>
 				<element value="edit_reply"/>
 				<element value="read_topic"/>
+				<element value="read_private_topics"/>
+				<element value="read_private_forums"/>
+				<element value="read_hidden_forums"/>
 				<element value="keep_gate"/>
 				<element value="moderate"/>
 				<element value="throttle"/>

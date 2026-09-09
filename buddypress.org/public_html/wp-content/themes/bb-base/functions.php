@@ -407,6 +407,22 @@ function bb_base_homepage_topics( $args = false ) {
 }
 
 /**
+ * Whether the current viewer's topic list is the same one anonymous visitors see.
+ *
+ * The topic query widens per viewer: `?view=all` adds non-public statuses,
+ * `read_private_topics` adds private topics, and the forum read caps lift the
+ * private/hidden forum exclusion. None of those renders may be shared.
+ *
+ * @return bool
+ */
+function bb_base_can_cache_topics() {
+	return ! bbp_get_view_all( 'edit_others_topics' )
+		&& ! current_user_can( 'read_private_topics' )
+		&& ! current_user_can( 'read_private_forums' )
+		&& ! current_user_can( 'read_hidden_forums' );
+}
+
+/**
  * Get front page topics output and stash it for an hour
  *
  * @author johnjamesjacoby
@@ -418,7 +434,8 @@ function bb_base_get_homepage_topics( $args = false ) {
 	// Transient settings
 	$expiration    = MINUTE_IN_SECONDS * 5;
 	$transient_key = 'bb_base_homepage_topics';
-	$output        = get_transient( $transient_key );
+	$cacheable     = bb_base_can_cache_topics();
+	$output        = $cacheable ? get_transient( $transient_key ) : false;
 
 	// No transient found, so query for topics again
 	if ( false === $output ) {
@@ -440,7 +457,9 @@ function bb_base_get_homepage_topics( $args = false ) {
 		}
 
 		// Set the transient
-		set_transient( $transient_key, $output, $expiration );
+		if ( $cacheable ) {
+			set_transient( $transient_key, $output, $expiration );
+		}
 	}
 
 	// Return the output
@@ -485,7 +504,8 @@ function bb_base_get_support_topics() {
 	// Transient settings
 	$expiration    = MINUTE_IN_SECONDS * 5;
 	$transient_key = 'bb_base_support_topics';
-	$output        = get_transient( $transient_key );
+	$cacheable     = bb_base_can_cache_topics();
+	$output        = $cacheable ? get_transient( $transient_key ) : false;
 
 	// No transient found, so query for topics again
 	if ( false === $output ) {
@@ -494,7 +514,9 @@ function bb_base_get_support_topics() {
 		$output = bbp_buffer_template_part( 'content', 'archive-topic', false );
 
 		// Set the transient
-		set_transient( $transient_key, $output, $expiration );
+		if ( $cacheable ) {
+			set_transient( $transient_key, $output, $expiration );
+		}
 	}
 
 	// Return the output
