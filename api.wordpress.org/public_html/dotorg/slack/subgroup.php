@@ -182,7 +182,7 @@ function handle_block_action( $payload ) {
 				api_call( 'conversations.invite', [
 					'channel' => $channel_to_join,
 					'users'   => $user_id,
-				] );
+				], channel_token( $channel_to_join ) );
 				invalidate_members( $channel_to_join );
 			}
 
@@ -897,13 +897,11 @@ function list_all_private_channels( $include_archived = false ) {
 		$archived = [];
 		foreach ( $bot['channels'] ?? [] as $g ) {
 			if ( ! empty( $g['is_archived'] ) ) {
-				$g['bot_member']      = true;
 				$archived[ $g['id'] ] = $g;
 			}
 		}
 		foreach ( $user['channels'] ?? [] as $g ) {
 			if ( ! empty( $g['is_archived'] ) && ! isset( $archived[ $g['id'] ] ) ) {
-				$g['bot_member']      = false;
 				$archived[ $g['id'] ] = $g;
 			}
 		}
@@ -933,10 +931,10 @@ function find_channel( $channel_id ) {
 }
 
 /*
- * Read member lists with the bot token where the bot is a member, and with the
- * owner token everywhere else.
+ * The token that can act on a channel: the bot where it is a member, the owner
+ * token everywhere else.
  */
-function members_token( $channel_id ) {
+function channel_token( $channel_id ) {
 	foreach ( list_all_private_channels() as $g ) {
 		if ( $g['id'] === $channel_id ) {
 			return empty( $g['bot_member'] ) ? SUBGROUP_USER_TOKEN : null;
@@ -962,7 +960,7 @@ function prime_members_cache( array $channel_ids ) {
 	}
 	$calls = [];
 	foreach ( $to_fetch as $id ) {
-		$calls[] = [ 'conversations.members', [ 'channel' => $id, 'limit' => 999 ], members_token( $id ) ];
+		$calls[] = [ 'conversations.members', [ 'channel' => $id, 'limit' => 999 ], channel_token( $id ) ];
 	}
 	$results = api_multi_call( $calls );
 	foreach ( $to_fetch as $i => $id ) {
@@ -978,7 +976,7 @@ function get_members( $channel_id ) {
 		$r       = api_call( 'conversations.members', [
 			'channel' => $channel_id,
 			'limit'   => 999,
-		], members_token( $channel_id ) );
+		], channel_token( $channel_id ) );
 		$members = $r['members'] ?? [];
 		wp_cache_set( $key, $members, CACHE_GROUP, CACHE_TTL_MEMBERS );
 	}
@@ -1072,8 +1070,7 @@ function build_home_view( $parent, $subgroups, $user_id ) {
 				'type' => 'section',
 				'text' => [ 'type' => 'mrkdwn', 'text' => implode( "\n", $lines ) ],
 			];
-			// Joining runs as the bot, so only offer it where the bot can invite.
-			if ( ! $is_member && ! empty( $g['bot_member'] ) ) {
+			if ( ! $is_member ) {
 				$block['accessory'] = [
 					'type'      => 'button',
 					'text'      => [ 'type' => 'plain_text', 'text' => 'Join' ],
