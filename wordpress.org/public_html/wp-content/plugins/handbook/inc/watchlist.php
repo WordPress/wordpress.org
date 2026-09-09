@@ -160,15 +160,17 @@ class WPorg_Handbook_Watchlist {
 
 			if ( $watchlist && in_array( get_current_user_id(), $watchlist ) ) {
 				printf(
-					__( '<a href="%s" title="%s">Unwatch</a>', 'wporg' ),
+					'<a href="%s" title="%s">%s</a>',
 					esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&post_id=' . $post->ID ), 'unwatch-' . $post->ID ) ),
-					esc_attr__( 'Stop getting notified about changes to this page', 'wporg' )
+					esc_attr__( 'Stop getting notified about changes to this page', 'wporg' ),
+					esc_html__( 'Unwatch', 'wporg' )
 				);
 			} else {
 				printf(
-					__( '<a href="%s" title="%s">Watch</a>', 'wporg' ),
+					'<a href="%s" title="%s">%s</a>',
 					esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&watch=1&post_id=' . $post->ID ), 'watch-' . $post->ID ) ),
-					esc_attr__( 'Get notified about changes to this page', 'wporg' )
+					esc_attr__( 'Get notified about changes to this page', 'wporg' ),
+					esc_html__( 'Watch', 'wporg' )
 				);
 			}
 		}
