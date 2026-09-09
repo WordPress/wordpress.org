@@ -1359,14 +1359,16 @@ class Admin {
 			return;
 		}
 
+		$format = '<div class="misc-pub-section misc-pub-%s">%s: <strong>%s</strong></div>';
+
 		// Output file hash.
 		if ( $file_hash = get_post_meta( $post_id, Registrations::get_meta_key( 'file_hash' ), true ) ) {
-			printf( '<div class="misc-pub-section misc-pub-%s">%s: <strong>%s</strong></div>', 'file-hash', esc_html__( 'File hash', 'wporg-photos' ), esc_html( $file_hash ) );
+			echo wp_kses_post( sprintf( $format, 'file-hash', esc_html__( 'File hash', 'wporg-photos' ), esc_html( $file_hash ) ) );
 		}
 
 		// Output original filename.
 		if ( $orig_filename = get_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), true ) ) {
-			printf( '<div class="misc-pub-section misc-pub-%s">%s: <strong>%s</strong></div>', 'original-filename', esc_html__( 'Original file name', 'wporg-photos' ), esc_html( $orig_filename ) );
+			echo wp_kses_post( sprintf( $format, 'original-filename', esc_html__( 'Original file name', 'wporg-photos' ), esc_html( $orig_filename ) ) );
 		}
 
 		// Output moderator.

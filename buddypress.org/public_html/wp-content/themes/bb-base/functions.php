@@ -212,7 +212,7 @@ function bb_base_single_topic_description() {
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="topic-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( esc_html__( 'About %s', 'bborg' ), esc_html( $time_since ) );
+			printf( esc_html__( 'About %s', 'bborg' ), wp_kses_post( $time_since ) );
 		?></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
@@ -289,7 +289,7 @@ function bb_base_single_forum_description() {
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="forum-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( esc_html__( 'About %s', 'bborg' ), esc_html( $time_since ) );
+			printf( esc_html__( 'About %s', 'bborg' ), wp_kses_post( $time_since ) );
 		?></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>

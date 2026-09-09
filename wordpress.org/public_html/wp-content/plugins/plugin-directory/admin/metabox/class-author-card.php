@@ -202,7 +202,7 @@ class Author_Card {
 						);
 					}
 					/* translators: %s: comma-separated list of negative user status labels */
-					echo '<p>' . sprintf( esc_html__( 'This user is: %s', 'wporg-plugins' ), esc_html( implode( ', ', $labels ) ) ) . '</p>';
+					echo '<p>' . sprintf( esc_html__( 'This user is: %s', 'wporg-plugins' ), wp_kses_post( implode( ', ', $labels ) ) ) . '</p>';
 				}
 
 				$user_notes = get_user_meta( $user->ID, '_wporg_bbp_user_notes', true );

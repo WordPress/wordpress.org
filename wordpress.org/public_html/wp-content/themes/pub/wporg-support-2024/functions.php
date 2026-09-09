@@ -1521,7 +1521,7 @@ function bb_base_single_topic_description() {
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="topic-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( esc_html__( 'Last activity: %s', 'wporg-forums' ), esc_html( $time_since ) );
+			printf( esc_html__( 'Last activity: %s', 'wporg-forums' ), wp_kses_post( $time_since ) );
 		?></li>
 	<?php endif; ?>
 	<?php if ( ! empty( $wp_version ) ) : ?>

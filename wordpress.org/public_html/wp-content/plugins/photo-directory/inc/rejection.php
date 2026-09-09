@@ -874,7 +874,7 @@ class Rejection {
 
 		echo '<div class="misc-pub-section curtime misc-pub-curtime">';
 		/* translators: %s: Name of the rejecting user. */
-		printf( esc_html__( 'Rejected by: %s', 'wporg-photos' ), '<b>' . esc_html( $rejection_user ) . '</b>' );
+		printf( esc_html__( 'Rejected by: %s', 'wporg-photos' ), '<b>' . wp_kses_post( $rejection_user ) . '</b>' );
 		echo '<br>';
 		/* translators: %s: Rejection date. */
 		printf( esc_html__( 'Rejected on: %s', 'wporg-photos' ), '<b>' . esc_html( $rejection_date ) . '</b>' );
