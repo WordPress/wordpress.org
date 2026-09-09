@@ -16,7 +16,14 @@ use Wporg\TranslationEvents\Event\Event_Start_Date;
 class Notifications_Send {
 
 	private Attendee_Repository $attendee_repository;
+
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
+
 	private DateTimeImmutable $now;
 
 	/**
@@ -39,6 +46,11 @@ class Notifications_Send {
 		add_action( 'wporg_gp_translation_events_email_notifications_24h', array( $this, 'send_notifications' ), 10, 1 );
 	}
 
+	/**
+	 * Re-check whether the attendees of an event are still new contributors.
+	 *
+	 * @param int $post_id Post ID.
+	 */
 	public function recalculate_new_contributor( int $post_id ) {
 		$event = $this->event_repository->get_event( $post_id );
 		if ( null === $event ) {

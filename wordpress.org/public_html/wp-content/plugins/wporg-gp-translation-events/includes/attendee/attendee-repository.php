@@ -299,7 +299,9 @@ class Attendee_Repository {
 	}
 
 	/**
-	 * Check the attendees if they are no longer new contributors and update
+	 * Check the attendees if they are no longer new contributors and update.
+	 *
+	 * @param int $event_id Event ID.
 	 */
 	public function recheck_new_contributor_status( int $event_id ) {
 		// Get all attendees marked as new contributors.

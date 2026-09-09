@@ -20,9 +20,9 @@ class Event {
 	private string $attendance_mode;
 
 	/**
-	 * @throws Invalid_Start
-	 * @throws Invalid_End
-	 * @throws Invalid_Status
+	 * @throws Invalid_Start  When the start date is not in UTC.
+	 * @throws Invalid_End    When the end date is not in UTC, or is not after the start date.
+	 * @throws Invalid_Status When the status is not draft, publish, or trash.
 	 */
 	public function __construct(
 		int $author_id,
@@ -141,7 +141,7 @@ class Event {
 	}
 
 	/**
-	 * @throws Invalid_Status
+	 * @throws Invalid_Status When the status is not draft, publish, or trash.
 	 */
 	public function set_status( string $status ): void {
 		if ( ! in_array( $status, array( 'draft', 'publish', 'trash' ), true ) ) {
@@ -167,8 +167,8 @@ class Event {
 	}
 
 	/**
-	 * @throws Invalid_Start
-	 * @throws Invalid_End
+	 * @throws Invalid_Start When the start date is not in UTC.
+	 * @throws Invalid_End   When the end date is not in UTC, or is not after the start date.
 	 */
 	public function validate_times( Event_Start_Date $start, Event_End_Date $end ) {
 		if ( $end <= $start ) {

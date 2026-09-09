@@ -15,6 +15,11 @@ use Wporg\TranslationEvents\Translation_Events;
  * Displays the event details page.
  */
 class Details_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 	private Project_Repository $project_repository;

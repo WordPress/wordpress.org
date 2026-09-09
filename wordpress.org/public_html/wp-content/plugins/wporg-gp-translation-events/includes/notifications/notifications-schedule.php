@@ -7,6 +7,12 @@ use Wporg\TranslationEvents\Event\Event_Repository;
 
 class Notifications_Schedule {
 	private DateTimeImmutable $now;
+
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 	/**

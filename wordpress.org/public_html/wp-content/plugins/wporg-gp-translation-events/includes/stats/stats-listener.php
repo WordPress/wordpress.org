@@ -15,8 +15,18 @@ class Stats_Listener {
 	const ACTION_REJECT          = 'reject';
 	const ACTION_REQUEST_CHANGES = 'request_changes';
 
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
+	/**
+	 * Stats_Listener constructor.
+	 *
+	 * @param Event_Repository $event_repository Event repository.
+	 */
 	public function __construct( Event_Repository $event_repository ) {
 		$this->event_repository = $event_repository;
 	}

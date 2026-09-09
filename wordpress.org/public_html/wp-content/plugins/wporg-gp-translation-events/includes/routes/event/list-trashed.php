@@ -10,6 +10,11 @@ use Wporg\TranslationEvents\Translation_Events;
  * Displays the page that shows the list of trashed events.
  */
 class List_Trashed_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 	public function __construct() {

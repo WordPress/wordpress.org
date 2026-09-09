@@ -10,6 +10,11 @@ use Wporg\TranslationEvents\Translation_Events;
  * Displays the event list page.
  */
 class List_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 	public function __construct() {
@@ -82,6 +87,12 @@ class List_Route extends Route {
 		);
 	}
 
+	/**
+	 * Respond to an AJAX request for the next page of an event list.
+	 *
+	 * @param string $filter_key Key of the event list to page through.
+	 * @param array  $tmpl_args  Template arguments, keyed by event list.
+	 */
 	public function handle_ajax( $filter_key, $tmpl_args ) {
 		$event_ids    = $tmpl_args[ $filter_key ]->event_ids;
 		$current_page = $tmpl_args[ $filter_key ]->current_page;

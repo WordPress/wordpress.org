@@ -10,6 +10,11 @@ use Wporg\TranslationEvents\Translation_Events;
  * Displays the event edit page.
  */
 class Edit_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 	public function __construct() {

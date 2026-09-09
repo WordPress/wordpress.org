@@ -15,6 +15,11 @@ use Wporg\TranslationEvents\Templates;
  * Displays the event translations page.
  */
 class Translations_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 	public function __construct() {

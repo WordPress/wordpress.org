@@ -15,6 +15,11 @@ use Wporg\TranslationEvents\Urls;
  * Displays the RSS page.
  */
 class Rss_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 	/**

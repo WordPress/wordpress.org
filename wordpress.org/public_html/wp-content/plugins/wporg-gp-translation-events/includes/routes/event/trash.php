@@ -13,6 +13,11 @@ use Wporg\TranslationEvents\Urls;
  * If the event is currently trashed, it will be un-trashed.
  */
 class Trash_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 	public function __construct() {

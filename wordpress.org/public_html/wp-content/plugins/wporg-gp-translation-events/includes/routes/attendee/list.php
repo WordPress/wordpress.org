@@ -13,6 +13,12 @@ use Wporg\TranslationEvents\Event\Event_Repository;
  */
 class List_Route extends Route {
 	private Attendee_Repository $attendee_repository;
+
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 

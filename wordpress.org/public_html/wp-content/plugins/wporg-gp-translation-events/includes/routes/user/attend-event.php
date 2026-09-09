@@ -19,6 +19,11 @@ use Wporg\TranslationEvents\Urls;
  * created since the event started are imported.
  */
 class Attend_Event_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 	private Attendee_Adder $attendee_adder;

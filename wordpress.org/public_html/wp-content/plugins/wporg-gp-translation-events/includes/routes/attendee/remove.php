@@ -13,6 +13,11 @@ use Wporg\TranslationEvents\Urls;
  * Remove an attendee from an event.
  */
 class Remove_Attendee_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 

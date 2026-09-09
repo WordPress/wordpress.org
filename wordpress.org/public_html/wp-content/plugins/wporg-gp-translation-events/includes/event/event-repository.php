@@ -11,6 +11,9 @@ use WP_Query;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Translation_Events;
 
+/**
+ * Stores and retrieves events.
+ */
 class Event_Repository {
 	private const POST_TYPE      = Translation_Events::CPT;
 	private const CACHE_DURATION = DAY_IN_SECONDS;
@@ -502,10 +505,10 @@ class Event_Repository {
 	}
 
 	/**
-	 * @throws Invalid_Start
-	 * @throws Invalid_End
-	 * @throws Invalid_Status
-	 * @throws Exception
+	 * @throws Invalid_Start  When a queried event has an invalid start date.
+	 * @throws Invalid_End    When a queried event has an invalid end date.
+	 * @throws Invalid_Status When a queried event has an invalid status.
+	 * @throws Exception      When the pagination arguments are inconsistent.
 	 */
 	private function execute_events_query(
 		int $page,
@@ -649,6 +652,11 @@ class Event_Repository {
 		update_post_meta( $event->id(), '_event_attendance_mode', $event->attendance_mode() );
 	}
 
+	/**
+	 * Remove an event from the object cache.
+	 *
+	 * @param int $event_id Event ID.
+	 */
 	private function invalidate_cache( $event_id ) {
 		wp_cache_delete( 'translation_event_' . $event_id );
 	}

@@ -46,7 +46,14 @@ class Event_Capabilities {
 	);
 
 	private DateTimeImmutable $now;
+
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
+
 	private Attendee_Repository $attendee_repository;
 	private Stats_Calculator $stats_calculator;
 

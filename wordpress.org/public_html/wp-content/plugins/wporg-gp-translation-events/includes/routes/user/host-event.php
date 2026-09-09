@@ -15,6 +15,11 @@ use Wporg\TranslationEvents\Urls;
  * If the user is currently marked as host, they will be marked as not host.
  */
 class Host_Event_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 

@@ -65,6 +65,14 @@ class Attendee_Adder {
 		// phpcs:enable
 	}
 
+	/**
+	 * Check whether a user is a new contributor, based on their translations before the event started.
+	 *
+	 * @param Event $event   The event.
+	 * @param int   $user_id User ID.
+	 *
+	 * @return bool True if the user had ten or fewer translations before the event started.
+	 */
 	public function check_is_new_contributor( Event $event, int $user_id ): bool {
 		global $wpdb, $gp_table_prefix;
 

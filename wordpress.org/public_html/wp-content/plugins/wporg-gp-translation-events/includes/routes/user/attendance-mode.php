@@ -15,6 +15,11 @@ use Wporg\TranslationEvents\Urls;
  * If the user is currently marked as as remote attendee, they will be marked as not remote attendee.
  */
 class Attendance_Mode_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 

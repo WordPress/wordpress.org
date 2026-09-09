@@ -12,6 +12,11 @@ use Wporg\TranslationEvents\Translation_Events;
  * Displays the My Events page for a user.
  */
 class My_Events_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 

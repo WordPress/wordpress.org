@@ -56,6 +56,11 @@ class Translation_Events {
 		return $now;
 	}
 
+	/**
+	 * Get the shared event repository.
+	 *
+	 * @return Event_Repository
+	 */
 	public static function get_event_repository(): Event_Repository {
 		static $event_repository = null;
 		if ( null === $event_repository ) {

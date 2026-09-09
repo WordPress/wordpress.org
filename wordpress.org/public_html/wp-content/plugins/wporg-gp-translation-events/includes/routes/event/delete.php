@@ -11,6 +11,11 @@ use Wporg\TranslationEvents\Urls;
  * Permanently delete an Event.
  */
 class Delete_Route extends Route {
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
 	private Event_Repository $event_repository;
 
 	public function __construct() {
