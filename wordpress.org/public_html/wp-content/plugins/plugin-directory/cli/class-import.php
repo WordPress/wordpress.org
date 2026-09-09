@@ -633,29 +633,7 @@ class Import {
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
 		}
 
-		// Add the release to storage.
-		if ( 'trunk' != $stable_tag ) {
-			Plugin_Directory::add_release(
-				$plugin,
-				[
-					'tag'       => $stable_tag,
-					'version'   => $version,
-					'committer' => [ $last_committer ],
-					'revision'  => [ $last_revision ]
-				]
-			);
-		} elseif ( 'trunk' === $stable_tag && version_compare( $version, $plugin->version, '>' ) ) {
-			// This is a new version, released from trunk.
-			Plugin_Directory::add_release(
-				$plugin,
-				[
-					'tag'       => "trunk@{$version}",
-					'version'   => $version,
-					'committer' => [ $last_committer ],
-					'revision'  => [ $last_revision ]
-				]
-			);
-		}
+		self::record_release( $plugin, $stable_tag, $version, $current_stable_tag, $last_committer, $last_revision );
 
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
@@ -1396,6 +1374,45 @@ class Import {
 		$segments = preg_split( '#[/\\\\]#', $version );
 
 		return '' !== $segments[0] && ! array_intersect( array( '.', '..' ), $segments );
+	}
+
+	/**
+	 * Record the release the plugin's stable ref now serves.
+	 *
+	 * A tagged stable ref always gets a row. Trunk gets a `trunk@{version}` row
+	 * when the version is new, or when trunk is newly stable: a flip from a tag
+	 * at an unchanged version still changes the served code, and the row's
+	 * fresh date is what the update-source writer holds the release on.
+	 *
+	 * @param \WP_Post   $plugin              The plugin post, still carrying the previous version meta.
+	 * @param string     $stable_tag          The stable tag being imported.
+	 * @param string     $version             The Version header being imported.
+	 * @param string     $previous_stable_tag The stable tag before this import.
+	 * @param string     $committer           The committer of the release.
+	 * @param int|string $revision            The revision of the release.
+	 */
+	public static function record_release( $plugin, $stable_tag, $version, $previous_stable_tag, $committer, $revision ) {
+		if ( 'trunk' !== $stable_tag ) {
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'       => $stable_tag,
+					'version'   => $version,
+					'committer' => [ $committer ],
+					'revision'  => [ $revision ],
+				]
+			);
+		} elseif ( 'trunk' !== $previous_stable_tag || version_compare( $version, $plugin->version, '>' ) ) {
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'       => "trunk@{$version}",
+					'version'   => $version,
+					'committer' => [ $committer ],
+					'revision'  => [ $revision ],
+				]
+			);
+		}
 	}
 
 	/**
