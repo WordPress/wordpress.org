@@ -1,4 +1,11 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024;
+<?php
+/**
+ * Registers the header block, which renders the site header and surrounding HTML document via site-header.php and render.php.
+ *
+ * @package wporg-translate-events-2024
+ */
+
+namespace Wporg\TranslationEvents\Theme_2024;
 
 register_block_type(
 	'wporg-translate-events-2024/header',

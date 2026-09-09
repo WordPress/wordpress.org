@@ -4,35 +4,11 @@ namespace Wporg\TranslationEvents\Event;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Exception;
-use Throwable;
 use Wporg\TranslationEvents\Translation_Events;
 
-class InvalidTimeZone extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
-		parent::__construct( 'Event time zone is invalid', 0, $previous );
-	}
-}
-
-class InvalidStart extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
-		parent::__construct( 'Event start is invalid', 0, $previous );
-	}
-}
-
-class InvalidEnd extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
-		parent::__construct( 'Event end is invalid', 0, $previous );
-	}
-}
-
-class InvalidStatus extends Exception {
-	public function __construct( ?Throwable $previous = null ) {
-		parent::__construct( 'Event status is invalid', 0, $previous );
-	}
-}
-
 class Event {
+	public const ATTENDANCE_MODES = array( 'onsite', 'remote', 'hybrid' );
+
 	private int $id = 0;
 	private int $author_id;
 	private Event_Start_Date $start;
@@ -46,9 +22,10 @@ class Event {
 	private string $attendance_mode;
 
 	/**
-	 * @throws InvalidStart
-	 * @throws InvalidEnd
-	 * @throws InvalidStatus
+	 * @throws Invalid_Start  When the start date is not in UTC.
+	 * @throws Invalid_End    When the end date is not in UTC, or is not after the start date.
+	 * @throws Invalid_Status When the status is not draft, publish, or trash.
+	 * @throws Invalid_Attendance_Mode When the attendance mode is not onsite, remote, or hybrid.
 	 */
 	public function __construct(
 		int $author_id,
@@ -167,11 +144,11 @@ class Event {
 	}
 
 	/**
-	 * @throws InvalidStatus
+	 * @throws Invalid_Status When the status is not draft, publish, or trash.
 	 */
 	public function set_status( string $status ): void {
 		if ( ! in_array( $status, array( 'draft', 'publish', 'trash' ), true ) ) {
-			throw new InvalidStatus();
+			throw new Invalid_Status();
 		}
 		$this->status = $status;
 	}
@@ -188,23 +165,33 @@ class Event {
 		$this->updated_at = $updated_at ?? Translation_Events::now();
 	}
 
+	/**
+	 * Set how attendees take part in the event.
+	 *
+	 * @param string $attendance_mode One of onsite, remote, or hybrid.
+	 *
+	 * @throws Invalid_Attendance_Mode When the attendance mode is not onsite, remote, or hybrid.
+	 */
 	public function set_attendance_mode( string $attendance_mode ): void {
+		if ( ! in_array( $attendance_mode, self::ATTENDANCE_MODES, true ) ) {
+			throw new Invalid_Attendance_Mode();
+		}
 		$this->attendance_mode = $attendance_mode;
 	}
 
 	/**
-	 * @throws InvalidStart
-	 * @throws InvalidEnd
+	 * @throws Invalid_Start When the start date is not in UTC.
+	 * @throws Invalid_End   When the end date is not in UTC, or is not after the start date.
 	 */
 	public function validate_times( Event_Start_Date $start, Event_End_Date $end ) {
 		if ( $end <= $start ) {
-			throw new InvalidEnd();
+			throw new Invalid_End();
 		}
 		if ( ! $start->getTimezone() || 'UTC' !== $start->getTimezone()->getName() ) {
-			throw new InvalidStart();
+			throw new Invalid_Start();
 		}
 		if ( ! $end->getTimezone() || 'UTC' !== $end->getTimezone()->getName() ) {
-			throw new InvalidEnd();
+			throw new Invalid_End();
 		}
 	}
 }
