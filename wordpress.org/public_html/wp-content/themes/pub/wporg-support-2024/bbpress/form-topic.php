@@ -15,6 +15,7 @@
 			<?php if ( bbp_is_topic_edit() ) { ?>
 
 				<h1>
+					<?php /* translators: %s: Topic title. */ ?>
 					<?php printf( esc_html__( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), bbp_get_topic_title() ); ?>
 				</h1>
 
@@ -77,6 +78,7 @@
 								<li><?php
 									/* translators: %s: Handbook URL for forum welcome */
 									printf(
+										/* translators: %s: Welcome guide URL. */
 										wp_kses_post( __( '<strong><a href="%s">Read the Welcome Guide</a></strong> to maximize your odds of getting help.', 'wporg-forums' ) ),
 										esc_url( __( 'https://wordpress.org/support/welcome/', 'wporg-forums' ) )
 									);
@@ -84,6 +86,7 @@
 								<li><?php
 									/* translators: %s: URL to search */
 									printf(
+										/* translators: %s: Forum search URL. */
 										wp_kses_post( __( '<strong><a href="%s">Search the forums</a></strong> for similar inquiries.', 'wporg-forums' ) ),
 										esc_url( bbp_get_search_url() )
 									);
@@ -95,6 +98,7 @@
 								<li><?php
 									/* translators: 1: Theme Directory URL, 2: Appearance icon, 3: Plugin Directory URL, 4: Plugins icon */
 									printf(
+										/* translators: 1: Theme directory URL, 2: Plugin directory URL. */
 										wp_kses_post( __( '<strong>Don\'t use this forum to ask for help with <a href="%1$s">themes</a> or <a href="%2$s">plugins</a></strong>.  Instead, head to the theme or plugin\'s page and find the "View support forum" link for its specific forum.', 'wporg-forums' ) ),
 										esc_url( __( 'https://wordpress.org/themes/', 'wporg-forums' ) ),
 										esc_url( __( 'https://wordpress.org/plugins/', 'wporg-forums' ) )
@@ -104,6 +108,7 @@
 								<li><?php
 									/* translators: %s: Handbook URL for reporting security issues */
 									printf(
+										/* translators: %s: Vulnerability reporting guidelines URL. */
 										wp_kses_post( __( '<strong>Reporting a security issue?</strong> Please follow the guidelines on <a href="%s">reporting vulnerabilities responsibly</a>.', 'wporg-forums' ) ),
 										esc_url( __( 'https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/', 'wporg-forums' ) )
 									);
@@ -143,8 +148,10 @@
 					<p>
 						<label for="bbp_topic_title"><?php
 							if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+								/* translators: %d: Maximum title length. */
 								printf( esc_html__( 'Review Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
 							} else {
+								/* translators: %d: Maximum title length. */
 								printf( esc_html__( 'Topic Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
 							}
 						?></label><br />
@@ -256,6 +263,7 @@
 
 	<div id="no-topic-<?php bbp_topic_id(); ?>" class="bbp-no-topic">
 		<div class="bbp-template-notice">
+			<?php /* translators: %s: Forum title. */ ?>
 			<p><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), bbp_get_forum_title() ); ?></p>
 		</div>
 	</div>

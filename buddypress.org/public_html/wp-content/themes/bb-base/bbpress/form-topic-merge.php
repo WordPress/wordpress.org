@@ -21,6 +21,7 @@
 
 				<fieldset class="bbp-form">
 
+					<?php /* translators: %s: Topic title. */ ?>
 					<legend><?php printf( esc_html__( 'Merge topic "%s"', 'bbpress' ), bbp_get_topic_title() ); ?></legend>
 
 					<div>

@@ -35,6 +35,7 @@ the_post();
 		foreach ( $releases['branches'] as $branch => $branch_rels ):
 			rosetta_release_row( null, null, null, true );
 ?>
+			<?php /* translators: %s: Branch number. */ ?>
 			<h3><?php printf( esc_html__( '%s Branch', 'rosetta' ), $branch );?></h3>
 			<table class="releases">
 <?php

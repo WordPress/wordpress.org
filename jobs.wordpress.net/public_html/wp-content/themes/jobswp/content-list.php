@@ -27,6 +27,7 @@
 		echo '<div class="row row-1">';
 		echo "<div class='no-job'>";
 		echo sprintf(
+			/* translators: %s: Post a job URL. */
 			wp_kses_post( __( 'There are no jobs in this category. If you\'re hiring, you can <a href="%s">post a new job</a>.', 'jobswp' ) ),
 			'/post-a-job'
 		);

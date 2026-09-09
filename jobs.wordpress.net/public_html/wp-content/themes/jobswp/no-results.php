@@ -16,6 +16,7 @@
 	<div class="page-content">
 		<?php if ( is_home() && current_user_can( 'publish_posts' ) ) : ?>
 
+			<?php /* translators: %1$s: New post URL. */ ?>
 			<p><?php printf( wp_kses_post( __( 'Ready to publish your first post? <a href="%1$s">Get started here</a>.', 'jobswp' ) ), esc_url( admin_url( 'post-new.php' ) ) ); ?></p>
 
 		<?php elseif ( is_search() ) : ?>

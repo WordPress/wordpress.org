@@ -166,6 +166,7 @@ if ( post_password_required() ) :
 
 	<div class="container">
 		<div class="video-upload">
+			<?php /* translators: %s: Contact form URL. */ ?>
 			<p><?php printf( wp_kses_post( __( 'Hey there! If you&#8217;re interested in subtitling or captioning videos for WordPress.tv, please fill out the <a href="%s">contact form</a>, and we&#8217;ll be in touch.', 'wptv' ) ), 'https://wordpress.tv/contact/' ); ?></p>
 			<div class="pass-form">
 				<?php echo get_the_password_form(); ?>

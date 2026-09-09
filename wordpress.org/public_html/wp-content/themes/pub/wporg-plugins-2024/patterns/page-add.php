@@ -58,6 +58,7 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 			<p>
 				<?php
 				printf(
+					/* translators: %s: Security handbook URL. */
 					wp_kses_post( __( 'Your plugin review cannot be prioritized over others, to help us approve your plugin sooner, please ensure that you have read the <a href="%s">Security chapter</a> of the Plugin Handbook.', 'wporg-plugins' ) ),
 					'https://developer.wordpress.org/apis/security/'
 				);

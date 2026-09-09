@@ -47,6 +47,7 @@ defined( 'ABSPATH' ) || die();
 					<div class="icon"></div>
 					<h2 lang="en"><?php echo $data->name; ?></h2>
 					<p class="info"><?php echo $data->info; ?></p>
+					<?php /* translators: %s: Browser version. */ ?>
 					<p class="version"><?php printf( esc_html__( 'Latest Version: %s', 'browsehappy' ), '<strong>' . apply_filters( 'get_browsehappy_version', $browser ) . '</strong>' ); ?></p>
 					<p class="website"><?php esc_html_e( 'Visit website for more info', 'browsehappy' ); ?></p>
 				</a>
@@ -105,6 +106,7 @@ $facebook_pieces = array(
 				</nav>
 			</section><!-- #share -->
 			<div id="byline">
+				<?php /* translators: %s: WordPress, in bold. */ ?>
 				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( esc_html__( 'Brought to you by %s', 'browsehappy' ), '<strong>WordPress</strong>' ); ?></a>
 			</div><!-- #byline -->
 		</div>

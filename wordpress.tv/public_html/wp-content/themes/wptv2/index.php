@@ -74,6 +74,7 @@ if ( have_posts() ) :
 				<p><?php esc_html_e( 'These sorts of things happen&hellip;' ); ?></p>
 				<p class="center"><?php esc_html_e( 'Try searching for what you were looking for.' ); ?></p>
 				<p><?php echo get_search_form(); ?></p>
+				<?php /* translators: %s: Homepage URL. */ ?>
 				<p><?php printf( wp_kses_post( __( 'Or, <a href="%s">visit the homepage</a> to start a fresh journey.', 'wptv' ) ), '/' ); ?></p>
 				<p>
 					<img src="<?php echo esc_url( get_theme_file_uri( 'i/michael-pick-stashes-a-guinness.gif' ) ); ?>" alt="" /><br />

@@ -7,6 +7,7 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 
 	<?php do_action( 'bp_before_profile_field_content' ); ?>
 
+		<?php /* translators: %s: Profile group name. */ ?>
 		<h4><?php printf( esc_html__( "Editing '%s' Profile Group", 'buddypress' ), bp_get_the_profile_group_name() ); ?></h4>
 
 		<ul class="button-nav">

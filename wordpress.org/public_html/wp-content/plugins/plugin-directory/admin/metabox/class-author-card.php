@@ -154,6 +154,7 @@ class Author_Card {
 					<?php
 					/* translators: 1: time ago, 2: registration date */
 					printf(
+						/* translators: 1: Time since registration, 2: Registration date. */
 						esc_html__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
 						human_time_diff( strtotime( $author->user_registered ) ),
 						date( 'Y-M-d', strtotime( $author->user_registered ) )
@@ -237,6 +238,7 @@ class Author_Card {
 
 				/* translators: %s: comma-separated list of plugin author's IP addresses */
 				printf(
+					/* translators: %s: List of IP addresses. */
 					'<p>' . esc_html__( 'IPs : %s', 'wporg-plugins' ) . '</p>',
 					implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) )
 				);
@@ -269,6 +271,7 @@ class Author_Card {
 			if ( empty( $author_commit ) && empty( $author_plugins ) ) {
 				esc_html_e( 'Not a developer on any plugin.', 'wporg-plugins' );
 			} else {
+				/* translators: %d: Number of plugins. */
 				echo '<strong>' . sprintf( esc_html( _n( '%d plugin:', '%d plugins:', count( $all_plugins ), 'wporg-plugins' ) ), count( $all_plugins ) ) . '</strong>';
 
 				echo '<ul>';

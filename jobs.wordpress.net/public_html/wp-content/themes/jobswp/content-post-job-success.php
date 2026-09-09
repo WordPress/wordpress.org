@@ -8,10 +8,12 @@
 	<p>
 	<?php
 	printf(
+		/* translators: %s: Remove a job URL. */
 		wp_kses_post( __( '<strong>Important!</strong> Take note of the following job token. It is your only means of removing the job from the site in a <em>timely</em> fashion prior to its automatic expiration. (Otherwise, you would have to make a request via the feedback form which could take 24-48 hours or longer to honor). The token is used on the <a href="%s">job removal page</a>.', 'jobswp' ) ),
 		'/remove-a-job/'
 	); ?></p>
 
+	<?php /* translators: %s: Job token. */ ?>
 	<p class="job-token"><?php printf( esc_html__( 'Your job token is: %s', 'jobswp' ), esc_html( $_POST['job_token'] ) ); ?></p>
 
 	<p><?php printf( wp_kses_post( __( 'If you would like to modify your posting, or you are having problems removing the job using the job token, please contact us using our <a href="%s">feedback form</a>. Be sure to specify the email address you supplied in your job posting.',

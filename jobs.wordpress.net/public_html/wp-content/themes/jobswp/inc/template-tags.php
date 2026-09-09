@@ -78,12 +78,14 @@ function jobswp_comment( $comment, $args, $depth ) {
 			<footer class="comment-meta">
 				<div class="comment-author vcard">
 					<?php if ( 0 != $args['avatar_size'] ) echo get_avatar( $comment, $args['avatar_size'] ); ?>
+					<?php /* translators: %s: Comment author link. */ ?>
 					<?php printf( wp_kses_post( __( '%s <span class="says">says:</span>', 'jobswp' ) ), sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() ) ); ?>
 				</div><!-- .comment-author -->
 
 				<div class="comment-metadata">
 					<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
 						<time datetime="<?php comment_time( 'c' ); ?>">
+							<?php /* translators: 1: Comment date, 2: Comment time. */ ?>
 							<?php printf( esc_html_x( '%1$s at %2$s', '1: date, 2: time', 'jobswp' ), get_comment_date(), get_comment_time() ); ?>
 						</time>
 					</a>

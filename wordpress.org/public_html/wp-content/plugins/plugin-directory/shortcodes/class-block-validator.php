@@ -274,6 +274,7 @@ class Block_Validator {
 				<p>
 					<?php
 					printf(
+						/* translators: %s: Plugin submission URL. */
 						wp_kses_post( __( 'Your plugin passed the checks, but only plugins hosted on WordPress.org can be added to the Block Directory. <a href="%s">Upload your plugin to the WordPress.org repo,</a> then come back here to add it to the Block Directory.', 'wporg-plugins' ) ),
 						esc_url( home_url( 'developers' ) )
 					);

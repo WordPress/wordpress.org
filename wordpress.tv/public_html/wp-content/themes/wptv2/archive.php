@@ -15,18 +15,23 @@ global $wp_query, $post, $wptv;
 <div class="wptv-hero">
 	<h2 class="page-title"><?php
 		if ( is_category() ) :
+			/* translators: %s: Category name. */
 			printf( esc_html__( '&#8216;%s&#8217; Videos', 'wptv' ), single_cat_title( '', false ) );
 
 		elseif ( is_tag() ) :
+			/* translators: %s: Tag name. */
 			printf( esc_html__( '&#8216;%s&#8217; Videos', 'wptv' ), single_tag_title( '', false ) );
 
 		elseif ( is_day() ) :
+			/* translators: %s: Date. */
 			printf( esc_html_x( 'Archive for %s', 'Daily archive page', 'wptv' ), get_the_time( __( 'F jS, Y', 'wptv' ) ) );
 
 		elseif ( is_month() ) :
+			/* translators: %s: Month. */
 			printf( esc_html_x( 'Archive for %s', 'Monthly archive page', 'wptv' ), get_the_time( __( 'F, Y', 'wptv' ) ) );
 
 		elseif ( is_year() ) :
+			/* translators: %s: Year. */
 			printf( esc_html_x( 'Archive for %s', 'Yearly archive page', 'wptv' ), get_the_time( __( 'Y', 'wptv' ) ) );
 
 		elseif ( is_author() ) :
@@ -38,6 +43,7 @@ global $wp_query, $post, $wptv;
 			print( "$tax->label: $terms->name" );
 
 		elseif ( is_search() ) :
+			/* translators: %s: Search query. */
 			printf( esc_html__( 'Search Results for &#8216;%s&#8217;', 'wptv' ), '<span>' . get_search_query() . '</span>' );
 
 		else :

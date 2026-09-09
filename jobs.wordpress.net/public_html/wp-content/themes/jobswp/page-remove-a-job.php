@@ -24,6 +24,7 @@ get_header(); ?>
 			<div class="entry-content">
 				<div class="notice notice-error">
 					<?php if ( is_string( $_POST['errors'] ) ) {
+						/* translators: %s: Error message. */
 						echo sprintf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( $_POST['errors'] ) );
 					} else {
 						echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' ) );

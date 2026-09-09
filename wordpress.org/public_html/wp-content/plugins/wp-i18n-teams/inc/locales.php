@@ -53,6 +53,7 @@ function render_wp_locales_shortcode(): string {
 			printf(
 				'<div class="callout callout-warning"><p>%s</p><p><a href="%s">%s</a></p></div>',
 				sprintf(
+					/* translators: %s: Locale slug. */
 					esc_html__( 'Locale %s doesn&#8217;t exist.', 'wporg' ),
 					'<code>' . esc_html( $_GET['locale'] ) . '</code>'
 				),

@@ -82,6 +82,7 @@ get_header();
 ?>
 
 <?php if ( ! $user_registration_available ) : ?>
+		<?php /* translators: %s: Holiday break announcement URL. */ ?>
 		<p><?php printf( wp_kses_post( __( 'New user registration is currently unavailable. Please check back after the <a href="%s">holiday break</a>.', 'wporg' ) ), 'https://wordpress.org/news/2024/12/holiday-break/' ); ?></p>
 <?php else: ?>
 

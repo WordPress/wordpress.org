@@ -244,6 +244,7 @@ class Upload {
 							printf(
 								'<div class="plugin-submission-submited-date">%s</div>',
 								sprintf(
+									/* translators: %s: Submission date. */
 									esc_html__( 'Submitted on: %s', 'wporg-plugins' ),
 									esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->post_date_gmt ) ) )
 								)
@@ -251,6 +252,7 @@ class Upload {
 							printf(
 								'<div class="plugin-submission-status">%s</div>',
 								sprintf(
+									/* translators: %s: Review status. */
 									esc_html__( 'Review status: %s', 'wporg-plugins' ),
 									$plugin->status
 								)
@@ -264,6 +266,7 @@ class Upload {
 								printf(
 									'<div class="plugin-submission-email">✉️✔️ %s</div>',
 									sprintf(
+										/* translators: 1: Email date, 2: Email subject. */
 										wp_kses_post( __( 'Our team emailed you on <strong>%s</strong> regarding your submission. The subject line is: "<strong>%s</strong>".', 'wporg-plugins' ) ),
 										esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->review_email->created ) ) ),
 										esc_html( $plugin->review_email->subject )
@@ -277,6 +280,7 @@ class Upload {
 								printf(
 									'<div class="plugin-submission-email">✉️⏳ %s</div>',
 									sprintf(
+										/* translators: 1: Email address, 2: Email subject. */
 										wp_kses_post( __( 'Please be patient and wait for the review email. It will be sent to your email address, <strong>%s</strong>, with the subject line: "<strong>%s</strong>".', 'wporg-plugins' ) ),
 										esc_html( get_userdata( $plugin->post_author )->user_email ),
 										'[WordPress Plugin Directory] Review in Progress: ' . $plugin->post_title
@@ -288,6 +292,7 @@ class Upload {
 							}
 							echo '<div class="plugin-submission-assigned-slug">';
 							printf(
+								/* translators: %s: Plugin slug. */
 								esc_html__( 'Current assigned slug: %s', 'wporg-plugins' ),
 								'<code>' . esc_html( $plugin->post_name ) . '</code>'
 							);
@@ -360,6 +365,7 @@ class Upload {
 
 							if ( $can_upload_extras ) {
 								echo '<div class="plugin-submission-update-code wp-block-button is-small">';
+								/* translators: %s: Plugin name. */
 								echo '<a href="#" class="show-upload-additional hide-if-no-js wp-block-button__link">' . sprintf( esc_html__( 'Upload updated "%s" plugin for review.', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</a>';
 
 								?>
@@ -440,6 +446,7 @@ class Upload {
 			printf(
 				'<div class="notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
+					/* translators: %s: Holiday break announcement URL. */
 					wp_kses_post( __( 'New plugin submissions are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-plugins' ) ),
 					'https://wordpress.org/news/2024/12/holiday-break/'
 				)

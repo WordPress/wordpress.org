@@ -79,6 +79,7 @@ get_header();
 			'<h2>' . esc_html__( 'Your account is pending approval', 'wporg' ) . '</h2>' .
 			/* translators: %s Email address */
 			'<p>' . esc_html__( 'You will receive an email at %s to set your password when approved.', 'wporg' ) . '</p>' .
+			/* translators: %s: Support email address. */
 			'<p>' . esc_html__( 'Please contact %s for more details.', 'wporg' ) . '</p>' .
 			( $email_change_available ? '<a href="#" class="change-email">' . esc_html__( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
 			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',

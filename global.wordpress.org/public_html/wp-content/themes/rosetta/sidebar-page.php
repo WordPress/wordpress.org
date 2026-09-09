@@ -14,11 +14,13 @@ if ( false !== $latest_release ) :
 				);
 			?></strong>
 		</a>
+		<?php /* translators: %s: File size in megabytes. */ ?>
 		<span><?php printf( esc_html__( '.zip &mdash; %s MB', 'rosetta' ), $latest_release['zip_size_mb'] ); ?></span>
 	</p>
 
 	<p class="download-tar">
 		<a href="<?php echo $latest_release['targz_url']; ?>"><?php printf(
+			/* translators: %s: File size in megabytes. */
 			esc_html__( 'Download .tar.gz &mdash; %s MB', 'rosetta' ),
 			$latest_release['tar_size_mb'] );
 		?></a>

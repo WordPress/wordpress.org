@@ -40,6 +40,7 @@ if ( 'register' == $reason && $user ) {
 
 } elseif ( 'register-logged-in' === $reason ) {
 	echo '<p class="center">' . sprintf(
+		/* translators: %s: Forum guidelines URL. */
 		wp_kses_post( __( 'Please do not make multiple WordPress.org accounts. Please read the <a href="%s">Forum Guidelines</a> for more information.', 'wporg' ) ),
 		'https://wordpress.org/support/guidelines/#do-not-create-multiple-accounts-sockpuppets'
 	) . '</p>';

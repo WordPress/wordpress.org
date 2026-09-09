@@ -54,6 +54,7 @@ class Reviews {
 								<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
 								<span class="review-date"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ); ?></span>
 								<?php if ( $reply_count ) : ?>
+								<?php /* translators: %s: Number of replies. */ ?>
 								<span class="review-replies"><?php printf( esc_html( _n( '%s reply', '%s replies', $reply_count, 'wporg-plugins' ) ), number_format_i18n( $reply_count ) ); ?></span>
 								<?php endif; ?>
 							</div>

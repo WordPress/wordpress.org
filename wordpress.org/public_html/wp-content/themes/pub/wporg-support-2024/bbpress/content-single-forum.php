@@ -10,6 +10,7 @@
 ?>
 
 <header class="page-header">
+	<?php /* translators: %s: Forum name. */ ?>
 	<h1 class="page-title"><?php printf( esc_html__( '%s Forum', 'wporg-forums' ), bbp_get_topic_title() ); ?></h1>
 	<p><?php bbp_forum_content(); ?></p>
 </header>

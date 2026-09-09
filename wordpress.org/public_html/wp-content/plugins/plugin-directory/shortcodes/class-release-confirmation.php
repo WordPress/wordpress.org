@@ -76,6 +76,7 @@ class Release_Confirmation {
 			printf(
 				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
+					/* translators: %s: Two-factor authentication setup URL. */
 					wp_kses_post( __( 'Your account has elevated privileges and requires extra security before you can manage plugin releases. Please <a href="%s">enable two-factor authentication now</a>.', 'wporg-plugins' ) ),
 					esc_url( get_2fa_onboarding_url() )
 				)
@@ -105,6 +106,7 @@ class Release_Confirmation {
 
 		if ( $not_enabled ) {
 			printf(
+				/* translators: %s: List of plugin links. */
 				'<p><em>' . esc_html__( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em></p>',
 				wp_sprintf_l( '%l', array_filter( array_map( function( $plugin ) {
 					if ( 'publish' == get_post_status( $plugin ) ) {
@@ -165,6 +167,7 @@ class Release_Confirmation {
 					</td>
 				</tr>',
 				sprintf(
+					/* translators: %s: Version number, linked. */
 					esc_html__( 'Version %s', 'wporg-plugins' ),
 					sprintf(
 						'<a href="%s">%s</a>',
@@ -224,6 +227,7 @@ class Release_Confirmation {
 			esc_html_e( 'Waiting for confirmation.', 'wporg-plugins' );
 		} else {
 			printf(
+				/* translators: 1: Number of confirmations, 2: Number of required confirmations. */
 				esc_html__( '%s of %s required confirmations.', 'wporg-plugins' ),
 				number_format_i18n( count( $data['confirmations'] ) ),
 				number_format_i18n( $plugin->release_confirmation )
@@ -262,6 +266,7 @@ class Release_Confirmation {
 				'<span title="%s">%s</span><br>',
 				esc_attr( gmdate( 'Y-m-d H:i:s', $data['discarded']['time'] ) ),
 				sprintf(
+					/* translators: 1: User name, 2: Time since the release was discarded. */
 					esc_html__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
 					$user->display_name ?: $user->user_login,
 					human_time_diff( $data['discarded']['time'] )
@@ -591,6 +596,7 @@ class Release_Confirmation {
 		printf(
 			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 			sprintf(
+				/* translators: %s: Releases page URL. */
 				wp_kses_post( __( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ) ),
 				esc_url( home_url( '/developers/releases/' ) ) // TODO: Hardcoded URL.
 			)

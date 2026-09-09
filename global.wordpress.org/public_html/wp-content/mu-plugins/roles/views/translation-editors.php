@@ -4,6 +4,7 @@
 		esc_html_e( 'Translation Editors', 'rosetta' );
 
 		if ( ! empty( $_REQUEST['s'] ) ) {
+			/* translators: %s: Search term. */
 			echo '<span class="subtitle">' . sprintf( esc_html__( 'Search results for &#8220;%s&#8221;', 'rosetta' ), esc_html( wp_unslash( $_REQUEST['s'] ) ) ) . '</span>';
 		}
 		?>

@@ -68,6 +68,7 @@
 </div>
 
 <?php if ( ! empty( $locale_data['locale_managers'] ) ) : ?>
+	<?php /* translators: %s: Number of locale managers. */ ?>
 	<h2><?php printf( esc_html__( 'Locale Managers (%s)', 'wporg' ), number_format_i18n( count( $locale_data['locale_managers'] ) ) ); ?></h2>
 
 	<ul class="validators">
@@ -89,6 +90,7 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $locale_data['validators'] ) ) : ?>
+	<?php /* translators: %s: Number of general translation editors. */ ?>
 	<h2><?php printf( esc_html__( 'General Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['validators'] ) ) ); ?></h2>
 
 	<ul class="validators">
@@ -110,6 +112,7 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $locale_data['project_validators'] ) ) : ?>
+	<?php /* translators: %s: Number of project translation editors. */ ?>
 	<h2><?php printf( esc_html__( 'Project Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['project_validators'] ) ) ); ?></h2>
 
 	<ul class="validators project-validators">
@@ -131,6 +134,7 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $locale_data['translators'] ) ) : ?>
+	<?php /* translators: %s: Number of current contributors. */ ?>
 	<h2><?php printf( esc_html__( 'Current Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators'] ) ) ); ?></h2>
 
 	<p>
@@ -149,6 +153,7 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $locale_data['translators_past'] ) ) : ?>
+	<?php /* translators: %s: Number of past contributors. */ ?>
 	<h2><?php printf( esc_html__( 'Past Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators_past'] ) ) ); ?></h2>
 
 	<p>

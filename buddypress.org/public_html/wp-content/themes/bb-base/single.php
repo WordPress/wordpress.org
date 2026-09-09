@@ -4,6 +4,7 @@
 	<cite><?php
 		/* translators: 1: post date, 2: post author */
 		printf(
+			/* translators: 1: Publication date, 2: Author link. */
 			esc_html__( 'Published on %1$s by %2$s', 'bborg' ),
 			get_the_time( 'F jS, Y' ),
 			get_the_author_link()

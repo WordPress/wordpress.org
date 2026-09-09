@@ -44,6 +44,7 @@ get_header();
 
 <p>&nbsp;</p>
 
+<?php /* translators: %s: Documentation URL. */ ?>
 <p><?php printf( wp_kses_post( __( 'For more information on our two-factor options, please read the <a href="%s" target="_blank">documentation</a>.', 'wporg' ) ), 'https://make.wordpress.org/meta/handbook/tutorials-guides/configuring-two-factor-authentication/' ); ?></p>
 
 <p>&nbsp;</p>

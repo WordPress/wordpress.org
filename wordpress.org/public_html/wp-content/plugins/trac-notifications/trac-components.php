@@ -649,6 +649,7 @@ jQuery( function( $ ) {
 		}
 
 		if ( is_singular() ) {
+			/* translators: %s: Number of tickets. */
 			echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $component_count ) ), $component_count ) . ' in the ' . $component . ' component</h3>';
 		}
 
@@ -712,6 +713,7 @@ jQuery( function( $ ) {
 
 		if ( $unreplied_tickets ) {
 			$count = count( $unreplied_tickets );
+			/* translators: %d: Number of tickets. */
 			echo '<h3>' . sprintf( esc_html( _n( '%d ticket that has no replies', '%d tickets that have no replies', $count ) ), $count ) . '</h3>';
 			echo '<a href="' . $this->trac_query( array( 'component' => $component, 'id' => implode( ',', wp_list_pluck( $unreplied_tickets, 'id' ) ) ) ) . '">View list on Trac</a>';
 			$this->render_tickets( $unreplied_tickets );
@@ -730,6 +732,7 @@ jQuery( function( $ ) {
 		$tickets_by_type = (array) $this->api->get_ticket_counts_for_component( $component );
 
 		$count = array_sum( $tickets_by_type );
+		/* translators: %s: Number of tickets. */
 		echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $count ) ), $count ) . '</h3>';
 
 		$types = array(

@@ -171,6 +171,7 @@ class Upload_Token {
 		printf(
 			'<div class="notice inline notice-success"><p>%s</p></div>',
 			sprintf(
+				/* translators: %1$s: Upload URL. */
 				wp_kses_post( __( 'Token created. Please provide the author with the following URL: <a href="%1$s">%1$s</a>', 'wporg-plugins' ) ),
 				esc_url(
 					add_query_arg(

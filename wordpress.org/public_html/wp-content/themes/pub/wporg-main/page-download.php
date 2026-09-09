@@ -284,6 +284,7 @@ the_post();
 						<p>
 							<?php
 							printf(
+								/* translators: %s: Support URL. */
 								wp_kses_post( __( 'For help getting started, check out our <a href="%s">Documentation and Support Forums</a>.', 'wporg' ) ),
 								esc_url( __( 'https://wordpress.org/support/', 'wporg' ) )
 							);
@@ -302,6 +303,7 @@ the_post();
 						<p>
 							<?php
 							printf(
+								/* translators: %s: Donation URL. */
 								wp_kses_post( __( 'To support education about WordPress and open source software, please donate to the <a href="%s">WordPress Foundation</a>.', 'wporg' ) ),
 								esc_url( __( 'https://wordpressfoundation.org/donate/', 'wporg' ) )
 							);

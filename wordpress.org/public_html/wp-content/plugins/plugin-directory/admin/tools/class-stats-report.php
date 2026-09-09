@@ -376,6 +376,7 @@ class Stats_Report {
 		<?php
 			/* translators: %s: today's date */
 			printf(
+				/* translators: %s: Today's date. */
 				esc_html__( 'The day up to which stats are to be gathered. In YYYY-MM-DD format. Defaults to today (%s).', 'wporg-plugins' ),
 				esc_html( $date )
 			);
@@ -389,6 +390,7 @@ class Stats_Report {
 		<?php
 			/* translators: %d: 7 */
 			printf(
+				/* translators: %d: Default number of days. */
 				esc_html__( 'The number of days before "Date" to include in stats. Default is %d.', 'wporg-plugins' ),
 				7
 			);
@@ -402,6 +404,7 @@ class Stats_Report {
 		<?php
 			/* translators: %d: 7 */
 			printf(
+				/* translators: %d: Default number of days. */
 				esc_html__( 'The number of days before today to consider as being "recent" (stats marked with **). Default is %d.', 'wporg-plugins' ),
 				7
 			);
@@ -419,6 +422,7 @@ class Stats_Report {
 		<?php
 			/* translators: 1: number of days, 2: selected date, 3: number of most recent days */
 			printf(
+				/* translators: 1: Number of days, 2: Date, 3: Number of recent days. */
 				esc_html__( 'Displaying stats for the %1$d days preceding %2$s (and other stats for the %3$d most recent days).', 'wporg-plugins' ),
 				esc_html( $stats['num_days'] ),
 				esc_html( $stats['date'] ),
@@ -434,6 +438,7 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of requested plugins */
 				printf(
+					/* translators: %d: Number of plugins. */
 					esc_html__( 'Plugins requested : %d', 'wporg-plugins' ),
 					esc_html( $stats['plugin_new'] )
 				);
@@ -443,6 +448,7 @@ class Stats_Report {
 			<?php
 				/* translators: %s: number of rejected plugins */
 				printf(
+					/* translators: %s: Number of plugins. */
 					esc_html__( 'Plugins rejected : %s', 'wporg-plugins' ),
 					esc_html( $stats['plugin_reject'] )
 				);
@@ -452,6 +458,7 @@ class Stats_Report {
 			<?php
 				/* translators: %s: number of closed plugins */
 				printf(
+					/* translators: %s: Number of plugins. */
 					esc_html__( 'Plugins closed : %s', 'wporg-plugins' ),
 					esc_html( $stats['plugin_delist'] )
 				);
@@ -470,6 +477,7 @@ class Stats_Report {
 			<?php
 				/* translators: %s: number of approved plugins */
 				printf(
+					/* translators: %s: Number of plugins. */
 					esc_html__( 'Plugins approved : %s', 'wporg-plugins' ),
 					esc_html( $stats['plugin_approve'] )
 				);
@@ -484,6 +492,7 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of plugins in the queue */
 				printf(
+					/* translators: %d: Number of plugins. */
 					esc_html__( 'Plugins in the queue (new and pending)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue'] )
 				);
@@ -493,6 +502,7 @@ class Stats_Report {
 			<?php
 				/* translators: 1: number of most recent days, 2: number of older plugins in the queue */
 				printf(
+					/* translators: 1: Number of days, 2: Number of plugins. */
 					esc_html__( '&rarr; (older than %1$d days ago)** : %2$d', 'wporg-plugins' ),
 					esc_html( $stats['recentdays'] ),
 					esc_html( $stats['in_queue_old'] )
@@ -503,6 +513,7 @@ class Stats_Report {
 			<?php
 				/* translators: 1: start date, 2: end date, 3: number of plugins in the queue within defined time window */
 				printf(
+					/* translators: 1: Start date, 2: End date, 3: Number of plugins. */
 					esc_html__( '&rarr; (%1$s - %2$s) : %3$d', 'wporg-plugins' ),
 					esc_html( $start_date ),
 					esc_html( $stats['date'] ),
@@ -514,6 +525,7 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of new plugins */
 				printf(
+					/* translators: %d: Number of plugins. */
 					esc_html__( '&rarr; (new; not processed or replied to yet)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue_new'] )
 				);
@@ -523,6 +535,7 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of pending plugins */
 				printf(
+					/* translators: %d: Number of plugins. */
 					esc_html__( '&rarr; (pending; replied to)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue_pending'] )
 				);
@@ -532,6 +545,7 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of pending plugins */
 				printf(
+					/* translators: %d: Number of plugins. */
 					esc_html__( '&rarr; (pending; waiting on author)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue_pending_why']['author'] ?? 0 )
 				);
@@ -541,6 +555,7 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of pending plugins */
 				printf(
+					/* translators: %d: Number of plugins. */
 					esc_html__( '&rarr; (pending; waiting on reviewer)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue_pending_why']['reviewer'] ?? 0 )
 				);
@@ -551,6 +566,7 @@ class Stats_Report {
 				<?php
 					/* translators: %d: number of pending plugins */
 					printf(
+						/* translators: %d: Number of plugins. */
 						esc_html__( '&rarr; (pending; waiting on reviewer, email not yet sent)* : %d', 'wporg-plugins' ),
 						esc_html( $stats['in_queue_pending_why']['noemail'] )
 					);

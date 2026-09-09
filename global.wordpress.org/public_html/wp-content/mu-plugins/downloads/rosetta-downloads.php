@@ -143,6 +143,7 @@ class Rosetta_Downloads {
 			<p>
 				<?php
 				printf(
+					/* translators: 1: Download counter URL, 2: WordPress version. */
 					wp_kses_post( __( 'This page shows the <a href="%s">Download Counter</a> number &mdash; total downloads of WordPress %s &mdash; broken down by locale.', 'rosetta' ) ),
 					'https://wordpress.org/download/counter/',
 					esc_html( WP_CORE_STABLE_BRANCH )

@@ -4,6 +4,7 @@
 
 	<div class="notice notice-error">
 		<?php if ( is_string( $_POST['errors'] ) ) {
+			/* translators: %s: Error message. */
 			echo sprintf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( $_POST['errors'] ) );
 		} else {
 			echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' ) );
@@ -108,6 +109,7 @@
 		<div class="post-job-input">
 			<label for="job_description"><?php esc_html_e( 'Job Description', 'jobswp' ); ?>*</label>
 			<textarea name="job_description" id="job_description" rows="10" class="<?php echo jobswp_required_field_classes( 'job_description' ); ?>"><?php echo jobswp_field_value( 'job_description' ); ?></textarea>
+			<?php /* translators: %s: List of allowed HTML tags. */ ?>
 			<p><?php printf( wp_kses_post( __( 'Line and paragraph breaks are automatic. <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>', 'jobswp' ) ), jobswp_allowed_tags() ); ?></p>
 			<p><?php esc_html_e( 'All job postings are moderated prior to appearing on the site.', 'jobswp' ); ?></p>
 

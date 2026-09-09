@@ -38,6 +38,7 @@ get_header(); ?>
                     <?php $version = DevHub\bporg_developer_get_current_version_term(); ?>
 					<?php if ( $version && ! is_wp_error( $version ) ) : ?>
                         <div class="widget box gray">
+                            <?php /* translators: %s: BuddyPress version. */ ?>
                             <h3 class="widget-title"><?php printf( esc_html__( 'New &amp; Updated in BuddyPress %s:', 'bporg-developer' ), substr( $version->name, 0, -2 ) ); ?></h3>
                             <div class="widget-content">
                                 <ul class="unordered-list no-bullets">

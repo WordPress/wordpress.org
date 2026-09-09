@@ -16,6 +16,7 @@ if ( ! empty( $source_file ) ) :
 		<p>
 			<?php
 			printf(
+				/* translators: %s: Source file link. */
 				esc_html__( 'File: %s', 'bporg-developer' ),
 				'<a href="' . esc_url( get_source_file_archive_link( $source_file ) ) . '">' . esc_html( $source_file ) . '</a>'
 			); ?>

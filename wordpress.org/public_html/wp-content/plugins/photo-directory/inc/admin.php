@@ -106,6 +106,7 @@ class Admin {
 			'<div id="message" class="notice notice-warning"><p>%s</p></div>' . "\n",
 			/* translators: %s: URL to settings page for enabling/disabling photo uploads. */
 			sprintf(
+				/* translators: %s: Media settings URL. */
 				wp_kses_post( __( '<strong>Photo uploads are currently disabled for all users!</strong> Uncheck <a href="%s">the setting</a> to re-enable uploading.', 'wporg-photos' ) ),
 				esc_url( admin_url( 'options-media.php' ) . '#' . Settings::KILLSWITCH_OPTION_NAME )
 			)
@@ -187,6 +188,7 @@ class Admin {
 			if ( $missing_taxonomies ) {
 				echo '<div class="notice notice-error is-dismissible notice-missing-taxonomies"><p>';
 				printf(
+					/* translators: %s: Missing taxonomy names. */
 					wp_kses_post( __( '<strong>Error:</strong> Photo was not published because the following taxonomies are missing terms: %s', 'wporg-photos' ) ),
 					'<strong>' . implode( '</strong>, <strong>', $missing_taxonomies ) . '</strong>'
 				);
@@ -1206,6 +1208,7 @@ class Admin {
 					<li><?php
 						/* translators: %s: Linked number of photos submitted by user. */
 						printf(
+							/* translators: %s: Number of published photos, possibly linked. */
 							wp_kses_post( __( 'Published photos: <strong>%s</strong>', 'wporg-photos' ) ),
 							( 0 === $published_count )
 								? $published_count
@@ -1221,6 +1224,7 @@ class Admin {
 						];
 						/* translators: %s: Linked number of photos submitted by user that have been rejected. */
 						printf(
+							/* translators: %s: Number of rejected photos, possibly linked. */
 							wp_kses_post( __( 'Rejected photos: <strong>%s</strong>', 'wporg-photos' ) ),
 							( 0 === $rejected_count )
 								? $rejected_count
@@ -1253,6 +1257,7 @@ class Admin {
 						];
 						/* translators: %s: Linked number of photos submitted by user that have been rejected. */
 						printf(
+							/* translators: %s: Number of pending photos, possibly linked. */
 							wp_kses_post( __( 'Pending photos: <strong>%s</strong>', 'wporg-photos' ) ),
 							( 0 === $pending_count )
 								? $pending_count

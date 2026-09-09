@@ -16,6 +16,7 @@
 						<?php
 							/* translators: 1: starting number of plugins, 2: ending number, 3: total number */
 							printf(
+								/* translators: 1: First plugin number, 2: Last plugin number, 3: Total number of plugins. */
 								esc_html__( 'Viewing %1$s to %2$s (%3$s)', 'bbporg' ),
 								number_format_i18n( $from_num ),
 								number_format_i18n( $to_num ),
@@ -51,14 +52,18 @@
 
 					<div class="plugin-meta">
 						<?php if ( ! empty( $plugin->version ) ) : ?>
+							<?php /* translators: %s: Plugin version. */ ?>
 							<div><?php printf( esc_html__( 'Version: %s', 'bbporg' ), esc_html( $plugin->version ) ); ?></div>
 						<?php endif; ?>
 						<?php if ( ! empty( $plugin->requires ) ) : ?>
+							<?php /* translators: %s: Minimum WordPress version. */ ?>
 							<div><?php printf( esc_html__( 'Requires: %s', 'bbporg' ), esc_html( $plugin->requires ) ); ?></div>
 						<?php endif; ?>
 						<?php if ( ! empty( $plugin->tested ) ) : ?>
+							<?php /* translators: %s: Highest tested WordPress version. */ ?>
 							<div><?php printf( esc_html__( 'Compatible up to: %s', 'bbporg' ), esc_html( $plugin->tested ) ); ?></div>
 						<?php endif; ?>
+						<?php /* translators: %s: Star rating markup. */ ?>
 						<div><?php printf( esc_html__( 'Rating: %s', 'bbporg' ), $plugin->rating_html ); // raw html - do not escape ?></div>
 					</div>
 
@@ -76,6 +81,7 @@
 						<?php
 							/* translators: 1: starting number of plugins, 2: ending number, 3: total number */
 							printf(
+								/* translators: 1: First plugin number, 2: Last plugin number, 3: Total number of plugins. */
 								esc_html__( 'Viewing %1$s to %2$s (%3$s)', 'bbporg' ),
 								number_format_i18n( $from_num ),
 								number_format_i18n( $to_num ),

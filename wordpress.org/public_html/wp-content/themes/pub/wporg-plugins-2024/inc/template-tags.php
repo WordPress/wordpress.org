@@ -606,6 +606,7 @@ function the_plugin_self_close_button() {
 				</label>
 			</p>
 			<p>
+				<?php /* translators: %1$s: Plugins team email address. */ ?>
 				<?php printf( wp_kses_post( __( 'If you have any questions, please contact <a href="mailto:%1$s">%1$s</a> before proceeding with a link to your plugin and your questions.', 'wporg-plugins' ) ), 'plugins@wordpress.org' ); ?>
 			<p class="wp-block-button is-small">
 				<input class="wp-block-button__link" type="submit" value="<?php echo esc_attr( $close_button_text ); ?>" />
