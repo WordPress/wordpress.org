@@ -874,10 +874,10 @@ class Rejection {
 
 		echo '<div class="misc-pub-section curtime misc-pub-curtime">';
 		/* translators: %s: Name of the rejecting user. */
-		printf( esc_html__( 'Rejected by: %s', 'wporg-photos' ), '<b>' . $rejection_user . '</b>' );
+		printf( esc_html__( 'Rejected by: %s', 'wporg-photos' ), '<b>' . esc_html( $rejection_user ) . '</b>' );
 		echo '<br>';
 		/* translators: %s: Rejection date. */
-		printf( esc_html__( 'Rejected on: %s', 'wporg-photos' ), '<b>' . $rejection_date . '</b>' );
+		printf( esc_html__( 'Rejected on: %s', 'wporg-photos' ), '<b>' . esc_html( $rejection_date ) . '</b>' );
 		echo '</div>';
 	}
 
@@ -1391,7 +1391,7 @@ JS;
 			echo "</tr>\n";
 		}
 
-		echo '<tr class="row-sum"><td>' . esc_html__( 'Total', 'wporg-photos' ) . '</td><td>' . number_format_i18n( $total_rejections ) . '</td><td>100%</td></tr>';
+		echo '<tr class="row-sum"><td>' . esc_html__( 'Total', 'wporg-photos' ) . '</td><td>' . esc_html( number_format_i18n( $total_rejections ) ) . '</td><td>100%</td></tr>';
 		echo '</tbody></table>';
 		echo '</div>';
 	}

@@ -1,3 +1,11 @@
+<?php
+/**
+ * Template for the project edit form.
+ *
+ * @package GlotPress
+ */
+
+?>
 <dl>
 	<dt><label for="project[name]"><?php esc_html_e( 'Name', 'glotpress' ); ?></label></dt>
 	<dd><input type="text" name="project[name]" value="<?php echo esc_html( $project->name ); ?>" id="project[name]"></dd>

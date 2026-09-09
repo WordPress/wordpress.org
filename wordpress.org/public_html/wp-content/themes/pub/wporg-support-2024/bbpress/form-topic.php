@@ -16,7 +16,7 @@
 
 				<h1>
 					<?php /* translators: %s: Topic title. */ ?>
-					<?php printf( esc_html__( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), bbp_get_topic_title() ); ?>
+					<?php printf( esc_html__( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), esc_html( bbp_get_topic_title() ) ); ?>
 				</h1>
 
 			<?php } else { ?>
@@ -149,10 +149,10 @@
 						<label for="bbp_topic_title"><?php
 							if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
 								/* translators: %d: Maximum title length. */
-								printf( esc_html__( 'Review Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
+								printf( esc_html__( 'Review Title (Maximum Length: %d):', 'wporg-forums' ), (int) bbp_get_title_max_length() );
 							} else {
 								/* translators: %d: Maximum title length. */
-								printf( esc_html__( 'Topic Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
+								printf( esc_html__( 'Topic Title (Maximum Length: %d):', 'wporg-forums' ), (int) bbp_get_title_max_length() );
 							}
 						?></label><br />
 						<input type="text" id="bbp_topic_title" value="<?php bbp_form_topic_title(); ?>" size="40" name="bbp_topic_title" maxlength="<?php bbp_title_max_length(); ?>" />
@@ -264,7 +264,7 @@
 	<div id="no-topic-<?php bbp_topic_id(); ?>" class="bbp-no-topic">
 		<div class="bbp-template-notice">
 			<?php /* translators: %s: Forum title. */ ?>
-			<p><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), bbp_get_forum_title() ); ?></p>
+			<p><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), esc_html( bbp_get_forum_title() ) ); ?></p>
 		</div>
 	</div>
 

@@ -1,11 +1,20 @@
+<?php
+/**
+ * The form for posting a job.
+ *
+ * @package jobswp
+ */
+
+?>
 <div class="items-required">* <?php esc_html_e( 'Items are required.', 'jobswp' ); ?></div>
 
 <?php if ( isset( $_POST['errors'] ) ) : ?>
 
 	<div class="notice notice-error">
-		<?php if ( is_string( $_POST['errors'] ) ) {
+		<?php
+		if ( is_string( $_POST['errors'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Set by the plugin's form handler, not read from the request.
 			/* translators: %s: Error message. */
-			echo sprintf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( $_POST['errors'] ) );
+			printf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( $_POST['errors'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Set by the plugin's form handler, not read from the request.
 		} else {
 			echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' ) );
 		}
@@ -110,7 +119,7 @@
 			<label for="job_description"><?php esc_html_e( 'Job Description', 'jobswp' ); ?>*</label>
 			<textarea name="job_description" id="job_description" rows="10" class="<?php echo jobswp_required_field_classes( 'job_description' ); ?>"><?php echo jobswp_field_value( 'job_description' ); ?></textarea>
 			<?php /* translators: %s: List of allowed HTML tags. */ ?>
-			<p><?php printf( wp_kses_post( __( 'Line and paragraph breaks are automatic. <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>', 'jobswp' ) ), jobswp_allowed_tags() ); ?></p>
+			<p><?php printf( wp_kses_post( __( 'Line and paragraph breaks are automatic. <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>', 'jobswp' ) ), esc_html( jobswp_allowed_tags() ) ); ?></p>
 			<p><?php esc_html_e( 'All job postings are moderated prior to appearing on the site.', 'jobswp' ); ?></p>
 
 			<p><?php esc_html_e( 'Please review your job posting for accuracy. Once submitted, you will not be able to make any changes unless you do so by submitting a contact form request which can take 24 hours or longer to fulfill.', 'jobswp' ); ?></p>

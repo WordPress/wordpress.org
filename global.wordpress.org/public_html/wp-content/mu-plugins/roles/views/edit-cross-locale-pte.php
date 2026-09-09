@@ -1,3 +1,11 @@
+<?php
+/**
+ * Admin view for editing a cross-locale project translation editor.
+ *
+ * @package Rosetta
+ */
+
+?>
 <div class="wrap">
 	<h2><?php esc_html_e( 'Edit Cross-Locale PTE', 'rosetta' ); ?></h2>
 

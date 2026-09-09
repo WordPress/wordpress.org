@@ -212,7 +212,7 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 } else { // Empty $_POST['submit']
 
 	if ( false !== strpos( get_the_content(), 'The contents of this page are filled automatically' ) ) : ?>
-		<p><?php esc_html_e( 'You can contact translators and this site administrators via this form:', 'rosetta'); ?></p>
+		<p><?php esc_html_e( 'You can contact translators and this site administrators via this form:', 'rosetta' ); ?></p>
 		<?php /* translators: feel free to add links to places, where one can get support in your language. */ ?>
 		<p><?php echo wp_kses_post( __( '<strong>Please, do not post support requests here!</strong> They will probably be ignored.', 'rosetta' ) ); ?></p>
 	<?php else: ?>

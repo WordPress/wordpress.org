@@ -136,8 +136,9 @@ class Status_Transitions {
 			esc_html__( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ),
 			'',
 			array(
-			'back_link' => true,
-		) );
+				'back_link' => true,
+			)
+		);
 	}
 
 	/**

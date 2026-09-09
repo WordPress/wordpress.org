@@ -269,7 +269,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	public function column_cb( $user ) {
 		if ( $this->user_can_promote ) {
 			?>
-			<label class="screen-reader-text" for="cb-select-<?php echo $user->ID; ?>"><?php esc_html_e( 'Select translation editor', 'rosetta' ); ?></label>
+			<label class="screen-reader-text" for="cb-select-<?php echo (int) $user->ID; ?>"><?php esc_html_e( 'Select translation editor', 'rosetta' ); ?></label>
 			<input id="cb-select-<?php echo $user->ID; ?>" type="checkbox" name="translation-editors[]" value="<?php echo $user->ID; ?>">
 			<?php
 		}

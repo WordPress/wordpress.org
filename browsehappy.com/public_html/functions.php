@@ -269,7 +269,7 @@ function browsehappy_browser_notice() {
 	<?php if ( $results['name'] == 'Internet Explorer' && strpos( $ua, 'Windows NT 5.' ) !== false ) : ?>
 		<?php if ( $results['insecure'] ) : ?>
 			<?php /* translators: %s: Browser name. */ ?>
-			<p><?php printf( esc_html__( 'It looks like you&#8217;re using an insecure version of %s.', 'browsehappy' ), $results['name'] ); ?>
+			<p><?php printf( esc_html__( 'It looks like you&#8217;re using an insecure version of %s.', 'browsehappy' ), esc_html( $results['name'] ) ); ?>
 						<?php esc_html_e( 'Using an outdated browser makes your computer unsafe.', 'browsehappy' ); ?>
 		<?php else : ?>
 			<p><?php esc_html_e( 'It looks like you&#8217;re using an old version of Internet Explorer.', 'browsehappy' ); ?>
@@ -277,13 +277,13 @@ function browsehappy_browser_notice() {
 			<?php esc_html_e( 'On Windows XP, you are unable to update to the latest version. For the best experience on the web, we suggest you try a new browser.', 'browsehappy' ); ?></p>
 	<?php elseif ( $results['insecure'] ) : ?>
 		<?php /* translators: %s: Browser name. */ ?>
-		<p class="browser-status-text"><?php printf( esc_html__( 'It looks like you&#8217;re using an insecure version of %s.', 'browsehappy' ), $results['name'] ); ?>
+		<p class="browser-status-text"><?php printf( esc_html__( 'It looks like you&#8217;re using an insecure version of %s.', 'browsehappy' ), esc_html( $results['name'] ) ); ?>
 			<?php esc_html_e( 'Using an outdated browser makes your computer unsafe.', 'browsehappy' ); ?>
 			<?php esc_html_e( 'For the best experience on the web, please update your browser.', 'browsehappy' ); ?></p>
 		<p class="browser-status-action"><a href="<?php echo esc_url( $results['update_url'] ); ?>"><?php esc_html_e( 'Upgrade now!', 'browsehappy' ); ?></a></p>
 	<?php else : ?>
 		<?php /* translators: %s: Browser name. */ ?>
-		<p class="browser-status-text"><?php printf( esc_html__( 'Your browser is out of date! It looks like you&#8217;re using an old version of %s.', 'browsehappy' ), $results['name'] ); ?>
+		<p class="browser-status-text"><?php printf( esc_html__( 'Your browser is out of date! It looks like you&#8217;re using an old version of %s.', 'browsehappy' ), esc_html( $results['name'] ) ); ?>
 			<?php esc_html_e( 'For the best experience on the web, please update your browser.', 'browsehappy' ); ?></p>
 		<p class="browser-status-action"><a href="<?php echo esc_url( $results['update_url'] ); ?>"><?php esc_html_e( 'Upgrade now!', 'browsehappy' ); ?></a></p>
 	<?php endif; ?>

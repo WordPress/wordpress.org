@@ -1,3 +1,11 @@
+<?php
+/**
+ * The sidebar shown on blog pages.
+ *
+ * @package Rosetta
+ */
+
+?>
 <h4><?php esc_html_e( 'Categories', 'rosetta' ); ?></h4>
 <ul>
 	<?php wp_list_categories( 'title_li=&show_count=1&orderby=count&order=DESC&number=10' ); ?>

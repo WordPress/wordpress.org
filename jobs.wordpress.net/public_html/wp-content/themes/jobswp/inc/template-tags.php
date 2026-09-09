@@ -86,7 +86,7 @@ function jobswp_comment( $comment, $args, $depth ) {
 					<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
 						<time datetime="<?php comment_time( 'c' ); ?>">
 							<?php /* translators: 1: Comment date, 2: Comment time. */ ?>
-							<?php printf( esc_html_x( '%1$s at %2$s', '1: date, 2: time', 'jobswp' ), get_comment_date(), get_comment_time() ); ?>
+							<?php printf( esc_html_x( '%1$s at %2$s', '1: date, 2: time', 'jobswp' ), esc_html( get_comment_date() ), esc_html( get_comment_time() ) ); ?>
 						</time>
 					</a>
 					<?php edit_comment_link( __( 'Edit', 'jobswp' ), '<span class="edit-link">', '</span>' ); ?>

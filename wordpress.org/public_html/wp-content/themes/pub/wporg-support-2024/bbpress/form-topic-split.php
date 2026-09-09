@@ -16,14 +16,14 @@
 		<div id="split-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-split">
 
 			<?php /* translators: %s: Topic title. */ ?>
-			<h1><?php printf( esc_html__( 'Split topic "%s"', 'wporg-forums' ), bbp_get_topic_title() ); ?></h1>
+			<h1><?php printf( esc_html__( 'Split topic "%s"', 'wporg-forums' ), esc_html( bbp_get_topic_title() ) ); ?></h1>
 
 			<form id="split_topic" name="split_topic" method="post" action="<?php the_permalink(); ?>">
 
 				<fieldset class="bbp-form">
 
 					<?php /* translators: %s: Topic title. */ ?>
-					<legend><?php printf( esc_html__( 'Split topic "%s"', 'wporg-forums' ), bbp_get_topic_title() ); ?></legend>
+					<legend><?php printf( esc_html__( 'Split topic "%s"', 'wporg-forums' ), esc_html( bbp_get_topic_title() ) ); ?></legend>
 
 					<div>
 
@@ -41,7 +41,7 @@
 							<div>
 								<input name="bbp_topic_split_option" id="bbp_topic_split_option_reply" type="radio" checked="checked" value="reply" />
 								<?php /* translators: %s: Forum title. */ ?>
-								<label for="bbp_topic_split_option_reply"><?php printf( wp_kses_post( __( 'New topic in <strong>%s</strong> titled:', 'wporg-forums' ) ), bbp_get_forum_title( bbp_get_topic_forum_id( bbp_get_topic_id() ) ) ); ?></label>
+								<label for="bbp_topic_split_option_reply"><?php printf( wp_kses_post( __( 'New topic in <strong>%s</strong> titled:', 'wporg-forums' ) ), esc_html( bbp_get_forum_title( bbp_get_topic_forum_id( bbp_get_topic_id() ) ) ) ); ?></label>
 								<input type="text" id="bbp_topic_split_destination_title" value="<?php echo esc_attr( sprintf( __( 'Split: %s', 'wporg-forums' ), bbp_get_topic_title() ) ); ?>" size="35" name="bbp_topic_split_destination_title" />
 							</div>
 

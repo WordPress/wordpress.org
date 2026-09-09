@@ -1,3 +1,11 @@
+<?php
+/**
+ * Skip links shown at the top of every page.
+ *
+ * @package bb-base
+ */
+
+?>
 	<dl id="accessibility">
 		<dt>Skip to:</dt>
 		<dd><a href="#content" title="Skip to content"><?php esc_html_e( 'Content', 'bborg' ); ?></a></dd>

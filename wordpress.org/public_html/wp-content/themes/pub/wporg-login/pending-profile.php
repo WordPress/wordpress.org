@@ -69,7 +69,7 @@ get_header();
 			'<h2>' . esc_html__( 'Confirm your email address', 'wporg' ) . '</h2>' .
 			/* translators: %s Email address */
 			'<p>' . esc_html__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) . '</p>' .
-			'<p>' . '<a href="#" class="resend" data-account="%s">' . esc_html__( 'Resend confirmation email.', 'wporg' ) . '</a></p>' .
+			'<p><a href="#" class="resend" data-account="%s">' . esc_html__( 'Resend confirmation email.', 'wporg' ) . '</a></p>' .
 			( $email_change_available ? '<a href="#" class="change-email">' . esc_html__( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
 			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
 			esc_attr( $pending_user['user_email'] )

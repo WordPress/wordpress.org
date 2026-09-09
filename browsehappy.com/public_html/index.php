@@ -48,7 +48,7 @@ defined( 'ABSPATH' ) || die();
 					<h2 lang="en"><?php echo $data->name; ?></h2>
 					<p class="info"><?php echo $data->info; ?></p>
 					<?php /* translators: %s: Browser version. */ ?>
-					<p class="version"><?php printf( esc_html__( 'Latest Version: %s', 'browsehappy' ), '<strong>' . apply_filters( 'get_browsehappy_version', $browser ) . '</strong>' ); ?></p>
+					<p class="version"><?php printf( esc_html__( 'Latest Version: %s', 'browsehappy' ), '<strong>' . esc_html( apply_filters( 'get_browsehappy_version', $browser ) ) . '</strong>' ); ?></p>
 					<p class="website"><?php esc_html_e( 'Visit website for more info', 'browsehappy' ); ?></p>
 				</a>
 				<?php do_action( 'browsehappy_browser_after', $browser ); ?>

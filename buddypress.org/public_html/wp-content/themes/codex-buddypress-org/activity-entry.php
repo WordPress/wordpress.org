@@ -87,7 +87,7 @@
 					<div class="ac-textarea">
 						<textarea id="ac-input-<?php bp_activity_id() ?>" class="ac-input" name="ac_input_<?php bp_activity_id() ?>"></textarea>
 					</div>
-					<input type="submit" name="ac_form_submit" value="<?php esc_attr_e( 'Post', 'buddypress' ) ?> &rarr;" /> &nbsp; <?php esc_html_e( 'or press esc to cancel.', 'buddypress' ) ?>
+					<input type="submit" name="ac_form_submit" value="<?php esc_attr_e( 'Post', 'buddypress' ); ?> &rarr;" /> &nbsp; <?php esc_html_e( 'or press esc to cancel.', 'buddypress' ); ?>
 					<input type="hidden" name="comment_form_id" value="<?php bp_activity_id() ?>" />
 				</div>
 				<?php wp_nonce_field( 'new_activity_comment', '_wpnonce_new_activity_comment' ) ?>

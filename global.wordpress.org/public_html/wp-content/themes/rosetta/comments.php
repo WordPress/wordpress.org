@@ -1,4 +1,10 @@
 <?php
+/**
+ * The template for displaying comments.
+ *
+ * @package Rosetta
+ */
+
 /*
  * If the current post is protected by a password and
  * the visitor has not yet entered the password we will
@@ -16,9 +22,9 @@ if ( post_password_required() ) {
 			<?php
 				printf(
 					/* translators: 1: Number of comments, 2: Post title. */
-					esc_html( _nx( 'One thought on &ldquo;%2$s&rdquo;', '%1$s thoughts on &ldquo;%2$s&rdquo;', get_comments_number(), 'comments title', 'rosetta' ) ),
-					number_format_i18n( get_comments_number() ),
-					get_the_title() 
+					esc_html( _nx( 'One thought on &ldquo;%2$s&rdquo;', '%1$s thoughts on &ldquo;%2$s&rdquo;', get_comments_number(), 'comments title', 'rosetta' ) ), // phpcs:ignore WordPress.WP.I18n.MissingSingularPlaceholder -- The singular form carries no count.
+					esc_html( number_format_i18n( get_comments_number() ) ),
+					esc_html( get_the_title() )
 				);
 			?>
 		</h2>
@@ -27,10 +33,10 @@ if ( post_password_required() ) {
 			<?php
 				wp_list_comments(
 					array(
-					'style'       => 'ol',
-					'short_ping'  => true,
-					'avatar_size' => 56,
-					) 
+						'style'       => 'ol',
+						'short_ping'  => true,
+						'avatar_size' => 56,
+					)
 				);
 			?>
 		</ol>

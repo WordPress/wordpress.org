@@ -176,11 +176,13 @@ function bb_base_single_topic_description() {
 	?>
 
 	<li class="topic-forum"><?php
-		/* translators: %s: forum title */
-		printf( esc_html__( 'In: %s', 'bborg' ),
-			sprintf( '<a href="%s">%s</a>',
+		printf(
+			/* translators: %s: forum title */
+			esc_html__( 'In: %s', 'bborg' ),
+			sprintf(
+				'<a href="%s">%s</a>',
 				esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id() ) ),
-				bbp_get_topic_forum_title()
+				esc_html( bbp_get_topic_forum_title() )
 			)
 		);
 	?></li>
@@ -192,16 +194,25 @@ function bb_base_single_topic_description() {
 	<?php endif; ?>
 	<?php if ( !empty( $last_reply  ) ) : ?>
 		<li class="topic-freshness-author"><?php
-			/* translators: %s: reply author link */
-			printf( esc_html__( 'Last voice: %s', 'bborg' ),
-				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) )
+			printf(
+				/* translators: %s: reply author link */
+				esc_html__( 'Last voice: %s', 'bborg' ),
+				wp_kses_post(
+					bbp_get_author_link(
+						array(
+							'type'    => 'name',
+							'post_id' => $last_reply,
+							'size'    => '15',
+						)
+					)
+				)
 			);
 		?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="topic-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( esc_html__( 'About %s', 'bborg' ), $time_since );
+			printf( esc_html__( 'About %s', 'bborg' ), esc_html( $time_since ) );
 		?></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
@@ -242,11 +253,13 @@ function bb_base_single_forum_description() {
 
 	<?php if ( bbp_get_forum_parent_id() ) : ?>
 		<li class="topic-parent"><?php
-			/* translators: %s: forum title */
-			printf( esc_html__( 'In: %s', 'bborg' ),
-				sprintf( '<a href="%s">%s</a>',
+			printf(
+				/* translators: %s: forum title */
+				esc_html__( 'In: %s', 'bborg' ),
+				sprintf(
+					'<a href="%s">%s</a>',
 					esc_url( bbp_get_forum_permalink( bbp_get_forum_parent_id() ) ),
-					bbp_get_forum_title( bbp_get_forum_parent_id() )
+					esc_html( bbp_get_forum_title( bbp_get_forum_parent_id() ) )
 				)
 			);
 		?></li>
@@ -259,16 +272,24 @@ function bb_base_single_forum_description() {
 	<?php endif; ?>
 	<?php if ( !empty( $last_active  ) ) : ?>
 		<li class="forum-freshness-author"><?php
-			/* translators: %s: post author link */
-			printf( esc_html__( 'Last voice: %s', 'bborg' ),
-				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) )
+			printf(
+				/* translators: %s: post author link */
+				esc_html__( 'Last voice: %s', 'bborg' ),
+				wp_kses_post(
+					bbp_get_author_link(
+						array(
+							'type'    => 'name',
+							'post_id' => $last_active,
+						)
+					)
+				)
 			);
 		?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="forum-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( esc_html__( 'About %s', 'bborg' ), $time_since );
+			printf( esc_html__( 'About %s', 'bborg' ), esc_html( $time_since ) );
 		?></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>

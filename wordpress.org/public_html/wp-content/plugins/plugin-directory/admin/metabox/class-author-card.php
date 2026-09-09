@@ -115,7 +115,7 @@ class Author_Card {
 		<div class="profile-personal">
 			<?php echo get_avatar( $author->ID, 48 ); ?>
 			<div class="profile-details">
-				<strong><a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>/"><?php echo $author->user_login; ?></a></strong>
+				<strong><a href="//profiles.wordpress.org/<?php echo esc_attr( $author->user_nicename ); ?>/"><?php echo esc_html( $author->user_login ); ?></a></strong>
 				<?php
 				$author_links = array(
 					sprintf(
@@ -133,8 +133,8 @@ class Author_Card {
 				?>
 
 				<span class="profile-links">
-					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>/"><?php esc_html_e( 'profile', 'wporg-plugins' ); ?></a> |
-					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>/"><?php esc_html_e( 'support', 'wporg-plugins' ); ?></a>
+					<a href="//profiles.wordpress.org/<?php echo esc_attr( $author->user_nicename ); ?>/"><?php esc_html_e( 'profile', 'wporg-plugins' ); ?></a> |
+					<a href="//wordpress.org/support/users/<?php echo esc_attr( $author->user_nicename ); ?>/"><?php esc_html_e( 'support', 'wporg-plugins' ); ?></a>
 				</span>
 
 				<div class="profile-email">
@@ -202,7 +202,7 @@ class Author_Card {
 						);
 					}
 					/* translators: %s: comma-separated list of negative user status labels */
-					echo '<p>' . sprintf( esc_html__( 'This user is: %s', 'wporg-plugins' ), implode( ', ', $labels ) ) . '</p>';
+					echo '<p>' . sprintf( esc_html__( 'This user is: %s', 'wporg-plugins' ), esc_html( implode( ', ', $labels ) ) ) . '</p>';
 				}
 
 				$user_notes = get_user_meta( $user->ID, '_wporg_bbp_user_notes', true );

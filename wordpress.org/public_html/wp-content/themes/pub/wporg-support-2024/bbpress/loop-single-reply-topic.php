@@ -21,13 +21,16 @@
 			<span class="bbp-topic-started-by">
 			<?php
 			printf(
+				/* translators: %1$s: Topic author link. */
 				esc_html__( 'Started by: %1$s', 'wporg-forums' ),
-				bbp_get_topic_author_link(
-					array(
-					'post_id' => $topic_id,
-					'size' => '14'
-					) 
-				) 
+				wp_kses_post(
+					bbp_get_topic_author_link(
+						array(
+							'post_id' => $topic_id,
+							'size'    => '14',
+						)
+					)
+				)
 			);
 			?>
 			</span>

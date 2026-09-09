@@ -15,7 +15,7 @@ if ( false !== $latest_release ) :
 			?></strong>
 		</a>
 		<?php /* translators: %s: File size in megabytes. */ ?>
-		<span><?php printf( esc_html__( '.zip &mdash; %s MB', 'rosetta' ), $latest_release['zip_size_mb'] ); ?></span>
+		<span><?php printf( esc_html__( '.zip &mdash; %s MB', 'rosetta' ), esc_html( $latest_release['zip_size_mb'] ) ); ?></span>
 	</p>
 
 	<p class="download-tar">

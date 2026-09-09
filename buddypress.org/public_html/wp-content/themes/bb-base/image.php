@@ -14,13 +14,13 @@ if ( have_posts() ) :
 			<dd>
 				<?php
 				/* translators: 1: Date; 2: time. */
-				printf( esc_html__( '%1$s at %2$s' ), get_the_time( 'l, F jS, Y' ), get_the_time() );
+				printf( esc_html__( '%1$s at %2$s' ), esc_html( get_the_time( 'l, F jS, Y' ) ), esc_html( get_the_time() ) );
 				?>
 			</dd>
 			<dd>
 				<?php
 				/* translators: author posts link */
-				printf( wp_kses_post( __( 'by <cite>%s</cite>', 'bborg' ) ), get_the_author_posts_link() );
+				printf( wp_kses_post( __( 'by <cite>%s</cite>', 'bborg' ) ), wp_kses_post( get_the_author_posts_link() ) );
 				?>
 			</dd>
 			<?php the_tags( "\t\t\t\t\t<dt>" . esc_html__( 'Tagged as', 'bborg' ) . "</dt>\n\t\t\t\t\t<dd>", "</dd>\t\t\t\t\t<dd>", "</dd>\n" ); ?>

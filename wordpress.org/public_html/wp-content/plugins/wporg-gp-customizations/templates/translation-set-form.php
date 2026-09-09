@@ -1,3 +1,11 @@
+<?php
+/**
+ * Template for the translation set edit form.
+ *
+ * @package GlotPress
+ */
+
+?>
 <dl>
 	<dt><label for="set[locale]"><?php esc_html_e( 'Locale', 'glotpress' ); ?></label></dt>
 	<dd>

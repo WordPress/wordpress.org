@@ -107,7 +107,7 @@ class Release_Confirmation {
 		if ( $not_enabled ) {
 			printf(
 				/* translators: %s: List of plugin links. */
-				'<p><em>' . esc_html__( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em></p>',
+				'<p><em>' . esc_html__( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins' ) . '</em></p>',
 				wp_sprintf_l( '%l', array_filter( array_map( function( $plugin ) {
 					if ( 'publish' == get_post_status( $plugin ) ) {
 						return sprintf(
@@ -228,7 +228,7 @@ class Release_Confirmation {
 		} else {
 			printf(
 				/* translators: 1: Number of confirmations, 2: Number of required confirmations. */
-				esc_html__( '%s of %s required confirmations.', 'wporg-plugins' ),
+				esc_html__( '%1$s of %2$s required confirmations.', 'wporg-plugins' ),
 				number_format_i18n( count( $data['confirmations'] ) ),
 				number_format_i18n( $plugin->release_confirmation )
 			);

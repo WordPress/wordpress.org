@@ -134,7 +134,7 @@ class Committers extends \WP_List_Table {
 						<input type="text" name="add_committer" class="form-required" value="" aria-required="true" placeholder="<?php esc_attr_e( 'WordPress.org username', 'wporg-plugins' ); ?>">
 						<span class="screen-reader-text"><?php esc_html_e( 'Add a new committer', 'wporg-plugins' ); ?></span>
 					</label>
-					<input type="button" id="add-committer-submit" class="button" data-wp-lists="add:the-committer-list:add-committer::post_id=<?php echo get_post()->ID; ?>" value="<?php esc_attr_e( 'Add Committer', 'wporg-plugins' ); ?>">
+					<input type="button" id="add-committer-submit" class="button" data-wp-lists="add:the-committer-list:add-committer::post_id=<?php echo (int) get_post()->ID; ?>" value="<?php esc_attr_e( 'Add Committer', 'wporg-plugins' ); ?>">
 				</p>
 			</td>
 		</tr>

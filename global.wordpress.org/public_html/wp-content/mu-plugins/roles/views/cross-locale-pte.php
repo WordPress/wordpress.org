@@ -1,3 +1,11 @@
+<?php
+/**
+ * Admin view listing cross-locale project translation editors.
+ *
+ * @package Rosetta
+ */
+
+?>
 <div class="wrap">
 	<h2>
 		<?php esc_html_e( 'Cross-Locale PTEs', 'rosetta' ); ?>

@@ -1266,7 +1266,7 @@ class Admin {
 					?></li>
 					<li><?php
 						/* translators: %s: Date user account was created. */
-						printf( wp_kses_post( __( 'Created: <strong>%s</strong>', 'wporg-photos' ) ), $account_created );
+						printf( wp_kses_post( __( 'Created: <strong>%s</strong>', 'wporg-photos' ) ), esc_html( $account_created ) );
 					?>
 						</li>
 				</ul>
@@ -1327,7 +1327,7 @@ class Admin {
 
 					printf(
 						/* translators: %s: Rejection rate as a percentage. */
-						esc_html__( 'Total rejection rate: %s', 'wporg-photos'),
+						esc_html__( 'Total rejection rate: %s', 'wporg-photos' ),
 						'<strong>' . $rejection_rate .'%</strong>'
 					);
 					echo "</p>\n";
@@ -1335,7 +1335,7 @@ class Admin {
 					if ( $submission_errors_count ) {
 						echo '<p>';
 						/* translators: %s: The number of submission errors. */
-						printf( esc_html__( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), $submission_errors_count );
+						printf( esc_html__( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), (int) $submission_errors_count );
 						echo "</p>\n";
 					}
 				?>
@@ -1359,16 +1359,14 @@ class Admin {
 			return;
 		}
 
-		$format = '<div class="misc-pub-section misc-pub-%s">%s: <strong>%s</strong></div>';
-
 		// Output file hash.
 		if ( $file_hash = get_post_meta( $post_id, Registrations::get_meta_key( 'file_hash' ), true ) ) {
-			printf( $format, 'file-hash', esc_html__( 'File hash', 'wporg-photos' ), $file_hash );
+			printf( '<div class="misc-pub-section misc-pub-%s">%s: <strong>%s</strong></div>', 'file-hash', esc_html__( 'File hash', 'wporg-photos' ), esc_html( $file_hash ) );
 		}
 
 		// Output original filename.
 		if ( $orig_filename = get_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), true ) ) {
-			printf( $format, 'original-filename', esc_html__( 'Original file name', 'wporg-photos' ), esc_html( $orig_filename ) );
+			printf( '<div class="misc-pub-section misc-pub-%s">%s: <strong>%s</strong></div>', 'original-filename', esc_html__( 'Original file name', 'wporg-photos' ), esc_html( $orig_filename ) );
 		}
 
 		// Output moderator.

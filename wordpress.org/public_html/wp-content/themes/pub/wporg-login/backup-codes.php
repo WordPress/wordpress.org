@@ -55,12 +55,15 @@ get_header();
 			esc_html_e( 'You do not have any backup codes remaining.', 'wporg' );
 		} else {
 			printf(
-				esc_html( _n(
-					'You have %s backup code remaining.',
-					'You have %s backup codes remaining.',
-					$codes_available,
-					'wporg'
-				) ),
+				esc_html(
+					/* translators: %s: Number of backup codes. */
+					_n(
+						'You have %s backup code remaining.',
+						'You have %s backup codes remaining.',
+						$codes_available,
+						'wporg'
+					)
+				),
 				'<code>' . number_format_i18n( $codes_available ) . '</code>'
 			);
 		}

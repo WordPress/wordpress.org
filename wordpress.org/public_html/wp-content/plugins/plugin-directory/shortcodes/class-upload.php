@@ -267,7 +267,7 @@ class Upload {
 									'<div class="plugin-submission-email">✉️✔️ %s</div>',
 									sprintf(
 										/* translators: 1: Email date, 2: Email subject. */
-										wp_kses_post( __( 'Our team emailed you on <strong>%s</strong> regarding your submission. The subject line is: "<strong>%s</strong>".', 'wporg-plugins' ) ),
+										wp_kses_post( __( 'Our team emailed you on <strong>%1$s</strong> regarding your submission. The subject line is: "<strong>%2$s</strong>".', 'wporg-plugins' ) ),
 										esc_html( wp_date( get_option( 'date_format' ), strtotime( $plugin->review_email->created ) ) ),
 										esc_html( $plugin->review_email->subject )
 									)
@@ -281,7 +281,7 @@ class Upload {
 									'<div class="plugin-submission-email">✉️⏳ %s</div>',
 									sprintf(
 										/* translators: 1: Email address, 2: Email subject. */
-										wp_kses_post( __( 'Please be patient and wait for the review email. It will be sent to your email address, <strong>%s</strong>, with the subject line: "<strong>%s</strong>".', 'wporg-plugins' ) ),
+										wp_kses_post( __( 'Please be patient and wait for the review email. It will be sent to your email address, <strong>%1$s</strong>, with the subject line: "<strong>%2$s</strong>".', 'wporg-plugins' ) ),
 										esc_html( get_userdata( $plugin->post_author )->user_email ),
 										'[WordPress Plugin Directory] Review in Progress: ' . $plugin->post_title
 									)

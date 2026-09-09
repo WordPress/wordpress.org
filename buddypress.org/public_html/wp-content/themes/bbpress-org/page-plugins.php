@@ -64,7 +64,7 @@
 							<div><?php printf( esc_html__( 'Compatible up to: %s', 'bbporg' ), esc_html( $plugin->tested ) ); ?></div>
 						<?php endif; ?>
 						<?php /* translators: %s: Star rating markup. */ ?>
-						<div><?php printf( esc_html__( 'Rating: %s', 'bbporg' ), $plugin->rating_html ); // raw html - do not escape ?></div>
+						<div><?php printf( esc_html__( 'Rating: %s', 'bbporg' ), wp_kses_post( $plugin->rating_html ) ); ?></div>
 					</div>
 
 					<p class="plugin-description" style="font-size: 12px">

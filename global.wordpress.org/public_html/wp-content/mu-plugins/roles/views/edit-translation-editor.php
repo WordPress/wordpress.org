@@ -1,3 +1,11 @@
+<?php
+/**
+ * Admin view for editing a translation editor.
+ *
+ * @package Rosetta
+ */
+
+?>
 <div class="wrap">
 	<h2><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
 

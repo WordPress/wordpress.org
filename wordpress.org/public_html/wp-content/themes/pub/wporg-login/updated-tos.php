@@ -58,7 +58,7 @@ get_header();
 <p>&nbsp;</p>
 
 <p>
-	<a href="https://<?php echo $localised_domain; ?>/about/privacy/"><?php esc_html_e( 'Privacy Policy', 'wporg' ); ?></a>
+	<a href="<?php echo esc_url( 'https://' . $localised_domain . '/about/privacy/' ); ?>"><?php esc_html_e( 'Privacy Policy', 'wporg' ); ?></a>
 </p>
 <?php /* ?>
 <p>

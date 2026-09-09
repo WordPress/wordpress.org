@@ -473,8 +473,9 @@ function wporg_theme_no_delete_repopackage( $post_id ) {
 			esc_html__( 'Repopackages can not be deleted.', 'wporg-themes' ),
 			'',
 			array(
-			'back_link' => true,
-		) );
+				'back_link' => true,
+			)
+		);
 	}
 }
 add_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );

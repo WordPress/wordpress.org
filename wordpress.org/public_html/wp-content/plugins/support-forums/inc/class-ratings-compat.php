@@ -270,13 +270,15 @@ class Ratings_Compat {
 		if ( $filter > 0 && $filter < 6 ) {
 			echo '<p class="reviews-filtered-msg" style="margin-top:12px;font-size:0.8rem;">';
 			printf(
-				/* translators: %d: number of stars */
-				wp_kses_post( _n(
-					'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
-					'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
-					$filter,
-					'wporg-forums'
-				) ) . ' ',
+				wp_kses_post(
+					/* translators: %d: number of stars */
+					_n(
+						'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
+						'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
+						$filter,
+						'wporg-forums'
+					)
+				) . ' ',
 				$filter
 			);
 			printf(

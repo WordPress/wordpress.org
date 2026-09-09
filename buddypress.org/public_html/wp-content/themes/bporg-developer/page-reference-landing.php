@@ -38,8 +38,8 @@ get_header(); ?>
                     <?php $version = DevHub\bporg_developer_get_current_version_term(); ?>
 					<?php if ( $version && ! is_wp_error( $version ) ) : ?>
                         <div class="widget box gray">
-                            <?php /* translators: %s: BuddyPress version. */ ?>
-                            <h3 class="widget-title"><?php printf( esc_html__( 'New &amp; Updated in BuddyPress %s:', 'bporg-developer' ), substr( $version->name, 0, -2 ) ); ?></h3>
+							<?php /* translators: %s: BuddyPress version. */ ?>
+							<h3 class="widget-title"><?php printf( esc_html__( 'New &amp; Updated in BuddyPress %s:', 'bporg-developer' ), esc_html( substr( $version->name, 0, -2 ) ) ); ?></h3>
                             <div class="widget-content">
                                 <ul class="unordered-list no-bullets">
                                     <?php
@@ -65,14 +65,14 @@ get_header(); ?>
                                         </li>
 
                                     <?php endwhile; ?>
-                                    <li class="view-all-new-in"><a href="<?php echo esc_attr( get_term_link( $version, 'wp-parser-since' ) ); ?>"><?php esc_html_e( 'View all&hellip;', 'bporg-developer' ); ?></a></li>
+									<li class="view-all-new-in"><a href="<?php echo esc_attr( get_term_link( $version, 'wp-parser-since' ) ); ?>"><?php esc_html_e( 'View all&hellip;', 'bporg-developer' ); ?></a></li>
                                 </ul>
                             </div>
                         </div>
                     <?php endif; ?>
                     <?php if ( has_nav_menu( 'reference-home-api' ) ) : ?>
                         <div class="widget box gray">
-                            <h3 class="widget-title"><?php esc_html_e( 'API', 'bporg-developer' ); ?></h3>
+							<h3 class="widget-title"><?php esc_html_e( 'API', 'bporg-developer' ); ?></h3>
                             <div class="widget-content">
                                 <?php wp_nav_menu(
                                         [

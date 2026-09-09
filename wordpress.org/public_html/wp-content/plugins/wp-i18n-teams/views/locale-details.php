@@ -1,3 +1,11 @@
+<?php
+/**
+ * View showing the translation team of a single locale.
+ *
+ * @package WordPressdotorg\I18nTeams
+ */
+
+?>
 <p><a href="<?php echo esc_url( get_permalink() ); ?>"><?php esc_html_e( '&larr; All locales', 'wporg' ); ?></a></p>
 <div id="locale-header">
 	<h1>
@@ -49,7 +57,7 @@
 				<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( $locale_data['localized_core_url'] ); ?>">
 					<?php
 					// translators: %s is the english variant of the locale name.
-					printf( esc_html__( 'Download WordPress in %s', 'wporg' ), $locale->english_name );
+					printf( esc_html__( 'Download WordPress in %s', 'wporg' ), esc_html( $locale->english_name ) );
 					?>
 				</a>
 			</div>
@@ -58,7 +66,7 @@
 					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( $locale_data['language_pack_url'] ); ?>" role="button">
 						<?php
 						// translators: %s is the latest version.
-						printf( esc_html__( 'Download language pack (%s)', 'wporg' ), $locale_data['language_pack_version'] );
+						printf( esc_html__( 'Download language pack (%s)', 'wporg' ), esc_html( $locale_data['language_pack_version'] ) );
 						?>
 					</a>
 				</div>
@@ -69,7 +77,7 @@
 
 <?php if ( ! empty( $locale_data['locale_managers'] ) ) : ?>
 	<?php /* translators: %s: Number of locale managers. */ ?>
-	<h2><?php printf( esc_html__( 'Locale Managers (%s)', 'wporg' ), number_format_i18n( count( $locale_data['locale_managers'] ) ) ); ?></h2>
+	<h2><?php printf( esc_html__( 'Locale Managers (%s)', 'wporg' ), esc_html( number_format_i18n( count( $locale_data['locale_managers'] ) ) ) ); ?></h2>
 
 	<ul class="validators">
 		<?php foreach ( $locale_data['locale_managers'] as $locale_manager ) :
@@ -91,7 +99,7 @@
 
 <?php if ( ! empty( $locale_data['validators'] ) ) : ?>
 	<?php /* translators: %s: Number of general translation editors. */ ?>
-	<h2><?php printf( esc_html__( 'General Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['validators'] ) ) ); ?></h2>
+	<h2><?php printf( esc_html__( 'General Translation Editors (%s)', 'wporg' ), esc_html( number_format_i18n( count( $locale_data['validators'] ) ) ) ); ?></h2>
 
 	<ul class="validators">
 		<?php foreach ( $locale_data['validators'] as $validator ) :
@@ -113,7 +121,7 @@
 
 <?php if ( ! empty( $locale_data['project_validators'] ) ) : ?>
 	<?php /* translators: %s: Number of project translation editors. */ ?>
-	<h2><?php printf( esc_html__( 'Project Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['project_validators'] ) ) ); ?></h2>
+	<h2><?php printf( esc_html__( 'Project Translation Editors (%s)', 'wporg' ), esc_html( number_format_i18n( count( $locale_data['project_validators'] ) ) ) ); ?></h2>
 
 	<ul class="validators project-validators">
 		<?php foreach ( $locale_data['project_validators'] as $validator ) :
@@ -135,7 +143,7 @@
 
 <?php if ( ! empty( $locale_data['translators'] ) ) : ?>
 	<?php /* translators: %s: Number of current contributors. */ ?>
-	<h2><?php printf( esc_html__( 'Current Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators'] ) ) ); ?></h2>
+	<h2><?php printf( esc_html__( 'Current Translation Contributors (%s)', 'wporg' ), esc_html( number_format_i18n( count( $locale_data['translators'] ) ) ) ); ?></h2>
 
 	<p>
 		<?php
@@ -154,7 +162,7 @@
 
 <?php if ( ! empty( $locale_data['translators_past'] ) ) : ?>
 	<?php /* translators: %s: Number of past contributors. */ ?>
-	<h2><?php printf( esc_html__( 'Past Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators_past'] ) ) ); ?></h2>
+	<h2><?php printf( esc_html__( 'Past Translation Contributors (%s)', 'wporg' ), esc_html( number_format_i18n( count( $locale_data['translators_past'] ) ) ) ); ?></h2>
 
 	<p>
 		<?php

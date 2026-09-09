@@ -74,7 +74,7 @@ class Translators {
 
 				if ( ! empty( $_REQUEST['s'] ) ) {
 					/* translators: %s: Search term. */
-					echo '<span class="subtitle">' . sprintf( esc_html__( 'Search results for &#8220;%s&#8221;', 'wporg-translate' ), esc_html( wp_unslash( $_REQUEST['s'] ) ) ) . '</span>';
+					echo '<span class="subtitle">' . sprintf( esc_html__( 'Search results for &#8220;%s&#8221;', 'wporg-translate' ), esc_html( wp_unslash( $_REQUEST['s'] ) ) ) . '</span>'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Escaped for display.
 				}
 				?>
 			</h2>

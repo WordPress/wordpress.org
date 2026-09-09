@@ -161,13 +161,15 @@ get_header( 'wporg' );
 					<?php
 					$plugin_count = defined( 'WP_PLUGIN_COUNT' ) ? WP_PLUGIN_COUNT : 54000;
 					printf(
-						/* translators: 1: Rounded number of plugins. 2: Link to Plugin Directory. */
-						wp_kses_post( _n(
-							'Extend WordPress with over %1$s plugin to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.',
-							'Extend WordPress with over %1$s plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.',
-							$plugin_count,
-							'wporg'
-						) ),
+						wp_kses_post(
+							/* translators: 1: Rounded number of plugins. 2: Link to Plugin Directory. */
+							_n(
+								'Extend WordPress with over %1$s plugin to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.',
+								'Extend WordPress with over %1$s plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.',
+								$plugin_count,
+								'wporg'
+							)
+						),
 						esc_html( number_format_i18n( $plugin_count ) ),
 						esc_url( home_url( '/plugins/' ) )
 					);
@@ -184,13 +186,15 @@ get_header( 'wporg' );
 						$meetups = 817;
 
 						printf(
-							/* translators: Number of meetups. */
-							esc_html( _n(
-								'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s city worldwide.',
-								'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s cities worldwide.',
-								$meetups,
-								'wporg'
-							) ),
+							esc_html(
+								/* translators: Number of meetups. */
+								_n(
+									'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s city worldwide.',
+									'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s cities worldwide.',
+									$meetups,
+									'wporg'
+								)
+							),
 							number_format_i18n( $meetups )
 						);
 						?>

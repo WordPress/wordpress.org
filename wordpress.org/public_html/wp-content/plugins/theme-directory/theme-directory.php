@@ -373,7 +373,7 @@ function wporg_themes_author_metabox_override( $post_type, $post ) {
 function wporg_themes_post_author_meta_box( $post ) {
 	global $user_ID;
 ?>
-<label class="screen-reader-text" for="post_author_override"><?php esc_html_e('Author'); ?></label>
+<label class="screen-reader-text" for="post_author_override"><?php esc_html_e( 'Author' ); ?></label>
 <?php
 	$value = empty($post->ID) ? $user_ID : $post->post_author;
 

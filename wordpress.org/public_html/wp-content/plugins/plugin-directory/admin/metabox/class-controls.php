@@ -234,19 +234,24 @@ class Controls {
 			<?php if ( 'closed' === $post->post_status ) : ?>
 
 				<?php /* translators: %s: Close reason. */ ?>
-				<p><?php printf( esc_html__( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
+				<p><?php printf( esc_html__( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . esc_html( $close_reason_label ) . '</strong>' ); ?></p>
 
 			<?php elseif ( 'disabled' === $post->post_status ) : ?>
 
 				<?php /* translators: %s: Disable reason. */ ?>
-				<p><?php printf( esc_html__( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
+				<p><?php printf( esc_html__( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . esc_html( $close_reason_label ) . '</strong>' ); ?></p>
 
 			<?php elseif ( 'rejected' === $post->post_status ) : ?>
 
-				<p><?php printf(
+				<p>
+					<?php
+					printf(
+						/* translators: %s: Rejection reason. */
 						esc_html__( 'Rejection Reason: %s', 'wporg-plugins' ),
-						'<strong>' . $rejection_reason_label . '</strong>'
-				); ?></p>
+						'<strong>' . esc_html( $rejection_reason_label ) . '</strong>'
+					);
+					?>
+				</p>
 
 			<?php elseif ( 'publish' === $post->post_status ) : ?>
 

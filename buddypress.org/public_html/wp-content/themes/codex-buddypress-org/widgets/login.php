@@ -13,7 +13,7 @@ class BPOrg_Login_Widget extends WP_Widget {
 
 			<?php
 				echo $before_widget;
-				echo $before_title . esc_html__( 'Logged In As', 'bp-follow' ) . $after_title;
+				echo wp_kses_post( $before_title ) . esc_html__( 'Logged In As', 'bp-follow' ) . wp_kses_post( $after_title );
 			?>
 
 			<?php do_action( 'bp_before_sidebar_me' ) ?>
@@ -41,7 +41,7 @@ class BPOrg_Login_Widget extends WP_Widget {
 
 			<?php
 				echo $before_widget;
-				echo $before_title . esc_html__( 'Log In', 'bp-follow' ) . $after_title;
+				echo wp_kses_post( $before_title ) . esc_html__( 'Log In', 'bp-follow' ) . wp_kses_post( $after_title );
 			?>
 
 			<p id="login-text">
@@ -55,7 +55,7 @@ class BPOrg_Login_Widget extends WP_Widget {
 			</p>
 
 			<form name="login-form" id="sidebar-login-form" class="standard-form" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post">
-				<label><?php esc_html_e( 'Username', 'buddypress' ) ?><br />
+				<label><?php esc_html_e( 'Username', 'buddypress' ); ?><br />
 				<input type="text" name="log" id="sidebar-user-login" class="input" value="<?php echo attribute_escape(stripslashes($user_login)); ?>" /></label>
 
 				<label><?php esc_html_e( 'Password', 'buddypress' ); ?><br />

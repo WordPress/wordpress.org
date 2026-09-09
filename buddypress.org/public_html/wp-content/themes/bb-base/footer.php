@@ -1,3 +1,11 @@
+<?php
+/**
+ * The template for displaying the footer.
+ *
+ * @package bb-base
+ */
+
+?>
 			</div>
 		</div>
 		<hr class="hidden" />

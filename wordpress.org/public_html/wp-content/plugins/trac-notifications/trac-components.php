@@ -650,7 +650,7 @@ jQuery( function( $ ) {
 
 		if ( is_singular() ) {
 			/* translators: %s: Number of tickets. */
-			echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $component_count ) ), $component_count ) . ' in the ' . $component . ' component</h3>';
+			echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $component_count ) ), (int) $component_count ) . ' in the ' . esc_html( $component ) . ' component</h3>';
 		}
 
 		$history = $this->api->get_component_history( $component, self::last_x_days );
@@ -714,7 +714,7 @@ jQuery( function( $ ) {
 		if ( $unreplied_tickets ) {
 			$count = count( $unreplied_tickets );
 			/* translators: %d: Number of tickets. */
-			echo '<h3>' . sprintf( esc_html( _n( '%d ticket that has no replies', '%d tickets that have no replies', $count ) ), $count ) . '</h3>';
+			echo '<h3>' . sprintf( esc_html( _n( '%d ticket that has no replies', '%d tickets that have no replies', $count ) ), (int) $count ) . '</h3>';
 			echo '<a href="' . $this->trac_query( array( 'component' => $component, 'id' => implode( ',', wp_list_pluck( $unreplied_tickets, 'id' ) ) ) ) . '">View list on Trac</a>';
 			$this->render_tickets( $unreplied_tickets );
 		}
@@ -724,7 +724,12 @@ jQuery( function( $ ) {
 		if ( $next_milestone ) {
 			$count = count( $next_milestone );
 			$next_milestone_object = (object) $next_milestone[0];
-			echo '<h3>' . sprintf( esc_html( _n( '%s ticket slated for ' . $next_milestone_object->milestone, '%s tickets slated for ' . $next_milestone_object->milestone, $count ) ), $count ) . '</h3>';
+			echo '<h3>' . sprintf(
+				/* translators: 1: Number of tickets, 2: Milestone name. */
+				esc_html( _n( '%1$s ticket slated for %2$s', '%1$s tickets slated for %2$s', $count ) ),
+				(int) $count,
+				esc_html( $next_milestone_object->milestone )
+			) . '</h3>';
 			echo $this->trac_query_link( 'View list in Trac', array( 'component' => $component, 'milestone' => $next_milestone_object->milestone ) );
 			$this->render_tickets( $next_milestone );
 		}
@@ -733,7 +738,7 @@ jQuery( function( $ ) {
 
 		$count = array_sum( $tickets_by_type );
 		/* translators: %s: Number of tickets. */
-		echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $count ) ), $count ) . '</h3>';
+		echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $count ) ), (int) $count ) . '</h3>';
 
 		$types = array(
 			'enhancement'     => 'Open enhancements',

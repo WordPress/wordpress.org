@@ -201,7 +201,7 @@ function breadcrumb() { ?>
 
 			<?php
 				/* translators: %s: document title */
-				printf( esc_html__( '&raquo; %s', 'wporg-showcase' ), wp_get_document_title() );
+				printf( esc_html__( '&raquo; %s', 'wporg-showcase' ), esc_html( wp_get_document_title() ) );
 			?>
 		<?php endif; // is_search ?>
 

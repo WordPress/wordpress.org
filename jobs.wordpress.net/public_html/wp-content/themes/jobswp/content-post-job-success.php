@@ -1,9 +1,23 @@
+<?php
+/**
+ * Confirmation shown after a job has been submitted.
+ *
+ * @package jobswp
+ */
+
+?>
 <div class="notice notice-success">
 	<h2><?php esc_html_e( 'Thank you for submitting your job posting!', 'jobswp' ); ?></h2>
 
-	<p><?php printf( wp_kses_post( __( 'Your job posting will be reviewed in the next 24-48 hours to ensure it meets the criteria listed in our <a href="%s">FAQ</a>. After approval, your posting will stay on the job board for a total of 21 days.',
-	'jobswp' ) ),
-	'/faq/' ); ?></p>
+	<p>
+		<?php
+		printf(
+			/* translators: %s: FAQ URL. */
+			wp_kses_post( __( 'Your job posting will be reviewed in the next 24-48 hours to ensure it meets the criteria listed in our <a href="%s">FAQ</a>. After approval, your posting will stay on the job board for a total of 21 days.', 'jobswp' ) ),
+			'/faq/'
+		);
+		?>
+	</p>
 
 	<p>
 	<?php
@@ -13,12 +27,22 @@
 		'/remove-a-job/'
 	); ?></p>
 
-	<?php /* translators: %s: Job token. */ ?>
-	<p class="job-token"><?php printf( esc_html__( 'Your job token is: %s', 'jobswp' ), esc_html( $_POST['job_token'] ) ); ?></p>
+	<p class="job-token">
+		<?php
+		/* translators: %s: Job token. */
+		printf( esc_html__( 'Your job token is: %s', 'jobswp' ), esc_html( $_POST['job_token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Set by the plugin's form handler, not read from the request.
+		?>
+	</p>
 
-	<p><?php printf( wp_kses_post( __( 'If you would like to modify your posting, or you are having problems removing the job using the job token, please contact us using our <a href="%s">feedback form</a>. Be sure to specify the email address you supplied in your job posting.',
-	'jobswp' ) ),
-	'/feedback/' ); ?></p>
+	<p>
+		<?php
+		printf(
+			/* translators: %s: Feedback form URL. */
+			wp_kses_post( __( 'If you would like to modify your posting, or you are having problems removing the job using the job token, please contact us using our <a href="%s">feedback form</a>. Be sure to specify the email address you supplied in your job posting.', 'jobswp' ) ),
+			'/feedback/'
+		);
+		?>
+	</p>
 
 	<p><?php esc_html_e( "Below you'll find a preview of your job posting.", 'jobswp' ); ?></p>
 </div>

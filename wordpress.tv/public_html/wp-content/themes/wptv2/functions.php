@@ -478,7 +478,7 @@ class WordPressTV_Theme {
 
 				<small class="commentmetadata">
 					<?php /* translators: 1: Comment date, 2: Comment time. */ ?>
-					<a href="#comment-<?php comment_ID(); ?>" title=""><?php printf( esc_html__( '%1$s at %2$s', 'wptv' ), get_comment_date(), get_comment_time() ); ?></a>
+					<a href="#comment-<?php comment_ID(); ?>" title=""><?php printf( esc_html__( '%1$s at %2$s', 'wptv' ), esc_html( get_comment_date() ), esc_html( get_comment_time() ) ); ?></a>
 					<?php
 						edit_comment_link( __( 'edit', 'wptv' ), '&nbsp;&nbsp;', '' );
 						echo comment_reply_link( array(

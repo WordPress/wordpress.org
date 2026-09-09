@@ -22,10 +22,10 @@
 					<?php
 						if ( bbp_is_topic_edit() )
 							/* translators: %s: Topic title. */
-							printf( esc_html__( 'Now Editing &ldquo;%s&rdquo;', 'bbpress' ), bbp_get_topic_title() );
+							printf( esc_html__( 'Now Editing &ldquo;%s&rdquo;', 'bbpress' ), esc_html( bbp_get_topic_title() ) );
 						else
 							/* translators: %s: Forum title. */
-							bbp_is_single_forum() ? printf( esc_html__( 'Create New Topic in &ldquo;%s&rdquo;', 'bbpress' ), bbp_get_forum_title() ) : esc_html_e( 'Create New Topic', 'bbpress' );
+							bbp_is_single_forum() ? printf( esc_html__( 'Create New Topic in &ldquo;%s&rdquo;', 'bbpress' ), esc_html( bbp_get_forum_title() ) ) : esc_html_e( 'Create New Topic', 'bbpress' );
 					?>
 
 				</legend>
@@ -69,7 +69,7 @@
 
 					<p>
 						<?php /* translators: %d: Maximum title length. */ ?>
-						<label for="bbp_topic_title"><?php printf( esc_html__( 'Topic Title (Maximum Length: %d):', 'bbpress' ), bbp_get_title_max_length() ); ?></label><br />
+						<label for="bbp_topic_title"><?php printf( esc_html__( 'Topic Title (Maximum Length: %d):', 'bbpress' ), (int) bbp_get_title_max_length() ); ?></label><br />
 						<input type="text" id="bbp_topic_title" value="<?php bbp_form_topic_title(); ?>" size="40" name="bbp_topic_title" maxlength="<?php bbp_title_max_length(); ?>" />
 					</p>
 
@@ -172,7 +172,7 @@
 							</legend>
 
 							<div>
-								<label for="bbp_topic_edit_reason"><?php printf( esc_html__( 'Optional reason for editing:', 'bbpress' ), bbp_get_current_user_name() ); ?></label><br />
+								<label for="bbp_topic_edit_reason"><?php printf( esc_html__( 'Optional reason for editing:', 'bbpress' ), esc_html( bbp_get_current_user_name() ) ); ?></label><br />
 								<input type="text" value="<?php bbp_form_topic_edit_reason(); ?>" size="40" name="bbp_topic_edit_reason" id="bbp_topic_edit_reason" />
 							</div>
 						</fieldset>
@@ -211,7 +211,7 @@
 	<div id="no-topic-<?php bbp_topic_id(); ?>" class="bbp-no-topic">
 		<div class="bbp-template-notice">
 			<?php /* translators: %s: Forum title. */ ?>
-			<p><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'bbpress' ), bbp_get_forum_title() ); ?></p>
+			<p><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'bbpress' ), esc_html( bbp_get_forum_title() ) ); ?></p>
 		</div>
 	</div>
 

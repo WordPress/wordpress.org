@@ -134,7 +134,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		<div class="wrapper">
 			<div id="blog" class="section">
 				<div class="col-9">
-					<h3><?php esc_html_e('Blog', 'rosetta'); ?></h3>
+					<h3><?php esc_html_e( 'Blog', 'rosetta' ); ?></h3>
 <?php
 	query_posts( 'showposts=5' );
 	while (have_posts()) : the_post();

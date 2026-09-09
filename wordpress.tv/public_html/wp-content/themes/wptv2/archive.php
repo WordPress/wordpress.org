@@ -24,15 +24,15 @@ global $wp_query, $post, $wptv;
 
 		elseif ( is_day() ) :
 			/* translators: %s: Date. */
-			printf( esc_html_x( 'Archive for %s', 'Daily archive page', 'wptv' ), get_the_time( __( 'F jS, Y', 'wptv' ) ) );
+			printf( esc_html_x( 'Archive for %s', 'Daily archive page', 'wptv' ), esc_html( get_the_time( __( 'F jS, Y', 'wptv' ) ) ) );
 
 		elseif ( is_month() ) :
 			/* translators: %s: Month. */
-			printf( esc_html_x( 'Archive for %s', 'Monthly archive page', 'wptv' ), get_the_time( __( 'F, Y', 'wptv' ) ) );
+			printf( esc_html_x( 'Archive for %s', 'Monthly archive page', 'wptv' ), esc_html( get_the_time( __( 'F, Y', 'wptv' ) ) ) );
 
 		elseif ( is_year() ) :
 			/* translators: %s: Year. */
-			printf( esc_html_x( 'Archive for %s', 'Yearly archive page', 'wptv' ), get_the_time( __( 'Y', 'wptv' ) ) );
+			printf( esc_html_x( 'Archive for %s', 'Yearly archive page', 'wptv' ), esc_html( get_the_time( __( 'Y', 'wptv' ) ) ) );
 
 		elseif ( is_author() ) :
 			esc_html_e( 'Author Archive', 'wptv' );

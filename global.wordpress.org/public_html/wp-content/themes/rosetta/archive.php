@@ -1,3 +1,11 @@
+<?php
+/**
+ * The template for displaying archive pages.
+ *
+ * @package Rosetta
+ */
+
+?>
 <?php get_header(); ?>
 
 	<div id="pagebody">
