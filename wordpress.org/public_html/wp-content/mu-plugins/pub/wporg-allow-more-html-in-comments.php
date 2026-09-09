@@ -71,7 +71,7 @@ function filter_comment_content( $data ) {
  * @return array[] Allowed HTML tags and attributes.
  */
 function comment_allowed_html() {
-	$tags = wp_kses_allowed_html( 'post' );
+	$tags = \wp_kses_allowed_html( 'post' );
 
 	unset( $tags['textarea'], $tags['button'] );
 
