@@ -1020,7 +1020,7 @@ JS;
 				'<option value="%s"%s>%s</option>' . "\n",
 				esc_attr( $reason ),
 				selected( $selected, $reason, false ),
-				esc_html( sanitize_text_field( $args['label'] ) )
+				esc_html( $args['label'] )
 			);
 		}
 		echo '</select></label>';
