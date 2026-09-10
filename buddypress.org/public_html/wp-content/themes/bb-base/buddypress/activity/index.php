@@ -16,7 +16,7 @@
 		<ul>
 			<?php do_action( 'bp_before_activity_type_tab_all' ); ?>
 
-			<li class="selected" id="activity-all"><a href="<?php bp_activity_directory_permalink(); ?>" title="<?php esc_attr_e( 'The public activity for everyone on this site.', 'buddypress' ); ?>"><?php printf( /* translators: %s: Member count. */ wp_kses_post( __( 'All Members <span>%s</span>', 'buddypress' ) ), (int) bp_get_total_member_count() ); ?></a></li>
+			<li class="selected" id="activity-all"><a href="<?php bp_activity_directory_permalink(); ?>" title="<?php esc_attr_e( 'The public activity for everyone on this site.', 'buddypress' ); ?>"><?php printf( /* translators: %s: Member count. */ wp_kses_post( __( 'All Members <span>%s</span>', 'buddypress' ) ), esc_html( bp_get_total_member_count() ) ); ?></a></li>
 
 			<?php if ( is_user_logged_in() ) : ?>
 
@@ -26,7 +26,7 @@
 
 					<?php if ( bp_get_total_friend_count( bp_loggedin_user_id() ) ) : ?>
 
-						<li id="activity-friends"><a href="<?php echo esc_url( bp_loggedin_user_domain() . bp_get_activity_slug() . '/' . bp_get_friends_slug() . '/' ); ?>" title="<?php esc_attr_e( 'The activity of my friends only.', 'buddypress' ); ?>"><?php printf( /* translators: %s: Friend count. */ wp_kses_post( __( 'My Friends <span>%s</span>', 'buddypress' ) ), (int) bp_get_total_friend_count( bp_loggedin_user_id() ) ); ?></a></li>
+						<li id="activity-friends"><a href="<?php echo esc_url( bp_loggedin_user_domain() . bp_get_activity_slug() . '/' . bp_get_friends_slug() . '/' ); ?>" title="<?php esc_attr_e( 'The activity of my friends only.', 'buddypress' ); ?>"><?php printf( /* translators: %s: Friend count. */ wp_kses_post( __( 'My Friends <span>%s</span>', 'buddypress' ) ), esc_html( bp_get_total_friend_count( bp_loggedin_user_id() ) ) ); ?></a></li>
 
 					<?php endif; ?>
 
@@ -38,7 +38,7 @@
 
 					<?php if ( bp_get_total_group_count_for_user( bp_loggedin_user_id() ) ) : ?>
 
-						<li id="activity-groups"><a href="<?php echo esc_url( bp_loggedin_user_domain() . bp_get_activity_slug() . '/' . bp_get_groups_slug() . '/' ); ?>" title="<?php esc_attr_e( 'The activity of groups I am a member of.', 'buddypress' ); ?>"><?php printf( /* translators: %s: Group count. */ wp_kses_post( __( 'My Groups <span>%s</span>', 'buddypress' ) ), (int) bp_get_total_group_count_for_user( bp_loggedin_user_id() ) ); ?></a></li>
+						<li id="activity-groups"><a href="<?php echo esc_url( bp_loggedin_user_domain() . bp_get_activity_slug() . '/' . bp_get_groups_slug() . '/' ); ?>" title="<?php esc_attr_e( 'The activity of groups I am a member of.', 'buddypress' ); ?>"><?php printf( /* translators: %s: Group count. */ wp_kses_post( __( 'My Groups <span>%s</span>', 'buddypress' ) ), esc_html( bp_get_total_group_count_for_user( bp_loggedin_user_id() ) ) ); ?></a></li>
 
 					<?php endif; ?>
 
@@ -48,7 +48,7 @@
 
 				<?php if ( bp_get_total_favorite_count_for_user( bp_loggedin_user_id() ) ) : ?>
 
-					<li id="activity-favorites"><a href="<?php echo esc_url( bp_loggedin_user_domain() . bp_get_activity_slug() . '/favorites/' ); ?>" title="<?php esc_attr_e( 'The activity I&#8217;ve marked as a favorite.', 'buddypress' ); ?>"><?php printf( /* translators: %s: Favorite count. */ wp_kses_post( __( 'My Favorites <span>%s</span>', 'buddypress' ) ), (int) bp_get_total_favorite_count_for_user( bp_loggedin_user_id() ) ); ?></a></li>
+					<li id="activity-favorites"><a href="<?php echo esc_url( bp_loggedin_user_domain() . bp_get_activity_slug() . '/favorites/' ); ?>" title="<?php esc_attr_e( "The activity I've marked as a favorite.", 'buddypress' ); ?>"><?php printf( /* translators: %s: Favorite count. */ wp_kses_post( __( 'My Favorites <span>%s</span>', 'buddypress' ) ), esc_html( bp_get_total_favorite_count_for_user( bp_loggedin_user_id() ) ) ); ?></a></li>
 
 				<?php endif; ?>
 
@@ -59,7 +59,7 @@
 				if ( bp_get_total_mention_count_for_user( bp_loggedin_user_id() ) ) :
 					?>
 					<?php /* translators: %s: Number of new mentions. */ ?>
-					<strong><?php printf( wp_kses_post( __( '<span>%s new</span>', 'buddypress' ) ), (int) bp_get_total_mention_count_for_user( bp_loggedin_user_id() ) ); ?></strong><?php endif; ?></a></li>
+					<strong><?php printf( wp_kses_post( __( '<span>%s new</span>', 'buddypress' ) ), esc_html( bp_get_total_mention_count_for_user( bp_loggedin_user_id() ) ) ); ?></strong><?php endif; ?></a></li>
 
 			<?php endif; ?>
 

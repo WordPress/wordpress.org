@@ -96,7 +96,6 @@
 								<li><?php echo wp_kses_post( __( '<strong>Provide relevant information</strong>, such as your browser, operating system, or server environment.', 'wporg-forums' ) ); ?></li>
 								<?php if ( ! bbp_is_single_view() || ! in_array( bbp_get_view_id(), array( 'theme', 'plugin' ) ) ) : ?>
 								<li><?php
-									/* translators: 1: Theme Directory URL, 2: Appearance icon, 3: Plugin Directory URL, 4: Plugins icon */
 									printf(
 										/* translators: 1: Theme directory URL, 2: Plugin directory URL. */
 										wp_kses_post( __( '<strong>Don&#8217;t use this forum to ask for help with <a href="%1$s">themes</a> or <a href="%2$s">plugins</a></strong>.  Instead, head to the theme or plugin&#8217;s page and find the "View support forum" link for its specific forum.', 'wporg-forums' ) ),

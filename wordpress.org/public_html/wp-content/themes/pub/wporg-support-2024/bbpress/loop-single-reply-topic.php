@@ -23,12 +23,11 @@
 			printf(
 				/* translators: %1$s: Topic author link. */
 				esc_html__( 'Started by: %1$s', 'wporg-forums' ),
-				wp_kses_post(
-					bbp_get_topic_author_link(
-						array(
-							'post_id' => $topic_id,
-							'size'    => '14',
-						)
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- bbPress builds this markup; wp_kses_post() would strip the avatar's srcset and decoding attributes.
+				bbp_get_topic_author_link(
+					array(
+						'post_id' => $topic_id,
+						'size'    => '14',
 					)
 				)
 			);

@@ -1255,7 +1255,6 @@ class Admin {
 							'post_status' => 'pending',
 							'author'      => $author->ID,
 						];
-						/* translators: %s: Linked number of photos submitted by user that have been rejected. */
 						printf(
 							/* translators: %s: Number of pending photos, possibly linked. */
 							wp_kses_post( __( 'Pending photos: <strong>%s</strong>', 'wporg-photos' ) ),

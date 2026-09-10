@@ -2,7 +2,7 @@
 /**
  * The template for displaying the footer.
  *
- * @package bbPress
+ * @package bb-base
  */
 
 ?>

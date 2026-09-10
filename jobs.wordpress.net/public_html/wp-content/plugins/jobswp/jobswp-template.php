@@ -173,9 +173,11 @@ function jobswp_required_field_classes( $field ) {
 /**
  * Returns the appropriate field value markup for use in appropriate form field.
  *
- * The return value is always an escaped attribute fragment, so it is safe in an
- * attribute context. The job description is not handled here because it carries
- * HTML; see jobswp_field_description_value().
+ * Returns a complete attribute pair (`value='…'`), or selected() output for the
+ * select fields, meant to be echoed between attributes inside a tag rather than
+ * inside an attribute's quotes. The value is run through esc_attr(). Returns
+ * nothing when there is no submitted value. The job description is not handled
+ * here because it carries HTML; see jobswp_field_description_value().
  *
  * @param string $field Field name/key
  * @param string $option_value Related value, if appropriate. (e.g. the other
@@ -212,7 +214,7 @@ function jobswp_field_description_value() {
 	$field = 'job_description';
 
 	if ( $_POST && isset( $_POST[ $field ] ) && ! empty( $_POST[ $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Display-only form redisplay.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- wp_filter_kses() sanitizes the value and handles the slashing itself.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- wp_filter_kses() unslashes and kses-filters the value, then re-slashes it; the outer stripslashes() undoes that.
 		return stripslashes( wp_filter_kses( trim( $_POST[ $field ] ) ) );
 	}
 

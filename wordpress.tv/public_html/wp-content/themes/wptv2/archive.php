@@ -16,23 +16,26 @@ global $wp_query, $post, $wptv;
 	<h2 class="page-title"><?php
 		if ( is_category() ) :
 			/* translators: %s: Category name. */
-			printf( esc_html__( '&#8216;%s&#8217; Videos', 'wptv' ), single_cat_title( '', false ) );
+			printf( esc_html__( '&#8216;%s&#8217; Videos', 'wptv' ), esc_html( single_cat_title( '', false ) ) );
 
 		elseif ( is_tag() ) :
 			/* translators: %s: Tag name. */
-			printf( esc_html__( '&#8216;%s&#8217; Videos', 'wptv' ), single_tag_title( '', false ) );
+			printf( esc_html__( '&#8216;%s&#8217; Videos', 'wptv' ), esc_html( single_tag_title( '', false ) ) );
 
 		elseif ( is_day() ) :
+			$archive_date = get_the_time( __( 'F jS, Y', 'wptv' ) );
 			/* translators: %s: Date. */
-			printf( esc_html_x( 'Archive for %s', 'Daily archive page', 'wptv' ), esc_html( get_the_time( __( 'F jS, Y', 'wptv' ) ) ) );
+			printf( esc_html_x( 'Archive for %s', 'Daily archive page', 'wptv' ), esc_html( $archive_date ) );
 
 		elseif ( is_month() ) :
+			$archive_date = get_the_time( __( 'F, Y', 'wptv' ) );
 			/* translators: %s: Month. */
-			printf( esc_html_x( 'Archive for %s', 'Monthly archive page', 'wptv' ), esc_html( get_the_time( __( 'F, Y', 'wptv' ) ) ) );
+			printf( esc_html_x( 'Archive for %s', 'Monthly archive page', 'wptv' ), esc_html( $archive_date ) );
 
 		elseif ( is_year() ) :
+			$archive_date = get_the_time( __( 'Y', 'wptv' ) );
 			/* translators: %s: Year. */
-			printf( esc_html_x( 'Archive for %s', 'Yearly archive page', 'wptv' ), esc_html( get_the_time( __( 'Y', 'wptv' ) ) ) );
+			printf( esc_html_x( 'Archive for %s', 'Yearly archive page', 'wptv' ), esc_html( $archive_date ) );
 
 		elseif ( is_author() ) :
 			esc_html_e( 'Author Archive', 'wptv' );
