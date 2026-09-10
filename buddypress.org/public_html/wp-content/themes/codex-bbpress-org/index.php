@@ -2,12 +2,11 @@
 <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
 			<h2 id="post-<?php the_ID(); ?>"><a href="<?php the_permalink() ?>" rel="bookmark"><?php the_title(); ?></a></h2>
 			<cite><?php
-				/* translators: 1: post date, 2: post author */
 				printf(
 					/* translators: 1: Publication date, 2: Author link. */
 					esc_html__( 'Published on %1$s by %2$s', 'bbporg' ),
-					get_the_time( 'F jS, Y' ),
-					get_the_author_link()
+					esc_html( get_the_time( 'F jS, Y' ) ),
+					wp_kses_post( get_the_author_link() )
 				);
 			?></cite>
 			<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_excerpt(); ?></div>
