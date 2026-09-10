@@ -29,6 +29,6 @@ Run from this directory (`npm install` first):
     committing; both must pass clean.
 -   The files in `trac/` run live on `*.trac.wordpress.org` with no build step. Once a change
     to them is committed AND deployed from a Dotorg sandbox, `scripts_version` must be bumped
-    in BOTH `trac.wordpress.org/templates/site_head.html` and `site_footer.html` in a
-    follow-up commit, or browsers keep serving the cached old version. The bump itself is
-    picked up automatically by the hosts' SVN refreshes. Details in trac/README.md.
+    in `trac.wordpress.org/conf/common.ini` in a follow-up commit, or browsers keep serving
+    the cached old version. The bump itself is picked up automatically by the hosts' SVN
+    refreshes. Details in trac/README.md.

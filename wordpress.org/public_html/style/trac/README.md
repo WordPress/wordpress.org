@@ -45,20 +45,17 @@ exact bytes that will ship using your browser's developer tools:
 ## Deploying and bumping the script version
 
 Every include of these files carries a cache-busting query string,
-`?${scripts_version}`, defined at the top of **both**
-`trac.wordpress.org/templates/site_head.html` and
-`trac.wordpress.org/templates/site_footer.html`. (Both definitions are
-needed: Trac includes the two templates separately, and Jinja2 `set`
-variables don't cross include boundaries.)
+`?${scripts_version}`, which both `site_head.html` and `site_footer.html`
+read from the `[wporg]` section of `trac.wordpress.org/conf/common.ini`.
 
 Deployment is a two-step flow:
 
 1. **Commit the JS/CSS changes to meta.svn and deploy them from a Dotorg
    sandbox, as usual.** Even once deployed, browsers keep using their cached
    copy, because the URL (including `?scripts_version`) hasn't changed.
-2. **Bump `scripts_version` in a follow-up commit** — in `site_head.html`
-   _and_ `site_footer.html` — once the assets are deployed. The bump needs no
-   deploy of its own: the Trac hosts pick the template change up through
-   their automatic SVN refresh. Bumping only _after_ the assets are live
-   matters: bump too early and the CDN caches the stale file under the new
-   version string.
+2. **Bump `scripts_version` in `common.ini` in a follow-up commit** once the
+   assets are deployed. The bump needs no deploy of its own: the Trac hosts
+   pick the config change up through their automatic SVN refresh, and Trac
+   re-reads the file when it changes. Bumping only _after_ the assets are
+   live matters: bump too early and the CDN caches the stale file under the
+   new version string.
