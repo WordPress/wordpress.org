@@ -394,7 +394,7 @@ class Flagged {
 					if (select) {
 						const optionExists = Array.from(select.options).some(opt => opt.value === post_status);
 						if (!optionExists) {
-							const newOption = new Option( "<?php echo esc_js( __( 'Flagged', 'wporg-photos' ) ); ?>", post_status);
+							const newOption = new Option( <?php echo wp_json_encode( __( 'Flagged', 'wporg-photos' ) ); ?>, post_status);
 							select.add(newOption);
 						}
 					}
