@@ -157,7 +157,7 @@ class Author_Card {
 						/* translators: 1: Time since registration, 2: Registration date. */
 						esc_html__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
 						esc_html( human_time_diff( strtotime( $author->user_registered ) ) ),
-						esc_html( date( 'Y-M-d', strtotime( $author->user_registered ) ) ) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Preserve the existing display timezone in this escaping change.
+						esc_html( gmdate( 'Y-M-d', strtotime( $author->user_registered ) ) )
 					);
 					?>
 				</div>

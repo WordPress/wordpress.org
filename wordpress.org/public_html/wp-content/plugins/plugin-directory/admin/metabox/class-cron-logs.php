@@ -96,7 +96,7 @@ class Cron_Logs {
 				</tr>',
 				esc_attr( $job->id ),
 				esc_attr( human_time_diff( $job->nextrun ?: $job->start ) . ' ago' ),
-				esc_html( date( 'Y-m-d H:i:s', $job->nextrun ?: $job->start ) ), // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Preserve the existing display timezone in this escaping change.
+				esc_html( gmdate( 'Y-m-d H:i:s', $job->nextrun ?: $job->start ) ),
 				esc_html( $task_name ),
 				esc_html( $job->status ),
 				wp_kses_post( $task_desc ),
