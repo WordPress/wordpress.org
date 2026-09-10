@@ -27,7 +27,8 @@
 		echo '<div class="row row-1">';
 		echo "<div class='no-job'>";
 		echo sprintf(
-			__( 'There are no jobs in this category. If you\'re hiring, you can <a href="%s">post a new job</a>.', 'jobswp' ),
+			/* translators: %s: Post a job URL. */
+			wp_kses( __( 'There are no jobs in this category. If you&#8217;re hiring, you can <a href="%s">post a new job</a>.', 'jobswp' ), 'jobswp-ui' ),
 			'/post-a-job'
 		);
 		echo '</div>';
@@ -49,7 +50,7 @@
 			$link .= 'title="'. esc_attr( sprintf( __( 'View all jobs filed under %s', 'jobswp' ), $category->name ) ) . '"';
 			$link .= '>';
 			$link .= 'Show all '.apply_filters( 'list_terms', $category->name, $category ) . ' jobs &raquo;</a>';		
-			echo wp_kses_post( $link );
+			echo wp_kses( $link, 'jobswp-ui' );
 			echo '</p>';
 		} else {
 			jobswp_content_nav( 'all-job-categories' );

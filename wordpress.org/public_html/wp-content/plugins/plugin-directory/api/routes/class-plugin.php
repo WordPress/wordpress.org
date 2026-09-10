@@ -413,14 +413,15 @@ class Plugin extends Base {
 				$review_author_markup         = '<a href="' . $review_author_markup_profile . '">';
 				$review_author_markup        .= get_avatar( $reviewer->ID, 16, 'monsterid' ) . '</a>';
 				$review_author_markup        .= '<a href="' . $review_author_markup_profile . '" class="reviewer-name">';
-				$review_author_markup        .= $reviewer->display_name;
+				$review_author_markup        .= esc_html( $reviewer->display_name );
 				if ( $reviewer->display_name != $reviewer->user_login ) {
-					$review_author_markup .= " <small>({$reviewer->user_login})</small>";
+					$review_author_markup .= ' <small>(' . esc_html( $reviewer->user_login ) . ')</small>';
 				}
 				$review_author_markup .= '</a>';
 
 				printf(
-					__( 'By %1$s on %2$s', 'wporg-plugins' ),
+					/* translators: 1: Review author, 2: Review date. */
+					esc_html__( 'By %1$s on %2$s', 'wporg-plugins' ),
 					$review_author_markup,
 					'<span class="review-date">' . date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ) . '</span>'
 				);

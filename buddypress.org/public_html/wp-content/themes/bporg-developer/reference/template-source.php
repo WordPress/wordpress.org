@@ -12,9 +12,12 @@ if ( ! empty( $source_file ) ) :
 	?>
 	<hr />
 	<section class="source-content">
-		<h3><?php _e( 'Source', 'bporg-developer' ); ?></h3>
+		<h3><?php esc_html_e( 'Source', 'bporg-developer' ); ?></h3>
 		<p>
-			<?php printf( __( 'File: %s', 'bporg-developer' ),
+			<?php
+			printf(
+				/* translators: %s: Source file link. */
+				esc_html__( 'File: %s', 'bporg-developer' ),
 				'<a href="' . esc_url( get_source_file_archive_link( $source_file ) ) . '">' . esc_html( $source_file ) . '</a>'
 			); ?>
 		</p>
@@ -25,14 +28,14 @@ if ( ! empty( $source_file ) ) :
 			</div>
 			<p class="source-code-links">
 				<span>
-					<a href="#" class="show-complete-source"><?php _e( 'Expand full source code', 'bporg-developer' ); ?></a>
-					<a href="#" class="less-complete-source"><?php _e( 'Collapse full source code', 'bporg-developer' ); ?></a>
+					<a href="#" class="show-complete-source"><?php esc_html_e( 'Expand full source code', 'bporg-developer' ); ?></a>
+					<a href="#" class="less-complete-source"><?php esc_html_e( 'Collapse full source code', 'bporg-developer' ); ?></a>
 				</span>
-				<span><a href="<?php bporg_developer_source_file_link(); ?>"><?php _e( 'View on Trac', 'bporg-developer' ); ?></a></span>
+				<span><a href="<?php bporg_developer_source_file_link(); ?>"><?php esc_html_e( 'View on Trac', 'bporg-developer' ); ?></a></span>
 			</p>
 		<?php else : ?>
 			<p>
-				<a href="<?php bporg_developer_source_file_link(); ?>"><?php _e( 'View on Trac', 'bporg-developer' ); ?></a>
+				<a href="<?php bporg_developer_source_file_link(); ?>"><?php esc_html_e( 'View on Trac', 'bporg-developer' ); ?></a>
 			</p>
 		<?php endif; ?>
 	</section>

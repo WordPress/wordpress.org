@@ -248,15 +248,15 @@ function wporg_themes_suspend_theme() {
 	$post = get_post( $post_id );
 
 	if ( 'suspend' == $post->post_status ) {
-		wp_die( __( 'This item has already been suspended.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'This item has already been suspended.', 'wporg-themes' ) );
 	}
 
 	if ( ! get_post_type_object( $post->post_type ) ) {
-		wp_die( __( 'Unknown post type.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'Unknown post type.', 'wporg-themes' ) );
 	}
 
 	if ( ! current_user_can( 'suspend_theme', $post_id ) || 'repopackage' != $post->post_type ) {
-		wp_die( __( 'You are not allowed to suspend this item.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'You are not allowed to suspend this item.', 'wporg-themes' ) );
 	}
 
 	wp_update_post( array(
@@ -285,15 +285,15 @@ function wporg_themes_reinstate_theme() {
 	$post = get_post( $post_id );
 
 	if ( 'suspend' != $post->post_status ) {
-		wp_die( __( 'This item has already been reinstated.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'This item has already been reinstated.', 'wporg-themes' ) );
 	}
 
 	if ( ! get_post_type_object( $post->post_type ) ) {
-		wp_die( __( 'Unknown post type.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'Unknown post type.', 'wporg-themes' ) );
 	}
 
 	if ( ! current_user_can( 'reinstate_theme', $post_id ) || 'repopackage' != $post->post_type ) {
-		wp_die( __( 'You are not allowed to reinstate this item.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'You are not allowed to reinstate this item.', 'wporg-themes' ) );
 	}
 
 	wp_update_post( array(
@@ -348,15 +348,15 @@ function wporg_themes_delist_theme() {
 	$post = get_post( $post_id );
 
 	if ( 'delist' == $post->post_status ) {
-		wp_die( __( 'This item has already been delisted.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'This item has already been delisted.', 'wporg-themes' ) );
 	}
 
 	if ( ! get_post_type_object( $post->post_type ) ) {
-		wp_die( __( 'Unknown post type.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'Unknown post type.', 'wporg-themes' ) );
 	}
 
 	if ( ! current_user_can( 'suspend_theme', $post_id ) || 'repopackage' != $post->post_type ) {
-		wp_die( __( 'You are not allowed to delist this item.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'You are not allowed to delist this item.', 'wporg-themes' ) );
 	}
 
 	wp_update_post( array(
@@ -385,15 +385,15 @@ function wporg_themes_relist_theme() {
 	$post = get_post( $post_id );
 
 	if ( 'delist' != $post->post_status ) {
-		wp_die( __( 'This item has already been relisted.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'This item has already been relisted.', 'wporg-themes' ) );
 	}
 
 	if ( ! get_post_type_object( $post->post_type ) ) {
-		wp_die( __( 'Unknown post type.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'Unknown post type.', 'wporg-themes' ) );
 	}
 
 	if ( ! current_user_can( 'reinstate_theme', $post_id ) || 'repopackage' != $post->post_type ) {
-		wp_die( __( 'You are not allowed to relist this item.', 'wporg-themes' ) );
+		wp_die( esc_html__( 'You are not allowed to relist this item.', 'wporg-themes' ) );
 	}
 
 	wp_update_post( array(
@@ -469,9 +469,13 @@ add_filter( 'post_thumbnail_html', 'wporg_themes_post_thumbnail_html', 10, 5 );
  */
 function wporg_theme_no_delete_repopackage( $post_id ) {
 	if ( 'repopackage' == get_post( $post_id )->post_type ) {
-		wp_die( __( 'Repopackages can not be deleted.', 'wporg-themes' ), '', array(
-			'back_link' => true,
-		) );
+		wp_die(
+			esc_html__( 'Repopackages can not be deleted.', 'wporg-themes' ),
+			'',
+			array(
+				'back_link' => true,
+			)
+		);
 	}
 }
 add_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );

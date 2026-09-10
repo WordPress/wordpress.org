@@ -159,7 +159,7 @@ class Review_Tools {
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 			echo '<label>
 				<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
-				<button class="button button-secondary plugin-upload-zip">' . __( 'Upload', 'wporg-plugins' ) . '</button>
+				<button class="button button-secondary plugin-upload-zip">' . esc_html__( 'Upload', 'wporg-plugins' ) . '</button>
 				</label>';
 		}
 

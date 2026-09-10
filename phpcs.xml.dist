@@ -147,6 +147,8 @@
 			<property name="customAutoEscapedFunctions" type="array">
 				<!-- Returns esc_url( $url ); see themes/pub/wporg-login/functions.php. -->
 				<element value="wporg_login_wordpress_url"/>
+				<!-- Returns selected() markup or an esc_attr()'d value attribute; see jobs.wordpress.net plugins/jobswp/jobswp-template.php. -->
+				<element value="jobswp_field_value"/>
 			</property>
 		</properties>
 	</rule>

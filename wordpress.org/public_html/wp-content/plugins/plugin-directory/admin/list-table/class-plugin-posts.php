@@ -333,11 +333,11 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			style="display: none"><td colspan="<?php echo $this->get_column_count(); ?>" class="colspanchange">
 
 		<fieldset class="inline-edit-col-left">
-			<legend class="inline-edit-legend"><?php _e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
+			<legend class="inline-edit-legend"><?php esc_html_e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
 			<div class="inline-edit-col">
 
 			<label>
-				<span class="title"><?php _e( 'Slug', 'wporg-plugins' ); ?></span>
+				<span class="title"><?php esc_html_e( 'Slug', 'wporg-plugins' ); ?></span>
 				<span class="input-text-wrap"><input type="text" name="post_name" value="" /></span>
 			</label>
 
@@ -362,9 +362,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	<?php endif; // count( $hierarchical_taxonomies ) ?>
 
 		<p class="submit inline-edit-save">
-			<button type="button" class="button cancel alignleft"><?php _e( 'Cancel', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button cancel alignleft"><?php esc_html_e( 'Cancel', 'wporg-plugins' ); ?></button>
 			<?php wp_nonce_field( 'inlineeditnonce', '_inline_edit', false ); ?>
-			<button type="button" class="button button-primary save alignright"><?php _e( 'Update', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button button-primary save alignright"><?php esc_html_e( 'Update', 'wporg-plugins' ); ?></button>
 			<span class="spinner"></span>
 			<input type="hidden" name="post_author" value="" />
 			<input type="hidden" name="post_view" value="<?php echo esc_attr( $m ); ?>" />

@@ -139,11 +139,12 @@ class Rosetta_Downloads {
 		}
 		?>
 		<div class="wrap">
-			<h2><?php _e( 'Download Stats', 'rosetta' ); ?></h2>
+			<h2><?php esc_html_e( 'Download Stats', 'rosetta' ); ?></h2>
 			<p>
 				<?php
 				printf(
-					__( 'This page shows the <a href="%s">Download Counter</a> number &mdash; total downloads of WordPress %s &mdash; broken down by locale.', 'rosetta' ),
+					/* translators: 1: Download counter URL, 2: WordPress version. */
+					wp_kses_post( __( 'This page shows the <a href="%1$s">Download Counter</a> number &mdash; total downloads of WordPress %2$s &mdash; broken down by locale.', 'rosetta' ) ),
 					'https://wordpress.org/download/counter/',
 					esc_html( WP_CORE_STABLE_BRANCH )
 				);
@@ -153,16 +154,16 @@ class Rosetta_Downloads {
 			<table class="widefat fixed striped" style="width:auto">
 				<thead>
 					<tr>
-						<th scope="col"><?php _e( 'Locale', 'rosetta' ); ?></th>
-						<th scope="col" style="text-align:right"><?php _e( 'Release Package', 'rosetta' ); ?></th>
-						<th scope="col" style="text-align:right"><?php _e( 'Language Pack', 'rosetta' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Locale', 'rosetta' ); ?></th>
+						<th scope="col" style="text-align:right"><?php esc_html_e( 'Release Package', 'rosetta' ); ?></th>
+						<th scope="col" style="text-align:right"><?php esc_html_e( 'Language Pack', 'rosetta' ); ?></th>
 					</tr>
 				</thead>
 
 				<tbody>
 					<tr>
 						<td>
-							<strong><?php _ex( 'All', 'locales', 'rosetta' ); ?></strong>
+							<strong><?php echo esc_html_x( 'All', 'locales', 'rosetta' ); ?></strong>
 						</td>
 						<td style="text-align:right">
 							<strong><?php echo number_format_i18n( $total_release_counts ); ?></strong>
@@ -176,9 +177,9 @@ class Rosetta_Downloads {
 
 				<tfoot>
 					<tr>
-						<th scope="col" style="width:80px"><?php _e( 'Locale', 'rosetta' ); ?></th>
-						<th scope="col" style="text-align:right"><?php _e( 'Release Package', 'rosetta' ); ?></th>
-						<th scope="col" style="text-align:right"><?php _e( 'Language Pack', 'rosetta' ); ?></th>
+						<th scope="col" style="width:80px"><?php esc_html_e( 'Locale', 'rosetta' ); ?></th>
+						<th scope="col" style="text-align:right"><?php esc_html_e( 'Release Package', 'rosetta' ); ?></th>
+						<th scope="col" style="text-align:right"><?php esc_html_e( 'Language Pack', 'rosetta' ); ?></th>
 					</tr>
 				</tfoot>
 			</table>

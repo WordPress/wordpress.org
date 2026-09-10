@@ -868,10 +868,10 @@ CSS;
 
 		echo '<table id="dashboard-photo-moderators" class="wp-list-table widefat fixed striped table-view-list">';
 		echo '<thead><tr>';
-		echo '<th>' . __( 'Moderator', 'wporg-photos' ) . '</th>';
+		echo '<th>' . esc_html__( 'Moderator', 'wporg-photos' ) . '</th>';
 		echo '<th class="col-num-approved" title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
 		echo '<th class="col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
-		echo '<th class="col-last-mod-date">' . __( 'Last Moderated', 'wporg-photos' ) . '</th>';
+		echo '<th class="col-last-mod-date">' . esc_html__( 'Last Moderated', 'wporg-photos' ) . '</th>';
 		echo '</tr></thead>';
 		echo '<tbody>';
 

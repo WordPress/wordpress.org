@@ -82,17 +82,18 @@ get_header();
 ?>
 
 <?php if ( ! $user_registration_available ) : ?>
-		<p><?php printf( __( 'New user registration is currently unavailable. Please check back after the <a href="%s">holiday break</a>.', 'wporg' ), 'https://wordpress.org/news/2024/12/holiday-break/' ); ?></p>
+		<?php /* translators: %s: Holiday break announcement URL. */ ?>
+		<p><?php printf( wp_kses_post( __( 'New user registration is currently unavailable. Please check back after the <a href="%s">holiday break</a>.', 'wporg' ) ), 'https://wordpress.org/news/2024/12/holiday-break/' ); ?></p>
 <?php else: ?>
 
-<p class="intro"><?php _e( 'Create a WordPress.org account to start contributing to WordPress, get help in the support forums, or rate and review themes and plugins.', 'wporg' ); ?></p>
+<p class="intro"><?php esc_html_e( 'Create a WordPress.org account to start contributing to WordPress, get help in the support forums, or rate and review themes and plugins.', 'wporg' ); ?></p>
 
 <form name="registerform" id="registerform" action="/register" method="post">
 
 	<p class="login-username">
-		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
+		<label for="user_login"><?php esc_html_e( 'Username', 'wporg' ); ?></label>
 		<input type="text" name="user_login" id="user_login" class="input <?php if ( $error_user_login ) echo 'error'; ?>" value="<?php echo esc_attr( $user_login ) ?>" size="20" maxlength="60" data-pattern-after-blur="[0-9a-z]{0,60}" required />
-		<span class="small"><?php _e( 'Only lower case letters (a-z) and numbers (0-9) are allowed.', 'wporg' ); ?></span>
+		<span class="small"><?php esc_html_e( 'Only lower case letters (a-z) and numbers (0-9) are allowed.', 'wporg' ); ?></span>
 	</p>
 	<?php
 	if ( $error_user_login ) {
@@ -106,9 +107,9 @@ get_header();
 	?>
 
 	<p class="login-email">
-		<label for="user_email"><?php _e( 'Email', 'wporg' ); ?></label>
+		<label for="user_email"><?php esc_html_e( 'Email', 'wporg' ); ?></label>
 		<input type="email" name="user_email" id="user_email" class="input <?php if ( $error_user_email ) echo 'error'; ?>" value="<?php echo esc_attr( $user_email ) ?>" size="20" maxlength="100" data-pattern-after-blur=".+@.+\..+" required />
-		<span class="small"><?php _e( 'A link to set your password will be sent here.', 'wporg' ); ?></span>
+		<span class="small"><?php esc_html_e( 'A link to set your password will be sent here.', 'wporg' ); ?></span>
 	</p>
 	<?php
 	if ( $error_user_email ) {
@@ -128,7 +129,7 @@ get_header();
 				$localised_domain = parse_url( wporg_login_wordpress_url(), PHP_URL_HOST );
 				printf(
 					/* translators: %s: List of linked policies, for example: <a>Privacy Policy</a> and <a>Terms of Service</a> */
-					_n( 'I have read and accept the %s', 'I have read and accept the %s', 1, 'wporg' ),
+					esc_html( _n( 'I have read and accept the %s', 'I have read and accept the %s', 1, 'wporg' ) ),
 					wp_sprintf_l( '%l', [
 						"<a href='https://{$localised_domain}/about/privacy/'>" . __( 'Privacy Policy', 'wporg' ) . '</a>',
 						// "<a href='https://{$localised_domain}/about/terms-of-service/'>" . __( 'Terms of Service', 'wporg' ) . '</a>',
@@ -142,12 +143,12 @@ get_header();
 	<p class="login-mailinglist checkbox">
 		<label for="user_mailinglist">
 			<input name="user_mailinglist" type="checkbox" id="user_mailinglist" value="true" <?php checked( $user_mailinglist, true ); ?>>
-			<?php _e( 'Subscribe to WordPress Announcements mailing list (a few messages a year)', 'wporg' ); ?>
+			<?php esc_html_e( 'Subscribe to WordPress Announcements mailing list (a few messages a year)', 'wporg' ); ?>
 		</label>
 	</p>
 	<?php
 		if ( $error_recapcha_status ) {
-			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
+			echo '<div class="message error"><p>' . esc_html__( 'Please try again.', 'wporg' ) . '</p></div>';
 		}
 	?>
 
@@ -160,8 +161,8 @@ get_header();
 <?php endif; // WPORG_ON_HOLIDAY else ?>
 
 <p id="nav">
-	<a href="/" title="<?php esc_attr_e( 'Already have an account?', 'wporg' ); ?>"><?php _e( 'Already have an account?', 'wporg' ); ?></a> &nbsp; • &nbsp;
-	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
+	<a href="/" title="<?php esc_attr_e( 'Already have an account?', 'wporg' ); ?>"><?php esc_html_e( 'Already have an account?', 'wporg' ); ?></a> &nbsp; • &nbsp;
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer();

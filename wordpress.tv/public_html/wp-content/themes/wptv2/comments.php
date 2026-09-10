@@ -23,19 +23,21 @@ if ( have_comments() ) :
 			$comments_number = get_comments_number();
 			if ( 1 == $comments_number ) {
 				/* translators: %s: post title */
-				printf( _x( 'One response on &ldquo;%s&rdquo;', 'comments title', 'wptv' ), '<span>' . get_the_title() . '</span>' );
+				printf( esc_html_x( 'One response on &ldquo;%s&rdquo;', 'comments title', 'wptv' ), '<span>' . esc_html( get_the_title() ) . '</span>' );
 			} else {
 				printf(
-					/* translators: 1: number of comments, 2: post title */
-					_nx(
-						'%1$s response on &ldquo;%2$s&rdquo;',
-						'%1$s responses on &ldquo;%2$s&rdquo;',
-						$comments_number,
-						'comments title',
-						'wptv'
+					esc_html(
+						/* translators: 1: Number of comments, 2: Post title. */
+						_nx(
+							'%1$s response on &ldquo;%2$s&rdquo;',
+							'%1$s responses on &ldquo;%2$s&rdquo;',
+							$comments_number,
+							'comments title',
+							'wptv'
+						)
 					),
 					number_format_i18n( $comments_number ),
-					'<span>' . get_the_title() . '</span>'
+					'<span>' . esc_html( get_the_title() ) . '</span>'
 				);
 			}
 		?>

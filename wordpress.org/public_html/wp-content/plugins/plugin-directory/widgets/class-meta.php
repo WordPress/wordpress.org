@@ -41,7 +41,7 @@ class Meta extends \WP_Widget {
 					<?php
 					printf(
 						/* translators: %s: term list */
-						__( 'Designed to work with: %s', 'wporg-plugins' ),
+						esc_html__( 'Designed to work with: %s', 'wporg-plugins' ),
 						esc_html( $built_for )
 					);
 					?>
@@ -52,7 +52,7 @@ class Meta extends \WP_Widget {
 				<?php
 				printf(
 					/* translators: %s: version number */
-					__( 'Version %s', 'wporg-plugins' ),
+					esc_html__( 'Version %s', 'wporg-plugins' ),
 					'<strong>' . esc_html( get_post_meta( $post->ID, 'version', true ) ) . '</strong>'
 				);
 				?>
@@ -71,7 +71,7 @@ class Meta extends \WP_Widget {
 
 				printf(
 					/* translators: %s: time since the last update */
-					__( 'Last updated %s', 'wporg-plugins' ),
+					esc_html__( 'Last updated %s', 'wporg-plugins' ),
 					/* translators: %s: time since the last update */
 					'<strong>' . wp_kses( sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $last_updated ) . '</span>' ), array( 'span' => true ) ) . '</strong>'
 				);
@@ -81,7 +81,7 @@ class Meta extends \WP_Widget {
 				<?php
 				printf(
 					/* translators: %s: active installations count */
-					__( 'Active installations %s', 'wporg-plugins' ),
+					esc_html__( 'Active installations %s', 'wporg-plugins' ),
 					'<strong>' . esc_html( Template::active_installs( false ) ) . '</strong>'
 				);
 				?>
@@ -107,7 +107,7 @@ class Meta extends \WP_Widget {
 					<?php
 					printf(
 						/* translators: %s: version number */
-						__( 'Tested up to %s', 'wporg-plugins' ),
+						esc_html__( 'Tested up to %s', 'wporg-plugins' ),
 						'<strong>' . esc_html( $tested_up_to ) . '</strong>'
 					);
 					?>
@@ -150,7 +150,7 @@ class Meta extends \WP_Widget {
 							<?php
 							printf(
 								/* translators: %s: Number of available languages */
-								_nx( 'See all %s', 'See all %s', $available_languages_count, 'languages', 'wporg-plugins' ),
+								esc_html( _nx( 'See all %s', 'See all %s', $available_languages_count, 'languages', 'wporg-plugins' ) ),
 								$available_languages_count
 							);
 							?>
@@ -159,7 +159,7 @@ class Meta extends \WP_Widget {
 							<div class="popover-arrow"></div>
 
 							<button type="button" class="button-link popover-close" aria-label="<?php esc_attr_e( 'Close this popover', 'wporg-plugins' ); ?>">
-								<?php _e( 'Close', 'wporg-plugins' ); ?>
+								<?php esc_html_e( 'Close', 'wporg-plugins' ); ?>
 							</button>
 
 							<div class="popover-inner">
@@ -169,7 +169,7 @@ class Meta extends \WP_Widget {
 									printf(
 										'<a href="%s">%s</a>',
 										esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $post->post_name ),
-										__( 'Translate into your language', 'wporg-plugins' )
+										esc_html__( 'Translate into your language', 'wporg-plugins' )
 									);
 								?>
 								</p>
@@ -210,7 +210,7 @@ class Meta extends \WP_Widget {
 					echo '<li class="clear">';
 					printf(
 						/* translators: %s: tag list */
-						_n( 'Tag %s', 'Tags %s', count( $term_links ), 'wporg-plugins' ),
+						esc_html( _n( 'Tag %s', 'Tags %s', count( $term_links ), 'wporg-plugins' ) ),
 						'<div class="tags">' . wp_kses_post( implode( $term_links ) ) . '</div>'
 					);
 					echo '</li>';
@@ -223,7 +223,7 @@ class Meta extends \WP_Widget {
 					printf(
 						'<a class="plugin-admin" href="%s">%s</a>',
 						esc_url( get_permalink() . 'advanced/' ),
-						__( 'Advanced View', 'wporg-plugins' )
+						esc_html__( 'Advanced View', 'wporg-plugins' )
 					);
 					?>
 				</li>

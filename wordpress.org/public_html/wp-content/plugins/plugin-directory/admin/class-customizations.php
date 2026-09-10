@@ -181,7 +181,7 @@ class Customizations {
 		global $submenu;
 		?>
 		<div class="wrap">
-			<h1><?php _e( 'Plugin Tools', 'wporg-plugins' ); ?></h1>
+			<h1><?php esc_html_e( 'Plugin Tools', 'wporg-plugins' ); ?></h1>
 			<ul>
 				<?php
 				foreach ( $submenu['plugin-tools'] ?? [] as $page ) {
@@ -588,7 +588,7 @@ class Customizations {
 		if ( $existing_plugin && $existing_plugin->ID != $plugin->ID ) {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
-				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
+				esc_html__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
 				$new_slug
 			) );
 		}
@@ -668,7 +668,7 @@ class Customizations {
 		if ( $slug !== $original_slug ) {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
-				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
+				esc_html__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
 				$original_slug
 			) );
 		}
@@ -890,7 +890,7 @@ class Customizations {
 
 		$user = wp_get_current_user();
 		if ( ! $user->exists() ) {
-			wp_die( __( 'Sorry, you must be logged in to reply to a comment.', 'wporg-plugins' ) );
+			wp_die( esc_html__( 'Sorry, you must be logged in to reply to a comment.', 'wporg-plugins' ) );
 		}
 
 		$user_ID              = $user->ID;
@@ -912,7 +912,7 @@ class Customizations {
 		}
 
 		if ( '' == $comment_content ) {
-			wp_die( __( 'ERROR: please type a comment.', 'wporg-plugins' ) );
+			wp_die( esc_html__( 'ERROR: please type a comment.', 'wporg-plugins' ) );
 		}
 
 		$comment_parent = 0;

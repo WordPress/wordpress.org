@@ -1,5 +1,5 @@
 <?php if ( !empty($post->post_password) && $_COOKIE['wp-postpass_' . COOKIEHASH] != $post->post_password) : ?>
-<p><?php _e( 'Enter your password to view comments.', 'wporg-showcase' ); ?></p>
+<p><?php esc_html_e( 'Enter your password to view comments.', 'wporg-showcase' ); ?></p>
 <?php return; endif; ?>
 
 <?php if ( is_single() ) : ?>
@@ -15,7 +15,7 @@
 	<?php comment_text() ?>
 	<p><cite><?php printf(
 		/* translators: 1: comment type, 2: comment author link, 3: comment date */
-		__( '%1$s from %2$s on %3$s', 'wporg-showcase' ),
+		esc_html__( '%1$s from %2$s on %3$s', 'wporg-showcase' ),
 		comment_type( __( 'Comment', 'wporg-showcase' ), __( 'Trackback', 'wporg-showcase' ), __( 'Pingback', 'wporg-showcase' ) ),
 		comment_author_link(),
 		comment_date()

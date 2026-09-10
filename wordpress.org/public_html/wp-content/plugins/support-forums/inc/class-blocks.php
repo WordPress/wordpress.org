@@ -275,7 +275,8 @@ class Blocks {
 			</p>',
 			checked( get_user_option( 'block_editor', $user_id ), 'disabled', false ),
 			sprintf(
-				__( 'Disable the <a href="%s">Block Editor</a> for new topics and replies.', 'wporg-forums' ),
+				/* translators: %s: Block editor documentation URL. */
+				wp_kses_post( __( 'Disable the <a href="%s">Block Editor</a> for new topics and replies.', 'wporg-forums' ) ),
 				'https://wordpress.org/support/article/wordpress-editor/'
 			)
 		);

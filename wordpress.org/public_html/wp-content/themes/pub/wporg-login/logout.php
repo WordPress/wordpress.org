@@ -15,13 +15,13 @@ if ( ! is_user_logged_in() ) {
 
 get_header();
 ?>
-<p class="intro"><?php _e( 'You are attempting to log out of WordPress.org.', 'wporg' ); ?></p>
+<p class="intro"><?php esc_html_e( 'You are attempting to log out of WordPress.org.', 'wporg' ); ?></p>
 
 <?php
 
 printf(
 	/* translators: %s: logout URL */
-	__( 'Do you really want to <a href="%s">log out</a>?', 'wporg' ),
+	wp_kses_post( __( 'Do you really want to <a href="%s">log out</a>?', 'wporg' ) ),
 	esc_url( wp_logout_url( $redirect_to ) )
 );
 ?>

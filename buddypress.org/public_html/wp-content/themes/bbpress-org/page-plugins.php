@@ -15,7 +15,9 @@
 
 						<?php
 							/* translators: 1: starting number of plugins, 2: ending number, 3: total number */
-							printf( __( 'Viewing %1$s to %2$s (%3$s)', 'bbporg' ),
+							printf(
+								/* translators: 1: First plugin number, 2: Last plugin number, 3: Total number of plugins. */
+								esc_html__( 'Viewing %1$s to %2$s (%3$s)', 'bbporg' ),
 								number_format_i18n( $from_num ),
 								number_format_i18n( $to_num ),
 								number_format_i18n( $plugins->info['results'] )
@@ -50,15 +52,19 @@
 
 					<div class="plugin-meta">
 						<?php if ( ! empty( $plugin->version ) ) : ?>
-							<div><?php printf( __( 'Version: %s', 'bbporg' ), esc_html( $plugin->version ) ); ?></div>
+							<?php /* translators: %s: Plugin version. */ ?>
+							<div><?php printf( esc_html__( 'Version: %s', 'bbporg' ), esc_html( $plugin->version ) ); ?></div>
 						<?php endif; ?>
 						<?php if ( ! empty( $plugin->requires ) ) : ?>
-							<div><?php printf( __( 'Requires: %s', 'bbporg' ), esc_html( $plugin->requires ) ); ?></div>
+							<?php /* translators: %s: Minimum WordPress version. */ ?>
+							<div><?php printf( esc_html__( 'Requires: %s', 'bbporg' ), esc_html( $plugin->requires ) ); ?></div>
 						<?php endif; ?>
 						<?php if ( ! empty( $plugin->tested ) ) : ?>
-							<div><?php printf( __( 'Compatible up to: %s', 'bbporg' ), esc_html( $plugin->tested ) ); ?></div>
+							<?php /* translators: %s: Highest tested WordPress version. */ ?>
+							<div><?php printf( esc_html__( 'Compatible up to: %s', 'bbporg' ), esc_html( $plugin->tested ) ); ?></div>
 						<?php endif; ?>
-						<div><?php printf( __( 'Rating: %s', 'bbporg' ), $plugin->rating_html ); // raw html - do not escape ?></div>
+						<?php /* translators: %s: Star rating markup. */ ?>
+						<div><?php printf( esc_html__( 'Rating: %s', 'bbporg' ), wp_kses_post( $plugin->rating_html ) ); ?></div>
 					</div>
 
 					<p class="plugin-description" style="font-size: 12px">
@@ -74,7 +80,9 @@
 
 						<?php
 							/* translators: 1: starting number of plugins, 2: ending number, 3: total number */
-							printf( __( 'Viewing %1$s to %2$s (%3$s)', 'bbporg' ),
+							printf(
+								/* translators: 1: First plugin number, 2: Last plugin number, 3: Total number of plugins. */
+								esc_html__( 'Viewing %1$s to %2$s (%3$s)', 'bbporg' ),
 								number_format_i18n( $from_num ),
 								number_format_i18n( $to_num ),
 								number_format_i18n( $plugins->info['results'] )

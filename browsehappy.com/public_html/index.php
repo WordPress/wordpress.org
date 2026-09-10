@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || die();
 
 <head>
 	<meta charset="utf-8">
-	<title><?php _e( 'Browse Happy', 'browsehappy' ); ?></title>
+	<title><?php esc_html_e( 'Browse Happy', 'browsehappy' ); ?></title>
 	<meta name="description" content="<?php esc_attr_e( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ); ?>" />
 	<meta name="author" content="WordPress" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,8 +34,8 @@ defined( 'ABSPATH' ) || die();
 
 	<header>
 		<hgroup class="wrap">
-			<h1><?php _e( 'Browse <em>Happy</em>', 'browsehappy' ); ?></h1>
-			<h2><?php _e( 'Online. Worry-free. <em>Upgrade your browser today</em>!', 'browsehappy' ); ?></h2>
+			<h1><?php echo wp_kses_post( __( 'Browse <em>Happy</em>', 'browsehappy' ) ); ?></h1>
+			<h2><?php echo wp_kses_post( __( 'Online. Worry-free. <em>Upgrade your browser today</em>!', 'browsehappy' ) ); ?></h2>
 		</hgroup>
 	</header>
 	<?php do_action( 'browsehappy_browser_notice' ); ?>
@@ -47,8 +47,9 @@ defined( 'ABSPATH' ) || die();
 					<div class="icon"></div>
 					<h2 lang="en"><?php echo $data->name; ?></h2>
 					<p class="info"><?php echo $data->info; ?></p>
-					<p class="version"><?php printf( __( 'Latest Version: %s', 'browsehappy' ), '<strong>' . apply_filters( 'get_browsehappy_version', $browser ) . '</strong>' ); ?></p>
-					<p class="website"><?php _e( 'Visit website for more info', 'browsehappy' ); ?></p>
+					<?php /* translators: %s: Browser version. */ ?>
+					<p class="version"><?php printf( esc_html__( 'Latest Version: %s', 'browsehappy' ), '<strong>' . esc_html( apply_filters( 'get_browsehappy_version', $browser ) ) . '</strong>' ); ?></p>
+					<p class="website"><?php esc_html_e( 'Visit website for more info', 'browsehappy' ); ?></p>
 				</a>
 				<?php do_action( 'browsehappy_browser_after', $browser ); ?>
 			</li><!-- #<?php echo $browser; ?> -->
@@ -59,12 +60,12 @@ defined( 'ABSPATH' ) || die();
 	<footer>
 		<div class="wrap">
 			<section id="about">
-				<h2><?php _e( 'What is Browse Happy?', 'browsehappy' ); ?></h2>
+				<h2><?php esc_html_e( 'What is Browse Happy?', 'browsehappy' ); ?></h2>
 				<p><?php $what = __( 'Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.', 'browsehappy' );
 echo $what; ?></p>
 			</section><!-- #about -->
 			<section id="share">
-				<h2><?php _e( 'Share the Happiness', 'browsehappy' ); ?></h2>
+				<h2><?php esc_html_e( 'Share the Happiness', 'browsehappy' ); ?></h2>
 				<nav>
 					<ul>
 						<li class="tumblr">
@@ -105,7 +106,7 @@ $facebook_pieces = array(
 				</nav>
 			</section><!-- #share -->
 			<div id="byline">
-				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( __( 'Brought to you by %s', 'browsehappy' ), '<strong>WordPress</strong>' ); ?></a>
+				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( /* translators: %s: WordPress, in bold. */ esc_html__( 'Brought to you by %s', 'browsehappy' ), '<strong>WordPress</strong>' ); ?></a>
 			</div><!-- #byline -->
 		</div>
 	</footer>

@@ -34,10 +34,10 @@ class Donate extends \WP_Widget {
 			echo $args['before_title'] . $title . $args['after_title'];
 			?>
 
-			<p class="aside"><?php _e( 'Would you like to support the advancement of this plugin?', 'wporg-plugins' ); ?></p>
+			<p class="aside"><?php esc_html_e( 'Would you like to support the advancement of this plugin?', 'wporg-plugins' ); ?></p>
 			<p>
 				<a href="<?php echo esc_url( $donate_link ); ?>" rel="nofollow ugc">
-					<?php _e( 'Donate to this plugin', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'Donate to this plugin', 'wporg-plugins' ); ?>
 				</a>
 			</p>
 

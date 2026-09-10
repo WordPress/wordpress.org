@@ -164,6 +164,19 @@ class Jobs_Dot_WP {
 	 * @return array The amended list of allowed tags
 	 */
 	public function wp_kses_allowed_html( $allowedtags, $content ) {
+		// Interface text needs links that are not permitted in job descriptions.
+		if ( 'jobswp-ui' === $content ) {
+			return array(
+				'a'      => array(
+					'href'  => true,
+					'rel'   => true,
+					'title' => true,
+				),
+				'em'     => array(),
+				'strong' => array(),
+			);
+		}
+
 		// Add permissable tags
 		$allowedtags['ol'] = array();
 		$allowedtags['ul'] = array();
@@ -483,24 +496,28 @@ class Jobs_Dot_WP {
 	function handle_close_job() {
 		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : null;
 
-		if ( ! $post_id )
-			wp_die( __( 'No job specified to close.', 'jobswp' ) );
+		if ( ! $post_id ) {
+			wp_die( esc_html__( 'No job specified to close.', 'jobswp' ) );
+		}
 
 		check_admin_referer( 'close-job-post_' . $post_id );
 
 		$post = get_post( $post_id );
 
-		if ( ! $post )
-			wp_die( __( 'The job you are trying to close no longer exists.', 'jobswp' ) );
+		if ( ! $post ) {
+			wp_die( esc_html__( 'The job you are trying to close no longer exists.', 'jobswp' ) );
+		}
 
 		$post_type = $post->post_type;
 		$post_type_object = get_post_type_object( $post_type );
 
-		if ( ! $post_type_object )
-			wp_die( __( 'Unknown post type.' ) );
+		if ( ! $post_type_object ) {
+			wp_die( esc_html__( 'Unknown post type.' ) );
+		}
 
-		if ( ! current_user_can( 'delete_post', $post_id ) )
-			wp_die( __( 'You are not allowed to close this job.', 'jobswp' ) );
+		if ( ! current_user_can( 'delete_post', $post_id ) ) {
+			wp_die( esc_html__( 'You are not allowed to close this job.', 'jobswp' ) );
+		}
 
 		if ( $user_id = wp_check_post_lock( $post_id ) ) {
 			$user = get_userdata( $user_id );
@@ -508,8 +525,9 @@ class Jobs_Dot_WP {
 			wp_die( sprintf( esc_html__( 'You cannot close this job. %s is currently editing.', 'jobswp' ), esc_html( $user->display_name ) ) );
 		}
 
-		if ( ! $this->close_job( $post ) )
-			wp_die( __( 'Error in closing job.', 'jobswp' ) );
+		if ( ! $this->close_job( $post ) ) {
+			wp_die( esc_html__( 'Error in closing job.', 'jobswp' ) );
+		}
 
 		// Redirect back to jobs listing
 		$sendback = wp_get_referer();
@@ -544,7 +562,7 @@ class Jobs_Dot_WP {
 			return;
 
 		echo '<div class="updated"><p>';
-		_e( 'Job closed.', 'jobswp' );
+		esc_html_e( 'Job closed.', 'jobswp' );
 		echo '</p></div>';
 	}
 

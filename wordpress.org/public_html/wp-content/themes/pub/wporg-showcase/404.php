@@ -13,8 +13,8 @@ $wp_query = new WP_Query( array( 'no_found_rows' => true, 'post_type' => 'post',
 
 					<div class="col-5">
 						<div class="storycontent">
-								<h2><?php _e( 'Page Not Found', 'wporg-showcase' ); ?></h2>
-								<p><?php _e( 'Sorry, we could not not find that site in the Showcase. We do have many others available though. Here&#8217;s one chosen at random!', 'wporg-showcase' ); ?></p>
+								<h2><?php esc_html_e( 'Page Not Found', 'wporg-showcase' ); ?></h2>
+								<p><?php esc_html_e( 'Sorry, we could not not find that site in the Showcase. We do have many others available though. Here&#8217;s one chosen at random!', 'wporg-showcase' ); ?></p>
 								<?php //breadcrumb(); ?>
 								<h2><?php the_title(); ?></h2>
 								<a href="<?php echo esc_url( 'http://' . get_site_domain( false, false ) ); ?>">

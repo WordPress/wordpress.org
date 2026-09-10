@@ -70,10 +70,11 @@ class Translators {
 		<div class="wrap">
 			<h2>
 				<?php
-				_e( 'Translators', 'wporg-translate' );
+				esc_html_e( 'Translators', 'wporg-translate' );
 
 				if ( ! empty( $_REQUEST['s'] ) ) {
-					echo '<span class="subtitle">' . sprintf( __( 'Search results for &#8220;%s&#8221;', 'wporg-translate' ), esc_html( wp_unslash( $_REQUEST['s'] ) ) ) . '</span>';
+					/* translators: %s: Search term. */
+					echo '<span class="subtitle">' . sprintf( esc_html__( 'Search results for &#8220;%s&#8221;', 'wporg-translate' ), esc_html( wp_unslash( $_REQUEST['s'] ) ) ) . '</span>'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Escaped for display.
 				}
 				?>
 			</h2>

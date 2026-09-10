@@ -18,7 +18,7 @@ gp_tmpl_header();
 	<table id="stats-table" class="table">
 		<thead>
 			<tr>
-				<th class="col-locale-code"><?php _e( 'Locale' ); ?></th>
+				<th class="col-locale-code"><?php esc_html_e( 'Locale' ); ?></th>
 				<?php foreach ( $projects as $slug => $project ) :
 					$name = str_replace( array( 'WordPress.org ', 'WordPress for ', 'WordPress ', 'ectory', ' - Development' ), '', $project->name );
 					if ( $slug == 'wp-plugins' || $slug == 'wp-themes' ) {

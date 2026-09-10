@@ -9,7 +9,7 @@
 		<div class="col-2 secondary leftsidebar">
 			<a href="<?php echo esc_url( home_url( '/submit-a-wordpress-site/' ) ); ?>" class="wpsc-submit-site"><?php esc_html_e( 'Submit a Site &rarr;', 'wporg-showcase' ); ?></a>
 
-			<h2 class="heading search"><?php _e( 'Search', 'wporg-showcase' ); ?></h2>
+			<h2 class="heading search"><?php esc_html_e( 'Search', 'wporg-showcase' ); ?></h2>
 			<?php // @todo: use get_search_form(); ?>
 			<form method="get" id="searchform" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 				<input type="text" value="<?php the_search_query(); ?>" name="s" id="s" class="text" />
@@ -19,7 +19,7 @@
 			<?php popular_tags(); ?>
 			<a href='<?php echo esc_url( home_url( '/tag-cloud/' ) ); ?>' class="wpsc-all-tags"><?php esc_html_e( 'View All Tags &rarr;', 'wporg-showcase' ); ?></a>
 
-			<h2 class="heading"><?php _e( 'Browse by Flavor', 'wporg-showcase' ); ?></h2>
+			<h2 class="heading"><?php esc_html_e( 'Browse by Flavor', 'wporg-showcase' ); ?></h2>
 			<ul class="submenu">
 				<?php wp_list_categories( 'exclude=4&title_li=' ); ?>
 			</ul>

@@ -6,9 +6,9 @@ gp_tmpl_header();
 
 	<div class="filter-header">
 		<ul class="filter-header-links">
-			<li><span class="current"><?php _e( 'Find your locale' ); ?></span></li>
-			<li><a href="/stats"><?php _e( 'Stats' ); ?></a></li>
-			<li><a href="/consistency"><?php _e( 'Consistency' ); ?></a></li>
+			<li><span class="current"><?php esc_html_e( 'Find your locale' ); ?></span></li>
+			<li><a href="/stats"><?php esc_html_e( 'Stats' ); ?></a></li>
+			<li><a href="/consistency"><?php esc_html_e( 'Consistency' ); ?></a></li>
 		</ul>
 		<div class="search-form">
 			<label class="screen-reader-text" for="locales-filter"><?php esc_attr_e( 'Search locales...' ); ?></label>

@@ -99,7 +99,8 @@ gp_tmpl_header();
 				</div>',
 				$has_editors ? ' has-editors' : ' no-editors',
 				$locale->english_name,
-				sprintf( _n( '%s person', '%s persons', $data['count'] ), number_format_i18n( $data['count'] ) ),
+				/* translators: %s: Number of people. */
+				sprintf( esc_html( _n( '%s person', '%s persons', $data['count'] ) ), esc_html( number_format_i18n( $data['count'] ) ) ),
 				esc_url( gp_url_join( '/locale', $locale->slug, 'default', $project->path ) ),
 				$locale->wp_locale,
 				wp_sprintf( '%l', $editors_list ),

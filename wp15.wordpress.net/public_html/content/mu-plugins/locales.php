@@ -241,7 +241,7 @@ function locale_notice() {
 				?>
 			</p>
 			<button type="button" class="wp15-locale-notice-dismiss">
-				<span class="screen-reader-text"><?php _e( 'Dismiss this notice.' ); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.' ); ?></span>
 			</button>
 		</div>
 	<?php endif;

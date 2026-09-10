@@ -84,7 +84,7 @@ if ( bbp_is_reply_edit() ) : ?>
 
 						<?php if ( bbp_allow_topic_tags() ) : ?>
 						<p>
-							<label for="bbp_topic_tags"><?php _e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
+							<label for="bbp_topic_tags"><?php esc_html_e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
 							<input type="text" value="<?php bbp_form_topic_tags(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" aria-describedby="bbp_topic_tags_description" <?php disabled( bbp_is_topic_spam() ); ?> /><br />
 							<em id="bbp_topic_tags_description"><?php esc_html_e( 'Separate tags with commas', 'wporg-forums' ); ?></em>
 						</p>
@@ -231,11 +231,11 @@ if ( bbp_is_reply_edit() ) : ?>
 			<?php if ( current_user_can( bbp_get_spectator_role() ) && ! bbp_is_topic_closed() && ! bbp_is_forum_closed( bbp_get_topic_forum_id() ) ) : ?>
 				<p><?php
 					printf(
-						__( 'This may be caused by your account being marked as a brand or shared company account.', 'wporg-forums' ) . '<br>' .
+						esc_html__( 'This may be caused by your account being marked as a brand or shared company account.', 'wporg-forums' ) . '<br>' .
 						/* translators: %s: Link to https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/ */
-						__( '<a href="%s">Please read this announcement</a> for more information.', 'wporg-forums' ) . '<br>' .
+						wp_kses_post( __( '<a href="%s">Please read this announcement</a> for more information.', 'wporg-forums' ) ) . '<br>' .
 						/* translators: %s: Email address. */
-						__( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ),
+						wp_kses_post( __( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ) ),
 						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
 						WordPressdotorg\Forums\MODERATION_EMAIL
 					);

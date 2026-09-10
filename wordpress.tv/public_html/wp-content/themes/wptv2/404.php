@@ -19,14 +19,16 @@ global $wp_query, $post, $wptv;
 		<div class="primary-content">
 			<div class="baron-von-pick">
 				<img src="<?php echo esc_url( get_theme_file_uri( 'i/michael-pick-stashes-a-guinness.gif' ) ); ?>" alt="" /><br />
-				<?php printf( __( 'Photo animation credit: %s.', 'wptv' ), '<a href="https://markjaquith.com/">Mark Jaquith</a>' ); ?>
+				<?php /* translators: %s: Photo credit link. */ ?>
+				<?php printf( esc_html__( 'Photo animation credit: %s.', 'wptv' ), '<a href="https://markjaquith.com/">Mark Jaquith</a>' ); ?>
 			</div>
 			<div class="message-404">
 				<h2><?php esc_html_e( 'Uh oh, someone made a mistake!', 'wptv' ); ?></h2>
 				<p><?php esc_html_e( 'These sorts of things happen&hellip;', 'wptv' ); ?></p>
 				<p><?php esc_html_e( 'Try searching for what you were looking for.', 'wptv' ); ?></p>
 				<p><?php echo get_search_form(); ?></p>
-				<p><?php printf( __( 'Or, <a href="%s">visit the homepage</a> to start a fresh journey.', 'wptv' ), '/' ); ?></p>
+				<?php /* translators: %s: Homepage URL. */ ?>
+				<p><?php printf( wp_kses_post( __( 'Or, <a href="%s">visit the homepage</a> to start a fresh journey.', 'wptv' ) ), '/' ); ?></p>
 			</div>
 		</div>
 	</div><!-- container -->

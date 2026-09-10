@@ -44,7 +44,7 @@ class Support extends \WP_Widget {
 
 		if ( $resolutions ) :
 		?>
-			<p class="aside"><?php _e( 'Issues resolved in last two months:', 'wporg-plugins' ); ?></p>
+			<p class="aside"><?php esc_html_e( 'Issues resolved in last two months:', 'wporg-plugins' ); ?></p>
 			<p class="counter-container">
 				<span class="counter-back">
 					<span class="counter-bar" style="width: <?php echo esc_attr( 100 * $resolved / $threads ); ?>%;"></span>
@@ -52,17 +52,17 @@ class Support extends \WP_Widget {
 				<span class="counter-count">
 					<?php
 					/* Translators: 1: Amount of resolved threads; 2: Amount of total threads; */
-					printf( __( '%1$s out of %2$s', 'wporg-plugins' ), $resolved, $threads );
+					printf( esc_html__( '%1$s out of %2$s', 'wporg-plugins' ), (int) $resolved, (int) $threads );
 					?>
 				</span>
 			</p>
 
 		<?php else : ?>
-			<p><?php _e( 'Got something to say? Need help?', 'wporg-plugins' ); ?></p>
+			<p><?php esc_html_e( 'Got something to say? Need help?', 'wporg-plugins' ); ?></p>
 		<?php endif; ?>
 
 		<p>
-			<a href="<?php echo esc_url( $support_url ); ?>"><?php _e( 'View support forum', 'wporg-plugins' ); ?></a>
+			<a href="<?php echo esc_url( $support_url ); ?>"><?php esc_html_e( 'View support forum', 'wporg-plugins' ); ?></a>
 		</p>
 
 		<?php

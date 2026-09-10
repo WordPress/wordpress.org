@@ -284,7 +284,8 @@ the_post();
 						<p>
 							<?php
 							printf(
-								__( 'For help getting started, check out our <a href="%s">Documentation and Support Forums</a>.', 'wporg' ),
+								/* translators: %s: Support URL. */
+								wp_kses_post( __( 'For help getting started, check out our <a href="%s">Documentation and Support Forums</a>.', 'wporg' ) ),
 								esc_url( __( 'https://wordpress.org/support/', 'wporg' ) )
 							);
 							?>
@@ -293,7 +294,7 @@ the_post();
 							<?php
 							printf(
 								/* translators: 1: URL to WordPress Meetup group, 2: URL to WordCamp Central */
-								__( 'Meet other WordPress enthusiasts and share your knowledge at a <a href="%1$s">WordPress meetup group</a> or a <a href="%2$s">WordCamp</a>.', 'wporg' ),
+								wp_kses_post( __( 'Meet other WordPress enthusiasts and share your knowledge at a <a href="%1$s">WordPress meetup group</a> or a <a href="%2$s">WordCamp</a>.', 'wporg' ) ),
 								esc_url( __( 'https://www.meetup.com/pro/wordpress/', 'wporg' ) ),
 								esc_url( __( 'https://central.wordcamp.org/', 'wporg' ) )
 							);
@@ -302,7 +303,8 @@ the_post();
 						<p>
 							<?php
 							printf(
-								__( 'To support education about WordPress and open source software, please donate to the <a href="%s">WordPress Foundation</a>.', 'wporg' ),
+								/* translators: %s: Donation URL. */
+								wp_kses_post( __( 'To support education about WordPress and open source software, please donate to the <a href="%s">WordPress Foundation</a>.', 'wporg' ) ),
 								esc_url( __( 'https://wordpressfoundation.org/donate/', 'wporg' ) )
 							);
 							?>

@@ -22,7 +22,7 @@ the_post();
 		if ( isset( $releases['latest'] ) ):
 			rosetta_release_row( null, null, null, true );
 ?>
-			<h3 id="latest"><?php _e( 'Latest release', 'rosetta' ); ?></h3>
+			<h3 id="latest"><?php esc_html_e( 'Latest release', 'rosetta' ); ?></h3>
 			<table class="releases latest">
 				<?php echo rosetta_release_row( $releases['latest'], 'alt' ); ?>
 			</table>
@@ -35,7 +35,8 @@ the_post();
 		foreach ( $releases['branches'] as $branch => $branch_rels ):
 			rosetta_release_row( null, null, null, true );
 ?>
-			<h3><?php printf( __( '%s Branch', 'rosetta' ), $branch );?></h3>
+			<?php /* translators: %s: Branch number. */ ?>
+			<h3><?php printf( esc_html__( '%s Branch', 'rosetta' ), esc_html( $branch ) ); ?></h3>
 			<table class="releases">
 <?php
 	foreach ( $branch_rels as $release ):
@@ -50,7 +51,7 @@ the_post();
 		endif; # any branches
 		if ( ! empty( $releases['betas'] ) ):
 ?>
-			<h3 id="betas"><?php _e( 'Beta &amp; RC releases', 'rosetta' ); ?></h3>
+			<h3 id="betas"><?php esc_html_e( 'Beta &amp; RC releases', 'rosetta' ); ?></h3>
 			<table id="beta" class="releases">
 <?php
 	rosetta_release_row( null, null, null, true );
@@ -66,7 +67,7 @@ the_post();
 		endif; # any betas
 	else: # no releases
 ?>
-	<p><?php _e( 'There are no releases, yet.', 'rosetta' ); ?></p>
+	<p><?php esc_html_e( 'There are no releases, yet.', 'rosetta' ); ?></p>
 <?php endif; # if releases?>
 			</div>
 		</div>

@@ -25,7 +25,7 @@ class Author {
 		?>
 		<label><input id="post_author_username" type="text" value="<?php echo esc_attr( $user->user_login ); ?>" /></label>
 		<input id="post_author_override" type="hidden" name="post_author_override" value="<?php echo esc_attr( $value ); ?>" />
-		<label class="screen-reader-text"><?php _e( 'Author', 'wporg-plugins' ); ?></label>
+		<label class="screen-reader-text"><?php esc_html_e( 'Author', 'wporg-plugins' ); ?></label>
 
 		<script>
 			jQuery( function( $ ) {

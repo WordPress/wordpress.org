@@ -1028,12 +1028,12 @@ class Hooks {
 				// Display site URL for logged-in users only.
 				if ( is_user_logged_in() ) {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <a href="%2$s" rel="nofollow ugc">%2$s</a></p>',
-						__( 'The page I need help with:', 'wporg-forums' ),
+						esc_html__( 'The page I need help with:', 'wporg-forums' ),
 						esc_url( $site_url )
 					);
 				} else {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <em>%2$s</em></p>',
-						__( 'The page I need help with:', 'wporg-forums' ),
+						esc_html__( 'The page I need help with:', 'wporg-forums' ),
 						/* translators: %s: URL of the log in page. */
 						sprintf( wp_kses_post( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ) ), esc_url( wp_login_url() ) )
 					);
@@ -1056,9 +1056,9 @@ class Hooks {
 			$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( $topic_id, self::SITE_URL_META, true ) : '';
 			?>
 			<p>
-				<label for="site_url"><?php _e( 'Link to the page you need help with:', 'wporg-forums' ) ?></label><br />
+				<label for="site_url"><?php esc_html_e( 'Link to the page you need help with:', 'wporg-forums' ); ?></label><br />
 				<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="400" aria-describedby="site_url_description" /><br />
-				<em id="site_url_description"><?php _e( 'This link will only be shown to logged-in users.', 'wporg-forums' ); ?></em>
+				<em id="site_url_description"><?php esc_html_e( 'This link will only be shown to logged-in users.', 'wporg-forums' ); ?></em>
 			</p>
 			<?php
 		endif;

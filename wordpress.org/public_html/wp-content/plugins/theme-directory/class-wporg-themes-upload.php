@@ -1440,9 +1440,10 @@ class WPORG_Themes_Upload {
 
 		// Display the errors.
 		$verdict = $result ? array( 'tc-pass', __( 'Pass', 'wporg-themes' ) ) : array( 'tc-fail', __( 'Fail', 'wporg-themes' ) );
-		echo '<h2>' . sprintf( __( 'Results of Automated Theme Scanning: %s', 'wporg-themes' ), vsprintf( '<span class="%1$s">%2$s</span>', $verdict ) ) . '</h2>';
+		/* translators: %s: Scan verdict. */
+		echo '<h2>' . sprintf( esc_html__( 'Results of Automated Theme Scanning: %s', 'wporg-themes' ), vsprintf( '<span class="%1$s">%2$s</span>', array_map( 'esc_html', $verdict ) ) ) . '</h2>';
 		echo '<ul class="tc-result">' . display_themechecks() . '</ul>';
-		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
 
 		return $result;
 	}

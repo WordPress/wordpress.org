@@ -46,7 +46,8 @@
 
 			<?php do_action( 'bbp_theme_before_topic_started_by' ); ?>
 
-			<span class="bbp-topic-started-by"><?php printf( __( 'Started by: %1$s', 'bbpress' ), bbp_get_topic_author_link( array( 'size' => '14' ) ) ); ?></span>
+			<?php /* translators: %1$s: Topic author link. */ ?>
+			<span class="bbp-topic-started-by"><?php printf( esc_html__( 'Started by: %1$s', 'bbpress' ), bbp_get_topic_author_link( array( 'size' => '14' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- bbPress builds this markup; wp_kses_post() would strip the avatar's srcset and decoding attributes. ?></span>
 
 			<?php do_action( 'bbp_theme_after_topic_started_by' ); ?>
 

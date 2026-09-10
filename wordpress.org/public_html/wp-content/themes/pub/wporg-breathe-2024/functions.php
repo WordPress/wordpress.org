@@ -388,7 +388,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
-		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu' ); ?></strong></a>
+		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu' ); ?></strong></a>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
@@ -396,7 +396,7 @@ function welcome_box() {
 				id="make-welcome-toggle"
 				data-show="<?php esc_attr_e( 'Show welcome box', 'wporg' ); ?>"
 				data-hide="<?php esc_attr_e( 'Hide welcome box', 'wporg' ); ?>"
-			><span><?php _e( 'Hide welcome box', 'wporg' ); ?></span></button>
+			><span><?php esc_html_e( 'Hide welcome box', 'wporg' ); ?></span></button>
 		</div>
 		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo $cookie; ?>" data-hash="<?php echo $content_hash; ?>">
 			<script type="text/javascript">
@@ -439,7 +439,7 @@ add_action( 'wporg_breathe_after_header', __NAMESPACE__ . '\welcome_box' );
 function javascript_notice() {
 	?>
 	<noscript class="js-disabled-notice">
-		<?php _e( 'Please enable JavaScript to view this page properly.', 'wporg' ); ?>
+		<?php esc_html_e( 'Please enable JavaScript to view this page properly.', 'wporg' ); ?>
 	</noscript>
 	<?php
 }
@@ -726,7 +726,7 @@ function breathe_content_nav( $nav_id ) {
 
 	?>
 	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo $nav_class; ?>">
-		<h2 class="screen-reader-text"><?php _e( 'Post navigation', 'wporg' ); ?></h2>
+		<h2 class="screen-reader-text"><?php esc_html_e( 'Post navigation', 'wporg' ); ?></h2>
 
 	<?php if ( is_single() ) : // navigation links for single posts ?>
 

@@ -1,7 +1,7 @@
 <div class="translators-info show-all">
 	<p class="locale-filters">
 	<?php
-		_e( 'Releases:', 'worg' );
+		esc_html_e( 'Releases:', 'worg' );
 
 		$release_statuses = array(
 			'all' => _n_noop( '%s locale.', '%s locales.', 'wporg' ),
@@ -27,7 +27,7 @@
 
 	<p class="locale-filters">
 	<?php
-		_e( 'Translations:', 'worg' );
+		esc_html_e( 'Translations:', 'worg' );
 
 		$translation_statuses = array(
 			'all' => _n_noop( '%s locale.', '%s locales.', 'wporg' ),
@@ -57,17 +57,17 @@
 		<thead>
 			<tr>
 				<th colspan="2">
-					<?php _e( 'Locale', 'wporg' ); ?><br>
-					<small><?php _e( '(English &amp; Native)', 'wporg' ); ?></small>
+					<?php esc_html_e( 'Locale', 'wporg' ); ?><br>
+					<small><?php esc_html_e( '(English &amp; Native)', 'wporg' ); ?></small>
 				</th>
-				<th><?php _e( 'WP Locale', 'wporg' ); ?></th>
+				<th><?php esc_html_e( 'WP Locale', 'wporg' ); ?></th>
 				<th colspan="2">
-					<?php _e( 'Version', 'wporg' ); ?><br>
-					<small><?php _e( '(Release &amp; Language Pack)', 'wporg' ); ?></small>
+					<?php esc_html_e( 'Version', 'wporg' ); ?><br>
+					<small><?php esc_html_e( '(Release &amp; Language Pack)', 'wporg' ); ?></small>
 				</th>
 				<th colspan="2">
-					<?php _e( 'GlotPress', 'wporg' ); ?><br>
-					<small><?php _e( '(Translated &amp; Slug)', 'wporg' ); ?></small>
+					<?php esc_html_e( 'GlotPress', 'wporg' ); ?><br>
+					<small><?php esc_html_e( '(Translated &amp; Slug)', 'wporg' ); ?></small>
 				</th>
 				<th><!-- intentionally blank --></th>
 			</tr>
@@ -101,10 +101,10 @@
 								if ( $locale_data[ $locale->wp_locale ]['latest_release'] ) {
 									echo esc_html( $locale_data[ $locale->wp_locale ]['latest_release'] );
 								} else {
-									_e( 'None', 'wporg' );
+									esc_html_e( 'None', 'wporg' );
 								}
 							} else {
-								_e( 'No&nbsp;site', 'wporg' );
+								esc_html_e( 'No&nbsp;site', 'wporg' );
 							}
 						?>
 					</td>
@@ -113,7 +113,7 @@
 						if ( isset( $language_packs_data[ $locale->wp_locale ] ) ) {
 							echo max( $language_packs_data[ $locale->wp_locale ] );
 						} else {
-							_e( 'No&nbsp;LP', 'wporg' );
+							esc_html_e( 'No&nbsp;LP', 'wporg' );
 						}
 						?>
 						<?php
@@ -144,7 +144,7 @@
 
 					<td class="center">
 						<a href="<?php echo esc_url( add_query_arg( 'locale', $locale->wp_locale ) ); ?>">
-							<?php _e( 'View Team Page', 'wporg' ); ?>
+							<?php esc_html_e( 'View Team Page', 'wporg' ); ?>
 						</a>
 					</td>
 				</tr>

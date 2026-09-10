@@ -59,7 +59,7 @@ class Support_Reps extends \WP_List_Table {
 	 * @access public
 	 */
 	public function no_items() {
-		_e( 'No support reps found.', 'wporg-plugins' );
+		esc_html_e( 'No support reps found.', 'wporg-plugins' );
 	}
 
 	/**
@@ -126,15 +126,15 @@ class Support_Reps extends \WP_List_Table {
 		?>
 		<tr id="add-support-rep" class="add-support-rep wp-hidden-children">
 			<td colspan="2">
-				<button type="button" id="add-support-rep-toggle" class="button-link"><?php _e( '+ Add New Support Rep', 'wporg-plugins' ); ?></button>
+				<button type="button" id="add-support-rep-toggle" class="button-link"><?php esc_html_e( '+ Add New Support Rep', 'wporg-plugins' ); ?></button>
 				<p class="wp-hidden-child">
 					<?php wp_nonce_field( 'add-support-rep', '_ajax_nonce', false ); ?>
 					<span id="support-rep-error" class="notice notice-alt notice-error" style="display:none;"></span>
 					<label>
 						<input type="text" name="add_support_rep" class="form-required" value="" aria-required="true" placeholder="<?php esc_attr_e( 'WordPress.org username', 'wporg-plugins' ); ?>">
-						<span class="screen-reader-text"><?php _e( 'Add a new support rep', 'wporg-plugins' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Add a new support rep', 'wporg-plugins' ); ?></span>
 					</label>
-					<input type="button" id="add-support-rep-submit" class="button" data-wp-lists="add:the-support-rep-list:add-support-rep::post_id=<?php echo get_post()->ID; ?>" value="<?php _e( 'Add Support Rep', 'wporg-plugins' ); ?>">
+					<input type="button" id="add-support-rep-submit" class="button" data-wp-lists="add:the-support-rep-list:add-support-rep::post_id=<?php echo (int) get_post()->ID; ?>" value="<?php esc_attr_e( 'Add Support Rep', 'wporg-plugins' ); ?>">
 				</p>
 			</td>
 		</tr>

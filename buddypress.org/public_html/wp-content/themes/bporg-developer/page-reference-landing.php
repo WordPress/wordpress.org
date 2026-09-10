@@ -19,13 +19,13 @@ get_header(); ?>
 		<main id="main" class="site-main" role="main">
 			<div class="reference-landing">
 				<div class="search-guide section clear">
-					<h4 class="ref-intro"><?php _e( 'Want to know what&#39;s going on inside BuddyPress? Search the Code Reference for more information about BuddyPress&#39; functions, classes, methods, and hooks.', 'bporg-developer' ); ?></h4>
-					<h3 class="search-intro"><?php _e( 'Try it out:', 'bporg-developer' ); ?></h3>
+					<h4 class="ref-intro"><?php esc_html_e( 'Want to know what&#39;s going on inside BuddyPress? Search the Code Reference for more information about BuddyPress&#39; functions, classes, methods, and hooks.', 'bporg-developer' ); ?></h4>
+					<h3 class="search-intro"><?php esc_html_e( 'Try it out:', 'bporg-developer' ); ?></h3>
 					<?php get_search_form(); ?>
 				</div><!-- /search-guide -->
 
 				<div class="topic-guide section">
-					<h4><?php _e( 'Or browse through topics:', 'bporg-developer' ); ?></h4>
+					<h4><?php esc_html_e( 'Or browse through topics:', 'bporg-developer' ); ?></h4>
 					<ul class="unordered-list horizontal-list no-bullets">
 						<li><a href="<?php echo esc_url( get_post_type_archive_link( 'wp-parser-function' ) ); ?>"><?php esc_html_e( 'Functions', 'bporg-developer' ); ?></a></li>
 						<li><a href="<?php echo esc_url( get_post_type_archive_link( 'wp-parser-hook' ) ); ?>"><?php esc_html_e( 'Hooks', 'bporg-developer' ); ?></a></li>
@@ -38,7 +38,8 @@ get_header(); ?>
                     <?php $version = DevHub\bporg_developer_get_current_version_term(); ?>
 					<?php if ( $version && ! is_wp_error( $version ) ) : ?>
                         <div class="widget box gray">
-                            <h3 class="widget-title"><?php printf( __( 'New &amp; Updated in BuddyPress %s:', 'bporg-developer' ), substr( $version->name, 0, -2 ) ); ?></h3>
+							<?php /* translators: %s: BuddyPress version. */ ?>
+							<h3 class="widget-title"><?php printf( esc_html__( 'New &amp; Updated in BuddyPress %s:', 'bporg-developer' ), esc_html( substr( $version->name, 0, -2 ) ) ); ?></h3>
                             <div class="widget-content">
                                 <ul class="unordered-list no-bullets">
                                     <?php
@@ -64,14 +65,14 @@ get_header(); ?>
                                         </li>
 
                                     <?php endwhile; ?>
-                                    <li class="view-all-new-in"><a href="<?php echo esc_attr( get_term_link( $version, 'wp-parser-since' ) ); ?>"><?php _e( 'View all&hellip;', 'bporg-developer' ); ?></a></li>
+									<li class="view-all-new-in"><a href="<?php echo esc_url( get_term_link( $version, 'wp-parser-since' ) ); ?>"><?php esc_html_e( 'View all&hellip;', 'bporg-developer' ); ?></a></li>
                                 </ul>
                             </div>
                         </div>
                     <?php endif; ?>
                     <?php if ( has_nav_menu( 'reference-home-api' ) ) : ?>
                         <div class="widget box gray">
-                            <h3 class="widget-title"><?php _e( 'API', 'bporg-developer' ); ?></h3>
+							<h3 class="widget-title"><?php esc_html_e( 'API', 'bporg-developer' ); ?></h3>
                             <div class="widget-content">
                                 <?php wp_nav_menu(
                                         [

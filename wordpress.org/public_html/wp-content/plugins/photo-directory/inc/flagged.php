@@ -223,7 +223,7 @@ class Flagged {
 				// User can't manage flagged photos.
 				! current_user_can( self::get_capability() )
 			) {
-				wp_die( __( 'Sorry, you are not allowed to edit this post.', 'wporg-photos' ) );
+				wp_die( esc_html__( 'Sorry, you are not allowed to edit this post.', 'wporg-photos' ) );
 			}
 		}
 	}
@@ -394,7 +394,7 @@ class Flagged {
 					if (select) {
 						const optionExists = Array.from(select.options).some(opt => opt.value === post_status);
 						if (!optionExists) {
-							const newOption = new Option( "<?php _e( 'Flagged', 'wporg-photos' ); ?>", post_status);
+							const newOption = new Option( <?php echo wp_json_encode( __( 'Flagged', 'wporg-photos' ) ); ?>, post_status);
 							select.add(newOption);
 						}
 					}

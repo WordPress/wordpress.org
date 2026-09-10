@@ -47,7 +47,7 @@ $banner_blocks = '<!-- wp:wporg/link-wrapper {"align":"full","style":{"elements"
 get_header( 'wporg' );
 ?>
 	<aside id="download-mobile">
-		<span class="download-ready"><?php _e( 'Ready to get started?', 'wporg' ); ?></span><a class="button download-button" href="/download/"><?php _e( 'Get WordPress', 'wporg' ); ?></a>
+		<span class="download-ready"><?php esc_html_e( 'Ready to get started?', 'wporg' ); ?></span><a class="button download-button" href="/download/"><?php esc_html_e( 'Get WordPress', 'wporg' ); ?></a>
 	</aside>
 
 	<style>
@@ -85,9 +85,9 @@ get_header( 'wporg' );
 
 	<header id="masthead" class="site-header" role="banner">
 		<div class="site-branding">
-			<p class="site-title"><?php _e( 'Meet WordPress', 'wporg' ); ?></p>
+			<p class="site-title"><?php esc_html_e( 'Meet WordPress', 'wporg' ); ?></p>
 
-			<p class="site-description"><?php _e( 'WordPress is open source software you can use to create a beautiful website, blog, or app.', 'wporg' ); ?></p>
+			<p class="site-description"><?php esc_html_e( 'WordPress is open source software you can use to create a beautiful website, blog, or app.', 'wporg' ); ?></p>
 		</div><!-- .site-branding -->
 	</header><!-- #masthead -->
 
@@ -96,7 +96,7 @@ get_header( 'wporg' );
 			<div id="lang-guess-wrap"></div>
 
 			<section class="intro">
-				<p class="subheading"><?php _e( 'Beautiful designs, powerful features, and the freedom to build anything you want. WordPress is both free and priceless at the same time.', 'wporg' ); ?></p>
+				<p class="subheading"><?php esc_html_e( 'Beautiful designs, powerful features, and the freedom to build anything you want. WordPress is both free and priceless at the same time.', 'wporg' ); ?></p>
 				<div class="screenshots">
 					<img src="https://s.w.org/images/home/screen-themes.png?4" class="dashboard" />
 					<img src="https://s.w.org/images/home/mobile-themes.png?4" class="dashboard-mobile" />
@@ -104,12 +104,12 @@ get_header( 'wporg' );
 			</section>
 
 			<section class="showcase">
-				<h2><?php _e( 'Trusted by the Best', 'wporg' ); ?></h2>
+				<h2><?php esc_html_e( 'Trusted by the Best', 'wporg' ); ?></h2>
 				<p class="subheading">
 					<?php
 					printf(
 						/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
-						__( '%s%% of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ),
+						esc_html__( '%s%% of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ),
 						number_format_i18n( WP_MARKET_SHARE )
 					);
 					?>
@@ -117,56 +117,58 @@ get_header( 'wporg' );
 				<div class="collage">
 
 				</div>
-				<p class="cta-link"><a href="https://wordpress.org/showcase/"><?php _e( 'Discover more sites built with WordPress', 'wporg' ); ?></a></p>
+				<p class="cta-link"><a href="https://wordpress.org/showcase/"><?php esc_html_e( 'Discover more sites built with WordPress', 'wporg' ); ?></a></p>
 			</section>
 
 			<section class="features">
-				<h2><?php _e( 'Powerful Features', 'wporg' ); ?></h2>
-				<p class="subheading"><?php _e( 'Limitless possibilities. What will you create?', 'wporg' ); ?></p>
+				<h2><?php esc_html_e( 'Powerful Features', 'wporg' ); ?></h2>
+				<p class="subheading"><?php esc_html_e( 'Limitless possibilities. What will you create?', 'wporg' ); ?></p>
 				<ul>
 					<li>
 						<span class="dashicons dashicons-admin-customizer"></span>
-						<?php _e( 'Customizable<br />Designs', 'wporg' ); ?>
+						<?php echo wp_kses_post( __( 'Customizable<br />Designs', 'wporg' ) ); ?>
 					</li>
 					<li>
 						<span class="dashicons dashicons-welcome-widgets-menus"></span>
-						<?php _e( 'SEO<br />Friendly', 'wporg' ); ?>
+						<?php echo wp_kses_post( __( 'SEO<br />Friendly', 'wporg' ) ); ?>
 					</li>
 					<li>
 						<span class="dashicons dashicons-smartphone"></span>
-						<?php _e( 'Responsive<br />Mobile Sites', 'wporg' ); ?>
+						<?php echo wp_kses_post( __( 'Responsive<br />Mobile Sites', 'wporg' ) ); ?>
 					</li>
 					<li>
 						<span class="dashicons dashicons-chart-line"></span>
-						<?php _e( 'High<br />Performance', 'wporg' ); ?>
+						<?php echo wp_kses_post( __( 'High<br />Performance', 'wporg' ) ); ?>
 					</li>
 					<li>
 						<a href="https://wordpress.org/mobile/"><img src="https://s.w.org/images/home/icon-run-blue.svg" />
-							<?php _e( 'Manage<br />on the Go', 'wporg' ); ?></a>
+							<?php echo wp_kses_post( __( 'Manage<br />on the Go', 'wporg' ) ); ?></a>
 					</li>
 					<li>
 						<span class="dashicons dashicons-lock"></span>
-						<?php _e( 'High<br />Security', 'wporg' ); ?>
+						<?php echo wp_kses_post( __( 'High<br />Security', 'wporg' ) ); ?>
 					</li>
 					<li>
 						<span class="dashicons dashicons-images-alt2"></span>
-						<?php _e( 'Powerful<br />Media Management', 'wporg' ); ?>
+						<?php echo wp_kses_post( __( 'Powerful<br />Media Management', 'wporg' ) ); ?>
 					</li>
 					<li>
 						<span class="dashicons dashicons-universal-access"></span>
-						<?php _e( 'Easy and<br />Accessible', 'wporg' ); ?>
+						<?php echo wp_kses_post( __( 'Easy and<br />Accessible', 'wporg' ) ); ?>
 					</li>
 				</ul>
 				<p>
 					<?php
 					$plugin_count = defined( 'WP_PLUGIN_COUNT' ) ? WP_PLUGIN_COUNT : 54000;
 					printf(
-						/* translators: 1: Rounded number of plugins. 2: Link to Plugin Directory. */
-						_n(
-							'Extend WordPress with over %1$s plugin to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.',
-							'Extend WordPress with over %1$s plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.',
-							$plugin_count,
-							'wporg'
+						wp_kses_post(
+							/* translators: 1: Rounded number of plugins. 2: Link to Plugin Directory. */
+							_n(
+								'Extend WordPress with over %1$s plugin to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.',
+								'Extend WordPress with over %1$s plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.',
+								$plugin_count,
+								'wporg'
+							)
 						),
 						esc_html( number_format_i18n( $plugin_count ) ),
 						esc_url( home_url( '/plugins/' ) )
@@ -178,32 +180,34 @@ get_header( 'wporg' );
 			<section class="community-2">
 				<div class="screen"></div>
 				<div class="container">
-					<h2><?php _e( 'Community', 'wporg' ); ?></h2>
+					<h2><?php esc_html_e( 'Community', 'wporg' ); ?></h2>
 					<p class="subheading">
 						<?php
 						$meetups = 817;
 
 						printf(
-							/* translators: Number of meetups. */
-							_n(
-								'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s city worldwide.',
-								'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s cities worldwide.',
-								$meetups,
-								'wporg'
+							esc_html(
+								/* translators: %s: Number of meetups. */
+								_n(
+									'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s city worldwide.',
+									'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s cities worldwide.',
+									$meetups,
+									'wporg'
+								)
 							),
 							number_format_i18n( $meetups )
 						);
 						?>
 					</p>
-					<a class="button button-secondary button-large" href="https://make.wordpress.org/community/meetups-landing-page"><?php _e( 'Find a local WordPress community', 'wporg' ); ?></a>
+					<a class="button button-secondary button-large" href="https://make.wordpress.org/community/meetups-landing-page"><?php esc_html_e( 'Find a local WordPress community', 'wporg' ); ?></a>
 				</div>
 			</section>
 
 			<section class="get">
-				<h2><?php _e( 'Get Started with WordPress', 'wporg' ); ?></h2>
-				<p class="subheading"><?php _e( 'Over 60 million people have chosen WordPress to power the place on the web they call &ldquo;home&rdquo; &mdash; join the family.', 'wporg' ); ?></p>
+				<h2><?php esc_html_e( 'Get Started with WordPress', 'wporg' ); ?></h2>
+				<p class="subheading"><?php esc_html_e( 'Over 60 million people have chosen WordPress to power the place on the web they call &ldquo;home&rdquo; &mdash; join the family.', 'wporg' ); ?></p>
 				<div class="cta-wrapper">
-					<a href="<?php echo esc_url( get_downloads_url() ); ?>" class="button button-primary button-xl"><?php _e( 'Get WordPress', 'wporg' ); ?></a>
+					<a href="<?php echo esc_url( get_downloads_url() ); ?>" class="button button-primary button-xl"><?php esc_html_e( 'Get WordPress', 'wporg' ); ?></a>
 				</div>
 			</section>
 		</div>
@@ -231,7 +235,7 @@ get_header( 'wporg' );
 				printf(
 					'<h4><a href="%s">%s</a></h4>',
 					esc_url( $news_blog_url ),
-					__( 'News From Our Blog', 'wporg' )
+					esc_html__( 'News From Our Blog', 'wporg' )
 				);
 
 				// Forcibly hide all Jetpack sharing buttons.
@@ -255,7 +259,7 @@ get_header( 'wporg' );
 			</div>
 
 			<div class="col-4">
-				<h4><?php _e( 'It&rsquo;s Easy&nbsp;As&hellip;', 'wporg' ); ?></h4>
+				<h4><?php esc_html_e( 'It&rsquo;s Easy&nbsp;As&hellip;', 'wporg' ); ?></h4>
 
 				<ol class="steps">
 					<li class="one">
@@ -263,7 +267,7 @@ get_header( 'wporg' );
 						<?php
 						printf(
 							/* translators: URL to Hosting page. */
-							__( '<a href="%s">Find a trusted web host</a> and maybe support WordPress at the same&nbsp;time.', 'wporg' ),
+							wp_kses_post( __( '<a href="%s">Find a trusted web host</a> and maybe support WordPress at the same&nbsp;time.', 'wporg' ) ),
 							esc_url( 'https://wordpress.org/hosting/' )
 						);
 						?>
@@ -273,7 +277,7 @@ get_header( 'wporg' );
 						<?php
 						printf(
 							/* translators: URL to Downloads page. */
-							__( '<a href="%s">Download &amp; install WordPress</a> with our famous 5-minute&nbsp;installation. Publishing has never been&nbsp;easier.', 'wporg' ),
+							wp_kses_post( __( '<a href="%s">Download &amp; install WordPress</a> with our famous 5-minute&nbsp;installation. Publishing has never been&nbsp;easier.', 'wporg' ) ),
 							esc_url( get_downloads_url() )
 						);
 						?>
@@ -283,7 +287,7 @@ get_header( 'wporg' );
 						<?php
 						printf(
 							/* translators: URL to HelpHub. */
-							__( '<a href="%s">Spend some time reading our documentation</a>, get to know WordPress better every day and start helping others,&nbsp;too.', 'wporg' ),
+							wp_kses_post( __( '<a href="%s">Spend some time reading our documentation</a>, get to know WordPress better every day and start helping others,&nbsp;too.', 'wporg' ) ),
 							esc_url( __( 'https://wordpress.org/support/', 'wporg' ) )
 						);
 						?>
@@ -292,7 +296,7 @@ get_header( 'wporg' );
 			</div>
 
 			<div class="<?php echo esc_attr( $swag_class ); ?> first">
-				<h4><a href="https://mercantile.wordpress.org/"><?php _e( 'WordPress&nbsp;Swag', 'wporg' ); ?></a></h4>
+				<h4><a href="https://mercantile.wordpress.org/"><?php esc_html_e( 'WordPress&nbsp;Swag', 'wporg' ); ?></a></h4>
 				<a href="https://mercantile.wordpress.org/">
 					<?php if ( $showcase ) : ?>
 						<img width="288" height="288" src="https://s.w.org/images/home/swag_col-2.png" srcset="https://s.w.org/images/home/swag_col-2_x2.png 2x" alt="<?php esc_attr_e( 'WordPress Swag', 'wporg' ); ?>" />
@@ -303,7 +307,7 @@ get_header( 'wporg' );
 			</div>
 
 			<div class="<?php echo esc_attr( $user_class ); ?>">
-				<h4><a href="https://wordpress.org/showcase/"><?php _e( 'WordPress&nbsp;Users', 'wporg' ); ?></a></h4>
+				<h4><a href="https://wordpress.org/showcase/"><?php esc_html_e( 'WordPress&nbsp;Users', 'wporg' ); ?></a></h4>
 
 				<?php if ( $showcase ) : ?>
 					<div id="notable-users" class="notable-users col-12 row gutters">
@@ -346,7 +350,7 @@ get_header( 'wporg' );
 					</ul>
 				<?php endif; ?>
 
-				<a class="showcase-link" href="https://wordpress.org/showcase/"><?php _e( '&hellip; and hundreds more', 'wporg' ); ?></a>
+				<a class="showcase-link" href="https://wordpress.org/showcase/"><?php esc_html_e( '&hellip; and hundreds more', 'wporg' ); ?></a>
 			</div>
 		</div>
 

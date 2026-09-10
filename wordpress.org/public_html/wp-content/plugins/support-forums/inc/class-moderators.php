@@ -1225,7 +1225,8 @@ class Moderators {
 		$user = get_user_by( 'id', get_post_meta( bbp_get_reply_id(), self::MODERATOR_REPLY_AUTHOR, true ) );
 
 		printf(
-			'<em>' . __( 'Posted by <a href="%s">@%s</a>.', 'wporg-forums' ) . '</em><br/>',
+			/* translators: 1: Profile URL, 2: Username. */
+			'<em>' . wp_kses_post( __( 'Posted by <a href="%1$s">@%2$s</a>.', 'wporg-forums' ) ) . '</em><br/>',
 			esc_url( bbp_get_user_profile_url( $user->ID ) ),
 			esc_html( $user->user_nicename )
 		);

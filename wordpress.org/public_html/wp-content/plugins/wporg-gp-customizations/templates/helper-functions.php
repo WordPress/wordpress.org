@@ -460,10 +460,10 @@ function wporg_gp_translate_textarea( $entry, $permissions, $index = 0 ) {
 			foreach ( $warnings as $key => $value ) :
 				?>
 				<div class="warning secondary">
-					<strong><?php _e( 'Warning:', 'glotpress' ); ?></strong> <?php echo esc_html( $value ); ?>
+					<strong><?php esc_html_e( 'Warning:', 'glotpress' ); ?></strong> <?php echo esc_html( $value ); ?>
 
 					<?php if ( $can_approve ) : ?>
-						<a href="#" class="discard-warning" data-nonce="<?php echo esc_attr( wp_create_nonce( 'discard-warning_' . $index . $key ) ); ?>" data-key="<?php echo esc_attr( $key ); ?>" data-index="<?php echo esc_attr( $index ); ?>"><?php _e( 'Discard', 'glotpress' ); ?></a>
+						<a href="#" class="discard-warning" data-nonce="<?php echo esc_attr( wp_create_nonce( 'discard-warning_' . $index . $key ) ); ?>" data-key="<?php echo esc_attr( $key ); ?>" data-index="<?php echo esc_attr( $index ); ?>"><?php esc_html_e( 'Discard', 'glotpress' ); ?></a>
 					<?php endif; ?>
 				</div>
 				<?php

@@ -15,19 +15,27 @@ global $wp_query, $post, $wptv;
 <div class="wptv-hero">
 	<h2 class="page-title"><?php
 		if ( is_category() ) :
-			printf( __( '&#8216;%s&#8217; Videos', 'wptv' ), single_cat_title( '', false ) );
+			/* translators: %s: Category name. */
+			printf( esc_html__( '&#8216;%s&#8217; Videos', 'wptv' ), esc_html( single_cat_title( '', false ) ) );
 
 		elseif ( is_tag() ) :
-			printf( __( '&#8216;%s&#8217; Videos', 'wptv' ), single_tag_title( '', false ) );
+			/* translators: %s: Tag name. */
+			printf( esc_html__( '&#8216;%s&#8217; Videos', 'wptv' ), esc_html( single_tag_title( '', false ) ) );
 
 		elseif ( is_day() ) :
-			printf( _x( 'Archive for %s', 'Daily archive page', 'wptv' ), get_the_time( __( 'F jS, Y', 'wptv' ) ) );
+			$archive_date = get_the_time( __( 'F jS, Y', 'wptv' ) );
+			/* translators: %s: Date. */
+			printf( esc_html_x( 'Archive for %s', 'Daily archive page', 'wptv' ), esc_html( $archive_date ) );
 
 		elseif ( is_month() ) :
-			printf( _x( 'Archive for %s', 'Monthly archive page', 'wptv' ), get_the_time( __( 'F, Y', 'wptv' ) ) );
+			$archive_date = get_the_time( __( 'F, Y', 'wptv' ) );
+			/* translators: %s: Month. */
+			printf( esc_html_x( 'Archive for %s', 'Monthly archive page', 'wptv' ), esc_html( $archive_date ) );
 
 		elseif ( is_year() ) :
-			printf( _x( 'Archive for %s', 'Yearly archive page', 'wptv' ), get_the_time( __( 'Y', 'wptv' ) ) );
+			$archive_date = get_the_time( __( 'Y', 'wptv' ) );
+			/* translators: %s: Year. */
+			printf( esc_html_x( 'Archive for %s', 'Yearly archive page', 'wptv' ), esc_html( $archive_date ) );
 
 		elseif ( is_author() ) :
 			esc_html_e( 'Author Archive', 'wptv' );
@@ -38,7 +46,8 @@ global $wp_query, $post, $wptv;
 			print( "$tax->label: $terms->name" );
 
 		elseif ( is_search() ) :
-			printf( __( 'Search Results for &#8216;%s&#8217;', 'wptv' ), '<span>' . get_search_query() . '</span>' );
+			/* translators: %s: Search query. */
+			printf( esc_html__( 'Search Results for &#8216;%s&#8217;', 'wptv' ), '<span>' . get_search_query() . '</span>' );
 
 		else :
 			esc_html_e( 'Archives', 'wptv' );
