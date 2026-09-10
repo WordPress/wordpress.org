@@ -53,6 +53,11 @@ function manually_load_plugin() {
 	 */
 	require_once dirname( __DIR__ ) . '/class-wporg-themes-upload.php';
 	require_once dirname( __DIR__ ) . '/class-themes-api.php';
+
+	// Not in the test environment, but the upload reads Theme Check results through it.
+	if ( ! interface_exists( 'themecheck' ) ) {
+		require_once __DIR__ . '/lib/interface-themecheck.php';
+	}
 }
 tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );
 

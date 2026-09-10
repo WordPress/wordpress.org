@@ -418,7 +418,10 @@ function bb_base_get_homepage_topics( $args = false ) {
 	// Transient settings
 	$expiration    = MINUTE_IN_SECONDS * 5;
 	$transient_key = 'bb_base_homepage_topics';
-	$output        = get_transient( $transient_key );
+
+	// Logged-in viewers get per-user topic lists, so only anonymous renders are shared.
+	$cacheable = ! is_user_logged_in();
+	$output    = $cacheable ? get_transient( $transient_key ) : false;
 
 	// No transient found, so query for topics again
 	if ( false === $output ) {
@@ -440,7 +443,9 @@ function bb_base_get_homepage_topics( $args = false ) {
 		}
 
 		// Set the transient
-		set_transient( $transient_key, $output, $expiration );
+		if ( $cacheable ) {
+			set_transient( $transient_key, $output, $expiration );
+		}
 	}
 
 	// Return the output
@@ -485,7 +490,10 @@ function bb_base_get_support_topics() {
 	// Transient settings
 	$expiration    = MINUTE_IN_SECONDS * 5;
 	$transient_key = 'bb_base_support_topics';
-	$output        = get_transient( $transient_key );
+
+	// Logged-in viewers get per-user topic lists, so only anonymous renders are shared.
+	$cacheable = ! is_user_logged_in();
+	$output    = $cacheable ? get_transient( $transient_key ) : false;
 
 	// No transient found, so query for topics again
 	if ( false === $output ) {
@@ -494,7 +502,9 @@ function bb_base_get_support_topics() {
 		$output = bbp_buffer_template_part( 'content', 'archive-topic', false );
 
 		// Set the transient
-		set_transient( $transient_key, $output, $expiration );
+		if ( $cacheable ) {
+			set_transient( $transient_key, $output, $expiration );
+		}
 	}
 
 	// Return the output

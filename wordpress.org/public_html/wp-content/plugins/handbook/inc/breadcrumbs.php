@@ -50,14 +50,14 @@ class WPorg_Handbook_Breadcrumbs {
 		$links = [];
 
 		// First link is always link to main site.
-		$links[] = sprintf( '<a href="%s/">%s</a>', esc_url( site_url() ), __( 'Home', 'wporg' ) );
+		$links[] = sprintf( '<a href="%s/">%s</a>', esc_url( site_url() ), esc_html__( 'Home', 'wporg' ) );
 
 		// Second link is always link to handbook home page.
 		$handbook_name = wporg_get_current_handbook_name();
 		if ( wporg_is_handbook_landing_page() ) {
-			$links[] = $handbook_name;
+			$links[] = esc_html( $handbook_name );
 		} else {
-			$links[] = sprintf( '<a href="%s">%s</a>', esc_url( wporg_get_current_handbook_home_url() ), $handbook_name );
+			$links[] = sprintf( '<a href="%s">%s</a>', esc_url( wporg_get_current_handbook_home_url() ), esc_html( $handbook_name ) );
 		}
 
 		// Add in links to current handbook page and all of its ancestor pages.
@@ -70,7 +70,7 @@ class WPorg_Handbook_Breadcrumbs {
 				$parent = get_post( $parent_id );
 				// Skip unreadable ancestors so unpublished titles/IDs aren't disclosed, but keep climbing.
 				if ( $parent && ( 'publish' === $parent->post_status || current_user_can( 'read_post', $parent->ID ) ) ) {
-					$pages[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $parent ) ), get_the_title( $parent ) );
+					$pages[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $parent ) ), esc_html( get_the_title( $parent ) ) );
 				}
 				$page = $parent_id;
 			}
@@ -83,11 +83,11 @@ class WPorg_Handbook_Breadcrumbs {
 
 		// Last link is the current handbook page, unless it's the landing page.
 		if ( ! wporg_is_handbook_landing_page() ) {
-			$links[] = get_the_title( $current_page );
+			$links[] = esc_html( get_the_title( $current_page ) );
 		}
 
 		echo '<div class="handbook-breadcrumbs">';
-		echo implode( ' / ', $links );
+		echo wp_kses_post( implode( ' / ', $links ) );
 		echo "</div>\n";
 	}
 

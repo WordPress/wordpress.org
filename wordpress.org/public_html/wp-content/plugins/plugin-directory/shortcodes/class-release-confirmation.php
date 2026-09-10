@@ -77,7 +77,7 @@ class Release_Confirmation {
 				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
 					__( 'Your account has elevated privileges and requires extra security before you can manage plugin releases. Please <a href="%s">enable two-factor authentication now</a>.', 'wporg-plugins' ),
-					get_2fa_onboarding_url()
+					esc_url( get_2fa_onboarding_url() )
 				)
 			);
 		}
@@ -92,7 +92,7 @@ class Release_Confirmation {
 			printf(
 				'<h2 id="releases-%s"><a href="%s">%s</a></h2>',
 				esc_attr( $plugin->post_name ),
-				get_permalink( $plugin ),
+				esc_url( get_permalink( $plugin ) ),
 				get_the_title( $plugin )
 			);
 
@@ -488,11 +488,14 @@ class Release_Confirmation {
 	}
 
 	/**
-	 * Surfaces an in-cooldown notice to committers on the plugin's public page.
+	 * Surfaces a release-hold notice to committers on the plugin's public page.
 	 *
-	 * Bails when the viewer isn't a committer, when there's no current release in
-	 * an active cooldown window, or when the release was force-released
-	 * (release_delay = 0 ⇒ no cooldown).
+	 * A current release is held from the update API either by an automated security
+	 * review block, which has no expiry, or by the release cooldown while its window
+	 * runs. Bails when the viewer isn't a committer, when there's no current release,
+	 * or when it is neither blocked nor still in cooldown. A block takes precedence,
+	 * since it is the hold that actually withholds the version and it outlasts the
+	 * cooldown.
 	 *
 	 * @param WP_Post $post The currently displayed post.
 	 */
@@ -509,15 +512,36 @@ class Release_Confirmation {
 			return;
 		}
 
-		$release_delay = (int) ( $release['release_delay'] ?? 0 );
-		if ( ! $release_delay ) {
+		$is_blocked = API_Update_Updater::is_release_blocked( $release );
+
+		// Match the enforced window: compute_release_time() is what update_single_plugin() gates on.
+		$release_delay  = (int) ( $release['release_delay'] ?? 0 );
+		$cooldown_until = $release_delay ? API_Update_Updater::compute_release_time( $post, $release ) + $release_delay : 0;
+		$in_cooldown    = $cooldown_until > time();
+
+		if ( ! $is_blocked && ! $in_cooldown ) {
 			return;
 		}
 
-		// Match the enforced window: compute_release_time() is what update_single_plugin() gates on.
-		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + $release_delay;
+		$allowed_html = array(
+			'code' => array(),
+			'a'    => array( 'href' => true ),
+		);
 
-		if ( $cooldown_until <= time() ) {
+		if ( $is_blocked ) {
+			printf(
+				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
+				wp_kses(
+					sprintf(
+						/* translators: 1: plugin version, 2: URL to the automated security review documentation. */
+						__( 'Version %1$s is blocked by an automated security review and is not being served to sites, which keep receiving the previously distributed version. Review the findings in the email sent to the plugin committers, then address them and release a new version. Learn more in the <a href="%2$s">plugin developer handbook</a>.', 'wporg-plugins' ),
+						'<code>' . esc_html( $release['version'] ) . '</code>',
+						'https://developer.wordpress.org/plugins/wordpress-org/automated-security-review/'
+					),
+					$allowed_html
+				)
+			);
+
 			return;
 		}
 
@@ -532,10 +556,7 @@ class Release_Confirmation {
 					(int) ( $release_delay / HOUR_IN_SECONDS ),
 					'<a href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>'
 				),
-				array(
-					'code' => array(),
-					'a'    => array( 'href' => true ),
-				)
+				$allowed_html
 			)
 		);
 	}
@@ -571,7 +592,7 @@ class Release_Confirmation {
 			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 			sprintf(
 				__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
-				home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
+				esc_url( home_url( '/developers/releases/' ) ) // TODO: Hardcoded URL.
 			)
 		);
 	}

@@ -447,7 +447,7 @@ class Display {
 			echo '<ul class="pagination">';
 			foreach ( $pagination_links as $paginated_link ) {
 				// $paginated_link contains arbitrary HTML
-				echo '<li>' . $paginated_link . '</li>';
+				echo '<li>' . wp_kses_post( $paginated_link ) . '</li>';
 			}
 			echo '</ul>';
 

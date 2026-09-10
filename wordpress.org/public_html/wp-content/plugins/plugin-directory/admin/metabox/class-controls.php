@@ -29,7 +29,7 @@ class Controls {
 			<div id="misc-publishing-actions">
 				<?php
 				self::display_meta();
-				self::display_release_cooldown();
+				self::display_release_hold();
 				self::display_post_status();
 				?>
 			</div>
@@ -46,13 +46,15 @@ class Controls {
 	}
 
 	/**
-	 * Display the release cooldown status and (for reviewers) a force-release control.
+	 * Display the release hold status and (for reviewers) a force-release control.
 	 *
-	 * Bails when there's no current release to gate, when the release has no cooldown
-	 * delay (feature off at release-creation, or already force-released), or when the
-	 * cooldown window has elapsed.
+	 * A current release is held from the update API either by an automated security
+	 * review block, which has no expiry, or by the release cooldown while its window
+	 * runs. Bails when there's no current release, or when it is neither blocked nor
+	 * still in cooldown. A block takes precedence in the message, since it is the hold
+	 * that actually withholds the version and it outlasts the cooldown.
 	 */
-	protected static function display_release_cooldown() {
+	protected static function display_release_hold() {
 		$post = get_post();
 
 		// Resolved from the stable tag, so the hold shows even when the Version header is empty or disagrees.
@@ -62,28 +64,40 @@ class Controls {
 		}
 
 		$release_version = $release['version'];
+		$is_blocked      = API_Update_Updater::is_release_blocked( $release );
 
-		$release_delay = (int) ( $release['release_delay'] ?? 0 );
-		if ( ! $release_delay ) {
+		$release_delay  = (int) ( $release['release_delay'] ?? 0 );
+		$cooldown_until = $release_delay ? API_Update_Updater::compute_release_time( $post, $release ) + $release_delay : 0;
+		$in_cooldown    = $cooldown_until > time();
+
+		if ( ! $is_blocked && ! $in_cooldown ) {
 			return;
 		}
 
-		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + $release_delay;
-		if ( $cooldown_until <= time() ) {
-			return;
-		}
+		// The force-release reason justifies the override; a block is lifted on review, a cooldown bypassed for urgency.
+		$reason_placeholder = $is_blocked
+			? __( 'e.g. reviewed the findings, not exploitable', 'wporg-plugins' )
+			: __( 'e.g. urgent security fix for CVE-…', 'wporg-plugins' );
 
 		?>
-		<div class="misc-pub-section misc-pub-release-cooldown">
+		<div class="misc-pub-section misc-pub-release-hold">
 			<p>
 			<?php
-			printf(
-				/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
-				esc_html__( 'Version %1$s is in the release cooldown — it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
-				esc_html( $release_version ),
-				esc_html( human_time_diff( time(), $cooldown_until ) ),
-				esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
-			);
+			if ( $is_blocked ) {
+				printf(
+					/* translators: %s: version */
+					esc_html__( 'Version %s is blocked by an automated security review, it is withheld from the update API, and sites keep receiving the previously distributed version.', 'wporg-plugins' ),
+					esc_html( $release_version )
+				);
+			} else {
+				printf(
+					/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
+					esc_html__( 'Version %1$s is in the release cooldown, it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
+					esc_html( $release_version ),
+					esc_html( human_time_diff( time(), $cooldown_until ) ),
+					esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
+				);
+			}
 			?>
 			</p>
 			<?php if ( current_user_can( 'plugin_review', $post ) ) : ?>
@@ -94,7 +108,7 @@ class Controls {
 						name="force_release_reason"
 						rows="2"
 						style="width: 100%;"
-						placeholder="<?php esc_attr_e( 'e.g. urgent security fix for CVE-…', 'wporg-plugins' ); ?>"
+						placeholder="<?php echo esc_attr( $reason_placeholder ); ?>"
 					></textarea>
 				</p>
 				<p>
