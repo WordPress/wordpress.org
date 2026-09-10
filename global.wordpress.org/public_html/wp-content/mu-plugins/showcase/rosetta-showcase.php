@@ -128,7 +128,7 @@ class Rosetta_Showcase {
 		<p><label for="rosetta_showcase_url"><?php esc_html_e( 'URL', 'rosetta' ); ?></label>
 			<input style="margin-left: 0; width: 98%" name="rosetta_showcase_url" id="rosetta_showcase_url" type="text" value="<?php echo esc_url( $url ); ?>" /></p>
 		<label for="excerpt"><?php esc_html_e( 'Description', 'rosetta' ); ?></label>
-		<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
+		<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt"><?php echo $post->post_excerpt; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The classic editor supplies an edit-context post; format_to_edit() has already escaped the excerpt for this textarea. ?></textarea>
 		<?php
 	}
 
