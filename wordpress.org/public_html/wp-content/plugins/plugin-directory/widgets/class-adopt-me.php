@@ -30,8 +30,10 @@ class Adopt_Me extends \WP_Widget {
 
 		if ( $is_adopt_me ) {
 
-			echo wp_kses_post( $args['before_widget'] );
-			echo wp_kses_post( $args['before_title'] ) . esc_html( $title ) . wp_kses_post( $args['after_title'] );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+			echo $args['before_widget'];
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+			echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 			?>
 
 			<div>
@@ -43,7 +45,8 @@ class Adopt_Me extends \WP_Widget {
 			</div>
 			<?php
 
-			echo wp_kses_post( $args['after_widget'] );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+			echo $args['after_widget'];
 		}
 	}
 }

@@ -30,7 +30,8 @@ class Meta extends \WP_Widget {
 	public function widget( $args, $instance ) {
 		$post = get_post();
 
-		echo wp_kses_post( $args['before_widget'] );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $args['before_widget'];
 		?>
 
 		<h2 class="screen-reader-text"><?php echo esc_html( apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Meta', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base ) ); ?></h2>
@@ -231,7 +232,8 @@ class Meta extends \WP_Widget {
 		</ul>
 
 		<?php
-		echo wp_kses_post( $args['after_widget'] );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $args['after_widget'];
 	}
 
 	/**

@@ -13,7 +13,8 @@ class BPOrg_Login_Widget extends WP_Widget {
 
 			<?php
 				echo $before_widget; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
-				echo wp_kses_post( $before_title ) . esc_html__( 'Logged In As', 'bp-follow' ) . wp_kses_post( $after_title );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+				echo $before_title . esc_html__( 'Logged In As', 'bp-follow' ) . $after_title;
 			?>
 
 			<?php do_action( 'bp_before_sidebar_me' ) ?>
@@ -41,7 +42,8 @@ class BPOrg_Login_Widget extends WP_Widget {
 
 			<?php
 				echo $before_widget; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
-				echo wp_kses_post( $before_title ) . esc_html__( 'Log In', 'bp-follow' ) . wp_kses_post( $after_title );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+				echo $before_title . esc_html__( 'Log In', 'bp-follow' ) . $after_title;
 			?>
 
 			<p id="login-text">
