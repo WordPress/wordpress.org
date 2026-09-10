@@ -1168,6 +1168,11 @@ class Hooks {
 	 * @return array Filtered reply data.
 	 */
 	public function update_replies_count_on_editing_reply( $data ) {
+		// Newer bbPress versions update counts after the status is persisted.
+		if ( function_exists( 'bbp_update_counts_on_transition_post_status' ) ) {
+			return $data;
+		}
+
 		// Bail if the reply is not published.
 		if ( 'publish' !== get_post_status( $data['ID'] ) ) {
 			return $data;
