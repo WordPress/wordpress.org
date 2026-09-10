@@ -686,6 +686,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$redirect_host = parse_url( $redirect, PHP_URL_HOST );
 
 			if ( $user && $this->_is_valid_targeted_domain( $redirect_host ) && ! preg_match( '!wordpress.org$!i', $redirect_host ) ) {
+				$redirect  = set_url_scheme( $redirect, 'https' );
 				$sso_token = $this->_generate_remote_token( $user, $redirect_host );
 				$redirect  = add_query_arg( 'sso_token', urlencode( $sso_token ), $redirect );
 			}
