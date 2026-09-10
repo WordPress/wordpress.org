@@ -1,0 +1,12 @@
+.ugc-photo-preview {
+	margin-top: 0.75em;
+	/* Clip extreme tall previews without rescaling normal width-constrained photos. */
+	max-height: 480px;
+	overflow: hidden;
+}
+
+.ugc-photo-preview img {
+	display: block;
+	max-width: min(100%, 320px);
+	height: auto;
+}

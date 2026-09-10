@@ -193,6 +193,43 @@ function photoShowFieldError( field ) {
 }
 
 /**
+ * Shows a local thumbnail preview of the selected photo.
+ *
+ * @param {string} dataUrl - Data URL of the selected image.
+ * @param {string} fileName - Selected file name, used for the image alt text.
+ */
+function photoShowFilePreview( dataUrl, fileName ) {
+	const previewWrap = document.getElementById( 'ug_photo_preview_wrap' );
+	const previewImg = document.getElementById( 'ug_photo_preview' );
+
+	if ( ! previewWrap || ! previewImg ) {
+		return;
+	}
+
+	previewImg.src = dataUrl;
+	previewImg.alt = fileName
+		? PhotoDir.preview_alt + ': ' + fileName
+		: PhotoDir.preview_alt;
+	previewWrap.hidden = false;
+}
+
+/**
+ * Clears and hides the local photo preview.
+ */
+function photoClearFilePreview() {
+	const previewWrap = document.getElementById( 'ug_photo_preview_wrap' );
+	const previewImg = document.getElementById( 'ug_photo_preview' );
+
+	if ( ! previewWrap || ! previewImg ) {
+		return;
+	}
+
+	previewImg.removeAttribute( 'src' );
+	previewImg.alt = PhotoDir.preview_alt;
+	previewWrap.hidden = true;
+}
+
+/**
  * Validates a file upload against multiple criteria.
  *
  * @param {HTMLElement} field - The HTML file input field element.
@@ -202,8 +239,9 @@ async function photoCheckFileValidations( field ) {
 	let error = false;
 
 	// Check if no file chosen.
-	if ( ! error ) {
-		error = field.validity.valueMissing;
+	if ( ! field.files.length ) {
+		photoClearFilePreview();
+		return field.validity.valueMissing;
 	}
 
 	// Check for duplicate file name.
@@ -219,31 +257,34 @@ async function photoCheckFileValidations( field ) {
 		error = photoCheckFileSize( field );
 	}
 
-	// Check for file dimension error.
-	if ( ! error ) {
+	// Always load the selected file for a local preview. Dimension checks run
+	// only when earlier validations passed.
+	const shouldCheckDimensions = ! error;
+	if ( shouldCheckDimensions ) {
 		// Hack: Wait for file dimensions check to complete before
 		// determining true validity. Once it has done so, it will
 		// potentially trigger submit if warranted.
 		field.setCustomValidity( PhotoDir.msg_validating_dimensions );
 		error = true;
-		photoCheckFileDimensions( field );
 	}
+
+	photoLoadSelectedFile( field, shouldCheckDimensions );
 
 	return error;
 }
 
 /**
- * Checks if the file selected via the file input field object is within an
- * acceptable file dimension range and sets custom validity message accordingly.
+ * Loads the selected file via FileReader for preview and optional dimension checks.
  *
  * An appropriate error message is defined if the file is too long or too short.
  * If there is no file selected, or the file is of sufficient size, then any
  * existing custom validity message is cleared.
  *
  * @param {HTMLElement} field - The HTML file input field element.
- * @return {Promise} Promise where result is true if file dimensions are invalid, else false.
+ * @param {Boolean} checkDimensions - Whether to validate image dimensions after load.
+ * @return {Boolean} True if a file was loaded, else false.
  */
-function photoCheckFileDimensions( field ) {
+function photoLoadSelectedFile( field, checkDimensions ) {
 	const MIN_SIZE = PhotoDir.min_file_dimension; // In px.
 	const MAX_SIZE = PhotoDir.max_file_dimension; // In px.
 
@@ -251,8 +292,15 @@ function photoCheckFileDimensions( field ) {
 
 	if ( files.length > 0 ) {
 		const reader = new FileReader();
+		const file = files.item( 0 );
 
 		reader.addEventListener( 'load', async (e) => {
+			photoShowFilePreview( e.target.result, file.name );
+
+			if ( ! checkDimensions ) {
+				return;
+			}
+
 			const img = new Image();
 			img.src = e.target.result;
 
@@ -273,14 +321,18 @@ function photoCheckFileDimensions( field ) {
 			} );
 		}, false );
 
-		reader.readAsDataURL( files.item( 0 ) );
+		reader.readAsDataURL( file );
 
-		// Return true. This will be rectified once the actual image dimensions are checked.
 		return true;
 	}
 
-	// No custom constraint violation.
-	field.setCustomValidity( '' );
+	photoClearFilePreview();
+
+	if ( checkDimensions ) {
+		// No custom constraint violation.
+		field.setCustomValidity( '' );
+	}
+
 	return false;
 }
 

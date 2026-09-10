@@ -245,13 +245,29 @@ class Uploads {
 	 */
 	public static function wp_enqueue_scripts() {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) ) {
-			wp_enqueue_script( 'wporg-photos-submit', plugins_url( 'assets/js/submit.js', dirname( __FILE__ ) ), [], '1', true );
+			wp_enqueue_style(
+				'wporg-photos-submit',
+				plugins_url( 'assets/css/submit.css', WPORG_PHOTO_DIRECTORY_MAIN_FILE ),
+				[],
+				filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/css/submit.css' )
+			);
+
+			wp_enqueue_script(
+				'wporg-photos-submit',
+				plugins_url( 'assets/js/submit.js', dirname( __FILE__ ) ),
+				[],
+				filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/js/submit.js' ),
+				true
+			);
 
 			wp_localize_script(
 				'wporg-photos-submit',
 				'PhotoDir',
 				[
 					'error_class'           => 'error',
+
+					// File preview.
+					'preview_alt'           => __( 'Selected photo preview', 'wporg-photos' ),
 
 					// Field required.
 					'err_field_required'    => __( 'This field is required.', 'wporg-photos' ),
@@ -1007,6 +1023,12 @@ class Uploads {
 					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" accept="%s">' . "\n",
 					esc_attr( $valid_upload_mimetypes )
 				)
+				. '<div id="ug_photo_preview_wrap" class="ugc-photo-preview" hidden>' . "\n"
+				. sprintf(
+					'<img id="ug_photo_preview" alt="%s" />' . "\n",
+					esc_attr__( 'Selected photo preview', 'wporg-photos' )
+				)
+				. "</div>\n"
 				. "</div>\n"
 				. sprintf(
 					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d"]' . "\n",
