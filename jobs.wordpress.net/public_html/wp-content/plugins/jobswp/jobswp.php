@@ -164,6 +164,19 @@ class Jobs_Dot_WP {
 	 * @return array The amended list of allowed tags
 	 */
 	public function wp_kses_allowed_html( $allowedtags, $content ) {
+		// Interface text needs links that are not permitted in job descriptions.
+		if ( 'jobswp-ui' === $content ) {
+			return array(
+				'a'      => array(
+					'href'  => true,
+					'rel'   => true,
+					'title' => true,
+				),
+				'em'     => array(),
+				'strong' => array(),
+			);
+		}
+
 		// Add permissable tags
 		$allowedtags['ol'] = array();
 		$allowedtags['ul'] = array();
