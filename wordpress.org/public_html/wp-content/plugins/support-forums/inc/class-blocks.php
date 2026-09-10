@@ -228,6 +228,15 @@ class Blocks {
 			return bbp_current_user_can_publish_topics() || bbp_current_user_can_publish_replies();
 		};
 
+		$callback = $oembed_proxy_route_args[0]['callback'];
+
+		// Discovery fetches the client-supplied URL; rendering has it off (embed_oembed_discover), so the preview shouldn't either.
+		$oembed_proxy_route_args[0]['callback'] = function ( $request ) use ( $callback ) {
+			$request['discover'] = false;
+
+			return call_user_func( $callback, $request );
+		};
+
 		register_rest_route(
 			'oembed/1.0',
 			'/proxy',
