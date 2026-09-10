@@ -6,7 +6,6 @@
 		<div class="my-account">
 			<ul>
 				<li><?php
-					/* translators: %s: user's display name */
 					printf(
 						/* translators: %s: Current user's profile link. */
 						esc_html__( 'Howdy, %s', 'wporg-forums' ),
