@@ -1337,17 +1337,22 @@ h5 {
 	}
 }
 
+/* Sprite offsets, not directional: the same slice must show in RTL. */
+
+/*rtl:begin:ignore*/
 #home-below ol.steps li.one span {
-	background-position: 100% 0;
+	background-position: 0 0;
 }
 
 #home-below ol.steps li.two span {
-	background-position: right -31px top 0;
+	background-position: -31px 0;
 }
 
 #home-below ol.steps li.three span {
-	background-position: right -62px top 0;
+	background-position: -62px 0;
 }
+
+/*rtl:end:ignore*/
 
 ul#notable-users {
 	list-style: none;

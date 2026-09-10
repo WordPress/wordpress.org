@@ -1337,6 +1337,9 @@ h5 {
 	}
 }
 
+/* Sprite offsets, not directional: the same slice must show in RTL. */
+
+/*rtl:begin:ignore*/
 #home-below ol.steps li.one span {
 	background-position: 0 0;
 }
@@ -1348,6 +1351,8 @@ h5 {
 #home-below ol.steps li.three span {
 	background-position: -62px 0;
 }
+
+/*rtl:end:ignore*/
 
 ul#notable-users {
 	list-style: none;
