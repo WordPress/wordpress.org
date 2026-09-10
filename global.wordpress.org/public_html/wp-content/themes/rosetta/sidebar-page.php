@@ -19,11 +19,8 @@ if ( false !== $latest_release ) :
 	</p>
 
 	<p class="download-tar">
-		<a href="<?php echo $latest_release['targz_url']; ?>"><?php printf(
-			/* translators: %s: File size in megabytes. */
-			esc_html__( 'Download .tar.gz &mdash; %s MB', 'rosetta' ),
-			esc_html( $latest_release['tar_size_mb'] ) );
-		?></a>
+		<?php /* translators: %s: File size in megabytes. */ ?>
+		<a href="<?php echo esc_url( $latest_release['targz_url'] ); ?>"><?php printf( esc_html__( 'Download .tar.gz &mdash; %s MB', 'rosetta' ), esc_html( $latest_release['tar_size_mb'] ) ); ?></a>
 	</p>
 	<?php
 endif;
