@@ -1057,6 +1057,102 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	}
 
 	/**
+	 * 'edit_others_posts' is only the generic name for the capability. A post type
+	 * can name its own, so the exemption asks the target post type which one it
+	 * means. Somebody who may edit other people's posts is still held to the object
+	 * check on a type whose capability they were never given.
+	 */
+	public function test_generic_others_capability_does_not_exempt_a_custom_post_type() {
+		register_post_type(
+			'wporg_capped_cpt',
+			array(
+				'public'          => true,
+				'map_meta_cap'    => true,
+				'capability_type' => array( 'wporg_test_capped', 'wporg_test_cappeds' ),
+			)
+		);
+
+		wp_set_current_user( 0 );
+		$author  = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_type'    => 'wporg_capped_cpt',
+				'post_author'  => $author,
+				'post_content' => 'Original.',
+			)
+		);
+
+		$editor = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
+		$has_generic_cap = current_user_can( 'edit_others_posts' );
+		$can_edit_object = current_user_can( 'edit_post', $post_id );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Overwritten.',
+			)
+		);
+
+		unregister_post_type( 'wporg_capped_cpt' );
+
+		$this->assertTrue( $has_generic_cap, 'The fixture needs the generic capability for this test to mean anything.' );
+		$this->assertFalse( $can_edit_object, 'The fixture needs the object check to fail for this test to mean anything.' );
+		$this->assertSame( 0, $result );
+		$this->assertSame( 'Original.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * The other half of that: holding the post type's own capability exempts the
+	 * update, so a handbook editor keeps working on handbook pages.
+	 */
+	public function test_post_type_capability_exempts_the_update() {
+		register_post_type(
+			'wporg_capped_cpt',
+			array(
+				'public'          => true,
+				'map_meta_cap'    => true,
+				'capability_type' => array( 'wporg_test_capped', 'wporg_test_cappeds' ),
+			)
+		);
+
+		wp_set_current_user( 0 );
+		$author  = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_type'    => 'wporg_capped_cpt',
+				'post_author'  => $author,
+				'post_content' => 'Original.',
+			)
+		);
+
+		$editor = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
+		$grant = function ( $caps ) {
+			$caps['edit_others_wporg_test_cappeds']    = true;
+			$caps['edit_published_wporg_test_cappeds'] = true;
+
+			return $caps;
+		};
+		add_filter( 'user_has_cap', $grant );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Edited by a handbook editor.',
+			)
+		);
+
+		remove_filter( 'user_has_cap', $grant );
+		unregister_post_type( 'wporg_capped_cpt' );
+
+		$this->assertSame( $post_id, $result );
+		$this->assertSame( 'Edited by a handbook editor.', get_post( $post_id )->post_content );
+	}
+
+	/**
 	 * Cron, WP-CLI and importers run with no current user and must not be caught.
 	 */
 	public function test_update_with_no_current_user_is_untouched() {

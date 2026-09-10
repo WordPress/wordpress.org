@@ -301,8 +301,10 @@ class Plugin {
 	 * permission over every row in the table. Ask on the caller's behalf, and let
 	 * the write short-circuit when the answer is no.
 	 *
-	 * Users who may edit other people's posts are left alone, as are inserts: a row
-	 * that does not exist yet has nobody to take it from.
+	 * Users who may edit other people's posts of that type are left alone, as are
+	 * inserts: a row that does not exist yet has nobody to take it from. The type
+	 * is read from the stored row rather than from the incoming data, and a
+	 * revision defers to its parent, which is how map_meta_cap() reads them too.
 	 *
 	 * @param bool  $maybe_empty Whether the post should be considered "empty".
 	 * @param array $postarr     Array of post data.
@@ -315,7 +317,21 @@ class Plugin {
 
 		$post_id = (int) ( $postarr['ID'] ?? 0 );
 
-		if ( ! $post_id || ! get_current_user_id() || current_user_can( 'edit_others_posts' ) ) {
+		if ( ! $post_id || ! get_current_user_id() ) {
+			return $maybe_empty;
+		}
+
+		$post = get_post( $post_id );
+		if ( $post && 'revision' === $post->post_type ) {
+			$post = get_post( $post->post_parent );
+		}
+
+		$post_type = $post ? get_post_type_object( $post->post_type ) : null;
+
+		// A post type names its own capability, and it is not always the generic one.
+		$edit_others = $post_type ? $post_type->cap->edit_others_posts : 'edit_others_posts';
+
+		if ( current_user_can( $edit_others ) ) {
 			return $maybe_empty;
 		}
 
