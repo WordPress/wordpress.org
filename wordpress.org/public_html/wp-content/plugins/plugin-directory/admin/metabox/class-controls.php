@@ -322,11 +322,11 @@ class Controls {
 			<tr>
 				<td><?php esc_html_e( 'Updated:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php
-					printf(
-						'<span title="%s">%s ago</span>',
-						esc_attr( $post->last_updated ),
-						esc_html( human_time_diff( strtotime( $post->last_updated ) ) )
-					);
+			printf(
+				'<span title="%s">%s ago</span>',
+				esc_attr( $post->last_updated ),
+				esc_html( human_time_diff( strtotime( $post->last_updated ) ) )
+			);
 				?></strong></td>
 			</tr>
 
