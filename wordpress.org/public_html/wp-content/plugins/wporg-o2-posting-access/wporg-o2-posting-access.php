@@ -21,6 +21,7 @@ class Plugin {
 		}
 
 		add_filter( 'user_has_cap', [ $this, 'add_post_capabilities' ], 10, 4 );
+		add_filter( 'wp_insert_post_empty_content', [ $this, 'restrict_updates_to_editable_posts' ], 10, 2 );
 		add_action( 'registered_post_type', [ $this, 'restrict_rest_queries' ] );
 
 		foreach ( get_post_types() as $post_type ) {
@@ -288,6 +289,37 @@ class Plugin {
 		$allcaps['edit_published_posts'] = true;
 
 		return $allcaps;
+	}
+
+	/**
+	 * Blocks updates to existing posts the current user cannot edit.
+	 *
+	 * The capabilities added in add_post_capabilities() are primitive capabilities,
+	 * which say nothing about the object they are used on, and the same is true of
+	 * the ones a low-privileged role carries. A caller that acts on a post ID
+	 * without asking 'edit_post' about that specific ID therefore reads them as
+	 * permission over every row in the table. Ask on the caller's behalf, and let
+	 * the write short-circuit when the answer is no.
+	 *
+	 * Users who may edit other people's posts are left alone, as are inserts: a row
+	 * that does not exist yet has nobody to take it from.
+	 *
+	 * @param bool  $maybe_empty Whether the post should be considered "empty".
+	 * @param array $postarr     Array of post data.
+	 * @return bool Filtered value.
+	 */
+	public function restrict_updates_to_editable_posts( $maybe_empty, $postarr ) {
+		if ( $maybe_empty ) {
+			return $maybe_empty;
+		}
+
+		$post_id = (int) ( $postarr['ID'] ?? 0 );
+
+		if ( ! $post_id || ! get_current_user_id() || current_user_can( 'edit_others_posts' ) ) {
+			return $maybe_empty;
+		}
+
+		return ! current_user_can( 'edit_post', $post_id );
 	}
 
 	/**
