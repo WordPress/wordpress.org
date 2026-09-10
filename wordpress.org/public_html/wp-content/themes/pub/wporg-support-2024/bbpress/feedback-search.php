@@ -2,7 +2,7 @@
 /**
  * Notice shown when a forum search has no terms.
  *
- * @package WPBBP
+ * @package bbPress
  */
 
 ?>

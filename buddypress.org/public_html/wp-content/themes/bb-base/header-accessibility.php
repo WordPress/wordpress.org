@@ -2,7 +2,7 @@
 /**
  * Skip links shown at the top of every page.
  *
- * @package bb-base
+ * @package bbPress
  */
 
 ?>

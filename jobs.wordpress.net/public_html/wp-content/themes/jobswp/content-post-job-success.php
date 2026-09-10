@@ -30,7 +30,7 @@
 	<p class="job-token">
 		<?php
 		/* translators: %s: Job token. */
-		printf( esc_html__( 'Your job token is: %s', 'jobswp' ), esc_html( $_POST['job_token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Set by the plugin's form handler, not read from the request.
+		printf( esc_html__( 'Your job token is: %s', 'jobswp' ), esc_html( wp_unslash( $_POST['job_token'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display-only form redisplay; the value is escaped with esc_html() at output.
 		?>
 	</p>
 

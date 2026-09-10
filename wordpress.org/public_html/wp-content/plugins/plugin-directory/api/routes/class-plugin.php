@@ -413,9 +413,9 @@ class Plugin extends Base {
 				$review_author_markup         = '<a href="' . $review_author_markup_profile . '">';
 				$review_author_markup        .= get_avatar( $reviewer->ID, 16, 'monsterid' ) . '</a>';
 				$review_author_markup        .= '<a href="' . $review_author_markup_profile . '" class="reviewer-name">';
-				$review_author_markup        .= $reviewer->display_name;
+				$review_author_markup        .= esc_html( $reviewer->display_name );
 				if ( $reviewer->display_name != $reviewer->user_login ) {
-					$review_author_markup .= " <small>({$reviewer->user_login})</small>";
+					$review_author_markup .= ' <small>(' . esc_html( $reviewer->user_login ) . ')</small>';
 				}
 				$review_author_markup .= '</a>';
 

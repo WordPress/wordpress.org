@@ -271,7 +271,7 @@ class Ratings_Compat {
 			echo '<p class="reviews-filtered-msg" style="margin-top:12px;font-size:0.8rem;">';
 			printf(
 				wp_kses_post(
-					/* translators: %d: number of stars */
+					/* translators: %d: Number of stars. */
 					_n(
 						'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
 						'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
@@ -484,7 +484,7 @@ class Ratings_Compat {
 		?>
 		<p><?php esc_html_e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
 		<ul>
-			<li><?php printf( $report, esc_url( sprintf( home_url( '/%s/%s/' ), $this->compat, $this->slug ) ) ); ?></li>
+			<li><?php printf( wp_kses_post( $report ), esc_url( sprintf( home_url( '/%s/%s/' ), $this->compat, $this->slug ) ) ); ?></li>
 			<li><?php echo esc_html( $rate ); ?></li>
 			<li><?php esc_html_e( 'Please provide as much detail as you can to justify your rating and to help others.', 'wporg-forums' ); ?></li>
 			<li><?php

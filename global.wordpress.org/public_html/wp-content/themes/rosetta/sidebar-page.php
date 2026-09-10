@@ -22,7 +22,7 @@ if ( false !== $latest_release ) :
 		<a href="<?php echo $latest_release['targz_url']; ?>"><?php printf(
 			/* translators: %s: File size in megabytes. */
 			esc_html__( 'Download .tar.gz &mdash; %s MB', 'rosetta' ),
-			$latest_release['tar_size_mb'] );
+			esc_html( $latest_release['tar_size_mb'] ) );
 		?></a>
 	</p>
 	<?php

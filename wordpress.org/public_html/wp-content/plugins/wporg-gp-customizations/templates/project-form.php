@@ -1,6 +1,6 @@
 <?php
 /**
- * Template for the project edit form.
+ * Shared project form fields, used by both the new-project and edit-project templates.
  *
  * @package GlotPress
  */

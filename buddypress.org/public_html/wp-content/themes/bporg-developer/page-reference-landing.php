@@ -65,7 +65,7 @@ get_header(); ?>
                                         </li>
 
                                     <?php endwhile; ?>
-									<li class="view-all-new-in"><a href="<?php echo esc_attr( get_term_link( $version, 'wp-parser-since' ) ); ?>"><?php esc_html_e( 'View all&hellip;', 'bporg-developer' ); ?></a></li>
+									<li class="view-all-new-in"><a href="<?php echo esc_url( get_term_link( $version, 'wp-parser-since' ) ); ?>"><?php esc_html_e( 'View all&hellip;', 'bporg-developer' ); ?></a></li>
                                 </ul>
                             </div>
                         </div>

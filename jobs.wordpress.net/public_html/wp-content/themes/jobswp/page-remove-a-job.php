@@ -25,7 +25,7 @@ get_header(); ?>
 				<div class="notice notice-error">
 					<?php if ( is_string( $_POST['errors'] ) ) {
 						/* translators: %s: Error message. */
-						printf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( $_POST['errors'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Set by the plugin's form handler, not read from the request.
+						printf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( wp_unslash( $_POST['errors'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display-only form redisplay; the value is escaped with esc_html() at output.
 					} else {
 						echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' ) );
 					} ?>

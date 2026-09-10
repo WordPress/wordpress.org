@@ -12,9 +12,9 @@
 
 	<div class="notice notice-error">
 		<?php
-		if ( is_string( $_POST['errors'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Set by the plugin's form handler, not read from the request.
+		if ( is_string( $_POST['errors'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display-only form redisplay; the value is only type-checked here and escaped at output.
 			/* translators: %s: Error message. */
-			printf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( $_POST['errors'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Set by the plugin's form handler, not read from the request.
+			printf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( wp_unslash( $_POST['errors'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display-only form redisplay; the value is escaped with esc_html() at output.
 		} else {
 			echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' ) );
 		}
@@ -94,7 +94,6 @@
 			<select name="category" id="category" class="<?php echo jobswp_required_field_classes( 'category' ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<?php foreach ( Jobs_Dot_WP::get_job_categories() as $cat ) : ?>
-					<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- jobswp_field_value() returns selected() markup. ?>
 					<option value="<?php echo esc_attr( $cat->slug ); ?>" <?php echo jobswp_field_value( 'category', esc_attr( $cat->slug ) ); ?>><?php echo esc_html( $cat->name ); ?></option>
 				<?php endforeach; ?>
 			</select>
@@ -117,7 +116,7 @@
 
 		<div class="post-job-input">
 			<label for="job_description"><?php esc_html_e( 'Job Description', 'jobswp' ); ?>*</label>
-			<textarea name="job_description" id="job_description" rows="10" class="<?php echo jobswp_required_field_classes( 'job_description' ); ?>"><?php echo jobswp_field_value( 'job_description' ); ?></textarea>
+			<textarea name="job_description" id="job_description" rows="10" class="<?php echo esc_attr( jobswp_required_field_classes( 'job_description' ) ); ?>"><?php echo jobswp_field_description_value(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Filtered with wp_filter_kses() for this textarea body. ?></textarea>
 			<?php /* translators: %s: List of allowed HTML tags. */ ?>
 			<p><?php printf( wp_kses_post( __( 'Line and paragraph breaks are automatic. <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>', 'jobswp' ) ), esc_html( jobswp_allowed_tags() ) ); ?></p>
 			<p><?php esc_html_e( 'All job postings are moderated prior to appearing on the site.', 'jobswp' ); ?></p>

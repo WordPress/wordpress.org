@@ -173,6 +173,10 @@ function jobswp_required_field_classes( $field ) {
 /**
  * Returns the appropriate field value markup for use in appropriate form field.
  *
+ * The return value is always an escaped attribute fragment, so it is safe in an
+ * attribute context. The job description is not handled here because it carries
+ * HTML; see jobswp_field_description_value().
+ *
  * @param string $field Field name/key
  * @param string $option_value Related value, if appropriate. (e.g. the other
  *  value to compare against for selected() or checked())
@@ -181,23 +185,38 @@ function jobswp_required_field_classes( $field ) {
 function jobswp_field_value( $field, $option_value = '' ) {
 	$val = '';
 
-	if ( $_POST && isset( $_POST[ $field ] ) && ! empty( $_POST[ $field ] ) ) {
-		// Allow certain HTML in job_description field
-		if ( 'job_description' == $field )
-			$val = stripslashes( wp_filter_kses( trim( $_POST[ $field ] ) ) );
-		else
-			$val = esc_attr( trim( strip_tags( stripslashes( $_POST[ $field ] ) ) ) );
+	if ( $_POST && isset( $_POST[ $field ] ) && ! empty( $_POST[ $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Display-only form redisplay.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Slashes are stripped and the value is escaped on the same line.
+		$val = esc_attr( trim( strip_tags( stripslashes( $_POST[ $field ] ) ) ) );
 	}
 
 	// Output appropriate attribute based on field type
 	if ( $val ) {
 		if ( in_array( $field, array( 'category', 'howtoapply_method', 'jobtype' ) ) )
 			return selected( $val, $option_value, false );
-		elseif ( 'job_description' == $field )
-			return $val;
 		else
 			return "value='$val'";
 	}
+}
+
+/**
+ * Returns the submitted job description, with its allowed HTML preserved.
+ *
+ * The return value is kses-filtered HTML meant for an element body. It carries
+ * unescaped quotes, so unlike jobswp_field_value() it must never be printed
+ * into an attribute.
+ *
+ * @return string
+ */
+function jobswp_field_description_value() {
+	$field = 'job_description';
+
+	if ( $_POST && isset( $_POST[ $field ] ) && ! empty( $_POST[ $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Display-only form redisplay.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- wp_filter_kses() sanitizes the value and handles the slashing itself.
+		return stripslashes( wp_filter_kses( trim( $_POST[ $field ] ) ) );
+	}
+
+	return '';
 }
 
 /**

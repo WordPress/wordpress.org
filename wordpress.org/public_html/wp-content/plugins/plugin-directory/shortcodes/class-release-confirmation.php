@@ -94,7 +94,7 @@ class Release_Confirmation {
 				'<h2 id="releases-%s"><a href="%s">%s</a></h2>',
 				esc_attr( $plugin->post_name ),
 				esc_url( get_permalink( $plugin ) ),
-				get_the_title( $plugin )
+				esc_html( get_the_title( $plugin ) )
 			);
 
 			self::single_plugin( $plugin );
@@ -112,8 +112,8 @@ class Release_Confirmation {
 					if ( 'publish' == get_post_status( $plugin ) ) {
 						return sprintf(
 							'<a href="%s">%s</a>',
-							get_permalink( $plugin ),
-							get_the_title( $plugin )
+							esc_url( get_permalink( $plugin ) ),
+							esc_html( get_the_title( $plugin ) )
 						);
 					}
 				}, $not_enabled ) ) )

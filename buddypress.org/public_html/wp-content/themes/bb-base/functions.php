@@ -177,7 +177,7 @@ function bb_base_single_topic_description() {
 
 	<li class="topic-forum"><?php
 		printf(
-			/* translators: %s: forum title */
+			/* translators: %s: Forum title. */
 			esc_html__( 'In: %s', 'bborg' ),
 			sprintf(
 				'<a href="%s">%s</a>',
@@ -195,7 +195,7 @@ function bb_base_single_topic_description() {
 	<?php if ( !empty( $last_reply  ) ) : ?>
 		<li class="topic-freshness-author"><?php
 			printf(
-				/* translators: %s: reply author link */
+				/* translators: %s: Reply author link. */
 				esc_html__( 'Last voice: %s', 'bborg' ),
 				wp_kses_post(
 					bbp_get_author_link(
@@ -254,7 +254,7 @@ function bb_base_single_forum_description() {
 	<?php if ( bbp_get_forum_parent_id() ) : ?>
 		<li class="topic-parent"><?php
 			printf(
-				/* translators: %s: forum title */
+				/* translators: %s: Forum title. */
 				esc_html__( 'In: %s', 'bborg' ),
 				sprintf(
 					'<a href="%s">%s</a>',
@@ -273,7 +273,7 @@ function bb_base_single_forum_description() {
 	<?php if ( !empty( $last_active  ) ) : ?>
 		<li class="forum-freshness-author"><?php
 			printf(
-				/* translators: %s: post author link */
+				/* translators: %s: Post author link. */
 				esc_html__( 'Last voice: %s', 'bborg' ),
 				wp_kses_post(
 					bbp_get_author_link(

@@ -187,7 +187,7 @@ get_header( 'wporg' );
 
 						printf(
 							esc_html(
-								/* translators: Number of meetups. */
+								/* translators: %s: Number of meetups. */
 								_n(
 									'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s city worldwide.',
 									'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in %s cities worldwide.',

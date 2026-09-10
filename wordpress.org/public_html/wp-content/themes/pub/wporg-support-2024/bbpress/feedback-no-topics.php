@@ -2,7 +2,7 @@
 /**
  * Notice shown when a forum view has no topics.
  *
- * @package WPBBP
+ * @package bbPress
  */
 
 ?>

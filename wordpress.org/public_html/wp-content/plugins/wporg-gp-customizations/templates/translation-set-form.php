@@ -1,6 +1,6 @@
 <?php
 /**
- * Template for the translation set edit form.
+ * Shared translation set form fields, used by both the new and edit templates.
  *
  * @package GlotPress
  */

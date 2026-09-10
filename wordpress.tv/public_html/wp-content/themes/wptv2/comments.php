@@ -27,7 +27,7 @@ if ( have_comments() ) :
 			} else {
 				printf(
 					esc_html(
-						/* translators: 1: number of comments, 2: post title */
+						/* translators: 1: Number of comments, 2: Post title. */
 						_nx(
 							'%1$s response on &ldquo;%2$s&rdquo;',
 							'%1$s responses on &ldquo;%2$s&rdquo;',
