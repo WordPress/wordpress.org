@@ -649,8 +649,12 @@ jQuery( function( $ ) {
 		}
 
 		if ( is_singular() ) {
-			/* translators: %s: Number of tickets. */
-			echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $component_count ) ), (int) $component_count ) . ' in the ' . esc_html( $component ) . ' component</h3>';
+			echo '<h3>' . sprintf(
+				/* translators: 1: Number of tickets. 2: Component name. */
+				esc_html( _n( '%1$s open ticket in the %2$s component', '%1$s open tickets in the %2$s component', $component_count ) ),
+				(int) $component_count,
+				esc_html( $component )
+			) . '</h3>';
 		}
 
 		$history = $this->api->get_component_history( $component, self::last_x_days );
