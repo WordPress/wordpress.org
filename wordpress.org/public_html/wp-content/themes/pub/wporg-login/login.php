@@ -24,7 +24,7 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] 
 ?>
 
 <form name="loginform" id="loginform" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post">
-	<p class="intro"><?php echo wporg_login_wporg_is_starpress(); ?></p>
+	<p class="intro"><?php echo wp_kses_post( wporg_login_wporg_is_starpress() ); ?></p>
 	<p class="login-username">
 		<label for="user_login"><?php esc_html_e( 'Username or Email Address', 'wporg' ); ?></label>
 		<input type="text" name="log" id="user_login" class="input" value="<?php echo esc_attr( $username ); ?>" size="20" />

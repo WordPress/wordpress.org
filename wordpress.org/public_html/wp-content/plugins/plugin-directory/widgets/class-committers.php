@@ -45,8 +45,8 @@ class Committers extends \WP_Widget {
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Committers', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
-		echo $args['before_widget'];
-		echo $args['before_title'] . $title . $args['after_title'];
+		echo wp_kses_post( $args['before_widget'] );
+		echo wp_kses_post( $args['before_title'] ) . esc_html( $title ) . wp_kses_post( $args['after_title'] );
 		?>
 
 		<ul id="committer-list" class="committer-list">
@@ -55,7 +55,7 @@ class Committers extends \WP_Widget {
 				<li data-user="<?php echo esc_attr( $committer->user_nicename ); ?>">
 					<?php echo get_avatar( $committer->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$committer->user_nicename}/" ); ?>">
-						<?php echo $committer->display_name ?: $committer->user_nicename; ?>
+						<?php echo esc_html( $committer->display_name ?: $committer->user_nicename ); ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_committer', $post ) ) : ?>
@@ -93,6 +93,6 @@ class Committers extends \WP_Widget {
 		</ul>
 
 		<?php
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 }

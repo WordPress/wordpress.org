@@ -48,8 +48,8 @@ class Support_Reps extends \WP_Widget {
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Support Reps', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
-		echo $args['before_widget'];
-		echo $args['before_title'] . $title . $args['after_title'];
+		echo wp_kses_post( $args['before_widget'] );
+		echo wp_kses_post( $args['before_title'] ) . esc_html( $title ) . wp_kses_post( $args['after_title'] );
 		?>
 
 		<ul id="support-rep-list" class="support-rep-list">
@@ -59,7 +59,7 @@ class Support_Reps extends \WP_Widget {
 				<li data-user="<?php echo esc_attr( $support_rep->user_nicename ); ?>">
 					<?php echo get_avatar( $support_rep->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$support_rep->user_nicename}/" ); ?>">
-						<?php echo $support_rep->display_name ?: $support_rep->user_nicename; ?>
+						<?php echo esc_html( $support_rep->display_name ?: $support_rep->user_nicename ); ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_support_rep', $post ) ) : ?>
@@ -97,6 +97,6 @@ class Support_Reps extends \WP_Widget {
 		</ul>
 
 		<?php
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 }

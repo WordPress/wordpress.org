@@ -30,10 +30,10 @@ class Meta extends \WP_Widget {
 	public function widget( $args, $instance ) {
 		$post = get_post();
 
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 		?>
 
-		<h2 class="screen-reader-text"><?php echo apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Meta', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base ); ?></h2>
+		<h2 class="screen-reader-text"><?php echo esc_html( apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Meta', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base ) ); ?></h2>
 
 		<ul>
 			<?php if ( $built_for = get_the_term_list( $post->ID, 'plugin_built_for', '', ', ' ) ) : ?>
@@ -151,7 +151,7 @@ class Meta extends \WP_Widget {
 							printf(
 								/* translators: %s: Number of available languages */
 								esc_html( _nx( 'See all %s', 'See all %s', $available_languages_count, 'languages', 'wporg-plugins' ) ),
-								$available_languages_count
+								esc_html( $available_languages_count )
 							);
 							?>
 						</button>
@@ -163,7 +163,7 @@ class Meta extends \WP_Widget {
 							</button>
 
 							<div class="popover-inner">
-								<p><?php echo wp_sprintf( '%l.', $available_languages ); ?></p>
+								<p><?php echo wp_kses_post( wp_sprintf( '%l.', $available_languages ) ); ?></p>
 								<p>
 								<?php
 									printf(
@@ -177,7 +177,7 @@ class Meta extends \WP_Widget {
 						</div>
 						<?php
 					else :
-						echo current( $available_languages );
+						echo wp_kses_post( current( $available_languages ) );
 					endif;
 
 					echo '</div>';
@@ -231,7 +231,7 @@ class Meta extends \WP_Widget {
 		</ul>
 
 		<?php
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 
 	/**

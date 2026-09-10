@@ -467,7 +467,7 @@ class Stats_Report {
 					echo '<ul>';
 					foreach ( $stats['plugin_delist_reasons'] as $reason => $number ) {
 						$reason = Template::get_close_reasons()[ $reason ];
-						echo "<li>&nbsp;&nbsp;{$reason}: {$number}</li>";
+						echo '<li>&nbsp;&nbsp;' . esc_html( $reason ) . ': ' . esc_html( $number ) . '</li>';
 					}
 					echo '</ul>';
 				}
@@ -674,17 +674,17 @@ class Stats_Report {
 				echo '<tr><th>', esc_html( $user->display_name ?: $user->user_login ), '</th>';
 
 				// Assigned, Unassigned, Assigned to others.
-				echo '<td><span title="Assigned to self">', number_format_i18n( $user_stat[ 'Assigned to self.' ] ?? 0 ), '</span>';
+				echo '<td><span title="Assigned to self">', esc_html( number_format_i18n( $user_stat['Assigned to self.'] ?? 0 ) ), '</span>';
 				if ( $user_stat[ 'Unassigned.' ] ?? 0 ) {
-					echo '<span title="Unassigned"> -', number_format_i18n( $user_stat[ 'Unassigned.' ] ), '</span>';
+					echo '<span title="Unassigned"> -', esc_html( number_format_i18n( $user_stat['Unassigned.'] ) ), '</span>';
 				}
 				if ( $user_stat[ 'Assigned to others.' ] ?? 0 ) {
-					echo ' <span title="Assigned to others">(', number_format_i18n( $user_stat[ 'Assigned to others.' ] ), ')</span>';
+					echo ' <span title="Assigned to others">(', esc_html( number_format_i18n( $user_stat['Assigned to others.'] ) ), ')</span>';
 				}
 				echo '</td>';
 
 				// Plugins Approved.
-				echo '<td>', number_format_i18n( $user_stat[ 'Plugin approved.' ] ?? 0 ), '</td>';
+				echo '<td>', esc_html( number_format_i18n( $user_stat['Plugin approved.'] ?? 0 ) ), '</td>';
 
 				// Plugins Rejected.
 				$user_rejected_breakdown = '';
@@ -708,9 +708,9 @@ class Stats_Report {
 				}
 				$user_rejected_breakdown = trim( $user_rejected_breakdown );
 
-				echo '<td class="breakdown">', '<span title="', esc_attr( $user_rejected_breakdown ), '">', number_format_i18n( $user_rejected_count ), '</span>';
+				echo '<td class="breakdown">', '<span title="', esc_attr( $user_rejected_breakdown ), '">', esc_html( number_format_i18n( $user_rejected_count ) ), '</span>';
 				if ( $user_rejected_breakdown ) {
-					echo '<div class="hidden">', nl2br( $user_rejected_breakdown ), '</div>';
+					echo '<div class="hidden">', nl2br( esc_html( $user_rejected_breakdown ) ), '</div>';
 				}
 				echo '</td>';
 
@@ -732,15 +732,15 @@ class Stats_Report {
 				}
 				$user_closed_breakdown = trim( $user_closed_breakdown );
 
-				echo '<td class="breakdown">', '<span title="', esc_attr( $user_closed_breakdown ), '">', number_format_i18n( $user_closed_count ), '</span>';
+				echo '<td class="breakdown">', '<span title="', esc_attr( $user_closed_breakdown ), '">', esc_html( number_format_i18n( $user_closed_count ) ), '</span>';
 				if ( $user_closed_breakdown ) {
-					echo '<div class="hidden">', nl2br( $user_closed_breakdown ), '</div>';
+					echo '<div class="hidden">', nl2br( esc_html( $user_closed_breakdown ) ), '</div>';
 				}
 				echo '</td>';
 
 				// Emails.
-				echo '<td>', number_format_i18n( $user_stat[ "Email Actions" ] ?? 0 ), '</td>';
-				echo '<td>', number_format_i18n( $user_stat[ "Email Replies" ] ?? 0 ), '</td>';
+				echo '<td>', esc_html( number_format_i18n( $user_stat['Email Actions'] ?? 0 ) ), '</td>';
+				echo '<td>', esc_html( number_format_i18n( $user_stat['Email Replies'] ?? 0 ) ), '</td>';
 				echo '</tr>';
 			}
 			echo '</tbody>';

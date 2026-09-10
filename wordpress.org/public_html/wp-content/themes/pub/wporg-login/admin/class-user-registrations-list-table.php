@@ -401,22 +401,22 @@ class User_Registrations_List_Table extends WP_List_Table {
 		printf(
 			'<abbr title="%s">%s ago</abbr>',
 			esc_attr( $item->user_registered ),
-			human_time_diff( strtotime( $item->user_registered ) )
+			esc_html( human_time_diff( strtotime( $item->user_registered ) ) )
 		);
 
 		if ( $item->created_date && '0000-00-00 00:00:00' !== $item->created_date ) {
 			printf(
 				'<br>Created: <abbr title="%s">%s ago</abbr>',
 				esc_attr( $item->created_date ),
-				human_time_diff( strtotime( $item->created_date ) )
+				esc_html( human_time_diff( strtotime( $item->created_date ) ) )
 			);
 		}
 	}
 
 	function column_user_login( $item ) {
 		if ( $item->created ) {
-			$url = esc_url( 'https://profiles.wordpress.org/' . $item->user_login . '/' );
-			echo "<a href='$url'>" . esc_html( $item->user_login ) . '</a>';
+			$url = 'https://profiles.wordpress.org/' . $item->user_login . '/';
+			echo '<a href="' . esc_url( $url ) . '">' . esc_html( $item->user_login ) . '</a>';
 
 			if (
 				$item->user &&
@@ -431,7 +431,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		echo '<hr>';
 
-		echo $this->link_to_search( $item->user_email );
+		echo wp_kses_post( $this->link_to_search( $item->user_email ) );
 
 		$row_actions = [];
 
@@ -482,6 +482,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		if ( $row_actions ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Action links are escaped above; retain core's row-toggle button.
 			echo $this->row_actions( $row_actions );
 		}
 
@@ -506,13 +507,13 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$ips[] = $ip . ' ' . $meta->{$field . '_ip_country'};
 		}
 
-		echo implode( ', ', array_map( array( $this, 'link_to_search' ), array_unique( $ips ) ) );
+		echo wp_kses_post( implode( ', ', array_map( array( $this, 'link_to_search' ), array_unique( $ips ) ) ) );
 
 		echo '<hr>';
 
 		foreach ( [ 'url', 'from', 'occ', 'interests', 'source', 'bypass' ] as $field ) {
 			if ( !empty( $meta->$field ) ) {
-				printf( "%s: %s<br>", esc_html( $field ), $this->link_to_search( $meta->$field ) );
+				printf( '%s: %s<br>', esc_html( $field ), wp_kses_post( $this->link_to_search( $meta->$field ) ) );
 			}
 		}
 
@@ -520,7 +521,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		if ( $item->user ) {
 			// Forum profile description (this is where the spam usually is)
 			if ( $desc = get_user_meta( $item->user->ID, 'description', true ) ) {
-				printf( "forum bio: %s<br>", $this->link_to_search( $desc ) );
+				printf( 'forum bio: %s<br>', wp_kses_post( $this->link_to_search( $desc ) ) );
 			}
 		}
 
@@ -605,6 +606,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		if ( $row_actions ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Action links are escaped above; retain core's row-toggle button.
 			echo $this->row_actions( $row_actions );
 		}
 	}

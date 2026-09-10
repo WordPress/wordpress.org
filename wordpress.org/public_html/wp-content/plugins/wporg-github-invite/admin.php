@@ -120,7 +120,7 @@ function render() {
 								%s
 							</p>',
 							$pending->login ?: $pending->email,
-							human_time_diff( strtotime( $pending->created_at ) ),
+							esc_html( human_time_diff( strtotime( $pending->created_at ) ) ),
 							$cancel_url ? '<a class="button" href="' . esc_url( $cancel_url ) . '">Cancel</a>' : ''
 						);
 					}

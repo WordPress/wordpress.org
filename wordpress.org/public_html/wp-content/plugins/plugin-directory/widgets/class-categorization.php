@@ -48,7 +48,7 @@ class Categorization extends \WP_Widget {
 			return;
 		}
 
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 		?>
 
 		<div class="widget categorization-widget categorization-widget-<?php echo esc_attr( $model_type ); ?>">
@@ -69,6 +69,6 @@ class Categorization extends \WP_Widget {
 			</p>
 		</div>
 		<?php
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 }

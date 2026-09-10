@@ -22,9 +22,9 @@ class Release_Confirmation {
 		] as $num => $text ) {
 			printf(
 				'<option value="%s" %s>%s</option>',
-				$num,
+				esc_attr( $num ),
 				selected( $post->release_confirmation, $num, false ),
-				$text
+				esc_html( $text )
 			);
 		}
 		echo "</select><span class='hidden'>&nbsp;Don't forget to save the changes!</span></p>";

@@ -8,7 +8,7 @@ class BPOrg_Inbox_Widget extends WP_Widget {
 		global $bp;
 
 	    extract( $args );
-		echo $before_widget;
+		echo $before_widget; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo wp_kses_post( $before_title ) . esc_html__( 'Inbox', 'bp-follow' ) . ' &middot <a href="' . esc_url( $bp->loggedin_user->domain . 'messages/inbox/' ) . '">View All</a>' . wp_kses_post( $after_title ); ?>
 
 		<?php if ( bp_has_message_threads( 'per_page=5&max=5' ) ) : ?>
@@ -33,7 +33,10 @@ class BPOrg_Inbox_Widget extends WP_Widget {
 			</div>
 		<?php endif;?>
 
-		<?php echo $after_widget; ?>
+		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $after_widget;
+		?>
 
 	<?php
 	}

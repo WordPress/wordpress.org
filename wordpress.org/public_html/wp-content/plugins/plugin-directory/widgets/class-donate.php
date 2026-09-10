@@ -30,8 +30,8 @@ class Donate extends \WP_Widget {
 		if ( $donate_link ) {
 			$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Donate', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
-			echo $args['before_widget'];
-			echo $args['before_title'] . $title . $args['after_title'];
+			echo wp_kses_post( $args['before_widget'] );
+			echo wp_kses_post( $args['before_title'] ) . esc_html( $title ) . wp_kses_post( $args['after_title'] );
 			?>
 
 			<p class="aside"><?php esc_html_e( 'Would you like to support the advancement of this plugin?', 'wporg-plugins' ); ?></p>
@@ -42,7 +42,7 @@ class Donate extends \WP_Widget {
 			</p>
 
 			<?php
-			echo $args['after_widget'];
+			echo wp_kses_post( $args['after_widget'] );
 		}
 	}
 }

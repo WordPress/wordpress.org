@@ -36,7 +36,7 @@ if ( have_comments() ) :
 							'wptv'
 						)
 					),
-					number_format_i18n( $comments_number ),
+					esc_html( number_format_i18n( $comments_number ) ),
 					'<span>' . esc_html( get_the_title() ) . '</span>'
 				);
 			}

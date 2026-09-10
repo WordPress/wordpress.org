@@ -1020,7 +1020,7 @@ JS;
 				'<option value="%s"%s>%s</option>' . "\n",
 				esc_attr( $reason ),
 				selected( $selected, $reason, false ),
-				sanitize_text_field( $args['label'] )
+				esc_html( sanitize_text_field( $args['label'] ) )
 			);
 		}
 		echo '</select></label>';
@@ -1067,7 +1067,7 @@ JS;
 		printf( '<div class="reject-action%s">', $is_rejected ? ' post-is-rejected' : '' );
 		printf(
 			'<input type="submit" name="%s" id="reject-post" value="%s" class="button button-large">',
-			self::$action,
+			esc_attr( self::$action ),
 			$is_rejected ? esc_attr__( 'Update', 'wporg-photos' ) : esc_attr__( 'Reject', 'wporg-photos' )
 		);
 		echo '</div>';
@@ -1201,13 +1201,13 @@ JS;
 	public static function custom_rejection_columns( $column_name, $post_id ) {
 		switch ( $column_name ) {
 			case 'rejected_by':
-				echo self::get_rejection_user( $post_id, 'link' );
+				echo wp_kses_post( self::get_rejection_user( $post_id, 'link' ) );
 				break;
 			case 'rejected_on':
-				echo self::get_rejection_date( $post_id );
+				echo esc_html( self::get_rejection_date( $post_id ) );
 				break;
 			case 'rejected_reason':
-				echo self::get_rejection_reason( $post_id );
+				echo esc_html( self::get_rejection_reason( $post_id ) );
 				// Add asterisk to denote there was a moderator note to user.
 				if ( self::get_moderator_note_to_user( $post_id, 'reject' ) || self::get_moderator_note_to_user( $post_id, 'publish' ) ) {
 					echo '*';
@@ -1316,7 +1316,7 @@ JS;
 
 		// If post is rejected, remove all existing post statuses from dropdown.
 		if ( self::is_post_rejected( $post ) ) {
-			echo <<<JS
+			?>
 			<script>
 			document.addEventListener('DOMContentLoaded', function () {
 				// Remove the 'Submit for Review' button.
@@ -1326,14 +1326,14 @@ JS;
 				document.querySelector("body.post-type-photo #preview-action")?.remove();
 
 				// Add rejected post status to status display.
-				document.querySelector("body.post-type-photo .misc-pub-post-status #post-status-display").innerText = "{$status_label}";
+				document.querySelector("body.post-type-photo .misc-pub-post-status #post-status-display").innerText = <?php echo wp_json_encode( $status_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 
 				// Change visibility display to indicate it is hidden.
-				document.querySelector("body.post-type-photo .misc-pub-visibility #post-visibility-display").innerText = "{$visibility_label}";
+				document.querySelector("body.post-type-photo .misc-pub-visibility #post-visibility-display").innerText = <?php echo wp_json_encode( $visibility_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 			} );
 			</script>
 
-JS;
+			<?php
 		}
 	}
 
@@ -1386,8 +1386,8 @@ JS;
 
 			echo '<tr>';
 			echo '<td title="' . esc_attr( $data['label'] ) . '">' . esc_html( $reason ) . '</td>';
-			echo '<td>' . number_format_i18n( $data['count'] ) . '</td>';
-			echo '<td>' . $rejection_pct . '%</td>';
+			echo '<td>' . esc_html( number_format_i18n( $data['count'] ) ) . '</td>';
+			echo '<td>' . esc_html( $rejection_pct ) . '%</td>';
 			echo "</tr>\n";
 		}
 

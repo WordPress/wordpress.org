@@ -39,8 +39,8 @@ class Support extends \WP_Widget {
 			$resolutions = false;
 		}
 
-		echo $args['before_widget'];
-		echo $args['before_title'] . $title . $args['after_title'];
+		echo wp_kses_post( $args['before_widget'] );
+		echo wp_kses_post( $args['before_title'] ) . esc_html( $title ) . wp_kses_post( $args['after_title'] );
 
 		if ( $resolutions ) :
 		?>
@@ -66,6 +66,6 @@ class Support extends \WP_Widget {
 		</p>
 
 		<?php
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 }

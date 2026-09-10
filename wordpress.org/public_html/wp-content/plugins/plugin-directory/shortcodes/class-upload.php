@@ -128,7 +128,7 @@ class Upload {
 			$can_submit_new_plugin                        = ! is_wp_error( Upload_Handler::has_queue_capacity() );
 
 			if ( ! empty( $message ) ) {
-				echo "<div class='notice notice-{$type} notice-alt'><p>{$message}</p></div>\n";
+				printf( '<div class="notice notice-%s notice-alt"><p>%s</p></div>' . "\n", esc_attr( $type ), wp_kses_post( $message ) );
 			}
 		}
 
@@ -161,7 +161,7 @@ class Upload {
 							$plugins->new,
 							'wporg-plugins'
 						) ),
-						'<strong>' . number_format_i18n( $plugins->new ) . '</strong>'
+						'<strong>' . esc_html( number_format_i18n( $plugins->new ) ) . '</strong>'
 					);
 				}
 
@@ -199,7 +199,7 @@ class Upload {
 								$submitted_counts->approved,
 								'wporg-plugins'
 							) ),
-							'<strong>' . $submitted_counts->approved . '</strong>',
+							'<strong>' . esc_html( $submitted_counts->approved ) . '</strong>',
 							'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/'
 						);
 					} elseif ( 0 !== $submitted_counts->pending ) {
@@ -211,7 +211,7 @@ class Upload {
 								$submitted_counts->pending,
 								'wporg-plugins'
 							) ),
-							'<strong>' . $submitted_counts->pending . '</strong>'
+							'<strong>' . esc_html( $submitted_counts->pending ) . '</strong>'
 						);
 					} elseif ( 0 !== $submitted_counts->new ) {
 						printf(
@@ -222,7 +222,7 @@ class Upload {
 								$submitted_counts->new,
 								'wporg-plugins'
 							) ),
-							'<strong>' . $submitted_counts->new . '</strong>'
+							'<strong>' . esc_html( $submitted_counts->new ) . '</strong>'
 						);
 					}
 					?>
@@ -254,7 +254,7 @@ class Upload {
 								sprintf(
 									/* translators: %s: Review status. */
 									esc_html__( 'Review status: %s', 'wporg-plugins' ),
-									$plugin->status
+									esc_html( $plugin->status )
 								)
 							);
 							if (

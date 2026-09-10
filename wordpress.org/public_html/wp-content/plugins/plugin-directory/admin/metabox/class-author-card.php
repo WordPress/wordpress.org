@@ -156,8 +156,8 @@ class Author_Card {
 					printf(
 						/* translators: 1: Time since registration, 2: Registration date. */
 						esc_html__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
-						human_time_diff( strtotime( $author->user_registered ) ),
-						date( 'Y-M-d', strtotime( $author->user_registered ) )
+						esc_html( human_time_diff( strtotime( $author->user_registered ) ) ),
+						esc_html( date( 'Y-M-d', strtotime( $author->user_registered ) ) ) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Preserve the existing display timezone in this escaping change.
 					);
 					?>
 				</div>
@@ -240,7 +240,7 @@ class Author_Card {
 				printf(
 					/* translators: %s: List of IP addresses. */
 					'<p>' . esc_html__( 'IPs : %s', 'wporg-plugins' ) . '</p>',
-					implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) )
+					wp_kses_post( implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) ) )
 				);
 			}
 
@@ -259,7 +259,7 @@ class Author_Card {
 					$note_html  = apply_filters( 'comment_text', $note->text, null, array() );
 					$note_html .= sprintf( '<p class="textright">%s</p>', $note_meta );
 
-					echo '<li>' . $note_html . '</li>' . "\n";
+					echo '<li>' . wp_kses_post( $note_html ) . '</li>' . "\n";
 				}
 				echo '</ul>';
 			}
@@ -503,7 +503,7 @@ class Author_Card {
 				esc_attr( implode( ' ', $classes ) ),
 				esc_attr( implode( ' ', $tooltips ) ),
 				esc_attr( get_permalink( $plugin ) ),
-				$plugin->post_name
+				esc_html( $plugin->post_name )
 			);
 
 			if ( $note ) {
@@ -530,7 +530,7 @@ class Author_Card {
 			] );
 
 			if ( $extra ) {
-				echo ' ' . $extra;
+				echo ' ' . wp_kses_post( $extra );
 			}
 
 			echo '</span></li>' . "\n";

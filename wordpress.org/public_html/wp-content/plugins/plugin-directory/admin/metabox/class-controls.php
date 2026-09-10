@@ -295,7 +295,7 @@ class Controls {
 				printf(
 					'<p><button type="submit" name="post_status" value="%s" class="button set-plugin-status">%s</button></p>',
 					esc_attr( $status ),
-					self::get_status_button_label( $status )
+					esc_html( self::get_status_button_label( $status ) )
 				);
 			} ?>
 		</div><!-- .misc-pub-section -->
@@ -325,31 +325,37 @@ class Controls {
 					printf(
 						'<span title="%s">%s ago</span>',
 						esc_attr( $post->last_updated ),
-						human_time_diff( strtotime( $post->last_updated ) )
+						esc_html( human_time_diff( strtotime( $post->last_updated ) ) )
 					);
 				?></strong></td>
 			</tr>
 
 			<tr>
 				<td><?php esc_html_e( 'Submitted:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php
-					$submitted_date = min( array_filter( [
-						$post->_submitted_date,           // Submitted date stored since 2017-04-11
-						$post->_approved,                 // The approval date is the next best thing.
-						strtotime( $post->post_date_gmt ) // Fallback to the post_date, which should be similar to approval date.
-					] ) );
-
-					printf(
-						'<span title="%s">%s ago</span>',
-						esc_attr( gmdate( 'Y-m-d H:i:s', $submitted_date ) ),
-						human_time_diff( $submitted_date )
+				<td><strong>
+				<?php
+					$submitted_date = min(
+						array_filter(
+							[
+								$post->_submitted_date,           // Submitted date stored since 2017-04-11.
+								$post->_approved,                 // The approval date is the next best thing.
+								strtotime( $post->post_date_gmt ), // Fallback to the post_date, which should be similar to approval date.
+							]
+						)
 					);
-				?></strong></td>
+
+							printf(
+								'<span title="%s">%s ago</span>',
+								esc_attr( gmdate( 'Y-m-d H:i:s', $submitted_date ) ),
+								esc_html( human_time_diff( $submitted_date ) )
+							);
+				?>
+				</strong></td>
 			</tr>
 
 			<tr>
 				<td><?php esc_html_e( 'Installs:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php echo Template::active_installs( false, $post ); ?></strong></td>
+				<td><strong><?php echo esc_html( Template::active_installs( false, $post ) ); ?></strong></td>
 			</tr>
 
 			<?php if (
@@ -360,9 +366,11 @@ class Controls {
 			<tr>
 				<td><?php echo esc_html( "Installs of {$post->version}:" ); ?></td>
 				<td><strong><?php
-					echo Template::format_active_installs_for_display(
-						Template::sanitize_active_installs(
-							\WordPressdotorg\Stats\plugin_active_installs( $post->post_name, $post->version )
+					echo esc_html(
+						Template::format_active_installs_for_display(
+							Template::sanitize_active_installs(
+								\WordPressdotorg\Stats\plugin_active_installs( $post->post_name, $post->version )
+							)
 						)
 					);
 				?></strong></td>

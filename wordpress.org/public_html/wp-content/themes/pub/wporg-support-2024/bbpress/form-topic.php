@@ -281,7 +281,7 @@
 						/* translators: %s: Email address. */
 						wp_kses_post( __( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ) ),
 						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
-						WordPressdotorg\Forums\MODERATION_EMAIL
+						esc_html( WordPressdotorg\Forums\MODERATION_EMAIL )
 					);
 				?></p>
 			<?php endif; ?>

@@ -12,18 +12,18 @@ class BPOrg_Login_Widget extends WP_Widget {
 		if ( is_user_logged_in() ) : ?>
 
 			<?php
-				echo $before_widget;
+				echo $before_widget; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 				echo wp_kses_post( $before_title ) . esc_html__( 'Logged In As', 'bp-follow' ) . wp_kses_post( $after_title );
 			?>
 
 			<?php do_action( 'bp_before_sidebar_me' ) ?>
 
 			<div id="sidebar-me">
-				<a href="<?php echo bp_loggedin_user_domain() ?>">
+				<a href="<?php echo esc_url( bp_loggedin_user_domain() ); ?>">
 					<?php bp_loggedin_user_avatar( 'type=thumb&width=40&height=40' ) ?>
 				</a>
 
-				<h4><?php echo bp_core_get_userlink( bp_loggedin_user_id() ) ?></h4>
+				<h4><?php echo wp_kses_post( bp_core_get_userlink( bp_loggedin_user_id() ) ); ?></h4>
 				<a class="button logout" href="<?php echo esc_url( wp_logout_url( bp_get_root_domain() ) ); ?>"><?php esc_html_e( 'Log Out', 'buddypress' ); ?></a>
 
 				<?php do_action( 'bp_sidebar_me' ) ?>
@@ -40,7 +40,7 @@ class BPOrg_Login_Widget extends WP_Widget {
 			<?php do_action( 'bp_before_sidebar_login_form' ) ?>
 
 			<?php
-				echo $before_widget;
+				echo $before_widget; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 				echo wp_kses_post( $before_title ) . esc_html__( 'Log In', 'bp-follow' ) . wp_kses_post( $after_title );
 			?>
 
@@ -56,7 +56,7 @@ class BPOrg_Login_Widget extends WP_Widget {
 
 			<form name="login-form" id="sidebar-login-form" class="standard-form" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post">
 				<label><?php esc_html_e( 'Username', 'buddypress' ); ?><br />
-				<input type="text" name="log" id="sidebar-user-login" class="input" value="<?php echo attribute_escape(stripslashes($user_login)); ?>" /></label>
+				<input type="text" name="log" id="sidebar-user-login" class="input" value="<?php echo esc_attr( stripslashes( $user_login ) ); ?>" /></label>
 
 				<label><?php esc_html_e( 'Password', 'buddypress' ); ?><br />
 				<input type="password" name="pwd" id="sidebar-user-pass" class="input" value="" /></label>
@@ -72,7 +72,10 @@ class BPOrg_Login_Widget extends WP_Widget {
 
 		<?php endif; ?>
 
-		<?php echo $after_widget; ?>
+		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $after_widget;
+		?>
 
 	<?php
 	}

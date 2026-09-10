@@ -79,7 +79,7 @@ function bb_base_topic_search_form() {
 		<div>
 			<h2><?php esc_html_e( 'Forum Search', 'bborg' ); ?></h2>
 			<label class="screen-reader-text hidden" for="ts"><?php esc_html_e( 'Search for:', 'bborg' ); ?></label>
-			<input type="text" value="<?php echo bb_base_topic_search_query(); ?>" name="ts" id="ts" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
+			<input type="text" value="<?php echo esc_attr( bb_base_topic_search_query() ); ?>" name="ts" id="ts" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -93,7 +93,7 @@ function bb_base_reply_search_form() {
 		<div>
 			<h2><?php esc_html_e( 'Reply Search', 'bborg' ); ?></h2>
 			<label class="screen-reader-text hidden" for="rs"><?php esc_html_e( 'Search for:', 'bborg' ); ?></label>
-			<input type="text" value="<?php echo bb_base_reply_search_query(); ?>" name="rs" id="rs" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
+			<input type="text" value="<?php echo esc_attr( bb_base_reply_search_query() ); ?>" name="rs" id="rs" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -107,7 +107,7 @@ function bb_base_plugin_search_form() {
 		<div>
 			<h2><?php esc_html_e( 'Plugin Search', 'bborg' ); ?></h2>
 			<label class="screen-reader-text hidden" for="ps"><?php esc_html_e( 'Search for:', 'bborg' ); ?></label>
-			<input type="text" value="<?php echo bb_base_plugin_search_query(); ?>" name="ps" id="ts" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
+			<input type="text" value="<?php echo esc_attr( bb_base_plugin_search_query() ); ?>" name="ps" id="ts" placeholder="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -187,10 +187,10 @@ function bb_base_single_topic_description() {
 		);
 	?></li>
 	<?php if ( !empty( $reply_count ) ) : ?>
-		<li class="reply-count"><?php echo $reply_count; ?></li>
+		<li class="reply-count"><?php echo wp_kses_post( $reply_count ); ?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $voice_count ) ) : ?>
-		<li class="voice-count"><?php echo $voice_count; ?></li>
+		<li class="voice-count"><?php echo esc_html( $voice_count ); ?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $last_reply  ) ) : ?>
 		<li class="topic-freshness-author"><?php
@@ -265,10 +265,10 @@ function bb_base_single_forum_description() {
 		?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $topic_count ) ) : ?>
-		<li class="topic-count"><?php echo $topic_text; ?></li>
+		<li class="topic-count"><?php echo wp_kses_post( $topic_text ); ?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $reply_count ) ) : ?>
-		<li class="reply-count"><?php echo $reply_text; ?></li>
+		<li class="reply-count"><?php echo esc_html( $reply_text ); ?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $last_active  ) ) : ?>
 		<li class="forum-freshness-author"><?php

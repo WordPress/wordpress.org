@@ -110,7 +110,7 @@ get_header( 'wporg' );
 					printf(
 						/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
 						esc_html__( '%s%% of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ),
-						number_format_i18n( WP_MARKET_SHARE )
+						esc_html( number_format_i18n( WP_MARKET_SHARE ) )
 					);
 					?>
 				</p>
@@ -195,7 +195,7 @@ get_header( 'wporg' );
 									'wporg'
 								)
 							),
-							number_format_i18n( $meetups )
+							esc_html( number_format_i18n( $meetups ) )
 						);
 						?>
 					</p>

@@ -18,9 +18,9 @@
 							printf(
 								/* translators: 1: First plugin number, 2: Last plugin number, 3: Total number of plugins. */
 								esc_html__( 'Viewing %1$s to %2$s (%3$s)', 'bbporg' ),
-								number_format_i18n( $from_num ),
-								number_format_i18n( $to_num ),
-								number_format_i18n( $plugins->info['results'] )
+								esc_html( number_format_i18n( $from_num ) ),
+								esc_html( number_format_i18n( $to_num ) ),
+								esc_html( number_format_i18n( $plugins->info['results'] ) )
 							);
 						?>
 
@@ -68,7 +68,7 @@
 					</div>
 
 					<p class="plugin-description" style="font-size: 12px">
-						<?php echo substr( strip_tags( $plugin->description ), 0, 300 ); ?>&hellip;
+						<?php echo esc_html( substr( wp_strip_all_tags( $plugin->description ), 0, 300 ) ); ?>&hellip;
 					</p>
 
 				</div>
@@ -83,9 +83,9 @@
 							printf(
 								/* translators: 1: First plugin number, 2: Last plugin number, 3: Total number of plugins. */
 								esc_html__( 'Viewing %1$s to %2$s (%3$s)', 'bbporg' ),
-								number_format_i18n( $from_num ),
-								number_format_i18n( $to_num ),
-								number_format_i18n( $plugins->info['results'] )
+								esc_html( number_format_i18n( $from_num ) ),
+								esc_html( number_format_i18n( $to_num ) ),
+								esc_html( number_format_i18n( $plugins->info['results'] ) )
 							);
 						?>
 

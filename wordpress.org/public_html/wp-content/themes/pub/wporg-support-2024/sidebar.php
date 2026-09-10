@@ -77,6 +77,7 @@
 					$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
 				}
 				if ( $term_subscription ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Subscription renderer escapes fields and includes a confirmation handler.
 					echo '<div>' . $term_subscription . "</div>\n";
 				}
 			?>

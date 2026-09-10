@@ -83,14 +83,14 @@ get_header();
 			'<p>' . esc_html__( 'Please contact %s for more details.', 'wporg' ) . '</p>' .
 			( $email_change_available ? '<a href="#" class="change-email">' . esc_html__( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
 			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
-			'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+			'<a href="' . esc_url( 'mailto:' . $sso::SUPPORT_EMAIL ) . '">' . esc_html( $sso::SUPPORT_EMAIL ) . '</a>'
 		);
 	}
 
 	if ( 'local' === wp_get_environment_type() && ! empty( $_COOKIE['emailed_url'] ) ) {
 		printf(
 			'<br><br><strong>Local Development</strong>: The URL emailed to you is: <a href="%1$s">%1$s</a>.',
-			wp_unslash( $_COOKIE['emailed_url'] )
+			esc_url( sanitize_url( wp_unslash( $_COOKIE['emailed_url'] ) ) )
 		);
 	}
 	?>

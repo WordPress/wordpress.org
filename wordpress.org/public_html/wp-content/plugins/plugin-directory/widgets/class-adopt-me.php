@@ -30,8 +30,8 @@ class Adopt_Me extends \WP_Widget {
 
 		if ( $is_adopt_me ) {
 
-			echo $args['before_widget'];
-			echo $args['before_title'] . $title . $args['after_title'];
+			echo wp_kses_post( $args['before_widget'] );
+			echo wp_kses_post( $args['before_title'] ) . esc_html( $title ) . wp_kses_post( $args['after_title'] );
 			?>
 
 			<div>
@@ -43,7 +43,7 @@ class Adopt_Me extends \WP_Widget {
 			</div>
 			<?php
 
-			echo $args['after_widget'];
+			echo wp_kses_post( $args['after_widget'] );
 		}
 	}
 }

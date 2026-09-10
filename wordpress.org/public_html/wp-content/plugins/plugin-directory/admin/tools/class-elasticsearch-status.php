@@ -44,7 +44,7 @@ class Elasticsearch_Status {
 		<div class="wrap">
 			<h1>ElasticSearch Index Status</h1>
 			<p>Checks that all published plugins exist in the ElasticSearch index.</p>
-			<p>Total plugins to check: <strong><?php echo number_format_i18n( $total ); ?></strong></p>
+			<p>Total plugins to check: <strong><?php echo esc_html( number_format_i18n( $total ) ); ?></strong></p>
 
 			<p>
 				<button id="es-check-start" class="button button-primary">Start Check</button>

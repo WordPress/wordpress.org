@@ -62,7 +62,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php foreach ( bbp_edit_user_contact_methods() as $name => $desc ) : ?>
 
 			<div>
-				<label for="<?php echo esc_attr( $name ); ?>"><?php echo apply_filters( 'user_' . $name . '_label', $desc ); ?></label>
+				<label for="<?php echo esc_attr( $name ); ?>"><?php echo esc_html( apply_filters( 'user_' . $name . '_label', $desc ) ); ?></label>
 				<input type="text" name="<?php echo esc_attr( $name ); ?>" id="<?php echo esc_attr( $name ); ?>" value="<?php bbp_displayed_user_field( $name, 'edit' ); ?>" class="regular-text" />
 			</div>
 

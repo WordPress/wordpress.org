@@ -29,14 +29,14 @@ $priority_char = array(
 		<?php
 		if ( ! $translation->plural ) :
 			?>
-			<span class="original-text"><?php echo prepare_original( $translation_singular ); ?></span>
+			<span class="original-text"><?php echo prepare_original( $translation_singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span>
 			<?php
 		else :
 			$translation_plural = isset( $translation->plural_glossary_markup ) ? $translation->plural_glossary_markup : esc_translation( $translation->plural );
 			?>
 			<ul>
-				<li><small>Singular:</small><br><span class="original-text"><?php echo prepare_original( $translation_singular ); ?></span></li>
-				<li><small>Plural:</small><br><span class="original-text"><?php echo prepare_original( $translation_plural ); ?></span></li>
+				<li><small>Singular:</small><br><span class="original-text"><?php echo prepare_original( $translation_singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span></li>
+				<li><small>Plural:</small><br><span class="original-text"><?php echo prepare_original( $translation_plural ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span></li>
 			</ul>
 			<?php
 		endif;
@@ -80,9 +80,9 @@ $priority_char = array(
 
 		$missing_text = "<span class='missing'>$edit_text</span>";
 		if ( ! count( array_filter( $translation->translations, 'gp_is_not_null' ) ) ) :
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $missing_text;
+			echo wp_kses_post( $missing_text );
 		elseif ( ! $translation->plural || 1 === $locale->nplurals ) :
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
 			echo '<span class="translation-text">' . esc_translation( $translation->translations[0] ) . '</span>';
 		elseif ( $translation->plural && 2 === $locale->nplurals && 'n != 1' === $locale->plural_expression ) :
 			?>
@@ -91,8 +91,9 @@ $priority_char = array(
 					<small>Singular:</small><br>
 					<?php
 					if ( ! isset( $translation->translations[0] ) || gp_is_empty_string( $translation->translations[0] ) ) {
-						echo $missing_text;
+						echo wp_kses_post( $missing_text );
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[0] ) . '</span>';
 					}
 					?>
@@ -101,8 +102,9 @@ $priority_char = array(
 					<small>Plural:</small><br>
 					<?php
 					if ( ! isset( $translation->translations[1] ) || gp_is_empty_string( $translation->translations[1] ) ) {
-						echo $missing_text;
+						echo wp_kses_post( $missing_text );
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[1] ) . '</span>';
 					}
 					?>
@@ -115,13 +117,14 @@ $priority_char = array(
 				$plural_string = implode(', ', $locale->numbers_for_index( $plural_index ) );
 				?>
 				<li>
-					<small class="with-tooltip" aria-label="<?php printf('This plural form is used for numbers like: %s', $plural_string ); ?>">
-						<?php echo $plural_string; ?>:
+					<small class="with-tooltip" aria-label="<?php printf( 'This plural form is used for numbers like: %s', esc_attr( $plural_string ) ); ?>">
+						<?php echo esc_html( $plural_string ); ?>:
 					</small><br>
 					<?php
 					if ( ! isset( $translation->translations[ $plural_index ] ) || gp_is_empty_string( $translation->translations[ $plural_index ] ) ) {
-						echo $missing_text;
+						echo wp_kses_post( $missing_text );
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[ $plural_index ] ) . '</span>';
 					}
 					?>
