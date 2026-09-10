@@ -1057,10 +1057,10 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	}
 
 	/**
-	 * 'edit_others_posts' is only the generic name for the capability. A post type
-	 * can name its own, so the exemption asks the target post type which one it
-	 * means. Somebody who may edit other people's posts is still held to the object
-	 * check on a type whose capability they were never given.
+	 * 'edit_others_posts' is only the generic name for the capability, and a post
+	 * type can name its own. Somebody who may edit other people's posts is still
+	 * refused on a type whose capability they were never given, because the check
+	 * asks about the object rather than about a capability name.
 	 */
 	public function test_generic_others_capability_does_not_exempt_a_custom_post_type() {
 		register_post_type(
@@ -1104,10 +1104,10 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	}
 
 	/**
-	 * The other half of that: holding the post type's own capability exempts the
-	 * update, so a handbook editor keeps working on handbook pages.
+	 * The other half of that: holding the post type's own capabilities satisfies
+	 * the object check, so a handbook editor keeps working on handbook pages.
 	 */
-	public function test_post_type_capability_exempts_the_update() {
+	public function test_post_type_capability_permits_the_update() {
 		register_post_type(
 			'wporg_capped_cpt',
 			array(
@@ -1150,6 +1150,89 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 
 		$this->assertSame( $post_id, $result );
 		$this->assertSame( 'Edited by a handbook editor.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * The status half of the same point: another author's private post needs
+	 * 'edit_private_posts' on top of 'edit_others_posts', and the object check
+	 * asks for both because map_meta_cap() does.
+	 */
+	public function test_others_capability_alone_does_not_reach_a_private_post() {
+		wp_set_current_user( 0 );
+		$author  = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_author'  => $author,
+				'post_status'  => 'private',
+				'post_content' => 'Original.',
+			)
+		);
+
+		$user = $this->factory()->user->create( array( 'role' => 'author' ) );
+		wp_set_current_user( $user );
+
+		// A role holding 'edit_others_posts' without 'edit_private_posts'.
+		$grant = function ( $caps ) {
+			$caps['edit_others_posts']    = true;
+			$caps['edit_published_posts'] = true;
+
+			return $caps;
+		};
+		add_filter( 'user_has_cap', $grant );
+
+		$has_others_cap  = current_user_can( 'edit_others_posts' );
+		$can_edit_object = current_user_can( 'edit_post', $post_id );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Overwritten.',
+			)
+		);
+
+		remove_filter( 'user_has_cap', $grant );
+
+		$this->assertTrue( $has_others_cap, 'The fixture needs the others capability for this test to mean anything.' );
+		$this->assertFalse( $can_edit_object, 'The fixture needs the object check to fail for this test to mean anything.' );
+		$this->assertSame( 0, $result );
+		$this->assertSame( 'Original.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * Core registers custom_css without map_meta_cap, so its 'edit_post' resolves
+	 * to a primitive no role is granted and the question denies even a site
+	 * administrator. The Customizer saves Additional CSS through wp_update_post(),
+	 * and the stored post belongs to whoever saved it first, so asking would break
+	 * that for the next administrator to touch it.
+	 */
+	public function test_post_type_without_meta_capability_mapping_is_untouched() {
+		wp_set_current_user( 0 );
+		$first_admin = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		$css_id      = $this->factory()->post->create(
+			array(
+				'post_type'    => 'custom_css',
+				'post_status'  => 'publish',
+				'post_title'   => 'wporg-test-theme',
+				'post_author'  => $first_admin,
+				'post_content' => 'body { color: #000; }',
+			)
+		);
+
+		$admin = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$can_edit_object = current_user_can( 'edit_post', $css_id );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $css_id,
+				'post_content' => 'body { color: #fff; }',
+			)
+		);
+
+		$this->assertFalse( $can_edit_object, 'This test is about a type whose edit_post check denies even an administrator.' );
+		$this->assertSame( $css_id, $result );
+		$this->assertSame( 'body { color: #fff; }', get_post( $css_id )->post_content );
 	}
 
 	/**
