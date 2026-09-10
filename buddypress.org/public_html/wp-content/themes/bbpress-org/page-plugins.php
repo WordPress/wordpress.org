@@ -68,7 +68,7 @@
 					</div>
 
 					<p class="plugin-description" style="font-size: 12px">
-						<?php echo esc_html( substr( wp_strip_all_tags( $plugin->description ), 0, 300 ) ); ?>&hellip;
+						<?php echo esc_html( mb_substr( wp_strip_all_tags( $plugin->description ), 0, 300, 'UTF-8' ) ); ?>&hellip;
 					</p>
 
 				</div>

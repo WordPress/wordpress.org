@@ -321,13 +321,15 @@ class Controls {
 
 			<tr>
 				<td><?php esc_html_e( 'Updated:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php
-			printf(
-				'<span title="%s">%s ago</span>',
-				esc_attr( $post->last_updated ),
-				esc_html( human_time_diff( strtotime( $post->last_updated ) ) )
-			);
-				?></strong></td>
+				<td><strong>
+				<?php
+					printf(
+						'<span title="%s">%s ago</span>',
+						esc_attr( $post->last_updated ),
+						esc_html( human_time_diff( strtotime( $post->last_updated ) ) )
+					);
+				?>
+				</strong></td>
 			</tr>
 
 			<tr>
@@ -344,11 +346,11 @@ class Controls {
 						)
 					);
 
-							printf(
-								'<span title="%s">%s ago</span>',
-								esc_attr( gmdate( 'Y-m-d H:i:s', $submitted_date ) ),
-								esc_html( human_time_diff( $submitted_date ) )
-							);
+					printf(
+						'<span title="%s">%s ago</span>',
+						esc_attr( gmdate( 'Y-m-d H:i:s', $submitted_date ) ),
+						esc_html( human_time_diff( $submitted_date ) )
+					);
 				?>
 				</strong></td>
 			</tr>
