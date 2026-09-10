@@ -16,14 +16,14 @@
 		<div id="split-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-split">
 
 			<?php /* translators: %s: Topic title. */ ?>
-			<h1><?php printf( esc_html__( 'Split topic "%s"', 'wporg-forums' ), wp_kses_post( bbp_get_topic_title() ) ); ?></h1>
+			<h1><?php printf( esc_html__( 'Split topic &#8220;%s&#8221;', 'wporg-forums' ), wp_kses_post( bbp_get_topic_title() ) ); ?></h1>
 
 			<form id="split_topic" name="split_topic" method="post" action="<?php the_permalink(); ?>">
 
 				<fieldset class="bbp-form">
 
 					<?php /* translators: %s: Topic title. */ ?>
-					<legend><?php printf( esc_html__( 'Split topic "%s"', 'wporg-forums' ), wp_kses_post( bbp_get_topic_title() ) ); ?></legend>
+					<legend><?php printf( esc_html__( 'Split topic &#8220;%s&#8221;', 'wporg-forums' ), wp_kses_post( bbp_get_topic_title() ) ); ?></legend>
 
 					<div>
 
