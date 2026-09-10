@@ -337,11 +337,17 @@ function social_meta_data() {
 	printf( '<meta name="twitter:card" content="summary_large_image">' . "\n" );
 	printf( '<meta name="twitter:site" content="@WordPress">' . "\n" );
 
-	if ( $banner['banner_2x'] ) {
-		printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $banner['banner_2x'] ) );
-	}
-	if ( $banner['banner'] ) {
-		printf( '<meta property="og:image" content="%s" />' . "\n", esc_url( $banner['banner'] ) );
+	$share_image = Template::get_share_image_url();
+	if ( $share_image ) {
+		printf( '<meta property="og:image" content="%s" />' . "\n", esc_url( $share_image ) );
+		printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $share_image ) );
+	} else {
+		if ( $banner['banner_2x'] ) {
+			printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $banner['banner_2x'] ) );
+		}
+		if ( $banner['banner'] ) {
+			printf( '<meta property="og:image" content="%s" />' . "\n", esc_url( $banner['banner'] ) );
+		}
 	}
 	if ( ! $icon['generated'] && ( $icon['icon_2x'] || $icon['icon'] ) ) {
 		printf( '<meta name="thumbnail" content="%s" />' . "\n", esc_url( $icon['icon_2x'] ?: $icon['icon'] ) );

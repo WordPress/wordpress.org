@@ -490,6 +490,101 @@ class Template {
 	}
 
 	/**
+	 * Retrieve the dynamic share image URL for a plugin.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object.
+	 * @return string|false
+	 */
+	public static function get_share_image_url( $post = null ) {
+		return Plugin_Share_Image::get_url( $post );
+	}
+
+	/**
+	 * Plugin contributors, owner first, excluding nicenames that no longer resolve.
+	 *
+	 * Shared by the Contributors widget and the share-image renderer so the
+	 * count on the card matches the sidebar.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return \WP_User[]
+	 */
+	public static function get_plugin_contributors( $post = null ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return array();
+		}
+
+		$contributors = get_terms(
+			array(
+				'taxonomy'   => 'plugin_contributors',
+				'object_ids' => array( $post->ID ),
+				'orderby'    => 'term_order',
+				'fields'     => 'names',
+			)
+		);
+
+		if ( is_wp_error( $contributors ) ) {
+			$contributors = array();
+		}
+
+		$plugin_owner = get_the_author_meta( 'user_nicename', $post->post_author );
+		if ( $plugin_owner && 0 !== array_search( $plugin_owner, $contributors, true ) ) {
+			$contributors = array_unique(
+				array_merge(
+					array( $plugin_owner ),
+					$contributors
+				)
+			);
+		}
+
+		$contributors = array_map(
+			function ( $user_nicename ) {
+				return get_user_by( 'slug', $user_nicename );
+			},
+			$contributors
+		);
+
+		return array_values( array_filter( $contributors ) );
+	}
+
+	/**
+	 * Count locales with a public Rosetta site for this plugin's translations.
+	 *
+	 * Matches the Meta widget's `get_sites()` query. When the global network
+	 * is available, a zero count is a real zero (variant-only packs), not a
+	 * signal to fall back to the unfiltered language-pack list.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return int
+	 */
+	public static function count_plugin_locales( $post = null ) {
+		$post = get_post( $post );
+		if ( ! $post || ! defined( 'GLOTPRESS_LOCALES_PATH' ) ) {
+			return 0;
+		}
+
+		$translations = Plugin_I18n::instance()->get_translations( $post->post_name );
+		if ( empty( $translations ) ) {
+			return 0;
+		}
+
+		if ( defined( 'WPORG_GLOBAL_NETWORK_ID' ) ) {
+			return (int) get_sites(
+				array(
+					'network_id' => WPORG_GLOBAL_NETWORK_ID,
+					'public'     => 1,
+					'path'       => '/',
+					'locale__in' => wp_list_pluck( $translations, 'wp_locale' ),
+					'number'     => '',
+					'count'      => true,
+				)
+			);
+		}
+
+		return count( $translations );
+	}
+
+	/**
 	 * Retrieve the Plugin banner details for a plugin.
 	 *
 	 * @static

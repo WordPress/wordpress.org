@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
 
+use WordPressdotorg\Plugin_Directory\Template;
+
 /**
  * A Widget to display contributor information about a plugin.
  *
@@ -25,40 +27,7 @@ class Contributors extends \WP_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		$post = get_post();
-
-		$contributors = get_terms( array(
-			'taxonomy'   => 'plugin_contributors',
-			'object_ids' => array( $post->ID ),
-			'orderby'    => 'term_order',
-			'fields'     => 'names',
-		) );
-
-		if ( is_wp_error( $contributors ) ) {
-			$contributors = [];
-		}
-
-		// The owner of the plugin is always a contributor, and shown first.
-		$plugin_owner = get_the_author_meta( 'user_nicename', $post->post_author );
-		if ( $plugin_owner && 0 !== array_search( $plugin_owner, $contributors, true ) ) {
-			$contributors = array_unique(
-				array_merge(
-					[ $plugin_owner ],
-					$contributors
-				)
-			);
-		}
-
-		// Convert the user_nicenames to user objects.
-		$contributors = array_map(
-			function( $user_nicename ) {
-				return get_user_by( 'slug', $user_nicename );
-			},
-			$contributors
-		);
-
-		// Remove any users that didn't exist.
-		$contributors = array_filter( $contributors );
+		$contributors = Template::get_plugin_contributors();
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Contributors', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
