@@ -717,7 +717,7 @@ class Plugin_Directory {
 				if ( ! empty( $wp_query->query_vars['favorites_user'] ) ) {
 					$favorites_user = $wp_query->query_vars['favorites_user'];
 				} elseif ( ! empty( $_GET['favorites_user'] ) ) {
-					$favorites_user = $_GET['favorites_user'];
+					$favorites_user = sanitize_user( wp_unslash( $_GET['favorites_user'] ?? '' ) );
 				}
 
 				if ( ! $favorites_user instanceof \WP_User ) {
@@ -1240,7 +1240,7 @@ class Plugin_Directory {
 		switch ( $term->taxonomy ) {
 			case 'plugin_section':
 				if ( 'favorites' == $term->slug ) {
-					$user = get_query_var( 'favorites_user' ) ?? $_GET['favorites_user'];
+					$user = get_query_var( 'favorites_user' ) ?? sanitize_user( wp_unslash( $_GET['favorites_user'] ?? '' ) );
 					$user = get_user_by( 'slug', $user );
 					if ( $user && $user != wp_get_current_user() ) {
 						$name = sprintf(
@@ -1389,7 +1389,7 @@ class Plugin_Directory {
 
 		// If it's an old search query, handle that too.
 		if ( 'search.php' == get_query_var( 'name' ) && isset( $_GET['q'] ) ) {
-			wp_safe_redirect( site_url( '/search/' . urlencode( wp_unslash( $_GET['q'] ) ) . '/' ), 301 );
+			wp_safe_redirect( site_url( '/search/' . urlencode( sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ) ) . '/' ), 301 );
 			die();
 		}
 

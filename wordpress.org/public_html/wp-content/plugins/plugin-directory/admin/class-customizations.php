@@ -321,14 +321,14 @@ class Customizations {
 		if (
 			empty( $_REQUEST['action'] ) ||
 			empty( $_REQUEST['action2'] ) ||
-			'plugin' !== $_REQUEST['post_type']
+			'plugin' !== sanitize_key( $_REQUEST['post_type'] ?? '' )
 		) {
 			return;
 		}
 
 		$action = array_intersect(
 			[ 'plugin_open', 'plugin_close', 'plugin_disable', 'plugin_reject', 'plugin_assign' ],
-			[ $_REQUEST['action'], $_REQUEST['action2'] ]
+			[ sanitize_key( $_REQUEST['action'] ?? '' ), sanitize_key( $_REQUEST['action2'] ?? '' ) ]
 		);
 		$action = array_shift( $action );
 		if ( ! $action ) {
@@ -386,8 +386,8 @@ class Customizations {
 		$closed = 0;
 		$args = array(
 			'post_type'      => 'plugin',
-			'post__in'       => array_map( 'absint', $_REQUEST['post'] ),
-			'posts_per_page' => count( $_REQUEST['post'] ),
+			'post__in'       => array_map( 'absint', (array) ( $_REQUEST['post'] ?? array() ) ),
+			'posts_per_page' => count( (array) ( $_REQUEST['post'] ?? array() ) ),
 		);
 		if ( $from_state ) {
 			$args['post_status'] = $from_state;
@@ -522,7 +522,7 @@ class Customizations {
 		$post_status = '';
 
 		if ( isset( $_REQUEST['post_status'] ) ) {
-			$post_status = $_REQUEST['post_status'];
+			$post_status = sanitize_key( wp_unslash( $_REQUEST['post_status'] ?? '' ) );
 		}
 
 		if ( 'disabled' == $post->post_status ) {
@@ -861,7 +861,8 @@ class Customizations {
 	 * We pretty much have to replicate all of `wp_ajax_replyto_comment()` to be able to comment on pending posts.
 	 */
 	public function save_custom_comment() {
-		$comment_post_ID = (int) $_POST['comment_post_ID'];
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- compact() below feeds wp_insert_comment(), which expects this key.
+		$comment_post_ID = absint( $_POST['comment_post_ID'] ?? 0 );
 		$post            = get_post( $comment_post_ID );
 
 		if ( 'plugin' !== $post->post_type ) {
@@ -897,8 +898,8 @@ class Customizations {
 		$comment_author       = wp_slash( $user->display_name );
 		$comment_author_email = wp_slash( $user->user_email );
 		$comment_author_url   = wp_slash( $user->user_url );
-		$comment_content      = trim( $_POST['content'] );
-		$comment_type         = isset( $_POST['comment_type'] ) ? trim( $_POST['comment_type'] ) : '';
+		$comment_content      = trim( wp_kses_post( wp_unslash( $_POST['content'] ?? '' ) ) );
+		$comment_type         = isset( $_POST['comment_type'] ) ? sanitize_key( wp_unslash( $_POST['comment_type'] ) ) : '';
 
 		if ( current_user_can( 'unfiltered_html' ) ) {
 			if ( ! isset( $_POST['_wp_unfiltered_html_comment'] ) ) {

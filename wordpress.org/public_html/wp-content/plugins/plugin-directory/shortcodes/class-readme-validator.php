@@ -18,7 +18,7 @@ class Readme_Validator {
 		$readme_url      = '';
 		$readme_contents = '';
 		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
-			$readme_url = wp_unslash( $_REQUEST['readme'] );
+			$readme_url = esc_url_raw( wp_unslash( $_REQUEST['readme'] ?? '' ) );
 
 			// If it's a slug..
 			if ( $readme_url === sanitize_title_with_dashes( $readme_url ) ) {
@@ -26,9 +26,11 @@ class Readme_Validator {
 			}
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Stateless validator; the submitted readme is parsed and echoed back, nothing is stored.
 		if ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
-			$readme_contents = base64_decode( wp_unslash( $_POST['readme_contents'] ), true );
+			$readme_contents = base64_decode( sanitize_text_field( wp_unslash( $_POST['readme_contents'] ?? '' ) ), true );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		// If the user has specified a plugin URL, validate the stable tags readme (Well, try to, we don't know it's exact filename).
 		if ( $readme_url && preg_match( '!^https?://([^./]+\.)?wordpress.org/plugins/(?P<slug>[^/]+)!i', $readme_url, $m ) ) {

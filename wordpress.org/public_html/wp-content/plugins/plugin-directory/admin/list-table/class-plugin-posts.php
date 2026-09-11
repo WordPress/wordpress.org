@@ -112,8 +112,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$post_counts = (array) wp_count_posts( $post_type, 'readable' );
 
 			if ( isset( $_REQUEST['post_status'] ) && in_array( $_REQUEST['post_status'], $avail_post_stati ) ) {
-				$total_items = $post_counts[ $_REQUEST['post_status'] ];
-			} elseif ( isset( $_REQUEST['show_sticky'] ) && $_REQUEST['show_sticky'] ) {
+				$total_items = $post_counts[ sanitize_key( $_REQUEST['post_status'] ?? '' ) ];
+			} elseif ( ! empty( $_REQUEST['show_sticky'] ) ) {
 				$total_items = $this->sticky_posts_count;
 			} elseif ( isset( $_GET['author'] ) && $_GET['author'] == get_current_user_id() ) {
 				$total_items = $this->user_posts_count;
@@ -512,7 +512,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				number_format_i18n( $assigned_count )
 			);
 
-			$status_links['assigned'] = $this->get_edit_link( $assigned_args, $assigned_label, ( ($_REQUEST['reviewer'] ?? 0) === get_current_user_id() ? 'current' : '' ) );
+			$status_links['assigned'] = $this->get_edit_link( $assigned_args, $assigned_label, ( absint( $_REQUEST['reviewer'] ?? 0 ) === get_current_user_id() ? 'current' : '' ) );
 		}
 
 		if ( $mine ) {

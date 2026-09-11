@@ -415,7 +415,7 @@ class Plugin_Scan {
 		// Run plugin check via CLI
 		$start_time = microtime(1);
 		$env_vars   = [
-			'PATH'               => $_ENV['PATH'] ?? '/usr/local/bin:/usr/bin:/bin',
+			'PATH'               => sanitize_text_field( $_ENV['PATH'] ?? '/usr/local/bin:/usr/bin:/bin' ),
 			'WP_CLI_CONFIG_PATH' => WP_CLI_CONFIG_PATH,
 		];
 		// Timeout after 45s, kill after 60s.

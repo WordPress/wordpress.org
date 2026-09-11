@@ -75,7 +75,7 @@ class Author_Cards {
 			return;
 		}
 
-		$usernames = ! empty( $_REQUEST['users'] ) ? $_REQUEST['users'] : '';
+		$usernames = ! empty( $_REQUEST['users'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['users'] ) ) : '';
 
 		echo '<div class="wrap author-cards">';
 		echo '<h1>' . esc_html__( 'Author Cards', 'wporg-plugins' ) . '</h1>';
@@ -85,7 +85,7 @@ class Author_Cards {
 		echo '<form method="GET">';
 		echo '<table class="form-table"><tbody><tr>';
 		echo '<th scope="row"><label for="users">' . esc_html__( 'Users', 'wporg-plugins' ) . '</label></th><td>';
-		echo '<input name="page" type="hidden" value="' . esc_attr( $_REQUEST['page'] ) . '">';
+		echo '<input name="page" type="hidden" value="' . esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['page'] ?? '' ) ) ) . '">';
 		echo '<input name="users" type="text" id="users" value="' . esc_attr( $usernames ) . '" class="regular-text">';
 		echo '<p>' . esc_html__( 'Comma-separated list of user slugs, logins, and/or email addresses.', 'wporg-plugins' ) . '</p>';
 		echo '</td></tr></tbody></table>';

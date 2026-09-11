@@ -346,8 +346,8 @@ class Stats_Report {
 
 		$args = array();
 
-		if ( isset( $_REQUEST['date'] ) && preg_match( '/[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/', $_REQUEST['date'] ) ) {
-			$args['date'] = $_REQUEST['date'];
+		if ( isset( $_REQUEST['date'] ) && preg_match( '/[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/', sanitize_text_field( wp_unslash( $_REQUEST['date'] ) ) ) ) {
+			$args['date'] = sanitize_text_field( wp_unslash( $_REQUEST['date'] ) );
 		} else {
 			$args['date'] = gmdate( 'Y-m-d' );
 		}
@@ -368,7 +368,7 @@ class Stats_Report {
 		<h1><?php esc_html_e( 'Plugin Repository and email Stats Report', 'wporg-plugins' ); ?></h1>
 
 		<form method="get">
-		<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>"/>
+		<input type="hidden" name="page" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['page'] ?? '' ) ) ); ?>"/>
 		<table class="form-table"><tbody>
 		<tr><th scope="row"><label for="date"><?php esc_html_e( 'Date', 'wporg-plugins' ); ?></label></th><td>
 		<input name="date" type="text" id="date" value="<?php echo esc_attr( $args['date'] ); ?>" class="text">

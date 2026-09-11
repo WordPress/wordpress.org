@@ -87,14 +87,14 @@ class Upload {
 			(
 				// New submission.
 				empty( $_POST['plugin_id'] ) &&
-				'upload' === $_POST['action'] &&
+				'upload' === sanitize_key( $_POST['action'] ?? '' ) &&
 				$can_submit_new_plugin &&
-				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' )
+				wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'wporg-plugins-upload' )
 			) || (
 				// Existing submission
 				! empty( $_POST['plugin_id'] ) &&
-				'upload-additional' === $_POST['action'] &&
-				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload-' . $_POST['plugin_id'] )
+				'upload-additional' === sanitize_key( $_POST['action'] ?? '' ) &&
+				wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'wporg-plugins-upload-' . absint( $_POST['plugin_id'] ?? 0 ) )
 			)
 		) {
 			$for_plugin = absint( $_POST['plugin_id'] ?? 0 );
@@ -598,7 +598,7 @@ class Upload {
 				if ( ! empty( $_REQUEST['upload_token'] ) ) {
 					printf(
 						'<input type="hidden" name="upload_token" value="%s"/>',
-						esc_attr( $_REQUEST['upload_token'] )
+						esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['upload_token'] ?? '' ) ) )
 					);
 
 					if ( ! $uploader->has_valid_upload_token() ) {
@@ -641,7 +641,7 @@ class Upload {
 						<?php esc_html_e( 'Additional Information', 'wporg-plugins' ); ?><br>
 						<textarea name="comment" rows="3" cols="80"><?php
 							if ( ! empty( $_REQUEST['comment'] ) ) {
-								echo esc_textarea( $_REQUEST['comment'] );
+								echo esc_textarea( sanitize_textarea_field( wp_unslash( $_REQUEST['comment'] ?? '' ) ) );
 							}
 							?></textarea>
 					</label>

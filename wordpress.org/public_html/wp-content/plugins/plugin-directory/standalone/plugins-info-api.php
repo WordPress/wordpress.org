@@ -22,8 +22,8 @@ $_REQUEST = array(
 );
 
 $format  = 'json'; // json, jsonp, xml, or php
-$method  = $_REQUEST['method'];
-$request = $_REQUEST['request'];
+$method  = sanitize_key( $_REQUEST['method'] ?? '' );
+$request = wp_unslash( $_REQUEST['request'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Structured API request; each field is validated by Plugins_Info_API_Request.
 
 require __DIR__ . '/class-plugins-info-api.php';
 require __DIR__ . '/class-plugins-info-api-request.php';

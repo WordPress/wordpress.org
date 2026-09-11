@@ -118,7 +118,7 @@ class Reviewer {
 		if (
 			! current_user_can( 'plugin_admin_edit', $post_id ) ||
 			! isset( $_POST['_set_reviewer_nonce'] ) ||
-			! wp_verify_nonce( $_POST['_set_reviewer_nonce'], 'set_reviewer' )
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_set_reviewer_nonce'] ?? '' ) ), 'set_reviewer' )
 		) {
 			return;
 		}
