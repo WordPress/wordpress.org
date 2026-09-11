@@ -57,10 +57,12 @@ class Helpscout_Slug_Scope_Test extends TestCase {
 	protected function create_plugin( string $slug ): WP_Post {
 		$plugin_id = wp_insert_post(
 			array(
-				'post_type'   => 'plugin',
-				'post_title'  => $slug,
-				'post_name'   => $slug,
-				'post_status' => 'new',
+				'post_type'         => 'plugin',
+				'post_title'        => $slug,
+				'post_name'         => $slug,
+				'post_status'       => 'new',
+				'post_modified'     => current_time( 'mysql' ),
+				'post_modified_gmt' => current_time( 'mysql', 1 ),
 			),
 			true
 		);
