@@ -11,26 +11,27 @@ add_action( 'admin_post_svn_save', function() {
 	check_admin_referer( 'edit_svn_prop' );
 
 	$svns = get_svns_for_current_site();
-	$svn = $svns[ $_REQUEST['svn'] ] ?? false;
-	$rev = $_REQUEST['revision'] ?? false;
+	$svn = $svns[ sanitize_key( $_REQUEST['svn'] ?? '' ) ] ?? false;
+	$rev = absint( $_REQUEST['revision'] ?? 0 );
 
 	if ( empty( $svn ) ) {
 		die( -1 );
 	}
 
-	$action = $_REQUEST['what'] ?? false;
+	$action = sanitize_key( $_REQUEST['what'] ?? '' );
 	if ( ! in_array( $action, [ 'add', 'edit', 'delete' ] ) ) {
 		die( -1 );
 	}
 
-	$user = Props\find_user_id( wp_unslash( $_REQUEST['user_id'] ?? '' ) ) ?: null;
+	// find_user_id() also accepts a profiles.wordpress.org URL, which sanitize_user() would mangle.
+	$user = Props\find_user_id( sanitize_text_field( wp_unslash( $_REQUEST['user_id'] ?? '' ) ) ) ?: null;
 
 	// Operation save. Step one, find the prop.
 	$props = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$svn['props_table']} WHERE revision = %d", $rev ) );
 
 	$the_prop = false;
 	if ( ! empty( $_REQUEST['prop_name_orig'] ) ) {
-		$the_prop = wp_list_filter( $props, [ 'prop_name' => wp_unslash( $_REQUEST['prop_name_orig'] ) ] );
+		$the_prop = wp_list_filter( $props, [ 'prop_name' => sanitize_text_field( wp_unslash( $_REQUEST['prop_name_orig'] ) ) ] );
 		$the_prop = $the_prop ? array_shift( $the_prop ) : false;
 	}
 
@@ -147,8 +148,8 @@ add_action( 'admin_post_svn_reparse', function() {
 	check_admin_referer( 'reparse_svn' );
 
 	$svns = get_svns_for_current_site();
-	$svn = $svns[ $_REQUEST['svn'] ] ?? false;
-	$rev = $_REQUEST['revision'] ?? false;
+	$svn = $svns[ sanitize_key( $_REQUEST['svn'] ?? '' ) ] ?? false;
+	$rev = absint( $_REQUEST['revision'] ?? 0 );
 
 	if ( empty( $svn ) || empty( $rev ) ) {
 		die( -1 );
