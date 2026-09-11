@@ -66,7 +66,7 @@ function render() {
 			printf(
 				'<div class="notice notice-%s is-dismissable"><p>%s</p></div>',
 				esc_attr( $class ),
-				esc_html( $message )
+				wp_kses_post( $message )
 			);
 		}
 	}

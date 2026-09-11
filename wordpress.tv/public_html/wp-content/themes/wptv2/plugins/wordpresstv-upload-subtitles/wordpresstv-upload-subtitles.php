@@ -379,7 +379,7 @@ class WordPressTV_Subtitles_Upload {
 			</style>
 			<strong>Content of the subtitles file</strong><br>
 
-			<div id="subs-content"><?php echo esc_html( $file_content ); ?></div>
+			<div id="subs-content"><?php echo $file_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- File contents are escaped above before inserting line breaks. ?></div>
 
 			<div class="subs-info">
 				<input type="hidden" name="wptv-subtitles" value="1"/>

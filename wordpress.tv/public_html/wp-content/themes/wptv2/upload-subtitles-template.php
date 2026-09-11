@@ -243,7 +243,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 
 <div class="container">
 	<div class="video-upload">
-		<?php echo esc_html( $message ); ?>
+		<?php echo wp_kses_post( $message ); ?>
 
 		<p>Subtitling: <a href="<?php echo esc_url( get_permalink( $parent->ID ) ); ?>"><?php echo apply_filters( 'the_title', $parent->post_title ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core template markup and the_title-filtered value; escaping would print the markup. ?></a></p>
 

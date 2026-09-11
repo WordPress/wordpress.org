@@ -361,6 +361,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			}
 		}
 
-		echo implode( '<br>', array_map( 'esc_html', $projects ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Project links are assembled above from escaped URLs and names.
+		echo implode( '<br>', $projects );
 	}
 }

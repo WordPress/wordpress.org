@@ -152,7 +152,7 @@ class Plugin {
 
 		echo '<div class="notice notice-info notice-alt with-dashicon">';
 		echo '<span class="dashicons dashicons-email-alt"></span>';
-		printf( '<p>%s</p>', esc_html( $message ) );
+		printf( '<p>%s</p>', wp_kses_post( $message ) );
 		echo '</div>';
 	}
 

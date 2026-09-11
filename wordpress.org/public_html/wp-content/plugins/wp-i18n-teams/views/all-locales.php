@@ -20,7 +20,7 @@
 
 			$string = translate_nooped_plural( $nooped_plural, $locale_data['status_counts'][ $status ] );
 			$string = sprintf( $string, sprintf( '<strong class="i18n-label %s">%s</strong>', $status, $locale_data['status_counts'][ $status ] ) );
-			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', esc_attr( $status ), esc_attr( $status ), esc_html( $string ) );
+			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', esc_attr( $status ), esc_attr( $status ), wp_kses_post( $string ) );
 		}
 	?>
 	</p>
@@ -48,7 +48,7 @@
 
 			$string = translate_nooped_plural( $nooped_plural, $locale_data['status_counts'][ $status ] );
 			$string = sprintf( $string, sprintf( '<strong class="i18n-label %s">%s</strong>', $status, $locale_data['status_counts'][ $status ] ) );
-			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', esc_attr( $status ), esc_attr( $status ), esc_html( $string ) );
+			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', esc_attr( $status ), esc_attr( $status ), wp_kses_post( $string ) );
 		}
 	?>
 	</p>
@@ -111,7 +111,7 @@
 					<td class="center no-left-border nowrap">
 						<?php
 						if ( isset( $language_packs_data[ $locale->wp_locale ] ) ) {
-							echo (int) max( $language_packs_data[ $locale->wp_locale ] );
+							echo esc_html( max( $language_packs_data[ $locale->wp_locale ] ) );
 						} else {
 							esc_html_e( 'No&nbsp;LP', 'wporg' );
 						}

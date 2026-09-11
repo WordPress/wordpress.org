@@ -257,7 +257,7 @@ if ( isset( $_GET['post_category'] ) ) {
 				get_footer();
 				return;
 			} else {
-				echo esc_html( $message );
+				echo wp_kses_post( $message );
 			}
 
 			?>
