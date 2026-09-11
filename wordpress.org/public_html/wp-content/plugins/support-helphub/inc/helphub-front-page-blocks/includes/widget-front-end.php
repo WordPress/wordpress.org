@@ -7,6 +7,7 @@
 
 ?>
 <?php
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Widget wrapper markup supplied by register_sidebar().
 echo $args['before_widget']; // WPCS: XSS OK.
 ?>
 
@@ -41,4 +42,5 @@ echo $args['before_widget']; // WPCS: XSS OK.
 </div>
 
 <?php
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Widget wrapper markup supplied by register_sidebar().
 echo $args['after_widget']; // WPCS: XSS OK.

@@ -13,7 +13,6 @@
  * @package WordPressdotorg\Theme
  */
 
-// phpcs:disable WordPress.XSS.EscapeOutput.UnsafePrintingFunction, WordPress.XSS.EscapeOutput.OutputNotEscaped
 
 namespace WordPressdotorg\MainTheme;
 

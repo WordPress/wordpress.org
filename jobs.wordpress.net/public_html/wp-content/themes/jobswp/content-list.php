@@ -6,16 +6,16 @@
 		foreach ( $posts as $post ) {
 
 			$evenodd = abs( $evenodd - 1 );
-			echo '<div class="row row-'. $evenodd . '">';
+			echo '<div class="row row-'. esc_attr( $evenodd ) . '">';
 
 			echo '<div class="job-date">' . get_the_date( 'M j' ) . '</div>';
 			echo '<div class="job-title">';
 			echo '<a href="'; the_permalink(); echo '" rel="bookmark">'; the_title(); echo '</a></div>';
 			echo '<div class="job-type">';
-			echo jobswp_get_job_meta( get_the_ID(), 'jobtype' );
+			echo esc_html( jobswp_get_job_meta( get_the_ID(), 'jobtype' ) );
 			echo '</div>';
 			echo '<div class="job-location">';
-			echo jobswp_get_job_meta( get_the_ID(), 'location' );
+			echo esc_html( jobswp_get_job_meta( get_the_ID(), 'location' ) );
 			echo '</div>';
 
 			echo '<div class="clear"></div>';

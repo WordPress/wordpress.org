@@ -152,7 +152,7 @@ class Plugin {
 
 		echo '<div class="notice notice-info notice-alt with-dashicon">';
 		echo '<span class="dashicons dashicons-email-alt"></span>';
-		echo "<p>{$message}</p>";
+		printf( '<p>%s</p>', esc_html( $message ) );
 		echo '</div>';
 	}
 
@@ -206,10 +206,11 @@ class Plugin {
 							'<input type="submit" name="confirm" value="%5$s">' .
 							'&nbsp<a href="%6$s">%7$s</a>' .
 						'</form>',
-						get_bloginfo('name'),
+						esc_html( get_bloginfo( 'name' ) ),
 						sprintf(
 							/* translators: 1: Plugin, Theme, or Tag name. */
 							esc_html__( 'Do you wish to unsubscribe from future emails for %s?', 'wporg-forums' ),
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Badge markup assembled by format_badge() from escaped parts.
 							$term->name
 						),
 						esc_attr( $_SERVER['REQUEST_URI'] ),

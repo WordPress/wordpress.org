@@ -27,14 +27,14 @@ if ( ! function_exists( __NAMESPACE__ . '\entry_meta' ) ) :
 				get_the_author()
 			);
 
-			// phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
+			// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 			printf(
 				/* translators: 1: post date 2: post author */
 				'<span class="posted-on">' . esc_html__( 'Posted on %1$s by %2$s.', 'wporg' ) . '</span>',
 				$time_string,
 				$author_string
 			);
-			// phpcs:enable WordPress.XSS.EscapeOutput.OutputNotEscaped
+			// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
 		$format = get_post_format();
@@ -97,7 +97,7 @@ if ( ! function_exists( __NAMESPACE__ . '\entry_date' ) ) :
 			'<span class="posted-on">%1$s <a href="%2$s" rel="bookmark">%3$s</a></span>',
 			esc_html_x( 'Posted on', 'Used before publish date.', 'wporg' ),
 			esc_url( get_permalink() ),
-			get_entry_date() // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+			get_entry_date() // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
 	}
 endif;
@@ -114,7 +114,7 @@ if ( ! function_exists( __NAMESPACE__ . '\entry_taxonomies' ) ) :
 			printf(
 				'<span class="cat-links"><span class="screen-reader-text">%1$s </span>%2$s</span>',
 				esc_html_x( 'Categories', 'Used before category names.', 'wporg' ),
-				$categories_list // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+				$categories_list // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
 
@@ -123,7 +123,7 @@ if ( ! function_exists( __NAMESPACE__ . '\entry_taxonomies' ) ) :
 			printf(
 				'<span class="tags-links"><span class="screen-reader-text">%1$s </span>%2$s</span>',
 				esc_html_x( 'Tags', 'Used before tag names.', 'wporg' ),
-				$tags_list // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+				$tags_list // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
 	}

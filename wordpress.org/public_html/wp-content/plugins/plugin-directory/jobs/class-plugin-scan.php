@@ -208,8 +208,7 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
-			echo "\n==== Plugin Check Results for {$plugin->post_name} EMAIL ====\n";
+			echo "\n==== Plugin Check Results for {$plugin->post_name} EMAIL ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo $body;
 		}
@@ -360,8 +359,7 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
-			echo "\n==== Plugin Check Results for {$plugin->post_name} {$tag} SLACK LOG ====\n";
+			echo "\n==== Plugin Check Results for {$plugin->post_name} {$tag} SLACK LOG ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo $fallback . "\n" . $table;
 		}
@@ -483,8 +481,7 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
-			echo "\n==== Plugin Check Results for {$plugin_slug} ====\n";
+			echo "\n==== Plugin Check Results for {$plugin_slug} ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo "Total Time: {$total_time}s\nReturn Code:{$return_code}.\n";
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.

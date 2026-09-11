@@ -26,6 +26,7 @@ class WPorg_GP_Help_Page {
 
 	function after_hello() {
 		if ( is_user_logged_in() || $this->is_notice_hidden() ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Help link markup built here from a class constant.
 			echo '<em><a class="secondary" href="' . self::handbook_link . '">Need help?</a></em>';
 		}
 	}
@@ -50,7 +51,7 @@ class WPorg_GP_Help_Page {
 		<div class="notice" id="help-notice">
 			<p>
 				New to Translating WordPress?
-				Read through our <a href="<?php echo self::handbook_link; ?>" target="_blank">Translator Handbook</a> to get started.
+				Read through our <a href="<?php echo esc_url( self::handbook_link ); ?>" target="_blank">Translator Handbook</a> to get started.
 				<a id="hide-help-notice" class="secondary" style="float: right;" href="<?php echo esc_url( $hide_url ); ?>">Hide</a>
 			</p>
 		</div>

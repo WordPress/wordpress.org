@@ -187,6 +187,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			if ( $missing ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 				die( '-1 Required argument(s) are missing: ' . implode( ', ', $missing ) );
 			}
 		}
@@ -213,14 +214,18 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				if ( is_wp_error( $result ) ) {
 					$status = $result->get_error_data()['status'] ?? 500;
 					status_header( $status );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 					trigger_error( $result->get_error_message(), E_USER_WARNING );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 					die( '-1 ' . $result->get_error_message() );
 				}
 
 				die( '1' );
 			} catch ( Exception $exception ) {
 				status_header( 500 );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 				trigger_error( $exception->getMessage(), E_USER_WARNING );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 				die( '-1 ' . $exception->getMessage() );
 			}
 		}

@@ -1,6 +1,7 @@
 <?php
 use PTR\Display;
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Display::get_display_css() returns the report stylesheet.
 echo Display::get_display_css();
 
 foreach ( $revisions as $revision ) :
@@ -10,7 +11,7 @@ foreach ( $revisions as $revision ) :
 
 <div class="ptr-test-reporter-single-revision">
 	<a href="<?php echo esc_url( sprintf( 'https://core.trac.wordpress.org/changeset/%d', $rev_id ) ); ?>">
-		r<?php echo $rev_id; ?>
+		r<?php echo esc_html( $rev_id ); ?>
 	</a>: <?php echo esc_attr( apply_filters( 'the_title', $revision->post_title ) ); ?>
 </div>
 

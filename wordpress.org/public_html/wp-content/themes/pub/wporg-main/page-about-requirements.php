@@ -45,8 +45,7 @@ the_post();
 						<li>
 							<?php
 							/* translators: 1: URL to PHP; 2: PHP Version */
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Translated string carrying an anchor, already through wp_kses_post().
-							printf( wp_kses_post( __( '<a href="%1$s">PHP</a> version %2$s or greater.', 'wporg' ) ), 'https://www.php.net/', RECOMMENDED_PHP );
+							printf( wp_kses_post( __( '<a href="%1$s">PHP</a> version %2$s or greater.', 'wporg' ) ), esc_url( 'https://www.php.net/' ), esc_html( RECOMMENDED_PHP ) );
 							?>
 						</li>
 						<li>

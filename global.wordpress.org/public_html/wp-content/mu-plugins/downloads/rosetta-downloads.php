@@ -172,7 +172,7 @@ class Rosetta_Downloads {
 							<strong><?php echo esc_html( number_format_i18n( $total_translation_counts ) ); ?></strong>
 						</td>
 					</tr>
-					<?php echo implode( "\n", $rows ); ?>
+					<?php echo implode( "\n", $rows ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Table row markup assembled above from escaped parts. ?>
 				</tbody>
 
 				<tfoot>

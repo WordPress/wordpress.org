@@ -51,7 +51,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		$checked = checked( ! empty( $instance['show_home'] ), true, false );
 		?>
 		<p>
-			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('show_home') ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_home' ) ); ?>" type="checkbox" value="1" <?php echo $checked ?> />
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('show_home') ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_home' ) ); ?>" type="checkbox" value="1" <?php echo $checked // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Widget form markup with the escaped field ids assembled on the same line. ?> />
 			<label for="<?php echo esc_attr( $this->get_field_id( 'show_home' ) ); ?>"><?php esc_html_e( 'List the home page', 'wporg' ); ?></label>
 		</p>
 		<?php
