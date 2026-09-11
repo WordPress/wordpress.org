@@ -36,7 +36,7 @@
 	<?php endif; ?>
 	<div class="site-branding">
 		<h1 class="site-title">
-			<a href="<?php echo esc_url( DevHub\bporg_developer_get_site_section_url() ); ?>" rel="home"><?php echo DevHub\bporg_developer_get_site_section_title(); ?></a>
+			<a href="<?php echo esc_url( DevHub\bporg_developer_get_site_section_url() ); ?>" rel="home"><?php echo esc_html( DevHub\bporg_developer_get_site_section_title() ); ?></a>
 		</h1>
 
 		<?php if ( is_front_page() ) : ?>

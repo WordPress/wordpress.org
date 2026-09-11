@@ -96,11 +96,11 @@ class Cron_Logs {
 				</tr>',
 				esc_attr( $job->id ),
 				esc_attr( human_time_diff( $job->nextrun ?: $job->start ) . ' ago' ),
-				date( 'Y-m-d H:i:s', $job->nextrun ?: $job->start ),
-				$task_name,
+				esc_html( gmdate( 'Y-m-d H:i:s', $job->nextrun ?: $job->start ) ),
+				esc_html( $task_name ),
 				esc_html( $job->status ),
-				$task_desc,
-				$logs,
+				wp_kses_post( $task_desc ),
+				wp_kses_post( $logs ),
 				esc_html( json_encode( $job->args[0] ?? $job->args, JSON_PRETTY_PRINT ) )
 			);
 		}

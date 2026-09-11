@@ -24,7 +24,7 @@ if ( ! empty( $source_file ) ) :
 
 		<?php if ( post_type_has_source_code() ) : ?>
 			<div class="source-code-container">
-				<pre class="brush: php; toolbar: false; first-line: <?php echo esc_attr( get_post_meta( get_the_ID(), '_wp-parser_line_num', true ) ); ?>"><?php echo htmlentities( get_source_code() ); ?></pre>
+				<pre class="brush: php; toolbar: false; first-line: <?php echo esc_attr( get_post_meta( get_the_ID(), '_wp-parser_line_num', true ) ); ?>"><?php echo esc_html( htmlentities( get_source_code() ) ); ?></pre>
 			</div>
 			<p class="source-code-links">
 				<span>

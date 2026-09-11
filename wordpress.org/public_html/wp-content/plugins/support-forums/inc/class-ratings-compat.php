@@ -138,7 +138,7 @@ class Ratings_Compat {
 			$topic_id = bbp_get_topic_id();
 			$rating   = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
-				echo \WPORG_Ratings::get_dashicons_stars( $rating );
+				echo wp_kses_post( \WPORG_Ratings::get_dashicons_stars( $rating ) );
 			}
 		}
 	}
@@ -240,10 +240,12 @@ class Ratings_Compat {
 				printf(
 					/* translators: %s: login URL */
 					wp_kses_post( __( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ) ),
-					add_query_arg(
-						'redirect_to',
-						urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
-						'https://login.wordpress.org/'
+					esc_url(
+						add_query_arg(
+							'redirect_to',
+							rawurlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
+							'https://login.wordpress.org/'
+						)
 					)
 				);
 				echo '</span>';
@@ -257,7 +259,7 @@ class Ratings_Compat {
 			printf(
 				/* translators: %s: number of reviews */
 				esc_html( _n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ) ),
-				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
+				'<span>' . esc_html( number_format_i18n( $this->reviews_count ) ) . '</span>'
 			);
 		?></div>
 		<?php echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' ); ?>
@@ -279,7 +281,7 @@ class Ratings_Compat {
 						'wporg-forums'
 					)
 				) . ' ',
-				$filter
+				esc_html( $filter )
 			);
 			printf(
 				/* translators: %s: plugin/theme reviews URL */
@@ -433,10 +435,12 @@ class Ratings_Compat {
 			printf(
 				/* translators: %s: login URL */
 				wp_kses_post( __( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ) ),
-				add_query_arg(
-					'redirect_to',
-					urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
-					'https://login.wordpress.org/'
+				esc_url(
+					add_query_arg(
+						'redirect_to',
+						rawurlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
+						'https://login.wordpress.org/'
+					)
 				)
 			);
 			echo '</p></div>';

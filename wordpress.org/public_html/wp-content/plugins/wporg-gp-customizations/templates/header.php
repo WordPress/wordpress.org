@@ -40,7 +40,7 @@ gp_enqueue_scripts( array( 'gp-tour' ) );
 	if ( gp_notice( 'error' ) ) :
 		?>
 		<div class="error">
-			<?php echo gp_notice( 'error' ); //TODO: run kses on notices ?>
+			<?php echo wp_kses_post( gp_notice( 'error' ) ); ?>
 		</div>
 		<?php
 	endif;
@@ -48,11 +48,11 @@ gp_enqueue_scripts( array( 'gp-tour' ) );
 	if ( gp_notice() ) :
 		?>
 		<div class="notice">
-			<?php echo gp_notice(); ?>
+			<?php echo wp_kses_post( gp_notice() ); ?>
 		</div>
 		<?php
 	endif;
 
-	echo gp_breadcrumb();
+	echo wp_kses_post( gp_breadcrumb() );
 
 	do_action( 'gp_after_notices' );

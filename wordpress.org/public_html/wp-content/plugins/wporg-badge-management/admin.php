@@ -70,7 +70,7 @@ function render_list_users_tab( $slug ) {
 	$users = get_users_with_badge( $slug );
 
 	// List users with badges.
-	echo '<h2>Users with Badge "' . ( $badges[ $slug ] ?? '' ) . '" (' . number_format_i18n( count( $users ) ) .')</h2>';
+	echo '<h2>Users with Badge "' . esc_html( $badges[ $slug ] ?? '' ) . '" (' . esc_html( number_format_i18n( count( $users ) ) ) . ')</h2>';
 	if ( $users ) {
 
 		// Lots of WP_User objects is extra hungry.

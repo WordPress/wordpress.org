@@ -166,10 +166,10 @@ class Rosetta_Downloads {
 							<strong><?php echo esc_html_x( 'All', 'locales', 'rosetta' ); ?></strong>
 						</td>
 						<td style="text-align:right">
-							<strong><?php echo number_format_i18n( $total_release_counts ); ?></strong>
+							<strong><?php echo esc_html( number_format_i18n( $total_release_counts ) ); ?></strong>
 						</td>
 						<td style="text-align:right">
-							<strong><?php echo number_format_i18n( $total_translation_counts ); ?></strong>
+							<strong><?php echo esc_html( number_format_i18n( $total_translation_counts ) ); ?></strong>
 						</td>
 					</tr>
 					<?php echo implode( "\n", $rows ); ?>

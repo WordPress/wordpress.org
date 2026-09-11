@@ -654,7 +654,7 @@ class Favorites {
 			return;
 		}
 
-		echo '<div class="wporg-photo-favorite-count">' . number_format_i18n( self::count_photo_favorites( $post_id ) ) . '</div>';
+		echo '<div class="wporg-photo-favorite-count">' . esc_html( number_format_i18n( self::count_photo_favorites( $post_id ) ) ) . '</div>';
 	}
 
 	/**

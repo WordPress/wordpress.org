@@ -302,13 +302,13 @@ class wporg_trac_notifications {
 
 		ob_start();
 		?>
-	<div id="notifications" class="<?php echo $class; ?>">
+	<div id="notifications" class="<?php echo esc_attr( $class ); ?>">
 		<fieldset>
 			<legend>Notifications</legend>
 				<p class="star-this-ticket">
 					<a href="#" class="button button-large watching-ticket"><span class="dashicons dashicons-star-filled"></span> Watching ticket</a>
 					<a href="#" class="button button-large watch-this-ticket"><span class="dashicons dashicons-star-empty"></span> Watch this ticket</a>
-					<span class="num-stars"><span class="count"><?php echo $star_count; ?></span> <span class="count-1">star</span> <span class="count-many">stars</span></span>
+					<span class="num-stars"><span class="count"><?php echo (int) $star_count; ?></span> <span class="count-1">star</span> <span class="count-many">stars</span></span>
 					<div class="star-list">
 				<?php
 
@@ -323,23 +323,21 @@ class wporg_trac_notifications {
 							continue;
 						}
 
-						$follower = esc_attr( $follower );
-						$class = ''; // in_array( $follower, $stars, true ) ? ' class="star"' : '';
 					?>
-						<a<?php echo $class; ?> title="<?php echo $follower; ?>" href="https://profiles.wordpress.org/<?php echo $follower; ?>/">
+						<a title="<?php echo esc_attr( $follower ); ?>" href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $follower . '/' ); ?>">
 							<?php echo get_avatar( $follower_obj->user_email, 36, 'retro' ); ?>
-							<span class="username"><?php echo $follower; ?></span>
+							<span class="username"><?php echo esc_html( $follower ); ?></span>
 						</a>
 					<?php endforeach; ?>
 					<a title="you" class="star-you" href="https://profiles.wordpress.org/<?php echo esc_attr( $username ); ?>/">
 						<?php echo get_avatar( wp_get_current_user()->user_email, 36, 'retro' ); ?>
-						<span class="username"><?php echo $username; ?></span>
+						<span class="username"><?php echo esc_html( $username ); ?></span>
 					</a>
 					</div>
 				</p>
 				<p class="receiving-notifications">You are receiving notifications.</p>
 			<?php if ( $reasons ) : ?>
-				<p class="receiving-notifications-because">You are receiving notifications because <?php echo current( $reasons ); ?>. <a href="#" class="button button-small block-notifications">Block notifications</a></p>
+				<p class="receiving-notifications-because">You are receiving notifications because <?php echo wp_kses_post( current( $reasons ) ); ?>. <a href="#" class="button button-small block-notifications">Block notifications</a></p>
 			<?php endif ?>
 				<p class="not-receiving-notifications">You do not receive notifications because you have blocked this ticket. <a href="#" class="button button-small unblock-notifications">Unblock</a></p>
 				<span class="preferences"><span class="grid-toggle"><a href="#" class="grid dashicons dashicons-screenoptions"></a> <a href="#" class="names dashicons dashicons-exerpt-view dashicons-excerpt-view"></a></span> <a href="<?php echo esc_url( home_url( 'notifications/' ) ); ?>">Preferences</a></span>
@@ -404,7 +402,7 @@ class wporg_trac_notifications {
 
 		echo '<p class="ticket-note note-new-reporter">';
 		echo get_avatar( $reporter->user_email, 36, 'retro' );
-		echo '<span class="note">' . $output . '</span>';
+		echo '<span class="note">' . wp_kses_post( $output ) . '</span>';
 		echo '<span class="dashicons dashicons-welcome-learn-more"></span>';
 	}
 
@@ -528,16 +526,14 @@ class wporg_trac_notifications {
 		echo '<form method="post" action="">';
 		wp_nonce_field( 'save-trac-notifications', 'trac-nonce', false );
 		echo '<h3>New Tickets</h3>';
-		$checked = checked( $notifications['newticket'], true, false );
-		echo '<ul style="margin-left: 1% !important"><li style="list-style:none"><label><input type="checkbox" ' . $checked . 'name="notifications[newticket]" /> Receive a notification when new tickets are created.</label></li></ul>';
+		echo '<ul style="margin-left: 1% !important"><li style="list-style:none"><label><input type="checkbox" ' . checked( $notifications['newticket'], true, false ) . 'name="notifications[newticket]" /> Receive a notification when new tickets are created.</label></li></ul>';
 
 		if ( $focuses ) {
 			echo '<div id="focuses">';
 			echo '<h3>Focuses</h3>';
 			echo '<ul>';
 			foreach ( $focuses as $focus ) {
-				$checked = checked( ! empty( $notifications['focus'][ $focus ] ), true, false );
-				echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[focus][' . esc_attr( $focus ) . ']" /> ' . $focus . '</label></li>';
+				echo '<li><label><input type="checkbox" ' . checked( ! empty( $notifications['focus'][ $focus ] ), true, false ) . 'name="notifications[focus][' . esc_attr( $focus ) . ']" /> ' . esc_html( $focus ) . '</label></li>';
 			}
 			echo '</ul>';
 			echo '</div>';
@@ -554,13 +550,11 @@ class wporg_trac_notifications {
 				if ( in_array( $component, $breakpoints ) ) {
 					echo '</ul><ul>';
 				}
-				$checked = checked( ! empty( $notifications['component'][ $component ] ), true, false );
-				echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $component ) . ']" /> ' . $component . "</label>\n";
+				echo '<li><label><input type="checkbox" ' . checked( ! empty( $notifications['component'][ $component ] ), true, false ) . 'name="notifications[component][' . esc_attr( $component ) . ']" /> ' . esc_html( $component ) . "</label>\n";
 				if ( is_array( $subcomponents ) ) {
 					echo "<ul>\n";
 					foreach ( $subcomponents as $subcomponent ) {
-						$checked = checked( ! empty( $notifications['component'][ $subcomponent ] ), true, false );
-						echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $subcomponent ) . ']" /> ' . $subcomponent . "</label></li>\n";
+						echo '<li><label><input type="checkbox" ' . checked( ! empty( $notifications['component'][ $subcomponent ] ), true, false ) . 'name="notifications[component][' . esc_attr( $subcomponent ) . ']" /> ' . esc_html( $subcomponent ) . "</label></li>\n";
 					}
 					echo "</ul>\n";
 				}
@@ -575,16 +569,15 @@ class wporg_trac_notifications {
 			echo '<h3>Milestones</h3>';
 			echo '<ul>';
 			foreach ( $milestones as $milestone ) {
-				$checked = checked( ! empty( $notifications['milestone'][ $milestone['name'] ] ), true, false );
+				$checked = ! empty( $notifications['milestone'][ $milestone['name'] ] );
 				$class = '';
 				if ( ! empty( $milestone['completed'] ) ) {
 					$class = 'completed-milestone';
 					if ( $checked ) {
 						$class .= ' checked';
 					}
-					$class = ' class="' . $class . '"';
 				}
-				echo  '<li' . $class . '><label><input type="checkbox" ' . $checked . 'name="notifications[milestone][' . esc_attr( $milestone['name'] ) . ']" /> ' . $milestone['name'] . '</label></li>';
+				echo '<li class="' . esc_attr( $class ) . '"><label><input type="checkbox" ' . checked( $checked, true, false ) . 'name="notifications[milestone][' . esc_attr( $milestone['name'] ) . ']" /> ' . esc_html( $milestone['name'] ) . '</label></li>';
 			}
 			echo '<li id="show-completed"><a href="#">Show recently completed&hellip;</a></li>';
 			echo '</ul>';

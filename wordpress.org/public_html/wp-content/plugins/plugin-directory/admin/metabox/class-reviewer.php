@@ -49,7 +49,7 @@ class Reviewer {
 			</p>
 			<?php
 		} else {
-			printf( '<p>%s ago</p>', human_time_diff( $reviewer_time ) );
+			printf( '<p>%s ago</p>', esc_html( human_time_diff( $reviewer_time ) ) );
 		}
 
 		?>

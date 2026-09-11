@@ -100,8 +100,8 @@ get_header();
 		printf(
 			'<div class="message error%s"><p>%s<span>%s</span></p></div>',
 			$error_user_login->get_data()['avatar'] ? ' with-avatar' : '',
-			$error_user_login->get_data()['avatar'],
-			$error_user_login->get_data()['error']
+			$error_user_login->get_data()['avatar'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The local REST handler returns escaped get_avatar() markup; preserve srcset.
+			wp_kses_post( $error_user_login->get_data()['error'] )
 		);
 	}
 	?>
@@ -116,8 +116,8 @@ get_header();
 		printf(
 			'<div class="message error%s"><p>%s<span>%s</span></p></div>',
 			$error_user_email->get_data()['avatar'] ? ' with-avatar' : '',
-			$error_user_email->get_data()['avatar'],
-			$error_user_email->get_data()['error']
+			$error_user_email->get_data()['avatar'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The local REST handler returns escaped get_avatar() markup; preserve srcset.
+			wp_kses_post( $error_user_email->get_data()['error'] )
 		);
 	}
 	?>
@@ -130,11 +130,14 @@ get_header();
 				printf(
 					/* translators: %s: List of linked policies, for example: <a>Privacy Policy</a> and <a>Terms of Service</a> */
 					esc_html( _n( 'I have read and accept the %s', 'I have read and accept the %s', 1, 'wporg' ) ),
-					wp_sprintf_l( '%l', [
-						"<a href='https://{$localised_domain}/about/privacy/'>" . __( 'Privacy Policy', 'wporg' ) . '</a>',
-						// "<a href='https://{$localised_domain}/about/terms-of-service/'>" . __( 'Terms of Service', 'wporg' ) . '</a>',
-						// "<a href='https://{$localised_domain}/about/code-of-conduct/'>" . __( 'Code of Conduct', 'wporg' ) . '</a>',
-					] )
+					wp_kses_post(
+						wp_sprintf_l(
+							'%l',
+							[
+								"<a href='https://{$localised_domain}/about/privacy/'>" . __( 'Privacy Policy', 'wporg' ) . '</a>',
+							]
+						)
+					)
 				)
 			?>
 		</label>
