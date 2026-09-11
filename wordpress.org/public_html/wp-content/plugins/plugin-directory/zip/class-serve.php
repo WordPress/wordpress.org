@@ -138,6 +138,7 @@ class Serve {
 			$version = $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = 'stable_tag' LIMIT 1", $post_id ) );
 		}
 		if ( ! $version ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Caught by serve(), which discards the message and renders a generic error.
 			throw new Exception( __METHOD__ . ": A version for $plugin_slug cannot be determined." );
 		}
 
@@ -163,6 +164,7 @@ class Serve {
 		}
 
 		if ( ! $post_id ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Caught by serve(), which discards the message and renders a generic error.
 			throw new Exception( __METHOD__ . ": A post_id for $plugin_slug cannot be determined." );
 		}
 

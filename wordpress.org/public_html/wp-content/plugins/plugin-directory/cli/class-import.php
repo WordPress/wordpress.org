@@ -201,6 +201,7 @@ class Import {
 			if ( ! $update_uri_valid || $update_uri_matches['slug'] !== $plugin_slug ) {
 				$this->warnings['invalid_update_uri'] = $headers->UpdateURI;
 
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'invalid_update_uri' ) );
 			}
 		}
@@ -226,6 +227,7 @@ class Import {
 		if ( $unmet_dependencies ) {
 			$this->warnings['unmet_dependencies'] = $unmet_dependencies;
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'unmet_dependencies', $unmet_dependencies ) );
 		}
 		unset( $_requires_plugins, $unmet_dependencies );
@@ -365,6 +367,7 @@ class Import {
 			// Now check to see if the stable has been confirmed.
 			$release = Plugin_Directory::get_release( $plugin, $stable_tag );
 			if ( ! $release ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( "Plugin release {$stable_tag} not found." );
 			}
 
@@ -428,6 +431,7 @@ class Import {
 				 */
 				do_action( 'wporg_plugins_import_release_pending', $plugin, $release, $data );
 
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( "Plugin release {$stable_tag} not confirmed." );
 			}
 
@@ -866,6 +870,7 @@ class Import {
 		}
 
 		if ( ! $svn_info['result'] ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( 'Could not find stable SVN URL: ' . ( $svn_info['errors'] ? implode( ' ', reset( $svn_info['errors'] ) ) : 'Unknown error' ) );
 		}
 
@@ -884,6 +889,7 @@ class Import {
 		 * causes a recursive checkout many multiple gigabytes in size, causing issues for WordPress.org.
 		 */
 		if ( ! wp_list_filter( SVN::ls( $stable_url, true ), [ 'kind' => 'file' ] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( "Could not create SVN export of {$stable_url}: Path appears not to have any files." );
 		}
 
@@ -901,6 +907,7 @@ class Import {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( 'Could not create SVN export: ' . ( $svn_export['errors'] ? implode( ' ', reset( $svn_export['errors'] ) ) : 'Unknown error' ) );
 		}
 

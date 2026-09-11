@@ -20,6 +20,8 @@
 	<exclude-pattern>*/plugins/plugin-directory/libs/*</exclude-pattern>
 	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
 	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
+	<!-- Near-verbatim copy of vendor/google/cloud-storage/src/StreamWrapper.php; kept diffable against upstream. -->
+	<exclude-pattern>*/plugins/photo-directory/inc/google-cloud-storage-stream-metadata.php</exclude-pattern>
 
 	<!-- Exclude generated wp-scripts asset files. -->
 	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>

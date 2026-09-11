@@ -380,6 +380,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$user = self::get_user( $activity['user_id'] );
 
 			if ( ! $user ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Plain-text API response; the interpolated user ID is intval()'d above.
 				throw new Exception( '-1 Activity reported for unrecognized user ID: ' . $activity['user_id'] );
 			}
 
