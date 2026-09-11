@@ -1393,6 +1393,11 @@ class Hooks {
 
 		remove_all_filters( 'bbp_get_reply_content' );
 
+		// The content is fetched again as the message is assembled, so keep it to the supported blocks.
+		if ( Plugin::get_instance()->blocks ) {
+			add_filter( 'bbp_get_reply_content', array( Plugin::get_instance()->blocks, 'limit_blocks' ), 7 );
+		}
+
 		// Strip tags from text and set up message body.
 		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );
 		$reply_url = bbp_get_reply_url( $reply_id );
