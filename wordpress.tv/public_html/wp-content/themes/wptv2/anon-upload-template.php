@@ -251,12 +251,13 @@ if ( isset( $_GET['post_category'] ) ) {
 			// temp pwd?
 			if ( post_password_required() ) {
 				echo '<div class="pass-form">';
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_the_password_form() returns core's form markup.
 				echo get_the_password_form();
 				echo '</div></div></div>';
 				get_footer();
 				return;
 			} else {
-				echo $message;
+				echo esc_html( $message );
 			}
 
 			?>
@@ -334,9 +335,9 @@ if ( isset( $_GET['post_category'] ) ) {
 							] ) as $term ) {
 								printf(
 									'<li id="category-%1$d"><label class="selectit"><input value="%1$d" type="checkbox" name="post_category[]" id="in-category-%1$d" %2$s> %3$s</label></li>',
-									$term->term_id,
+									(int) $term->term_id,
 									isset( $selected_cats[ $term->term_id ] ) ? 'checked="checked" ' : '',
-									$term->name,
+									esc_html( $term->name ),
 								);
 							}
 							?>
@@ -357,9 +358,9 @@ if ( isset( $_GET['post_category'] ) ) {
 							] ) as $term ) {
 								printf(
 									'<li id="category-%1$d"><label class="selectit"><input value="%1$d" type="checkbox" name="post_category[]" id="in-category-%1$d" %2$s> %3$s</label></li>',
-									$term->term_id,
+									(int) $term->term_id,
 									isset( $selected_cats[ $term->term_id ] ) ? 'checked="checked" ' : '',
-									$term->name,
+									esc_html( $term->name ),
 								);
 							}
 							?>

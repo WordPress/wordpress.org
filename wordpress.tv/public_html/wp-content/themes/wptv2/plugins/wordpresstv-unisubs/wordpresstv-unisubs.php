@@ -165,6 +165,7 @@ class WordCampTV_Unisubs {
 				echo '<' . '?xml version="1.0" encoding="utf-8" standalone="yes"?>' . "\n";
 				echo "<item>\n";
 				foreach ( $data as $tag => $value ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- XML response element; the value is htmlspecialchars()'d and the tag name is an internal key.
 					echo "	<{$tag}>" . htmlspecialchars( $value ) . "</{$tag}>\n";
 				}
 				echo '</item>';

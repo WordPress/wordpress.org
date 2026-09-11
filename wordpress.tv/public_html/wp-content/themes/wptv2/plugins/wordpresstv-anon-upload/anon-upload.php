@@ -77,7 +77,7 @@ class WPTV_Anon_Upload {
 
 		// For an XHR request, just send the redirect location, don't redirect to it.
 		if ( isset( $_GET['xhr'] ) ) {
-			die( $redir );
+			die( esc_url_raw( $redir ) );
 		}
 
 		wp_redirect( $redir );
@@ -449,10 +449,11 @@ class WPTV_Anon_Upload {
 
 			<div id="anon-data-wrap" class="inside">
 
-				<p>To change the default thumbnail image, <a href="https://wordpress.com/media/wordpress.tv/<?php echo $attachment_post->ID; ?>">go here and select Edit Thumbnail</a>.</p>
+				<p>To change the default thumbnail image, <a href="https://wordpress.com/media/wordpress.tv/<?php echo $attachment_post->ID; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_video_shortcode() and the surrounding literal markup. ?>">go here and select Edit Thumbnail</a>.</p>
 
 				<div class="wp_attachment_holder wp-clearfix">
 				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_video_shortcode() and the surrounding literal markup.
 				echo wp_video_shortcode( array( 'src' => wp_get_attachment_url( $attachment_post->ID ) ) )
 				?>
 				</div>
@@ -504,7 +505,7 @@ class WPTV_Anon_Upload {
 								// Find the year cat
 								$cat = get_term_by( 'name', substr( $meta['recorded'], 0, 4 ), 'category' );
 								if ( $cat ) {
-									echo '<a href="#in-category-' . $cat->term_id . '" class="button-secondary anon-approve anon-cat-link" title="Click to approve">Approve</a>';
+									echo '<a href="#in-category-' . esc_attr( $cat->term_id ) . '" class="button-secondary anon-approve anon-cat-link" title="Click to approve">Approve</a>';
 								}
 							?>
 							
@@ -520,7 +521,7 @@ class WPTV_Anon_Upload {
 								$cats = explode( ',', $cats );
 								foreach ( $cats as $cat ) {
 									if ( intval( $cat ) ) {
-										echo '<a href="#in-category-' . $cat . '-2" class="anon-cat-link" title="Click to approve">Unknown?</a>, ';
+										echo '<a href="#in-category-' . esc_attr( $cat ) . '-2" class="anon-cat-link" title="Click to approve">Unknown?</a>, ';
 									}
 								}
 							?>
