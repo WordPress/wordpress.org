@@ -20,7 +20,7 @@
 
 			$string = translate_nooped_plural( $nooped_plural, $locale_data['status_counts'][ $status ] );
 			$string = sprintf( $string, sprintf( '<strong class="i18n-label %s">%s</strong>', $status, $locale_data['status_counts'][ $status ] ) );
-			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', $status, $status, $string );
+			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', esc_attr( $status ), esc_attr( $status ), esc_html( $string ) );
 		}
 	?>
 	</p>
@@ -48,7 +48,7 @@
 
 			$string = translate_nooped_plural( $nooped_plural, $locale_data['status_counts'][ $status ] );
 			$string = sprintf( $string, sprintf( '<strong class="i18n-label %s">%s</strong>', $status, $locale_data['status_counts'][ $status ] ) );
-			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', $status, $status, $string );
+			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', esc_attr( $status ), esc_attr( $status ), esc_html( $string ) );
 		}
 	?>
 	</p>
@@ -81,7 +81,7 @@
 				$classes .= ' ' . $locale_data[ $locale->wp_locale ]['translation_status'];
 				$classes .= ' ' . $locale_data[ $locale->wp_locale ]['language_pack_status'];
 				?>
-				<tr class="<?php echo trim( $classes ); ?>">
+				<tr class="<?php echo esc_attr( trim( $classes ) ); ?>">
 					<td data-column-title="<?php esc_attr_e( 'Locale', 'wporg' ); ?>" class="no-right-border">
 						<?php if ( $locale_data[ $locale->wp_locale ]['rosetta_site_url'] ) : ?>
 							<a href="<?php echo esc_url( $locale_data[ $locale->wp_locale ]['rosetta_site_url'] ); ?>">
@@ -111,7 +111,7 @@
 					<td class="center no-left-border nowrap">
 						<?php
 						if ( isset( $language_packs_data[ $locale->wp_locale ] ) ) {
-							echo max( $language_packs_data[ $locale->wp_locale ] );
+							echo (int) max( $language_packs_data[ $locale->wp_locale ] );
 						} else {
 							esc_html_e( 'No&nbsp;LP', 'wporg' );
 						}
@@ -125,8 +125,8 @@
 						if ( isset( $percentages[ $locale->wp_locale ] ) ) :
 							$locale_slug = false !== strpos( $locale->slug, '/' ) ? $locale->slug : $locale->slug . '/default';
 							?>
-							<a href="https://translate.wordpress.org/locale/<?php echo $locale_slug; ?>/wp/dev">
-								<?php echo $percentages[ $locale->wp_locale ] . '%'; ?>
+							<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale_slug ); ?>/wp/dev">
+								<?php echo esc_html( $percentages[ $locale->wp_locale ] . '%' ); ?>
 							</a>
 							<?php
 						else :
@@ -137,8 +137,8 @@
 						?>
 					</td>
 					<td class="center no-left-border nowrap">
-						<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">
-							<?php echo $locale->slug; ?>
+						<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale->slug ); ?>">
+							<?php echo esc_html( $locale->slug ); ?>
 						</a>
 					</td>
 
