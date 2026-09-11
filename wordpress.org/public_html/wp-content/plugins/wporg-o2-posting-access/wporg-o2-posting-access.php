@@ -322,11 +322,21 @@ class Plugin {
 		}
 
 		$post = get_post( $post_id );
-		if ( $post && 'revision' === $post->post_type ) {
-			$post = get_post( $post->post_parent );
+		if ( ! $post ) {
+			return $maybe_empty;
 		}
 
-		$post_type = $post ? get_post_type_object( $post->post_type ) : null;
+		/*
+		 * get_post( 0 ) hands back whatever is in the global $post, so a revision
+		 * with no parent has to stay itself rather than borrow the page it is being
+		 * asked about from.
+		 */
+		$target = $post;
+		if ( 'revision' === $target->post_type && $target->post_parent ) {
+			$target = get_post( $target->post_parent );
+		}
+
+		$post_type = $target ? get_post_type_object( $target->post_type ) : null;
 
 		/*
 		 * A post type that does not map meta capabilities answers 'edit_post' with
@@ -335,12 +345,31 @@ class Plugin {
 		 * of those, and the Customizer saves Additional CSS through wp_update_post(),
 		 * so asking would break it. Authorization for those types is whatever the
 		 * code registering them decided it is.
+		 *
+		 * A type that will not resolve at all is not exempt: core answers 'edit_post'
+		 * for those by denying, or by falling back to 'edit_others_posts', and either
+		 * is a better answer than letting the write through.
 		 */
-		if ( ! $post_type || ! $post_type->map_meta_cap ) {
+		if ( $post_type && ! $post_type->map_meta_cap ) {
 			return $maybe_empty;
 		}
 
-		return ! current_user_can( 'edit_post', $post_id );
+		if ( current_user_can( 'edit_post', $post_id ) ) {
+			return $maybe_empty;
+		}
+
+		/**
+		 * Fires when an update is refused because the current user cannot edit the post.
+		 *
+		 * The caller sees wp_insert_post() report the post as empty, which says
+		 * nothing about why, so anything diagnosing a refused save needs this.
+		 *
+		 * @param int $post_id The post the update was aimed at.
+		 * @param int $user_id The user the update was refused for.
+		 */
+		do_action( 'wporg_o2_posting_access_update_refused', $post_id, get_current_user_id() );
+
+		return true;
 	}
 
 	/**

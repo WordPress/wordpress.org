@@ -930,7 +930,9 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	}
 
 	/**
-	 * The block is on the object, not on one field: content is protected too.
+	 * The check is on the object rather than on one field, so a caller supplying
+	 * content for somebody else's post is refused the same way a caller supplying
+	 * a parent is.
 	 */
 	public function test_non_member_cannot_overwrite_another_authors_post() {
 		list( $post_id ) = $this->seed_others_post_with_revision( 'publish' );
@@ -1199,11 +1201,12 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	}
 
 	/**
-	 * Core registers custom_css without map_meta_cap, so its 'edit_post' resolves
-	 * to a primitive no role is granted and the question denies even a site
-	 * administrator. The Customizer saves Additional CSS through wp_update_post(),
-	 * and the stored post belongs to whoever saved it first, so asking would break
-	 * that for the next administrator to touch it.
+	 * Core registers custom_css without map_meta_cap, which makes 'edit_post'
+	 * resolve to the type's own 'edit_css' without recursing, and that is not a
+	 * capability any role is granted. Ownership has nothing to do with it: the
+	 * check fails for the administrator who saved the CSS in the first place just
+	 * as readily. The Customizer writes Additional CSS through wp_update_post(),
+	 * so a type answering that way has to be left to its own authorization.
 	 */
 	public function test_post_type_without_meta_capability_mapping_is_untouched() {
 		wp_set_current_user( 0 );
@@ -1233,6 +1236,157 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 		$this->assertFalse( $can_edit_object, 'This test is about a type whose edit_post check denies even an administrator.' );
 		$this->assertSame( $css_id, $result );
 		$this->assertSame( 'body { color: #fff; }', get_post( $css_id )->post_content );
+	}
+
+	/**
+	 * A revision whose parent row is gone resolves to no post type at all. Core
+	 * denies 'edit_post' in that case, so the guard has to ask rather than treat
+	 * an unresolved type as permission.
+	 */
+	public function test_orphaned_revision_is_still_refused() {
+		global $wpdb;
+
+		list( $post_id, $revision ) = $this->seed_others_post_with_revision();
+		$carrier                    = $this->create_own_post();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Orphaning a revision has no API equivalent.
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $post_id ) );
+		clean_post_cache( $post_id );
+		clean_post_cache( $revision->ID );
+
+		$can_edit_object = current_user_can( 'edit_post', $revision->ID );
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $revision->ID,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$this->assertFalse( $can_edit_object, 'Core denies the orphan, so the guard has something to agree with.' );
+		$this->assertSame( 0, $result );
+		$this->assertNotSame( $carrier, (int) get_post( $revision->ID )->post_parent );
+	}
+
+	/**
+	 * Resolving a revision with no parent must not fall through to the global
+	 * $post: get_post( 0 ) returns it, so the capability model would be read off
+	 * whatever the request happens to be rendering.
+	 */
+	public function test_revision_with_no_parent_does_not_consult_the_global_post() {
+		global $wpdb, $post;
+
+		list( , $revision ) = $this->seed_others_post_with_revision();
+		$carrier            = $this->create_own_post();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Detaching a revision has no API equivalent.
+		$wpdb->update( $wpdb->posts, array( 'post_parent' => 0 ), array( 'ID' => $revision->ID ) );
+		clean_post_cache( $revision->ID );
+
+		$previous_global = $post;
+
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Standing in for a request that is rendering a post.
+		$post = get_post(
+			$this->factory()->post->create(
+				array(
+					'post_type'   => 'custom_css',
+					'post_status' => 'publish',
+					'post_title'  => 'wporg-test-theme',
+				)
+			)
+		);
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $revision->ID,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$post = $previous_global;
+		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertSame( 0, $result );
+		$this->assertNotSame( $carrier, (int) get_post( $revision->ID )->post_parent );
+	}
+
+	/**
+	 * A refused update reports itself as empty content, which says nothing about
+	 * why, so the action is the only thing an operator has to go on.
+	 */
+	public function test_refusal_fires_an_action() {
+		list( $post_id ) = $this->seed_others_post_with_revision( 'publish' );
+
+		$refused = array();
+		$spy     = function ( $refused_post_id, $user_id ) use ( &$refused ) {
+			$refused[] = array( $refused_post_id, $user_id );
+		};
+		add_action( 'wporg_o2_posting_access_update_refused', $spy, 10, 2 );
+
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Overwritten.',
+			)
+		);
+
+		remove_action( 'wporg_o2_posting_access_update_refused', $spy, 10 );
+
+		$this->assertSame( array( array( $post_id, $this->non_member ) ), $refused );
+	}
+
+	/**
+	 * Changing one field re-saves the whole row, and the row goes through the
+	 * current user's content filters on the way. A caller without 'unfiltered_html'
+	 * therefore rewrites the stored content of a post written by somebody who had
+	 * it, quite apart from whatever the caller was trying to change. The refusal
+	 * has to land before any of that: no rewritten content, no revision on the
+	 * victim's post, no save_post.
+	 */
+	public function test_refused_update_leaves_the_stored_row_alone() {
+		wp_set_current_user( 0 );
+		$author = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		grant_super_admin( $author );
+		wp_set_current_user( $author );
+
+		$raw     = '<p>Keep</p><script>alert(1)</script><div onclick="x()">Hi</div>';
+		$post_id = wp_insert_post(
+			array(
+				'post_author'  => $author,
+				'post_status'  => 'publish',
+				'post_title'   => 'Written with unfiltered_html',
+				'post_content' => $raw,
+			)
+		);
+
+		$this->assertSame( $raw, get_post( $post_id )->post_content, 'The fixture needs markup the attacker could not have written.' );
+
+		wp_set_current_user( $this->non_member );
+		$carrier = $this->create_own_post();
+
+		$saved = 0;
+		$spy   = function ( $saved_post_id ) use ( &$saved, $post_id ) {
+			if ( $saved_post_id === $post_id ) {
+				++$saved;
+			}
+		};
+		add_action( 'save_post', $spy );
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_parent' => $carrier,
+			)
+		);
+
+		remove_action( 'save_post', $spy );
+		clean_post_cache( $post_id );
+
+		$this->assertSame( 0, $result );
+		$this->assertSame( $raw, get_post( $post_id )->post_content );
+		$this->assertSame( 0, (int) get_post( $post_id )->post_parent );
+		$this->assertCount( 0, wp_get_post_revisions( $post_id ) );
+		$this->assertSame( 0, $saved );
 	}
 
 	/**
