@@ -15,7 +15,7 @@ function verify_signature() {
 		return;
 	}
 
-	$sent_signature     = $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '';
+	$sent_signature     = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '' ) );
 	$expected_signature = 'sha1=' . hash_hmac( 'sha1', $HTTP_RAW_POST_DATA, GH_PRBOT_WEBHOOK_SECRET );
 
 	if ( ! hash_equals( $expected_signature, $sent_signature ) ) {

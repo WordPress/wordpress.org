@@ -157,7 +157,7 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
-	$path = $_SERVER['REQUEST_URI'] ?? '/';
+	$path = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) );
 	// Remove the site prefix.
 	$path = preg_replace( '!^' . preg_quote( wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '!' ) . '!', '/', $path );
 
@@ -281,7 +281,7 @@ function wporg_redirect_site_not_found() {
  * Redirect w.org/contributor-training/ to it's new home on Learn.
  */
 add_action( 'template_redirect', function() {
-	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
+	$path = strtolower( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) );
 	if ( 'wordpress.org' !== sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) || ! str_starts_with( $path, '/contributor-training' ) ) {
 		return;
 	}
@@ -312,7 +312,7 @@ add_action( 'template_redirect', function() {
 
 // Add wp.org redirect from developer.wp.org see: https://github.com/WordPress/wporg-developer/issues/452
 add_action( 'parse_request', function() {
-	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
+	$path = strtolower( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) );
 	if ( 'developer.wordpress.org' !== sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) || '/themes/getting-started/wordpress-licensing-the-gpl/' !== $path ) {
 		return;
 	}

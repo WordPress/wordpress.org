@@ -653,7 +653,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$redirect_to = wp_unslash( $_GET['redirect_to'] );
 			} else {
 				// Generate the current url based on the current hostname and request uri.
-				$redirect_to = set_url_scheme( 'http://' . $this->host . ( $_SERVER['REQUEST_URI'] ?? '/' ) );
+				$redirect_to = set_url_scheme( 'http://' . $this->host . ( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) ) );
 
 				// Remove the sso_token parameter, as we've now used it.
 				$redirect_to = remove_query_arg( 'sso_token', $redirect_to );

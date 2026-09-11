@@ -17,7 +17,7 @@ $wp_object_cache->blog_prefix = WPORG_THEME_DIRECTORY_BLOGID;
 function send_error( $error, $code = 404 ) {
 	global $format;
 
-	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' ' . $code, true, $code );
+	header( ( sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) ) ) . ' ' . $code, true, $code );
 
 	$response = (object) [
 		'error' => $error	
@@ -26,7 +26,7 @@ function send_error( $error, $code = 404 ) {
 	// Browsers get a nicer action not implemented error.
 	if (
 		'GET' === sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) &&
-		false === strpos( $_SERVER['HTTP_USER_AGENT'] ?? '', 'WordPress/' ) &&
+		false === strpos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ), 'WordPress/' ) &&
 		false !== strpos( $error, 'Action not implemented.' )
 	) {
 		header( 'Content-Type: text/html; charset=utf-8' );

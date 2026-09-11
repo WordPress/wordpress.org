@@ -567,7 +567,9 @@ function wporg_remember_where_user_came_from() {
 	}
 
 	// Make sure value is a string, since setcookie requires it to be.
-	$came_from = sanitize_text_field( $_REQUEST['redirect_to'] ?? ( $_SERVER['HTTP_REFERER'] ?? '' ) );
+	$came_from = isset( $_REQUEST['redirect_to'] )
+		? sanitize_text_field( wp_unslash( $_REQUEST['redirect_to'] ) )
+		: esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
 	if ( ! $came_from ) {
 		return;
 	}

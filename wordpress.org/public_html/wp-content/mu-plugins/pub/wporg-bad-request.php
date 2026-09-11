@@ -379,7 +379,7 @@ add_action( 'init', function() {
 		return;
 	}
 
-	$path = parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH );
+	$path = parse_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH );
 	if ( str_ends_with( $path, '/wp-activate.php' ) ) {
 		die_bad_request( 'Invalid request to wp-activate.php' );
 	}
