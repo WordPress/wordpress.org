@@ -23,7 +23,7 @@ function api_send_json( $data ) {
 	}
 
 	if ( isset( $_GET['callback'] ) ) {
-		$callback = preg_replace( '/[^a-z0-9_]/i', '', $_GET['callback'] );
+		$callback = preg_replace( '/[^a-z0-9_]/i', '', sanitize_text_field( wp_unslash( $_GET['callback'] ?? '' ) ) );
 	} else {
 		$callback = false;
 	}
@@ -46,18 +46,18 @@ if ( ! is_user_logged_in() ) {
 	) );
 }
 
-switch ( $_REQUEST['action'] ) {
+switch ( sanitize_key( $_REQUEST['action'] ?? '' ) ) {
 	case 'add-favorite':
 	case 'remove-favorite':
-		if ( ! isset( $_REQUEST['theme'] ) || ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'modify-theme-favorite' ) ) {
+		if ( ! isset( $_REQUEST['theme'] ) || ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'modify-theme-favorite' ) ) {
 			api_send_json( array(
 				'error' => 'bad_request'
 			) );
 		}
 
-		$theme_slug = wp_unslash( $_REQUEST['theme'] );
+		$theme_slug = sanitize_key( wp_unslash( $_REQUEST['theme'] ?? '' ) );
 
-		if ( 'add-favorite' == $_REQUEST['action'] ) {
+		if ( 'add-favorite' == sanitize_key( $_REQUEST['action'] ?? '' ) ) {
 			$result = wporg_themes_add_favorite( $theme_slug );
 		} else {
 			$result = wporg_themes_remove_favorite( $theme_slug );

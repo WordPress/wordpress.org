@@ -34,7 +34,7 @@ if ( empty( $_SERVER['CONTENT_TYPE'] ) || 'application/json' !== $_SERVER['CONTE
 $payload = json_decode( $HTTP_RAW_POST_DATA );
 
 if ( ! empty( $_GET['trac'] ) ) {
-	define( 'WEBHOOK_TRAC_HINT', $_GET['trac'] );
+	define( 'WEBHOOK_TRAC_HINT', sanitize_key( $_GET['trac'] ?? '' ) );
 }
 
 switch ( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '' ) ) ) {

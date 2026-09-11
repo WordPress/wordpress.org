@@ -7,8 +7,8 @@ require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
 require( $base_dir . '/includes/object-cache.php' );
 wp_cache_init();
 
-$slug    = isset( $_REQUEST['slug'] )    ? $_REQUEST['slug']    : '';
-$version = isset( $_REQUEST['version'] ) ? $_REQUEST['version'] : null;
+$slug    = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : '';
+$version = isset( $_REQUEST['version'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['version'] ) ) : null;
 
 foreach ( [ 'slug', 'version' ] as $field ) {
 	if ( $$field && ! is_string( $$field ) ) {

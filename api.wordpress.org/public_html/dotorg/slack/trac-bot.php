@@ -21,7 +21,8 @@ namespace Dotorg\Slack\Trac {
 	}
 
 	// Prevent recursion.
-	if ( $_POST['user_name'] === 'slackbot' ) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Webhook endpoint; the request is authenticated by its signature, not a nonce.
+	if ( sanitize_text_field( wp_unslash( $_POST['user_name'] ?? '' ) ) === 'slackbot' ) {
 		return;
 	}
 
@@ -112,7 +113,8 @@ namespace Dotorg\Slack\Trac {
 
 		$slack->send( $parser->get_channel(), $parser->get_thread() );
 
-		if ( $_POST['channel_name'] === 'test' ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Webhook endpoint; the request is authenticated by its signature, not a nonce.
+		if ( sanitize_text_field( wp_unslash( $_POST['channel_name'] ?? '' ) ) === 'test' ) {
 			// Don't post to Trac if we're coming from #test.
 			continue;
 		}
@@ -124,7 +126,8 @@ namespace Dotorg\Slack\Trac {
 
 		$trac_xmlrpc = new \Trac( 'slackbot', SLACKBOT_WPORG_PASSWORD, "https://$trac.trac.wordpress.org/login/xmlrpc" );
 
-		$comment = sprintf( $comment_template, $_POST['channel_name'], $_POST['user_name'], str_replace( '.', '', $_POST['timestamp'] ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Webhook endpoint; the request is authenticated by its signature, not a nonce.
+		$trac_comment = sprintf( $comment_template, sanitize_text_field( wp_unslash( $_POST['channel_name'] ?? '' ) ), sanitize_text_field( wp_unslash( $_POST['user_name'] ?? '' ) ), str_replace( '.', '', sanitize_text_field( wp_unslash( $_POST['timestamp'] ?? '' ) ) ) );
 		foreach ( $results['ticket'] as $ticket ) {
 			$ticket_id = is_array( $ticket ) ? $ticket['id'] : $ticket;
 
@@ -153,7 +156,7 @@ namespace Dotorg\Slack\Trac {
 
 			$parser->set_redundancy( 'trac', $trac, 'ticket', $ticket_id );
 
-			$trac_xmlrpc->ticket_update( $ticket_id, $comment );
+			$trac_xmlrpc->ticket_update( $ticket_id, $trac_comment );
 		}
 	}
 }

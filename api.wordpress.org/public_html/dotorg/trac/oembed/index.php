@@ -24,7 +24,7 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = $_GET['url'] ?? '';
+$url = esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) );
 $url = is_string( $url ) ? wp_unslash( $url ) : '';
 
 header( 'Allow: GET' );
@@ -108,7 +108,7 @@ if ( ! isset( $_GET['embed'] ) ) {
 	);
 
 	if ( ! empty( $_GET['api_key'] ) ) {
-		$embed_url = add_query_arg( 'api_key', wp_unslash( $_GET['api_key'] ), $embed_url );
+		$embed_url = add_query_arg( 'api_key', sanitize_text_field( wp_unslash( $_GET['api_key'] ?? '' ) ), $embed_url );
 	}
 
 	$embed_url .= '#el=' . $id;

@@ -4,9 +4,11 @@ require dirname( __FILE__ ) . '/parse.php';
 
 $jsonp = '';
 if ( ! empty( $_GET['jsonp'] ) ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable. The callback is restricted with preg_replace() and the user agent is only parsed.
 	$jsonp = preg_replace( '/[^a-zA-Z0-9_]/', '', $_GET['jsonp'] );
 	header( 'Content-Type: application/javascript' );
 } else if ( ! empty( $_GET['callback'] ) ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable. The callback is restricted with preg_replace() and the user agent is only parsed.
 	$jsonp = preg_replace( '/[^a-zA-Z0-9_]/', '', $_GET['callback'] );
 	header( 'Content-Type: application/javascript' );
 }
@@ -15,10 +17,12 @@ if ( empty( $_REQUEST['useragent'] ) ) {
 	return;
 }
 
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable. The callback is restricted with preg_replace() and the user agent is only parsed.
 $user_agent = $_REQUEST['useragent'];
 $data = browsehappy_parse_user_agent( $user_agent );
 
 // Collect a sample: One out of every 25.
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable. The callback is restricted with preg_replace() and the user agent is only parsed.
 if ( 0 === strpos( $_SERVER['HTTP_USER_AGENT'], 'WordPress/' ) && 1 === rand( 1, 25 ) ) {
 	require( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/includes/hyperdb/bb-10-hyper-db.php' );
 	bh_record_data( $user_agent, $data );
@@ -46,6 +50,7 @@ if ( $jsonp ) {
 function bh_record_data( $ua, $data ) {
 	global $wpdb;
 
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable. The callback is restricted with preg_replace() and the user agent is only parsed.
 	list( $wp_ver, $url ) = explode( ';', $_SERVER['HTTP_USER_AGENT'], 2 );
 	$wp_ver = substr( $wp_ver, 10, 64 );
 	$url = rtrim( strtolower( trim( $url ) ), '/' );

@@ -99,6 +99,7 @@ function api_call() {
 	exit;
 }
 
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable.
 if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( $_SERVER['REQUEST_URI'], '/security-team.php?token=' ) ) {
 	api_call();
 }

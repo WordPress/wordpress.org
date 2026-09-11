@@ -16,7 +16,7 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 // Support "flat" requests, ie. no '?request[slug]=..` needed, just '?slug=...'
 if ( ! isset( $_GET['request'] ) ) {
 	$_GET = $_REQUEST = array(
-		'action'  => $_GET['action'] ?? '', // 1.2 only supports GET requests
+		'action'  => sanitize_key( $_GET['action'] ?? '' ), // 1.2 only supports GET requests
 		'request' => array_diff_key( $_GET, [ 'action' => false, 'callback' => false ] ),
 	);
 }

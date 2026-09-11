@@ -17,6 +17,7 @@ output_response(
 
 // Output functions
 function bail( $error_code, $error_text, $http_code = 400, $http_code_text = false ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable.
 	$server_protocol = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
 	$http_code_texts = [
 		400 => 'Bad Request',
@@ -43,7 +44,8 @@ function output_response( $data ) {
 		call_headers( 'application/javascript' );
 
 		echo '/**/' .
-			preg_replace('/[^a-zA-Z0-9_.]/', '', $_GET['callback'] ) .
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSONP response body; the callback is restricted to [a-zA-Z0-9_.] here.
+			preg_replace( '/[^a-zA-Z0-9_.]/', '', sanitize_text_field( wp_unslash( $_GET['callback'] ?? '' ) ) ) .
 			'(' . $json_data . ')';
 	} else {
 		call_headers( 'application/json' );

@@ -83,8 +83,8 @@ function ack_and_finish() {
 }
 
 function verify_slack_signature( $body ) {
-	$timestamp = $_SERVER['HTTP_X_SLACK_REQUEST_TIMESTAMP'] ?? '';
-	$signature = $_SERVER['HTTP_X_SLACK_SIGNATURE'] ?? '';
+	$timestamp = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_SLACK_REQUEST_TIMESTAMP'] ?? '' ) );
+	$signature = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_SLACK_SIGNATURE'] ?? '' ) );
 	if ( ! $timestamp || ! $signature ) {
 		return false;
 	}
@@ -104,16 +104,20 @@ if ( ! verify_slack_signature( $raw_body ) ) {
 
 // Dispatch: slash command vs. interactivity callback.
 if ( isset( $_POST['payload'] ) ) {
-	$payload = json_decode( $_POST['payload'], true );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- JSON body from Slack; sanitizing would corrupt it before json_decode(), and the request signature is verified above. Webhook endpoint; the request is authenticated by its signature, not a nonce.
+	$payload = json_decode( wp_unslash( $_POST['payload'] ?? '' ), true );
 	handle_interaction( $payload );
 	exit;
 }
 handle_slash_command();
 
 function handle_slash_command() {
-	$channel_id = $_POST['channel_id'] ?? '';
-	$user_id    = $_POST['user_id'] ?? '';
-	$trigger_id = $_POST['trigger_id'] ?? '';
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Webhook endpoint; the request is authenticated by its signature, not a nonce.
+	$channel_id = sanitize_text_field( wp_unslash( $_POST['channel_id'] ?? '' ) );
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Webhook endpoint; the request is authenticated by its signature, not a nonce.
+	$user_id    = sanitize_text_field( wp_unslash( $_POST['user_id'] ?? '' ) );
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Webhook endpoint; the request is authenticated by its signature, not a nonce.
+	$trigger_id = sanitize_text_field( wp_unslash( $_POST['trigger_id'] ?? '' ) );
 
 	// trigger_id is only valid for 3s, and listing every subgroup's membership will take
 	// longer than that. Open a loading view now, then views.update after we have the data.

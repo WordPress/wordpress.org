@@ -43,7 +43,7 @@ if (
 function get_signed_payload_or_die() {
 	$payload            = file_get_contents( 'php://input' );
 	// Validate that the request came from GitHub.
-	$sent_signature     = $_SERVER['HTTP_X_HUB_SIGNATURE_256'];
+	$sent_signature     = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '' ) );
 	$expected_signature = 'sha256=' . hash_hmac( 'sha256', $payload, constant( 'GH_ACTIVITY_WEBHOOK_SECRET' ) );
 
 	if ( ! hash_equals( $expected_signature, $sent_signature ) ) {

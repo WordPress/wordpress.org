@@ -3,7 +3,7 @@
 header( 'Access-Control-Allow-Origin: *' );
 
 if ( isset( $_GET['callback'] ) && is_string( $_GET['callback'] ) ) {
-	$callback = preg_replace( '/[^a-z0-9_]/i', '', $_GET['callback'] );
+	$callback = preg_replace( '/[^a-z0-9_]/i', '', sanitize_text_field( wp_unslash( $_GET['callback'] ?? '' ) ) );
 } else {
 	$callback = false;
 }

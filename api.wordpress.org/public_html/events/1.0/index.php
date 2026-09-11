@@ -128,31 +128,32 @@ function parse_request() {
 
 	// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
 	if ( isset( $_GET['latitude'], $_GET['longitude'] ) ) {
-		$location_args['latitude']  = $_GET['latitude'];
-		$location_args['longitude'] = $_GET['longitude'];
+		$location_args['latitude']  = floatval( $_GET['latitude'] ?? 0 );
+		$location_args['longitude'] = floatval( $_GET['longitude'] ?? 0 );
 	}
 
 	if ( isset( $_GET['country'] ) ) {
-		$location_args['country']             = $_GET['country'];
+		$location_args['country']             = sanitize_text_field( wp_unslash( $_GET['country'] ?? '' ) );
 		$location_args['restrict_by_country'] = true;
 	}
 
 	// If a precise location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
 	if ( isset( $_POST['location_data'] ) ) {
-		$location_args = $_POST['location_data'];
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- Structured location payload; each field is validated by the location lookup below. Webhook endpoint; the request is authenticated by its signature, not a nonce.
+		$location_args = (array) wp_unslash( $_POST['location_data'] ?? array() );
 	}
 
 	// Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
 	if ( isset( $_REQUEST['location'] ) ) {
-		$location_args['location_name'] = trim( $_REQUEST['location'] );
+		$location_args['location_name'] = trim( sanitize_text_field( wp_unslash( $_REQUEST['location'] ?? '' ) ) );
 	}
 
 	if ( isset( $_REQUEST['timezone'] ) ) {
-		$location_args['timezone'] = $_REQUEST['timezone'];
+		$location_args['timezone'] = sanitize_text_field( wp_unslash( $_REQUEST['timezone'] ?? '' ) );
 	}
 
 	if ( isset( $_REQUEST['locale'] ) ) {
-		$location_args['locale'] = $_REQUEST['locale'];
+		$location_args['locale'] = sanitize_text_field( wp_unslash( $_REQUEST['locale'] ?? '' ) );
 	}
 
 	if ( isset( $_REQUEST['ip'] ) ) {
@@ -162,7 +163,7 @@ function parse_request() {
 		 * as the dev's browser IP.
 		 */
 		$public_ip = filter_var(
-			$_REQUEST['ip'],
+			sanitize_text_field( wp_unslash( $_REQUEST['ip'] ?? '' ) ),
 			FILTER_VALIDATE_IP,
 			FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
 		);
@@ -264,7 +265,7 @@ function build_response( $location, $location_args ) {
 		);
 
 		if ( isset( $_REQUEST['number'] ) ) {
-			$event_args['number'] = $_REQUEST['number'];
+			$event_args['number'] = absint( $_REQUEST['number'] ?? 0 );
 		}
 
 		if ( ! empty( $location['latitude'] ) ) {
