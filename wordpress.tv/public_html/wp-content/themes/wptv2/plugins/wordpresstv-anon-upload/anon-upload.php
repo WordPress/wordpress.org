@@ -449,11 +449,11 @@ class WPTV_Anon_Upload {
 
 			<div id="anon-data-wrap" class="inside">
 
-				<p>To change the default thumbnail image, <a href="https://wordpress.com/media/wordpress.tv/<?php echo $attachment_post->ID; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_video_shortcode() and the surrounding literal markup. ?>">go here and select Edit Thumbnail</a>.</p>
+				<p>To change the default thumbnail image, <a href="https://wordpress.com/media/wordpress.tv/<?php echo (int) $attachment_post->ID; ?>">go here and select Edit Thumbnail</a>.</p>
 
 				<div class="wp_attachment_holder wp-clearfix">
 				<?php
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_video_shortcode() and the surrounding literal markup.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_video_shortcode() returns the rendered video player markup.
 				echo wp_video_shortcode( array( 'src' => wp_get_attachment_url( $attachment_post->ID ) ) )
 				?>
 				</div>
