@@ -11,12 +11,12 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			exit;
 
 		// temp fix for /Blocks, rm later
-		} elseif ( 0 === strpos( $_SERVER['REQUEST_URI'], '/Blocks' ) ) {
+		} elseif ( 0 === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/Blocks' ) ) {
 			wp_safe_redirect( '/blocks/', 301 );
 			exit;
 
 		// WordPress.org does not have a specific site search, only the global WordPress.org search
-		} elseif ( ! empty( $_GET['s'] ) && false === strpos( $_SERVER['REQUEST_URI'], '/search/' ) ) {
+		} elseif ( ! empty( $_GET['s'] ) && false === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/search/' ) ) {
 			wp_safe_redirect( '/search/' . urlencode( wp_unslash( $_GET['s'] ) ) . '/', 301 );
 			exit;
 
@@ -62,7 +62,7 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
-				if ( 0 === strpos( $_SERVER['REQUEST_URI'], $test ) ) {
+				if ( 0 === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), $test ) ) {
 
 					$code = 301;
 					if ( is_array( $redirect ) ) {
@@ -85,8 +85,8 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
  * Redirect some common urls to the proper location.
  */
 add_action( 'template_redirect', function() {
-	$host = $_SERVER['HTTP_HOST'];
-	$path = $_SERVER['REQUEST_URI'];
+	$host = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
+	$path = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 
 	if ( ! is_404() ) {
 		return;
@@ -195,7 +195,7 @@ add_action( 'template_redirect', function() {
 function wporg_redirect_site_not_found() {
 	$location    = '';
 	$status_code = 301;
-	$host        = strtolower( $_SERVER['HTTP_HOST'] );
+	$host        = strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) );
 
 	switch ( $host ) {
 		// :earth_asia::earth_africa::earth_americas:.wordpress.org
@@ -205,7 +205,7 @@ function wporg_redirect_site_not_found() {
 
 		// Singular => Plural
 		case 'profile.wordpress.org':
-			$location = 'https://profiles.wordpress.org' . $_SERVER['REQUEST_URI'];
+			$location = 'https://profiles.wordpress.org' . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 			break;
 
 		// WordPress.org => WordPress.net
@@ -282,7 +282,7 @@ function wporg_redirect_site_not_found() {
  */
 add_action( 'template_redirect', function() {
 	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
-	if ( 'wordpress.org' !== $_SERVER['HTTP_HOST'] || ! str_starts_with( $path, '/contributor-training' ) ) {
+	if ( 'wordpress.org' !== sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) || ! str_starts_with( $path, '/contributor-training' ) ) {
 		return;
 	}
 
@@ -313,7 +313,7 @@ add_action( 'template_redirect', function() {
 // Add wp.org redirect from developer.wp.org see: https://github.com/WordPress/wporg-developer/issues/452
 add_action( 'parse_request', function() {
 	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
-	if ( 'developer.wordpress.org' !== $_SERVER['HTTP_HOST'] || '/themes/getting-started/wordpress-licensing-the-gpl/' !== $path ) {
+	if ( 'developer.wordpress.org' !== sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) || '/themes/getting-started/wordpress-licensing-the-gpl/' !== $path ) {
 		return;
 	}
 

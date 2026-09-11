@@ -37,7 +37,7 @@ if ( ! empty( $_GET['trac'] ) ) {
 	define( 'WEBHOOK_TRAC_HINT', $_GET['trac'] );
 }
 
-switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
+switch ( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '' ) ) ) {
 	// Pull Request
 	case 'pull_request':
 

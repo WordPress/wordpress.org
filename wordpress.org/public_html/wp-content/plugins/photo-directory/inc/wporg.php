@@ -90,7 +90,7 @@ class WPorg {
 		}
 
 		// Don't redirect the login page.
-		if ( false !== stripos( wp_login_url(), $_SERVER['SCRIPT_NAME'] ) ) {
+		if ( false !== stripos( wp_login_url(), esc_url_raw( wp_unslash( $_SERVER['SCRIPT_NAME'] ?? '' ) ) ) ) {
 			return;
 		}
 

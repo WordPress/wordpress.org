@@ -529,7 +529,7 @@ The WordPress.org Team',
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
 			'meta_input' => array(
-				'_bbp_author_ip' => $_SERVER['REMOTE_ADDR'],
+				'_bbp_author_ip' => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
 			),
 		);
 

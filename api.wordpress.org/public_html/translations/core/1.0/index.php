@@ -11,7 +11,7 @@ $version = WP_CORE_LATEST_RELEASE;
 if ( isset( $_REQUEST['version'] ) ) {
 	$version = $_REQUEST['version'];
 	if ( empty( $version ) || ! is_string( $version ) || ! is_numeric( $version[0] ) ) {
-		header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request' );
+		header( sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? '' ) ) . ' 400 Bad Request' );
 		die( '?version= must be a valid WordPress version' );
 	}
 
@@ -23,7 +23,7 @@ $translations = find_all_translations_for_core( $version );
 header( 'Access-Control-Allow-Origin: *' );
 header( 'Access-Control-Expose-Headers: X-Translations-Count' );
 header( 'X-Translations-Count:' . count( $translations ) );
-if ( 'HEAD' === $_SERVER['REQUEST_METHOD'] ) {
+if ( 'HEAD' === sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
 	exit;
 }
 

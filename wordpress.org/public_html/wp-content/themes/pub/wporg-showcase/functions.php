@@ -190,7 +190,7 @@ function breadcrumb() { ?>
 				/* translators: %s: search query */
 				printf( esc_html__( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() );
 			?>
-		<?php elseif ( strstr( $_SERVER['REQUEST_URI'], '/showcase/archives' ) ) : ?>
+		<?php elseif ( strstr( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/showcase/archives' ) ) : ?>
 			<?php esc_html_e( '&raquo; Archives', 'wporg-showcase' ); ?>
 		<?php else : ?>
 			<?php if ( is_category() ) : ?>

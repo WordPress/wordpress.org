@@ -15,14 +15,15 @@ if ( !function_exists( 'bporg_unhook_single_user_filter' ) )
 	include_once( plugin_dir_path( __FILE__ ) . 'extensions.php' );
 
 // Always show the toolbar
-if ( 'profiles.wordpress.org' != $_SERVER['HTTP_HOST'] )
+if ( 'profiles.wordpress.org' != sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) ) {
 	add_filter( 'show_admin_bar', '__return_true' );
+}
 
 function bporg_maintenance() {
 	if ( is_super_admin() )
 		return;
 
-	if ( 'buddypress.org' == $_SERVER['HTTP_HOST'] ) {
+	if ( 'buddypress.org' == sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) ) {
 		header( 'Retry-After: 7200' );
 		wp_die( 'BuddyPress.org is down for maintenance. See you tomorrow!', 'Be back soon!', array( 'response' => 503 ) );
 	}
@@ -59,7 +60,7 @@ function bporg_admin_redirect() {
 	// Allow registered unprivileged admin-ajax.php requests for
 	// profiles.wordpress.org to pass through.
 	if (
-		'profiles.wordpress.org' == $_SERVER['HTTP_HOST'] &&
+		'profiles.wordpress.org' == sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) &&
 		isset( $_REQUEST['action'] ) &&
 		(
 			has_action( 'wp_ajax_nopriv_' . $_REQUEST['action'] ) ||

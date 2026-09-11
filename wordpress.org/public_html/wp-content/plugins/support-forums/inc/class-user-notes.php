@@ -77,7 +77,7 @@ class User_Notes {
 		$this->add_user_note( $user_id, $note_text, $post_id, $note_id );
 
 		if ( $should_redirect ) {
-			$redirect_url = set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+			$redirect_url = set_url_scheme( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 
 			// Redirect to clear form data.
 			bbp_redirect( $redirect_url );

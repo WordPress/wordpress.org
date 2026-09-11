@@ -633,7 +633,7 @@ class Tools {
 			'comment_author'       => $user->display_name,
 			'comment_author_email' => $user->user_email,
 			'comment_author_url'   => $user->user_url,
-			'comment_author_IP'    => $_SERVER['REMOTE_ADDR'],
+			'comment_author_IP'    => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
 			'comment_type'         => 'internal-note',
 			'comment_post_ID'      => $post->ID,
 			'user_id'              => $user->ID,

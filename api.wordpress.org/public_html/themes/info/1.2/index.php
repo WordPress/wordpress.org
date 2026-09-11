@@ -2,7 +2,7 @@
 
 // Version 1.2+ only accepts GET requests
 if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'POST' ) {
-	header( $_SERVER['SERVER_PROTOCOL'] . ' 405 Method not allowed' );
+	header( sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? '' ) ) . ' 405 Method not allowed' );
 	header( 'Allow: GET' );
 	header( 'Content-Type: text/plain' );
 

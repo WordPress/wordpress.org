@@ -395,7 +395,7 @@ function filter_navigation_block( $block_content, $block ) {
 				$tags->set_bookmark( 'parent-li' );
 				$tags->next_tag( 'a' );
 
-				if ( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] === $tags->get_attribute( 'href' ) ) {
+				if ( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) === $tags->get_attribute( 'href' ) ) {
 					$tags->seek( 'parent-li' );
 					$tags->add_class( 'current-menu-item' );
 					break;

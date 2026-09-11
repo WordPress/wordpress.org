@@ -53,7 +53,7 @@ class Plugins_Info_API {
 				break;
 
 			default:
-				if ( 'POST' != strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
+				if ( 'POST' != strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) {
 					die( '<p>Action not implemented. <a href="https://codex.wordpress.org/WordPress.org_API">API Docs</a>.</p>' );
 				} else {
 					$this->output( (object) [ 'error' => 'Action not implemented' ], 400 );
@@ -344,7 +344,7 @@ class Plugins_Info_API {
 		header( 'Content-Type: ' . $this->formats[ $this->format ] );
 
 		if ( $http_code ) {
-			header( $_SERVER['SERVER_PROTOCOL'] . "$http_code $http_code", true, $http_code );
+			header( sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? '' ) ) . "$http_code $http_code", true, $http_code );
 		}
 
 		switch ( $this->format ) {
@@ -388,8 +388,8 @@ class Plugins_Info_API {
 		global $wpdb;
 		define( 'REST_REQUEST', true );
 
-		$host                   = $_SERVER['HTTP_HOST'];
-		$request_uri            = $_SERVER['REQUEST_URI'];
+		$host                   = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
+		$request_uri            = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 		$_SERVER['HTTP_HOST']   = 'wordpress.org';
 		$_SERVER['REQUEST_URI'] = '/plugins/';
 

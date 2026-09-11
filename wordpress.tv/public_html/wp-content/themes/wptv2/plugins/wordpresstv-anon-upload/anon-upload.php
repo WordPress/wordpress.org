@@ -314,7 +314,7 @@ class WPTV_Anon_Upload {
 		$language          = $this->sanitize_text( $_posted['wptv_language'] );
 		$slides            = $this->sanitize_text( $_posted['wptv_slides_url'] );
 		$recorded          = $this->sanitize_text( $_posted['wptv_date'] ); // yyyy-mm-dd
-		$ip                = $_SERVER['REMOTE_ADDR'];
+		$ip                = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 
 		$categories = '';
 		if ( ! empty( $_posted['post_category'] ) && is_array( $_posted['post_category'] ) ) {

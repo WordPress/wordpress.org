@@ -44,7 +44,7 @@ class Browse_Happy_Locale {
 		$locales = array();
 		$variant = '';
 
-		$langs = explode( ',', $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
+		$langs = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '' ) ) );
 
 		foreach ( $langs as $lang ) {
 			$lang   = str_replace( 'q=', '', $lang );

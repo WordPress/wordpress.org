@@ -589,7 +589,7 @@ class Upload_Handler {
 
 		// First time submission, track some additional metadata.
 		if ( ! $updating_existing ) {
-			$post_args['meta_input']['_author_ip']         = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
+			$post_args['meta_input']['_author_ip']         = preg_replace( '/[^0-9a-fA-F:., ]/', '', sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
 			$post_args['meta_input']['_submitted_date']    = time();
 			$post_args['meta_input']['_used_upload_token'] = $has_upload_token;
 		}

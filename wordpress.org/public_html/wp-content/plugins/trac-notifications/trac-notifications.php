@@ -410,7 +410,7 @@ class wporg_trac_notifications {
 
 	function notification_settings_page() {
 		if ( ! is_user_logged_in() ) {
-			$current_url = esc_url_raw( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+			$current_url = esc_url_raw( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 			return 'Please <a href="' . esc_url( add_query_arg( 'redirect_to', $current_url, 'https://login.wordpress.org/' ) ) . '">log in</a> to save your notification preferences.';
 		}
 

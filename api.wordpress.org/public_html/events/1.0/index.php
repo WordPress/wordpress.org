@@ -167,7 +167,7 @@ function parse_request() {
 			FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
 		);
 
-		$location_args['ip'] = $public_ip ? $public_ip : $_SERVER['REMOTE_ADDR'];
+		$location_args['ip'] = $public_ip ? $public_ip : sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 	}
 
 	return $location_args;
@@ -259,7 +259,7 @@ function build_response( $location, $location_args ) {
 
 	if ( $location ) {
 		$event_args = array(
-			'is_client_core'      => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+			'is_client_core'      => is_client_core( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ) ),
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
@@ -290,13 +290,13 @@ function build_response( $location, $location_args ) {
 		$events = maybe_add_regional_wordcamps(
 			$events,
 			get_regional_wordcamp_data(),
-			$_SERVER['HTTP_USER_AGENT'],
+			sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ),
 			time(),
 			$location
 		);
 
-		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time(), $location['country'] ?? '' );
-		$events = pin_next_workshop_discussion_group( $events, $_SERVER['HTTP_USER_AGENT'] );
+		$events = pin_next_online_wordcamp( $events, sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ), time(), $location['country'] ?? '' );
+		$events = pin_next_workshop_discussion_group( $events, sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ) );
 		$events = pin_one_off_events( $events, time() );
 		$events = remove_duplicate_events( $events );
 
@@ -331,7 +331,7 @@ function build_response( $location, $location_args ) {
  * @return bool
  */
 function is_client_core( $user_agent = null ) {
-	return str_starts_with( $user_agent ?? $_SERVER['HTTP_USER_AGENT'], 'WordPress/' );
+	return str_starts_with( $user_agent ?? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ), 'WordPress/' );
 }
 
 /**

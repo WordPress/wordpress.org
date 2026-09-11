@@ -386,7 +386,7 @@ class Hooks {
 		if ( 'profile' === get_query_var( 'bbp_user' ) ) {
 			if ( is_user_logged_in() ) {
 				$user = wp_get_current_user();
-				$url  = str_replace( '/profile/', "/{$user->user_nicename}/", $_SERVER['REQUEST_URI'] );
+				$url  = str_replace( '/profile/', "/{$user->user_nicename}/", esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 			} else {
 				$url  = wp_login_url( home_url( $wp->request ) );
 			}
@@ -900,7 +900,7 @@ class Hooks {
 	 */
 	public function fix_login_url( $login_url, $redirect, $force_reauth ) {
 		// modify the redirect_to for the support forums to point to the current page
-		if ( 0 === strpos($_SERVER['REQUEST_URI'], '/support' ) ) {
+		if ( 0 === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/support' ) ) {
 			// Note that this is not normal because of the code in /mu-plugins/wporg-sso/class-wporg-sso.php.
 			// The login_url function there expects the redirect_to as the first parameter passed into it instead of the second
 			// Since we're changing this with a filter on login_url, then we have to change the login_url to the
@@ -910,7 +910,7 @@ class Hooks {
 			//
 			// parse_url is used here to remove any additional query args from the REQUEST_URI before redirection
 			// The SSO code handles the urlencoding of the redirect_to parameter
-			$url_parts = parse_url( set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ) );
+			$url_parts = parse_url( set_url_scheme( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) );
 			$constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
 
 			if ( class_exists( 'WPOrg_SSO' ) ) {

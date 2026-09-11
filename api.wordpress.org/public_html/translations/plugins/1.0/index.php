@@ -12,7 +12,7 @@ $version = isset( $_REQUEST['version'] ) ? $_REQUEST['version'] : null;
 
 foreach ( [ 'slug', 'version' ] as $field ) {
 	if ( $$field && ! is_string( $$field ) ) {
-		header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request' );
+		header( sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? '' ) ) . ' 400 Bad Request' );
 		die( "?{$field}= invalid." );
 	}
 }

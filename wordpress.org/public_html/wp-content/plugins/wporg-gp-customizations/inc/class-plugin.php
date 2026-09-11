@@ -646,7 +646,7 @@ class Plugin {
 		if ( isset( $_SERVER['HTTP_ORIGIN'] ) ) {
 			switch ( $_SERVER['HTTP_ORIGIN'] ) {
 				case 'https://playground.wordpress.net':
-					header( 'Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] );
+					header( 'Access-Control-Allow-Origin: ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_ORIGIN'] ?? '' ) ) );
 			}
 		}
 		header( 'Vary: origin' );

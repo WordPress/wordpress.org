@@ -121,7 +121,7 @@ class Detector {
 		}
 
 		$locales   = [];
-		$languages = explode( ',', $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
+		$languages = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '' ) ) );
 
 		foreach ( $languages as $lang ) {
 			$lang   = str_replace( 'q=', '', $lang );

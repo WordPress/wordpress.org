@@ -219,7 +219,7 @@ add_filter( 'index_template_hierarchy', 'wporg_login_filter_templates' );
 add_filter( 'wporg_noindex_request', function( $noindex ) {
 
 	// Don't no-index the front page, see https://meta.trac.wordpress.org/ticket/5530
-	if ( '/' === $_SERVER['REQUEST_URI'] ) {
+	if ( '/' === esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
 		return $noindex;
 	}
 
@@ -369,7 +369,7 @@ function wporg_login_recaptcha_api( $token, $key ) {
 
 	$verify = array(
 		'secret'   => $key,
-		'remoteip' => $_SERVER['REMOTE_ADDR'],
+		'remoteip' => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
 		'response' => $token,
 	);
 	$cache_key = implode( ':', $verify );

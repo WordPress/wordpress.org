@@ -25,7 +25,7 @@ function send_error( $error, $code = 404 ) {
 
 	// Browsers get a nicer action not implemented error.
 	if (
-		'GET' === $_SERVER['REQUEST_METHOD'] &&
+		'GET' === sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) &&
 		false === strpos( $_SERVER['HTTP_USER_AGENT'] ?? '', 'WordPress/' ) &&
 		false !== strpos( $error, 'Action not implemented.' )
 	) {

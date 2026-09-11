@@ -61,8 +61,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			$this->sso_signup_url = $this->sso_host_url . '/register';
 
 			if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
-				$this->host   = $_SERVER['HTTP_HOST'];
-				$this->script = $_SERVER['SCRIPT_NAME'];
+				$this->host   = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
+				$this->script = esc_url_raw( wp_unslash( $_SERVER['SCRIPT_NAME'] ?? '' ) );
 			}
 		}
 
@@ -131,7 +131,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			// Always include the redirect_to if not set, to avoid cross-origin redirect issues.
 			if ( empty( $redirect_to ) ) {
-				$redirect_to = 'https://' . $this->host . $_SERVER['REQUEST_URI'];
+				$redirect_to = 'https://' . $this->host . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 			}
 
 			if ( ! empty( $redirect_to ) && $this->_is_valid_targeted_domain( $redirect_to ) ) {
@@ -179,13 +179,14 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				}
 			} else if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
 				// We didn't get a redirect_to, but we got a referrer, use that if a valid target.
-				$redirect_to_referrer = $_SERVER['HTTP_REFERER'];
+				$redirect_to_referrer = esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) && $this->sso_host != parse_url( $redirect_to_referrer, PHP_URL_HOST ) ) {
 					$redirect_to = $redirect_to_referrer;
 				}
 			} elseif ( ! $this->is_sso_host() ) {
 				// Otherwise, attempt to guess the parent dir of where they came from and validate that.
-				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$_SERVER['REQUEST_URI']}" );
+				$request_uri               = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$request_uri}" );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_source_parent ) ) {
 					$redirect_to = $redirect_to_source_parent;
 				}

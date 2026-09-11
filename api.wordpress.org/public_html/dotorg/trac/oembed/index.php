@@ -38,7 +38,7 @@ $allowed_hosts = [
 
 if (
 	! $url ||
-	'GET' !== $_SERVER['REQUEST_METHOD'] ||
+	'GET' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ||
 	! in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ), $allowed_hosts, true )
 ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );

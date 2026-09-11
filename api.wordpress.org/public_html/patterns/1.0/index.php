@@ -8,7 +8,7 @@ namespace WordPressdotorg\API\Patterns;
  * This is cached by nginx, so we don't have to worry about the performance costs of loading WP, and don't need to
  * do any any object caching.
  */
-main( $_SERVER['QUERY_STRING'] );
+main( esc_url_raw( wp_unslash( $_SERVER['QUERY_STRING'] ?? '' ) ) );
 
 /**
  * Last minute rewrite of headers, to correct URLs set by the internal API endpoint.

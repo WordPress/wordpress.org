@@ -178,7 +178,7 @@ class Themes_API {
 			$this->$action();
 		} else {
 			// Assume a friendly wp hacker :)
-			if ( 'POST' != strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
+			if ( 'POST' != strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) {
 				wp_die( 'Action not implemented. <a href="https://codex.wordpress.org/WordPress.org_API">API Docs</a>' );
 			} else {
 				$this->response = (object) array( 'error' => 'Action not implemented' );
@@ -334,7 +334,7 @@ class Themes_API {
 			if ( ! empty( $this->request->wp_version ) ) {
 				$wp_version = (string) $this->request->wp_version;
 			}
-		} elseif ( preg_match( '|WordPress/([^;]+)|', $_SERVER['HTTP_USER_AGENT'], $matches ) ) {
+		} elseif ( preg_match( '|WordPress/([^;]+)|', sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ), $matches ) ) {
 			// Get version from user agent since it's not explicitly sent to feature_list requests in older API branches.
 			$wp_version = $matches[1];
 		}

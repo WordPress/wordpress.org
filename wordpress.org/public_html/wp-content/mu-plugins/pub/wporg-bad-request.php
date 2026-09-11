@@ -267,7 +267,7 @@ add_filter( 'xmlrpc_methods', function( $methods ) {
 add_action( 'send_headers', function() {
 	if ( isset( $_REQUEST['EGOTEC'] ) ) {
 		die_bad_request( 'EGOTEC request parameter set' );
-	} elseif ( str_contains( $_SERVER['REQUEST_URI'], '$acunetix' ) ) {
+	} elseif ( str_contains( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '$acunetix' ) ) {
 		die_bad_request( 'acunetix request' );
 	}
 } );
@@ -279,7 +279,7 @@ add_action( 'send_headers', function() {
  * warnings downstream when the value is used in esc_attr().
  */
 add_action( 'send_headers', function() {
-	if ( ! str_starts_with( $_SERVER['REQUEST_URI'], '/patterns/' ) ) {
+	if ( ! str_starts_with( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/patterns/' ) ) {
 		return;
 	}
 
@@ -407,7 +407,7 @@ function die_bad_request( $reference = '' ) {
 
 	// Use a prettier error page on WordPress.org
 	if (
-		str_contains( $_SERVER['HTTP_HOST'], 'wordpress.org' ) &&
+		str_contains( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), 'wordpress.org' ) &&
 		! defined( 'XMLRPC_REQUEST' ) && ! defined( 'REST_REQUEST' ) &&
 		! is_admin() /* admin-ajax, admin-post */
 	) {

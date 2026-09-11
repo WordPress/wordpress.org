@@ -71,7 +71,7 @@ function github_user_to_user_id( $user ) {
 	return $user_id ? intval( $user_id ) : false;
 }
 
-$event   = $_SERVER['HTTP_X_GITHUB_EVENT'];
+$event   = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '' ) );
 $payload = get_signed_payload_or_die();
 
 // Ignore anything on private repos.

@@ -123,7 +123,7 @@ function current_page() {
 		$page = \WordPressdotorg\SEO\Canonical\get_canonical_url();
 	}
 	if ( ! $page ) {
-		$page = $_SERVER['REQUEST_URI'];
+		$page = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 	}
 
 	return sanitize_page_url_for_db( $page );

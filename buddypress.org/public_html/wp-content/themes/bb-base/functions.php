@@ -19,7 +19,7 @@ show_admin_bar( true );
  * @return bool
  */
 function bb_base_is_codex() {
-	return (bool) strstr( $_SERVER['HTTP_HOST'], 'codex' );
+	return (bool) strstr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), 'codex' );
 }
 
 /**
@@ -28,7 +28,7 @@ function bb_base_is_codex() {
  * @return bool
  */
 function bb_base_is_buddypress() {
-	$retval = (bool) strstr( $_SERVER['HTTP_HOST'], 'buddypress' );
+	$retval = (bool) strstr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), 'buddypress' );
 	return (bool) apply_filters( 'bb_base_is_buddypress', $retval );
 }
 
@@ -38,7 +38,7 @@ function bb_base_is_buddypress() {
  * @return bool
  */
 function bb_base_is_bbpress() {
-	$retval = (bool) strstr( $_SERVER['HTTP_HOST'], 'bbpress' );
+	$retval = (bool) strstr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), 'bbpress' );
 	return (bool) apply_filters( 'bb_base_is_bbpress', $retval );
 }
 

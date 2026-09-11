@@ -1000,7 +1000,7 @@ class Plugin_Directory {
 	 */
 	public function fix_login_url( $login_url, $redirect, $force_reauth ) {
 		// modify the redirect_to for the plugin directory to point to the current page
-		if ( 0 === strpos( $_SERVER['REQUEST_URI'], '/plugins' ) ) {
+		if ( 0 === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/plugins' ) ) {
 			// Note that this is not normal because of the code in /mu-plugins/wporg-sso/class-wporg-sso.php.
 			// The login_url function there expects the redirect_to as the first parameter passed into it instead of the second
 			// Since we're changing this with a filter on login_url, then we have to change the login_url to the
@@ -1010,7 +1010,7 @@ class Plugin_Directory {
 			//
 			// parse_url is used here to remove any additional query args from the REQUEST_URI before redirection
 			// The SSO code handles the urlencoding of the redirect_to parameter
-			$url_parts       = parse_url( set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ) );
+			$url_parts       = parse_url( set_url_scheme( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) );
 			$constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . ( isset( $url_parts['path'] ) ? $url_parts['path'] : '' );
 
 			if ( class_exists( 'WPOrg_SSO' ) ) {
@@ -1314,7 +1314,7 @@ class Plugin_Directory {
 		if ( is_404() ) {
 
 			$path_prefix = wp_parse_url( home_url('/'), PHP_URL_PATH );
-			$path        = substr( $_SERVER['REQUEST_URI'], strlen( $path_prefix ) );
+			$path        = substr( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), strlen( $path_prefix ) );
 			// [0] => example-plugin-name [1..] => random().
 			$path        = explode( '/', trailingslashit( explode( '?', $path )[0] ) );
 			$path_base   = $path[0];
@@ -1358,7 +1358,7 @@ class Plugin_Directory {
 			// Handle any plugin redirects.
 			if ( $path_base && ( $plugin = self::get_plugin_post( $path_base ) ) ) {
 				$permalink = get_permalink( $plugin->ID );
-				if ( parse_url( $permalink, PHP_URL_PATH ) != $_SERVER['REQUEST_URI'] ) {
+				if ( parse_url( $permalink, PHP_URL_PATH ) != esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
 					wp_safe_redirect( $permalink, 301 );
 					die();
 				}
