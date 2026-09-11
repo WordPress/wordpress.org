@@ -388,7 +388,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
-		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu' ); ?></strong></a>
+		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu', 'wporg' ); ?></strong></a>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
@@ -772,12 +772,12 @@ function modify_site_title_block( $block_content, $block ) {
 	// On the project and updates sites replace the link with a Make home page link
 	if ( '/project/' === $site->path || '/updates/' === $site->path ) {
 		$make_home_url = 'https://' . $site->domain;
-		$block_content = preg_replace( 
+		$block_content = preg_replace(
 			'/<a\b[^>]*>(.*?)<\/a>/',
 			'<a target="_self" rel="home" href="' . esc_url( $make_home_url ) . '">' . 
 			esc_html__( 'Make WordPress', 'wporg' ) . 
-			'</a>', 
-			$block_content 
+			'</a>',
+			$block_content
 		);
 	}
 
@@ -797,7 +797,6 @@ add_action(
 				"ready.o2",
 				function () {
 					setTimeout( () => Prism.highlightAll(), 10 );
-					console.log( "test" );
 				}
 			);',
 			'after'
