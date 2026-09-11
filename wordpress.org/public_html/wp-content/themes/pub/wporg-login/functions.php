@@ -326,7 +326,7 @@ function wporg_login_language_switcher( $display = true ) {
 	<div class="language-switcher">
 		<form id="language-switcher" action="" method="GET">
 			<?php if ( !empty( $_GET['redirect_to'] ) ): ?>
-				<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $_GET['redirect_to'] ); ?>" />
+				<input type="hidden" name="redirect_to" value="<?php echo esc_attr( esc_url_raw( wp_unslash( $_GET['redirect_to'] ?? '' ) ) ); ?>" />
 			<?php endif; ?>
 			<label for="language-switcher-locales">
 				<span aria-hidden="true" class="dashicons dashicons-translation"></span>
@@ -466,9 +466,9 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 	if ( $redirect_to ) {
 		$from = sanitize_text_field( $redirect_to );
 	} elseif ( !empty( $_REQUEST['from'] ) ) {
-		$from = sanitize_text_field( $_REQUEST['from'] );
+		$from = esc_url_raw( wp_unslash( $_REQUEST['from'] ?? '' ) );
 	} elseif ( !empty( $_REQUEST['redirect_to'] ) ) {
-		$from = sanitize_text_field( $_REQUEST['redirect_to'] );
+		$from = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) );
 	}
 
 	if ( str_contains( $from, 'buddypress.org' ) ) {
@@ -480,7 +480,8 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 		$message .= __( 'Log in to your WordPress.org account to contribute to bbPress, or get help in the support forums.', 'wporg' );
 	} elseif ( str_contains( $from, 'wordcamp.org' ) || str_contains( $from, 'events.wordpress.org' ) ) {
 		if ( ! empty( $_REQUEST['wcname'] ) ) {
-			$message .= '<strong>' . sprintf( __( 'Register for %s', 'wporg' ), esc_html( $_REQUEST['wcname'] ) ) . '</strong>';
+			/* translators: %s: WordCamp name. */
+			$message .= '<strong>' . sprintf( __( 'Register for %s', 'wporg' ), esc_html( sanitize_text_field( wp_unslash( $_REQUEST['wcname'] ?? '' ) ) ) ) . '</strong>';
 			$message .=  __( 'Log in to your WordPress.org account. If you don\'t have one, you can <a href="/register">create an account</a>.', 'wporg' );
 		} else {
 			$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong>';
@@ -520,7 +521,7 @@ function wporg_login_errors_nicify( $errors, $redirect_to ) {
 		'invalid_username' => sprintf(
 			/* translators: %s: <strong>UserLogin</strong> */
 			__( "<strong>Error:</strong> The username %s is not registered on WordPress.org. If you're unsure of your username, you can attempt to log in using your email address instead.", 'wporg' ),
-			'<strong>' . esc_html( wp_unslash( $_POST['log'] ?? '' ) ) . '</strong>'
+			'<strong>' . esc_html( sanitize_user( wp_unslash( $_POST['log'] ?? '' ) ) ) . '</strong>' // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login form served to logged-out visitors; there is no nonce to verify.
 		),
 
 		'must_change_password' => sprintf(
@@ -592,7 +593,7 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 	// If the redirect is to a url that doesn't seem right, override it.
 	$redirect_host = parse_url( $redirect, PHP_URL_HOST ) ?? '';
 	$redirect_qv   = parse_url( $redirect, PHP_URL_QUERY ) ?? '';
-	$proper_host   = parse_url( $_COOKIE['wporg_came_from'], PHP_URL_HOST ) ?? '';
+	$proper_host   = parse_url( esc_url_raw( wp_unslash( $_COOKIE['wporg_came_from'] ?? '' ) ), PHP_URL_HOST ) ?? '';
 	if (
 		$redirect_host != $proper_host &&
 		in_array(
@@ -613,8 +614,8 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 			str_contains( $redirect_qv, 'action=authorize_application' )
 		)
 	) {
-		if ( wp_validate_redirect( $_COOKIE['wporg_came_from'] ) ) {
-			$redirect = $_COOKIE['wporg_came_from'];
+		if ( wp_validate_redirect( esc_url_raw( wp_unslash( $_COOKIE['wporg_came_from'] ?? '' ) ) ) ) {
+			$redirect = esc_url_raw( wp_unslash( $_COOKIE['wporg_came_from'] ?? '' ) );
 		}
 	}
 

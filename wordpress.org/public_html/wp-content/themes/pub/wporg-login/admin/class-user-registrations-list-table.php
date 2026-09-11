@@ -65,7 +65,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 				$url = admin_url( 'admin.php?page=user-registrations' );
 				if ( $is_search ) {
-					$url = add_query_arg( 's', urlencode( wp_unslash( $_GET['s'] ) ), $url );
+					$url = add_query_arg( 's', urlencode( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ), $url );
 				}
 
 				if ( 'all' !== $view ) {
@@ -89,7 +89,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 	 * @return string
 	 */
 	protected function get_current_view() {
-		$view = $_REQUEST['view'] ?? false;
+		$view = sanitize_key( $_REQUEST['view'] ?? '' ) ?: false;
 		if ( ! $view ) {
 			$view = 'all';
 			if ( ! empty( $_GET['s'] ) ) {
@@ -173,12 +173,12 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		$join  = '';
 		$where = ' WHERE ';
-		$where .= $this->get_view_sql_where( $view ?: ( $_REQUEST['view'] ?? 'all' ) );
+		$where .= $this->get_view_sql_where( $view ?: sanitize_key( $_REQUEST['view'] ?? 'all' ) );
 
 		if ( isset( $_GET['s'] ) && 'all' != $view ) {
 			$where .= ' ';
 
-			$search_term = wp_unslash( $_GET['s'] );
+			$search_term = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
 			$search_like = '%' . $wpdb->esc_like( $search_term ) . '%';
 			
 			// Limit searches to where they're likely, for performance.
@@ -230,14 +230,14 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		// Join if the view needs the users or description table.
-		if ( strpos( $where . $join, 'users.' ) || strpos( $where, 'description.' ) || (  'banned-users' === $view ?: ( $_REQUEST['view'] ?? 'all' )  ) ) {
+		if ( strpos( $where . $join, 'users.' ) || strpos( $where, 'description.' ) || ( 'banned-users' === $view ?: sanitize_key( $_REQUEST['view'] ?? 'all' ) ) ) {
 			$join .= " LEFT JOIN {$wpdb->users} users ON registrations.created = 1 AND registrations.user_login = users.user_login";
 		}
 		if ( strpos( $where, 'description.' ) ) {
 			$join .= " LEFT JOIN {$wpdb->usermeta} description ON users.ID = description.user_id AND description.meta_key = 'description'";
 		}
 
-		if ( 'banned-users' === ( $view ?: ( $_REQUEST['view'] ?? 'all' ) ) ) {
+		if ( 'banned-users' === ( $view ?: sanitize_key( $_REQUEST['view'] ?? 'all' ) ) ) {
 			$join .= " LEFT JOIN {$wpdb->usermeta} notes ON users.ID = notes.user_id AND notes.meta_key = '_wporg_bbp_user_notes'";
 		}
 
@@ -277,8 +277,8 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$this->get_sortable_columns(),
 		);
 
-		$sort_column = $_GET['orderby'] ?? 'pending_id';
-		$sort_order = strtoupper( $_GET['order'] ?? 'DESC' );
+		$sort_column = sanitize_key( $_GET['orderby'] ?? 'pending_id' );
+		$sort_order = strtoupper( sanitize_key( $_GET['order'] ?? 'DESC' ) );
 
 		if ( ! in_array( $sort_order, [ 'DESC', 'ASC' ] ) ) {
 			$sort_order = 'DESC';
@@ -286,7 +286,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		if ( ! isset( $this->get_sortable_columns()[ $sort_column ] ) ) {
 			$sort_column = 'pending_id';
 		}
-		if ( 'banned-users' === ( $_GET['view'] ?? '' ) ) {
+		if ( 'banned-users' === sanitize_key( $_GET['view'] ?? '' ) ) {
 			$sort_column = 'notes.umeta_id';
 			$sort_order = 'DESC';
 		}
@@ -349,7 +349,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		?>
 
 		<fieldset class="alignleft actions">
-			<input name="block_reason" id="block_reason" placeholder="Ban/Block reason. Used for bulk + single." style="width: 32em;padding: 0.4em;margin: 0;" value="<?php echo esc_attr( $_REQUEST['block_reason'] ?? '' ); ?>" />
+			<input name="block_reason" id="block_reason" placeholder="Ban/Block reason. Used for bulk + single." style="width: 32em;padding: 0.4em;margin: 0;" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['block_reason'] ?? '' ) ) ); ?>" />
 		</fieldset>
 		<?php
 	}

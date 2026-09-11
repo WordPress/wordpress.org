@@ -17,7 +17,8 @@ function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low
 			return false;
 		}
 		$result = wporg_login_recaptcha_api(
-			$_POST['_reCaptcha_v3_token'],
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+			sanitize_text_field( wp_unslash( $_POST['_reCaptcha_v3_token'] ?? '' ) ),
 			RECAPTCHA_V3_PRIVKEY
 		);
 
@@ -42,7 +43,8 @@ function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low
 	}
 
 	$result = wporg_login_recaptcha_api(
-		$_POST['g-recaptcha-response'],
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+		sanitize_text_field( wp_unslash( $_POST['g-recaptcha-response'] ?? '' ) ),
 		RECAPTCHA_INVIS_PRIVKEY
 	);
 
@@ -74,7 +76,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	$profile_key        = wp_generate_password( 24, false, false );
 	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
-	$source = $_COOKIE['wporg_came_from'] ?? '';
+	$source = esc_url_raw( wp_unslash( $_COOKIE['wporg_came_from'] ?? '' ) );
 	if ( $source ) {
 		$source = remove_query_arg( [ 'SAMLRequest', 'RelayState' ], $source );
 	}
@@ -99,7 +101,8 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	// reCaptcha v3 logging.
 	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
 		$recaptcha_api = wporg_login_recaptcha_api(
-			$_POST['_reCaptcha_v3_token'],
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+			sanitize_text_field( wp_unslash( $_POST['_reCaptcha_v3_token'] ?? '' ) ),
 			RECAPTCHA_V3_PRIVKEY
 		);
 		$pending_user['scores']['pending'] = -1;
@@ -390,7 +393,8 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 	// reCaptcha v3 logging.
 	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
 		$recaptcha_api = wporg_login_recaptcha_api(
-			$_POST['_reCaptcha_v3_token'],
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+			sanitize_text_field( wp_unslash( $_POST['_reCaptcha_v3_token'] ?? '' ) ),
 			RECAPTCHA_V3_PRIVKEY
 		);
 		$pending_user['scores']['create'] = -1;
@@ -492,7 +496,8 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	}
 
 	$updated_email = false;
-	$new_email     = trim( wp_unslash( $_POST['user_email'] ?? '' ) );
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+	$new_email     = trim( sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) ) );
 	if (
 		'pending' === $state &&
 		empty( $pending_user['meta']['changed_email'] ) && // Only if they've not changed it before.

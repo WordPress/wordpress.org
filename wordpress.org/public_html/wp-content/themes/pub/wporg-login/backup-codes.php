@@ -19,7 +19,7 @@ $codes_available      = Two_Factor_Backup_Codes::codes_remaining_for_user( $user
 $can_ignore           = ! $used_backup_code || ( $used_backup_code && $codes_available > 1 );
 
 if ( isset( $_REQUEST['redirect_to'] ) ) {
-	$redirect_to = wp_validate_redirect( wp_unslash( $_REQUEST['redirect_to'] ), $redirect_to );
+	$redirect_to = wp_validate_redirect( esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ), $redirect_to );
 }
 
 // If the user is here in error, redirect off.
