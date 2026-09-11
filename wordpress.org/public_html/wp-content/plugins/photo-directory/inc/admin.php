@@ -467,7 +467,6 @@ class Admin {
 		if ( Photo::is_controversial( $post ) ) {
 			$classes .= ' blurred';
 		}
-		$image = wp_get_attachment_image( $image_id, 'thumbnail', false, [ 'class' => trim( $classes ) ] );
 
 		$can_edit_post = current_user_can( 'edit_post', $post->ID );
 
@@ -479,13 +478,13 @@ class Admin {
 					esc_url( (string) get_edit_post_link( $post_id ) ),
 					/* translators: %s: Post title. */
 					esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
-					wp_kses_post( $image )
+					wp_get_attachment_image( $image_id, 'thumbnail', false, [ 'class' => trim( $classes ) ] )
 				)
 			);
 		} else {
 			printf(
 				'<div>%s</div>',
-				sprintf( wp_kses_post( $prefixed_format ), wp_kses_post( $image ) )
+				sprintf( wp_kses_post( $prefixed_format ), wp_get_attachment_image( $image_id, 'thumbnail', false, [ 'class' => trim( $classes ) ] ) )
 			);
 		}
 
