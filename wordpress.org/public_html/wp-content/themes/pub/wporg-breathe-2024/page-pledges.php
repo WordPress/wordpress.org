@@ -156,7 +156,7 @@ $contributors = Pledges\get_team_contributors(
 // One bulk DB call per signal source, hour-cached.
 // ------------------------------------------------------------------
 $window_days = ContributionMetrics\resolve_window_days(
-	isset( $_GET['window'] ) ? $_GET['window'] : ContributionMetrics\WINDOW_DAYS_DEFAULT
+	isset( $_GET['window'] ) ? sanitize_text_field( wp_unslash( $_GET['window'] ) ) : ContributionMetrics\WINDOW_DAYS_DEFAULT
 );
 
 $metrics = ContributionMetrics\get_team_contribution_metrics(
@@ -210,8 +210,9 @@ $sponsorship_allowed = array( 'all', 'independent', 'sponsored' );
 // is_string() guard before sanitize_key(): a URL like ?sponsorship[]=foo makes
 // $_GET['sponsorship'] an array, which would TypeError sanitize_key() on PHP 8
 // and 500 the page.
-$sponsorship_raw = isset( $_GET['sponsorship'] ) ? wp_unslash( $_GET['sponsorship'] ) : '';
-$sponsorship     = is_string( $sponsorship_raw ) ? sanitize_key( $sponsorship_raw ) : '';
+$sponsorship = isset( $_GET['sponsorship'] ) && is_string( $_GET['sponsorship'] )
+	? sanitize_key( wp_unslash( $_GET['sponsorship'] ) )
+	: '';
 if ( ! in_array( $sponsorship, $sponsorship_allowed, true ) ) {
 	$sponsorship = $sponsorship_default;
 }

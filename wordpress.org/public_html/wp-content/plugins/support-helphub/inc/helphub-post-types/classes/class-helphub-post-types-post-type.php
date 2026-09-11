@@ -595,22 +595,19 @@ class HelpHub_Post_Types_Post_Type {
 
 			switch ( $field_data[ $f ]['type'] ) {
 				case 'url':
-					${$f} = isset( $_POST[ $f ] ) ? esc_url( $_POST[ $f ] ) : '';
-					/* @codingStandardsIgnoreLine */
+					${$f} = esc_url_raw( wp_unslash( $_POST[ $f ] ?? '' ) );
 					break;
 				case 'textarea':
 				case 'editor':
-					${$f} = isset( $_POST[ $f ] ) ? wp_kses_post( trim( $_POST[ $f ] ) ) : '';
-					/* @codingStandardsIgnoreLine */
+					${$f} = trim( wp_kses_post( wp_unslash( $_POST[ $f ] ?? '' ) ) );
 					break;
 				case 'checkbox':
 					${$f} = isset( $_POST[ $f ] ) ? 'yes' : 'no';
-					/* @codingStandardsIgnoreLine */
 					break;
 				case 'multicheck':
 					// Ensure checkbox is array and whitelist accepted values against options.
-					${$f} = isset( $_POST[ $f ] ) && is_array( $field_data[ $f ]['options'] ) ? (array) array_intersect( (array) $_POST[ $f ], array_flip( $field_data[ $f ]['options'] ) ) : '';
-					/* @codingStandardsIgnoreLine */
+					$submitted = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST[ $f ] ?? array() ) );
+					${$f}      = isset( $_POST[ $f ] ) && is_array( $field_data[ $f ]['options'] ) ? (array) array_intersect( $submitted, array_flip( $field_data[ $f ]['options'] ) ) : '';
 					break;
 				case 'radio':
 				case 'select':
@@ -619,16 +616,14 @@ class HelpHub_Post_Types_Post_Type {
 					if ( is_array( $field_data[ $f ]['options'] ) ) {
 						$values = array_keys( $field_data[ $f ]['options'] );
 					}
-					${$f} = isset( $_POST[ $f ] ) && in_array( $_POST[ $f ], $values ) ? $_POST[ $f ] : '';
-					/* @codingStandardsIgnoreLine */
+					$submitted = sanitize_text_field( wp_unslash( $_POST[ $f ] ?? '' ) );
+					${$f}      = in_array( $submitted, $values ) ? $submitted : '';
 					break;
 				case 'date':
-					${$f} = isset( $_POST[ $f ] ) ? strtotime( wp_strip_all_tags( $_POST[ $f ] ) ) : '';
-					/* @codingStandardsIgnoreLine */
+					${$f} = isset( $_POST[ $f ] ) ? strtotime( wp_strip_all_tags( wp_unslash( $_POST[ $f ] ) ) ) : '';
 					break;
 				default:
-					${$f} = isset( $_POST[ $f ] ) ? strip_tags( trim( $_POST[ $f ] ) ) : '';
-					/* @codingStandardsIgnoreLine */
+					${$f} = trim( wp_strip_all_tags( wp_unslash( $_POST[ $f ] ?? '' ) ) );
 					break;
 			}
 
@@ -640,8 +635,7 @@ class HelpHub_Post_Types_Post_Type {
 
 		// Save the project gallery image IDs.
 		if ( isset( $_POST['helphub_image_gallery'] ) ) : /* @codingStandardsIgnoreLine */
-			$attachment_ids = array_filter( explode( ',', sanitize_text_field( $_POST['helphub_image_gallery'] ) ) );
-			/* @codingStandardsIgnoreLine */
+			$attachment_ids = array_filter( explode( ',', sanitize_text_field( wp_unslash( $_POST['helphub_image_gallery'] ) ) ) );
 			update_post_meta( $post_id, '_helphub_image_gallery', implode( ',', $attachment_ids ) );
 		endif;
 

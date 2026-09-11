@@ -20,7 +20,8 @@ wp_enqueue_script( 'jquery' );
 get_header( 'top-level-page' );
 the_post();
 
-$terms = urldecode( wp_unslash( $_GET['s'] ?? '' ) );
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_text_field() strips percent-encoded octets, so it has to run after urldecode() rather than around the raw value.
+$terms = sanitize_text_field( urldecode( wp_unslash( $_GET['s'] ?? '' ) ) );
 $terms = htmlspecialchars_decode( $terms );
 $terms = explode( '?', $terms )[0];
 $terms = trim( $terms, "/ \r\n\t" );
@@ -36,8 +37,9 @@ $search_config = array(
 	),
 );
 
-if ( isset( $_REQUEST['in'] ) && in_array( $_REQUEST['in'], [ 'support_forums', 'support_docs', 'developer_documentation' ] ) ) {
-	$search_config['attributes']['defaultToRefinement'] = $_REQUEST['in'];
+$refinement = sanitize_key( $_REQUEST['in'] ?? '' );
+if ( in_array( $refinement, [ 'support_forums', 'support_docs', 'developer_documentation' ], true ) ) {
+	$search_config['attributes']['defaultToRefinement'] = $refinement;
 }
 
 ?>

@@ -159,7 +159,8 @@ function get_workshop_application_form_submission() {
 
 	foreach ( $schema['properties'] as $field => $config ) {
 		if ( isset( $_POST[ $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$value = wp_unslash( $_POST[ $field ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized just below by the field's own sanitize_callback from the schema.
+			$value = wp_unslash( $_POST[ $field ] );
 			if ( isset( $config['sanitize_callback'] ) && is_callable( $config['sanitize_callback'] ) ) {
 				$value = call_user_func( $config['sanitize_callback'], $value );
 			}

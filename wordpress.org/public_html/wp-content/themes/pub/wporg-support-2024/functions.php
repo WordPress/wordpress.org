@@ -1417,7 +1417,7 @@ function bb_base_topic_search_query( $escaped = true ) {
 		return false;
 	}
 
-	$query = apply_filters( 'bb_base_topic_search_query', $_GET['ts'] );
+	$query = apply_filters( 'bb_base_topic_search_query', sanitize_text_field( wp_unslash( $_GET['ts'] ) ) );
 	if ( true === $escaped ) {
 		$query = stripslashes( esc_attr( $query ) );
 	}
@@ -1431,7 +1431,7 @@ function bb_base_reply_search_query( $escaped = true ) {
 		return false;
 	}
 
-	$query = apply_filters( 'bb_base_reply_search_query', $_GET['rs'] );
+	$query = apply_filters( 'bb_base_reply_search_query', sanitize_text_field( wp_unslash( $_GET['rs'] ) ) );
 	if ( true === $escaped ) {
 		$query = stripslashes( esc_attr( $query ) );
 	}
@@ -1445,7 +1445,7 @@ function bb_base_plugin_search_query( $escaped = true ) {
 		return false;
 	}
 
-	$query = apply_filters( 'bb_base_plugin_search_query', $_GET['ps'] );
+	$query = apply_filters( 'bb_base_plugin_search_query', sanitize_text_field( wp_unslash( $_GET['ps'] ) ) );
 	if ( true === $escaped ) {
 		$query = stripslashes( esc_attr( $query ) );
 	}

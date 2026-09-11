@@ -150,7 +150,7 @@ function the_content_limit( $max_char, $more_link_text = '(more...)', $stripteas
 	$content = str_replace( ']]>', ']]&gt;', $content );
 	$content = strip_tags( $content );
 
-	if ( ! empty( $_GET['p'] ) && strlen( $_GET['p'] ) > 0 ) {
+	if ( ! empty( $_GET['p'] ) ) {
 		echo "<p>" . $content . "</p>";
 	} else if ( ( strlen( $content ) > $max_char ) && ( $espacio = strpos( $content, " ", $max_char ) ) ) {
 		$content = substr( $content, 0, $espacio );
