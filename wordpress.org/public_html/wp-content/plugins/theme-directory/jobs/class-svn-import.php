@@ -58,6 +58,7 @@ class SVN_Import {
 		) );
 
 		if ( ! $last_revision ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			trigger_error( "Theme Importing aborting, no starting revision known. Set 'svn_import_last_revision' option. Latest Revision: [{$latest_revision}]", E_USER_WARNING );
 			return;
 		}

@@ -37,6 +37,7 @@ add_filter( 'rest_pre_echo_response', function( $result ) {
 	global $wp;
 
 	if ( defined( 'THEMES_API_VERSION' ) && '1.0' === THEMES_API_VERSION ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (serialized PHP); escaping would corrupt the format.
 		echo serialize( $result );
 		exit;
 	}

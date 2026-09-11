@@ -83,7 +83,7 @@ echo do_blocks( '<!-- wp:template-part {"slug":"grid-controls"} /-->' );
 
 		<section class="plugin-section">
 			<header class="section-header">
-				<?php echo $title; ?>
+				<?php echo $title; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() output and Template::get_plugin_icon() markup; escaping would print the markup. ?>
 				<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>">
 					<?php
 					printf(

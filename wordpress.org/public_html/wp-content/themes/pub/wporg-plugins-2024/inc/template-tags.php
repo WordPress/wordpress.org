@@ -58,7 +58,7 @@ function wporg_plugins_template_authors() {
  * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
  */
 function the_plugin_banner( $post = null ) {
-	echo Template::get_plugin_banner( $post, 'html' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+	echo Template::get_plugin_banner( $post, 'html' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**
@@ -79,10 +79,10 @@ function the_plugin_favorite_button( $post = null ) {
 			<?php
 			if ( $is_favorited ) {
 				/* translators: %s: plugin name */
-				printf( esc_html__( 'Unfavorite %s', 'wporg-plugins' ), get_the_title() );
+				printf( esc_html__( 'Unfavorite %s', 'wporg-plugins' ), esc_html( get_the_title() ) );
 			} else {
 				/* translators: %s: plugin name */
-				printf( esc_html__( 'Favorite %s', 'wporg-plugins' ), get_the_title() );
+				printf( esc_html__( 'Favorite %s', 'wporg-plugins' ), esc_html( get_the_title() ) );
 			}
 			?>
 		</span>
@@ -309,6 +309,7 @@ function the_no_self_management_notice() {
 
 	printf(
 		'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice and dialog markup assembled here from escaped parts.
 		$message
 	);
 }
@@ -564,7 +565,7 @@ function the_plugin_self_close_button() {
 	// Translators: %s is the plugin name, as defined by the plugin itself.
 	$close_button_text = sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() );
 	?>
-	<div class="wp-block-button is-small"><button class="show-dialog wp-block-button__link" onclick="this.parentNode.nextElementSibling.showModal()"><?php echo $close_button_text; ?></button></div>
+	<div class="wp-block-button is-small"><button class="show-dialog wp-block-button__link" onclick="this.parentNode.nextElementSibling.showModal()"><?php echo $close_button_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice and dialog markup assembled here from escaped parts. ?></button></div>
 	<dialog>
 		<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
 		<strong><?php esc_html_e( 'Close your plugin?', 'wporg-plugins' ); ?></strong>
@@ -579,7 +580,7 @@ function the_plugin_self_close_button() {
 					<?php printf(
 						/* translators: %s: The plugin name. */
 						esc_html__( 'Yes, I wish to close %s.', 'wporg-plugins' ),
-						'<code>' . get_the_title() . '</code>'
+						'<code>' . esc_html( get_the_title() ) . '</code>'
 					); ?>
 				</label>
 			</p>
