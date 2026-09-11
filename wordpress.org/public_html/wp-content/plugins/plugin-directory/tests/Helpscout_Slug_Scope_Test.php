@@ -153,11 +153,10 @@ class Helpscout_Slug_Scope_Test extends TestCase {
 	 */
 	public static function data_namespaced_slugs(): array {
 		return array(
-			'wrapped'          => array( 'rejected-fixture-sample-rejected' ),
-			'prefix only'      => array( 'rejected-fixture-sample' ),
-			'suffix only'      => array( 'fixture-sample-rejected' ),
-			'suffixed with -1' => array( 'fixture-sample-rejected-1' ),
-			'mixed case'       => array( 'Rejected-Fixture-Sample' ),
+			'wrapped'           => array( 'rejected-fixture-sample-rejected' ),
+			'wrapped, suffixed' => array( 'rejected-fixture-sample-rejected-2' ),
+			'suffixed past -9'  => array( 'rejected-fixture-sample-rejected-12' ),
+			'mixed case'        => array( 'Rejected-Fixture-Sample-Rejected' ),
 		);
 	}
 
@@ -178,14 +177,34 @@ class Helpscout_Slug_Scope_Test extends TestCase {
 	}
 
 	/**
-	 * An ordinary slug is still allowed.
+	 * Slugs that only look like the wrapper, which the unwrapping leaves alone.
 	 *
+	 * @return array
+	 */
+	public static function data_one_sided_slugs(): array {
+		return array(
+			'ordinary'    => array( 'fixture-sample' ),
+			'prefix only' => array( 'rejected-fixture-sample' ),
+			'suffix only' => array( 'fixture-sample-rejected' ),
+		);
+	}
+
+	/**
+	 * A slug outside the wrapper format stays available, and stays as it is.
+	 *
+	 * @dataProvider data_one_sided_slugs
+	 *
+	 * @param string $slug The slug to check.
 	 * @return void
 	 */
-	public function test_an_ordinary_slug_is_not_reserved(): void {
+	#[DataProvider( 'data_one_sided_slugs' )]
+	public function test_a_slug_outside_the_wrapper_format_is_left_alone( string $slug ): void {
 		$upload_handler              = new Upload_Handler();
-		$upload_handler->plugin_slug = 'fixture-sample';
+		$upload_handler->plugin_slug = $slug;
 
 		$this->assertFalse( $upload_handler->has_reserved_slug() );
+
+		$plugin = $this->create_plugin( $slug );
+		$this->assertSame( $slug, $this->unwrap( $slug, $plugin->ID ) );
 	}
 }

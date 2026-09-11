@@ -7,8 +7,11 @@ class Helpscout {
 
 	/**
 	 * The namespace a rejected plugin's slug is wrapped in.
+	 *
+	 * The trailing digits are the suffix `wp_update_post()` adds when the wrapped slug
+	 * is itself taken.
 	 */
-	const REJECTED_SLUG_REGEX = '/(^rejected-|-rejected(-\d)?$)/i';
+	const REJECTED_SLUG_REGEX = '/^rejected-(.+)-rejected(-\d+)?$/i';
 
 	/**
 	 * Fetch the slug a post's emails may also be recorded against.
@@ -22,7 +25,7 @@ class Helpscout {
 	 * @return string The unwrapped slug, or $post_name if it isn't this post's to claim.
 	 */
 	protected static function get_unwrapped_slug( $post_name, $post_id ) {
-		$unwrapped = preg_replace( self::REJECTED_SLUG_REGEX, '', $post_name );
+		$unwrapped = preg_replace( self::REJECTED_SLUG_REGEX, '$1', $post_name );
 		if ( ! $unwrapped || $unwrapped === $post_name ) {
 			return $post_name;
 		}
