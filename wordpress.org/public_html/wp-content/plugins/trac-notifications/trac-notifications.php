@@ -22,8 +22,8 @@ class wporg_trac_notifications {
 		if ( $make_site[2] !== 'make.wordpress.org' || ! in_array( $trac, $this->tracs_supported ) ) {
 			return;
 		}
-		if ( 'core' === $trac && isset( $_GET['trac'] ) && in_array( $_GET['trac'], $this->tracs_supported_extra ) ) {
-			$trac = $_GET['trac'];
+		if ( 'core' === $trac && in_array( sanitize_key( $_GET['trac'] ?? '' ), $this->tracs_supported_extra ) ) {
+			$trac = sanitize_key( $_GET['trac'] );
 		}
 
 		$this->trac = $trac;
@@ -146,13 +146,13 @@ class wporg_trac_notifications {
 			wp_send_json_error();
 		}
 
-		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], "manage_ticket_notifications" ) ) {
+		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), "manage_ticket_notifications" ) ) {
 			wp_send_json_error();
 		}
 
 		$username = wp_get_current_user()->user_login;
 
-		$ticket = absint( $_POST['trac-ticket-sub'] );
+		$ticket = absint( $_POST['trac-ticket-sub'] ?? 0 );
 		if ( ! $ticket ) {
 			wp_send_json_error();
 		}
@@ -161,7 +161,7 @@ class wporg_trac_notifications {
 			wp_send_json_error();
 		}
 
-		$action = $_POST['action'];
+		$action = sanitize_key( $_POST['action'] ?? '' );
 		if ( ! $action ) {
 			wp_send_json_error();
 		}
@@ -195,7 +195,7 @@ class wporg_trac_notifications {
 		}
 		$username = wp_get_current_user()->user_login;
 
-		$queried_tickets = (array) $_POST['tickets'];
+		$queried_tickets = array_map( 'absint', (array) ( $_POST['tickets'] ?? array() ) );
 		if ( count( $queried_tickets ) > 100 ) {
 			wp_send_json_error();
 		}
@@ -220,7 +220,7 @@ class wporg_trac_notifications {
 		}
 		$username = wp_get_current_user()->user_login;
 
-		$ticket_id = absint( $_GET['trac-notifications'] );
+		$ticket_id = absint( $_GET['trac-notifications'] ?? 0 );
 		if ( ! $ticket_id ) {
 			exit;
 		}
@@ -429,7 +429,11 @@ class wporg_trac_notifications {
 
 			foreach ( array( 'milestone', 'component', 'focus' ) as $type ) {
 				if ( ! empty( $_POST['notifications'][ $type ] ) ) {
-					foreach ( $_POST['notifications'][ $type ] as $value => $on ) {
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The submitted values are this array's keys, sanitized on the next line.
+					$submitted = (array) wp_unslash( $_POST['notifications'][ $type ] );
+					$submitted = array_map( 'sanitize_text_field', array_keys( $submitted ) );
+
+					foreach ( $submitted as $value ) {
 						if ( empty( $notifications[ $type ][ $value ] ) ) {
 							$changes['insert'][] = compact( 'username', 'type', 'value' );
 							$notifications[ $type ][ $value ] = true;

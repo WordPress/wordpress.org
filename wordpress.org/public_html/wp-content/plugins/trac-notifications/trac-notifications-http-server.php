@@ -13,7 +13,13 @@ class Trac_Notifications_HTTP_Server {
 	}
 
 	function serve_request() {
-		$this->serve( $_GET['call'], $_GET['secret'], json_decode( $_POST['arguments'], true ) );
+		/*
+		 * serve() checks the method name against Trac_Notifications_DB and compares the
+		 * secret with hash_equals(), so the secret is passed through as sent rather than
+		 * sanitized. The arguments must reach json_decode() unchanged.
+		 */
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$this->serve( sanitize_key( $_GET['call'] ?? '' ), wp_unslash( $_GET['secret'] ?? '' ), json_decode( wp_unslash( $_POST['arguments'] ?? '' ), true ) );
 	}
 
 	function serve( $method, $secret, $arguments ) {

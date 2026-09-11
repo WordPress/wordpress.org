@@ -181,7 +181,7 @@ class Make_Core_Trac_Components {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_POST['component-settings-nonce'], 'component-settings_' . $post->ID ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['component-settings-nonce'] ) ), 'component-settings_' . $post->ID ) ) {
 			return;
 		}
 

@@ -79,9 +79,12 @@ class Cross_Locale_PTE {
 		if ( ! empty( $_REQUEST['user'] ) ) {
 			check_admin_referer( 'cross-locale-pte', '_nonce_cross-locale-pte' );
 
-			self::$user = get_user_by( 'login', $_REQUEST['user'] );
+			// The field takes either a login or an email address, so it is not sanitize_user()'d.
+			$user_key = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
+
+			self::$user = get_user_by( 'login', $user_key );
 			if ( ! self::$user ) {
-				self::$user = get_user_by( 'email', $_REQUEST['user'] );
+				self::$user = get_user_by( 'email', $user_key );
 			}
 
 			if ( self::$user ) {
@@ -93,7 +96,7 @@ class Cross_Locale_PTE {
 		}
 
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			self::$user = get_user_by( 'id', $_REQUEST['user_id'] );
+			self::$user = get_user_by( 'id', absint( $_REQUEST['user_id'] ) );
 			if ( ! self::$user ) {
 				wp_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 				exit;
@@ -116,7 +119,7 @@ class Cross_Locale_PTE {
 	 */
 	public static function render_admin_page() {
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			return self::render_edit_page( $_REQUEST['user_id'] );
+			return self::render_edit_page( absint( $_REQUEST['user_id'] ) );
 		}
 
 		$feedback_message = '';
@@ -130,7 +133,7 @@ class Cross_Locale_PTE {
 	public static function update_cross_locale_pte() {
 		global $wpdb;
 
-		$projects = array_filter( array_map( 'strval', explode( ',', $_REQUEST['projects'] ) ) );
+		$projects = array_filter( array_map( 'strval', explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['projects'] ?? '' ) ) ) ) );
 		$current_projects = self::get_users_projects( self::$user->ID );
 
 		$projects_to_remove = array_diff( $current_projects, $projects );
