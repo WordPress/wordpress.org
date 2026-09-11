@@ -683,20 +683,12 @@ function __translations_in_private_functions() {
  */
 function modify_handbook_search_block_action( $block_content, $block ) {
 	if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() ) {
-		$html = wp_html_split( $block_content );
+		$tags = new \WP_HTML_Tag_Processor( $block_content );
 		
-		foreach ( $html as &$token ) {
-			if ( 0 === strpos( $token, '<form' ) ) {
-				$token = preg_replace(
-					'/action="[^"]*"/',
-					'action="' . esc_url( home_url( '/handbook/' ) ) . '"',
-					$token
-				);
-				break;
-			}
+		if ( $tags->next_tag( 'form' ) ) {
+			 $tags->set_attribute( 'action', esc_url( home_url( '/handbook/' ) ) );
+			 $block_content = $tags->get_updated_html();
 		}
-		
-		$block_content = implode( '', $html );
 	}
 	return $block_content;
 }
