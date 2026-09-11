@@ -16,7 +16,7 @@ if ( isset( $wporg_trac_notifications ) ) {
 
 <?php
 	if ( $cached = get_transient( 'trac_components_page' ) ) {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Cached component table markup rendered by the Trac importer.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Component page content plus the table the component_table_row action renders.
 		echo $cached;
 	} else {
 		ob_start();
@@ -34,7 +34,7 @@ if ( isset( $wporg_trac_notifications ) ) {
 
 		$cache = ob_get_clean();
 		set_transient( 'trac_components_page', $cache, 300 );
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Cached component table markup rendered by the Trac importer.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Component page content plus the table the component_table_row action renders.
 		echo $cache;
 	}
 ?>

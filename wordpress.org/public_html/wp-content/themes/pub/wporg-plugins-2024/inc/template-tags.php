@@ -309,8 +309,7 @@ function the_no_self_management_notice() {
 
 	printf(
 		'<div class="plugin-notice notice notice-warning notice-alt"><p>%s</p></div>',
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice and dialog markup assembled here from escaped parts.
-		$message
+		wp_kses_post( $message )
 	);
 }
 
@@ -565,7 +564,7 @@ function the_plugin_self_close_button() {
 	// Translators: %s is the plugin name, as defined by the plugin itself.
 	$close_button_text = sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() );
 	?>
-	<div class="wp-block-button is-small"><button class="show-dialog wp-block-button__link" onclick="this.parentNode.nextElementSibling.showModal()"><?php echo $close_button_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice and dialog markup assembled here from escaped parts. ?></button></div>
+	<div class="wp-block-button is-small"><button class="show-dialog wp-block-button__link" onclick="this.parentNode.nextElementSibling.showModal()"><?php echo esc_html( $close_button_text ); ?></button></div>
 	<dialog>
 		<a onclick="this.parentNode.close()" class="close dashicons dashicons-no-alt"></a>
 		<strong><?php esc_html_e( 'Close your plugin?', 'wporg-plugins' ); ?></strong>

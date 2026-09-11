@@ -90,18 +90,22 @@ defined( 'ABSPATH' ) || die();
 $redirect_uri = home_url( '/' );
 if ( isset( $_GET['locale'] ) )
 	$redirect_uri = add_query_arg( 'locale', urlencode( $_GET['locale'] ), $redirect_uri );
-$facebook_pieces = array(
-	'app_id=180651631983617', // Browse Happy app
-	'link=' . home_url( '/' ),
-	'picture=' . get_template_directory_uri() . '/imgs/apple-touch-icon-114x114.png',
-	'name=' . urlencode( __( 'Browse Happy', 'browsehappy' ) ),
-	'description=' . urlencode( $what ),
-	'message=' . urlencode( __( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ) ),
-	'display=popup',
-	'redirect_uri=' . $redirect_uri,
+
+$facebook_args = array(
+	'app_id'       => '180651631983617', // Browse Happy app.
+	'link'         => home_url( '/' ),
+	'picture'      => get_template_directory_uri() . '/imgs/apple-touch-icon-114x114.png',
+	'name'         => __( 'Browse Happy', 'browsehappy' ),
+	'description'  => $what,
+	'message'      => __( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ),
+	'display'      => 'popup',
+	'redirect_uri' => $redirect_uri,
 );
+
+// add_query_arg() leaves the values it is given alone, so they are encoded here.
+$facebook_url = add_query_arg( rawurlencode_deep( $facebook_args ), 'https://www.facebook.com/dialog/feed' );
 ?>
-						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="https://www.facebook.com/dialog/feed?<?php echo implode( '&', $facebook_pieces ); ?>" title="<?php esc_attr_e( 'Share on Facebook', 'browsehappy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Share link markup built from literal strings. ?>">Facebook</a></li>
+						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="<?php echo esc_url( $facebook_url ); ?>" title="<?php esc_attr_e( 'Share on Facebook', 'browsehappy' ); ?>">Facebook</a></li>
 					</ul>
 				</nav>
 			</section><!-- #share -->

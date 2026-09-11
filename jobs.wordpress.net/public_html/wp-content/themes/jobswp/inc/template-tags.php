@@ -30,7 +30,7 @@ function jobswp_content_nav( $nav_id ) {
 	$nav_class = ( is_single() ) ? 'post-navigation' : 'paging-navigation';
 
 	?>
-	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo $nav_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Date, author and category markup assembled above from escaped parts. ?>">
+	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo esc_attr( $nav_class ); ?>">
 		<h1 class="screen-reader-text"><?php esc_html_e( 'Post navigation', 'jobswp' ); ?></h1>
 
 	<?php if ( is_single() ) : // navigation links for single posts ?>

@@ -48,7 +48,7 @@
 		</li>
 		<li>
 			<strong><?php esc_html_e( 'Translation Projects:', 'wporg' ); ?></strong>
-			<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale->slug ); ?>">translate.wordpress.org/locale/<?php echo $locale->slug; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Anchor list assembled above from esc_url() and esc_html() escaped parts. ?></a>
+			<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale->slug ); ?>">translate.wordpress.org/locale/<?php echo esc_html( $locale->slug ); ?></a>
 		</li>
 	</ul>
 

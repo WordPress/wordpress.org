@@ -210,8 +210,7 @@ class Plugin {
 						sprintf(
 							/* translators: 1: Plugin, Theme, or Tag name. */
 							esc_html__( 'Do you wish to unsubscribe from future emails for %s?', 'wporg-forums' ),
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Badge markup assembled by format_badge() from escaped parts.
-							$term->name
+							esc_html( $term->name )
 						),
 						esc_attr( $_SERVER['REQUEST_URI'] ),
 						esc_attr( wp_get_raw_referer() ),

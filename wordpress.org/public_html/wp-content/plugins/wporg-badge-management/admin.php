@@ -120,8 +120,7 @@ function render_list_users_tab( $slug ) {
 
 		}
 		echo '</ul>';
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin notice and textarea markup assembled here from escaped parts.
-		echo '<textarea rows="10" style="width:100%">' . implode( ', ', wp_list_pluck( $users, 'user_login' ) ) . '</textarea>';
+		echo '<textarea rows="10" style="width:100%">' . esc_textarea( implode( ', ', wp_list_pluck( $users, 'user_login' ) ) ) . '</textarea>';
 	} else {
 		echo '<p><em>No users have this badge.</em></p>';
 	}
@@ -155,7 +154,7 @@ function render_manage_tab() {
 		}
 
 		if ( $messages ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin notice and textarea markup assembled here from escaped parts.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice built from a literal format string with intval()-cast counts.
 			echo '<div id="message" class="updated notice is-dismissible"><p>' . implode( '<br>', $messages ) . '</p></div>';
 		}
 	}
